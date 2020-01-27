@@ -110,7 +110,12 @@ router.beforeEach((to, from, next) => {
             });
             if (data.isLogged && data.hasOwnProperty('isLogged')) {
               router.app.$store.commit('SWITCH_LOGGED_IN', true);
-              next(lastRouteName)
+              if(!process.env.RUNNING_IN_POPUP) {
+                next(lastRouteName)
+              } else {
+                next('/')
+              }
+              
             }
           });
         });

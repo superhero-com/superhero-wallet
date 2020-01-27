@@ -232,27 +232,31 @@ export default {
         sendResponse({ host:receiver.host, received: true })
       })
 
-      //init SDK
-      this.checkSDKReady = setInterval(() => {
-        if(this.isLoggedIn && this.sdk == null) {
+      if(!process.env.RUNNING_IN_POPUP) {
+        //init SDK
+        this.checkSDKReady = setInterval(() => {
+          if(this.isLoggedIn && this.sdk == null) {
 
-          this.initLedger()
-          this.initSDK()
-          
-          this.pollData()
-          clearInterval(this.checkSDKReady)
-        }
-      },500)
+            this.initLedger()
+            this.initSDK()
+            
+            this.pollData()
+            clearInterval(this.checkSDKReady)
+          }
+        },500)
 
-      setTimeout(() => {
-        if(this.isLoggedIn) {
-          this.pollData()
-        }else {
-          this.hideLoader()
-        }
-      },500)
+        setTimeout(() => {
+          if(this.isLoggedIn) {
+            this.pollData()
+          }else {
+            this.hideLoader()
+          }
+        },500)
+      } else {
+        this.hideLoader()
+      }
 
-      this.checkPendingTx()
+      // this.checkPendingTx()
       window.addEventListener('resize', () => {
         
         if(window.innerWidth <= 480) {
@@ -277,6 +281,7 @@ export default {
     changeAccount (index,subaccount) {
       this.$store.commit('SET_ACTIVE_TOKEN',0)
       browser.storage.local.set({activeAccount: index}).then(() => {
+        postMesssage(this.background, { type: 'changeAccount' , payload: subaccount.publicKey } )
         this.$store.commit('SET_ACTIVE_ACCOUNT', {publicKey:subaccount.publicKey,index:index});
         this.initSDK();
         this.dropdown.account = false;
@@ -318,6 +323,7 @@ export default {
     switchNetwork (network) {
       this.dropdown.network = false;
       this.$store.dispatch('switchNetwork', network).then(() => {
+        postMesssage(this.background, { type: 'switchNetwork' , payload: network } )
         this.initSDK();
         this.$store.dispatch('updateBalance');
         let transactions = this.$store.dispatch('getTransactionsByPublicKey',{publicKey:this.account.publicKey,limit:3});
@@ -496,6 +502,7 @@ export default {
             clearInterval(this.checkPendingTxInterval)
             if(this.$router.currentRoute.path.includes("/sign-transaction") &&  this.$router.currentRoute.params.data.popup == false) {
               this.$store.commit('SET_AEPP_POPUP',false)
+              console.log("tukk 1111")
               this.$router.push('/account')
             }
           }

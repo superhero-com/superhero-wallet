@@ -1,4 +1,12 @@
 import { extractHostName, detectBrowser, checkAddress } from './popup/utils/helper';
+import BrowserRuntimeConnection
+  from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime'
+import BrowserWindowMessageConnection
+  from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message'
+import { getBrowserAPI } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/helpers'
+import { MESSAGE_DIRECTION } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/schema'
+import ContentScriptBridge from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/content-script-bridge'
+
 global.browser = require('webextension-polyfill');
 
 const redirectToWarning = (hostname,href,extUrl = '') => {
@@ -22,12 +30,17 @@ if(typeof navigator.clipboard == 'undefined') {
 } else {
     sendToBackground('phishingCheck',{ hostname:extractHostName(window.location.href), href:window.location.href })    
 }
+
+/**
+ * This should be depricated
+ */
 let aepp = browser.runtime.getURL("aepp.js")
 fetch(aepp) 
 .then(res => res.text())
 .then(res => {
     injectScript(res)
 })
+
 // Subscribe from postMessages from page
 window.addEventListener("message", ({data}) => {
     let method = "pageMessage";
@@ -82,16 +95,7 @@ function sendToBackground(method, params) {
     })
 }
 
-// setInterval(() => {
-//     browser.runtime.sendMessage({
-//         from: "content",
-//         type: "readDom",
-//         data: "as"
-//     })
-// }, 5000)
-
 window.addEventListener("load", () => {
-    
     var address = document.all[0].outerHTML.match(/(ak\_[A-Za-z0-9]{49,50})/g)
     if(address) {
         var sendInterval = setInterval(() => {
@@ -106,8 +110,38 @@ window.addEventListener("load", () => {
             })
         }, 5000)
     }
-
 });
+
+
+/**
+ * Aex-2 Aepp communication
+ */
+const readyStateCheckInterval = setInterval(function () {
+    if (document.readyState === 'complete') {
+        clearInterval(readyStateCheckInterval)
+        const port = getBrowserAPI().runtime.connect()
+        console.log(port)
+        console.log(getBrowserAPI())
+        const extConnection = BrowserRuntimeConnection({
+        connectionInfo: {
+            description: 'Content Script to Extension connection',
+            origin: window.origin
+        },
+        port
+        })
+        const pageConnection = BrowserWindowMessageConnection({
+        connectionInfo: {
+            description: 'Content Script to Page  connection',
+            origin: window.origin
+        },
+        origin: window.origin,
+        sendDirection: MESSAGE_DIRECTION.to_aepp,
+        receiveDirection: MESSAGE_DIRECTION.to_waellet
+        })
+        const bridge = ContentScriptBridge({ pageConnection, extConnection })
+        bridge.run()
+    }
+  }, 10)    
 
 
 

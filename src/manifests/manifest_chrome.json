@@ -28,7 +28,7 @@
   },
   "content_scripts": [{
     "run_at": "document_start",
-    "all_frames":true,
+    "all_frames":false,
     "matches": [
       "https://*/*",
       "http://*/*"

@@ -187,11 +187,73 @@ const redirectAfterLogin = (ctx) => {
             ctx.$router.push({'name':'sign', params: {
                 data:tx
             }});
-        }else {
+        } else if(process.env.RUNNING_IN_POPUP ) {
+            ctx.$store.commit('SET_AEPP_POPUP',true)
+            if(window.hasOwnProperty("name") && window.name.includes("popup")) {
+                if(window.props.type == "connectConfirm") {
+                    ctx.$router.push('/connect');
+                }else if(window.props.type == "sign") {
+                    ctx.$router.push('/popup-sign-tx');
+                }
+            }
+        } else {
             ctx.$router.push('/account');
         }
     })
   })
+}
+
+const getAeppAccountPermission = (host, account) => {
+    return new Promise((resolve, reject) => {
+        browser.storage.sync.get('connectedAepps').then((aepps) => {
+            if(!aepps.hasOwnProperty('connectedAepps')) {
+                return resolve(false)
+            }
+            if(aepps.hasOwnProperty('connectedAepps') && aepps.connectedAepps.hasOwnProperty('list')) {
+                let list = aepps.connectedAepps.list
+                if(list.find(ae => ae.host == host && ae.accounts.includes(account))) {
+                    return resolve(true)
+                }
+                return resolve(false)
+            }
+
+            return resolve(false)
+        })
+    })
+}
+
+const setPermissionForAccount = (host, account) => {
+    return new Promise((resolve, reject) => {
+        browser.storage.sync.get('connectedAepps').then((aepps) => {
+
+            let list = []
+            if(aepps.hasOwnProperty('connectedAepps') && aepps.connectedAepps.hasOwnProperty('list')) {
+                list = aepps.connectedAepps.list
+            }
+
+            if (list.length && typeof list.find(l => l.host == host) != "undefined") {
+                let hst = list.find(h => h.host == host)
+                let index = list.findIndex(h => h.host == host)
+                if(typeof hst == "undefined") {
+                    resolve()
+                    return 
+                }
+                if(hst.accounts.includes(account)) {
+                    resolve()
+                    return
+                }
+
+                list[index].accounts = [...hst.accounts, account]
+
+            } else {
+                list.push({ host, accounts: [account] })
+            }   
+            // return;
+            browser.storage.sync.set({connectedAepps: { list }}).then(() => {
+                resolve()
+            })
+        })
+    })
 }
 
 export const fetchJson = async (...args) => {
@@ -599,7 +661,9 @@ export {
     contractCall,
     checkContractAbiVersion,
     setContractInstance,
-    getContractInstance
+    getContractInstance,
+    getAeppAccountPermission,
+    setPermissionForAccount
 }
 
 

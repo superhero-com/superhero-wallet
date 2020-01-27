@@ -1,7 +1,7 @@
 {
-  "name": "waellet",
-  "version": "0.3.4",
-  "description": "waellet - aeternity browser extension",
+  "name": "tipwallet",
+  "version": "0.0.1",
+  "description": "tipwallet - aeternity browser extension",
   "author": "Milen Radkov <milenradkov@me.com>",
   "license": "MIT",
   "private": true,

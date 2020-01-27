@@ -115,8 +115,12 @@
         "connectConfirm": {
             "websiteRequestconnect": "would like to connect to your account",
             "websiteRequest": "This website is requesting access to view your current account address. Always make sure you trust the website you interact with. ",
-            "cancelButton": "Cancel",
-            "confirmButton": "Confirm"
+            "cancelButton": "Deny",
+            "confirmButton": "Accept",
+            "addressLabel": "Address",
+            "transactionLabel": "Transaction",
+            "addressRequest": "This aepp is requesting access to view your current account address",
+            "transactionRequest": "This aepp will prepare a transaction, you are in charge of confirming it."
         },
         "createFungibleToken": {
             "backToFungibleTokens":"Back to Fungible Tokens",
@@ -344,7 +348,10 @@
             "contractCall": "Contract call",
             "contractCalling": "Calling contract method. Please do not close the window",
             "insufficientBalance": "Insufficient Balance",
-            "inccorectAddress": "Incorrect address"
+            "inccorectAddress": "Incorrect address",
+            "compiledCode": "Compiled Code",
+            "callData": "Call Data",
+            "payload": "Payload"
         },
         "signTransactionByQrCode": {
             "backToAccount": "Back to account",
