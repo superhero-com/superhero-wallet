@@ -1,6 +1,6 @@
 {
-  "name": "waellet",
-  "description": "waellet - aeternity browser extension",
+  "name": "Tip Waellet",
+  "description": "Tip Waellet - aeternity browser extension",
   "version": null,
   "manifest_version": 2,
   "permissions": [
