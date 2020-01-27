@@ -6,20 +6,6 @@
         <h3 style='text-align:center;'>{{$t('pages.securitySettings.heading')}}</h3>
         <ae-panel>
             <div class="maindiv_input-group-addon">
-                <h4>{{$t('pages.securitySettings.privacyDataHeading')}}</h4><hr>
-                <small class="sett_info">{{$t('pages.securitySettings.privacyDataSmall')}}</small>
-                <ae-button face="round" fill="primary" class="notround settingBtn" extend @click="clearPrivacyConfirm">{{$t('pages.securitySettings.privacyDataClearBtn')}}</ae-button>
-            </div>
-        </ae-panel>
-        <ae-panel class="decryptKey">
-            <div class="maindiv_input-group-addon">
-                <h4>{{$t('pages.securitySettings.privateKeyHeading')}}</h4><hr>
-                <small class="sett_info">{{$t('pages.securitySettings.privateKeySmall')}}</small>
-                <ae-button face="round" fill="primary" class="notround settingBtn" extend @click="revealPrivateKey">{{$t('pages.securitySettings.privateKeyRevealBtn')}}</ae-button>
-            </div>
-        </ae-panel>
-        <ae-panel>
-            <div class="maindiv_input-group-addon">
                 <h4>{{$t('pages.securitySettings.seedRecoveryHeading')}}</h4><hr>
                 <small class="sett_info">{{$t('pages.securitySettings.seedRecoverySmall')}}</small>
                 <ae-button face="round" fill="primary" class="notround settingBtn" extend @click="seedPhraseRecovery">{{$t('pages.securitySettings.seedRecoveryBtn')}}</ae-button>
@@ -29,31 +15,6 @@
         <div v-if="loading" class="loading">
             <ae-loader />
         </div>
-        <Modal v-if="type == 2" :modal="modal">
-            <div slot="content">
-                <small v-if="privateKey == '' && !loading && type == '2'">{{$t('pages.securitySettings.privateKeyWarning')}}</small>
-                <h3 v-if="privateKey != '' && type == '2'">{{$t('pages.securitySettings.privateKey')}}</h3>
-                <Alert :fill="alert.fill" :show="alert.show && !loading">
-                    <div slot="content">
-                        {{alert.content}}
-                    </div>
-                </Alert>
-                <ae-toolbar fill="alternative" v-if="privateKey != ''" align="right">
-                    <ae-button face="toolbar" v-clipboard:copy="privateKey" @click="reset(privateKey)">
-                        <ae-icon name="copy" />
-                        {{$t('pages.securitySettings.copy')}}
-                    </ae-button>
-                </ae-toolbar>
-                <div v-if="privateKey == '' && !loading">
-                    <ae-input class="my-2" label="Password">
-                        <input type="password" class="ae-input"  placeholder="Enter password" v-model="password" slot-scope="{ context }" @focus="context.focus = true" @blur="context.focus = false" />
-                    </ae-input>
-                    <ae-button class="notround decrypt-btn" extend face="round" fill="primary" @click="decryptKeystore">{{$t('pages.securitySettings.showPrivateKey')}}</ae-button>
-                </div>
-                <Loader :loading="loading" size="small" :content="$t('pages.securitySettings.decryptingPrivateKey')"></Loader>
-                <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
-            </div>
-        </Modal>
         <Modal v-if="type == 3" :modal="modal">
             <div slot="content">
                 <small v-if="seedPhrase == '' && !loading && type == '3'">{{$t('pages.securitySettings.seedPhraseWarning')}}</small>
@@ -128,12 +89,6 @@ export default {
             this.type = '1';
             browser.storage.local.remove('connectedAepps')
         },
-        revealPrivateKey() {
-            this.type = '2';
-            this.modal.visible = true
-            this.modal.title = this.$t('pages.securitySettings.showPrivateKey')
-            this.reset()
-        },
         seedPhraseRecovery() {
             this.type = '3';
             this.modal.visible = true
@@ -164,22 +119,7 @@ export default {
                         }
                     }
                 })
-            } else if (this.type == '2') {
-                this.loading = true
-                browser.storage.local.get('userAccount').then(async (user) => {
-                    if(user.userAccount && user.hasOwnProperty('userAccount')) {
-                        let encryptedPrivateKey = JSON.parse(user.userAccount.encryptedPrivateKey);
-                        let match = await addressGenerator.decryptKeystore(encryptedPrivateKey, this.password)
-                        this.loading = false
-                        if(match) {
-                            this.privateKey = match
-                            this.setAlertData("alternative",true,match)
-                        }else {
-                            this.setAlertData("primary",true,this.$t('pages.securitySettings.incorrectPassword'))
-                        }
-                    }
-                })
-            }
+            } 
         },
         reset(privateKey = '') {
             if(privateKey == '') {

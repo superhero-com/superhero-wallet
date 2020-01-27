@@ -187,68 +187,54 @@ export default {
           this.modalAskVisible = false;
         }
       });
-      browser.storage.local.get('showAeppPopup').then(aepp => {
-        browser.storage.local.get('pendingTransaction').then(pendingTx => {
-          browser.storage.local.get('isLogged').then(data => {
-            browser.storage.local.get('userAccount').then(async user => {
-              if (user.userAccount && user.hasOwnProperty('userAccount')) {
-                try {
-                  user.userAccount.encryptedPrivateKey = JSON.parse(user.userAccount.encryptedPrivateKey);
-                } catch (e) {
-                  user.userAccount.encryptedPrivateKey = JSON.stringify(user.userAccount.encryptedPrivateKey);
-                }
-                this.$store.commit('UPDATE_ACCOUNT', user.userAccount);
-                if (data.isLogged && data.hasOwnProperty('isLogged')) {
-                  browser.storage.local.get('subaccounts').then(subaccounts => {
-                    let sub = [];
-                    if (
-                      !subaccounts.hasOwnProperty('subaccounts') ||
-                      subaccounts.subaccounts == '' ||
-                      (typeof subaccounts.subaccounts == 'object' && !subaccounts.subaccounts.find(f => f.publicKey == user.userAccount.publicKey))
-                    ) {
-                      sub.push({
-                        name: typeof subaccounts.subaccounts != 'undefined' ? subaccounts.subaccounts.name : 'Main account',
-                        publicKey: user.userAccount.publicKey,
-                        root: true,
-                        balance: 0,
-                      });
-                    }
-                    if (subaccounts.hasOwnProperty('subaccounts') && subaccounts.subaccounts.length > 0 && subaccounts.subaccounts != '') {
-                      subaccounts.subaccounts.forEach(su => {
-                        sub.push({ ...su });
-                      });
-                    }
-                    this.$store.dispatch('setSubAccounts', sub);
-                    browser.storage.local.get('activeAccount').then(active => {
-                      if (active.hasOwnProperty('activeAccount')) {
-                        this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: sub[active.activeAccount].publicKey, index: active.activeAccount });
-                      }
-                    });
-                  });
-
-                  // Get user networks
-                  browser.storage.local.get('userNetworks').then(usernetworks => {
-                    if (usernetworks.hasOwnProperty('userNetworks')) {
-                      usernetworks.userNetworks.forEach(data => {
-                        this.$store.state.network[data.name] = data;
-                      });
-                      this.$store.dispatch('setUserNetworks', usernetworks.userNetworks);
-                    }
+      browser.storage.local.get('isLogged').then(data => {
+        browser.storage.local.get('userAccount').then(async user => {
+          if (user.userAccount && user.hasOwnProperty('userAccount')) {
+            try {
+              user.userAccount.encryptedPrivateKey = JSON.parse(user.userAccount.encryptedPrivateKey);
+            } catch (e) {
+              user.userAccount.encryptedPrivateKey = JSON.stringify(user.userAccount.encryptedPrivateKey);
+            }
+            this.$store.commit('UPDATE_ACCOUNT', user.userAccount);
+            if (data.isLogged && data.hasOwnProperty('isLogged')) {
+              browser.storage.local.get('subaccounts').then(subaccounts => {
+                let sub = [];
+                if (
+                  !subaccounts.hasOwnProperty('subaccounts') ||
+                  subaccounts.subaccounts == '' ||
+                  (typeof subaccounts.subaccounts == 'object' && !subaccounts.subaccounts.find(f => f.publicKey == user.userAccount.publicKey))
+                ) {
+                  sub.push({
+                    name: typeof subaccounts.subaccounts != 'undefined' ? subaccounts.subaccounts.name : 'Main account',
+                    publicKey: user.userAccount.publicKey,
+                    root: true,
+                    balance: 0,
                   });
                 }
-              }
-              browser.storage.local.get('confirmSeed').then(seed => {
-                if (seed.hasOwnProperty('confirmSeed') && seed.confirmSeed == false) {
-                  this.$router.push('/seed');
-                  return;
+                if (subaccounts.hasOwnProperty('subaccounts') && subaccounts.subaccounts.length > 0 && subaccounts.subaccounts != '') {
+                  subaccounts.subaccounts.forEach(su => {
+                    sub.push({ ...su });
+                  });
                 }
+                this.$store.dispatch('setSubAccounts', sub);
+                browser.storage.local.get('activeAccount').then(active => {
+                  if (active.hasOwnProperty('activeAccount')) {
+                    this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: sub[active.activeAccount].publicKey, index: active.activeAccount });
+                  }
+                });
               });
-              if (data.isLogged && data.hasOwnProperty('isLogged')) {
-                  this.$store.commit('SWITCH_LOGGED_IN', true);
-                  redirectAfterLogin(this);
-              }
-            });
+            }
+          }
+          browser.storage.local.get('confirmSeed').then(seed => {
+            if (seed.hasOwnProperty('confirmSeed') && seed.confirmSeed == false) {
+              this.$router.push('/seed');
+              return;
+            }
           });
+          if (data.isLogged && data.hasOwnProperty('isLogged')) {
+              this.$store.commit('SWITCH_LOGGED_IN', true);
+              redirectAfterLogin(this);
+          }
         });
       });
     },

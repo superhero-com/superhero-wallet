@@ -1,7 +1,7 @@
 {
     "pages": {
         "appVUE": {
-            "systemName": "Waellet",
+            "systemName": "Tip Waellet",
             "manageNetworks": "Gestisci reti",
             "manageAccounts": "Gestisci account",
             "airGapVault": "Creare un deposito per il traferro",

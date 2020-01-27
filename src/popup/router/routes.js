@@ -1,28 +1,16 @@
 import IndexComponent from './pages/Index';
 import AccountComponent from './pages/Account';
-import SendComponent from './pages/Send';
-import ReceiveComponent from './pages/Receive';
 import AccountPasswordComponent from './pages/AccountPassword';
 import SeedPhraseComponent from './pages/SeedPhrase';
-import TransactionsComponent from './pages/Transactions';
-import TransactionDetailsComponent from './pages/TransactionDetails';
 import SignTransactionComponent from './pages/SignTransaction';
 import PopupSignTransactionComponent from './pages/Popups/PopupSignTx';
 import PopupConnectComponent from './pages/Popups/PopupConnect';
-import ManageAccountComponent from './pages/ManageAccounts';
 import SettingsComponent from './pages/Settings';
 import GeneralSettingsComponent from './pages/GeneralSettings';
 import SecuritySettingsComponent from './pages/SecuritySettings';
-import AdvancedSettingsComponent from './pages/AdvancedSettings';
 import AboutSettingsComponent from './pages/AboutSettings';
-import UtilitiesComponent from './pages/Utilities';
 import TipComponent from './pages/TipPage';
-import ConnectConfirmComponent from './pages/ConnectConfirm';
-import ManageNetworksComponent from './pages/ManageNetworks';
-import AirGapSetup from './pages/AirGapSetup';
-import SignTransactionByQrCode from './pages/SignTransactionByQrCode';
 import QrCodeReader from './pages/QrCodeReader';
-import LedgerSetupComponent from './pages/LedgerSetup';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 export default [
@@ -35,16 +23,6 @@ export default [
     component: AccountComponent,
   },
   {
-    path: '/send',
-    name: 'send',
-    props:true,
-    component: SendComponent,
-  },
-  {
-    path: '/receive',
-    component: ReceiveComponent,
-  },
-  {
     name: 'password',
     path: '/password',
     component: AccountPasswordComponent,
@@ -54,16 +32,6 @@ export default [
     name:'seed',
     path:'/seed',
     component:SeedPhraseComponent,
-    props:true
-  },
-  {
-    path:'/transactions',
-    component:TransactionsComponent
-  },
-  {
-    name:'transaction-details',
-    path:'/transaction-details',
-    component:TransactionDetailsComponent,
     props:true
   },
   {
@@ -85,16 +53,6 @@ export default [
     props:true
   },
   {
-    name:'connect-confirm',
-    path:'/connect-confirm',
-    component:ConnectConfirmComponent,
-    props:true
-  },
-  {
-    path:'/manageAccounts',
-    component:ManageAccountComponent,
-  },
-  {
     path:'/settings',
     component:SettingsComponent,
   },
@@ -107,44 +65,18 @@ export default [
     component:SecuritySettingsComponent,
   },
   {
-    path:'/advancedSettings',
-    component:AdvancedSettingsComponent,
-  },
-  {
     path:'/aboutSettings',
     component:AboutSettingsComponent,
-  },
-  {
-    path:'/utilities',
-    component:UtilitiesComponent,
   },
   {
     path:'/tip',
     component:TipComponent
   },
   {
-    path:'/manageNetworks',
-    component:ManageNetworksComponent
-  },
-  {
-    path:'/airGapSetup',
-    component:AirGapSetup
-  },
-  {
     path:'/qrCodeReader',
     name:'qrCodeReader',
     props:true,
     component: QrCodeReader
-  },
-  {
-    path:'/signTransactionByQrCode',
-    component: SignTransactionByQrCode,
-    props: true,
-    name: 'signTransactionByQrCode'
-  },
-  {
-    path:'/ledger-setup',
-    component:LedgerSetupComponent
   },
   {
     path:'/termsOfService',

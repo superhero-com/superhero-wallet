@@ -29,75 +29,16 @@
                     </div>
                     <ae-check class="subAccountCheckbox"  type="radio" :value="name" v-model="current.network" /> 
                 </ae-list-item>
-                <ae-list-item fill="neutral" class="manageAccounts" v-if="!aeppPopup">
-                  <ae-button @click="navigateNetworks" class="">
-                    <ae-button face="icon" fill="primary" class="iconBtn">
-                      <ae-icon name="plus" />
-                    </ae-button>
-                    <span class="newSubaccount">
-                      {{ $t('pages.appVUE.manageNetworks') }}
-                      </span>
-                  </ae-button>
-                </ae-list-item>
               </ae-list>
-                <!-- <li v-for="(value, name) in network" v-bind:key="value.networkId">
-                  <ae-button v-on:click="switchNetwork(name)" class="status triggerhidedd" :class="current.network == name ? 'current' : ''">
-                      {{ name }}
-                  </ae-button>
-                </li>
-              </ul> -->
             </transition>
           </div>
 
           <!-- account dropdown -->
           <div id="account" class="dropdown big" v-if="account.publicKey && isLoggedIn" :slot="menuSlot" direction="center" ref="account">
-            <button v-on:click.prevent="toggleDropdown">
+            <button>
               <ae-identicon id="identIcon" class="dropdown-button-icon" v-bind:address="this.account.publicKey" size="base" slot="button" />
               <span class="dropdown-button-name" slot="button">{{ activeAccountName }}</span>
             </button>
-            <transition name="slide-fade">
-              <ae-list v-if="dropdown.account" class="dropdown-holder">
-                <ae-list-item fill="neutral"  @click="changeAccount(index,subaccount)" :class="activeAccount == index ? 'activeAccount' : '' " v-for="(subaccount,index) in subaccounts" v-bind:key="index">
-                    <ae-identicon class="subAccountIcon" v-bind:address="subaccount.publicKey" size="base" />
-                    <div class="subAccountInfo">
-                      <div class="subAccountName">{{subaccount.name}}</div>
-                      <div class="subAccountBalance">{{subaccount.balance}} AE</div>
-                    </div>
-                    <ae-icon fill="primary" face="round" name="reload" class="name-pending" v-if="subaccount.pending"/>
-                    <ae-check class="subAccountCheckbox"  type="radio" :value="index" v-model="activeAccount" /> 
-                </ae-list-item>
-                <ae-list-item fill="neutral" class="manageAccounts account-btn" v-if="!aeppPopup">
-                  <ae-button @click="manageAccounts" class="triggerhidedd">
-                    <ae-button face="icon" fill="primary" class="iconBtn">
-                      <ae-icon name="plus" />
-                    </ae-button>
-                    <span class="newSubaccount">
-                      {{ $t('pages.appVUE.manageAccounts') }}
-                      </span>
-                  </ae-button>
-                </ae-list-item>
-                <ae-list-item fill="neutral" class="airGapVault manageAccounts account-btn" v-if="!aeppPopup">
-                  <ae-button @click="airGapVault" class="triggerhidedd">
-                    <ae-button face="icon" fill="alternative" class="iconBtn">
-                      <ae-icon name="plus" />
-                    </ae-button>
-                    <span class="newSubaccount">
-                      {{ $t('pages.appVUE.airGapVault') }}
-                      </span>
-                  </ae-button>
-                </ae-list-item>
-                <ae-list-item fill="neutral" class="ledger manageAccounts account-btn" v-if="!aeppPopup">
-                  <ae-button @click="addLedgerAccount" class="triggerhidedd">
-                    <ae-button face="icon" class="iconBtn ledger">
-                      <ae-icon name="plus" />
-                    </ae-button>
-                    <span class="newSubaccount">
-                      {{ $t('pages.appVUE.ledgerAccount') }}
-                      </span>
-                  </ae-button>
-                </ae-list-item>
-              </ae-list>
-            </transition>
           </div>
 
           <!-- settings dropdown -->
@@ -112,12 +53,6 @@
                   <ae-button @click="navigateAccount" class="toAccount">
                     <ae-icon name="home" />
                       {{ $t('pages.appVUE.myAccount') }}
-                  </ae-button>
-                </li>
-                <li id="utilities">
-                  <ae-button @click="utilities" class="utilities">
-                    <ae-icon name="underline" />
-                    {{ $t('pages.appVUE.utilities') }}
                   </ae-button>
                 </li>
                 <li id="settings">
@@ -156,7 +91,7 @@ import store from '../store';
 import locales from './locales/en.json'
 import { mapGetters } from 'vuex';
 import { saveAs } from 'file-saver';
-import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
+// import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
 import { initializeSDK, contractCall } from './utils/helper';
 import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT } from './utils/constants'
 import LedgerBridge from './utils/ledger/ledger-bridge'
@@ -188,9 +123,9 @@ export default {
     }
   },
   computed: {
-    ...mapGetters (['account', 'current', 'network', 'userNetworks', 'popup', 'isLoggedIn', 'AeAPI', 'subaccounts', 'activeAccount', 'activeNetwork', 'balance', 'activeAccountName', 'background', 'sdk','tokens','aeppPopup','ledgerNextIdx']),
+    ...mapGetters (['account', 'current', 'network', 'popup', 'isLoggedIn', 'subaccounts', 'activeAccount', 'activeNetwork', 'balance', 'activeAccountName', 'background', 'sdk', 'aeppPopup']),
     extensionVersion() {
-      return 'v.' + browser.runtime.getManifest().version + 'beta'
+      return 'v.' + browser.runtime.getManifest().version 
     }
   },
   created: async function () {
@@ -217,10 +152,7 @@ export default {
         //init SDK
         this.checkSDKReady = setInterval(() => {
           if(this.isLoggedIn && this.sdk == null) {
-
-            this.initLedger()
             this.initSDK()
-            
             this.pollData()
             clearInterval(this.checkSDKReady)
           }
@@ -228,6 +160,9 @@ export default {
 
         setTimeout(() => {
           if(this.isLoggedIn) {
+            if(this.sdk == null) {
+              this.initSDK()
+            }
             this.pollData()
           }else {
             this.hideLoader()
@@ -236,8 +171,6 @@ export default {
       } else {
         this.hideLoader()
       }
-
-      // this.checkPendingTx()
       window.addEventListener('resize', () => {
         
         if(window.innerWidth <= 480) {
@@ -260,13 +193,11 @@ export default {
       }, 1500);
     },
     changeAccount (index,subaccount) {
-      this.$store.commit('SET_ACTIVE_TOKEN',0)
       browser.storage.local.set({activeAccount: index}).then(() => {
         postMesssage(this.background, { type: 'changeAccount' , payload: subaccount.publicKey } )
         this.$store.commit('SET_ACTIVE_ACCOUNT', {publicKey:subaccount.publicKey,index:index});
         this.initSDK();
         this.dropdown.account = false;
-        this.$store.commit('RESET_TRANSACTIONS',[]);
       });
     },
     hideMenu (event) {
@@ -303,10 +234,6 @@ export default {
         postMesssage(this.background, { type: 'switchNetwork' , payload: network } )
         this.initSDK();
         this.$store.dispatch('updateBalance');
-        let transactions = this.$store.dispatch('getTransactionsByPublicKey',{publicKey:this.account.publicKey,limit:3});
-        transactions.then(res => {
-          this.$store.dispatch('updateLatestTransactions',res);
-        });
       }); 
     },
     logout () {
@@ -360,16 +287,9 @@ export default {
       let triggerOnce = false
       this.polling = setInterval(async () => {
         if(this.sdk != null && this.isLoggedIn) {
-            if(this.current.token != 0) {
-              this.$store.dispatch('updateBalanceToken')
-            }
             this.$store.dispatch('updateBalance');
-            if(this.dropdown.account) {
-              this.$store.dispatch('updateBalanceSubaccounts');
-            }
             if(!triggerOnce) {
               this.$store.dispatch('getRegisteredNames')
-              this.$store.dispatch('updateBalanceSubaccounts');
               triggerOnce = true
             }
         }
@@ -383,7 +303,7 @@ export default {
             await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract }) 
           )
         } catch(e) {
-          
+          console.log("error",e)
         }
       }
       
@@ -398,35 +318,6 @@ export default {
           
           this.$router.push('/')
       }
-    },
-    checkPendingTx() {
-      this.checkPendingTxInterval = setInterval(() => {
-        browser.storage.local.get('pendingTransaction').then((pendingTx) => {
-          if(!pendingTx.hasOwnProperty('pendingTransaction') || ( pendingTx.hasOwnProperty('pendingTransaction') && pendingTx.pendingTransaction.hasOwnProperty('list') && Object.keys(pendingTx.pendingTransaction.list).length <= 0 )) {
-            clearInterval(this.checkPendingTxInterval)
-            if(this.$router.currentRoute.path.includes("/sign-transaction") &&  this.$router.currentRoute.params.data.popup == false) {
-              this.$store.commit('SET_AEPP_POPUP',false)
-              console.log("tukk 1111")
-              this.$router.push('/account')
-            }
-          }
-        });
-      },1000)
-    },
-    async addLedgerAccount() {
-      if(this.ledgerNextIdx != 0) {
-        let account = await this.$store.dispatch('ledgerCreate')
-        if(!account.success) {
-          this.$store.dispatch('popupAlert', { name: 'account', type: 'ledger_account_error'})
-        }
-      }else {
-        this.$router.push('/ledger-setup')
-      }
-      
-    },
-    initLedger() {
-      let ledger = new LedgerBridge("https://waellet.com/ledger.html")
-      this.$store.commit('SET_LEDGER_API', { ledger })
     },
     hideConnectError() {
       this.connectError = false

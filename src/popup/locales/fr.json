@@ -1,7 +1,7 @@
 {
     "pages": {
         "appVUE": {
-            "systemName": "Waellet",
+            "systemName": "Tip Waellet",
             "manageNetworks": "Gérer les réseaux",
             "manageAccounts": "Gérer les comptes",
             "airGapVault": "Créer une voûte pour Cheminement",

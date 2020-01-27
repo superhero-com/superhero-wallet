@@ -95,16 +95,6 @@ router.beforeEach((to, from, next) => {
                     }
                   });
                 });
-
-                // Get user networks
-                browser.storage.local.get('userNetworks').then(usernetworks => {
-                  if (usernetworks.hasOwnProperty('userNetworks')) {
-                    usernetworks.userNetworks.forEach(data => {
-                      router.app.$store.state.network[data.name] = data;
-                    });
-                    router.app.$store.dispatch('setUserNetworks', usernetworks.userNetworks);
-                  }
-                });
               }
             }
             browser.storage.local.get('confirmSeed').then(seed => {
@@ -122,6 +112,8 @@ router.beforeEach((to, from, next) => {
                 next('/')
               }
               
+            } else {
+              next('/')
             }
           });
         });
