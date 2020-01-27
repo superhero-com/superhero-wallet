@@ -79,24 +79,6 @@ export default {
   [types.INIT_SDK] (state, payload) {
     state.sdk = payload
   },
-  [types.SET_TOKENS] (state, payload) {
-    state.tokens = payload
-  },
-  [types.UPDATE_TOKENS_BALANCE] (state, payload) {
-    state.tokens[payload.token].balance = payload.balance
-  },
-  [types.UNSET_TOKENS] (state, payload) {
-    state.tokens = [{
-      name:"AE",
-      symbol:"AE",
-      precision:7,
-      balance:0,
-      contract:''
-    }];
-  },
-  [types.SET_ACTIVE_TOKEN] (state, payload) {
-    state.current.token = payload
-  },
   [types.SET_AEPP_POPUP] (state, payload) {
     state.aeppPopup = payload
   },
@@ -108,12 +90,6 @@ export default {
   },
   [types.SET_BACKGROUND] (state, payload) {
     state.background = payload
-  },
-  [types.SET_TOKEN_REGISTRY] (state, payload) {
-    state.tokenRegistry = payload
-  },
-  [types.SET_TOKEN_REGISTRY_LIMA] (state, payload) {
-    state.tokenRegistryLima = payload
   },
   [types.SET_TX_ADVANCED_MODE] (state, payload) {
     state.txAdvancedMode = payload

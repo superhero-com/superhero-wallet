@@ -50,34 +50,6 @@ export default {
         });
     });
   },
-  updateBalanceTokens({ commit, state }) {
-    state.tokens.forEach((tkn, index) => {
-      if (typeof tkn.parent != 'undefined' && tkn.contract != '' && tkn.parent == state.account.publicKey) {
-        state.sdk.contractCallStatic(FUNGIBLE_TOKEN_CONTRACT, tkn.contract, 'balance', [state.account.publicKey])
-          .then((res) => {
-            res.decode()
-              .then(balance => {
-                commit(types.UPDATE_TOKENS_BALANCE, { token: index, balance: balance == 'None' ? 0 : balance.Some[0] });
-              })
-          })
-          .catch(e => {
-
-          })
-      }
-    })
-  },
-  updateBalanceToken({ commit, state }) {
-    state.sdk.contractCallStatic(FUNGIBLE_TOKEN_CONTRACT, state.tokens[state.current.token].contract, 'balance', [state.account.publicKey])
-      .then((res) => {
-        res.decode()
-          .then(balance => {
-            commit(types.UPDATE_TOKENS_BALANCE, { token: state.current.token, balance: balance == 'None' ? 0 : balance.Some[0] });
-          })
-      })
-      .catch(e => {
-
-      })
-  },
   popupAlert({ commit, state }, payload) {
     switch (payload.name) {
       case 'spend':
@@ -127,15 +99,6 @@ export default {
           case 'added_success':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.SUCCESS_ADDED });
             break;
-          case 'token_add':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.INCORRECT_FIELDS_ADD_TOKEN });
-            break;
-          case 'token_exists':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TOKEN_ADDED });
-            break;
-          case 'token_invalid_address':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TOKEN_INVALID_ADDRESS });
-            break;
           case 'only_allowed_chars':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.CHARS_ALLOWED });
             break;
@@ -154,44 +117,14 @@ export default {
           case 'confirm_privacy_clear':
             commit(types.SHOW_POPUP, { show: true, secondBtn: true, secondBtnClick: 'clearPrivacyData', ...popupMessages.CONFIRM_PRIVACY_CLEAR })
             break;
-          case 'name_exist':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.AENS_NAME_EXIST })
-            break;
           case 'ledger_support':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.LEDGER_SUPPORT })
             break
           case 'ledger_account_error':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.LEDGER_ACCOUNT_ERROR })
             break
-          case 'signedMessage':
-            commit(types.SHOW_POPUP, { show: true, secondBtn: true, secondBtnClick: 'copyText', ...popupMessages.SIGNED_MESSAGE, msg: payload.msg, data: payload.data })
-            break
-          case 'success_verifymessage':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.SUCCESS_VERIFYMESSAGE })
-            break
-          case 'unsuccess_verifymessage':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.UNSUCCESS_VERIFYMESSAGE })
-            break
-          case 'token_migration_error':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TOKEN_MIGRATION_ERROR })
-            break
-          case 'token_migration_success':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TOKEN_MIGRATION })
-            break
           case 'reveal_seed_phrase_impossible':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.REVEAL_SEED_IMPOSSIBLE })
-            break;
-          default:
-            break;
-        }
-        break;
-      case 'fungible_token':
-        switch (payload.type) {
-          case 'balance_account_not_existent':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.BALANCE_ACCOUNT_NOT_EXISTENT });
-            break;
-          case 'allowance_change_success':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.ALLOWANCE_CHANGE_SUCCESS });
             break;
           default:
             break;
@@ -251,9 +184,6 @@ export default {
   },
   initSdk({ commit }, payload) {
     commit(types.INIT_SDK, payload)
-  },
-  setTokens({ commit }, payload) {
-    commit(types.SET_TOKENS, payload)
   },
   async getRegisteredNames({ commit, state }) {
     const middlewareUrl = state.network[state.current.network].middlewareUrl;
@@ -458,52 +388,6 @@ export default {
     const mac = new Uint8Array(await aes.decrypt(encryptedWallet.mac));
     if (mac.reduce((p, n) => p || n !== 0, false)) throw new Error('Wrong password');
     return passwordDerivedKey;
-  },
-
-  async getAllUserTokens({ state: { tokenRegistry, tokenRegistryLima, account, tokens, sdk, network, current }, dispatch }) {
-    let { publicKey } = account
-    let savedTokens = await browser.storage.local.get('tokens')
-    
-    if(savedTokens.hasOwnProperty("tokens")) {
-      dispatch('setTokens', savedTokens.tokens)
-    }
-    try {
-      let tkns = (await contractCall({ instance:tokenRegistry, method:'get_all_tokens' })).decodedResult
-      let tknsLima = (await contractCall({ instance:tokenRegistryLima, method:'get_all_tokens' })).decodedResult
-      let res = (await Promise.all(uniqWith(tkns.concat(tknsLima), isEqual).map(async ( tkn ) => { 
-        let instance = tokenRegistry
-        if(await checkContractAbiVersion({ address: tkn[0], middleware: network[current.network].middlewareUrl }) == 3) {
-          instance= tokenRegistryLima
-        }
-        // console.log(instance)
-        let balance = (await contractCall({ instance, method:'get_token_balance', params: [tkn[0], publicKey] })).decodedResult
-        let owner = (await contractCall({ instance, method:'get_token_owner', params: [tkn[0]] })).decodedResult
-        let token
-        if(typeof balance != 'undefined' || owner == publicKey) {
-          token = {
-            balance,
-            parent: publicKey,
-            contract: tkn[0],
-            name: tkn[1].name,
-            symbol:tkn[1].symbol,
-            precision:tkn[1].decimals
-          }
-        } 
-        return token
-        // console.log(tokens)
-      }))).filter(t => typeof t != 'undefined')
-      
-      res = tokens.concat(res)
-      let userTokens = res
-      
-      if(savedTokens.hasOwnProperty("tokens")) {
-        userTokens = savedTokens.tokens.concat(res)
-      } 
-      userTokens = uniqBy(userTokens, (elem) => ( [elem.contract, elem.parent].join() ))
-      dispatch('setTokens', userTokens)
-    } catch(e){
-      console.log(e)
-    }
   },
 
   ...Ledger

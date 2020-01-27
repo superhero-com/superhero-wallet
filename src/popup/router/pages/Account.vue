@@ -37,7 +37,7 @@
         <ae-input-plain fill="white" :placeholder="$t('pages.account.accountName')" @keyup.native="setAccountName" :value="activeAccountName"  />
       </template>
       <template slot="header">
-        <ae-text fill="white" face="mono-base">{{tokenBalance}} {{tokenSymbol}}</ae-text>
+        <ae-text fill="white" face="mono-base">{{tokenBalance}} AE</ae-text>
       </template>
       <ae-address class="accountAddress" :value="account.publicKey" copyOnClick enableCopyToClipboard length="medium" gap=0 />
       <ae-toolbar :fill="cardColor" align="right" slot="footer">

@@ -114,25 +114,6 @@
                       {{ $t('pages.appVUE.myAccount') }}
                   </ae-button>
                 </li>
-                <li id="tokens" class="have-subDropdown" :class="dropdown.tokens ? 'show' : ''">
-                    <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
-                    <ae-icon name="grid" />
-                    {{ $t('pages.appVUE.switchToken') }}
-                    <ae-icon name="left-more" />
-                  </ae-button>
-
-                  <!-- Tokens dropdown -->
-                  <ul class="sub-dropdown">
-                    <li v-for="(tkn, index) in tokens" v-if="typeof tkn.parent == 'undefined' || tkn.parent == account.publicKey" :key="index">
-                      <ae-button @click="switchToken(index)" class="triggerhidedd flex flex-justify-between" >
-                        <ae-identicon class="token-image" :address="tkn.contract" size="base" v-if="index != 0 "/>
-                        <img :src="ae_token" class="token-image" alt="" v-if="index == 0" >
-                        <span class="subAccountBalance tokenBalance">{{typeof tkn.parent == 'undefined' ? balance : tkn.balance }} {{ tkn.symbol }}</span>
-                        <ae-check class="subAccountCheckbox"  type="radio" :value="index" v-model="current.token" /> 
-                      </ae-button>
-                    </li>
-                  </ul>
-                </li>
                 <li id="utilities">
                   <ae-button @click="utilities" class="utilities">
                     <ae-icon name="underline" />
@@ -316,10 +297,6 @@ export default {
       }
       
     },
-    switchToken(token){
-      this.current.token = token
-      this.$store.commit('RESET_TRANSACTIONS',[]);
-    },
     switchNetwork (network) {
       this.dropdown.network = false;
       this.$store.dispatch('switchNetwork', network).then(() => {
@@ -379,24 +356,6 @@ export default {
       this.$router.push('/manageAccounts');
       this.dropdown.network = false;
     },
-    exportKeypair (type) {
-      if(type == 'keypair') {
-        let blobData = JSON.stringify({"publicKey": this.account.publicKey, "secretKey": this.account.secretKey});
-        let blob = new Blob([blobData], {type: "application/json;charset=utf-8"});
-        saveAs(blob, "keypair.json");
-        this.dropdown.settings = false; this.dropdown.languages = false; 
-      }else if(type == 'keystore') {
-        let blobData = "";
-        try {
-          blobData = JSON.parse(this.account.encryptedPrivateKey);
-        }catch(err) {
-          blobData = JSON.stringify(this.account.encryptedPrivateKey);
-        }
-        let blob = new Blob([blobData], {type: "application/json;charset=utf-8"});
-        saveAs(blob, "keystore.json");
-        this.dropdown.settings = false; this.dropdown.languages = false;
-      }
-    },
     pollData() {
       let triggerOnce = false
       let running = false
@@ -447,23 +406,6 @@ export default {
     async initSDK() {
       let sdk = await initializeSDK(this, { network:this.network, current:this.current, account:this.account, wallet:this.wallet, activeAccount:this.activeAccount, background:this.background })
       if( typeof sdk != null && !sdk.hasOwnProperty("error")) {
-       
-        try {
-          await this.$store.commit('SET_TOKEN_REGISTRY', 
-            await this.$helpers.getContractInstance(this.network[this.current.network].networkId == "ae_uat" ? 
-            TOKEN_REGISTRY_CONTRACT_LIMA : 
-            TOKEN_REGISTRY_CONTRACT_LIMA, { contractAddress: this.network[this.current.network].tokenRegistry }) 
-          )
-        } catch (e) {
-
-        }
-        try {
-          await this.$store.commit('SET_TOKEN_REGISTRY_LIMA', 
-            await this.$helpers.getContractInstance(TOKEN_REGISTRY_CONTRACT_LIMA, { contractAddress: this.network[this.current.network].tokenRegistryLima }) 
-          )
-        } catch(e) {
-
-        }
         try {
           await this.$store.commit('SET_TIPPING', 
             await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract }) 
@@ -471,8 +413,6 @@ export default {
         } catch(e) {
           
         }
-        
-        this.$store.dispatch('getAllUserTokens')
       }
       
       if(typeof sdk.error != 'undefined') {
@@ -486,14 +426,6 @@ export default {
           
           this.$router.push('/')
       }
-    },
-    toTokens() {
-      this.dropdown.settings = false
-      this.$router.push('/tokens')
-    },
-    createToken() {
-      this.dropdown.settings = false
-      this.$router.push('/create-token')
     },
     checkPendingTx() {
       this.checkPendingTxInterval = setInterval(() => {

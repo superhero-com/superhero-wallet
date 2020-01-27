@@ -39,20 +39,14 @@ export const getters = {
   sdk(state) {
     return state.sdk
   },
-  tokens(state) {
-    return state.tokens
-  },
-  tokenSymbol(state) {
-    return state.tokens[state.current.token].symbol
-  },
   tokenBalance(state) {
     return state.current.token != 0 ? state.tokens[state.current.token].balance : state.balance
   },
+  tokenSymbol() {
+    return 'AE'
+  },
   aeppPopup(state) {
     return state.aeppPopup
-  },
-  names(state) {
-    return state.names
   },
   ledgerApi(state) {
     return state.ledgerApi
@@ -64,7 +58,6 @@ export const getters = {
     ) + 1
   },
   isLedger(state) {
-
     if(state.subaccounts.length > 0){
       return state.subaccounts.find(s => s.publicKey == state.account.publicKey).isLedger
     } else{
@@ -76,12 +69,6 @@ export const getters = {
   },
   background({ background }) {
     return background
-  },
-  tokenRegistry({ tokenRegistry }) {
-    return tokenRegistry
-  },
-  tokenRegistryLima({ tokenRegistryLima }) {
-    return tokenRegistryLima
   },
   txAdvancedMode({ txAdvancedMode }) {
     return txAdvancedMode

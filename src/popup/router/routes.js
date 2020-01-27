@@ -17,24 +17,14 @@ import AdvancedSettingsComponent from './pages/AdvancedSettings';
 import AboutSettingsComponent from './pages/AboutSettings';
 import UtilitiesComponent from './pages/Utilities';
 import TipComponent from './pages/TipPage';
-import AllowancesComponent from './pages/Allowances';
 import ConnectConfirmComponent from './pages/ConnectConfirm';
 import ManageNetworksComponent from './pages/ManageNetworks';
-import FungibleTokensComponent from './pages/AddFungibleToken';
-import SignAndVerifyMsg from './pages/SignAndVerifyMsg';
-import FungibleTokensPageComponent from './pages/FungibleTokensPage';
-import AensComponent from './pages/NamingSystem';
-import AuctionBid from './pages/AuctionBid';
-import MintFungibleTokenComponent from './pages/MintFungibleToken';
 import AirGapSetup from './pages/AirGapSetup';
 import SignTransactionByQrCode from './pages/SignTransactionByQrCode';
 import QrCodeReader from './pages/QrCodeReader';
-import CreateFungibleTokenComponent from './pages/CreateFungibleToken';
 import LedgerSetupComponent from './pages/LedgerSetup';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
-import TokenMigration from './pages/TokenMigration';
-import TokenMigrationInfo from './pages/TokenMigrationInfo';
 export default [
   {
     path: '/',
@@ -133,40 +123,8 @@ export default [
     component:TipComponent
   },
   {
-    path:'/allowances',
-    component:AllowancesComponent
-  },
-  {
     path:'/manageNetworks',
     component:ManageNetworksComponent
-  },
-  {
-    path:'/tokens',
-    component:FungibleTokensComponent
-  },
-  {
-    path:'/fungible-tokens',
-    component:FungibleTokensPageComponent
-  },
-  {
-    path:'/aens',
-    component:AensComponent
-  },
-  {
-    name:'auction-bid',
-    path: '/auction-bid',
-    component: AuctionBid,
-    props:true
-  },
-  {
-    path:'/mint-token',
-    component: MintFungibleTokenComponent
-  },
-  {
-    name:'sign-verify-message',
-    path:'/signAndVerifyMsg',
-    component:SignAndVerifyMsg,
-    props: true
   },
   {
     path:'/airGapSetup',
@@ -185,10 +143,6 @@ export default [
     name: 'signTransactionByQrCode'
   },
   {
-    path:'/create-token',
-    component:CreateFungibleTokenComponent
-  },
-  {
     path:'/ledger-setup',
     component:LedgerSetupComponent
   },
@@ -199,14 +153,6 @@ export default [
   {
     path:'/privacyPolicy',
     component:PrivacyPolicy
-  },
-  {
-    path: '/token-migration',
-    component: TokenMigration
-  },
-  {
-    path: '/token-migration-info',
-    component: TokenMigrationInfo
   }
   
 ];

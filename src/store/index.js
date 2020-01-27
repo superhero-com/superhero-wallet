@@ -6,8 +6,6 @@ import mutations from './mutations';
 import actions from './actions';
 import { POPUP_PROPS } from '../popup/utils/popup-messages';
 import { networks } from '../popup/utils/constants';
-import names from '../popup/utils/names'
-import observables from '../popup/utils/observables';
 
 Vue.use(Vuex);
 
@@ -35,20 +33,9 @@ export default new Vuex.Store({
       new: []
     },
     sdk: null,
-    tokens: [
-      {
-        name: "AE",
-        symbol: "AE",
-        precision: 7,
-        balance: 0,
-        contract: ''
-      }
-    ],
     aeppPopup: false,
     ledgerApi: null,
     background:null,
-    tokenRegistry: null,
-    tokenRegistryLima:null,
     txAdvancedMode:false,
     tipping:null,
     tippingReceiver: {}
@@ -56,5 +43,5 @@ export default new Vuex.Store({
   getters,
   mutations,
   actions,
-  plugins: [ names]
+  plugins: [ ]
 });

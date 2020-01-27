@@ -1,14 +1,6 @@
 <template>
     <ae-input :label="$t('pages.send.amount')" placeholder="0.0" aemount v-model="amount" class="sendAmount">
         <ae-text slot="header" fill="black">
-          <!-- <span class="token-symbol">{{tokenSymbol}}</span> -->
-          <ae-dropdown v-if="myTokens && myTokens.length > 1">
-            <ae-icon name="grid" size="20px" slot="button" />
-            <li v-for="(tkn,key) in myTokens" v-bind:key="key" v-if="tkn.name != tokenSymbol" @click="setActiveToken(tkn.key)">
-              <img :src="ae_token" class="token-image" alt="" v-if="tkn.key == 0" >
-              <ae-identicon class="subAccountIcon" :address="tkn.contract" size="base" v-if="tkn.key != 0"/> {{tkn.name}}
-            </li>
-          </ae-dropdown>
         </ae-text>
         <ae-toolbar slot="footer" class="flex-justify-between" v-if="txFee">
           <span>
@@ -27,7 +19,7 @@ import {mapGetters} from 'vuex';
 export default {
     props: ['myTokens', 'txFee', 'amount', 'error'],
     computed: {
-        ...mapGetters(['tokens', 'tokenSymbol', 'current']),
+        ...mapGetters(['current']),
     },
     watch: {
       amount(val) {
