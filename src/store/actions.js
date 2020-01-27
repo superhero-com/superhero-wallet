@@ -244,36 +244,6 @@ export default {
 
     commit(types.SET_NAMES, { names: Array.prototype.concat.apply([], res) })
   },
-  async updateRegisteredName({ commit, state }) {
-    let pending = uniqBy(state.pendingNames, 'hash')
-    return new Promise(async (resolve, reject) => {
-      if (pending.length) {
-        let { hash, name } = head(pending)
-        let register = await state.sdk.poll(hash)
-        let claim = await state.sdk.aensQuery(name)
-        let tx = {
-          popup: false,
-          tx: {
-            name,
-            recipientId: '',
-            claim,
-            hash
-          },
-          type: 'nameUpdate'
-        }
-        commit('SET_AEPP_POPUP', true)
-        resolve(register)
-        router.push({
-          'name': 'sign', params: {
-            data: tx,
-            type: tx.type
-          }
-        })
-      } else {
-        resolve()
-      }
-    })
-  },
   removePendingName({ commit, state }, { hash }) {
     return new Promise((resolve, reject) => {
       let pending = state.pendingNames

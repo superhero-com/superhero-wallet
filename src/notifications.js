@@ -1,6 +1,6 @@
 global.browser = require('webextension-polyfill');
 const { Universal: Ae, Crypto } = require('@aeternity/aepp-sdk')
-import { networks } from './popup/utils/constants';
+import { networks, DEFAULT_NETWORK } from './popup/utils/constants';
 import { detectBrowser } from './popup/utils/helper';
 import Node from '@aeternity/aepp-sdk/es/node'
 
@@ -15,6 +15,8 @@ export default class Notification {
         this.network = networks.Testnet
         if(typeof activeNetwork != "undefined") {
             this.network = networks[activeNetwork]
+        } else {
+            activeNetwork = DEFAULT_NETWORK
         }
         const node = await Node({ url: this.network.internalUrl, internalUrl: this.network.internalUrl })
         this.client = await Ae({

@@ -31,15 +31,6 @@ if(typeof navigator.clipboard == 'undefined') {
     sendToBackground('phishingCheck',{ hostname:extractHostName(window.location.href), href:window.location.href })    
 }
 
-/**
- * This should be depricated
- */
-let aepp = browser.runtime.getURL("aepp.js")
-fetch(aepp) 
-.then(res => res.text())
-.then(res => {
-    injectScript(res)
-})
 
 // Subscribe from postMessages from page
 window.addEventListener("message", ({data}) => {
@@ -68,19 +59,6 @@ browser.runtime.onMessage.addListener(({ data, method }, sender, sendResponse) =
     }
 })
 
-
-
-const injectScript = (content) => {
-    try {
-      const container = document.head || document.documentElement
-      const scriptTag = document.createElement('script')
-      scriptTag.setAttribute('async', false)
-      scriptTag.textContent = content
-      container.insertBefore(scriptTag, container.children[0])
-    } catch (e) {
-      console.error('Waellet script injection failed', e)
-    }
-}
 
 function sendToBackground(method, params) {
     return new Promise((resolve,reject) => {

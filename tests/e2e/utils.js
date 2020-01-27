@@ -173,22 +173,6 @@ export const importSeed  = () => {
   .invoke('attr', 'title')
   .should('eq',hdWallet(mnemonicToSeed(mnemonic)));
 }
- 
-export const importKeystore = () => {
-  cy
-  .visit('popup/popup.html',{onBeforeLoad})
-  .get('button.importBtn').click()
-  .get('.tabs span').eq(1).click()
-  .uploadFile('input[type="file"]','../../keystore4.json','application/json')
-  .get('button').contains('Continue').click()
-  .get('input[type="password"]').clear().type(ACCOUNT_PASSWORD_STRONG)
-  .get('button').contains('Import').click()
-  .get('.ae-loader')
-  .should('be.visible')
-  .get('.ae-card.primary ul')
-  .invoke('attr', 'title')
-  .should('eq',hdWallet(PRIVATE_KEY_IMPORT));
-}
 
 export const generateHdWallet = (seed) => {
     

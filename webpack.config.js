@@ -180,7 +180,7 @@ function getPlatformFiles(platform) {
     [`options/options`]: './options/options.js',
     // [`main`]:'./main.js',
     [`phishing/phishing`]:'./phishing/phishing.js',
-    [`aepp`]:'./aepp.js',
+    // [`aepp`]:'./aepp.js',
     [`popup/cameraPermission`]:'./popup/cameraPermission.js'
   }
 }

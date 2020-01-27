@@ -358,7 +358,6 @@ export default {
     },
     pollData() {
       let triggerOnce = false
-      let running = false
       this.polling = setInterval(async () => {
         if(this.sdk != null && this.isLoggedIn) {
             if(this.current.token != 0) {
@@ -368,17 +367,6 @@ export default {
             if(this.dropdown.account) {
               this.$store.dispatch('updateBalanceSubaccounts');
             }
-            if(this.dropdown.settings) {
-              this.$store.dispatch('updateBalanceTokens');
-            }
-            if(!this.$router.currentRoute.path.includes("/sign-transaction")) {
-              if(!running) {
-                running = true
-                this.$store.dispatch('updateRegisteredName').then(res => {
-                  running = false
-                })
-              }
-            }
             if(!triggerOnce) {
               this.$store.dispatch('getRegisteredNames')
               this.$store.dispatch('updateBalanceSubaccounts');
@@ -386,22 +374,6 @@ export default {
             }
         }
       }, 2500);
-    },
-    fetchApi() {
-      let states = this.$store.state;
-      let ae = Ae({
-          url: states.network[states.current.network].url,
-          internalUrl: states.network[states.current.network].internalUrl,
-          keypair: {
-            secretKey: states.account.secretKey,
-            publicKey: states.account.publicKey,
-          },
-          networkId: states.network[states.current.network].networkId,
-      });
-      ae.then(a => {
-        console.log(a);
-      })
-      return ae;
     },
     async initSDK() {
       let sdk = await initializeSDK(this, { network:this.network, current:this.current, account:this.account, wallet:this.wallet, activeAccount:this.activeAccount, background:this.background })

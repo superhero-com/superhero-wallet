@@ -150,36 +150,7 @@ const checkAeppConnected = (host) => {
 const redirectAfterLogin = (ctx) => {
   browser.storage.local.get('showAeppPopup').then((aepp) => {
     browser.storage.local.get('pendingTransaction').then((pendingTx) => {
-        if(aepp.hasOwnProperty('showAeppPopup') && aepp.showAeppPopup.hasOwnProperty('type') && aepp.showAeppPopup.hasOwnProperty('data') && aepp.showAeppPopup.type != "" ) {
-            browser.storage.local.remove('showAeppPopup').then(() => {
-                ctx.$store.commit('SET_AEPP_POPUP',true)
-                if(aepp.showAeppPopup.data.hasOwnProperty("tx") && aepp.showAeppPopup.data.tx.hasOwnProperty("params")) {
-                    aepp.showAeppPopup.data.tx.params = parseFromStorage(aepp.showAeppPopup.data.tx.params)
-                }
-                if(aepp.showAeppPopup.type == 'connectConfirm') {
-                    aepp.showAeppPopup.data.popup = true
-                    ctx.$router.push({'name':'connect-confirm', params: {
-                    data:aepp.showAeppPopup.data
-                    }});
-                }else if(aepp.showAeppPopup.type == 'txSign') {
-                    aepp.showAeppPopup.data.popup = true
-                    ctx.$router.push({'name':'sign', params: {
-                    data:aepp.showAeppPopup.data
-                    }});
-                }else if(aepp.showAeppPopup.type == 'contractCall') {
-                    aepp.showAeppPopup.data.popup = true
-                    ctx.$router.push({'name':'sign', params: {
-                        data:aepp.showAeppPopup.data
-                    }});
-                }else if(aepp.showAeppPopup.type == 'signMessage') {
-                    aepp.showAeppPopup.data.popup = true
-                    ctx.$router.push({'name':'sign-verify-message', params: {
-                        data:aepp.showAeppPopup.data
-                    }})
-                }
-                return;
-            });
-        }else if(pendingTx.hasOwnProperty('pendingTransaction') && pendingTx.pendingTransaction.hasOwnProperty('list') && Object.keys(pendingTx.pendingTransaction.list).length > 0) {
+        if(pendingTx.hasOwnProperty('pendingTransaction') && pendingTx.pendingTransaction.hasOwnProperty('list') && Object.keys(pendingTx.pendingTransaction.list).length > 0) {
             ctx.$store.commit('SET_AEPP_POPUP',true)
             let tx = pendingTx.pendingTransaction.list[Object.keys(pendingTx.pendingTransaction.list)[0]];
             tx.popup = false

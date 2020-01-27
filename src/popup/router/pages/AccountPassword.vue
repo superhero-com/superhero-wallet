@@ -79,8 +79,6 @@ export default {
                 this.importPrivateKey({accountPassword,data, termsAgreed});
             }else if(this.type == 'seedPhrase') {
                 this.importSeedPhrase({accountPassword,data, termsAgreed});
-            }else if(this.type == 'keystore') {
-                this.importKeystore({accountPassword,data, termsAgreed});
             }else if(this.type == 'generateEncrypt') {
                 this.generateAddress({accountPassword,termsAgreed});
             }else if(this.type == 'login') {

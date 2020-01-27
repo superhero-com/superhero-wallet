@@ -90,7 +90,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { convertToAE, currencyConv, convertAmountToCurrency, removeTxFromStorage, contractEncodeCall, initializeSDK, checkAddress, chekAensName, escapeCallParam, addRejectedToken, checkContractAbiVersion, parseFromStorage  } from '../../utils/helper';
-import { MAGNITUDE, MIN_SPEND_TX_FEE, MIN_SPEND_TX_FEE_MICRO, MAX_REASONABLE_FEE, FUNGIBLE_TOKEN_CONTRACT, TX_TYPES, calculateFee, TX_LIMIT_PER_DAY, TOKEN_REGISTRY_ADDRESS, TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA } from '../../utils/constants';
+import { MAGNITUDE, MIN_SPEND_TX_FEE, MIN_SPEND_TX_FEE_MICRO, MAX_REASONABLE_FEE, TX_TYPES, calculateFee, TX_LIMIT_PER_DAY } from '../../utils/constants';
 import { Wallet, MemoryAccount } from '@aeternity/aepp-sdk/es'
 import { computeAuctionEndBlock, computeBidFee  } from '@aeternity/aepp-sdk/es/tx/builder/helpers'
 import BigNumber from 'bignumber.js';
@@ -340,7 +340,7 @@ export default {
                         
                         if(this.data.type == 'contractCreate') {
                             this.data.tx.contract = {}
-                            this.data.tx.contract.bytecode = (await this.sdk.contractCompile(FUNGIBLE_TOKEN_CONTRACT)).bytecode
+                            this.data.tx.contract.bytecode = (await this.sdk.contractCompile(this.data.tx.source)).bytecode
                             // let callData = await contractEncodeCall(this.sdk,FUNGIBLE_TOKEN_CONTRACT,'init',[...escapeCallParams(this.data.tx.init)])
                             this.txParams = {
                                 ...this.txParams,
@@ -662,42 +662,6 @@ export default {
                 try {
                     deployed = await this.contractInstance.deploy([...this.data.tx.init], { fee: this.convertSelectedFee })
                     this.setTxInQueue(deployed.transaction)
-                    if(this.data.tx.contractType == 'fungibleToken') {
-                        if(!this.data.tx.tokenRegistry) {
-                            addRejectedToken(deployed.address)
-                        }
-
-                        let tokens = this.tokens.map(tkn => tkn)
-                        tokens.push({
-                            contract:deployed.address,
-                            name:this.data.tx.init[0].split('"').join(''),
-                            symbol:this.data.tx.init[2].split('"').join(''),
-                            precision:this.data.tx.init[1],
-                            balance:0,
-                            parent:this.account.publicKey
-                        })
-                        this.$store.dispatch('setTokens', tokens)
-                        await browser.storage.local.set({ tokens: tokens})
-                        if(this.data.tx.tokenRegistry) {
-                            let abi_version = await checkContractAbiVersion({ address: deployed.address, middleware: this.network[this.current.network].middlewareUrl}, true )
-                            let tx = {
-                                popup:false,
-                                tx: {
-                                    source: abi_version == 3 ? TOKEN_REGISTRY_CONTRACT_LIMA : TOKEN_REGISTRY_CONTRACT,
-                                    address: abi_version == 3 ? this.network[this.current.network].tokenRegistryLima : this.network[this.current.network].tokenRegistry ,
-                                    params: [deployed.address],
-                                    abi_version,
-                                    method: 'add_token',
-                                    amount: 0,
-                                    contractType: 'fungibleToken'
-                                },
-                                callType: 'pay',
-                                type:'contractCall'
-                            }
-                            this.redirectToTxConfirm(tx)
-                        }
-                        
-                    }
                 } catch(err) {
                     console.log(err)
                     this.setTxInQueue('error')

@@ -11,11 +11,6 @@ import {
 
 global.browser = require('webextension-polyfill');
 
-// browser.browserAction.onClicked.addListener(function (tab) {
-// 	browser.tabs.executeScript(tab.id, {
-//         file: 'inject.js'
-// 	}); 
-// });
 
 setInterval(() => {
     browser.windows.getAll({}).then((wins) => {
@@ -40,22 +35,9 @@ function getAccount() {
     });
 }
 
-const error = {
-    "error": {
-        "code": 1,
-        "data": {
-            "request": {}
-        },
-        "message": "Transaction verification failed"
-    },
-    "id": null,
-    "jsonrpc": "2.0"
-}
-
 const controller = new WalletContorller()
 setController(controller)
 browser.runtime.onMessage.addListener( (msg, sender,sendResponse) => {
-    // setController(controller)
     switch(msg.method) {
         case 'phishingCheck':
             let data = {...msg, extUrl: browser.extension.getURL ('./') };
@@ -79,179 +61,10 @@ browser.runtime.onMessage.addListener( (msg, sender,sendResponse) => {
             urls.push(msg.params.hostname);
             setPhishingUrl(urls);
         break;
-        case 'aeppMessage':
-            /**
-             * This should be deprecated
-             */
-            switch(msg.params.type) {
-                case "txSign":
-                    checkAeppConnected(msg.params.hostname).then((check) => {
-                        if(check) {
-                            openAeppPopup(msg,'txSign')
-                            .then(res => {
-                                sendResponse(res)
-                            })
-                        }else {
-                            error.error.message = "Account not connected. Establish connection first"
-                            error.id = msg.id
-                            sendResponse(error)
-                        }
-                    });
-                break;
-
-                case 'connectConfirm':
-                    checkAeppConnected(msg.params.params.hostname).then((check) => {
-                        if(!check) {
-                            openAeppPopup(msg,'connectConfirm')
-                            .then(res => {
-                                sendResponse(res)
-                            })
-                        } else {
-                            error.error.message = "Connection already established"
-                            error.id = msg.id
-                            sendResponse(error)
-                        }
-                    })
-                break;
-
-                case 'getAddress':
-                    browser.storage.local.get('userAccount').then((user)=> {
-                        browser.storage.local.get('isLogged').then((data) => {
-                            if (data.isLogged && data.hasOwnProperty('isLogged')) {
-                                browser.storage.local.get('subaccounts').then((subaccounts) => {
-                                    browser.storage.local.get('activeAccount').then((active) => {
-                                        let activeIdx = 0
-                                        if(active.hasOwnProperty("activeAccount")) {
-                                            activeIdx = active.activeAccount
-                                        }
-                                        let address = subaccounts.subaccounts[activeIdx].publicKey
-                                        sendResponse({id:null, jsonrpc:"2.0",address})
-                                    })
-                                })
-                            }else {
-                                sendResponse({id:null, jsonrpc:"2.0",address:""})
-                            }
-                        })
-                    })
-                break;
-                
-                case 'contractCall':
-                    checkAeppConnected(msg.params.hostname).then((check) => {
-                        if(check) {
-                            if(typeof msg.params.callType != "undefined" && msg.params.callType == 'static') {
-                                if(msg.params.hasOwnProperty("tx") && msg.params.tx.hasOwnProperty("params")) {
-                                    msg.params.tx.params = parseFromStorage(msg.params.tx.params)
-                                }
-                                contractCallStatic(msg.params).then(res => {
-                                    res.id = msg.id
-                                    sendResponse(res)
-                                }).catch(err => {
-                                    error.error.message = err
-                                    error.id = msg.id
-                                    sendResponse(error)
-                                });
-                            } else {
-                                openAeppPopup(msg,'contractCall')
-                                .then(res => {
-                                    sendResponse(res)
-                                })
-                            }
-                        }else {
-                            error.error.message = "Account not connected. Establish connection first"
-                            error.id = msg.id
-                            sendResponse(error)
-                        }
-                    })
-                    
-                break;
-                
-                case 'signMessage':
-                    checkAeppConnected(msg.params.hostname).then((check) => {
-                        if(check) {
-                            openAeppPopup(msg,'signMessage')
-                            .then(res => {
-                                sendResponse(res)
-                            })
-                        }else {
-                            error.error.message = "Account not connected. Establish connection first"
-                            error.id = msg.id
-                            sendResponse(error)
-                        }
-                    })
-                break;
-
-                case 'verifyMessage':
-                    checkAeppConnected(msg.params.hostname).then((check) => {
-                        if(check) {
-                            openAeppPopup(msg,'verifyMessage')
-                            .then(res => {
-                                sendResponse(res)
-                            })
-                        }else {
-                            error.error.message = "Account not connected. Establish connection first"
-                            error.id = msg.id
-                            sendResponse(error)
-                        }
-                    })
-                break;
-            }
-        break
     }
 
     return true
 })
-
-/**
- * This should be deprecated
- */
-const connectToPopup = (cb,type, id) => {
-    browser.runtime.onConnect.addListener((port) => {
-        port.onMessage.addListener((msg,sender) => {
-            msg.id = sender.name
-            if(id == sender.name) cb(msg)
-        });
-        port.onDisconnect.addListener(async (event) => {
-            let list = await removeTxFromStorage(event.name)
-            browser.storage.local.set({pendingTransaction: { list } }).then(() => {})
-            browser.storage.local.remove('showAeppPopup').then(() => {}); 
-            error.id = event.name
-            if(event.name == id) {
-                if(type == 'txSign') {
-                    error.error.message = "Transaction rejected by user"
-                    cb(error)
-                }else if(type == 'connectConfirm') {
-                    error.error.message = "Connection canceled"
-                    cb(error)
-                }else if(type == 'contractCall') {
-                    error.error.message = "Transaction rejected by user"
-                    cb(error)
-                }else {
-                    cb()
-                }
-            }
-        });
-   })
-}
-
-/**
- * This should be deprecated
- */
-const openAeppPopup = (msg,type) => {
-    return new Promise((resolve,reject) => {
-        browser.storage.local.set({showAeppPopup:{ data: msg.params, type } } ).then( () => {
-            browser.windows.create({
-                url: browser.runtime.getURL('./popup/popup.html'),
-                type: "popup",
-                height: 680,
-                width:420
-            }).then((window) => {
-                connectToPopup((res) => {
-                    resolve(res)
-                }, type, msg.params.id)
-            })
-        })
-    })
-}
 
 const checkPendingTx = () => {
     return new Promise((resolve,reject) => {

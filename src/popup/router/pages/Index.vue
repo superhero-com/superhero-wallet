@@ -71,10 +71,6 @@
           :class="{'tab-active':importType =='privateKey'}"
         >{{ $t('pages.index.privateKey') }}</span>
         <span
-          @click="switchImportType('keystore')"
-          :class="{'tab-active':importType == 'keystore'}"
-        >{{ $t('pages.index.keystoreJson') }}</span>
-        <span
           @click="switchImportType('seedPhrase')"
           :class="{'tab-active':importType == 'seedPhrase'}"
         >{{ $t('pages.index.seedPhrase') }}</span>

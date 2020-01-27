@@ -1,5 +1,33 @@
-
+const nacl = require('tweetnacl')
+import uuid from 'uuid';
+import { encodeBase58Check } from '@aeternity/aepp-sdk/es/utils/crypto';
 import WebCrypto from './webCrypto';
+
+const DEFAULTS = {
+  crypto: {
+    secret_type: 'ed25519',
+    symmetric_alg: 'xsalsa20-poly1305',
+    kdf: 'argon2id',
+    kdf_params: {
+      memlimit_kib: 65536,
+      opslimit: 3,
+      parallelism: 1,
+    },
+  },
+};
+
+export function getAddressFromPriv(secret) {
+  const keys = nacl.sign.keyPair.fromSecretKey(str2buf(secret));
+  const publicBuffer = Buffer.from(keys.publicKey);
+  return `ak_${encodeBase58Check(publicBuffer)}`;
+}
+
+export function str2buf(str, enc) {
+  if (!str || str.constructor !== String) return str;
+  if (!enc && isHex(str)) enc = 'hex';
+  if (!enc && isBase64(str)) enc = 'base64';
+  return Buffer.from(str, enc);
+}
 
 /**
  * WebCrypto Support

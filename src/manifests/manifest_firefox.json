@@ -45,7 +45,6 @@
       "inject.js",
       "phishing/phishing.html",
       "phishing/phishing.js",
-      "aepp.js",
       "popup/CameraRequestPermission.html"
     ],
     "options_ui": {

@@ -70,7 +70,7 @@ import { mapGetters } from 'vuex';
 import QrcodeVue from 'qrcode.vue';
 import Wallet from '@aeternity/aepp-sdk/es/ae/wallet';
 import { MemoryAccount } from '@aeternity/aepp-sdk';
-import { MAGNITUDE, MIN_SPEND_TX_FEE, MIN_SPEND_TX_FEE_MICRO, MAX_UINT256, calculateFee, TX_TYPES, FUNGIBLE_TOKEN_CONTRACT } from '../../utils/constants';
+import { MAGNITUDE, MIN_SPEND_TX_FEE, MIN_SPEND_TX_FEE_MICRO, MAX_UINT256, calculateFee, TX_TYPES } from '../../utils/constants';
 import BigNumber from 'bignumber.js';
 import Ae from '@aeternity/aepp-sdk/es/ae/universal';
 import { getPublicKeyByResponseUrl, getSignedTransactionByResponseUrl, generateSignRequestUrl } from '../../utils/airGap';
@@ -157,17 +157,8 @@ export default {
       this.fee = fee
     },
     async feeParams() {
-      if(this.current.token == 0) {
-        return {
-          ...this.sdk.Ae.defaults
-        }
-      }else {
-        return {
-          ...this.sdk.Ae.defaults,
-          callerId:this.account.publicKey,
-          contractId:this.tokens[this.current.token].contract,
-          callData: await contractEncodeCall(this.sdk,FUNGIBLE_TOKEN_CONTRACT,"transfer",[this.account.publicKey,"0"])
-        }
+      return {
+        ...this.sdk.Ae.defaults
       }
     },
     send(){
