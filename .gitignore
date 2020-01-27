@@ -1,0 +1,14 @@
+/node_modules
+/*.log
+/dist
+/dist-zip
+/bower_components
+/.history
+/cypress
+/.nyc_output
+*.png
+*.png
+tests/e2e/screenshots/accountPage.js/Test cases for Account Page -- can logout and login again (failed).png
+tests/e2e/screenshots/accountPage.js/Test cases for Account Page -- can logout and login again (failed).png
+tests/e2e/screenshots/accountPage.js/Test cases for Account Page -- can logout and login again (failed).png
+.DS_Store

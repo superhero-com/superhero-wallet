@@ -1,0 +1,16 @@
+{
+  "pluginsFile": "tests/e2e/plugins/index.js",
+  "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1",
+  "video": false,
+  "baseUrl": "http://localhost:5000/",
+  "viewportWidth": 400,
+  "viewportHeight": 660,
+  "execTimeout": 360000,
+  "taskTimeout": 360000,
+  "defaultCommandTimeout": 360000,
+  "pageLoadTimeout": 200000,
+  "responseTimeout": 360000,
+  "numTestsKeptInMemory": 1,
+  "chromeWebSecurity": false,
+  "projectId": "p6f3ro"
+}
