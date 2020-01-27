@@ -1,7 +1,7 @@
 {
     "pages": {
         "appVUE": {
-            "systemName": "Waellet",
+            "systemName": "Tip Waellet",
             "manageNetworks": "Manage networks",
             "manageAccounts": "Manage accounts",
             "airGapVault": "Create a vault for AirGap",
@@ -364,7 +364,7 @@
             "heading": "Terms and conditions"
         },
         "tipPage": {
-            "backToUtilities": "Back to utilities",
+            "back": "Back",
             "noImage": "No Image",
             "domainVerified":"Verified",
             "domainNotVerified":"Not verified",

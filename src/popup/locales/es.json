@@ -1,7 +1,7 @@
 {
     "pages": {
         "appVUE": {
-            "systemName": "Waellet",
+            "systemName": "Tip Waellet",
             "manageNetworks": "Administrar redes",
             "manageAccounts": "Cuentas de administración",
             "airGapVault": "Crear una bóveda de entrehierro",

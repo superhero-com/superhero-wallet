@@ -1,7 +1,7 @@
 <template>
     <div class="popup">
         <div class="actions">
-            <button class="backbutton toAccount" @click="navigateUtilities"><ae-icon name="back" /> {{$t('pages.tipPage.backToUtilities')}}</button>
+            <button class="backbutton toAccount" @click="navigateUtilities"><ae-icon name="back" /> {{$t('pages.tipPage.back')}}</button>
         </div>
         <div>
             <h3>{{$t('pages.tipPage.heading') }}</h3>
@@ -18,12 +18,7 @@
                             </h3>
                         </div>
                         <h6>{{ title }}</h6>
-                        <!-- <p class="balance"></p> -->
                         <p>
-                            <!-- <div class="verifyRow">
-                                <ae-icon fill="alternative" face="round" name="aeternity" /> 
-                                {{ unpaid }}
-                            </div> -->
                             <div v-if="canClaim" class="verified verifyRow">
                                 <ae-icon fill="alternative" face="round" name="check" /> 
                                 {{$t('pages.tipPage.domainVerified')}}
@@ -32,13 +27,7 @@
                                 <ae-icon fill="alternative"  face="round" name="close" /> 
                                 {{$t('pages.tipPage.domainNotVerified')}}
                             </div>
-                            <!-- <span class="verifyBtn" @click="checkDomain"> {{$t('pages.tipPage.check')}}</span> -->
                         </p>
-                        <!-- <div class="small-checkbox">
-                            <ae-check v-model="tipDomain" @change="tipWebsiteType">
-                                {{$t('pages.tipPage.tipDomain') }}
-                            </ae-check>
-                        </div> -->
                     </div>
                 </div>
                 <ae-divider />
@@ -215,7 +204,7 @@ export default {
             });
         },
         navigateUtilities() {
-            this.$router.push('/utilities')
+            this.$router.push('/account')
         },
         checkDomain() {
             this.domainVerified = true;

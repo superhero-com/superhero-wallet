@@ -25,19 +25,6 @@ export default {
   [types.SWITCH_LOGGED_IN](state, payload) {
     state.isLoggedIn = payload;
   },
-  [types.UPDATE_LATEST_TRANSACTIONS](state, payload) {
-    state.transactions.latest = payload;
-  },
-  [types.UPDATE_ALL_TRANSACTIONS](state, payload) {
-    if(payload.new) {
-      state.transactions.all.unshift(...payload.transactions);
-    }else {
-      state.transactions.all.push(...payload.transactions);
-    }
-  },
-  [types.RESET_TRANSACTIONS](state) {
-      state.transactions.all = [];  
-  },
   [types.SET_SUBACCOUNT](state, payload) {
     state.subaccounts.push(payload);
   },

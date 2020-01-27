@@ -1,7 +1,7 @@
 {
     "pages": {
         "appVUE": {
-            "systemName": "Waellet",
+            "systemName": "Tip Waellet",
             "manageNetworks": "管理网络",
             "manageAccounts": "管理账户",
             "airGapVault": "创建气隙保管库",

@@ -2,14 +2,6 @@
   <div class="popup">
     <h3>{{ $t('pages.account.heading') }}</h3>
     <div class="currenciesgroup">
-      <!-- <div class="inputGroup-currencies">
-        <div class="input-group-icon">$</div>
-        <div class="input-group-area"><input disabled type="text" :value=toUsd></div>
-      </div>
-      <div class="inputGroup-currencies">
-        <div class="input-group-icon">€</div>
-        <div class="input-group-area"><input disabled type="text" :value=toEur></div>
-      </div> -->
       <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
         <div class="inputGroup-currencies">
           <div class="input-group-icon"><ae-icon name="flip"/></div>
@@ -48,24 +40,8 @@
       </ae-toolbar>
     </ae-card>
     <br>
-    <div class="actions">
-      <ae-button-group>
-        <ae-button face="round" fill="primary" extend class="sendBtn" @click="navigateSend">{{$t('pages.account.send') }}</ae-button>
-        <ae-button face="round" fill="secondary" extend class="receiveBtn" @click="navigateReceive">{{$t('pages.account.receive') }}</ae-button>
-      </ae-button-group>
-    </div>
-    <h3>{{$t('pages.account.latestTransactions') }}</h3>
-    <div v-if="transactions.latest.length && !loading">
-      <ae-list class="transactionList">
-        <TransactionItem v-for="transaction in transactions.latest" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
-      </ae-list>
-      <ae-button face="round" fill="primary" class="transactionHistory" @click="showAllTranactions">{{$t('pages.account.wholeTransaction') }}</ae-button>
-    </div>
-    <div v-if="transactions.latest.length == 0 && !loading">
-        <p class="paragraph noTransactions">{{$t('pages.account.noTransactionsFound') }}</p> 
-    </div>
+    <ae-button  face="round" fill="primary" extend @click="navigateTips" >{{ $t('pages.utilities.tipWebsite') }}</ae-button>
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
-    <Loader size="small" :loading="loading" ></Loader>
   </div> 
 </template>
 
@@ -82,7 +58,6 @@ export default {
   data () {
     return {
       polling: null,
-      loading:true,
       accountName:'',
       pollingTransaction:null,
       toUsd: null,
@@ -120,22 +95,11 @@ export default {
       });
     }
   },
-  watch:{
-      publicKey() {
-        this.loading = true;
-        this.updateTransactions();
-      },
-      watchToken() {
-        this.updateTransactions();
-      }
-  },
   created () {
-    this.pollData();
     currencyConv(this);
     
   },
   mounted(){
-    this.updateTransactions();
   }, 
   methods: {
     copy(){
@@ -144,38 +108,11 @@ export default {
     showAllTranactions() {
         this.$router.push('/transactions');
     },
-    pollData() {
-        this.polling = setInterval(async () => {
-          if(this.sdk != null) {
-            
-              this.updateTransactions();
-              if (this.tokenSymbol == 'AE') {
-                this.toUsd = (this.balance * this.usdRate).toFixed(3);
-                this.toEur = (this.balance * this.eurRate).toFixed(3);
-              }
-              else {
-                this.toUsd = this.toEur = '---'
-              }
-          }
-        }, 2500);
-    },
-    navigateSend () {
-      this.$router.push('/send');
-    },
     navigateReceive () {
       this.$router.push('/receive');
     },
-    updateTransactions() {
-      if(this.current.token == 0) {
-        this.$store.dispatch('getTransactionsByPublicKey',{publicKey:this.account.publicKey,limit:3})
-        .then(res => {
-          this.loading = false;
-          this.$store.dispatch('updateLatestTransactions',res);
-        });
-      }else {
-        this.loading = false;
-        this.$store.dispatch('updateLatestTransactions',[]);
-      }
+    navigateTips() {
+      this.$router.push('/tip');
     },
     setAccountName(e) {
       this.$store.dispatch('setAccountName', e.target.value)
