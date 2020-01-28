@@ -159,7 +159,6 @@ const rpcWallet = {
         const clients = this.getClientsByCond((client) => client.isConnected())
         const context = this
         clients.forEach(async (client) => {
-            console.log(client)
             let { connection: { port: {  sender: { url } } } } = client
             let isConnected = await getAeppAccountPermission(extractHostName(url), address)
             if (!isConnected) {
