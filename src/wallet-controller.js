@@ -19,6 +19,9 @@ export default class WalletController {
                         browser.storage.local.remove('isLogged')
                     }
                 });
+                if(!this.wallet) {
+                    browser.storage.local.remove('isLogged')
+                }
             },5000);
         }
     }
