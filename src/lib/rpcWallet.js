@@ -76,7 +76,7 @@ const rpcWallet = {
                         
                     })
                 },
-                onAskAccounts (aepp, { accept, deny }) {
+                onAskAccounts (aepp, action) {
                     context.checkAeppPermissions(aepp, action, "accounts", () => {
                         setTimeout(() => {
                             context.showPopup({ aepp, action, type: "askAccounts" })

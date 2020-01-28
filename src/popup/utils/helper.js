@@ -163,8 +163,10 @@ const redirectAfterLogin = (ctx) => {
             if(window.hasOwnProperty("name") && window.name.includes("popup")) {
                 if(window.props.type == "connectConfirm") {
                     ctx.$router.push('/connect');
-                }else if(window.props.type == "sign") {
+                } else if(window.props.type == "sign") {
                     ctx.$router.push('/popup-sign-tx');
+                } else if(window.props.type == "askAccounts") {
+                    ctx.$router.push('/ask-accounts');
                 }
             }
         } else {
