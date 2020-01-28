@@ -57,14 +57,14 @@ export default {
                 this.data.action.deny()
             }
            
-            this.data.reject()
+            this.data.reject(false)
         },
         async connect() {
             await setPermissionForAccount(this.data.host, this.account.publicKey)
             if(Object.keys( this.data.action).length) {
                 this.data.action.accept()
             }
-            this.data.resolve()
+            this.data.resolve(true)
         }
     },
     computed: {
