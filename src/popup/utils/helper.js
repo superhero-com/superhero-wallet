@@ -163,8 +163,10 @@ const redirectAfterLogin = (ctx) => {
             if(window.hasOwnProperty("name") && window.name.includes("popup")) {
                 if(window.props.type == "connectConfirm") {
                     ctx.$router.push('/connect');
-                }else if(window.props.type == "sign") {
+                } else if(window.props.type == "sign") {
                     ctx.$router.push('/popup-sign-tx');
+                } else if(window.props.type == "askAccounts") {
+                    ctx.$router.push('/ask-accounts');
                 }
             }
         } else {
@@ -176,7 +178,7 @@ const redirectAfterLogin = (ctx) => {
 
 const getAeppAccountPermission = (host, account) => {
     return new Promise((resolve, reject) => {
-        browser.storage.sync.get('connectedAepps').then((aepps) => {
+        browser.storage.local.get('connectedAepps').then((aepps) => {
             if(!aepps.hasOwnProperty('connectedAepps')) {
                 return resolve(false)
             }
@@ -195,7 +197,7 @@ const getAeppAccountPermission = (host, account) => {
 
 const setPermissionForAccount = (host, account) => {
     return new Promise((resolve, reject) => {
-        browser.storage.sync.get('connectedAepps').then((aepps) => {
+        browser.storage.local.get('connectedAepps').then((aepps) => {
 
             let list = []
             if(aepps.hasOwnProperty('connectedAepps') && aepps.connectedAepps.hasOwnProperty('list')) {
@@ -220,7 +222,7 @@ const setPermissionForAccount = (host, account) => {
                 list.push({ host, accounts: [account] })
             }   
             // return;
-            browser.storage.sync.set({connectedAepps: { list }}).then(() => {
+            browser.storage.local.set({connectedAepps: { list }}).then(() => {
                 resolve()
             })
         })
@@ -607,6 +609,16 @@ const getContractInstance = async (source, options = {}) => {
     }
 }
 
+const getUniqueId = (length = 6) => {
+    const ID_LENGTH = length
+    const START_LETTERS_ASCII = 97
+    const ALPHABET_LENGTH = 26
+
+    return  [...new Array(ID_LENGTH)]
+                .map(() => String.fromCharCode(START_LETTERS_ASCII + Math.random() * ALPHABET_LENGTH))
+                .join('')
+}
+
 export { 
     shuffleArray, 
     convertToAE, 
@@ -634,7 +646,8 @@ export {
     setContractInstance,
     getContractInstance,
     getAeppAccountPermission,
-    setPermissionForAccount
+    setPermissionForAccount,
+    getUniqueId
 }
 
 

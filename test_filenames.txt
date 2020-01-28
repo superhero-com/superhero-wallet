@@ -1,17 +1,6 @@
 tests/e2e/specs/accountPage.js
-tests/e2e/specs/ledger.js
-tests/e2e/specs/receivePage.js
-tests/e2e/specs/airGap.js
 tests/e2e/specs/hdWallet.js
-tests/e2e/specs/aeppComunication.js
 tests/e2e/specs/generateWallet.js
 tests/e2e/specs/importPage.js
 tests/e2e/specs/indexPage.js
-tests/e2e/specs/manageAccounts.js
-tests/e2e/specs/manageAccounts2.js
-tests/e2e/specs/manageNetworks.js
-tests/e2e/specs/sendPage.js
-tests/e2e/specs/settings.js
-tests/e2e/specs/transactionsPage.js
-tests/e2e/specs/utilitiesPage.j
 tests/e2e/specs/accountPage2.js

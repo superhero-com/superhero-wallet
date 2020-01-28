@@ -130,13 +130,7 @@ export default {
         }
     },
     async created() {
-        // let { userAccount } = await browser.storage.sync.get('userAccount')
-        // console.log(userAccount)
-        // this.$store.commit('UPDATE_ACCOUNT', userAccount);
-        // console.log(userAccount)
-        console.log(this.props)
         this.unpackedTx = TxBuilder.unpackTx(this.props.action.params.tx)
-        console.log(this.unpackedTx)
     },
     computed: {
         ...mapGetters(['account','activeAccountName','balance','network','current','wallet','activeAccount', 'sdk', 'tokens', 'tokenBalance','isLedger','popup', 'tokenRegistry']),
