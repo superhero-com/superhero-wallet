@@ -130,7 +130,7 @@ export default {
         }
     },
     async created() {
-        // let { userAccount } = await browser.storage.sync.get('userAccount')
+        // let { userAccount } = await browser.storage.local.get('userAccount')
         // console.log(userAccount)
         // this.$store.commit('UPDATE_ACCOUNT', userAccount);
         // console.log(userAccount)

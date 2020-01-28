@@ -24,7 +24,7 @@ setInterval(() => {
 
 function getAccount() {
     return new Promise(resolve => {
-        browser.storage.sync.get('userAccount', data => {
+        browser.storage.local.get('userAccount', data => {
             if (data.userAccount && data.userAccount.hasOwnProperty('publicKey')) {
                 resolve({ keypair: {
                     publicKey: data.userAccount.publicKey,

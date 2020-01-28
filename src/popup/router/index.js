@@ -49,7 +49,8 @@ const noRedirectUrls = [
   '/popup-sign-tx',
   '/connect',
   '/connect-confirm',
-  '/sign-transaction/:type?'
+  '/sign-transaction/:type?',
+  '/ask-accounts'
 ]
 router.beforeEach((to, from, next) => { 
   const lastRouteName = localStorage.getItem(lastRouteKey);

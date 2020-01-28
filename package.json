@@ -17,7 +17,7 @@
     "test": " start-server-and-test start http://localhost:5000 start:tests",
     "start": "serve",
     "start:ci": "serve",
-    "start:tests": "cypress open"
+    "start:tests": "cypress run"
   },
   "dependencies": {
     "@aeternity/aepp-components": "git+https://github.com/aeternity/aepp-components.git#develop",

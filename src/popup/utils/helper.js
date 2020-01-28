@@ -176,7 +176,7 @@ const redirectAfterLogin = (ctx) => {
 
 const getAeppAccountPermission = (host, account) => {
     return new Promise((resolve, reject) => {
-        browser.storage.sync.get('connectedAepps').then((aepps) => {
+        browser.storage.local.get('connectedAepps').then((aepps) => {
             if(!aepps.hasOwnProperty('connectedAepps')) {
                 return resolve(false)
             }
@@ -195,7 +195,7 @@ const getAeppAccountPermission = (host, account) => {
 
 const setPermissionForAccount = (host, account) => {
     return new Promise((resolve, reject) => {
-        browser.storage.sync.get('connectedAepps').then((aepps) => {
+        browser.storage.local.get('connectedAepps').then((aepps) => {
 
             let list = []
             if(aepps.hasOwnProperty('connectedAepps') && aepps.connectedAepps.hasOwnProperty('list')) {
@@ -220,7 +220,7 @@ const setPermissionForAccount = (host, account) => {
                 list.push({ host, accounts: [account] })
             }   
             // return;
-            browser.storage.sync.set({connectedAepps: { list }}).then(() => {
+            browser.storage.local.set({connectedAepps: { list }}).then(() => {
                 resolve()
             })
         })

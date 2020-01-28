@@ -5,6 +5,7 @@ import SeedPhraseComponent from './pages/SeedPhrase';
 import SignTransactionComponent from './pages/SignTransaction';
 import PopupSignTransactionComponent from './pages/Popups/PopupSignTx';
 import PopupConnectComponent from './pages/Popups/PopupConnect';
+import PopupAskAccountsComponent from './pages/Popups/PopupAskAccounts';
 import SettingsComponent from './pages/Settings';
 import GeneralSettingsComponent from './pages/GeneralSettings';
 import SecuritySettingsComponent from './pages/SecuritySettings';
@@ -50,6 +51,12 @@ export default [
     name:'connect',
     path:'/connect',
     component:PopupConnectComponent,
+    props:true
+  },
+  {
+    name:'ask-accounts',
+    path:'/ask-accounts',
+    component:PopupAskAccountsComponent,
     props:true
   },
   {
