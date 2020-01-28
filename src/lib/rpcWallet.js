@@ -1,5 +1,5 @@
 import { DEFAULT_NETWORK, networks } from '../popup/utils/constants'
-import { stringifyForStorage, parseFromStorage, extractHostName, getAeppAccountPermission } from '../popup/utils/helper'
+import { stringifyForStorage, parseFromStorage, extractHostName, getAeppAccountPermission, getUniqueId } from '../popup/utils/helper'
 import { getAccounts } from '../popup/utils/storage'
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory'
 import { RpcWallet } from '@aeternity/aepp-sdk/es/ae/wallet'
@@ -131,7 +131,9 @@ const rpcWallet = {
     },
 
     showPopup ({ action, aepp, type = "connectConfirm" })  {
-        const popupWindow = window.open(`/popup/popup.html?t=${action.id}`, `popup_id_${action.id}`, 'width=420,height=680', false);
+        const uid = getUniqueId()
+        const time = `${Math.floor(Date.now() / 1000)}${uid}`
+        const popupWindow = window.open(`/popup/popup.html?t=${time}`, `popup_id_${time}`, 'width=420,height=680', false);
         if (!popupWindow) action.deny()
         let { connection: { port: {  sender: { url } } }, info: { icons, name} } = aepp
         let { protocol } = new URL (url)

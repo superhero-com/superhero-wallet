@@ -609,6 +609,16 @@ const getContractInstance = async (source, options = {}) => {
     }
 }
 
+const getUniqueId = (length = 6) => {
+    const ID_LENGTH = length
+    const START_LETTERS_ASCII = 97
+    const ALPHABET_LENGTH = 26
+
+    return  [...new Array(ID_LENGTH)]
+                .map(() => String.fromCharCode(START_LETTERS_ASCII + Math.random() * ALPHABET_LENGTH))
+                .join('')
+}
+
 export { 
     shuffleArray, 
     convertToAE, 
@@ -636,7 +646,8 @@ export {
     setContractInstance,
     getContractInstance,
     getAeppAccountPermission,
-    setPermissionForAccount
+    setPermissionForAccount,
+    getUniqueId
 }
 
 

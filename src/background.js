@@ -103,9 +103,10 @@ browser.runtime.onConnect.addListener( async ( port ) => {
         extensionUrl = 'moz-extension'
     }
 
+    const senderUrl = port.sender.url.split("?")
     const popupSender = Boolean((port.name == 'popup' && 
                                 port.sender.id == browser.runtime.id && 
-                                port.sender.url == `${extensionUrl}://${browser.runtime.id}/popup/popup.html` && 
+                                senderUrl[0] == `${extensionUrl}://${browser.runtime.id}/popup/popup.html` && 
                                 detectBrowser() != 'Firefox') || 
                                 (detectBrowser() == 'Firefox' && 
                                 port.name == 'popup' && 
