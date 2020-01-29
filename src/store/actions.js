@@ -5,7 +5,6 @@ import { convertToAE, stringifyForStorage, parseFromStorage, contractCall, check
 import { FUNGIBLE_TOKEN_CONTRACT } from '../popup/utils/constants';
 import { uniqBy, head, flatten, merge, uniqWith, isEqual } from 'lodash-es';
 import router from '../popup/router/index'
-import Ledger from '../popup/utils/ledger/ledger';
 import { derivePasswordKey, genRandomBuffer } from '../popup/utils/hdWallet'
 import AES from '../popup/utils/aes';
 import { postMesssage } from '../popup/utils/connection';
@@ -332,7 +331,5 @@ export default {
     const mac = new Uint8Array(await aes.decrypt(encryptedWallet.mac));
     if (mac.reduce((p, n) => p || n !== 0, false)) throw new Error('Wrong password');
     return passwordDerivedKey;
-  },
-
-  ...Ledger
+  }
 };
