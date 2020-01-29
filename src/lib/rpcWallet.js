@@ -1,4 +1,4 @@
-import { DEFAULT_NETWORK, networks } from '../popup/utils/constants'
+import { DEFAULT_NETWORK, networks, AEX2_METHODS } from '../popup/utils/constants'
 import { stringifyForStorage, parseFromStorage, extractHostName, getAeppAccountPermission, getUniqueId } from '../popup/utils/helper'
 import { getAccounts } from '../popup/utils/storage'
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory'
@@ -11,38 +11,34 @@ import { detectBrowser } from '../popup/utils/helper'
 global.browser = require('webextension-polyfill');
 
 const rpcWallet = {
-    sdk: null,
-    network: DEFAULT_NETWORK,
-    compiler: networks[DEFAULT_NETWORK].compilerUrl,
-    internalUrl: networks[DEFAULT_NETWORK].internalUrl,
-    activeAccount: null,
-    subaccounts: null,
-    accounts: [],
-    accountKeyPairs: [],
-    created: false,
-    createInterval: null,
-    controller: null,
     async init(walletController) {
+        this.initFields()
         this.controller = walletController
+    },
+    async initSubaccounts() {
         let { subaccounts } = await getAccounts()
         this.subaccounts = subaccounts
-
-        this.createInterval = setInterval(async () => {
-            if(this.controller.isLoggedIn()) {
-                if(!this.created) {
-                    this.recreateWallet()
-                    clearInterval(this.createInterval)
-                }
-                this.created = true
-            }
-        }, 5000)
+        return Promise.resolve(true)
+    },
+    initSdk() {
+        this.recreateWallet()
+    },
+    initFields() {
+        this.sdk = null
+        this.network = DEFAULT_NETWORK
+        this.compiler = networks[DEFAULT_NETWORK].compilerUrl
+        this.internalUrl = networks[DEFAULT_NETWORK].internalUrl
+        this.activeAccount = null
+        this.subaccounts = null
+        this.accounts = []
+        this.accountKeyPairs = []
     },
     async createWallet() {
         this.accountKeyPairs = await Promise.all(this.subaccounts.map(async (a, index) => (
             parseFromStorage(await this.controller.getKeypair({ activeAccount: index, account: a}))
         )))
         
-        let activeIdx = await browser.storage.local.get('activeAccount') 
+        // let activeIdx = await browser.storage.local.get('activeAccount') 
         
         this.accounts = this.accountKeyPairs.map((a) => {
             return MemoryAccount({
@@ -85,13 +81,10 @@ const rpcWallet = {
                 }
             })
 
-            if (activeIdx.hasOwnProperty("activeAccount") && !isNaN(activeIdx.activeAccount)) {
-                this.sdk.selectAccount(this.accountKeyPairs[activeIdx.activeAccount].publicKey)
-                this.activeAccount = this.accountKeyPairs[activeIdx.activeAccount].publicKey
-            } else {
+            if (!this.activeAccount) {
                 this.sdk.selectAccount(this.accountKeyPairs[0].publicKey)
                 this.activeAccount = this.accountKeyPairs[0].publicKey
-            }
+            } 
 
         } catch(e) {
             console.error(e)
@@ -110,7 +103,6 @@ const rpcWallet = {
     async checkAeppPermissions (aepp, action, caller, cb )  {
         let { connection: { port: {  sender: { url } } } } = aepp
         let isConnected = await getAeppAccountPermission(extractHostName(url), this.activeAccount)
-
         if(!isConnected) {
             try {
                 let a = caller == "connection" ? action : {}
@@ -155,7 +147,7 @@ const rpcWallet = {
         .filter(condition)
         return clients
     },
-    getAccessForAddres(address) {
+    getAccessForAddress(address) {
         const clients = this.getClientsByCond((client) => client.isConnected())
         const context = this
         clients.forEach(async (client) => {
@@ -171,12 +163,11 @@ const rpcWallet = {
             }
         })
     },
-    changeAccount(payload) {
+    [AEX2_METHODS.CHANGE_ACCOUNT](payload) {
         this.activeAccount = payload
-        this.getAccessForAddres(payload)
-        // this.sdk.selectAccount(payload)
+        this.getAccessForAddress(payload)
     },
-    async addAccount(payload) {
+    async [AEX2_METHODS.ADD_ACCOUNT](payload) {
         let account = {
             publicKey: payload.address
         }
@@ -185,9 +176,9 @@ const rpcWallet = {
         })
         this.sdk.addAccount(newAccount)
         this.activeAccount = payload.address
-        this.getAccessForAddres(payload.address)
+        this.getAccessForAddress(payload.address)
     },
-    async switchNetwork(payload) {
+    async [AEX2_METHODS.SWITCH_NETWORK](payload) {
         this.network = payload
         this.compiler = networks[this.network].compilerUrl
         this.internalUrl = networks[this.network].internalUrl
@@ -199,7 +190,19 @@ const rpcWallet = {
         }
         this.sdk.selectNode(this.network)
     },
-
+    async [AEX2_METHODS.LOGOUT]() {
+        this.controller.lockWallet()
+        this.initFields()
+    },
+    async [AEX2_METHODS.INIT_RPC_WALLET]({ address }) {
+        this.activeAccount = address
+        if(this.sdk) {
+            this.sdk.selectAccount(this.activeAccount)
+        }else {
+            await this.initSubaccounts()
+            this.initSdk()
+        }
+    },
     async recreateWallet() {
         await this.createWallet()
     }

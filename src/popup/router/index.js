@@ -61,6 +61,10 @@ router.beforeEach((to, from, next) => {
     browser.storage.local.get('showAeppPopup').then(aepp => {
       browser.storage.local.get('pendingTransaction').then(pendingTx => {
         browser.storage.local.get('isLogged').then(data => {
+          if (!data.isLogged && !data.hasOwnProperty('isLogged')) {
+            next();
+            return;
+          }
           browser.storage.local.get('userAccount').then(async user => {
             if (user.userAccount && user.hasOwnProperty('userAccount')) {
               try {

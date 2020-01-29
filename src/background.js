@@ -127,7 +127,7 @@ browser.runtime.onConnect.addListener( async ( port ) => {
                 controller[type](payload).then((res) => {
                     port.postMessage({ uuid, res })
                 })
-            } else if(AEX2_METHODS.includes(type)) {
+            } else if(AEX2_METHODS.hasOwnProperty(type)) {
                 rpcWallet[type](payload)
             }
         })  

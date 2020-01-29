@@ -93,7 +93,7 @@ import { mapGetters } from 'vuex';
 import { saveAs } from 'file-saver';
 // import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
 import { initializeSDK, contractCall } from './utils/helper';
-import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT } from './utils/constants'
+import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT, AEX2_METHODS  } from './utils/constants'
 import { start, postMesssage, readWebPageDom } from './utils/connection'
 import { langs,fetchAndSetLocale } from './utils/i18nHelper'
 import { computeAuctionEndBlock, computeBidFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers'
@@ -149,14 +149,7 @@ export default {
 
       if(!process.env.RUNNING_IN_POPUP) {
         //init SDK
-        this.checkSDKReady = setInterval(() => {
-          if(this.isLoggedIn && this.sdk == null) {
-            this.initSDK()
-            this.pollData()
-            clearInterval(this.checkSDKReady)
-          }
-        },500)
-
+        this.checkSdkReady()
         setTimeout(() => {
           if(this.isLoggedIn) {
             if(this.sdk == null) {
@@ -185,19 +178,23 @@ export default {
     this.dropdown.settings = false;
   },
   methods: {
+    checkSdkReady() {
+      if(!process.env.RUNNING_IN_POPUP) {
+        this.checkSDKReady = setInterval(() => {
+          if(this.isLoggedIn && this.sdk == null) {
+            this.initRpcWallet()
+            this.initSDK()
+            this.pollData()
+            clearInterval(this.checkSDKReady)
+          }
+        },500)
+      }
+    },
     hideLoader() {
       var self = this;
       setTimeout(function() {
         self.mainLoading = false;
       }, 1500);
-    },
-    changeAccount (index,subaccount) {
-      browser.storage.local.set({activeAccount: index}).then(() => {
-        postMesssage(this.background, { type: 'changeAccount' , payload: subaccount.publicKey } )
-        this.$store.commit('SET_ACTIVE_ACCOUNT', {publicKey:subaccount.publicKey,index:index});
-        this.initSDK();
-        this.dropdown.account = false;
-      });
     },
     hideMenu (event) {
       let target = event.target
@@ -230,7 +227,7 @@ export default {
     switchNetwork (network) {
       this.dropdown.network = false;
       this.$store.dispatch('switchNetwork', network).then(() => {
-        postMesssage(this.background, { type: 'switchNetwork' , payload: network } )
+        postMesssage(this.background, { type: AEX2_METHODS.SWITCH_NETWORK , payload: network } )
         this.initSDK();
         this.$store.dispatch('updateBalance');
       }); 
@@ -248,6 +245,9 @@ export default {
             this.$store.commit('SWITCH_LOGGED_IN', false);
             this.$store.commit('SET_WALLET', []);
             this.$store.dispatch('initSdk',null);
+            postMesssage(this.background, { type: AEX2_METHODS.LOGOUT } )
+            console.log(this.sdk)
+            this.checkSdkReady()
             this.$router.push('/');
           });
         });
@@ -260,10 +260,6 @@ export default {
       this.dropdown.settings = false;
       this.$router.push('/account');
     },
-    navigateNetworks () {
-      this.$router.push('/manageNetworks');
-      this.dropdown.network = false;
-    },
     myAccount () {
       this.dropdown.settings = false; this.dropdown.languages = false;
       this.$router.push('/account');
@@ -271,17 +267,6 @@ export default {
     settings () {
       this.dropdown.settings = false; this.dropdown.languages = false;
       this.$router.push('/settings');
-    },
-    utilities () {
-      this.dropdown.settings = false; this.dropdown.languages = false;
-      this.$router.push('/utilities');
-    },
-    airGapVault() {
-        this.$router.push('/airGapSetup')
-    },
-    manageAccounts () {
-      this.$router.push('/manageAccounts');
-      this.dropdown.network = false;
     },
     pollData() {
       let triggerOnce = false
@@ -318,6 +303,9 @@ export default {
           
           this.$router.push('/')
       }
+    },
+    initRpcWallet() {
+      postMesssage(this.background, { type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey } } )
     },
     hideConnectError() {
       this.connectError = false
