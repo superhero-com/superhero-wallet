@@ -619,6 +619,18 @@ const getUniqueId = (length = 6) => {
                 .join('')
 }
 
+const getUserNetworks = async () => {
+    const { userNetworks } = await browser.storage.local.get('userNetworks')
+    const networks = {}
+    if(userNetworks) {
+        userNetworks.forEach(net => (networks[net.name] = net ))
+    }
+    return new Promise((resolve, reject) => {
+        resolve(networks)
+    })
+}
+
+
 export { 
     shuffleArray, 
     convertToAE, 
@@ -647,7 +659,8 @@ export {
     getContractInstance,
     getAeppAccountPermission,
     setPermissionForAccount,
-    getUniqueId
+    getUniqueId,
+    getUserNetworks
 }
 
 

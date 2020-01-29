@@ -1,7 +1,7 @@
 global.browser = require('webextension-polyfill');
 const { Universal: Ae, Crypto } = require('@aeternity/aepp-sdk')
-import { networks, DEFAULT_NETWORK } from './popup/utils/constants';
-import { detectBrowser } from './popup/utils/helper';
+import { networks, DEFAULT_NETWORK, NOTIFICATION_METHODS } from './popup/utils/constants';
+import { detectBrowser, getUserNetworks } from './popup/utils/helper';
 import Node from '@aeternity/aepp-sdk/es/node'
 
 export default class Notification {
@@ -12,10 +12,11 @@ export default class Notification {
 
     async init() {
         let { activeNetwork } = await browser.storage.local.get('activeNetwork')
-        this.network = networks.Testnet
+        await this.getNodes()
+        this.network = this.nodes[DEFAULT_NETWORK]
         if(typeof activeNetwork != "undefined") {
-            this.network = networks[activeNetwork]
-        } else {
+            this.network = this.nodes[activeNetwork]
+        }else {
             activeNetwork = DEFAULT_NETWORK
         }
         const node = await Node({ url: this.network.internalUrl, internalUrl: this.network.internalUrl })
@@ -35,6 +36,29 @@ export default class Notification {
             browser.tabs.create({url: id.split('?')[1], active: true});
         })
 
+    }
+
+    async getNodes() {
+        const userNetworks = await getUserNetworks()
+        const nodes = { ...networks, ...userNetworks }
+        this.nodes = nodes
+        return Promise.resolve(this.nodes)
+    }
+
+    async [NOTIFICATION_METHODS.SWITCH_NETWORK](network) {
+        await this.getNodes()
+        this.network = this.nodes[network]
+        
+        const node = await Node({ url: this.network.internalUrl, internalUrl: this.network.internalUrl })
+        if(this.client) {
+            try {
+                await this.client.addNode(network, node, true)
+            } catch(e) {
+                // console.log(e)
+            }
+            this.client.selectNode(network)
+        }
+        
     }
 
     async getAllNotifications() {

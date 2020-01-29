@@ -1,5 +1,5 @@
 import { DEFAULT_NETWORK, networks, AEX2_METHODS } from '../popup/utils/constants'
-import { stringifyForStorage, parseFromStorage, extractHostName, getAeppAccountPermission, getUniqueId } from '../popup/utils/helper'
+import { stringifyForStorage, parseFromStorage, extractHostName, getAeppAccountPermission, getUniqueId, getUserNetworks } from '../popup/utils/helper'
 import { getAccounts } from '../popup/utils/storage'
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory'
 import { RpcWallet } from '@aeternity/aepp-sdk/es/ae/wallet'
@@ -12,6 +12,7 @@ global.browser = require('webextension-polyfill');
 
 const rpcWallet = {
     async init(walletController) {
+        await this.initNodes()
         this.initFields()
         this.controller = walletController
     },
@@ -25,13 +26,22 @@ const rpcWallet = {
     },
     initFields() {
         this.sdk = null
-        this.network = DEFAULT_NETWORK
-        this.compiler = networks[DEFAULT_NETWORK].compilerUrl
-        this.internalUrl = networks[DEFAULT_NETWORK].internalUrl
+        this.initNetwork()
         this.activeAccount = null
         this.subaccounts = null
         this.accounts = []
         this.accountKeyPairs = []
+    },
+    initNetwork(network = DEFAULT_NETWORK) {
+        this.network = network
+        this.compiler = this.nodes[network].compilerUrl
+        this.internalUrl = this.nodes[network].internalUrl
+    },
+    async initNodes() {
+        const userNetworks = await getUserNetworks()
+        const nodes = { ...networks, ...userNetworks }
+        this.nodes = nodes
+        return Promise.resolve(true)
     },
     async createWallet() {
         this.accountKeyPairs = await Promise.all(this.subaccounts.map(async (a, index) => (
@@ -87,7 +97,7 @@ const rpcWallet = {
             } 
 
         } catch(e) {
-            console.error(e)
+            this.sdk = null
         }
         return this.sdk
     },
@@ -179,26 +189,37 @@ const rpcWallet = {
         this.getAccessForAddress(payload.address)
     },
     async [AEX2_METHODS.SWITCH_NETWORK](payload) {
-        this.network = payload
-        this.compiler = networks[this.network].compilerUrl
-        this.internalUrl = networks[this.network].internalUrl
+        this.addNewNetwork(payload)
+    },
+    async addNewNetwork(network) {
+        this.initNetwork(network)
         const node = await Node({ url:this.internalUrl, internalUrl: this.internalUrl })
-        try {
-            await this.sdk.addNode(payload, node, true)
-        } catch(e) {
-            // console.log(e)
+        if(this.sdk) {
+            try {
+                await this.sdk.addNode(network, node, true)
+            } catch(e) {
+                // console.log(e)
+            }
+            this.sdk.selectNode(network)
         }
-        this.sdk.selectNode(this.network)
+        
     },
     async [AEX2_METHODS.LOGOUT]() {
         this.controller.lockWallet()
         this.initFields()
     },
-    async [AEX2_METHODS.INIT_RPC_WALLET]({ address }) {
+    async [AEX2_METHODS.INIT_RPC_WALLET]({ address, network }) {
         this.activeAccount = address
+        if(!this.nodes.hasOwnProperty(network)) {
+            await this.initNodes()
+        }
         if(this.sdk) {
             this.sdk.selectAccount(this.activeAccount)
+            if(this.network !== network) {
+                this.addNewNetwork(network)
+            }
         }else {
+            this.initNetwork(network)
             await this.initSubaccounts()
             this.initSdk()
         }
