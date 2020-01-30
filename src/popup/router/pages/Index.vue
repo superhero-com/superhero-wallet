@@ -2,7 +2,6 @@
   <div>
     <main>
       <div class="wrapper">
-        <p>{{ $t('pages.index.heading') }}</p>
         <div class="logo-center">
           <img :src="logo" alt="Waellet logo" />
         </div>
@@ -11,33 +10,6 @@
     <Loader size="small" :loading="loading" v-bind="{'content':$t('pages.index.securingAccount')}"></Loader>
     <footer v-if="!loading">
       <div class="wrapper">
-        <div v-if="account.encryptedPrivateKey">
-          <ae-input placeholder class="my-2" label="Password" v-bind="inputError">
-            <input
-              type="password"
-              class="ae-input"
-              min="4"
-              v-model="accountPassword"
-              slot-scope="{ context }"
-              @focus="context.focus = true"
-              @blur="context.focus = false"
-            />
-            <ae-toolbar
-              v-if="errorMsg == 'length'"
-              slot="footer"
-            >{{ $t('pages.index.passwordError') }}</ae-toolbar>
-            <ae-toolbar v-if="loginError" slot="footer">{{ $t('pages.index.incorrectPasswordError') }}</ae-toolbar>
-          </ae-input>
-          <ae-button
-            face="round"
-            extend
-            fill="primary"
-            class="loginBtn"
-            @click="login({accountPassword})"
-          >{{ $t('pages.index.loginButton') }}</ae-button>
-          <ae-divider />
-        </div>
-        
         <ae-check v-if="termsAgreedOrNot != true || termsAgreedOrNot == undefined" class="termsCheck" v-model="terms" value="1" type="checkbox">
           <div class="termsHolder">
             {{ $t('pages.index.term1') }}<a href="#" @click="goToTermsOfService"> {{ $t('pages.index.term2') }}</a> and <a href="#" @click="goToPrivacyPolicy"> {{ $t('pages.index.term3') }}</a>
@@ -45,23 +17,25 @@
         </ae-check>
         <ae-button
           face="round"
-          v-if="!account.encryptedPrivateKey"
           fill="primary"
           class="mb-1"
           :class="[ terms[0] != 1 && termsAgreedOrNot != true ? 'disabled' : '' ]"
           extend
-          @click="generateAddress"
+          @click="generwateWalletIntro"
         >{{ $t('pages.index.generateWallet') }}</ae-button>
         <ae-button
           face="round"
           extend
           :class="[ terms[0] != 1 && termsAgreedOrNot != true ? 'disabled' : '' ]"
-          @click="openImportModal"
+          @click="importAccount"
           class="importBtn"
         >{{ $t('pages.index.importPrivateKey') }}</ae-button>
+
+
+        <!-- <ae-button face="round" extend>{{ $t('pages.index.continue') }}</ae-button> -->
       </div>
     </footer>
-
+<!-- 
     <ae-modal v-if="modalVisible" @close="modalVisible = false">
       <h2 class="modaltitle">{{ $t('pages.index.importWaellet') }}</h2>
 
@@ -101,19 +75,7 @@
       </div>
 
       <div v-if="importType == 'seedPhrase'">
-        <p
-          class="importTitle"
-        >{{ $t('pages.index.enterSeedPhrase') }}</p>
-        <ae-input label="Seed phrase" class="my-2" v-bind="inputError">
-          <textarea
-            class="ae-input textarea"
-            v-model="seedPhrase"
-            slot-scope="{ context }"
-            @focus="context.focus = true"
-            @blur="context.focus = false"
-          />
-          <ae-toolbar slot="footer">{{errorMsg}}</ae-toolbar>
-        </ae-input>
+        
       </div>
 
       <ae-button
@@ -122,7 +84,7 @@
         fill="primary"
         @click="importShowPassword({importType,privateKey,seedPhrase})"
       >{{ $t('pages.index.continueButton') }}</ae-button>
-    </ae-modal>
+    </ae-modal> -->
   </div>
 </template>
 
@@ -131,7 +93,7 @@ import { mapGetters } from 'vuex';
 import { addressGenerator } from '../../utils/address-generator';
 import { decrypt } from '../../utils/keystore';
 import { fetchData, redirectAfterLogin, parseFromStorage } from '../../utils/helper';
-import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
+
 import { generateHdWallet, getHdWalletAccount } from '../../utils/hdWallet';
 
 export default {
@@ -175,11 +137,6 @@ export default {
       this.$router.push('/termsOfService');
     },
     init() {
-      // check if there is an account generated already
-      // browser.storage.local.set({userAccount: ''}).then(() => {});
-      // browser.storage.local.set({isLogged: ''}).then(() => {});
-      // browser.storage.local.set({confirmSeed: true}).then(() => {});
-      // browser.storage.local.set({mnemonic: ''}).then(() => {});
       browser.storage.local.remove('processingTx').then(() => {});
       var newTab = false;
       browser.storage.local.get('allowTracking').then(result => {
@@ -187,16 +144,16 @@ export default {
           this.modalAskVisible = false;
         }
       });
+     
       browser.storage.local.get('isLogged').then(data => {
+
         browser.storage.local.get('userAccount').then(async user => {
+          
           if (user.userAccount && user.hasOwnProperty('userAccount')) {
-            try {
-              user.userAccount.encryptedPrivateKey = JSON.parse(user.userAccount.encryptedPrivateKey);
-            } catch (e) {
-              user.userAccount.encryptedPrivateKey = JSON.stringify(user.userAccount.encryptedPrivateKey);
-            }
+            console.log("ne tuk")
             this.$store.commit('UPDATE_ACCOUNT', user.userAccount);
-            if (data.isLogged && data.hasOwnProperty('isLogged')) {
+            const address = await this.$store.dispatch('generateWallet', { seed:user.userAccount.privateKey })
+            // if (data.isLogged && data.hasOwnProperty('isLogged')) {
               browser.storage.local.get('subaccounts').then(subaccounts => {
                 let sub = [];
                 if (
@@ -223,7 +180,7 @@ export default {
                   }
                 });
               });
-            }
+            // }
           }
           browser.storage.local.get('confirmSeed').then(seed => {
             if (seed.hasOwnProperty('confirmSeed') && seed.confirmSeed == false) {
@@ -231,25 +188,19 @@ export default {
               return;
             }
           });
-          if (data.isLogged && data.hasOwnProperty('isLogged')) {
+          // if (data.isLogged && data.hasOwnProperty('isLogged')) {
+          if (user.userAccount && user.hasOwnProperty('userAccount')){
               this.$store.commit('SWITCH_LOGGED_IN', true);
               redirectAfterLogin(this);
           }
         });
       });
     },
-    generateAddress: async function generateAddress({ dispatch }) {
-      this.$router.push({
-        name: 'password',
-        params: {
-          confirmPassword: true,
-          data: '',
-          buttonTitle: 'Continue',
-          type: 'generateEncrypt',
-          title: 'Protect Account with Password',
-          termsAgreed: true
-        },
-      });
+    generwateWalletIntro () {
+      this.$router.push('/intro');
+    },
+    importAccount() {
+      this.$router.push('/importAccount')
     },
     switchImportType(type) {
       this.importType = type;
@@ -284,26 +235,7 @@ export default {
           this.errorMsg = 'Private key is incorrect! ';
         }
       } else if (importType == 'seedPhrase') {
-        let seed = seedPhrase.split(' ');
-        if (seed.length >= 12 && seed.length <= 24 && this.checkSeed(seedPhrase)) {
-          this.$router.push({
-            name: 'password',
-            params: {
-              confirmPassword: true,
-              data: seedPhrase,
-              buttonTitle: 'Restore',
-              type: importType,
-              title: 'Import From Seed Phrase',
-              termsAgreed: true
-            },
-          });
-          this.modalVisible = false;
-          this.inputError = {};
-          this.imported = true;
-        } else {
-          this.inputError = { error: '' };
-          this.errorMsg = 'Incorrect seed phrase! ';
-        }
+        
       } else if (importType == 'keystore') {
         if (this.walletFile != '') {
           let reader = new FileReader();
@@ -346,83 +278,7 @@ export default {
       this.modalVisible = true;
       this.inputError = {};
       this.errorMsg = 'This field is requried! ';
-    },
-    login: async function login({ accountPassword }) {
-      let context = this;
-      if (accountPassword.length >= 4) {
-        context.loading = true;
-        browser.storage.local.get('userAccount').then(async user => {
-          this.errorMsg = '';
-          if (user.userAccount && user.hasOwnProperty('userAccount')) {
-            let encPrivateKey = user.userAccount.encryptedPrivateKey;
-            try {
-              JSON.parse(user.userAccount.encryptedPrivateKey);
-            } catch (e) {
-              user.userAccount.encryptedPrivateKey = JSON.stringify(user.userAccount.encryptedPrivateKey);
-              encPrivateKey = JSON.stringify(user.userAccount.encryptedPrivateKey);
-            }
-            let encryptedPrivateKey = JSON.parse(user.userAccount.encryptedPrivateKey);
-            let unlock = await this.$store.dispatch('unlockWallet', { accountPassword, encryptedPrivateKey  })
-            user.userAccount.encryptedPrivateKey = JSON.stringify(user.userAccount.encryptedPrivateKey);
-            
-            if (unlock.decrypt) {
-              this.loginError = false;
-              this.inputError = {};
-              let address = unlock.address;
-              let sub = [];
-              let account = {
-                name: 'Main account',
-                publicKey: address,
-                balance: 0,
-                root: true,
-              };
-              browser.storage.local.set({ isLogged: true }).then(() => {
-                  if (address !== user.userAccount.publicKey) {
-                    user.userAccount.publicKey = address;
-                    user.userAccount.encryptedPrivateKey = encPrivateKey;
-                    browser.storage.local.set({ userAccount: user.userAccount }).then(() => {
-                      sub.push(account);
-                      browser.storage.local.set({ subaccounts: sub }).then(() => {
-                        browser.storage.local.set({ activeAccount: 0 }).then(async () => {
-                          this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: account.publicKey, index: 0 });
-                          this.$store.dispatch('setSubAccounts', sub);
-                          this.$store.commit('SWITCH_LOGGED_IN', true);
-                          this.$router.push('/account');
-                        });
-                      });
-                    });
-                    return;
-                  }
-                  browser.storage.local.get('subaccounts').then(subaccounts => {
-                    if ((subaccounts.hasOwnProperty('subaccounts') && subaccounts.subaccounts == '') || !subaccounts.hasOwnProperty('subaccounts')) {
-                      sub.push(account);
-                      browser.storage.local.set({ subaccounts: sub }).then(() => {
-                        browser.storage.local.set({ activeAccount: 0 }).then(() => {
-                          this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: account.publicKey, index: 0 });
-                        });
-                      });
-                    } else {
-                      sub = subaccounts.subaccounts;
-                    }
-                    this.$store.dispatch('setSubAccounts', sub).then(async () => {
-                      this.$store.commit('SWITCH_LOGGED_IN', true);
-                      redirectAfterLogin(this);
-                    });
-                  });
-              });
-            } else {
-              this.loginError = true;
-              this.inputError = { error: '' };
-            }
-            this.loading = false;
-          }
-        });
-      } else {
-        this.errorMsg = 'length';
-        this.inputError = { error: '' };
-        context.loading = false;
-      }
-    },
+    }
   },
 };
 </script>

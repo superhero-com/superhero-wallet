@@ -40,7 +40,7 @@
       </ae-toolbar>
     </ae-card>
     <br>
-    <ae-button  face="round" fill="primary" extend @click="navigateTips" >{{ $t('pages.utilities.tipWebsite') }}</ae-button>
+    <ae-button  face="round" fill="primary" extend @click="navigateTips" >{{ $t('pages.account.tipSomeone') }}</ae-button>
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div> 
 </template>

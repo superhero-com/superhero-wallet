@@ -8,72 +8,68 @@
           <p>
             {{ $t('pages.appVUE.systemName') }} 
             <span class="extensionVersion extensionVersionTop">{{extensionVersion}}</span></p>
-          
         </div>
-        
-        <!-- logged in header START -->
-          <!-- network dropdown -->
-          <div id="network" class="dropdown" v-if="account.publicKey && isLoggedIn" :slot="menuSlot" direction="left" ref="network">
-            <button v-on:click.prevent="toggleDropdown">
-              <ae-icon class="dropdown-button-icon status" name="globe" slot="button" />
-              <span class="dropdown-button-name" v-html="current.network" slot="button"></span>
-            </button>
-            <transition name="slide-fade">
-              <!-- <ul v-if="dropdown.network" class="dropdown-holder"> -->
-              <ae-list v-if="dropdown.network" class="dropdown-holder">
-                <ae-list-item fill="neutral" @click="switchNetwork(name)" :class="current.network == name ? 'activeAccount' : '' " v-for="(value, name) in network" v-bind:key="name">
-                    <!-- <ae-identicon class="subAccountIcon" v-bind:address="subaccount.publicKey" size="base" /> -->
-                    <div class="subAccountInfo">
-                      <div class="subAccountName">{{ name }}</div>
-                      <div class="subAccountBalance" :title="value.url">{{ value.url }}</div>
-                    </div>
-                    <ae-check class="subAccountCheckbox"  type="radio" :value="name" v-model="current.network" /> 
-                </ae-list-item>
-              </ae-list>
-            </transition>
-          </div>
-
-          <!-- account dropdown -->
-          <div id="account" class="dropdown big" v-if="account.publicKey && isLoggedIn" :slot="menuSlot" direction="center" ref="account">
-            <button>
-              <ae-identicon id="identIcon" class="dropdown-button-icon" v-bind:address="this.account.publicKey" size="base" slot="button" />
-              <span class="dropdown-button-name" slot="button">{{ activeAccountName }}</span>
-            </button>
-          </div>
-
-          <!-- settings dropdown -->
-          <div id="settings" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="mobileRight" direction="right" ref="settings">
+          <div id="settings" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="menuSlot" direction="left" ref="settings">
             <button v-on:click="toggleDropdown">
               <ae-icon class="dropdown-button-icon" name="burger" slot="button" />
-              <span class="dropdown-button-name" slot="button">{{ $t('pages.appVUE.menu') }}</span>
             </button>
             <transition name="slide-fade">
               <ul v-if="dropdown.settings" class="dropdown-holder">
                 <li>
-                  <ae-button @click="navigateAccount" class="toAccount">
-                    <ae-icon name="home" />
-                      {{ $t('pages.appVUE.myAccount') }}
+                  <ae-button @click="topUp">
+                    <!-- <ae-icon  /> -->
+                      {{ $t('pages.appVUE.topUp') }}
                   </ae-button>
                 </li>
-                <li id="settings">
-                  <ae-button @click="settings" class="settings">
-                    <ae-icon name="settings" />
-                    {{ $t('pages.appVUE.settings') }}
+                <li >
+                  <ae-button @click="withdraw">
+                    <!-- <ae-icon  /> -->
+                    {{ $t('pages.appVUE.withdraw') }}
                   </ae-button>
                 </li>
-                <li id="toLogout">
-                  <ae-button @click="logout" class="toLogout">
-                    <ae-icon name="sign-out" />
-                    {{ $t('pages.appVUE.logout') }}
+                <li >
+                  <ae-button @click="transactions">
+                    <!-- <ae-icon  /> -->
+                    {{ $t('pages.appVUE.myTransactions') }}
                   </ae-button>
                 </li>
               </ul>
             </transition>
           </div>
-
-
-      
-        <!-- logged in header END -->
+          
+          <div id="account" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="mobileRight" direction="right" ref="account">
+            <button v-on:click="toggleDropdown">
+              <ae-identicon id="identIcon" class="dropdown-button-icon" v-bind:address="this.account.publicKey" size="base" slot="button" />
+            </button>
+            <transition name="slide-fade">
+              <ul v-if="dropdown.account" class="dropdown-holder">
+                <li>
+                  <ae-button @click="profile">
+                    <ae-icon name="contacts" />
+                    {{ $t('pages.appVUE.profile') }}
+                  </ae-button>
+                </li>
+                <li>
+                  <ae-button @click="settings" >
+                    <ae-icon name="settings" />
+                    {{ $t('pages.appVUE.settings') }}
+                  </ae-button>
+                </li>
+                <li>
+                  <ae-button >
+                    <ae-icon name="settings" />
+                    {{ $t('pages.appVUE.advanced') }}
+                  </ae-button>
+                </li>
+                <li>
+                  <ae-button >
+                    <ae-icon name="info" />
+                    {{ $t('pages.appVUE.help') }}
+                  </ae-button>
+                </li>
+              </ul>
+            </transition>
+          </div>
       </ae-header>
     <router-view :key="$route.fullPath"></router-view>
     <span class="extensionVersion " v-if="isLoggedIn">
@@ -93,8 +89,7 @@ import { mapGetters } from 'vuex';
 import { saveAs } from 'file-saver';
 // import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
 import { initializeSDK, contractCall } from './utils/helper';
-import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT } from './utils/constants'
-import LedgerBridge from './utils/ledger/ledger-bridge'
+import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT, AEX2_METHODS  } from './utils/constants'
 import { start, postMesssage, readWebPageDom } from './utils/connection'
 import { langs,fetchAndSetLocale } from './utils/i18nHelper'
 import { computeAuctionEndBlock, computeBidFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers'
@@ -150,14 +145,7 @@ export default {
 
       if(!process.env.RUNNING_IN_POPUP) {
         //init SDK
-        this.checkSDKReady = setInterval(() => {
-          if(this.isLoggedIn && this.sdk == null) {
-            this.initSDK()
-            this.pollData()
-            clearInterval(this.checkSDKReady)
-          }
-        },500)
-
+        this.checkSdkReady()
         setTimeout(() => {
           if(this.isLoggedIn) {
             if(this.sdk == null) {
@@ -186,19 +174,23 @@ export default {
     this.dropdown.settings = false;
   },
   methods: {
+    checkSdkReady() {
+      if(!process.env.RUNNING_IN_POPUP) {
+        this.checkSDKReady = setInterval(() => {
+          if(this.isLoggedIn && this.sdk == null) {
+            this.initRpcWallet()
+            this.initSDK()
+            this.pollData()
+            clearInterval(this.checkSDKReady)
+          }
+        },500)
+      }
+    },
     hideLoader() {
       var self = this;
       setTimeout(function() {
         self.mainLoading = false;
       }, 1500);
-    },
-    changeAccount (index,subaccount) {
-      browser.storage.local.set({activeAccount: index}).then(() => {
-        postMesssage(this.background, { type: 'changeAccount' , payload: subaccount.publicKey } )
-        this.$store.commit('SET_ACTIVE_ACCOUNT', {publicKey:subaccount.publicKey,index:index});
-        this.initSDK();
-        this.dropdown.account = false;
-      });
     },
     hideMenu (event) {
       let target = event.target
@@ -231,7 +223,7 @@ export default {
     switchNetwork (network) {
       this.dropdown.network = false;
       this.$store.dispatch('switchNetwork', network).then(() => {
-        postMesssage(this.background, { type: 'switchNetwork' , payload: network } )
+        postMesssage(this.background, { type: AEX2_METHODS.SWITCH_NETWORK , payload: network } )
         this.initSDK();
         this.$store.dispatch('updateBalance');
       }); 
@@ -248,6 +240,10 @@ export default {
             this.$store.commit('UPDATE_ACCOUNT', '');
             this.$store.commit('SWITCH_LOGGED_IN', false);
             this.$store.commit('SET_WALLET', []);
+            this.$store.dispatch('initSdk',null);
+            postMesssage(this.background, { type: AEX2_METHODS.LOGOUT } )
+            console.log(this.sdk)
+            this.checkSdkReady()
             this.$router.push('/');
           });
         });
@@ -260,28 +256,25 @@ export default {
       this.dropdown.settings = false;
       this.$router.push('/account');
     },
-    navigateNetworks () {
-      this.$router.push('/manageNetworks');
-      this.dropdown.network = false;
-    },
     myAccount () {
       this.dropdown.settings = false; this.dropdown.languages = false;
       this.$router.push('/account');
     },
     settings () {
-      this.dropdown.settings = false; this.dropdown.languages = false;
+      this.dropdown.account = false; 
       this.$router.push('/settings');
     },
-    utilities () {
-      this.dropdown.settings = false; this.dropdown.languages = false;
-      this.$router.push('/utilities');
+    transactions() {
+      this.dropdown.settings = false; 
+      this.$router.push('/transactions');
     },
-    airGapVault() {
-        this.$router.push('/airGapSetup')
+    topUp() {
+      this.dropdown.settings = false; 
+      this.$router.push('/receive');
     },
-    manageAccounts () {
-      this.$router.push('/manageAccounts');
-      this.dropdown.network = false;
+    withdraw() {
+      this.dropdown.settings = false; 
+      this.$router.push('/send');
     },
     pollData() {
       let triggerOnce = false
@@ -302,6 +295,7 @@ export default {
           await this.$store.commit('SET_TIPPING', 
             await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract }) 
           )
+          console.log(this.$store.state.tipping)
         } catch(e) {
           console.log("error",e)
         }
@@ -318,6 +312,9 @@ export default {
           
           this.$router.push('/')
       }
+    },
+    initRpcWallet() {
+      postMesssage(this.background, { type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } } )
     },
     hideConnectError() {
       this.connectError = false
@@ -363,9 +360,18 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 #network li .status::before { content: ''; display: inline-block; width: 8px; height: 8px; -moz-border-radius: 7.5px; -webkit-border-radius: 7.5px; border-radius: 7.5px; margin-right: 5px;
                 border: 1px solid #DDD; background-color: #EFEFEF; }
 #network li .status.current::before { border-color: green; background-color: greenyellow; }
-#account { position: absolute; left: 50%; margin-left: -60px; top: 50%; margin-top: -24px; }
-#account  > button { width: 120px; }
-#account .dropdown-button-icon.ae-identicon.base { height: 1.8rem; margin-bottom: 3px; vertical-align: top; }
+// #account { position: absolute; left: 50%; margin-left: -60px; top: 50%; margin-top: -24px; }
+// #account  > button { width: 120px; }
+#account .dropdown-button-icon.ae-identicon.base { height: 1.8rem; margin-bottom: 3px; vertical-align: top; 
+  -webkit-box-shadow: 0 0 0 2px #ff0d6a;  
+  box-shadow: 0 0 0 2px #ff0d6a;
+  border: .125rem solid transparent;
+  width: 2.625rem!important;
+  height: 2.625rem!important;
+  vertical-align: middle;
+  margin: 0;
+  margin-top: 4px;
+}
 #account .ae-dropdown-button .dropdown-button-name { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .subAccountInfo { margin-right:auto; margin-bottom:0 !important; max-width: 155px; }
 #network .subAccountInfo { max-width: 195px; }
@@ -374,8 +380,8 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 .subAccountBalance { font-family: monospace; margin-bottom:0 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px;}
 .name-pending { width:24px !important; height:24px !important; margin-right:5px; font-size:.8rem; }
 #account .subAccountCheckbox { float: right; }
-#account li, #network li { padding:0.75rem; cursor:pointer !important; }
-#account ul { width:250px; margin-left: -125px; max-height: 350px; height: auto; overflow-y: scroll;}
+// #account li, #network li { padding:0.75rem; cursor:pointer !important; }
+// #account ul { width:250px; margin-left: -125px; max-height: 350px; height: auto; overflow-y: scroll;}
 #account .activeAccount { background: #f6f6f6; }
 #account .manageAccounts, #network .manageAccounts { padding:0; }
 #account .manageAccounts button, #network .manageAccounts button { padding: 0.5rem 0.75rem; height: auto; justify-content: center; }
@@ -388,7 +394,7 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 .subAccountCheckbox .ae-check-button:after { left: 0 !important; top: 0 !important; width: 28px !important; height: 28px !important; }
 .subAccountCheckbox > input[type="radio"]:checked + .ae-check-button:before, .ae-check > input[type="checkbox"]:checked + .ae-check-button:before { border-color: #dae1ea !important; }
 #settings li .ae-icon { font-size: 1.2rem; margin-right: 10px; }
-#settings.dropdown ul { min-width: 250px }
+#settings.dropdown ul, #account.dropdown ul  { min-width: 200px }
 #languages .ae-button img { margin-right: 5px; }
 #languages .ae-button.current { text-decoration: underline; }
 .dropdown { display: inline-block; position: relative; vertical-align: top; }
@@ -408,7 +414,7 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 .dropdown li > .ae-button { width: 100%; }
 .dropdown > .ae-button { text-align: center; }
 .dropdown > .ae-button, .dropdown .ae-dropdown-button { color: #717C87; vertical-align: top; height: 50px; width: 50px; display: inline-block !important; }
-.dropdown .dropdown-button-icon { font-size: 1.5rem; margin: 0 auto 5px; display: block; }
+.dropdown .dropdown-button-icon { font-size: 2.5rem; margin: 0 auto 5px; display: block; }
 .dropdown .dropdown-button-name { display: block; margin: 0 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dropdown > button:hover, .dropdown > .ae-dropdown-button:hover { color: #FFF; }
 .slide-fade-enter-active { transition: all .3s ease; }

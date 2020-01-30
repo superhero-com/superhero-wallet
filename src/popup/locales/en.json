@@ -11,7 +11,14 @@
             "switchToken": "Tokens",
             "utilities": "Utilities",
             "settings": "Settings",
-            "logout": "Logout"
+            "logout": "Logout",
+            "profile": "Profile",
+            "advanced": "Advanced",
+            "help": "Help",
+            "topUp": "Top Up",
+            "withdraw": "Withdraw",
+            "myTransactions": "My transactions",
+            "dashboard": "Dashboard"
         },
         "aboutSettings": {
             "heading": "About",
@@ -28,7 +35,8 @@
             "receive": "Receive",
             "wholeTransaction": "Whole transaction history",
             "latestTransactions": "Latest transactions",
-            "noTransactionsFound": "No transactions found!"
+            "noTransactionsFound": "No transactions found!",
+            "tipSomeone": "Tip someone"
         },
         "accountPassword": {
             "heading": "",
@@ -215,9 +223,11 @@
             "privateKey": "Private key",
             "keystoreJson": "Keystore.json",
             "seedPhrase": "Seed phrase",
-            "enterSeedPhrase": "Enter your seed phrase. The one you wrote down during account creation.",
+            "enterSeedPhrase": "Enter your seed phrase. ",
             "continueButton": "Continue",
-            "chooseFile": "Choose file"
+            "chooseFile": "Choose file",
+            "importAccount": "Import Account",
+            "continue": "Continue"
         },
         "ledgerSetup": {
             "ledgerConnectSetup": "How to connect from Ledger",
@@ -380,14 +390,23 @@
             "sendTipBtn": "Send tip",
             "tipDetails": "Details",
             "tipWebsite":"Website",
-            "heading": "Tip website",
+            "heading": "TIP SOMEONE",
             "selectTip": "Select amount to tip",
             "tipDomain": "Tip domain",
             "claim": "Claim Tips",
             "tipsForDomain": "Tips",
             "tips": "Tips",
             "noTips": "No tips for this url",
-            "claimInfo": "If you are verified you can claim the amount of tokens by click the button below"
+            "claimInfo": "If you are verified you can claim the amount of tokens by click the button below",
+            "title": "Title",
+            "titlePlaceholder": "Send a message of support along with your tip!",
+            "account": "Account",
+            "next": "NEXT",
+            "url": "Send a tip to"
+        },
+        "successTip": {
+            "sendMore": "Send more tips",
+            "feed": "View your tip on the feed"
         },
         "transactionDetails": {
             "heading": "Transactions Details",

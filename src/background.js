@@ -2,11 +2,11 @@ import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils
 import { checkAeppConnected, initializeSDK, removeTxFromStorage, detectBrowser, parseFromStorage } from './popup/utils/helper';
 import WalletContorller from './wallet-controller'
 import Notification from './notifications';
-import { setController, contractCallStatic } from './popup/utils/aepp-utils'
 import rpcWallet from './lib/rpcWallet'
 import { 
     HDWALLET_METHODS,
-    AEX2_METHODS
+    AEX2_METHODS,
+    NOTIFICATION_METHODS
 } from './popup/utils/constants'
 
 global.browser = require('webextension-polyfill');
@@ -15,7 +15,7 @@ global.browser = require('webextension-polyfill');
 setInterval(() => {
     browser.windows.getAll({}).then((wins) => {
         if(wins.length == 0) {
-            sessionStorage.removeItem("phishing_urls");
+            sessionStorage.removeItem("phishing_urls")
             browser.storage.local.remove('isLogged')
             browser.storage.local.remove('activeAccount')
         }
@@ -39,7 +39,7 @@ function getAccount() {
 }
 
 const controller = new WalletContorller()
-setController(controller)
+const notification = new Notification();
 browser.runtime.onMessage.addListener( (msg, sender,sendResponse) => {
     switch(msg.method) {
         case 'phishingCheck':
@@ -128,14 +128,20 @@ browser.runtime.onConnect.addListener( async ( port ) => {
                 controller[type](payload).then((res) => {
                     port.postMessage({ uuid, res })
                 })
-            } else if(AEX2_METHODS.includes(type)) {
+            } 
+            
+            if(AEX2_METHODS.hasOwnProperty(type)) {
                 rpcWallet[type](payload)
+            }
+
+            if(NOTIFICATION_METHODS.hasOwnProperty(type)) {
+                notification[type](payload) 
             }
         })  
     }
 }) 
 
 
-const notification = new Notification();
+
 
 
