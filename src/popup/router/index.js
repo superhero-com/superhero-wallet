@@ -12,6 +12,7 @@ import AlertComponent from './components/Alert';
 import AmountInput from './components/AmountInput';
 import AddressInput from './components/AddressInput';
 import BackLink from './components/BackLink';
+import DropDown from './components/DropDown';
 
 import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from 'vue-qrcode-reader'
 import ModalComponent from './components/Modal';
@@ -41,6 +42,7 @@ Vue.component('Modal', ModalComponent);
 Vue.component('AmountInput', AmountInput);
 Vue.component("AddressInput", AddressInput);
 Vue.component("BackLink", BackLink);
+Vue.component("DropDown", DropDown);
 
 let router = new VueRouter({
   routes,

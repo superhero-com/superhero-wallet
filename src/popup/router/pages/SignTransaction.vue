@@ -649,7 +649,18 @@ export default {
                     window.close()
                 },1000)
             }else {
-                this.redirectInExtensionAfterAction()
+                if(this.data.tx.contractType == "tip" && call) {
+                    const domain = this.data.tx.params[0]
+                    const amount = this.data.tx.options.amount
+                    this.$store.commit('SET_AEPP_POPUP',false)
+                    return this.$router.push({ 'name': 'success-tip', params: {
+                        amount,
+                        domain
+                    }})
+                } else {    
+                    this.redirectInExtensionAfterAction()
+                }
+                
             }
         },
         async contractDeploy() { 

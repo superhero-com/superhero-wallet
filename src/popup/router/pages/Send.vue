@@ -1,8 +1,8 @@
 <template>
   <div class="popup">
-    <div class="actions">
-      <button class="backbutton toAccount" @click="navigateAccount"><ae-icon name="back" /> {{$t('pages.send.backToAccount')}}</button>
-    </div>
+    <BackLink to="/account">
+        {{ $t('pages.send.backToAccount') }}
+    </BackLink>
     <h3 class="">
       {{$t('pages.send.heading')}} 
       <ae-identicon class="send-account-icon" :address="account.publicKey" size="s" /> 

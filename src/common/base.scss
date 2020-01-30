@@ -154,6 +154,11 @@ main {
 .ae-button.ledger {
   background:$ledger-color !important;
 }
+.ae-button {
+  border-radius: 8px !important;
+  height:52px;
+  padding: 0 2.5rem;
+}
 .btnFixed {
   position: fixed !important;
   bottom: 25px;
@@ -640,4 +645,28 @@ input::-moz-focus-outer {
 }
 .mr-auto {
   margin-right:auto;
+}
+.custom-dropdown {
+  width:100%;
+  .ae-dropdown-button {
+    width: 100% !important;
+    height: auto;
+    padding: 1rem;
+    border-radius: 6px;
+    background: #ececec !important;
+    width: 100px;
+    text-align: left;
+    display: block;
+    position:relative;
+    .ae-icon {
+      position: absolute;
+      right: 6px;
+      font-weight: bold;
+      top: 50%;
+      transform: translateY(-50%) rotate(90deg);
+      -webkit-transform: translateY(-50%) rotate(90deg);
+      -ms-transform: translateY(-50%) rotate(90deg);
+      font-size: 1.4rem;
+    }
+  }
 }

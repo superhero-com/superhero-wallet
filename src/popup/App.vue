@@ -8,9 +8,7 @@
           <p>
             {{ $t('pages.appVUE.systemName') }} 
             <span class="extensionVersion extensionVersionTop">{{extensionVersion}}</span></p>
-          
         </div>
-        
           <div id="settings" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="menuSlot" direction="left" ref="settings">
             <button v-on:click="toggleDropdown">
               <ae-icon class="dropdown-button-icon" name="burger" slot="button" />
@@ -72,10 +70,6 @@
               </ul>
             </transition>
           </div>
-
-
-      
-        <!-- logged in header END -->
       </ae-header>
     <router-view :key="$route.fullPath"></router-view>
     <span class="extensionVersion " v-if="isLoggedIn">
@@ -301,6 +295,7 @@ export default {
           await this.$store.commit('SET_TIPPING', 
             await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract }) 
           )
+          console.log(this.$store.state.tipping)
         } catch(e) {
           console.log("error",e)
         }

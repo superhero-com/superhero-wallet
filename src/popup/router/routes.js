@@ -19,6 +19,7 @@ import IntroComponent from './pages/Intro';
 import TransactionsComponent from './pages/Transactions';
 import SendComponent from './pages/Send';
 import ReceiveComponent from './pages/Receive';
+import SuccessTip from './pages/SuccessTip';
 
 export default [
   {
@@ -122,4 +123,10 @@ export default [
     path: '/receive',
     component: ReceiveComponent,
   },
+  {
+    path: '/success-tip',
+    component: SuccessTip,
+    name:'success-tip',
+    props:true,
+  }
 ];

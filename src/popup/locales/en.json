@@ -17,7 +17,8 @@
             "help": "Help",
             "topUp": "Top Up",
             "withdraw": "Withdraw",
-            "myTransactions": "My transactions"
+            "myTransactions": "My transactions",
+            "dashboard": "Dashboard"
         },
         "aboutSettings": {
             "heading": "About",
@@ -398,7 +399,14 @@
             "noTips": "No tips for this url",
             "claimInfo": "If you are verified you can claim the amount of tokens by click the button below",
             "title": "Title",
-            "titlePlaceholder": "Send a message of support along with your tip!"
+            "titlePlaceholder": "Send a message of support along with your tip!",
+            "account": "Account",
+            "next": "NEXT",
+            "url": "Send a tip to"
+        },
+        "successTip": {
+            "sendMore": "Send more tips",
+            "feed": "View your tip on the feed"
         },
         "transactionDetails": {
             "heading": "Transactions Details",

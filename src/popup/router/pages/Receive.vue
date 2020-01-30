@@ -1,8 +1,8 @@
 <template>
   <div class="popup">
-    <div class="actions">
-      <button class="backbutton toAccount" @click="navigateAccount"><ae-icon name="back" /> {{$t('pages.receive.backToAccount') }}</button>
-    </div>
+    <BackLink to="/account">
+        {{$t('pages.receive.backToAccount') }}
+    </BackLink>
     <p>{{$t('pages.receive.heading') }}</p>
     <ae-card fill="neutral" align="center">
       <div class="qr-wrapper">
