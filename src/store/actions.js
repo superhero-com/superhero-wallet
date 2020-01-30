@@ -10,6 +10,7 @@ import AES from '../popup/utils/aes';
 import { postMesssage } from '../popup/utils/connection';
 import { getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 
+
 export default {
   setAccount({ commit }, payload) {
     commit(types.UPDATE_ACCOUNT, payload);
@@ -331,5 +332,26 @@ export default {
     const mac = new Uint8Array(await aes.decrypt(encryptedWallet.mac));
     if (mac.reduce((p, n) => p || n !== 0, false)) throw new Error('Wrong password');
     return passwordDerivedKey;
+  },
+
+  async setLogin({ state, commit, dispatch }, { keypair }) {
+    await browser.storage.local.set({ userAccount: keypair })
+    await browser.storage.local.set({ isLogged: true })
+    await browser.storage.local.set({ termsAgreed: true })
+
+    let sub = [];
+    sub.push({
+        name:'Main account',
+        publicKey:keypair.publicKey,
+        balance:0,
+        root:true
+    });
+    await browser.storage.local.set({subaccounts: sub})
+    await browser.storage.local.set({activeAccount: 0})
+    commit('SET_ACTIVE_ACCOUNT', { publicKey:keypair.publicKey,index:0 })
+    await dispatch('setSubAccounts', sub)
+    commit('UPDATE_ACCOUNT', keypair)
+    commit('SWITCH_LOGGED_IN', true)
+    router.push('/account')
   }
 };

@@ -11,6 +11,8 @@ import Popup from './components/Popup';
 import AlertComponent from './components/Alert';
 import AmountInput from './components/AmountInput';
 import AddressInput from './components/AddressInput';
+import BackLink from './components/BackLink';
+
 import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from 'vue-qrcode-reader'
 import ModalComponent from './components/Modal';
 import * as helper from '../utils/helper';
@@ -38,6 +40,7 @@ Vue.component('QrcodeCapture',QrcodeCapture);
 Vue.component('Modal', ModalComponent);
 Vue.component('AmountInput', AmountInput);
 Vue.component("AddressInput", AddressInput);
+Vue.component("BackLink", BackLink);
 
 let router = new VueRouter({
   routes,
@@ -56,7 +59,7 @@ router.beforeEach((to, from, next) => {
   const lastRouteName = localStorage.getItem(lastRouteKey);
 
   const shouldRedirect = to.path === ("/" || "/account") && lastRouteName && isFirstTransition;
-
+  console.log(to.path)
   if (shouldRedirect){
     browser.storage.local.get('showAeppPopup').then(aepp => {
       browser.storage.local.get('pendingTransaction').then(pendingTx => {

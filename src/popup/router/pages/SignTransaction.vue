@@ -631,6 +631,7 @@ export default {
                     this.port.postMessage({...res})
                 }
             }catch(err) {
+                console.log(err)
                 this.setTxInQueue('error')
                 this.errorTx.error.message = typeof err.message != "undefined" ? err.message : err
                 this.sending = true

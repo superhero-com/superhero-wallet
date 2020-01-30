@@ -1,11 +1,11 @@
 <template>
     <div class="popup">
-        <div class="actions">
-            <button class="backbutton toAccount" @click="navigateUtilities"><ae-icon name="back" /> {{$t('pages.tipPage.back')}}</button>
-        </div>
+        <BackLink to="/">
+           {{ $t('pages.tipPage.heading') }}
+        </BackLink>
         <div>
-            <h3>{{$t('pages.tipPage.heading') }}</h3>
-            <ae-panel>
+            
+            <!-- <ae-panel>
                 <div class="tipWebsiteHeader flex flex-align-center ">
                     <Loader size="small" class="loader" v-if="loadFavicon" :loading="loadFavicon" v-bind="{'content':''}"></Loader>
                     <img :src="favicon" v-if="!loadFavicon && typeof favicon !== 'undefined'" class="domainFavicon"/>
@@ -38,18 +38,16 @@
                         <ae-button face="round" fill="primary" :class="!canClaim ? 'disabled' : ''" @click="claimTips">{{ $t('pages.tipPage.claim') }}</ae-button>
                     </ae-button-group>
                 </div>
-            </ae-panel>
+            </ae-panel> -->
             <ae-panel>
                 <div class="tabs">
                     <span :class="activeTab == 'details' ? 'tab-active' : ''" @click="selectActiveTab('details')">{{ $t('pages.tipPage.sendHeading') }}</span>
                     <span :class="activeTab == 'tips' ? 'tab-active' : ''" @click="selectActiveTab('tips')">{{ $t('pages.tipPage.tipsForDomain') }}</span>
                 </div>
                 <div v-if="activeTab == 'details'">
-                    <ae-input label="More info" class="my-2">
-                        <textarea class="ae-input textarea" v-model="note" slot-scope="{ context }" @focus="context.focus = true" @blur="context.focus = false" />
+                    <ae-input :label="$t('pages.tipPage.title')" class="my-2">
+                        <textarea class="ae-input textarea" :placeholder="$t('pages.tipPage.titlePlaceholder')" v-model="note" slot-scope="{ context }" @focus="context.focus = true" @blur="context.focus = false" />
                     </ae-input>
-                    <!-- <h4> {{$t('pages.tipPage.sendHeading')}}</h4>
-                    <hr> -->
                     <div class="flex flex-justify-between tipWebisteAmount">  
                         <ae-badge :class="selectedTip == index ? 'alternative' : ''" @click.native="selectTip(index)" v-for="(tip,index) in tips" :key="index">{{tip == 0 ? 'other' : `${tip} ${tokenSymbol}`}} </ae-badge>
                     </div>
@@ -184,12 +182,7 @@ export default {
                 this.url = tabs[0].url
                 
                 await this.tipWebsiteType();
-
-                this.unpaid = convertToAE((await this.tipping.methods['unpaid'](this.domain)).decodedResult)
-                if(this.activeTab == 'tips') {
-                    this.fetchTips()
-                }
-
+                console.log(this.tippingReceiver)
                 if(this.tippingReceiver && 
                     (this.tippingReceiver.address == this.account.publicKey || 
                         (Array.isArray(this.tippingReceiver.address) && 
@@ -198,6 +191,13 @@ export default {
                 {
                   this.canClaim = true
                 }
+
+                this.unpaid = convertToAE((await this.tipping.methods['unpaid'](this.domain)).decodedResult)
+                if(this.activeTab == 'tips') {
+                    this.fetchTips()
+                }
+
+                
                 setTimeout(() => {
                     this.loadFavicon = false;
                 },1500)
@@ -245,6 +245,7 @@ export default {
                 callType: 'pay',
                 type:'contractCall'
             }
+            console.log(tx)
             this.$store.commit('SET_AEPP_POPUP',true)
             return this.$router.push({'name':'sign', params: {
                 data:tx

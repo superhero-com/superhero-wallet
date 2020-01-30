@@ -14,6 +14,12 @@ import TipComponent from './pages/TipPage';
 import QrCodeReader from './pages/QrCodeReader';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import ImportAccount from './pages/ImportAccount';
+import IntroComponent from './pages/Intro';
+import TransactionsComponent from './pages/Transactions';
+import SendComponent from './pages/Send';
+import ReceiveComponent from './pages/Receive';
+
 export default [
   {
     path: '/',
@@ -92,6 +98,28 @@ export default [
   {
     path:'/privacyPolicy',
     component:PrivacyPolicy
-  }
+  },
+  {
+    path: '/importAccount',
+    component: ImportAccount
+  },
+  {
+    path: '/intro',
+    component: IntroComponent
+  },
   
+  {
+    path:'/transactions',
+    component:TransactionsComponent
+  },
+  {
+    path: '/send',
+    name: 'send',
+    props:true,
+    component: SendComponent,
+  },
+  {
+    path: '/receive',
+    component: ReceiveComponent,
+  },
 ];

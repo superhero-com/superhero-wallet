@@ -148,32 +148,20 @@ const checkAeppConnected = (host) => {
 
 
 const redirectAfterLogin = (ctx) => {
-  browser.storage.local.get('showAeppPopup').then((aepp) => {
-    browser.storage.local.get('pendingTransaction').then((pendingTx) => {
-        if(pendingTx.hasOwnProperty('pendingTransaction') && pendingTx.pendingTransaction.hasOwnProperty('list') && Object.keys(pendingTx.pendingTransaction.list).length > 0) {
-            ctx.$store.commit('SET_AEPP_POPUP',true)
-            let tx = pendingTx.pendingTransaction.list[Object.keys(pendingTx.pendingTransaction.list)[0]];
-            tx.popup = false
-            tx.countTx =  Object.keys(pendingTx.pendingTransaction.list).length
-            ctx.$router.push({'name':'sign', params: {
-                data:tx
-            }});
-        } else if(process.env.RUNNING_IN_POPUP ) {
-            ctx.$store.commit('SET_AEPP_POPUP',true)
-            if(window.hasOwnProperty("name") && window.name.includes("popup")) {
-                if(window.props.type == "connectConfirm") {
-                    ctx.$router.push('/connect');
-                } else if(window.props.type == "sign") {
-                    ctx.$router.push('/popup-sign-tx');
-                } else if(window.props.type == "askAccounts") {
-                    ctx.$router.push('/ask-accounts');
-                }
+    if(process.env.RUNNING_IN_POPUP ) {
+        ctx.$store.commit('SET_AEPP_POPUP',true)
+        if(window.hasOwnProperty("name") && window.name.includes("popup")) {
+            if(window.props.type == "connectConfirm") {
+                ctx.$router.push('/connect');
+            } else if(window.props.type == "sign") {
+                ctx.$router.push('/popup-sign-tx');
+            } else if(window.props.type == "askAccounts") {
+                ctx.$router.push('/ask-accounts');
             }
-        } else {
-            ctx.$router.push('/account');
         }
-    })
-  })
+    } else {
+        ctx.$router.push('/account');
+    }
 }
 
 const getAeppAccountPermission = (host, account) => {
