@@ -80,7 +80,8 @@ window.addEventListener("load", () => {
             browser.runtime.sendMessage({
                 from: "content",
                 type: "readDom",
-                data: address
+                data: address,
+                url: window.location.href
             }).then(res => {
                 if(res && res.host == window.origin && res.received) {
                     // clearInterval(sendInterval)
@@ -98,8 +99,6 @@ const readyStateCheckInterval = setInterval(function () {
     if (document.readyState === 'complete') {
         clearInterval(readyStateCheckInterval)
         const port = getBrowserAPI().runtime.connect()
-        console.log(port)
-        console.log(getBrowserAPI())
         const extConnection = BrowserRuntimeConnection({
         connectionInfo: {
             description: 'Content Script to Extension connection',

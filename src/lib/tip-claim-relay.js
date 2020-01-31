@@ -36,20 +36,22 @@ export default {
                     params: [ url ],
                     source: TIPPING_CONTRACT
                 }
-                contractCallStatic({ tx, callType:"static"})
-                .then(res => {
-                    const amount = convertToAE(res.decodedResult)
-                    if(amount && this.checkAddressMatch(account.publicKey, addresses)) {
-                        axios.post(`${SERVICE_URL}/submit`, {
-                            url,
-                            address:account.publicKey
-                        }).then(res => {
-                            console.log(res)
-                        })
-                    }
-                }).catch(err => {
-                    console.log(err)
-                })
+                if(this.checkAddressMatch(account.publicKey, addresses)) {
+                    contractCallStatic({ tx, callType:"static"})
+                    .then(res => {
+                        const amount = convertToAE(res.decodedResult)
+                        if(amount) {
+                            axios.post(`${SERVICE_URL}/submit`, {
+                                url,
+                                address:account.publicKey
+                            }).then(res => {
+                                console.log(res)
+                            })
+                        }
+                    }).catch(err => {
+                        console.log(err)
+                    })
+                }  
             }
             
         } catch(err){
