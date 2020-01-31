@@ -213,7 +213,7 @@ export default {
             try {
               return await state.sdk.middleware.getActiveNames({ owner: publicKey })
             } catch(e) {
-              
+              console.log("error",e)
             }
             return []
           }
@@ -222,6 +222,7 @@ export default {
       
       names = flatten(names)
       names = uniqBy(names, 'name')
+
       if (names.length) commit(types.SET_ACCOUNT_AENS, { account: index, name: names[0].name, pending: names[0].pending ? true : false })
       browser.storage.local.get('pendingNames').then(pNames => {
         let pending = []

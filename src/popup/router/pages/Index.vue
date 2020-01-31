@@ -15,7 +15,7 @@
             {{ $t('pages.index.term1') }}<a href="#" @click="goToTermsOfService"> {{ $t('pages.index.term2') }}</a> and <a href="#" @click="goToPrivacyPolicy"> {{ $t('pages.index.term3') }}</a>
           </div>
         </ae-check>
-        <ae-button
+        <!-- <ae-button
           face="round"
           fill="primary"
           class="mb-1"
@@ -29,8 +29,29 @@
           :class="[ terms[0] != 1 && termsAgreedOrNot != true ? 'disabled' : '' ]"
           @click="importAccount"
           class="importBtn"
-        >{{ $t('pages.index.importPrivateKey') }}</ae-button>
-
+        >{{ $t('pages.index.importPrivateKey') }}</ae-button> -->
+          <ae-check value="create" type="radio" name="walletType" v-model="walletType" :disabled=" terms[0] != 1 && termsAgreedOrNot != true ? true : false ">
+            <div class="termsHolder">
+              Generate a new wallet. <br>
+              <b>Start claiming tips!</b>
+            </div>
+          </ae-check>
+          <br><br>
+          <ae-check value="import" type="radio" name="walletType" v-model="walletType" :disabled=" terms[0] != 1 && termsAgreedOrNot != true ? true : false ">
+            <div class="termsHolder">
+              Already have an account? <br>
+              Retrieve existing account.
+            </div>
+          </ae-check>
+          <br><br>
+          <ae-button
+          face="round"
+          fill="primary"
+          class="mb-1"
+          :class="[ terms[0] != 1 && termsAgreedOrNot != true || !walletType ? 'disabled' : '' ]"
+          extend
+          @click="introContinue"
+        >{{ $t('pages.index.continue') }}</ae-button>
 
         <!-- <ae-button face="round" extend>{{ $t('pages.index.continue') }}</ae-button> -->
       </div>
@@ -116,7 +137,8 @@ export default {
       imported: false,
       termsIndex: 0,
       terms: [],
-      termsAgreedOrNot: false
+      termsAgreedOrNot: false,
+      walletType: null
     };
   },
   computed: {
@@ -135,6 +157,14 @@ export default {
     },
     goToTermsOfService() {
       this.$router.push('/termsOfService');
+    },
+    introContinue() {
+      this.loading = true
+      if(this.walletType == "create") {
+        this.generwateWalletIntro()
+      } else if(this.walletType == "import") {
+        this.importAccount()
+      }
     },
     init() {
       browser.storage.local.remove('processingTx').then(() => {});

@@ -30,7 +30,7 @@
         "account": {
             "heading": "Account",
             "accountName": "Account name",
-            "copy": "Copy",
+            "copy": "Copy address",
             "send": "Send",
             "receive": "Receive",
             "wholeTransaction": "Whole transaction history",
@@ -406,7 +406,11 @@
         },
         "successTip": {
             "sendMore": "Send more tips",
-            "feed": "View your tip on the feed"
+            "feed": "View your tip on the feed",
+            "completedHeading":" Transaction completed",
+            "sentTo": "Send to: ",
+            "letThemKnow": "Let them know!",
+            "heading": "SEND"
         },
         "transactionDetails": {
             "heading": "Transactions Details",

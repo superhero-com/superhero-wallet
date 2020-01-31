@@ -72,7 +72,7 @@
           </div>
       </ae-header>
     <router-view :key="$route.fullPath"></router-view>
-    <span class="extensionVersion " v-if="isLoggedIn">
+    <span class="extensionVersion " v-if="isLoggedIn && !onAccount">
       {{ $t('pages.appVUE.systemName') }} 
       {{extensionVersion}} </span>
     <Loader size="big" :loading="mainLoading"></Loader>
@@ -121,6 +121,9 @@ export default {
     ...mapGetters (['account', 'current', 'network', 'popup', 'isLoggedIn', 'subaccounts', 'activeAccount', 'activeNetwork', 'balance', 'activeAccountName', 'background', 'sdk', 'aeppPopup']),
     extensionVersion() {
       return 'v.' + browser.runtime.getManifest().version 
+    },
+    onAccount() {
+      return this.$router.currentRoute.path == "/account"
     }
   },
   created: async function () {
@@ -276,6 +279,9 @@ export default {
       this.dropdown.settings = false; 
       this.$router.push('/send');
     },
+    profile() {
+
+    },
     pollData() {
       let triggerOnce = false
       this.polling = setInterval(async () => {
@@ -291,16 +297,19 @@ export default {
     async initSDK() {
       let sdk = await initializeSDK(this, { network:this.network, current:this.current, account:this.account, wallet:this.wallet, activeAccount:this.activeAccount, background:this.background })
       if( typeof sdk != null && !sdk.hasOwnProperty("error")) {
+        console.log("sdk",this.sdk)
         try {
           await this.$store.commit('SET_TIPPING', 
             await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract }) 
           )
-          console.log(this.$store.state.tipping)
         } catch(e) {
           console.log("error",e)
         }
+        console.log("tipping ready")
+        console.log(this.tipping)
+        this.hideLoader()
       }
-      
+      console.log(sdk)
       if(typeof sdk.error != 'undefined') {
           await browser.storage.local.remove('isLogged')
           await browser.storage.local.remove('activeAccount')
