@@ -67,7 +67,7 @@ export const network = {
   }
 };
 export const current = {
-  network: 'Testnet',
+  network: 'Mainnet',
   language: 'en'
 };
 export const ACCOUNT_PASSWORD = "qwerty";
