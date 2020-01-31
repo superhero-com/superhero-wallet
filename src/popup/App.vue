@@ -55,14 +55,14 @@
                     {{ $t('pages.appVUE.settings') }}
                   </ae-button>
                 </li>
-                <li>
+                <!-- <li>
                   <ae-button >
                     <ae-icon name="settings" />
                     {{ $t('pages.appVUE.advanced') }}
                   </ae-button>
-                </li>
+                </li> -->
                 <li>
-                  <ae-button >
+                  <ae-button @click="about" >
                     <ae-icon name="info" />
                     {{ $t('pages.appVUE.help') }}
                   </ae-button>
@@ -274,6 +274,9 @@ export default {
       this.dropdown.account = false; 
       this.$router.push('/settings');
     },
+    about () {
+      this.$router.push('/aboutSettings')
+    },
     transactions() {
       this.dropdown.settings = false; 
       this.$router.push('/transactions');
@@ -287,7 +290,8 @@ export default {
       this.$router.push('/send');
     },
     profile() {
-
+      this.dropdown.settings = false;
+      this.$router.push('/account');
     },
     pollData() {
       let triggerOnce = false
