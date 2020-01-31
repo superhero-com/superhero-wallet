@@ -1,6 +1,10 @@
   <template>
   <div class="popup">
     <h3>{{ $t('pages.account.heading') }}</h3>
+    <div v-show="backup_seed_notif" class="backup_seed_notif float">
+      <p><ae-icon name="shield" class="fa fa-warning" /><span>!</span> You need to BACK UP your SEED PHRASE!</p>
+      <button class="back-up-button" @click="navigateToBackUpSeed">BACK UP NOW</button>
+    </div>
     <div class="currenciesgroup">
       <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
         <div class="inputGroup-currencies">
@@ -26,6 +30,7 @@
     <ae-card :fill="cardColor">
       <template slot="avatar">
         <ae-identicon :address="account.publicKey" />
+        <!-- <span v-show="not_backedUp_seed"> ! </span> -->
         <ae-input-plain fill="white" :placeholder="$t('pages.account.accountName')" @keyup.native="setAccountName" :value="activeAccountName"  />
       </template>
       <template slot="header">
@@ -71,6 +76,7 @@ export default {
       dropdown: {
           currencies: false,
       },
+      backup_seed_notif: true
     }
   },
   computed: {
@@ -95,9 +101,16 @@ export default {
       });
     }
   },
-  created () {
+  async created () {
+    // browser.storage.local.remove('backed_up_Seed');
+    await browser.storage.local.get('backed_up_Seed').then(res => {
+      if(!res.backed_up_Seed) {
+        setTimeout(() => this.backup_seed_notif = false, 6000)
+      } else {
+        this.backup_seed_notif = false
+      }
+    });
     currencyConv(this);
-    
   },
   mounted(){
   }, 
@@ -272,6 +285,9 @@ export default {
         });
       });
     },
+    navigateToBackUpSeed() {
+      this.$router.push('/securitySettings')
+    }
   },
   beforeDestroy () {
     clearInterval(this.polling)
@@ -381,5 +397,84 @@ export default {
   -webkit-transform: rotate(-45deg);
   position: absolute;
   right: 1rem;
+}
+.backup_seed_notif {
+  margin-bottom: 1.5rem;
+  color: #000000;
+  padding: 0.5rem;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.52), 0 6px 6px rgba(0, 0, 0, 0.25);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-size: 15px;
+  display: block;
+  position: absolute;
+  z-index: 1;
+  top: 66px;
+  left: 0;
+  background: #ffffff;
+  right: 0;
+  width: 80%;
+  margin: 0 auto;
+}
+.backup_seed_notif p{
+  margin: 0.5rem;
+}
+.backup_seed_notif span {
+  position: absolute;
+  color: #ff0d6a;
+  left: 29px;
+  top: 13px;
+  font-size: 22px;
+  font-weight: bold;
+}
+.backup_seed_notif .fa-warning {
+  float: left;
+  font-size: 2.6rem;
+  color: #ff0d6a;
+}
+.float {
+  animation-name: float;
+  -webkit-animation-name: float;
+
+  animation-duration: 1.5s;
+  -webkit-animation-duration: 1.5s;
+
+  animation-iteration-count: infinite;
+  -webkit-animation-iteration-count: infinite;
+  }
+
+
+@keyframes float {
+  0% {
+    transform: translateY(0%);
+  }
+  50% {
+    transform: translateY(8%);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+
+@-webkit-keyframes float {
+  0% {
+    -webkit-transform: translateY(0%);
+  }
+  50% {
+    -webkit-transform: translateY(8%);
+  }
+  100% {
+    -webkit-transform: translateY(0%);
+  }
+}
+
+.back-up-button {
+  color: #ff0d6a;
+  padding: 1rem;
+  background: #e0e1e3;
+  width: 100%;
+}
+.back-up-button:hover {
+  background: #d4d4d4;
 }
 </style>

@@ -1,5 +1,9 @@
 {
     "pages": {
+        "intro": {
+            "heading" :"Intro",
+            "skip": "Skip"
+        },
         "appVUE": {
             "systemName": "Tip Waellet",
             "manageNetworks": "Manage networks",
