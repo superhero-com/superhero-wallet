@@ -253,10 +253,16 @@ const initializeSDK = (ctx, { network, current, account, wallet, activeAccount =
                 if(typeof res.error != 'undefined') {
                     resolve({error:true})
                 } else {
-                    res = parseFromStorage(res)
-                    let sdk = await createSDKObject(ctx, { network, current, account, wallet, activeAccount, background, res },backgr)
-                    sdk.middleware = (await swag(network,current)).api;
-                    resolve(sdk)
+                    let sdk = null
+                    try {
+                        res = parseFromStorage(res)
+                        let sdk = await createSDKObject(ctx, { network, current, account, wallet, activeAccount, background, res },backgr)
+                        sdk.middleware = (await swag(network,current)).api;
+                        resolve(sdk)
+                    } catch(err) {
+                        resolve({ error:true })
+                    }
+                    
                 }
             })
         }else {

@@ -416,8 +416,7 @@ main {
   align-items: center !important;
 }
 .ae-panel {
-  margin-top:1.5rem !important;
-  margin-bottom:1.5rem !important;
+  margin: 1.5rem 0 !important;
 }
 .ae-panel .content > h4 {
   margin:0;
@@ -580,6 +579,17 @@ input::-moz-focus-outer {
   word-break: break-word;
   text-align: left;
   margin-bottom:1rem;
+}
+.ae-check-button:after {
+  width: 29px !important;
+  height: 26px !important;
+  top:7px !important;
+}
+.ae-check-button:before {
+  top:7px !important;
+}
+.termsCheck .ae-check-button:before  {
+  border-radius: 0 !important;
 }
 
 .token-action-holder {

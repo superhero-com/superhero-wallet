@@ -1,5 +1,5 @@
 <template>
-    <div @click="showTransactionDetails">
+    <div>
         <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
             <ae-identicon :address="transactionAccount" />
             <div class="transaction-address">

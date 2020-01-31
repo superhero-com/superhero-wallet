@@ -48,6 +48,7 @@ export default {
     state.wallet = payload;
   },
   [types.SET_ACTIVE_ACCOUNT] (state, payload) {
+    console.log(payload)
     state.account.publicKey = payload.publicKey;
     state.activeAccount = payload.index;
   },
