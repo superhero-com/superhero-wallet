@@ -1,7 +1,7 @@
 {
     "pages": {
         "appVUE": {
-            "systemName": "Tip Waellet",
+            "systemName": "Corona",
             "manageNetworks": "Administrar redes",
             "manageAccounts": "Cuentas de administración",
             "airGapVault": "Crear una bóveda de entrehierro",
@@ -16,7 +16,7 @@
         "aboutSettings": {
             "heading": "Acerca de",
             "backToSettings": "Ajustes",
-            "systemName": "Waellet",
+            "systemName": "Corona",
             "terms": "Términos de servicio",
             "privacyPolicy": "Política de privacidad"
         },
@@ -249,7 +249,7 @@
         },
         "receive": {
             "backToAccount": "Volver a la cuenta",
-            "heading": "Recibe fichas AE",
+            "heading": "Recibe fichas æid",
             "copy": "Dupdo"
         },
         "securitySettings": {
@@ -459,7 +459,7 @@
         "aeAddressInput": {
             "label": "Aeternity Dirección",
             "identicon": "Su identicon",
-            "error": "Dirección AE no válida"
+            "error": "Dirección æid no válida"
         }
     }
 }

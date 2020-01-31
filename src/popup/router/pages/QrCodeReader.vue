@@ -127,7 +127,7 @@ export default {
                 })
             }
             else if(detectBrowser() == 'Firefox') {
-                this.errorMessage = 'Please enable access to your camera for the mobile browser that you are using to open the Waellet.';
+                this.errorMessage = 'Please enable access to your camera for the mobile browser that you are using to open the Corona.';
             }
         },
     }

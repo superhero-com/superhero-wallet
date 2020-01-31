@@ -380,7 +380,7 @@ main {
   }
 
   &:after {
-      content: ' AE';
+      content: ' æid';
   }
   &.no-sign:after {
     content: '';
@@ -393,7 +393,7 @@ main {
 .balanceTotalSpend {
   color:$primary-color;
 }
-.popup-modal { width: 100%; }
+.popup-modal { width: 100%; z-index:100;}
 .popup-button { width:60%; }
 
 .backbutton {
@@ -679,4 +679,7 @@ input::-moz-focus-outer {
       font-size: 1.4rem;
     }
   }
+}
+html, body, .ae-main-account, .height-100 {
+  height:100%;
 }

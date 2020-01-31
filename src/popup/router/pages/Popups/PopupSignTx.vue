@@ -120,7 +120,7 @@ export default {
     data() {
         return {
             props: window.props,
-            token: "AE",
+            token: "æid",
             usdRate: 0,
             alertMsg:"",
             loading:false,

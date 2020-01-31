@@ -1,7 +1,7 @@
 {
     "pages": {
         "appVUE": {
-            "systemName": "Tip Waellet",
+            "systemName": "Corona",
             "manageNetworks": "verwalten Netzwerke",
             "manageAccounts": "Konten verwalten",
             "airGapVault": "Erstellen Sie ein Depot für Airgap",
@@ -16,7 +16,7 @@
         "aboutSettings": {
             "heading": "Über",
             "backToSettings": "Einstellungen",
-            "systemName": "Waellet",
+            "systemName": "Corona",
             "terms": "Nutzungsbedingungen",
             "privacyPolicy": "Datenschutz-Bestimmungen"
         },
@@ -193,17 +193,17 @@
             "currentLanguage": "aktuelle Sprache"
         },
         "index": {
-            "term1": "Ich stimme der Waellet ",
+            "term1": "Ich stimme der Corona ",
             "term2": "Nutzungsbedingungen",
             "term3": "Datenschutz-Bestimmungen",
-            "heading": "Willkommen, waellet mit aeternity blockchain beginnen die Interaktion: ",
+            "heading": "Willkommen, Corona mit aeternity blockchain beginnen die Interaktion: ",
             "securingAccount": "Sichern Sie Ihren Account",
             "generateWallet": "generieren Wallet",
             "importPrivateKey": "Import geheime Schlüssel",
             "passwordError": "Das Passwort muss bei damit 4 Symbolen sein!",
             "incorrectPasswordError": "Falsches Passwort !",
             "loginButton": "Einloggen",
-            "importWaellet": "Import waellet",
+            "importWaellet": "Import wallet",
             "privateKey": "Privat Schlüssel",
             "keystoreJson": "Keystore.json",
             "seedPhrase": "Seed phrase",
@@ -249,7 +249,7 @@
         },
         "receive": {
             "backToAccount": "Zurück zu Konto",
-            "heading": "Erhalten AE tokens",
+            "heading": "Erhalten æid tokens",
             "copy": "Kopieren"
         },
         "securitySettings": {
@@ -276,10 +276,10 @@
         },
         "seedPhrase": {
             "securingAccount": "Sichern Sie Ihren Account",
-            "attentionMsg": "Bitte stellen Sie sicher, dass Ihre seedphrase sicher zu halten! Waellet nicht speichert und können Ihre seedphrase nicht erholen! Es liegt in Ihrer Verantwortung, die sie sicher zu halten. Wenn Sie Zugriff auf Ihre waellet verlieren, erhalten Sie alle Ihr Geld verlieren.",
+            "attentionMsg": "Bitte stellen Sie sicher, dass Ihre seedphrase sicher zu halten! Corona nicht speichert und können Ihre seedphrase nicht erholen! Es liegt in Ihrer Verantwortung, die sie sicher zu halten. Wenn Sie Zugriff auf Ihre Corona verlieren, erhalten Sie alle Ihr Geld verlieren.",
             "tips": "Tipps, wie Sie Ihr Geld zu schützen",
             "tip1": "Sicher ein Backup auf mehreren Orten",
-            "tip2": "Denken Sie daran, Ihr Passwort zu entschlüsseln waellet",
+            "tip2": "Denken Sie daran, Ihr Passwort zu entschlüsseln Corona",
             "tip3": "Nie teilen die Phrase mit niemandem",
             "keepCarefully": "Sorgfältig halten diesen Satz sicher! Schreiben Sie diese 12 Wörter nach unten und halten Sie sie an einem sicheren Ort. Sie müssen sie Ihr Konto in der Zukunft erholen. ",
             "confirmSeedPhrase": "Bestätigen Sie Ihre Phrase. Tippen Sie auf die folgenden Worte Ihren Satz zu komponieren, beachten richtige Reihenfolge! ",
@@ -459,7 +459,7 @@
         "aeAddressInput": {
             "label": "Aeternity Addressе",
             "identicon": "Dein Identicon",
-            "error": "Ungültige AE-Adresse"
+            "error": "Ungültige æid-Adresse"
         }
     }
 }

@@ -4,7 +4,7 @@
             <button class="backbutton toAccount" @click="navigateToIndex"><ae-icon name="back" /> {{ $t('pages.privacyPolicy.backButton') }}</button>
         </div>
         <h2> {{ $t('pages.privacyPolicy.heading') }} </h2>
-            Your privacy is important to us. It is Waellet's policy to respect your privacy regarding any information we may collect from you across our website, https://waellet.com, and other sites we own and operate.
+            Your privacy is important to us. It is Corona's policy to respect your privacy regarding any information we may collect from you across our website, https://waellet.com, and other sites we own and operate.
 
             We don't ask for personal information to provide a service to you.
 

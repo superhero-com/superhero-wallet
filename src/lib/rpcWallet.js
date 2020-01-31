@@ -63,7 +63,7 @@ const rpcWallet = {
                     { name: DEFAULT_NETWORK, instance: node },
                 ],
                 compilerUrl: this.compiler,
-                name: 'Waellet',
+                name: 'Corona',
                 accounts:this.accounts,
                 async onConnection (aepp, action) {
                     context.checkAeppPermissions(aepp, action, "connection")
