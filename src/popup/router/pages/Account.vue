@@ -30,7 +30,6 @@
     <ae-card :fill="cardColor">
       <template slot="avatar">
         <ae-identicon :address="account.publicKey" />
-        <!-- <span v-show="not_backedUp_seed"> ! </span> -->
         <ae-input-plain fill="white" :placeholder="$t('pages.account.accountName')" @keyup.native="setAccountName" :value="activeAccountName"  />
       </template>
       <template slot="header">
@@ -102,7 +101,6 @@ export default {
     }
   },
   async created () {
-    // browser.storage.local.remove('backed_up_Seed');
     await browser.storage.local.get('backed_up_Seed').then(res => {
       if(!res.backed_up_Seed) {
         setTimeout(() => this.backup_seed_notif = false, 6000)
