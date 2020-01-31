@@ -1,48 +1,72 @@
-  <template>
-  <div class="popup">
-    <h3>{{ $t('pages.account.heading') }}</h3>
-    <div class="currenciesgroup">
-      <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
-        <div class="inputGroup-currencies">
-          <div class="input-group-icon"><ae-icon name="flip"/></div>
-            <div class="input-group-area">
-              <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
-                {{ (this.current.currency && this.current.currencyRate ? currencyFullName +' '+ '('+this.current.currency.toUpperCase()+')' +' - '+ (this.current.currencyRate*tokenBalance).toFixed(3) +' '+ currencySign : 'Select currency') }}
-                <ae-icon style="margin:0" name="left-more"/>
+<template>
+  <div>
+    <div class="popup">
+      <!-- <div class="currenciesgroup">
+        <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
+          <div class="inputGroup-currencies">
+            <div class="input-group-icon"><ae-icon name="flip"/></div>
+              <div class="input-group-area">
+                <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
+                  {{ (this.current.currency && this.current.currencyRate ? currencyFullName +' '+ '('+this.current.currency.toUpperCase()+')' +' - '+ (this.current.currencyRate*tokenBalance).toFixed(3) +' '+ currencySign : 'Select currency') }}
+                  <ae-icon style="margin:0" name="left-more"/>
+                </ae-button>
+              </div>
+          </div>
+          <ul class="sub-dropdown">
+            <li class="single-currency" v-for="(index, item) in allCurrencies" v-bind:key="index">
+              <ae-button v-on:click="switchCurrency(index, item)" class="" :class="current.currency == item ? 'current' : ''">
+                  {{ item.toUpperCase() }}
+                  <i class="arrowrightCurrency"></i>
               </ae-button>
-            </div>
+            </li>
+          </ul>
+        </li>
+      </div> -->
+      <ClaimTipButton ></ClaimTipButton>
+      <div class="flex flex-align-center flex-justify-between account-info">
+        <div class="text-left">
+          <span class="account-name">{{ activeAccountName }}</span>
+          <ae-address :value="account.publicKey" length="short" />
+          
         </div>
-        <!-- Currencies sub dropdown -->
-        <ul class="sub-dropdown">
-          <li class="single-currency" v-for="(index, item) in allCurrencies" v-bind:key="index">
-            <ae-button v-on:click="switchCurrency(index, item)" class="" :class="current.currency == item ? 'current' : ''">
-                {{ item.toUpperCase() }}
-                <i class="arrowrightCurrency"></i>
+        <div class="balance no-sign">
+            {{ roundedAmount }} {{ tokenSymbol }}
+            <ae-button face="toolbar" v-clipboard:copy="account.publicKey" @click="copy">
+                <ae-icon name="copy" />
+                {{ $t('pages.account.copy') }}
             </ae-button>
-          </li>
-        </ul>
-      </li>
+        </div>
+      </div>
+
+     
+      <!-- <ae-card :fill="cardColor">
+        <template slot="avatar">
+          <ae-identicon :address="account.publicKey" />
+          <ae-input-plain fill="white" :placeholder="$t('pages.account.accountName')" @keyup.native="setAccountName" :value="activeAccountName"  />
+        </template>
+        <template slot="header">
+          <ae-text fill="white" face="mono-base">{{tokenBalance}} AE</ae-text>
+        </template>
+        <ae-address class="accountAddress" :value="account.publicKey" copyOnClick enableCopyToClipboard length="medium" gap=0 />
+        <ae-toolbar :fill="cardColor" align="right" slot="footer">
+          <ae-button face="toolbar" v-clipboard:copy="account.publicKey" @click="copy">
+            <ae-icon name="copy" />
+            {{ $t('pages.account.copy') }}
+          </ae-button>
+        </ae-toolbar>
+      </ae-card> -->
+      
+      
+      <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
+    </div> 
+    <div>
+       <RecentTransactions>
+          <br>
+          <ae-button  face="round" fill="primary" extend @click="navigateTips" >{{ $t('pages.account.tipSomeone') }}</ae-button>
+
+        </RecentTransactions>
     </div>
-    <ae-card :fill="cardColor">
-      <template slot="avatar">
-        <ae-identicon :address="account.publicKey" />
-        <ae-input-plain fill="white" :placeholder="$t('pages.account.accountName')" @keyup.native="setAccountName" :value="activeAccountName"  />
-      </template>
-      <template slot="header">
-        <ae-text fill="white" face="mono-base">{{tokenBalance}} AE</ae-text>
-      </template>
-      <ae-address class="accountAddress" :value="account.publicKey" copyOnClick enableCopyToClipboard length="medium" gap=0 />
-      <ae-toolbar :fill="cardColor" align="right" slot="footer">
-        <ae-button face="toolbar" v-clipboard:copy="account.publicKey" @click="copy">
-          <ae-icon name="copy" />
-          {{ $t('pages.account.copy') }}
-        </ae-button>
-      </ae-toolbar>
-    </ae-card>
-    <br>
-    <ae-button  face="round" fill="primary" extend @click="navigateTips" >{{ $t('pages.account.tipSomeone') }}</ae-button>
-    <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
-  </div> 
+  </div>
 </template>
 
 <script>
@@ -93,6 +117,9 @@ export default {
         this.allCurrencies = allCurrencies;
         return allCurrencies;
       });
+    },
+    roundedAmount() {
+      return this.tokenBalance.toFixed(3)
     }
   },
   created () {
@@ -381,5 +408,28 @@ export default {
   -webkit-transform: rotate(-45deg);
   position: absolute;
   right: 1rem;
+}
+.account-info {
+  margin-top: 30px;
+  .ae-address {
+    color:#565656;
+  }
+  .balance {
+    font-size: 1.4rem;
+    font-family: "Inter UI", sans-serif;
+    font-weight: 800;
+    color: #ff0d6a;
+    .ae-button {
+      display:block;
+    }
+  }
+  .account-name {
+    font-size: 1.4rem;
+    color: #565656;
+    font-weight: 500;
+  }
+}
+.extensionVersion {
+  display:none;
 }
 </style>

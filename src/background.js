@@ -8,6 +8,7 @@ import {
     AEX2_METHODS,
     NOTIFICATION_METHODS
 } from './popup/utils/constants'
+import TipClaimRelay from './lib/tip-claim-relay'
 
 global.browser = require('webextension-polyfill');
 
@@ -40,7 +41,9 @@ function getAccount() {
 
 const controller = new WalletContorller()
 const notification = new Notification();
+rpcWallet.init(controller)
 browser.runtime.onMessage.addListener( (msg, sender,sendResponse) => {
+    
     switch(msg.method) {
         case 'phishingCheck':
             let data = {...msg, extUrl: browser.extension.getURL ('./') };
@@ -64,6 +67,10 @@ browser.runtime.onMessage.addListener( (msg, sender,sendResponse) => {
             urls.push(msg.params.hostname);
             setPhishingUrl(urls);
         break;
+    }
+    
+    if(typeof msg.from !== "undefined" && typeof msg.type !== "undefined" && msg.from == "content" && msg.type == "readDom" && msg.data.length) {
+        
     }
 
     return true
@@ -95,10 +102,8 @@ const postToContent = (data, tabId) => {
 
 
 
-/** 
- * AEX-2 RpcWallet Init
- */
-rpcWallet.init(controller)
+
+
 
 browser.runtime.onConnect.addListener( async ( port ) => {
     let extensionUrl = 'chrome-extension'

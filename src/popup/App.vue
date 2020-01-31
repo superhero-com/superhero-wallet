@@ -72,7 +72,7 @@
           </div>
       </ae-header>
     <router-view :key="$route.fullPath"></router-view>
-    <span class="extensionVersion " v-if="isLoggedIn">
+    <span class="extensionVersion " v-if="isLoggedIn && !onAccount">
       {{ $t('pages.appVUE.systemName') }} 
       {{extensionVersion}} </span>
     <Loader size="big" :loading="mainLoading"></Loader>
@@ -121,6 +121,9 @@ export default {
     ...mapGetters (['account', 'current', 'network', 'popup', 'isLoggedIn', 'subaccounts', 'activeAccount', 'activeNetwork', 'balance', 'activeAccountName', 'background', 'sdk', 'aeppPopup']),
     extensionVersion() {
       return 'v.' + browser.runtime.getManifest().version 
+    },
+    onAccount() {
+      return this.$router.currentRoute.path == "/account"
     }
   },
   created: async function () {
@@ -304,7 +307,7 @@ export default {
         }
         console.log("tipping ready")
         console.log(this.tipping)
-        // this.hideLoader()
+        this.hideLoader()
       }
       console.log(sdk)
       if(typeof sdk.error != 'undefined') {

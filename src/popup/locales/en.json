@@ -30,7 +30,7 @@
         "account": {
             "heading": "Account",
             "accountName": "Account name",
-            "copy": "Copy",
+            "copy": "Copy address",
             "send": "Send",
             "receive": "Receive",
             "wholeTransaction": "Whole transaction history",
