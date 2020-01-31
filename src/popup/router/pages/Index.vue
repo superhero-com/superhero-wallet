@@ -3,7 +3,7 @@
     <main>
       <div class="wrapper">
         <div class="logo-center">
-          <img :src="logo" alt="Waellet logo" />
+          <img :src="logo" alt="Corona logo" />
         </div>
       </div>
     </main>
@@ -180,7 +180,6 @@ export default {
         browser.storage.local.get('userAccount').then(async user => {
           
           if (user.userAccount && user.hasOwnProperty('userAccount')) {
-            console.log("ne tuk")
             this.$store.commit('UPDATE_ACCOUNT', user.userAccount);
             const address = await this.$store.dispatch('generateWallet', { seed:user.userAccount.privateKey })
             // if (data.isLogged && data.hasOwnProperty('isLogged')) {

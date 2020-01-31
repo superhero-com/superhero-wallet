@@ -101,7 +101,6 @@ export default {
                     this.tipUrl = this.url
                 }
                 await this.tipWebsiteType();
-                console.log(this.tippingReceiver)
                 if(this.tippingReceiver && 
                     (this.tippingReceiver.address == this.account.publicKey || 
                         (Array.isArray(this.tippingReceiver.address) && 
@@ -142,7 +141,6 @@ export default {
                 this.finalAmount = this.selectedTip
             }
             let amount = this.finalAmount;
-            console.log(amount)
             if (this.maxValue - amount <= 0 || isNaN (amount) || amount <= 0) {
                 this.$store.dispatch('popupAlert', { name: 'spend', type: 'insufficient_balance'});
                 return;
@@ -170,10 +168,10 @@ export default {
                 type:'contractCall',
             }
 
-            return this.$router.push({ 'name': 'success-tip', params: {
-                        amount,
-                        domain
-                    }})
+            // return this.$router.push({ 'name': 'success-tip', params: {
+            //             amount,
+            //             domain
+            //         }})
             
             this.$store.commit('SET_AEPP_POPUP',true)
             return this.$router.push({'name':'sign', params: {

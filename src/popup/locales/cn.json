@@ -1,7 +1,7 @@
 {
     "pages": {
         "appVUE": {
-            "systemName": "Tip Waellet",
+            "systemName": "Corona",
             "manageNetworks": "管理网络",
             "manageAccounts": "管理账户",
             "airGapVault": "创建气隙保管库",
@@ -16,7 +16,7 @@
         "aboutSettings": {
             "heading": "关于",
             "backToSettings": "设置",
-            "systemName": "Waellet",
+            "systemName": "Corona",
             "terms": "服务条款",
             "privacyPolicy": "隐私政策"
         },
@@ -193,17 +193,17 @@
             "currentLanguage": "当前语言"
         },
         "index": {
-            "term1": "我同意Waellet ",
+            "term1": "我同意Corona ",
             "term2": "服务条款",
             "term3": "隐私政策",
-            "heading": "欢迎waellet，开始与aeternity blockchain互动：",
+            "heading": "欢迎Corona，开始与aeternity blockchain互动：",
             "securingAccount": "保护您的帐户",
             "generateWallet": "产生钱包",
             "importPrivateKey": "导入密钥",
             "passwordError": "密码必须免得4个符号！",
             "incorrectPasswordError": "密码错误 ！",
             "loginButton": "登录",
-            "importWaellet": "进口waellet",
+            "importWaellet": "进口Corona",
             "privateKey": "私有密钥",
             "keystoreJson": "Keystore.json",
             "seedPhrase": "种子短语",
@@ -276,10 +276,10 @@
         },
         "seedPhrase": {
             "securingAccount": "保护您的帐户",
-            "attentionMsg": "请一定要保持你seedphrase安全！ Waellet不存储，并且不能恢复seedphrase！这是你的责任，以保证它的安全。如果你松访问您的waellet，你将失去所有的资金。",
+            "attentionMsg": "请一定要保持你seedphrase安全！ Corona不存储，并且不能恢复seedphrase！这是你的责任，以保证它的安全。如果你松访问您的Corona，你将失去所有的资金。",
             "tips": "如何保护你的资金技巧",
             "tip1": "在多个地方安全备份",
-            "tip2": "请记住您的密码才能解密waellet",
+            "tip2": "请记住您的密码才能解密Corona",
             "tip3": "永远不要与任何人分享短语",
             "keepCarefully": "妥善保管，这句话安全！写下这12个字，并保存在安全的地方。你需要它们来恢复您的帐户在未来。",
             "confirmSeedPhrase": "确认您的短语。轻按下方的话来撰写你的短语，注意正确的顺序！",

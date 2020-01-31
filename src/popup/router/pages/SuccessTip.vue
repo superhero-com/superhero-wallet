@@ -5,7 +5,7 @@
         </BackLink>
         <ae-panel>
             <h3 class="heading">{{ $t('pages.successTip.completedHeading') }}</h3>
-            <p class="sub-heading">You’ve successfully sent {{ amountTip }} AE in <b>TIPS</b> to (URL)</p>
+            <p class="sub-heading">You’ve successfully sent {{ amountTip }} æid in <b>TIPS</b> to (URL)</p>
             <small><i>{{ $t('pages.successTip.sentTo') }} {{ domain }}</i></small>
             <h3 >{{ $t('pages.successTip.letThemKnow') }} </h3>
             <div>

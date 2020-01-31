@@ -9,6 +9,7 @@ import {
     NOTIFICATION_METHODS
 } from './popup/utils/constants'
 import TipClaimRelay from './lib/tip-claim-relay'
+import { setController } from './lib/background-utils'
 
 global.browser = require('webextension-polyfill');
 
@@ -42,8 +43,8 @@ function getAccount() {
 const controller = new WalletContorller()
 const notification = new Notification();
 rpcWallet.init(controller)
-browser.runtime.onMessage.addListener( (msg, sender,sendResponse) => {
-    
+setController(controller)
+browser.runtime.onMessage.addListener(async (msg, sender,sendResponse) => {
     switch(msg.method) {
         case 'phishingCheck':
             let data = {...msg, extUrl: browser.extension.getURL ('./') };
@@ -70,7 +71,11 @@ browser.runtime.onMessage.addListener( (msg, sender,sendResponse) => {
     }
     
     if(typeof msg.from !== "undefined" && typeof msg.type !== "undefined" && msg.from == "content" && msg.type == "readDom" && msg.data.length) {
-        
+        const tabs = await browser.tabs.query({ active:true, currentWindow:true })
+        tabs.forEach(({ title, url }) => {
+            TipClaimRelay.checkUrlHasBalance(url, msg.data)
+
+        })
     }
 
     return true

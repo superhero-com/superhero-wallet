@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div class="popup">
+  <div class="height-100">
+    <div class="popup account-popup">
       <!-- <div class="currenciesgroup">
         <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
           <div class="inputGroup-currencies">
@@ -24,13 +24,13 @@
       </div> -->
       <ClaimTipButton ></ClaimTipButton>
       <div class="flex flex-align-center flex-justify-between account-info">
-        <div class="text-left">
+        <div class="text-left account-addresses">
           <span class="account-name">{{ activeAccountName }}</span>
-          <ae-address :value="account.publicKey" length="short" />
+          <ae-address :value="account.publicKey" length="flat" />
           
         </div>
         <div class="balance no-sign">
-            {{ roundedAmount }} {{ tokenSymbol }}
+            <span>{{ roundedAmount }} {{ tokenSymbol }}</span>
             <ae-button face="toolbar" v-clipboard:copy="account.publicKey" @click="copy">
                 <ae-icon name="copy" />
                 {{ $t('pages.account.copy') }}
@@ -57,14 +57,15 @@
       </ae-card> -->
       
       
-      <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
+      
     </div> 
-    <div>
-       <RecentTransactions>
+    <div class="height-100 recent-tx">
+        <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
+        <RecentTransactions>
           <br>
           <ae-button  face="round" fill="primary" extend @click="navigateTips" >{{ $t('pages.account.tipSomeone') }}</ae-button>
-
         </RecentTransactions>
+        
     </div>
   </div>
 </template>
@@ -411,16 +412,23 @@ export default {
 }
 .account-info {
   margin-top: 30px;
-  .ae-address {
-    color:#565656;
-  }
+  
   .balance {
+    max-width:40%;
     font-size: 1.4rem;
     font-family: "Inter UI", sans-serif;
     font-weight: 800;
     color: #ff0d6a;
+    word-break: break-word;
+    text-align: right;
     .ae-button {
       display:block;
+      padding:0;
+      font-size:.7rem;
+      margin-left:auto;
+      i {
+        font-size:.7rem;
+      }
     }
   }
   .account-name {
@@ -428,8 +436,31 @@ export default {
     color: #565656;
     font-weight: 500;
   }
+  .account-addresses {
+    max-width:60%;
+    .ae-address {
+      color:#565656;
+      font-size:.7rem;
+      line-height: .9rem;
+    }
+  }
 }
 .extensionVersion {
   display:none;
+}
+.account-popup {
+  position: fixed;
+  top: 70px;
+  z-index:0;
+}
+.recent-tx {
+  margin-top:220px;
+  height:320px;
+  position: relative;
+  z-index:0;
+}
+.recent-tx .recent-transactions {
+  overflow-y: scroll;
+  padding-bottom:20px;
 }
 </style>

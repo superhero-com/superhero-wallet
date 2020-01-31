@@ -10,7 +10,7 @@
                 <div class="balance" :class="dark ? 'dark' : ''" >{{ txAmount }}</div>
             </div>
         </ae-list-item>
-        <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
+        <!-- <popup :popupSecondBtnClick="popup.secondBtnClick"></popup> -->
     </div>
 </template>
 
@@ -138,7 +138,7 @@ export default  {
         }
 
         &:after {
-            content: ' AE';
+            content: ' æid';
         }
     }
     .transaction-address {

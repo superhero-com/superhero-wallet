@@ -1,7 +1,7 @@
 {
     "pages": {
         "appVUE": {
-            "systemName": "Tip Waellet",
+            "systemName": "Corona",
             "manageNetworks": "Gestisci reti",
             "manageAccounts": "Gestisci account",
             "airGapVault": "Creare un deposito per il traferro",
@@ -16,7 +16,7 @@
         "aboutSettings": {
             "heading": "Di",
             "backToSettings": "impostazioni",
-            "systemName": "Waellet",
+            "systemName": "Corona",
             "terms": "Termini di servizio",
             "privacyPolicy": "politica sulla riservatezza"
         },
@@ -249,7 +249,7 @@
         },
         "receive": {
             "backToAccount": "Torna al conto",
-            "heading": "Ricevere gettoni AE",
+            "heading": "Ricevere gettoni æid",
             "copy": "copia"
         },
         "securitySettings": {
@@ -459,7 +459,7 @@
         "aeAddressInput": {
             "label": "Aeternity Indirizzo",
             "identicon": "Il tuo identicon",
-            "error": "Indirizzo AE non valido"
+            "error": "Indirizzo æid non valido"
         }
     }
 }

@@ -1,6 +1,6 @@
 {
-    "name": "Tip Waellet",
-    "description": "Tip Waellet - aeternity browser extension",
+    "name": "Corona",
+    "description": "Corona - aeternity browser extension",
     "version": null,
     "manifest_version": 2,
     "applications": {
@@ -15,14 +15,15 @@
       "videoCapture",
       "activeTab",
       "clipboardWrite",
-      "notifications"
+      "notifications",
+      "tabs"
     ],
     "icons": {
       "48": "icons/icon_48.png",
       "128": "icons/icon_128.png"
     },
     "browser_action": {
-      "default_title": "waellet",
+      "default_title": "Corona",
       "default_popup": "popup/popup.html"
     },
     "background": {

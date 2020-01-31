@@ -43,7 +43,7 @@ export const getters = {
     return state.current.token != 0 ? state.tokens[state.current.token].balance : state.balance
   },
   tokenSymbol() {
-    return 'AE'
+    return 'æid'
   },
   aeppPopup(state) {
     return state.aeppPopup

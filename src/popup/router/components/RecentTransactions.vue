@@ -61,10 +61,11 @@ export default {
 <style scoped>
 .recent-transactions {
     padding: 4px 14px;
-    color: #fff;
     height: 100%;
-    margin-top: 20px;
     background:#656565;
+}
+.recent-transactions h3, .recent-transactions p, .recent-transactions .transactionList {
+    color: #fff !important;
 }
 .all-transactions {
     height:auto !important;

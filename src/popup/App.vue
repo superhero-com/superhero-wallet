@@ -1,5 +1,5 @@
 <template>
-  <ae-main @click.native="hideMenu">
+  <ae-main @click.native="hideMenu" :class="onAccount ? 'ae-main-account' : ''">
       <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''">
 
         <!-- login screen header -->
@@ -114,18 +114,26 @@ export default {
       menuSlot:"mobile-left",
       mobileRight: "mobile-right",
       checkSDKReady:null,
-      connectError:false
+      connectError:false,
+      onAccount:false
     }
   },
   computed: {
     ...mapGetters (['account', 'current', 'network', 'popup', 'isLoggedIn', 'subaccounts', 'activeAccount', 'activeNetwork', 'balance', 'activeAccountName', 'background', 'sdk', 'aeppPopup']),
     extensionVersion() {
       return 'v.' + browser.runtime.getManifest().version 
-    },
-    onAccount() {
-      return this.$router.currentRoute.path == "/account"
     }
   },
+  watch:{
+    $route (to, from){
+        if(to.path == "/account") {
+            this.onAccount = true
+        } else {
+            this.onAccount = false
+        }
+       
+    }
+} ,
   created: async function () {
       browser.storage.local.get('language').then((data) => {
         this.language = langs[data.language];
@@ -245,7 +253,6 @@ export default {
             this.$store.commit('SET_WALLET', []);
             this.$store.dispatch('initSdk',null);
             postMesssage(this.background, { type: AEX2_METHODS.LOGOUT } )
-            console.log(this.sdk)
             this.checkSdkReady()
             this.$router.push('/');
           });
@@ -297,19 +304,15 @@ export default {
     async initSDK() {
       let sdk = await initializeSDK(this, { network:this.network, current:this.current, account:this.account, wallet:this.wallet, activeAccount:this.activeAccount, background:this.background })
       if( typeof sdk != null && !sdk.hasOwnProperty("error")) {
-        console.log("sdk",this.sdk)
         try {
           await this.$store.commit('SET_TIPPING', 
             await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract }) 
           )
         } catch(e) {
-          console.log("error",e)
+
         }
-        console.log("tipping ready")
-        console.log(this.tipping)
         this.hideLoader()
       }
-      console.log(sdk)
       if(typeof sdk.error != 'undefined') {
           await browser.storage.local.remove('isLogged')
           await browser.storage.local.remove('activeAccount')

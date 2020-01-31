@@ -2,7 +2,7 @@
   "en": {
     "okBtn": "OK",
     "cancelBtn": "Cancel",
-    "appName": "Waellet",
+    "appName": "Corona",
     "account": {
       "generateBtn": "Generate wallet",
       "importBtn": "Import secret key"
@@ -11,7 +11,7 @@
   "es": {
     "okBtn": "OK",
     "cancelBtn": "Cancelar",
-    "appName": "Waellet",
+    "appName": "Corona",
     "account": {
       "generateBtn": "Billetera generar",
       "importBtn": "Importar clave secreta"
@@ -20,7 +20,7 @@
   "zh-cn": {
     "okBtn": "确认",
     "cancelBtn": "取消",
-    "appName": "Waellet",
+    "appName": "Corona",
     "account": {
       "generateBtn": "生成錢包",
       "importBtn": "導入密鑰"

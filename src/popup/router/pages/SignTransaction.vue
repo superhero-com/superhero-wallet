@@ -182,7 +182,7 @@ export default {
         },
         txType() {
             if(this.data.type == 'txSign') {
-                return "Send AE"
+                return "Send æid"
             }else if(this.data.type == 'contractCall') {
                 if(this.data.tx.method != "" ) {
                     return this.data.tx.method
@@ -214,7 +214,7 @@ export default {
             return BigNumber(this.selectedFee).shiftedBy(MAGNITUDE)
         },
         token () {
-            return typeof this.data.tx.token != 'undefined' ? this.data.tx.token : 'AE' 
+            return typeof this.data.tx.token != 'undefined' ? this.data.tx.token : 'æid' 
         }
     },
     watch:{ 
@@ -518,7 +518,7 @@ export default {
                         this.hash = result.hash
                         this.setTxInQueue(result.hash)
                         let txUrl = this.network[this.current.network].explorerUrl + '/transactions/' + result.hash
-                        let msg = 'You have sent ' + this.amount + ' AE'
+                        let msg = 'You have sent ' + this.amount + ' æid'
                         if(this.data.popup) {
                             let res = {
                                 "id": null,
@@ -572,7 +572,7 @@ export default {
             this.loading = false
             if(sign.success) {
                 let txUrl = this.network[this.current.network].explorerUrl + '/transactions/' + sign.res.hash
-                let msg = 'You have sent ' + this.amount + ' AE'
+                let msg = 'You have sent ' + this.amount + ' æid'
                 this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer',msg,data:txUrl})
                 .then(async () => {
                     this.$store.commit('SET_AEPP_POPUP',false)
@@ -623,13 +623,11 @@ export default {
                 }
                 
                 console.log("[Debug]: Transaction parameters")
-                console.log(...this.data.tx.params)
                 options = { ...options, fee:this.convertSelectedFee }
                 if(!this.contractInstance) {
                     await this.setContractInstance(this.data.tx.source, this.data.tx.address, this.data.tx.options)
                 }
                 call = await this.$helpers.contractCall({ instance:this.contractInstance, method:this.data.tx.method, params:[...this.data.tx.params, options] })
-                
                 this.setTxInQueue(call.hash)
                 let decoded = await call.decode()
                 call.decoded = decoded
@@ -639,6 +637,7 @@ export default {
                     this.port.postMessage({...res})
                 }
             }catch(err) {
+                console.log("err", err)
                 this.setTxInQueue('error')
                 this.errorTx.error.message = typeof err.message != "undefined" ? err.message : err
                 this.sending = true

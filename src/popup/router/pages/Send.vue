@@ -23,7 +23,7 @@
             <ae-identicon class="subAccountIcon" v-bind:address="account.publicKey" size="base" />
             <div class="subAccountInfo flex flex-align-start flex-direction-column ">
               <div class="subAccountName">{{account.name}}</div>
-              <div class="subAccountBalance">{{account.balance}} AE</div>
+              <div class="subAccountBalance">{{account.balance}} æid</div>
             </div>
           </ae-list-item>
         </ae-list>
@@ -45,7 +45,7 @@
             {{$t('pages.send.txFee')}}
           </span>
           <span>
-            {{txFee}} AE
+            {{txFee}} æid
           </span>
         </ae-toolbar>
       </ae-input>
@@ -132,7 +132,7 @@ export default {
     },
     myTokens() {
       return this.tokens.filter((t,index) =>  {
-        if(t.parent == this.account.publicKey || t.symbol == 'AE') {
+        if(t.parent == this.account.publicKey || t.symbol == 'æid') {
           t.key = index
           return t
         }
@@ -192,7 +192,7 @@ export default {
         this.loading = false;
         return;
       }
-      if (this.tokenSymbol != 'AE' && this.form.amount % 1 != 0) {
+      if (this.tokenSymbol != 'æid' && this.form.amount % 1 != 0) {
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'integer_required'});
         this.loading = false;
         return;
