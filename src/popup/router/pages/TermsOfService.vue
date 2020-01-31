@@ -6,11 +6,11 @@
         <h2> {{ $t('pages.termsOfService.heading') }} </h2>
         <p class="termsText">
             TERMS OF USE
-            Last Update Posted: August 27, 2019
+            Last Update Posted: January 31, 2020
             IMPORTANT NOTICE: THIS AGREEMENT IS SUBJECT TO BINDING ARBITRATION AND A WAIVER OF CLASS ACTION RIGHTS AS DETAILED IN SECTION 14. PLEASE READ THE AGREEMENT CAREFULLY.
 
             1. Acceptance of terms
-            hack.bg’s Corona (Corona,” “we,” “us,” or “our”) provides a platform for managing Aeternity (or “AE”) accounts, and allowing ordinary websites and applications to interact with the Aeternity blockchain, while keeping the user in control over what transactions they approve, through our website located at https://Corona.com/ and browser plugin (the “Site”) and mobile application (the “App”) — which includes text, images, audio, code and other materials (collectively, the “Content”) and all of the features, and services provided. The Site, the App and any other features, tools, materials, or other services offered from time to time by Corona are referred to here as the “Services.” Please read these Terms of Use (the “Terms” or “Terms of Use”) carefully before using the Services. By using or otherwise accessing the Services, or clicking to accept or agree to these Terms where that option is made available, you (1) accept and agree to these Terms, (2) consent to the collection if any, use, disclosure and other handling of information as described in our Privacy Policy and (3) agree to any additional terms, rules and conditions of participation issued by Corona from time to time. If you do not agree to the Terms, then you may not access or use the Content or Services.
+            aeternity developed Corona (“Corona,” “we,” “us,” or “our”) which provides a platform for managing Aeternity (or “AE”) accounts, and allowing ordinary websites and applications to interact with the Aeternity blockchain, while keeping the user in control over what transactions they approve, through browser plugin and allowing them through coronanews.org get the latest curated news about Corona virus— which includes text, images, audio, code and other materials (collectively, the “Content”) and all of the features, and services provided. The plugin, tools, materials, or other services offered from time to time by Corona are referred to here as the “Services.” Please read these Terms of Use (the “Terms” or “Terms of Use”) carefully before using the Services. By using or otherwise accessing the Services, or clicking to accept or agree to these Terms where that option is made available, you (1) accept and agree to these Terms, (2) consent to the collection if any, use, disclosure and other handling of information as described in our Privacy Policy and (3) agree to any additional terms, rules and conditions of participation issued by Corona from time to time. If you do not agree to the Terms, then you may not access or use the Content or Services.
 
             2. Modification of Terms of Use
             Except for Section 14, providing for binding arbitration and waiver of class action rights, Corona reserves the right, at its sole discretion, to modify or replace the Terms of Use at any time. The most current version of these Terms will be posted on our Site. You shall be responsible for reviewing and becoming familiar with any such modifications. Use of the Services by you after any modification to the Terms constitutes your acceptance of the Terms of Use as modified.
@@ -21,7 +21,7 @@
             Corona is a global platform and by accessing the Content or Services, you are representing and warranting that you are of the legal age of majority in your jurisdiction as is required to access such Services and Content and enter into arrangements as provided by the Service. You further represent that you are otherwise legally permitted to use the service in your jurisdiction including owning cryptographic tokens of value, and interacting with the Services or Content in any way. You further represent you are responsible for ensuring compliance with the laws of your jurisdiction and acknowledge that Corona is not liable for your compliance with such laws.
 
             4. Account Password and Security
-            When setting up an account within Corona, you will be responsible for keeping your own account secrets, which may be a twelve-word seed phrase, an account file, or other locally stored secret information. Corona encrypts this information locally with a password you provide, that we never send to our servers. You agree to (a) never use the same password for Corona that you have ever used outside of this service, (b) keep your secret information and password confidential and do not share them with anyone else and (c) immediately notify Corona of any unauthorized use of your account or breach of security. Corona cannot and will not be liable for any loss or damage arising from your failure to comply with this section.
+            When setting up an account within Corona, you will be responsible for keeping your own account secrets, which may be a twelve-word seed phrase, an account file, or other locally stored secret information. Do not share them with anyone else and immediately notify Corona of any unauthorized use of your account or breach of security. Corona cannot and will not be liable for any loss or damage arising from your failure to comply with this section.
 
             5. REPRESENTATIONS, WARRANTIES AND RISKS
             5.1. Warranty disclaimer
@@ -50,15 +50,11 @@
 
             You acknowledge that Aeternity applications (aepps) are code subject to flaws and acknowledge that you are solely responsible for evaluating any code provided by the Services or Content and the trustworthiness of any third-party websites, products, smart-contracts, or Content you access or use through the Service. You further expressly acknowledge and represent that Aeternity applications can be written maliciously or negligently, that Corona cannot be held liable for your interaction with such applications and that such applications may cause the loss of property or even identity. This warning and others later provided by Corona in no way evidence or represent an on-going duty to alert you to all of the potential risks of utilizing the Service or Content.
 
-            5.7 Mobile Application
-
-            You acknowledge that the App is in public beta and still undergoing testing before its official release. As such, the Services provided through the App is not intended to be relied on for any reason whatsoever or used in a production environment. You acknowledge and accept that the App or the Services (a) may contain bugs, errors and defects, (b) may function improperly or be subject to periods of downtime and unavailability, (c) may result in total or partial loss or corruption of data and (d) may be modified at any time, including through the release of subsequent versions, all with or without notice to you. The App is available on an “as is” basis for the sole purpose of collecting feedback on quality, usability, performance and defects.
-
             6. Indemnity
             You agree to release and to indemnify, defend and hold harmless Corona and its parents, subsidiaries, affiliates and agencies, as well as the officers, directors, employees, shareholders and representatives of any of the foregoing entities, from and against any and all losses, liabilities, expenses, damages, costs (including attorneys’ fees and court costs) claims or actions of any kind whatsoever arising or resulting from your use of the Service, your violation of these Terms of Use, and any of your acts or omissions that implicate publicity rights, defamation or invasion of privacy. Corona reserves the right, at its own expense, to assume exclusive defense and control of any matter otherwise subject to indemnification by you and, in such case, you agree to cooperate with Corona in the defense of such matter.
 
             7. Limitation on liability
-            YOU ACKNOWLEDGE AND AGREE THAT YOU ASSUME FULL RESPONSIBILITY FOR YOUR USE OF THE SITE, THE APP AND THE SERVICE. YOU ACKNOWLEDGE AND AGREE THAT ANY INFORMATION YOU SEND OR RECEIVE DURING YOUR USE OF THE SITE, THE APP AND THE SERVICE MAY NOT BE SECURE AND MAY BE INTERCEPTED OR LATER ACQUIRED BY UNAUTHORIZED PARTIES. YOU ACKNOWLEDGE AND AGREE THAT YOUR USE OF THE SITE, THE APP AND THE SERVICE IS AT YOUR OWN RISK. RECOGNIZING SUCH, YOU UNDERSTAND AND AGREE THAT, TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, NEITHER Corona NOR ITS SUPPLIERS OR LICENSORS WILL BE LIABLE TO YOU FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, PUNITIVE, EXEMPLARY OR OTHER DAMAGES OF ANY KIND, INCLUDING WITHOUT LIMITATION DAMAGES FOR LOSS OF PROFITS, GOODWILL, USE, DATA OR OTHER TANGIBLE OR INTANGIBLE LOSSES OR ANY OTHER DAMAGES BASED ON CONTRACT, TORT, STRICT LIABILITY OR ANY OTHER THEORY (EVEN IF Corona HAD BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES), RESULTING FROM THE SITE, THE APP OR SERVICE; THE USE OR THE INABILITY TO USE THE SITE, THE APP OR THE SERVICE; UNAUTHORIZED ACCESS TO OR ALTERATION OF YOUR TRANSMISSIONS OR DATA; STATEMENTS OR CONDUCT OF ANY THIRD PARTY ON THE SITE, THE APP OR THE SERVICE; ANY ACTIONS WE TAKE OR FAIL TO TAKE AS A RESULT OF COMMUNICATIONS YOU SEND TO US; HUMAN ERRORS; TECHNICAL MALFUNCTIONS; FAILURES, INCLUDING PUBLIC UTILITY OR TELEPHONE OUTAGES; OMISSIONS, INTERRUPTIONS, LATENCY, DELETIONS OR DEFECTS OF ANY DEVICE OR NETWORK, PROVIDERS, OR SOFTWARE (INCLUDING, BUT NOT LIMITED TO, THOSE THAT DO NOT PERMIT PARTICIPATION IN THE SERVICE); ANY INJURY OR DAMAGE TO COMPUTER EQUIPMENT; INABILITY TO FULLY ACCESS THE SITE, THE APP OR THE SERVICE OR ANY OTHER WEBSITE; THEFT, TAMPERING, DESTRUCTION, OR UNAUTHORIZED ACCESS TO, IMAGES OR OTHER CONTENT OF ANY KIND; DATA THAT IS PROCESSED LATE OR INCORRECTLY OR IS INCOMPLETE OR LOST; TYPOGRAPHICAL, PRINTING OR OTHER ERRORS, OR ANY COMBINATION THEREOF; OR ANY OTHER MATTER RELATING TO THE SITE, THE APP OR THE SERVICE.
+            YOU ACKNOWLEDGE AND AGREE THAT YOU ASSUME FULL RESPONSIBILITY FOR YOUR USE OF THE SITE, THE APP AND THE SERVICE. YOU ACKNOWLEDGE AND AGREE THAT ANY INFORMATION YOU SEND OR RECEIVE DURING YOUR USE OF THE PLUG IN MAY NOT BE SECURE AND MAY BE INTERCEPTED OR LATER ACQUIRED BY UNAUTHORIZED PARTIES. YOU ACKNOWLEDGE AND AGREE THAT YOUR USE OF PLUG IN IS AT YOUR OWN RISK. RECOGNIZING SUCH, YOU UNDERSTAND AND AGREE THAT, TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, NEITHER Corona NOR ITS SUPPLIERS OR LICENSORS WILL BE LIABLE TO YOU FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, PUNITIVE, EXEMPLARY OR OTHER DAMAGES OF ANY KIND, INCLUDING WITHOUT LIMITATION DAMAGES FOR LOSS OF PROFITS, GOODWILL, USE, DATA OR OTHER TANGIBLE OR INTANGIBLE LOSSES OR ANY OTHER DAMAGES BASED ON CONTRACT, TORT, STRICT LIABILITY OR ANY OTHER THEORY (EVEN IF PLUG IN HAD BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES), RESULTING FROM THE SITE, THE APP OR SERVICE; THE USE OR THE INABILITY TO USE THE PLUGIN; UNAUTHORIZED ACCESS TO OR ALTERATION OF YOUR TRANSMISSIONS OR DATA; STATEMENTS OR CONDUCT OF ANY THIRD PARTY ON THE PLUGIN; ANY ACTIONS WE TAKE OR FAIL TO TAKE AS A RESULT OF COMMUNICATIONS YOU SEND TO US; HUMAN ERRORS; TECHNICAL MALFUNCTIONS; FAILURES, INCLUDING PUBLIC UTILITY OR TELEPHONE OUTAGES; OMISSIONS, INTERRUPTIONS, LATENCY, DELETIONS OR DEFECTS OF ANY DEVICE OR NETWORK, PROVIDERS, OR SOFTWARE (INCLUDING, BUT NOT LIMITED TO, THOSE THAT DO NOT PERMIT PARTICIPATION IN THE SERVICE); ANY INJURY OR DAMAGE TO COMPUTER EQUIPMENT; INABILITY TO FULLY ACCESS THE SITE, THE APP OR THE SERVICE OR ANY OTHER WEBSITE; THEFT, TAMPERING, DESTRUCTION, OR UNAUTHORIZED ACCESS TO, IMAGES OR OTHER CONTENT OF ANY KIND; DATA THAT IS PROCESSED LATE OR INCORRECTLY OR IS INCOMPLETE OR LOST; TYPOGRAPHICAL, PRINTING OR OTHER ERRORS, OR ANY COMBINATION THEREOF; OR ANY OTHER MATTER RELATING TO THE SITE, THE APP OR THE SERVICE.
 
             SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF CERTAIN WARRANTIES OR THE LIMITATION OR EXCLUSION OF LIABILITY FOR INCIDENTAL OR CONSEQUENTIAL DAMAGES. ACCORDINGLY, SOME OF THE ABOVE LIMITATIONS MAY NOT APPLY TO YOU.
 
@@ -71,15 +67,15 @@
 
             We grant you limited, non-exclusive, revocable permission to make use of the Site, the App and the Service (collectively, “Access”). This Access shall remain in effect until and unless terminated by you or us. You promise and agree that you will not redistribute or transfer the Service.
 
-            The Corona software application, including without limitation the Site, the App and the Service, are not sold or transferred to you, and Corona and its licensors retain ownership of all copies of the software applications even after installation on your personal computers, mobile handsets, tablets, wearable devices, speakers and/or other devices (“Devices”).
+            The Corona software application, including without limitation the Site, the App and the Service, are not sold or transferred to you, and Coronaand its licensors retain ownership of all copies of the software applications even after installation on your personal computers, mobile handsets, tablets, wearable devices, speakers and/or other devices (“Devices”).
 
-            All Corona trademarks, service marks, trade names, logos, domain names, and any other features of the Corona brand (Corona Brand Features”) are the sole property of Corona or its licensors. The Terms do not grant you any rights to use any Corona Brand Features whether for commercial or non-commercial use.
+            All Corona trademarks, service marks, trade names, logos, domain names, and any other features of the Corona brand (“Corona Brand Features”) are the sole property of Corona or its licensors. The Terms do not grant you any rights to use any Corona Brand Features whether for commercial or non-commercial use.
 
             You agree to abide by our user guidelines and not to use the Service or any part thereof in any manner not expressly permitted by the Terms. Except for the rights expressly granted to you in the Terms, Corona grants no right, title, or interest to you in the Site, the App or the Service.
 
             Third party software (for example, open source software libraries) included in the Service are made available to you under the relevant third party software library’s license terms.
 
-            Notwithstanding anything herein to the contrary, nothing in the Terms entitles you to use, copy, fork, modify or create derivative works based on the App’s source code for commercial purposes without our prior written consent. A separate license solely to inspect and study the App’s source code can be found at https://github.com/Corona/Corona/blob/master/LICENSE.
+            Notwithstanding anything herein to the contrary, nothing in the Terms entitles you to use, copy, fork, modify or create derivative works based on the App’s source code for commercial purposes without our prior written consent.
 
             9. Links
             The Service provides, or third parties may provide, links to other World Wide Web or accessible sites, applications or resources. Because Corona has no control over such sites, applications and resources, you acknowledge and agree that Corona is not responsible for the availability of such external sites, applications or resources, and does not endorse and is not responsible or liable for any content, advertising, products or other materials on or available from such sites or resources. You further acknowledge and agree that Corona shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with use of or reliance on any such content, goods or services available on or through any such site or resource.
@@ -109,17 +105,13 @@
 
             Corona Copyright Agent can be reached at:
 
-            Email: hello [at] Corona [dot] com
+            Email: info[at] corona[dot] com
 
             Mail:
 
             Attention:
 
-            Corona Copyright ℅ hack.bg
-
-            fl. 4, 47 Cherni Vrah
-
-            Sofia, Bulgaria
+            Corona 
 
             13. Binding arbitration and class action waiver
             PLEASE READ THIS SECTION CAREFULLY – IT MAY SIGNIFICANTLY AFFECT YOUR LEGAL RIGHTS, INCLUDING YOUR RIGHT TO FILE A LAWSUIT IN COURT
@@ -150,7 +142,7 @@
 
             13.6 30-Day Right to Opt Out
 
-            You have the right to opt-out and not be bound by the arbitration and class action waiver provisions set forth above by sending written notice of your decision to opt-out to the following address: Corona ℅ hack.bg, fl. 4, 47 Cherni Vrah, Sofia, Bulgaria and via email at hello@Corona.com. The notice must be sent within 30 days of 27 August 2019 or your first use of the Service, whichever is later, otherwise you shall be bound to arbitrate disputes in accordance with the terms of those paragraphs. If you opt-out of these arbitration provisions, Corona also will not be bound by them.
+            You have the right to opt-out and not be bound by the arbitration and class action waiver provisions set forth above by sending written notice of your decision to opt-out to the email at info@corona.org. The notice must be sent within 30 days of 31 January 2020 or your first use of the Service, whichever is later, otherwise you shall be bound to arbitrate disputes in accordance with the terms of those paragraphs. If you opt-out of these arbitration provisions, Corona also will not be bound by them.
 
             13.7 Changes to this Section
 
@@ -180,8 +172,7 @@
             14.5 Communications
 
             Users with questions, complaints or claims with respect to the Service may contact us using the relevant contact information set forth above.
-
-            hello@Corona.com
+            info@corona.org
         </p> 
     </div>
 </template>
