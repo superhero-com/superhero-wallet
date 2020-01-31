@@ -24,9 +24,6 @@ setInterval(() => {
     });
 },5000);
 
-browser.browserAction.setBadgeText({ 'text': 'tip' });
-browser.browserAction.setBadgeBackgroundColor({ color: "#FF004D"});
-
 function getAccount() {
     return new Promise(resolve => {
         browser.storage.local.get('userAccount', data => {
