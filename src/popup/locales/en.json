@@ -36,7 +36,8 @@
             "wholeTransaction": "Whole transaction history",
             "latestTransactions": "Latest transactions",
             "noTransactionsFound": "No transactions found!",
-            "tipSomeone": "Tip someone"
+            "tipSomeone": "Send æid",
+            "howToClaim": "How to claim æid donations?"
         },
         "accountPassword": {
             "heading": "",
