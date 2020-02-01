@@ -5,7 +5,7 @@
     "manifest_version": 2,
     "applications": {
       "gecko": {
-        "id": "5ca99faa-fea7-4820-a006-6372c8ced8da",
+        "id": "coronanews@protonmail.com",
         "strict_min_version": "53.0"
       }
     },
