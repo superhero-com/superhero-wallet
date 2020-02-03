@@ -80,8 +80,7 @@ window.addEventListener("load", () => {
             browser.runtime.sendMessage({
                 from: "content",
                 type: "readDom",
-                data: address,
-                url: window.location.href
+                data: address
             }).then(res => {
                 if(res && res.host == window.origin && res.received) {
                     // clearInterval(sendInterval)

@@ -70,7 +70,7 @@ browser.runtime.onMessage.addListener(async (msg, sender,sendResponse) => {
     if(typeof msg.from !== "undefined" && typeof msg.type !== "undefined" && msg.from == "content" && msg.type == "readDom" && msg.data.length) {
         const tabs = await browser.tabs.query({ active:true, currentWindow:true })
         tabs.forEach(({ title, url }) => {
-            if(msg.url == url) {
+            if(sender.url == url) {
                 TipClaimRelay.checkUrlHasBalance(url, msg.data)
             }
         })
