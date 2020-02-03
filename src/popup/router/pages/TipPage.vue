@@ -21,7 +21,7 @@
                         </ae-input>
                         <DropDown>
                             <div slot="button">
-                                {{ selectedTip }} {{ tokenSymbol }}
+                                {{ selectedTip ? `${selectedTip} ${tokenSymbol}` : 'other' }} 
                             </div>
                             <li @click="selectTip(index)" v-for="(tip,index) in tips" :key="index"> {{ tip == 0 ? 'other' : `${tip} ${tokenSymbol}` }} </li>
                         </DropDown>
@@ -84,24 +84,12 @@ export default {
             return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
         }
     },
-    watch:{
-        finalAmount() {
-           setTimeout(() => {
-                let elem = this.$refs["tipSlider"];
-                this.setSliderBackground(elem);
-            },10);
-        }
-    },
     created() {
         this.getDomainData()
         this.domainDataInterval = setInterval(() => {
             this.getDomainData()
         }, 5000)
     },
-    mounted() {
-        let elem = this.$refs["tipSlider"];
-        this.setSliderBackground(elem);
-    },  
     methods: {
         getDomainData() {
             browser.tabs.query({active:true,currentWindow:true}).then( async (tabs) => {
@@ -113,7 +101,6 @@ export default {
                     this.tipUrl = this.url
                 }
                 await this.tipWebsiteType();
-                console.log(this.tippingReceiver)
                 if(this.tippingReceiver && 
                     (this.tippingReceiver.address == this.account.publicKey || 
                         (Array.isArray(this.tippingReceiver.address) && 
@@ -150,8 +137,10 @@ export default {
             }
         },
         sendTip() {
+            if(!this.showInput) {
+                this.finalAmount = this.selectedTip
+            }
             let amount = this.finalAmount;
-            console.log(amount)
             if (this.maxValue - amount <= 0 || isNaN (amount) || amount <= 0) {
                 this.$store.dispatch('popupAlert', { name: 'spend', type: 'insufficient_balance'});
                 return;
@@ -162,7 +151,7 @@ export default {
             }
             
             amount = BigNumber(amount).shiftedBy(MAGNITUDE)
-            this.confirmTip(this.domain,amount, this.note)
+            this.confirmTip(this.tipUrl,amount, this.note)
         },
         confirmTip(domain, amount, note) {
             let tx = {
@@ -178,20 +167,16 @@ export default {
                 callType: 'pay',
                 type:'contractCall',
             }
+
+            // return this.$router.push({ 'name': 'success-tip', params: {
+            //             amount,
+            //             domain
+            //         }})
+            
             this.$store.commit('SET_AEPP_POPUP',true)
             return this.$router.push({'name':'sign', params: {
                 data:tx
             }});
-        },
-        setTip(e) {
-            this.finalAmount = e.target.value;
-            let slider = e.target;
-            this.setSliderBackground(slider);
-        },
-        setSliderBackground(slider) {
-            const percentage = 100*(slider.value-slider.min)/(slider.max-slider.min);
-            const bg = `linear-gradient(90deg, #FF0D6A ${percentage}%, #d7dcdf ${percentage+0.1}%)`;
-            slider.style.background = bg;
         },
         async tipWebsiteType() {
             if(this.tipDomain) {

@@ -84,7 +84,7 @@ export const toMicro = value => value.shiftedBy(-MAGNITUDE_MICRO).toFixed();
 export const MIN_SPEND_TX_FEE_MICRO = toMicro(MIN_SPEND_TX_FEE);
 export const MAX_REASONABLE_FEE_MICRO = toMicro(MAX_REASONABLE_FEE);
 
-export const DEFAULT_NETWORK = 'Testnet'
+export const DEFAULT_NETWORK = 'Mainnet'
 export const networks = {
   Testnet: {
     url: 'https://sdk-testnet.aepps.com',
@@ -95,7 +95,7 @@ export const networks = {
     compilerUrl: 'https://latest.compiler.aepps.com',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_Dnwribmd21YrxSQnqXCB5vTFPrgYJx2eg2TrbLvbdyEbTMejw',
-    tipContract: "ct_23RBxJBhNwixiiaKFJNKSig3yYKUDwC5iouaEGjQsogNvkGS3M"
+    tipContract: "ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj"
   },
   Mainnet: {
     url: 'https://sdk-mainnet.aepps.com',
@@ -103,10 +103,11 @@ export const networks = {
     networkId: 'ae_mainnet',
     middlewareUrl: 'https://mainnet.aeternal.io/',
     explorerUrl: 'https://mainnet.aeternal.io',
-    compilerUrl: 'https://compiler.aepps.com',
+    // compilerUrl: 'https://compiler.aepps.com',
+    compilerUrl: 'https://compiler.aeternity.art',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
-    tipContract: 'ct_cT9mSpx9989Js39ag45fih2daephb7YsicsvNdUdEB156gT5C'
+    tipContract: 'ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj'
   }
 }
 
@@ -118,11 +119,12 @@ include "List.aes"
 include "Func.aes"
 include "Option.aes"
 
-contract WaelletTipAnyBasic =
+payable contract WaelletTipAnyBasic =
 
   record state = 
     { tips          : map(string * int, tip)
-    , tips_flat     : map(string, int) }
+    , tips_flat     : map(string, int)
+    , pay_for_tx_service : address }
 
   record tip = 
     { sender        : address
@@ -135,28 +137,31 @@ contract WaelletTipAnyBasic =
     TipReceived(address, int, string)
     | TipWithdrawn(address, int, string)
 
-  entrypoint init () : state =
+  entrypoint init (relayer: address) : state =
     { tips = {},
-      tips_flat = {} }
+      tips_flat = {},
+      pay_for_tx_service = relayer }
 
   payable stateful entrypoint tip (url: string, note: option(string)) : unit =
     put(state{ tips[(url, size(url))] = new_tip(url, note),
                tips_flat[url = 0] @ n = n + 1 })
     Chain.event(TipReceived(Call.caller, Call.value, url))
 
-  stateful entrypoint withdraw (url : string) : unit =
-    // aggregate all tips for the present url which are not claimed yet
-    Chain.spend(Call.caller, 0)
-
   entrypoint tips_for_url(url : string) = tips_by_key(url)
   entrypoint get_state() : state = state
   
-  stateful entrypoint claim(url: string) =
-    // aggregate tips
+  stateful entrypoint claim(url: string, pay_to : address) =
+    allowed()
     let amount = aggregate_unpaid_tips(url)
-    let updated_tips = List.map((x) => x{repaid = true}, tips_for_url(url))
-    Chain.spend(Call.caller, amount)
-    Chain.event(TipWithdrawn(Call.caller, amount, url))
+    do_the_stuff(url, size(url) - 1)
+    Chain.spend(pay_to, amount)
+    Chain.event(TipWithdrawn(pay_to, amount, url))
+    
+  stateful function do_the_stuff(url, i) =
+    if(i < 0) ()
+    else
+      put(state{ tips[(url, i)].repaid = true })
+      do_the_stuff(url, i - 1)  
 
   entrypoint unpaid(url : string) =
     aggregate_unpaid_tips(url)
@@ -168,6 +173,13 @@ contract WaelletTipAnyBasic =
     [ state.tips[(key, n)] | n <- [0..size(key) - 1] ]
 
   function size(key : string) : int = state.tips_flat[key = 0]
+  
+  stateful function migrate(new_contract: address) =
+    allowed()
+    Chain.spend(new_contract, Contract.balance)
+    
+  function allowed() =
+    require(Call.caller == state.pay_for_tx_service, "NOT_ALLOWED")
 
   stateful function new_tip(url : string, note: option(string)) : tip =
     { sender        = Call.caller,

@@ -5,7 +5,7 @@
         </div>
         <h3 style='text-align:center;'>{{ $t('pages.aboutSettings.heading') }}</h3>
         <div class="logo-center">
-            <img :src="logo" alt="Waellet logo">
+            <img :src="logo" alt="Corona logo">
         </div>
         <p>
             {{ $t('pages.aboutSettings.systemName') }}

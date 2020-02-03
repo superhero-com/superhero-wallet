@@ -1,5 +1,5 @@
 <template>
-  <ae-main @click.native="hideMenu">
+  <ae-main @click.native="hideMenu" :class="onAccount ? 'ae-main-account' : ''">
       <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''">
 
         <!-- login screen header -->
@@ -55,14 +55,14 @@
                     {{ $t('pages.appVUE.settings') }}
                   </ae-button>
                 </li>
-                <li>
+                <!-- <li>
                   <ae-button >
                     <ae-icon name="settings" />
                     {{ $t('pages.appVUE.advanced') }}
                   </ae-button>
-                </li>
+                </li> -->
                 <li>
-                  <ae-button >
+                  <ae-button @click="about" >
                     <ae-icon name="info" />
                     {{ $t('pages.appVUE.help') }}
                   </ae-button>
@@ -72,7 +72,7 @@
           </div>
       </ae-header>
     <router-view :key="$route.fullPath"></router-view>
-    <span class="extensionVersion " v-if="isLoggedIn">
+    <span class="extensionVersion " v-if="isLoggedIn && !onAccount">
       {{ $t('pages.appVUE.systemName') }} 
       {{extensionVersion}} </span>
     <Loader size="big" :loading="mainLoading"></Loader>
@@ -114,7 +114,8 @@ export default {
       menuSlot:"mobile-left",
       mobileRight: "mobile-right",
       checkSDKReady:null,
-      connectError:false
+      connectError:false,
+      onAccount:false
     }
   },
   computed: {
@@ -123,6 +124,16 @@ export default {
       return 'v.' + browser.runtime.getManifest().version 
     }
   },
+  watch:{
+    $route (to, from){
+        if(to.path == "/account") {
+            this.onAccount = true
+        } else {
+            this.onAccount = false
+        }
+       
+    }
+} ,
   created: async function () {
       browser.storage.local.get('language').then((data) => {
         this.language = langs[data.language];
@@ -242,7 +253,6 @@ export default {
             this.$store.commit('SET_WALLET', []);
             this.$store.dispatch('initSdk',null);
             postMesssage(this.background, { type: AEX2_METHODS.LOGOUT } )
-            console.log(this.sdk)
             this.checkSdkReady()
             this.$router.push('/');
           });
@@ -264,6 +274,9 @@ export default {
       this.dropdown.account = false; 
       this.$router.push('/settings');
     },
+    about () {
+      this.$router.push('/aboutSettings')
+    },
     transactions() {
       this.dropdown.settings = false; 
       this.$router.push('/transactions');
@@ -275,6 +288,10 @@ export default {
     withdraw() {
       this.dropdown.settings = false; 
       this.$router.push('/send');
+    },
+    profile() {
+      this.dropdown.settings = false;
+      this.$router.push('/account');
     },
     pollData() {
       let triggerOnce = false
@@ -295,12 +312,11 @@ export default {
           await this.$store.commit('SET_TIPPING', 
             await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract }) 
           )
-          console.log(this.$store.state.tipping)
         } catch(e) {
-          console.log("error",e)
+
         }
+        this.hideLoader()
       }
-      
       if(typeof sdk.error != 'undefined') {
           await browser.storage.local.remove('isLogged')
           await browser.storage.local.remove('activeAccount')

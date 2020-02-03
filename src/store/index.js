@@ -19,7 +19,7 @@ export default new Vuex.Store({
     wallet: [],
     balance: 0,
     current: {
-      network: 'Testnet',
+      network: 'Mainnet',
       language: '',
       token: 0
     },

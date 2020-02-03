@@ -8,6 +8,8 @@ import {
     AEX2_METHODS,
     NOTIFICATION_METHODS
 } from './popup/utils/constants'
+import TipClaimRelay from './lib/tip-claim-relay'
+import { setController } from './lib/background-utils'
 
 global.browser = require('webextension-polyfill');
 
@@ -21,9 +23,6 @@ setInterval(() => {
         }
     });
 },5000);
-
-browser.browserAction.setBadgeText({ 'text': 'tip' });
-browser.browserAction.setBadgeBackgroundColor({ color: "#FF004D"});
 
 function getAccount() {
     return new Promise(resolve => {
@@ -40,7 +39,9 @@ function getAccount() {
 
 const controller = new WalletContorller()
 const notification = new Notification();
-browser.runtime.onMessage.addListener( (msg, sender,sendResponse) => {
+rpcWallet.init(controller)
+setController(controller)
+browser.runtime.onMessage.addListener(async (msg, sender,sendResponse) => {
     switch(msg.method) {
         case 'phishingCheck':
             let data = {...msg, extUrl: browser.extension.getURL ('./') };
@@ -64,6 +65,14 @@ browser.runtime.onMessage.addListener( (msg, sender,sendResponse) => {
             urls.push(msg.params.hostname);
             setPhishingUrl(urls);
         break;
+    }
+    
+    if(typeof msg.from !== "undefined" && typeof msg.type !== "undefined" && msg.from == "content" && msg.type == "readDom" && msg.data.length) {
+        const tabs = await browser.tabs.query({ active:true, currentWindow:true })
+        tabs.forEach(({ title, url }) => {
+            TipClaimRelay.checkUrlHasBalance(url, msg.data)
+
+        })
     }
 
     return true
@@ -95,10 +104,8 @@ const postToContent = (data, tabId) => {
 
 
 
-/** 
- * AEX-2 RpcWallet Init
- */
-rpcWallet.init(controller)
+
+
 
 browser.runtime.onConnect.addListener( async ( port ) => {
     let extensionUrl = 'chrome-extension'

@@ -1,52 +1,83 @@
-  <template>
-  <div class="popup">
-    <h3>{{ $t('pages.account.heading') }}</h3>
+<template>
+  <div class="height-100">
+    <div class="popup account-popup">
+
     <div v-show="backup_seed_notif" class="backup_seed_notif float">
       <p><ae-icon name="shield" class="fa fa-warning" /><span>!</span> You need to BACK UP your SEED PHRASE!</p>
       <button class="back-up-button" @click="navigateToBackUpSeed">BACK UP NOW</button>
     </div>
-    <div class="currenciesgroup">
-      <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
-        <div class="inputGroup-currencies">
-          <div class="input-group-icon"><ae-icon name="flip"/></div>
-            <div class="input-group-area">
-              <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
-                {{ (this.current.currency && this.current.currencyRate ? currencyFullName +' '+ '('+this.current.currency.toUpperCase()+')' +' - '+ (this.current.currencyRate*tokenBalance).toFixed(3) +' '+ currencySign : 'Select currency') }}
-                <ae-icon style="margin:0" name="left-more"/>
+
+      <!-- <div class="currenciesgroup">
+        <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
+          <div class="inputGroup-currencies">
+            <div class="input-group-icon"><ae-icon name="flip"/></div>
+              <div class="input-group-area">
+                <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
+                  {{ (this.current.currency && this.current.currencyRate ? currencyFullName +' '+ '('+this.current.currency.toUpperCase()+')' +' - '+ (this.current.currencyRate*tokenBalance).toFixed(3) +' '+ currencySign : 'Select currency') }}
+                  <ae-icon style="margin:0" name="left-more"/>
+                </ae-button>
+              </div>
+          </div>
+          <ul class="sub-dropdown">
+            <li class="single-currency" v-for="(index, item) in allCurrencies" v-bind:key="index">
+              <ae-button v-on:click="switchCurrency(index, item)" class="" :class="current.currency == item ? 'current' : ''">
+                  {{ item.toUpperCase() }}
+                  <i class="arrowrightCurrency"></i>
               </ae-button>
-            </div>
+            </li>
+          </ul>
+        </li>
+      </div> -->
+      <ClaimTipButton ></ClaimTipButton>
+      <div class="flex flex-align-center flex-justify-between account-info">
+        <div class="text-left account-addresses">
+          <span class="account-name">{{ activeAccountName }}</span>
+          <ae-address :value="account.publicKey" length="flat" />
+          
         </div>
-        <!-- Currencies sub dropdown -->
-        <ul class="sub-dropdown">
-          <li class="single-currency" v-for="(index, item) in allCurrencies" v-bind:key="index">
-            <ae-button v-on:click="switchCurrency(index, item)" class="" :class="current.currency == item ? 'current' : ''">
-                {{ item.toUpperCase() }}
-                <i class="arrowrightCurrency"></i>
+        <div class="balance no-sign">
+            <span>{{ roundedAmount }} {{ tokenSymbol }}</span>
+            <ae-button face="toolbar" v-clipboard:copy="account.publicKey" @click="copy">
+                <ae-icon name="copy" />
+                {{ $t('pages.account.copy') }}
             </ae-button>
-          </li>
-        </ul>
-      </li>
+        </div>
+      </div>
+
+     
+      <!-- <ae-card :fill="cardColor">
+        <template slot="avatar">
+          <ae-identicon :address="account.publicKey" />
+          <ae-input-plain fill="white" :placeholder="$t('pages.account.accountName')" @keyup.native="setAccountName" :value="activeAccountName"  />
+        </template>
+        <template slot="header">
+          <ae-text fill="white" face="mono-base">{{tokenBalance}} AE</ae-text>
+        </template>
+        <ae-address class="accountAddress" :value="account.publicKey" copyOnClick enableCopyToClipboard length="medium" gap=0 />
+        <ae-toolbar :fill="cardColor" align="right" slot="footer">
+          <ae-button face="toolbar" v-clipboard:copy="account.publicKey" @click="copy">
+            <ae-icon name="copy" />
+            {{ $t('pages.account.copy') }}
+          </ae-button>
+        </ae-toolbar>
+      </ae-card> -->
+      
+      
+      
+    </div> 
+    <div class="height-100 recent-tx">
+        <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
+        <RecentTransactions>
+          <br>
+          <ae-button face="round" fill="primary" extend @click="navigateTips" >{{ $t('pages.account.tipSomeone') }}</ae-button>
+          
+          <ae-text class="center how-to-url">
+            <a @click="openHowToClaimURL">{{ $t('pages.account.howToClaim') }}</a>
+          </ae-text>
+        </RecentTransactions>
+        
     </div>
-    <ae-card :fill="cardColor">
-      <template slot="avatar">
-        <ae-identicon :address="account.publicKey" />
-        <ae-input-plain fill="white" :placeholder="$t('pages.account.accountName')" @keyup.native="setAccountName" :value="activeAccountName"  />
-      </template>
-      <template slot="header">
-        <ae-text fill="white" face="mono-base">{{tokenBalance}} AE</ae-text>
-      </template>
-      <ae-address class="accountAddress" :value="account.publicKey" copyOnClick enableCopyToClipboard length="medium" gap=0 />
-      <ae-toolbar :fill="cardColor" align="right" slot="footer">
-        <ae-button face="toolbar" v-clipboard:copy="account.publicKey" @click="copy">
-          <ae-icon name="copy" />
-          {{ $t('pages.account.copy') }}
-        </ae-button>
-      </ae-toolbar>
-    </ae-card>
-    <br>
-    <ae-button  face="round" fill="primary" extend @click="navigateTips" >{{ $t('pages.account.tipSomeone') }}</ae-button>
-    <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
-  </div> 
+  </div>
 </template>
 
 <script>
@@ -75,7 +106,8 @@ export default {
       dropdown: {
           currencies: false,
       },
-      backup_seed_notif: true
+      backup_seed_notif: false,
+      howToClaimURL: 'https://forum.aeternity.com/t/receive-and-tip-the-best-corona-news/5957',
     }
   },
   computed: {
@@ -98,12 +130,17 @@ export default {
         this.allCurrencies = allCurrencies;
         return allCurrencies;
       });
+    },
+    roundedAmount() {
+      return this.tokenBalance.toFixed(3)
     }
   },
   async created () {
+    // browser.storage.local.remove('backed_up_Seed');
     await browser.storage.local.get('backed_up_Seed').then(res => {
       if(!res.backed_up_Seed) {
-        setTimeout(() => this.backup_seed_notif = false, 6000)
+        this.backup_seed_notif = true;
+        setTimeout(() => this.backup_seed_notif = false, 3000)
       } else {
         this.backup_seed_notif = false
       }
@@ -133,6 +170,9 @@ export default {
     },
     showTransaction() {
       browser.tabs.create({url:this.popup.data,active:false});
+    },
+    openHowToClaimURL() {
+      browser.tabs.create({url: this.howToClaimURL, active: true});
     },
     async toggleDropdown(event, parentClass) {
         if (typeof parentClass == 'undefined') {
@@ -396,6 +436,64 @@ export default {
   position: absolute;
   right: 1rem;
 }
+.account-info {
+  margin-top: 30px;
+  
+  .balance {
+    max-width:40%;
+    font-size: 1.4rem;
+    font-family: "Inter UI", sans-serif;
+    font-weight: 800;
+    color: #ff0d6a;
+    word-break: break-word;
+    text-align: right;
+    .ae-button {
+      display:block;
+      padding:0;
+      font-size:.7rem;
+      margin-left:auto;
+      i {
+        font-size:.7rem;
+      }
+    }
+  }
+  .account-name {
+    font-size: 1.4rem;
+    color: #565656;
+    font-weight: 500;
+  }
+  .account-addresses {
+    max-width:60%;
+    .ae-address {
+      color:#565656;
+      font-size:.7rem;
+      line-height: .9rem;
+    }
+  }
+}
+.extensionVersion {
+  display:none;
+}
+.account-popup {
+  position: fixed;
+  top: 70px;
+  z-index:0;
+}
+.recent-tx {
+  margin-top:130px;
+  height:500px;
+  position: relative;
+  z-index:0;
+}
+.recent-tx .recent-transactions {
+  overflow-y: scroll;
+  padding-bottom:20px;
+}
+
+.how-to-url a {
+  color: white;
+}
+
 .backup_seed_notif {
   margin-bottom: 1.5rem;
   color: #000000;
@@ -407,7 +505,7 @@ export default {
   display: block;
   position: absolute;
   z-index: 1;
-  top: 66px;
+  top: 20px;
   left: 0;
   background: #ffffff;
   right: 0;
@@ -433,15 +531,11 @@ export default {
 .float {
   animation-name: float;
   -webkit-animation-name: float;
-
   animation-duration: 1.5s;
   -webkit-animation-duration: 1.5s;
-
   animation-iteration-count: infinite;
   -webkit-animation-iteration-count: infinite;
   }
-
-
 @keyframes float {
   0% {
     transform: translateY(0%);
@@ -453,7 +547,6 @@ export default {
     transform: translateY(0%);
   }
 }
-
 @-webkit-keyframes float {
   0% {
     -webkit-transform: translateY(0%);
@@ -465,10 +558,9 @@ export default {
     -webkit-transform: translateY(0%);
   }
 }
-
 .back-up-button {
   color: #ff0d6a;
-  padding: 1rem;
+  padding: 0.2rem;
   background: #e0e1e3;
   width: 100%;
 }

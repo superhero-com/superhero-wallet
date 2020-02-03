@@ -1,6 +1,8 @@
 <template>
     <div class="popup">
-        <BackLink to="/"></BackLink>
+        <BackLink to="/">
+            Retrieve existing account
+        </BackLink>
         <p class="importTitle">{{ $t('pages.index.enterSeedPhrase') }}</p>
         <ae-input label="Seed phrase" class="my-2">
             <textarea
@@ -14,6 +16,7 @@
         </ae-input>
 
         <ae-button face="round" fill="primary" extend @click="importAccount" >{{ $t('pages.index.importAccount') }}</ae-button>
+        <Loader size="big" :loading="loading"></Loader>
     </div>
 </template>
 
@@ -24,12 +27,14 @@ export default {
     data () {
         return {
             mnemonic: null,
-            errorMsg: null
+            errorMsg: null,
+            loading: false
         }
     },
     methods: {
         async importAccount() {
             if(this.mnemonic) {
+                this.loading = true
                 let mnemonic = this.mnemonic.split(' ');
                 if (mnemonic.length >= 12 && mnemonic.length <= 24 && validateMnemonic(this.mnemonic)) {
                     this.errorMsg = null
@@ -43,6 +48,7 @@ export default {
                     this.$store.dispatch('setLogin', { keypair })
 
                 } else {
+                    this.loading = false
                     this.errorMsg = 'Account not found. Please check your seed phrase';
                 }
             }  else {

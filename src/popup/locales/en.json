@@ -5,7 +5,7 @@
             "skip": "Skip"
         },
         "appVUE": {
-            "systemName": "Tip Waellet",
+            "systemName": "Corona",
             "manageNetworks": "Manage networks",
             "manageAccounts": "Manage accounts",
             "airGapVault": "Create a vault for AirGap",
@@ -27,20 +27,21 @@
         "aboutSettings": {
             "heading": "About",
             "backToSettings": "Settings",
-            "systemName": "Waellet",
+            "systemName": "Corona",
             "terms": "Terms of Service",
             "privacyPolicy": "Privacy Policy"
         },
         "account": {
             "heading": "Account",
             "accountName": "Account name",
-            "copy": "Copy",
+            "copy": "Copy address",
             "send": "Send",
             "receive": "Receive",
             "wholeTransaction": "Whole transaction history",
             "latestTransactions": "Latest transactions",
             "noTransactionsFound": "No transactions found!",
-            "tipSomeone": "Tip someone"
+            "tipSomeone": "Send æid",
+            "howToClaim": "How to claim æid donations?"
         },
         "accountPassword": {
             "heading": "",
@@ -213,17 +214,17 @@
             "currentLanguage": "Current language"
         },
         "index": {
-            "term1": "I agree to the Waellet ",
+            "term1": "I agree to the Corona ",
             "term2": "Terms of Service",
             "term3": "Privacy Policy",
-            "heading": "Welcome to waellet, to start interacting with aeternity blockchain: ",
+            "heading": "Welcome to Corona, to start interacting with aeternity blockchain: ",
             "securingAccount": "Securing your account",
             "generateWallet": "Generate wallet",
             "importPrivateKey": "Import secret key",
             "passwordError": "Password must be at lest 4 symbols!",
             "incorrectPasswordError": "Incorrect password !",
             "loginButton": "Login",
-            "importWaellet": "Import waellet",
+            "importWaellet": "Import wallet",
             "privateKey": "Private key",
             "keystoreJson": "Keystore.json",
             "seedPhrase": "Seed phrase",
@@ -271,7 +272,7 @@
         },
         "receive": {
             "backToAccount": "Back to account",
-            "heading": "Receive AE tokens",
+            "heading": "Receive æid tokens",
             "copy": "Copy"
         },
         "securitySettings": {
@@ -298,10 +299,10 @@
         },
         "seedPhrase": {
             "securingAccount": "Securing your account",
-            "attentionMsg": "Please make sure to keep your seedphrase safe! Waellet does not store and cannot recover your seedphrase! It is your responsibility to keep it safe. If you loose access to your waellet, you will loose all your funds.",
+            "attentionMsg": "Please make sure to keep your seedphrase safe! Corona does not store and cannot recover your seedphrase! It is your responsibility to keep it safe. If you loose access to your wallet, you will loose all your funds.",
             "tips": "Tips on how to protect your funds",
             "tip1": "Safe a backup on multiple places",
-            "tip2": "Remember your password to decrypt your waellet",
+            "tip2": "Remember your password to decrypt your wallet",
             "tip3": "Never share the phrase with anyone",
             "keepCarefully": "Carefully keep this phrase safe! Write these 12 words down and keep them in safe place. You need them to recover your account in the future. ",
             "confirmSeedPhrase": "Confirm your phrase. Tap the words below to compose your phrase, note correct order! ",
@@ -394,7 +395,7 @@
             "sendTipBtn": "Send tip",
             "tipDetails": "Details",
             "tipWebsite":"Website",
-            "heading": "TIP SOMEONE",
+            "heading": "Donate",
             "selectTip": "Select amount to tip",
             "tipDomain": "Tip domain",
             "claim": "Claim Tips",
@@ -410,7 +411,11 @@
         },
         "successTip": {
             "sendMore": "Send more tips",
-            "feed": "View your tip on the feed"
+            "feed": "View your tip on the feed",
+            "completedHeading":" Transaction completed",
+            "sentTo": "Send to: ",
+            "letThemKnow": "Let them know!",
+            "heading": "SEND"
         },
         "transactionDetails": {
             "heading": "Transactions Details",
@@ -503,7 +508,7 @@
         "aeAddressInput": {
             "label": "Aeternity Address",
             "identicon": "Your identicon",
-            "error": "Invalid AE Address"
+            "error": "Invalid æid Address"
         }
     }
 }

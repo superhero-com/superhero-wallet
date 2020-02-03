@@ -1,25 +1,23 @@
 <template>
-    <div @click="showTransactionDetails">
+    <div>
         <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
             <ae-identicon :address="transactionAccount" />
             <div class="transaction-address">
-                <ae-address :value="transactionAccount" length="short" v-if="transactionAccount != ''"/>
+                <ae-address :value="transactionAccount" length="short" :class="dark ? 'dark' : ''" v-if="transactionAccount != ''"/>
                 <ae-text face="mono-xs" class="transactionDate">{{ new Date(transactionData.time).toLocaleTimeString() }}</ae-text>
             </div>
-            <div class="text-right balance-change">
-                <ae-badge class="badgeTransactionType" :class="transactionType.fill">{{transactionType.type}}</ae-badge>
-                <div class="balance" :class="balanceSign" v-if="transactionData.tx.type == 'SpendTx'">{{transactionData.tx.amount / 10 ** 18}}</div>
-                <small><span class="balance">{{transactionData.tx.fee / 10 ** 18}}</span></small>
+            <div class="text-right balance-change" :class="recent ? 'mr-0' : ''">
+                <div class="balance" :class="dark ? 'dark' : ''" >{{ txAmount }}</div>
             </div>
         </ae-list-item>
-        <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
+        <!-- <popup :popupSecondBtnClick="popup.secondBtnClick"></popup> -->
     </div>
 </template>
 
 <script>
 import {mapGetters} from 'vuex';
 export default  {
-    props: ['transactionData'],
+    props: ['transactionData','recent','dark'],
     data() {
         return {}
     },
@@ -60,7 +58,11 @@ export default  {
             }
 
             return typeof this.transactionData.tx.account_id != "undefined" ? this.transactionData.tx.account_id : "";
-            
+        },
+        txAmount() {
+            let amount = this.transactionData.tx.amount ? this.transactionData.tx.amount : 0
+            let fee = this.transactionData.tx.fee
+            return ((amount + fee) / 10 ** 18).toFixed(3)
         }
     },
     methods: {
@@ -78,9 +80,10 @@ export default  {
 @import '../../../common/base';
 .list-item-transaction {
     justify-content: start;
-    
+    .dark {
+        color: #fff !important;
+    }
     .ae-address {
-        
         font-weight: bold;
         color: $color-neutral-negative-2;
     }
@@ -89,6 +92,7 @@ export default  {
         font-weight: bold;
         color: $color-secondary;
     }
+    
     .balance-change {
         margin-right: 1rem;
         font-weight: bold;
@@ -121,8 +125,12 @@ export default  {
         }
         
     }
+    .mr-0 {
+        margin-right: 0 !important;
+    }
     .balance {
         font-weight: bold;
+        font-size:1.2rem;
         color: $color-neutral-negative-1;
 
         &.invert {
@@ -130,7 +138,7 @@ export default  {
         }
 
         &:after {
-            content: ' AE';
+            content: ' æid';
         }
     }
     .transaction-address {

@@ -1,7 +1,7 @@
 {
     "pages": {
         "appVUE": {
-            "systemName": "Tip Waellet",
+            "systemName": "Corona",
             "manageNetworks": "Gérer les réseaux",
             "manageAccounts": "Gérer les comptes",
             "airGapVault": "Créer une voûte pour Cheminement",
@@ -16,7 +16,7 @@
         "aboutSettings": {
             "heading": "Sur",
             "backToSettings": "Paramètres",
-            "systemName": "Waellet",
+            "systemName": "Corona",
             "terms": "Conditions d'utilisation",
             "privacyPolicy": "Politique de confidentialité"
         },
@@ -249,7 +249,7 @@
         },
         "receive": {
             "backToAccount": "Retour à compte",
-            "heading": "Recevoir des tokens AE",
+            "heading": "Recevoir des tokens æid",
             "copy": "Copie"
         },
         "securitySettings": {
@@ -459,7 +459,7 @@
         "aeAddressInput": {
             "label": "Aeternity Adresse",
             "identicon": "Votre identicon",
-            "error": "Adresse AE non valide"
+            "error": "Adresse æid non valide"
         }
     }
 }
