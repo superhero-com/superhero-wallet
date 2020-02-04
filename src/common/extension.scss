@@ -1,0 +1,38 @@
+@import './variables';
+
+body, .ae-main {
+    background: $bg-color !important;
+    font-size:$font-size;
+    font-family: 'Roboto', sans-serif !important;
+}
+#app {
+    font-family: 'Roboto', sans-serif !important;
+}
+* {
+    color: $white-color;
+    font-family: 'Roboto', sans-serif !important;
+}
+.disabled {
+    opacity: .4;
+    pointer-events: none;
+}
+
+a {
+    color: $accent-color !important;
+}
+
+.primary-text {
+    color:$text-color;
+}
+.primary-title {
+    color: $white-color;
+    font-size: 1.3rem;
+    font-weight: lighter;
+    margin-bottom:27px;
+}
+.secondary-text {
+    color: $secondary-color;
+}
+.logo{
+    margin:60px 0;
+}

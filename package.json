@@ -105,6 +105,7 @@
     "serve": "^11.2.0",
     "start-server-and-test": "^1.10.6",
     "vue-loader": "^15.7.1",
+    "vue-svg-loader": "^0.15.0",
     "vue-template-compiler": "^2.6.10",
     "web-ext-types": "^2.1.0",
     "webpack": "^4.41.2",

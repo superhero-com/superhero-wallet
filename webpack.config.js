@@ -249,12 +249,16 @@ function getRules() {
       use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader?indentedSyntax'],
     },
     {
-      test: /\.(png|jpg|gif|svg|ico)$/,
+      test: /\.(png|jpg|gif|ico)$/,
       loader: 'file-loader',
       options: {
         name: '[name].[ext]?emitFile=false',
       },
     },
+    {
+      test: /\.svg$/,
+      loader: 'vue-svg-loader'
+    }
   ]
 }
 

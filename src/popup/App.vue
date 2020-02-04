@@ -1,6 +1,6 @@
 <template>
   <ae-main @click.native="hideMenu" :class="onAccount ? 'ae-main-account' : ''">
-      <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''">
+      <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''" v-if="showNavigation">
 
         <!-- login screen header -->
         <div class="logo_top" :slot="menuSlot" v-if="!isLoggedIn">
@@ -115,7 +115,8 @@ export default {
       mobileRight: "mobile-right",
       checkSDKReady:null,
       connectError:false,
-      onAccount:false
+      onAccount:false,
+      showNavigation: false
     }
   },
   computed: {
@@ -131,7 +132,12 @@ export default {
         } else {
             this.onAccount = false
         }
-       
+
+        if(to.path !== '/') {
+          this.showNavigation = true
+        } else {
+          this.showNavigation = false
+        }
     }
 } ,
   created: async function () {
@@ -346,7 +352,9 @@ export default {
 </script>
 
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
 @import '../common/base';
+@import '../common/extension';
 @-moz-document url-prefix() {
   html { scrollbar-width: none; }
   .actions .backbutton .ae-icon { vertical-align: middle !important; }

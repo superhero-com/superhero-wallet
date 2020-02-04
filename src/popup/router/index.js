@@ -15,6 +15,8 @@ import BackLink from './components/BackLink';
 import DropDown from './components/DropDown';
 import ClaimTIpButton from './components/ClaimTipButton';
 import RecentTransactions from './components/RecentTransactions'
+import Button from './components/Button'
+import CheckBox from './components/CheckBox'
 
 import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from 'vue-qrcode-reader'
 import ModalComponent from './components/Modal';
@@ -47,6 +49,8 @@ Vue.component("BackLink", BackLink);
 Vue.component("DropDown", DropDown);
 Vue.component('ClaimTipButton', ClaimTIpButton);
 Vue.component('RecentTransactions', RecentTransactions);
+Vue.component('Button',Button);
+Vue.component('CheckBox',CheckBox);
 
 let router = new VueRouter({
   routes,
