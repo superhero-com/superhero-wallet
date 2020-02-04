@@ -1,4 +1,3 @@
-
 export const getters = {
   account(state) {
     return state.account;
@@ -37,46 +36,42 @@ export const getters = {
     return state.subaccounts.find(s => s.publicKey == state.account.publicKey) ? state.subaccounts.find(s => s.publicKey == state.account.publicKey).name : 'Account';
   },
   sdk(state) {
-    return state.sdk
+    return state.sdk;
   },
   tokenBalance(state) {
-    return state.current.token != 0 ? state.tokens[state.current.token].balance : state.balance
+    return state.current.token != 0 ? state.tokens[state.current.token].balance : state.balance;
   },
   tokenSymbol() {
-    return 'æid'
+    return 'æid';
   },
   aeppPopup(state) {
-    return state.aeppPopup
+    return state.aeppPopup;
   },
   ledgerApi(state) {
-    return state.ledgerApi
+    return state.ledgerApi;
   },
   ledgerNextIdx(state) {
-    return Math.max(
-      ...state.subaccounts.filter(a => a.isLedger).map(({ idx }) => idx),
-      -1,
-    ) + 1
+    return Math.max(...state.subaccounts.filter(a => a.isLedger).map(({ idx }) => idx), -1) + 1;
   },
   isLedger(state) {
-    if(state.subaccounts.length > 0){
-      return state.subaccounts.find(s => s.publicKey == state.account.publicKey).isLedger
-    } else{
-      return state.subaccounts
+    if (state.subaccounts.length > 0) {
+      return state.subaccounts.find(s => s.publicKey == state.account.publicKey).isLedger;
     }
+    return state.subaccounts;
   },
   getActiveAccount(state) {
-    return state.subaccounts.find(s => s.publicKey == state.account.publicKey)
+    return state.subaccounts.find(s => s.publicKey == state.account.publicKey);
   },
   background({ background }) {
-    return background
+    return background;
   },
   txAdvancedMode({ txAdvancedMode }) {
-    return txAdvancedMode
+    return txAdvancedMode;
   },
   tipping({ tipping }) {
-    return tipping
+    return tipping;
   },
   tippingReceiver({ tippingReceiver }) {
-    return tippingReceiver
-  }
+    return tippingReceiver;
+  },
 };
