@@ -6,7 +6,7 @@
         <div class="logo_top" :slot="menuSlot" v-if="!isLoggedIn">
           <img :src="logo_top" alt="">
           <p>
-            {{ $t('pages.appVUE.systemName') }} 
+            {{ $t('pages.appVUE.systemName') }}
             <span class="extensionVersion extensionVersionTop">{{extensionVersion}}</span></p>
         </div>
           <div id="settings" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="menuSlot" direction="left" ref="settings">
@@ -36,7 +36,7 @@
               </ul>
             </transition>
           </div>
-          
+
           <div id="account" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="mobileRight" direction="right" ref="account">
             <button v-on:click="toggleDropdown">
               <ae-identicon id="identIcon" class="dropdown-button-icon" v-bind:address="this.account.publicKey" size="base" slot="button" />
@@ -73,13 +73,13 @@
       </ae-header>
     <router-view :key="$route.fullPath"></router-view>
     <span class="extensionVersion " v-if="isLoggedIn && !onAccount">
-      {{ $t('pages.appVUE.systemName') }} 
+      {{ $t('pages.appVUE.systemName') }}
       {{extensionVersion}} </span>
     <Loader size="big" :loading="mainLoading"></Loader>
     <div class="connect-error" v-if="connectError" >Unable to connect to choosen node</div>
   </ae-main>
 </template>
- 
+
 <script>
 import Ae from '@aeternity/aepp-sdk/es/ae/universal';
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
@@ -90,12 +90,12 @@ import { saveAs } from 'file-saver';
 // import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
 import { initializeSDK, contractCall } from './utils/helper';
 import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT, AEX2_METHODS  } from './utils/constants'
-import { start, postMesssage, readWebPageDom } from './utils/connection'
+import { start, postMessage, readWebPageDom } from './utils/connection'
 import { langs,fetchAndSetLocale } from './utils/i18nHelper'
 import { computeAuctionEndBlock, computeBidFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers'
 
 export default {
-  
+
   data () {
     return {
       logo_top: browser.runtime.getURL('../../../icons/icon_48.png'),
@@ -121,7 +121,7 @@ export default {
   computed: {
     ...mapGetters (['account', 'current', 'network', 'popup', 'isLoggedIn', 'subaccounts', 'activeAccount', 'activeNetwork', 'balance', 'activeAccountName', 'background', 'sdk', 'aeppPopup']),
     extensionVersion() {
-      return 'v.' + browser.runtime.getManifest().version 
+      return 'v.' + browser.runtime.getManifest().version
     }
   },
   watch:{
@@ -131,7 +131,7 @@ export default {
         } else {
             this.onAccount = false
         }
-       
+
     }
 } ,
   created: async function () {
@@ -171,7 +171,7 @@ export default {
         this.hideLoader()
       }
       window.addEventListener('resize', () => {
-        
+
         if(window.innerWidth <= 480) {
           this.menuSlot = "mobile-left"
           this.mobileRight = "mobile-right"
@@ -229,15 +229,15 @@ export default {
         let dropdownParent = event.target.closest(parentClass);
         this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id]
       }
-      
+
     },
     switchNetwork (network) {
       this.dropdown.network = false;
       this.$store.dispatch('switchNetwork', network).then(() => {
-        postMesssage(this.background, { type: AEX2_METHODS.SWITCH_NETWORK , payload: network } )
+        postMessage(this.background, { type: AEX2_METHODS.SWITCH_NETWORK , payload: network } )
         this.initSDK();
         this.$store.dispatch('updateBalance');
-      }); 
+      });
     },
     logout () {
       browser.storage.local.remove('isLogged').then(() => {
@@ -252,13 +252,13 @@ export default {
             this.$store.commit('SWITCH_LOGGED_IN', false);
             this.$store.commit('SET_WALLET', []);
             this.$store.dispatch('initSdk',null);
-            postMesssage(this.background, { type: AEX2_METHODS.LOGOUT } )
+            postMessage(this.background, { type: AEX2_METHODS.LOGOUT } )
             this.checkSdkReady()
             this.$router.push('/');
           });
         });
       });
-    }, 
+    },
     popupAlert(payload) {
       this.$store.dispatch('popupAlert', payload)
     },
@@ -271,22 +271,22 @@ export default {
       this.$router.push('/account');
     },
     settings () {
-      this.dropdown.account = false; 
+      this.dropdown.account = false;
       this.$router.push('/settings');
     },
     about () {
       this.$router.push('/aboutSettings')
     },
     transactions() {
-      this.dropdown.settings = false; 
+      this.dropdown.settings = false;
       this.$router.push('/transactions');
     },
     topUp() {
-      this.dropdown.settings = false; 
+      this.dropdown.settings = false;
       this.$router.push('/receive');
     },
     withdraw() {
-      this.dropdown.settings = false; 
+      this.dropdown.settings = false;
       this.$router.push('/send');
     },
     profile() {
@@ -309,8 +309,8 @@ export default {
       let sdk = await initializeSDK(this, { network:this.network, current:this.current, account:this.account, wallet:this.wallet, activeAccount:this.activeAccount, background:this.background })
       if( typeof sdk != null && !sdk.hasOwnProperty("error")) {
         try {
-          await this.$store.commit('SET_TIPPING', 
-            await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract }) 
+          await this.$store.commit('SET_TIPPING',
+            await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract })
           )
         } catch(e) {
 
@@ -325,12 +325,12 @@ export default {
           this.$store.commit('UNSET_SUBACCOUNTS');
           this.$store.commit('UPDATE_ACCOUNT', '');
           this.$store.commit('SWITCH_LOGGED_IN', false);
-          
+
           this.$router.push('/')
       }
     },
     initRpcWallet() {
-      postMesssage(this.background, { type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } } )
+      postMessage(this.background, { type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } } )
     },
     hideConnectError() {
       this.connectError = false
@@ -378,8 +378,8 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 #network li .status.current::before { border-color: green; background-color: greenyellow; }
 // #account { position: absolute; left: 50%; margin-left: -60px; top: 50%; margin-top: -24px; }
 // #account  > button { width: 120px; }
-#account .dropdown-button-icon.ae-identicon.base { height: 1.8rem; margin-bottom: 3px; vertical-align: top; 
-  -webkit-box-shadow: 0 0 0 2px #ff0d6a;  
+#account .dropdown-button-icon.ae-identicon.base { height: 1.8rem; margin-bottom: 3px; vertical-align: top;
+  -webkit-box-shadow: 0 0 0 2px #ff0d6a;
   box-shadow: 0 0 0 2px #ff0d6a;
   border: .125rem solid transparent;
   width: 2.625rem!important;

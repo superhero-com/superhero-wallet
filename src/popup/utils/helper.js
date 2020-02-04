@@ -1,7 +1,7 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import { getHdWalletAccount } from './hdWallet';
 import { Crypto } from '@aeternity/aepp-sdk/es';
-import { postMesssage } from './connection';
+import { postMessage } from './connection';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger'
 import axios from 'axios';
 import { MAGNITUDE_EXA, MAGNITUDE_GIGA, MAGNITUDE_PICO } from './constants';
@@ -85,7 +85,7 @@ const fetchData = (url, method, fetchedData) => {
 const setConnectedAepp = (host, account) => {
     return new Promise((resolve, reject) => {
         browser.storage.local.get('connectedAepps').then((aepps) => {
-            
+
             let list = []
             if(aepps.hasOwnProperty('connectedAepps') && aepps.connectedAepps.hasOwnProperty('list')) {
                 list = aepps.connectedAepps.list
@@ -96,7 +96,7 @@ const setConnectedAepp = (host, account) => {
                 let index = list.findIndex(h => h.host == host)
                 if(typeof hst == "undefined") {
                     resolve()
-                    return 
+                    return
                 }
                 if(hst.accounts.includes(account)) {
                     resolve()
@@ -107,7 +107,7 @@ const setConnectedAepp = (host, account) => {
 
             } else {
                 list.push({ host, accounts: [account] })
-            }   
+            }
 
             browser.storage.local.set({connectedAepps: { list }}).then(() => {
                 resolve()
@@ -137,11 +137,11 @@ const checkAeppConnected = (host) => {
                         }
                         return resolve(false)
                     }
-            
+
                     return resolve(false)
                 })
             })
-            
+
         })
     })
 }
@@ -197,7 +197,7 @@ const setPermissionForAccount = (host, account) => {
                 let index = list.findIndex(h => h.host == host)
                 if(typeof hst == "undefined") {
                     resolve()
-                    return 
+                    return
                 }
                 if(hst.accounts.includes(account)) {
                     resolve()
@@ -208,7 +208,7 @@ const setPermissionForAccount = (host, account) => {
 
             } else {
                 list.push({ host, accounts: [account] })
-            }   
+            }
             // return;
             browser.storage.local.set({connectedAepps: { list }}).then(() => {
                 resolve()
@@ -249,7 +249,7 @@ const initializeSDK = (ctx, { network, current, account, wallet, activeAccount =
     }
     return new Promise (async (resolve,reject) => {
         if(!backgr) {
-            postMesssage(background, { type: 'getKeypair' , payload: {  activeAccount, account } } ).then(async ({ res }) => {
+            postMessage(background, { type: 'getKeypair' , payload: {  activeAccount, account } } ).then(async ({ res }) => {
                 if(typeof res.error != 'undefined') {
                     resolve({error:true})
                 } else {
@@ -271,7 +271,7 @@ const initializeSDK = (ctx, { network, current, account, wallet, activeAccount =
         }else {
             let sdk = await createSDKObject(ctx, { network, current, account, activeAccount, background, res: account },backgr)
             resolve(sdk)
-        }       
+        }
     })
 }
 let countErr = 0;
@@ -284,7 +284,7 @@ const createSDKObject = (ctx, { network, current, account, wallet, activeAccount
                 { name: current.network, instance: node },
             ],
             accounts:[account],
-            networkId: (typeof network != 'undefined' ? network[current.network].networkId : "ae_uat" ), 
+            networkId: (typeof network != 'undefined' ? network[current.network].networkId : "ae_uat" ),
             nativeMode: true,
             compilerUrl: (typeof network != 'undefined' ? network[current.network].compilerUrl : "https://compiler.aepps.com" )
         }).then((sdk) => {
@@ -360,9 +360,9 @@ const removeTxFromStorage = (id) => {
                     delete list[id]
                 }
                 resolve(list)
-            }); 
+            });
         });
-    }) 
+    })
 }
 
 const checkAddress = (value) => {
@@ -379,7 +379,7 @@ const chekAensName = (value) => {
 
 const stringifyForStorage = state =>  {
     return JSON.stringify(state, (key, value) => {
-        
+
         if (value instanceof ArrayBuffer) {
           return { type: 'ArrayBuffer', data: Array.from(new Uint8Array(value)) };
         }
@@ -422,11 +422,11 @@ const stringifyForStorage = state =>  {
         // if (value instanceof BigUint64Array) {
         //     return { type: 'BigUint64Array', data: Array.from(value) };
         // }
-        
+
         return value;
     })
 }
-    
+
 const parseFromStorage = state => {
     return JSON.parse(
         state,
@@ -475,7 +475,7 @@ const parseFromStorage = state => {
         //   if(value && value.type == 'BigUint64Array' ) {
         //     return new BigUint64Array(value.data);
         //   }
-          
+
           return value;
         },
     );
@@ -628,20 +628,20 @@ const getUserNetworks = async () => {
 }
 
 
-export { 
-    shuffleArray, 
-    convertToAE, 
-    extractHostName, 
-    fetchData, 
-    detectBrowser, 
-    setConnectedAepp, 
-    checkAeppConnected, 
-    redirectAfterLogin, 
-    initializeSDK, 
-    currencyConv, 
-    convertAmountToCurrency, 
-    contractEncodeCall, 
-    contractDecodeData, 
+export {
+    shuffleArray,
+    convertToAE,
+    extractHostName,
+    fetchData,
+    detectBrowser,
+    setConnectedAepp,
+    checkAeppConnected,
+    redirectAfterLogin,
+    initializeSDK,
+    currencyConv,
+    convertAmountToCurrency,
+    contractEncodeCall,
+    contractDecodeData,
     removeTxFromStorage,
     checkAddress,
     chekAensName,

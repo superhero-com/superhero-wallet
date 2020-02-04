@@ -7,7 +7,7 @@ import { uniqBy, head, flatten, merge, uniqWith, isEqual } from 'lodash-es';
 import router from '../popup/router/index'
 import { derivePasswordKey, genRandomBuffer } from '../popup/utils/hdWallet'
 import AES from '../popup/utils/aes';
-import { postMesssage } from '../popup/utils/connection';
+import { postMessage } from '../popup/utils/connection';
 import { getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 
 
@@ -219,7 +219,7 @@ export default {
           }
         )()
       ]))
-      
+
       names = flatten(names)
       names = uniqBy(names, 'name')
 
@@ -293,14 +293,14 @@ export default {
 
   async unlockWallet({ state: { background }, dispatch, commit }, payload) {
     return new Promise(async (resolve, reject) => {
-      let msg = await postMesssage(background, { type: 'unlockWallet', payload })
+      let msg = await postMessage(background, { type: 'unlockWallet', payload })
       resolve(msg.res)
     })
   },
 
   async getAccount({ state: { background } }, { idx }) {
     return new Promise(async (resolve, reject) => {
-      let { res: { address } } = await postMesssage(background, { type: 'getAccount', payload: { idx } })
+      let { res: { address } } = await postMessage(background, { type: 'getAccount', payload: { idx } })
       resolve(address)
     })
   },
@@ -308,7 +308,7 @@ export default {
   async getKeyPair({ state: { background, account } }, { idx }) {
     return new Promise(async (resolve, reject) => {
 
-      let { res } = await postMesssage(background, { type: 'getKeypair', payload: { activeAccount: idx, account: { publicKey: account.publicKey } } })
+      let { res } = await postMessage(background, { type: 'getKeypair', payload: { activeAccount: idx, account: { publicKey: account.publicKey } } })
       res = parseFromStorage(res)
       resolve({ publicKey: res.publicKey, secretKey: res.secretKey })
     })
@@ -316,7 +316,7 @@ export default {
 
   async generateWallet({ state: { background } }, { seed }) {
     return new Promise(async (resolve, reject) => {
-      let { res: { address } } = await postMesssage(background, { type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })
+      let { res: { address } } = await postMessage(background, { type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })
       resolve(address)
     })
   },

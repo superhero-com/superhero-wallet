@@ -3,11 +3,11 @@ global.browser = require('webextension-polyfill');
 import store from '../../store';
 
 export const start = async (browser) =>  {
-    
+
     return browser.runtime.connect({ name: 'popup' })
 }
 
-export const postMesssage = async (connection, { type, payload }) => {
+export const postMessage = async (connection, { type, payload }) => {
     let id = uuid()
     if(typeof connection.postMessage !== 'function') {
         connection = browser.runtime.connect({ name: 'popup' })
