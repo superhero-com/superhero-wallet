@@ -135,7 +135,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
 .cameraMsg p {
 word-break: break-word;
 }

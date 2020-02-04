@@ -1,17 +1,4 @@
-$main-font-color: #333;
 
-$main-color: #08c;
-
-$input-background:#ececec;
-$input-toolbar-background:#e0e0e0;
-$input-toolbar-color:#000;
-$primary-color:#FF0D6A;
-$input-border-color:#B300FF;
-$color-neutral-negative-1: #76818C;
-$color-neutral-negative-2: #203040;
-$color-alternative: #14CCB7;
-$color-secondary:#6948A1;
-$ledger-color:#203040;
 
 @import './variables';
 
@@ -569,7 +556,7 @@ input::-moz-focus-outer {
 }
 
 .ae-check-button { 
-  padding-left:3rem !important;
+  padding-left:2.5rem !important;
   word-break: break-word;
   text-align: left;
   margin-bottom:1rem;

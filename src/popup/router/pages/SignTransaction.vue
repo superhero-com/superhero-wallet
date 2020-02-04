@@ -887,7 +887,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
+@import '../../../common/variables';
 .balanceSpend {
     font-size:2rem;
     color:#001833;

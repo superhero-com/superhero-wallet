@@ -198,7 +198,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
 .termsText {
     width: 100%;
     white-space: pre-line;

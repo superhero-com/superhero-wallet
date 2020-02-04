@@ -213,7 +213,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
+@import '../../../common/variables';
 .date{
     background: #EDF3F7;
     padding: 0.5rem 1rem;

@@ -62,8 +62,6 @@ export default {
 </script>
 
 <style lang="scss">
-
-@import '../../../common/base';
 .settingslist  {
     padding:0 !important;
 }

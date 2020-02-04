@@ -25,6 +25,9 @@ textarea {
     color: $text-color !important;
     font-size:$font-size;
     min-height: 200px !important;
+    width:330px;
+    margin-left:auto;
+    margin-right: auto;
 }
 textarea:focus {
     border-color: $accent-color !important;

@@ -29,7 +29,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
 .fadeOut-enter-active, .fadeOut-leave-active { transition: all .5s ease-in-out; }
 .fadeOut-leave-to { opacity: 0; }
 .mainLoader { position: fixed; width: 100%; height: 100%; background-color: rgba(255,255,255,1); top: 0; z-index:6}

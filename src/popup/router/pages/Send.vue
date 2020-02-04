@@ -283,7 +283,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
 .sendContent > div:not(.sendAmount):not(.address) { 
   margin-bottom: 10px;
 }

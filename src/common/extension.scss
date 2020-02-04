@@ -1,9 +1,13 @@
 @import './variables';
 
-body, .ae-main {
+body, .ae-main, html {
     background: $bg-color !important;
     font-size:$font-size;
     font-family: 'Roboto', sans-serif !important;
+}
+.popup {
+    max-width: 480px !important;
+    margin:0 auto;
 }
 #app {
     font-family: 'Roboto', sans-serif !important;
@@ -23,6 +27,7 @@ a {
 
 .primary-text {
     color:$text-color;
+    font-size: .88rem;
 }
 .primary-title {
     color: $white-color;
@@ -47,6 +52,7 @@ a {
 .error-msg {
     color: $secondary-color !important;
     margin-top:22px;
+    font-size: .88rem;
 }
 .nav-title  {
     .title-text {

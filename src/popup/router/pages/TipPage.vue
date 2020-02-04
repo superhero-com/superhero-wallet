@@ -230,7 +230,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
+@import '../../../common/variables';
 
 .actions{
     width:50%;

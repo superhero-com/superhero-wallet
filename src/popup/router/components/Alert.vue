@@ -14,7 +14,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
+@import '../../../common/variables';
 .ae-card.primary, .ae-card.alternative {
     color:#fff !important;
 }

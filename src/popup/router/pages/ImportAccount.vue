@@ -5,9 +5,7 @@
         <Button @click="importAccount" :disabled="mnemonic && !disabled ? false : true">
             {{ $t('pages.index.importAccount') }}
         </Button>
-        <div v-if="errorMsg" class="error-msg">
-            {{ errorMsg }}
-        </div>
+        <div v-if="errorMsg" class="error-msg" v-html="errorMsg"></div>
         <Loader size="big" :loading="loading"></Loader>
     </div>
 </template>
@@ -49,11 +47,11 @@ export default {
                 } else {
                     this.loading = false
                     this.disabled = true
-                    this.errorMsg = 'Account not found.';
+                    this.errorMsg = 'Account not found. <br> Please check your seed phrase.';
                 }
             }  else {
                 this.disabled = true
-                this.errorMsg = 'Account not found.';
+                this.errorMsg = 'Account not found. <br> Please check your seed phrase.';
             }
         },
         validateMnemonic() {

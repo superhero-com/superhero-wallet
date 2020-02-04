@@ -49,7 +49,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
 .qr-wrapper {
   display: flex;
   justify-content: center;

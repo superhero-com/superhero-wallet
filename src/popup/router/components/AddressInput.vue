@@ -50,7 +50,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
 .ae-input-container{ overflow: unset;}
 .ae-toolbar { justify-content: space-between; }
 </style>
