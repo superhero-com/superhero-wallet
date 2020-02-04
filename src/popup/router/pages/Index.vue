@@ -7,12 +7,13 @@
         </div>
       </div>
     </main>
-    <Loader size="small" :loading="loading" v-bind="{'content':$t('pages.index.securingAccount')}"></Loader>
+    <Loader size="small" :loading="loading" v-bind="{ content: $t('pages.index.securingAccount') }"></Loader>
     <footer v-if="!loading">
       <div class="wrapper">
         <ae-check v-if="termsAgreedOrNot != true || termsAgreedOrNot == undefined" class="termsCheck" v-model="terms" value="1" type="checkbox">
           <div class="termsHolder">
-            {{ $t('pages.index.term1') }}<a href="#" @click="goToTermsOfService"> {{ $t('pages.index.term2') }}</a> and <a href="#" @click="goToPrivacyPolicy"> {{ $t('pages.index.term3') }}</a>
+            {{ $t('pages.index.term1') }}<a href="#" @click="goToTermsOfService"> {{ $t('pages.index.term2') }}</a> and
+            <a href="#" @click="goToPrivacyPolicy"> {{ $t('pages.index.term3') }}</a>
           </div>
         </ae-check>
         <!-- <ae-button
@@ -30,33 +31,28 @@
           @click="importAccount"
           class="importBtn"
         >{{ $t('pages.index.importPrivateKey') }}</ae-button> -->
-          <ae-check value="create" type="radio" name="walletType" v-model="walletType" :disabled=" terms[0] != 1 && termsAgreedOrNot != true ? true : false ">
-            <div class="termsHolder">
-              Generate a new wallet. <br>
-              <b>Start claiming tips!</b>
-            </div>
-          </ae-check>
-          <br><br>
-          <ae-check value="import" type="radio" name="walletType" v-model="walletType" :disabled=" terms[0] != 1 && termsAgreedOrNot != true ? true : false ">
-            <div class="termsHolder">
-              Already have an account? <br>
-              Retrieve existing account.
-            </div>
-          </ae-check>
-          <br><br>
-          <ae-button
-          face="round"
-          fill="primary"
-          class="mb-1"
-          :class="[ terms[0] != 1 && termsAgreedOrNot != true || !walletType ? 'disabled' : '' ]"
-          extend
-          @click="introContinue"
-        >{{ $t('pages.index.continue') }}</ae-button>
+        <ae-check value="create" type="radio" name="walletType" v-model="walletType" :disabled="terms[0] != 1 && termsAgreedOrNot != true ? true : false">
+          <div class="termsHolder">
+            Generate a new wallet. <br />
+            <b>Start claiming tips!</b>
+          </div>
+        </ae-check>
+        <br /><br />
+        <ae-check value="import" type="radio" name="walletType" v-model="walletType" :disabled="terms[0] != 1 && termsAgreedOrNot != true ? true : false">
+          <div class="termsHolder">
+            Already have an account? <br />
+            Retrieve existing account.
+          </div>
+        </ae-check>
+        <br /><br />
+        <ae-button face="round" fill="primary" class="mb-1" :class="[(terms[0] != 1 && termsAgreedOrNot != true) || !walletType ? 'disabled' : '']" extend @click="introContinue">{{
+          $t('pages.index.continue')
+        }}</ae-button>
 
         <!-- <ae-button face="round" extend>{{ $t('pages.index.continue') }}</ae-button> -->
       </div>
     </footer>
-<!-- 
+    <!-- 
     <ae-modal v-if="modalVisible" @close="modalVisible = false">
       <h2 class="modaltitle">{{ $t('pages.index.importWaellet') }}</h2>
 
@@ -138,7 +134,7 @@ export default {
       termsIndex: 0,
       terms: [],
       termsAgreedOrNot: false,
-      walletType: null
+      walletType: null,
     };
   },
   computed: {
@@ -159,77 +155,74 @@ export default {
       this.$router.push('/termsOfService');
     },
     introContinue() {
-      this.loading = true
-      if(this.walletType == "create") {
-        this.generwateWalletIntro()
-      } else if(this.walletType == "import") {
-        this.importAccount()
+      this.loading = true;
+      if (this.walletType == 'create') {
+        this.generwateWalletIntro();
+      } else if (this.walletType == 'import') {
+        this.importAccount();
       }
     },
     init() {
       browser.storage.local.remove('processingTx').then(() => {});
-      var newTab = false;
+      const newTab = false;
       browser.storage.local.get('allowTracking').then(result => {
         if (result.hasOwnProperty('allowTracking')) {
           this.modalAskVisible = false;
         }
       });
-     
-      browser.storage.local.get('isLogged').then(data => {
 
+      browser.storage.local.get('isLogged').then(data => {
         browser.storage.local.get('userAccount').then(async user => {
-          
           if (user.userAccount && user.hasOwnProperty('userAccount')) {
             this.$store.commit('UPDATE_ACCOUNT', user.userAccount);
-            const address = await this.$store.dispatch('generateWallet', { seed:user.userAccount.privateKey })
+            const address = await this.$store.dispatch('generateWallet', { seed: user.userAccount.privateKey });
             // if (data.isLogged && data.hasOwnProperty('isLogged')) {
-              browser.storage.local.get('subaccounts').then(subaccounts => {
-                let sub = [];
-                if (
-                  !subaccounts.hasOwnProperty('subaccounts') ||
-                  subaccounts.subaccounts == '' ||
-                  (typeof subaccounts.subaccounts == 'object' && !subaccounts.subaccounts.find(f => f.publicKey == user.userAccount.publicKey))
-                ) {
-                  sub.push({
-                    name: typeof subaccounts.subaccounts != 'undefined' ? subaccounts.subaccounts.name : 'Main account',
-                    publicKey: user.userAccount.publicKey,
-                    root: true,
-                    balance: 0,
-                  });
-                }
-                if (subaccounts.hasOwnProperty('subaccounts') && subaccounts.subaccounts.length > 0 && subaccounts.subaccounts != '') {
-                  subaccounts.subaccounts.forEach(su => {
-                    sub.push({ ...su });
-                  });
-                }
-                this.$store.dispatch('setSubAccounts', sub);
-                browser.storage.local.get('activeAccount').then(active => {
-                  if (active.hasOwnProperty('activeAccount')) {
-                    this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: sub[active.activeAccount].publicKey, index: active.activeAccount });
-                  }
+            browser.storage.local.get('subaccounts').then(subaccounts => {
+              const sub = [];
+              if (
+                !subaccounts.hasOwnProperty('subaccounts') ||
+                subaccounts.subaccounts == '' ||
+                (typeof subaccounts.subaccounts === 'object' && !subaccounts.subaccounts.find(f => f.publicKey == user.userAccount.publicKey))
+              ) {
+                sub.push({
+                  name: typeof subaccounts.subaccounts !== 'undefined' ? subaccounts.subaccounts.name : 'Main account',
+                  publicKey: user.userAccount.publicKey,
+                  root: true,
+                  balance: 0,
                 });
+              }
+              if (subaccounts.hasOwnProperty('subaccounts') && subaccounts.subaccounts.length > 0 && subaccounts.subaccounts != '') {
+                subaccounts.subaccounts.forEach(su => {
+                  sub.push({ ...su });
+                });
+              }
+              this.$store.dispatch('setSubAccounts', sub);
+              browser.storage.local.get('activeAccount').then(active => {
+                if (active.hasOwnProperty('activeAccount')) {
+                  this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: sub[active.activeAccount].publicKey, index: active.activeAccount });
+                }
               });
+            });
             // }
           }
           browser.storage.local.get('confirmSeed').then(seed => {
             if (seed.hasOwnProperty('confirmSeed') && seed.confirmSeed == false) {
               this.$router.push('/seed');
-              return;
             }
           });
           // if (data.isLogged && data.hasOwnProperty('isLogged')) {
-          if (user.userAccount && user.hasOwnProperty('userAccount')){
-              this.$store.commit('SWITCH_LOGGED_IN', true);
-              redirectAfterLogin(this);
+          if (user.userAccount && user.hasOwnProperty('userAccount')) {
+            this.$store.commit('SWITCH_LOGGED_IN', true);
+            redirectAfterLogin(this);
           }
         });
       });
     },
-    generwateWalletIntro () {
+    generwateWalletIntro() {
       this.$router.push('/intro');
     },
     importAccount() {
-      this.$router.push('/importAccount')
+      this.$router.push('/importAccount');
     },
     switchImportType(type) {
       this.importType = type;
@@ -253,7 +246,7 @@ export default {
               buttonTitle: 'Import',
               type: importType,
               title: 'Import From Private Key',
-              termsAgreed: true
+              termsAgreed: true,
             },
           });
           this.modalVisible = false;
@@ -264,14 +257,13 @@ export default {
           this.errorMsg = 'Private key is incorrect! ';
         }
       } else if (importType == 'seedPhrase') {
-        
       } else if (importType == 'keystore') {
         if (this.walletFile != '') {
-          let reader = new FileReader();
-          let context = this;
+          const reader = new FileReader();
+          const context = this;
           reader.onload = function(e) {
             try {
-              let keystore = JSON.parse(e.target.result);
+              const keystore = JSON.parse(e.target.result);
               context.inputError = {};
               if (keystore.crypto.ciphertext.length && keystore.crypto.cipher_params.nonce && keystore.crypto.kdf_params.salt.length) {
                 context.$router.push({
@@ -282,7 +274,7 @@ export default {
                     buttonTitle: 'Import',
                     type: importType,
                     title: 'Import From Keystore.json',
-                    termsAgreed: true
+                    termsAgreed: true,
                   },
                 });
                 context.modalVisible = false;
@@ -307,7 +299,7 @@ export default {
       this.modalVisible = true;
       this.inputError = {};
       this.errorMsg = 'This field is requried! ';
-    }
+    },
   },
 };
 </script>
