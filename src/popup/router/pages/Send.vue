@@ -183,18 +183,17 @@ export default {
       this.fee = fee;
     },
     async feeParams() {
-      if(this.current.token == 0) {
-        return {
-          ...this.sdk.Ae.defaults
-        }
-      }
+      if (this.current.token == 0) {
         return {
           ...this.sdk.Ae.defaults,
-          callerId:this.account.publicKey,
-          contractId:this.tokens[this.current.token].contract,
-          callData: await contractEncodeCall(this.sdk,FUNGIBLE_TOKEN_CONTRACT,"transfer",[this.account.publicKey,"0"])
-        }
-      
+        };
+      }
+      return {
+        ...this.sdk.Ae.defaults,
+        callerId: this.account.publicKey,
+        contractId: this.tokens[this.current.token].contract,
+        callData: await contractEncodeCall(this.sdk, FUNGIBLE_TOKEN_CONTRACT, 'transfer', [this.account.publicKey, '0']),
+      };
     },
     send() {
       const sender = this.subaccounts.filter(sender => sender.publicKey == this.account.publicKey);
@@ -251,31 +250,31 @@ export default {
             data: tx,
           },
         });
-      } else if (isAirGapAcc) {
-          browser.storage.local.get('airGapGeneratedKey').then(async publicKHex => {
-            const spendTx = await this.sdk.spendTx({senderId: this.account.publicKey, recipientId: receiver, amount: amount});
-            const generated = generateSignRequestUrl(this.network[this.current.network].networkId, spendTx, publicKHex.airGapGeneratedKey);
-            this.$router.push({'name': 'signTransactionByQrCode', params:{url:generated}})
-          });
-        }
-        else {
-          let tx = {
-            popup:false,
-            tx: {
-              amount:this.form.amount,
-              recipientId:receiver
-            },
-            type:'txSign'
-          }
-          this.$store.commit('SET_AEPP_POPUP',true)
-          this.$router.push({'name':'sign', params: {
-            data:tx
-          }});
-        }
+        return;
       }
-    },
-    init() {
-      const calculatedMaxValue = this.balance - this.maxFee;
+      if (isAirGapAcc) {
+        browser.storage.local.get('airGapGeneratedKey').then(async publicKHex => {
+          const spendTx = await this.sdk.spendTx({ senderId: this.account.publicKey, recipientId: receiver, amount });
+          const generated = generateSignRequestUrl(this.network[this.current.network].networkId, spendTx, publicKHex.airGapGeneratedKey);
+          this.$router.push({ name: 'signTransactionByQrCode', params: { url: generated } });
+        });
+        return;
+      }
+      const tx = {
+        popup: false,
+        tx: {
+          amount: this.form.amount,
+          recipientId: receiver,
+        },
+        type: 'txSign',
+      };
+      this.$store.commit('SET_AEPP_POPUP', true);
+      this.$router.push({
+        name: 'sign',
+        params: {
+          data: tx,
+        },
+      });
     },
     init() {
       const calculatedMaxValue = this.balance - this.maxFee;
