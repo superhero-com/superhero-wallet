@@ -238,11 +238,11 @@ function getRules() {
     },
     {
       test: /\.css$/,
-      use: [MiniCssExtractPlugin.loader, 'css-loader'],
+      use: [MiniCssExtractPlugin.loader, { loader: 'css-loader', options: { minimize:true } }],
     },
     {
       test: /\.scss$/,
-      use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+      use: [MiniCssExtractPlugin.loader,  { loader: 'css-loader', options: { minimize:true } },  { loader: 'sass-loader', options: { minimize:true } }],
     },
     {
       test: /\.sass$/,

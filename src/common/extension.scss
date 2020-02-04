@@ -23,6 +23,7 @@ body, .ae-main, html {
 
 a {
     color: $accent-color !important;
+    text-decoration: underline;
 }
 
 .primary-text {
@@ -41,6 +42,7 @@ a {
 .regular-text {
     font-size:$font-size;
     text-align: left;
+    font-weight: normal;
 }
 .logo{
     margin:60px 0;
@@ -57,6 +59,7 @@ a {
 .nav-title  {
     .title-text {
         margin-left:15px;
+        font-weight: lighter;
     }
     .arrow-back {
         cursor: pointer;

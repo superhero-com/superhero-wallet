@@ -146,6 +146,7 @@ export default {
       if(this.$router.currentRoute.path !== '/') {
         this.showNavigation = true
       } 
+      console.log(this.$router.currentRoute.meta.title)
       this.title = this.$router.currentRoute.meta.title
       browser.storage.local.get('language').then((data) => {
         this.language = langs[data.language];
@@ -182,21 +183,24 @@ export default {
       } else {
         this.hideLoader()
       }
+      this.setMenuSlots()
       window.addEventListener('resize', () => {
-        
-        if(window.innerWidth <= 480) {
-          this.menuSlot = "mobile-left"
-          this.mobileRight = "mobile-right"
-        }else {
-          this.menuSlot = "default"
-          this.mobileRight = "default"
-        }
+        this.setMenuSlots()
       });
   },
   mounted: function mounted () {
     this.dropdown.settings = false;
   },
   methods: {
+    setMenuSlots() {
+      if(window.innerWidth <= 480) {
+        this.menuSlot = "mobile-left"
+        this.mobileRight = "mobile-right"
+      }else {
+        this.menuSlot = "default"
+        this.mobileRight = "default"
+      }
+    },
     checkSdkReady() {
       if(!process.env.RUNNING_IN_POPUP) {
         this.checkSDKReady = setInterval(() => {
@@ -391,7 +395,7 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 .ae-header.logged > * { color: #717C87; }
 .logo_top { display: flex; flex-flow: row wrap; justify-content: center; vertical-align: center; }
 .logo_top p { color: #FF0D6A; font-size: 20px; line-height: 12px; }
-.popup { color: #555; padding: 4px 14px; text-align: center; font-size: 16px; word-break: break-all; word-wrap: break-word; }
+.popup { color: #555; padding: 4px 25px; text-align: center; font-size: 16px; word-break: break-all; word-wrap: break-word; }
 #network.dropdown > ul { min-width: 250px; }
 #network > button { max-width: 80px; }
 #network li .status::before { content: ''; display: inline-block; width: 8px; height: 8px; -moz-border-radius: 7.5px; -webkit-border-radius: 7.5px; border-radius: 7.5px; margin-right: 5px;
