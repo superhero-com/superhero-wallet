@@ -225,7 +225,8 @@
             "seedPhrase": "Seed phrase",
             "enterSeedPhrase": "Enter your seed phrase. ",
             "continueButton": "Continue",
-            "continue": "Continue"
+            "continue": "Continue",
+            "importAccount": "Import Account"
         },
         "ledgerSetup": {
             "ledgerConnectSetup": "How to connect from Ledger",

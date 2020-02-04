@@ -186,3 +186,4 @@ payable contract WaelletTipAnyBasic =
       repaid        = false,
       amount        = Call.value,
       note          = note }`
+

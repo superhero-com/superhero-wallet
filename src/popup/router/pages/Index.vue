@@ -4,7 +4,7 @@
     <main>
       <div class="wrapper center">
         <Logo class="logo" /> 
-        <p class="primary-title">{{ $t('pages.index.heading') }} <span class="secondary-text"> {{ $t('pages.index.aeid') }} </span></p>
+        <p class="primary-title">{{ $t('pages.index.heading') }} <span class="secondary-text"> {{ $t('pages.appVUE.aeid') }} </span></p>
         <CheckBox v-if="!termsAgreedOrNot || termsAgreedOrNot == undefined" v-model="terms">
           <div class="primary-text">
             {{ $t('pages.index.term1') }} <u><a @click="goToTermsAndConditions"> {{ $t('pages.index.termsAndConditions') }} </a></u>

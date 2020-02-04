@@ -17,6 +17,7 @@ import ClaimTIpButton from './components/ClaimTipButton';
 import RecentTransactions from './components/RecentTransactions'
 import Button from './components/Button'
 import CheckBox from './components/CheckBox'
+import Textarea from './components/Textarea'
 
 import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from 'vue-qrcode-reader'
 import ModalComponent from './components/Modal';
@@ -51,6 +52,7 @@ Vue.component('ClaimTipButton', ClaimTIpButton);
 Vue.component('RecentTransactions', RecentTransactions);
 Vue.component('Button',Button);
 Vue.component('CheckBox',CheckBox);
+Vue.component('Textarea', Textarea)
 
 let router = new VueRouter({
   routes,

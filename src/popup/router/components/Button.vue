@@ -8,8 +8,6 @@
 export default {
     props: {
         disabled: Boolean
-    },
-    methods: {
     }
 }
 </script>

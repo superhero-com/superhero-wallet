@@ -33,6 +33,26 @@ a {
 .secondary-text {
     color: $secondary-color;
 }
+.regular-text {
+    font-size:$font-size;
+    text-align: left;
+}
 .logo{
     margin:60px 0;
+}
+.ae-header {
+    background: $nav-bg-color !important;
+    border-color: $nav-border-color !important;
+}
+.error-msg {
+    color: $secondary-color !important;
+    margin-top:22px;
+}
+.nav-title  {
+    .title-text {
+        margin-left:15px;
+    }
+    .arrow-back {
+        cursor: pointer;
+    }
 }

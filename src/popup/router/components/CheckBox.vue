@@ -9,17 +9,17 @@ export default {
     props:['value', 'val'],
     data () {
         return {
-        checkedProxy: false
+            checkedProxy: false
         }
     },
     computed: {
         checked: {
-        get () {
-            return this.value
-        },
-        set (val) {
-            this.checkedProxy = val
-        }
+            get () {
+                return this.value
+            },
+            set (val) {
+                this.checkedProxy = val
+            }
         }
     },
     methods: {

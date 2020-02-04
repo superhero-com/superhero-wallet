@@ -3,11 +3,11 @@
       <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''" v-if="showNavigation">
 
         <!-- login screen header -->
-        <div class="logo_top" :slot="menuSlot" v-if="!isLoggedIn">
-          <img :src="logo_top" alt="">
-          <p>
-            {{ $t('pages.appVUE.systemName') }} 
-            <span class="extensionVersion extensionVersionTop">{{extensionVersion}}</span></p>
+        
+        <div class="nav-title" :slot="menuSlot" v-if="!isLoggedIn">
+          <p v-if="title" class="flex flex-align-center">
+            <Arrow class="arrow-back" @click="goBack" /> <span class="title-text"> {{ title }} </span>
+          </p>
         </div>
           <div id="settings" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="menuSlot" direction="left" ref="settings">
             <button v-on:click="toggleDropdown">
@@ -17,19 +17,16 @@
               <ul v-if="dropdown.settings" class="dropdown-holder">
                 <li>
                   <ae-button @click="topUp">
-                    <!-- <ae-icon  /> -->
                       {{ $t('pages.appVUE.topUp') }}
                   </ae-button>
                 </li>
                 <li >
                   <ae-button @click="withdraw">
-                    <!-- <ae-icon  /> -->
                     {{ $t('pages.appVUE.withdraw') }}
                   </ae-button>
                 </li>
                 <li >
                   <ae-button @click="transactions">
-                    <!-- <ae-icon  /> -->
                     {{ $t('pages.appVUE.myTransactions') }}
                   </ae-button>
                 </li>
@@ -93,9 +90,12 @@ import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT
 import { start, postMesssage, readWebPageDom } from './utils/connection'
 import { langs,fetchAndSetLocale } from './utils/i18nHelper'
 import { computeAuctionEndBlock, computeBidFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers'
+import Arrow from '../icons/arrow.svg';
 
 export default {
-  
+  components: {
+    Arrow
+  },
   data () {
     return {
       logo_top: browser.runtime.getURL('../../../icons/icon_48.png'),
@@ -116,17 +116,19 @@ export default {
       checkSDKReady:null,
       connectError:false,
       onAccount:false,
-      showNavigation: false
+      showNavigation: false,
+      title: ''
     }
   },
   computed: {
     ...mapGetters (['account', 'current', 'network', 'popup', 'isLoggedIn', 'subaccounts', 'activeAccount', 'activeNetwork', 'balance', 'activeAccountName', 'background', 'sdk', 'aeppPopup']),
     extensionVersion() {
       return 'v.' + browser.runtime.getManifest().version 
-    }
+    },
   },
   watch:{
     $route (to, from){
+        this.title = to.meta.title || ''
         if(to.path == "/account") {
             this.onAccount = true
         } else {
@@ -141,6 +143,10 @@ export default {
     }
 } ,
   created: async function () {
+      if(this.$router.currentRoute.path !== '/') {
+        this.showNavigation = true
+      } 
+      this.title = this.$router.currentRoute.meta.title
       browser.storage.local.get('language').then((data) => {
         this.language = langs[data.language];
         this.$store.state.current.language = data.language;
@@ -343,6 +349,13 @@ export default {
     },
     showConnectError() {
       this.connectError = true
+    },
+    goBack() {
+      if(this.isLoggedIn) {
+        this.$router.push('/account')
+      } else {
+        this.$router.push('/')
+      }
     }
   },
   beforeDestroy() {
