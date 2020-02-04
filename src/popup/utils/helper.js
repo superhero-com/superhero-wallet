@@ -543,6 +543,7 @@ const contractCall = async ({ instance, method,  params = [], decode = false, as
     let call
     try {
         if(params.length) {
+            browser.storage.local.set({ pendingTip: true }).then(() => { });
             call = await instance.methods[method](...params)
         } else {
             call = await instance.methods[method]()
@@ -555,9 +556,22 @@ const contractCall = async ({ instance, method,  params = [], decode = false, as
             throw e.message
         }
     }
+    let store = await import('../../store');
+        store = store.default
+    let res = await store.state.sdk.poll(call.hash)
+    if (res) {
+        await browser.storage.local.remove('pendingTip');
+        let router = await import('../../../src/popup/router')
+            router = router.default
+        return router.push({ 'name': 'success-tip', params: {
+            amount: params[2].amount, domain: params[0]
+        }})
+    } else {
+        await browser.storage.local.remove('pendingTip');
+    }
 
     return async ? (decode ? call.decodedResult : call ) : params.length ? instance.methods[method](...params) :  instance.methods[method]()
-}
+};
 
 const checkContractAbiVersion = ({ address, middleware }, test = false) => {
     return new Promise((resolve, reject) => {

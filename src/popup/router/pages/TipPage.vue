@@ -161,17 +161,13 @@ export default {
                     address: this.network[this.current.network].tipContract,
                     params: [ domain, note ],
                     method: 'tip',
-                    options: { amount },
+                    options: { amount, waitMined: false },
                     contractType:'tip'
                 },
                 callType: 'pay',
                 type:'contractCall',
             }
 
-            // return this.$router.push({ 'name': 'success-tip', params: {
-            //             amount,
-            //             domain
-            //         }})
             
             this.$store.commit('SET_AEPP_POPUP',true)
             return this.$router.push({'name':'sign', params: {

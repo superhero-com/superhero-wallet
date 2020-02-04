@@ -627,10 +627,11 @@ export default {
                 if(!this.contractInstance) {
                     await this.setContractInstance(this.data.tx.source, this.data.tx.address, this.data.tx.options)
                 }
-                call = await this.$helpers.contractCall({ instance:this.contractInstance, method:this.data.tx.method, params:[...this.data.tx.params, options] })
+                call = this.$helpers.contractCall({ instance:this.contractInstance, method:this.data.tx.method, params:[...this.data.tx.params, options] })
                 this.setTxInQueue(call.hash)
-                let decoded = await call.decode()
-                call.decoded = decoded
+
+                // let decoded = await call.decode()
+                // call.decoded = decoded
                 if (this.data.popup) {
                     let { decode, ...res} = call
                     this.sending = true
@@ -659,10 +660,11 @@ export default {
                     const domain = this.data.tx.params[0]
                     const amount = this.data.tx.options.amount
                     this.$store.commit('SET_AEPP_POPUP',false)
-                    return this.$router.push({ 'name': 'success-tip', params: {
-                        amount,
-                        domain
-                    }})
+                    this.$router.push('/account')
+                    // return this.$router.push({ 'name': 'success-tip', params: {
+                    //     amount,
+                    //     domain
+                    // }})
                 } else {    
                     this.redirectInExtensionAfterAction()
                 }

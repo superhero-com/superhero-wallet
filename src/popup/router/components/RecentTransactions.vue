@@ -8,6 +8,9 @@
         </div>
         
         <div v-if="transactions.latest.length && !loading">
+            <div v-if="newTip" style="padding: 10px;font-size: 16px;text-align: center;">
+                <ae-icon fill="primary" name="reload" /> New Tip Pending..
+            </div>
             <ae-list class="transactionList">
                 <TransactionItem :recent="true" :dark="true" v-for="transaction in transactions.latest" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
             </ae-list>
@@ -29,7 +32,8 @@ export default {
     data() {
         return {
             polling:null,
-            loading: true
+            loading: true,
+            newTip: false
         }
     },
     computed: {
@@ -43,6 +47,13 @@ export default {
             let transactions = await this.$store.dispatch('getTransactionsByPublicKey',{ publicKey:this.account.publicKey,limit:3 })
             this.loading = false
             this.$store.dispatch('updateLatestTransactions',transactions);
+            await browser.storage.local.get('pendingTip').then(res => {
+                if (res.hasOwnProperty('pendingTip') && res.pendingTip) {
+                    this.newTip = true;
+                } else {
+                    this.newTip = false;
+                }
+            });
         },
         pollData() {
             this.polling = setInterval(async () => {

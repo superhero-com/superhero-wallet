@@ -107,6 +107,7 @@ export default {
           currencies: false,
       },
       backup_seed_notif: false,
+      pendingTip: false,
       howToClaimURL: 'https://forum.aeternity.com/t/receive-and-tip-the-best-corona-news/5957',
     }
   },
@@ -136,7 +137,6 @@ export default {
     }
   },
   async created () {
-    // browser.storage.local.remove('backed_up_Seed');
     await browser.storage.local.get('backed_up_Seed').then(res => {
       if(!res.backed_up_Seed) {
         this.backup_seed_notif = true;
