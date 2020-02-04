@@ -161,7 +161,7 @@ export default {
                     address: this.network[this.current.network].tipContract,
                     params: [ domain, note ],
                     method: 'tip',
-                    options: { amount },
+                    options: { amount, waitMined: false },
                     contractType:'tip'
                 },
                 callType: 'pay',

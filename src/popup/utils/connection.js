@@ -1,5 +1,6 @@
 import uuid from 'uuid';
 global.browser = require('webextension-polyfill');
+import store from '../../store';
 
 export const start = async (browser) =>  {
     
@@ -8,6 +9,10 @@ export const start = async (browser) =>  {
 
 export const postMesssage = async (connection, { type, payload }) => {
     let id = uuid()
+    if(typeof connection.postMessage !== 'function') {
+        connection = browser.runtime.connect({ name: 'popup' })
+        store.commit( 'SET_BACKGROUND', connection )
+    }
     connection.postMessage({ type, payload, uuid:id  })
     return new Promise((resolve, reject) => {
         connection.onMessage.addListener((msg) => {

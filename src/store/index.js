@@ -5,7 +5,7 @@ import { getters } from './getters';
 import mutations from './mutations';
 import actions from './actions';
 import { POPUP_PROPS } from '../popup/utils/popup-messages';
-import { networks } from '../popup/utils/constants';
+import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
 
 Vue.use(Vuex);
 
@@ -19,7 +19,7 @@ export default new Vuex.Store({
     wallet: [],
     balance: 0,
     current: {
-      network: 'Mainnet',
+      network: DEFAULT_NETWORK,
       language: '',
       token: 0
     },
