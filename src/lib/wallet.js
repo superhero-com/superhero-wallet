@@ -120,6 +120,7 @@ export default {
     },
     async initContractInstances() {
       store.commit('SET_NODE_STATUS', 'connected')
+      setTimeout(() => store.commit('SET_NODE_STATUS', ''), 2000 )
       // init tipping
       try {
         await store.commit('SET_TIPPING', 
@@ -127,7 +128,7 @@ export default {
         )
       } catch(e) { console.log(e) }
 
-      setTimeout(() => store.commit('SET_NODE_STATUS', ''), 2000 )
+      
     },
     redirectAfterLogin(cb){
         if (process.env.RUNNING_IN_POPUP) {
