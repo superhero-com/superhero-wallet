@@ -47,11 +47,13 @@ export default {
             let transactions = await this.$store.dispatch('getTransactionsByPublicKey',{ publicKey:this.account.publicKey,limit:3 })
             this.loading = false
             this.$store.dispatch('updateLatestTransactions',transactions);
-            await browser.storage.local.get('pendingTip').then(res => {
+            browser.storage.local.get('pendingTip').then(res => {
+                console.log(res)
                 if (res.hasOwnProperty('pendingTip') && res.pendingTip) {
                     this.newTip = true;
                 } else {
                     this.newTip = false;
+                    browser.storage.local.remove('pendingTip');
                 }
             });
         },

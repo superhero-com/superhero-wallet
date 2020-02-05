@@ -1,18 +1,26 @@
 <template>
   <ae-main @click.native="hideMenu" :class="onAccount ? 'ae-main-account' : ''">
       <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''">
-
+        
         <!-- login screen header -->
-        <div class="logo_top" :slot="menuSlot" v-if="!isLoggedIn">
-          <img :src="logo_top" alt="">
-          <p>
-            {{ $t('pages.appVUE.systemName') }} 
-            <span class="extensionVersion extensionVersionTop">{{extensionVersion}}</span></p>
-        </div>
-          <div id="settings" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="menuSlot" direction="left" ref="settings">
-            <button v-on:click="toggleDropdown">
-              <ae-icon class="dropdown-button-icon" name="burger" slot="button" />
-            </button>
+          <div class="logo_top" :slot="menuSlot" v-if="!isLoggedIn">
+            <img :src="logo_top" alt="">
+            <p>
+              {{ $t('pages.appVUE.systemName') }} 
+              <span class="extensionVersion extensionVersionTop">{{extensionVersion}}</span></p>
+          </div>
+          
+          <div style="position: absolute; left: 50%; font-size: 16px; margin-left: -50px; color: #F1F1F1;" :slot="menuSlot" v-if="isLoggedIn">
+            Corona Wallet
+          </div>
+          <div style="height: 22px;" id="settings" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="menuSlot" direction="left" ref="settings">
+              <svg v-on:click="toggleDropdown" xmlns="http://www.w3.org/2000/svg" width="26" height="22" viewBox="0 0 26 22">
+                <g id="Group_28" data-name="Group 28" transform="translate(-241 -13)">
+                  <rect id="Rectangle_2" data-name="Rectangle 2" width="26" height="2" rx="1" transform="translate(241 13)" fill="#f1f1f1"/>
+                  <rect id="Rectangle_3" data-name="Rectangle 3" width="26" height="2" rx="1" transform="translate(241 23)" fill="#f1f1f1"/>
+                  <rect id="Rectangle_4" data-name="Rectangle 4" width="26" height="2" rx="1" transform="translate(241 33)" fill="#f1f1f1"/>
+                </g>
+              </svg>
             <transition name="slide-fade">
               <ul v-if="dropdown.settings" class="dropdown-holder">
                 <li>
@@ -38,7 +46,15 @@
           </div>
           
           <div id="account" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="mobileRight" direction="right" ref="account">
-            <button v-on:click="toggleDropdown">
+            <svg style="margin: 6px;" xmlns="http://www.w3.org/2000/svg" width="17.437" height="22" viewBox="0 0 17.437 22">
+              <g id="bell" transform="translate(-53.013 0)">
+                <path id="Path_236" data-name="Path 236" d="M184.9,465.044a3.649,3.649,0,0,0,6.68,0Z" transform="translate(-126.512 -445.223)" fill="#f1f1f1"/>
+                <path id="Path_237" data-name="Path 237" d="M199.079,2.308a8.208,8.208,0,0,1,2.8.491V2.691A2.694,2.694,0,0,0,199.191,0h-.223a2.694,2.694,0,0,0-2.691,2.691V2.8A8.225,8.225,0,0,1,199.079,2.308Z" transform="translate(-137.348)" fill="#f1f1f1"/>
+                <path id="Path_238" data-name="Path 238" d="M69.788,93.513H53.676a.652.652,0,0,1-.647-.482.593.593,0,0,1,.345-.682,3.3,3.3,0,0,0,1.04-1.354A15.046,15.046,0,0,0,55.5,84.8a6.24,6.24,0,0,1,12.466-.024c0,.008,0,.016,0,.024a15.046,15.046,0,0,0,1.085,6.191,3.3,3.3,0,0,0,1.04,1.354.592.592,0,0,1,.345.682A.652.652,0,0,1,69.788,93.513Zm.31-1.16h0Z" transform="translate(0 -75.11)" fill="#f1f1f1"/>
+              </g>
+            </svg>
+
+            <button style="width: 38px; height: 38px; padding: 0; margin-top: 6px;margin-bottom: 6px;" v-on:click="toggleDropdown">
               <ae-identicon id="identIcon" class="dropdown-button-icon" v-bind:address="this.account.publicKey" size="base" slot="button" />
             </button>
             <transition name="slide-fade">
@@ -71,6 +87,7 @@
             </transition>
           </div>
       </ae-header>
+      <hr style="margin: 0; background: #3a3a47; height: 2px; border: 0;">
     <router-view :key="$route.fullPath"></router-view>
     <span class="extensionVersion " v-if="isLoggedIn && !onAccount">
       {{ $t('pages.appVUE.systemName') }} 
@@ -113,6 +130,7 @@ export default {
       checkPendingTxInterval:null,
       menuSlot:"mobile-left",
       mobileRight: "mobile-right",
+      defaulT: "default",
       checkSDKReady:null,
       connectError:false,
       onAccount:false
@@ -175,9 +193,11 @@ export default {
         if(window.innerWidth <= 480) {
           this.menuSlot = "mobile-left"
           this.mobileRight = "mobile-right"
+          this.defaulT = "default"
         }else {
           this.menuSlot = "default"
           this.mobileRight = "default"
+          this.defaulT = "default"
         }
       });
   },
@@ -356,6 +376,9 @@ export default {
 }
 .desktop-right { width: 100%; display: flex; justify-content: space-evenly; }
 .desktop-right #account { position: relative; left: 0; top: 0; margin-left: 0; margin-top: 0; }
+.ae-header header {
+  height: 50px !important
+}
 .ae-header header .title { display: none; }
 html { min-width: 357px; min-height: 600px; background-color: #f5f5f5; }
 p { font-weight: bolder; margin-left: 3px; }
@@ -364,8 +387,8 @@ input:focus { border-bottom: 1px solid #DDD; }
 button:focus { outline: none; }
 button { background: none; border: none; color: #717C87; cursor: pointer; transition: all 0.2s; }
 .pageTitle { margin: 0 0 10px; }
-.ae-header { border-bottom: 1px solid #EEE; margin-bottom: 10px; }
-.ae-header.logged { background: #001833; }
+.ae-header { margin-bottom: 0 !important; }
+.ae-header.logged { background: $bg-color; box-shadow: #000000 0px 2px 3px; height: 50px; }
 .ae-header.logged.aeppPopup { margin-bottom:0 !important; }
 .ae-header.logged > * { color: #717C87; }
 .logo_top { display: flex; flex-flow: row wrap; justify-content: center; vertical-align: center; }
@@ -376,22 +399,11 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 #network li .status::before { content: ''; display: inline-block; width: 8px; height: 8px; -moz-border-radius: 7.5px; -webkit-border-radius: 7.5px; border-radius: 7.5px; margin-right: 5px;
                 border: 1px solid #DDD; background-color: #EFEFEF; }
 #network li .status.current::before { border-color: green; background-color: greenyellow; }
-// #account { position: absolute; left: 50%; margin-left: -60px; top: 50%; margin-top: -24px; }
-// #account  > button { width: 120px; }
-#account .dropdown-button-icon.ae-identicon.base { height: 1.8rem; margin-bottom: 3px; vertical-align: top; 
-  -webkit-box-shadow: 0 0 0 2px #ff0d6a;  
-  box-shadow: 0 0 0 2px #ff0d6a;
-  border: .125rem solid transparent;
-  width: 2.625rem!important;
-  height: 2.625rem!important;
-  vertical-align: middle;
-  margin: 0;
-  margin-top: 4px;
-}
 #account .ae-dropdown-button .dropdown-button-name { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .subAccountInfo { margin-right:auto; margin-bottom:0 !important; max-width: 155px; }
 #network .subAccountInfo { max-width: 195px; }
 .subAccountIcon, .identicon { margin-right: 10px; }
+.ae-identicon.base { height: 100% !important; width: 100% !important;}
 .subAccountName { text-align: left; color: #000; text-overflow: ellipsis; overflow: hidden; font-weight:bold; margin-bottom:0 !important; white-space: nowrap; }
 .subAccountBalance { font-family: monospace; margin-bottom:0 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px;}
 .name-pending { width:24px !important; height:24px !important; margin-right:5px; font-size:.8rem; }
@@ -430,7 +442,7 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 .dropdown li > .ae-button { width: 100%; }
 .dropdown > .ae-button { text-align: center; }
 .dropdown > .ae-button, .dropdown .ae-dropdown-button { color: #717C87; vertical-align: top; height: 50px; width: 50px; display: inline-block !important; }
-.dropdown .dropdown-button-icon { font-size: 2.5rem; margin: 0 auto 5px; display: block; }
+.dropdown .dropdown-button-icon { font-size: 2.5rem; height: 100%;}
 .dropdown .dropdown-button-name { display: block; margin: 0 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dropdown > button:hover, .dropdown > .ae-dropdown-button:hover { color: #FFF; }
 .slide-fade-enter-active { transition: all .3s ease; }

@@ -560,14 +560,14 @@ const contractCall = async ({ instance, method,  params = [], decode = false, as
         store = store.default
     let res = await store.state.sdk.poll(call.hash)
     if (res) {
-        await browser.storage.local.remove('pendingTip');
+        browser.storage.local.remove('pendingTip')
         let router = await import('../../../src/popup/router')
             router = router.default
         return router.push({ 'name': 'success-tip', params: {
             amount: params[2].amount, domain: params[0]
         }})
     } else {
-        await browser.storage.local.remove('pendingTip');
+        browser.storage.local.remove('pendingTip')
     }
 
     return async ? (decode ? call.decodedResult : call ) : params.length ? instance.methods[method](...params) :  instance.methods[method]()

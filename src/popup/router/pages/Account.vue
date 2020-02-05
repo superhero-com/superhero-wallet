@@ -1,34 +1,14 @@
 <template>
-  <div class="height-100">
+  <div style="background:#16161D;" class="height-100">
     <div class="popup account-popup">
 
-    <div v-show="backup_seed_notif" class="backup_seed_notif float">
-      <p><ae-icon name="shield" class="fa fa-warning" /><span>!</span> You need to BACK UP your SEED PHRASE!</p>
-      <button class="back-up-button" @click="navigateToBackUpSeed">BACK UP NOW</button>
-    </div>
+      <div v-show="backup_seed_notif" class="backup_seed_notif">
+        <span>
+          You need to <a @click="navigateToBackUpSeed" style="text-decoration: underline;">backup</a> your seed phrase
+        </span>
+      </div>
+      <ClaimTipButton :styling="buttonstyle"></ClaimTipButton>
 
-      <!-- <div class="currenciesgroup">
-        <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
-          <div class="inputGroup-currencies">
-            <div class="input-group-icon"><ae-icon name="flip"/></div>
-              <div class="input-group-area">
-                <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
-                  {{ (this.current.currency && this.current.currencyRate ? currencyFullName +' '+ '('+this.current.currency.toUpperCase()+')' +' - '+ (this.current.currencyRate*tokenBalance).toFixed(3) +' '+ currencySign : 'Select currency') }}
-                  <ae-icon style="margin:0" name="left-more"/>
-                </ae-button>
-              </div>
-          </div>
-          <ul class="sub-dropdown">
-            <li class="single-currency" v-for="(index, item) in allCurrencies" v-bind:key="index">
-              <ae-button v-on:click="switchCurrency(index, item)" class="" :class="current.currency == item ? 'current' : ''">
-                  {{ item.toUpperCase() }}
-                  <i class="arrowrightCurrency"></i>
-              </ae-button>
-            </li>
-          </ul>
-        </li>
-      </div> -->
-      <ClaimTipButton ></ClaimTipButton>
       <div class="flex flex-align-center flex-justify-between account-info">
         <div class="text-left account-addresses">
           <span class="account-name">{{ activeAccountName }}</span>
@@ -43,45 +23,22 @@
             </ae-button>
         </div>
       </div>
-
-     
-      <!-- <ae-card :fill="cardColor">
-        <template slot="avatar">
-          <ae-identicon :address="account.publicKey" />
-          <ae-input-plain fill="white" :placeholder="$t('pages.account.accountName')" @keyup.native="setAccountName" :value="activeAccountName"  />
-        </template>
-        <template slot="header">
-          <ae-text fill="white" face="mono-base">{{tokenBalance}} AE</ae-text>
-        </template>
-        <ae-address class="accountAddress" :value="account.publicKey" copyOnClick enableCopyToClipboard length="medium" gap=0 />
-        <ae-toolbar :fill="cardColor" align="right" slot="footer">
-          <ae-button face="toolbar" v-clipboard:copy="account.publicKey" @click="copy">
-            <ae-icon name="copy" />
-            {{ $t('pages.account.copy') }}
-          </ae-button>
-        </ae-toolbar>
-      </ae-card> -->
-      
-      
       
     </div> 
-    <div class="height-100 recent-tx">
+    <!-- <div class="height-100 recent-tx">
         <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
         <RecentTransactions>
           <br>
           <ae-button face="round" fill="primary" extend @click="navigateTips" >{{ $t('pages.account.tipSomeone') }}</ae-button>
           
-          <ae-text class="center how-to-url">
-            <a @click="openHowToClaimURL">{{ $t('pages.account.howToClaim') }}</a>
-          </ae-text>
         </RecentTransactions>
-        
-    </div>
+     
+    </div> -->
+    
   </div>
 </template>
 
 <script>
-
 import { mapGetters } from 'vuex';
 import { setInterval, setTimeout, setImmediate, clearInterval } from 'timers';
 import { request } from 'http';
@@ -90,11 +47,11 @@ import { FUNGIBLE_TOKEN_CONTRACT, TOKEN_REGISTRY_ADDRESS, TOKEN_REGISTRY_CONTRAC
 
 export default {
   name: 'Account',
-  data () {
+  data() {
     return {
       polling: null,
-      accountName:'',
-      pollingTransaction:null,
+      accountName: '',
+      pollingTransaction: null,
       toUsd: null,
       toEur: null,
       timer: '',
@@ -104,87 +61,99 @@ export default {
       currencySign: '',
       currencyFullName: '',
       dropdown: {
-          currencies: false,
+        currencies: false,
       },
       backup_seed_notif: false,
       pendingTip: false,
-      howToClaimURL: 'https://forum.aeternity.com/t/receive-and-tip-the-best-corona-news/5957',
-    }
+      buttonstyle: '',
+    };
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'network', 'current','transactions','subaccounts','wallet','activeAccountName','activeAccount','sdk','tokens','tokenSymbol','tokenBalance', 'popup','isLedger', 'tokenRegistry']),
-    publicKey() { 
-      return this.account.publicKey; 
+    ...mapGetters([
+      'account',
+      'balance',
+      'network',
+      'current',
+      'transactions',
+      'subaccounts',
+      'wallet',
+      'activeAccountName',
+      'activeAccount',
+      'sdk',
+      'tokens',
+      'tokenSymbol',
+      'tokenBalance',
+      'popup',
+      'isLedger',
+      'tokenRegistry',
+    ]),
+    publicKey() {
+      return this.account.publicKey;
     },
     watchBalance() {
       return this.balance;
     },
     watchToken() {
-      return this.current.token
+      return this.current.token;
     },
     cardColor() {
-      return this.isLedger ? 'neutral' : 'primary'
+      return this.isLedger ? 'neutral' : 'primary';
     },
-    currs(){
+    currs() {
       browser.storage.local.get('allCurrencies').then(resall => {
-        let allCurrencies = JSON.parse(resall.allCurrencies)
+        let allCurrencies = JSON.parse(resall.allCurrencies);
         this.allCurrencies = allCurrencies;
         return allCurrencies;
       });
     },
     roundedAmount() {
-      return this.tokenBalance.toFixed(3)
-    }
+      return this.tokenBalance.toFixed(3);
+    },
   },
-  async created () {
+  async created() {
     await browser.storage.local.get('backed_up_Seed').then(res => {
-      if(!res.backed_up_Seed) {
+      if (!res.backed_up_Seed) {
         this.backup_seed_notif = true;
-        setTimeout(() => this.backup_seed_notif = false, 3000)
+        this.buttonstyle = 'margin-top: 2rem;';
+        setTimeout(() => (this.backup_seed_notif = false), 3000);
       } else {
-        this.backup_seed_notif = false
+        this.backup_seed_notif = false;
       }
     });
     currencyConv(this);
   },
-  mounted(){
-  }, 
+  mounted() {},
   methods: {
-    copy(){
-      this.$store.dispatch('popupAlert', { name: 'account', type: 'publicKeyCopied'});
+    copy() {
+      this.$store.dispatch('popupAlert', { name: 'account', type: 'publicKeyCopied' });
     },
     showAllTranactions() {
-        this.$router.push('/transactions');
+      this.$router.push('/transactions');
     },
-    navigateReceive () {
+    navigateReceive() {
       this.$router.push('/receive');
     },
     navigateTips() {
       this.$router.push('/tip');
     },
     setAccountName(e) {
-      this.$store.dispatch('setAccountName', e.target.value)
-      .then(() => {
-         browser.storage.local.set({ subaccounts: this.subaccounts}).then(() => {});
+      this.$store.dispatch('setAccountName', e.target.value).then(() => {
+        browser.storage.local.set({ subaccounts: this.subaccounts }).then(() => {});
       });
     },
     showTransaction() {
-      browser.tabs.create({url:this.popup.data,active:false});
-    },
-    openHowToClaimURL() {
-      browser.tabs.create({url: this.howToClaimURL, active: true});
+      browser.tabs.create({ url: this.popup.data, active: false });
     },
     async toggleDropdown(event, parentClass) {
-        if (typeof parentClass == 'undefined') {
-            parentClass = '.currenciesgroup';
-        }
-        let dropdownParent = event.target.closest(parentClass);
-        this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id]
-
+      if (typeof parentClass == 'undefined') {
+        parentClass = '.currenciesgroup';
+      }
+      let dropdownParent = event.target.closest(parentClass);
+      this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
     },
     async switchCurrency(index, item) {
-      browser.storage.local.set({currency: item}).then(() => {
-        browser.storage.local.set({currencyRate: index}).then(() => {
+      browser.storage.local.set({ currency: item }).then(() => {
+        browser.storage.local.set({ currencyRate: index }).then(() => {
           switch (item) {
             case 'aud':
               this.currencySign = '$';
@@ -324,14 +293,14 @@ export default {
       });
     },
     navigateToBackUpSeed() {
-      this.$router.push('/securitySettings')
-    }
+      this.$router.push('/securitySettings');
+    },
   },
-  beforeDestroy () {
-    clearInterval(this.polling)
-    clearInterval(this.pollingTransaction)
+  beforeDestroy() {
+    clearInterval(this.polling);
+    clearInterval(this.pollingTransaction);
   },
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -343,16 +312,16 @@ export default {
   font-weight: normal;
 }
 .transactionHistory {
-  margin-top:1rem;
+  margin-top: 1rem;
   width: 100%;
 }
-.inputGroup-currencies{
+.inputGroup-currencies {
   display: flex;
   border-collapse: collapse;
   width: 100%;
   margin: 10px 0;
 }
-.inputGroup-currencies > div{
+.inputGroup-currencies > div {
   font-weight: bold;
   border-bottom: 2px solid #ff0d6a;
   vertical-align: middle;
@@ -361,15 +330,15 @@ export default {
   border-bottom-right-radius: 0;
   text-align: center;
 }
-.input-group-icon{
+.input-group-icon {
   background: #ff0d6a;
   color: #fff;
   padding: 0 12px;
 }
-.input-group-area{
-  width:100%;
+.input-group-area {
+  width: 100%;
 }
-.inputGroup-currencies input{
+.inputGroup-currencies input {
   border: 0;
   display: block;
   font-weight: bold;
@@ -379,7 +348,7 @@ export default {
 
 .currenciesgroup li {
   list-style-type: none;
-  color: #717C87;
+  color: #717c87;
   margin: 0;
 }
 .currenciesgroup li .ae-icon {
@@ -416,14 +385,14 @@ export default {
   transform: rotate(90deg);
 }
 .ae-list .ae-list-item:first-child {
-  border-top:none !important
+  border-top: none !important;
 }
 .sub-dropdown .single-currency:hover {
-    border-left: 2px solid #ff0d6a;
-    background: rgba(226, 226, 226, 0.5);
-    .arrowrightCurrency {
-        right: 20px;
-    }
+  border-left: 2px solid #ff0d6a;
+  background: rgba(226, 226, 226, 0.5);
+  .arrowrightCurrency {
+    right: 20px;
+  }
 }
 .arrowrightCurrency {
   transition: 0.4s;
@@ -438,22 +407,22 @@ export default {
 }
 .account-info {
   margin-top: 30px;
-  
+
   .balance {
-    max-width:40%;
+    max-width: 40%;
     font-size: 1.4rem;
-    font-family: "Inter UI", sans-serif;
+    font-family: 'Inter UI', sans-serif;
     font-weight: 800;
     color: #ff0d6a;
     word-break: break-word;
     text-align: right;
     .ae-button {
-      display:block;
-      padding:0;
-      font-size:.7rem;
-      margin-left:auto;
+      display: block;
+      padding: 0;
+      font-size: 0.7rem;
+      margin-left: auto;
       i {
-        font-size:.7rem;
+        font-size: 0.7rem;
       }
     }
   }
@@ -463,108 +432,36 @@ export default {
     font-weight: 500;
   }
   .account-addresses {
-    max-width:60%;
+    max-width: 60%;
     .ae-address {
-      color:#565656;
-      font-size:.7rem;
-      line-height: .9rem;
+      color: #565656;
+      font-size: 0.7rem;
+      line-height: 0.9rem;
     }
   }
 }
 .extensionVersion {
-  display:none;
-}
-.account-popup {
-  position: fixed;
-  top: 70px;
-  z-index:0;
+  display: none;
 }
 .recent-tx {
-  margin-top:130px;
-  height:500px;
+  margin-top: 130px;
+  height: 500px;
   position: relative;
-  z-index:0;
+  z-index: 0;
 }
 .recent-tx .recent-transactions {
   overflow-y: scroll;
-  padding-bottom:20px;
+  padding-bottom: 20px;
 }
 
-.how-to-url a {
-  color: white;
-}
 
 .backup_seed_notif {
-  margin-bottom: 1.5rem;
-  color: #000000;
-  padding: 0.5rem;
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.52), 0 6px 6px rgba(0, 0, 0, 0.25);
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  font-size: 15px;
-  display: block;
-  position: absolute;
-  z-index: 1;
-  top: 20px;
-  left: 0;
-  background: #ffffff;
-  right: 0;
-  width: 80%;
-  margin: 0 auto;
+  color: $accent-color;
+  font-size: 14px;
+  margin: 14px auto 32px;
 }
-.backup_seed_notif p{
-  margin: 0.5rem;
-}
-.backup_seed_notif span {
-  position: absolute;
-  color: #ff0d6a;
-  left: 29px;
-  top: 13px;
-  font-size: 22px;
-  font-weight: bold;
-}
-.backup_seed_notif .fa-warning {
-  float: left;
-  font-size: 2.6rem;
-  color: #ff0d6a;
-}
-.float {
-  animation-name: float;
-  -webkit-animation-name: float;
-  animation-duration: 1.5s;
-  -webkit-animation-duration: 1.5s;
-  animation-iteration-count: infinite;
-  -webkit-animation-iteration-count: infinite;
-  }
-@keyframes float {
-  0% {
-    transform: translateY(0%);
-  }
-  50% {
-    transform: translateY(8%);
-  }
-  100% {
-    transform: translateY(0%);
-  }
-}
-@-webkit-keyframes float {
-  0% {
-    -webkit-transform: translateY(0%);
-  }
-  50% {
-    -webkit-transform: translateY(8%);
-  }
-  100% {
-    -webkit-transform: translateY(0%);
-  }
-}
-.back-up-button {
-  color: #ff0d6a;
-  padding: 0.2rem;
-  background: #e0e1e3;
-  width: 100%;
-}
-.back-up-button:hover {
-  background: #d4d4d4;
+.backup_seed_notif a {
+  cursor: pointer;
+  color: $accent-color !important;
 }
 </style>
