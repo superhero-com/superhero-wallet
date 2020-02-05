@@ -143,6 +143,7 @@ export default {
   },
   watch: {
     $route(to, from) {
+      this.title = to.meta.title || ''
       if (to.path == '/account') {
         this.onAccount = true;
       } else {
