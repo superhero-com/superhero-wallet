@@ -5,7 +5,7 @@ import { getters } from './getters';
 import mutations from './mutations';
 import actions from './actions';
 import { POPUP_PROPS } from '../popup/utils/popup-messages';
-import { networks } from '../popup/utils/constants';
+import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
 
 Vue.use(Vuex);
 
@@ -19,9 +19,9 @@ export default new Vuex.Store({
     wallet: [],
     balance: 0,
     current: {
-      network: 'Mainnet',
+      network: DEFAULT_NETWORK,
       language: '',
-      token: 0
+      token: 0,
     },
     network: networks,
     userNetworks: [],
@@ -30,18 +30,18 @@ export default new Vuex.Store({
     transactions: {
       latest: [],
       all: [],
-      new: []
+      new: [],
     },
     sdk: null,
     aeppPopup: false,
     ledgerApi: null,
-    background:null,
-    txAdvancedMode:false,
-    tipping:null,
-    tippingReceiver: {}
+    background: null,
+    txAdvancedMode: false,
+    tipping: null,
+    tippingReceiver: {},
   },
   getters,
   mutations,
   actions,
-  plugins: [ ]
+  plugins: [],
 });

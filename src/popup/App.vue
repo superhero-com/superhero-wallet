@@ -1,13 +1,12 @@
 <template>
   <ae-main @click.native="hideMenu" :class="onAccount ? 'ae-main-account' : ''">
-      <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''">
+      <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''" v-if="showNavigation">
         
         <!-- login screen header -->
-          <div class="logo_top" :slot="menuSlot" v-if="!isLoggedIn">
-            <img :src="logo_top" alt="">
-            <p>
-              {{ $t('pages.appVUE.systemName') }} 
-              <span class="extensionVersion extensionVersionTop">{{extensionVersion}}</span></p>
+          <div class="nav-title" :slot="menuSlot" v-if="!isLoggedIn">
+            <p v-if="title" class="flex flex-align-center">
+              <Arrow class="arrow-back" @click="goBack" /> <span class="title-text"> {{ title }} </span>
+            </p>
           </div>
           
           <div style="position: absolute; left: 50%; font-size: 16px; margin-left: -50px; color: #F1F1F1;" :slot="menuSlot" v-if="isLoggedIn">
@@ -90,30 +89,33 @@
       <hr style="margin: 0; background: #3a3a47; height: 2px; border: 0;">
     <router-view :key="$route.fullPath"></router-view>
     <span class="extensionVersion " v-if="isLoggedIn && !onAccount">
-      {{ $t('pages.appVUE.systemName') }} 
-      {{extensionVersion}} </span>
+      {{ $t('pages.appVUE.systemName') }}
+      {{ extensionVersion }}
+    </span>
     <Loader size="big" :loading="mainLoading"></Loader>
-    <div class="connect-error" v-if="connectError" >Unable to connect to choosen node</div>
+    <div class="connect-error" v-if="connectError">Unable to connect to choosen node</div>
   </ae-main>
 </template>
- 
+
 <script>
 import Ae from '@aeternity/aepp-sdk/es/ae/universal';
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
-import store from '../store';
-import locales from './locales/en.json'
 import { mapGetters } from 'vuex';
 import { saveAs } from 'file-saver';
+import { computeAuctionEndBlock, computeBidFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
+import store from '../store';
+import locales from './locales/en.json';
 // import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
 import { initializeSDK, contractCall } from './utils/helper';
-import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT, AEX2_METHODS  } from './utils/constants'
-import { start, postMesssage, readWebPageDom } from './utils/connection'
-import { langs,fetchAndSetLocale } from './utils/i18nHelper'
-import { computeAuctionEndBlock, computeBidFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers'
-
+import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT, AEX2_METHODS } from './utils/constants';
+import { start, postMessage, readWebPageDom } from './utils/connection';
+import { langs, fetchAndSetLocale } from './utils/i18nHelper';
+import Arrow from '../icons/arrow.svg';
 export default {
-  
-  data () {
+  components: {
+    Arrow
+  },
+  data() {
     return {
       logo_top: browser.runtime.getURL('../../../icons/icon_48.png'),
       ae_token: browser.runtime.getURL('../../../icons/ae.png'),
@@ -124,7 +126,7 @@ export default {
         settings: false,
         account: false,
         languages: false,
-        tokens: false
+        tokens: false,
       },
       mainLoading: true,
       checkPendingTxInterval:null,
@@ -133,100 +135,132 @@ export default {
       defaulT: "default",
       checkSDKReady:null,
       connectError:false,
-      onAccount:false
+      onAccount:false,
+      showNavigation: false,
+      title: ''
     }
   },
   computed: {
-    ...mapGetters (['account', 'current', 'network', 'popup', 'isLoggedIn', 'subaccounts', 'activeAccount', 'activeNetwork', 'balance', 'activeAccountName', 'background', 'sdk', 'aeppPopup']),
+    ...mapGetters([
+      'account',
+      'current',
+      'network',
+      'popup',
+      'isLoggedIn',
+      'subaccounts',
+      'activeAccount',
+      'activeNetwork',
+      'balance',
+      'activeAccountName',
+      'background',
+      'sdk',
+      'aeppPopup',
+    ]),
     extensionVersion() {
-      return 'v.' + browser.runtime.getManifest().version 
-    }
+      return `v.${browser.runtime.getManifest().version}`;
+    },
   },
-  watch:{
-    $route (to, from){
-        if(to.path == "/account") {
-            this.onAccount = true
-        } else {
-            this.onAccount = false
-        }
-       
-    }
-} ,
-  created: async function () {
-      browser.storage.local.get('language').then((data) => {
-        this.language = langs[data.language];
-        this.$store.state.current.language = data.language;
-        if (typeof data.language != 'undefined') {
-          fetchAndSetLocale(data.language);
-        }
-      });
-      browser.storage.local.get('activeNetwork').then((data) => {
-        if (data.hasOwnProperty('activeNetwork') && data.activeNetwork != 0) {
-          this.$store.state.current.network = data.activeNetwork;
-        }
-      });
-      let background = await start(browser)
-      this.$store.commit( 'SET_BACKGROUND', background )
-      readWebPageDom((receiver,sendResponse ) => {
-        this.$store.commit('SET_TIPPING_RECEIVER', receiver)
-        sendResponse({ host:receiver.host, received: true })
-      })
-
-      if(!process.env.RUNNING_IN_POPUP) {
-        //init SDK
-        this.checkSdkReady()
-        setTimeout(() => {
-          if(this.isLoggedIn) {
-            if(this.sdk == null) {
-              this.initSDK()
-            }
-            this.pollData()
-          }else {
-            this.hideLoader()
-          }
-        },500)
+  watch: {
+    $route(to, from) {
+      this.title = to.meta.title || ''
+      if (to.path == '/account') {
+        this.onAccount = true;
       } else {
-        this.hideLoader()
+        this.onAccount = false;
       }
-      window.addEventListener('resize', () => {
-        
-        if(window.innerWidth <= 480) {
-          this.menuSlot = "mobile-left"
-          this.mobileRight = "mobile-right"
-          this.defaulT = "default"
-        }else {
-          this.menuSlot = "default"
-          this.mobileRight = "default"
-          this.defaulT = "default"
-        }
-      });
+
+      if(to.path !== '/') {
+        this.showNavigation = true
+      } else {
+        this.showNavigation = false
+      }
+    },
   },
-  mounted: function mounted () {
+  async created() {
+    if(this.$router.currentRoute.path !== '/') {
+      this.showNavigation = true
+    } 
+    this.title = this.$router.currentRoute.meta.title
+    browser.storage.local.get('language').then(data => {
+      this.language = langs[data.language];
+      this.$store.state.current.language = data.language;
+      if (typeof data.language !== 'undefined') {
+        fetchAndSetLocale(data.language);
+      }
+    });
+    browser.storage.local.get('activeNetwork').then(data => {
+      if (data.hasOwnProperty('activeNetwork') && data.activeNetwork != 0) {
+        this.$store.state.current.network = data.activeNetwork;
+      }
+    });
+    const background = await start(browser);
+    this.$store.commit('SET_BACKGROUND', background);
+    readWebPageDom((receiver, sendResponse) => {
+      this.$store.commit('SET_TIPPING_RECEIVER', receiver);
+      sendResponse({ host: receiver.host, received: true });
+    });
+
+    if (!process.env.RUNNING_IN_POPUP) {
+      // init SDK
+      this.checkSdkReady();
+      setTimeout(() => {
+        if (this.isLoggedIn) {
+          if (this.sdk == null) {
+            this.initSDK();
+          }
+          this.pollData();
+        } else {
+          this.hideLoader();
+        }
+      }, 500);
+    } else {
+      this.hideLoader();
+    }
+    this.setMenuSlots()
+    window.addEventListener('resize', () => {
+      this.setMenuSlots()
+    });
+  },
+  mounted: function mounted() {
     this.dropdown.settings = false;
   },
   methods: {
+    setMenuSlots() {
+      if(window.innerWidth <= 480) {
+        this.menuSlot = "mobile-left"
+        this.menuSlot = "default"
+        this.mobileRight = "mobile-right"
+      }else {
+        this.menuSlot = "default"
+        this.menuSlot = "default"
+        this.mobileRight = "default"
+      }
+    },
     checkSdkReady() {
-      if(!process.env.RUNNING_IN_POPUP) {
+      if (!process.env.RUNNING_IN_POPUP) {
         this.checkSDKReady = setInterval(() => {
-          if(this.isLoggedIn && this.sdk == null) {
-            this.initRpcWallet()
-            this.initSDK()
-            this.pollData()
-            clearInterval(this.checkSDKReady)
+          if (this.isLoggedIn && this.sdk == null) {
+            this.initRpcWallet();
+            this.initSDK();
+            this.pollData();
+            clearInterval(this.checkSDKReady);
           }
-        },500)
+        }, 500);
       }
     },
     hideLoader() {
-      var self = this;
-      setTimeout(function() {
+      const self = this;
+      setTimeout(() => {
         self.mainLoading = false;
       }, 1500);
     },
-    hideMenu (event) {
-      let target = event.target
+    hideMenu(event) {
+      const { target } = event;
       // Hide dropdown menu on click of the element with class triggerhidedd
-      if (typeof target != 'undefined' && (target.className.indexOf('triggerhidedd') > -1 || (target.parentElement != null && target.parentElement.className.indexOf('triggerhidedd') > -1 ))) {
+      if (
+        typeof target !== 'undefined' &&
+        (target.className.indexOf('triggerhidedd') > -1 || (target.parentElement != null && target.parentElement.className.indexOf('triggerhidedd') > -1))
+      ) {
         let dropdownParent = event.target.closest('.dropdown');
         this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
         if (event.target.closest('.have-subDropdown') != null) {
@@ -234,79 +268,79 @@ export default {
           this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
         }
       }
-      for (var tar in this.dropdown) {
-        let el = this.$refs[tar];
-        if ( tar != 'languages' && typeof el != 'undefined' && el !== target && !el.contains(target)) {
-          this.dropdown[tar]=false
+      for (const tar in this.dropdown) {
+        const el = this.$refs[tar];
+        if (tar != 'languages' && typeof el !== 'undefined' && el !== target && !el.contains(target)) {
+          this.dropdown[tar] = false;
         }
       }
     },
     toggleDropdown(event, parentClass) {
-      if(!this.aeppPopup) {
-        if (typeof parentClass == 'undefined') {
+      if (!this.aeppPopup) {
+        if (typeof parentClass === 'undefined') {
           parentClass = '.dropdown';
         }
-        let dropdownParent = event.target.closest(parentClass);
-        this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id]
+        const dropdownParent = event.target.closest(parentClass);
+        this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
       }
-      
     },
-    switchNetwork (network) {
+    switchNetwork(network) {
       this.dropdown.network = false;
       this.$store.dispatch('switchNetwork', network).then(() => {
-        postMesssage(this.background, { type: AEX2_METHODS.SWITCH_NETWORK , payload: network } )
+        postMessage(this.background, { type: AEX2_METHODS.SWITCH_NETWORK, payload: network });
         this.initSDK();
         this.$store.dispatch('updateBalance');
-      }); 
+      });
     },
-    logout () {
+    logout() {
       browser.storage.local.remove('isLogged').then(() => {
         browser.storage.local.remove('wallet').then(() => {
           browser.storage.local.remove('activeAccount').then(() => {
             this.dropdown.settings = false;
             this.dropdown.languages = false;
             this.dropdown.account = false;
-            this.$store.commit('SET_ACTIVE_ACCOUNT', {publicKey:'',index:0});
+            this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: '', index: 0 });
             this.$store.commit('UNSET_SUBACCOUNTS');
             this.$store.commit('UPDATE_ACCOUNT', '');
             this.$store.commit('SWITCH_LOGGED_IN', false);
             this.$store.commit('SET_WALLET', []);
-            this.$store.dispatch('initSdk',null);
-            postMesssage(this.background, { type: AEX2_METHODS.LOGOUT } )
-            this.checkSdkReady()
+            this.$store.dispatch('initSdk', null);
+            postMessage(this.background, { type: AEX2_METHODS.LOGOUT });
+            this.checkSdkReady();
             this.$router.push('/');
           });
         });
       });
-    }, 
-    popupAlert(payload) {
-      this.$store.dispatch('popupAlert', payload)
     },
-    navigateAccount () {
+    popupAlert(payload) {
+      this.$store.dispatch('popupAlert', payload);
+    },
+    navigateAccount() {
       this.dropdown.settings = false;
       this.$router.push('/account');
     },
-    myAccount () {
-      this.dropdown.settings = false; this.dropdown.languages = false;
+    myAccount() {
+      this.dropdown.settings = false;
+      this.dropdown.languages = false;
       this.$router.push('/account');
     },
-    settings () {
-      this.dropdown.account = false; 
+    settings() {
+      this.dropdown.account = false;
       this.$router.push('/settings');
     },
-    about () {
-      this.$router.push('/aboutSettings')
+    about() {
+      this.$router.push('/aboutSettings');
     },
     transactions() {
-      this.dropdown.settings = false; 
+      this.dropdown.settings = false;
       this.$router.push('/transactions');
     },
     topUp() {
-      this.dropdown.settings = false; 
+      this.dropdown.settings = false;
       this.$router.push('/receive');
     },
     withdraw() {
-      this.dropdown.settings = false; 
+      this.dropdown.settings = false;
       this.$router.push('/send');
     },
     profile() {
@@ -314,64 +348,78 @@ export default {
       this.$router.push('/account');
     },
     pollData() {
-      let triggerOnce = false
+      let triggerOnce = false;
       this.polling = setInterval(async () => {
-        if(this.sdk != null && this.isLoggedIn) {
-            this.$store.dispatch('updateBalance');
-            if(!triggerOnce) {
-              this.$store.dispatch('getRegisteredNames')
-              triggerOnce = true
-            }
+        if (this.sdk != null && this.isLoggedIn) {
+          this.$store.dispatch('updateBalance');
+          if (!triggerOnce) {
+            this.$store.dispatch('getRegisteredNames');
+            triggerOnce = true;
+          }
         }
       }, 2500);
     },
     async initSDK() {
-      let sdk = await initializeSDK(this, { network:this.network, current:this.current, account:this.account, wallet:this.wallet, activeAccount:this.activeAccount, background:this.background })
-      if( typeof sdk != null && !sdk.hasOwnProperty("error")) {
+      const sdk = await initializeSDK(this, {
+        network: this.network,
+        current: this.current,
+        account: this.account,
+        wallet: this.wallet,
+        activeAccount: this.activeAccount,
+        background: this.background,
+      });
+      if (typeof sdk != null && !sdk.hasOwnProperty('error')) {
         try {
-          await this.$store.commit('SET_TIPPING', 
-            await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract }) 
-          )
-        } catch(e) {
-
-        }
-        this.hideLoader()
+          await this.$store.commit('SET_TIPPING', await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract }));
+        } catch (e) {}
+        this.hideLoader();
       }
-      if(typeof sdk.error != 'undefined') {
-          await browser.storage.local.remove('isLogged')
-          await browser.storage.local.remove('activeAccount')
-          this.hideLoader()
-          this.$store.commit('SET_ACTIVE_ACCOUNT', {publicKey:'',index:0});
-          this.$store.commit('UNSET_SUBACCOUNTS');
-          this.$store.commit('UPDATE_ACCOUNT', '');
-          this.$store.commit('SWITCH_LOGGED_IN', false);
-          
-          this.$router.push('/')
+      if (typeof sdk.error !== 'undefined') {
+        await browser.storage.local.remove('isLogged');
+        await browser.storage.local.remove('activeAccount');
+        this.hideLoader();
+        this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: '', index: 0 });
+        this.$store.commit('UNSET_SUBACCOUNTS');
+        this.$store.commit('UPDATE_ACCOUNT', '');
+        this.$store.commit('SWITCH_LOGGED_IN', false);
+
+        this.$router.push('/');
       }
     },
     initRpcWallet() {
-      postMesssage(this.background, { type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } } )
+      postMessage(this.background, { type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
     },
     hideConnectError() {
-      this.connectError = false
+      this.connectError = false;
     },
     showConnectError() {
       this.connectError = true
+    },
+    goBack() {
+      if(this.isLoggedIn) {
+        this.$router.push('/account')
+      } else {
+        this.$router.push('/')
+      }
     }
   },
   beforeDestroy() {
-    clearInterval(this.polling)
-  }
+    clearInterval(this.polling);
+  },
 };
 </script>
 
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
 @import '../common/base';
+@import '../common/extension';
 @-moz-document url-prefix() {
-  html { scrollbar-width: none; }
-  .actions .backbutton .ae-icon { vertical-align: middle !important; }
-}
-@-moz-document url-prefix() {
+  html {
+    scrollbar-width: none;
+  }
+  .actions .backbutton .ae-icon {
+    vertical-align: middle !important;
+  }
   .ae-main { width: 380px; margin:0 auto; }
 }
 .desktop-right { width: 100%; display: flex; justify-content: space-evenly; }
@@ -459,11 +507,37 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 .Password .passwordStrengthMeter .Password__strength-meter--fill[data-score="3"] { background: #1d7fe2 }
 .Password .passwordStrengthMeter .Password__strength-meter--fill[data-score="4"] { background: $color-alternative }
 
-.actions { text-align: left; }
-.actions .backbutton { padding: 0; color: #9d3fc0 !important; }
-.token-image { margin-right:1rem; width:28px; }
-.tokenBalance { margin-right: auto; }
-#tokens .ae-check-button:before { width: 20px !important; height: 20px !important; }
-#tokens .ae-check-button:after { width: 26px !important; height: 25px !important; }
-.connect-error { position:fixed; bottom: 0; left:0; right:0; background:$primary-color; color:#fff; padding: .3rem; text-align:center; font-weight:bold; }
+.actions {
+  text-align: left;
+}
+.actions .backbutton {
+  padding: 0;
+  color: #9d3fc0 !important;
+}
+.token-image {
+  margin-right: 1rem;
+  width: 28px;
+}
+.tokenBalance {
+  margin-right: auto;
+}
+#tokens .ae-check-button:before {
+  width: 20px !important;
+  height: 20px !important;
+}
+#tokens .ae-check-button:after {
+  width: 26px !important;
+  height: 25px !important;
+}
+.connect-error {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: $primary-color;
+  color: #fff;
+  padding: 0.3rem;
+  text-align: center;
+  font-weight: bold;
+}
 </style>

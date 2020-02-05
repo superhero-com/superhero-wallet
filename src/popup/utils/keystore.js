@@ -1,7 +1,8 @@
-const nacl = require('tweetnacl')
 import uuid from 'uuid';
 import { encodeBase58Check } from '@aeternity/aepp-sdk/es/utils/crypto';
 import WebCrypto from './webCrypto';
+
+const nacl = require('tweetnacl');
 
 const DEFAULTS = {
   crypto: {
@@ -33,11 +34,18 @@ export function str2buf(str, enc) {
  * WebCrypto Support
  */
 
-export async function generateEncryptedWallet(name, password, privateKey, nonce = window.crypto.getRandomValues(new Uint8Array(12)), salt = window.crypto.getRandomValues(new Uint8Array(16)), options = {}) {
+export async function generateEncryptedWallet(
+  name,
+  password,
+  privateKey,
+  nonce = window.crypto.getRandomValues(new Uint8Array(12)),
+  salt = window.crypto.getRandomValues(new Uint8Array(16)),
+  options = {}
+) {
   const opt = Object.assign({}, DEFAULTS.crypto, options);
-  opt.kdf = "webCrypto";
-  let webCrypto = new WebCrypto();
-  let ciphertext =  Buffer.from(await webCrypto.encrypt(Buffer.from(privateKey).toString('hex'), password, nonce, salt)).toString('hex');
+  opt.kdf = 'webCrypto';
+  const webCrypto = new WebCrypto();
+  const ciphertext = Buffer.from(await webCrypto.encrypt(Buffer.from(privateKey).toString('hex'), password, nonce, salt)).toString('hex');
   const encrypted = Object.assign(
     { name, version: 1, public_key: getAddressFromPriv(privateKey), id: uuid.v4() },
     {

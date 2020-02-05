@@ -1,0 +1,67 @@
+@import './variables';
+
+body, .ae-main, html {
+    background: $bg-color !important;
+    font-size:$font-size;
+    font-family: 'Roboto', sans-serif !important;
+}
+.popup {
+    max-width: 480px !important;
+    margin:0 auto;
+}
+#app {
+    font-family: 'Roboto', sans-serif !important;
+}
+* {
+    color: $white-color;
+    font-family: 'Roboto', sans-serif !important;
+}
+.disabled {
+    opacity: .4;
+    pointer-events: none;
+}
+
+a {
+    color: $accent-color !important;
+    text-decoration: underline;
+}
+
+.primary-text {
+    color:$text-color;
+    font-size: .88rem;
+}
+.primary-title {
+    color: $white-color;
+    font-size: 1.3rem;
+    font-weight: lighter;
+    margin-bottom:27px;
+}
+.secondary-text {
+    color: $secondary-color;
+}
+.regular-text {
+    font-size:$font-size;
+    text-align: left;
+    font-weight: normal;
+}
+.logo{
+    margin:60px 0;
+}
+.ae-header {
+    background: $nav-bg-color !important;
+    border-color: $nav-border-color !important;
+}
+.error-msg {
+    color: $secondary-color !important;
+    margin-top:22px;
+    font-size: .88rem;
+}
+.nav-title  {
+    .title-text {
+        margin-left:15px;
+        font-weight: lighter;
+    }
+    .arrow-back {
+        cursor: pointer;
+    }
+}

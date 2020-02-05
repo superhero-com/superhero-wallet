@@ -13,14 +13,13 @@
         <div class="text-left account-addresses">
           <span class="account-name">{{ activeAccountName }}</span>
           <ae-address :value="account.publicKey" length="flat" />
-          
         </div>
         <div class="balance no-sign">
-            <span>{{ roundedAmount }} {{ tokenSymbol }}</span>
-            <ae-button face="toolbar" v-clipboard:copy="account.publicKey" @click="copy">
-                <ae-icon name="copy" />
-                {{ $t('pages.account.copy') }}
-            </ae-button>
+          <span>{{ roundedAmount }} {{ tokenSymbol }}</span>
+          <ae-button face="toolbar" v-clipboard:copy="account.publicKey" @click="copy">
+            <ae-icon name="copy" />
+            {{ $t('pages.account.copy') }}
+          </ae-button>
         </div>
       </div>
       
@@ -304,7 +303,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
 .accountAddress {
   color: #fff;
 }

@@ -24,10 +24,26 @@
         
         <slot></slot>
     </div>
+
+    <div v-if="transactions.latest.length && !loading">
+      <ae-list class="transactionList">
+        <TransactionItem :recent="true" :dark="true" v-for="transaction in transactions.latest" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
+      </ae-list>
+    </div>
+    <div v-if="transactions.latest.length == 0 && !loading">
+      <p class="paragraph noTransactions">{{ $t('pages.account.noTransactionsFound') }}</p>
+    </div>
+    <div class="loader-holder">
+      <Loader size="small" :loading="loading"></Loader>
+    </div>
+
+    <slot></slot>
+  </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
+
 export default {
     data() {
         return {
@@ -36,11 +52,15 @@ export default {
             newTip: false
         }
     },
-    computed: {
-        ...mapGetters(['transactions','account','sdk'])
+    pollData() {
+      this.polling = setInterval(async () => {
+        if (this.sdk != null) {
+          this.updateTransactions();
+        }
+      }, 2500);
     },
-    created () {
-        this.pollData();
+    allTransactions() {
+      this.$router.push('/transactions');
     },
     methods: {
         async updateTransactions() {
@@ -48,7 +68,6 @@ export default {
             this.loading = false
             this.$store.dispatch('updateLatestTransactions',transactions);
             browser.storage.local.get('pendingTip').then(res => {
-                console.log(res)
                 if (res.hasOwnProperty('pendingTip') && res.pendingTip) {
                     this.newTip = true;
                 } else {
@@ -73,16 +92,18 @@ export default {
 
 <style scoped>
 .recent-transactions {
-    padding: 4px 14px;
-    height: 100%;
-    background:#656565;
+  padding: 4px 14px;
+  height: 100%;
+  background: #656565;
 }
-.recent-transactions h3, .recent-transactions p, .recent-transactions .transactionList {
-    color: #fff !important;
+.recent-transactions h3,
+.recent-transactions p,
+.recent-transactions .transactionList {
+  color: #fff !important;
 }
 .all-transactions {
-    height:auto !important;
-    padding:5px 10px !important;
-    width:auto !important;
+  height: auto !important;
+  padding: 5px 10px !important;
+  width: auto !important;
 }
 </style>

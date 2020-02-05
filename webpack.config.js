@@ -238,23 +238,27 @@ function getRules() {
     },
     {
       test: /\.css$/,
-      use: [MiniCssExtractPlugin.loader, 'css-loader'],
+      use: [MiniCssExtractPlugin.loader, { loader: 'css-loader', options: { minimize:true } }],
     },
     {
       test: /\.scss$/,
-      use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+      use: [MiniCssExtractPlugin.loader,  { loader: 'css-loader', options: { minimize:true } },  { loader: 'sass-loader', options: { minimize:true } }],
     },
     {
       test: /\.sass$/,
       use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader?indentedSyntax'],
     },
     {
-      test: /\.(png|jpg|gif|svg|ico)$/,
+      test: /\.(png|jpg|gif|ico)$/,
       loader: 'file-loader',
       options: {
         name: '[name].[ext]?emitFile=false',
       },
     },
+    {
+      test: /\.svg$/,
+      loader: 'vue-svg-loader'
+    }
   ]
 }
 

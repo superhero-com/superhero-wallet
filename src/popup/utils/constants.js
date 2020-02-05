@@ -55,7 +55,7 @@ const MIN_SPEND_TX_FEE_STRING = TxBuilder.calculateMinFee(
 );
 
 export const calculateFee = (type,params) => {
-  let MIN_FEE = TxBuilder.calculateMinFee(type, {
+  const MIN_FEE = TxBuilder.calculateMinFee(type, {
     params: {
       senderId: STUB_ADDRESS,
       recipientId: STUB_ADDRESS,
@@ -68,8 +68,8 @@ export const calculateFee = (type,params) => {
       ...params
     }
   })
-  let min = BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE)
-  let max = min.multipliedBy(10);
+  const min = BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE)
+  const max = min.multipliedBy(10);
   return {
     min,
     max
@@ -187,3 +187,4 @@ payable contract WaelletTipAnyBasic =
       repaid        = false,
       amount        = Call.value,
       note          = note }`
+

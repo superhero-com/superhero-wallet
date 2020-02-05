@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import VueClipboard from 'vue-clipboard2';
 import Components from '@aeternity/aepp-components-3';
+import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from 'vue-qrcode-reader';
 import routes from './routes';
 import '@aeternity/aepp-components-3/dist/aepp.components.css';
 import LoaderComponent from './components/Loader';
@@ -14,54 +15,53 @@ import AddressInput from './components/AddressInput';
 import BackLink from './components/BackLink';
 import DropDown from './components/DropDown';
 import ClaimTIpButton from './components/ClaimTipButton';
-import RecentTransactions from './components/RecentTransactions'
+import RecentTransactions from './components/RecentTransactions';
+import Button from './components/Button';
+import CheckBox from './components/CheckBox';
+import Textarea from './components/Textarea';
 
-import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from 'vue-qrcode-reader'
 import ModalComponent from './components/Modal';
 import * as helper from '../utils/helper';
 
 const plugin = {
-  install () {
-      Vue.helpers = helper
-      Vue.prototype.$helpers = helper
-  }
-}
+  install() {
+    Vue.helpers = helper;
+    Vue.prototype.$helpers = helper;
+  },
+};
 
-Vue.use(plugin)
+Vue.use(plugin);
 Vue.use(VueRouter);
 Vue.use(VueClipboard);
 Vue.use(Components);
 
-Vue.component('Loader',LoaderComponent);
-Vue.component('TransactionItem',TransactionItemComponent);
-Vue.component('SwitchButton',SwitchButtonComponent);
-Vue.component('Popup',Popup);
+Vue.component('Loader', LoaderComponent);
+Vue.component('TransactionItem', TransactionItemComponent);
+Vue.component('SwitchButton', SwitchButtonComponent);
+Vue.component('Popup', Popup);
 Vue.component('Alert', AlertComponent);
-Vue.component('QrcodeStream',QrcodeStream);
-Vue.component('QrcodeDropZone',QrcodeDropZone);
-Vue.component('QrcodeCapture',QrcodeCapture);
+Vue.component('QrcodeStream', QrcodeStream);
+Vue.component('QrcodeDropZone', QrcodeDropZone);
+Vue.component('QrcodeCapture', QrcodeCapture);
 Vue.component('Modal', ModalComponent);
 Vue.component('AmountInput', AmountInput);
-Vue.component("AddressInput", AddressInput);
-Vue.component("BackLink", BackLink);
-Vue.component("DropDown", DropDown);
+Vue.component('AddressInput', AddressInput);
+Vue.component('BackLink', BackLink);
+Vue.component('DropDown', DropDown);
 Vue.component('ClaimTipButton', ClaimTIpButton);
 Vue.component('RecentTransactions', RecentTransactions);
+Vue.component('Button',Button);
+Vue.component('CheckBox',CheckBox);
+Vue.component('Textarea', Textarea)
 
-let router = new VueRouter({
+const router = new VueRouter({
   routes,
 });
 
-let isFirstTransition = true;
-let lastRouteKey = 'lsroute'
-const noRedirectUrls = [
-  '/popup-sign-tx',
-  '/connect',
-  '/connect-confirm',
-  '/sign-transaction/:type?',
-  '/ask-accounts'
-]
-// router.beforeEach((to, from, next) => { 
+const isFirstTransition = true;
+const lastRouteKey = 'lsroute';
+const noRedirectUrls = ['/popup-sign-tx', '/connect', '/connect-confirm', '/sign-transaction/:type?', '/ask-accounts'];
+// router.beforeEach((to, from, next) => {
 //   const lastRouteName = localStorage.getItem(lastRouteKey);
 
 //   const shouldRedirect = to.path === ("/" || "/account") && lastRouteName && isFirstTransition;
@@ -125,7 +125,7 @@ const noRedirectUrls = [
 //               } else {
 //                 next('/')
 //               }
-              
+
 //             } else {
 //               next('/')
 //             }
@@ -133,10 +133,10 @@ const noRedirectUrls = [
 //         });
 //       });
 //     });
-//   } 
+//   }
 //   else{
 //     next()
-//   } 
+//   }
 //   isFirstTransition = false;
 // })
 
