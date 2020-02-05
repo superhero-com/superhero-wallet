@@ -15,3 +15,4 @@ tests/e2e/screenshots/accountPage.js/Test cases for Account Page -- can logout a
 /www
 /platforms
 /plugins
+/resources/*/
