@@ -386,7 +386,7 @@ button {
 }
 .ae-header {
   border-bottom: 1px solid #eee;
-  margin-bottom: 10px;
+  margin-bottom: 0 !important;
 }
 .ae-header.logged {
   background: #001833;
