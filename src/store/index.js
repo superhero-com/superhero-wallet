@@ -21,7 +21,7 @@ export default new Vuex.Store({
     current: {
       network: DEFAULT_NETWORK,
       language: '',
-      token: 0
+      token: 0,
     },
     network: networks,
     userNetworks: [],
@@ -30,18 +30,18 @@ export default new Vuex.Store({
     transactions: {
       latest: [],
       all: [],
-      new: []
+      new: [],
     },
     sdk: null,
     aeppPopup: false,
     ledgerApi: null,
-    background:null,
-    txAdvancedMode:false,
-    tipping:null,
-    tippingReceiver: {}
+    background: null,
+    txAdvancedMode: false,
+    tipping: null,
+    tippingReceiver: {},
   },
   getters,
   mutations,
   actions,
-  plugins: [ ]
+  plugins: [],
 });

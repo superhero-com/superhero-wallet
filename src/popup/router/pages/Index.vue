@@ -37,7 +37,7 @@ export default {
       logo: browser.runtime.getURL('../../../icons/icon_128.png'),
       terms: false,
       termsAgreedOrNot: false,
-      walletType: null
+      walletType: null,
     };
   },
   computed: {
@@ -59,56 +59,55 @@ export default {
         browser.storage.local.get('userAccount').then(async user => {
           if (user.userAccount && user.hasOwnProperty('userAccount')) {
             this.$store.commit('UPDATE_ACCOUNT', user.userAccount);
-            const address = await this.$store.dispatch('generateWallet', { seed:user.userAccount.privateKey })
+            const address = await this.$store.dispatch('generateWallet', { seed: user.userAccount.privateKey });
             // if (data.isLogged && data.hasOwnProperty('isLogged')) {
-              browser.storage.local.get('subaccounts').then(subaccounts => {
-                let sub = [];
-                if (
-                  !subaccounts.hasOwnProperty('subaccounts') ||
-                  subaccounts.subaccounts == '' ||
-                  (typeof subaccounts.subaccounts == 'object' && !subaccounts.subaccounts.find(f => f.publicKey == user.userAccount.publicKey))
-                ) {
-                  sub.push({
-                    name: typeof subaccounts.subaccounts != 'undefined' ? subaccounts.subaccounts.name : 'Main account',
-                    publicKey: user.userAccount.publicKey,
-                    root: true,
-                    balance: 0,
-                  });
-                }
-                if (subaccounts.hasOwnProperty('subaccounts') && subaccounts.subaccounts.length > 0 && subaccounts.subaccounts != '') {
-                  subaccounts.subaccounts.forEach(su => {
-                    sub.push({ ...su });
-                  });
-                }
-                this.$store.dispatch('setSubAccounts', sub);
-                browser.storage.local.get('activeAccount').then(active => {
-                  if (active.hasOwnProperty('activeAccount')) {
-                    this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: sub[active.activeAccount].publicKey, index: active.activeAccount });
-                  }
+            browser.storage.local.get('subaccounts').then(subaccounts => {
+              const sub = [];
+              if (
+                !subaccounts.hasOwnProperty('subaccounts') ||
+                subaccounts.subaccounts == '' ||
+                (typeof subaccounts.subaccounts === 'object' && !subaccounts.subaccounts.find(f => f.publicKey == user.userAccount.publicKey))
+              ) {
+                sub.push({
+                  name: typeof subaccounts.subaccounts !== 'undefined' ? subaccounts.subaccounts.name : 'Main account',
+                  publicKey: user.userAccount.publicKey,
+                  root: true,
+                  balance: 0,
                 });
+              }
+              if (subaccounts.hasOwnProperty('subaccounts') && subaccounts.subaccounts.length > 0 && subaccounts.subaccounts != '') {
+                subaccounts.subaccounts.forEach(su => {
+                  sub.push({ ...su });
+                });
+              }
+              this.$store.dispatch('setSubAccounts', sub);
+              browser.storage.local.get('activeAccount').then(active => {
+                if (active.hasOwnProperty('activeAccount')) {
+                  this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: sub[active.activeAccount].publicKey, index: active.activeAccount });
+                }
               });
+            });
             // }
           }
           browser.storage.local.get('confirmSeed').then(seed => {
             if (seed.hasOwnProperty('confirmSeed') && seed.confirmSeed == false) {
               this.$router.push('/seed');
-              return;
             }
           });
           // if (data.isLogged && data.hasOwnProperty('isLogged')) {
-          if (user.userAccount && user.hasOwnProperty('userAccount')){
-              this.$store.commit('SWITCH_LOGGED_IN', true);
-              redirectAfterLogin(this);
+          if (user.userAccount && user.hasOwnProperty('userAccount')) {
+            this.$store.commit('SWITCH_LOGGED_IN', true);
+            redirectAfterLogin(this);
           }
         });
       });
     },
-    generwateWalletIntro () {
+    generwateWalletIntro() {
       this.$router.push('/intro');
     },
     importAccount() {
-      this.$router.push('/importAccount')
+      this.$router.push('/importAccount');
     },
-  },
+  }
 };
 </script>

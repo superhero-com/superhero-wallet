@@ -55,7 +55,7 @@ const MIN_SPEND_TX_FEE_STRING = TxBuilder.calculateMinFee(
 );
 
 export const calculateFee = (type,params) => {
-  let MIN_FEE = TxBuilder.calculateMinFee(type, {
+  const MIN_FEE = TxBuilder.calculateMinFee(type, {
     params: {
       senderId: STUB_ADDRESS,
       recipientId: STUB_ADDRESS,
@@ -68,8 +68,8 @@ export const calculateFee = (type,params) => {
       ...params
     }
   })
-  let min = BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE)
-  let max = min.multipliedBy(10);
+  const min = BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE)
+  const max = min.multipliedBy(10);
   return {
     min,
     max
@@ -103,7 +103,8 @@ export const networks = {
     networkId: 'ae_mainnet',
     middlewareUrl: 'https://mainnet.aeternal.io/',
     explorerUrl: 'https://mainnet.aeternal.io',
-    compilerUrl: 'https://compiler.aepps.com',
+    // compilerUrl: 'https://compiler.aepps.com',
+    compilerUrl: 'https://compiler.aeternity.art',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tipContract: 'ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj'

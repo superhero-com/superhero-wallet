@@ -1,91 +1,92 @@
 <template>
-    <div class="popup">
-        <h2>
-            <span class="primary">{{ data.host }} ({{ data.name }}) </span> 
-            {{$t('pages.connectConfirm.websiteRequestAccounts') }} 
-        </h2>
-        <ul>
-            <ae-list-item fill="neutral" class="permission-set">
-                <h4> {{ $t('pages.connectConfirm.addressesLabel') }} </h4>
-                <p> {{ $t('pages.connectConfirm.addressesRequest') }} </p>
-            </ae-list-item>
-        </ul>
-        <ae-button-group class="btnFixed">
-            <ae-button face="round" fill="primary" @click="cancel">{{$t('pages.connectConfirm.cancelButton') }}</ae-button>
-            <ae-button face="round" fill="alternative" @click="connect">{{$t('pages.connectConfirm.confirmButton') }}</ae-button>
-        </ae-button-group>
-    </div>
+  <div class="popup">
+    <h2>
+      <span class="primary">{{ data.host }} ({{ data.name }}) </span>
+      {{ $t('pages.connectConfirm.websiteRequestAccounts') }}
+    </h2>
+    <ul>
+      <ae-list-item fill="neutral" class="permission-set">
+        <h4>{{ $t('pages.connectConfirm.addressesLabel') }}</h4>
+        <p>{{ $t('pages.connectConfirm.addressesRequest') }}</p>
+      </ae-list-item>
+    </ul>
+    <ae-button-group class="btnFixed">
+      <ae-button face="round" fill="primary" @click="cancel">{{ $t('pages.connectConfirm.cancelButton') }}</ae-button>
+      <ae-button face="round" fill="alternative" @click="connect">{{ $t('pages.connectConfirm.confirmButton') }}</ae-button>
+    </ae-button-group>
+  </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
+
 export default {
-    data(){
-        return {
-            data: window.props,
-            imageError: false
-        }
+  data() {
+    return {
+      data: window.props,
+      imageError: false,
+    };
+  },
+  methods: {
+    cancel() {
+      if (Object.keys(this.data.action).length) {
+        this.data.action.deny();
+      }
+
+      this.data.reject();
     },
-    methods: {
-        cancel() {
-            if(Object.keys( this.data.action).length) {
-                this.data.action.deny()
-            }
-           
-            this.data.reject()
-        },
-        async connect() {
-            if(Object.keys( this.data.action).length) {
-                this.data.action.accept()
-            }
-            this.data.resolve()
-        }
+    async connect() {
+      if (Object.keys(this.data.action).length) {
+        this.data.action.accept();
+      }
+      this.data.resolve();
     },
-    computed: {
-        ...mapGetters(['account','activeAccountName']),
-        faviconUrl() {
-            return typeof this.data.icons != "undefined" ? this.data.icons : `${this.data.protocol}//${this.data.host}/favicon.ico`
-        }
-    }
-}
+  },
+  computed: {
+    ...mapGetters(['account', 'activeAccountName']),
+    faviconUrl() {
+      return typeof this.data.icons !== 'undefined' ? this.data.icons : `${this.data.protocol}//${this.data.host}/favicon.ico`;
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
 @import '../../../../common/variables';
 .primary {
-    color:$primary-color;
+  color: $primary-color;
 }
-h2{
-    word-break:break-word;
-    line-height:1.8rem;
-    font-size:1.5rem
+h2 {
+  word-break: break-word;
+  line-height: 1.8rem;
+  font-size: 1.5rem;
 }
-p{
-    font-weight:normal;
-    word-break:break-word;
-    font-size:.9rem
+p {
+  font-weight: normal;
+  word-break: break-word;
+  font-size: 0.9rem;
 }
 .accountName {
-    font-size:1rem;
+  font-size: 1rem;
 }
 .hostname {
-    font-size:.8rem;
+  font-size: 0.8rem;
 }
 .permission-set {
-    flex-direction: column;
-    text-align: left;
-    h4{ 
-        display: block;
-        width:100%;
-        margin:0;
-    }
-    p {
-        display: block;
-        width:100%;
-        margin:0;
-    }
+  flex-direction: column;
+  text-align: left;
+  h4 {
+    display: block;
+    width: 100%;
+    margin: 0;
+  }
+  p {
+    display: block;
+    width: 100%;
+    margin: 0;
+  }
 }
 ul {
-    padding:0;
+  padding: 0;
 }
 </style>

@@ -1,11 +1,11 @@
 {
     "name": "Corona",
-    "description": "Corona - aeternity browser extension",
+    "description": "Corona Wallet",
     "version": null,
     "manifest_version": 2,
     "applications": {
       "gecko": {
-        "id": "radkov@hack.bg",
+        "id": "coronanews@protonmail.com",
         "strict_min_version": "53.0"
       }
     },

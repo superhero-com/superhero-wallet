@@ -1,8 +1,8 @@
 {
-  "name": "tipwallet",
+  "name": "corona-wallet",
   "version": "0.0.1",
-  "description": "tipwallet - aeternity browser extension",
-  "author": "Milen Radkov <milenradkov@me.com>",
+  "description": "corona news wallet",
+  "author": "Corona News",
   "license": "MIT",
   "private": true,
   "scripts": {

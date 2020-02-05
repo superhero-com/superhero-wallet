@@ -3,7 +3,6 @@ import App from './popup/App';
 import store from './store';
 import router from './popup/router';
 
-
 global.browser = require('webextension-polyfill');
 
 Vue.prototype.$browser = global.browser;
