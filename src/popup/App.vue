@@ -70,10 +70,10 @@
       </div>
     </ae-header>
     <router-view :key="$route.fullPath"></router-view>
-    <span class="extensionVersion " v-if="isLoggedIn && !onAccount">
+    <!-- <span class="extensionVersion " v-if="isLoggedIn && !onAccount">
       {{ $t('pages.appVUE.systemName') }}
       {{ extensionVersion }}
-    </span>
+    </span> -->
     <Loader size="big" :loading="mainLoading"></Loader>
     <NodeConnectionStatus />
   </ae-main>
@@ -410,7 +410,7 @@ button {
 }
 .popup {
   color: #555;
-  padding: 4px 14px;
+  padding: 4px 25px;
   text-align: center;
   font-size: 16px;
   word-break: break-all;

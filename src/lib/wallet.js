@@ -3,6 +3,7 @@ import { postMessage } from '../popup/utils/connection';
 import { parseFromStorage, swag } from '../popup/utils/helper';
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
+import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import { TIPPING_CONTRACT, DEFAULT_NETWORK } from '../popup/utils/constants'
 
 export default {
@@ -70,9 +71,10 @@ export default {
           const network = store.getters.network
           const current = store.getters.current
           const node = await Node({ url: network[current.network].internalUrl, internalUrl: network[current.network].internalUrl });
+          const account = MemoryAccount({ keypair })
           Universal({
               nodes: [{ name: DEFAULT_NETWORK, instance: node }],
-              accounts:[],
+              accounts:[account],
               networkId: network[current.network].networkId, 
               nativeMode: true,
               compilerUrl: network[current.network].compilerUrl
