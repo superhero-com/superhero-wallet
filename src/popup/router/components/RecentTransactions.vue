@@ -1,10 +1,15 @@
 <template>
     <div class="recent-transactions">
         <div class="flex flex flex-align-center flex-justify-between">
+            
+        <!-- <div style="justify-content: space-between;display: flex;padding: 0 20px 10px; border-bottom: 1px solid #16161D; "> -->
+            <span style="color:#f1f1f1;" class="title">Recent Activity</span>
+            <span style="color:#6A8EBE; cursor:pointer;" @click="allTransactions" class="viewAll">View all</span>
+        <!-- </div>
             <h3>MY RECENT TRANSACTIONS</h3>
             <ae-button extend fill="primary" face="round" class="all-transactions" @click="allTransactions">
                 View All
-            </ae-button>
+            </ae-button> -->
         </div>
         
         <div v-if="transactions.latest.length && !loading">
@@ -24,26 +29,10 @@
         
         <slot></slot>
     </div>
-
-    <div v-if="transactions.latest.length && !loading">
-      <ae-list class="transactionList">
-        <TransactionItem :recent="true" :dark="true" v-for="transaction in transactions.latest" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
-      </ae-list>
-    </div>
-    <div v-if="transactions.latest.length == 0 && !loading">
-      <p class="paragraph noTransactions">{{ $t('pages.account.noTransactionsFound') }}</p>
-    </div>
-    <div class="loader-holder">
-      <Loader size="small" :loading="loading"></Loader>
-    </div>
-
-    <slot></slot>
-  </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-
 export default {
     data() {
         return {
@@ -52,15 +41,11 @@ export default {
             newTip: false
         }
     },
-    pollData() {
-      this.polling = setInterval(async () => {
-        if (this.sdk != null) {
-          this.updateTransactions();
-        }
-      }, 2500);
+    computed: {
+        ...mapGetters(['transactions','account','sdk'])
     },
-    allTransactions() {
-      this.$router.push('/transactions');
+    created () {
+        this.pollData();
     },
     methods: {
         async updateTransactions() {
@@ -92,18 +77,15 @@ export default {
 
 <style scoped>
 .recent-transactions {
-  padding: 4px 14px;
-  height: 100%;
-  background: #656565;
+    padding: 0 20px;
+    height: 100%;
 }
-.recent-transactions h3,
-.recent-transactions p,
-.recent-transactions .transactionList {
-  color: #fff !important;
+.recent-transactions h3, .recent-transactions p, .recent-transactions .transactionList {
+    color: #fff !important;
 }
 .all-transactions {
-  height: auto !important;
-  padding: 5px 10px !important;
-  width: auto !important;
+    height:auto !important;
+    padding:5px 10px !important;
+    width:auto !important;
 }
 </style>

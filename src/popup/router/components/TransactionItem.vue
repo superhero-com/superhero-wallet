@@ -1,14 +1,23 @@
 <template>
   <div>
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
-      <ae-identicon :address="transactionAccount" />
+      <div class="holder">
+        <span class="amount">{{ txAmount }} æid ( <span style="color: #BCBCC4;">{{ txAmountToUSD }} USD</span> )</span>
+        <span style="color: #BCBCC4;" class="status">{{ status }}</span>
+        <span class="time">{{ new Date(transactionData.time).toLocaleTimeString() }}</span>
+      </div>
+      <div class="holder">
+        <span class="url">https://facebook.com/JohnDoe/post/something/someofthchanges/wallet/notwallet/facebookgiven</span>
+        <span class="seeTransaction"><Eye /></span>
+      </div>
+      <!-- <ae-identicon style="width: 10%;" :address="transactionAccount" />
       <div class="transaction-address">
         <ae-address :value="transactionAccount" length="short" :class="dark ? 'dark' : ''" v-if="transactionAccount != ''" />
         <ae-text face="mono-xs" class="transactionDate">{{ new Date(transactionData.time).toLocaleTimeString() }}</ae-text>
       </div>
       <div class="text-right balance-change" :class="recent ? 'mr-0' : ''">
         <div class="balance" :class="dark ? 'dark' : ''">{{ txAmount }}</div>
-      </div>
+      </div> -->
     </ae-list-item>
     <!-- <popup :popupSecondBtnClick="popup.secondBtnClick"></popup> -->
   </div>
@@ -16,13 +25,30 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import Eye from '../../../icons/eye.svg';
 
 export default {
   props: ['transactionData', 'recent', 'dark'],
-  data() {
-    return {};
+  components: {
+    Eye
   },
-  created() {},
+  data() {
+    return {
+      status: '',
+      rateUsd: null
+    };
+  },
+  async created() {
+    if (this.transactionData.tx.recipient_id == this.account.publicKey) {
+      this.status = 'Received'
+    } else if (this.transactionData.tx.caller_id == this.account.publicKey) {
+      this.status = 'Sent'
+    }
+    
+    await browser.storage.local.get('rateUsd').then(res => {
+      this.rateUsd = res.rateUsd;
+    });
+  },
   computed: {
     ...mapGetters(['account', 'popup']),
     balanceSign() {
@@ -74,6 +100,12 @@ export default {
       const { fee } = this.transactionData.tx;
       return ((amount + fee) / 10 ** 18).toFixed(3);
     },
+    txAmountToUSD() {
+      const amount = this.transactionData.tx.amount ? this.transactionData.tx.amount : 0;
+      const { fee } = this.transactionData.tx;
+      let txamount = (amount + fee) / 10 ** 18;
+      return (txamount * this.rateUsd).toFixed(3);
+    },
   },
   methods: {
     showTransactionDetails() {
@@ -89,69 +121,37 @@ export default {
 <style lang="scss" scoped>
 @import '../../../common/variables';
 .list-item-transaction {
-  justify-content: start;
-  .dark {
-    color: #fff !important;
-  }
-  .ae-address {
-    font-weight: bold;
-    color: $color-neutral-negative-2;
-  }
-  .pending {
-    font-weight: bold;
-    color: $color-secondary;
-  }
+  display: inline-block;
+  padding: 5px 0;
+  border-color: #16161d;
+  text-decoration: none;
+  list-style: none;
+  cursor: default;
+  border-top: 1px solid transparent;
 
-  .balance-change {
-    margin-right: 1rem;
-    font-weight: bold;
-    color: $color-secondary;
-    text-align: right;
-    .plus {
-      color: $color-alternative !important;
-      &:before {
-        content: '+';
-      }
+  .holder {
+    display: flex;
+    justify-content: space-between;
+    .url {
+      display: inline-block;
+      width: 294px;
+      white-space: nowrap;
+      overflow: hidden !important;
+      text-overflow: ellipsis;
+      color: $accent-color;
+      font-size: 12px
     }
-    .minus {
-      color: $primary-color !important;
-      &:before {
-        content: '-';
-      }
-    }
-    .balance {
-      font-weight: bold;
-      color: $color-neutral-negative-2;
-    }
-    small {
-      display: block;
-      .balance {
-        font-size: rem(11px);
-        font-weight: normal;
-        color: $color-neutral-negative-1;
-      }
-    }
-  }
-  .mr-0 {
-    margin-right: 0 !important;
-  }
-  .balance {
-    font-weight: bold;
-    font-size: 1.2rem;
-    color: $color-neutral-negative-1;
+    .seeTransaction {
 
-    &.invert {
-      color: #fff;
     }
-
-    &:after {
-      content: ' æid';
+    .time {
+      color: #CBCBCB;
+      font-size: 12px;
     }
-  }
-  .transaction-address {
-    text-align: left;
-    margin-right: auto;
-    margin-left: 1rem;
+    .amount {
+      color: $secondary-color;
+      font-size: 14px;
+    }
   }
 }
 </style>

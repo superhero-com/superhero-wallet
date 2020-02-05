@@ -1,5 +1,5 @@
 <template>
-  <ae-main @click.native="hideMenu" :class="onAccount ? 'ae-main-account' : ''">
+  <ae-main :class="onAccount ? 'ae-main-account' : ''">
       <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''" v-if="showNavigation">
         
         <!-- login screen header -->
@@ -9,17 +9,14 @@
             </p>
           </div>
           
-          <div style="position: absolute; left: 50%; font-size: 16px; margin-left: -50px; color: #F1F1F1;" :slot="menuSlot" v-if="isLoggedIn">
+          <div style="position: absolute; left: 50%; font-size: 16px; margin-left: -50px; color: #F1F1F1;" :slot="defaulT" v-if="isLoggedIn">
             Corona Wallet
           </div>
+
           <div style="height: 22px;" id="settings" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="menuSlot" direction="left" ref="settings">
-              <svg v-on:click="toggleDropdown" xmlns="http://www.w3.org/2000/svg" width="26" height="22" viewBox="0 0 26 22">
-                <g id="Group_28" data-name="Group 28" transform="translate(-241 -13)">
-                  <rect id="Rectangle_2" data-name="Rectangle 2" width="26" height="2" rx="1" transform="translate(241 13)" fill="#f1f1f1"/>
-                  <rect id="Rectangle_3" data-name="Rectangle 3" width="26" height="2" rx="1" transform="translate(241 23)" fill="#f1f1f1"/>
-                  <rect id="Rectangle_4" data-name="Rectangle 4" width="26" height="2" rx="1" transform="translate(241 33)" fill="#f1f1f1"/>
-                </g>
-              </svg>
+            <button style="padding: 0;" v-on:click="toggleDropdown">
+              <Hamburger class="dropdown-button-icon" slot="button" />
+            </button>
             <transition name="slide-fade">
               <ul v-if="dropdown.settings" class="dropdown-holder">
                 <li>
@@ -43,16 +40,8 @@
               </ul>
             </transition>
           </div>
-          
           <div id="account" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="mobileRight" direction="right" ref="account">
-            <svg style="margin: 6px;" xmlns="http://www.w3.org/2000/svg" width="17.437" height="22" viewBox="0 0 17.437 22">
-              <g id="bell" transform="translate(-53.013 0)">
-                <path id="Path_236" data-name="Path 236" d="M184.9,465.044a3.649,3.649,0,0,0,6.68,0Z" transform="translate(-126.512 -445.223)" fill="#f1f1f1"/>
-                <path id="Path_237" data-name="Path 237" d="M199.079,2.308a8.208,8.208,0,0,1,2.8.491V2.691A2.694,2.694,0,0,0,199.191,0h-.223a2.694,2.694,0,0,0-2.691,2.691V2.8A8.225,8.225,0,0,1,199.079,2.308Z" transform="translate(-137.348)" fill="#f1f1f1"/>
-                <path id="Path_238" data-name="Path 238" d="M69.788,93.513H53.676a.652.652,0,0,1-.647-.482.593.593,0,0,1,.345-.682,3.3,3.3,0,0,0,1.04-1.354A15.046,15.046,0,0,0,55.5,84.8a6.24,6.24,0,0,1,12.466-.024c0,.008,0,.016,0,.024a15.046,15.046,0,0,0,1.085,6.191,3.3,3.3,0,0,0,1.04,1.354.592.592,0,0,1,.345.682A.652.652,0,0,1,69.788,93.513Zm.31-1.16h0Z" transform="translate(0 -75.11)" fill="#f1f1f1"/>
-              </g>
-            </svg>
-
+            <Bell style="margin: 6px;" />
             <button style="width: 38px; height: 38px; padding: 0; margin-top: 6px;margin-bottom: 6px;" v-on:click="toggleDropdown">
               <ae-identicon id="identIcon" class="dropdown-button-icon" v-bind:address="this.account.publicKey" size="base" slot="button" />
             </button>
@@ -85,6 +74,7 @@
               </ul>
             </transition>
           </div>
+
       </ae-header>
       <hr style="margin: 0; background: #3a3a47; height: 2px; border: 0;">
     <router-view :key="$route.fullPath"></router-view>
@@ -111,9 +101,11 @@ import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT
 import { start, postMessage, readWebPageDom } from './utils/connection';
 import { langs, fetchAndSetLocale } from './utils/i18nHelper';
 import Arrow from '../icons/arrow.svg';
+import Bell from '../icons/bell.svg';
+import Hamburger from '../icons/hamburger.svg';
 export default {
   components: {
-    Arrow
+    Arrow, Bell, Hamburger
   },
   data() {
     return {
@@ -228,11 +220,11 @@ export default {
     setMenuSlots() {
       if(window.innerWidth <= 480) {
         this.menuSlot = "mobile-left"
-        this.menuSlot = "default"
+        this.defaulT = "default"
         this.mobileRight = "mobile-right"
       }else {
         this.menuSlot = "default"
-        this.menuSlot = "default"
+        this.defaulT = "default"
         this.mobileRight = "default"
       }
     },
@@ -371,7 +363,9 @@ export default {
       if (typeof sdk != null && !sdk.hasOwnProperty('error')) {
         try {
           await this.$store.commit('SET_TIPPING', await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract }));
-        } catch (e) {}
+        } catch (e) {
+          console.log('err => ', e)
+        }
         this.hideLoader();
       }
       if (typeof sdk.error !== 'undefined') {
@@ -441,7 +435,7 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 .ae-header.logged > * { color: #717C87; }
 .logo_top { display: flex; flex-flow: row wrap; justify-content: center; vertical-align: center; }
 .logo_top p { color: #FF0D6A; font-size: 20px; line-height: 12px; }
-.popup { color: #555; padding: 4px 14px; text-align: center; font-size: 16px; word-break: break-all; word-wrap: break-word; }
+.popup { color: #555; padding: 4px 0px; text-align: center; font-size: 16px; word-break: break-all; word-wrap: break-word; }
 #network.dropdown > ul { min-width: 250px; }
 #network > button { max-width: 80px; }
 #network li .status::before { content: ''; display: inline-block; width: 8px; height: 8px; -moz-border-radius: 7.5px; -webkit-border-radius: 7.5px; border-radius: 7.5px; margin-right: 5px;
@@ -451,7 +445,7 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 .subAccountInfo { margin-right:auto; margin-bottom:0 !important; max-width: 155px; }
 #network .subAccountInfo { max-width: 195px; }
 .subAccountIcon, .identicon { margin-right: 10px; }
-.ae-identicon.base { height: 100% !important; width: 100% !important;}
+.ae-identicon.base { height: 100%; width: 100%;}
 .subAccountName { text-align: left; color: #000; text-overflow: ellipsis; overflow: hidden; font-weight:bold; margin-bottom:0 !important; white-space: nowrap; }
 .subAccountBalance { font-family: monospace; margin-bottom:0 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px;}
 .name-pending { width:24px !important; height:24px !important; margin-right:5px; font-size:.8rem; }
