@@ -17,6 +17,8 @@ $ cd tipwallet
 ```
 $ npm install
 $ npm run build
+$ npm run gen:cordova-resources
+$ npx cordova build/run android/ios # to build Cordova application
 ```
 
 ### Develop locally

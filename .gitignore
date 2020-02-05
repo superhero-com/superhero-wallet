@@ -10,3 +10,9 @@ tests/e2e/screenshots/accountPage.js/Test cases for Account Page -- can logout a
 tests/e2e/screenshots/accountPage.js/Test cases for Account Page -- can logout and login again (failed).png
 tests/e2e/screenshots/accountPage.js/Test cases for Account Page -- can logout and login again (failed).png
 .DS_Store
+
+# Cordova files
+/www
+/platforms
+/plugins
+/resources/*/

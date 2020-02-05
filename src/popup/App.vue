@@ -80,16 +80,9 @@
 </template>
 
 <script>
-import Ae from '@aeternity/aepp-sdk/es/ae/universal';
-import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import { mapGetters } from 'vuex';
-import { saveAs } from 'file-saver';
-import { computeAuctionEndBlock, computeBidFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import store from '../store';
-import locales from './locales/en.json';
-// import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
-import { initializeSDK, contractCall } from './utils/helper';
-import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT, AEX2_METHODS } from './utils/constants';
+import { initializeSDK } from './utils/helper';
+import { TIPPING_CONTRACT, AEX2_METHODS } from './utils/constants';
 import { start, postMessage, readWebPageDom } from './utils/connection';
 import { langs, fetchAndSetLocale } from './utils/i18nHelper';
 import Arrow from '../icons/arrow.svg';
@@ -99,8 +92,7 @@ export default {
   },
   data() {
     return {
-      logo_top: browser.runtime.getURL('../../../icons/icon_48.png'),
-      ae_token: browser.runtime.getURL('../../../icons/ae.png'),
+      logo_top: browser.runtime.getURL('../icons/icon_48.png'),
       language: '',
       locales: langs,
       dropdown: {
@@ -138,7 +130,7 @@ export default {
       'aeppPopup',
     ]),
     extensionVersion() {
-      return `v.${browser.runtime.getManifest().version}`;
+      return `v.${process.env.npm_package_version}`;
     },
   },
   watch: {
@@ -174,12 +166,14 @@ export default {
         this.$store.state.current.network = data.activeNetwork;
       }
     });
-    const background = await start(browser);
-    this.$store.commit('SET_BACKGROUND', background);
-    readWebPageDom((receiver, sendResponse) => {
-      this.$store.commit('SET_TIPPING_RECEIVER', receiver);
-      sendResponse({ host: receiver.host, received: true });
-    });
+    if (process.env.IS_EXTENSION) {
+      const background = await start(browser);
+      this.$store.commit('SET_BACKGROUND', background);
+      readWebPageDom((receiver, sendResponse) => {
+        this.$store.commit('SET_TIPPING_RECEIVER', receiver);
+        sendResponse({ host: receiver.host, received: true });
+      });
+    }
 
     if (!process.env.RUNNING_IN_POPUP) {
       // init SDK
