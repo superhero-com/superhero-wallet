@@ -39,6 +39,8 @@ export default new Vuex.Store({
     txAdvancedMode: false,
     tipping: null,
     tippingReceiver: {},
+    mainLoading: true,
+    nodeStatus:'connecting'
   },
   getters,
   mutations,

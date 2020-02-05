@@ -1,11 +1,14 @@
 <template>
-  <div class="popup">
-    <div class="actions">
-      <button class="backbutton toAccount" @click="navigateToIndex"><ae-icon name="back" /> {{ $t('pages.termsOfService.backButton') }}</button>
-    </div>
-    <h2>{{ $t('pages.termsOfService.heading') }}</h2>
+  <div class="popup text-left">
+    <h1 class="heading-1">{{ $t('pages.termsOfService.heading') }}</h1>
+    <p class="sub-heading">Last Update Posted: February 03, 2020</p>
     <p class="termsText">
-      TERMS OF USE Last Update Posted: January 31, 2020 IMPORTANT NOTICE: THIS AGREEMENT IS SUBJECT TO BINDING ARBITRATION AND A WAIVER OF CLASS ACTION RIGHTS AS DETAILED IN
+
+      <div v-for="(item, index) in details">
+        <p>{{ item.title }}</p>
+        <p>{{ item.content }}</p>
+      </div>
+      <!-- TERMS OF USE Last Update Posted: January 31, 2020 IMPORTANT NOTICE: THIS AGREEMENT IS SUBJECT TO BINDING ARBITRATION AND A WAIVER OF CLASS ACTION RIGHTS AS DETAILED IN
       SECTION 14. PLEASE READ THE AGREEMENT CAREFULLY. 1. Acceptance of terms aeternity developed Corona (“Corona,” “we,” “us,” or “our”) which provides a platform for managing
       Aeternity (or “AE”) accounts, and allowing ordinary websites and applications to interact with the Aeternity blockchain, while keeping the user in control over what
       transactions they approve, through browser plugin and allowing them through coronanews.org get the latest curated news about Corona virus— which includes text, images, audio,
@@ -137,24 +140,27 @@
       the Terms remain in full force and effect. 14.3 Statute of Limitations You agree that regardless of any statute or law to the contrary, any claim or cause of action arising
       out of or related to the use of the Service or the Terms must be filed within one (1) year after such claim or cause of action arose or be forever barred. 14.4 Section Titles
       The section titles in the Terms are for convenience only and have no legal or contractual effect. 14.5 Communications Users with questions, complaints or claims with respect
-      to the Service may contact us using the relevant contact information set forth above. info@corona.org
+      to the Service may contact us using the relevant contact information set forth above. info@corona.org -->
     </p>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-
 export default {
   data() {
-    return {};
+    return {
+      details: [
+        {
+          title: 'I. Lorem ipsum dolor sit amet',
+          content: `of any statute or law to the contrary, any claim or cause of action arising
+      out of or related to the use of the Service or the Terms must be filed within one (1) year after such claim or cause of action arose or be forever barred. 14.4 Section Titles
+      The section titles in the Terms are for convenience only and have no legal or contractual effect. 14.5 Communications Users with questions, complaints or claims with respect
+      to the Service may contact us using the relevant contact information set forth above. info@corona.org`
+        }
+      ]
+    };
   },
   created() {},
-  methods: {
-    navigateToIndex() {
-      this.$router.push('/');
-    },
-  },
   computed: {},
 };
 </script>

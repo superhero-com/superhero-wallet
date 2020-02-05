@@ -3,6 +3,7 @@ import { decrypt } from './popup/utils/keystore';
 import { generateHdWallet, getHdWalletAccount } from './popup/utils/hdWallet';
 import { stringifyForStorage, parseFromStorage } from './popup/utils/helper';
 import { addressGenerator } from './popup/utils/address-generator';
+import { setInterval  } from 'timers';
 
 export default class WalletController {
   constructor(tests = false) {

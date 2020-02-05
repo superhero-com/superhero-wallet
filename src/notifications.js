@@ -1,7 +1,7 @@
 import Node from '@aeternity/aepp-sdk/es/node';
 import { networks, DEFAULT_NETWORK, NOTIFICATION_METHODS } from './popup/utils/constants';
 import { detectBrowser, getUserNetworks } from './popup/utils/helper';
-
+import { setInterval  } from 'timers';
 global.browser = require('webextension-polyfill');
 const { Universal: Ae, Crypto } = require('@aeternity/aepp-sdk');
 

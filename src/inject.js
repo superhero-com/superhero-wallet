@@ -3,14 +3,13 @@ import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wa
 import { getBrowserAPI } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/helpers';
 import { MESSAGE_DIRECTION } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/schema';
 import ContentScriptBridge from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/content-script-bridge';
-import { extractHostName, detectBrowser, checkAddress } from './popup/utils/helper';
-
+import { setInterval, clearInterval  } from 'timers';
 global.browser = require('webextension-polyfill');
 
 const redirectToWarning = (hostname, href, extUrl = '') => {
   window.stop();
   let extensionUrl = 'chrome-extension';
-  if (detectBrowser() == 'Firefox') {
+  if (typeof chrome === 'undefined') {
     extensionUrl = 'moz-extension';
   }
   let redirectUrl = '';
@@ -25,7 +24,7 @@ const redirectToWarning = (hostname, href, extUrl = '') => {
 if (typeof navigator.clipboard === 'undefined') {
   // redirectToWarning(extractHostName(window.location.href),window.location.href)
 } else {
-  sendToBackground('phishingCheck', { hostname: extractHostName(window.location.href), href: window.location.href });
+  sendToBackground('phishingCheck', { href: window.location.href });
 }
 
 // Subscribe from postMessages from page
@@ -38,13 +37,7 @@ window.addEventListener(
     }
     // Handle message from page and redirect to background script
     if (!data.hasOwnProperty('resolve')) {
-      sendToBackground(method, data).then(res => {
-        if (method == 'aeppMessage') {
-          res.resolve = true;
-          res.method = method;
-          window.postMessage(res, '*');
-        }
-      });
+      sendToBackground(method, data)
     }
   },
   false
@@ -54,7 +47,7 @@ window.addEventListener(
 browser.runtime.onMessage.addListener(({ data, method }, sender, sendResponse) => {
   if (data.method == 'phishingCheck') {
     if (data.blocked) {
-      redirectToWarning(data.params.hostname, data.params.href, data.extUrl);
+      redirectToWarning(data.params.host, data.params.href, data.extUrl);
     }
   }
 });
@@ -84,11 +77,6 @@ window.addEventListener('load', () => {
           type: 'readDom',
           data: address,
         })
-        .then(res => {
-          if (res && res.host == window.origin && res.received) {
-            // clearInterval(sendInterval)
-          }
-        });
     }, 5000);
   }
 });

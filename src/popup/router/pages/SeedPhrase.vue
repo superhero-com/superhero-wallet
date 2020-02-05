@@ -61,6 +61,7 @@ import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/b
 import { shuffleArray, fetchData } from '../../utils/helper';
 import { addressGenerator, encryptMnemonic } from '../../utils/address-generator';
 import { generateHdWallet } from '../../utils/hdWallet';
+import { setInterval  } from 'timers';
 
 export default {
   props: ['termsAgreed'],

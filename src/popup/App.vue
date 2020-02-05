@@ -75,7 +75,7 @@
       {{ extensionVersion }}
     </span>
     <Loader size="big" :loading="mainLoading"></Loader>
-    <div class="connect-error" v-if="connectError">Unable to connect to choosen node</div>
+    <NodeConnectionStatus />
   </ae-main>
 </template>
 
@@ -87,7 +87,7 @@ import { saveAs } from 'file-saver';
 import { computeAuctionEndBlock, computeBidFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import store from '../store';
 import locales from './locales/en.json';
-// import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
+import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
 import { initializeSDK, contractCall } from './utils/helper';
 import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT, AEX2_METHODS } from './utils/constants';
 import { start, postMessage, readWebPageDom } from './utils/connection';
@@ -110,7 +110,6 @@ export default {
         languages: false,
         tokens: false,
       },
-      mainLoading: true,
       checkPendingTxInterval: null,
       menuSlot: 'mobile-left',
       mobileRight: 'mobile-right',
@@ -136,6 +135,8 @@ export default {
       'background',
       'sdk',
       'aeppPopup',
+      'mainLoading',
+      'nodeConnecting'
     ]),
     extensionVersion() {
       return `v.${browser.runtime.getManifest().version}`;
@@ -184,16 +185,6 @@ export default {
     if (!process.env.RUNNING_IN_POPUP) {
       // init SDK
       this.checkSdkReady();
-      setTimeout(() => {
-        if (this.isLoggedIn) {
-          if (this.sdk == null) {
-            this.initSDK();
-          }
-          this.pollData();
-        } else {
-          this.hideLoader();
-        }
-      }, 500);
     } else {
       this.hideLoader();
     }
@@ -218,20 +209,13 @@ export default {
     checkSdkReady() {
       if (!process.env.RUNNING_IN_POPUP) {
         this.checkSDKReady = setInterval(() => {
-          if (this.isLoggedIn && this.sdk == null) {
+          if (this.sdk != null) {
             this.initRpcWallet();
-            this.initSDK();
             this.pollData();
             clearInterval(this.checkSDKReady);
           }
-        }, 500);
+        }, 100);
       }
-    },
-    hideLoader() {
-      const self = this;
-      setTimeout(() => {
-        self.mainLoading = false;
-      }, 1500);
     },
     hideMenu(event) {
       const { target } = event;
@@ -269,26 +253,6 @@ export default {
         postMessage(this.background, { type: AEX2_METHODS.SWITCH_NETWORK, payload: network });
         this.initSDK();
         this.$store.dispatch('updateBalance');
-      });
-    },
-    logout() {
-      browser.storage.local.remove('isLogged').then(() => {
-        browser.storage.local.remove('wallet').then(() => {
-          browser.storage.local.remove('activeAccount').then(() => {
-            this.dropdown.settings = false;
-            this.dropdown.languages = false;
-            this.dropdown.account = false;
-            this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: '', index: 0 });
-            this.$store.commit('UNSET_SUBACCOUNTS');
-            this.$store.commit('UPDATE_ACCOUNT', '');
-            this.$store.commit('SWITCH_LOGGED_IN', false);
-            this.$store.commit('SET_WALLET', []);
-            this.$store.dispatch('initSdk', null);
-            postMessage(this.background, { type: AEX2_METHODS.LOGOUT });
-            this.checkSdkReady();
-            this.$router.push('/');
-          });
-        });
       });
     },
     popupAlert(payload) {
@@ -338,41 +302,8 @@ export default {
         }
       }, 2500);
     },
-    async initSDK() {
-      const sdk = await initializeSDK(this, {
-        network: this.network,
-        current: this.current,
-        account: this.account,
-        wallet: this.wallet,
-        activeAccount: this.activeAccount,
-        background: this.background,
-      });
-      if (typeof sdk != null && !sdk.hasOwnProperty('error')) {
-        try {
-          await this.$store.commit('SET_TIPPING', await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract }));
-        } catch (e) {}
-        this.hideLoader();
-      }
-      if (typeof sdk.error !== 'undefined') {
-        await browser.storage.local.remove('isLogged');
-        await browser.storage.local.remove('activeAccount');
-        this.hideLoader();
-        this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: '', index: 0 });
-        this.$store.commit('UNSET_SUBACCOUNTS');
-        this.$store.commit('UPDATE_ACCOUNT', '');
-        this.$store.commit('SWITCH_LOGGED_IN', false);
-
-        this.$router.push('/');
-      }
-    },
     initRpcWallet() {
       postMessage(this.background, { type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
-    },
-    hideConnectError() {
-      this.connectError = false;
-    },
-    showConnectError() {
-      this.connectError = true
     },
     goBack() {
       if(this.isLoggedIn) {

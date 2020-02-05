@@ -15,7 +15,7 @@ const platforms = [
 ];
 const distFolder = path.resolve(__dirname, 'dist')
 
-
+const mode =  process.env.NODE_ENV === 'production' ? '' : '_dev';
 
 const config = [
   {
@@ -208,7 +208,7 @@ function getPlugins(platform) {
       { from: 'popup/CameraRequestPermission.html', to: `popup/CameraRequestPermission.html`, transform:transformHtml },
       { from: 'icons/icon_48.png', to: `popup/assets/logo-small.png` },
       {
-        from: `manifests/manifest_${platform}.json`,
+        from: `manifests/manifest_${platform}${mode}.json`,
         to: `manifest.json`,
         transform: content => {
           const jsonContent = JSON.parse(content);

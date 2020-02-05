@@ -84,7 +84,7 @@ export const toMicro = value => value.shiftedBy(-MAGNITUDE_MICRO).toFixed();
 export const MIN_SPEND_TX_FEE_MICRO = toMicro(MIN_SPEND_TX_FEE);
 export const MAX_REASONABLE_FEE_MICRO = toMicro(MAX_REASONABLE_FEE);
 
-export const DEFAULT_NETWORK = 'Mainnet'
+export const DEFAULT_NETWORK = 'Testnet'
 export const networks = {
   Testnet: {
     url: 'https://sdk-testnet.aepps.com',
@@ -103,8 +103,8 @@ export const networks = {
     networkId: 'ae_mainnet',
     middlewareUrl: 'https://mainnet.aeternal.io/',
     explorerUrl: 'https://mainnet.aeternal.io',
-    // compilerUrl: 'https://compiler.aepps.com',
-    compilerUrl: 'https://compiler.aeternity.art',
+    compilerUrl: 'https://compiler.aepps.com',
+    // compilerUrl: 'https://compiler.aeternity.art',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tipContract: 'ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj'
@@ -187,4 +187,3 @@ payable contract WaelletTipAnyBasic =
       repaid        = false,
       amount        = Call.value,
       note          = note }`
-

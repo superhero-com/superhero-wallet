@@ -19,9 +19,12 @@ import RecentTransactions from './components/RecentTransactions';
 import Button from './components/Button';
 import CheckBox from './components/CheckBox';
 import Textarea from './components/Textarea';
-
 import ModalComponent from './components/Modal';
+import NodeConnectionStatus from './components/NodeConnectionStatus'
+
 import * as helper from '../utils/helper';
+import store from '../../store';
+import wallet from '../../lib/wallet'
 
 const plugin = {
   install() {
@@ -52,93 +55,40 @@ Vue.component('ClaimTipButton', ClaimTIpButton);
 Vue.component('RecentTransactions', RecentTransactions);
 Vue.component('Button',Button);
 Vue.component('CheckBox',CheckBox);
-Vue.component('Textarea', Textarea)
+Vue.component('Textarea', Textarea);
+Vue.component("NodeConnectionStatus", NodeConnectionStatus);
 
 const router = new VueRouter({
   routes,
 });
 
-const isFirstTransition = true;
+let isFirstTransition = true;
 const lastRouteKey = 'lsroute';
-const noRedirectUrls = ['/popup-sign-tx', '/connect', '/connect-confirm', '/sign-transaction/:type?', '/ask-accounts'];
-// router.beforeEach((to, from, next) => {
-//   const lastRouteName = localStorage.getItem(lastRouteKey);
+const noRedirectUrls = ['/popup-sign-tx', '/connect', '/connect-confirm', '/sign-transaction/:type?', '/sign-transaction', '/ask-accounts'];
 
-//   const shouldRedirect = to.path === ("/" || "/account") && lastRouteName && isFirstTransition;
-//   console.log(to.path)
-//   if (shouldRedirect){
-//     browser.storage.local.get('showAeppPopup').then(aepp => {
-//       browser.storage.local.get('pendingTransaction').then(pendingTx => {
-//         browser.storage.local.get('isLogged').then(data => {
-//           if (!data.isLogged && !data.hasOwnProperty('isLogged')) {
-//             next();
-//             return;
-//           }
-//           browser.storage.local.get('userAccount').then(async user => {
-//             if (user.userAccount && user.hasOwnProperty('userAccount')) {
-//               try {
-//                 user.userAccount.encryptedPrivateKey = JSON.parse(user.userAccount.encryptedPrivateKey);
-//               } catch (e) {
-//                 user.userAccount.encryptedPrivateKey = JSON.stringify(user.userAccount.encryptedPrivateKey);
-//               }
-//               router.app.$store.commit('UPDATE_ACCOUNT', user.userAccount);
-//               if (data.isLogged && data.hasOwnProperty('isLogged')) {
-//                 browser.storage.local.get('subaccounts').then(subaccounts => {
-//                   let sub = [];
-//                   if (
-//                     !subaccounts.hasOwnProperty('subaccounts') ||
-//                     subaccounts.subaccounts == '' ||
-//                     (typeof subaccounts.subaccounts == 'object' && !subaccounts.subaccounts.find(f => f.publicKey == user.userAccount.publicKey))
-//                   ) {
-//                     sub.push({
-//                       name: typeof subaccounts.subaccounts != 'undefined' ? subaccounts.subaccounts.name : 'Main account',
-//                       publicKey: user.userAccount.publicKey,
-//                       root: true,
-//                       balance: 0,
-//                     });
-//                   }
-//                   if (subaccounts.hasOwnProperty('subaccounts') && subaccounts.subaccounts.length > 0 && subaccounts.subaccounts != '') {
-//                     subaccounts.subaccounts.forEach(su => {
-//                       sub.push({ ...su });
-//                     });
-//                   }
-//                   router.app.$store.dispatch('setSubAccounts', sub);
-//                   browser.storage.local.get('activeAccount').then(active => {
-//                     if (active.hasOwnProperty('activeAccount')) {
-//                       router.app.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: sub[active.activeAccount].publicKey, index: active.activeAccount });
-//                     }
-//                   });
-//                 });
-//               }
-//             }
-//             browser.storage.local.get('confirmSeed').then(seed => {
-//               if (seed.hasOwnProperty('confirmSeed') && seed.confirmSeed == false) {
-//                 router.app.$router.push('/seed');
-//                 return;
-//               }
-//             });
-//             if (data.isLogged && data.hasOwnProperty('isLogged')) {
-//               router.app.$store.commit('SWITCH_LOGGED_IN', true);
-
-//               if(!process.env.RUNNING_IN_POPUP && !noRedirectUrls.includes(lastRouteName)) {
-//                 next(lastRouteName)
-//               } else {
-//                 next('/')
-//               }
-
-//             } else {
-//               next('/')
-//             }
-//           });
-//         });
-//       });
-//     });
-//   }
-//   else{
-//     next()
-//   }
-//   isFirstTransition = false;
-// })
+router.beforeEach((to, from, next) => {
+  const lastRouteName = localStorage.getItem(lastRouteKey);
+  const shouldRedirect = to.path === ("/" || "/account") && lastRouteName && isFirstTransition;
+  if(store.getters.account.hasOwnProperty("publicKey") && store.getters.isLoggedIn) {
+    if(!store.getters.sdk) {
+      wallet.initSdk(() => next('/'))
+    }
+    next()
+  } else {
+    wallet.init((route) => {
+      if(shouldRedirect && (route == '/' || route == '/account') && !noRedirectUrls.includes(lastRouteName)) {
+        next(lastRouteName)
+      } else {
+        if(route) {
+          next(route)
+        } else {
+          next()
+        }
+      }
+    })
+  }
+  isFirstTransition = false
+})
 
 router.afterEach(to => {
   localStorage.setItem(lastRouteKey, to.path);

@@ -94,7 +94,7 @@ import { mapGetters } from 'vuex';
 import { Wallet, MemoryAccount } from '@aeternity/aepp-sdk/es';
 import { computeAuctionEndBlock, computeBidFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import BigNumber from 'bignumber.js';
-import { clearInterval, clearTimeout } from 'timers';
+import { clearInterval, clearTimeout, setInterval } from 'timers';
 import { MAGNITUDE, MIN_SPEND_TX_FEE, MIN_SPEND_TX_FEE_MICRO, MAX_REASONABLE_FEE, TX_TYPES, calculateFee, TX_LIMIT_PER_DAY } from '../../utils/constants';
 import {
   convertToAE,
