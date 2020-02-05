@@ -16,6 +16,9 @@ import BackLink from './components/BackLink';
 import DropDown from './components/DropDown';
 import ClaimTIpButton from './components/ClaimTipButton';
 import RecentTransactions from './components/RecentTransactions';
+import Button from './components/Button';
+import CheckBox from './components/CheckBox';
+import Textarea from './components/Textarea';
 
 import ModalComponent from './components/Modal';
 import * as helper from '../utils/helper';
@@ -47,6 +50,9 @@ Vue.component('BackLink', BackLink);
 Vue.component('DropDown', DropDown);
 Vue.component('ClaimTipButton', ClaimTIpButton);
 Vue.component('RecentTransactions', RecentTransactions);
+Vue.component('Button',Button);
+Vue.component('CheckBox',CheckBox);
+Vue.component('Textarea', Textarea)
 
 const router = new VueRouter({
   routes,

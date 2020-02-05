@@ -341,7 +341,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
 .accountAddress {
   color: #fff;
 }

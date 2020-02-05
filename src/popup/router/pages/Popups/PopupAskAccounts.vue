@@ -52,7 +52,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../common/base';
+@import '../../../../common/variables';
 .primary {
   color: $primary-color;
 }

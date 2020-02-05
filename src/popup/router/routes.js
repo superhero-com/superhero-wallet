@@ -103,6 +103,9 @@ export default [
   {
     path: '/importAccount',
     component: ImportAccount,
+    meta: {
+      title: 'Retrieve Existing Account'
+    }
   },
   {
     path: '/intro',

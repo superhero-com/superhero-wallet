@@ -61,9 +61,8 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../../common/base';
-.settingslist {
-  padding: 0 !important;
+.settingslist  {
+    padding:0 !important;
 }
 .settingslist button {
   transition: 0.4s;

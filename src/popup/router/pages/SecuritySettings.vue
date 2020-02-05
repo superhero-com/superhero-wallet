@@ -195,7 +195,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../../common/base';
 .primary-button {
   background: #4f4f4f;
   color: #fff;

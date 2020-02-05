@@ -194,7 +194,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-@import '../../../common/base';
 .closeBtn {
   position: absolute !important;
   top: 17px;

@@ -236,7 +236,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
+@import '../../../common/variables';
 .attentionHolder h1 {
   color: red;
   font-size: 35px;

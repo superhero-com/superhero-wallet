@@ -1,17 +1,6 @@
-$main-font-color: #333;
 
-$main-color: #08c;
 
-$input-background:#ececec;
-$input-toolbar-background:#e0e0e0;
-$input-toolbar-color:#000;
-$primary-color:#FF0D6A;
-$input-border-color:#B300FF;
-$color-neutral-negative-1: #76818C;
-$color-neutral-negative-2: #203040;
-$color-alternative: #14CCB7;
-$color-secondary:#6948A1;
-$ledger-color:#203040;
+@import './variables';
 
 ::-webkit-scrollbar {	
   width: 1px;
@@ -48,6 +37,7 @@ a {
 }
 p {
   word-break: break-word;
+  font-weight: normal;
 }
 .ae-input-container.focus { 
   caret-color: $primary-color !important;
@@ -79,7 +69,7 @@ p {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0 auto;
-  padding: 0 3rem;
+  padding: 0 25px;
 }
 
 main {
@@ -325,7 +315,6 @@ main {
 .textarea { 
   outline:none;
   resize:none;
-  background:$input-background !important;
   border:none;
   padding-left:1rem;
   min-height: 110px;
@@ -566,30 +555,37 @@ input::-moz-focus-outer {
   border:none;
 }
 
-.tokenRegistry .ae-check-button:after {
-  width: 29px;
-  height: 26px;
-  top:7px;
-}
-.tokenRegistry .ae-check-button:before {
-  top:7px;
-}
-.tokenRegistry .ae-check-button { 
-  padding-left:3rem;
+.ae-check-button { 
+  padding-left:2.5rem !important;
   word-break: break-word;
   text-align: left;
   margin-bottom:1rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 .ae-check-button:after {
-  width: 29px !important;
+  width: 26px !important;
   height: 26px !important;
-  top:7px !important;
+  top:50% !important;
+  transform:translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
 }
 .ae-check-button:before {
-  top:7px !important;
+  border-color: $accent-color !important;
+  top:50% !important;
+  border-radius: 4px !important;
+  transform:translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  width: 18px !important;
+  height: 18px !important;
+  background: transparent !important;
+  border-width:3px !important;
 }
-.termsCheck .ae-check-button:before  {
-  border-radius: 0 !important;
+.ae-check > input[type="checkbox"]:checked + span.ae-check-button:before {
+  border-color: $accent-color !important;
+  background: $accent-color !important;
 }
 
 .token-action-holder {

@@ -28,8 +28,4 @@ export default {
   },
   computed: {},
 };
-</script>
-
-<style lang="scss" scoped>
-@import '../../../common/base';
-</style>
+</script>]

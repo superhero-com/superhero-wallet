@@ -98,7 +98,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../../common/base';
 .backbtn {
   width: 50%;
   margin-top: 5px;

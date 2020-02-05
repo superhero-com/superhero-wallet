@@ -1,13 +1,11 @@
 <template>
   <ae-main @click.native="hideMenu" :class="onAccount ? 'ae-main-account' : ''">
-    <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''">
+    <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''" v-if="showNavigation">
       <!-- login screen header -->
-      <div class="logo_top" :slot="menuSlot" v-if="!isLoggedIn">
-        <img :src="logo_top" alt="" />
-        <p>
-          {{ $t('pages.appVUE.systemName') }}
-          <span class="extensionVersion extensionVersionTop">{{ extensionVersion }}</span>
-        </p>
+      <div class="nav-title" :slot="menuSlot" v-if="!isLoggedIn">
+          <p v-if="title" class="flex flex-align-center">
+            <Arrow class="arrow-back" @click="goBack" /> <span class="title-text"> {{ title }} </span>
+          </p>
       </div>
       <div id="settings" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="menuSlot" direction="left" ref="settings">
         <button v-on:click="toggleDropdown">
@@ -94,8 +92,11 @@ import { initializeSDK, contractCall } from './utils/helper';
 import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT, AEX2_METHODS } from './utils/constants';
 import { start, postMessage, readWebPageDom } from './utils/connection';
 import { langs, fetchAndSetLocale } from './utils/i18nHelper';
-
+import Arrow from '../icons/arrow.svg';
 export default {
+  components: {
+    Arrow
+  },
   data() {
     return {
       logo_top: browser.runtime.getURL('../../../icons/icon_48.png'),
@@ -116,6 +117,8 @@ export default {
       checkSDKReady: null,
       connectError: false,
       onAccount: false,
+      showNavigation: false,
+      title: ''
     };
   },
   computed: {
@@ -140,14 +143,25 @@ export default {
   },
   watch: {
     $route(to, from) {
+      this.title = to.meta.title || ''
       if (to.path == '/account') {
         this.onAccount = true;
       } else {
         this.onAccount = false;
       }
+
+      if(to.path !== '/') {
+        this.showNavigation = true
+      } else {
+        this.showNavigation = false
+      }
     },
   },
   async created() {
+    if(this.$router.currentRoute.path !== '/') {
+      this.showNavigation = true
+    } 
+    this.title = this.$router.currentRoute.meta.title
     browser.storage.local.get('language').then(data => {
       this.language = langs[data.language];
       this.$store.state.current.language = data.language;
@@ -183,20 +197,24 @@ export default {
     } else {
       this.hideLoader();
     }
+    this.setMenuSlots()
     window.addEventListener('resize', () => {
-      if (window.innerWidth <= 480) {
-        this.menuSlot = 'mobile-left';
-        this.mobileRight = 'mobile-right';
-      } else {
-        this.menuSlot = 'default';
-        this.mobileRight = 'default';
-      }
+      this.setMenuSlots()
     });
   },
   mounted: function mounted() {
     this.dropdown.settings = false;
   },
   methods: {
+    setMenuSlots() {
+      if(window.innerWidth <= 480) {
+        this.menuSlot = "mobile-left"
+        this.mobileRight = "mobile-right"
+      }else {
+        this.menuSlot = "default"
+        this.mobileRight = "default"
+      }
+    },
     checkSdkReady() {
       if (!process.env.RUNNING_IN_POPUP) {
         this.checkSDKReady = setInterval(() => {
@@ -354,8 +372,15 @@ export default {
       this.connectError = false;
     },
     showConnectError() {
-      this.connectError = true;
+      this.connectError = true
     },
+    goBack() {
+      if(this.isLoggedIn) {
+        this.$router.push('/account')
+      } else {
+        this.$router.push('/')
+      }
+    }
   },
   beforeDestroy() {
     clearInterval(this.polling);
@@ -364,7 +389,9 @@ export default {
 </script>
 
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
 @import '../common/base';
+@import '../common/extension';
 @-moz-document url-prefix() {
   html {
     scrollbar-width: none;

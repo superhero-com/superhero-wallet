@@ -18,7 +18,8 @@
             "topUp": "Top Up",
             "withdraw": "Withdraw",
             "myTransactions": "My transactions",
-            "dashboard": "Dashboard"
+            "dashboard": "Dashboard",
+            "aeid": "æid"
         },
         "aboutSettings": {
             "heading": "About",
@@ -213,22 +214,19 @@
             "term1": "I agree to the Corona ",
             "term2": "Terms of Service",
             "term3": "Privacy Policy",
-            "heading": "Welcome to Corona, to start interacting with aeternity blockchain: ",
+            "termsAndConditions": "Terms & Conditions",
+            "heading": "Start sending and receiving ",
             "securingAccount": "Securing your account",
-            "generateWallet": "Generate wallet",
-            "importPrivateKey": "Import secret key",
+            "generateWallet": "Generate New Wallet",
+            "importWallet": "Retrieve existing account",
             "passwordError": "Password must be at lest 4 symbols!",
             "incorrectPasswordError": "Incorrect password !",
             "loginButton": "Login",
-            "importWaellet": "Import wallet",
-            "privateKey": "Private key",
-            "keystoreJson": "Keystore.json",
             "seedPhrase": "Seed phrase",
             "enterSeedPhrase": "Enter your seed phrase. ",
             "continueButton": "Continue",
-            "chooseFile": "Choose file",
-            "importAccount": "Import Account",
-            "continue": "Continue"
+            "continue": "Continue",
+            "importAccount": "Import Account"
         },
         "ledgerSetup": {
             "ledgerConnectSetup": "How to connect from Ledger",

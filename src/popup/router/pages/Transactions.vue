@@ -212,14 +212,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
-.date {
-  background: #edf3f7;
-  padding: 0.5rem 1rem;
-  color: #4e4e4e;
-  text-transform: uppercase;
-  font-size: 0.9rem;
-  font-family: monospace;
+@import '../../../common/variables';
+.date{
+    background: #EDF3F7;
+    padding: 0.5rem 1rem;
+    color: #4e4e4e;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    font-family: monospace;
 }
 .actions {
   width: 50%;

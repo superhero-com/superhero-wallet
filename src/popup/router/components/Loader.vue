@@ -24,7 +24,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/base';
 .fadeOut-enter-active,
 .fadeOut-leave-active {
   transition: all 0.5s ease-in-out;

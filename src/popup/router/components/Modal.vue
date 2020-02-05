@@ -12,7 +12,3 @@ export default {
   props: ['modal'],
 };
 </script>
-
-<style lang="scss" scoped>
-@import '../../../common/base';
-</style>
