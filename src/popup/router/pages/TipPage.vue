@@ -43,6 +43,7 @@
       </div>
       <TipBackground class="tip-bg" v-if="confirmMode" />
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
+    <Loader size="big" :loading="loading" type="transparent" content=""></Loader>
   </div>
 </template>
 
@@ -65,7 +66,8 @@ export default {
       domainDataInterval: null,
       confirmMode: false,
       amountError:false,
-      noteError:false
+      noteError:false,
+      loading: false
     };
   },
   computed: {
@@ -119,8 +121,10 @@ export default {
     },
     async confirmTip(domain, amount, note) {
       try {
+        this.loading = true
         const res = await this.$helpers.contractCall({ instance: this.tipping, method:'tip', params: [domain,note, { amount, waitMined:false }] })
         if(res.hash) {
+          this.loading = false
           this.$store.commit('SET_AEPP_POPUP', false);
           return this.$router.push({
             name: 'success-tip',
@@ -131,7 +135,7 @@ export default {
           });
         }
       } catch(e) {
-
+        this.loading = false
         return this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
       }
     },

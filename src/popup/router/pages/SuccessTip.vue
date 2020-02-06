@@ -1,6 +1,11 @@
 <template>
   <div class="popup">
-      <h3 class="heading-1 mb-25 mt-15">{{ $t('pages.successTip.completedHeading') }}</h3>
+      <h3 class="heading-1 mb-25 mt-15 center">
+          <div class="flex flex-align-center flex-justify-content-center">
+            <Heart />
+            <span class="ml-5">{{ $t('pages.successTip.completedHeading') }}</span>
+          </div>
+      </h3>
       <p class="primary-title text-left mb-8 f-16">
         {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text">{{ amountTip }} æid</span> (0.30 USD) {{ $t('pages.successTip.to') }}
       </p>
@@ -29,8 +34,12 @@
 <script>
 import BigNumber from 'bignumber.js';
 import { MAGNITUDE } from '../../utils/constants';
+import Heart from '../../../icons/heart.svg'
 
 export default {
+  components: {
+    Heart
+  },
   props: ['amount', 'domain'],
   data() {
     return {
