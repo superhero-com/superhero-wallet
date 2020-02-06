@@ -28,6 +28,7 @@
 import { mapGetters } from 'vuex';
 import { setInterval  } from 'timers';
 
+
 export default {
     data() {
         return {

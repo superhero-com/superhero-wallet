@@ -32,10 +32,12 @@ export default {
     width:270px !important;
     border-radius: 5px;
     font-size:18px;
-    padding: 13px;
+    padding: 0;
     margin: 8px auto;
     color: $button-text-color !important;
     font-weight: normal !important;
+    line-height: 40px;
+    max-height: 40px;
 }
 .primary-button.disabled {
     opacity: .4;

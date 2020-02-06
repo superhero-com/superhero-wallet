@@ -1,15 +1,12 @@
 <template>
   <div class="popup">
-    <BackLink to="/account">
-      {{ $t('pages.receive.backToAccount') }}
-    </BackLink>
     <p>{{ $t('pages.receive.heading') }}</p>
-    <ae-card fill="neutral" align="center">
+    <ae-card align="center" class="qr-code">
       <div class="qr-wrapper">
         <qrcode-vue :value="account.publicKey"></qrcode-vue>
       </div>
       <ae-address :value="account.publicKey" gap="0" />
-      <ae-toolbar fill="neutral" align="right" slot="footer">
+      <ae-toolbar align="right" slot="footer">
         <ae-button face="toolbar" v-clipboard:copy="account.publicKey" @click="copy">
           <ae-icon name="copy" />
           {{ $t('pages.receive.copy') }}
@@ -46,7 +43,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" >
 .qr-wrapper {
   display: flex;
   justify-content: center;
@@ -54,5 +51,8 @@ export default {
   padding: 5px;
   background-color: white;
   border-radius: 6px;
+}
+.qr-code li {
+  color: #000;
 }
 </style>

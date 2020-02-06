@@ -22,6 +22,7 @@ import Textarea from './components/Textarea';
 import ModalComponent from './components/Modal';
 import NodeConnectionStatus from './components/NodeConnectionStatus'
 import Input from './components/Input';
+import AmountSend from './components/AmountSend';
 
 import * as helper from '../utils/helper';
 import store from '../../store';
@@ -59,6 +60,7 @@ Vue.component('CheckBox',CheckBox);
 Vue.component('Textarea', Textarea);
 Vue.component("NodeConnectionStatus", NodeConnectionStatus);
 Vue.component('Input', Input);
+Vue.component('AmountSend', AmountSend);
 
 const router = new VueRouter({
   routes,

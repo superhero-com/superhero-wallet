@@ -213,7 +213,6 @@ export default {
   },
   async getRegisteredNames({ commit, state }) {
     const { middlewareUrl } = state.network[state.current.network];
-
     const res = await Promise.all(
       state.subaccounts.map(async ({ publicKey }, index) => {
         let names = await Promise.all([
@@ -239,7 +238,6 @@ export default {
 
         names = flatten(names);
         names = uniqBy(names, 'name');
-
         if (names.length) commit(types.SET_ACCOUNT_AENS, { account: index, name: names[0].name, pending: !!names[0].pending });
         browser.storage.local.get('pendingNames').then(pNames => {
           let pending = [];
@@ -262,7 +260,6 @@ export default {
         return names;
       })
     );
-
     commit(types.SET_NAMES, { names: Array.prototype.concat.apply([], res) });
   },
   removePendingName({ commit, state }, { hash }) {
@@ -389,7 +386,7 @@ export default {
 
     const sub = [];
     sub.push({
-      name: 'Main account',
+      name: 'Account',
       publicKey: keypair.publicKey,
       balance: 0,
       root: true,

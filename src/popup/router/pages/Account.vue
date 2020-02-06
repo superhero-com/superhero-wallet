@@ -20,7 +20,7 @@
       <div class="external-svg" :style="{'background-image': 'url(' + accbalanceBG + ')'}">
         <span class="title">Balance</span>
         <div class="balance no-sign">
-          <div class="amount"> <span>{{ roundedAmount }}</span> <span>{{ tokenSymbol }}</span> </div>
+          <div class="amount"> <span>{{ tokenBalance }}</span> <span>{{ tokenSymbol }}</span> </div>
           <div class="currenciesgroup">
             <span> ~ </span>
             <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
@@ -45,7 +45,12 @@
       </div>
 
       <div style="background: #21212A" class="height-100">
-        <Button style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips"> <Heart /> Send æid </Button>
+        <Button style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips"> 
+            <div class="flex flex-align-center flex-justify-content-center">
+              <Heart /> 
+              <span class="ml-5">Send æid</span> 
+           </div>
+        </Button>
         <RecentTransactions></RecentTransactions>
       </div> 
 
@@ -129,21 +134,18 @@ export default {
         this.allCurrencies = allCurrencies;
         return allCurrencies;
       });
-    },
-    roundedAmount() {
-      return this.tokenBalance.toFixed(3);
-    },
+    }
   },
   async created() {
-    await browser.storage.local.get('rateUsd').then(res => {
+    browser.storage.local.get('rateUsd').then(res => {
       this.usdRate = res.rateUsd;
     });
     
-    await browser.storage.local.get('backed_up_Seed').then(res => {
+    browser.storage.local.get('backed_up_Seed').then(res => {
       if (!res.backed_up_Seed) {
         this.backup_seed_notif = true;
         this.buttonstyle = 'margin-top: 2rem;';
-        setTimeout(() => (this.backup_seed_notif = false), 3000);
+        // setTimeout(() => (this.backup_seed_notif = false), 3000);
       } else {
         this.backup_seed_notif = false;
       }
@@ -312,11 +314,8 @@ export default {
               this.currencyFullName = '';
               break;
           }
-          this.current.currency = item;
-          this.current.currencyRate = index;
+          this.$store.commit("SET_CURRENCY", { currency: item, currencyRate:index })
           this.dropdown.currencies = false;
-          this.$store.state.current.currency = item;
-          this.$store.state.current.currencyRate = index;
         });
       });
     },
@@ -333,7 +332,9 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
-
+.account-popup {
+  padding:4px 0;
+}
 .accountAddress {
   color: #fff;
 }

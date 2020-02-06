@@ -75,22 +75,37 @@ export default [
   {
     path: '/settings',
     component: SettingsComponent,
+    meta: {
+      title: 'Settings'
+    }
   },
   {
     path: '/generalSettings',
     component: GeneralSettingsComponent,
+    meta: {
+      title: 'General'
+    }
   },
   {
     path: '/securitySettings',
     component: SecuritySettingsComponent,
+    meta: {
+      title: 'Security'
+    }
   },
   {
     path: '/aboutSettings',
     component: AboutSettingsComponent,
+    meta: {
+      title: 'About'
+    }
   },
   {
     path: '/tip',
     component: TipComponent,
+    meta: {
+      title: 'Send æid'
+    }
   },
   {
     path: '/qrCodeReader',
@@ -123,23 +138,35 @@ export default [
 
   {
     path: '/transactions',
-    component: TransactionsComponent
+    component: TransactionsComponent,
+    meta: {
+      title: 'Transactions'
+    }
   },
   {
     path: '/send',
     name: 'send',
     props: true,
-    component: SendComponent
+    component: SendComponent,
+    meta: {
+      title: 'Withdraw'
+    }
   },
   {
     path: '/receive',
-    component: ReceiveComponent
+    component: ReceiveComponent,
+    meta: {
+      title: 'Receive'
+    }
   },
   {
     path: '/success-tip',
     component: SuccessTip,
     name: 'success-tip',
-    props: true
+    props: true,
+    meta: {
+      title: 'Send æid'
+    }
   },
   {
     path: '/welcome',
