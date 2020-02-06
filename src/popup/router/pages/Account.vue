@@ -312,11 +312,8 @@ export default {
               this.currencyFullName = '';
               break;
           }
-          this.current.currency = item;
-          this.current.currencyRate = index;
+          this.$store.commit("SET_CURRENCY", { currency: item, currencyRate:index })
           this.dropdown.currencies = false;
-          this.$store.state.current.currency = item;
-          this.$store.state.current.currencyRate = index;
         });
       });
     },

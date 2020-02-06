@@ -10,7 +10,7 @@
             {{ $t('pages.tipPage.headingSending') }} 
             <span class="secondary-text">{{ finalAmount }} {{ $t('pages.appVUE.aeid') }} </span> 
             {{ $t('pages.tipPage.to') }}
-            (0.30 USD) to
+            ({{ getCurrencyAmount }} {{ getCurrency }}) to
         </p>
         <a class="link-sm text-left block">{{ tipUrl }}</a>
         <div class="flex flex-justify-between flex-align-start mt-25" v-if="!confirmMode">
@@ -18,12 +18,12 @@
           <div class="ml-15 text-left" style="margin-right:auto">
             <p class="label hidden">Empty</p>
             <span class="secondary-text f-14 block l-1"> {{ tokenSymbol }}</span>
-            <span class="f-14 block l-1">60 USD</span>
+            <span class="f-14 block l-1">{{ getCurrencyAmount }} {{ getCurrency }}</span>
           </div>
           <div class="balance-box">
             <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
             <span class="secondary-text f-14 block l-1">{{ roundedAmount }} {{ tokenSymbol }}</span>
-            <span class="f-14 block l-1">60 USD</span>
+            <span class="f-14 block l-1">{{ getCurrencyBalance }} {{ getCurrency }}</span>
           </div>
         </div>
 
@@ -31,10 +31,10 @@
         <div class="tip-note-preview mt-15" v-if="confirmMode">
           {{ note }}
         </div>
-        <Button @click="toConfirm" :disabled="note && validAmount && tipping && !noteError ? false: true" v-if="!confirmMode">
+        <Button @click="toConfirm" :disabled="note && validAmount && !noteError ? false: true" v-if="!confirmMode">
           {{ $t('pages.tipPage.next') }}
         </Button>
-        <Button @click="sendTip"  v-if="confirmMode">
+        <Button @click="sendTip"  v-if="confirmMode" :disabled="!tipping ? true : false">
           {{ $t('pages.tipPage.confirm') }}
         </Button>
         <Button @click="confirmMode = false" v-if="confirmMode">
@@ -76,7 +76,8 @@ export default {
       'tokenSymbol', 
       'tokenBalance', 
       'popup', 
-      'tipping'
+      'tipping',
+      'current'
     ]),
     maxValue() {
       const calculatedMaxValue = this.balance - MIN_SPEND_TX_FEE;
@@ -87,6 +88,15 @@ export default {
     },
     roundedAmount() {
       return this.tokenBalance.toFixed(3);
+    },
+    getCurrency() {
+      return this.current.currency.toUpperCase();
+    },
+    getCurrencyBalance() {
+      return (this.tokenBalance * this.current.currencyRate).toFixed(3);
+    },
+    getCurrencyAmount() {
+      return (this.finalAmount * this.current.currencyRate).toFixed(3);
     }
   },
   watch: {
@@ -97,6 +107,7 @@ export default {
   created() {
     this.getDomainData();
     this.domainDataInterval = setInterval(() => this.getDomainData(), 5000);
+    console.log(this.current)
   },
   methods: {
     getDomainData() {

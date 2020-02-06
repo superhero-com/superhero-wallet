@@ -191,6 +191,7 @@ export default {
     window.addEventListener('resize', () => {
       this.setMenuSlots()
     });
+    this.getCurrencies()
   },
   mounted: function mounted() {
     this.dropdown.settings = false;
@@ -312,6 +313,11 @@ export default {
       } else {
         this.$router.push('/')
       }
+    },
+    async getCurrencies() {
+      const { currency } = await browser.storage.local.get('currency') || 'USD'
+      const { currencyRate } = await browser.storage.local.get('currencyRate') || 0
+      this.$store.commit("SET_CURRENCY", { currency, currencyRate })
     }
   },
   beforeDestroy() {
