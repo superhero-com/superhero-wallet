@@ -13,7 +13,7 @@
             ({{ getCurrencyAmount }} {{ getCurrency }}) to
         </p>
         <a class="link-sm text-left block">{{ tipUrl }}</a>
-        <div class="flex flex-justify-between flex-align-start mt-25" >
+        <div class="flex flex-justify-between flex-align-start mt-25" v-if="!confirmMode">
           <Input class="amount-box" type="number" :error="!amountError ? false : true" v-model="finalAmount" :placeholder="$t('pages.tipPage.amountPlaceholder')" :label="$t('pages.tipPage.amountLabel')"/>
           <div class="ml-15 text-left" style="margin-right:auto">
             <p class="label hidden">Empty</p>
