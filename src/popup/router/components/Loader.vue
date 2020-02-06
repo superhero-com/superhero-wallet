@@ -7,14 +7,20 @@
         <ae-loader v-if="size == 'small'" />
       </div>
       <transition name="fadeOut" v-if="size == 'big'">
-        <span class="mainLoader" :class="type == 'transparent' ? 'mainLoaderTransparent' : ''"><ae-loader /></span>
+        <!-- <span class="mainLoader" :class="type == 'transparent' ? 'mainLoaderTransparent' : ''"><ae-loader /></span> -->
+        <Welcome class="mainLoader"/>
       </transition>
     </div>
   </div>
 </template>
 
 <script>
+import Welcome from '../pages/Welcome'
+
 export default {
+  components: {
+    Welcome
+  },  
   data() {
     return {};
   },

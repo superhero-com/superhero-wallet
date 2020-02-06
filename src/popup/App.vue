@@ -1,5 +1,5 @@
 <template>
-  <ae-main :class="onAccount ? 'ae-main-account' : ''">
+  <ae-main @click.native="hideMenu" :class="onAccount ? 'ae-main-account' : ''">
       <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''" v-if="showNavigation">
         
         <!-- login screen header -->
@@ -149,7 +149,6 @@ export default {
     $route(to, from) {
       this.title = to.meta.title || ''
       this.showNavigation = typeof to.meta.navigation !== 'undefined' ? to.meta.navigation : true
-      console.log(this.showNavigation)
       if (to.path == '/account') {
         this.onAccount = true;
       } else {
@@ -368,7 +367,6 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 .subAccountBalance { font-family: monospace; margin-bottom:0 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px;}
 .name-pending { width:24px !important; height:24px !important; margin-right:5px; font-size:.8rem; }
 #account .subAccountCheckbox { float: right; }
-}
 @-moz-document url-prefix() {
   .ae-main {
     width: 380px;
@@ -557,7 +555,7 @@ button {
 .dropdown[direction="left"] ul { left: 0; }
 .dropdown[direction="right"] ul { right: 0; }
 .dropdown[direction="center"] ul { width: 200px; left: 50%; margin-left: -100px; }
-.dropdown > ul { min-width: 120px; position: absolute; top: 100%; padding: 0; background-color: #FFF; z-index: 1; }
+.dropdown > ul { min-width: 120px; position: absolute; top: 100%; padding: 0; background-color: #FFF; z-index: 12; }
 .dropdown ul { transition: all 0.2s; margin: 0; padding: 5px 0; overflow: hidden; border-radius: 4px; box-shadow: 0 0 16px rgba(0, 33, 87, 0.15); list-style: none; }
 .dropdown ul.sub-dropdown { box-shadow: none; visibility: hidden; max-height:0; padding: 0; overflow: hidden; transition: all 0.3s ease-in-out; }
 .dropdown .have-subDropdown.show ul.sub-dropdown { visibility: visible; max-height: 300px; overflow-y: scroll; }
