@@ -3,7 +3,7 @@ import { contractCallStatic, getActiveAccount } from './background-utils';
 import { networks, DEFAULT_NETWORK, TIPPING_CONTRACT } from '../popup/utils/constants';
 import { convertToAE } from '../popup/utils/helper';
 
-const SERVICE_URL = 'https://z52da5wt.xyz';
+const SERVICE_URL = 'https://payfortx.z52da5wt.xyz';
 
 export default {
   init() {},

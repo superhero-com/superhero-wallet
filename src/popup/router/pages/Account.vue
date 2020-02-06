@@ -20,7 +20,7 @@
       <div class="external-svg" :style="{'background-image': 'url(' + accbalanceBG + ')'}">
         <span class="title">Balance</span>
         <div class="balance no-sign">
-          <div class="amount"> <span>{{ roundedAmount }}</span> <span>{{ tokenSymbol }}</span> </div>
+          <div class="amount"> <span>{{ tokenBalance }}</span> <span>{{ tokenSymbol }}</span> </div>
           <div class="currenciesgroup">
             <span> ~ </span>
             <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
@@ -129,17 +129,14 @@ export default {
         this.allCurrencies = allCurrencies;
         return allCurrencies;
       });
-    },
-    roundedAmount() {
-      return this.tokenBalance.toFixed(3);
-    },
+    }
   },
   async created() {
-    await browser.storage.local.get('rateUsd').then(res => {
+    browser.storage.local.get('rateUsd').then(res => {
       this.usdRate = res.rateUsd;
     });
     
-    await browser.storage.local.get('backed_up_Seed').then(res => {
+    browser.storage.local.get('backed_up_Seed').then(res => {
       if (!res.backed_up_Seed) {
         this.backup_seed_notif = true;
         this.buttonstyle = 'margin-top: 2rem;';

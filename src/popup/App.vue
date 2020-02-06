@@ -1,22 +1,22 @@
 <template>
   <ae-main @click.native="hideMenu" :class="onAccount ? 'ae-main-account' : ''">
-      <div class="coronaTitle" :slot="defaulT" v-if="isLoggedIn">
-        Corona Wallet
+       <div class="coronaTitle" :slot="defaulT" v-if="isLoggedIn">
+        <span>{{ title || "Corona Wallet "}}</span>
       </div>
       <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''" v-if="showNavigation">
-        
         <!-- login screen header -->
           <div class="nav-title" :slot="menuSlot" v-if="!isLoggedIn">
             <p v-if="title" class="flex flex-align-center">
               <Arrow class="arrow-back" @click="goBack" /> <span class="title-text"> {{ title }} </span>
             </p>
           </div>
-          
+         
 
           <div style="height: 22px;" id="settings" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="menuSlot" direction="left" ref="settings">
             <button style="padding: 0;" v-on:click="toggleDropdown">
               <Hamburger class="dropdown-button-icon" slot="button" />
             </button>
+            <Arrow class="arrow-back ml-15" @click="goBack" v-if="title" />
             <transition name="slide-fade">
               <ul v-if="dropdown.settings" class="dropdown-holder">
                 <li>
@@ -315,9 +315,12 @@ export default {
       }
     },
     async getCurrencies() {
-      const { currency } = await browser.storage.local.get('currency') || 'USD'
-      const { currencyRate } = await browser.storage.local.get('currencyRate') || 0
-      this.$store.commit("SET_CURRENCY", { currency, currencyRate })
+      let { currency } = await browser.storage.local.get('currency') || 'USD'
+      let { currencyRate } = await browser.storage.local.get('currencyRate') || 0
+      let { rateUsd } = await browser.storage.local.get('rateUsd')
+      this.$store.commit("SET_CURRENCY", { 
+        currency: typeof currency !== 'undefined' ? currency : 'USD', 
+        currencyRate: typeof currencyRate !== 'undefined' ? currencyRate : rateUsd, })
     }
   },
   beforeDestroy() {

@@ -91,6 +91,9 @@ export default [
   {
     path: '/tip',
     component: TipComponent,
+    meta: {
+      title: 'Send æid'
+    }
   },
   {
     path: '/qrCodeReader',
@@ -139,7 +142,10 @@ export default [
     path: '/success-tip',
     component: SuccessTip,
     name: 'success-tip',
-    props: true
+    props: true,
+    meta: {
+      title: 'Send æid'
+    }
   },
   {
     path: '/welcome',
