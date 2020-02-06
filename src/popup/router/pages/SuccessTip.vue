@@ -19,7 +19,7 @@
           </Button>
         </div>
         <br />
-        <Button extend>
+         <Button extend>
           {{ $t('pages.successTip.feed') }}
         </Button>
       </div>
@@ -33,7 +33,9 @@ import { MAGNITUDE } from '../../utils/constants';
 export default {
   props: ['amount', 'domain'],
   data() {
-    return {};
+    return {
+      feed: 'https://coronanews.org'
+    };
   },
   computed: {
     amountTip() {
@@ -48,6 +50,9 @@ export default {
     toDashboard() {
       this.$router.push('/account');
     },
+    redirectOnFeed() {
+      browser.tabs.create({ url: this.feed, active: true });
+    }
   },
 };
 </script>

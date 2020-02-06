@@ -27,7 +27,7 @@
               <div class="input-group-area">
                 <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
                   {{ this.current.currencyRate ? (this.current.currencyRate*tokenBalance).toFixed(3) : (this.usdRate*tokenBalance).toFixed(3) }} 
-                  <span style="color: #6A8EBE">{{ this.current.currency ? this.current.currency.toUpperCase() : 'USD' }}</span>
+                  <span style="color: #6A8EBE !important">{{ this.current.currency ? this.current.currency.toUpperCase() : 'USD' }}</span>
                   <DropdownArrow />
                 </ae-button>
               </div>
@@ -44,7 +44,7 @@
         </div>
       </div>
 
-      <div style="height:100vh; background: #21212A" class="height-100">
+      <div style="background: #21212A" class="height-100">
         <Button style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips"> <Heart /> Send æid </Button>
         <RecentTransactions></RecentTransactions>
       </div> 
@@ -442,14 +442,14 @@ export default {
 
   .account-name {
     font-size: 16px;
-    color: #F1F1F1;
+    color: $white-color !important;
     font-weight: 500;
     float: left;
     width: 92%;
   }
   .account-addresses {
     .ae-address {
-      color: $text-color;
+      color: $text-color !important;
       font-size: 11px;
       line-height: 0.9rem;
     }
@@ -464,7 +464,7 @@ export default {
     left: 20px;
     top: 50%;
     margin-top: -24px;
-    color: #f1f1f1;
+    color: $white-color !important;
     font-size: 16px;
     padding: 0;
   }
@@ -481,13 +481,13 @@ export default {
   font-size: 26px;
   .amount {
     font-size: 26px;
-    color: $text-color;
-    :last-child { color: $secondary-color; }
+    color: $text-color !important;
+    :last-child { color: $secondary-color !important; }
   }
   .ae-button {
     display: block;
     font-size: 18px;
-    color: $text-color;
+    color: $text-color !important;
   }
 }
 .extensionVersion {
@@ -506,7 +506,7 @@ export default {
 
 
 .backup_seed_notif {
-  color: $accent-color;
+  color: $accent-color !important;
   font-size: 14px;
   margin: 14px auto 32px;
 }
