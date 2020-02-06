@@ -75,6 +75,7 @@ export default {
 @import '../../../common/variables';
 .recent-transactions {
     padding: 0 20px;
+    padding-bottom: 10px;
     .title {
         color: $white-color !important;
     }

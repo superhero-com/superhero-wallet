@@ -13,7 +13,8 @@
             ({{ getCurrencyAmount }} {{ getCurrency }}) to
         </p>
         <a class="link-sm text-left block">{{ tipUrl }}</a>
-        <div class="flex flex-justify-between flex-align-start mt-25" v-if="!confirmMode">
+        <AmountSend :amountError="amountError" @changeAmount="val => finalAmount = val" v-if="!confirmMode" :value="finalAmount"/>
+        <!-- <div class="flex flex-justify-between flex-align-start mt-25" v-if="!confirmMode">
           <Input class="amount-box" type="number" :error="!amountError ? false : true" v-model="finalAmount" :placeholder="$t('pages.tipPage.amountPlaceholder')" :label="$t('pages.tipPage.amountLabel')"/>
           <div class="ml-15 text-left" style="margin-right:auto">
             <p class="label hidden">Empty</p>
@@ -25,13 +26,12 @@
             <span class="secondary-text f-14 block l-1">{{ tokenBalance }} {{ tokenSymbol }}</span>
             <span class="f-14 block l-1">{{ balanceCurrency }} {{ getCurrency }}</span>
           </div>
-        </div>
-
+        </div> -->
         <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" v-if="!confirmMode"/>
         <div class="tip-note-preview mt-15" v-if="confirmMode">
           {{ note }}
         </div>
-        <Button @click="toConfirm" :disabled="note && validAmount && !noteError ? false: true" v-if="!confirmMode">
+        <Button @click="toConfirm" :disabled="note && validAmount && !noteError && minCallFee ? false: true" v-if="!confirmMode">
           {{ $t('pages.tipPage.next') }}
         </Button>
         <Button @click="sendTip"  v-if="confirmMode" :disabled="!tipping ? true : false">
@@ -51,7 +51,8 @@
 import { mapGetters } from 'vuex';
 import { setInterval, setTimeout, setImmediate, clearInterval } from 'timers';
 import BigNumber from 'bignumber.js';
-import { MAGNITUDE, MIN_SPEND_TX_FEE } from '../../utils/constants';
+import { MAGNITUDE, MIN_SPEND_TX_FEE, calculateFee, TX_TYPES } from '../../utils/constants';
+import { setTxInQueue } from '../../utils/helper';
 import TipBackground from '../../../icons/tip-bg.svg'
 
 export default {
@@ -67,7 +68,9 @@ export default {
       confirmMode: false,
       amountError:false,
       noteError:false,
-      loading: false
+      loading: false,
+      minCallFee:null,
+      txParams: { }
     };
   },
   computed: {
@@ -79,10 +82,12 @@ export default {
       'tipping',
       'current',
       'balanceCurrency',
-      'sdk'
+      'sdk',
+      'account',
+      'network'
     ]),
     maxValue() {
-      const calculatedMaxValue = this.balance - MIN_SPEND_TX_FEE;
+      const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
     },
     validAmount(){
@@ -103,17 +108,24 @@ export default {
   created() {
     this.getDomainData();
     this.domainDataInterval = setInterval(() => this.getDomainData(), 5000);
-    
   },
   methods: {
     getDomainData() {
-      if(this.tipping !== null) {
+      if(this.sdk !== null && !this.minCallFee) {
+        this.txParams = {
+          ...this.sdk.Ae.defaults,
+          contractId: this.network[this.current.network].tipContract,
+          callerId: this.account.publicKey
+        }
+        try {
+           const fee = calculateFee(TX_TYPES['contractCall'], this.txParams)
+          this.minCallFee = fee.min
+        } catch(e) { }
       }
-     
       browser.tabs.query({ active: true, currentWindow: true }).then(async tabs => this.tipUrl = tabs[0].url );
     },
     toConfirm() {
-      if (this.maxValue - this.finalAmount <= 0 || isNaN(this.finalAmount) || this.finalAmount <= 0) {
+      if (!this.minCallFee || this.maxValue - this.finalAmount <= 0 || isNaN(this.finalAmount) || this.finalAmount <= 0) {
         return this.amountError = true
       } 
       this.amountError = false
@@ -134,6 +146,7 @@ export default {
         this.loading = true
         const res = await this.tipping.call('tip',[domain,note],{ amount, waitMined: false })
         if(res.hash) {
+          setTxInQueue(res.hash)
           this.loading = false
           this.$store.commit('SET_AEPP_POPUP', false);
           return this.$router.push({

@@ -26,8 +26,8 @@
             <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
               <div class="input-group-area">
                 <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
-                  {{ this.current.currencyRate ? (this.current.currencyRate*tokenBalance).toFixed(3) : (this.usdRate*tokenBalance).toFixed(3) }} 
-                  <span style="color: #6A8EBE !important">{{ this.current.currency ? this.current.currency.toUpperCase() : 'USD' }}</span>
+                  {{ current.currencyRate ? (current.currencyRate*tokenBalance).toFixed(3) : (usdRate*tokenBalance).toFixed(3) }} 
+                  <span style="color: #6A8EBE !important">{{ current.currency ? current.currency.toUpperCase() : 'USD' }}</span>
                   <DropdownArrow />
                 </ae-button>
               </div>
@@ -86,7 +86,7 @@ export default {
       timer: '',
       eurRate: '',
       allCurrencies: '',
-      usdRate: '',
+      usdRate: 0,
       currencySign: '',
       currencyFullName: '',
       dropdown: {
@@ -138,7 +138,7 @@ export default {
   },
   async created() {
     browser.storage.local.get('rateUsd').then(res => {
-      this.usdRate = res.rateUsd;
+      this.usdRate = res.hasOwnProperty("rateUsd") ? res.rateUsd : 0;
     });
     
     browser.storage.local.get('backed_up_Seed').then(res => {

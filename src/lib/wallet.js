@@ -29,7 +29,7 @@ export default {
                       (typeof subaccounts.subaccounts == 'object' && !subaccounts.subaccounts.find(f => f.publicKey == user.userAccount.publicKey))
                     ) {
                       sub.push({
-                        name: typeof subaccounts.subaccounts != 'undefined' ? subaccounts.subaccounts.name : 'Account',
+                        name: typeof subaccounts.subaccounts != 'undefined' ? subaccounts.subaccounts.name : 'Main Account',
                         publicKey: user.userAccount.publicKey,
                         root: true,
                         balance: 0,

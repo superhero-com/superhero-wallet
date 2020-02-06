@@ -596,6 +596,15 @@ const getUserNetworks = async () => {
     resolve(networks);
   });
 };
+const setTxInQueue = async (tx) => {
+  const { processingTx } = await browser.storage.local.get('processingTx');
+  let list = [];
+  if (typeof processingTx !== 'undefined' && processingTx.length) {
+    list = [...list, ...processingTx];
+  }
+  list.push(tx);
+  await browser.storage.local.set({ processingTx: list });
+}
 
 export {
   shuffleArray,
@@ -628,4 +637,5 @@ export {
   setPermissionForAccount,
   getUniqueId,
   getUserNetworks,
+  setTxInQueue
 };

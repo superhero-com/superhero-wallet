@@ -320,7 +320,7 @@ export default {
       let { rateUsd } = await browser.storage.local.get('rateUsd')
       this.$store.commit("SET_CURRENCY", { 
         currency: typeof currency !== 'undefined' ? currency : 'USD', 
-        currencyRate: typeof currencyRate !== 'undefined' ? currencyRate : rateUsd, })
+        currencyRate: typeof currencyRate !== 'undefined' ? currencyRate : (typeof rateUsd !== 'undefined' ? rateUsd : 0) })
     }
   },
   beforeDestroy() {

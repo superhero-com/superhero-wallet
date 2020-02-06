@@ -18,10 +18,18 @@
 <script>
 import { mapGetters } from 'vuex';
 export default {
-    props:['amountError'],
+    props:['amountError', 'value'],
     data() {
         return {
             finalAmount:null
+        }
+    },
+    created() {
+        if(this.value) this.finalAmount = this.value
+    },
+    watch: {
+        finalAmount(val) {
+            this.$emit('changeAmount',val)
         }
     },
     computed: {
