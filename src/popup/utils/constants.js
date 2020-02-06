@@ -88,7 +88,7 @@ export const DEFAULT_NETWORK = 'Testnet'
 export const networks = {
   Testnet: {
     url: 'https://sdk-testnet.aepps.com',
-    internalUrl: 'https://sdk-testnet.aepps.com',
+    internalUrl: 'https://testnet.aeternal.io',
     networkId: 'ae_uat',
     middlewareUrl: 'https://testnet.aeternal.io',
     explorerUrl: 'https://testnet.aeternal.io',

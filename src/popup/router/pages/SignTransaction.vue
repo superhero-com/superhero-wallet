@@ -641,64 +641,67 @@ export default {
         window.close();
       }, 1000);
     },
-    async contractCall() {
-      let call;
+    async contractCall(){
+      let call
       try {
-        let options;
-        if (this.data.tx.hasOwnProperty('options')) {
-          options = { ...this.data.tx.options };
-        }
-        if (this.data.tx.hasOwnProperty('options') && this.data.tx.options.hasOwnProperty('amount')) {
-          this.data.tx.options.amount = BigNumber(this.data.tx.options.amount).shiftedBy(MAGNITUDE);
-          options = { ...options, ...this.data.tx.options };
-        }
+          let options
+          if(this.data.tx.hasOwnProperty("options")) {
+              options = { ...this.data.tx.options }
+          }
+          if(this.data.tx.hasOwnProperty("options") && this.data.tx.options.hasOwnProperty("amount")) {
+              this.data.tx.options.amount = BigNumber(this.data.tx.options.amount).shiftedBy(MAGNITUDE)
+              options = { ...options, ...this.data.tx.options }
+          }
+          
+          console.log("[Debug]: Transaction parameters")
+          options = { ...options, fee:this.convertSelectedFee }
+          if(!this.contractInstance) {
+              await this.setContractInstance(this.data.tx.source, this.data.tx.address, this.data.tx.options)
+          }
+          call = this.$helpers.contractCall({ instance:this.contractInstance, method:this.data.tx.method, params:[...this.data.tx.params, options] })
+          this.setTxInQueue(call.hash)
 
-        console.log('[Debug]: Transaction parameters');
-        options = { ...options, fee: this.convertSelectedFee };
-        if (!this.contractInstance) {
-          await this.setContractInstance(this.data.tx.source, this.data.tx.address, this.data.tx.options);
-        }
-        call = await this.$helpers.contractCall({ instance: this.contractInstance, method: this.data.tx.method, params: [...this.data.tx.params, options] });
-        this.setTxInQueue(call.hash);
-        const decoded = await call.decode();
-        call.decoded = decoded;
-        if (this.data.popup) {
-          const { decode, ...res } = call;
-          this.sending = true;
-          this.port.postMessage({ ...res });
-        }
-      } catch (err) {
-        console.log('err', err);
-        this.setTxInQueue('error');
-        this.errorTx.error.message = typeof err.message !== 'undefined' ? err.message : err;
-        this.sending = true;
-        if (this.data.popup) {
-          this.port.postMessage(this.errorTx);
-        } else {
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
-        }
+          // let decoded = await call.decode()
+          // call.decoded = decoded
+          if (this.data.popup) {
+              let { decode, ...res} = call
+              this.sending = true
+              this.port.postMessage({...res})
+          }
+      }catch(err) {
+          console.log("err", err)
+          this.setTxInQueue('error')
+          this.errorTx.error.message = typeof err.message != "undefined" ? err.message : err
+          this.sending = true
+          if(this.data.popup) {
+              this.port.postMessage(this.errorTx)
+          } else {
+              this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed'})
+          }
+          
       }
-      const list = await removeTxFromStorage(this.data.id);
-      browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-      if (this.data.popup) {
-        setInterval(() => {
-          window.close();
-        }, 1000);
-      } else if (this.data.tx.contractType == 'tip' && call) {
-        const domain = this.data.tx.params[0];
-        const { amount } = this.data.tx.options;
-        this.$store.commit('SET_AEPP_POPUP', false);
-        return this.$router.push({
-          name: 'success-tip',
-          params: {
-            amount,
-            domain,
-          },
-        });
-      } else {
-        this.redirectInExtensionAfterAction();
+      let list = await removeTxFromStorage(this.data.id)
+      browser.storage.local.set({pendingTransaction: { list } }).then(() => {})
+      if(this.data.popup) {
+          setInterval(() => {
+              window.close()
+          },1000)
+      }else {
+          if(this.data.tx.contractType == "tip" && call) {
+              const domain = this.data.tx.params[0]
+              const amount = this.data.tx.options.amount
+              this.$store.commit('SET_AEPP_POPUP',false)
+              this.$router.push('/account')
+              // return this.$router.push({ 'name': 'success-tip', params: {
+              //     amount,
+              //     domain
+              // }})
+          } else {    
+              this.redirectInExtensionAfterAction()
+          }
+          
       }
-    },
+  },
     async contractDeploy() {
       let deployed;
       if (this.isLedger) {

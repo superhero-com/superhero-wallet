@@ -1,74 +1,55 @@
 <template>
-  <div class="height-100">
+  <div style="background:#16161D;" class="height-100">
     <div class="popup account-popup">
-      <div v-show="backup_seed_notif" class="backup_seed_notif float">
-        <p><ae-icon name="shield" class="fa fa-warning" /><span>!</span> You need to BACK UP your SEED PHRASE!</p>
-        <button class="back-up-button" @click="navigateToBackUpSeed">BACK UP NOW</button>
-      </div>
 
-      <!-- <div class="currenciesgroup">
-        <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
-          <div class="inputGroup-currencies">
-            <div class="input-group-icon"><ae-icon name="flip"/></div>
-              <div class="input-group-area">
-                <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
-                  {{ (this.current.currency && this.current.currencyRate ? currencyFullName +' '+ '('+this.current.currency.toUpperCase()+')' +' - '+ (this.current.currencyRate*tokenBalance).toFixed(3) +' '+ currencySign : 'Select currency') }}
-                  <ae-icon style="margin:0" name="left-more"/>
-                </ae-button>
-              </div>
-          </div>
-          <ul class="sub-dropdown">
-            <li class="single-currency" v-for="(index, item) in allCurrencies" v-bind:key="index">
-              <ae-button v-on:click="switchCurrency(index, item)" class="" :class="current.currency == item ? 'current' : ''">
-                  {{ item.toUpperCase() }}
-                  <i class="arrowrightCurrency"></i>
-              </ae-button>
-            </li>
-          </ul>
-        </li>
-      </div> -->
-      <ClaimTipButton></ClaimTipButton>
+      <div v-show="backup_seed_notif" class="backup_seed_notif">
+        <span>
+          You need to <a @click="navigateToBackUpSeed" style="text-decoration: underline;">backup</a> your seed phrase
+        </span>
+      </div>
+      <ClaimTipButton :styling="buttonstyle"></ClaimTipButton>
+
       <div class="flex flex-align-center flex-justify-between account-info">
         <div class="text-left account-addresses">
+          <button style="padding:0" @click="copy" v-clipboard:copy="account.publicKey"><Copyicon /></button>
           <span class="account-name">{{ activeAccountName }}</span>
           <ae-address :value="account.publicKey" length="flat" />
         </div>
+      </div>
+
+      <div class="external-svg" :style="{'background-image': 'url(' + accbalanceBG + ')'}">
+        <span class="title">Balance</span>
         <div class="balance no-sign">
-          <span>{{ roundedAmount }} {{ tokenSymbol }}</span>
-          <ae-button face="toolbar" v-clipboard:copy="account.publicKey" @click="copy">
-            <ae-icon name="copy" />
-            {{ $t('pages.account.copy') }}
-          </ae-button>
+          <div class="amount"> <span>{{ roundedAmount }}</span> <span>{{ tokenSymbol }}</span> </div>
+          <div class="currenciesgroup">
+            <span> ~ </span>
+            <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
+              <div class="input-group-area">
+                <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
+                  {{ this.current.currencyRate ? (this.current.currencyRate*tokenBalance).toFixed(3) : (this.usdRate*tokenBalance).toFixed(3) }} 
+                  <span style="color: #6A8EBE">{{ this.current.currency ? this.current.currency.toUpperCase() : 'USD' }}</span>
+                  <DropdownArrow />
+                </ae-button>
+              </div>
+              <ul class="sub-dropdown">
+                <li class="single-currency" v-for="(index, item) in allCurrencies" v-bind:key="index">
+                  <ae-button v-on:click="switchCurrency(index, item)" class="" :class="current.currency == item ? 'current' : ''">
+                      {{ item.toUpperCase() }}
+                      <i class="arrowrightCurrency"></i>
+                  </ae-button>
+                </li>
+              </ul>
+            </li>
+          </div>
         </div>
       </div>
 
-      <!-- <ae-card :fill="cardColor">
-        <template slot="avatar">
-          <ae-identicon :address="account.publicKey" />
-          <ae-input-plain fill="white" :placeholder="$t('pages.account.accountName')" @keyup.native="setAccountName" :value="activeAccountName"  />
-        </template>
-        <template slot="header">
-          <ae-text fill="white" face="mono-base">{{tokenBalance}} AE</ae-text>
-        </template>
-        <ae-address class="accountAddress" :value="account.publicKey" copyOnClick enableCopyToClipboard length="medium" gap=0 />
-        <ae-toolbar :fill="cardColor" align="right" slot="footer">
-          <ae-button face="toolbar" v-clipboard:copy="account.publicKey" @click="copy">
-            <ae-icon name="copy" />
-            {{ $t('pages.account.copy') }}
-          </ae-button>
-        </ae-toolbar>
-      </ae-card> -->
-    </div>
-    <div class="height-100 recent-tx">
-      <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
-      <RecentTransactions>
-        <br />
-        <ae-button face="round" fill="primary" extend @click="navigateTips">{{ $t('pages.account.tipSomeone') }}</ae-button>
+      <div style="height:100vh; background: #21212A" class="height-100">
+        <Button style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips"> <Heart /> Send æid </Button>
+        <RecentTransactions></RecentTransactions>
+      </div> 
 
-        <ae-text class="center how-to-url">
-          <a @click="openHowToClaimURL">{{ $t('pages.account.howToClaim') }}</a>
-        </ae-text>
-      </RecentTransactions>
+
     </div>
   </div>
 </template>
@@ -79,11 +60,19 @@ import { setInterval, setTimeout, setImmediate, clearInterval } from 'timers';
 import { request } from 'http';
 import { fetchData, currencyConv } from '../../utils/helper';
 import { FUNGIBLE_TOKEN_CONTRACT, TOKEN_REGISTRY_ADDRESS, TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA } from '../../utils/constants';
+import Copyicon from '../../../icons/copy.svg'
+import DropdownArrow from '../../../icons/dropdownarrow.svg'
+import Heart from '../../../icons/heart.svg'
+import RecentTransactions from '../components/RecentTransactions'
 
 export default {
   name: 'Account',
+  components: {
+    Copyicon, DropdownArrow, Heart, RecentTransactions
+  },
   data() {
     return {
+      accbalanceBG: browser.runtime.getURL('../../../icons/acc_balance.png'),
       polling: null,
       accountName: '',
       pollingTransaction: null,
@@ -99,7 +88,8 @@ export default {
         currencies: false,
       },
       backup_seed_notif: false,
-      howToClaimURL: 'https://forum.aeternity.com/t/receive-and-tip-the-best-corona-news/5957',
+      pendingTip: false,
+      buttonstyle: '',
     };
   },
   computed: {
@@ -135,7 +125,7 @@ export default {
     },
     currs() {
       browser.storage.local.get('allCurrencies').then(resall => {
-        const allCurrencies = JSON.parse(resall.allCurrencies);
+        let allCurrencies = JSON.parse(resall.allCurrencies);
         this.allCurrencies = allCurrencies;
         return allCurrencies;
       });
@@ -145,10 +135,14 @@ export default {
     },
   },
   async created() {
-    // browser.storage.local.remove('backed_up_Seed');
+    await browser.storage.local.get('rateUsd').then(res => {
+      this.usdRate = res.rateUsd;
+    });
+    
     await browser.storage.local.get('backed_up_Seed').then(res => {
       if (!res.backed_up_Seed) {
         this.backup_seed_notif = true;
+        this.buttonstyle = 'margin-top: 2rem;';
         setTimeout(() => (this.backup_seed_notif = false), 3000);
       } else {
         this.backup_seed_notif = false;
@@ -161,8 +155,8 @@ export default {
     copy() {
       this.$store.dispatch('popupAlert', { name: 'account', type: 'publicKeyCopied' });
     },
-    showAllTranactions() {
-      this.$router.push('/transactions');
+    allTransactions() {
+        this.$router.push('/transactions')
     },
     navigateReceive() {
       this.$router.push('/receive');
@@ -178,14 +172,11 @@ export default {
     showTransaction() {
       browser.tabs.create({ url: this.popup.data, active: false });
     },
-    openHowToClaimURL() {
-      browser.tabs.create({ url: this.howToClaimURL, active: true });
-    },
     async toggleDropdown(event, parentClass) {
-      if (typeof parentClass === 'undefined') {
+      if (typeof parentClass == 'undefined') {
         parentClass = '.currenciesgroup';
       }
-      const dropdownParent = event.target.closest(parentClass);
+      let dropdownParent = event.target.closest(parentClass);
       this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
     },
     async switchCurrency(index, item) {
@@ -341,6 +332,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../../common/variables';
+
 .accountAddress {
   color: #fff;
 }
@@ -382,10 +375,13 @@ export default {
   padding: 8px;
 }
 
+.currenciesgroup {
+  font-size: 18px;
+  width: 90%;
+  display: flex;
+}
 .currenciesgroup li {
   list-style-type: none;
-  color: #717c87;
-  margin: 0;
 }
 .currenciesgroup li .ae-icon {
   font-size: 1.2rem;
@@ -442,47 +438,60 @@ export default {
   right: 1rem;
 }
 .account-info {
-  margin-top: 30px;
+  margin: 32px 20px 0 20px;
 
-  .balance {
-    max-width: 40%;
-    font-size: 1.4rem;
-    font-family: 'Inter UI', sans-serif;
-    font-weight: 800;
-    color: #ff0d6a;
-    word-break: break-word;
-    text-align: right;
-    .ae-button {
-      display: block;
-      padding: 0;
-      font-size: 0.7rem;
-      margin-left: auto;
-      i {
-        font-size: 0.7rem;
-      }
-    }
-  }
   .account-name {
-    font-size: 1.4rem;
-    color: #565656;
+    font-size: 16px;
+    color: #F1F1F1;
     font-weight: 500;
+    float: left;
+    width: 92%;
   }
   .account-addresses {
-    max-width: 60%;
     .ae-address {
-      color: #565656;
-      font-size: 0.7rem;
+      color: $text-color;
+      font-size: 11px;
       line-height: 0.9rem;
     }
   }
 }
+
+.external-svg {
+  height: 93px;
+  position: relative;
+  .title {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    margin-top: -24px;
+    color: #f1f1f1;
+    font-size: 16px;
+    padding: 0;
+  }
+}
+.balance {
+  width: 163px;
+  height: 60px;
+  margin: auto;
+  position: absolute;
+  left: 50%;
+  margin-left: -81px;
+  top: 50%;
+  margin-top: -36px;
+  font-size: 26px;
+  .amount {
+    font-size: 26px;
+    color: $text-color;
+    :last-child { color: $secondary-color; }
+  }
+  .ae-button {
+    display: block;
+    font-size: 18px;
+    color: $text-color;
+  }
+}
 .extensionVersion {
   display: none;
-}
-.account-popup {
-  position: fixed;
-  top: 70px;
-  z-index: 0;
 }
 .recent-tx {
   margin-top: 130px;
@@ -495,81 +504,14 @@ export default {
   padding-bottom: 20px;
 }
 
-.how-to-url a {
-  color: white;
-}
 
 .backup_seed_notif {
-  margin-bottom: 1.5rem;
-  color: #000000;
-  padding: 0.5rem;
-  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.52), 0 6px 6px rgba(0, 0, 0, 0.25);
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  font-size: 15px;
-  display: block;
-  position: absolute;
-  z-index: 1;
-  top: 20px;
-  left: 0;
-  background: #ffffff;
-  right: 0;
-  width: 80%;
-  margin: 0 auto;
+  color: $accent-color;
+  font-size: 14px;
+  margin: 14px auto 32px;
 }
-.backup_seed_notif p {
-  margin: 0.5rem;
-}
-.backup_seed_notif span {
-  position: absolute;
-  color: #ff0d6a;
-  left: 29px;
-  top: 13px;
-  font-size: 22px;
-  font-weight: bold;
-}
-.backup_seed_notif .fa-warning {
-  float: left;
-  font-size: 2.6rem;
-  color: #ff0d6a;
-}
-.float {
-  animation-name: float;
-  -webkit-animation-name: float;
-  animation-duration: 1.5s;
-  -webkit-animation-duration: 1.5s;
-  animation-iteration-count: infinite;
-  -webkit-animation-iteration-count: infinite;
-}
-@keyframes float {
-  0% {
-    transform: translateY(0%);
-  }
-  50% {
-    transform: translateY(8%);
-  }
-  100% {
-    transform: translateY(0%);
-  }
-}
-@-webkit-keyframes float {
-  0% {
-    -webkit-transform: translateY(0%);
-  }
-  50% {
-    -webkit-transform: translateY(8%);
-  }
-  100% {
-    -webkit-transform: translateY(0%);
-  }
-}
-.back-up-button {
-  color: #ff0d6a;
-  padding: 0.2rem;
-  background: #e0e1e3;
-  width: 100%;
-}
-.back-up-button:hover {
-  background: #d4d4d4;
+.backup_seed_notif a {
+  cursor: pointer;
+  color: $accent-color !important;
 }
 </style>
