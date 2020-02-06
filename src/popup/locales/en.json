@@ -523,6 +523,10 @@
             "label": "Aeternity Address",
             "identicon": "Your identicon",
             "error": "Invalid æid Address"
+        },
+        "welcome": {
+            "send":"Send",
+            "across": "across the Globe"
         }
     }
 }

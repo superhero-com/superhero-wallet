@@ -81,10 +81,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import store from '../store';
-import locales from './locales/en.json';
 import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
-import { TIPPING_CONTRACT, AEX2_METHODS } from './utils/constants';
+import { AEX2_METHODS } from './utils/constants';
 import { start, postMessage, readWebPageDom } from './utils/connection';
 import { langs, fetchAndSetLocale } from './utils/i18nHelper';
 import Arrow from '../icons/arrow.svg';
@@ -139,24 +137,19 @@ export default {
   watch: {
     $route(to, from) {
       this.title = to.meta.title || ''
+      this.showNavigation = typeof to.meta.navigation !== 'undefined' ? to.meta.navigation : true
+      console.log(this.showNavigation)
       if (to.path == '/account') {
         this.onAccount = true;
       } else {
         this.onAccount = false;
       }
-
-      if(to.path !== '/') {
-        this.showNavigation = true
-      } else {
-        this.showNavigation = false
-      }
     },
   },
   async created() {
-    if(this.$router.currentRoute.path !== '/') {
-      this.showNavigation = true
-    } 
     this.title = this.$router.currentRoute.meta.title
+    this.showNavigation = this.$router.currentRoute.meta.navigation
+    // this.$router.push('/welcome')
     browser.storage.local.get('language').then(data => {
       this.language = langs[data.language];
       this.$store.state.current.language = data.language;

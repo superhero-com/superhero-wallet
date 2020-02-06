@@ -20,11 +20,16 @@ import TransactionsComponent from './pages/Transactions';
 import SendComponent from './pages/Send';
 import ReceiveComponent from './pages/Receive';
 import SuccessTip from './pages/SuccessTip';
+import WelcomePage from './pages/Welcome';
 
 export default [
   {
     path: '/',
     component: IndexComponent,
+    meta: {
+      title: '',
+      navigation:false
+    }
   },
   {
     path: '/account',
@@ -112,27 +117,34 @@ export default [
   },
   {
     path: '/intro',
-    component: IntroComponent,
+    component: IntroComponent
   },
 
   {
     path: '/transactions',
-    component: TransactionsComponent,
+    component: TransactionsComponent
   },
   {
     path: '/send',
     name: 'send',
     props: true,
-    component: SendComponent,
+    component: SendComponent
   },
   {
     path: '/receive',
-    component: ReceiveComponent,
+    component: ReceiveComponent
   },
   {
     path: '/success-tip',
     component: SuccessTip,
     name: 'success-tip',
-    props: true,
+    props: true
   },
+  {
+    path: '/welcome',
+    component: WelcomePage,
+    meta: {
+      navigation: false
+    }
+  }
 ];

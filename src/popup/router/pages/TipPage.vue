@@ -41,6 +41,7 @@
           {{ $t('pages.tipPage.edit') }}
         </Button>
       </div>
+      <TipBackground class="tip-bg" v-if="confirmMode" />
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div>
 </template>
@@ -50,8 +51,12 @@ import { mapGetters } from 'vuex';
 import { setInterval, setTimeout, setImmediate, clearInterval } from 'timers';
 import BigNumber from 'bignumber.js';
 import { MAGNITUDE, MIN_SPEND_TX_FEE } from '../../utils/constants';
+import TipBackground from '../../../icons/tip-bg.svg'
 
 export default {
+  components: {
+    TipBackground
+  },
   data() {
     return {
       tipUrl: false,
@@ -135,3 +140,14 @@ export default {
   },
 };
 </script>
+<style lang="scss">
+.tip-bg {
+    position: fixed;
+    left: 50%;
+    top: 79%;
+    transform: translateX(-50%);
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    z-index:0;
+}
+</style>
