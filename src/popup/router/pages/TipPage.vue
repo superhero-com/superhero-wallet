@@ -119,7 +119,7 @@ export default {
     },
     async confirmTip(domain, amount, note) {
       try {
-        const res = await this.$helpers.contractCall({ instance: this.tippin, method:'tip', params: [domain,note, { amount, waitMined:false }] })
+        const res = await this.$helpers.contractCall({ instance: this.tipping, method:'tip', params: [domain,note, { amount, waitMined:false }] })
         if(res.hash) {
           this.$store.commit('SET_AEPP_POPUP', false);
           return this.$router.push({
@@ -131,6 +131,7 @@ export default {
           });
         }
       } catch(e) {
+
         return this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
       }
     },
