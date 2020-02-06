@@ -35,11 +35,6 @@ export default {
                         balance: 0,
                       });
                     }
-                    // if (subaccounts.hasOwnProperty('subaccounts') && subaccounts.subaccounts.length > 0 && subaccounts.subaccounts != '') {
-                    //   subaccounts.subaccounts.forEach(su => {
-                    //     sub.push({ ...su });
-                    //   });
-                    // }
                     store.dispatch('setSubAccounts', sub);
                     store.commit('SET_ACTIVE_ACCOUNT', { publicKey: address, index: 0 });
                   });

@@ -420,12 +420,16 @@
             "edit": "Edit æid Details"
         },
         "successTip": {
-            "sendMore": "Send more tips",
+            "sendMore": "Send More æid",
             "feed": "View your tip on the feed",
-            "completedHeading":" Transaction completed",
+            "completedHeading":" Transaction Completed.",
             "sentTo": "Send to: ",
             "letThemKnow": "Let them know!",
-            "heading": "SEND"
+            "heading": "SEND",
+            "home": "Home",
+            "successfullySent":"You have successfully sent ",
+            "to": "to",
+            "note": "NOTE: The owner of this URL has not created an account yet. They can claim their tokens easily by creating a wallet - the same way you did."
         },
         "transactionDetails": {
             "heading": "Transactions Details",

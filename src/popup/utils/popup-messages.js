@@ -7,7 +7,7 @@ export const POPUP_PROPS = {
   secondBtn: false,
   secondBtnClick: '',
   data: '',
-  buttonsTextPrimary: 'Ok',
+  buttonsTextPrimary: 'OK',
   buttonsTextSecondary: 'See in explorer',
   buttonsFillPrimary: 'primary',
   buttonsFillSecondary: 'secondary',

@@ -411,6 +411,7 @@ button {
   font-size: 16px;
   word-break: break-all;
   word-wrap: break-word;
+  max-width: 380px!important;
 }
 #network.dropdown > ul {
   min-width: 250px;

@@ -1,21 +1,27 @@
 <template>
   <div class="popup">
-      <h3 class="heading">{{ $t('pages.successTip.completedHeading') }}</h3>
-      <p class="sub-heading">You’ve successfully sent {{ amountTip }} æid in <b>TIPS</b> to (URL)</p>
-      <small
-        ><i>{{ $t('pages.successTip.sentTo') }} {{ domain }}</i></small
-      >
-      <h3>{{ $t('pages.successTip.letThemKnow') }}</h3>
+      <h3 class="heading-1 mb-25 mt-15">{{ $t('pages.successTip.completedHeading') }}</h3>
+      <p class="primary-title text-left mb-8 f-16">
+        {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text">{{ amountTip }} æid</span> (0.30 USD) {{ $t('pages.successTip.to') }}
+      </p>
+      <a class="link-sm text-left block">{{ domain }}</a>
+      <p class="f-14 sub-heading text-left">
+        {{ $t('pages.successTip.note') }}
+      </p>
+      <a class="f-18 my-35 block">{{ $t('pages.successTip.letThemKnow') }}</a>
       <div>
         <div class="flex flex-align-center flex-justify-between">
-          <ae-button face="round" fill="primary" @click="toTips"
-            >Send more <br />
-            Tips</ae-button
-          >
-          <ae-button face="round" fill="secondary" @click="toDashboard">{{ $t('pages.appVUE.dashboard') }} <br /></ae-button>
+          <Button half  @click="toTips">
+            {{ $t('pages.successTip.sendMore') }}
+          </Button>
+          <Button half  @click="toDashboard">
+            {{ $t('pages.successTip.home') }}
+          </Button>
         </div>
         <br />
-        <ae-button face="round" extend>{{ $t('pages.successTip.feed') }}</ae-button>
+        <Button extend>
+          {{ $t('pages.successTip.feed') }}
+        </Button>
       </div>
   </div>
 </template>
@@ -45,19 +51,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-h4,
-h3,
-small {
-  word-break: break-word;
-}
-.sub-heading {
-  font-weight: 500;
-  margin: 0;
-}
-.heading {
-  margin-bottom: 5px;
-  text-transform: uppercase;
-}
-</style>
