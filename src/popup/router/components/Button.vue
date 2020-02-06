@@ -1,5 +1,5 @@
 <template>
-    <button class="primary-button" @click="$emit('click')" :class="disabled ? 'disabled': ''">
+    <button class="primary-button" @click="$emit('click')" :class="getClasses">
         <slot></slot>
     </button>
 </template>
@@ -7,7 +7,19 @@
 <script>
 export default {
     props: {
-        disabled: Boolean
+        disabled: Boolean,
+        extend: Boolean,
+        half: Boolean
+    },
+    computed:{
+        getClasses() {
+            let c = []
+            if(this.disabled) c.push('disabled')
+            if(this.extend) c.push('extend')
+            if(this.half) c.push('half')
+            
+            return c.join(" ")
+        }
     }
 }
 </script>
@@ -28,5 +40,15 @@ export default {
 .primary-button.disabled {
     opacity: .4;
     pointer-events: none;
+}
+.primary-button.extend {
+    // width: 304px !important;
+    width:100% !important;
+}
+.primary-button.half {
+    // width: 148px !important;
+    width:48% !important;
+    margin:0 !important;
+
 }
 </style>

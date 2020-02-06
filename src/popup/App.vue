@@ -1,5 +1,5 @@
 <template>
-  <ae-main :class="onAccount ? 'ae-main-account' : ''">
+  <ae-main @click.native="hideMenu" :class="onAccount ? 'ae-main-account' : ''">
       <div class="coronaTitle" :slot="defaulT" v-if="isLoggedIn">
         Corona Wallet
       </div>
@@ -89,10 +89,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import store from '../store';
-import locales from './locales/en.json';
 import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
-import { TIPPING_CONTRACT, AEX2_METHODS } from './utils/constants';
+import { AEX2_METHODS } from './utils/constants';
 import { start, postMessage, readWebPageDom } from './utils/connection';
 import { langs, fetchAndSetLocale } from './utils/i18nHelper';
 import Arrow from '../icons/arrow.svg';
@@ -150,24 +148,18 @@ export default {
   watch: {
     $route(to, from) {
       this.title = to.meta.title || ''
+      this.showNavigation = typeof to.meta.navigation !== 'undefined' ? to.meta.navigation : true
       if (to.path == '/account') {
         this.onAccount = true;
       } else {
         this.onAccount = false;
       }
-
-      if(to.path !== '/') {
-        this.showNavigation = true
-      } else {
-        this.showNavigation = false
-      }
     },
   },
   async created() {
-    if(this.$router.currentRoute.path !== '/') {
-      this.showNavigation = true
-    } 
     this.title = this.$router.currentRoute.meta.title
+    this.showNavigation = this.$router.currentRoute.meta.navigation
+    // this.$router.push('/welcome')
     browser.storage.local.get('language').then(data => {
       this.language = langs[data.language];
       this.$store.state.current.language = data.language;
@@ -354,6 +346,13 @@ export default {
   position: relative;
   height: 50px !important
 }
+
+@-moz-document url-prefix() {
+  .ae-main {
+    width: 380px;
+    margin: 0 auto;
+  }
+}
 .ae-identicon.base {
   height: 100%;
   width: 100%;
@@ -431,11 +430,12 @@ button {
 }
 .popup {
   color: #555;
-  padding: 4px 0px;
+  padding: 4px 20px;
   text-align: center;
   font-size: 16px;
   word-break: break-all;
   word-wrap: break-word;
+  max-width: 380px!important;
 }
 #network.dropdown > ul {
   min-width: 250px;
@@ -529,7 +529,7 @@ button {
 .dropdown[direction="left"] ul { left: 0; }
 .dropdown[direction="right"] ul { right: 0; }
 .dropdown[direction="center"] ul { width: 200px; left: 50%; margin-left: -100px; }
-.dropdown > ul { min-width: 120px; position: absolute; top: 100%; padding: 0; background-color: #FFF; z-index: 1; }
+.dropdown > ul { min-width: 120px; position: absolute; top: 100%; padding: 0; background-color: #FFF; z-index: 12; }
 .dropdown ul { transition: all 0.2s; margin: 0; padding: 5px 0; overflow: hidden; border-radius: 4px; box-shadow: 0 0 16px rgba(0, 33, 87, 0.15); list-style: none; }
 .dropdown ul.sub-dropdown { box-shadow: none; visibility: hidden; max-height:0; padding: 0; overflow: hidden; transition: all 0.3s ease-in-out; }
 .dropdown .have-subDropdown.show ul.sub-dropdown { visibility: visible; max-height: 300px; overflow-y: scroll; }
