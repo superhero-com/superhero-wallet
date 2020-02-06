@@ -495,23 +495,38 @@ export const prefixedAmount = value => {
   return `${v}${name ? ' ' : ''}${name}`;
 };
 
-const contractCall = async ({ instance, method, params = [], decode = false, async = true }) => {
-  let call;
-  try {
-    if (params.length) {
-      call = await instance.methods[method](...params);
+const contractCall = async ({ instance, method,  params = [], decode = false, async = true }) => {
+    let call
+    try {
+        if(params.length) {
+            browser.storage.local.set({ pendingTip: true }).then(() => { });
+            call = await instance.methods[method](...params)
+        } else {
+            call = await instance.methods[method]()
+        }
+    }catch(e) {
+        if(e.message.indexOf("wrong_abi_version") > -1) {
+            instance.setOptions({ backend: 'aevm'})
+            return await contractCall({ instance, method, params, decode, async })
+        } else {
+            throw e.message
+        }
+    }
+    let store = await import('../../store');
+        store = store.default
+    let res = await store.state.sdk.poll(call.hash)
+    if (res) {
+        browser.storage.local.remove('pendingTip')
+        let router = await import('../../../src/popup/router')
+            router = router.default
+        return router.push({ 'name': 'success-tip', params: {
+            amount: params[2].amount, domain: params[0]
+        }})
     } else {
-      call = await instance.methods[method]();
+        browser.storage.local.remove('pendingTip')
     }
-  } catch (e) {
-    if (e.message.indexOf('wrong_abi_version') > -1) {
-      instance.setOptions({ backend: 'aevm' });
-      return await contractCall({ instance, method, params, decode, async });
-    }
-    throw e.message;
-  }
 
-  return async ? (decode ? call.decodedResult : call) : params.length ? instance.methods[method](...params) : instance.methods[method]();
+    return async ? (decode ? call.decodedResult : call ) : params.length ? instance.methods[method](...params) :  instance.methods[method]()
 };
 
 const checkContractAbiVersion = ({ address, middleware }, test = false) =>

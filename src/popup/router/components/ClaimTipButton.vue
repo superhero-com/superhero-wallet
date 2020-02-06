@@ -1,20 +1,44 @@
 <template>
-  <div></div>
+    <div class="center how-to-url">
+      <Button :style="styling" @click="openHowToClaimURL"><Claim /> {{ $t('pages.account.howToClaim') }}</Button>
+      </div>
 </template>
 
 <script>
-export default {};
+import Button from '../components/Button'
+import Claim from '../../../icons/claim.svg'
+
+export default {
+    props: ['styling'],
+    components: {
+      Button, Claim
+    },
+    data(){
+        return {
+            howToClaimURL: 'https://forum.aeternity.com/t/receive-and-tip-the-best-corona-news/5957'
+        }
+    },
+    created(){
+    },
+    methods: {
+        openHowToClaimURL() {
+            browser.tabs.create({ url: this.howToClaimURL, active: true });
+        },
+    }
+}
 </script>
 
 <style scoped>
-.claim-tips-button {
-  border-radius: 50% !important;
-  padding: 20px !important;
-  width: 120px;
-  height: 120px !important;
-  font-size: 1rem !important;
-  word-break: break-word;
-  line-height: 23px !important;
-  font-weight: 800 !important;
+
+.how-to-url button {
+  background: #505058;
+  color: #BCBCC4;
+  font-size: 18px;
+  border-radius: 5px;
+  width: 270px;
+  line-height: 38px;
+}
+.how-to-url svg {
+  vertical-align: middle;
 }
 </style>

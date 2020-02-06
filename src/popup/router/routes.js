@@ -28,6 +28,7 @@ export default [
   },
   {
     path: '/account',
+    name: 'account',
     component: AccountComponent,
   },
   {
