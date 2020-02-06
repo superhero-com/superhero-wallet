@@ -78,26 +78,21 @@
       </ae-header>
       <hr style="margin: 0; background: #3a3a47; height: 2px; border: 0;">
     <router-view :key="$route.fullPath"></router-view>
-    <span class="extensionVersion " v-if="isLoggedIn && !onAccount">
+    <!-- <span class="extensionVersion " v-if="isLoggedIn && !onAccount">
       {{ $t('pages.appVUE.systemName') }}
       {{ extensionVersion }}
-    </span>
+    </span> -->
     <Loader size="big" :loading="mainLoading"></Loader>
-    <div class="connect-error" v-if="connectError">Unable to connect to choosen node</div>
+    <NodeConnectionStatus />
   </ae-main>
 </template>
 
 <script>
-import Ae from '@aeternity/aepp-sdk/es/ae/universal';
-import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import { mapGetters } from 'vuex';
-import { saveAs } from 'file-saver';
-import { computeAuctionEndBlock, computeBidFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import store from '../store';
 import locales from './locales/en.json';
-// import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
-import { initializeSDK, contractCall } from './utils/helper';
-import { TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA, TIPPING_CONTRACT, AEX2_METHODS } from './utils/constants';
+import { setTimeout, clearInterval, clearTimeout, setInterval  } from 'timers';
+import { TIPPING_CONTRACT, AEX2_METHODS } from './utils/constants';
 import { start, postMessage, readWebPageDom } from './utils/connection';
 import { langs, fetchAndSetLocale } from './utils/i18nHelper';
 import Arrow from '../icons/arrow.svg';
@@ -109,8 +104,7 @@ export default {
   },
   data() {
     return {
-      logo_top: browser.runtime.getURL('../../../icons/icon_48.png'),
-      ae_token: browser.runtime.getURL('../../../icons/ae.png'),
+      logo_top: browser.runtime.getURL('../icons/icon_48.png'),
       language: '',
       locales: langs,
       dropdown: {
@@ -120,14 +114,13 @@ export default {
         languages: false,
         tokens: false,
       },
-      mainLoading: true,
-      checkPendingTxInterval:null,
-      menuSlot:"mobile-left",
-      mobileRight: "mobile-right",
+      checkPendingTxInterval: null,
+      menuSlot: 'mobile-left',
+      mobileRight: 'mobile-right',
       defaulT: "default",
-      checkSDKReady:null,
-      connectError:false,
-      onAccount:false,
+      checkSDKReady: null,
+      connectError: false,
+      onAccount: false,
       showNavigation: false,
       title: ''
     }
@@ -147,9 +140,11 @@ export default {
       'background',
       'sdk',
       'aeppPopup',
+      'mainLoading',
+      'nodeConnecting'
     ]),
     extensionVersion() {
-      return `v.${browser.runtime.getManifest().version}`;
+      return `v.${process.env.npm_package_version}`;
     },
   },
   watch: {
@@ -185,26 +180,18 @@ export default {
         this.$store.state.current.network = data.activeNetwork;
       }
     });
-    const background = await start(browser);
-    this.$store.commit('SET_BACKGROUND', background);
-    readWebPageDom((receiver, sendResponse) => {
-      this.$store.commit('SET_TIPPING_RECEIVER', receiver);
-      sendResponse({ host: receiver.host, received: true });
-    });
+    if (process.env.IS_EXTENSION) {
+      const background = await start(browser);
+      this.$store.commit('SET_BACKGROUND', background);
+      readWebPageDom((receiver, sendResponse) => {
+        this.$store.commit('SET_TIPPING_RECEIVER', receiver);
+        sendResponse({ host: receiver.host, received: true });
+      });
+    }
 
     if (!process.env.RUNNING_IN_POPUP) {
       // init SDK
       this.checkSdkReady();
-      setTimeout(() => {
-        if (this.isLoggedIn) {
-          if (this.sdk == null) {
-            this.initSDK();
-          }
-          this.pollData();
-        } else {
-          this.hideLoader();
-        }
-      }, 500);
     } else {
       this.hideLoader();
     }
@@ -231,20 +218,13 @@ export default {
     checkSdkReady() {
       if (!process.env.RUNNING_IN_POPUP) {
         this.checkSDKReady = setInterval(() => {
-          if (this.isLoggedIn && this.sdk == null) {
+          if (this.sdk != null) {
             this.initRpcWallet();
-            this.initSDK();
             this.pollData();
             clearInterval(this.checkSDKReady);
           }
-        }, 500);
+        }, 100);
       }
-    },
-    hideLoader() {
-      const self = this;
-      setTimeout(() => {
-        self.mainLoading = false;
-      }, 1500);
     },
     hideMenu(event) {
       const { target } = event;
@@ -282,26 +262,6 @@ export default {
         postMessage(this.background, { type: AEX2_METHODS.SWITCH_NETWORK, payload: network });
         this.initSDK();
         this.$store.dispatch('updateBalance');
-      });
-    },
-    logout() {
-      browser.storage.local.remove('isLogged').then(() => {
-        browser.storage.local.remove('wallet').then(() => {
-          browser.storage.local.remove('activeAccount').then(() => {
-            this.dropdown.settings = false;
-            this.dropdown.languages = false;
-            this.dropdown.account = false;
-            this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: '', index: 0 });
-            this.$store.commit('UNSET_SUBACCOUNTS');
-            this.$store.commit('UPDATE_ACCOUNT', '');
-            this.$store.commit('SWITCH_LOGGED_IN', false);
-            this.$store.commit('SET_WALLET', []);
-            this.$store.dispatch('initSdk', null);
-            postMessage(this.background, { type: AEX2_METHODS.LOGOUT });
-            this.checkSdkReady();
-            this.$router.push('/');
-          });
-        });
       });
     },
     popupAlert(payload) {
@@ -351,43 +311,8 @@ export default {
         }
       }, 2500);
     },
-    async initSDK() {
-      const sdk = await initializeSDK(this, {
-        network: this.network,
-        current: this.current,
-        account: this.account,
-        wallet: this.wallet,
-        activeAccount: this.activeAccount,
-        background: this.background,
-      });
-      if (typeof sdk != null && !sdk.hasOwnProperty('error')) {
-        try {
-          await this.$store.commit('SET_TIPPING', await this.$helpers.getContractInstance(TIPPING_CONTRACT, { contractAddress: this.network[this.current.network].tipContract }));
-        } catch (e) {
-          console.log('err => ', e)
-        }
-        this.hideLoader();
-      }
-      if (typeof sdk.error !== 'undefined') {
-        await browser.storage.local.remove('isLogged');
-        await browser.storage.local.remove('activeAccount');
-        this.hideLoader();
-        this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: '', index: 0 });
-        this.$store.commit('UNSET_SUBACCOUNTS');
-        this.$store.commit('UPDATE_ACCOUNT', '');
-        this.$store.commit('SWITCH_LOGGED_IN', false);
-
-        this.$router.push('/');
-      }
-    },
     initRpcWallet() {
       postMessage(this.background, { type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
-    },
-    hideConnectError() {
-      this.connectError = false;
-    },
-    showConnectError() {
-      this.connectError = true
     },
     goBack() {
       if(this.isLoggedIn) {
@@ -450,6 +375,173 @@ button { background: none; border: none; color: #717C87; cursor: pointer; transi
 .subAccountBalance { font-family: monospace; margin-bottom:0 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px;}
 .name-pending { width:24px !important; height:24px !important; margin-right:5px; font-size:.8rem; }
 #account .subAccountCheckbox { float: right; }
+}
+@-moz-document url-prefix() {
+  .ae-main {
+    width: 380px;
+    margin: 0 auto;
+  }
+}
+.desktop-right {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+}
+.desktop-right #account {
+  position: relative;
+  left: 0;
+  top: 0;
+  margin-left: 0;
+  margin-top: 0;
+}
+.ae-header header .title {
+  display: none;
+}
+html {
+  min-width: 357px;
+  min-height: 600px;
+  background-color: #f5f5f5;
+}
+p {
+  font-weight: bolder;
+  margin-left: 3px;
+}
+input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px;
+  height: 25px;
+  line-height: 25px;
+}
+input:focus {
+  border-bottom: 1px solid #ddd;
+}
+button:focus {
+  outline: none;
+}
+button {
+  background: none;
+  border: none;
+  color: #717c87;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pageTitle {
+  margin: 0 0 10px;
+}
+.ae-header {
+  border-bottom: 1px solid #eee;
+  margin-bottom: 0 !important;
+}
+.ae-header.logged {
+  background: #001833;
+}
+.ae-header.logged.aeppPopup {
+  margin-bottom: 0 !important;
+}
+.ae-header.logged > * {
+  color: #717c87;
+}
+.logo_top {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  vertical-align: center;
+}
+.logo_top p {
+  color: #ff0d6a;
+  font-size: 20px;
+  line-height: 12px;
+}
+.popup {
+  color: #555;
+  padding: 4px 25px;
+  text-align: center;
+  font-size: 16px;
+  word-break: break-all;
+  word-wrap: break-word;
+}
+#network.dropdown > ul {
+  min-width: 250px;
+}
+#network > button {
+  max-width: 80px;
+}
+#network li .status::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  -moz-border-radius: 7.5px;
+  -webkit-border-radius: 7.5px;
+  border-radius: 7.5px;
+  margin-right: 5px;
+  border: 1px solid #ddd;
+  background-color: #efefef;
+}
+#network li .status.current::before {
+  border-color: green;
+  background-color: greenyellow;
+}
+// #account { position: absolute; left: 50%; margin-left: -60px; top: 50%; margin-top: -24px; }
+// #account  > button { width: 120px; }
+#account .dropdown-button-icon.ae-identicon.base {
+  height: 1.8rem;
+  margin-bottom: 3px;
+  vertical-align: top;
+  -webkit-box-shadow: 0 0 0 2px #ff0d6a;
+  box-shadow: 0 0 0 2px #ff0d6a;
+  border: 0.125rem solid transparent;
+  width: 2.625rem !important;
+  height: 2.625rem !important;
+  vertical-align: middle;
+  margin: 0;
+  margin-top: 4px;
+}
+#account .ae-dropdown-button .dropdown-button-name {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.subAccountInfo {
+  margin-right: auto;
+  margin-bottom: 0 !important;
+  max-width: 155px;
+}
+#network .subAccountInfo {
+  max-width: 195px;
+}
+.subAccountIcon,
+.identicon {
+  margin-right: 10px;
+}
+.subAccountName {
+  text-align: left;
+  color: #000;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-weight: bold;
+  margin-bottom: 0 !important;
+  white-space: nowrap;
+}
+.subAccountBalance {
+  font-family: monospace;
+  margin-bottom: 0 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+}
+.name-pending {
+  width: 24px !important;
+  height: 24px !important;
+  margin-right: 5px;
+  font-size: 0.8rem;
+}
+#account .subAccountCheckbox {
+  float: right;
+}
 // #account li, #network li { padding:0.75rem; cursor:pointer !important; }
 // #account ul { width:250px; margin-left: -125px; max-height: 350px; height: auto; overflow-y: scroll;}
 #account .activeAccount { background: #f6f6f6; }

@@ -141,20 +141,7 @@ const checkAeppConnected = host =>
   });
 
 const redirectAfterLogin = ctx => {
-  if (process.env.RUNNING_IN_POPUP) {
-    ctx.$store.commit('SET_AEPP_POPUP', true);
-    if (window.hasOwnProperty('name') && window.name.includes('popup')) {
-      if (window.props.type == 'connectConfirm') {
-        ctx.$router.push('/connect');
-      } else if (window.props.type == 'sign') {
-        ctx.$router.push('/popup-sign-tx');
-      } else if (window.props.type == 'askAccounts') {
-        ctx.$router.push('/ask-accounts');
-      }
-    }
-  } else {
-    ctx.$router.push('/account');
-  }
+  
 };
 
 const getAeppAccountPermission = (host, account) =>
@@ -620,6 +607,7 @@ export {
   checkAeppConnected,
   redirectAfterLogin,
   initializeSDK,
+  swag,
   currencyConv,
   convertAmountToCurrency,
   contractEncodeCall,

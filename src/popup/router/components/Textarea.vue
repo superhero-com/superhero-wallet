@@ -1,13 +1,27 @@
 <template>
     <textarea
         class="textarea"
-        :class="error ? 'has-error' : ''"
+        :placeholder="placeholder ? placeholder : ''"
+        :class="getClasses"
         :value="value" @input="$emit('input', $event.target.value)" />
 </template>
 
 <script>
 export default {
-    props:['value','error'],
+    props:['value','error','placeholder','size'],
+    computed: {
+        getClasses() {
+            let cl = [];
+            if(this.error) {
+                cl.push("has-error")
+            }
+            if(this.size == "sm") {
+                cl.push("textarea-sm")
+            }
+
+            return cl.join(" ");
+        }
+    }
 }
 </script>
 
@@ -27,11 +41,15 @@ textarea {
     min-height: 200px !important;
     margin-left:auto;
     margin-right: auto;
+    word-break: break-word;
 }
 textarea:focus {
     border-color: $accent-color !important;
 }
 textarea.has-error {
     border-color: $secondary-color !important;
+}
+textarea.textarea-sm{
+    font-size:14px;
 }
 </style>

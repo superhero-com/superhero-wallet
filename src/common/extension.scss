@@ -31,7 +31,7 @@ a {
 }
 .primary-title {
     color: $white-color;
-    font-size: 1.3rem;
+    font-size: 18px;
     font-weight: lighter;
     margin-bottom:27px;
 }
@@ -63,4 +63,90 @@ a {
     .arrow-back {
         cursor: pointer;
     }
+}
+
+.heading-1 {
+    font-size:18px;
+    font-weight: normal;
+    margin:8px 0;
+}
+.sub-heading {
+    font-size:14px;
+    font-weight: normal;
+    margin:8px 0;
+}
+.uppercase {
+    text-transform: uppercase;
+}
+.link-sm {
+    font-size:11px;
+    margin:8px 0;
+}
+.block {
+    display:block;
+}
+/* Font size 14*/
+.f-14 {
+    font-size:14px;
+}
+.f-16 {
+    font-size:16px;
+}
+.l-1 {
+    line-height: 1.2;
+}
+.balance-box {
+    width:80px;
+    text-align: left;
+    border-left:1px solid $border-color;
+    padding-left:10px;
+}
+.amount-box {
+    width: 120px;
+}
+.hidden {
+    visibility: hidden;
+}
+.tip-note-preview {
+    border-radius: 5px;
+    border: 1px;
+    padding: 10px;
+    font-size:14px;
+    border:1px dashed $text-color;
+    margin-top:5px;
+    margin-bottom:30px;
+    text-align: left;
+    word-break: break-word;
+}
+
+/** 
+* Dynamic Margins Utilities Clasess
+*/
+@mixin margin-left($i) {
+  margin-left: $i + px;
+}
+@mixin margin-right($i) {
+    margin-right: $i + px;
+}
+@mixin margin-bottom($i) {
+    margin-bottom: $i + px;
+}
+@mixin margin-top($i) {
+    margin-top: $i + px;
+}
+@mixin margin-x($i) {
+    margin-left: $i + px;
+    margin-right: $i + px;
+}
+@mixin margin-y($i) {
+    margin-top: $i + px;
+    margin-bottom: $i + px;
+}
+@for $i from 1 through 25 {
+  .ml-#{$i} { @include margin-left($i); }
+  .mr-#{$i} { @include margin-right($i); }
+  .mb-#{$i} { @include margin-bottom($i); }
+  .mt-#{$i} { @include margin-top($i); }
+  .mx-#{$i} { @include margin-x($i); }
+  .my-#{$i} { @include margin-y($i); }
 }

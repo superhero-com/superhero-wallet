@@ -96,6 +96,9 @@ export default [
   {
     path: '/termsOfService',
     component: TermsOfService,
+    meta: {
+      title: 'Terms & Conditions'
+    }
   },
   {
     path: '/privacyPolicy',

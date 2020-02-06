@@ -1,4 +1,5 @@
-const path = require('path')
+const path = require('path');
+const { mergeWith } = require('lodash');
 const webpack = require('webpack');
 const ejs = require('ejs');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -7,191 +8,72 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ChromeExtensionReloader = require('webpack-chrome-extension-reloader');
 const { VueLoaderPlugin } = require('vue-loader');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { version } = require('./package.json');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const platforms = [
-  "chrome",
-  "firefox"
-];
-const distFolder = path.resolve(__dirname, 'dist')
 
 
+const mode =  process.env.NODE_ENV === 'production' ? '' : '_dev';
+const transformHtml = content => ejs.render(content.toString(), process.env);
 
-const config = [
-  {
-    name: "chrome",
-    mode: process.env.NODE_ENV,
-    context: __dirname + '/src',
-    entry: {
-      ...getPlatformFiles('chrome')
-    },
-    node: {
-      fs: 'empty', net: 'empty', tls: 'empty'
-    },
-    output: {
-      path: __dirname + '/dist/chrome',
-      filename: '[name].js',
-    },
-    resolve: {
-      extensions: ['.js', '.vue'],
-    },
-    module: {
-      rules: [
-        ...getRules()
-      ],
-    },
-    plugins: [
-      ...getPlugins('chrome'),
+const commonConfig = {
+  mode: process.env.NODE_ENV,
+  context: path.resolve(__dirname, 'src'),
+  entry: {
+    background: './background.js',
+    inject: './inject.js',
+    'popup/popup': './popup/popup.js',
+    'options/options': './options/options.js',
+    'phishing/phishing': './phishing/phishing.js',
+    'popup/cameraPermission': './popup/cameraPermission.js',
+  },
+  node: { fs: 'empty', net: 'empty', tls: 'empty' },
+  output: {
+    filename: '[name].js',
+  },
+  resolve: {
+    extensions: ['.js', '.vue'],
+  },
+  module: {
+    rules: [
+      {
+        test: /\.vue$/,
+        loaders: 'vue-loader',
+      },
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, { loader: 'css-loader', options: { minimize: true } }],
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          { loader: 'css-loader', options: { minimize: true } },
+          { loader: 'sass-loader', options: { minimize: true } },
+        ],
+      },
+      {
+        test: /\.sass$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader?indentedSyntax'],
+      },
+      {
+        test: /\.(png|jpg|gif|ico)$/,
+        loader: 'file-loader',
+        options: {
+          name: '[name].[ext]?emitFile=false',
+        },
+      },
+      {
+        test: /\.svg$/,
+        loader: 'vue-svg-loader',
+      },
     ],
   },
-  {
-    name: "firefox",
-    mode: process.env.NODE_ENV,
-    context: __dirname + '/src',
-    entry: {
-      ...getPlatformFiles('firefox')
-    
-    },
-    node: {
-      fs: 'empty', net: 'empty', tls: 'empty'
-    },
-    output: {
-      path: __dirname + '/dist/firefox',
-      filename: '[name].js',
-    },
-    optimization: {
-      splitChunks: {
-        cacheGroups: {
-          vendor: {
-            name: 'vendor',
-            test: /[\\/]node_modules[\\/]/,
-            chunks (chunk) {
-              return chunk.name == 'popup/popup';
-            },
-            maxSize:3999999
-          },
-        },
-      }
-    },
-    resolve: {
-      extensions: ['.js', '.vue'],
-    },
-    module: {
-      rules: [
-        ...getRules()
-      ],
-    },
-    plugins: [
-      ...getPlugins('firefox'),
-      new HtmlWebpackPlugin({
-        template: path.join(__dirname, "src", "popup", "popup.html"),
-        filename: "popup/popup.html",
-        excludeChunks: ["background", "inject", "options/options","phishing/phishing","aepp","popup/cameraPermission"]
-
-      }),
-      new HtmlWebpackPlugin({
-        template: path.join(__dirname, "src", "options", "options.html"),
-        filename: "options/options.html",
-        chunks: ["options/options"]
-      }),
-      new HtmlWebpackPlugin({
-        template: path.join(__dirname, "src", "phishing", "phishing.html"),
-        filename: "phishing/phishing.html",
-        chunks: ["phishing/phishing"]
-      }),
-      new HtmlWebpackPlugin({
-        template: path.join(__dirname, "src", "popup", "CameraRequestPermission.html"),
-        filename: "popup/CameraRequestPermission.html",
-        chunks: ["popup/cameraPermission"]
-      })
-    ]
-  }
-]
-
-config.forEach((c) => {
-  if (c.mode === 'production') {
-    c.plugins = (c.plugins || []).concat([
-      new webpack.DefinePlugin({
-        'process.env': {
-          NODE_ENV: '"production"',
-        },
-      }),
-    ]);
-  }
-
-  
-})
-
-if (process.env.HMR === 'true') {
-  config[0].plugins = (config[0].plugins || []).concat([
-    new ChromeExtensionReloader({
-      port: 9099
-    }),
-  ]);
-} 
-
-
-
-function transformHtml(content) {
-  return ejs.render(content.toString(), {
-    ...process.env,
-  });
-}
-
-function filterByEntryPoint(entry) {
-  return function(module, chunks) {
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
-
-      if (chunk.groupsIterable) {
-        for (const group of chunk.groupsIterable) {
-          let parentGroup = group.getParents()[0];
-
-          while (parentGroup) {
-            if (parentGroup.name === entry) {
-              return true;
-            }
-            parentGroup = parentGroup.getParents()[0];
-          }
-        }
-      }
-    }
-
-    return false;
-  };
-}
-
-function getPlatformFiles(platform) {
-  let files = {}
-  let pl = platforms.map((platform) => {
-    
-  })
-
-  pl.forEach(p => {
-    files =  {
-      ...files,
-      ...p
-    }
-  })
-  return {
-    [`background`]: './background.js',
-    [`inject`]: './inject.js',
-    [`popup/popup`]: './popup/popup.js',
-    [`options/options`]: './options/options.js',
-    // [`main`]:'./main.js',
-    [`phishing/phishing`]:'./phishing/phishing.js',
-    // [`aepp`]:'./aepp.js',
-    [`popup/cameraPermission`]:'./popup/cameraPermission.js'
-  }
-}
-
-function getPlugins(platform) {
-  return [
+  plugins: [
     new CleanWebpackPlugin({
-      cleanStaleWebpackAssets: false
-    }),
-    new webpack.DefinePlugin({
-      global: 'window',
+      cleanStaleWebpackAssets: false,
     }),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
@@ -199,67 +81,112 @@ function getPlugins(platform) {
       chunkFilename: '[id].css',
       ignoreOrder: false,
     }),
-    
     new CopyWebpackPlugin([
       { from: 'icons', to: `icons`, ignore: ['icon.xcf'] },
       { from: 'popup/popup.html', to: `popup/popup.html`, transform: transformHtml },
       { from: 'options/options.html', to: `options/options.html`, transform: transformHtml },
-      { from: 'phishing/phishing.html', to: `phishing/phishing.html`, transform:transformHtml },
-      { from: 'popup/CameraRequestPermission.html', to: `popup/CameraRequestPermission.html`, transform:transformHtml },
+      { from: 'phishing/phishing.html', to: `phishing/phishing.html`, transform: transformHtml },
+      { from: 'popup/CameraRequestPermission.html', to: `popup/CameraRequestPermission.html`, transform: transformHtml },
       { from: 'icons/icon_48.png', to: `popup/assets/logo-small.png` },
+    ]),
+  ],
+};
+
+const genPlatformDependentPlugins = platform => {
+  const plugins = [
+    new webpack.DefinePlugin({
+      global: 'window',
+      'process.env': {
+        NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+        IS_EXTENSION: platform !== 'cordova',
+        npm_package_version: JSON.stringify(process.env.npm_package_version),
+      },
+    }),
+  ];
+  if (['chrome', 'firefox'].includes(platform)) {
+    const p = new CopyWebpackPlugin([
       {
-        from: `manifests/manifest_${platform}.json`,
+        from: `manifests/manifest_${platform}${mode}.json`,
         to: `manifest.json`,
         transform: content => {
           const jsonContent = JSON.parse(content);
-          jsonContent.version = version;
+          jsonContent.version = process.env.npm_package_version;
 
-          if (config.mode === 'development') {
-            jsonContent['content_security_policy'] = "script-src 'self' 'unsafe-eval'; object-src 'self'";
+          if (process.env.NODE_ENV === 'development') {
+            jsonContent.content_security_policy = "script-src 'self' 'unsafe-eval'; object-src 'self'";
           }
 
           return JSON.stringify(jsonContent, null, 2);
         },
       },
-    ]),
-  ]
-}
+    ]);
+    plugins.push(p);
+  }
+  return plugins;
+};
 
-function getRules() {
-  return [
-    {
-      test: /\.vue$/,
-      loaders: 'vue-loader',
+module.exports = [
+  {
+    name: 'chrome',
+    output: {
+      path: path.resolve(__dirname, 'dist/chrome'),
     },
-    {
-      test: /\.js$/,
-      loader: 'babel-loader',
-      exclude: /node_modules/,
+    plugins: [
+      ...genPlatformDependentPlugins('chrome'),
+      ...process.env.HMR === 'true' ? [new ChromeExtensionReloader({ port: 9099 })] : [],
+    ],
+  },
+  {
+    name: 'firefox',
+    output: {
+      path: path.resolve(__dirname, 'dist/firefox'),
     },
-    {
-      test: /\.css$/,
-      use: [MiniCssExtractPlugin.loader, { loader: 'css-loader', options: { minimize:true } }],
-    },
-    {
-      test: /\.scss$/,
-      use: [MiniCssExtractPlugin.loader,  { loader: 'css-loader', options: { minimize:true } },  { loader: 'sass-loader', options: { minimize:true } }],
-    },
-    {
-      test: /\.sass$/,
-      use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader?indentedSyntax'],
-    },
-    {
-      test: /\.(png|jpg|gif|ico)$/,
-      loader: 'file-loader',
-      options: {
-        name: '[name].[ext]?emitFile=false',
+    optimization: {
+      splitChunks: {
+        cacheGroups: {
+          vendor: {
+            name: 'vendor',
+            test: /[\\/]node_modules[\\/]/,
+            chunks(chunk) {
+              return chunk.name === 'popup/popup';
+            },
+            maxSize: 3999999,
+          },
+        },
       },
     },
-    {
-      test: /\.svg$/,
-      loader: 'vue-svg-loader'
-    }
-  ]
-}
-
-module.exports = config;
+    plugins: [
+      ...genPlatformDependentPlugins('firefox'),
+      new HtmlWebpackPlugin({
+        template: path.join(__dirname, 'src', 'popup', 'popup.html'),
+        filename: 'popup/popup.html',
+        excludeChunks: ['background', 'inject', 'options/options', 'phishing/phishing', 'aepp', 'popup/cameraPermission'],
+      }),
+      new HtmlWebpackPlugin({
+        template: path.join(__dirname, 'src', 'options', 'options.html'),
+        filename: 'options/options.html',
+        chunks: ['options/options'],
+      }),
+      new HtmlWebpackPlugin({
+        template: path.join(__dirname, 'src', 'phishing', 'phishing.html'),
+        filename: 'phishing/phishing.html',
+        chunks: ['phishing/phishing'],
+      }),
+      new HtmlWebpackPlugin({
+        template: path.join(__dirname, 'src', 'popup', 'CameraRequestPermission.html'),
+        filename: 'popup/CameraRequestPermission.html',
+        chunks: ['popup/cameraPermission'],
+      }),
+    ],
+  },
+  {
+    name: 'cordova',
+    output: {
+      path: path.resolve(__dirname, 'www'),
+    },
+    plugins: genPlatformDependentPlugins('cordova'),
+  },
+].map(c => {
+  const customizer = (obj, src) => (Array.isArray(obj) ? obj.concat(src) : undefined);
+  return mergeWith({}, commonConfig, c, customizer);
+});

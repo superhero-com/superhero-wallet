@@ -22,7 +22,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { groupBy, orderBy } from 'lodash-es';
-import { clearInterval, clearTimeout } from 'timers';
+import { clearInterval, clearTimeout, setInterval } from 'timers';
 
 export default {
   data() {
