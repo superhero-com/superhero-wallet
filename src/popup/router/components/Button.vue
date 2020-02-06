@@ -19,7 +19,7 @@ export default {
     background: $button-color !important;
     width:270px !important;
     border-radius: 5px;
-    font-size:1.13rem;
+    font-size:18px;
     padding: 13px;
     margin: 8px auto;
     color: $button-text-color !important;

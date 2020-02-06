@@ -28,7 +28,7 @@
 
 <script>
 import { getPhishingUrls, setPhishingUrl } from '../popup/utils/phishing-detect';
-
+import { setInterval  } from 'timers';
 export default {
   name: 'App',
   data() {

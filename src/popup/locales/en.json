@@ -373,7 +373,16 @@
         },
         "termsOfService": {
             "backButton": "Back",
-            "heading": "Terms and conditions"
+            "heading": "Terms of use",
+            "sub-heading":"Last Update Posted: February 03, 2020",
+            "section1Title": "I. Lorem ipsum dolor sit amet",
+            "section1Content": " Lorem ipsum dolor sit amet",
+            "section2Title": "II. Sed adipiscing diam donec adipiscing tristique",
+            "section2Content": " Sed adipiscing diam donec adipiscing tristique",
+            "section3Title": "III. Placerat in egestas erat imperdiet",
+            "section3Content": "1. Placerat in egestas erat imperdiet. Netus et malesuada fames ac. Tortor aliquam nulla facilisi cras fermentum odio eu. Urna neque viverra justo nec ultrices dui sapien eget mi. Gravida in fermentum et sollicitudin ac orci phasellus egestas tellus. Turpis egestas integer eget aliquet nibh. Risus nullam eget felis eget nunc. Facilisis volutpat est velit egestas dui id. Adipiscing at in tellus integer feugiat. Aliquam sem et tortor consequat id porta. Eget magna fermentum iaculis eu non. 2. Urna duis convallis convallis tellus id interdum velit laoreet. Erat nam at lectus urna duis. Felis imperdiet proin fermentum leo vel. Sit amet commodo nulla facilisi nullam vehicula ipsum a arcu. Viverra mauris in aliquam sem fringilla ut. Ut tortor pretium viverra suspendisse potenti. At tellus at urna condimentum mattis pellentesque id nibh tortor. Turpis egestas integer eget aliquet nibh. Risus nullam eget felis eget nunc.",
+            "section4Title": "Velit euismod in pellentesque massa",
+            "section4Content": "Velit euismod in pellentesque massa"
         },
         "tipPage": {
             "back": "Back",
@@ -389,7 +398,8 @@
             "sendTipBtn": "Send tip",
             "tipDetails": "Details",
             "tipWebsite":"Website",
-            "heading": "Donate",
+            "heading": "Send",
+            "headingSending":"Sending",
             "selectTip": "Select amount to tip",
             "tipDomain": "Tip domain",
             "claim": "Claim Tips",
@@ -398,10 +408,16 @@
             "noTips": "No tips for this url",
             "claimInfo": "If you are verified you can claim the amount of tokens by click the button below",
             "title": "Title",
-            "titlePlaceholder": "Send a message of support along with your tip!",
+            "titlePlaceholder": "Send a message of #support along with your donation...",
             "account": "Account",
-            "next": "NEXT",
-            "url": "Send a tip to"
+            "next": "Send æid",
+            "url": "Send a tip to",
+            "to": "to",
+            "amountPlaceholder":"Enter amount",
+            "amountLabel": "Amount",
+            "availableLabel": "Available",
+            "confirm": "Confirm",
+            "edit": "Edit æid Details"
         },
         "successTip": {
             "sendMore": "Send more tips",

@@ -1,9 +1,5 @@
 <template>
   <div class="popup">
-    <BackLink to="/account">
-      {{ $t('pages.successTip.heading') }}
-    </BackLink>
-    <ae-panel>
       <h3 class="heading">{{ $t('pages.successTip.completedHeading') }}</h3>
       <p class="sub-heading">You’ve successfully sent {{ amountTip }} æid in <b>TIPS</b> to (URL)</p>
       <small
@@ -21,7 +17,6 @@
         <br />
         <ae-button face="round" extend>{{ $t('pages.successTip.feed') }}</ae-button>
       </div>
-    </ae-panel>
   </div>
 </template>
 

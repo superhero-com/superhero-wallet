@@ -5,7 +5,7 @@ import Node from '@aeternity/aepp-sdk/es/node';
 import { getAccounts } from '../popup/utils/storage';
 import { stringifyForStorage, parseFromStorage, extractHostName, getAeppAccountPermission, getUniqueId, getUserNetworks, detectBrowser } from '../popup/utils/helper';
 import { DEFAULT_NETWORK, networks, AEX2_METHODS } from '../popup/utils/constants';
-
+import { setInterval  } from 'timers';
 global.browser = require('webextension-polyfill');
 
 const rpcWallet = {
@@ -43,7 +43,7 @@ const rpcWallet = {
   },
   async createWallet() {
     this.accountKeyPairs = await Promise.all(this.subaccounts.map(async (a, index) => parseFromStorage(await this.controller.getKeypair({ activeAccount: index, account: a }))));
-
+    
     // let activeIdx = await browser.storage.local.get('activeAccount')
 
     this.accounts = this.accountKeyPairs.map(a =>

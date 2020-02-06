@@ -1,51 +1,46 @@
 <template>
-  <div class="popup">
-    <BackLink to="/account">
-      {{ $t('pages.tipPage.heading') }}
-    </BackLink>
+  <div class="popup ">
     <div>
-      <ae-panel>
-        <div v-if="activeTab == 'details'">
-          <div class="flex flex-justify-between balanceInfo">
-            <div>
-              {{ $t('pages.tipPage.account') }}
-            </div>
-            <div class="balance no-sign">{{ tokenBalance }} {{ tokenSymbol }}</div>
+        <p class="primary-title text-left mb-8 f-16" v-if="!confirmMode">
+          {{ $t('pages.tipPage.heading') }} 
+          <span class="secondary-text"> {{ $t('pages.appVUE.aeid') }} </span> 
+          {{ $t('pages.tipPage.to') }} 
+        </p>
+        <p class="primary-title text-left mb-8 f-16" v-if="confirmMode">
+            {{ $t('pages.tipPage.headingSending') }} 
+            <span class="secondary-text">{{ finalAmount }} {{ $t('pages.appVUE.aeid') }} </span> 
+            {{ $t('pages.tipPage.to') }}
+            (0.30 USD) to
+        </p>
+        <a class="link-sm text-left block">{{ tipUrl }}</a>
+        <div class="flex flex-justify-between flex-align-start mt-25" v-if="!confirmMode">
+          <Input class="amount-box" type="number" :error="validAmount ? false : true" v-model="finalAmount" :placeholder="$t('pages.tipPage.amountPlaceholder')" :label="$t('pages.tipPage.amountLabel')"/>
+          <div class="ml-15 text-left" style="margin-right:auto">
+            <p class="label hidden">Empty</p>
+            <span class="secondary-text f-14 block l-1"> {{ tokenSymbol }}</span>
+            <span class="f-14 block l-1">60 USD</span>
           </div>
-
-          <div>
-            <ae-input :label="$t('pages.tipPage.url')" class="my-2">
-              <textarea class="ae-input textarea" v-model="tipUrl" slot-scope="{ context }" @focus="context.focus = true" @blur="context.focus = false" />
-            </ae-input>
-            <DropDown>
-              <div slot="button">
-                {{ selectedTip ? `${selectedTip} ${tokenSymbol}` : 'other' }}
-              </div>
-              <li @click="selectTip(index)" v-for="(tip, index) in tips" :key="index">{{ tip == 0 ? 'other' : `${tip} ${tokenSymbol}` }}</li>
-            </DropDown>
-            <br /><br />
-            <div class="amount-container" :class="!showInput ? 'hideSlider' : ''">
-              <div class="sliderOver"></div>
-              <ae-input label="Tip amount" placeholder="0.0" aemount v-model="finalAmount" disabled="true" class="finalAmount">
-                <ae-text slot="header" fill="black">{{ tokenSymbol }}</ae-text>
-              </ae-input>
-            </div>
-
-            <ae-input :label="$t('pages.tipPage.title')" class="my-2">
-              <textarea
-                class="ae-input textarea"
-                :placeholder="$t('pages.tipPage.titlePlaceholder')"
-                v-model="note"
-                slot-scope="{ context }"
-                @focus="context.focus = true"
-                @blur="context.focus = false"
-              />
-            </ae-input>
+          <div class="balance-box">
+            <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
+            <span class="secondary-text f-14 block l-1">{{ roundedAmount }} {{ tokenSymbol }}</span>
+            <span class="f-14 block l-1">60 USD</span>
           </div>
-          <ae-button face="round" fill="alternative" extend class="sendTip" @click="sendTip">{{ $t('pages.tipPage.next') }}</ae-button>
         </div>
-      </ae-panel>
-    </div>
+
+        <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" v-if="!confirmMode"/>
+        <div class="tip-note-preview" v-if="confirmMode">
+          {{ note }}
+        </div>
+        <Button @click="toConfirm" :disabled="note && validAmount && tipping ? false: true" v-if="!confirmMode">
+          {{ $t('pages.tipPage.next') }}
+        </Button>
+        <Button @click="sendTip"  v-if="confirmMode">
+          {{ $t('pages.tipPage.confirm') }}
+        </Button>
+        <Button @click="confirmMode = false" v-if="confirmMode">
+          {{ $t('pages.tipPage.edit') }}
+        </Button>
+      </div>
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div>
 </template>
@@ -67,19 +62,14 @@ export default {
       tipUrl: false,
       loadFavicon: true,
       domainVerified: true,
-      tips: [10, 20, 50, 100, 0],
-      selectedTip: 10,
-      finalAmount: 10,
-      showInput: false,
+      selectedTip: null,
+      finalAmount: null,
       txFee: MIN_SPEND_TX_FEE,
       tipDomain: false,
       note: undefined,
-      unpaid: 0,
       domainDataInterval: null,
       websiteTips: undefined,
-      loadingTips: true,
-      activeTab: 'details',
-      canClaim: false,
+      confirmMode: false
     };
   },
   computed: {
@@ -88,6 +78,12 @@ export default {
       const calculatedMaxValue = this.balance - MIN_SPEND_TX_FEE;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
     },
+    validAmount(){
+      return this.finalAmount && !isNaN(this.finalAmount) && this.maxValue - this.finalAmount > 0 && this.finalAmount > 0
+    },
+    roundedAmount() {
+      return this.tokenBalance.toFixed(3);
+    }
   },
   created() {
     this.getDomainData();
@@ -106,19 +102,6 @@ export default {
           this.tipUrl = this.url;
         }
         await this.tipWebsiteType();
-        if (
-          this.tippingReceiver &&
-          (this.tippingReceiver.address == this.account.publicKey ||
-            (Array.isArray(this.tippingReceiver.address) && this.tippingReceiver.address.includes(this.account.publicKey))) &&
-          extractHostName(this.tippingReceiver.host) == extractHostName(currentTabUrl)
-        ) {
-          this.canClaim = true;
-        }
-
-        this.unpaid = convertToAE((await this.tipping.methods.unpaid(this.domain)).decodedResult);
-        if (this.activeTab == 'tips') {
-          this.fetchTips();
-        }
 
         setTimeout(() => {
           this.loadFavicon = false;
@@ -131,19 +114,10 @@ export default {
     checkDomain() {
       this.domainVerified = true;
     },
-    selectTip(index) {
-      this.selectedTip = this.tips[index];
-      if (this.tips[index] == 0) {
-        this.showInput = true;
-      } else {
-        this.finalAmount = this.tips[index];
-        this.showInput = false;
-      }
+    toConfirm() {
+      this.confirmMode = true
     },
     sendTip() {
-      if (!this.showInput) {
-        this.finalAmount = this.selectedTip;
-      }
       let amount = this.finalAmount;
       if (this.maxValue - amount <= 0 || isNaN(amount) || amount <= 0) {
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'insufficient_balance' });
@@ -157,78 +131,28 @@ export default {
       amount = BigNumber(amount).shiftedBy(MAGNITUDE);
       this.confirmTip(this.tipUrl, amount, this.note);
     },
-    confirmTip(domain, amount, note) {
-      const tx = {
-        popup: false,
-        tx: {
-          source: TIPPING_CONTRACT,
-          address: this.network[this.current.network].tipContract,
-          params: [domain, note],
-          method: 'tip',
-          options: { amount, waitMined: false },
-          contractType: 'tip',
-        },
-        callType: 'pay',
-        type: 'contractCall',
-      };
+    async confirmTip(domain, amount, note) {
+      try {
+        const res = await this.$helpers.contractCall({ instance: this.tipping, method:'tip', params: [domain,note, { amount, waitMined:false }] })
+        if(res.hash) {
+          this.$store.commit('SET_AEPP_POPUP', false);
+          return this.$router.push({
+            name: 'success-tip',
+            params: {
+              amount,
+              domain,
+            },
+          });
+        }
+      } catch(e) {
 
-      // return this.$router.push({ 'name': 'success-tip', params: {
-      //             amount,
-      //             domain
-      //         }})
-
-      this.$store.commit('SET_AEPP_POPUP', true);
-      return this.$router.push({
-        name: 'sign',
-        params: {
-          data: tx,
-        },
-      });
+      }
     },
     async tipWebsiteType() {
       if (this.tipDomain) {
         this.domain = extractHostName(this.url);
-        this.unpaid = convertToAE((await this.tipping.methods.unpaid(this.domain)).decodedResult);
       } else {
         this.domain = this.url;
-        this.unpaid = convertToAE((await this.tipping.methods.unpaid(this.domain)).decodedResult);
-      }
-    },
-    claimTips() {
-      if (this.canClaim) {
-        const tx = {
-          popup: false,
-          tx: {
-            source: TIPPING_CONTRACT,
-            address: this.network[this.current.network].tipContract,
-            params: [this.domain],
-            method: 'claim',
-          },
-          callType: 'pay',
-          type: 'contractCall',
-        };
-        this.$store.commit('SET_AEPP_POPUP', true);
-        return this.$router.push({
-          name: 'sign',
-          params: {
-            data: tx,
-          },
-        });
-      }
-    },
-    async fetchTips() {
-      if (this.tipping) {
-        this.websiteTips = (await this.tipping.methods.tips_for_url(this.domain)).decodedResult;
-        this.websiteTips = this.websiteTips
-          .map(i => ({ ...i, amount: convertToAE(i.amount) }))
-          .sort((a, b) => new Date(b.received_at).getTime() - new Date(a.received_at).getTime());
-        this.loadingTips = false;
-      }
-    },
-    selectActiveTab(tab) {
-      this.activeTab = tab;
-      if (tab == 'tips') {
-        this.fetchTips();
       }
     },
   },

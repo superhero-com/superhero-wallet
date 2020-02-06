@@ -9,6 +9,8 @@ const ChromeExtensionReloader = require('webpack-chrome-extension-reloader');
 const { VueLoaderPlugin } = require('vue-loader');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+
+const mode =  process.env.NODE_ENV === 'production' ? '' : '_dev';
 const transformHtml = content => ejs.render(content.toString(), process.env);
 
 const commonConfig = {
@@ -104,7 +106,7 @@ const genPlatformDependentPlugins = platform => {
   if (['chrome', 'firefox'].includes(platform)) {
     const p = new CopyWebpackPlugin([
       {
-        from: `manifests/manifest_${platform}.json`,
+        from: `manifests/manifest_${platform}${mode}.json`,
         to: `manifest.json`,
         transform: content => {
           const jsonContent = JSON.parse(content);
