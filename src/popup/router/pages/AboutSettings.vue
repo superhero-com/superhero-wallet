@@ -1,8 +1,5 @@
 <template>
   <div class="popup">
-    <div class="actions">
-      <button class="backbutton toAccount" @click="navigateToSettings"><ae-icon name="back" /> {{ $t('pages.aboutSettings.backToSettings') }}</button>
-    </div>
     <h3 style="text-align:center;">{{ $t('pages.aboutSettings.heading') }}</h3>
     <div class="logo-center">
       <img :src="logo" alt="Corona logo" />

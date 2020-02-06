@@ -7,7 +7,7 @@
           </div>
       </h3>
       <p class="primary-title text-left mb-8 f-16">
-        {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text">{{ amountTip }} æid</span> (0.30 USD) {{ $t('pages.successTip.to') }}
+        {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text">{{ amountTip }} æid</span> ({{ getCurrencyAmount }} {{ current.currency }}) {{ $t('pages.successTip.to') }}
       </p>
       <a class="link-sm text-left block">{{ domain }}</a>
       <p class="f-14 sub-heading text-left">
@@ -32,6 +32,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { MAGNITUDE } from '../../utils/constants';
 import Heart from '../../../icons/heart.svg'
@@ -47,9 +48,13 @@ export default {
     };
   },
   computed: {
+    ...mapGetters([ 'current' ]),
     amountTip() {
       return BigNumber(this.amount).shiftedBy(-MAGNITUDE);
     },
+    getCurrencyAmount() {
+      return (this.amountTip * this.current.currencyRate).toFixed(3);
+    }
   },
   created() {},
   methods: {

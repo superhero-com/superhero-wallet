@@ -105,5 +105,9 @@ export default {
   },
   [types.SET_NODE_STATUS] (state, payload) {
     state.nodeStatus = payload
+  },
+  [types.SET_CURRENCY] (state, { currency, currencyRate}) {
+    state.current.currency = currency
+    state.current.currencyRate = currencyRate
   }
 };

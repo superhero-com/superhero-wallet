@@ -10,20 +10,20 @@
             {{ $t('pages.tipPage.headingSending') }} 
             <span class="secondary-text">{{ finalAmount }} {{ $t('pages.appVUE.aeid') }} </span> 
             {{ $t('pages.tipPage.to') }}
-            (0.30 USD) to
+            ({{ getCurrencyAmount }} {{ getCurrency }}) to
         </p>
         <a class="link-sm text-left block">{{ tipUrl }}</a>
-        <div class="flex flex-justify-between flex-align-start mt-25" v-if="!confirmMode">
+        <div class="flex flex-justify-between flex-align-start mt-25" >
           <Input class="amount-box" type="number" :error="!amountError ? false : true" v-model="finalAmount" :placeholder="$t('pages.tipPage.amountPlaceholder')" :label="$t('pages.tipPage.amountLabel')"/>
           <div class="ml-15 text-left" style="margin-right:auto">
             <p class="label hidden">Empty</p>
             <span class="secondary-text f-14 block l-1"> {{ tokenSymbol }}</span>
-            <span class="f-14 block l-1">60 USD</span>
+            <span class="f-14 block l-1">{{ getCurrencyAmount }} {{ getCurrency }}</span>
           </div>
           <div class="balance-box">
             <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
-            <span class="secondary-text f-14 block l-1">{{ roundedAmount }} {{ tokenSymbol }}</span>
-            <span class="f-14 block l-1">60 USD</span>
+            <span class="secondary-text f-14 block l-1">{{ tokenBalance }} {{ tokenSymbol }}</span>
+            <span class="f-14 block l-1">{{ balanceCurrency }} {{ getCurrency }}</span>
           </div>
         </div>
 
@@ -31,10 +31,10 @@
         <div class="tip-note-preview mt-15" v-if="confirmMode">
           {{ note }}
         </div>
-        <Button @click="toConfirm" :disabled="note && validAmount && tipping && !noteError ? false: true" v-if="!confirmMode">
+        <Button @click="toConfirm" :disabled="note && validAmount && !noteError ? false: true" v-if="!confirmMode">
           {{ $t('pages.tipPage.next') }}
         </Button>
-        <Button @click="sendTip"  v-if="confirmMode">
+        <Button @click="sendTip"  v-if="confirmMode" :disabled="!tipping ? true : false">
           {{ $t('pages.tipPage.confirm') }}
         </Button>
         <Button @click="confirmMode = false" v-if="confirmMode">
@@ -76,7 +76,10 @@ export default {
       'tokenSymbol', 
       'tokenBalance', 
       'popup', 
-      'tipping'
+      'tipping',
+      'current',
+      'balanceCurrency',
+      'sdk'
     ]),
     maxValue() {
       const calculatedMaxValue = this.balance - MIN_SPEND_TX_FEE;
@@ -85,8 +88,11 @@ export default {
     validAmount(){
       return this.finalAmount && !this.amountError
     },
-    roundedAmount() {
-      return this.tokenBalance.toFixed(3);
+    getCurrency() {
+      return this.current.currency.toUpperCase();
+    },
+    getCurrencyAmount() {
+      return (this.finalAmount * this.current.currencyRate).toFixed(3);
     }
   },
   watch: {
@@ -97,9 +103,13 @@ export default {
   created() {
     this.getDomainData();
     this.domainDataInterval = setInterval(() => this.getDomainData(), 5000);
+    
   },
   methods: {
     getDomainData() {
+      if(this.tipping !== null) {
+      }
+     
       browser.tabs.query({ active: true, currentWindow: true }).then(async tabs => this.tipUrl = tabs[0].url );
     },
     toConfirm() {
@@ -122,7 +132,7 @@ export default {
     async confirmTip(domain, amount, note) {
       try {
         this.loading = true
-        const res = await this.$helpers.contractCall({ instance: this.tipping, method:'tip', params: [domain,note, { amount, waitMined:false }] })
+        const res = await this.tipping.call('tip',[domain,note],{ amount, waitMined: false })
         if(res.hash) {
           this.loading = false
           this.$store.commit('SET_AEPP_POPUP', false);

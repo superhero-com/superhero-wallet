@@ -1,6 +1,6 @@
 <template>
     <div class="center how-to-url">
-      <Button :style="styling" @click="openHowToClaimURL"><Claim /> {{ $t('pages.account.howToClaim') }}</Button>
+      <Button :style="styling" @click="openHowToClaimURL"><Claim class="mr-5" /> {{ $t('pages.account.howToClaim') }}</Button>
       </div>
 </template>
 
