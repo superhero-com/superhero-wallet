@@ -430,7 +430,7 @@ button {
 }
 .popup {
   color: #555;
-  padding: 4px 0px;
+  padding: 4px 20px;
   text-align: center;
   font-size: 16px;
   word-break: break-all;
