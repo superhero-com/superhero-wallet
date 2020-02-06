@@ -1,15 +1,8 @@
 <template>
     <div class="recent-transactions">
         <div class="flex flex flex-align-center flex-justify-between">
-            
-        <!-- <div style="justify-content: space-between;display: flex;padding: 0 20px 10px; border-bottom: 1px solid #16161D; "> -->
-            <span style="color:#f1f1f1;" class="title">Recent Activity</span>
-            <span style="color:#6A8EBE; cursor:pointer;" @click="allTransactions" class="viewAll">View all</span>
-        <!-- </div>
-            <h3>MY RECENT TRANSACTIONS</h3>
-            <ae-button extend fill="primary" face="round" class="all-transactions" @click="allTransactions">
-                View All
-            </ae-button> -->
+            <span class="title">Recent Activity</span>
+            <span @click="allTransactions" class="viewAll">View all</span>
         </div>
         
         <div v-if="transactions.latest.length && !loading">
@@ -77,10 +70,17 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '../../../common/variables';
 .recent-transactions {
     padding: 0 20px;
-    height: 100%;
+    .title {
+        color: $white-color !important;
+    }
+    .viewAll {
+        color: $accent-color !important;
+        cursor: pointer;
+    }
 }
 .recent-transactions h3, .recent-transactions p, .recent-transactions .transactionList {
     color: #fff !important;

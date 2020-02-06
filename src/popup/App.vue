@@ -1,5 +1,8 @@
 <template>
   <ae-main :class="onAccount ? 'ae-main-account' : ''">
+      <div class="coronaTitle" :slot="defaulT" v-if="isLoggedIn">
+        Corona Wallet
+      </div>
       <ae-header :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''" v-if="showNavigation">
         
         <!-- login screen header -->
@@ -9,9 +12,6 @@
             </p>
           </div>
           
-          <div style="position: absolute; left: 50%; font-size: 16px; margin-left: -50px; color: #F1F1F1;" :slot="defaulT" v-if="isLoggedIn">
-            Corona Wallet
-          </div>
 
           <div style="height: 22px;" id="settings" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="menuSlot" direction="left" ref="settings">
             <button style="padding: 0;" v-on:click="toggleDropdown">
@@ -42,7 +42,7 @@
           </div>
           <div id="account" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="mobileRight" direction="right" ref="account">
             <Bell style="margin: 6px;" />
-            <button style="width: 38px; height: 38px; padding: 0; margin-top: 6px;margin-bottom: 6px;" v-on:click="toggleDropdown">
+            <button class="acc-dropdown" v-on:click="toggleDropdown">
               <ae-identicon id="identIcon" class="dropdown-button-icon" v-bind:address="this.account.publicKey" size="base" slot="button" />
             </button>
             <transition name="slide-fade">
@@ -332,6 +332,7 @@ export default {
 @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
 @import '../common/base';
 @import '../common/extension';
+
 @-moz-document url-prefix() {
   html {
     scrollbar-width: none;
@@ -341,46 +342,21 @@ export default {
   }
   .ae-main { width: 380px; margin:0 auto; }
 }
-.desktop-right { width: 100%; display: flex; justify-content: space-evenly; }
-.desktop-right #account { position: relative; left: 0; top: 0; margin-left: 0; margin-top: 0; }
+
+.coronaTitle {
+  position: absolute;
+  left: 50%;
+  top: 15px;
+  font-size: 16px;
+  margin-left: -50px;
+}
 .ae-header header {
+  position: relative;
   height: 50px !important
 }
-.ae-header header .title { display: none; }
-html { min-width: 357px; min-height: 600px; background-color: #f5f5f5; }
-p { font-weight: bolder; margin-left: 3px; }
-input { background: transparent; border: none; border-bottom: 1px; height: 25px; line-height: 25px; }
-input:focus { border-bottom: 1px solid #DDD; }
-button:focus { outline: none; }
-button { background: none; border: none; color: #717C87; cursor: pointer; transition: all 0.2s; }
-.pageTitle { margin: 0 0 10px; }
-.ae-header { margin-bottom: 0 !important; }
-.ae-header.logged { background: $bg-color; box-shadow: #000000 0px 2px 3px; height: 50px; }
-.ae-header.logged.aeppPopup { margin-bottom:0 !important; }
-.ae-header.logged > * { color: #717C87; }
-.logo_top { display: flex; flex-flow: row wrap; justify-content: center; vertical-align: center; }
-.logo_top p { color: #FF0D6A; font-size: 20px; line-height: 12px; }
-.popup { color: #555; padding: 4px 0px; text-align: center; font-size: 16px; word-break: break-all; word-wrap: break-word; }
-#network.dropdown > ul { min-width: 250px; }
-#network > button { max-width: 80px; }
-#network li .status::before { content: ''; display: inline-block; width: 8px; height: 8px; -moz-border-radius: 7.5px; -webkit-border-radius: 7.5px; border-radius: 7.5px; margin-right: 5px;
-                border: 1px solid #DDD; background-color: #EFEFEF; }
-#network li .status.current::before { border-color: green; background-color: greenyellow; }
-#account .ae-dropdown-button .dropdown-button-name { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.subAccountInfo { margin-right:auto; margin-bottom:0 !important; max-width: 155px; }
-#network .subAccountInfo { max-width: 195px; }
-.subAccountIcon, .identicon { margin-right: 10px; }
-.ae-identicon.base { height: 100%; width: 100%;}
-.subAccountName { text-align: left; color: #000; text-overflow: ellipsis; overflow: hidden; font-weight:bold; margin-bottom:0 !important; white-space: nowrap; }
-.subAccountBalance { font-family: monospace; margin-bottom:0 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px;}
-.name-pending { width:24px !important; height:24px !important; margin-right:5px; font-size:.8rem; }
-#account .subAccountCheckbox { float: right; }
-}
-@-moz-document url-prefix() {
-  .ae-main {
-    width: 380px;
-    margin: 0 auto;
-  }
+.ae-identicon.base {
+  height: 100%;
+  width: 100%;
 }
 .desktop-right {
   width: 100%;
@@ -455,7 +431,7 @@ button {
 }
 .popup {
   color: #555;
-  padding: 4px 25px;
+  padding: 4px 0px;
   text-align: center;
   font-size: 16px;
   word-break: break-all;
@@ -483,20 +459,11 @@ button {
   border-color: green;
   background-color: greenyellow;
 }
-// #account { position: absolute; left: 50%; margin-left: -60px; top: 50%; margin-top: -24px; }
-// #account  > button { width: 120px; }
-#account .dropdown-button-icon.ae-identicon.base {
-  height: 1.8rem;
-  margin-bottom: 3px;
-  vertical-align: top;
-  -webkit-box-shadow: 0 0 0 2px #ff0d6a;
-  box-shadow: 0 0 0 2px #ff0d6a;
-  border: 0.125rem solid transparent;
-  width: 2.625rem !important;
-  height: 2.625rem !important;
-  vertical-align: middle;
-  margin: 0;
-  margin-top: 4px;
+.acc-dropdown {
+  height: 38px;
+  padding: 0;
+  margin-top: 6px;
+  margin-bottom: 6px;
 }
 #account .ae-dropdown-button .dropdown-button-name {
   max-width: 100%;
@@ -542,8 +509,7 @@ button {
 #account .subAccountCheckbox {
   float: right;
 }
-// #account li, #network li { padding:0.75rem; cursor:pointer !important; }
-// #account ul { width:250px; margin-left: -125px; max-height: 350px; height: auto; overflow-y: scroll;}
+
 #account .activeAccount { background: #f6f6f6; }
 #account .manageAccounts, #network .manageAccounts { padding:0; }
 #account .manageAccounts button, #network .manageAccounts button { padding: 0.5rem 0.75rem; height: auto; justify-content: center; }
