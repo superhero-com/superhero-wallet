@@ -3,7 +3,7 @@
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
       <div class="holder">
         <span class="amount">{{ txAmount }} æid ( <span style="color: #BCBCC4;">{{ txAmountToUSD }} USD</span> )</span>
-        <span style="color: #BCBCC4;" class="status">{{ status }}</span>
+        <span class="status">{{ status }}</span>
         <span class="time">{{ new Date(transactionData.time).toLocaleTimeString() }}</span>
       </div>
       <div class="holder">
@@ -123,7 +123,7 @@ export default {
 .list-item-transaction {
   display: inline-block;
   padding: 5px 0;
-  border-color: #16161d;
+  border-color: $bg-color !important;
   text-decoration: none;
   list-style: none;
   cursor: default;
@@ -145,12 +145,15 @@ export default {
 
     }
     .time {
-      color: #CBCBCB;
+      color: #CBCBCB !important;
       font-size: 12px;
     }
     .amount {
-      color: $secondary-color;
+      color: $secondary-color !important;
       font-size: 14px;
+    }
+    .status {
+      color: $text-color !important;
     }
   }
 }

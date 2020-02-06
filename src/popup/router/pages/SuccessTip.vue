@@ -15,7 +15,7 @@
           <ae-button face="round" fill="secondary" @click="toDashboard">{{ $t('pages.appVUE.dashboard') }} <br /></ae-button>
         </div>
         <br />
-        <ae-button face="round" extend>{{ $t('pages.successTip.feed') }}</ae-button>
+        <ae-button face="round" extend @click="redirectOnFeed">{{ $t('pages.successTip.feed') }}</ae-button>
       </div>
   </div>
 </template>
@@ -27,7 +27,9 @@ import { MAGNITUDE } from '../../utils/constants';
 export default {
   props: ['amount', 'domain'],
   data() {
-    return {};
+    return {
+      feed: 'https://coronanews.org'
+    };
   },
   computed: {
     amountTip() {
@@ -42,6 +44,9 @@ export default {
     toDashboard() {
       this.$router.push('/account');
     },
+    redirectOnFeed() {
+      browser.tabs.create({ url: this.feed, active: true });
+    }
   },
 };
 </script>
