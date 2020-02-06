@@ -13,7 +13,7 @@
             ({{ getCurrencyAmount }} {{ getCurrency }}) to
         </p>
         <a class="link-sm text-left block">{{ tipUrl }}</a>
-        <div class="flex flex-justify-between flex-align-start mt-25" v-if="!confirmMode">
+        <div class="flex flex-justify-between flex-align-start mt-25" >
           <Input class="amount-box" type="number" :error="!amountError ? false : true" v-model="finalAmount" :placeholder="$t('pages.tipPage.amountPlaceholder')" :label="$t('pages.tipPage.amountLabel')"/>
           <div class="ml-15 text-left" style="margin-right:auto">
             <p class="label hidden">Empty</p>
@@ -78,7 +78,8 @@ export default {
       'popup', 
       'tipping',
       'current',
-      'balanceCurrency'
+      'balanceCurrency',
+      'sdk'
     ]),
     maxValue() {
       const calculatedMaxValue = this.balance - MIN_SPEND_TX_FEE;
@@ -102,9 +103,13 @@ export default {
   created() {
     this.getDomainData();
     this.domainDataInterval = setInterval(() => this.getDomainData(), 5000);
+    
   },
   methods: {
     getDomainData() {
+      if(this.tipping !== null) {
+      }
+     
       browser.tabs.query({ active: true, currentWindow: true }).then(async tabs => this.tipUrl = tabs[0].url );
     },
     toConfirm() {
@@ -127,7 +132,7 @@ export default {
     async confirmTip(domain, amount, note) {
       try {
         this.loading = true
-        const res = await this.$helpers.contractCall({ instance: this.tipping, method:'tip', params: [domain,note, { amount, waitMined:false }] })
+        const res = await this.tipping.call('tip',[domain,note],{ amount, waitMined: false })
         if(res.hash) {
           this.loading = false
           this.$store.commit('SET_AEPP_POPUP', false);

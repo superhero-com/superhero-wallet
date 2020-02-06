@@ -22,6 +22,6 @@ export default {
 
 <style lang="scss">
 @import '../../../common/variables';
-.connect-error, .connect-node { position:fixed; bottom: 0; left:0; right:0; background:$secondary-color; color:#fff; padding: .3rem; text-align:center; font-size:14px }
+.connect-error, .connect-node { position:fixed; bottom: 0; left:0; right:0; background:$secondary-color; color:#fff; padding: .3rem; z-index:5; text-align:center; font-size:14px }
 .connect-node { background: $nav-bg-color; }
 </style>

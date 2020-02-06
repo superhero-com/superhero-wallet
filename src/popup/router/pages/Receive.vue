@@ -1,8 +1,5 @@
 <template>
   <div class="popup">
-    <BackLink to="/account">
-      {{ $t('pages.receive.backToAccount') }}
-    </BackLink>
     <p>{{ $t('pages.receive.heading') }}</p>
     <ae-card fill="neutral" align="center">
       <div class="qr-wrapper">

@@ -75,18 +75,30 @@ export default [
   {
     path: '/settings',
     component: SettingsComponent,
+    meta: {
+      title: 'Settings'
+    }
   },
   {
     path: '/generalSettings',
     component: GeneralSettingsComponent,
+    meta: {
+      title: 'General'
+    }
   },
   {
     path: '/securitySettings',
     component: SecuritySettingsComponent,
+    meta: {
+      title: 'Security'
+    }
   },
   {
     path: '/aboutSettings',
     component: AboutSettingsComponent,
+    meta: {
+      title: 'About'
+    }
   },
   {
     path: '/tip',
@@ -126,17 +138,26 @@ export default [
 
   {
     path: '/transactions',
-    component: TransactionsComponent
+    component: TransactionsComponent,
+    meta: {
+      title: 'Transactions'
+    }
   },
   {
     path: '/send',
     name: 'send',
     props: true,
-    component: SendComponent
+    component: SendComponent,
+    meta: {
+      title: 'Withdraw'
+    }
   },
   {
     path: '/receive',
-    component: ReceiveComponent
+    component: ReceiveComponent,
+    meta: {
+      title: 'Receive'
+    }
   },
   {
     path: '/success-tip',

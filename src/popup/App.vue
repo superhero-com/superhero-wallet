@@ -289,7 +289,7 @@ export default {
       this.$router.push('/send');
     },
     profile() {
-      this.dropdown.settings = false;
+      this.dropdown.account = false;
       this.$router.push('/account');
     },
     pollData() {

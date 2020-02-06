@@ -519,7 +519,7 @@ const contractCall = async ({ instance, method,  params = [], decode = false, as
         browser.storage.local.remove('pendingTip')
         let router = await import('../../../src/popup/router')
             router = router.default
-        return router.push({ 'name': 'success-tip', params: {
+        router.push({ 'name': 'success-tip', params: {
             amount: params[2].amount, domain: params[0]
         }})
     } else {

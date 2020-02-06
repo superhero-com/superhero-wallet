@@ -1,9 +1,5 @@
 <template>
   <div class="popup">
-    <div class="actions">
-      <button class="backbutton toAccount" @click="navigateToSettings"><ae-icon name="back" /> {{ $t('pages.generalSettings.backToSettings') }}</button>
-    </div>
-    <ae-panel>
       <div class="maindiv_input-group-addon">
         <h4>{{ $t('pages.generalSettings.switchLanguage') }}</h4>
         <hr />
@@ -28,7 +24,6 @@
           </li>
         </div>
       </div>
-    </ae-panel>
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div>
 </template>

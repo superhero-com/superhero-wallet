@@ -45,7 +45,12 @@
       </div>
 
       <div style="background: #21212A" class="height-100">
-        <Button style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips"> <Heart /> Send æid </Button>
+        <Button style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips"> 
+            <div class="flex flex-align-center flex-justify-content-center">
+              <Heart /> 
+              <span class="ml-5">Send æid</span> 
+           </div>
+        </Button>
         <RecentTransactions></RecentTransactions>
       </div> 
 
@@ -140,7 +145,7 @@ export default {
       if (!res.backed_up_Seed) {
         this.backup_seed_notif = true;
         this.buttonstyle = 'margin-top: 2rem;';
-        setTimeout(() => (this.backup_seed_notif = false), 3000);
+        // setTimeout(() => (this.backup_seed_notif = false), 3000);
       } else {
         this.backup_seed_notif = false;
       }
@@ -327,7 +332,9 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
-
+.account-popup {
+  padding:4px 0;
+}
 .accountAddress {
   color: #fff;
 }
