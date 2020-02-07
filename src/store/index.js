@@ -23,7 +23,7 @@ export default new Vuex.Store({
       language: '',
       token: 0,
       currency: 'USD',
-      currencyRate: null,
+      currencyRate: 0,
     },
     network: networks,
     userNetworks: [],

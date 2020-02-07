@@ -386,7 +386,7 @@ export default {
 
     const sub = [];
     sub.push({
-      name: 'Account',
+      name: 'Main Account',
       publicKey: keypair.publicKey,
       balance: 0,
       root: true,

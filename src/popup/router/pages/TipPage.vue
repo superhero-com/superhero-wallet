@@ -2,26 +2,20 @@
   <div class="popup ">
     <div>
       <p class="primary-title text-left mb-8 f-16" v-if="!confirmMode">
-        {{ $t('pages.tipPage.heading') }}
-        <span class="secondary-text"> {{ $t('pages.appVUE.aeid') }} </span>
-        {{ $t('pages.tipPage.to') }}
+        {{ $t('pages.tipPage.heading') }} 
+        <span class="secondary-text"> {{ $t('pages.appVUE.aeid') }} </span> 
+        {{ $t('pages.tipPage.to') }} 
       </p>
       <p class="primary-title text-left mb-8 f-16" v-if="confirmMode">
-        {{ $t('pages.tipPage.headingSending') }}
-        <span class="secondary-text">{{ finalAmount }} {{ $t('pages.appVUE.aeid') }} </span>
-        {{ $t('pages.tipPage.to') }}
-        ({{ getCurrencyAmount }} {{ getCurrency }}) to
+          {{ $t('pages.tipPage.headingSending') }} 
+          <span class="secondary-text">{{ finalAmount }} {{ $t('pages.appVUE.aeid') }} </span> 
+          {{ $t('pages.tipPage.to') }}
+          ({{ getCurrencyAmount }} {{ getCurrency }}) to
       </p>
       <a class="link-sm text-left block">{{ tipUrl }}</a>
-      <div class="flex flex-justify-between flex-align-start mt-25">
-        <Input
-          class="amount-box"
-          type="number"
-          :error="!amountError ? false : true"
-          v-model="finalAmount"
-          :placeholder="$t('pages.tipPage.amountPlaceholder')"
-          :label="$t('pages.tipPage.amountLabel')"
-        />
+      <AmountSend :amountError="amountError" @changeAmount="val => finalAmount = val" v-if="!confirmMode" :value="finalAmount"/>
+      <!-- <div class="flex flex-justify-between flex-align-start mt-25" v-if="!confirmMode">
+        <Input class="amount-box" type="number" :error="!amountError ? false : true" v-model="finalAmount" :placeholder="$t('pages.tipPage.amountPlaceholder')" :label="$t('pages.tipPage.amountLabel')"/>
         <div class="ml-15 text-left" style="margin-right:auto">
           <p class="label hidden">Empty</p>
           <span class="secondary-text f-14 block l-1"> {{ tokenSymbol }}</span>
@@ -32,16 +26,15 @@
           <span class="secondary-text f-14 block l-1">{{ tokenBalance }} {{ tokenSymbol }}</span>
           <span class="f-14 block l-1">{{ balanceCurrency }} {{ getCurrency }}</span>
         </div>
-      </div>
-
-      <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" v-if="!confirmMode" />
+      </div> -->
+      <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" v-if="!confirmMode"/>
       <div class="tip-note-preview mt-15" v-if="confirmMode">
         {{ note }}
       </div>
-      <Button @click="toConfirm" :disabled="note && validAmount && !noteError ? false : true" v-if="!confirmMode">
+      <Button @click="toConfirm" :disabled="note && validAmount && !noteError && minCallFee ? false: true" v-if="!confirmMode">
         {{ $t('pages.tipPage.next') }}
       </Button>
-      <Button @click="sendTip" v-if="confirmMode" :disabled="!tipping ? true : false">
+      <Button @click="sendTip"  v-if="confirmMode" :disabled="!tipping ? true : false">
         {{ $t('pages.tipPage.confirm') }}
       </Button>
       <Button @click="confirmMode = false" v-if="confirmMode">
@@ -58,8 +51,9 @@
 import { mapGetters } from 'vuex';
 import { setInterval, setTimeout, setImmediate, clearInterval } from 'timers';
 import BigNumber from 'bignumber.js';
-import { MAGNITUDE, MIN_SPEND_TX_FEE } from '../../utils/constants';
-import TipBackground from '../../../icons/tip-bg.svg';
+import { MAGNITUDE, MIN_SPEND_TX_FEE, calculateFee, TX_TYPES } from '../../utils/constants';
+import { setTxInQueue } from '../../utils/helper';
+import TipBackground from '../../../icons/tip-bg.svg'
 
 export default {
   components: {
@@ -72,15 +66,17 @@ export default {
       note: null,
       domainDataInterval: null,
       confirmMode: false,
-      amountError: false,
-      noteError: false,
+      amountError:false,
+      noteError:false,
       loading: false,
+      minCallFee:null,
+      txParams: { }
     };
   },
   computed: {
-    ...mapGetters(['balance', 'tokenSymbol', 'tokenBalance', 'popup', 'tipping', 'current', 'balanceCurrency', 'sdk']),
+    ...mapGetters(['balance', 'tokenSymbol', 'tokenBalance', 'popup', 'tipping', 'current', 'balanceCurrency', 'sdk', 'account', 'network']),
     maxValue() {
-      const calculatedMaxValue = this.balance - MIN_SPEND_TX_FEE;
+      const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
     },
     validAmount() {
@@ -104,16 +100,24 @@ export default {
   },
   methods: {
     getDomainData() {
-      if (this.tipping !== null) {
+      if(this.sdk !== null && !this.minCallFee) {
+        this.txParams = {
+          ...this.sdk.Ae.defaults,
+          contractId: this.network[this.current.network].tipContract,
+          callerId: this.account.publicKey
+        }
+        try {
+           const fee = calculateFee(TX_TYPES['contractCall'], this.txParams)
+          this.minCallFee = fee.min
+        } catch(e) { }
       }
-
-      browser.tabs.query({ active: true, currentWindow: true }).then(async tabs => (this.tipUrl = tabs[0].url));
+      browser.tabs.query({ active: true, currentWindow: true }).then(async tabs => this.tipUrl = tabs[0].url );
     },
     toConfirm() {
-      if (this.maxValue - this.finalAmount <= 0 || isNaN(this.finalAmount) || this.finalAmount <= 0) {
-        return (this.amountError = true);
-      }
-      this.amountError = false;
+      if (!this.minCallFee || this.maxValue - this.finalAmount <= 0 || isNaN(this.finalAmount) || this.finalAmount <= 0) {
+        return this.amountError = true
+      } 
+      this.amountError = false
 
       if (!this.note || !this.tipUrl) {
         return (this.noteError = true);
@@ -128,10 +132,11 @@ export default {
     },
     async confirmTip(domain, amount, note) {
       try {
-        this.loading = true;
-        const res = await this.tipping.call('tip', [domain, note], { amount, waitMined: false });
-        if (res.hash) {
-          this.loading = false;
+        this.loading = true
+        const res = await this.tipping.call('tip',[domain,note],{ amount, waitMined: false })
+        if(res.hash) {
+          setTxInQueue(res.hash)
+          this.loading = false
           this.$store.commit('SET_AEPP_POPUP', false);
           return this.$router.push({
             name: 'success-tip',
