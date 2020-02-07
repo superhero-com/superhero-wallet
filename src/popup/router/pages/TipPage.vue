@@ -126,20 +126,24 @@ export default {
         this.loading = true;
         const res = await this.tipping.call('tip', [domain, note], { amount, waitMined: false });
         if (res.hash) {
-          setTxInQueue(res.hash);
+          browser.storage.local.set({ pendingTip: { hash: res.hash, amount: this.finalAmount, domain, time: new Date().toLocaleTimeString() } }).then(() => {});
           this.loading = false;
           this.$store.commit('SET_AEPP_POPUP', false);
           return this.$router.push({
-            name: 'success-tip',
-            params: {
-              amount,
-              domain,
-            },
+            name: 'account',
           });
         }
       } catch (e) {
+        console.log(e);
         this.loading = false;
         return this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+      }
+    },
+    async tipWebsiteType() {
+      if (this.tipDomain) {
+        this.domain = extractHostName(this.url);
+      } else {
+        this.domain = this.url;
       }
     },
   },
