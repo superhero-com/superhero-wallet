@@ -28,8 +28,8 @@ export default [
     component: IndexComponent,
     meta: {
       title: '',
-      navigation:false
-    }
+      navigation: false,
+    },
   },
   {
     path: '/account',
@@ -76,36 +76,36 @@ export default [
     path: '/settings',
     component: SettingsComponent,
     meta: {
-      title: 'Settings'
-    }
+      title: 'Settings',
+    },
   },
   {
     path: '/generalSettings',
     component: GeneralSettingsComponent,
     meta: {
-      title: 'General'
-    }
+      title: 'General',
+    },
   },
   {
     path: '/securitySettings',
     component: SecuritySettingsComponent,
     meta: {
-      title: 'Security'
-    }
+      title: 'Security',
+    },
   },
   {
     path: '/aboutSettings',
     component: AboutSettingsComponent,
     meta: {
-      title: 'About'
-    }
+      title: 'About',
+    },
   },
   {
     path: '/tip',
     component: TipComponent,
     meta: {
-      title: 'Send æid'
-    }
+      title: 'Send æid',
+    },
   },
   {
     path: '/qrCodeReader',
@@ -117,8 +117,8 @@ export default [
     path: '/termsOfService',
     component: TermsOfService,
     meta: {
-      title: 'Terms & Conditions'
-    }
+      title: 'Terms & Conditions',
+    },
   },
   {
     path: '/privacyPolicy',
@@ -128,20 +128,20 @@ export default [
     path: '/importAccount',
     component: ImportAccount,
     meta: {
-      title: 'Retrieve Existing Account'
-    }
+      title: 'Retrieve Existing Account',
+    },
   },
   {
     path: '/intro',
-    component: IntroComponent
+    component: IntroComponent,
   },
 
   {
     path: '/transactions',
     component: TransactionsComponent,
     meta: {
-      title: 'Transactions'
-    }
+      title: 'Transactions',
+    },
   },
   {
     path: '/send',
@@ -149,15 +149,15 @@ export default [
     props: true,
     component: SendComponent,
     meta: {
-      title: 'Withdraw'
-    }
+      title: 'Withdraw',
+    },
   },
   {
     path: '/receive',
     component: ReceiveComponent,
     meta: {
-      title: 'Receive'
-    }
+      title: 'Receive',
+    },
   },
   {
     path: '/success-tip',
@@ -165,14 +165,14 @@ export default [
     name: 'success-tip',
     props: true,
     meta: {
-      title: 'Send æid'
-    }
+      title: 'Send æid',
+    },
   },
   {
     path: '/welcome',
     component: WelcomePage,
     meta: {
-      navigation: false
-    }
-  }
+      navigation: false,
+    },
+  },
 ];

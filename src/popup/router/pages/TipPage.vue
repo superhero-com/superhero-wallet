@@ -1,47 +1,47 @@
 <template>
   <div class="popup ">
     <div>
-        <p class="primary-title text-left mb-8 f-16" v-if="!confirmMode">
-          {{ $t('pages.tipPage.heading') }} 
-          <span class="secondary-text"> {{ $t('pages.appVUE.aeid') }} </span> 
-          {{ $t('pages.tipPage.to') }} 
-        </p>
-        <p class="primary-title text-left mb-8 f-16" v-if="confirmMode">
-            {{ $t('pages.tipPage.headingSending') }} 
-            <span class="secondary-text">{{ finalAmount }} {{ $t('pages.appVUE.aeid') }} </span> 
-            {{ $t('pages.tipPage.to') }}
-            ({{ getCurrencyAmount }} {{ getCurrency }}) to
-        </p>
-        <a class="link-sm text-left block">{{ tipUrl }}</a>
-        <AmountSend :amountError="amountError" @changeAmount="val => finalAmount = val" v-if="!confirmMode" :value="finalAmount"/>
-        <!-- <div class="flex flex-justify-between flex-align-start mt-25" v-if="!confirmMode">
-          <Input class="amount-box" type="number" :error="!amountError ? false : true" v-model="finalAmount" :placeholder="$t('pages.tipPage.amountPlaceholder')" :label="$t('pages.tipPage.amountLabel')"/>
-          <div class="ml-15 text-left" style="margin-right:auto">
-            <p class="label hidden">Empty</p>
-            <span class="secondary-text f-14 block l-1"> {{ tokenSymbol }}</span>
-            <span class="f-14 block l-1">{{ getCurrencyAmount }} {{ getCurrency }}</span>
-          </div>
-          <div class="balance-box">
-            <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
-            <span class="secondary-text f-14 block l-1">{{ tokenBalance }} {{ tokenSymbol }}</span>
-            <span class="f-14 block l-1">{{ balanceCurrency }} {{ getCurrency }}</span>
-          </div>
-        </div> -->
-        <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" v-if="!confirmMode"/>
-        <div class="tip-note-preview mt-15" v-if="confirmMode">
-          {{ note }}
+      <p class="primary-title text-left mb-8 f-16" v-if="!confirmMode">
+        {{ $t('pages.tipPage.heading') }} 
+        <span class="secondary-text"> {{ $t('pages.appVUE.aeid') }} </span> 
+        {{ $t('pages.tipPage.to') }} 
+      </p>
+      <p class="primary-title text-left mb-8 f-16" v-if="confirmMode">
+          {{ $t('pages.tipPage.headingSending') }} 
+          <span class="secondary-text">{{ finalAmount }} {{ $t('pages.appVUE.aeid') }} </span> 
+          {{ $t('pages.tipPage.to') }}
+          ({{ getCurrencyAmount }} {{ getCurrency }}) to
+      </p>
+      <a class="link-sm text-left block">{{ tipUrl }}</a>
+      <AmountSend :amountError="amountError" @changeAmount="val => finalAmount = val" v-if="!confirmMode" :value="finalAmount"/>
+      <!-- <div class="flex flex-justify-between flex-align-start mt-25" v-if="!confirmMode">
+        <Input class="amount-box" type="number" :error="!amountError ? false : true" v-model="finalAmount" :placeholder="$t('pages.tipPage.amountPlaceholder')" :label="$t('pages.tipPage.amountLabel')"/>
+        <div class="ml-15 text-left" style="margin-right:auto">
+          <p class="label hidden">Empty</p>
+          <span class="secondary-text f-14 block l-1"> {{ tokenSymbol }}</span>
+          <span class="f-14 block l-1">{{ getCurrencyAmount }} {{ getCurrency }}</span>
         </div>
-        <Button @click="toConfirm" :disabled="note && validAmount && !noteError && minCallFee ? false: true" v-if="!confirmMode">
-          {{ $t('pages.tipPage.next') }}
-        </Button>
-        <Button @click="sendTip"  v-if="confirmMode" :disabled="!tipping ? true : false">
-          {{ $t('pages.tipPage.confirm') }}
-        </Button>
-        <Button @click="confirmMode = false" v-if="confirmMode">
-          {{ $t('pages.tipPage.edit') }}
-        </Button>
+        <div class="balance-box">
+          <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
+          <span class="secondary-text f-14 block l-1">{{ tokenBalance }} {{ tokenSymbol }}</span>
+          <span class="f-14 block l-1">{{ balanceCurrency }} {{ getCurrency }}</span>
+        </div>
+      </div> -->
+      <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" v-if="!confirmMode"/>
+      <div class="tip-note-preview mt-15" v-if="confirmMode">
+        {{ note }}
       </div>
-      <TipBackground class="tip-bg" v-if="confirmMode" />
+      <Button @click="toConfirm" :disabled="note && validAmount && !noteError && minCallFee ? false: true" v-if="!confirmMode">
+        {{ $t('pages.tipPage.next') }}
+      </Button>
+      <Button @click="sendTip"  v-if="confirmMode" :disabled="!tipping ? true : false">
+        {{ $t('pages.tipPage.confirm') }}
+      </Button>
+      <Button @click="confirmMode = false" v-if="confirmMode">
+        {{ $t('pages.tipPage.edit') }}
+      </Button>
+    </div>
+    <TipBackground class="tip-bg" v-if="confirmMode" />
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
     <Loader size="big" :loading="loading" type="transparent" content=""></Loader>
   </div>
@@ -57,7 +57,7 @@ import TipBackground from '../../../icons/tip-bg.svg'
 
 export default {
   components: {
-    TipBackground
+    TipBackground,
   },
   data() {
     return {
@@ -74,36 +74,25 @@ export default {
     };
   },
   computed: {
-    ...mapGetters([
-      'balance', 
-      'tokenSymbol', 
-      'tokenBalance', 
-      'popup', 
-      'tipping',
-      'current',
-      'balanceCurrency',
-      'sdk',
-      'account',
-      'network'
-    ]),
+    ...mapGetters(['balance', 'tokenSymbol', 'tokenBalance', 'popup', 'tipping', 'current', 'balanceCurrency', 'sdk', 'account', 'network']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
     },
-    validAmount(){
-      return this.finalAmount && !this.amountError
+    validAmount() {
+      return this.finalAmount && !this.amountError;
     },
     getCurrency() {
       return this.current.currency.toUpperCase();
     },
     getCurrencyAmount() {
       return (this.finalAmount * this.current.currencyRate).toFixed(3);
-    }
+    },
   },
   watch: {
-      finalAmount() {
-        this.amountError = false
-      }
+    finalAmount() {
+      this.amountError = false;
+    },
   },
   created() {
     this.getDomainData();
@@ -131,11 +120,11 @@ export default {
       this.amountError = false
 
       if (!this.note || !this.tipUrl) {
-        return this.noteError = true
+        return (this.noteError = true);
       }
-      this.noteError = false
+      this.noteError = false;
 
-      this.confirmMode = true
+      this.confirmMode = true;
     },
     sendTip() {
       const amount = BigNumber(this.finalAmount).shiftedBy(MAGNITUDE);
@@ -157,8 +146,8 @@ export default {
             },
           });
         }
-      } catch(e) {
-        this.loading = false
+      } catch (e) {
+        this.loading = false;
         return this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
       }
     },
@@ -170,12 +159,12 @@ export default {
 </script>
 <style lang="scss">
 .tip-bg {
-    position: fixed;
-    left: 50%;
-    top: 79%;
-    transform: translateX(-50%);
-    -webkit-transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
-    z-index:0;
+  position: fixed;
+  left: 50%;
+  top: 79%;
+  transform: translateX(-50%);
+  -webkit-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  z-index: 0;
 }
 </style>

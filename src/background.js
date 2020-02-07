@@ -1,3 +1,4 @@
+import { setInterval } from 'timers';
 import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
 import { checkAeppConnected, initializeSDK, removeTxFromStorage, detectBrowser, parseFromStorage, extractHostName } from './popup/utils/helper';
 import WalletContorller from './wallet-controller';
@@ -6,7 +7,6 @@ import rpcWallet from './lib/rpcWallet';
 import { HDWALLET_METHODS, AEX2_METHODS, NOTIFICATION_METHODS } from './popup/utils/constants';
 import TipClaimRelay from './lib/tip-claim-relay';
 import { setController } from './lib/background-utils';
-import { setInterval } from 'timers';
 
 global.browser = require('webextension-polyfill');
 
@@ -42,9 +42,9 @@ setController(controller);
 browser.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
   switch (msg.method) {
     case 'phishingCheck':
-      let data = { ...msg, extUrl: browser.extension.getURL('./') };
+      const data = { ...msg, extUrl: browser.extension.getURL('./') };
       const host = extractHostName(msg.params.href);
-      data.host = host
+      data.host = host;
       phishingCheckUrl(host).then(res => {
         if (typeof res.result !== 'undefined' && res.result == 'blocked') {
           const whitelist = getPhishingUrls().filter(url => url === host);

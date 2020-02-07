@@ -100,14 +100,14 @@ export default {
   [types.SET_TIPPING_RECEIVER](state, payload) {
     state.tippingReceiver = payload;
   },
-  [types.SET_MAIN_LOADING] (state, payload) {
-    state.mainLoading = payload
+  [types.SET_MAIN_LOADING](state, payload) {
+    state.mainLoading = payload;
   },
-  [types.SET_NODE_STATUS] (state, payload) {
-    state.nodeStatus = payload
+  [types.SET_NODE_STATUS](state, payload) {
+    state.nodeStatus = payload;
   },
-  [types.SET_CURRENCY] (state, { currency, currencyRate}) {
-    state.current.currency = currency
-    state.current.currencyRate = currencyRate
-  }
+  [types.SET_CURRENCY](state, { currency, currencyRate }) {
+    state.current.currency = currency;
+    state.current.currencyRate = currencyRate;
+  },
 };

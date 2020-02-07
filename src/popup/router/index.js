@@ -20,13 +20,13 @@ import Button from './components/Button';
 import CheckBox from './components/CheckBox';
 import Textarea from './components/Textarea';
 import ModalComponent from './components/Modal';
-import NodeConnectionStatus from './components/NodeConnectionStatus'
+import NodeConnectionStatus from './components/NodeConnectionStatus';
 import Input from './components/Input';
 import AmountSend from './components/AmountSend';
 
 import * as helper from '../utils/helper';
 import store from '../../store';
-import wallet from '../../lib/wallet'
+import wallet from '../../lib/wallet';
 
 const plugin = {
   install() {
@@ -55,10 +55,10 @@ Vue.component('BackLink', BackLink);
 Vue.component('DropDown', DropDown);
 Vue.component('ClaimTipButton', ClaimTIpButton);
 Vue.component('RecentTransactions', RecentTransactions);
-Vue.component('Button',Button);
-Vue.component('CheckBox',CheckBox);
+Vue.component('Button', Button);
+Vue.component('CheckBox', CheckBox);
 Vue.component('Textarea', Textarea);
-Vue.component("NodeConnectionStatus", NodeConnectionStatus);
+Vue.component('NodeConnectionStatus', NodeConnectionStatus);
 Vue.component('Input', Input);
 Vue.component('AmountSend', AmountSend);
 
@@ -68,31 +68,29 @@ const router = new VueRouter({
 
 let isFirstTransition = true;
 const lastRouteKey = 'lsroute';
-const noRedirectUrls = ['/popup-sign-tx', '/connect', '/connect-confirm', '/sign-transaction/:type?', '/sign-transaction', '/ask-accounts','/success-tip'];
+const noRedirectUrls = ['/popup-sign-tx', '/connect', '/connect-confirm', '/sign-transaction/:type?', '/sign-transaction', '/ask-accounts', '/success-tip'];
 
 router.beforeEach((to, from, next) => {
   const lastRouteName = localStorage.getItem(lastRouteKey);
-  const shouldRedirect = to.path === ("/" || "/account") && lastRouteName && isFirstTransition;
-  if(store.getters.account.hasOwnProperty("publicKey") && store.getters.isLoggedIn) {
-    if(!store.getters.sdk) {
-      wallet.initSdk(() => next('/'))
+  const shouldRedirect = to.path === ('/' || '/account') && lastRouteName && isFirstTransition;
+  if (store.getters.account.hasOwnProperty('publicKey') && store.getters.isLoggedIn) {
+    if (!store.getters.sdk) {
+      wallet.initSdk(() => next('/'));
     }
-    next()
+    next();
   } else {
-    wallet.init((route) => {
-      if(shouldRedirect && (route == '/' || route == '/account') && !noRedirectUrls.includes(lastRouteName)) {
-        next(lastRouteName)
+    wallet.init(route => {
+      if (shouldRedirect && (route == '/' || route == '/account') && !noRedirectUrls.includes(lastRouteName)) {
+        next(lastRouteName);
+      } else if (route) {
+        next(route);
       } else {
-        if(route) {
-          next(route)
-        } else {
-          next()
-        }
+        next();
       }
-    })
+    });
   }
-  isFirstTransition = false
-})
+  isFirstTransition = false;
+});
 
 router.afterEach(to => {
   localStorage.setItem(lastRouteKey, to.path);

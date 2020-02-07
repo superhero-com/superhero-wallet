@@ -43,7 +43,7 @@ export default {
 };
 </script>
 
-<style lang="scss" >
+<style lang="scss">
 .qr-wrapper {
   display: flex;
   justify-content: center;
