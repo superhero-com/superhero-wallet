@@ -14,7 +14,7 @@
         <Logo class="dropdown-button-icon mt-9" slot="button" v-else />
       </div>
       <div id="account" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="mobileRight" direction="right" ref="account">
-        <Bell style="margin: 6px;" />
+        <Bell style="margin: 5px;" />
         <button class="acc-dropdown" v-on:click="toggleDropdown">
           <Hamburger class="dropdown-button-icon" style="padding-top:9px;" />
         </button>
@@ -168,20 +168,7 @@ export default {
         }, 100);
       }
     },
-    hideMenu(event) {
-      const { target } = event;
-      // Hide dropdown menu on click of the element with class triggerhidedd
-      if (
-        typeof target !== 'undefined' &&
-        (target.className.indexOf('triggerhidedd') > -1 || (target.parentElement != null && target.parentElement.className.indexOf('triggerhidedd') > -1))
-      ) {
-        let dropdownParent = event.target.closest('.dropdown');
-        this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
-        if (event.target.closest('.have-subDropdown') != null) {
-          dropdownParent = event.target.closest('.have-subDropdown');
-          this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
-        }
-      }
+    hideMenu({ target }) {
       for (const tar in this.dropdown) {
         const el = this.$refs[tar];
         if (tar != 'languages' && typeof el !== 'undefined' && el !== target && !el.contains(target)) {

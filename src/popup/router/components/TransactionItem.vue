@@ -3,10 +3,10 @@
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
       <div class="holder">
         <span class="amount"
-          >{{ txAmount }} æid <span style="color: #BCBCC4;">( {{ txAmountToUSD }} {{ this.current.currency.toUpperCase() }} ) </span>
-        </span>
+          >{{ txAmount }} æid <span style="color: #BCBCC4;">( {{ txAmountToUSD }} {{ this.current.currency.toUpperCase() }} )</span></span
+        >
         <span class="status">{{ txType }}</span>
-        <span class="time">{{ new Date(transactionData.time).toLocaleTimeString() }}</span>
+        <span class="time">{{ transactionData.time ? new Date(transactionData.time).toLocaleTimeString() : '-- -- --' }}</span>
       </div>
       <div class="holder">
         <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
@@ -38,13 +38,7 @@ export default {
     };
   },
   async created() {
-    if (this.transactionData.tx.recipient_id == this.account.publicKey) {
-      this.status = 'Received';
-    } else if (this.transactionData.tx.caller_id == this.account.publicKey) {
-      this.status = 'Sent';
-    }
-
-    browser.storage.local.get('rateUsd').then(res => {
+    await browser.storage.local.get('rateUsd').then(res => {
       this.rateUsd = res.rateUsd;
     });
     this.checkSdk = setInterval(() => {

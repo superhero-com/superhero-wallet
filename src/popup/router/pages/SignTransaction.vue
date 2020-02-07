@@ -3,14 +3,14 @@
     <ae-list class="spendTxDetailsList">
       <ae-list-item fill="neutral" class="flex-justify-between whiteBg noBorder">
         <div class="flex flex-align-center accountFrom">
-          <ae-identicon :address="account.publicKey" />
+          <ae-identicon style="height: 100%; width: 25%;" :address="account.publicKey" />
           <span class="spendAccountAddr">{{ activeAccountName }}</span>
         </div>
         <div class="arrowSeprator">
           <ae-icon name="left-more" />
         </div>
         <div class="flex flex-align-center accountTo" v-if="isAddressShow">
-          <ae-identicon :address="receiver" />
+          <ae-identicon style="height: 100%; width: 25%;" :address="receiver" />
           <ae-address :value="receiver" v-if="receiver" length="short" class="spendAccountAddr" />
           <span v-if="!receiver" class="spendAccountAddr">{{ $t('pages.signTransaction.unknownAccount') }}</span>
         </div>
@@ -916,10 +916,6 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
-.balanceSpend {
-  font-size: 2rem;
-  color: #001833;
-}
 .spendTxDetailsList .ae-list-item {
   padding: 1rem;
   position: relative;
@@ -944,7 +940,7 @@ export default {
   border: 1px solid #d8d8d8;
   line-height: 20px;
   .ae-icon {
-    font-size: 1.2rem !important;
+    display: block;
     float: none !important;
   }
   &:after {
@@ -952,9 +948,6 @@ export default {
   }
 }
 
-.whiteBg {
-  background: #fff;
-}
 .spendAccountAddr {
   padding: 0 0.5rem !important;
   font-weight: bold !important;
@@ -977,9 +970,6 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.btnFixed {
-  background: #fff;
 }
 .btnFixed button {
   width: 50%;

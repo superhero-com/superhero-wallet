@@ -9,6 +9,7 @@
       <div class="flex flex-align-center flex-justify-between account-info">
         <div class="text-left account-addresses">
           <button style="padding:0" @click="copy" v-clipboard:copy="account.publicKey"><Copyicon /></button>
+          <p class="copied-alert" v-if="copied">Address copied</p>
           <span class="account-name">{{ activeAccountName }}</span>
           <ae-address :value="account.publicKey" length="flat" />
         </div>
@@ -97,6 +98,7 @@ export default {
       backup_seed_notif: false,
       pendingTip: false,
       buttonstyle: '',
+      copied: false,
     };
   },
   computed: {
@@ -146,8 +148,10 @@ export default {
     browser.storage.local.get('backed_up_Seed').then(res => {
       if (!res.backed_up_Seed) {
         this.backup_seed_notif = true;
-        this.buttonstyle = 'margin-top: 2rem;';
-        // setTimeout(() => (this.backup_seed_notif = false), 3000);
+        setTimeout(() => {
+          this.backup_seed_notif = false;
+          this.buttonstyle = 'margin-top: 2rem;';
+        }, 3000);
       } else {
         this.backup_seed_notif = false;
       }
@@ -157,7 +161,10 @@ export default {
   mounted() {},
   methods: {
     copy() {
-      this.$store.dispatch('popupAlert', { name: 'account', type: 'publicKeyCopied' });
+      this.copied = true;
+      setTimeout(() => {
+        this.copied = false;
+      }, 3000);
     },
     allTransactions() {
       this.$router.push('/transactions');
@@ -401,8 +408,7 @@ export default {
   justify-content: unset;
 }
 .currenciesgroup ul {
-  margin: 0px;
-  min-width: 250px;
+  margin: 0;
   box-shadow: none;
   visibility: hidden;
   max-height: 0;
@@ -410,6 +416,8 @@ export default {
   overflow: hidden;
   transition: all 0.3s ease-in-out;
   right: 0;
+  background: #21212a;
+  border: 1px solid #505058;
 }
 .currenciesgroup .have-subDropdown.show ul.sub-dropdown {
   visibility: visible;
@@ -439,6 +447,7 @@ export default {
   -webkit-transform: rotate(-45deg);
   position: absolute;
   right: 1rem;
+  top: 0.8rem;
 }
 .account-info {
   margin: 32px 20px 0 20px;
@@ -450,12 +459,21 @@ export default {
     float: left;
     width: 92%;
   }
+  .ae-address {
+    color: $text-color !important;
+    font-size: 11px;
+    line-height: 0.9rem;
+  }
   .account-addresses {
-    .ae-address {
-      color: $text-color !important;
-      font-size: 11px;
-      line-height: 0.9rem;
-    }
+    position: relative;
+  }
+  .copied-alert {
+    color: #505058;
+    z-index: 1;
+    top: 0;
+    right: 35px;
+    margin: 0;
+    position: absolute;
   }
 }
 
@@ -510,9 +528,11 @@ export default {
 }
 
 .backup_seed_notif {
-  color: $accent-color !important;
   font-size: 14px;
   margin: 14px auto 10px; //32
+}
+.backup_seed_notif span {
+  color: $accent-color !important;
 }
 .backup_seed_notif a {
   cursor: pointer;

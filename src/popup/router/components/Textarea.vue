@@ -14,6 +14,9 @@ export default {
       if (this.size == 'sm') {
         cl.push('textarea-sm');
       }
+      if (this.size == 'h-50') {
+        cl.push('h-50');
+      }
 
       return cl.join(' ');
     },
@@ -47,5 +50,8 @@ textarea.has-error {
 }
 textarea.textarea-sm {
   font-size: 14px;
+}
+textarea.h-50 {
+  min-height: 100px !important;
 }
 </style>
