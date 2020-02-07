@@ -25,7 +25,12 @@
         </Button>
       </div>
       <br />
-      <Button extend>
+
+      <div>
+        <span style="word-break: break-word;font-size: 14px;float: left;">Notify someone that you sent æid to this post</span>
+        <Textarea v-model="note" size="h-50" />
+      </div>
+      <Button @click="redirectOnFeed" extend>
         {{ $t('pages.successTip.feed') }}
       </Button>
     </div>
@@ -46,12 +51,13 @@ export default {
   data() {
     return {
       feed: 'https://coronanews.org',
+      note: 'I just sent æid to this post! Anyone can start sending and receiving æid through CoronaNews. Learn more.',
     };
   },
   computed: {
     ...mapGetters(['current']),
     amountTip() {
-      return BigNumber(this.amount).shiftedBy(-MAGNITUDE);
+      return this.amount.toFixed(3);
     },
     getCurrencyAmount() {
       return (this.amountTip * this.current.currencyRate).toFixed(3);

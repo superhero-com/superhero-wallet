@@ -40,7 +40,7 @@
         </transition>
       </div>
       <div id="account" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="mobileRight" direction="right" ref="account">
-        <Bell style="margin: 6px;" />
+        <Bell style="margin: 5px;" />
         <button class="acc-dropdown" v-on:click="toggleDropdown">
           <ae-identicon id="identIcon" class="dropdown-button-icon" v-bind:address="this.account.publicKey" size="base" slot="button" />
         </button>
@@ -650,11 +650,6 @@ button {
 .dropdown li {
   color: #717c87;
   margin: 0;
-}
-.dropdown li > .ae-button:hover,
-.sub-dropdown li:not(.backBtn) > .ae-button:hover,
-#network li:hover {
-  background-color: #f3f3f3;
 }
 .dropdown li > .ae-button {
   width: 100%;
