@@ -96,7 +96,7 @@ export default {
       backup_seed_notif: false,
       pendingTip: false,
       buttonstyle: '',
-      copied: false
+      copied: false,
     };
   },
   computed: {
@@ -140,14 +140,14 @@ export default {
   },
   async created() {
     browser.storage.local.get('rateUsd').then(res => {
-      this.usdRate = res.hasOwnProperty("rateUsd") ? res.rateUsd : 0;
+      this.usdRate = res.hasOwnProperty('rateUsd') ? res.rateUsd : 0;
     });
 
     browser.storage.local.get('backed_up_Seed').then(res => {
       if (!res.backed_up_Seed) {
         this.backup_seed_notif = true;
         setTimeout(() => {
-          this.backup_seed_notif = false
+          this.backup_seed_notif = false;
           this.buttonstyle = 'margin-top: 2rem;';
         }, 3000);
       } else {
@@ -160,7 +160,9 @@ export default {
   methods: {
     copy() {
       this.copied = true;
-      setTimeout(() => { this.copied = false; }, 3000);
+      setTimeout(() => {
+        this.copied = false;
+      }, 3000);
     },
     allTransactions() {
       this.$router.push('/transactions');
@@ -410,7 +412,7 @@ export default {
   max-height: 0;
   padding: 0;
   overflow: hidden;
-  transition: all .3s ease-in-out;
+  transition: all 0.3s ease-in-out;
   right: 0;
   background: #21212a;
   border: 1px solid #505058;

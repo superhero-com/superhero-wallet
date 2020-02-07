@@ -6,8 +6,8 @@
       {{ activeAccountName }}
     </h3>
     <div class="sendContent">
-      <AmountSend @changeAmount="val => form.amount = val" :value="form.amount"/>
-      <Textarea  v-model="form.address" placeholder="ak.. / name.test" size="sm">  </Textarea>
+      <AmountSend @changeAmount="val => (form.amount = val)" :value="form.amount" />
+      <Textarea v-model="form.address" placeholder="ak.. / name.test" size="sm"> </Textarea>
       <div>
         <p v-if="sendSubaccounts">{{ $t('pages.send.sendSubaccount') }}</p>
         <ae-list class="sendSubaccount">
@@ -40,9 +40,9 @@
       </div> -->
 
       <div>
-          <Button @click="send">
-            {{ $t('pages.send.send') }}
-          </Button>
+        <Button @click="send">
+          {{ $t('pages.send.send') }}
+        </Button>
       </div>
     </div>
     <input type="hidden" class="txHash" :value="tx.hash" />

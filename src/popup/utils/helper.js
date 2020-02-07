@@ -493,22 +493,21 @@ export const prefixedAmount = value => {
   return `${v}${name ? ' ' : ''}${name}`;
 };
 
-const contractCall = async ({ instance, method,  params = [], decode = false, async = true }) => {
-    let call
-    try {
-      if(params.length) {
-          call = await instance.methods[method](...params)
-        } else {
-          call = await instance.methods[method]()
-        }
-    }catch(e) {
-        if(e.message.indexOf("wrong_abi_version") > -1) {
-            instance.setOptions({ backend: 'aevm'})
-            return await contractCall({ instance, method, params, decode, async })
-        } else {
-            throw e.message
-        }
+const contractCall = async ({ instance, method, params = [], decode = false, async = true }) => {
+  let call;
+  try {
+    if (params.length) {
+      call = await instance.methods[method](...params);
+    } else {
+      call = await instance.methods[method]();
     }
+  } catch (e) {
+    if (e.message.indexOf('wrong_abi_version') > -1) {
+      instance.setOptions({ backend: 'aevm' });
+      return await contractCall({ instance, method, params, decode, async });
+    }
+    throw e.message;
+  }
 
   return async ? (decode ? call.decodedResult : call) : params.length ? instance.methods[method](...params) : instance.methods[method]();
 };
@@ -580,7 +579,7 @@ const getUserNetworks = async () => {
     resolve(networks);
   });
 };
-const setTxInQueue = async (tx) => {
+const setTxInQueue = async tx => {
   const { processingTx } = await browser.storage.local.get('processingTx');
   let list = [];
   if (typeof processingTx !== 'undefined' && processingTx.length) {
@@ -588,7 +587,7 @@ const setTxInQueue = async (tx) => {
   }
   list.push(tx);
   await browser.storage.local.set({ processingTx: list });
-}
+};
 
 export {
   shuffleArray,
@@ -621,5 +620,5 @@ export {
   setPermissionForAccount,
   getUniqueId,
   getUserNetworks,
-  setTxInQueue
+  setTxInQueue,
 };

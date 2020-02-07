@@ -4,19 +4,19 @@
 
 <script>
 export default {
-    props: ['value', 'error', 'placeholder', 'size'],
-    computed: {
-        getClasses() {
-            let cl = [];
-            if(this.error) {
-                cl.push("has-error")
-            }
-            if(this.size == "sm") {
-                cl.push("textarea-sm")
-            }
-            if(this.size == "h-50") {
-                cl.push("h-50")
-            }
+  props: ['value', 'error', 'placeholder', 'size'],
+  computed: {
+    getClasses() {
+      const cl = [];
+      if (this.error) {
+        cl.push('has-error');
+      }
+      if (this.size == 'sm') {
+        cl.push('textarea-sm');
+      }
+      if (this.size == 'h-50') {
+        cl.push('h-50');
+      }
 
       return cl.join(' ');
     },
@@ -52,6 +52,6 @@ textarea.textarea-sm {
   font-size: 14px;
 }
 textarea.h-50 {
-    min-height: 100px !important;
+  min-height: 100px !important;
 }
 </style>
