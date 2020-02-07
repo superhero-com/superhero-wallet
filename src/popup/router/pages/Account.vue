@@ -9,6 +9,7 @@
       <div class="flex flex-align-center flex-justify-between account-info">
         <div class="text-left account-addresses">
           <button style="padding:0" @click="copy" v-clipboard:copy="account.publicKey"><Copyicon /></button>
+          <p class="copied-alert" v-if="copied">Address copied</p>
           <span class="account-name">{{ activeAccountName }}</span>
           <ae-address :value="account.publicKey" length="flat" />
         </div>
@@ -95,6 +96,7 @@ export default {
       backup_seed_notif: false,
       pendingTip: false,
       buttonstyle: '',
+      copied: false
     };
   },
   computed: {
@@ -144,8 +146,10 @@ export default {
     browser.storage.local.get('backed_up_Seed').then(res => {
       if (!res.backed_up_Seed) {
         this.backup_seed_notif = true;
-        this.buttonstyle = 'margin-top: 2rem;';
-        // setTimeout(() => (this.backup_seed_notif = false), 3000);
+        setTimeout(() => {
+          this.backup_seed_notif = false
+          this.buttonstyle = 'margin-top: 2rem;';
+        }, 3000);
       } else {
         this.backup_seed_notif = false;
       }
@@ -155,7 +159,8 @@ export default {
   mounted() {},
   methods: {
     copy() {
-      this.$store.dispatch('popupAlert', { name: 'account', type: 'publicKeyCopied' });
+      this.copied = true;
+      setTimeout(() => { this.copied = false; }, 3000);
     },
     allTransactions() {
       this.$router.push('/transactions');
@@ -454,6 +459,17 @@ export default {
     color: $text-color !important;
     font-size: 11px;
     line-height: 0.9rem;
+  }
+  .account-addresses {
+    position: relative;
+  }
+  .copied-alert {
+    color: #505058;
+    z-index: 1;
+    top: 0;
+    right: 35px;
+    margin: 0;
+    position: absolute;
   }
 }
 

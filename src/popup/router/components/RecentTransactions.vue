@@ -58,6 +58,9 @@ export default {
             },
         }
     },
+    created() {
+        this.pollData();
+    },
     computed: {
         ...mapGetters(['transactions','account','sdk', 'current'])
     },
@@ -70,15 +73,14 @@ export default {
             this.loading = false
             this.$store.dispatch('updateLatestTransactions',transactions);
 
-
             browser.storage.local.get('pendingTip').then(async res => {
                 if (res.hasOwnProperty('pendingTip') && res.pendingTip) {
                     this.newTip = true;
                     if (this.newTip) {
-                        this.pendingTipo.amount = res.pendingTip.amount
+                        this.pendingTipo.amount = (parseFloat(res.pendingTip.amount)).toFixed(3)
                         this.pendingTipo.domain = res.pendingTip.domain;
                         this.pendingTipo.time = res.pendingTip.time;
-                        this.pendingTipo.amountUSD = this.current.currencyRate ? this.pendingTipo.amount * this.current.currencyRate : this.pendingTipo.amount
+                        this.pendingTipo.amountUSD = (parseFloat(this.current.currencyRate ? this.pendingTipo.amount * this.current.currencyRate : this.pendingTipo.amount)).toFixed(3)
                     }
                     let mined = await this.sdk.poll(res.pendingTip.hash)
                     let transaction_ready = false;
