@@ -36,7 +36,7 @@ export default {
   margin: 8px auto;
   color: $button-text-color !important;
   font-weight: normal !important;
-  line-height: 40px;
+  line-height: 40px !important;
   max-height: 40px;
 }
 .primary-button.disabled {
