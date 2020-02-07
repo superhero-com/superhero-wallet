@@ -152,6 +152,7 @@
 <script>
 import ArrowDown from '../../../icons/arrow-down.svg';
 import ArrowRight from '../../../icons/arrow-right.svg';
+
 export default {
   components: {
     ArrowDown,

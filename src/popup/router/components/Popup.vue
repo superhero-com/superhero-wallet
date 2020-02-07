@@ -8,7 +8,7 @@
   >
     <div class="popup-message" v-html="popup.msg"></div>
     <Button half @click="closePopup" slot="buttons">
-      {{ popup.buttonsTextPrimary}}
+      {{ popup.buttonsTextPrimary }}
     </Button>
     <ae-button v-if="popup.secondBtn" class="popup-button" face="round" :fill="popup.buttonsFillSecondary" uppercase @click.native="clickSecondBtn" slot="buttons">{{
       popup.buttonsTextSecondary
@@ -45,17 +45,17 @@ export default {
 <style lang="scss">
 @import '../../../common/variables';
 .ae-overlay {
-  background: rgba(18, 18, 23, 0.8)!important;
+  background: rgba(18, 18, 23, 0.8) !important;
 }
 .ae-overlay .ae-modal-light {
   background: $border-color !important;
-  width:310px !important;
+  width: 310px !important;
   border-radius: 5px !important;
 }
 .ae-overlay .ae-modal-light h1 {
   display: none;
 }
 .ae-overlay .ae-modal-light .popup-message {
-  font-size:14px;
+  font-size: 14px;
 }
 </style>

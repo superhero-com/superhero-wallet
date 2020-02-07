@@ -3,7 +3,8 @@ import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wa
 import { getBrowserAPI } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/helpers';
 import { MESSAGE_DIRECTION } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/schema';
 import ContentScriptBridge from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/content-script-bridge';
-import { setInterval, clearInterval  } from 'timers';
+import { setInterval, clearInterval } from 'timers';
+
 global.browser = require('webextension-polyfill');
 
 const redirectToWarning = (hostname, href, extUrl = '') => {
@@ -37,7 +38,7 @@ window.addEventListener(
     }
     // Handle message from page and redirect to background script
     if (!data.hasOwnProperty('resolve')) {
-      sendToBackground(method, data)
+      sendToBackground(method, data);
     }
   },
   false
@@ -71,12 +72,11 @@ window.addEventListener('load', () => {
   const address = document.all[0].outerHTML.match(/(ak\_[A-Za-z0-9]{49,50})/g);
   if (address) {
     const sendInterval = setInterval(() => {
-      browser.runtime
-        .sendMessage({
-          from: 'content',
-          type: 'readDom',
-          data: address,
-        })
+      browser.runtime.sendMessage({
+        from: 'content',
+        type: 'readDom',
+        data: address,
+      });
     }, 5000);
   }
 });
