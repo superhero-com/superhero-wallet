@@ -58,10 +58,10 @@
 import { mapGetters } from 'vuex';
 
 import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
+import { setInterval } from 'timers';
 import { shuffleArray, fetchData } from '../../utils/helper';
 import { addressGenerator, encryptMnemonic } from '../../utils/address-generator';
 import { generateHdWallet } from '../../utils/hdWallet';
-import { setInterval  } from 'timers';
 
 export default {
   props: ['termsAgreed'],

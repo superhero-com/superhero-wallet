@@ -7,20 +7,20 @@
         <ae-loader v-if="size == 'small'" />
       </div>
       <transition name="fadeOut" v-if="size == 'big'">
-        <span class="mainLoader mainLoaderTransparent"  v-if="type == 'transparent'"><ae-loader /></span>
-        <Welcome class="mainLoader" v-if="type !== 'transparent'"/>
+        <span class="mainLoader mainLoaderTransparent" v-if="type == 'transparent'"><ae-loader /></span>
+        <Welcome class="mainLoader" v-if="type !== 'transparent'" />
       </transition>
     </div>
   </div>
 </template>
 
 <script>
-import Welcome from '../pages/Welcome'
+import Welcome from '../pages/Welcome';
 
 export default {
   components: {
-    Welcome
-  },  
+    Welcome,
+  },
   data() {
     return {};
   },
@@ -29,7 +29,7 @@ export default {
 };
 </script>
 
-<style lang="scss" >
+<style lang="scss">
 @import '../../../common/variables';
 .fadeOut-enter-active,
 .fadeOut-leave-active {
@@ -39,7 +39,7 @@ export default {
   opacity: 0;
 }
 .ae-loader {
-  border: .2em solid $secondary-color !important;
+  border: 0.2em solid $secondary-color !important;
   border-left-color: transparent !important;
   border-right-color: transparent !important;
 }
@@ -47,8 +47,7 @@ export default {
   position: fixed;
   width: 100%;
   height: 100%;
-  background-color: $bg-color
-  ;
+  background-color: $bg-color;
   top: 0;
   z-index: 6;
 }

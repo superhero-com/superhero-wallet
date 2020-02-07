@@ -22,8 +22,8 @@ export default new Vuex.Store({
       network: DEFAULT_NETWORK,
       language: '',
       token: 0,
-      currency:'USD',
-      currencyRate:null
+      currency: 'USD',
+      currencyRate: null,
     },
     network: networks,
     userNetworks: [],
@@ -42,7 +42,7 @@ export default new Vuex.Store({
     tipping: null,
     tippingReceiver: {},
     mainLoading: true,
-    nodeStatus:'connecting'
+    nodeStatus: 'connecting',
   },
   getters,
   mutations,

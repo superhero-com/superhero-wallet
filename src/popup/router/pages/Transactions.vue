@@ -5,9 +5,7 @@
         <div class="date">{{ index }}</div>
         <TransactionItem v-for="transaction in trans" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
       </div>
-      <Button v-if="showMoreBtn" @click="loadMore">
-          <ae-icon name="reload" /> {{ $t('pages.transactions.loadMore') }}
-      </Button>
+      <Button v-if="showMoreBtn" @click="loadMore"> <ae-icon name="reload" /> {{ $t('pages.transactions.loadMore') }} </Button>
       <p v-if="showMoreBtn == false">{{ $t('pages.transactions.allLoaded') }}</p>
     </ae-list>
     <div class="newTx" @click="mergeNewTransactions" v-if="newTransactions != 0">
@@ -211,13 +209,13 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
-.date{
-    background: #505058;
-    padding: 0.5rem 1rem;
-    color: $white-color;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    font-family: monospace;
+.date {
+  background: #505058;
+  padding: 0.5rem 1rem;
+  color: $white-color;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  font-family: monospace;
 }
 .actions {
   width: 50%;
