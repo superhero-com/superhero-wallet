@@ -341,7 +341,7 @@ const checkAddress = value => Crypto.isAddressValid(value, 'ak') || Crypto.isAdd
 
 const isInt = n => n % 1 === 0;
 
-const chekAensName = value => value.endsWith('.test');
+const chekAensName = value => value.endsWith('.test') || value.endsWith('.chain');
 
 const stringifyForStorage = state =>
   JSON.stringify(state, (key, value) => {

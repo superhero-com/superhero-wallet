@@ -83,11 +83,10 @@ export const toMicro = value => value.shiftedBy(-MAGNITUDE_MICRO).toFixed();
 
 export const MIN_SPEND_TX_FEE_MICRO = toMicro(MIN_SPEND_TX_FEE);
 export const MAX_REASONABLE_FEE_MICRO = toMicro(MAX_REASONABLE_FEE);
-
-export const DEFAULT_NETWORK = 'Testnet'
+export const DEFAULT_NETWORK = typeof process.env.NETWORK !== 'undefined' ? process.env.NETWORK.trim() : 'Mainnet'
 export const networks = {
   Testnet: {
-    url: 'https://sdk-testnet.aepps.com',
+    url: 'https://testnet.aeternal.io',
     internalUrl: 'https://testnet.aeternal.io',
     networkId: 'ae_uat',
     middlewareUrl: 'https://testnet.aeternal.io',
@@ -98,13 +97,12 @@ export const networks = {
     tipContract: "ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj"
   },
   Mainnet: {
-    url: 'https://sdk-mainnet.aepps.com',
-    internalUrl: 'https://sdk-mainnet.aepps.com',
+    url: 'https://mainnet.aeternal.io',
+    internalUrl: 'https://mainnet.aeternal.io',
     networkId: 'ae_mainnet',
     middlewareUrl: 'https://mainnet.aeternal.io/',
     explorerUrl: 'https://mainnet.aeternal.io',
     compilerUrl: 'https://compiler.aepps.com',
-    // compilerUrl: 'https://compiler.aeternity.art',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tipContract: 'ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj'

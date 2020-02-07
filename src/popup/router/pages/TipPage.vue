@@ -14,19 +14,6 @@
       </p>
       <a class="link-sm text-left block">{{ tipUrl }}</a>
       <AmountSend :amountError="amountError" @changeAmount="val => (finalAmount = val)" v-if="!confirmMode" :value="finalAmount" />
-      <!-- <div class="flex flex-justify-between flex-align-start mt-25" v-if="!confirmMode">
-        <Input class="amount-box" type="number" :error="!amountError ? false : true" v-model="finalAmount" :placeholder="$t('pages.tipPage.amountPlaceholder')" :label="$t('pages.tipPage.amountLabel')"/>
-        <div class="ml-15 text-left" style="margin-right:auto">
-          <p class="label hidden">Empty</p>
-          <span class="secondary-text f-14 block l-1"> {{ tokenSymbol }}</span>
-          <span class="f-14 block l-1">{{ getCurrencyAmount }} {{ getCurrency }}</span>
-        </div>
-        <div class="balance-box">
-          <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
-          <span class="secondary-text f-14 block l-1">{{ tokenBalance }} {{ tokenSymbol }}</span>
-          <span class="f-14 block l-1">{{ balanceCurrency }} {{ getCurrency }}</span>
-        </div>
-      </div> -->
       <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" v-if="!confirmMode" />
       <div class="tip-note-preview mt-15" v-if="confirmMode">
         {{ note }}
@@ -54,10 +41,14 @@ import BigNumber from 'bignumber.js';
 import { MAGNITUDE, MIN_SPEND_TX_FEE, calculateFee, TX_TYPES } from '../../utils/constants';
 import { setTxInQueue } from '../../utils/helper';
 import TipBackground from '../../../icons/tip-bg.svg';
+import AmountSend from '../components/AmountSend';
+import Textarea from '../components/Textarea';
 
 export default {
   components: {
     TipBackground,
+    AmountSend,
+    Textarea,
   },
   data() {
     return {

@@ -12,8 +12,12 @@
 
 <script>
 import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
+import Textarea from '../components/Textarea';
 
 export default {
+  components: {
+    Textarea,
+  },
   data() {
     return {
       mnemonic: null,
