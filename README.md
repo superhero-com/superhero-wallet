@@ -17,6 +17,8 @@ $ cd tipwallet
 ```
 $ npm install
 $ npm run build
+$ NETWORK=Testnet && npm run build # build for Testnet
+$ NETWORK=Mainnet && npm run build # build for Mainnet
 $ npm run gen:cordova-resources
 $ npx cordova build/run android/ios # to build Cordova application
 ```

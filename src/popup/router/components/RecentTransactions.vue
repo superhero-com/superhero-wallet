@@ -124,6 +124,7 @@ export default {
 @import '../../../common/variables';
 .recent-transactions {
   padding: 0 20px;
+  padding-bottom: 20px;
   .title {
     color: $white-color !important;
   }

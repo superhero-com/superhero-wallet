@@ -123,6 +123,9 @@ export default [
   {
     path: '/privacyPolicy',
     component: PrivacyPolicy,
+    meta: {
+      title: 'Privacy Policy',
+    },
   },
   {
     path: '/importAccount',

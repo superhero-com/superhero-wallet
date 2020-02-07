@@ -67,6 +67,7 @@ import Copyicon from '../../../icons/copy.svg';
 import DropdownArrow from '../../../icons/dropdownarrow.svg';
 import Heart from '../../../icons/heart.svg';
 import RecentTransactions from '../components/RecentTransactions';
+import ClaimTipButton from '../components/ClaimTipButton';
 
 export default {
   name: 'Account',
@@ -75,6 +76,7 @@ export default {
     DropdownArrow,
     Heart,
     RecentTransactions,
+    ClaimTipButton,
   },
   data() {
     return {
@@ -527,7 +529,7 @@ export default {
 
 .backup_seed_notif {
   font-size: 14px;
-  margin: 14px auto 32px;
+  margin: 14px auto 10px; //32
 }
 .backup_seed_notif span {
   color: $accent-color !important;

@@ -23,8 +23,12 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import Input from './Input';
 
 export default {
+  components: {
+    Input,
+  },
   props: ['amountError', 'value'],
   data() {
     return {

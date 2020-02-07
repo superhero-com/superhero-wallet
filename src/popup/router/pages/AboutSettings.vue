@@ -1,9 +1,6 @@
 <template>
   <div class="popup">
-    <h3 style="text-align:center;">{{ $t('pages.aboutSettings.heading') }}</h3>
-    <div class="logo-center">
-      <img :src="logo" alt="Corona logo" />
-    </div>
+    <Logo class="logo" />
     <p>
       {{ $t('pages.aboutSettings.systemName') }}
     </p>
@@ -19,7 +16,12 @@
 </template>
 
 <script>
+import Logo from '../../../icons/logo.svg';
+
 export default {
+  components: {
+    Logo,
+  },
   data() {
     return {
       logo: browser.runtime.getURL('../../../icons/icon_128.png'),

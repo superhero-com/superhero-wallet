@@ -1,7 +1,7 @@
 <template>
   <div class="popup">
-    <p>{{ $t('pages.receive.heading') }}</p>
-    <ae-card align="center" class="qr-code">
+    <!-- <p>{{ $t('pages.receive.heading') }}</p> -->
+    <ae-card align="center" class="qr-code mt-35">
       <div class="qr-wrapper">
         <qrcode-vue :value="account.publicKey"></qrcode-vue>
       </div>

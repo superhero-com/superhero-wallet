@@ -5,7 +5,12 @@
         <div class="date">{{ index }}</div>
         <TransactionItem v-for="transaction in trans" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
       </div>
-      <Button v-if="showMoreBtn" @click="loadMore"> <ae-icon name="reload" /> {{ $t('pages.transactions.loadMore') }} </Button>
+      <Button v-if="showMoreBtn" @click="loadMore">
+        <div class="flex flex-align-center flex-justify-content-center">
+          <ae-icon name="reload" />
+          <span class="ml-5"> {{ $t('pages.transactions.loadMore') }} </span>
+        </div>
+      </Button>
       <p v-if="showMoreBtn == false">{{ $t('pages.transactions.allLoaded') }}</p>
     </ae-list>
     <div class="newTx" @click="mergeNewTransactions" v-if="newTransactions != 0">

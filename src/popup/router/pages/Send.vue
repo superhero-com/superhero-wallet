@@ -20,25 +20,6 @@
           </ae-list-item>
         </ae-list>
       </div>
-
-      <!-- <ae-input :label="$t('pages.send.amount')" placeholder="0.0" aemount v-model="form.amount" class="sendAmount">
-        <ae-text slot="header" fill="black">
-          <span class="token-symbol">{{ tokenSymbol }}</span>
-        </ae-text>
-        <ae-toolbar slot="footer" class="flex-justify-between">
-          <span>
-            {{ $t('pages.send.txFee') }}
-          </span>
-          <span> {{ txFee }} æid </span>
-        </ae-toolbar>
-      </ae-input>
-      <div class="flex flex-justify-between balanceInfo">
-        <div>
-          {{ $t('pages.send.maxSpendableValue') }}
-        </div>
-        <div class="balance no-sign">{{ tokenBalance }} {{ tokenSymbol }}</div>
-      </div> -->
-
       <div>
         <Button @click="send">
           {{ $t('pages.send.send') }}
@@ -65,9 +46,15 @@ import Ae from '@aeternity/aepp-sdk/es/ae/universal';
 import { MAGNITUDE, MIN_SPEND_TX_FEE, MIN_SPEND_TX_FEE_MICRO, MAX_UINT256, calculateFee, TX_TYPES, FUNGIBLE_TOKEN_CONTRACT } from '../../utils/constants';
 import { getPublicKeyByResponseUrl, getSignedTransactionByResponseUrl, generateSignRequestUrl } from '../../utils/airGap';
 import { contractEncodeCall, checkAddress, chekAensName } from '../../utils/helper';
+import AmountSend from '../components/AmountSend';
+import Textarea from '../components/Textarea';
 
 export default {
   name: 'Send',
+  components: {
+    AmountSend,
+    Textarea,
+  },
   data() {
     return {
       ae_token: browser.runtime.getURL('../../../icons/ae.png'),

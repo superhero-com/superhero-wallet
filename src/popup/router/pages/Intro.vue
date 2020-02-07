@@ -1,6 +1,6 @@
 <template>
   <div class="popup">
-    <div class="createWallet-holder">
+    <!-- <div class="createWallet-holder">
       <div v-show="step === 1">
         <h2>{{ $t('pages.intro.heading') }}</h2>
         <p>(Onboarding page {{ step }} of {{ totalsteps }})</p>
@@ -81,7 +81,7 @@
         <p style="bottom: 50px; color: rgb(235, 88, 250); position: absolute; margin: 0 auto; width: 100%;"><b>Enjoy your autonomy</b></p>
         <button @click="createWallet" class="createWallet-button">Go to Dashboard</button>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -96,7 +96,9 @@ export default {
       mnemonic: null,
     };
   },
-  async created() {},
+  async created() {
+    this.createWallet();
+  },
   methods: {
     async createWallet() {
       this.mnemonic = generateMnemonic();

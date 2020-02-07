@@ -6,7 +6,9 @@
         <h4>{{ $t('pages.securitySettings.seedRecoveryHeading') }}</h4>
         <hr />
         <small class="sett_info">{{ $t('pages.securitySettings.seedRecoverySmall') }}</small>
-        <ae-button face="round" fill="primary" class="notround settingBtn" extend @click="seedPhraseRecovery">{{ $t('pages.securitySettings.seedRecoveryBtn') }}</ae-button>
+        <Button @click="seedPhraseRecovery">
+          {{ $t('pages.securitySettings.seedRecoveryBtn') }}
+        </Button>
       </div>
       <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
       <div v-if="loading" class="loading">
@@ -22,7 +24,7 @@
             {{ alert.content }}
           </div>
         </Alert>
-        <ae-panel style="box-shadow: #c6c3c3 0px 0px 20px;margin:0">
+        <ae-panel style="margin:0" class="mnemonics">
           <p style="word-spacing: 10px;">{{ seedPhrase }}</p>
           <ae-button style="float: right;margin: 10px 0 30px 0;" face="toolbar" v-clipboard:copy="seedPhrase">
             <ae-icon name="copy" />
@@ -189,7 +191,15 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+@import '../../../common/variables';
+.ae-modal {
+  background: $border-color !important;
+}
+.mnemonics p,
+.mnemonics button {
+  color: #000 !important;
+}
 .primary-button {
   background: #4f4f4f;
   color: #fff;

@@ -63,9 +63,9 @@ a {
         margin-left:15px;
         font-weight: lighter;
     }
-    .arrow-back {
-        cursor: pointer;
-    }
+}
+.arrow-back {
+    cursor: pointer;
 }
 
 .heading-1 {
@@ -89,6 +89,9 @@ a {
     display:block;
 }
 /* Font size 14*/
+.f-12 {
+    font-size:12px;
+}
 .f-14 {
     font-size:14px;
 }
@@ -158,4 +161,7 @@ a {
   .mt-#{$i} { @include margin-top($i); }
   .mx-#{$i} { @include margin-x($i); }
   .my-#{$i} { @include margin-y($i); }
+}
+.mr-auto { 
+    margin-right: auto;
 }
