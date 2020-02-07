@@ -8,8 +8,8 @@ export const getters = {
   balance(state) {
     return state.balance;
   },
-  balanceCurrency({ current, balance}) {
-    return (current.currencyRate * balance).toFixed(3)
+  balanceCurrency({ current, balance }) {
+    return (current.currencyRate * balance).toFixed(3);
   },
   network(state) {
     return state.network;
@@ -78,9 +78,9 @@ export const getters = {
     return tippingReceiver;
   },
   mainLoading({ mainLoading }) {
-    return mainLoading
+    return mainLoading;
   },
   nodeStatus({ nodeStatus }) {
-    return nodeStatus
-  }
+    return nodeStatus;
+  },
 };

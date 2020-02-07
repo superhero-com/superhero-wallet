@@ -2,13 +2,15 @@
   <div>
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
       <div class="holder">
-        <span class="amount">{{ txAmount }} æid  <span style="color: #BCBCC4;">( {{ txAmountToUSD }} {{ this.current.currency.toUpperCase() }} ) </span> </span>
+        <span class="amount"
+          >{{ txAmount }} æid <span style="color: #BCBCC4;">( {{ txAmountToUSD }} {{ this.current.currency.toUpperCase() }} ) </span>
+        </span>
         <span class="status">{{ txType }}</span>
         <span class="time">{{ new Date(transactionData.time).toLocaleTimeString() }}</span>
       </div>
       <div class="holder">
         <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
-        <span class="seeTransaction" :class="!tipTx ? 'invisible' : ''" @click="seeTx" ><Eye /></span>
+        <span class="seeTransaction" :class="!tipTx ? 'invisible' : ''" @click="seeTx"><Eye /></span>
       </div>
     </ae-list-item>
   </div>
@@ -16,55 +18,57 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import Eye from '../../../icons/eye.svg';
-import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers'
-import { convertToAE } from '../../utils/helper'
+import { convertToAE } from '../../utils/helper';
+
 export default {
   props: ['transactionData', 'recent', 'dark'],
   components: {
-    Eye
+    Eye,
   },
   data() {
     return {
       status: '',
       rateUsd: null,
-      tipUrl:'',
-      checkSdk:null,
-      tipTx:true,
-      tipAmount:0
+      tipUrl: '',
+      checkSdk: null,
+      tipTx: true,
+      tipAmount: 0,
     };
   },
   async created() {
     if (this.transactionData.tx.recipient_id == this.account.publicKey) {
-      this.status = 'Received'
+      this.status = 'Received';
     } else if (this.transactionData.tx.caller_id == this.account.publicKey) {
-      this.status = 'Sent'
+      this.status = 'Sent';
     }
-    
+
     browser.storage.local.get('rateUsd').then(res => {
       this.rateUsd = res.rateUsd;
     });
     this.checkSdk = setInterval(() => {
-      if(this.sdk !== null) {
-        this.getEventData()
-        clearInterval(this.checkSdk)
-      } 
-    },100)
-    
+      if (this.sdk !== null) {
+        this.getEventData();
+        clearInterval(this.checkSdk);
+      }
+    }, 100);
   },
   computed: {
-    ...mapGetters(['account', 'popup','sdk', 'current']),
+    ...mapGetters(['account', 'popup', 'sdk', 'current']),
     balanceSign() {
       return this.transactionData.tx.sender_id == this.account.publicKey || this.transactionData.tx.account_id == this.account.publicKey ? 'minus' : 'plus';
     },
     txType() {
-      if(this.transactionData.tx.sender_id == this.account.publicKey ||
+      if (
+        this.transactionData.tx.sender_id == this.account.publicKey ||
         this.transactionData.tx.account_id == this.account.publicKey ||
         this.transactionData.tx.owner_id == this.account.publicKey ||
-        this.transactionData.tx.caller_id == this.account.publicKey) {
-          return 'Sent'
-        } 
-        return 'Received'
+        this.transactionData.tx.caller_id == this.account.publicKey
+      ) {
+        return 'Sent';
+      }
+      return 'Received';
     },
     transactionType() {
       if (this.transactionData.tx.type == 'SpendTx') {
@@ -106,8 +110,8 @@ export default {
     txAmountToUSD() {
       const amount = this.transactionData.tx.amount ? this.transactionData.tx.amount : 0;
       const { fee } = this.transactionData.tx;
-      let txamount = (amount + fee) / 10 ** 18;
-      let rate = this.current.currencyRate ? this.current.currencyRate : this.rateUsd
+      const txamount = (amount + fee) / 10 ** 18;
+      const rate = this.current.currencyRate ? this.current.currencyRate : this.rateUsd;
       return (txamount * rate).toFixed(3);
     },
   },
@@ -118,21 +122,21 @@ export default {
     showTransaction() {
       browser.tabs.create({ url: this.popup.data, active: false });
     },
-    async getEventData(){
+    async getEventData() {
       try {
-        const { log } = await this.sdk.tx(this.transactionData.hash, true)
-        this.tipUrl = decode(log[0].data).toString()
-        this.tipAmount = convertToAE(log[0].topics[2])
-      } catch(e) {
-        this.tipTx = false
+        const { log } = await this.sdk.tx(this.transactionData.hash, true);
+        this.tipUrl = decode(log[0].data).toString();
+        this.tipAmount = convertToAE(log[0].topics[2]);
+      } catch (e) {
+        this.tipTx = false;
       }
     },
-    visitTipUrl(){
-      browser.tabs.create({ url: this.tipUrl, active: true })
+    visitTipUrl() {
+      browser.tabs.create({ url: this.tipUrl, active: true });
     },
     seeTx() {
-      browser.tabs.create({ url: 'https://coronanews.org/#/', active: true })
-    }
+      browser.tabs.create({ url: 'https://coronanews.org/#/', active: true });
+    },
   },
 };
 </script>
@@ -163,10 +167,10 @@ export default {
       cursor: pointer;
     }
     .seeTransaction {
-      margin-left:10px;
+      margin-left: 10px;
     }
     .time {
-      color: #CBCBCB !important;
+      color: #cbcbcb !important;
       font-size: 12px;
     }
     .amount {

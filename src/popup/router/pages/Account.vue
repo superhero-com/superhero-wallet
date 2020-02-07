@@ -1,11 +1,8 @@
 <template>
   <div style="background:#16161D;" class="height-100">
     <div class="popup account-popup">
-
       <div v-show="backup_seed_notif" class="backup_seed_notif">
-        <span>
-          You need to <a @click="navigateToBackUpSeed" style="text-decoration: underline;">backup</a> your seed phrase
-        </span>
+        <span> You need to <a @click="navigateToBackUpSeed" style="text-decoration: underline;">backup</a> your seed phrase </span>
       </div>
       <ClaimTipButton :styling="buttonstyle"></ClaimTipButton>
 
@@ -17,16 +14,18 @@
         </div>
       </div>
 
-      <div class="external-svg" :style="{'background-image': 'url(' + accbalanceBG + ')'}">
+      <div class="external-svg" :style="{ 'background-image': 'url(' + accbalanceBG + ')' }">
         <span class="title">Balance</span>
         <div class="balance no-sign">
-          <div class="amount"> <span>{{ tokenBalance }}</span> <span>{{ tokenSymbol }}</span> </div>
+          <div class="amount">
+            <span>{{ tokenBalance }}</span> <span>{{ tokenSymbol }}</span>
+          </div>
           <div class="currenciesgroup">
             <span> ~ </span>
             <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
               <div class="input-group-area">
                 <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
-                  {{ this.current.currencyRate ? (this.current.currencyRate*tokenBalance).toFixed(3) : (this.usdRate*tokenBalance).toFixed(3) }} 
+                  {{ this.current.currencyRate ? (this.current.currencyRate * tokenBalance).toFixed(3) : (this.usdRate * tokenBalance).toFixed(3) }}
                   <span style="color: #6A8EBE !important">{{ this.current.currency ? this.current.currency.toUpperCase() : 'USD' }}</span>
                   <DropdownArrow />
                 </ae-button>
@@ -34,8 +33,8 @@
               <ul class="sub-dropdown">
                 <li class="single-currency" v-for="(index, item) in allCurrencies" v-bind:key="index">
                   <ae-button v-on:click="switchCurrency(index, item)" class="" :class="current.currency == item ? 'current' : ''">
-                      {{ item.toUpperCase() }}
-                      <i class="arrowrightCurrency"></i>
+                    {{ item.toUpperCase() }}
+                    <i class="arrowrightCurrency"></i>
                   </ae-button>
                 </li>
               </ul>
@@ -45,16 +44,14 @@
       </div>
 
       <div style="background: #21212A" class="height-100">
-        <Button style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips"> 
-            <div class="flex flex-align-center flex-justify-content-center">
-              <Heart /> 
-              <span class="ml-5">Send æid</span> 
-           </div>
+        <Button style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
+          <div class="flex flex-align-center flex-justify-content-center">
+            <Heart />
+            <span class="ml-5">Send æid</span>
+          </div>
         </Button>
         <RecentTransactions></RecentTransactions>
-      </div> 
-
-
+      </div>
     </div>
   </div>
 </template>
@@ -65,15 +62,18 @@ import { setInterval, setTimeout, setImmediate, clearInterval } from 'timers';
 import { request } from 'http';
 import { fetchData, currencyConv } from '../../utils/helper';
 import { FUNGIBLE_TOKEN_CONTRACT, TOKEN_REGISTRY_ADDRESS, TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA } from '../../utils/constants';
-import Copyicon from '../../../icons/copy.svg'
-import DropdownArrow from '../../../icons/dropdownarrow.svg'
-import Heart from '../../../icons/heart.svg'
-import RecentTransactions from '../components/RecentTransactions'
+import Copyicon from '../../../icons/copy.svg';
+import DropdownArrow from '../../../icons/dropdownarrow.svg';
+import Heart from '../../../icons/heart.svg';
+import RecentTransactions from '../components/RecentTransactions';
 
 export default {
   name: 'Account',
   components: {
-    Copyicon, DropdownArrow, Heart, RecentTransactions
+    Copyicon,
+    DropdownArrow,
+    Heart,
+    RecentTransactions,
   },
   data() {
     return {
@@ -130,17 +130,17 @@ export default {
     },
     currs() {
       browser.storage.local.get('allCurrencies').then(resall => {
-        let allCurrencies = JSON.parse(resall.allCurrencies);
+        const allCurrencies = JSON.parse(resall.allCurrencies);
         this.allCurrencies = allCurrencies;
         return allCurrencies;
       });
-    }
+    },
   },
   async created() {
     browser.storage.local.get('rateUsd').then(res => {
       this.usdRate = res.rateUsd;
     });
-    
+
     browser.storage.local.get('backed_up_Seed').then(res => {
       if (!res.backed_up_Seed) {
         this.backup_seed_notif = true;
@@ -158,7 +158,7 @@ export default {
       this.$store.dispatch('popupAlert', { name: 'account', type: 'publicKeyCopied' });
     },
     allTransactions() {
-        this.$router.push('/transactions')
+      this.$router.push('/transactions');
     },
     navigateReceive() {
       this.$router.push('/receive');
@@ -175,10 +175,10 @@ export default {
       browser.tabs.create({ url: this.popup.data, active: false });
     },
     async toggleDropdown(event, parentClass) {
-      if (typeof parentClass == 'undefined') {
+      if (typeof parentClass === 'undefined') {
         parentClass = '.currenciesgroup';
       }
-      let dropdownParent = event.target.closest(parentClass);
+      const dropdownParent = event.target.closest(parentClass);
       this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
     },
     async switchCurrency(index, item) {
@@ -314,7 +314,7 @@ export default {
               this.currencyFullName = '';
               break;
           }
-          this.$store.commit("SET_CURRENCY", { currency: item, currencyRate:index })
+          this.$store.commit('SET_CURRENCY', { currency: item, currencyRate: index });
           this.dropdown.currencies = false;
         });
       });
@@ -333,7 +333,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../common/variables';
 .account-popup {
-  padding:4px 0;
+  padding: 4px 0;
 }
 .accountAddress {
   color: #fff;
@@ -483,7 +483,9 @@ export default {
   .amount {
     font-size: 26px;
     color: $text-color !important;
-    :last-child { color: $secondary-color !important; }
+    :last-child {
+      color: $secondary-color !important;
+    }
   }
   .ae-button {
     display: block;
@@ -504,7 +506,6 @@ export default {
   overflow-y: scroll;
   padding-bottom: 20px;
 }
-
 
 .backup_seed_notif {
   color: $accent-color !important;

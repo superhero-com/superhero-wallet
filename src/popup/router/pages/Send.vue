@@ -301,7 +301,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.sendContent > div:not(.sendAmount):not(.address) { 
+.sendContent > div:not(.sendAmount):not(.address) {
   margin-bottom: 10px;
 }
 .sendContent > div {

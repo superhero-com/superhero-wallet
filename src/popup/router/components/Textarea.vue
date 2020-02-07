@@ -1,55 +1,51 @@
 <template>
-    <textarea
-        class="textarea"
-        :placeholder="placeholder ? placeholder : ''"
-        :class="getClasses"
-        :value="value" @input="$emit('input', $event.target.value)" />
+  <textarea class="textarea" :placeholder="placeholder ? placeholder : ''" :class="getClasses" :value="value" @input="$emit('input', $event.target.value)" />
 </template>
 
 <script>
 export default {
-    props:['value','error','placeholder','size'],
-    computed: {
-        getClasses() {
-            let cl = [];
-            if(this.error) {
-                cl.push("has-error")
-            }
-            if(this.size == "sm") {
-                cl.push("textarea-sm")
-            }
+  props: ['value', 'error', 'placeholder', 'size'],
+  computed: {
+    getClasses() {
+      const cl = [];
+      if (this.error) {
+        cl.push('has-error');
+      }
+      if (this.size == 'sm') {
+        cl.push('textarea-sm');
+      }
 
-            return cl.join(" ");
-        }
-    }
-}
+      return cl.join(' ');
+    },
+  },
+};
 </script>
 
 <style lang="scss">
 @import '../../../common/variables';
 
 textarea {
-    display: block;
-    width:100%;
-    border-radius: 5px;
-    border:2px solid $border-color !important;
-    background: $input-bg-color !important;
-    padding:15px;
-    margin-bottom:22px;
-    color: $text-color !important;
-    font-size:$font-size;
-    min-height: 200px !important;
-    margin-left:auto;
-    margin-right: auto;
-    word-break: break-word;
+  display: block;
+  width: 100%;
+  border-radius: 5px;
+  border: 2px solid $border-color !important;
+  background: $input-bg-color !important;
+  padding: 15px;
+  margin-bottom: 22px;
+  color: $text-color !important;
+  font-size: $font-size;
+  min-height: 200px !important;
+  margin-left: auto;
+  margin-right: auto;
+  word-break: break-word;
 }
 textarea:focus {
-    border-color: $accent-color !important;
+  border-color: $accent-color !important;
 }
 textarea.has-error {
-    border-color: $secondary-color !important;
+  border-color: $secondary-color !important;
 }
-textarea.textarea-sm{
-    font-size:14px;
+textarea.textarea-sm {
+  font-size: 14px;
 }
 </style>
