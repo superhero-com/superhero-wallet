@@ -128,7 +128,7 @@ import {
 } from '../../../utils/constants';
 import {
   convertToAE,
-  currencyConv,
+  getCurrencies,
   convertAmountToCurrency,
   removeTxFromStorage,
   contractEncodeCall,

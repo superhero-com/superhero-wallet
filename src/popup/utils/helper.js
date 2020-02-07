@@ -284,37 +284,26 @@ const createSDKObject = (ctx, { network, current, account, wallet, activeAccount
       });
   });
 
-const currencyConv = async ctx => {
-  browser.storage.local.get('convertTimer').then(async result => {
-    const time = new Date().getTime();
-    if (
-      !result.hasOwnProperty('convertTimer') ||
-      (result.hasOwnProperty('convertTimer') && (result.convertTimer == '' || result.convertTimer == 'undefined' || result.convertTimer <= time))
-    ) {
-      const fetched = await fetchData(
-        'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
-        'get',
-        ''
-      );
-      browser.storage.local.set({ rateUsd: fetched.aeternity.usd }).then(() => {});
-      browser.storage.local.set({ rateEur: fetched.aeternity.eur }).then(() => {});
-      browser.storage.local.set({ convertTimer: time + 3600000 }).then(() => {});
-      browser.storage.local.set({ allCurrencies: JSON.stringify(fetched.aeternity) }).then(() => {});
-    }
+const getCurrencies = async () => {
+  const result = await browser.storage.local.get('convertTimer');
+  const time = new Date().getTime();
+  if (
+    !result.hasOwnProperty('convertTimer') ||
+    (result.hasOwnProperty('convertTimer') && (result.convertTimer == '' || result.convertTimer == 'undefined' || result.convertTimer <= time))
+  ) {
+    const fetched = await fetchData(
+      'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
+      'get',
+      ''
+    );
+    await browser.storage.local.set({ convertTimer: time + 3600000 });
+    await browser.storage.local.set({ allCurrencies: JSON.stringify(fetched.aeternity) });
 
-    browser.storage.local.get('rateUsd').then(resusd => {
-      ctx.usdRate = resusd.rateUsd;
-      ctx.toUsd = resusd.rateUsd * ctx.balance;
-    });
-    browser.storage.local.get('rateEur').then(reseur => {
-      ctx.eurRate = reseur.rateEur;
-      ctx.toEur = reseur.rateEur * ctx.balance;
-    });
-    browser.storage.local.get('allCurrencies').then(resall => {
-      const ar = JSON.parse(resall.allCurrencies);
-      ctx.allCurrencies = ar;
-    });
-  });
+    return fetched.aeternity;
+  }
+
+  const { allCurrencies } = await browser.storage.local.get('allCurrencies');
+  return JSON.parse(allCurrencies);
 };
 
 const convertAmountToCurrency = (currency, amount) => currency * amount;
@@ -600,7 +589,7 @@ export {
   redirectAfterLogin,
   initializeSDK,
   swag,
-  currencyConv,
+  getCurrencies,
   convertAmountToCurrency,
   contractEncodeCall,
   contractDecodeData,

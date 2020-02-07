@@ -110,4 +110,7 @@ export default {
     state.current.currency = currency;
     state.current.currencyRate = currencyRate;
   },
+  [types.SET_CURRENCIES](state, payload) {
+    state.currencies = payload;
+  },
 };

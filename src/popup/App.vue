@@ -36,6 +36,7 @@ import { mapGetters } from 'vuex';
 import { setTimeout, clearInterval, clearTimeout, setInterval } from 'timers';
 import { AEX2_METHODS } from './utils/constants';
 import { start, postMessage, readWebPageDom } from './utils/connection';
+import { getCurrencies } from './utils/helper';
 import { langs, fetchAndSetLocale } from './utils/i18nHelper';
 import Arrow from '../icons/arrow.svg';
 import Bell from '../icons/bell.svg';
@@ -89,6 +90,7 @@ export default {
       'aeppPopup',
       'mainLoading',
       'nodeConnecting',
+      'currencies',
     ]),
     extensionVersion() {
       return `v.${process.env.npm_package_version}`;
@@ -208,12 +210,12 @@ export default {
       }
     },
     async getCurrencies() {
-      const { currency } = (await browser.storage.local.get('currency')) || 'USD';
-      const { currencyRate } = (await browser.storage.local.get('currencyRate')) || 0;
-      const { rateUsd } = await browser.storage.local.get('rateUsd');
+      const { currency } = await browser.storage.local.get('currency');
+      const currencies = await getCurrencies();
+      this.$store.commit('SET_CURRENCIES', currencies);
       this.$store.commit('SET_CURRENCY', {
-        currency: typeof currency !== 'undefined' ? currency : 'USD',
-        currencyRate: typeof currencyRate !== 'undefined' ? currencyRate : rateUsd,
+        currency: currency || this.current.currency,
+        currencyRate: currency ? currencies[currency] : currencies[this.current.currency],
       });
     },
   },

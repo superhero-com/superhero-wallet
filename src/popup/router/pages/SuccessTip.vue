@@ -7,7 +7,7 @@
       </div>
     </h3>
     <p class="primary-title text-left mb-8 f-16">
-      {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text">{{ amountTip }} æid</span> ({{ getCurrencyAmount }} {{ current.currency }})
+      {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text">{{ amountTip }} æid</span> ({{ getCurrencyAmount }} {{ currentCurrency }})
       {{ $t('pages.successTip.to') }}
     </p>
     <a class="link-sm text-left block">{{ domain }}</a>
@@ -42,10 +42,12 @@ import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { MAGNITUDE } from '../../utils/constants';
 import Heart from '../../../icons/heart.svg';
+import Textarea from '../components/Textarea';
 
 export default {
   components: {
     Heart,
+    Textarea,
   },
   props: ['amount', 'domain'],
   data() {
@@ -55,9 +57,9 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['current']),
+    ...mapGetters(['current', 'currentCurrency']),
     amountTip() {
-      return this.amount.toFixed(3);
+      return this.amount;
     },
     getCurrencyAmount() {
       return (this.amountTip * this.current.currencyRate).toFixed(3);
