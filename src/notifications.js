@@ -1,10 +1,10 @@
 import Node from '@aeternity/aepp-sdk/es/node';
+import { Universal as Ae } from '@aeternity/aepp-sdk/es';
 import { setInterval } from 'timers';
 import { networks, DEFAULT_NETWORK, NOTIFICATION_METHODS } from './popup/utils/constants';
 import { detectBrowser, getUserNetworks } from './popup/utils/helper';
 
 global.browser = require('webextension-polyfill');
-const { Universal: Ae, Crypto } = require('@aeternity/aepp-sdk');
 
 export default class Notification {
   constructor() {

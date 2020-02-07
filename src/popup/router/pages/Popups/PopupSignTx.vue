@@ -109,35 +109,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { Wallet, MemoryAccount, TxBuilder } from '@aeternity/aepp-sdk/es';
-import BigNumber from 'bignumber.js';
-import { clearInterval, clearTimeout } from 'timers';
-
-import {
-  MAGNITUDE,
-  MIN_SPEND_TX_FEE,
-  MIN_SPEND_TX_FEE_MICRO,
-  MAX_REASONABLE_FEE,
-  FUNGIBLE_TOKEN_CONTRACT,
-  TX_TYPES,
-  calculateFee,
-  TX_LIMIT_PER_DAY,
-  TOKEN_REGISTRY_ADDRESS,
-  TOKEN_REGISTRY_CONTRACT,
-  TOKEN_REGISTRY_CONTRACT_LIMA,
-} from '../../../utils/constants';
-import {
-  convertToAE,
-  currencyConv,
-  convertAmountToCurrency,
-  removeTxFromStorage,
-  contractEncodeCall,
-  initializeSDK,
-  checkAddress,
-  chekAensName,
-  escapeCallParam,
-  addRejectedToken,
-} from '../../../utils/helper';
+import { TxBuilder } from '@aeternity/aepp-sdk/es';
+import { convertToAE, convertAmountToCurrency } from '../../../utils/helper';
 
 export default {
   data() {

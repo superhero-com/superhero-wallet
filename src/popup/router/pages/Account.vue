@@ -45,7 +45,7 @@
       </div>
 
       <div style="background: #21212A" class="height-100">
-        <Button style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
+        <Button v-if="IS_EXTENSION" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
           <div class="flex flex-align-center flex-justify-content-center">
             <Heart />
             <span class="ml-5">Send æid</span>
@@ -59,10 +59,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { setInterval, setTimeout, setImmediate, clearInterval } from 'timers';
-import { request } from 'http';
-import { fetchData, currencyConv } from '../../utils/helper';
-import { FUNGIBLE_TOKEN_CONTRACT, TOKEN_REGISTRY_ADDRESS, TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA } from '../../utils/constants';
+import { setTimeout, clearInterval } from 'timers';
+import { currencyConv } from '../../utils/helper';
 import Copyicon from '../../../icons/copy.svg';
 import DropdownArrow from '../../../icons/dropdownarrow.svg';
 import Heart from '../../../icons/heart.svg';
@@ -99,6 +97,7 @@ export default {
       pendingTip: false,
       buttonstyle: '',
       copied: false,
+      IS_EXTENSION: process.env.IS_EXTENSION,
     };
   },
   computed: {

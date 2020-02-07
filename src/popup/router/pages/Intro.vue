@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
+import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
 
 export default {
   data() {
