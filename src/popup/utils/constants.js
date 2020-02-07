@@ -83,8 +83,7 @@ export const toMicro = value => value.shiftedBy(-MAGNITUDE_MICRO).toFixed();
 
 export const MIN_SPEND_TX_FEE_MICRO = toMicro(MIN_SPEND_TX_FEE);
 export const MAX_REASONABLE_FEE_MICRO = toMicro(MAX_REASONABLE_FEE);
-
-export const DEFAULT_NETWORK = process.env.NODE_ENV === 'development' ? 'Testnet' : 'Mainnet'
+export const DEFAULT_NETWORK = typeof process.env.NETWORK !== 'undefined' ? process.env.NETWORK.trim() : 'Mainnet'
 export const networks = {
   Testnet: {
     url: 'https://testnet.aeternal.io',

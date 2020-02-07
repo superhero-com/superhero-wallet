@@ -205,7 +205,7 @@ export default {
       if (this.data.type != 'txSign') {
         return this.receiver == null || this.receiver == '';
       }
-      return !checkAddress(this.receiver) && !chekAensName(this.receiver);
+      return !checkAddress(this.receiver) || !chekAensName(this.receiver);
     },
     watchBalance() {
       return this.balance;

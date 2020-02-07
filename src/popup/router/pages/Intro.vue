@@ -97,7 +97,7 @@ export default {
     };
   },
   async created() {
-    this.createWallet()
+    this.createWallet();
   },
   methods: {
     async createWallet() {

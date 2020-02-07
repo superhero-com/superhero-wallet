@@ -341,7 +341,7 @@ const checkAddress = value => Crypto.isAddressValid(value, 'ak') || Crypto.isAdd
 
 const isInt = n => n % 1 === 0;
 
-const chekAensName = value => value.endsWith('.test');
+const chekAensName = value => value.endsWith('.test') || value.endsWith('.chain');
 
 const stringifyForStorage = state =>
   JSON.stringify(state, (key, value) => {
@@ -597,7 +597,7 @@ const getUserNetworks = async () => {
     resolve(networks);
   });
 };
-const setTxInQueue = async (tx) => {
+const setTxInQueue = async tx => {
   const { processingTx } = await browser.storage.local.get('processingTx');
   let list = [];
   if (typeof processingTx !== 'undefined' && processingTx.length) {
@@ -605,7 +605,7 @@ const setTxInQueue = async (tx) => {
   }
   list.push(tx);
   await browser.storage.local.set({ processingTx: list });
-}
+};
 
 export {
   shuffleArray,
@@ -638,5 +638,5 @@ export {
   setPermissionForAccount,
   getUniqueId,
   getUserNetworks,
-  setTxInQueue
+  setTxInQueue,
 };

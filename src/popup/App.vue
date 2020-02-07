@@ -1,5 +1,5 @@
 <template>
-  <ae-main @click.native="hideMenu" :class="onAccount ? 'ae-main-account' : ''">
+  <ae-main :class="onAccount ? 'ae-main-account' : ''">
     <div class="coronaTitle" :slot="defaulT" v-if="isLoggedIn">
       <span>{{ title || 'Corona Wallet ' }}</span>
     </div>
@@ -19,13 +19,13 @@
           <Hamburger class="dropdown-button-icon" style="padding-top:9px;" />
         </button>
         <transition name="slide">
-          <SidebarMenu :open="dropdown.account" @toggleMenu="toggleDropdown" @closeMenu="dropdown.account = false"/>
+          <SidebarMenu :open="dropdown.account" @toggleMenu="toggleDropdown" @closeMenu="dropdown.account = false" />
         </transition>
       </div>
     </ae-header>
     <hr style="margin: 0; background: #3a3a47; height: 2px; border: 0;" />
     <router-view :key="$route.fullPath"></router-view>
-    <div class="menu-overlay" v-if="dropdown.account"></div>
+    <div class="menu-overlay" v-if="dropdown.account" @click="dropdown.account = false"></div>
     <Loader size="big" :loading="mainLoading"></Loader>
     <NodeConnectionStatus />
   </ae-main>
@@ -40,7 +40,9 @@ import { langs, fetchAndSetLocale } from './utils/i18nHelper';
 import Arrow from '../icons/arrow.svg';
 import Bell from '../icons/bell.svg';
 import Hamburger from '../icons/hamburger.svg';
-import Logo from '../icons/logo-small.svg'
+import Logo from '../icons/logo-small.svg';
+import SidebarMenu from './router/components/SidebarMenu';
+import NodeConnectionStatus from './router/components/NodeConnectionStatus';
 
 export default {
   components: {
@@ -48,12 +50,12 @@ export default {
     Bell,
     Hamburger,
     Logo,
+    SidebarMenu,
+    NodeConnectionStatus,
   },
   data() {
     return {
-      logo_top: browser.runtime.getURL('../icons/icon_48.png'),
       language: '',
-      locales: langs,
       dropdown: {
         network: false,
         settings: false,
@@ -61,12 +63,10 @@ export default {
         languages: false,
         tokens: false,
       },
-      checkPendingTxInterval: null,
       menuSlot: 'mobile-left',
       mobileRight: 'mobile-right',
       defaulT: 'default',
       checkSDKReady: null,
-      connectError: false,
       onAccount: false,
       showNavigation: false,
       title: '',
@@ -108,7 +108,7 @@ export default {
   async created() {
     this.title = this.$router.currentRoute.meta.title;
     this.showNavigation = this.$router.currentRoute.meta.navigation;
-    // this.$router.push('/welcome')
+
     browser.storage.local.get('language').then(data => {
       this.language = langs[data.language];
       this.$store.state.current.language = data.language;
@@ -197,14 +197,6 @@ export default {
         const dropdownParent = event.target.closest(parentClass);
         this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
       }
-    },
-    switchNetwork(network) {
-      this.dropdown.network = false;
-      this.$store.dispatch('switchNetwork', network).then(() => {
-        postMessage(this.background, { type: AEX2_METHODS.SWITCH_NETWORK, payload: network });
-        this.initSDK();
-        this.$store.dispatch('updateBalance');
-      });
     },
     pollData() {
       let triggerOnce = false;

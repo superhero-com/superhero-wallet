@@ -12,18 +12,9 @@ import Popup from './components/Popup';
 import AlertComponent from './components/Alert';
 import AmountInput from './components/AmountInput';
 import AddressInput from './components/AddressInput';
-import BackLink from './components/BackLink';
-import DropDown from './components/DropDown';
-import ClaimTIpButton from './components/ClaimTipButton';
-import RecentTransactions from './components/RecentTransactions';
 import Button from './components/Button';
-import CheckBox from './components/CheckBox';
 import Textarea from './components/Textarea';
 import ModalComponent from './components/Modal';
-import NodeConnectionStatus from './components/NodeConnectionStatus';
-import Input from './components/Input';
-import AmountSend from './components/AmountSend';
-import SidebarMenu from './components/SidebarMenu'
 
 import * as helper from '../utils/helper';
 import store from '../../store';
@@ -52,17 +43,7 @@ Vue.component('QrcodeCapture', QrcodeCapture);
 Vue.component('Modal', ModalComponent);
 Vue.component('AmountInput', AmountInput);
 Vue.component('AddressInput', AddressInput);
-Vue.component('BackLink', BackLink);
-Vue.component('DropDown', DropDown);
-Vue.component('ClaimTipButton', ClaimTIpButton);
-Vue.component('RecentTransactions', RecentTransactions);
 Vue.component('Button', Button);
-Vue.component('CheckBox', CheckBox);
-Vue.component('Textarea', Textarea);
-Vue.component('NodeConnectionStatus', NodeConnectionStatus);
-Vue.component('Input', Input);
-Vue.component('AmountSend', AmountSend);
-Vue.component('SidebarMenu', SidebarMenu);
 
 const router = new VueRouter({
   routes,

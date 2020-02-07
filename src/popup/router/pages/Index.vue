@@ -26,11 +26,13 @@
 <script>
 import { mapGetters } from 'vuex';
 import Logo from '../../../icons/logo.svg';
+import CheckBox from '../components/CheckBox';
 
 export default {
   name: 'Home',
   components: {
     Logo,
+    CheckBox,
   },
   data() {
     return {

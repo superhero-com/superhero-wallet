@@ -66,6 +66,7 @@ import Copyicon from '../../../icons/copy.svg';
 import DropdownArrow from '../../../icons/dropdownarrow.svg';
 import Heart from '../../../icons/heart.svg';
 import RecentTransactions from '../components/RecentTransactions';
+import ClaimTipButton from '../components/ClaimTipButton';
 
 export default {
   name: 'Account',
@@ -74,6 +75,7 @@ export default {
     DropdownArrow,
     Heart,
     RecentTransactions,
+    ClaimTipButton,
   },
   data() {
     return {
@@ -138,7 +140,7 @@ export default {
   },
   async created() {
     browser.storage.local.get('rateUsd').then(res => {
-      this.usdRate = res.hasOwnProperty("rateUsd") ? res.rateUsd : 0;
+      this.usdRate = res.hasOwnProperty('rateUsd') ? res.rateUsd : 0;
     });
 
     browser.storage.local.get('backed_up_Seed').then(res => {

@@ -100,6 +100,7 @@ const genPlatformDependentPlugins = platform => {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         IS_EXTENSION: platform !== 'cordova',
         npm_package_version: JSON.stringify(process.env.npm_package_version),
+        NETWORK: JSON.stringify(process.env.NETWORK)
       },
     }),
   ];

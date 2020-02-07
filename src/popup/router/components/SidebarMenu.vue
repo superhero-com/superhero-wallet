@@ -1,121 +1,122 @@
 <template>
-    <div v-if="open" class="menu-holder">
-        <ul class="dropdown-holder">
-            <li class="menu-close">
-                <ae-icon name="close" @click.native="closeMenu" />
-            </li>
-            <li class="account-icon-holder">
-                <div class="flex flex-align-center flex-justify-between">
-                    <ae-identicon class="account-icon" :address="account.publicKey" size="base"/>
-                    <div class="ml-8 mr-auto">
-                        <div class="f-14">Main Account</div> 
-                        <div class="f-12" v-if="activeAccountName.includes('.chain')">{{ activeAccountName }} </div>
-                    </div>
-                </div>
-            </li>
-            <li>
-                <ae-button @click="topUp">
-                    {{ $t('pages.appVUE.topUp') }}
-                </ae-button>
-            </li>
-            <li>
-              <ae-button @click="withdraw">
-                {{ $t('pages.appVUE.withdraw') }}
-              </ae-button>
-            </li>
-            <li>
-              <ae-button @click="transactions">
-                {{ $t('pages.appVUE.myTransactions') }}
-              </ae-button>
-            </li>
-            <li>
-                <ae-button @click="profile">
-                    {{ $t('pages.appVUE.profile') }}
-                </ae-button>
-            </li>
-            <li>
-                <ae-button @click="settings">
-                    {{ $t('pages.appVUE.settings') }}
-                </ae-button>
-            </li>
-            <!-- <li>
+  <div v-if="open" class="menu-holder">
+    <ul class="dropdown-holder">
+      <li class="menu-close">
+        <ae-icon name="close" @click.native="closeMenu" />
+      </li>
+      <li class="account-icon-holder">
+        <div class="flex flex-align-center flex-justify-between">
+          <ae-identicon class="account-icon" :address="account.publicKey" size="base" />
+          <div class="ml-8 mr-auto">
+            <div class="f-14">Main Account</div>
+            <div class="f-12" v-if="activeAccountName.includes('.chain')">{{ activeAccountName }}</div>
+          </div>
+        </div>
+      </li>
+      <li>
+        <ae-button @click="topUp">
+          {{ $t('pages.appVUE.topUp') }}
+        </ae-button>
+      </li>
+      <li>
+        <ae-button @click="withdraw">
+          {{ $t('pages.appVUE.withdraw') }}
+        </ae-button>
+      </li>
+      <li>
+        <ae-button @click="transactions">
+          {{ $t('pages.appVUE.myTransactions') }}
+        </ae-button>
+      </li>
+      <li>
+        <ae-button @click="profile">
+          {{ $t('pages.appVUE.profile') }}
+        </ae-button>
+      </li>
+      <li>
+        <ae-button @click="settings">
+          {{ $t('pages.appVUE.settings') }}
+        </ae-button>
+      </li>
+      <!-- <li>
                     <ae-button >
                     <ae-icon name="settings" />
                     {{ $t('pages.appVUE.advanced') }}
                     </ae-button>
                 </li> -->
-            <li>
-                <ae-button @click="about">
-                    {{ $t('pages.appVUE.help') }}
-                </ae-button>
-            </li>
-        </ul>
-    </div>
+      <li>
+        <ae-button @click="about">
+          {{ $t('pages.appVUE.help') }}
+        </ae-button>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
+
 export default {
-    props: {
-        open: Boolean
+  props: {
+    open: Boolean,
+  },
+  computed: {
+    ...mapGetters(['account', 'activeAccountName']),
+  },
+  methods: {
+    closeMenu() {
+      this.$emit('closeMenu');
     },
-    computed: {
-        ...mapGetters(['account', 'activeAccountName'])
+    profile() {
+      this.$emit('closeMenu');
+      this.$router.push('/account');
     },
-    methods: {
-        closeMenu() {
-            this.$emit('closeMenu')
-        },
-        profile() {
-            this.$emit('closeMenu')
-            this.$router.push('/account');
-        },
-        settings() {
-             this.$emit('closeMenu')
-            this.$router.push('/settings');
-        },
-        about() {
-             this.$emit('closeMenu')
-            this.$router.push('/aboutSettings');
-        },
-        transactions() {
-            this.$emit('closeMenu')
-            this.$router.push('/transactions');
-        },
-        topUp() {
-            this.$emit('closeMenu')
-            this.$router.push('/receive');
-        },
-        withdraw() {
-            this.$emit('closeMenu')
-            this.$router.push('/send');
-        }
-    }
+    settings() {
+      this.$emit('closeMenu');
+      this.$router.push('/settings');
+    },
+    about() {
+      this.$emit('closeMenu');
+      this.$router.push('/aboutSettings');
+    },
+    transactions() {
+      this.$emit('closeMenu');
+      this.$router.push('/transactions');
+    },
+    topUp() {
+      this.$emit('closeMenu');
+      this.$router.push('/receive');
+    },
+    withdraw() {
+      this.$emit('closeMenu');
+      this.$router.push('/send');
+    },
+  },
 };
 </script>
 
 <style lang="scss">
 @import '../../../common/variables';
 .menu-close {
-    padding:10px;
-    text-align: right;
-    border: none !important;
-    .ae-icon {
-        font-size:40px;
-        color: $white-color;
-        font-weight: normal;
-        cursor: pointer;
-    }
+  padding: 10px;
+  text-align: right;
+  border: none !important;
+  .ae-icon {
+    font-size: 40px;
+    color: $white-color;
+    font-weight: normal;
+    cursor: pointer;
+  }
 }
 .account-icon {
-    width:auto !important;
-    height: 2.2rem !important;
-    border: .125rem solid transparent;
-    -webkit-box-shadow: 0 0 0 2px $secondary-color;
-    box-shadow: 0 0 0 2px $secondary-color;
+  width: auto !important;
+  height: 2.2rem !important;
+  border: 0.125rem solid transparent;
+  -webkit-box-shadow: 0 0 0 2px $secondary-color;
+  box-shadow: 0 0 0 2px $secondary-color;
 }
 .account-icon-holder {
-    padding: .5rem 1rem;
+  padding: 0.5rem 1rem;
 }
 .dropdown {
   display: inline-block;
@@ -138,11 +139,11 @@ export default {
   position: fixed;
   top: 0;
   padding: 0;
-  background-color:#20202A;
+  background-color: #20202a;
   z-index: 12;
   height: 100%;
-//   min-height: 100%;
-  min-height:1500px;
+  //   min-height: 100%;
+  min-height: 1500px;
 }
 .dropdown ul {
   transition: all 0.2s;
@@ -195,8 +196,8 @@ export default {
 .dropdown li > .ae-button:hover,
 .sub-dropdown li:not(.backBtn) > .ae-button:hover,
 #network li:hover {
-  background-color:$accent-color;
-  color:$white-color;
+  background-color: $accent-color;
+  color: $white-color;
 }
 .dropdown li > .ae-button {
   width: 100%;
@@ -244,32 +245,32 @@ export default {
 .slide-enter-active {
   transition: all 0.3s ease;
   min-height: 1500px;
-  z-index:12;
+  z-index: 12;
   position: fixed;
-  right:0;
-  top:0;
+  right: 0;
+  top: 0;
 }
 .slide-leave-active {
   transition: all 0.2s ease;
   min-height: 1500px;
-  z-index:12;
+  z-index: 12;
   position: fixed;
 }
 .slide-enter {
   transform: translateX(100%);
-  height:100%;
+  height: 100%;
   min-height: 1500px;
-  z-index:12;
+  z-index: 12;
   position: fixed;
-  right:0;
-  top:0;
+  right: 0;
+  top: 0;
 }
 .slide-leave-to {
   transform: translateX(100%);
   opacity: 0;
-  height:100%;
+  height: 100%;
   min-height: 1500px;
-  z-index:12;
+  z-index: 12;
   position: fixed;
 }
 
