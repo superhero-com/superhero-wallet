@@ -23,6 +23,7 @@ import ModalComponent from './components/Modal';
 import NodeConnectionStatus from './components/NodeConnectionStatus';
 import Input from './components/Input';
 import AmountSend from './components/AmountSend';
+import SidebarMenu from './components/SidebarMenu'
 
 import * as helper from '../utils/helper';
 import store from '../../store';
@@ -61,6 +62,7 @@ Vue.component('Textarea', Textarea);
 Vue.component('NodeConnectionStatus', NodeConnectionStatus);
 Vue.component('Input', Input);
 Vue.component('AmountSend', AmountSend);
+Vue.component('SidebarMenu', SidebarMenu);
 
 const router = new VueRouter({
   routes,

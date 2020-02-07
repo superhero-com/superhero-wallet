@@ -510,7 +510,7 @@ export default {
 .backup_seed_notif {
   color: $accent-color !important;
   font-size: 14px;
-  margin: 14px auto 32px;
+  margin: 14px auto 10px; //32
 }
 .backup_seed_notif a {
   cursor: pointer;
