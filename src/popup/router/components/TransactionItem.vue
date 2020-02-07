@@ -2,9 +2,9 @@
   <div>
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
       <div class="holder">
-        <span class="amount">{{ txAmount }} æid ( <span style="color: #BCBCC4;">{{ txAmountToUSD }} USD</span> )</span>
+        <span class="amount">{{ txAmount }} æid <span style="color: #BCBCC4;">( {{ txAmountToUSD }} USD )</span></span>
         <span class="status">{{ status }}</span>
-        <span class="time">{{ new Date(transactionData.time).toLocaleTimeString() }}</span>
+        <span class="time">{{ transactionData.time ? new Date(transactionData.time).toLocaleTimeString() : '-- -- --' }}</span>
       </div>
       <div class="holder">
         <span class="url">https://facebook.com/JohnDoe/post/something/someofthchanges/wallet/notwallet/facebookgiven</span>
@@ -39,11 +39,13 @@ export default {
     };
   },
   async created() {
-    if (this.transactionData.tx.recipient_id == this.account.publicKey) {
-      this.status = 'Received'
-    } else if (this.transactionData.tx.caller_id == this.account.publicKey) {
-      this.status = 'Sent'
-    }
+    setInterval(() => {
+      if (this.transactionData.tx.recipient_id == this.account.publicKey) {
+        this.status = 'Received'
+      } else if (this.transactionData.tx.caller_id == this.account.publicKey) {
+        this.status = 'Sent'
+      }
+    }, 2500);
     
     await browser.storage.local.get('rateUsd').then(res => {
       this.rateUsd = res.rateUsd;

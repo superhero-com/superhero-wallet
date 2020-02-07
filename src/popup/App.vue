@@ -41,7 +41,7 @@
             </transition>
           </div>
           <div id="account" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup" :slot="mobileRight" direction="right" ref="account">
-            <Bell style="margin: 6px;" />
+            <Bell style="margin: 5px;" />
             <button class="acc-dropdown" v-on:click="toggleDropdown">
               <ae-identicon id="identIcon" class="dropdown-button-icon" v-bind:address="this.account.publicKey" size="base" slot="button" />
             </button>
@@ -538,7 +538,7 @@ button {
 .dropdown ul li .ae-button .ae-icon-left-more { margin-top: 3px; transition: all 0.3s; }
 .dropdown .have-subDropdown.show .ae-button .ae-icon-left-more { transform: rotate(90deg); }
 .dropdown li { color: #717C87; margin: 0; }
-.dropdown li > .ae-button:hover, .sub-dropdown li:not(.backBtn) > .ae-button:hover, #network li:hover { background-color: #F3F3F3; }
+// .dropdown li > .ae-button:hover, .sub-dropdown li:not(.backBtn) > .ae-button:hover, #network li:hover { background-color: #F3F3F3; }
 .dropdown li > .ae-button { width: 100%; }
 .dropdown > .ae-button { text-align: center; }
 .dropdown > .ae-button, .dropdown .ae-dropdown-button { color: #717C87; vertical-align: top; height: 50px; width: 50px; display: inline-block !important; }

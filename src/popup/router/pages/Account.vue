@@ -398,15 +398,16 @@ export default {
   justify-content: unset;
 }
 .currenciesgroup ul {
-  margin: 0px;
-  min-width: 250px;
+  margin: 0;
   box-shadow: none;
   visibility: hidden;
   max-height: 0;
   padding: 0;
   overflow: hidden;
-  transition: all 0.3s ease-in-out;
+  transition: all .3s ease-in-out;
   right: 0;
+  background: #21212a;
+  border: 1px solid #505058;
 }
 .currenciesgroup .have-subDropdown.show ul.sub-dropdown {
   visibility: visible;
@@ -436,6 +437,7 @@ export default {
   -webkit-transform: rotate(-45deg);
   position: absolute;
   right: 1rem;
+  top: 0.8rem;
 }
 .account-info {
   margin: 32px 20px 0 20px;
@@ -447,12 +449,10 @@ export default {
     float: left;
     width: 92%;
   }
-  .account-addresses {
-    .ae-address {
-      color: $text-color !important;
-      font-size: 11px;
-      line-height: 0.9rem;
-    }
+  .ae-address {
+    color: $text-color !important;
+    font-size: 11px;
+    line-height: 0.9rem;
   }
 }
 
@@ -506,9 +506,11 @@ export default {
 
 
 .backup_seed_notif {
-  color: $accent-color !important;
   font-size: 14px;
   margin: 14px auto 32px;
+}
+.backup_seed_notif span {
+  color: $accent-color !important;
 }
 .backup_seed_notif a {
   cursor: pointer;

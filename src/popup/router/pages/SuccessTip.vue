@@ -15,6 +15,11 @@
           <ae-button face="round" fill="secondary" @click="toDashboard">{{ $t('pages.appVUE.dashboard') }} <br /></ae-button>
         </div>
         <br />
+        <div>
+          <span style="word-break: break-word;font-size: 14px;float: left;">Notify someone that you sent æid to this post</span>
+          <Textarea v-model="note" size="h-50"/>
+        </div>
+        <br />
         <ae-button face="round" extend @click="redirectOnFeed">{{ $t('pages.successTip.feed') }}</ae-button>
       </div>
   </div>
@@ -28,12 +33,13 @@ export default {
   props: ['amount', 'domain'],
   data() {
     return {
-      feed: 'https://coronanews.org'
+      feed: 'https://coronanews.org',
+      note: 'I just sent æid to this post! Anyone can start sending and receiving æid through CoronaNews. Learn more.'
     };
   },
   computed: {
     amountTip() {
-      return BigNumber(this.amount).shiftedBy(-MAGNITUDE);
+      return this.amount;
     },
   },
   created() {},
