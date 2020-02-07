@@ -220,20 +220,7 @@ export default {
         }, 100);
       }
     },
-    hideMenu(event) {
-      const { target } = event;
-      // Hide dropdown menu on click of the element with class triggerhidedd
-      if (
-        typeof target !== 'undefined' &&
-        (target.className.indexOf('triggerhidedd') > -1 || (target.parentElement != null && target.parentElement.className.indexOf('triggerhidedd') > -1))
-      ) {
-        let dropdownParent = event.target.closest('.dropdown');
-        this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
-        if (event.target.closest('.have-subDropdown') != null) {
-          dropdownParent = event.target.closest('.have-subDropdown');
-          this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
-        }
-      }
+    hideMenu({ target }) {
       for (const tar in this.dropdown) {
         const el = this.$refs[tar];
         if (tar != 'languages' && typeof el !== 'undefined' && el !== target && !el.contains(target)) {
