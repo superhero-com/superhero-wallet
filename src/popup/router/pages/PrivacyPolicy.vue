@@ -28,4 +28,5 @@ export default {
   },
   computed: {},
 };
-</script>]
+</script>
+]

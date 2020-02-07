@@ -20,11 +20,16 @@ import TransactionsComponent from './pages/Transactions';
 import SendComponent from './pages/Send';
 import ReceiveComponent from './pages/Receive';
 import SuccessTip from './pages/SuccessTip';
+import WelcomePage from './pages/Welcome';
 
 export default [
   {
     path: '/',
     component: IndexComponent,
+    meta: {
+      title: '',
+      navigation: false,
+    },
   },
   {
     path: '/account',
@@ -70,22 +75,37 @@ export default [
   {
     path: '/settings',
     component: SettingsComponent,
+    meta: {
+      title: 'Settings',
+    },
   },
   {
     path: '/generalSettings',
     component: GeneralSettingsComponent,
+    meta: {
+      title: 'General',
+    },
   },
   {
     path: '/securitySettings',
     component: SecuritySettingsComponent,
+    meta: {
+      title: 'Security',
+    },
   },
   {
     path: '/aboutSettings',
     component: AboutSettingsComponent,
+    meta: {
+      title: 'About',
+    },
   },
   {
     path: '/tip',
     component: TipComponent,
+    meta: {
+      title: 'Send æid',
+    },
   },
   {
     path: '/qrCodeReader',
@@ -97,8 +117,8 @@ export default [
     path: '/termsOfService',
     component: TermsOfService,
     meta: {
-      title: 'Terms & Conditions'
-    }
+      title: 'Terms & Conditions',
+    },
   },
   {
     path: '/privacyPolicy',
@@ -108,8 +128,8 @@ export default [
     path: '/importAccount',
     component: ImportAccount,
     meta: {
-      title: 'Retrieve Existing Account'
-    }
+      title: 'Retrieve Existing Account',
+    },
   },
   {
     path: '/intro',
@@ -119,21 +139,40 @@ export default [
   {
     path: '/transactions',
     component: TransactionsComponent,
+    meta: {
+      title: 'Transactions',
+    },
   },
   {
     path: '/send',
     name: 'send',
     props: true,
     component: SendComponent,
+    meta: {
+      title: 'Withdraw',
+    },
   },
   {
     path: '/receive',
     component: ReceiveComponent,
+    meta: {
+      title: 'Receive',
+    },
   },
   {
     path: '/success-tip',
     component: SuccessTip,
     name: 'success-tip',
     props: true,
+    meta: {
+      title: 'Send æid',
+    },
+  },
+  {
+    path: '/welcome',
+    component: WelcomePage,
+    meta: {
+      navigation: false,
+    },
   },
 ];

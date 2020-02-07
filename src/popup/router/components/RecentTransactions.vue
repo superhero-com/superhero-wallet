@@ -61,8 +61,8 @@ export default {
     computed: {
         ...mapGetters(['transactions','account','sdk', 'current'])
     },
-    created () {
-        this.pollData();
+    allTransactions() {
+      this.$router.push('/transactions');
     },
     methods: {
         async updateTransactions() {
@@ -118,22 +118,24 @@ export default {
 <style lang="scss" scoped>
 @import '../../../common/variables';
 .recent-transactions {
-    padding: 0 20px;
-    .title {
-        color: $white-color !important;
-    }
-    .viewAll {
-        color: $accent-color !important;
-        cursor: pointer;
-    }
+  padding: 0 20px;
+  .title {
+    color: $white-color !important;
+  }
+  .viewAll {
+    color: $accent-color !important;
+    cursor: pointer;
+  }
 }
-.recent-transactions h3, .recent-transactions p, .recent-transactions .transactionList {
-    color: #fff !important;
+.recent-transactions h3,
+.recent-transactions p,
+.recent-transactions .transactionList {
+  color: #fff !important;
 }
 .all-transactions {
-    height:auto !important;
-    padding:5px 10px !important;
-    width:auto !important;
+  height: auto !important;
+  padding: 5px 10px !important;
+  width: auto !important;
 }
 .list-item-transaction {
   display: inline-block !important;

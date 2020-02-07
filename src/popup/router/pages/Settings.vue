@@ -1,9 +1,5 @@
 <template>
   <div class="popup">
-    <div class="actions">
-      <button class="backbutton toAccount" @click="navigateAccount"><ae-icon name="back" /> {{ $t('pages.settings.backToAccount') }}</button>
-    </div>
-    <h3 style="text-align:center;">{{ $t('pages.settings.heading') }}</h3>
     <br />
     <ae-list class="settingslist" face="primary">
       <button class="generalsett" @click="GeneralSettings">
@@ -61,8 +57,8 @@ export default {
 </script>
 
 <style lang="scss">
-.settingslist  {
-    padding:0 !important;
+.settingslist {
+  padding: 0 !important;
 }
 .settingslist button {
   transition: 0.4s;

@@ -24,6 +24,7 @@ body, .ae-main, html {
 a {
     color: $accent-color !important;
     text-decoration: underline;
+    cursor: pointer;
 }
 
 .primary-text {
@@ -35,6 +36,7 @@ a {
     font-size: 18px;
     font-weight: lighter;
     margin-bottom:27px;
+    margin-left:0 !important;
 }
 .secondary-text {
     color: $secondary-color;
@@ -93,6 +95,12 @@ a {
 .f-16 {
     font-size:16px;
 }
+.f-18 {
+    font-size:18px;
+}
+.f-24 {
+    font-size:24px;
+}
 .l-1 {
     line-height: 1.2;
 }
@@ -143,7 +151,7 @@ a {
     margin-top: $i + px;
     margin-bottom: $i + px;
 }
-@for $i from 1 through 25 {
+@for $i from 1 through 40 {
   .ml-#{$i} { @include margin-left($i); }
   .mr-#{$i} { @include margin-right($i); }
   .mb-#{$i} { @include margin-bottom($i); }

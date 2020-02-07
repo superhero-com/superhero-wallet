@@ -140,9 +140,7 @@ const checkAeppConnected = host =>
     });
   });
 
-const redirectAfterLogin = ctx => {
-  
-};
+const redirectAfterLogin = ctx => {};
 
 const getAeppAccountPermission = (host, account) =>
   new Promise((resolve, reject) => {
@@ -512,7 +510,7 @@ const contractCall = async ({ instance, method,  params = [], decode = false, as
         }
     }
 
-    return async ? (decode ? call.decodedResult : call ) : params.length ? instance.methods[method](...params) :  instance.methods[method]()
+  return async ? (decode ? call.decodedResult : call) : params.length ? instance.methods[method](...params) : instance.methods[method]();
 };
 
 const checkContractAbiVersion = ({ address, middleware }, test = false) =>
@@ -582,6 +580,15 @@ const getUserNetworks = async () => {
     resolve(networks);
   });
 };
+const setTxInQueue = async (tx) => {
+  const { processingTx } = await browser.storage.local.get('processingTx');
+  let list = [];
+  if (typeof processingTx !== 'undefined' && processingTx.length) {
+    list = [...list, ...processingTx];
+  }
+  list.push(tx);
+  await browser.storage.local.set({ processingTx: list });
+}
 
 export {
   shuffleArray,
@@ -614,4 +621,5 @@ export {
   setPermissionForAccount,
   getUniqueId,
   getUserNetworks,
+  setTxInQueue
 };

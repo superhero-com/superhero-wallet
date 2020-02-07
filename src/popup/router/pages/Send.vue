@@ -1,28 +1,13 @@
 <template>
   <div class="popup">
-    <BackLink to="/account">
-      {{ $t('pages.send.backToAccount') }}
-    </BackLink>
     <h3 class="">
       {{ $t('pages.send.heading') }}
       <ae-identicon class="send-account-icon" :address="account.publicKey" size="s" />
       {{ activeAccountName }}
     </h3>
     <div class="sendContent">
-      <ae-input :label="$t('pages.send.recipient')" class="address">
-        <textarea
-          class="ae-input textarea"
-          v-model="form.address"
-          placeholder="ak.. / name.test"
-          slot-scope="{ context }"
-          @focus="context.focus = true"
-          @blur="context.focus = false"
-        />
-        <ae-toolbar slot="footer" align="right">
-          <div class="paste" @click="scan"><ae-icon name="camera" /> {{ $t('pages.send.scan') }}</div>
-        </ae-toolbar>
-      </ae-input>
-
+      <AmountSend @changeAmount="val => form.amount = val" :value="form.amount"/>
+      <Textarea  v-model="form.address" placeholder="ak.. / name.test" size="sm">  </Textarea>
       <div>
         <p v-if="sendSubaccounts">{{ $t('pages.send.sendSubaccount') }}</p>
         <ae-list class="sendSubaccount">
@@ -36,16 +21,9 @@
         </ae-list>
       </div>
 
-      <ae-input :label="$t('pages.send.amount')" placeholder="0.0" aemount v-model="form.amount" class="sendAmount">
+      <!-- <ae-input :label="$t('pages.send.amount')" placeholder="0.0" aemount v-model="form.amount" class="sendAmount">
         <ae-text slot="header" fill="black">
           <span class="token-symbol">{{ tokenSymbol }}</span>
-          <!-- <ae-dropdown v-if="tokens.length > 1">
-            <ae-icon name="grid" size="20px" slot="button" />
-            <li v-for="(tkn,key) in myTokens" v-bind:key="key" v-if="tkn.name != tokenSymbol" @click="setActiveToken(tkn.key)">
-              <img :src="ae_token" class="token-image" alt="" v-if="tkn.key == 0" >
-              <ae-identicon class="subAccountIcon" :address="tkn.contract" size="base" v-if="tkn.key != 0"/> {{tkn.name}}
-            </li>
-          </ae-dropdown> -->
         </ae-text>
         <ae-toolbar slot="footer" class="flex-justify-between">
           <span>
@@ -59,10 +37,12 @@
           {{ $t('pages.send.maxSpendableValue') }}
         </div>
         <div class="balance no-sign">{{ tokenBalance }} {{ tokenSymbol }}</div>
-      </div>
+      </div> -->
 
       <div>
-        <ae-button face="round" fill="primary" class="sendBtn extend" @click="send">{{ $t('pages.send.send') }}</ae-button>
+          <Button @click="send">
+            {{ $t('pages.send.send') }}
+          </Button>
       </div>
     </div>
     <input type="hidden" class="txHash" :value="tx.hash" />
@@ -301,7 +281,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.sendContent > div:not(.sendAmount):not(.address) { 
+.sendContent > div:not(.sendAmount):not(.address) {
   margin-bottom: 10px;
 }
 .sendContent > div {

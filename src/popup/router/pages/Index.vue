@@ -1,23 +1,25 @@
 <template>
   <div>
-    <Loader size="small" :loading="loading" v-bind="{'content':$t('pages.index.securingAccount')}"></Loader>
+    <Loader size="small" :loading="loading" v-bind="{ content: $t('pages.index.securingAccount') }"></Loader>
     <main>
       <div class="wrapper center">
         <Logo class="logo" />
-        <p class="primary-title">{{ $t('pages.index.heading') }} <span class="secondary-text"> {{ $t('pages.appVUE.aeid') }} </span></p>
+        <p class="primary-title">
+          {{ $t('pages.index.heading') }} <span class="secondary-text"> {{ $t('pages.appVUE.aeid') }} </span>
+        </p>
         <CheckBox v-if="!termsAgreedOrNot || termsAgreedOrNot == undefined" v-model="terms">
           <div class="primary-text">
             {{ $t('pages.index.term1') }} <a @click="goToTermsAndConditions"> {{ $t('pages.index.termsAndConditions') }} </a>
           </div>
         </CheckBox>
-        <Button @click="generwateWalletIntro" :disabled=" !terms && !termsAgreedOrNot ? true : false ">
+        <Button @click="generwateWalletIntro" :disabled="!terms && !termsAgreedOrNot ? true : false">
           {{ $t('pages.index.generateWallet') }}
         </Button>
-        <Button @click="importAccount" :disabled=" !terms && !termsAgreedOrNot ? true : false ">
+        <Button @click="importAccount" :disabled="!terms && !termsAgreedOrNot ? true : false">
           {{ $t('pages.index.importWallet') }}
         </Button>
       </div>
-     </main>
+    </main>
   </div>
 </template>
 
@@ -56,6 +58,6 @@ export default {
     importAccount() {
       this.$router.push('/importAccount');
     },
-  }
+  },
 };
 </script>

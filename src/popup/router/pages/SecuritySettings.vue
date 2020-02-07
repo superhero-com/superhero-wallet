@@ -1,18 +1,13 @@
 <template>
   <div class="popup">
-    <BackLink to="/account">
-      {{ $t('pages.securitySettings.backToSettings') }}
-    </BackLink>
     <div v-if="type == ''">
       <h3 style="text-align:center;">{{ $t('pages.securitySettings.heading') }}</h3>
-      <ae-panel>
-        <div class="maindiv_input-group-addon">
-          <h4>{{ $t('pages.securitySettings.seedRecoveryHeading') }}</h4>
-          <hr />
-          <small class="sett_info">{{ $t('pages.securitySettings.seedRecoverySmall') }}</small>
-          <ae-button face="round" fill="primary" class="notround settingBtn" extend @click="seedPhraseRecovery">{{ $t('pages.securitySettings.seedRecoveryBtn') }}</ae-button>
-        </div>
-      </ae-panel>
+      <div class="maindiv_input-group-addon">
+        <h4>{{ $t('pages.securitySettings.seedRecoveryHeading') }}</h4>
+        <hr />
+        <small class="sett_info">{{ $t('pages.securitySettings.seedRecoverySmall') }}</small>
+        <ae-button face="round" fill="primary" class="notround settingBtn" extend @click="seedPhraseRecovery">{{ $t('pages.securitySettings.seedRecoveryBtn') }}</ae-button>
+      </div>
       <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
       <div v-if="loading" class="loading">
         <ae-loader />

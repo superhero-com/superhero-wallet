@@ -30,7 +30,7 @@ export const start = browser => browser.runtime.connect({ name: 'popup' });
 
 export const postMessage = async (connection, { type, payload }) => {
   const id = uuid();
-  if (typeof connection.postMessage !== 'function') {
+  if (!connection) {
     connection = browser.runtime.connect({ name: 'popup' });
     store.commit('SET_BACKGROUND', connection);
   }

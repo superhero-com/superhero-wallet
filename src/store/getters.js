@@ -8,6 +8,9 @@ export const getters = {
   balance(state) {
     return state.balance;
   },
+  balanceCurrency({ current, balance }) {
+    return (current.currencyRate * balance).toFixed(3);
+  },
   network(state) {
     return state.network;
   },
@@ -39,7 +42,7 @@ export const getters = {
     return state.sdk;
   },
   tokenBalance(state) {
-    return state.current.token != 0 ? state.tokens[state.current.token].balance : state.balance;
+    return state.current.token != 0 ? state.tokens[state.current.token].balance.toFixed(3) : state.balance.toFixed(3);
   },
   tokenSymbol() {
     return 'æid';
@@ -75,9 +78,9 @@ export const getters = {
     return tippingReceiver;
   },
   mainLoading({ mainLoading }) {
-    return mainLoading
+    return mainLoading;
   },
   nodeStatus({ nodeStatus }) {
-    return nodeStatus
-  }
+    return nodeStatus;
+  },
 };

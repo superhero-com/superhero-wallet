@@ -1,15 +1,11 @@
 <template>
   <div class="popup">
-    <BackLink to="/account">
-      {{ $t('pages.transactions.heading') }}
-    </BackLink>
-
     <ae-list class="allTransactions">
       <div v-for="(trans, index) in groupedTransactionsByDate" v-bind:key="index">
         <div class="date">{{ index }}</div>
         <TransactionItem v-for="transaction in trans" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
       </div>
-      <ae-button face="flat" v-if="showMoreBtn" @click="loadMore" fill="neutral"> <ae-icon name="reload" /> {{ $t('pages.transactions.loadMore') }}</ae-button>
+      <Button v-if="showMoreBtn" @click="loadMore"> <ae-icon name="reload" /> {{ $t('pages.transactions.loadMore') }} </Button>
       <p v-if="showMoreBtn == false">{{ $t('pages.transactions.allLoaded') }}</p>
     </ae-list>
     <div class="newTx" @click="mergeNewTransactions" v-if="newTransactions != 0">
@@ -213,13 +209,13 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
-.date{
-    background: #EDF3F7;
-    padding: 0.5rem 1rem;
-    color: #4e4e4e;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    font-family: monospace;
+.date {
+  background: #505058;
+  padding: 0.5rem 1rem;
+  color: $white-color;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  font-family: monospace;
 }
 .actions {
   width: 50%;

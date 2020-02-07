@@ -1,34 +1,29 @@
 <template>
   <div class="popup">
-    <div class="actions">
-      <button class="backbutton toAccount" @click="navigateToSettings"><ae-icon name="back" /> {{ $t('pages.generalSettings.backToSettings') }}</button>
-    </div>
-    <ae-panel>
-      <div class="maindiv_input-group-addon">
-        <h4>{{ $t('pages.generalSettings.switchLanguage') }}</h4>
-        <hr />
-        <small class="sett_info">{{ $t('pages.generalSettings.currentLanguage') }}: {{ this.current.language ? this.current.language : 'en' }}</small>
-        <div class="language-settings">
-          <li id="languages" class="have-subDropdown" :class="dropdown.languages ? 'show' : ''">
-            <ae-button class="notround switchlanguageBtn" face="round" fill="primary" extend @click="toggleDropdown($event, '.have-subDropdown')">
-              <ae-icon name="globe" />
-              {{ $t('pages.generalSettings.switchLanguage') }}
-              <ae-icon name="left-more" />
-            </ae-button>
+    <div class="maindiv_input-group-addon">
+      <h4>{{ $t('pages.generalSettings.switchLanguage') }}</h4>
+      <hr />
+      <small class="sett_info">{{ $t('pages.generalSettings.currentLanguage') }}: {{ this.current.language ? this.current.language : 'en' }}</small>
+      <div class="language-settings">
+        <li id="languages" class="have-subDropdown" :class="dropdown.languages ? 'show' : ''">
+          <ae-button class="notround switchlanguageBtn" face="round" fill="primary" extend @click="toggleDropdown($event, '.have-subDropdown')">
+            <ae-icon name="globe" />
+            {{ $t('pages.generalSettings.switchLanguage') }}
+            <ae-icon name="left-more" />
+          </ae-button>
 
-            <!-- Language sub dropdown -->
-            <ul class="sub-dropdown">
-              <li style="width: 30%;text-align: center;margin: auto;" v-for="(value, name) in locales" v-bind:key="name">
-                <ae-button v-on:click="switchLanguage(name)" class="" :class="current.language == name ? 'current' : ''">
-                  <img :src="'../icons/flag_' + name + '.png'" />
-                  <span style="margin-left: auto;">{{ languageFullName(name) }}</span>
-                </ae-button>
-              </li>
-            </ul>
-          </li>
-        </div>
+          <!-- Language sub dropdown -->
+          <ul class="sub-dropdown">
+            <li style="width: 30%;text-align: center;margin: auto;" v-for="(value, name) in locales" v-bind:key="name">
+              <ae-button v-on:click="switchLanguage(name)" class="" :class="current.language == name ? 'current' : ''">
+                <img :src="'../icons/flag_' + name + '.png'" />
+                <span style="margin-left: auto;">{{ languageFullName(name) }}</span>
+              </ae-button>
+            </li>
+          </ul>
+        </li>
       </div>
-    </ae-panel>
+    </div>
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div>
 </template>

@@ -7,9 +7,9 @@
     :class="(popup.secondBtn ? 'modal-two-buttons ' : '') + (popup.class ? popup.class : '')"
   >
     <div class="popup-message" v-html="popup.msg"></div>
-    <ae-button size="small" type="exciting" class="popup-button" face="round" :fill="popup.buttonsFillPrimary" uppercase @click.native="closePopup" slot="buttons">{{
-      popup.buttonsTextPrimary
-    }}</ae-button>
+    <Button half @click="closePopup" slot="buttons">
+      {{ popup.buttonsTextPrimary }}
+    </Button>
     <ae-button v-if="popup.secondBtn" class="popup-button" face="round" :fill="popup.buttonsFillSecondary" uppercase @click.native="clickSecondBtn" slot="buttons">{{
       popup.buttonsTextSecondary
     }}</ae-button>
@@ -42,4 +42,20 @@ export default {
 };
 </script>
 
-<style></style>
+<style lang="scss">
+@import '../../../common/variables';
+.ae-overlay {
+  background: rgba(18, 18, 23, 0.8) !important;
+}
+.ae-overlay .ae-modal-light {
+  background: $border-color !important;
+  width: 310px !important;
+  border-radius: 5px !important;
+}
+.ae-overlay .ae-modal-light h1 {
+  display: none;
+}
+.ae-overlay .ae-modal-light .popup-message {
+  font-size: 14px;
+}
+</style>

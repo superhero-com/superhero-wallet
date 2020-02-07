@@ -2,13 +2,13 @@
   <div class="popup">
     <div class="createWallet-holder">
       <div v-show="step === 1">
-        <h2>{{$t('pages.intro.heading')}}</h2>
+        <h2>{{ $t('pages.intro.heading') }}</h2>
         <p>(Onboarding page {{ step }} of {{ totalsteps }})</p>
         <div style="font-weight:bold;">How to CLAIM tips</div>
         <div class="text-info">
-          Do so written as raising parlors spirits mr elderly. Made late in of high left hold. Carried females of up highest calling.
-          Limits marked led silent dining her she far. Sir but elegance marriage dwelling likewise position old pleasure men.
-          Dissimilar themselves simplicity no of contrasted as. Delay great day hours men. Stuff front to do allow to asked he. 
+          Do so written as raising parlors spirits mr elderly. Made late in of high left hold. Carried females of up highest calling. Limits marked led silent dining her she far.
+          Sir but elegance marriage dwelling likewise position old pleasure men. Dissimilar themselves simplicity no of contrasted as. Delay great day hours men. Stuff front to do
+          allow to asked he.
         </div>
         <div class="dotstyle dotstyle-fillup">
           <ul>
@@ -17,18 +17,17 @@
             <li @click="step = 3"><a></a></li>
           </ul>
         </div>
-        <button class="skip-button" @click="next()">{{$t('pages.intro.skip')}}</button>
+        <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
       </div>
 
       <div v-show="step === 2">
-        <h2>{{$t('pages.intro.heading')}}</h2>
+        <h2>{{ $t('pages.intro.heading') }}</h2>
         <p>(Onboarding page {{ step }} of {{ totalsteps }})</p>
         <div style="font-weight:bold;">How to SEND TIPS</div>
         <div class="text-info">
-          Mr do raising article general norland my hastily. Its companions say uncommonly pianoforte favourable.
-          Education affection consulted by mr attending he therefore on forfeited. High way more far feet kind evil play led.
-          Sometimes furnished collected add for resources attention. Norland an by minuter enquire it general on towards forming.
-          Adapted mrs totally company two yet conduct men. 
+          Mr do raising article general norland my hastily. Its companions say uncommonly pianoforte favourable. Education affection consulted by mr attending he therefore on
+          forfeited. High way more far feet kind evil play led. Sometimes furnished collected add for resources attention. Norland an by minuter enquire it general on towards
+          forming. Adapted mrs totally company two yet conduct men.
         </div>
         <div class="dotstyle dotstyle-fillup">
           <ul>
@@ -37,21 +36,20 @@
             <li @click="step = 3"><a></a></li>
           </ul>
         </div>
-        <button class="skip-button" @click="next()">{{$t('pages.intro.skip')}}</button>
+        <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
       </div>
 
       <div v-show="step === 3">
-        <h2>{{$t('pages.intro.heading')}}</h2>
+        <h2>{{ $t('pages.intro.heading') }}</h2>
         <p>(Onboarding page {{ step }} of {{ totalsteps }})</p>
         <div style="font-weight:bold;">How to ADD tokens cashing out</div>
         <div class="text-info">
-          Its had resolving otherwise she contented therefore. Afford relied warmth out sir hearts sister use garden.
-          Men day warmth formed admire former simple. 
+          Its had resolving otherwise she contented therefore. Afford relied warmth out sir hearts sister use garden. Men day warmth formed admire former simple.
         </div>
         <div style="font-weight:bold;">Cashing Out</div>
         <div>
-          Humanity declared vicinity continue supplied no an. He hastened am no property exercise of.
-          Dissimilar comparison no terminated devonshire no literature on. Say most yet head room such just easy. 
+          Humanity declared vicinity continue supplied no an. He hastened am no property exercise of. Dissimilar comparison no terminated devonshire no literature on. Say most yet
+          head room such just easy.
         </div>
         <div class="dotstyle dotstyle-fillup">
           <ul>
@@ -60,7 +58,7 @@
             <li @click="step = 3" class="current"><a></a></li>
           </ul>
         </div>
-        <button class="skip-button" @click="next()">{{$t('pages.intro.skip')}}</button>
+        <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
       </div>
 
       <div v-show="step === 4">
@@ -76,7 +74,8 @@
           <b style="display:block;">Ever.</b>
 
           <small>
-            Unlike other monetization platforms and payment systems, the creators of this wallet cannot - and can never take away your ability to receive tips from your followers and supporters.
+            Unlike other monetization platforms and payment systems, the creators of this wallet cannot - and can never take away your ability to receive tips from your followers
+            and supporters.
           </small>
         </div>
         <p style="bottom: 50px; color: rgb(235, 88, 250); position: absolute; margin: 0 auto; width: 100%;"><b>Enjoy your autonomy</b></p>
@@ -97,8 +96,7 @@ export default {
       mnemonic: null,
     };
   },
-  async created() {
-  },
+  async created() {},
   methods: {
     async createWallet() {
       this.mnemonic = generateMnemonic();
