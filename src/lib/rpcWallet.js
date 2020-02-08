@@ -2,9 +2,9 @@ import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import { RpcWallet } from '@aeternity/aepp-sdk/es/ae/wallet';
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import Node from '@aeternity/aepp-sdk/es/node';
-import { setInterval } from 'timers';
+import { setInterval, clearInterval } from 'timers';
 import { getAccounts } from '../popup/utils/storage';
-import { stringifyForStorage, parseFromStorage, extractHostName, getAeppAccountPermission, getUniqueId, getUserNetworks, detectBrowser } from '../popup/utils/helper';
+import { parseFromStorage, extractHostName, getAeppAccountPermission, getUniqueId, getUserNetworks, stringifyForStorage } from '../popup/utils/helper';
 import { DEFAULT_NETWORK, networks, AEX2_METHODS } from '../popup/utils/constants';
 
 global.browser = require('webextension-polyfill');
@@ -14,6 +14,11 @@ const rpcWallet = {
     await this.initNodes();
     this.initFields();
     this.controller = walletController;
+    const { userAccount } = await browser.storage.local.get('userAccount')
+    if(userAccount) {
+      this.controller.generateWallet({ seed: stringifyForStorage(userAccount.privateKey) })
+      this[AEX2_METHODS.INIT_RPC_WALLET]({ address: userAccount.publicKey, network: DEFAULT_NETWORK })
+    }
   },
   async initSubaccounts() {
     const { subaccounts } = await getAccounts();
