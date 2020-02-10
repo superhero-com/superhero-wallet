@@ -24,11 +24,17 @@ export const PopupConnections = stampit({
       popup.setMessageListener();
       popup.shareAeppInfo();
       this.popups.set(id, popup);
+      popup.connection.onDisconnect.addListener(() => {
+        this.removePopup(id);
+      });
     },
     setAeppInfo(id, aepp) {
       const popup = this.getPopup(id);
       popup.aeppInfo = aepp;
       this.popups.set(id, popup);
+    },
+    removePopup(id) {
+      this.popups.delete(id);
     },
   },
 });
