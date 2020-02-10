@@ -170,14 +170,6 @@ export default {
         }, 100);
       }
     },
-    hideMenu({ target }) {
-      for (const tar in this.dropdown) {
-        const el = this.$refs[tar];
-        if (tar != 'languages' && typeof el !== 'undefined' && el !== target && !el.contains(target)) {
-          this.dropdown[tar] = false;
-        }
-      }
-    },
     toggleDropdown(event, parentClass) {
       if (!this.aeppPopup) {
         if (typeof parentClass === 'undefined') {

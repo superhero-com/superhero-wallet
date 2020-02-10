@@ -20,8 +20,8 @@ export default {
 
   async checkUrlHasBalance(url, addresses) {
     try {
-      const { activeAccount, account } = await getActiveAccount();
-      if (account && typeof account.publicKey !== 'undefined' && account.publicKey) {
+      const { account } = await getActiveAccount();
+      if (account && account.publicKey) {
         const tippingAddress = networks[DEFAULT_NETWORK].tipContract;
         const tx = {
           method: 'unpaid',
