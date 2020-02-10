@@ -17,6 +17,7 @@
     <platform name="android">
         <allow-intent href="market:*" />
         <preference name="SplashMaintainAspectRatio" value="true" />
+        <preference name="HeaderColor" value="#21202a" />
     </platform>
     <platform name="ios">
         <allow-intent href="itms:*" />
@@ -24,6 +25,7 @@
     </platform>
     <preference name="SplashScreen" value="screen" />
     <preference name="ShowSplashScreenSpinner" value="false" />
+    <preference name="StatusBarBackgroundColor" value="#21202a" />
     <feature name="SplashScreen">
         <param name="onload" value="true" />
     </feature>
