@@ -14,7 +14,7 @@
     <br />
     <div>
       <span style="word-break: break-word;font-size: 14px;float: left;">{{ $t('pages.successTip.notify') }}</span>
-      <Textarea v-model="note" size="h-50" />
+      <Textarea v-model="note" :value="note" size="h-50" />
     </div>
     <p class="f-14 sub-heading text-left">
       {{ $t('pages.successTip.note') }}
@@ -42,10 +42,11 @@ import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { MAGNITUDE } from '../../utils/constants';
 import Heart from '../../../icons/heart.svg';
+import Textarea from '../components/Textarea';
 
 export default {
   components: {
-    Heart,
+    Heart, Textarea
   },
   props: ['amount', 'domain'],
   data() {
