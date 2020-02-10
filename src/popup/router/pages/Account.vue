@@ -2,21 +2,21 @@
   <div style="background:#16161D;" class="height-100">
     <div class="popup account-popup">
       <div v-show="backup_seed_notif" class="backup_seed_notif">
-        <span> You need to <a @click="navigateToBackUpSeed" style="text-decoration: underline;">backup</a> your seed phrase </span>
+        <span>{{ $t('pages.account.youNeedTo') }} <a @click="navigateToBackUpSeed" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a> {{ $t('pages.account.yourSeedPhrase') }}</span> 
       </div>
       <ClaimTipButton :styling="buttonstyle"></ClaimTipButton>
 
       <div class="flex flex-align-center flex-justify-between account-info">
         <div class="text-left account-addresses">
           <button style="padding:0" @click="copy" v-clipboard:copy="account.publicKey"><Copyicon /></button>
-          <p class="copied-alert" v-if="copied">Address copied</p>
+          <p class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</p>
           <span class="account-name">{{ activeAccountName }}</span>
           <ae-address :value="account.publicKey" length="flat" />
         </div>
       </div>
 
       <div class="external-svg" :style="{ 'background-image': 'url(' + accbalanceBG + ')' }">
-        <span class="title">Balance</span>
+        <span class="title"> {{ $t('pages.account.balance') }} </span>
         <div class="balance no-sign">
           <div class="amount">
             <span>{{ tokenBalance }}</span> <span>{{ tokenSymbol }}</span>
@@ -48,7 +48,7 @@
         <Button style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
           <div class="flex flex-align-center flex-justify-content-center">
             <Heart />
-            <span class="ml-5">Send æid</span>
+            <span class="ml-5">{{ $t('pages.account.send') }}</span>
           </div>
         </Button>
         <RecentTransactions></RecentTransactions>
