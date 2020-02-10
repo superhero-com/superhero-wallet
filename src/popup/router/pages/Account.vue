@@ -2,7 +2,10 @@
   <div style="background:#16161D;" class="height-100">
     <div class="popup account-popup">
       <div v-show="backup_seed_notif" class="backup_seed_notif">
-        <span>{{ $t('pages.account.youNeedTo') }} <a @click="navigateToBackUpSeed" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a> {{ $t('pages.account.yourSeedPhrase') }}</span> 
+        <span
+          >{{ $t('pages.account.youNeedTo') }} <a @click="navigateToBackUpSeed" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a>
+          {{ $t('pages.account.yourSeedPhrase') }}</span
+        >
       </div>
       <ClaimTipButton :styling="buttonstyle"></ClaimTipButton>
 
@@ -26,14 +29,14 @@
             <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
               <div class="input-group-area">
                 <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
-                  {{ current.currencyRate ? (current.currencyRate * tokenBalance).toFixed(3) : (usdRate * tokenBalance).toFixed(3) }}
-                  <span style="color: #6A8EBE !important">{{ current.currency ? current.currency.toUpperCase() : 'USD' }}</span>
+                  {{ balanceCurrency }}
+                  <span style="color: #6A8EBE !important">{{ currentCurrency }}</span>
                   <DropdownArrow />
                 </ae-button>
               </div>
               <ul class="sub-dropdown">
-                <li class="single-currency" v-for="(index, item) in allCurrencies" v-bind:key="index">
-                  <ae-button v-on:click="switchCurrency(index, item)" class="" :class="current.currency == item ? 'current' : ''">
+                <li class="single-currency" v-for="(index, item) in currencies" :key="index">
+                  <ae-button v-on:click="switchCurrency(index, item)" :class="current.currency == item ? 'current' : ''">
                     {{ item.toUpperCase() }}
                     <i class="arrowrightCurrency"></i>
                   </ae-button>
@@ -82,14 +85,7 @@ export default {
       polling: null,
       accountName: '',
       pollingTransaction: null,
-      toUsd: null,
-      toEur: null,
       timer: '',
-      eurRate: '',
-      allCurrencies: '',
-      usdRate: 0,
-      currencySign: '',
-      currencyFullName: '',
       dropdown: {
         currencies: false,
       },
@@ -104,20 +100,16 @@ export default {
     ...mapGetters([
       'account',
       'balance',
-      'network',
       'current',
-      'transactions',
-      'subaccounts',
-      'wallet',
       'activeAccountName',
       'activeAccount',
-      'sdk',
-      'tokens',
       'tokenSymbol',
       'tokenBalance',
       'popup',
-      'isLedger',
       'tokenRegistry',
+      'currencies',
+      'currentCurrency',
+      'balanceCurrency',
     ]),
     publicKey() {
       return this.account.publicKey;
@@ -125,25 +117,8 @@ export default {
     watchBalance() {
       return this.balance;
     },
-    watchToken() {
-      return this.current.token;
-    },
-    cardColor() {
-      return this.isLedger ? 'neutral' : 'primary';
-    },
-    currs() {
-      browser.storage.local.get('allCurrencies').then(resall => {
-        const allCurrencies = JSON.parse(resall.allCurrencies);
-        this.allCurrencies = allCurrencies;
-        return allCurrencies;
-      });
-    },
   },
   async created() {
-    browser.storage.local.get('rateUsd').then(res => {
-      this.usdRate = res.hasOwnProperty('rateUsd') ? res.rateUsd : 0;
-    });
-
     browser.storage.local.get('backed_up_Seed').then(res => {
       if (!res.backed_up_Seed) {
         this.backup_seed_notif = true;
@@ -155,7 +130,6 @@ export default {
         this.backup_seed_notif = false;
       }
     });
-    currencyConv(this);
   },
   mounted() {},
   methods: {
@@ -165,19 +139,8 @@ export default {
         this.copied = false;
       }, 3000);
     },
-    allTransactions() {
-      this.$router.push('/transactions');
-    },
-    navigateReceive() {
-      this.$router.push('/receive');
-    },
     navigateTips() {
       this.$router.push('/tip');
-    },
-    setAccountName(e) {
-      this.$store.dispatch('setAccountName', e.target.value).then(() => {
-        browser.storage.local.set({ subaccounts: this.subaccounts }).then(() => {});
-      });
     },
     showTransaction() {
       browser.tabs.create({ url: this.popup.data, active: false });
@@ -190,142 +153,9 @@ export default {
       this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
     },
     async switchCurrency(index, item) {
-      browser.storage.local.set({ currency: item }).then(() => {
-        browser.storage.local.set({ currencyRate: index }).then(() => {
-          switch (item) {
-            case 'aud':
-              this.currencySign = '$';
-              this.currencyFullName = 'Australian Dollar';
-              break;
-            case 'brl':
-              this.currencySign = 'R$';
-              this.currencyFullName = 'Brazilian Real';
-              break;
-            case 'cad':
-              this.currencySign = '$';
-              this.currencyFullName = 'Canadian dollar';
-              break;
-            case 'chf':
-              this.currencySign = 'CHF';
-              this.currencyFullName = 'Swiss franc';
-              break;
-            case 'cny':
-              this.currencySign = '¥';
-              this.currencyFullName = 'Chinese yuan renminbi';
-              break;
-            case 'czk':
-              this.currencySign = 'Kč';
-              this.currencyFullName = 'Czech koruna';
-              break;
-            case 'dkk':
-              this.currencySign = 'kr';
-              this.currencyFullName = 'Danish krone';
-              break;
-            case 'eur':
-              this.currencySign = '€';
-              this.currencyFullName = 'Euro';
-              break;
-            case 'gbp':
-              this.currencySign = '£';
-              this.currencyFullName = 'Pound sterling';
-              break;
-            case 'hkd':
-              this.currencySign = '‎$';
-              this.currencyFullName = 'Hong Kong dollar';
-              break;
-            case 'huf':
-              this.currencySign = 'Ft';
-              this.currencyFullName = 'Hungarian forint';
-              break;
-            case 'idr':
-              this.currencySign = 'Rp';
-              this.currencyFullName = 'Indonesian rupiah';
-              break;
-            case 'ils':
-              this.currencySign = '₪';
-              this.currencyFullName = 'Israeli shekel';
-              break;
-            case 'inr':
-              this.currencySign = '₹';
-              this.currencyFullName = 'Indian rupee';
-              break;
-            case 'jpy':
-              this.currencySign = '¥';
-              this.currencyFullName = 'Japanese yen';
-              break;
-            case 'krw':
-              this.currencySign = '₩';
-              this.currencyFullName = 'South Korean won';
-              break;
-            case 'mxn':
-              this.currencySign = '$';
-              this.currencyFullName = 'Mexican peso';
-              break;
-            case 'myr':
-              this.currencySign = 'RM';
-              this.currencyFullName = 'Malaysian ringgit';
-              break;
-            case 'nok':
-              this.currencySign = 'kr';
-              this.currencyFullName = 'Norwegian krone';
-              break;
-            case 'nzd':
-              this.currencySign = '$';
-              this.currencyFullName = 'New Zealand dollar';
-              break;
-            case 'php':
-              this.currencySign = '₱';
-              this.currencyFullName = 'Philippine peso';
-              break;
-            case 'pln':
-              this.currencySign = '‎zł';
-              this.currencyFullName = 'Polish zloty';
-              break;
-            case 'rub':
-              this.currencySign = '‎₽';
-              this.currencyFullName = 'Russian rouble';
-              break;
-            case 'ron':
-              this.currencySign = '‎₽';
-              this.currencyFullName = 'Romanian leu';
-              break;
-            case 'sek':
-              this.currencySign = 'kr';
-              this.currencyFullName = 'Swedish krona';
-              break;
-            case 'sgd':
-              this.currencySign = '‎S$';
-              this.currencyFullName = 'Singapore dollar';
-              break;
-            case 'thb':
-              this.currencySign = '‎฿';
-              this.currencyFullName = 'Thai baht';
-              break;
-            case 'try':
-              this.currencySign = '‎₺';
-              this.currencyFullName = 'Turkish lira';
-              break;
-            case 'usd':
-              this.currencySign = '$';
-              this.currencyFullName = 'US Dollar';
-              break;
-            case 'xau':
-              this.currencySign = 'Au';
-              this.currencyFullName = 'Gold';
-              break;
-            case 'zar':
-              this.currencySign = 'R';
-              this.currencyFullName = 'South African rand';
-              break;
-            default:
-              this.currencySign = '';
-              this.currencyFullName = '';
-              break;
-          }
-          this.$store.commit('SET_CURRENCY', { currency: item, currencyRate: index });
-          this.dropdown.currencies = false;
-        });
-      });
+      await browser.storage.local.set({ currency: item });
+      this.$store.commit('SET_CURRENCY', { currency: item, currencyRate: this.currencies[item] });
+      this.dropdown.currencies = false;
     },
     navigateToBackUpSeed() {
       this.$router.push('/securitySettings');

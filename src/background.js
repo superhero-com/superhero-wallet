@@ -79,8 +79,11 @@ if (process.env.IS_EXTENSION) {
 
     const senderUrl = port.sender.url.split('?');
     const popupSender = Boolean(
-      (port.name == 'popup' && port.sender.id == browser.runtime.id && senderUrl[0] == `${extensionUrl}://${browser.runtime.id}/popup/popup.html` && detectBrowser() != 'Firefox') ||
-      (detectBrowser() == 'Firefox' && port.name == 'popup' && port.sender.id == browser.runtime.id)
+      (port.name == 'popup' &&
+        port.sender.id == browser.runtime.id &&
+        senderUrl[0] == `${extensionUrl}://${browser.runtime.id}/popup/popup.html` &&
+        detectBrowser() != 'Firefox') ||
+        (detectBrowser() == 'Firefox' && port.name == 'popup' && port.sender.id == browser.runtime.id)
     );
 
     if (!popupSender) {
@@ -109,7 +112,7 @@ if (process.env.IS_EXTENSION) {
     }
   });
 } else {
-  window.addEventListener('message', (event) => {
+  window.addEventListener('message', event => {
     if (event.source !== window.parent) return;
     const { type, payload, uuid } = event.data;
     if (HDWALLET_METHODS.includes(type)) {

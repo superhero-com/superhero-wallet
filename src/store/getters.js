@@ -11,6 +11,9 @@ export const getters = {
   balanceCurrency({ current, balance }) {
     return (current.currencyRate * balance).toFixed(3);
   },
+  currentCurrency({ current }) {
+    return current.currency.toUpperCase();
+  },
   network(state) {
     return state.network;
   },
@@ -79,5 +82,8 @@ export const getters = {
   },
   nodeStatus({ nodeStatus }) {
     return nodeStatus;
+  },
+  currencies({ currencies }) {
+    return currencies;
   },
 };

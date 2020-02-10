@@ -25,7 +25,7 @@
           <ae-badge>{{ txType }}</ae-badge>
         </div>
         <div class="balance balanceSpend no-sign" v-if="!isNameTx">{{ amount }} {{ token }}</div>
-        <div class="fiat-rate" v-if="!data.tx.token && !isNameTx">${{ convertCurrency(usdRate, amount) }}</div>
+        <div class="fiat-rate" v-if="!data.tx.token && !isNameTx">{{ convertCurrency(current.currencyRate, amount) }} {{ currentCurrency }}</div>
       </ae-list-item>
       <ae-list-item v-if="data.type == 'nameClaim' || data.type == 'nameUpdate'" fill="neutral" class="flex-justify-between whiteBg  flex-align-center ">
         <div class="tx-label">
@@ -56,7 +56,7 @@
           <div class="tx-label">{{ $t('pages.signTransaction.fee') }}</div>
           <div class="text-right">
             <div class="balance balanceBig txFee">{{ selectedFee }}</div>
-            <div class="fiat-rate">${{ convertCurrency(usdRate, selectedFee) }}</div>
+            <div class="fiat-rate">{{ convertCurrency(current.currencyRate, selectedFee) }} {{ currentCurrency }}</div>
           </div>
         </div>
         <div class="range-slider">
@@ -68,7 +68,7 @@
         <div class="tx-label">{{ $t('pages.signTransaction.total') }}</div>
         <div class="text-right">
           <div class="balance balanceBig balanceTotalSpend no-sign">{{ totalSpend }} {{ token }}</div>
-          <div class="fiat-rate" v-if="!data.tx.token">${{ convertCurrency(usdRate, totalSpend) }}</div>
+          <div class="fiat-rate" v-if="!data.tx.token">{{ convertCurrency(current.currencyRate, totalSpend) }} {{ currentCurrency }}</div>
         </div>
       </ae-list-item>
     </ae-list>
@@ -94,14 +94,7 @@ import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { setInterval } from 'timers';
 import { MAGNITUDE, TX_TYPES, calculateFee, TX_LIMIT_PER_DAY } from '../../utils/constants';
-import {
-  currencyConv,
-  convertAmountToCurrency,
-  removeTxFromStorage,
-  checkAddress,
-  chekAensName,
-  addRejectedToken,
-} from '../../utils/helper';
+import { getCurrencies, convertAmountToCurrency, removeTxFromStorage, checkAddress, chekAensName, addRejectedToken } from '../../utils/helper';
 
 export default {
   data() {
@@ -128,8 +121,6 @@ export default {
         jsonrpc: '2.0',
       },
       selectedFee: 0,
-      usdRate: 0,
-      eurRate: 0,
       checkSDKReady: null,
       receiver: '',
       hash: '',
@@ -161,6 +152,7 @@ export default {
       'popup',
       'tokenRegistry',
       'tokenRegistryLima',
+      'currentCurrency',
     ]),
     maxValue() {
       const calculatedMaxValue = this.balance - this.fee;
@@ -197,7 +189,8 @@ export default {
       if (this.data.type != 'txSign') {
         return this.receiver == null || this.receiver == '';
       }
-      return !checkAddress(this.receiver) || !chekAensName(this.receiver);
+
+      return !checkAddress(this.receiver) && !chekAensName(this.receiver);
     },
     watchBalance() {
       return this.balance;
@@ -448,6 +441,7 @@ export default {
 
             const fee = calculateFee(TX_TYPES[this.data.type], this.txParams);
             this.txFee = fee;
+            console.log(this.txFee);
             this.selectedFee = this.fee.toFixed(7);
             if (this.alertMsg == '') {
               this.signDisabled = false;
@@ -455,7 +449,7 @@ export default {
           }
         }, 500);
       }
-      currencyConv(this);
+      // currencyConv(this);
 
       setTimeout(() => {
         this.showAlert();
