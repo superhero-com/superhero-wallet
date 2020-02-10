@@ -96,14 +96,10 @@ export default {
     },
   },
   watch: {
-    $route(to, from) {
+    $route(to) {
       this.title = to.meta.title || '';
       this.showNavigation = typeof to.meta.navigation !== 'undefined' ? to.meta.navigation : true;
-      if (to.path == '/account') {
-        this.onAccount = true;
-      } else {
-        this.onAccount = false;
-      }
+      this.onAccount = to.path === '/account';
     },
   },
   async created() {
@@ -191,11 +187,7 @@ export default {
       postMessage({ type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
     },
     goBack() {
-      if (this.isLoggedIn) {
-        this.$router.push('/account');
-      } else {
-        this.$router.push('/');
-      }
+      this.$router.push(this.isLoggedIn ? '/account' : '/');
     },
     async getCurrencies() {
       const { currency } = await browser.storage.local.get('currency');
