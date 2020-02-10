@@ -115,7 +115,7 @@ import { convertToAE, convertAmountToCurrency } from '../../../utils/helper';
 export default {
   data() {
     return {
-      props: window.props,
+      props: {},
       token: 'æid',
       usdRate: 0,
       alertMsg: '',
@@ -126,7 +126,13 @@ export default {
     };
   },
   async created() {
-    this.unpackedTx = TxBuilder.unpackTx(this.props.action.params.tx);
+    const waitProps = setInterval(() => {
+      if (window.props) {
+        this.props = window.props;
+        this.unpackedTx = TxBuilder.unpackTx(this.props.action.params.tx);
+        clearInterval(waitProps);
+      }
+    });
   },
   computed: {
     ...mapGetters([
@@ -189,19 +195,11 @@ export default {
       return convertToAE(balance);
     },
     cancelTransaction() {
-      if (Object.keys(this.props.action).length) {
-        this.props.action.deny();
-      }
-
-      this.props.reject();
+      this.props.reject(false);
     },
     signTransaction() {
       this.loading = true;
-      if (Object.keys(this.props.action).length) {
-        this.props.action.accept();
-      }
-
-      this.props.resolve();
+      this.props.resolve(true);
     },
   },
 };

@@ -4,7 +4,7 @@ import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import axios from 'axios';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import Node from '@aeternity/aepp-sdk/es/node';
-import { MAGNITUDE_EXA, MAGNITUDE_GIGA, MAGNITUDE_PICO } from './constants';
+import { MAGNITUDE_EXA, MAGNITUDE_GIGA, MAGNITUDE_PICO, CONNECTION_TYPES } from './constants';
 
 const shuffleArray = array => {
   let currentIndex = array.length;
@@ -63,6 +63,28 @@ const detectBrowser = () => {
     return 'IE';
   }
   return 'unknown';
+};
+
+const getExtensionProtocol = () => {
+  let extensionUrl = 'chrome-extension';
+  if (detectBrowser() == 'Firefox') {
+    extensionUrl = 'moz-extension';
+  }
+  return extensionUrl;
+};
+
+const detectConnectionType = port => {
+  const extensionProtocol = getExtensionProtocol();
+  const senderUrl = port.sender.url.split('?');
+  let type = CONNECTION_TYPES.OTHER;
+  if (port.name == CONNECTION_TYPES.EXTENSION && (senderUrl[0] == `${extensionProtocol}://${browser.runtime.id}/popup/popup.html` || detectBrowser() == 'Firefox')) {
+    type = CONNECTION_TYPES.EXTENSION;
+  } else if (port.name == CONNECTION_TYPES.POPUP && (senderUrl[0] == `${extensionProtocol}://${browser.runtime.id}/popup/popup.html` || detectBrowser() == 'Firefox')) {
+    type = CONNECTION_TYPES.POPUP;
+  } else {
+    type = CONNECTION_TYPES.OTHER;
+  }
+  return type;
 };
 
 const fetchData = (url, method, fetchedData) => {
@@ -576,4 +598,6 @@ export {
   getUniqueId,
   getUserNetworks,
   setTxInQueue,
+  getExtensionProtocol,
+  detectConnectionType,
 };

@@ -86,7 +86,6 @@ export default {
           this.initContractInstances();
         })
         .catch(err => {
-          console.log(err);
           if (this.countError < 2) {
             this.initSdk(cb);
           } else {
@@ -129,12 +128,14 @@ export default {
   redirectAfterLogin(cb) {
     if (window.RUNNING_IN_POPUP) {
       store.commit('SET_AEPP_POPUP', true);
-      if (window.hasOwnProperty('name') && window.name.includes('popup')) {
-        if (window.props.type == 'connectConfirm') {
+      const url = new URL(window.location.href);
+      const type = url.searchParams.get('type');
+      if (type) {
+        if (type == 'connectConfirm') {
           cb('/connect');
-        } else if (window.props.type == 'sign') {
+        } else if (type == 'sign') {
           cb('/popup-sign-tx');
-        } else if (window.props.type == 'askAccounts') {
+        } else if (type == 'askAccounts') {
           cb('/ask-accounts');
         }
       }

@@ -4,17 +4,46 @@ import '../../lib/initPolyfills';
 let background;
 const pendingRequests = {};
 
+const unloadHandler = () => {
+  if (!window.props.resolved) {
+    background.postMessage({ action: 'deny' });
+    if (window.hasOwnProperty('reject')) window.reject(new Error('Rejected by user'));
+  }
+};
+
+const closingWrapper = f => (...args) => {
+  window.props.resolved = true;
+  window.removeEventListener('beforeunload', unloadHandler, true);
+  f(...args);
+  window.close();
+  setTimeout(() => {
+    window.close();
+  }, 1000);
+};
+
+const setPopupData = data => {
+  if (window.RUNNING_IN_POPUP) {
+    window.props = data;
+    window.addEventListener('beforeunload', unloadHandler, true);
+    const resolve = () => background.postMessage({ action: 'accept' });
+    const reject = () => background.postMessage({ action: 'deny' });
+    window.props.resolve = closingWrapper(resolve);
+    window.props.reject = closingWrapper(reject);
+  }
+};
 const messageHandler = message => {
   if (!pendingRequests[message.uuid]) {
-    throw new Error(`Can't find request with id: ${message.uuid}`);
+    if (message.type !== 'POPUP_INFO') throw new Error(`Can't find request with id: ${message.uuid}`);
+    else return setPopupData(message);
   }
+
   pendingRequests[message.uuid].resolve(message);
 };
 
 const ensureBackgroundInitialised = async () => {
   if (background) return;
   if (process.env.IS_EXTENSION) {
-    background = await browser.runtime.connect({ name: 'popup' });
+    background = await browser.runtime.connect({ name: window.RUNNING_IN_POPUP ? 'POPUP' : 'EXTENSION' });
     background.onMessage.addListener(messageHandler);
   } else {
     const iframe = document.createElement('iframe');
@@ -37,6 +66,7 @@ export const postMessage = async ({ type, payload }) => {
   const id = uuid();
   background.postMessage({ type, payload, uuid: id });
   return new Promise((resolve, reject) => {
+    console.log(id, type);
     pendingRequests[id] = { resolve, reject };
   });
 };

@@ -3,6 +3,7 @@ import { RpcWallet } from '@aeternity/aepp-sdk/es/ae/wallet';
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import Node from '@aeternity/aepp-sdk/es/node';
 import { setInterval, clearInterval } from 'timers';
+import uuid from 'uuid';
 import { getAccounts } from '../popup/utils/storage';
 import { parseFromStorage, extractHostName, getAeppAccountPermission, getUniqueId, getUserNetworks, stringifyForStorage } from '../popup/utils/helper';
 import { DEFAULT_NETWORK, networks, AEX2_METHODS } from '../popup/utils/constants';
@@ -10,7 +11,8 @@ import { DEFAULT_NETWORK, networks, AEX2_METHODS } from '../popup/utils/constant
 global.browser = require('webextension-polyfill');
 
 const rpcWallet = {
-  async init(walletController) {
+  async init(walletController, popups) {
+    this.popups = popups;
     await this.initNodes();
     this.initFields();
     this.controller = walletController;
@@ -132,11 +134,18 @@ const rpcWallet = {
     }
   },
 
-  showPopup({ action, aepp, type = 'connectConfirm' }) {
-    const uid = getUniqueId();
-    const time = `${Math.floor(Date.now() / 1000)}${uid}`;
-    const popupWindow = window.open(`/popup/popup.html?t=${time}`, `popup_id_${time}`, 'width=420,height=680', false);
-    if (!popupWindow) action.deny();
+  async showPopup({ action, aepp, type = 'connectConfirm' }) {
+    const id = uuid();
+    const popupUrl = `${browser.runtime.getURL('./popup/popup.html')}?id=${id}&type=${type}`;
+    const popupWindow = await browser.windows.create({
+      url: popupUrl,
+      type: 'popup',
+      height: 680,
+      width: 420,
+    });
+    if (!popupWindow) return action.deny();
+    this.popups.addPopup(id, this.controller);
+    this.popups.addActions(id, action);
     const {
       connection: {
         port: {
@@ -146,8 +155,13 @@ const rpcWallet = {
       info: { icons, name },
     } = aepp;
     const { protocol } = new URL(url);
+
     return new Promise((resolve, reject) => {
-      popupWindow.window.props = { type, resolve, reject, action, host: extractHostName(url), icons, name, protocol };
+      try {
+        this.popups.setAeppInfo(id, { type, action: { params: action.params, method: action.method }, url, icons, name, protocol, host: extractHostName(url) });
+      } catch (e) {
+        console.log(e);
+      }
     });
   },
 

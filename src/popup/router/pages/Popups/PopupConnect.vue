@@ -42,28 +42,30 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { setInterval, clearInterval } from 'timers';
 import { setConnectedAepp, checkAeppConnected, setPermissionForAccount } from '../../../utils/helper';
 
 export default {
   data() {
     return {
-      data: window.props,
+      data: {},
       imageError: false,
     };
   },
+  created() {
+    const waitProps = setInterval(() => {
+      if (window.props) {
+        this.data = window.props;
+        clearInterval(waitProps);
+      }
+    }, 500);
+  },
   methods: {
     cancel() {
-      if (Object.keys(this.data.action).length) {
-        this.data.action.deny();
-      }
-
       this.data.reject(false);
     },
     async connect() {
       await setPermissionForAccount(this.data.host, this.account.publicKey);
-      if (Object.keys(this.data.action).length) {
-        this.data.action.accept();
-      }
       this.data.resolve(true);
     },
   },

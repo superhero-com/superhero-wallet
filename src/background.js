@@ -1,13 +1,14 @@
 import { setInterval } from 'timers';
 import './lib/initPolyfills';
 import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
-import { detectBrowser, extractHostName } from './popup/utils/helper';
+import { detectBrowser, extractHostName, detectConnectionType } from './popup/utils/helper';
 import WalletContorller from './wallet-controller';
 import Notification from './notifications';
 import rpcWallet from './lib/rpcWallet';
-import { HDWALLET_METHODS, AEX2_METHODS, NOTIFICATION_METHODS } from './popup/utils/constants';
+import { HDWALLET_METHODS, AEX2_METHODS, NOTIFICATION_METHODS, CONNECTION_TYPES } from './popup/utils/constants';
 import TipClaimRelay from './lib/tip-claim-relay';
 import { setController } from './lib/background-utils';
+import { PopupConnections } from './lib/popup-connection';
 
 const controller = new WalletContorller();
 
@@ -23,8 +24,8 @@ if (process.env.IS_EXTENSION) {
   }, 5000);
 
   const notification = new Notification();
-  rpcWallet.init(controller);
-  setController(controller);
+  // rpcWallet.init(controller);
+  // setController(controller);
   browser.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
     switch (msg.method) {
       case 'phishingCheck':
@@ -71,44 +72,41 @@ if (process.env.IS_EXTENSION) {
     });
   };
 
+  const popupConnections = PopupConnections();
+  popupConnections.init();
+  rpcWallet.init(controller, popupConnections);
   browser.runtime.onConnect.addListener(async port => {
-    let extensionUrl = 'chrome-extension';
-    if (detectBrowser() == 'Firefox') {
-      extensionUrl = 'moz-extension';
-    }
+    if (port.sender.id == browser.runtime.id) {
+      const connectionType = detectConnectionType(port);
+      if (connectionType == CONNECTION_TYPES.EXTENSION) {
+        port.onMessage.addListener(({ type, payload, uuid }, sender) => {
+          console.log(type);
+          console.log(payload);
+          if (HDWALLET_METHODS.includes(type)) {
+            controller[type](payload).then(res => {
+              port.postMessage({ uuid, res });
+            });
+          }
+          if (AEX2_METHODS.hasOwnProperty(type)) {
+            rpcWallet[type](payload);
+          }
+          if (NOTIFICATION_METHODS.hasOwnProperty(type)) {
+            notification[type](payload);
+          }
+        });
+      } else if (connectionType == CONNECTION_TYPES.POPUP) {
+        const url = new URL(port.sender.url);
+        const id = url.searchParams.get('id');
 
-    const senderUrl = port.sender.url.split('?');
-    const popupSender = Boolean(
-      (port.name == 'popup' &&
-        port.sender.id == browser.runtime.id &&
-        senderUrl[0] == `${extensionUrl}://${browser.runtime.id}/popup/popup.html` &&
-        detectBrowser() != 'Firefox') ||
-        (detectBrowser() == 'Firefox' && port.name == 'popup' && port.sender.id == browser.runtime.id)
-    );
-
-    if (!popupSender) {
-      const check = rpcWallet.sdkReady(() => {
-        rpcWallet.addConnection(port);
-      });
-      port.onDisconnect.addListener(p => {
-        clearInterval(check);
-      });
-    } else {
-      port.onMessage.addListener(({ type, payload, uuid }) => {
-        if (HDWALLET_METHODS.includes(type)) {
-          controller[type](payload).then(res => {
-            port.postMessage({ uuid, res });
-          });
-        }
-
-        if (AEX2_METHODS.hasOwnProperty(type)) {
-          rpcWallet[type](payload);
-        }
-
-        if (NOTIFICATION_METHODS.hasOwnProperty(type)) {
-          notification[type](payload);
-        }
-      });
+        popupConnections.addConnection(id, port);
+      } else if (connectionType == CONNECTION_TYPES.OTHER) {
+        const check = rpcWallet.sdkReady(() => {
+          rpcWallet.addConnection(port);
+        });
+        port.onDisconnect.addListener(p => {
+          clearInterval(check);
+        });
+      }
     }
   });
 } else {

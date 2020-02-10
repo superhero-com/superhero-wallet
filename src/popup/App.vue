@@ -131,8 +131,6 @@ export default {
     if (!window.RUNNING_IN_POPUP) {
       // init SDK
       this.checkSdkReady();
-    } else {
-      this.hideLoader();
     }
     this.setMenuSlots();
     window.addEventListener('resize', () => {
