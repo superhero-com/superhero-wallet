@@ -131,8 +131,7 @@ export default {
         sendResponse({ host: receiver.host, received: true });
       });
     }
-
-    if (!process.env.RUNNING_IN_POPUP) {
+    if (!window.RUNNING_IN_POPUP) {
       // init SDK
       this.checkSdkReady();
     } else {
@@ -160,7 +159,7 @@ export default {
       }
     },
     checkSdkReady() {
-      if (!process.env.RUNNING_IN_POPUP) {
+      if (!window.RUNNING_IN_POPUP) {
         this.checkSDKReady = setInterval(() => {
           if (this.sdk != null) {
             this.initRpcWallet();

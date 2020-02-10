@@ -3,3 +3,4 @@ Object.assign(process.env, {
     RUNNING_IN_POPUP: !!window.opener && window.name.includes('popup'),
   }),
 });
+window.RUNNING_IN_POPUP = !!window.opener && window.name.includes('popup')
