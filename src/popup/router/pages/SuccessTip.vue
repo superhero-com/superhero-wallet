@@ -46,7 +46,8 @@ import Textarea from '../components/Textarea';
 
 export default {
   components: {
-    Heart, Textarea
+    Heart,
+    Textarea,
   },
   props: ['amount', 'domain'],
   data() {
@@ -58,7 +59,7 @@ export default {
   computed: {
     ...mapGetters(['current', 'currentCurrency']),
     amountTip() {
-      return this.amount
+      return this.amount;
     },
     getCurrencyAmount() {
       return (this.amountTip * this.current.currencyRate).toFixed(3);

@@ -121,7 +121,7 @@ export default {
       }
     },
     visitTipUrl() {
-      if(this.tipUrl) {
+      if (this.tipUrl) {
         browser.tabs.create({ url: this.tipUrl, active: true });
       }
     },

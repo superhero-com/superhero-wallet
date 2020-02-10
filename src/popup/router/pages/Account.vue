@@ -2,7 +2,10 @@
   <div style="background:#16161D;" class="height-100">
     <div class="popup account-popup">
       <div v-show="backup_seed_notif" class="backup_seed_notif">
-        <span>{{ $t('pages.account.youNeedTo') }} <a @click="navigateToBackUpSeed" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a> {{ $t('pages.account.yourSeedPhrase') }}</span> 
+        <span
+          >{{ $t('pages.account.youNeedTo') }} <a @click="navigateToBackUpSeed" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a>
+          {{ $t('pages.account.yourSeedPhrase') }}</span
+        >
       </div>
       <ClaimTipButton :styling="buttonstyle"></ClaimTipButton>
 

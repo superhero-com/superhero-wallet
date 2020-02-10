@@ -94,14 +94,7 @@ import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { setInterval } from 'timers';
 import { MAGNITUDE, TX_TYPES, calculateFee, TX_LIMIT_PER_DAY } from '../../utils/constants';
-import {
-  getCurrencies,
-  convertAmountToCurrency,
-  removeTxFromStorage,
-  checkAddress,
-  chekAensName,
-  addRejectedToken,
-} from '../../utils/helper';
+import { getCurrencies, convertAmountToCurrency, removeTxFromStorage, checkAddress, chekAensName, addRejectedToken } from '../../utils/helper';
 
 export default {
   data() {

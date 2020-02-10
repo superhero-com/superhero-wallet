@@ -128,7 +128,6 @@ export default {
   },
   redirectAfterLogin(cb) {
     if (window.RUNNING_IN_POPUP) {
-      
       store.commit('SET_AEPP_POPUP', true);
       if (window.hasOwnProperty('name') && window.name.includes('popup')) {
         if (window.props.type == 'connectConfirm') {
