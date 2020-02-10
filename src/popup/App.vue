@@ -33,9 +33,9 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { setTimeout, clearInterval, clearTimeout, setInterval } from 'timers';
+import { clearInterval, setInterval } from 'timers';
 import { AEX2_METHODS } from './utils/constants';
-import { start, postMessage, readWebPageDom } from './utils/connection';
+import { postMessage, readWebPageDom } from './utils/connection';
 import { getCurrencies } from './utils/helper';
 import { langs, fetchAndSetLocale } from './utils/i18nHelper';
 import Arrow from '../icons/arrow.svg';
@@ -85,7 +85,6 @@ export default {
       'activeNetwork',
       'balance',
       'activeAccountName',
-      'background',
       'sdk',
       'aeppPopup',
       'mainLoading',
@@ -124,8 +123,6 @@ export default {
       }
     });
     if (process.env.IS_EXTENSION) {
-      const background = await start(browser);
-      this.$store.commit('SET_BACKGROUND', background);
       readWebPageDom((receiver, sendResponse) => {
         this.$store.commit('SET_TIPPING_RECEIVER', receiver);
         sendResponse({ host: receiver.host, received: true });
@@ -191,7 +188,7 @@ export default {
       }, 2500);
     },
     initRpcWallet() {
-      postMessage(this.background, { type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
+      postMessage({ type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
     },
     goBack() {
       if (this.isLoggedIn) {

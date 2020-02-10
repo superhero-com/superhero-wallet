@@ -27,7 +27,6 @@
         },
         "aboutSettings": {
             "heading": "About",
-            "backToSettings": "Settings",
             "systemName": "Corona",
             "terms": "Terms of Service",
             "privacyPolicy": "Privacy Policy"
@@ -36,13 +35,18 @@
             "heading": "Account",
             "accountName": "Account name",
             "copy": "Copy address",
-            "send": "Send",
+            "send": "Send æid",
             "receive": "Receive",
             "wholeTransaction": "Whole transaction history",
             "latestTransactions": "Latest transactions",
             "noTransactionsFound": "No transactions found!",
             "tipSomeone": "Send æid",
-            "howToClaim": "How to claim æid"
+            "howToClaim": "How to claim æid",
+            "balance": "Balance",
+            "copied": "Copied to clipboard",
+            "youNeedTo": "You need to",
+            "backup": "backup",
+            "yourSeedPhrase": "your seed phrase"
         },
         "accountPassword": {
             "heading": "",
@@ -51,6 +55,12 @@
             "incorrectPasswordError": "Incorrect password !",
             "passwordDoesntMatchError": "Password does not match!",
             "securingAccount": "Securing your account"
+        },
+        "recentTransactions": {
+            "recentActivity": "Recent Activity",
+            "viewAll": "View all",
+            "pendingStatus": "Pending",
+            "noTransactionsFound": "No transactions found!"
         },
         "addFungibleToken": {
             "heading": "Fungible Tokens",
@@ -433,7 +443,8 @@
             "home": "Home",
             "successfullySent":"You have successfully sent ",
             "to": "to",
-            "note": "NOTE: The owner of this URL has not created an account yet. They can claim their tokens easily by creating a wallet - the same way you did."
+            "note": "NOTE: The owner of this URL has not created an account yet. They can claim their tokens easily by creating a wallet - the same way you did.",
+            "notify": "Notify someone that you sent æid to this post"
         },
         "transactionDetails": {
             "heading": "Transactions Details",

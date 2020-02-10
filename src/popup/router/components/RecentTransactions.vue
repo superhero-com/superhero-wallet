@@ -1,18 +1,17 @@
 <template>
   <div class="recent-transactions">
     <div class="flex flex flex-align-center flex-justify-between">
-      <span class="title">Recent Activity</span>
-      <span @click="allTransactions" class="viewAll">View all</span>
+      <span class="title">{{ $t('pages.recentTransactions.recentActivity') }}</span>
+      <span @click="allTransactions" class="viewAll">{{ $t('pages.recentTransactions.viewAll') }}</span>
     </div>
 
     <div v-if="newTip && !loading">
       <ae-list-item fill="neutral" class="list-item-transaction">
         <div class="holder">
-          <span class="amount"
-            >{{ pendingTipo.amount }} æid <span style="color: #BCBCC4;">( {{ pendingTipo.amountCurrency }} {{ currentCurrency }} )</span></span
-          >
-          >
-          <span class="status">Pending</span>
+          <span class="amount">
+            {{ pendingTipo.amount }} æid <span style="color: #BCBCC4;">( {{ pendingTipo.amountCurrency }} {{ currentCurrency }} )</span>
+          </span>
+          <span class="status">{{ $t('pages.recentTransactions.pendingStatus') }}</span>
           <span class="time">{{ pendingTipo.time }}</span>
         </div>
         <div class="holder">
@@ -27,7 +26,7 @@
       </ae-list>
     </div>
     <div v-if="transactions.latest.length == 0 && !loading">
-      <p class="paragraph noTransactions">{{ $t('pages.account.noTransactionsFound') }}</p>
+      <p class="paragraph noTransactions">{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
     </div>
     <div class="loader-holder">
       <Loader size="small" :loading="loading"></Loader>

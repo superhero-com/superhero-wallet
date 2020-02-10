@@ -11,6 +11,11 @@
       {{ $t('pages.successTip.to') }}
     </p>
     <a class="link-sm text-left block">{{ domain }}</a>
+    <br />
+    <div>
+      <span style="word-break: break-word;font-size: 14px;float: left;">{{ $t('pages.successTip.notify') }}</span>
+      <Textarea v-model="note" :value="note" size="h-50" />
+    </div>
     <p class="f-14 sub-heading text-left">
       {{ $t('pages.successTip.note') }}
     </p>
@@ -25,11 +30,6 @@
         </Button>
       </div>
       <br />
-
-      <div>
-        <span style="word-break: break-word;font-size: 14px;float: left;">Notify someone that you sent æid to this post</span>
-        <Textarea v-model="note" size="h-50" />
-      </div>
       <Button @click="redirectOnFeed" extend>
         {{ $t('pages.successTip.feed') }}
       </Button>
@@ -46,8 +46,7 @@ import Textarea from '../components/Textarea';
 
 export default {
   components: {
-    Heart,
-    Textarea,
+    Heart, Textarea
   },
   props: ['amount', 'domain'],
   data() {
@@ -59,7 +58,7 @@ export default {
   computed: {
     ...mapGetters(['current', 'currentCurrency']),
     amountTip() {
-      return this.amount;
+      return this.amount
     },
     getCurrencyAmount() {
       return (this.amountTip * this.current.currencyRate).toFixed(3);

@@ -307,37 +307,25 @@ export default {
     });
   },
 
-  async unlockWallet({ state: { background }, dispatch, commit }, payload) {
-    return new Promise(async (resolve, reject) => {
-      const msg = await postMessage(background, { type: 'unlockWallet', payload });
-      resolve(msg.res);
-    });
+  async unlockWallet(context, payload) {
+    return (await postMessage({ type: 'unlockWallet', payload })).res;
   },
 
-  async getAccount({ state: { background } }, { idx }) {
-    return new Promise(async (resolve, reject) => {
-      const {
-        res: { address },
-      } = await postMessage(background, { type: 'getAccount', payload: { idx } });
-      resolve(address);
-    });
+  async getAccount(context, { idx }) {
+    return (await postMessage({ type: 'getAccount', payload: { idx } })).res.address;
   },
 
-  async getKeyPair({ state: { background, account } }, { idx }) {
-    return new Promise(async (resolve, reject) => {
-      let { res } = await postMessage(background, { type: 'getKeypair', payload: { activeAccount: idx, account: { publicKey: account.publicKey } } });
-      res = parseFromStorage(res);
-      resolve({ publicKey: res.publicKey, secretKey: res.secretKey });
+  async getKeyPair({ state: { account } }, { idx }) {
+    let { res } = await postMessage({
+      type: 'getKeypair',
+      payload: { activeAccount: idx, account: { publicKey: account.publicKey } },
     });
+    res = parseFromStorage(res);
+    return { publicKey: res.publicKey, secretKey: res.secretKey };
   },
 
-  async generateWallet({ state: { background } }, { seed }) {
-    return new Promise(async (resolve, reject) => {
-      const {
-        res: { address },
-      } = await postMessage(background, { type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } });
-      resolve(address);
-    });
+  async generateWallet(context, { seed }) {
+    return (await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })).res.address;
   },
 
   async getEncryptedWallet() {

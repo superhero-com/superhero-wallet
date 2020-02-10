@@ -2,21 +2,21 @@
   <div style="background:#16161D;" class="height-100">
     <div class="popup account-popup">
       <div v-show="backup_seed_notif" class="backup_seed_notif">
-        <span> You need to <a @click="navigateToBackUpSeed" style="text-decoration: underline;">backup</a> your seed phrase </span>
+        <span>{{ $t('pages.account.youNeedTo') }} <a @click="navigateToBackUpSeed" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a> {{ $t('pages.account.yourSeedPhrase') }}</span> 
       </div>
       <ClaimTipButton :styling="buttonstyle"></ClaimTipButton>
 
       <div class="flex flex-align-center flex-justify-between account-info">
         <div class="text-left account-addresses">
           <button style="padding:0" @click="copy" v-clipboard:copy="account.publicKey"><Copyicon /></button>
-          <p class="copied-alert" v-if="copied">Address copied</p>
+          <p class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</p>
           <span class="account-name">{{ activeAccountName }}</span>
           <ae-address :value="account.publicKey" length="flat" />
         </div>
       </div>
 
       <div class="external-svg" :style="{ 'background-image': 'url(' + accbalanceBG + ')' }">
-        <span class="title">Balance</span>
+        <span class="title"> {{ $t('pages.account.balance') }} </span>
         <div class="balance no-sign">
           <div class="amount">
             <span>{{ tokenBalance }}</span> <span>{{ tokenSymbol }}</span>
@@ -45,10 +45,10 @@
       </div>
 
       <div style="background: #21212A" class="height-100">
-        <Button style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
+        <Button v-if="IS_EXTENSION" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
           <div class="flex flex-align-center flex-justify-content-center">
             <Heart />
-            <span class="ml-5">Send æid</span>
+            <span class="ml-5">{{ $t('pages.account.send') }}</span>
           </div>
         </Button>
         <RecentTransactions></RecentTransactions>
@@ -59,10 +59,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { setInterval, setTimeout, setImmediate, clearInterval } from 'timers';
-import { request } from 'http';
-import { fetchData } from '../../utils/helper';
-import { FUNGIBLE_TOKEN_CONTRACT, TOKEN_REGISTRY_ADDRESS, TOKEN_REGISTRY_CONTRACT, TOKEN_REGISTRY_CONTRACT_LIMA } from '../../utils/constants';
+import { setTimeout, clearInterval } from 'timers';
+import { currencyConv } from '../../utils/helper';
 import Copyicon from '../../../icons/copy.svg';
 import DropdownArrow from '../../../icons/dropdownarrow.svg';
 import Heart from '../../../icons/heart.svg';
@@ -92,6 +90,7 @@ export default {
       pendingTip: false,
       buttonstyle: '',
       copied: false,
+      IS_EXTENSION: process.env.IS_EXTENSION,
     };
   },
   computed: {
