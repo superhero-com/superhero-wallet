@@ -66,7 +66,6 @@ export const postMessage = async ({ type, payload }) => {
   const id = uuid();
   background.postMessage({ type, payload, uuid: id });
   return new Promise((resolve, reject) => {
-    console.log(id, type);
     pendingRequests[id] = { resolve, reject };
   });
 };
