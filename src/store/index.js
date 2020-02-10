@@ -37,7 +37,6 @@ export default new Vuex.Store({
     sdk: null,
     aeppPopup: false,
     ledgerApi: null,
-    background: null,
     txAdvancedMode: false,
     tipping: null,
     tippingReceiver: {},

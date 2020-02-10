@@ -1,6 +1,4 @@
-import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import { setInterval } from 'timers';
-import { decrypt } from './popup/utils/keystore';
 import { generateHdWallet, getHdWalletAccount } from './popup/utils/hdWallet';
 import { stringifyForStorage, parseFromStorage } from './popup/utils/helper';
 import { addressGenerator } from './popup/utils/address-generator';
@@ -11,7 +9,7 @@ export default class WalletController {
     if (tests && localStorage.getItem('wallet')) {
       this.wallet = parseFromStorage(localStorage.getItem('wallet'));
     }
-    if (!tests) {
+    if (!tests && process.env.IS_EXTENSION) {
       setInterval(() => {
         browser.windows.getAll({}).then(wins => {
           if (wins.length == 0) {

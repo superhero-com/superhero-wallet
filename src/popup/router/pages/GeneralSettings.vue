@@ -30,7 +30,6 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { clearTimeout } from 'timers';
 import { langs, fetchAndSetLocale } from '../../utils/i18nHelper';
 
 export default {

@@ -5,8 +5,6 @@ import axios from 'axios';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import Node from '@aeternity/aepp-sdk/es/node';
 import { MAGNITUDE_EXA, MAGNITUDE_GIGA, MAGNITUDE_PICO } from './constants';
-import { postMessage } from './connection';
-import { getHdWalletAccount } from './hdWallet';
 
 const shuffleArray = array => {
   let currentIndex = array.length;
@@ -219,37 +217,6 @@ const swag = async (network, current) => {
   })({ swag });
 };
 
-const initializeSDK = (ctx, { network, current, account, wallet, activeAccount = 0, background }, backgr = false) => {
-  if (!backgr) {
-    ctx.hideConnectError();
-  }
-  return new Promise(async (resolve, reject) => {
-    if (!backgr) {
-      postMessage(background, { type: 'getKeypair', payload: { activeAccount, account } }).then(async ({ res }) => {
-        if (typeof res.error !== 'undefined') {
-          resolve({ error: true });
-        } else {
-          let sdk = null;
-          try {
-            res = parseFromStorage(res);
-            sdk = await createSDKObject(ctx, { network, current, account, wallet, activeAccount, background, res }, backgr);
-            sdk.middleware = (await swag(network, current)).api; // uncomment this
-            resolve(sdk); // remove this from here
-          } catch (err) {
-            if (sdk) {
-              resolve(sdk);
-            } else {
-              resolve({ error: true });
-            }
-          }
-        }
-      });
-    } else {
-      const sdk = await createSDKObject(ctx, { network, current, account, activeAccount, background, res: account }, backgr);
-      resolve(sdk);
-    }
-  });
-};
 let countErr = 0;
 const createSDKObject = (ctx, { network, current, account, wallet, activeAccount = 0, background, res }, backgr) =>
   new Promise(async (resolve, reject) => {
@@ -598,7 +565,6 @@ export {
   setConnectedAepp,
   checkAeppConnected,
   redirectAfterLogin,
-  initializeSDK,
   swag,
   currencyConv,
   convertAmountToCurrency,
