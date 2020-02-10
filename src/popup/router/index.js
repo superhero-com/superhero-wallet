@@ -13,7 +13,6 @@ import AlertComponent from './components/Alert';
 import AmountInput from './components/AmountInput';
 import AddressInput from './components/AddressInput';
 import Button from './components/Button';
-import Textarea from './components/Textarea';
 import ModalComponent from './components/Modal';
 
 import * as helper from '../utils/helper';

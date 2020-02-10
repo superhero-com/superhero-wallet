@@ -7,62 +7,54 @@ import { parseFromStorage, swag } from '../popup/utils/helper';
 import { TIPPING_CONTRACT, DEFAULT_NETWORK } from '../popup/utils/constants';
 
 export default {
-  store: null,
   countError: 0,
   init(cb) {
-    browser.storage.local.get('isLogged').then(data => {
-      browser.storage.local.get('userAccount').then(async user => {
-        if (user.userAccount && user.hasOwnProperty('userAccount')) {
-          try {
-            user.userAccount.encryptedPrivateKey = JSON.parse(user.userAccount.encryptedPrivateKey);
-          } catch (e) {
-            user.userAccount.encryptedPrivateKey = JSON.stringify(user.userAccount.encryptedPrivateKey);
-          }
+    browser.storage.local.get('userAccount').then(async user => {
+      if (user.userAccount && user.hasOwnProperty('userAccount')) {
+        const address = await store.dispatch('generateWallet', { seed: user.userAccount.privateKey });
+        if (address) {
           store.commit('UPDATE_ACCOUNT', user.userAccount);
-          const address = await store.dispatch('generateWallet', { seed: user.userAccount.privateKey });
-          if (address) {
-            browser.storage.local.get('subaccounts').then(subaccounts => {
-              const sub = [];
-              if (
-                !subaccounts.hasOwnProperty('subaccounts') ||
-                subaccounts.subaccounts == '' ||
-                (typeof subaccounts.subaccounts === 'object' && !subaccounts.subaccounts.find(f => f.publicKey == user.userAccount.publicKey))
-              ) {
-                sub.push({
-                  name: typeof subaccounts.subaccounts !== 'undefined' ? subaccounts.subaccounts.name : 'Main Account',
-                  publicKey: user.userAccount.publicKey,
-                  root: true,
-                  balance: 0,
-                });
-              }
-              if (subaccounts.hasOwnProperty('subaccounts') && subaccounts.subaccounts.length > 0 && subaccounts.subaccounts != '') {
-                subaccounts.subaccounts.forEach(su => {
-                  sub.push({ ...su });
-                });
-              }
-              store.dispatch('setSubAccounts', sub);
-              store.commit('SET_ACTIVE_ACCOUNT', { publicKey: address, index: 0 });
-            });
+          browser.storage.local.get('subaccounts').then(subaccounts => {
+            const sub = [];
+            if (
+              !subaccounts.hasOwnProperty('subaccounts') ||
+              subaccounts.subaccounts == '' ||
+              (typeof subaccounts.subaccounts === 'object' && !subaccounts.subaccounts.find(f => f.publicKey == user.userAccount.publicKey))
+            ) {
+              sub.push({
+                name: typeof subaccounts.subaccounts !== 'undefined' ? subaccounts.subaccounts.name : 'Main Account',
+                publicKey: user.userAccount.publicKey,
+                root: true,
+                balance: 0,
+              });
+            }
+            if (subaccounts.hasOwnProperty('subaccounts') && subaccounts.subaccounts.length > 0 && subaccounts.subaccounts != '') {
+              subaccounts.subaccounts.forEach(su => {
+                sub.push({ ...su });
+              });
+            }
+            store.dispatch('setSubAccounts', sub);
+            store.commit('SET_ACTIVE_ACCOUNT', { publicKey: address, index: 0 });
+          });
 
-            store.commit('SWITCH_LOGGED_IN', true);
-            this.redirectAfterLogin(cb);
+          store.commit('SWITCH_LOGGED_IN', true);
+          this.redirectAfterLogin(cb);
 
-            store.commit('SET_MAIN_LOADING', false);
+          store.commit('SET_MAIN_LOADING', false);
+        } else {
+          store.commit('SET_MAIN_LOADING', false);
+          cb();
+        }
+      } else {
+        browser.storage.local.get('confirmSeed').then(seed => {
+          store.commit('SET_MAIN_LOADING', false);
+          if (seed.hasOwnProperty('confirmSeed') && seed.confirmSeed == false) {
+            cb('/seed');
           } else {
-            store.commit('SET_MAIN_LOADING', false);
             cb();
           }
-        } else {
-          browser.storage.local.get('confirmSeed').then(seed => {
-            store.commit('SET_MAIN_LOADING', false);
-            if (seed.hasOwnProperty('confirmSeed') && seed.confirmSeed == false) {
-              cb('/seed');
-            } else {
-              cb();
-            }
-          });
-        }
-      });
+        });
+      }
     });
   },
   async initSdk(cb) {
