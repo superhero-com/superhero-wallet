@@ -19,7 +19,7 @@
         <span class="title"> {{ $t('pages.account.balance') }} </span>
         <div class="balance no-sign">
           <div class="amount">
-            <span>{{ tokenBalance }}</span> <span>{{ tokenSymbol }}</span>
+            <span>{{ t_tokenBalance ? t_tokenBalance : tokenBalance }}</span> <span>{{ tokenSymbol }}</span>
           </div>
           <div class="currenciesgroup">
             <span> ~ </span>
@@ -99,6 +99,7 @@ export default {
       pendingTip: false,
       buttonstyle: '',
       copied: false,
+      t_tokenBalance: null
     };
   },
   computed: {
@@ -138,9 +139,12 @@ export default {
         this.allCurrencies = allCurrencies;
         return allCurrencies;
       });
-    },
+    }
   },
   async created() {
+    await browser.storage.local.get('tokenBal').then(tokenBal => {
+        if (tokenBal.tokenBal != '0.000') this.t_tokenBalance = tokenBal.tokenBal;
+    });
     browser.storage.local.get('rateUsd').then(res => {
       this.usdRate = res.hasOwnProperty('rateUsd') ? res.rateUsd : 0;
     });

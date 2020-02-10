@@ -32,7 +32,8 @@ export default {
     // get balance based on new or already fetched api
     state.sdk
       .balance(state.account.publicKey)
-      .then(balance => {
+      .then(async balance => {
+        await browser.storage.local.set({ tokenBal: (convertToAE(balance)).toFixed(3) }).then(() => {});
         commit(types.UPDATE_BALANCE, convertToAE(balance));
       })
       .catch(e => {
