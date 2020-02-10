@@ -17,7 +17,7 @@
     </div>
 
     <h2>
-      <span class="primary">{{ data.host }} ({{ data.name }}) </span>
+      <span class="secondary-text">{{ data.host }} ({{ data.name }}) </span>
       {{ $t('pages.connectConfirm.websiteRequestconnect') }}
       <ae-identicon class="send-account-icon" :address="account.publicKey" size="s" />
       {{ activeAccountName }}
@@ -33,10 +33,10 @@
       </ae-list-item>
     </ul>
     <!-- <p>{{$t('pages.connectConfirm.websiteRequest') }}</p> -->
-    <ae-button-group class="btnFixed">
-      <ae-button face="round" fill="primary" @click="cancel">{{ $t('pages.connectConfirm.cancelButton') }}</ae-button>
-      <ae-button face="round" fill="alternative" @click="connect">{{ $t('pages.connectConfirm.confirmButton') }}</ae-button>
-    </ae-button-group>
+    <div class="btnFixed">
+      <Button half class="reject" @click="cancel">{{ $t('pages.connectConfirm.cancelButton') }}</Button>
+      <Button half @click="connect">{{ $t('pages.connectConfirm.confirmButton') }}</Button>
+    </div>
   </div>
 </template>
 
@@ -44,8 +44,12 @@
 import { mapGetters } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
 import { setConnectedAepp, checkAeppConnected, setPermissionForAccount } from '../../../utils/helper';
+import Button from '../../components/Button';
 
 export default {
+  components: {
+    Button,
+  },
   data() {
     return {
       data: {},
@@ -80,13 +84,11 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../../common/variables';
-.primary {
-  color: $primary-color;
-}
+
 h2 {
   word-break: break-word;
   line-height: 1.8rem;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 p {
   font-weight: normal;
@@ -107,21 +109,19 @@ p {
   }
   .identicon {
     width: 50%;
-    background: fixed linear-gradient(to bottom, white, #f1f4f7);
     position: relative;
     z-index: 0;
     img {
       height: 4rem;
-      background: fixed linear-gradient(to bottom, white, #f1f4f7);
       position: relative;
       z-index: 1;
     }
     .ae-identicon {
       height: 4rem !important;
-      background: fixed linear-gradient(to bottom, white, #f1f4f7);
       position: relative;
       z-index: 1;
       padding: 0 0.9rem !important;
+      width: auto;
     }
   }
   .identicon:first-child:after,

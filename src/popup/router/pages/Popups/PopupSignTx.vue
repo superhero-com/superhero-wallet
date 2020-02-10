@@ -1,7 +1,7 @@
 <template>
   <div class="popup">
     <ae-list class="spendTxDetailsList">
-      <ae-list-item fill="neutral" class="flex-justify-between whiteBg noBorder">
+      <ae-list-item fill="neutral" class="flex-justify-between noBorder">
         <div class="flex flex-align-center accountFrom">
           <ae-identicon :address="account.publicKey" />
           <span class="spendAccountAddr">{{ activeAccountName }}</span>
@@ -27,7 +27,7 @@
         <div class="balance balanceSpend no-sign" v-if="!isNameTx">{{ toAe(amount) }} {{ token }}</div>
         <!-- <div class="fiat-rate" v-if="!txObject.token && !isNameTx">${{convertCurrency(usdRate,amount)}}</div> -->
       </ae-list-item>
-      <ae-list-item v-if="txObject.payload" fill="neutral" class="flex-justify-between whiteBg flex-align-center flex-direction-column flex-align-start">
+      <ae-list-item v-if="txObject.payload" fill="neutral" class="flex-justify-between flex-align-center flex-direction-column flex-align-start">
         <div class="tx-label ">
           {{ $t('pages.signTransaction.payload') }}
         </div>
@@ -36,7 +36,7 @@
         </div>
       </ae-list-item>
 
-      <ae-list-item v-if="txType == 'nameClaimTx' || txType == 'nameUpdateTx'" fill="neutral" class="flex-justify-between whiteBg  flex-align-center ">
+      <ae-list-item v-if="txType == 'nameClaimTx' || txType == 'nameUpdateTx'" fill="neutral" class="flex-justify-between  flex-align-center ">
         <div class="tx-label">
           {{ $t('pages.signTransaction.name') }}
         </div>
@@ -44,7 +44,7 @@
           <strong>{{ txObject.name }}</strong>
         </div>
       </ae-list-item>
-      <ae-list-item v-if="txType == 'nameClaimTx'" fill="neutral" class="flex-justify-between whiteBg flex-align-center ">
+      <ae-list-item v-if="txType == 'nameClaimTx'" fill="neutral" class="flex-justify-between flex-align-center ">
         <div class="tx-label ">
           {{ $t('pages.signTransaction.nameSalt') }}
         </div>
@@ -52,7 +52,7 @@
           <strong>{{ txObject.preclaim.salt }}</strong>
         </div>
       </ae-list-item>
-      <ae-list-item v-if="txType == 'nameUpdateTx'" fill="neutral" class="flex-justify-between whiteBg  flex-align-center flex-direction-column">
+      <ae-list-item v-if="txType == 'nameUpdateTx'" fill="neutral" class="flex-justify-between  flex-align-center flex-direction-column">
         <div class="tx-label extend text-left">
           {{ $t('pages.signTransaction.nameId') }}
         </div>
@@ -60,7 +60,7 @@
           <strong>{{ txObject.claim.id }}</strong>
         </div>
       </ae-list-item>
-      <ae-list-item fill="neutral" class="flex-justify-between whiteBg flex-direction-column flex-align-center " v-if="alertMsg == ''">
+      <ae-list-item fill="neutral" class="flex-justify-between flex-direction-column flex-align-center " v-if="alertMsg == ''">
         <div class="flex extend flex-justify-between ">
           <div class="tx-label">{{ $t('pages.signTransaction.fee') }}</div>
           <div class="text-right">
@@ -70,14 +70,14 @@
         </div>
       </ae-list-item>
 
-      <ae-list-item fill="neutral" class="flex-justify-between whiteBg" v-if="alertMsg == '' && !isNameTx">
+      <ae-list-item fill="neutral" class="flex-justify-between" v-if="alertMsg == '' && !isNameTx">
         <div class="tx-label">{{ $t('pages.signTransaction.total') }}</div>
         <div class="text-right">
           <div class="balance balanceBig balanceTotalSpend no-sign">{{ totalSpend }} {{ token }}</div>
           <!-- <div class="fiat-rate" v-if="!txObject.token">${{ convertCurrency(usdRate,totalSpend) }}</div> -->
         </div>
       </ae-list-item>
-      <ae-list-item v-if="txType == 'contractCreateTx'" fill="neutral" class="flex-justify-between whiteBg flex-align-center flex-direction-column flex-align-start">
+      <ae-list-item v-if="txType == 'contractCreateTx'" fill="neutral" class="flex-justify-between flex-align-center flex-direction-column flex-align-start">
         <div class="tx-label ">
           {{ $t('pages.signTransaction.compiledCode') }}
         </div>
@@ -85,7 +85,7 @@
           <strong>{{ txObject.code }}</strong>
         </div>
       </ae-list-item>
-      <ae-list-item v-if="txType == 'contractCreateTx'" fill="neutral" class="flex-justify-between whiteBg flex-align-center flex-direction-column flex-align-start">
+      <ae-list-item v-if="txType == 'contractCreateTx'" fill="neutral" class="flex-justify-between flex-align-center flex-direction-column flex-align-start">
         <div class="tx-label ">
           {{ $t('pages.signTransaction.callData') }}
         </div>
@@ -99,10 +99,10 @@
         {{ alertMsg }}
       </div>
     </Alert>
-    <ae-button-group class="btnFixed">
-      <ae-button face="round" fill="primary" @click="cancelTransaction" class="reject">{{ $t('pages.signTransaction.reject') }}</ae-button>
-      <ae-button face="round" fill="alternative" @click="signTransaction">{{ $t('pages.signTransaction.confirm') }}</ae-button>
-    </ae-button-group>
+    <div class="btnFixed">
+      <Button half @click="cancelTransaction" class="reject">{{ $t('pages.signTransaction.reject') }}</Button>
+      <Button half @click="signTransaction">{{ $t('pages.signTransaction.confirm') }}</Button>
+    </div>
     <Loader size="big" :loading="loading" :type="loaderType" :content="loaderContent"></Loader>
   </div>
 </template>
@@ -111,8 +111,12 @@
 import { mapGetters } from 'vuex';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { convertToAE, convertAmountToCurrency } from '../../../utils/helper';
+import Button from '../../components/Button';
 
 export default {
+  components: {
+    Button,
+  },
   data() {
     return {
       props: {},
@@ -209,7 +213,7 @@ export default {
 @import '../../../../common/variables';
 .balanceSpend {
   font-size: 2rem;
-  color: #001833;
+  color: $white-color;
 }
 .spendTxDetailsList .ae-list-item {
   padding: 1rem;
@@ -242,9 +246,6 @@ export default {
     content: '';
   }
 }
-.whiteBg {
-  background: #fff;
-}
 .spendAccountAddr {
   padding: 0 0.5rem !important;
   font-weight: bold !important;
@@ -268,12 +269,6 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.btnFixed {
-  background: #fff;
-}
-.btnFixed button {
-  width: 50%;
-}
 .confirm.disabled {
   opacity: 0.5;
   cursor: unset;
@@ -294,5 +289,8 @@ export default {
 }
 .tx-label {
   margin-top: 0.4rem;
+}
+.ae-identicon {
+  width: auto;
 }
 </style>

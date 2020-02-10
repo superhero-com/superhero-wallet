@@ -52,4 +52,8 @@ export default {
   width: 48% !important;
   margin: 0 !important;
 }
+.primary-button.reject {
+  background: $secondary-color !important;
+  color: #fff !important;
+}
 </style>
