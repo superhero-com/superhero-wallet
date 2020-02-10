@@ -151,7 +151,7 @@ export default {
       'tokenRegistry',
     ]),
     txType() {
-      return this.unpackedTx.txType;
+      return this.unpackedTx ? this.unpackedTx.txType : null;
     },
     isAddressShow() {
       if (this.txType == 'contractCreateTx' || this.txType == 'namePreClaimTx' || this.txType == 'nameClaimTx' || this.txType == 'nameUpdateTx') {
