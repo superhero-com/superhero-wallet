@@ -441,7 +441,6 @@ export default {
 
             const fee = calculateFee(TX_TYPES[this.data.type], this.txParams);
             this.txFee = fee;
-            console.log(this.txFee);
             this.selectedFee = this.fee.toFixed(7);
             if (this.alertMsg == '') {
               this.signDisabled = false;

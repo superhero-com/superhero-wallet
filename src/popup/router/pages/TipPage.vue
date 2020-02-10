@@ -123,10 +123,19 @@ export default {
     },
     async confirmTip(domain, amount, note) {
       try {
+        let pendings = [];
         this.loading = true;
         const res = await this.tipping.call('tip', [domain, note], { amount, waitMined: false });
         if (res.hash) {
-          browser.storage.local.set({ pendingTip: { hash: res.hash, amount: this.finalAmount, domain, time: new Date().toLocaleTimeString() } }).then(() => {});
+          await browser.storage.local.get('pendingTip').then(async allPendingsTip => {
+            if (allPendingsTip.hasOwnProperty('pendingTip')) {
+              allPendingsTip.pendingTip.forEach(element => {
+                pendings.push(element)
+              });
+            }
+            pendings.push({ hash: res.hash, amount: this.finalAmount, domain, time: new Date().toLocaleTimeString() })
+            await browser.storage.local.set({ pendingTip: pendings }).then(() => {});
+          });
           this.loading = false;
           this.$store.commit('SET_AEPP_POPUP', false);
           return this.$router.push({

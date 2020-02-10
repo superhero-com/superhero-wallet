@@ -1,6 +1,62 @@
 <template>
-  <div class="popup">
-    <h3 class="">
+  <div>
+    <div v-if="step == 1">
+      <AccountInfo />
+      <BalanceInfo />
+      <div class="popup withdraw step1">
+        <p class="primary-title text-left mb-8 f-16">
+          {{ $t('pages.tipPage.heading') }}
+          <span
+            class="secondary-text"
+          >{{ $t('pages.appVUE.aeid') }}</span>
+          {{ $t('pages.tipPage.to') }}
+        </p>
+        <div class="d-flex">
+          <Textarea v-model="form.address" placeholder="ak.. / name.test" size="h-50"></Textarea>
+          <div class="scan" @click="scan">
+            <QrIcon />
+            <small>Scan QR</small>
+          </div>
+        </div>
+        <AmountSend @changeAmount="val => (form.amount = val)" :value="form.amount" />
+        <div class="button-group">
+          <Button @click="navigateAccount">Cancel</Button>
+          <Button @click="step = 2" :disabled="!form.address || !form.amount">Review</Button>
+        </div>
+      </div>
+    </div>
+    <div v-if="step == 2">
+      <div class="popup withdraw step2">
+        <p>
+          <AlertExclamination />Review Transaction
+        </p>
+        <p>Please check the information carefully!</p>
+        <div class="info-group">
+          <label class="info-label">Sending address</label>
+          <span class="info-span">{{ account.publicKey }}</span>
+        </div>
+        <div class="info-group">
+          <label class="info-label">Receiving address</label>
+          <span class="info-span">{{ form.address }}</span>
+        </div>
+        <div class="info-group">
+          <label>Amount</label>
+          <div class="text-center">
+            <span class="amount">{{ toFixedAmount }} {{ tokenSymbol }}</span>
+            <span class="currencyamount">
+              ~
+              <span>{{ amountConvert }} {{ (current.currency).toUpperCase() }}</span>
+            </span>
+          </div>
+        </div>
+        <Button @click="step = 1">Edit Transaction Details</Button>
+        <div class="button-group">
+          <Button @click="navigateAccount">Cancel</Button>
+          <Button @click="send">{{ $t('pages.send.send') }}</Button>
+        </div>
+      </div>
+    </div>
+    <!-- <h3 class="">
       {{ $t('pages.send.heading') }}
       <ae-identicon class="send-account-icon" :address="account.publicKey" size="s" />
       {{ activeAccountName }}
@@ -30,7 +86,8 @@
     <div class="result" v-if="tx.status">
       <p>{{ $t('pages.send.success') }}</p>
       <a :href="tx.url">{{ $t('pages.send.seeTransactionExplorer') }}</a>
-    </div>
+    </div>-->
+
     <Loader size="big" :loading="loading" type="transparent"></Loader>
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div>
@@ -44,15 +101,24 @@ import { generateSignRequestUrl } from '../../utils/airGap';
 import { contractEncodeCall, checkAddress, chekAensName } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
+import AccountInfo from '../components/AccountInfo';
+import BalanceInfo from '../components/BalanceInfo';
+import QrIcon from '../../../icons/qr-code.svg';
+import AlertExclamination from '../../../icons/alert-exclamation.svg';
 
 export default {
   name: 'Send',
   components: {
     AmountSend,
     Textarea,
+    AccountInfo,
+    BalanceInfo,
+    QrIcon,
+    AlertExclamination,
   },
   data() {
     return {
+      step: 1,
       ae_token: browser.runtime.getURL('../../../icons/ae.png'),
       form: {
         address: '',
@@ -69,6 +135,7 @@ export default {
         min: 0,
         max: 0,
       },
+      not_correct: false,
     };
   },
   props: ['address'],
@@ -93,6 +160,13 @@ export default {
       'popup',
       'activeAccountName',
     ]),
+    amountConvert() {
+      console.log('curr => ', this.current);
+      return (this.form.amount * this.current.currencyRate).toFixed(3);
+    },
+    toFixedAmount() {
+      return parseFloat((this.form.amount)).toFixed(3);
+    },
     maxValue() {
       const calculatedMaxValue = this.balance - this.maxFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -109,14 +183,6 @@ export default {
     },
     activeToken() {
       return this.current.token;
-    },
-    myTokens() {
-      return this.tokens.filter((t, index) => {
-        if (t.parent == this.account.publicKey || t.symbol == 'æid') {
-          t.key = index;
-          return t;
-        }
-      });
     },
   },
   created() {
@@ -264,6 +330,71 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../../common/variables';
+.d-flex {
+  display: flex;
+}
+.withdraw.step1 {
+  textarea {
+    width: 250px;
+    min-height: 60px !important;
+    margin: 0 20px 0px 0px;
+    font-size: 11px;
+  }
+  small {
+    color: $accent-color;
+    display: block;
+    width: 100%;
+    padding-top: 5px;
+    font-size: 12px;
+  }
+}
+.withdraw.step2 {
+  p {
+    display: flex;
+    justify-content: center;
+    line-height: 2rem;
+  }
+  p:not(:first-of-type) {
+    color: $text-color;
+  }
+  p > svg {
+    margin-right: 10px;
+  }
+  .info-group {
+    text-align: left;
+    display: block;
+    margin: 20px 0px;
+    .info-label {
+      display: block;
+      padding: 10px 0;
+    }
+    .info-span {
+      color: $accent-color;
+      font-size: 11px;
+      display: inline-block;
+      width: 300px;
+      white-space: nowrap;
+      overflow: hidden !important;
+      text-overflow: ellipsis;
+    }
+    .amount {
+      font-size: 26px;
+      color: $secondary-color;
+    }
+    .currencyamount {
+      font-size: 18px;
+      display: block;
+      span {
+        font-size: 18px;
+      }
+    }
+  }
+  .text-center {
+    text-align: center;
+  }
+}
+
 .sendContent > div:not(.sendAmount):not(.address) {
   margin-bottom: 10px;
 }
@@ -341,5 +472,12 @@ export default {
   transform: translateY(5px);
   -ms-transform: translateY(5px);
   -webkit-transform: translateY(5px);
+}
+.button-group {
+  display: flex;
+  button {
+    margin: 5px;
+    width: 50% !important;
+  }
 }
 </style>

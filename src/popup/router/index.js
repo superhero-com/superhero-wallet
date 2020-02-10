@@ -51,7 +51,7 @@ const router = new VueRouter({
 
 let isFirstTransition = true;
 const lastRouteKey = 'lsroute';
-const noRedirectUrls = ['/popup-sign-tx', '/connect', '/connect-confirm', '/sign-transaction/:type?', '/sign-transaction', '/ask-accounts', '/success-tip'];
+const noRedirectUrls = ['/popup-sign-tx', '/connect', '/connect-confirm', '/sign-transaction/:type?', '/sign-transaction', '/ask-accounts', '/success-tip', '/qrCodeReader'];
 
 router.beforeEach((to, from, next) => {
   const lastRouteName = localStorage.getItem(lastRouteKey);
