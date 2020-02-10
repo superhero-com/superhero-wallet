@@ -26,6 +26,7 @@
     <preference name="SplashScreen" value="screen" />
     <preference name="ShowSplashScreenSpinner" value="false" />
     <preference name="StatusBarBackgroundColor" value="#21202a" />
+    <preference name="BackgroundColor" value="0xff16161d" />
     <feature name="SplashScreen">
         <param name="onload" value="true" />
     </feature>

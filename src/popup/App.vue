@@ -218,3 +218,12 @@ export default {
 @import '../common/base';
 @import '../common/extension';
 </style>
+
+<style lang="scss" scoped>
+.ae-main {
+  .coronaTitle,
+  .ae-header {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+</style>
