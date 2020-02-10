@@ -10,7 +10,7 @@
         {{ $t('pages.tipPage.headingSending') }}
         <span class="secondary-text">{{ finalAmount }} {{ $t('pages.appVUE.aeid') }} </span>
         {{ $t('pages.tipPage.to') }}
-        ({{ getCurrencyAmount }} {{ getCurrency }}) to
+        ({{ getCurrencyAmount }} {{ currentCurrency }}) to
       </p>
       <a class="link-sm text-left block">{{ tipUrl }}</a>
       <AmountSend :amountError="amountError" @changeAmount="val => (finalAmount = val)" v-if="!confirmMode" :value="finalAmount" />
@@ -65,7 +65,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['balance', 'tokenSymbol', 'tokenBalance', 'popup', 'tipping', 'current', 'balanceCurrency', 'sdk', 'account', 'network']),
+    ...mapGetters(['balance', 'tokenSymbol', 'tokenBalance', 'popup', 'tipping', 'current', 'balanceCurrency', 'sdk', 'account', 'network', 'currentCurrency']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;

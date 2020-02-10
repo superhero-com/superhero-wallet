@@ -9,7 +9,7 @@
       <ae-list-item fill="neutral" class="list-item-transaction">
         <div class="holder">
           <span class="amount">
-            {{ pendingTipo.amount }} æid <span style="color: #BCBCC4;">( {{ pendingTipo.amountUSD }} {{ this.current.currency.toUpperCase() }} )</span>
+            {{ pendingTipo.amount }} æid <span style="color: #BCBCC4;">( {{ pendingTipo.amountCurrency }} {{ currentCurrency }} )</span>
           </span>
           <span class="status">{{ $t('pages.recentTransactions.pendingStatus') }}</span>
           <span class="time">{{ pendingTipo.time }}</span>
@@ -50,13 +50,13 @@ export default {
   data() {
     return {
       polling: null,
-      loading: false,
+      loading: true,
       newTip: false,
       pendingTipo: {
         amount: 0,
         domain: '',
         time: '',
-        amountUSD: 0,
+        amountCurrency: 0,
       },
     };
   },
@@ -64,7 +64,7 @@ export default {
     this.pollData();
   },
   computed: {
-    ...mapGetters(['transactions', 'account', 'sdk', 'current']),
+    ...mapGetters(['transactions', 'account', 'sdk', 'current', 'currentCurrency']),
   },
   allTransactions() {
     this.$router.push('/transactions');
@@ -82,7 +82,7 @@ export default {
             this.pendingTipo.amount = parseFloat(res.pendingTip.amount).toFixed(3);
             this.pendingTipo.domain = res.pendingTip.domain;
             this.pendingTipo.time = res.pendingTip.time;
-            this.pendingTipo.amountUSD = parseFloat(this.current.currencyRate ? this.pendingTipo.amount * this.current.currencyRate : this.pendingTipo.amount).toFixed(3);
+            this.pendingTipo.amountCurrency = parseFloat(this.current.currencyRate ? this.pendingTipo.amount * this.current.currencyRate : this.pendingTipo.amount).toFixed(3);
           }
           const mined = await this.sdk.poll(res.pendingTip.hash);
           let transaction_ready = false;

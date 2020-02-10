@@ -107,19 +107,11 @@ export default {
     store.commit('SWITCH_LOGGED_IN', false);
     cb();
   },
-  getKeyPair() {
+  async getKeyPair() {
     const { activeAccount } = store.getters;
     const { account } = store.getters;
-    return new Promise((resolve, reject) => {
-      postMessage(store.getters.background, { type: 'getKeypair', payload: { activeAccount, account } }).then(async ({ res }) => {
-        if (typeof res.error !== 'undefined') {
-          resolve({ error: true });
-        } else {
-          res = parseFromStorage(res);
-          resolve(res);
-        }
-      });
-    });
+    const { res } = await postMessage({ type: 'getKeypair', payload: { activeAccount, account } });
+    return res.error ? { error: true } : parseFromStorage(res);
   },
   async initContractInstances() {
     store.commit('SET_NODE_STATUS', 'connected');
@@ -135,7 +127,7 @@ export default {
     }
   },
   redirectAfterLogin(cb) {
-    if (process.env.RUNNING_IN_POPUP) {
+    if (window.RUNNING_IN_POPUP) {
       store.commit('SET_AEPP_POPUP', true);
       if (window.hasOwnProperty('name') && window.name.includes('popup')) {
         if (window.props.type == 'connectConfirm') {

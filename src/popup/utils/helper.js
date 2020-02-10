@@ -5,8 +5,6 @@ import axios from 'axios';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import Node from '@aeternity/aepp-sdk/es/node';
 import { MAGNITUDE_EXA, MAGNITUDE_GIGA, MAGNITUDE_PICO } from './constants';
-import { postMessage } from './connection';
-import { getHdWalletAccount } from './hdWallet';
 
 const shuffleArray = array => {
   let currentIndex = array.length;
@@ -219,37 +217,6 @@ const swag = async (network, current) => {
   })({ swag });
 };
 
-const initializeSDK = (ctx, { network, current, account, wallet, activeAccount = 0, background }, backgr = false) => {
-  if (!backgr) {
-    ctx.hideConnectError();
-  }
-  return new Promise(async (resolve, reject) => {
-    if (!backgr) {
-      postMessage(background, { type: 'getKeypair', payload: { activeAccount, account } }).then(async ({ res }) => {
-        if (typeof res.error !== 'undefined') {
-          resolve({ error: true });
-        } else {
-          let sdk = null;
-          try {
-            res = parseFromStorage(res);
-            sdk = await createSDKObject(ctx, { network, current, account, wallet, activeAccount, background, res }, backgr);
-            sdk.middleware = (await swag(network, current)).api; // uncomment this
-            resolve(sdk); // remove this from here
-          } catch (err) {
-            if (sdk) {
-              resolve(sdk);
-            } else {
-              resolve({ error: true });
-            }
-          }
-        }
-      });
-    } else {
-      const sdk = await createSDKObject(ctx, { network, current, account, activeAccount, background, res: account }, backgr);
-      resolve(sdk);
-    }
-  });
-};
 let countErr = 0;
 const createSDKObject = (ctx, { network, current, account, wallet, activeAccount = 0, background, res }, backgr) =>
   new Promise(async (resolve, reject) => {
@@ -284,37 +251,26 @@ const createSDKObject = (ctx, { network, current, account, wallet, activeAccount
       });
   });
 
-const currencyConv = async ctx => {
-  browser.storage.local.get('convertTimer').then(async result => {
-    const time = new Date().getTime();
-    if (
-      !result.hasOwnProperty('convertTimer') ||
-      (result.hasOwnProperty('convertTimer') && (result.convertTimer == '' || result.convertTimer == 'undefined' || result.convertTimer <= time))
-    ) {
-      const fetched = await fetchData(
-        'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
-        'get',
-        ''
-      );
-      browser.storage.local.set({ rateUsd: fetched.aeternity.usd }).then(() => {});
-      browser.storage.local.set({ rateEur: fetched.aeternity.eur }).then(() => {});
-      browser.storage.local.set({ convertTimer: time + 3600000 }).then(() => {});
-      browser.storage.local.set({ allCurrencies: JSON.stringify(fetched.aeternity) }).then(() => {});
-    }
+const getCurrencies = async () => {
+  const result = await browser.storage.local.get('convertTimer');
+  const time = new Date().getTime();
+  if (
+    !result.hasOwnProperty('convertTimer') ||
+    (result.hasOwnProperty('convertTimer') && (result.convertTimer == '' || result.convertTimer == 'undefined' || result.convertTimer <= time))
+  ) {
+    const fetched = await fetchData(
+      'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
+      'get',
+      ''
+    );
+    await browser.storage.local.set({ convertTimer: time + 3600000 });
+    await browser.storage.local.set({ allCurrencies: JSON.stringify(fetched.aeternity) });
 
-    browser.storage.local.get('rateUsd').then(resusd => {
-      ctx.usdRate = resusd.rateUsd;
-      ctx.toUsd = resusd.rateUsd * ctx.balance;
-    });
-    browser.storage.local.get('rateEur').then(reseur => {
-      ctx.eurRate = reseur.rateEur;
-      ctx.toEur = reseur.rateEur * ctx.balance;
-    });
-    browser.storage.local.get('allCurrencies').then(resall => {
-      const ar = JSON.parse(resall.allCurrencies);
-      ctx.allCurrencies = ar;
-    });
-  });
+    return fetched.aeternity;
+  }
+
+  const { allCurrencies } = await browser.storage.local.get('allCurrencies');
+  return JSON.parse(allCurrencies);
 };
 
 const convertAmountToCurrency = (currency, amount) => currency * amount;
@@ -598,9 +554,8 @@ export {
   setConnectedAepp,
   checkAeppConnected,
   redirectAfterLogin,
-  initializeSDK,
   swag,
-  currencyConv,
+  getCurrencies,
   convertAmountToCurrency,
   contractEncodeCall,
   contractDecodeData,

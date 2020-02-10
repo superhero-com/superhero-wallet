@@ -18,7 +18,11 @@
     "start": "serve",
     "start:ci": "serve",
     "start:tests": "cypress open",
-    "gen:cordova-resources": "cordova-res"
+    "gen:cordova-resources": "cordova-res",
+    "build:Testnet":"cross-env NETWORK=Testnet npm run build",
+    "build:Mainnet":"cross-env NETWORK=Mainnet npm run build",
+    "watch:dev:Testnet": "cross-env NETWORK=Testnet npm run watch:dev",
+    "watch:dev:Mainnet": "cross-env NETWORK=Mainnet npm run watch:dev"
   },
   "dependencies": {
     "@aeternity/aepp-components": "git+https://github.com/aeternity/aepp-components.git#develop",

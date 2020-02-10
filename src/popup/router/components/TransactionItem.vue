@@ -3,7 +3,7 @@
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
       <div class="holder">
         <span class="amount"
-          >{{ txAmount }} æid <span style="color: #BCBCC4;">( {{ txAmountToUSD }} {{ this.current.currency.toUpperCase() }} )</span></span
+          >{{ txAmount }} æid <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span
         >
         <span class="status">{{ txType }}</span>
         <span class="time">{{ transactionData.time ? new Date(transactionData.time).toLocaleTimeString() : '-- -- --' }}</span>
@@ -30,17 +30,13 @@ export default {
   data() {
     return {
       status: '',
-      rateUsd: null,
-      tipUrl: '',
+      tipUrl: null,
       checkSdk: null,
       tipTx: true,
       tipAmount: 0,
     };
   },
   async created() {
-    await browser.storage.local.get('rateUsd').then(res => {
-      this.rateUsd = res.rateUsd;
-    });
     this.checkSdk = setInterval(() => {
       if (this.sdk !== null) {
         this.getEventData();
@@ -101,12 +97,11 @@ export default {
       // const { fee } = this.transactionData.tx;
       return convertToAE(amount).toFixed(3);
     },
-    txAmountToUSD() {
+    txAmountToCurrency() {
       const amount = this.transactionData.tx.amount ? this.transactionData.tx.amount : 0;
       const { fee } = this.transactionData.tx;
       const txamount = (amount + fee) / 10 ** 18;
-      const rate = this.current.currencyRate ? this.current.currencyRate : this.rateUsd;
-      return (txamount * rate).toFixed(3);
+      return (txamount * this.current.currencyRate).toFixed(3);
     },
   },
   methods: {
@@ -126,7 +121,9 @@ export default {
       }
     },
     visitTipUrl() {
-      browser.tabs.create({ url: this.tipUrl, active: true });
+      if (this.tipUrl) {
+        browser.tabs.create({ url: this.tipUrl, active: true });
+      }
     },
     seeTx() {
       browser.tabs.create({ url: 'https://coronanews.org/#/', active: true });

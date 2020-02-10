@@ -1,46 +1,43 @@
 import uuid from 'uuid';
-import store from '../../store';
+import '../../lib/initPolyfills';
 
-global.browser = process.env.IS_EXTENSION
-  ? require('webextension-polyfill')
-  : {
-      runtime: {
-        getURL: url => url,
-      },
-      storage: {
-        local: {
-          get(key) {
-            const keys = Array.isArray(key) ? key : [key];
-            return Promise.resolve(keys.reduce((p, n) => ({ ...p, [n]: localStorage.getItem(n) }), {}));
-          },
-          set(object) {
-            Object.entries(object).forEach(([key, value]) => localStorage.setItem(key, value));
-            return Promise.resolve();
-          },
-          remove(key) {
-            const keys = Array.isArray(key) ? key : [key];
-            keys.forEach(k => localStorage.removeItem(k));
-            return Promise.resolve();
-          },
-        },
-      },
-    };
+let background;
+const pendingRequests = {};
 
-export const start = browser => browser.runtime.connect({ name: 'popup' });
-
-export const postMessage = async (connection, { type, payload }) => {
-  const id = uuid();
-  if (!connection) {
-    connection = browser.runtime.connect({ name: 'popup' });
-    store.commit('SET_BACKGROUND', connection);
+const messageHandler = message => {
+  if (!pendingRequests[message.uuid]) {
+    throw new Error(`Can't find request with id: ${message.uuid}`);
   }
-  connection.postMessage({ type, payload, uuid: id });
-  return new Promise((resolve, reject) => {
-    connection.onMessage.addListener(msg => {
-      if (msg.uuid == id) {
-        resolve(msg);
-      }
+  pendingRequests[message.uuid].resolve(message);
+};
+
+const ensureBackgroundInitialised = async () => {
+  if (background) return;
+  if (process.env.IS_EXTENSION) {
+    background = await browser.runtime.connect({ name: 'popup' });
+    background.onMessage.addListener(messageHandler);
+  } else {
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = '../background.html';
+    document.body.appendChild(iframe);
+    await new Promise(resolve => iframe.addEventListener('load', resolve));
+    window.addEventListener('message', event => {
+      if (event.source !== iframe.contentWindow) return;
+      messageHandler(event.data);
     });
+    background = {
+      postMessage: message => iframe.contentWindow.postMessage(message, window.location.origin),
+    };
+  }
+};
+
+export const postMessage = async ({ type, payload }) => {
+  await ensureBackgroundInitialised();
+  const id = uuid();
+  background.postMessage({ type, payload, uuid: id });
+  return new Promise((resolve, reject) => {
+    pendingRequests[id] = { resolve, reject };
   });
 };
 

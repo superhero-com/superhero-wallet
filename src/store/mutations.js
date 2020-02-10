@@ -88,9 +88,6 @@ export default {
   [types.SET_ENCRYPTED_WALLET](state, payload) {
     state.encryptedWallet = payload;
   },
-  [types.SET_BACKGROUND](state, payload) {
-    state.background = payload;
-  },
   [types.SET_TX_ADVANCED_MODE](state, payload) {
     state.txAdvancedMode = payload;
   },
@@ -109,5 +106,8 @@ export default {
   [types.SET_CURRENCY](state, { currency, currencyRate }) {
     state.current.currency = currency;
     state.current.currencyRate = currencyRate;
+  },
+  [types.SET_CURRENCIES](state, payload) {
+    state.currencies = payload;
   },
 };
