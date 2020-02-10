@@ -52,8 +52,7 @@ if (process.env.IS_EXTENSION) {
         setPhishingUrl(urls);
         break;
     }
-
-    if (typeof msg.from !== 'undefined' && typeof msg.type !== 'undefined' && msg.from == 'content' && msg.type == 'readDom' && msg.data.length) {
+    if (typeof msg.from !== 'undefined' && typeof msg.type !== 'undefined' && msg.from == 'content' && msg.type == 'readDom' && (msg.data.address || msg.data.chainName )) {
       const tabs = await browser.tabs.query({ active: true, currentWindow: true });
       tabs.forEach(({ title, url }) => {
         if (sender.url == url) {
@@ -80,8 +79,6 @@ if (process.env.IS_EXTENSION) {
       const connectionType = detectConnectionType(port);
       if (connectionType == CONNECTION_TYPES.EXTENSION) {
         port.onMessage.addListener(({ type, payload, uuid }, sender) => {
-          console.log(type);
-          console.log(payload);
           if (HDWALLET_METHODS.includes(type)) {
             controller[type](payload).then(res => {
               port.postMessage({ uuid, res });

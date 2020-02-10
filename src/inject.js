@@ -70,14 +70,16 @@ function sendToBackground(method, params) {
 
 window.addEventListener('load', () => {
   const address = document.all[0].outerHTML.match(/(ak\_[A-Za-z0-9]{49,50})/g);
-  // const chainName
-  // regex [A-Za-z0-9]+\.chain
-  if (address) {
-    const sendInterval = setInterval(() => {
+  const chainName = document.all[0].outerHTML.match(/[A-Za-z0-9]+\.chain/g)
+  if (address || chainName) {
+    setTimeout(() => {
       browser.runtime.sendMessage({
         from: 'content',
         type: 'readDom',
-        data: address,
+        data: {
+          address,
+          chainName
+        },
       });
     }, 5000);
   }
