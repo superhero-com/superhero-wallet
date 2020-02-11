@@ -31,7 +31,7 @@
       ],
       "persistent": true
     },
-    "content_security_policy": "script-src 'self' 'unsafe-eval' 'strict-dynamic' blob: moz-extension: blob:moz-extension://59d3146e-7607-4906-92b6-b79271f4016b ; object-src 'self' 'strict-dynamic' blob: moz-extension: blob:moz-extension://59d3146e-7607-4906-92b6-b79271f4016b; worker-src blob: moz-extension: blob:moz-extension://59d3146e-7607-4906-92b6-b79271f4016b",
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "content_scripts": [{
       "run_at": "document_start",
       "all_frames":false,
