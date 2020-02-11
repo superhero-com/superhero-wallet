@@ -29,19 +29,37 @@
         </ae-button>
       </li>
       <li id="settings" class="have-subDropdown" :class="dropdown.settings ? 'show' : ''">
-        <ae-button @click="$emit('toggleMenu', $event, '.have-subDropdown')">
-          {{ $t('pages.appVUE.settings') }}
+        <ae-button class="flex flex-justify-between" @click="$emit('toggleMenu', $event, '.have-subDropdown')">
+          <span>{{ $t('pages.appVUE.settings') }}</span>
           <ArrowDown class="arrow-down arrow" v-if="dropdown.settings" />
           <ArrowRight class="arrow-right arrow" v-else />
         </ae-button>
         <ul class="sub-dropdown">
-          <li>1</li>
-          <li>2</li>
+          <li>
+            <ae-button @click="general">
+              {{ $t('pages.appVUE.general') }}
+            </ae-button>
+          </li>
+          <li>
+            <ae-button @click="security">
+              {{ $t('pages.appVUE.security') }}
+            </ae-button>
+          </li>
+          <li>
+            <ae-button @click="seedPhrase">
+              {{ $t('pages.appVUE.seedPhrase') }}
+            </ae-button>
+          </li>
+          <li>
+            <ae-button @click="language">
+              {{ $t('pages.appVUE.language') }}
+            </ae-button>
+          </li>
         </ul>
       </li>
       <li>
-        <ae-button @click="settings">
-          {{ $t('pages.appVUE.settings') }}
+        <ae-button @click="advanced">
+          {{ $t('pages.appVUE.advanced') }}
         </ae-button>
       </li>
       <!-- <li>
@@ -63,7 +81,7 @@
 import { mapGetters } from 'vuex';
 import Close from '../../../icons/close.svg';
 import ArrowRight from '../../../icons/arrow-right.svg';
-import ArrowDown from '../../../icons/arrow-down.svg';
+import ArrowDown from '../../../icons/arrow-down-white.svg';
 
 export default {
   props: {
@@ -106,6 +124,17 @@ export default {
       this.$emit('closeMenu');
       this.$router.push('/send');
     },
+    general() {},
+    security() {},
+    seedPhrase() {
+      this.$emit('closeMenu');
+      this.$router.push('/securitySettings');
+    },
+    language() {
+      this.$emit('closeMenu');
+      this.$router.push('/generalSettings');
+    },
+    advanced() {},
   },
 };
 </script>
@@ -184,7 +213,8 @@ export default {
   overflow-y: scroll;
 }
 .dropdown ul.sub-dropdown .ae-button {
-  padding: 0 2rem;
+  padding: 6px 1rem;
+  padding-left: 25px;
 }
 .dropdown ul li .ae-button {
   font-size: 15px;
@@ -197,6 +227,11 @@ export default {
   justify-content: unset;
   border-radius: 0 !important;
   height: auto;
+  display: flex;
+  justify-content: space-between;
+}
+.dropdown ul li .ae-button span {
+  color: $accent-color;
 }
 .dropdown ul li .ae-button .arrow {
   margin-top: 3px;
@@ -212,6 +247,9 @@ export default {
 .sub-dropdown li:not(.backBtn) > .ae-button:hover,
 #network li:hover {
   background-color: $accent-color;
+  color: $white-color;
+}
+.dropdown li > .ae-button:hover span {
   color: $white-color;
 }
 .dropdown li > .ae-button {
@@ -306,5 +344,19 @@ export default {
 #account.dropdown ul li .ae-button > * {
   display: inline-block;
   vertical-align: middle;
+}
+header .have-subDropdown ul {
+  background: $submenu-bg;
+  border-radius: 0 !important;
+}
+header .have-subDropdown.show > button {
+  background: $accent-color;
+  color: $white-color !important;
+}
+header .have-subDropdown.show > button span {
+  color: $white-color !important;
+}
+.dropdown ul.sub-dropdown li {
+  color: $accent-color;
 }
 </style>

@@ -25,7 +25,12 @@
             "activity": "Activity",
             "dashboard": "Dashboard",
             "aeid": "æid",
-            "coronaWallet": "Corona Wallet"
+            "coronaWallet": "Corona Wallet",
+            "general": "General",
+            "security": "Security",
+            "seedPhrase": "Seed Phrase",
+            "language": "Language",
+            "advanced": "Advanced"
         },
         "aboutSettings": {
             "heading": "About",

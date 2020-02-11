@@ -62,8 +62,6 @@ export default {
   },
   methods: {
     toggleDropdown(event, parentClass) {
-      console.log(event);
-      console.log(parentClass);
       if (!this.aeppPopup) {
         if (typeof parentClass === 'undefined') {
           parentClass = '.dropdown';
