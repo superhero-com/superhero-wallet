@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { contractCallStatic, getActiveAccount } from './background-utils';
+import { uniq } from 'lodash-es';
+import { contractCallStatic, getActiveAccount, getAddressFromChainName } from './background-utils';
 import { networks, DEFAULT_NETWORK, TIPPING_CONTRACT } from '../popup/utils/constants';
 import { convertToAE } from '../popup/utils/helper';
 
@@ -18,7 +19,7 @@ export default {
     return false;
   },
 
-  async checkUrlHasBalance(url, addresses) {
+  async checkUrlHasBalance(url, { address, chainName }) {
     try {
       const { account } = await getActiveAccount();
       if (account && account.publicKey) {
@@ -29,7 +30,15 @@ export default {
           params: [url],
           source: TIPPING_CONTRACT,
         };
-        if (this.checkAddressMatch(account.publicKey, addresses)) {
+        let addresses = [address];
+        if (Array.isArray(address)) {
+          addresses = address;
+        }
+        if (chainName) {
+          const pub_keys = await getAddressFromChainName(uniq(chainName));
+          addresses = [...addresses, ...pub_keys];
+        }
+        if (this.checkAddressMatch(account.publicKey, uniq(addresses))) {
           contractCallStatic({ tx, callType: 'static' })
             .then(res => {
               const amount = convertToAE(res.decodedResult);

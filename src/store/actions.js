@@ -1,13 +1,8 @@
-import Ae from '@aeternity/aepp-sdk/es/ae/universal';
-import { uniqBy, head, flatten, merge, uniqWith, isEqual } from 'lodash-es';
-import { getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
+import { uniqBy, flatten } from 'lodash-es';
 import * as types from './mutation-types';
 import * as popupMessages from '../popup/utils/popup-messages';
-import { convertToAE, stringifyForStorage, parseFromStorage, contractCall, checkContractAbiVersion } from '../popup/utils/helper';
-import { FUNGIBLE_TOKEN_CONTRACT } from '../popup/utils/constants';
+import { convertToAE, stringifyForStorage, parseFromStorage } from '../popup/utils/helper';
 import router from '../popup/router/index';
-import { derivePasswordKey, genRandomBuffer } from '../popup/utils/hdWallet';
-import AES from '../popup/utils/aes';
 import { postMessage } from '../popup/utils/connection';
 
 export default {
@@ -28,31 +23,12 @@ export default {
       resolve();
     });
   },
-  updateBalance({ commit, state }) {
-    // get balance based on new or already fetched api
-    state.sdk
-      .balance(state.account.publicKey)
-      .then(async balance => {
-        await browser.storage.local.set({ tokenBal: convertToAE(balance).toFixed(3) }).then(() => {});
-        commit(types.UPDATE_BALANCE, convertToAE(balance));
-      })
-      .catch(e => {
-        commit(types.UPDATE_BALANCE, convertToAE(0));
-      });
+  async updateBalance({ commit, state }) {
+    const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
+    await browser.storage.local.set({ tokenBal: convertToAE(balance).toFixed(3) });
+    commit(types.UPDATE_BALANCE, convertToAE(balance));
   },
-  updateBalanceSubaccounts({ commit, state }) {
-    state.subaccounts.forEach((sub, index) => {
-      state.sdk
-        .balance(sub.publicKey)
-        .then(balance => {
-          commit(types.UPDATE_SUBACCOUNTS_BALANCE, { account: index, balance: convertToAE(balance) });
-        })
-        .catch(e => {
-          commit(types.UPDATE_SUBACCOUNTS_BALANCE, { account: index, balance: convertToAE(0) });
-        });
-    });
-  },
-  popupAlert({ commit, state }, payload) {
+  popupAlert({ commit }, payload) {
     switch (payload.name) {
       case 'spend':
         switch (payload.type) {
@@ -172,7 +148,7 @@ export default {
         break;
     }
   },
-  getTransactionsByPublicKey({ commit, state }, payload) {
+  getTransactionsByPublicKey({ state }, payload) {
     const { middlewareUrl } = state.network[state.current.network];
     let limit = '';
     let page = '';
@@ -190,24 +166,16 @@ export default {
     return fetch(`${middlewareUrl}/middleware/transactions/account/${account}${limit}${page}${param}`, {
       method: 'GET',
       mode: 'cors',
-    })
-      .then(res => res.json())
-      .catch(err => err);
+    }).then(res => res.json());
   },
   updateLatestTransactions({ commit }, payload) {
     commit(types.UPDATE_LATEST_TRANSACTIONS, payload);
   },
-  updateAllTransactions({ commit, state }, payload) {
+  updateAllTransactions({ commit }, payload) {
     commit(types.UPDATE_ALL_TRANSACTIONS, payload);
   },
-  setAccountName({ commit, state }, payload) {
+  setAccountName({ commit }, payload) {
     commit(types.SET_ACCOUNT_NAME, payload);
-  },
-  setUserNetwork({ commit }, payload) {
-    commit(types.SET_USERNETWORK, payload);
-  },
-  setUserNetworks({ commit }, payload) {
-    commit(types.SET_USERNETWORKS, payload);
   },
   initSdk({ commit }, payload) {
     commit(types.INIT_SDK, payload);
@@ -263,49 +231,12 @@ export default {
     );
     commit(types.SET_NAMES, { names: Array.prototype.concat.apply([], res) });
   },
-  removePendingName({ commit, state }, { hash }) {
-    return new Promise((resolve, reject) => {
-      let pending = state.pendingNames;
-      pending = pending.filter(p => p.hash != hash);
-      browser.storage.local.set({ pendingNames: { list: pending } }).then(() => {
-        commit(types.SET_PENDING_NAMES, { names: pending });
-        setTimeout(() => {
-          resolve();
-        }, 1500);
-      });
-    });
-  },
-
-  async unlockHdWallet({ state, dispatch, commit }, { accountPassword, wallet }) {
-    return new Promise(async (resolve, reject) => {
-      browser.storage.local.get('encryptedWallet').then(async ({ encryptedWallet }) => {
-        if (!encryptedWallet) {
-          commit('SET_WALLET', wallet);
-          await dispatch('encryptHdWallet', accountPassword);
-          encryptedWallet = parseFromStorage(await dispatch('getEncryptedWallet'));
-        } else {
-          encryptedWallet = parseFromStorage(encryptedWallet);
-        }
-
-        commit('SET_ENCRYPTED_WALLET', encryptedWallet);
-        try {
-          const passwordDerivedKey = await dispatch('deriveAndCheckPasswordKey', accountPassword);
-          const aes = new AES(passwordDerivedKey);
-
-          const wallet = {
-            privateKey: new Uint8Array(await aes.decrypt(encryptedWallet.privateKey)),
-            chainCode: new Uint8Array(await aes.decrypt(encryptedWallet.chainCode)),
-          };
-          commit('SET_WALLET', wallet);
-
-          browser.storage.local.set({ wallet: stringifyForStorage(wallet) }).then(() => {
-            resolve();
-          });
-        } catch (err) {
-          reject(err);
-        }
-      });
-    });
+  async removePendingName({ commit, state }, { hash }) {
+    let pending = state.pendingNames;
+    pending = pending.filter(p => p.hash !== hash);
+    await browser.storage.local.set({ pendingNames: { list: pending } });
+    commit(types.SET_PENDING_NAMES, { names: pending });
+    await new Promise(resolve => setTimeout(resolve, 1500));
   },
 
   async unlockWallet(context, payload) {
@@ -329,49 +260,8 @@ export default {
     return (await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })).res.address;
   },
 
-  async getEncryptedWallet() {
-    return new Promise((resolve, reject) => {
-      browser.storage.local.get('encryptedWallet').then(async ({ encryptedWallet }) => {
-        resolve(encryptedWallet);
-      });
-    });
-  },
-  async encryptHdWallet({ commit, state: { wallet } }, password) {
-    return new Promise(async (resolve, reject) => {
-      const salt = genRandomBuffer(16);
-      const passwordDerivedKey = await derivePasswordKey(password, salt);
-      const aes = new AES(passwordDerivedKey);
-      const encryptedWallet = {
-        privateKey: await aes.encrypt(wallet.privateKey),
-        chainCode: await aes.encrypt(wallet.chainCode),
-        mac: await aes.encrypt(new Uint8Array(2)),
-        salt,
-      };
-
-      commit('SET_ENCRYPTED_WALLET', encryptedWallet);
-
-      browser.storage.local.set({ encryptedWallet: stringifyForStorage(encryptedWallet) }).then(() => {
-        browser.storage.local.set({ wallet: stringifyForStorage(wallet) }).then(() => {
-          resolve();
-        });
-      });
-    });
-  },
-
-  async deriveAndCheckPasswordKey({ state: { encryptedWallet } }, password) {
-    const passwordDerivedKey = await derivePasswordKey(password, encryptedWallet.salt);
-    const aes = new AES(passwordDerivedKey);
-    await aes.decrypt(encryptedWallet.privateKey);
-    await aes.decrypt(encryptedWallet.chainCode);
-    const mac = new Uint8Array(await aes.decrypt(encryptedWallet.mac));
-    if (mac.reduce((p, n) => p || n !== 0, false)) throw new Error('Wrong password');
-    return passwordDerivedKey;
-  },
-
-  async setLogin({ state, commit, dispatch }, { keypair }) {
-    await browser.storage.local.set({ userAccount: keypair });
-    await browser.storage.local.set({ isLogged: true });
-    await browser.storage.local.set({ termsAgreed: true });
+  async setLogin({ commit, dispatch }, { keypair }) {
+    await browser.storage.local.set({ userAccount: keypair, isLogged: true, termsAgreed: true });
 
     const sub = [];
     sub.push({
@@ -380,8 +270,7 @@ export default {
       balance: 0,
       root: true,
     });
-    await browser.storage.local.set({ subaccounts: sub });
-    await browser.storage.local.set({ activeAccount: 0 });
+    await browser.storage.local.set({ subaccounts: sub, activeAccount: 0 });
     commit('SET_ACTIVE_ACCOUNT', { publicKey: keypair.publicKey, index: 0 });
     await dispatch('setSubAccounts', sub);
     commit('UPDATE_ACCOUNT', keypair);

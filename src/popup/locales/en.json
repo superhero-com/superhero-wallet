@@ -17,13 +17,20 @@
             "settings": "Settings",
             "logout": "Logout",
             "profile": "Profile",
-            "advanced": "Advanced",
             "help": "Help",
             "topUp": "Top Up",
             "withdraw": "Withdraw",
             "myTransactions": "My transactions",
+            "activity": "Activity",
             "dashboard": "Dashboard",
-            "aeid": "æid"
+            "aeid": "æid",
+            "coronaWallet": "Corona Wallet",
+            "general": "General",
+            "security": "Security",
+            "seedPhrase": "Seed Phrase",
+            "language": "Language",
+            "advanced": "Advanced",
+            "versions": "Version & Updates"
         },
         "aboutSettings": {
             "heading": "About",

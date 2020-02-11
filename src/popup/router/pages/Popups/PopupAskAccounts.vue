@@ -23,23 +23,24 @@ import { mapGetters } from 'vuex';
 export default {
   data() {
     return {
-      data: window.props,
+      data: {},
       imageError: false,
     };
   },
+  created() {
+    const waitProps = setInterval(() => {
+      if (window.props) {
+        this.data = window.props;
+        clearInterval(waitProps);
+      }
+    }, 500);
+  },
   methods: {
     cancel() {
-      if (Object.keys(this.data.action).length) {
-        this.data.action.deny();
-      }
-
-      this.data.reject();
+      this.data.reject(false);
     },
     async connect() {
-      if (Object.keys(this.data.action).length) {
-        this.data.action.accept();
-      }
-      this.data.resolve();
+      this.data.resolve(true);
     },
   },
   computed: {

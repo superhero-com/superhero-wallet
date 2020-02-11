@@ -1,7 +1,7 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
 import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
-import { setContractInstance, contractCall, parseFromStorage } from '../popup/utils/helper';
+import { setContractInstance, contractCall } from '../popup/utils/helper';
 
 let sdk;
 let controller;
@@ -50,6 +50,20 @@ export const getSDK = async (keypair = {}) => {
   }
 
   return sdk;
+};
+
+export const getAddressFromChainName = async names => {
+  const sdk = await getSDK();
+  return Promise.all(
+    names.map(async n => {
+      try {
+        return (await sdk.api.getNameEntryByName(n)).pointers[0].id;
+      } catch (e) {
+        console.log(e);
+        return null;
+      }
+    })
+  );
 };
 
 export const contractCallStatic = async ({ tx, callType }) =>
