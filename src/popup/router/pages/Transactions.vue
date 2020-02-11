@@ -1,5 +1,8 @@
 <template>
   <div class="popup">
+    <AccountInfo />
+    <BalanceInfo />
+    <TransactionFilters />
     <ae-list class="allTransactions">
       <div v-for="(trans, index) in groupedTransactionsByDate" v-bind:key="index">
         <div class="date">{{ index }}</div>
@@ -24,8 +27,16 @@
 import { mapGetters } from 'vuex';
 import { groupBy, orderBy } from 'lodash-es';
 import { clearInterval, clearTimeout, setInterval } from 'timers';
+import AccountInfo from '../components/AccountInfo';
+import BalanceInfo from '../components/BalanceInfo';
+import TransactionFilters from '../components/TransactionFilters';
 
 export default {
+  components: {
+    AccountInfo,
+    BalanceInfo,
+    TransactionFilters
+  },
   data() {
     return {
       transactionsType: 'all',
@@ -86,6 +97,7 @@ export default {
     },
   },
   created() {
+    console.log('tuk');
     this.getTotalTransactions();
     this.getTransactions('load');
     this.pollData();

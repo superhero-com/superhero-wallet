@@ -2,15 +2,13 @@
   <div>
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
       <div class="holder">
-        <span class="amount"
-          >{{ txAmount }} æid <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span
-        >
+        <span class="amount">{{ txAmount }} æid <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span>
         <span class="status">{{ txType }}</span>
         <span class="time">{{ transactionData.time ? new Date(transactionData.time).toLocaleTimeString() : '-- -- --' }}</span>
       </div>
       <div class="holder">
         <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
-        <span class="seeTransaction" :class="!tipTx ? 'invisible' : ''" @click="seeTx"><Eye /></span>
+        <span class="seeTransaction" @click="seeTx"><Eye /></span>
       </div>
     </ae-list-item>
   </div>
@@ -32,7 +30,6 @@ export default {
       status: '',
       tipUrl: null,
       checkSdk: null,
-      tipTx: true,
       tipAmount: 0,
     };
   },
@@ -117,7 +114,6 @@ export default {
         this.tipUrl = decode(log[0].data).toString();
         this.tipAmount = convertToAE(log[0].topics[2]);
       } catch (e) {
-        this.tipTx = false;
       }
     },
     visitTipUrl() {
@@ -170,9 +166,6 @@ export default {
     }
     .status {
       color: $text-color !important;
-    }
-    .invisible {
-      visibility: hidden;
     }
   }
 }
