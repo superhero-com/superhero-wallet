@@ -120,6 +120,9 @@ export default {
           case 'reveal_seed_phrase_impossible':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.REVEAL_SEED_IMPOSSIBLE });
             break;
+          case 'error_qrcode':
+            commit(types.SHOW_POPUP, { show: true, ...popupMessages.ERROR_QRCODE, msg: payload.msg, data: payload.data });
+            break;
           default:
             break;
         }
@@ -276,5 +279,38 @@ export default {
     commit('UPDATE_ACCOUNT', keypair);
     commit('SWITCH_LOGGED_IN', true);
     router.push('/account');
+  },
+  async getPendingTxs({ state: { current }, commit }) {
+    const { pendingTxs } = await browser.storage.local.get('pendingTxs');
+    let txs = [];
+    if (pendingTxs && pendingTxs.length) {
+      txs = pendingTxs.map(el => {
+        if (el.domain) el.domain = el.domain;
+        el.amount = parseFloat(el.amount).toFixed(3);
+        el.time = el.time;
+        el.amountCurrency = parseFloat(current.currencyRate ? el.amount * current.currencyRate : el.amount).toFixed(3);
+        return el;
+      });
+    }
+    commit('SET_PENDING_TXS', txs);
+  },
+  async checkPendingTxMined({ commit, state: { sdk } }) {
+    const { pendingTxs } = await browser.storage.local.get('pendingTxs');
+    if (pendingTxs && pendingTxs.length) {
+      pendingTxs.forEach(async ({ hash, type, amount, domain }) => {
+        const mined = await sdk.poll(hash);
+        if (mined) {
+          const pending = pendingTxs.filter(p => p.hash !== hash);
+          browser.storage.local.set({ pendingTxs: pending });
+          commit('SET_PENDING_TXS', pending);
+          if (type === 'tip') {
+            return router.push({ name: 'success-tip', params: { amount, domain } });
+          }
+          if (type === 'spend') {
+            return router.push({ name: 'send', params: { redirectstep: 3, successtx: mined } });
+          }
+        }
+      });
+    }
   },
 };

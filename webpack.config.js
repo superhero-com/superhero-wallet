@@ -174,11 +174,6 @@ module.exports = [
         filename: 'phishing/phishing.html',
         chunks: ['phishing/phishing'],
       }),
-      new HtmlWebpackPlugin({
-        template: path.join(__dirname, 'src', 'popup', 'CameraRequestPermission.html'),
-        filename: 'popup/CameraRequestPermission.html',
-        chunks: ['popup/cameraPermission'],
-      }),
     ],
   },
   {

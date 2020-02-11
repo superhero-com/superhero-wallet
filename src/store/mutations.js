@@ -34,6 +34,9 @@ export default {
       state.transactions.all.push(...payload.transactions);
     }
   },
+  [types.SET_PENDING_TXS](state, payload) {
+    state.transactions.pending = payload;
+  },
   [types.RESET_TRANSACTIONS](state) {
     state.transactions.all = [];
   },

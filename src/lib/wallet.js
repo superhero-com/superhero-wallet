@@ -33,8 +33,8 @@ export default {
                 sub.push({ ...su });
               });
             }
-            const { tokenBal } = await browser.storage.local.get('tokenBal')
-            if(tokenBal && tokenBal != '0.000') store.commit('UPDATE_BALANCE',parseFloat(tokenBal))
+            const { tokenBal } = await browser.storage.local.get('tokenBal');
+            if (tokenBal && tokenBal != '0.000') store.commit('UPDATE_BALANCE', parseFloat(tokenBal));
             store.dispatch('setSubAccounts', sub);
             store.commit('SET_ACTIVE_ACCOUNT', { publicKey: address, index: 0 });
           });

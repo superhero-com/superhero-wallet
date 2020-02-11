@@ -33,6 +33,7 @@ export default new Vuex.Store({
       latest: [],
       all: [],
       new: [],
+      pending: [],
     },
     sdk: null,
     aeppPopup: false,

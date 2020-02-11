@@ -80,5 +80,7 @@ export default {
 <style lang="scss">
 .ae-header header {
   padding: 0 10px;
+  max-width: 380px !important;
+  margin: 0 auto;
 }
 </style>

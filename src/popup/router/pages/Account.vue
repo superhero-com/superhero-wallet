@@ -1,6 +1,6 @@
 <template>
   <div style="background:#16161D;" class="height-100">
-    <div class="popup account-popup">
+    <div class="popup popup-no-padding">
       <div v-show="backup_seed_notif" class="backup_seed_notif">
         <span
           >{{ $t('pages.account.youNeedTo') }} <a @click="navigateToBackUpSeed" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a>
@@ -59,7 +59,6 @@ export default {
       pollingTransaction: null,
       timer: '',
       backup_seed_notif: false,
-      pendingTip: false,
       buttonstyle: '',
       IS_EXTENSION: process.env.IS_EXTENSION,
     };
@@ -114,9 +113,6 @@ export default {
 <style lang="scss" scoped>
 @import '../../../common/variables';
 
-.account-popup {
-  padding: 4px 0;
-}
 .accountAddress {
   color: #fff;
 }

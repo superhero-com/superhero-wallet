@@ -1,5 +1,4 @@
 import { setInterval } from 'timers';
-import stampit from '@stamp/it';
 import { generateHdWallet, getHdWalletAccount } from './popup/utils/hdWallet';
 import { stringifyForStorage, parseFromStorage } from './popup/utils/helper';
 import { addressGenerator } from './popup/utils/address-generator';
