@@ -3,7 +3,7 @@
     <span class="title">{{ $t('pages.account.balance') }}</span>
     <div class="balance no-sign">
       <div class="amount">
-        <span>{{ t_tokenBalance ? t_tokenBalance : tokenBalance }}</span>
+        <span>{{ tokenBalance }}</span>
         <span>{{ tokenSymbol }}</span>
       </div>
       <div class="currenciesgroup">
@@ -41,7 +41,6 @@ export default {
   data() {
     return {
       accbalanceBG: browser.runtime.getURL('../../../icons/acc_balance.png'),
-      t_tokenBalance: null,
       dropdown: {
         currencies: false,
       },
@@ -49,11 +48,6 @@ export default {
   },
   computed: {
     ...mapGetters(['tokenSymbol', 'tokenBalance', 'balanceCurrency', 'current', 'currentCurrency', 'currencies']),
-  },
-  async created() {
-    await browser.storage.local.get('tokenBal').then(tokenBal => {
-      if (tokenBal.tokenBal != '0.000') this.t_tokenBalance = tokenBal.tokenBal;
-    });
   },
   methods: {
     async toggleDropdown(event, parentClass) {

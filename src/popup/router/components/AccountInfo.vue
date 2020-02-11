@@ -27,11 +27,6 @@ export default {
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
   },
-  async created() {
-    await browser.storage.local.get('tokenBal').then(tokenBal => {
-      if (tokenBal.tokenBal != '0.000') this.t_tokenBalance = tokenBal.tokenBal;
-    });
-  },
   methods: {
     copy() {
       this.copied = true;
