@@ -15,8 +15,8 @@ export default class WalletController {
         browser.windows.getAll({}).then(wins => {
           if (wins.length === 0) {
             this.lockWallet();
-            sessionStorage.removeItem("phishing_urls")
-            browser.storage.local.remove('activeAccount')
+            sessionStorage.removeItem('phishing_urls');
+            browser.storage.local.remove('activeAccount');
           }
         });
         if (!this.wallet) {
@@ -74,5 +74,3 @@ export default class WalletController {
     return typeof this.wallet !== 'undefined' && this.wallet != null;
   }
 }
-
-
