@@ -22,8 +22,10 @@
             "topUp": "Top Up",
             "withdraw": "Withdraw",
             "myTransactions": "My transactions",
+            "activity": "Activity",
             "dashboard": "Dashboard",
-            "aeid": "æid"
+            "aeid": "æid",
+            "coronaWallet": "Corona Wallet"
         },
         "aboutSettings": {
             "heading": "About",

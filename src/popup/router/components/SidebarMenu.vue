@@ -2,7 +2,7 @@
   <div v-if="open" class="menu-holder">
     <ul class="dropdown-holder">
       <li class="menu-close">
-        <ae-icon name="close" @click.native="closeMenu" />
+        <Close class="icon" @click="closeMenu"/>
       </li>
       <li class="account-icon-holder">
         <div class="flex flex-align-center flex-justify-between">
@@ -25,13 +25,20 @@
       </li>
       <li>
         <ae-button @click="transactions">
-          {{ $t('pages.appVUE.myTransactions') }}
+          {{ $t('pages.appVUE.activity') }}
         </ae-button>
       </li>
-      <li>
-        <ae-button @click="profile">
-          {{ $t('pages.appVUE.profile') }}
-        </ae-button>
+      <li id="settings" class="have-subDropdown" :class="dropdown.settings ? 'show' : ''">
+          <ae-button @click="$emit('toggleMenu', $event,'.have-subDropdown' )">
+              {{ $t('pages.appVUE.settings') }}
+              <ArrowDown class="arrow-down arrow" v-if="dropdown.settings"/>
+              <ArrowRight class="arrow-right arrow" v-else />
+           
+          </ae-button>
+          <ul class="sub-dropdown">
+            <li>1</li>
+            <li>2</li>
+          </ul>
       </li>
       <li>
         <ae-button @click="settings">
@@ -55,10 +62,19 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import Close from '../../../icons/close.svg';
+import ArrowRight from '../../../icons/arrow-right.svg';
+import ArrowDown from '../../../icons/arrow-down.svg';
 
 export default {
   props: {
     open: Boolean,
+    dropdown: Object
+  },
+  components: {
+    Close,
+    ArrowRight,
+    ArrowDown
   },
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
@@ -101,22 +117,22 @@ export default {
   padding: 10px;
   text-align: right;
   border: none !important;
-  .ae-icon {
-    font-size: 40px;
+  .icon {
     color: $white-color;
     font-weight: normal;
     cursor: pointer;
   }
 }
 .account-icon {
-  width: auto !important;
-  height: 2.2rem !important;
+  width: 38px !important;
+  height: 38px !important;
   border: 0.125rem solid transparent;
   -webkit-box-shadow: 0 0 0 2px $secondary-color;
   box-shadow: 0 0 0 2px $secondary-color;
 }
 .account-icon-holder {
   padding: 0.5rem 1rem;
+  padding-bottom:20px;
 }
 .dropdown {
   display: inline-block;
@@ -138,6 +154,7 @@ export default {
   min-width: 120px;
   position: fixed;
   top: 0;
+  right:0;
   padding: 0;
   background-color: #20202a;
   z-index: 12;
@@ -171,23 +188,22 @@ export default {
   padding: 0 2rem;
 }
 .dropdown ul li .ae-button {
-  font-size: 14px;
+  font-size: 15px;
   width: 100%;
   color: $accent-color;
   text-align: left;
   margin: 0;
-  padding: 0 1rem;
+  padding: 8px 1rem;
   white-space: nowrap;
   justify-content: unset;
   border-radius: 0 !important;
+  height:auto;
 }
-.dropdown ul li .ae-button .ae-icon-left-more {
+.dropdown ul li .ae-button .arrow {
   margin-top: 3px;
   transition: all 0.3s;
-}
-.dropdown .have-subDropdown.show .ae-button .ae-icon-left-more {
-  transform: rotate(90deg);
-}
+  color:#fff;
+} 
 .dropdown li {
   color: #717c87;
   margin: 0;
@@ -255,6 +271,7 @@ export default {
   min-height: 1500px;
   z-index: 12;
   position: fixed;
+  right:0;
 }
 .slide-enter {
   transform: translateX(100%);
@@ -272,6 +289,7 @@ export default {
   min-height: 1500px;
   z-index: 12;
   position: fixed;
+  right:0;
 }
 
 #account .ae-dropdown-button .dropdown-button-name {
