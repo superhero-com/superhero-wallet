@@ -1,9 +1,9 @@
 <template>
   <ae-main :class="onAccount ? 'ae-main-account' : ''">
-    <Header  v-if="showNavigation" :title="title" />
+    <Header v-if="showNavigation" :title="title" />
     <hr style="margin: 0; background: #3a3a47; height: 2px; border: 0;" />
     <router-view :key="$route.fullPath"></router-view>
-    
+
     <Loader size="big" :loading="mainLoading"></Loader>
     <NodeConnectionStatus />
   </ae-main>
@@ -22,7 +22,7 @@ import Header from './router/components/Header';
 export default {
   components: {
     NodeConnectionStatus,
-    Header
+    Header,
   },
   data() {
     return {
@@ -34,19 +34,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters([
-      'account',
-      'current',
-      'network',
-      'popup',
-      'isLoggedIn',
-      'activeNetwork',
-      'balance',
-      'sdk',
-      'mainLoading',
-      'nodeConnecting',
-      'currencies',
-    ]),
+    ...mapGetters(['account', 'current', 'network', 'popup', 'isLoggedIn', 'activeNetwork', 'balance', 'sdk', 'mainLoading', 'nodeConnecting', 'currencies']),
     extensionVersion() {
       return `v.${process.env.npm_package_version}`;
     },
@@ -97,7 +85,7 @@ export default {
         }, 100);
       }
     },
-    
+
     pollData() {
       let triggerOnce = false;
       this.polling = setInterval(async () => {

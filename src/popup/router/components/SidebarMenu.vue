@@ -2,7 +2,7 @@
   <div v-if="open" class="menu-holder">
     <ul class="dropdown-holder">
       <li class="menu-close">
-        <Close class="icon" @click="closeMenu"/>
+        <Close class="icon" @click="closeMenu" />
       </li>
       <li class="account-icon-holder">
         <div class="flex flex-align-center flex-justify-between">
@@ -29,16 +29,15 @@
         </ae-button>
       </li>
       <li id="settings" class="have-subDropdown" :class="dropdown.settings ? 'show' : ''">
-          <ae-button @click="$emit('toggleMenu', $event,'.have-subDropdown' )">
-              {{ $t('pages.appVUE.settings') }}
-              <ArrowDown class="arrow-down arrow" v-if="dropdown.settings"/>
-              <ArrowRight class="arrow-right arrow" v-else />
-           
-          </ae-button>
-          <ul class="sub-dropdown">
-            <li>1</li>
-            <li>2</li>
-          </ul>
+        <ae-button @click="$emit('toggleMenu', $event, '.have-subDropdown')">
+          {{ $t('pages.appVUE.settings') }}
+          <ArrowDown class="arrow-down arrow" v-if="dropdown.settings" />
+          <ArrowRight class="arrow-right arrow" v-else />
+        </ae-button>
+        <ul class="sub-dropdown">
+          <li>1</li>
+          <li>2</li>
+        </ul>
       </li>
       <li>
         <ae-button @click="settings">
@@ -69,12 +68,12 @@ import ArrowDown from '../../../icons/arrow-down.svg';
 export default {
   props: {
     open: Boolean,
-    dropdown: Object
+    dropdown: Object,
   },
   components: {
     Close,
     ArrowRight,
-    ArrowDown
+    ArrowDown,
   },
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
@@ -132,7 +131,7 @@ export default {
 }
 .account-icon-holder {
   padding: 0.5rem 1rem;
-  padding-bottom:20px;
+  padding-bottom: 20px;
 }
 .dropdown {
   display: inline-block;
@@ -154,7 +153,7 @@ export default {
   min-width: 120px;
   position: fixed;
   top: 0;
-  right:0;
+  right: 0;
   padding: 0;
   background-color: #20202a;
   z-index: 12;
@@ -197,13 +196,13 @@ export default {
   white-space: nowrap;
   justify-content: unset;
   border-radius: 0 !important;
-  height:auto;
+  height: auto;
 }
 .dropdown ul li .ae-button .arrow {
   margin-top: 3px;
   transition: all 0.3s;
-  color:#fff;
-} 
+  color: #fff;
+}
 .dropdown li {
   color: #717c87;
   margin: 0;
@@ -271,7 +270,7 @@ export default {
   min-height: 1500px;
   z-index: 12;
   position: fixed;
-  right:0;
+  right: 0;
 }
 .slide-enter {
   transform: translateX(100%);
@@ -289,7 +288,7 @@ export default {
   min-height: 1500px;
   z-index: 12;
   position: fixed;
-  right:0;
+  right: 0;
 }
 
 #account .ae-dropdown-button .dropdown-button-name {

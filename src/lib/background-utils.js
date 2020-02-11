@@ -52,17 +52,19 @@ export const getSDK = async (keypair = {}) => {
   return sdk;
 };
 
-export const getAddressFromChainName = async (names) => {
+export const getAddressFromChainName = async names => {
   const sdk = await getSDK();
-  return Promise.all(names.map(async n => {
-    try {
-      return (await sdk.api.getNameEntryByName(n)).pointers[0].id;
-    } catch(e) {
-      console.log(e)
-      return null
-    }
-  }))
-}
+  return Promise.all(
+    names.map(async n => {
+      try {
+        return (await sdk.api.getNameEntryByName(n)).pointers[0].id;
+      } catch (e) {
+        console.log(e);
+        return null;
+      }
+    })
+  );
+};
 
 export const contractCallStatic = async ({ tx, callType }) =>
   new Promise(async (resolve, reject) => {
