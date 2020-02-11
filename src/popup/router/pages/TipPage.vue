@@ -123,17 +123,17 @@ export default {
     },
     async confirmTip(domain, amount, note) {
       try {
-        let pendings = [];
+        const pendings = [];
         this.loading = true;
         const res = await this.tipping.call('tip', [domain, note], { amount, waitMined: false });
         if (res.hash) {
           await browser.storage.local.get('pendingTip').then(async allPendingsTip => {
             if (allPendingsTip.hasOwnProperty('pendingTip')) {
               allPendingsTip.pendingTip.forEach(element => {
-                pendings.push(element)
+                pendings.push(element);
               });
             }
-            pendings.push({ hash: res.hash, amount: this.finalAmount, domain, time: new Date().toLocaleTimeString() })
+            pendings.push({ hash: res.hash, amount: this.finalAmount, domain, time: new Date().toLocaleTimeString() });
             await browser.storage.local.set({ pendingTip: pendings }).then(() => {});
           });
           this.loading = false;

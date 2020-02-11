@@ -18,10 +18,7 @@
           </div>
           <ul class="sub-dropdown">
             <li class="single-currency" v-for="(index, item) in currencies" :key="index">
-              <ae-button
-                v-on:click="switchCurrency(index, item)"
-                :class="current.currency == item ? 'current' : ''"
-              >
+              <ae-button v-on:click="switchCurrency(index, item)" :class="current.currency == item ? 'current' : ''">
                 {{ item.toUpperCase() }}
                 <i class="arrowrightCurrency"></i>
               </ae-button>

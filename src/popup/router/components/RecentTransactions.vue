@@ -81,11 +81,12 @@ export default {
               element.domain = element.domain;
               element.time = element.time;
               element.amountCurrency = parseFloat(this.current.currencyRate ? element.amount * this.current.currencyRate : element.amount).toFixed(3);
-              
-              this.pendingTipoArr.push(element)
-            });          }
-          for (var k in this.pendingTipoArr) {
-              let pendingTip = this.pendingTipoArr[k];
+
+              this.pendingTipoArr.push(element);
+            });
+          }
+          for (const k in this.pendingTipoArr) {
+            const pendingTip = this.pendingTipoArr[k];
             Object.keys(transactions).forEach(async key => {
               const mined = await this.sdk.poll(pendingTip.hash);
               let transaction_ready = false;
@@ -96,7 +97,7 @@ export default {
               }
               if (transaction_ready) {
                 const del = res.pendingTip.filter(p => p.hash != hash_ready);
-                browser.storage.local.set({ pendingTip:del });
+                browser.storage.local.set({ pendingTip: del });
                 this.newTip = false;
                 return this.$router.push({
                   name: 'success-tip',

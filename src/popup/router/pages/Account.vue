@@ -21,7 +21,6 @@
 
       <BalanceInfo />
 
-
       <div style="background: #21212A" class="height-100">
         <Button v-if="IS_EXTENSION" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
           <div class="flex flex-align-center flex-justify-content-center">
@@ -42,8 +41,8 @@ import { currencyConv } from '../../utils/helper';
 import Heart from '../../../icons/heart.svg';
 import RecentTransactions from '../components/RecentTransactions';
 import ClaimTipButton from '../components/ClaimTipButton';
-import BalanceInfo from '../components/BalanceInfo'
-import AccountInfo from '../components/AccountInfo'
+import BalanceInfo from '../components/BalanceInfo';
+import AccountInfo from '../components/AccountInfo';
 
 export default {
   name: 'Account',
@@ -52,7 +51,7 @@ export default {
     RecentTransactions,
     ClaimTipButton,
     BalanceInfo,
-    AccountInfo
+    AccountInfo,
   },
   data() {
     return {
@@ -66,13 +65,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters([
-      'account',
-      'balance',
-      'activeAccount',
-      'popup',
-      'tokenRegistry',
-    ]),
+    ...mapGetters(['account', 'balance', 'activeAccount', 'popup', 'tokenRegistry']),
     publicKey() {
       return this.account.publicKey;
     },
@@ -120,7 +113,6 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
-
 
 .account-popup {
   padding: 4px 0;

@@ -33,7 +33,7 @@ export default {
     state.sdk
       .balance(state.account.publicKey)
       .then(async balance => {
-        await browser.storage.local.set({ tokenBal: (convertToAE(balance)).toFixed(3) }).then(() => {});
+        await browser.storage.local.set({ tokenBal: convertToAE(balance).toFixed(3) }).then(() => {});
         commit(types.UPDATE_BALANCE, convertToAE(balance));
       })
       .catch(e => {

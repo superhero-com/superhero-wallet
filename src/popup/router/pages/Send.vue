@@ -6,9 +6,7 @@
       <div class="popup withdraw step1">
         <p class="primary-title text-left mb-8 f-16">
           {{ $t('pages.tipPage.heading') }}
-          <span
-            class="secondary-text"
-          >{{ $t('pages.appVUE.aeid') }}</span>
+          <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
           {{ $t('pages.tipPage.to') }}
         </p>
         <div class="d-flex">
@@ -27,9 +25,7 @@
     </div>
     <div v-if="step == 2">
       <div class="popup withdraw step2">
-        <p>
-          <AlertExclamination />{{ $t('pages.send.reviewtx') }}
-        </p>
+        <p><AlertExclamination />{{ $t('pages.send.reviewtx') }}</p>
         <p>{{ $t('pages.send.checkalert') }}</p>
         <div class="info-group">
           <label class="info-label">{{ $t('pages.send.sendingAddress') }}</label>
@@ -45,7 +41,7 @@
             <span class="amount">{{ toFixedAmount }} {{ tokenSymbol }}</span>
             <span class="currencyamount">
               ~
-              <span>{{ amountConvert }} {{ (current.currency).toUpperCase() }}</span>
+              <span>{{ amountConvert }} {{ current.currency.toUpperCase() }}</span>
             </span>
           </div>
         </div>
@@ -58,10 +54,10 @@
     </div>
     <div v-if="step == 3">
       <div class="popup withdraw step2">
+        <p><Heart /> {{ $t('pages.send.tx-success') }}</p>
         <p>
-          <Heart /> {{ $t('pages.send.tx-success') }}
+          {{ $t('pages.send.successalert') }} <span style="color:#FF4784"> {{ successTx.amount }} {{ tokenSymbol }}</span>
         </p>
-        <p>{{ $t('pages.send.successalert') }} <span style="color:#FF4784"> {{ successTx.amount }} {{tokenSymbol}}</span></p>
         <div class="info-group">
           <label class="info-label">{{ $t('pages.send.to') }}</label>
           <span class="info-span">{{ successTx.to }}</span>
@@ -105,7 +101,7 @@ export default {
     BalanceInfo,
     QrIcon,
     AlertExclamination,
-    Heart
+    Heart,
   },
   data() {
     return {
@@ -131,8 +127,8 @@ export default {
         amount: '',
         from: '',
         to: '',
-        hash: ''
-      }
+        hash: '',
+      },
     };
   },
   props: ['address', 'redirectstep', 'successtx'],
@@ -161,7 +157,7 @@ export default {
       return (this.form.amount * this.current.currencyRate).toFixed(3);
     },
     toFixedAmount() {
-      return parseFloat((this.form.amount)).toFixed(3);
+      return parseFloat(this.form.amount).toFixed(3);
     },
     maxValue() {
       const calculatedMaxValue = this.balance - this.maxFee;
@@ -184,7 +180,7 @@ export default {
   created() {
     if (this.redirectstep && this.successtx) {
       this.step = 3;
-      this.successTx.amount = ( parseFloat((this.successtx.tx.amount) / 10 ** 18) ).toFixed(3);
+      this.successTx.amount = parseFloat(this.successtx.tx.amount / 10 ** 18).toFixed(3);
       this.successTx.to = this.successtx.tx.recipientId;
       this.successTx.from = this.successtx.tx.senderId;
       this.successTx.hash = this.successtx.hash;
