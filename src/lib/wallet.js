@@ -14,7 +14,7 @@ export default {
         const address = await store.dispatch('generateWallet', { seed: user.userAccount.privateKey });
         if (address) {
           store.commit('UPDATE_ACCOUNT', user.userAccount);
-          browser.storage.local.get('subaccounts').then(subaccounts => {
+          browser.storage.local.get('subaccounts').then(async subaccounts => {
             const sub = [];
             if (
               !subaccounts.hasOwnProperty('subaccounts') ||
@@ -33,6 +33,8 @@ export default {
                 sub.push({ ...su });
               });
             }
+            const { tokenBal } = await browser.storage.local.get('tokenBal')
+            if(tokenBal && tokenBal != '0.000') store.commit('UPDATE_BALANCE',parseFloat(tokenBal))
             store.dispatch('setSubAccounts', sub);
             store.commit('SET_ACTIVE_ACCOUNT', { publicKey: address, index: 0 });
           });

@@ -16,8 +16,16 @@ export default {
   setSubAccounts({ commit }, payload) {
     commit(types.SET_SUBACCOUNTS, payload);
   },
+  switchNetwork({ commit }, payload) {
+    browser.storage.local.set({ activeNetwork: payload });
+    return new Promise((resolve, reject) => {
+      commit(types.SWITCH_NETWORK, payload);
+      resolve();
+    });
+  },
   async updateBalance({ commit, state }) {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
+    await browser.storage.local.set({ tokenBal: convertToAE(balance).toFixed(3) });
     commit(types.UPDATE_BALANCE, convertToAE(balance));
   },
   popupAlert({ commit }, payload) {

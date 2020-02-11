@@ -6,16 +6,16 @@
     </div>
 
     <div v-if="newTip && !loading">
-      <ae-list-item fill="neutral" class="list-item-transaction">
+      <ae-list-item v-for="tr in pendingTipoArr" v-bind:key="tr.id" fill="neutral" class="list-item-transaction">
         <div class="holder">
           <span class="amount">
-            {{ pendingTipo.amount }} æid <span style="color: #BCBCC4;">( {{ pendingTipo.amountCurrency }} {{ currentCurrency }} )</span>
+            {{ tr.amount }} æid <span style="color: #BCBCC4;">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
           </span>
           <span class="status">{{ $t('pages.recentTransactions.pendingStatus') }}</span>
-          <span class="time">{{ pendingTipo.time }}</span>
+          <span class="time">{{ tr.time }}</span>
         </div>
         <div class="holder">
-          <span class="url">{{ pendingTipo.domain }}</span>
+          <span class="url">{{ tr.domain }}</span>
           <span class="seeTransaction"><Eye /></span>
         </div>
       </ae-list-item>
@@ -52,12 +52,8 @@ export default {
       polling: null,
       loading: true,
       newTip: false,
-      pendingTipo: {
-        amount: 0,
-        domain: '',
-        time: '',
-        amountCurrency: 0,
-      },
+      pendingTipoArr: [],
+      hash_ready: '',
     };
   },
   created() {
@@ -75,31 +71,42 @@ export default {
       this.loading = false;
       this.$store.dispatch('updateLatestTransactions', transactions);
 
-      browser.storage.local.get('pendingTip').then(async res => {
-        if (res.hasOwnProperty('pendingTip') && res.pendingTip) {
+      await browser.storage.local.get('pendingTip').then(async res => {
+        this.pendingTipoArr = [];
+        if (res.hasOwnProperty('pendingTip') && res.pendingTip.length) {
           this.newTip = true;
           if (this.newTip) {
-            this.pendingTipo.amount = parseFloat(res.pendingTip.amount).toFixed(3);
-            this.pendingTipo.domain = res.pendingTip.domain;
-            this.pendingTipo.time = res.pendingTip.time;
-            this.pendingTipo.amountCurrency = parseFloat(this.current.currencyRate ? this.pendingTipo.amount * this.current.currencyRate : this.pendingTipo.amount).toFixed(3);
+            res.pendingTip.forEach(element => {
+              element.amount = parseFloat(element.amount).toFixed(3);
+              element.domain = element.domain;
+              element.time = element.time;
+              element.amountCurrency = parseFloat(this.current.currencyRate ? element.amount * this.current.currencyRate : element.amount).toFixed(3);
+
+              this.pendingTipoArr.push(element);
+            });
           }
-          const mined = await this.sdk.poll(res.pendingTip.hash);
-          let transaction_ready = false;
-          Object.keys(transactions).forEach(key => {
-            if (mined && transactions[key].hash == res.pendingTip.hash) {
-              transaction_ready = true;
-            }
-          });
-          if (transaction_ready) {
-            browser.storage.local.remove('pendingTip');
-            this.newTip = false;
-            return this.$router.push({
-              name: 'success-tip',
-              params: {
-                amount: res.pendingTip.amount,
-                domain: res.pendingTip.domain,
-              },
+          for (const k in this.pendingTipoArr) {
+            const pendingTip = this.pendingTipoArr[k];
+            Object.keys(transactions).forEach(async key => {
+              const mined = await this.sdk.poll(pendingTip.hash);
+              let transaction_ready = false;
+              let hash_ready = '';
+              if (mined && transactions[key].hash == pendingTip.hash) {
+                transaction_ready = true;
+                hash_ready = pendingTip.hash;
+              }
+              if (transaction_ready) {
+                const del = res.pendingTip.filter(p => p.hash != hash_ready);
+                browser.storage.local.set({ pendingTip: del });
+                this.newTip = false;
+                return this.$router.push({
+                  name: 'success-tip',
+                  params: {
+                    amount: pendingTip.amount,
+                    domain: pendingTip.domain,
+                  },
+                });
+              }
             });
           }
         }
@@ -110,7 +117,10 @@ export default {
         if (this.sdk != null) {
           this.updateTransactions();
         }
-      }, 2500);
+      }, 5000);
+    },
+    getKeyByValue(object, value) {
+      return Object.keys(object).find(key => object[key] === value);
     },
     allTransactions() {
       this.$router.push('/transactions');
