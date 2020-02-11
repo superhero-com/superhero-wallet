@@ -46,8 +46,6 @@ import { mnemonicToSeed } from '@aeternity/bip39';
 import Password from 'vue-password-strength-meter';
 import { mapGetters } from 'vuex';
 import { addressGenerator, encryptMnemonic } from '../../utils/address-generator';
-import { decrypt } from '../../utils/keystore';
-import { generateHdWallet, getHdWalletAccount } from '../../utils/hdWallet';
 import { MINPASSWORDLENGTH } from '../../utils/constants';
 import { redirectAfterLogin } from '../../utils/helper';
 

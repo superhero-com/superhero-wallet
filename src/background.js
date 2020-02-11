@@ -10,30 +10,37 @@ import TipClaimRelay from './lib/tip-claim-relay';
 import { setController } from './lib/background-utils';
 import { PopupConnections } from './lib/popup-connection';
 
-const controller = new WalletContorller();
+const controller = new WalletController();
 
 if (process.env.IS_EXTENSION) {
   setInterval(() => {
     browser.windows.getAll({}).then(wins => {
-      if (wins.length == 0) {
+      if (wins.length === 0) {
         sessionStorage.removeItem('phishing_urls');
-        browser.storage.local.remove('isLogged');
-        browser.storage.local.remove('activeAccount');
+        browser.storage.local.remove(['isLogged', 'activeAccount']);
       }
     });
   }, 5000);
 
   const notification = new Notification();
-  // rpcWallet.init(controller);
-  // setController(controller);
-  browser.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
+  rpcWallet.init(controller);
+  setController(controller);
+
+  const postPhishingData = data => {
+    browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
+      const message = { method: 'phishingCheck', data };
+      tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message));
+    });
+  };
+
+  browser.runtime.onMessage.addListener(async (msg, sender) => {
     switch (msg.method) {
-      case 'phishingCheck':
+      case 'phishingCheck': {
         const data = { ...msg, extUrl: browser.extension.getURL('./') };
         const host = extractHostName(msg.params.href);
         data.host = host;
         phishingCheckUrl(host).then(res => {
-          if (typeof res.result !== 'undefined' && res.result == 'blocked') {
+          if (res.result === 'blocked') {
             const whitelist = getPhishingUrls().filter(url => url === host);
             if (whitelist.length) {
               data.blocked = false;
@@ -46,16 +53,19 @@ if (process.env.IS_EXTENSION) {
           return postPhishingData(data);
         });
         break;
-      case 'setPhishingUrl':
+      }
+      case 'setPhishingUrl': {
         const urls = getPhishingUrls();
         urls.push(msg.params.hostname);
         setPhishingUrl(urls);
         break;
+      }
     }
-    if (typeof msg.from !== 'undefined' && typeof msg.type !== 'undefined' && msg.from == 'content' && msg.type == 'readDom' && (msg.data.address || msg.data.chainName )) {
+
+    if (msg.from === 'content' && msg.type === 'readDom' && (msg.data.address || msg.data.chainName )) {
       const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-      tabs.forEach(({ title, url }) => {
-        if (sender.url == url) {
+      tabs.forEach(({ url }) => {
+        if (sender.url === url) {
           TipClaimRelay.checkUrlHasBalance(url, msg.data);
         }
       });
@@ -80,16 +90,11 @@ if (process.env.IS_EXTENSION) {
       if (connectionType == CONNECTION_TYPES.EXTENSION) {
         port.onMessage.addListener(({ type, payload, uuid }, sender) => {
           if (HDWALLET_METHODS.includes(type)) {
-            controller[type](payload).then(res => {
-              port.postMessage({ uuid, res });
-            });
+            port.postMessage({ uuid, res: await controller[type](payload) });
           }
-          if (AEX2_METHODS.hasOwnProperty(type)) {
-            rpcWallet[type](payload);
-          }
-          if (NOTIFICATION_METHODS.hasOwnProperty(type)) {
-            notification[type](payload);
-          }
+          if (AEX2_METHODS[type]) rpcWallet[type](payload);
+
+          if (NOTIFICATION_METHODS[type]) notification[type](payload);
         });
       } else if (connectionType == CONNECTION_TYPES.POPUP) {
         const url = new URL(port.sender.url);
@@ -107,13 +112,11 @@ if (process.env.IS_EXTENSION) {
     }
   });
 } else {
-  window.addEventListener('message', event => {
+  window.addEventListener('message', async event => {
     if (event.source !== window.parent) return;
     const { type, payload, uuid } = event.data;
     if (HDWALLET_METHODS.includes(type)) {
-      controller[type](payload).then(res => {
-        window.parent.postMessage({ uuid, res }, window.location.origin);
-      });
+      window.parent.postMessage({ uuid, res: await controller[type](payload) }, window.location.origin);
     }
   });
 }
