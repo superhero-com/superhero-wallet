@@ -48,11 +48,9 @@ export const PopupConnection = stampit({
     this.aeppInfo = aeppInfo;
   },
   methods: {
-    messageHandler(msg) {
+    async messageHandler(msg) {
       if (HDWALLET_METHODS.includes(msg.type)) {
-        this.controller[msg.type](msg.payload).then(res => {
-          this.postMessage({ uuid: msg.uuid, res });
-        });
+        this.postMessage({ uuid: msg.uuid, res: await this.controller[msg.type](msg.payload) });
       } else if (msg.action && (msg.action == 'deny' || msg.action == 'accept')) {
         this.actions[msg.action]();
       }

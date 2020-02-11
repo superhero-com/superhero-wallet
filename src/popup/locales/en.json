@@ -17,7 +17,6 @@
             "settings": "Settings",
             "logout": "Logout",
             "profile": "Profile",
-            "advanced": "Advanced",
             "help": "Help",
             "topUp": "Top Up",
             "withdraw": "Withdraw",
@@ -30,7 +29,8 @@
             "security": "Security",
             "seedPhrase": "Seed Phrase",
             "language": "Language",
-            "advanced": "Advanced"
+            "advanced": "Advanced",
+            "versions": "Version & Updates"
         },
         "aboutSettings": {
             "heading": "About",
