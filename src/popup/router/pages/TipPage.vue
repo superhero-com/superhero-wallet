@@ -39,7 +39,7 @@ import { mapGetters } from 'vuex';
 import { setInterval, setTimeout, setImmediate, clearInterval } from 'timers';
 import BigNumber from 'bignumber.js';
 import { MAGNITUDE, MIN_SPEND_TX_FEE, calculateFee, TX_TYPES } from '../../utils/constants';
-import { setTxInQueue, setPendingTx } from '../../utils/helper';
+import { setPendingTx, escapeSpecialChars } from '../../utils/helper';
 import TipBackground from '../../../icons/tip-bg.svg';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
@@ -125,7 +125,7 @@ export default {
       try {
         const pendings = [];
         this.loading = true;
-        const res = await this.tipping.call('tip', [domain, note], { amount, waitMined: false });
+        const res = await this.tipping.call('tip', [domain, escapeSpecialChars(note)], { amount, waitMined: false });
         if (res.hash) {
           await setPendingTx({ hash: res.hash, amount: this.finalAmount, domain, time: new Date().toLocaleTimeString(), type: 'tip' });
           this.loading = false;

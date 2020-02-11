@@ -578,6 +578,10 @@ const setPendingTx = async tx => {
   return await browser.storage.local.set({ pendingTxs: list });
 };
 
+const escapeSpecialChars = (str) => {
+  return str.replace(/(\n|\r|[^a-zA-Z0-9])/g,'')
+}
+
 export {
   shuffleArray,
   convertToAE,
@@ -612,4 +616,5 @@ export {
   getExtensionProtocol,
   detectConnectionType,
   setPendingTx,
+  escapeSpecialChars
 };
