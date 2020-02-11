@@ -62,15 +62,14 @@
           {{ $t('pages.appVUE.advanced') }}
         </ae-button>
       </li>
-      <!-- <li>
-                    <ae-button >
-                    <ae-icon name="settings" />
-                    {{ $t('pages.appVUE.advanced') }}
-                    </ae-button>
-                </li> -->
       <li>
         <ae-button @click="about">
           {{ $t('pages.appVUE.help') }}
+        </ae-button>
+      </li>
+      <li>
+        <ae-button @click="versions">
+          {{ $t('pages.appVUE.versions') }}
         </ae-button>
       </li>
     </ul>
@@ -135,6 +134,7 @@ export default {
       this.$router.push('/generalSettings');
     },
     advanced() {},
+    versions() {},
   },
 };
 </script>
