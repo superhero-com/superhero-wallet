@@ -9,25 +9,6 @@ global.browser = require('webextension-polyfill');
 
 Vue.prototype.$browser = global.browser;
 
-const unloadHandler = () => {
-  window.props.action.deny();
-  window.reject(new Error('Rejected by user'));
-};
-
-const closingWrapper = f => (...args) => {
-  f(...args);
-  window.removeEventListener('beforeunload', unloadHandler);
-  window.close();
-  setTimeout(() => {
-    window.close();
-  }, 1000);
-};
-if (window.RUNNING_IN_POPUP) {
-  window.addEventListener('beforeunload', unloadHandler);
-  window.props.resolve = closingWrapper(window.props.resolve);
-  window.props.reject = closingWrapper(window.props.reject);
-}
-
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
