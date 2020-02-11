@@ -49,6 +49,11 @@ export default {
   padding-top: env(safe-area-inset-top);
   background-color: #21212a;
   border-bottom: 3px solid #3a3a47;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 8;
 
   .content {
     height: 50px;

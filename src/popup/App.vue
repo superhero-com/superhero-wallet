@@ -115,6 +115,9 @@ export default {
     min-height: 600px;
   }
 
+  padding-top: 50px;
+  padding-top: calc(50px + env(safe-area-inset-top));
+
   .menu-overlay {
     position: fixed;
     top: 0;
