@@ -15,32 +15,32 @@
           <Textarea v-model="form.address" placeholder="ak.. / name.test" size="h-50"></Textarea>
           <div class="scan" @click="scan">
             <QrIcon />
-            <small>Scan QR</small>
+            <small>{{ $t('pages.send.scan') }}</small>
           </div>
         </div>
         <AmountSend @changeAmount="val => (form.amount = val)" :value="form.amount" />
         <div class="button-group">
-          <Button @click="navigateAccount">Cancel</Button>
-          <Button @click="step = 2" :disabled="!form.address || !form.amount">Review</Button>
+          <Button @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
+          <Button @click="step = 2" :disabled="!form.address || !form.amount">{{ $t('pages.send.review') }}</Button>
         </div>
       </div>
     </div>
     <div v-if="step == 2">
       <div class="popup withdraw step2">
         <p>
-          <AlertExclamination />Review Transaction
+          <AlertExclamination />{{ $t('pages.send.reviewtx') }}
         </p>
-        <p>Please check the information carefully!</p>
+        <p>{{ $t('pages.send.checkalert') }}</p>
         <div class="info-group">
-          <label class="info-label">Sending address</label>
+          <label class="info-label">{{ $t('pages.send.sendingAddress') }}</label>
           <span class="info-span">{{ account.publicKey }}</span>
         </div>
         <div class="info-group">
-          <label class="info-label">Receiving address</label>
+          <label class="info-label">{{ $t('pages.send.receivingAddress') }}</label>
           <span class="info-span">{{ form.address }}</span>
         </div>
         <div class="info-group">
-          <label>Amount</label>
+          <label>{{ $t('pages.send.amount') }}</label>
           <div class="text-center">
             <span class="amount">{{ toFixedAmount }} {{ tokenSymbol }}</span>
             <span class="currencyamount">
@@ -49,45 +49,34 @@
             </span>
           </div>
         </div>
-        <Button @click="step = 1">Edit Transaction Details</Button>
+        <Button @click="step = 1">{{ $t('pages.send.editTxDetails') }}</Button>
         <div class="button-group">
-          <Button @click="navigateAccount">Cancel</Button>
+          <Button @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
           <Button @click="send">{{ $t('pages.send.send') }}</Button>
         </div>
       </div>
     </div>
-    <!-- <h3 class="">
-      {{ $t('pages.send.heading') }}
-      <ae-identicon class="send-account-icon" :address="account.publicKey" size="s" />
-      {{ activeAccountName }}
-    </h3>
-    <div class="sendContent">
-      <AmountSend @changeAmount="val => (form.amount = val)" :value="form.amount" />
-      <Textarea v-model="form.address" placeholder="ak.. / name.test" size="sm"> </Textarea>
-      <div>
-        <p v-if="sendSubaccounts">{{ $t('pages.send.sendSubaccount') }}</p>
-        <ae-list class="sendSubaccount">
-          <ae-list-item v-for="(account, index) in sendSubaccounts" @click="selectSendSubaccount(account)" fill="neutral" :key="index" class=" flex-align-center">
-            <ae-identicon class="subAccountIcon" v-bind:address="account.publicKey" size="base" />
-            <div class="subAccountInfo flex flex-align-start flex-direction-column ">
-              <div class="subAccountName">{{ account.name }}</div>
-              <div class="subAccountBalance">{{ account.balance }} æid</div>
-            </div>
-          </ae-list-item>
-        </ae-list>
-      </div>
-      <div>
-        <Button @click="send">
-          {{ $t('pages.send.send') }}
-        </Button>
+    <div v-if="step == 3">
+      <div class="popup withdraw step2">
+        <p>
+          <Heart /> {{ $t('pages.send.tx-success') }}
+        </p>
+        <p>{{ $t('pages.send.successalert') }} <span style="color:#FF4784"> {{ successTx.amount }} {{tokenSymbol}}</span></p>
+        <div class="info-group">
+          <label class="info-label">{{ $t('pages.send.to') }}</label>
+          <span class="info-span">{{ successTx.to }}</span>
+        </div>
+        <div class="info-group">
+          <label class="info-label">{{ $t('pages.send.from') }}</label>
+          <span class="info-span">{{ successTx.from }}</span>
+        </div>
+        <div class="info-group">
+          <label class="info-label">{{ $t('pages.send.txhash') }}</label>
+          <span class="info-span">{{ successTx.hash }}</span>
+        </div>
+        <Button @click="navigateAccount">{{ $t('pages.send.home') }}</Button>
       </div>
     </div>
-    <input type="hidden" class="txHash" :value="tx.hash" />
-    <div class="result" v-if="tx.status">
-      <p>{{ $t('pages.send.success') }}</p>
-      <a :href="tx.url">{{ $t('pages.send.seeTransactionExplorer') }}</a>
-    </div>-->
-
     <Loader size="big" :loading="loading" type="transparent"></Loader>
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div>
@@ -105,6 +94,7 @@ import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
 import QrIcon from '../../../icons/qr-code.svg';
 import AlertExclamination from '../../../icons/alert-exclamation.svg';
+import Heart from '../../../icons/heart.svg';
 
 export default {
   name: 'Send',
@@ -115,6 +105,7 @@ export default {
     BalanceInfo,
     QrIcon,
     AlertExclamination,
+    Heart
   },
   data() {
     return {
@@ -136,9 +127,15 @@ export default {
         max: 0,
       },
       not_correct: false,
+      successTx: {
+        amount: '',
+        from: '',
+        to: '',
+        hash: ''
+      }
     };
   },
-  props: ['address'],
+  props: ['address', 'redirectstep', 'successtx'],
   watch: {
     activeToken() {
       this.fetchFee();
@@ -161,7 +158,6 @@ export default {
       'activeAccountName',
     ]),
     amountConvert() {
-      console.log('curr => ', this.current);
       return (this.form.amount * this.current.currencyRate).toFixed(3);
     },
     toFixedAmount() {
@@ -186,6 +182,13 @@ export default {
     },
   },
   created() {
+    if (this.redirectstep && this.successtx) {
+      this.step = 3;
+      this.successTx.amount = ( parseFloat((this.successtx.tx.amount) / 10 ** 18) ).toFixed(3);
+      this.successTx.to = this.successtx.tx.recipientId;
+      this.successTx.from = this.successtx.tx.senderId;
+      this.successTx.hash = this.successtx.hash;
+    }
     if (typeof this.address !== 'undefined') {
       this.form.address = this.address;
     }

@@ -557,12 +557,18 @@ export default {
                 window.close();
               }, 1000);
             } else {
-              this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(async () => {
+              // this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(async () => {
+                
                 this.$store.commit('SET_AEPP_POPUP', false);
                 const list = await removeTxFromStorage(this.data.id);
                 browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-                this.redirectInExtensionAfterAction();
-              });
+                // this.redirectInExtensionAfterAction();
+                
+                return this.$router.push({ 'name': 'send', params: {
+                  redirectstep:3,
+                  successtx: result
+                }})
+              // });
             }
           } else {
           }
