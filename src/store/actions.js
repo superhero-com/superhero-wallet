@@ -246,25 +246,26 @@ export default {
     await new Promise(resolve => setTimeout(resolve, 1500));
   },
 
-  async unlockWallet(context, payload) {
-    return (await postMessage({ type: 'unlockWallet', payload })).res;
+  unlockWallet(context, payload) {
+    return postMessage({ type: 'unlockWallet', payload });
   },
 
   async getAccount(context, { idx }) {
-    return (await postMessage({ type: 'getAccount', payload: { idx } })).res.address;
+    return (await postMessage({ type: 'getAccount', payload: { idx } })).address;
   },
 
   async getKeyPair({ state: { account } }, { idx }) {
-    let { res } = await postMessage({
-      type: 'getKeypair',
-      payload: { activeAccount: idx, account: { publicKey: account.publicKey } },
-    });
-    res = parseFromStorage(res);
-    return { publicKey: res.publicKey, secretKey: res.secretKey };
+    const { publicKey, secretKey } = parseFromStorage(
+      await postMessage({
+        type: 'getKeypair',
+        payload: { activeAccount: idx, account: { publicKey: account.publicKey } },
+      })
+    );
+    return { publicKey, secretKey };
   },
 
   async generateWallet(context, { seed }) {
-    return (await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })).res.address;
+    return (await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })).address;
   },
 
   async setLogin({ commit, dispatch }, { keypair }) {

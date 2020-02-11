@@ -24,7 +24,7 @@ export default async () => {
     }, 1000);
   };
 
-  const props = (await postMessage({ type: 'POPUP_INFO' })).res;
+  const props = await postMessage({ type: 'POPUP_INFO' });
   props.resolve = closingWrapper(resolve);
   props.reject = closingWrapper(reject);
   return props;

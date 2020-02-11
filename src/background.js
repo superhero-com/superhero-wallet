@@ -103,12 +103,12 @@ if (process.env.IS_EXTENSION) {
       }
     }
   });
-} else {
-  window.addEventListener('message', async event => {
-    if (event.source !== window.parent) return;
-    const { type, payload, uuid } = event.data;
-    if (HDWALLET_METHODS.includes(type)) {
-      window.parent.postMessage({ uuid, res: await controller[type](payload) }, window.location.origin);
-    }
-  });
 }
+
+export const handleMessage = ({ type, payload }) => {
+  if (HDWALLET_METHODS.includes(type)) {
+    return controller[type](payload);
+  }
+
+  throw new Error(`Unknown message type: ${type}`);
+};
