@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="ae-header" :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''">
+    <div :style="fixedheader" class="ae-header" :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''">
       <header class="flex " :class="isLoggedIn ? 'flex-justify-between' : 'flex-justify-content-start'">
         <div class="dropdown" v-if="!aeppPopup">
           <Arrow class="arrow-back mt-15" @click="goBack" v-if="title" />
@@ -55,12 +55,26 @@ export default {
         account: false,
         settings: false,
       },
+      fixedheader: ''
     };
   },
   computed: {
     ...mapGetters(['account', 'isLoggedIn', 'aeppPopup']),
   },
+  created() {
+      window.addEventListener('scroll', this.handleScroll);
+  },
+  destroyed () {
+      window.removeEventListener('scroll', this.handleScroll);
+  },
   methods: {
+    handleScroll (event) {
+      if (window.scrollY > 150 && this.$router.currentRoute.path == '/transactions') {
+          this.fixedheader = 'position:fixed; top:0; width:100%; z-index:15;';
+      } else {
+          this.fixedheader = '';
+      }
+    },
     toggleDropdown(event, parentClass) {
       if (!this.aeppPopup) {
         if (typeof parentClass === 'undefined') {

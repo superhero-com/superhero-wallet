@@ -2,11 +2,10 @@
   <div class="popup">
     <AccountInfo />
     <BalanceInfo />
-    <TransactionFilters />
+    <TransactionFilters @filtrate="filtrate" />
     <ae-list class="allTransactions">
       <div v-for="(trans, index) in groupedTransactionsByDate" v-bind:key="index">
-        <div class="date">{{ index }}</div>
-        <TransactionItem v-for="transaction in trans" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
+        <TransactionItem v-for="transaction in t_transactions ? t_transactions : trans" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
       </div>
       <Button v-if="showMoreBtn" @click="loadMore">
         <div class="flex flex-align-center flex-justify-content-center">
@@ -37,6 +36,7 @@ export default {
     BalanceInfo,
     TransactionFilters
   },
+  props: [''],
   data() {
     return {
       transactionsType: 'all',
@@ -57,6 +57,7 @@ export default {
         direction: '',
       },
       upadateInterval: null,
+      t_transactions: null
     };
   },
   computed: {
@@ -95,9 +96,37 @@ export default {
     watchToken() {
       return this.current.token;
     },
+
+
+    filterDateRecent() {
+      this.t_transactions.sort( ( a, b) => {
+        return new Date(b.time) - new Date(a.time);
+      });
+      return this.t_transactions;
+    },
+    filterDateOldest() {
+      this.t_transactions.sort( ( a, b) => {
+        return new Date(a.time) - new Date(b.time);
+      });
+      return this.t_transactions;
+    },
+    filterSent() {
+      return this.t_transactions.filter(tr =>
+        tr.tx.caller_id != 'undefined' && tr.tx.type == "ContractCallTx" && tr.tx.caller_id == this.publicKey
+      );
+    },
+    // filterReceived() {
+    //   return this.t_transactions.filter(tr =>
+    //     tr.tx.recipient_id != 'undefined' && tr.tx.type == "ContractCallTx" && tr.tx.recipient_id == this.publicKey
+    //   );
+    // },
+    filterWithdrawals() {
+      return this.t_transactions.filter(tr =>
+        tr.tx.sender_id != 'undefined' && tr.tx.type == "SpendTx" && tr.tx.sender_id == this.publicKey
+      );
+    },
   },
   created() {
-    console.log('tuk');
     this.getTotalTransactions();
     this.getTransactions('load');
     this.pollData();
@@ -131,6 +160,45 @@ export default {
     },
   },
   methods: {
+    async filtrate(type, date_type) {
+      let transactions = this.transactions;
+      Object.keys(transactions).forEach(async key => {
+        if (key == 'all') {
+          let alltransactions = transactions[key]
+          Object.keys(alltransactions).forEach(async k => {
+            this.t_transactions = alltransactions;
+          });
+        }
+      });
+      switch (type) {
+        case 'date':
+           if (date_type == 'recent') {
+            console.log('date-recent')
+            this.t_transactions = this.filterDateRecent;
+          } else if (date_type == 'oldest') {
+            console.log('date-oldest')
+            this.t_transactions = this.filterDateOldest;
+          }
+        break;
+        case 'sent':
+          this.t_transactions = this.filterSent;
+          console.log('sent')
+        break;
+        case 'received':
+          console.log('received')
+        break;
+        case 'topups':
+          console.log('topups')
+        break;
+        case 'withdrawals':
+          this.t_transactions = this.filterWithdrawals;
+          console.log('withdrawals')
+        break;
+        case 'all':
+          console.log('all')
+        break;
+      }
+    },
     getPage() {
       return this.transactions.all.length == 0 ? 1 : Math.ceil(this.transactions.all.length / this.limit);
     },
@@ -245,12 +313,12 @@ export default {
   -ms-transform: translateX(-50%);
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%);
-  background: $primary-color;
-  color: #fff;
-  padding: 0.7rem 1rem;
+  background: #111117;
+  color: #ffffff;
+  padding: .7rem 1rem;
   text-align: center;
-  border-radius: 32px;
   cursor: pointer;
+  width: 100%;
 }
 .newTxCount {
   background: #fff;

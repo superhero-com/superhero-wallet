@@ -34,6 +34,7 @@ export default {
     };
   },
   async created() {
+    console.log('transactionData => ', this.transactionData)
     this.checkSdk = setInterval(() => {
       if (this.sdk !== null) {
         this.getEventData();
