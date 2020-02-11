@@ -56,17 +56,11 @@ export const getters = {
   ledgerApi(state) {
     return state.ledgerApi;
   },
-  ledgerNextIdx(state) {
-    return Math.max(...state.subaccounts.filter(a => a.isLedger).map(({ idx }) => idx), -1) + 1;
-  },
   isLedger(state) {
     if (state.subaccounts.length > 0) {
       return state.subaccounts.find(s => s.publicKey == state.account.publicKey).isLedger;
     }
     return state.subaccounts;
-  },
-  getActiveAccount(state) {
-    return state.subaccounts.find(s => s.publicKey == state.account.publicKey);
   },
   txAdvancedMode({ txAdvancedMode }) {
     return txAdvancedMode;
