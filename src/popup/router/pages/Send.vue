@@ -19,7 +19,7 @@
         <AmountSend @changeAmount="val => (form.amount = val)" :value="form.amount" />
         <div class="button-group">
           <Button @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
-          <Button @click="step = 2" :disabled="!form.address || !form.amount">{{ $t('pages.send.review') }}</Button>
+          <Button @click="step = 2" :disabled="!form.address || !form.amount || (form.amount && isNaN(form.amount))">{{ $t('pages.send.review') }}</Button>
         </div>
       </div>
     </div>
@@ -45,7 +45,7 @@
             </span>
           </div>
         </div>
-        <Button @click="step = 1">{{ $t('pages.send.editTxDetails') }}</Button>
+        <Button @click="step = 1" extend>{{ $t('pages.send.editTxDetails') }}</Button>
         <div class="button-group">
           <Button @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
           <Button @click="send">{{ $t('pages.send.send') }}</Button>
