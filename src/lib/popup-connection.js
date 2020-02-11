@@ -50,7 +50,7 @@ export const PopupConnection = stampit({
   methods: {
     async messageHandler(msg) {
       if (HDWALLET_METHODS.includes(msg.type)) {
-        this.postMessage({ uuid:msg.uuid, res: await this.controller[msg.type](msg.payload) });
+        this.postMessage({ uuid: msg.uuid, res: await this.controller[msg.type](msg.payload) });
       } else if (msg.action && (msg.action == 'deny' || msg.action == 'accept')) {
         this.actions[msg.action]();
       }
