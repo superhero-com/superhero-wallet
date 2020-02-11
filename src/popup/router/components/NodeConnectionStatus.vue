@@ -31,6 +31,7 @@ export default {
   background: $secondary-color;
   color: #fff;
   padding: 0.3rem;
+  padding-bottom: calc(0.3rem + env(safe-area-inset-bottom));
   z-index: 5;
   text-align: center;
   font-size: 14px;

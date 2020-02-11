@@ -114,6 +114,7 @@ export default {
   background-color: #20202a;
   margin: 0;
   padding: 0;
+  padding-top: env(safe-area-inset-top);
   list-style: none;
 
   li {
