@@ -15,8 +15,7 @@ export default {
     Object.assign(state.popup, payload);
   },
   [types.DEF_POPUP](state) {
-    const def_popup_props = Object.assign({}, POPUP_PROPS);
-    state.popup = def_popup_props;
+    state.popup = Object.assign({}, POPUP_PROPS);
   },
   [types.HIDE_POPUP](state) {
     state.popup.show = false;

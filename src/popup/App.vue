@@ -52,14 +52,10 @@ export default {
     },
   },
   watch: {
-    $route(to, from) {
+    $route(to) {
       this.title = to.meta.title || '';
       this.showNavigation = typeof to.meta.navigation !== 'undefined' ? to.meta.navigation : true;
-      if (to.path == '/account') {
-        this.onAccount = true;
-      } else {
-        this.onAccount = false;
-      }
+      this.onAccount = to.path === '/account';
     },
   },
   async created() {
@@ -137,4 +133,13 @@ export default {
 @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
 @import '../common/base';
 @import '../common/extension';
+</style>
+
+<style lang="scss" scoped>
+.ae-main {
+  .coronaTitle,
+  .ae-header {
+    padding-top: env(safe-area-inset-top);
+  }
+}
 </style>
