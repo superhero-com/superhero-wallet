@@ -26,7 +26,6 @@ import { mapGetters } from 'vuex';
 import { setInterval } from 'timers';
 import BigNumber from 'bignumber.js';
 import Eye from '../../../icons/eye.svg';
-import { MAGNITUDE, MIN_SPEND_TX_FEE, MIN_SPEND_TX_FEE_MICRO, TIPPING_CONTRACT, toMicro } from '../../utils/constants';
 import PendingTxs from './PendingTxs';
 
 export default {
@@ -38,8 +37,6 @@ export default {
     return {
       polling: null,
       loading: true,
-      pendingTxs: [],
-      hash_ready: '',
     };
   },
   created() {
