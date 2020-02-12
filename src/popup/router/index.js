@@ -73,4 +73,20 @@ router.afterEach(to => {
   localStorage.setItem(lastRouteKey, to.path);
 });
 
+window.handleOpenURL = async url => {
+  if (!store.getters.isLoggedIn) {
+    await Promise(resolve => {
+      const unsubscribe = store.watch(
+        (state, { isLoggedIn }) => isLoggedIn,
+        isLoggedIn => {
+          if (!isLoggedIn) return;
+          unsubscribe();
+          resolve();
+        }
+      );
+    });
+  }
+  router.push(`/${url.replace(/^corona:/, '')}`);
+};
+
 export default router;

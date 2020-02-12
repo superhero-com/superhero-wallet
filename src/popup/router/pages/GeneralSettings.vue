@@ -6,7 +6,7 @@
       <small class="sett_info">{{ $t('pages.generalSettings.currentLanguage') }}: {{ this.current.language ? this.current.language : 'en' }}</small>
       <div class="language-settings">
         <li id="languages" class="have-subDropdown" :class="dropdown.languages ? 'show' : ''">
-          <ae-button class="notround switchlanguageBtn" face="round" fill="primary" extend @click="toggleDropdown($event, '.have-subDropdown')">
+          <ae-button class="switchlanguageBtn color-grey" extend @click="toggleDropdown($event, '.have-subDropdown')">
             <ae-icon name="globe" />
             {{ $t('pages.generalSettings.switchLanguage') }}
             <ae-icon name="left-more" />
@@ -92,12 +92,16 @@ export default {
 </script>
 
 <style lang="scss">
+.color-grey {
+  background-color: #505058 !important;
+  border-radius: 4px;
+}
 .backbtn {
   width: 50%;
   margin-top: 5px;
 }
 .regbtn {
-  background: #ff0d6a;
+  background: #e2e2e2;
   color: #ffffff;
   float: right;
   width: 19%;

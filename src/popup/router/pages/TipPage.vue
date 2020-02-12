@@ -1,5 +1,5 @@
 <template>
-  <div class="popup ">
+  <div class="popup">
     <div>
       <p class="primary-title text-left mb-8 f-16" v-if="!confirmMode">
         {{ $t('pages.tipPage.heading') }}
@@ -21,10 +21,10 @@
       <div class="tip-note-preview mt-15" v-if="confirmMode">
         {{ note }}
       </div>
-      <Button @click="toConfirm" :disabled="note && validAmount && !noteError && minCallFee ? false : true" v-if="!confirmMode">
+      <Button @click="toConfirm" :disabled="!note || !validAmount || noteError || !minCallFee" v-if="!confirmMode">
         {{ $t('pages.tipPage.next') }}
       </Button>
-      <Button @click="sendTip" v-if="confirmMode" :disabled="!tipping ? true : false">
+      <Button @click="sendTip" v-if="confirmMode" :disabled="!tipping">
         {{ $t('pages.tipPage.confirm') }}
       </Button>
       <Button @click="confirmMode = false" v-if="confirmMode">
@@ -39,9 +39,9 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { setInterval, setTimeout, setImmediate, clearInterval } from 'timers';
+import { setInterval, clearInterval } from 'timers';
 import BigNumber from 'bignumber.js';
-import { MAGNITUDE, MIN_SPEND_TX_FEE, calculateFee, TX_TYPES, TIP_SERVICE } from '../../utils/constants';
+import { MAGNITUDE, calculateFee, TX_TYPES, TIP_SERVICE } from '../../utils/constants';
 import { setPendingTx, escapeSpecialChars } from '../../utils/helper';
 import TipBackground from '../../../icons/tip-bg.svg';
 import CheckIcon from '../../../icons/check-icon.svg';
@@ -58,7 +58,7 @@ export default {
   },
   data() {
     return {
-      tipUrl: false,
+      tipUrlCurrentTab: false,
       finalAmount: null,
       note: null,
       feeInterval: null,
@@ -86,6 +86,13 @@ export default {
     getCurrencyAmount() {
       return (this.finalAmount * this.current.currencyRate).toFixed(3);
     },
+    tipUrl() {
+      const currentUrl = new URL(this.$route.fullPath, window.location);
+      const path = decodeURIComponent(currentUrl.searchParams.get('url'));
+      if (!path) return this.tipUrlCurrentTab;
+      const url = new URL(/^\w+:\D+/.test(path) ? path : `https://${path}`);
+      return url.toString();
+    },
   },
   watch: {
     finalAmount() {
@@ -100,15 +107,17 @@ export default {
         clearInterval(this.feeInterval)
       }
     }, 5000);
+    this.$once('hook:beforeDestroy', () => clearInterval(this.feeInterval));
   },
   methods: {
     async getDomainData() {
-      const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-      if(tabs.length) {
-        this.tipUrl =  tabs[0].url
-        this.checkUrlVerified();
+      if (process.env.IS_EXTENSION) {
+        const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+        if(tabs) {
+          this.tipUrlCurrentTab =  tabs.url
+          this.checkUrlVerified();
+        }
       }
-      
     },
     getCallFee() {
       if (this.sdk !== null && !this.minCallFee) {
@@ -122,6 +131,7 @@ export default {
           this.minCallFee = fee.min;
         } catch (e) { console.log(e) }
       }
+      
     },
     toConfirm() {
       if (!this.minCallFee || this.maxValue - this.finalAmount <= 0 || isNaN(this.finalAmount) || this.finalAmount <= 0) {
@@ -173,7 +183,8 @@ export default {
   },
 };
 </script>
-<style lang="scss">
+
+<style lang="scss" scoped>
 .tip-bg {
   position: fixed;
   left: 50%;
