@@ -39,7 +39,8 @@ export const getters = {
     return state.activeAccount;
   },
   activeAccountName(state) {
-    return state.subaccounts.find(s => s.publicKey == state.account.publicKey) ? state.subaccounts.find(s => s.publicKey == state.account.publicKey).name : 'Account';
+    const account = state.subaccounts.find(s => s.publicKey == state.account.publicKey);
+    return account ? (account.aename ? account.aename : account.name) : 'Main Account';
   },
   sdk(state) {
     return state.sdk;

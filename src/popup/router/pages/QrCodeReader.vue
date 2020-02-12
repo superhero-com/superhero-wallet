@@ -1,142 +1,92 @@
 <template>
-  <div class="popup">
-    <div class="actions">
-      <button class="backbutton toAccount" @click="navigateAccount"><ae-icon name="back" /> {{ $t('pages.qrCodeReader.backToAccount') }}</button>
-    </div>
-    <h3 style="text-align:center;">{{ $t('pages.qrCodeReader.heading') }}</h3>
-    <br />
-
-    <div class="cameraMsg">
-      <p v-if="successMessage != ''">
-        <b>{{ successMessage }}</b>
-      </p>
-      <p v-if="errorMessage != ''" class="error">
-        <b>{{ errorMessage }}</b>
-      </p>
-    </div>
-    <qrcode-stream @decode="onDecode" @init="onInit"></qrcode-stream>
-
-    <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
-    <Loader size="small" :loading="loading" v-bind="{ content: '' }"></Loader>
+  <div class="popup popup-camera">
+    <qrcode-stream @decode="onDecode" @init="onInit" @detect="onDetect"></qrcode-stream>
+    <popup />
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import QrcodeVue from 'qrcode.vue';
-import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from 'vue-qrcode-reader';
-import { Crypto } from '@aeternity/aepp-sdk/es';
-import { getPublicKeyByResponseUrl, getSignedTransactionByResponseUrl, generateSignRequestUrl } from '../../utils/airGap';
-import { detectBrowser } from '../../utils/helper';
+import { QrcodeStream } from 'vue-qrcode-reader';
+import { detectBrowser, checkAddress, chekAensName } from '../../utils/helper';
 
 export default {
+  components: {
+    QrcodeStream,
+  },
+  props: {
+    type: String,
+  },
   data() {
     return {
-      loading: false,
       successMessage: '',
       errorMessage: '',
-      counter: 0,
-      accountspublicKeys: [],
     };
   },
-  computed: {
-    ...mapGetters(['account', 'current', 'network', 'subaccounts', 'wallet', 'popup']),
+  created() {
+    this.$store.commit('SET_MAIN_LOADING', true);
   },
-  created() {},
   methods: {
-    navigateAccount() {
-      this.$router.push('/account');
-    },
-    onDecode(content) {
-      this.loading = true;
-      this.decodedContent = content;
+    onDecode(address) {
       try {
-        const publicKey = getPublicKeyByResponseUrl(content);
-        browser.storage.local.set({ airGapGeneratedKey: publicKey }).then(() => {});
-        const address = Crypto.aeEncodeKey(publicKey);
-        if (address.includes('ak_')) {
-          this.subaccounts.forEach(element => {
-            this.accountspublicKeys.push(element.publicKey);
-          });
-          if (this.accountspublicKeys.includes(address)) {
-            this.$store.dispatch('popupAlert', {
-              name: 'account',
-              type: 'account_already_exist',
-            });
-            this.loading = false;
-          } else {
-            const public_K = address;
-            const nameCounter = this.subaccounts.length;
-            const name = `AirGap Vault Account #${nameCounter}`;
-            this.$store
-              .dispatch('setSubAccount', {
-                isAirGapAcc: true,
-                name,
-                publicKey: public_K,
-                root: false,
-                balance: 0,
-              })
-              .then(() => {
-                this.loading = false;
-                browser.storage.local.set({ subaccounts: this.subaccounts }).then(() => {
-                  this.$store
-                    .dispatch('popupAlert', {
-                      name: 'account',
-                      type: 'airgap_created',
-                    })
-                    .then(() => {
-                      const index = this.subaccounts.length - 1;
-                      browser.storage.local.set({ activeAccount: index }).then(() => {
-                        this.$store.commit('SET_ACTIVE_ACCOUNT', { publicKey: public_K, index });
-                      });
-                      this.$router.push('/account');
-                    });
-                });
-              });
-          }
+        if (this.type == 'send' && (checkAddress(address) || chekAensName(address))) {
+          return this.$router.push({ name: 'send', params: { address } });
         }
-      } catch (error) {
-        error = error.toString();
-        console.log(error);
-        if (error.includes('Invalid URL')) {
-          this.$router.push('/airGapSetup');
-        }
+      } catch (err) {
+        console.log(err);
       }
     },
-    onInit(promise) {
-      if (detectBrowser() == 'Chrome') {
-        promise
-          .then(() => {
-            this.successMessage = 'Camera successfully initilized! Ready for scanning now!';
-          })
-          .catch(error => {
-            console.log(error);
-            const extensionUrl = `chrome-extension://${browser.runtime.id}`;
-            browser.tabs.create({ url: `${extensionUrl}/popup/CameraRequestPermission.html`, active: true });
-            if (error.name === 'NotAllowedError') {
-              this.errorMessage = 'Hey! I need access to your camera';
-            } else if (error.name === 'NotFoundError') {
-              this.errorMessage = 'Do you even have a camera on your device?';
-            } else if (error.name === 'NotSupportedError') {
-              this.errorMessage = 'Seems like this page is served in non-secure context (HTTPS, localhost or file://)';
-            } else if (error.name === 'NotReadableError') {
-              this.errorMessage = "Couldn't access your camera. Is it already in use?";
-            } else if (error.name === 'OverconstrainedError') {
-              this.errorMessage = "Constraints don't match any installed camera. Did you asked for the front camera although there is none?";
-            } else {
-              this.errorMessage = `UNKNOWN ERROR: ${error.message}`;
-            }
-          });
-      } else if (detectBrowser() == 'Firefox') {
-        this.errorMessage = 'Please enable access to your camera for the mobile browser that you are using to open the Corona.';
+    async onInit(promise) {
+      const url = browser.extension.getURL('./popup/CameraRequestPermission.html');
+      try {
+        await promise;
+        this.$store.commit('SET_MAIN_LOADING', false);
+      } catch (error) {
+        this.$store.commit('SET_MAIN_LOADING', false);
+        browser.tabs.create({ url, active: true });
+        if (error.name === 'NotAllowedError') {
+          this.errorMessage = 'ERROR: you need to grant camera access permisson';
+        } else if (error.name === 'NotFoundError') {
+          this.errorMessage = 'ERROR: no camera on this device';
+        } else if (error.name === 'NotSupportedError') {
+          this.errorMessage = 'ERROR: secure context required (HTTPS, localhost)';
+        } else if (error.name === 'NotReadableError') {
+          this.errorMessage = 'ERROR: is the camera already in use?';
+        } else if (error.name === 'OverconstrainedError') {
+          this.errorMessage = 'ERROR: installed cameras are not suitable';
+        } else if (error.name === 'StreamApiNotSupportedError') {
+          this.errorMessage = 'ERROR: Stream API is not supported in this browser';
+        }
+        this.$store.dispatch('popupAlert', { name: 'account', type: 'error_qrcode', msg: this.errorMessage, data: this.errorMessage });
+        this.$router.go(-1);
+      }
+    },
+    async onDetect(promise) {
+      try {
+        const {
+          imageData, // raw image data of image/frame
+          content, // decoded String
+          location, // QR code coordinates
+        } = await promise;
+
+        console.log(imageData);
+        console.log(content);
+        console.log(location);
+      } catch (error) {
+        console.log(error);
       }
     },
   },
 };
 </script>
 
-<style lang="scss" scoped>
-.cameraMsg p {
-  word-break: break-word;
+<style lang="scss">
+.popup-camera .wrapper {
+  position: fixed;
+  top: 50px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0;
+  max-width: 380px;
 }
 </style>

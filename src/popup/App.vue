@@ -1,5 +1,5 @@
 <template>
-  <ae-main :class="onAccount ? 'ae-main-account' : ''">
+  <ae-main :class="onAccount ? 'ae-main-account' : onReceive ? 'ae-main-receive' : ''">
     <Header v-if="showNavigation" :title="title" />
     <hr style="margin: 0; background: #3a3a47; height: 2px; border: 0;" />
     <router-view :key="$route.fullPath"></router-view>
@@ -29,6 +29,7 @@ export default {
       language: '',
       checkSDKReady: null,
       onAccount: false,
+      onReceive: false,
       showNavigation: false,
       title: '',
     };
@@ -44,6 +45,7 @@ export default {
       this.title = to.meta.title || '';
       this.showNavigation = typeof to.meta.navigation !== 'undefined' ? to.meta.navigation : true;
       this.onAccount = to.path === '/account';
+      this.onReceive = to.path === '/receive';
     },
   },
   async created() {

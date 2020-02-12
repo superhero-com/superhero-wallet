@@ -1,6 +1,8 @@
 <template>
   <div class="popup">
     <ae-list class="allTransactions">
+      <div class="date" v-if="transactions.pending.length">Pending</div>
+      <PendingTxs />
       <div v-for="(trans, index) in groupedTransactionsByDate" v-bind:key="index">
         <div class="date">{{ index }}</div>
         <TransactionItem v-for="transaction in trans" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
@@ -24,8 +26,12 @@
 import { mapGetters } from 'vuex';
 import { groupBy, orderBy } from 'lodash-es';
 import { clearInterval, clearTimeout, setInterval } from 'timers';
+import PendingTxs from '../components/PendingTxs';
 
 export default {
+  components: {
+    PendingTxs,
+  },
   data() {
     return {
       transactionsType: 'all',

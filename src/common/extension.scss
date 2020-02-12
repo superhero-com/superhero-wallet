@@ -5,9 +5,16 @@ body, .ae-main, html {
     font-size:$font-size;
     font-family: 'Roboto', sans-serif !important;
 }
+.ae-main-receive {
+    background:#1d1d25 !important; 
+    min-height: 600px !important;
+}
 .popup {
-    max-width: 480px !important;
+    max-width: 380px !important;
     margin:0 auto;
+}
+.popup-no-padding {
+    padding: 4px 0;
 }
 #app {
     font-family: 'Roboto', sans-serif !important;
@@ -37,6 +44,9 @@ a {
     font-weight: lighter;
     margin-bottom:27px;
     margin-left:0 !important;
+}
+.primary-title-darker {
+    color: $text-color;
 }
 .secondary-text {
     color: $secondary-color;
