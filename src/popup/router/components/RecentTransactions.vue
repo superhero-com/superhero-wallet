@@ -1,6 +1,6 @@
 <template>
   <div class="recent-transactions">
-    <div class="flex flex flex-align-center flex-justify-between">
+    <div class="flex flex flex-align-center flex-justify-between my-10">
       <span class="title">{{ $t('pages.recentTransactions.recentActivity') }}</span>
       <span @click="allTransactions" class="viewAll">{{ $t('pages.recentTransactions.viewAll') }}</span>
     </div>

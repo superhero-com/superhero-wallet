@@ -134,6 +134,9 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+.list-item-transaction:first-child {
+  border-top: 1px solid $bg-color !important;
+}
 .list-item-transaction {
   display: inline-block;
   padding: 5px 0;
@@ -141,7 +144,7 @@ export default {
   text-decoration: none;
   list-style: none;
   cursor: default;
-  border-top: 1px solid transparent;
+  border-top: 1px solid transparent ;
 
   .holder {
     display: flex;

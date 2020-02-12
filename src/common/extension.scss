@@ -5,6 +5,10 @@ body, .ae-main, html {
     font-size:$font-size;
     font-family: 'Roboto', sans-serif !important;
 }
+.ae-main-receive {
+    background:#1d1d25 !important; 
+    min-height: 600px !important;
+}
 .popup {
     max-width: 380px !important;
     margin:0 auto;
