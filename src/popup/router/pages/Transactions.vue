@@ -229,9 +229,6 @@ export default {
         this.getTransactions('new');
       }, 5000);
     },
-    changeTransactionType(type) {
-      this.transactionsType = type;
-    },
     getTransactions(type, limit = this.limit) {
       if (this.current.token == 0) {
         if (type == 'load') {
@@ -292,20 +289,6 @@ export default {
       });
     },
     group() {},
-    navigateAccount() {
-      this.$router.push('/account');
-    },
-    setFilter(type, value) {
-      this.filter[type] = value;
-    },
-    applyFilter() {
-      this.openFilter = false;
-    },
-    clearFilter() {
-      this.openFilter = false;
-      this.filter.direction = '';
-      this.filter.spendType = 'all';
-    },
   },
   beforeDestroy() {
     window.clearTimeout(this.polling);
