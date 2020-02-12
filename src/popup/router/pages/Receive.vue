@@ -6,11 +6,11 @@
     <AccountInfo />
     <qrcode-vue :value="account.publicKey" size="140" class="my-25"></qrcode-vue>
     <div class="text-left mx-20">
-      <a @click="exchange" class="block mt-15">{{ $t('pages.receive.transferExchange') }}</a>
-      <div class="flex flex flex-align-center flex-justify-between mt-20 mb-35">
+      <!-- <a @click="exchange" class="block mt-15">{{ $t('pages.receive.transferExchange') }}</a> -->
+      <!-- <div class="flex flex flex-align-center flex-justify-between mt-20 mb-35">
         <a @click="purchase" class="block">{{ $t('pages.receive.purchase') }}</a>
         <img :src="changelly" alt="" />
-      </div>
+      </div> -->
     </div>
     <Button @click="navigateAccount">{{ $t('pages.receive.home') }}</Button>
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
