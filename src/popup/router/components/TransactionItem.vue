@@ -4,7 +4,8 @@
       <div class="holder">
         <span class="amount">{{ txAmount }} æid <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span>
         <span class="status">{{ txType }}</span>
-        <span class="time">{{ transactionData.time ? new Date(transactionData.time).toLocaleTimeString() : '-- -- --' }}</span>
+        <span class="date">{{ new Date(transactionData.time).toLocaleDateString() }} </span>
+        <span class="time">{{ new Date(transactionData.time).toLocaleTimeString([], {timeStyle: 'short'}) }}</span>
       </div>
       <div class="holder">
         <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
@@ -22,7 +23,7 @@ import { convertToAE } from '../../utils/helper';
 import { decodeEvents } from '@aeternity/aepp-sdk/es/contract/aci/transformation' 
 
 export default {
-  props: ['transactionData', 'recent', 'dark', 'network', 'current'],
+  props: ['transactionData', 'recent', 'dark'],
   components: {
     Eye,
   },
@@ -36,6 +37,7 @@ export default {
     };
   },
   async created() {
+
     this.checkSdk = setInterval(() => {
       if (this.sdk !== null && this.tipping != null) {
         this.getEventData();
@@ -116,7 +118,6 @@ export default {
         this.tipUrl = decode(log[0].data).toString();
         this.tipAmount = convertToAE(log[0].topics[2]);
       } catch (e) {
-        console.log('Error => ', e)
       }
     },
     visitTipUrl() {
@@ -146,6 +147,7 @@ export default {
   .holder {
     display: flex;
     justify-content: space-between;
+    font-size: 14px;
     .url {
       display: inline-block;
       width: 284px;
@@ -163,6 +165,12 @@ export default {
     .time {
       color: #cbcbcb !important;
       font-size: 12px;
+      padding-top: 1px;
+    }
+    .date {
+      color: #cbcbcb !important;
+      font-size: 12px;
+      padding-top: 1px;
     }
     .amount {
       color: $secondary-color !important;

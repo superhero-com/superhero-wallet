@@ -220,7 +220,7 @@ main {
   z-index:5;
 }
 .transactionList, .allTransactions {
-  padding: 25px 0 0 0 !important;
+  padding: 25px 0 25px 0!important;
   background-color: #21212A;
   .ae-badge.primary {
     background:$primary-color;

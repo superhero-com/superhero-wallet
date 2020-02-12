@@ -7,13 +7,7 @@
       <div v-for="(trans, index) in groupedTransactionsByDate" v-bind:key="index">
         <TransactionItem v-for="transaction in t_transactions ? t_transactions : trans" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
       </div>
-      <Button v-if="showMoreBtn" @click="loadMore">
-        <div class="flex flex-align-center flex-justify-content-center">
-          <ae-icon name="reload" />
-          <span class="ml-5"> {{ $t('pages.transactions.loadMore') }} </span>
-        </div>
-      </Button>
-      <p v-if="showMoreBtn == false">{{ $t('pages.transactions.allLoaded') }}</p>
+      <p v-if="noTransactionsFound !== ''">{{ noTransactionsFound }}</p>
     </ae-list>
     <div class="newTx" @click="mergeNewTransactions" v-if="newTransactions != 0">
       <span class="newTxCount">{{ newTransactions }}</span> {{ $t('pages.transactions.newTransactions') }}
@@ -57,7 +51,8 @@ export default {
         direction: '',
       },
       upadateInterval: null,
-      t_transactions: null
+      t_transactions: null,
+      noTransactionsFound: ''
     };
   },
   computed: {
@@ -110,17 +105,22 @@ export default {
       });
       return this.t_transactions;
     },
-    filterSent() {
+    filterSent() { // sent tipings
       return this.t_transactions.filter(tr =>
         tr.tx.caller_id != 'undefined' && tr.tx.type == "ContractCallTx" && tr.tx.caller_id == this.publicKey
       );
     },
-    // filterReceived() {
-    //   return this.t_transactions.filter(tr =>
-    //     tr.tx.recipient_id != 'undefined' && tr.tx.type == "ContractCallTx" && tr.tx.recipient_id == this.publicKey
-    //   );
-    // },
-    filterWithdrawals() {
+    filterReceived() { // received tipings
+      return this.t_transactions.filter(tr =>
+        tr.tx.recipient_id != 'undefined' && tr.tx.type == "ContractCallTx" && tr.tx.recipient_id == this.publicKey
+      );
+    },
+    filterTopups() { // received spend txs
+      return this.t_transactions.filter(tr =>
+        tr.tx.recipient_id != 'undefined' && tr.tx.type == "SpendTx" && tr.tx.recipient_id == this.publicKey
+      );
+    },
+    filterWithdrawals() { // sent spend txs
       return this.t_transactions.filter(tr =>
         tr.tx.sender_id != 'undefined' && tr.tx.type == "SpendTx" && tr.tx.sender_id == this.publicKey
       );
@@ -172,30 +172,50 @@ export default {
       });
       switch (type) {
         case 'date':
+          this.noTransactionsFound = '';
            if (date_type == 'recent') {
-            console.log('date-recent')
             this.t_transactions = this.filterDateRecent;
           } else if (date_type == 'oldest') {
-            console.log('date-oldest')
             this.t_transactions = this.filterDateOldest;
+          }
+          if (Object.entries(this.t_transactions).length === 0) {
+            this.noTransactionsFound = 'No Transactions found';
           }
         break;
         case 'sent':
+          this.noTransactionsFound = '';
           this.t_transactions = this.filterSent;
-          console.log('sent')
+          if (Object.entries(this.t_transactions).length === 0) {
+            this.noTransactionsFound = 'No Transactions found';
+          }
         break;
         case 'received':
           console.log('received')
+          this.t_transactions = this.filterReceived;
+          if (Object.entries(this.t_transactions).length === 0) {
+            this.noTransactionsFound = 'No Transactions found';
+          }
         break;
         case 'topups':
+          this.noTransactionsFound = '';
           console.log('topups')
+          this.t_transactions = this.filterTopups;
+          if (Object.entries(this.t_transactions).length === 0) {
+            this.noTransactionsFound = 'No Transactions found';
+          }
         break;
         case 'withdrawals':
+          this.noTransactionsFound = '';
           this.t_transactions = this.filterWithdrawals;
-          console.log('withdrawals')
+          if (Object.entries(this.t_transactions).length === 0) {
+            this.noTransactionsFound = 'No Transactions found';
+          }
         break;
         case 'all':
-          console.log('all')
+          this.noTransactionsFound = '';
+          if (Object.entries(this.t_transactions).length === 0) {
+            this.noTransactionsFound = 'No Transactions found';
+          }
         break;
       }
     },
