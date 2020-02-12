@@ -287,8 +287,11 @@
         },
         "receive": {
             "backToAccount": "Back to account",
-            "heading": "Receive æid tokens",
-            "copy": "Copy"
+            "heading": "To receive tokens, provide this address or have the payor scan the QR code below.",
+            "copy": "Copy",
+            "home": "Home",
+            "transferExchange": "Transfer from exchange?",
+            "purchase": "Purchase via credit card"
         },
         "securitySettings": {
             "backToSettings": "Back to settings",

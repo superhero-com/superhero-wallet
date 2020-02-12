@@ -52,7 +52,7 @@ export default class Notification {
       try {
         await this.client.addNode(network, node, true);
       } catch (e) {
-        // console.log(e)
+        console.log(e);
       }
       this.client.selectNode(network);
     }
@@ -74,7 +74,7 @@ export default class Notification {
     const noties = await this.getAllNotifications();
     if (noties) {
       noties.forEach(async (tx, index) => {
-        if (tx != 'error' && tx) {
+        if (tx !== 'error' && tx) {
           const res = await this.client.poll(tx);
           const url = `${this.network.explorerUrl}/transactions/${tx}`;
           await this.sendNoti({ title: 'Transaction ready', message: `You can expore your transaction by clicking button below`, contextMessage: url, error: false });

@@ -32,7 +32,8 @@
         <ae-button class="flex flex-justify-between" @click="$emit('toggleMenu', $event, '.have-subDropdown')">
           <span>{{ $t('pages.appVUE.settings') }}</span>
           <ArrowDown class="arrow-down arrow" v-if="dropdown.settings" />
-          <ArrowRight class="arrow-right arrow" v-else />
+          <ArrowRight class="arrow-right arrow" v-if="!dropdown.settings" />
+          <ArrowRightWhite class="arrow-right arrow-right-white arrow" v-if="!dropdown.settings" />
         </ae-button>
         <ul class="sub-dropdown">
           <li>
@@ -80,6 +81,7 @@
 import { mapGetters } from 'vuex';
 import Close from '../../../icons/close.svg';
 import ArrowRight from '../../../icons/arrow-right.svg';
+import ArrowRightWhite from '../../../icons/arrow-right-white.svg';
 import ArrowDown from '../../../icons/arrow-down-white.svg';
 
 export default {
@@ -91,6 +93,7 @@ export default {
     Close,
     ArrowRight,
     ArrowDown,
+    ArrowRightWhite,
   },
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
@@ -252,6 +255,16 @@ export default {
 .dropdown li > .ae-button:hover span {
   color: $white-color;
 }
+.arrow-right-white {
+  display: none !important;
+}
+.dropdown li > .ae-button:hover .arrow-right {
+  display: none !important;
+}
+.dropdown li > .ae-button:hover .arrow-right-white {
+  display: block !important;
+}
+
 .dropdown li > .ae-button {
   width: 100%;
 }

@@ -112,6 +112,9 @@ export default [
     name: 'qrCodeReader',
     props: true,
     component: QrCodeReader,
+    meta: {
+      title: 'Scan QR',
+    },
   },
   {
     path: '/termsOfService',

@@ -2,7 +2,6 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import VueClipboard from 'vue-clipboard2';
 import Components from '@aeternity/aepp-components-3';
-import { QrcodeStream, QrcodeDropZone, QrcodeCapture } from 'vue-qrcode-reader';
 import routes from './routes';
 import '@aeternity/aepp-components-3/dist/aepp.components.css';
 import LoaderComponent from './components/Loader';
@@ -36,9 +35,6 @@ Vue.component('TransactionItem', TransactionItemComponent);
 Vue.component('SwitchButton', SwitchButtonComponent);
 Vue.component('Popup', Popup);
 Vue.component('Alert', AlertComponent);
-Vue.component('QrcodeStream', QrcodeStream);
-Vue.component('QrcodeDropZone', QrcodeDropZone);
-Vue.component('QrcodeCapture', QrcodeCapture);
 Vue.component('Modal', ModalComponent);
 Vue.component('AmountInput', AmountInput);
 Vue.component('AddressInput', AddressInput);
@@ -51,7 +47,6 @@ const router = new VueRouter({
 let isFirstTransition = true;
 const lastRouteKey = 'lsroute';
 const noRedirectUrls = ['/popup-sign-tx', '/connect', '/connect-confirm', '/sign-transaction/:type?', '/sign-transaction', '/ask-accounts', '/success-tip', '/qrCodeReader'];
-
 router.beforeEach((to, from, next) => {
   const lastRouteName = localStorage.getItem(lastRouteKey);
   const shouldRedirect = to.path === ('/' || '/account') && lastRouteName && isFirstTransition;

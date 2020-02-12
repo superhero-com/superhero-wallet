@@ -4,6 +4,8 @@
     <BalanceInfo />
     <TransactionFilters @filtrate="filtrate" />
     <ae-list class="allTransactions">
+      <div class="date" v-if="transactions.pending.length">Pending</div>
+      <PendingTxs />
       <div v-for="(trans, index) in groupedTransactionsByDate" v-bind:key="index">
         <TransactionItem v-for="transaction in t_transactions ? t_transactions : trans" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
       </div>
@@ -23,12 +25,14 @@ import { clearInterval, clearTimeout, setInterval } from 'timers';
 import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
 import TransactionFilters from '../components/TransactionFilters';
+import PendingTxs from '../components/PendingTxs';
 
 export default {
   components: {
     AccountInfo,
     BalanceInfo,
-    TransactionFilters
+    TransactionFilters,
+    PendingTxs
   },
   props: [''],
   data() {

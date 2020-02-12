@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="popup popup-no-padding">
     <div v-if="step == 1">
       <AccountInfo />
       <BalanceInfo />
@@ -10,23 +10,30 @@
           {{ $t('pages.tipPage.to') }}
         </p>
         <div class="d-flex">
-          <Textarea v-model="form.address" placeholder="ak.. / name.test" size="h-50"></Textarea>
+          <Textarea v-model="form.address" placeholder="ak.. / name.chain" size="h-50"></Textarea>
           <div class="scan" @click="scan">
             <QrIcon />
             <small>{{ $t('pages.send.scan') }}</small>
           </div>
         </div>
         <AmountSend @changeAmount="val => (form.amount = val)" :value="form.amount" />
-        <div class="button-group">
-          <Button @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
-          <Button @click="step = 2" :disabled="!form.address || !form.amount || (form.amount && isNaN(form.amount))">{{ $t('pages.send.review') }}</Button>
+        <div class="flex flex-align-center flex-justify-between">
+          <Button half @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
+          <Button half @click="step = 2" :disabled="!form.address || !form.amount || (form.amount && isNaN(form.amount))">{{ $t('pages.send.review') }}</Button>
         </div>
       </div>
     </div>
     <div v-if="step == 2">
       <div class="popup withdraw step2">
-        <p><AlertExclamination />{{ $t('pages.send.reviewtx') }}</p>
-        <p>{{ $t('pages.send.checkalert') }}</p>
+        <h3 class="heading-1 my-15 center">
+          <div class="flex flex-align-center flex-justify-content-center">
+            <AlertExclamination />
+            <span class="ml-7">{{ $t('pages.send.reviewtx') }}</span>
+          </div>
+        </h3>
+        <p class="primary-title primary-title-darker text-left my-5 f-16">
+          {{ $t('pages.send.checkalert') }}
+        </p>
         <div class="info-group">
           <label class="info-label">{{ $t('pages.send.sendingAddress') }}</label>
           <span class="info-span">{{ account.publicKey }}</span>
@@ -46,17 +53,23 @@
           </div>
         </div>
         <Button @click="step = 1" extend>{{ $t('pages.send.editTxDetails') }}</Button>
-        <div class="button-group">
-          <Button @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
-          <Button @click="send">{{ $t('pages.send.send') }}</Button>
+        <div class="flex flex-align-center flex-justify-between">
+          <Button half @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
+          <Button half @click="send" :disabled="sdk ? false : true">{{ $t('pages.send.send') }}</Button>
         </div>
       </div>
     </div>
     <div v-if="step == 3">
       <div class="popup withdraw step2">
-        <p><Heart /> {{ $t('pages.send.tx-success') }}</p>
-        <p>
-          {{ $t('pages.send.successalert') }} <span style="color:#FF4784"> {{ successTx.amount }} {{ tokenSymbol }}</span>
+        <h3 class="heading-1 my-15 center">
+          <div class="flex flex-align-center flex-justify-content-center">
+            <Heart />
+            <span class="ml-7">{{ $t('pages.send.tx-success') }}</span>
+          </div>
+        </h3>
+        <p class="primary-title primary-title-darker text-left my-5 f-16">
+          <span>{{ $t('pages.send.successalert') }}</span>
+          <span class="secondary-text ml-5"> {{ successTx.amount }} {{ tokenSymbol }}</span>
         </p>
         <div class="info-group">
           <label class="info-label">{{ $t('pages.send.to') }}</label>
@@ -82,8 +95,7 @@
 import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
-import { generateSignRequestUrl } from '../../utils/airGap';
-import { contractEncodeCall, checkAddress, chekAensName } from '../../utils/helper';
+import { contractEncodeCall, checkAddress, chekAensName, setPendingTx } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
 import AccountInfo from '../components/AccountInfo';
@@ -112,17 +124,10 @@ export default {
         amount: '',
       },
       loading: false,
-      tx: {
-        status: false,
-        hash: '',
-        block: '',
-        url: '',
-      },
       fee: {
         min: 0,
         max: 0,
       },
-      not_correct: false,
       successTx: {
         amount: '',
         from: '',
@@ -180,10 +185,7 @@ export default {
   created() {
     if (this.redirectstep && this.successtx) {
       this.step = 3;
-      this.successTx.amount = parseFloat(this.successtx.tx.amount / 10 ** 18).toFixed(3);
-      this.successTx.to = this.successtx.tx.recipientId;
-      this.successTx.from = this.successtx.tx.senderId;
-      this.successTx.hash = this.successtx.hash;
+      this.setTxDetails(this.successtx);
     }
     if (typeof this.address !== 'undefined') {
       this.form.address = this.address;
@@ -202,10 +204,6 @@ export default {
         },
       });
     },
-    setActiveToken(token) {
-      this.current.token = token;
-      this.$store.commit('RESET_TRANSACTIONS', []);
-    },
     async fetchFee() {
       const fee = await calculateFee(this.current.token == 0 ? TX_TYPES.txSign : TX_TYPES.contractCall, { ...(await this.feeParams()) });
       this.fee = fee;
@@ -223,9 +221,14 @@ export default {
         callData: await contractEncodeCall(this.sdk, FUNGIBLE_TOKEN_CONTRACT, 'transfer', [this.account.publicKey, '0']),
       };
     },
-    send() {
+    setTxDetails(tx) {
+      this.successTx.amount = parseFloat(tx.tx.amount / 10 ** 18).toFixed(3);
+      this.successTx.to = tx.tx.recipientId;
+      this.successTx.from = tx.tx.senderId;
+      this.successTx.hash = tx.hash;
+    },
+    async send() {
       const sender = this.subaccounts.filter(sender => sender.publicKey == this.account.publicKey);
-      const isAirGapAcc = sender[0].isAirGapAcc == true && sender[0].isAirGapAcc != undefined;
       const amount = BigNumber(this.form.amount).shiftedBy(MAGNITUDE);
       const receiver = this.form.address;
       if (receiver == '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
@@ -248,61 +251,18 @@ export default {
         this.loading = false;
         return;
       }
-      if (this.current.token != 0) {
-        if (this.maxValue - this.txFee <= 0) {
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'insufficient_balance' });
-          this.loading = false;
-          return;
+      this.loading = true;
+      try {
+        const result = await this.sdk.spend(parseInt(amount), receiver, { waitMined: false });
+        if (result.hash) {
+          await setPendingTx({ hash: result.hash, amount: this.form.amount, time: new Date().toLocaleTimeString(), type: 'spend' });
+          return this.$router.push('/account');
         }
-        if (this.tokenBalance - this.form.amount <= 0) {
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'insufficient_balance' });
-          this.loading = false;
-          return;
-        }
-        const tx = {
-          popup: false,
-          tx: {
-            source: FUNGIBLE_TOKEN_CONTRACT,
-            method: 'transfer',
-            params: [receiver, parseFloat(this.form.amount)],
-            address: this.tokens[this.current.token].contract,
-            amount: parseFloat(this.form.amount),
-            token: this.tokenSymbol,
-          },
-          type: 'contractCall',
-        };
-        this.$store.commit('SET_AEPP_POPUP', true);
-        this.$router.push({
-          name: 'sign',
-          params: {
-            data: tx,
-          },
-        });
-        return;
+        this.loading = false;
+      } catch (e) {
+        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+        this.loading = false;
       }
-      if (isAirGapAcc) {
-        browser.storage.local.get('airGapGeneratedKey').then(async publicKHex => {
-          const spendTx = await this.sdk.spendTx({ senderId: this.account.publicKey, recipientId: receiver, amount });
-          const generated = generateSignRequestUrl(this.network[this.current.network].networkId, spendTx, publicKHex.airGapGeneratedKey);
-          this.$router.push({ name: 'signTransactionByQrCode', params: { url: generated } });
-        });
-        return;
-      }
-      const tx = {
-        popup: false,
-        tx: {
-          amount: this.form.amount,
-          recipientId: receiver,
-        },
-        type: 'txSign',
-      };
-      this.$store.commit('SET_AEPP_POPUP', true);
-      this.$router.push({
-        name: 'sign',
-        params: {
-          data: tx,
-        },
-      });
     },
     init() {
       const calculatedMaxValue = this.balance - this.maxFee;
@@ -310,19 +270,12 @@ export default {
     clearForm() {
       setTimeout(() => {
         this.loading = false;
-        this.tx.status = false;
         this.form.address = '';
         this.form.amount = '';
       }, 2000);
     },
     navigateAccount() {
       this.$router.push('/account');
-    },
-    openExplorer(url) {
-      browser.tabs.create({ url, active: false });
-    },
-    selectSendSubaccount(account) {
-      this.form.address = account.publicKey;
     },
   },
 };

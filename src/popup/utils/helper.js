@@ -567,6 +567,19 @@ const setTxInQueue = async tx => {
   await browser.storage.local.set({ processingTx: list });
 };
 
+const setPendingTx = async tx => {
+  const { pendingTxs } = await browser.storage.local.get('pendingTxs');
+  let list = [];
+  if (pendingTxs && pendingTxs.length) {
+    list = [...list, ...pendingTxs];
+  }
+  list.push(tx);
+  await setTxInQueue(tx.hash);
+  return await browser.storage.local.set({ pendingTxs: list });
+};
+
+const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/[\""]/g,'');
+
 export {
   shuffleArray,
   convertToAE,
@@ -600,4 +613,6 @@ export {
   setTxInQueue,
   getExtensionProtocol,
   detectConnectionType,
+  setPendingTx,
+  escapeSpecialChars,
 };

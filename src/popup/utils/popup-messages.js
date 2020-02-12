@@ -47,6 +47,7 @@ export const INTEGER_REQUIRED = { type: 'error', title: 'Oops! Something went wr
 export const TX_LIMIT_PER_DAY = { type: 'error', title: 'Oops! Something went wrong', msg: 'You reach your daily limit for transactions! ' };
 export const TOKEN_MIGRATION_ERROR = { type: 'error', title: 'Oops! Something went wrong', msg: 'Token is not migrated! ' };
 export const REVEAL_SEED_IMPOSSIBLE = { type: 'error', title: 'Аttention to security', msg: 'This is only available after generating an account or after importing a phrase. ' };
+export const ERROR_QRCODE = { type: 'error', title: '', msg: '' };
 // success messages
 export const SIGNED_MESSAGE = {
   type: 'success',

@@ -3,36 +3,34 @@ if (navigator.userAgent.indexOf('Firefox') != -1) {
     navigator.mediaDevices
       .getUserMedia({ video: true })
       .then(result => {
-        browser.storage.local.set({ firefoxCameraAllowed: true }).then(() => {
-          const extensionUrl = browser.extension.getURL('./');
-          browser.tabs.create({ url: `${extensionUrl}/popup/popup.html#/qrCodeReader`, active: true });
-        });
+        browser.storage.local.set({ firefoxCameraAllowed: true });
+        alert('You have allowed the firefox camera. Now, try again scan QR code');
       })
       .catch(err => {
-        alert('You have denied the access to camera.');
+        alert(err);
       });
+  } else {
+    alert('Sorry, your browser does not support getUserMedia');
   }
 } else if (navigator.userAgent.indexOf('Chrome') != -1) {
   if (navigator.getUserMedia) {
-    // Request the camera.
     navigator.getUserMedia(
-      // Constraints
       {
         video: true,
       },
 
-      // Success Callback
       localMediaStream => {
-        alert('You have allowed the chrome camera. Now, try again to create a vault for AirGap! :)');
+        alert('You have allowed the chrome camera. Now, try again scan QR code');
+        window.close();
       },
 
-      // Error Callback
       err => {
-        // Log the error to the console.
-        console.log(`The following error occurred when trying to use getUserMedia: ${err}`);
+        alert(`The following error occurred when trying to use getUserMedia: ${err}`);
+        window.close();
       }
     );
   } else {
     alert('Sorry, your browser does not support getUserMedia');
+    window.close();
   }
 }
