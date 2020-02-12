@@ -8,7 +8,7 @@
       </div>
       <div class="holder">
         <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
-        <span class="seeTransaction" @click="seeTx"><Eye /></span>
+        <span class="seeTransaction" @click="seeTx(transactionData.hash)"><Eye /></span>
       </div>
     </ae-list-item>
   </div>
@@ -19,9 +19,10 @@ import { mapGetters } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import Eye from '../../../icons/eye.svg';
 import { convertToAE } from '../../utils/helper';
+import { decodeEvents } from '@aeternity/aepp-sdk/es/contract/aci/transformation' 
 
 export default {
-  props: ['transactionData', 'recent', 'dark'],
+  props: ['transactionData', 'recent', 'dark', 'network', 'current'],
   components: {
     Eye,
   },
@@ -31,19 +32,19 @@ export default {
       tipUrl: null,
       checkSdk: null,
       tipAmount: 0,
+      tipComment: null
     };
   },
   async created() {
-    console.log('transactionData => ', this.transactionData)
     this.checkSdk = setInterval(() => {
-      if (this.sdk !== null) {
+      if (this.sdk !== null && this.tipping != null) {
         this.getEventData();
         clearInterval(this.checkSdk);
       }
     }, 100);
   },
   computed: {
-    ...mapGetters(['account', 'popup', 'sdk', 'current']),
+    ...mapGetters(['account', 'popup', 'sdk', 'current', 'network', 'transactions', 'tipping']),
     balanceSign() {
       return this.transactionData.tx.sender_id == this.account.publicKey || this.transactionData.tx.account_id == this.account.publicKey ? 'minus' : 'plus';
     },
@@ -115,6 +116,7 @@ export default {
         this.tipUrl = decode(log[0].data).toString();
         this.tipAmount = convertToAE(log[0].topics[2]);
       } catch (e) {
+        console.log('Error => ', e)
       }
     },
     visitTipUrl() {
@@ -122,8 +124,9 @@ export default {
         browser.tabs.create({ url: this.tipUrl, active: true });
       }
     },
-    seeTx() {
-      browser.tabs.create({ url: 'https://coronanews.org/#/', active: true });
+    seeTx(txHash) {
+      let txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${txHash}`;
+      browser.tabs.create({ url: txUrl, active: true });
     },
   },
 };
