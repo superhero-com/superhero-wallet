@@ -1,7 +1,7 @@
 import { setInterval } from 'timers';
 import './lib/initPolyfills';
 import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
-import { detectBrowser, extractHostName, detectConnectionType } from './popup/utils/helper';
+import { extractHostName, detectConnectionType } from './popup/utils/helper';
 import WalletController from './wallet-controller';
 import Notification from './notifications';
 import rpcWallet from './lib/rpcWallet';

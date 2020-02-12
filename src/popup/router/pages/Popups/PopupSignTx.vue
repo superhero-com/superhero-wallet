@@ -112,6 +112,7 @@ import { mapGetters } from 'vuex';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { convertToAE, convertAmountToCurrency } from '../../../utils/helper';
 import Button from '../../components/Button';
+import getPopupProps from '../../../utils/getPopupProps';
 
 export default {
   components: {
@@ -130,13 +131,8 @@ export default {
     };
   },
   async created() {
-    const waitProps = setInterval(() => {
-      if (window.props) {
-        this.props = window.props;
-        this.unpackedTx = TxBuilder.unpackTx(this.props.action.params.tx);
-        clearInterval(waitProps);
-      }
-    });
+    this.props = await getPopupProps();
+    this.unpackedTx = TxBuilder.unpackTx(this.props.action.params.tx);
   },
   computed: {
     ...mapGetters([

@@ -42,9 +42,9 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { setInterval, clearInterval } from 'timers';
-import { setConnectedAepp, checkAeppConnected, setPermissionForAccount } from '../../../utils/helper';
+import { setPermissionForAccount } from '../../../utils/helper';
 import Button from '../../components/Button';
+import getPopupProps from '../../../utils/getPopupProps';
 
 export default {
   components: {
@@ -56,13 +56,8 @@ export default {
       imageError: false,
     };
   },
-  created() {
-    const waitProps = setInterval(() => {
-      if (window.props) {
-        this.data = window.props;
-        clearInterval(waitProps);
-      }
-    }, 500);
+  async created() {
+    this.data = await getPopupProps();
   },
   methods: {
     cancel() {

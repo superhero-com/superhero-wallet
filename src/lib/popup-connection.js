@@ -22,7 +22,6 @@ export const PopupConnections = stampit({
       const popup = this.getPopup(id);
       popup.connection = port;
       popup.setMessageListener();
-      popup.shareAeppInfo();
       this.popups.set(id, popup);
       popup.connection.onDisconnect.addListener(() => {
         this.removePopup(id);
@@ -49,17 +48,21 @@ export const PopupConnection = stampit({
   },
   methods: {
     async messageHandler(msg) {
+      const typeToAction = {
+        ACTION_DENY: 'deny',
+        ACTION_ACCEPT: 'accept',
+      };
+
       if (HDWALLET_METHODS.includes(msg.type)) {
         this.postMessage({ uuid: msg.uuid, res: await this.controller[msg.type](msg.payload) });
-      } else if (msg.action && (msg.action == 'deny' || msg.action == 'accept')) {
-        this.actions[msg.action]();
+      } else if (msg.type === 'POPUP_INFO') {
+        this.postMessage({ uuid: msg.uuid, res: this.aeppInfo });
+      } else if (typeToAction[msg.type]) {
+        this.actions[typeToAction[msg.type]]();
       }
     },
     setMessageListener() {
       this.connection.onMessage.addListener(this.messageHandler.bind(this));
-    },
-    shareAeppInfo() {
-      this.postMessage({ ...this.aeppInfo, type: 'POPUP_INFO' });
     },
     postMessage(msg) {
       this.connection.postMessage(msg);
