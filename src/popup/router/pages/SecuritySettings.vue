@@ -1,7 +1,6 @@
 <template>
   <div class="popup">
     <div v-if="type == ''">
-      <h3 style="text-align:center;">{{ $t('pages.securitySettings.heading') }}</h3>
       <div class="maindiv_input-group-addon">
         <h4>{{ $t('pages.securitySettings.seedRecoveryHeading') }}</h4>
         <hr />
@@ -54,7 +53,7 @@
         >
       </ae-phraser>
       <div class="phraseSubTitle">{{ $t('pages.seedPhrase.recoveryPhrase') }}</div>
-      <ae-phraser v-if="selectedSeed.length == 0">
+      <ae-phraser v-if="selectedSeed.length == 0" class="phraser">
         <ae-badge class="seedBadge selected">{{ $t('pages.seedPhrase.first') }}</ae-badge>
         <ae-badge class="seedBadge selected">{{ $t('pages.seedPhrase.second') }}</ae-badge>
         <ae-badge class="seedBadge selected">{{ $t('pages.seedPhrase.third') }}</ae-badge>
@@ -121,19 +120,20 @@ export default {
   },
   created() {},
   methods: {
-    seedPhraseRecovery() {
+    async seedPhraseRecovery() {
       this.type = '3';
       this.modal.visible = true;
       this.modal.title = this.$t('pages.securitySettings.showSeedPhrase');
       this.loading = true;
-      browser.storage.local.get('mnemonic').then(async seed => {
-        this.seedPhrase = seed.mnemonic;
-        this.setAlertData('alternative', true, seed.mnemonic);
-        const seedPhraseToArray = seed.mnemonic.split(' ');
+      const { mnemonic } = await browser.storage.local.get('mnemonic');
+      if (mnemonic) {
+        this.seedPhrase = mnemonic;
+        this.setAlertData('alternative', true, mnemonic);
+        const seedPhraseToArray = mnemonic.split(' ');
         this.seeds.forEach((item, index) => {
           item.name = seedPhraseToArray[index];
         });
-      });
+      }
     },
     navigateToAccount() {
       this.$router.push('/account');
@@ -181,7 +181,7 @@ export default {
           this.loading = true;
           this.seed_verified = true;
           this.type = '5';
-          browser.storage.local.set({ backed_up_Seed: true }).then(() => {});
+          browser.storage.local.set({ backed_up_Seed: true });
         }
       } else {
         this.seedError = { error: 'Oops! Incorrect length of words!' };
@@ -199,14 +199,6 @@ export default {
 .mnemonics p,
 .mnemonics button {
   color: #000 !important;
-}
-.primary-button {
-  background: #4f4f4f;
-  color: #fff;
-  margin: 1rem auto 0;
-  padding: 1rem;
-  font-weight: bold;
-  border-radius: 10px;
 }
 .regbtn {
   background: #ff0d6a;
@@ -265,6 +257,7 @@ small {
     cursor: unset;
     background: transparent;
     border: 2px solid #c1c1c1;
+    color: #fff;
   }
 }
 </style>

@@ -47,11 +47,19 @@ export default {
 .ae-overlay {
   background: rgba(18, 18, 23, 0.8) !important;
 }
-.ae-overlay .ae-modal-light {
+.ae-overlay .ae-modal-light,
+.ae-overlay .ae-modal {
   background: $border-color !important;
   width: 310px !important;
   border-radius: 5px !important;
 }
+.ae-overlay .ae-modal {
+  width: 100% !important;
+}
+.ae-overlay .ae-modal .mobile-right {
+  display: none !important;
+}
+
 .ae-overlay .ae-modal-light h1 {
   display: none;
 }
