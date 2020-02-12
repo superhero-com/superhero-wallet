@@ -25,7 +25,7 @@ import { decodeEvents } from '@aeternity/aepp-sdk/es/contract/aci/transformation
 export default {
   props: ['transactionData', 'recent', 'dark'],
   components: {
-    Eye,
+    Eye
   },
   data() {
     return {
