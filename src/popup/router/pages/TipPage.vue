@@ -1,5 +1,5 @@
 <template>
-  <div class="popup ">
+  <div class="popup">
     <div>
       <p class="primary-title text-left mb-8 f-16" v-if="!confirmMode">
         {{ $t('pages.tipPage.heading') }}
@@ -18,10 +18,10 @@
       <div class="tip-note-preview mt-15" v-if="confirmMode">
         {{ note }}
       </div>
-      <Button @click="toConfirm" :disabled="note && validAmount && !noteError && minCallFee ? false : true" v-if="!confirmMode">
+      <Button @click="toConfirm" :disabled="!note || !validAmount || noteError || !minCallFee" v-if="!confirmMode">
         {{ $t('pages.tipPage.next') }}
       </Button>
-      <Button @click="sendTip" v-if="confirmMode" :disabled="!tipping ? true : false">
+      <Button @click="sendTip" v-if="confirmMode" :disabled="!tipping">
         {{ $t('pages.tipPage.confirm') }}
       </Button>
       <Button @click="confirmMode = false" v-if="confirmMode">
@@ -36,9 +36,9 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { setInterval, setTimeout, setImmediate, clearInterval } from 'timers';
+import { setInterval, clearInterval } from 'timers';
 import BigNumber from 'bignumber.js';
-import { MAGNITUDE, MIN_SPEND_TX_FEE, calculateFee, TX_TYPES } from '../../utils/constants';
+import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
 import { setPendingTx, escapeSpecialChars } from '../../utils/helper';
 import TipBackground from '../../../icons/tip-bg.svg';
 import AmountSend from '../components/AmountSend';
@@ -52,10 +52,9 @@ export default {
   },
   data() {
     return {
-      tipUrl: false,
+      tipUrlCurrentTab: false,
       finalAmount: null,
       note: null,
-      domainDataInterval: null,
       confirmMode: false,
       amountError: false,
       noteError: false,
@@ -79,6 +78,13 @@ export default {
     getCurrencyAmount() {
       return (this.finalAmount * this.current.currencyRate).toFixed(3);
     },
+    tipUrl() {
+      const currentUrl = new URL(this.$route.fullPath, window.location);
+      const path = decodeURIComponent(currentUrl.searchParams.get('url'));
+      if (!path) return this.tipUrlCurrentTab;
+      const url = new URL(/^\w+:\D+/.test(path) ? path : `https://${path}`);
+      return url.toString();
+    },
   },
   watch: {
     finalAmount() {
@@ -87,10 +93,11 @@ export default {
   },
   created() {
     this.getDomainData();
-    this.domainDataInterval = setInterval(() => this.getDomainData(), 5000);
+    const domainDataInterval = setInterval(() => this.getDomainData(), 5000);
+    this.$once('hook:beforeDestroy', () => clearInterval(domainDataInterval));
   },
   methods: {
-    getDomainData() {
+    async getDomainData() {
       if (this.sdk !== null && !this.minCallFee) {
         this.txParams = {
           ...this.sdk.Ae.defaults,
@@ -102,7 +109,10 @@ export default {
           this.minCallFee = fee.min;
         } catch (e) {}
       }
-      browser.tabs.query({ active: true, currentWindow: true }).then(async tabs => (this.tipUrl = tabs[0].url));
+      if (process.env.IS_EXTENSION) {
+        const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+        this.tipUrlCurrentTab = tab.url;
+      }
     },
     toConfirm() {
       if (!this.minCallFee || this.maxValue - this.finalAmount <= 0 || isNaN(this.finalAmount) || this.finalAmount <= 0) {
@@ -137,20 +147,11 @@ export default {
         return this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
       }
     },
-    async tipWebsiteType() {
-      if (this.tipDomain) {
-        this.domain = extractHostName(this.url);
-      } else {
-        this.domain = this.url;
-      }
-    },
-  },
-  beforeDestroy() {
-    clearInterval(this.domainDataInterval);
   },
 };
 </script>
-<style lang="scss">
+
+<style lang="scss" scoped>
 .tip-bg {
   position: fixed;
   left: 50%;
