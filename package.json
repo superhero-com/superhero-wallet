@@ -50,6 +50,7 @@
     "coinkey": "^3.0.0",
     "cordova-android": "^8.1.0",
     "cordova-ios": "^5.1.1",
+    "cordova-plugin-customurlscheme": "^5.0.0",
     "cordova-plugin-headercolor": "^1.0.0",
     "cordova-plugin-splashscreen": "^5.0.3",
     "cordova-plugin-statusbar": "^2.4.3",
@@ -134,7 +135,10 @@
       "cordova-plugin-whitelist": {},
       "cordova-plugin-splashscreen": {},
       "cordova-plugin-statusbar": {},
-      "cordova-plugin-headercolor": {}
+      "cordova-plugin-headercolor": {},
+      "cordova-plugin-customurlscheme": {
+        "URL_SCHEME": "corona"
+      }
     },
     "platforms": [
       "android",
