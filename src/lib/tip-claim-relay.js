@@ -1,22 +1,12 @@
 import axios from 'axios';
 import { uniq } from 'lodash-es';
 import { contractCallStatic, getActiveAccount, getAddressFromChainName } from './background-utils';
-import { networks, DEFAULT_NETWORK, TIPPING_CONTRACT } from '../popup/utils/constants';
+import { networks, DEFAULT_NETWORK, TIPPING_CONTRACT, TIP_SERVICE } from '../popup/utils/constants';
 import { convertToAE } from '../popup/utils/helper';
 
-const SERVICE_URL = 'https://payfortx.z52da5wt.xyz';
-
 export default {
-  init() {},
-  signPersonalMessage(content = '') {},
-
-  sendMessageToService(message = '') {},
-
   checkAddressMatch(account, addresses) {
-    if (account == addresses || (Array.isArray(addresses) && addresses.includes(account))) {
-      return true;
-    }
-    return false;
+    return account == addresses || (Array.isArray(addresses) && addresses.includes(account));
   },
 
   async checkUrlHasBalance(url, { address, chainName }) {
@@ -44,7 +34,7 @@ export default {
               const amount = convertToAE(res.decodedResult);
               if (amount) {
                 axios
-                  .post(`${SERVICE_URL}/submit`, {
+                  .post(`${TIP_SERVICE}/submit`, {
                     url,
                     address: account.publicKey,
                   })

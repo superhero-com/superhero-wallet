@@ -12,7 +12,10 @@
         {{ $t('pages.tipPage.to') }}
         ({{ getCurrencyAmount }} {{ currentCurrency }}) to
       </p>
-      <a class="link-sm text-left block">{{ tipUrl }}</a>
+      <div class="flex flex-align-center flex-justify-between">
+        <a class="link-sm text-left block" style="width:90%;">  {{ tipUrl }} </a>
+        <CheckIcon v-if="urlVerified" />
+      </div>
       <AmountSend :amountError="amountError" @changeAmount="val => (finalAmount = val)" v-if="!confirmMode" :value="finalAmount" />
       <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" v-if="!confirmMode" />
       <div class="tip-note-preview mt-15" v-if="confirmMode">
@@ -38,30 +41,34 @@
 import { mapGetters } from 'vuex';
 import { setInterval, setTimeout, setImmediate, clearInterval } from 'timers';
 import BigNumber from 'bignumber.js';
-import { MAGNITUDE, MIN_SPEND_TX_FEE, calculateFee, TX_TYPES } from '../../utils/constants';
+import { MAGNITUDE, MIN_SPEND_TX_FEE, calculateFee, TX_TYPES, TIP_SERVICE } from '../../utils/constants';
 import { setPendingTx, escapeSpecialChars } from '../../utils/helper';
 import TipBackground from '../../../icons/tip-bg.svg';
+import CheckIcon from '../../../icons/check-icon.svg';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
+import axios from 'axios';
 
 export default {
   components: {
     TipBackground,
     AmountSend,
     Textarea,
+    CheckIcon
   },
   data() {
     return {
       tipUrl: false,
       finalAmount: null,
       note: null,
-      domainDataInterval: null,
+      feeInterval: null,
       confirmMode: false,
       amountError: false,
       noteError: false,
       loading: false,
       minCallFee: null,
       txParams: {},
+      urlVerified: false
     };
   },
   computed: {
@@ -87,10 +94,23 @@ export default {
   },
   created() {
     this.getDomainData();
-    this.domainDataInterval = setInterval(() => this.getDomainData(), 5000);
+    this.feeInterval = setInterval(() => { 
+      if(!this.minCallFee) {
+        this.getCallFee() 
+        clearInterval(this.feeInterval)
+      }
+    }, 5000);
   },
   methods: {
-    getDomainData() {
+    async getDomainData() {
+      const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+      if(tabs.length) {
+        this.tipUrl =  tabs[0].url
+        this.checkUrlVerified();
+      }
+      
+    },
+    getCallFee() {
       if (this.sdk !== null && !this.minCallFee) {
         this.txParams = {
           ...this.sdk.Ae.defaults,
@@ -100,9 +120,8 @@ export default {
         try {
           const fee = calculateFee(TX_TYPES.contractCall, this.txParams);
           this.minCallFee = fee.min;
-        } catch (e) {}
+        } catch (e) { console.log(e) }
       }
-      browser.tabs.query({ active: true, currentWindow: true }).then(async tabs => (this.tipUrl = tabs[0].url));
     },
     toConfirm() {
       if (!this.minCallFee || this.maxValue - this.finalAmount <= 0 || isNaN(this.finalAmount) || this.finalAmount <= 0) {
@@ -137,16 +156,20 @@ export default {
         return this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
       }
     },
-    async tipWebsiteType() {
-      if (this.tipDomain) {
-        this.domain = extractHostName(this.url);
-      } else {
-        this.domain = this.url;
-      }
-    },
+    async checkUrlVerified() {
+      try {
+        const res = (await axios.get(`${TIP_SERVICE}/verified`)).json()
+        if(res.includes(this.tipUrl)) {
+          this.$store.dispatch('popupAlert', { name: 'account', type: 'tip_url_verified' });
+          this.urlVerified = true
+        }
+      } catch(e) {
+        console.log(e)
+      } 
+    }
   },
   beforeDestroy() {
-    clearInterval(this.domainDataInterval);
+    clearInterval(this.feeInterval);
   },
 };
 </script>

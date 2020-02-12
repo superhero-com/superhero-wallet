@@ -123,6 +123,9 @@ export default {
           case 'error_qrcode':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.ERROR_QRCODE, msg: payload.msg, data: payload.data });
             break;
+          case 'tip_url_verified':
+            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TIP_URL_VERIFIED });
+            break;
           default:
             break;
         }

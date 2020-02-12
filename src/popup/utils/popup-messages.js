@@ -93,3 +93,4 @@ export const CONFIRM_PRIVACY_CLEAR = {
   buttonsFillSecondary: 'alternative',
 };
 export const TOKEN_MIGRATION = { type: 'success', title: 'Tokens migrated', msg: 'Your tokens was successfully migrated! ' };
+export const TIP_URL_VERIFIED = { type: 'success', title: '', msg: 'This URL has been verified.' };
