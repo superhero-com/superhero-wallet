@@ -578,7 +578,7 @@ const setPendingTx = async tx => {
   return await browser.storage.local.set({ pendingTxs: list });
 };
 
-const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/[\""]/g,'\\"');
+const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/[\""]/g,'');
 
 export {
   shuffleArray,
