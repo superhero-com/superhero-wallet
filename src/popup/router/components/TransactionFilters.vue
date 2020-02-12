@@ -55,7 +55,6 @@ export default {
       }
     },
     filtrateTx(type, date_type) {
-      console.log('type => ', type);
       switch (type) {
         case 'date':
           if (date_type == '') {

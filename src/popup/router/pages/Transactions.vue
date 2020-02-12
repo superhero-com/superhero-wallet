@@ -190,7 +190,6 @@ export default {
           }
         break;
         case 'received':
-          console.log('received')
           this.t_transactions = this.filterReceived;
           if (Object.entries(this.t_transactions).length === 0) {
             this.noTransactionsFound = 'No Transactions found';
@@ -198,7 +197,6 @@ export default {
         break;
         case 'topups':
           this.noTransactionsFound = '';
-          console.log('topups')
           this.t_transactions = this.filterTopups;
           if (Object.entries(this.t_transactions).length === 0) {
             this.noTransactionsFound = 'No Transactions found';
