@@ -36,11 +36,11 @@
           <ArrowRightWhite class="arrow-right arrow-right-white arrow" v-if="!dropdown.settings" />
         </ae-button>
         <ul class="sub-dropdown">
-          <li>
+          <!-- <li>
             <ae-button @click="general">
               {{ $t('pages.appVUE.general') }}
             </ae-button>
-          </li>
+          </li> -->
           <li>
             <ae-button @click="security">
               {{ $t('pages.appVUE.security') }}
@@ -58,21 +58,21 @@
           </li>
         </ul>
       </li>
-      <li>
+      <!-- <li>
         <ae-button @click="advanced">
           {{ $t('pages.appVUE.advanced') }}
         </ae-button>
-      </li>
+      </li> -->
       <li>
         <ae-button @click="about">
           {{ $t('pages.appVUE.help') }}
         </ae-button>
       </li>
-      <li>
+      <!-- <li>
         <ae-button @click="versions">
           {{ $t('pages.appVUE.versions') }}
         </ae-button>
-      </li>
+      </li> -->
     </ul>
   </div>
 </template>
