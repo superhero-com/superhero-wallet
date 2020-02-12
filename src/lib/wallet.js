@@ -26,6 +26,7 @@ export default {
                 publicKey: user.userAccount.publicKey,
                 root: true,
                 balance: 0,
+                aename: null,
               });
             }
             if (subaccounts.hasOwnProperty('subaccounts') && subaccounts.subaccounts.length > 0 && subaccounts.subaccounts != '') {

@@ -207,10 +207,13 @@ export default {
             return [];
           })(),
         ]);
-
         names = flatten(names);
         names = uniqBy(names, 'name');
-        if (names.length) commit(types.SET_ACCOUNT_AENS, { account: index, name: names[0].name, pending: !!names[0].pending });
+        if (names.length) {
+          commit(types.SET_ACCOUNT_AENS, { account: index, aename: names[0].name, pending: !!names[0].pending });
+        } else {
+          commit(types.SET_ACCOUNT_AENS, { account: index, aename: null, pending: false });
+        }
         browser.storage.local.get('pendingNames').then(pNames => {
           let pending = [];
           if (pNames.hasOwnProperty('pendingNames') && pNames.pendingNames.hasOwnProperty('list')) {
@@ -232,6 +235,7 @@ export default {
         return names;
       })
     );
+    await browser.storage.local.set({ subaccounts: state.subaccounts });
     commit(types.SET_NAMES, { names: Array.prototype.concat.apply([], res) });
   },
   async removePendingName({ commit, state }, { hash }) {

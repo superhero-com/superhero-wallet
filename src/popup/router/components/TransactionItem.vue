@@ -144,7 +144,7 @@ export default {
   text-decoration: none;
   list-style: none;
   cursor: default;
-  border-top: 1px solid transparent ;
+  border-top: 1px solid transparent;
 
   .holder {
     display: flex;

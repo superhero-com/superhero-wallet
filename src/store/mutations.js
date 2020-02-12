@@ -62,8 +62,8 @@ export default {
   [types.SET_ACCOUNT_NAME](state, payload) {
     state.subaccounts[state.activeAccount].name = payload;
   },
-  [types.SET_ACCOUNT_AENS](state, { account, name, pending }) {
-    state.subaccounts[account].name = name;
+  [types.SET_ACCOUNT_AENS](state, { account, aename, pending }) {
+    state.subaccounts[account].aename = aename;
     state.subaccounts[account].pending = pending;
   },
   [types.SET_PENDING_NAMES](state, { names }) {
