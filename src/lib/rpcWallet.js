@@ -24,7 +24,6 @@ const rpcWallet = {
   },
   async initSubaccounts() {
     const subaccounts = await getAccounts();
-    console.log(subaccounts);
     this.subaccounts = subaccounts;
     return Promise.resolve(true);
   },
