@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+  <g id="url-verified-icon" transform="translate(194 -630)">
+    <circle id="Ellipse_15" data-name="Ellipse 15" cx="10" cy="10" r="10" transform="translate(-194 630)" fill="#6a8ebe"/>
+    <circle id="Ellipse_16" data-name="Ellipse 16" cx="6.667" cy="6.667" r="6.667" transform="translate(-190.667 633.333)" fill="#f1f1f1"/>
+    <g id="Selection_Control_Checkbox_On_Enabled" data-name="Selection Control / Checkbox / On / Enabled" transform="translate(-191.5 632.5)">
+      <path id="Selection_Control_Checkbox_On_Enabled-2" data-name="Selection Control / Checkbox / On / Enabled" d="M19.333-681H7.667A1.666,1.666,0,0,0,6-679.333v11.667A1.666,1.666,0,0,0,7.667-666H19.333A1.666,1.666,0,0,0,21-667.667v-11.667A1.666,1.666,0,0,0,19.333-681Zm-7.5,11.667L7.667-673.5l1.175-1.175,2.992,2.983,6.325-6.325,1.175,1.183Z" transform="translate(-6 681)" fill="#6a8ebe"/>
+    </g>
+  </g>
+</svg>
