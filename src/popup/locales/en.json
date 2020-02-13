@@ -2,7 +2,8 @@
     "pages": {
         "intro": {
             "heading" :"Intro",
-            "skip": "Skip"
+            "skip": "Skip",
+            "generateWallet": "Generate Wallet"
         },
         "appVUE": {
             "systemName": "Corona",

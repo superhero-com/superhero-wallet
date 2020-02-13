@@ -56,11 +56,6 @@ export default {
   .ae-address {
     color: $text-color !important;
     font-size: 11px;
-    display: inline-block;
-    width: 300px;
-    white-space: nowrap;
-    overflow: hidden !important;
-    text-overflow: ellipsis;
   }
   .account-addresses {
     position: relative;

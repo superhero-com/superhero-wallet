@@ -1,14 +1,10 @@
 <template>
   <div class="popup">
-    <!-- <div class="createWallet-holder">
+    <div class="createWallet-holder" >
       <div v-show="step === 1">
-        <h2>{{ $t('pages.intro.heading') }}</h2>
-        <p>(Onboarding page {{ step }} of {{ totalsteps }})</p>
-        <div style="font-weight:bold;">How to CLAIM tips</div>
+        <h2><Claim /> Receive <span class="aeid">æid</span></h2>
         <div class="text-info">
-          Do so written as raising parlors spirits mr elderly. Made late in of high left hold. Carried females of up highest calling. Limits marked led silent dining her she far.
-          Sir but elegance marriage dwelling likewise position old pleasure men. Dissimilar themselves simplicity no of contrasted as. Delay great day hours men. Stuff front to do
-          allow to asked he.
+          for creating great content, engaging in meaningful discussions, curating good content from others, launching causes for humanity, and for just being a wonderful human being.
         </div>
         <div class="dotstyle dotstyle-fillup">
           <ul>
@@ -16,18 +12,14 @@
             <li @click="step = 2"><a></a></li>
             <li @click="step = 3"><a></a></li>
           </ul>
+          <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
         </div>
-        <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
       </div>
 
       <div v-show="step === 2">
-        <h2>{{ $t('pages.intro.heading') }}</h2>
-        <p>(Onboarding page {{ step }} of {{ totalsteps }})</p>
-        <div style="font-weight:bold;">How to SEND TIPS</div>
+        <h2><Heart /> Send <span class="aeid">æid</span></h2>
         <div class="text-info">
-          Mr do raising article general norland my hastily. Its companions say uncommonly pianoforte favourable. Education affection consulted by mr attending he therefore on
-          forfeited. High way more far feet kind evil play led. Sometimes furnished collected add for resources attention. Norland an by minuter enquire it general on towards
-          forming. Adapted mrs totally company two yet conduct men.
+          to great content creators online, humanitarian causes, and other awesome human beings—for whatever reason.
         </div>
         <div class="dotstyle dotstyle-fillup">
           <ul>
@@ -35,21 +27,16 @@
             <li @click="step = 2" class="current"><a></a></li>
             <li @click="step = 3"><a></a></li>
           </ul>
+          <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
         </div>
-        <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
       </div>
 
       <div v-show="step === 3">
-        <h2>{{ $t('pages.intro.heading') }}</h2>
-        <p>(Onboarding page {{ step }} of {{ totalsteps }})</p>
-        <div style="font-weight:bold;">How to ADD tokens cashing out</div>
         <div class="text-info">
-          Its had resolving otherwise she contented therefore. Afford relied warmth out sir hearts sister use garden. Men day warmth formed admire former simple.
+          This wallet does not—and will never take commissions off the <span class="aeid">æid</span> you send or receive. Corona was created specifically so that no one but you will have control over your funds.
         </div>
-        <div style="font-weight:bold;">Cashing Out</div>
-        <div>
-          Humanity declared vicinity continue supplied no an. He hastened am no property exercise of. Dissimilar comparison no terminated devonshire no literature on. Say most yet
-          head room such just easy.
+        <div style="float:left;margin-top:2rem;">
+          Ever.
         </div>
         <div class="dotstyle dotstyle-fillup">
           <ul>
@@ -57,8 +44,8 @@
             <li @click="step = 2"><a></a></li>
             <li @click="step = 3" class="current"><a></a></li>
           </ul>
+          <Button @click="createWallet">{{ $t('pages.intro.generateWallet') }}</Button>
         </div>
-        <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
       </div>
 
       <div v-show="step === 4">
@@ -81,14 +68,21 @@
         <p style="bottom: 50px; color: rgb(235, 88, 250); position: absolute; margin: 0 auto; width: 100%;"><b>Enjoy your autonomy</b></p>
         <button @click="createWallet" class="createWallet-button">Go to Dashboard</button>
       </div>
-    </div> -->
+    </div>
   </div>
 </template>
 
 <script>
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
-
+import Claim from '../../../icons/claim.svg';
+import Heart from '../../../icons/heart.svg';
+import Button from '../components/Button'
 export default {
+  components: {
+    Claim,
+    Heart,
+    Button
+  },
   data() {
     return {
       step: 1,
@@ -97,7 +91,6 @@ export default {
     };
   },
   async created() {
-    this.createWallet();
   },
   methods: {
     async createWallet() {
@@ -126,22 +119,33 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../../common/variables';
 .createWallet-holder {
   position: relative;
   height: 80vh;
-}
-.createWallet-holder .skip-button {
-  font-style: italic;
-  text-transform: uppercase;
-  left: 0;
-  right: 0;
-  bottom: 15px;
-  position: absolute;
-  margin: 0 auto;
-  font-size: 25px;
-}
-.createWallet-holder .text-info {
-  margin: 10px;
+  padding-top: 40px;
+  h2 {
+    display: flex;
+    justify-content: center;
+    font-size: 18px;
+    svg {
+      margin-right: 10px;
+    }
+  }
+  .aeid {
+    color: $secondary-color !important ;
+  }
+  .text-info {
+    margin: 10px 0 0 0;
+    color: $text-color !important;
+  }
+  .skip-button {
+    color: $accent-color !important;
+    font-size: 18px;
+    margin-top: 30px;
+    text-decoration: underline;
+    width: 100%;
+  }
 }
 .createWallet-button {
   background: #4f4f4f;
@@ -156,11 +160,10 @@ export default {
   border-radius: 10px;
 }
 .dotstyle {
-  position: absolute;
-  bottom: 50px;
+  position: fixed;
   left: 0;
   right: 0;
-  margin: 0 auto;
+  top: 50%;
 }
 .dotstyle ul {
   position: relative;
@@ -195,7 +198,7 @@ export default {
 /* Fill up */
 .dotstyle-fillup li a {
   overflow: hidden;
-  background-color: #ccc;
+  background-color: $text-color !important;
   transition: background 0.3s;
 }
 
@@ -217,7 +220,7 @@ export default {
 }
 
 .dotstyle-fillup li.current a {
-  background-color: #7d7d7d;
+  background-color: $secondary-color !important;
 }
 .dotstyle-fillup li.current a::after {
   height: 100%;

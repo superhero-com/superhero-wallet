@@ -57,7 +57,7 @@ export default {
 
   .content {
     height: 50px;
-    max-width: 380px;
+    max-width: 357px;
     margin: 0 auto;
     padding: 0 20px;
     display: flex;

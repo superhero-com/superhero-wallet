@@ -1,5 +1,6 @@
 <template>
   <ae-main :class="$route.path === '/receive' ? 'ae-main-receive' : ''">
+    <div class="background-big-wave" :style="$route.path === '/intro' ? { 'background-image': 'url(' + wave_bg + ') !important' } : ''" ></div>
     <Header @toggle-sidebar="showSidebar = !showSidebar" />
 
     <router-view :key="$route.fullPath" />
@@ -33,6 +34,7 @@ export default {
     NodeConnectionStatus,
   },
   data: () => ({
+    wave_bg: browser.runtime.getURL('../icons/background-big-wave.png'),
     showSidebar: false,
     checkSDKReady: null,
   }),
@@ -109,6 +111,21 @@ export default {
 </style>
 
 <style lang="scss" scoped>
+*:not(.background-big-wave) {
+  z-index: 1;
+}
+.background-big-wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  top: 0;
+  background: transparent;
+  background-position-y: bottom;
+  background-position-x: right;
+  background-repeat: no-repeat;
+}
 .ae-main {
   &.ae-main-receive {
     background: #1d1d25 !important;
