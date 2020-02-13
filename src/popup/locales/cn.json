@@ -4,6 +4,20 @@
             "heading" :"介绍",
             "skip": "跳过"
         },
+        "titles": {
+            "settings": "设置",
+            "general": "通常",
+            "security": "安全",
+            "about": "关于",
+            "send": "发送❤币",
+            "scanQr": "扫描二维码",
+            "terms": "服务条款",
+            "privacy": "隐私政策",
+            "importAccount": "导入账号",
+            "activity": "活动",
+            "withdraw": "提取",
+            "topUp": "充值"
+        },
         "appVUE": {
             "systemName": "Corona",
             "manageNetworks": "网络管理",
