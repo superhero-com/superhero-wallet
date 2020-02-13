@@ -9,7 +9,7 @@
       <TransactionItem v-for="transaction in t_transactions" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
     </ae-list>
     <div v-if="!t_transactions.length">
-        <p>No Transactions found</p>
+        <p>{{ $t('pages.transactions.noTransactions') }}</p>
     </div>
     <div class="newTx" @click="mergeNewTransactions" v-if="newTransactions != 0">
       <span class="newTxCount">{{ newTransactions }}</span> {{ $t('pages.transactions.newTransactions') }}
@@ -75,9 +75,9 @@ export default {
       switch (this.type) {
         case 'date':
           if (this.date_type == 'recent') {
-            return this.transactions.all.sort(( a, b) => ( new Date(b.time) - new Date(a.time)) )
+            return this.transactions.all.slice().sort(( a, b) => ( new Date(b.time) - new Date(a.time)) )
           } else if (this.date_type == 'oldest') {
-            return this.transactions.all.sort(( a, b) => ( new Date(a.time) - new Date(b.time)) )
+            return this.transactions.all.slice().sort(( a, b) => ( new Date(a.time) - new Date(b.time)) )
           }
         break;
         case 'sent':

@@ -6,7 +6,7 @@
         :class="type == 'date' ? 'active' : ''"
         @click="filtrateTx('date', date_type)"
       >
-        <span>Date</span>
+        <span>{{ $t('pages.transactionDetails.date') }}</span>
         <FilterArrow :class="direction" />
       </span>
       <span
