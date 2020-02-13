@@ -1,75 +1,42 @@
 <template>
-  <div>
-    <div class="ae-header" :class="account.publicKey && isLoggedIn ? 'logged' + (aeppPopup ? ' aeppPopup' : '') : ''">
-      <header class="flex " :class="isLoggedIn ? 'flex-justify-between' : 'flex-justify-content-start'">
-        <div class="dropdown" v-if="!aeppPopup">
-          <Arrow class="arrow-back mt-15" @click="goBack" v-if="title" />
-          <Logo class="dropdown-button-icon mt-15" slot="button" v-else />
-        </div>
-        <div class="nav-title">
-          <p v-if="title" class="flex flex-align-center">
-            <span class="title-text"> {{ title }} </span>
-          </p>
-          <p v-else class="flex flex-align-center">
-            <span class="title-text"> {{ $t('pages.appVUE.coronaWallet') }} </span>
-          </p>
-        </div>
+  <div class="header" v-if="showNavigation">
+    <div class="content" :class="{ isLoggedIn }">
+      <Arrow v-if="title" @click="goBack" />
+      <Logo v-else />
 
-        <div id="account" class="dropdown" v-if="account.publicKey && isLoggedIn && !aeppPopup">
-          <Bell style="margin: 5px;" />
-          <button class="acc-dropdown" v-on:click="toggleDropdown">
-            <Hamburger class="dropdown-button-icon" style="padding-top:9px;" />
-          </button>
-          <transition name="slide">
-            <SidebarMenu :dropdown="dropdown" :open="dropdown.account" @toggleMenu="toggleDropdown" @closeMenu="dropdown.account = false" />
-          </transition>
-        </div>
-      </header>
+      <div class="title">
+        {{ title || 'Corona Wallet ' }}
+      </div>
+
+      <div v-if="isLoggedIn">
+        <Bell />
+        <button @click="$emit('toggle-sidebar')">
+          <Hamburger />
+        </button>
+      </div>
     </div>
-    <div class="menu-overlay" v-if="dropdown.account" @click="dropdown.account = false"></div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import SidebarMenu from './SidebarMenu';
 import Arrow from '../../../icons/arrow.svg';
 import Bell from '../../../icons/bell.svg';
 import Hamburger from '../../../icons/hamburger.svg';
 import Logo from '../../../icons/logo-small.svg';
 
 export default {
-  props: {
-    title: String,
-  },
-  components: {
-    SidebarMenu,
-    Arrow,
-    Bell,
-    Hamburger,
-    Logo,
-  },
-  data() {
-    return {
-      dropdown: {
-        account: false,
-        settings: false,
-      },
-    };
-  },
+  components: { Arrow, Bell, Hamburger, Logo },
   computed: {
-    ...mapGetters(['account', 'isLoggedIn', 'aeppPopup']),
+    ...mapGetters(['isLoggedIn']),
+    title() {
+      return this.$route.meta.title;
+    },
+    showNavigation() {
+      return this.$route.meta.navigation !== undefined ? this.$route.meta.navigation : true;
+    },
   },
   methods: {
-    toggleDropdown(event, parentClass) {
-      if (!this.aeppPopup) {
-        if (typeof parentClass === 'undefined') {
-          parentClass = '.dropdown';
-        }
-        const dropdownParent = event.target.closest(parentClass);
-        this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
-      }
-    },
     goBack() {
       this.$router.push(this.isLoggedIn ? '/account' : '/');
     },
@@ -77,10 +44,54 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.ae-header header {
-  padding: 0 10px;
-  max-width: 380px !important;
-  margin: 0 auto;
+<style lang="scss" scoped>
+.header {
+  padding-top: env(safe-area-inset-top);
+  background-color: #21212a;
+  border-bottom: 3px solid #3a3a47;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 8;
+
+  .content {
+    height: 50px;
+    max-width: 380px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:not(.isLoggedIn) .title {
+      margin-left: 15px;
+    }
+
+    &.isLoggedIn {
+      justify-content: space-between;
+      position: relative;
+
+      > :not(.title) {
+        z-index: 1;
+      }
+
+      .title {
+        position: absolute;
+        left: 0;
+        right: 0;
+        text-align: center;
+      }
+    }
+
+    svg {
+      vertical-align: middle;
+    }
+
+    button {
+      padding: 0;
+      margin-left: 5px;
+    }
+  }
 }
 </style>
