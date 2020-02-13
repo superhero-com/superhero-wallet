@@ -5,10 +5,6 @@ body, .ae-main, html {
     font-size:$font-size;
     font-family: 'Roboto', sans-serif !important;
 }
-.ae-main-receive {
-    background:#1d1d25 !important; 
-    min-height: 600px !important;
-}
 .popup {
     max-width: 380px !important;
     margin:0 auto;
@@ -19,9 +15,12 @@ body, .ae-main, html {
 #app {
     font-family: 'Roboto', sans-serif !important;
 }
-* {
+:not(svg):not(rect) {
     font-family: 'Roboto', sans-serif !important;
-    color: $white-color;
+
+    &:not(a) {
+        color: $white-color;
+    }
 }
 .disabled {
     opacity: .4;
@@ -29,7 +28,7 @@ body, .ae-main, html {
 }
 
 a {
-    color: $accent-color !important;
+    color: $accent-color;
     text-decoration: underline;
     cursor: pointer;
 }
@@ -141,7 +140,7 @@ a {
     word-break: break-word;
 }
 
-/** 
+/**
 * Dynamic Margins Utilities Clasess
 */
 @mixin margin-left($i) {
@@ -172,7 +171,7 @@ a {
   .mx-#{$i} { @include margin-x($i); }
   .my-#{$i} { @include margin-y($i); }
 }
-.mr-auto { 
+.mr-auto {
     margin-right: auto;
 }
 

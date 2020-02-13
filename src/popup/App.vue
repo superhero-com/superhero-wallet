@@ -1,10 +1,16 @@
 <template>
-  <ae-main :class="onAccount ? 'ae-main-account' : onReceive ? 'ae-main-receive' : ''">
-    <Header v-if="showNavigation" :title="title" />
-    <hr style="margin: 0; background: #3a3a47; height: 2px; border: 0;" />
-    <router-view :key="$route.fullPath"></router-view>
+  <ae-main :class="$route.path === '/receive' ? 'ae-main-receive' : ''">
+    <Header @toggle-sidebar="showSidebar = !showSidebar" />
 
-    <Loader size="big" :loading="mainLoading"></Loader>
+    <router-view :key="$route.fullPath" />
+
+    <transition name="slide">
+      <div class="menu-overlay" v-if="showSidebar" @click.self="showSidebar = false">
+        <SidebarMenu @closeMenu="showSidebar = false" />
+      </div>
+    </transition>
+
+    <Loader size="big" :loading="mainLoading" />
     <NodeConnectionStatus />
   </ae-main>
 </template>
@@ -15,54 +21,32 @@ import { clearInterval, setInterval } from 'timers';
 import { AEX2_METHODS } from './utils/constants';
 import { postMessage, readWebPageDom } from './utils/connection';
 import { getCurrencies } from './utils/helper';
-import { langs, fetchAndSetLocale } from './utils/i18nHelper';
-import NodeConnectionStatus from './router/components/NodeConnectionStatus';
+import { fetchAndSetLocale } from './utils/i18nHelper';
 import Header from './router/components/Header';
+import SidebarMenu from './router/components/SidebarMenu';
+import NodeConnectionStatus from './router/components/NodeConnectionStatus';
 
 export default {
   components: {
-    NodeConnectionStatus,
     Header,
+    SidebarMenu,
+    NodeConnectionStatus,
   },
-  data() {
-    return {
-      language: '',
-      checkSDKReady: null,
-      onAccount: false,
-      onReceive: false,
-      showNavigation: false,
-      title: '',
-    };
-  },
-  computed: {
-    ...mapGetters(['account', 'current', 'network', 'popup', 'isLoggedIn', 'activeNetwork', 'balance', 'sdk', 'mainLoading', 'nodeConnecting', 'currencies']),
-    extensionVersion() {
-      return `v.${process.env.npm_package_version}`;
-    },
-  },
-  watch: {
-    $route(to) {
-      this.title = to.meta.title || '';
-      this.showNavigation = typeof to.meta.navigation !== 'undefined' ? to.meta.navigation : true;
-      this.onAccount = to.path === '/account';
-      this.onReceive = to.path === '/receive';
-    },
-  },
+  data: () => ({
+    showSidebar: false,
+    checkSDKReady: null,
+  }),
+  computed: mapGetters(['account', 'current', 'mainLoading']),
   async created() {
-    this.title = this.$router.currentRoute.meta.title;
-    this.showNavigation = this.$router.currentRoute.meta.navigation;
+    const { language, activeNetwork } = await browser.storage.local.get(['language', 'activeNetwork']);
 
-    browser.storage.local.get('language').then(data => {
-      this.$store.state.current.language = data.language;
-      if (typeof data.language !== 'undefined') {
-        fetchAndSetLocale(data.language);
-      }
-    });
-    browser.storage.local.get('activeNetwork').then(data => {
-      if (data.hasOwnProperty('activeNetwork') && data.activeNetwork != 0) {
-        this.$store.state.current.network = data.activeNetwork;
-      }
-    });
+    this.$store.state.current.language = language;
+    if (language) fetchAndSetLocale(language);
+
+    if (activeNetwork) {
+      this.$store.state.current.network = activeNetwork;
+    }
+
     if (process.env.IS_EXTENSION) {
       readWebPageDom((receiver, sendResponse) => {
         this.$store.commit('SET_TIPPING_RECEIVER', receiver);
@@ -87,7 +71,6 @@ export default {
         }, 100);
       }
     },
-
     pollData() {
       let triggerOnce = false;
       this.polling = setInterval(async () => {
@@ -127,9 +110,39 @@ export default {
 
 <style lang="scss" scoped>
 .ae-main {
-  .coronaTitle,
-  .ae-header {
-    padding-top: env(safe-area-inset-top);
+  &.ae-main-receive {
+    background: #1d1d25 !important;
+    min-height: 600px;
+  }
+
+  .menu-overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(#000, 0.6);
+    z-index: 10;
+  }
+
+  .slide-enter-active,
+  .slide-enter-active .sidebar-menu,
+  .slide-leave-active,
+  .slide-leave-active .sidebar-menu {
+    transition-property: right, opacity;
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
+  }
+  .slide-leave-active,
+  .slide-leave-active .sidebar-menu {
+    transition-duration: 0.2s;
+  }
+  .slide-enter .sidebar-menu,
+  .slide-leave-to .sidebar-menu {
+    right: -200px;
+  }
+  .slide-leave-to .sidebar-menu {
+    opacity: 0;
   }
 }
 </style>
