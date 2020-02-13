@@ -6,11 +6,11 @@
     <ae-list class="allTransactions">
       <div class="date" v-if="transactions.pending.length">Pending</div>
       <PendingTxs />
-      <div v-for="(trans, index) in groupedTransactionsByDate" v-bind:key="index">
-        <TransactionItem v-for="transaction in t_transactions ? t_transactions : trans" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
-      </div>
-      <p v-if="noTransactionsFound !== ''">{{ noTransactionsFound }}</p>
+      <TransactionItem v-for="transaction in t_transactions" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
     </ae-list>
+    <div v-if="!t_transactions.length">
+        <p>No Transactions found</p>
+    </div>
     <div class="newTx" @click="mergeNewTransactions" v-if="newTransactions != 0">
       <span class="newTxCount">{{ newTransactions }}</span> {{ $t('pages.transactions.newTransactions') }}
     </div>
@@ -55,8 +55,8 @@ export default {
         direction: '',
       },
       upadateInterval: null,
-      t_transactions: null,
-      noTransactionsFound: ''
+      type: '',
+      date_type: ''
     };
   },
   computed: {
@@ -68,67 +68,46 @@ export default {
       this.loading = true;
       return this.account.publicKey;
     },
-    groupedTransactionsByDate() {
-      let txs =
-        this.filter.direction === ''
-          ? this.transactions.all
-          : this.filter.direction == 'incoming'
-          ? this.transactions.all.filter(tx => tx.tx.recipient_id == this.account.publicKey)
-          : this.transactions.all.filter(tx => tx.tx.sender_id == this.account.publicKey);
-      if (this.filter.spendType == 'spendTx') {
-        txs = txs.filter(tx => tx.tx.type == 'SpendTx');
-      } else if (this.filter.spendType == 'namePreclaimTx') {
-        txs = txs.filter(tx => tx.tx.type == 'NamePreclaimTx');
-      } else if (this.filter.spendType == 'nameClaimTx') {
-        txs = txs.filter(tx => tx.tx.type == 'NameClaimTx');
-      } else if (this.filter.spendType == 'nameUpdateTx') {
-        txs = txs.filter(tx => tx.tx.type == 'NameUpdateTx');
-      } else if (this.filter.spendType == 'contractCreateTx') {
-        txs = txs.filter(tx => tx.tx.type == 'ContractCreateTx');
-      }
-
-      return groupBy(orderBy(txs, ['time'], ['desc']), tx => {
-        const dateString = new Date(tx.time).toDateString();
-        return dateString === new Date().toDateString() ? 'Today' : dateString;
-      });
-    },
     watchToken() {
       return this.current.token;
     },
-
-
-    filterDateRecent() {
-      this.t_transactions.sort( ( a, b) => {
-        return new Date(b.time) - new Date(a.time);
-      });
-      return this.t_transactions;
-    },
-    filterDateOldest() {
-      this.t_transactions.sort( ( a, b) => {
-        return new Date(a.time) - new Date(b.time);
-      });
-      return this.t_transactions;
-    },
-    filterSent() { // sent tipings
-      return this.t_transactions.filter(tr =>
-        tr.tx.caller_id != 'undefined' && tr.tx.type == "ContractCallTx" && tr.tx.caller_id == this.publicKey
-      );
-    },
-    filterReceived() { // received tipings
-      return this.t_transactions.filter(tr =>
-        tr.tx.recipient_id != 'undefined' && tr.tx.type == "ContractCallTx" && tr.tx.recipient_id == this.publicKey
-      );
-    },
-    filterTopups() { // received spend txs
-      return this.t_transactions.filter(tr =>
-        tr.tx.recipient_id != 'undefined' && tr.tx.type == "SpendTx" && tr.tx.recipient_id == this.publicKey
-      );
-    },
-    filterWithdrawals() { // sent spend txs
-      return this.t_transactions.filter(tr =>
-        tr.tx.sender_id != 'undefined' && tr.tx.type == "SpendTx" && tr.tx.sender_id == this.publicKey
-      );
-    },
+    t_transactions() {
+      switch (this.type) {
+        case 'date':
+          if (this.date_type == 'recent') {
+            return this.transactions.all.sort(( a, b) => ( new Date(b.time) - new Date(a.time)) )
+          } else if (this.date_type == 'oldest') {
+            return this.transactions.all.sort(( a, b) => ( new Date(a.time) - new Date(b.time)) )
+          }
+        break;
+        case 'sent':
+          return this.transactions.all.filter(tr =>
+            tr.tx.caller_id != 'undefined' && tr.tx.type == "ContractCallTx" && tr.tx.caller_id == this.publicKey
+          );
+        break;
+        case 'received':
+          return this.transactions.all.filter(tr =>
+            tr.tx.recipient_id != 'undefined' && tr.tx.type == "ContractCallTx" && tr.tx.recipient_id == this.publicKey
+          );
+        break;
+        case 'topups':
+          return this.transactions.all.filter(tr =>
+            tr.tx.recipient_id != 'undefined' && tr.tx.type == "SpendTx" && tr.tx.recipient_id == this.publicKey
+          );
+        break;
+        case 'withdrawals':
+          return this.transactions.all.filter(tr =>
+            tr.tx.sender_id != 'undefined' && tr.tx.type == "SpendTx" && tr.tx.sender_id == this.publicKey
+          );
+        break;
+        case 'all':
+          return this.transactions.all;
+        break;
+        default:
+          return this.transactions.all;
+        break;
+      }
+    }
   },
   created() {
     this.getTotalTransactions();
@@ -165,61 +144,8 @@ export default {
   },
   methods: {
     async filtrate(type, date_type) {
-      let transactions = this.transactions;
-      Object.keys(transactions).forEach(async key => {
-        if (key == 'all') {
-          let alltransactions = transactions[key]
-          Object.keys(alltransactions).forEach(async k => {
-            this.t_transactions = alltransactions;
-          });
-        }
-      });
-      switch (type) {
-        case 'date':
-          this.noTransactionsFound = '';
-           if (date_type == 'recent') {
-            this.t_transactions = this.filterDateRecent;
-          } else if (date_type == 'oldest') {
-            this.t_transactions = this.filterDateOldest;
-          }
-          if (Object.entries(this.t_transactions).length === 0) {
-            this.noTransactionsFound = 'No Transactions found';
-          }
-        break;
-        case 'sent':
-          this.noTransactionsFound = '';
-          this.t_transactions = this.filterSent;
-          if (Object.entries(this.t_transactions).length === 0) {
-            this.noTransactionsFound = 'No Transactions found';
-          }
-        break;
-        case 'received':
-          this.t_transactions = this.filterReceived;
-          if (Object.entries(this.t_transactions).length === 0) {
-            this.noTransactionsFound = 'No Transactions found';
-          }
-        break;
-        case 'topups':
-          this.noTransactionsFound = '';
-          this.t_transactions = this.filterTopups;
-          if (Object.entries(this.t_transactions).length === 0) {
-            this.noTransactionsFound = 'No Transactions found';
-          }
-        break;
-        case 'withdrawals':
-          this.noTransactionsFound = '';
-          this.t_transactions = this.filterWithdrawals;
-          if (Object.entries(this.t_transactions).length === 0) {
-            this.noTransactionsFound = 'No Transactions found';
-          }
-        break;
-        case 'all':
-          this.noTransactionsFound = '';
-          if (Object.entries(this.t_transactions).length === 0) {
-            this.noTransactionsFound = 'No Transactions found';
-          }
-        break;
-      }
+      this.type = type
+      this.date_type = date_type
     },
     getPage() {
       return this.transactions.all.length == 0 ? 1 : Math.ceil(this.transactions.all.length / this.limit);
