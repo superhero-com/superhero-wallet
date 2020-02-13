@@ -67,6 +67,8 @@
             "recentActivity": "近期活动",
             "viewAll": "查看全部",
             "pendingStatus": "待定",
+            "sentStatus": "已发送",
+            "receivedStatus": "已接受",
             "noTransactionsFound": "没有发现交易！"
         },
         "addFungibleToken": {

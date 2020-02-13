@@ -67,6 +67,8 @@
             "recentActivity": "Recent Activity",
             "viewAll": "View all",
             "pendingStatus": "Pending",
+            "sentStatus": "Sent",
+            "receivedStatus": "Received",
             "noTransactionsFound": "No transactions found!"
         },
         "addFungibleToken": {

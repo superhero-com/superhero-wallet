@@ -3,7 +3,7 @@
     <ae-list-item v-for="tr in transactions.pending" :key="tr.hash" fill="neutral" class="list-item-transaction">
       <div class="holder">
         <span class="amount">
-          {{ tr.amount }} æid <span style="color: #BCBCC4;">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
+          {{ tr.amount }} {{ $t('pages.appVUE.aeid') }} <span style="color: #BCBCC4;">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
         </span>
         <span class="status">{{ $t('pages.recentTransactions.pendingStatus') }}</span>
         <span class="time">{{ tr.time }}</span>

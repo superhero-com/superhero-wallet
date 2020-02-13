@@ -5,7 +5,7 @@
       <span>
         {{ $t('pages.send.txFee') }}
       </span>
-      <span> {{ txFee }} æid </span>
+      <span> {{ txFee }} {{ $t('pages.appVUE.aeid') }} </span>
     </ae-toolbar>
     <ae-toolbar slot="footer" class="flex-justify-between" v-if="error">{{ error }}</ae-toolbar>
   </ae-input>
