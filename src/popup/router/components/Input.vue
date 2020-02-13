@@ -22,15 +22,14 @@ export default {
   },
   computed: {
     getClasses() {
-      const cl = [];
       if (this.error || this.err) {
+        const cl = [];
         cl.push('has-error');
       }
-      if (this.size == 'sm') {
-        cl.push('input-sm');
+      if (this.size) {
+        var cl = this.size.split(' ');
       }
-
-      return cl.join(' ');
+      return cl;
     },
   },
 };
@@ -59,8 +58,14 @@ input.input {
 .input.has-error {
   border-color: $secondary-color !important;
 }
-.input.input-sm {
+.input.sm {
   font-size: 14px;
+}
+.input.xsm {
+  font-size: 11px;
+}
+.input.m-0 {
+  margin:0 !important;
 }
 .label {
   font-size: 14px;

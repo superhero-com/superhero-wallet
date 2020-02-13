@@ -12,16 +12,21 @@
         {{ $t('pages.tipPage.to') }}
         ({{ getCurrencyAmount }} {{ currentCurrency }}) to
       </p>
+
       <div class="flex flex-align-center flex-justify-between">
-        <input class="link-sm text-left block" style="width:90%;" :value="tipUrl" />
-        <CheckIcon v-if="urlVerified" />
+        <div v-if="!editUrl" class="flex flex-align-center flex-justify-between"> <a class="link-sm text-left block" style="width:90%;"> {{ editedUrl ? editedUrl : tipUrl }} </a> <CheckIcon v-if="urlVerified" /> </div>
+        <button v-if="!editUrl && !confirmMode" @click="handleUrlEdit"><ae-icon name="vote" /></button>
+
+        <Input style="width:100%;" size="m-0 xsm" v-if="editUrl && !confirmMode" type="text" v-model="editedUrl" :value="tipUrl" />
+        <button v-if="editUrl && !confirmMode" @click="editUrl = false"><ae-icon name="check" /></button>
       </div>
+
       <AmountSend :amountError="amountError" @changeAmount="val => (finalAmount = val)" v-if="!confirmMode" :value="finalAmount" />
       <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" v-if="!confirmMode" />
       <div class="tip-note-preview mt-15" v-if="confirmMode">
         {{ note }}
       </div>
-      <Button @click="toConfirm" :disabled="!note || !validAmount || noteError || !minCallFee" v-if="!confirmMode">
+      <Button @click="toConfirm" :disabled="!note || !validAmount || noteError || !minCallFee || editUrl" v-if="!confirmMode">
         {{ $t('pages.tipPage.next') }}
       </Button>
       <Button @click="sendTip" v-if="confirmMode" :disabled="!tipping">
@@ -48,6 +53,7 @@ import TipBackground from '../../../icons/tip-bg.svg';
 import CheckIcon from '../../../icons/check-icon.svg';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
+import Input from '../components/Input';
 
 export default {
   components: {
@@ -55,6 +61,7 @@ export default {
     AmountSend,
     Textarea,
     CheckIcon,
+    Input
   },
   data() {
     return {
@@ -69,6 +76,8 @@ export default {
       minCallFee: null,
       txParams: {},
       urlVerified: false,
+      editUrl: false,
+      editedUrl: ''
     };
   },
   computed: {
@@ -98,18 +107,29 @@ export default {
     finalAmount() {
       this.amountError = false;
     },
+    editedtipUrl(val) {
+      this.$emit('changeAmount', val);
+    },
   },
   created() {
     this.getDomainData();
     this.feeInterval = setInterval(() => {
       if (!this.minCallFee) {
         this.getCallFee();
+      } else {
         clearInterval(this.feeInterval);
       }
     }, 1000);
     this.$once('hook:beforeDestroy', () => clearInterval(this.feeInterval));
   },
   methods: {
+    editUrlfunc() {
+      this.editUrl = false;
+    },
+    handleUrlEdit() {
+      this.editUrl = true;
+      this.editedUrl = this.tipUrl
+    },
     async getDomainData() {
       if (process.env.IS_EXTENSION) {
         const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
@@ -147,7 +167,7 @@ export default {
     },
     sendTip() {
       const amount = BigNumber(this.finalAmount).shiftedBy(MAGNITUDE);
-      return this.confirmTip(this.tipUrl, amount, this.note);
+      return this.confirmTip(this.editedUrl ? this.editedUrl : this.tipUrl, amount, this.note);
     },
     async confirmTip(domain, amount, note) {
       try {
