@@ -2,15 +2,14 @@
   <div>
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
       <div class="holder">
-        <span class="amount"
-          >{{ txAmount }} æid <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span
-        >
+        <span class="amount">{{ txAmount }} æid <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span>
         <span class="status">{{ txType }}</span>
-        <span class="time">{{ transactionData.time ? new Date(transactionData.time).toLocaleTimeString() : '-- -- --' }}</span>
+        <span class="date">{{ new Date(transactionData.time).toLocaleDateString() }} </span>
+        <span class="time">{{ new Date(transactionData.time).toLocaleTimeString([], {timeStyle: 'short'}) }}</span>
       </div>
       <div class="holder">
         <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
-        <span class="seeTransaction" :class="!tipTx ? 'invisible' : ''" @click="seeTx"><Eye /></span>
+        <span class="seeTransaction" @click="seeTx(transactionData.hash)"><Eye /></span>
       </div>
     </ae-list-item>
   </div>
@@ -25,15 +24,15 @@ import { convertToAE } from '../../utils/helper';
 export default {
   props: ['transactionData', 'recent', 'dark'],
   components: {
-    Eye,
+    Eye
   },
   data() {
     return {
       status: '',
       tipUrl: null,
       checkSdk: null,
-      tipTx: true,
       tipAmount: 0,
+      tipComment: null
     };
   },
   async created() {
@@ -45,10 +44,7 @@ export default {
     }, 100);
   },
   computed: {
-    ...mapGetters(['account', 'popup', 'sdk', 'current']),
-    balanceSign() {
-      return this.transactionData.tx.sender_id == this.account.publicKey || this.transactionData.tx.account_id == this.account.publicKey ? 'minus' : 'plus';
-    },
+    ...mapGetters(['account', 'popup', 'sdk', 'current', 'network', 'transactions', 'tipping']),
     txType() {
       if (
         this.transactionData.tx.sender_id == this.account.publicKey ||
@@ -59,38 +55,6 @@ export default {
         return 'Sent';
       }
       return 'Received';
-    },
-    transactionType() {
-      if (this.transactionData.tx.type == 'SpendTx') {
-        if (this.transactionData.tx.sender_id == this.account.publicKey) {
-          return { fill: 'primary', type: 'Spend Tx Out' };
-        }
-        return { fill: 'alternative', type: 'Spend Tx In' };
-      }
-      if (this.transactionData.tx.type == 'ContractCreateTx') {
-        return { fill: 'secondary', type: 'Contract Create Tx ' };
-      }
-      if (this.transactionData.tx.type == 'NamePreclaimTx' || this.transactionData.tx.type == 'NameUpdateTx' || this.transactionData.tx.type == 'NameClaimTx') {
-        return { fill: '', type: this.transactionData.tx.type };
-      }
-      if (this.transactionData.tx.type == 'ContractCallTx') {
-        return { fill: 'secondary', type: 'Contract Call Tx' };
-      }
-
-      return { fill: '', type: this.transactionData.tx.type };
-    },
-    transactionAccount() {
-      if (this.transactionData.tx.type == 'SpendTx') {
-        return this.transactionData.tx.sender_id;
-      }
-      if (this.transactionData.tx.type == 'ContractCreateTx') {
-        return this.transactionData.tx.owner_id;
-      }
-      if (this.transactionData.tx.type == 'ContractCallTx') {
-        return this.transactionData.tx.caller_id;
-      }
-
-      return typeof this.transactionData.tx.account_id !== 'undefined' ? this.transactionData.tx.account_id : '';
     },
     txAmount() {
       const amount = this.transactionData.tx.amount ? this.transactionData.tx.amount : 0;
@@ -105,19 +69,12 @@ export default {
     },
   },
   methods: {
-    showTransactionDetails() {
-      this.$router.push({ name: 'transaction-details', params: { transaction: this.transactionData } });
-    },
-    showTransaction() {
-      browser.tabs.create({ url: this.popup.data, active: false });
-    },
     async getEventData() {
       try {
         const { log } = await this.sdk.tx(this.transactionData.hash, true);
         this.tipUrl = decode(log[0].data).toString();
         this.tipAmount = convertToAE(log[0].topics[2]);
       } catch (e) {
-        this.tipTx = false;
       }
     },
     visitTipUrl() {
@@ -125,8 +82,9 @@ export default {
         browser.tabs.create({ url: this.tipUrl, active: true });
       }
     },
-    seeTx() {
-      browser.tabs.create({ url: 'https://coronanews.org/#/', active: true });
+    seeTx(txHash) {
+      let txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${txHash}`;
+      browser.tabs.create({ url: txUrl, active: true });
     },
   },
 };
@@ -149,6 +107,7 @@ export default {
   .holder {
     display: flex;
     justify-content: space-between;
+    font-size: 14px;
     .url {
       display: inline-block;
       width: 284px;
@@ -166,6 +125,12 @@ export default {
     .time {
       color: #cbcbcb !important;
       font-size: 12px;
+      padding-top: 1px;
+    }
+    .date {
+      color: #cbcbcb !important;
+      font-size: 12px;
+      padding-top: 1px;
     }
     .amount {
       color: $secondary-color !important;
@@ -173,9 +138,6 @@ export default {
     }
     .status {
       color: $text-color !important;
-    }
-    .invisible {
-      visibility: hidden;
     }
   }
 }

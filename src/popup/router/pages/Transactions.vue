@@ -1,20 +1,16 @@
 <template>
   <div class="popup">
+    <AccountInfo />
+    <BalanceInfo />
+    <TransactionFilters @filtrate="filtrate" />
     <ae-list class="allTransactions">
       <div class="date" v-if="transactions.pending.length">Pending</div>
       <PendingTxs />
-      <div v-for="(trans, index) in groupedTransactionsByDate" v-bind:key="index">
-        <div class="date">{{ index }}</div>
-        <TransactionItem v-for="transaction in trans" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
-      </div>
-      <Button v-if="showMoreBtn" @click="loadMore">
-        <div class="flex flex-align-center flex-justify-content-center">
-          <ae-icon name="reload" />
-          <span class="ml-5"> {{ $t('pages.transactions.loadMore') }} </span>
-        </div>
-      </Button>
-      <p v-if="showMoreBtn == false">{{ $t('pages.transactions.allLoaded') }}</p>
+      <TransactionItem v-for="transaction in t_transactions" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
     </ae-list>
+    <div v-if="!t_transactions.length">
+        <p>{{ $t('pages.transactions.noTransactions') }}</p>
+    </div>
     <div class="newTx" @click="mergeNewTransactions" v-if="newTransactions != 0">
       <span class="newTxCount">{{ newTransactions }}</span> {{ $t('pages.transactions.newTransactions') }}
     </div>
@@ -26,12 +22,19 @@
 import { mapGetters } from 'vuex';
 import { groupBy, orderBy } from 'lodash-es';
 import { clearInterval, clearTimeout, setInterval } from 'timers';
+import AccountInfo from '../components/AccountInfo';
+import BalanceInfo from '../components/BalanceInfo';
+import TransactionFilters from '../components/TransactionFilters';
 import PendingTxs from '../components/PendingTxs';
 
 export default {
   components: {
-    PendingTxs,
+    AccountInfo,
+    BalanceInfo,
+    TransactionFilters,
+    PendingTxs
   },
+  props: [''],
   data() {
     return {
       transactionsType: 'all',
@@ -52,6 +55,8 @@ export default {
         direction: '',
       },
       upadateInterval: null,
+      type: '',
+      date_type: ''
     };
   },
   computed: {
@@ -63,33 +68,46 @@ export default {
       this.loading = true;
       return this.account.publicKey;
     },
-    groupedTransactionsByDate() {
-      let txs =
-        this.filter.direction === ''
-          ? this.transactions.all
-          : this.filter.direction == 'incoming'
-          ? this.transactions.all.filter(tx => tx.tx.recipient_id == this.account.publicKey)
-          : this.transactions.all.filter(tx => tx.tx.sender_id == this.account.publicKey);
-      if (this.filter.spendType == 'spendTx') {
-        txs = txs.filter(tx => tx.tx.type == 'SpendTx');
-      } else if (this.filter.spendType == 'namePreclaimTx') {
-        txs = txs.filter(tx => tx.tx.type == 'NamePreclaimTx');
-      } else if (this.filter.spendType == 'nameClaimTx') {
-        txs = txs.filter(tx => tx.tx.type == 'NameClaimTx');
-      } else if (this.filter.spendType == 'nameUpdateTx') {
-        txs = txs.filter(tx => tx.tx.type == 'NameUpdateTx');
-      } else if (this.filter.spendType == 'contractCreateTx') {
-        txs = txs.filter(tx => tx.tx.type == 'ContractCreateTx');
-      }
-
-      return groupBy(orderBy(txs, ['time'], ['desc']), tx => {
-        const dateString = new Date(tx.time).toDateString();
-        return dateString === new Date().toDateString() ? 'Today' : dateString;
-      });
-    },
     watchToken() {
       return this.current.token;
     },
+    t_transactions() {
+      switch (this.type) {
+        case 'date':
+          if (this.date_type == 'recent') {
+            return this.transactions.all.slice().sort(( a, b) => ( new Date(b.time) - new Date(a.time)) )
+          } else if (this.date_type == 'oldest') {
+            return this.transactions.all.slice().sort(( a, b) => ( new Date(a.time) - new Date(b.time)) )
+          }
+        break;
+        case 'sent':
+          return this.transactions.all.filter(tr =>
+            tr.tx.caller_id != 'undefined' && tr.tx.type == "ContractCallTx" && tr.tx.caller_id == this.publicKey
+          );
+        break;
+        case 'received':
+          return this.transactions.all.filter(tr =>
+            tr.tx.recipient_id != 'undefined' && tr.tx.type == "ContractCallTx" && tr.tx.recipient_id == this.publicKey
+          );
+        break;
+        case 'topups':
+          return this.transactions.all.filter(tr =>
+            tr.tx.recipient_id != 'undefined' && tr.tx.type == "SpendTx" && tr.tx.recipient_id == this.publicKey
+          );
+        break;
+        case 'withdrawals':
+          return this.transactions.all.filter(tr =>
+            tr.tx.sender_id != 'undefined' && tr.tx.type == "SpendTx" && tr.tx.sender_id == this.publicKey
+          );
+        break;
+        case 'all':
+          return this.transactions.all;
+        break;
+        default:
+          return this.transactions.all;
+        break;
+      }
+    }
   },
   created() {
     this.getTotalTransactions();
@@ -125,6 +143,10 @@ export default {
     },
   },
   methods: {
+    async filtrate(type, date_type) {
+      this.type = type
+      this.date_type = date_type
+    },
     getPage() {
       return this.transactions.all.length == 0 ? 1 : Math.ceil(this.transactions.all.length / this.limit);
     },
@@ -132,9 +154,6 @@ export default {
       this.polling = setInterval(() => {
         this.getTransactions('new');
       }, 5000);
-    },
-    changeTransactionType(type) {
-      this.transactionsType = type;
     },
     getTransactions(type, limit = this.limit) {
       if (this.current.token == 0) {
@@ -196,20 +215,6 @@ export default {
       });
     },
     group() {},
-    navigateAccount() {
-      this.$router.push('/account');
-    },
-    setFilter(type, value) {
-      this.filter[type] = value;
-    },
-    applyFilter() {
-      this.openFilter = false;
-    },
-    clearFilter() {
-      this.openFilter = false;
-      this.filter.direction = '';
-      this.filter.spendType = 'all';
-    },
   },
   beforeDestroy() {
     window.clearTimeout(this.polling);
@@ -239,12 +244,12 @@ export default {
   -ms-transform: translateX(-50%);
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%);
-  background: $primary-color;
-  color: #fff;
-  padding: 0.7rem 1rem;
+  background: #111117;
+  color: #ffffff;
+  padding: .7rem 1rem;
   text-align: center;
-  border-radius: 32px;
   cursor: pointer;
+  width: 100%;
 }
 .newTxCount {
   background: #fff;

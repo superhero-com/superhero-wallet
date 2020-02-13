@@ -4,6 +4,7 @@
       <button style="padding:0" @click="copy" v-clipboard:copy="account.publicKey">
         <Copyicon />
       </button>
+      <Eye style="display:none;" />
       <p class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</p>
       <span class="account-name">{{ activeAccountName }}</span>
       <span class="ae-address">{{ account.publicKey }}</span>
@@ -14,10 +15,12 @@
 <script>
 import { mapGetters } from 'vuex';
 import Copyicon from '../../../icons/copy.svg';
+import Eye from '../../../icons/eye.svg';
 
 export default {
   components: {
     Copyicon,
+    Eye
   },
   data() {
     return {

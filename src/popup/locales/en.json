@@ -534,6 +534,7 @@
             "loadMore":"Load More",
             "allLoaded": "All transactions loaded!",
             "newTransactions": "new transactions",
+            "noTransactions": "No Transactions found",
             "type": "Type",
             "all": "All",
             "incoming": "Incoming",
