@@ -190,55 +190,38 @@ export default {
     const { middlewareUrl } = state.network[state.current.network];
     const res = await Promise.all(
       state.subaccounts.map(async ({ publicKey }, index) => {
-        let names = await Promise.all([
-          (async () =>
-            (await state.sdk.api.getPendingAccountTransactionsByPubkey(publicKey).catch(() => ({ transactions: [] }))).transactions
-              .filter(({ tx: { type } }) => type === 'NameClaimTx')
-              .map(({ tx, ...otherTx }) => ({
-                ...otherTx,
-                ...tx,
-                pending: true,
-                owner: tx.accountId,
-              })))(),
-          (async () => uniqBy(await (await fetch(`${middlewareUrl}/middleware/names/reverse/${publicKey}`)).json(), 'name'))(),
-          (async () => {
-            try {
-              return await state.sdk.middleware.getActiveNames({ owner: publicKey });
-            } catch (e) {
-              console.log('error', e);
-            }
-            return [];
-          })(),
-        ]);
-        names = flatten(names);
-        names = uniqBy(names, 'name');
-        if (names.length) {
-          commit(types.SET_ACCOUNT_AENS, { account: index, aename: names[0].name, pending: !!names[0].pending });
-        } else {
-          commit(types.SET_ACCOUNT_AENS, { account: index, aename: null, pending: false });
+        if (publicKey) {
+          let names = await Promise.all([
+            (async () =>
+              (await state.sdk.api.getPendingAccountTransactionsByPubkey(publicKey).catch(() => ({ transactions: [] }))).transactions
+                .filter(({ tx: { type } }) => type === 'NameClaimTx')
+                .map(({ tx, ...otherTx }) => ({
+                  ...otherTx,
+                  ...tx,
+                  pending: true,
+                  owner: tx.accountId,
+                })))(),
+            (async () => uniqBy(await (await fetch(`${middlewareUrl}/middleware/names/reverse/${publicKey}`)).json(), 'name'))(),
+            (async () => {
+              try {
+                return await state.sdk.middleware.getActiveNames({ owner: publicKey });
+              } catch (e) {}
+              return [];
+            })(),
+          ]);
+          names = flatten(names);
+          names = uniqBy(names, 'name');
+          if (names.length) {
+            commit(types.SET_ACCOUNT_AENS, { account: index, aename: names[0].name, pending: !!names[0].pending });
+          } else {
+            commit(types.SET_ACCOUNT_AENS, { account: index, aename: null, pending: false });
+          }
+          return names;
         }
-        browser.storage.local.get('pendingNames').then(pNames => {
-          let pending = [];
-          if (pNames.hasOwnProperty('pendingNames') && pNames.pendingNames.hasOwnProperty('list')) {
-            pending = pNames.pendingNames.list;
-          }
-          names
-            .filter(n => n.pending)
-            .forEach(n => {
-              if (typeof pending.find(p => p.name == n.name) === 'undefined') {
-                pending.push(n);
-              }
-            });
-
-          if (pending.length) {
-            browser.storage.local.set({ pendingNames: { list: pending } });
-            commit(types.SET_PENDING_NAMES, { names: pending });
-          }
-        });
-        return names;
+        return [];
       })
     );
-    await browser.storage.local.set({ subaccounts: state.subaccounts });
+    await browser.storage.local.set({ subaccounts: state.subaccounts.filter(s => s.publicKey) });
     commit(types.SET_NAMES, { names: Array.prototype.concat.apply([], res) });
   },
   async removePendingName({ commit, state }, { hash }) {
@@ -279,6 +262,7 @@ export default {
       publicKey: keypair.publicKey,
       balance: 0,
       root: true,
+      aename: null,
     });
     await browser.storage.local.set({ subaccounts: sub, activeAccount: 0 });
     commit('SET_ACTIVE_ACCOUNT', { publicKey: keypair.publicKey, index: 0 });

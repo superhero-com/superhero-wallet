@@ -23,7 +23,8 @@ const rpcWallet = {
     }
   },
   async initSubaccounts() {
-    const { subaccounts } = await getAccounts();
+    const subaccounts = await getAccounts();
+    console.log(subaccounts);
     this.subaccounts = subaccounts;
     return Promise.resolve(true);
   },
@@ -237,7 +238,12 @@ const rpcWallet = {
       await this.initNodes();
     }
     if (this.sdk) {
-      this.sdk.selectAccount(this.activeAccount);
+      try {
+        this.sdk.selectAccount(this.activeAccount);
+      } catch (e) {
+        this[AEX2_METHODS.ADD_ACCOUNT]({ address, idx: 0 });
+      }
+
       if (this.network !== network) {
         this.addNewNetwork(network);
       }

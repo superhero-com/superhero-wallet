@@ -13,7 +13,7 @@
         ({{ getCurrencyAmount }} {{ currentCurrency }}) to
       </p>
       <div class="flex flex-align-center flex-justify-between">
-        <a class="link-sm text-left block" style="width:90%;">  {{ tipUrl }} </a>
+        <a class="link-sm text-left block" style="width:90%;"> {{ tipUrl }} </a>
         <CheckIcon v-if="urlVerified" />
       </div>
       <AmountSend :amountError="amountError" @changeAmount="val => (finalAmount = val)" v-if="!confirmMode" :value="finalAmount" />
@@ -41,20 +41,20 @@
 import { mapGetters } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
 import BigNumber from 'bignumber.js';
+import axios from 'axios';
 import { MAGNITUDE, calculateFee, TX_TYPES, TIP_SERVICE } from '../../utils/constants';
 import { setPendingTx, escapeSpecialChars } from '../../utils/helper';
 import TipBackground from '../../../icons/tip-bg.svg';
 import CheckIcon from '../../../icons/check-icon.svg';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
-import axios from 'axios';
 
 export default {
   components: {
     TipBackground,
     AmountSend,
     Textarea,
-    CheckIcon
+    CheckIcon,
   },
   data() {
     return {
@@ -68,7 +68,7 @@ export default {
       loading: false,
       minCallFee: null,
       txParams: {},
-      urlVerified: false
+      urlVerified: false,
     };
   },
   computed: {
@@ -101,10 +101,10 @@ export default {
   },
   created() {
     this.getDomainData();
-    this.feeInterval = setInterval(() => { 
-      if(!this.minCallFee) {
-        this.getCallFee() 
-        clearInterval(this.feeInterval)
+    this.feeInterval = setInterval(() => {
+      if (!this.minCallFee) {
+        this.getCallFee();
+        clearInterval(this.feeInterval);
       }
     }, 5000);
     this.$once('hook:beforeDestroy', () => clearInterval(this.feeInterval));
@@ -113,8 +113,8 @@ export default {
     async getDomainData() {
       if (process.env.IS_EXTENSION) {
         const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-        if(tabs) {
-          this.tipUrlCurrentTab =  tabs.url
+        if (tabs) {
+          this.tipUrlCurrentTab = tabs.url;
           this.checkUrlVerified();
         }
       }
@@ -129,9 +129,10 @@ export default {
         try {
           const fee = calculateFee(TX_TYPES.contractCall, this.txParams);
           this.minCallFee = fee.min;
-        } catch (e) { console.log(e) }
+        } catch (e) {
+          console.log(e);
+        }
       }
-      
     },
     toConfirm() {
       if (!this.minCallFee || this.maxValue - this.finalAmount <= 0 || isNaN(this.finalAmount) || this.finalAmount <= 0) {
@@ -158,7 +159,6 @@ export default {
         if (res.hash) {
           await setPendingTx({ hash: res.hash, amount: this.finalAmount, domain, time: new Date().toLocaleTimeString(), type: 'tip' });
           this.loading = false;
-          this.$store.commit('SET_AEPP_POPUP', false);
           return this.$router.push('/account');
         }
       } catch (e) {
@@ -168,15 +168,15 @@ export default {
     },
     async checkUrlVerified() {
       try {
-        const res = (await axios.get(`${TIP_SERVICE}/verified`)).json()
-        if(res.includes(this.tipUrl)) {
+        const res = (await axios.get(`${TIP_SERVICE}/verified`)).json();
+        if (res.includes(this.tipUrl)) {
           this.$store.dispatch('popupAlert', { name: 'account', type: 'tip_url_verified' });
-          this.urlVerified = true
+          this.urlVerified = true;
         }
-      } catch(e) {
-        console.log(e)
-      } 
-    }
+      } catch (e) {
+        console.log(e);
+      }
+    },
   },
   beforeDestroy() {
     clearInterval(this.feeInterval);

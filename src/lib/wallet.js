@@ -8,57 +8,41 @@ import { TIPPING_CONTRACT, DEFAULT_NETWORK } from '../popup/utils/constants';
 
 export default {
   countError: 0,
-  init(cb) {
-    browser.storage.local.get('userAccount').then(async user => {
-      if (user.userAccount && user.hasOwnProperty('userAccount')) {
-        const address = await store.dispatch('generateWallet', { seed: user.userAccount.privateKey });
-        if (address) {
-          store.commit('UPDATE_ACCOUNT', user.userAccount);
-          browser.storage.local.get('subaccounts').then(async subaccounts => {
-            const sub = [];
-            if (
-              !subaccounts.hasOwnProperty('subaccounts') ||
-              subaccounts.subaccounts == '' ||
-              (typeof subaccounts.subaccounts === 'object' && !subaccounts.subaccounts.find(f => f.publicKey == user.userAccount.publicKey))
-            ) {
-              sub.push({
-                name: typeof subaccounts.subaccounts !== 'undefined' ? subaccounts.subaccounts.name : 'Main Account',
-                publicKey: user.userAccount.publicKey,
-                root: true,
-                balance: 0,
-                aename: null,
-              });
-            }
-            if (subaccounts.hasOwnProperty('subaccounts') && subaccounts.subaccounts.length > 0 && subaccounts.subaccounts != '') {
-              subaccounts.subaccounts.forEach(su => {
-                sub.push({ ...su });
-              });
-            }
-            const { tokenBal } = await browser.storage.local.get('tokenBal');
-            if (tokenBal && tokenBal != '0.000') store.commit('UPDATE_BALANCE', parseFloat(tokenBal));
-            store.dispatch('setSubAccounts', sub);
-            store.commit('SET_ACTIVE_ACCOUNT', { publicKey: address, index: 0 });
+  async init(cb) {
+    const { userAccount } = await browser.storage.local.get('userAccount');
+    if (userAccount) {
+      const address = await store.dispatch('generateWallet', { seed: userAccount.privateKey });
+      if (address) {
+        store.commit('UPDATE_ACCOUNT', userAccount);
+        store.commit('SET_ACTIVE_ACCOUNT', { publicKey: address, index: 0 });
+        let sub = [];
+        const { subaccounts } = await browser.storage.local.get('subaccounts');
+        if (!subaccounts || (subaccounts && !subaccounts.find(f => f.publicKey == userAccount.publicKey))) {
+          sub.push({
+            name: 'Main Account',
+            publicKey: userAccount.publicKey,
+            root: true,
+            balance: 0,
+            aename: null,
           });
-
-          store.commit('SWITCH_LOGGED_IN', true);
-          this.redirectAfterLogin(cb);
-
-          store.commit('SET_MAIN_LOADING', false);
-        } else {
-          store.commit('SET_MAIN_LOADING', false);
-          cb();
         }
+        if (subaccounts) sub = [...sub, ...subaccounts.filter(s => s.publicKey)];
+        store.dispatch('setSubAccounts', sub);
+        const { tokenBal } = await browser.storage.local.get('tokenBal');
+        if (tokenBal && tokenBal != '0.000') store.commit('UPDATE_BALANCE', parseFloat(tokenBal));
+        store.commit('SWITCH_LOGGED_IN', true);
+        this.redirectAfterLogin(cb);
+        store.commit('SET_MAIN_LOADING', false);
       } else {
-        browser.storage.local.get('confirmSeed').then(seed => {
-          store.commit('SET_MAIN_LOADING', false);
-          if (seed.hasOwnProperty('confirmSeed') && seed.confirmSeed == false) {
-            cb('/seed');
-          } else {
-            cb();
-          }
-        });
+        store.commit('SET_MAIN_LOADING', false);
+        cb();
       }
-    });
+    } else {
+      const { confirmSeed } = await browser.storage.local.get('confirmSeed');
+      store.commit('SET_MAIN_LOADING', false);
+      if (confirmSeed) cb('/seed');
+      else cb();
+    }
   },
   async initSdk(cb) {
     const keypair = await this.getKeyPair();
