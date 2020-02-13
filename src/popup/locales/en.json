@@ -4,6 +4,20 @@
             "heading" :"Intro",
             "skip": "Skip"
         },
+        "titles": {
+            "settings": "Settings",
+            "general": "General",
+            "security": "Security",
+            "about": "About",
+            "send": "Send æid",
+            "scanQr": "Scan QR",
+            "terms": "Terms & Conditions",
+            "privacy": "Privacy Policy",
+            "importAccount": "Retrieve Existing Account",
+            "activity": "Activity History",
+            "withdraw": "Withdraw",
+            "topUp": "Top Up"
+        },
         "appVUE": {
             "systemName": "Corona",
             "manageNetworks": "Manage networks",
