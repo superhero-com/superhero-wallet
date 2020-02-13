@@ -13,7 +13,7 @@
         ({{ getCurrencyAmount }} {{ currentCurrency }}) to
       </p>
       <div class="flex flex-align-center flex-justify-between">
-        <a class="link-sm text-left block" style="width:90%;"> {{ tipUrl }} </a>
+        <input class="link-sm text-left block" style="width:90%;" :value="tipUrl" />
         <CheckIcon v-if="urlVerified" />
       </div>
       <AmountSend :amountError="amountError" @changeAmount="val => (finalAmount = val)" v-if="!confirmMode" :value="finalAmount" />
