@@ -106,15 +106,15 @@ export default {
         this.getCallFee();
         clearInterval(this.feeInterval);
       }
-    }, 5000);
+    }, 1000);
     this.$once('hook:beforeDestroy', () => clearInterval(this.feeInterval));
   },
   methods: {
     async getDomainData() {
       if (process.env.IS_EXTENSION) {
         const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-        if (tabs) {
-          this.tipUrlCurrentTab = tabs.url;
+        if (tab) {
+          this.tipUrlCurrentTab = tab.url;
           this.checkUrlVerified();
         }
       }
@@ -129,9 +129,7 @@ export default {
         try {
           const fee = calculateFee(TX_TYPES.contractCall, this.txParams);
           this.minCallFee = fee.min;
-        } catch (e) {
-          console.log(e);
-        }
+        } catch (e) {}
       }
     },
     toConfirm() {
@@ -173,14 +171,9 @@ export default {
           this.$store.dispatch('popupAlert', { name: 'account', type: 'tip_url_verified' });
           this.urlVerified = true;
         }
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) {}
     },
-  },
-  beforeDestroy() {
-    clearInterval(this.feeInterval);
-  },
+  }
 };
 </script>
 
