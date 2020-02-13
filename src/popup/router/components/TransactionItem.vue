@@ -37,7 +37,7 @@ export default {
   },
   async created() {
     this.checkSdk = setInterval(() => {
-      if (this.sdk !== null && this.tipping != null) {
+      if (this.sdk !== null) {
         this.getEventData();
         clearInterval(this.checkSdk);
       }
