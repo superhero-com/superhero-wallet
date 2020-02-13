@@ -7,18 +7,14 @@ export default {
   props: ['value', 'error', 'placeholder', 'size'],
   computed: {
     getClasses() {
-      const cl = [];
-      if (this.error) {
+      if (this.error || this.err) {
+        const cl = [];
         cl.push('has-error');
       }
-      if (this.size == 'sm') {
-        cl.push('textarea-sm');
+      if (this.size) {
+        var cl = this.size.split(' ');
       }
-      if (this.size == 'h-50') {
-        cl.push('h-50');
-      }
-
-      return cl.join(' ');
+      return cl;
     },
   },
 };
@@ -48,7 +44,7 @@ textarea:focus {
 textarea.has-error {
   border-color: $secondary-color !important;
 }
-textarea.textarea-sm {
+textarea.sm {
   font-size: 14px;
 }
 textarea.h-50 {
