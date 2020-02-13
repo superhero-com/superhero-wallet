@@ -5,7 +5,7 @@
       <Logo v-else />
 
       <div class="title">
-        {{ title || 'Corona Wallet ' }}
+        {{ title || $t('pages.appVUE.coronaWallet') }}
       </div>
 
       <div v-if="isLoggedIn">
