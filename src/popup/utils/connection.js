@@ -1,73 +1,35 @@
-import uuid from 'uuid';
+import genUuid from 'uuid';
 import '../../lib/initPolyfills';
+import { handleMessage } from '../../background';
 
-let background;
-const pendingRequests = {};
-
-const unloadHandler = () => {
-  if (!window.props.resolved) {
-    background.postMessage({ action: 'deny' });
-    if (window.hasOwnProperty('reject')) window.reject(new Error('Rejected by user'));
-  }
-};
-
-const closingWrapper = f => (...args) => {
-  window.props.resolved = true;
-  window.removeEventListener('beforeunload', unloadHandler, true);
-  f(...args);
-  window.close();
-  setTimeout(() => {
-    window.close();
-  }, 1000);
-};
-
-const setPopupData = data => {
-  if (window.RUNNING_IN_POPUP) {
-    window.props = data;
-    window.addEventListener('beforeunload', unloadHandler, true);
-    const resolve = () => background.postMessage({ action: 'accept' });
-    const reject = () => background.postMessage({ action: 'deny' });
-    window.props.resolve = closingWrapper(resolve);
-    window.props.reject = closingWrapper(reject);
-  }
-};
-const messageHandler = message => {
-  if (!pendingRequests[message.uuid]) {
-    if (message.type !== 'POPUP_INFO') throw new Error(`Can't find request with id: ${message.uuid}`);
-    else return setPopupData(message);
-  }
-
-  pendingRequests[message.uuid].resolve(message);
-};
+let internalPostMessage;
 
 const ensureBackgroundInitialised = async () => {
-  if (background) return;
+  if (internalPostMessage) return;
   if (process.env.IS_EXTENSION) {
-    background = await browser.runtime.connect({ name: window.RUNNING_IN_POPUP ? 'POPUP' : 'EXTENSION' });
-    background.onMessage.addListener(messageHandler);
-  } else {
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = '../background.html';
-    document.body.appendChild(iframe);
-    await new Promise(resolve => iframe.addEventListener('load', resolve));
-    window.addEventListener('message', event => {
-      if (event.source !== iframe.contentWindow) return;
-      messageHandler(event.data);
+    const background = await browser.runtime.connect({ name: window.RUNNING_IN_POPUP ? 'POPUP' : 'EXTENSION' });
+    const pendingRequests = {};
+    background.onMessage.addListener(({ uuid, res }) => {
+      if (!pendingRequests[uuid]) {
+        throw new Error(`Can't find request with id: ${uuid}`);
+      }
+      pendingRequests[uuid].resolve(res);
     });
-    background = {
-      postMessage: message => iframe.contentWindow.postMessage(message, window.location.origin),
+    internalPostMessage = message => {
+      const id = genUuid();
+      background.postMessage({ ...message, uuid: id });
+      return new Promise((resolve, reject) => {
+        pendingRequests[id] = { resolve, reject };
+      });
     };
+  } else {
+    internalPostMessage = handleMessage;
   }
 };
 
 export const postMessage = async ({ type, payload }) => {
   await ensureBackgroundInitialised();
-  const id = uuid();
-  background.postMessage({ type, payload, uuid: id });
-  return new Promise((resolve, reject) => {
-    pendingRequests[id] = { resolve, reject };
-  });
+  return internalPostMessage({ type, payload });
 };
 
 export const setMessageListener = async cb => {

@@ -1,7 +1,7 @@
 import { setInterval } from 'timers';
 import './lib/initPolyfills';
 import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
-import { detectBrowser, extractHostName, detectConnectionType } from './popup/utils/helper';
+import { extractHostName, detectConnectionType } from './popup/utils/helper';
 import WalletController from './wallet-controller';
 import Notification from './notifications';
 import rpcWallet from './lib/rpcWallet';
@@ -103,12 +103,12 @@ if (process.env.IS_EXTENSION) {
       }
     }
   });
-} else {
-  window.addEventListener('message', async event => {
-    if (event.source !== window.parent) return;
-    const { type, payload, uuid } = event.data;
-    if (HDWALLET_METHODS.includes(type)) {
-      window.parent.postMessage({ uuid, res: await controller[type](payload) }, window.location.origin);
-    }
-  });
 }
+
+export const handleMessage = ({ type, payload }) => {
+  if (HDWALLET_METHODS.includes(type)) {
+    return controller[type](payload);
+  }
+
+  throw new Error(`Unknown message type: ${type}`);
+};

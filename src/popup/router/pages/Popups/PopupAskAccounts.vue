@@ -19,6 +19,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import getPopupProps from '../../../utils/getPopupProps';
 
 export default {
   data() {
@@ -27,13 +28,8 @@ export default {
       imageError: false,
     };
   },
-  created() {
-    const waitProps = setInterval(() => {
-      if (window.props) {
-        this.data = window.props;
-        clearInterval(waitProps);
-      }
-    }, 500);
+  async created() {
+    this.data = await getPopupProps();
   },
   methods: {
     cancel() {

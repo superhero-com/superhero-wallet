@@ -104,7 +104,7 @@ export default {
   async getKeyPair() {
     const { activeAccount } = store.getters;
     const { account } = store.getters;
-    const { res } = await postMessage({ type: 'getKeypair', payload: { activeAccount, account } });
+    const res = await postMessage({ type: 'getKeypair', payload: { activeAccount, account } });
     return res.error ? { error: true } : parseFromStorage(res);
   },
   async initContractInstances() {

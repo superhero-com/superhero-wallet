@@ -86,7 +86,6 @@ const commonConfig = {
       { from: 'popup/popup.html', to: `popup/popup.html`, transform: transformHtml },
       { from: 'options/options.html', to: `options/options.html`, transform: transformHtml },
       { from: 'phishing/phishing.html', to: `phishing/phishing.html`, transform: transformHtml },
-      { from: 'background.html', to: `background.html`, transform: transformHtml },
       { from: 'popup/CameraRequestPermission.html', to: `popup/CameraRequestPermission.html`, transform: transformHtml },
       { from: 'icons/icon_48.png', to: `popup/assets/logo-small.png` },
     ]),
