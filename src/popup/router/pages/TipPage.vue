@@ -79,8 +79,8 @@ export default {
       return (this.finalAmount * this.current.currencyRate).toFixed(3);
     },
     tipUrl() {
-      const currentUrl = new URL(this.$route.fullPath, window.location);
-      const path = decodeURIComponent(currentUrl.searchParams.get('url'));
+      const urlParam = new URL(this.$route.fullPath, window.location).searchParams.get('url');
+      const path = urlParam && decodeURIComponent(urlParam);
       if (!path) return this.tipUrlCurrentTab;
       const url = new URL(/^\w+:\D+/.test(path) ? path : `https://${path}`);
       return url.toString();
