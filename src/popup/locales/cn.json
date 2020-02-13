@@ -30,7 +30,8 @@
             "seedPhrase": "密钥",
             "language": "语言",
             "advanced": "高级",
-            "versions": "版本与更新"
+            "versions": "版本与更新",
+            "mainAccount": "main account"
         },
         "aboutSettings": {
             "heading": "关于",

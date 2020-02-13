@@ -30,7 +30,8 @@
             "seedPhrase": "Seed Phrase",
             "language": "Language",
             "advanced": "Advanced",
-            "versions": "Version & Updates"
+            "versions": "Version & Updates",
+            "mainAccount": "Main account"
         },
         "aboutSettings": {
             "heading": "About",
