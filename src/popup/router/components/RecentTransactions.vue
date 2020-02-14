@@ -23,7 +23,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { setInterval } from 'timers';
+import { setInterval, clearInterval } from 'timers';
 import BigNumber from 'bignumber.js';
 import Eye from '../../../icons/eye.svg';
 import PendingTxs from './PendingTxs';
@@ -40,7 +40,9 @@ export default {
     };
   },
   created() {
-    this.pollData();
+    this.updateTransactions();
+    this.polling = setInterval(() => this.updateTransactions(), 5000);
+    this.$once('hook:beforeDestroy', () => clearInterval(this.polling));
   },
   computed: {
     ...mapGetters(['transactions', 'account', 'sdk', 'current', 'currentCurrency']),
@@ -53,13 +55,6 @@ export default {
       const transactions = await this.$store.dispatch('getTransactionsByPublicKey', { publicKey: this.account.publicKey, limit: 3 });
       this.loading = false;
       this.$store.dispatch('updateLatestTransactions', transactions);
-    },
-    pollData() {
-      this.polling = setInterval(async () => {
-        if (this.sdk != null) {
-          this.updateTransactions();
-        }
-      }, 5000);
     },
     getKeyByValue(object, value) {
       return Object.keys(object).find(key => object[key] === value);

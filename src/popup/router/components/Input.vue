@@ -22,12 +22,12 @@ export default {
   },
   computed: {
     getClasses() {
+      let cl = [];
       if (this.error || this.err) {
-        const cl = [];
         cl.push('has-error');
       }
       if (this.size) {
-        var cl = this.size.split(' ');
+        cl = [...cl, ...this.size.split(' ')];
       }
       return cl;
     },
@@ -65,7 +65,7 @@ input.input {
   font-size: 11px;
 }
 .input.m-0 {
-  margin:0 !important;
+  margin: 0 !important;
 }
 .label {
   font-size: 14px;

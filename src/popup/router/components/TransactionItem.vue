@@ -2,10 +2,12 @@
   <div>
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
       <div class="holder">
-        <span class="amount">{{ txAmount }} {{ $t('pages.appVUE.aeid') }} <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span>
+        <span class="amount"
+          >{{ txAmount }} {{ $t('pages.appVUE.aeid') }} <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span
+        >
         <span class="status">{{ txType == 'Sent' ? $t('pages.recentTransactions.sentStatus') : $t('pages.recentTransactions.receivedStatus') }}</span>
         <span class="date">{{ new Date(transactionData.time).toLocaleDateString() }} </span>
-        <span class="time">{{ new Date(transactionData.time).toLocaleTimeString([], {timeStyle: 'short'}) }}</span>
+        <span class="time">{{ new Date(transactionData.time).toLocaleTimeString([], { timeStyle: 'short' }) }}</span>
       </div>
       <div class="holder">
         <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
@@ -24,7 +26,7 @@ import { convertToAE } from '../../utils/helper';
 export default {
   props: ['transactionData', 'recent', 'dark'],
   components: {
-    Eye
+    Eye,
   },
   data() {
     return {
@@ -32,7 +34,7 @@ export default {
       tipUrl: null,
       checkSdk: null,
       tipAmount: 0,
-      tipComment: null
+      tipComment: null,
     };
   },
   async created() {
@@ -74,8 +76,7 @@ export default {
         const { log } = await this.sdk.tx(this.transactionData.hash, true);
         this.tipUrl = decode(log[0].data).toString();
         this.tipAmount = convertToAE(log[0].topics[2]);
-      } catch (e) {
-      }
+      } catch (e) {}
     },
     visitTipUrl() {
       if (this.tipUrl) {
@@ -83,7 +84,7 @@ export default {
       }
     },
     seeTx(txHash) {
-      let txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${txHash}`;
+      const txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${txHash}`;
       browser.tabs.create({ url: txUrl, active: true });
     },
   },

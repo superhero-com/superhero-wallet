@@ -9,7 +9,7 @@
       <TransactionItem v-for="transaction in t_transactions" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
     </ae-list>
     <div v-if="!t_transactions.length">
-        <p>{{ $t('pages.transactions.noTransactions') }}</p>
+      <p>{{ $t('pages.transactions.noTransactions') }}</p>
     </div>
     <div class="newTx" @click="mergeNewTransactions" v-if="newTransactions != 0">
       <span class="newTxCount">{{ newTransactions }}</span> {{ $t('pages.transactions.newTransactions') }}
@@ -32,7 +32,7 @@ export default {
     AccountInfo,
     BalanceInfo,
     TransactionFilters,
-    PendingTxs
+    PendingTxs,
   },
   props: [''],
   data() {
@@ -56,7 +56,7 @@ export default {
       },
       upadateInterval: null,
       type: '',
-      date_type: ''
+      date_type: '',
     };
   },
   computed: {
@@ -75,39 +75,32 @@ export default {
       switch (this.type) {
         case 'date':
           if (this.date_type == 'recent') {
-            return this.transactions.all.slice().sort(( a, b) => ( new Date(b.time) - new Date(a.time)) )
-          } else if (this.date_type == 'oldest') {
-            return this.transactions.all.slice().sort(( a, b) => ( new Date(a.time) - new Date(b.time)) )
+            return this.transactions.all.slice().sort((a, b) => new Date(b.time) - new Date(a.time));
           }
-        break;
+          if (this.date_type == 'oldest') {
+            return this.transactions.all.slice().sort((a, b) => new Date(a.time) - new Date(b.time));
+          }
+          break;
         case 'sent':
-          return this.transactions.all.filter(tr =>
-            tr.tx.caller_id != 'undefined' && tr.tx.type == "ContractCallTx" && tr.tx.caller_id == this.publicKey
-          );
-        break;
+          return this.transactions.all.filter(tr => tr.tx.caller_id != 'undefined' && tr.tx.type == 'ContractCallTx' && tr.tx.caller_id == this.publicKey);
+          break;
         case 'received':
-          return this.transactions.all.filter(tr =>
-            tr.tx.recipient_id != 'undefined' && tr.tx.type == "ContractCallTx" && tr.tx.recipient_id == this.publicKey
-          );
-        break;
+          return this.transactions.all.filter(tr => tr.tx.recipient_id != 'undefined' && tr.tx.type == 'ContractCallTx' && tr.tx.recipient_id == this.publicKey);
+          break;
         case 'topups':
-          return this.transactions.all.filter(tr =>
-            tr.tx.recipient_id != 'undefined' && tr.tx.type == "SpendTx" && tr.tx.recipient_id == this.publicKey
-          );
-        break;
+          return this.transactions.all.filter(tr => tr.tx.recipient_id != 'undefined' && tr.tx.type == 'SpendTx' && tr.tx.recipient_id == this.publicKey);
+          break;
         case 'withdrawals':
-          return this.transactions.all.filter(tr =>
-            tr.tx.sender_id != 'undefined' && tr.tx.type == "SpendTx" && tr.tx.sender_id == this.publicKey
-          );
-        break;
+          return this.transactions.all.filter(tr => tr.tx.sender_id != 'undefined' && tr.tx.type == 'SpendTx' && tr.tx.sender_id == this.publicKey);
+          break;
         case 'all':
           return this.transactions.all;
-        break;
+          break;
         default:
           return this.transactions.all;
-        break;
+          break;
       }
-    }
+    },
   },
   created() {
     this.getTotalTransactions();
@@ -144,8 +137,8 @@ export default {
   },
   methods: {
     async filtrate(type, date_type) {
-      this.type = type
-      this.date_type = date_type
+      this.type = type;
+      this.date_type = date_type;
     },
     getPage() {
       return this.transactions.all.length == 0 ? 1 : Math.ceil(this.transactions.all.length / this.limit);
@@ -246,7 +239,7 @@ export default {
   transform: translateX(-50%);
   background: #111117;
   color: #ffffff;
-  padding: .7rem 1rem;
+  padding: 0.7rem 1rem;
   text-align: center;
   cursor: pointer;
   width: 100%;
