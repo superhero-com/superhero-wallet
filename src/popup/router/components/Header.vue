@@ -2,7 +2,7 @@
   <div class="header" v-if="showNavigation && !aeppPopup">
     <div class="content" :class="{ isLoggedIn }">
       <Arrow v-if="title" @click="goBack" class="back-arrow" />
-      <Logo v-else />
+      <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
 
       <div class="title">
         <span v-if="title">{{ $t(`pages.titles.${title}`) }}</span>
@@ -58,13 +58,16 @@ export default {
 
   .content {
     height: 50px;
-    max-width: 380px;
+    max-width: 357px;
     margin: 0 auto;
     padding: 0 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-
+    .intro_style {
+      position: absolute;
+      left: 20px;
+    }
     &:not(.isLoggedIn) .title {
       margin-left: auto;
       margin-right: auto;

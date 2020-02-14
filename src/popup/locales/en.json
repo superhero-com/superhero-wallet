@@ -2,7 +2,18 @@
     "pages": {
         "intro": {
             "heading" :"Intro",
-            "skip": "Skip"
+            "skip": "Skip",
+            "generateWallet": "Generate Wallet",
+            "receive": "Receive",
+            "step1text": "for creating great content, engaging in meaningful discussions, curating good content from others, launching causes for humanity, and for just being a wonderful human being.",
+            "step2text": "to great content creators online, humanitarian causes, and other awesome human beings—for whatever reason.",
+            "step3text-1": "This wallet does not—and will never take commissions off the",
+            "step3text-2": "you send or receive. Corona was created specifically so that no one but you will have control over your funds.",
+            "createdWallet": "Your waellet has been created!",
+            "step4text-1": "Welcome to fairer Internet. This wallet was created specifically so that no one but you will have control over your funds - or your ability to receive them.",
+            "step4text-2": "Unlike other monetization platforms and payment systems, the creators of this wallet cannot - and can never take away your ability to receive tips from your followers and supporters.",
+            "enjoy-msg": "Enjoy your autonomy",
+            "toHome": "Proceed to Home"
         },
         "titles": {
             "settings": "Settings",

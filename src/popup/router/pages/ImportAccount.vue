@@ -46,7 +46,8 @@ export default {
             publicKey: address,
             privateKey: seed,
           };
-          this.$store.dispatch('setLogin', { keypair });
+          await this.$store.dispatch('setLogin', { keypair });
+          this.$router.push('/account');
         } else {
           this.loading = false;
           this.disabled = true;
