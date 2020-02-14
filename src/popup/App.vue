@@ -1,6 +1,6 @@
 <template>
   <ae-main :class="$route.path === '/receive' ? 'ae-main-receive' : ''">
-    <div class="background-big-wave" :style="$route.path === '/intro' ? { 'background-image': 'url(' + wave_bg + ') !important' } : ''" ></div>
+    <div class="background-big-wave" :style="$route.path === '/intro' ? { 'z-index': '0', 'background-image': 'url(' + wave_bg + ') !important' } : ''" ></div>
     <Header @toggle-sidebar="showSidebar = !showSidebar" />
 
     <router-view :key="$route.fullPath" />
@@ -119,7 +119,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 0;
+  z-index: -1;
   top: 0;
   background: transparent;
   background-position-y: bottom;

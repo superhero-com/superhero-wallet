@@ -14,7 +14,7 @@
       </p>
 
       <div class="flex flex-align-center flex-justify-between">
-        <div v-if="!editUrl" class="flex flex-align-center flex-justify-between"> <a class="link-sm text-left block" style="width:90%;"> {{ editedUrl ? editedUrl : tipUrl }} </a> <CheckIcon v-if="urlVerified" /> </div>
+        <div v-if="!editUrl" class="flex flex-align-center flex-justify-between" style="width: 100%;"> <a class="link-sm text-left block" style="width:90%;"> {{ editedUrl ? editedUrl : tipUrl }} </a> <CheckIcon v-if="urlVerified" /> </div>
         <button v-if="!editUrl && !confirmMode" @click="handleUrlEdit"><ae-icon name="vote" /></button>
 
         <Input style="width:100%;" size="m-0 xsm" v-if="editUrl && !confirmMode" type="text" v-model="editedUrl" :value="tipUrl" />

@@ -2,7 +2,7 @@
   <div class="header" v-if="showNavigation">
     <div class="content" :class="{ isLoggedIn }">
       <Arrow v-if="title" @click="goBack" />
-      <Logo v-else />
+      <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
 
       <div class="title">
         {{ title || 'Corona Wallet ' }}
@@ -63,7 +63,10 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-
+    .intro_style {
+      position: absolute;
+      left: 20px;
+    }
     &:not(.isLoggedIn) .title {
       margin-left: 15px;
     }

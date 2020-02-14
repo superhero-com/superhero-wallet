@@ -1,6 +1,7 @@
 <template>
   <div class="popup">
     <div class="createWallet-holder" >
+
       <div v-show="step === 1">
         <h2><Claim /> Receive <span class="aeid">æid</span></h2>
         <div class="text-info">
@@ -12,6 +13,7 @@
             <li @click="step = 2"><a></a></li>
             <li @click="step = 3"><a></a></li>
           </ul>
+          <RightArrow @click="step = step + 1" class="right-arrow" />
           <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
         </div>
       </div>
@@ -22,11 +24,13 @@
           to great content creators online, humanitarian causes, and other awesome human beings—for whatever reason.
         </div>
         <div class="dotstyle dotstyle-fillup">
+          <LeftArrow @click="step = step - 1" class="left-arrow" />
           <ul>
             <li @click="step = 1"><a></a></li>
             <li @click="step = 2" class="current"><a></a></li>
             <li @click="step = 3"><a></a></li>
           </ul>
+          <RightArrow @click="step = step + 1" class="right-arrow" />
           <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
         </div>
       </div>
@@ -39,49 +43,54 @@
           Ever.
         </div>
         <div class="dotstyle dotstyle-fillup">
+          <LeftArrow @click="step = step - 1" class="left-arrow" />
           <ul>
             <li @click="step = 1"><a></a></li>
             <li @click="step = 2"><a></a></li>
             <li @click="step = 3" class="current"><a></a></li>
           </ul>
-          <Button @click="createWallet">{{ $t('pages.intro.generateWallet') }}</Button>
+          <Button style="margin-top: 30px;" @click="createWallet">{{ $t('pages.intro.generateWallet') }}</Button>
         </div>
       </div>
 
       <div v-show="step === 4">
-        <div class="actions flex flex-align-center">
-          <button @click="step = 3" class="back-button">
-            <i data-v-1e70ab95 data-v-521427f6 class="ae-icon back-icon ae-icon-left-more"></i>
-          </button>
-        </div>
+        <h2>Your waellet has been created!</h2>
         <div class="text-info">
-          <p><b>Your waellet has been created!</b></p>
-          <b style="display:block;">Welcome to fairer Internet.</b>
-          This wallet was created specifically so that no one but you will have control over your funds - or your ability to receive them.
-          <b style="display:block;">Ever.</b>
+          <span style="display:block;">Welcome to fairer Internet. This wallet was created specifically so that no one but you will have control over your funds - or your ability to receive them.</span>
+          <span style="display:block;">Ever.</span>
 
-          <small>
+          <span style="display:block;">
             Unlike other monetization platforms and payment systems, the creators of this wallet cannot - and can never take away your ability to receive tips from your followers
             and supporters.
-          </small>
+          </span>
         </div>
-        <p style="bottom: 50px; color: rgb(235, 88, 250); position: absolute; margin: 0 auto; width: 100%;"><b>Enjoy your autonomy</b></p>
-        <button @click="createWallet" class="createWallet-button">Go to Dashboard</button>
+        <p class="last-msg-enjoy">Enjoy your autonomy</p>
+        <Button @click="toAccount">Proceed to Home</Button>
       </div>
+
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
 import Claim from '../../../icons/claim.svg';
 import Heart from '../../../icons/heart.svg';
+import LeftArrow from '../../../icons/left-arrow.svg';
+import RightArrow from '../../../icons/right-arrow.svg';
 import Button from '../components/Button'
+
 export default {
   components: {
     Claim,
     Heart,
-    Button
+    Button,
+    LeftArrow,
+    RightArrow
+  },
+  computed: {
+    ...mapGetters(['isLoggedIn']),
   },
   data() {
     return {
@@ -91,6 +100,9 @@ export default {
     };
   },
   async created() {
+    setInterval(() => {
+      console.log('isLoggedIn => ', this.isLoggedIn)
+    }, 3000);
   },
   methods: {
     async createWallet() {
@@ -103,6 +115,10 @@ export default {
         privateKey: seed,
       };
       this.$store.dispatch('setLogin', { keypair });
+      this.next();
+    },
+    toAccount(){
+      this.$router.push('/account');
     },
     prev() {
       this.step--;
@@ -138,6 +154,12 @@ export default {
   .text-info {
     margin: 10px 0 0 0;
     color: $text-color !important;
+    span {
+      color: $text-color !important;
+      font-size: 16px;
+      white-space: pre-line;
+      text-align: left;
+    }
   }
   .skip-button {
     color: $accent-color !important;
@@ -146,18 +168,22 @@ export default {
     text-decoration: underline;
     width: 100%;
   }
-}
-.createWallet-button {
-  background: #4f4f4f;
-  color: #fff;
-  position: absolute;
-  bottom: 0;
-  margin: 0 auto;
-  left: 0;
-  right: 0;
-  padding: 1rem;
-  font-weight: bold;
-  border-radius: 10px;
+  .last-msg-enjoy {
+    color: $secondary-color !important;
+    font-size:18px;
+    width:100%;
+    margin: 0 auto;
+  }
+  .left-arrow{
+    left: 20px;
+    position: absolute;
+    cursor: pointer;
+  }
+  .right-arrow{
+    right: 20px;
+    position: absolute;
+    cursor: pointer;
+  }
 }
 .dotstyle {
   position: fixed;
