@@ -1,14 +1,12 @@
 <template>
   <div class="popup">
-    <!-- <div class="createWallet-holder">
+    <div class="createWallet-holder">
       <div v-show="step === 1">
-        <h2>{{ $t('pages.intro.heading') }}</h2>
-        <p>(Onboarding page {{ step }} of {{ totalsteps }})</p>
-        <div style="font-weight:bold;">How to CLAIM tips</div>
+        <h2><Claim /> {{ $t('pages.intro.receive') }} <span class="aeid"> æid </span></h2>
         <div class="text-info">
-          Do so written as raising parlors spirits mr elderly. Made late in of high left hold. Carried females of up highest calling. Limits marked led silent dining her she far.
-          Sir but elegance marriage dwelling likewise position old pleasure men. Dissimilar themselves simplicity no of contrasted as. Delay great day hours men. Stuff front to do
-          allow to asked he.
+          <span>
+          {{ $t('pages.intro.step1text') }}
+          </span>
         </div>
         <div class="dotstyle dotstyle-fillup">
           <ul>
@@ -16,88 +14,95 @@
             <li @click="step = 2"><a></a></li>
             <li @click="step = 3"><a></a></li>
           </ul>
+          <RightArrow @click="step = step + 1" class="right-arrow" />
+          <button class="skip-button" @click="step = 3">{{ $t('pages.intro.skip') }}</button>
         </div>
-        <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
       </div>
 
       <div v-show="step === 2">
-        <h2>{{ $t('pages.intro.heading') }}</h2>
-        <p>(Onboarding page {{ step }} of {{ totalsteps }})</p>
-        <div style="font-weight:bold;">How to SEND TIPS</div>
+        <h2><Heart /> Send <span class="aeid">æid</span></h2>
         <div class="text-info">
-          Mr do raising article general norland my hastily. Its companions say uncommonly pianoforte favourable. Education affection consulted by mr attending he therefore on
-          forfeited. High way more far feet kind evil play led. Sometimes furnished collected add for resources attention. Norland an by minuter enquire it general on towards
-          forming. Adapted mrs totally company two yet conduct men.
+          <span>
+          {{ $t('pages.intro.step2text') }}
+          </span>
         </div>
         <div class="dotstyle dotstyle-fillup">
+          <LeftArrow @click="step = step - 1" class="left-arrow" />
           <ul>
             <li @click="step = 1"><a></a></li>
             <li @click="step = 2" class="current"><a></a></li>
             <li @click="step = 3"><a></a></li>
           </ul>
+          <RightArrow @click="step = step + 1" class="right-arrow" />
+          <button class="skip-button" @click="step = 3">{{ $t('pages.intro.skip') }}</button>
         </div>
-        <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
       </div>
 
       <div v-show="step === 3">
-        <h2>{{ $t('pages.intro.heading') }}</h2>
-        <p>(Onboarding page {{ step }} of {{ totalsteps }})</p>
-        <div style="font-weight:bold;">How to ADD tokens cashing out</div>
         <div class="text-info">
-          Its had resolving otherwise she contented therefore. Afford relied warmth out sir hearts sister use garden. Men day warmth formed admire former simple.
+          <span>
+          {{ $t('pages.intro.step3text-1') }} <span style="margin-left: 0px;" class="aeid">æid</span> {{ $t('pages.intro.step3text-2') }} 
+          </span>
         </div>
-        <div style="font-weight:bold;">Cashing Out</div>
-        <div>
-          Humanity declared vicinity continue supplied no an. He hastened am no property exercise of. Dissimilar comparison no terminated devonshire no literature on. Say most yet
-          head room such just easy.
+        <div style="float:left;margin-top:2rem;">
+          Ever.
         </div>
         <div class="dotstyle dotstyle-fillup">
+          <LeftArrow @click="step = step - 1" class="left-arrow" />
           <ul>
             <li @click="step = 1"><a></a></li>
             <li @click="step = 2"><a></a></li>
             <li @click="step = 3" class="current"><a></a></li>
           </ul>
+          <Button style="margin-top: 30px;" @click="createWallet">{{ $t('pages.intro.generateWallet') }}</Button>
         </div>
-        <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
       </div>
 
       <div v-show="step === 4">
-        <div class="actions flex flex-align-center">
-          <button @click="step = 3" class="back-button">
-            <i data-v-1e70ab95 data-v-521427f6 class="ae-icon back-icon ae-icon-left-more"></i>
-          </button>
-        </div>
+        <h2>{{ $t('pages.intro.createdWallet') }}</h2>
         <div class="text-info">
-          <p><b>Your waellet has been created!</b></p>
-          <b style="display:block;">Welcome to fairer Internet.</b>
-          This wallet was created specifically so that no one but you will have control over your funds - or your ability to receive them.
-          <b style="display:block;">Ever.</b>
+          <span style="display:block;"
+            >{{ $t('pages.intro.step4text-1') }}</span
+          >
+          <span style="display:block;">Ever.</span>
 
-          <small>
-            Unlike other monetization platforms and payment systems, the creators of this wallet cannot - and can never take away your ability to receive tips from your followers
-            and supporters.
-          </small>
+          <span style="display:block;">
+            {{ $t('pages.intro.step4text-2') }}
+          </span>
         </div>
-        <p style="bottom: 50px; color: rgb(235, 88, 250); position: absolute; margin: 0 auto; width: 100%;"><b>Enjoy your autonomy</b></p>
-        <button @click="createWallet" class="createWallet-button">Go to Dashboard</button>
+        <p class="last-msg-enjoy">{{ $t('pages.intro.enjoy-msg') }} </p>
+        <Button @click="toAccount">{{$t('pages.intro.toHome') }}</Button>
       </div>
-    </div> -->
+    </div>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
+import Claim from '../../../icons/claim.svg';
+import Heart from '../../../icons/heart.svg';
+import LeftArrow from '../../../icons/left-arrow.svg';
+import RightArrow from '../../../icons/right-arrow.svg';
+import Button from '../components/Button';
 
 export default {
+  components: {
+    Claim,
+    Heart,
+    Button,
+    LeftArrow,
+    RightArrow,
+  },
+  computed: {
+    ...mapGetters(['isLoggedIn']),
+  },
   data() {
     return {
       step: 1,
       totalsteps: 4,
       mnemonic: null,
     };
-  },
-  async created() {
-    this.createWallet();
   },
   methods: {
     async createWallet() {
@@ -110,6 +115,10 @@ export default {
         privateKey: seed,
       };
       this.$store.dispatch('setLogin', { keypair });
+      this.next();
+    },
+    toAccount() {
+      this.$router.push('/account');
     },
     prev() {
       this.step--;
@@ -126,41 +135,62 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../../common/variables';
 .createWallet-holder {
   position: relative;
   height: 80vh;
-}
-.createWallet-holder .skip-button {
-  font-style: italic;
-  text-transform: uppercase;
-  left: 0;
-  right: 0;
-  bottom: 15px;
-  position: absolute;
-  margin: 0 auto;
-  font-size: 25px;
-}
-.createWallet-holder .text-info {
-  margin: 10px;
-}
-.createWallet-button {
-  background: #4f4f4f;
-  color: #fff;
-  position: absolute;
-  bottom: 0;
-  margin: 0 auto;
-  left: 0;
-  right: 0;
-  padding: 1rem;
-  font-weight: bold;
-  border-radius: 10px;
+  padding-top: 40px;
+  h2 {
+    display: flex;
+    justify-content: center;
+    font-size: 18px;
+    svg {
+      margin-right: 10px;
+    }
+  }
+  .aeid {
+    margin-left: 10px;
+    color: $secondary-color !important ;
+  }
+  .text-info {
+    margin: 10px 0 0 0;
+    color: $text-color !important;
+    text-align: left;
+    span:not(.aeid) {
+      color: $text-color !important;
+      font-size: 16px;
+      word-break: break-word;
+    }
+  }
+  .skip-button {
+    color: $accent-color !important;
+    font-size: 18px;
+    margin-top: 30px;
+    text-decoration: underline;
+    width: 100%;
+  }
+  .last-msg-enjoy {
+    color: $secondary-color !important;
+    font-size: 18px;
+    width: 100%;
+    margin: 10px auto;
+  }
+  .left-arrow {
+    left: 20px;
+    position: absolute;
+    cursor: pointer;
+  }
+  .right-arrow {
+    right: 20px;
+    position: absolute;
+    cursor: pointer;
+  }
 }
 .dotstyle {
-  position: absolute;
-  bottom: 50px;
+  position: fixed;
   left: 0;
   right: 0;
-  margin: 0 auto;
+  top: 50%;
 }
 .dotstyle ul {
   position: relative;
@@ -195,7 +225,7 @@ export default {
 /* Fill up */
 .dotstyle-fillup li a {
   overflow: hidden;
-  background-color: #ccc;
+  background-color: $text-color !important;
   transition: background 0.3s;
 }
 
@@ -217,7 +247,7 @@ export default {
 }
 
 .dotstyle-fillup li.current a {
-  background-color: #7d7d7d;
+  background-color: $secondary-color !important;
 }
 .dotstyle-fillup li.current a::after {
   height: 100%;
