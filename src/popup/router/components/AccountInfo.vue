@@ -55,7 +55,8 @@ export default {
   }
   .ae-address {
     color: $text-color !important;
-    font-size: 11px;
+    font-size: 10px;
+    letter-spacing: -0.1px;
   }
   .account-addresses {
     position: relative;

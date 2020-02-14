@@ -45,7 +45,7 @@
         <div class="info-group">
           <label>{{ $t('pages.send.amount') }}</label>
           <div class="text-center">
-            <span class="amount">{{ toFixedAmount }} {{ tokenSymbol }}</span>
+            <span class="amount">{{ toFixedAmount }} {{ $t('pages.appVUE.aeid') }}</span>
             <span class="currencyamount">
               ~
               <span>{{ amountConvert }} {{ current.currency.toUpperCase() }}</span>
@@ -69,7 +69,7 @@
         </h3>
         <p class="primary-title primary-title-darker text-left my-5 f-16">
           <span>{{ $t('pages.send.successalert') }}</span>
-          <span class="secondary-text ml-5"> {{ successTx.amount }} {{ tokenSymbol }}</span>
+          <span class="secondary-text ml-5"> {{ successTx.amount }} {{ $t('pages.appVUE.aeid') }}</span>
         </p>
         <div class="info-group">
           <label class="info-label">{{ $t('pages.send.to') }}</label>
@@ -327,8 +327,9 @@ export default {
       display: inline-block;
       width: 300px;
       white-space: nowrap;
-      overflow: hidden !important;
-      text-overflow: ellipsis;
+      // overflow: hidden !important;
+      // text-overflow: ellipsis;
+      letter-spacing: -0.3px;
     }
     .amount {
       font-size: 26px;

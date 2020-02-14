@@ -111,9 +111,6 @@ export default {
 </style>
 
 <style lang="scss" scoped>
-*:not(.background-big-wave) {
-  z-index: 1;
-}
 .background-big-wave {
   position: absolute;
   left: 0;

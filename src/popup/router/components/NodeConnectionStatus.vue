@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div class="connect-error" v-if="nodeStatus == 'error' && account.publicKey && isLoggedIn">Unable to connect to choosen node</div>
-    <div class="connect-node" v-if="nodeStatus == 'connecting' && account.publicKey && isLoggedIn">Connecting to node...</div>
-    <div class="connect-node" v-if="nodeStatus == 'connected' && account.publicKey && isLoggedIn">Connected to node</div>
-    <div class="connect-node" v-if="nodeStatus == 'initServices' && account.publicKey && isLoggedIn">Initializing services...</div>
+    <div class="connect-error" v-if="nodeStatus == 'error' && account.publicKey && isLoggedIn">{{ $t('pages.nodeConnectionStatus.error') }}</div>
+    <div class="connect-node" v-if="nodeStatus == 'connecting' && account.publicKey && isLoggedIn">{{ $t('pages.nodeConnectionStatus.connecting') }}</div>
+    <div class="connect-node" v-if="nodeStatus == 'connected' && account.publicKey && isLoggedIn">{{ $t('pages.nodeConnectionStatus.connected') }}</div>
+    <div class="connect-node" v-if="nodeStatus == 'initServices' && account.publicKey && isLoggedIn">{{ $t('pages.nodeConnectionStatus.init') }}</div>
   </div>
 </template>
 
