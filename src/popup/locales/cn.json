@@ -2,7 +2,20 @@
     "pages": {
         "intro": {
             "heading" :"介绍",
-            "skip": "跳过"
+            "skip": "跳过",
+            "generateWallet": "生成新钱包",
+            "receive": "接收",
+            "step1text": "创造精彩的内容，进行有意义的讨论，从他人那里筹集好的内容，发动人类事业以及成为一个出色的人.",
+            "step2text": "竭尽所能，吸引在线上的精彩内容创作者，人道主义事业和其他令人敬畏的人们",
+            "step3text-1": "此钱包不会干涉您❤币的",
+            "step3text-2": "发送或接收。 本应用程序是专门为您创建的，因此没有人可以控制您的资金.",
+            "createdWallet": "您的钱包已建成!",
+            "step4text-1": "欢迎来到更公平的互联网。 这个钱包是专门为您创建的，因此没有人除了您可以控制您的资金.",
+            "step4text-2": "与其他货币化平台和支付系统不同，此钱包应用程序的创建者不能-永远也不能剥夺您从您的关注者那里获取奖励的权力.",
+            "enjoy-msg": "享受您的自主权",
+            "toHome": "回到主界面",
+            "send": "发送❤币",
+            "ever": "Ever."
         },
         "titles": {
             "settings": "设置",
@@ -45,7 +58,8 @@
             "language": "语言",
             "advanced": "高级",
             "versions": "版本与更新",
-            "mainAccount": "main account"
+            "mainAccount": "主账号",
+            "reportBug": "报告错误"
         },
         "aboutSettings": {
             "heading": "关于",

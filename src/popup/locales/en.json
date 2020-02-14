@@ -58,7 +58,8 @@
             "language": "Language",
             "advanced": "Advanced",
             "versions": "Version & Updates",
-            "mainAccount": "Main account"
+            "mainAccount": "Main account",
+            "reportBug": "Report a bug"
         },
         "aboutSettings": {
             "heading": "About",

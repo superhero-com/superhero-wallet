@@ -9,6 +9,9 @@
     <div class="waellet-links">
       <a href="#" @click="goToTermsOfService">{{ $t('pages.aboutSettings.terms') }}</a>
       <a href="#" @click="goToPrivacyPolicy">{{ $t('pages.aboutSettings.privacyPolicy') }}</a>
+      <Button :style="styling" @click="bugReport">
+        {{ $t('pages.appVUE.reportBug') }}
+      </Button>
     </div>
     <div v-if="loading" class="loading">
       <ae-loader />
@@ -27,9 +30,13 @@ export default {
     return {
       logo: browser.runtime.getURL('../../../icons/icon_128.png'),
       loading: false,
+      bugReportURL: 'https://coronawallet.typeform.com/to/U3RroS',
     };
   },
   methods: {
+    bugReport() {
+      browser.tabs.create({ url: this.bugReportURL, active: true });
+    },
     navigateToSettings() {
       this.$router.push('/settings');
     },
