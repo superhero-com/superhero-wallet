@@ -80,7 +80,7 @@ export default {
         case 'fr':
           return 'French';
         case 'cn':
-          return 'Chinese';
+          return '中文';
         case 'it':
           return 'Italian';
         default:
