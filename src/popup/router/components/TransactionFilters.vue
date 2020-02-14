@@ -40,7 +40,7 @@ export default {
   methods: {
     handleScroll(event) {
       if (window.scrollY > 150) {
-        this.fixedheader = 'position:fixed; top:50px;';
+        this.fixedheader = 'position:fixed; top:50px;max-width:357px';
       } else {
         this.fixedheader = '';
       }

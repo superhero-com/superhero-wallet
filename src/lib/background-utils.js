@@ -5,6 +5,7 @@ import { setContractInstance, contractCall } from '../popup/utils/helper';
 
 let sdk;
 let controller;
+let tippingContract;
 
 export const setController = contr => {
   controller = contr;
@@ -66,6 +67,13 @@ export const getAddressFromChainName = async names => {
   );
 };
 
+export const getTippingContractInstance = async (tx) => {
+  if(tippingContract) return tippingContract;
+  const sdk = await getSDK();
+  tippingContract = await setContractInstance(tx, sdk, tx.address);
+  return tippingContract;
+}
+
 export const contractCallStatic = async ({ tx, callType }) =>
   new Promise(async (resolve, reject) => {
     try {
@@ -73,8 +81,9 @@ export const contractCallStatic = async ({ tx, callType }) =>
       // controller.isLoggedIn() &&
       if (typeof callType !== 'undefined' && callType == 'static' && account) {
         // let keypair = parseFromStorage(await controller.getKeypair({ activeAccount, account }));
-        const sdk = await getSDK();
-        const contractInstance = await setContractInstance(tx, sdk, tx.address);
+        // const sdk = await getSDK();
+        // const contractInstance = await setContractInstance(tx, sdk, tx.address);
+        const contractInstance = await getTippingContractInstance(tx);
         const call = await contractCall({ instance: contractInstance, method: tx.method, params: [...tx.params, tx.options] });
         if (call) {
           resolve(call);
