@@ -185,6 +185,10 @@ export default {
       font-size: 40px;
       cursor: pointer;
     }
+
+    svg {
+      cursor: pointer;
+    }
   }
 
   .account-icon-holder {

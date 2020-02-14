@@ -7,12 +7,12 @@ export default {
   props: ['value', 'error', 'placeholder', 'size'],
   computed: {
     getClasses() {
+      let cl = [];
       if (this.error || this.err) {
-        const cl = [];
         cl.push('has-error');
       }
       if (this.size) {
-        var cl = this.size.split(' ');
+        cl = [...cl, ...this.size.split(' ')];
       }
       return cl;
     },

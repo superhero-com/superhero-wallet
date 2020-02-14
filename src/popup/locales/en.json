@@ -15,6 +15,20 @@
             "enjoy-msg": "Enjoy your autonomy",
             "toHome": "Proceed to Home"
         },
+        "titles": {
+            "settings": "Settings",
+            "general": "General",
+            "security": "Security",
+            "about": "About",
+            "send": "Send æid",
+            "scanQr": "Scan QR",
+            "terms": "Terms & Conditions",
+            "privacy": "Privacy Policy",
+            "importAccount": "Retrieve Existing Account",
+            "activity": "Activity History",
+            "withdraw": "Withdraw",
+            "topUp": "Top Up"
+        },
         "appVUE": {
             "systemName": "Corona",
             "manageNetworks": "Manage networks",
@@ -41,7 +55,8 @@
             "seedPhrase": "Seed Phrase",
             "language": "Language",
             "advanced": "Advanced",
-            "versions": "Version & Updates"
+            "versions": "Version & Updates",
+            "mainAccount": "Main account"
         },
         "aboutSettings": {
             "heading": "About",
@@ -78,6 +93,8 @@
             "recentActivity": "Recent Activity",
             "viewAll": "View all",
             "pendingStatus": "Pending",
+            "sentStatus": "Sent",
+            "receivedStatus": "Received",
             "noTransactionsFound": "No transactions found!"
         },
         "addFungibleToken": {

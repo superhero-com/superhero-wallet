@@ -1,11 +1,11 @@
 <template>
-  <div class="header" v-if="showNavigation">
+  <div class="header" v-if="showNavigation && !aeppPopup">
     <div class="content" :class="{ isLoggedIn }">
-      <Arrow v-if="title" @click="goBack" />
+      <Arrow v-if="title" @click="goBack" class="back-arrow" />
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
 
       <div class="title">
-        {{ title || 'Corona Wallet ' }}
+        {{ title || $t('pages.appVUE.coronaWallet') }}
       </div>
 
       <div v-if="isLoggedIn">
@@ -28,7 +28,7 @@ import Logo from '../../../icons/logo-small.svg';
 export default {
   components: { Arrow, Bell, Hamburger, Logo },
   computed: {
-    ...mapGetters(['isLoggedIn']),
+    ...mapGetters(['isLoggedIn', 'aeppPopup']),
     title() {
       return this.$route.meta.title;
     },
@@ -59,7 +59,7 @@ export default {
     height: 50px;
     max-width: 357px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 10px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -68,7 +68,12 @@ export default {
       left: 20px;
     }
     &:not(.isLoggedIn) .title {
-      margin-left: 15px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .back-arrow {
+      cursor: pointer;
     }
 
     &.isLoggedIn {
