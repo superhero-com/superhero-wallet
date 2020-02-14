@@ -2,7 +2,7 @@
   <div class="popup">
     <div class="createWallet-holder">
       <div v-show="step === 1">
-        <h2><Claim /> {{ $t('pages.intro.receive') }} <span class="aeid"> æid </span></h2>
+        <h2><Claim /> {{ $t('pages.intro.receive') }} <span class="aeid"> {{ $t('pages.appVUE.aeid') }} </span></h2>
         <div class="text-info">
           <span>
           {{ $t('pages.intro.step1text') }}
@@ -20,7 +20,7 @@
       </div>
 
       <div v-show="step === 2">
-        <h2><Heart /> Send <span class="aeid">æid</span></h2>
+        <h2><Heart /> {{ $t('pages.send.send') }} <span class="aeid">{{ $t('pages.appVUE.aeid') }}</span></h2>
         <div class="text-info">
           <span>
           {{ $t('pages.intro.step2text') }}
@@ -41,11 +41,11 @@
       <div v-show="step === 3">
         <div class="text-info">
           <span>
-          {{ $t('pages.intro.step3text-1') }} <span style="margin-left: 0px;" class="aeid">æid</span> {{ $t('pages.intro.step3text-2') }} 
+          {{ $t('pages.intro.step3text-1') }} <span style="margin-left: 0px;" class="aeid">{{ $t('pages.appVUE.aeid') }}</span> {{ $t('pages.intro.step3text-2') }} 
           </span>
         </div>
         <div style="float:left;margin-top:2rem;">
-          Ever.
+          {{ $t('pages.intro.ever') }}
         </div>
         <div class="dotstyle dotstyle-fillup">
           <LeftArrow @click="step = step - 1" class="left-arrow" />
@@ -64,7 +64,7 @@
           <span style="display:block;"
             >{{ $t('pages.intro.step4text-1') }}</span
           >
-          <span style="display:block;">Ever.</span>
+          <span style="display:block;">{{ $t('pages.intro.ever') }}</span>
 
           <span style="display:block;">
             {{ $t('pages.intro.step4text-2') }}

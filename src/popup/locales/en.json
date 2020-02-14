@@ -13,7 +13,9 @@
             "step4text-1": "Welcome to fairer Internet. This wallet was created specifically so that no one but you will have control over your funds - or your ability to receive them.",
             "step4text-2": "Unlike other monetization platforms and payment systems, the creators of this wallet cannot - and can never take away your ability to receive tips from your followers and supporters.",
             "enjoy-msg": "Enjoy your autonomy",
-            "toHome": "Proceed to Home"
+            "toHome": "Proceed to Home",
+            "send": "Send",
+            "ever": "Ever."
         },
         "titles": {
             "settings": "Settings",
@@ -439,7 +441,9 @@
             "inccorectAddress": "Incorrect address",
             "compiledCode": "Compiled Code",
             "callData": "Call Data",
-            "payload": "Payload"
+            "payload": "Payload",
+            "newContract": "New Contract",
+            "aens": "AENS"
         },
         "signTransactionByQrCode": {
             "backToAccount": "Back to account",

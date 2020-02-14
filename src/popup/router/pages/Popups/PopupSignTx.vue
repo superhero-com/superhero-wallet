@@ -16,7 +16,7 @@
         </div>
         <div v-else class="flex flex-align-center accountTo">
           <ae-icon name="square" />
-          <span class="spendAccountAddr">{{ txType == 'contractCreateTx' ? 'New contract' : 'AENS' }}</span>
+          <span class="spendAccountAddr">{{ txType == 'contractCreateTx' ? $t('pages.signTransaction.newContract') : $t('pages.signTransaction.aens') }}</span>
         </div>
       </ae-list-item>
       <ae-list-item fill="neutral" class="flex-justify-between flex-align-start flex-direction-column">
@@ -24,7 +24,7 @@
           <!-- <ae-badge v-if="txType=='contractCallTx'">{{$t('pages.signTransaction.contractCall')}}</ae-badge> -->
           <ae-badge>{{ txType }}</ae-badge>
         </div>
-        <div class="balance balanceSpend no-sign" v-if="!isNameTx">{{ toAe(amount) }} {{ token }}</div>
+        <div class="balance balanceSpend no-sign" v-if="!isNameTx">{{ toAe(amount) }} {{ $t('pages.appVUE.aeid') }}</div>
         <!-- <div class="fiat-rate" v-if="!txObject.token && !isNameTx">${{convertCurrency(usdRate,amount)}}</div> -->
       </ae-list-item>
       <ae-list-item v-if="txObject.payload" fill="neutral" class="flex-justify-between flex-align-center flex-direction-column flex-align-start">
@@ -64,7 +64,7 @@
         <div class="flex extend flex-justify-between ">
           <div class="tx-label">{{ $t('pages.signTransaction.fee') }}</div>
           <div class="text-right">
-            <div class="balance balanceBig txFee">{{ toAe(txObject.fee) }}</div>
+            <div class="balance balanceBig txFee no-sign">{{ toAe(txObject.fee) }} {{ $t('pages.appVUE.aeid') }}</div>
             <!-- <div class="fiat-rate">${{ convertCurrency(usdRate,selectedFee) }}</div> -->
           </div>
         </div>
@@ -73,7 +73,7 @@
       <ae-list-item fill="neutral" class="flex-justify-between" v-if="alertMsg == '' && !isNameTx">
         <div class="tx-label">{{ $t('pages.signTransaction.total') }}</div>
         <div class="text-right">
-          <div class="balance balanceBig balanceTotalSpend no-sign">{{ totalSpend }} {{ token }}</div>
+          <div class="balance balanceBig balanceTotalSpend no-sign">{{ totalSpend }} {{ $t('pages.appVUE.aeid') }}</div>
           <!-- <div class="fiat-rate" v-if="!txObject.token">${{ convertCurrency(usdRate,totalSpend) }}</div> -->
         </div>
       </ae-list-item>
