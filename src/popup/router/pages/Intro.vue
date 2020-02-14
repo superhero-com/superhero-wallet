@@ -4,7 +4,9 @@
       <div v-show="step === 1">
         <h2><Claim /> {{ $t('pages.intro.receive') }} <span class="aeid"> æid </span></h2>
         <div class="text-info">
+          <span>
           {{ $t('pages.intro.step1text') }}
+          </span>
         </div>
         <div class="dotstyle dotstyle-fillup">
           <ul>
@@ -13,14 +15,16 @@
             <li @click="step = 3"><a></a></li>
           </ul>
           <RightArrow @click="step = step + 1" class="right-arrow" />
-          <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
+          <button class="skip-button" @click="step = 3">{{ $t('pages.intro.skip') }}</button>
         </div>
       </div>
 
       <div v-show="step === 2">
         <h2><Heart /> Send <span class="aeid">æid</span></h2>
         <div class="text-info">
+          <span>
           {{ $t('pages.intro.step2text') }}
+          </span>
         </div>
         <div class="dotstyle dotstyle-fillup">
           <LeftArrow @click="step = step - 1" class="left-arrow" />
@@ -30,13 +34,15 @@
             <li @click="step = 3"><a></a></li>
           </ul>
           <RightArrow @click="step = step + 1" class="right-arrow" />
-          <button class="skip-button" @click="next()">{{ $t('pages.intro.skip') }}</button>
+          <button class="skip-button" @click="step = 3">{{ $t('pages.intro.skip') }}</button>
         </div>
       </div>
 
       <div v-show="step === 3">
         <div class="text-info">
+          <span>
           {{ $t('pages.intro.step3text-1') }} <span style="margin-left: 0px;" class="aeid">æid</span> {{ $t('pages.intro.step3text-2') }} 
+          </span>
         </div>
         <div style="float:left;margin-top:2rem;">
           Ever.
@@ -149,11 +155,11 @@ export default {
   .text-info {
     margin: 10px 0 0 0;
     color: $text-color !important;
+    text-align: left;
     span:not(.aeid) {
       color: $text-color !important;
       font-size: 16px;
-      white-space: pre-line;
-      text-align: left;
+      word-break: break-word;
     }
   }
   .skip-button {
