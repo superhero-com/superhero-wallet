@@ -1,11 +1,10 @@
 <template>
   <div class="popup">
-    <div class="createWallet-holder" >
-
+    <div class="createWallet-holder">
       <div v-show="step === 1">
-        <h2><Claim /> Receive <span class="aeid">æid</span></h2>
+        <h2><Claim /> {{ $t('pages.intro.receive') }} <span class="aeid"> æid </span></h2>
         <div class="text-info">
-          for creating great content, engaging in meaningful discussions, curating good content from others, launching causes for humanity, and for just being a wonderful human being.
+          {{ $t('pages.intro.step1text') }}
         </div>
         <div class="dotstyle dotstyle-fillup">
           <ul>
@@ -21,7 +20,7 @@
       <div v-show="step === 2">
         <h2><Heart /> Send <span class="aeid">æid</span></h2>
         <div class="text-info">
-          to great content creators online, humanitarian causes, and other awesome human beings—for whatever reason.
+          {{ $t('pages.intro.step2text') }}
         </div>
         <div class="dotstyle dotstyle-fillup">
           <LeftArrow @click="step = step - 1" class="left-arrow" />
@@ -37,7 +36,7 @@
 
       <div v-show="step === 3">
         <div class="text-info">
-          This wallet does not—and will never take commissions off the <span class="aeid">æid</span> you send or receive. Corona was created specifically so that no one but you will have control over your funds.
+          {{ $t('pages.intro.step3text-1') }} <span style="margin-left: 0px;" class="aeid">æid</span> {{ $t('pages.intro.step3text-2') }} 
         </div>
         <div style="float:left;margin-top:2rem;">
           Ever.
@@ -54,20 +53,20 @@
       </div>
 
       <div v-show="step === 4">
-        <h2>Your waellet has been created!</h2>
+        <h2>{{ $t('pages.intro.createdWallet') }}</h2>
         <div class="text-info">
-          <span style="display:block;">Welcome to fairer Internet. This wallet was created specifically so that no one but you will have control over your funds - or your ability to receive them.</span>
+          <span style="display:block;"
+            >{{ $t('pages.intro.step4text-1') }}</span
+          >
           <span style="display:block;">Ever.</span>
 
           <span style="display:block;">
-            Unlike other monetization platforms and payment systems, the creators of this wallet cannot - and can never take away your ability to receive tips from your followers
-            and supporters.
+            {{ $t('pages.intro.step4text-2') }}
           </span>
         </div>
-        <p class="last-msg-enjoy">Enjoy your autonomy</p>
-        <Button @click="toAccount">Proceed to Home</Button>
+        <p class="last-msg-enjoy">{{ $t('pages.intro.enjoy-msg') }} </p>
+        <Button @click="toAccount">{{$t('pages.intro.toHome') }}</Button>
       </div>
-
     </div>
   </div>
 </template>
@@ -79,7 +78,7 @@ import Claim from '../../../icons/claim.svg';
 import Heart from '../../../icons/heart.svg';
 import LeftArrow from '../../../icons/left-arrow.svg';
 import RightArrow from '../../../icons/right-arrow.svg';
-import Button from '../components/Button'
+import Button from '../components/Button';
 
 export default {
   components: {
@@ -87,7 +86,7 @@ export default {
     Heart,
     Button,
     LeftArrow,
-    RightArrow
+    RightArrow,
   },
   computed: {
     ...mapGetters(['isLoggedIn']),
@@ -98,11 +97,6 @@ export default {
       totalsteps: 4,
       mnemonic: null,
     };
-  },
-  async created() {
-    setInterval(() => {
-      console.log('isLoggedIn => ', this.isLoggedIn)
-    }, 3000);
   },
   methods: {
     async createWallet() {
@@ -117,7 +111,7 @@ export default {
       this.$store.dispatch('setLogin', { keypair });
       this.next();
     },
-    toAccount(){
+    toAccount() {
       this.$router.push('/account');
     },
     prev() {
@@ -149,12 +143,13 @@ export default {
     }
   }
   .aeid {
+    margin-left: 10px;
     color: $secondary-color !important ;
   }
   .text-info {
     margin: 10px 0 0 0;
     color: $text-color !important;
-    span {
+    span:not(.aeid) {
       color: $text-color !important;
       font-size: 16px;
       white-space: pre-line;
@@ -170,16 +165,16 @@ export default {
   }
   .last-msg-enjoy {
     color: $secondary-color !important;
-    font-size:18px;
-    width:100%;
-    margin: 0 auto;
+    font-size: 18px;
+    width: 100%;
+    margin: 10px auto;
   }
-  .left-arrow{
+  .left-arrow {
     left: 20px;
     position: absolute;
     cursor: pointer;
   }
-  .right-arrow{
+  .right-arrow {
     right: 20px;
     position: absolute;
     cursor: pointer;

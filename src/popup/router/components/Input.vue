@@ -65,7 +65,7 @@ input.input {
   font-size: 11px;
 }
 .input.m-0 {
-  margin:0 !important;
+  margin: 0 !important;
 }
 .label {
   font-size: 14px;

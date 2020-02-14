@@ -20,7 +20,7 @@ import Eye from '../../../icons/eye.svg';
 export default {
   components: {
     Copyicon,
-    Eye
+    Eye,
   },
   data() {
     return {

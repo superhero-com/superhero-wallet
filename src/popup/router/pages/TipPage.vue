@@ -14,7 +14,9 @@
       </p>
 
       <div class="flex flex-align-center flex-justify-between">
-        <div v-if="!editUrl" class="flex flex-align-center flex-justify-between" style="width: 100%;"> <a class="link-sm text-left block" style="width:90%;"> {{ editedUrl ? editedUrl : tipUrl }} </a> <CheckIcon v-if="urlVerified" /> </div>
+        <div v-if="!editUrl" class="flex flex-align-center flex-justify-between" style="width: 100%;">
+          <a class="link-sm text-left block" style="width:90%;"> {{ editedUrl ? editedUrl : tipUrl }} </a> <CheckIcon v-if="urlVerified" />
+        </div>
         <button v-if="!editUrl && !confirmMode" @click="handleUrlEdit"><ae-icon name="vote" /></button>
 
         <Input style="width:100%;" size="m-0 xsm" v-if="editUrl && !confirmMode" type="text" v-model="editedUrl" :value="tipUrl" />
@@ -61,7 +63,7 @@ export default {
     AmountSend,
     Textarea,
     CheckIcon,
-    Input
+    Input,
   },
   data() {
     return {
@@ -77,7 +79,7 @@ export default {
       txParams: {},
       urlVerified: false,
       editUrl: false,
-      editedUrl: ''
+      editedUrl: '',
     };
   },
   computed: {
@@ -128,7 +130,7 @@ export default {
     },
     handleUrlEdit() {
       this.editUrl = true;
-      this.editedUrl = this.tipUrl
+      this.editedUrl = this.tipUrl;
     },
     async getDomainData() {
       if (process.env.IS_EXTENSION) {
@@ -193,7 +195,7 @@ export default {
         }
       } catch (e) {}
     },
-  }
+  },
 };
 </script>
 

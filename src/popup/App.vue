@@ -1,6 +1,6 @@
 <template>
   <ae-main :class="$route.path === '/receive' ? 'ae-main-receive' : ''">
-    <div class="background-big-wave" :style="$route.path === '/intro' ? { 'z-index': '0', 'background-image': 'url(' + wave_bg + ') !important' } : ''" ></div>
+    <div class="background-big-wave" :style="$route.path === '/intro' ? { 'z-index': '0', 'background-image': 'url(' + wave_bg + ') !important' } : ''"></div>
     <Header @toggle-sidebar="showSidebar = !showSidebar" />
 
     <router-view :key="$route.fullPath" />
@@ -38,7 +38,7 @@ export default {
     showSidebar: false,
     checkSDKReady: null,
   }),
-  computed: mapGetters(['account', 'current', 'mainLoading','sdk','isLoggedIn']),
+  computed: mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn']),
   async created() {
     const { language, activeNetwork } = await browser.storage.local.get(['language', 'activeNetwork']);
 
