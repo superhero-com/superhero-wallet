@@ -4,8 +4,7 @@
       <div class="holder">
         <span class="amount">{{ txAmount }} {{ $t('pages.appVUE.aeid') }} <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span>
         <span class="status">{{ txType == 'Sent' ? $t('pages.recentTransactions.sentStatus') : $t('pages.recentTransactions.receivedStatus') }}</span>
-        <span class="date">{{ new Date(transactionData.time).toLocaleDateString() }} </span>
-        <span class="time">{{ new Date(transactionData.time).toLocaleTimeString([], { timeStyle: 'short' }) }}</span>
+        <span class="time">{{ transactionDate }}</span>
       </div>
       <div class="holder">
         <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
@@ -19,7 +18,7 @@
 import { mapGetters } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import Eye from '../../../icons/eye.svg';
-import { convertToAE } from '../../utils/helper';
+import { convertToAE, formatDate } from '../../utils/helper';
 
 export default {
   props: ['transactionData', 'recent', 'dark'],
@@ -67,6 +66,9 @@ export default {
       const txamount = (amount + fee) / 10 ** 18;
       return (txamount * this.current.currencyRate).toFixed(3);
     },
+    transactionDate() {
+      return formatDate(this.transactionData.time)
+    }
   },
   methods: {
     async getEventData() {
