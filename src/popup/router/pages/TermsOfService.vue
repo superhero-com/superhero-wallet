@@ -4,6 +4,14 @@
     <p class="sub-heading">{{ $t('pages.termsOfService.sub-heading') }}</p>
     <p class="termsText">
 
+      <p>
+        {{ $t('pages.termsOfService.section0Content') }}
+      </p>
+
+      <p>
+        {{ $t('pages.termsOfService.section01Content') }}
+      </p>
+
       <div v-for="(item, index) in details">
         <p class="accordion-item-title uppercase flex flex-justify-between flex-align-start" @click="toggleAccordionItem(index)">
           <ArrowDown class="icon" v-if="item.open"/>
@@ -77,26 +85,6 @@ export default {
         {
           title: this.$t('pages.termsOfService.section10Title'),
           content: this.$t('pages.termsOfService.section10Content'),
-          open: false
-        },
-        {
-          title: this.$t('pages.termsOfService.section11Title'),
-          content: this.$t('pages.termsOfService.section11Content'),
-          open: false
-        },
-        {
-          title: this.$t('pages.termsOfService.section12Title'),
-          content: this.$t('pages.termsOfService.section12Content'),
-          open: false
-        },
-        {
-          title: this.$t('pages.termsOfService.section13Title'),
-          content: this.$t('pages.termsOfService.section13Content'),
-          open: false
-        },
-        {
-          title: this.$t('pages.termsOfService.section14Title'),
-          content: this.$t('pages.termsOfService.section14Content'),
           open: false
         }
       ]
