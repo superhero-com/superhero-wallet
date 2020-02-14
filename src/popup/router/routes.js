@@ -21,7 +21,7 @@ import SendComponent from './pages/Send';
 import ReceiveComponent from './pages/Receive';
 import SuccessTip from './pages/SuccessTip';
 import WelcomePage from './pages/Welcome';
-import { i18n } from '../utils/i18nHelper'
+import { i18n } from '../utils/i18nHelper';
 
 export default [
   {

@@ -36,7 +36,7 @@ export default {
     showSidebar: false,
     checkSDKReady: null,
   }),
-  computed: mapGetters(['account', 'current', 'mainLoading','sdk','isLoggedIn']),
+  computed: mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn']),
   async created() {
     const { language, activeNetwork } = await browser.storage.local.get(['language', 'activeNetwork']);
 

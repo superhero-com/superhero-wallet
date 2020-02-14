@@ -1,7 +1,7 @@
 <template>
   <div class="header" v-if="showNavigation && !aeppPopup">
     <div class="content" :class="{ isLoggedIn }">
-      <Arrow v-if="title" @click="goBack" class="back-arrow"/>
+      <Arrow v-if="title" @click="goBack" class="back-arrow" />
       <Logo v-else />
 
       <div class="title">
@@ -28,7 +28,7 @@ import Logo from '../../../icons/logo-small.svg';
 export default {
   components: { Arrow, Bell, Hamburger, Logo },
   computed: {
-    ...mapGetters(['isLoggedIn','aeppPopup']),
+    ...mapGetters(['isLoggedIn', 'aeppPopup']),
     title() {
       return this.$route.meta.title;
     },

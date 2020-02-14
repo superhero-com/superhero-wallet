@@ -3,7 +3,7 @@
     <Logo class="logo" />
     <p>
       {{ $t('pages.aboutSettings.systemName') }}
-      <span class="extensionVersion extensionVersionTop">{{extensionVersion}}</span>
+      <span class="extensionVersion extensionVersionTop">{{ extensionVersion }}</span>
     </p>
     <hr />
     <div class="waellet-links">
@@ -42,8 +42,8 @@ export default {
   },
   computed: {
     extensionVersion() {
-      return 'v.' + browser.runtime.getManifest().version
-    }
+      return `v.${browser.runtime.getManifest().version}`;
+    },
   },
 };
 </script>
