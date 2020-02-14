@@ -40,7 +40,8 @@ export default {
     };
   },
   created() {
-    this.pollData();
+    this.updateTransactions();
+    this.pollData()
   },
   computed: {
     ...mapGetters(['transactions', 'account', 'sdk', 'current', 'currentCurrency']),
@@ -56,7 +57,7 @@ export default {
     },
     pollData() {
       this.polling = setInterval(async () => {
-        if (this.sdk != null) {
+        if (this.sdk !== null) {
           this.updateTransactions();
         }
       }, 5000);

@@ -32,7 +32,7 @@ export default {
           contractCallStatic({ tx, callType: 'static' })
             .then(res => {
               const amount = convertToAE(res.decodedResult);
-              if (amount && DEFAULT_NETWORK === 'Mainnet') {
+              if (amount) {
                 axios
                   .post(`${TIP_SERVICE}/submit`, {
                     url,
