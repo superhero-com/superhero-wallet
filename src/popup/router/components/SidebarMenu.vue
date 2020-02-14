@@ -7,7 +7,7 @@
       <div class="flex flex-align-center flex-justify-between">
         <ae-identicon class="account-icon" :address="account.publicKey" size="base" />
         <div class="ml-8 mr-auto">
-          <div class="f-14">Main Account</div>
+          <div class="f-14">{{ $t('pages.appVUE.mainAccount') }}</div>
           <div class="f-12" v-if="activeAccountName.includes('.chain')">{{ activeAccountName }}</div>
         </div>
       </div>

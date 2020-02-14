@@ -77,35 +77,35 @@ export default [
     path: '/settings',
     component: SettingsComponent,
     meta: {
-      title: i18n.tc('pages.titles.settings'),
+      title: 'settings',
     },
   },
   {
     path: '/generalSettings',
     component: GeneralSettingsComponent,
     meta: {
-      title: i18n.tc('pages.titles.general'),
+      title: 'general',
     },
   },
   {
     path: '/securitySettings',
     component: SecuritySettingsComponent,
     meta: {
-      title: i18n.tc('pages.titles.security'),
+      title: 'security',
     },
   },
   {
     path: '/aboutSettings',
     component: AboutSettingsComponent,
     meta: {
-      title: i18n.tc('pages.titles.about'),
+      title: 'about',
     },
   },
   {
     path: '/tip',
     component: TipComponent,
     meta: {
-      title: i18n.tc('pages.titles.send'),
+      title: 'send',
     },
   },
   {
@@ -114,28 +114,28 @@ export default [
     props: true,
     component: QrCodeReader,
     meta: {
-      title: i18n.tc('pages.titles.scanQr'),
+      title: 'scanQr',
     },
   },
   {
     path: '/termsOfService',
     component: TermsOfService,
     meta: {
-      title: i18n.tc('pages.titles.terms'),
+      title: 'terms',
     },
   },
   {
     path: '/privacyPolicy',
     component: PrivacyPolicy,
     meta: {
-      title: i18n.tc('pages.titles.privacy'),
+      title: 'privacy',
     },
   },
   {
     path: '/importAccount',
     component: ImportAccount,
     meta: {
-      title: i18n.tc('pages.titles.importAccount'),
+      title: 'importAccount',
     },
   },
   {
@@ -147,7 +147,7 @@ export default [
     path: '/transactions',
     component: TransactionsComponent,
     meta: {
-      title: i18n.tc('pages.titles.activity'),
+      title: 'activity',
     },
   },
   {
@@ -156,14 +156,14 @@ export default [
     props: true,
     component: SendComponent,
     meta: {
-      title: i18n.tc('pages.titles.withdraw'),
+      title: 'withdraw',
     },
   },
   {
     path: '/receive',
     component: ReceiveComponent,
     meta: {
-      title: i18n.tc('pages.titles.topUp'),
+      title: 'topUp',
     },
   },
   {
@@ -172,7 +172,7 @@ export default [
     name: 'success-tip',
     props: true,
     meta: {
-      title: i18n.tc('pages.titles.send'),
+      title: 'send',
     },
   },
   {

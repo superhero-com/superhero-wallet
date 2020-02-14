@@ -7,7 +7,7 @@
       </div>
     </h3>
     <p class="primary-title primary-title-darker text-left mb-8 f-16">
-      {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text">{{ amountTip }} æid</span> ({{ getCurrencyAmount }} {{ currentCurrency }})
+      {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text">{{ amountTip }} {{ $t('pages.appVUE.aeid') }} </span> ({{ getCurrencyAmount }} {{ currentCurrency }})
       {{ $t('pages.successTip.to') }}
     </p>
     <a class="link-sm text-left block">{{ domain }}</a>
@@ -53,7 +53,7 @@ export default {
   data() {
     return {
       feed: 'https://coronanews.org',
-      note: 'I just sent æid to this post! Anyone can start sending and receiving æid through CoronaNews. Learn more.',
+      note: this.$t('pages.successTip.notifyMessage'),
     };
   },
   computed: {

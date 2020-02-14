@@ -31,12 +31,12 @@
           </ae-button>
         </ae-panel>
         <span>
-          Back up your seed phrase on a piece of paper or file that no one except you will ever see. Make multiple copies.
+          {{ $t('pages.seedPhrase.backupText') }}
         </span>
-        <p>Do not lose this seed phrase!</p>
-        <small>To make sure you got it right, you will be asked to recreate this seed phrase in the next screen.</small>
-        <button @click="verifySeed" class="primary-button">Verify seed</button>
-        <button @click="navigateToAccount" class="primary-button">I've already done this</button>
+        <p>{{ $t('pages.seedPhrase.dontLose') }}</p>
+        <small>{{ $t('pages.seedPhrase.nextScreen') }}</small>
+        <button @click="verifySeed" class="primary-button">{{ $t('pages.seedPhrase.verifySeed') }}</button>
+        <button @click="navigateToAccount" class="primary-button">{{ $t('pages.seedPhrase.doneThis') }}</button>
         <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
       </div>
     </Modal>
@@ -64,12 +64,12 @@
           >{{ seed.name }} <ae-icon name="close" class="seedClose"
         /></ae-badge>
       </ae-phraser>
-      <button @click="verifyLastStep" class="primary-button" style="width:50%">Verify</button>
+      <button @click="verifyLastStep" class="primary-button" style="width:50%">{{ $t('pages.seedPhrase.verify') }}</button>
     </div>
     <div v-if="seed_verified && type == 5">
       <ae-icon style="color:#e911ff; font-size:100px;" name="check" />
-      <p>Seed phrase confirmed.</p>
-      <button @click="navigateToAccount" class="primary-button">Back to Dashboard</button>
+      <p>{{ $t('pages.seedPhrase.seedConfirmed') }}</p>
+      <button @click="navigateToAccount" class="primary-button">{{ $t('pages.seedPhrase.toDashboard') }}</button>
     </div>
   </div>
 </template>
