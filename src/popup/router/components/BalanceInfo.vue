@@ -4,7 +4,7 @@
     <div class="balance no-sign">
       <div class="amount">
         <span>{{ tokenBalance }}</span>
-        <span>{{ tokenSymbol }}</span>
+        <span>{{ $t('pages.appVUE.aeid') }}</span>
       </div>
       <div class="currenciesgroup">
         <span class="approx-sign">~</span>
@@ -47,7 +47,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['tokenSymbol', 'tokenBalance', 'balanceCurrency', 'current', 'currentCurrency', 'currencies']),
+    ...mapGetters(['tokenBalance', 'balanceCurrency', 'current', 'currentCurrency', 'currencies']),
   },
   methods: {
     async toggleDropdown(event, parentClass) {

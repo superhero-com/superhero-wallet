@@ -554,7 +554,12 @@
             "nameTtl": "Name TTL",
             "pointerId": "Pointer Id",
             "pointerKey": "Pointer Key",
-            "moreInfo": "More Info"
+            "moreInfo": "More Info",
+            "sent": "Sent",
+            "received": "Received",
+            "withdrawals": "Withdrawals",
+            "topups": "Topups",
+            "all": "All"
         },
         "transactions": {
             "backToAccount": "Back to account",
@@ -615,6 +620,12 @@
         "welcome": {
             "send":"Send",
             "across": "across the Globe"
+        },
+        "nodeConnectionStatus": {
+            "error": "Unable to connect to choosen node",
+            "connecting": "Connecting to node...",
+            "connected": "Connected",
+            "init": "Initializing services..."
         }
     }
 }
