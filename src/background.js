@@ -5,7 +5,7 @@ import { extractHostName, detectConnectionType } from './popup/utils/helper';
 import WalletController from './wallet-controller';
 import Notification from './notifications';
 import rpcWallet from './lib/rpcWallet';
-import { HDWALLET_METHODS, AEX2_METHODS, NOTIFICATION_METHODS, CONNECTION_TYPES } from './popup/utils/constants';
+import { HDWALLET_METHODS, AEX2_METHODS, NOTIFICATION_METHODS, CONNECTION_TYPES, DEFAULT_NETWORK } from './popup/utils/constants';
 import TipClaimRelay from './lib/tip-claim-relay';
 import { setController } from './lib/background-utils';
 import { PopupConnections } from './lib/popup-connection';
@@ -64,7 +64,7 @@ if (process.env.IS_EXTENSION) {
     if (msg.from === 'content' && msg.type === 'readDom' && (msg.data.address || msg.data.chainName)) {
       const tabs = await browser.tabs.query({ active: true, currentWindow: true });
       tabs.forEach(({ url }) => {
-        if (sender.url === url) {
+        if (sender.url === url && DEFAULT_NETWORK === 'Mainnet') {
           TipClaimRelay.checkUrlHasBalance(url, msg.data);
         }
       });

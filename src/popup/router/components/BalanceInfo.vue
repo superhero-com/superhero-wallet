@@ -20,7 +20,7 @@
             <li class="single-currency" v-for="(index, item) in currencies" :key="index">
               <ae-button v-on:click="switchCurrency(index, item)" :class="current.currency == item ? 'current' : ''">
                 {{ item.toUpperCase() }}
-                <i class="arrowrightCurrency"></i>
+                <!-- <i class="arrowrightCurrency"></i> -->
               </ae-button>
             </li>
           </ul>
@@ -124,6 +124,7 @@ export default {
   padding: 0 1rem;
   white-space: nowrap;
   justify-content: unset;
+  padding: 0 5px !important;
   span {
     padding: 0 5px;
   }
@@ -152,7 +153,7 @@ export default {
   border-top: none !important;
 }
 .sub-dropdown .single-currency:hover {
-  border-left: 2px solid #ff0d6a;
+  border-left: 2px solid $secondary-color;
   background: rgba(226, 226, 226, 0.5);
   .arrowrightCurrency {
     right: 20px;
@@ -173,7 +174,7 @@ export default {
 }
 
 .external-svg {
-  height: 93px;
+  height: 84px;
   position: relative;
   text-align: center;
   .title {

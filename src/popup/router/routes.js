@@ -21,6 +21,7 @@ import SendComponent from './pages/Send';
 import ReceiveComponent from './pages/Receive';
 import SuccessTip from './pages/SuccessTip';
 import WelcomePage from './pages/Welcome';
+import { i18n } from '../utils/i18nHelper';
 
 export default [
   {
@@ -76,35 +77,35 @@ export default [
     path: '/settings',
     component: SettingsComponent,
     meta: {
-      title: 'Settings',
+      title: i18n.tc('pages.titles.settings'),
     },
   },
   {
     path: '/generalSettings',
     component: GeneralSettingsComponent,
     meta: {
-      title: 'General',
+      title: i18n.tc('pages.titles.general'),
     },
   },
   {
     path: '/securitySettings',
     component: SecuritySettingsComponent,
     meta: {
-      title: 'Security',
+      title: i18n.tc('pages.titles.security'),
     },
   },
   {
     path: '/aboutSettings',
     component: AboutSettingsComponent,
     meta: {
-      title: 'About',
+      title: i18n.tc('pages.titles.about'),
     },
   },
   {
     path: '/tip',
     component: TipComponent,
     meta: {
-      title: 'Send æid',
+      title: i18n.tc('pages.titles.send'),
     },
   },
   {
@@ -113,28 +114,28 @@ export default [
     props: true,
     component: QrCodeReader,
     meta: {
-      title: 'Scan QR',
+      title: i18n.tc('pages.titles.scanQr'),
     },
   },
   {
     path: '/termsOfService',
     component: TermsOfService,
     meta: {
-      title: 'Terms & Conditions',
+      title: i18n.tc('pages.titles.terms'),
     },
   },
   {
     path: '/privacyPolicy',
     component: PrivacyPolicy,
     meta: {
-      title: 'Privacy Policy',
+      title: i18n.tc('pages.titles.privacy'),
     },
   },
   {
     path: '/importAccount',
     component: ImportAccount,
     meta: {
-      title: 'Retrieve Existing Account',
+      title: i18n.tc('pages.titles.importAccount'),
     },
   },
   {
@@ -146,7 +147,7 @@ export default [
     path: '/transactions',
     component: TransactionsComponent,
     meta: {
-      title: 'Transactions',
+      title: i18n.tc('pages.titles.activity'),
     },
   },
   {
@@ -155,14 +156,14 @@ export default [
     props: true,
     component: SendComponent,
     meta: {
-      title: 'Withdraw',
+      title: i18n.tc('pages.titles.withdraw'),
     },
   },
   {
     path: '/receive',
     component: ReceiveComponent,
     meta: {
-      title: 'Receive',
+      title: i18n.tc('pages.titles.topUp'),
     },
   },
   {
@@ -171,7 +172,7 @@ export default [
     name: 'success-tip',
     props: true,
     meta: {
-      title: 'Send æid',
+      title: i18n.tc('pages.titles.send'),
     },
   },
   {

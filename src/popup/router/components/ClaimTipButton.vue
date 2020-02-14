@@ -16,7 +16,7 @@ export default {
   },
   data() {
     return {
-      howToClaimURL: 'https://forum.aeternity.com/t/receive-and-tip-the-best-corona-news/5957',
+      howToClaimURL: 'https://medium.com/@coronanewsorg/a46e2f845832',
     };
   },
   created() {},

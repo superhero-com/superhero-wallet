@@ -2,10 +2,8 @@
   <div>
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
       <div class="holder">
-        <span class="amount"
-          >{{ txAmount }} æid <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span
-        >
-        <span class="status">{{ txType }}</span>
+        <span class="amount">{{ txAmount }} {{ $t('pages.appVUE.aeid') }} <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span>
+        <span class="status">{{ txType == 'Sent' ? $t('pages.recentTransactions.sentStatus') : $t('pages.recentTransactions.receivedStatus') }}</span>
         <span class="date">{{ new Date(transactionData.time).toLocaleDateString() }} </span>
         <span class="time">{{ new Date(transactionData.time).toLocaleTimeString([], { timeStyle: 'short' }) }}</span>
       </div>
