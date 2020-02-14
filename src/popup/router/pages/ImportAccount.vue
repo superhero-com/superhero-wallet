@@ -50,11 +50,11 @@ export default {
         } else {
           this.loading = false;
           this.disabled = true;
-          this.errorMsg = 'Account not found. <br> Please check your seed phrase.';
+          this.errorMsg = `${this.$t('pages.index.accountNotFound')} <br> ${this.$t('pages.index.checkSeed')}`
         }
       } else {
         this.disabled = true;
-        this.errorMsg = 'Account not found. <br> Please check your seed phrase.';
+        this.errorMsg = `${this.$t('pages.index.accountNotFound')} <br> ${this.$t('pages.index.checkSeed')}`
       }
     },
     validateMnemonic() {

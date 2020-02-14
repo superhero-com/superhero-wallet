@@ -264,7 +264,9 @@
             "enterSeedPhrase": "Enter your seed phrase. ",
             "continueButton": "Continue",
             "continue": "Continue",
-            "importAccount": "Import Account"
+            "importAccount": "Import Account",
+            "accountNotFound": "Account not found.",
+            "checkSeed": "Please check your seed phrase."
         },
         "ledgerSetup": {
             "ledgerConnectSetup": "How to connect from Ledger",
@@ -296,7 +298,8 @@
         },
         "privacyPolicy": {
             "backButton": "Back",
-            "heading": "Privacy Policy"
+            "heading": "Privacy Policy",
+            "content": "Your privacy is important to us. It is Corona's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
         },
         "qrCodeReader": {
             "backToAccount": "Back to account",
@@ -344,7 +347,15 @@
             "recoveryPhrase": "Your recovery phrase",
             "first": "first",
             "second": "second",
-            "third": "third"
+            "third": "third",
+            "backupText": "Back up your seed phrase on a piece of paper or file that no one except you will ever see. Make multiple copies.",
+            "dontLose": "Do not lose this seed phrase!",
+            "nextScreen": "To make sure you got it right, you will be asked to recreate this seed phrase in the next screen.",
+            "verifySeed": "Verify seed",
+            "doneThis": "I've already done this",
+            "verify": "Verify",
+            "seedConfirmed": "Seed phrase confirmed.",
+            "toDashboard": "Back to Dashboard"
         },
         "send": {
             "backToAccount": "Back to account",
@@ -504,7 +515,8 @@
             "successfullySent":"You have successfully sent ",
             "to": "to",
             "note": "NOTE: The owner of this URL has not created an account yet. They can claim their tokens easily by creating a wallet - the same way you did.",
-            "notify": "Notify someone that you sent æid to this post"
+            "notify": "Notify someone that you sent æid to this post",
+            "notifyMessage": "I just sent æid to this post! Anyone can start sending and receiving æid through CoronaNews. Learn more."
         },
         "transactionDetails": {
             "heading": "Transactions Details",

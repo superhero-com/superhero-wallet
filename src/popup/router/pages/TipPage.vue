@@ -115,13 +115,7 @@ export default {
   },
   created() {
     this.getDomainData();
-    this.feeInterval = setInterval(() => {
-      if (!this.minCallFee) {
-        this.getCallFee();
-      } else {
-        clearInterval(this.feeInterval);
-      }
-    }, 1000);
+    this.feeInterval = setInterval(() => this.getCallFee(), 1000);
     this.$once('hook:beforeDestroy', () => clearInterval(this.feeInterval));
   },
   methods: {
@@ -151,7 +145,8 @@ export default {
         try {
           const fee = calculateFee(TX_TYPES.contractCall, this.txParams);
           this.minCallFee = fee.min;
-        } catch (e) {}
+          clearInterval(this.feeInterval)
+        } catch (e) { this.minCallFee = null }
       }
     },
     toConfirm() {
