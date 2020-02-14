@@ -580,6 +580,10 @@ const setPendingTx = async tx => {
 
 const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/[\""]/g, '');
 
+const formatTime = time => (new Date(parseInt(time)).toLocaleTimeString(navigator.language, { timeStyle: 'short', hourCycle: 'h24',hour: "2-digit", minute: "2-digit" }))
+
+const formatDate = time => (new Date(parseInt(time)).toLocaleString(navigator.language, { timeStyle: 'short', dateStyle:"short", hourCycle: 'h24',hour: "2-digit", minute: "2-digit", day:"2-digit",month:"2-digit",year:"2-digit" }))
+
 export {
   shuffleArray,
   convertToAE,
@@ -615,4 +619,6 @@ export {
   detectConnectionType,
   setPendingTx,
   escapeSpecialChars,
+  formatTime,
+  formatDate
 };
