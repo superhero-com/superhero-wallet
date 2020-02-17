@@ -82,7 +82,8 @@
             "copied": "Copied to clipboard",
             "youNeedTo": "You need to",
             "backup": "backup",
-            "yourSeedPhrase": "your seed phrase"
+            "yourSeedPhrase": "your seed phrase",
+            "updateExtension": "New verison available! Please update your extension!"
         },
         "accountPassword": {
             "heading": "",

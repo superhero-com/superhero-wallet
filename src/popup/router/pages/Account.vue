@@ -2,23 +2,16 @@
   <div style="background:#16161D;" class="height-100">
     <div class="popup popup-no-padding">
       <div v-show="backup_seed_notif" class="backup_seed_notif">
-        <span
-          >{{ $t('pages.account.youNeedTo') }} <a @click="navigateToBackUpSeed" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a>
-          {{ $t('pages.account.yourSeedPhrase') }}</span
-        >
+        <span>
+          {{ $t('pages.account.youNeedTo') }} <a @click="navigateToBackUpSeed" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a>
+          {{ $t('pages.account.yourSeedPhrase') }}
+        </span>
+      </div>
+      <div v-show="updateExtension" class="update_extension" >
+        <span>{{ $t('pages.account.updateExtension') }} </span>
       </div>
       <ClaimTipButton :styling="buttonstyle"></ClaimTipButton>
-
-      <!-- <div class="flex flex-align-center flex-justify-between account-info">
-        <div class="text-left account-addresses">
-          <button style="padding:0" @click="copy" v-clipboard:copy="account.publicKey"><Copyicon /></button>
-          <p class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</p>
-          <span class="account-name">{{ activeAccountName }}</span>
-          <ae-address :value="account.publicKey" length="flat" />
-        </div>
-      </div> -->
       <AccountInfo />
-
       <BalanceInfo />
 
       <div style="background: #21212A" class="height-100">
@@ -43,6 +36,7 @@ import RecentTransactions from '../components/RecentTransactions';
 import ClaimTipButton from '../components/ClaimTipButton';
 import BalanceInfo from '../components/BalanceInfo';
 import AccountInfo from '../components/AccountInfo';
+import { TIP_SERVICE } from '../../utils/constants';
 
 export default {
   name: 'Account',
@@ -61,10 +55,11 @@ export default {
       backup_seed_notif: false,
       buttonstyle: '',
       IS_EXTENSION: process.env.IS_EXTENSION,
+      updateExtension: false
     };
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'activeAccount', 'popup', 'tokenRegistry']),
+    ...mapGetters(['account', 'balance', 'activeAccount', 'popup', 'current', 'network']),
     publicKey() {
       return this.account.publicKey;
     },
@@ -76,20 +71,17 @@ export default {
     },
   },
   async created() {
-    browser.storage.local.get('rateUsd').then(res => {
-      this.usdRate = res.hasOwnProperty('rateUsd') ? res.rateUsd : 0;
-    });
-    browser.storage.local.get('backed_up_Seed').then(res => {
-      if (!res.backed_up_Seed) {
-        this.backup_seed_notif = true;
-        setTimeout(() => {
-          this.backup_seed_notif = false;
-          this.buttonstyle = 'margin-top: 2rem;';
-        }, 3000);
-      } else {
+    const { backed_up_Seed } = await browser.storage.local.get('backed_up_Seed')
+    if(!backed_up_Seed) {
+      this.backup_seed_notif = true;
+      setTimeout(() => {
         this.backup_seed_notif = false;
-      }
-    });
+        this.buttonstyle = 'margin-top: 2rem;';
+      }, 3000);
+    } else {
+      this.backup_seed_notif = false;
+    }
+    this.checkTipContractVersion()
   },
   mounted() {},
   methods: {
@@ -102,6 +94,16 @@ export default {
     navigateToBackUpSeed() {
       this.$router.push('/securitySettings');
     },
+    async checkTipContractVersion() {
+      const { tipContract } = this.network[this.current.network]
+      try {
+        const latestContract = await (await fetch(`${TIP_SERVICE}/tip-contract`)).json()
+        if(tipContract !== latestContract) {
+          this.updateExtension = true
+          this.buttonstyle = '';
+        } 
+      } catch(e) { this.updateExtension = false; }
+    }
   },
   beforeDestroy() {
     clearInterval(this.polling);
@@ -138,11 +140,11 @@ export default {
   padding-bottom: 20px;
 }
 
-.backup_seed_notif {
+.backup_seed_notif, .update_extension {
   font-size: 14px;
   margin: 14px auto 10px; //32
 }
-.backup_seed_notif span {
+.backup_seed_notif span, .update_extension span {
   color: $accent-color !important;
 }
 .backup_seed_notif a {
