@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="popup popup-no-padding">
     <ae-list class="spendTxDetailsList">
       <ae-list-item fill="neutral" class="flex-justify-between noBorder">
         <div class="flex flex-align-center accountFrom">
@@ -24,7 +24,15 @@
           <!-- <ae-badge v-if="txType=='contractCallTx'">{{$t('pages.signTransaction.contractCall')}}</ae-badge> -->
           <ae-badge>{{ txType }}</ae-badge>
         </div>
-        <div class="balance balanceSpend no-sign" v-if="!isNameTx">{{ toAe(amount) }} {{ $t('pages.appVUE.aeid') }}</div>
+        <div class="balance balanceSpend no-sign text-left" v-if="!isNameTx">
+          <div class="flex flex-align-center">
+            <span  v-if="!editTx" class="mr-5">{{ tx.amount }} </span>
+            <Input type="number" :error="amountError" v-model="tx.amount" :value="aeAmount" size="big" v-else />
+            <span class="mr-5"> {{ $t('pages.appVUE.aeid') }}</span>
+            <Button small v-if="!editTx && unpackedTx.tx" @click="editTx = true" class="danger"><ae-icon name="vote" /></Button>
+            <Button small v-if="editTx" @click="editTx = false" class="danger" :disabled="amountError"><ae-icon name="check" /></Button>
+          </div>
+        </div>
         <!-- <div class="fiat-rate" v-if="!txObject.token && !isNameTx">${{convertCurrency(usdRate,amount)}}</div> -->
       </ae-list-item>
       <ae-list-item v-if="txObject.payload" fill="neutral" class="flex-justify-between flex-align-center flex-direction-column flex-align-start">
@@ -60,7 +68,7 @@
           <strong>{{ txObject.claim.id }}</strong>
         </div>
       </ae-list-item>
-      <ae-list-item fill="neutral" class="flex-justify-between flex-direction-column flex-align-center " v-if="alertMsg == ''">
+      <ae-list-item fill="neutral" class="flex-justify-between flex-direction-column flex-align-center ">
         <div class="flex extend flex-justify-between ">
           <div class="tx-label">{{ $t('pages.signTransaction.fee') }}</div>
           <div class="text-right">
@@ -70,7 +78,7 @@
         </div>
       </ae-list-item>
 
-      <ae-list-item fill="neutral" class="flex-justify-between" v-if="alertMsg == '' && !isNameTx">
+      <ae-list-item fill="neutral" class="flex-justify-between" v-if="!isNameTx">
         <div class="tx-label">{{ $t('pages.signTransaction.total') }}</div>
         <div class="text-right">
           <div class="balance balanceBig balanceTotalSpend no-sign">{{ totalSpend }} {{ $t('pages.appVUE.aeid') }}</div>
@@ -94,61 +102,50 @@
         </div>
       </ae-list-item>
     </ae-list>
-    <Alert fill="primary" :show="alertMsg != ''">
-      <div slot="content">
-        {{ alertMsg }}
-      </div>
-    </Alert>
     <div class="btnFixed">
-      <Button half @click="cancelTransaction" class="reject">{{ $t('pages.signTransaction.reject') }}</Button>
-      <Button half @click="signTransaction">{{ $t('pages.signTransaction.confirm') }}</Button>
+      <Button half @click="cancelTransaction" :disabled="editTx" class="reject">{{ $t('pages.signTransaction.reject') }}</Button>
+      <Button half @click="signTransaction" :disabled="editTx" >{{ $t('pages.signTransaction.confirm') }}</Button>
     </div>
-    <Loader size="big" :loading="loading" :type="loaderType" :content="loaderContent"></Loader>
+    <Loader size="big" :loading="loading" type="transparent" content=""></Loader>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
+import BigNumber from 'bignumber.js';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { convertToAE, convertAmountToCurrency } from '../../../utils/helper';
+import { toMicro, MAGNITUDE } from '../../../utils/constants';
 import Button from '../../components/Button';
+import Input from '../../components/Input';
 import getPopupProps from '../../../utils/getPopupProps';
 
 export default {
-  components: {
-    Button,
-  },
+  components: { Button, Input },
   data() {
     return {
       props: {},
-      token: 'æid',
-      usdRate: 0,
-      alertMsg: '',
       loading: false,
-      loaderType: 'transparent',
-      loaderContent: '',
       unpackedTx: null,
+      editTx: false,
+      amountError:false,
+      tx: { 
+        amount:0
+      }
     };
   },
   async created() {
     this.props = await getPopupProps();
     this.unpackedTx = TxBuilder.unpackTx(this.props.action.params.tx);
+    this.tx.amount = convertToAE(this.txObject.amount)
   },
   computed: {
     ...mapGetters([
       'account',
       'activeAccountName',
       'balance',
-      'network',
       'current',
-      'wallet',
-      'activeAccount',
-      'sdk',
-      'tokens',
-      'tokenBalance',
-      'isLedger',
       'popup',
-      'tokenRegistry',
     ]),
     txType() {
       return this.unpackedTx ? this.unpackedTx.txType : null;
@@ -162,11 +159,11 @@ export default {
     txObject() {
       return this.unpackedTx.tx;
     },
-    tx() {
-      return this.props.action.params.tx;
-    },
     amount() {
       return this.txObject.amount;
+    },
+    aeAmount() {
+      return convertToAE(this.txObject.amount);
     },
     receiver() {
       if (this.txType == 'spendTx') {
@@ -181,11 +178,16 @@ export default {
       return this.txType == 'namePreClaimTx' || this.txType == 'nameClaimTx' || this.txType == 'nameUpdateTx';
     },
     totalSpend() {
-      if (typeof this.txObject.token !== 'undefined') {
-        return parseFloat(this.amount).toFixed(7);
-      }
-      return (parseFloat(this.toAe(this.amount)) + parseFloat(this.toAe(this.txObject.fee))).toFixed(7);
+      return (parseFloat(this.tx.amount) + parseFloat(convertToAE(this.txObject.fee))).toFixed(7);
     },
+  },
+  watch: {
+    'tx.amount':function (newVal, oldVal) {
+      this.amountError = false
+      if(isNaN(newVal)) {
+        this.amountError = true
+      }
+    }
   },
   methods: {
     convertCurrency(currency, amount) {
@@ -198,8 +200,9 @@ export default {
       this.props.reject(false);
     },
     signTransaction() {
+      const { tx } = TxBuilder.buildTx({...this.unpackedTx.tx, ...this.tx, amount: BigNumber(this.tx.amount).shiftedBy(MAGNITUDE)}, this.txType)
       this.loading = true;
-      this.props.resolve(true);
+      this.props.resolve(tx);
     },
   },
 };
@@ -212,7 +215,6 @@ export default {
   color: $white-color;
 }
 .spendTxDetailsList .ae-list-item {
-  padding: 1rem;
   position: relative;
   cursor: unset;
   text-transform: uppercase;
@@ -230,8 +232,6 @@ export default {
   height: 20px;
   text-align: center;
   vertical-align: middle;
-  padding-left: 0px;
-  padding-top: 1.5px;
   border: 1px solid #d8d8d8;
   line-height: 20px;
   .ae-icon {
@@ -250,7 +250,7 @@ export default {
   border-top: none !important;
 }
 .accountFrom {
-  width: 50%;
+  width: 40%;
 }
 .accountTo {
   width: 70%;

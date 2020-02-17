@@ -144,24 +144,22 @@ const rpcWallet = {
       width: 420,
     });
     if (!popupWindow) return action.deny();
-    this.popups.addPopup(id, this.controller);
-    this.popups.addActions(id, action);
-    const {
-      connection: {
-        port: {
-          sender: { url },
-        },
-      },
-      info: { icons, name },
-    } = aepp;
-    const { protocol } = new URL(url);
 
     return new Promise((resolve, reject) => {
       try {
+        this.popups.addPopup(id, this.controller);
+        this.popups.addActions(id, { ...action, resolve, reject });
+        const {
+          connection: {
+            port: {
+              sender: { url },
+            },
+          },
+          info: { icons, name },
+        } = aepp;
+        const { protocol } = new URL(url);
         this.popups.setAeppInfo(id, { type, action: { params: action.params, method: action.method }, url, icons, name, protocol, host: extractHostName(url) });
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) { }
     });
   },
 
