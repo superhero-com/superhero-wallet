@@ -40,6 +40,9 @@ export default {
   line-height: 40px !important;
   max-height: 40px;
 }
+.primary-button span {
+  color: $button-text-color !important;
+}
 .primary-button.disabled {
   opacity: 0.4;
   pointer-events: none;
@@ -61,6 +64,6 @@ export default {
 .primary-button.reject,
 .primary-button.danger {
   background: $secondary-color !important;
-  color: #fff !important;
+  color: $white-color !important;
 }
 </style>

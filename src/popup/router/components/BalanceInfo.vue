@@ -12,7 +12,7 @@
           <div class="input-group-area">
             <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
               {{ balanceCurrency }}
-              <span style="color: #6A8EBE !important">{{ currentCurrency }}</span>
+              <span class="accent-text">{{ currentCurrency }}</span>
               <DropdownArrow />
             </ae-button>
           </div>
@@ -20,7 +20,6 @@
             <li class="single-currency" v-for="(index, item) in currencies" :key="index">
               <ae-button v-on:click="switchCurrency(index, item)" :class="current.currency == item ? 'current' : ''">
                 {{ item.toUpperCase() }}
-                <!-- <i class="arrowrightCurrency"></i> -->
               </ae-button>
             </li>
           </ul>
@@ -68,37 +67,10 @@ export default {
 
 <style lang="scss">
 @import '../../../common/variables';
-.inputGroup-currencies {
-  display: flex;
-  border-collapse: collapse;
-  width: 100%;
-  margin: 10px 0;
-}
-.inputGroup-currencies > div {
-  font-weight: bold;
-  border-bottom: 2px solid #ff0d6a;
-  vertical-align: middle;
-  border-radius: 5px;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  text-align: center;
-}
-.input-group-icon {
-  background: #ff0d6a;
-  color: #fff;
-  padding: 0 12px;
-}
+
 .input-group-area {
   width: 100%;
 }
-.inputGroup-currencies input {
-  border: 0;
-  display: block;
-  font-weight: bold;
-  width: 100%;
-  padding: 8px;
-}
-
 .currenciesgroup {
   font-size: 18px;
   width: 90%;
@@ -118,7 +90,7 @@ export default {
 .currenciesgroup button {
   font-size: 14px;
   width: 100%;
-  color: #000;
+  color: $black-color;
   text-align: left;
   margin: 0;
   padding: 0 1rem;
@@ -138,8 +110,8 @@ export default {
   overflow: hidden;
   transition: all 0.3s ease-in-out;
   right: 0;
-  background: #21212a;
-  border: 1px solid #505058;
+  background: $nav-bg-color;
+  border: 1px solid $button-color;
 }
 .currenciesgroup .have-subDropdown.show ul.sub-dropdown {
   visibility: visible;
@@ -155,22 +127,6 @@ export default {
 .sub-dropdown .single-currency:hover {
   border-left: 2px solid $secondary-color;
   background: rgba(226, 226, 226, 0.5);
-  .arrowrightCurrency {
-    right: 20px;
-  }
-}
-
-.arrowrightCurrency {
-  transition: 0.4s;
-  border: solid #565656;
-  border-width: 0 2px 2px 0;
-  display: inline-block;
-  padding: 3px;
-  transform: rotate(-45deg);
-  -webkit-transform: rotate(-45deg);
-  position: absolute;
-  right: 1rem;
-  top: 0.8rem;
 }
 
 .external-svg {

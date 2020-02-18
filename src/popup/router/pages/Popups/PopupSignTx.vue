@@ -211,13 +211,13 @@ export default {
 .arrowSeprator {
   margin-right: 1rem;
   background: $accent-color;
-  color: #fff;
+  color: $white-color;
   border-radius: 50%;
   width: 20px;
   height: 20px;
   text-align: center;
   vertical-align: middle;
-  border: 1px solid #d8d8d8;
+  border: 1px solid $white-color;
   line-height: 20px;
   .ae-icon {
     font-size: 1.2rem !important;
@@ -258,17 +258,12 @@ export default {
 .ae-badge {
   background: $accent-color !important;
   color: $white-color !important;
-  border: 2px solid #001833;
   -webkit-box-shadow: 0 0 0 2px $accent-color;
   box-shadow: 0px 0px 0px 2px $accent-color;
-  border: 2px solid #16161d;
+  border: 2px solid $bg-color;
 }
 .extend {
   width: 100%;
-}
-.fiat-rate {
-  color: #939393;
-  font-size: 1rem;
 }
 .tx-label {
   margin-top: 0.4rem;

@@ -3,7 +3,7 @@
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
       <div class="holder">
         <span class="amount"
-          >{{ txAmount }} {{ $t('pages.appVUE.aeid') }} <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span
+          >{{ txAmount }} {{ $t('pages.appVUE.aeid') }} <span class="text">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span
         >
         <span class="status">{{ txType == 'Sent' ? $t('pages.recentTransactions.sentStatus') : $t('pages.recentTransactions.receivedStatus') }}</span>
         <span class="time">{{ transactionDate }}</span>
@@ -126,12 +126,12 @@ export default {
       margin-left: 10px;
     }
     .time {
-      color: #cbcbcb !important;
+      color: $text-color !important;
       font-size: 12px;
       padding-top: 1px;
     }
     .date {
-      color: #cbcbcb !important;
+      color: $text-color !important;
       font-size: 12px;
       padding-top: 1px;
     }

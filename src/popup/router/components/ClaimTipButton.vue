@@ -28,10 +28,11 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '../../../common/variables';
 .how-to-url button {
-  background: #505058;
-  color: #bcbcc4;
+  background: $button-color;
+  color: $text-color;
   font-size: 18px;
   border-radius: 5px;
   width: 270px;

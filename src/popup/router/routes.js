@@ -2,7 +2,6 @@ import IndexComponent from './pages/Index';
 import AccountComponent from './pages/Account';
 import AccountPasswordComponent from './pages/AccountPassword';
 import SeedPhraseComponent from './pages/SeedPhrase';
-import SignTransactionComponent from './pages/SignTransaction';
 import PopupSignTransactionComponent from './pages/Popups/PopupSignTx';
 import PopupConnectComponent from './pages/Popups/PopupConnect';
 import PopupAskAccountsComponent from './pages/Popups/PopupAskAccounts';
@@ -47,12 +46,6 @@ export default [
     name: 'seed',
     path: '/seed',
     component: SeedPhraseComponent,
-    props: true,
-  },
-  {
-    name: 'sign',
-    path: '/sign-transaction/:type?',
-    component: SignTransactionComponent,
     props: true,
   },
   {

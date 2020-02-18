@@ -1,5 +1,5 @@
 <template>
-  <div style="background:#16161D;" class="height-100">
+  <div class="height-100 primary-bg">
     <div class="popup popup-no-padding">
       <div v-show="backup_seed_notif" class="noti">
         <span>
@@ -10,7 +10,7 @@
       <ClaimTipButton :class="!backup_seed_notif ? 'mt-32' : ''" />
       <AccountInfo />
       <BalanceInfo />
-      <div style="background: #21212A" class="height-100">
+      <div class="height-100 secondary-bg">
         <Button v-if="IS_EXTENSION" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
           <div class="flex flex-align-center flex-justify-content-center">
             <Heart />
@@ -77,7 +77,7 @@ export default {
 @import '../../../common/variables';
 
 .accountAddress {
-  color: #fff;
+  color: $white-color;
 }
 .paragraph {
   font-weight: normal;

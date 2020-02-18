@@ -52,8 +52,8 @@ export default {
 @import '../../../common/variables';
 .header {
   padding-top: env(safe-area-inset-top);
-  background-color: #21212a;
-  border-bottom: 3px solid #3a3a47;
+  background-color: $nav-bg-color;
+  border-bottom: 3px solid $nav-border-color;
   position: fixed;
   top: 0;
   left: 0;
@@ -122,6 +122,7 @@ export default {
       vertical-align: middle;
       left: -8px;
       top: 2px;
+      line-height: 16px;
     }
   }
 }

@@ -36,10 +36,18 @@ a {
     text-decoration: underline;
     cursor: pointer;
 }
-
+.primary-bg {
+    background:$bg-color;
+}
+.secondary-bg {
+    background:$nav-bg-color;
+}
 .primary-text {
     color:$text-color;
     font-size: .88rem;
+}
+.text {
+    color: $text-color;
 }
 .primary-title {
     color: $white-color;
@@ -53,6 +61,9 @@ a {
 }
 .secondary-text {
     color: $secondary-color;
+}
+.accent-text {
+    color: $accent-color;
 }
 .regular-text {
     font-size:$font-size;

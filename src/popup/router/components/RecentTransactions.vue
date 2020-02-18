@@ -82,7 +82,7 @@ export default {
 .recent-transactions h3,
 .recent-transactions p,
 .recent-transactions .transactionList {
-  color: #fff !important;
+  color: $white-color!important;
 }
 .all-transactions {
   height: auto !important;

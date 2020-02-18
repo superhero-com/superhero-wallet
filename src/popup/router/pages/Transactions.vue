@@ -219,7 +219,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../common/variables';
 .date {
-  background: #505058;
+  background: $button-color;
   padding: 0.5rem 1rem;
   color: $white-color;
   text-transform: uppercase;
@@ -237,17 +237,17 @@ export default {
   -ms-transform: translateX(-50%);
   -webkit-transform: translateX(-50%);
   transform: translateX(-50%);
-  background: #111117;
-  color: #ffffff;
+  background: $filters-bg;
+  color: $white-color;
   padding: 0.7rem 1rem;
   text-align: center;
   cursor: pointer;
   width: 100%;
 }
 .newTxCount {
-  background: #fff;
+  background: $white-color;
   border-radius: 50%;
-  color: #000;
+  color: $black-color;
   padding: 0.1rem.5rem;
   line-height: 3px;
   font-size: 0.9rem;
@@ -263,13 +263,6 @@ export default {
 .filters h4 {
   margin-top: 0 !important;
   margin-bottom: 5px;
-}
-.filters .ae-badge {
-  background: #d9d9d9;
-}
-.filters .ae-badge.selected {
-  background: $primary-color;
-  color: #fff;
 }
 .w-100 {
   width: 100%;

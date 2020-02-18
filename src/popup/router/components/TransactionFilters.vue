@@ -99,7 +99,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../common/variables';
 .filters {
-  background: #111117;
+  background: $filters-bg;
   height: 40px;
   width: 100%;
   line-height: 40px;

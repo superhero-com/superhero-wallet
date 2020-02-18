@@ -116,7 +116,7 @@ export default {
   .identicon:last-child:after {
     content: '';
     width: 40%;
-    border-top: 2px dashed #ccc;
+    border-top: 2px dashed $white-color;
     height: 1px;
     display: inline-block;
     position: absolute;
@@ -139,7 +139,7 @@ export default {
     .ae-icon {
       background: $accent-color;
       padding: 0.5rem;
-      color: #fff;
+      color: $white-color;
       border-radius: 50%;
     }
   }

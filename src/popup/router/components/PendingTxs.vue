@@ -3,7 +3,7 @@
     <ae-list-item v-for="tr in transactions.pending" :key="tr.hash" fill="neutral" class="list-item-transaction">
       <div class="holder">
         <span class="amount">
-          {{ tr.amount }} {{ $t('pages.appVUE.aeid') }} <span style="color: #BCBCC4;">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
+          {{ tr.amount }} {{ $t('pages.appVUE.aeid') }} <span class="text">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
         </span>
         <span class="status">{{ $t('pages.recentTransactions.pendingStatus') }}</span>
         <span class="time">{{ tr.time }}</span>
@@ -58,26 +58,28 @@ export default {
   .holder {
     display: flex;
     justify-content: space-between;
+
     .url {
       display: inline-block;
       width: 295px;
       white-space: nowrap;
       overflow: hidden !important;
       text-overflow: ellipsis;
-      color: #6a8ebe;
+      color: $accent-color;
       font-size: 12px;
       text-align: left;
     }
-    .seeTransaction {
-    }
+
     .time {
-      color: #cbcbcb !important;
+      color: $text-color !important;
       font-size: 12px;
     }
+
     .amount {
       color: $secondary-color !important;
       font-size: 14px;
     }
+
     .status {
       color: $text-color !important;
     }

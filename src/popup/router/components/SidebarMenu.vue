@@ -111,7 +111,7 @@ export default {
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: #20202a;
+  background-color: $nav-bg-color;
   margin: 0;
   padding: 0;
   padding-top: env(safe-area-inset-top);
@@ -120,7 +120,7 @@ export default {
   li {
     color: #717c87;
     margin: 0;
-    border-bottom: 1px solid #16161d;
+    border-bottom: 1px solid $bg-color;
 
     a,
     button {
