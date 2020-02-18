@@ -141,6 +141,31 @@ a {
 }
 
 /**
+* POPUP WINDWOS
+*/
+.popup-aex2 {
+    max-height: 600px;
+    min-height: 600px;
+    margin-bottom:30px;
+    position:relative;
+    // overflow-y:scroll;
+    h2 {
+        word-break: break-word;
+        line-height: 1.8rem;
+        font-size: 1.2rem;
+    }
+    p {
+        font-weight: normal;
+        word-break: break-word;
+        font-size: 0.9rem;
+    }
+    ul li {
+        border-width:1px !important;
+        border-color:#424242 !important;
+    }
+}
+
+/**
 * Dynamic Margins Utilities Clasess
 */
 @mixin margin-left($i) {

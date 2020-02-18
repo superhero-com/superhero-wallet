@@ -69,8 +69,9 @@ input.input {
   font-weight: bold;
   margin-bottom: 0;
   height: auto;
-  width:230px;
+  width:180px;
   margin-right: 15px;
+  padding:3px 10px;
 }
 .input.m-0 {
   margin: 0 !important;

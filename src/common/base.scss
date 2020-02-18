@@ -151,12 +151,16 @@ main {
 }
 .btnFixed {
   position: fixed !important;
-  bottom: 25px;
+  bottom: 0;
   left:50%;
   transform:translateX(-50%);
   -webkit-transform:translateX(-50%);
   -ms-transform:translateX(-50%);
-  width:340px;
+  width:357px;
+  max-width:357px;
+  min-width:357px;
+  background: $bg-color;
+  padding:10px 0;
   button {
       margin-bottom:0 !important;
   }
@@ -380,7 +384,7 @@ main {
   }
 }
 .balanceTotalSpend {
-  color:$primary-color;
+  color:$secondary-color;
 }
 .popup-modal { width: 100%; z-index:100;}
 .popup-button { width:60%; }

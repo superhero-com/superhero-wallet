@@ -1,6 +1,6 @@
 <template>
-  <ae-main :class="$route.path === '/receive' ? 'ae-main-receive' : ''">
-    <div class="background-big-wave" :style="$route.path === '/intro' ? { 'z-index': '0', 'background-image': 'url(' + wave_bg + ') !important' } : ''"></div>
+  <ae-main :class="$route.path === '/receive' ? 'ae-main-receive' : (aeppPopup ? 'ae-main-popup' : '')">
+    <div class="background-big-wave" :style="$route.path === '/intro' || $route.path === '/popup-sign-tx' || $route.path === '/connect' ? { 'z-index': '0', 'background-image': 'url(' + wave_bg + ') !important' } : ''"></div>
     <Header @toggle-sidebar="showSidebar = !showSidebar" />
 
     <router-view :key="$route.fullPath" />
@@ -38,7 +38,7 @@ export default {
     showSidebar: false,
     checkSDKReady: null,
   }),
-  computed: mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn']),
+  computed: mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup']),
   async created() {
     const { language, activeNetwork } = await browser.storage.local.get(['language', 'activeNetwork']);
 
@@ -111,6 +111,7 @@ export default {
 </style>
 
 <style lang="scss" scoped>
+@import '../common/variables';
 .background-big-wave {
   position: absolute;
   left: 0;
@@ -126,6 +127,14 @@ export default {
 .ae-main {
   &.ae-main-receive {
     background: #1d1d25 !important;
+    min-height: 600px;
+  }
+  &.ae-main-popup {
+    background: $bg-color !important;
+    padding-top:0;
+    position:relative;
+    margin:0 auto;
+    max-width:357px !important;
     min-height: 600px;
   }
 

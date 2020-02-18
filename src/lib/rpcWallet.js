@@ -140,8 +140,8 @@ const rpcWallet = {
     const popupWindow = await browser.windows.create({
       url: popupUrl,
       type: 'popup',
-      height: 680,
-      width: 420,
+      height: 600,
+      width: 375,
     });
     if (!popupWindow) return action.deny();
 
