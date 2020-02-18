@@ -39,7 +39,6 @@ export default {
   data: () => ({
     wave_bg: browser.runtime.getURL('../icons/background-big-wave.png'),
     showSidebar: false,
-    checkSDKReady: null,
   }),
   computed: mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup']),
   async created() {
@@ -58,10 +57,8 @@ export default {
         sendResponse({ host: receiver.host, received: true });
       });
     }
-    if (!window.RUNNING_IN_POPUP) {
-      // init SDK
-      this.checkSdkReady();
-    }
+
+    this.checkSdkReady();
     this.getCurrencies();
 
     if (await this.$store.dispatch('checkExtensionUpdate')) {
@@ -76,15 +73,15 @@ export default {
   },
   methods: {
     checkSdkReady() {
-      if (!window.RUNNING_IN_POPUP) {
-        this.checkSDKReady = setInterval(() => {
-          if (this.sdk != null) {
-            this.initRpcWallet();
-            this.pollData();
-            clearInterval(this.checkSDKReady);
+      const checkSDKReady = setInterval(() => {
+        if (this.sdk !== null) {
+          if (!window.RUNNING_IN_POPUP) {
+            postMessage({ type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
           }
-        }, 100);
-      }
+          this.pollData();
+          clearInterval(checkSDKReady);
+        }
+      }, 100);
     },
     pollData() {
       let triggerOnce = false;
@@ -97,9 +94,6 @@ export default {
           }
         }
       }, 2500);
-    },
-    initRpcWallet() {
-      postMessage({ type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
     },
     async getCurrencies() {
       const { currency } = await browser.storage.local.get('currency');
