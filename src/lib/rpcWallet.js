@@ -159,7 +159,7 @@ const rpcWallet = {
         } = aepp;
         const { protocol } = new URL(url);
         this.popups.setAeppInfo(id, { type, action: { params: action.params, method: action.method }, url, icons, name, protocol, host: extractHostName(url) });
-      } catch (e) { }
+      } catch (e) {}
     });
   },
 

@@ -2,7 +2,9 @@
   <div>
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
       <div class="holder">
-        <span class="amount">{{ txAmount }} {{ $t('pages.appVUE.aeid') }} <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span>
+        <span class="amount"
+          >{{ txAmount }} {{ $t('pages.appVUE.aeid') }} <span style="color: #BCBCC4;">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span></span
+        >
         <span class="status">{{ txType == 'Sent' ? $t('pages.recentTransactions.sentStatus') : $t('pages.recentTransactions.receivedStatus') }}</span>
         <span class="time">{{ transactionDate }}</span>
       </div>
@@ -67,8 +69,8 @@ export default {
       return (txamount * this.current.currencyRate).toFixed(3);
     },
     transactionDate() {
-      return formatDate(this.transactionData.time)
-    }
+      return formatDate(this.transactionData.time);
+    },
   },
   methods: {
     async getEventData() {

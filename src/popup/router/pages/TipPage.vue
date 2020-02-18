@@ -145,8 +145,10 @@ export default {
         try {
           const fee = calculateFee(TX_TYPES.contractCall, this.txParams);
           this.minCallFee = fee.min;
-          clearInterval(this.feeInterval)
-        } catch (e) { this.minCallFee = null }
+          clearInterval(this.feeInterval);
+        } catch (e) {
+          this.minCallFee = null;
+        }
       }
     },
     toConfirm() {

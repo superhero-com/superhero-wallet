@@ -1,6 +1,9 @@
 <template>
-  <ae-main :class="$route.path === '/receive' ? 'ae-main-receive' : (aeppPopup ? 'ae-main-popup' : '')">
-    <div class="background-big-wave" :style="['/intro','/popup-sign-tx','/connect'].includes($route.path) ? { 'z-index': '0', 'background-image': 'url(' + wave_bg + ') !important' } : ''"></div>
+  <ae-main :class="$route.path === '/receive' ? 'ae-main-receive' : aeppPopup ? 'ae-main-popup' : ''">
+    <div
+      class="background-big-wave"
+      :style="['/intro', '/popup-sign-tx', '/connect'].includes($route.path) ? { 'z-index': '0', 'background-image': 'url(' + wave_bg + ') !important' } : ''"
+    ></div>
     <Header @toggle-sidebar="showSidebar = !showSidebar" />
 
     <router-view :key="$route.fullPath" />
@@ -61,11 +64,14 @@ export default {
     }
     this.getCurrencies();
 
-    if(await this.$store.dispatch('checkExtensionUpdate')) {
-      this.$store.commit('ADD_NOTIFICATION',{ title:'', content:this.$t('pages.account.updateExtension')})
+    if (await this.$store.dispatch('checkExtensionUpdate')) {
+      this.$store.commit('ADD_NOTIFICATION', { title: '', content: this.$t('pages.account.updateExtension') });
     }
-    if(!(await this.$store.dispatch('checkBackupSeed'))) {
-      this.$store.commit('ADD_NOTIFICATION',{ title:'', content:`${this.$t('pages.account.youNeedTo')} ${this.$t('pages.account.backup')} ${this.$t('pages.account.yourSeedPhrase')}`})
+    if (!(await this.$store.dispatch('checkBackupSeed'))) {
+      this.$store.commit('ADD_NOTIFICATION', {
+        title: '',
+        content: `${this.$t('pages.account.youNeedTo')} ${this.$t('pages.account.backup')} ${this.$t('pages.account.yourSeedPhrase')}`,
+      });
     }
   },
   methods: {
@@ -138,10 +144,10 @@ export default {
   }
   &.ae-main-popup {
     background: $bg-color !important;
-    padding-top:0;
-    position:relative;
-    margin:0 auto;
-    max-width:357px !important;
+    padding-top: 0;
+    position: relative;
+    margin: 0 auto;
+    max-width: 357px !important;
     min-height: 600px;
   }
 

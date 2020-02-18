@@ -65,13 +65,13 @@ input.input {
   font-size: 11px;
 }
 .input.big {
-  font-size:2rem;
+  font-size: 2rem;
   font-weight: bold;
   margin-bottom: 0;
   height: auto;
-  width:180px;
+  width: 180px;
   margin-right: 15px;
-  padding:3px 10px;
+  padding: 3px 10px;
 }
 .input.m-0 {
   margin: 0 !important;

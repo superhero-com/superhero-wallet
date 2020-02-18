@@ -10,7 +10,7 @@ export default {
     disabled: Boolean,
     extend: Boolean,
     half: Boolean,
-    small: Boolean
+    small: Boolean,
   },
   computed: {
     getClasses() {
@@ -58,7 +58,8 @@ export default {
   line-height: 1px !important;
   padding: 10px;
 }
-.primary-button.reject, .primary-button.danger {
+.primary-button.reject,
+.primary-button.danger {
   background: $secondary-color !important;
   color: #fff !important;
 }

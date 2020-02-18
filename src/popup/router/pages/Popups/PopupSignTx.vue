@@ -23,7 +23,7 @@
         <div class="mt-20">
           <ae-badge>{{ txType }}</ae-badge>
         </div>
-        <AmountSend :value="tx.amount" @changeAmount="val => (tx.amount = val)" style="width:100%;"/>
+        <AmountSend :value="tx.amount" @changeAmount="val => (tx.amount = val)" style="width:100%;" />
       </ae-list-item>
       <ae-list-item v-if="txObject.payload" fill="neutral" class="flex-justify-between flex-align-center flex-direction-column flex-align-start">
         <div class="tx-label ">
@@ -92,7 +92,7 @@
     </ae-list>
     <div class="btnFixed">
       <Button half @click="cancelTransaction" :disabled="editTx" class="reject">{{ $t('pages.signTransaction.reject') }}</Button>
-      <Button half @click="signTransaction" :disabled="editTx || amountError" >{{ $t('pages.signTransaction.confirm') }}</Button>
+      <Button half @click="signTransaction" :disabled="editTx || amountError">{{ $t('pages.signTransaction.confirm') }}</Button>
     </div>
     <Loader size="big" :loading="loading" type="transparent" content=""></Loader>
   </div>
@@ -117,25 +117,19 @@ export default {
       loading: false,
       unpackedTx: null,
       editTx: false,
-      amountError:false,
-      tx: { 
-        amount:0
-      }
+      amountError: false,
+      tx: {
+        amount: 0,
+      },
     };
   },
   async created() {
     this.props = await getPopupProps();
     this.unpackedTx = TxBuilder.unpackTx(this.props.action.params.tx);
-    this.tx.amount = convertToAE(this.txObject.amount)
+    this.tx.amount = convertToAE(this.txObject.amount);
   },
   computed: {
-    ...mapGetters([
-      'account',
-      'activeAccountName',
-      'balance',
-      'current',
-      'popup',
-    ]),
+    ...mapGetters(['account', 'activeAccountName', 'balance', 'current', 'popup']),
     txType() {
       return this.unpackedTx ? this.unpackedTx.txType : null;
     },
@@ -167,17 +161,17 @@ export default {
       return this.txType == 'namePreClaimTx' || this.txType == 'nameClaimTx' || this.txType == 'nameUpdateTx';
     },
     totalSpend() {
-      const amount = this.tx.amount ? this.tx.amount : 0
+      const amount = this.tx.amount ? this.tx.amount : 0;
       return (parseFloat(amount) + parseFloat(convertToAE(this.txObject.fee))).toFixed(7);
     },
   },
   watch: {
-    'tx.amount':function (newVal, oldVal) {
-      this.amountError = false
-      if(isNaN(newVal)) {
-        this.amountError = true
+    'tx.amount': function(newVal, oldVal) {
+      this.amountError = false;
+      if (isNaN(newVal)) {
+        this.amountError = true;
       }
-    }
+    },
   },
   methods: {
     toAe(balance) {
@@ -187,8 +181,8 @@ export default {
       this.props.reject(false);
     },
     signTransaction() {
-      if(parseFloat(this.tx.amount) !== convertToAE(this.unpackedTx.tx.amount)) {
-        const { tx } = TxBuilder.buildTx({...this.unpackedTx.tx, ...this.tx, amount: BigNumber(this.tx.amount ? this.tx.amount : 0).shiftedBy(MAGNITUDE)}, this.txType)
+      if (parseFloat(this.tx.amount) !== convertToAE(this.unpackedTx.tx.amount)) {
+        const { tx } = TxBuilder.buildTx({ ...this.unpackedTx.tx, ...this.tx, amount: BigNumber(this.tx.amount ? this.tx.amount : 0).shiftedBy(MAGNITUDE) }, this.txType);
         this.loading = true;
         this.props.resolve(tx);
       } else {
@@ -234,15 +228,15 @@ export default {
   }
 }
 .ae-identicon.base {
-   border: 0.125rem solid transparent;
-   -webkit-box-shadow: 0 0 0 2px $secondary-color;
-   box-shadow: 0 0 0 1px $secondary-color;
-   width: 2rem;
+  border: 0.125rem solid transparent;
+  -webkit-box-shadow: 0 0 0 2px $secondary-color;
+  box-shadow: 0 0 0 1px $secondary-color;
+  width: 2rem;
 }
 .spendAccountAddr {
   padding: 0 0.5rem !important;
   font-weight: normal !important;
-  font-size:.8rem !important;
+  font-size: 0.8rem !important;
 }
 .noBorder {
   border-top: none !important;
@@ -262,8 +256,8 @@ export default {
   text-overflow: ellipsis;
 }
 .ae-badge {
-  background:$accent-color !important;
-  color:$white-color !important;
+  background: $accent-color !important;
+  color: $white-color !important;
   border: 2px solid #001833;
   -webkit-box-shadow: 0 0 0 2px $accent-color;
   box-shadow: 0px 0px 0px 2px $accent-color;

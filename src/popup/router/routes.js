@@ -186,7 +186,7 @@ export default [
     path: '/notifications',
     component: NotificationsPage,
     meta: {
-      title: 'notifications'
-    }
-  }
+      title: 'notifications',
+    },
+  },
 ];

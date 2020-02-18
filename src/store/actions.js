@@ -306,20 +306,22 @@ export default {
       });
     }
   },
-  async checkExtensionUpdate({ state: { network, current }}) {
-    const { tipContract } = network[current.network]
-    let update = false
+  async checkExtensionUpdate({ state: { network, current } }) {
+    const { tipContract } = network[current.network];
+    let update = false;
     try {
-      const latestContract = await (await fetch(`${TIP_SERVICE}/tip-contract`)).json()
-      if(tipContract !== latestContract) update = true
-    } catch(e) { update = false; }
+      const latestContract = await (await fetch(`${TIP_SERVICE}/tip-contract`)).json();
+      if (tipContract !== latestContract) update = true;
+    } catch (e) {
+      update = false;
+    }
 
-    return update
+    return update;
   },
   async checkBackupSeed() {
-    const { backed_up_Seed } = await browser.storage.local.get('backed_up_Seed')
-    if(!backed_up_Seed) return false;
+    const { backed_up_Seed } = await browser.storage.local.get('backed_up_Seed');
+    if (!backed_up_Seed) return false;
 
     return true;
-  }
+  },
 };

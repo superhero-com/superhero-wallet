@@ -79,12 +79,12 @@ export default {
 <style lang="scss" scoped>
 @import '../../../../common/variables';
 .accountName {
-  font-size: .8rem;
+  font-size: 0.8rem;
   word-break: break-word;
   white-space: nowrap;
 }
 .hostname {
-  font-size: .65rem;
+  font-size: 0.65rem;
   word-break: break-word;
 }
 .identiconContainer {

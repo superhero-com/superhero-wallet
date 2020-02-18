@@ -10,7 +10,7 @@
       </div>
 
       <div v-if="isLoggedIn">
-        <span class="noti-holder" @click="notifications.length && $router.push('/notifications') ">
+        <span class="noti-holder" @click="notifications.length && $router.push('/notifications')">
           <span v-if="notifications.length" class="noti-count">{{ notifications.length }}</span>
           <Bell />
         </span>
@@ -32,7 +32,7 @@ import Logo from '../../../icons/logo-small.svg';
 export default {
   components: { Arrow, Bell, Hamburger, Logo },
   computed: {
-    ...mapGetters(['isLoggedIn', 'aeppPopup','notifications']),
+    ...mapGetters(['isLoggedIn', 'aeppPopup', 'notifications']),
     title() {
       return this.$route.meta.title;
     },
@@ -107,12 +107,12 @@ export default {
     }
 
     .noti-holder {
-      position:relative;
+      position: relative;
       cursor: pointer;
     }
-    
+
     .noti-count {
-      position:absolute;
+      position: absolute;
       background: $secondary-color;
       font-size: 12px;
       border-radius: 50%;

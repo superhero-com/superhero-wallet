@@ -83,5 +83,5 @@ export const getters = {
   },
   notifications({ notifications }) {
     return notifications;
-  }
+  },
 };

@@ -44,7 +44,7 @@ export default new Vuex.Store({
     mainLoading: true,
     nodeStatus: 'connecting',
     currencies: {},
-    notifications:[]
+    notifications: [],
   },
   getters,
   mutations,

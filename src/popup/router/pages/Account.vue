@@ -7,7 +7,7 @@
           {{ $t('pages.account.yourSeedPhrase') }}
         </span>
       </div>
-      <ClaimTipButton :class="!backup_seed_notif ? 'mt-32' : ''"/>
+      <ClaimTipButton :class="!backup_seed_notif ? 'mt-32' : ''" />
       <AccountInfo />
       <BalanceInfo />
       <div style="background: #21212A" class="height-100">
@@ -45,7 +45,7 @@ export default {
   data() {
     return {
       backup_seed_notif: false,
-      IS_EXTENSION: process.env.IS_EXTENSION
+      IS_EXTENSION: process.env.IS_EXTENSION,
     };
   },
   computed: {
@@ -61,8 +61,8 @@ export default {
     },
   },
   async created() {
-    this.backup_seed_notif = !(await this.$store.dispatch('checkBackupSeed'))
-    setTimeout(() => this.backup_seed_notif = false, 3000);
+    this.backup_seed_notif = !(await this.$store.dispatch('checkBackupSeed'));
+    setTimeout(() => (this.backup_seed_notif = false), 3000);
   },
   mounted() {},
   methods: {
