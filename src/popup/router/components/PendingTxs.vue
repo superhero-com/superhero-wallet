@@ -6,7 +6,7 @@
           {{ tr.amount }} {{ $t('pages.appVUE.aeid') }} <span class="text">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
         </span>
         <span class="status">{{ $t('pages.recentTransactions.pendingStatus') }}</span>
-        <span class="time">{{ tr.time }}</span>
+        <span class="time">{{ txTime(tr.time) }}</span>
       </div>
       <div class="holder">
         <span class="url">{{ tr.domain }}</span>
@@ -19,14 +19,16 @@
 <script>
 import { mapGetters } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
+import { formatDate } from '../../utils/helper';
 import Eye from '../../../icons/eye.svg';
+
 
 export default {
   components: {
     Eye,
   },
   computed: {
-    ...mapGetters(['transactions', 'currentCurrency']),
+    ...mapGetters(['transactions', 'currentCurrency'])
   },
   data() {
     return {
@@ -36,6 +38,11 @@ export default {
   created() {
     this.$store.dispatch('getPendingTxs');
     this.checkMined = setInterval(() => this.$store.dispatch('checkPendingTxMined'), 2500);
+  },
+  methods: {
+    txTime(time) {
+      return formatDate(time);
+    }
   },
   beforeDestroy() {
     clearInterval(this.checkMined);
@@ -82,6 +89,7 @@ export default {
 
     .status {
       color: $text-color !important;
+      font-size:14px;
     }
   }
 }

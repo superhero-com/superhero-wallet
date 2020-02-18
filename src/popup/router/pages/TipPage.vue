@@ -174,7 +174,7 @@ export default {
         this.loading = true;
         const res = await this.tipping.call('tip', [domain, escapeSpecialChars(note)], { amount, waitMined: false });
         if (res.hash) {
-          await setPendingTx({ hash: res.hash, amount: this.finalAmount, domain, time: new Date().toLocaleTimeString(), type: 'tip' });
+          await setPendingTx({ hash: res.hash, amount: this.finalAmount, domain, time: Date.parse(new Date()), type: 'tip' });
           this.loading = false;
           return this.$router.push('/account');
         }
