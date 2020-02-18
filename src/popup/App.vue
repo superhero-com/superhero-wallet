@@ -1,9 +1,5 @@
 <template>
-  <ae-main :class="$route.path === '/receive' ? 'ae-main-receive' : aeppPopup ? 'ae-main-popup' : ''">
-    <div
-      class="background-big-wave"
-      :style="['/intro', '/popup-sign-tx', '/connect'].includes($route.path) ? { 'z-index': '0', 'background-image': 'url(' + wave_bg + ') !important' } : ''"
-    ></div>
+  <ae-main :class="aeppPopup ? 'ae-main-popup ae-main-wave' : waveBg ? 'ae-main-wave' : ''" :style="waveBg ? { 'background-image': `url(${wave_bg}) !important` } : {}">
     <Header @toggle-sidebar="showSidebar = !showSidebar" />
 
     <router-view :key="$route.fullPath" />
@@ -40,7 +36,12 @@ export default {
     wave_bg: browser.runtime.getURL('../icons/background-big-wave.png'),
     showSidebar: false,
   }),
-  computed: mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup']),
+  computed: {
+    ...mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup']),
+    waveBg() {
+      return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(this.$route.path);
+    },
+  },
   async created() {
     const { language, activeNetwork } = await browser.storage.local.get(['language', 'activeNetwork']);
 
@@ -119,30 +120,20 @@ export default {
 
 <style lang="scss" scoped>
 @import '../common/variables';
-.background-big-wave {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  top: 0;
-  background: transparent;
-  background-position-y: bottom;
-  background-position-x: right;
-  background-repeat: no-repeat;
-}
+
 .ae-main {
-  &.ae-main-receive {
-    background: #1d1d25 !important;
-    min-height: 600px;
-  }
+  position: relative;
+  max-width: 357px;
+  min-height: 600px;
+  margin: 0 auto;
+
   &.ae-main-popup {
-    background: $bg-color !important;
+    background-color: $bg-color !important;
     padding-top: 0;
-    position: relative;
-    margin: 0 auto;
-    max-width: 357px !important;
-    min-height: 600px;
+  }
+  &.ae-main-wave {
+    background-position: 100% 100% !important;
+    background-repeat: no-repeat !important;
   }
 
   padding-top: 50px;

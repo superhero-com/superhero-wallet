@@ -5,9 +5,13 @@ body, .ae-main, html {
     font-size:$font-size;
     font-family: 'Roboto', sans-serif !important;
 }
+body, html {
+    height: 100%;
+}
 .popup {
     max-width: 357px !important;
     margin:0 auto;
+    position:relative;
 }
 .popup-no-padding {
     padding: 4px 0;

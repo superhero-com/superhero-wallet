@@ -3,77 +3,60 @@
     <div class="createWallet-holder">
       <div v-show="step === 1">
         <h2>
-          <Claim /> {{ $t('pages.intro.receive') }} <span class="aeid"> {{ $t('pages.appVUE.aeid') }} </span>
+          <Claim /> {{ $t('pages.intro.receive') }} <span class="ml-10 secondary-text"> {{ $t('pages.appVUE.aeid') }} </span>
         </h2>
         <div class="text-info">
           <span>
             {{ $t('pages.intro.step1text') }}
           </span>
         </div>
-        <div class="dotstyle dotstyle-fillup">
-          <ul>
-            <li @click="step = 1" class="current"><a></a></li>
-            <li @click="step = 2"><a></a></li>
-            <li @click="step = 3"><a></a></li>
-          </ul>
-          <RightArrow @click="step = step + 1" class="right-arrow" />
-          <button class="skip-button" @click="step = 3">{{ $t('pages.intro.skip') }}</button>
-        </div>
       </div>
 
       <div v-show="step === 2">
         <h2>
-          <Heart /> {{ $t('pages.send.send') }} <span class="aeid">{{ $t('pages.appVUE.aeid') }}</span>
+          <Heart /> {{ $t('pages.send.send') }} <span class="ml-10 secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
         </h2>
         <div class="text-info">
           <span>
             {{ $t('pages.intro.step2text') }}
           </span>
         </div>
-        <div class="dotstyle dotstyle-fillup">
-          <LeftArrow @click="step = step - 1" class="left-arrow" />
-          <ul>
-            <li @click="step = 1"><a></a></li>
-            <li @click="step = 2" class="current"><a></a></li>
-            <li @click="step = 3"><a></a></li>
-          </ul>
-          <RightArrow @click="step = step + 1" class="right-arrow" />
-          <button class="skip-button" @click="step = 3">{{ $t('pages.intro.skip') }}</button>
-        </div>
       </div>
 
       <div v-show="step === 3">
         <div class="text-info">
           <span>
-            {{ $t('pages.intro.step3text-1') }} <span style="margin-left: 0px;" class="aeid">{{ $t('pages.appVUE.aeid') }}</span> {{ $t('pages.intro.step3text-2') }}
+            {{ $t('pages.intro.step3text-1') }} <span class="secondary-text aeid">{{ $t('pages.appVUE.aeid') }}</span> {{ $t('pages.intro.step3text-2') }}
           </span>
         </div>
-        <div style="float:left;margin-top:2rem;">
+        <div class="mt-32 text-left">
           {{ $t('pages.intro.ever') }}
         </div>
-        <div class="dotstyle dotstyle-fillup">
-          <LeftArrow @click="step = step - 1" class="left-arrow" />
-          <ul>
-            <li @click="step = 1"><a></a></li>
-            <li @click="step = 2"><a></a></li>
-            <li @click="step = 3" class="current"><a></a></li>
-          </ul>
-          <Button style="margin-top: 30px;" @click="createWallet">{{ $t('pages.intro.generateWallet') }}</Button>
-        </div>
+      </div>
+
+      <div class="dotstyle dotstyle-fillup" v-show="step < 4">
+        <LeftArrow @click="step = step - 1" class="left-arrow" v-show="step > 1" />
+        <ul>
+          <li @click="step = 1" :class="step === 1 ? 'current' : ''"><a></a></li>
+          <li @click="step = 2" :class="step === 2 ? 'current' : ''"><a></a></li>
+          <li @click="step = 3" :class="step === 3 ? 'current' : ''"><a></a></li>
+        </ul>
+        <RightArrow @click="step = step + 1" class="right-arrow" v-show="step < 3" />
+        <button class="skip-button" @click="step = 3" v-show="step < 3">{{ $t('pages.intro.skip') }}</button>
+        <Button style="margin-top: 30px;" @click="createWallet" v-show="step === 3">{{ $t('pages.intro.generateWallet') }}</Button>
       </div>
 
       <div v-show="step === 4">
         <h2>{{ $t('pages.intro.createdWallet') }}</h2>
         <div class="text-info">
-          <span style="display:block;">{{ $t('pages.intro.step4text-1') }}</span>
-          <span style="display:block;">{{ $t('pages.intro.ever') }}</span>
+          <span class="block">{{ $t('pages.intro.step4text-1') }}</span>
+          <span class="block">{{ $t('pages.intro.ever') }}</span>
 
-          <span style="display:block;">
-            {{ $t('pages.intro.step4text-2') }}
-          </span>
+          <span class="block"> {{ $t('pages.intro.step4text-2') }} </span>
         </div>
+
         <p class="last-msg-enjoy">{{ $t('pages.intro.enjoy-msg') }}</p>
-        <Button @click="toAccount">{{ $t('pages.intro.toHome') }}</Button>
+        <Button @click="$router.push('/account')">{{ $t('pages.intro.toHome') }}</Button>
       </div>
     </div>
   </div>
@@ -119,9 +102,6 @@ export default {
       this.$store.dispatch('setLogin', { keypair });
       this.next();
     },
-    toAccount() {
-      this.$router.push('/account');
-    },
     prev() {
       this.step--;
     },
@@ -150,16 +130,11 @@ export default {
       margin-right: 10px;
     }
   }
-  .aeid {
-    margin-left: 10px;
-    color: $secondary-color !important ;
-  }
   .text-info {
     margin: 10px 0 0 0;
-    color: $text-color !important;
     text-align: left;
     span:not(.aeid) {
-      color: $text-color !important;
+      color: $text-color;
       font-size: 16px;
       word-break: break-word;
     }
