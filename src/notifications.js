@@ -31,7 +31,6 @@ export default class Notification {
       this.checkTxReady();
     }, 2000);
     browser.notifications.onButtonClicked.addListener(id => {
-      console.log(id);
       browser.tabs.create({ url: id.split('?')[1], active: true });
     });
   }

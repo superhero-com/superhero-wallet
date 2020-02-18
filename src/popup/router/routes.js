@@ -21,7 +21,7 @@ import SendComponent from './pages/Send';
 import ReceiveComponent from './pages/Receive';
 import SuccessTip from './pages/SuccessTip';
 import WelcomePage from './pages/Welcome';
-import { i18n } from '../utils/i18nHelper';
+import NotificationsPage from './pages/Notifications';
 
 export default [
   {
@@ -182,4 +182,11 @@ export default [
       navigation: false,
     },
   },
+  {
+    path: '/notifications',
+    component: NotificationsPage,
+    meta: {
+      title: 'notifications'
+    }
+  }
 ];

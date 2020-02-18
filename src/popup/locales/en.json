@@ -29,7 +29,8 @@
             "importAccount": "Retrieve Existing Account",
             "activity": "Activity History",
             "withdraw": "Withdraw",
-            "topUp": "Top Up"
+            "topUp": "Top Up",
+            "notifications": "Notifications"
         },
         "appVUE": {
             "systemName": "Corona",

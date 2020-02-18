@@ -112,4 +112,7 @@ export default {
   [types.SET_CURRENCIES](state, payload) {
     state.currencies = payload;
   },
+  [types.ADD_NOTIFICATION](state, payload) {
+    state.notifications = [ ...state.notifications, payload]
+  }
 };

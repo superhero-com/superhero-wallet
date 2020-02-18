@@ -10,7 +10,10 @@
       </div>
 
       <div v-if="isLoggedIn">
-        <Bell />
+        <span class="noti-holder" @click="notifications.length && $router.push('/notifications') ">
+          <span v-if="notifications.length" class="noti-count">{{ notifications.length }}</span>
+          <Bell />
+        </span>
         <button @click="$emit('toggle-sidebar')">
           <Hamburger />
         </button>
@@ -29,7 +32,7 @@ import Logo from '../../../icons/logo-small.svg';
 export default {
   components: { Arrow, Bell, Hamburger, Logo },
   computed: {
-    ...mapGetters(['isLoggedIn', 'aeppPopup']),
+    ...mapGetters(['isLoggedIn', 'aeppPopup','notifications']),
     title() {
       return this.$route.meta.title;
     },
@@ -46,6 +49,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../../common/variables';
 .header {
   padding-top: env(safe-area-inset-top);
   background-color: #21212a;
@@ -100,6 +104,24 @@ export default {
     button {
       padding: 0;
       margin-left: 5px;
+    }
+
+    .noti-holder {
+      position:relative;
+      cursor: pointer;
+    }
+    
+    .noti-count {
+      position:absolute;
+      background: $secondary-color;
+      font-size: 12px;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      text-align: center;
+      vertical-align: middle;
+      left: -8px;
+      top: 2px;
     }
   }
 }
