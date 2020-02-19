@@ -1,27 +1,16 @@
 <template>
-  <div style="background:#16161D;" class="height-100">
+  <div class="height-100 primary-bg">
     <div class="popup popup-no-padding">
-      <div v-show="backup_seed_notif" class="backup_seed_notif">
-        <span
-          >{{ $t('pages.account.youNeedTo') }} <a @click="navigateToBackUpSeed" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a>
-          {{ $t('pages.account.yourSeedPhrase') }}</span
-        >
+      <div v-show="backup_seed_notif" class="noti">
+        <span>
+          {{ $t('pages.account.youNeedTo') }} <a href="#/securitySettings" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a>
+          {{ $t('pages.account.yourSeedPhrase') }}
+        </span>
       </div>
-      <ClaimTipButton :styling="buttonstyle"></ClaimTipButton>
-
-      <!-- <div class="flex flex-align-center flex-justify-between account-info">
-        <div class="text-left account-addresses">
-          <button style="padding:0" @click="copy" v-clipboard:copy="account.publicKey"><Copyicon /></button>
-          <p class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</p>
-          <span class="account-name">{{ activeAccountName }}</span>
-          <ae-address :value="account.publicKey" length="flat" />
-        </div>
-      </div> -->
+      <ClaimTipButton :class="!backup_seed_notif ? 'mt-32' : ''" />
       <AccountInfo />
-
       <BalanceInfo />
-
-      <div style="background: #21212A" class="height-100">
+      <div class="height-100 secondary-bg">
         <Button v-if="IS_EXTENSION" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
           <div class="flex flex-align-center flex-justify-content-center">
             <Heart />
@@ -55,16 +44,12 @@ export default {
   },
   data() {
     return {
-      polling: null,
-      pollingTransaction: null,
-      timer: '',
       backup_seed_notif: false,
-      buttonstyle: '',
       IS_EXTENSION: process.env.IS_EXTENSION,
     };
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'activeAccount', 'popup', 'tokenRegistry']),
+    ...mapGetters(['account', 'balance', 'activeAccount', 'popup', 'current', 'network']),
     publicKey() {
       return this.account.publicKey;
     },
@@ -76,36 +61,14 @@ export default {
     },
   },
   async created() {
-    browser.storage.local.get('rateUsd').then(res => {
-      this.usdRate = res.hasOwnProperty('rateUsd') ? res.rateUsd : 0;
-    });
-    browser.storage.local.get('backed_up_Seed').then(res => {
-      if (!res.backed_up_Seed) {
-        this.backup_seed_notif = true;
-        setTimeout(() => {
-          this.backup_seed_notif = false;
-          this.buttonstyle = 'margin-top: 2rem;';
-        }, 3000);
-      } else {
-        this.backup_seed_notif = false;
-      }
-    });
+    this.backup_seed_notif = !(await this.$store.dispatch('checkBackupSeed'));
+    setTimeout(() => (this.backup_seed_notif = false), 3000);
   },
   mounted() {},
   methods: {
     navigateTips() {
       this.$router.push('/tip');
     },
-    showTransaction() {
-      browser.tabs.create({ url: this.popup.data, active: false });
-    },
-    navigateToBackUpSeed() {
-      this.$router.push('/securitySettings');
-    },
-  },
-  beforeDestroy() {
-    clearInterval(this.polling);
-    clearInterval(this.pollingTransaction);
   },
 };
 </script>
@@ -114,7 +77,7 @@ export default {
 @import '../../../common/variables';
 
 .accountAddress {
-  color: #fff;
+  color: $white-color;
 }
 .paragraph {
   font-weight: normal;
@@ -136,17 +99,5 @@ export default {
 .recent-tx .recent-transactions {
   overflow-y: scroll;
   padding-bottom: 20px;
-}
-
-.backup_seed_notif {
-  font-size: 14px;
-  margin: 14px auto 10px; //32
-}
-.backup_seed_notif span {
-  color: $accent-color !important;
-}
-.backup_seed_notif a {
-  cursor: pointer;
-  color: $accent-color !important;
 }
 </style>

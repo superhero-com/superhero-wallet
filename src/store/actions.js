@@ -2,6 +2,7 @@ import { uniqBy, flatten } from 'lodash-es';
 import * as types from './mutation-types';
 import * as popupMessages from '../popup/utils/popup-messages';
 import { convertToAE, stringifyForStorage, parseFromStorage } from '../popup/utils/helper';
+import { TIP_SERVICE } from '../popup/utils/constants';
 import router from '../popup/router/index';
 import { postMessage } from '../popup/utils/connection';
 
@@ -304,5 +305,23 @@ export default {
         }
       });
     }
+  },
+  async checkExtensionUpdate({ state: { network, current } }) {
+    const { tipContract } = network[current.network];
+    let update = false;
+    try {
+      const latestContract = await (await fetch(`${TIP_SERVICE}/tip-contract`)).json();
+      if (tipContract !== latestContract) update = true;
+    } catch (e) {
+      update = false;
+    }
+
+    return update;
+  },
+  async checkBackupSeed() {
+    const { backed_up_Seed } = await browser.storage.local.get('backed_up_Seed');
+    if (!backed_up_Seed) return false;
+
+    return true;
   },
 };

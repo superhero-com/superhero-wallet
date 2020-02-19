@@ -140,28 +140,26 @@ const rpcWallet = {
     const popupWindow = await browser.windows.create({
       url: popupUrl,
       type: 'popup',
-      height: 680,
-      width: 420,
+      height: 600,
+      width: 375,
     });
     if (!popupWindow) return action.deny();
-    this.popups.addPopup(id, this.controller);
-    this.popups.addActions(id, action);
-    const {
-      connection: {
-        port: {
-          sender: { url },
-        },
-      },
-      info: { icons, name },
-    } = aepp;
-    const { protocol } = new URL(url);
 
     return new Promise((resolve, reject) => {
       try {
+        this.popups.addPopup(id, this.controller);
+        this.popups.addActions(id, { ...action, resolve, reject });
+        const {
+          connection: {
+            port: {
+              sender: { url },
+            },
+          },
+          info: { icons, name },
+        } = aepp;
+        const { protocol } = new URL(url);
         this.popups.setAeppInfo(id, { type, action: { params: action.params, method: action.method }, url, icons, name, protocol, host: extractHostName(url) });
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) {}
     });
   },
 

@@ -5,7 +5,9 @@
         <span>{{ $t('pages.transactionDetails.date') }}</span>
         <FilterArrow :class="direction" />
       </span>
-      <span v-for="filter in filters" v-bind:key="filter.id" :class="type == filter ? 'active' : filter" @click="filtrateTx(filter)">{{ $t(`pages.transactionDetails.${filter}`) }}</span>
+      <span v-for="filter in filters" v-bind:key="filter.id" :class="type == filter ? 'active' : filter" @click="filtrateTx(filter)">{{
+        $t(`pages.transactionDetails.${filter}`)
+      }}</span>
     </div>
   </div>
 </template>
@@ -97,7 +99,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../common/variables';
 .filters {
-  background: #111117;
+  background: $filters-bg;
   height: 40px;
   width: 100%;
   line-height: 40px;

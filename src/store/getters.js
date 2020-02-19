@@ -81,4 +81,7 @@ export const getters = {
   currencies({ currencies }) {
     return currencies;
   },
+  notifications({ notifications }) {
+    return notifications;
+  },
 };

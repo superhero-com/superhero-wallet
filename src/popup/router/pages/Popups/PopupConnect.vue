@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="popup popup-aex2">
     <div class="flex identiconContainer">
       <div class="identicon">
         <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
@@ -32,7 +32,6 @@
         <p>{{ $t('pages.connectConfirm.transactionRequest') }}</p>
       </ae-list-item>
     </ul>
-    <!-- <p>{{$t('pages.connectConfirm.websiteRequest') }}</p> -->
     <div class="btnFixed">
       <Button half class="reject" @click="cancel">{{ $t('pages.connectConfirm.cancelButton') }}</Button>
       <Button half @click="connect">{{ $t('pages.connectConfirm.confirmButton') }}</Button>
@@ -79,22 +78,14 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../../common/variables';
-
-h2 {
-  word-break: break-word;
-  line-height: 1.8rem;
-  font-size: 1.2rem;
-}
-p {
-  font-weight: normal;
-  word-break: break-word;
-  font-size: 0.9rem;
-}
 .accountName {
-  font-size: 1rem;
+  font-size: 0.8rem;
+  word-break: break-word;
+  white-space: nowrap;
 }
 .hostname {
-  font-size: 0.8rem;
+  font-size: 0.65rem;
+  word-break: break-word;
 }
 .identiconContainer {
   position: relative;
@@ -115,15 +106,17 @@ p {
       height: 4rem !important;
       position: relative;
       z-index: 1;
-      padding: 0 0.9rem !important;
       width: auto;
+      border: 0.125rem solid transparent;
+      -webkit-box-shadow: 0 0 0 2px $secondary-color;
+      box-shadow: 0 0 0 2px $secondary-color;
     }
   }
   .identicon:first-child:after,
   .identicon:last-child:after {
     content: '';
     width: 40%;
-    border-top: 2px dashed #ccc;
+    border-top: 2px dashed $white-color;
     height: 1px;
     display: inline-block;
     position: absolute;
@@ -144,9 +137,9 @@ p {
     margin-top: 1rem;
     padding: 0 0.7rem;
     .ae-icon {
-      background: $color-alternative;
+      background: $accent-color;
       padding: 0.5rem;
-      color: #fff;
+      color: $white-color;
       border-radius: 50%;
     }
   }
@@ -155,7 +148,7 @@ p {
 .permission-set {
   flex-direction: column;
   text-align: left;
-
+  cursor: unset !important;
   h4 {
     display: block;
     width: 100%;

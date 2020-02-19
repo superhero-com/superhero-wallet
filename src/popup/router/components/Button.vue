@@ -10,6 +10,7 @@ export default {
     disabled: Boolean,
     extend: Boolean,
     half: Boolean,
+    small: Boolean,
   },
   computed: {
     getClasses() {
@@ -17,7 +18,7 @@ export default {
       if (this.disabled) c.push('disabled');
       if (this.extend) c.push('extend');
       if (this.half) c.push('half');
-
+      if (this.small) c.push('small');
       return c.join(' ');
     },
   },
@@ -39,6 +40,9 @@ export default {
   line-height: 40px !important;
   max-height: 40px;
 }
+.primary-button span {
+  color: $button-text-color !important;
+}
 .primary-button.disabled {
   opacity: 0.4;
   pointer-events: none;
@@ -52,8 +56,14 @@ export default {
   width: 48% !important;
   margin: 0 !important;
 }
-.primary-button.reject {
+.primary-button.small {
+  width: auto !important;
+  line-height: 1px !important;
+  padding: 10px;
+}
+.primary-button.reject,
+.primary-button.danger {
   background: $secondary-color !important;
-  color: #fff !important;
+  color: $white-color !important;
 }
 </style>
