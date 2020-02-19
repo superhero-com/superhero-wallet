@@ -5,9 +5,13 @@ body, .ae-main, html {
     font-size:$font-size;
     font-family: 'Roboto', sans-serif !important;
 }
+body, html {
+    height: 100%;
+}
 .popup {
     max-width: 357px !important;
     margin:0 auto;
+    position:relative;
 }
 .popup-no-padding {
     padding: 4px 0;
@@ -32,10 +36,18 @@ a {
     text-decoration: underline;
     cursor: pointer;
 }
-
+.primary-bg {
+    background:$bg-color;
+}
+.secondary-bg {
+    background:$nav-bg-color;
+}
 .primary-text {
     color:$text-color;
     font-size: .88rem;
+}
+.text {
+    color: $text-color;
 }
 .primary-title {
     color: $white-color;
@@ -49,6 +61,9 @@ a {
 }
 .secondary-text {
     color: $secondary-color;
+}
+.accent-text {
+    color: $accent-color;
 }
 .regular-text {
     font-size:$font-size;
@@ -138,6 +153,60 @@ a {
     margin-bottom:30px;
     text-align: left;
     word-break: break-word;
+}
+
+/**
+* POPUP WINDWOS
+*/
+.popup-aex2 {
+    max-height: 600px;
+    min-height: 600px;
+    margin-bottom:55px;
+    position:relative;
+    // overflow-y:scroll;
+    h2 {
+        word-break: break-word;
+        line-height: 1.8rem;
+        font-size: 1.2rem;
+    }
+    p {
+        font-weight: normal;
+        word-break: break-word;
+        font-size: 0.9rem;
+    }
+    ul li {
+        border-width:1px !important;
+        border-color:#424242 !important;
+    }
+}
+
+/** Noti styles */
+.noti {
+    font-size: 14px;
+    margin: 14px auto 10px; 
+}
+.noti span {
+    color: $accent-color !important;
+    word-break: break-word;
+}
+.noti a {
+    cursor: pointer;
+    color: $accent-color !important;
+}
+.noti img {
+    width:30px;
+    margin-right: 10px;
+}
+.noti-list {
+    margin-top:20px !important;
+    .noti {
+        background:$nav-bg-color;
+        padding-left:10px !important;
+        padding-right: 10px !important;
+        text-align: left;
+        margin:0 !important;
+        border-color:#3a3a47 !important;
+    }
 }
 
 /**

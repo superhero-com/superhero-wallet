@@ -62,7 +62,7 @@ export default {
     position: relative;
   }
   .copied-alert {
-    color: #505058;
+    color: $button-color;
     z-index: 1;
     top: 0;
     right: 35px;

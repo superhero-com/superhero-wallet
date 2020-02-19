@@ -83,15 +83,19 @@ const sendDomData = () => {
       });
     }, 1000);
   }
-}
+};
 
 window.addEventListener('load', () => {
   sendDomData();
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-      sendDomData();
-    }
-  }, false);
+  document.addEventListener(
+    'visibilitychange',
+    () => {
+      if (!document.hidden) {
+        sendDomData();
+      }
+    },
+    false
+  );
 });
 
 /**

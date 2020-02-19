@@ -2,7 +2,6 @@ import IndexComponent from './pages/Index';
 import AccountComponent from './pages/Account';
 import AccountPasswordComponent from './pages/AccountPassword';
 import SeedPhraseComponent from './pages/SeedPhrase';
-import SignTransactionComponent from './pages/SignTransaction';
 import PopupSignTransactionComponent from './pages/Popups/PopupSignTx';
 import PopupConnectComponent from './pages/Popups/PopupConnect';
 import PopupAskAccountsComponent from './pages/Popups/PopupAskAccounts';
@@ -21,7 +20,7 @@ import SendComponent from './pages/Send';
 import ReceiveComponent from './pages/Receive';
 import SuccessTip from './pages/SuccessTip';
 import WelcomePage from './pages/Welcome';
-import { i18n } from '../utils/i18nHelper';
+import NotificationsPage from './pages/Notifications';
 
 export default [
   {
@@ -47,12 +46,6 @@ export default [
     name: 'seed',
     path: '/seed',
     component: SeedPhraseComponent,
-    props: true,
-  },
-  {
-    name: 'sign',
-    path: '/sign-transaction/:type?',
-    component: SignTransactionComponent,
     props: true,
   },
   {
@@ -180,6 +173,13 @@ export default [
     component: WelcomePage,
     meta: {
       navigation: false,
+    },
+  },
+  {
+    path: '/notifications',
+    component: NotificationsPage,
+    meta: {
+      title: 'notifications',
     },
   },
 ];

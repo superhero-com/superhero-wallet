@@ -3,8 +3,8 @@ import { postMessage } from './connection';
 export default async () => {
   let resolved = false;
 
-  const resolve = () => postMessage({ type: 'ACTION_ACCEPT' });
-  const reject = () => postMessage({ type: 'ACTION_DENY' });
+  const resolve = (payload = '') => postMessage({ type: 'ACTION_ACCEPT', payload });
+  const reject = (payload = '') => postMessage({ type: 'ACTION_DENY', payload });
 
   const unloadHandler = () => {
     if (!resolved) {

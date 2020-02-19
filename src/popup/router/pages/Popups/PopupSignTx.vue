@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="popup popup-aex2">
     <ae-list class="spendTxDetailsList">
       <ae-list-item fill="neutral" class="flex-justify-between noBorder">
         <div class="flex flex-align-center accountFrom">
@@ -20,136 +20,116 @@
         </div>
       </ae-list-item>
       <ae-list-item fill="neutral" class="flex-justify-between flex-align-start flex-direction-column">
-        <div>
-          <!-- <ae-badge v-if="txType=='contractCallTx'">{{$t('pages.signTransaction.contractCall')}}</ae-badge> -->
+        <div class="mt-20">
           <ae-badge>{{ txType }}</ae-badge>
         </div>
-        <div class="balance balanceSpend no-sign" v-if="!isNameTx">{{ toAe(amount) }} {{ $t('pages.appVUE.aeid') }}</div>
-        <!-- <div class="fiat-rate" v-if="!txObject.token && !isNameTx">${{convertCurrency(usdRate,amount)}}</div> -->
+        <AmountSend :value="tx.amount" @changeAmount="val => (tx.amount = val)" style="width:100%;" />
       </ae-list-item>
       <ae-list-item v-if="txObject.payload" fill="neutral" class="flex-justify-between flex-align-center flex-direction-column flex-align-start">
         <div class="tx-label ">
-          {{ $t('pages.signTransaction.payload') }}
+          <strong>{{ $t('pages.signTransaction.payload') }}</strong>
         </div>
         <div class="text-left">
-          <strong>{{ txObject.payload }}</strong>
+          {{ txObject.payload }}
         </div>
       </ae-list-item>
 
       <ae-list-item v-if="txType == 'nameClaimTx' || txType == 'nameUpdateTx'" fill="neutral" class="flex-justify-between  flex-align-center ">
         <div class="tx-label">
-          {{ $t('pages.signTransaction.name') }}
+          <strong>{{ $t('pages.signTransaction.name') }}</strong>
         </div>
         <div>
-          <strong>{{ txObject.name }}</strong>
+          {{ txObject.name }}
         </div>
       </ae-list-item>
       <ae-list-item v-if="txType == 'nameClaimTx'" fill="neutral" class="flex-justify-between flex-align-center ">
         <div class="tx-label ">
-          {{ $t('pages.signTransaction.nameSalt') }}
+          <strong>{{ $t('pages.signTransaction.nameSalt') }}</strong>
         </div>
         <div>
-          <strong>{{ txObject.preclaim.salt }}</strong>
+          {{ txObject.preclaim.salt }}
         </div>
       </ae-list-item>
       <ae-list-item v-if="txType == 'nameUpdateTx'" fill="neutral" class="flex-justify-between  flex-align-center flex-direction-column">
         <div class="tx-label extend text-left">
-          {{ $t('pages.signTransaction.nameId') }}
+          <strong>{{ $t('pages.signTransaction.nameId') }}</strong>
         </div>
         <div class="text-left">
-          <strong>{{ txObject.claim.id }}</strong>
+          {{ txObject.claim.id }}
         </div>
       </ae-list-item>
-      <ae-list-item fill="neutral" class="flex-justify-between flex-direction-column flex-align-center " v-if="alertMsg == ''">
+      <ae-list-item fill="neutral" class="flex-justify-between flex-direction-column flex-align-center ">
         <div class="flex extend flex-justify-between ">
           <div class="tx-label">{{ $t('pages.signTransaction.fee') }}</div>
           <div class="text-right">
             <div class="balance balanceBig txFee no-sign">{{ toAe(txObject.fee) }} {{ $t('pages.appVUE.aeid') }}</div>
-            <!-- <div class="fiat-rate">${{ convertCurrency(usdRate,selectedFee) }}</div> -->
           </div>
         </div>
       </ae-list-item>
 
-      <ae-list-item fill="neutral" class="flex-justify-between" v-if="alertMsg == '' && !isNameTx">
+      <ae-list-item fill="neutral" class="flex-justify-between" v-if="!isNameTx">
         <div class="tx-label">{{ $t('pages.signTransaction.total') }}</div>
         <div class="text-right">
           <div class="balance balanceBig balanceTotalSpend no-sign">{{ totalSpend }} {{ $t('pages.appVUE.aeid') }}</div>
-          <!-- <div class="fiat-rate" v-if="!txObject.token">${{ convertCurrency(usdRate,totalSpend) }}</div> -->
         </div>
       </ae-list-item>
       <ae-list-item v-if="txType == 'contractCreateTx'" fill="neutral" class="flex-justify-between flex-align-center flex-direction-column flex-align-start">
         <div class="tx-label ">
-          {{ $t('pages.signTransaction.compiledCode') }}
+          <strong>{{ $t('pages.signTransaction.compiledCode') }}</strong>
         </div>
         <div class="text-left ">
-          <strong>{{ txObject.code }}</strong>
+          {{ txObject.code }}
         </div>
       </ae-list-item>
       <ae-list-item v-if="txType == 'contractCreateTx'" fill="neutral" class="flex-justify-between flex-align-center flex-direction-column flex-align-start">
         <div class="tx-label ">
-          {{ $t('pages.signTransaction.callData') }}
+          <strong>{{ $t('pages.signTransaction.callData') }}</strong>
         </div>
         <div class="text-left">
-          <strong>{{ txObject.callData }}</strong>
+          {{ txObject.callData }}
         </div>
       </ae-list-item>
     </ae-list>
-    <Alert fill="primary" :show="alertMsg != ''">
-      <div slot="content">
-        {{ alertMsg }}
-      </div>
-    </Alert>
     <div class="btnFixed">
-      <Button half @click="cancelTransaction" class="reject">{{ $t('pages.signTransaction.reject') }}</Button>
-      <Button half @click="signTransaction">{{ $t('pages.signTransaction.confirm') }}</Button>
+      <Button half @click="cancelTransaction" :disabled="editTx" class="reject">{{ $t('pages.signTransaction.reject') }}</Button>
+      <Button half @click="signTransaction" :disabled="editTx || amountError">{{ $t('pages.signTransaction.confirm') }}</Button>
     </div>
-    <Loader size="big" :loading="loading" :type="loaderType" :content="loaderContent"></Loader>
+    <Loader size="big" :loading="loading" type="transparent" content=""></Loader>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
+import BigNumber from 'bignumber.js';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { convertToAE, convertAmountToCurrency } from '../../../utils/helper';
+import { toMicro, MAGNITUDE } from '../../../utils/constants';
 import Button from '../../components/Button';
+import Input from '../../components/Input';
+import AmountSend from '../../components/AmountSend';
 import getPopupProps from '../../../utils/getPopupProps';
 
 export default {
-  components: {
-    Button,
-  },
+  components: { Button, Input, AmountSend },
   data() {
     return {
       props: {},
-      token: 'æid',
-      usdRate: 0,
-      alertMsg: '',
       loading: false,
-      loaderType: 'transparent',
-      loaderContent: '',
       unpackedTx: null,
+      editTx: false,
+      amountError: false,
+      tx: {
+        amount: 0,
+      },
     };
   },
   async created() {
     this.props = await getPopupProps();
     this.unpackedTx = TxBuilder.unpackTx(this.props.action.params.tx);
+    this.tx.amount = convertToAE(this.txObject.amount);
   },
   computed: {
-    ...mapGetters([
-      'account',
-      'activeAccountName',
-      'balance',
-      'network',
-      'current',
-      'wallet',
-      'activeAccount',
-      'sdk',
-      'tokens',
-      'tokenBalance',
-      'isLedger',
-      'popup',
-      'tokenRegistry',
-    ]),
+    ...mapGetters(['account', 'activeAccountName', 'balance', 'current', 'popup']),
     txType() {
       return this.unpackedTx ? this.unpackedTx.txType : null;
     },
@@ -162,11 +142,11 @@ export default {
     txObject() {
       return this.unpackedTx.tx;
     },
-    tx() {
-      return this.props.action.params.tx;
-    },
     amount() {
       return this.txObject.amount;
+    },
+    aeAmount() {
+      return convertToAE(this.txObject.amount);
     },
     receiver() {
       if (this.txType == 'spendTx') {
@@ -181,16 +161,19 @@ export default {
       return this.txType == 'namePreClaimTx' || this.txType == 'nameClaimTx' || this.txType == 'nameUpdateTx';
     },
     totalSpend() {
-      if (typeof this.txObject.token !== 'undefined') {
-        return parseFloat(this.amount).toFixed(7);
+      const amount = this.tx.amount ? this.tx.amount : 0;
+      return (parseFloat(amount) + parseFloat(convertToAE(this.txObject.fee))).toFixed(7);
+    },
+  },
+  watch: {
+    'tx.amount': function(newVal, oldVal) {
+      this.amountError = false;
+      if (isNaN(newVal)) {
+        this.amountError = true;
       }
-      return (parseFloat(this.toAe(this.amount)) + parseFloat(this.toAe(this.txObject.fee))).toFixed(7);
     },
   },
   methods: {
-    convertCurrency(currency, amount) {
-      return parseFloat(convertAmountToCurrency(currency, amount));
-    },
     toAe(balance) {
       return convertToAE(balance);
     },
@@ -198,8 +181,13 @@ export default {
       this.props.reject(false);
     },
     signTransaction() {
-      this.loading = true;
-      this.props.resolve(true);
+      if (parseFloat(this.tx.amount) !== convertToAE(this.unpackedTx.tx.amount)) {
+        const { tx } = TxBuilder.buildTx({ ...this.unpackedTx.tx, ...this.tx, amount: BigNumber(this.tx.amount ? this.tx.amount : 0).shiftedBy(MAGNITUDE) }, this.txType);
+        this.loading = true;
+        this.props.resolve(tx);
+      } else {
+        this.props.resolve();
+      }
     },
   },
 };
@@ -212,27 +200,24 @@ export default {
   color: $white-color;
 }
 .spendTxDetailsList .ae-list-item {
-  padding: 1rem;
   position: relative;
   cursor: unset;
-  text-transform: uppercase;
-  font-size: 0.9rem;
+  // text-transform: uppercase;
+  font-size: 0.8rem;
 }
 .spendTxDetailsList .ae-button {
   margin-bottom: 0 !important;
 }
 .arrowSeprator {
   margin-right: 1rem;
-  background: $primary-color;
-  color: #fff;
+  background: $accent-color;
+  color: $white-color;
   border-radius: 50%;
   width: 20px;
   height: 20px;
   text-align: center;
   vertical-align: middle;
-  padding-left: 0px;
-  padding-top: 1.5px;
-  border: 1px solid #d8d8d8;
+  border: 1px solid $white-color;
   line-height: 20px;
   .ae-icon {
     font-size: 1.2rem !important;
@@ -242,15 +227,22 @@ export default {
     content: '';
   }
 }
+.ae-identicon.base {
+  border: 0.125rem solid transparent;
+  -webkit-box-shadow: 0 0 0 2px $secondary-color;
+  box-shadow: 0 0 0 1px $secondary-color;
+  width: 2rem;
+}
 .spendAccountAddr {
   padding: 0 0.5rem !important;
-  font-weight: bold !important;
+  font-weight: normal !important;
+  font-size: 0.8rem !important;
 }
 .noBorder {
   border-top: none !important;
 }
 .accountFrom {
-  width: 50%;
+  width: 40%;
 }
 .accountTo {
   width: 70%;
@@ -259,29 +251,19 @@ export default {
   }
 }
 .spendAccountAddr {
-  font-size: 0.9rem !important;
-  font-family: 'IBM Plex Mono', monospace;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.confirm.disabled {
-  opacity: 0.5;
-  cursor: unset;
-}
 .ae-badge {
-  border: 2px solid #001833;
-  background: $color-alternative;
-}
-.ae-header {
-  margin-bottom: 0 !important;
+  background: $accent-color !important;
+  color: $white-color !important;
+  -webkit-box-shadow: 0 0 0 2px $accent-color;
+  box-shadow: 0px 0px 0px 2px $accent-color;
+  border: 2px solid $bg-color;
 }
 .extend {
   width: 100%;
-}
-.fiat-rate {
-  color: #939393;
-  font-size: 1rem;
 }
 .tx-label {
   margin-top: 0.4rem;

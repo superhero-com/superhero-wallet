@@ -29,7 +29,7 @@ export default {
   left: 0;
   right: 0;
   background: $secondary-color;
-  color: #fff;
+  color: $white-color;
   padding: 0.3rem;
   padding-bottom: calc(0.3rem + env(safe-area-inset-bottom));
   z-index: 5;

@@ -7,7 +7,8 @@
       </div>
     </h3>
     <p class="primary-title primary-title-darker text-left mb-8 f-16">
-      {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text">{{ amountTip }} {{ $t('pages.appVUE.aeid') }} </span> ({{ getCurrencyAmount }} {{ currentCurrency }})
+      {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text">{{ amountTip }} {{ $t('pages.appVUE.aeid') }} </span> ({{ getCurrencyAmount }}
+      {{ currentCurrency }})
       {{ $t('pages.successTip.to') }}
     </p>
     <a class="link-sm text-left block">{{ domain }}</a>

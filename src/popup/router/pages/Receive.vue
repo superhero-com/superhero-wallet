@@ -48,17 +48,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss">
-.qr-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 5px;
-  background-color: white;
-  border-radius: 6px;
-}
-.qr-code li {
-  color: #000;
-}
-</style>

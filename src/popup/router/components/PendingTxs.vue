@@ -3,10 +3,10 @@
     <ae-list-item v-for="tr in transactions.pending" :key="tr.hash" fill="neutral" class="list-item-transaction">
       <div class="holder">
         <span class="amount">
-          {{ tr.amount }} {{ $t('pages.appVUE.aeid') }} <span style="color: #BCBCC4;">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
+          {{ tr.amount }} {{ $t('pages.appVUE.aeid') }} <span class="text">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
         </span>
         <span class="status">{{ $t('pages.recentTransactions.pendingStatus') }}</span>
-        <span class="time">{{ tr.time }}</span>
+        <span class="time">{{ txTime(tr.time) }}</span>
       </div>
       <div class="holder">
         <span class="url">{{ tr.domain }}</span>
@@ -19,14 +19,16 @@
 <script>
 import { mapGetters } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
+import { formatDate } from '../../utils/helper';
 import Eye from '../../../icons/eye.svg';
+
 
 export default {
   components: {
     Eye,
   },
   computed: {
-    ...mapGetters(['transactions', 'currentCurrency']),
+    ...mapGetters(['transactions', 'currentCurrency'])
   },
   data() {
     return {
@@ -36,6 +38,11 @@ export default {
   created() {
     this.$store.dispatch('getPendingTxs');
     this.checkMined = setInterval(() => this.$store.dispatch('checkPendingTxMined'), 2500);
+  },
+  methods: {
+    txTime(time) {
+      return formatDate(time);
+    }
   },
   beforeDestroy() {
     clearInterval(this.checkMined);
@@ -58,28 +65,31 @@ export default {
   .holder {
     display: flex;
     justify-content: space-between;
+
     .url {
       display: inline-block;
       width: 295px;
       white-space: nowrap;
       overflow: hidden !important;
       text-overflow: ellipsis;
-      color: #6a8ebe;
+      color: $accent-color;
       font-size: 12px;
       text-align: left;
     }
-    .seeTransaction {
-    }
+
     .time {
-      color: #cbcbcb !important;
+      color: $text-color !important;
       font-size: 12px;
     }
+
     .amount {
       color: $secondary-color !important;
       font-size: 14px;
     }
+
     .status {
       color: $text-color !important;
+      font-size:14px;
     }
   }
 }

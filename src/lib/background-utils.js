@@ -67,12 +67,12 @@ export const getAddressFromChainName = async names => {
   );
 };
 
-export const getTippingContractInstance = async (tx) => {
-  if(tippingContract) return tippingContract;
+export const getTippingContractInstance = async tx => {
+  if (tippingContract) return tippingContract;
   const sdk = await getSDK();
   tippingContract = await setContractInstance(tx, sdk, tx.address);
   return tippingContract;
-}
+};
 
 export const contractCallStatic = async ({ tx, callType }) =>
   new Promise(async (resolve, reject) => {

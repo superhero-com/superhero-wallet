@@ -1,6 +1,5 @@
 <template>
-  <ae-main :class="$route.path === '/receive' ? 'ae-main-receive' : ''">
-    <div class="background-big-wave" :style="$route.path === '/intro' ? { 'z-index': '0', 'background-image': 'url(' + wave_bg + ') !important' } : ''"></div>
+  <ae-main :class="aeppPopup ? 'ae-main-popup ae-main-wave' : waveBg ? 'ae-main-wave' : ''" :style="waveBg ? { 'background-image': `url(${wave_bg}) !important` } : {}">
     <Header @toggle-sidebar="showSidebar = !showSidebar" />
 
     <router-view :key="$route.fullPath" />
@@ -36,9 +35,13 @@ export default {
   data: () => ({
     wave_bg: browser.runtime.getURL('../icons/background-big-wave.png'),
     showSidebar: false,
-    checkSDKReady: null,
   }),
-  computed: mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn']),
+  computed: {
+    ...mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup']),
+    waveBg() {
+      return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(this.$route.path);
+    },
+  },
   async created() {
     const { language, activeNetwork } = await browser.storage.local.get(['language', 'activeNetwork']);
 
@@ -55,23 +58,31 @@ export default {
         sendResponse({ host: receiver.host, received: true });
       });
     }
-    if (!window.RUNNING_IN_POPUP) {
-      // init SDK
-      this.checkSdkReady();
-    }
+
+    this.checkSdkReady();
     this.getCurrencies();
+
+    if (await this.$store.dispatch('checkExtensionUpdate')) {
+      this.$store.commit('ADD_NOTIFICATION', { title: '', content: this.$t('pages.account.updateExtension') });
+    }
+    if (!(await this.$store.dispatch('checkBackupSeed'))) {
+      this.$store.commit('ADD_NOTIFICATION', {
+        title: '',
+        content: `${this.$t('pages.account.youNeedTo')} ${this.$t('pages.account.backup')} ${this.$t('pages.account.yourSeedPhrase')}`,
+      });
+    }
   },
   methods: {
     checkSdkReady() {
-      if (!window.RUNNING_IN_POPUP) {
-        this.checkSDKReady = setInterval(() => {
-          if (this.sdk != null) {
-            this.initRpcWallet();
-            this.pollData();
-            clearInterval(this.checkSDKReady);
+      const checkSDKReady = setInterval(() => {
+        if (this.sdk !== null) {
+          if (!window.RUNNING_IN_POPUP) {
+            postMessage({ type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
           }
-        }, 100);
-      }
+          this.pollData();
+          clearInterval(checkSDKReady);
+        }
+      }, 100);
     },
     pollData() {
       let triggerOnce = false;
@@ -84,9 +95,6 @@ export default {
           }
         }
       }, 2500);
-    },
-    initRpcWallet() {
-      postMessage({ type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
     },
     async getCurrencies() {
       const { currency } = await browser.storage.local.get('currency');
@@ -111,22 +119,21 @@ export default {
 </style>
 
 <style lang="scss" scoped>
-.background-big-wave {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  top: 0;
-  background: transparent;
-  background-position-y: bottom;
-  background-position-x: right;
-  background-repeat: no-repeat;
-}
+@import '../common/variables';
+
 .ae-main {
-  &.ae-main-receive {
-    background: #1d1d25 !important;
-    min-height: 600px;
+  position: relative;
+  max-width: 357px;
+  min-height: 600px;
+  margin: 0 auto;
+
+  &.ae-main-popup {
+    background-color: $bg-color !important;
+    padding-top: 0;
+  }
+  &.ae-main-wave {
+    background-position: 100% 100% !important;
+    background-repeat: no-repeat !important;
   }
 
   padding-top: 50px;
