@@ -115,6 +115,7 @@ export const networks = {
   }
 }
 export const TIP_SERVICE = 'https://payfortx.z52da5wt.xyz';
+export const BACKEND_URL = 'https://backend.z52da5wt.xyz';
 
 export const TX_LIMIT_PER_DAY = 2000
 export const TIPPING_CONTRACT =
