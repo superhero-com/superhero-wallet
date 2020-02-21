@@ -114,8 +114,9 @@ export const networks = {
     tipContract: 'ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj'
   }
 }
-export const TIP_SERVICE = 'https://payfortx.z52da5wt.xyz';
 export const BACKEND_URL = 'https://backend.z52da5wt.xyz';
+export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
+
 
 export const TX_LIMIT_PER_DAY = 2000
 export const TIPPING_CONTRACT =

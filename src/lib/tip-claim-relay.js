@@ -34,7 +34,7 @@ export default {
               const amount = convertToAE(res.decodedResult);
               if (amount) {
                 axios
-                  .post(`${TIP_SERVICE}/submit`, {
+                  .post(`${TIP_SERVICE}`, {
                     url,
                     address: account.publicKey,
                   })
