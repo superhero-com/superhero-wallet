@@ -178,7 +178,36 @@ a {
         border-width:1px !important;
         border-color:#424242 !important;
     }
+
+    .permission-set {
+        flex-direction: column;
+        text-align: left;
+        cursor: unset !important;
+        h4 {
+          display: block;
+          width: 100%;
+          margin: 0;
+        }
+        p {
+          display: block;
+          width: 100%;
+          margin: 0;
+        }
+    }
+    ul {
+        padding: 0;
+    }
+    .accountName {
+        font-size: 0.8rem;
+        word-break: break-word;
+        white-space: nowrap;
+    }
+    .hostname {
+        font-size: 0.65rem;
+        word-break: break-word;
+    }
 }
+
 
 /** Noti styles */
 .noti {

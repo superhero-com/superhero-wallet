@@ -638,6 +638,10 @@
             "connecting": "Connecting to node...",
             "connected": "Connected",
             "init": "Initializing services..."
+        },
+        "popupMessageSign": {
+            "heading": "would like to sign message ",
+            "message": "Message"
         }
     }
 }

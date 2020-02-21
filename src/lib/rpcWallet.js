@@ -83,6 +83,11 @@ const rpcWallet = {
             }, 2000);
           });
         },
+        async onMessageSign(aepp, action) {
+          context.checkAeppPermissions(aepp, action, 'messageSign', () => {
+            context.showPopup({ aepp, action, type: 'messageSign' });
+          });
+        },
         onAskAccounts(aepp, action) {
           context.checkAeppPermissions(aepp, action, 'accounts', () => {
             setTimeout(() => {
