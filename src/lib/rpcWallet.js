@@ -70,7 +70,7 @@ const rpcWallet = {
         async onConnection(aepp, action) {
           context.shouldOpenPopup(aepp, action, () => {
             context.checkAeppPermissions(aepp, action, 'connection');
-          })
+          });
         },
         onDisconnect(msg, client) {
           client.disconnect();
@@ -78,7 +78,7 @@ const rpcWallet = {
         async onSubscription(aepp, action) {
           context.shouldOpenPopup(aepp, action, () => {
             context.checkAeppPermissions(aepp, action, 'subscription');
-          })
+          });
         },
         async onSign(aepp, action) {
           context.shouldOpenPopup(aepp, action, () => {
@@ -87,14 +87,14 @@ const rpcWallet = {
                 context.showPopup({ aepp, action, type: 'sign' });
               }, 2000);
             });
-          })
+          });
         },
         async onMessageSign(aepp, action) {
           context.shouldOpenPopup(aepp, action, () => {
             context.checkAeppPermissions(aepp, action, 'messageSign', () => {
               context.showPopup({ aepp, action, type: 'messageSign' });
             });
-          })
+          });
         },
         onAskAccounts(aepp, action) {
           context.shouldOpenPopup(aepp, action, () => {
@@ -103,7 +103,7 @@ const rpcWallet = {
                 context.showPopup({ aepp, action, type: 'askAccounts' });
               }, 2000);
             });
-          })
+          });
         },
       });
 
@@ -117,16 +117,22 @@ const rpcWallet = {
     return this.sdk;
   },
   getAeppOrigin(aepp) {
-    const { connection: { port: { sender: { origin } } } } = aepp
-    return origin
+    const {
+      connection: {
+        port: {
+          sender: { origin },
+        },
+      },
+    } = aepp;
+    return origin;
   },
   shouldOpenPopup(aepp, action, cb) {
     const origin = this.getAeppOrigin(aepp);
-    if(NO_POPUP_AEPPS.includes(origin)) {
+    if (NO_POPUP_AEPPS.includes(origin)) {
       // accept action automatically
       action.accept();
     } else {
-      // open popup 
+      // open popup
       cb();
     }
   },

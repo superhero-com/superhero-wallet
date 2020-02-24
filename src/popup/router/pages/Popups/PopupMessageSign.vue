@@ -1,14 +1,13 @@
 <template>
   <div class="popup popup-aex2">
     <h2 class="identity">
-        <div class="flex flex-align-center flex-justify-content-center">
-            <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
-            <div>
-                <span class="secondary-text">{{ data.host }} ({{ data.name }}) </span>
-                {{ $t('pages.popupMessageSign.heading') }}
-            </div>
+      <div class="flex flex-align-center flex-justify-content-center">
+        <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
+        <div>
+          <span class="secondary-text">{{ data.host }} ({{ data.name }}) </span>
+          {{ $t('pages.popupMessageSign.heading') }}
         </div>
-        
+      </div>
     </h2>
     <ul>
       <ae-list-item fill="neutral" class="permission-set">
@@ -20,7 +19,6 @@
       <Button half @click="cancel" :disabled="editTx" class="reject">{{ $t('pages.signTransaction.reject') }}</Button>
       <Button half @click="accept" :disabled="editTx || amountError">{{ $t('pages.signTransaction.confirm') }}</Button>
     </div>
-
   </div>
 </template>
 
@@ -36,7 +34,7 @@ export default {
   },
   async created() {
     this.data = await getPopupProps();
-    console.log(this.data)
+    console.log(this.data);
   },
   methods: {
     cancel() {
@@ -58,8 +56,8 @@ export default {
 <style lang="scss" scoped>
 @import '../../../../common/variables';
 .identity {
-    img {
-        width:32px;
-    }
+  img {
+    width: 32px;
+  }
 }
 </style>

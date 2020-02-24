@@ -71,7 +71,7 @@ export default [
     name: 'message-sign',
     path: '/message-sign',
     component: PopupMessageSignComponent,
-    props: true
+    props: true,
   },
   {
     path: '/settings',
