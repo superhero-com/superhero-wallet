@@ -6,7 +6,7 @@ import { setInterval, clearInterval } from 'timers';
 import uuid from 'uuid';
 import { getAccounts } from '../popup/utils/storage';
 import { parseFromStorage, extractHostName, getAeppAccountPermission, getUniqueId, getUserNetworks, stringifyForStorage } from '../popup/utils/helper';
-import { DEFAULT_NETWORK, networks, AEX2_METHODS } from '../popup/utils/constants';
+import { DEFAULT_NETWORK, networks, AEX2_METHODS, NO_POPUP_AEPPS } from '../popup/utils/constants';
 
 global.browser = require('webextension-polyfill');
 
@@ -68,26 +68,41 @@ const rpcWallet = {
         name: 'Corona',
         accounts: this.accounts,
         async onConnection(aepp, action) {
-          context.checkAeppPermissions(aepp, action, 'connection');
+          context.shouldOpenPopup(aepp, action, () => {
+            context.checkAeppPermissions(aepp, action, 'connection');
+          });
         },
         onDisconnect(msg, client) {
           client.disconnect();
         },
         async onSubscription(aepp, action) {
-          context.checkAeppPermissions(aepp, action, 'subscription');
+          context.shouldOpenPopup(aepp, action, () => {
+            context.checkAeppPermissions(aepp, action, 'subscription');
+          });
         },
         async onSign(aepp, action) {
-          context.checkAeppPermissions(aepp, action, 'sign', () => {
-            setTimeout(() => {
-              context.showPopup({ aepp, action, type: 'sign' });
-            }, 2000);
+          context.shouldOpenPopup(aepp, action, () => {
+            context.checkAeppPermissions(aepp, action, 'sign', () => {
+              setTimeout(() => {
+                context.showPopup({ aepp, action, type: 'sign' });
+              }, 2000);
+            });
+          });
+        },
+        async onMessageSign(aepp, action) {
+          context.shouldOpenPopup(aepp, action, () => {
+            context.checkAeppPermissions(aepp, action, 'messageSign', () => {
+              context.showPopup({ aepp, action, type: 'messageSign' });
+            });
           });
         },
         onAskAccounts(aepp, action) {
-          context.checkAeppPermissions(aepp, action, 'accounts', () => {
-            setTimeout(() => {
-              context.showPopup({ aepp, action, type: 'askAccounts' });
-            }, 2000);
+          context.shouldOpenPopup(aepp, action, () => {
+            context.checkAeppPermissions(aepp, action, 'accounts', () => {
+              setTimeout(() => {
+                context.showPopup({ aepp, action, type: 'askAccounts' });
+              }, 2000);
+            });
           });
         },
       });
@@ -100,6 +115,26 @@ const rpcWallet = {
       this.sdk = null;
     }
     return this.sdk;
+  },
+  getAeppOrigin(aepp) {
+    const {
+      connection: {
+        port: {
+          sender: { origin },
+        },
+      },
+    } = aepp;
+    return origin;
+  },
+  shouldOpenPopup(aepp, action, cb) {
+    const origin = this.getAeppOrigin(aepp);
+    if (NO_POPUP_AEPPS.includes(origin)) {
+      // accept action automatically
+      action.accept();
+    } else {
+      // open popup
+      cb();
+    }
   },
   sdkReady(cb) {
     const check = setInterval(() => {

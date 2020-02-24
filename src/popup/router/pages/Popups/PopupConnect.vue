@@ -78,15 +78,6 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../../common/variables';
-.accountName {
-  font-size: 0.8rem;
-  word-break: break-word;
-  white-space: nowrap;
-}
-.hostname {
-  font-size: 0.65rem;
-  word-break: break-word;
-}
 .identiconContainer {
   position: relative;
   margin-top: 2rem;
@@ -143,24 +134,5 @@ export default {
       border-radius: 50%;
     }
   }
-}
-
-.permission-set {
-  flex-direction: column;
-  text-align: left;
-  cursor: unset !important;
-  h4 {
-    display: block;
-    width: 100%;
-    margin: 0;
-  }
-  p {
-    display: block;
-    width: 100%;
-    margin: 0;
-  }
-}
-ul {
-  padding: 0;
 }
 </style>

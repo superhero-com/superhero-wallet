@@ -49,6 +49,7 @@ const noRedirectUrls = [
   '/sign-transaction/:type?',
   '/sign-transaction',
   '/ask-accounts',
+  '/message-sign',
   '/success-tip',
   '/qrCodeReader',
   '/intro',

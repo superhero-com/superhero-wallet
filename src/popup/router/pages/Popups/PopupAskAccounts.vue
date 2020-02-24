@@ -1,7 +1,7 @@
 <template>
   <div class="popup">
     <h2>
-      <span class="primary">{{ data.host }} ({{ data.name }}) </span>
+      <span class="secondary-text">{{ data.host }} ({{ data.name }}) </span>
       {{ $t('pages.connectConfirm.websiteRequestAccounts') }}
     </h2>
     <ul>
@@ -50,9 +50,6 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../../common/variables';
-.primary {
-  color: $primary-color;
-}
 h2 {
   word-break: break-word;
   line-height: 1.8rem;
@@ -62,28 +59,5 @@ p {
   font-weight: normal;
   word-break: break-word;
   font-size: 0.9rem;
-}
-.accountName {
-  font-size: 1rem;
-}
-.hostname {
-  font-size: 0.8rem;
-}
-.permission-set {
-  flex-direction: column;
-  text-align: left;
-  h4 {
-    display: block;
-    width: 100%;
-    margin: 0;
-  }
-  p {
-    display: block;
-    width: 100%;
-    margin: 0;
-  }
-}
-ul {
-  padding: 0;
 }
 </style>

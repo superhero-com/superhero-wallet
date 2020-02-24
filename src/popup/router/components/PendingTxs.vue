@@ -22,13 +22,12 @@ import { setInterval, clearInterval } from 'timers';
 import { formatDate } from '../../utils/helper';
 import Eye from '../../../icons/eye.svg';
 
-
 export default {
   components: {
     Eye,
   },
   computed: {
-    ...mapGetters(['transactions', 'currentCurrency'])
+    ...mapGetters(['transactions', 'currentCurrency']),
   },
   data() {
     return {
@@ -42,7 +41,7 @@ export default {
   methods: {
     txTime(time) {
       return formatDate(time);
-    }
+    },
   },
   beforeDestroy() {
     clearInterval(this.checkMined);
@@ -89,7 +88,7 @@ export default {
 
     .status {
       color: $text-color !important;
-      font-size:14px;
+      font-size: 14px;
     }
   }
 }

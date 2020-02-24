@@ -5,6 +5,7 @@ import SeedPhraseComponent from './pages/SeedPhrase';
 import PopupSignTransactionComponent from './pages/Popups/PopupSignTx';
 import PopupConnectComponent from './pages/Popups/PopupConnect';
 import PopupAskAccountsComponent from './pages/Popups/PopupAskAccounts';
+import PopupMessageSignComponent from './pages/Popups/PopupMessageSign';
 import SettingsComponent from './pages/Settings';
 import GeneralSettingsComponent from './pages/GeneralSettings';
 import SecuritySettingsComponent from './pages/SecuritySettings';
@@ -64,6 +65,12 @@ export default [
     name: 'ask-accounts',
     path: '/ask-accounts',
     component: PopupAskAccountsComponent,
+    props: true,
+  },
+  {
+    name: 'message-sign',
+    path: '/message-sign',
+    component: PopupMessageSignComponent,
     props: true,
   },
   {
