@@ -5,7 +5,7 @@ import Node from '@aeternity/aepp-sdk/es/node';
 import { setInterval, clearInterval } from 'timers';
 import uuid from 'uuid';
 import { getAccounts } from '../popup/utils/storage';
-import { parseFromStorage, extractHostName, getAeppAccountPermission, getUniqueId, getUserNetworks, stringifyForStorage } from '../popup/utils/helper';
+import { parseFromStorage, extractHostName, getAeppAccountPermission, getUserNetworks, stringifyForStorage } from '../popup/utils/helper';
 import { DEFAULT_NETWORK, networks, AEX2_METHODS, NO_POPUP_AEPPS } from '../popup/utils/constants';
 
 global.browser = require('webextension-polyfill');
@@ -120,11 +120,11 @@ const rpcWallet = {
     const {
       connection: {
         port: {
-          sender: { origin },
+          sender: { url },
         },
       },
     } = aepp;
-    return origin;
+    return extractHostName(url);
   },
   shouldOpenPopup(aepp, action, cb) {
     const origin = this.getAeppOrigin(aepp);
