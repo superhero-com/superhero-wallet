@@ -117,7 +117,9 @@ export const networks = {
 export const BACKEND_URL = 'https://backend.z52da5wt.xyz';
 export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
 export const NO_POPUP_AEPPS = [
-  'coronanews.org'
+  'coronanews.org',
+  'superhero.com',
+  'localhost'
 ];
 
 export const TX_LIMIT_PER_DAY = 2000
