@@ -19,7 +19,7 @@ body, html {
 #app {
     font-family: 'Roboto', sans-serif !important;
 }
-:not(svg):not(rect) {
+:not(svg):not(rect):not(.aemount) {
     font-family: 'Roboto', sans-serif !important;
 
     &:not(a) {

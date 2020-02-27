@@ -6,6 +6,7 @@ import PopupSignTransactionComponent from './pages/Popups/PopupSignTx';
 import PopupConnectComponent from './pages/Popups/PopupConnect';
 import PopupAskAccountsComponent from './pages/Popups/PopupAskAccounts';
 import PopupMessageSignComponent from './pages/Popups/PopupMessageSign';
+import SignTransactionComponent from './pages/SignTransaction';
 import SettingsComponent from './pages/Settings';
 import GeneralSettingsComponent from './pages/GeneralSettings';
 import SecuritySettingsComponent from './pages/SecuritySettings';
@@ -22,6 +23,8 @@ import ReceiveComponent from './pages/Receive';
 import SuccessTip from './pages/SuccessTip';
 import WelcomePage from './pages/Welcome';
 import NotificationsPage from './pages/Notifications';
+import NamesPage from './pages/Names.vue';
+import AuctionBid from './pages/AuctionBid';
 
 export default [
   {
@@ -48,6 +51,12 @@ export default [
     path: '/seed',
     component: SeedPhraseComponent,
     props: true,
+  },
+  {
+    name:'sign',
+    path:'/sign-transaction/:type?',
+    component:SignTransactionComponent,
+    props:true
   },
   {
     name: 'popup-sign-tx',
@@ -188,5 +197,21 @@ export default [
     meta: {
       title: 'notifications',
     },
+  },
+  {
+    path:'/names',
+    component:NamesPage,
+    meta: {
+      title: 'names',
+    }
+  },
+  {
+    name:'auction-bid',
+    path: '/auction-bid',
+    component: AuctionBid,
+    props:true,
+    meta: {
+      title: 'bidding',
+    }
   },
 ];
