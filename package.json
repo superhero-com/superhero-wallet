@@ -1,6 +1,6 @@
 {
   "name": "corona-wallet",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "corona news wallet",
   "author": "Corona News",
   "license": "MIT",
@@ -27,7 +27,7 @@
   "dependencies": {
     "@aeternity/aepp-components": "git+https://github.com/aeternity/aepp-components.git#develop",
     "@aeternity/aepp-components-3": "3.0.0-alpha.9",
-    "@aeternity/aepp-sdk": "git+https://github.com/aeternity/aepp-sdk-js.git#release/7.1.1",
+    "@aeternity/aepp-sdk": "7.1.1",
     "@aeternity/bip39": "^0.1.0",
     "@aeternity/hd-wallet": "^0.2.0",
     "@aeternity/ledger-app-api": "^0.1.0",
