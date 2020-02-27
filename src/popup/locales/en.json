@@ -330,8 +330,8 @@
             "heading": "To receive tokens, provide this address or have the payor scan the QR code below.",
             "copy": "Copy",
             "home": "Home",
-            "transferExchange": "Transfer from exchange?",
-            "purchase": "Purchase via credit card"
+            "transferExchange": "Swap crypto for AE tokens",
+            "purchase": "Purchase AE via credit card"
         },
         "securitySettings": {
             "backToSettings": "Back to settings",

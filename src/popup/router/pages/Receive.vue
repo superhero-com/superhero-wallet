@@ -12,6 +12,8 @@
         <img :src="changelly" alt="" />
       </div> -->
     </div>
+    <Button @click="purchase">{{ $t('pages.receive.purchase')}}</Button>
+    <Button @click="exchange">{{ $t('pages.receive.transferExchange')}}</Button>
     <Button @click="navigateAccount">{{ $t('pages.receive.home') }}</Button>
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div>
@@ -30,6 +32,8 @@ export default {
   },
   data() {
     return {
+      jellySwapUrl: 'https://app.jelly.market',
+      changellyUrl: 'https://changelly.com/processing',
       changelly: browser.runtime.getURL('../../../icons/changelly.png'),
     };
   },
@@ -43,8 +47,12 @@ export default {
     navigateAccount() {
       this.$router.push('/account');
     },
-    exchange() {},
-    purchase() {},
+    exchange() {
+      browser.tabs.create({ url: this.jellySwapUrl, active: true });
+    },
+    purchase() {
+      browser.tabs.create({ url: this.changellyUrl, active: true });
+    },
   },
 };
 </script>
