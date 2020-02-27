@@ -28,9 +28,9 @@ export default {
   },
   data() {
     return {
-      logo: browser.runtime.getURL('../../../icons/icon_128.png'),
       loading: false,
       bugReportURL: 'https://coronawallet.typeform.com/to/U3RroS',
+      extensionVersion: `v.${process.env.npm_package_version}`,
     };
   },
   methods: {
@@ -45,11 +45,6 @@ export default {
     },
     goToPrivacyPolicy() {
       this.$router.push('/privacyPolicy');
-    },
-  },
-  computed: {
-    extensionVersion() {
-      return `v.${browser.runtime.getManifest().version}`;
     },
   },
 };
