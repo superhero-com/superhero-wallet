@@ -55,10 +55,9 @@ const noRedirectUrls = [
   '/qrCodeReader',
   '/intro',
   '/notifications',
-  '/auction-bid'
+  '/auction-bid',
 ];
 router.beforeEach((to, from, next) => {
-  
   const lastRouteName = localStorage.getItem(lastRouteKey);
   const shouldRedirect = to.path === ('/' || '/account') && lastRouteName && isFirstTransition;
   if (store.getters.account.hasOwnProperty('publicKey') && store.getters.isLoggedIn) {

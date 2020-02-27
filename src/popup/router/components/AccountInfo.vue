@@ -30,9 +30,9 @@ export default {
     Copyicon,
     Eye,
   },
-  data:() => ({
+  data: () => ({
     account_icon: browser.runtime.getURL('../icons/account-name-icon.png'),
-    copied: false
+    copied: false,
   }),
   computed: {
     ...mapGetters(['account', 'activeAccountName']),

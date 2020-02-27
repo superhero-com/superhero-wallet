@@ -53,10 +53,10 @@ export default [
     props: true,
   },
   {
-    name:'sign',
-    path:'/sign-transaction/:type?',
-    component:SignTransactionComponent,
-    props:true
+    name: 'sign',
+    path: '/sign-transaction/:type?',
+    component: SignTransactionComponent,
+    props: true,
   },
   {
     name: 'popup-sign-tx',
@@ -199,19 +199,19 @@ export default [
     },
   },
   {
-    path:'/names',
-    component:NamesPage,
+    path: '/names',
+    component: NamesPage,
     meta: {
       title: 'names',
-    }
+    },
   },
   {
-    name:'auction-bid',
+    name: 'auction-bid',
     path: '/auction-bid',
     component: AuctionBid,
-    props:true,
+    props: true,
     meta: {
       title: 'bidding',
-    }
+    },
   },
 ];

@@ -7,7 +7,7 @@
 
 <script>
 export default {
-  props: ['value', 'error', 'placeholder', 'size', 'type', 'label','labelPosition'],
+  props: ['value', 'error', 'placeholder', 'size', 'type', 'label', 'labelPosition'],
   data: () => ({ err: false }),
   watch: {
     value(val) {
@@ -27,8 +27,8 @@ export default {
       if (this.size) {
         cl = [...cl, ...this.size.split(' ')];
       }
-      if(this.labelPosition) {
-        cl.push("input-label")
+      if (this.labelPosition) {
+        cl.push('input-label');
       }
       return cl;
     },
@@ -84,13 +84,13 @@ input.input {
   font-weight: normal;
 }
 .input-group {
-  width:80%;
-  position:relative;
-  display:inline-block;
-  margin:8px auto;
+  width: 80%;
+  position: relative;
+  display: inline-block;
+  margin: 8px auto;
   .input {
-    padding-right:50px;
-    margin-bottom:0;
+    padding-right: 50px;
+    margin-bottom: 0;
   }
 }
 .label-right {

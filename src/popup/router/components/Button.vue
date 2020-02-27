@@ -11,7 +11,7 @@ export default {
     extend: Boolean,
     half: Boolean,
     small: Boolean,
-    third: Boolean
+    third: Boolean,
   },
   computed: {
     getClasses() {
@@ -63,7 +63,7 @@ export default {
   line-height: 1px !important;
   padding: 10px;
 }
-.primary-button.third{
+.primary-button.third {
   width: 32% !important;
   margin: 0 !important;
   max-height: 100px;
@@ -72,7 +72,7 @@ export default {
   word-break: break-word;
 }
 .primary-button.small.third {
-  font-size:12px;
+  font-size: 12px;
 }
 .primary-button.reject,
 .primary-button.danger {

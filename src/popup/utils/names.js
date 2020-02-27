@@ -3,11 +3,9 @@ import { update } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import Vue from 'vue';
 import { MAGNITUDE } from './constants';
-import {
-  handleUnknownError, isAccountNotFoundError, getAddressByNameEntry,
-} from './helper';
+import { handleUnknownError, isAccountNotFoundError, getAddressByNameEntry } from './helper';
 
-export default (store) => {
+export default store => {
   store.registerModule('names', {
     namespaced: true,
     state: {
@@ -24,9 +22,7 @@ export default (store) => {
         }
         return '';
       },
-      isPending: ({ owned }) => name => (
-        !!((owned && owned.names.find(t => t.name === name)) || {}).pending
-      ),
+      isPending: ({ owned }) => name => !!((owned && owned.names.find(t => t.name === name)) || {}).pending,
     },
     mutations: {
       set({ names }, { address, name }) {
@@ -43,61 +39,59 @@ export default (store) => {
     actions: {
       async getHeight({ rootState }) {
         let subscription;
-        const height = await new Promise((resolve) => {
+        const height = await new Promise(resolve => {
           subscription = rootState.observables.topBlockHeight.subscribe(h => h !== 0 && resolve(h));
         });
         subscription.unsubscribe();
         return height;
       },
-      async fetch({
-        rootState, state, commit, dispatch,
-      }, address) {
+      async fetch({ rootState, state, commit, dispatch }, address) {
         if (state.names[address]) return;
         commit('set', { address });
         const sdk = rootState.sdk.then ? await rootState.sdk : rootState.sdk;
         const height = await dispatch('getHeight');
-        const names = (await sdk.middleware.getNameByAddress(address))
-          .filter(({ expiresAt }) => expiresAt > height);
+        const names = (await sdk.middleware.getNameByAddress(address)).filter(({ expiresAt }) => expiresAt > height);
         if (names.length) commit('set', { address, name: names[0].name });
       },
       async fetchOwned({ rootState, commit }) {
         const sdk = rootState.sdk.then ? await rootState.sdk : rootState.sdk;
         const [names, bids] = await Promise.all([
-          (await Promise.all(rootState.accounts.list.map(({ address }) => Promise.all([
-            sdk.api.getPendingAccountTransactionsByPubkey(address)
-              .then(({ transactions }) => transactions
-                .filter(({ tx: { type } }) => type === 'NameClaimTx')
-                .map(({ tx, ...otherTx }) => ({
-                  ...otherTx,
-                  ...tx,
-                  pending: true,
-                  owner: tx.accountId,
-                })))
-              .catch((error) => {
-                if (!isAccountNotFoundError(error)) {
-                  handleUnknownError(error);
-                }
-                return [];
-              }),
-            sdk.middleware.getActiveNames({ owner: address }),
-          ])))).flat(2),
-          (await Promise.all(rootState.accounts.list
-            .map(({ address }) => sdk.middleware.getNameAuctionsBidsbyAddress(address))))
+          (
+            await Promise.all(
+              rootState.accounts.list.map(({ address }) =>
+                Promise.all([
+                  sdk.api
+                    .getPendingAccountTransactionsByPubkey(address)
+                    .then(({ transactions }) =>
+                      transactions
+                        .filter(({ tx: { type } }) => type === 'NameClaimTx')
+                        .map(({ tx, ...otherTx }) => ({
+                          ...otherTx,
+                          ...tx,
+                          pending: true,
+                          owner: tx.accountId,
+                        }))
+                    )
+                    .catch(error => {
+                      if (!isAccountNotFoundError(error)) {
+                        handleUnknownError(error);
+                      }
+                      return [];
+                    }),
+                  sdk.middleware.getActiveNames({ owner: address }),
+                ])
+              )
+            )
+          ).flat(2),
+          (await Promise.all(rootState.accounts.list.map(({ address }) => sdk.middleware.getNameAuctionsBidsbyAddress(address))))
             .flat()
-            .filter(({ nameAuctionEntry, transaction }) => nameAuctionEntry
-              .winningBid === transaction.tx.nameFee)
-            .map(bid => update(
-              bid,
-              'transaction.tx.nameFee',
-              v => BigNumber(v).shiftedBy(-MAGNITUDE),
-            )),
+            .filter(({ nameAuctionEntry, transaction }) => nameAuctionEntry.winningBid === transaction.tx.nameFee)
+            .map(bid => update(bid, 'transaction.tx.nameFee', v => BigNumber(v).shiftedBy(-MAGNITUDE))),
         ]);
         commit('setOwned', { names, bids });
       },
       async fetchName({ rootState, commit }, name) {
-        const address = getAddressByNameEntry(
-          await rootState.sdk.api.getNameEntryByName(name),
-        );
+        const address = getAddressByNameEntry(await rootState.sdk.api.getNameEntryByName(name));
         commit('set', { address, name });
         return address;
       },
@@ -113,12 +107,13 @@ export default (store) => {
         };
       },
       async getAddressByName({ state, dispatch }, name) {
-        return (
-          Object.entries(state.names).find(([, value]) => value.name === name) || {}
-        ).key || dispatch('fetchName', name);
+        return (Object.entries(state.names).find(([, value]) => value.name === name) || {}).key || dispatch('fetchName', name);
       },
     },
   });
 
-  store.watch((state, { currentNetwork }) => currentNetwork, () => store.commit('names/reset'));
+  store.watch(
+    (state, { currentNetwork }) => currentNetwork,
+    () => store.commit('names/reset')
+  );
 };

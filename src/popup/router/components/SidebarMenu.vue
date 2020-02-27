@@ -77,7 +77,7 @@
         {{ $t('pages.appVUE.help') }}
       </router-link>
     </li>
-    
+
     <!-- <li>
       <router-link>
         {{ $t('pages.appVUE.versions') }}
