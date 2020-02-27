@@ -12,8 +12,8 @@
         <img :src="changelly" alt="" />
       </div> -->
     </div>
-    <Button @click="purchase">{{ $t('pages.receive.purchase')}}</Button>
-    <Button @click="exchange">{{ $t('pages.receive.transferExchange')}}</Button>
+    <Button @click="purchase">{{ $t('pages.receive.purchase') }}</Button>
+    <Button @click="exchange">{{ $t('pages.receive.transferExchange') }}</Button>
     <Button @click="navigateAccount">{{ $t('pages.receive.home') }}</Button>
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div>

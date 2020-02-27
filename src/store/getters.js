@@ -84,4 +84,7 @@ export const getters = {
   notifications({ notifications }) {
     return notifications;
   },
+  names(state) {
+    return state.names;
+  },
 };

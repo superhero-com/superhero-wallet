@@ -48,12 +48,14 @@ const noRedirectUrls = [
   '/connect-confirm',
   '/sign-transaction/:type?',
   '/sign-transaction',
+  'sign',
   '/ask-accounts',
   '/message-sign',
   '/success-tip',
   '/qrCodeReader',
   '/intro',
   '/notifications',
+  '/auction-bid',
 ];
 router.beforeEach((to, from, next) => {
   const lastRouteName = localStorage.getItem(lastRouteKey);
@@ -65,7 +67,7 @@ router.beforeEach((to, from, next) => {
     next();
   } else {
     wallet.init(route => {
-      if (shouldRedirect && (route == '/' || route == '/account') && !noRedirectUrls.includes(lastRouteName)) {
+      if (shouldRedirect && (route == '/' || route == '/account') && !noRedirectUrls.includes(lastRouteName) && lastRouteName.indexOf('/sign-transaction') == -1) {
         next(lastRouteName);
       } else if (route) {
         next(route);

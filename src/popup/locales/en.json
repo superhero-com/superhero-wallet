@@ -30,7 +30,9 @@
             "activity": "Activity History",
             "withdraw": "Withdraw",
             "topUp": "Top Up",
-            "notifications": "Notifications"
+            "notifications": "Notifications",
+            "names": "Names",
+            "bidding": "Bidding"
         },
         "appVUE": {
             "systemName": "Corona",
@@ -60,7 +62,8 @@
             "advanced": "Advanced",
             "versions": "Version & Updates",
             "mainAccount": "Main account",
-            "reportBug": "Report a bug"
+            "reportBug": "Report a bug",
+            "names": "Names"
         },
         "aboutSettings": {
             "heading": "About",
@@ -256,7 +259,8 @@
             "noPreviousBids": "No previous bids",
             "goBiddingBtn": "Go for bidding",
             "backButton": "Back",
-            "extend": "Extend"
+            "extend": "Extend",
+            "namePlaceholder": "Enter .chain name"
         },
         "generalSettings": {
             "backToSettings": "Back to settings",

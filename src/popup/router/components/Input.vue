@@ -1,16 +1,14 @@
 <template>
-  <div class="text-left">
-    <label class="label" v-if="label">{{ label }}</label>
+  <div class="text-left" :class="labelPosition ? 'input-group' : ''">
+    <label class="label" v-if="label" :class="labelPosition ? `label-${labelPosition}` : ''">{{ label }}</label>
     <input type="text" class="input" :placeholder="placeholder ? placeholder : ''" :class="getClasses" :value="value" @input="$emit('input', $event.target.value)" />
   </div>
 </template>
 
 <script>
 export default {
-  props: ['value', 'error', 'placeholder', 'size', 'type', 'label'],
-  data() {
-    return { err: false };
-  },
+  props: ['value', 'error', 'placeholder', 'size', 'type', 'label', 'labelPosition'],
+  data: () => ({ err: false }),
   watch: {
     value(val) {
       if (this.type == 'number' && isNaN(val)) {
@@ -28,6 +26,9 @@ export default {
       }
       if (this.size) {
         cl = [...cl, ...this.size.split(' ')];
+      }
+      if (this.labelPosition) {
+        cl.push('input-label');
       }
       return cl;
     },
@@ -81,5 +82,25 @@ input.input {
   margin: 4px 0;
   display: block;
   font-weight: normal;
+}
+.input-group {
+  width: 80%;
+  position: relative;
+  display: inline-block;
+  margin: 8px auto;
+  .input {
+    padding-right: 50px;
+    margin-bottom: 0;
+  }
+}
+.label-right {
+  position: absolute;
+  right: 9px;
+  margin: 0;
+  top: 17px;
+  transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  opacity: 0.6;
 }
 </style>

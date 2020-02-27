@@ -11,6 +11,7 @@ export default {
     extend: Boolean,
     half: Boolean,
     small: Boolean,
+    third: Boolean,
   },
   computed: {
     getClasses() {
@@ -19,6 +20,7 @@ export default {
       if (this.extend) c.push('extend');
       if (this.half) c.push('half');
       if (this.small) c.push('small');
+      if (this.third) c.push('third');
       return c.join(' ');
     },
   },
@@ -60,6 +62,17 @@ export default {
   width: auto !important;
   line-height: 1px !important;
   padding: 10px;
+}
+.primary-button.third {
+  width: 32% !important;
+  margin: 0 !important;
+  max-height: 100px;
+  line-height: normal !important;
+  padding: 5px;
+  word-break: break-word;
+}
+.primary-button.small.third {
+  font-size: 12px;
 }
 .primary-button.reject,
 .primary-button.danger {

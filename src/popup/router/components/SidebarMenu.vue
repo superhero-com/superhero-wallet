@@ -68,10 +68,16 @@
       </router-link>
     </li> -->
     <li>
+      <router-link to="/names">
+        {{ $t('pages.appVUE.names') }}
+      </router-link>
+    </li>
+    <li>
       <router-link to="/aboutSettings">
         {{ $t('pages.appVUE.help') }}
       </router-link>
     </li>
+
     <!-- <li>
       <router-link>
         {{ $t('pages.appVUE.versions') }}

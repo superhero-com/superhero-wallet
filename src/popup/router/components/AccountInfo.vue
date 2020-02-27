@@ -6,7 +6,15 @@
       </button>
       <Eye style="display:none;" />
       <p class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</p>
-      <span class="account-name">{{ activeAccountName }}</span>
+      <span class="account-name">
+        <div class="flex flex-align-center ">
+          <img :src="account_icon" />
+          <div class="ml-5">
+            <span v-if="activeAccountName.includes('.chain')">{{ activeAccountName }}</span>
+            <router-link to="/names" v-else>Claim your .chain name</router-link>
+          </div>
+        </div>
+      </span>
       <span class="ae-address">{{ account.publicKey }}</span>
     </div>
   </div>
@@ -22,11 +30,10 @@ export default {
     Copyicon,
     Eye,
   },
-  data() {
-    return {
-      copied: false,
-    };
-  },
+  data: () => ({
+    account_icon: browser.runtime.getURL('../icons/account-name-icon.png'),
+    copied: false,
+  }),
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
   },
