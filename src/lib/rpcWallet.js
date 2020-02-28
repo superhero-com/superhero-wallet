@@ -65,7 +65,7 @@ const rpcWallet = {
       this.sdk = await RpcWallet({
         nodes: [{ name: DEFAULT_NETWORK, instance: node }],
         compilerUrl: this.compiler,
-        name: 'Corona',
+        name: 'SuperHero',
         accounts: this.accounts,
         async onConnection(aepp, action) {
           context.shouldOpenPopup(aepp, action, () => {

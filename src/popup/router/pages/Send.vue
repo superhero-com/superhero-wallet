@@ -241,7 +241,7 @@ export default {
         this.loading = false;
         return;
       }
-      if (this.tokenSymbol != 'æid' && this.form.amount % 1 != 0) {
+      if (this.tokenSymbol != 'AE' && this.form.amount % 1 != 0) {
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'integer_required' });
         this.loading = false;
         return;

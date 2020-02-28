@@ -8,7 +8,7 @@
         {{ $t('pages.welcome.across') }}
       </p>
     </div>
-    <Welcome class="welcome-bg" />
+    <!-- <Welcome class="welcome-bg" /> -->
   </main>
 </template>
 

@@ -60,7 +60,7 @@ a {
     color: $text-color;
 }
 .secondary-text {
-    color: $secondary-color;
+    color: $secondary-color !important;
 }
 .accent-text {
     color: $accent-color;

@@ -38,7 +38,7 @@
         {{ $t('pages.tipPage.edit') }}
       </Button>
     </div>
-    <TipBackground class="tip-bg" v-if="confirmMode" />
+    <!-- <TipBackground class="tip-bg" v-if="confirmMode" /> -->
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
     <Loader size="big" :loading="loading" type="transparent" content=""></Loader>
   </div>

@@ -7,7 +7,7 @@
 The present Privacy Policy was created on ​13th​ February 2020.
 I. Introduction
 xyz ​(“​xyz”, “​we​”, “​us​” or “​our​”) is a company and xyz ​takes your privacy and the security of your information as a ​User​ very seriously.
-This ​Privacy Policy (“​Policy​”) is applicable for the ​xyz ​created and operated website extension Corona wallet (​the ​“Wallet” or the “application”)- ​is a digital cryptocurrency wallet that enables supporters to send value to content creators, causes, charities, groups, or regular individuals online as a reward for contributing accurate information, relevant insights, quality content regarding the novel Corona virus outbreak (2019-nCoV).
+This ​Privacy Policy (“​Policy​”) is applicable for the ​xyz ​created and operated website extension SuperHero wallet (​the ​“Wallet” or the “application”)- ​is a digital cryptocurrency wallet that enables supporters to send value to content creators, causes, charities, groups, or regular individuals online as a reward for contributing accurate information, relevant insights, quality content regarding the novel SuperHero virus outbreak (2019-nCoV).
 If you have any questions regarding this ​Policy​, please contact us at coronanews@protonmail.com. If you do not agree to the terms of this Policy, please do not use the application​.
 Each time you use ​the application​, the current version of this ​Policy will apply. The new version of the ​Privacy Policy becomes effective from the day it is announced publicly on ​the application unless stated otherwise. Accordingly, when ​You use ​the application​, ​You should check the date of this ​Policy (which appears at the top). If ​You continue to use the ​application after the changes have been enforced, ​We shall consider this a given consent and acceptance to the modified content. If ​You do not agree to the new modifications, please contact ​Us for further assistance via the above-mentioned in the previous paragraph email address.
 II. Definitions
@@ -23,7 +23,7 @@ III. Personal data collection
 The personal data ​xyz ​collects is minimized completely, selecting only those types of information, which are adequate, relevant and limited to what is necessary for the use of ​the application​.
 xyz ​collects two main groups of personal data according to their purpose:
 3.1. Personal data in relation to indirect identifiers
-The Corona wallet is a blockchain based application on which an account address is generated for user identification.
+The SuperHero wallet is a blockchain based application on which an account address is generated for user identification.
 Therefore, the account address will appear on the ​application​. The account addresses can be treated as indirect identifiers. An indirect identifier is a value which cannot be used alone to identify a data subject, however, could be identifying if combined with other indirect identifiers. The processing is necessary for the purpose of provision of the Service, namely the ​application​. The retention period for the personal data is until termination of the Service provision.
 For more information about the account address, please refer to the Terms of the application- Article 3- ​USERS IDENTIFICATION.
 3.2.​ ​Personal data in relation to User support and communication

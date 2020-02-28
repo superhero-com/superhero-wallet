@@ -69,7 +69,7 @@ p {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0 auto;
-  padding: 0 25px;
+  padding: 0 18px;
 }
 
 main {
@@ -377,7 +377,7 @@ main {
   }
 
   &:after {
-      content: ' æid';
+      content: ' AE';
   }
   &.no-sign:after {
     content: '';

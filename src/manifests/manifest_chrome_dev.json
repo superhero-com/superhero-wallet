@@ -1,6 +1,6 @@
 {
-    "name": "Corona",
-    "description": "Corona Wallet",
+    "name": "SuperHero",
+    "description": "SuperHero Wallet",
     "version": null,
     "manifest_version": 2,
     "permissions": [
@@ -17,7 +17,7 @@
       "128": "icons/icon_128.png"
     },
     "browser_action": {
-      "default_title": "Corona",
+      "default_title": "SuperHero",
       "default_popup": "popup/popup.html"
     },
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",

@@ -5,7 +5,7 @@
       <div class="wrapper center">
         <Logo class="logo" />
         <p class="primary-title">
-          {{ $t('pages.index.heading') }} <span class="secondary-text"> {{ $t('pages.appVUE.aeid') }} </span>
+          {{ $t('pages.index.heading') }}
         </p>
         <CheckBox v-if="!termsAgreedOrNot" v-model="terms">
           <div class="primary-text">
