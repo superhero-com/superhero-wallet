@@ -9,7 +9,7 @@ Clone the master branch of this repo.
 
 ```
 $ git clone https://github.com/aeternity/superhero-wallet.git
-$ cd tipwallet
+$ cd superhero-wallet
 ```
 
 ### Build locally
