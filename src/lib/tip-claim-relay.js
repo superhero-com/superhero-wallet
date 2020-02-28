@@ -29,22 +29,13 @@ export default {
           addresses = [...addresses, ...pub_keys];
         }
         if (this.checkAddressMatch(account.publicKey, uniq(addresses))) {
-          contractCallStatic({ tx, callType: 'static' })
-            .then(res => {
-              const amount = convertToAE(res.decodedResult);
-              if (amount) {
-                axios
-                  .post(`${TIP_SERVICE}`, {
-                    url,
-                    address: account.publicKey,
-                  })
-                  .then(res => {
-                    console.log(res);
-                  });
-              }
+          axios
+            .post(`${TIP_SERVICE}`, {
+              url,
+              address: account.publicKey,
             })
-            .catch(err => {
-              console.log(err);
+            .then(res => {
+              console.log(res);
             });
         }
       }
