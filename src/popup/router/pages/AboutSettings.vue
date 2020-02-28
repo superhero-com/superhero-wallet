@@ -51,10 +51,6 @@ export default {
 </script>
 
 <style lang="scss">
-.backbtn {
-  width: 50%;
-  margin-top: 5px;
-}
 .waellet-links a {
   font-weight: bold;
   display: block;

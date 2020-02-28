@@ -96,10 +96,6 @@ export default {
   background-color: #505058 !important;
   border-radius: 4px;
 }
-.backbtn {
-  width: 50%;
-  margin-top: 5px;
-}
 .regbtn {
   background: #e2e2e2;
   color: #ffffff;
