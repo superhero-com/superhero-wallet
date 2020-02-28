@@ -249,7 +249,7 @@
         },
         "receive": {
             "backToAccount": "Zurück zu Konto",
-            "heading": "Erhalten æid tokens",
+            "heading": "Erhalten AE tokens",
             "copy": "Kopieren"
         },
         "securitySettings": {
@@ -459,7 +459,7 @@
         "aeAddressInput": {
             "label": "Aeternity Addressе",
             "identicon": "Dein Identicon",
-            "error": "Ungültige æid-Adresse"
+            "error": "Ungültige AE-Adresse"
         }
     }
 }

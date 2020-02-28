@@ -249,7 +249,7 @@
         },
         "receive": {
             "backToAccount": "Torna al conto",
-            "heading": "Ricevere gettoni æid",
+            "heading": "Ricevere gettoni AE",
             "copy": "copia"
         },
         "securitySettings": {
@@ -459,7 +459,7 @@
         "aeAddressInput": {
             "label": "Aeternity Indirizzo",
             "identicon": "Il tuo identicon",
-            "error": "Indirizzo æid non valido"
+            "error": "Indirizzo AE non valido"
         }
     }
 }

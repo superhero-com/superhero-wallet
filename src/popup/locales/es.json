@@ -249,7 +249,7 @@
         },
         "receive": {
             "backToAccount": "Volver a la cuenta",
-            "heading": "Recibe fichas æid",
+            "heading": "Recibe fichas AE",
             "copy": "Dupdo"
         },
         "securitySettings": {
@@ -459,7 +459,7 @@
         "aeAddressInput": {
             "label": "Aeternity Dirección",
             "identicon": "Su identicon",
-            "error": "Dirección æid no válida"
+            "error": "Dirección AE no válida"
         }
     }
 }

@@ -22,7 +22,7 @@
             "general": "General",
             "security": "Security",
             "about": "About",
-            "send": "Send æid",
+            "send": "Send AE",
             "scanQr": "Scan QR",
             "terms": "Terms & Conditions",
             "privacy": "Privacy Policy",
@@ -53,7 +53,7 @@
             "myTransactions": "My transactions",
             "activity": "Activity",
             "dashboard": "Dashboard",
-            "aeid": "æid",
+            "aeid": "AE",
             "coronaWallet": "SuperHero Wallet",
             "general": "General",
             "security": "Security",
@@ -75,13 +75,13 @@
             "heading": "Account",
             "accountName": "Account name",
             "copy": "Copy address",
-            "send": "Send æid",
+            "send": "Send AE",
             "receive": "Receive",
             "wholeTransaction": "Whole transaction history",
             "latestTransactions": "Latest transactions",
             "noTransactionsFound": "No transactions found!",
-            "tipSomeone": "Send æid",
-            "howToClaim": "How to claim æid",
+            "tipSomeone": "Send AE",
+            "howToClaim": "How to claim AE",
             "balance": "Balance",
             "copied": "Copied!",
             "youNeedTo": "You need to",
@@ -511,17 +511,17 @@
             "title": "Title",
             "titlePlaceholder": "Send a message of #support along with your donation...",
             "account": "Account",
-            "next": "Send æid",
+            "next": "Send AE",
             "url": "Send a tip to",
             "to": "to",
             "amountPlaceholder":"Enter amount",
             "amountLabel": "Amount",
             "availableLabel": "Available",
             "confirm": "Confirm",
-            "edit": "Edit æid Details"
+            "edit": "Edit AE Details"
         },
         "successTip": {
-            "sendMore": "Send More æid",
+            "sendMore": "Send More AE",
             "feed": "View your tip on the feed",
             "completedHeading":" Transaction Completed.",
             "sentTo": "Send to: ",
@@ -531,8 +531,8 @@
             "successfullySent":"You have successfully sent ",
             "to": "to",
             "note": "NOTE: The owner of this URL has not created an account yet. They can claim their tokens easily by creating a wallet - the same way you did.",
-            "notify": "Notify someone that you sent æid to this post",
-            "notifyMessage": "I just sent æid to this post! Anyone can start sending and receiving æid through SuperHeroNews. Learn more."
+            "notify": "Notify someone that you sent AE to this post",
+            "notifyMessage": "I just sent AE to this post! Anyone can start sending and receiving AE through SuperHeroNews. Learn more."
         },
         "transactionDetails": {
             "heading": "Transactions Details",
@@ -631,7 +631,7 @@
         "aeAddressInput": {
             "label": "Aeternity Address",
             "identicon": "Your identicon",
-            "error": "Invalid æid Address"
+            "error": "Invalid AE Address"
         },
         "welcome": {
             "send":"Send",
