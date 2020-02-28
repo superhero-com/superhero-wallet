@@ -52,6 +52,7 @@
     "cordova-ios": "^5.1.1",
     "cordova-plugin-customurlscheme": "^5.0.0",
     "cordova-plugin-headercolor": "^1.0.0",
+    "cordova-plugin-inappbrowser": "^3.2.0",
     "cordova-plugin-splashscreen": "^5.0.3",
     "cordova-plugin-statusbar": "^2.4.3",
     "cordova-plugin-wkwebview-engine": "github:mwchambers/cordova-plugin-wkwebview-engine#da67d6bb6ce8597c38fc69e66b84566e34efea8d",
@@ -140,7 +141,8 @@
       "cordova-plugin-customurlscheme": {
         "URL_SCHEME": "corona"
       },
-      "cordova-plugin-wkwebview-engine": {}
+      "cordova-plugin-wkwebview-engine": {},
+      "cordova-plugin-inappbrowser": {}
     },
     "platforms": [
       "android",
