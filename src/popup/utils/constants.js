@@ -122,6 +122,10 @@ export const NO_POPUP_AEPPS = [
   'localhost'
 ];
 
+export const BLACKLIST_AEPPS = [
+  'superhero.com'
+];
+
 export const TX_LIMIT_PER_DAY = 2000
 export const TIPPING_CONTRACT =
 `@compiler >= 4
