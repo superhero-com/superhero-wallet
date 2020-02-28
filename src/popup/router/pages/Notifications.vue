@@ -13,7 +13,7 @@
 import { mapGetters } from 'vuex';
 
 export default {
-  data: () => ({ icon: browser.runtime.getURL('../../../icons/icon_48.png') }),
+  data: () => ({ icon: browser.runtime.getURL('../icons/icon_48.png') }),
   computed: mapGetters(['notifications']),
 };
 </script>

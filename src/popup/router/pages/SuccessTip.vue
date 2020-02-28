@@ -40,10 +40,9 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import BigNumber from 'bignumber.js';
-import { MAGNITUDE } from '../../utils/constants';
 import Heart from '../../../icons/heart.svg';
 import Textarea from '../components/Textarea';
+import openUrl from '../../utils/openUrl';
 
 export default {
   components: {
@@ -75,7 +74,7 @@ export default {
       this.$router.push('/account');
     },
     redirectOnFeed() {
-      browser.tabs.create({ url: this.feed, active: true });
+      openUrl(this.feed);
     },
   },
 };

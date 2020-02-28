@@ -3,24 +3,22 @@
     <Logo class="logo" />
     <p>
       {{ $t('pages.aboutSettings.systemName') }}
-      <span class="extensionVersion extensionVersionTop">{{ extensionVersion }}</span>
+      <span class="version">{{ extensionVersion }}</span>
     </p>
     <hr />
     <div class="waellet-links">
-      <a href="#" @click="goToTermsOfService">{{ $t('pages.aboutSettings.terms') }}</a>
-      <a href="#" @click="goToPrivacyPolicy">{{ $t('pages.aboutSettings.privacyPolicy') }}</a>
-      <Button :style="styling" @click="bugReport">
+      <router-link to="/termsOfService">{{ $t('pages.aboutSettings.terms') }}</router-link>
+      <router-link to="/privacyPolicy">{{ $t('pages.aboutSettings.privacyPolicy') }}</router-link>
+      <Button @click="bugReport">
         {{ $t('pages.appVUE.reportBug') }}
       </Button>
-    </div>
-    <div v-if="loading" class="loading">
-      <ae-loader />
     </div>
   </div>
 </template>
 
 <script>
 import Logo from '../../../icons/logo.svg';
+import openUrl from '../../utils/openUrl';
 
 export default {
   components: {
@@ -28,38 +26,23 @@ export default {
   },
   data() {
     return {
-      logo: browser.runtime.getURL('../../../icons/icon_128.png'),
-      loading: false,
       bugReportURL: 'https://coronawallet.typeform.com/to/U3RroS',
+      extensionVersion: `v.${process.env.npm_package_version}`,
     };
   },
   methods: {
     bugReport() {
-      browser.tabs.create({ url: this.bugReportURL, active: true });
-    },
-    navigateToSettings() {
-      this.$router.push('/settings');
-    },
-    goToTermsOfService() {
-      this.$router.push('/termsOfService');
-    },
-    goToPrivacyPolicy() {
-      this.$router.push('/privacyPolicy');
-    },
-  },
-  computed: {
-    extensionVersion() {
-      return `v.${browser.runtime.getManifest().version}`;
+      openUrl(this.bugReportURL);
     },
   },
 };
 </script>
 
-<style lang="scss">
-.backbtn {
-  width: 50%;
-  margin-top: 5px;
+<style lang="scss" scoped>
+.version {
+  color: #909090;
 }
+
 .waellet-links a {
   font-weight: bold;
   display: block;

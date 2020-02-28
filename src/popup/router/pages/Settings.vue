@@ -104,8 +104,4 @@ export default {
   width: 90%;
   word-break: break-word;
 }
-.backbtn {
-  width: 50%;
-  margin-top: 5px;
-}
 </style>

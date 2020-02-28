@@ -7,6 +7,7 @@
 <script>
 import Button from './Button';
 import Claim from '../../../icons/claim.svg';
+import openUrl from '../../utils/openUrl';
 
 export default {
   props: ['styling'],
@@ -22,7 +23,7 @@ export default {
   created() {},
   methods: {
     openHowToClaimURL() {
-      browser.tabs.create({ url: this.howToClaimURL, active: true });
+      openUrl(this.howToClaimURL);
     },
   },
 };

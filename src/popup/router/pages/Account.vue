@@ -87,9 +87,6 @@ export default {
   width: 100%;
 }
 
-.extensionVersion {
-  display: none;
-}
 .recent-tx {
   margin-top: 130px;
   height: 500px;

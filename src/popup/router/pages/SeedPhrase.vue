@@ -321,12 +321,4 @@ export default {
   -webkit-transform: translate(-50%) !important;
   width: 80% !important;
 }
-.extensionVersion {
-  position: fixed;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  -ms-transform: translateX(-50%0);
-  -webkit-transform: translateX(-50%);
-}
 </style>
