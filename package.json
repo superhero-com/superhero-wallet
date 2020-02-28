@@ -1,8 +1,8 @@
 {
-  "name": "corona-wallet",
-  "version": "0.0.18",
-  "description": "corona news wallet",
-  "author": "Corona News",
+  "name": "superhero-wallet",
+  "version": "0.0.1",
+  "description": "Superhero wallet",
+  "author": "SuperHero",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -139,7 +139,7 @@
       "cordova-plugin-statusbar": {},
       "cordova-plugin-headercolor": {},
       "cordova-plugin-customurlscheme": {
-        "URL_SCHEME": "corona"
+        "URL_SCHEME": "superhero"
       },
       "cordova-plugin-wkwebview-engine": {},
       "cordova-plugin-inappbrowser": {}

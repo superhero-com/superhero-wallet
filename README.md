@@ -1,6 +1,6 @@
-# Tip Wallet
+# Superhero Wallet
 
-**TipWallet is a browser extension that allows you to send and recieve value to URLs and content accross Internet.**
+**SuperHero is a browser extension that allows you to send and recieve value to URLs and content accross Internet.**
 
 
 ## Build
@@ -8,7 +8,7 @@
 Clone the master branch of this repo.
 
 ```
-$ git clone https://github.com/aeternity/tipwallet.git
+$ git clone https://github.com/aeternity/superhero-wallet.git
 $ cd tipwallet
 ```
 
@@ -60,6 +60,6 @@ If you discover a security vulnerability within this application, please get in 
 
 Contributions are more than welcome.
 
-If you spot an issue while testing/using the extension - [submit an issue](https://github.com/aeternity/tipwallet/issues)
+If you spot an issue while testing/using the extension - [submit an issue](https://github.com/aeternity/superhero-wallet/issues)
 
 If you want to help us with building this amazing project submit your PR!
