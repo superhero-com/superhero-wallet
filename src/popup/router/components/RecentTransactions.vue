@@ -69,6 +69,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../common/variables';
 .recent-transactions {
+  overflow: hidden;
   padding: 0 20px;
   padding-bottom: 20px;
   .title {

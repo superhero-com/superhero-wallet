@@ -39,7 +39,7 @@ export default {
   },
   data() {
     return {
-      accbalanceBG: browser.runtime.getURL('../../../icons/acc_balance.png'),
+      accbalanceBG: browser.runtime.getURL('../icons/acc_balance.png'),
       dropdown: {
         currencies: false,
       },

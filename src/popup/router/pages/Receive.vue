@@ -23,6 +23,7 @@
 import { mapGetters } from 'vuex';
 import QrcodeVue from 'qrcode.vue';
 import AccountInfo from '../components/AccountInfo';
+import openUrl from '../../utils/openUrl';
 
 export default {
   name: 'Receive',
@@ -48,10 +49,10 @@ export default {
       this.$router.push('/account');
     },
     exchange() {
-      browser.tabs.create({ url: this.jellySwapUrl, active: true });
+      openUrl(this.jellySwapUrl);
     },
     purchase() {
-      browser.tabs.create({ url: this.changellyUrl, active: true });
+      openUrl(this.changellyUrl);
     },
   },
 };
