@@ -114,7 +114,7 @@ export const networks = {
     tipContract: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z'
   }
 }
-export const BACKEND_URL = 'https://backend.z52da5wt.xyz';
+export const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
 export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
 export const NO_POPUP_AEPPS = [
   'coronanews.org',
