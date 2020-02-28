@@ -123,7 +123,7 @@ export const NO_POPUP_AEPPS = [
 ];
 
 export const BLACKLIST_AEPPS = [
-  'youdonotneedacapetobeahero.com'
+  'coronanews.org'
 ];
 
 export const TX_LIMIT_PER_DAY = 2000

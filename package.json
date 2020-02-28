@@ -139,7 +139,10 @@
       "cordova-plugin-statusbar": {},
       "cordova-plugin-headercolor": {},
       "cordova-plugin-customurlscheme": {
-        "URL_SCHEME": "superhero"
+        "URL_SCHEME": "superhero",
+        "ANDROID_SCHEME": " ",
+        "ANDROID_HOST": " ",
+        "ANDROID_PATHPREFIX": "/"
       },
       "cordova-plugin-wkwebview-engine": {},
       "cordova-plugin-inappbrowser": {}
