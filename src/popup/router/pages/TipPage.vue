@@ -9,8 +9,7 @@
       <p class="primary-title text-left mb-8 f-16" v-if="confirmMode">
         {{ $t('pages.tipPage.headingSending') }}
         <span class="secondary-text">{{ finalAmount }} {{ $t('pages.appVUE.aeid') }} </span>
-        {{ $t('pages.tipPage.to') }}
-        ({{ getCurrencyAmount }} {{ currentCurrency }}) to
+        ({{ getCurrencyAmount }} {{ currentCurrency }}) {{ $t('pages.tipPage.to') }}
       </p>
 
       <div class="flex flex-align-center flex-justify-between">

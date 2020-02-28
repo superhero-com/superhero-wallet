@@ -100,7 +100,7 @@ export const networks = {
     compilerUrl: 'https://latest.compiler.aepps.com',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_Dnwribmd21YrxSQnqXCB5vTFPrgYJx2eg2TrbLvbdyEbTMejw',
-    tipContract: "ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj"
+    tipContract: "ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z"
   },
   Mainnet: {
     url: 'https://mainnet.aeternal.io',
@@ -111,7 +111,7 @@ export const networks = {
     compilerUrl: 'https://compiler.aepps.com',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
-    tipContract: 'ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj'
+    tipContract: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z'
   }
 }
 export const BACKEND_URL = 'https://backend.z52da5wt.xyz';
@@ -134,71 +134,25 @@ include "List.aes"
 include "Func.aes"
 include "Option.aes"
 
-payable contract WaelletTipAnyBasic =
+contract OracleService =
+  record success_claim = { success : bool, caller : address, percentage : int }
 
-  record state = 
-    { tips          : map(string * int, tip)
-    , tips_flat     : map(string, int)
-    , pay_for_tx_service : address }
+  stateful entrypoint check_persist_claim : (string, address, bool) => success_claim
+  payable stateful entrypoint query_oracle : (string, address) => unit
 
-  record tip = 
-    { sender        : address
-    , received_at   : int
-    , repaid        : bool
-    , amount        : int
-    , note          : option(string) }
-    
-  datatype event = 
-    TipReceived(address, int, string)
-    | TipWithdrawn(address, int, string)
+contract Tipping =
+  type tip_id = int
+  type url_id = int
+  type retip_id = int
+  type url = string
+  type claim_gen = int
 
-  entrypoint init (relayer: address) : state =
-    { tips = {},
-      tips_flat = {},
-      pay_for_tx_service = relayer }
+  record tip = { sender : address, title : string, claim_gen : claim_gen, timestamp : int, url_id : url_id, amount : int }
+  record retip = { sender : address, amount : int, claim_gen : claim_gen, tip_id : tip_id }
+  record state = { urls : map(url, url_id), claims : map(url_id, claim_gen * int), url_index : map(url_id, url), tips : map(tip_id, tip), retips : map(retip_id, retip), owner : address, oracle_service : OracleService }
 
-  payable stateful entrypoint tip (url: string, note: option(string)) : unit =
-    put(state{ tips[(url, size(url))] = new_tip(url, note),
-               tips_flat[url = 0] @ n = n + 1 })
-    Chain.event(TipReceived(Call.caller, Call.value, url))
-
-  entrypoint tips_for_url(url : string) = tips_by_key(url)
-  entrypoint get_state() : state = state
-  
-  stateful entrypoint claim(url: string, pay_to : address) =
-    allowed()
-    let amount = aggregate_unpaid_tips(url)
-    do_the_stuff(url, size(url) - 1)
-    Chain.spend(pay_to, amount)
-    Chain.event(TipWithdrawn(pay_to, amount, url))
-    
-  stateful function do_the_stuff(url, i) =
-    if(i < 0) ()
-    else
-      put(state{ tips[(url, i)].repaid = true })
-      do_the_stuff(url, i - 1)  
-
-  entrypoint unpaid(url : string) =
-    aggregate_unpaid_tips(url)
-  
-  function aggregate_unpaid_tips(url : string) =
-    List.sum(List.map((x) => x.amount, List.filter((x) => x.repaid == false, tips_for_url(url))))
-    
-  function tips_by_key(key : string) =
-    [ state.tips[(key, n)] | n <- [0..size(key) - 1] ]
-
-  function size(key : string) : int = state.tips_flat[key = 0]
-  
-  stateful function migrate(new_contract: address) =
-    allowed()
-    Chain.spend(new_contract, Contract.balance)
-    
-  function allowed() =
-    require(Call.caller == state.pay_for_tx_service, "NOT_ALLOWED")
-
-  stateful function new_tip(url : string, note: option(string)) : tip =
-    { sender        = Call.caller,
-      received_at   = Chain.timestamp,
-      repaid        = false,
-      amount        = Call.value,
-      note          = note }`
+  payable stateful entrypoint tip : (string, string) => unit
+  payable stateful entrypoint retip : (tip_id) => unit
+  payable stateful entrypoint pre_claim : (string, address) => unit
+  stateful entrypoint claim : (string, address, bool) => unit
+  entrypoint get_state : () => state`
