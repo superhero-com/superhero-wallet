@@ -21,6 +21,7 @@ import { mapGetters } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import Eye from '../../../icons/eye.svg';
 import { convertToAE, formatDate } from '../../utils/helper';
+import openUrl from '../../utils/openUrl';
 
 export default {
   props: ['transactionData', 'recent', 'dark'],
@@ -82,12 +83,11 @@ export default {
     },
     visitTipUrl() {
       if (this.tipUrl) {
-        browser.tabs.create({ url: this.tipUrl, active: true });
+        openUrl(this.tipUrl);
       }
     },
     seeTx(txHash) {
-      const txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${txHash}`;
-      browser.tabs.create({ url: txUrl, active: true });
+      openUrl(`${this.network[this.current.network].explorerUrl}/transactions/${txHash}`);
     },
   },
 };

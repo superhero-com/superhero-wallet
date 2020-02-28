@@ -7,7 +7,8 @@
 
 <script>
 import { QrcodeStream } from 'vue-qrcode-reader';
-import { detectBrowser, checkAddress, chekAensName } from '../../utils/helper';
+import { checkAddress, chekAensName } from '../../utils/helper';
+import openUrl from '../../utils/openUrl';
 
 export default {
   components: {
@@ -42,7 +43,7 @@ export default {
         this.$store.commit('SET_MAIN_LOADING', false);
       } catch (error) {
         this.$store.commit('SET_MAIN_LOADING', false);
-        browser.tabs.create({ url, active: true });
+        openUrl(url);
         if (error.name === 'NotAllowedError') {
           this.errorMessage = 'ERROR: you need to grant camera access permisson';
         } else if (error.name === 'NotFoundError') {

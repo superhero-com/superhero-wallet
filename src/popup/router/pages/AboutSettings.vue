@@ -17,8 +17,8 @@
 </template>
 
 <script>
-/* globals cordova */
 import Logo from '../../../icons/logo.svg';
+import openUrl from '../../utils/openUrl';
 
 export default {
   components: {
@@ -32,8 +32,7 @@ export default {
   },
   methods: {
     bugReport() {
-      if (process.env.IS_EXTENSION) browser.tabs.create({ url: this.bugReportURL, active: true });
-      else cordova.InAppBrowser.open(this.bugReportURL, '_system');
+      openUrl(this.bugReportURL);
     },
   },
 };
