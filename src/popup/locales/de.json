@@ -1,7 +1,7 @@
 {
     "pages": {
         "appVUE": {
-            "systemName": "Corona",
+            "systemName": "SuperHero",
             "manageNetworks": "verwalten Netzwerke",
             "manageAccounts": "Konten verwalten",
             "airGapVault": "Erstellen Sie ein Depot für Airgap",
@@ -16,7 +16,7 @@
         "aboutSettings": {
             "heading": "Über",
             "backToSettings": "Einstellungen",
-            "systemName": "Corona",
+            "systemName": "SuperHero",
             "terms": "Nutzungsbedingungen",
             "privacyPolicy": "Datenschutz-Bestimmungen"
         },
@@ -193,10 +193,10 @@
             "currentLanguage": "aktuelle Sprache"
         },
         "index": {
-            "term1": "Ich stimme der Corona ",
+            "term1": "Ich stimme der SuperHero ",
             "term2": "Nutzungsbedingungen",
             "term3": "Datenschutz-Bestimmungen",
-            "heading": "Willkommen, Corona mit aeternity blockchain beginnen die Interaktion: ",
+            "heading": "Willkommen, SuperHero mit aeternity blockchain beginnen die Interaktion: ",
             "securingAccount": "Sichern Sie Ihren Account",
             "generateWallet": "generieren Wallet",
             "importPrivateKey": "Import geheime Schlüssel",
@@ -276,10 +276,10 @@
         },
         "seedPhrase": {
             "securingAccount": "Sichern Sie Ihren Account",
-            "attentionMsg": "Bitte stellen Sie sicher, dass Ihre seedphrase sicher zu halten! Corona nicht speichert und können Ihre seedphrase nicht erholen! Es liegt in Ihrer Verantwortung, die sie sicher zu halten. Wenn Sie Zugriff auf Ihre Corona verlieren, erhalten Sie alle Ihr Geld verlieren.",
+            "attentionMsg": "Bitte stellen Sie sicher, dass Ihre seedphrase sicher zu halten! SuperHero nicht speichert und können Ihre seedphrase nicht erholen! Es liegt in Ihrer Verantwortung, die sie sicher zu halten. Wenn Sie Zugriff auf Ihre SuperHero verlieren, erhalten Sie alle Ihr Geld verlieren.",
             "tips": "Tipps, wie Sie Ihr Geld zu schützen",
             "tip1": "Sicher ein Backup auf mehreren Orten",
-            "tip2": "Denken Sie daran, Ihr Passwort zu entschlüsseln Corona",
+            "tip2": "Denken Sie daran, Ihr Passwort zu entschlüsseln SuperHero",
             "tip3": "Nie teilen die Phrase mit niemandem",
             "keepCarefully": "Sorgfältig halten diesen Satz sicher! Schreiben Sie diese 12 Wörter nach unten und halten Sie sie an einem sicheren Ort. Sie müssen sie Ihr Konto in der Zukunft erholen. ",
             "confirmSeedPhrase": "Bestätigen Sie Ihre Phrase. Tippen Sie auf die folgenden Worte Ihren Satz zu komponieren, beachten richtige Reihenfolge! ",

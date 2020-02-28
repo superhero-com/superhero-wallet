@@ -1,7 +1,7 @@
 {
     "pages": {
         "appVUE": {
-            "systemName": "Corona",
+            "systemName": "SuperHero",
             "manageNetworks": "Manage networks",
             "manageAccounts": "Manage accounts",
             "airGapVault": "Create a vault for AirGap",
@@ -16,7 +16,7 @@
         "aboutSettings": {
             "heading": "About",
             "backToSettings": "Settings",
-            "systemName": "Corona",
+            "systemName": "SuperHero",
             "terms": "Terms of Service",
             "privacyPolicy": "Privacy Policy"
         },
@@ -193,10 +193,10 @@
             "currentLanguage": "Current language"
         },
         "index": {
-            "term1": "I agree to the Corona ",
+            "term1": "I agree to the SuperHero ",
             "term2": "Terms of Service",
             "term3": "Privacy Policy",
-            "heading": "Welcome to Corona, to start interacting with aeternity blockchain: ",
+            "heading": "Welcome to SuperHero, to start interacting with aeternity blockchain: ",
             "securingAccount": "Securing your account",
             "generateWallet": "Generate wallet",
             "importPrivateKey": "Import secret key",
@@ -276,7 +276,7 @@
         },
         "seedPhrase": {
             "securingAccount": "Securing your account",
-            "attentionMsg": "Please make sure to keep your seedphrase safe! Corona does not store and cannot recover your seedphrase! It is your responsibility to keep it safe. If you loose access to your waellet, you will loose all your funds.",
+            "attentionMsg": "Please make sure to keep your seedphrase safe! SuperHero does not store and cannot recover your seedphrase! It is your responsibility to keep it safe. If you loose access to your waellet, you will loose all your funds.",
             "tips": "Tips on how to protect your funds",
             "tip1": "Safe a backup on multiple places",
             "tip2": "Remember your password to decrypt your waellet",

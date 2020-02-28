@@ -1,7 +1,7 @@
 {
     "pages": {
         "appVUE": {
-            "systemName": "Corona",
+            "systemName": "SuperHero",
             "manageNetworks": "Gestisci reti",
             "manageAccounts": "Gestisci account",
             "airGapVault": "Creare un deposito per il traferro",
@@ -16,7 +16,7 @@
         "aboutSettings": {
             "heading": "Di",
             "backToSettings": "impostazioni",
-            "systemName": "Corona",
+            "systemName": "SuperHero",
             "terms": "Termini di servizio",
             "privacyPolicy": "politica sulla riservatezza"
         },
