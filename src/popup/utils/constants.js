@@ -117,7 +117,7 @@ export const networks = {
 export const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
 export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
 export const NO_POPUP_AEPPS = [
-  'coronanews.org',
+  'youdonotneedacapetobeahero.com',
   'superhero.com',
   'localhost'
 ];
