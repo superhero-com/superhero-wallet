@@ -52,7 +52,7 @@ export default {
   props: ['amount', 'domain'],
   data() {
     return {
-      feed: 'https://coronanews.org',
+      feed: 'https://youdonotneedacapetobeahero.com',
       note: this.$t('pages.successTip.notifyMessage'),
     };
   },

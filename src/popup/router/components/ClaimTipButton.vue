@@ -17,7 +17,7 @@ export default {
   },
   data() {
     return {
-      howToClaimURL: 'https://medium.com/@coronanewsorg/a46e2f845832',
+      howToClaimURL: 'https://youdonotneedacapetobeahero.com',
     };
   },
   created() {},
