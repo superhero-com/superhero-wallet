@@ -26,7 +26,7 @@ export default {
   },
   data() {
     return {
-      bugReportURL: 'https://coronawallet.typeform.com/to/U3RroS',
+      bugReportURL: 'https://superherowallet.typeform.com/to/mezmZ0',
       extensionVersion: `v.${process.env.npm_package_version}`,
     };
   },
