@@ -96,7 +96,7 @@ export default {
     setTimeout(() => store.commit('SET_NODE_STATUS', ''), 2000);
     // init tipping
     try {
-      await store.commit(
+      store.commit(
         'SET_TIPPING',
         await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, { contractAddress: store.getters.network[store.getters.current.network].tipContract, forceCodeCheck: true })
       );
