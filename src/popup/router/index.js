@@ -96,7 +96,7 @@ window.handleOpenURL = async url => {
       );
     });
   }
-  router.push(`/${url.replace(/^corona:/, '')}`);
+  router.push(`/${url.replace(/^superhero:/, '')}`);
 };
 
 export default router;

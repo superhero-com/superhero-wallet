@@ -177,6 +177,9 @@ export default {
   list-style: none;
   cursor: default;
 }
+.dotstyle button {
+  display: block;
+}
 
 .dotstyle li {
   position: relative;
