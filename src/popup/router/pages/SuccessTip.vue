@@ -20,7 +20,7 @@
     <p class="f-14 sub-heading text-left">
       {{ $t('pages.successTip.note') }}
     </p>
-    <a class="f-18 my-35 block">{{ $t('pages.successTip.letThemKnow') }}</a>
+    <p class="f-18 my-35">{{ $t('pages.successTip.letThemKnow') }}</p>
     <div>
       <div class="flex flex-align-center flex-justify-between">
         <Button half @click="toTips">
