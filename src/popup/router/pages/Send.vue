@@ -118,7 +118,6 @@ export default {
   data() {
     return {
       step: 1,
-      ae_token: browser.runtime.getURL('../../../icons/ae.png'),
       form: {
         address: '',
         amount: '',
