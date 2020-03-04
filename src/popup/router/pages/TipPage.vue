@@ -37,7 +37,6 @@
         {{ $t('pages.tipPage.edit') }}
       </Button>
     </div>
-    <!-- <TipBackground class="tip-bg" v-if="confirmMode" /> -->
     <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
     <Loader size="big" :loading="loading" type="transparent" content=""></Loader>
   </div>
@@ -50,7 +49,6 @@ import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import { MAGNITUDE, calculateFee, TX_TYPES, TIP_SERVICE } from '../../utils/constants';
 import { setPendingTx, escapeSpecialChars } from '../../utils/helper';
-import TipBackground from '../../../icons/tip-bg.svg';
 import CheckIcon from '../../../icons/check-icon.svg';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
@@ -58,7 +56,6 @@ import Input from '../components/Input';
 
 export default {
   components: {
-    TipBackground,
     AmountSend,
     Textarea,
     CheckIcon,
