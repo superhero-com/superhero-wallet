@@ -112,6 +112,8 @@ export default {
     },
   },
   async created() {
+    await this.persistTipDetails();
+
     if (process.env.IS_EXTENSION) {
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       if (tab) {
@@ -135,6 +137,25 @@ export default {
     }).min;
   },
   methods: {
+    async persistTipDetails() {
+      const { tipDetails } = await browser.storage.local.get('tipDetails');
+      if (tipDetails) {
+        const { amount, note, exp } = tipDetails;
+        if (exp > Date.now()) {
+          this.amount = parseFloat(amount);
+          this.note = note;
+        } else {
+          await browser.storage.local.remove('tipDetails');
+        }
+      }
+      this.$watch(
+        ({ amount, note }) => [amount, note],
+        ([amount, note]) => {
+          const exp = new Date().setMinutes(new Date().getMinutes() + 20);
+          browser.storage.local.set({ tipDetails: { note, amount, exp } });
+        }
+      );
+    },
     toConfirm() {
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
       this.amountError = this.amountError || Number.isNaN(this.amount) || this.amount <= 0;
