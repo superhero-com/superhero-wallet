@@ -105,9 +105,6 @@ export default {
     finalAmount() {
       this.amountError = false;
     },
-    editedtipUrl(val) {
-      this.$emit('changeAmount', val);
-    },
   },
   created() {
     this.getDomainData();
@@ -115,9 +112,6 @@ export default {
     this.$once('hook:beforeDestroy', () => clearInterval(this.feeInterval));
   },
   methods: {
-    editUrlfunc() {
-      this.editUrl = false;
-    },
     handleUrlEdit() {
       this.editUrl = true;
       this.editedUrl = this.tipUrl;
@@ -166,7 +160,6 @@ export default {
     },
     async confirmTip(domain, amount, note) {
       try {
-        const pendings = [];
         this.loading = true;
         const res = await this.tipping.call('tip', [domain, escapeSpecialChars(note)], { amount, waitMined: false });
         if (res.hash) {
@@ -191,15 +184,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.tip-bg {
-  position: fixed;
-  left: 50%;
-  top: 79%;
-  transform: translateX(-50%);
-  -webkit-transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
-  z-index: 0;
-}
-</style>
