@@ -47,7 +47,7 @@ import { mapGetters } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
 import BigNumber from 'bignumber.js';
 import axios from 'axios';
-import { MAGNITUDE, calculateFee, TX_TYPES, TIP_SERVICE } from '../../utils/constants';
+import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import { setPendingTx, escapeSpecialChars } from '../../utils/helper';
 import CheckIcon from '../../../icons/check-icon.svg';
 import AmountSend from '../components/AmountSend';
@@ -174,7 +174,7 @@ export default {
     },
     async checkUrlVerified() {
       try {
-        const res = (await axios.get(`${TIP_SERVICE}/verified`)).json();
+        const res = (await axios.get(`${BACKEND_URL}/verified`)).json();
         if (res.includes(this.tipUrl)) {
           this.$store.dispatch('popupAlert', { name: 'account', type: 'tip_url_verified' });
           this.urlVerified = true;
