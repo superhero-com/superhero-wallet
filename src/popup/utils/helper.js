@@ -4,7 +4,8 @@ import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import axios from 'axios';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import Node from '@aeternity/aepp-sdk/es/node';
-import { MAGNITUDE_EXA, MAGNITUDE_GIGA, MAGNITUDE_PICO, CONNECTION_TYPES } from './constants';
+import { TxBuilder } from '@aeternity/aepp-sdk/es';
+import { MAGNITUDE_EXA, MAGNITUDE_GIGA, MAGNITUDE_PICO, CONNECTION_TYPES, networks, DEFAULT_NETWORK } from './constants';
 
 const shuffleArray = array => {
   let currentIndex = array.length;
@@ -594,6 +595,30 @@ const formatDate = time =>
     year: '2-digit',
   });
 
+const addTipAmount = async amount => {
+  const { tippedAmount } = await browser.storage.local.get('tippedAmount')
+  return browser.storage.local.set({ tippedAmount: tippedAmount ? (tippedAmount + amount) : amount })
+}
+
+const resetTippedAmount = () => browser.storage.local.remove('tippedAmount');
+
+const getTippedAmount = async () => ((await browser.storage.local.get('tippedAmount')).tippedAmount);
+
+const getContractCallInfo = transaction => {
+  let isTip = false;
+  let contractId = null;
+  let amount = 0;
+  let tipContract = networks[DEFAULT_NETWORK].tipContract;
+
+  if(transaction) {
+    const { tx } = TxBuilder.unpackTx(transaction);
+    amount = convertToAE(tx.amount);
+    contractId = tx.contractId;
+    if(contractId === tipContract) isTip = true
+  }
+
+  return { isTip, contractId, amount }
+}
 
 const checkHashType = async (hash) => {
   const accountPublicKeyRegex = RegExp('^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$');
@@ -613,10 +638,6 @@ const checkHashType = async (hash) => {
   }
 
   return { valid, endpoint }
-}
-
-const openTxExplorer = () => {
-
 }
 
 export {
@@ -656,5 +677,9 @@ export {
   escapeSpecialChars,
   formatTime,
   formatDate,
+  addTipAmount,
+  getTippedAmount,
+  resetTippedAmount,
+  getContractCallInfo
   checkHashType
 };

@@ -127,6 +127,7 @@ export const BLACKLIST_AEPPS = [
 ];
 
 export const TX_LIMIT_PER_DAY = 2000
+export const MAX_AMOUNT_WITHOUT_CONFIRM = 10
 export const TIPPING_CONTRACT =
 `@compiler >= 4
 
