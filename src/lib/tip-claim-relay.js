@@ -2,41 +2,42 @@ import axios from 'axios';
 import { uniq } from 'lodash-es';
 import { contractCallStatic, getActiveAccount, getAddressFromChainName } from './background-utils';
 import { networks, DEFAULT_NETWORK, TIPPING_CONTRACT, TIP_SERVICE } from '../popup/utils/constants';
-import { convertToAE } from '../popup/utils/helper';
 
 export default {
   checkAddressMatch(account, addresses) {
-    return account == addresses || (Array.isArray(addresses) && addresses.includes(account));
+    return account === addresses || (Array.isArray(addresses) && addresses.includes(account));
+  },
+
+  async abortIfZeroClaim(url) {
+    const tippingAddress = networks[DEFAULT_NETWORK].tipContract;
+    const tx = {
+      method: 'unclaimed_for_url',
+      address: tippingAddress,
+      params: [url],
+      source: TIPPING_CONTRACT,
+    };
+
+    const claimAmount = await contractCallStatic({ tx, callType: 'static' });
+    if (claimAmount.decodedResult === 0) throw new Error('No zero amount claims');
   },
 
   async checkUrlHasBalance(url, { address, chainName }) {
     try {
       const { account } = await getActiveAccount();
       if (account && account.publicKey) {
-        const tippingAddress = networks[DEFAULT_NETWORK].tipContract;
-        const tx = {
-          method: 'unpaid',
-          address: tippingAddress,
-          params: [url],
-          source: TIPPING_CONTRACT,
-        };
         let addresses = [address];
-        if (Array.isArray(address)) {
-          addresses = address;
-        }
+        if (Array.isArray(address)) addresses = address;
+
         if (chainName) {
-          const pub_keys = await getAddressFromChainName(uniq(chainName));
-          addresses = [...addresses, ...pub_keys];
+          const pubKeys = await getAddressFromChainName(uniq(chainName));
+          addresses = [...addresses, ...pubKeys];
         }
+
         if (this.checkAddressMatch(account.publicKey, uniq(addresses))) {
-          axios
-            .post(`${TIP_SERVICE}`, {
-              url,
-              address: account.publicKey,
-            })
-            .then(res => {
-              console.log(res);
-            });
+          await this.abortIfZeroClaim(url);
+
+          const submit = await axios.post(`${TIP_SERVICE}`, { url, address: account.publicKey });
+          console.log(submit);
         }
       }
     } catch (err) {
