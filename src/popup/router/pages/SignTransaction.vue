@@ -736,8 +736,12 @@ export default {
                     const claim = await this.data.tx.preclaim.claim({ waitMined: false, fee: this.convertSelectedFee })
                     this.setTxInQueue(claim.hash)
                 } catch(err) {
+                    let msg = err.message;
+                    if(msg.includes("is not enough to execute")) {
+                        msg = this.$t('pages.signTransaction.balanceError')
+                    }
                     this.setTxInQueue('error')
-                    this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message })
+                    this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg })
                 }
             }
             this.$store.commit('SET_AEPP_POPUP',false)

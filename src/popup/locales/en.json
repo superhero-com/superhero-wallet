@@ -450,7 +450,8 @@
             "callData": "Call Data",
             "payload": "Payload",
             "newContract": "New Contract",
-            "aens": "AENS"
+            "aens": "AENS",
+            "balanceError": "The account balance is not enough to execute the transaction"
         },
         "signTransactionByQrCode": {
             "backToAccount": "Back to account",
