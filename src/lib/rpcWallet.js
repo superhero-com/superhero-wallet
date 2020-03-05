@@ -127,7 +127,7 @@ const rpcWallet = {
     return extractHostName(url);
   },
   async shouldOpenPopup(aepp, action, cb) {
-    const { isTip, amount } =  getContractCallInfo(action.params.tx);
+    const { isTip, amount } = getContractCallInfo(action.params.tx);
     const origin = this.getAeppOrigin(aepp);
     if(BLACKLIST_AEPPS.includes(origin)) {
       // deny action if in blacklist
