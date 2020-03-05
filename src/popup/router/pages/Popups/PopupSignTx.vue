@@ -102,7 +102,7 @@
 import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
-import { convertToAE, convertAmountToCurrency } from '../../../utils/helper';
+import { convertToAE, convertAmountToCurrency, getContractCallInfo, addTipAmount } from '../../../utils/helper';
 import { toMicro, MAGNITUDE } from '../../../utils/constants';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
@@ -129,7 +129,7 @@ export default {
     this.tx.amount = convertToAE(this.txObject.amount);
   },
   computed: {
-    ...mapGetters(['account', 'activeAccountName', 'balance', 'current', 'popup']),
+    ...mapGetters(['account', 'activeAccountName', 'balance', 'current', 'popup', 'network']),
     txType() {
       return this.unpackedTx ? this.unpackedTx.txType : null;
     },
@@ -180,9 +180,13 @@ export default {
     cancelTransaction() {
       this.props.reject(false);
     },
-    signTransaction() {
+    async signTransaction() {
+      const { tx } = TxBuilder.buildTx({ ...this.unpackedTx.tx, ...this.tx, amount: BigNumber(this.tx.amount ? this.tx.amount : 0).shiftedBy(MAGNITUDE) }, this.txType);
+      const { isTip, amount } =  getContractCallInfo(tx);
+      if(isTip) {
+        await addTipAmount(amount);
+      }
       if (parseFloat(this.tx.amount) !== convertToAE(this.unpackedTx.tx.amount)) {
-        const { tx } = TxBuilder.buildTx({ ...this.unpackedTx.tx, ...this.tx, amount: BigNumber(this.tx.amount ? this.tx.amount : 0).shiftedBy(MAGNITUDE) }, this.txType);
         this.loading = true;
         this.props.resolve(tx);
       } else {
