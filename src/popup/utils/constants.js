@@ -156,4 +156,5 @@ contract Tipping =
   payable stateful entrypoint retip : (tip_id) => unit
   payable stateful entrypoint pre_claim : (string, address) => unit
   stateful entrypoint claim : (string, address, bool) => unit
-  entrypoint get_state : () => state`
+  entrypoint get_state : () => state
+  entrypoint unclaimed_for_url : (string) => int`
