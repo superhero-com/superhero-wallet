@@ -106,7 +106,7 @@ export const networks = {
     url: 'https://mainnet.aeternal.io',
     internalUrl: 'https://mainnet.aeternal.io',
     networkId: 'ae_mainnet',
-    middlewareUrl: 'https://mainnet.aeternal.io/',
+    middlewareUrl: 'https://mainnet.aeternal.io',
     explorerUrl: 'https://mainnet.aeternal.io',
     compilerUrl: 'https://compiler.aepps.com',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',

@@ -620,6 +620,26 @@ const getContractCallInfo = transaction => {
   return { isTip, contractId, amount }
 }
 
+const checkHashType = async (hash) => {
+  const accountPublicKeyRegex = RegExp('^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$');
+  const transactionHashRegex = RegExp('^th_[1-9A-HJ-NP-Za-km-z]{48,50}$');
+  const nameRegex = RegExp('^nm_[1-9A-HJ-NP-Za-km-z]{48,50}$');
+  let valid = true;
+  let endpoint = null;
+
+  if (transactionHashRegex.test(hash)) {
+    endpoint = 'transactions';
+  } else if (accountPublicKeyRegex.test(hash)) {
+    endpoint = 'account/transactions';
+  } else if (nameRegex.test(hash) || hash.endsWith(".chain")) {
+    endpoint = 'names';
+  } else {
+    valid = false
+  }
+
+  return { valid, endpoint }
+}
+
 export {
   shuffleArray,
   convertToAE,
@@ -661,4 +681,5 @@ export {
   getTippedAmount,
   resetTippedAmount,
   getContractCallInfo
+  checkHashType
 };
