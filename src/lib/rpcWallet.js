@@ -2,11 +2,12 @@ import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import { RpcWallet } from '@aeternity/aepp-sdk/es/ae/wallet';
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import Node from '@aeternity/aepp-sdk/es/node';
+import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { setInterval, clearInterval } from 'timers';
 import uuid from 'uuid';
 import { getAccounts } from '../popup/utils/storage';
-import { parseFromStorage, extractHostName, getAeppAccountPermission, getUserNetworks, stringifyForStorage } from '../popup/utils/helper';
-import { DEFAULT_NETWORK, networks, AEX2_METHODS, NO_POPUP_AEPPS, BLACKLIST_AEPPS } from '../popup/utils/constants';
+import { parseFromStorage, extractHostName, getAeppAccountPermission, getUserNetworks, stringifyForStorage, convertToAE, addTipAmount, getTippedAmount, resetTippedAmount } from '../popup/utils/helper';
+import { DEFAULT_NETWORK, networks, AEX2_METHODS, NO_POPUP_AEPPS, BLACKLIST_AEPPS, MAX_AMOUNT_WITHOUT_CONFIRM } from '../popup/utils/constants';
 
 global.browser = require('webextension-polyfill');
 
@@ -126,14 +127,37 @@ const rpcWallet = {
     } = aepp;
     return extractHostName(url);
   },
-  shouldOpenPopup(aepp, action, cb) {
+  async shouldOpenPopup(aepp, action, cb) {
+    let isTip = false;
+    let contractId = null;
+    let amount = 0;
+    let tipContract = this.nodes[this.network].tipContract;
+
+    if(action.params.tx) {
+      const { tx } = TxBuilder.unpackTx(action.params.tx);
+      amount = tx.amount;
+      contractId = tx.contractId;
+      if(contractId === tipContract) isTip = true
+    }
+    
     const origin = this.getAeppOrigin(aepp);
     if(BLACKLIST_AEPPS.includes(origin)) {
       // deny action if in blacklist
       action.deny();
     } else if (NO_POPUP_AEPPS.includes(origin)) {
       // accept action automatically
-      action.accept();
+      if(isTip) {
+        await addTipAmount(convertToAE(amount));
+        const tippedAmount = await getTippedAmount();
+        if(tippedAmount > MAX_AMOUNT_WITHOUT_CONFIRM) {
+          cb();
+          resetTippedAmount()
+        } else {
+          action.accept();
+        }
+      } else {
+        action.accept();
+      }
     } else {
       // open popup
       cb();

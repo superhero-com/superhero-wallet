@@ -594,6 +594,16 @@ const formatDate = time =>
     year: '2-digit',
   });
 
+const addTipAmount = async amount => {
+  const { tippedAmount } = await browser.storage.local.get('tippedAmount')
+  const total = tippedAmount ? (tippedAmount + amount) : amount;
+  return browser.storage.local.set({ tippedAmount: total })
+}
+
+const resetTippedAmount = () => browser.storage.local.remove('tippedAmount');
+
+const getTippedAmount = async () => ((await browser.storage.local.get('tippedAmount')).tippedAmount);
+
 export {
   shuffleArray,
   convertToAE,
@@ -631,4 +641,7 @@ export {
   escapeSpecialChars,
   formatTime,
   formatDate,
+  addTipAmount,
+  getTippedAmount,
+  resetTippedAmount
 };
