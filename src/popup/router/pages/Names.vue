@@ -99,7 +99,7 @@
             </div>
         </div>
 
-        <Loader size="big" :loading="loading" type="transparent" content="" ></Loader>
+        <Loader size="big" :loading="loading || sdk === null" type="transparent" content="" ></Loader>
         <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
     </div>
 </template>
@@ -216,6 +216,7 @@ export default {
                 try {
                     const query = await this.sdk.aensQuery(name)
                     this.loading = false;
+                    console.log(query)
                     this.$store.dispatch('popupAlert', { name: 'account', type: 'name_exist' });
                 } catch(err) {
                     console.log(err)
@@ -232,12 +233,6 @@ export default {
                         data:tx,
                         type:tx.type
                     }});
-                    // this.$store.commit('SET_AEPP_POPUP',true)
-                    // const res = await this.$router.push({'name':'popup-sign-tx', params: { transaction }});
-                    // console.log(this.sdk.Ae.defaults)
-                    // const { tx } = TxBuilder.buildTx({ ...basicTxParams, ...this.sdk.Ae.defaults,...transaction.tx }, TX_TYPES['namePreClaim']);
-                    // console.log(tx)
-                    // console.log(res)
                 }
             }
         },

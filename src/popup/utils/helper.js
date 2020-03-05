@@ -680,6 +680,6 @@ export {
   addTipAmount,
   getTippedAmount,
   resetTippedAmount,
-  getContractCallInfo
+  getContractCallInfo,
   checkHashType
 };
