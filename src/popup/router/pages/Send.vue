@@ -36,11 +36,11 @@
         </p>
         <div class="info-group">
           <label class="info-label">{{ $t('pages.send.sendingAddress') }}</label>
-          <span class="info-span">{{ account.publicKey }}</span>
+          <span class="info-span" @click="openTxExplorer(account.publicKey)">{{ account.publicKey }}</span>
         </div>
         <div class="info-group">
           <label class="info-label">{{ $t('pages.send.receivingAddress') }}</label>
-          <span class="info-span">{{ form.address }}</span>
+          <span class="info-span" @click="openTxExplorer(form.address)">{{ form.address }}</span>
         </div>
         <div class="info-group">
           <label>{{ $t('pages.send.amount') }}</label>
@@ -73,15 +73,15 @@
         </p>
         <div class="info-group">
           <label class="info-label">{{ $t('pages.send.to') }}</label>
-          <span class="info-span">{{ successTx.to }}</span>
+          <span class="info-span" @click="openTxExplorer(successTx.to)">{{ successTx.to }}</span>
         </div>
         <div class="info-group">
           <label class="info-label">{{ $t('pages.send.from') }}</label>
-          <span class="info-span">{{ successTx.from }}</span>
+          <span class="info-span" @click="openTxExplorer(successTx.from)">{{ successTx.from }}</span>
         </div>
         <div class="info-group">
           <label class="info-label">{{ $t('pages.send.txhash') }}</label>
-          <span class="info-span">{{ successTx.hash }}</span>
+          <span class="info-span" @click="openTxExplorer(successTx.hash)">{{ successTx.hash }}</span>
         </div>
         <Button @click="navigateAccount">{{ $t('pages.send.home') }}</Button>
       </div>
@@ -95,7 +95,8 @@
 import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
-import { contractEncodeCall, checkAddress, chekAensName, setPendingTx } from '../../utils/helper';
+import { contractEncodeCall, checkAddress, chekAensName, setPendingTx, checkHashType } from '../../utils/helper';
+import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
 import AccountInfo from '../components/AccountInfo';
@@ -276,6 +277,14 @@ export default {
     navigateAccount() {
       this.$router.push('/account');
     },
+    async openTxExplorer(hash) {
+      const { middlewareUrl } = this.network[this.current.network];
+      const { endpoint, valid } = await checkHashType(hash);
+      if(valid) {
+        const url = `${middlewareUrl}/${endpoint}/${hash}`;
+        openUrl(url)
+      }
+    }
   },
 };
 </script>
@@ -329,6 +338,7 @@ export default {
       // overflow: hidden !important;
       // text-overflow: ellipsis;
       letter-spacing: -0.3px;
+      cursor: pointer;
     }
     .amount {
       font-size: 26px;
