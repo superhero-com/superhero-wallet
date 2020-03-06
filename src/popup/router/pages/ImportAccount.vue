@@ -36,6 +36,7 @@ export default {
     async importAccount() {
       if (this.mnemonic) {
         this.loading = true;
+        this.mnemonic = this.mnemonic.trim();
         const mnemonic = this.mnemonic.split(' ');
         if (mnemonic.length >= 12 && mnemonic.length <= 24 && validateMnemonic(this.mnemonic)) {
           this.errorMsg = null;

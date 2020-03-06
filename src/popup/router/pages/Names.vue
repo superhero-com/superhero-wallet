@@ -197,6 +197,7 @@ export default {
             this.moreAuInfo.info = info;
         },
         async registerName() {
+            this.name = this.name.trim();
             var onlyLettersAndNums = /^[A-Za-z0-9]+$/;
             if (this.name == '') {
                 this.$store.dispatch('popupAlert', {
@@ -216,10 +217,8 @@ export default {
                 try {
                     const query = await this.sdk.aensQuery(name)
                     this.loading = false;
-                    console.log(query)
                     this.$store.dispatch('popupAlert', { name: 'account', type: 'name_exist' });
                 } catch(err) {
-                    console.log(err)
                     let tx = {
                         popup:false,
                         tx: {
