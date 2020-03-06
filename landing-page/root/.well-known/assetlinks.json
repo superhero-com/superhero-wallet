@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.superhero.cordova",
+    "sha256_cert_fingerprints": ["31:D7:B9:6F:36:2D:A2:99:A6:D3:1E:44:FF:D0:90:EA:57:D1:CA:9D:46:38:90:39:82:0F:EC:49:B5:E4:86:57"]
+  }
+}]
