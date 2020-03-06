@@ -51,7 +51,6 @@
     "coinkey": "^3.0.0",
     "cordova-android": "^8.1.0",
     "cordova-ios": "^5.1.1",
-    "cordova-plugin-customurlscheme": "^5.0.0",
     "cordova-plugin-headercolor": "^1.0.0",
     "cordova-plugin-inappbrowser": "^3.2.0",
     "cordova-plugin-splashscreen": "^5.0.3",
@@ -62,6 +61,7 @@
     "emailjs-com": "^2.4.0",
     "extensionizer": "^1.0.1",
     "file-saver": "^2.0.2",
+    "ionic-plugin-deeplinks": "github:aeternity/ionic-plugin-deeplinks",
     "lodash-es": "^4.17.15",
     "node-fetch": "^2.6.0",
     "nyc": "^14.1.1",
@@ -139,14 +139,12 @@
       "cordova-plugin-splashscreen": {},
       "cordova-plugin-statusbar": {},
       "cordova-plugin-headercolor": {},
-      "cordova-plugin-customurlscheme": {
-        "URL_SCHEME": "superhero",
-        "ANDROID_SCHEME": " ",
-        "ANDROID_HOST": " ",
-        "ANDROID_PATHPREFIX": "/"
-      },
       "cordova-plugin-wkwebview-engine": {},
-      "cordova-plugin-inappbrowser": {}
+      "cordova-plugin-inappbrowser": {},
+      "ionic-plugin-deeplinks": {
+        "URL_SCHEME": "superhero",
+        "DEEPLINK_HOST": "mobile.z52da5wt.xyz"
+      }
     },
     "platforms": [
       "android",
