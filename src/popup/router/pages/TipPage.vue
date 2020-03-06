@@ -53,7 +53,7 @@ import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
-import { setPendingTx, escapeSpecialChars } from '../../utils/helper';
+import { setPendingTx, escapeSpecialChars, pollGetter } from '../../utils/helper';
 import CheckIcon from '../../../icons/check-icon.svg';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
@@ -123,13 +123,7 @@ export default {
 
     this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
 
-    await new Promise(resolve => {
-      const id = setInterval(() => {
-        if (!this.sdk) return;
-        clearInterval(id);
-        resolve();
-      }, 1000);
-    });
+    await pollGetter(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
       contractId: this.network[this.current.network].tipContract,
