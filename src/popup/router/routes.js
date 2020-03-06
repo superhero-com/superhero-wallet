@@ -12,6 +12,7 @@ import GeneralSettingsComponent from './pages/GeneralSettings';
 import SecuritySettingsComponent from './pages/SecuritySettings';
 import AboutSettingsComponent from './pages/AboutSettings';
 import TipComponent from './pages/TipPage';
+import Retip from './pages/Retip';
 import QrCodeReader from './pages/QrCodeReader';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -113,6 +114,13 @@ export default [
   {
     path: '/tip',
     component: TipComponent,
+    meta: {
+      title: 'send',
+    },
+  },
+  {
+    path: '/retip',
+    component: Retip,
     meta: {
       title: 'send',
     },

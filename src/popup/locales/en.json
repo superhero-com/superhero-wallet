@@ -519,6 +519,7 @@
             "amountLabel": "Amount",
             "availableLabel": "Available",
             "confirm": "Confirm",
+            "cancel": "Cancel",
             "edit": "Edit AE Details"
         },
         "successTip": {

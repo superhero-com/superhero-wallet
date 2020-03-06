@@ -6,11 +6,23 @@
 </head>
 <body>
   <script>
+    const result = new URL(window.location).searchParams.get('result');
+    if (result) alert(`Result: ${result}`);
+
+    const successUrl = encodeURIComponent(`${window.location.origin}?result=success`);
+    const cancelUrl = encodeURIComponent(`${window.location.origin}?result=cancel`);
+
     [
       'superhero:404',
       'superhero:tip',
       'superhero:tip?url=example.com',
-      'superhero:tip?url=http%3A%2F%2Fexample.com%2Farticle%3Fid%3D123123',
+      `superhero:tip?url=${encodeURIComponent('http://example.com/article?id=123123')}`,
+      'superhero:retip',
+      `superhero:retip?id=26`,
+      `superhero:retip?id=26&x-success=${successUrl}`,
+      `superhero:retip?id=26&x-cancel=${cancelUrl}`,
+      `superhero:retip?id=25&x-success=${successUrl}&x-cancel=${cancelUrl}`,
+      `superhero:retip?id=26&x-success=${successUrl}&x-cancel=${cancelUrl}`,
     ].forEach(url => document.write(`<a href="${url}">${url}</a><br>`));
   </script>
 </body>
