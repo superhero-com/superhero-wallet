@@ -74,7 +74,7 @@ export default {
 .primary-button.small.third {
   font-size: 12px;
 }
-.primary-button.reject,
+.primary-button.confirm,
 .primary-button.danger {
   background: $secondary-color !important;
   color: $white-color !important;

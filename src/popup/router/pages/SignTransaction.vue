@@ -73,8 +73,8 @@
             </ae-list-item>
          </ae-list>
         <div class="btnFixed">
-            <Button half @click="cancelTransaction" class="reject">{{ $t('pages.signTransaction.reject') }}</Button>
-            <Button half @click="signTransaction" :disabled="signDisabled">{{ $t('pages.signTransaction.confirm') }}</Button>
+            <Button half @click="cancelTransaction" >{{ $t('pages.signTransaction.reject') }}</Button>
+            <Button half @click="signTransaction" class="confirm" :disabled="signDisabled">{{ $t('pages.signTransaction.confirm') }}</Button>
         </div>
         <Loader size="big" :loading="loading" :type="loaderType" :content="loaderContent" ></Loader>
         <input type="hidden" class="txHash" :value="hash" />
