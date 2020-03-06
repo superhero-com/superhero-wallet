@@ -1,5 +1,5 @@
 <template>
-  <ul class="sidebar-menu">
+  <ul class="sidebar-menu" @click="menuClickHandler">
     <li class="menu-close">
       <Close @click="closeMenu" />
     </li>
@@ -96,13 +96,11 @@ export default {
   computed: mapGetters(['account', 'activeAccountName']),
   data: () => ({ showSettingsDropdown: false }),
   methods: {
+    menuClickHandler({ target }) {
+      if (target.tagName === 'A') this.closeMenu();
+    },
     closeMenu() {
       this.$emit('closeMenu');
-    },
-  },
-  watch: {
-    $route() {
-      this.closeMenu();
     },
   },
 };
