@@ -34,19 +34,10 @@ import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
-import { setPendingTx } from '../../utils/helper';
+import { setPendingTx, pollGetter } from '../../utils/helper';
 import openUrl from '../../utils/openUrl';
 import CheckIcon from '../../../icons/check-icon.svg';
 import AmountSend from '../components/AmountSend';
-
-const pollGetter = getter =>
-  new Promise(resolve => {
-    const id = setInterval(() => {
-      if (!getter()) return;
-      clearInterval(id);
-      resolve();
-    }, 300);
-  });
 
 export default {
   components: { AmountSend, CheckIcon },

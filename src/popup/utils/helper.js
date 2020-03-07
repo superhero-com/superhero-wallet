@@ -640,6 +640,16 @@ const checkHashType = async (hash) => {
   return { valid, endpoint }
 }
 
+// TODO: Use proper promises/reactivity instead of polling pattern
+export const pollGetter = getter =>
+  new Promise(resolve => {
+    const id = setInterval(() => {
+      if (!getter()) return;
+      clearInterval(id);
+      resolve();
+    }, 300);
+  });
+
 export {
   shuffleArray,
   convertToAE,
