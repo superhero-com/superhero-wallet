@@ -12,7 +12,7 @@
             <ae-list v-if="names.length">
                 <ae-list-item fill="neutral" v-for="(name, key) in names" :key="key" >
                     <ae-identicon v-bind:address="name.owner" size="base" />
-                    <div class="text-left ml-10">
+                    <div style="width:50%;" class="text-left ml-10">
                         <div class="">{{name.name}}</div>
                         <ae-address :value="name.owner" length="short" />
                     </div>

@@ -48,14 +48,14 @@
 
       <div v-show="step === 4">
         <h2>{{ $t('pages.intro.createdWallet') }}</h2>
+        <h4>{{$t('pages.intro.step4text-0')}}</h4>
         <div class="text-info">
-          <span class="block">{{ $t('pages.intro.step4text-1') }}</span>
-          <span class="block">{{ $t('pages.intro.ever') }}</span>
-
-          <span class="block"> {{ $t('pages.intro.step4text-2') }} </span>
+          <span class="mb-4 block">{{ $t('pages.intro.step4text-1') }}</span>
+          <span class="mb-4 block"> {{ $t('pages.intro.step4text-2') }} </span>
+          <span class="mb-4 block"> {{ $t('pages.intro.step4text-3') }} </span>
         </div>
 
-        <p class="last-msg-enjoy">{{ $t('pages.intro.enjoy-msg') }}</p>
+        <p class="last-msg-enjoy">{{ $t('pages.intro.step4text-4') }}</p>
         <Button @click="$router.push('/account')">{{ $t('pages.intro.toHome') }}</Button>
       </div>
     </div>
@@ -132,7 +132,7 @@ export default {
   }
   .text-info {
     margin: 10px 0 0 0;
-    text-align: left;
+    text-align: center;
     span:not(.aeid) {
       color: $text-color;
       font-size: 16px;
