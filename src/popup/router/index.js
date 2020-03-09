@@ -57,6 +57,13 @@ const noRedirectUrls = [
   '/notifications',
   '/auction-bid',
 ];
+const noAuthUrls = [
+  '/',
+  '/importAccount',
+  '/termsOfService',
+  '/intro'
+]
+
 router.beforeEach((to, from, next) => {
   const lastRouteName = localStorage.getItem(lastRouteKey);
   const shouldRedirect = to.path === ('/' || '/account') && lastRouteName && isFirstTransition;
@@ -64,7 +71,11 @@ router.beforeEach((to, from, next) => {
     if (!store.getters.sdk) {
       wallet.initSdk(() => next('/'));
     }
-    next();
+    if(noAuthUrls.includes(to.path) && to.path !== '/termsOfService') {
+      next('/account');
+    } else {
+      next();
+    }
   } else {
     wallet.init(route => {
       if (shouldRedirect && (route == '/' || route == '/account') && !noRedirectUrls.includes(lastRouteName) && lastRouteName.indexOf('/sign-transaction') == -1) {
@@ -72,7 +83,12 @@ router.beforeEach((to, from, next) => {
       } else if (route) {
         next(route);
       } else {
-        next();
+        if(!noAuthUrls.includes(to.path)) {
+          next('/');
+        } else {
+          next();
+        }
+        
       }
     });
   }
