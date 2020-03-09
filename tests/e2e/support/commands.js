@@ -1,5 +1,8 @@
-Cypress.Commands.add('openPopup', () => {
-  cy.visit('popup/popup.html')
+import { mnemonicToSeed } from '@aeternity/bip39';
+import '../../../src/lib/initPolyfills';
+
+Cypress.Commands.add('openPopup', (onBeforeLoad) => {
+  cy.visit('popup/popup.html', { onBeforeLoad })
 })
 
 Cypress.Commands.add('termsAgree', () => {
@@ -108,4 +111,29 @@ Cypress.Commands.add('accordionItemShouldNotBeVisible', (item) => {
   .eq(item)
   .find('[data-cy=accordion-item-close]')
   .should('be.visible')
+});
+
+
+
+Cypress.Commands.add('login', () => {
+  cy
+  .openPopup((win) => {
+    const mnemonic = "media view gym mystery all fault truck target envelope kit drop fade"
+    const seed = mnemonicToSeed(mnemonic).toString('hex')
+    const keypair = {
+      publicKey:"ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5",
+      privateKey: seed
+    }
+    browser.storage.local.set({ userAccount: keypair, isLogged: true, termsAgreed: true });
+    const sub = [];
+    sub.push({
+      name: 'Main Account',
+      publicKey: keypair.publicKey,
+      balance: 0,
+      root: true,
+      aename: null,
+    });
+    browser.storage.local.set({ subaccounts: sub, activeAccount: 0 });
+    browser.storage.local.set({ mnemonic: mnemonic });
+  })
 });
