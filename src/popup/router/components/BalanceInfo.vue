@@ -13,7 +13,8 @@
             <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
               {{ balanceCurrency }}
               <span class="accent-text">{{ currentCurrency }}</span>
-              <DropdownArrow />
+              <!-- <DropdownArrow /> -->
+              <expanded-angle-arrow />
             </ae-button>
           </div>
           <ul class="sub-dropdown">
@@ -31,11 +32,11 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import DropdownArrow from '../../../icons/dropdownarrow.svg';
+import expandedAngleArrow from '../../../icons/expanded-angle-arrow.svg';
 
 export default {
   components: {
-    DropdownArrow,
+    'expanded-angle-arrow': expandedAngleArrow,
   },
   data() {
     return {

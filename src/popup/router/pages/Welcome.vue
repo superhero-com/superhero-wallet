@@ -4,7 +4,7 @@
       <Logo class="logo" />
       <p class="primary-title f-24">
         {{ $t('pages.welcome.send') }}
-        <span class="secondary-text"> {{ $t('pages.appVUE.aeid') }} </span>
+        <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
         {{ $t('pages.welcome.across') }}
       </p>
     </div>
@@ -24,6 +24,11 @@ export default {
 };
 </script>
 <style lang="scss">
+.primary-title {
+  color: #bcbcc4 !important;
+  font-size: 16px;
+  margin-top: 0;
+}
 .welcome-bg {
   position: fixed;
   left: 50%;

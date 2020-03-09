@@ -10,7 +10,7 @@
       <ClaimTipButton :class="!backup_seed_notif ? 'mt-32' : ''" />
       <AccountInfo />
       <BalanceInfo />
-      <div class="height-100 secondary-bg">
+      <div class="height-100 submenu-bg">
         <Button v-if="IS_EXTENSION" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
           <div class="flex flex-align-center flex-justify-content-center">
             <Heart />

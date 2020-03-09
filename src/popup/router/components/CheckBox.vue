@@ -1,7 +1,9 @@
 <template>
-  <ae-check :value="val" v-model="checked" @change="onChange" type="checkbox">
+  <label class="checkbox-container">
     <slot class="checkbox-holder"></slot>
-  </ae-check>
+    <input :value="val" v-model="checked" @change="onChange" type="checkbox">
+    <span class="checkmark" :style="checked ? { 'background-image': `url(${checkbox_checked}) !important` } : { 'background-image': `url(${checkbox_unchecked}) !important` }"></span>
+  </label>
 </template>
 
 <script>
@@ -10,6 +12,8 @@ export default {
   data() {
     return {
       checkedProxy: false,
+      checkbox_unchecked: browser.runtime.getURL('../icons/checkbox-unchecked.svg'),
+      checkbox_checked: browser.runtime.getURL('../icons/checkbox-checked.svg'),
     };
   },
   computed: {
@@ -32,6 +36,33 @@ export default {
 
 <style lang="scss">
 @import '../../../common/variables';
+.checkbox-container {
+  display: flex;
+  position: relative;
+  padding-left: 25px;
+  margin-bottom: 2rem;
+  cursor: pointer;
+  justify-content: space-around;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+    input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+    .checkmark {
+      background: no-repeat;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 20px;
+      width: 20px;
+    }
+}
 .checkbox-holder {
   position: relative;
   margin: 0px 10px;
