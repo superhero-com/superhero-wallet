@@ -37,9 +37,7 @@ describe("Test cases for Front Page", () => {
 
   it("should open terms and conditions", () => {
     cy
-    .get('[data-cy=terms]')
-    .should('be.visible')
-    .click()
+    .openTerms()
     .get('[data-cy=terms]')
     .should('not.exist')
   })

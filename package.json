@@ -23,6 +23,7 @@
     "build:Mainnet": "cross-env NETWORK=Mainnet npm run build",
     "watch:dev:Testnet": "cross-env NETWORK=Testnet npm run watch:dev",
     "watch:dev:Mainnet": "cross-env NETWORK=Mainnet npm run watch:dev",
+    "watch:dev:tests": "cross-env NETWORK=Testnet cross-env TEST=true npm run watch:dev",
     "build:tests": "cross-env NETWORK=Testnet cross-env TEST=true npm run build:dev"
   },
   "dependencies": {

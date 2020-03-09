@@ -22,6 +22,13 @@ Cypress.Commands.add('openImportWallet', () => {
   .click()
 })
 
+Cypress.Commands.add('openTerms', () => {
+  cy
+  .get('[data-cy=terms]')
+  .should('be.visible')
+  .click()
+})
+
 Cypress.Commands.add('enterSeedPhrase', (seed) => {
   cy
   .openImportWallet()
@@ -72,3 +79,33 @@ Cypress.Commands.add('clickDotNavigationMakeSlideActive', (slide) => {
   .click()
   .onboardingSlideShouldBeActive(slide)
 })
+
+
+Cypress.Commands.add('toggleAccordionItem', (item) => {
+  cy
+  .get('[data-cy=accordion-item]')
+  .eq(item)
+  .click()
+})
+
+Cypress.Commands.add('accordionItemShouldBeVisible', (item) => {
+  cy
+  .get('[data-cy=accordion-item-content]')
+  .eq(item)
+  .should('be.visible')
+  .get('[data-cy=accordion-item]')
+  .eq(item)
+  .find('[data-cy=accordion-item-open]')
+  .should('be.visible')
+});
+
+Cypress.Commands.add('accordionItemShouldNotBeVisible', (item) => {
+  cy
+  .get('[data-cy=accordion-item-content]')
+  .eq(item)
+  .should('not.be.visible')
+  .get('[data-cy=accordion-item]')
+  .eq(item)
+  .find('[data-cy=accordion-item-close]')
+  .should('be.visible')
+});
