@@ -65,5 +65,17 @@ describe("Test cases for menu sidebar component", () => {
     })
   })
 
-  
+  links.forEach((page) => {
+    it(`should open ${page} page and return to account page`, () => {
+      cy
+      .openMenuPage(page)
+      .get('[data-cy=back-arrow]')
+      .should('be.visible')
+      .click()
+      .get('[data-cy=balance-info]')
+      .should('be.visible')
+      .get('[data-cy=back-arrow]')
+      .should('not.be.visible')
+    })
+  })
 })
