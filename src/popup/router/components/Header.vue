@@ -15,7 +15,7 @@
           <Bell />
         </span>
         <button @click="$emit('toggle-sidebar')">
-          <Hamburger />
+          <Hamburger data-cy="hamburger" />
         </button>
       </div>
     </div>

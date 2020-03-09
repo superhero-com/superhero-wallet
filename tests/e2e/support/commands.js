@@ -55,3 +55,20 @@ Cypress.Commands.add('shouldHasErrorMessage', (el) => {
   .should('exist')
   .should('be.visible')
 })
+
+Cypress.Commands.add('onboardingSlideShouldBeActive', (slide) => {
+  cy
+  .get('[data-cy=onboarding-steps]')
+  .find('ul li')
+  .eq(slide)
+  .should('have.class','current')
+})
+
+Cypress.Commands.add('clickDotNavigationMakeSlideActive', (slide) => {
+  cy
+  .get('[data-cy=onboarding-steps]')
+  .find('ul li')
+  .eq(slide)
+  .click()
+  .onboardingSlideShouldBeActive(slide)
+})
