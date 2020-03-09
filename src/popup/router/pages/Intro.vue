@@ -43,7 +43,7 @@
         </ul>
         <RightArrow @click="step = step + 1" class="right-arrow" v-show="step < 3" data-cy="next"/>
         <button class="skip-button" @click="step = 3" v-show="step < 3" data-cy="skip">{{ $t('pages.intro.skip') }}</button>
-        <Button style="margin-top: 30px;" @click="createWallet" v-show="step === 3" data-cy="generate-wallet">{{ $t('pages.intro.generateWallet') }}</Button>
+        <Button style="margin-top: 30px;" @click="createWallet" v-if="step === 3" data-cy="generate-wallet">{{ $t('pages.intro.generateWallet') }}</Button>
       </div>
 
       <div v-show="step === 4">

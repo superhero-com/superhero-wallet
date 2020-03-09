@@ -14,8 +14,8 @@
     "build-zip": "node scripts/build-zip.js",
     "watch": "npm run build -- --watch",
     "watch:dev": "cross-env HMR=true npm run build:dev -- --watch",
-    "test": " start-server-and-test start http://localhost:5000 start:tests",
-    "start": "serve",
+    "test": "start-server-and-test start http://localhost:5000 start:tests",
+    "start": "npm run build:tests && serve",
     "start:ci": "serve",
     "start:tests": "cypress open",
     "gen:cordova-resources": "cordova-res",
@@ -23,7 +23,7 @@
     "build:Mainnet": "cross-env NETWORK=Mainnet npm run build",
     "watch:dev:Testnet": "cross-env NETWORK=Testnet npm run watch:dev",
     "watch:dev:Mainnet": "cross-env NETWORK=Mainnet npm run watch:dev",
-    "build:tests": "cross-env NETWORK=Testnet cross-env TEST=true npm run watch:dev"
+    "build:tests": "cross-env NETWORK=Testnet cross-env TEST=true npm run build:dev"
   },
   "dependencies": {
     "@aeternity/aepp-components": "git+https://github.com/aeternity/aepp-components.git#develop",
