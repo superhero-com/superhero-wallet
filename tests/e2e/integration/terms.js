@@ -28,13 +28,13 @@ describe("Test cases for Terms & Conditions page", () => {
     cy
     .openTerms()
     .toggleAccordionItem(2)
-    .accordionItemShouldBeVisible(2)
+    .accordionItemShould(2,'be.visible')
     .toggleAccordionItem(4)
-    .accordionItemShouldBeVisible(4)
+    .accordionItemShould(4,'be.visible')
     .toggleAccordionItem(7)
-    .accordionItemShouldBeVisible(7)
+    .accordionItemShould(7,'be.visible')
     .toggleAccordionItem(7)
-    .accordionItemShouldNotBeVisible(7)
+    .accordionItemShould(7,'not.be.visible')
   })
 
 })

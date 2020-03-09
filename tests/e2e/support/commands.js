@@ -96,27 +96,17 @@ Cypress.Commands.add('toggleAccordionItem', (item) => {
   .click()
 })
 
-Cypress.Commands.add('accordionItemShouldBeVisible', (item) => {
+Cypress.Commands.add('accordionItemShould', (item, cond) => {
   cy
   .get('[data-cy=accordion-item-content]')
   .eq(item)
-  .should('be.visible')
+  .should(cond)
   .get('[data-cy=accordion-item]')
   .eq(item)
   .find('[data-cy=accordion-item-open]')
-  .should('be.visible')
+  .should(cond)
 });
 
-Cypress.Commands.add('accordionItemShouldNotBeVisible', (item) => {
-  cy
-  .get('[data-cy=accordion-item-content]')
-  .eq(item)
-  .should('not.be.visible')
-  .get('[data-cy=accordion-item]')
-  .eq(item)
-  .find('[data-cy=accordion-item-close]')
-  .should('be.visible')
-});
 
 
 
@@ -148,4 +138,43 @@ Cypress.Commands.add('shouldRedirect', (url, to) => {
   .visit(`#${url}`)
   .url()
   .should('eq',`${Cypress.config().baseUrl}popup/popup#${to}`)
+})
+
+
+Cypress.Commands.add('openMenu', () => {
+  cy
+  .get('[data-cy=hamburger]')
+  .click()
+})
+
+Cypress.Commands.add('closeMenu', (from = 'button') => {
+  if(from === 'button') {
+    cy
+    .get('[data-cy=close-menu]')
+    .should('be.visible')
+    .click()
+  } else if(from === 'overlay') {
+    cy
+    .get('[data-cy=menu-overlay]')
+    .should('be.visible')
+    .click('left')
+  }
+})
+
+Cypress.Commands.add('menuShould', (cond) => {
+  cy
+  .get('[data-cy=sidebar-menu]')
+  .should(cond)
+  .get('[data-cy=close-menu]')
+  .should(cond)
+})
+
+Cypress.Commands.add('openMenuPage', (page) => {
+  cy
+  .openMenu()
+  .get(`[data-cy=${page}]`)
+  .click()
+  .url()
+  .should('eq', `${Cypress.config().baseUrl}popup/popup#/${page}`)
+  .menuShould('not.be.visible')
 })

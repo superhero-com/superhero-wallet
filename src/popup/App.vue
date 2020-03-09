@@ -5,7 +5,7 @@
     <router-view :key="$route.fullPath" />
 
     <transition name="slide">
-      <div class="menu-overlay" v-if="showSidebar" @click.self="showSidebar = false">
+      <div class="menu-overlay" v-if="showSidebar" @click.self="showSidebar = false" data-cy="menu-overlay">
         <SidebarMenu @closeMenu="showSidebar = false" />
       </div>
     </transition>

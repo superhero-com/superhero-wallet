@@ -1,7 +1,7 @@
 <template>
   <ul class="sidebar-menu" data-cy="sidebar-menu">
     <li class="menu-close">
-      <Close @click="closeMenu" />
+      <Close @click="closeMenu" data-cy="close-menu"/>
     </li>
     <li class="account-icon-holder">
       <div class="flex flex-align-center flex-justify-between">
@@ -13,17 +13,17 @@
       </div>
     </li>
     <li>
-      <router-link to="/receive">
+      <router-link to="/receive" data-cy="receive">
         {{ $t('pages.appVUE.topUp') }}
       </router-link>
     </li>
     <li>
-      <router-link to="/send">
+      <router-link to="/send" data-cy="send">
         {{ $t('pages.appVUE.withdraw') }}
       </router-link>
     </li>
     <li>
-      <router-link to="/transactions">
+      <router-link to="/transactions" data-cy="transactions">
         {{ $t('pages.appVUE.activity') }}
       </router-link>
     </li>
@@ -68,12 +68,12 @@
       </router-link>
     </li> -->
     <li>
-      <router-link to="/names">
+      <router-link to="/names" data-cy="names">
         {{ $t('pages.appVUE.names') }}
       </router-link>
     </li>
     <li>
-      <router-link to="/aboutSettings">
+      <router-link to="/aboutSettings" data-cy="aboutSettings">
         {{ $t('pages.appVUE.help') }}
       </router-link>
     </li>
