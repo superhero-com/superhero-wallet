@@ -1,5 +1,3 @@
-
-
 describe("Test cases for Front Page", () => {
   beforeEach(() => {
     cy.openPopup()
@@ -26,8 +24,7 @@ describe("Test cases for Front Page", () => {
 
   it("terms agree activate buttons", () => {
     cy
-    .get('[data-cy=checkbox]')
-    .click()
+    .termsAgree()
     .get('[data-cy=generate-wallet]')
     .should('not.have.class','disabled')
     .get('[data-cy=import-wallet]')
@@ -36,9 +33,8 @@ describe("Test cases for Front Page", () => {
 
   it("terms uncheck disable buttons", () => {
     cy
-    .get('[data-cy=checkbox]')
-    .click()
-    .click()
+    .termsAgree()
+    .termsAgree()
     .get('[data-cy=generate-wallet]')
     .should('have.class','disabled')
     .get('[data-cy=import-wallet]')
@@ -52,7 +48,19 @@ describe("Test cases for Front Page", () => {
     .click()
     .get('[data-cy=terms]')
     .should('not.exist')
-    .get('.title')
-    .should('be.visible')
+  })
+
+  it("should open generate wallet page", () => {
+    cy
+    .generateWallet()
+    .get('[data-cy=generate-wallet]')
+    .should('not.exist')
+  })
+
+  it("should open import wallet page", () => {
+    cy
+    .importWallet()
+    .get('[data-cy=import-wallet]')
+    .should('not.exist')
   })
 })
