@@ -1,5 +1,5 @@
 <template>
-  <ul class="sidebar-menu">
+  <ul class="sidebar-menu" data-cy="sidebar-menu">
     <li class="menu-close">
       <Close @click="closeMenu" />
     </li>
