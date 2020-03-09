@@ -1,8 +1,13 @@
 import { mnemonicToSeed } from '@aeternity/bip39';
 import '../../../src/lib/initPolyfills';
 
+Cypress.Commands.overwrite('visit', (orig, url, options) => {
+  url = `popup/popup${url}`
+  return orig(url, options)
+})
+
 Cypress.Commands.add('openPopup', (onBeforeLoad) => {
-  cy.visit('popup/popup.html', { onBeforeLoad })
+  cy.visit('', { onBeforeLoad })
 })
 
 Cypress.Commands.add('termsAgree', () => {
@@ -137,3 +142,10 @@ Cypress.Commands.add('login', () => {
     browser.storage.local.set({ mnemonic: mnemonic });
   })
 });
+
+Cypress.Commands.add('shouldRedirect', (url, to) => {
+  cy
+  .visit(`#${url}`)
+  .url()
+  .should('eq',`${Cypress.config().baseUrl}popup/popup#${to}`)
+})
