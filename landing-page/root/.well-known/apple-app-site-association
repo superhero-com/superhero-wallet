@@ -1,0 +1,9 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [{
+      "appID": "8H7FGC266S.com.superhero.cordova",
+      "paths": ["*"]
+    }]
+  }
+}
