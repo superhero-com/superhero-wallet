@@ -11,6 +11,5 @@
   "pageLoadTimeout": 200000,
   "responseTimeout": 360000,
   "numTestsKeptInMemory": 1,
-  "chromeWebSecurity": false,
-  "projectId": "p6f3ro"
+  "chromeWebSecurity": false
 }

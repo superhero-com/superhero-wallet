@@ -93,12 +93,16 @@ const commonConfig = {
 };
 
 const genPlatformDependentPlugins = platform => {
+  let IS_EXTENSION = platform !== 'cordova';
+  if(process.env.TEST) {
+    IS_EXTENSION = false;
+  }
   const plugins = [
     new webpack.DefinePlugin({
       global: 'window',
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-        IS_EXTENSION: platform !== 'cordova',
+        IS_EXTENSION,
         npm_package_version: JSON.stringify(process.env.npm_package_version),
         NETWORK: JSON.stringify(process.env.NETWORK)
       },
