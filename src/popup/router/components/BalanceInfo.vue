@@ -1,5 +1,5 @@
 <template>
-  <div class="external-svg" :style="{ 'background-image': 'url(' + accbalanceBG + ')' }">
+  <div class="external-svg" :style="{ 'background-image': 'url(' + accbalanceBG + ')' }" data-cy="balance-info">
     <span class="title">{{ $t('pages.account.balance') }}</span>
     <div class="balance no-sign">
       <div class="amount">

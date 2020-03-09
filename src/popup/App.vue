@@ -76,7 +76,7 @@ export default {
     checkSdkReady() {
       const checkSDKReady = setInterval(() => {
         if (this.sdk !== null) {
-          if (!window.RUNNING_IN_POPUP) {
+          if (!window.RUNNING_IN_POPUP && IS_EXTENSION) {
             postMessage({ type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
           }
           this.pollData();
