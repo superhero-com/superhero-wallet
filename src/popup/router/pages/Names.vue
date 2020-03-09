@@ -14,7 +14,7 @@
                     <ae-identicon v-bind:address="name.owner" size="base" />
                     <div style="width:50%;" class="text-left ml-10">
                         <div class="">{{name.name}}</div>
-                        <ae-address :value="name.owner" length="short" />
+                        <ae-address style="display:flex !important;" :value="name.owner" length="short" />
                     </div>
                     <Button class="danger" @click="extend(name)" small>{{ $t('pages.namingSystemPage.extend') }}</Button>
                     <ae-icon fill="primary" face="round" name="reload" class="name-pending" v-if="name.pending"/>
