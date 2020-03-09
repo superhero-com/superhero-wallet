@@ -17,9 +17,9 @@
             </ae-button>
           </div>
           <ul class="sub-dropdown">
-            <li class="single-currency" v-for="(index, item) in currencies" :key="index">
-              <ae-button v-on:click="switchCurrency(index, item)" :class="current.currency == item ? 'current' : ''">
-                {{ item.toUpperCase() }}
+            <li class="single-currency" v-for="(rate, currency) in currencies" :key="currency">
+              <ae-button @click="switchCurrency(currency)" :class="current.currency == currency ? 'current' : ''">
+                {{ currency.toUpperCase() }}
               </ae-button>
             </li>
           </ul>
@@ -56,9 +56,9 @@ export default {
       const dropdownParent = event.target.closest(parentClass);
       this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
     },
-    async switchCurrency(index, item) {
-      await browser.storage.local.set({ currency: item });
-      this.$store.commit('SET_CURRENCY', { currency: item, currencyRate: this.currencies[item] });
+    async switchCurrency(currency) {
+      await browser.storage.local.set({ currency });
+      this.$store.commit('SET_CURRENCY', { currency, currencyRate: this.currencies[currency] });
       this.dropdown.currencies = false;
     },
   },
