@@ -5,7 +5,18 @@ import Node from '@aeternity/aepp-sdk/es/node';
 import { setInterval, clearInterval } from 'timers';
 import uuid from 'uuid';
 import { getAccounts } from '../popup/utils/storage';
-import { parseFromStorage, extractHostName, getAeppAccountPermission, getUserNetworks, stringifyForStorage, convertToAE, addTipAmount, getTippedAmount, resetTippedAmount, getContractCallInfo } from '../popup/utils/helper';
+import {
+  parseFromStorage,
+  extractHostName,
+  getAeppAccountPermission,
+  getUserNetworks,
+  stringifyForStorage,
+  convertToAE,
+  addTipAmount,
+  getTippedAmount,
+  resetTippedAmount,
+  getContractCallInfo,
+} from '../popup/utils/helper';
 import { DEFAULT_NETWORK, networks, AEX2_METHODS, NO_POPUP_AEPPS, BLACKLIST_AEPPS, MAX_AMOUNT_WITHOUT_CONFIRM } from '../popup/utils/constants';
 
 global.browser = require('webextension-polyfill');
@@ -129,20 +140,19 @@ const rpcWallet = {
   async shouldOpenPopup(aepp, action, cb) {
     const { isTip, amount } = getContractCallInfo(action.params.tx);
     const origin = this.getAeppOrigin(aepp);
-    if(BLACKLIST_AEPPS.includes(origin)) {
+    if (BLACKLIST_AEPPS.includes(origin)) {
       // deny action if in blacklist
       action.deny();
     } else if (NO_POPUP_AEPPS.includes(origin)) {
-      if(isTip) {
+      if (isTip) {
         const tippedAmount = await getTippedAmount();
-        if(tippedAmount >= MAX_AMOUNT_WITHOUT_CONFIRM) {
+        if (tippedAmount >= MAX_AMOUNT_WITHOUT_CONFIRM) {
           cb();
-          resetTippedAmount()
+          resetTippedAmount();
         } else {
           action.accept();
           await addTipAmount(amount);
         }
-        
       } else {
         action.accept();
       }

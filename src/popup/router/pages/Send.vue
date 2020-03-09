@@ -280,11 +280,11 @@ export default {
     async openTxExplorer(hash) {
       const { middlewareUrl } = this.network[this.current.network];
       const { endpoint, valid } = await checkHashType(hash);
-      if(valid) {
+      if (valid) {
         const url = `${middlewareUrl}/${endpoint}/${hash}`;
-        openUrl(url)
+        openUrl(url);
       }
-    }
+    },
   },
 };
 </script>

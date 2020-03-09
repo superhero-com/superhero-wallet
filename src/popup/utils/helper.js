@@ -1,10 +1,10 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
-import { Crypto } from '@aeternity/aepp-sdk/es';
+import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import axios from 'axios';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import Node from '@aeternity/aepp-sdk/es/node';
-import { TxBuilder } from '@aeternity/aepp-sdk/es';
+
 import { MAGNITUDE_EXA, MAGNITUDE_GIGA, MAGNITUDE_PICO, CONNECTION_TYPES, networks, DEFAULT_NETWORK } from './constants';
 
 const shuffleArray = array => {
@@ -596,31 +596,31 @@ const formatDate = time =>
   });
 
 const addTipAmount = async amount => {
-  const { tippedAmount } = await browser.storage.local.get('tippedAmount')
-  return browser.storage.local.set({ tippedAmount: tippedAmount ? (tippedAmount + amount) : amount })
-}
+  const { tippedAmount } = await browser.storage.local.get('tippedAmount');
+  return browser.storage.local.set({ tippedAmount: tippedAmount ? tippedAmount + amount : amount });
+};
 
 const resetTippedAmount = () => browser.storage.local.remove('tippedAmount');
 
-const getTippedAmount = async () => ((await browser.storage.local.get('tippedAmount')).tippedAmount);
+const getTippedAmount = async () => (await browser.storage.local.get('tippedAmount')).tippedAmount;
 
 const getContractCallInfo = transaction => {
   let isTip = false;
   let contractId = null;
   let amount = 0;
-  let tipContract = networks[DEFAULT_NETWORK].tipContract;
+  const { tipContract } = networks[DEFAULT_NETWORK];
 
-  if(transaction) {
+  if (transaction) {
     const { tx } = TxBuilder.unpackTx(transaction);
     amount = convertToAE(tx.amount);
     contractId = tx.contractId;
-    if(contractId === tipContract) isTip = true
+    if (contractId === tipContract) isTip = true;
   }
 
-  return { isTip, contractId, amount }
-}
+  return { isTip, contractId, amount };
+};
 
-const checkHashType = async (hash) => {
+const checkHashType = async hash => {
   const accountPublicKeyRegex = RegExp('^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$');
   const transactionHashRegex = RegExp('^th_[1-9A-HJ-NP-Za-km-z]{48,50}$');
   const nameRegex = RegExp('^nm_[1-9A-HJ-NP-Za-km-z]{48,50}$');
@@ -631,14 +631,14 @@ const checkHashType = async (hash) => {
     endpoint = 'transactions';
   } else if (accountPublicKeyRegex.test(hash)) {
     endpoint = 'account/transactions';
-  } else if (nameRegex.test(hash) || hash.endsWith(".chain")) {
+  } else if (nameRegex.test(hash) || hash.endsWith('.chain')) {
     endpoint = 'names';
   } else {
-    valid = false
+    valid = false;
   }
 
-  return { valid, endpoint }
-}
+  return { valid, endpoint };
+};
 
 // TODO: Use proper promises/reactivity instead of polling pattern
 export const pollGetter = getter =>
@@ -691,5 +691,5 @@ export {
   getTippedAmount,
   resetTippedAmount,
   getContractCallInfo,
-  checkHashType
+  checkHashType,
 };

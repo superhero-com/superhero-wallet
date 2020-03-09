@@ -1,5 +1,5 @@
 <template>
-    <div class="popup">
+  <div class="popup">
         <ae-list class="spendTxDetailsList">
             <ae-list-item fill="neutral" class="flex-justify-between whiteBg noBorder">
                 <div class="flex flex-align-center accountFrom">
@@ -14,7 +14,7 @@
                     <ae-address :value="receiver" v-if="receiver" length="short" class="spendAccountAddr" />
                     <span v-if="!receiver" class="spendAccountAddr">{{$t('pages.signTransaction.unknownAccount')}}</span>
                 </div>
-                <div v-else class="flex flex-align-center accountTo">
+        <div v-else class="flex flex-align-center accountTo">
                     <ae-icon name="square" />
                     <span class="spendAccountAddr">{{ data.type == 'contractCreate' ? 'New contract' : 'AENS' }}</span>
                 </div>
@@ -36,11 +36,11 @@
                 </div>
             </ae-list-item>
             <ae-list-item v-if="data.type == 'nameClaim'" fill="neutral" class="flex-justify-between whiteBg flex-align-center " >
-                <div class="tx-label ">
+        <div class="tx-label ">
                     {{$t('pages.signTransaction.nameSalt')}}
                 </div>
                 <div>
-                    <strong>{{data.tx.preclaim.salt}}</strong>
+          <strong>{{ data.tx.preclaim.salt }}</strong>
                 </div>
             </ae-list-item>
             <ae-list-item v-if="data.type == 'nameUpdate'" fill="neutral" class="flex-justify-between whiteBg  flex-align-center flex-direction-column" >
@@ -57,46 +57,60 @@
                     <div class="text-right">
                         <div class="balance balanceBig txFee">{{selectedFee}}</div>
                         <!-- <div class="fiat-rate">${{convertCurrency(usdRate,selectedFee)}}</div> -->
-                    </div>
+          </div>
                 </div>
                 <!-- <div class="range-slider">
                     <div class="sliderOver"></div>
                     <input class="range-slider__range" type="range"  :min="fee" :max="maxFee" step="0.000001" v-model="selectedFee">
                 </div> -->
-            </ae-list-item>
+      </ae-list-item>
             <ae-list-item fill="neutral" class="flex-justify-between whiteBg" v-if="alertMsg == '' && !isNameTx">
                 <div class="tx-label">{{$t('pages.signTransaction.total')}}</div>
                 <div class="text-right">
                     <div class="balance balanceBig balanceTotalSpend no-sign">{{totalSpend}} {{token}}</div>
                     <!-- <div class="fiat-rate" v-if="!data.tx.token">${{convertCurrency(usdRate,totalSpend)}}</div> -->
-                </div>
+        </div>
             </ae-list-item>
-         </ae-list>
+    </ae-list>
         <div class="btnFixed">
             <Button half @click="cancelTransaction" >{{ $t('pages.signTransaction.reject') }}</Button>
             <Button half @click="signTransaction" class="confirm" :disabled="signDisabled">{{ $t('pages.signTransaction.confirm') }}</Button>
-        </div>
+    </div>
         <Loader size="big" :loading="loading" :type="loaderType" :content="loaderContent" ></Loader>
         <input type="hidden" class="txHash" :value="hash" />
-        <popup :popupSecondBtnClick="popup.secondBtnClick" :redirect="true"></popup>
+    <popup :popupSecondBtnClick="popup.secondBtnClick" :redirect="true"></popup>
     </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import { convertToAE, currencyConv, convertAmountToCurrency, removeTxFromStorage, contractEncodeCall, initializeSDK, checkAddress, chekAensName, escapeCallParam, addRejectedToken, checkContractAbiVersion, parseFromStorage  } from '../../utils/helper';
+import {
+  convertToAE,
+  currencyConv,
+  convertAmountToCurrency,
+  removeTxFromStorage,
+  contractEncodeCall,
+  initializeSDK,
+  checkAddress,
+  chekAensName,
+  escapeCallParam,
+  addRejectedToken,
+  checkContractAbiVersion,
+  parseFromStorage,
+} from '../../utils/helper';
 import { MAGNITUDE, MIN_SPEND_TX_FEE, MIN_SPEND_TX_FEE_MICRO, MAX_REASONABLE_FEE, TX_TYPES, calculateFee, TX_LIMIT_PER_DAY, TOKEN_REGISTRY_ADDRESS } from '../../utils/constants';
-import { Wallet, MemoryAccount } from '@aeternity/aepp-sdk/es'
-import { computeAuctionEndBlock, computeBidFee  } from '@aeternity/aepp-sdk/es/tx/builder/helpers'
+import { Wallet, MemoryAccount } from '@aeternity/aepp-sdk/es';
+import { computeAuctionEndBlock, computeBidFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import BigNumber from 'bignumber.js';
-import { clearInterval, clearTimeout  } from 'timers';
+import { clearInterval, clearTimeout } from 'timers';
 import Button from '../components/Button';
+
 export default {
-    components: {
+  components: {
         Button
     },
     data(){
-        return {
+    return {
             port:null,
             txFee:{
                 min:0,
@@ -106,9 +120,9 @@ export default {
             alertMsg:'',
             loading:false,
             loaderType:'transparent',
-            loaderContent:"",
+      loaderContent: '',
             errorTx:  {
-                "error": {
+        error: {
                     "code": 1,
                     "data": {
                         "request": {}
@@ -122,7 +136,7 @@ export default {
             usdRate:0,
             eurRate:0,
             checkSDKReady:null,
-            receiver:"",
+      receiver: '',
             hash:"",
             txParams:{},
             sending: false,
@@ -131,19 +145,34 @@ export default {
             tokenRegistryInstance: null
         };
     },
-    props:['data'],
+  props: ['data'],
     async created(){
         await this.init()
     },
    
     computed: {
-        ...mapGetters(['account','activeAccountName','balance','network','current','wallet','activeAccount', 'sdk', 'tokens', 'tokenBalance','isLedger','popup', 'tokenRegistry', 'tokenRegistryLima']),
-        maxValue() {
-            let calculatedMaxValue = this.balance - this.fee
-            return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
-        },
+    ...mapGetters([
+      'account',
+      'activeAccountName',
+      'balance',
+      'network',
+      'current',
+      'wallet',
+      'activeAccount',
+      'sdk',
+      'tokens',
+      'tokenBalance',
+      'isLedger',
+      'popup',
+      'tokenRegistry',
+      'tokenRegistryLima',
+    ]),
+    maxValue() {
+            const calculatedMaxValue = this.balance - this.fee
+      return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
+    },
         amount() {
-            return typeof this.data.tx.amount != "undefined" ? this.data.tx.amount : 0
+            return typeof this.data.tx.amount !== "undefined" ? this.data.tx.amount : 0
         },
         fee() {
             return this.txFee.min
@@ -152,7 +181,7 @@ export default {
             return this.txFee.max.toFixed(7)
         },
         totalSpend() {
-            if(typeof this.data.tx.token != 'undefined') {
+      if (typeof this.data.tx.token !== 'undefined') {
                 return parseFloat(this.amount).toFixed(7)
             }
             return (parseFloat(this.amount) + parseFloat(this.selectedFee)).toFixed(7)
@@ -162,14 +191,14 @@ export default {
                 if(this.data.type == 'contractCall' && this.data.tx.method == "transfer_allowance") {
                     return false;
                 }
-                if(typeof this.data.tx.token != 'undefined' ) {
+      if (typeof this.data.tx.token != 'undefined') {
                     return this.tokenBalance - this.amount <= 0
                 }
                 
                 return this.maxValue - this.amount <= 0
             // }
         },
-        inccorectAddress() {
+    inccorectAddress() {
                 if(this.data.type != 'txSign') {
                     return this.receiver == null || this.receiver == ""
                 }
@@ -181,7 +210,7 @@ export default {
         txType() {
             if(this.data.type == 'txSign') {
                 return "Send AE"
-            }else if(this.data.type == 'contractCall') {
+            }if(this.data.type == 'contractCall') {
                 if(this.data.tx.method != "" ) {
                     return this.data.tx.method
                 }
@@ -200,9 +229,15 @@ export default {
             
         },
         isAddressShow() {
-            if(this.data.type == 'contractCreate' || this.data.type == 'namePreClaim' || this.data.type == 'nameClaim' ||this.data.type == 'nameBid' || this.data.type == 'nameUpdate') {
-                return false
-            }
+      if (
+        this.data.type == 'contractCreate' ||
+        this.data.type == 'namePreClaim' ||
+        this.data.type == 'nameClaim' ||
+        this.data.type == 'nameBid' ||
+        this.data.type == 'nameUpdate'
+      ) {
+        return false;
+      }
             return true
         },
         isNameTx() {
@@ -212,7 +247,7 @@ export default {
             return BigNumber(this.selectedFee).shiftedBy(MAGNITUDE)
         },
         token () {
-            return typeof this.data.tx.token != 'undefined' ? this.data.tx.token : 'AE' 
+            return typeof this.data.tx.token !== 'undefined' ? this.data.tx.token : 'AE' 
         }
     },
     watch:{ 
@@ -222,15 +257,15 @@ export default {
     },
     methods: {
         async setContractInstance(source, contractAddress = null, options = {}) {
-            try {
+      try {
                 let backend = "fate";
-                if(typeof this.data.tx.abi_version != "undefined" && this.data.tx.abi_version != 3) {
+                if(typeof this.data.tx.abi_version !== "undefined" && this.data.tx.abi_version != 3) {
                     backend = "aevm";
                 }
                 try {
                     this.contractInstance = await this.$helpers.getContractInstance(source, { contractAddress });
-                    this.contractInstance.setOptions({ backend })
-                    if(typeof options.waitMined != "undefined") {
+          this.contractInstance.setOptions({ backend });
+          if (typeof options.waitMined != 'undefined') {
                         this.contractInstance.setOptions({ waitMined: options.waitMined })
                     }
                 }catch(e) {
@@ -238,31 +273,27 @@ export default {
                 }
                 return Promise.resolve(true)
             } catch(err) {
-                    console.log(err)
-                if(this.data.popup) {
+        console.log(err);
+        if (this.data.popup) {
                     this.errorTx.error.message = err
                     this.sending = true
                     this.port.postMessage(this.errorTx)
                     setTimeout(() => {
                         window.close()
                     },1000)
-                }
-                
-            }
+        }
+      }
             return Promise.resolve(false)
         },
         async setTxInQueue(tx) {
-            let { processingTx } = await browser.storage.local.get('processingTx')
+            const { processingTx } = await browser.storage.local.get('processingTx')
             let list = [];
-            if(typeof processingTx != 'undefined' && processingTx.length) {
-                list = [
-                    ...list,
-                    ...processingTx
-                ]
-            }
-            list.push(tx)
-            await browser.storage.local.set({ processingTx: list })
-        },
+            if(typeof processingTx !== 'undefined' && processingTx.length) {
+        list = [...list, ...processingTx];
+      }
+      list.push(tx);
+      await browser.storage.local.set({ processingTx: list });
+    },
         async init() {
             this.setReceiver()
             if(this.isLedger && this.data.type != 'txSign') {
@@ -278,8 +309,8 @@ export default {
                 })
             }
             if(this.data.tx.hasOwnProperty("options") && this.data.tx.options.hasOwnProperty("amount")) {
-                this.data.tx.amount = this.data.tx.options.amount
-                if(this.data.type == 'contractCall' ) {
+        this.data.tx.amount = this.data.tx.options.amount;
+        if (this.data.type == 'contractCall') {
                     this.data.tx.amount = BigNumber(this.data.tx.options.amount).shiftedBy(-MAGNITUDE)
                     this.data.tx.options.amount = BigNumber(this.data.tx.options.amount).shiftedBy(-MAGNITUDE)
                 }  
@@ -291,17 +322,17 @@ export default {
                 this.port = browser.runtime.connect({ name: this.data.id })
                 this.port.onMessage.addListener((msg, sender,sendResponse) => {})
             }
-            if(typeof this.data.callType != "undefined" && this.data.callType == 'static') {
+            if(typeof this.data.callType !== "undefined" && this.data.callType == 'static') {
                 this.loaderType = ''
                 this.loading = true
                 this.loaderContent = this.$t('pages.signTransaction.contractCalling')
                 
                 this.checkSDKReady = setInterval(async () => {
-                    if(this.sdk != null) {
+          if (this.sdk != null) {
                         window.clearTimeout(this.checkSDKReady)
                         await this.setContractInstance(this.data.tx.source, this.data.tx.address)
                         try {
-                            let call = await this.$helpers.contractCall({ instance:this.contractInstance, method:this.data.tx.method, params:[...this.data.tx.params, this.data.tx.options] })
+                            const call = await this.$helpers.contractCall({ instance:this.contractInstance, method:this.data.tx.method, params:[...this.data.tx.params, this.data.tx.options] })
                             this.sending = true
                             this.port.postMessage(call)
                         } catch(e)  {
@@ -310,60 +341,59 @@ export default {
                             this.port.postMessage(this.errorTx)
                         }
                         
-                        let list = await removeTxFromStorage(this.data.id)
+                        const list = await removeTxFromStorage(this.data.id)
                         
-                        browser.storage.local.set({pendingTransaction: { list } }).then(() => {})
-                        setTimeout(() => {
+            browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
+            setTimeout(() => {
                             window.close()
                         },1000)
                     }
                 },500)
-            }else {
+      } else {
                 if(this.data.popup) {
                     browser.storage.local.get('pendingTransaction').then((tx) => {
                         let list = {}
                         if(tx.hasOwnProperty('pendingTransaction') && tx.pendingTransaction.hasOwnProperty("list")) { 
                             list = tx.pendingTransaction.list
                         }
-                        list[this.data.id] = this.data
-                        browser.storage.local.set({pendingTransaction:{ list }}).then(() => { })
-                    })
-                }   
-                this.checkSDKReady = setInterval(async () => {
-                    if( this.sdk != null ) {
+            list[this.data.id] = this.data;
+            browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
+          });
+        }
+        this.checkSDKReady = setInterval(async () => {
+          if (this.sdk != null) {
                         window.clearTimeout(this.checkSDKReady)
                         this.txParams = {
                             ...this.sdk.Ae.defaults
                         }
                         
                         if(this.data.type == 'contractCreate') {
-                            this.data.tx.contract = {}
-                            this.data.tx.contract.bytecode = (await this.sdk.contractCompile(this.data.tx.source)).bytecode
-                            this.txParams = {
+              this.data.tx.contract = {};
+              this.data.tx.contract.bytecode = (await this.sdk.contractCompile(this.data.tx.source)).bytecode;
+              this.txParams = {
                                 ...this.txParams,
                                 ownerId:this.account.publicKey,
                                 code:this.data.tx.contract.bytecode
                             } 
                             // here new contract na mqstoto na fugible token contract
-                            await this.setContractInstance(this.data.tx.source)
-                            
-                        }else if(this.data.type == 'contractCall') {
+              await this.setContractInstance(this.data.tx.source);
+            } else if (this.data.type == 'contractCall') {
                             this.data.tx.call = {}
                             // let callData = await contractEncodeCall(this.sdk,this.data.tx.source,this.data.tx.method,[...escapeCallParams(this.data.tx.params)])
-                            this.txParams = {
+              this.txParams = {
                                 ...this.txParams,
                                 contractId:this.data.tx.address,
                                 callerId:this.account.publicKey
                             }
                             await this.setContractInstance(this.data.tx.source, this.data.tx.address, this.data.tx.options)
-                        }else if(this.data.type == 'txSign') {
-                            let recipientId 
-                            if(this.data.tx.recipientId.substring(0,3) == 'ak_') {
+            } else if (this.data.type == 'txSign') {
+              let recipientId;
+              if (this.data.tx.recipientId.substring(0, 3) == 'ak_') {
                                 recipientId = this.data.tx.recipientId
                             }else {
                                 try {
-                                    let address = await this.sdk.api.getNameEntryByName(this.data.tx.recipientId)
-                                    if(typeof address.pointers[0] != "undefined") {
+                                    const address = await this.sdk.api.getNameEntryByName(this.data.tx.recipientId)
+                                    if(typeof address.pointers[0] !== "undefined") {
                                         recipientId = address.pointers[0].id
                                         this.receiver = recipientId
                                     }else {
@@ -371,7 +401,7 @@ export default {
                                         this.showAlert()
                                         return
                                     }
-                                }catch(err) {
+                } catch (err) {
                                     this.receiver = ""
                                     this.showAlert()
                                     return
@@ -381,22 +411,22 @@ export default {
                             this.txParams = {
                                 ...this.txParams,
                                 senderId:this.account.publicKey,
-                                recipientId:recipientId
-                            }
-                        }else if(this.data.type == 'namePreClaim') {
+                                recipientId
+              };
+            } else if (this.data.type == 'namePreClaim') {
                             this.txParams = { 
                                 ...this.txParams,
                                 accountId:this.account.publicKey,
-                                commitmentId:"cm_PtSWNMMNJ187NzGgivLFpYKptevuFQx1rKdqsDFAKVkXtyjPJ"
-                            }
-                        }else if(this.data.type == 'nameClaim') {
+                commitmentId: 'cm_PtSWNMMNJ187NzGgivLFpYKptevuFQx1rKdqsDFAKVkXtyjPJ',
+              };
+            } else if (this.data.type == 'nameClaim') {
                             this.txParams = { 
                                 ...this.txParams,
                                 accountId:this.account.publicKey,
                                 name:"nm_2Wb2xdC9WMSnExyHd8aoDu2Ee8qHD94nvsFQsyiy1iEyUGPQp9",
                                 nameSalt:this.data.tx.preclaim.salt
                             }
-                        }else if(this.data.type == 'nameBid') {
+            } else if (this.data.type == 'nameBid') {
                             this.txParams = { 
                                 ...this.txParams,
                                 accountId:this.account.publicKey,
@@ -411,10 +441,10 @@ export default {
                                 pointers:this.data.tx.claim.pointers
                             }
                         }
-                        let fee = calculateFee(TX_TYPES[this.data.type],this.txParams)
-                        this.txFee = fee
-                        this.selectedFee = this.fee.toFixed(7)
-                        if(this.alertMsg == '') {
+            let fee = calculateFee(TX_TYPES[this.data.type], this.txParams);
+            this.txFee = fee;
+            this.selectedFee = this.fee.toFixed(7);
+            if (this.alertMsg == '') {
                             this.signDisabled = false
                         }
                     }
@@ -431,52 +461,51 @@ export default {
             }else if(this.data.type == 'contractCall') {
                 this.receiver = this.data.tx.address
             }
-        },
+    },
         showAlert(balance = false) {
             if(this.insufficientBalance && this.sdk !== null && !this.loading && balance) {
-                this.alertMsg = this.$t('pages.signTransaction.insufficientBalance')
-            }else if(this.inccorectAddress && this.isAddressShow) {
+        this.alertMsg = this.$t('pages.signTransaction.insufficientBalance');
+      } else if (this.inccorectAddress && this.isAddressShow) {
                 this.alertMsg = this.$t('pages.signTransaction.inccorectAddress')
             }else{
                 this.alertMsg = ''
             }
             if(this.alertMsg == '') {
-                if(this.selectedFee) {
-                    this.signDisabled = false
-                }
-            }else {
+        if (this.selectedFee) {
+          this.signDisabled = false;
+        }
+      } else {
                 this.signDisabled = true
                 if(balance) {
                     setTimeout(() => {
-                        if(this.data.popup && !this.sending) {
+            if (this.data.popup && !this.sending) {
                             this.errorTx.error.message = this.alertMsg
                             
                             this.port.postMessage(this.errorTx)
-                            setTimeout(() => {
+              setTimeout(() => {
                                 window.close()
                             },1000)
                         }
                     },5000)  
                 }
-            }
+      }
         },
         async cancelTransaction() {
-            let list = await removeTxFromStorage(this.data.id)
+            const list = await removeTxFromStorage(this.data.id)
             if(this.data.tx.contractType == 'fungibleToken' && this.data.tx.method == 'add_token') {
-                addRejectedToken(this.data.tx.params[0])
-            }
+        addRejectedToken(this.data.tx.params[0]);
+      }
             if(!this.data.popup) {
                 if(this.data.type == 'nameUpdate') {
                     this.$store.dispatch('removePendingName', { hash: this.data.tx.hash }).then(() => {
                         browser.storage.local.set({pendingTransaction: { list } }).then(() => {})
                         this.redirectInExtensionAfterAction()
                     })
-                }else {
-                    browser.storage.local.set({pendingTransaction: { list } }).then(() => {})
-                    this.redirectInExtensionAfterAction()
-                }   
-                
-            }else {
+        } else {
+          browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
+          this.redirectInExtensionAfterAction();
+        }
+      } else {
                 browser.storage.local.set({pendingTransaction: { list } }).then(() => {
                     this.errorTx.error.message = "Transaction rejected by user"
                     this.sending = true
@@ -490,55 +519,55 @@ export default {
         redirectInExtensionAfterAction() {
             browser.storage.local.get('pendingTransaction').then((data) => {
                 if(data.hasOwnProperty('pendingTransaction') && data.pendingTransaction.hasOwnProperty('list') && Object.keys(data.pendingTransaction.list).length > 0) {
-                    let tx = data.pendingTransaction.list[Object.keys(data.pendingTransaction.list)[0]];
+          let tx = data.pendingTransaction.list[Object.keys(data.pendingTransaction.list)[0]];
                     tx.popup = false
                     tx.countTx =  Object.keys(data.pendingTransaction.list).length
-                    // this.redirectToTxConfirm(tx)
+          // this.redirectToTxConfirm(tx)
                     this.$store.commit('SET_AEPP_POPUP',false)
                     this.$router.push('/account')
                 }else {
                     this.$store.commit('SET_AEPP_POPUP',false)
-                    this.$router.push('/account')
-                }
+          this.$router.push('/account');
+        }
             });
         },
         signSpendTx(amount) {
-                this.sdk.spend(parseInt(amount), this.receiver, { fee: this.convertSelectedFee}).then(async result => {
-                    if(typeof result == "object") {
+      this.sdk
+        .spend(parseInt(amount), this.receiver, { fee: this.convertSelectedFee })
+        .then(async result => {
+                    if(typeof result === "object") {
                         this.loading = false
                         this.hash = result.hash
                         this.setTxInQueue(result.hash)
-                        let txUrl = this.network[this.current.network].explorerUrl + '/transactions/' + result.hash
-                        let msg = 'You have sent ' + this.amount + ' AE'
-                        if(this.data.popup) {
-                            let res = {
+                        const txUrl = `${this.network[this.current.network].explorerUrl  }/transactions/${  result.hash}`
+            let msg = 'You have sent ' + this.amount + ' AE';
+            if (this.data.popup) {
+                            const res = {
                                 "id": null,
                                 "jsonrpc": "2.0",
                                 "method":"aeppMessage",
-                                "params":{...result}
-                                
-                            }
-                            this.sending = true
-                            this.port.postMessage(res)
-                            let list = await removeTxFromStorage(this.data.id)
-                            browser.storage.local.set({pendingTransaction: { list } }).then(() => {})
-                            
-                            setTimeout(() => {
+                params: { ...result },
+              };
+              this.sending = true;
+              this.port.postMessage(res);
+              let list = await removeTxFromStorage(this.data.id);
+              browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
+
+              setTimeout(() => {
                                 window.close()
                             },1000)
                         }else {
                             this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer',msg,data:txUrl})
                             .then(async () => {
                                 this.$store.commit('SET_AEPP_POPUP',false)
-                                let list = await removeTxFromStorage(this.data.id)
+                                const list = await removeTxFromStorage(this.data.id)
                                 browser.storage.local.set({pendingTransaction: { list } }).then(() => {})
                                 this.redirectInExtensionAfterAction()
-                            })
-                        }
+              });
+            }
                     }
                     else {
-                        
-                    }
+          }
                 })
                 .catch(async err => {
                     this.setTxInQueue('error')
@@ -554,29 +583,28 @@ export default {
                         this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed'})
                     }
                     this.loading = false;
-                    return;
+                    
                 });
         },
         async signSpendTxLedger(amount) {
             const tx = await this.sdk.spendTx({ senderId: this.account.publicKey, recipientId: this.receiver, amount, fee: this.convertSelectedFee })
-            let sign = await this.$store.dispatch('ledgerSignTransaction', { tx })  
-            this.loading = false
-            if(sign.success) {
-                let txUrl = this.network[this.current.network].explorerUrl + '/transactions/' + sign.res.hash
-                let msg = 'You have sent ' + this.amount + ' AE'
-                this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer',msg,data:txUrl})
-                .then(async () => {
-                    this.$store.commit('SET_AEPP_POPUP',false)
-                    this.redirectInExtensionAfterAction()
-                })
-            }else {
+      let sign = await this.$store.dispatch('ledgerSignTransaction', { tx });
+      this.loading = false;
+      if (sign.success) {
+                const txUrl = `${this.network[this.current.network].explorerUrl  }/transactions/${  sign.res.hash}`
+        let msg = 'You have sent ' + this.amount + ' AE';
+        this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(async () => {
+          this.$store.commit('SET_AEPP_POPUP', false);
+          this.redirectInExtensionAfterAction();
+        });
+      } else {
                 this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed'}).then(() => {
                     this.redirectInExtensionAfterAction()
                 })
             }
         },
         async contractCallStatic(tx) {
-            try {
+      try {
                 let options = { }
                 if(tx.hasOwntProperty("options")) {
                     options = { ...tx.options }
@@ -585,19 +613,19 @@ export default {
                     tx.options.amount = BigNumber(this.data.tx.options.amount).shiftedBy(MAGNITUDE)
                     options = { ...options, ...tx.options }
                 }
-                let call = await this.$helpers.contractCall({ instance:this.contractInstance, method:tx.method, params:[...tx.params, options] })
-                let decoded = await call.decode()
+                const call = await this.$helpers.contractCall({ instance:this.contractInstance, method:tx.method, params:[...tx.params, options] })
+                const decoded = await call.decode()
                 call.decoded = decoded
                 this.sending = true
                 this.port.postMessage(call)
-            }catch(err) {
-                this.errorTx.error.message = typeof err.message != "undefined" ? err.message : err
-                this.sending = true
-                this.port.postMessage(this.errorTx)
-            }
-            let list = await removeTxFromStorage(this.data.id)
-            browser.storage.local.set({pendingTransaction: { list } }).then(() => {})
-            setTimeout(() => {
+      } catch (err) {
+        this.errorTx.error.message = typeof err.message != 'undefined' ? err.message : err;
+        this.sending = true;
+        this.port.postMessage(this.errorTx);
+      }
+            const list = await removeTxFromStorage(this.data.id)
+      browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
+      setTimeout(() => {
                 window.close()
             },1000)
         },
@@ -614,34 +642,33 @@ export default {
                 }
                 
                 console.log("[Debug]: Transaction parameters")
-                console.log(...this.data.tx.params)
-            
-                options = { ...options, fee:this.convertSelectedFee }
-                if (!this.contractInstance) {
+        console.log(...this.data.tx.params);
+
+        options = { ...options, fee: this.convertSelectedFee };
+        if (!this.contractInstance) {
                     await this.setContractInstance(this.data.tx.source, this.data.tx.address, this.data.tx.options);
                 }
                 call = await this.$helpers.contractCall({ instance:this.contractInstance, method:this.data.tx.method, params:[...this.data.tx.params, options] })
                 
                 this.setTxInQueue(call.hash)
-                let decoded = await call.decode()
+                const decoded = await call.decode()
                 call.decoded = decoded
                 if (this.data.popup) {
-                    let { decode, ...res} = call
+                    const { decode, ...res} = call
                     this.sending = true
-                    this.port.postMessage({...res})
-                }
-            }catch(err) {
+          this.port.postMessage({ ...res });
+        }
+      } catch (err) {
                 this.setTxInQueue('error')
-                this.errorTx.error.message = typeof err.message != "undefined" ? err.message : err
+                this.errorTx.error.message = typeof err.message !== "undefined" ? err.message : err
                 this.sending = true
                 if(this.data.popup) {
                     this.port.postMessage(this.errorTx)
-                } else {
+        } else {
                     this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed'})
                 }
-                
-            }
-            let list = await removeTxFromStorage(this.data.id)
+      }
+            const list = await removeTxFromStorage(this.data.id)
             browser.storage.local.set({pendingTransaction: { list } }).then(() => {})
             if(this.data.popup) {
                 setInterval(() => {
@@ -650,16 +677,15 @@ export default {
             }else {
                 this.redirectInExtensionAfterAction()
             }
-        },
+    },
         async contractDeploy() { 
-            let deployed
-            if(this.isLedger) {
-                let { ownerId, amount, gas, code, callData, deposit } = this.txParams 
-                let tx = (await this.sdk[TX_TYPES[this.data.type]]({ownerId, amount, gas, code, callData, deposit})).tx
-                let sign = await this.$store.dispatch('ledgerSignTransaction', { tx })  
-                
-            }else {
-                try {
+      let deployed;
+      if (this.isLedger) {
+                const { ownerId, amount, gas, code, callData, deposit } = this.txParams 
+                const {tx} = await this.sdk[TX_TYPES[this.data.type]]({ownerId, amount, gas, code, callData, deposit})
+        let sign = await this.$store.dispatch('ledgerSignTransaction', { tx });
+      } else {
+        try {
                     deployed = await this.contractInstance.deploy([...this.data.tx.init], { fee: this.convertSelectedFee })
                     this.setTxInQueue(deployed.transaction)
                 } catch(err) {
@@ -667,7 +693,7 @@ export default {
                     this.setTxInQueue('error')
                     this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed'})
                 }
-            }
+      }
             
             this.loading = false
             if(this.data.popup) {
@@ -677,34 +703,37 @@ export default {
             }else {
                 if(deployed) {
                     this.deployed = deployed.address
-                    let msg = `Contract deployed at address <br> ${deployed.address}`
-                    let noRedirect = this.data.tx.contractType == 'fungibleToken' && this.data.tx.tokenRegistry
+                    const msg = `Contract deployed at address <br> ${deployed.address}`
+                    const noRedirect = this.data.tx.contractType == 'fungibleToken' && this.data.tx.tokenRegistry
                     this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_deploy',msg, noRedirect, data:deployed.address })    
                 }
-                if(this.data.tx.contractType != 'fungibleToken') {
+        if (this.data.tx.contractType != 'fungibleToken') {
                     this.redirectInExtensionAfterAction()
                 }
             }
-        },
+    },
         copyAddress() {
             this.$copyText(this.popup.data)
             if(this.data.type == 'contractCreate' && !this.data.tx.tokenRegistry) {
-                this.redirectInExtensionAfterAction()
-            }
+        this.redirectInExtensionAfterAction();
+      }
         },
         redirectToTxConfirm(tx) {
-            this.$store.commit('SET_AEPP_POPUP',true)
-            
-            this.$router.push({'name':'sign', params: {
+      this.$store.commit('SET_AEPP_POPUP', true);
+
+      this.$router.push({
+        name: 'sign',
+        params: {
                 data:tx,
                 type:tx.type
-            }});
+        },
+      });
         },
         async namePreclaim(){
             try {
                 const preclaim = await this.sdk.aensPreclaim(this.data.tx.name, { fee: this.convertSelectedFee } )
                 this.setTxInQueue(preclaim.hash)
-                let tx = {
+                const tx = {
                     popup:false,
                     tx: {
                         name:this.data.tx.name,
@@ -720,18 +749,16 @@ export default {
                 this.$store.commit('SET_AEPP_POPUP',false)
                 this.$router.push('/names')
             }
-            
-        },  
-        async nameClaim() {
-            if (this.data.bid) {
+    },
+    async nameClaim() {
+      if (this.data.bid) {
                 try {
                     const bid = await this.sdk.aensBid(this.data.tx.name, this.data.tx.BigNumberAmount);
                 } catch(err) {
                     this.setTxInQueue('error')
                     this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message })
                 }
-            }
-            else {
+      } else {
                 try {
                     const claim = await this.data.tx.preclaim.claim({ waitMined: false, fee: this.convertSelectedFee })
                     this.setTxInQueue(claim.hash)
@@ -747,7 +774,7 @@ export default {
             this.$store.commit('SET_AEPP_POPUP',false)
             this.$router.push('/names')
         },
-        async nameUpdate(){
+    async nameUpdate() {
             try {
                 let options
                 if(this.data.tx.hasOwnProperty("options")) {
@@ -755,13 +782,13 @@ export default {
                 }
                 options = { ...options, fee:this.convertSelectedFee }
                 const nameObject = await this.sdk.aensQuery(this.data.tx.name)
-                let update ;
-                if(this.data.nameUpdateType === 'extend') {
-                    update = await nameObject.extendTtl()
-                }
+        let update;
+        if (this.data.nameUpdateType === 'extend') {
+          update = await nameObject.extendTtl();
+        }
                 this.setTxInQueue(update.hash)
                 await this.$store.dispatch('popupAlert', {
-                    name: 'account',
+          name: 'account',
                     type: 'added_success'
                 })
                 await this.$store.dispatch('removePendingName',{ hash: this.data.tx.hash })
@@ -771,18 +798,17 @@ export default {
                 
             }
             this.$store.commit('SET_AEPP_POPUP',false)
-            this.$router.push('/names')
-            
-        },
+      this.$router.push('/names');
+    },
         async signTransaction() {
-            if(!this.signDisabled) {
-                this.loading = true
-                let amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
-                try {
+      if (!this.signDisabled) {
+        this.loading = true;
+        let amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
+        try {
                     let { tx_count } = await browser.storage.local.get('tx_count')
-                    if(typeof tx_count == 'undefined') {
-                        tx_count = {}
-                    }
+                    if(typeof tx_count === 'undefined') {
+            tx_count = {};
+          }
                     if(!tx_count.hasOwnProperty(new Date().toDateString()) ) {
                         tx_count = {
                             [new Date().toDateString()]: { 
@@ -790,11 +816,11 @@ export default {
                             }
                         }
                     } else if(tx_count.hasOwnProperty(new Date().toDateString()) && !tx_count[new Date().toDateString()].hasOwnProperty(this.account.publicKey)) {
-                        tx_count[new Date().toDateString()][this.account.publicKey] = 1
-                    } else {
+            tx_count[new Date().toDateString()][this.account.publicKey] = 1;
+          } else {
                         tx_count[new Date().toDateString()][this.account.publicKey]++
                     }
-                    await browser.storage.local.set({ tx_count: tx_count })
+                    await browser.storage.local.set({ tx_count })
                     if(tx_count[[new Date().toDateString()]] > TX_LIMIT_PER_DAY) {
                         return this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_limit_per_day'})
                         .then(() => {
@@ -808,30 +834,30 @@ export default {
                         }else {
                             this.signSpendTx(amount)
                         }
-                    }else if(this.data.type == 'contractCall') {
+          } else if (this.data.type == 'contractCall') {
                         if(this.data.callType == 'pay') {
                             this.contractCall()
                         }else {
-                            let call = await this.$helpers.contractCall({ instance:this.contractInstance, method:this.data.tx.method, params:[...this.data.tx.params,{ fee:this.convertSelectedFee}] })
-                            this.setTxInQueue(call.hash)
-                            let decoded = await call.decode()
-                            let msg = `You have sent ${this.data.tx.amount} ${this.data.tx.token}` 
-                            let txUrl = this.network[this.current.network].explorerUrl + '/transactions/' + call.hash
-                            this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer',msg, data:txUrl})
-                            .then(() => {
+                            const call = await this.$helpers.contractCall({ instance:this.contractInstance, method:this.data.tx.method, params:[...this.data.tx.params,{ fee:this.convertSelectedFee}] })
+              });
+              this.setTxInQueue(call.hash);
+              let decoded = await call.decode();
+              let msg = `You have sent ${this.data.tx.amount} ${this.data.tx.token}`;
+              let txUrl = this.network[this.current.network].explorerUrl + '/transactions/' + call.hash;
+              this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(() => {
                                 this.$store.commit('SET_AEPP_POPUP',false)
                                 this.$router.push('/account')
                             })
                         }
                     }else if(this.data.type == 'contractCreate') {
-                        this.contractDeploy()
-                    }else if(this.data.type == 'namePreClaim') {
+            this.contractDeploy();
+          } else if (this.data.type == 'namePreClaim') {
                         this.namePreclaim()
-                    }else if(this.data.type == 'nameClaim') {
+          } else if (this.data.type == 'nameClaim') {
                         this.nameClaim()
                     }else if(this.data.type == 'nameUpdate') {
                         this.nameUpdate()
-                    }else if(this.data.type == 'nameBid') {
+          } else if (this.data.type == 'nameBid') {
                         this.nameClaim()
                     }
                     
@@ -844,30 +870,29 @@ export default {
             return parseFloat(convertAmountToCurrency(currency,amount))
         },
         async checkSourceByteCode(source) {
-            let byteCode = await this.sdk.contractCompile(source)
-            return byteCode
-        },
-        async getDeployedByteCode(address) {
-            let res = await fetch(`https://testnet.mdw.aepps.com/middleware/contracts/transactions/address/${address}`)
-            let txs = await res.json()
-            let byteCode = txs.transactions.find(tx => tx.tx.type == "ContractCreateTx")
-            return byteCode
-        }
+      let byteCode = await this.sdk.contractCompile(source);
+      return byteCode;
     },
+        async getDeployedByteCode(address) {
+            const res = await fetch(`https://testnet.mdw.aepps.com/middleware/contracts/transactions/address/${address}`)
+            const txs = await res.json()
+      let byteCode = txs.transactions.find(tx => tx.tx.type == 'ContractCreateTx');
+      return byteCode;
+    },
+  },
     async beforeDestroy() {
         if(this.data.popup) {
             if(!this.sending) {
                 this.port.postMessage(this.errorTx)
             }   
         }
-        let list = await removeTxFromStorage(this.data.id)
-        browser.storage.local.set({pendingTransaction: { list } }).then(() => {})
-    },
+    let list = await removeTxFromStorage(this.data.id);
+    browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
+  },
     beforeRouteUpdate (to, from, next) {
         next()
-        
-    }
-}
+  },
+};
 </script>
 
 <style lang="scss" scoped>

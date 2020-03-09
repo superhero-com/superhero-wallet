@@ -48,7 +48,7 @@
 
       <div v-show="step === 4">
         <h2>{{ $t('pages.intro.createdWallet') }}</h2>
-        <h4>{{$t('pages.intro.step4text-0')}}</h4>
+        <h4>{{ $t('pages.intro.step4text-0') }}</h4>
         <div class="text-info">
           <span class="mb-4 block">{{ $t('pages.intro.step4text-1') }}</span>
           <span class="mb-4 block"> {{ $t('pages.intro.step4text-2') }} </span>

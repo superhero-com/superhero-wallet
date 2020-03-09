@@ -1,8 +1,11 @@
 <template>
   <label class="checkbox-container">
     <slot class="checkbox-holder"></slot>
-    <input :value="val" v-model="checked" @change="onChange" type="checkbox">
-    <span class="checkmark" :style="checked ? { 'background-image': `url(${checkbox_checked}) !important` } : { 'background-image': `url(${checkbox_unchecked}) !important` }"></span>
+    <input :value="val" v-model="checked" @change="onChange" type="checkbox" />
+    <span
+      class="checkmark"
+      :style="checked ? { 'background-image': `url(${checkbox_checked}) !important` } : { 'background-image': `url(${checkbox_unchecked}) !important` }"
+    ></span>
   </label>
 </template>
 
@@ -47,21 +50,21 @@ export default {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-    input {
-      position: absolute;
-      opacity: 0;
-      cursor: pointer;
-      height: 0;
-      width: 0;
-    }
-    .checkmark {
-      background: no-repeat;
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 20px;
-      width: 20px;
-    }
+  input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  .checkmark {
+    background: no-repeat;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+  }
 }
 .checkbox-holder {
   position: relative;

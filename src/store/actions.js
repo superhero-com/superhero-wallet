@@ -74,7 +74,7 @@ export default {
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.TRANSACTION_FAILED });
             break;
           case 'tx_error':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TRANSACTION_FAILED, msg:payload.msg });
+            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TRANSACTION_FAILED, msg: payload.msg });
             break;
           case 'integer_required':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.INTEGER_REQUIRED });

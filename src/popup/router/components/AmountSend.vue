@@ -43,8 +43,8 @@ export default {
       this.$emit('changeAmount', val);
     },
     value(val) {
-      this.finalAmount = val
-    }
+      this.finalAmount = val;
+    },
   },
   computed: {
     ...mapGetters(['tokenBalance', 'balanceCurrency', 'current', 'currentCurrency']),
