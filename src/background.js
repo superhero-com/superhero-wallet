@@ -2,6 +2,7 @@ import { setInterval } from 'timers';
 import './lib/initPolyfills';
 import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
 import { extractHostName, detectConnectionType } from './popup/utils/helper';
+import { mockLogin } from './popup/utils';
 import WalletController from './wallet-controller';
 import Notification from './notifications';
 import rpcWallet from './lib/rpcWallet';
@@ -11,6 +12,8 @@ import { setController } from './lib/background-utils';
 import { PopupConnections } from './lib/popup-connection';
 
 const controller = new WalletController();
+
+if(process.env.EXTENSION_RUNNING_IN_TESTS_BROWSER) mockLogin()
 
 if (process.env.IS_EXTENSION) {
   setInterval(() => {

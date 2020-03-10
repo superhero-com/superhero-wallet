@@ -15,6 +15,7 @@ import ModalComponent from './components/Modal';
 import * as helper from '../utils/helper';
 import store from '../../store';
 import wallet from '../../lib/wallet';
+import { noRedirectRoutes } from '../utils/config';
 
 const plugin = {
   install() {
@@ -42,21 +43,7 @@ const router = new VueRouter({
 
 let isFirstTransition = true;
 const lastRouteKey = 'lsroute';
-const noRedirectUrls = [
-  '/popup-sign-tx',
-  '/connect',
-  '/connect-confirm',
-  '/sign-transaction/:type?',
-  '/sign-transaction',
-  'sign',
-  '/ask-accounts',
-  '/message-sign',
-  '/success-tip',
-  '/qrCodeReader',
-  '/intro',
-  '/notifications',
-  '/auction-bid',
-];
+
 const noAuthUrls = [
   '/',
   '/importAccount',
@@ -78,7 +65,7 @@ router.beforeEach((to, from, next) => {
     }
   } else {
     wallet.init(route => {
-      if (shouldRedirect && (route == '/' || route == '/account') && !noRedirectUrls.includes(lastRouteName) && lastRouteName.indexOf('/sign-transaction') == -1) {
+      if (shouldRedirect && (route == '/' || route == '/account') && !noRedirectRoutes.includes(lastRouteName) && lastRouteName.indexOf('/sign-transaction') == -1) {
         next(lastRouteName);
       } else if (route) {
         next(route);

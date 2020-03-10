@@ -20,7 +20,8 @@
 import { mapGetters } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import Eye from '../../../icons/eye.svg';
-import { convertToAE, formatDate } from '../../utils/helper';
+import { convertToAE } from '../../utils/helper';
+import { formatDate } from '../../utils';
 import openUrl from '../../utils/openUrl';
 
 export default {

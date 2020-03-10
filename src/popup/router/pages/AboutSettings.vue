@@ -6,9 +6,9 @@
       <span class="version">{{ extensionVersion }}</span>
     </p>
     <hr />
-    <div class="waellet-links">
-      <router-link to="/termsOfService">{{ $t('pages.aboutSettings.terms') }}</router-link>
-      <router-link to="/privacyPolicy">{{ $t('pages.aboutSettings.privacyPolicy') }}</router-link>
+    <div class="waellet-links" >
+      <router-link to="/termsOfService" data-cy="terms">{{ $t('pages.aboutSettings.terms') }}</router-link>
+      <router-link to="/privacyPolicy" data-cy="privacy">{{ $t('pages.aboutSettings.privacyPolicy') }}</router-link>
       <Button @click="bugReport">
         {{ $t('pages.appVUE.reportBug') }}
       </Button>

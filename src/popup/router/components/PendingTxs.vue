@@ -6,7 +6,7 @@
           {{ tr.amount }} {{ $t('pages.appVUE.aeid') }} <span class="text">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
         </span>
         <span class="status" data-cy="status">{{ $t('pages.recentTransactions.pendingStatus') }}</span>
-        <span class="time">{{ txTime(tr.time) }}</span>
+        <span class="time" data-cy="time">{{ txTime(tr.time) }}</span>
       </div>
       <div class="holder">
         <span class="url" data-cy="url">{{ tr.domain }}</span>
@@ -19,7 +19,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
-import { formatDate } from '../../utils/helper';
+import { formatDate } from '../../utils';
 import Eye from '../../../icons/eye.svg';
 
 export default {
