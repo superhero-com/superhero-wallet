@@ -18,6 +18,16 @@ describe("Tests cases for notifications page and icon", () => {
     .urlEquals('/notifications')
   })
 
+  it("should return to account from notifications ", () => {
+    cy
+    .login()
+    .get('[data-cy=noti]')
+    .click()
+    .urlEquals('/notifications')
+    .goBack()
+    .urlEquals('/account')
+  })
+
   it("should not have backup seed notification", () => {
     cy
     .login({ backupSeed: true })
