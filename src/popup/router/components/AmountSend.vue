@@ -7,7 +7,7 @@
       v-model="finalAmount"
       :placeholder="$t('pages.tipPage.amountPlaceholder')"
       :label="$t('pages.tipPage.amountLabel')"
-      data-cy="amount-input"
+      
     />
     <div class="ml-15 text-left" style="margin-right:auto">
       <p class="label hidden">Empty</p>
@@ -50,6 +50,7 @@ export default {
   computed: {
     ...mapGetters(['tokenBalance', 'balanceCurrency', 'current', 'currentCurrency']),
     getCurrencyAmount() {
+      if(isNaN(this.finalAmount)) return "0.000"
       return (this.finalAmount * this.current.currencyRate).toFixed(3);
     },
   },

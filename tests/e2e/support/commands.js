@@ -205,11 +205,19 @@ Cypress.Commands.add('openTip', () => {
   .should('be.visible')
 })
 
+
 Cypress.Commands.add('enterTipDetails', (url = '', amount = 0, note = '') => {
   cy
   .openTip()
   .buttonShouldBeDisabled('[data-cy=send-tip]')
-  .get('[data-cy=amount-input]')
+  .get('[data-cy=input]')
   .type(amount)
-  
+})
+
+Cypress.Commands.add('enterAmountSend', (amount = 0) => {
+  cy
+  .get('[data-cy=input]')
+  .clear()
+  .type(amount)
+  .wait(1000)
 })

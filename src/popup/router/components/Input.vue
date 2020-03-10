@@ -1,7 +1,7 @@
 <template>
   <div class="text-left" :class="labelPosition ? 'input-group' : ''">
     <label class="label" v-if="label" :class="labelPosition ? `label-${labelPosition}` : ''">{{ label }}</label>
-    <input type="text" class="input" :placeholder="placeholder ? placeholder : ''" :class="getClasses" :value="value" @input="$emit('input', $event.target.value)" />
+    <input type="text" class="input" :placeholder="placeholder ? placeholder : ''" :class="getClasses" :value="value" @input="$emit('input', $event.target.value)" data-cy="input" />
   </div>
 </template>
 
