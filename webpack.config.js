@@ -92,11 +92,12 @@ const commonConfig = {
   ],
 };
 
-const genPlatformDependentPlugins = platform => {
+const genPlatformDependentPlugins = (platform, EXTENSION_RUNNING_IN_TESTS_BROWSER = false) => {
   let IS_EXTENSION = platform !== 'cordova';
-  if(process.env.RUNNING_IN_TESTS) {
+  if(process.env.RUNNING_IN_TESTS && !EXTENSION_RUNNING_IN_TESTS_BROWSER) {
     IS_EXTENSION = false;
   }
+  const RUNNING_IN_TESTS = process.env.RUNNING_IN_TESTS && !EXTENSION_RUNNING_IN_TESTS_BROWSER
   const plugins = [
     new webpack.DefinePlugin({
       global: 'window',
@@ -105,7 +106,8 @@ const genPlatformDependentPlugins = platform => {
         IS_EXTENSION,
         npm_package_version: JSON.stringify(process.env.npm_package_version),
         NETWORK: JSON.stringify(process.env.NETWORK),
-        RUNNING_IN_TESTS: JSON.stringify(process.env.RUNNING_IN_TESTS)
+        RUNNING_IN_TESTS: JSON.stringify(RUNNING_IN_TESTS),
+        EXTENSION_RUNNING_IN_TESTS_BROWSER: JSON.stringify(EXTENSION_RUNNING_IN_TESTS_BROWSER),
       },
     }),
   ];
@@ -186,6 +188,19 @@ module.exports = [
       path: path.resolve(__dirname, 'www'),
     },
     plugins: genPlatformDependentPlugins('cordova'),
+  },
+  {
+    /* 
+    * This build is loaded in browser when running integration tests
+    */
+    name: 'extension',
+    output: {
+      path: path.resolve(__dirname, 'dist/extension'),
+    },
+    plugins: [
+      ...genPlatformDependentPlugins('chrome', true),
+      ...process.env.HMR === 'true' ? [new ChromeExtensionReloader({ port: 9098 })] : [],
+    ],
   },
 ].map(c => {
   const customizer = (obj, src) => (Array.isArray(obj) ? obj.concat(src) : undefined);

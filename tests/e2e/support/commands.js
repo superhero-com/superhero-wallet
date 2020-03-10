@@ -1,6 +1,7 @@
 import { mnemonicToSeed } from '@aeternity/bip39';
 import '../../../src/lib/initPolyfills';
-import { setPendingTx, formatDate } from '../../../src/popup/utils'
+import { setPendingTx, formatDate, mockLogin } from '../../../src/popup/utils'
+import { testAccount } from '../../../src/popup/utils/config'
 
 Cypress.Commands.overwrite('visit', (orig, url, options) => {
   url = `popup/popup${url}`
@@ -113,28 +114,13 @@ Cypress.Commands.add('accordionItemShould', (item, cond) => {
 
 Cypress.Commands.add('login', (options = { balance:10 }) => {
   cy
-  .openPopup((win) => {
-    const mnemonic = "media view gym mystery all fault truck target envelope kit drop fade"
-    const seed = mnemonicToSeed(mnemonic).toString('hex')
-    const keypair = {
-      publicKey:"ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5",
-      privateKey: seed
-    }
-    browser.storage.local.set({ userAccount: keypair, isLogged: true, termsAgreed: true });
-    const sub = [];
-    sub.push({
-      name: 'Main Account',
-      publicKey: keypair.publicKey,
-      balance: 0,
-      root: true,
-      aename: options.name || null,
-    });
-    browser.storage.local.set({ subaccounts: sub, activeAccount: 0, mnemonic: mnemonic });
-    if(options.balance) browser.storage.local.set({ tokenBal: options.balance })
+  .openPopup((win) => mockLogin(() => {
+      if(options.balance) browser.storage.local.set({ tokenBal: options.balance })
 
-    if(options.lastRoute) localStorage.setItem("lsroute", options.lastRoute)
-    if(options.backupSeed) browser.storage.local.set({ backed_up_Seed: true })
-  })
+      if(options.lastRoute) localStorage.setItem("lsroute", options.lastRoute)
+      if(options.backupSeed) browser.storage.local.set({ backed_up_Seed: true })
+    })
+  )
 });
 
 Cypress.Commands.add('shouldRedirect', (url, to) => {

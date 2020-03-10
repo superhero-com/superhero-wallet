@@ -41,4 +41,5 @@ describe("Tests cases for about page", () => {
     .click()
     .urlEquals('/privacyPolicy')
   })
+  
 })

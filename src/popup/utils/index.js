@@ -1,3 +1,6 @@
+import { mnemonicToSeed } from '@aeternity/bip39';
+import { testAccount } from './config';
+
 export const setTxInQueue = async tx => {
   const { processingTx } = await browser.storage.local.get('processingTx');
   let list = [];
@@ -31,4 +34,26 @@ export const formatDate = time =>
     day: '2-digit',
     month: '2-digit',
     year: '2-digit',
+});
+
+export const mockLogin = (cb) => {
+  const { mnemonic, publicKey} = testAccount
+  const seed = mnemonicToSeed(mnemonic).toString('hex')
+  const keypair = {
+    publicKey,
+    privateKey: seed
+  }
+  browser.storage.local.set({ userAccount: keypair, isLogged: true, termsAgreed: true });
+  const sub = [];
+  sub.push({
+    name: 'Main Account',
+    publicKey: keypair.publicKey,
+    balance: 0,
+    root: true,
+    aename: null,
   });
+  browser.storage.local.set({ subaccounts: sub, activeAccount: 0, mnemonic: mnemonic });
+  
+  if(cb) cb();
+  
+}
