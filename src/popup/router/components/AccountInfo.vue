@@ -2,7 +2,7 @@
   <div class="account-info">
     <div class="title">
       <img :src="account_icon" />
-      <div class="account-name">
+      <div class="account-name" data-cy="account-name">
         <template v-if="activeAccountName.includes('.chain')">{{ activeAccountName }}</template>
         <router-link to="/names" v-else>Claim your .chain name</router-link>
       </div>

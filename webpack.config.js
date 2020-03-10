@@ -94,7 +94,7 @@ const commonConfig = {
 
 const genPlatformDependentPlugins = platform => {
   let IS_EXTENSION = platform !== 'cordova';
-  if(process.env.TEST) {
+  if(process.env.RUNNING_IN_TESTS) {
     IS_EXTENSION = false;
   }
   const plugins = [
@@ -104,7 +104,8 @@ const genPlatformDependentPlugins = platform => {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         IS_EXTENSION,
         npm_package_version: JSON.stringify(process.env.npm_package_version),
-        NETWORK: JSON.stringify(process.env.NETWORK)
+        NETWORK: JSON.stringify(process.env.NETWORK),
+        RUNNING_IN_TESTS: JSON.stringify(process.env.RUNNING_IN_TESTS)
       },
     }),
   ];

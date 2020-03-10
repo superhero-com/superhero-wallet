@@ -110,7 +110,7 @@ Cypress.Commands.add('accordionItemShould', (item, cond) => {
 
 
 
-Cypress.Commands.add('login', () => {
+Cypress.Commands.add('login', (name = null) => {
   cy
   .openPopup((win) => {
     const mnemonic = "media view gym mystery all fault truck target envelope kit drop fade"
@@ -126,7 +126,7 @@ Cypress.Commands.add('login', () => {
       publicKey: keypair.publicKey,
       balance: 0,
       root: true,
-      aename: null,
+      aename: name,
     });
     browser.storage.local.set({ subaccounts: sub, activeAccount: 0 });
     browser.storage.local.set({ mnemonic: mnemonic });
@@ -169,12 +169,29 @@ Cypress.Commands.add('menuShould', (cond) => {
   .should(cond)
 })
 
-Cypress.Commands.add('openMenuPage', (page) => {
+Cypress.Commands.add('openMenuPage', (page, dropdown = false) => {
   cy
   .openMenu()
+  if(dropdown) {
+    cy.toggleDropdown()
+  }
+  cy
   .get(`[data-cy=${page}]`)
   .click()
   .url()
   .should('eq', `${Cypress.config().baseUrl}popup/popup#/${page}`)
   .menuShould('not.be.visible')
+})
+
+Cypress.Commands.add('toggleDropdown', () => {
+  cy
+  .get('[data-cy=settings]')
+  .click()
+  .get('[data-cy=dropdown]')
+})
+
+Cypress.Commands.add('dropdownShould', (cond) => {
+  cy
+  .get('[data-cy=dropdown]')
+  .should(cond)
 })

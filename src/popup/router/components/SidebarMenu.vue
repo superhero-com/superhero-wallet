@@ -8,7 +8,7 @@
         <ae-identicon class="account-icon" :address="account.publicKey" size="base" />
         <div class="ml-8 mr-auto">
           <div class="f-14">{{ $t('pages.appVUE.mainAccount') }}</div>
-          <div class="f-12" v-if="activeAccountName.includes('.chain')">{{ activeAccountName }}</div>
+          <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">{{ activeAccountName }}</div>
         </div>
       </div>
     </li>
@@ -33,29 +33,29 @@
       </router-link>
     </li> -->
     <li>
-      <button :class="showSettingsDropdown && 'opened'" @click="showSettingsDropdown = !showSettingsDropdown">
+      <button :class="showSettingsDropdown && 'opened'" @click="showSettingsDropdown = !showSettingsDropdown" data-cy="settings">
         {{ $t('pages.appVUE.settings') }}
         <Arrow />
       </button>
       <transition name="slide">
-        <ul v-if="showSettingsDropdown">
+        <ul v-if="showSettingsDropdown" data-cy="dropdown">
           <!-- <li>
             <router-link>
               {{ $t('pages.appVUE.general') }}
             </router-link>
           </li> -->
           <li>
-            <router-link to="/securitySettings">
+            <router-link to="/securitySettings" >
               {{ $t('pages.appVUE.security') }}
             </router-link>
           </li>
           <li>
-            <router-link to="/securitySettings">
+            <router-link to="/securitySettings" data-cy="securitySettings">
               {{ $t('pages.appVUE.seedPhrase') }}
             </router-link>
           </li>
           <li>
-            <router-link to="/generalSettings">
+            <router-link to="/generalSettings" data-cy="generalSettings">
               {{ $t('pages.appVUE.language') }}
             </router-link>
           </li>
