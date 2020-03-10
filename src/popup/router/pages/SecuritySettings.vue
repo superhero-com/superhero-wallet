@@ -1,6 +1,6 @@
 <template>
   <div class="popup">
-    <div v-if="type == ''">
+    <div data-cy="seed-phrase-backup-window" v-if="type == ''">
       <div class="maindiv_input-group-addon">
         <h4>{{ $t('pages.securitySettings.seedRecoveryHeading') }}</h4>
         <hr />
