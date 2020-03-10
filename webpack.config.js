@@ -13,6 +13,18 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const mode =  process.env.NODE_ENV === 'production' ? '' : '_dev';
 const transformHtml = content => ejs.render(content.toString(), process.env);
 
+const commonPlugins = [
+  new CleanWebpackPlugin({
+    cleanStaleWebpackAssets: false,
+  }),
+  new VueLoaderPlugin(),
+  new MiniCssExtractPlugin({
+    filename: '[name].css',
+    chunkFilename: '[id].css',
+    ignoreOrder: false,
+  }),
+]
+
 const commonConfig = {
   mode: process.env.NODE_ENV,
   context: path.resolve(__dirname, 'src'),
@@ -22,7 +34,7 @@ const commonConfig = {
     'popup/popup': './popup/popup.js',
     'options/options': './options/options.js',
     'phishing/phishing': './phishing/phishing.js',
-    'popup/cameraPermission': './popup/cameraPermission.js',
+    'popup/cameraPermission': './popup/cameraPermission.js'
   },
   node: { fs: 'empty', net: 'empty', tls: 'empty' },
   output: {
@@ -72,15 +84,7 @@ const commonConfig = {
     ],
   },
   plugins: [
-    new CleanWebpackPlugin({
-      cleanStaleWebpackAssets: false,
-    }),
-    new VueLoaderPlugin(),
-    new MiniCssExtractPlugin({
-      filename: '[name].css',
-      chunkFilename: '[id].css',
-      ignoreOrder: false,
-    }),
+    ...commonPlugins,
     new CopyWebpackPlugin([
       { from: 'icons', to: `icons`, ignore: ['icon.xcf'] },
       { from: 'popup/popup.html', to: `popup/popup.html`, transform: transformHtml },
@@ -202,7 +206,28 @@ module.exports = [
       ...process.env.HMR === 'true' ? [new ChromeExtensionReloader({ port: 9098 })] : [],
     ],
   },
+  {
+    /* 
+    * This build is loaded in browser when running integration tests
+    */
+    name: 'aepp',
+    entry: {
+      aepp: './aepp/aepp.js',
+    },
+    output: {
+      path: path.resolve(__dirname, 'dist/aepp'),
+    },
+    plugins: [
+      ...genPlatformDependentPlugins('aepp', true),
+      ...[ new CopyWebpackPlugin([ { from: 'aepp/aepp.html', to: `aepp.html`, transform: transformHtml }])]
+    ],
+  }
 ].map(c => {
+  const config = { ...commonConfig }
+  if(c.name === "aepp") {
+    config.entry = { }
+    config.plugins = commonPlugins
+  }
   const customizer = (obj, src) => (Array.isArray(obj) ? obj.concat(src) : undefined);
-  return mergeWith({}, commonConfig, c, customizer);
+  return mergeWith({}, config, c, customizer);
 });

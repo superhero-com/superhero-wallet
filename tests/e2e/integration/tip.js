@@ -113,7 +113,7 @@ describe("Test cases for tip page", () => {
     .get('[data-cy=tip-container]')
     .should('be.visible')
     .url()
-    .should('eq', `${Cypress.config().baseUrl}popup/popup#/tip`)
+    .should('eq', `${Cypress.config().popupUrl}/popup#/tip`)
     
   })
 
@@ -126,7 +126,7 @@ describe("Test cases for tip page", () => {
     .get('[data-cy=balance-info]')
     .should('be.visible')
     .url()
-    .should('eq', `${Cypress.config().baseUrl}popup/popup#/account`)
+    .should('eq', `${Cypress.config().popupUrl}/popup#/account`)
   })
 
   

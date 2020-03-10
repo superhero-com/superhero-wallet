@@ -36,7 +36,7 @@ export const formatDate = time =>
     year: '2-digit',
 });
 
-export const mockLogin = (cb) => {
+export const mockLogin = (options = {}) => {
   const { mnemonic, publicKey} = testAccount
   const seed = mnemonicToSeed(mnemonic).toString('hex')
   const keypair = {
@@ -50,10 +50,13 @@ export const mockLogin = (cb) => {
     publicKey: keypair.publicKey,
     balance: 0,
     root: true,
-    aename: null,
+    aename: options.name ? options.name :  null,
   });
   browser.storage.local.set({ subaccounts: sub, activeAccount: 0, mnemonic: mnemonic });
   
-  if(cb) cb();
+  if(options.balance) browser.storage.local.set({ tokenBal: options.balance })
+
+  if(options.lastRoute) localStorage.setItem("lsroute", options.lastRoute)
+  if(options.backupSeed) browser.storage.local.set({ backed_up_Seed: true })
   
 }

@@ -3,13 +3,13 @@ import '../../../src/lib/initPolyfills';
 import { setPendingTx, formatDate, mockLogin } from '../../../src/popup/utils'
 import { testAccount } from '../../../src/popup/utils/config'
 
-Cypress.Commands.overwrite('visit', (orig, url, options) => {
-  url = `popup/popup${url}`
-  return orig(url, options)
-})
+// Cypress.Commands.overwrite('visit', (orig, url, options) => {
+//   url = `popup/popup${url}`
+//   return orig(url, options)
+// })
 
 Cypress.Commands.add('openPopup', (onBeforeLoad) => {
-  cy.visit('', { onBeforeLoad })
+  cy.visit('chrome/popup/popup', { onBeforeLoad })
 })
 
 Cypress.Commands.add('termsAgree', () => {
@@ -114,20 +114,14 @@ Cypress.Commands.add('accordionItemShould', (item, cond) => {
 
 Cypress.Commands.add('login', (options = { balance:10 }) => {
   cy
-  .openPopup((win) => mockLogin(() => {
-      if(options.balance) browser.storage.local.set({ tokenBal: options.balance })
-
-      if(options.lastRoute) localStorage.setItem("lsroute", options.lastRoute)
-      if(options.backupSeed) browser.storage.local.set({ backed_up_Seed: true })
-    })
-  )
+  .openPopup((win) => mockLogin(options))
 });
 
 Cypress.Commands.add('shouldRedirect', (url, to) => {
   cy
-  .visit(`#${url}`)
+  .visit(`chrome/popup/popup#${url}`)
   .url()
-  .should('eq',`${Cypress.config().baseUrl}popup/popup#${to}`)
+  .should('eq',`${Cypress.config().popupUrl}/popup#${to}`)
 })
 
 
@@ -169,7 +163,7 @@ Cypress.Commands.add('openMenuPage', (page, dropdown = false) => {
   .get(`[data-cy=${page}]`)
   .click()
   .url()
-  .should('eq', `${Cypress.config().baseUrl}popup/popup#/${page}`)
+  .should('eq', `${Cypress.config().popupUrl}/popup#/${page}`)
   .menuShould('not.be.visible')
 })
 
@@ -243,13 +237,13 @@ Cypress.Commands.add('sendTip', (tip = {}) => {
   .get('[data-cy=balance-info]')
   .should('be.visible')
   .url()
-  .should('eq', `${Cypress.config().baseUrl}popup/popup#/account`)
+  .should('eq', `${Cypress.config().popupUrl}/popup#/account`)
   .get('[data-cy=pending-txs]')
   .should('be.visible')
   .get('[data-cy=success-tip]')
   .should('be.visible')
   .url()
-  .should('eq', `${Cypress.config().baseUrl}popup/popup#/success-tip`)
+  .should('eq', `${Cypress.config().popupUrl}/popup#/success-tip`)
   .get('[data-cy=tip-amount]')
   .should('contain',tip.amount)
   .get('[data-cy=tip-url]')
@@ -297,5 +291,5 @@ Cypress.Commands.add('setPendingTx', (tx) => {
 Cypress.Commands.add('urlEquals', (route) => {
   cy
   .url()
-  .should('eq', `${Cypress.config().baseUrl}popup/popup#${route}`)
+  .should('eq', `${Cypress.config().popupUrl}/popup#${route}`)
 })
