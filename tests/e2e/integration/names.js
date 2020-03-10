@@ -1,7 +1,7 @@
 const name = "test.chain"
 describe("Test cases for names", () => {
   beforeEach(() => {
-    cy.login(name)
+    cy.login({ name })
   })
 
 

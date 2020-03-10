@@ -88,7 +88,7 @@ export default {
       let triggerOnce = false;
       this.polling = setInterval(async () => {
         if (this.sdk != null && this.isLoggedIn) {
-          this.$store.dispatch('updateBalance');
+          if(!process.env.RUNNING_IN_TESTS) this.$store.dispatch('updateBalance');
           if (!triggerOnce) {
             this.$store.dispatch('getRegisteredNames');
             triggerOnce = true;

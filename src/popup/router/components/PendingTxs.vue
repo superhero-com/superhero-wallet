@@ -1,15 +1,15 @@
 <template>
-  <div v-if="transactions.pending.length">
+  <div v-if="transactions.pending.length" data-cy="pending-txs">
     <ae-list-item v-for="tr in transactions.pending" :key="tr.hash" fill="neutral" class="list-item-transaction">
       <div class="holder">
-        <span class="amount">
+        <span class="amount" data-cy="amount">
           {{ tr.amount }} {{ $t('pages.appVUE.aeid') }} <span class="text">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
         </span>
-        <span class="status">{{ $t('pages.recentTransactions.pendingStatus') }}</span>
+        <span class="status" data-cy="status">{{ $t('pages.recentTransactions.pendingStatus') }}</span>
         <span class="time">{{ txTime(tr.time) }}</span>
       </div>
       <div class="holder">
-        <span class="url">{{ tr.domain }}</span>
+        <span class="url" data-cy="url">{{ tr.domain }}</span>
         <span class="seeTransaction"><Eye /></span>
       </div>
     </ae-list-item>

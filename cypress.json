@@ -6,5 +6,6 @@
   "viewportWidth": 400,
   "viewportHeight": 660,
   "numTestsKeptInMemory": 1,
-  "chromeWebSecurity": false
+  "chromeWebSecurity": false,
+  "defaultCommandTimeout": 30000
 }

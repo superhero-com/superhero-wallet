@@ -16,8 +16,8 @@
     </div>
     <div class="balance-box">
       <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
-      <span class="secondary-text f-14 block l-1">{{ tokenBalance }} {{ $t('pages.appVUE.aeid') }}</span>
-      <span class="f-14 block l-1">{{ balanceCurrency }} {{ currentCurrency }}</span>
+      <span class="secondary-text f-14 block l-1" data-cy="balance">{{ tokenBalance }} {{ $t('pages.appVUE.aeid') }}</span>
+      <span class="f-14 block l-1" data-cy="balance-currency">{{ balanceCurrency }} {{ currentCurrency }}</span>
     </div>
   </div>
 </template>

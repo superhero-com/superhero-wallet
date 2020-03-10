@@ -1,8 +1,9 @@
 
+const balance = 10
 describe("Test cases AmountSend component", () => {
   beforeEach(() => {
     cy
-    .login()
+    .login({ balance })
     .openTip()
   })
 
@@ -22,14 +23,26 @@ describe("Test cases AmountSend component", () => {
   it("should validate entered amount", () => {
     cy
     .enterAmountSend('asd')
-    .inputShouldHaveError('[data-cy=input]')
+    .inputShouldHaveError('[data-cy=input-number]')
     .get('[data-cy=amount-currency]')
     .invoke('text')
     .then(text => expect(text).to.eq('0.000 USD'))
     .enterAmountSend(0)
-    .get('[data-cy=input]')
+    .get('[data-cy=input-number]')
+    .should('have.class','has-error')
+    .enterAmountSend(0.1)
+    .get('[data-cy=input-number]')
     .should('not.have.class','has-error')
   })
 
-  
+  it("should show correct balance", () => {
+    cy
+    .get('[data-cy=balance]')
+    .invoke('text')
+    .then(text => expect(text).to.eq(`${balance.toFixed(3)} AE`))
+    .get('[data-cy=balance-currency]')
+    .invoke('text')
+    .then(text => expect(text).not.to.eq('0.000 USD'))
+  })
+
 })

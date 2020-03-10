@@ -110,7 +110,7 @@ Cypress.Commands.add('accordionItemShould', (item, cond) => {
 
 
 
-Cypress.Commands.add('login', (name = null) => {
+Cypress.Commands.add('login', (options = { balance:10 }) => {
   cy
   .openPopup((win) => {
     const mnemonic = "media view gym mystery all fault truck target envelope kit drop fade"
@@ -126,10 +126,12 @@ Cypress.Commands.add('login', (name = null) => {
       publicKey: keypair.publicKey,
       balance: 0,
       root: true,
-      aename: name,
+      aename: options.name || null,
     });
-    browser.storage.local.set({ subaccounts: sub, activeAccount: 0 });
-    browser.storage.local.set({ mnemonic: mnemonic });
+    browser.storage.local.set({ subaccounts: sub, activeAccount: 0, mnemonic: mnemonic });
+    if(options.balance) {
+      browser.storage.local.set({ tokenBal: options.balance })
+    }
   })
 });
 
@@ -198,7 +200,7 @@ Cypress.Commands.add('dropdownShould', (cond) => {
 
 Cypress.Commands.add('openTip', () => {
   cy
-  .get('[data-cy=tip-page]')
+  .get('[data-cy=tip-button]')
   .should('be.visible')
   .click()
   .get('[data-cy=tip-container]')
@@ -206,18 +208,86 @@ Cypress.Commands.add('openTip', () => {
 })
 
 
-Cypress.Commands.add('enterTipDetails', (url = '', amount = 0, note = '') => {
+Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '' }) => {
+  cy.get('[data-cy=input-number]').clear()
+  if(amount || amount === 0) {
+    cy.get('[data-cy=input-number]').type(amount)
+  }
+
+  cy.get('[data-cy=textarea]').clear()
+  if(note) cy.get('[data-cy=textarea]').type(note)
+
+  if(url) {
+    cy
+    .get('[data-cy=edit-url]')
+    .click()
+    .get('[data-cy=input]')
+    .clear()
+    .type(url)
+    .get('[data-cy=confirm-url]')
+    .click()
+  }
+})
+
+Cypress.Commands.add('toConfirmTip', (tip = {}) => {
+  if(!tip.onTip) cy.openTip()
   cy
-  .openTip()
-  .buttonShouldBeDisabled('[data-cy=send-tip]')
-  .get('[data-cy=input]')
-  .type(amount)
+  .enterTipDetails({ ...tip })
+  .buttonShouldNotBeDisabled('[data-cy=send-tip]')
+  .get('[data-cy=send-tip]')
+  .click()
+  .get('[data-cy=confirm-tip]')
+  .should('be.visible')
+  .buttonShouldNotBeDisabled('[data-cy=confirm-tip]')
+  .get('[data-cy=tip-amount]')
+  .should('contain', tip.amount)
+  .get('[data-cy=tip-url]')
+  .should('contain', tip.url)
+  .get('[data-cy=tip-note]')
+  .should('contain', tip.note)
+})
+
+Cypress.Commands.add('sendTip', (tip = {}) => {
+  cy
+  .toConfirmTip({ ...tip })
+  .get('[data-cy=confirm-tip]')
+  .click()
+  .get('[data-cy=balance-info]')
+  .should('be.visible')
+  .url()
+  .should('eq', `${Cypress.config().baseUrl}popup/popup#/account`)
+  .get('[data-cy=pending-txs]')
+  .should('be.visible')
+  .get('[data-cy=success-tip]')
+  .should('be.visible')
+  .url()
+  .should('eq', `${Cypress.config().baseUrl}popup/popup#/success-tip`)
+  .get('[data-cy=tip-amount]')
+  .should('contain',tip.amount)
+  .get('[data-cy=tip-url]')
+  .should('contain',tip.url)
+})
+
+Cypress.Commands.add('pendingTx', (tx = {}) => {
+  const txItem = cy.get('[data-cy=pending-txs] li').eq(0)
+  txItem.find('[data-cy=amount]').should('contain',tx.amount)
+  txItem.find('[data-cy=status]').should('contain','Pending')
+  if(tx.url) txItem.find('[data-cy=url]').should('contain',tx.url)
 })
 
 Cypress.Commands.add('enterAmountSend', (amount = 0) => {
   cy
-  .get('[data-cy=input]')
+  .get('[data-cy=input-number]')
   .clear()
   .type(amount)
   .wait(1000)
 })
+
+
+Cypress.Commands.add('goBack', (amount = 0) => {
+  cy
+  .get('[data-cy=back-arrow]')
+  .click()
+})
+
+
