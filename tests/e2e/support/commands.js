@@ -133,7 +133,7 @@ Cypress.Commands.add('login', (options = { balance:10 }) => {
     if(options.balance) browser.storage.local.set({ tokenBal: options.balance })
 
     if(options.lastRoute) localStorage.setItem("lsroute", options.lastRoute)
-    
+    if(options.backupSeed) browser.storage.local.set({ backed_up_Seed: true })
   })
 });
 
