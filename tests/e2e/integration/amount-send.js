@@ -40,6 +40,7 @@ describe("Test cases AmountSend component", () => {
     .get('[data-cy=balance]')
     .invoke('text')
     .then(text => expect(text).to.eq(`${balance.toFixed(3)} AE`))
+    .wait(2000)
     .get('[data-cy=balance-currency]')
     .invoke('text')
     .then(text => expect(text).not.to.eq('0.000 USD'))
