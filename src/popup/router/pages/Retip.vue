@@ -90,8 +90,8 @@ export default {
   },
   methods: {
     openCallbackOrGoHome(paramName) {
-      const cancelUrl = this.urlParams.get(paramName);
-      if (cancelUrl) openUrl(cancelUrl);
+      const callbackUrl = this.urlParams.get(paramName);
+      if (callbackUrl) openUrl(decodeURIComponent(callbackUrl));
       else this.$router.push('/account');
     },
     async sendTip() {
