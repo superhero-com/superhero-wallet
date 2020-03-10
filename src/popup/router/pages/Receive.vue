@@ -4,7 +4,7 @@
       {{ $t('pages.receive.heading') }}
     </p>
     <AccountInfo />
-    <qrcode-vue :value="account.publicKey" size="140" class="my-25"></qrcode-vue>
+    <qrcode-vue :value="account.publicKey" size="140" class="my-25 qrcode"></qrcode-vue>
     <div class="text-left mx-20">
       <!-- <a @click="exchange" class="block mt-15">{{ $t('pages.receive.transferExchange') }}</a> -->
       <!-- <div class="flex flex flex-align-center flex-justify-between mt-20 mb-35">
@@ -57,3 +57,8 @@ export default {
   },
 };
 </script>
+<style>
+.qrcode canvas {
+   border:5px solid #fff;
+}
+</style>
