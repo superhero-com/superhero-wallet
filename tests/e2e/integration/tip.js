@@ -128,4 +128,6 @@ describe("Test cases for tip page", () => {
     .url()
     .should('eq', `${Cypress.config().baseUrl}popup/popup#/account`)
   })
+
+  
 })

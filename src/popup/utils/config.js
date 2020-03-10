@@ -1,0 +1,15 @@
+export const noRedirectRoutes = [
+  '/popup-sign-tx',
+  '/connect',
+  '/connect-confirm',
+  '/sign-transaction/:type?',
+  '/sign-transaction',
+  '/sign',
+  '/ask-accounts',
+  '/message-sign',
+  '/success-tip',
+  '/qrCodeReader',
+  '/intro',
+  '/notifications',
+  '/auction-bid',
+];

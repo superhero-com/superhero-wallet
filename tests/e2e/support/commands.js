@@ -1,5 +1,6 @@
 import { mnemonicToSeed } from '@aeternity/bip39';
 import '../../../src/lib/initPolyfills';
+import { setPendingTx, formatDate } from '../../../src/popup/utils'
 
 Cypress.Commands.overwrite('visit', (orig, url, options) => {
   url = `popup/popup${url}`
@@ -129,9 +130,10 @@ Cypress.Commands.add('login', (options = { balance:10 }) => {
       aename: options.name || null,
     });
     browser.storage.local.set({ subaccounts: sub, activeAccount: 0, mnemonic: mnemonic });
-    if(options.balance) {
-      browser.storage.local.set({ tokenBal: options.balance })
-    }
+    if(options.balance) browser.storage.local.set({ tokenBal: options.balance })
+
+    if(options.lastRoute) localStorage.setItem("lsroute", options.lastRoute)
+    
   })
 });
 
@@ -273,6 +275,7 @@ Cypress.Commands.add('pendingTx', (tx = {}) => {
   txItem.find('[data-cy=amount]').should('contain',tx.amount)
   txItem.find('[data-cy=status]').should('contain','Pending')
   if(tx.url) txItem.find('[data-cy=url]').should('contain',tx.url)
+  if(tx.time) txItem.find('[data-cy=time]').should('contain',formatDate(tx.time))
 })
 
 Cypress.Commands.add('enterAmountSend', (amount = 0) => {
@@ -290,4 +293,23 @@ Cypress.Commands.add('goBack', (amount = 0) => {
   .click()
 })
 
+Cypress.Commands.add('storageSet', (key, value) => {
+  return new Cypress.Promise(async (resolve, reject) => {
+    await browser.storage.local.set({ [key]: value })
+    resolve()
+  })
+})
 
+
+Cypress.Commands.add('setPendingTx', (tx) => {
+  return new Cypress.Promise(async (resolve, reject) => {
+    await setPendingTx(tx)
+    resolve()
+  })
+})
+
+Cypress.Commands.add('urlEquals', (route) => {
+  cy
+  .url()
+  .should('eq', `${Cypress.config().baseUrl}popup/popup#${route}`)
+})

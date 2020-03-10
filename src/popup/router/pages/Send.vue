@@ -95,7 +95,8 @@
 import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
-import { contractEncodeCall, checkAddress, chekAensName, setPendingTx, checkHashType } from '../../utils/helper';
+import { contractEncodeCall, checkAddress, chekAensName, checkHashType } from '../../utils/helper';
+import { setPendingTx } from '../../utils';
 import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
