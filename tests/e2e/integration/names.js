@@ -1,5 +1,5 @@
 const name = "test.chain"
-describe("Test cases for menu sidebar component", () => {
+describe("Test cases for names", () => {
   beforeEach(() => {
     cy.login(name)
   })

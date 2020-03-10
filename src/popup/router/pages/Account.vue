@@ -11,7 +11,7 @@
       <AccountInfo />
       <BalanceInfo />
       <div class="height-100 secondary-bg">
-        <Button v-if="IS_EXTENSION" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
+        <Button v-if="IS_EXTENSION || RUNNING_IN_TESTS" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips" data-cy="tip-page">
           <div class="flex flex-align-center flex-justify-content-center">
             <Heart />
             <span class="ml-5">{{ $t('pages.account.send') }}</span>
@@ -46,6 +46,7 @@ export default {
     return {
       backup_seed_notif: false,
       IS_EXTENSION: process.env.IS_EXTENSION,
+      RUNNING_IN_TESTS:  process.env.RUNNING_IN_TESTS
     };
   },
   computed: {

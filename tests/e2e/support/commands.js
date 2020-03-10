@@ -195,3 +195,21 @@ Cypress.Commands.add('dropdownShould', (cond) => {
   .get('[data-cy=dropdown]')
   .should(cond)
 })
+
+Cypress.Commands.add('openTip', () => {
+  cy
+  .get('[data-cy=tip-page]')
+  .should('be.visible')
+  .click()
+  .get('[data-cy=tip-container]')
+  .should('be.visible')
+})
+
+Cypress.Commands.add('enterTipDetails', (url = '', amount = 0, note = '') => {
+  cy
+  .openTip()
+  .buttonShouldBeDisabled('[data-cy=send-tip]')
+  .get('[data-cy=amount-input]')
+  .type(amount)
+  
+})
