@@ -80,6 +80,9 @@ export default {
     padding: 3px 10px;
   }
 }
+.currenciesgroup li:first-of-type {
+  z-index: 1;
+}
 .currenciesgroup li {
   list-style-type: none;
 }

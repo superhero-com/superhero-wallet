@@ -207,6 +207,15 @@ Cypress.Commands.add('openTip', () => {
   .should('be.visible')
 })
 
+Cypress.Commands.add('openWithdraw', () => {
+  cy
+  .get('[data-cy=hamburger]')
+  .click()
+  .menuShould('be.visible')
+  .get('[data-cy=send]')
+  .click()
+})
+
 
 Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '' }) => {
   cy.get('[data-cy=input-number]').clear()
@@ -290,4 +299,11 @@ Cypress.Commands.add('goBack', (amount = 0) => {
   .click()
 })
 
+Cypress.Commands.add('enterAddress', (address) => {
+  cy
+  .get('[data-cy=address]')
+  .clear()
+  .type(address)
+  .wait(1000)
+})
 
