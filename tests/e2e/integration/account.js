@@ -3,20 +3,20 @@ describe("Test cases for Account Page" , () => {
         cy.login()
     })
 
-    // it("Check if button for seed phrase backup disappear", () => {
-    //     cy
-    //     .wait(2000)
-    //     .get('[data-cy=seed-notif]')
-    //     .should('not.be.visible')
-    // })
+    it("Check if button for seed phrase backup disappear", () => {
+        cy
+        .wait(2000)
+        .get('[data-cy=seed-notif]')
+        .should('not.be.visible')
+    })
     
-    // it("Sidebar open and close", () => {
-    //     cy
-    //     .openMenu()
-    //     .menuShould('be.visible')
-    //     .closeMenu()
-    //     .menuShould('not.be.visible')
-    // })
+    it("Sidebar open and close", () => {
+        cy
+        .openMenu()
+        .menuShould('be.visible')
+        .closeMenu()
+        .menuShould('not.be.visible')
+    })
 
     it("Check copy button", () => {
         cy
@@ -71,6 +71,19 @@ describe("Test cases for Account Page" , () => {
         .click()
         .get('[data-cy=how-to-claim-button]')
         .should('be.visible')
+    })
+
+    it("Check Currency Dropdown Button And Back to Account", () => {
+        cy
+        .get('[data-cy=toggle-currency-dropdown]')
+        .should('be.visible')
+        .click()
+        .get('#currencies')
+        .should('have.class','show')
+        .get('[data-cy=toggle-currency-dropdown]')
+        .click()
+        .get('#currencies')
+        .should('not.have.class','show')
     })
 
 })

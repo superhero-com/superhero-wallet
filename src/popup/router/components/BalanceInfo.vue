@@ -10,7 +10,7 @@
         <span class="approx-sign">~</span>
         <li id="currencies" class="have-subDropdown" :class="dropdown.currencies ? 'show' : ''">
           <div class="input-group-area">
-            <ae-button @click="toggleDropdown($event, '.have-subDropdown')">
+            <ae-button data-cy="toggle-currency-dropdown" @click="toggleDropdown($event, '.have-subDropdown')">
               {{ balanceCurrency }}
               <span class="accent-text">{{ currentCurrency }}</span>
               <DropdownArrow />
