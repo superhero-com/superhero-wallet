@@ -1,11 +1,18 @@
 <template>
   <div>
-    <div v-if="wallet.address">
+    <p data-cy="wallet-found" v-if="wallet.found">Wallet found</p>
+    <div v-if="wallet.address && wallet.name" data-cy="wallet-info">
       <p data-cy="wallet-address">{{ wallet.address }}</p>
       <p data-cy="wallet-balance">{{ wallet.balance }}</p>
       <p data-cy="wallet-name">{{ wallet.name }}</p>
       <button data-cy="wallet-sign-msg" @click="sign">Sign Msg</button>
+      <button data-cy="contract-call" @click="contractCall('statefull')">Contract Call</button>
+      <button data-cy="contract-call-static" @click="contractCall('static')">Contract Call Static</button>
+      <button data-cy="send" @click="spend">Spend</button>
       <p data-cy="message-valid" v-if="message.valid">{{ message.sig }}</p>
+      <p data-cy="contract-call-res" v-if="contractCallRes">{{ contractCallRes }}</p>
+      <p data-cy="contract-call-static-res" v-if="contractCallStaticRes">{{ contractCallStaticRes }}</p>
+      <p data-cy="send-res" v-if="sendRes">{{ sendRes }}</p>
     </div>
     
   </div>
@@ -37,43 +44,90 @@ export default {
         wallet: {
           address:null,
           balance:0,
-          name:null
+          name:null,
+          found: false
         },
         message: {
           valid:false,
           sig:null
-        }
+        },
+        contractCallRes: null,
+        contractCallStaticRes: null,
+        sendRes: null,
+        contractCode: `@compiler >= 4
+contract Example =
+  record state = { b: bytes(32) }
+  entrypoint init() : state = { b = #aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa }
+  entrypoint get_bytes() : bytes(32) = state.b
+  stateful entrypoint set_bytes(x: bytes(32)) = put(state{ b = x })`,
+        contractAddress: 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio'
+
       }
   },
   async created () {
       window !== window.parent || await this.getReverseWindow()
-      const node = await Node({ url: networks[process.env.NETWORK].NODE_URL, internalUrl:  networks[process.env.NETWORK].NODE_INTERNAL_URL })
-      this.client = await RpcAepp({
-        name: 'AEPP',
-        nodes: [
-            { name: process.env.NETWORK, instance: node },
-        ],
-        compilerUrl: networks[process.env.NETWORK].COMPILER_URL,
-        onNetworkChange (params) {
-          if (this.getNetworkId() !== params.networkId) alert(`Connected network ${this.getNetworkId()} is not supported with wallet network ${params.networkId}`)
-        },
-        onAddressChange:  async (addresses) => {
-          this.wallet.address = await this.client.address()
-          this.wallet.balance = await this.client.balance(this.pub).catch(e => '0')
-        },
-        onDisconnect (a) {
+      this.initClient()
+      setInterval(async () =>{
+        if(this.client && !this.wallet.found) {
+          await this.scanForWallets()
         }
-      })
-      this.height = await this.client.height()
-      console.log("client", this.client)
-      await this.scanForWallets()
+      },2500)
     },
     methods: {
+      async initClient() {
+        const node = await Node({ url: networks[process.env.NETWORK].NODE_URL, internalUrl:  networks[process.env.NETWORK].NODE_INTERNAL_URL })
+        this.client = await RpcAepp({
+          name: 'AEPP',
+          nodes: [
+              { name: process.env.NETWORK, instance: node },
+          ],
+          compilerUrl: networks[process.env.NETWORK].COMPILER_URL,
+          onNetworkChange (params) {
+            if (this.getNetworkId() !== params.networkId) alert(`Connected network ${this.getNetworkId()} is not supported with wallet network ${params.networkId}`)
+          },
+          onAddressChange:  async (addresses) => {
+            this.wallet.address = await this.client.address()
+            this.wallet.balance = await this.client.balance(this.pub).catch(e => '0')
+          },
+          onDisconnect (a) {
+          }
+        })
+        
+      },
+      async spend() {
+        const spend = await this.client.spend(1000000000000000,"ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q", { payload: '' })
+        if(spend.hash) {
+          this.sendRes = spend
+        }
+      },
+      async contractCall(type) {
+        const compile = (await this.client.contractCompile(this.contractCode)).bytecode
+        const deploy = await this.client.contractDeploy(
+            compile, this.contractCode, []
+        )
+        if(type === 'statefull') {
+          
+          const result = await this.client.contractCall(
+            this.contractCode, deploy.address, 'set_bytes',  ["#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+          )
+          if(result.hash) {
+            this.contractCallRes = result
+          }
+        } else if(type === 'static') {
+          const result = await this.client.contractCall(
+            this.contractCode, deploy.address, 'get_bytes',  []
+          )
+          if(result.hash) {
+            this.contractCallStaticRes = result
+          }
+        }
+      },
       async sign() {
         this.message.sig = await this.client.signMessage('test');
         this.message.valid = await this.client.verifyMessage('test', this.message.sig)
       },
       async getReverseWindow() {
+        console.log("get iframe")
         const iframe = document.createElement('iframe')
         // iframe.src = prompt('Enter wallet URL', 'http://localhost:9000')
         iframe.src = ''
@@ -88,13 +142,13 @@ export default {
         this.wallet = {
           address,
           balance :await this.client.getBalance(address),
-          name:this.client.rpcClient.info.name
+          name:this.client.rpcClient.info.name,
+          found: true
         }
       },
       async scanForWallets () {
         try {
           const handleWallets = async function ({ wallets, newWallet }) {
-            console.log("wallets", wallets)
             newWallet = newWallet || Object.values(wallets)[0]
             // if (confirm(`Do you want to connect to wallet ${newWallet.name}`)) {
               
@@ -108,14 +162,11 @@ export default {
           const scannerConnection = await BrowserWindowMessageConnection({
             connectionInfo: { id: 'spy' }
           })
-          console.log(scannerConnection)
           this.detector = await Detector({ connection: scannerConnection })
           this.detector.scan(handleWallets.bind(this))
-          console.log(this.detector)
         } catch(e) {
           console.log(e)
         }
-        
       }
     
     }

@@ -1,7 +1,5 @@
-import { mnemonicToSeed } from '@aeternity/bip39';
 import '../../../src/lib/initPolyfills';
 import { setPendingTx, formatDate, mockLogin } from '../../../src/popup/utils'
-import { testAccount } from '../../../src/popup/utils/config'
 
 // Cypress.Commands.overwrite('visit', (orig, url, options) => {
 //   url = `popup/popup${url}`
@@ -13,7 +11,13 @@ Cypress.Commands.add('openPopup', (onBeforeLoad) => {
 })
 
 Cypress.Commands.add('openAepp', (onBeforeLoad) => {
-  cy.visit('aepp/aepp', { onBeforeLoad })
+  cy
+  .wait(1500)
+  .visit('aepp/aepp', { onBeforeLoad })
+  .get('[data-cy=wallet-found]')
+  .should('be.visible')
+  .get('[data-cy=wallet-info]')
+  .should('be.visible')
 })
 
 Cypress.Commands.add('termsAgree', () => {
@@ -118,7 +122,7 @@ Cypress.Commands.add('accordionItemShould', (item, cond) => {
 
 Cypress.Commands.add('login', (options = { balance:10 }) => {
   cy
-  .openPopup((win) => mockLogin(options))
+  .openPopup(async (win) => await mockLogin(options))
 });
 
 Cypress.Commands.add('shouldRedirect', (url, to) => {

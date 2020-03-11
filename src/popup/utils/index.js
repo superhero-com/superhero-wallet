@@ -36,14 +36,14 @@ export const formatDate = time =>
     year: '2-digit',
 });
 
-export const mockLogin = (options = {}) => {
+export const mockLogin = async (options = {}) => {
   const { mnemonic, publicKey} = testAccount
   const seed = mnemonicToSeed(mnemonic).toString('hex')
   const keypair = {
     publicKey,
     privateKey: seed
   }
-  browser.storage.local.set({ userAccount: keypair, isLogged: true, termsAgreed: true });
+  await browser.storage.local.set({ userAccount: keypair, isLogged: true, termsAgreed: true });
   const sub = [];
   sub.push({
     name: 'Main Account',
@@ -52,11 +52,10 @@ export const mockLogin = (options = {}) => {
     root: true,
     aename: options.name ? options.name :  null,
   });
-  browser.storage.local.set({ subaccounts: sub, activeAccount: 0, mnemonic: mnemonic });
+  await browser.storage.local.set({ subaccounts: sub, activeAccount: 0, mnemonic: mnemonic });
   
-  if(options.balance) browser.storage.local.set({ tokenBal: options.balance })
-
-  if(options.lastRoute) localStorage.setItem("lsroute", options.lastRoute)
-  if(options.backupSeed) browser.storage.local.set({ backed_up_Seed: true })
+  if(options.balance) await browser.storage.local.set({ tokenBal: options.balance })
+  if(options.lastRoute) await localStorage.setItem("lsroute", options.lastRoute)
+  if(options.backupSeed) await browser.storage.local.set({ backed_up_Seed: true })
   
 }

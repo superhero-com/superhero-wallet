@@ -7,6 +7,7 @@ import uuid from 'uuid';
 import { getAccounts } from '../popup/utils/storage';
 import { parseFromStorage, extractHostName, getAeppAccountPermission, getUserNetworks, stringifyForStorage, convertToAE, addTipAmount, getTippedAmount, resetTippedAmount, getContractCallInfo } from '../popup/utils/helper';
 import { DEFAULT_NETWORK, networks, AEX2_METHODS, NO_POPUP_AEPPS, BLACKLIST_AEPPS, MAX_AMOUNT_WITHOUT_CONFIRM } from '../popup/utils/constants';
+import { mockLogin } from '../popup/utils';
 
 global.browser = require('webextension-polyfill');
 
@@ -16,7 +17,9 @@ const rpcWallet = {
     await this.initNodes();
     this.initFields();
     this.controller = walletController;
+    if(process.env.EXTENSION_RUNNING_IN_TESTS_BROWSER) await mockLogin()
     const { userAccount } = await browser.storage.local.get('userAccount');
+    console.log(userAccount)
     if (userAccount) {
       this.controller.generateWallet({ seed: stringifyForStorage(userAccount.privateKey) });
       this[AEX2_METHODS.INIT_RPC_WALLET]({ address: userAccount.publicKey, network: DEFAULT_NETWORK });
@@ -215,6 +218,7 @@ const rpcWallet = {
 
   async addConnection(port) {
     const connection = await BrowserRuntimeConnection({ connectionInfo: { id: port.sender.frameId }, port });
+    console.log("connection", connection)
     this.sdk.addRpcClient(connection);
     this.sdk.shareWalletInfo(port.postMessage.bind(port));
     setTimeout(() => this.sdk.shareWalletInfo(port.postMessage.bind(port)), 3000);
