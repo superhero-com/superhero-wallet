@@ -25,12 +25,10 @@
 import { mapGetters } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
 import BigNumber from 'bignumber.js';
-import Eye from '../../../icons/eye.svg';
 import PendingTxs from './PendingTxs';
 
 export default {
   components: {
-    Eye,
     PendingTxs,
   },
   data() {

@@ -10,7 +10,7 @@
       </div>
       <div class="holder">
         <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
-        <span class="seeTransaction" @click="seeTx(transactionData.hash)"><Eye /></span>
+        <span class="seeTransaction" @click="seeTx(transactionData.hash)"><img :src="eye" /></span>
       </div>
     </ae-list-item>
   </div>
@@ -19,17 +19,14 @@
 <script>
 import { mapGetters } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import Eye from '../../../icons/eye.svg';
 import { convertToAE, formatDate } from '../../utils/helper';
 import openUrl from '../../utils/openUrl';
 
 export default {
   props: ['transactionData', 'recent', 'dark'],
-  components: {
-    Eye,
-  },
   data() {
     return {
+      eye: browser.runtime.getURL('../icons/eye.png'),
       status: '',
       tipUrl: null,
       checkSdk: null,
@@ -124,6 +121,7 @@ export default {
     }
     .seeTransaction {
       margin-left: 10px;
+      cursor: pointer;
     }
     .time {
       color: $text-color !important;
