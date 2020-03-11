@@ -3,7 +3,7 @@ describe("Test cases for import account page", () => {
     cy.openPopup()
   })
 
-  it("should open import account page", () => {
+  it("Open import account page", () => {
     cy
     .openImportWallet()
     .get('textarea')
@@ -13,7 +13,7 @@ describe("Test cases for import account page", () => {
     .should('have.class','disabled')
   })
 
-  it("should return to index", () => {
+  it("Rreturn to index", () => {
     cy
     .openImportWallet()
     .get('[data-cy=back-arrow]')
@@ -24,7 +24,7 @@ describe("Test cases for import account page", () => {
     .should('be.visible')
   })
 
-  it("wrong seed should show error message", () => {
+  it("Wrong seed shows error message", () => {
     cy
     .enterSeedPhrase('test')
     .inputShouldHaveError('textarea')
@@ -32,7 +32,7 @@ describe("Test cases for import account page", () => {
     .buttonShouldBeDisabled('[data-cy=import]')
   })
 
-  it("wrong seed should show error message", () => {
+  it("Wrong seed shows error message", () => {
     cy
     .enterSeedPhrase('gentle kid gap')
     .inputShouldHaveError('textarea')
@@ -40,14 +40,14 @@ describe("Test cases for import account page", () => {
     .buttonShouldBeDisabled('[data-cy=import]')
   })
 
-  it("enter correct seed redirects to account", () => {
+  it("Enter correct seed redirects to account", () => {
     cy
     .enterSeedPhrase('media view gym mystery all fault truck target envelope kit drop fade')
     .get('[data-cy=balance-info]')
     .should('be.visible')
   })
 
-  it("enter seed phrase with spaces redirects to account", () => {
+  it("Enter seed phrase with spaces redirects to account", () => {
     cy
     .enterSeedPhrase(' media view gym mystery all fault truck target envelope kit drop fade ')
     .get('[data-cy=balance-info]')

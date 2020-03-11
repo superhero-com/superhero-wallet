@@ -5,7 +5,7 @@ describe("Test cases for names", () => {
   })
 
 
-  it("sidebar menu should show .chain name", () => {
+  it("Sidebar menu show .chain name", () => {
     cy
     .openMenu()
     .get('[data-cy=chain-name]')
@@ -13,7 +13,7 @@ describe("Test cases for names", () => {
     .contains(name)
   })
 
-  it("account infor should containr .chain name", () => {
+  it("Account info contain .chain name", () => {
     cy
     .get('[data-cy=account-name]')
     .should('be.visible')

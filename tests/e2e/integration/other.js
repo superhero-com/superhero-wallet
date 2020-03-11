@@ -18,7 +18,7 @@ const txs = [
 describe("Tests cases not connected to specific page", () => {
 
   noRedirectRoutes.forEach((url) => {
-    it(`should not redirect to last visited route ${url}`, () => {
+    it(`No redirect to last visited route ${url}`, () => {
       cy
       .login({ lastRoute:url })
       .urlEquals('/account')
@@ -26,7 +26,7 @@ describe("Tests cases not connected to specific page", () => {
   })
 
   redirectRoutes.forEach((url) => {
-    it(`should redirect to last visited route ${url}`, () => {
+    it(`Redirect to last visited route ${url}`, () => {
       cy
       .login({ lastRoute:url })
       .urlEquals(url)
@@ -34,7 +34,7 @@ describe("Tests cases not connected to specific page", () => {
   })
 
   txs.forEach(tx => {
-    it("should show pending tx", () => {
+    it("Show pending tx", () => {
       cy
       .setPendingTx(tx)
       .login()

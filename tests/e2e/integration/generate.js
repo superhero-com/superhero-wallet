@@ -3,7 +3,7 @@ describe("Test cases for generate wallet page", () => {
     cy.openPopup()
   })
 
-  it("should open generate wallet page", () => {
+  it("Open generate wallet page", () => {
     cy
     .openGenerateWallet()
     .get('[data-cy=onboarding-steps]')
@@ -11,7 +11,7 @@ describe("Test cases for generate wallet page", () => {
     .onboardingSlideShouldBeActive(0)
   })
 
-  it("should skip onboarding after click skip", () => {
+  it("Skip onboarding after click skip", () => {
     cy
     .openGenerateWallet()
     .onboardingSlideShouldBeActive(0)
@@ -23,7 +23,7 @@ describe("Test cases for generate wallet page", () => {
   })
 
 
-  it("click next arrow should change slide", () => {
+  it("Next arrow should change slide", () => {
     cy
     .openGenerateWallet()
     .onboardingSlideShouldBeActive(0)
@@ -39,7 +39,7 @@ describe("Test cases for generate wallet page", () => {
     .should('not.be.visible')
   })
 
-  it("click prev arrow should change slide", () => {
+  it("Prev arrow should change slide", () => {
     cy
     .openGenerateWallet()
     .onboardingSlideShouldBeActive(0)
@@ -55,7 +55,7 @@ describe("Test cases for generate wallet page", () => {
   })
 
 
-  it("click prev arrow should change slide", () => {
+  it("Click prev arrow changes slide", () => {
     cy
     .openGenerateWallet()
     .get('[data-cy=skip]')
@@ -71,7 +71,7 @@ describe("Test cases for generate wallet page", () => {
     .onboardingSlideShouldBeActive(0)
   })
 
-  it("click dot navigation makes slide active", () => {
+  it("Click dot navigation makes slide active", () => {
     cy
     .openGenerateWallet()
     .clickDotNavigationMakeSlideActive(1)
@@ -79,7 +79,7 @@ describe("Test cases for generate wallet page", () => {
     .clickDotNavigationMakeSlideActive(0)
   })
 
-  it("should generate wallet", () => {
+  it("Generate wallet", () => {
     cy
     .openGenerateWallet()
     .get('[data-cy=skip]')
@@ -92,7 +92,7 @@ describe("Test cases for generate wallet page", () => {
     .should('be.visible')
   })
 
-  it("proceed to account after generate wallet", () => {
+  it("Proceed to account after generate wallet", () => {
     cy
     .openGenerateWallet()
     .get('[data-cy=skip]')

@@ -6,12 +6,12 @@ describe("Test cases for tip page", () => {
     cy.login()
   })
 
-  it("should open tip page", () => {
+  it("Open tip page", () => {
     cy
     .openTip()
   })
 
-  it("should return to account", () => {
+  it("Return to account", () => {
     cy
     .openTip()
     .goBack()
@@ -19,7 +19,7 @@ describe("Test cases for tip page", () => {
     .should('not.be.visible')
   })
 
-  it("tip page components are present", () => {
+  it("Tip page components are present", () => {
     cy
     .openTip()
     .get('[data-cy=send-tip]')
@@ -36,7 +36,7 @@ describe("Test cases for tip page", () => {
   })
 
 
-  it("should validate tip details", () => {
+  it("Validate tip details", () => {
     cy
     .openTip()
     .buttonShouldBeDisabled('[data-cy=send-tip]')
@@ -58,7 +58,7 @@ describe("Test cases for tip page", () => {
     .buttonShouldNotBeDisabled('[data-cy=send-tip]')
   })
 
-  it("should persist tip details", () => {
+  it("Persist tip details", () => {
     cy
     .openTip()
     .enterTipDetails({ ...tip })
@@ -70,7 +70,7 @@ describe("Test cases for tip page", () => {
     .should('have.value',tip.note)
   })
 
-  it("edit url should disable button", () => {
+  it("Edit url disable button", () => {
     cy
     .openTip()
     .get('[data-cy=edit-url]')
@@ -78,12 +78,12 @@ describe("Test cases for tip page", () => {
     .buttonShouldBeDisabled('[data-cy=send-tip]')
   })
 
-  it("valid tip details should open confirm", () => {
+  it("Valid tip details open confirm", () => {
     cy
     .toConfirmTip({ ...tip })
   })
 
-  it("should return to edit after in confirm page", () => {
+  it("Return to edit after in confirm page", () => {
     cy
     .toConfirmTip({ ...tip })
     .get('[data-cy=edit-tip]')
@@ -98,13 +98,13 @@ describe("Test cases for tip page", () => {
     .toConfirmTip({ ...tip2 })
   })
 
-  it("should send tip", () => {
+  it("Send tip", () => {
     cy
     .sendTip({ ...tip })
   })
 
 
-  it("should redirect to tip page from success tip", () => {
+  it("Redirect to tip page from success tip", () => {
     cy
     .sendTip({ ...tip })
     .get('[data-cy=to-tips]')
@@ -117,7 +117,7 @@ describe("Test cases for tip page", () => {
     
   })
 
-  it("should redirect to account page from success tip", () => {
+  it("Redirect to account page from success tip", () => {
     cy
     .sendTip({ ...tip })
     .get('[data-cy=to-dashboard]')

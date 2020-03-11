@@ -4,7 +4,7 @@ describe("Tests cases for about page", () => {
     cy.login()
   })
 
-  it("should open about page ", () => {
+  it("Open about page ", () => {
     cy
     .openMenu()
     .get('[data-cy=aboutSettings]')
@@ -12,7 +12,7 @@ describe("Tests cases for about page", () => {
     .urlEquals('/aboutSettings')
   })
 
-  it("should return to account page ", () => {
+  it("Return to account page ", () => {
     cy
     .openMenu()
     .get('[data-cy=aboutSettings]')
@@ -22,7 +22,7 @@ describe("Tests cases for about page", () => {
     .urlEquals('/account')
   })
 
-  it("should open terms of service", () => {
+  it("Open terms of service", () => {
     cy
     .openMenu()
     .get('[data-cy=aboutSettings]')
@@ -32,7 +32,7 @@ describe("Tests cases for about page", () => {
     .urlEquals('/termsOfService')
   })
 
-  it("should open privacy policy", () => {
+  it("Open privacy policy", () => {
     cy
     .openMenu()
     .get('[data-cy=aboutSettings]')

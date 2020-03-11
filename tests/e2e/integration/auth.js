@@ -1,13 +1,13 @@
 describe("Test cases for login functionality", () => {
 
-  it("is on account when login", () => {
+  it("Is on account when login", () => {
     cy
     .login()
     .get('[data-cy=balance-info]')
     .should('be.visible')
   })
 
-  it("should not have access to routes which requires auth", () => {
+  it("No access to routes which requires auth", () => {
     cy
     .shouldRedirect('/account','/')
     .shouldRedirect('/intro','/intro')
@@ -19,7 +19,7 @@ describe("Test cases for login functionality", () => {
     .shouldRedirect('/termsOfService','/termsOfService')
   })
 
-  it("should not have access to no auth routes when auth", () => {
+  it("No access to no auth routes when auth", () => {
     cy
     .login()
     .shouldRedirect('/intro','/account')

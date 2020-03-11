@@ -7,7 +7,7 @@ describe("Test cases AmountSend component", () => {
     .openTip()
   })
 
-  it("should calculate currency on enter amount", () => {
+  it("Calculate currency on enter amount", () => {
     cy
     .enterAmountSend(5)
     .get('[data-cy=amount-currency]')
@@ -20,7 +20,7 @@ describe("Test cases AmountSend component", () => {
   })
 
 
-  it("should validate entered amount", () => {
+  it("Validate entered amount", () => {
     cy
     .enterAmountSend('asd')
     .inputShouldHaveError('[data-cy=input-number]')
@@ -35,7 +35,7 @@ describe("Test cases AmountSend component", () => {
     .should('not.have.class','has-error')
   })
 
-  it("should show correct balance", () => {
+  it("Show correct balance", () => {
     cy
     .get('[data-cy=balance]')
     .invoke('text')

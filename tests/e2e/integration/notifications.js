@@ -2,7 +2,7 @@ describe("Tests cases for notifications page and icon", () => {
 
   
 
-  it("should have backup seed notification", () => {
+  it("Have backup seed notification", () => {
     cy
     .login()
     .get('[data-cy=noti-count]')
@@ -10,7 +10,7 @@ describe("Tests cases for notifications page and icon", () => {
     .should('contain',1)
   })
 
-  it("click notification icon should open notifications page ", () => {
+  it("Click notification icon open notifications page ", () => {
     cy
     .login()
     .get('[data-cy=noti]')
@@ -18,7 +18,7 @@ describe("Tests cases for notifications page and icon", () => {
     .urlEquals('/notifications')
   })
 
-  it("should return to account from notifications ", () => {
+  it("Return to account from notifications ", () => {
     cy
     .login()
     .get('[data-cy=noti]')
@@ -28,14 +28,14 @@ describe("Tests cases for notifications page and icon", () => {
     .urlEquals('/account')
   })
 
-  it("should not have backup seed notification", () => {
+  it("Don't have backup seed notification", () => {
     cy
     .login({ backupSeed: true })
     .get('[data-cy=noti-count]')
     .should('be.not.visible')
   })
 
-  it("click notification icon should not open notifications page ", () => {
+  it("Click notification icon don't open notifications page ", () => {
     cy
     .login({ backupSeed: true })
     .get('[data-cy=noti]')

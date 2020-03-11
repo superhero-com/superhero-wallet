@@ -16,19 +16,19 @@ describe("Test cases for menu sidebar component", () => {
     cy.login()
   })
 
-  it("menu open button should be visible when authenticated", () => {
+  it("Menu open button is visible when authenticated", () => {
     cy
     .get('[data-cy=hamburger]')
     .should('be.visible')
   })
 
-  it("should open menu when click hamburger", () => {
+  it("Open menu when click hamburger", () => {
     cy
     .openMenu()
     .menuShould('be.visible')
   })
 
-  it("should close menu when click close button", () => {
+  it("Close menu when click close button", () => {
     cy
     .openMenu()
     .menuShould('be.visible')
@@ -36,7 +36,7 @@ describe("Test cases for menu sidebar component", () => {
     .menuShould('not.be.visible')
   })
 
-  it("should close menu when click on overlay", () => {
+  it("Close menu when click on overlay", () => {
     cy
     .openMenu()
     .menuShould('be.visible')
@@ -44,14 +44,14 @@ describe("Test cases for menu sidebar component", () => {
     .menuShould('not.be.visible')
   })
 
-  it("should have account identicon", () => {
+  it("Have account identicon", () => {
     cy
     .openMenu()
     .get('.account-icon')
     .should('be.visible')
   })
   
-  it("menu links should have correct href", () => {
+  it("Menu links have correct href", () => {
 
     cy
     .openMenu()
@@ -64,14 +64,14 @@ describe("Test cases for menu sidebar component", () => {
   })
 
   links.forEach((page) => {
-    it(`should open ${page} page`, () => {
+    it(`Open ${page} page`, () => {
       cy
       .openMenuPage(page)
     })
   })
 
   links.forEach((page) => {
-    it(`should open ${page} page and return to account page`, () => {
+    it(`Open ${page} page and return to account page`, () => {
       cy
       .openMenuPage(page)
       .get('[data-cy=back-arrow]')
@@ -84,7 +84,7 @@ describe("Test cases for menu sidebar component", () => {
     })
   })
 
-  it("should open dropdown", () => {
+  it("Open dropdown", () => {
     cy
     .openMenu()
     .toggleDropdown()
@@ -94,14 +94,14 @@ describe("Test cases for menu sidebar component", () => {
   })
 
   dropdownLinks.forEach((page) => {
-    it(`should open ${page} dropdown page`, () => {
+    it(`Open ${page} dropdown page`, () => {
       cy
       .openMenuPage(page, true)
     })
   })
 
   dropdownLinks.forEach((page) => {
-    it(`should open ${page} dropdown page and return to account page`, () => {
+    it(`Open ${page} dropdown page and return to account page`, () => {
       cy
       .openMenuPage(page, true)
       .get('[data-cy=back-arrow]')
@@ -114,7 +114,7 @@ describe("Test cases for menu sidebar component", () => {
     })
   })
 
-  it("should not have chain name", () => {
+  it("Don't have chain name", () => {
       cy
       .openMenu()
       .get('[data-cy=chain-name]')

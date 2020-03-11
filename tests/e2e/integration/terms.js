@@ -3,7 +3,7 @@ describe("Test cases for Terms & Conditions page", () => {
     cy.openPopup()
   })
 
-  it("should open terms&conditions page", () => {
+  it("Open terms&conditions page", () => {
     cy
     .openTerms()
     .get('[data-cy=terms]')
@@ -12,7 +12,7 @@ describe("Test cases for Terms & Conditions page", () => {
     .should('be.visible')
   })
 
-  it("should return to index", () => {
+  it("Return to index", () => {
     cy
     .openTerms()
     .get('[data-cy=back-arrow]')
@@ -24,7 +24,7 @@ describe("Test cases for Terms & Conditions page", () => {
   })
 
 
-  it("should open accordion", () => {
+  it("Open accordion", () => {
     cy
     .openTerms()
     .toggleAccordionItem(2)

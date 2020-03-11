@@ -3,31 +3,31 @@ describe("Test cases for Front Page", () => {
     cy.openPopup()
   })
 
-  it("should have terms checkbox",() =>{
+  it("Have terms checkbox",() =>{
     cy
     .get('[data-cy=checkbox]')
     .should('be.visible')
   })
 
-  it("buttons should be disabled", () => {
+  it("Buttons are disabled", () => {
     cy
     .buttonShouldBeDisabled('[data-cy=generate-wallet]')
     .buttonShouldBeDisabled('[data-cy=import-wallet]')
   })
 
-  it("have create/import wallet buttons", () => {
+  it("Have create/import wallet buttons", () => {
     cy.get('[data-cy=generate-wallet]').should('be.visible')
     cy.get('[data-cy=import-wallet]').should('be.visible')
   })
 
-  it("terms agree activate buttons", () => {
+  it("Terms agree activate buttons", () => {
     cy
     .termsAgree()
     .buttonShouldNotBeDisabled('[data-cy=generate-wallet]')
     .buttonShouldNotBeDisabled('[data-cy=import-wallet]')
   })
 
-  it("terms uncheck disable buttons", () => {
+  it("Terms uncheck disable buttons", () => {
     cy
     .termsAgree()
     .termsAgree()
@@ -35,21 +35,21 @@ describe("Test cases for Front Page", () => {
     .buttonShouldBeDisabled('[data-cy=import-wallet]')
   })
 
-  it("should open terms and conditions", () => {
+  it("Open terms and conditions", () => {
     cy
     .openTerms()
     .get('[data-cy=terms]')
     .should('not.exist')
   })
 
-  it("should open generate wallet page", () => {
+  it("Open generate wallet page", () => {
     cy
     .openGenerateWallet()
     .get('[data-cy=generate-wallet]')
     .should('not.exist')
   })
 
-  it("should open import wallet page", () => {
+  it("Open import wallet page", () => {
     cy
     .openImportWallet()
     .get('[data-cy=import-wallet]')

@@ -33,8 +33,5 @@ describe("Tests cases for AEX-2 communication", () => {
     })
   }
   
-
-
-
   
 })
