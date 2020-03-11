@@ -127,7 +127,6 @@ contract Example =
         this.message.valid = await this.client.verifyMessage('test', this.message.sig)
       },
       async getReverseWindow() {
-        console.log("get iframe")
         const iframe = document.createElement('iframe')
         // iframe.src = prompt('Enter wallet URL', 'http://localhost:9000')
         iframe.src = ''

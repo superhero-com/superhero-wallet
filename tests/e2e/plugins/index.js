@@ -1,6 +1,23 @@
 const path = require('path')
-module.exports = (on, config) => {
+const wp = require('@cypress/webpack-preprocessor')
 
+module.exports = (on, config) => {
+  const options = {
+    webpackOptions: {
+      resolve: {
+        extensions: [ ".js"]
+      },
+      module: {
+        rules: [
+          {
+            test: /\.js?$/,
+            loader: "babel-loader"
+          }
+        ]
+      }
+    },
+  }
+  on('file:preprocessor', wp(options))
   on('before:browser:launch', (browser, args) => {
     if (browser.family === 'chromium' && browser.isHeaded) {
       const extensionFolder = path.resolve(__dirname, '..', '..','..', 'dist/extension')

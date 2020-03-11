@@ -1,13 +1,23 @@
 import '../../../src/lib/initPolyfills';
 import { setPendingTx, formatDate, mockLogin } from '../../../src/popup/utils'
-
-// Cypress.Commands.overwrite('visit', (orig, url, options) => {
-//   url = `popup/popup${url}`
-//   return orig(url, options)
-// })
+import { popupProps } from '../../../src/popup/utils/config'
+import uuid from 'uuid';
 
 Cypress.Commands.add('openPopup', (onBeforeLoad) => {
   cy.visit('chrome/popup/popup', { onBeforeLoad })
+})
+
+Cypress.Commands.add('openAex2Popup', (type, txType) => {
+  const id = uuid();
+  const params = `?id=${id}&type=${type}`
+  const onBeforeLoad = async () => {
+    if(txType) await browser.storage.local.set({ txType })
+  }
+  cy
+  .visit(`chrome/popup/popup${params}`, { onBeforeLoad })
+  .get('[data-cy=popup-aex2]')
+  .should('exist')
+  .should('be.visible')
 })
 
 Cypress.Commands.add('openAepp', (onBeforeLoad) => {

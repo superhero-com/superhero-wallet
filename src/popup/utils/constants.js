@@ -119,7 +119,7 @@ export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
 export const NO_POPUP_AEPPS = [
   'youdonotneedacapetobeahero.com',
   'superhero.com',
-  'localhost'
+  // 'localhost'
 ];
 
 export const BLACKLIST_AEPPS = [

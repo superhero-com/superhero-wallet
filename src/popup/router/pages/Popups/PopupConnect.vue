@@ -1,11 +1,11 @@
 <template>
-  <div class="popup popup-aex2">
+  <div class="popup popup-aex2" data-cy="popup-aex2">
     <div class="flex identiconContainer">
       <div class="identicon">
         <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
         <ae-identicon :address="data.host" size="base" v-if="imageError" />
-        <div class="accountName">{{ data.name }}</div>
-        <div class="hostname">{{ data.host }}</div>
+        <div class="accountName" data-cy="name">{{ data.name }}</div>
+        <div class="hostname" data-cy="host">{{ data.host }}</div>
       </div>
       <div class="separator">
         <ae-icon name="check" />
@@ -17,7 +17,7 @@
     </div>
 
     <h2>
-      <span class="secondary-text">{{ data.host }} ({{ data.name }}) </span>
+      <span class="secondary-text" data-cy="aepp">{{ data.host }} ({{ data.name }}) </span>
       {{ $t('pages.connectConfirm.websiteRequestconnect') }}
       <ae-identicon class="send-account-icon" :address="account.publicKey" size="s" />
       {{ activeAccountName }}
@@ -33,8 +33,8 @@
       </ae-list-item>
     </ul>
     <div class="btnFixed">
-      <Button half class="reject" @click="cancel">{{ $t('pages.connectConfirm.cancelButton') }}</Button>
-      <Button half @click="connect">{{ $t('pages.connectConfirm.confirmButton') }}</Button>
+      <Button half class="reject" @click="cancel" data-cy="deny">{{ $t('pages.connectConfirm.cancelButton') }}</Button>
+      <Button half @click="connect" data-cy="accept">{{ $t('pages.connectConfirm.confirmButton') }}</Button>
     </div>
   </div>
 </template>
@@ -59,7 +59,7 @@ export default {
     this.data = await getPopupProps();
   },
   methods: {
-    cancel() {
+    async cancel() {
       this.data.reject(false);
     },
     async connect() {

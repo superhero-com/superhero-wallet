@@ -1,5 +1,6 @@
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { testAccount } from './config';
+import { testAccount, txParams} from './config';
+import { TxBuilder } from '@aeternity/aepp-sdk/es';
 
 export const setTxInQueue = async tx => {
   const { processingTx } = await browser.storage.local.get('processingTx');
@@ -59,3 +60,6 @@ export const mockLogin = async (options = {}) => {
   if(options.backupSeed) await browser.storage.local.set({ backed_up_Seed: true })
   
 }
+
+
+export const buildTx = (txtype) => TxBuilder.buildTx({ ...txParams[txtype]}, txtype)

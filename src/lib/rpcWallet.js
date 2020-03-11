@@ -19,7 +19,6 @@ const rpcWallet = {
     this.controller = walletController;
     if(process.env.EXTENSION_RUNNING_IN_TESTS_BROWSER) await mockLogin()
     const { userAccount } = await browser.storage.local.get('userAccount');
-    console.log(userAccount)
     if (userAccount) {
       this.controller.generateWallet({ seed: stringifyForStorage(userAccount.privateKey) });
       this[AEX2_METHODS.INIT_RPC_WALLET]({ address: userAccount.publicKey, network: DEFAULT_NETWORK });
