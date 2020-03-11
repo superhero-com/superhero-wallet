@@ -17,7 +17,7 @@
     "test": "start-server-and-test start http://localhost:5000 start:tests",
     "start": "npm run build:tests && serve",
     "start:ci": "serve",
-    "start:tests": "cypress open",
+    "start:tests": "cypress run",
     "gen:cordova-resources": "cordova-res",
     "build:Testnet": "cross-env NETWORK=Testnet npm run build",
     "build:Mainnet": "cross-env NETWORK=Mainnet npm run build",

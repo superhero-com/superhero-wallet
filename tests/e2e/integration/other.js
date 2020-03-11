@@ -41,4 +41,11 @@ describe("Tests cases not connected to specific page", () => {
     })
   })
 
+
+  it("Connection message disappear", () => {
+    cy
+    .login()
+    .get('[data-cy=connect-node]')
+    .should('not.be.visible')
+  })
 })
