@@ -2,7 +2,7 @@ const path = require('path')
 module.exports = (on, config) => {
 
   on('before:browser:launch', (browser, args) => {
-    if (browser.family === 'chromium') {
+    if (browser.family === 'chromium' && browser.isHeaded) {
       const extensionFolder = path.resolve(__dirname, '..', '..','..', 'dist/extension')
       args.extensions.push(extensionFolder)
     }

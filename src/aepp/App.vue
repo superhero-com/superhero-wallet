@@ -5,6 +5,7 @@
       <p data-cy="wallet-balance">{{ wallet.balance }}</p>
       <p data-cy="wallet-name">{{ wallet.name }}</p>
       <button data-cy="wallet-sign-msg" @click="sign">Sign Msg</button>
+      <p data-cy="message-valid" v-if="message.valid">{{ message.sig }}</p>
     </div>
     
   </div>
@@ -37,6 +38,10 @@ export default {
           address:null,
           balance:0,
           name:null
+        },
+        message: {
+          valid:false,
+          sig:null
         }
       }
   },
@@ -65,10 +70,8 @@ export default {
     },
     methods: {
       async sign() {
-        const messageSig  = await this.client.signMessage('test');
-        console.log("signed message => ", messageSig)
-        const isValid = await this.client.verifyMessage('test', messageSig)
-        console.log("verified", isValid)
+        this.message.sig = await this.client.signMessage('test');
+        this.message.valid = await this.client.verifyMessage('test', this.message.sig)
       },
       async getReverseWindow() {
         const iframe = document.createElement('iframe')
