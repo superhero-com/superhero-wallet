@@ -12,6 +12,10 @@ Cypress.Commands.add('openPopup', (onBeforeLoad) => {
   cy.visit('chrome/popup/popup', { onBeforeLoad })
 })
 
+Cypress.Commands.add('openAepp', (onBeforeLoad) => {
+  cy.visit('aepp/aepp', { onBeforeLoad })
+})
+
 Cypress.Commands.add('termsAgree', () => {
   cy
   .get('[data-cy=checkbox]')
