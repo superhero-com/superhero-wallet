@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="popup" data-cy="tip-container">
     <p class="primary-title text-left mb-8 f-16">
       <template v-if="!confirmMode">
         {{ $t('pages.tipPage.heading') }}
@@ -8,37 +8,37 @@
       </template>
       <template v-else>
         {{ $t('pages.tipPage.headingSending') }}
-        <span class="secondary-text">{{ amount }} {{ $t('pages.appVUE.aeid') }}</span>
+        <span class="secondary-text" data-cy="tip-amount">{{ amount }} {{ $t('pages.appVUE.aeid') }}</span>
         ({{ currencyAmount }} {{ currentCurrency }}) {{ $t('pages.tipPage.to') }}
       </template>
     </p>
 
     <div class="url-bar">
       <template v-if="!editUrl">
-        <a class="link-sm text-left">{{ url }}</a>
+        <a class="link-sm text-left" data-cy="tip-url">{{ url }}</a>
         <CheckIcon v-if="urlVerified" />
       </template>
       <Input v-else size="m-0 xsm" v-model="url" />
-      <button v-if="!confirmMode" @click="editUrl = !editUrl">
-        <ae-icon :name="editUrl ? 'check' : 'vote'" />
+      <button v-if="!confirmMode" @click="editUrl = !editUrl" data-cy="edit-url">
+        <ae-icon :name="editUrl ? 'check' : 'vote'" data-cy="confirm-url" />
       </button>
     </div>
 
     <template v-if="!confirmMode">
       <AmountSend :amountError="amountError" @changeAmount="val => (amount = val)" :value="amount" />
       <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
-      <Button @click="toConfirm" :disabled="!note || amountError || noteError || !minCallFee || editUrl">
+      <Button @click="toConfirm" :disabled="!note || amountError || noteError || !minCallFee || editUrl" data-cy="send-tip">
         {{ $t('pages.tipPage.next') }}
       </Button>
     </template>
     <template v-else>
-      <div class="tip-note-preview mt-15">
+      <div class="tip-note-preview mt-15" data-cy="tip-note">
         {{ note }}
       </div>
-      <Button @click="sendTip" :disabled="!tipping">
+      <Button @click="sendTip" :disabled="!tipping" data-cy="confirm-tip">
         {{ $t('pages.tipPage.confirm') }}
       </Button>
-      <Button @click="confirmMode = false">
+      <Button @click="confirmMode = false" data-cy="edit-tip">
         {{ $t('pages.tipPage.edit') }}
       </Button>
     </template>
@@ -53,7 +53,8 @@ import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
-import { setPendingTx, escapeSpecialChars, pollGetter } from '../../utils/helper';
+import { escapeSpecialChars, pollGetter } from '../../utils/helper';
+import { setPendingTx } from '../../utils';
 import CheckIcon from '../../../icons/check-icon.svg';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
@@ -95,7 +96,11 @@ export default {
   },
   watch: {
     amount() {
-      this.amountError = false;
+      if(isNaN(this.amount) || parseFloat(this.amount) === 0) {
+        this.amountError = true
+      } else {
+        this.amountError = false;
+      }
     },
     urlVerified(val) {
       if (val) this.$store.dispatch('popupAlert', { name: 'account', type: 'tip_url_verified' });
@@ -152,7 +157,7 @@ export default {
     },
     toConfirm() {
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
-      this.amountError = this.amountError || Number.isNaN(this.amount) || this.amount <= 0;
+      this.amountError = this.amountError || Number.isNaN(this.amount) || this.amount <= 0 || isNaN(this.amount);
       this.noteError = !this.note || !this.url;
       this.confirmMode = !this.amountError && !this.noteError;
     },

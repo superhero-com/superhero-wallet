@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="popup" data-cy="success-tip">
     <h3 class="heading-1 mb-25 mt-15 center">
       <div class="flex flex-align-center flex-justify-content-center">
         <Heart />
@@ -7,11 +7,11 @@
       </div>
     </h3>
     <p class="primary-title primary-title-darker text-left mb-8 f-16">
-      {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text">{{ amountTip }} {{ $t('pages.appVUE.aeid') }} </span> ({{ getCurrencyAmount }}
+      {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text" data-cy="tip-amount">{{ amountTip }} {{ $t('pages.appVUE.aeid') }} </span> ({{ getCurrencyAmount }}
       {{ currentCurrency }})
       {{ $t('pages.successTip.to') }}
     </p>
-    <a class="link-sm text-left block">{{ domain }}</a>
+    <a class="link-sm text-left block" data-cy="tip-url">{{ domain }}</a>
     <br />
     <div>
       <span style="word-break: break-word;font-size: 14px;float: left;">{{ $t('pages.successTip.notify') }}</span>
@@ -23,10 +23,10 @@
     <p class="f-18 my-35">{{ $t('pages.successTip.letThemKnow') }}</p>
     <div>
       <div class="flex flex-align-center flex-justify-between">
-        <Button half @click="toTips">
+        <Button half @click="toTips" data-cy="to-tips">
           {{ $t('pages.successTip.sendMore') }}
         </Button>
-        <Button half @click="toDashboard">
+        <Button half @click="toDashboard" data-cy="to-dashboard">
           {{ $t('pages.successTip.home') }}
         </Button>
       </div>

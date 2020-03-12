@@ -2,15 +2,20 @@ import { setInterval } from 'timers';
 import './lib/initPolyfills';
 import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
 import { extractHostName, detectConnectionType } from './popup/utils/helper';
+import { buildTx } from './popup/utils';
+
 import WalletController from './wallet-controller';
 import Notification from './notifications';
 import rpcWallet from './lib/rpcWallet';
 import { HDWALLET_METHODS, AEX2_METHODS, NOTIFICATION_METHODS, CONNECTION_TYPES, DEFAULT_NETWORK } from './popup/utils/constants';
+import { popupProps } from './popup/utils/config';
 import TipClaimRelay from './lib/tip-claim-relay';
 import { setController } from './lib/background-utils';
 import { PopupConnections } from './lib/popup-connection';
 
 const controller = new WalletController();
+
+
 
 if (process.env.IS_EXTENSION) {
   setInterval(() => {
@@ -109,6 +114,21 @@ export const handleMessage = ({ type, payload }) => {
   if (HDWALLET_METHODS.includes(type)) {
     return controller[type](payload);
   }
+
+  if(process.env.RUNNING_IN_TESTS) {
+    if(type === "POPUP_INFO") {
+      if(payload.txType) {
+        const props = popupProps["base"]
+        props.action.params.tx = (buildTx(payload.txType)).tx
+        return props
+      } else {
+        return popupProps[payload.popupType]
+      }
+    } else if(["ACTION_DENY", "ACTION_ACCEPT"].includes(type)) {
+      return "send"
+    }
+  }
+
 
   throw new Error(`Unknown message type: ${type}`);
 };

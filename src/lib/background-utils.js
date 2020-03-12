@@ -96,4 +96,4 @@ export const contractCallStatic = async ({ tx, callType }) =>
     } catch (e) {
       reject(e);
     }
-  });
+});

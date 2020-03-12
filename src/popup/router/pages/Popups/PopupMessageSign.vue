@@ -1,10 +1,10 @@
 <template>
-  <div class="popup popup-aex2">
+  <div class="popup popup-aex2" data-cy="popup-aex2">
     <h2 class="identity">
       <div class="flex flex-align-center flex-justify-content-center">
         <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
         <div>
-          <span class="secondary-text">{{ data.host }} ({{ data.name }}) </span>
+          <span class="secondary-text" data-cy="host">{{ data.host }} ({{ data.name }}) </span>
           {{ $t('pages.popupMessageSign.heading') }}
         </div>
       </div>
@@ -12,12 +12,12 @@
     <ul>
       <ae-list-item fill="neutral" class="permission-set">
         <h4>{{ $t('pages.popupMessageSign.message') }}</h4>
-        <p>{{ data.action.params.message }}</p>
+        <p v-if="data.action" data-cy="message">{{ data.action.params.message }}</p>
       </ae-list-item>
     </ul>
     <div class="btnFixed">
-      <Button half @click="cancel" :disabled="editTx" class="reject">{{ $t('pages.signTransaction.reject') }}</Button>
-      <Button half @click="accept" :disabled="editTx || amountError">{{ $t('pages.signTransaction.confirm') }}</Button>
+      <Button half @click="cancel" data-cy="deny" class="reject">{{ $t('pages.signTransaction.reject') }}</Button>
+      <Button half @click="accept" data-cy="accept">{{ $t('pages.signTransaction.confirm') }}</Button>
     </div>
   </div>
 </template>
@@ -30,11 +30,11 @@ export default {
   data() {
     return {
       data: {},
+      imageError: false,
     };
   },
   async created() {
     this.data = await getPopupProps();
-    console.log(this.data);
   },
   methods: {
     cancel() {

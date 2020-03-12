@@ -5,7 +5,7 @@
     <router-view :key="$route.fullPath" />
 
     <transition name="slide">
-      <div class="menu-overlay" v-if="showSidebar" @click.self="showSidebar = false">
+      <div class="menu-overlay" v-if="showSidebar" @click.self="showSidebar = false" data-cy="menu-overlay">
         <SidebarMenu @closeMenu="showSidebar = false" />
       </div>
     </transition>
@@ -62,7 +62,7 @@ export default {
     this.checkSdkReady();
     this.getCurrencies();
 
-    if (await this.$store.dispatch('checkExtensionUpdate')) {
+    if (await this.$store.dispatch('checkExtensionUpdate') && !process.env.RUNNING_IN_TESTS) {
       this.$store.commit('ADD_NOTIFICATION', { title: '', content: this.$t('pages.account.updateExtension') });
     }
     if (!(await this.$store.dispatch('checkBackupSeed'))) {
@@ -76,7 +76,7 @@ export default {
     checkSdkReady() {
       const checkSDKReady = setInterval(() => {
         if (this.sdk !== null) {
-          if (!window.RUNNING_IN_POPUP) {
+          if (!window.RUNNING_IN_POPUP && process.env.IS_EXTENSION) {
             postMessage({ type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
           }
           this.pollData();
@@ -88,7 +88,7 @@ export default {
       let triggerOnce = false;
       this.polling = setInterval(async () => {
         if (this.sdk != null && this.isLoggedIn) {
-          this.$store.dispatch('updateBalance');
+          if(!process.env.RUNNING_IN_TESTS) this.$store.dispatch('updateBalance');
           if (!triggerOnce) {
             this.$store.dispatch('getRegisteredNames');
             triggerOnce = true;
