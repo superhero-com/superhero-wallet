@@ -11,25 +11,14 @@ export const setController = contr => {
   controller = contr;
 };
 
-export const getActiveAccount = () =>
-  new Promise((resolve, rejet) => {
-    browser.storage.local.get('userAccount').then(data => {
-      if (data.userAccount && data.userAccount.hasOwnProperty('publicKey')) {
-        browser.storage.local.get('subaccounts').then(subaccounts => {
-          browser.storage.local.get('activeAccount').then(active => {
-            let activeIdx = 0;
-            if (active.hasOwnProperty('activeAccount')) {
-              activeIdx = active.activeAccount;
-            }
-            const address = subaccounts.subaccounts[activeIdx].publicKey;
-            resolve({ account: { publicKey: address }, activeAccount: activeIdx });
-          });
-        });
-      } else {
-        resolve(false);
-      }
-    });
-  });
+export const getActiveAccount = async () => {
+  const { userAccount } = await browser.storage.local.get('userAccount')
+  if(userAccount) {
+    return { account: { publicKey: userAccount.publicKey }, activeAccount: 0 }
+  } else {
+    return false
+  } 
+};
 
 export const getActiveNetwork = async () => {
   const { activeNetwork } = await browser.storage.local.get('activeNetwork');
