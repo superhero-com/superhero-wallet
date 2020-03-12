@@ -1,10 +1,11 @@
 import { postMessage } from './connection';
 
+
 export default async () => {
   let resolved = false;
 
-  const resolve = (payload = '') => postMessage({ type: 'ACTION_ACCEPT', payload });
-  const reject = (payload = '') => postMessage({ type: 'ACTION_DENY', payload });
+  const resolve = async (payload = '') => await postMessage({ type: 'ACTION_ACCEPT', payload });
+  const reject = async (payload = '') => await postMessage({ type: 'ACTION_DENY', payload });
 
   const unloadHandler = () => {
     if (!resolved) {
@@ -14,17 +15,25 @@ export default async () => {
   };
   window.addEventListener('beforeunload', unloadHandler, true);
 
-  const closingWrapper = f => (...args) => {
+  const closingWrapper = f => async (...args) => {
     resolved = true;
     window.removeEventListener('beforeunload', unloadHandler, true);
-    f(...args);
+    if(process.env.RUNNING_IN_TESTS) {
+      window[f.name] = await f(...args)
+    } else {
+      f(...args);
+    }
     window.close();
     setTimeout(() => {
       window.close();
     }, 1000);
+    
+    
+    
   };
-
-  const props = await postMessage({ type: 'POPUP_INFO' });
+  const { txType } = await browser.storage.local.get('txType')
+  const payload = process.env.RUNNING_IN_TESTS ? { popupType: window.POPUP_TYPE, txType } : { }
+  const props = await postMessage({ type: 'POPUP_INFO', payload })
   props.resolve = closingWrapper(resolve);
   props.reject = closingWrapper(reject);
   return props;

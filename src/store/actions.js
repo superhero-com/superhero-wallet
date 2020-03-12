@@ -215,10 +215,12 @@ export default {
           ]);
           names = flatten(names);
           names = uniqBy(names, 'name');
-          if (names.length) {
-            commit(types.SET_ACCOUNT_AENS, { account: index, aename: names[0].name, pending: !!names[0].pending });
-          } else {
-            commit(types.SET_ACCOUNT_AENS, { account: index, aename: null, pending: false });
+          if(!process.env.RUNNING_IN_TESTS) {
+            if (names.length) {
+              commit(types.SET_ACCOUNT_AENS, { account: index, aename: names[0].name, pending: !!names[0].pending });
+            } else {
+              commit(types.SET_ACCOUNT_AENS, { account: index, aename: null, pending: false });
+            }
           }
           return names;
         }

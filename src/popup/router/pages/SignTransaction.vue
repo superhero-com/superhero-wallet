@@ -88,6 +88,7 @@ import { convertToAE, currencyConv, convertAmountToCurrency, removeTxFromStorage
 import { MAGNITUDE, MIN_SPEND_TX_FEE, MIN_SPEND_TX_FEE_MICRO, MAX_REASONABLE_FEE, TX_TYPES, calculateFee, TX_LIMIT_PER_DAY, TOKEN_REGISTRY_ADDRESS } from '../../utils/constants';
 import { Wallet, MemoryAccount } from '@aeternity/aepp-sdk/es'
 import { computeAuctionEndBlock, computeBidFee  } from '@aeternity/aepp-sdk/es/tx/builder/helpers'
+import { setTxInQueue } from '../../utils';
 import BigNumber from 'bignumber.js';
 import { clearInterval, clearTimeout  } from 'timers';
 import Button from '../components/Button';
@@ -507,7 +508,7 @@ export default {
                     if(typeof result == "object") {
                         this.loading = false
                         this.hash = result.hash
-                        this.setTxInQueue(result.hash)
+                        setTxInQueue(result.hash)
                         let txUrl = this.network[this.current.network].explorerUrl + '/transactions/' + result.hash
                         let msg = 'You have sent ' + this.amount + ' AE'
                         if(this.data.popup) {
@@ -541,7 +542,7 @@ export default {
                     }
                 })
                 .catch(async err => {
-                    this.setTxInQueue('error')
+                    setTxInQueue('error')
                     if(this.data.popup) {
                         this.sending = true
                         this.port.postMessage(this.errorTx)
@@ -622,7 +623,7 @@ export default {
                 }
                 call = await this.$helpers.contractCall({ instance:this.contractInstance, method:this.data.tx.method, params:[...this.data.tx.params, options] })
                 
-                this.setTxInQueue(call.hash)
+                setTxInQueue(call.hash)
                 let decoded = await call.decode()
                 call.decoded = decoded
                 if (this.data.popup) {
@@ -631,7 +632,7 @@ export default {
                     this.port.postMessage({...res})
                 }
             }catch(err) {
-                this.setTxInQueue('error')
+                setTxInQueue('error')
                 this.errorTx.error.message = typeof err.message != "undefined" ? err.message : err
                 this.sending = true
                 if(this.data.popup) {
@@ -661,10 +662,10 @@ export default {
             }else {
                 try {
                     deployed = await this.contractInstance.deploy([...this.data.tx.init], { fee: this.convertSelectedFee })
-                    this.setTxInQueue(deployed.transaction)
+                    setTxInQueue(deployed.transaction)
                 } catch(err) {
                     console.log(err)
-                    this.setTxInQueue('error')
+                    setTxInQueue('error')
                     this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed'})
                 }
             }
@@ -703,7 +704,7 @@ export default {
         async namePreclaim(){
             try {
                 const preclaim = await this.sdk.aensPreclaim(this.data.tx.name, { fee: this.convertSelectedFee } )
-                this.setTxInQueue(preclaim.hash)
+                setTxInQueue(preclaim.hash)
                 let tx = {
                     popup:false,
                     tx: {
@@ -715,7 +716,7 @@ export default {
                 }
                 this.redirectToTxConfirm(tx)
             } catch(err) {
-                this.setTxInQueue('error')
+                setTxInQueue('error')
                 this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message })
                 this.$store.commit('SET_AEPP_POPUP',false)
                 this.$router.push('/names')
@@ -727,20 +728,20 @@ export default {
                 try {
                     const bid = await this.sdk.aensBid(this.data.tx.name, this.data.tx.BigNumberAmount);
                 } catch(err) {
-                    this.setTxInQueue('error')
+                    setTxInQueue('error')
                     this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message })
                 }
             }
             else {
                 try {
                     const claim = await this.data.tx.preclaim.claim({ waitMined: false, fee: this.convertSelectedFee })
-                    this.setTxInQueue(claim.hash)
+                    setTxInQueue(claim.hash)
                 } catch(err) {
                     let msg = err.message;
                     if(msg.includes("is not enough to execute")) {
                         msg = this.$t('pages.signTransaction.balanceError')
                     }
-                    this.setTxInQueue('error')
+                    setTxInQueue('error')
                     this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg })
                 }
             }
@@ -759,14 +760,14 @@ export default {
                 if(this.data.nameUpdateType === 'extend') {
                     update = await nameObject.extendTtl()
                 }
-                this.setTxInQueue(update.hash)
+                setTxInQueue(update.hash)
                 await this.$store.dispatch('popupAlert', {
                     name: 'account',
                     type: 'added_success'
                 })
                 await this.$store.dispatch('removePendingName',{ hash: this.data.tx.hash })
             } catch(err) {
-                this.setTxInQueue('error')
+                setTxInQueue('error')
                 this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message})
                 
             }
@@ -813,7 +814,7 @@ export default {
                             this.contractCall()
                         }else {
                             let call = await this.$helpers.contractCall({ instance:this.contractInstance, method:this.data.tx.method, params:[...this.data.tx.params,{ fee:this.convertSelectedFee}] })
-                            this.setTxInQueue(call.hash)
+                            setTxInQueue(call.hash)
                             let decoded = await call.decode()
                             let msg = `You have sent ${this.data.tx.amount} ${this.data.tx.token}` 
                             let txUrl = this.network[this.current.network].explorerUrl + '/transactions/' + call.hash

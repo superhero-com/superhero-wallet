@@ -7,15 +7,15 @@
         <p class="primary-title">
           {{ $t('pages.index.heading') }}
         </p>
-        <CheckBox v-if="!termsAgreedOrNot" v-model="terms">
+        <CheckBox v-if="!termsAgreedOrNot" v-model="terms" data-cy="checkbox">
           <div class="primary-text">
-            {{ $t('pages.index.term1') }} <a @click="goToTermsAndConditions"> {{ $t('pages.index.termsAndConditions') }} </a>
+            {{ $t('pages.index.term1') }} <a @click="goToTermsAndConditions" data-cy="terms"> {{ $t('pages.index.termsAndConditions') }} </a>
           </div>
         </CheckBox>
-        <Button @click="generwateWalletIntro" :disabled="!terms && !termsAgreedOrNot">
+        <Button @click="generwateWalletIntro" :disabled="!terms && !termsAgreedOrNot" data-cy="generate-wallet">
           {{ $t('pages.index.generateWallet') }}
         </Button>
-        <Button @click="importAccount" :disabled="!terms && !termsAgreedOrNot">
+        <Button @click="importAccount" :disabled="!terms && !termsAgreedOrNot" data-cy="import-wallet">
           {{ $t('pages.index.importWallet') }}
         </Button>
       </div>

@@ -1,7 +1,7 @@
 <template>
   <div class="header" v-if="showNavigation && !aeppPopup">
     <div class="content" :class="{ isLoggedIn }">
-      <Arrow v-if="title" @click="goBack" class="back-arrow" />
+      <Arrow v-if="title" @click="goBack" class="back-arrow" data-cy="back-arrow" />
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
 
       <div class="title">
@@ -10,12 +10,12 @@
       </div>
 
       <div v-if="isLoggedIn">
-        <span class="noti-holder" @click="notifications.length && $router.push('/notifications')">
-          <span v-if="notifications.length" class="noti-count">{{ notifications.length }}</span>
+        <span class="noti-holder" @click="notifications.length && $router.push('/notifications')" data-cy="noti">
+          <span v-if="notifications.length" class="noti-count" data-cy="noti-count">{{ notifications.length }}</span>
           <Bell />
         </span>
         <button @click="$emit('toggle-sidebar')">
-          <Hamburger />
+          <Hamburger data-cy="hamburger" />
         </button>
       </div>
     </div>

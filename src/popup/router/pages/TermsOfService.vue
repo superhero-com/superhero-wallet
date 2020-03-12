@@ -2,8 +2,6 @@
   <div class="popup text-left">
     <h1 class="heading-1 uppercase">{{ $t('pages.termsOfService.heading') }}</h1>
     <p class="sub-heading">{{ $t('pages.termsOfService.sub-heading') }}</p>
-    <p class="termsText">
-
       <p>
         {{ $t('pages.termsOfService.section0Content') }}
       </p>
@@ -12,16 +10,14 @@
         {{ $t('pages.termsOfService.section01Content') }}
       </p>
 
-      <div v-for="(item, index) in details">
-        <p class="accordion-item-title uppercase flex flex-justify-between flex-align-start" @click="toggleAccordionItem(index)">
-          <ArrowDown class="icon" v-if="item.open"/>
-          <ArrowRight class="icon" v-else />
+      <div v-for="(item, index) in details" :key="index" >
+        <p class="accordion-item-title uppercase flex flex-justify-between flex-align-start" @click="toggleAccordionItem(index)" data-cy="accordion-item">
+          <ArrowDown class="icon" v-if="item.open" data-cy="accordion-item-open"/>
+          <ArrowRight class="icon" v-else data-cy="accordion-item-close"/>
           <span> {{ item.title }} </span>
         </p>
-        <p class="accordion-item-content" v-if="item.open">{{ item.content }}</p>
+        <p class="accordion-item-content" v-show="item.open" data-cy="accordion-item-content">{{ item.content }}</p>
       </div>
-      
-    </p>
   </div>
 </template>
 

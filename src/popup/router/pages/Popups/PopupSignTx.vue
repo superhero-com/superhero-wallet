@@ -1,5 +1,5 @@
 <template>
-  <div class="popup popup-aex2">
+  <div class="popup popup-aex2" data-cy="popup-aex2">
     <ae-list class="spendTxDetailsList">
       <ae-list-item fill="neutral" class="flex-justify-between noBorder">
         <div class="flex flex-align-center accountFrom">
@@ -11,17 +11,17 @@
         </div>
         <div class="flex flex-align-center accountTo" v-if="isAddressShow">
           <ae-identicon :address="receiver" />
-          <ae-address :value="receiver" v-if="receiver" length="short" class="spendAccountAddr" />
+          <ae-address :value="receiver" v-if="receiver" length="short" class="spendAccountAddr" data-cy="address-receiver" />
           <span v-if="!receiver" class="spendAccountAddr">{{ $t('pages.signTransaction.unknownAccount') }}</span>
         </div>
         <div v-else class="flex flex-align-center accountTo">
           <ae-icon name="square" />
-          <span class="spendAccountAddr">{{ txType == 'contractCreateTx' ? $t('pages.signTransaction.newContract') : $t('pages.signTransaction.aens') }}</span>
+          <span class="spendAccountAddr" data-cy="receiver">{{ txType == 'contractCreateTx' ? $t('pages.signTransaction.newContract') : $t('pages.signTransaction.aens') }}</span>
         </div>
       </ae-list-item>
       <ae-list-item fill="neutral" class="flex-justify-between flex-align-start flex-direction-column">
         <div class="mt-20">
-          <ae-badge>{{ txType }}</ae-badge>
+          <ae-badge data-cy="tx-type">{{ txType }}</ae-badge>
         </div>
         <AmountSend :value="tx.amount" @changeAmount="val => (tx.amount = val)" style="width:100%;" />
       </ae-list-item>
@@ -62,7 +62,7 @@
         <div class="flex extend flex-justify-between ">
           <div class="tx-label">{{ $t('pages.signTransaction.fee') }}</div>
           <div class="text-right">
-            <div class="balance balanceBig txFee no-sign">{{ toAe(txObject.fee) }} {{ $t('pages.appVUE.aeid') }}</div>
+            <div class="balance balanceBig txFee no-sign" data-cy="fee">{{ toAe(txObject.fee) }} {{ $t('pages.appVUE.aeid') }}</div>
           </div>
         </div>
       </ae-list-item>
@@ -70,7 +70,7 @@
       <ae-list-item fill="neutral" class="flex-justify-between" v-if="!isNameTx">
         <div class="tx-label">{{ $t('pages.signTransaction.total') }}</div>
         <div class="text-right">
-          <div class="balance balanceBig balanceTotalSpend no-sign">{{ totalSpend }} {{ $t('pages.appVUE.aeid') }}</div>
+          <div class="balance balanceBig balanceTotalSpend no-sign" data-cy="total">{{ totalSpend }} {{ $t('pages.appVUE.aeid') }}</div>
         </div>
       </ae-list-item>
       <ae-list-item v-if="txType == 'contractCreateTx'" fill="neutral" class="flex-justify-between flex-align-center flex-direction-column flex-align-start">
@@ -91,8 +91,8 @@
       </ae-list-item>
     </ae-list>
     <div class="btnFixed">
-      <Button half @click="cancelTransaction" :disabled="editTx" class="reject">{{ $t('pages.signTransaction.reject') }}</Button>
-      <Button half @click="signTransaction" :disabled="editTx || amountError">{{ $t('pages.signTransaction.confirm') }}</Button>
+      <Button half @click="cancelTransaction" :disabled="editTx" class="reject" data-cy="deny">{{ $t('pages.signTransaction.reject') }}</Button>
+      <Button half @click="signTransaction" :disabled="editTx || amountError" data-cy="accept">{{ $t('pages.signTransaction.confirm') }}</Button>
     </div>
     <Loader size="big" :loading="loading" type="transparent" content=""></Loader>
   </div>

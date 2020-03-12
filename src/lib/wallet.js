@@ -107,18 +107,11 @@ export default {
   redirectAfterLogin(cb) {
     if (window.RUNNING_IN_POPUP) {
       store.commit('SET_AEPP_POPUP', true);
-      const url = new URL(window.location.href);
-      const type = url.searchParams.get('type');
-      if (type) {
-        if (type == 'connectConfirm') {
-          cb('/connect');
-        } else if (type == 'sign') {
-          cb('/popup-sign-tx');
-        } else if (type == 'askAccounts') {
-          cb('/ask-accounts');
-        } else if (type == 'messageSign') {
-          cb('/message-sign');
-        }
+      if (window.POPUP_TYPE) {
+        if (window.POPUP_TYPE === 'connectConfirm') cb('/connect');
+        else if (window.POPUP_TYPE === 'sign') cb('/popup-sign-tx');
+        else if (window.POPUP_TYPE === 'askAccounts') cb('/ask-accounts');
+        else if (window.POPUP_TYPE === 'messageSign') cb('/message-sign');
       }
     } else {
       cb('/account');

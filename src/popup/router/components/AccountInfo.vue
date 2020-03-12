@@ -2,13 +2,13 @@
   <div class="account-info">
     <div class="title">
       <img :src="account_icon" />
-      <div class="account-name">
+      <div class="account-name" data-cy="account-name">
         <template v-if="activeAccountName.includes('.chain')">{{ activeAccountName }}</template>
         <router-link to="/names" v-else>Claim your .chain name</router-link>
       </div>
 
       <div class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</div>
-      <button @click="copy" v-clipboard:copy="account.publicKey">
+      <button data-cy="copy" @click="copy" v-clipboard:copy="account.publicKey">
         <Copyicon />
       </button>
     </div>

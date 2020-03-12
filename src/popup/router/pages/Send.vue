@@ -1,89 +1,91 @@
 <template>
   <div class="popup popup-no-padding">
-    <div v-if="step == 1">
-      <AccountInfo />
-      <BalanceInfo />
-      <div class="popup withdraw step1">
-        <p class="primary-title text-left mb-8 f-16">
-          {{ $t('pages.tipPage.heading') }}
-          <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
-          {{ $t('pages.tipPage.to') }}
-        </p>
-        <div class="d-flex">
-          <Textarea v-model="form.address" placeholder="ak.. / name.chain" size="h-50"></Textarea>
-          <div class="scan" @click="scan">
-            <QrIcon />
-            <small>{{ $t('pages.send.scan') }}</small>
+    <div data-cy="send-container">
+      <div v-if="step == 1">
+        <AccountInfo />
+        <BalanceInfo />
+        <div class="popup withdraw step1">
+          <p class="primary-title text-left mb-8 f-16">
+            {{ $t('pages.tipPage.heading') }}
+            <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+            {{ $t('pages.tipPage.to') }}
+          </p>
+          <div class="d-flex">
+            <Textarea :type="address" data-cy="address" v-model="form.address" placeholder="ak.. / name.chain" size="h-50"></Textarea>
+            <div class="scan" data-cy="scan-button" @click="scan">
+              <QrIcon />
+              <small>{{ $t('pages.send.scan') }}</small>
+            </div>
           </div>
-        </div>
-        <AmountSend @changeAmount="val => (form.amount = val)" :value="form.amount" />
-        <div class="flex flex-align-center flex-justify-between">
-          <Button half @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
-          <Button half @click="step = 2" :disabled="!form.address || !form.amount || (form.amount && isNaN(form.amount))">{{ $t('pages.send.review') }}</Button>
+          <AmountSend data-cy="amount-box" @changeAmount="val => (form.amount = val)" :value="form.amount" />
+          <div class="flex flex-align-center flex-justify-between">
+            <Button data-cy="reject-withdraw" half @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
+            <Button data-cy="review-withdraw" half @click="step = 2" :disabled="!form.address || !form.amount || (form.amount && isNaN(form.amount))">{{ $t('pages.send.review') }}</Button>
+          </div>
         </div>
       </div>
-    </div>
-    <div v-if="step == 2">
-      <div class="popup withdraw step2">
-        <h3 class="heading-1 my-15 center">
-          <div class="flex flex-align-center flex-justify-content-center">
-            <AlertExclamination />
-            <span class="ml-7">{{ $t('pages.send.reviewtx') }}</span>
+      <div v-if="step == 2">
+        <div class="popup withdraw step2">
+          <h3 class="heading-1 my-15 center">
+            <div class="flex flex-align-center flex-justify-content-center">
+              <AlertExclamination />
+              <span class="ml-7">{{ $t('pages.send.reviewtx') }}</span>
+            </div>
+          </h3>
+          <p class="primary-title primary-title-darker text-left my-5 f-16">
+            {{ $t('pages.send.checkalert') }}
+          </p>
+          <div class="info-group">
+            <label class="info-label">{{ $t('pages.send.sendingAddress') }}</label>
+            <span data-cy="review-sendingAddress" class="info-span" @click="openTxExplorer(account.publicKey)">{{ account.publicKey }}</span>
           </div>
-        </h3>
-        <p class="primary-title primary-title-darker text-left my-5 f-16">
-          {{ $t('pages.send.checkalert') }}
-        </p>
-        <div class="info-group">
-          <label class="info-label">{{ $t('pages.send.sendingAddress') }}</label>
-          <span class="info-span" @click="openTxExplorer(account.publicKey)">{{ account.publicKey }}</span>
-        </div>
-        <div class="info-group">
-          <label class="info-label">{{ $t('pages.send.receivingAddress') }}</label>
-          <span class="info-span" @click="openTxExplorer(form.address)">{{ form.address }}</span>
-        </div>
-        <div class="info-group">
-          <label>{{ $t('pages.send.amount') }}</label>
-          <div class="text-center">
-            <span class="amount">{{ toFixedAmount }} {{ $t('pages.appVUE.aeid') }}</span>
-            <span class="currencyamount">
-              ~
-              <span>{{ amountConvert }} {{ current.currency.toUpperCase() }}</span>
-            </span>
+          <div class="info-group">
+            <label class="info-label">{{ $t('pages.send.receivingAddress') }}</label>
+            <span data-cy="review-receivingAddress" class="info-span" @click="openTxExplorer(form.address)">{{ form.address }}</span>
           </div>
-        </div>
-        <Button @click="step = 1" extend>{{ $t('pages.send.editTxDetails') }}</Button>
-        <div class="flex flex-align-center flex-justify-between">
-          <Button half @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
-          <Button half @click="send" :disabled="sdk ? false : true">{{ $t('pages.send.send') }}</Button>
+          <div class="info-group">
+            <label>{{ $t('pages.send.amount') }}</label>
+            <div class="text-center">
+              <span data-cy="review-amount" class="amount">{{ toFixedAmount }} {{ $t('pages.appVUE.aeid') }}</span>
+              <span class="currencyamount">
+                ~
+                <span>{{ amountConvert }} {{ current.currency.toUpperCase() }}</span>
+              </span>
+            </div>
+          </div>
+          <Button data-cy="reivew-editTxDetails-button" @click="step = 1" extend>{{ $t('pages.send.editTxDetails') }}</Button>
+          <div class="flex flex-align-center flex-justify-between">
+            <Button data-cy="review-cancel-button" half @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
+            <Button data-cy="review-send-button" half @click="send" :disabled="sdk ? false : true">{{ $t('pages.send.send') }}</Button>
+          </div>
         </div>
       </div>
-    </div>
-    <div v-if="step == 3">
-      <div class="popup withdraw step2">
-        <h3 class="heading-1 my-15 center">
-          <div class="flex flex-align-center flex-justify-content-center">
-            <Heart />
-            <span class="ml-7">{{ $t('pages.send.tx-success') }}</span>
+      <div v-if="step == 3">
+        <div class="popup withdraw step2">
+          <h3 class="heading-1 my-15 center">
+            <div class="flex flex-align-center flex-justify-content-center">
+              <Heart />
+              <span class="ml-7">{{ $t('pages.send.tx-success') }}</span>
+            </div>
+          </h3>
+          <p class="primary-title primary-title-darker text-left my-5 f-16">
+            <span>{{ $t('pages.send.successalert') }}</span>
+            <span class="secondary-text ml-5"> {{ successTx.amount }} {{ $t('pages.appVUE.aeid') }}</span>
+          </p>
+          <div class="info-group">
+            <label class="info-label">{{ $t('pages.send.to') }}</label>
+            <span class="info-span" @click="openTxExplorer(successTx.to)">{{ successTx.to }}</span>
           </div>
-        </h3>
-        <p class="primary-title primary-title-darker text-left my-5 f-16">
-          <span>{{ $t('pages.send.successalert') }}</span>
-          <span class="secondary-text ml-5"> {{ successTx.amount }} {{ $t('pages.appVUE.aeid') }}</span>
-        </p>
-        <div class="info-group">
-          <label class="info-label">{{ $t('pages.send.to') }}</label>
-          <span class="info-span" @click="openTxExplorer(successTx.to)">{{ successTx.to }}</span>
+          <div class="info-group">
+            <label class="info-label">{{ $t('pages.send.from') }}</label>
+            <span class="info-span" @click="openTxExplorer(successTx.from)">{{ successTx.from }}</span>
+          </div>
+          <div class="info-group">
+            <label class="info-label">{{ $t('pages.send.txhash') }}</label>
+            <span class="info-span" @click="openTxExplorer(successTx.hash)">{{ successTx.hash }}</span>
+          </div>
+          <Button @click="navigateAccount">{{ $t('pages.send.home') }}</Button>
         </div>
-        <div class="info-group">
-          <label class="info-label">{{ $t('pages.send.from') }}</label>
-          <span class="info-span" @click="openTxExplorer(successTx.from)">{{ successTx.from }}</span>
-        </div>
-        <div class="info-group">
-          <label class="info-label">{{ $t('pages.send.txhash') }}</label>
-          <span class="info-span" @click="openTxExplorer(successTx.hash)">{{ successTx.hash }}</span>
-        </div>
-        <Button @click="navigateAccount">{{ $t('pages.send.home') }}</Button>
       </div>
     </div>
     <Loader size="big" :loading="loading" type="transparent"></Loader>
@@ -95,7 +97,8 @@
 import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
-import { contractEncodeCall, checkAddress, chekAensName, setPendingTx, checkHashType } from '../../utils/helper';
+import { contractEncodeCall, checkAddress, chekAensName, checkHashType } from '../../utils/helper';
+import { setPendingTx } from '../../utils';
 import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
@@ -121,7 +124,7 @@ export default {
       step: 1,
       form: {
         address: '',
-        amount: '',
+        amount: ''
       },
       loading: false,
       fee: {
