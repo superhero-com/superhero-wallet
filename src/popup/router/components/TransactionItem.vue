@@ -19,7 +19,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import { convertToAE, formatDate } from '../../utils/helper';
+import { convertToAE } from '../../utils/helper';
 import { formatDate } from '../../utils';
 import openUrl from '../../utils/openUrl';
 

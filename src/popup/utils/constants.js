@@ -92,8 +92,8 @@ export const MAX_REASONABLE_FEE_MICRO = toMicro(MAX_REASONABLE_FEE);
 export const DEFAULT_NETWORK = typeof process.env.NETWORK !== 'undefined' ? process.env.NETWORK.trim() : 'Mainnet'
 export const networks = {
   Testnet: {
-    url: 'https://testnet.aeternal.io',
-    internalUrl: 'https://testnet.aeternal.io',
+    url: 'https://sdk-testnet.aepps.com/',
+    internalUrl: 'https://sdk-testnet.aepps.com/',
     networkId: 'ae_uat',
     middlewareUrl: 'https://testnet.aeternal.io',
     explorerUrl: 'https://testnet.aeternal.io',
