@@ -1,6 +1,7 @@
 <template>
     <div>
       <div id="info">
+        <Logo class="logo" />
         <div class="loader" v-if="!error"></div>
         <p v-if="!error">Redirecting</p>
         <p v-if="error">{{ error }}</p>
@@ -9,8 +10,12 @@
 </template>
 
 <script>
+import Logo from '../icons/logo.svg';
 export default {
   name: 'App',
+  components: {
+    Logo
+  },
   data() {
     return {
       error:null
@@ -30,6 +35,9 @@ export default {
 body, html {
   background: #16161d!important;
   color:#fff;
+}
+.logo {
+  margin-bottom:25px;
 }
 p {
   font-size:20px;
