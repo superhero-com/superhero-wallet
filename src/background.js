@@ -10,14 +10,15 @@ import rpcWallet from './lib/rpcWallet';
 import { HDWALLET_METHODS, AEX2_METHODS, NOTIFICATION_METHODS, CONNECTION_TYPES, DEFAULT_NETWORK } from './popup/utils/constants';
 import { popupProps } from './popup/utils/config';
 import TipClaimRelay from './lib/tip-claim-relay';
+import RedirectChainNames from './lib/redirect-chain-names';
 import { setController } from './lib/background-utils';
 import { PopupConnections } from './lib/popup-connection';
 
 const controller = new WalletController();
 
 
-
 if (process.env.IS_EXTENSION) {
+  RedirectChainNames.init();
   setInterval(() => {
     browser.windows.getAll({}).then(wins => {
       if (wins.length === 0) {

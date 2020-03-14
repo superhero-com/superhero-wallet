@@ -217,7 +217,6 @@ const rpcWallet = {
 
   async addConnection(port) {
     const connection = await BrowserRuntimeConnection({ connectionInfo: { id: port.sender.frameId }, port });
-    console.log("connection", connection)
     this.sdk.addRpcClient(connection);
     this.sdk.shareWalletInfo(port.postMessage.bind(port));
     setTimeout(() => this.sdk.shareWalletInfo(port.postMessage.bind(port)), 3000);
