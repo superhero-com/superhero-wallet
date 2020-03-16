@@ -17,7 +17,7 @@
                             <div class="">{{name.name}}</div>
                             <ae-address :value="name.owner" length="short" />
                         </div>
-                        <Button class="danger" @click="extend(name)" small>{{ $t('pages.namingSystemPage.extend') }}</Button>
+                        <Button class="danger" :disabled="!address(name)" @click="extend(name)" small>{{ $t('pages.namingSystemPage.extend') }}</Button>
                         <ae-icon fill="primary" face="round" name="reload" class="name-pending" v-if="name.pending"/>
                     </ae-list-item>
                 </ae-list>
@@ -108,7 +108,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { fetchData, convertToAE, addressToName } from '../../utils/helper'
+import { fetchData, convertToAE, addressToName, getAddressByNameEntry } from '../../utils/helper'
 import { TX_TYPES, basicTxParams } from '../../utils/constants'
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import Input from '../components/Input';
@@ -180,6 +180,9 @@ export default {
         },3000)
     },
     methods: {
+        address(name) {
+            return getAddressByNameEntry(name);
+        },
         async updateAuctionEntry() {
             const res = await this.$store.dispatch('names/fetchAuctionEntry', this.moreAuInfo.info.name);
             this.expiration = res.expiration;
