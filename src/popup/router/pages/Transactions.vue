@@ -8,7 +8,7 @@
       <PendingTxs />
       <TransactionItem v-for="transaction in t_transactions" v-bind:key="transaction.id" :transactionData="transaction"></TransactionItem>
     </ae-list>
-    <div v-if="!t_transactions.length">
+    <div v-if="!t_transactions.length && !loading">
       <p>{{ $t('pages.transactions.noTransactions') }}</p>
     </div>
     <div class="newTx" @click="mergeNewTransactions" v-if="newTransactions != 0">
@@ -109,13 +109,6 @@ export default {
     this.page = this.getPage();
   },
   watch: {
-    publicKey() {
-      this.loading = true;
-      this.page = 1;
-      this.getTotalTransactions();
-      this.getTransactions('load');
-      this.showMoreBtn = true;
-    },
     'filter.direction': function(newValue, oldValue) {
       if (this.filter.direction == 'inocming' || this.filter.direction == 'outgoing') {
         this.updateInterval = setInterval(() => {

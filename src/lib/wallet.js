@@ -85,6 +85,7 @@ export default {
             this.initSdk(cb);
           } else {
             store.commit('SET_NODE_STATUS', 'error');
+            this.initMiddleware();
           }
           this.countError++;
         });
