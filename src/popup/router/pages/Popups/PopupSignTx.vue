@@ -182,8 +182,8 @@ export default {
     },
     async signTransaction() {
       const { tx } = TxBuilder.buildTx({ ...this.unpackedTx.tx, ...this.tx, amount: BigNumber(this.tx.amount ? this.tx.amount : 0).shiftedBy(MAGNITUDE) }, this.txType);
-      const { isTip, amount } =  getContractCallInfo(tx);
-      if(isTip) {
+      const { isTip, amount } = getContractCallInfo(tx);
+      if (isTip) {
         await addTipAmount(amount);
       }
       if (parseFloat(this.tx.amount) !== convertToAE(this.unpackedTx.tx.amount)) {

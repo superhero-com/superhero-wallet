@@ -61,6 +61,6 @@ export default {
 </script>
 <style>
 .qrcode canvas {
-   border:5px solid #fff;
+  border: 5px solid #fff;
 }
 </style>

@@ -16,7 +16,6 @@ import { PopupConnections } from './lib/popup-connection';
 
 const controller = new WalletController();
 
-
 if (process.env.IS_EXTENSION) {
   RedirectChainNames.init();
   setInterval(() => {
@@ -116,20 +115,19 @@ export const handleMessage = ({ type, payload }) => {
     return controller[type](payload);
   }
 
-  if(process.env.RUNNING_IN_TESTS) {
-    if(type === "POPUP_INFO") {
-      if(payload.txType) {
-        const props = popupProps["base"]
-        props.action.params.tx = (buildTx(payload.txType)).tx
-        return props
-      } else {
-        return popupProps[payload.popupType]
+  if (process.env.RUNNING_IN_TESTS) {
+    if (type === 'POPUP_INFO') {
+      if (payload.txType) {
+        const props = popupProps.base;
+        props.action.params.tx = buildTx(payload.txType).tx;
+        return props;
       }
-    } else if(["ACTION_DENY", "ACTION_ACCEPT"].includes(type)) {
-      return "send"
+      return popupProps[payload.popupType];
+    }
+    if (['ACTION_DENY', 'ACTION_ACCEPT'].includes(type)) {
+      return 'send';
     }
   }
-
 
   throw new Error(`Unknown message type: ${type}`);
 };

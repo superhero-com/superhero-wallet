@@ -74,7 +74,7 @@ export default {
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.TRANSACTION_FAILED });
             break;
           case 'tx_error':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TRANSACTION_FAILED, msg:payload.msg });
+            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TRANSACTION_FAILED, msg: payload.msg });
             break;
           case 'integer_required':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.INTEGER_REQUIRED });
@@ -215,7 +215,7 @@ export default {
           ]);
           names = flatten(names);
           names = uniqBy(names, 'name');
-          if(!process.env.RUNNING_IN_TESTS) {
+          if (!process.env.RUNNING_IN_TESTS) {
             if (names.length) {
               commit(types.SET_ACCOUNT_AENS, { account: index, aename: names[0].name, pending: !!names[0].pending });
             } else {

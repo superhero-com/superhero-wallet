@@ -32,7 +32,7 @@ export default {
           const pubKeys = await getAddressFromChainName(uniq(chainName));
           addresses = [...addresses, ...pubKeys];
         }
-        
+
         if (this.checkAddressMatch(account.publicKey, uniq(addresses))) {
           await this.abortIfZeroClaim(url);
 

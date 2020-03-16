@@ -7,12 +7,11 @@
       v-model="finalAmount"
       :placeholder="$t('pages.tipPage.amountPlaceholder')"
       :label="$t('pages.tipPage.amountLabel')"
-      
     />
     <div class="ml-15 text-left" style="margin-right:auto">
       <p class="label hidden">Empty</p>
       <span class="secondary-text f-14 block l-1" data-cy="amount"> {{ $t('pages.appVUE.aeid') }}</span>
-      <span class="f-14 block l-1" data-cy="amount-currency" >{{ getCurrencyAmount }} {{ currentCurrency }}</span>
+      <span class="f-14 block l-1" data-cy="amount-currency">{{ getCurrencyAmount }} {{ currentCurrency }}</span>
     </div>
     <div class="balance-box">
       <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
@@ -44,13 +43,13 @@ export default {
       this.$emit('changeAmount', val);
     },
     value(val) {
-      this.finalAmount = val
-    }
+      this.finalAmount = val;
+    },
   },
   computed: {
     ...mapGetters(['tokenBalance', 'balanceCurrency', 'current', 'currentCurrency']),
     getCurrencyAmount() {
-      if(isNaN(this.finalAmount)) return "0.000"
+      if (isNaN(this.finalAmount)) return '0.000';
       return (this.finalAmount * this.current.currencyRate).toFixed(3);
     },
   },
