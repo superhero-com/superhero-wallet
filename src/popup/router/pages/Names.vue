@@ -17,7 +17,7 @@
                             <div class="">{{name.name}}</div>
                             <ae-address :value="name.owner" length="flat" />
                             <div v-if="name.addPointer" class="pointer-holder mt-10">
-                                <Input size="m-0" v-model="name.pointerAddress" :error="name.pointerError" class="pointer-input" placeholder="Enter ak_ or .chain name" />
+                                <Input size="m-0" v-model="name.pointerAddress" :error="name.pointerError" class="pointer-input" :placeholder="$t('pages.namingSystemPage.pointerPlaceholder')" />
                                 <ae-icon name="close" @click.native="name.addPointer = false"/>
                             </div>
                             <Button v-if="!name.addPointer" class="danger" :disabled="!address(name)" @click="extend(name)" small>{{ $t('pages.namingSystemPage.extend') }}</Button>

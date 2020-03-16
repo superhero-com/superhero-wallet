@@ -263,7 +263,8 @@
             "backButton": "Back",
             "extend": "Extend",
             "namePlaceholder": "Enter .chain name",
-            "pointer": "Set Name Pointer"
+            "pointer": "Set Name Pointer",
+            "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
         },
         "generalSettings": {
             "backToSettings": "Back to settings",
