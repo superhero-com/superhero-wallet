@@ -262,7 +262,8 @@
             "goBiddingBtn": "Go for bidding",
             "backButton": "Back",
             "extend": "Extend",
-            "namePlaceholder": "Enter .chain name"
+            "namePlaceholder": "Enter .chain name",
+            "pointer": "Set Name Pointer"
         },
         "generalSettings": {
             "backToSettings": "Back to settings",

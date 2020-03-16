@@ -10,14 +10,20 @@
             <!-- if is clicked Your Names  -->
             <div class="seeAllRegisteredNames" v-if="tab == 'registered'">
                 <h4>{{$t('pages.namingSystemPage.registeredNames') }}</h4><hr>
-                <ae-list v-if="names.length">
-                    <ae-list-item fill="neutral" v-for="(name, key) in names" :key="key" >
+                <ae-list v-if="registeredNames.length">
+                    <ae-list-item fill="neutral" v-for="(name, key) in registeredNames" :key="key" >
                         <ae-identicon v-bind:address="name.owner" size="base" />
-                        <div style="width:50%;" class="text-left ml-10">
+                        <div style="width:100%;" class="text-left ml-10">
                             <div class="">{{name.name}}</div>
-                            <ae-address :value="name.owner" length="short" />
+                            <ae-address :value="name.owner" length="flat" />
+                            <div v-if="name.addPointer" class="pointer-holder mt-10">
+                                <Input size="m-0" v-model="name.pointerAddress" :error="name.pointerError" class="pointer-input" placeholder="Enter ak_ or .chain name" />
+                                <ae-icon name="close" @click.native="name.addPointer = false"/>
+                            </div>
+                            <Button v-if="!name.addPointer" class="danger" :disabled="!address(name)" @click="extend(name)" small>{{ $t('pages.namingSystemPage.extend') }}</Button>
+                            <Button :small="!name.addPointer" @click="setPointer(name)" :class="name.addPointer ? 'danger' : ''">{{ $t('pages.namingSystemPage.pointer') }}</Button>
                         </div>
-                        <Button class="danger" :disabled="!address(name)" @click="extend(name)" small>{{ $t('pages.namingSystemPage.extend') }}</Button>
+                        
                         <ae-icon fill="primary" face="round" name="reload" class="name-pending" v-if="name.pending"/>
                     </ae-list-item>
                 </ae-list>
@@ -108,7 +114,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { fetchData, convertToAE, addressToName, getAddressByNameEntry } from '../../utils/helper'
+import { fetchData, convertToAE, addressToName, getAddressByNameEntry, checkAddress, chekAensName } from '../../utils/helper'
 import { TX_TYPES, basicTxParams } from '../../utils/constants'
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import Input from '../components/Input';
@@ -135,7 +141,8 @@ export default {
             byCharLength: false,
             byBid: false,
             bids: null,
-            namesofaddresses: null
+            namesofaddresses: null,
+            registeredNames: []
         }
     },
     computed: {
@@ -164,6 +171,17 @@ export default {
                 this.loading = false;
                 return this.bids.filter(bid => bid !== this.currentBid);
             }
+        }
+    },
+    watch: {
+        names(names) {
+            this.registeredNames = names ? names.map((n,i) => ({ 
+                ...n, 
+                addPointer: this.registeredNames[i] ? this.registeredNames[i].addPointer : false, 
+                pointerAddress: this.registeredNames[i] ? this.registeredNames[i].pointerAddress : null,
+                pointerError: this.registeredNames[i] ? this.registeredNames[i].pointerError : null
+            })) : []
+            console.log(names)
         }
     },
     created() {
@@ -261,6 +279,52 @@ export default {
                 this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed'})
             }
             
+        },
+        async setPointer(name) {
+            if(!name.addPointer) {
+                name.addPointer = !name.addPointer;
+            } else {
+                name.pointerError = false;
+                if(!chekAensName(name.pointerAddress) && !checkAddress(name.pointerAddress)) {
+                    name.pointerError = true;
+                    return
+                }
+                let pointer = name.pointerAddress
+                if(chekAensName(name.pointerAddress)) {
+                    try {
+                        const nameObject = await this.sdk.aensQuery(name.pointerAddress)
+                        const address = getAddressByNameEntry(nameObject);
+                        if(!address) {
+                            name.pointerError = true;
+                            return
+                        }
+                        pointer = address
+                    } catch(e) {
+                        name.pointerError = true;
+                        return;
+                    }
+                    
+                }
+                let { id, pointers, ttl } = await this.sdk.getName(name.name)
+                let tx = {
+                    popup:false,
+                    tx: {
+                        name:name.name,
+                        pointers:[pointer],
+                        claim:{ id, name, pointers }
+                    },
+                    type:'nameUpdate',
+                    nameUpdateType:'pointer'
+                }
+                this.$store.commit('SET_AEPP_POPUP',true)
+                this.$router.push({'name':'sign', params: {
+                    data:tx,
+                    type:tx.type
+                }}).catch(err => {});
+
+                console.log("set pointer", name.pointerAddress)
+            }
+           
         }
     },
     beforeDestroy() {
@@ -287,5 +351,15 @@ export default {
 }
 .ae-list .ae-list-item:first-child {
     border-top:none !important
+}
+.ae-address.flat {
+    font-size:12px;
+}
+.pointer-holder {
+    display: flex;
+    justify-content: space-between;
+    .pointer-input {
+        width:90%;
+    }
 }
 </style>
