@@ -316,7 +316,7 @@ const removeTxFromStorage = id =>
     });
   });
 
-const checkAddress = value => Crypto.isAddressValid(value, 'ak') || Crypto.isAddressValid(value, 'ct');
+const checkAddress = value => Crypto.isAddressValid(value, 'ak') || Crypto.isAddressValid(value, 'ct') || Crypto.isAddressValid(value, 'ok');
 
 const isInt = n => n % 1 === 0;
 

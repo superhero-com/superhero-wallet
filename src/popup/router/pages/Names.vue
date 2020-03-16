@@ -258,17 +258,18 @@ export default {
                 }
             }
         },
-        async extend({ name }) {
+        async redirectToConfirm(name, type = 'extend', options = {}) {
             try {
                 let { id, pointers, ttl } = await this.sdk.getName(name)
                 let tx = {
                     popup:false,
                     tx: {
                         name,
-                        claim:{ id, name, pointers }
+                        claim:{ id, name, pointers },
+                        ...options
                     },
                     type:'nameUpdate',
-                    nameUpdateType:'extend'
+                    nameUpdateType:type
                 }
                 this.$store.commit('SET_AEPP_POPUP',true)
                 this.$router.push({'name':'sign', params: {
@@ -278,7 +279,9 @@ export default {
             } catch(e) {
                 this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed'})
             }
-            
+        },
+        async extend({ name }) {
+            await this.redirectToConfirm(name)
         },
         async setPointer(name) {
             if(!name.addPointer) {
@@ -303,26 +306,8 @@ export default {
                         name.pointerError = true;
                         return;
                     }
-                    
                 }
-                let { id, pointers, ttl } = await this.sdk.getName(name.name)
-                let tx = {
-                    popup:false,
-                    tx: {
-                        name:name.name,
-                        pointers:[pointer],
-                        claim:{ id, name, pointers }
-                    },
-                    type:'nameUpdate',
-                    nameUpdateType:'pointer'
-                }
-                this.$store.commit('SET_AEPP_POPUP',true)
-                this.$router.push({'name':'sign', params: {
-                    data:tx,
-                    type:tx.type
-                }}).catch(err => {});
-
-                console.log("set pointer", name.pointerAddress)
+                await this.redirectToConfirm(name.name, 'updatePointer', { pointers:[pointer] })
             }
            
         }
