@@ -44,16 +44,27 @@ export const getSDK = async (keypair = {}) => {
 
 export const getAddressFromChainName = async names => {
   const sdk = await getSDK();
-  return Promise.all(
-    names.map(async n => {
-      try {
-        return (await sdk.api.getNameEntryByName(n)).pointers[0].id;
-      } catch (e) {
-        console.log(e);
-        return null;
-      }
-    })
-  );
+  if(Array.isArray(names)) {
+    return Promise.all(
+      names.map(async n => {
+        try {
+          return (await sdk.api.getNameEntryByName(n)).pointers[0].id;
+        } catch (e) {
+          console.log(e);
+          return null;
+        }
+      })
+    );
+  } else {
+    try {
+      const pointers = (await sdk.api.getNameEntryByName(names)).pointers
+      let { id } =  pointers.find(({ key }) => key === 'account_pubkey')
+      return id ? id : null
+    } catch(e) {
+      return null
+    }
+  }
+  
 };
 
 export const getTippingContractInstance = async tx => {

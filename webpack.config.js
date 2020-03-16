@@ -34,7 +34,8 @@ const commonConfig = {
     'popup/popup': './popup/popup.js',
     'options/options': './options/options.js',
     'phishing/phishing': './phishing/phishing.js',
-    'popup/cameraPermission': './popup/cameraPermission.js'
+    'popup/cameraPermission': './popup/cameraPermission.js',
+    'redirect/redirect': './redirect/redirect.js'
   },
   node: { fs: 'empty', net: 'empty', tls: 'empty' },
   output: {
@@ -91,6 +92,7 @@ const commonConfig = {
       { from: 'options/options.html', to: `options/options.html`, transform: transformHtml },
       { from: 'phishing/phishing.html', to: `phishing/phishing.html`, transform: transformHtml },
       { from: 'popup/CameraRequestPermission.html', to: `popup/CameraRequestPermission.html`, transform: transformHtml },
+      { from: 'redirect/redirect.html', to: `redirect/index.html`, transform: transformHtml },
       { from: 'icons/icon_48.png', to: `popup/assets/logo-small.png` },
     ]),
   ],
