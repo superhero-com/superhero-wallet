@@ -47,7 +47,7 @@ export const getAddressFromChainName = async names => {
   return Array.isArray(names) ? Promise.all(names.map(async n => (getAddress(n)))) : getAddress(names)
 };
 
-const getAddress = (name) => {
+const getAddress = async (name) => {
   try {
     return getAddressByNameEntry((await sdk.api.getNameEntryByName(name)))
   } catch(e) {
