@@ -1,14 +1,12 @@
 const publicKey = 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5';
 
 
-describe("Test cases for Account Page" , () => {
+describe("Test cases for Withdraw Page" , () => {
     beforeEach(() => {
         cy.login()
         .openWithdraw()
     })
 
-    /*
-    
     it("Go to Withdraw Page", () => {
         cy
         .get('[data-cy=send-container]')
@@ -87,7 +85,7 @@ describe("Test cases for Account Page" , () => {
         .get('div.step2')
         .should('be.visible')
     })
-    */
+    
 
     it("Continue to step 2(Review) if all inputs are valid AND send", () => {
         cy

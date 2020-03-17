@@ -11,7 +11,7 @@
             {{ $t('pages.tipPage.to') }}
           </p>
           <div class="d-flex">
-            <Textarea :type="address" data-cy="address" v-model="form.address" placeholder="ak.. / name.chain" size="h-50"></Textarea>
+            <Textarea :type="address" data-cy="address" :error="form.address && !validAddress" v-model="form.address" placeholder="ak.. / name.chain" size="h-50"></Textarea>
             <div class="scan" data-cy="scan-button" @click="scan">
               <QrIcon />
               <small>{{ $t('pages.send.scan') }}</small>
@@ -185,6 +185,9 @@ export default {
     },
     activeToken() {
       return this.current.token;
+    },
+    validAddress() {
+      return checkAddress(this.form.address) || chekAensName(this.form.address);
     },
   },
   created() {

@@ -1,4 +1,4 @@
-describe("Test cases for Account Page" , () => {
+describe("Test cases for Top Up Page" , () => {
     beforeEach(() => {
         cy.login()
     })
