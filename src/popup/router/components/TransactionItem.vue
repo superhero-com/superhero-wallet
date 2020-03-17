@@ -10,7 +10,7 @@
       </div>
       <div class="holder">
         <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
-        <span class="seeTransaction" @click="seeTx(transactionData.hash)"><img :src="eye" /></span>
+        <span class="seeTransaction" @click="seeTx(transactionData.hash)"><img :src="eye"/></span>
       </div>
     </ae-list-item>
   </div>

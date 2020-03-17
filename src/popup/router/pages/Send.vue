@@ -20,7 +20,9 @@
           <AmountSend data-cy="amount-box" @changeAmount="val => (form.amount = val)" :value="form.amount" />
           <div class="flex flex-align-center flex-justify-between">
             <Button data-cy="reject-withdraw" half @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
-            <Button data-cy="review-withdraw" half @click="step = 2" :disabled="!form.address || !form.amount || (form.amount && isNaN(form.amount))">{{ $t('pages.send.review') }}</Button>
+            <Button data-cy="review-withdraw" half @click="step = 2" :disabled="!form.address || !form.amount || (form.amount && isNaN(form.amount))">{{
+              $t('pages.send.review')
+            }}</Button>
           </div>
         </div>
       </div>
@@ -124,7 +126,7 @@ export default {
       step: 1,
       form: {
         address: '',
-        amount: ''
+        amount: '',
       },
       loading: false,
       fee: {
@@ -283,11 +285,11 @@ export default {
     async openTxExplorer(hash) {
       const { middlewareUrl } = this.network[this.current.network];
       const { endpoint, valid } = await checkHashType(hash);
-      if(valid) {
+      if (valid) {
         const url = `${middlewareUrl}/${endpoint}/${hash}`;
-        openUrl(url)
+        openUrl(url);
       }
-    }
+    },
   },
 };
 </script>

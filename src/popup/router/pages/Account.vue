@@ -1,7 +1,7 @@
 <template>
   <div class="height-100 primary-bg">
     <div class="popup popup-no-padding">
-      <div v-show="backup_seed_notif" class="noti" data-cy="seed-notif" >
+      <div v-show="backup_seed_notif" class="noti" data-cy="seed-notif">
         <span>
           {{ $t('pages.account.youNeedTo') }} <a href="#/securitySettings" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a>
           {{ $t('pages.account.yourSeedPhrase') }}
@@ -46,7 +46,7 @@ export default {
     return {
       backup_seed_notif: false,
       IS_EXTENSION: process.env.IS_EXTENSION,
-      RUNNING_IN_TESTS:  process.env.RUNNING_IN_TESTS
+      RUNNING_IN_TESTS: process.env.RUNNING_IN_TESTS,
     };
   },
   computed: {

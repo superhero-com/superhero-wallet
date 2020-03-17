@@ -12,12 +12,11 @@ export const setController = contr => {
 };
 
 export const getActiveAccount = async () => {
-  const { userAccount } = await browser.storage.local.get('userAccount')
-  if(userAccount) {
-    return { account: { publicKey: userAccount.publicKey }, activeAccount: 0 }
-  } else {
-    return false
-  } 
+  const { userAccount } = await browser.storage.local.get('userAccount');
+  if (userAccount) {
+    return { account: { publicKey: userAccount.publicKey }, activeAccount: 0 };
+  }
+  return false;
 };
 
 export const getActiveNetwork = async () => {
@@ -44,16 +43,16 @@ export const getSDK = async (keypair = {}) => {
 
 export const getAddressFromChainName = async names => {
   const sdk = await getSDK();
-  return Array.isArray(names) ? Promise.all(names.map(async n => (getAddress(n)))) : getAddress(names)
+  return Array.isArray(names) ? Promise.all(names.map(async n => getAddress(n))) : getAddress(names);
 };
 
-const getAddress = async (name) => {
+const getAddress = async name => {
   try {
-    return getAddressByNameEntry((await sdk.api.getNameEntryByName(name)))
-  } catch(e) {
-    return null
+    return getAddressByNameEntry(await sdk.api.getNameEntryByName(name));
+  } catch (e) {
+    return null;
   }
-}
+};
 
 export const getTippingContractInstance = async tx => {
   if (tippingContract) return tippingContract;
@@ -84,4 +83,4 @@ export const contractCallStatic = async ({ tx, callType }) =>
     } catch (e) {
       reject(e);
     }
-});
+  });

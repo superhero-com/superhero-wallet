@@ -1,7 +1,7 @@
 <template>
   <ul class="sidebar-menu" @click="menuClickHandler" data-cy="sidebar-menu">
     <li class="menu-close">
-      <Close @click="closeMenu" data-cy="close-menu"/>
+      <Close @click="closeMenu" data-cy="close-menu" />
     </li>
     <li class="account-icon-holder">
       <div class="flex flex-align-center flex-justify-between">
@@ -45,7 +45,7 @@
             </router-link>
           </li> -->
           <li>
-            <router-link to="/securitySettings" >
+            <router-link to="/securitySettings">
               {{ $t('pages.appVUE.security') }}
             </router-link>
           </li>
