@@ -2,7 +2,7 @@
   <main>
     <div class="wrapper center">
       <Logo class="logo" />
-      <p class="f-24">
+      <p class="f-24 primary-title">
         {{ $t('pages.welcome.send') }}
         <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
         {{ $t('pages.welcome.across') }}
