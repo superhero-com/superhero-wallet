@@ -159,6 +159,8 @@ export default {
     }
   },
   getTransactionsByPublicKey({ state }, payload) {
+    const sdk = state.sdk ? state.sdk : {} 
+    if(!sdk.middleware) return []
     const { middlewareUrl } = state.network[state.current.network];
     let limit = '';
     let page = '';
@@ -191,6 +193,7 @@ export default {
     commit(types.INIT_SDK, payload);
   },
   async getRegisteredNames({ commit, state }) {
+    if(!state.sdk.middleware) return
     const { middlewareUrl } = state.network[state.current.network];
     const res = await Promise.all(
       state.subaccounts.map(async ({ publicKey }, index) => {

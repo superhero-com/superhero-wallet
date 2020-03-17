@@ -187,6 +187,10 @@ export default {
     created() {
         this.loading = true;
         this.polling = setInterval(async () => {
+            if(!this.sdk.middleware) {
+                this.loading = false;
+                return
+            }
             if (this.moreAuInfo.info != null) {
                 this.updateAuctionEntry();
             }
