@@ -7,29 +7,24 @@
         <Button :class="tab == 'claim' ? 'danger' : ''" @click="tab = 'claim'" third>{{ $t('pages.namingSystemPage.AddNewBtn') }}</Button>
       </div>
 
-            <!-- if is clicked Your Names  -->
-            <div class="seeAllRegisteredNames" v-if="tab == 'registered'">
-                <h4>{{$t('pages.namingSystemPage.registeredNames') }}</h4><hr>
-                <ae-list v-if="registeredNames.length">
-                    <ae-list-item fill="neutral" v-for="(name, key) in registeredNames" :key="key" >
-                        <ae-identicon v-bind:address="name.owner" size="base" />
-                        <div style="width:100%;" class="text-left ml-10">
-                            <div class="">{{name.name}}</div>
-                            <ae-address :value="name.owner" length="flat" />
-                            <div v-if="name.addPointer" class="pointer-holder mt-10">
-                                <Input size="m-0" v-model="name.pointerAddress" :error="name.pointerError" class="pointer-input" :placeholder="$t('pages.namingSystemPage.pointerPlaceholder')" />
-                                <ae-icon name="close" @click.native="name.addPointer = false"/>
-                            </div>
-                            <Button v-if="!name.addPointer" class="danger" :disabled="!address(name)" @click="extend(name)" small>{{ $t('pages.namingSystemPage.extend') }}</Button>
-                            <Button :small="!name.addPointer" @click="setPointer(name)" :class="name.addPointer ? 'danger' : ''">{{ $t('pages.namingSystemPage.pointer') }}</Button>
-                        </div>
-                        
-                        <ae-icon fill="primary" face="round" name="reload" class="name-pending" v-if="name.pending"/>
-                    </ae-list-item>
-                </ae-list>
-                <p v-if="!names.length">{{ $t('pages.namingSystemPage.noNames') }}</p>
+      <!-- if is clicked Your Names  -->
+      <div class="seeAllRegisteredNames" v-if="tab == 'registered'">
+        <h4>{{ $t('pages.namingSystemPage.registeredNames') }}</h4>
+        <hr />
+        <ae-list v-if="registeredNames.length">
+          <ae-list-item fill="neutral" v-for="(name, key) in registeredNames" :key="key">
+            <ae-identicon v-bind:address="name.owner" size="base" />
+            <div style="width:100%;" class="text-left ml-10">
+              <div class="">{{ name.name }}</div>
+              <ae-address :value="name.owner" length="flat" />
+              <div v-if="name.addPointer" class="pointer-holder mt-10">
+                <Input size="m-0" v-model="name.pointerAddress" :error="name.pointerError" class="pointer-input" :placeholder="$t('pages.namingSystemPage.pointerPlaceholder')" />
+                <ae-icon name="close" @click.native="name.addPointer = false" />
+              </div>
+              <Button v-if="!name.addPointer" class="danger" :disabled="!address(name)" @click="extend(name)" small>{{ $t('pages.namingSystemPage.extend') }}</Button>
+              <Button :small="!name.addPointer" @click="setPointer(name)" :class="name.addPointer ? 'danger' : ''">{{ $t('pages.namingSystemPage.pointer') }}</Button>
             </div>
-            <Button class="danger" @click="extend(name)" small>{{ $t('pages.namingSystemPage.extend') }}</Button>
+
             <ae-icon fill="primary" face="round" name="reload" class="name-pending" v-if="name.pending" />
           </ae-list-item>
         </ae-list>
@@ -123,9 +118,9 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { fetchData, convertToAE, addressToName, getAddressByNameEntry, checkAddress, chekAensName } from '../../utils/helper'
-import { TX_TYPES, basicTxParams } from '../../utils/constants'
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
+import { fetchData, convertToAE, addressToName, getAddressByNameEntry, checkAddress, chekAensName } from '../../utils/helper';
+import { TX_TYPES, basicTxParams } from '../../utils/constants';
 import Input from '../components/Input';
 import Button from '../components/Button';
 
@@ -152,6 +147,7 @@ export default {
       byBid: false,
       bids: null,
       namesofaddresses: null,
+      registeredNames: [],
     };
   },
   computed: {
@@ -161,27 +157,14 @@ export default {
       if (this.filterType == 'length') return this.activeAuctions.sort((a, b) => a.name.length - b.name.length);
       if (this.filterType == 'bid') return this.activeAuctions.sort((a, b) => a.winning_bid - b.winning_bid);
     },
-    data () {
-        return {
-            tab:'claim',
-            loading: false,
-            name: '',
-            ak_address: '',
-            polling:null,
-            activeAuctions: null,
-            moreAuInfo: {
-                visible: false,
-                key: null,
-                info: null
-            },
-            filterType:'soonest',
-            bySoonest: true,
-            byCharLength: false,
-            byBid: false,
-            bids: null,
-            namesofaddresses: null,
-            registeredNames: []
-        }
+    currentBid() {
+      if (!this.bids) {
+        this.loading = true;
+        return null;
+      }
+
+      this.loading = false;
+      return this.bids.reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b));
     },
     previousBids() {
       if (!this.bids) {
@@ -193,9 +176,26 @@ export default {
       return this.bids.filter(bid => bid !== this.currentBid);
     },
   },
+  watch: {
+    names(names) {
+      this.registeredNames = names
+        ? names.map((n, i) => ({
+            ...n,
+            addPointer: this.registeredNames[i] ? this.registeredNames[i].addPointer : false,
+            pointerAddress: this.registeredNames[i] ? this.registeredNames[i].pointerAddress : null,
+            pointerError: this.registeredNames[i] ? this.registeredNames[i].pointerError : null,
+          }))
+        : [];
+      console.log(names);
+    },
+  },
   created() {
     this.loading = true;
     this.polling = setInterval(async () => {
+      if (!this.sdk.middleware) {
+        this.loading = false;
+        return;
+      }
       if (this.moreAuInfo.info != null) {
         this.updateAuctionEntry();
       }
@@ -207,6 +207,9 @@ export default {
     }, 3000);
   },
   methods: {
+    address(name) {
+      return getAddressByNameEntry(name);
+    },
     async updateAuctionEntry() {
       const res = await this.$store.dispatch('names/fetchAuctionEntry', this.moreAuInfo.info.name);
       this.expiration = res.expiration;
@@ -225,150 +228,47 @@ export default {
       });
       this.moreAuInfo.info = info;
     },
-    watch: {
-        names(names) {
-            this.registeredNames = names ? names.map((n,i) => ({ 
-                ...n, 
-                addPointer: this.registeredNames[i] ? this.registeredNames[i].addPointer : false, 
-                pointerAddress: this.registeredNames[i] ? this.registeredNames[i].pointerAddress : null,
-                pointerError: this.registeredNames[i] ? this.registeredNames[i].pointerError : null
-            })) : []
-            console.log(names)
-        }
-    },
-    created() {
+    async registerName() {
+      this.name = this.name.trim();
+      const onlyLettersAndNums = /^[A-Za-z0-9]+$/;
+      if (this.name == '') {
+        this.$store.dispatch('popupAlert', {
+          name: 'account',
+          type: 'requiredField',
+        });
+      } else if (!onlyLettersAndNums.test(this.name)) {
+        this.$store.dispatch('popupAlert', {
+          name: 'account',
+          type: 'only_allowed_chars',
+        });
+      } else {
         this.loading = true;
-        this.polling = setInterval(async () => {
-            if(!this.sdk.middleware) {
-                this.loading = false;
-                return
-            }
-            if (this.moreAuInfo.info != null) {
-                this.updateAuctionEntry();
-            }
-            let middleWareBaseUrl = this.network[this.current.network].middlewareUrl; 
-            const fetched = await fetchData(middleWareBaseUrl + '/middleware/names/auctions/active','get','')
-            this.activeAuctions = fetched;
-            this.$store.dispatch('getRegisteredNames')
-            this.loading = false;
-        },3000)
-    },
-    methods: {
-        address(name) {
-            return getAddressByNameEntry(name);
-        },
-        async updateAuctionEntry() {
-            const res = await this.$store.dispatch('names/fetchAuctionEntry', this.moreAuInfo.info.name);
-            this.expiration = res.expiration;
-            this.bids = res.bids;
-        },
-        bidOnThisHandler(info) {
-            this.$router.push({'name':'auction-bid',params: { auctionInfo: info }});
-        },
-        moreAuctionInfo(key,info) {
-            this.moreAuInfo.visible = true;
-            this.moreAuInfo.key = key;
-            var exists = Object.keys(info).some(function(k) {
-                if (k == 'winning_bid') {
-                    info[k] = convertToAE(info[k]);
-                }
-            });
-            this.moreAuInfo.info = info;
-        },
-        async registerName() {
-            this.name = this.name.trim();
-            var onlyLettersAndNums = /^[A-Za-z0-9]+$/;
-            if (this.name == '') {
-                this.$store.dispatch('popupAlert', {
-                    name: 'account',
-                    type: 'requiredField'
-                });
-            }
-            else if (!onlyLettersAndNums.test(this.name)) {
-                this.$store.dispatch('popupAlert', {
-                    name: 'account',
-                    type: 'only_allowed_chars'
-                });
-            }
-            else {
-                this.loading = true;
-                let name = `${this.name}.chain`
-                try {
-                    const query = await this.sdk.aensQuery(name)
-                    this.loading = false;
-                    this.$store.dispatch('popupAlert', { name: 'account', type: 'name_exist' });
-                } catch(err) {
-                    let tx = {
-                        popup:false,
-                        tx: {
-                            name,
-                            recipientId:''
-                        },
-                        type:'namePreClaim'
-                    }
-                    this.$store.commit('SET_AEPP_POPUP',true)
-                    this.$router.push({'name':'sign', params: {
-                        data:tx,
-                        type:tx.type
-                    }});
-                }
-            }
-        },
-        async redirectToConfirm(name, type = 'extend', options = {}) {
-            try {
-                let { id, pointers, ttl } = await this.sdk.getName(name)
-                let tx = {
-                    popup:false,
-                    tx: {
-                        name,
-                        claim:{ id, name, pointers },
-                        ...options
-                    },
-                    type:'nameUpdate',
-                    nameUpdateType:type
-                }
-                this.$store.commit('SET_AEPP_POPUP',true)
-                this.$router.push({'name':'sign', params: {
-                    data:tx,
-                    type:tx.type
-                }}).catch(err => {});
-            } catch(e) {
-                this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed'})
-            }
-        },
-        async extend({ name }) {
-            await this.redirectToConfirm(name)
-        },
-        async setPointer(name) {
-            if(!name.addPointer) {
-                name.addPointer = !name.addPointer;
-            } else {
-                name.pointerError = false;
-                if(!chekAensName(name.pointerAddress) && !checkAddress(name.pointerAddress)) {
-                    name.pointerError = true;
-                    return
-                }
-                let pointer = name.pointerAddress
-                if(chekAensName(name.pointerAddress)) {
-                    try {
-                        const nameObject = await this.sdk.aensQuery(name.pointerAddress)
-                        const address = getAddressByNameEntry(nameObject);
-                        if(!address) {
-                            name.pointerError = true;
-                            return
-                        }
-                        pointer = address
-                    } catch(e) {
-                        name.pointerError = true;
-                        return;
-                    }
-                }
-                await this.redirectToConfirm(name.name, 'updatePointer', { pointers:[pointer] })
-            }
+        const name = `${this.name}.chain`;
+        try {
+          const query = await this.sdk.aensQuery(name);
+          this.loading = false;
+          this.$store.dispatch('popupAlert', { name: 'account', type: 'name_exist' });
+        } catch (err) {
+          const tx = {
+            popup: false,
+            tx: {
+              name,
+              recipientId: '',
+            },
+            type: 'namePreClaim',
+          };
+          this.$store.commit('SET_AEPP_POPUP', true);
+          this.$router.push({
+            name: 'sign',
+            params: {
+              data: tx,
+              type: tx.type,
+            },
+          });
         }
       }
     },
-    async extend({ name }) {
+    async redirectToConfirm(name, type = 'extend', options = {}) {
       try {
         const { id, pointers, ttl } = await this.sdk.getName(name);
         const tx = {
@@ -376,9 +276,10 @@ export default {
           tx: {
             name,
             claim: { id, name, pointers },
+            ...options,
           },
           type: 'nameUpdate',
-          nameUpdateType: 'extend',
+          nameUpdateType: type,
         };
         this.$store.commit('SET_AEPP_POPUP', true);
         this.$router
@@ -392,6 +293,36 @@ export default {
           .catch(err => {});
       } catch (e) {
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+      }
+    },
+    async extend({ name }) {
+      await this.redirectToConfirm(name);
+    },
+    async setPointer(name) {
+      if (!name.addPointer) {
+        name.addPointer = !name.addPointer;
+      } else {
+        name.pointerError = false;
+        if (!chekAensName(name.pointerAddress) && !checkAddress(name.pointerAddress)) {
+          name.pointerError = true;
+          return;
+        }
+        let pointer = name.pointerAddress;
+        if (chekAensName(name.pointerAddress)) {
+          try {
+            const nameObject = await this.sdk.aensQuery(name.pointerAddress);
+            const address = getAddressByNameEntry(nameObject);
+            if (!address) {
+              name.pointerError = true;
+              return;
+            }
+            pointer = address;
+          } catch (e) {
+            name.pointerError = true;
+            return;
+          }
+        }
+        await this.redirectToConfirm(name.name, 'updatePointer', { pointers: [pointer] });
       }
     },
   },
@@ -425,13 +356,13 @@ export default {
   border-top: none !important;
 }
 .ae-address.flat {
-    font-size:12px;
+  font-size: 12px;
 }
 .pointer-holder {
-    display: flex;
-    justify-content: space-between;
-    .pointer-input {
-        width:90%;
-    }
+  display: flex;
+  justify-content: space-between;
+  .pointer-input {
+    width: 90%;
+  }
 }
 </style>

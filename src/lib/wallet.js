@@ -8,7 +8,7 @@ import { TIPPING_CONTRACT, DEFAULT_NETWORK } from '../popup/utils/constants';
 
 export default {
   countError: 0,
-  middlewareConnError:0,
+  middlewareConnError: 0,
   async init(cb) {
     const { userAccount } = await browser.storage.local.get('userAccount');
     if (userAccount) {
@@ -49,16 +49,14 @@ export default {
     const { network } = store.getters;
     const { current } = store.getters;
     try {
-      const middleware = (await swag(network, current)).api
+      const middleware = (await swag(network, current)).api;
       store.commit('SET_MIDDLEWARE', middleware);
-    } catch(e) {
-      if(this.middlewareConnError < 2) {
-        this.initMiddleware()
+    } catch (e) {
+      if (this.middlewareConnError < 2) {
+        this.initMiddleware();
       }
       this.middlewareConnError++;
-    } 
-    
-   
+    }
   },
   async initSdk(cb) {
     const keypair = await this.getKeyPair();
@@ -78,7 +76,7 @@ export default {
           await store.dispatch('initSdk', sdk);
           store.commit('SET_NODE_STATUS', 'connected');
           this.initContractInstances();
-          this.initMiddleware();         
+          this.initMiddleware();
         })
         .catch(err => {
           if (this.countError < 2) {
