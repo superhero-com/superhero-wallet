@@ -23,7 +23,7 @@ export default {
   },
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .primary-title {
   color: #bcbcc4 !important;
   font-size: 16px;
