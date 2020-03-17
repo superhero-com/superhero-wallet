@@ -42,7 +42,7 @@ export default {
 .checkbox-container {
   display: flex;
   position: relative;
-  padding-left: 25px;
+  padding-left: 15px;
   margin-bottom: 2rem;
   cursor: pointer;
   justify-content: space-around;
