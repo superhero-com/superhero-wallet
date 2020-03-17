@@ -66,7 +66,7 @@ describe("Test cases for Account Page" , () => {
         .should('be.visible')
         .click()
         .get('ul.allTransactions')
-        .should('be.visible')
+        .should('exist')
         .get('[data-cy="back-arrow"]')
         .click()
         .get('[data-cy=how-to-claim-button]')
