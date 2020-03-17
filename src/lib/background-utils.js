@@ -1,7 +1,7 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
 import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
-import { setContractInstance, contractCall } from '../popup/utils/helper';
+import { setContractInstance, contractCall, getAddressByNameEntry } from '../popup/utils/helper';
 
 let sdk;
 let controller;
@@ -11,25 +11,13 @@ export const setController = contr => {
   controller = contr;
 };
 
-export const getActiveAccount = () =>
-  new Promise((resolve, rejet) => {
-    browser.storage.local.get('userAccount').then(data => {
-      if (data.userAccount && data.userAccount.hasOwnProperty('publicKey')) {
-        browser.storage.local.get('subaccounts').then(subaccounts => {
-          browser.storage.local.get('activeAccount').then(active => {
-            let activeIdx = 0;
-            if (active.hasOwnProperty('activeAccount')) {
-              activeIdx = active.activeAccount;
-            }
-            const address = subaccounts.subaccounts[activeIdx].publicKey;
-            resolve({ account: { publicKey: address }, activeAccount: activeIdx });
-          });
-        });
-      } else {
-        resolve(false);
-      }
-    });
-  });
+export const getActiveAccount = async () => {
+  const { userAccount } = await browser.storage.local.get('userAccount');
+  if (userAccount) {
+    return { account: { publicKey: userAccount.publicKey }, activeAccount: 0 };
+  }
+  return false;
+};
 
 export const getActiveNetwork = async () => {
   const { activeNetwork } = await browser.storage.local.get('activeNetwork');
@@ -55,16 +43,15 @@ export const getSDK = async (keypair = {}) => {
 
 export const getAddressFromChainName = async names => {
   const sdk = await getSDK();
-  return Promise.all(
-    names.map(async n => {
-      try {
-        return (await sdk.api.getNameEntryByName(n)).pointers[0].id;
-      } catch (e) {
-        console.log(e);
-        return null;
-      }
-    })
-  );
+  return Array.isArray(names) ? Promise.all(names.map(async n => getAddress(n))) : getAddress(names);
+};
+
+const getAddress = async name => {
+  try {
+    return getAddressByNameEntry(await sdk.api.getNameEntryByName(name));
+  } catch (e) {
+    return null;
+  }
 };
 
 export const getTippingContractInstance = async tx => {

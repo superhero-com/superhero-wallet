@@ -1,7 +1,7 @@
 <template>
   <div class="height-100 primary-bg">
     <div class="popup popup-no-padding">
-      <div v-show="backup_seed_notif" class="noti">
+      <div v-show="backup_seed_notif" class="noti" data-cy="seed-notif">
         <span>
           {{ $t('pages.account.youNeedTo') }} <a href="#/securitySettings" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a>
           {{ $t('pages.account.yourSeedPhrase') }}
@@ -11,7 +11,7 @@
       <AccountInfo />
       <BalanceInfo />
       <div class="height-100 submenu-bg">
-        <Button v-if="IS_EXTENSION" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
+        <Button data-cy="tip-button" v-if="IS_EXTENSION || RUNNING_IN_TESTS" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
           <div class="flex flex-align-center flex-justify-content-center">
             <Heart />
             <span class="ml-5">{{ $t('pages.account.send') }}</span>
@@ -46,6 +46,7 @@ export default {
     return {
       backup_seed_notif: false,
       IS_EXTENSION: process.env.IS_EXTENSION,
+      RUNNING_IN_TESTS: process.env.RUNNING_IN_TESTS,
     };
   },
   computed: {

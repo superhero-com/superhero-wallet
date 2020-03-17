@@ -10,13 +10,13 @@
     />
     <div class="ml-15 text-left" style="margin-right:auto">
       <p class="label hidden">Empty</p>
-      <span class="secondary-text f-14 block l-1"> {{ $t('pages.appVUE.aeid') }}</span>
-      <span class="f-14 block l-1">{{ getCurrencyAmount }} {{ currentCurrency }}</span>
+      <span class="secondary-text f-14 block l-1" data-cy="amount"> {{ $t('pages.appVUE.aeid') }}</span>
+      <span class="f-14 block l-1" data-cy="amount-currency">{{ getCurrencyAmount }} {{ currentCurrency }}</span>
     </div>
     <div class="balance-box">
       <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
-      <span class="secondary-text f-14 block l-1">{{ tokenBalance }} {{ $t('pages.appVUE.aeid') }}</span>
-      <span class="f-14 block l-1">{{ balanceCurrency }} {{ currentCurrency }}</span>
+      <span class="secondary-text f-14 block l-1" data-cy="balance">{{ tokenBalance }} {{ $t('pages.appVUE.aeid') }}</span>
+      <span class="f-14 block l-1" data-cy="balance-currency">{{ balanceCurrency }} {{ currentCurrency }}</span>
     </div>
   </div>
 </template>
@@ -49,6 +49,7 @@ export default {
   computed: {
     ...mapGetters(['tokenBalance', 'balanceCurrency', 'current', 'currentCurrency']),
     getCurrencyAmount() {
+      if (isNaN(this.finalAmount)) return '0.000';
       return (this.finalAmount * this.current.currencyRate).toFixed(3);
     },
   },

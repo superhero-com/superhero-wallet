@@ -18,6 +18,7 @@ import {
   getContractCallInfo,
 } from '../popup/utils/helper';
 import { DEFAULT_NETWORK, networks, AEX2_METHODS, NO_POPUP_AEPPS, BLACKLIST_AEPPS, MAX_AMOUNT_WITHOUT_CONFIRM } from '../popup/utils/constants';
+import { mockLogin } from '../popup/utils';
 
 global.browser = require('webextension-polyfill');
 
@@ -27,6 +28,7 @@ const rpcWallet = {
     await this.initNodes();
     this.initFields();
     this.controller = walletController;
+    if (process.env.EXTENSION_RUNNING_IN_TESTS_BROWSER) await mockLogin();
     const { userAccount } = await browser.storage.local.get('userAccount');
     if (userAccount) {
       this.controller.generateWallet({ seed: stringifyForStorage(userAccount.privateKey) });

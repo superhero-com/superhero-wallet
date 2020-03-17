@@ -34,16 +34,16 @@
         </div>
       </div>
 
-      <div class="dotstyle dotstyle-fillup" v-show="step < 4">
-        <LeftArrow @click="step = step - 1" class="left-arrow" v-show="step > 1" />
+      <div class="dotstyle dotstyle-fillup" v-show="step < 4" data-cy="onboarding-steps">
+        <LeftArrow @click="step = step - 1" class="left-arrow" v-show="step > 1" data-cy="prev" />
         <ul>
           <li @click="step = 1" :class="step === 1 ? 'current' : ''"><a></a></li>
           <li @click="step = 2" :class="step === 2 ? 'current' : ''"><a></a></li>
           <li @click="step = 3" :class="step === 3 ? 'current' : ''"><a></a></li>
         </ul>
-        <RightArrow @click="step = step + 1" class="right-arrow" v-show="step < 3" />
-        <button class="skip-button" @click="step = 3" v-show="step < 3">{{ $t('pages.intro.skip') }}</button>
-        <Button style="margin-top: 30px;" @click="createWallet" v-show="step === 3">{{ $t('pages.intro.generateWallet') }}</Button>
+        <RightArrow @click="step = step + 1" class="right-arrow" v-show="step < 3" data-cy="next" />
+        <button class="skip-button" @click="step = 3" v-show="step < 3" data-cy="skip">{{ $t('pages.intro.skip') }}</button>
+        <Button style="margin-top: 30px;" @click="createWallet" v-if="step === 3" data-cy="generate-wallet">{{ $t('pages.intro.generateWallet') }}</Button>
       </div>
 
       <div v-show="step === 4">
@@ -56,7 +56,7 @@
         </div>
 
         <p class="last-msg-enjoy">{{ $t('pages.intro.step4text-4') }}</p>
-        <Button @click="$router.push('/account')">{{ $t('pages.intro.toHome') }}</Button>
+        <Button @click="$router.push('/account')" data-cy="proceed-to-wallet">{{ $t('pages.intro.toHome') }}</Button>
       </div>
     </div>
   </div>

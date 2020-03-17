@@ -15,7 +15,11 @@
       "activeTab",
       "clipboardWrite",
       "notifications",
-      "tabs"
+      "tabs",
+      "webRequest",
+      "webRequestBlocking",
+      "*://*.chain/*",
+      "*://*.google.com/*"
     ],
     "icons": {
       "48": "icons/icon_48.png",

@@ -34,7 +34,8 @@ import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
-import { setPendingTx, pollGetter } from '../../utils/helper';
+import { pollGetter } from '../../utils/helper';
+import { setPendingTx } from '../../utils';
 import openUrl from '../../utils/openUrl';
 import CheckIcon from '../../../icons/check-icon.svg';
 import AmountSend from '../components/AmountSend';
@@ -90,8 +91,8 @@ export default {
   },
   methods: {
     openCallbackOrGoHome(paramName) {
-      const cancelUrl = this.urlParams.get(paramName);
-      if (cancelUrl) openUrl(cancelUrl);
+      const callbackUrl = this.urlParams.get(paramName);
+      if (callbackUrl) openUrl(decodeURIComponent(callbackUrl));
       else this.$router.push('/account');
     },
     async sendTip() {

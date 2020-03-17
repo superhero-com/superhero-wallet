@@ -1,25 +1,37 @@
-const webpack = require('@cypress/webpack-preprocessor')
-module.exports = (on, config) => {
-  
-  const options = {
-    // send in the options from your webpack.config.js, so it works the same
-    // as your app's code
-    webpackOptions: require('../../../webpack.config'),
-    watchOptions: {}
-  }
+const path = require('path')
+const wp = require('@cypress/webpack-preprocessor')
 
-  on('file:preprocessor', webpack(options))
-  on('task', {
-    log (message) {
-      console.log(message)
-      return null
+module.exports = (on, config) => {
+  const options = {
+    webpackOptions: {
+      resolve: {
+        extensions: [ ".js"]
+      },
+      module: {
+        rules: [
+          {
+            test: /\.js?$/,
+            loader: "babel-loader"
+          }
+        ]
+      }
+    },
+  }
+  on('file:preprocessor', wp(options))
+  on('before:browser:launch', (browser, args) => {
+    if (browser.family === 'chromium' && browser.isHeaded) {
+      const extensionFolder = path.resolve(__dirname, '..', '..','..', 'dist/extension')
+      args.extensions.push(extensionFolder)
     }
+
+    return args
   })
+
   return Object.assign({}, config, {
     fixturesFolder: 'tests/e2e/fixtures',
-    integrationFolder: 'tests/e2e/specs',
+    integrationFolder: 'tests/e2e/integration',
     screenshotsFolder: 'tests/e2e/screenshots',
     videosFolder: 'tests/e2e/videos',
     supportFile: 'tests/e2e/support/index.js',
-  });
+  })
 };

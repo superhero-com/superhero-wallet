@@ -92,19 +92,19 @@ export const MAX_REASONABLE_FEE_MICRO = toMicro(MAX_REASONABLE_FEE);
 export const DEFAULT_NETWORK = typeof process.env.NETWORK !== 'undefined' ? process.env.NETWORK.trim() : 'Mainnet'
 export const networks = {
   Testnet: {
-    url: 'https://testnet.aeternal.io',
-    internalUrl: 'https://testnet.aeternal.io',
+    url: 'https://sdk-testnet.aepps.com/',
+    internalUrl: 'https://sdk-testnet.aepps.com/',
     networkId: 'ae_uat',
     middlewareUrl: 'https://testnet.aeternal.io',
     explorerUrl: 'https://testnet.aeternal.io',
     compilerUrl: 'https://latest.compiler.aepps.com',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_Dnwribmd21YrxSQnqXCB5vTFPrgYJx2eg2TrbLvbdyEbTMejw',
-    tipContract: "ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z"
+    tipContract: "ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj"
   },
   Mainnet: {
-    url: 'https://mainnet.aeternal.io',
-    internalUrl: 'https://mainnet.aeternal.io',
+    url: 'https://mainnet.aeternity.io',
+    internalUrl: 'https://mainnet.aeternity.io',
     networkId: 'ae_mainnet',
     middlewareUrl: 'https://mainnet.aeternal.io',
     explorerUrl: 'https://mainnet.aeternal.io',

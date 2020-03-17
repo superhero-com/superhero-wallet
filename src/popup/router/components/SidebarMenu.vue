@@ -1,29 +1,29 @@
 <template>
-  <ul class="sidebar-menu">
+  <ul class="sidebar-menu" @click="menuClickHandler" data-cy="sidebar-menu">
     <li class="menu-close">
-      <Close @click="closeMenu" />
+      <Close @click="closeMenu" data-cy="close-menu" />
     </li>
     <li class="account-icon-holder">
       <div class="flex flex-align-center flex-justify-between">
         <ae-identicon class="account-icon" :address="account.publicKey" size="base" />
         <div class="ml-8 mr-auto">
           <div class="f-14">{{ $t('pages.appVUE.mainAccount') }}</div>
-          <div class="f-12" v-if="activeAccountName.includes('.chain')">{{ activeAccountName }}</div>
+          <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">{{ activeAccountName }}</div>
         </div>
       </div>
     </li>
     <li>
-      <router-link to="/receive">
+      <router-link to="/receive" data-cy="receive">
         {{ $t('pages.appVUE.topUp') }}
       </router-link>
     </li>
     <li>
-      <router-link to="/send">
+      <router-link to="/send" data-cy="send">
         {{ $t('pages.appVUE.withdraw') }}
       </router-link>
     </li>
     <li>
-      <router-link to="/transactions">
+      <router-link to="/transactions" data-cy="transactions">
         {{ $t('pages.appVUE.activity') }}
       </router-link>
     </li>
@@ -33,12 +33,12 @@
       </router-link>
     </li> -->
     <li>
-      <button :class="showSettingsDropdown && 'opened'" @click="showSettingsDropdown = !showSettingsDropdown">
+      <button :class="showSettingsDropdown && 'opened'" @click="showSettingsDropdown = !showSettingsDropdown" data-cy="settings">
         {{ $t('pages.appVUE.settings') }}
         <Arrow />
       </button>
       <transition name="slide">
-        <ul v-if="showSettingsDropdown">
+        <ul v-if="showSettingsDropdown" data-cy="dropdown">
           <!-- <li>
             <router-link>
               {{ $t('pages.appVUE.general') }}
@@ -50,12 +50,12 @@
             </router-link>
           </li>
           <li>
-            <router-link to="/securitySettings">
+            <router-link to="/securitySettings" data-cy="securitySettings">
               {{ $t('pages.appVUE.seedPhrase') }}
             </router-link>
           </li>
           <li>
-            <router-link to="/generalSettings">
+            <router-link to="/generalSettings" data-cy="generalSettings">
               {{ $t('pages.appVUE.language') }}
             </router-link>
           </li>
@@ -68,12 +68,12 @@
       </router-link>
     </li> -->
     <li>
-      <router-link to="/names">
+      <router-link to="/names" data-cy="names">
         {{ $t('pages.appVUE.names') }}
       </router-link>
     </li>
     <li>
-      <router-link to="/aboutSettings">
+      <router-link to="/aboutSettings" data-cy="aboutSettings">
         {{ $t('pages.appVUE.help') }}
       </router-link>
     </li>
@@ -96,13 +96,11 @@ export default {
   computed: mapGetters(['account', 'activeAccountName']),
   data: () => ({ showSettingsDropdown: false }),
   methods: {
+    menuClickHandler({ target }) {
+      if (target.tagName === 'A') this.closeMenu();
+    },
     closeMenu() {
       this.$emit('closeMenu');
-    },
-  },
-  watch: {
-    $route() {
-      this.closeMenu();
     },
   },
 };

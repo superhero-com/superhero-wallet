@@ -2,7 +2,7 @@
   <div class="recent-transactions">
     <div class="flex flex flex-align-center flex-justify-between my-10">
       <span class="title">{{ $t('pages.recentTransactions.recentActivity') }}</span>
-      <span @click="allTransactions" class="viewAll">{{ $t('pages.recentTransactions.viewAll') }}</span>
+      <span data-cy="view-all-transactions" @click="allTransactions" class="viewAll">{{ $t('pages.recentTransactions.viewAll') }}</span>
     </div>
     <PendingTxs />
     <div v-if="transactions.latest.length && !loading">
@@ -25,12 +25,10 @@
 import { mapGetters } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
 import BigNumber from 'bignumber.js';
-import Eye from '../../../icons/eye.svg';
 import PendingTxs from './PendingTxs';
 
 export default {
   components: {
-    Eye,
     PendingTxs,
   },
   data() {

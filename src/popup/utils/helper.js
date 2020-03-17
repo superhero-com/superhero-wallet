@@ -316,7 +316,7 @@ const removeTxFromStorage = id =>
     });
   });
 
-const checkAddress = value => Crypto.isAddressValid(value, 'ak') || Crypto.isAddressValid(value, 'ct');
+const checkAddress = value => Crypto.isAddressValid(value, 'ak') || Crypto.isAddressValid(value, 'ct') || Crypto.isAddressValid(value, 'ok');
 
 const isInt = n => n % 1 === 0;
 
@@ -558,42 +558,8 @@ const getUserNetworks = async () => {
     resolve(networks);
   });
 };
-const setTxInQueue = async tx => {
-  const { processingTx } = await browser.storage.local.get('processingTx');
-  let list = [];
-  if (typeof processingTx !== 'undefined' && processingTx.length) {
-    list = [...list, ...processingTx];
-  }
-  list.push(tx);
-  await browser.storage.local.set({ processingTx: list });
-};
-
-const setPendingTx = async tx => {
-  const { pendingTxs } = await browser.storage.local.get('pendingTxs');
-  let list = [];
-  if (pendingTxs && pendingTxs.length) {
-    list = [...list, ...pendingTxs];
-  }
-  list.push(tx);
-  await setTxInQueue(tx.hash);
-  return await browser.storage.local.set({ pendingTxs: list });
-};
 
 const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/[\""]/g, '');
-
-const formatTime = time => new Date(parseInt(time)).toLocaleTimeString(navigator.language, { timeStyle: 'short', hourCycle: 'h24', hour: '2-digit', minute: '2-digit' });
-
-const formatDate = time =>
-  new Date(parseInt(time)).toLocaleString(navigator.language, {
-    timeStyle: 'short',
-    dateStyle: 'short',
-    hourCycle: 'h24',
-    hour: '2-digit',
-    minute: '2-digit',
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit',
-  });
 
 const addTipAmount = async amount => {
   const { tippedAmount } = await browser.storage.local.get('tippedAmount');
@@ -680,13 +646,9 @@ export {
   setPermissionForAccount,
   getUniqueId,
   getUserNetworks,
-  setTxInQueue,
   getExtensionProtocol,
   detectConnectionType,
-  setPendingTx,
   escapeSpecialChars,
-  formatTime,
-  formatDate,
   addTipAmount,
   getTippedAmount,
   resetTippedAmount,

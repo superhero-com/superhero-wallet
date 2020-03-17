@@ -1,10 +1,24 @@
 <template>
-  <textarea class="textarea" :placeholder="placeholder ? placeholder : ''" :class="getClasses" :value="value" @input="$emit('input', $event.target.value)" />
+  <textarea class="textarea" :placeholder="placeholder ? placeholder : ''" :class="getClasses" :value="value" @input="$emit('input', $event.target.value)" data-cy="textarea" />
 </template>
 
 <script>
+import { checkAddress, chekAensName } from '../../utils/helper';
+
 export default {
-  props: ['value', 'error', 'placeholder', 'size'],
+  props: ['type', 'value', 'error', 'placeholder', 'size'],
+  data: () => ({ err: false }),
+  watch: {
+    value(val) {
+      if (this.type == 'address') {
+        if (!checkAddress(val) && !chekAensName(val)) {
+          this.err = true;
+        } else {
+          this.err = false;
+        }
+      }
+    },
+  },
   computed: {
     getClasses() {
       let cl = [];

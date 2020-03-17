@@ -12,18 +12,24 @@
     const successUrl = encodeURIComponent(`${window.location.origin}?result=success`);
     const cancelUrl = encodeURIComponent(`${window.location.origin}?result=cancel`);
 
-    [
-      'superhero:404',
-      'superhero:tip',
-      'superhero:tip?url=example.com',
-      `superhero:tip?url=${encodeURIComponent('http://example.com/article?id=123123')}`,
-      'superhero:retip',
-      `superhero:retip?id=26`,
-      `superhero:retip?id=26&x-success=${successUrl}`,
-      `superhero:retip?id=26&x-cancel=${cancelUrl}`,
-      `superhero:retip?id=25&x-success=${successUrl}&x-cancel=${cancelUrl}`,
-      `superhero:retip?id=26&x-success=${successUrl}&x-cancel=${cancelUrl}`,
-    ].forEach(url => document.write(`<a href="${url}">${url}</a><br>`));
+    const prefixes = ['superhero:', 'https://mobile.z52da5wt.xyz/'];
+    const paths = [
+      '404',
+      'tip',
+      'tip?url=example.com',
+      `tip?url=${encodeURIComponent('http://example.com/article?id=123123')}`,
+      'retip',
+      `retip?id=26`,
+      `retip?id=26&x-success=${successUrl}`,
+      `retip?id=26&x-cancel=${cancelUrl}`,
+      `retip?id=25&x-success=${successUrl}&x-cancel=${cancelUrl}`,
+      `retip?id=26&x-success=${successUrl}&x-cancel=${cancelUrl}`,
+    ];
+
+    prefixes.forEach(prefix => paths.forEach(path => {
+      const url = prefix + path;
+      document.write(`<a href="${url}">${url}</a><br>`);
+    }));
   </script>
 </body>
 </html>
