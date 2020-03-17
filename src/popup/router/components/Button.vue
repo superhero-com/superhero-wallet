@@ -62,6 +62,7 @@ export default {
   width: auto !important;
   line-height: 1px !important;
   padding: 10px;
+  font-size: 12px;
 }
 .primary-button.third {
   width: 32% !important;

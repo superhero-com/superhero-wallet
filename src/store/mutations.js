@@ -81,6 +81,9 @@ export default {
   [types.INIT_SDK](state, payload) {
     state.sdk = payload;
   },
+  [types.SET_MIDDLEWARE](state, payload) {
+    state.sdk.middleware = payload;
+  },
   [types.SET_AEPP_POPUP](state, payload) {
     state.aeppPopup = payload;
   },

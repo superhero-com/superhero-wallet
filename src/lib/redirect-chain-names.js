@@ -1,12 +1,13 @@
-const redirectUrl = "https://youdonotneedacapetobeahero.com/#/";
 import { getAddressFromChainName } from './background-utils';
+
+const redirectUrl = 'https://youdonotneedacapetobeahero.com/#/';
 
 export default {
   init() {
     this.setListener();
   },
-  supportedDomain (domain) {
-    return domain.endsWith('.chain')
+  supportedDomain(domain) {
+    return domain.endsWith('.chain');
   },
   async getAddressFromChainName(name) {
     const pubKeys = await getAddressFromChainName([name]);
@@ -14,62 +15,52 @@ export default {
   setListener() {
     browser.webRequest.onBeforeRequest.addListener(
       async requestDetails => {
-        const url = new URL(requestDetails.url)
-        const params = url.searchParams.get('q').trim().toLowerCase()
-        const q = new URL(url.protocol + '//' + params)
-        if (
-          !q.hostname ||
-          !this.supportedDomain(q.hostname) ||
-          url.pathname !== '/search'
-        ) {
-          return
+        const url = new URL(requestDetails.url);
+        const params = url.searchParams
+          .get('q')
+          .trim()
+          .toLowerCase();
+        const q = new URL(`${url.protocol}//${params}`);
+        if (!q.hostname || !this.supportedDomain(q.hostname) || url.pathname !== '/search') {
+          return;
         }
 
-        
+        chrome.tabs.update({ url: q.toString() });
 
-        chrome.tabs.update({url: q.toString()})
-    
-        return {cancel: true}
+        return { cancel: true };
       },
       {
-        urls: [
-          '*://*.google.com/*'
-        ],
-        types: ['main_frame']
+        urls: ['*://*.google.com/*'],
+        types: ['main_frame'],
       },
-      ['blocking'],
-    )
+      ['blocking']
+    );
 
-    browser.webRequest.onBeforeRequest.addListener(requestDetails => {
-        chrome.tabs.update({url: '/redirect/index.html'}, async (tab) => {
+    browser.webRequest.onBeforeRequest.addListener(
+      requestDetails => {
+        chrome.tabs.update({ url: '/redirect/index.html' }, async tab => {
           try {
             const url = new URL(requestDetails.url);
-            const host = url.hostname
-            if(!this.supportedDomain(host)){
-              throw new Error("invalid")
+            const host = url.hostname;
+            if (!this.supportedDomain(host)) {
+              throw new Error('invalid');
             }
             const pubKey = await getAddressFromChainName(host);
-            if(!pubKey) {
-              throw new Error(`${host} not found`)
+            if (!pubKey) {
+              throw new Error(`${host} not found`);
             }
-            const displayUrl = `${redirectUrl}user-profile/` + pubKey;
+            const displayUrl = `${redirectUrl}user-profile/${pubKey}`;
             chrome.tabs.update({ url: displayUrl });
-
-          } catch(err) {    
-            chrome.tabs.update({url: '/redirect/index.html?error='+err.message });
+          } catch (err) {
+            chrome.tabs.update({ url: `/redirect/index.html?error=${err.message}` });
           }
         });
-        return { cancel: true }
+        return { cancel: true };
       },
       {
-        urls: [
-          "*://*.chain/*",
-        ],
-        types: ['main_frame']
+        urls: ['*://*.chain/*'],
+        types: ['main_frame'],
       }
-    )
-  } 
-}
-
-
-
+    );
+  },
+};

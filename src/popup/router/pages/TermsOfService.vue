@@ -2,22 +2,22 @@
   <div class="popup text-left">
     <h1 class="heading-1 uppercase">{{ $t('pages.termsOfService.heading') }}</h1>
     <p class="sub-heading">{{ $t('pages.termsOfService.sub-heading') }}</p>
-      <p>
-        {{ $t('pages.termsOfService.section0Content') }}
-      </p>
+    <p>
+      {{ $t('pages.termsOfService.section0Content') }}
+    </p>
 
-      <p>
-        {{ $t('pages.termsOfService.section01Content') }}
-      </p>
+    <p>
+      {{ $t('pages.termsOfService.section01Content') }}
+    </p>
 
-      <div v-for="(item, index) in details" :key="index" >
-        <p class="accordion-item-title uppercase flex flex-justify-between flex-align-start" @click="toggleAccordionItem(index)" data-cy="accordion-item">
-          <ArrowDown class="icon" v-if="item.open" data-cy="accordion-item-open"/>
-          <ArrowRight class="icon" v-else data-cy="accordion-item-close"/>
-          <span> {{ item.title }} </span>
-        </p>
-        <p class="accordion-item-content" v-show="item.open" data-cy="accordion-item-content">{{ item.content }}</p>
-      </div>
+    <div v-for="(item, index) in details" :key="index">
+      <p class="accordion-item-title uppercase flex flex-justify-between flex-align-start" @click="toggleAccordionItem(index)" data-cy="accordion-item">
+        <ArrowDown class="icon" v-if="item.open" data-cy="accordion-item-open" />
+        <ArrowRight class="icon" v-else data-cy="accordion-item-close" />
+        <span> {{ item.title }} </span>
+      </p>
+      <p class="accordion-item-content" v-show="item.open" data-cy="accordion-item-content">{{ item.content }}</p>
+    </div>
   </div>
 </template>
 
@@ -28,7 +28,7 @@ import ArrowRight from '../../../icons/arrow-right.svg';
 export default {
   components: {
     ArrowDown,
-    ArrowRight
+    ArrowRight,
   },
   data() {
     return {
@@ -36,60 +36,60 @@ export default {
         {
           title: this.$t('pages.termsOfService.section1Title'),
           content: this.$t('pages.termsOfService.section1Content'),
-          open: false
+          open: false,
         },
         {
           title: this.$t('pages.termsOfService.section2Title'),
           content: this.$t('pages.termsOfService.section2Content'),
-          open: false
+          open: false,
         },
         {
           title: this.$t('pages.termsOfService.section3Title'),
           content: this.$t('pages.termsOfService.section3Content'),
-          open: false
+          open: false,
         },
         {
           title: this.$t('pages.termsOfService.section4Title'),
           content: this.$t('pages.termsOfService.section4Content'),
-          open: false
+          open: false,
         },
         {
           title: this.$t('pages.termsOfService.section5Title'),
           content: this.$t('pages.termsOfService.section5Content'),
-          open: false
+          open: false,
         },
         {
           title: this.$t('pages.termsOfService.section6Title'),
           content: this.$t('pages.termsOfService.section6Content'),
-          open: false
+          open: false,
         },
         {
           title: this.$t('pages.termsOfService.section7Title'),
           content: this.$t('pages.termsOfService.section7Content'),
-          open: false
+          open: false,
         },
         {
           title: this.$t('pages.termsOfService.section8Title'),
           content: this.$t('pages.termsOfService.section8Content'),
-          open: false
+          open: false,
         },
         {
           title: this.$t('pages.termsOfService.section9Title'),
           content: this.$t('pages.termsOfService.section9Content'),
-          open: false
+          open: false,
         },
         {
           title: this.$t('pages.termsOfService.section10Title'),
           content: this.$t('pages.termsOfService.section10Content'),
-          open: false
-        }
-      ]
+          open: false,
+        },
+      ],
     };
   },
   methods: {
     toggleAccordionItem(index) {
-      this.details[index].open = !this.details[index].open
-    }
+      this.details[index].open = !this.details[index].open;
+    },
   },
 };
 </script>
@@ -98,20 +98,20 @@ export default {
 @import '../../../common/variables';
 .accordion-item-title {
   color: $accent-color;
-  font-size:14px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   .icon {
-    width:25px;
-    margin-top:4px;
+    width: 25px;
+    margin-top: 4px;
   }
   span {
-    margin-right:auto;
+    margin-right: auto;
     color: $accent-color;
   }
 }
 .accordion-item-content {
-  font-size:14px;
+  font-size: 14px;
   font-weight: 500;
 }
 </style>

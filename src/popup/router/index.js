@@ -44,12 +44,7 @@ const router = new VueRouter({
 let isFirstTransition = true;
 const lastRouteKey = 'lsroute';
 
-const noAuthUrls = [
-  '/',
-  '/importAccount',
-  '/termsOfService',
-  '/intro'
-]
+const noAuthUrls = ['/', '/importAccount', '/termsOfService', '/intro'];
 
 router.beforeEach((to, from, next) => {
   const lastRouteName = localStorage.getItem(lastRouteKey);
@@ -58,7 +53,7 @@ router.beforeEach((to, from, next) => {
     if (!store.getters.sdk) {
       wallet.initSdk(() => next('/'));
     }
-    if(noAuthUrls.includes(to.path) && to.path !== '/termsOfService') {
+    if (noAuthUrls.includes(to.path) && to.path !== '/termsOfService') {
       next('/account');
     } else {
       next();
@@ -69,13 +64,10 @@ router.beforeEach((to, from, next) => {
         next(lastRouteName);
       } else if (route) {
         next(route);
+      } else if (!noAuthUrls.includes(to.path)) {
+        next('/');
       } else {
-        if(!noAuthUrls.includes(to.path)) {
-          next('/');
-        } else {
-          next();
-        }
-        
+        next();
       }
     });
   }

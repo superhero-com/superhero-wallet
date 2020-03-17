@@ -96,8 +96,8 @@ export default {
   },
   watch: {
     amount() {
-      if(isNaN(this.amount) || parseFloat(this.amount) === 0) {
-        this.amountError = true
+      if (isNaN(this.amount) || parseFloat(this.amount) === 0) {
+        this.amountError = true;
       } else {
         this.amountError = false;
       }

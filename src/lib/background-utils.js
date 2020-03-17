@@ -1,7 +1,7 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
 import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
-import { setContractInstance, contractCall } from '../popup/utils/helper';
+import { setContractInstance, contractCall, getAddressByNameEntry } from '../popup/utils/helper';
 
 let sdk;
 let controller;
@@ -12,12 +12,11 @@ export const setController = contr => {
 };
 
 export const getActiveAccount = async () => {
-  const { userAccount } = await browser.storage.local.get('userAccount')
-  if(userAccount) {
-    return { account: { publicKey: userAccount.publicKey }, activeAccount: 0 }
-  } else {
-    return false
-  } 
+  const { userAccount } = await browser.storage.local.get('userAccount');
+  if (userAccount) {
+    return { account: { publicKey: userAccount.publicKey }, activeAccount: 0 };
+  }
+  return false;
 };
 
 export const getActiveNetwork = async () => {
@@ -44,27 +43,15 @@ export const getSDK = async (keypair = {}) => {
 
 export const getAddressFromChainName = async names => {
   const sdk = await getSDK();
-  if(Array.isArray(names)) {
-    return Promise.all(
-      names.map(async n => {
-        try {
-          return (await sdk.api.getNameEntryByName(n)).pointers[0].id;
-        } catch (e) {
-          console.log(e);
-          return null;
-        }
-      })
-    );
-  } else {
-    try {
-      const pointers = (await sdk.api.getNameEntryByName(names)).pointers
-      let { id } =  pointers.find(({ key }) => key === 'account_pubkey')
-      return id ? id : null
-    } catch(e) {
-      return null
-    }
+  return Array.isArray(names) ? Promise.all(names.map(async n => getAddress(n))) : getAddress(names);
+};
+
+const getAddress = async name => {
+  try {
+    return getAddressByNameEntry(await sdk.api.getNameEntryByName(name));
+  } catch (e) {
+    return null;
   }
-  
 };
 
 export const getTippingContractInstance = async tx => {
@@ -96,4 +83,4 @@ export const contractCallStatic = async ({ tx, callType }) =>
     } catch (e) {
       reject(e);
     }
-});
+  });
