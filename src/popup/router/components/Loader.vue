@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import Welcome from '../pages/Welcome';
+import Welcome from './Welcome';
 
 export default {
   components: {
