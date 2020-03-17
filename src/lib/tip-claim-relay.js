@@ -17,8 +17,8 @@ export default {
       source: TIPPING_CONTRACT,
     };
 
-    const claimAmount = await contractCallStatic({ tx, callType: 'static' });
-    if (claimAmount.decodedResult === 0) throw new Error('No zero amount claims');
+    const claimAmount = await contractCallStatic({ tx, callType: 'static' }).then(r => r.decodedResult).catch(() => 1);
+    if (claimAmount === 0) throw new Error('No zero amount claims');
   },
 
   async checkUrlHasBalance(url, { address, chainName }) {

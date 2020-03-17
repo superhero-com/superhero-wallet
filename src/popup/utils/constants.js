@@ -103,8 +103,8 @@ export const networks = {
     tipContract: "ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj"
   },
   Mainnet: {
-    url: 'https://mainnet.aeternal.io',
-    internalUrl: 'https://mainnet.aeternal.io',
+    url: 'https://mainnet.aeternity.io',
+    internalUrl: 'https://mainnet.aeternity.io',
     networkId: 'ae_mainnet',
     middlewareUrl: 'https://mainnet.aeternal.io',
     explorerUrl: 'https://mainnet.aeternal.io',

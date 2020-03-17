@@ -732,110 +732,29 @@ export default {
           data: tx,
           type: tx.type,
         },
-      });
-    },
-    async namePreclaim() {
-      try {
-        const preclaim = await this.sdk.aensPreclaim(this.data.tx.name, { fee: this.convertSelectedFee });
-        setTxInQueue(preclaim.hash);
-        const tx = {
-          popup: false,
-          tx: {
-            name: this.data.tx.name,
-            recipientId: '',
-            preclaim,
-          },
-          type: 'nameClaim',
-        };
-        this.redirectToTxConfirm(tx);
-      } catch (err) {
-        setTxInQueue('error');
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });
-        this.$store.commit('SET_AEPP_POPUP', false);
-        this.$router.push('/names');
-      }
-    },
-    async nameClaim() {
-      if (this.data.bid) {
-        try {
-          const bid = await this.sdk.aensBid(this.data.tx.name, this.data.tx.BigNumberAmount);
-        } catch (err) {
-          setTxInQueue('error');
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });
-        }
-      } else {
-        try {
-          const claim = await this.data.tx.preclaim.claim({ waitMined: false, fee: this.convertSelectedFee });
-          setTxInQueue(claim.hash);
-        } catch (err) {
-          let msg = err.message;
-          if (msg.includes('is not enough to execute')) {
-            msg = this.$t('pages.signTransaction.balanceError');
-          }
-          setTxInQueue('error');
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg });
-        }
-      }
-      this.$store.commit('SET_AEPP_POPUP', false);
-      this.$router.push('/names');
-    },
-    async nameUpdate() {
-      try {
-        let options;
-        if (this.data.tx.hasOwnProperty('options')) {
-          options = { ...this.data.tx.options };
-        }
-        options = { ...options, fee: this.convertSelectedFee };
-        const nameObject = await this.sdk.aensQuery(this.data.tx.name);
-        let update;
-        if (this.data.nameUpdateType === 'extend') {
-          update = await nameObject.extendTtl();
-        }
-        setTxInQueue(update.hash);
-        await this.$store.dispatch('popupAlert', {
-          name: 'account',
-          type: 'added_success',
-        });
-        await this.$store.dispatch('removePendingName', { hash: this.data.tx.hash });
-      } catch (err) {
-        setTxInQueue('error');
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });
-      }
-      this.$store.commit('SET_AEPP_POPUP', false);
-      this.$router.push('/names');
-    },
-    async signTransaction() {
-      if (!this.signDisabled) {
-        this.loading = true;
-        const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
-        try {
-          let { tx_count } = await browser.storage.local.get('tx_count');
-          if (typeof tx_count === 'undefined') {
-            tx_count = {};
-          }
-          if (!tx_count.hasOwnProperty(new Date().toDateString())) {
-            tx_count = {
-              [new Date().toDateString()]: {
-                [this.account.publicKey]: 1,
-              },
-            };
-          } else if (tx_count.hasOwnProperty(new Date().toDateString()) && !tx_count[new Date().toDateString()].hasOwnProperty(this.account.publicKey)) {
-            tx_count[new Date().toDateString()][this.account.publicKey] = 1;
-          } else {
-            tx_count[new Date().toDateString()][this.account.publicKey]++;
-          }
-          await browser.storage.local.set({ tx_count });
-          if (tx_count[[new Date().toDateString()]] > TX_LIMIT_PER_DAY) {
-            return this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_limit_per_day' }).then(() => {
-              this.$store.commit('SET_AEPP_POPUP', false);
-              this.$router.push('/account');
-            });
-          }
-          if (this.data.type == 'txSign') {
-            if (this.isLedger) {
-              this.signSpendTxLedger(amount);
-            } else {
-              this.signSpendTx(amount);
+        async nameUpdate(){
+            try {
+                let options
+                if(this.data.tx.hasOwnProperty("options")) {
+                    options = { ...this.data.tx.options }
+                }
+                options = { ...options, fee:this.convertSelectedFee }
+                const nameObject = await this.sdk.aensQuery(this.data.tx.name)
+                let update ;
+                if(this.data.nameUpdateType === 'extend') {
+                    update = await nameObject.extendTtl()
+                } else if(this.data.nameUpdateType === "updatePointer") {
+                    update = await nameObject.update(this.data.tx.pointers, { extendPointers: true })
+                }
+                setTxInQueue(update.hash)
+                await this.$store.dispatch('popupAlert', {
+                    name: 'account',
+                    type: 'added_success'
+                })
+                await this.$store.dispatch('removePendingName',{ hash: this.data.tx.hash })
+            } catch(err) {
+                setTxInQueue('error')
+                this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message})
             }
           } else if (this.data.type == 'contractCall') {
             if (this.data.callType == 'pay') {
