@@ -103,6 +103,8 @@ import {
   addRejectedToken,
   checkContractAbiVersion,
   parseFromStorage,
+  aettosToAe,
+  aeToAettos
 } from '../../utils/helper';
 import Button from '../components/Button';
 
@@ -316,12 +318,12 @@ export default {
       if (this.data.tx.hasOwnProperty('options') && this.data.tx.options.hasOwnProperty('amount')) {
         this.data.tx.amount = this.data.tx.options.amount;
         if (this.data.type == 'contractCall') {
-          this.data.tx.amount = BigNumber(this.data.tx.options.amount).shiftedBy(-MAGNITUDE);
-          this.data.tx.options.amount = BigNumber(this.data.tx.options.amount).shiftedBy(-MAGNITUDE);
+          this.data.tx.amount = aettosToAe(this.data.tx.options.amount);
+          this.data.tx.options.amount = aettosToAe(this.data.tx.options.amount);
         }
       }
       if (this.data.type == 'txSign' && this.data.popup) {
-        this.data.tx.amount = BigNumber(this.data.tx.amount).shiftedBy(-MAGNITUDE);
+        this.data.tx.amount = aettosToAe(this.data.tx.amount);
       }
       if (this.data.popup) {
         this.port = browser.runtime.connect({ name: this.data.id });
@@ -615,7 +617,7 @@ export default {
           options = { ...tx.options };
         }
         if (tx.hasOwntProperty('options') && tx.options.hasOwnProperty('amount')) {
-          tx.options.amount = BigNumber(this.data.tx.options.amount).shiftedBy(MAGNITUDE);
+          tx.options.amount = aeToAettos(this.data.tx.options.amount);
           options = { ...options, ...tx.options };
         }
         const call = await this.$helpers.contractCall({ instance: this.contractInstance, method: tx.method, params: [...tx.params, options] });
@@ -642,7 +644,7 @@ export default {
           options = { ...this.data.tx.options };
         }
         if (this.data.tx.hasOwnProperty('options') && this.data.tx.options.hasOwnProperty('amount')) {
-          this.data.tx.options.amount = BigNumber(this.data.tx.options.amount).shiftedBy(MAGNITUDE);
+          this.data.tx.options.amount = aeToAettos(this.data.tx.options.amount);
           options = { ...options, ...this.data.tx.options };
         }
 
@@ -809,7 +811,7 @@ export default {
     async signTransaction() {
       if (!this.signDisabled) {
         this.loading = true;
-        const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
+        const amount = aeToAettos(this.amount);
         try {
           let { tx_count } = await browser.storage.local.get('tx_count');
           if (typeof tx_count === 'undefined') {

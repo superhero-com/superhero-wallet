@@ -53,7 +53,7 @@ import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
-import { escapeSpecialChars, pollGetter } from '../../utils/helper';
+import { escapeSpecialChars, pollGetter, aeToAettos } from '../../utils/helper';
 import { setPendingTx } from '../../utils';
 import CheckIcon from '../../../icons/check-icon.svg';
 import AmountSend from '../components/AmountSend';
@@ -162,7 +162,7 @@ export default {
       this.confirmMode = !this.amountError && !this.noteError;
     },
     async sendTip() {
-      const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
+      const amount = aeToAettos(this.amount);
       this.loading = true;
       try {
         const res = await this.tipping.call('tip', [this.url, escapeSpecialChars(this.note)], { amount, waitMined: false });
