@@ -187,7 +187,7 @@ export default {
       return this.current.token;
     },
     validAddress() {
-      return checkAddress(this.form.address) || chekAensName(this.form.address)
+      return checkAddress(this.form.address) || chekAensName(this.form.address);
     },
   },
   created() {

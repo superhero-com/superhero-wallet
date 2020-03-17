@@ -127,8 +127,7 @@ export default {
     }
     try {
       this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
-    } catch(e) {}
-    
+    } catch (e) {}
 
     await pollGetter(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
