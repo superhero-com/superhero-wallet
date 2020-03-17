@@ -59,10 +59,10 @@ export const SIGNED_MESSAGE = {
   buttonsFillSecondary: 'primary',
 };
 export const PUBLIC_KEY_COPIED = { type: 'success', title: 'Copied to clipboard', msg: 'Copied to clipboard' };
-export const SUCCESS_TRANSFER = { type: 'success', title: 'Transfer completed', msg: '' };
-export const SUCCESS_VERIFYMESSAGE = { type: 'success', title: 'Verification completed', msg: '' };
-export const SUCCESS_DEPLOY = { type: 'success', title: 'Contract deployed', msg: '' };
-export const SUCCESS_ADDED = { type: 'success', title: 'Successfully added!', msg: '' };
+export const SUCCESS_TRANSFER = { type: 'success', title: 'Transfer completed', msg: 'Transfer completed' };
+export const SUCCESS_VERIFYMESSAGE = { type: 'success', title: 'Verification completed', msg: 'Verification completed' };
+export const SUCCESS_DEPLOY = { type: 'success', title: 'Contract deployed', msg: 'Contract deployed' };
+export const SUCCESS_ADDED = { type: 'success', title: 'Successfully added!', msg: 'Successfully added!' };
 export const REMOVE_USER_NETWORK = {
   type: 'success',
   title: 'Are you sure?',

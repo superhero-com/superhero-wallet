@@ -759,6 +759,8 @@ export default {
                 let update ;
                 if(this.data.nameUpdateType === 'extend') {
                     update = await nameObject.extendTtl()
+                } else if(this.data.nameUpdateType === "updatePointer") {
+                    update = await nameObject.update(this.data.tx.pointers, { extendPointers: true })
                 }
                 setTxInQueue(update.hash)
                 await this.$store.dispatch('popupAlert', {
