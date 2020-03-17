@@ -11,7 +11,9 @@ cache:
     - ~/.cache
 jobs:
   include:
-    - stage: Project install
+    - stage: Install dependencies
       script: npm ci
-    - stage: Project tests
+    - stage: Build
+      script: npm run build
+    - stage: Run tests
       script: npm run test
