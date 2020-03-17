@@ -99,7 +99,7 @@
 import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
-import { contractEncodeCall, checkAddress, chekAensName, checkHashType } from '../../utils/helper';
+import { contractEncodeCall, checkAddress, chekAensName, checkHashType, aeToAettos, pollGetter } from '../../utils/helper';
 import { setPendingTx } from '../../utils';
 import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';
@@ -213,6 +213,7 @@ export default {
       });
     },
     async fetchFee() {
+      await pollGetter(() => this.sdk);
       const fee = await calculateFee(this.current.token == 0 ? TX_TYPES.txSign : TX_TYPES.contractCall, { ...(await this.feeParams()) });
       this.fee = fee;
     },
@@ -237,7 +238,7 @@ export default {
     },
     async send() {
       const sender = this.subaccounts.filter(sender => sender.publicKey == this.account.publicKey);
-      const amount = BigNumber(this.form.amount).shiftedBy(MAGNITUDE);
+      const amount = aeToAettos(this.form.amount);
       const receiver = this.form.address;
       if (receiver == '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'incorrect_address' });
@@ -261,7 +262,7 @@ export default {
       }
       this.loading = true;
       try {
-        const result = await this.sdk.spend(parseInt(amount), receiver, { waitMined: false });
+        const result = await this.sdk.spend(amount, receiver, { waitMined: false });
         if (result.hash) {
           await setPendingTx({ hash: result.hash, amount: this.form.amount, time: Date.parse(new Date()), type: 'spend' });
           return this.$router.push('/account');
