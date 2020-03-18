@@ -2,9 +2,9 @@
   <main>
     <div class="wrapper center">
       <Logo class="logo" />
-      <p class="primary-title f-24">
+      <p class="f-24 primary-title">
         {{ $t('pages.welcome.send') }}
-        <span class="secondary-text"> {{ $t('pages.appVUE.aeid') }} </span>
+        <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
         {{ $t('pages.welcome.across') }}
       </p>
     </div>
@@ -23,7 +23,7 @@ export default {
   },
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .welcome-bg {
   position: fixed;
   left: 50%;

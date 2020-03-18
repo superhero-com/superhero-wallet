@@ -4,7 +4,7 @@
     <main>
       <div class="wrapper center">
         <Logo class="logo" />
-        <p class="primary-title">
+        <p class="primary-title primary-title-small">
           {{ $t('pages.index.heading') }}
         </p>
         <CheckBox v-if="!termsAgreedOrNot" v-model="terms" data-cy="checkbox">

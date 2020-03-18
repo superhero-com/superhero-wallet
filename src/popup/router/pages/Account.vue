@@ -10,7 +10,7 @@
       <ClaimTipButton :class="!backup_seed_notif ? 'mt-32' : ''" />
       <AccountInfo />
       <BalanceInfo />
-      <div class="height-100 secondary-bg">
+      <div class="height-100 submenu-bg">
         <Button data-cy="tip-button" v-if="IS_EXTENSION || RUNNING_IN_TESTS" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
           <div class="flex flex-align-center flex-justify-content-center">
             <Heart />
@@ -97,5 +97,8 @@ export default {
 .recent-tx .recent-transactions {
   overflow-y: scroll;
   padding-bottom: 20px;
+}
+.submenu-bg {
+    background:$submenu-bg;
 }
 </style>
