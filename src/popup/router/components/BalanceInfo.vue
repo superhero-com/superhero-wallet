@@ -13,8 +13,7 @@
             <ae-button data-cy="toggle-currency-dropdown" @click="toggleDropdown($event, '.have-subDropdown')">
               {{ balanceCurrency }}
               <span class="accent-text">{{ currentCurrency }}</span>
-              <!-- <DropdownArrow /> -->
-              <expanded-angle-arrow />
+              <ExpandedAngleArrow />
             </ae-button>
           </div>
           <ul class="sub-dropdown">
