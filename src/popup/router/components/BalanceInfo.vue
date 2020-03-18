@@ -31,7 +31,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import expandedAngleArrow from '../../../icons/expanded-angle-arrow.svg';
+import ExpandedAngleArrow from '../../../icons/expanded-angle-arrow.svg';
 
 export default {
   components: {
