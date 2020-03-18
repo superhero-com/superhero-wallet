@@ -15,7 +15,7 @@ export default {
   data() {
     return {
       checkedProxy: false,
-      checkbox_unchecked: browser.runtime.getURL('../icons/checkbox-unchecked.svg'),
+      checkboxUnchecked: browser.runtime.getURL('../icons/checkbox-unchecked.svg'),
       checkbox_checked: browser.runtime.getURL('../icons/checkbox-checked.svg'),
     };
   },
