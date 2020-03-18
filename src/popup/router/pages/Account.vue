@@ -98,4 +98,7 @@ export default {
   overflow-y: scroll;
   padding-bottom: 20px;
 }
+.submenu-bg {
+    background:$submenu-bg;
+}
 </style>
