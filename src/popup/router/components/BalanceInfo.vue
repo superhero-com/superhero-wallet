@@ -35,7 +35,7 @@ import expandedAngleArrow from '../../../icons/expanded-angle-arrow.svg';
 
 export default {
   components: {
-    'expanded-angle-arrow': expandedAngleArrow,
+    ExpandedAngleArrow,
   },
   data() {
     return {
