@@ -109,9 +109,7 @@ export const TIP_URL_VERIFIED = {
   </svg>
   This URL has been verified.
 </span>
-This means that urna neque viverra justo nec ultrices dui sapien eget mi.
-Gravida in fermentum et sollicitudin ac orci phasellus egestas tellus.
-Turpis egestas integer eget aliquet nibh. Risus nullam eget felis eget nunc.
-Facilisis volutpat est velit egestas dui id. Adipiscing at in tellus integer feugiat.
+This means that the creator of the content there or the website owner has
+successfully claimed tips for this url.
   `,
 };
