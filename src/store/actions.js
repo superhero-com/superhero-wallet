@@ -2,7 +2,7 @@ import { uniqBy, flatten } from 'lodash-es';
 import * as types from './mutation-types';
 import * as popupMessages from '../popup/utils/popup-messages';
 import { convertToAE, stringifyForStorage, parseFromStorage } from '../popup/utils/helper';
-import { BACKEND_URL } from '../popup/utils/constants';
+import { BACKEND_URL, DEFAULT_NETWORK } from '../popup/utils/constants';
 import router from '../popup/router/index';
 import { postMessage } from '../popup/utils/connection';
 
@@ -17,12 +17,9 @@ export default {
   setSubAccounts({ commit }, payload) {
     commit(types.SET_SUBACCOUNTS, payload);
   },
-  switchNetwork({ commit }, payload) {
-    browser.storage.local.set({ activeNetwork: payload });
-    return new Promise((resolve, reject) => {
-      commit(types.SWITCH_NETWORK, payload);
-      resolve();
-    });
+  async switchNetwork({ commit }, payload) {
+    await browser.storage.local.set({ activeNetwork: payload });
+    return commit(types.SWITCH_NETWORK, payload);
   },
   async updateBalance({ commit, state }) {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
@@ -315,7 +312,7 @@ export default {
     }
   },
   async checkExtensionUpdate({ state: { network, current } }) {
-    const { tipContract } = network[current.network];
+    const { tipContract } = network[current.network] ? network[current.network] : network[DEFAULT_NETWORK];
     let update = false;
     try {
       const { contractAddress } = await (await fetch(`${BACKEND_URL}/static/contract`)).json();

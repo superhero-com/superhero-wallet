@@ -1,7 +1,7 @@
 <template>
   <label class="checkbox-container">
     <slot class="checkbox-holder"></slot>
-    <input :value="val" v-model="checked" @change="onChange" type="checkbox" />
+    <input :value="val" v-model="checked" @change="onChange" :type="getType" :name="name" />
     <span
       class="checkmark"
       :style="{ 'background-image': `url(${checked ? checkboxChecked : checkboxUnchecked})` }"
@@ -11,7 +11,7 @@
 
 <script>
 export default {
-  props: ['value', 'val'],
+  props: ['value', 'val', 'type', 'name'],
   data() {
     return {
       checkedProxy: false,
@@ -28,6 +28,9 @@ export default {
         this.checkedProxy = val;
       },
     },
+    getType() {
+      return !this.type ? 'checkbox' : this.type;
+    }
   },
   methods: {
     onChange(e) {

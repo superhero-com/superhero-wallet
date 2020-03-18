@@ -1,8 +1,8 @@
 import Node from '@aeternity/aepp-sdk/es/node';
 import { Universal as Ae } from '@aeternity/aepp-sdk/es';
 import { setInterval } from 'timers';
-import { networks, DEFAULT_NETWORK, NOTIFICATION_METHODS } from './popup/utils/constants';
-import { detectBrowser, getUserNetworks } from './popup/utils/helper';
+import { NOTIFICATION_METHODS } from './popup/utils/constants';
+import { detectBrowser, getActiveNetwork } from './popup/utils/helper';
 
 global.browser = require('webextension-polyfill');
 
@@ -12,17 +12,10 @@ export default class Notification {
   }
 
   async init() {
-    let { activeNetwork } = await browser.storage.local.get('activeNetwork');
     await this.getNodes();
-    this.network = this.nodes[DEFAULT_NETWORK];
-    if (typeof activeNetwork !== 'undefined') {
-      this.network = this.nodes[activeNetwork];
-    } else {
-      activeNetwork = DEFAULT_NETWORK;
-    }
     const node = await Node({ url: this.network.internalUrl, internalUrl: this.network.internalUrl });
     this.client = await Ae({
-      nodes: [{ name: activeNetwork, instance: node }],
+      nodes: [{ name: this.activeNetwork, instance: node }],
       networkId: this.network.networkId,
       compilerUrl: this.network.compilerUrl,
     });
@@ -36,9 +29,10 @@ export default class Notification {
   }
 
   async getNodes() {
-    const userNetworks = await getUserNetworks();
-    const nodes = { ...networks, ...userNetworks };
-    this.nodes = nodes;
+    const nodes = await getActiveNetwork();
+    this.network = nodes.network;
+    this.nodes = nodes.all;
+    this.activeNetwork = this.network.name;
     return Promise.resolve(this.nodes);
   }
 

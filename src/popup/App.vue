@@ -43,14 +43,10 @@ export default {
     },
   },
   async created() {
-    const { language, activeNetwork } = await browser.storage.local.get(['language', 'activeNetwork']);
+    const { language } = await browser.storage.local.get(['language']);
 
     this.$store.state.current.language = language;
     if (language) fetchAndSetLocale(language);
-
-    if (activeNetwork) {
-      this.$store.state.current.network = activeNetwork;
-    }
 
     if (process.env.IS_EXTENSION) {
       readWebPageDom((receiver, sendResponse) => {

@@ -1,7 +1,6 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
-import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
-import { setContractInstance, contractCall, getAddressByNameEntry } from '../popup/utils/helper';
+import { setContractInstance, contractCall, getAddressByNameEntry, getActiveNetwork } from '../popup/utils/helper';
 
 let sdk;
 let controller;
@@ -19,18 +18,13 @@ export const getActiveAccount = async () => {
   return false;
 };
 
-export const getActiveNetwork = async () => {
-  const { activeNetwork } = await browser.storage.local.get('activeNetwork');
-  return networks[activeNetwork || DEFAULT_NETWORK];
-};
-
-export const getSDK = async (keypair = {}) => {
+export const getSDK = async () => {
   if (!sdk) {
     try {
-      const network = await getActiveNetwork();
+      const { network } = await getActiveNetwork();
       const node = await Node({ url: network.internalUrl, internalUrl: network.internalUrl });
       sdk = await Universal({
-        nodes: [{ name: DEFAULT_NETWORK, instance: node }],
+        nodes: [{ name: network.name, instance: node }],
         networkId: network.networkId,
         nativeMode: true,
         compilerUrl: network.compilerUrl,
@@ -41,17 +35,17 @@ export const getSDK = async (keypair = {}) => {
   return sdk;
 };
 
-export const getAddressFromChainName = async names => {
-  const sdk = await getSDK();
-  return Array.isArray(names) ? Promise.all(names.map(async n => getAddress(n))) : getAddress(names);
-};
-
 const getAddress = async name => {
+  await getSDK();
   try {
     return getAddressByNameEntry(await sdk.api.getNameEntryByName(name));
   } catch (e) {
     return null;
   }
+};
+
+export const getAddressFromChainName = async names => {
+  return Array.isArray(names) ? Promise.all(names.map(async n => getAddress(n))) : getAddress(names);
 };
 
 export const getTippingContractInstance = async tx => {
@@ -64,21 +58,17 @@ export const getTippingContractInstance = async tx => {
 export const contractCallStatic = async ({ tx, callType }) =>
   new Promise(async (resolve, reject) => {
     try {
-      const { activeAccount, account } = await getActiveAccount();
-      // controller.isLoggedIn() &&
-      if (typeof callType !== 'undefined' && callType == 'static' && account) {
-        // let keypair = parseFromStorage(await controller.getKeypair({ activeAccount, account }));
-        // const sdk = await getSDK();
-        // const contractInstance = await setContractInstance(tx, sdk, tx.address);
+      const { account } = await getActiveAccount();
+      if (typeof callType !== 'undefined' && callType === 'static' && account) {
         const contractInstance = await getTippingContractInstance(tx);
         const call = await contractCall({ instance: contractInstance, method: tx.method, params: [...tx.params, tx.options] });
         if (call) {
           resolve(call);
         } else {
-          reject('Contract call failed');
+          reject(new Error('Contract call failed'));
         }
-      } else if (!controller.isLoggedIn() && typeof callType !== 'undefined' && callType == 'static') {
-        reject('You need to unlock the wallet first');
+      } else if (!controller.isLoggedIn() && typeof callType !== 'undefined' && callType === 'static') {
+        reject(new Error('You need to unlock the wallet first'));
       }
     } catch (e) {
       reject(e);
