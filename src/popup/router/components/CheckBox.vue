@@ -4,7 +4,7 @@
     <input :value="val" v-model="checked" @change="onChange" type="checkbox" />
     <span
       class="checkmark"
-      :style="checked ? { 'background-image': `url(${checkbox_checked}) !important` } : { 'background-image': `url(${checkbox_unchecked}) !important` }"
+      :style="{ 'background-image': `url(${checked ? checkbox_checked : checkbox_unchecked})` }"
     ></span>
   </label>
 </template>
