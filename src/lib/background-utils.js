@@ -18,10 +18,30 @@ export const getActiveAccount = async () => {
   return false;
 };
 
+export const getNodes = async () => {
+  const { network, all } = await getActiveNetwork();
+  return {
+    network,
+    nodes: all,
+    activeNetwork: network.name,
+  };
+};
+
+export const switchNode = async () => {
+  if (sdk) {
+    const { network } = await getNodes();
+    const node = await Node({ url: network.internalUrl, internalUrl: network.internalUrl });
+    try {
+      await sdk.addNode(network.name, node, true);
+    } catch (e) { }
+    sdk.selectNode(network.name);
+  }
+};
+
 export const getSDK = async () => {
   if (!sdk) {
     try {
-      const { network } = await getActiveNetwork();
+      const { network } = await getNodes();
       const node = await Node({ url: network.internalUrl, internalUrl: network.internalUrl });
       sdk = await Universal({
         nodes: [{ name: network.name, instance: node }],
@@ -50,7 +70,7 @@ export const getAddressFromChainName = async names => {
 
 export const getTippingContractInstance = async tx => {
   if (tippingContract) return tippingContract;
-  const sdk = await getSDK();
+  await getSDK();
   tippingContract = await setContractInstance(tx, sdk, tx.address);
   return tippingContract;
 };

@@ -35,7 +35,7 @@
             "notifications": "Notifications",
             "names": "Names",
             "bidding": "Bidding",
-            "networks": "Network"
+            "networks": "Networks"
         },
         "appVUE": {
             "systemName": "SuperHero",
@@ -67,7 +67,7 @@
             "mainAccount": "Main account",
             "reportBug": "Report a bug",
             "names": "Names",
-            "networks": "Network"
+            "networks": "Networks"
         },
         "aboutSettings": {
             "heading": "About",
@@ -658,14 +658,14 @@
         "network": {
             "allNetworks": "Your networks",
             "cancel": "Cancel",
-            "addNetwork": "Add network",
+            "addNetwork": "Connect to another node",
             "networkNamePlaceholder": "Enter network name",
             "networkNameLabel": "Network name",
             "networkUrlPlaceholder": "Enter network url",
             "networkUrlLabel": "Network Url",
-            "networkMiddlewarePlaceholder": "Enter network placeholder",
+            "networkMiddlewarePlaceholder": "Enter network middleware url",
             "networkMiddlewareLabel": "Network middleware",
-            "save": "Save"
+            "save": "Connect"
         }
     }
 }

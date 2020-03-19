@@ -4,7 +4,7 @@ import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
 import { parseFromStorage, swag, getAllNetworks } from '../popup/utils/helper';
-import { TIPPING_CONTRACT, DEFAULT_NETWORK } from '../popup/utils/constants';
+import { TIPPING_CONTRACT } from '../popup/utils/constants';
 
 export default {
   countError: 0,
@@ -29,13 +29,18 @@ export default {
         }
         if (subaccounts) sub = [...sub, ...subaccounts.filter(s => s.publicKey)];
         store.dispatch('setSubAccounts', sub);
+
+        /* Get cached balance */
         const { tokenBal } = await browser.storage.local.get('tokenBal');
         if (tokenBal && tokenBal !== '0.000') store.commit('UPDATE_BALANCE', parseFloat(tokenBal));
         store.commit('SWITCH_LOGGED_IN', true);
+
+        /* Get network */
         const networks = await getAllNetworks();
         store.commit('SET_NETWORKS', networks);
         const { activeNetwork } = await browser.storage.local.get(['activeNetwork']);
         if (activeNetwork) store.commit('SWITCH_NETWORK', activeNetwork);
+
         this.redirectAfterLogin(cb);
         store.commit('SET_MAIN_LOADING', false);
       } else {
@@ -70,7 +75,7 @@ export default {
       const node = await Node({ url: network[current.network].internalUrl, internalUrl: network[current.network].internalUrl });
       const account = MemoryAccount({ keypair });
       Universal({
-        nodes: [{ name: DEFAULT_NETWORK, instance: node }],
+        nodes: [{ name: current.network, instance: node }],
         accounts: [account],
         networkId: network[current.network].networkId,
         nativeMode: true,

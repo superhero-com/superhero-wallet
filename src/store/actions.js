@@ -311,8 +311,8 @@ export default {
       });
     }
   },
-  async checkExtensionUpdate({ state: { network, current } }) {
-    const { tipContract } = network[current.network] ? network[current.network] : network[DEFAULT_NETWORK];
+  async checkExtensionUpdate({ state: { network } }) {
+    const { tipContract } = network[DEFAULT_NETWORK];
     let update = false;
     try {
       const { contractAddress } = await (await fetch(`${BACKEND_URL}/static/contract`)).json();

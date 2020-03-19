@@ -102,7 +102,6 @@ export const defaultNetworks = {
     tokenRegistryLima: 'ct_Dnwribmd21YrxSQnqXCB5vTFPrgYJx2eg2TrbLvbdyEbTMejw',
     tipContract: "ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj",
     name: "Testnet",
-    selected: DEFAULT_NETWORK === "Testnet",
   },
   Mainnet: {
     url: 'https://mainnet.aeternity.io',
@@ -115,7 +114,6 @@ export const defaultNetworks = {
     tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tipContract: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z',
     name: "Mainnet",
-    selected: DEFAULT_NETWORK === "Mainnet",
   }
 }
 export const networks = {

@@ -1,16 +1,28 @@
 <template>
   <div class="popup">
     <div v-if="mode === 'list'">
-      <h1 class="primary-title text-left mb-8">{{ $t('pages.network.allNetworks') }}</h1>
-      <ListItem v-for="(n, key, index) in networks" :key="index" @click.native="selectNetwork(n.name)">
-        {{ n.name }}
-        <CheckBox :value="n.name === current.network" type="radio" name="activeNetwork" />
-        <ae-icon name="edit" v-if="!n.system" @click.native="setNetworkEdit(n, index)" />
+      <ListItem v-for="(n, key, index) in networks" :key="index" class="network-row">
+        <CheckBox :value="n.name === current.network" type="radio" name="activeNetwork" @click.native="selectNetwork(n.name)" />
+        <div class="mr-auto ml-15 text-left">
+          <p class="f-16">{{ n.name }}</p>
+          <p class="f-12 url"><b>Url:</b> {{ n.url }}</p>
+          <p class="f-12 url"><b>MIddleware:</b> {{ n.middlewareUrl }}</p>
+        </div>
+        <ae-dropdown direction="right" v-if="!n.system">
+          <ae-icon name="more" size="20px" slot="button" />
+          <li @click="setNetworkEdit(n, index)">
+            <ae-icon name="edit" />
+            Edit
+          </li>
+          <li @click="deleteNetwork(n, index)">
+            <ae-icon name="delete" />
+            Delete
+          </li>
+        </ae-dropdown>
       </ListItem>
-      <Button extend @click="mode = 'add'">{{ $t('pages.network.addNetwork') }}</Button>
+      <Button extend @click="mode = 'add'" class="mt-20">{{ $t('pages.network.addNetwork') }}</Button>
     </div>
-    <div v-if="mode === 'add' || mode === 'edit'">
-      <h1 class="primary-title text-left mb-8">{{ $t('pages.network.addNetwork') }}</h1>
+    <div v-if="mode === 'add' || mode === 'edit'" class="mt-10">
       <Input :placeholder="$t('pages.network.networkNamePlaceholder')" :label="$t('pages.network.networkNameLabel')" v-model="network.name" />
       <Input :placeholder="$t('pages.network.networkUrlPlaceholder')" :label="$t('pages.network.networkUrlLabel')" v-model="network.url" />
       <Input :placeholder="$t('pages.network.networkMiddlewarePlaceholder')" :label="$t('pages.network.networkMiddlewareLabel')" v-model="network.middlewareUrl" />
@@ -57,13 +69,14 @@ export default {
   computed: {
     ...mapGetters(['networks', 'current']),
   },
-  watch: {
-    'network.name': function(val) {
-      this.network.error = val === DEFAULT_NETWORK;
-    },
-  },
   created() {
-
+    this.$watch(
+      'network',
+      v => {
+        this.network.error = v.name === DEFAULT_NETWORK ? 'Network with this name exist' : false;
+      },
+      { deep: true }
+    );
   },
   methods: {
     async selectNetwork(network) {
@@ -79,6 +92,15 @@ export default {
     setNetworkEdit(n, idx) {
       this.mode = 'edit';
       this.network = { ...networkProps, ...n, idx };
+    },
+    async deleteNetwork(network, idx) {
+      if (network.name !== DEFAULT_NETWORK) this.selectNetwork(DEFAULT_NETWORK);
+      const allNetworks = Object.values(this.networks).filter((n, i) => idx !== i);
+      await this.$store.commit(
+        'SET_NETWORKS',
+        allNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {})
+      );
+      await browser.storage.local.set({ userNetworks: allNetworks.filter(({ name }) => name !== DEFAULT_NETWORK) });
     },
     async addNetwork() {
       try {
@@ -97,7 +119,6 @@ export default {
           internalUrl: this.network.url,
           middlewareUrl: this.network.middlewareUrl,
           name: this.network.name,
-          selected: true,
         };
         if (this.network.idx >= 0) {
           allNetworks[this.network.idx] = newNetwork;
@@ -118,3 +139,22 @@ export default {
   },
 };
 </script>
+<style lang="scss">
+.network-row li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  border-top: 1px solid #100c0d !important;
+  p {
+    margin: 0;
+  }
+  p.url {
+    font-weight: normal;
+  }
+}
+.edit-btn {
+  margin-left: 5px;
+  margin-right: 0;
+}
+</style>

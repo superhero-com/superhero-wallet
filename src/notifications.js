@@ -2,7 +2,8 @@ import Node from '@aeternity/aepp-sdk/es/node';
 import { Universal as Ae } from '@aeternity/aepp-sdk/es';
 import { setInterval } from 'timers';
 import { NOTIFICATION_METHODS } from './popup/utils/constants';
-import { detectBrowser, getActiveNetwork } from './popup/utils/helper';
+import { detectBrowser } from './popup/utils/helper';
+import { getSDK } from './lib/background-utils';
 
 global.browser = require('webextension-polyfill');
 
@@ -12,14 +13,7 @@ export default class Notification {
   }
 
   async init() {
-    await this.getNodes();
-    const node = await Node({ url: this.network.internalUrl, internalUrl: this.network.internalUrl });
-    this.client = await Ae({
-      nodes: [{ name: this.activeNetwork, instance: node }],
-      networkId: this.network.networkId,
-      compilerUrl: this.network.compilerUrl,
-    });
-
+    this.client = await getSDK();
     setInterval(() => {
       this.checkTxReady();
     }, 2000);
@@ -28,27 +22,8 @@ export default class Notification {
     });
   }
 
-  async getNodes() {
-    const nodes = await getActiveNetwork();
-    this.network = nodes.network;
-    this.nodes = nodes.all;
-    this.activeNetwork = this.network.name;
-    return Promise.resolve(this.nodes);
-  }
-
-  async [NOTIFICATION_METHODS.SWITCH_NETWORK](network) {
-    await this.getNodes();
-    this.network = this.nodes[network];
-
-    const node = await Node({ url: this.network.internalUrl, internalUrl: this.network.internalUrl });
-    if (this.client) {
-      try {
-        await this.client.addNode(network, node, true);
-      } catch (e) {
-        console.log(e);
-      }
-      this.client.selectNode(network);
-    }
+  async [NOTIFICATION_METHODS.SWITCH_NETWORK]() {
+    this.client = await getSDK();
   }
 
   async getAllNotifications() {
@@ -59,16 +34,16 @@ export default class Notification {
   async deleteNotification(tx) {
     const { processingTx } = await browser.storage.local.get('processingTx');
     let list = [...processingTx];
-    list = list.filter(t => t != tx);
+    list = list.filter(t => t !== tx);
     await browser.storage.local.set({ processingTx: list });
   }
 
   async checkTxReady() {
     const noties = await this.getAllNotifications();
     if (noties) {
-      noties.forEach(async (tx, index) => {
+      noties.forEach(async tx => {
         if (tx !== 'error' && tx) {
-          const res = await this.client.poll(tx);
+          await this.client.poll(tx);
           const url = `${this.network.explorerUrl}/transactions/${tx}`;
           await this.sendNoti({ title: 'Transaction ready', message: `You can expore your transaction by clicking button below`, contextMessage: url, error: false });
         } else {

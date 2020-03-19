@@ -273,6 +273,7 @@ const rpcWallet = {
     this.addNewNetwork(payload);
   },
   async addNewNetwork(network) {
+    this.initNodes();
     this.initNetwork(network);
     const node = await Node({ url: this.internalUrl, internalUrl: this.internalUrl });
     if (this.sdk) {

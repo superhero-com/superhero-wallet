@@ -46,7 +46,7 @@ export default {
   display: flex;
   position: relative;
   padding-left: 15px;
-  margin-bottom: 2rem;
+  height: 20px;
   cursor: pointer;
   justify-content: space-around;
   -webkit-user-select: none;
