@@ -180,8 +180,8 @@ const rpcWallet = {
     const isConnected = await getAeppAccountPermission(extractHostName(url), this.activeAccount);
     if (!isConnected) {
       try {
-        const a = caller == 'connection' ? action : {};
-        const res = await this.showPopup({ action: a, aepp, type: 'connectConfirm' });
+        const a = caller === 'connection' ? action : {};
+        await this.showPopup({ action: a, aepp, type: 'connectConfirm' });
         if (typeof cb !== 'undefined') {
           cb();
         }
@@ -234,7 +234,6 @@ const rpcWallet = {
   },
   getAccessForAddress(address) {
     const clients = this.getClientsByCond(client => client.isConnected());
-    const context = this;
     clients.forEach(async client => {
       const {
         connection: {

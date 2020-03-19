@@ -10,7 +10,7 @@ export default {
   data: () => ({ err: false }),
   watch: {
     value(val) {
-      if (this.type == 'address') {
+      if (this.type === 'address') {
         if (!checkAddress(val) && !chekAensName(val)) {
           this.err = true;
         } else {

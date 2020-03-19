@@ -103,12 +103,12 @@ export default {
       this.next();
     },
     prev() {
-      this.step--;
+      this.step -= 1;
     },
     next() {
       if (this.step <= this.totalsteps) {
-        this.step++;
-      } else if (this.step == this.totalsteps) {
+        this.step += 1;
+      } else if (this.step === this.totalsteps) {
         return false;
       }
     },

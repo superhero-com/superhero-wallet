@@ -47,13 +47,13 @@ export const getters = {
   },
   activeAccountName(state) {
     const account = state.subaccounts.find(s => s.publicKey === state.account.publicKey);
-    return account ? (account.aename ? account.aename : account.name) : 'Main Account';
+    return account.aename ? account.aename : account.name;
   },
   sdk(state) {
     return state.sdk;
   },
   tokenBalance(state) {
-    return state.current.token != 0 ? state.tokens[state.current.token].balance.toFixed(3) : state.balance.toFixed(3);
+    return state.current.token !== 0 ? state.tokens[state.current.token].balance.toFixed(3) : state.balance.toFixed(3);
   },
   tokenSymbol() {
     return 'AE';
@@ -66,7 +66,7 @@ export const getters = {
   },
   isLedger(state) {
     if (state.subaccounts.length > 0) {
-      return state.subaccounts.find(s => s.publicKey == state.account.publicKey).isLedger;
+      return state.subaccounts.find(s => s.publicKey === state.account.publicKey).isLedger;
     }
     return state.subaccounts;
   },

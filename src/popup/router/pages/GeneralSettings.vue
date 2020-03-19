@@ -46,7 +46,7 @@ export default {
     ...mapGetters(['current', 'popup', 'names', 'sdk']),
   },
   created() {
-    if (this.current.language == undefined) {
+    if (!this.current.language) {
       this.current.language = 'en';
     }
   },

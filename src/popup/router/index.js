@@ -60,7 +60,7 @@ router.beforeEach((to, from, next) => {
     }
   } else {
     wallet.init(route => {
-      if (shouldRedirect && (route == '/' || route == '/account') && !noRedirectRoutes.includes(lastRouteName) && lastRouteName.indexOf('/sign-transaction') == -1) {
+      if (shouldRedirect && (route === '/' || route === '/account') && !noRedirectRoutes.includes(lastRouteName) && lastRouteName.indexOf('/sign-transaction') === -1) {
         next(lastRouteName);
       } else if (route) {
         next(route);

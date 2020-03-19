@@ -76,9 +76,6 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { getHdWalletAccount } from '../../utils/hdWallet';
-import { decrypt } from '../../utils/keystore';
-import { addressGenerator, decryptMnemonic } from '../../utils/address-generator';
 import { shuffleArray } from '../../utils/helper';
 
 export default {
@@ -148,20 +145,20 @@ export default {
       this.alert.content = content;
     },
     selectSeed(seed, index, id) {
-      if (!this.selectedSeed.find(s => s.parent == id)) {
+      if (!this.selectedSeed.find(s => s.parent === id)) {
         this.selectedSeed.push({ name: seed, parent: id });
-        this.seeds.find(s => s.id == id).selected = true;
+        this.seeds.find(s => s.id === id).selected = true;
       }
-      if (this.selectedSeed.length == 12) {
+      if (this.selectedSeed.length === 12) {
         this.buttonFill = 'primary';
       } else {
         this.buttonFill = '';
       }
     },
     removeSeed(parent, index) {
-      this.seeds.find(s => s.id == parent).selected = false;
+      this.seeds.find(s => s.id === parent).selected = false;
       this.selectedSeed.splice(index, 1);
-      if (this.selectedSeed.length == 12) {
+      if (this.selectedSeed.length === 12) {
         this.buttonFill = 'primary';
       } else {
         this.buttonFill = '';
@@ -173,8 +170,8 @@ export default {
       const sorted = seed.sort((a, b) => (a.id > b.id ? 1 : -1));
       const originalSeed = sorted.map(seed => seed.name).join(',');
       const selectSeed = this.selectedSeed.map(seed => seed.name).join(',');
-      if (this.selectedSeed.length == 12) {
-        if (originalSeed != selectSeed) {
+      if (this.selectedSeed.length === 12) {
+        if (originalSeed !== selectSeed) {
           this.seedError = { error: 'Oops! Incorrect seed phrase!' };
         } else {
           this.seedError = {};

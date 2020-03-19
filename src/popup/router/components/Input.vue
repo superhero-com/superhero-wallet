@@ -20,7 +20,7 @@ export default {
   created() {},
   watch: {
     value(val) {
-      if ((this.type == 'number' && isNaN(val)) || parseFloat(val) === 0) {
+      if ((this.type === 'number' && isNaN(val)) || parseFloat(val) === 0) {
         this.err = true;
       } else {
         this.err = false;

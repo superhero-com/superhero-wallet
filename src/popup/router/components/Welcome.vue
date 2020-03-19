@@ -8,18 +8,15 @@
         {{ $t('pages.welcome.across') }}
       </p>
     </div>
-    <!-- <Welcome class="welcome-bg" /> -->
   </main>
 </template>
 
 <script>
 import Logo from '../../../icons/logo.svg';
-import Welcome from '../../../icons/welcome.svg';
 
 export default {
   components: {
     Logo,
-    Welcome,
   },
 };
 </script>

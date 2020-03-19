@@ -50,9 +50,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import BigNumber from 'bignumber.js';
 import axios from 'axios';
-import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
+import { calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import { escapeSpecialChars, pollGetter, aeToAettos } from '../../utils/helper';
 import { setPendingTx } from '../../utils';
 import CheckIcon from '../../../icons/check-icon.svg';

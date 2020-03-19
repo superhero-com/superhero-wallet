@@ -24,7 +24,6 @@
 <script>
 import { mapGetters } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
-import BigNumber from 'bignumber.js';
 import PendingTxs from './PendingTxs';
 
 export default {

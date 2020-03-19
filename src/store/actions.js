@@ -149,6 +149,8 @@ export default {
           case 'name_exists':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.USER_NETWORK_EXISTS_ERROR });
             break;
+          default:
+            break;
         }
         break;
       default:

@@ -28,7 +28,6 @@
 
 <script>
 import { setInterval } from 'timers';
-import { getPhishingUrls, setPhishingUrl } from '../popup/utils/phishing-detect';
 
 export default {
   name: 'App',
@@ -59,12 +58,10 @@ export default {
           this.href = href;
         }
       }
-      if (hostname != '') {
-      }
     }
   },
   methods: {
-    continueHost(e) {
+    continueHost() {
       if (this.href != '' && this.href != null) {
         browser.runtime.sendMessage({
           method: 'setPhishingUrl',

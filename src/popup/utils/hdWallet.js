@@ -1,4 +1,4 @@
-import { derivePathFromKey, getKeyPair, derivePathFromSeed } from '@aeternity/hd-wallet/src/hd-key';
+import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { Crypto } from '@aeternity/aepp-sdk/es';
 import { generateHDWallet } from '@aeternity/hd-wallet/src';
 

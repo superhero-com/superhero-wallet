@@ -64,7 +64,6 @@ contract Example =
     };
   },
   async created() {
-    window !== window.parent || (await this.getReverseWindow());
     this.initClient();
     setInterval(async () => {
       if (this.client && !this.wallet.found) {
@@ -80,13 +79,14 @@ contract Example =
         nodes: [{ name: process.env.NETWORK, instance: node }],
         compilerUrl: networks[process.env.NETWORK].COMPILER_URL,
         onNetworkChange(params) {
+          // eslint-disable-next-line no-alert
           if (this.getNetworkId() !== params.networkId) alert(`Connected network ${this.getNetworkId()} is not supported with wallet network ${params.networkId}`);
         },
-        onAddressChange: async addresses => {
+        onAddressChange: async () => {
           this.wallet.address = await this.client.address();
-          this.wallet.balance = await this.client.balance(this.pub).catch(e => '0');
+          this.wallet.balance = await this.client.balance(this.pub).catch(() => 0);
         },
-        onDisconnect(a) {},
+        onDisconnect() {},
       });
     },
     async spend() {
@@ -114,14 +114,6 @@ contract Example =
       this.message.sig = await this.client.signMessage('test');
       this.message.valid = await this.client.verifyMessage('test', this.message.sig);
     },
-    async getReverseWindow() {
-      const iframe = document.createElement('iframe');
-      // iframe.src = prompt('Enter wallet URL', 'http://localhost:9000')
-      iframe.src = '';
-      iframe.style.display = 'none';
-      document.body.appendChild(iframe);
-      return iframe.contentWindow;
-    },
     async connectToWallet(wallet) {
       await this.client.connectToWallet(await wallet.getConnection());
       this.accounts = await this.client.subscribeAddress('subscribe', 'connected');
@@ -135,14 +127,12 @@ contract Example =
     },
     async scanForWallets() {
       try {
+        // eslint-disable-next-line func-names
         const handleWallets = async function({ wallets, newWallet }) {
-          newWallet = newWallet || Object.values(wallets)[0];
-          // if (confirm(`Do you want to connect to wallet ${newWallet.name}`)) {
-
-          // }
+          const wallet = newWallet || Object.values(wallets)[0];
           this.detector.stopScan();
 
-          await this.connectToWallet(newWallet);
+          await this.connectToWallet(wallet);
           // let addr = await this.client.askAddresses()
         };
 
@@ -151,9 +141,7 @@ contract Example =
         });
         this.detector = await Detector({ connection: scannerConnection });
         this.detector.scan(handleWallets.bind(this));
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) {}
     },
   },
 };

@@ -78,8 +78,6 @@ To contact us with your questions or comments regarding this Policy or the infor
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-
 export default {
   data() {
     return {};

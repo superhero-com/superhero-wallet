@@ -118,15 +118,14 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { TxBuilder } from '@aeternity/aepp-sdk/es';
-import { fetchData, convertToAE, addressToName, getAddressByNameEntry, checkAddress, chekAensName } from '../../utils/helper';
-import { TX_TYPES, basicTxParams } from '../../utils/constants';
+import { fetchData, convertToAE, getAddressByNameEntry, checkAddress, chekAensName } from '../../utils/helper';
 import Input from '../components/Input';
 import Button from '../components/Button';
 
 export default {
   components: {
     Input,
+    Button,
   },
   data() {
     return {
@@ -153,9 +152,9 @@ export default {
   computed: {
     ...mapGetters(['current', 'popup', 'names', 'sdk', 'network', 'account']),
     auctions() {
-      if (this.filterType == 'soonest') return this.activeAuctions;
-      if (this.filterType == 'length') return this.activeAuctions.sort((a, b) => a.name.length - b.name.length);
-      if (this.filterType == 'bid') return this.activeAuctions.sort((a, b) => a.winning_bid - b.winning_bid);
+      if (this.filterType === 'soonest') return this.activeAuctions;
+      if (this.filterType === 'length') return this.activeAuctions.sort((a, b) => a.name.length - b.name.length);
+      if (this.filterType === 'bid') return this.activeAuctions.sort((a, b) => a.winning_bid - b.winning_bid);
     },
     currentBid() {
       if (!this.bids) {
@@ -221,7 +220,7 @@ export default {
       this.moreAuInfo.visible = true;
       this.moreAuInfo.key = key;
       const exists = Object.keys(info).some(k => {
-        if (k == 'winning_bid') {
+        if (k === 'winning_bid') {
           info[k] = convertToAE(info[k]);
         }
       });
@@ -230,7 +229,7 @@ export default {
     async registerName() {
       this.name = this.name.trim();
       const onlyLettersAndNums = /^[A-Za-z0-9]+$/;
-      if (this.name == '') {
+      if (this.name === '') {
         this.$store.dispatch('popupAlert', {
           name: 'account',
           type: 'requiredField',
@@ -244,7 +243,7 @@ export default {
         this.loading = true;
         const name = `${this.name}.chain`;
         try {
-          const query = await this.sdk.aensQuery(name);
+          await this.sdk.aensQuery(name);
           this.loading = false;
           this.$store.dispatch('popupAlert', { name: 'account', type: 'name_exist' });
         } catch (err) {
@@ -269,7 +268,7 @@ export default {
     },
     async redirectToConfirm(name, type = 'extend', options = {}) {
       try {
-        const { id, pointers, ttl } = await this.sdk.getName(name);
+        const { id, pointers } = await this.sdk.getName(name);
         const tx = {
           popup: false,
           tx: {

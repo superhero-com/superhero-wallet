@@ -97,8 +97,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import BigNumber from 'bignumber.js';
-import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
+import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { contractEncodeCall, checkAddress, chekAensName, checkHashType, aeToAettos, pollGetter } from '../../utils/helper';
 import { setPendingTx } from '../../utils';
 import openUrl from '../../utils/openUrl';
@@ -175,7 +174,7 @@ export default {
     },
     sendSubaccounts() {
       const subs = this.subaccounts.filter(sub => sub.publicKey != this.account.publicKey);
-      return subs.length == 0 ? false : subs;
+      return subs.length === 0 ? false : subs;
     },
     txFee() {
       return this.fee.min;
@@ -200,7 +199,6 @@ export default {
     }
   },
   async mounted() {
-    this.init();
     this.fetchFee();
   },
   methods: {
@@ -214,20 +212,12 @@ export default {
     },
     async fetchFee() {
       await pollGetter(() => this.sdk);
-      const fee = await calculateFee(this.current.token == 0 ? TX_TYPES.txSign : TX_TYPES.contractCall, { ...(await this.feeParams()) });
+      const fee = await calculateFee(this.current.token === 0 ? TX_TYPES.txSign : TX_TYPES.contractCall, { ...(await this.feeParams()) });
       this.fee = fee;
     },
     async feeParams() {
-      if (this.current.token == 0) {
-        return {
-          ...this.sdk.Ae.defaults,
-        };
-      }
       return {
         ...this.sdk.Ae.defaults,
-        callerId: this.account.publicKey,
-        contractId: this.tokens[this.current.token].contract,
-        callData: await contractEncodeCall(this.sdk, FUNGIBLE_TOKEN_CONTRACT, 'transfer', [this.account.publicKey, '0']),
       };
     },
     setTxDetails(tx) {
@@ -237,10 +227,9 @@ export default {
       this.successTx.hash = tx.hash;
     },
     async send() {
-      const sender = this.subaccounts.filter(sender => sender.publicKey == this.account.publicKey);
       const amount = aeToAettos(this.form.amount);
       const receiver = this.form.address;
-      if (receiver == '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
+      if (receiver === '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'incorrect_address' });
         this.loading = false;
         return;
@@ -250,12 +239,12 @@ export default {
         this.loading = false;
         return;
       }
-      if (this.tokenSymbol != 'AE' && this.form.amount % 1 != 0) {
+      if (this.tokenSymbol !== 'AE' && this.form.amount % 1 !== 0) {
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'integer_required' });
         this.loading = false;
         return;
       }
-      if (this.maxValue - this.form.amount <= 0 && this.current.token == 0) {
+      if (this.maxValue - this.form.amount <= 0 && this.current.token === 0) {
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'insufficient_balance' });
         this.loading = false;
         return;
@@ -272,9 +261,6 @@ export default {
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
         this.loading = false;
       }
-    },
-    init() {
-      const calculatedMaxValue = this.balance - this.maxFee;
     },
     clearForm() {
       setTimeout(() => {

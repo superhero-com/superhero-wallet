@@ -20,8 +20,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { groupBy, orderBy } from 'lodash-es';
-import { clearInterval, clearTimeout, setInterval } from 'timers';
+import { setInterval } from 'timers';
 import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
 import TransactionFilters from '../components/TransactionFilters';
@@ -74,24 +73,24 @@ export default {
     t_transactions() {
       switch (this.type) {
         case 'date':
-          if (this.date_type == 'recent') {
+          if (this.date_type === 'recent') {
             return this.transactions.all.slice().sort((a, b) => new Date(b.time) - new Date(a.time));
           }
-          if (this.date_type == 'oldest') {
+          if (this.date_type === 'oldest') {
             return this.transactions.all.slice().sort((a, b) => new Date(a.time) - new Date(b.time));
           }
           break;
         case 'sent':
-          return this.transactions.all.filter(tr => tr.tx.caller_id != 'undefined' && tr.tx.type == 'ContractCallTx' && tr.tx.caller_id == this.publicKey);
+          return this.transactions.all.filter(tr => tr.tx.caller_id !== 'undefined' && tr.tx.type === 'ContractCallTx' && tr.tx.caller_id === this.publicKey);
           break;
         case 'received':
-          return this.transactions.all.filter(tr => tr.tx.recipient_id != 'undefined' && tr.tx.type == 'ContractCallTx' && tr.tx.recipient_id == this.publicKey);
+          return this.transactions.all.filter(tr => tr.tx.recipient_id !== 'undefined' && tr.tx.type === 'ContractCallTx' && tr.tx.recipient_id === this.publicKey);
           break;
         case 'topups':
-          return this.transactions.all.filter(tr => tr.tx.recipient_id != 'undefined' && tr.tx.type == 'SpendTx' && tr.tx.recipient_id == this.publicKey);
+          return this.transactions.all.filter(tr => tr.tx.recipient_id !== 'undefined' && tr.tx.type === 'SpendTx' && tr.tx.recipient_id === this.publicKey);
           break;
         case 'withdrawals':
-          return this.transactions.all.filter(tr => tr.tx.sender_id != 'undefined' && tr.tx.type == 'SpendTx' && tr.tx.sender_id == this.publicKey);
+          return this.transactions.all.filter(tr => tr.tx.sender_id !== 'undefined' && tr.tx.type === 'SpendTx' && tr.tx.sender_id === this.publicKey);
           break;
         case 'all':
           return this.transactions.all;
@@ -110,17 +109,17 @@ export default {
   },
   watch: {
     'filter.direction': function(newValue, oldValue) {
-      if (this.filter.direction == 'inocming' || this.filter.direction == 'outgoing') {
+      if (this.filter.direction === 'inocming' || this.filter.direction === 'outgoing') {
         this.updateInterval = setInterval(() => {
           const txs =
-            this.filter.direction == 'incoming'
-              ? this.transactions.all.filter(tx => tx.tx.recipient_id == this.account.publicKey)
-              : this.transactions.all.filter(tx => tx.tx.sender_id == this.account.publicKey);
-          if (this.showMoreBtn == false) {
+            this.filter.direction === 'incoming'
+              ? this.transactions.all.filter(tx => tx.tx.recipient_id === this.account.publicKey)
+              : this.transactions.all.filter(tx => tx.tx.sender_id === this.account.publicKey);
+          if (!this.showMoreBtn) {
             window.clearInterval(this.updateInterval);
             return;
           }
-          if (this.showMoreBtn && (txs.length % this.limit != 0 || txs.length == 0)) {
+          if (this.showMoreBtn && (txs.length % this.limit !== 0 || txs.length === 0)) {
             this.loading = true;
             this.loadMore();
           }
@@ -134,7 +133,7 @@ export default {
       this.date_type = date_type;
     },
     getPage() {
-      return this.transactions.all.length == 0 ? 1 : Math.ceil(this.transactions.all.length / this.limit);
+      return this.transactions.all.length === 0 ? 1 : Math.ceil(this.transactions.all.length / this.limit);
     },
     pollData() {
       this.polling = setInterval(() => {
@@ -142,8 +141,8 @@ export default {
       }, 5000);
     },
     getTransactions(type, limit = this.limit) {
-      if (this.current.token == 0) {
-        if (type == 'load') {
+      if (this.current.token === 0) {
+        if (type === 'load') {
           const transactions = this.$store.dispatch('getTransactionsByPublicKey', { publicKey: this.account.publicKey, page: this.page, limit });
           transactions.then(res => {
             if (res.length != 0) {
@@ -157,15 +156,15 @@ export default {
             }
             this.loading = false;
           });
-        } else if (type == 'new') {
+        } else if (type === 'new') {
           const transactions = this.$store.dispatch('getTransactionsByPublicKey', { publicKey: this.account.publicKey, limit });
           transactions.then(res => {
             const newTrans = res.filter(tr => {
-              const found = this.transactions.all.find(t => t.hash == tr.hash);
+              const found = this.transactions.all.find(t => t.hash === tr.hash);
               if (typeof found === 'undefined') return tr;
             });
             newTrans.forEach(element => {
-              if (typeof this.newTr.find(tr => tr.hash == element.hash) === 'undefined') {
+              if (typeof this.newTr.find(tr => tr.hash === element.hash) === 'undefined') {
                 this.newTr.unshift(element);
                 this.newTransactions += 1;
               }
