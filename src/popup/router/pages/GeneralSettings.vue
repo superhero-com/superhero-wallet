@@ -52,10 +52,7 @@ export default {
   },
   methods: {
     toggleDropdown(event, parentClass) {
-      if (typeof parentClass === 'undefined') {
-        parentClass = '.language-settings';
-      }
-      const dropdownParent = event.target.closest(parentClass);
+      const dropdownParent = event.target.closest(!parentClass ? '.language-settings' : parentClass);
       this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
     },
     async switchLanguage(languageChoose) {

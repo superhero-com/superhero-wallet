@@ -117,6 +117,7 @@
 </template>
 
 <script>
+/* eslint-disable no-param-reassign */
 import { mapGetters } from 'vuex';
 import { fetchData, convertToAE, getAddressByNameEntry, checkAddress, chekAensName } from '../../utils/helper';
 import Input from '../components/Input';
@@ -155,6 +156,7 @@ export default {
       if (this.filterType === 'soonest') return this.activeAuctions;
       if (this.filterType === 'length') return this.activeAuctions.sort((a, b) => a.name.length - b.name.length);
       if (this.filterType === 'bid') return this.activeAuctions.sort((a, b) => a.winning_bid - b.winning_bid);
+      return null;
     },
     currentBid() {
       if (!this.bids) {
@@ -166,6 +168,8 @@ export default {
       return this.bids.reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b));
     },
     previousBids() {
+      console.log("here")
+      console.log(this.currentBid)
       if (!this.bids) {
         this.loading = true;
         return null;
@@ -280,15 +284,13 @@ export default {
           nameUpdateType: type,
         };
         this.$store.commit('SET_AEPP_POPUP', true);
-        this.$router
-          .push({
-            name: 'sign',
-            params: {
-              data: tx,
-              type: tx.type,
-            },
-          })
-          .catch(err => {});
+        this.$router.push({
+          name: 'sign',
+          params: {
+            data: tx,
+            type: tx.type,
+          },
+        });
       } catch (e) {
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
       }

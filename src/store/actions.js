@@ -285,11 +285,10 @@ export default {
     let txs = [];
     if (pendingTxs && pendingTxs.length) {
       txs = pendingTxs.map(el => {
-        if (el.domain) el.domain = el.domain;
-        el.amount = parseFloat(el.amount).toFixed(3);
-        el.time = el.time;
-        el.amountCurrency = parseFloat(current.currencyRate ? el.amount * current.currencyRate : el.amount).toFixed(3);
-        return el;
+        const { time, domain } = el;
+        const amount = parseFloat(el.amount).toFixed(3);
+        const amountCurrency = parseFloat(current.currencyRate ? amount * current.currencyRate : amount).toFixed(3);
+        return { ...el, amount, time, amountCurrency, domain };
       });
     }
     commit('SET_PENDING_TXS', txs);
@@ -310,6 +309,7 @@ export default {
             return router.push({ name: 'send', params: { redirectstep: 3, successtx: mined } });
           }
         }
+        return false;
       });
     }
   },

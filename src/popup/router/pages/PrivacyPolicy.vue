@@ -1,4 +1,4 @@
-/* eslint-disable no-irregular-whitespace */
+<!-- eslint-disable no-irregular-whitespace -->
 <template>
   <div class="popup">
     <h2>{{ $t('pages.privacyPolicy.heading') }}</h2>

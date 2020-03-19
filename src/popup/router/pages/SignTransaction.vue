@@ -86,7 +86,7 @@
 import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { setTxInQueue } from '../../utils';
-import { MAGNITUDE, TX_TYPES, calculateFee, TX_LIMIT_PER_DAY } from '../../utils/constants';
+import { MAGNITUDE, TX_TYPES, calculateFee } from '../../utils/constants';
 import { convertAmountToCurrency, removeTxFromStorage, checkAddress, chekAensName, aettosToAe, aeToAettos } from '../../utils/helper';
 import Button from '../components/Button';
 
@@ -216,6 +216,8 @@ export default {
       if (this.data.type === 'nameBid') {
         return 'Name Claim';
       }
+
+      return this.data.type;
     },
     isAddressShow() {
       if (
@@ -293,7 +295,7 @@ export default {
           }
         });
       }
-      if (this.data.tx.hasOwnProperty('options') && this.data.tx.options.hasOwnProperty('amount')) {
+      if (this.data.tx.options && this.data.tx.options.amount) {
         this.data.tx.amount = this.data.tx.options.amount;
         if (this.data.type === 'contractCall') {
           this.data.tx.amount = aettosToAe(this.data.tx.options.amount);
@@ -338,16 +340,6 @@ export default {
           }
         }, 500);
       } else {
-        if (this.data.popup) {
-          browser.storage.local.get('pendingTransaction').then(tx => {
-            let list = {};
-            if (tx.hasOwnProperty('pendingTransaction') && tx.pendingTransaction.hasOwnProperty('list')) {
-              list = tx.pendingTransaction.list;
-            }
-            list[this.data.id] = this.data;
-            browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-          });
-        }
         this.checkSDKReady = setInterval(async () => {
           if (this.sdk != null) {
             window.clearTimeout(this.checkSDKReady);
@@ -500,23 +492,12 @@ export default {
       }
     },
     redirectInExtensionAfterAction() {
-      browser.storage.local.get('pendingTransaction').then(data => {
-        if (data.hasOwnProperty('pendingTransaction') && data.pendingTransaction.hasOwnProperty('list') && Object.keys(data.pendingTransaction.list).length > 0) {
-          const tx = data.pendingTransaction.list[Object.keys(data.pendingTransaction.list)[0]];
-          tx.popup = false;
-          tx.countTx = Object.keys(data.pendingTransaction.list).length;
-          // this.redirectToTxConfirm(tx)
-          this.$store.commit('SET_AEPP_POPUP', false);
-          this.$router.push('/account');
-        } else {
-          this.$store.commit('SET_AEPP_POPUP', false);
-          this.$router.push('/account');
-        }
-      });
+      this.$store.commit('SET_AEPP_POPUP', false);
+      this.$router.push('/account');
     },
     signSpendTx(amount) {
       this.sdk
-        .spend(parseInt(amount), this.receiver, { fee: this.convertSelectedFee })
+        .spend(amount, this.receiver, { fee: this.convertSelectedFee })
         .then(async result => {
           if (typeof result === 'object') {
             this.loading = false;
@@ -547,10 +528,9 @@ export default {
                 this.redirectInExtensionAfterAction();
               });
             }
-          } else {
           }
         })
-        .catch(async err => {
+        .catch(async () => {
           setTxInQueue('error');
           if (this.data.popup) {
             this.sending = true;
@@ -586,12 +566,11 @@ export default {
     async contractCallStatic(tx) {
       try {
         let options = {};
-        if (tx.hasOwntProperty('options')) {
+        if (tx.options) {
           options = { ...tx.options };
         }
-        if (tx.hasOwntProperty('options') && tx.options.hasOwnProperty('amount')) {
-          tx.options.amount = aeToAettos(this.data.tx.options.amount);
-          options = { ...options, ...tx.options };
+        if (tx.options && tx.options.amount) {
+          options = { ...options, ...tx.options, amount: aeToAettos(this.data.tx.options.amount) };
         }
         const call = await this.$helpers.contractCall({ instance: this.contractInstance, method: tx.method, params: [...tx.params, options] });
         const decoded = await call.decode();
@@ -613,10 +592,10 @@ export default {
       let call;
       try {
         let options;
-        if (this.data.tx.hasOwnProperty('options')) {
+        if (this.data.tx.options) {
           options = { ...this.data.tx.options };
         }
-        if (this.data.tx.hasOwnProperty('options') && this.data.tx.options.hasOwnProperty('amount')) {
+        if (this.data.tx.options && this.data.tx.options.amount) {
           this.data.tx.options.amount = aeToAettos(this.data.tx.options.amount);
           options = { ...options, ...this.data.tx.options };
         }
@@ -753,7 +732,7 @@ export default {
     async nameUpdate() {
       try {
         let options;
-        if (this.data.tx.hasOwnProperty('options')) {
+        if (this.data.tx.options) {
           options = { ...this.data.tx.options };
         }
         options = { ...options, fee: this.convertSelectedFee };
@@ -782,28 +761,6 @@ export default {
         this.loading = true;
         const amount = aeToAettos(this.amount);
         try {
-          let { tx_count } = await browser.storage.local.get('tx_count');
-          if (typeof tx_count === 'undefined') {
-            tx_count = {};
-          }
-          if (!tx_count.hasOwnProperty(new Date().toDateString())) {
-            tx_count = {
-              [new Date().toDateString()]: {
-                [this.account.publicKey]: 1,
-              },
-            };
-          } else if (tx_count.hasOwnProperty(new Date().toDateString()) && !tx_count[new Date().toDateString()].hasOwnProperty(this.account.publicKey)) {
-            tx_count[new Date().toDateString()][this.account.publicKey] = 1;
-          } else {
-            tx_count[new Date().toDateString()][this.account.publicKey]++;
-          }
-          await browser.storage.local.set({ tx_count });
-          if (tx_count[[new Date().toDateString()]] > TX_LIMIT_PER_DAY) {
-            return this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_limit_per_day' }).then(() => {
-              this.$store.commit('SET_AEPP_POPUP', false);
-              this.$router.push('/account');
-            });
-          }
           if (this.data.type === 'txSign') {
             if (this.isLedger) {
               this.signSpendTxLedger(amount);
@@ -851,7 +808,7 @@ export default {
     async getDeployedByteCode(address) {
       const res = await fetch(`https://testnet.mdw.aepps.com/middleware/contracts/transactions/address/${address}`);
       const txs = await res.json();
-      const byteCode = txs.transactions.find(tx => tx.tx.type == 'ContractCreateTx');
+      const byteCode = txs.transactions.find(tx => tx.tx.type === 'ContractCreateTx');
       return byteCode;
     },
   },

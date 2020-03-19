@@ -62,7 +62,9 @@ export default {
   },
   async created() {
     this.backup_seed_notif = !(await this.$store.dispatch('checkBackupSeed'));
-    setTimeout(() => (this.backup_seed_notif = false), 3000);
+    setTimeout(() => {
+      this.backup_seed_notif = false;
+    }, 3000);
   },
   mounted() {},
   methods: {

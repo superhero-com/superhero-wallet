@@ -30,7 +30,7 @@ export default {
     onDecode(address) {
       try {
         if (this.type === 'send' && (checkAddress(address) || chekAensName(address))) {
-          return this.$router.push({ name: 'send', params: { address } });
+          this.$router.push({ name: 'send', params: { address } });
         }
       } catch (err) {}
     },

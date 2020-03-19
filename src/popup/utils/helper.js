@@ -137,8 +137,8 @@ export const fetchJson = async (...args) => {
   return response.json();
 };
 
-const swag = async (network, current) => {
-  await fetchJson(`${network[current.network].middlewareUrl}/middleware/api`);
+const middleware = async (network, current) => {
+  const swag = await fetchJson(`${network[current.network].middlewareUrl}/middleware/api`);
   swag.paths['/names/auctions/{name}/info'] = {
     get: {
       operationId: 'getAuctionInfoByName',
@@ -457,7 +457,7 @@ export {
   extractHostName,
   fetchData,
   detectBrowser,
-  swag,
+  middleware,
   getCurrencies,
   convertAmountToCurrency,
   removeTxFromStorage,

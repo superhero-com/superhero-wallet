@@ -3,7 +3,7 @@ import Node from '@aeternity/aepp-sdk/es/node';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
-import { parseFromStorage, swag, getAllNetworks } from '../popup/utils/helper';
+import { parseFromStorage, middleware, getAllNetworks } from '../popup/utils/helper';
 import { TIPPING_CONTRACT } from '../popup/utils/constants';
 
 export default {
@@ -58,8 +58,7 @@ export default {
     const { network } = store.getters;
     const { current } = store.getters;
     try {
-      const middleware = (await swag(network, current)).api;
-      store.commit('SET_MIDDLEWARE', middleware);
+      store.commit('SET_MIDDLEWARE', (await middleware(network, current)).api);
     } catch (e) {
       if (this.middlewareConnError < 2) {
         this.initMiddleware();

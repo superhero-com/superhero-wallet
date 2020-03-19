@@ -9,7 +9,7 @@ export default async () => {
   const unloadHandler = () => {
     if (!resolved) {
       reject();
-      if (window.hasOwnProperty('reject')) window.reject(new Error('Rejected by user'));
+      if (window.reject) window.reject(new Error('Rejected by user'));
     }
   };
   window.addEventListener('beforeunload', unloadHandler, true);

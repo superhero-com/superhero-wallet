@@ -1,3 +1,4 @@
+/* eslint-disable radix */
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { testAccount, txParams } from './config';

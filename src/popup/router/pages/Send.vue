@@ -254,7 +254,7 @@ export default {
         const result = await this.sdk.spend(amount, receiver, { waitMined: false });
         if (result.hash) {
           await setPendingTx({ hash: result.hash, amount: this.form.amount, time: Date.parse(new Date()), type: 'spend' });
-          return this.$router.push('/account');
+          this.$router.push('/account');
         }
         this.loading = false;
       } catch (e) {

@@ -127,9 +127,7 @@ export default {
         this.seedPhrase = mnemonic;
         this.setAlertData('alternative', true, mnemonic);
         const seedPhraseToArray = mnemonic.split(' ');
-        this.seeds.forEach((item, index) => {
-          item.name = seedPhraseToArray[index];
-        });
+        this.seeds = this.seeds.map((seed, i) => ({ ...seed, name: seedPhraseToArray[i] }));
       }
     },
     navigateToAccount() {
@@ -168,8 +166,8 @@ export default {
     verifyLastStep() {
       const seed = this.seeds.slice();
       const sorted = seed.sort((a, b) => (a.id > b.id ? 1 : -1));
-      const originalSeed = sorted.map(seed => seed.name).join(',');
-      const selectSeed = this.selectedSeed.map(seed => seed.name).join(',');
+      const originalSeed = sorted.map(({ name }) => name).join(',');
+      const selectSeed = this.selectedSeed.map(({ name }) => name).join(',');
       if (this.selectedSeed.length === 12) {
         if (originalSeed !== selectSeed) {
           this.seedError = { error: 'Oops! Incorrect seed phrase!' };

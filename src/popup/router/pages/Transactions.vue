@@ -49,13 +49,9 @@ export default {
       newTransactions: 0,
       newTr: [],
       openFilter: false,
-      filter: {
-        spendType: 'all',
-        direction: '',
-      },
       upadateInterval: null,
       type: '',
-      date_type: '',
+      dateType: '',
     };
   },
   computed: {
@@ -73,32 +69,27 @@ export default {
     t_transactions() {
       switch (this.type) {
         case 'date':
-          if (this.date_type === 'recent') {
+          if (this.dateType === 'recent') {
             return this.transactions.all.slice().sort((a, b) => new Date(b.time) - new Date(a.time));
           }
-          if (this.date_type === 'oldest') {
+          if (this.dateType === 'oldest') {
             return this.transactions.all.slice().sort((a, b) => new Date(a.time) - new Date(b.time));
           }
           break;
         case 'sent':
           return this.transactions.all.filter(tr => tr.tx.caller_id !== 'undefined' && tr.tx.type === 'ContractCallTx' && tr.tx.caller_id === this.publicKey);
-          break;
         case 'received':
           return this.transactions.all.filter(tr => tr.tx.recipient_id !== 'undefined' && tr.tx.type === 'ContractCallTx' && tr.tx.recipient_id === this.publicKey);
-          break;
         case 'topups':
           return this.transactions.all.filter(tr => tr.tx.recipient_id !== 'undefined' && tr.tx.type === 'SpendTx' && tr.tx.recipient_id === this.publicKey);
-          break;
         case 'withdrawals':
           return this.transactions.all.filter(tr => tr.tx.sender_id !== 'undefined' && tr.tx.type === 'SpendTx' && tr.tx.sender_id === this.publicKey);
-          break;
         case 'all':
           return this.transactions.all;
-          break;
         default:
           return this.transactions.all;
-          break;
       }
+      return this.transactions.all;
     },
   },
   created() {
@@ -107,30 +98,10 @@ export default {
     this.pollData();
     this.page = this.getPage();
   },
-  watch: {
-    'filter.direction': function(newValue, oldValue) {
-      if (this.filter.direction === 'inocming' || this.filter.direction === 'outgoing') {
-        this.updateInterval = setInterval(() => {
-          const txs =
-            this.filter.direction === 'incoming'
-              ? this.transactions.all.filter(tx => tx.tx.recipient_id === this.account.publicKey)
-              : this.transactions.all.filter(tx => tx.tx.sender_id === this.account.publicKey);
-          if (!this.showMoreBtn) {
-            window.clearInterval(this.updateInterval);
-            return;
-          }
-          if (this.showMoreBtn && (txs.length % this.limit !== 0 || txs.length === 0)) {
-            this.loading = true;
-            this.loadMore();
-          }
-        }, 1000);
-      }
-    },
-  },
   methods: {
-    async filtrate(type, date_type) {
+    async filtrate(type, dateType) {
       this.type = type;
-      this.date_type = date_type;
+      this.dateType = dateType;
     },
     getPage() {
       return this.transactions.all.length === 0 ? 1 : Math.ceil(this.transactions.all.length / this.limit);
@@ -173,33 +144,23 @@ export default {
         }
       }
     },
-    getTotalTransactions() {
-      return new Promise((resolve, reject) => {
-        const transactions = this.$store.dispatch('getTransactionsByPublicKey', { publicKey: this.account.publicKey, param: 'count' });
-        transactions.then(res => {
-          this.totalTransactions = res.count;
-          resolve();
-        });
-      });
+    async getTotalTransactions() {
+      const transactions = await this.$store.dispatch('getTransactionsByPublicKey', { publicKey: this.account.publicKey, param: 'count' });
+      this.totalTransactions = transactions.count;
     },
-    mergeNewTransactions() {
-      return new Promise((resolve, reject) => {
-        this.$store.dispatch('updateAllTransactions', { new: true, transactions: this.newTr }).then(() => {
-          this.newTr = [];
-          this.newTransactions = 0;
-          this.getTotalTransactions().then(() => {
-            resolve();
-          });
-        });
-      });
+    async mergeNewTransactions() {
+      await this.$store.dispatch('updateAllTransactions', { new: true, transactions: this.newTr });
+      this.newTr = [];
+      this.newTransactions = 0;
+      this.getTotalTransactions();
     },
     loadMore() {
       this.mergeNewTransactions().then(() => {
+        console.log("a")
         this.page += 1;
         this.getTransactions('load');
       });
     },
-    group() {},
   },
   beforeDestroy() {
     window.clearTimeout(this.polling);

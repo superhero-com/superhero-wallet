@@ -108,8 +108,6 @@ export default {
     next() {
       if (this.step <= this.totalsteps) {
         this.step += 1;
-      } else if (this.step === this.totalsteps) {
-        return false;
       }
     },
   },

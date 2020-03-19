@@ -49,7 +49,8 @@ const noAuthUrls = ['/', '/importAccount', '/termsOfService', '/intro'];
 router.beforeEach((to, from, next) => {
   const lastRouteName = localStorage.getItem(lastRouteKey);
   const shouldRedirect = to.path === ('/' || '/account') && lastRouteName && isFirstTransition;
-  if (store.getters.account.hasOwnProperty('publicKey') && store.getters.isLoggedIn) {
+
+  if (store.getters.account && store.getters.isLoggedIn) {
     if (!store.getters.sdk) {
       wallet.initSdk(() => next('/'));
     }
