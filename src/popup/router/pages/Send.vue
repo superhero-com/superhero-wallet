@@ -173,7 +173,7 @@ export default {
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
     },
     sendSubaccounts() {
-      const subs = this.subaccounts.filter(sub => sub.publicKey != this.account.publicKey);
+      const subs = this.subaccounts.filter(sub => sub.publicKey !== this.account.publicKey);
       return subs.length === 0 ? false : subs;
     },
     txFee() {

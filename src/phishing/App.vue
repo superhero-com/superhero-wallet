@@ -62,7 +62,7 @@ export default {
   },
   methods: {
     continueHost() {
-      if (this.href != '' && this.href != null) {
+      if (this.href !== '' && this.href != null) {
         browser.runtime.sendMessage({
           method: 'setPhishingUrl',
           params: {

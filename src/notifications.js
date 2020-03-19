@@ -1,5 +1,3 @@
-import Node from '@aeternity/aepp-sdk/es/node';
-import { Universal as Ae } from '@aeternity/aepp-sdk/es';
 import { setInterval } from 'timers';
 import { NOTIFICATION_METHODS } from './popup/utils/constants';
 import { detectBrowser } from './popup/utils/helper';
@@ -63,7 +61,7 @@ export default class Notification {
       message,
       priority: 2,
     };
-    if (detectBrowser() != 'Firefox') {
+    if (detectBrowser() !== 'Firefox') {
       if (!error) {
         params = {
           ...params,
@@ -72,7 +70,7 @@ export default class Notification {
       }
     }
 
-    const noti = await browser.notifications.create(`popup.html?${contextMessage}`, params);
+    await browser.notifications.create(`popup.html?${contextMessage}`, params);
 
     return Promise.resolve(true);
   }

@@ -87,7 +87,7 @@ export default {
           this.initContractInstances();
           this.initMiddleware();
         })
-        .catch(err => {
+        .catch(() => {
           if (this.countError < 2) {
             this.initSdk(cb);
           } else {

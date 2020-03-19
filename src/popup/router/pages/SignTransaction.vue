@@ -86,23 +86,8 @@
 import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { setTxInQueue } from '../../utils';
-import { MAGNITUDE, MIN_SPEND_TX_FEE, MIN_SPEND_TX_FEE_MICRO, MAX_REASONABLE_FEE, TX_TYPES, calculateFee, TX_LIMIT_PER_DAY, TOKEN_REGISTRY_ADDRESS } from '../../utils/constants';
-import {
-  convertToAE,
-  currencyConv,
-  convertAmountToCurrency,
-  removeTxFromStorage,
-  contractEncodeCall,
-  initializeSDK,
-  checkAddress,
-  chekAensName,
-  escapeCallParam,
-  addRejectedToken,
-  checkContractAbiVersion,
-  parseFromStorage,
-  aettosToAe,
-  aeToAettos,
-} from '../../utils/helper';
+import { MAGNITUDE, TX_TYPES, calculateFee, TX_LIMIT_PER_DAY } from '../../utils/constants';
+import { convertAmountToCurrency, removeTxFromStorage, checkAddress, chekAensName, aettosToAe, aeToAettos } from '../../utils/helper';
 import Button from '../components/Button';
 
 export default {

@@ -145,9 +145,9 @@ export default {
         if (type === 'load') {
           const transactions = this.$store.dispatch('getTransactionsByPublicKey', { publicKey: this.account.publicKey, page: this.page, limit });
           transactions.then(res => {
-            if (res.length != 0) {
+            if (res.length !== 0) {
               const newTrans = res.filter(tr => {
-                const found = this.transactions.all.find(t => t.hash == tr.hash);
+                const found = this.transactions.all.find(t => t.hash === tr.hash);
                 if (typeof found === 'undefined') return tr;
               });
               this.$store.dispatch('updateAllTransactions', { new: false, transactions: newTrans });
