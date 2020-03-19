@@ -2,10 +2,7 @@
   <label class="checkbox-container">
     <slot class="checkbox-holder"></slot>
     <input :value="val" v-model="checked" @change="onChange" :type="getType" :name="name" />
-    <span
-      class="checkmark"
-      :style="{ 'background-image': `url(${checked ? checkboxChecked : checkboxUnchecked})` }"
-    ></span>
+    <span class="checkmark" :style="{ 'background-image': `url(${checked ? checkboxChecked : checkboxUnchecked})` }"></span>
   </label>
 </template>
 
@@ -30,7 +27,7 @@ export default {
     },
     getType() {
       return !this.type ? 'checkbox' : this.type;
-    }
+    },
   },
   methods: {
     onChange(e) {

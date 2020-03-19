@@ -279,7 +279,7 @@ const rpcWallet = {
     if (this.sdk) {
       try {
         await this.sdk.addNode(network, node, true);
-      } catch (e) { }
+      } catch (e) {}
       this.sdk.selectNode(network);
     }
   },

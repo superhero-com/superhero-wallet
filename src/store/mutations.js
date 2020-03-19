@@ -84,11 +84,6 @@ export default {
   [types.ADD_NETWORK](state, payload) {
     state.network = { ...state.network, ...{ [payload.name]: { ...payload } } };
   },
-  [types.UPDATE_NETWORK](state, payload) {
-    const networks = state.network;
-    networks[payload.name] = payload;
-    state.network = networks;
-  },
   [types.INIT_SDK](state, payload) {
     state.sdk = payload;
   },

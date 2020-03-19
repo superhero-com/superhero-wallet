@@ -99,6 +99,6 @@ export default {
   padding-bottom: 20px;
 }
 .submenu-bg {
-    background:$submenu-bg;
+  background: $submenu-bg;
 }
 </style>

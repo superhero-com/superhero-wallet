@@ -220,7 +220,7 @@ export default [
     component: Networks,
     props: true,
     meta: {
-      title: 'networks'
-    }
+      title: 'networks',
+    },
   },
 ];

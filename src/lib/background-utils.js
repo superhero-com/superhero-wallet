@@ -33,7 +33,7 @@ export const switchNode = async () => {
     const node = await Node({ url: network.internalUrl, internalUrl: network.internalUrl });
     try {
       await sdk.addNode(network.name, node, true);
-    } catch (e) { }
+    } catch (e) {}
     sdk.selectNode(network.name);
   }
 };
@@ -64,9 +64,7 @@ const getAddress = async name => {
   }
 };
 
-export const getAddressFromChainName = async names => {
-  return Array.isArray(names) ? Promise.all(names.map(async n => getAddress(n))) : getAddress(names);
-};
+export const getAddressFromChainName = async names => (Array.isArray(names) ? Promise.all(names.map(async n => getAddress(n))) : getAddress(names));
 
 export const getTippingContractInstance = async tx => {
   if (tippingContract) return tippingContract;
