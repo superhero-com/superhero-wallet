@@ -8,9 +8,9 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ChromeExtensionReloader = require('webpack-chrome-extension-reloader');
 const { VueLoaderPlugin } = require('vue-loader');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const GenerateJsonPlugin = require('generate-json-webpack-plugin');
+const genManifest = require('./src/manifest');
 
-
-const mode =  process.env.NODE_ENV === 'production' ? '' : '_dev';
 const transformHtml = content => ejs.render(content.toString(), process.env);
 
 const commonPlugins = [
@@ -118,22 +118,8 @@ const genPlatformDependentPlugins = (platform, EXTENSION_RUNNING_IN_TESTS_BROWSE
     }),
   ];
   if (['chrome', 'firefox'].includes(platform)) {
-    const p = new CopyWebpackPlugin([
-      {
-        from: `manifests/manifest_${platform}${mode}.json`,
-        to: `manifest.json`,
-        transform: content => {
-          const jsonContent = JSON.parse(content);
-          jsonContent.version = process.env.npm_package_version;
-
-          if (process.env.NODE_ENV === 'development') {
-            jsonContent.content_security_policy = "script-src 'self' 'unsafe-eval'; object-src 'self'";
-          }
-
-          return JSON.stringify(jsonContent, null, 2);
-        },
-      },
-    ]);
+    const isProd = process.env.NODE_ENV === 'production';
+    const p = new GenerateJsonPlugin('manifest.json', genManifest(isProd, platform), null, 2);
     plugins.push(p);
   }
   return plugins;
