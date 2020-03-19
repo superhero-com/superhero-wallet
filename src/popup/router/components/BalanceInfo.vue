@@ -53,7 +53,7 @@ export default {
       if (typeof parentClass === 'undefined') {
         parentClass = '.currenciesgroup';
       }
-      const dropdownParent = event.target.closest(parentClass);
+      const dropdownParent = event.target.closest(!parentClass ? '.currenciesgroup' : parentClass);
       this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
     },
     async switchCurrency(currency) {

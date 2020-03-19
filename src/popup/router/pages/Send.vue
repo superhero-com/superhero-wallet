@@ -98,7 +98,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
-import { contractEncodeCall, checkAddress, chekAensName, checkHashType, aeToAettos, pollGetter } from '../../utils/helper';
+import { checkAddress, chekAensName, checkHashType, aeToAettos, pollGetter } from '../../utils/helper';
 import { setPendingTx } from '../../utils';
 import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';

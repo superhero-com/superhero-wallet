@@ -367,7 +367,6 @@ export default {
               await this.setContractInstance(this.data.tx.source);
             } else if (this.data.type === 'contractCall') {
               this.data.tx.call = {};
-              // let callData = await contractEncodeCall(this.sdk,this.data.tx.source,this.data.tx.method,[...escapeCallParams(this.data.tx.params)])
               this.txParams = {
                 ...this.txParams,
                 contractId: this.data.tx.address,

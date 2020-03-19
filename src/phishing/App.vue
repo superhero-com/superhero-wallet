@@ -69,7 +69,9 @@ export default {
             hostname: this.hostname,
           },
         });
-        setInterval(() => (window.location.href = this.href), 500);
+        setInterval(() => {
+          window.location.href = this.href;
+        }, 500);
       }
     },
   },

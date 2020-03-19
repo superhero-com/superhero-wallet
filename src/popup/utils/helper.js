@@ -181,10 +181,6 @@ const getCurrencies = async () => {
 
 const convertAmountToCurrency = (currency, amount) => currency * amount;
 
-const contractEncodeCall = async (sdk, source, name, args = []) => await sdk.contractEncodeCall(source, name, args);
-
-const contractDecodeData = async (sdk, source, fn, callValue, callResults, options = {}) => await sdk.contractDecodeData(source, fn, callValue, callResults, options);
-
 const removeTxFromStorage = id =>
   new Promise((resolve, reject) => {
     browser.storage.local.get('pendingTransaction').then(data => {
@@ -464,8 +460,6 @@ export {
   swag,
   getCurrencies,
   convertAmountToCurrency,
-  contractEncodeCall,
-  contractDecodeData,
   removeTxFromStorage,
   checkAddress,
   chekAensName,
