@@ -59,6 +59,11 @@
               {{ $t('pages.appVUE.language') }}
             </router-link>
           </li>
+          <li>
+            <router-link to="/networks" data-cy="networks">
+              {{ $t('pages.appVUE.networks') }}
+            </router-link>
+          </li>
         </ul>
       </transition>
     </li>

@@ -9,15 +9,14 @@ import {
   parseFromStorage,
   extractHostName,
   getAeppAccountPermission,
-  getUserNetworks,
+  getActiveNetwork,
   stringifyForStorage,
-  convertToAE,
   addTipAmount,
   getTippedAmount,
   resetTippedAmount,
   getContractCallInfo,
 } from '../popup/utils/helper';
-import { DEFAULT_NETWORK, networks, AEX2_METHODS, NO_POPUP_AEPPS, BLACKLIST_AEPPS, MAX_AMOUNT_WITHOUT_CONFIRM } from '../popup/utils/constants';
+import { DEFAULT_NETWORK, AEX2_METHODS, NO_POPUP_AEPPS, BLACKLIST_AEPPS, MAX_AMOUNT_WITHOUT_CONFIRM } from '../popup/utils/constants';
 import { mockLogin } from '../popup/utils';
 
 global.browser = require('webextension-polyfill');
@@ -32,7 +31,8 @@ const rpcWallet = {
     const { userAccount } = await browser.storage.local.get('userAccount');
     if (userAccount) {
       this.controller.generateWallet({ seed: stringifyForStorage(userAccount.privateKey) });
-      this[AEX2_METHODS.INIT_RPC_WALLET]({ address: userAccount.publicKey, network: DEFAULT_NETWORK });
+      const { activeNetwork } = await browser.storage.local.get('activeNetwork');
+      this[AEX2_METHODS.INIT_RPC_WALLET]({ address: userAccount.publicKey, network: !activeNetwork ? DEFAULT_NETWORK : activeNetwork });
     }
   },
   async initSubaccounts() {
@@ -57,15 +57,12 @@ const rpcWallet = {
     this.internalUrl = this.nodes[network].internalUrl;
   },
   async initNodes() {
-    const userNetworks = await getUserNetworks();
-    const nodes = { ...networks, ...userNetworks };
-    this.nodes = nodes;
+    const nodes = await getActiveNetwork();
+    this.nodes = nodes.all;
     return Promise.resolve(true);
   },
   async createWallet() {
     this.accountKeyPairs = await Promise.all(this.subaccounts.map(async (a, index) => parseFromStorage(await this.controller.getKeypair({ activeAccount: index, account: a }))));
-
-    // let activeIdx = await browser.storage.local.get('activeAccount')
 
     this.accounts = this.accountKeyPairs.map(a =>
       MemoryAccount({
@@ -76,7 +73,7 @@ const rpcWallet = {
     try {
       const node = await Node({ url: this.internalUrl, internalUrl: this.internalUrl });
       this.sdk = await RpcWallet({
-        nodes: [{ name: DEFAULT_NETWORK, instance: node }],
+        nodes: [{ name: this.network, instance: node }],
         compilerUrl: this.compiler,
         name: 'SuperHero',
         accounts: this.accounts,
@@ -276,14 +273,13 @@ const rpcWallet = {
     this.addNewNetwork(payload);
   },
   async addNewNetwork(network) {
+    this.initNodes();
     this.initNetwork(network);
     const node = await Node({ url: this.internalUrl, internalUrl: this.internalUrl });
     if (this.sdk) {
       try {
         await this.sdk.addNode(network, node, true);
-      } catch (e) {
-        // console.log(e)
-      }
+      } catch (e) {}
       this.sdk.selectNode(network);
     }
   },
@@ -293,7 +289,7 @@ const rpcWallet = {
   },
   async [AEX2_METHODS.INIT_RPC_WALLET]({ address, network }) {
     this.activeAccount = address;
-    if (!this.nodes.hasOwnProperty(network)) {
+    if (!this.nodes[network]) {
       await this.initNodes();
     }
     if (this.sdk) {

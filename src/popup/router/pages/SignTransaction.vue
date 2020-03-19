@@ -104,7 +104,7 @@ import {
   checkContractAbiVersion,
   parseFromStorage,
   aettosToAe,
-  aeToAettos
+  aeToAettos,
 } from '../../utils/helper';
 import Button from '../components/Button';
 

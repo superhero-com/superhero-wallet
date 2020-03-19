@@ -1,3 +1,5 @@
+import { DEFAULT_NETWORK } from '../popup/utils/constants';
+
 export const getters = {
   account(state) {
     return state.account;
@@ -16,6 +18,11 @@ export const getters = {
   },
   network(state) {
     return state.network;
+  },
+  networks({ network }) {
+    const networks = { ...network };
+    networks[DEFAULT_NETWORK].system = true;
+    return networks;
   },
   userNetworks(state) {
     return state.userNetworks;

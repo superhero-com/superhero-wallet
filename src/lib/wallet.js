@@ -3,8 +3,8 @@ import Node from '@aeternity/aepp-sdk/es/node';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
-import { parseFromStorage, swag } from '../popup/utils/helper';
-import { TIPPING_CONTRACT, DEFAULT_NETWORK } from '../popup/utils/constants';
+import { parseFromStorage, swag, getAllNetworks } from '../popup/utils/helper';
+import { TIPPING_CONTRACT } from '../popup/utils/constants';
 
 export default {
   countError: 0,
@@ -18,7 +18,7 @@ export default {
         store.commit('SET_ACTIVE_ACCOUNT', { publicKey: address, index: 0 });
         let sub = [];
         const { subaccounts } = await browser.storage.local.get('subaccounts');
-        if (!subaccounts || (subaccounts && !subaccounts.find(f => f.publicKey == userAccount.publicKey))) {
+        if (!subaccounts || (subaccounts && !subaccounts.find(f => f.publicKey === userAccount.publicKey))) {
           sub.push({
             name: 'Main Account',
             publicKey: userAccount.publicKey,
@@ -29,9 +29,18 @@ export default {
         }
         if (subaccounts) sub = [...sub, ...subaccounts.filter(s => s.publicKey)];
         store.dispatch('setSubAccounts', sub);
+
+        /* Get cached balance */
         const { tokenBal } = await browser.storage.local.get('tokenBal');
-        if (tokenBal && tokenBal != '0.000') store.commit('UPDATE_BALANCE', parseFloat(tokenBal));
+        if (tokenBal && tokenBal !== '0.000') store.commit('UPDATE_BALANCE', parseFloat(tokenBal));
         store.commit('SWITCH_LOGGED_IN', true);
+
+        /* Get network */
+        const networks = await getAllNetworks();
+        store.commit('SET_NETWORKS', networks);
+        const { activeNetwork } = await browser.storage.local.get(['activeNetwork']);
+        if (activeNetwork) store.commit('SWITCH_NETWORK', activeNetwork);
+
         this.redirectAfterLogin(cb);
         store.commit('SET_MAIN_LOADING', false);
       } else {
@@ -55,7 +64,7 @@ export default {
       if (this.middlewareConnError < 2) {
         this.initMiddleware();
       }
-      this.middlewareConnError++;
+      this.middlewareConnError += 1;
     }
   },
   async initSdk(cb) {
@@ -66,7 +75,7 @@ export default {
       const node = await Node({ url: network[current.network].internalUrl, internalUrl: network[current.network].internalUrl });
       const account = MemoryAccount({ keypair });
       Universal({
-        nodes: [{ name: DEFAULT_NETWORK, instance: node }],
+        nodes: [{ name: current.network, instance: node }],
         accounts: [account],
         networkId: network[current.network].networkId,
         nativeMode: true,
@@ -85,7 +94,7 @@ export default {
             store.commit('SET_NODE_STATUS', 'error');
             this.initMiddleware();
           }
-          this.countError++;
+          this.countError += 1;
         });
     } else {
       this.logout(() => cb());

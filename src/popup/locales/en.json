@@ -34,7 +34,8 @@
             "topUp": "Top Up",
             "notifications": "Notifications",
             "names": "Names",
-            "bidding": "Bidding"
+            "bidding": "Bidding",
+            "networks": "Networks"
         },
         "appVUE": {
             "systemName": "SuperHero",
@@ -65,7 +66,8 @@
             "versions": "Version & Updates",
             "mainAccount": "Main account",
             "reportBug": "Report a bug",
-            "names": "Names"
+            "names": "Names",
+            "networks": "Networks"
         },
         "aboutSettings": {
             "heading": "About",
@@ -652,6 +654,18 @@
         "popupMessageSign": {
             "heading": "would like to sign message ",
             "message": "Message"
+        },
+        "network": {
+            "allNetworks": "Your networks",
+            "cancel": "Cancel",
+            "addNetwork": "Connect to another node",
+            "networkNamePlaceholder": "Enter network name",
+            "networkNameLabel": "Network name",
+            "networkUrlPlaceholder": "Enter network url",
+            "networkUrlLabel": "Network Url",
+            "networkMiddlewarePlaceholder": "Enter network middleware url",
+            "networkMiddlewareLabel": "Network middleware",
+            "save": "Connect"
         }
     }
 }

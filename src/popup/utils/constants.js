@@ -90,7 +90,7 @@ export const toMicro = value => value.shiftedBy(-MAGNITUDE_MICRO).toFixed();
 export const MIN_SPEND_TX_FEE_MICRO = toMicro(MIN_SPEND_TX_FEE);
 export const MAX_REASONABLE_FEE_MICRO = toMicro(MAX_REASONABLE_FEE);
 export const DEFAULT_NETWORK = typeof process.env.NETWORK !== 'undefined' ? process.env.NETWORK.trim() : 'Mainnet'
-export const networks = {
+export const defaultNetworks = {
   Testnet: {
     url: 'https://sdk-testnet.aepps.com/',
     internalUrl: 'https://sdk-testnet.aepps.com/',
@@ -100,7 +100,8 @@ export const networks = {
     compilerUrl: 'https://latest.compiler.aepps.com',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_Dnwribmd21YrxSQnqXCB5vTFPrgYJx2eg2TrbLvbdyEbTMejw',
-    tipContract: "ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj"
+    tipContract: "ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj",
+    name: "Testnet",
   },
   Mainnet: {
     url: 'https://mainnet.aeternity.io',
@@ -111,9 +112,13 @@ export const networks = {
     compilerUrl: 'https://compiler.aepps.com',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
-    tipContract: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z'
+    tipContract: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z',
+    name: "Mainnet",
   }
 }
+export const networks = {
+  [DEFAULT_NETWORK]: { ...defaultNetworks[DEFAULT_NETWORK] }
+};
 export const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
 export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
 export const NO_POPUP_AEPPS = [

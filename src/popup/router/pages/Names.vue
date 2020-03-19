@@ -186,7 +186,6 @@ export default {
             pointerError: this.registeredNames[i] ? this.registeredNames[i].pointerError : null,
           }))
         : [];
-      console.log(names);
     },
   },
   created() {

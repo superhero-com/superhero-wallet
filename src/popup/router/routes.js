@@ -25,6 +25,7 @@ import SuccessTip from './pages/SuccessTip';
 import NotificationsPage from './pages/Notifications';
 import NamesPage from './pages/Names';
 import AuctionBid from './pages/AuctionBid';
+import Networks from './pages/Networks';
 
 export default [
   {
@@ -212,6 +213,14 @@ export default [
     props: true,
     meta: {
       title: 'bidding',
+    },
+  },
+  {
+    path: '/networks',
+    component: Networks,
+    props: true,
+    meta: {
+      title: 'networks',
     },
   },
 ];

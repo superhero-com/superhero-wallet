@@ -4,11 +4,11 @@ import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import axios from 'axios';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import Node from '@aeternity/aepp-sdk/es/node';
+import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 import { MAGNITUDE_EXA, MAGNITUDE_GIGA, MAGNITUDE_PICO, CONNECTION_TYPES, networks, DEFAULT_NETWORK } from './constants';
-import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter'
 
-export const aeToAettos = (v) => formatAmount(v, { denomination: AE_AMOUNT_FORMATS.AE, targetDenomination: AE_AMOUNT_FORMATS.AETTOS })
-export const aettosToAe = (v) => formatAmount(v, { denomination: AE_AMOUNT_FORMATS.AETTOS, targetDenomination: AE_AMOUNT_FORMATS.AE  })
+export const aeToAettos = v => formatAmount(v, { denomination: AE_AMOUNT_FORMATS.AE, targetDenomination: AE_AMOUNT_FORMATS.AETTOS });
+export const aettosToAe = v => formatAmount(v, { denomination: AE_AMOUNT_FORMATS.AETTOS, targetDenomination: AE_AMOUNT_FORMATS.AE });
 
 const shuffleArray = array => {
   let currentIndex = array.length;
@@ -557,9 +557,12 @@ const getUserNetworks = async () => {
   if (userNetworks) {
     userNetworks.forEach(net => (networks[net.name] = net));
   }
-  return new Promise((resolve, reject) => {
-    resolve(networks);
-  });
+  return networks;
+};
+
+export const getAllNetworks = async () => {
+  const userNetworks = await getUserNetworks();
+  return { ...userNetworks, ...networks };
 };
 
 const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/[\""]/g, '');
@@ -618,6 +621,15 @@ export const pollGetter = getter =>
       resolve();
     }, 300);
   });
+
+export const getActiveNetwork = async () => {
+  const all = await getAllNetworks();
+  const { activeNetwork } = await browser.storage.local.get('activeNetwork');
+  return {
+    network: all[activeNetwork || DEFAULT_NETWORK],
+    all,
+  };
+};
 
 export {
   shuffleArray,

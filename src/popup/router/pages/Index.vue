@@ -4,7 +4,7 @@
     <p class="primary-title primary-title-small">
       {{ $t('pages.index.heading') }}
     </p>
-    <CheckBox v-if="!termsAgreedOrNot" v-model="terms" data-cy="checkbox">
+    <CheckBox v-if="!termsAgreedOrNot" v-model="terms" data-cy="checkbox" class="mb-25">
       <div class="primary-text">
         {{ $t('pages.index.term1') }}
         <router-link to="/termsOfService" data-cy="terms">{{ $t('pages.index.termsAndConditions') }}</router-link>
