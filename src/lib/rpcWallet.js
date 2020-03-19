@@ -28,7 +28,7 @@ const rpcWallet = {
     await this.initNodes();
     this.initFields();
     this.controller = walletController;
-    if (process.env.EXTENSION_RUNNING_IN_TESTS_BROWSER) await mockLogin();
+    if (process.env.RUNNING_IN_TESTS) await mockLogin();
     const { userAccount } = await browser.storage.local.get('userAccount');
     if (userAccount) {
       this.controller.generateWallet({ seed: stringifyForStorage(userAccount.privateKey) });

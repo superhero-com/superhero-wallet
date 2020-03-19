@@ -98,22 +98,16 @@ const commonConfig = {
   ],
 };
 
-const genPlatformDependentPlugins = (platform, EXTENSION_RUNNING_IN_TESTS_BROWSER = false) => {
-  let IS_EXTENSION = platform !== 'cordova';
-  if(process.env.RUNNING_IN_TESTS && !EXTENSION_RUNNING_IN_TESTS_BROWSER) {
-    IS_EXTENSION = false;
-  }
-  const RUNNING_IN_TESTS = process.env.RUNNING_IN_TESTS && !EXTENSION_RUNNING_IN_TESTS_BROWSER
+const genPlatformDependentPlugins = platform => {
   const plugins = [
     new webpack.DefinePlugin({
       global: 'window',
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-        IS_EXTENSION,
+        IS_EXTENSION: platform !== 'cordova' && !process.env.RUNNING_IN_TESTS,
         npm_package_version: JSON.stringify(process.env.npm_package_version),
         NETWORK: JSON.stringify(process.env.NETWORK),
-        RUNNING_IN_TESTS: JSON.stringify(RUNNING_IN_TESTS),
-        EXTENSION_RUNNING_IN_TESTS_BROWSER: JSON.stringify(EXTENSION_RUNNING_IN_TESTS_BROWSER),
+        RUNNING_IN_TESTS: JSON.stringify(process.env.RUNNING_IN_TESTS),
       },
     }),
   ];
@@ -125,17 +119,19 @@ const genPlatformDependentPlugins = (platform, EXTENSION_RUNNING_IN_TESTS_BROWSE
   return plugins;
 };
 
-module.exports = [
-  {
-    name: 'chrome',
-    output: {
-      path: path.resolve(__dirname, 'dist/chrome'),
-    },
-    plugins: [
-      ...genPlatformDependentPlugins('chrome'),
-      ...process.env.HMR === 'true' ? [new ChromeExtensionReloader({ port: 9099 })] : [],
-    ],
+const chromeConfig = {
+  name: 'chrome',
+  output: {
+    path: path.resolve(__dirname, 'dist/chrome'),
   },
+  plugins: [
+    ...genPlatformDependentPlugins('chrome'),
+    ...process.env.HMR === 'true' && process.env.RUNNING_IN_TESTS ? [new ChromeExtensionReloader({ port: 9099 })] : [],
+  ],
+};
+
+const configs = [
+  chromeConfig,
   {
     name: 'firefox',
     output: {
@@ -181,23 +177,12 @@ module.exports = [
     },
     plugins: genPlatformDependentPlugins('cordova'),
   },
+];
+
+// These builds are loaded in browser when running e2e tests
+const configsE2e = [
+  chromeConfig,
   {
-    /* 
-    * This build is loaded in browser when running integration tests
-    */
-    name: 'extension',
-    output: {
-      path: path.resolve(__dirname, 'dist/extension'),
-    },
-    plugins: [
-      ...genPlatformDependentPlugins('chrome', true),
-      ...process.env.HMR === 'true' ? [new ChromeExtensionReloader({ port: 9098 })] : [],
-    ],
-  },
-  {
-    /* 
-    * This build is loaded in browser when running integration tests
-    */
     name: 'aepp',
     entry: {
       aepp: './aepp/aepp.js',
@@ -206,11 +191,13 @@ module.exports = [
       path: path.resolve(__dirname, 'dist/aepp'),
     },
     plugins: [
-      ...genPlatformDependentPlugins('aepp', true),
+      ...genPlatformDependentPlugins('aepp'),
       ...[ new CopyWebpackPlugin([ { from: 'aepp/aepp.html', to: `aepp.html`, transform: transformHtml }])]
     ],
-  }
-].map(c => {
+  },
+];
+
+module.exports = (process.env.RUNNING_IN_TESTS ? configsE2e : configs).map(c => {
   const config = { ...commonConfig }
   if(c.name === "aepp") {
     config.entry = { }
