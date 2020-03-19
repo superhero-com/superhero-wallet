@@ -50,7 +50,7 @@ export default {
     ...mapGetters(['tokenBalance', 'balanceCurrency', 'current', 'currentCurrency']),
     getCurrencyAmount() {
       // eslint-disable-next-line no-restricted-globals
-      if (isNaN(this.finalAmount)) return '0.000';
+      if (Number.isNaN(this.finalAmount)) return '0.000';
       return (this.finalAmount * this.current.currencyRate).toFixed(3);
     },
   },

@@ -95,7 +95,7 @@ export default {
   },
   watch: {
     amount() {
-      if (isNaN(this.amount) || parseFloat(this.amount) === 0) {
+      if (Number.isNaN(this.amount) || parseFloat(this.amount) === 0) {
         this.amountError = true;
       } else {
         this.amountError = false;
@@ -157,7 +157,7 @@ export default {
     },
     toConfirm() {
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
-      this.amountError = this.amountError || Number.isNaN(this.amount) || this.amount <= 0 || isNaN(this.amount);
+      this.amountError = this.amountError || Number.isNaN(this.amount) || this.amount <= 0 || Number.isNaN(this.amount);
       this.noteError = !this.note || !this.url;
       this.confirmMode = !this.amountError && !this.noteError;
     },

@@ -479,9 +479,6 @@ export default {
     },
     async cancelTransaction() {
       const list = await removeTxFromStorage(this.data.id);
-      if (this.data.tx.contractType === 'fungibleToken' && this.data.tx.method === 'add_token') {
-        addRejectedToken(this.data.tx.params[0]);
-      }
       if (!this.data.popup) {
         if (this.data.type === 'nameUpdate') {
           this.$store.dispatch('removePendingName', { hash: this.data.tx.hash }).then(() => {

@@ -17,10 +17,15 @@ const DEFAULTS = {
   },
 };
 
-export function getAddressFromPriv(secret) {
-  const keys = nacl.sign.keyPair.fromSecretKey(str2buf(secret));
-  const publicBuffer = Buffer.from(keys.publicKey);
-  return `ak_${encodeBase58Check(publicBuffer)}`;
+function isHex(str) {
+  return !!(str.length % 2 === 0 && str.match(/^[0-9a-f]+$/i));
+}
+
+function isBase64(str) {
+  // eslint-disable-next-line no-useless-escape
+  if (str.length % 4 > 0 || str.match(/[^0-9a-z+\/=]/i)) return false;
+  const index = str.indexOf('=');
+  return !!(index === -1 || str.slice(index).match(/={1,2}/));
 }
 
 export function str2buf(str, enc) {
@@ -28,6 +33,12 @@ export function str2buf(str, enc) {
   if (!enc && isHex(str)) enc = 'hex';
   if (!enc && isBase64(str)) enc = 'base64';
   return Buffer.from(str, enc);
+}
+
+export function getAddressFromPriv(secret) {
+  const keys = nacl.sign.keyPair.fromSecretKey(str2buf(secret));
+  const publicBuffer = Buffer.from(keys.publicKey);
+  return `ak_${encodeBase58Check(publicBuffer)}`;
 }
 
 /**

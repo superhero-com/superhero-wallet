@@ -111,36 +111,26 @@ const getAeppAccountPermission = async (host, account) => {
   return false;
 };
 
-const setPermissionForAccount = (host, account) =>
-  new Promise((resolve, reject) => {
-    browser.storage.local.get('connectedAepps').then(aepps => {
-      let list = [];
-      if (aepps.hasOwnProperty('connectedAepps') && aepps.connectedAepps.hasOwnProperty('list')) {
-        list = aepps.connectedAepps.list;
-      }
+const setPermissionForAccount = async (host, account) => {
+  const { connectedAepps } = await browser.storage.local.get('connectedAepps');
+  let list = [];
+  if (connectedAepps && connectedAepps.list) {
+    list = connectedAepps.list;
+  }
 
-      if (list.length && typeof list.find(l => l.host === host) !== 'undefined') {
-        const hst = list.find(h => h.host === host);
-        const index = list.findIndex(h => h.host === host);
-        if (typeof hst === 'undefined') {
-          resolve();
-          return;
-        }
-        if (hst.accounts.includes(account)) {
-          resolve();
-          return;
-        }
+  if (list.length && list.find(l => l.host === host)) {
+    const hst = list.find(h => h.host === host);
+    const index = list.findIndex(h => h.host === host);
+    if (!hst) return;
+    if (hst.accounts.includes(account)) return;
 
-        list[index].accounts = [...hst.accounts, account];
-      } else {
-        list.push({ host, accounts: [account] });
-      }
+    list[index].accounts = [...hst.accounts, account];
+  } else {
+    list.push({ host, accounts: [account] });
+  }
 
-      browser.storage.local.set({ connectedAepps: { list } }).then(() => {
-        resolve();
-      });
-    });
-  });
+  await browser.storage.local.set({ connectedAepps: { list } });
+};
 
 export const fetchJson = async (...args) => {
   const response = await fetch(...args);
