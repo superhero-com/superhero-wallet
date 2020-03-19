@@ -1,5 +1,5 @@
 <template>
-  <div class="external-svg" :style="{ 'background-image': 'url(' + accbalanceBG + ')' }" data-cy="balance-info">
+  <div class="external-svg" data-cy="balance-info">
     <span class="title">{{ $t('pages.account.balance') }}</span>
     <div class="balance no-sign">
       <div class="amount">
@@ -31,7 +31,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import ExpandedAngleArrow from '../../../icons/expanded-angle-arrow.svg';
+import ExpandedAngleArrow from '../../../icons/expanded-angle-arrow.svg?vue-component';
 
 export default {
   components: {
@@ -39,7 +39,6 @@ export default {
   },
   data() {
     return {
-      accbalanceBG: browser.runtime.getURL('../icons/acc_balance.png'),
       dropdown: {
         currencies: false,
       },
@@ -136,6 +135,7 @@ export default {
   height: 84px;
   position: relative;
   text-align: center;
+  background-image: url('../../../icons/acc_balance.png');
   .title {
     position: absolute;
     left: 20px;

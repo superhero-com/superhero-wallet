@@ -22,8 +22,8 @@
 </template>
 
 <script>
-import ArrowDown from '../../../icons/arrow-down.svg';
-import ArrowRight from '../../../icons/arrow-right.svg';
+import ArrowDown from '../../../icons/arrow-down.svg?vue-component';
+import ArrowRight from '../../../icons/arrow-right.svg?vue-component';
 
 export default {
   components: {

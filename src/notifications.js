@@ -2,6 +2,7 @@ import { setInterval } from 'timers';
 import { NOTIFICATION_METHODS } from './popup/utils/constants';
 import { detectBrowser } from './popup/utils/helper';
 import { getSDK } from './lib/background-utils';
+import iconUrl from './icons/icon_48.png';
 
 global.browser = require('webextension-polyfill');
 
@@ -57,7 +58,7 @@ export default class Notification {
     let params = {
       type: 'basic',
       title,
-      iconUrl: browser.runtime.getURL('../../../icons/icon_48.png'),
+      iconUrl,
       message,
       priority: 2,
     };

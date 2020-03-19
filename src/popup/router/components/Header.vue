@@ -24,10 +24,10 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Arrow from '../../../icons/arrow.svg';
-import Bell from '../../../icons/bell.svg';
-import Hamburger from '../../../icons/hamburger.svg';
-import Logo from '../../../icons/logo-small.svg';
+import Arrow from '../../../icons/arrow.svg?vue-component';
+import Bell from '../../../icons/bell.svg?vue-component';
+import Hamburger from '../../../icons/hamburger.svg?vue-component';
+import Logo from '../../../icons/logo-small.svg?vue-component';
 
 export default {
   components: { Arrow, Bell, Hamburger, Logo },

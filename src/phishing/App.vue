@@ -2,7 +2,7 @@
   <div class="content">
     <ae-main>
       <ae-panel class="text-center">
-        <img :src="logo" alt="SuperHero logo" />
+        <img src="../icons/icon_128.png" alt="SuperHero logo" />
         <h1><ae-icon fill="primary" face="round" name="info" />SuperHero Phishing Detection</h1>
         <p>
           This domain is currently on the SuperHero domain warning list. This means that based on information available to us, SuperHero believes this domain could currently
@@ -33,7 +33,6 @@ export default {
   name: 'App',
   data() {
     return {
-      logo: browser.runtime.getURL('../../../icons/icon_128.png'),
       href: null,
       hostname: null,
     };

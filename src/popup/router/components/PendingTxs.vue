@@ -20,7 +20,7 @@
 import { mapGetters } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
 import { formatDate } from '../../utils';
-import Eye from '../../../icons/eye.svg';
+import Eye from '../../../icons/eye.svg?vue-component';
 
 export default {
   components: {

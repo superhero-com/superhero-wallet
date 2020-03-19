@@ -1,8 +1,8 @@
 <template>
   <label class="checkbox-container">
-    <slot class="checkbox-holder"></slot>
+    <slot class="checkbox-holder" />
     <input :value="val" v-model="checked" @change="onChange" :type="getType" :name="name" />
-    <span class="checkmark" :style="{ 'background-image': `url(${checked ? checkboxChecked : checkboxUnchecked})` }"></span>
+    <span class="checkmark" :class="{ checked }" />
   </label>
 </template>
 
@@ -12,8 +12,6 @@ export default {
   data() {
     return {
       checkedProxy: false,
-      checkboxUnchecked: browser.runtime.getURL('../icons/checkbox-unchecked.svg'),
-      checkboxChecked: browser.runtime.getURL('../icons/checkbox-checked.svg'),
     };
   },
   computed: {
@@ -58,12 +56,16 @@ export default {
     width: 0;
   }
   .checkmark {
-    background: no-repeat;
+    background: no-repeat url('../../../icons/checkbox-unchecked.svg');
     position: absolute;
     top: 0;
     left: 0;
     height: 20px;
     width: 20px;
+
+    &.checked {
+      background-image: url('../../../icons/checkbox-checked.svg');
+    }
   }
 }
 .checkbox-holder {

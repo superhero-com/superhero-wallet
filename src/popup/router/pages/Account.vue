@@ -26,7 +26,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { setTimeout } from 'timers';
-import Heart from '../../../icons/heart.svg';
+import Heart from '../../../icons/heart.svg?vue-component';
 import RecentTransactions from '../components/RecentTransactions';
 import ClaimTipButton from '../components/ClaimTipButton';
 import BalanceInfo from '../components/BalanceInfo';
