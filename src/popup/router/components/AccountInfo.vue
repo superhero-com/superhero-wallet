@@ -1,7 +1,7 @@
 <template>
   <div class="account-info">
     <div class="title">
-      <img :src="account_icon" />
+      <img src="../../../icons/account-name-icon.png" />
       <div class="account-name" data-cy="account-name">
         <template v-if="activeAccountName.includes('.chain')">{{ activeAccountName }}</template>
         <router-link to="/names" v-else>Claim your .chain name</router-link>
@@ -19,12 +19,11 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Copyicon from '../../../icons/copy.svg';
+import Copyicon from '../../../icons/copy.svg?vue-component';
 
 export default {
   components: { Copyicon },
   data: () => ({
-    account_icon: browser.runtime.getURL('../icons/account-name-icon.png'),
     copied: false,
   }),
   computed: mapGetters(['account', 'activeAccountName']),

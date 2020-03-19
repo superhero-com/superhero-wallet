@@ -1,5 +1,5 @@
 <template>
-  <ae-main :class="aeppPopup ? 'ae-main-popup ae-main-wave' : waveBg ? 'ae-main-wave' : ''" :style="waveBg ? { 'background-image': `url(${wave_bg}) !important` } : {}">
+  <ae-main :class="aeppPopup ? 'ae-main-popup ae-main-wave' : waveBg ? 'ae-main-wave' : ''">
     <Header @toggle-sidebar="showSidebar = !showSidebar" />
 
     <router-view :key="$route.fullPath" />
@@ -33,7 +33,6 @@ export default {
     NodeConnectionStatus,
   },
   data: () => ({
-    wave_bg: browser.runtime.getURL('../icons/background-big-wave.png'),
     showSidebar: false,
   }),
   computed: {
@@ -130,6 +129,7 @@ export default {
   &.ae-main-wave {
     background-position: 100% 100% !important;
     background-repeat: no-repeat !important;
+    background-image: url('../icons/background-big-wave.png') !important;
   }
 
   padding-top: 50px;

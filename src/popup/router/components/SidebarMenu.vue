@@ -93,8 +93,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Close from '../../../icons/close.svg';
-import Arrow from '../../../icons/arrow-current-color.svg';
+import Close from '../../../icons/close.svg?vue-component';
+import Arrow from '../../../icons/arrow-current-color.svg?vue-component';
 
 export default {
   components: { Close, Arrow },

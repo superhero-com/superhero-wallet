@@ -33,7 +33,7 @@ module.exports = (isProd, browser) => ({
     default_popup: 'popup/popup.html',
   },
   background: {
-    scripts: ['background.js'],
+    scripts: ['other/background.js'],
     persistent: true,
   },
   options_ui: {
@@ -45,7 +45,7 @@ module.exports = (isProd, browser) => ({
       run_at: 'document_start',
       all_frames: !isProd && browser === 'chrome',
       matches: ['https://*/*', 'http://*/*'],
-      js: ['inject.js'],
+      js: ['other/inject.js'],
     },
   ],
   web_accessible_resources: ['inject.js', 'phishing/phishing.html', 'phishing/phishing.js', 'popup/CameraRequestPermission.html'],

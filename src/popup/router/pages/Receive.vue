@@ -10,7 +10,7 @@
         <!-- <a @click="exchange" class="block mt-15">{{ $t('pages.receive.transferExchange') }}</a> -->
         <!-- <div class="flex flex flex-align-center flex-justify-between mt-20 mb-35">
           <a @click="purchase" class="block">{{ $t('pages.receive.purchase') }}</a>
-          <img :src="changelly" alt="" />
+          <img src="../../../icons/changelly.png" alt="" />
         </div> -->
       </div>
       <Button @click="purchase">{{ $t('pages.receive.purchase') }}</Button>
@@ -37,7 +37,6 @@ export default {
     return {
       jellySwapUrl: 'https://app.jelly.market',
       changellyUrl: 'https://changelly.com/processing',
-      changelly: browser.runtime.getURL('../../../icons/changelly.png'),
     };
   },
   computed: {

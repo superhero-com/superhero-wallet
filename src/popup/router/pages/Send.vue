@@ -106,9 +106,9 @@ import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
 import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
-import QrIcon from '../../../icons/qr-code.svg';
-import AlertExclamination from '../../../icons/alert-exclamation.svg';
-import Heart from '../../../icons/heart.svg';
+import QrIcon from '../../../icons/qr-code.svg?vue-component';
+import AlertExclamination from '../../../icons/alert-exclamation.svg?vue-component';
+import Heart from '../../../icons/heart.svg?vue-component';
 
 export default {
   name: 'Send',

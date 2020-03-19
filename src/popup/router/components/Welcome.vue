@@ -13,8 +13,8 @@
 </template>
 
 <script>
-import Logo from '../../../icons/logo.svg';
-import Welcome from '../../../icons/welcome.svg';
+import Logo from '../../../icons/logo.svg?vue-component';
+import Welcome from '../../../icons/welcome.svg?vue-component';
 
 export default {
   components: {

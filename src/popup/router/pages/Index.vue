@@ -21,7 +21,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Logo from '../../../icons/logo.svg';
+import Logo from '../../../icons/logo.svg?vue-component';
 import CheckBox from '../components/CheckBox';
 
 export default {

@@ -42,7 +42,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Heart from '../../../icons/heart.svg';
+import Heart from '../../../icons/heart.svg?vue-component';
 import Textarea from '../components/Textarea';
 import openUrl from '../../utils/openUrl';
 
