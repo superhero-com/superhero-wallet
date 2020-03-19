@@ -14,7 +14,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import FilterArrow from '../../../icons/filter-arrow.svg';
+import FilterArrow from '../../../icons/filter-arrow.svg?vue-component';
 
 export default {
   props: [''],

@@ -65,10 +65,10 @@
 <script>
 import { mapGetters } from 'vuex';
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
-import Claim from '../../../icons/claim.svg';
-import Heart from '../../../icons/heart.svg';
-import LeftArrow from '../../../icons/left-arrow.svg';
-import RightArrow from '../../../icons/right-arrow.svg';
+import Claim from '../../../icons/claim.svg?vue-component';
+import Heart from '../../../icons/heart.svg?vue-component';
+import LeftArrow from '../../../icons/left-arrow.svg?vue-component';
+import RightArrow from '../../../icons/right-arrow.svg?vue-component';
 import Button from '../components/Button';
 
 export default {

@@ -37,7 +37,7 @@ import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/cons
 import { pollGetter } from '../../utils/helper';
 import { setPendingTx } from '../../utils';
 import openUrl from '../../utils/openUrl';
-import CheckIcon from '../../../icons/check-icon.svg';
+import CheckIcon from '../../../icons/check-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
 
 export default {

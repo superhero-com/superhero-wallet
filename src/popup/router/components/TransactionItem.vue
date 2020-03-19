@@ -10,7 +10,9 @@
       </div>
       <div class="holder">
         <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
-        <span class="seeTransaction" @click="seeTx(transactionData.hash)"><img :src="eye"/></span>
+        <span class="seeTransaction" @click="seeTx(transactionData.hash)">
+          <img src="../../../icons/eye.png" />
+        </span>
       </div>
     </ae-list-item>
   </div>
@@ -27,7 +29,6 @@ export default {
   props: ['transactionData', 'recent', 'dark'],
   data() {
     return {
-      eye: browser.runtime.getURL('../icons/eye.png'),
       status: '',
       tipUrl: null,
       checkSdk: null,

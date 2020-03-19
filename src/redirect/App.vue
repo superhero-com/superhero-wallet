@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import Logo from '../icons/logo.svg';
+import Logo from '../icons/logo.svg?vue-component';
 
 export default {
   name: 'App',

@@ -29,8 +29,8 @@ const commonConfig = {
   mode: process.env.NODE_ENV,
   context: path.resolve(__dirname, 'src'),
   entry: {
-    background: './background.js',
-    inject: './inject.js',
+    'other/background': './background.js',
+    'other/inject': './inject.js',
     'popup/popup': './popup/popup.js',
     'options/options': './options/options.js',
     'phishing/phishing': './phishing/phishing.js',
@@ -40,6 +40,7 @@ const commonConfig = {
   node: { fs: 'empty', net: 'empty', tls: 'empty' },
   output: {
     filename: '[name].js',
+    publicPath: '../',
   },
   resolve: {
     extensions: ['.js', '.vue'],
@@ -72,28 +73,36 @@ const commonConfig = {
         use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader?indentedSyntax'],
       },
       {
-        test: /\.(png|jpg|gif|ico)$/,
-        loader: 'file-loader',
-        options: {
-          name: '[name].[ext]?emitFile=false',
-        },
-      },
-      {
-        test: /\.svg$/,
-        loader: 'vue-svg-loader',
+        test: /\.(png|jpg|gif|svg|ico)$/,
+        oneOf: [
+          {
+            test: /\.svg$/,
+            resourceQuery: /vue-component/,
+            loader: 'vue-svg-loader',
+          },
+          {
+            loader: 'url-loader',
+            options: {
+              name: '[name].[contenthash].[ext]',
+              esModule: false,
+              limit: 4096,
+              outputPath: 'assets/',
+            },
+          },
+        ],
       },
     ],
   },
   plugins: [
     ...commonPlugins,
     new CopyWebpackPlugin([
-      { from: 'icons', to: `icons`, ignore: ['icon.xcf'] },
       { from: 'popup/popup.html', to: `popup/popup.html`, transform: transformHtml },
       { from: 'options/options.html', to: `options/options.html`, transform: transformHtml },
       { from: 'phishing/phishing.html', to: `phishing/phishing.html`, transform: transformHtml },
       { from: 'popup/CameraRequestPermission.html', to: `popup/CameraRequestPermission.html`, transform: transformHtml },
       { from: 'redirect/redirect.html', to: `redirect/index.html`, transform: transformHtml },
-      { from: 'icons/icon_48.png', to: `popup/assets/logo-small.png` },
+      { from: 'icons/icon_48.png', to: `icons/icon_48.png` },
+      { from: 'icons/icon_128.png', to: `icons/icon_128.png` },
     ]),
   ],
 };
