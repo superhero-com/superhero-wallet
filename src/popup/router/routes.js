@@ -22,9 +22,8 @@ import TransactionsComponent from './pages/Transactions';
 import SendComponent from './pages/Send';
 import ReceiveComponent from './pages/Receive';
 import SuccessTip from './pages/SuccessTip';
-import WelcomePage from './pages/Welcome';
 import NotificationsPage from './pages/Notifications';
-import NamesPage from './pages/Names.vue';
+import NamesPage from './pages/Names';
 import AuctionBid from './pages/AuctionBid';
 
 export default [
@@ -190,13 +189,6 @@ export default [
     props: true,
     meta: {
       title: 'send',
-    },
-  },
-  {
-    path: '/welcome',
-    component: WelcomePage,
-    meta: {
-      navigation: false,
     },
   },
   {
