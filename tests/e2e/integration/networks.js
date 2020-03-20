@@ -1,0 +1,77 @@
+
+import { defaultNetworks, networks, DEFAULT_NETWORK } from '../../../src/popup/utils/constants'
+const network = "Testnet";
+describe("Test cases for networks page", () => {
+  beforeEach(() => {
+    cy
+    .login()
+    .openNetworks()
+  });
+
+  // it("Open networks page", () => {
+  //   cy
+  //   .get('[data-cy=to-add]')
+  //   .should('be.visible')
+  //   .get('[data-cy=networks]')
+  //   .should('be.visible')
+  //   .get('[data-cy=network-name]')
+  //   .should('contain', network)
+  //   .get('[data-cy=network-url]')
+  //   .should('contain', defaultNetworks[network].url)
+  //   .get('[data-cy=network-middleware]')
+  //   .should('contain', defaultNetworks[network].middlewareUrl)
+  // });
+
+  // it("Can cancel add network", () => {
+  //   cy
+  //   .get('[data-cy=to-add]')
+  //   .click()
+  //   .get('[data-cy=cancel]')
+  //   .should('be.visible')
+  //   .click()
+  //   .get('[data-cy=cancel]')
+  //   .should('not.be.visible')
+  // })
+
+  // it("Can't add network with default network name", () => {
+  //   cy
+  //   .get('[data-cy=to-add]')
+  //   .click()
+  //   .enterNetworkDetails(network, defaultNetworks[network].url, defaultNetworks[network].middlewareUrl)
+  //   .get('[data-cy=connect]')
+  //   .click()
+  //   .buttonShouldBeDisabled('[data-cy=connect]')
+  //   .get('[data-cy=error-msg]')
+  //   .should('exist')
+  // })
+
+  // it("Can't add network with invalid urls", () => {
+  //   cy
+  //   .get('[data-cy=to-add]')
+  //   .click()
+  //   .enterNetworkDetails("test", "test", "test")
+  //   .get('[data-cy=connect]')
+  //   .click()
+  //   .buttonShouldBeDisabled('[data-cy=connect]')
+  //   .get('[data-cy=error-msg]')
+  //   .should('exist')
+  // })
+
+  // it("Can add new network", () => {
+  //   cy
+  //   .addNetwork("Mainnet", networks[DEFAULT_NETWORK].url, networks[DEFAULT_NETWORK].middlewareUrl)
+  // })
+
+  it("Can select network", () => {
+    cy
+    .selectNetwork("Mainnet", networks[DEFAULT_NETWORK].url, networks[DEFAULT_NETWORK].middlewareUrl)
+
+  })
+
+  // it("Can select network", () => {
+  //   cy
+  //   .selectNetwork("Mainnet", networks[DEFAULT_NETWORK].url, networks[DEFAULT_NETWORK].middlewareUrl)
+    
+  // })
+
+})

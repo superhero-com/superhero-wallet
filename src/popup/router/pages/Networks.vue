@@ -1,12 +1,12 @@
 <template>
   <div class="popup">
-    <div v-if="mode === 'list'">
+    <div v-if="mode === 'list'" data-cy="networks">
       <ListItem v-for="(n, key, index) in networks" :key="index" class="network-row">
         <CheckBox :value="n.name === current.network" type="radio" name="activeNetwork" @click.native="selectNetwork(n.name)" />
         <div class="mr-auto ml-15 text-left">
-          <p class="f-16">{{ n.name }}</p>
-          <p class="f-12 url"><b>Url:</b> {{ n.url }}</p>
-          <p class="f-12 url"><b>MIddleware:</b> {{ n.middlewareUrl }}</p>
+          <p class="f-16" data-cy="network-name">{{ n.name }}</p>
+          <p class="f-12 url" data-cy="network-url"><b>Url:</b> {{ n.url }}</p>
+          <p class="f-12 url" data-cy="network-middleware"><b>MIddleware:</b> {{ n.middlewareUrl }}</p>
         </div>
         <ae-dropdown direction="right" v-if="!n.system">
           <ae-icon name="more" size="20px" slot="button" />
@@ -20,17 +20,22 @@
           </li>
         </ae-dropdown>
       </ListItem>
-      <Button extend @click="mode = 'add'" class="mt-20">{{ $t('pages.network.addNetwork') }}</Button>
+      <Button extend @click="mode = 'add'" class="mt-20" data-cy="to-add">{{ $t('pages.network.addNetwork') }}</Button>
     </div>
     <div v-if="mode === 'add' || mode === 'edit'" class="mt-10">
-      <Input :placeholder="$t('pages.network.networkNamePlaceholder')" :label="$t('pages.network.networkNameLabel')" v-model="network.name" />
-      <Input :placeholder="$t('pages.network.networkUrlPlaceholder')" :label="$t('pages.network.networkUrlLabel')" v-model="network.url" />
-      <Input :placeholder="$t('pages.network.networkMiddlewarePlaceholder')" :label="$t('pages.network.networkMiddlewareLabel')" v-model="network.middlewareUrl" />
-      <Button half @click="cancel">{{ $t('pages.network.cancel') }}</Button>
-      <Button class="danger" half @click="addNetwork" :disabled="!network.name || !network.url || !network.middlewareUrl || network.error !== false">
+      <Input :placeholder="$t('pages.network.networkNamePlaceholder')" :label="$t('pages.network.networkNameLabel')" v-model="network.name" data-cy="network" />
+      <Input :placeholder="$t('pages.network.networkUrlPlaceholder')" :label="$t('pages.network.networkUrlLabel')" v-model="network.url" data-cy="url" />
+      <Input
+        :placeholder="$t('pages.network.networkMiddlewarePlaceholder')"
+        :label="$t('pages.network.networkMiddlewareLabel')"
+        v-model="network.middlewareUrl"
+        data-cy="middleware"
+      />
+      <Button half @click="cancel" data-cy="cancel">{{ $t('pages.network.cancel') }}</Button>
+      <Button class="danger" half @click="addNetwork" :disabled="!network.name || !network.url || !network.middlewareUrl || network.error !== false" data-cy="connect">
         {{ $t('pages.network.save') }}
       </Button>
-      <div v-if="network.error" class="error-msg" v-html="network.error"></div>
+      <div v-if="network.error" class="error-msg" v-html="network.error" data-cy="error-msg"></div>
     </div>
   </div>
 </template>
@@ -69,15 +74,6 @@ export default {
   computed: {
     ...mapGetters(['networks', 'current']),
   },
-  created() {
-    this.$watch(
-      'network',
-      v => {
-        this.network.error = v.name === DEFAULT_NETWORK ? 'Network with this name exist' : false;
-      },
-      { deep: true }
-    );
-  },
   methods: {
     async selectNetwork(network) {
       await this.$store.dispatch('switchNetwork', network);
@@ -105,6 +101,8 @@ export default {
     async addNetwork() {
       try {
         this.network.error = false;
+        if (this.network.name === DEFAULT_NETWORK) throw new Error('Network with this name exist');
+        if (!this.network.name) throw new Error('Enter network name');
         const url = new URL(this.network.url);
         const middleware = new URL(this.network.middlewareUrl);
 
