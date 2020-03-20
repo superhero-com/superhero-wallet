@@ -59,12 +59,6 @@ export const popupProps = {
     host: 'localhost',
   },
 };
-const contractCode = `@compiler >= 4
-contract Example =
-  record state = { b: bytes(32) }
-  entrypoint init() : state = { b = #aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa }
-  entrypoint get_bytes() : bytes(32) = state.b
-  stateful entrypoint set_bytes(x: bytes(32)) = put(state{ b = x })`;
 
 export const recipientId = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';
 export const MAX_UINT256 = BigNumber(2)

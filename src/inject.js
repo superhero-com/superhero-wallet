@@ -14,7 +14,7 @@ const redirectToWarning = (hostname, href, extUrl = '') => {
     extensionUrl = 'moz-extension';
   }
   let redirectUrl = '';
-  if (extUrl != '') {
+  if (extUrl !== '') {
     redirectUrl = `${extUrl}phishing/phishing.html#hostname=${hostname}&href=${href}`;
   } else {
     redirectUrl = `${extensionUrl}://${browser.runtime.id}/phishing/phishing.html#hostname=${hostname}&href=${href}`;
@@ -22,39 +22,8 @@ const redirectToWarning = (hostname, href, extUrl = '') => {
   window.location.href = redirectUrl;
 };
 
-if (typeof navigator.clipboard === 'undefined') {
-  // redirectToWarning(extractHostName(window.location.href),window.location.href)
-} else {
-  sendToBackground('phishingCheck', { href: window.location.href });
-}
-
-// Subscribe from postMessages from page
-window.addEventListener(
-  'message',
-  ({ data }) => {
-    let method = 'pageMessage';
-    if (typeof data.method !== 'undefined') {
-      method = data.method;
-    }
-    // Handle message from page and redirect to background script
-    if (!data.hasOwnProperty('resolve')) {
-      sendToBackground(method, data);
-    }
-  },
-  false
-);
-
-// Handle message from background and redirect to page
-browser.runtime.onMessage.addListener(({ data, method }, sender, sendResponse) => {
-  if (data.method == 'phishingCheck') {
-    if (data.blocked) {
-      redirectToWarning(data.params.host, data.params.href, data.extUrl);
-    }
-  }
-});
-
-function sendToBackground(method, params) {
-  return new Promise((resolve, reject) => {
+const sendToBackground = (method, params) =>
+  new Promise(resolve => {
     browser.runtime
       .sendMessage({
         jsonrpc: '2.0',
@@ -66,10 +35,39 @@ function sendToBackground(method, params) {
         resolve(res);
       });
   });
+
+if (typeof navigator.clipboard === 'undefined') {
+  // redirectToWarning(extractHostName(window.location.href),window.location.href)
+} else {
+  sendToBackground('phishingCheck', { href: window.location.href });
 }
 
+// Subscribe from postMessages from page
+window.addEventListener(
+  'message',
+  ({ data }) => {
+    let { method } = data;
+    if (!method) method = 'pageMessage';
+
+    // Handle message from page and redirect to background script
+    if (!data.resolve) {
+      sendToBackground(method, data);
+    }
+  },
+  false
+);
+
+// Handle message from background and redirect to page
+browser.runtime.onMessage.addListener(({ data }) => {
+  if (data.method === 'phishingCheck') {
+    if (data.blocked) {
+      redirectToWarning(data.params.host, data.params.href, data.extUrl);
+    }
+  }
+});
+
 const sendDomData = () => {
-  const address = document.all[0].outerHTML.match(/(ak\_[A-Za-z0-9]{49,50})/g);
+  const address = document.all[0].outerHTML.match(/(ak_[A-Za-z0-9]{49,50})/g);
   const chainName = document.all[0].outerHTML.match(/[A-Za-z0-9]+\.chain/g);
   if (address || chainName) {
     setTimeout(() => {

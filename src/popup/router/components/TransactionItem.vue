@@ -48,10 +48,10 @@ export default {
     ...mapGetters(['account', 'popup', 'sdk', 'current', 'network', 'transactions', 'tipping']),
     txType() {
       if (
-        this.transactionData.tx.sender_id == this.account.publicKey ||
-        this.transactionData.tx.account_id == this.account.publicKey ||
-        this.transactionData.tx.owner_id == this.account.publicKey ||
-        this.transactionData.tx.caller_id == this.account.publicKey
+        this.transactionData.tx.sender_id === this.account.publicKey ||
+        this.transactionData.tx.account_id === this.account.publicKey ||
+        this.transactionData.tx.owner_id === this.account.publicKey ||
+        this.transactionData.tx.caller_id === this.account.publicKey
       ) {
         return 'Sent';
       }
@@ -59,7 +59,6 @@ export default {
     },
     txAmount() {
       const amount = this.transactionData.tx.amount ? this.transactionData.tx.amount : 0;
-      // const { fee } = this.transactionData.tx;
       return convertToAE(amount).toFixed(3);
     },
     txAmountToCurrency() {

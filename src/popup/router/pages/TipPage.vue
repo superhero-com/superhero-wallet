@@ -50,9 +50,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import BigNumber from 'bignumber.js';
 import axios from 'axios';
-import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
+import { calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import { escapeSpecialChars, pollGetter, aeToAettos } from '../../utils/helper';
 import { setPendingTx } from '../../utils';
 import CheckIcon from '../../../icons/check-icon.svg?vue-component';
@@ -158,7 +157,7 @@ export default {
     },
     toConfirm() {
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
-      this.amountError = this.amountError || Number.isNaN(this.amount) || this.amount <= 0 || isNaN(this.amount);
+      this.amountError = this.amountError || isNaN(this.amount) || this.amount <= 0 || isNaN(this.amount);
       this.noteError = !this.note || !this.url;
       this.confirmMode = !this.amountError && !this.noteError;
     },

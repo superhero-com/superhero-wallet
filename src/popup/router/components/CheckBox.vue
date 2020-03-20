@@ -28,7 +28,7 @@ export default {
     },
   },
   methods: {
-    onChange(e) {
+    onChange() {
       this.$emit('input', this.checkedProxy);
     },
   },

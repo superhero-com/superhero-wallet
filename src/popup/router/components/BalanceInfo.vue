@@ -49,10 +49,7 @@ export default {
   },
   methods: {
     async toggleDropdown(event, parentClass) {
-      if (typeof parentClass === 'undefined') {
-        parentClass = '.currenciesgroup';
-      }
-      const dropdownParent = event.target.closest(parentClass);
+      const dropdownParent = event.target.closest(!parentClass ? '.currenciesgroup' : parentClass);
       this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
     },
     async switchCurrency(currency) {

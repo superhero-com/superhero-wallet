@@ -1,9 +1,5 @@
-import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
-import axios from 'axios';
-import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
-import Node from '@aeternity/aepp-sdk/es/node';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 import { MAGNITUDE_EXA, MAGNITUDE_GIGA, MAGNITUDE_PICO, CONNECTION_TYPES, networks, DEFAULT_NETWORK } from './constants';
 
@@ -11,7 +7,8 @@ export const aeToAettos = v => formatAmount(v, { denomination: AE_AMOUNT_FORMATS
 export const aettosToAe = v => formatAmount(v, { denomination: AE_AMOUNT_FORMATS.AETTOS, targetDenomination: AE_AMOUNT_FORMATS.AE });
 
 const shuffleArray = array => {
-  let currentIndex = array.length;
+  const shuffle = array;
+  let currentIndex = shuffle.length;
   let temporaryValue;
   let randomIndex;
 
@@ -22,12 +19,12 @@ const shuffleArray = array => {
     currentIndex -= 1;
 
     // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
+    temporaryValue = shuffle[currentIndex];
+    shuffle[currentIndex] = shuffle[randomIndex];
+    shuffle[randomIndex] = temporaryValue;
   }
 
-  return array;
+  return shuffle;
 };
 
 const convertToAE = balance => +(balance / 10 ** 18).toFixed(7);
@@ -51,19 +48,19 @@ const extractHostName = url => {
 };
 
 const detectBrowser = () => {
-  if ((navigator.userAgent.indexOf('Opera') || navigator.userAgent.indexOf('OPR')) != -1) {
+  if ((navigator.userAgent.indexOf('Opera') || navigator.userAgent.indexOf('OPR')) !== -1) {
     return 'Opera';
   }
-  if (navigator.userAgent.indexOf('Chrome') != -1) {
+  if (navigator.userAgent.indexOf('Chrome') !== -1) {
     return 'Chrome';
   }
-  if (navigator.userAgent.indexOf('Safari') != -1) {
+  if (navigator.userAgent.indexOf('Safari') !== -1) {
     return 'Safari';
   }
-  if (navigator.userAgent.indexOf('Firefox') != -1) {
+  if (navigator.userAgent.indexOf('Firefox') !== -1) {
     return 'Firefox';
   }
-  if (navigator.userAgent.indexOf('MSIE') != -1 || !!document.documentMode == true) {
+  if (navigator.userAgent.indexOf('MSIE') !== -1 || !!document.documentMode === true) {
     return 'IE';
   }
   return 'unknown';
@@ -71,7 +68,7 @@ const detectBrowser = () => {
 
 const getExtensionProtocol = () => {
   let extensionUrl = 'chrome-extension';
-  if (detectBrowser() == 'Firefox') {
+  if (detectBrowser() === 'Firefox') {
     extensionUrl = 'moz-extension';
   }
   return extensionUrl;
@@ -81,9 +78,9 @@ const detectConnectionType = port => {
   const extensionProtocol = getExtensionProtocol();
   const senderUrl = port.sender.url.split('?');
   let type = CONNECTION_TYPES.OTHER;
-  if (port.name == CONNECTION_TYPES.EXTENSION && (senderUrl[0] == `${extensionProtocol}://${browser.runtime.id}/popup/popup.html` || detectBrowser() == 'Firefox')) {
+  if (port.name === CONNECTION_TYPES.EXTENSION && (senderUrl[0] === `${extensionProtocol}://${browser.runtime.id}/popup/popup.html` || detectBrowser() === 'Firefox')) {
     type = CONNECTION_TYPES.EXTENSION;
-  } else if (port.name == CONNECTION_TYPES.POPUP && (senderUrl[0] == `${extensionProtocol}://${browser.runtime.id}/popup/popup.html` || detectBrowser() == 'Firefox')) {
+  } else if (port.name === CONNECTION_TYPES.POPUP && (senderUrl[0] === `${extensionProtocol}://${browser.runtime.id}/popup/popup.html` || detectBrowser() === 'Firefox')) {
     type = CONNECTION_TYPES.POPUP;
   } else {
     type = CONNECTION_TYPES.OTHER;
@@ -92,135 +89,56 @@ const detectConnectionType = port => {
 };
 
 const fetchData = (url, method, fetchedData) => {
-  if (method == 'post') {
-    fetch(url, {
+  if (method === 'post') {
+    return fetch(url, {
       method,
       body: fetchedData,
-    })
-      .then(response => response.json())
-      .then(json => console.log(json));
+    }).then(response => response.json());
   }
-  if (method == 'get') {
-    return fetch(url).then(response => response.json());
-  }
+
+  return fetch(url).then(response => response.json());
 };
 
-const setConnectedAepp = (host, account) =>
-  new Promise((resolve, reject) => {
-    browser.storage.local.get('connectedAepps').then(aepps => {
-      let list = [];
-      if (aepps.hasOwnProperty('connectedAepps') && aepps.connectedAepps.hasOwnProperty('list')) {
-        list = aepps.connectedAepps.list;
-      }
+const getAeppAccountPermission = async (host, account) => {
+  const { connectedAepps } = await browser.storage.local.get('connectedAepps');
+  if (!connectedAepps) return false;
+  if (connectedAepps && connectedAepps.list) {
+    const { list } = connectedAepps;
+    if (list.find(ae => ae.host === host && ae.accounts.includes(account))) {
+      return true;
+    }
+    return false;
+  }
+  return false;
+};
 
-      if (list.length && typeof list.find(l => l.host == host) !== 'undefined') {
-        const hst = list.find(h => h.host == host);
-        const index = list.findIndex(h => h.host == host);
-        if (typeof hst === 'undefined') {
-          resolve();
-          return;
-        }
-        if (hst.accounts.includes(account)) {
-          resolve();
-          return;
-        }
+const setPermissionForAccount = async (host, account) => {
+  const { connectedAepps } = await browser.storage.local.get('connectedAepps');
+  let list = [];
+  if (connectedAepps && connectedAepps.list) {
+    list = connectedAepps.list;
+  }
 
-        list[index].accounts = [...hst.accounts, account];
-      } else {
-        list.push({ host, accounts: [account] });
-      }
+  if (list.length && list.find(l => l.host === host)) {
+    const hst = list.find(h => h.host === host);
+    const index = list.findIndex(h => h.host === host);
+    if (!hst) return;
+    if (hst.accounts.includes(account)) return;
 
-      browser.storage.local.set({ connectedAepps: { list } }).then(() => {
-        resolve();
-      });
-    });
-  });
+    list[index].accounts = [...hst.accounts, account];
+  } else {
+    list.push({ host, accounts: [account] });
+  }
 
-const checkAeppConnected = host =>
-  new Promise((resolve, reject) => {
-    browser.storage.local.get('connectedAepps').then(aepps => {
-      browser.storage.local.get('subaccounts').then(subaccounts => {
-        browser.storage.local.get('activeAccount').then(active => {
-          let activeIdx = 0;
-          if (active.hasOwnProperty('activeAccount')) {
-            activeIdx = active.activeAccount;
-          }
-          const address = subaccounts.subaccounts[activeIdx].publicKey;
-
-          if (!aepps.hasOwnProperty('connectedAepps')) {
-            return resolve(false);
-          }
-          if (aepps.hasOwnProperty('connectedAepps') && aepps.connectedAepps.hasOwnProperty('list')) {
-            const { list } = aepps.connectedAepps;
-            if (list.find(ae => ae.host == host && ae.accounts.includes(address))) {
-              return resolve(true);
-            }
-            return resolve(false);
-          }
-
-          return resolve(false);
-        });
-      });
-    });
-  });
-
-const redirectAfterLogin = ctx => {};
-
-const getAeppAccountPermission = (host, account) =>
-  new Promise((resolve, reject) => {
-    browser.storage.local.get('connectedAepps').then(aepps => {
-      if (!aepps.hasOwnProperty('connectedAepps')) {
-        return resolve(false);
-      }
-      if (aepps.hasOwnProperty('connectedAepps') && aepps.connectedAepps.hasOwnProperty('list')) {
-        const { list } = aepps.connectedAepps;
-        if (list.find(ae => ae.host == host && ae.accounts.includes(account))) {
-          return resolve(true);
-        }
-        return resolve(false);
-      }
-
-      return resolve(false);
-    });
-  });
-
-const setPermissionForAccount = (host, account) =>
-  new Promise((resolve, reject) => {
-    browser.storage.local.get('connectedAepps').then(aepps => {
-      let list = [];
-      if (aepps.hasOwnProperty('connectedAepps') && aepps.connectedAepps.hasOwnProperty('list')) {
-        list = aepps.connectedAepps.list;
-      }
-
-      if (list.length && typeof list.find(l => l.host == host) !== 'undefined') {
-        const hst = list.find(h => h.host == host);
-        const index = list.findIndex(h => h.host == host);
-        if (typeof hst === 'undefined') {
-          resolve();
-          return;
-        }
-        if (hst.accounts.includes(account)) {
-          resolve();
-          return;
-        }
-
-        list[index].accounts = [...hst.accounts, account];
-      } else {
-        list.push({ host, accounts: [account] });
-      }
-      // return;
-      browser.storage.local.set({ connectedAepps: { list } }).then(() => {
-        resolve();
-      });
-    });
-  });
+  await browser.storage.local.set({ connectedAepps: { list } });
+};
 
 export const fetchJson = async (...args) => {
   const response = await fetch(...args);
   return response.json();
 };
 
-const swag = async (network, current) => {
+const middleware = async (network, current) => {
   const swag = await fetchJson(`${network[current.network].middlewareUrl}/middleware/api`);
   swag.paths['/names/auctions/{name}/info'] = {
     get: {
@@ -243,47 +161,10 @@ const swag = async (network, current) => {
   })({ swag });
 };
 
-let countErr = 0;
-const createSDKObject = (ctx, { network, current, account, wallet, activeAccount = 0, background, res }, backgr) =>
-  new Promise(async (resolve, reject) => {
-    const account = MemoryAccount({ keypair: { ...res } });
-    const node = await Node({ url: network[current.network].internalUrl, internalUrl: network[current.network].internalUrl });
-    Universal({
-      nodes: [{ name: current.network, instance: node }],
-      accounts: [account],
-      networkId: typeof network !== 'undefined' ? network[current.network].networkId : 'ae_uat',
-      nativeMode: true,
-      compilerUrl: typeof network !== 'undefined' ? network[current.network].compilerUrl : 'https://compiler.aepps.com',
-    })
-      .then(sdk => {
-        if (!backgr) {
-          ctx.$store.dispatch('initSdk', sdk).then(() => {
-            ctx.hideLoader();
-          });
-        }
-        resolve(sdk);
-      })
-      .catch(err => {
-        if (!backgr) {
-          ctx.hideLoader();
-          ctx.showConnectError();
-        }
-        if (countErr < 3) {
-          createSDKObject(ctx, { network, current, account, activeAccount, background, res }, backgr);
-        } else {
-          reject({ error: true });
-        }
-        countErr++;
-      });
-  });
-
 const getCurrencies = async () => {
-  const result = await browser.storage.local.get('convertTimer');
+  const { convertTimer } = await browser.storage.local.get('convertTimer');
   const time = new Date().getTime();
-  if (
-    !result.hasOwnProperty('convertTimer') ||
-    (result.hasOwnProperty('convertTimer') && (result.convertTimer == '' || result.convertTimer == 'undefined' || result.convertTimer <= time))
-  ) {
+  if (!convertTimer || (convertTimer && (convertTimer === '' || convertTimer <= time))) {
     const fetched = await fetchData(
       'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
       'get',
@@ -300,24 +181,6 @@ const getCurrencies = async () => {
 };
 
 const convertAmountToCurrency = (currency, amount) => currency * amount;
-
-const contractEncodeCall = async (sdk, source, name, args = []) => await sdk.contractEncodeCall(source, name, args);
-
-const contractDecodeData = async (sdk, source, fn, callValue, callResults, options = {}) => await sdk.contractDecodeData(source, fn, callValue, callResults, options);
-
-const removeTxFromStorage = id =>
-  new Promise((resolve, reject) => {
-    browser.storage.local.get('pendingTransaction').then(data => {
-      browser.storage.local.remove('showAeppPopup').then(() => {
-        let list = {};
-        if (data.hasOwnProperty('pendingTransaction') && data.pendingTransaction.hasOwnProperty('list')) {
-          list = data.pendingTransaction.list;
-          delete list[id];
-        }
-        resolve(list);
-      });
-    });
-  });
 
 const checkAddress = value => Crypto.isAddressValid(value, 'ak') || Crypto.isAddressValid(value, 'ct') || Crypto.isAddressValid(value, 'ok');
 
@@ -362,14 +225,6 @@ const stringifyForStorage = state =>
       return { type: 'Float64Array', data: Array.from(value) };
     }
 
-    // if (value instanceof BigInt64Array) {
-    //     return { type: 'BigInt64Array', data: Array.from(value) };
-    // }
-
-    // if (value instanceof BigUint64Array) {
-    //     return { type: 'BigUint64Array', data: Array.from(value) };
-    // }
-
     return value;
   });
 
@@ -381,44 +236,36 @@ const parseFromStorage = state =>
     if (value && value.type === 'Uint8Array') {
       return new Uint8Array(value.data);
     }
-    if (value && value.type == 'Buffer') {
+    if (value && value.type === 'Buffer') {
       return new Uint8Array(value.data);
     }
-    if (value && value.type == 'Int8Array') {
+    if (value && value.type === 'Int8Array') {
       return new Int8Array(value.data);
     }
 
-    if (value && value.type == 'Int16Array') {
+    if (value && value.type === 'Int16Array') {
       return new Int16Array(value.data);
     }
 
-    if (value && value.type == 'Uint16Array') {
+    if (value && value.type === 'Uint16Array') {
       return new Uint16Array(value.data);
     }
 
-    if (value && value.type == 'Int32Array') {
+    if (value && value.type === 'Int32Array') {
       return new Int32Array(value.data);
     }
 
-    if (value && value.type == 'Uint32Array') {
+    if (value && value.type === 'Uint32Array') {
       return new Uint32Array(value.data);
     }
 
-    if (value && value.type == 'Float32Array') {
+    if (value && value.type === 'Float32Array') {
       return new Float32Array(value.data);
     }
 
-    if (value && value.type == 'Float64Array') {
+    if (value && value.type === 'Float64Array') {
       return new Float64Array(value.data);
     }
-
-    //   if(value && value.type == 'BigInt64Array' ) {
-    //     return new BigInt64Array(value.data);
-    //   }
-
-    //   if(value && value.type == 'BigUint64Array' ) {
-    //     return new BigUint64Array(value.data);
-    //   }
 
     return value;
   });
@@ -430,19 +277,6 @@ const escapeCallParams = params =>
     }
     return p.toString();
   });
-
-const addRejectedToken = async token => {
-  let { rejected_token } = await browser.storage.local.get('rejected_token');
-  if (typeof rejected_token === 'undefined') {
-    rejected_token = [];
-  }
-  rejected_token.push(token);
-  return await browser.storage.local.set({ rejected_token });
-};
-
-export const handleUnknownError = error => console.warn('Unknown rejection', error);
-
-export const isAccountNotFoundError = error => isNotFoundError(error) && get(error, 'response.data.reason') === 'Account not found';
 
 export const getAddressByNameEntry = nameEntry => ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === 'account_pubkey')) || {}).id;
 
@@ -486,50 +320,28 @@ const contractCall = async ({ instance, method, params = [], decode = false, asy
   } catch (e) {
     if (e.message.indexOf('wrong_abi_version') > -1) {
       instance.setOptions({ backend: 'aevm' });
-      return await contractCall({ instance, method, params, decode, async });
+      return contractCall({ instance, method, params, decode, async });
     }
     throw e.message;
   }
 
+  // eslint-disable-next-line no-nested-ternary
   return async ? (decode ? call.decodedResult : call) : params.length ? instance.methods[method](...params) : instance.methods[method]();
 };
-
-const checkContractAbiVersion = ({ address, middleware }, test = false) =>
-  new Promise((resolve, reject) => {
-    axios
-      .get(`${middleware}/middleware/contracts/transactions/address/${address}`)
-      .then(res => {
-        if (!res.data.transactions.length) {
-          return resolve(3);
-        }
-        const {
-          tx: { abi_version },
-        } = res.data.transactions.find(({ tx: { type } }) => type == 'ContractCreateTx');
-        return resolve(abi_version);
-      })
-      .catch(err => {
-        console.log(err);
-        resolve(0);
-      });
-  });
 
 const setContractInstance = async (tx, sdk, contractAddress = null) => {
   let contractInstance = false;
   try {
     let backend = 'fate';
-    if (typeof tx.abi_version !== 'undefined' && tx._abi_version != 3) {
+    if (typeof tx.abi_version !== 'undefined' && tx.abi_version !== 3) {
       backend = 'aevm';
     }
     try {
       contractInstance = await sdk.getContractInstance(tx.source, { contractAddress, forceCodeCheck: true });
       contractInstance.setOptions({ backend });
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
     return Promise.resolve(contractInstance);
-  } catch (e) {
-    console.log(e);
-  }
+  } catch (e) {}
   return Promise.resolve(contractInstance);
 };
 
@@ -553,11 +365,7 @@ const getUniqueId = (length = 6) => {
 
 const getUserNetworks = async () => {
   const { userNetworks } = await browser.storage.local.get('userNetworks');
-  const networks = {};
-  if (userNetworks) {
-    userNetworks.forEach(net => (networks[net.name] = net));
-  }
-  return networks;
+  return !userNetworks ? {} : userNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {});
 };
 
 export const getAllNetworks = async () => {
@@ -565,6 +373,7 @@ export const getAllNetworks = async () => {
   return { ...userNetworks, ...networks };
 };
 
+// eslint-disable-next-line no-useless-escape
 const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/[\""]/g, '');
 
 const addTipAmount = async amount => {
@@ -637,24 +446,16 @@ export {
   extractHostName,
   fetchData,
   detectBrowser,
-  setConnectedAepp,
-  checkAeppConnected,
-  redirectAfterLogin,
-  swag,
+  middleware,
   getCurrencies,
   convertAmountToCurrency,
-  contractEncodeCall,
-  contractDecodeData,
-  removeTxFromStorage,
   checkAddress,
   chekAensName,
   isInt,
   stringifyForStorage,
   parseFromStorage,
   escapeCallParams,
-  addRejectedToken,
   contractCall,
-  checkContractAbiVersion,
   setContractInstance,
   getContractInstance,
   getAeppAccountPermission,

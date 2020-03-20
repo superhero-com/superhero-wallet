@@ -1,7 +1,8 @@
 import { uniqBy, flatten } from 'lodash-es';
+import BigNumber from 'bignumber.js';
 import * as types from './mutation-types';
 import * as popupMessages from '../popup/utils/popup-messages';
-import { convertToAE, stringifyForStorage, parseFromStorage } from '../popup/utils/helper';
+import { convertToAE, stringifyForStorage, parseFromStorage, aettosToAe } from '../popup/utils/helper';
 import { BACKEND_URL, DEFAULT_NETWORK } from '../popup/utils/constants';
 import router from '../popup/router/index';
 import { postMessage } from '../popup/utils/connection';
@@ -149,6 +150,8 @@ export default {
           case 'name_exists':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.USER_NETWORK_EXISTS_ERROR });
             break;
+          default:
+            break;
         }
         break;
       default:
@@ -219,6 +222,16 @@ export default {
     await browser.storage.local.set({ subaccounts: state.subaccounts.filter(s => s.publicKey) });
     commit(types.SET_NAMES, { names: Array.prototype.concat.apply([], res) });
   },
+  async fetchAuctionEntry({ state: { sdk } }, name) {
+    const { info, bids } = await sdk.middleware.getAuctionInfoByName(name);
+    return {
+      ...info,
+      bids: bids.map(({ tx }) => ({
+        ...tx,
+        nameFee: BigNumber(aettosToAe(tx.nameFee)),
+      })),
+    };
+  },
   async removePendingName({ commit, state }, { hash }) {
     let pending = state.pendingNames;
     pending = pending.filter(p => p.hash !== hash);
@@ -272,11 +285,10 @@ export default {
     let txs = [];
     if (pendingTxs && pendingTxs.length) {
       txs = pendingTxs.map(el => {
-        if (el.domain) el.domain = el.domain;
-        el.amount = parseFloat(el.amount).toFixed(3);
-        el.time = el.time;
-        el.amountCurrency = parseFloat(current.currencyRate ? el.amount * current.currencyRate : el.amount).toFixed(3);
-        return el;
+        const { time, domain } = el;
+        const amount = parseFloat(el.amount).toFixed(3);
+        const amountCurrency = parseFloat(current.currencyRate ? amount * current.currencyRate : amount).toFixed(3);
+        return { ...el, amount, time, amountCurrency, domain };
       });
     }
     commit('SET_PENDING_TXS', txs);
@@ -297,6 +309,7 @@ export default {
             return router.push({ name: 'send', params: { redirectstep: 3, successtx: mined } });
           }
         }
+        return false;
       });
     }
   },
@@ -313,7 +326,9 @@ export default {
     return update;
   },
   async checkBackupSeed() {
+    // eslint-disable-next-line camelcase
     const { backed_up_Seed } = await browser.storage.local.get('backed_up_Seed');
+    // eslint-disable-next-line camelcase
     if (!backed_up_Seed) return false;
 
     return true;

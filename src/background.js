@@ -64,6 +64,8 @@ if (process.env.IS_EXTENSION) {
         setPhishingUrl(urls);
         break;
       }
+      default:
+        break;
     }
 
     if (msg.from === 'content' && msg.type === 'readDom' && (msg.data.address || msg.data.chainName)) {
@@ -105,7 +107,7 @@ if (process.env.IS_EXTENSION) {
         const check = rpcWallet.sdkReady(() => {
           rpcWallet.addConnection(port);
         });
-        port.onDisconnect.addListener(p => {
+        port.onDisconnect.addListener(() => {
           clearInterval(check);
         });
       }

@@ -1,8 +1,8 @@
-if (navigator.userAgent.indexOf('Firefox') != -1) {
+if (navigator.userAgent.indexOf('Firefox') !== -1) {
   if (navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices
       .getUserMedia({ video: true })
-      .then(result => {
+      .then(() => {
         browser.storage.local.set({ firefoxCameraAllowed: true });
         alert('You have allowed the firefox camera. Now, try again scan QR code');
       })
@@ -12,14 +12,14 @@ if (navigator.userAgent.indexOf('Firefox') != -1) {
   } else {
     alert('Sorry, your browser does not support getUserMedia');
   }
-} else if (navigator.userAgent.indexOf('Chrome') != -1) {
+} else if (navigator.userAgent.indexOf('Chrome') !== -1) {
   if (navigator.getUserMedia) {
     navigator.getUserMedia(
       {
         video: true,
       },
 
-      localMediaStream => {
+      () => {
         alert('You have allowed the chrome camera. Now, try again scan QR code');
         window.close();
       },

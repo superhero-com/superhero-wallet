@@ -45,8 +45,6 @@ import BigNumber from 'bignumber.js';
 import { pick } from 'lodash-es';
 import { MAGNITUDE } from '../../utils/constants';
 import { convertToAE } from '../../utils/helper';
-import Input from '../components/Input';
-import Button from '../components/Button';
 
 export default {
   data() {
@@ -55,7 +53,6 @@ export default {
       expiration: 0,
       bids: null,
       highestBid: null,
-      expiration: 0,
       amount: '',
       MAGNITUDE,
       err: {
@@ -79,7 +76,7 @@ export default {
     const id = setInterval(() => this.updateAuctionEntry(), 3000);
     this.$once('hook:destroyed', () => clearInterval(id));
     this.$watch(
-      ({ name }) => this.auctionInfo.info.name,
+      () => this.auctionInfo.info.name,
       () => this.updateAuctionEntry(),
       { immediate: true }
     );
@@ -93,7 +90,7 @@ export default {
       this.highestBid = res.bids.map(({ nameFee }) => nameFee).reduce((a, b) => (a.isGreaterThan(b) ? a : b));
     },
     async nextStepBiddingHandler() {
-      if (this.amount == '') {
+      if (this.amount === '') {
         this.errtext.amount = 'Please add some amount';
         this.err.amount = true;
       } else if (this.amount <= this.highestBid.multipliedBy(1.05)) {

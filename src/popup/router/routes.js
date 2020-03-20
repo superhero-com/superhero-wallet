@@ -1,7 +1,5 @@
 import IndexComponent from './pages/Index';
 import AccountComponent from './pages/Account';
-import AccountPasswordComponent from './pages/AccountPassword';
-import SeedPhraseComponent from './pages/SeedPhrase';
 import PopupSignTransactionComponent from './pages/Popups/PopupSignTx';
 import PopupConnectComponent from './pages/Popups/PopupConnect';
 import PopupAskAccountsComponent from './pages/Popups/PopupAskAccounts';
@@ -40,18 +38,6 @@ export default [
     path: '/account',
     name: 'account',
     component: AccountComponent,
-  },
-  {
-    name: 'password',
-    path: '/password',
-    component: AccountPasswordComponent,
-    props: true,
-  },
-  {
-    name: 'seed',
-    path: '/seed',
-    component: SeedPhraseComponent,
-    props: true,
   },
   {
     name: 'sign',
