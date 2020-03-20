@@ -39,6 +39,7 @@ Vue.component('Button', Button);
 
 const router = new VueRouter({
   routes,
+  mode: process.env.PLATFORM === 'web' ? 'history' : 'hash',
 });
 
 let isFirstTransition = true;

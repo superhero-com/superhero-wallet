@@ -158,33 +158,22 @@ export default {
         break;
     }
   },
-  getTransactionsByPublicKey({ state }, payload) {
-    const sdk = state.sdk ? state.sdk : {};
-    if (!sdk.middleware) return [];
+  async fetchTransactions({ state }, { limit, page }) {
+    if (!state.middleware) return [];
     const { middlewareUrl } = state.network[state.current.network];
-    let limit = '';
-    let page = '';
-    let param = '';
-    const account = payload.publicKey;
-    if (payload.limit) {
-      limit = `?limit=${payload.limit}`;
+    const { publicKey } = state.account;
+    try {
+      const tx = await fetch(`${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`, {
+        method: 'GET',
+        mode: 'cors',
+      });
+      return tx.json();
+    } catch (e) {
+      return [];
     }
-    if (payload.page) {
-      page = `&page=${payload.page}`;
-    }
-    if (payload.param) {
-      param = `/${payload.param}`;
-    }
-    return fetch(`${middlewareUrl}/middleware/transactions/account/${account}${limit}${page}${param}`, {
-      method: 'GET',
-      mode: 'cors',
-    }).then(res => res.json());
   },
   updateLatestTransactions({ commit }, payload) {
     commit(types.UPDATE_LATEST_TRANSACTIONS, payload);
-  },
-  updateAllTransactions({ commit }, payload) {
-    commit(types.UPDATE_ALL_TRANSACTIONS, payload);
   },
   setAccountName({ commit }, payload) {
     commit(types.SET_ACCOUNT_NAME, payload);
@@ -193,7 +182,7 @@ export default {
     commit(types.INIT_SDK, payload);
   },
   async getRegisteredNames({ commit, state }) {
-    if (!state.sdk.middleware) return;
+    if (!state.middleware) return;
     const { middlewareUrl } = state.network[state.current.network];
     const res = await Promise.all(
       state.subaccounts.map(async ({ publicKey }, index) => {
@@ -211,7 +200,7 @@ export default {
             (async () => uniqBy(await (await fetch(`${middlewareUrl}/middleware/names/reverse/${publicKey}`)).json(), 'name'))(),
             (async () => {
               try {
-                return await state.sdk.middleware.getActiveNames({ owner: publicKey });
+                return await state.middleware.getActiveNames({ owner: publicKey });
               } catch (e) {}
               return [];
             })(),

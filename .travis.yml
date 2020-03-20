@@ -9,11 +9,9 @@ cache:
   npm: true
   directories:
     - ~/.cache
-jobs:
-  include:
-    - stage: Run linter
-      script: npm run lint
-    - stage: Install dependencies and build
-      script: npm ci && npm run build
-    - stage: Run tests
-      script: npm run test
+ 
+script:
+  - npm run lint -- --no-fix
+  - npm test
+  - npm run build
+

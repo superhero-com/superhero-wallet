@@ -39,6 +39,9 @@ export const getters = {
   transactions(state) {
     return state.transactions;
   },
+  pendingTransactions(state) {
+    return state.transactions.pending;
+  },
   wallet(state) {
     return state.wallet;
   },
@@ -51,6 +54,9 @@ export const getters = {
   },
   sdk(state) {
     return state.sdk;
+  },
+  middleware(state) {
+    return state.middleware;
   },
   tokenBalance(state) {
     return state.current.token !== 0 ? state.tokens[state.current.token].balance.toFixed(3) : state.balance.toFixed(3);
