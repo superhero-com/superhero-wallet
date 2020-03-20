@@ -3,14 +3,16 @@
     <ae-list class="spendTxDetailsList">
       <ae-list-item fill="neutral" class="flex-justify-between noBorder">
         <div class="flex flex-align-center accountFrom">
-          <ae-identicon :address="account.publicKey" />
+          <!-- <ae-identicon :address="account.publicKey" /> -->
+          <UserAvatar :address="account.publicKey" />
           <span class="spendAccountAddr">{{ activeAccountName }}</span>
         </div>
         <div class="arrowSeprator">
           <ae-icon name="left-more" />
         </div>
         <div class="flex flex-align-center accountTo" v-if="isAddressShow">
-          <ae-identicon :address="receiver" />
+          <!-- <ae-identicon :address="receiver" /> -->
+          <UserAvatar :address="receiver" />
           <ae-address :value="receiver" v-if="receiver" length="short" class="spendAccountAddr" data-cy="address-receiver" />
           <span v-if="!receiver" class="spendAccountAddr">{{ $t('pages.signTransaction.unknownAccount') }}</span>
         </div>
@@ -107,9 +109,10 @@ import { MAGNITUDE } from '../../../utils/constants';
 import Button from '../../components/Button';
 import AmountSend from '../../components/AmountSend';
 import getPopupProps from '../../../utils/getPopupProps';
+import UserAvatar from '../../components/UserAvatar';
 
 export default {
-  components: { Button, AmountSend },
+  components: { Button, AmountSend, UserAvatar },
   data() {
     return {
       props: {},

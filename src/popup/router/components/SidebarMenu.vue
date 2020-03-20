@@ -5,7 +5,7 @@
     </li>
     <li class="account-icon-holder">
       <div class="flex flex-align-center flex-justify-between">
-        <UserAvatar />
+        <UserAvatar :address="account.publicKey" />
         <div class="ml-8 mr-auto">
           <div class="f-14">{{ $t('pages.appVUE.mainAccount') }}</div>
           <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">{{ activeAccountName }}</div>

@@ -1,28 +1,35 @@
 <template>
-    <div>
-        <img :src="avatarUrl" />
-    </div>
+    <img :src="avatarUrl" class="user-avatar" :class="size"/>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import { BACKEND_URL } from '../../utils/constants';
 
 export default {
-  components: {
+  props: {
+    address: String,
+    size: String
   },
   data() {
     return {
     };
   },
   computed: {
-    ...mapGetters(['account']),
     avatarUrl() {
-      return `${BACKEND_URL}/profile/image/${this.account.publicKey}`
+      return `${BACKEND_URL}/profile/image/${this.address}`
     }
-  },
-  methods: {
-
   },
 };
 </script>
+
+<style scoped>
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+}
+.user-avatar.lg {
+  height: 4rem;
+  width: 4rem;
+}
+</style>
