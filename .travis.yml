@@ -11,6 +11,8 @@ cache:
     - ~/.cache
 jobs:
   include:
+    - stage: Run linter
+      script: npm run lint
     - stage: Install dependencies and build
       script: npm ci && npm run build
     - stage: Run tests

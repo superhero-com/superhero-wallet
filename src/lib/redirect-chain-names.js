@@ -24,6 +24,7 @@ export default {
 
         chrome.tabs.update({ url: q.toString() });
 
+        // eslint-disable-next-line consistent-return
         return { cancel: true };
       },
       {

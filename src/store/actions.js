@@ -1,7 +1,8 @@
 import { uniqBy, flatten } from 'lodash-es';
+import BigNumber from 'bignumber.js';
 import * as types from './mutation-types';
 import * as popupMessages from '../popup/utils/popup-messages';
-import { convertToAE, stringifyForStorage, parseFromStorage } from '../popup/utils/helper';
+import { convertToAE, stringifyForStorage, parseFromStorage, aettosToAe } from '../popup/utils/helper';
 import { BACKEND_URL, DEFAULT_NETWORK } from '../popup/utils/constants';
 import router from '../popup/router/index';
 import { postMessage } from '../popup/utils/connection';
@@ -232,6 +233,16 @@ export default {
     await browser.storage.local.set({ subaccounts: state.subaccounts.filter(s => s.publicKey) });
     commit(types.SET_NAMES, { names: Array.prototype.concat.apply([], res) });
   },
+  async fetchAuctionEntry({ state: { sdk } }, name) {
+    const { info, bids } = await sdk.middleware.getAuctionInfoByName(name);
+    return {
+      ...info,
+      bids: bids.map(({ tx }) => ({
+        ...tx,
+        nameFee: BigNumber(aettosToAe(tx.nameFee)),
+      })),
+    };
+  },
   async removePendingName({ commit, state }, { hash }) {
     let pending = state.pendingNames;
     pending = pending.filter(p => p.hash !== hash);
@@ -326,7 +337,9 @@ export default {
     return update;
   },
   async checkBackupSeed() {
+    // eslint-disable-next-line camelcase
     const { backed_up_Seed } = await browser.storage.local.get('backed_up_Seed');
+    // eslint-disable-next-line camelcase
     if (!backed_up_Seed) return false;
 
     return true;

@@ -87,7 +87,7 @@ import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { setTxInQueue } from '../../utils';
 import { MAGNITUDE, TX_TYPES, calculateFee } from '../../utils/constants';
-import { convertAmountToCurrency, removeTxFromStorage, checkAddress, chekAensName, aettosToAe, aeToAettos } from '../../utils/helper';
+import { convertAmountToCurrency, checkAddress, chekAensName, aettosToAe, aeToAettos } from '../../utils/helper';
 import Button from '../components/Button';
 
 export default {
@@ -331,9 +331,6 @@ export default {
               this.port.postMessage(this.errorTx);
             }
 
-            const list = await removeTxFromStorage(this.data.id);
-
-            browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
             setTimeout(() => {
               window.close();
             }, 1000);
@@ -469,27 +466,7 @@ export default {
       }
     },
     async cancelTransaction() {
-      const list = await removeTxFromStorage(this.data.id);
-      if (!this.data.popup) {
-        if (this.data.type === 'nameUpdate') {
-          this.$store.dispatch('removePendingName', { hash: this.data.tx.hash }).then(() => {
-            browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-            this.redirectInExtensionAfterAction();
-          });
-        } else {
-          browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-          this.redirectInExtensionAfterAction();
-        }
-      } else {
-        browser.storage.local.set({ pendingTransaction: { list } }).then(() => {
-          this.errorTx.error.message = 'Transaction rejected by user';
-          this.sending = true;
-          this.port.postMessage(this.errorTx);
-          setInterval(() => {
-            window.close();
-          }, 1000);
-        });
-      }
+      this.redirectInExtensionAfterAction();
     },
     redirectInExtensionAfterAction() {
       this.$store.commit('SET_AEPP_POPUP', false);
@@ -505,44 +482,15 @@ export default {
             setTxInQueue(result.hash);
             const txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${result.hash}`;
             const msg = `You have sent ${this.amount} AE`;
-            if (this.data.popup) {
-              const res = {
-                id: null,
-                jsonrpc: '2.0',
-                method: 'aeppMessage',
-                params: { ...result },
-              };
-              this.sending = true;
-              this.port.postMessage(res);
-              const list = await removeTxFromStorage(this.data.id);
-              browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-
-              setTimeout(() => {
-                window.close();
-              }, 1000);
-            } else {
-              this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(async () => {
-                this.$store.commit('SET_AEPP_POPUP', false);
-                const list = await removeTxFromStorage(this.data.id);
-                browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-                this.redirectInExtensionAfterAction();
-              });
-            }
+            this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(async () => {
+              this.$store.commit('SET_AEPP_POPUP', false);
+              this.redirectInExtensionAfterAction();
+            });
           }
         })
         .catch(async () => {
           setTxInQueue('error');
-          if (this.data.popup) {
-            this.sending = true;
-            this.port.postMessage(this.errorTx);
-            const list = await removeTxFromStorage(this.data.id);
-            browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-            setTimeout(() => {
-              window.close();
-            }, 1000);
-          } else {
-            this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
-          }
+          this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
           this.loading = false;
         });
     },
@@ -582,8 +530,6 @@ export default {
         this.sending = true;
         this.port.postMessage(this.errorTx);
       }
-      const list = await removeTxFromStorage(this.data.id);
-      browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
       setTimeout(() => {
         window.close();
       }, 1000);
@@ -618,21 +564,9 @@ export default {
         setTxInQueue('error');
         this.errorTx.error.message = typeof err.message !== 'undefined' ? err.message : err;
         this.sending = true;
-        if (this.data.popup) {
-          this.port.postMessage(this.errorTx);
-        } else {
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
-        }
+        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
       }
-      const list = await removeTxFromStorage(this.data.id);
-      browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-      if (this.data.popup) {
-        setInterval(() => {
-          window.close();
-        }, 1000);
-      } else {
-        this.redirectInExtensionAfterAction();
-      }
+      this.redirectInExtensionAfterAction();
     },
     async contractDeploy() {
       let deployed;
@@ -731,11 +665,6 @@ export default {
     },
     async nameUpdate() {
       try {
-        let options;
-        if (this.data.tx.options) {
-          options = { ...this.data.tx.options };
-        }
-        options = { ...options, fee: this.convertSelectedFee };
         const nameObject = await this.sdk.aensQuery(this.data.tx.name);
         let update;
         if (this.data.nameUpdateType === 'extend') {
@@ -818,8 +747,6 @@ export default {
         this.port.postMessage(this.errorTx);
       }
     }
-    const list = await removeTxFromStorage(this.data.id);
-    browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
   },
   beforeRouteUpdate(to, from, next) {
     next();

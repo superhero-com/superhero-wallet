@@ -154,28 +154,20 @@ export default {
     ...mapGetters(['current', 'popup', 'names', 'sdk', 'network', 'account']),
     auctions() {
       if (this.filterType === 'soonest') return this.activeAuctions;
-      if (this.filterType === 'length') return this.activeAuctions.sort((a, b) => a.name.length - b.name.length);
-      if (this.filterType === 'bid') return this.activeAuctions.sort((a, b) => a.winning_bid - b.winning_bid);
+      if (this.filterType === 'length') return this.activeAuctions.map(a => a).sort((a, b) => a.name.length - b.name.length);
+      if (this.filterType === 'bid') return this.activeAuctions.map(a => a).sort((a, b) => a.winning_bid - b.winning_bid);
       return null;
     },
     currentBid() {
       if (!this.bids) {
-        this.loading = true;
         return null;
       }
-
-      this.loading = false;
       return this.bids.reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b));
     },
     previousBids() {
-      console.log("here")
-      console.log(this.currentBid)
       if (!this.bids) {
-        this.loading = true;
         return null;
       }
-
-      this.loading = false;
       return this.bids.filter(bid => bid !== this.currentBid);
     },
   },
@@ -213,7 +205,7 @@ export default {
       return getAddressByNameEntry(name);
     },
     async updateAuctionEntry() {
-      const res = await this.$store.dispatch('names/fetchAuctionEntry', this.moreAuInfo.info.name);
+      const res = await this.$store.dispatch('fetchAuctionEntry', this.moreAuInfo.info.name);
       this.expiration = res.expiration;
       this.bids = res.bids;
     },
@@ -223,12 +215,7 @@ export default {
     moreAuctionInfo(key, info) {
       this.moreAuInfo.visible = true;
       this.moreAuInfo.key = key;
-      const exists = Object.keys(info).some(k => {
-        if (k === 'winning_bid') {
-          info[k] = convertToAE(info[k]);
-        }
-      });
-      this.moreAuInfo.info = info;
+      this.moreAuInfo.info = { ...info, winning_bid: convertToAE(info.winning_bid) };
     },
     async registerName() {
       this.name = this.name.trim();

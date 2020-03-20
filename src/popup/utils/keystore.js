@@ -30,9 +30,10 @@ function isBase64(str) {
 
 export function str2buf(str, enc) {
   if (!str || str.constructor !== String) return str;
-  if (!enc && isHex(str)) enc = 'hex';
-  if (!enc && isBase64(str)) enc = 'base64';
-  return Buffer.from(str, enc);
+  let type = enc;
+  if (!enc && isHex(str)) type = 'hex';
+  if (!enc && isBase64(str)) type = 'base64';
+  return Buffer.from(str, type);
 }
 
 export function getAddressFromPriv(secret) {

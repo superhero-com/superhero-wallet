@@ -7,7 +7,8 @@ export const aeToAettos = v => formatAmount(v, { denomination: AE_AMOUNT_FORMATS
 export const aettosToAe = v => formatAmount(v, { denomination: AE_AMOUNT_FORMATS.AETTOS, targetDenomination: AE_AMOUNT_FORMATS.AE });
 
 const shuffleArray = array => {
-  let currentIndex = array.length;
+  const shuffle = array;
+  let currentIndex = shuffle.length;
   let temporaryValue;
   let randomIndex;
 
@@ -18,12 +19,12 @@ const shuffleArray = array => {
     currentIndex -= 1;
 
     // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
+    temporaryValue = shuffle[currentIndex];
+    shuffle[currentIndex] = shuffle[randomIndex];
+    shuffle[randomIndex] = temporaryValue;
   }
 
-  return array;
+  return shuffle;
 };
 
 const convertToAE = balance => +(balance / 10 ** 18).toFixed(7);
@@ -181,20 +182,6 @@ const getCurrencies = async () => {
 
 const convertAmountToCurrency = (currency, amount) => currency * amount;
 
-const removeTxFromStorage = id =>
-  new Promise((resolve, reject) => {
-    browser.storage.local.get('pendingTransaction').then(data => {
-      browser.storage.local.remove('showAeppPopup').then(() => {
-        let list = {};
-        if (data.hasOwnProperty('pendingTransaction') && data.pendingTransaction.hasOwnProperty('list')) {
-          list = data.pendingTransaction.list;
-          delete list[id];
-        }
-        resolve(list);
-      });
-    });
-  });
-
 const checkAddress = value => Crypto.isAddressValid(value, 'ak') || Crypto.isAddressValid(value, 'ct') || Crypto.isAddressValid(value, 'ok');
 
 const isInt = n => n % 1 === 0;
@@ -333,11 +320,12 @@ const contractCall = async ({ instance, method, params = [], decode = false, asy
   } catch (e) {
     if (e.message.indexOf('wrong_abi_version') > -1) {
       instance.setOptions({ backend: 'aevm' });
-      return await contractCall({ instance, method, params, decode, async });
+      return contractCall({ instance, method, params, decode, async });
     }
     throw e.message;
   }
 
+  // eslint-disable-next-line no-nested-ternary
   return async ? (decode ? call.decodedResult : call) : params.length ? instance.methods[method](...params) : instance.methods[method]();
 };
 
@@ -345,7 +333,7 @@ const setContractInstance = async (tx, sdk, contractAddress = null) => {
   let contractInstance = false;
   try {
     let backend = 'fate';
-    if (typeof tx.abi_version !== 'undefined' && tx._abi_version !== 3) {
+    if (typeof tx.abi_version !== 'undefined' && tx.abi_version !== 3) {
       backend = 'aevm';
     }
     try {
@@ -385,6 +373,7 @@ export const getAllNetworks = async () => {
   return { ...userNetworks, ...networks };
 };
 
+// eslint-disable-next-line no-useless-escape
 const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/[\""]/g, '');
 
 const addTipAmount = async amount => {
@@ -460,7 +449,6 @@ export {
   middleware,
   getCurrencies,
   convertAmountToCurrency,
-  removeTxFromStorage,
   checkAddress,
   chekAensName,
   isInt,

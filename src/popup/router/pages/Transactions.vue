@@ -60,7 +60,6 @@ export default {
       return this.currentCount + 1 <= this.totalTransactions;
     },
     publicKey() {
-      this.loading = true;
       return this.account.publicKey;
     },
     watchToken() {
@@ -118,8 +117,8 @@ export default {
           transactions.then(res => {
             if (res.length !== 0) {
               const newTrans = res.filter(tr => {
-                const found = this.transactions.all.find(t => t.hash === tr.hash);
-                if (typeof found === 'undefined') return tr;
+                if (!this.transactions.all.find(t => t.hash === tr.hash)) return tr;
+                return null;
               });
               this.$store.dispatch('updateAllTransactions', { new: false, transactions: newTrans });
             } else {
@@ -131,8 +130,8 @@ export default {
           const transactions = this.$store.dispatch('getTransactionsByPublicKey', { publicKey: this.account.publicKey, limit });
           transactions.then(res => {
             const newTrans = res.filter(tr => {
-              const found = this.transactions.all.find(t => t.hash === tr.hash);
-              if (typeof found === 'undefined') return tr;
+              if (!this.transactions.all.find(t => t.hash === tr.hash)) return tr;
+              return null;
             });
             newTrans.forEach(element => {
               if (typeof this.newTr.find(tr => tr.hash === element.hash) === 'undefined') {
@@ -156,7 +155,6 @@ export default {
     },
     loadMore() {
       this.mergeNewTransactions().then(() => {
-        console.log("a")
         this.page += 1;
         this.getTransactions('load');
       });
