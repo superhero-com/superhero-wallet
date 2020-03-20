@@ -57,20 +57,20 @@ export default {
           this.href = href;
         }
       }
-      if (hostname != '') {
-      }
     }
   },
   methods: {
-    continueHost(e) {
-      if (this.href != '' && this.href != null) {
+    continueHost() {
+      if (this.href !== '' && this.href != null) {
         browser.runtime.sendMessage({
           method: 'setPhishingUrl',
           params: {
             hostname: this.hostname,
           },
         });
-        setInterval(() => (window.location.href = this.href), 500);
+        setInterval(() => {
+          window.location.href = this.href;
+        }, 500);
       }
     },
   },

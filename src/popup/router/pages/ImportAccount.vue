@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { generateMnemonic, mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
+import { mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
 import Textarea from '../components/Textarea';
 
 export default {

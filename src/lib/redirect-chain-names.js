@@ -9,9 +9,6 @@ export default {
   supportedDomain(domain) {
     return domain.endsWith('.chain');
   },
-  async getAddressFromChainName(name) {
-    const pubKeys = await getAddressFromChainName([name]);
-  },
   setListener() {
     browser.webRequest.onBeforeRequest.addListener(
       async requestDetails => {
@@ -27,6 +24,7 @@ export default {
 
         chrome.tabs.update({ url: q.toString() });
 
+        // eslint-disable-next-line consistent-return
         return { cancel: true };
       },
       {
@@ -38,7 +36,7 @@ export default {
 
     browser.webRequest.onBeforeRequest.addListener(
       requestDetails => {
-        chrome.tabs.update({ url: '/redirect/index.html' }, async tab => {
+        chrome.tabs.update({ url: '/redirect/index.html' }, async () => {
           try {
             const url = new URL(requestDetails.url);
             const host = url.hostname;

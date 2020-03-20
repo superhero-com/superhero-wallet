@@ -46,16 +46,13 @@ export default {
     ...mapGetters(['current', 'popup', 'names', 'sdk']),
   },
   created() {
-    if (this.current.language == undefined) {
+    if (!this.current.language) {
       this.current.language = 'en';
     }
   },
   methods: {
     toggleDropdown(event, parentClass) {
-      if (typeof parentClass === 'undefined') {
-        parentClass = '.language-settings';
-      }
-      const dropdownParent = event.target.closest(parentClass);
+      const dropdownParent = event.target.closest(!parentClass ? '.language-settings' : parentClass);
       this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
     },
     async switchLanguage(languageChoose) {
