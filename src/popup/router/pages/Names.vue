@@ -151,7 +151,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['current', 'popup', 'names', 'sdk', 'network', 'account']),
+    ...mapGetters(['current', 'popup', 'names', 'sdk', 'network', 'account', 'middleware']),
     auctions() {
       if (this.filterType == 'soonest') return this.activeAuctions;
       if (this.filterType == 'length') return this.activeAuctions.sort((a, b) => a.name.length - b.name.length);
@@ -191,7 +191,7 @@ export default {
   created() {
     this.loading = true;
     this.polling = setInterval(async () => {
-      if (!this.sdk.middleware) {
+      if (!this.middleware) {
         this.loading = false;
         return;
       }

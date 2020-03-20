@@ -50,7 +50,7 @@ export default {
   },
   methods: {
     async updateTransactions() {
-      const transactions = await this.$store.dispatch('getTransactionsByPublicKey', { publicKey: this.account.publicKey, limit: 3 });
+      const transactions = await this.$store.dispatch('fetchTransactions', { limit: 3, page: 1 });
       this.loading = false;
       this.$store.dispatch('updateLatestTransactions', transactions);
     },
