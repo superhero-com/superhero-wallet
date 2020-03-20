@@ -49,6 +49,7 @@ module.exports = {
     "prefer-destructuring": "warn",
     "class-methods-use-this": "warn",
     "import/no-cycle": "warn",
-    "no-empty": "warn"
+    "no-empty": "warn",
+    "no-restricted-globals": "warn"
   }
 }

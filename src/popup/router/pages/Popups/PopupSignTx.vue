@@ -167,7 +167,7 @@ export default {
   watch: {
     'tx.amount': function(newVal) {
       this.amountError = false;
-      if (Number.isNaN(newVal)) {
+      if (isNaN(newVal)) {
         this.amountError = true;
       }
     },
