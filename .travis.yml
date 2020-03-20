@@ -9,9 +9,6 @@ cache:
   npm: true
   directories:
     - ~/.cache
-jobs:
-  include:
-    - stage: Install dependencies and build
-      script: npm ci && npm run build
-    - stage: Run tests
-      script: npm run test
+script:
+  - npm test
+  - npm run build
