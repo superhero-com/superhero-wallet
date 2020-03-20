@@ -34,7 +34,7 @@ export default new Vuex.Store({
       pending: [],
     },
     sdk: null,
-    middleware:null,
+    middleware: null,
     aeppPopup: false,
     ledgerApi: null,
     txAdvancedMode: false,
