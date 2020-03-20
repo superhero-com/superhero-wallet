@@ -32,11 +32,10 @@ export default new Vuex.Store({
     isLoggedIn: false,
     transactions: {
       latest: [],
-      all: [],
-      new: [],
       pending: [],
     },
     sdk: null,
+    middleware:null,
     aeppPopup: false,
     ledgerApi: null,
     txAdvancedMode: false,
