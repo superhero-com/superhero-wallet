@@ -1,8 +1,8 @@
 import { setInterval } from 'timers';
+import iconUrl from './icons/icon_48.png';
+import { getSDK } from './lib/background-utils';
 import { NOTIFICATION_METHODS } from './popup/utils/constants';
 import { detectBrowser } from './popup/utils/helper';
-import { getSDK } from './lib/background-utils';
-import iconUrl from './icons/icon_48.png';
 
 global.browser = require('webextension-polyfill');
 
@@ -44,7 +44,7 @@ export default class Notification {
         if (tx !== 'error' && tx) {
           await this.client.poll(tx);
           const url = `${this.network.explorerUrl}/transactions/${tx}`;
-          await this.sendNoti({ title: 'Transaction ready', message: `You can expore your transaction by clicking button below`, contextMessage: url, error: false });
+          await this.sendNoti({ title: 'Transaction ready', message: `You can explore your transaction by clicking button below`, contextMessage: url, error: false });
         } else {
           await this.sendNoti({ title: 'Transaction error', message: 'Transaction cannot be processed ', error: true });
         }
