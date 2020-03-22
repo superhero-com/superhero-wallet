@@ -341,11 +341,14 @@ Cypress.Commands.add('openNetworks', (route) => {
 
 Cypress.Commands.add('enterNetworkDetails', (network, url, middleware) => {
   cy
-  .get('[data-cy=network]')
+  .get('[data-cy=network] input')
+  .clear()
   .type(network)
-  .get('[data-cy=url]')
+  .get('[data-cy=url] input')
+  .clear()
   .type(url)
-  .get('[data-cy=middleware]')
+  .get('[data-cy=middleware] input')
+  .clear()
   .type(middleware)
 })
 

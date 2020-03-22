@@ -8,13 +8,9 @@
           <p class="f-12 url" data-cy="network-url"><b>Url:</b> {{ n.url }}</p>
           <p class="f-12 url" data-cy="network-middleware"><b>MIddleware:</b> {{ n.middlewareUrl }}</p>
         </div>
-        <ae-dropdown direction="right" v-if="!n.system">
+        <ae-dropdown direction="right" v-if="!n.system" data-cy="more">
           <ae-icon name="more" size="20px" slot="button" />
-          <li @click="setNetworkEdit(n, index)">
-            <ae-icon name="edit" />
-            Edit
-          </li>
-          <li @click="deleteNetwork(n, index)">
+          <li @click="deleteNetwork(n, index)" data-cy="delete">
             <ae-icon name="delete" />
             Delete
           </li>
