@@ -78,6 +78,8 @@ export default {
       minCallFee: null,
       editUrl: false,
       verifiedUrls: [],
+      IS_EXTENSION: process.env.IS_EXTENSION,
+      RUNNING_IN_TESTS: process.env.RUNNING_IN_TESTS,
     };
   },
   computed: {
@@ -123,6 +125,11 @@ export default {
       if (tab) {
         this.url = tab.url;
       }
+    }
+    // if mobile
+    if (!this.IS_EXTENSION && !this.RUNNING_IN_TESTS) {
+      this.url = '';
+      this.editUrl = true;
     }
     try {
       this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
