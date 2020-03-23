@@ -3,11 +3,9 @@
     <ae-list class="noti-list">
       <ae-list-item fill="neutral" v-for="(noti, i) in notifications" :key="i" class="noti">
         <img src="../../../icons/icon_48.png" />
-        <span>
-          <Component :is="noti.route ? 'RouterLink' : 'span'" :to="noti.route">
-            {{ noti.content }}
-          </Component>
-        </span>
+        <Component :is="noti.route ? 'RouterLink' : 'span'" :to="noti.route">
+          {{ noti.content }}
+        </Component>
       </ae-list-item>
     </ae-list>
   </div>
