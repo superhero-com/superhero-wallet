@@ -29,11 +29,14 @@ describe('Test cases for menu sidebar component', () => {
       .menuShould('not.be.visible');
   });
 
-  it('Have account identicon', () => {
-    cy.openMenu()
-      .get('.account-icon')
-      .should('be.visible');
-  });
+  it("Have account identicon", () => {
+    cy
+    .openMenu()
+    .get('.user-avatar')
+    .should('be.visible')
+  })
+  
+  it("Menu links have correct href", () => {
 
   it('Menu links have correct href', () => {
     cy.openMenu()

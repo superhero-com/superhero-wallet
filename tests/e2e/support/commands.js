@@ -245,41 +245,98 @@ Cypress.Commands.add('pendingTx', (tx = {}) => {
 });
 
 Cypress.Commands.add('enterAmountSend', (amount = 0) => {
-  cy.get('[data-cy=input-number]')
-    .clear()
-    .type(amount)
-    .wait(1000);
-});
+  cy
+  .get('[data-cy=input-number]')
+  .clear()
+  .type(amount)
+  .wait(1000)
+})
 
-Cypress.Commands.add('goBack', () => {
-  cy.get('[data-cy=back-arrow]').click();
-});
 
-Cypress.Commands.add('enterAddress', address => {
-  cy.get('[data-cy=address]')
-    .clear()
-    .type(address)
-    .wait(1000);
-});
+Cypress.Commands.add('goBack', (amount = 0) => {
+  cy
+  .get('[data-cy=back-arrow]')
+  .click()
+})
 
-Cypress.Commands.add(
-  'storageSet',
-  (key, value) =>
-    new Cypress.Promise(async resolve => {
-      await browser.storage.local.set({ [key]: value });
-      resolve();
-    })
-);
+Cypress.Commands.add('enterAddress', (address) => {
+  cy
+  .get('[data-cy=address]')
+  .clear()
+  .type(address)
+  .wait(1000)
+})
 
-Cypress.Commands.add(
-  'setPendingTx',
-  tx =>
-    new Cypress.Promise(async resolve => {
-      await setPendingTx(tx);
-      resolve();
-    })
-);
+Cypress.Commands.add('storageSet', (key, value) => {
+  return new Cypress.Promise(async (resolve, reject) => {
+    await browser.storage.local.set({ [key]: value })
+    resolve()
+  })
+})
 
-Cypress.Commands.add('urlEquals', route => {
-  cy.url().should('eq', `${Cypress.config().popupUrl}/popup#${route}`);
-});
+
+Cypress.Commands.add('setPendingTx', (tx) => {
+  return new Cypress.Promise(async (resolve, reject) => {
+    await setPendingTx(tx)
+    resolve()
+  })
+})
+
+Cypress.Commands.add('urlEquals', (route) => {
+  cy
+  .url()
+  .should('eq', `${Cypress.config().popupUrl}/popup#${route}`)
+})
+
+
+Cypress.Commands.add('openNetworks', (route) => {
+  cy
+  .openMenu()
+  .toggleDropdown()
+  .get('[data-cy=networks]')
+  .click()
+  .urlEquals('/networks')
+})
+
+Cypress.Commands.add('enterNetworkDetails', (network, url, middleware) => {
+  cy
+  .get('[data-cy=network] input')
+  .clear()
+  .type(network)
+  .get('[data-cy=url] input')
+  .clear()
+  .type(url)
+  .get('[data-cy=middleware] input')
+  .clear()
+  .type(middleware)
+})
+
+Cypress.Commands.add('addNetwork', (network, url, middleware) => {
+  cy
+  .get('[data-cy=to-add]')
+  .click()
+  .get('[data-cy=connect]')
+  .should('be.visible')
+  .buttonShouldBeDisabled('[data-cy=connect]')
+  .enterNetworkDetails(network, url, middleware)
+  .get('[data-cy=connect]')
+  .click()
+  .get('[data-cy=networks]')
+  .should('be.visible')
+  .get('[data-cy=network-name]')
+  .should('contain', network)
+  .get('[data-cy=network-url]')
+  .should('contain', url)
+  .get('[data-cy=network-middleware]')
+  .should('contain', middleware)
+})
+
+Cypress.Commands.add('selectNetwork', (network, url, middleware) => {
+  cy
+  .addNetwork(network, url, middleware)
+  .get('[data-cy=networks] .network-row')
+  .eq(1)
+  .find('.checkmark')
+  .click()
+  .should('have.class', 'checked')
+})

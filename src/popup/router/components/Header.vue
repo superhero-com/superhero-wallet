@@ -6,7 +6,7 @@
 
       <div class="title">
         <span v-if="title">{{ $t(`pages.titles.${title}`) }}</span>
-        <span v-else>{{ $t('pages.appVUE.coronaWallet') }}</span>
+        <span v-else>{{ $t('pages.appVUE.walletName') }}</span>
       </div>
 
       <div v-if="isLoggedIn">
