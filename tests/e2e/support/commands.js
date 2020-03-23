@@ -328,3 +328,56 @@ Cypress.Commands.add('urlEquals', (route) => {
   .url()
   .should('eq', `${Cypress.config().popupUrl}/popup#${route}`)
 })
+
+
+Cypress.Commands.add('openNetworks', (route) => {
+  cy
+  .openMenu()
+  .toggleDropdown()
+  .get('[data-cy=networks]')
+  .click()
+  .urlEquals('/networks')
+})
+
+Cypress.Commands.add('enterNetworkDetails', (network, url, middleware) => {
+  cy
+  .get('[data-cy=network] input')
+  .clear()
+  .type(network)
+  .get('[data-cy=url] input')
+  .clear()
+  .type(url)
+  .get('[data-cy=middleware] input')
+  .clear()
+  .type(middleware)
+})
+
+Cypress.Commands.add('addNetwork', (network, url, middleware) => {
+  cy
+  .get('[data-cy=to-add]')
+  .click()
+  .get('[data-cy=connect]')
+  .should('be.visible')
+  .buttonShouldBeDisabled('[data-cy=connect]')
+  .enterNetworkDetails(network, url, middleware)
+  .get('[data-cy=connect]')
+  .click()
+  .get('[data-cy=networks]')
+  .should('be.visible')
+  .get('[data-cy=network-name]')
+  .should('contain', network)
+  .get('[data-cy=network-url]')
+  .should('contain', url)
+  .get('[data-cy=network-middleware]')
+  .should('contain', middleware)
+})
+
+Cypress.Commands.add('selectNetwork', (network, url, middleware) => {
+  cy
+  .addNetwork(network, url, middleware)
+  .get('[data-cy=networks] .network-row')
+  .eq(1)
+  .find('.checkmark')
+  .click()
+  .should('have.class', 'checked')
+})
