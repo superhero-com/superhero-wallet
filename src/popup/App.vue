@@ -58,7 +58,7 @@ export default {
     this.getCurrencies();
 
     if ((await this.$store.dispatch('checkExtensionUpdate')) && !process.env.RUNNING_IN_TESTS) {
-      this.$store.commit('ADD_NOTIFICATION', { 
+      this.$store.commit('ADD_NOTIFICATION', {
         title: '',
         content: this.$t('pages.account.updateExtension'),
         route: '',
@@ -68,7 +68,7 @@ export default {
       this.$store.commit('ADD_NOTIFICATION', {
         title: '',
         content: `${this.$t('pages.account.youNeedTo')} ${this.$t('pages.account.backup')} ${this.$t('pages.account.yourSeedPhrase')}`,
-        route: '/securitySettings'
+        route: '/securitySettings',
       });
     }
   },
