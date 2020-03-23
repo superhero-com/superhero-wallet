@@ -214,26 +214,25 @@ Cypress.Commands.add('toConfirmTip', (tip = {}) => {
 });
 
 Cypress.Commands.add('sendTip', (tip = {}) => {
-  cy.toConfirmTip({ ...tip })
-    .get('[data-cy=confirm-tip]')
-    .click()
-    .get('[data-cy=balance-info]')
-    .should('be.visible')
-    .url()
-    .should('eq', `${Cypress.config().popupUrl}/popup#/account`)
-    .get('[data-cy=pending-txs]')
-    .should('be.visible')
-    .get('[data-cy=success-tip]')
-    .should('be.visible')
-    .url()
-    .should('eq', `${Cypress.config().popupUrl}/popup#/success-tip`)
-    .get('[data-cy=tip-amount]')
-    .should('contain', tip.amount)
-    .get('[data-cy=tip-url]')
-    .should('contain', tip.url);
-});
-
-Cypress.Commands.add('pendingTxItem', () => cy.get('[data-cy=pending-txs] li').eq(0));
+  cy
+  .toConfirmTip({ ...tip })
+  .get('[data-cy=confirm-tip]')
+  .click()
+  .get('[data-cy=balance-info]')
+  .should('be.visible')
+  .url()
+  .should('eq', `${Cypress.config().popupUrl}/popup#/account`)
+  .get('[data-cy=pending-txs]')
+  .should('be.visible')
+  .get('[data-cy=success-tip]', { timeout: 60000 })
+  .should('be.visible')
+  .url()
+  .should('eq', `${Cypress.config().popupUrl}/popup#/success-tip`)
+  .get('[data-cy=tip-amount]')
+  .should('contain',tip.amount)
+  .get('[data-cy=tip-url]')
+  .should('contain',tip.url)
+})
 
 Cypress.Commands.add('pendingTx', (tx = {}) => {
   cy.pendingTxItem().then(txItem => {

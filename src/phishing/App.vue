@@ -41,20 +41,16 @@ export default {
     const uri = window.location.href.split('#');
     if (typeof uri[1] !== 'undefined') {
       const url = uri[1].split('&');
-      let hostname = '';
-      let href = '';
       if (typeof url[0] !== 'undefined') {
         const host = url[0].split('=');
         if (typeof host[1] !== 'undefined') {
-          hostname = host[1];
-          this.hostname = hostname;
+          [, this.hostname] = host;
         }
       }
       if (typeof url[1] !== 'undefined') {
         const host = url[1].split('=');
         if (typeof host[1] !== 'undefined') {
-          href = host[1];
-          this.href = href;
+          [, this.href] = host;
         }
       }
     }

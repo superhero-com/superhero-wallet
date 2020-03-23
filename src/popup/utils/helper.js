@@ -29,23 +29,7 @@ const shuffleArray = array => {
 
 const convertToAE = balance => +(balance / 10 ** 18).toFixed(7);
 
-const extractHostName = url => {
-  let hostname;
-  // find & remove protocol (http, ftp, etc.) and get hostname
-
-  if (url.indexOf('//') > -1) {
-    hostname = url.split('/')[2];
-  } else {
-    hostname = url.split('/')[0];
-  }
-
-  // find & remove port number
-  hostname = hostname.split(':')[0];
-  // find & remove "?"
-  hostname = hostname.split('?')[0];
-
-  return hostname;
-};
+const extractHostName = url => new URL(url.includes('://') ? url : `http://${url}`).hostname;
 
 const detectBrowser = () => {
   if ((navigator.userAgent.indexOf('Opera') || navigator.userAgent.indexOf('OPR')) !== -1) {
@@ -114,10 +98,7 @@ const getAeppAccountPermission = async (host, account) => {
 
 const setPermissionForAccount = async (host, account) => {
   const { connectedAepps } = await browser.storage.local.get('connectedAepps');
-  let list = [];
-  if (connectedAepps && connectedAepps.list) {
-    list = connectedAepps.list;
-  }
+  const list = (connectedAepps && connectedAepps.list) || [];
 
   if (list.length && list.find(l => l.host === host)) {
     const hst = list.find(h => h.host === host);
@@ -386,19 +367,16 @@ const resetTippedAmount = () => browser.storage.local.remove('tippedAmount');
 const getTippedAmount = async () => (await browser.storage.local.get('tippedAmount')).tippedAmount;
 
 const getContractCallInfo = transaction => {
-  let isTip = false;
-  let contractId = null;
-  let amount = 0;
+  if (!transaction) return { isTip: false, contractId: null, amount: 0 };
+
   const { tipContract } = networks[DEFAULT_NETWORK];
+  const { tx } = TxBuilder.unpackTx(transaction);
 
-  if (transaction) {
-    const { tx } = TxBuilder.unpackTx(transaction);
-    amount = convertToAE(tx.amount);
-    contractId = tx.contractId;
-    if (contractId === tipContract) isTip = true;
-  }
-
-  return { isTip, contractId, amount };
+  return {
+    isTip: tx.contractId === tipContract,
+    contractId: tx.contractId,
+    amount: convertToAE(tx.amount),
+  };
 };
 
 const checkHashType = async hash => {

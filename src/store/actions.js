@@ -4,7 +4,6 @@ import * as types from './mutation-types';
 import * as popupMessages from '../popup/utils/popup-messages';
 import { convertToAE, stringifyForStorage, parseFromStorage, aettosToAe } from '../popup/utils/helper';
 import { BACKEND_URL, DEFAULT_NETWORK } from '../popup/utils/constants';
-import router from '../popup/router/index';
 import { postMessage } from '../popup/utils/connection';
 
 export default {
@@ -292,26 +291,6 @@ export default {
       });
     }
     commit('SET_PENDING_TXS', txs);
-  },
-  async checkPendingTxMined({ commit, state: { sdk } }) {
-    const { pendingTxs } = await browser.storage.local.get('pendingTxs');
-    if (pendingTxs && pendingTxs.length) {
-      pendingTxs.forEach(async ({ hash, type, amount, domain }) => {
-        const mined = await sdk.poll(hash);
-        if (mined) {
-          const pending = pendingTxs.filter(p => p.hash !== hash);
-          browser.storage.local.set({ pendingTxs: pending });
-          commit('SET_PENDING_TXS', pending);
-          if (type === 'tip') {
-            return router.push({ name: 'success-tip', params: { amount, domain } });
-          }
-          if (type === 'spend') {
-            return router.push({ name: 'send', params: { redirectstep: 3, successtx: mined } });
-          }
-        }
-        return false;
-      });
-    }
   },
   async checkExtensionUpdate({ state: { network } }) {
     const { tipContract } = network[DEFAULT_NETWORK];

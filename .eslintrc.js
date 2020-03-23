@@ -46,9 +46,7 @@ module.exports = {
     'import/prefer-default-export': 'off',
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    "prefer-destructuring": "warn",
     "class-methods-use-this": "warn",
-    "import/no-cycle": "warn",
     "no-empty": "warn",
     "no-restricted-globals": "warn"
   }
