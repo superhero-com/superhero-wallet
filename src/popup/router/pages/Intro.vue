@@ -63,7 +63,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
 import Claim from '../../../icons/claim.svg?vue-component';
 import Heart from '../../../icons/heart.svg?vue-component';
@@ -78,9 +77,6 @@ export default {
     Button,
     LeftArrow,
     RightArrow,
-  },
-  computed: {
-    ...mapGetters(['isLoggedIn']),
   },
   data() {
     return {
