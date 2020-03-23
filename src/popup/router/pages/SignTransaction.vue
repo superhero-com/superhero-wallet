@@ -367,7 +367,7 @@ export default {
             } else if (this.data.type === 'txSign') {
               let recipientId;
               if (this.data.tx.recipientId.substring(0, 3) === 'ak_') {
-                recipientId = this.data.tx.recipientId;
+                recipientId = this.data.tx.recipientId; // eslint-disable-line prefer-destructuring
               } else {
                 try {
                   const address = await this.sdk.api.getNameEntryByName(this.data.tx.recipientId);
