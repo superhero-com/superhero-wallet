@@ -89,7 +89,7 @@ import { setTxInQueue } from '../../utils';
 import { MAGNITUDE, TX_TYPES, calculateFee } from '../../utils/constants';
 import { convertAmountToCurrency, checkAddress, chekAensName, aettosToAe, aeToAettos } from '../../utils/helper';
 import Button from '../components/Button';
-import UserAvatar from '../components/UserAvatar'
+import UserAvatar from '../components/UserAvatar';
 
 export default {
   components: {

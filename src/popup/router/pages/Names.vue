@@ -13,7 +13,6 @@
         <hr />
         <ae-list v-if="registeredNames.length">
           <ae-list-item fill="neutral" v-for="(name, key) in registeredNames" :key="key">
-            <!-- <ae-identicon v-bind:address="name.owner" size="base" /> -->
             <UserAvatar :address="name.owner" />
             <div style="width:100%;" class="text-left ml-10">
               <div class="">{{ name.name }}</div>
@@ -48,7 +47,6 @@
 
         <ae-list v-if="!moreAuInfo.visible && activeAuctions != null">
           <ae-list-item class="singleAuction" fill="neutral" v-for="(info, key) in auctions" :key="key" @click="moreAuctionInfo(key, info)">
-            <!-- <ae-identicon class="subAccountIcon" v-bind:address="info.winning_bidder" size="base" /> -->
             <UserAvatar class="subAccountIcon" :address="info.winning_bidde" />
             <div class="auctionInfo">
               <div class="name">{{ info.name }}</div>
@@ -68,7 +66,6 @@
             <hr />
             <span>{{ $t('pages.namingSystemPage.currentBid') }}</span>
             <ae-list-item style="border:none" fill="neutral">
-              <!-- <ae-identicon class="subAccountIcon" v-bind:address="moreAuInfo.info.winning_bidder" size="base" /> -->
               <UserAvatar class="subAccountIcon" :address="moreAuInfo.info.winning_bidder" />
               <div class="auctionInfo">
                 <div class="name">{{ moreAuInfo.info.winning_bid.toFixed(3) }} {{ $t('pages.appVUE.aeid') }}</div>
@@ -81,7 +78,6 @@
             <span>{{ $t('pages.namingSystemPage.previousBids') }}</span>
             <div v-if="previousBids">
               <ae-list-item v-for="(bid, idx) in previousBids" v-bind:key="idx" style="border:none" fill="neutral">
-                <!-- <ae-identicon class="subAccountIcon" v-bind:address="bid.accountId" size="base" /> -->
                 <UserAvatar class="subAccountIcon" :address="bid.accountId" />
                 <div class="auctionInfo">
                   <div class="name">{{ bid.nameFee.toFixed(3) }} AE</div>

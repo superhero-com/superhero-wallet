@@ -1,5 +1,5 @@
 <template>
-    <img :src="avatarUrl" class="user-avatar" :class="size"/>
+  <img :src="avatarUrl" class="user-avatar" :class="size" />
 </template>
 
 <script>
@@ -8,16 +8,12 @@ import { BACKEND_URL } from '../../utils/constants';
 export default {
   props: {
     address: String,
-    size: String
-  },
-  data() {
-    return {
-    };
+    size: String,
   },
   computed: {
     avatarUrl() {
-      return `${BACKEND_URL}/profile/image/${this.address}`
-    }
+      return `${BACKEND_URL}/profile/image/${this.address}`;
+    },
   },
 };
 </script>

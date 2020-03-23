@@ -3,7 +3,6 @@
     <ae-list class="spendTxDetailsList">
       <ae-list-item fill="neutral" class="flex-justify-between noBorder">
         <div class="flex flex-align-center accountFrom">
-          <!-- <ae-identicon :address="account.publicKey" /> -->
           <UserAvatar :address="account.publicKey" />
           <span class="spendAccountAddr">{{ activeAccountName }}</span>
         </div>
@@ -11,7 +10,6 @@
           <ae-icon name="left-more" />
         </div>
         <div class="flex flex-align-center accountTo" v-if="isAddressShow">
-          <!-- <ae-identicon :address="receiver" /> -->
           <UserAvatar :address="receiver" />
           <ae-address :value="receiver" v-if="receiver" length="short" class="spendAccountAddr" data-cy="address-receiver" />
           <span v-if="!receiver" class="spendAccountAddr">{{ $t('pages.signTransaction.unknownAccount') }}</span>
