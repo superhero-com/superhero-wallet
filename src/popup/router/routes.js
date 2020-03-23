@@ -33,6 +33,8 @@ export default [
     meta: {
       title: '',
       navigation: false,
+      ifNotAuthOnly: true,
+      notPersist: true,
     },
   },
   {
@@ -45,30 +47,45 @@ export default [
     path: '/sign-transaction/:type?',
     component: SignTransactionComponent,
     props: true,
+    meta: {
+      notPersist: true,
+    },
   },
   {
     name: 'popup-sign-tx',
     path: '/popup-sign-tx',
     component: PopupSignTransactionComponent,
     props: true,
+    meta: {
+      notPersist: true,
+    },
   },
   {
     name: 'connect',
     path: '/connect',
     component: PopupConnectComponent,
     props: true,
+    meta: {
+      notPersist: true,
+    },
   },
   {
     name: 'ask-accounts',
     path: '/ask-accounts',
     component: PopupAskAccountsComponent,
     props: true,
+    meta: {
+      notPersist: true,
+    },
   },
   {
     name: 'message-sign',
     path: '/message-sign',
     component: PopupMessageSignComponent,
     props: true,
+    meta: {
+      notPersist: true,
+    },
   },
   {
     path: '/settings',
@@ -119,6 +136,7 @@ export default [
     component: QrCodeReader,
     meta: {
       title: 'scanQr',
+      notPersist: true,
     },
   },
   {
@@ -126,6 +144,7 @@ export default [
     component: TermsOfService,
     meta: {
       title: 'terms',
+      ifNotAuth: true,
     },
   },
   {
@@ -140,11 +159,16 @@ export default [
     component: ImportAccount,
     meta: {
       title: 'importAccount',
+      ifNotAuthOnly: true,
     },
   },
   {
     path: '/intro',
     component: IntroComponent,
+    meta: {
+      ifNotAuthOnly: true,
+      notPersist: true,
+    },
   },
 
   {
@@ -177,6 +201,7 @@ export default [
     props: true,
     meta: {
       title: 'send',
+      notPersist: true,
     },
   },
   {
@@ -184,6 +209,7 @@ export default [
     component: NotificationsPage,
     meta: {
       title: 'notifications',
+      notPersist: true,
     },
   },
   {
@@ -200,6 +226,7 @@ export default [
     props: true,
     meta: {
       title: 'bidding',
+      notPersist: true,
     },
   },
   {
@@ -214,5 +241,8 @@ export default [
     name: 'not-found',
     path: '*',
     component: NotFound,
+    meta: {
+      ifNotAuth: true,
+    },
   },
 ];

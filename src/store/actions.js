@@ -277,7 +277,6 @@ export default {
     await dispatch('setSubAccounts', sub);
     commit('UPDATE_ACCOUNT', keypair);
     commit('SWITCH_LOGGED_IN', true);
-    // router.push('/account');
   },
   async getPendingTxs({ state: { current }, commit }) {
     const { pendingTxs } = await browser.storage.local.get('pendingTxs');

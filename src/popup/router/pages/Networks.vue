@@ -83,7 +83,7 @@ export default {
       await this.$store.dispatch('switchNetwork', network);
       this.$store.commit('SET_NODE_STATUS', 'connecting');
       postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload: network });
-      wallet.initSdk();
+      await wallet.initSdk();
     },
     cancel() {
       this.mode = 'list';
