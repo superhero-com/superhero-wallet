@@ -6,7 +6,7 @@
           {{ tr.amount }} {{ $t('pages.appVUE.aeid') }} <span class="text">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
         </span>
         <span class="status" data-cy="status">{{ $t('pages.recentTransactions.pendingStatus') }}</span>
-        <span class="time" data-cy="time">{{ txTime(tr.time) }}</span>
+        <span class="time" data-cy="time">{{ tr.time | formatDate }}</span>
       </div>
       <div class="holder">
         <span class="url" data-cy="url">{{ tr.domain }}</span>
@@ -29,6 +29,7 @@ export default {
   computed: {
     ...mapGetters(['transactions', 'currentCurrency']),
   },
+  filters: { formatDate },
   data() {
     return {
       checkMined: null,
@@ -37,11 +38,6 @@ export default {
   created() {
     this.$store.dispatch('getPendingTxs');
     this.checkMined = setInterval(() => this.$store.dispatch('checkPendingTxMined'), 2500);
-  },
-  methods: {
-    txTime(time) {
-      return formatDate(time);
-    },
   },
   beforeDestroy() {
     clearInterval(this.checkMined);
