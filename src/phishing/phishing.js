@@ -9,7 +9,7 @@ Vue.prototype.$browser = global.browser;
 
 Vue.use(Components);
 
-new Vue({
+export default new Vue({
   el: '#app',
   render: h => h(App),
 });

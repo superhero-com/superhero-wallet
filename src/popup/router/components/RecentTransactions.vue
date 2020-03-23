@@ -24,7 +24,6 @@
 <script>
 import { mapGetters } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
-import BigNumber from 'bignumber.js';
 import PendingTxs from './PendingTxs';
 
 export default {
@@ -50,7 +49,7 @@ export default {
   },
   methods: {
     async updateTransactions() {
-      const transactions = await this.$store.dispatch('getTransactionsByPublicKey', { publicKey: this.account.publicKey, limit: 3 });
+      const transactions = await this.$store.dispatch('fetchTransactions', { limit: 3, page: 1 });
       this.loading = false;
       this.$store.dispatch('updateLatestTransactions', transactions);
     },

@@ -25,8 +25,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { setTimeout, clearInterval } from 'timers';
-import { currencyConv } from '../../utils/helper';
+import { setTimeout } from 'timers';
 import Heart from '../../../icons/heart.svg?vue-component';
 import RecentTransactions from '../components/RecentTransactions';
 import ClaimTipButton from '../components/ClaimTipButton';
@@ -63,7 +62,9 @@ export default {
   },
   async created() {
     this.backup_seed_notif = !(await this.$store.dispatch('checkBackupSeed'));
-    setTimeout(() => (this.backup_seed_notif = false), 3000);
+    setTimeout(() => {
+      this.backup_seed_notif = false;
+    }, 3000);
   },
   mounted() {},
   methods: {

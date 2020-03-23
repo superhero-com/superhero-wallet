@@ -40,21 +40,21 @@ export default {
     ...mapGetters(['account', 'popup', 'sdk', 'current', 'transactions']),
   },
   methods: {
-    handleScroll(event) {
+    handleScroll() {
       if (window.scrollY > 150) {
         this.fixedheader = 'position:fixed; top:50px;max-width:357px';
       } else {
         this.fixedheader = '';
       }
     },
-    filtrateTx(type, date_type) {
+    filtrateTx(type, deteType) {
       switch (type) {
         case 'date':
-          if (date_type == '') {
+          if (deteType === '') {
             this.date_type = 'recent';
-          } else if (date_type == 'recent') {
+          } else if (deteType === 'recent') {
             this.date_type = 'oldest';
-          } else if (date_type == 'oldest') {
+          } else if (deteType === 'oldest') {
             this.date_type = 'recent';
           }
 
@@ -65,6 +65,8 @@ export default {
               break;
             case 'recent':
               this.direction = '';
+              break;
+            default:
               break;
           }
           this.type = 'date';
@@ -88,6 +90,8 @@ export default {
         case 'all':
           this.type = 'all';
           this.date_type = '';
+          break;
+        default:
           break;
       }
       this.$emit('filtrate', this.type, this.date_type);

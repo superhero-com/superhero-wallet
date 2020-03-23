@@ -38,12 +38,9 @@ export default {
         if (this.checkAddressMatch(account.publicKey, uniq(addresses))) {
           await this.abortIfZeroClaim(url);
 
-          const submit = await axios.post(`${TIP_SERVICE}`, { url, address: account.publicKey });
-          console.log(submit);
+          await axios.post(`${TIP_SERVICE}`, { url, address: account.publicKey });
         }
       }
-    } catch (err) {
-      console.log('err', err);
-    }
+    } catch (err) {}
   },
 };

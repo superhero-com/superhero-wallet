@@ -17,20 +17,17 @@ export default class WebCrypto {
   }
 
   async decrypt(message, password, nonce, salt) {
-    message = Buffer.from(message, 'hex');
-    nonce = Buffer.from(nonce, 'hex');
-    salt = Buffer.from(salt, 'hex');
     const keyMaterial = await this.getKeyMaterial(password);
-    const key = await this.getKey(keyMaterial, salt);
+    const key = await this.getKey(keyMaterial, Buffer.from(salt, 'hex'));
 
     try {
       const decrypted = await window.crypto.subtle.decrypt(
         {
           name: 'AES-GCM',
-          iv: nonce,
+          iv: Buffer.from(nonce, 'hex'),
         },
         key,
-        message
+        Buffer.from(message, 'hex')
       );
       const dec = new TextDecoder();
       const decoded = dec.decode(decrypted);

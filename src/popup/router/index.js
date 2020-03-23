@@ -39,6 +39,7 @@ Vue.component('Button', Button);
 
 const router = new VueRouter({
   routes,
+  mode: process.env.PLATFORM === 'web' ? 'history' : 'hash',
 });
 
 let isFirstTransition = true;
@@ -49,7 +50,8 @@ const noAuthUrls = ['/', '/importAccount', '/termsOfService', '/intro'];
 router.beforeEach((to, from, next) => {
   const lastRouteName = localStorage.getItem(lastRouteKey);
   const shouldRedirect = to.path === ('/' || '/account') && lastRouteName && isFirstTransition;
-  if (store.getters.account.hasOwnProperty('publicKey') && store.getters.isLoggedIn) {
+
+  if (store.getters.account && store.getters.isLoggedIn) {
     if (!store.getters.sdk) {
       wallet.initSdk(() => next('/'));
     }
@@ -60,7 +62,7 @@ router.beforeEach((to, from, next) => {
     }
   } else {
     wallet.init(route => {
-      if (shouldRedirect && (route == '/' || route == '/account') && !noRedirectRoutes.includes(lastRouteName) && lastRouteName.indexOf('/sign-transaction') == -1) {
+      if (shouldRedirect && (route === '/' || route === '/account') && !noRedirectRoutes.includes(lastRouteName) && lastRouteName.indexOf('/sign-transaction') === -1) {
         next(lastRouteName);
       } else if (route) {
         next(route);

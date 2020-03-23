@@ -102,15 +102,14 @@
 import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
-import { convertToAE, convertAmountToCurrency, getContractCallInfo, addTipAmount } from '../../../utils/helper';
-import { toMicro, MAGNITUDE } from '../../../utils/constants';
+import { convertToAE, getContractCallInfo, addTipAmount } from '../../../utils/helper';
+import { MAGNITUDE } from '../../../utils/constants';
 import Button from '../../components/Button';
-import Input from '../../components/Input';
 import AmountSend from '../../components/AmountSend';
 import getPopupProps from '../../../utils/getPopupProps';
 
 export default {
-  components: { Button, Input, AmountSend },
+  components: { Button, AmountSend },
   data() {
     return {
       props: {},
@@ -134,7 +133,7 @@ export default {
       return this.unpackedTx ? this.unpackedTx.txType : null;
     },
     isAddressShow() {
-      if (this.txType == 'contractCreateTx' || this.txType == 'namePreClaimTx' || this.txType == 'nameClaimTx' || this.txType == 'nameUpdateTx') {
+      if (this.txType === 'contractCreateTx' || this.txType === 'namePreClaimTx' || this.txType === 'nameClaimTx' || this.txType === 'nameUpdateTx') {
         return false;
       }
       return true;
@@ -149,16 +148,16 @@ export default {
       return convertToAE(this.txObject.amount);
     },
     receiver() {
-      if (this.txType == 'spendTx') {
+      if (this.txType === 'spendTx') {
         return this.txObject.recipientId;
       }
-      if (this.txType == 'contractCallTx') {
+      if (this.txType === 'contractCallTx') {
         return this.txObject.contractId;
       }
       return '';
     },
     isNameTx() {
-      return this.txType == 'namePreClaimTx' || this.txType == 'nameClaimTx' || this.txType == 'nameUpdateTx';
+      return this.txType === 'namePreClaimTx' || this.txType === 'nameClaimTx' || this.txType === 'nameUpdateTx';
     },
     totalSpend() {
       const amount = this.tx.amount ? this.tx.amount : 0;
@@ -166,7 +165,7 @@ export default {
     },
   },
   watch: {
-    'tx.amount': function(newVal, oldVal) {
+    'tx.amount': function(newVal) {
       this.amountError = false;
       if (isNaN(newVal)) {
         this.amountError = true;

@@ -6,7 +6,6 @@ import mutations from './mutations';
 import actions from './actions';
 import { POPUP_PROPS } from '../popup/utils/popup-messages';
 import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
-import names from '../popup/utils/names';
 
 Vue.use(Vuex);
 
@@ -32,11 +31,10 @@ export default new Vuex.Store({
     isLoggedIn: false,
     transactions: {
       latest: [],
-      all: [],
-      new: [],
       pending: [],
     },
     sdk: null,
+    middleware: null,
     aeppPopup: false,
     ledgerApi: null,
     txAdvancedMode: false,
@@ -50,5 +48,5 @@ export default new Vuex.Store({
   getters,
   mutations,
   actions,
-  plugins: [names],
+  plugins: [],
 });

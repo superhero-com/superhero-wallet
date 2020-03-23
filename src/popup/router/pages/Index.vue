@@ -4,6 +4,11 @@
     <p class="primary-title primary-title-small">
       {{ $t('pages.index.heading') }}
     </p>
+    <div class="install-native-version" v-if="IS_WEB">
+      <a href="https://example.com/"><img src="../../../icons/app-store.svg" alt="App Store"/></a>
+      <a href="https://example.com/"><img src="../../../icons/google-play.svg" alt="Google Play"/></a>
+      <span>Or use a web version</span>
+    </div>
     <CheckBox v-if="!termsAgreedOrNot" v-model="terms" data-cy="checkbox" class="mb-25">
       <div class="primary-text">
         {{ $t('pages.index.term1') }}
@@ -34,6 +39,7 @@ export default {
     return {
       terms: false,
       termsAgreedOrNot: false,
+      IS_WEB: process.env.PLATFORM === 'web',
     };
   },
   computed: {
@@ -55,3 +61,11 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.install-native-version > * {
+  display: block;
+  width: 270px;
+  margin: 15px auto;
+}
+</style>

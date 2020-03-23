@@ -4,7 +4,8 @@ import App from './App';
 global.browser = require('webextension-polyfill');
 
 Vue.prototype.$browser = global.browser;
-new Vue({
+
+export default new Vue({
   el: '#app',
   render: h => h(App),
 });

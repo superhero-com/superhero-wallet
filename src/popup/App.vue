@@ -69,8 +69,8 @@ export default {
   },
   methods: {
     checkSdkReady() {
-      const checkSDKReady = setInterval(() => {
-        if (this.sdk !== null) {
+      const checkSDKReady = setInterval(async () => {
+        if (this.sdk) {
           if (!window.RUNNING_IN_POPUP && process.env.IS_EXTENSION) {
             postMessage({ type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
           }

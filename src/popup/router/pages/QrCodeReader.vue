@@ -1,6 +1,6 @@
 <template>
   <div class="popup popup-camera">
-    <qrcode-stream @decode="onDecode" @init="onInit" @detect="onDetect"></qrcode-stream>
+    <qrcode-stream @decode="onDecode" @init="onInit"></qrcode-stream>
     <popup />
   </div>
 </template>
@@ -29,12 +29,10 @@ export default {
   methods: {
     onDecode(address) {
       try {
-        if (this.type == 'send' && (checkAddress(address) || chekAensName(address))) {
-          return this.$router.push({ name: 'send', params: { address } });
+        if (this.type === 'send' && (checkAddress(address) || chekAensName(address))) {
+          this.$router.push({ name: 'send', params: { address } });
         }
-      } catch (err) {
-        console.log(err);
-      }
+      } catch (err) {}
     },
     async onInit(promise) {
       const url = browser.extension.getURL('./popup/CameraRequestPermission.html');
@@ -59,21 +57,6 @@ export default {
         }
         this.$store.dispatch('popupAlert', { name: 'account', type: 'error_qrcode', msg: this.errorMessage, data: this.errorMessage });
         this.$router.go(-1);
-      }
-    },
-    async onDetect(promise) {
-      try {
-        const {
-          imageData, // raw image data of image/frame
-          content, // decoded String
-          location, // QR code coordinates
-        } = await promise;
-
-        console.log(imageData);
-        console.log(content);
-        console.log(location);
-      } catch (error) {
-        console.log(error);
       }
     },
   },

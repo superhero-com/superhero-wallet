@@ -84,28 +84,10 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { Wallet, MemoryAccount } from '@aeternity/aepp-sdk/es';
-import { computeAuctionEndBlock, computeBidFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import BigNumber from 'bignumber.js';
-import { clearInterval, clearTimeout } from 'timers';
 import { setTxInQueue } from '../../utils';
-import { MAGNITUDE, MIN_SPEND_TX_FEE, MIN_SPEND_TX_FEE_MICRO, MAX_REASONABLE_FEE, TX_TYPES, calculateFee, TX_LIMIT_PER_DAY, TOKEN_REGISTRY_ADDRESS } from '../../utils/constants';
-import {
-  convertToAE,
-  currencyConv,
-  convertAmountToCurrency,
-  removeTxFromStorage,
-  contractEncodeCall,
-  initializeSDK,
-  checkAddress,
-  chekAensName,
-  escapeCallParam,
-  addRejectedToken,
-  checkContractAbiVersion,
-  parseFromStorage,
-  aettosToAe,
-  aeToAettos,
-} from '../../utils/helper';
+import { MAGNITUDE, TX_TYPES, calculateFee } from '../../utils/constants';
+import { convertAmountToCurrency, checkAddress, chekAensName, aettosToAe, aeToAettos } from '../../utils/helper';
 import Button from '../components/Button';
 
 export default {
@@ -190,8 +172,7 @@ export default {
       return (parseFloat(this.amount) + parseFloat(this.selectedFee)).toFixed(7);
     },
     insufficientBalance() {
-      // if (this.data.type != 'contractCall') {
-      if (this.data.type == 'contractCall' && this.data.tx.method == 'transfer_allowance') {
+      if (this.data.type === 'contractCall' && this.data.tx.method === 'transfer_allowance') {
         return false;
       }
       if (typeof this.data.tx.token !== 'undefined') {
@@ -202,8 +183,8 @@ export default {
       // }
     },
     inccorectAddress() {
-      if (this.data.type != 'txSign') {
-        return this.receiver == null || this.receiver == '';
+      if (this.data.type !== 'txSign') {
+        return this.receiver == null || this.receiver === '';
       }
       return !checkAddress(this.receiver) && !chekAensName(this.receiver);
     },
@@ -211,45 +192,47 @@ export default {
       return this.balance;
     },
     txType() {
-      if (this.data.type == 'txSign') {
+      if (this.data.type === 'txSign') {
         return 'Send AE';
       }
-      if (this.data.type == 'contractCall') {
-        if (this.data.tx.method != '') {
+      if (this.data.type === 'contractCall') {
+        if (this.data.tx.method !== '') {
           return this.data.tx.method;
         }
         return 'Contract Call';
       }
-      if (this.data.type == 'contractCreate') {
+      if (this.data.type === 'contractCreate') {
         return 'Contract Create';
       }
-      if (this.data.type == 'namePreClaim') {
+      if (this.data.type === 'namePreClaim') {
         return 'Name Preclaim';
       }
-      if (this.data.type == 'nameClaim') {
+      if (this.data.type === 'nameClaim') {
         return 'Name Claim';
       }
-      if (this.data.type == 'nameUpdate') {
+      if (this.data.type === 'nameUpdate') {
         return 'Name Update';
       }
-      if (this.data.type == 'nameBid') {
+      if (this.data.type === 'nameBid') {
         return 'Name Claim';
       }
+
+      return this.data.type;
     },
     isAddressShow() {
       if (
-        this.data.type == 'contractCreate' ||
-        this.data.type == 'namePreClaim' ||
-        this.data.type == 'nameClaim' ||
-        this.data.type == 'nameBid' ||
-        this.data.type == 'nameUpdate'
+        this.data.type === 'contractCreate' ||
+        this.data.type === 'namePreClaim' ||
+        this.data.type === 'nameClaim' ||
+        this.data.type === 'nameBid' ||
+        this.data.type === 'nameUpdate'
       ) {
         return false;
       }
       return true;
     },
     isNameTx() {
-      return this.data.type == 'namePreClaim' || this.data.type == 'nameBid' || this.data.type == 'nameClaim' || this.data.type == 'nameUpdate';
+      return this.data.type === 'namePreClaim' || this.data.type === 'nameBid' || this.data.type === 'nameClaim' || this.data.type === 'nameUpdate';
     },
     convertSelectedFee() {
       return BigNumber(this.selectedFee).shiftedBy(MAGNITUDE);
@@ -267,7 +250,7 @@ export default {
     async setContractInstance(source, contractAddress = null, options = {}) {
       try {
         let backend = 'fate';
-        if (typeof this.data.tx.abi_version !== 'undefined' && this.data.tx.abi_version != 3) {
+        if (typeof this.data.tx.abi_version !== 'undefined' && this.data.tx.abi_version !== 3) {
           backend = 'aevm';
         }
         try {
@@ -276,12 +259,9 @@ export default {
           if (typeof options.waitMined !== 'undefined') {
             this.contractInstance.setOptions({ waitMined: options.waitMined });
           }
-        } catch (e) {
-          console.log('e=>', e);
-        }
+        } catch (e) {}
         return Promise.resolve(true);
       } catch (err) {
-        console.log(err);
         if (this.data.popup) {
           this.errorTx.error.message = err;
           this.sending = true;
@@ -304,7 +284,7 @@ export default {
     },
     async init() {
       this.setReceiver();
-      if (this.isLedger && this.data.type != 'txSign') {
+      if (this.isLedger && this.data.type !== 'txSign') {
         this.$store.dispatch('popupAlert', { name: 'account', type: 'ledger_support' }).then(() => {
           if (this.data.popup) {
             setTimeout(() => {
@@ -315,21 +295,20 @@ export default {
           }
         });
       }
-      if (this.data.tx.hasOwnProperty('options') && this.data.tx.options.hasOwnProperty('amount')) {
+      if (this.data.tx.options && this.data.tx.options.amount) {
         this.data.tx.amount = this.data.tx.options.amount;
-        if (this.data.type == 'contractCall') {
+        if (this.data.type === 'contractCall') {
           this.data.tx.amount = aettosToAe(this.data.tx.options.amount);
           this.data.tx.options.amount = aettosToAe(this.data.tx.options.amount);
         }
       }
-      if (this.data.type == 'txSign' && this.data.popup) {
+      if (this.data.type === 'txSign' && this.data.popup) {
         this.data.tx.amount = aettosToAe(this.data.tx.amount);
       }
       if (this.data.popup) {
         this.port = browser.runtime.connect({ name: this.data.id });
-        this.port.onMessage.addListener((msg, sender, sendResponse) => {});
       }
-      if (typeof this.data.callType !== 'undefined' && this.data.callType == 'static') {
+      if (typeof this.data.callType !== 'undefined' && this.data.callType === 'static') {
         this.loaderType = '';
         this.loading = true;
         this.loaderContent = this.$t('pages.signTransaction.contractCalling');
@@ -352,25 +331,12 @@ export default {
               this.port.postMessage(this.errorTx);
             }
 
-            const list = await removeTxFromStorage(this.data.id);
-
-            browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
             setTimeout(() => {
               window.close();
             }, 1000);
           }
         }, 500);
       } else {
-        if (this.data.popup) {
-          browser.storage.local.get('pendingTransaction').then(tx => {
-            let list = {};
-            if (tx.hasOwnProperty('pendingTransaction') && tx.pendingTransaction.hasOwnProperty('list')) {
-              list = tx.pendingTransaction.list;
-            }
-            list[this.data.id] = this.data;
-            browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-          });
-        }
         this.checkSDKReady = setInterval(async () => {
           if (this.sdk != null) {
             window.clearTimeout(this.checkSDKReady);
@@ -378,7 +344,7 @@ export default {
               ...this.sdk.Ae.defaults,
             };
 
-            if (this.data.type == 'contractCreate') {
+            if (this.data.type === 'contractCreate') {
               this.data.tx.contract = {};
               this.data.tx.contract.bytecode = (await this.sdk.contractCompile(this.data.tx.source)).bytecode;
               this.txParams = {
@@ -388,18 +354,17 @@ export default {
               };
               // here new contract na mqstoto na fugible token contract
               await this.setContractInstance(this.data.tx.source);
-            } else if (this.data.type == 'contractCall') {
+            } else if (this.data.type === 'contractCall') {
               this.data.tx.call = {};
-              // let callData = await contractEncodeCall(this.sdk,this.data.tx.source,this.data.tx.method,[...escapeCallParams(this.data.tx.params)])
               this.txParams = {
                 ...this.txParams,
                 contractId: this.data.tx.address,
                 callerId: this.account.publicKey,
               };
               await this.setContractInstance(this.data.tx.source, this.data.tx.address, this.data.tx.options);
-            } else if (this.data.type == 'txSign') {
+            } else if (this.data.type === 'txSign') {
               let recipientId;
-              if (this.data.tx.recipientId.substring(0, 3) == 'ak_') {
+              if (this.data.tx.recipientId.substring(0, 3) === 'ak_') {
                 recipientId = this.data.tx.recipientId;
               } else {
                 try {
@@ -423,27 +388,27 @@ export default {
                 senderId: this.account.publicKey,
                 recipientId,
               };
-            } else if (this.data.type == 'namePreClaim') {
+            } else if (this.data.type === 'namePreClaim') {
               this.txParams = {
                 ...this.txParams,
                 accountId: this.account.publicKey,
                 commitmentId: 'cm_PtSWNMMNJ187NzGgivLFpYKptevuFQx1rKdqsDFAKVkXtyjPJ',
               };
-            } else if (this.data.type == 'nameClaim') {
+            } else if (this.data.type === 'nameClaim') {
               this.txParams = {
                 ...this.txParams,
                 accountId: this.account.publicKey,
                 name: 'nm_2Wb2xdC9WMSnExyHd8aoDu2Ee8qHD94nvsFQsyiy1iEyUGPQp9',
                 nameSalt: this.data.tx.preclaim.salt,
               };
-            } else if (this.data.type == 'nameBid') {
+            } else if (this.data.type === 'nameBid') {
               this.txParams = {
                 ...this.txParams,
                 accountId: this.account.publicKey,
                 name: 'nm_2Wb2xdC9WMSnExyHd8aoDu2Ee8qHD94nvsFQsyiy1iEyUGPQp9',
                 nameSalt: 0,
               };
-            } else if (this.data.type == 'nameUpdate') {
+            } else if (this.data.type === 'nameUpdate') {
               this.txParams = {
                 ...this.txParams,
                 accountId: this.account.publicKey,
@@ -454,7 +419,7 @@ export default {
             const fee = calculateFee(TX_TYPES[this.data.type], this.txParams);
             this.txFee = fee;
             this.selectedFee = this.fee.toFixed(7);
-            if (this.alertMsg == '') {
+            if (this.alertMsg === '') {
               this.signDisabled = false;
             }
           }
@@ -466,9 +431,9 @@ export default {
       }, 3500);
     },
     setReceiver() {
-      if (this.data.type == 'txSign') {
+      if (this.data.type === 'txSign') {
         this.receiver = this.data.tx.recipientId;
-      } else if (this.data.type == 'contractCall') {
+      } else if (this.data.type === 'contractCall') {
         this.receiver = this.data.tx.address;
       }
     },
@@ -480,7 +445,7 @@ export default {
       } else {
         this.alertMsg = '';
       }
-      if (this.alertMsg == '') {
+      if (this.alertMsg === '') {
         if (this.selectedFee) {
           this.signDisabled = false;
         }
@@ -501,49 +466,15 @@ export default {
       }
     },
     async cancelTransaction() {
-      const list = await removeTxFromStorage(this.data.id);
-      if (this.data.tx.contractType == 'fungibleToken' && this.data.tx.method == 'add_token') {
-        addRejectedToken(this.data.tx.params[0]);
-      }
-      if (!this.data.popup) {
-        if (this.data.type == 'nameUpdate') {
-          this.$store.dispatch('removePendingName', { hash: this.data.tx.hash }).then(() => {
-            browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-            this.redirectInExtensionAfterAction();
-          });
-        } else {
-          browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-          this.redirectInExtensionAfterAction();
-        }
-      } else {
-        browser.storage.local.set({ pendingTransaction: { list } }).then(() => {
-          this.errorTx.error.message = 'Transaction rejected by user';
-          this.sending = true;
-          this.port.postMessage(this.errorTx);
-          setInterval(() => {
-            window.close();
-          }, 1000);
-        });
-      }
+      this.redirectInExtensionAfterAction();
     },
     redirectInExtensionAfterAction() {
-      browser.storage.local.get('pendingTransaction').then(data => {
-        if (data.hasOwnProperty('pendingTransaction') && data.pendingTransaction.hasOwnProperty('list') && Object.keys(data.pendingTransaction.list).length > 0) {
-          const tx = data.pendingTransaction.list[Object.keys(data.pendingTransaction.list)[0]];
-          tx.popup = false;
-          tx.countTx = Object.keys(data.pendingTransaction.list).length;
-          // this.redirectToTxConfirm(tx)
-          this.$store.commit('SET_AEPP_POPUP', false);
-          this.$router.push('/account');
-        } else {
-          this.$store.commit('SET_AEPP_POPUP', false);
-          this.$router.push('/account');
-        }
-      });
+      this.$store.commit('SET_AEPP_POPUP', false);
+      this.$router.push('/account');
     },
     signSpendTx(amount) {
       this.sdk
-        .spend(parseInt(amount), this.receiver, { fee: this.convertSelectedFee })
+        .spend(amount, this.receiver, { fee: this.convertSelectedFee })
         .then(async result => {
           if (typeof result === 'object') {
             this.loading = false;
@@ -551,45 +482,15 @@ export default {
             setTxInQueue(result.hash);
             const txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${result.hash}`;
             const msg = `You have sent ${this.amount} AE`;
-            if (this.data.popup) {
-              const res = {
-                id: null,
-                jsonrpc: '2.0',
-                method: 'aeppMessage',
-                params: { ...result },
-              };
-              this.sending = true;
-              this.port.postMessage(res);
-              const list = await removeTxFromStorage(this.data.id);
-              browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-
-              setTimeout(() => {
-                window.close();
-              }, 1000);
-            } else {
-              this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(async () => {
-                this.$store.commit('SET_AEPP_POPUP', false);
-                const list = await removeTxFromStorage(this.data.id);
-                browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-                this.redirectInExtensionAfterAction();
-              });
-            }
-          } else {
+            this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(async () => {
+              this.$store.commit('SET_AEPP_POPUP', false);
+              this.redirectInExtensionAfterAction();
+            });
           }
         })
-        .catch(async err => {
+        .catch(async () => {
           setTxInQueue('error');
-          if (this.data.popup) {
-            this.sending = true;
-            this.port.postMessage(this.errorTx);
-            const list = await removeTxFromStorage(this.data.id);
-            browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-            setTimeout(() => {
-              window.close();
-            }, 1000);
-          } else {
-            this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
-          }
+          this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
           this.loading = false;
         });
     },
@@ -613,12 +514,11 @@ export default {
     async contractCallStatic(tx) {
       try {
         let options = {};
-        if (tx.hasOwntProperty('options')) {
+        if (tx.options) {
           options = { ...tx.options };
         }
-        if (tx.hasOwntProperty('options') && tx.options.hasOwnProperty('amount')) {
-          tx.options.amount = aeToAettos(this.data.tx.options.amount);
-          options = { ...options, ...tx.options };
+        if (tx.options && tx.options.amount) {
+          options = { ...options, ...tx.options, amount: aeToAettos(this.data.tx.options.amount) };
         }
         const call = await this.$helpers.contractCall({ instance: this.contractInstance, method: tx.method, params: [...tx.params, options] });
         const decoded = await call.decode();
@@ -630,8 +530,6 @@ export default {
         this.sending = true;
         this.port.postMessage(this.errorTx);
       }
-      const list = await removeTxFromStorage(this.data.id);
-      browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
       setTimeout(() => {
         window.close();
       }, 1000);
@@ -640,16 +538,13 @@ export default {
       let call;
       try {
         let options;
-        if (this.data.tx.hasOwnProperty('options')) {
+        if (this.data.tx.options) {
           options = { ...this.data.tx.options };
         }
-        if (this.data.tx.hasOwnProperty('options') && this.data.tx.options.hasOwnProperty('amount')) {
+        if (this.data.tx.options && this.data.tx.options.amount) {
           this.data.tx.options.amount = aeToAettos(this.data.tx.options.amount);
           options = { ...options, ...this.data.tx.options };
         }
-
-        console.log('[Debug]: Transaction parameters');
-        console.log(...this.data.tx.params);
 
         options = { ...options, fee: this.convertSelectedFee };
         if (!this.contractInstance) {
@@ -669,34 +564,21 @@ export default {
         setTxInQueue('error');
         this.errorTx.error.message = typeof err.message !== 'undefined' ? err.message : err;
         this.sending = true;
-        if (this.data.popup) {
-          this.port.postMessage(this.errorTx);
-        } else {
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
-        }
+        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
       }
-      const list = await removeTxFromStorage(this.data.id);
-      browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
-      if (this.data.popup) {
-        setInterval(() => {
-          window.close();
-        }, 1000);
-      } else {
-        this.redirectInExtensionAfterAction();
-      }
+      this.redirectInExtensionAfterAction();
     },
     async contractDeploy() {
       let deployed;
       if (this.isLedger) {
         const { ownerId, amount, gas, code, callData, deposit } = this.txParams;
         const { tx } = await this.sdk[TX_TYPES[this.data.type]]({ ownerId, amount, gas, code, callData, deposit });
-        const sign = await this.$store.dispatch('ledgerSignTransaction', { tx });
+        await this.$store.dispatch('ledgerSignTransaction', { tx });
       } else {
         try {
           deployed = await this.contractInstance.deploy([...this.data.tx.init], { fee: this.convertSelectedFee });
           setTxInQueue(deployed.transaction);
         } catch (err) {
-          console.log(err);
           setTxInQueue('error');
           this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
         }
@@ -711,17 +593,17 @@ export default {
         if (deployed) {
           this.deployed = deployed.address;
           const msg = `Contract deployed at address <br> ${deployed.address}`;
-          const noRedirect = this.data.tx.contractType == 'fungibleToken' && this.data.tx.tokenRegistry;
+          const noRedirect = this.data.tx.contractType === 'fungibleToken' && this.data.tx.tokenRegistry;
           this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_deploy', msg, noRedirect, data: deployed.address });
         }
-        if (this.data.tx.contractType != 'fungibleToken') {
+        if (this.data.tx.contractType !== 'fungibleToken') {
           this.redirectInExtensionAfterAction();
         }
       }
     },
     copyAddress() {
       this.$copyText(this.popup.data);
-      if (this.data.type == 'contractCreate' && !this.data.tx.tokenRegistry) {
+      if (this.data.type === 'contractCreate' && !this.data.tx.tokenRegistry) {
         this.redirectInExtensionAfterAction();
       }
     },
@@ -760,7 +642,7 @@ export default {
     async nameClaim() {
       if (this.data.bid) {
         try {
-          const bid = await this.sdk.aensBid(this.data.tx.name, this.data.tx.BigNumberAmount);
+          await this.sdk.aensBid(this.data.tx.name, this.data.tx.BigNumberAmount);
         } catch (err) {
           setTxInQueue('error');
           this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });
@@ -783,11 +665,6 @@ export default {
     },
     async nameUpdate() {
       try {
-        let options;
-        if (this.data.tx.hasOwnProperty('options')) {
-          options = { ...this.data.tx.options };
-        }
-        options = { ...options, fee: this.convertSelectedFee };
         const nameObject = await this.sdk.aensQuery(this.data.tx.name);
         let update;
         if (this.data.nameUpdateType === 'extend') {
@@ -813,36 +690,14 @@ export default {
         this.loading = true;
         const amount = aeToAettos(this.amount);
         try {
-          let { tx_count } = await browser.storage.local.get('tx_count');
-          if (typeof tx_count === 'undefined') {
-            tx_count = {};
-          }
-          if (!tx_count.hasOwnProperty(new Date().toDateString())) {
-            tx_count = {
-              [new Date().toDateString()]: {
-                [this.account.publicKey]: 1,
-              },
-            };
-          } else if (tx_count.hasOwnProperty(new Date().toDateString()) && !tx_count[new Date().toDateString()].hasOwnProperty(this.account.publicKey)) {
-            tx_count[new Date().toDateString()][this.account.publicKey] = 1;
-          } else {
-            tx_count[new Date().toDateString()][this.account.publicKey]++;
-          }
-          await browser.storage.local.set({ tx_count });
-          if (tx_count[[new Date().toDateString()]] > TX_LIMIT_PER_DAY) {
-            return this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_limit_per_day' }).then(() => {
-              this.$store.commit('SET_AEPP_POPUP', false);
-              this.$router.push('/account');
-            });
-          }
-          if (this.data.type == 'txSign') {
+          if (this.data.type === 'txSign') {
             if (this.isLedger) {
               this.signSpendTxLedger(amount);
             } else {
               this.signSpendTx(amount);
             }
-          } else if (this.data.type == 'contractCall') {
-            if (this.data.callType == 'pay') {
+          } else if (this.data.type === 'contractCall') {
+            if (this.data.callType === 'pay') {
               this.contractCall();
             } else {
               const call = await this.$helpers.contractCall({
@@ -851,7 +706,6 @@ export default {
                 params: [...this.data.tx.params, { fee: this.convertSelectedFee }],
               });
               setTxInQueue(call.hash);
-              const decoded = await call.decode();
               const msg = `You have sent ${this.data.tx.amount} ${this.data.tx.token}`;
               const txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${call.hash}`;
               this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(() => {
@@ -859,20 +713,18 @@ export default {
                 this.$router.push('/account');
               });
             }
-          } else if (this.data.type == 'contractCreate') {
+          } else if (this.data.type === 'contractCreate') {
             this.contractDeploy();
-          } else if (this.data.type == 'namePreClaim') {
+          } else if (this.data.type === 'namePreClaim') {
             this.namePreclaim();
-          } else if (this.data.type == 'nameClaim') {
+          } else if (this.data.type === 'nameClaim') {
             this.nameClaim();
-          } else if (this.data.type == 'nameUpdate') {
+          } else if (this.data.type === 'nameUpdate') {
             this.nameUpdate();
-          } else if (this.data.type == 'nameBid') {
+          } else if (this.data.type === 'nameBid') {
             this.nameClaim();
           }
-        } catch (err) {
-          console.log(err);
-        }
+        } catch (err) {}
       }
     },
     convertCurrency(currency, amount) {
@@ -885,7 +737,7 @@ export default {
     async getDeployedByteCode(address) {
       const res = await fetch(`https://testnet.mdw.aepps.com/middleware/contracts/transactions/address/${address}`);
       const txs = await res.json();
-      const byteCode = txs.transactions.find(tx => tx.tx.type == 'ContractCreateTx');
+      const byteCode = txs.transactions.find(tx => tx.tx.type === 'ContractCreateTx');
       return byteCode;
     },
   },
@@ -895,8 +747,6 @@ export default {
         this.port.postMessage(this.errorTx);
       }
     }
-    const list = await removeTxFromStorage(this.data.id);
-    browser.storage.local.set({ pendingTransaction: { list } }).then(() => {});
   },
   beforeRouteUpdate(to, from, next) {
     next();

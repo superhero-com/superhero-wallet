@@ -117,16 +117,16 @@
 </template>
 
 <script>
+/* eslint-disable no-param-reassign */
 import { mapGetters } from 'vuex';
-import { TxBuilder } from '@aeternity/aepp-sdk/es';
-import { fetchData, convertToAE, addressToName, getAddressByNameEntry, checkAddress, chekAensName } from '../../utils/helper';
-import { TX_TYPES, basicTxParams } from '../../utils/constants';
+import { fetchData, convertToAE, getAddressByNameEntry, checkAddress, chekAensName } from '../../utils/helper';
 import Input from '../components/Input';
 import Button from '../components/Button';
 
 export default {
   components: {
     Input,
+    Button,
   },
   data() {
     return {
@@ -151,28 +151,23 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['current', 'popup', 'names', 'sdk', 'network', 'account']),
+    ...mapGetters(['current', 'popup', 'names', 'sdk', 'network', 'account', 'middleware']),
     auctions() {
-      if (this.filterType == 'soonest') return this.activeAuctions;
-      if (this.filterType == 'length') return this.activeAuctions.sort((a, b) => a.name.length - b.name.length);
-      if (this.filterType == 'bid') return this.activeAuctions.sort((a, b) => a.winning_bid - b.winning_bid);
+      if (this.filterType === 'soonest') return this.activeAuctions;
+      if (this.filterType === 'length') return this.activeAuctions.map(a => a).sort((a, b) => a.name.length - b.name.length);
+      if (this.filterType === 'bid') return this.activeAuctions.map(a => a).sort((a, b) => a.winning_bid - b.winning_bid);
+      return null;
     },
     currentBid() {
       if (!this.bids) {
-        this.loading = true;
         return null;
       }
-
-      this.loading = false;
       return this.bids.reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b));
     },
     previousBids() {
       if (!this.bids) {
-        this.loading = true;
         return null;
       }
-
-      this.loading = false;
       return this.bids.filter(bid => bid !== this.currentBid);
     },
   },
@@ -191,7 +186,7 @@ export default {
   created() {
     this.loading = true;
     this.polling = setInterval(async () => {
-      if (!this.sdk.middleware) {
+      if (!this.middleware) {
         this.loading = false;
         return;
       }
@@ -210,7 +205,7 @@ export default {
       return getAddressByNameEntry(name);
     },
     async updateAuctionEntry() {
-      const res = await this.$store.dispatch('names/fetchAuctionEntry', this.moreAuInfo.info.name);
+      const res = await this.$store.dispatch('fetchAuctionEntry', this.moreAuInfo.info.name);
       this.expiration = res.expiration;
       this.bids = res.bids;
     },
@@ -220,17 +215,12 @@ export default {
     moreAuctionInfo(key, info) {
       this.moreAuInfo.visible = true;
       this.moreAuInfo.key = key;
-      const exists = Object.keys(info).some(k => {
-        if (k == 'winning_bid') {
-          info[k] = convertToAE(info[k]);
-        }
-      });
-      this.moreAuInfo.info = info;
+      this.moreAuInfo.info = { ...info, winning_bid: convertToAE(info.winning_bid) };
     },
     async registerName() {
       this.name = this.name.trim();
       const onlyLettersAndNums = /^[A-Za-z0-9]+$/;
-      if (this.name == '') {
+      if (this.name === '') {
         this.$store.dispatch('popupAlert', {
           name: 'account',
           type: 'requiredField',
@@ -244,7 +234,7 @@ export default {
         this.loading = true;
         const name = `${this.name}.chain`;
         try {
-          const query = await this.sdk.aensQuery(name);
+          await this.sdk.aensQuery(name);
           this.loading = false;
           this.$store.dispatch('popupAlert', { name: 'account', type: 'name_exist' });
         } catch (err) {
@@ -269,7 +259,7 @@ export default {
     },
     async redirectToConfirm(name, type = 'extend', options = {}) {
       try {
-        const { id, pointers, ttl } = await this.sdk.getName(name);
+        const { id, pointers } = await this.sdk.getName(name);
         const tx = {
           popup: false,
           tx: {
@@ -281,15 +271,13 @@ export default {
           nameUpdateType: type,
         };
         this.$store.commit('SET_AEPP_POPUP', true);
-        this.$router
-          .push({
-            name: 'sign',
-            params: {
-              data: tx,
-              type: tx.type,
-            },
-          })
-          .catch(err => {});
+        this.$router.push({
+          name: 'sign',
+          params: {
+            data: tx,
+            type: tx.type,
+          },
+        });
       } catch (e) {
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
       }

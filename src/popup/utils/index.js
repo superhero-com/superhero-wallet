@@ -1,3 +1,4 @@
+/* eslint-disable radix */
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { testAccount, txParams } from './config';
@@ -20,7 +21,8 @@ export const setPendingTx = async tx => {
   }
   list.push(tx);
   await setTxInQueue(tx.hash);
-  return await browser.storage.local.set({ pendingTxs: list });
+  await browser.storage.local.set({ pendingTxs: list });
+  return true;
 };
 
 export const formatTime = time => new Date(parseInt(time)).toLocaleTimeString(navigator.language, { timeStyle: 'short', hourCycle: 'h24', hour: '2-digit', minute: '2-digit' });
