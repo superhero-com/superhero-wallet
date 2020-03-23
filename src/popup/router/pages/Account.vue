@@ -11,7 +11,7 @@
       <AccountInfo />
       <BalanceInfo />
       <div class="height-100 submenu-bg">
-        <Button data-cy="tip-button" v-if="IS_EXTENSION || RUNNING_IN_TESTS" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
+        <Button data-cy="tip-button" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
           <div class="flex flex-align-center flex-justify-content-center">
             <Heart />
             <span class="ml-5">{{ $t('pages.account.send') }}</span>
