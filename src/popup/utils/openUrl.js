@@ -1,10 +1,20 @@
 /* globals cordova */
 
 export default url => {
-  if (process.env.IS_EXTENSION) browser.tabs.create({ url, active: true });
-  else {
-    document.addEventListener('deviceready', () => {
-      cordova.InAppBrowser.open(url, '_system');
-    });
+  switch (process.env.PLATFORM) {
+    case 'chrome':
+    case 'firefox':
+      browser.tabs.create({ url, active: true });
+      break;
+    case 'cordova':
+      document.addEventListener('deviceready', () => {
+        cordova.InAppBrowser.open(url, '_system');
+      });
+      break;
+    case 'web':
+      window.location = url;
+      break;
+    default:
+      throw new Error(`Unknown platform: ${process.env.PLATFORM}`);
   }
 };
