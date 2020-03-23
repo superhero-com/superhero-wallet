@@ -1,12 +1,10 @@
-import { get } from 'lodash-es';
-
 const txs = [
   { hash: '', amount: 0.1, domain: 'localhost:5000', time: Date.now(), type: 'tip' },
   { hash: '', amount: 2, domain: 'localhost:8000', time: Date.now(), type: 'tip' },
   { hash: '', amount: 10, domain: 'localhost:8080', time: Date.now(), type: 'tip' },
 ];
 
-describe("Tests cases not connected to specific page", () => {
+describe('Tests cases not connected to specific page', () => {
   [
     { path: '/popup-sign-tx', redirect: false },
     { path: '/connect', redirect: false },
@@ -26,13 +24,12 @@ describe("Tests cases not connected to specific page", () => {
     { path: '/transactions', redirect: true },
   ].forEach(({ path, redirect }) => {
     it(`${redirect ? '' : 'no '}redirect to last visited route ${path}`, () => {
-      cy
-      .login()
-      .visit(`chrome/popup/popup#${path}`)
-      .visit(`chrome/popup/popup`)
-      .urlEquals(redirect ? path : '/account')
-    })
-  })
+      cy.login()
+        .visit(`chrome/popup/popup#${path}`)
+        .visit(`chrome/popup/popup`)
+        .urlEquals(redirect ? path : '/account');
+    });
+  });
 
   txs.forEach(tx => {
     it('Show pending tx', () => {
