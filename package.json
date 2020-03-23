@@ -6,8 +6,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "lint": "eslint --ext .js,.vue src",
-    "prettier": "prettier \"src/**/*.{js,vue}\"",
+    "lint": "eslint --ext .js,.vue src tests",
+    "prettier": "prettier \"src/**/*.{js,vue}\" \"tests/**/*.{js,vue}\"",
     "prettier:write": "npm run prettier -- --write",
     "build": "cross-env NODE_ENV=production webpack --hide-modules",
     "build:dev": "cross-env NODE_ENV=development webpack --hide-modules",
