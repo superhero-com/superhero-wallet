@@ -5,7 +5,7 @@
     </li>
     <li class="account-icon-holder">
       <div class="flex flex-align-center flex-justify-between">
-        <ae-identicon class="account-icon" :address="account.publicKey" size="base" />
+        <UserAvatar :address="account.publicKey" />
         <div class="ml-8 mr-auto">
           <div class="f-14">{{ $t('pages.appVUE.mainAccount') }}</div>
           <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">{{ activeAccountName }}</div>
@@ -95,9 +95,10 @@
 import { mapGetters } from 'vuex';
 import Close from '../../../icons/close.svg?vue-component';
 import Arrow from '../../../icons/arrow-current-color.svg?vue-component';
+import UserAvatar from './UserAvatar';
 
 export default {
-  components: { Close, Arrow },
+  components: { Close, Arrow, UserAvatar },
   computed: mapGetters(['account', 'activeAccountName']),
   data: () => ({ showSettingsDropdown: false }),
   methods: {
@@ -202,14 +203,6 @@ export default {
 
   .account-icon-holder {
     padding: 0.5rem 1rem 20px 1rem;
-
-    .account-icon {
-      width: 38px;
-      height: 38px;
-      border: 0.125rem solid transparent;
-      -webkit-box-shadow: 0 0 0 2px $secondary-color;
-      box-shadow: 0 0 0 2px $secondary-color;
-    }
   }
 }
 </style>
