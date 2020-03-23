@@ -36,7 +36,7 @@ export default {
     showSidebar: false,
   }),
   computed: {
-    ...mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup']),
+    ...mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup', 'notifications']),
     waveBg() {
       return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(this.$route.path);
     },
@@ -71,6 +71,8 @@ export default {
         route: '/securitySettings',
       });
     }
+    const { notifCounter } = await browser.storage.local.get('notifCounter');
+    if (notifCounter !== 0) await browser.storage.local.set({ notifCounter: this.notifications.length });
   },
   methods: {
     checkSdkReady() {
