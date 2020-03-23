@@ -11,7 +11,7 @@
         <ae-dropdown direction="right" v-if="!n.system" data-cy="more">
           <ae-icon name="more" size="20px" slot="button" />
           <li @click="setNetworkEdit(n, index)" data-cy="edit">
-            <ae-icon name="edit" />	
+            <ae-icon name="edit" />
             Edit
           </li>
           <li @click="deleteNetwork(n, index)" data-cy="delete">
@@ -107,7 +107,8 @@ export default {
 
         if (!url.hostname || !middleware.hostname) throw new Error('Invalid hostname');
 
-        const exist = (name, idx) => (this.network.idx ? name === this.network.name && idx !== this.network.idx : name === this.network.name) || this.network.name === DEFAULT_NETWORK;
+        const exist = (name, idx) =>
+          (this.network.idx ? name === this.network.name && idx !== this.network.idx : name === this.network.name) || this.network.name === DEFAULT_NETWORK;
         const allNetworks = Object.values(this.networks);
         if (allNetworks.find(({ name }, idx) => exist(name, idx))) throw new Error('Network with this name exist');
         const newNetwork = {
