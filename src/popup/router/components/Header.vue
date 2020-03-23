@@ -6,12 +6,20 @@
 
       <div class="title">
         <span v-if="title">{{ $t(`pages.titles.${title}`) }}</span>
-        <span v-else>{{ $t('pages.appVUE.superheroWallet') }}</span>
+        <span v-else>{{ $t('pages.appVUE.walletName') }}</span>
       </div>
 
       <div v-if="isLoggedIn">
-        <span class="noti-holder" @click="notifications.length && $router.push('/notifications')" data-cy="noti">
-          <span v-if="notifications.length" class="noti-count" data-cy="noti-count">{{ notifications.length }}</span>
+        <span
+          class="noti-holder"
+          @click="notifications.length && $router.push('/notifications')"
+          data-cy="noti"
+        >
+          <span
+            v-if="notifications.length"
+            class="noti-count"
+            data-cy="noti-count"
+          >{{ notifications.length }}</span>
           <Bell />
         </span>
         <button @click="$emit('toggle-sidebar')">
