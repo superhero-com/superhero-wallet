@@ -10,6 +10,10 @@
         </div>
         <ae-dropdown direction="right" v-if="!n.system" data-cy="more">
           <ae-icon name="more" size="20px" slot="button" />
+          <li @click="setNetworkEdit(n, index)" data-cy="edit">
+            <ae-icon name="edit" />	
+            Edit
+          </li>
           <li @click="deleteNetwork(n, index)" data-cy="delete">
             <ae-icon name="delete" />
             Delete
@@ -98,13 +102,12 @@ export default {
       try {
         this.network.error = false;
         if (!this.network.name) throw new Error('Enter network name');
-        if (this.network.name === DEFAULT_NETWORK) throw new Error('Network with this name exist');
         const url = new URL(this.network.url);
         const middleware = new URL(this.network.middlewareUrl);
 
         if (!url.hostname || !middleware.hostname) throw new Error('Invalid hostname');
 
-        const exist = (name, idx) => (this.network.idx ? name === this.network.name && idx !== this.network.idx : name === this.network.name);
+        const exist = (name, idx) => (this.network.idx ? name === this.network.name && idx !== this.network.idx : name === this.network.name) || this.network.name === DEFAULT_NETWORK;
         const allNetworks = Object.values(this.networks);
         if (allNetworks.find(({ name }, idx) => exist(name, idx))) throw new Error('Network with this name exist');
         const newNetwork = {
@@ -120,6 +123,7 @@ export default {
             'SET_NETWORKS',
             allNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {})
           );
+          this.selectNetwork(this.network.name);
         } else {
           allNetworks.push(newNetwork);
           await this.$store.commit('ADD_NETWORK', newNetwork);
