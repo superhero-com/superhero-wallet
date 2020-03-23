@@ -97,8 +97,8 @@ export default {
     async addNetwork() {
       try {
         this.network.error = false;
-        if (this.network.name === DEFAULT_NETWORK) throw new Error('Network with this name exist');
         if (!this.network.name) throw new Error('Enter network name');
+        if (this.network.name === DEFAULT_NETWORK) throw new Error('Network with this name exist');
         const url = new URL(this.network.url);
         const middleware = new URL(this.network.middlewareUrl);
 
