@@ -6,7 +6,7 @@
           {{ tr.amount }} {{ $t('pages.appVUE.aeid') }} <span class="text">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
         </span>
         <span class="status" data-cy="status">{{ $t('pages.recentTransactions.pendingStatus') }}</span>
-        <span class="time" data-cy="time">{{ txTime(tr.time) }}</span>
+        <span class="time" data-cy="time">{{ tr.time | formatDate }}</span>
       </div>
       <div class="holder">
         <span class="url" data-cy="url">{{ tr.domain }}</span>
@@ -26,25 +26,28 @@ export default {
   components: {
     Eye,
   },
-  computed: {
-    ...mapGetters(['transactions', 'currentCurrency']),
-  },
-  data() {
-    return {
-      checkMined: null,
-    };
-  },
+  computed: mapGetters(['transactions', 'currentCurrency']),
+  filters: { formatDate },
   created() {
     this.$store.dispatch('getPendingTxs');
-    this.checkMined = setInterval(() => this.$store.dispatch('checkPendingTxMined'), 2500);
+    const checkMined = setInterval(() => this.checkPendingTxMined(), 2500);
+    this.$once('hook:destroyed', () => clearInterval(checkMined));
   },
   methods: {
-    txTime(time) {
-      return formatDate(time);
+    async checkPendingTxMined() {
+      const { pendingTxs = [] } = await browser.storage.local.get('pendingTxs');
+      await Promise.all(
+        pendingTxs.map(async ({ hash, type, amount, domain }) => {
+          const mined = await this.$store.state.sdk.poll(hash);
+          if (!mined) return;
+          const pending = pendingTxs.filter(p => p.hash !== hash);
+          await browser.storage.local.set({ pendingTxs: pending });
+          this.$store.commit('SET_PENDING_TXS', pending);
+          if (type === 'tip') this.$router.push({ name: 'success-tip', params: { amount, domain } });
+          if (type === 'spend') this.$router.push({ name: 'send', params: { redirectstep: 3, successtx: mined } });
+        })
+      );
     },
-  },
-  beforeDestroy() {
-    clearInterval(this.checkMined);
   },
 };
 </script>
