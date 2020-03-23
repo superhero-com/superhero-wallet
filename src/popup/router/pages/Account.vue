@@ -44,8 +44,6 @@ export default {
   data() {
     return {
       backup_seed_notif: false,
-      IS_EXTENSION: process.env.IS_EXTENSION,
-      RUNNING_IN_TESTS: process.env.RUNNING_IN_TESTS,
     };
   },
   computed: {
