@@ -119,7 +119,7 @@ export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
 export const NO_POPUP_AEPPS = ['youdonotneedacapetobeahero.com', 'superhero.com', 'localhost'];
 
 export const BLACKLIST_AEPPS = ['coronanews.org'];
-
+export const TXS_PER_PAGE = 30;
 export const TX_LIMIT_PER_DAY = 2000;
 export const MAX_AMOUNT_WITHOUT_CONFIRM = 10;
 export const TIPPING_CONTRACT = `@compiler >= 4

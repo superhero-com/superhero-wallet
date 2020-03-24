@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="loading" class="loading">
+    <div v-if="loading" class="loading" data-cy="loader">
       <div class="center">
         <span v-if="content != ''">{{ content }}</span>
         <br v-if="content != ''" />

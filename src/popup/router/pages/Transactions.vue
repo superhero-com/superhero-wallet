@@ -3,7 +3,7 @@
     <AccountInfo />
     <BalanceInfo />
     <TransactionFilters @filtrate="filtrate" />
-    <ae-list class="allTransactions">
+    <ae-list class="allTransactions" data-cy="all-transactions">
       <div class="date" v-if="pendingTransactions.length">{{ $t('pages.recentTransactions.pendingStatus') }}</div>
       <PendingTxs />
       <TransactionItem v-for="transaction in filteredTransactions" :key="transaction.id" :transactionData="transaction"></TransactionItem>
@@ -23,6 +23,7 @@ import BalanceInfo from '../components/BalanceInfo';
 import TransactionFilters from '../components/TransactionFilters';
 import PendingTxs from '../components/PendingTxs';
 import { pollGetter } from '../../utils/helper';
+import { TXS_PER_PAGE } from '../../utils/constants';
 
 export default {
   components: {
@@ -99,13 +100,13 @@ export default {
       if (this.loading && !init) return;
       await pollGetter(() => this.middleware);
       this.loading = true;
-      const transactions = await this.$store.dispatch('fetchTransactions', { page: this.page, limit: 50 });
+      const transactions = await this.$store.dispatch('fetchTransactions', { page: this.page, limit: TXS_PER_PAGE });
       this.updateTransactions({ transactions });
       this.loading = false;
       if (transactions.length) this.page += 1;
     },
     async getLatest() {
-      const transactions = await this.$store.dispatch('fetchTransactions', { limit: 20, page: 1 });
+      const transactions = await this.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE, page: 1 });
       const diff = differenceWith(transactions, this.transactions, isEqual);
       this.updateTransactions({ latest: true, transactions: diff });
     },

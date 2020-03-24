@@ -1,6 +1,6 @@
 <template>
   <div :style="fixedheader" class="popup">
-    <div :style="fixedheader" id="filters" class="filters">
+    <div :style="fixedheader" id="filters" class="filters" data-cy="filters">
       <span class="date d-flex" :class="type == 'date' ? 'active' : ''" @click="filtrateTx('date', date_type)">
         <span>{{ $t('pages.transactionDetails.date') }}</span>
         <FilterArrow :class="direction" />
