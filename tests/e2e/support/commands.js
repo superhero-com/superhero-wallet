@@ -329,3 +329,14 @@ Cypress.Commands.add('selectNetwork', (network, url, middleware) => {
     .click()
     .should('have.class', 'checked');
 });
+
+Cypress.Commands.add('openTransactions', () => {
+  cy.get('[data-cy=view-all-transactions]')
+    .click()
+    .get('[data-cy=loader]')
+    .should('be.visible')
+    .get('[data-cy=all-transactions]')
+    .should('be.visible')
+    .get('[data-cy=filters]')
+    .should('be.visible');
+});
