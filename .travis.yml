@@ -15,3 +15,13 @@ script:
   - npm test
   - npm run build
 
+before_deploy: scripts/before-deploy.sh
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  keep_history: true
+  local_dir: dist/web/root
+  on:
+    branch: master
