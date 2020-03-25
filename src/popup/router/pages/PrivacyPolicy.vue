@@ -8,7 +8,7 @@
       applicable for the Superhero.com ​created and operated website extension SuperHero wallet (​the ​“Wallet” or the “application”)- ​is a digital cryptocurrency wallet that
       enables supporters to send value to content creators, causes, charities, groups, or regular individuals online as a reward for contributing accurate information, relevant
       insights, quality content regarding the novel SuperHero virus outbreak (2019-nCoV). If you have any questions regarding this ​Policy​, please contact us at
-      coronanews@protonmail.com. If you do not agree to the terms of this Policy, please do not use the application​. Each time you use ​the application​, the current version of
+      superherowallet@protonmail.com. If you do not agree to the terms of this Policy, please do not use the application​. Each time you use ​the application​, the current version of
       this ​Policy will apply. The new version of the ​Privacy Policy becomes effective from the day it is announced publicly on ​the application unless stated otherwise.
       Accordingly, when ​You use ​the application​, ​You should check the date of this ​Policy (which appears at the top). If ​You continue to use the ​application after the
       changes have been enforced, ​We shall consider this a given consent and acceptance to the modified content. If ​You do not agree to the new modifications, please contact ​Us
@@ -49,7 +49,7 @@
       material or non-material damage to ​Users​. Breaches in the security may include identity theft, identity fraud, funds loss, unauthorised access to your account, loss of
       confidentiality of personal data, etc. As soon as Superhero.com ​becomes aware of any breach, ​Users and the competent authorities will be notified immediately. You may be
       asked to follow certain instructions for prevention of breaches. VIII. How Do I contact Superhero.com ? To contact us with your questions or comments regarding this Policy or
-      the information collection and dissemination practices of Superhero.com ​relevant to your use of the application, please email us at ​coronanews@protonmail.com
+      the information collection and dissemination practices of Superhero.com ​relevant to your use of the application, please email us at superherowallet@protonmail.com
     </div>
   </div>
 </template>
