@@ -7,7 +7,7 @@
       “​us​” or “​our​”) is a company and Superhero.com ​takes your privacy and the security of your information as a ​User​ very seriously. This ​Privacy Policy (“​Policy​”) is
       applicable for the Superhero.com ​created and operated website extension SuperHero wallet (​the ​“Wallet” or the “application”)- ​is a digital cryptocurrency wallet that
       enables supporters to send value to content creators, causes, charities, groups, or regular individuals online as a reward for contributing accurate information, relevant
-      insights, quality content regarding the novel SuperHero virus outbreak (2019-nCoV). If you have any questions regarding this ​Policy​, please contact us at
+      insights, quality content. If you have any questions regarding this ​Policy​, please contact us at
       superherowallet@protonmail.com. If you do not agree to the terms of this Policy, please do not use the application​. Each time you use ​the application​, the current version of
       this ​Policy will apply. The new version of the ​Privacy Policy becomes effective from the day it is announced publicly on ​the application unless stated otherwise.
       Accordingly, when ​You use ​the application​, ​You should check the date of this ​Policy (which appears at the top). If ​You continue to use the ​application after the
