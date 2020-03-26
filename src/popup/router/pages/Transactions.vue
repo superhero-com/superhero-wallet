@@ -82,7 +82,7 @@ export default {
     const checkLoadMore = () => {
       const { scrollHeight, clientHeight } = document.documentElement;
       if (scrollHeight - window.scrollY === clientHeight) {
-        this.loadMore();
+        setTimeout(() => this.loadMore(), 1500);
       }
     };
     window.addEventListener('scroll', checkLoadMore);
