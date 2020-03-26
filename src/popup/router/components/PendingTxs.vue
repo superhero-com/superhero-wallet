@@ -1,6 +1,6 @@
 <template>
-  <div v-if="transactions.pending.length" data-cy="pending-txs">
-    <ae-list-item v-for="tr in transactions.pending" :key="tr.hash" fill="neutral" class="list-item-transaction">
+  <div v-if="filteredPendings.length" data-cy="pending-txs">
+    <ae-list-item v-for="tr in filteredPendings" :key="tr.hash" fill="neutral" class="list-item-transaction">
       <div class="holder">
         <span class="amount" data-cy="amount">
           {{ tr.amount }} {{ $t('pages.appVUE.aeid') }} <span class="text">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
@@ -26,7 +26,12 @@ export default {
   components: {
     Eye,
   },
-  computed: mapGetters(['transactions', 'currentCurrency']),
+  computed: {
+    ...mapGetters(['transactions', 'currentCurrency']),
+    filteredPendings() {
+      return this.transactions.pending.filter(({ amount, hash }) => !isNaN(amount) && hash);
+    },
+  },
   filters: { formatDate },
   created() {
     this.$store.dispatch('getPendingTxs');
