@@ -45,7 +45,7 @@
             </router-link>
           </li> -->
           <li>
-            <router-link to="/securitySettings">
+            <router-link to="/securitySettings" data-cy="securitySettings">
               {{ $t('pages.appVUE.security') }}
             </router-link>
           </li>
