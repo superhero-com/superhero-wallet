@@ -92,7 +92,7 @@ export default {
       return (this.amount * this.current.currencyRate).toFixed(3);
     },
     urlVerified() {
-      return this.url && this.verifiedUrls.includes(new URL(this.url).hostname);
+      return this.url && this.verifiedUrls.includes(this.url);
     },
   },
   watch: {
