@@ -50,11 +50,6 @@
             </router-link>
           </li>
           <li>
-            <router-link to="/securitySettings" data-cy="securitySettings">
-              {{ $t('pages.appVUE.seedPhrase') }}
-            </router-link>
-          </li>
-          <li>
             <router-link to="/generalSettings" data-cy="generalSettings">
               {{ $t('pages.appVUE.language') }}
             </router-link>
