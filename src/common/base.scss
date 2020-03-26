@@ -162,13 +162,13 @@ main {
   background: $bg-color;
   padding:10px 0;
   button {
-      margin-bottom:0 !important;
+    margin-bottom:0 !important;
   }
   .ae-button.round {
-      padding: 0 0.5rem !important;
+    padding: 0 0.5rem !important;
   }
   button .ae-icon {
-      font-size:1.5rem !important;
+    font-size:1.5rem !important;
   }
 }
 .customFileUpload {
@@ -197,14 +197,14 @@ main {
     align-items: center;
   }
   .file-label {
-      padding: 0.5rem 1rem;
-      display:inline-block;
-      font-family: "Inter UI", sans-serif;
-      font-size: 0.8125rem;
-      letter-spacing: 0.02em;
-      line-height: 1rem;
-      color: #76818C;
-      padding-bottom:0;
+    padding: 0.5rem 1rem;
+    display:inline-block;
+    font-family: "Inter UI", sans-serif;
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+    line-height: 1rem;
+    color: #76818C;
+    padding-bottom:0;
   }
   .file-input {
     font-family: "Inter UI", sans-serif;
@@ -229,15 +229,15 @@ main {
     background:$primary-color;
   }
   .ae-badge.alternative{
-      background:$color-alternative;
+    background:$color-alternative;
   }
   .ae-badge.secondary{
-      background:$color-secondary;
+    background:$color-secondary;
   }
   .ae-badge {
-      background:#929CA6;
-      color:#fff !important;
-      font-size:.7rem;
+    background:#929CA6;
+    color:#fff !important;
+    font-size:.7rem;
   }
 }
 .allTransactions .ae-identicon {
@@ -372,11 +372,11 @@ main {
   color: $color-neutral-negative-1;
   font-family: monospace;
   &.invert {
-      color: #fff;
+    color: #fff;
   }
 
   &:after {
-      content: ' AE';
+    content: ' AE';
   }
   &.no-sign:after {
     content: '';
@@ -444,19 +444,19 @@ $range-label-color: $shade-10 !default;
 $range-label-width: 60px !default;
 
 .range-slider {
-    width: 100%;
-    position:relative;
-    .tipAmount {
-        position:absolute;
-        color: #909090;
-        font-size: 0.9rem;
-    }
-    .tipMin {
-        left:0;
-    }
-    .tipMax {
-        right:0;
-    }
+  width: 100%;
+  position:relative;
+  .tipAmount {
+    position:absolute;
+    color: #909090;
+    font-size: 0.9rem;
+  }
+  .tipMin {
+    left:0;
+  }
+  .tipMax {
+    right:0;
+  }
 }
 
 .range-slider__range {
@@ -522,8 +522,8 @@ $range-label-width: 60px !default;
 }
 
 ::-moz-range-track {
-    background: $range-track-color;
-    border: 0;
+  background: $range-track-color;
+  border: 0;
 }
 
 input::-moz-focus-inner,
@@ -597,20 +597,20 @@ input::-moz-focus-outer {
 }
 .custom-ae-input-header {
   position: relative;
-    display: flex;
-    flex: 0 0;
-    justify-content: space-between;
-    align-items: center;
-    align-self: flex-start;
-    width: 100%;
-    padding: 0.5rem 1rem 0 1rem;
+  display: flex;
+  flex: 0 0;
+  justify-content: space-between;
+  align-items: center;
+  align-self: flex-start;
+  width: 100%;
+  padding: 0.5rem 1rem 0 1rem;
 }
 .custom-ae-input-label {
   color: #76818C;
-    font-family: "Inter UI", sans-serif;
-    font-size: 0.8125rem;
-    letter-spacing: 0.02em;
-    line-height: 1rem;
+  font-family: "Inter UI", sans-serif;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  line-height: 1rem;
 }
 .tokenExtensions .ae-check-button:after {
   width: 29px;
