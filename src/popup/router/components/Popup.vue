@@ -65,5 +65,6 @@ export default {
 }
 .ae-overlay .ae-modal-light .popup-message {
   font-size: 14px;
+  color: $white-color;
 }
 </style>

@@ -1,12 +1,13 @@
 @import './variables';
 
-body, .ae-main, html {
-  background: $bg-color !important;
-  font-size:$font-size;
-  font-family: 'Roboto', sans-serif !important;
-}
-body, html {
+html, body {
   height: 100%;
+}
+html, body, .ae-main {
+  font-family: 'Roboto', sans-serif;
+  font-size: $font-size;
+  color: $white-color;
+  background: $bg-color !important;
 }
 .popup {
   max-width: 357px !important;
@@ -18,13 +19,6 @@ body, html {
 }
 #app {
   font-family: 'Roboto', sans-serif !important;
-}
-:not(svg):not(rect):not(.aemount) {
-  font-family: 'Roboto', sans-serif !important;
-
-  &:not(a) {
-    color: $white-color;
-  }
 }
 .disabled {
   opacity: .4;
