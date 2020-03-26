@@ -223,7 +223,7 @@ Cypress.Commands.add('sendTip', (tip = {}) => {
     .should('eq', `${Cypress.config().popupUrl}/popup#/account`)
     .get('[data-cy=pending-txs]')
     .should('be.visible')
-    .get('[data-cy=success-tip]', { timeout: 60000 })
+    .get('[data-cy=success-tip]', { timeout: 120000 })
     .should('be.visible')
     .url()
     .should('eq', `${Cypress.config().popupUrl}/popup#/success-tip`)
