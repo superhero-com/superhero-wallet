@@ -170,7 +170,9 @@ const getConfig = platform => {
         : []),
       ...(platform === 'chrome' && process.env.HMR === 'true' && !process.env.RUNNING_IN_TESTS ? [new ChromeExtensionReloader({ port: 9099 })] : []),
       ...(['cordova', 'web'].includes(platform) ? [new CopyWebpackPlugin([{ from: 'popup/popup.html', to: `index.html`, transform: transformHtml }])] : []),
-      ...(platform === 'web' ? [new CopyWebpackPlugin([{ from: 'web', to: `../` }])] : []),
+      ...(platform === 'web'
+        ? [new CopyWebpackPlugin([{ from: 'web', to: `../` }]), new CopyWebpackPlugin([{ from: 'popup/popup.html', to: `404.html`, transform: transformHtml }])]
+        : []),
       ...(platform === 'aepp' ? [new CopyWebpackPlugin([{ from: 'aepp/aepp.html', to: `aepp.html`, transform: transformHtml }])] : []),
     ],
   };
