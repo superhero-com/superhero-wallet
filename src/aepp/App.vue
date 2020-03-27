@@ -79,7 +79,6 @@ contract Example =
         nodes: [{ name: process.env.NETWORK, instance: node }],
         compilerUrl: networks[process.env.NETWORK].COMPILER_URL,
         onNetworkChange(params) {
-          // eslint-disable-next-line no-alert
           if (this.getNetworkId() !== params.networkId) alert(`Connected network ${this.getNetworkId()} is not supported with wallet network ${params.networkId}`);
         },
         onAddressChange: async () => {
@@ -126,8 +125,7 @@ contract Example =
       };
     },
     async scanForWallets() {
-      // eslint-disable-next-line func-names
-      const handleWallets = async function({ wallets, newWallet }) {
+      const handleWallets = async ({ wallets, newWallet }) => {
         const wallet = newWallet || Object.values(wallets)[0];
         this.detector.stopScan();
 
@@ -139,7 +137,7 @@ contract Example =
         connectionInfo: { id: 'spy' },
       });
       this.detector = await Detector({ connection: scannerConnection });
-      this.detector.scan(handleWallets.bind(this));
+      this.detector.scan(handleWallets);
     },
   },
 };

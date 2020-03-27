@@ -1,4 +1,3 @@
-/* eslint-disable global-require */
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import en from '../locales/en.json';
@@ -16,10 +15,10 @@ export const i18n = new VueI18n({
 
 export const langs = {
   en: {
-    getMessages: () => require('../locales/en.json'),
+    getMessages: () => import('../locales/en.json'),
   },
   cn: {
-    getMessages: () => require(/* webpackChunkName: "locale-en" */ '../locales/cn.json'),
+    getMessages: () => import(/* webpackChunkName: "locale-en" */ '../locales/cn.json'),
   },
 };
 

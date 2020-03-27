@@ -22,7 +22,7 @@
                 <ae-icon name="close" @click.native="name.addPointer = false" />
               </div>
               <Button v-if="!name.addPointer" class="danger" :disabled="!address(name)" @click="extend(name)" small>{{ $t('pages.namingSystemPage.extend') }}</Button>
-              <Button :small="!name.addPointer" @click="setPointer(name)" :class="name.addPointer ? 'danger' : ''">{{ $t('pages.namingSystemPage.pointer') }}</Button>
+              <Button :small="!name.addPointer" @click="setPointer(key)" :class="name.addPointer ? 'danger' : ''">{{ $t('pages.namingSystemPage.pointer') }}</Button>
             </div>
 
             <ae-icon fill="primary" face="round" name="reload" class="name-pending" v-if="name.pending" />
@@ -117,7 +117,6 @@
 </template>
 
 <script>
-/* eslint-disable no-param-reassign */
 import { mapGetters } from 'vuex';
 import { fetchData, convertToAE, getAddressByNameEntry, checkAddress, chekAensName } from '../../utils/helper';
 import Input from '../components/Input';
@@ -287,15 +286,13 @@ export default {
     async extend({ name }) {
       await this.redirectToConfirm(name);
     },
-    async setPointer(name) {
+    async setPointer(key) {
+      const name = this.registeredNames[key];
       if (!name.addPointer) {
-        name.addPointer = !name.addPointer;
+        name.addPointer = true;
       } else {
-        name.pointerError = false;
-        if (!chekAensName(name.pointerAddress) && !checkAddress(name.pointerAddress)) {
-          name.pointerError = true;
-          return;
-        }
+        name.pointerError = !chekAensName(name.pointerAddress) && !checkAddress(name.pointerAddress);
+        if (name.pointerError) return;
         let pointer = name.pointerAddress;
         if (chekAensName(name.pointerAddress)) {
           try {

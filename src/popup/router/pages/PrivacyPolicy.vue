@@ -1,8 +1,8 @@
-<!-- eslint-disable no-irregular-whitespace -->
 <template>
   <div class="popup">
     <h2>{{ $t('pages.privacyPolicy.heading') }}</h2>
     <div style="font-weight:normal">
+      <!-- eslint-disable no-irregular-whitespace -->
       The present Privacy Policy was created on ​13th​ February 2020. I. Introduction Superhero.com LVC, Dr. Grass Str 12, 9490 Vaduz, Liechtenstein ​("Superhero.com", “​we​”,
       “​us​” or “​our​”) is a company and Superhero.com ​takes your privacy and the security of your information as a ​User​ very seriously. This ​Privacy Policy (“​Policy​”) is
       applicable for the Superhero.com ​created and operated website extension SuperHero wallet (​the ​“Wallet” or the “application”)- ​is a digital cryptocurrency wallet that
@@ -50,6 +50,7 @@
       aware of any breach, ​Users and the competent authorities will be notified immediately. You may be asked to follow certain instructions for prevention of breaches. VIII. How
       Do I contact Superhero.com ? To contact us with your questions or comments regarding this Policy or the information collection and dissemination practices of Superhero.com
       ​relevant to your use of the application, please email us at superherowallet@protonmail.com
+      <!-- eslint-enable no-irregular-whitespace -->
     </div>
   </div>
 </template>
