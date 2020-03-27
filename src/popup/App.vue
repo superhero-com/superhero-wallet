@@ -57,6 +57,16 @@ export default {
     this.checkSdkReady();
     this.getCurrencies();
 
+    if (process.env.IS_EXTENSION) {
+      const [update] = await browser.runtime.requestUpdateCheck();
+      if (update === 'update_available' && !process.env.RUNNING_IN_TESTS) {
+        this.$store.commit('ADD_NOTIFICATION', {
+          title: '',
+          content: this.$t('pages.account.updateAvailable'),
+          route: '',
+        });
+      }
+    }
     if ((await this.$store.dispatch('checkExtensionUpdate')) && !process.env.RUNNING_IN_TESTS) {
       this.$store.commit('ADD_NOTIFICATION', {
         title: '',
