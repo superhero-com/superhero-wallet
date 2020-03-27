@@ -95,7 +95,7 @@ export default {
         publicKey: address,
         privateKey: seed,
       };
-      this.$store.dispatch('setLogin', { keypair });
+      await this.$store.dispatch('setLogin', { keypair });
       this.next();
     },
     prev() {

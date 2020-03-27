@@ -114,6 +114,9 @@ export default {
   [types.SET_CURRENCIES](state, payload) {
     state.currencies = payload;
   },
+  [types.SET_NEXT_CURRENCY_FETCH](state, payload) {
+    state.nextCurrenciesFetch = payload;
+  },
   [types.ADD_NOTIFICATION](state, payload) {
     state.notifications = [...state.notifications, payload];
   },

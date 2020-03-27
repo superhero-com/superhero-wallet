@@ -9,16 +9,16 @@
       <a href="https://example.com/"><img src="../../../icons/google-play.svg" alt="Google Play"/></a>
       <span>Or use a web version</span>
     </div>
-    <CheckBox v-if="!termsAgreedOrNot" v-model="terms" data-cy="checkbox" class="mb-25">
+    <CheckBox v-if="!termsAgreed" v-model="terms" data-cy="checkbox" class="mb-25">
       <div class="primary-text">
         {{ $t('pages.index.term1') }}
         <router-link to="/termsOfService" data-cy="terms">{{ $t('pages.index.termsAndConditions') }}</router-link>
       </div>
     </CheckBox>
-    <Button @click="generwateWalletIntro" :disabled="!terms && !termsAgreedOrNot" data-cy="generate-wallet">
+    <Button @click="generwateWalletIntro" :disabled="!terms && !termsAgreed" data-cy="generate-wallet">
       {{ $t('pages.index.generateWallet') }}
     </Button>
-    <Button @click="importAccount" :disabled="!terms && !termsAgreedOrNot" data-cy="import-wallet">
+    <Button @click="importAccount" :disabled="!terms && !termsAgreed" data-cy="import-wallet">
       {{ $t('pages.index.importWallet') }}
     </Button>
   </main>
@@ -38,7 +38,7 @@ export default {
   data() {
     return {
       terms: false,
-      termsAgreedOrNot: false,
+      termsAgreed: false,
       IS_WEB: process.env.PLATFORM === 'web',
     };
   },
@@ -46,11 +46,6 @@ export default {
     ...mapGetters(['account', 'isLoggedIn', 'wallet', 'tokens']),
   },
   mounted() {},
-  created() {
-    browser.storage.local.get('termsAgreed').then(res => {
-      this.termsAgreedOrNot = res.termsAgreed;
-    });
-  },
   methods: {
     generwateWalletIntro() {
       this.$router.push('/intro');

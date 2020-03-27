@@ -34,19 +34,16 @@ export default {
   },
   filters: { formatDate },
   created() {
-    this.$store.dispatch('getPendingTxs');
     const checkMined = setInterval(() => this.checkPendingTxMined(), 2500);
     this.$once('hook:destroyed', () => clearInterval(checkMined));
   },
   methods: {
     async checkPendingTxMined() {
-      const { pendingTxs = [] } = await browser.storage.local.get('pendingTxs');
       await Promise.all(
-        pendingTxs.map(async ({ hash, type, amount, domain }) => {
+        this.transactions.pending.map(async ({ hash, type, amount, domain }) => {
           const mined = await this.$store.state.sdk.poll(hash);
           if (!mined) return;
-          const pending = pendingTxs.filter(p => p.hash !== hash);
-          await browser.storage.local.set({ pendingTxs: pending });
+          const pending = this.transactions.pending.filter(p => p.hash !== hash);
           this.$store.commit('SET_PENDING_TXS', pending);
           if (type === 'tip') this.$router.push({ name: 'success-tip', params: { amount, domain } });
           if (type === 'spend') this.$router.push({ name: 'send', params: { redirectstep: 3, successtx: mined } });

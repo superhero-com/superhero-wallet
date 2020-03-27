@@ -35,7 +35,6 @@ import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import { pollGetter } from '../../utils/helper';
-import { setPendingTx } from '../../utils';
 import openUrl from '../../utils/openUrl';
 import CheckIcon from '../../../icons/check-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
@@ -103,9 +102,9 @@ export default {
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
       this.loading = true;
       try {
-        const res = await this.tipping.methods.retip(this.tip.id, { amount, waitMined: false });
-        if (res.hash) {
-          await setPendingTx({ hash: res.hash, amount: this.amount, domain: this.tip.url, time: Date.now(), type: 'tip' });
+        const { hash } = await this.tipping.methods.retip(this.tip.id, { amount, waitMined: false });
+        if (hash) {
+          await this.$store.dispatch('setPendingTx', { hash, amount: this.amount, domain: this.tip.url, time: Date.now(), type: 'tip' });
           this.openCallbackOrGoHome('x-success');
         }
       } catch (e) {

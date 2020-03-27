@@ -18,6 +18,7 @@ import {
 } from '../popup/utils/helper';
 import { DEFAULT_NETWORK, AEX2_METHODS, NO_POPUP_AEPPS, BLACKLIST_AEPPS, MAX_AMOUNT_WITHOUT_CONFIRM } from '../popup/utils/constants';
 import { mockLogin } from '../popup/utils';
+import { getState } from '../store/plugins/persistState';
 
 global.browser = require('webextension-polyfill');
 
@@ -31,8 +32,10 @@ const rpcWallet = {
     const { userAccount } = await browser.storage.local.get('userAccount');
     if (userAccount) {
       this.controller.generateWallet({ seed: stringifyForStorage(userAccount.privateKey) });
-      const { activeNetwork } = await browser.storage.local.get('activeNetwork');
-      this[AEX2_METHODS.INIT_RPC_WALLET]({ address: userAccount.publicKey, network: !activeNetwork ? DEFAULT_NETWORK : activeNetwork });
+      const {
+        current: { network },
+      } = await getState();
+      this[AEX2_METHODS.INIT_RPC_WALLET]({ address: userAccount.publicKey, network });
     }
   },
   async initSubaccounts() {

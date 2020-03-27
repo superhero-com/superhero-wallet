@@ -22,7 +22,6 @@ if (process.env.IS_EXTENSION) {
     browser.windows.getAll({}).then(wins => {
       if (wins.length === 0) {
         sessionStorage.removeItem('phishing_urls');
-        browser.storage.local.remove(['isLogged', 'activeAccount']);
       }
     });
   }, 5000);

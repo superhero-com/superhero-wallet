@@ -2,6 +2,7 @@ import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 import { MAGNITUDE_EXA, MAGNITUDE_GIGA, MAGNITUDE_PICO, CONNECTION_TYPES, networks, DEFAULT_NETWORK } from './constants';
+import { getState } from '../../store/plugins/persistState';
 
 export const aeToAettos = v => formatAmount(v, { denomination: AE_AMOUNT_FORMATS.AE, targetDenomination: AE_AMOUNT_FORMATS.AETTOS });
 export const aettosToAe = v => formatAmount(v, { denomination: AE_AMOUNT_FORMATS.AETTOS, targetDenomination: AE_AMOUNT_FORMATS.AE });
@@ -140,25 +141,6 @@ const middleware = async (network, current) => {
       axiosError: () => '',
     },
   })({ swag });
-};
-
-const getCurrencies = async () => {
-  const { convertTimer } = await browser.storage.local.get('convertTimer');
-  const time = new Date().getTime();
-  if (!convertTimer || (convertTimer && (convertTimer === '' || convertTimer <= time))) {
-    const fetched = await fetchData(
-      'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
-      'get',
-      ''
-    );
-    await browser.storage.local.set({ convertTimer: time + 3600000 });
-    await browser.storage.local.set({ allCurrencies: JSON.stringify(fetched.aeternity) });
-
-    return fetched.aeternity;
-  }
-
-  const { allCurrencies } = await browser.storage.local.get('allCurrencies');
-  return JSON.parse(allCurrencies);
 };
 
 const convertAmountToCurrency = (currency, amount) => currency * amount;
@@ -411,9 +393,9 @@ export const pollGetter = getter =>
 
 export const getActiveNetwork = async () => {
   const all = await getAllNetworks();
-  const { activeNetwork } = await browser.storage.local.get('activeNetwork');
+  const { current } = await getState();
   return {
-    network: all[activeNetwork || DEFAULT_NETWORK],
+    network: all[current.network || DEFAULT_NETWORK],
     all,
   };
 };
@@ -425,7 +407,6 @@ export {
   fetchData,
   detectBrowser,
   middleware,
-  getCurrencies,
   convertAmountToCurrency,
   checkAddress,
   chekAensName,

@@ -18,30 +18,13 @@ export default {
     const address = await store.dispatch('generateWallet', { seed: userAccount.privateKey });
     store.commit('UPDATE_ACCOUNT', userAccount);
     store.commit('SET_ACTIVE_ACCOUNT', { publicKey: address, index: 0 });
-    let sub = [];
-    const { subaccounts } = await browser.storage.local.get('subaccounts');
-    if (!subaccounts || (subaccounts && !subaccounts.find(f => f.publicKey === userAccount.publicKey))) {
-      sub.push({
-        name: 'Main Account',
-        publicKey: userAccount.publicKey,
-        root: true,
-        balance: 0,
-        aename: null,
-      });
-    }
-    if (subaccounts) sub = [...sub, ...subaccounts.filter(s => s.publicKey)];
-    store.dispatch('setSubAccounts', sub);
 
     /* Get cached balance */
-    const { tokenBal } = await browser.storage.local.get('tokenBal');
-    if (tokenBal && tokenBal !== '0.000') store.commit('UPDATE_BALANCE', parseFloat(tokenBal));
     store.commit('SWITCH_LOGGED_IN', true);
 
     /* Get network */
     const networks = await getAllNetworks();
     store.commit('SET_NETWORKS', networks);
-    const { activeNetwork } = await browser.storage.local.get(['activeNetwork']);
-    if (activeNetwork) store.commit('SWITCH_NETWORK', activeNetwork);
 
     store.commit('SET_MAIN_LOADING', false);
     return { loggedIn: true };
@@ -80,7 +63,6 @@ export default {
     }
   },
   async logout() {
-    await browser.storage.local.remove(['isLogged', 'activeAccount']);
     store.commit('SET_ACTIVE_ACCOUNT', { publicKey: '', index: 0 });
     store.commit('UNSET_SUBACCOUNTS');
     store.commit('UPDATE_ACCOUNT', {});

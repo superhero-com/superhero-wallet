@@ -53,7 +53,6 @@ export default {
       this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
     },
     async switchCurrency(currency) {
-      await browser.storage.local.set({ currency });
       this.$store.commit('SET_CURRENCY', { currency, currencyRate: this.currencies[currency] });
       this.dropdown.currencies = false;
     },

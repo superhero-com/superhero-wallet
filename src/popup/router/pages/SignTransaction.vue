@@ -275,15 +275,6 @@ export default {
       }
       return Promise.resolve(false);
     },
-    async setTxInQueue(tx) {
-      const { processingTx } = await browser.storage.local.get('processingTx');
-      let list = [];
-      if (typeof processingTx !== 'undefined' && processingTx.length) {
-        list = [...list, ...processingTx];
-      }
-      list.push(tx);
-      await browser.storage.local.set({ processingTx: list });
-    },
     async init() {
       this.setReceiver();
       if (this.isLedger && this.data.type !== 'txSign') {
@@ -679,7 +670,6 @@ export default {
           name: 'account',
           type: 'added_success',
         });
-        await this.$store.dispatch('removePendingName', { hash: this.data.tx.hash });
       } catch (err) {
         setTxInQueue('error');
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });

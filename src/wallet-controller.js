@@ -15,7 +15,6 @@ export default class WalletController {
           if (wins.length === 0) {
             this.lockWallet();
             sessionStorage.removeItem('phishing_urls');
-            browser.storage.local.remove('activeAccount');
           }
         });
         if (!this.wallet) {
@@ -40,7 +39,6 @@ export default class WalletController {
 
   lockWallet() {
     this.wallet = null;
-    browser.storage.local.remove('isLogged');
   }
 
   generateWallet({ seed }) {

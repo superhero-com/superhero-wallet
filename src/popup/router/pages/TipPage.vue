@@ -53,7 +53,6 @@ import { mapGetters } from 'vuex';
 import axios from 'axios';
 import { calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import { escapeSpecialChars, pollGetter, aeToAettos } from '../../utils/helper';
-import { setPendingTx } from '../../utils';
 import CheckIcon from '../../../icons/check-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
@@ -172,9 +171,9 @@ export default {
       const amount = aeToAettos(this.amount);
       this.loading = true;
       try {
-        const res = await this.tipping.call('tip', [this.url, escapeSpecialChars(this.note)], { amount, waitMined: false });
-        if (res.hash) {
-          await setPendingTx({ hash: res.hash, amount: this.amount, domain: this.url, time: Date.now(), type: 'tip' });
+        const { hash } = await this.tipping.call('tip', [this.url, escapeSpecialChars(this.note)], { amount, waitMined: false });
+        if (hash) {
+          await this.$store.dispatch('setPendingTx', { hash, amount: this.amount, domain: this.url, time: Date.now(), type: 'tip' });
           this.$router.push('/account');
         }
       } catch (e) {

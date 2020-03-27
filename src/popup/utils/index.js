@@ -13,18 +13,6 @@ export const setTxInQueue = async tx => {
   await browser.storage.local.set({ processingTx: list });
 };
 
-export const setPendingTx = async tx => {
-  const { pendingTxs } = await browser.storage.local.get('pendingTxs');
-  let list = [];
-  if (pendingTxs && pendingTxs.length) {
-    list = [...list, ...pendingTxs];
-  }
-  list.push(tx);
-  await setTxInQueue(tx.hash);
-  await browser.storage.local.set({ pendingTxs: list });
-  return true;
-};
-
 export const formatTime = time => new Date(parseInt(time)).toLocaleTimeString(navigator.language, { timeStyle: 'short', hourCycle: 'h24', hour: '2-digit', minute: '2-digit' });
 
 export const formatDate = time =>
@@ -46,7 +34,7 @@ export const mockLogin = async (options = {}) => {
     publicKey,
     privateKey: seed,
   };
-  await browser.storage.local.set({ userAccount: keypair, isLogged: true, termsAgreed: true });
+  await browser.storage.local.set({ userAccount: keypair });
   const sub = [];
   sub.push({
     name: 'Main Account',
@@ -55,7 +43,7 @@ export const mockLogin = async (options = {}) => {
     root: true,
     aename: options.name ? options.name : null,
   });
-  await browser.storage.local.set({ subaccounts: sub, activeAccount: 0, mnemonic });
+  await browser.storage.local.set({ subaccounts: sub, mnemonic });
 
   if (options.balance) await browser.storage.local.set({ tokenBal: options.balance });
   if (options.lastRoute) await localStorage.setItem('lsroute', options.lastRoute);

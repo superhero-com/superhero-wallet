@@ -5,6 +5,7 @@ import * as popupMessages from '../popup/utils/popup-messages';
 import { convertToAE, stringifyForStorage, parseFromStorage, aettosToAe } from '../popup/utils/helper';
 import { BACKEND_URL, DEFAULT_NETWORK } from '../popup/utils/constants';
 import { postMessage } from '../popup/utils/connection';
+import { setTxInQueue } from '../popup/utils';
 
 export default {
   setAccount({ commit }, payload) {
@@ -18,12 +19,10 @@ export default {
     commit(types.SET_SUBACCOUNTS, payload);
   },
   async switchNetwork({ commit }, payload) {
-    await browser.storage.local.set({ activeNetwork: payload });
     return commit(types.SWITCH_NETWORK, payload);
   },
   async updateBalance({ commit, state }) {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
-    await browser.storage.local.set({ tokenBal: convertToAE(balance).toFixed(3) });
     commit(types.UPDATE_BALANCE, convertToAE(balance));
   },
   popupAlert({ commit }, payload) {
@@ -180,7 +179,7 @@ export default {
   initSdk({ commit }, payload) {
     commit(types.INIT_SDK, payload);
   },
-  async getRegisteredNames({ commit, state }) {
+  async getRegisteredNames({ commit, state, dispatch }) {
     if (!state.middleware) return;
     const { middlewareUrl } = state.network[state.current.network];
     const res = await Promise.all(
@@ -218,7 +217,10 @@ export default {
         return [];
       })
     );
-    await browser.storage.local.set({ subaccounts: state.subaccounts.filter(s => s.publicKey) });
+    await dispatch(
+      'setSubAccounts',
+      state.subaccounts.filter(s => s.publicKey)
+    );
     commit(types.SET_NAMES, { names: Array.prototype.concat.apply([], res) });
   },
   async fetchAuctionEntry({ state: { sdk } }, name) {
@@ -230,13 +232,6 @@ export default {
         nameFee: BigNumber(aettosToAe(tx.nameFee)),
       })),
     };
-  },
-  async removePendingName({ commit, state }, { hash }) {
-    let pending = state.pendingNames;
-    pending = pending.filter(p => p.hash !== hash);
-    await browser.storage.local.set({ pendingNames: { list: pending } });
-    commit(types.SET_PENDING_NAMES, { names: pending });
-    await new Promise(resolve => setTimeout(resolve, 1500));
   },
 
   unlockWallet(context, payload) {
@@ -261,34 +256,31 @@ export default {
     return (await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })).address;
   },
 
-  async setLogin({ commit, dispatch }, { keypair }) {
-    await browser.storage.local.set({ userAccount: keypair, isLogged: true, termsAgreed: true });
+  async setLogin({ commit, dispatch, state }, { keypair }) {
+    await browser.storage.local.set({ userAccount: keypair });
 
-    const sub = [];
-    sub.push({
-      name: 'Main Account',
-      publicKey: keypair.publicKey,
-      balance: 0,
-      root: true,
-      aename: null,
-    });
-    await browser.storage.local.set({ subaccounts: sub, activeAccount: 0 });
+    const sub = [
+      {
+        name: 'Main Account',
+        publicKey: keypair.publicKey,
+        balance: 0,
+        root: true,
+        aename: null,
+      },
+    ];
     commit('SET_ACTIVE_ACCOUNT', { publicKey: keypair.publicKey, index: 0 });
     await dispatch('setSubAccounts', sub);
     commit('UPDATE_ACCOUNT', keypair);
     commit('SWITCH_LOGGED_IN', true);
   },
-  async getPendingTxs({ state: { current }, commit }) {
-    const { pendingTxs } = await browser.storage.local.get('pendingTxs');
-    let txs = [];
-    if (pendingTxs && pendingTxs.length) {
-      txs = pendingTxs.map(el => {
-        const { time, domain } = el;
-        const amount = parseFloat(el.amount).toFixed(3);
-        const amountCurrency = parseFloat(current.currencyRate ? amount * current.currencyRate : amount).toFixed(3);
-        return { ...el, amount, time, amountCurrency, domain };
-      });
-    }
+  async setPendingTx({ commit, state: { transactions, current } }, tx) {
+    await setTxInQueue(tx.hash);
+    const txs = [...transactions.pending, tx].map(el => {
+      const { time, domain } = el;
+      const amount = parseFloat(el.amount).toFixed(3);
+      const amountCurrency = parseFloat(current.currencyRate ? amount * current.currencyRate : amount).toFixed(3);
+      return { ...el, amount, time, amountCurrency, domain };
+    });
     commit('SET_PENDING_TXS', txs);
   },
   async checkExtensionUpdate({ state: { network } }) {
@@ -310,5 +302,28 @@ export default {
     if (!backed_up_Seed) return false;
 
     return true;
+  },
+  async setCurrency({
+    commit,
+    state: {
+      currencies,
+      current: { currency },
+    },
+  }) {
+    commit('SET_CURRENCY', {
+      currency,
+      currencyRate: currencies[currency],
+    });
+  },
+  async getCurrencies({ state: { nextCurrenciesFetch }, commit, dispatch }) {
+    if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
+      const res = await fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau'
+      );
+      const { aeternity } = await res.json();
+      commit('SET_CURRENCIES', aeternity);
+      commit('SET_NEXT_CURRENCY_FETCH', new Date().getTime() + 3600000);
+    }
+    dispatch('setCurrency');
   },
 };

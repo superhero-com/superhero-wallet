@@ -20,7 +20,6 @@ import { mapGetters } from 'vuex';
 import { clearInterval, setInterval } from 'timers';
 import { AEX2_METHODS } from './utils/constants';
 import { postMessage, readWebPageDom } from './utils/connection';
-import { getCurrencies } from './utils/helper';
 import { fetchAndSetLocale } from './utils/i18nHelper';
 import Header from './router/components/Header';
 import SidebarMenu from './router/components/SidebarMenu';
@@ -42,10 +41,8 @@ export default {
     },
   },
   async created() {
-    const { language } = await browser.storage.local.get(['language']);
-
-    this.$store.state.current.language = language;
-    if (language) fetchAndSetLocale(language);
+    // console.log(this.current.language)
+    fetchAndSetLocale(this.current.language);
 
     if (process.env.IS_EXTENSION) {
       readWebPageDom((receiver, sendResponse) => {
@@ -55,7 +52,7 @@ export default {
     }
 
     this.checkSdkReady();
-    this.getCurrencies();
+    this.$store.dispatch('getCurrencies');
 
     if (process.env.IS_EXTENSION) {
       const [update] = await browser.runtime.requestUpdateCheck();
@@ -107,15 +104,6 @@ export default {
           }
         }
       }, 2500);
-    },
-    async getCurrencies() {
-      const { currency } = await browser.storage.local.get('currency');
-      const currencies = await getCurrencies();
-      this.$store.commit('SET_CURRENCIES', currencies);
-      this.$store.commit('SET_CURRENCY', {
-        currency: currency || this.current.currency,
-        currencyRate: currency ? currencies[currency] : currencies[this.current.currency],
-      });
     },
   },
   beforeDestroy() {
