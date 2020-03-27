@@ -1,6 +1,6 @@
 import { setInterval } from 'timers';
 import iconUrl from './icons/icon_48.png';
-import { getSDK } from './lib/background-utils';
+import { getSDK, getNodes } from './lib/background-utils';
 import { NOTIFICATION_METHODS } from './popup/utils/constants';
 import { detectBrowser } from './popup/utils/helper';
 
@@ -13,6 +13,7 @@ export default class Notification {
 
   async init() {
     this.client = await getSDK();
+    this.network = (await getNodes()).network;
     setInterval(() => {
       this.checkTxReady();
     }, 2000);
@@ -23,6 +24,7 @@ export default class Notification {
 
   async [NOTIFICATION_METHODS.SWITCH_NETWORK]() {
     this.client = await getSDK();
+    this.network = (await getNodes()).network;
   }
 
   async getAllNotifications() {
