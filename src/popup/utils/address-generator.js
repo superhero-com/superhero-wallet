@@ -4,7 +4,7 @@ import { generateEncryptedWallet } from './keystore';
 import { dump, recover } from '@aeternity/aepp-sdk/es/utils/keystore';
 import * as Crypto from '@aeternity/aepp-sdk/es/utils/crypto';
 import { getHdWalletAccount } from './hdWallet';
-import WebCrypto from './webCrypto';
+import * as WebCrypto from './webCrypto';
 
 const nacl = require('tweetnacl');
 
@@ -13,8 +13,6 @@ export const addressGenerator = {
   importPrivateKey,
   decryptKeystore,
 };
-
-const webCrypto = new WebCrypto();
 
 export function printUnderscored(key, val) {
   print(`${key}${R.repeat('_', WIDTH - key.length).reduce((a, b) => (a += b), '')} ${typeof val !== 'object' ? val : JSON.stringify(val)}`);
@@ -60,7 +58,7 @@ async function decryptKeystore(encryptedKeystore, key) {
     } else if (encryptedKeystore.crypto.kdf == 'webCrypto') {
       // webCrypto decrypt
 
-      decrypted = await webCrypto.decrypt(encryptedKeystore.crypto.ciphertext, key, encryptedKeystore.crypto.cipher_params.nonce, encryptedKeystore.crypto.kdf_params.salt);
+      decrypted = await WebCrypto.decrypt(encryptedKeystore.crypto.ciphertext, key, encryptedKeystore.crypto.cipher_params.nonce, encryptedKeystore.crypto.kdf_params.salt);
     }
 
     return decrypted;
@@ -70,11 +68,11 @@ async function decryptKeystore(encryptedKeystore, key) {
 }
 
 export const encryptMnemonic = async (mnemonic, password, nonce = new Uint8Array(12), salt = new Uint8Array(16)) => {
-  return Buffer.from(await webCrypto.encrypt(mnemonic, password, nonce, salt)).toString('hex');
+  return Buffer.from(await WebCrypto.encrypt(mnemonic, password, nonce, salt)).toString('hex');
 };
 
 export const decryptMnemonic = async (mnemonic, password, nonce = new Uint8Array(12), salt = new Uint8Array(16)) => {
-  let dec = await webCrypto.decrypt(mnemonic, password, nonce, salt);
+  let dec = await WebCrypto.decrypt(mnemonic, password, nonce, salt);
   if (dec) {
     return dec;
   }

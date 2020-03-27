@@ -6,6 +6,38 @@ import { detectBrowser } from './popup/utils/helper';
 
 global.browser = require('webextension-polyfill');
 
+async function getAllNotifications() {
+  const { processingTx } = await browser.storage.local.get('processingTx');
+  return processingTx;
+}
+
+async function deleteNotification(tx) {
+  const { processingTx } = await browser.storage.local.get('processingTx');
+  let list = [...processingTx];
+  list = list.filter(t => t !== tx);
+  await browser.storage.local.set({ processingTx: list });
+}
+
+async function sendNoti({ title, message, contextMessage, error }) {
+  let params = {
+    type: 'basic',
+    title,
+    iconUrl,
+    message,
+    priority: 2,
+  };
+  if (detectBrowser() !== 'Firefox') {
+    if (!error) {
+      params = {
+        ...params,
+        buttons: [{ title: 'See transaction details' }],
+      };
+    }
+  }
+
+  await browser.notifications.create(`popup.html?${contextMessage}`, params);
+}
+
 export default class Notification {
   constructor() {
     this.init();
@@ -27,54 +59,20 @@ export default class Notification {
     this.network = (await getNodes()).network;
   }
 
-  async getAllNotifications() {
-    const { processingTx } = await browser.storage.local.get('processingTx');
-    return processingTx;
-  }
-
-  async deleteNotification(tx) {
-    const { processingTx } = await browser.storage.local.get('processingTx');
-    let list = [...processingTx];
-    list = list.filter(t => t !== tx);
-    await browser.storage.local.set({ processingTx: list });
-  }
-
   async checkTxReady() {
-    const noties = await this.getAllNotifications();
+    const noties = await getAllNotifications();
     if (noties) {
       noties.forEach(async tx => {
         if (tx !== 'error' && tx) {
           await this.client.poll(tx);
           const url = `${this.network.explorerUrl}/transactions/${tx}`;
-          await this.sendNoti({ title: 'Transaction ready', message: `You can explore your transaction by clicking button below`, contextMessage: url, error: false });
+          await sendNoti({ title: 'Transaction ready', message: `You can explore your transaction by clicking button below`, contextMessage: url, error: false });
         } else {
-          await this.sendNoti({ title: 'Transaction error', message: 'Transaction cannot be processed ', error: true });
+          await sendNoti({ title: 'Transaction error', message: 'Transaction cannot be processed ', error: true });
         }
 
-        await this.deleteNotification(tx);
+        await deleteNotification(tx);
       });
     }
-  }
-
-  async sendNoti({ title, message, contextMessage, error }) {
-    let params = {
-      type: 'basic',
-      title,
-      iconUrl,
-      message,
-      priority: 2,
-    };
-    if (detectBrowser() !== 'Firefox') {
-      if (!error) {
-        params = {
-          ...params,
-          buttons: [{ title: 'See transaction details' }],
-        };
-      }
-    }
-
-    await browser.notifications.create(`popup.html?${contextMessage}`, params);
-
-    return Promise.resolve(true);
   }
 }
