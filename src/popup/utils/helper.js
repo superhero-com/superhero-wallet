@@ -317,12 +317,11 @@ const setContractInstance = async (tx, sdk, contractAddress = null) => {
     if (typeof tx.abi_version !== 'undefined' && tx.abi_version !== 3) {
       backend = 'aevm';
     }
-    try {
-      contractInstance = await sdk.getContractInstance(tx.source, { contractAddress, forceCodeCheck: true });
-      contractInstance.setOptions({ backend });
-    } catch (e) {}
-    return Promise.resolve(contractInstance);
-  } catch (e) {}
+    contractInstance = await sdk.getContractInstance(tx.source, { contractAddress, forceCodeCheck: true });
+    contractInstance.setOptions({ backend });
+  } catch (e) {
+    console.error(`setContractInstance: ${e}`);
+  }
   return Promise.resolve(contractInstance);
 };
 

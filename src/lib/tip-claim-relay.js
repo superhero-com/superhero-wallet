@@ -41,6 +41,8 @@ export default {
           await axios.post(`${TIP_SERVICE}`, { url, address: account.publicKey });
         }
       }
-    } catch (err) {}
+    } catch (e) {
+      console.error(`checkUrlHasBalance: ${e}`);
+    }
   },
 };

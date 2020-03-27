@@ -126,22 +126,20 @@ contract Example =
       };
     },
     async scanForWallets() {
-      try {
-        // eslint-disable-next-line func-names
-        const handleWallets = async function({ wallets, newWallet }) {
-          const wallet = newWallet || Object.values(wallets)[0];
-          this.detector.stopScan();
+      // eslint-disable-next-line func-names
+      const handleWallets = async function({ wallets, newWallet }) {
+        const wallet = newWallet || Object.values(wallets)[0];
+        this.detector.stopScan();
 
-          await this.connectToWallet(wallet);
-          // let addr = await this.client.askAddresses()
-        };
+        await this.connectToWallet(wallet);
+        // let addr = await this.client.askAddresses()
+      };
 
-        const scannerConnection = await BrowserWindowMessageConnection({
-          connectionInfo: { id: 'spy' },
-        });
-        this.detector = await Detector({ connection: scannerConnection });
-        this.detector.scan(handleWallets.bind(this));
-      } catch (e) {}
+      const scannerConnection = await BrowserWindowMessageConnection({
+        connectionInfo: { id: 'spy' },
+      });
+      this.detector = await Detector({ connection: scannerConnection });
+      this.detector.scan(handleWallets.bind(this));
     },
   },
 };

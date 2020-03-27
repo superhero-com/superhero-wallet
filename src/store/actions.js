@@ -200,7 +200,9 @@ export default {
             (async () => {
               try {
                 return await state.middleware.getActiveNames({ owner: publicKey });
-              } catch (e) {}
+              } catch (e) {
+                console.error(`middleware.getActiveNames: ${e}`);
+              }
               return [];
             })(),
           ]);
