@@ -45,13 +45,8 @@
             </router-link>
           </li> -->
           <li>
-            <router-link to="/securitySettings">
-              {{ $t('pages.appVUE.security') }}
-            </router-link>
-          </li>
-          <li>
             <router-link to="/securitySettings" data-cy="securitySettings">
-              {{ $t('pages.appVUE.seedPhrase') }}
+              {{ $t('pages.appVUE.security') }}
             </router-link>
           </li>
           <li>

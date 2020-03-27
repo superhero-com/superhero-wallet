@@ -91,7 +91,8 @@
       "youNeedTo": "You need to",
       "backup": "backup",
       "yourSeedPhrase": "your seed phrase",
-      "updateExtension": "New verison available! Please update your extension!"
+      "updateExtension": "New verison available! Please update your extension!",
+      "updateAvailable": "New verison in store avaible!"
     },
     "accountPassword": {
       "heading": "",
