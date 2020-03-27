@@ -1,6 +1,6 @@
 import { DEFAULT_NETWORK } from '../popup/utils/constants';
 
-export const getters = {
+export default {
   account(state) {
     return state.account;
   },
