@@ -46,6 +46,7 @@ textarea {
   padding: 15px;
   margin-bottom: 22px;
   color: $text-color !important;
+  font-family: 'Roboto', sans-serif;
   font-size: $font-size;
   min-height: 200px !important;
   margin-left: auto;

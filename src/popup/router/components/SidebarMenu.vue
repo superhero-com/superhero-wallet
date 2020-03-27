@@ -123,7 +123,6 @@ export default {
   list-style: none;
 
   li {
-    color: #717c87;
     margin: 0;
     border-bottom: 1px solid $bg-color;
 

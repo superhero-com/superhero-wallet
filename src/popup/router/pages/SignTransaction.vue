@@ -762,11 +762,27 @@ export default {
   font-size: 2rem;
   color: $white-color;
 }
-.spendTxDetailsList .ae-list-item {
-  position: relative;
-  cursor: unset;
-  // text-transform: uppercase;
-  font-size: 0.8rem;
+.spendTxDetailsList {
+  .balance {
+    font-family: Roboto, sans-serif;
+    color: $white-color;
+  }
+
+  .ae-list-item {
+    position: relative;
+    cursor: unset;
+    // text-transform: uppercase;
+    font-size: 0.8rem;
+
+    div .ae-badge {
+      background: $accent-color;
+      font-family: Roboto, sans-serif;
+      color: $white-color;
+      -webkit-box-shadow: 0 0 0 2px $accent-color;
+      box-shadow: 0px 0px 0px 2px $accent-color;
+      border: 2px solid $bg-color;
+    }
+  }
 }
 .spendTxDetailsList .ae-button {
   margin-bottom: 0 !important;
@@ -817,13 +833,6 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.ae-badge {
-  background: $accent-color !important;
-  color: $white-color !important;
-  -webkit-box-shadow: 0 0 0 2px $accent-color;
-  box-shadow: 0px 0px 0px 2px $accent-color;
-  border: 2px solid $bg-color;
 }
 .extend {
   width: 100%;

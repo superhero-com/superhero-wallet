@@ -57,6 +57,7 @@ export default {
     .account-name {
       flex-grow: 1;
       font-weight: 500;
+      color: $white-color;
     }
 
     .copied-alert {

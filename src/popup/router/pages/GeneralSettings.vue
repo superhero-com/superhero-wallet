@@ -89,6 +89,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import '../../../common/variables';
+
 .color-grey {
   background-color: #505058 !important;
   border-radius: 4px;
@@ -128,7 +130,7 @@ export default {
 .language-settings button {
   font-size: 14px;
   width: 100%;
-  color: #000;
+  color: $button-text-color;
   text-align: left;
   margin: 0;
   padding: 0 1rem;

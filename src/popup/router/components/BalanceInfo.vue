@@ -152,12 +152,13 @@ export default {
     top: 50%;
     margin-top: -36px;
     font-size: 26px;
-    .amount {
-      font-size: 26px;
-      color: $text-color !important;
-      :last-child {
-        color: $secondary-color !important;
-      }
+    color: $white-color;
+    &,
+    .ae-button {
+      font-family: 'Roboto', sans-serif;
+    }
+    .amount :last-child {
+      color: $secondary-color;
     }
     .ae-button {
       display: block;
