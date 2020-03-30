@@ -37,7 +37,7 @@ export default {
     };
   },
   async created() {
-    await pollGetter(() => this.sdk);
+    await this.$watchUntilTruly(() => this.sdk);
     this.getEventData();
   },
   computed: {

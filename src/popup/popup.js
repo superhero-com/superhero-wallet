@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import { defer } from 'lodash-es';
 import App from './App';
 import store from '../store';
 import router from './router';
@@ -8,6 +9,19 @@ import '../lib/initEnv';
 global.browser = require('webextension-polyfill');
 
 Vue.prototype.$browser = global.browser;
+Vue.prototype.$watchUntilTruly = function watchUntilTruly(getter) {
+  return new Promise(resolve => {
+    const unwatch = this.$watch(
+      getter,
+      value => {
+        if (!value) return;
+        resolve();
+        defer(() => unwatch());
+      },
+      { immediate: true }
+    );
+  });
+};
 
 new Vue({
   store,

@@ -85,28 +85,24 @@ export default {
     if (notifCounter !== 0) await browser.storage.local.set({ notifCounter: this.notifications.length });
   },
   methods: {
-    checkSdkReady() {
-      const checkSDKReady = setInterval(async () => {
-        if (this.sdk) {
-          if (!window.RUNNING_IN_POPUP && process.env.IS_EXTENSION) {
-            postMessage({ type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
-          }
-          this.pollData();
-          clearInterval(checkSDKReady);
-        }
-      }, 100);
+    async checkSdkReady() {
+      await this.$watchUntilTruly(() => this.sdk);
+      if (!window.RUNNING_IN_POPUP && process.env.IS_EXTENSION) {
+        postMessage({ type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
+      }
+      this.pollData();
     },
     pollData() {
       let triggerOnce = false;
-      this.polling = setInterval(async () => {
-        if (this.sdk != null && this.isLoggedIn) {
-          if (!process.env.RUNNING_IN_TESTS) this.$store.dispatch('updateBalance');
-          if (!triggerOnce) {
-            this.$store.dispatch('getRegisteredNames');
-            triggerOnce = true;
-          }
+      const polling = setInterval(async () => {
+        if (!this.isLoggedIn) return;
+        if (!process.env.RUNNING_IN_TESTS) this.$store.dispatch('updateBalance');
+        if (!triggerOnce) {
+          this.$store.dispatch('getRegisteredNames');
+          triggerOnce = true;
         }
       }, 2500);
+      this.$once('hook:beforeDestroy', () => clearInterval(polling));
     },
     async getCurrencies() {
       const { currency } = await browser.storage.local.get('currency');
@@ -117,9 +113,6 @@ export default {
         currencyRate: currency ? currencies[currency] : currencies[this.current.currency],
       });
     },
-  },
-  beforeDestroy() {
-    clearInterval(this.polling);
   },
 };
 </script>

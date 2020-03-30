@@ -52,7 +52,7 @@
 import { mapGetters } from 'vuex';
 import axios from 'axios';
 import { calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
-import { escapeSpecialChars, pollGetter, aeToAettos } from '../../utils/helper';
+import { escapeSpecialChars, aeToAettos } from '../../utils/helper';
 import { setPendingTx } from '../../utils';
 import CheckIcon from '../../../icons/check-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
@@ -137,7 +137,7 @@ export default {
       console.error(`Can't fetch /verified: ${e}`);
     }
 
-    await pollGetter(() => this.sdk);
+    await this.$watchUntilTruly(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
       contractId: this.network[this.current.network].tipContract,
