@@ -63,9 +63,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../../common/variables';
+
 .install-native-version > * {
   display: block;
   width: 270px;
   margin: 15px auto;
+}
+.primary-text {
+  color: $white-color;
+  font-size: 0.88rem;
 }
 </style>

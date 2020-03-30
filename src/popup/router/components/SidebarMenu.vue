@@ -45,13 +45,8 @@
             </router-link>
           </li> -->
           <li>
-            <router-link to="/securitySettings">
-              {{ $t('pages.appVUE.security') }}
-            </router-link>
-          </li>
-          <li>
             <router-link to="/securitySettings" data-cy="securitySettings">
-              {{ $t('pages.appVUE.seedPhrase') }}
+              {{ $t('pages.appVUE.security') }}
             </router-link>
           </li>
           <li>
@@ -128,7 +123,6 @@ export default {
   list-style: none;
 
   li {
-    color: #717c87;
     margin: 0;
     border-bottom: 1px solid $bg-color;
 

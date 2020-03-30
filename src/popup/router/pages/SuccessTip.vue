@@ -6,7 +6,7 @@
         <span class="ml-5">{{ $t('pages.successTip.completedHeading') }}</span>
       </div>
     </h3>
-    <p class="primary-title primary-title-darker text-left mb-8 f-16">
+    <p class="primary-title text-left mb-8 f-16">
       {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text" data-cy="tip-amount">{{ amountTip }} {{ $t('pages.appVUE.aeid') }} </span> ({{
         getCurrencyAmount
       }}

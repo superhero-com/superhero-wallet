@@ -1,6 +1,6 @@
 const links = ['receive', 'send', 'transactions', 'names', 'aboutSettings'];
 
-const dropdownLinks = ['securitySettings', 'generalSettings'];
+const dropdownLinks = ['securitySettings', 'generalSettings', 'networks'];
 
 describe('Test cases for menu sidebar component', () => {
   beforeEach(() => {
