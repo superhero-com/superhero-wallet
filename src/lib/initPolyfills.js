@@ -30,7 +30,7 @@ global.browser = process.env.IS_EXTENSION
           clear() {
             localStorage.clear();
             return Promise.resolve();
-          }
+          },
         },
       },
     };

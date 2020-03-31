@@ -1,6 +1,6 @@
 import '../../../src/lib/initPolyfills';
 import uuid from 'uuid';
-import { setPendingTx, formatDate, mockLogin } from '../../../src/popup/utils';
+import { formatDate, mockLogin } from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', onBeforeLoad => {
   cy.visit('chrome/popup/popup', { onBeforeLoad });
@@ -265,15 +265,6 @@ Cypress.Commands.add(
   (key, value) =>
     new Cypress.Promise(async resolve => {
       await browser.storage.local.set({ [key]: value });
-      resolve();
-    })
-);
-
-Cypress.Commands.add(
-  'setPendingTx',
-  tx =>
-    new Cypress.Promise(async resolve => {
-      await setPendingTx(tx);
       resolve();
     })
 );

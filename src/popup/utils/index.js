@@ -26,13 +26,15 @@ export const mockLogin = async (options = {}) => {
     privateKey: seed,
   };
   await browser.storage.local.set({ userAccount: keypair });
-  const sub = [{
-    name: 'Main Account',
-    publicKey: keypair.publicKey,
-    balance: 10,
-    root: true,
-    aename: options.name ? options.name : null,
-  }];
+  const sub = [
+    {
+      name: 'Main Account',
+      publicKey: keypair.publicKey,
+      balance: 10,
+      root: true,
+      aename: options.name ? options.name : null,
+    },
+  ];
   if (options.tx) await browser.storage.local.set({ transactions: { pending: [options.tx] } });
   if (options.balance) await browser.storage.local.set({ balance: options.balance });
   if (options.lastRoute) await localStorage.setItem('lsroute', options.lastRoute);

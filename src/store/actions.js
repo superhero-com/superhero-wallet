@@ -255,7 +255,7 @@ export default {
     return (await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })).address;
   },
 
-  async setLogin({ commit, dispatch, state }, { keypair }) {
+  async setLogin({ commit, dispatch }, { keypair }) {
     commit('UPDATE_ACCOUNT', keypair);
 
     const sub = [

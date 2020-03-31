@@ -3,12 +3,14 @@ const migrations = [];
 export const registerMigration = migration => migrations.push(migration);
 
 export default (state, store) => {
-  let newState = state ? {
-    migrations: {},
-    ...state,
-  } : {
-    migrations: migrations.reduce((p, m, id) => ({ ...p, [id]: false }), {}),
-  };
+  let newState = state
+    ? {
+        migrations: {},
+        ...state,
+      }
+    : {
+        migrations: migrations.reduce((p, m, id) => ({ ...p, [id]: false }), {}),
+      };
 
   const asyncMigrations = [];
 
@@ -20,7 +22,6 @@ export default (state, store) => {
       newState.migrations[idx] = true;
     } else asyncMigrations.push({ promise: result, idx });
   });
-
 
   asyncMigrations.forEach(async ({ promise, idx }) => {
     await promise;

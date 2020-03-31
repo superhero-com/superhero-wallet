@@ -1,11 +1,11 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
+import { isEmpty } from 'lodash-es';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
 import { parseFromStorage, middleware, getAllNetworks } from '../popup/utils/helper';
 import { TIPPING_CONTRACT } from '../popup/utils/constants';
-import { isEmpty } from 'lodash-es';
 
 export default {
   countError: 0,

@@ -42,7 +42,8 @@ export default {
   },
   async created() {
     this.$watch(
-      ({ current: { language } }) => [language],([language]) => {
+      ({ current: { language } }) => [language],
+      ([language]) => {
         fetchAndSetLocale(language);
       }
     );

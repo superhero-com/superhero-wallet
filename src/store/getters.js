@@ -111,5 +111,5 @@ export const getters = {
   },
   backedUpSeed({ backedUpSeed }) {
     return backedUpSeed;
-  }
+  },
 };
