@@ -1,7 +1,11 @@
-const phishingCheckUrl = url =>
-  fetch(`https://etherscamdb.info/api/check/${url}`)
-    .then(res => res.json())
-    .catch(err => err);
+const phishingCheckUrl = async url => {
+  try {
+    const res = await fetch(`https://etherscamdb.info/api/check/${url}`)
+    return await res.json();
+  } catch (e) {
+    return e;
+  }
+}
 
 const getPhishingUrls = () => {
   const storage = sessionStorage.getItem('phishing_urls');

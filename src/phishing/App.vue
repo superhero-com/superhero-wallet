@@ -74,7 +74,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../common/base';
+@import '../common/variables';
 body,
 html,
 .content {
@@ -105,7 +105,7 @@ p {
   text-align: left;
 }
 a {
-  color: $primary-color;
+  color: $bg-color;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -113,6 +113,6 @@ a {
   text-align: center;
 }
 .ae-main {
-  background: $primary-color !important;
+  background: $bg-color !important;
 }
 </style>

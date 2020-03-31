@@ -30,32 +30,30 @@ if (process.env.IS_EXTENSION) {
   const notification = new Notification();
   setController(controller);
 
-  const postPhishingData = data => {
-    browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
-      const message = { method: 'phishingCheck', data };
-      tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message));
-    });
+  const postPhishingData = async data => {
+    const tabs = await browser.tabs.query({ active: true, currentWindow: true })
+    const message = { method: 'phishingCheck', data };
+    tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message));
   };
 
   browser.runtime.onMessage.addListener(async (msg, sender) => {
     switch (msg.method) {
       case 'phishingCheck': {
         const data = { ...msg, extUrl: browser.extension.getURL('./') };
-        const host = extractHostName(msg.params.href);
+        const host = (new URL(msg.params.href)).hostname;
         data.host = host;
-        phishingCheckUrl(host).then(res => {
-          if (res.result === 'blocked') {
-            const whitelist = getPhishingUrls().filter(url => url === host);
-            if (whitelist.length) {
-              data.blocked = false;
-              return postPhishingData(data);
-            }
-            data.blocked = true;
+        const { result } = await phishingCheckUrl(host)
+        if (result === 'blocked' && host !== 'localhost' && host !== '127.0.0.1') {
+          const whitelist = getPhishingUrls().filter(url => url === host);
+          if (whitelist.length) {
+            data.blocked = false;
             return postPhishingData(data);
           }
-          data.blocked = false;
+          data.blocked = true;
           return postPhishingData(data);
-        });
+        }
+        data.blocked = false;
+        return postPhishingData(data);
         break;
       }
       case 'setPhishingUrl': {
