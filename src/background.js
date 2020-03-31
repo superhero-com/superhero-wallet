@@ -43,7 +43,7 @@ if (process.env.IS_EXTENSION) {
         const host = (new URL(msg.params.href)).hostname;
         data.host = host;
         const { result } = await phishingCheckUrl(host)
-        if (result === 'blocked' && host !== 'localhost' && host !== '127.0.0.1') {
+        if (result === 'blocked') {
           const whitelist = getPhishingUrls().filter(url => url === host);
           if (whitelist.length) {
             data.blocked = false;
