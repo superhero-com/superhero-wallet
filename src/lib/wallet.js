@@ -5,21 +5,21 @@ import store from '../store';
 import { postMessage } from '../popup/utils/connection';
 import { parseFromStorage, middleware, getAllNetworks } from '../popup/utils/helper';
 import { TIPPING_CONTRACT } from '../popup/utils/constants';
+import { isEmpty } from 'lodash-es';
 
 export default {
   countError: 0,
   async init() {
     const { userAccount } = await browser.storage.local.get('userAccount');
-    if (!userAccount) {
+    if (!userAccount && isEmpty(store.getters.account)) {
       store.commit('SET_MAIN_LOADING', false);
       return { loggedIn: false };
     }
-
-    const address = await store.dispatch('generateWallet', { seed: userAccount.privateKey });
-    store.commit('UPDATE_ACCOUNT', userAccount);
+    const account = !userAccount ? store.getters.account : userAccount;
+    const address = await store.dispatch('generateWallet', { seed: account.privateKey });
+    store.commit('UPDATE_ACCOUNT', account);
     store.commit('SET_ACTIVE_ACCOUNT', { publicKey: address, index: 0 });
 
-    /* Get cached balance */
     store.commit('SWITCH_LOGGED_IN', true);
 
     /* Get network */

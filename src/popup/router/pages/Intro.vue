@@ -90,7 +90,7 @@ export default {
       this.mnemonic = generateMnemonic();
       const seed = mnemonicToSeed(this.mnemonic).toString('hex');
       const address = await this.$store.dispatch('generateWallet', { seed });
-      await browser.storage.local.set({ mnemonic: this.mnemonic });
+      this.$store.commit('SET_MNEMONIC', this.mnemonic);
       const keypair = {
         publicKey: address,
         privateKey: seed,

@@ -82,7 +82,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['balance', 'popup', 'tipping', 'current', 'sdk', 'account', 'network', 'currentCurrency']),
+    ...mapGetters(['balance', 'popup', 'tipping', 'current', 'sdk', 'account', 'network', 'currentCurrency', 'tip']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -143,21 +143,20 @@ export default {
   },
   methods: {
     async persistTipDetails() {
-      const { tipDetails } = await browser.storage.local.get('tipDetails');
-      if (tipDetails) {
-        const { amount, note, exp } = tipDetails;
+      if (this.tip) {
+        const { amount, note, exp } = this.tip;
         if (exp > Date.now()) {
           this.amount = parseFloat(amount);
           this.note = note;
         } else {
-          await browser.storage.local.remove('tipDetails');
+          this.$store.commit('SET_TIP_DETAILS', null);
         }
       }
       this.$watch(
         ({ amount, note }) => [amount, note],
         ([amount, note]) => {
           const exp = new Date().setMinutes(new Date().getMinutes() + 20);
-          browser.storage.local.set({ tipDetails: { note, amount, exp } });
+          this.$store.commit('SET_TIP_DETAILS', { note, amount, exp });
         }
       );
     },

@@ -5,6 +5,7 @@ import { getters } from './getters';
 import mutations from './mutations';
 import actions from './actions';
 import persistState from './plugins/persistState';
+import runMigrations from './migrations';
 import { POPUP_PROPS } from '../popup/utils/popup-messages';
 import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
 
@@ -14,6 +15,7 @@ export default new Vuex.Store({
   state: {
     subaccounts: [],
     account: {},
+    mnemonic: null,
     activeAccount: 0,
     names: [],
     wallet: [],
@@ -45,6 +47,12 @@ export default new Vuex.Store({
     currencies: {},
     nextCurrenciesFetch: null,
     notifications: [],
+    notificationsCounter: null,
+    tip: null,
+    txQueue: [],
+    connectedAepps: {},
+    migrations: {},
+    backedUpSeed: null,
   },
   getters,
   mutations: {
@@ -56,13 +64,17 @@ export default new Vuex.Store({
       };
       Object.entries(mergeWith({}, state, remoteState, customizer)).forEach(([name, value]) => Vue.set(state, name, value));
     },
+    markMigrationAsApplied(state, migrationId) {
+      Vue.set(state.migrations, migrationId, true);
+    },
     ...mutations,
   },
   actions,
   plugins: [
     persistState(
-      state => state,
-      ({ current, transactions, balance, subaccounts, currencies, userNetworks, names, nextCurrenciesFetch }) => ({
+      (state, store) => runMigrations(state, store),
+      ({
+        migrations,
         current,
         transactions,
         balance,
@@ -71,6 +83,28 @@ export default new Vuex.Store({
         userNetworks,
         names,
         nextCurrenciesFetch,
+        tip,
+        notificationsCounter,
+        connectedAepps,
+        backedUpSeed,
+        account,
+        mnemonic,
+      }) => ({
+        migrations,
+        current,
+        transactions,
+        balance,
+        subaccounts,
+        currencies,
+        userNetworks,
+        names,
+        nextCurrenciesFetch,
+        tip,
+        notificationsCounter,
+        connectedAepps,
+        backedUpSeed,
+        account,
+        mnemonic,
       })
     ),
   ],

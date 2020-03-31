@@ -13,7 +13,6 @@ export const resetState = () => {
   browser.storage.remove.local(KEY);
 }
 
-
 export default (reducerLoad, reducerSave) => async store => {
   let resetting = false;
   let lastEmitedState = reducerLoad(await getState(), store);
@@ -30,9 +29,15 @@ export default (reducerLoad, reducerSave) => async store => {
       },
     },
   });
-
-  chrome.storage.onChanged.addListener(async () => {
-    lastEmitedState = reducerLoad(await getState());
-    store.commit('syncState', lastEmitedState);
-  });
+  if (process.env.IS_EXTENSION) {
+    browser.storage.onChanged.addListener(async () => {
+      lastEmitedState = reducerLoad(await getState());
+      store.commit('syncState', lastEmitedState);
+    });
+  } else {
+    window.addEventListener('storage', async () => {
+      lastEmitedState = reducerLoad(await getState());
+      store.commit('syncState', lastEmitedState);
+    })
+  }
 };

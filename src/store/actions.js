@@ -5,7 +5,6 @@ import * as popupMessages from '../popup/utils/popup-messages';
 import { convertToAE, stringifyForStorage, parseFromStorage, aettosToAe } from '../popup/utils/helper';
 import { BACKEND_URL, DEFAULT_NETWORK } from '../popup/utils/constants';
 import { postMessage } from '../popup/utils/connection';
-import { setTxInQueue } from '../popup/utils';
 
 export default {
   setAccount({ commit }, payload) {
@@ -257,7 +256,7 @@ export default {
   },
 
   async setLogin({ commit, dispatch, state }, { keypair }) {
-    await browser.storage.local.set({ userAccount: keypair });
+    commit('UPDATE_ACCOUNT', keypair);
 
     const sub = [
       {
@@ -274,7 +273,6 @@ export default {
     commit('SWITCH_LOGGED_IN', true);
   },
   async setPendingTx({ commit, state: { transactions, current } }, tx) {
-    await setTxInQueue(tx.hash);
     const txs = [...transactions.pending, tx].map(el => {
       const { time, domain } = el;
       const amount = parseFloat(el.amount).toFixed(3);
@@ -294,14 +292,6 @@ export default {
     }
 
     return update;
-  },
-  async checkBackupSeed() {
-    // eslint-disable-next-line camelcase
-    const { backed_up_Seed } = await browser.storage.local.get('backed_up_Seed');
-    // eslint-disable-next-line camelcase
-    if (!backed_up_Seed) return false;
-
-    return true;
   },
   async setCurrency({
     commit,
@@ -325,5 +315,13 @@ export default {
       commit('SET_NEXT_CURRENCY_FETCH', new Date().getTime() + 3600000);
     }
     dispatch('setCurrency');
+  },
+  async setPermissionForAccount({ commit, state: { connectedAepps } }, { host, account }) {
+    if (connectedAepps[host]) {
+      if (connectedAepps[host].includes(account)) return;
+      commit('UPDATE_CONNECTED_AEPP', { host, account });
+    } else {
+      commit('ADD_CONNECTED_AEPP', { host, account });
+    }
   },
 };

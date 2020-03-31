@@ -3,16 +3,6 @@ import { mnemonicToSeed } from '@aeternity/bip39';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { testAccount, txParams } from './config';
 
-export const setTxInQueue = async tx => {
-  const { processingTx } = await browser.storage.local.get('processingTx');
-  let list = [];
-  if (typeof processingTx !== 'undefined' && processingTx.length) {
-    list = [...list, ...processingTx];
-  }
-  list.push(tx);
-  await browser.storage.local.set({ processingTx: list });
-};
-
 export const formatTime = time => new Date(parseInt(time)).toLocaleTimeString(navigator.language, { timeStyle: 'short', hourCycle: 'h24', hour: '2-digit', minute: '2-digit' });
 
 export const formatDate = time =>
@@ -28,6 +18,7 @@ export const formatDate = time =>
   });
 
 export const mockLogin = async (options = {}) => {
+  await browser.storage.local.clear();
   const { mnemonic, publicKey } = testAccount;
   const seed = mnemonicToSeed(mnemonic).toString('hex');
   const keypair = {
@@ -35,19 +26,19 @@ export const mockLogin = async (options = {}) => {
     privateKey: seed,
   };
   await browser.storage.local.set({ userAccount: keypair });
-  const sub = [];
-  sub.push({
+  const sub = [{
     name: 'Main Account',
     publicKey: keypair.publicKey,
-    balance: 0,
+    balance: 10,
     root: true,
     aename: options.name ? options.name : null,
-  });
-  await browser.storage.local.set({ subaccounts: sub, mnemonic });
-
-  if (options.balance) await browser.storage.local.set({ tokenBal: options.balance });
+  }];
+  if (options.tx) await browser.storage.local.set({ transactions: { pending: [options.tx] } });
+  if (options.balance) await browser.storage.local.set({ balance: options.balance });
   if (options.lastRoute) await localStorage.setItem('lsroute', options.lastRoute);
   if (options.backupSeed) await browser.storage.local.set({ backed_up_Seed: true });
+
+  await browser.storage.local.set({ subaccounts: sub, mnemonic });
 };
 
 export const buildTx = txtype => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);

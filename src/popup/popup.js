@@ -4,8 +4,7 @@ import store from '../store';
 import router from './router';
 import { i18n } from './utils/i18nHelper';
 import '../lib/initEnv';
-
-global.browser = require('webextension-polyfill');
+import '../lib/initPolyfills';
 
 Vue.prototype.$browser = global.browser;
 

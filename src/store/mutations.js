@@ -120,4 +120,25 @@ export default {
   [types.ADD_NOTIFICATION](state, payload) {
     state.notifications = [...state.notifications, payload];
   },
+  [types.SET_NOTIFICATIONS_COUNTER](state, payload) {
+    state.notificationsCounter = payload;
+  },
+  [types.SET_TIP_DETAILS](state, payload) {
+    state.tip = payload;
+  },
+  [types.SET_TX_QUEUE](state, payload) {
+    state.txQueue = [...state.txQueue, payload];
+  },
+  [types.ADD_CONNECTED_AEPP](state, { host, account }) {
+    state.connectedAepps = { ...state.connectedAepps, [host]: [account] };
+  },
+  [types.UPDATE_CONNECTED_AEPP](state, { host, account }) {
+    state.connectedAepps = { ...state.connectedAepps, [host]: [...state.connectedAepps[host].accounts, account] };
+  },
+  [types.SET_MNEMONIC](state, payload) {
+    state.mnemonic = payload;
+  },
+  [types.SET_BACKED_UP_SEED](state, payload) {
+    state.backedUpSeed = payload;
+  },
 };

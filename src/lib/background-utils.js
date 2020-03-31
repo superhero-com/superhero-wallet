@@ -1,6 +1,7 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
 import { setContractInstance, contractCall, getAddressByNameEntry, getActiveNetwork } from '../popup/utils/helper';
+import { getState } from '../store/plugins/persistState';
 
 let sdk;
 let controller;
@@ -11,9 +12,9 @@ export const setController = contr => {
 };
 
 export const getActiveAccount = async () => {
-  const { userAccount } = await browser.storage.local.get('userAccount');
-  if (userAccount) {
-    return { account: { publicKey: userAccount.publicKey }, activeAccount: 0 };
+  const { account } = await getState();
+  if (account) {
+    return { account: { publicKey: account.publicKey }, activeAccount: 0 };
   }
   return false;
 };

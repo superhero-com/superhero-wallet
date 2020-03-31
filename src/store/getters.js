@@ -97,7 +97,19 @@ export const getters = {
   notifications({ notifications }) {
     return notifications;
   },
-  names(state) {
-    return state.names;
+  notificationsCounter({ notificationsCounter }) {
+    return notificationsCounter;
   },
+  names({ names }) {
+    return names;
+  },
+  tip({ tip }) {
+    return tip;
+  },
+  mnemonic({ mnemonic }) {
+    return mnemonic;
+  },
+  backedUpSeed({ backedUpSeed }) {
+    return backedUpSeed;
+  }
 };

@@ -85,34 +85,13 @@ const fetchData = (url, method, fetchedData) => {
 };
 
 const getAeppAccountPermission = async (host, account) => {
-  const { connectedAepps } = await browser.storage.local.get('connectedAepps');
-  if (!connectedAepps) return false;
-  if (connectedAepps && connectedAepps.list) {
-    const { list } = connectedAepps;
-    if (list.find(ae => ae.host === host && ae.accounts.includes(account))) {
-      return true;
-    }
-    return false;
+  const { connectedAepps } = await getState();
+  if (!Object.keys(connectedAepps).length) return false;
+  if (!connectedAepps[host]) return false;
+  if (connectedAepps[host].includes(account)) {
+    return true;
   }
   return false;
-};
-
-const setPermissionForAccount = async (host, account) => {
-  const { connectedAepps } = await browser.storage.local.get('connectedAepps');
-  const list = (connectedAepps && connectedAepps.list) || [];
-
-  if (list.length && list.find(l => l.host === host)) {
-    const hst = list.find(h => h.host === host);
-    const index = list.findIndex(h => h.host === host);
-    if (!hst) return;
-    if (hst.accounts.includes(account)) return;
-
-    list[index].accounts = [...hst.accounts, account];
-  } else {
-    list.push({ host, accounts: [account] });
-  }
-
-  await browser.storage.local.set({ connectedAepps: { list } });
 };
 
 export const fetchJson = async (...args) => {
@@ -327,7 +306,7 @@ const getUniqueId = (length = 6) => {
 };
 
 const getUserNetworks = async () => {
-  const { userNetworks } = await browser.storage.local.get('userNetworks');
+  const { userNetworks } = await getState();
   return !userNetworks ? {} : userNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {});
 };
 
@@ -418,7 +397,6 @@ export {
   setContractInstance,
   getContractInstance,
   getAeppAccountPermission,
-  setPermissionForAccount,
   getUniqueId,
   getUserNetworks,
   getExtensionProtocol,

@@ -85,7 +85,6 @@
 <script>
 import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
-import { setTxInQueue } from '../../utils';
 import { MAGNITUDE, TX_TYPES, calculateFee } from '../../utils/constants';
 import { convertAmountToCurrency, checkAddress, chekAensName, aettosToAe, aeToAettos } from '../../utils/helper';
 import Button from '../components/Button';
@@ -472,7 +471,7 @@ export default {
           if (typeof result === 'object') {
             this.loading = false;
             this.hash = result.hash;
-            setTxInQueue(result.hash);
+            this.$store.commit('SET_TX_QUEUE', result.hash);
             const txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${result.hash}`;
             const msg = `You have sent ${this.amount} AE`;
             this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(async () => {
@@ -482,7 +481,7 @@ export default {
           }
         })
         .catch(async () => {
-          setTxInQueue('error');
+          this.$store.commit('SET_TX_QUEUE', 'error');
           this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
           this.loading = false;
         });
@@ -545,7 +544,7 @@ export default {
         }
         call = await this.$helpers.contractCall({ instance: this.contractInstance, method: this.data.tx.method, params: [...this.data.tx.params, options] });
 
-        setTxInQueue(call.hash);
+        this.$store.commit('SET_TX_QUEUE', call.hash);
         const decoded = await call.decode();
         call.decoded = decoded;
         if (this.data.popup) {
@@ -554,7 +553,7 @@ export default {
           this.port.postMessage({ ...res });
         }
       } catch (err) {
-        setTxInQueue('error');
+        this.$store.commit('SET_TX_QUEUE', 'error');
         this.errorTx.error.message = typeof err.message !== 'undefined' ? err.message : err;
         this.sending = true;
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
@@ -570,9 +569,9 @@ export default {
       } else {
         try {
           deployed = await this.contractInstance.deploy([...this.data.tx.init], { fee: this.convertSelectedFee });
-          setTxInQueue(deployed.transaction);
+          this.$store.commit('SET_TX_QUEUE', deployed.transaction);
         } catch (err) {
-          setTxInQueue('error');
+          this.$store.commit('SET_TX_QUEUE', 'error');
           this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
         }
       }
@@ -614,7 +613,7 @@ export default {
     async namePreclaim() {
       try {
         const preclaim = await this.sdk.aensPreclaim(this.data.tx.name, { fee: this.convertSelectedFee });
-        setTxInQueue(preclaim.hash);
+        this.$store.commit('SET_TX_QUEUE', preclaim.hash);
         const tx = {
           popup: false,
           tx: {
@@ -626,7 +625,7 @@ export default {
         };
         this.redirectToTxConfirm(tx);
       } catch (err) {
-        setTxInQueue('error');
+        this.$store.commit('SET_TX_QUEUE', 'error');
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });
         this.$store.commit('SET_AEPP_POPUP', false);
         this.$router.push('/names');
@@ -637,19 +636,19 @@ export default {
         try {
           await this.sdk.aensBid(this.data.tx.name, this.data.tx.BigNumberAmount);
         } catch (err) {
-          setTxInQueue('error');
+          this.$store.commit('SET_TX_QUEUE', 'error');
           this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });
         }
       } else {
         try {
           const claim = await this.data.tx.preclaim.claim({ waitMined: false, fee: this.convertSelectedFee });
-          setTxInQueue(claim.hash);
+          this.$store.commit('SET_TX_QUEUE', claim.hash);
         } catch (err) {
           let msg = err.message;
           if (msg.includes('is not enough to execute')) {
             msg = this.$t('pages.signTransaction.balanceError');
           }
-          setTxInQueue('error');
+          this.$store.commit('SET_TX_QUEUE', 'error');
           this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg });
         }
       }
@@ -665,13 +664,13 @@ export default {
         } else if (this.data.nameUpdateType === 'updatePointer') {
           update = await nameObject.update(this.data.tx.pointers, { extendPointers: true });
         }
-        setTxInQueue(update.hash);
+        this.$store.commit('SET_TX_QUEUE', update.hash);
         await this.$store.dispatch('popupAlert', {
           name: 'account',
           type: 'added_success',
         });
       } catch (err) {
-        setTxInQueue('error');
+        this.$store.commit('SET_TX_QUEUE', 'error');
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });
       }
       this.$store.commit('SET_AEPP_POPUP', false);
@@ -697,7 +696,7 @@ export default {
                 method: this.data.tx.method,
                 params: [...this.data.tx.params, { fee: this.convertSelectedFee }],
               });
-              setTxInQueue(call.hash);
+              this.$store.commit('SET_TX_QUEUE', call.hash);
               const msg = `You have sent ${this.data.tx.amount} ${this.data.tx.token}`;
               const txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${call.hash}`;
               this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(() => {

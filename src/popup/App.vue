@@ -35,14 +35,17 @@ export default {
     showSidebar: false,
   }),
   computed: {
-    ...mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup', 'notifications']),
+    ...mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup', 'notifications', 'notificationsCounter', 'backedUpSeed']),
     waveBg() {
       return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(this.$route.path);
     },
   },
   async created() {
-    // console.log(this.current.language)
-    fetchAndSetLocale(this.current.language);
+    this.$watch(
+      ({ current: { language } }) => [language],([language]) => {
+        fetchAndSetLocale(language);
+      }
+    );
 
     if (process.env.IS_EXTENSION) {
       readWebPageDom((receiver, sendResponse) => {
@@ -71,15 +74,14 @@ export default {
         route: '',
       });
     }
-    if (!(await this.$store.dispatch('checkBackupSeed'))) {
+    if (!this.backedUpSeed) {
       this.$store.commit('ADD_NOTIFICATION', {
         title: '',
         content: `${this.$t('pages.account.youNeedTo')} ${this.$t('pages.account.backup')} ${this.$t('pages.account.yourSeedPhrase')}`,
         route: '/securitySettings',
       });
     }
-    const { notifCounter } = await browser.storage.local.get('notifCounter');
-    if (notifCounter !== 0) await browser.storage.local.set({ notifCounter: this.notifications.length });
+    if (this.notificationsCounter !== 0) this.$store.commit('SET_NOTIFICATIONS_COUNTER', this.notifications.length);
   },
   methods: {
     checkSdkReady() {
@@ -108,6 +110,7 @@ export default {
   },
   beforeDestroy() {
     clearInterval(this.polling);
+    this.$store.commit('RESET_NOTIFICATIONS');
   },
 };
 </script>

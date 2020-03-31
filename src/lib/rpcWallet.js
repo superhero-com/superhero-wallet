@@ -4,7 +4,6 @@ import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-c
 import Node from '@aeternity/aepp-sdk/es/node';
 import { setInterval, clearInterval } from 'timers';
 import uuid from 'uuid';
-import { getAccounts } from '../popup/utils/storage';
 import {
   parseFromStorage,
   extractHostName,
@@ -29,17 +28,17 @@ const rpcWallet = {
     this.initFields();
     this.controller = walletController;
     if (process.env.RUNNING_IN_TESTS) await mockLogin();
-    const { userAccount } = await browser.storage.local.get('userAccount');
-    if (userAccount) {
-      this.controller.generateWallet({ seed: stringifyForStorage(userAccount.privateKey) });
+    const { account } = await getState();
+    if (account) {
+      this.controller.generateWallet({ seed: stringifyForStorage(account.privateKey) });
       const {
         current: { network },
       } = await getState();
-      this[AEX2_METHODS.INIT_RPC_WALLET]({ address: userAccount.publicKey, network });
+      this[AEX2_METHODS.INIT_RPC_WALLET]({ address: account.publicKey, network });
     }
   },
   async initSubaccounts() {
-    const subaccounts = await getAccounts();
+    const { subaccounts } = await getState();
     this.subaccounts = subaccounts;
     return Promise.resolve(true);
   },
