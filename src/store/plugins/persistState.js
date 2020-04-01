@@ -1,7 +1,9 @@
+import { cloneDeep } from 'lodash-es';
+
 const KEY = 'state';
 
 const setState = async state => {
-  browser.storage.local.set({ [KEY]: state });
+  browser.storage.local.set({ [KEY]: cloneDeep(state) });
 };
 
 export const getState = async () => {
