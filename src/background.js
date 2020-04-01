@@ -113,6 +113,7 @@ if (process.env.IS_EXTENSION) {
   });
 }
 
+// eslint-disable-next-line import/prefer-default-export
 export const handleMessage = ({ type, payload }) => {
   if (HDWALLET_METHODS.includes(type)) {
     return controller[type](payload);

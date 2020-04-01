@@ -200,7 +200,9 @@ export default {
             (async () => {
               try {
                 return await state.middleware.getActiveNames({ owner: publicKey });
-              } catch (e) {}
+              } catch (e) {
+                console.error(`middleware.getActiveNames: ${e}`);
+              }
               return [];
             })(),
           ]);
@@ -304,11 +306,6 @@ export default {
     return update;
   },
   async checkBackupSeed() {
-    // eslint-disable-next-line camelcase
-    const { backed_up_Seed } = await browser.storage.local.get('backed_up_Seed');
-    // eslint-disable-next-line camelcase
-    if (!backed_up_Seed) return false;
-
-    return true;
+    return (await browser.storage.local.get('backed_up_Seed')).backed_up_Seed;
   },
 };
