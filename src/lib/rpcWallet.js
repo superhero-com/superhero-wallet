@@ -4,7 +4,7 @@ import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-c
 import Node from '@aeternity/aepp-sdk/es/node';
 import { setInterval, clearInterval } from 'timers';
 import uuid from 'uuid';
-import { getAccounts } from '../popup/utils/storage';
+import { isEmpty } from 'lodash-es';
 import {
   parseFromStorage,
   extractHostName,
@@ -18,6 +18,7 @@ import {
 } from '../popup/utils/helper';
 import { DEFAULT_NETWORK, AEX2_METHODS, NO_POPUP_AEPPS, BLACKLIST_AEPPS, MAX_AMOUNT_WITHOUT_CONFIRM } from '../popup/utils/constants';
 import { mockLogin } from '../popup/utils';
+import { getState } from '../store/plugins/persistState';
 
 global.browser = require('webextension-polyfill');
 
@@ -28,15 +29,17 @@ const rpcWallet = {
     this.initFields();
     this.controller = walletController;
     if (process.env.RUNNING_IN_TESTS) await mockLogin();
-    const { userAccount } = await browser.storage.local.get('userAccount');
-    if (userAccount) {
-      this.controller.generateWallet({ seed: stringifyForStorage(userAccount.privateKey) });
-      const { activeNetwork } = await browser.storage.local.get('activeNetwork');
-      this[AEX2_METHODS.INIT_RPC_WALLET]({ address: userAccount.publicKey, network: !activeNetwork ? DEFAULT_NETWORK : activeNetwork });
+    const { account } = await getState();
+    if (!isEmpty(account)) {
+      this.controller.generateWallet({ seed: stringifyForStorage(account.privateKey) });
+      const {
+        current: { network },
+      } = await getState();
+      this[AEX2_METHODS.INIT_RPC_WALLET]({ address: account.publicKey, network });
     }
   },
   async initSubaccounts() {
-    const subaccounts = await getAccounts();
+    const { subaccounts } = await getState();
     this.subaccounts = subaccounts;
     return Promise.resolve(true);
   },

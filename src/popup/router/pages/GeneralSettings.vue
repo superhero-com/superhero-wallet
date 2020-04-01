@@ -45,11 +45,6 @@ export default {
   computed: {
     ...mapGetters(['current', 'popup', 'names', 'sdk']),
   },
-  created() {
-    if (!this.current.language) {
-      this.current.language = 'en';
-    }
-  },
   methods: {
     toggleDropdown(event, parentClass) {
       const dropdownParent = event.target.closest(!parentClass ? '.language-settings' : parentClass);
@@ -57,11 +52,8 @@ export default {
     },
     async switchLanguage(languageChoose) {
       fetchAndSetLocale(languageChoose);
-      browser.storage.local.set({ language: languageChoose }).then(() => {
-        this.current.language = languageChoose;
-        this.dropdown.languages = false;
-        this.$store.state.current.language = languageChoose;
-      });
+      this.dropdown.languages = false;
+      this.$store.state.current.language = languageChoose;
     },
     navigateToSettings() {
       this.$router.push('/settings');

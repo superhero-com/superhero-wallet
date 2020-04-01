@@ -20,8 +20,8 @@ import { mapGetters } from 'vuex';
 import { clearInterval, setInterval } from 'timers';
 import { AEX2_METHODS } from './utils/constants';
 import { postMessage, readWebPageDom } from './utils/connection';
-import { getCurrencies } from './utils/helper';
 import { fetchAndSetLocale } from './utils/i18nHelper';
+import { detectBrowser } from './utils/helper';
 import Header from './router/components/Header';
 import SidebarMenu from './router/components/SidebarMenu';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus';
@@ -36,16 +36,18 @@ export default {
     showSidebar: false,
   }),
   computed: {
-    ...mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup', 'notifications']),
+    ...mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup', 'notifications', 'notificationsCounter', 'backedUpSeed']),
     waveBg() {
       return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(this.$route.path);
     },
   },
   async created() {
-    const { language } = await browser.storage.local.get(['language']);
-
-    this.$store.state.current.language = language;
-    if (language) fetchAndSetLocale(language);
+    this.$watch(
+      ({ current: { language } }) => [language],
+      ([language]) => {
+        fetchAndSetLocale(language);
+      }
+    );
 
     if (process.env.IS_EXTENSION) {
       readWebPageDom((receiver, sendResponse) => {
@@ -55,9 +57,9 @@ export default {
     }
 
     this.checkSdkReady();
-    this.getCurrencies();
+    this.$store.dispatch('getCurrencies');
 
-    if (process.env.IS_EXTENSION) {
+    if (process.env.IS_EXTENSION && detectBrowser() !== 'Firefox') {
       const [update] = await browser.runtime.requestUpdateCheck();
       if (update === 'update_available' && !process.env.RUNNING_IN_TESTS) {
         this.$store.commit('ADD_NOTIFICATION', {
@@ -74,15 +76,14 @@ export default {
         route: '',
       });
     }
-    if (!(await this.$store.dispatch('checkBackupSeed'))) {
+    if (!this.backedUpSeed) {
       this.$store.commit('ADD_NOTIFICATION', {
         title: '',
         content: `${this.$t('pages.account.youNeedTo')} ${this.$t('pages.account.backup')} ${this.$t('pages.account.yourSeedPhrase')}`,
         route: '/securitySettings',
       });
     }
-    const { notifCounter } = await browser.storage.local.get('notifCounter');
-    if (notifCounter !== 0) await browser.storage.local.set({ notifCounter: this.notifications.length });
+    if (this.notificationsCounter !== 0) this.$store.commit('SET_NOTIFICATIONS_COUNTER', this.notifications.length);
   },
   methods: {
     async checkSdkReady() {
@@ -103,15 +104,6 @@ export default {
         }
       }, 2500);
       this.$once('hook:beforeDestroy', () => clearInterval(polling));
-    },
-    async getCurrencies() {
-      const { currency } = await browser.storage.local.get('currency');
-      const currencies = await getCurrencies();
-      this.$store.commit('SET_CURRENCIES', currencies);
-      this.$store.commit('SET_CURRENCY', {
-        currency: currency || this.current.currency,
-        currencyRate: currency ? currencies[currency] : currencies[this.current.currency],
-      });
     },
   },
 };

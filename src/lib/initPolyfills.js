@@ -27,6 +27,10 @@ global.browser = process.env.IS_EXTENSION
             keys.forEach(k => localStorage.removeItem(k));
             return Promise.resolve();
           },
+          clear() {
+            localStorage.clear();
+            return Promise.resolve();
+          },
         },
       },
     };

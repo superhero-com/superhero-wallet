@@ -27,8 +27,7 @@ export default async () => {
       window.close();
     }, 1000);
   };
-  const { txType } = await browser.storage.local.get('txType');
-  const payload = process.env.RUNNING_IN_TESTS ? { popupType: window.POPUP_TYPE, txType } : {};
+  const payload = process.env.RUNNING_IN_TESTS ? { popupType: window.POPUP_TYPE, txType: (await browser.storage.local.get('txType')).txType } : {};
   const props = await postMessage({ type: 'POPUP_INFO', payload });
   props.resolve = closingWrapper(resolve);
   props.reject = closingWrapper(reject);

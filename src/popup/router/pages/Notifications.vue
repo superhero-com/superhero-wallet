@@ -17,7 +17,7 @@ import { mapGetters } from 'vuex';
 export default {
   computed: mapGetters(['notifications']),
   async created() {
-    await browser.storage.local.set({ notifCounter: 0 });
+    this.$store.commit('SET_NOTIFICATIONS_COUNTER', 0);
   },
 };
 </script>
