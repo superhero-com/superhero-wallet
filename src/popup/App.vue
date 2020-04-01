@@ -21,6 +21,7 @@ import { clearInterval, setInterval } from 'timers';
 import { AEX2_METHODS } from './utils/constants';
 import { postMessage, readWebPageDom } from './utils/connection';
 import { fetchAndSetLocale } from './utils/i18nHelper';
+import { detectBrowser } from './utils/helper';
 import Header from './router/components/Header';
 import SidebarMenu from './router/components/SidebarMenu';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus';
@@ -58,7 +59,7 @@ export default {
     this.checkSdkReady();
     this.$store.dispatch('getCurrencies');
 
-    if (process.env.IS_EXTENSION) {
+    if (process.env.IS_EXTENSION && detectBrowser() !== 'Firefox') {
       const [update] = await browser.runtime.requestUpdateCheck();
       if (update === 'update_available' && !process.env.RUNNING_IN_TESTS) {
         this.$store.commit('ADD_NOTIFICATION', {

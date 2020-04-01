@@ -1,5 +1,6 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
+import { isEmpty } from 'lodash-es';
 import { setContractInstance, contractCall, getAddressByNameEntry, getActiveNetwork } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 
@@ -13,7 +14,7 @@ export const setController = contr => {
 
 export const getActiveAccount = async () => {
   const { account } = await getState();
-  if (account.publicKey) {
+  if (!isEmpty(account)) {
     return { account: { publicKey: account.publicKey }, activeAccount: 0 };
   }
   return false;

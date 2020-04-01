@@ -367,8 +367,9 @@ export const pollGetter = getter =>
 export const getActiveNetwork = async () => {
   const all = await getAllNetworks();
   const { current } = await getState();
+  const networkName = current ? current.network : DEFAULT_NETWORK;
   return {
-    network: all[current.network || DEFAULT_NETWORK],
+    network: all[networkName],
     all,
   };
 };

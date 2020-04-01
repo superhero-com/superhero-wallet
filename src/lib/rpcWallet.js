@@ -4,6 +4,7 @@ import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-c
 import Node from '@aeternity/aepp-sdk/es/node';
 import { setInterval, clearInterval } from 'timers';
 import uuid from 'uuid';
+import { isEmpty } from 'lodash-es';
 import {
   parseFromStorage,
   extractHostName,
@@ -29,7 +30,7 @@ const rpcWallet = {
     this.controller = walletController;
     if (process.env.RUNNING_IN_TESTS) await mockLogin();
     const { account } = await getState();
-    if (account.privateKey) {
+    if (!isEmpty(account)) {
       this.controller.generateWallet({ seed: stringifyForStorage(account.privateKey) });
       const {
         current: { network },
