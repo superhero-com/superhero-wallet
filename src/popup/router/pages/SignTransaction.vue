@@ -261,7 +261,9 @@ export default {
           if (typeof options.waitMined !== 'undefined') {
             this.contractInstance.setOptions({ waitMined: options.waitMined });
           }
-        } catch (e) {}
+        } catch (e) {
+          console.error(`setContractInstance: ${e}`);
+        }
         return Promise.resolve(true);
       } catch (err) {
         if (this.data.popup) {
@@ -726,7 +728,9 @@ export default {
           } else if (this.data.type === 'nameBid') {
             this.nameClaim();
           }
-        } catch (err) {}
+        } catch (e) {
+          console.error(`signTransaction: ${e}`);
+        }
       }
     },
     convertCurrency(currency, amount) {
