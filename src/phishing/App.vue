@@ -14,7 +14,6 @@
           security risks, such as domains that test positive on the <a>SuperHero Phishing Detector</a>. Domains on these warning lists may include outright malicious websites and
           legitimate websites that have been compromised by a malicious actor.
         </p>
-        <p>To read more about this site <a>please review the domain on </a>.</p>
         <p>
           Note that this warning list is compiled on a voluntary basis. This list may be inaccurate or incomplete. Just because a domain does not appear on this list is not an
           implicit guarantee of that domain's safety. As always, your transactions are your own responsibility. If you wish to interact with any domain on our warning list, you can
@@ -74,7 +73,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../common/base';
+@import '../common/variables';
 body,
 html,
 .content {
@@ -105,7 +104,7 @@ p {
   text-align: left;
 }
 a {
-  color: $primary-color;
+  color: $bg-color;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -113,6 +112,6 @@ a {
   text-align: center;
 }
 .ae-main {
-  background: $primary-color !important;
+  background: $bg-color !important;
 }
 </style>

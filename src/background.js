@@ -1,7 +1,7 @@
 import { setInterval } from 'timers';
 import './lib/initPolyfills';
 import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
-import { extractHostName, detectConnectionType } from './popup/utils/helper';
+import { detectConnectionType } from './popup/utils/helper';
 import { buildTx } from './popup/utils';
 import WalletController from './wallet-controller';
 import Notification from './notifications';
@@ -28,33 +28,30 @@ if (process.env.IS_EXTENSION && require.main.i === module.id) {
   const notification = new Notification();
   setController(controller);
 
-  const postPhishingData = data => {
-    browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
-      const message = { method: 'phishingCheck', data };
-      tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message));
-    });
+  const postPhishingData = async data => {
+    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+    const message = { method: 'phishingCheck', data };
+    tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message));
   };
 
   browser.runtime.onMessage.addListener(async (msg, sender) => {
     switch (msg.method) {
       case 'phishingCheck': {
         const data = { ...msg, extUrl: browser.extension.getURL('./') };
-        const host = extractHostName(msg.params.href);
+        const host = new URL(msg.params.href).hostname;
         data.host = host;
-        phishingCheckUrl(host).then(res => {
-          if (res.result === 'blocked') {
-            const whitelist = getPhishingUrls().filter(url => url === host);
-            if (whitelist.length) {
-              data.blocked = false;
-              return postPhishingData(data);
-            }
-            data.blocked = true;
+        const { result } = await phishingCheckUrl(host);
+        if (result === 'blocked') {
+          const whitelist = getPhishingUrls().filter(url => url === host);
+          if (whitelist.length) {
+            data.blocked = false;
             return postPhishingData(data);
           }
-          data.blocked = false;
+          data.blocked = true;
           return postPhishingData(data);
-        });
-        break;
+        }
+        data.blocked = false;
+        return postPhishingData(data);
       }
       case 'setPhishingUrl': {
         const urls = getPhishingUrls();
