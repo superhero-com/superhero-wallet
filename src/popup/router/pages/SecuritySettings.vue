@@ -113,7 +113,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'network', 'current', 'transactions', 'subaccounts', 'wallet', 'activeAccountName', 'activeAccount', 'popup']),
+    ...mapGetters(['account', 'balance', 'network', 'current', 'transactions', 'subaccounts', 'wallet', 'activeAccountName', 'activeAccount', 'popup', 'mnemonic']),
   },
   created() {},
   methods: {
@@ -122,11 +122,10 @@ export default {
       this.modal.visible = true;
       this.modal.title = this.$t('pages.securitySettings.showSeedPhrase');
       this.loading = true;
-      const { mnemonic } = await browser.storage.local.get('mnemonic');
-      if (mnemonic) {
-        this.seedPhrase = mnemonic;
-        this.setAlertData('alternative', true, mnemonic);
-        const seedPhraseToArray = mnemonic.split(' ');
+      if (this.mnemonic) {
+        this.seedPhrase = this.mnemonic;
+        this.setAlertData('alternative', true, this.mnemonic);
+        const seedPhraseToArray = this.mnemonic.split(' ');
         this.seeds = this.seeds.map((seed, i) => ({ ...seed, name: seedPhraseToArray[i] }));
       }
     },
@@ -176,7 +175,7 @@ export default {
           this.loading = true;
           this.seed_verified = true;
           this.type = '5';
-          browser.storage.local.set({ backed_up_Seed: true });
+          this.$store.commit('SET_BACKED_UP_SEED', true);
         }
       } else {
         this.seedError = { error: 'Oops! Incorrect length of words!' };

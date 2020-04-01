@@ -3,7 +3,6 @@ if (navigator.userAgent.indexOf('Firefox') !== -1) {
     navigator.mediaDevices
       .getUserMedia({ video: true })
       .then(() => {
-        browser.storage.local.set({ firefoxCameraAllowed: true });
         alert('You have allowed the firefox camera. Now, try again scan QR code');
       })
       .catch(err => {

@@ -47,7 +47,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'activeAccount', 'popup', 'current', 'network']),
+    ...mapGetters(['account', 'balance', 'activeAccount', 'popup', 'current', 'network', 'backedUpSeed']),
     publicKey() {
       return this.account.publicKey;
     },
@@ -59,7 +59,7 @@ export default {
     },
   },
   async created() {
-    this.backup_seed_notif = !(await this.$store.dispatch('checkBackupSeed'));
+    this.backup_seed_notif = !this.backedUpSeed;
     setTimeout(() => {
       this.backup_seed_notif = false;
     }, 3000);

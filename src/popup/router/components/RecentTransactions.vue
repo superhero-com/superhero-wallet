@@ -5,12 +5,12 @@
       <span data-cy="view-all-transactions" @click="allTransactions" class="viewAll">{{ $t('pages.recentTransactions.viewAll') }}</span>
     </div>
     <PendingTxs />
-    <div v-if="transactions.latest.length && !loading">
+    <div v-if="transactions.latest.length">
       <ae-list class="transactionList">
         <TransactionItem :recent="true" :dark="true" v-for="transaction in transactions.latest" :key="transaction.id" :transactionData="transaction"></TransactionItem>
       </ae-list>
     </div>
-    <div v-if="transactions.latest.length == 0 && !loading">
+    <div v-if="!transactions.latest.length && !transactions.pending.length">
       <p class="paragraph noTransactions">{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
     </div>
     <div class="loader-holder">
@@ -37,7 +37,7 @@ export default {
     };
   },
   created() {
-    this.updateTransactions();
+    if (this.transactions.latest.length) this.loading = false;
     this.polling = setInterval(() => this.updateTransactions(), 5000);
     this.$once('hook:beforeDestroy', () => clearInterval(this.polling));
   },
