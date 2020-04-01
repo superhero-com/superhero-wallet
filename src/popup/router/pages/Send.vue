@@ -20,9 +20,7 @@
           <AmountSend data-cy="amount-box" @changeAmount="val => (form.amount = val)" :value="form.amount" />
           <div class="flex flex-align-center flex-justify-between">
             <Button data-cy="reject-withdraw" half @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
-            <Button data-cy="review-withdraw" half @click="step = 2" :disabled="!form.address || !form.amount || (form.amount && isNaN(form.amount))">{{
-              $t('pages.send.review')
-            }}</Button>
+            <Button data-cy="review-withdraw" half @click="step = 2" :disabled="!form.address || !+form.amount">{{ $t('pages.send.review') }}</Button>
           </div>
         </div>
       </div>
