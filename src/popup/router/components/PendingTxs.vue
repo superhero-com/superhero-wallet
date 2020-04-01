@@ -29,7 +29,7 @@ export default {
   computed: {
     ...mapGetters(['transactions', 'currentCurrency']),
     filteredPendings() {
-      return this.transactions.pending.filter(({ amount, hash }) => !isNaN(amount) && hash);
+      return this.transactions.pending.filter(({ amount, hash }) => !Number.isNaN(+amount) && hash);
     },
   },
   filters: { formatDate },

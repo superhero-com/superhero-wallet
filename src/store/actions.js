@@ -198,7 +198,9 @@ export default {
             (async () => {
               try {
                 return await state.middleware.getActiveNames({ owner: publicKey });
-              } catch (e) {}
+              } catch (e) {
+                console.error(`middleware.getActiveNames: ${e}`);
+              }
               return [];
             })(),
           ]);
@@ -323,5 +325,8 @@ export default {
     } else {
       commit('ADD_CONNECTED_AEPP', { host, account });
     }
+  },
+  async checkBackupSeed() {
+    return (await browser.storage.local.get('backed_up_Seed')).backed_up_Seed;
   },
 };

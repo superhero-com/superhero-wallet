@@ -254,11 +254,7 @@ export const prefixedAmount = value => {
 const contractCall = async ({ instance, method, params = [], decode = false, async = true }) => {
   let call;
   try {
-    if (params.length) {
-      call = await instance.methods[method](...params);
-    } else {
-      call = await instance.methods[method]();
-    }
+    call = await instance.methods[method](...params);
   } catch (e) {
     if (e.message.indexOf('wrong_abi_version') > -1) {
       instance.setOptions({ backend: 'aevm' });
@@ -267,8 +263,8 @@ const contractCall = async ({ instance, method, params = [], decode = false, asy
     throw e.message;
   }
 
-  // eslint-disable-next-line no-nested-ternary
-  return async ? (decode ? call.decodedResult : call) : params.length ? instance.methods[method](...params) : instance.methods[method]();
+  if (async) return decode ? call.decodedResult : call;
+  return instance.methods[method](...params);
 };
 
 const setContractInstance = async (tx, sdk, contractAddress = null) => {
@@ -278,12 +274,11 @@ const setContractInstance = async (tx, sdk, contractAddress = null) => {
     if (typeof tx.abi_version !== 'undefined' && tx.abi_version !== 3) {
       backend = 'aevm';
     }
-    try {
-      contractInstance = await sdk.getContractInstance(tx.source, { contractAddress, forceCodeCheck: true });
-      contractInstance.setOptions({ backend });
-    } catch (e) {}
-    return Promise.resolve(contractInstance);
-  } catch (e) {}
+    contractInstance = await sdk.getContractInstance(tx.source, { contractAddress, forceCodeCheck: true });
+    contractInstance.setOptions({ backend });
+  } catch (e) {
+    console.error(`setContractInstance: ${e}`);
+  }
   return Promise.resolve(contractInstance);
 };
 
@@ -315,8 +310,7 @@ export const getAllNetworks = async () => {
   return { ...userNetworks, ...networks };
 };
 
-// eslint-disable-next-line no-useless-escape
-const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/[\""]/g, '');
+const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
 
 const addTipAmount = async amount => {
   const { tippedAmount } = await browser.storage.local.get('tippedAmount');

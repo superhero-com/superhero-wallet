@@ -40,7 +40,7 @@ describe('Test cases for tip page', () => {
       .enterTipDetails({ amount: tip.amount })
       .buttonShouldBeDisabled('[data-cy=send-tip]')
       .enterTipDetails({ note: tip.note })
-      .buttonShouldNotBeDisabled('[data-cy=send-tip]')
+      .buttonShouldBeDisabled('[data-cy=send-tip]')
       .enterTipDetails({ amount: 'asd' })
       .buttonShouldBeDisabled('[data-cy=send-tip]')
       .enterTipDetails({ note: '' })

@@ -96,11 +96,7 @@ export default {
   },
   watch: {
     amount() {
-      if (isNaN(this.amount) || parseFloat(this.amount) === 0) {
-        this.amountError = true;
-      } else {
-        this.amountError = false;
-      }
+      this.amountError = !+this.amount || this.amount <= 0;
     },
     urlVerified(val) {
       if (val) this.$store.dispatch('popupAlert', { name: 'account', type: 'tip_url_verified' });
@@ -132,7 +128,9 @@ export default {
     }
     try {
       this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
-    } catch (e) {}
+    } catch (e) {
+      console.error(`Can't fetch /verified: ${e}`);
+    }
 
     await pollGetter(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
@@ -162,7 +160,7 @@ export default {
     },
     toConfirm() {
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
-      this.amountError = this.amountError || isNaN(this.amount) || this.amount <= 0 || isNaN(this.amount);
+      this.amountError = this.amountError || !+this.amount || this.amount <= 0;
       this.noteError = !this.note || !this.url;
       this.confirmMode = !this.amountError && !this.noteError;
     },

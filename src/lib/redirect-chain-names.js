@@ -19,12 +19,11 @@ export default {
           .toLowerCase();
         const q = new URL(`${url.protocol}//${params}`);
         if (!q.hostname || !this.supportedDomain(q.hostname) || url.pathname !== '/search') {
-          return;
+          return {};
         }
 
         chrome.tabs.update({ url: q.toString() });
 
-        // eslint-disable-next-line consistent-return
         return { cancel: true };
       },
       {

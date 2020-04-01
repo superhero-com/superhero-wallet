@@ -17,7 +17,6 @@ module.exports = (isProd, browser) => ({
     'activeTab',
     'clipboardWrite',
     'notifications',
-    'tabs',
     'webRequest',
     'webRequestBlocking',
     '*://*.chain/*',

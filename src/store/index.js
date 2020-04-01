@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { mergeWith } from 'lodash-es';
-import { getters } from './getters';
+import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
 import persistState from './plugins/persistState';

@@ -187,7 +187,9 @@ const rpcWallet = {
         if (typeof cb !== 'undefined') {
           cb();
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error(`checkAeppPermissions: ${e}`);
+      }
     } else if (typeof cb === 'undefined') {
       action.accept();
     } else {
@@ -220,7 +222,9 @@ const rpcWallet = {
         } = aepp;
         const { protocol } = new URL(url);
         this.popups.setAeppInfo(id, { type, action: { params: action.params, method: action.method }, url, icons, name, protocol, host: extractHostName(url) });
-      } catch (e) {}
+      } catch (e) {
+        console.error(`showPopup: ${e}`);
+      }
     });
   },
 
@@ -280,7 +284,9 @@ const rpcWallet = {
     if (this.sdk) {
       try {
         await this.sdk.addNode(network, node, true);
-      } catch (e) {}
+      } catch (e) {
+        console.error(`addNewNetwork: ${e}`);
+      }
       this.sdk.selectNode(network);
     }
   },

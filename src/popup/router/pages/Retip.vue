@@ -96,7 +96,7 @@ export default {
     },
     async sendTip() {
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
-      this.amountError = this.amountError || isNaN(this.amount) || this.amount <= 0;
+      this.amountError = this.amountError || !+this.amount || this.amount <= 0;
       if (this.amountError) return;
 
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
