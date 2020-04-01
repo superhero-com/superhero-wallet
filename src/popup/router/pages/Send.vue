@@ -96,7 +96,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
-import { checkAddress, chekAensName, checkHashType, aeToAettos, pollGetter } from '../../utils/helper';
+import { checkAddress, chekAensName, checkHashType, aeToAettos } from '../../utils/helper';
 import { setPendingTx } from '../../utils';
 import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';
@@ -209,7 +209,7 @@ export default {
       });
     },
     async fetchFee() {
-      await pollGetter(() => this.sdk);
+      await this.$watchUntilTruly(() => this.sdk);
       const fee = await calculateFee(this.current.token === 0 ? TX_TYPES.txSign : TX_TYPES.contractCall, { ...(await this.feeParams()) });
       this.fee = fee;
     },
