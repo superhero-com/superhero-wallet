@@ -1,7 +1,7 @@
 import { setInterval } from 'timers';
 import './lib/initPolyfills';
 import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
-import { extractHostName, detectConnectionType } from './popup/utils/helper';
+import { detectConnectionType } from './popup/utils/helper';
 import { buildTx } from './popup/utils';
 
 import WalletController from './wallet-controller';
@@ -31,7 +31,7 @@ if (process.env.IS_EXTENSION) {
   setController(controller);
 
   const postPhishingData = async data => {
-    const tabs = await browser.tabs.query({ active: true, currentWindow: true })
+    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     const message = { method: 'phishingCheck', data };
     tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message));
   };
@@ -40,9 +40,9 @@ if (process.env.IS_EXTENSION) {
     switch (msg.method) {
       case 'phishingCheck': {
         const data = { ...msg, extUrl: browser.extension.getURL('./') };
-        const host = (new URL(msg.params.href)).hostname;
+        const host = new URL(msg.params.href).hostname;
         data.host = host;
-        const { result } = await phishingCheckUrl(host)
+        const { result } = await phishingCheckUrl(host);
         if (result === 'blocked') {
           const whitelist = getPhishingUrls().filter(url => url === host);
           if (whitelist.length) {
@@ -54,7 +54,6 @@ if (process.env.IS_EXTENSION) {
         }
         data.blocked = false;
         return postPhishingData(data);
-        break;
       }
       case 'setPhishingUrl': {
         const urls = getPhishingUrls();
