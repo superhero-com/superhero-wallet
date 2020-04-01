@@ -31,5 +31,4 @@ describe('Test cases for login functionality', () => {
       .shouldRedirect('/importAccount', '/account')
       .shouldRedirect('/termsOfService', '/termsOfService');
   });
-
 });
