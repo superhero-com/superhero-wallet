@@ -110,7 +110,6 @@ describe('Test cases for Withdraw Page', () => {
       .get('[data-cy="review-send-button"]')
       .should('be.visible')
       .click()
-      .wait(3000)
       .get('[data-cy=pending-txs]')
       .should('be.visible');
   });

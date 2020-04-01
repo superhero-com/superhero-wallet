@@ -33,7 +33,9 @@ export const switchNode = async () => {
     const node = await Node({ url: network.internalUrl, internalUrl: network.internalUrl });
     try {
       await sdk.addNode(network.name, node, true);
-    } catch (e) {}
+    } catch (e) {
+      console.error(`switchNode: ${e}`);
+    }
     sdk.selectNode(network.name);
   }
 };
@@ -49,7 +51,9 @@ export const getSDK = async () => {
         nativeMode: true,
         compilerUrl: network.compilerUrl,
       });
-    } catch (e) {}
+    } catch (e) {
+      console.error(`getSDK: ${e}`);
+    }
   }
 
   return sdk;

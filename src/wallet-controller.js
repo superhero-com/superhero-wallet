@@ -1,7 +1,7 @@
 import { setInterval } from 'timers';
 import { generateHdWallet, getHdWalletAccount } from './popup/utils/hdWallet';
 import { stringifyForStorage, parseFromStorage } from './popup/utils/helper';
-import { addressGenerator } from './popup/utils/address-generator';
+import decryptKeystore from './popup/utils/decrypt-keystore';
 
 export default class WalletController {
   constructor(tests = false) {
@@ -26,7 +26,7 @@ export default class WalletController {
   }
 
   async unlockWallet({ accountPassword, encryptedPrivateKey }) {
-    const match = await addressGenerator.decryptKeystore(encryptedPrivateKey, accountPassword);
+    const match = await decryptKeystore(encryptedPrivateKey, accountPassword);
     if (match !== false) {
       this.wallet = generateHdWallet(match);
       if (this.tests) {

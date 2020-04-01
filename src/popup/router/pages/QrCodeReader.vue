@@ -28,11 +28,9 @@ export default {
   },
   methods: {
     onDecode(address) {
-      try {
-        if (this.type === 'send' && (checkAddress(address) || chekAensName(address))) {
-          this.$router.push({ name: 'send', params: { address } });
-        }
-      } catch (err) {}
+      if (this.type === 'send' && (checkAddress(address) || chekAensName(address))) {
+        this.$router.push({ name: 'send', params: { address } });
+      }
     },
     async onInit(promise) {
       const url = browser.extension.getURL('./popup/CameraRequestPermission.html');

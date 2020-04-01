@@ -38,16 +38,9 @@ module.exports = {
       props: true,
       ignorePropertyModificationsFor: [
         'state', // for vuex state
-        'acc', // for reduce accumulators
-        'e' // for e.returnvalue
       ]
     }],
-    // disallow default export over named export
-    'import/prefer-default-export': 'off',
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    "class-methods-use-this": "warn",
-    "no-empty": "warn",
-    "no-restricted-globals": "warn"
   }
 }

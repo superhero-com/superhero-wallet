@@ -52,7 +52,7 @@
 import { mapGetters } from 'vuex';
 import axios from 'axios';
 import { calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
-import { escapeSpecialChars, pollGetter, aeToAettos } from '../../utils/helper';
+import { escapeSpecialChars, aeToAettos } from '../../utils/helper';
 import { setPendingTx } from '../../utils';
 import CheckIcon from '../../../icons/check-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
@@ -97,11 +97,7 @@ export default {
   },
   watch: {
     amount() {
-      if (isNaN(this.amount) || parseFloat(this.amount) === 0) {
-        this.amountError = true;
-      } else {
-        this.amountError = false;
-      }
+      this.amountError = !+this.amount || this.amount <= 0;
     },
     urlVerified(val) {
       if (val) this.$store.dispatch('popupAlert', { name: 'account', type: 'tip_url_verified' });
@@ -133,9 +129,11 @@ export default {
     }
     try {
       this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
-    } catch (e) {}
+    } catch (e) {
+      console.error(`Can't fetch /verified: ${e}`);
+    }
 
-    await pollGetter(() => this.sdk);
+    await this.$watchUntilTruly(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
       contractId: this.network[this.current.network].tipContract,
@@ -164,7 +162,7 @@ export default {
     },
     toConfirm() {
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
-      this.amountError = this.amountError || isNaN(this.amount) || this.amount <= 0 || isNaN(this.amount);
+      this.amountError = this.amountError || !+this.amount || this.amount <= 0;
       this.noteError = !this.note || !this.url;
       this.confirmMode = !this.amountError && !this.noteError;
     },

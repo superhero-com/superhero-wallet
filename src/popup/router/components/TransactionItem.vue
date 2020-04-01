@@ -3,7 +3,8 @@
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
       <div class="holder">
         <span class="amount">
-          <span data-cy="amount">{{ txAmount }}</span> {{ $t('pages.appVUE.aeid') }}
+          <span data-cy="amount">{{ txAmount }}</span>
+          {{ $t('pages.appVUE.aeid') }}
           <span class="text" data-cy="currency-amount">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span>
         </span>
         <span class="status">{{ txType == 'Sent' ? $t('pages.recentTransactions.sentStatus') : $t('pages.recentTransactions.receivedStatus') }}</span>
@@ -32,18 +33,13 @@ export default {
     return {
       status: '',
       tipUrl: null,
-      checkSdk: null,
       tipAmount: 0,
       tipComment: null,
     };
   },
   async created() {
-    this.checkSdk = setInterval(() => {
-      if (this.sdk !== null) {
-        this.getEventData();
-        clearInterval(this.checkSdk);
-      }
-    }, 100);
+    await this.$watchUntilTruly(() => this.sdk);
+    this.getEventData();
   },
   computed: {
     ...mapGetters(['account', 'popup', 'sdk', 'current', 'network', 'transactions', 'tipping']),
@@ -74,11 +70,9 @@ export default {
   },
   methods: {
     async getEventData() {
-      try {
-        const { log } = await this.sdk.tx(this.transactionData.hash, true);
-        this.tipUrl = decode(log[0].data).toString();
-        this.tipAmount = convertToAE(log[0].topics[2]);
-      } catch (e) {}
+      const { log } = await this.sdk.tx(this.transactionData.hash, true);
+      this.tipUrl = decode(log[0].data).toString();
+      this.tipAmount = convertToAE(log[0].topics[2]);
     },
     visitTipUrl() {
       if (this.tipUrl) {

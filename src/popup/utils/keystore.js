@@ -1,6 +1,6 @@
 import uuid from 'uuid';
 import { encodeBase58Check } from '@aeternity/aepp-sdk/es/utils/crypto';
-import WebCrypto from './webCrypto';
+import * as WebCrypto from './webCrypto';
 
 const nacl = require('tweetnacl');
 
@@ -22,8 +22,7 @@ function isHex(str) {
 }
 
 function isBase64(str) {
-  // eslint-disable-next-line no-useless-escape
-  if (str.length % 4 > 0 || str.match(/[^0-9a-z+\/=]/i)) return false;
+  if (str.length % 4 > 0 || str.match(/[^0-9a-z+/=]/i)) return false;
   const index = str.indexOf('=');
   return !!(index === -1 || str.slice(index).match(/={1,2}/));
 }
@@ -56,8 +55,7 @@ export async function generateEncryptedWallet(
 ) {
   const opt = Object.assign({}, DEFAULTS.crypto, options);
   opt.kdf = 'webCrypto';
-  const webCrypto = new WebCrypto();
-  const ciphertext = Buffer.from(await webCrypto.encrypt(Buffer.from(privateKey).toString('hex'), password, nonce, salt)).toString('hex');
+  const ciphertext = Buffer.from(await WebCrypto.encrypt(Buffer.from(privateKey).toString('hex'), password, nonce, salt)).toString('hex');
   const encrypted = Object.assign(
     { name, version: 1, public_key: getAddressFromPriv(privateKey), id: uuid.v4() },
     {
