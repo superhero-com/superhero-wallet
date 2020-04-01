@@ -3,7 +3,8 @@
     <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
       <div class="holder">
         <span class="amount">
-          <span data-cy="amount">{{ txAmount }}</span> {{ $t('pages.appVUE.aeid') }}
+          <span data-cy="amount">{{ txAmount }}</span>
+          {{ $t('pages.appVUE.aeid') }}
           <span class="text" data-cy="currency-amount">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span>
         </span>
         <span class="status">{{ txType == 'Sent' ? $t('pages.recentTransactions.sentStatus') : $t('pages.recentTransactions.receivedStatus') }}</span>
@@ -22,7 +23,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import { convertToAE, pollGetter } from '../../utils/helper';
+import { convertToAE } from '../../utils/helper';
 import { formatDate } from '../../utils';
 import openUrl from '../../utils/openUrl';
 
