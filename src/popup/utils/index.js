@@ -42,4 +42,9 @@ export const mockLogin = async (options = {}) => {
   await browser.storage.local.set({ subaccounts: sub, mnemonic });
 };
 
+export const mockLogout = async () => {
+  await browser.storage.local.clear();
+  localStorage.clear();
+}
+
 export const buildTx = txtype => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);

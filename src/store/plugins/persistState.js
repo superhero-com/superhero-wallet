@@ -8,7 +8,7 @@ const setState = async state => {
 
 export const getState = async () => {
   const { [KEY]: state } = await browser.storage.local.get(KEY);
-  return state ? state : {};
+  return state || {};
 };
 
 export const resetState = () => {

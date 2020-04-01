@@ -1,6 +1,6 @@
 import '../../../src/lib/initPolyfills';
 import uuid from 'uuid';
-import { formatDate, mockLogin } from '../../../src/popup/utils';
+import { formatDate, mockLogin, mockLogout } from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', onBeforeLoad => {
   cy.visit('chrome/popup/popup', { onBeforeLoad });
@@ -107,6 +107,10 @@ Cypress.Commands.add('accordionItemShould', (item, cond) => {
 
 Cypress.Commands.add('login', (options = { balance: 10 }) => {
   cy.openPopup(async () => mockLogin(options));
+});
+
+Cypress.Commands.add('logout', () => {
+  cy.openPopup(async () => mockLogout());
 });
 
 Cypress.Commands.add('shouldRedirect', (url, to) => {
