@@ -145,7 +145,7 @@
       "cordova-plugin-inappbrowser": {},
       "ionic-plugin-deeplinks": {
         "URL_SCHEME": "superhero",
-        "DEEPLINK_HOST": "mobile.z52da5wt.xyz"
+        "DEEPLINK_HOST": "wallet.superhero.com"
       }
     },
     "platforms": [

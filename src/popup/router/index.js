@@ -88,7 +88,7 @@ router.afterEach(to => {
 if (!process.env.IS_EXTENSION) {
   document.addEventListener('deviceready', () => {
     window.IonicDeeplink.onDeepLink(async ({ url }) => {
-      const prefix = ['superhero:', 'https://mobile.z52da5wt.xyz/'].find(p => url.startsWith(p));
+      const prefix = ['superhero:', 'https://wallet.superhero.com/'].find(p => url.startsWith(p));
       if (!prefix) throw new Error(`Unknown url: ${url}`);
       router.push(`/${url.slice(prefix.length)}`);
     });
