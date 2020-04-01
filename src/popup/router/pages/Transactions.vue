@@ -22,7 +22,6 @@ import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
 import TransactionFilters from '../components/TransactionFilters';
 import PendingTxs from '../components/PendingTxs';
-import { pollGetter } from '../../utils/helper';
 import { TXS_PER_PAGE } from '../../utils/constants';
 
 export default {
@@ -98,7 +97,7 @@ export default {
     },
     async loadMore(init = false) {
       if (this.loading && !init) return;
-      await pollGetter(() => this.middleware);
+      await this.$watchUntilTruly(() => this.middleware);
       this.loading = true;
       const transactions = await this.$store.dispatch('fetchTransactions', { page: this.page, limit: TXS_PER_PAGE });
       this.updateTransactions({ transactions });

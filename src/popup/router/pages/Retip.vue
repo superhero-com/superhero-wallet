@@ -34,7 +34,6 @@ import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
-import { pollGetter } from '../../utils/helper';
 import { setPendingTx } from '../../utils';
 import openUrl from '../../utils/openUrl';
 import CheckIcon from '../../../icons/check-icon.svg?vue-component';
@@ -75,14 +74,14 @@ export default {
     this.loading = true;
     this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
 
-    await pollGetter(() => this.sdk);
+    await this.$watchUntilTruly(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
       contractId: this.network[this.current.network].tipContract,
       callerId: this.account.publicKey,
     }).min;
 
-    await pollGetter(() => this.tipping);
+    await this.$watchUntilTruly(() => this.tipping);
     const tipId = +this.urlParams.get('id');
     if (!tipId) throw new Error('"id" param is missed');
     const { decodedResult } = await this.tipping.methods.get_state();
