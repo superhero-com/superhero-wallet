@@ -1,4 +1,12 @@
 describe('Test cases for login functionality', () => {
+  beforeEach(() => {
+    cy.logout();
+  });
+
+  afterEach(() => {
+    cy.logout();
+  });
+
   it('Is on account when login', () => {
     cy.login()
       .get('[data-cy=balance-info]')

@@ -36,11 +36,7 @@ const sendToBackground = (method, params) =>
       });
   });
 
-if (typeof navigator.clipboard === 'undefined') {
-  // redirectToWarning(extractHostName(window.location.href),window.location.href)
-} else {
-  sendToBackground('phishingCheck', { href: window.location.href });
-}
+sendToBackground('phishingCheck', { href: window.location.href });
 
 // Subscribe from postMessages from page
 window.addEventListener(
@@ -98,14 +94,12 @@ window.addEventListener('load', () => {
 
 // Handle message from background and redirect to page
 browser.runtime.onMessage.addListener(({ data }) => {
-  const { method } = data;
+  const { method, blocked, params, extUrl, host, uuid } = data;
 
-  if (method === 'phishingCheck') {
-    if (data.blocked) {
-      redirectToWarning(data.params.host, data.params.href, data.extUrl);
-    }
+  if (method === 'phishingCheck' && blocked) {
+    redirectToWarning(host, params.href, extUrl);
   } else if (method === 'getAddresses') {
-    browser.runtime.sendMessage({ uuid: data.uuid, data: { ...getAddresses() } });
+    browser.runtime.sendMessage({ uuid, data: { ...getAddresses() } });
   }
 });
 

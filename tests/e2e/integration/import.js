@@ -1,6 +1,6 @@
 describe('Test cases for import account page', () => {
   beforeEach(() => {
-    cy.openPopup();
+    cy.logout().openPopup();
   });
 
   it('Open import account page', () => {

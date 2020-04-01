@@ -97,7 +97,6 @@
 import { mapGetters } from 'vuex';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { checkAddress, chekAensName, checkHashType, aeToAettos } from '../../utils/helper';
-import { setPendingTx } from '../../utils';
 import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
@@ -249,9 +248,9 @@ export default {
       }
       this.loading = true;
       try {
-        const result = await this.sdk.spend(amount, receiver, { waitMined: false });
-        if (result.hash) {
-          await setPendingTx({ hash: result.hash, amount: this.form.amount, time: Date.parse(new Date()), type: 'spend' });
+        const { hash } = await this.sdk.spend(amount, receiver, { waitMined: false });
+        if (hash) {
+          await this.$store.dispatch('setPendingTx', { hash, amount: this.form.amount, time: Date.parse(new Date()), type: 'spend' });
           this.$router.push('/account');
         }
         this.loading = false;

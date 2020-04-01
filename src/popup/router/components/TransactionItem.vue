@@ -71,8 +71,10 @@ export default {
   methods: {
     async getEventData() {
       const { log } = await this.sdk.tx(this.transactionData.hash, true);
-      this.tipUrl = decode(log[0].data).toString();
-      this.tipAmount = convertToAE(log[0].topics[2]);
+      if (log && log.length) {
+        this.tipUrl = decode(log[0].data).toString();
+        this.tipAmount = convertToAE(log[0].topics[2]);
+      }
     },
     visitTipUrl() {
       if (this.tipUrl) {

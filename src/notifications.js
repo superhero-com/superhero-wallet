@@ -3,13 +3,9 @@ import iconUrl from './icons/icon_48.png';
 import { getSDK, getNodes } from './lib/background-utils';
 import { NOTIFICATION_METHODS } from './popup/utils/constants';
 import { detectBrowser } from './popup/utils/helper';
+import { getState } from './store/plugins/persistState';
 
 global.browser = require('webextension-polyfill');
-
-async function getAllNotifications() {
-  const { processingTx } = await browser.storage.local.get('processingTx');
-  return processingTx;
-}
 
 async function deleteNotification(tx) {
   const { processingTx } = await browser.storage.local.get('processingTx');
@@ -60,9 +56,9 @@ export default class Notification {
   }
 
   async checkTxReady() {
-    const noties = await getAllNotifications();
-    if (noties) {
-      noties.forEach(async tx => {
+    const { txQueue } = await getState();
+    if (txQueue) {
+      txQueue.forEach(async tx => {
         if (tx !== 'error' && tx) {
           await this.client.poll(tx);
           const url = `${this.network.explorerUrl}/transactions/${tx}`;
