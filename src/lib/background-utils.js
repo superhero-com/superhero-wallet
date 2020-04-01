@@ -13,7 +13,7 @@ export const setController = contr => {
 
 export const getActiveAccount = async () => {
   const { account } = await getState();
-  if (account) {
+  if (account.publicKey) {
     return { account: { publicKey: account.publicKey }, activeAccount: 0 };
   }
   return false;

@@ -29,7 +29,7 @@ const rpcWallet = {
     this.controller = walletController;
     if (process.env.RUNNING_IN_TESTS) await mockLogin();
     const { account } = await getState();
-    if (account) {
+    if (account.privateKey) {
       this.controller.generateWallet({ seed: stringifyForStorage(account.privateKey) });
       const {
         current: { network },

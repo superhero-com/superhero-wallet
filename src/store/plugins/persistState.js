@@ -6,7 +6,7 @@ const setState = async state => {
 
 export const getState = async () => {
   const { [KEY]: state } = await browser.storage.local.get(KEY);
-  return state;
+  return state ? state : {};
 };
 
 export const resetState = () => {
@@ -31,12 +31,12 @@ export default (reducerLoad, reducerSave) => async store => {
   });
   if (process.env.IS_EXTENSION) {
     browser.storage.onChanged.addListener(async () => {
-      lastEmitedState = reducerLoad(await getState());
+      lastEmitedState = reducerLoad(await getState(), store);
       store.commit('syncState', lastEmitedState);
     });
   } else {
     window.addEventListener('storage', async () => {
-      lastEmitedState = reducerLoad(await getState());
+      lastEmitedState = reducerLoad(await getState(), store);
       store.commit('syncState', lastEmitedState);
     });
   }
