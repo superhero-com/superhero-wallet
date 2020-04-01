@@ -94,6 +94,13 @@
       "updateExtension": "New verison available! Please update your extension!",
       "updateAvailable": "New verison in store avaible!"
     },
+    "claim": {
+      "claim": "Claim tips",
+      "noZeroClaim": "No zero amount claims",
+      "noAddress": "Address not found",
+      "errorClaim": "Error claiming",
+      "claimed": " AE tokens claimed !"
+    },
     "accountPassword": {
       "heading": "",
       "passwordSymbolsError": "Required minimum symbols - ",

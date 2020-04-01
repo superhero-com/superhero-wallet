@@ -153,6 +153,18 @@ export default {
             break;
         }
         break;
+      case 'tipping':
+        switch (payload.type) {
+          case 'claim_error':
+            commit(types.SHOW_POPUP, { show: true, ...popupMessages.CLAIM_ERROR, msg: payload.msg });
+            break;
+          case 'claim_success':
+            commit(types.SHOW_POPUP, { show: true, ...popupMessages.CLAIM_SUCCESS, msg: payload.msg });
+            break;
+          default:
+            break;
+        }
+        break;
       default:
         break;
     }

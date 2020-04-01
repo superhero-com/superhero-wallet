@@ -11,7 +11,8 @@
       <AccountInfo />
       <BalanceInfo />
       <div class="height-100 submenu-bg">
-        <Button data-cy="tip-button" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
+        <ClaimTips @setLoading="val => (loading = val)" v-if="IS_EXTENSION" />
+        <Button data-cy="tip-button" class="send-tips" @click="$router.push('/tip')">
           <div class="flex flex-align-center flex-justify-content-center">
             <Heart />
             <span class="ml-5">{{ $t('pages.account.send') }}</span>
@@ -20,6 +21,7 @@
         <RecentTransactions></RecentTransactions>
       </div>
     </div>
+    <Loader size="big" :loading="loading" type="transparent" />
   </div>
 </template>
 
@@ -31,6 +33,7 @@ import RecentTransactions from '../components/RecentTransactions';
 import ClaimTipButton from '../components/ClaimTipButton';
 import BalanceInfo from '../components/BalanceInfo';
 import AccountInfo from '../components/AccountInfo';
+import ClaimTips from '../components/ClaimTips';
 
 export default {
   name: 'Account',
@@ -40,14 +43,17 @@ export default {
     ClaimTipButton,
     BalanceInfo,
     AccountInfo,
+    ClaimTips,
   },
   data() {
     return {
       backup_seed_notif: false,
+      loading: false,
+      IS_EXTENSION: process.env.IS_EXTENSION,
     };
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'activeAccount', 'popup', 'current', 'network']),
+    ...mapGetters(['account', 'balance', 'activeAccount', 'current', 'network']),
     publicKey() {
       return this.account.publicKey;
     },
@@ -63,12 +69,6 @@ export default {
     setTimeout(() => {
       this.backup_seed_notif = false;
     }, 3000);
-  },
-  mounted() {},
-  methods: {
-    navigateTips() {
-      this.$router.push('/tip');
-    },
   },
 };
 </script>
@@ -99,5 +99,8 @@ export default {
 }
 .submenu-bg {
   background: $submenu-bg;
+}
+.send-tips {
+  margin-bottom: 26px;
 }
 </style>

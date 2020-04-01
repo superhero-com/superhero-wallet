@@ -57,18 +57,18 @@ window.addEventListener(
   false
 );
 
-// Handle message from background and redirect to page
-browser.runtime.onMessage.addListener(({ data }) => {
-  if (data.method === 'phishingCheck') {
-    if (data.blocked) {
-      redirectToWarning(data.params.host, data.params.href, data.extUrl);
-    }
-  }
-});
-
-const sendDomData = () => {
+const getAddresses = () => {
   const address = document.all[0].outerHTML.match(/(ak_[A-Za-z0-9]{49,50})/g);
   const chainName = document.all[0].outerHTML.match(/[A-Za-z0-9]+\.chain/g);
+
+  return {
+    address,
+    chainName,
+  };
+};
+
+const sendDomData = () => {
+  const { address, chainName } = getAddresses();
   if (address || chainName) {
     setTimeout(() => {
       browser.runtime.sendMessage({
@@ -94,6 +94,19 @@ window.addEventListener('load', () => {
     },
     false
   );
+});
+
+// Handle message from background and redirect to page
+browser.runtime.onMessage.addListener(({ data }) => {
+  const { method } = data;
+
+  if (method === 'phishingCheck') {
+    if (data.blocked) {
+      redirectToWarning(data.params.host, data.params.href, data.extUrl);
+    }
+  } else if (method === 'getAddresses') {
+    browser.runtime.sendMessage({ uuid: data.uuid, data: { ...getAddresses() } });
+  }
 });
 
 /**
