@@ -79,7 +79,6 @@ contract Example =
         nodes: [{ name: process.env.NETWORK, instance: node }],
         compilerUrl: networks[process.env.NETWORK].COMPILER_URL,
         onNetworkChange(params) {
-          // eslint-disable-next-line no-alert
           if (this.getNetworkId() !== params.networkId) alert(`Connected network ${this.getNetworkId()} is not supported with wallet network ${params.networkId}`);
         },
         onAddressChange: async () => {
@@ -126,22 +125,19 @@ contract Example =
       };
     },
     async scanForWallets() {
-      try {
-        // eslint-disable-next-line func-names
-        const handleWallets = async function({ wallets, newWallet }) {
-          const wallet = newWallet || Object.values(wallets)[0];
-          this.detector.stopScan();
+      const handleWallets = async ({ wallets, newWallet }) => {
+        const wallet = newWallet || Object.values(wallets)[0];
+        this.detector.stopScan();
 
-          await this.connectToWallet(wallet);
-          // let addr = await this.client.askAddresses()
-        };
+        await this.connectToWallet(wallet);
+        // let addr = await this.client.askAddresses()
+      };
 
-        const scannerConnection = await BrowserWindowMessageConnection({
-          connectionInfo: { id: 'spy' },
-        });
-        this.detector = await Detector({ connection: scannerConnection });
-        this.detector.scan(handleWallets.bind(this));
-      } catch (e) {}
+      const scannerConnection = await BrowserWindowMessageConnection({
+        connectionInfo: { id: 'spy' },
+      });
+      this.detector = await Detector({ connection: scannerConnection });
+      this.detector.scan(handleWallets);
     },
   },
 };
