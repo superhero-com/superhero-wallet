@@ -101,7 +101,7 @@
     "cordova": "^9.0.0",
     "cordova-plugin-whitelist": "^1.3.4",
     "cordova-res": "^0.9.0",
-    "core-js": "^2.6.10",
+    "core-js": "^3.6.4",
     "cross-env": "^5.2.1",
     "css-loader": "^0.28.11",
     "cypress": "^4.1.0",
