@@ -18,7 +18,7 @@ export const resetState = () => {
 export default (reducerLoad, reducerSave) => async store => {
   let resetting = false;
   let lastEmitedState = reducerLoad(await getState(), store);
-  store.commit('syncState', lastEmitedState);
+  store.commit('syncState', { ...lastEmitedState, isRestored: true });
   store.subscribe(({ type, payload }, state) => {
     if (resetting || (type === 'syncState' && payload === lastEmitedState)) return;
     setState(reducerSave(state));

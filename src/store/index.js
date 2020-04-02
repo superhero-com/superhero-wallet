@@ -13,6 +13,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    isRestored: false,
     subaccounts: [],
     account: {},
     mnemonic: null,
