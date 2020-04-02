@@ -12,10 +12,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { uniq } from 'lodash-es';
 import axios from 'axios';
-import { postMessageToContent } from '../../utils/connection';
-import { getAddressByNameEntry, aettosToAe } from '../../utils/helper';
+import { aettosToAe } from '../../utils/helper';
 import { TIP_SERVICE } from '../../utils/constants';
 import Button from './Button';
 import Claim from '../../../icons/claim.svg?vue-component';
@@ -29,22 +27,9 @@ export default {
   methods: {
     async claimTips() {
       this.$emit('setLoading', true);
-      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-      const { address, chainName } = await postMessageToContent({ method: 'getAddresses' }, tab.id);
-      let addresses = Array.isArray(address) ? address : [address];
-      const chainNames = Array.isArray(chainName) ? chainName : [chainName];
-      const chainNamesAddresses = await Promise.all(
-        chainNames.map(async n => {
-          try {
-            return getAddressByNameEntry(await this.sdk.api.getNameEntryByName(n));
-          } catch (e) {
-            return null;
-          }
-        })
-      );
-      addresses = [...addresses, ...chainNamesAddresses];
+      const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
       try {
-        if (!uniq(addresses).includes(this.account.publicKey)) throw new Error(this.$t('pages.claim.noAddress'));
+        if (!addresses || !addresses.includes(this.account.publicKey)) throw new Error(this.$t('pages.claim.noAddress'));
         const claimAmount = parseFloat(
           aettosToAe(
             await this.tipping.methods

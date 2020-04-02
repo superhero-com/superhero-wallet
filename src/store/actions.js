@@ -1,10 +1,10 @@
-import { uniqBy, flatten } from 'lodash-es';
+import { uniqBy, flatten, uniq } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import * as types from './mutation-types';
 import * as popupMessages from '../popup/utils/popup-messages';
-import { convertToAE, stringifyForStorage, parseFromStorage, aettosToAe } from '../popup/utils/helper';
+import { convertToAE, stringifyForStorage, parseFromStorage, aettosToAe, getAddressByNameEntry } from '../popup/utils/helper';
 import { BACKEND_URL, DEFAULT_NETWORK } from '../popup/utils/constants';
-import { postMessage } from '../popup/utils/connection';
+import { postMessage, postMessageToContent } from '../popup/utils/connection';
 
 export default {
   setAccount({ commit }, payload) {
@@ -340,5 +340,23 @@ export default {
   },
   async checkBackupSeed() {
     return (await browser.storage.local.get('backed_up_Seed')).backed_up_Seed;
+  },
+  async getWebPageAddresses({ state: { sdk }}) {
+    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+    const { address, chainName } = await postMessageToContent({ method: 'getAddresses' }, tab.id);
+    let addresses = Array.isArray(address) ? address : [address];
+    const chainNames = Array.isArray(chainName) ? chainName : [chainName];
+    const chainNamesAddresses = await Promise.all(
+      chainNames.map(async n => {
+        try {
+          return getAddressByNameEntry(await sdk.api.getNameEntryByName(n));
+        } catch (e) {
+          return null;
+        }
+      })
+    );
+    addresses = [...addresses, ...chainNamesAddresses];
+
+    return { addresses: uniq(addresses).filter(a => a), tab };
   },
 };
