@@ -21,8 +21,8 @@ export default {
     handleClick() {
       return this.to ? this.$router.push(this.to) : this.$emit('handleClick');
     },
-  }
-}
+  },
+};
 </script>
 <style lang="scss">
 @import '../../../common/variables';
@@ -50,6 +50,7 @@ export default {
       font-size: 15px;
       display: block;
       font-weight: bold;
+      margin-top: 5px;
 
       &.button-text-accent {
         color: $accent-color;
