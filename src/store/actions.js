@@ -341,7 +341,7 @@ export default {
   async checkBackupSeed() {
     return (await browser.storage.local.get('backed_up_Seed')).backed_up_Seed;
   },
-  async getWebPageAddresses({ state: { sdk }}) {
+  async getWebPageAddresses({ state: { sdk } }) {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
     const { address, chainName } = await postMessageToContent({ method: 'getAddresses' }, tab.id);
     let addresses = Array.isArray(address) ? address : [address];
