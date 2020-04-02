@@ -124,9 +124,9 @@ export default {
       height: 16px;
       text-align: center;
       vertical-align: middle;
-      left: -9px;
-      top: 2px;
-      line-height: 16px;
+      left: -10px;
+      top: 0px;
+      line-height: 15px;
       border: 1px solid $nav-bg-color;
     }
   }
