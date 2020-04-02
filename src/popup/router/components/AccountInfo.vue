@@ -72,7 +72,7 @@ export default {
 
   .ae-address {
     color: $text-color;
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: -0.1px;
   }
 }

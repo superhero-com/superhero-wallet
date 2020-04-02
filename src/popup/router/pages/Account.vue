@@ -7,7 +7,6 @@
           {{ $t('pages.account.yourSeedPhrase') }}
         </span>
       </div>
-      <ClaimTipButton :class="!backup_seed_notif ? 'mt-32' : ''" />
       <AccountInfo />
       <BalanceInfo />
       <div class="height-100 submenu-bg">

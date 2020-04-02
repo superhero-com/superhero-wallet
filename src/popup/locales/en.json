@@ -35,7 +35,8 @@
       "notifications": "Notifications",
       "names": "Names",
       "bidding": "Bidding",
-      "networks": "Networks"
+      "networks": "Networks",
+      "home": "Superhero Home"
     },
     "appVUE": {
       "systemName": "SuperHero",

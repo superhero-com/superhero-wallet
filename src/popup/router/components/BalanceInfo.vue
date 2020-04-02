@@ -12,7 +12,7 @@
           <div class="input-group-area">
             <ae-button data-cy="toggle-currency-dropdown" @click="toggleDropdown($event, '.have-subDropdown')">
               {{ balanceCurrency }}
-              <span class="accent-text">{{ currentCurrency }}</span>
+              <span class="currency">{{ currentCurrency }}</span>
               <ExpandedAngleArrow />
             </ae-button>
           </div>
@@ -74,6 +74,9 @@ export default {
   .approx-sign {
     padding: 3px 10px;
   }
+  .currency {
+    color: $white-color;
+  }
 }
 .currenciesgroup li:first-of-type {
   z-index: 1;
@@ -132,6 +135,7 @@ export default {
   position: relative;
   text-align: center;
   background-image: url('../../../icons/acc_balance.png');
+  border-bottom: 2px solid $transactions-bg;
   .title {
     position: absolute;
     left: 20px;
@@ -155,6 +159,9 @@ export default {
     &,
     .ae-button {
       font-family: 'Roboto', sans-serif;
+    }
+    .amount {
+      color: $text-color;
     }
     .amount :last-child {
       color: $secondary-color;

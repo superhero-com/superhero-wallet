@@ -6,7 +6,7 @@
 
       <div class="title">
         <span v-if="title">{{ $t(`pages.titles.${title}`) }}</span>
-        <span v-else>{{ $t('pages.appVUE.walletName') }}</span>
+        <span v-else>{{ $t('pages.titles.home') }}</span>
       </div>
 
       <div v-if="isLoggedIn">
@@ -97,6 +97,7 @@ export default {
         left: 0;
         right: 0;
         text-align: center;
+        font-weight: bold;
       }
     }
 
@@ -123,9 +124,10 @@ export default {
       height: 16px;
       text-align: center;
       vertical-align: middle;
-      left: -8px;
+      left: -9px;
       top: 2px;
       line-height: 16px;
+      border: 1px solid $nav-bg-color;
     }
   }
 }
