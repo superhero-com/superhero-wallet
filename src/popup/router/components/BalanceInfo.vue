@@ -156,6 +156,7 @@ export default {
     margin-top: -36px;
     font-size: 26px;
     color: $white-color;
+    font-weight: normal;
     &,
     .ae-button {
       font-family: 'Roboto', sans-serif;

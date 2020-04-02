@@ -9,15 +9,27 @@
       </div>
       <AccountInfo />
       <BalanceInfo />
-      <div class="height-100 submenu-bg">
-        <Button data-cy="tip-button" style="margin-top: 26px;margin-bottom: 32px;" @click="navigateTips">
-          <div class="flex flex-align-center flex-justify-content-center">
-            <Heart />
-            <span class="ml-5">{{ $t('pages.account.send') }}</span>
-          </div>
-        </Button>
-        <RecentTransactions></RecentTransactions>
+      <div class="submenu-bg">
+        <BoxButton :text="$t('pages.account.send')" accent to="/tip">
+          <Tip slot="icon" />
+        </BoxButton>
+        <BoxButton :text="$t('pages.account.claim')" accent>
+          <Claim slot="icon" />
+        </BoxButton>
+        <BoxButton text="Activity" to="/transactions">
+          <Activity slot="icon" />
+        </BoxButton>
+        <BoxButton :text="$t('pages.appVUE.topUp')" to="/receive">
+          <Topup slot="icon" />
+        </BoxButton>
+        <BoxButton :text="$t('pages.appVUE.withdraw')" to="/send">
+          <Withdraw slot="icon" />
+        </BoxButton>
+        <BoxButton :text="$t('pages.appVUE.settings')" to="/securitySettings">
+          <Settings slot="icon" />
+        </BoxButton>
       </div>
+      <RecentTransactions></RecentTransactions>
     </div>
   </div>
 </template>
@@ -25,20 +37,30 @@
 <script>
 import { mapGetters } from 'vuex';
 import { setTimeout } from 'timers';
-import Heart from '../../../icons/heart.svg?vue-component';
+import Tip from '../../../icons/tip-icon.svg?vue-component';
+import Claim from '../../../icons/claim-icon.svg?vue-component';
+import Activity from '../../../icons/activity-icon.svg?vue-component';
+import Topup from '../../../icons/topup-icon.svg?vue-component';
+import Withdraw from '../../../icons/withdraw-icon.svg?vue-component';
+import Settings from '../../../icons/settings-icon.svg?vue-component';
 import RecentTransactions from '../components/RecentTransactions';
-import ClaimTipButton from '../components/ClaimTipButton';
 import BalanceInfo from '../components/BalanceInfo';
 import AccountInfo from '../components/AccountInfo';
+import BoxButton from '../components/BoxButton';
 
 export default {
   name: 'Account',
   components: {
-    Heart,
+    Tip,
+    Claim,
+    Activity,
+    Topup,
+    Withdraw,
+    Settings,
     RecentTransactions,
-    ClaimTipButton,
     BalanceInfo,
     AccountInfo,
+    BoxButton,
   },
   data() {
     return {
@@ -62,12 +84,6 @@ export default {
     setTimeout(() => {
       this.backup_seed_notif = false;
     }, 3000);
-  },
-  mounted() {},
-  methods: {
-    navigateTips() {
-      this.$router.push('/tip');
-    },
   },
 };
 </script>
@@ -98,5 +114,8 @@ export default {
 }
 .submenu-bg {
   background: $submenu-bg;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
 }
 </style>
