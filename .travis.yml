@@ -18,10 +18,19 @@ script:
 before_deploy: scripts/before-deploy.sh
 
 deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $GITHUB_TOKEN
-  keep_history: true
-  local_dir: dist/web/root
-  on:
-    branch: master
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN
+    keep_history: true
+    local_dir: dist/web/root
+    on:
+      branch: master
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN_SUPERHEROWALLET
+    keep_history: true
+    local_dir: dist/web/root
+    repo: superherowallet/wallet
+    target_branch: master
+    on:
+      branch: develop
