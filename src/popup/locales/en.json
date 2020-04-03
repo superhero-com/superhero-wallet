@@ -6,31 +6,31 @@
     },
     "step_2": {
       "title": "Send Tip",
-      "content": "Duis at tellus at urna condimentum mattis pellentesque. Nulla malesuada pellentesque elit eget gravida cum. Consequat mauris nunc congue nisi vitae suscipit tellus mauris a. Sed adipiscing diam donec adipiscing tristique risus."
+      "content": "To send AE, open the wallet while the URL you want to tip is on your active tab. Fill in how much you want to tip and add a message along with that tip. Hit Send and confirm."
     },
     "step_3": {
       "title": "What is \"Verified\" URL",
-      "content": "Duis at tellus at urna condimentum mattis pellentesque. Nulla malesuada pellentesque elit eget gravida cum. "
+      "content": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero—and that is awesome!"
     },
     "step_4": {
       "title": "Claim Tip",
-      "content": "Duis at tellus at urna condimentum mattis pellentesque. Nulla malesuada pellentesque elit eget gravida cum. Consequat mauris nunc congue nisi vitae suscipit tellus mauris a. Sed adipiscing diam donec adipiscing tristique risus."
+      "content": "Hit this button to trigger tip collection—all tips you’ve received from URLs where you’ve added your AE address will then be added to your balance."
     },
     "step_5": {
       "title": "Activity",
-      "content": "This tab will show you a full log of your recent activity using the Superhero Wallet.  Consequat mauris nunc congue nisi vitae suscipit tellus!"
+      "content": "This tab will show you a full log of your recent activity using the Superhero Wallet."
     },
     "step_6": {
       "title": "Top Up",
-      "content": "This tab will show you a full log of your recent activity using the Superhero Wallet.  Consequat mauris nunc congue nisi vitae suscipit tellus!"
+      "content": "You can top up your wallet by swapping ETH or BTC into AE, or by purchasing AE using your credit card. It’s very easy."
     },
     "step_7": {
       "title": "Withdraw",
-      "content": "This tab will show you a full log of your recent activity using the Superhero Wallet.  Consequat mauris nunc congue nisi vitae suscipit tellus!"
+      "content": "You can easily withdraw your tips by sending them out to AE wallet addresses from your accounts in exchanges or external wallets, provided that they support AE tokens. You can then exchange them for other cryptocurrencies or withdraw to your bank."
     },
     "step_8": {
       "title": "Settings",
-      "content": "This tab will show you a full log of your recent activity using the Superhero Wallet.  Consequat mauris nunc congue nisi vitae suscipit tellus!"
+      "content": "You can view your security phrase (also referred to as seedphrase or private keys) and change your language settings."
     }
   },
   "pages": {
