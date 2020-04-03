@@ -155,23 +155,23 @@ export default {
       document.body.style.overflow = '';
       document.body.style.pointerEvents = '';
     },
-    back() {
+    async back() {
       const prevStep = this.$tours.onboarding.steps[this.$tours.onboarding.currentStep - 1];
       if (prevStep && prevStep.route) {
-        this.$router.push(prevStep.route);
+        if (this.$route.path !== prevStep.route) await this.$router.push(prevStep.route);
         this.$nextTick(() => {
-          setTimeout(() => this.$tours.onboarding.previousStep(), 500);
+          this.$tours.onboarding.previousStep();
         });
       } else {
         this.$tours.onboarding.previousStep();
       }
     },
-    next() {
+    async next() {
       const nextStep = this.$tours.onboarding.steps[this.$tours.onboarding.currentStep + 1];
       if (nextStep && nextStep.route) {
-        this.$router.push(nextStep.route);
+        if (this.$route.path !== nextStep.route) await this.$router.push(nextStep.route);
         this.$nextTick(() => {
-          setTimeout(() => this.$tours.onboarding.nextStep(), 500);
+          this.$tours.onboarding.nextStep();
         });
       } else if (nextStep) {
         this.$tours.onboarding.nextStep();
