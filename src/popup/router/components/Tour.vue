@@ -149,8 +149,8 @@ export default {
       document.body.style.overflow = 'hidden';
     },
     enableScroll() {
-      document.documentElement.style.overflow = 'auto';
-      document.body.style.overflow = 'auto';
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
     },
     back() {
       if (this.$tours.onboarding.steps[this.$tours.onboarding.currentStep - 1].route) {
