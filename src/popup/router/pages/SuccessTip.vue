@@ -25,10 +25,10 @@
     <p class="f-18 my-35">{{ $t('pages.successTip.letThemKnow') }}</p>
     <div>
       <div class="flex flex-align-center flex-justify-between">
-        <Button half @click="toTips" data-cy="to-tips">
+        <Button half @click="$router.push('/tip')" data-cy="to-tips">
           {{ $t('pages.successTip.sendMore') }}
         </Button>
-        <Button half @click="toDashboard" data-cy="to-dashboard">
+        <Button half @click="$router.push('/account')" data-cy="to-dashboard">
           {{ $t('pages.successTip.home') }}
         </Button>
       </div>
@@ -42,9 +42,11 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import axios from 'axios';
 import Heart from '../../../icons/heart.svg?vue-component';
 import Textarea from '../components/Textarea';
 import openUrl from '../../utils/openUrl';
+import { TIP_SERVICE } from '../../utils/constants';
 
 export default {
   components: {
@@ -67,14 +69,14 @@ export default {
       return (this.amountTip * this.current.currencyRate).toFixed(3);
     },
   },
-  created() {},
+  async created() {
+    const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
+    console.log(addresses);
+    if (addresses.length) {
+      await axios.post(`${TIP_SERVICE}`, { url: tab.url, address: addresses[0] });
+    }
+  },
   methods: {
-    toTips() {
-      this.$router.push('/tip');
-    },
-    toDashboard() {
-      this.$router.push('/account');
-    },
     redirectOnFeed() {
       openUrl(this.feed);
     },

@@ -13,6 +13,7 @@
         <BoxButton :text="$t('pages.account.send')" accent to="/tip">
           <Tip slot="icon" />
         </BoxButton>
+        <ClaimTips @setLoading="val => (loading = val)" v-if="IS_EXTENSION" />
         <BoxButton :text="$t('pages.account.claim')" accent>
           <Claim slot="icon" />
         </BoxButton>
@@ -31,6 +32,7 @@
       </div>
       <RecentTransactions></RecentTransactions>
     </div>
+    <Loader size="big" :loading="loading" type="transparent" />
   </div>
 </template>
 
@@ -47,6 +49,7 @@ import RecentTransactions from '../components/RecentTransactions';
 import BalanceInfo from '../components/BalanceInfo';
 import AccountInfo from '../components/AccountInfo';
 import BoxButton from '../components/BoxButton';
+import ClaimTips from '../components/ClaimTips';
 
 export default {
   name: 'Account',
@@ -61,14 +64,17 @@ export default {
     BalanceInfo,
     AccountInfo,
     BoxButton,
+    ClaimTips,
   },
   data() {
     return {
       backup_seed_notif: false,
+      loading: false,
+      IS_EXTENSION: process.env.IS_EXTENSION,
     };
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'activeAccount', 'popup', 'current', 'network', 'backedUpSeed']),
+    ...mapGetters(['account', 'balance', 'activeAccount', 'current', 'network', 'backedUpSeed']),
     publicKey() {
       return this.account.publicKey;
     },
@@ -117,5 +123,8 @@ export default {
   padding: 10px;
   display: flex;
   flex-wrap: wrap;
+}
+.send-tips {
+  margin-bottom: 26px;
 }
 </style>
