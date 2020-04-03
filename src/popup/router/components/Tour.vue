@@ -1,11 +1,12 @@
+<!-- eslint-disable vue/no-use-v-if-with-v-for-->
 <template>
   <div>
     <v-tour name="onboarding" :steps="steps" :options="{ highlight: true }">
       <template slot-scope="tour">
         <transition name="fade">
           <v-step
-            v-if="tour.currentStep === index"
             v-for="(step, index) of tour.steps"
+            v-if="tour.currentStep === index"
             :key="index"
             :step="step"
             :previous-step="tour.previousStep"
@@ -153,8 +154,9 @@ export default {
       document.body.style.overflow = '';
     },
     back() {
-      if (this.$tours.onboarding.steps[this.$tours.onboarding.currentStep - 1].route) {
-        this.$router.push(this.$tours.onboarding.steps[this.$tours.onboarding.currentStep - 1].route);
+      const prevStep = this.$tours.onboarding.steps[this.$tours.onboarding.currentStep - 1];
+      if (prevStep && prevStep.route) {
+        this.$router.push(prevStep.route);
         this.$nextTick(() => {
           this.$tours.onboarding.previousStep();
         });
@@ -234,7 +236,7 @@ export default {
     }
   }
   &.tip-step[x-placement^='bottom'] {
-    margin-top: 1.8rem !important;
+    margin-top: 2.5rem !important;
   }
 }
 

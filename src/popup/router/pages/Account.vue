@@ -72,7 +72,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'activeAccount', 'current', 'network', 'backedUpSeed']),
+    ...mapGetters(['account', 'balance', 'activeAccount', 'current', 'network', 'backedUpSeed', 'tourRunning']),
     publicKey() {
       return this.account.publicKey;
     },
@@ -84,10 +84,12 @@ export default {
     },
   },
   async created() {
-    this.backup_seed_notif = !this.backedUpSeed;
-    setTimeout(() => {
-      this.backup_seed_notif = false;
-    }, 3000);
+    if (!this.tourRunning) {
+      this.backup_seed_notif = !this.backedUpSeed;
+      setTimeout(() => {
+        if (!this.tourRunning) this.backup_seed_notif = false;
+      }, 3000);
+    }
   },
 };
 </script>
