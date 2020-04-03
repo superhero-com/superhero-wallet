@@ -13,6 +13,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    isRestored: false,
     subaccounts: [],
     account: {},
     mnemonic: null,
@@ -53,6 +54,7 @@ export default new Vuex.Store({
     connectedAepps: {},
     migrations: {},
     backedUpSeed: null,
+    tourRunning: false,
   },
   getters,
   mutations: {

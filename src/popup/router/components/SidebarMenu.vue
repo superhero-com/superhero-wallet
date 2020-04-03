@@ -134,7 +134,7 @@ export default {
       font-size: 15px;
       line-height: 18px;
       width: 100%;
-      color: $accent-color;
+      color: $secondary-color;
       text-align: left;
       margin: 0;
       padding: 8px 1rem;
@@ -143,7 +143,7 @@ export default {
 
       &.opened,
       &:hover {
-        background-color: $accent-color;
+        background-color: $secondary-color;
         color: $white-color;
       }
 

@@ -1,13 +1,7 @@
 <template>
-  <div>
-    <Button data-cy="tip-button" class="claim-tips" @click="claimTips">
-      <div class="flex flex-align-center flex-justify-content-center">
-        <Claim />
-        <span class="ml-5">{{ $t('pages.claim.claim') }}</span>
-      </div>
-    </Button>
-    <popup />
-  </div>
+  <BoxButton :text="$t('pages.account.claim')" accent @handleClick="claimTips" class="tour__step4">
+    <Claim slot="icon" />
+  </BoxButton>
 </template>
 
 <script>
@@ -15,13 +9,13 @@ import { mapGetters } from 'vuex';
 import axios from 'axios';
 import { aettosToAe } from '../../utils/helper';
 import { TIP_SERVICE } from '../../utils/constants';
-import Button from './Button';
-import Claim from '../../../icons/claim.svg?vue-component';
+import BoxButton from './BoxButton';
+import Claim from '../../../icons/claim-icon.svg?vue-component';
 
 export default {
   components: {
-    Button,
     Claim,
+    BoxButton,
   },
   computed: mapGetters(['sdk', 'tipping', 'account', 'popup']),
   methods: {
