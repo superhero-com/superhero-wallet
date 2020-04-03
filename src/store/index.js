@@ -54,6 +54,7 @@ export default new Vuex.Store({
     connectedAepps: {},
     migrations: {},
     backedUpSeed: null,
+    tourRunning: false,
   },
   getters,
   mutations: {

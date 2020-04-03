@@ -49,8 +49,8 @@ export default {
   computed: {
     ...mapGetters(['tokenBalance', 'balanceCurrency', 'current', 'currentCurrency']),
     getCurrencyAmount() {
-      if (!+this.finalAmount) return '0.000';
-      return (this.finalAmount * this.current.currencyRate).toFixed(3);
+      if (!+this.finalAmount) return '0.00';
+      return (this.finalAmount * this.current.currencyRate).toFixed(2);
     },
   },
 };

@@ -1,6 +1,6 @@
 <template>
   <div class="recent-transactions">
-    <div class="flex flex flex-align-center flex-justify-between my-10">
+    <div class="flex flex flex-align-center flex-justify-between mb-10 mt-20">
       <span class="title">{{ $t('pages.recentTransactions.recentActivity') }}</span>
       <span data-cy="view-all-transactions" @click="allTransactions" class="viewAll">{{ $t('pages.recentTransactions.viewAll') }}</span>
     </div>
@@ -69,6 +69,7 @@ export default {
   overflow: hidden;
   padding: 0 20px;
   padding-bottom: 20px;
+  background: $transactions-bg;
   .title {
     color: $white-color !important;
   }

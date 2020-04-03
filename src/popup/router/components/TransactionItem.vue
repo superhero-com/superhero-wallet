@@ -56,13 +56,13 @@ export default {
     },
     txAmount() {
       const amount = this.transactionData.tx.amount ? this.transactionData.tx.amount : 0;
-      return convertToAE(amount).toFixed(3);
+      return convertToAE(amount).toFixed(2);
     },
     txAmountToCurrency() {
       const amount = this.transactionData.tx.amount ? this.transactionData.tx.amount : 0;
       const { fee } = this.transactionData.tx;
       const txamount = (amount + fee) / 10 ** 18;
-      return (txamount * this.current.currencyRate).toFixed(3);
+      return (txamount * this.current.currencyRate).toFixed(2);
     },
     transactionDate() {
       return formatDate(this.transactionData.time);
@@ -91,11 +91,11 @@ export default {
 <style lang="scss" scoped>
 @import '../../../common/variables';
 .list-item-transaction:first-child {
-  border-top: 1px solid $bg-color !important;
+  border-top: 1px solid $tx-border-color !important;
 }
 .list-item-transaction {
   display: inline-block;
-  padding: 5px 0;
+  padding: 10px 0;
   border-color: $bg-color !important;
   text-decoration: none;
   list-style: none;
@@ -112,7 +112,7 @@ export default {
       white-space: nowrap;
       overflow: hidden !important;
       text-overflow: ellipsis;
-      color: $accent-color;
+      color: $text-color;
       font-size: 12px;
       text-align: left;
       cursor: pointer;
@@ -135,8 +135,13 @@ export default {
       color: $secondary-color !important;
       font-size: 14px;
     }
+    .text {
+      color: $white-color !important;
+    }
     .status {
-      color: $text-color !important;
+      color: $white-color !important;
+      margin-left: 4px;
+      margin-right: auto;
     }
   }
 }

@@ -3,10 +3,11 @@
     <div class="content" :class="{ isLoggedIn }">
       <Arrow v-if="title" @click="goBack" class="back-arrow" data-cy="back-arrow" />
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
+      <StartOnboarding v-if="!title && isLoggedIn" class="start-onboarding" @click="$store.commit('SET_TOUR_RUNNING', true)" />
 
       <div class="title">
         <span v-if="title">{{ $t(`pages.titles.${title}`) }}</span>
-        <span v-else>{{ $t('pages.appVUE.walletName') }}</span>
+        <span v-else>{{ $t('pages.titles.home') }}</span>
       </div>
 
       <div v-if="isLoggedIn">
@@ -28,9 +29,10 @@ import Arrow from '../../../icons/arrow.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
 import Hamburger from '../../../icons/hamburger.svg?vue-component';
 import Logo from '../../../icons/logo-small.svg?vue-component';
+import StartOnboarding from '../../../icons/start-onboarding.svg?vue-component';
 
 export default {
-  components: { Arrow, Bell, Hamburger, Logo },
+  components: { Arrow, Bell, Hamburger, Logo, StartOnboarding },
   data() {
     return {};
   },
@@ -97,6 +99,13 @@ export default {
         left: 0;
         right: 0;
         text-align: center;
+        font-weight: bold;
+      }
+
+      .start-onboarding {
+        margin-left: 7px;
+        margin-right: auto;
+        cursor: pointer;
       }
     }
 
@@ -123,9 +132,10 @@ export default {
       height: 16px;
       text-align: center;
       vertical-align: middle;
-      left: -8px;
-      top: 2px;
-      line-height: 16px;
+      left: -10px;
+      top: 0px;
+      line-height: 15px;
+      border: 1px solid $nav-bg-color;
     }
   }
 }

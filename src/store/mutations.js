@@ -141,4 +141,7 @@ export default {
   [types.SET_BACKED_UP_SEED](state, payload) {
     state.backedUpSeed = payload;
   },
+  [types.SET_TOUR_RUNNING](state, payload) {
+    state.tourRunning = payload;
+  },
 };
