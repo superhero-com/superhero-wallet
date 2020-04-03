@@ -204,8 +204,8 @@
           In addition, <strong>USERS</strong> are given the option to claim a <strong>name</strong> for their account(s) via the <strong>&AElig;ternity Naming System</strong>. If a
           <strong>USER</strong> claims a <strong>name</strong> on the <strong>application</strong>, other <strong>USERS</strong> may associate it with the corresponding account.
           <strong>USERS</strong> are free to choose the <strong>name</strong>. The only requirement is that the <strong>USER</strong> must have a minimum of
-          <strong>&AElig; tokens </strong>in the <strong>WALLET</strong><strong> depending on the number of letters of the domain to be claimed</strong>. <strong>We</strong> request
-          from <strong>USERS</strong> not to use any offensive, racist, misleading, provocative or any other inappropriate wording.
+          <strong>&AElig; tokens </strong>in the <strong>WALLET</strong><strong> depending on the number of letters of the domain to be claimed</strong>.
+          <strong>We</strong> request from <strong>USERS</strong> not to use any offensive, racist, misleading, provocative or any other inappropriate wording.
         </p>
         <p>&nbsp;</p>
         <p>
@@ -217,26 +217,26 @@
         <p>
           In Section &ldquo;Names&rdquo; every <strong>USER</strong> can freely claim a <strong>name</strong>. The <strong>name</strong> pre-claim requires the payment of a
           transaction fee in micro <strong>&AElig; tokens</strong> and the commitment of the fee to the <strong>USER</strong> owned account. Once a person has set up a
-          <strong>name</strong>, the <strong>&AElig;ternity Naming System</strong> launches an auction within which all <strong>USERS</strong> of the <strong>WALLET</strong> can bid
-          and within which a final <strong>name</strong> fee is paid. Please bear in mind that <strong>names</strong> with 13 (thirteen) or more characters are claimed directly
-          without undergoing an auction and after the payment of the <strong>name</strong> fee. The period of time during which the auction is available (for names with less than 13
-          characters) cannot be specified- it is based on the length of the name and the number of bids. Each bid resets the auction counter on the ongoing auction. The highest bid
-          after the time has passed, receives the <strong>name</strong>. Please bear in mind that the person who has suggested the <strong>name</strong> and the person who has
+          <strong>name</strong>, the <strong>&AElig;ternity Naming System</strong> launches an auction within which all <strong>USERS</strong> of the <strong>WALLET</strong> can
+          bid and within which a final <strong>name</strong> fee is paid. Please bear in mind that <strong>names</strong> with 13 (thirteen) or more characters are claimed directly
+          without undergoing an auction and after the payment of the <strong>name</strong> fee. The period of time during which the auction is available (for names with less than
+          13 characters) cannot be specified- it is based on the length of the name and the number of bids. Each bid resets the auction counter on the ongoing auction. The highest
+          bid after the time has passed, receives the <strong>name</strong>. Please bear in mind that the person who has suggested the <strong>name</strong> and the person who has
           received the <strong>name</strong> can be two separate people and the claim of the <strong>name</strong> solely depends on the bids in the auctions.
           <strong>Superhero</strong> does not regulate or control the auctions. The claim is only available for 100 (one hundred) days.
         </p>
         <p>
           Before the lapse of 100 (one hundred) days, if the <strong>USER</strong> wants to preserve the <strong>name</strong>, they should update the claim and pay for the same.
           Each update is for one more period of 100 (one hundred) days with an option for reservation for an additional period of 100 (one hundred) days. Once it reaches the
-          expiration date on the claim, the <strong>name</strong> is released, i.e. transition into the unclaimed state, after which it can be claimed again. During the claim, if the
-          <strong>USER</strong> decides to extend the account related name, they shall only pay the transaction fee without paying additional name fees. The extension possibility is
-          available within the above-mentioned period of 100 (one hundred) days and is not a prerequisite for renewal of the period.&nbsp;
+          expiration date on the claim, the <strong>name</strong> is released, i.e. transition into the unclaimed state, after which it can be claimed again. During the claim, if
+          the <strong>USER</strong> decides to extend the account related name, they shall only pay the transaction fee without paying additional name fees. The extension
+          possibility is available within the above-mentioned period of 100 (one hundred) days and is not a prerequisite for renewal of the period.&nbsp;
         </p>
         <p>
           The <strong>&AElig;ternity Naming System</strong> gives the possibility for <strong>USERS</strong> to exchange and transfer their <strong>names</strong>. The
           <strong>USER</strong> who has received the <strong>name</strong> can transfer it to an account of another <strong>USER</strong>- third party, or another
-          <strong>&AElig; Wallet address</strong> the <strong>USER</strong> owns. <strong>USERS</strong> understand and accept that <strong>Superhero</strong> does not control in any
-          way the assignment and alienation of <strong>names</strong>. The decisions undertaken during the claim period of the <strong>name</strong> are a result of the
+          <strong>&AElig; Wallet address</strong> the <strong>USER</strong> owns. <strong>USERS</strong> understand and accept that <strong>Superhero</strong> does not control in
+          any way the assignment and alienation of <strong>names</strong>. The decisions undertaken during the claim period of the <strong>name</strong> are a result of the
           <strong>USER&rsquo;s</strong> sole estimation.
         </p>
         <p>
@@ -286,15 +286,16 @@
         <p>
           As mentioned above, the <strong>Wallet</strong> is only a software solution, which facilitates the interaction between <strong>USER</strong><strong>S</strong> and the
           decentralized, public ledger. Therefore, <strong>YOU</strong> are solely responsible and liable for any and all of your actions and inactions on the
-          <strong>application</strong> and all gains and losses sustained from your use of it. <strong>YOU</strong> indemnify <strong>Superhero</strong>, its employees and affiliates
-          in full for any and all negative consequences that might arise from the use of the <strong>application</strong> due to the lack of control over the peer-to-peer activities.
+          <strong>application</strong> and all gains and losses sustained from your use of it. <strong>YOU</strong> indemnify <strong>Superhero</strong>, its employees and
+          affiliates in full for any and all negative consequences that might arise from the use of the <strong>application</strong> due to the lack of control over the
+          peer-to-peer activities.
         </p>
         <p>&nbsp;</p>
         <p>
           <strong><u>General Disclaimer:</u></strong> The <strong>&AElig;ternity blockchain</strong> is open-source, public and permissionless ledger, meaning that anyone can
-          download, participate, develop, improve and validate transactions on the <strong>blockchain</strong>. <strong>Superhero</strong> cannot and does not control in any way the
-          transactions conducted by <strong>USERS</strong>. <strong>Superhero</strong> does not ensure the trustworthiness and validity of the same. Please, bear in mind that every
-          <strong>USER</strong> is solely responsible for the actions undertaken on the <strong>application</strong> and the information presented by them.
+          download, participate, develop, improve and validate transactions on the <strong>blockchain</strong>. <strong>Superhero</strong> cannot and does not control in any way
+          the transactions conducted by <strong>USERS</strong>. <strong>Superhero</strong> does not ensure the trustworthiness and validity of the same. Please, bear in mind that
+          every <strong>USER</strong> is solely responsible for the actions undertaken on the <strong>application</strong> and the information presented by them.
         </p>
         <p>&nbsp;</p>
         <p>
@@ -316,7 +317,8 @@
         </p>
         <p>&nbsp;</p>
         <p>
-          Please bear in mind that the option &ldquo;Already have an account? Retrieve existing account&rdquo; is applicable only in case the <strong>USER</strong> has a seed phrase.
+          Please bear in mind that the option &ldquo;Already have an account? Retrieve existing account&rdquo; is applicable only in case the <strong>USER</strong> has a seed
+          phrase.
         </p>
         <p>&nbsp;</p>
         <p>
@@ -334,33 +336,33 @@
           <a href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related"
             >https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related</a
           >
-          &nbsp;for Chrome, Brave and Opera. Please bear in mind that the Internet browsers can cease the supporting of the <strong>extension</strong> &nbsp;in their own estimation,
-          making it difficult or impossible to receive any functionality from the browser or updates. Devices on which the <strong>Wallet</strong> is installed are likely to be
-          harmed by malware/spyware/viruses/cyber-attacks, etc. or during technical support. Damage or loss of the device can possibly result in loss of funds or endanger them.
-          Therefore, please refer to section <strong><u>Password and Seed Phrase Security Disclaimer</u></strong> in regard to seed phrases. <strong>Superhero</strong> is not
-          responsible for any of the above-mentioned access and connectivity troubleshooting. Therefore, <strong>WE</strong> shall not be held liable for any loss of data on the
-          <strong>application</strong> caused in these cases.
+          &nbsp;for Chrome, Brave and Opera. Please bear in mind that the Internet browsers can cease the supporting of the <strong>extension</strong> &nbsp;in their own
+          estimation, making it difficult or impossible to receive any functionality from the browser or updates. Devices on which the <strong>Wallet</strong> is installed are
+          likely to be harmed by malware/spyware/viruses/cyber-attacks, etc. or during technical support. Damage or loss of the device can possibly result in loss of funds or
+          endanger them. Therefore, please refer to section <strong><u>Password and Seed Phrase Security Disclaimer</u></strong> in regard to seed phrases.
+          <strong>Superhero</strong> is not responsible for any of the above-mentioned access and connectivity troubleshooting. Therefore, <strong>WE</strong> shall not be held
+          liable for any loss of data on the <strong>application</strong> caused in these cases.
         </p>
         <p>&nbsp;</p>
         <p>
-          <strong><u>Cryptocurrency Guidance Disclaimer:</u></strong> The content presented on the <strong>application</strong> is not intended to be used as guide for cryptocurrency
-          investments or signing of other legal agreements in connection to cryptocurrencies. <strong>Superhero</strong> does not offer business advices, which can be used as a legal
-          basis for any investments or agreements in the sphere. <strong>Superhero</strong> shall not be held liable in any case of negative consequences from transactions or
-          non-compliance with obligations of legal agreements signed by <strong>YOU</strong>, including but not only losses, tort, revenue, income or profits loss arising out of the
-          contracts/ transactions/investment acts/agreements.
+          <strong><u>Cryptocurrency Guidance Disclaimer:</u></strong> The content presented on the <strong>application</strong> is not intended to be used as guide for
+          cryptocurrency investments or signing of other legal agreements in connection to cryptocurrencies. <strong>Superhero</strong> does not offer business advices, which can
+          be used as a legal basis for any investments or agreements in the sphere. <strong>Superhero</strong> shall not be held liable in any case of negative consequences from
+          transactions or non-compliance with obligations of legal agreements signed by <strong>YOU</strong>, including but not only losses, tort, revenue, income or profits loss
+          arising out of the contracts/ transactions/investment acts/agreements.
         </p>
         <p>&nbsp;</p>
         <p>
           <strong><u>Jurisdiction and Regulatory Disclaimer:</u></strong> The access to the <strong>application</strong> is granted worldwide. The use of the
           <strong>Wallet extension</strong> may be technically restricted or prohibited in certain territories and countries depending on the different legal acts. Please, bear in
-          mind that <strong>YOU</strong> have to inform yourself about such legal restrictions and <strong>YOU</strong> are liable solely in case of a breach of any legal norms. The
-          access to our <strong>application</strong> is prohibited provided the access point is in a territory where the content is illegal. <strong>Superhero</strong> does not have
-          the obligation to control the legislation applicability according to each access point of <strong>USERS</strong> and shall not be held liable in these circumstances.
+          mind that <strong>YOU</strong> have to inform yourself about such legal restrictions and <strong>YOU</strong> are liable solely in case of a breach of any legal norms.
+          The access to our <strong>application</strong> is prohibited provided the access point is in a territory where the content is illegal. <strong>Superhero</strong> does not
+          have the obligation to control the legislation applicability according to each access point of <strong>USERS</strong> and shall not be held liable in these circumstances.
         </p>
         <p>&nbsp;</p>
         <p>
-          <strong>USERS</strong> understand and accept that the legislation on a national, regional and international levels can introduce new regulations with an object- blockchain
-          technology, tokens, blockchain technology based applications, etc. Therefore, in case of regulatory restrictions, bans and prohibitions, the
+          <strong>USERS</strong> understand and accept that the legislation on a national, regional and international levels can introduce new regulations with an object-
+          blockchain technology, tokens, blockchain technology based applications, etc. Therefore, in case of regulatory restrictions, bans and prohibitions, the
           <strong>&AElig;ternity blockchain&rsquo;s</strong> or the <strong>Wallet extension&rsquo;s </strong>development shall be immensely influenced, probably causing its
           termination. Taking into account the above-mentioned, <strong>USERS</strong> understand that there is no assurance that they will constantly or for indefinite period of
           time receive any functionality through the <strong>application</strong> or the <strong>&AElig;</strong> <strong>tokens</strong> held by them.
@@ -376,10 +378,10 @@
         <ul>
           <li>
             <u>Risk of software weaknesses: </u><strong>USERS</strong> understand and accept that due to the open-source, decentralized, public, permissionless cloud concept, the
-            software, the blockchain technology, incorporating all elements and the <strong>application</strong> are in a constant development process. There is no warranty that the
-            receipt and transfer of <strong>&AElig;</strong> <strong>tokens</strong> shall be uninterrupted or error-free at all times. <strong>USERS</strong> accept and guarantee to
-            dispense of responsibility <strong>Superhero</strong> for any software or technology weaknesses, malfunctions, vulnerabilities or bugs, which can cause complete or
-            partial loss of <strong>&AElig;</strong><strong> tokens</strong>.
+            software, the blockchain technology, incorporating all elements and the <strong>application</strong> are in a constant development process. There is no warranty that
+            the receipt and transfer of <strong>&AElig;</strong> <strong>tokens</strong> shall be uninterrupted or error-free at all times. <strong>USERS</strong> accept and
+            guarantee to dispense of responsibility <strong>Superhero</strong> for any software or technology weaknesses, malfunctions, vulnerabilities or bugs, which can cause
+            complete or partial loss of <strong>&AElig;</strong><strong> tokens</strong>.
           </li>
           <li>
             <u>Risk of theft:</u> <strong>USERS</strong> understand and accept that due to the open-source, decentralized, public, permissionless cloud concept, the software, the
@@ -388,33 +390,33 @@
           </li>
           <li>
             <u>Risk of mining attacks</u>: <strong>USERS</strong> understand and accept that due to <strong>the application&rsquo;s</strong> blockchain based system, it may be
-            susceptible to mining attacks, including but not limited to double-spend attacks, majority mining power attacks, 'selfish-mining' attacks, and race condition attacks. Any
-            of the above-mentioned attacks could for example result in disturbance of the transactions on the <strong>application</strong>.
+            susceptible to mining attacks, including but not limited to double-spend attacks, majority mining power attacks, 'selfish-mining' attacks, and race condition attacks.
+            Any of the above-mentioned attacks could for example result in disturbance of the transactions on the <strong>application</strong>.
           </li>
         </ul>
         <p>
-          <u>Risk of phishing attacks and <strong>forks</strong>:</u> <strong>USERS</strong> understand and accept that the <strong>application</strong> can be an object of phishing
-          attacks. Highly possible results are the steal of data and credentials. The phishing attacks represent masquerade of an attacker as an authentic and trusted entity and the
-          creation of an <strong>application</strong>/ <strong>website</strong> with high percentage of resemblance with the original one. <strong>USERS</strong> should be careful
-          when they download and use the original <strong>application</strong>. <strong>USERS</strong> can identity the authentic <strong>Wallet</strong> by verifying that the
-          developer on the marketplace is <strong>Superhero.com / Superhero.com LVC</strong> and can use the hyperlinks for downloading, incorporated in the present Terms. Due to the
-          fact <strong>&AElig;ternity blockchain</strong> is public and permissionless, any person has the possibility to create a &ldquo;<strong>fork</strong>&rdquo;. Any developer
-          can copy and develop the source code resulting in the formation of a distinct and separate software. <strong>USERS</strong> understand and accept that
-          <strong>Superhero</strong> cannot avoid the creation of such <strong>forks</strong> and is not responsible for them. <strong>Superhero</strong> shall not be held liable for
-          any losses and/or damages resulted from the use of <strong>forks</strong>.
+          <u>Risk of phishing attacks and <strong>forks</strong>:</u> <strong>USERS</strong> understand and accept that the <strong>application</strong> can be an object of
+          phishing attacks. Highly possible results are the steal of data and credentials. The phishing attacks represent masquerade of an attacker as an authentic and trusted
+          entity and the creation of an <strong>application</strong>/ <strong>website</strong> with high percentage of resemblance with the original one.
+          <strong>USERS</strong> should be careful when they download and use the original <strong>application</strong>. <strong>USERS</strong> can identity the authentic
+          <strong>Wallet</strong> by verifying that the developer on the marketplace is <strong>Superhero.com / Superhero.com LVC</strong> and can use the hyperlinks for
+          downloading, incorporated in the present Terms. Due to the fact <strong>&AElig;ternity blockchain</strong> is public and permissionless, any person has the possibility to
+          create a &ldquo;<strong>fork</strong>&rdquo;. Any developer can copy and develop the source code resulting in the formation of a distinct and separate software.
+          <strong>USERS</strong> understand and accept that <strong>Superhero</strong> cannot avoid the creation of such <strong>forks</strong> and is not responsible for them.
+          <strong>Superhero</strong> shall not be held liable for any losses and/or damages resulted from the use of <strong>forks</strong>.
         </p>
       </div>
 
       <div v-if="index == 5" class="accordion-item-content" v-show="item.open" data-cy="accordion-item-content">
         <p>
-          The <strong>Wallet</strong> does not collect any fees or taxes for its use <strong>application </strong>- it is free of charge. However, taxes and fees are payable for the
-          transactions on the <strong>&AElig;ternity </strong><strong>blockchain</strong> including but not limited to miner fees, gas tax, transaction fee. The amounts of the taxes
-          and fees are fixed unilaterally.
+          The <strong>Wallet</strong> does not collect any fees or taxes for its use <strong>application </strong>- it is free of charge. However, taxes and fees are payable for
+          the transactions on the <strong>&AElig;ternity </strong><strong>blockchain</strong> including but not limited to miner fees, gas tax, transaction fee. The amounts of the
+          taxes and fees are fixed unilaterally.
         </p>
         <p>
-          In addition, depending on the territory access point, the transfer and receipt of funds through the <strong>application</strong> may be an object of tax and fee payments to
-          public authorities in different countries depending on the legal regulations. <strong>USERS</strong> are obliged to inform themselves about such requirements and are solely
-          responsible for their donations.
+          In addition, depending on the territory access point, the transfer and receipt of funds through the <strong>application</strong> may be an object of tax and fee payments
+          to public authorities in different countries depending on the legal regulations. <strong>USERS</strong> are obliged to inform themselves about such requirements and are
+          solely responsible for their donations.
         </p>
       </div>
 
@@ -424,22 +426,22 @@
           sure that <strong>YOU</strong> are no the URL that <strong>YOU</strong> want to tip. <strong>Superhero</strong> does not participate or control in any way the tips and
           shall not be held liable for any mistakes and wrong donations. The tips cannot be sent back. Please bear in mind that the <strong>application</strong> is created in order
           for people to stimulate the full, transparent, useful and accurate information worldwide. Therefore, <strong>USERS</strong> shall be fully liable for any use of the
-          <strong>Wallet</strong> in violation of its purpose and the present <strong>TERMS</strong>. <strong>Superhero</strong> does not control the platforms the donations are sent
-          to. <strong>Superhero</strong> is not responsible for the content on the third-party platforms in any way.
+          <strong>Wallet</strong> in violation of its purpose and the present <strong>TERMS</strong>. <strong>Superhero</strong> does not control the platforms the donations are
+          sent to. <strong>Superhero</strong> is not responsible for the content on the third-party platforms in any way.
         </p>
         <p>&nbsp;</p>
         <p>
-          In addition, any use of third-party platforms for the purpose of exchanging <strong>&AElig;</strong> <strong>tokens</strong> with other cryptocurrencies or fiat currencies
-          is subject to compliance with the third-party platform&rsquo;s Terms of use and other compulsory documentation. It is solely your responsibility to comply duly with the
-          rules, applicable for these platforms. <strong>Superhero</strong> is not responsible in any way for the use of these third-party platforms in relation to loading the
-          <strong>USERS&rsquo;</strong> wallets and the withdrawal of <strong>&AElig;</strong> <strong>tokens</strong>.
+          In addition, any use of third-party platforms for the purpose of exchanging <strong>&AElig;</strong> <strong>tokens</strong> with other cryptocurrencies or fiat
+          currencies is subject to compliance with the third-party platform&rsquo;s Terms of use and other compulsory documentation. It is solely your responsibility to comply duly
+          with the rules, applicable for these platforms. <strong>Superhero</strong> is not responsible in any way for the use of these third-party platforms in relation to loading
+          the <strong>USERS&rsquo;</strong> wallets and the withdrawal of <strong>&AElig;</strong> <strong>tokens</strong>.
         </p>
       </div>
 
       <div v-if="index == 7" class="accordion-item-content" v-show="item.open" data-cy="accordion-item-content">
         <p>
-          The <strong>application</strong> is developed under the open-source, permissive free software ISC License (&ldquo;ISC&rdquo;). Under this license other developers have the
-          right to use, copy, modify and distribute the source code of the <strong>Wallet</strong> for any purpose without a fee. The license only requires preservation of the
+          The <strong>application</strong> is developed under the open-source, permissive free software ISC License (&ldquo;ISC&rdquo;). Under this license other developers have
+          the right to use, copy, modify and distribute the source code of the <strong>Wallet</strong> for any purpose without a fee. The license only requires preservation of the
           copyright and license notice below. <strong>Superhero</strong> is not liable in any way for the diffusion and public access to the amended/modified by other developers
           source code files due to the open source character of the software.
         </p>
@@ -453,9 +455,9 @@
           permission notice appear in all copies.
         </p>
         <p>
-          THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO
-          EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
-          IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.&rdquo;
+          THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
+          NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+          WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.&rdquo;
         </p>
       </div>
 
@@ -489,8 +491,8 @@
       </div>
       <div v-if="index == 10" class="accordion-item-content" v-show="item.open" data-cy="accordion-item-content">
         <p>
-          These <strong>TERMS</strong> set forth the entire understanding and agreement as to the subject matter hereof and supersedes any and all prior discussions, agreements, and
-          understandings of any kind and every nature between <strong>USERS</strong> and <strong>Superhero</strong>.
+          These <strong>TERMS</strong> set forth the entire understanding and agreement as to the subject matter hereof and supersedes any and all prior discussions, agreements,
+          and understandings of any kind and every nature between <strong>USERS</strong> and <strong>Superhero</strong>.
         </p>
         <p>&nbsp;</p>
         <p>
@@ -498,8 +500,8 @@
           provisions. The invalidity of one or more clauses/ provisions in the <strong>TERMS</strong> does not lead to the invalidity of the whole agreement.
         </p>
         <p>
-          <strong><u>The Privacy Policy</u></strong> is an inseparable part of the present <strong>TERMS</strong> and should be considered as a complementary document with compulsory
-          character. Unless explicitly stated otherwise in the <strong>Privacy Policy</strong>, all rules from the <strong>TERMS</strong> apply respectively.
+          <strong><u>The Privacy Policy</u></strong> is an inseparable part of the present <strong>TERMS</strong> and should be considered as a complementary document with
+          compulsory character. Unless explicitly stated otherwise in the <strong>Privacy Policy</strong>, all rules from the <strong>TERMS</strong> apply respectively.
         </p>
         <p>&nbsp;</p>
         <p>&nbsp;</p>
