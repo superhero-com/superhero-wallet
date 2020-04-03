@@ -14,9 +14,6 @@
           <Tip slot="icon" />
         </BoxButton>
         <ClaimTips @setLoading="val => (loading = val)" v-if="IS_EXTENSION" />
-        <BoxButton :text="$t('pages.account.claim')" accent>
-          <Claim slot="icon" />
-        </BoxButton>
         <BoxButton text="Activity" to="/transactions">
           <Activity slot="icon" />
         </BoxButton>
@@ -33,6 +30,7 @@
       <RecentTransactions></RecentTransactions>
     </div>
     <Loader size="big" :loading="loading" type="transparent" />
+    <popup />
   </div>
 </template>
 
@@ -40,7 +38,6 @@
 import { mapGetters } from 'vuex';
 import { setTimeout } from 'timers';
 import Tip from '../../../icons/tip-icon.svg?vue-component';
-import Claim from '../../../icons/claim-icon.svg?vue-component';
 import Activity from '../../../icons/activity-icon.svg?vue-component';
 import Topup from '../../../icons/topup-icon.svg?vue-component';
 import Withdraw from '../../../icons/withdraw-icon.svg?vue-component';
@@ -55,7 +52,6 @@ export default {
   name: 'Account',
   components: {
     Tip,
-    Claim,
     Activity,
     Topup,
     Withdraw,
