@@ -103,7 +103,7 @@ export default {
       }
 
       .start-onboarding {
-        margin-left: 7px;
+        margin-left: 13px;
         margin-right: auto;
         cursor: pointer;
       }
