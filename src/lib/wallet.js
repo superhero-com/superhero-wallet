@@ -10,12 +10,11 @@ import { TIPPING_CONTRACT } from '../popup/utils/constants';
 export default {
   countError: 0,
   async init() {
-    const { userAccount } = await browser.storage.local.get('userAccount');
-    if (!userAccount && isEmpty(store.getters.account)) {
+    const { account } = store.getters;
+    if (isEmpty(account)) {
       store.commit('SET_MAIN_LOADING', false);
       return { loggedIn: false };
     }
-    const account = !userAccount ? store.getters.account : userAccount;
     const address = await store.dispatch('generateWallet', { seed: account.privateKey });
     store.commit('UPDATE_ACCOUNT', account);
     store.commit('SET_ACTIVE_ACCOUNT', { publicKey: address, index: 0 });

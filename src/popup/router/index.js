@@ -51,6 +51,7 @@ const unbind = router.beforeEach((to, from, next) => {
 });
 
 router.beforeEach(async (to, from, next) => {
+  await helper.pollGetter(() => store.state.isRestored);
   if (store.getters.isLoggedIn) {
     if (!store.getters.sdk) wallet.initSdk();
     next(to.meta.ifNotAuthOnly ? '/account' : undefined);
