@@ -225,23 +225,6 @@ main {
 }
 .transactionList, .allTransactions {
   padding: 0px 0 0px 0!important;
-  .ae-badge.primary {
-    background:$primary-color;
-  }
-  .ae-badge.alternative{
-    background:$color-alternative;
-  }
-  .ae-badge.secondary{
-    background:$color-secondary;
-  }
-  .ae-badge {
-    background:#929CA6;
-    color:#fff !important;
-    font-size:.7rem;
-  }
-}
-.allTransactions .ae-identicon {
-  margin-left: 1rem;
 }
 .transactionsPadding {
   padding:1rem !important;

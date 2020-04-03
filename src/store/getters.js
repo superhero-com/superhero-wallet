@@ -11,7 +11,7 @@ export default {
     return state.balance;
   },
   balanceCurrency({ current, balance }) {
-    return (current.currencyRate * balance).toFixed(3);
+    return (current.currencyRate * balance).toFixed(2);
   },
   currentCurrency({ current }) {
     return current.currency.toUpperCase();
@@ -59,7 +59,7 @@ export default {
     return state.middleware;
   },
   tokenBalance(state) {
-    return state.current.token !== 0 ? state.tokens[state.current.token].balance.toFixed(3) : state.balance.toFixed(3);
+    return state.current.token !== 0 ? state.tokens[state.current.token].balance.toFixed(2) : state.balance.toFixed(2);
   },
   tokenSymbol() {
     return 'AE';
@@ -111,5 +111,8 @@ export default {
   },
   backedUpSeed({ backedUpSeed }) {
     return backedUpSeed;
+  },
+  tourRunning({ tourRunning }) {
+    return tourRunning;
   },
 };

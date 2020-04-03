@@ -3,10 +3,10 @@
     <AccountInfo />
     <BalanceInfo />
     <TransactionFilters @filtrate="filtrate" />
-    <ae-list class="allTransactions" data-cy="all-transactions">
+    <ae-list class="all-transactions" data-cy="all-transactions">
       <div class="date" v-if="pendingTransactions.length">{{ $t('pages.recentTransactions.pendingStatus') }}</div>
       <PendingTxs />
-      <TransactionItem v-for="transaction in filteredTransactions" :key="transaction.id" :transactionData="transaction"></TransactionItem>
+      <TransactionItem v-for="transaction in filteredTransactions" :key="transaction.id" :transactionData="transaction" />
     </ae-list>
     <div v-if="!filteredTransactions.length && !loading">
       <p>{{ $t('pages.transactions.noTransactions') }}</p>
@@ -132,5 +132,8 @@ export default {
 }
 .popup {
   padding: 0;
+}
+.all-transactions {
+  background: $transactions-bg;
 }
 </style>

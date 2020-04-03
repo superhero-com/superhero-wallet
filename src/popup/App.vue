@@ -12,6 +12,7 @@
 
     <Loader size="big" :loading="mainLoading" />
     <NodeConnectionStatus />
+    <Tour />
   </ae-main>
 </template>
 
@@ -25,12 +26,14 @@ import { detectBrowser } from './utils/helper';
 import Header from './router/components/Header';
 import SidebarMenu from './router/components/SidebarMenu';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus';
+import Tour from './router/components/Tour';
 
 export default {
   components: {
     Header,
     SidebarMenu,
     NodeConnectionStatus,
+    Tour,
   },
   data: () => ({
     showSidebar: false,

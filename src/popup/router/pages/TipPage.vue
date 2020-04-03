@@ -1,50 +1,53 @@
 <template>
-  <div class="popup" data-cy="tip-container">
-    <p class="primary-title text-left mb-8 f-16">
+  <div>
+    <div class="tour__step3 popup">
+      <p class="primary-title text-left mb-8 f-16">
+        <template v-if="!confirmMode">
+          {{ $t('pages.tipPage.heading') }}
+          <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+          {{ $t('pages.tipPage.to') }}
+        </template>
+        <template v-else>
+          {{ $t('pages.tipPage.headingSending') }}
+          <span class="secondary-text" data-cy="tip-amount">{{ amount }} {{ $t('pages.appVUE.aeid') }}</span>
+          ({{ currencyAmount }} {{ currentCurrency }}) {{ $t('pages.tipPage.to') }}
+        </template>
+      </p>
+
+      <div class="url-bar">
+        <template v-if="!editUrl">
+          <a class="link-sm text-left" data-cy="tip-url">{{ url }}</a>
+          <CheckIcon v-if="urlVerified" />
+        </template>
+        <Input v-else size="m-0 xsm" v-model="url" />
+        <button v-if="!confirmMode" @click="editUrl = !editUrl" data-cy="edit-url">
+          <ae-icon :name="editUrl ? 'check' : 'vote'" data-cy="confirm-url" />
+        </button>
+      </div>
+    </div>
+    <div class="popup" data-cy="tip-container">
       <template v-if="!confirmMode">
-        {{ $t('pages.tipPage.heading') }}
-        <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
-        {{ $t('pages.tipPage.to') }}
+        <AmountSend :amountError="amountError" @changeAmount="val => (amount = val)" :value="amount" />
+        <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
+        <Button @click="toConfirm" :disabled="!note || amountError || noteError || !minCallFee || editUrl" data-cy="send-tip">
+          {{ $t('pages.tipPage.next') }}
+        </Button>
       </template>
       <template v-else>
-        {{ $t('pages.tipPage.headingSending') }}
-        <span class="secondary-text" data-cy="tip-amount">{{ amount }} {{ $t('pages.appVUE.aeid') }}</span>
-        ({{ currencyAmount }} {{ currentCurrency }}) {{ $t('pages.tipPage.to') }}
+        <div class="tip-note-preview mt-15" data-cy="tip-note">
+          {{ note }}
+        </div>
+        <Button @click="sendTip" :disabled="!tipping" data-cy="confirm-tip">
+          {{ $t('pages.tipPage.confirm') }}
+        </Button>
+        <Button @click="confirmMode = false" data-cy="edit-tip">
+          {{ $t('pages.tipPage.edit') }}
+        </Button>
       </template>
-    </p>
 
-    <div class="url-bar">
-      <template v-if="!editUrl">
-        <a class="link-sm text-left" data-cy="tip-url">{{ url }}</a>
-        <CheckIcon v-if="urlVerified" />
-      </template>
-      <Input v-else size="m-0 xsm" v-model="url" />
-      <button v-if="!confirmMode" @click="editUrl = !editUrl" data-cy="edit-url">
-        <ae-icon :name="editUrl ? 'check' : 'vote'" data-cy="confirm-url" />
-      </button>
+      <popup :popupSecondBtnClick="popup.secondBtnClick" />
+      <Loader size="big" :loading="loading" type="transparent" content="" />
     </div>
-
-    <template v-if="!confirmMode">
-      <AmountSend :amountError="amountError" @changeAmount="val => (amount = val)" :value="amount" />
-      <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
-      <Button @click="toConfirm" :disabled="!note || amountError || noteError || !minCallFee || editUrl" data-cy="send-tip">
-        {{ $t('pages.tipPage.next') }}
-      </Button>
-    </template>
-    <template v-else>
-      <div class="tip-note-preview mt-15" data-cy="tip-note">
-        {{ note }}
-      </div>
-      <Button @click="sendTip" :disabled="!tipping" data-cy="confirm-tip">
-        {{ $t('pages.tipPage.confirm') }}
-      </Button>
-      <Button @click="confirmMode = false" data-cy="edit-tip">
-        {{ $t('pages.tipPage.edit') }}
-      </Button>
-    </template>
-
-    <popup :popupSecondBtnClick="popup.secondBtnClick" />
-    <Loader size="big" :loading="loading" type="transparent" content="" />
   </div>
 </template>
 
@@ -184,6 +187,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.tour__step3 {
+  margin: 0 10px;
+  padding: 12px 10px 4px;
+  margin-top: 10px;
+  p {
+    margin-top: 0;
+  }
+}
 .url-bar {
   display: flex;
   align-items: center;
