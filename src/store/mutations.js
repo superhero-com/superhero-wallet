@@ -143,5 +143,5 @@ export default {
   },
   [types.SET_TOUR_RUNNING](state, payload) {
     state.tourRunning = payload;
-  }
+  },
 };

@@ -4,24 +4,25 @@
       <template slot-scope="tour">
         <transition name="fade">
           <v-step
-          v-if="tour.currentStep === index"
-          v-for="(step, index) of tour.steps"
-          :key="index"
-          :step="step"
-          :previous-step="tour.previousStep"
-          :next-step="tour.nextStep"
-          :stop="tour.stop"
-          :is-first="tour.isFirst"
-          :is-last="tour.isLast"
-          :labels="tour.labels"
-          :highlight="tour.highlight"
-          :class="tour.currentStep === 2 ? 'tip-step' : ''">
+            v-if="tour.currentStep === index"
+            v-for="(step, index) of tour.steps"
+            :key="index"
+            :step="step"
+            :previous-step="tour.previousStep"
+            :next-step="tour.nextStep"
+            :stop="tour.stop"
+            :is-first="tour.isFirst"
+            :is-last="tour.isLast"
+            :labels="tour.labels"
+            :highlight="tour.highlight"
+            :class="tour.currentStep === 2 ? 'tip-step' : ''"
+          >
             <template>
               <div slot="header" class="step-header">
                 {{ $t(`onboarding.step_${tour.currentStep + 1}.title`) }} <span class="step-info"> ({{ tour.currentStep + 1 }}/10) </span>
               </div>
               <div slot="content" class="step-content" v-html="$t(`onboarding.step_${tour.currentStep + 1}.content`)"></div>
-              <div slot="actions" ></div>
+              <div slot="actions"></div>
             </template>
           </v-step>
         </transition>
@@ -38,7 +39,7 @@
         </div>
         <div class="tour-control-buttons">
           <Button onboarding class="skip" @click="stop">Skip</Button>
-          <Button v-if="started" onboarding @click="back" >Back</Button>
+          <Button v-if="started" onboarding @click="back">Back</Button>
           <Button v-if="started" onboarding class="next" @click="next">Next</Button>
           <Button v-if="!started" onboarding class="start" @click="start">Start</Button>
         </div>
@@ -63,7 +64,7 @@ export default {
         params: {
           enableScrolling: false,
           placement: 'bottom',
-        }
+        },
       },
       {
         route: '/account',
@@ -71,7 +72,7 @@ export default {
         params: {
           enableScrolling: false,
           placement: 'top',
-        }
+        },
       },
       {
         target: '.tour__step3',
@@ -87,48 +88,48 @@ export default {
         params: {
           enableScrolling: false,
           placement: 'top',
-        }
+        },
       },
       {
         target: '.tour__step5 .button-content',
         params: {
           enableScrolling: false,
           placement: 'top',
-        }
+        },
       },
       {
         target: '.tour__step6 .button-content',
         params: {
           enableScrolling: false,
           placement: 'top',
-        }
+        },
       },
       {
         target: '.tour__step7 .button-content',
         params: {
           enableScrolling: false,
           placement: 'top',
-        }
+        },
       },
       {
         target: '.tour__step8 .button-content',
         params: {
           enableScrolling: false,
           placement: 'top',
-        }
+        },
       },
-    ]
+    ],
   }),
   computed: {
     ...mapGetters(['tourRunning']),
     tour() {
       return this.$tours.onboarding;
-    }
+    },
   },
   watch: {
     tourRunning(val) {
       if (val) this.showActions();
-    }
+    },
   },
   methods: {
     showActions() {
@@ -153,12 +154,12 @@ export default {
     },
     back() {
       if (this.$tours.onboarding.steps[this.$tours.onboarding.currentStep - 1].route) {
-        this.$router.push(this.$tours.onboarding.steps[this.$tours.onboarding.currentStep - 1].route)
+        this.$router.push(this.$tours.onboarding.steps[this.$tours.onboarding.currentStep - 1].route);
         this.$nextTick(() => {
-          this.$tours.onboarding.previousStep()
-        })
+          this.$tours.onboarding.previousStep();
+        });
       } else {
-        this.$tours.onboarding.previousStep()
+        this.$tours.onboarding.previousStep();
       }
     },
     next() {
@@ -166,7 +167,7 @@ export default {
       if (nextStep && nextStep.route) {
         this.$router.push(nextStep.route);
         this.$nextTick(() => {
-          this.$tours.onboarding.nextStep()
+          this.$tours.onboarding.nextStep();
         });
       } else if (nextStep) {
         this.$tours.onboarding.nextStep();
@@ -178,7 +179,7 @@ export default {
       }
     },
   },
-}
+};
 </script>
 
 <style lang="scss">
@@ -222,8 +223,8 @@ export default {
       transform: rotate(180deg);
       bottom: -0.75rem !important;
     }
-  } 
-  
+  }
+
   &[x-placement^='bottom'] {
     margin-top: 0.8rem !important;
 
@@ -241,7 +242,7 @@ export default {
   box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
 
   &:after {
-    content: "";
+    content: '';
     border: 1.5px dashed #fff !important;
     border-radius: 5px;
     background: rgba(42, 156, 255, 0.25) !important;
@@ -271,7 +272,7 @@ export default {
   }
 
   &:after {
-    content: "";
+    content: '';
     background-image: url('../../../icons/onboarding-bg.png');
     position: absolute;
     top: -40px;
@@ -317,6 +318,5 @@ export default {
     margin-top: 25px;
     display: flex;
   }
-
 }
 </style>

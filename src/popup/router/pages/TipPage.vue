@@ -26,8 +26,6 @@
       </div>
     </div>
     <div class="popup" data-cy="tip-container">
-      
-
       <template v-if="!confirmMode">
         <AmountSend :amountError="amountError" @changeAmount="val => (amount = val)" :value="amount" />
         <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />

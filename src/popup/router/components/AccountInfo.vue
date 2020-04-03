@@ -63,7 +63,7 @@ export default {
     .account-name {
       font-weight: 500;
       color: #fff;
-      line-height: 21px;;
+      line-height: 21px;
     }
 
     .help-icon {

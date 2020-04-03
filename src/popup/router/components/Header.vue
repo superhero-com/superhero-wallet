@@ -117,7 +117,6 @@ export default {
       padding: 0;
       margin-left: 5px;
     }
-    
 
     .noti-holder {
       position: relative;
