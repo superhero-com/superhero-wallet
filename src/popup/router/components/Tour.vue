@@ -27,7 +27,7 @@
         </transition>
       </template>
     </v-tour>
-    <div class="tour-actions" v-if="running" :class="!started ? 'not-started' : ''">
+    <div class="tour-actions" v-if="tourRunning" :class="!started ? 'not-started' : ''">
       <div class="container">
         <div class="tour-welcome-message">
           <Hero />
@@ -48,6 +48,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import Hero from '../../../icons/hero.svg?vue-component';
 
 export default {
@@ -55,7 +56,6 @@ export default {
     Hero,
   },
   data: () => ({
-    running: false,
     started: false,
     steps: [
       {
@@ -120,18 +120,19 @@ export default {
     ]
   }),
   computed: {
+    ...mapGetters(['tourRunning']),
     tour() {
       return this.$tours.onboarding;
     }
   },
-  mounted() {
-    console.log(this.$tours.onboarding)
-    setTimeout(() => this.showActions(), 4000);
+  watch: {
+    tourRunning(val) {
+      if (val) this.showActions();
+    }
   },
   methods: {
     showActions() {
       this.disableScroll();
-      this.running = true;
     },
     start() {
       this.$tours.onboarding.start();
@@ -139,7 +140,7 @@ export default {
     },
     stop() {
       this.$tours.onboarding.skip();
-      this.running = false;
+      this.$store.commit('SET_TOUR_RUNNING', false);
       this.enableScroll();
     },
     disableScroll() {
@@ -171,7 +172,7 @@ export default {
         this.$tours.onboarding.nextStep();
       } else {
         this.$tours.onboarding.finish();
-        this.running = false;
+        this.$store.commit('SET_TOUR_RUNNING', false);
         this.enableScroll();
         this.started = false;
       }
