@@ -96,7 +96,7 @@
     },
     "claim": {
       "claim": "Claim tips",
-      "noZeroClaim": "There are no tips to be claimed here",
+      "noZeroClaim": "There are no tips to be claimed for this URL.",
       "noAddress": "Address not found",
       "errorClaim": "Error claiming",
       "ae": "AE tokens",
