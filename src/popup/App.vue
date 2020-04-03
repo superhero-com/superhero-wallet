@@ -19,7 +19,7 @@
 import { mapGetters } from 'vuex';
 import { clearInterval, setInterval } from 'timers';
 import { AEX2_METHODS } from './utils/constants';
-import { postMessage, readWebPageDom } from './utils/connection';
+import { postMessage } from './utils/connection';
 import { fetchAndSetLocale } from './utils/i18nHelper';
 import { detectBrowser } from './utils/helper';
 import Header from './router/components/Header';
@@ -48,13 +48,6 @@ export default {
         fetchAndSetLocale(language);
       }
     );
-
-    if (process.env.IS_EXTENSION) {
-      readWebPageDom((receiver, sendResponse) => {
-        this.$store.commit('SET_TIPPING_RECEIVER', receiver);
-        sendResponse({ host: receiver.host, received: true });
-      });
-    }
 
     this.checkSdkReady();
     this.$store.dispatch('getCurrencies');
