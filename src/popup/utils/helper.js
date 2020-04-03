@@ -2,6 +2,7 @@ import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 import { MAGNITUDE_EXA, MAGNITUDE_GIGA, MAGNITUDE_PICO, CONNECTION_TYPES, networks, DEFAULT_NETWORK } from './constants';
+import { getState } from '../../store/plugins/persistState';
 
 export const aeToAettos = v => formatAmount(v, { denomination: AE_AMOUNT_FORMATS.AE, targetDenomination: AE_AMOUNT_FORMATS.AETTOS });
 export const aettosToAe = v => formatAmount(v, { denomination: AE_AMOUNT_FORMATS.AETTOS, targetDenomination: AE_AMOUNT_FORMATS.AE });
@@ -84,34 +85,13 @@ const fetchData = (url, method, fetchedData) => {
 };
 
 const getAeppAccountPermission = async (host, account) => {
-  const { connectedAepps } = await browser.storage.local.get('connectedAepps');
-  if (!connectedAepps) return false;
-  if (connectedAepps && connectedAepps.list) {
-    const { list } = connectedAepps;
-    if (list.find(ae => ae.host === host && ae.accounts.includes(account))) {
-      return true;
-    }
-    return false;
+  const { connectedAepps } = await getState();
+  if (!Object.keys(connectedAepps).length) return false;
+  if (!connectedAepps[host]) return false;
+  if (connectedAepps[host].includes(account)) {
+    return true;
   }
   return false;
-};
-
-const setPermissionForAccount = async (host, account) => {
-  const { connectedAepps } = await browser.storage.local.get('connectedAepps');
-  const list = (connectedAepps && connectedAepps.list) || [];
-
-  if (list.length && list.find(l => l.host === host)) {
-    const hst = list.find(h => h.host === host);
-    const index = list.findIndex(h => h.host === host);
-    if (!hst) return;
-    if (hst.accounts.includes(account)) return;
-
-    list[index].accounts = [...hst.accounts, account];
-  } else {
-    list.push({ host, accounts: [account] });
-  }
-
-  await browser.storage.local.set({ connectedAepps: { list } });
 };
 
 export const fetchJson = async (...args) => {
@@ -140,25 +120,6 @@ const middleware = async (network, current) => {
       axiosError: () => '',
     },
   })({ swag });
-};
-
-const getCurrencies = async () => {
-  const { convertTimer } = await browser.storage.local.get('convertTimer');
-  const time = new Date().getTime();
-  if (!convertTimer || (convertTimer && (convertTimer === '' || convertTimer <= time))) {
-    const fetched = await fetchData(
-      'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
-      'get',
-      ''
-    );
-    await browser.storage.local.set({ convertTimer: time + 3600000 });
-    await browser.storage.local.set({ allCurrencies: JSON.stringify(fetched.aeternity) });
-
-    return fetched.aeternity;
-  }
-
-  const { allCurrencies } = await browser.storage.local.get('allCurrencies');
-  return JSON.parse(allCurrencies);
 };
 
 const convertAmountToCurrency = (currency, amount) => currency * amount;
@@ -293,11 +254,7 @@ export const prefixedAmount = value => {
 const contractCall = async ({ instance, method, params = [], decode = false, async = true }) => {
   let call;
   try {
-    if (params.length) {
-      call = await instance.methods[method](...params);
-    } else {
-      call = await instance.methods[method]();
-    }
+    call = await instance.methods[method](...params);
   } catch (e) {
     if (e.message.indexOf('wrong_abi_version') > -1) {
       instance.setOptions({ backend: 'aevm' });
@@ -306,8 +263,8 @@ const contractCall = async ({ instance, method, params = [], decode = false, asy
     throw e.message;
   }
 
-  // eslint-disable-next-line no-nested-ternary
-  return async ? (decode ? call.decodedResult : call) : params.length ? instance.methods[method](...params) : instance.methods[method]();
+  if (async) return decode ? call.decodedResult : call;
+  return instance.methods[method](...params);
 };
 
 const setContractInstance = async (tx, sdk, contractAddress = null) => {
@@ -317,12 +274,11 @@ const setContractInstance = async (tx, sdk, contractAddress = null) => {
     if (typeof tx.abi_version !== 'undefined' && tx.abi_version !== 3) {
       backend = 'aevm';
     }
-    try {
-      contractInstance = await sdk.getContractInstance(tx.source, { contractAddress, forceCodeCheck: true });
-      contractInstance.setOptions({ backend });
-    } catch (e) {}
-    return Promise.resolve(contractInstance);
-  } catch (e) {}
+    contractInstance = await sdk.getContractInstance(tx.source, { contractAddress, forceCodeCheck: true });
+    contractInstance.setOptions({ backend });
+  } catch (e) {
+    console.error(`setContractInstance: ${e}`);
+  }
   return Promise.resolve(contractInstance);
 };
 
@@ -345,7 +301,7 @@ const getUniqueId = (length = 6) => {
 };
 
 const getUserNetworks = async () => {
-  const { userNetworks } = await browser.storage.local.get('userNetworks');
+  const { userNetworks } = await getState();
   return !userNetworks ? {} : userNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {});
 };
 
@@ -354,8 +310,7 @@ export const getAllNetworks = async () => {
   return { ...userNetworks, ...networks };
 };
 
-// eslint-disable-next-line no-useless-escape
-const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/[\""]/g, '');
+const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
 
 const addTipAmount = async amount => {
   const { tippedAmount } = await browser.storage.local.get('tippedAmount');
@@ -411,9 +366,10 @@ export const pollGetter = getter =>
 
 export const getActiveNetwork = async () => {
   const all = await getAllNetworks();
-  const { activeNetwork } = await browser.storage.local.get('activeNetwork');
+  const { current } = await getState();
+  const networkName = current ? current.network : DEFAULT_NETWORK;
   return {
-    network: all[activeNetwork || DEFAULT_NETWORK],
+    network: all[networkName],
     all,
   };
 };
@@ -425,7 +381,6 @@ export {
   fetchData,
   detectBrowser,
   middleware,
-  getCurrencies,
   convertAmountToCurrency,
   checkAddress,
   chekAensName,
@@ -437,7 +392,6 @@ export {
   setContractInstance,
   getContractInstance,
   getAeppAccountPermission,
-  setPermissionForAccount,
   getUniqueId,
   getUserNetworks,
   getExtensionProtocol,

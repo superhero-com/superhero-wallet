@@ -20,11 +20,7 @@ export default {
   created() {},
   watch: {
     value(val) {
-      if ((this.type === 'number' && isNaN(val)) || parseFloat(val) === 0) {
-        this.err = true;
-      } else {
-        this.err = false;
-      }
+      this.err = this.type === 'number' && Number.isNaN(+val);
     },
   },
   computed: {
@@ -63,10 +59,10 @@ input.input {
   margin-right: auto;
 }
 .input:focus {
-  border-color: $accent-color !important;
+  border-color: $input-focus-color !important;
 }
 .input.has-error {
-  border-color: $secondary-color !important;
+  border-color: $input-error-color !important;
 }
 .input.sm {
   font-size: 14px;

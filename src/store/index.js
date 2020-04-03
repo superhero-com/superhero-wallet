@@ -1,9 +1,11 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-
-import { getters } from './getters';
+import { mergeWith } from 'lodash-es';
+import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
+import persistState from './plugins/persistState';
+import runMigrations from './migrations';
 import { POPUP_PROPS } from '../popup/utils/popup-messages';
 import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
 
@@ -11,16 +13,17 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    isRestored: false,
     subaccounts: [],
     account: {},
+    mnemonic: null,
     activeAccount: 0,
     names: [],
-    pendingNames: [],
     wallet: [],
     balance: 0,
     current: {
       network: DEFAULT_NETWORK,
-      language: '',
+      language: 'en',
       token: 0,
       currency: 'usd',
       currencyRate: 0,
@@ -43,10 +46,68 @@ export default new Vuex.Store({
     mainLoading: true,
     nodeStatus: 'connecting',
     currencies: {},
+    nextCurrenciesFetch: null,
     notifications: [],
+    notificationsCounter: null,
+    tip: null,
+    txQueue: [],
+    connectedAepps: {},
+    migrations: {},
+    backedUpSeed: null,
+    tourRunning: false,
   },
   getters,
-  mutations,
+  mutations: {
+    syncState(state, remoteState) {
+      const customizer = (objValue, srcValue) => {
+        if (!Array.isArray(srcValue)) return undefined;
+        if (!Array.isArray(objValue)) return srcValue;
+        return srcValue.map((el, idx) => (el && typeof el === 'object' ? mergeWith({}, objValue[idx], el, customizer) : el));
+      };
+      Object.entries(mergeWith({}, state, remoteState, customizer)).forEach(([name, value]) => Vue.set(state, name, value));
+    },
+    markMigrationAsApplied(state, migrationId) {
+      Vue.set(state.migrations, migrationId, true);
+    },
+    ...mutations,
+  },
   actions,
-  plugins: [],
+  plugins: [
+    persistState(
+      (state, store) => runMigrations(state, store),
+      ({
+        migrations,
+        current,
+        transactions,
+        balance,
+        subaccounts,
+        currencies,
+        userNetworks,
+        names,
+        nextCurrenciesFetch,
+        tip,
+        notificationsCounter,
+        connectedAepps,
+        backedUpSeed,
+        account,
+        mnemonic,
+      }) => ({
+        migrations,
+        current,
+        transactions,
+        balance,
+        subaccounts,
+        currencies,
+        userNetworks,
+        names,
+        nextCurrenciesFetch,
+        tip,
+        notificationsCounter,
+        connectedAepps,
+        backedUpSeed,
+        account,
+        mnemonic,
+      })
+    ),
+  ],
 });

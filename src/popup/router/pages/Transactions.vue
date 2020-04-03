@@ -3,10 +3,10 @@
     <AccountInfo />
     <BalanceInfo />
     <TransactionFilters @filtrate="filtrate" />
-    <ae-list class="allTransactions" data-cy="all-transactions">
+    <ae-list class="all-transactions" data-cy="all-transactions">
       <div class="date" v-if="pendingTransactions.length">{{ $t('pages.recentTransactions.pendingStatus') }}</div>
       <PendingTxs />
-      <TransactionItem v-for="transaction in filteredTransactions" :key="transaction.id" :transactionData="transaction"></TransactionItem>
+      <TransactionItem v-for="transaction in filteredTransactions" :key="transaction.id" :transactionData="transaction" />
     </ae-list>
     <div v-if="!filteredTransactions.length && !loading">
       <p>{{ $t('pages.transactions.noTransactions') }}</p>
@@ -22,7 +22,6 @@ import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
 import TransactionFilters from '../components/TransactionFilters';
 import PendingTxs from '../components/PendingTxs';
-import { pollGetter } from '../../utils/helper';
 import { TXS_PER_PAGE } from '../../utils/constants';
 
 export default {
@@ -98,7 +97,7 @@ export default {
     },
     async loadMore(init = false) {
       if (this.loading && !init) return;
-      await pollGetter(() => this.middleware);
+      await this.$watchUntilTruly(() => this.middleware);
       this.loading = true;
       const transactions = await this.$store.dispatch('fetchTransactions', { page: this.page, limit: TXS_PER_PAGE });
       this.updateTransactions({ transactions });
@@ -133,5 +132,8 @@ export default {
 }
 .popup {
   padding: 0;
+}
+.all-transactions {
+  background: $transactions-bg;
 }
 </style>

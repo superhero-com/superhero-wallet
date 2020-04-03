@@ -24,6 +24,7 @@ import NotificationsPage from './pages/Notifications';
 import NamesPage from './pages/Names';
 import AuctionBid from './pages/AuctionBid';
 import Networks from './pages/Networks';
+import CommentNew from './pages/CommentNew';
 import NotFound from './pages/NotFound';
 
 export default [
@@ -235,6 +236,13 @@ export default [
     props: true,
     meta: {
       title: 'networks',
+    },
+  },
+  {
+    path: '/comment',
+    component: CommentNew,
+    meta: {
+      title: 'comment-new',
     },
   },
   {

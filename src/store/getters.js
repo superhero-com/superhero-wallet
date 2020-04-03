@@ -1,6 +1,6 @@
 import { DEFAULT_NETWORK } from '../popup/utils/constants';
 
-export const getters = {
+export default {
   account(state) {
     return state.account;
   },
@@ -11,7 +11,7 @@ export const getters = {
     return state.balance;
   },
   balanceCurrency({ current, balance }) {
-    return (current.currencyRate * balance).toFixed(3);
+    return (current.currencyRate * balance).toFixed(2);
   },
   currentCurrency({ current }) {
     return current.currency.toUpperCase();
@@ -59,7 +59,7 @@ export const getters = {
     return state.middleware;
   },
   tokenBalance(state) {
-    return state.current.token !== 0 ? state.tokens[state.current.token].balance.toFixed(3) : state.balance.toFixed(3);
+    return state.current.token !== 0 ? state.tokens[state.current.token].balance.toFixed(2) : state.balance.toFixed(2);
   },
   tokenSymbol() {
     return 'AE';
@@ -97,7 +97,22 @@ export const getters = {
   notifications({ notifications }) {
     return notifications;
   },
-  names(state) {
-    return state.names;
+  notificationsCounter({ notificationsCounter }) {
+    return notificationsCounter;
+  },
+  names({ names }) {
+    return names;
+  },
+  tip({ tip }) {
+    return tip;
+  },
+  mnemonic({ mnemonic }) {
+    return mnemonic;
+  },
+  backedUpSeed({ backedUpSeed }) {
+    return backedUpSeed;
+  },
+  tourRunning({ tourRunning }) {
+    return tourRunning;
   },
 };

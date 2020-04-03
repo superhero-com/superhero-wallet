@@ -1,16 +1,16 @@
 <template>
   <div class="recent-transactions">
-    <div class="flex flex flex-align-center flex-justify-between my-10">
+    <div class="flex flex flex-align-center flex-justify-between mb-10 mt-20">
       <span class="title">{{ $t('pages.recentTransactions.recentActivity') }}</span>
       <span data-cy="view-all-transactions" @click="allTransactions" class="viewAll">{{ $t('pages.recentTransactions.viewAll') }}</span>
     </div>
     <PendingTxs />
-    <div v-if="transactions.latest.length && !loading">
+    <div v-if="transactions.latest.length">
       <ae-list class="transactionList">
         <TransactionItem :recent="true" :dark="true" v-for="transaction in transactions.latest" :key="transaction.id" :transactionData="transaction"></TransactionItem>
       </ae-list>
     </div>
-    <div v-if="transactions.latest.length == 0 && !loading">
+    <div v-if="!transactions.latest.length && !transactions.pending.length">
       <p class="paragraph noTransactions">{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
     </div>
     <div class="loader-holder">
@@ -37,7 +37,7 @@ export default {
     };
   },
   created() {
-    this.updateTransactions();
+    if (this.transactions.latest.length) this.loading = false;
     this.polling = setInterval(() => this.updateTransactions(), 5000);
     this.$once('hook:beforeDestroy', () => clearInterval(this.polling));
   },
@@ -69,6 +69,7 @@ export default {
   overflow: hidden;
   padding: 0 20px;
   padding-bottom: 20px;
+  background: $transactions-bg;
   .title {
     color: $white-color !important;
   }

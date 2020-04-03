@@ -1,7 +1,7 @@
 import { setInterval } from 'timers';
 import { generateHdWallet, getHdWalletAccount } from './popup/utils/hdWallet';
 import { stringifyForStorage, parseFromStorage } from './popup/utils/helper';
-import { addressGenerator } from './popup/utils/address-generator';
+import decryptKeystore from './popup/utils/decrypt-keystore';
 
 export default class WalletController {
   constructor(tests = false) {
@@ -15,7 +15,6 @@ export default class WalletController {
           if (wins.length === 0) {
             this.lockWallet();
             sessionStorage.removeItem('phishing_urls');
-            browser.storage.local.remove('activeAccount');
           }
         });
         if (!this.wallet) {
@@ -26,7 +25,7 @@ export default class WalletController {
   }
 
   async unlockWallet({ accountPassword, encryptedPrivateKey }) {
-    const match = await addressGenerator.decryptKeystore(encryptedPrivateKey, accountPassword);
+    const match = await decryptKeystore(encryptedPrivateKey, accountPassword);
     if (match !== false) {
       this.wallet = generateHdWallet(match);
       if (this.tests) {
@@ -40,7 +39,6 @@ export default class WalletController {
 
   lockWallet() {
     this.wallet = null;
-    browser.storage.local.remove('isLogged');
   }
 
   generateWallet({ seed }) {

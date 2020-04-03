@@ -96,7 +96,10 @@ export default {
         'SET_NETWORKS',
         allNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {})
       );
-      await browser.storage.local.set({ userNetworks: allNetworks.filter(({ name }) => name !== DEFAULT_NETWORK) });
+      this.$store.commit(
+        'SET_USERNETWORKS',
+        allNetworks.filter(({ name }) => name !== DEFAULT_NETWORK)
+      );
     },
     async addNetwork() {
       try {
@@ -129,7 +132,10 @@ export default {
           allNetworks.push(newNetwork);
           await this.$store.commit('ADD_NETWORK', newNetwork);
         }
-        await browser.storage.local.set({ userNetworks: allNetworks.filter(({ name }) => name !== DEFAULT_NETWORK) });
+        this.$store.commit(
+          'SET_USERNETWORKS',
+          allNetworks.filter(({ name }) => name !== DEFAULT_NETWORK)
+        );
         this.mode = 'list';
       } catch (e) {
         this.network.error = e.message;

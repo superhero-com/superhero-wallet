@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24.5" height="24.5" viewBox="0 0 24.5 24.5">
+  <g id="Group_620" data-name="Group 620" transform="translate(738.25 0.25)">
+    <g id="buy_1_" data-name="buy (1)" transform="translate(-738 0)">
+      <g id="Group_606" data-name="Group 606">
+        <g id="Group_605" data-name="Group 605">
+          <path id="Path_383" data-name="Path 383" d="M12.023,266.125a10.033,10.033,0,0,1-8.7-4.969H6.55v-1.875H0v6.563H1.871v-3.472A11.98,11.98,0,0,0,12.023,268a11.817,11.817,0,0,0,8.447-3.517A11.965,11.965,0,0,0,23.953,256H22.082A10.1,10.1,0,0,1,12.023,266.125Z" transform="translate(0 -244)" fill="#fff" stroke="#fff" stroke-width="0.5"/>
+          <path id="Path_384" data-name="Path 384" d="M22.129,2.655V6.127A11.977,11.977,0,0,0,0,12.5H1.871A10.105,10.105,0,0,1,20.679,7.343H17.45V9.218H24V2.655Z" transform="translate(0 -0.499)" fill="#fff" stroke="#fff" stroke-width="0.5"/>
+        </g>
+      </g>
+    </g>
+    <g id="Group_607" data-name="Group 607" transform="translate(1.27 0.294)">
+      <g id="Union_1" data-name="Union 1" transform="translate(-732.27 10.296)" fill="#fff">
+        <path d="M 9.750030517578125 2.25 L 0.250030517578125 2.25 L 0.250030517578125 0.25 L 9.750030517578125 0.25 L 9.750030517578125 2.25 Z" stroke="none"/>
+        <path d="M 0.500030517578125 0.5 L 0.500030517578125 2 L 9.500030517578125 2 L 9.500030517578125 0.5 L 0.500030517578125 0.5 M 3.0517578125e-05 0 L 10.00003051757813 0 L 10.00003051757813 2.5 L 3.0517578125e-05 2.5 L 3.0517578125e-05 0 Z" stroke="none" fill="#fff"/>
+      </g>
+    </g>
+  </g>
+</svg>

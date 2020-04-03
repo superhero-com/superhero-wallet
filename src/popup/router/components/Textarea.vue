@@ -54,10 +54,10 @@ textarea {
   word-break: break-word;
 }
 textarea:focus {
-  border-color: $accent-color !important;
+  border-color: $input-focus-color !important;
 }
 textarea.has-error {
-  border-color: $secondary-color !important;
+  border-color: $input-error-color !important;
 }
 textarea.sm {
   font-size: 14px;

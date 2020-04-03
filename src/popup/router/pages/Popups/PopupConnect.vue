@@ -41,7 +41,6 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { setPermissionForAccount } from '../../../utils/helper';
 import getPopupProps from '../../../utils/getPopupProps';
 import Button from '../../components/Button';
 import UserAvatar from '../../components/UserAvatar';
@@ -65,7 +64,7 @@ export default {
       this.data.reject(false);
     },
     async connect() {
-      await setPermissionForAccount(this.data.host, this.account.publicKey);
+      await this.$store.dispatch('setPermissionForAccount', { host: this.data.host, account: this.account.publicKey });
       this.data.resolve(true);
     },
   },

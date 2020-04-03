@@ -1,6 +1,8 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
+import { isEmpty } from 'lodash-es';
 import { setContractInstance, contractCall, getAddressByNameEntry, getActiveNetwork } from '../popup/utils/helper';
+import { getState } from '../store/plugins/persistState';
 
 let sdk;
 let controller;
@@ -11,9 +13,9 @@ export const setController = contr => {
 };
 
 export const getActiveAccount = async () => {
-  const { userAccount } = await browser.storage.local.get('userAccount');
-  if (userAccount) {
-    return { account: { publicKey: userAccount.publicKey }, activeAccount: 0 };
+  const { account } = await getState();
+  if (!isEmpty(account)) {
+    return { account: { publicKey: account.publicKey }, activeAccount: 0 };
   }
   return false;
 };
@@ -33,7 +35,9 @@ export const switchNode = async () => {
     const node = await Node({ url: network.internalUrl, internalUrl: network.internalUrl });
     try {
       await sdk.addNode(network.name, node, true);
-    } catch (e) {}
+    } catch (e) {
+      console.error(`switchNode: ${e}`);
+    }
     sdk.selectNode(network.name);
   }
 };
@@ -49,7 +53,9 @@ export const getSDK = async () => {
         nativeMode: true,
         compilerUrl: network.compilerUrl,
       });
-    } catch (e) {}
+    } catch (e) {
+      console.error(`getSDK: ${e}`);
+    }
   }
 
   return sdk;

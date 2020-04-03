@@ -1,6 +1,6 @@
 {
   "name": "superhero-wallet",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Superhero wallet",
   "author": "SuperHero",
   "license": "MIT",
@@ -81,6 +81,7 @@
     "vue-qr-reader": "^1.6.0",
     "vue-qrcode-reader": "^2.1.1",
     "vue-router": "^3.1.5",
+    "vue-tour": "^1.3.0",
     "vuex": "^3.1.1",
     "web3": "^1.2.2",
     "webextension-polyfill": "^0.3.1",
@@ -89,6 +90,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.6.4",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/plugin-proposal-optional-chaining": "^7.6.0",
     "@babel/preset-env": "^7.6.3",
     "@cypress/webpack-preprocessor": "^4.1.3",
@@ -101,7 +103,7 @@
     "cordova": "^9.0.0",
     "cordova-plugin-whitelist": "^1.3.4",
     "cordova-res": "^0.9.0",
-    "core-js": "^2.6.10",
+    "core-js": "^3.6.4",
     "cross-env": "^5.2.1",
     "css-loader": "^0.28.11",
     "cypress": "^4.1.0",
@@ -145,7 +147,7 @@
       "cordova-plugin-inappbrowser": {},
       "ionic-plugin-deeplinks": {
         "URL_SCHEME": "superhero",
-        "DEEPLINK_HOST": "mobile.z52da5wt.xyz"
+        "DEEPLINK_HOST": "wallet.superhero.com"
       }
     },
     "platforms": [

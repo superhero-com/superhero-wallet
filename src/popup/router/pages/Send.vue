@@ -20,9 +20,7 @@
           <AmountSend data-cy="amount-box" @changeAmount="val => (form.amount = val)" :value="form.amount" />
           <div class="flex flex-align-center flex-justify-between">
             <Button data-cy="reject-withdraw" half @click="navigateAccount">{{ $t('pages.send.cancel') }}</Button>
-            <Button data-cy="review-withdraw" half @click="step = 2" :disabled="!form.address || !form.amount || (form.amount && isNaN(form.amount))">{{
-              $t('pages.send.review')
-            }}</Button>
+            <Button data-cy="review-withdraw" half @click="step = 2" :disabled="!form.address || !+form.amount">{{ $t('pages.send.review') }}</Button>
           </div>
         </div>
       </div>
@@ -98,8 +96,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
-import { checkAddress, chekAensName, checkHashType, aeToAettos, pollGetter } from '../../utils/helper';
-import { setPendingTx } from '../../utils';
+import { checkAddress, chekAensName, checkHashType, aeToAettos } from '../../utils/helper';
 import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
@@ -211,7 +208,7 @@ export default {
       });
     },
     async fetchFee() {
-      await pollGetter(() => this.sdk);
+      await this.$watchUntilTruly(() => this.sdk);
       const fee = await calculateFee(this.current.token === 0 ? TX_TYPES.txSign : TX_TYPES.contractCall, { ...(await this.feeParams()) });
       this.fee = fee;
     },
@@ -251,9 +248,9 @@ export default {
       }
       this.loading = true;
       try {
-        const result = await this.sdk.spend(amount, receiver, { waitMined: false });
-        if (result.hash) {
-          await setPendingTx({ hash: result.hash, amount: this.form.amount, time: Date.parse(new Date()), type: 'spend' });
+        const { hash } = await this.sdk.spend(amount, receiver, { waitMined: false });
+        if (hash) {
+          await this.$store.dispatch('setPendingTx', { hash, amount: this.form.amount, time: Date.parse(new Date()), type: 'spend' });
           this.$router.push('/account');
         }
         this.loading = false;

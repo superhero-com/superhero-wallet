@@ -34,8 +34,6 @@ import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
-import { pollGetter } from '../../utils/helper';
-import { setPendingTx } from '../../utils';
 import openUrl from '../../utils/openUrl';
 import CheckIcon from '../../../icons/check-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
@@ -75,14 +73,14 @@ export default {
     this.loading = true;
     this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
 
-    await pollGetter(() => this.sdk);
+    await this.$watchUntilTruly(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
       contractId: this.network[this.current.network].tipContract,
       callerId: this.account.publicKey,
     }).min;
 
-    await pollGetter(() => this.tipping);
+    await this.$watchUntilTruly(() => this.tipping);
     const tipId = +this.urlParams.get('id');
     if (!tipId) throw new Error('"id" param is missed');
     const { decodedResult } = await this.tipping.methods.get_state();
@@ -97,15 +95,15 @@ export default {
     },
     async sendTip() {
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
-      this.amountError = this.amountError || isNaN(this.amount) || this.amount <= 0;
+      this.amountError = this.amountError || !+this.amount || this.amount <= 0;
       if (this.amountError) return;
 
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
       this.loading = true;
       try {
-        const res = await this.tipping.methods.retip(this.tip.id, { amount, waitMined: false });
-        if (res.hash) {
-          await setPendingTx({ hash: res.hash, amount: this.amount, domain: this.tip.url, time: Date.now(), type: 'tip' });
+        const { hash } = await this.tipping.methods.retip(this.tip.id, { amount, waitMined: false });
+        if (hash) {
+          await this.$store.dispatch('setPendingTx', { hash, amount: this.amount, domain: this.tip.url, time: Date.now(), type: 'tip' });
           this.openCallbackOrGoHome('x-success');
         }
       } catch (e) {

@@ -3,7 +3,7 @@
     <Input
       class="amount-box"
       type="number"
-      :error="!amountError ? false : true"
+      :error="amountError || finalAmount <= 0"
       v-model="finalAmount"
       :placeholder="$t('pages.tipPage.amountPlaceholder')"
       :label="$t('pages.tipPage.amountLabel')"
@@ -49,8 +49,8 @@ export default {
   computed: {
     ...mapGetters(['tokenBalance', 'balanceCurrency', 'current', 'currentCurrency']),
     getCurrencyAmount() {
-      if (isNaN(this.finalAmount)) return '0.000';
-      return (this.finalAmount * this.current.currencyRate).toFixed(3);
+      if (!+this.finalAmount) return '0.00';
+      return (this.finalAmount * this.current.currencyRate).toFixed(2);
     },
   },
 };
