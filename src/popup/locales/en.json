@@ -133,10 +133,14 @@
     },
     "claim": {
       "claim": "Claim tips",
-      "noZeroClaim": "No zero amount claims",
+      "noZeroClaim": "There are no tips to be claimed for this URL.",
       "noAddress": "Address not found",
       "errorClaim": "Error claiming",
-      "claimed": " AE tokens claimed !"
+      "ae": "AE tokens",
+      "claimed": " Claim request sent! ",
+      "url": "URL",
+      "tipsOnUrl": "Tips on this URL"
+
     },
     "accountPassword": {
       "heading": "",
