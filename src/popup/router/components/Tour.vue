@@ -5,8 +5,8 @@
       <template slot-scope="tour">
         <transition name="fade">
           <v-step
-            v-for="(step, index) of tour.steps"
             v-if="tour.currentStep === index"
+            v-for="(step, index) of tour.steps"
             :key="index"
             :step="step"
             :previous-step="tour.previousStep"
@@ -148,17 +148,19 @@ export default {
     disableScroll() {
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
+      document.body.style.pointerEvents = 'none';
     },
     enableScroll() {
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
+      document.body.style.pointerEvents = '';
     },
     back() {
       const prevStep = this.$tours.onboarding.steps[this.$tours.onboarding.currentStep - 1];
       if (prevStep && prevStep.route) {
         this.$router.push(prevStep.route);
         this.$nextTick(() => {
-          this.$tours.onboarding.previousStep();
+          setTimeout(() => this.$tours.onboarding.previousStep(), 500);
         });
       } else {
         this.$tours.onboarding.previousStep();
@@ -169,7 +171,7 @@ export default {
       if (nextStep && nextStep.route) {
         this.$router.push(nextStep.route);
         this.$nextTick(() => {
-          this.$tours.onboarding.nextStep();
+          setTimeout(() => this.$tours.onboarding.nextStep(), 500);
         });
       } else if (nextStep) {
         this.$tours.onboarding.nextStep();
@@ -242,13 +244,13 @@ export default {
 
 .v-tour__target--highlighted {
   box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
+  pointer-events: none !important;
 
   &:after {
     content: '';
     border: 1.5px dashed #fff !important;
     border-radius: 5px;
     background: rgba(42, 156, 255, 0.25) !important;
-    pointer-events: none !important;
     position: absolute;
     left: 0;
     right: 0;
