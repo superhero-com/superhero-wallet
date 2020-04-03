@@ -12,7 +12,6 @@ cache:
  
 script:
   - npm run lint -- --no-fix
-  - npm test
   - npm run build
 
 before_deploy: scripts/before-deploy.sh
