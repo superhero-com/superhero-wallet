@@ -52,6 +52,7 @@ export default {
 .currenciesgroup {
   font-size: 18px;
   display: flex;
+  line-height: 24px;
 
   .approx-sign {
     margin-top: 3px;
@@ -106,14 +107,14 @@ export default {
 }
 
 .external-svg {
-  height: 84px;
+  height: 76px;
   position: relative;
   text-align: center;
   background-image: url('../../../icons/acc_balance.png');
   border-bottom: 2px solid $transactions-bg;
   display: flex;
-  padding: 0 20px;
-  margin-top: 20px;
+  padding: 0 20px 10px 20px;
+  margin-top: 15px;
   .title {
     color: $white-color !important;
     font-size: 16px;
@@ -126,6 +127,7 @@ export default {
     font-weight: normal;
     text-align: left;
     margin-left: 20px;
+    line-height: 34px;
     &,
     .ae-button {
       font-family: 'Roboto', sans-serif;

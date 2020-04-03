@@ -7,23 +7,25 @@
           {{ $t('pages.account.yourSeedPhrase') }}
         </span>
       </div>
-      <AccountInfo />
-      <BalanceInfo />
+      <div class="tour__step1">
+        <AccountInfo />
+        <BalanceInfo />
+      </div>
       <div class="submenu-bg">
-        <BoxButton :text="$t('pages.account.send')" accent to="/tip">
+        <BoxButton :text="$t('pages.account.send')" accent to="tip" class="tour__step2">
           <Tip slot="icon" />
         </BoxButton>
         <ClaimTips @setLoading="val => (loading = val)" v-if="IS_EXTENSION" />
-        <BoxButton text="Activity" to="/transactions">
+        <BoxButton text="Activity" to="transactions" class="tour__step5">
           <Activity slot="icon" />
         </BoxButton>
-        <BoxButton :text="$t('pages.appVUE.topUp')" to="/receive">
+        <BoxButton :text="$t('pages.appVUE.topUp')" to="receive" class="tour__step6">
           <Topup slot="icon" />
         </BoxButton>
-        <BoxButton :text="$t('pages.appVUE.withdraw')" to="/send">
+        <BoxButton :text="$t('pages.appVUE.withdraw')" to="send" class="tour__step7">
           <Withdraw slot="icon" />
         </BoxButton>
-        <BoxButton :text="$t('pages.appVUE.settings')" to="/securitySettings">
+        <BoxButton :text="$t('pages.appVUE.settings')" to="securitySettings" class="tour__step8">
           <Settings slot="icon" />
         </BoxButton>
       </div>

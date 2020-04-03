@@ -3,6 +3,7 @@
     <div class="content" :class="{ isLoggedIn }">
       <Arrow v-if="title" @click="goBack" class="back-arrow" data-cy="back-arrow" />
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
+      <StartOnboarding v-if="!title && isLoggedIn" class="start-onboarding" />
 
       <div class="title">
         <span v-if="title">{{ $t(`pages.titles.${title}`) }}</span>
@@ -28,9 +29,10 @@ import Arrow from '../../../icons/arrow.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
 import Hamburger from '../../../icons/hamburger.svg?vue-component';
 import Logo from '../../../icons/logo-small.svg?vue-component';
+import StartOnboarding from '../../../icons/start-onboarding.svg?vue-component';
 
 export default {
-  components: { Arrow, Bell, Hamburger, Logo },
+  components: { Arrow, Bell, Hamburger, Logo, StartOnboarding },
   data() {
     return {};
   },
@@ -99,6 +101,12 @@ export default {
         text-align: center;
         font-weight: bold;
       }
+
+      .start-onboarding {
+        margin-left: 7px;
+        margin-right: auto;
+        cursor: pointer;
+      }
     }
 
     svg {
@@ -109,6 +117,7 @@ export default {
       padding: 0;
       margin-left: 5px;
     }
+    
 
     .noti-holder {
       position: relative;

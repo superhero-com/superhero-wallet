@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import VueClipboard from 'vue-clipboard2';
 import Components from '@aeternity/aepp-components-3';
+import VueTour from 'vue-tour'
 import routes from './routes';
 import '@aeternity/aepp-components-3/dist/aepp.components.css';
 import LoaderComponent from './components/Loader';
@@ -22,12 +23,13 @@ const plugin = {
     Vue.prototype.$helpers = helper;
   },
 };
+require('vue-tour/dist/vue-tour.css');
 
 Vue.use(plugin);
 Vue.use(VueRouter);
 Vue.use(VueClipboard);
 Vue.use(Components);
-
+Vue.use(VueTour);
 Vue.component('Loader', LoaderComponent);
 Vue.component('TransactionItem', TransactionItemComponent);
 Vue.component('Popup', Popup);

@@ -19,7 +19,7 @@ export default {
   },
   methods: {
     handleClick() {
-      return this.to ? this.$router.push(this.to) : this.$emit('handleClick');
+      return this.to ? this.$router.push(`/${this.to}`) : this.$emit('handleClick');
     },
   },
 };
@@ -36,6 +36,7 @@ export default {
     background: $box-button-color;
     border-radius: 5px;
     padding: 15px 10px;
+    border: 1px solid transparent;
 
     &:hover {
       background-color: $secondary-color;

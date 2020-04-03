@@ -1,7 +1,6 @@
 <template>
   <div class="account-info">
     <div class="title">
-      <img v-if="!chainName" src="../../../icons/account-name-icon.png" />
       <div class="account-name" data-cy="account-name">
         <template v-if="chainName">{{ activeAccountName }}</template>
         <router-link to="/names" v-else>Claim your .chain name</router-link>
@@ -48,13 +47,14 @@ export default {
 @import '../../../common/variables';
 
 .account-info {
-  margin: 32px 20px 0 20px;
+  padding: 10px 20px 0 20px;
   text-align: left;
 
   .title {
     display: flex;
     align-items: center;
     margin-bottom: 4px;
+    line-height: 21px;
 
     img {
       margin-right: 5px;
@@ -63,6 +63,7 @@ export default {
     .account-name {
       font-weight: 500;
       color: #fff;
+      line-height: 21px;;
     }
 
     .help-icon {
@@ -83,7 +84,7 @@ export default {
 
   .ae-address {
     color: $text-color;
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: -0.1px;
   }
 }

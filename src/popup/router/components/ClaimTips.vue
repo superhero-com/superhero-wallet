@@ -1,5 +1,5 @@
 <template>
-  <BoxButton :text="$t('pages.account.claim')" accent @handleClick="claimTips">
+  <BoxButton :text="$t('pages.account.claim')" accent @handleClick="claimTips" class="tour__step4">
     <Claim slot="icon" />
   </BoxButton>
 </template>

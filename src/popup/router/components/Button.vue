@@ -12,6 +12,7 @@ export default {
     half: Boolean,
     small: Boolean,
     third: Boolean,
+    onboarding: Boolean,
   },
   computed: {
     getClasses() {
@@ -21,6 +22,7 @@ export default {
       if (this.half) c.push('half');
       if (this.small) c.push('small');
       if (this.third) c.push('third');
+      if (this.onboarding) c.push('onboarding');
       return c.join(' ');
     },
   },
@@ -80,5 +82,35 @@ export default {
 .primary-button.danger {
   background: $secondary-color !important;
   color: $white-color !important;
+}
+.primary-button.onboarding {
+  width: 100px !important;
+  font-size: 14px;
+  height: 34px;
+  border-radius: 5px;
+  line-height: 34px !important;
+  background: $box-button-color !important;
+  margin: 0 !important;
+  margin-right: 10px !important;
+  font-weight: 500 !important;
+  color: #fff !important;
+
+  &:last-child {
+    margin-right: 0
+  }
+
+  &.skip {
+    background: #FF5857 !important;
+  }
+
+  &.next {
+    background: $secondary-color !important;
+  }
+
+  &.start {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    background: $secondary-color !important;
+  }
 }
 </style>
