@@ -6,7 +6,7 @@
           {{ $t('pages.tipPage.heading') }}
           <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
           {{ $t('pages.tipPage.to') }}
-          <div class="verified-url" v-if="urlVerified || tourRunning"><TickIcon /> Verified</div> 
+          <div class="verified-url" v-if="urlVerified || tourRunning"><TickIcon /> Verified</div>
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
@@ -21,7 +21,7 @@
         </template>
         <Input v-else size="m-0 xsm" v-model="url" />
         <button v-if="!confirmMode" @click="editUrl = !editUrl" data-cy="edit-url">
-          <ae-icon name="check" data-cy="confirm-url" v-if="editUrl"/>
+          <ae-icon name="check" data-cy="confirm-url" v-if="editUrl" />
           <EditIcon data-cy="confirm-url" v-else />
         </button>
       </div>
@@ -224,7 +224,7 @@ export default {
   padding: 3px 5px;
   float: right;
 }
-@media screen and (min-width: 780px){
+@media screen and (min-width: 780px) {
   .tour__step3 {
     margin: 0 auto;
     padding: 12px 20px 4px;

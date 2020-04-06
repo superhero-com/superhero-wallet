@@ -285,9 +285,9 @@ export default {
     left: 0;
     right: 0;
     z-index: -1;
-    content: "";
-    -webkit-clip-path: polygon(0% 49%,100% 36%,100% 100%,0 100%);
-    clip-path: polygon(0% 49%,100% 36%,100% 100%,0 100%);
+    content: '';
+    -webkit-clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
+    clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
     background: #12121b;
   }
 
@@ -328,7 +328,7 @@ export default {
   }
 }
 
-@media screen and (min-width: 780px){
+@media screen and (min-width: 780px) {
   .tour-actions:after {
     top: -30px;
   }

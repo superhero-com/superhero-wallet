@@ -1,10 +1,12 @@
 <template>
   <div class="popup">
     <p class="primary-title text-left mb-8 f-16">
-      {{ $t('pages.tipPage.heading') }}
-      <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
-      {{ $t('pages.tipPage.to') }}
-      <div class="verified-url" v-if="urlVerified"><TickIcon /> Verified</div> 
+      <template>
+        {{ $t('pages.tipPage.heading') }}
+        <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+        {{ $t('pages.tipPage.to') }}
+        <div class="verified-url" v-if="urlVerified"><TickIcon /> Verified</div>
+      </template>
     </p>
 
     <div class="url-bar">
