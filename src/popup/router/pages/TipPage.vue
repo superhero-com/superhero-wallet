@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="tour__step3 popup">
+    <div class="tour__step3 popup" :class="!IS_EXTENSION ? 'tour__step3_mobile' : ''">
       <p class="primary-title text-left mb-8 f-16">
         <template v-if="!confirmMode">
           {{ $t('pages.tipPage.heading') }}
@@ -195,6 +195,9 @@ export default {
     margin-top: 0;
   }
 }
+.tour__step3_mobile.v-tour__target--highlighted {
+  padding-bottom: 25px;
+}
 .url-bar {
   display: flex;
   align-items: center;
@@ -206,6 +209,7 @@ export default {
 @media screen and (min-width: 780px){
   .tour__step3 {
     margin: 0 auto;
+    padding: 12px 20px 4px;
   }
 }
 </style>
