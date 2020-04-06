@@ -28,7 +28,7 @@ describe('Test cases for Account Page', () => {
       .get('[data-cy=names-container]')
       .should('be.visible')
       .get('[data-cy="back-arrow"]')
-      .click()
+      .click();
   });
 
   it('Check Tip Button And Back to Account', () => {
@@ -38,7 +38,7 @@ describe('Test cases for Account Page', () => {
       .get('[data-cy=tip-container]')
       .should('be.visible')
       .get('[data-cy="back-arrow"]')
-      .click()
+      .click();
   });
 
   it('Check View-All-Transactions Button And Back to Account', () => {
@@ -48,7 +48,7 @@ describe('Test cases for Account Page', () => {
       .get('[data-cy=all-transactions]')
       .should('exist')
       .get('[data-cy="back-arrow"]')
-      .click()
+      .click();
   });
 
   it('Check Currency Dropdown Button And Back to Account', () => {
