@@ -134,9 +134,6 @@ export default {
       if (val) this.showActions();
     },
   },
-  created() {
-    console.log(this.tourSteps);
-  },
   methods: {
     showActions() {
       this.disableScroll();
@@ -280,19 +277,20 @@ export default {
     box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
   }
 
-  &:after {
-    content: '';
-    background-image: url('../../../icons/onboarding-bg.png');
+  &:before {
     position: absolute;
-    top: -40px;
-    bottom: 0;
+    top: -90px;
+    /* bottom: 0; */
     height: 100%;
     left: 0;
     right: 0;
     z-index: -1;
-    background-repeat: no-repeat;
-    background-position: top center;
+    content: "";
+    -webkit-clip-path: polygon(0% 49%,100% 36%,100% 100%,0 100%);
+    clip-path: polygon(0% 49%,100% 36%,100% 100%,0 100%);
+    background: #12121b;
   }
+
   .container {
     max-width: 357px;
     margin: 0 auto;
@@ -326,6 +324,12 @@ export default {
   .tour-control-buttons {
     margin-top: 25px;
     display: flex;
+  }
+}
+
+@media screen and (min-width: 780px){
+  .tour-actions:after {
+    top: -30px;
   }
 }
 </style>

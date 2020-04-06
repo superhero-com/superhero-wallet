@@ -163,4 +163,9 @@ export default {
     opacity: 0;
   }
 }
+@media screen and (min-width: 780px){
+  .ae-main {
+    max-width: 100%;
+  }
+}
 </style>

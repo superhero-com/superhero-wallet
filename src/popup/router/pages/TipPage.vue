@@ -203,4 +203,9 @@ export default {
     flex-grow: 1;
   }
 }
+@media screen and (min-width: 780px){
+  .tour__step3 {
+    margin: 0 auto;
+  }
+}
 </style>
