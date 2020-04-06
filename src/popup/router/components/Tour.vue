@@ -280,7 +280,6 @@ export default {
   &:before {
     position: absolute;
     top: -90px;
-    /* bottom: 0; */
     height: 100%;
     left: 0;
     right: 0;
