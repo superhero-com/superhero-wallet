@@ -6,6 +6,7 @@
           {{ $t('pages.tipPage.heading') }}
           <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
           {{ $t('pages.tipPage.to') }}
+          <div class="verified-url" v-if="urlVerified"><TickIcon /> Verified</div> 
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
@@ -17,11 +18,11 @@
       <div class="url-bar">
         <template v-if="!editUrl">
           <a class="link-sm text-left" data-cy="tip-url">{{ url }}</a>
-          <CheckIcon v-if="urlVerified" />
         </template>
         <Input v-else size="m-0 xsm" v-model="url" />
         <button v-if="!confirmMode" @click="editUrl = !editUrl" data-cy="edit-url">
-          <ae-icon :name="editUrl ? 'check' : 'vote'" data-cy="confirm-url" />
+          <ae-icon name="check" data-cy="confirm-url" v-if="editUrl"/>
+          <EditIcon data-cy="confirm-url" v-else />
         </button>
       </div>
     </div>
@@ -56,7 +57,8 @@ import { mapGetters } from 'vuex';
 import axios from 'axios';
 import { calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import { escapeSpecialChars, aeToAettos } from '../../utils/helper';
-import CheckIcon from '../../../icons/check-icon.svg?vue-component';
+import TickIcon from '../../../icons/tick-icon.svg?vue-component';
+import EditIcon from '../../../icons/edit-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
 import Input from '../components/Input';
@@ -65,7 +67,8 @@ export default {
   components: {
     AmountSend,
     Textarea,
-    CheckIcon,
+    TickIcon,
+    EditIcon,
     Input,
   },
   data() {
@@ -187,6 +190,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../../common/variables';
 .tour__step3 {
   margin: 0 10px;
   padding: 12px 10px 4px;
@@ -204,7 +208,21 @@ export default {
 
   :first-child {
     flex-grow: 1;
+    color: $text-color;
   }
+}
+.ae-icon-check {
+  font-size: 24px;
+  color: #fff !important;
+}
+.verified-url {
+  background: $accent-color;
+  color: #000;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 3px;
+  padding: 3px 5px;
+  float: right;
 }
 @media screen and (min-width: 780px){
   .tour__step3 {

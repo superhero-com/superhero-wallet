@@ -4,11 +4,11 @@
       {{ $t('pages.tipPage.heading') }}
       <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
       {{ $t('pages.tipPage.to') }}
+      <div class="verified-url" v-if="urlVerified"><TickIcon /> Verified</div> 
     </p>
 
     <div class="url-bar">
       <a class="link-sm text-left">{{ tip.url }}</a>
-      <CheckIcon v-if="urlVerified" />
     </div>
 
     <AmountSend :amountError="amountError" @changeAmount="val => (amount = val)" :value="amount" />
@@ -35,11 +35,11 @@ import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import openUrl from '../../utils/openUrl';
-import CheckIcon from '../../../icons/check-icon.svg?vue-component';
+import TickIcon from '../../../icons/tick-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
 
 export default {
-  components: { AmountSend, CheckIcon },
+  components: { AmountSend, TickIcon },
   data: () => ({
     tip: {},
     amount: null,
@@ -120,6 +120,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../../common/variables';
 .url-bar {
   display: flex;
   align-items: center;
@@ -127,5 +128,14 @@ export default {
   :first-child {
     flex-grow: 1;
   }
+}
+.verified-url {
+  background: $accent-color;
+  color: #000;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 3px;
+  padding: 3px 5px;
+  float: right;
 }
 </style>
