@@ -1,12 +1,12 @@
 <!-- eslint-disable vue/no-use-v-if-with-v-for-->
 <template>
   <div>
-    <v-tour name="onboarding" :steps="steps" :options="{ highlight: true }">
+    <v-tour name="onboarding" :steps="tourSteps" :options="{ highlight: true }">
       <template slot-scope="tour">
         <transition name="fade">
           <v-step
-            v-if="tour.currentStep === index"
             v-for="(step, index) of tour.steps"
+            v-if="tour.currentStep === index"
             :key="index"
             :step="step"
             :previous-step="tour.previousStep"
@@ -20,9 +20,9 @@
           >
             <template>
               <div slot="header" class="step-header">
-                {{ $t(`onboarding.step_${tour.currentStep + 1}.title`) }} <span class="step-info"> ({{ tour.currentStep + 1 }}/10) </span>
+                {{ $t(`onboarding.step_${step.step}.title`) }} <span class="step-info"> ({{ step.step }}/10) </span>
               </div>
-              <div slot="content" class="step-content" v-html="$t(`onboarding.step_${tour.currentStep + 1}.content`)"></div>
+              <div slot="content" class="step-content" v-html="$t(`onboarding.step_${step.step}.content`)"></div>
               <div slot="actions"></div>
             </template>
           </v-step>
@@ -34,15 +34,15 @@
         <div class="tour-welcome-message">
           <Hero />
           <div>
-            <h3>Hey superhero! Welcome onboard.</h3>
-            <p>This short guide will walk you through the Superhero Wallet DApp and its features.</p>
+            <h3>{{ $t('onboarding.heading') }}</h3>
+            <p>{{ $t('onboarding.sub-heading') }}</p>
           </div>
         </div>
         <div class="tour-control-buttons">
-          <Button onboarding class="skip" @click="stop">Skip</Button>
-          <Button v-if="started" onboarding @click="back">Back</Button>
-          <Button v-if="started" onboarding class="next" @click="next">Next</Button>
-          <Button v-if="!started" onboarding class="start" @click="start">Start</Button>
+          <Button onboarding class="skip" @click="stop">{{ $t('onboarding.skip') }}</Button>
+          <Button v-if="started" onboarding @click="back">{{ $t('onboarding.back') }}</Button>
+          <Button v-if="started" onboarding class="next" @click="next">{{ $t('onboarding.next') }}</Button>
+          <Button v-if="!started" onboarding class="start" @click="start">{{ $t('onboarding.start') }}</Button>
         </div>
       </div>
     </div>
@@ -62,60 +62,62 @@ export default {
     steps: [
       {
         target: '.tour__step1',
+        step: 1,
         params: {
-          enableScrolling: false,
           placement: 'bottom',
         },
       },
       {
         route: '/account',
         target: '.tour__step2 .button-content',
+        step: 2,
         params: {
-          enableScrolling: false,
           placement: 'top',
         },
       },
       {
         target: '.tour__step3',
+        step: 3,
         params: {
-          enableScrolling: false,
           placement: 'bottom',
         },
         route: '/tip',
       },
       {
         route: '/account',
+        hide: !process.env.IS_EXTENSION,
         target: '.tour__step4 .button-content',
+        step: 4,
         params: {
-          enableScrolling: false,
           placement: 'top',
         },
       },
       {
+        route: '/account',
         target: '.tour__step5 .button-content',
+        step: 5,
         params: {
-          enableScrolling: false,
           placement: 'top',
         },
       },
       {
         target: '.tour__step6 .button-content',
+        step: 6,
         params: {
-          enableScrolling: false,
           placement: 'top',
         },
       },
       {
         target: '.tour__step7 .button-content',
+        step: 7,
         params: {
-          enableScrolling: false,
           placement: 'top',
         },
       },
       {
         target: '.tour__step8 .button-content',
+        step: 8,
         params: {
-          enableScrolling: false,
           placement: 'top',
         },
       },
@@ -123,14 +125,17 @@ export default {
   }),
   computed: {
     ...mapGetters(['tourRunning']),
-    tour() {
-      return this.$tours.onboarding;
+    tourSteps() {
+      return this.steps.filter(({ hide }) => !hide).map(step => ({ ...step, params: { ...step.params, enableScrolling: false } }));
     },
   },
   watch: {
     tourRunning(val) {
       if (val) this.showActions();
     },
+  },
+  created() {
+    console.log(this.tourSteps);
   },
   methods: {
     showActions() {
