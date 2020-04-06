@@ -70,10 +70,11 @@ export default {
     },
   },
   async created() {
-    const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
-    console.log(addresses);
-    if (addresses.length) {
-      await axios.post(`${TIP_SERVICE}`, { url: tab.url, address: addresses[0] });
+    if (process.env.IS_EXTENSION) {
+      const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
+      if (addresses.length) {
+        await axios.post(`${TIP_SERVICE}`, { url: tab.url, address: addresses[0] });
+      }
     }
   },
   methods: {
