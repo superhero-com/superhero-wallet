@@ -116,7 +116,6 @@ export default {
 
 .ae-main {
   position: relative;
-  max-width: 357px;
   min-height: 600px;
   margin: 0 auto;
 
@@ -161,11 +160,6 @@ export default {
   }
   .slide-leave-to .sidebar-menu {
     opacity: 0;
-  }
-}
-@media screen and (min-width: 780px){
-  .ae-main {
-    max-width: 100%;
   }
 }
 </style>
