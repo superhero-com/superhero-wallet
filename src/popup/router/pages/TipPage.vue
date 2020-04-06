@@ -6,7 +6,7 @@
           {{ $t('pages.tipPage.heading') }}
           <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
           {{ $t('pages.tipPage.to') }}
-          <div class="verified-url" v-if="urlVerified"><TickIcon /> Verified</div> 
+          <div class="verified-url" v-if="urlVerified || tourRunning"><TickIcon /> Verified</div> 
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
@@ -88,7 +88,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['balance', 'popup', 'tipping', 'current', 'sdk', 'account', 'network', 'currentCurrency', 'tip']),
+    ...mapGetters(['balance', 'popup', 'tipping', 'current', 'sdk', 'account', 'network', 'currentCurrency', 'tip', 'tourRunning']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
