@@ -146,6 +146,7 @@ export default {
       this.$tours.onboarding.skip();
       this.$store.commit('SET_TOUR_RUNNING', false);
       this.enableScroll();
+      this.started = false;
     },
     disableScroll() {
       document.documentElement.style.overflow = 'hidden';
