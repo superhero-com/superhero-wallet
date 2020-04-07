@@ -195,15 +195,20 @@ export default {
   background-color: #12121b !important;
   border-radius: 5px !important;
   border: 1px solid $secondary-color;
-  padding: 14px !important;
+  padding: 20px 15px 25px 15px !important;
+  
   min-width: 345px;
 
   .step-header {
     background-color: #12121b !important;
     margin-bottom: 18px;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 21px;
 
     .step-info {
       color: $text-color;
+      margin-left: 8px;
     }
   }
 
@@ -211,6 +216,7 @@ export default {
     text-align: left;
     font-size: 14px;
     color: $text-color;
+    line-height: 20px;
   }
 
   .v-step__arrow {

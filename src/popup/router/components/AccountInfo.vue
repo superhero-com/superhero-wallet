@@ -61,7 +61,7 @@ export default {
     }
 
     .account-name {
-      font-weight: 500;
+      font-weight: 400;
       color: #fff;
       line-height: 21px;
     }
@@ -84,7 +84,7 @@ export default {
 
   .ae-address {
     color: $text-color;
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: -0.1px;
   }
 }

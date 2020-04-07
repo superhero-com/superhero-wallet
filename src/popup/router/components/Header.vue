@@ -99,7 +99,7 @@ export default {
         left: 0;
         right: 0;
         text-align: center;
-        font-weight: bold;
+        font-weight: 500;
       }
 
       .start-onboarding {

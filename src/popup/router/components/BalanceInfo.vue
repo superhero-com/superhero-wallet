@@ -53,9 +53,11 @@ export default {
   font-size: 18px;
   display: flex;
   line-height: 24px;
+  font-weight: 500;
 
   .approx-sign {
     margin-top: 3px;
+    color: $text-color;
   }
 
   .currency {
@@ -142,6 +144,7 @@ export default {
       display: block;
       font-size: 18px;
       color: $text-color !important;
+      font-weight: 500;
     }
   }
 }

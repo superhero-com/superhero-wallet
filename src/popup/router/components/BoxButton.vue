@@ -52,6 +52,7 @@ export default {
       display: block;
       font-weight: bold;
       margin-top: 5px;
+      line-height: 20px;
 
       &.button-text-accent {
         color: $accent-color;
