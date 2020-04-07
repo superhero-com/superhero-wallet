@@ -130,5 +130,6 @@ export default {
 .noti {
   margin-top: 20px;
   margin-bottom: 0;
+  line-height: 14px;
 }
 </style>
