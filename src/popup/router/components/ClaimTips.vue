@@ -21,9 +21,8 @@ export default {
   methods: {
     async claimTips() {
       this.$emit('setLoading', true);
-      const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
+      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       try {
-        if (!addresses || !addresses.includes(this.account.publicKey)) throw new Error(this.$t('pages.claim.noAddress'));
         const claimAmount = parseFloat(
           aettosToAe(
             await this.tipping.methods

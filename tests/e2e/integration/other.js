@@ -25,8 +25,11 @@ describe('Tests cases not connected to specific page', () => {
   ].forEach(({ path, redirect }) => {
     it(`${redirect ? '' : 'no '}redirect to last visited route ${path}`, () => {
       cy.login()
+        .wait(2000)
         .visit(`chrome/popup/popup#${path}`)
+        .wait(2000)
         .visit(`chrome/popup/popup`)
+        .wait(2000)
         .urlEquals(redirect ? path : '/account');
     });
   });

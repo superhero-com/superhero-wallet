@@ -21,12 +21,6 @@ describe('Test cases for Account Page', () => {
       .should('contain', 'Copied!');
   });
 
-  it('Check How-to-claim Button', () => {
-    cy.get('[data-cy=how-to-claim-button]')
-      .should('be.visible')
-      .click();
-  });
-
   it('Check Claim-Name Button And Back to Account', () => {
     cy.get('[data-cy="account-name"]')
       .should('be.visible')
@@ -34,9 +28,7 @@ describe('Test cases for Account Page', () => {
       .get('[data-cy=names-container]')
       .should('be.visible')
       .get('[data-cy="back-arrow"]')
-      .click()
-      .get('[data-cy=how-to-claim-button]')
-      .should('be.visible');
+      .click();
   });
 
   it('Check Tip Button And Back to Account', () => {
@@ -46,32 +38,28 @@ describe('Test cases for Account Page', () => {
       .get('[data-cy=tip-container]')
       .should('be.visible')
       .get('[data-cy="back-arrow"]')
-      .click()
-      .get('[data-cy=how-to-claim-button]')
-      .should('be.visible');
+      .click();
   });
 
   it('Check View-All-Transactions Button And Back to Account', () => {
     cy.get('[data-cy=view-all-transactions]')
       .should('be.visible')
       .click()
-      .get('ul.allTransactions')
+      .get('[data-cy=all-transactions]')
       .should('exist')
       .get('[data-cy="back-arrow"]')
-      .click()
-      .get('[data-cy=how-to-claim-button]')
-      .should('be.visible');
+      .click();
   });
 
   it('Check Currency Dropdown Button And Back to Account', () => {
     cy.get('[data-cy=toggle-currency-dropdown]')
       .should('be.visible')
       .click()
-      .get('#currencies')
+      .get('[data-cy=currency-dropdown]')
       .should('have.class', 'show')
       .get('[data-cy=toggle-currency-dropdown]')
       .click()
-      .get('#currencies')
+      .get('[data-cy=currency-dropdown]')
       .should('not.have.class', 'show');
   });
 

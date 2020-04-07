@@ -69,4 +69,7 @@ export default {
   color: $white-color;
   font-size: 0.88rem;
 }
+.primary-title {
+  font-weight: 500;
+}
 </style>
