@@ -73,13 +73,10 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    .intro_style {
-      position: absolute;
-      left: 20px;
-    }
     &:not(.isLoggedIn) .title {
       margin-left: auto;
       margin-right: auto;
+      font-weight: 500;
     }
 
     .back-arrow {
@@ -95,16 +92,13 @@ export default {
       }
 
       .title {
-        position: absolute;
-        left: 0;
-        right: 0;
-        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
         font-weight: 500;
       }
 
       .start-onboarding {
         margin-left: 13px;
-        margin-right: auto;
         cursor: pointer;
       }
     }

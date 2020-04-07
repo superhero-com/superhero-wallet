@@ -195,6 +195,7 @@ export default {
   margin: 0 10px;
   padding: 12px 10px 4px;
   margin-top: 10px;
+  min-width: auto;
   p {
     margin-top: 0;
   }
@@ -224,7 +225,7 @@ export default {
   padding: 3px 5px;
   float: right;
 }
-@media screen and (min-width: 780px) {
+@media screen and (min-width: 380px) {
   .tour__step3 {
     margin: 0 auto;
     padding: 12px 20px 4px;

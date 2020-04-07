@@ -124,7 +124,7 @@ export default {
     padding-top: 0;
   }
   &.ae-main-wave {
-    background-position: 100% 100% !important;
+    background-position: center bottom !important;
     background-repeat: no-repeat !important;
     background-image: url('../icons/background-big-wave.png') !important;
   }
@@ -160,6 +160,11 @@ export default {
   }
   .slide-leave-to .sidebar-menu {
     opacity: 0;
+  }
+}
+@media screen and (max-width: 380px) {
+  .ae-main.ae-main-wave {
+    background-position: 100% 100% !important;
   }
 }
 </style>

@@ -93,7 +93,8 @@ export default {
     overflow: hidden;
     transition: all 0.3s ease-in-out;
     background: $nav-bg-color;
-    border: 1px solid $button-color;
+    border: 1px solid $secondary-color;
+    border-radius: 5px;
   }
 
   .dropdown-container.show ul.sub-dropdown {
@@ -103,9 +104,12 @@ export default {
   }
 
   .sub-dropdown .single-currency:hover {
-    border-left: 2px solid $secondary-color;
-    background: rgba(226, 226, 226, 0.5);
+    background: #33343e;
   }
+}
+
+.tour__step1:not(.v-tour__target--highlighted) .external-svg {
+  z-index: 5;
 }
 
 .external-svg {
@@ -117,6 +121,9 @@ export default {
   display: flex;
   padding: 0 20px 10px 20px;
   margin-top: 15px;
+  
+  
+
   .title {
     color: $white-color !important;
     font-size: 16px;

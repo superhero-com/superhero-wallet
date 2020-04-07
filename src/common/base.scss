@@ -922,6 +922,21 @@ button {
   @-moz-document url-prefix() {
     .ae-main {
       width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+  }
+}
+
+@media screen and (max-width: 380px) {
+  .ae-main {
+    max-width: 357px;
+    margin: 0 auto;
+  }
+
+  @-moz-document url-prefix() {
+    .ae-main {
+      max-width: 357px;
       margin: 0 auto;
     }
   }
