@@ -12,7 +12,7 @@
         <BalanceInfo />
       </div>
       <div class="submenu-bg">
-        <BoxButton :text="$t('pages.account.send')" accent to="tip" class="tour__step2">
+        <BoxButton data-cy="tip-button" :text="$t('pages.account.send')" accent to="tip" class="tour__step2">
           <Tip slot="icon" />
         </BoxButton>
         <ClaimTips @setLoading="val => (loading = val)" v-if="IS_EXTENSION" />

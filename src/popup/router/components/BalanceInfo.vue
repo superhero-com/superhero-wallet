@@ -8,7 +8,7 @@
       </div>
       <div class="currenciesgroup">
         <span class="approx-sign">~</span>
-        <li class="dropdown-container" :class="dropdown ? 'show' : ''">
+        <li data-cy="currency-dropdown" class="dropdown-container" :class="dropdown ? 'show' : ''">
           <ae-button data-cy="toggle-currency-dropdown" @click="dropdown = !dropdown">
             {{ balanceCurrency }}
             <span class="currency">{{ currentCurrency }}</span>
