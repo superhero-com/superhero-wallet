@@ -47,7 +47,7 @@ export default {
 @import '../../../common/variables';
 
 .account-info {
-  padding: 10px 20px 0 20px;
+  padding: 20px 20px 0 20px;
   text-align: left;
 
   .title {

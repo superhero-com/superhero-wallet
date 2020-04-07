@@ -127,4 +127,8 @@ export default {
 .send-tips {
   margin-bottom: 26px;
 }
+.noti {
+  margin-top: 20px;
+  margin-bottom: 0;
+}
 </style>
