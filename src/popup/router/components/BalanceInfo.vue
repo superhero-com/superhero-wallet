@@ -121,8 +121,6 @@ export default {
   display: flex;
   padding: 0 20px 10px 20px;
   margin-top: 15px;
-  
-  
 
   .title {
     color: $white-color !important;
