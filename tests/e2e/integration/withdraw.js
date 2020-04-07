@@ -24,7 +24,9 @@ describe('Test cases for Withdraw Page', () => {
   });
 
   it('Check copy button', () => {
-    cy.get('[data-cy=copy]')
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(3000)
+      .get('[data-cy=copy]')
       .click()
       .get('.copied-alert')
       .should('contain', 'Copied!');
