@@ -96,7 +96,7 @@ export default {
   color: #fff !important;
 
   &:last-child {
-    margin-right: 0;
+    margin-right: 0 !important;
   }
 
   &.skip {
