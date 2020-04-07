@@ -196,7 +196,7 @@ export default {
   border-radius: 5px !important;
   border: 1px solid $secondary-color;
   padding: 20px 15px 25px 15px !important;
-  
+
   min-width: 345px;
 
   .step-header {
