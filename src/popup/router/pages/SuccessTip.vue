@@ -61,7 +61,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['current', 'currentCurrency']),
+    ...mapGetters(['current', 'currentCurrency', 'account']),
     amountTip() {
       return this.amount;
     },
@@ -70,11 +70,11 @@ export default {
     },
   },
   async created() {
-    if (process.env.IS_EXTENSION) {
-      const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
-      if (addresses.length) {
-        await axios.post(`${TIP_SERVICE}`, { url: tab.url, address: addresses[0] });
-      }
+    const { addresses } = await this.$store.dispatch('getWebPageAddresses');
+    const address = addresses.length ? addresses[0] : this.account.publicKey;
+    const url = this.domain;
+    if (addresses.length || !process.env.IS_EXTENSION) {
+      await axios.post(`${TIP_SERVICE}`, { url, address });
     }
   },
   methods: {
