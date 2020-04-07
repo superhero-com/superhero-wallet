@@ -31,7 +31,13 @@
     "step_8": {
       "title": "Settings",
       "content": "You can view your security phrase (also referred to as seedphrase or private keys) and change your language settings."
-    }
+    },
+    "heading": "Hey superhero! Welcome onboard",
+    "sub-heading": "This short guide will walk you through the Superhero Wallet DApp and its features.",
+    "skip": "Skip",
+    "back": "Back",
+    "next": "Next",
+    "start": "Start"
   },
   "pages": {
     "intro": {

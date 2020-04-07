@@ -1,7 +1,7 @@
 <template>
   <div class="height-100 primary-bg">
     <div class="popup popup-no-padding">
-      <div v-show="backup_seed_notif" class="noti" data-cy="seed-notif">
+      <div v-show="backup_seed_notif && !tourRunning" class="noti" data-cy="seed-notif">
         <span>
           {{ $t('pages.account.youNeedTo') }} <a href="#/securitySettings" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a>
           {{ $t('pages.account.yourSeedPhrase') }}
@@ -84,12 +84,10 @@ export default {
     },
   },
   async created() {
-    if (!this.tourRunning) {
-      this.backup_seed_notif = !this.backedUpSeed;
-      setTimeout(() => {
-        if (!this.tourRunning) this.backup_seed_notif = false;
-      }, 3000);
-    }
+    this.backup_seed_notif = !this.backedUpSeed;
+    setTimeout(() => {
+      this.backup_seed_notif = false;
+    }, 3000);
   },
 };
 </script>
@@ -126,5 +124,10 @@ export default {
 }
 .send-tips {
   margin-bottom: 26px;
+}
+.noti {
+  margin-top: 20px;
+  margin-bottom: 0;
+  line-height: 14px;
 }
 </style>

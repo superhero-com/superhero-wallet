@@ -1,9 +1,9 @@
 <template>
   <div class="header" v-if="showNavigation && !aeppPopup">
     <div class="content" :class="{ isLoggedIn }">
-      <Arrow v-if="title" @click="goBack" class="back-arrow" data-cy="back-arrow" />
+      <Arrow v-if="title && !tourRunning" @click="goBack" class="back-arrow" data-cy="back-arrow" />
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
-      <StartOnboarding v-if="!title && isLoggedIn" class="start-onboarding" @click="$store.commit('SET_TOUR_RUNNING', true)" />
+      <StartOnboarding v-if="!title && isLoggedIn && !tourRunning" class="start-onboarding" @click="$store.commit('SET_TOUR_RUNNING', true)" />
 
       <div class="title">
         <span v-if="title">{{ $t(`pages.titles.${title}`) }}</span>
@@ -37,7 +37,7 @@ export default {
     return {};
   },
   computed: {
-    ...mapGetters(['isLoggedIn', 'aeppPopup', 'notifications', 'notificationsCounter']),
+    ...mapGetters(['isLoggedIn', 'aeppPopup', 'notifications', 'notificationsCounter', 'tourRunning']),
     title() {
       return this.$route.meta.title;
     },
@@ -73,13 +73,10 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    .intro_style {
-      position: absolute;
-      left: 20px;
-    }
     &:not(.isLoggedIn) .title {
       margin-left: auto;
       margin-right: auto;
+      font-weight: 500;
     }
 
     .back-arrow {
@@ -95,16 +92,13 @@ export default {
       }
 
       .title {
-        position: absolute;
-        left: 0;
-        right: 0;
-        text-align: center;
-        font-weight: bold;
+        margin-left: auto;
+        margin-right: auto;
+        font-weight: 500;
       }
 
       .start-onboarding {
         margin-left: 13px;
-        margin-right: auto;
         cursor: pointer;
       }
     }

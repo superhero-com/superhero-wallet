@@ -47,7 +47,7 @@ export default {
 @import '../../../common/variables';
 
 .account-info {
-  padding: 10px 20px 0 20px;
+  padding: 20px 20px 0 20px;
   text-align: left;
 
   .title {
@@ -61,7 +61,7 @@ export default {
     }
 
     .account-name {
-      font-weight: 500;
+      font-weight: 400;
       color: #fff;
       line-height: 21px;
     }
@@ -84,7 +84,7 @@ export default {
 
   .ae-address {
     color: $text-color;
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: -0.1px;
   }
 }
