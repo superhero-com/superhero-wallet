@@ -689,12 +689,6 @@ input::-moz-focus-outer {
   height: 50px !important;
 }
 
-@-moz-document url-prefix() {
-  .ae-main {
-    width: 357px;
-    margin: 0 auto;
-  }
-}
 .ae-identicon.base {
   height: 100%;
   width: 100%;
@@ -922,4 +916,28 @@ button {
   padding: 0.3rem;
   text-align: center;
   font-weight: bold;
+}
+
+@media screen and (min-width: 780px) {
+  @-moz-document url-prefix() {
+    .ae-main {
+      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+  }
+}
+
+@media screen and (max-width: 380px) {
+  .ae-main {
+    max-width: 357px;
+    margin: 0 auto;
+  }
+
+  @-moz-document url-prefix() {
+    .ae-main {
+      max-width: 357px;
+      margin: 0 auto;
+    }
+  }
 }
