@@ -1,6 +1,7 @@
 import { getAddressFromChainName } from './background-utils';
+import { UI_URL } from '../popup/utils/constants';
 
-const redirectUrl = 'https://youdonotneedacapetobeahero.com/#/';
+const redirectUrl = `${UI_URL}/#/`;
 
 export default {
   init() {

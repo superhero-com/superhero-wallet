@@ -8,6 +8,7 @@
 import Button from './Button';
 import Claim from '../../../icons/claim.svg?vue-component';
 import openUrl from '../../utils/openUrl';
+import { UI_URL } from '../../utils/constants';
 
 export default {
   props: ['styling'],
@@ -15,15 +16,10 @@ export default {
     Button,
     Claim,
   },
-  data() {
-    return {
-      howToClaimURL: 'https://youdonotneedacapetobeahero.com',
-    };
-  },
   created() {},
   methods: {
     openHowToClaimURL() {
-      openUrl(this.howToClaimURL);
+      openUrl(UI_URL);
     },
   },
 };
