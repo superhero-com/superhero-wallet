@@ -3,7 +3,7 @@
     <div class="content" :class="{ isLoggedIn }">
       <Arrow v-if="title && !tourRunning" @click="goBack" class="back-arrow" data-cy="back-arrow" />
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
-      <StartOnboarding v-if="!title && isLoggedIn" class="start-onboarding" @click="$store.commit('SET_TOUR_RUNNING', true)" />
+      <StartOnboarding v-if="!title && isLoggedIn && !tourRunning" class="start-onboarding" @click="$store.commit('SET_TOUR_RUNNING', true)" />
 
       <div class="title">
         <span v-if="title">{{ $t(`pages.titles.${title}`) }}</span>
