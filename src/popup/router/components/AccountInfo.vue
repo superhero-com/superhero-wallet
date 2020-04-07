@@ -36,7 +36,7 @@ export default {
     copy() {
       this.copied = true;
       setTimeout(() => {
-        // this.copied = false;
+        this.copied = false;
       }, 3000);
     },
   },

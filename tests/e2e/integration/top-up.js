@@ -29,6 +29,7 @@ describe('Test cases for Top Up Page', () => {
       .menuShould('be.visible')
       .get('[data-cy=receive]')
       .click()
+      .wait(3000)
       .get('[data-cy=copy]')
       .click()
       .get('.copied-alert')
