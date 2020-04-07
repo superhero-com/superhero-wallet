@@ -58,7 +58,7 @@ export default {
     return {
       feed: 'https://youdonotneedacapetobeahero.com',
       note: this.$t('pages.successTip.notifyMessage'),
-      verifiedUrls: []
+      verifiedUrls: [],
     };
   },
   computed: {
@@ -71,7 +71,7 @@ export default {
     },
     urlVerified() {
       return this.domain && this.verifiedUrls.includes(this.domain);
-    }
+    },
   },
   async created() {
     try {
