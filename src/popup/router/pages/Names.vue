@@ -47,7 +47,7 @@
 
         <ae-list v-if="!moreAuInfo.visible && activeAuctions != null">
           <ae-list-item class="singleAuction" fill="neutral" v-for="(info, key) in auctions" :key="key" @click="moreAuctionInfo(key, info)">
-            <UserAvatar class="subAccountIcon" :address="info.winning_bidde" />
+            <UserAvatar class="subAccountIcon" :address="info.winning_bidder" />
             <div class="auctionInfo">
               <div class="name">{{ info.name }}</div>
               <div class="expiration">Expires in {{ info.expiration }} blocks</div>
