@@ -64,6 +64,7 @@
     "extensionizer": "^1.0.1",
     "file-saver": "^2.0.2",
     "ionic-plugin-deeplinks": "github:aeternity/ionic-plugin-deeplinks",
+    "jdenticon": "^2.2.0",
     "lodash-es": "^4.17.15",
     "node-fetch": "^2.6.0",
     "nyc": "^14.1.1",
