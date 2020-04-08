@@ -5,12 +5,7 @@
 
 <script>
 import jdenticon from 'jdenticon';
-import { BACKEND_URL } from '../../utils/constants';
-
-const identiconSizes = {
-  normal: 38,
-  lg: 64,
-};
+import { BACKEND_URL, IDENTICON_CONFIG, IDENTICON_SIZES } from '../../utils/constants';
 
 export default {
   props: {
@@ -28,19 +23,8 @@ export default {
       return `${BACKEND_URL}/profile/image/${this.address}`;
     },
     identicon() {
-      jdenticon.config = {
-        lightness: {
-          color: [0.4, 1.0],
-          grayscale: [0.5, 1.0],
-        },
-        saturation: {
-          color: 1.0,
-          grayscale: 1.0,
-        },
-        backColor: '#12121bff',
-      };
-
-      return jdenticon.toSvg(this.address, identiconSizes[this.size]);
+      jdenticon.config = IDENTICON_CONFIG;
+      return jdenticon.toSvg(this.address, IDENTICON_SIZES[this.size]);
     },
   },
 };
