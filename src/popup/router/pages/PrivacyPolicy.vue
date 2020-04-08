@@ -248,11 +248,7 @@ export default {
     return {};
   },
   created() {},
-  methods: {
-    navigateToIndex() {
-      this.$router.push('/');
-    },
-  },
+  methods: {},
   computed: {},
 };
 </script>
