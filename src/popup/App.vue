@@ -13,6 +13,7 @@
     <Loader size="big" :loading="mainLoading" />
     <NodeConnectionStatus />
     <Tour />
+    <Component :is="component" v-for="{ component, key, props } in opened" :key="key" v-bind="props" />
   </ae-main>
 </template>
 
@@ -39,10 +40,13 @@ export default {
     showSidebar: false,
   }),
   computed: {
-    ...mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup', 'notifications', 'notificationsCounter', 'backedUpSeed']),
+    ...mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup', 'notifications', 'notificationsCounter', 'backedUpSeed', 'modals/opened']),
     waveBg() {
       return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(this.$route.path);
     },
+    opened() {
+      return this.$store.getters['modals/opened'];
+    }
   },
   async created() {
     this.$watch(
