@@ -19,7 +19,7 @@ export default {
   created() {},
   methods: {
     openHowToClaimURL() {
-      openUrl(UI_URL);
+      openUrl(`${UI_URL}create-profile`);
     },
   },
 };
