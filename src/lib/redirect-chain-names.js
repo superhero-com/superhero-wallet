@@ -1,6 +1,5 @@
 import { getAddressFromChainName } from './background-utils';
-
-const redirectUrl = 'https://youdonotneedacapetobeahero.com/#/';
+import { UI_URL } from '../popup/utils/constants';
 
 export default {
   init() {
@@ -46,7 +45,7 @@ export default {
             if (!pubKey) {
               throw new Error(`${host} not found`);
             }
-            const displayUrl = `${redirectUrl}user-profile/${pubKey}`;
+            const displayUrl = `${UI_URL}user-profile/${pubKey}`;
             chrome.tabs.update({ url: displayUrl });
           } catch (err) {
             chrome.tabs.update({ url: `/redirect/index.html?error=${err.message}` });
