@@ -46,7 +46,7 @@ import axios from 'axios';
 import Heart from '../../../icons/heart.svg?vue-component';
 import Textarea from '../components/Textarea';
 import openUrl from '../../utils/openUrl';
-import { TIP_SERVICE, BACKEND_URL } from '../../utils/constants';
+import { TIP_SERVICE, BACKEND_URL, UI_URL } from '../../utils/constants';
 
 export default {
   components: {
@@ -56,7 +56,6 @@ export default {
   props: ['amount', 'domain'],
   data() {
     return {
-      feed: 'https://youdonotneedacapetobeahero.com',
       note: this.$t('pages.successTip.notifyMessage'),
       verifiedUrls: [],
     };
@@ -86,7 +85,7 @@ export default {
   },
   methods: {
     redirectOnFeed() {
-      openUrl(this.feed);
+      openUrl(UI_URL);
     },
   },
 };
