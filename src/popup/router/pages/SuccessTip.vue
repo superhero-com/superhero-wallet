@@ -70,11 +70,11 @@ export default {
     },
   },
   async created() {
-    const { addresses } = await this.$store.dispatch('getWebPageAddresses');
-    const address = addresses.length ? addresses[0] : this.account.publicKey;
-    const url = this.domain;
-    if (addresses.length || !process.env.IS_EXTENSION) {
-      await axios.post(`${TIP_SERVICE}`, { url, address });
+    if (process.env.IS_EXTENSION) {
+      const { addresses } = await this.$store.dispatch('getWebPageAddresses');
+      if (addresses.length) {
+        await axios.post(`${TIP_SERVICE}`, { url: this.domain, address: addresses[0] });
+      }
     }
   },
   methods: {

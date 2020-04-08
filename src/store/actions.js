@@ -342,23 +342,20 @@ export default {
     return (await browser.storage.local.get('backed_up_Seed')).backed_up_Seed;
   },
   async getWebPageAddresses({ state: { sdk } }) {
-    if (process.env.IS_EXTENSION) {
-      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-      const { address, chainName } = await postMessageToContent({ method: 'getAddresses' }, tab.id);
-      let addresses = Array.isArray(address) ? address : [address];
-      const chainNames = Array.isArray(chainName) ? chainName : [chainName];
-      const chainNamesAddresses = await Promise.all(
-        chainNames.map(async n => {
-          try {
-            return getAddressByNameEntry(await sdk.api.getNameEntryByName(n));
-          } catch (e) {
-            return null;
-          }
-        })
-      );
-      addresses = [...addresses, ...chainNamesAddresses];
-      return { addresses: uniq(addresses).filter(a => a), tab };
-    }
-    return { addresses: [], tab: false };
+    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+    const { address, chainName } = await postMessageToContent({ method: 'getAddresses' }, tab.id);
+    let addresses = Array.isArray(address) ? address : [address];
+    const chainNames = Array.isArray(chainName) ? chainName : [chainName];
+    const chainNamesAddresses = await Promise.all(
+      chainNames.map(async n => {
+        try {
+          return getAddressByNameEntry(await sdk.api.getNameEntryByName(n));
+        } catch (e) {
+          return null;
+        }
+      })
+    );
+    addresses = [...addresses, ...chainNamesAddresses];
+    return { addresses: uniq(addresses).filter(a => a), tab };
   },
 };
