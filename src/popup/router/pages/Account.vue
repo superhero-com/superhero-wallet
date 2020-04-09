@@ -41,7 +41,6 @@
       <RecentTransactions></RecentTransactions>
     </div>
     <Loader size="big" :loading="loading" type="transparent" />
-    <popup />
   </div>
 </template>
 

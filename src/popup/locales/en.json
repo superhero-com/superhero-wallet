@@ -39,6 +39,29 @@
     "next": "Next",
     "start": "Start"
   },
+  "modals": {
+    "transaction-failed": {
+      "msg": "We cannot process this transaction! Please, try again!"
+    },
+    "required": {
+      "msg": "Please fill in all fields."
+    },
+    "only-chars": {
+      "msg": "Allowed only letters and numbers!"
+    },
+    "name-exist": {
+      "msg": "This name is already registered!"
+    },
+    "incorrect-address": {
+      "msg": "Please make sure that you have entered a valid public address!"
+    },
+    "incorrect-amount": {
+      "msg": "Please make sure you entered valid amount!"
+    },
+    "insufficient-balance": {
+      "msg": "The requested amount cannot be spent."
+    }
+  },
   "pages": {
     "intro": {
       "heading": "Intro",
