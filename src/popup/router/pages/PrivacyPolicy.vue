@@ -189,26 +189,48 @@
           <ul>
             <li>
               <p>
-                <strong>Superhero</strong> does not process information of persons under the age of obtaining full legal capacity (in most countries 18 years old) due to the character of the
-                <strong>Wallet</strong>.
+                <strong>Superhero</strong> does not process information of persons under the age of obtaining full legal capacity (in most countries 18 years old) due to the
+                character of the <strong>Wallet</strong>.
               </p>
             </li>
-            <li><p><strong>Superhero</strong> will immediately delete any <strong>personal data</strong> referring to persons under the age of full legal capacity if <strong>Superhero</strong> receives such information.</p></li>
-            <li><p>We are not liable in any way if <strong>YOU</strong> provide false information about your age or use the <strong>application</strong> before <strong>YOU</strong> have turned the above-mentioned age.</p></li>
+            <li>
+              <p>
+                <strong>Superhero</strong> will immediately delete any <strong>personal data</strong> referring to persons under the age of full legal capacity if
+                <strong>Superhero</strong> receives such information.
+              </p>
+            </li>
+            <li>
+              <p>
+                We are not liable in any way if <strong>YOU</strong> provide false information about your age or use the <strong>application</strong> before
+                <strong>YOU</strong> have turned the above-mentioned age.
+              </p>
+            </li>
           </ul>
         </li>
         <li class="ninth">
           <h3><strong>Measures for protection</strong></h3>
-          <p>We undertake all necessary technological, technical and organizational measures to protect your <strong>personal data</strong>. Your <strong>personal data</strong> is stored on protected servers with a strictly controlled access.</p>
+          <p>
+            We undertake all necessary technological, technical and organizational measures to protect your <strong>personal data</strong>. Your <strong>personal data</strong> is
+            stored on protected servers with a strictly controlled access.
+          </p>
           <p>Some of the above-mentioned information is stored in such a form that could not be used to identify <strong>YOU</strong> directly.</p>
         </li>
         <li class="tenth">
           <h3><strong>Breach measures</strong></h3>
-          <p>In case of <strong>breach</strong> in the software, disruptive interference in the <strong>Wallet</strong>, the <strong>&AElig;ternity</strong> Network, malware, spyware, virus attacks and any other harmful cyber-attacks, <strong>We</strong> will undertake every possible action in an appropriate and timely manner, to avoid any material or non-material damage to <strong>USERS</strong>. As soon as <strong>Superhero</strong> becomes aware of any <strong>breach</strong>, <strong>USERS</strong> and the competent authorities will be notified immediately. <strong>YOU</strong> may be asked to follow certain instructions for prevention of <strong>breaches</strong>.</p>
+          <p>
+            In case of <strong>breach</strong> in the software, disruptive interference in the <strong>Wallet</strong>, the <strong>&AElig;ternity</strong> Network, malware,
+            spyware, virus attacks and any other harmful cyber-attacks, <strong>We</strong> will undertake every possible action in an appropriate and timely manner, to avoid any
+            material or non-material damage to <strong>USERS</strong>. As soon as <strong>Superhero</strong> becomes aware of any <strong>breach</strong>,
+            <strong>USERS</strong> and the competent authorities will be notified immediately. <strong>YOU</strong> may be asked to follow certain instructions for prevention of
+            <strong>breaches</strong>.
+          </p>
         </li>
         <li class="eleventh">
           <h3><strong>How Do I contact Æternity?</strong></h3>
-          <p>To contact us with your questions or comments regarding this <strong>Policy</strong>, please email us at&nbsp; <a href="mailto:superherowallet@protonmail.com">superherowallet@protonmail.com</a>.</p>
+          <p>
+            To contact us with your questions or comments regarding this <strong>Policy</strong>, please email us at&nbsp;
+            <a href="mailto:superherowallet@protonmail.com">superherowallet@protonmail.com</a>.
+          </p>
         </li>
       </ol>
     </div>
