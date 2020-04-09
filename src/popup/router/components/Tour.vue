@@ -57,7 +57,7 @@
     </div>
     <div
       class="tour-start"
-      v-if="!nodeStatus && home && isLoggedIn && !tourRunning && tourStartBar"
+      v-if="!nodeStatus && home && isLoggedIn && !tourRunning && $store.state.tourStartBar"
       @click="toggleTour"
     >
       <div class="container">
@@ -148,7 +148,7 @@ export default {
     ],
   }),
   computed: {
-    ...mapGetters(['tourRunning', 'tourStartBar', 'isLoggedIn', 'nodeStatus']),
+    ...mapGetters(['tourRunning', 'isLoggedIn', 'nodeStatus']),
     tourSteps() {
       return this.steps
         .filter(({ hide }) => !hide)
@@ -228,29 +228,34 @@ export default {
   max-width: 357px;
   margin: 0 auto;
 }
+
 .v-step {
   background-color: $tour-bg-color !important;
   border-radius: 5px !important;
   border: 1px solid $secondary-color;
   padding: 20px 15px 25px 15px !important;
   min-width: 345px;
+
   .step-header {
     background-color: $tour-bg-color !important;
     margin-bottom: 18px;
     font-weight: bold;
     font-size: 16px;
     line-height: 21px;
+
     .step-info {
       color: $text-color;
       margin-left: 8px;
     }
   }
+
   .step-content {
     text-align: left;
     font-size: 14px;
     color: $text-color;
     line-height: 20px;
   }
+
   .v-step__arrow {
     border-color: $tour-bg-color !important;
     border: none !important;
@@ -259,6 +264,7 @@ export default {
     z-index: -3;
     background-repeat: no-repeat;
   }
+
   &[x-placement^='top'] {
     margin-bottom: 0.8rem !important;
     .v-step__arrow {
@@ -267,6 +273,7 @@ export default {
       bottom: -0.75rem !important;
     }
   }
+
   &[x-placement^='bottom'] {
     margin-top: 0.8rem !important;
     .v-step__arrow {
@@ -274,13 +281,16 @@ export default {
       top: -0.75rem !important;
     }
   }
+
   &.tip-step[x-placement^='bottom'] {
     margin-top: 2.5rem !important;
   }
 }
+
 .v-tour__target--highlighted {
   box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
   pointer-events: none !important;
+
   &:after {
     content: '';
     border: 1.5px dashed #fff !important;
@@ -293,6 +303,7 @@ export default {
     bottom: 0;
   }
 }
+
 .tour-actions {
   position: fixed;
   bottom: 0;
@@ -304,9 +315,11 @@ export default {
   padding-top: 0;
   padding-bottom: 25px;
   pointer-events: all;
+
   &.not-started {
     box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
   }
+
   &:before {
     position: absolute;
     top: -90px;
@@ -319,20 +332,24 @@ export default {
     clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
     background: $tour-bg-color;
   }
+
   .tour-welcome-message {
     display: flex;
     align-items: flex-end;
+
     svg {
       width: 165px;
       margin-left: -51px;
       margin-right: 10px;
     }
+
     h3 {
       font-size: 16px;
       margin: 0;
       margin-bottom: 10px;
       line-height: 21px;
     }
+
     p {
       font-size: 14px;
       font-weight: normal;
@@ -341,12 +358,14 @@ export default {
       line-height: 20px;
     }
   }
+
   .tour-control-buttons {
     margin-top: 25px;
     display: flex;
     justify-content: space-between;
   }
 }
+
 .tour-start {
   position: fixed;
   background: $tour-start-bg-color;
@@ -355,32 +374,38 @@ export default {
   right: 0;
   height: 44px;
   cursor: pointer;
+
   &:hover {
     background: #2c2c34;
   }
+
   .container {
     display: flex;
     align-items: center;
     height: 100%;
     padding: 0 20px;
   }
+
   span {
     color: $accent-color;
     margin-left: 6px;
     font-size: 15px;
     font-weight: bold;
   }
+
   .close {
     margin-left: auto;
     height: 100%;
     align-items: center;
     width: 30px;
     text-align: center;
+
     svg {
       margin-top: 11px;
     }
   }
 }
+
 @media screen and (min-width: 780px) {
   .tour-actions:after {
     top: -30px;

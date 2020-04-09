@@ -117,7 +117,4 @@ export default {
   tourRunning({ tourRunning }) {
     return tourRunning;
   },
-  tourStartBar({ tourStartBar }) {
-    return tourStartBar;
-  },
 };
