@@ -125,7 +125,7 @@ export default {
     },
     verifiedStatus() {
       return this.urlVerified || this.tourRunning ? 'verified' : 'untrusted';
-    }
+    },
   },
   watch: {
     amount() {
