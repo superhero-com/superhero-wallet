@@ -18,7 +18,12 @@
     <Loader size="big" :loading="mainLoading" />
     <NodeConnectionStatus />
     <Tour />
-    <Component :is="component" v-for="{ component, key, props } in modals" :key="key" v-bind="props" />
+    <Component
+      :is="component"
+      v-for="{ component, key, props } in modals"
+      :key="key"
+      v-bind="props"
+    />
   </ae-main>
 </template>
 

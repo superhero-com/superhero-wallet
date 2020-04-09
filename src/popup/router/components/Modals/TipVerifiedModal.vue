@@ -5,7 +5,8 @@
         <CheckIcon />
         This URL has been verified.
       </span>
-      This means that the creator of the content there or the website owner has successfully claimed tips for this url.
+      This means that the creator of the content there or the website owner has successfully claimed
+      tips for this url.
     </div>
     <div slot="footer">
       <Button @click="resolve">OK</Button>

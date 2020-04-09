@@ -325,15 +325,20 @@ export default {
     async init() {
       this.setReceiver();
       if (this.isLedger && this.data.type !== 'txSign') {
-        this.$store.dispatch('modals/open', { name: 'default', msg: 'Ledger currently cannot sign this type of transaction! ' }).then(() => {
-          if (this.data.popup) {
-            setTimeout(() => {
-              window.close();
-            });
-          } else {
-            this.redirectInExtensionAfterAction();
-          }
-        });
+        this.$store
+          .dispatch('modals/open', {
+            name: 'default',
+            msg: 'Ledger currently cannot sign this type of transaction! ',
+          })
+          .then(() => {
+            if (this.data.popup) {
+              setTimeout(() => {
+                window.close();
+              });
+            } else {
+              this.redirectInExtensionAfterAction();
+            }
+          });
       }
       if (this.data.tx.options && this.data.tx.options.amount) {
         this.data.tx.amount = this.data.tx.options.amount;
@@ -548,9 +553,11 @@ export default {
           this.redirectInExtensionAfterAction();
         });
       } else {
-        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' }).then(() => {
-          this.redirectInExtensionAfterAction();
-        });
+        this.$store
+          .dispatch('modals/open', { name: 'default', type: 'transaction-failed' })
+          .then(() => {
+            this.redirectInExtensionAfterAction();
+          });
       }
     },
     async contractCallStatic(tx) {
