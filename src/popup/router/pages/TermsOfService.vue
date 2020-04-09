@@ -979,7 +979,7 @@ export default {
   font-weight: 100;
 }
 .terms--heading {
-  margin: 25px;
+  margin: 20px;
   text-align: center;
 }
 .accordion-item-title {
