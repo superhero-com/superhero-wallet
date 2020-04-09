@@ -46,7 +46,6 @@
       </div>
     </div>
     <Loader size="big" :loading="loading" type="transparent" content=""></Loader>
-    <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div>
 </template>
 

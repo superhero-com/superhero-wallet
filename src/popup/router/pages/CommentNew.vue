@@ -11,7 +11,6 @@
       {{ $t('pages.tipPage.cancel') }}
     </Button>
 
-    <popup :popupSecondBtnClick="popup.secondBtnClick" />
     <Loader size="big" :loading="loading" type="transparent" content="" />
   </div>
 </template>
@@ -54,7 +53,7 @@ export default {
         );
         this.openCallbackOrGoHome('x-success');
       } catch (e) {
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
       } finally {
         this.loading = false;
       }

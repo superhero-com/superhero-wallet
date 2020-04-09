@@ -5,8 +5,8 @@ import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
 import persistState from './plugins/persistState';
+import modals from './plugins/modals';
 import runMigrations from './migrations';
-import { POPUP_PROPS } from '../popup/utils/popup-messages';
 import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
 
 Vue.use(Vuex);
@@ -30,7 +30,6 @@ export default new Vuex.Store({
     },
     network: networks,
     userNetworks: [],
-    popup: Object.assign({}, POPUP_PROPS),
     isLoggedIn: false,
     transactions: {
       latest: [],
@@ -113,5 +112,6 @@ export default new Vuex.Store({
         mnemonic,
       }),
     ),
+    modals,
   ],
 });

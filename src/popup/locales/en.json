@@ -43,6 +43,29 @@
     "verified": "Verfied",
     "untrusted": "Untrusted"
   },
+  "modals": {
+    "transaction-failed": {
+      "msg": "We cannot process this transaction! Please, try again!"
+    },
+    "required": {
+      "msg": "Please fill in all fields."
+    },
+    "only-chars": {
+      "msg": "Allowed only letters and numbers!"
+    },
+    "name-exist": {
+      "msg": "This name is already registered!"
+    },
+    "incorrect-address": {
+      "msg": "Please make sure that you have entered a valid public address!"
+    },
+    "incorrect-amount": {
+      "msg": "Please make sure you entered valid amount!"
+    },
+    "insufficient-balance": {
+      "msg": "The requested amount cannot be spent."
+    }
+  },
   "pages": {
     "intro": {
       "heading": "Intro",
@@ -569,7 +592,7 @@
       "section9Content": "USERS understand and accept ​the application can be periodically modified, updated, maintained or technically supported, which could to some extent influence the use of the Wallet​, the visual representation of ​the application ​or could result in malfunction. In the latter case, if ​You as a ​USER notice any change in the funds, settings, accounts or any other information on the application, please superherowallet@protonmail.com​ for assistance.",
       "section10Title": "10. MODIFICATIONS",
       "section10Content": "The legislation and jurisdiction of Liechtenstein is applied for the issues outstanding the present ​TERMS​. The invalidity of one or more clauses/ provisions in the ​TERMS does not lead to the invalidity of the whole agreement. \n The Privacy Policy is an inseparable part of the present ​TERMS and should be considered as a complementary document with compulsory character. Unless explicitly stated otherwise in the Privacy Policy, all rules from the ​TERMS​ apply respectively.",
-      "section11Title": "10. FINAL PROVISIONS"
+      "section11Title": "11. FINAL PROVISIONS"
     },
     "tipPage": {
       "back": "Back",

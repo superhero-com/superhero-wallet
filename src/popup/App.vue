@@ -18,6 +18,12 @@
     <Loader size="big" :loading="mainLoading" />
     <NodeConnectionStatus />
     <Tour />
+    <Component
+      :is="component"
+      v-for="{ component, key, props } in modals"
+      :key="key"
+      v-bind="props"
+    />
   </ae-main>
 </template>
 
@@ -59,6 +65,9 @@ export default {
       return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(
         this.$route.path,
       );
+    },
+    modals() {
+      return this.$store.getters['modals/opened'];
     },
   },
   async created() {

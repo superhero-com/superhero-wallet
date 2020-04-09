@@ -2,10 +2,7 @@
   <div class="popup text-left terms">
     <!-- header -->
     <h1 class="terms--heading heading-1 uppercase bolder">TERMS OF USE</h1>
-    <p class="italic">
-      The present
-      <b>TERMS OF USE</b> were created on 3 th April 2020.
-    </p>
+    <p class="italic">The present <b>TERMS OF USE</b> are effective since 9th April 2020.</p>
     <p class="italic">
       <b>Superhero.com LVC</b> reserves its right to modify and update these
       <b>TERMS OF USE</b> according to the policy and practice of the <b>company</b>. The new
@@ -30,7 +27,7 @@
       <b>TERMS OF USE</b> represent a binding agreement between you, the legal entity you represent
       and the legal entity that registered you (collectively „<b>YOU</b>“) and
       <b>Superhero.com LVC (“Superhero”, “we”, “us”</b> or <b>“our”)</b> in connection to your use
-      of the <b>SuperHero Wallet website extension</b>.
+      of the <b>SuperHero Wallet application.</b>.
     </p>
     <p>
       Please, do not use the application provided by <b>Superhero</b>, if you do not agree to the
@@ -66,6 +63,7 @@
         <span>{{ item.title }}</span>
       </p>
       <div
+        data-content="1"
         v-if="index == 0"
         class="accordion-item-content"
         v-show="item.open"
@@ -85,7 +83,7 @@
         <p>
           1.2. &ldquo;<strong>USER</strong>&ldquo; or &ldquo;<strong>YOU</strong>&ldquo; means a
           natural or legal person, who has downloaded and uses the
-          <strong>SuperHero Wallet</strong> <strong>website extension</strong>.
+          <strong>SuperHero Wallet</strong> <strong>application</strong>.
         </p>
         <p>
           1.3. &ldquo;<strong>Blockchain</strong>&ldquo; means the list of records, also known as
@@ -99,30 +97,49 @@
         </p>
         <p>
           1.4. &ldquo;<strong>SuperHero Wallet</strong>&rdquo;
-          (&ldquo;<strong>WALLET</strong>&rdquo; or &ldquo;<strong>application</strong>&rdquo;) is a
-          website extension, which allows supporters to send value to content creators, causes,
-          charities, groups or regular individuals online as a reward for contributing accurate
-          information, relevant insights, quality content. The website extension is a piece of
-          software which acts as an add-on to the web browsers Firefox, Chrome, Brave and Opera and
-          contributes to the browsers&rsquo; additional functionalities. The application is
-          available at: 1) for Firefox:
-          <a href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet-extension/"
-            >https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet-extension/</a
-          >; 2) for Chrome, Brave and Opera:
+          (&ldquo;<strong>Wallet</strong>&rdquo; or &ldquo;<strong>application</strong>&rdquo;) is a
+          software program designed for end users, which allows supporters to send value to content
+          creators, causes, charities, groups or regular individuals online as a reward for
+          contributing accurate information, relevant insights, quality content. The
+          <strong>application</strong> is a piece of software which is available for
+          downloading/access and use as it follows:
+        </p>
+        <p>
+          1) the <strong>application</strong> can act &nbsp;as an add-on to the web browsers
+          Firefox, Chrome, Brave and Opera and contributes to the browsers&rsquo; additional
+          functionalities. For Firefox:
+          <a href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/"
+            >https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/</a
+          >
+          ; for Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <a
             href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related"
             >https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related</a
+          >;
+        </p>
+        <p>
+          2) the <strong>application</strong> can be accessed and used from any Browser at the
+          address: <a href="https://wallet.superhero.com/">https://wallet.superhero.com/</a> ;
+        </p>
+        <p>
+          3) the <strong>application</strong> can be downloaded from Google Play and/or App Store.
+          For Google Play:
+          <a href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
+            >https://play.google.com/store/apps/details?id=com.superhero.cordova</a
           >
+          and for App Store:
+          <a href="https://apps.apple.com/bg/app/superhero-wallet/id1502786641"
+            >https://apps.apple.com/bg/app/superhero-wallet/id1502786641</a
+          >;
         </p>
         <p>
           The results of the donations and comments are published on the website
           <a href="https://youdonotneedacapetobeahero.com/">www.superhero.com</a> .
         </p>
         <p>
-          1.5<strong>. </strong
-          ><strong>&ldquo;&AElig;id&ldquo;, &ldquo;&AElig;ternity token&rdquo;</strong> or
+          1.5<strong>. &ldquo;&AElig;id&ldquo;, &ldquo;&AElig;ternity token&rdquo;</strong> or
           &ldquo;<strong>&AElig; token</strong>&rdquo; are the
-          <strong>&AElig;ternity</strong> digital assets, which can be tracked or transferred on the
+          <strong>&AElig;ternity </strong>digital assets, which can be tracked or transferred on the
           <strong>&AElig;ternity blockchain. </strong>
         </p>
         <p>
@@ -152,28 +169,23 @@
           alienation.
         </p>
       </div>
-
       <div
+        data-content="2"
         v-if="index == 1"
         class="accordion-item-content"
         v-show="item.open"
         data-cy="accordion-item-content"
       >
         <p><strong>2.1. The application </strong></p>
-        <p><strong>&nbsp;</strong></p>
         <p>
           <strong>Superhero</strong> designed and built the <strong>application</strong> as a
-          cryptocurrency wallet, which once installed, acts as a website extension for the browsers
-          Firefox, Chrome, Brave and Opera.
-        </p>
-        <p>
-          Through it <strong>USERS</strong> can store, send and collect
+          cryptocurrency wallet which is connected with the <strong>&AElig;ternity</strong>
+          <strong>blockchain</strong>.Through it, <strong>USERS</strong> can store, send and collect
           <strong>&AElig; tokens.</strong> &nbsp;The purpose is to conduct donations to creators,
           causes, charities, groups, or regular individuals online as a reward for contributing
-          accurate information, relevant insights, quality content. <strong>USERS</strong> can
+          accurate information, relevant insights and quality content. <strong>USERS</strong> can
           donate to different platforms through the <strong>application</strong>.
         </p>
-        <p>&nbsp;</p>
         <p>
           The <strong>Wallet</strong> is a software solution, the interface is provided with the
           purpose of facilitating the interaction between the <strong>USERS</strong> and the
@@ -186,49 +198,69 @@
           executed between <strong>USERS</strong> in a peer-to-peer manner in which
           <strong>Superhero</strong> is not involved.
         </p>
-        <p>&nbsp;</p>
-        <p><strong>2.2. Sending tips</strong></p>
-        <p><strong>&nbsp;</strong></p>
         <p>
-          The <strong>application</strong> automatically searches for the public key of a website
-          for the purpose of the donation. Once <strong>YOU</strong> are on the URL address
-          that<strong> YOU </strong>want to tip, you have to:
+          <strong>USERS</strong> can use a variety of options to download and access the
+          <strong>Wallet</strong>. They can download the <strong>Wallet</strong> as a browser
+          extension, access it on an Internet address or download a mobile application.
+          <strong>USERS</strong> should be aware that they can use all the options mentioned with
+          the same <strong>account</strong> only when they have created a seed phrase and they use
+          it to link their <strong>accounts</strong> on the <strong>Wallet</strong>.
+        </p>
+        <p><strong>2.2. Sending tips</strong></p>
+        <p>
+          The <strong>application</strong> when downloaded and used as an extension only,
+          automatically finds the URL of a website for the purpose of the donation. Once
+          <strong>YOU</strong> are on the URL address that<strong> YOU </strong>want to tip, you
+          have to:
         </p>
         <ul>
           <li>
             Open your Superhero wallet extension. The button should be in the upper right of your
             browser tool bar.
           </li>
-          <li>Click Tip someone.</li>
+          <li>Click &ldquo;Send <strong>&AElig;</strong>&rdquo;.</li>
           <li>
             On the next screen, fill in the required fields. Enter the amount of tips
             <strong>YOU</strong> want to send, and add a message telling the receiver why
             they&rsquo;re awesome.
           </li>
-          <li>Click Send tip.</li>
+          <li>Click &ldquo;Send Tips&rdquo;.</li>
           <li>On the next screen, review the details of your tip.</li>
-          <li>Click Confirm to complete the transaction.</li>
+          <li>Click &ldquo;Confirm&rdquo; to complete the transaction.</li>
         </ul>
-        <p>&nbsp;</p>
-        <p>Please bear in mind that the transactions are irreversible when completed.</p>
-        <p>&nbsp;</p>
+        <p>
+          When the&nbsp;<strong>application</strong> is accessed from the Web or as a mobile
+          application, <strong>YOU</strong> have to choose and copy the URL address of the website
+          <strong>YOU</strong> would like to tip and afterwards:
+        </p>
+        <ul>
+          <li>Click &ldquo;Send <strong>&AElig;</strong>&rdquo;.</li>
+          <li>
+            On the next screen, fill in the required fields. Enter the URL address, amount of tips
+            <strong>YOU</strong> want to send, and add a message telling the receiver why
+            they&rsquo;re awesome.
+          </li>
+          <li>Click &ldquo;Send Tips&rdquo;.</li>
+          <li>On the next screen, review the details of your tip.</li>
+          <li>Click &ldquo;Confirm&rdquo; to complete the transaction.</li>
+        </ul>
+        <p>
+          Please bear in mind that the transactions are irreversible when completed &ndash; meaning
+          that <strong>YOU </strong>cannot change the URL address you sent the tip to, the amount or
+          comment sent.
+        </p>
         <p>
           The donations can be oriented in two flows as it follows - <strong>USERS</strong> can tip
           the owner of the whole website/platform or the specific creator/author on the platform who
           has written/prepared the news/article/section/material.
         </p>
-        <p>&nbsp;</p>
         <p>
           After that, the website -
-          <a href="https://youdonotneedacapetobeahero.com/"
-            >https://youdonotneedacapetobeahero.com/</a
-          >, reflects the <strong>USERS&rsquo;</strong> donations and comments and gives the
-          possibility for other <strong>USERS</strong> to actively donate and comment on the
-          newsfeed of the Website.
+          <a href="https://youdonotneedacapetobeahero.com/">www.superhero.com</a>, reflects the
+          <strong>USERS&rsquo;</strong> donations and comments and gives the possibility for other
+          <strong>USERS</strong> to actively donate and comment on the newsfeed of the Website.
         </p>
-        <p>&nbsp;</p>
         <p><strong>2.3. Collecting tips</strong></p>
-        <p>&nbsp;</p>
         <p>
           If <strong>YOU</strong> want to receive such tips yourself, copy your
           <strong>Wallet address </strong>and paste it onto your web page or profile &ndash; it
@@ -240,45 +272,96 @@
           and open the <strong>Wallet </strong>again. Do not hesitate to contact us if
           <strong>YOU</strong> experience any difficulties.
         </p>
-        <p>&nbsp;</p>
         <p><strong>2.4. Loading your wallet</strong></p>
-        <p><strong>&nbsp;</strong></p>
         <p>
-          In order to load your <strong>Wallet </strong>with <strong>&AElig; tokens,</strong> you
-          can exchange other cryptocurrencies or fiat currencies with
-          <strong>&AElig; tokens</strong> through partnering third-party platforms. A full list of
-          these platforms, you can see in our Superhero Tutorial. Our team is also ready to provide
-          detailed information when contacted through email at
+          In order to load your <strong>Wallet </strong>with <strong>&AElig; tokens,</strong>
+          <strong>YOU</strong> should click Button &ldquo;Top Up&rdquo; of the
+          <strong>application</strong> and <strong>YOU</strong> can exchange other cryptocurrencies
+          or fiat currencies with <strong>&AElig; tokens</strong> through partnering third-party
+          platforms. A full list of these platforms, you can see in our Superhero Tutorial. Our team
+          is also ready to provide detailed information when contacted through email at
           <a href="mailto:superherowallet@protonmail.com">superherowallet@protonmail.com</a>.
         </p>
         <p>
           Please bear in mind that the third-party platforms may collect fees. They are unilaterally
           determined and are not an object of control by <strong>Superhero</strong>.
         </p>
-        <p><strong>&nbsp;</strong></p>
         <p><strong>2.5. Withdrawing tips</strong></p>
-        <p><strong>&nbsp;</strong></p>
         <p>
           To withdraw your tips, <strong>YOU</strong> can use one of the third-party crypto
           exchanges that supports <strong>&AElig; tokens. </strong>Again, additional information
           about the platforms can be seen in our Superhero Tutorial and <strong>WE</strong> are at
           disposal for further assistance.
         </p>
-        <p><strong>&nbsp;</strong></p>
-        <p><strong>2.6. Transactions on the application</strong></p>
-        <p><strong>&nbsp;</strong></p>
         <p>
-          <strong>USERS</strong> can browse through their transaction history.
+          <strong>2.6. Transactions on the application and </strong><strong>&AElig; claims</strong>
+        </p>
+        <p>
+          <strong><u>Transactions on the application</u></strong
+          ><strong>: USERS</strong> can browse through their transaction history.
           <strong>The Wallet</strong> displays the <strong>USER&rsquo;s</strong> tokens.
           <strong>USERS</strong> are in charge of the safe storage, sending and receiving of funds.
-        </p>
-        <p>&nbsp;</p>
-        <p>
           The application is built for small transactions. High volume transactions or storage can
           be undertaken via the application at the <strong>USER&rsquo;s</strong> own risk.
         </p>
+        <p>
+          <strong><u>&AElig; claims:</u></strong> Please bear in mind that for the present moment
+          the <strong><u>&AElig; claims function is not possible, </u></strong>however,
+          Superhero&rsquo;s intention is to constantly develop and improve the
+          <strong>application</strong> for all<strong> USERS</strong> and once this function is
+          available on the <strong>Wallet</strong>, the following will be applicable:
+        </p>
+        <p>
+          The tips are sent to the <strong>SuperHero Wallet</strong> of the URL address entered when
+          there is such <strong>Wallet</strong> created. Donations can also be made to
+          websites/platforms/organizations/people who have not downloaded and used the
+          <strong>SuperHero Wallet</strong> before or during the moment of tipping.
+        </p>
+        <p>
+          The <strong>&AElig;ternity blockchain </strong>manages <u>smart contracts</u> &ndash; they
+          are self-enforcing agreements which are embedded in the source code. Therefore, the
+          <u>smart contracts</u> are independent, with incorporated set of rules when and how to act
+          without any control or interference conducted by <strong>Superhero</strong> under any
+          form. The <u>smart contracts</u> are a specific feature of the decentralized public
+          ledger. If the websites/platforms/organizations/people who are tipped, do not have a
+          <strong>SuperHero Wallet, </strong>the sent tip is stored in the so called &ldquo;<u
+            >Tipping Smart Contract</u
+          >&rdquo;. The <u>Oracles</u> &ndash; also a function of the decentralized blockchain
+          &ndash; follows when the receiver of the tip will generate a <strong>Wallet</strong>. If
+          the receiver of the tip creates a <strong>Wallet,</strong> they can claim the
+          <strong>&AElig; tokens </strong>initially tipped and stored in the &ldquo;<u
+            >Tipping Smart Contract</u
+          >&rdquo;. The receiver of the tip has the right to access and claim the
+          <strong>&AElig; tokens</strong> in a time frame of 1 (one) year from the moment of
+          tipping. After the lapse of this 1 (one) year, the receiver loses their right to gain the
+          <strong>&AElig; tokens</strong>. Within the second year from the moment of tipping, only
+          the tipping <strong>USER</strong> can claim its <strong>&AElig; tokens</strong> back.
+          After the lapse of the second year, the tipping <strong>USER</strong> loses its right to
+          regain back the <strong>&AElig; tokens</strong> he has sent. Due to the decentralized
+          character of the blockchain, <strong>Superhero</strong> cannot control the
+          accumulation/receipt of the tips and to return them back when they are not received. Only
+          the <u>smart contract </u>and the <strong>USERS </strong>themselves can affect the
+          <strong>tokens</strong> due to the peer-to-peer method. <strong>USERS</strong> understand
+          that if the <strong>tokens</strong> are not claimed, they can be stored in the
+          <u>smart contract</u> without limitation of time and without any purpose. This is why,
+          after the lapse of the two years in which the receiver and the sender of the tips could
+          claim the <strong>tokens</strong> but have not<strong>,</strong> the &ldquo;<u
+            >Tipping Smart Contract</u
+          >&rdquo; sends the <strong>&AElig; tokens</strong> to an <strong>address</strong> of
+          <strong>Superhero</strong>. Once the <strong>tokens</strong> are received by
+          <strong>Superhero</strong>, receivers and senders of the tip accept and agree that they
+          shall not have any claims over the <strong>tokens</strong> and
+          <strong>Superhero</strong> shall not be held liable for their receipt provided it is
+          caused by the receiver and the sender&rsquo;s inactivity from their side during the
+          above-mentioned periods of time. The tips will then be used by
+          <strong>Superhero</strong> for the further development of the
+          <strong>blockchain</strong> ecosystem, the development of the <strong>Wallet</strong> or
+          any other project or activity it finds suitable and reasonable.
+          <strong>Superhero</strong> shall make such decisions at its own estimation.
+        </p>
       </div>
       <div
+        data-content="3"
         v-if="index == 2"
         class="accordion-item-content"
         v-show="item.open"
@@ -302,7 +385,6 @@
             >&nbsp;
           </strong>
         </p>
-        <p>&nbsp;</p>
         <p>
           In addition, <strong>USERS</strong> are given the option to claim a
           <strong>name</strong> for their account(s) via the
@@ -310,22 +392,20 @@
           <strong>name</strong> on the <strong>application</strong>, other
           <strong>USERS</strong> may associate it with the corresponding account.
           <strong>USERS</strong> are free to choose the <strong>name</strong>. The only requirement
-          is that the <strong>USER</strong> must have a minimum of
-          <strong>&AElig; tokens </strong>in the <strong>WALLET</strong
-          ><strong> depending on the number of letters of the domain to be claimed</strong>.
+          is that the <strong>USER</strong> must have a minimum amount of
+          <strong>&AElig; tokens </strong>in the
+          <strong>WALLET depending on the number of letters of the domain to be claimed</strong>.
           <strong>We</strong> request from <strong>USERS</strong> not to use any offensive, racist,
           misleading, provocative or any other inappropriate wording.
         </p>
-        <p>&nbsp;</p>
         <p>
           The idea behind account <strong>names</strong> is to serve as an alternative to the
           <strong>Account address</strong>, making it much easier for other
           <strong>USERS</strong> to send a tip.
         </p>
-        <p>&nbsp;</p>
         <p>
-          <strong>USERS</strong> can claim <strong>names</strong> via a set of smart contracts. The
-          name establishment to a person can be an object of an auction.
+          <strong>USERS</strong> can claim <strong>names</strong> via a set of
+          <u>smart contracts</u>. The name establishment to a person can be an object of an auction.
         </p>
         <p>
           In Section &ldquo;Names&rdquo; every <strong>USER</strong> can freely claim a
@@ -337,7 +417,7 @@
           <strong>name</strong> fee is paid. Please bear in mind that <strong>names</strong> with 13
           (thirteen) or more characters are claimed directly without undergoing an auction and after
           the payment of the <strong>name</strong> fee. The period of time during which the auction
-          is available (for names with less than 13 characters) cannot be specified- it is based on
+          is available (for names with less than 13 characters) cannot be specified - it is based on
           the length of the name and the number of bids. Each bid resets the auction counter on the
           ongoing auction. The highest bid after the time has passed, receives the
           <strong>name</strong>. Please bear in mind that the person who has suggested the
@@ -353,16 +433,16 @@
           additional period of 100 (one hundred) days. Once it reaches the expiration date on the
           claim, the <strong>name</strong> is released, i.e. transition into the unclaimed state,
           after which it can be claimed again. During the claim, if the
-          <strong>USER</strong> decides to extend the account related name, they shall only pay the
-          transaction fee without paying additional name fees. The extension possibility is
-          available within the above-mentioned period of 100 (one hundred) days and is not a
-          prerequisite for renewal of the period.&nbsp;
+          <strong>USER</strong> decides to extend the account related <strong>name</strong>, they
+          shall only pay the transaction fee without paying additional <strong>name</strong> fees.
+          The extension possibility is available within the above-mentioned period of 100 (one
+          hundred) days and is not a prerequisite for renewal of the period.&nbsp;
         </p>
         <p>
           The <strong>&AElig;ternity Naming System</strong> gives the possibility for
           <strong>USERS</strong> to exchange and transfer their <strong>names</strong>. The
           <strong>USER</strong> who has received the <strong>name</strong> can transfer it to an
-          account of another <strong>USER</strong>- third party, or another
+          account of another <strong>USER </strong>- third party, or another
           <strong>&AElig; Wallet address</strong> the <strong>USER</strong> owns.
           <strong>USERS</strong> understand and accept that <strong>Superhero</strong> does not
           control in any way the assignment and alienation of <strong>names</strong>. The decisions
@@ -371,24 +451,11 @@
         </p>
         <p>
           The <strong>name</strong> can also be used as your profile name on the Superhero website
-          <a href="https://youdonotneedacapetobeahero.com/"
-            >https://youdonotneedacapetobeahero.com/</a
-          >.
+          <a href="https://youdonotneedacapetobeahero.com/">www.superhero.com</a>.
         </p>
-        <p>&nbsp;</p>
-        <p>&nbsp;</p>
-        <p>
-          According to the Superhero Tuturial: &ldquo;When moving .chain names to another AE wallet
-          address that you own, please make sure that you hold the private keys to that wallet
-          address. In the case of wallet addresses in crypto exchanges, the exchange holds the
-          private keys. This means that your .chain name will not be under your control. (Please ask
-          Milen to confirm this)&rdquo;
-        </p>
-        <p>&nbsp;</p>
-        <p>This should be arranged in the ToS, once confirmed.</p>
       </div>
-
       <div
+        data-content="4"
         v-if="index == 3"
         class="accordion-item-content"
         v-show="item.open"
@@ -396,9 +463,8 @@
       >
         <p>
           As a <strong>USER</strong>, <strong>YOU</strong> agree to the following rules applicable
-          for <strong>the SuperHero Wallet</strong> :
+          for the<strong> SuperHero Wallet</strong> :
         </p>
-        <p>&nbsp;</p>
         <ul>
           <li>
             <strong>YOU</strong> shall comply with the rules set within the present
@@ -434,13 +500,13 @@
             malware, Trojan horses or other harmful or destructive content.
           </li>
         </ul>
-        <p>&nbsp;</p>
         <p>
           <strong>USERS</strong> shall be liable for any action undertaken in violation of the
           present article.
         </p>
       </div>
       <div
+        data-content="5"
         v-if="index == 4"
         class="accordion-item-content"
         v-show="item.open"
@@ -448,15 +514,14 @@
       >
         <p>
           As mentioned above, the <strong>Wallet</strong> is only a software solution, which
-          facilitates the interaction between <strong>USER</strong><strong>S</strong> and the
-          decentralized, public ledger. Therefore, <strong>YOU</strong> are solely responsible and
-          liable for any and all of your actions and inactions on the
-          <strong>application</strong> and all gains and losses sustained from your use of it.
-          <strong>YOU</strong> indemnify <strong>Superhero</strong>, its employees and affiliates in
-          full for any and all negative consequences that might arise from the use of the
-          <strong>application</strong> due to the lack of control over the peer-to-peer activities.
+          facilitates the interaction between <strong>USERS</strong> and the decentralized, public
+          ledger. Therefore, <strong>YOU</strong> are solely responsible and liable for any and all
+          of your actions and inactions on the <strong>application</strong> and all gains and losses
+          sustained from your use of it. <strong>YOU</strong> indemnify <strong>Superhero</strong>,
+          its employees and affiliates in full for any and all negative consequences that might
+          arise from the use of the <strong>application</strong> due to the lack of control over the
+          peer-to-peer activities.
         </p>
-        <p>&nbsp;</p>
         <p>
           <strong><u>General Disclaimer:</u></strong> The
           <strong>&AElig;ternity blockchain</strong> is open-source, public and permissionless
@@ -468,7 +533,6 @@
           actions undertaken on the <strong>application</strong> and the information presented by
           them.
         </p>
-        <p>&nbsp;</p>
         <p>
           <strong><u>Password and Seed Phrase Security Disclaimer:</u></strong>
           <strong>USERS</strong> take responsibility for their digital security. The
@@ -496,17 +560,15 @@
           impossibility of <strong>USERS</strong> to regain access to their account on the
           <strong>Wallet</strong>.
         </p>
-        <p>&nbsp;</p>
         <p>
-          Please bear in mind that the option &ldquo;Already have an account? Retrieve existing
-          account&rdquo; is applicable only in case the <strong>USER</strong> has a seed phrase.
+          Please bear in mind that the option &ldquo;Retrieve existing account&rdquo; is applicable
+          only in case the <strong>USER</strong> has a seed phrase.
         </p>
-        <p>&nbsp;</p>
         <p>
           <strong><u>Decentralization and Control </u></strong
           ><strong><u>Transparency Disclaimer</u></strong
-          >: <strong>Blockchain</strong> technology is decentralized by nature- which means that the
-          makers of the <strong>Wallet</strong> cannot access or freeze your
+          >: <strong>Blockchain</strong> technology is decentralized by nature - which means that
+          the makers of the <strong>Wallet</strong> cannot access or freeze your
           <strong>account</strong>; recover or reset your seed phrase; reverse, cancel or refund
           transactions. Only <strong>USERS</strong> are in charge of the safe storage and sending of
           their funds. By agreeing to the present <strong>TERMS</strong>,
@@ -515,20 +577,58 @@
           including but not limited to attorneys&rsquo; fees, damages, etc., related to or arising
           from the use of the <strong>application</strong>.
         </p>
-        <p>&nbsp;</p>
         <p>
           <strong><u>Access and Connectivity Disclaimer</u></strong
-          >: The <strong>Wallet</strong> can be downloaded from
-          https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet-extension/ (for Firefox)
-          and
+          >: The <strong>application</strong> can be downloaded or used from the following places:
+        </p>
+        <p>
+          1) downloaded as an add-on (extension) to Firefox:
+          <a href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/"
+            >https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/</a
+          >
+          ; to Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <a
             href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related"
             >https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related</a
+          >;
+        </p>
+        <p>
+          2) accessed from any Browser at the address:
+          <a href="https://wallet.superhero.com/">https://wallet.superhero.com/</a> ;
+        </p>
+        <p>
+          3) downloaded from Google Play:&nbsp;&nbsp;&nbsp;&nbsp;
+          <a href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
+            >https://play.google.com/store/apps/details?id=com.superhero.cordova</a
           >
-          &nbsp;for Chrome, Brave and Opera. Please bear in mind that the Internet browsers can
-          cease the supporting of the <strong>extension</strong> &nbsp;in their own estimation,
-          making it difficult or impossible to receive any functionality from the browser or
-          updates. Devices on which the <strong>Wallet</strong> is installed are likely to be harmed
+          and
+        </p>
+        <p>
+          from App Store:
+          <a href="https://apps.apple.com/bg/app/superhero-wallet/id1502786641"
+            >https://apps.apple.com/bg/app/superhero-wallet/id1502786641</a
+          >.
+        </p>
+        <p>
+          Please bear in mind that the marketplaces for downloading are third-party owned and
+          therefore, can cease the supporting of the <strong>application</strong> in their own
+          estimation, making it difficult or impossible to receive any functionality from the
+          <strong>application</strong> or updates.
+        </p>
+        <p>
+          Moreover, please bear in mind that the source code to the <strong>application</strong> is
+          uploaded on GitHub. When any modifications/updates, etc. are conducted on the source code,
+          they are automatically reflected on the browser extension option and the web browser due
+          to the fact they are Internet connected <strong>application</strong> access points.
+          However, for <strong>USERS</strong> who use the mobile options from Google Play or App
+          Store, for them to receive updates, modifications, etc. of the
+          <strong>application</strong>, they should download the new version of the
+          <strong>Wallet</strong> from the same marketplaces. <strong>USERS</strong> understand and
+          agree that if they do not download the newest versions from Google Play or App Store, they
+          will not receive the latest features, improvements, etc.
+        </p>
+        <p>
+          It is possible that devices on which the <strong>Wallet</strong> is installed to be harmed
           by malware/spyware/viruses/cyber-attacks, etc. or during technical support. Damage or loss
           of the device can possibly result in loss of funds or endanger them. Therefore, please
           refer to section <strong><u>Password and Seed Phrase Security Disclaimer</u></strong> in
@@ -537,7 +637,6 @@
           <strong>WE</strong> shall not be held liable for any loss of data on the
           <strong>application</strong> caused in these cases.
         </p>
-        <p>&nbsp;</p>
         <p>
           <strong><u>Cryptocurrency Guidance Disclaimer:</u></strong> The content presented on the
           <strong>application</strong> is not intended to be used as guide for cryptocurrency
@@ -549,12 +648,11 @@
           including but not only losses, tort, revenue, income or profits loss arising out of the
           contracts/ transactions/investment acts/agreements.
         </p>
-        <p>&nbsp;</p>
         <p>
           <strong><u>Jurisdiction and Regulatory Disclaimer:</u></strong> The access to the
           <strong>application</strong> is granted worldwide. The use of the
-          <strong>Wallet extension</strong> may be technically restricted or prohibited in certain
-          territories and countries depending on the different legal acts. Please, bear in mind that
+          <strong>Wallet </strong>may be technically restricted or prohibited in certain territories
+          and countries depending on the different legal acts. Please, bear in mind that
           <strong>YOU</strong> have to inform yourself about such legal restrictions and
           <strong>YOU</strong> are liable solely in case of a breach of any legal norms. The access
           to our <strong>application</strong> is prohibited provided the access point is in a
@@ -562,37 +660,34 @@
           obligation to control the legislation applicability according to each access point of
           <strong>USERS</strong> and shall not be held liable in these circumstances.
         </p>
-        <p>&nbsp;</p>
         <p>
           <strong>USERS</strong> understand and accept that the legislation on a national, regional
           and international levels can introduce new regulations with an object- blockchain
           technology, tokens, blockchain technology based applications, etc. Therefore, in case of
           regulatory restrictions, bans and prohibitions, the
           <strong>&AElig;ternity blockchain&rsquo;s</strong> or the
-          <strong>Wallet extension&rsquo;s </strong>development shall be immensely influenced,
-          probably causing its termination. Taking into account the above-mentioned,
+          <strong>Wallet&rsquo;s </strong>development shall be immensely influenced, probably
+          causing its termination. Taking into account the above-mentioned,
           <strong>USERS</strong> understand that there is no assurance that they will constantly or
           for indefinite period of time receive any functionality through the
           <strong>application</strong> or the <strong>&AElig;</strong> <strong>tokens</strong> held
           by them.
         </p>
-        <p>&nbsp;</p>
         <p>
           <strong><u>Risks</u></strong
           >: <strong>USERS</strong> understand and agree with the risks related to the
           <strong>&AElig;ternity blockchain</strong> contribution and/or with the allocation, use
-          and ownership of <strong>&AElig;</strong> <strong>tokens</strong> and guarantee to relieve
+          and ownership of <strong>&AElig;</strong><strong> tokens</strong> and guarantee to relieve
           of responsibility <strong>Superhero</strong> in these cases.
         </p>
         <p>The risks mentioned within the present <strong>TERMS</strong> are not comprehensive:</p>
-        <p>&nbsp;</p>
         <ul>
           <li>
             <u>Risk of software weaknesses: </u><strong>USERS</strong> understand and accept that
             due to the open-source, decentralized, public, permissionless cloud concept, the
             software, the blockchain technology, incorporating all elements and the
             <strong>application</strong> are in a constant development process. There is no warranty
-            that the receipt and transfer of <strong>&AElig;</strong> <strong>tokens</strong> shall
+            that the receipt and transfer of <strong>&AElig;</strong><strong> tokens</strong> shall
             be uninterrupted or error-free at all times. <strong>USERS</strong> accept and guarantee
             to dispense of responsibility <strong>Superhero</strong> for any software or technology
             weaknesses, malfunctions, vulnerabilities or bugs, which can cause complete or partial
@@ -636,8 +731,8 @@
           losses and/or damages resulted from the use of <strong>forks</strong>.
         </p>
       </div>
-
       <div
+        data-content="6"
         v-if="index == 5"
         class="accordion-item-content"
         v-show="item.open"
@@ -646,9 +741,9 @@
         <p>
           The <strong>Wallet</strong> does not collect any fees or taxes for its use
           <strong>application </strong>- it is free of charge. However, taxes and fees are payable
-          for the transactions on the <strong>&AElig;ternity </strong
-          ><strong>blockchain</strong> including but not limited to miner fees, gas tax, transaction
-          fee. The amounts of the taxes and fees are fixed unilaterally.
+          for the transactions on the <strong>&AElig;ternity blockchain</strong> including but not
+          limited to miner fees, gas tax, transaction fee. The amounts of the taxes and fees are
+          fixed unilaterally.
         </p>
         <p>
           In addition, depending on the territory access point, the transfer and receipt of funds
@@ -658,19 +753,19 @@
           solely responsible for their donations.
         </p>
       </div>
-
       <div
+        data-content="7"
         v-if="index == 6"
         class="accordion-item-content"
         v-show="item.open"
         data-cy="accordion-item-content"
       >
         <p>
-          For its purpose, the <strong>Wallet extension</strong> automatically detects the URL on
-          the <strong>USER&rsquo;s</strong> active tab. To send someone a tip, please make sure that
-          <strong>YOU</strong> are no the URL that <strong>YOU</strong> want to tip.
+          To send someone a tip, please make sure that <strong>YOU</strong> are no the URL that
+          <strong>YOU</strong> want to tip or <strong>YOU</strong> have copied and pasted the right
+          URL (depending on the option for access to the <strong>Wallet</strong>).
           <strong>Superhero</strong> does not participate or control in any way the tips and shall
-          not be held liable for any mistakes and wrong donations. The tips cannot be sent back.
+          not be held liable for any mistakes and wrong donations. The tips cannot be modified.
           Please bear in mind that the <strong>application</strong> is created in order for people
           to stimulate the full, transparent, useful and accurate information worldwide. Therefore,
           <strong>USERS</strong> shall be fully liable for any use of the <strong>Wallet</strong> in
@@ -679,7 +774,6 @@
           <strong>Superhero</strong> is not responsible for the content on the third-party platforms
           in any way.
         </p>
-        <p>&nbsp;</p>
         <p>
           In addition, any use of third-party platforms for the purpose of exchanging
           <strong>&AElig;</strong> <strong>tokens</strong> with other cryptocurrencies or fiat
@@ -690,9 +784,14 @@
           <strong>USERS&rsquo;</strong> wallets and the withdrawal of <strong>&AElig;</strong>
           <strong>tokens</strong>.
         </p>
+        <p>
+          Moreover, the platforms from which the <strong>Wallet</strong> can be downloaded are owned
+          by third parties. Therefore, <strong>USERS</strong> should comply their behaviour with the
+          rules applicable for these third-party platforms.
+        </p>
       </div>
-
       <div
+        data-content="8"
         v-if="index == 7"
         class="accordion-item-content"
         v-show="item.open"
@@ -707,9 +806,7 @@
           liable in any way for the diffusion and public access to the amended/modified by other
           developers source code files due to the open source character of the software.
         </p>
-        <p>&nbsp;</p>
         <p>The notice is as it follows:</p>
-        <p>&nbsp;</p>
         <p>&ldquo;ISC License</p>
         <p>Copyright (c) 2019, SuperHero</p>
         <p>
@@ -726,8 +823,8 @@
           USE OR PERFORMANCE OF THIS SOFTWARE.&rdquo;
         </p>
       </div>
-
       <div
+        data-content="9"
         v-if="index == 8"
         class="accordion-item-content"
         v-show="item.open"
@@ -740,27 +837,24 @@
           names, etc. &nbsp;It is prohibited to use any intellectual property of
           <strong>Superhero</strong> before a prior explicit consent from the latter.
         </p>
-        <p>&nbsp;</p>
         <p>
           None of the elements mentioned above can be edited, downloaded, reproduced, used for
           commercial purposes, distributed and transmitted in any manner and/or any medium
           whatsoever, partially or in whole, without the explicit prior written consent of
           <strong>Superhero</strong>.
         </p>
-        <p>&nbsp;</p>
         <p>
           <strong>Superhero</strong> reserves its right to take any necessary legal action against
           intellectual property infringement.
         </p>
-        <p>&nbsp;</p>
         <p>
           The present article does not in any way exclude or interfere with the rights granted
           according to article 8- <strong><u>LICENSE</u></strong
           >, of the present Terms.
         </p>
       </div>
-
       <div
+        data-content="10"
         v-if="index == 9"
         class="accordion-item-content"
         v-show="item.open"
@@ -777,6 +871,7 @@
         </p>
       </div>
       <div
+        data-content="11"
         v-if="index == 10"
         class="accordion-item-content"
         v-show="item.open"
@@ -788,7 +883,6 @@
           understandings of any kind and every nature between <strong>USERS</strong> and
           <strong>Superhero</strong>.
         </p>
-        <p>&nbsp;</p>
         <p>
           The legislation and jurisdiction of Liechtenstein is applied for the issues outstanding
           the present <strong>TERMS</strong> without regard to possible conflict of law provisions.
@@ -802,8 +896,6 @@
           <strong>Privacy Policy</strong>, all rules from the <strong>TERMS</strong> apply
           respectively.
         </p>
-        <p>&nbsp;</p>
-        <p>&nbsp;</p>
         <p>
           For more information regarding our Services and the present <strong>TERMS</strong>, please
           do not hesitate to contact the <strong>Superhero</strong> team at:
