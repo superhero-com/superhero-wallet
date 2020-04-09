@@ -7,19 +7,22 @@
       </div>
     </h3>
     <p class="primary-title text-left mb-8 f-16">
-      {{ $t('pages.successTip.successfullySent') }} <span class="secondary-text" data-cy="tip-amount">{{ amountTip }} {{ $t('pages.appVUE.aeid') }} </span> ({{
-        getCurrencyAmount
-      }}
-      {{ currentCurrency }})
+      {{ $t('pages.successTip.successfullySent') }}
+      <span class="secondary-text" data-cy="tip-amount"
+        >{{ amountTip }} {{ $t('pages.appVUE.aeid') }}
+      </span>
+      ({{ getCurrencyAmount }} {{ currentCurrency }})
       {{ $t('pages.successTip.to') }}
     </p>
     <a class="link-sm text-left block" data-cy="tip-url">{{ domain }}</a>
     <br />
     <div>
-      <span style="word-break: break-word;font-size: 14px;float: left;">{{ $t('pages.successTip.notify') }}</span>
+      <span style="word-break: break-word;font-size: 14px;float: left;">{{
+        $t('pages.successTip.notify')
+      }}</span>
       <Textarea v-model="note" :value="note" size="h-50" />
     </div>
-    <p class="f-14 sub-heading text-left">
+    <p class="f-14 sub-heading text-left" v-if="!urlVerified">
       {{ $t('pages.successTip.note') }}
     </p>
     <p class="f-18 my-35">{{ $t('pages.successTip.letThemKnow') }}</p>
@@ -46,7 +49,7 @@ import axios from 'axios';
 import Heart from '../../../icons/heart.svg?vue-component';
 import Textarea from '../components/Textarea';
 import openUrl from '../../utils/openUrl';
-import { TIP_SERVICE } from '../../utils/constants';
+import { TIP_SERVICE, BACKEND_URL, UI_URL } from '../../utils/constants';
 
 export default {
   components: {
@@ -56,8 +59,8 @@ export default {
   props: ['amount', 'domain'],
   data() {
     return {
-      feed: 'https://youdonotneedacapetobeahero.com',
       note: this.$t('pages.successTip.notifyMessage'),
+      verifiedUrls: [],
     };
   },
   computed: {
@@ -68,17 +71,24 @@ export default {
     getCurrencyAmount() {
       return (this.amountTip * this.current.currencyRate).toFixed(3);
     },
+    urlVerified() {
+      return this.domain && this.verifiedUrls.includes(this.domain);
+    },
   },
   async created() {
+    try {
+      this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
+    } catch (e) {
+      console.error(`Can't fetch /verified: ${e}`);
+    }
     const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
-    console.log(addresses);
     if (addresses.length) {
       await axios.post(`${TIP_SERVICE}`, { url: tab.url, address: addresses[0] });
     }
   },
   methods: {
     redirectOnFeed() {
-      openUrl(this.feed);
+      openUrl(UI_URL);
     },
   },
 };

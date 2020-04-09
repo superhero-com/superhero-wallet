@@ -10,7 +10,7 @@
     },
     "step_3": {
       "title": "What is \"Verified\" URL",
-      "content": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero—and that is awesome!"
+      "content": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed."
     },
     "step_4": {
       "title": "Claim Tip",
@@ -22,11 +22,11 @@
     },
     "step_6": {
       "title": "Top Up",
-      "content": "You can top up your wallet by swapping ETH or BTC into AE, or by purchasing AE using your credit card. It’s very easy."
+      "content": "You can top up your wallet by swapping ETH or BTC into AE, by purchasing AE using your credit card or by sending AE to your SuperHero wallet address from another AE account. It’s very easy."
     },
     "step_7": {
       "title": "Withdraw",
-      "content": "You can easily withdraw your tips by sending them out to AE wallet addresses from your accounts in exchanges or external wallets, provided that they support AE tokens. You can then exchange them for other cryptocurrencies or withdraw to your bank."
+      "content": "You can easily withdraw your tips by sending them out to AE wallet addresses from your accounts in exchanges or external wallets, provided that they support AE tokens."
     },
     "step_8": {
       "title": "Settings",
@@ -38,6 +38,29 @@
     "back": "Back",
     "next": "Next",
     "start": "Start"
+  },
+  "modals": {
+    "transaction-failed": {
+      "msg": "We cannot process this transaction! Please, try again!"
+    },
+    "required": {
+      "msg": "Please fill in all fields."
+    },
+    "only-chars": {
+      "msg": "Allowed only letters and numbers!"
+    },
+    "name-exist": {
+      "msg": "This name is already registered!"
+    },
+    "incorrect-address": {
+      "msg": "Please make sure that you have entered a valid public address!"
+    },
+    "incorrect-amount": {
+      "msg": "Please make sure you entered valid amount!"
+    },
+    "insufficient-balance": {
+      "msg": "The requested amount cannot be spent."
+    }
   },
   "pages": {
     "intro": {
@@ -121,8 +144,8 @@
       "heading": "Account",
       "accountName": "Account name",
       "copy": "Copy address",
-      "send": "Send AE",
-      "claim": "Claim AE",
+      "send": "Send Tip",
+      "claim": "Claim Tip",
       "receive": "Receive",
       "wholeTransaction": "Whole transaction history",
       "latestTransactions": "Latest transactions",
@@ -657,7 +680,7 @@
       "sent": "Sent",
       "received": "Received",
       "withdrawals": "Withdrawals",
-      "topups": "Topups",
+      "topups": "Top ups",
       "all": "All"
     },
     "transactions": {

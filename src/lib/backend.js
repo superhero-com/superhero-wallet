@@ -22,7 +22,8 @@ const wrapTry = async promise => {
 const backendFetch = (path, ...args) => wrapTry(fetch(`${BACKEND_URL}/${path}`, ...args));
 
 export default class Backend {
-  static getTipComments = async tipId => backendFetch(`comment/api/tip/${encodeURIComponent(tipId)}`);
+  static getTipComments = async tipId =>
+    backendFetch(`comment/api/tip/${encodeURIComponent(tipId)}`);
 
   static async sendTipComment(tipId, text, author, signCb) {
     const sendComment = async postParam =>
@@ -91,7 +92,8 @@ export default class Backend {
 
   static cacheInvalidateTips = async () => backendFetch(`cache/invalidate/tips`);
 
-  static getCommentCountForAddress = async address => backendFetch(`comment/count/author/${address}`);
+  static getCommentCountForAddress = async address =>
+    backendFetch(`comment/count/author/${address}`);
 
   static getTipPreviewUrl = previewLink => `${BACKEND_URL}${previewLink}`;
 

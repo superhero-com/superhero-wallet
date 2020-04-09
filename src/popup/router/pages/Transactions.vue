@@ -4,9 +4,15 @@
     <BalanceInfo />
     <TransactionFilters @filtrate="filtrate" />
     <ae-list class="all-transactions" data-cy="all-transactions">
-      <div class="date" v-if="pendingTransactions.length">{{ $t('pages.recentTransactions.pendingStatus') }}</div>
+      <div class="date" v-if="pendingTransactions.length">
+        {{ $t('pages.recentTransactions.pendingStatus') }}
+      </div>
       <PendingTxs />
-      <TransactionItem v-for="transaction in filteredTransactions" :key="transaction.id" :transactionData="transaction" />
+      <TransactionItem
+        v-for="transaction in filteredTransactions"
+        :key="transaction.id"
+        :transactionData="transaction"
+      />
     </ae-list>
     <div v-if="!filteredTransactions.length && !loading">
       <p>{{ $t('pages.transactions.noTransactions') }}</p>
@@ -58,13 +64,33 @@ export default {
           }
           break;
         case 'sent':
-          return this.transactions.filter(tr => tr.tx.caller_id !== 'undefined' && tr.tx.type === 'ContractCallTx' && tr.tx.caller_id === this.publicKey);
+          return this.transactions.filter(
+            tr =>
+              tr.tx.caller_id !== 'undefined' &&
+              tr.tx.type === 'ContractCallTx' &&
+              tr.tx.caller_id === this.publicKey,
+          );
         case 'received':
-          return this.transactions.filter(tr => tr.tx.recipient_id !== 'undefined' && tr.tx.type === 'ContractCallTx' && tr.tx.recipient_id === this.publicKey);
+          return this.transactions.filter(
+            tr =>
+              tr.tx.recipient_id !== 'undefined' &&
+              tr.tx.type === 'ContractCallTx' &&
+              tr.tx.recipient_id === this.publicKey,
+          );
         case 'topups':
-          return this.transactions.filter(tr => tr.tx.recipient_id !== 'undefined' && tr.tx.type === 'SpendTx' && tr.tx.recipient_id === this.publicKey);
+          return this.transactions.filter(
+            tr =>
+              tr.tx.recipient_id !== 'undefined' &&
+              tr.tx.type === 'SpendTx' &&
+              tr.tx.recipient_id === this.publicKey,
+          );
         case 'withdrawals':
-          return this.transactions.filter(tr => tr.tx.sender_id !== 'undefined' && tr.tx.type === 'SpendTx' && tr.tx.sender_id === this.publicKey);
+          return this.transactions.filter(
+            tr =>
+              tr.tx.sender_id !== 'undefined' &&
+              tr.tx.type === 'SpendTx' &&
+              tr.tx.sender_id === this.publicKey,
+          );
         case 'all':
           return this.transactions;
         default:
@@ -99,13 +125,19 @@ export default {
       if (this.loading && !init) return;
       await this.$watchUntilTruly(() => this.middleware);
       this.loading = true;
-      const transactions = await this.$store.dispatch('fetchTransactions', { page: this.page, limit: TXS_PER_PAGE });
+      const transactions = await this.$store.dispatch('fetchTransactions', {
+        page: this.page,
+        limit: TXS_PER_PAGE,
+      });
       this.updateTransactions({ transactions });
       this.loading = false;
       if (transactions.length) this.page += 1;
     },
     async getLatest() {
-      const transactions = await this.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE, page: 1 });
+      const transactions = await this.$store.dispatch('fetchTransactions', {
+        limit: TXS_PER_PAGE,
+        page: 1,
+      });
       const diff = differenceWith(transactions, this.transactions, isEqual);
       this.updateTransactions({ latest: true, transactions: diff });
     },

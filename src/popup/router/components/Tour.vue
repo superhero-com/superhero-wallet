@@ -20,9 +20,14 @@
           >
             <template>
               <div slot="header" class="step-header">
-                {{ $t(`onboarding.step_${step.step}.title`) }} <span class="step-info"> ({{ step.step }}/10) </span>
+                {{ $t(`onboarding.step_${step.step}.title`) }}
+                <span class="step-info"> ({{ step.step }}/10) </span>
               </div>
-              <div slot="content" class="step-content" v-html="$t(`onboarding.step_${step.step}.content`)"></div>
+              <div
+                slot="content"
+                class="step-content"
+                v-html="$t(`onboarding.step_${step.step}.content`)"
+              ></div>
               <div slot="actions"></div>
             </template>
           </v-step>
@@ -41,8 +46,12 @@
         <div class="tour-control-buttons">
           <Button onboarding class="skip" @click="stop">{{ $t('onboarding.skip') }}</Button>
           <Button v-if="started" onboarding @click="back">{{ $t('onboarding.back') }}</Button>
-          <Button v-if="started" onboarding class="next" @click="next">{{ $t('onboarding.next') }}</Button>
-          <Button v-if="!started" onboarding class="start" @click="start">{{ $t('onboarding.start') }}</Button>
+          <Button v-if="started" onboarding class="next" @click="next">{{
+            $t('onboarding.next')
+          }}</Button>
+          <Button v-if="!started" onboarding class="start" @click="start">{{
+            $t('onboarding.start')
+          }}</Button>
         </div>
       </div>
     </div>
@@ -126,7 +135,9 @@ export default {
   computed: {
     ...mapGetters(['tourRunning']),
     tourSteps() {
-      return this.steps.filter(({ hide }) => !hide).map(step => ({ ...step, params: { ...step.params, enableScrolling: false } }));
+      return this.steps
+        .filter(({ hide }) => !hide)
+        .map(step => ({ ...step, params: { ...step.params, enableScrolling: false } }));
     },
   },
   watch: {

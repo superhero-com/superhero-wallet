@@ -25,7 +25,6 @@
       {{ $t('pages.tipPage.cancel') }}
     </Button>
 
-    <popup :popupSecondBtnClick="popup.secondBtnClick" />
     <Loader size="big" :loading="loading" type="transparent" content="" />
   </div>
 </template>
@@ -51,7 +50,16 @@ export default {
     verifiedUrls: [],
   }),
   computed: {
-    ...mapGetters(['balance', 'popup', 'tipping', 'current', 'sdk', 'account', 'network', 'currentCurrency']),
+    ...mapGetters([
+      'balance',
+      'popup',
+      'tipping',
+      'current',
+      'sdk',
+      'account',
+      'network',
+      'currentCurrency',
+    ]),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -68,7 +76,7 @@ export default {
       this.amountError = false;
     },
     urlVerified(val) {
-      if (val) this.$store.dispatch('popupAlert', { name: 'account', type: 'tip_url_verified' });
+      if (val) this.$store.dispatch('modals/open', { name: 'tip-verified' });
     },
   },
   async created() {
@@ -103,13 +111,22 @@ export default {
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
       this.loading = true;
       try {
-        const { hash } = await this.tipping.methods.retip(this.tip.id, { amount, waitMined: false });
+        const { hash } = await this.tipping.methods.retip(this.tip.id, {
+          amount,
+          waitMined: false,
+        });
         if (hash) {
-          await this.$store.dispatch('setPendingTx', { hash, amount: this.amount, domain: this.tip.url, time: Date.now(), type: 'tip' });
+          await this.$store.dispatch('setPendingTx', {
+            hash,
+            amount: this.amount,
+            domain: this.tip.url,
+            time: Date.now(),
+            type: 'tip',
+          });
           this.openCallbackOrGoHome('x-success');
         }
       } catch (e) {
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
       } finally {
         this.loading = false;
       }

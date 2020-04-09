@@ -7,7 +7,6 @@ import routes from './routes';
 import '@aeternity/aepp-components-3/dist/aepp.components.css';
 import LoaderComponent from './components/Loader';
 import TransactionItemComponent from './components/TransactionItem';
-import Popup from './components/Popup';
 import AmountInput from './components/AmountInput';
 import AddressInput from './components/AddressInput';
 import Button from './components/Button';
@@ -32,7 +31,6 @@ Vue.use(Components);
 Vue.use(VueTour);
 Vue.component('Loader', LoaderComponent);
 Vue.component('TransactionItem', TransactionItemComponent);
-Vue.component('Popup', Popup);
 Vue.component('Modal', ModalComponent);
 Vue.component('AmountInput', AmountInput);
 Vue.component('AddressInput', AddressInput);
@@ -72,7 +70,7 @@ router.beforeEach(async (to, from, next) => {
         sign: '/popup-sign-tx',
         askAccounts: '/ask-accounts',
         messageSign: '/message-sign',
-      }[window.POPUP_TYPE]
+      }[window.POPUP_TYPE],
     );
     return;
   }

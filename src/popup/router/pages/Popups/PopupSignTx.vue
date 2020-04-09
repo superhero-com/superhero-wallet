@@ -11,21 +11,44 @@
         </div>
         <div class="flex flex-align-center accountTo" v-if="isAddressShow">
           <UserAvatar :address="receiver" />
-          <ae-address :value="receiver" v-if="receiver" length="short" class="spendAccountAddr" data-cy="address-receiver" />
-          <span v-if="!receiver" class="spendAccountAddr">{{ $t('pages.signTransaction.unknownAccount') }}</span>
+          <ae-address
+            :value="receiver"
+            v-if="receiver"
+            length="short"
+            class="spendAccountAddr"
+            data-cy="address-receiver"
+          />
+          <span v-if="!receiver" class="spendAccountAddr">{{
+            $t('pages.signTransaction.unknownAccount')
+          }}</span>
         </div>
         <div v-else class="flex flex-align-center accountTo">
           <ae-icon name="square" />
-          <span class="spendAccountAddr" data-cy="receiver">{{ txType == 'contractCreateTx' ? $t('pages.signTransaction.newContract') : $t('pages.signTransaction.aens') }}</span>
+          <span class="spendAccountAddr" data-cy="receiver">{{
+            txType == 'contractCreateTx'
+              ? $t('pages.signTransaction.newContract')
+              : $t('pages.signTransaction.aens')
+          }}</span>
         </div>
       </ae-list-item>
-      <ae-list-item fill="neutral" class="flex-justify-between flex-align-start flex-direction-column">
+      <ae-list-item
+        fill="neutral"
+        class="flex-justify-between flex-align-start flex-direction-column"
+      >
         <div class="mt-20">
           <ae-badge data-cy="tx-type">{{ txType }}</ae-badge>
         </div>
-        <AmountSend :value="tx.amount" @changeAmount="val => (tx.amount = val)" style="width:100%;" />
+        <AmountSend
+          :value="tx.amount"
+          @changeAmount="val => (tx.amount = val)"
+          style="width:100%;"
+        />
       </ae-list-item>
-      <ae-list-item v-if="txObject.payload" fill="neutral" class="flex-justify-between flex-align-center flex-direction-column flex-align-start">
+      <ae-list-item
+        v-if="txObject.payload"
+        fill="neutral"
+        class="flex-justify-between flex-align-center flex-direction-column flex-align-start"
+      >
         <div class="tx-label ">
           <strong>{{ $t('pages.signTransaction.payload') }}</strong>
         </div>
@@ -34,7 +57,11 @@
         </div>
       </ae-list-item>
 
-      <ae-list-item v-if="txType == 'nameClaimTx' || txType == 'nameUpdateTx'" fill="neutral" class="flex-justify-between  flex-align-center ">
+      <ae-list-item
+        v-if="txType == 'nameClaimTx' || txType == 'nameUpdateTx'"
+        fill="neutral"
+        class="flex-justify-between  flex-align-center "
+      >
         <div class="tx-label">
           <strong>{{ $t('pages.signTransaction.name') }}</strong>
         </div>
@@ -42,7 +69,11 @@
           {{ txObject.name }}
         </div>
       </ae-list-item>
-      <ae-list-item v-if="txType == 'nameClaimTx'" fill="neutral" class="flex-justify-between flex-align-center ">
+      <ae-list-item
+        v-if="txType == 'nameClaimTx'"
+        fill="neutral"
+        class="flex-justify-between flex-align-center "
+      >
         <div class="tx-label ">
           <strong>{{ $t('pages.signTransaction.nameSalt') }}</strong>
         </div>
@@ -50,7 +81,11 @@
           {{ txObject.preclaim.salt }}
         </div>
       </ae-list-item>
-      <ae-list-item v-if="txType == 'nameUpdateTx'" fill="neutral" class="flex-justify-between  flex-align-center flex-direction-column">
+      <ae-list-item
+        v-if="txType == 'nameUpdateTx'"
+        fill="neutral"
+        class="flex-justify-between  flex-align-center flex-direction-column"
+      >
         <div class="tx-label extend text-left">
           <strong>{{ $t('pages.signTransaction.nameId') }}</strong>
         </div>
@@ -58,11 +93,16 @@
           {{ txObject.claim.id }}
         </div>
       </ae-list-item>
-      <ae-list-item fill="neutral" class="flex-justify-between flex-direction-column flex-align-center ">
+      <ae-list-item
+        fill="neutral"
+        class="flex-justify-between flex-direction-column flex-align-center "
+      >
         <div class="flex extend flex-justify-between ">
           <div class="tx-label">{{ $t('pages.signTransaction.fee') }}</div>
           <div class="text-right">
-            <div class="balance balanceBig txFee no-sign" data-cy="fee">{{ toAe(txObject.fee) }} {{ $t('pages.appVUE.aeid') }}</div>
+            <div class="balance balanceBig txFee no-sign" data-cy="fee">
+              {{ toAe(txObject.fee) }} {{ $t('pages.appVUE.aeid') }}
+            </div>
           </div>
         </div>
       </ae-list-item>
@@ -70,10 +110,16 @@
       <ae-list-item fill="neutral" class="flex-justify-between" v-if="!isNameTx">
         <div class="tx-label">{{ $t('pages.signTransaction.total') }}</div>
         <div class="text-right">
-          <div class="balance balanceBig balanceTotalSpend no-sign" data-cy="total">{{ totalSpend }} {{ $t('pages.appVUE.aeid') }}</div>
+          <div class="balance balanceBig balanceTotalSpend no-sign" data-cy="total">
+            {{ totalSpend }} {{ $t('pages.appVUE.aeid') }}
+          </div>
         </div>
       </ae-list-item>
-      <ae-list-item v-if="txType == 'contractCreateTx'" fill="neutral" class="flex-justify-between flex-align-center flex-direction-column flex-align-start">
+      <ae-list-item
+        v-if="txType == 'contractCreateTx'"
+        fill="neutral"
+        class="flex-justify-between flex-align-center flex-direction-column flex-align-start"
+      >
         <div class="tx-label ">
           <strong>{{ $t('pages.signTransaction.compiledCode') }}</strong>
         </div>
@@ -81,7 +127,11 @@
           {{ txObject.code }}
         </div>
       </ae-list-item>
-      <ae-list-item v-if="txType == 'contractCreateTx'" fill="neutral" class="flex-justify-between flex-align-center flex-direction-column flex-align-start">
+      <ae-list-item
+        v-if="txType == 'contractCreateTx'"
+        fill="neutral"
+        class="flex-justify-between flex-align-center flex-direction-column flex-align-start"
+      >
         <div class="tx-label ">
           <strong>{{ $t('pages.signTransaction.callData') }}</strong>
         </div>
@@ -91,8 +141,12 @@
       </ae-list-item>
     </ae-list>
     <div class="btnFixed">
-      <Button half @click="cancelTransaction" :disabled="editTx" class="reject" data-cy="deny">{{ $t('pages.signTransaction.reject') }}</Button>
-      <Button half @click="signTransaction" :disabled="editTx || amountError" data-cy="accept">{{ $t('pages.signTransaction.confirm') }}</Button>
+      <Button half @click="cancelTransaction" :disabled="editTx" class="reject" data-cy="deny">{{
+        $t('pages.signTransaction.reject')
+      }}</Button>
+      <Button half @click="signTransaction" :disabled="editTx || amountError" data-cy="accept">{{
+        $t('pages.signTransaction.confirm')
+      }}</Button>
     </div>
     <Loader size="big" :loading="loading" type="transparent" content=""></Loader>
   </div>
@@ -134,7 +188,12 @@ export default {
       return this.unpackedTx ? this.unpackedTx.txType : null;
     },
     isAddressShow() {
-      if (this.txType === 'contractCreateTx' || this.txType === 'namePreClaimTx' || this.txType === 'nameClaimTx' || this.txType === 'nameUpdateTx') {
+      if (
+        this.txType === 'contractCreateTx' ||
+        this.txType === 'namePreClaimTx' ||
+        this.txType === 'nameClaimTx' ||
+        this.txType === 'nameUpdateTx'
+      ) {
         return false;
       }
       return true;
@@ -158,7 +217,11 @@ export default {
       return '';
     },
     isNameTx() {
-      return this.txType === 'namePreClaimTx' || this.txType === 'nameClaimTx' || this.txType === 'nameUpdateTx';
+      return (
+        this.txType === 'namePreClaimTx' ||
+        this.txType === 'nameClaimTx' ||
+        this.txType === 'nameUpdateTx'
+      );
     },
     totalSpend() {
       const amount = this.tx.amount ? this.tx.amount : 0;
@@ -178,7 +241,14 @@ export default {
       this.props.reject(false);
     },
     async signTransaction() {
-      const { tx } = TxBuilder.buildTx({ ...this.unpackedTx.tx, ...this.tx, amount: BigNumber(this.tx.amount ? this.tx.amount : 0).shiftedBy(MAGNITUDE) }, this.txType);
+      const { tx } = TxBuilder.buildTx(
+        {
+          ...this.unpackedTx.tx,
+          ...this.tx,
+          amount: BigNumber(this.tx.amount ? this.tx.amount : 0).shiftedBy(MAGNITUDE),
+        },
+        this.txType,
+      );
       const { isTip, amount } = getContractCallInfo(tx);
       if (isTip) {
         await addTipAmount(amount);

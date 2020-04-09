@@ -9,7 +9,10 @@ export const testAccount = {
 export const popupProps = {
   connectConfirm: {
     type: 'connectConfirm',
-    action: { params: { name: 'AEPP', networkId: 'ae_uat', version: 1 }, method: 'connection.open' },
+    action: {
+      params: { name: 'AEPP', networkId: 'ae_uat', version: 1 },
+      method: 'connection.open',
+    },
     url: 'http://localhost:5000/aepp/aepp',
     name: 'AEPP',
     protocol: 'http:',
@@ -26,7 +29,11 @@ export const popupProps = {
   sign: {
     type: 'sign',
     action: {
-      params: { tx: 'tx_+FkMAaEB3CgyWh2tdZqs4BJVyb/oKE3hK81oYzteWEKnjfZSZ2ehAaH5Fh3pFTFpn4Qi3igqgWqqC8mMZN/OgZ74yFfWCM/thwONfqTGgACGD0w2IAgAAIG+gKIX7fM=', returnSigned: false },
+      params: {
+        tx:
+          'tx_+FkMAaEB3CgyWh2tdZqs4BJVyb/oKE3hK81oYzteWEKnjfZSZ2ehAaH5Fh3pFTFpn4Qi3igqgWqqC8mMZN/OgZ74yFfWCM/thwONfqTGgACGD0w2IAgAAIG+gKIX7fM=',
+        returnSigned: false,
+      },
       method: 'transaction.sign',
     },
     url: 'http://localhost:5000/aepp/aepp',

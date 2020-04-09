@@ -1,11 +1,19 @@
 <template>
   <div v-if="filteredPendings.length" data-cy="pending-txs">
-    <ae-list-item v-for="tr in filteredPendings" :key="tr.hash" fill="neutral" class="list-item-transaction">
+    <ae-list-item
+      v-for="tr in filteredPendings"
+      :key="tr.hash"
+      fill="neutral"
+      class="list-item-transaction"
+    >
       <div class="holder">
         <span class="amount" data-cy="amount">
-          {{ tr.amount }} {{ $t('pages.appVUE.aeid') }} <span class="text">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
+          {{ tr.amount }} {{ $t('pages.appVUE.aeid') }}
+          <span class="text">( {{ tr.amountCurrency }} {{ currentCurrency }} )</span>
         </span>
-        <span class="status" data-cy="status">{{ $t('pages.recentTransactions.pendingStatus') }}</span>
+        <span class="status" data-cy="status">{{
+          $t('pages.recentTransactions.pendingStatus')
+        }}</span>
         <span class="time" data-cy="time">{{ tr.time | formatDate }}</span>
       </div>
       <div class="holder">
@@ -45,9 +53,11 @@ export default {
           if (!mined) return;
           const pending = this.transactions.pending.filter(p => p.hash !== hash);
           this.$store.commit('SET_PENDING_TXS', pending);
-          if (type === 'tip') this.$router.push({ name: 'success-tip', params: { amount, domain } });
-          if (type === 'spend') this.$router.push({ name: 'send', params: { redirectstep: 3, successtx: mined } });
-        })
+          if (type === 'tip')
+            this.$router.push({ name: 'success-tip', params: { amount, domain } });
+          if (type === 'spend')
+            this.$router.push({ name: 'send', params: { redirectstep: 3, successtx: mined } });
+        }),
       );
     },
   },
