@@ -1,5 +1,5 @@
 <template>
-  <div class="recent-transactions" v-bind:class="{ 'tour-bar': tourStartBar }">
+  <div class="recent-transactions" :class="{ 'tour-bar': tourStartBar }">
     <div class="flex flex flex-align-center flex-justify-between mb-10 mt-20">
       <span class="title">{{ $t('pages.recentTransactions.recentActivity') }}</span>
       <span data-cy="view-all-transactions" @click="allTransactions" class="viewAll">{{
