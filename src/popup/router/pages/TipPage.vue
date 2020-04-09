@@ -1,12 +1,14 @@
 <template>
   <div>
     <div class="tour__step3 popup" :class="!IS_EXTENSION ? 'tour__step3_mobile' : ''">
-      <p class="primary-title text-left mb-8 f-16">
+      <p class="primary-title text-left mb-8 f-16" :class="!confirmMode ? 'title-holder' : ''">
         <template v-if="!confirmMode">
-          {{ $t('pages.tipPage.heading') }}
-          <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
-          {{ $t('pages.tipPage.to') }}
-          <div class="verified-url" v-if="urlVerified || tourRunning"><TickIcon /> Verified</div>
+          <div>
+            {{ $t('pages.tipPage.heading') }}
+            <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+            {{ $t('pages.tipPage.to') }}
+          </div>
+          <UrlBadge :type="urlVerified || tourRunning ? 'verified' : 'untrusted'" />
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
@@ -19,7 +21,9 @@
 
       <div class="url-bar">
         <template v-if="!editUrl">
-          <a class="link-sm text-left" data-cy="tip-url">{{ url }}</a>
+          <a class="link-sm text-left" :class="!urlVerified ? 'untrusted' : ''" data-cy="tip-url">{{
+            url
+          }}</a>
         </template>
         <Input v-else size="m-0 xsm" v-model="url" />
         <button v-if="!confirmMode" @click="editUrl = !editUrl" data-cy="edit-url">
@@ -67,19 +71,19 @@ import { mapGetters } from 'vuex';
 import axios from 'axios';
 import { calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import { escapeSpecialChars, aeToAettos } from '../../utils/helper';
-import TickIcon from '../../../icons/tick-icon.svg?vue-component';
 import EditIcon from '../../../icons/edit-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
 import Input from '../components/Input';
+import UrlBadge from '../components/UrlBadge';
 
 export default {
   components: {
     AmountSend,
     Textarea,
-    TickIcon,
     EditIcon,
     Input,
+    UrlBadge,
   },
   data() {
     return {
@@ -141,7 +145,6 @@ export default {
   },
   async created() {
     await this.persistTipDetails();
-
     if (process.env.IS_EXTENSION) {
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       if (tab) {
@@ -158,7 +161,6 @@ export default {
     } catch (e) {
       console.error(`Can't fetch /verified: ${e}`);
     }
-
     await this.$watchUntilTruly(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
@@ -228,6 +230,10 @@ export default {
   min-width: auto;
   p {
     margin-top: 0;
+    &.title-holder {
+      display: flex;
+      align-items: center;
+    }
   }
 }
 .tour__step3_mobile.v-tour__target--highlighted {
@@ -236,24 +242,18 @@ export default {
 .url-bar {
   display: flex;
   align-items: center;
-
   :first-child {
     flex-grow: 1;
     color: $text-color;
+    text-decoration: none;
+    &.untrusted {
+      color: $untrusted-badge-bg;
+    }
   }
 }
 .ae-icon-check {
   font-size: 24px;
   color: #fff !important;
-}
-.verified-url {
-  background: $accent-color;
-  color: #000;
-  font-size: 10px;
-  font-weight: bold;
-  border-radius: 3px;
-  padding: 3px 5px;
-  float: right;
 }
 @media screen and (min-width: 380px) {
   .tour__step3 {

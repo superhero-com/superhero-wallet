@@ -1,16 +1,18 @@
 <template>
   <div class="popup">
-    <p class="primary-title text-left mb-8 f-16">
+    <p class="primary-title text-left mb-8 f-16 title-holder">
       <template>
-        {{ $t('pages.tipPage.heading') }}
-        <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
-        {{ $t('pages.tipPage.to') }}
-        <div class="verified-url" v-if="urlVerified"><TickIcon /> Verified</div>
+        <div>
+          {{ $t('pages.tipPage.heading') }}
+          <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+          {{ $t('pages.tipPage.to') }}
+        </div>
+        <UrlBadge :type="urlVerified ? 'verified' : 'untrusted'" />
       </template>
     </p>
 
     <div class="url-bar">
-      <a class="link-sm text-left">{{ tip.url }}</a>
+      <a class="link-sm text-left" :class="!urlVerified ? 'untrusted' : ''">{{ tip.url }}</a>
     </div>
 
     <AmountSend :amountError="amountError" @changeAmount="val => (amount = val)" :value="amount" />
@@ -37,11 +39,11 @@ import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import openUrl from '../../utils/openUrl';
-import TickIcon from '../../../icons/tick-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
+import UrlBadge from '../components/UrlBadge';
 
 export default {
-  components: { AmountSend, TickIcon },
+  components: { AmountSend, UrlBadge },
   data: () => ({
     tip: {},
     amount: null,
@@ -83,14 +85,12 @@ export default {
   async created() {
     this.loading = true;
     this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
-
     await this.$watchUntilTruly(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
       contractId: this.network[this.current.network].tipContract,
       callerId: this.account.publicKey,
     }).min;
-
     await this.$watchUntilTruly(() => this.tipping);
     const tipId = +this.urlParams.get('id');
     if (!tipId) throw new Error('"id" param is missed');
@@ -108,7 +108,6 @@ export default {
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
       this.amountError = this.amountError || !+this.amount || this.amount <= 0;
       if (this.amountError) return;
-
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
       this.loading = true;
       try {
@@ -144,18 +143,16 @@ export default {
 .url-bar {
   display: flex;
   align-items: center;
-
   :first-child {
     flex-grow: 1;
+    text-decoration: none;
+    &.untrusted {
+      color: $untrusted-badge-bg;
+    }
   }
 }
-.verified-url {
-  background: $accent-color;
-  color: #000;
-  font-size: 10px;
-  font-weight: bold;
-  border-radius: 3px;
-  padding: 3px 5px;
-  float: right;
+.title-holder {
+  display: flex;
+  align-items: center;
 }
 </style>

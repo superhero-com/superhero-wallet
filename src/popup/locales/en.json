@@ -39,6 +39,10 @@
     "next": "Next",
     "start": "Start"
   },
+  "badges": {
+    "verified": "Verfied",
+    "untrusted": "Untrusted"
+  },
   "pages": {
     "intro": {
       "heading": "Intro",
