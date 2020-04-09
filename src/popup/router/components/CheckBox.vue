@@ -48,6 +48,7 @@ export default {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+
   input {
     position: absolute;
     opacity: 0;
@@ -55,6 +56,7 @@ export default {
     height: 0;
     width: 0;
   }
+
   .checkmark {
     background: no-repeat url('../../../icons/checkbox-unchecked.svg');
     height: 20px;
@@ -65,6 +67,7 @@ export default {
       background-image: url('../../../icons/checkbox-checked.svg');
     }
   }
+
   .checkbox-holder {
     position: relative;
     margin: 0px 10px;
