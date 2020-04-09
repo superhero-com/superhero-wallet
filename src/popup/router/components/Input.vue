@@ -1,6 +1,8 @@
 <template>
   <div class="text-left" :class="labelPosition ? 'input-group' : ''">
-    <label class="label" v-if="label" :class="labelPosition ? `label-${labelPosition}` : ''">{{ label }}</label>
+    <label class="label" v-if="label" :class="labelPosition ? `label-${labelPosition}` : ''">{{
+      label
+    }}</label>
     <input
       type="text"
       class="input"

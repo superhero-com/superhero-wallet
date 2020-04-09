@@ -10,7 +10,9 @@
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
-          <span class="secondary-text" data-cy="tip-amount">{{ amount }} {{ $t('pages.appVUE.aeid') }}</span>
+          <span class="secondary-text" data-cy="tip-amount"
+            >{{ amount }} {{ $t('pages.appVUE.aeid') }}</span
+          >
           ({{ currencyAmount }} {{ currentCurrency }}) {{ $t('pages.tipPage.to') }}
         </template>
       </p>
@@ -28,9 +30,17 @@
     </div>
     <div class="popup" data-cy="tip-container">
       <template v-if="!confirmMode">
-        <AmountSend :amountError="amountError" @changeAmount="val => (amount = val)" :value="amount" />
+        <AmountSend
+          :amountError="amountError"
+          @changeAmount="val => (amount = val)"
+          :value="amount"
+        />
         <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
-        <Button @click="toConfirm" :disabled="!note || amountError || noteError || !minCallFee || editUrl" data-cy="send-tip">
+        <Button
+          @click="toConfirm"
+          :disabled="!note || amountError || noteError || !minCallFee || editUrl"
+          data-cy="send-tip"
+        >
           {{ $t('pages.tipPage.next') }}
         </Button>
       </template>
@@ -88,7 +98,18 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['balance', 'popup', 'tipping', 'current', 'sdk', 'account', 'network', 'currentCurrency', 'tip', 'tourRunning']),
+    ...mapGetters([
+      'balance',
+      'popup',
+      'tipping',
+      'current',
+      'sdk',
+      'account',
+      'network',
+      'currentCurrency',
+      'tip',
+      'tourRunning',
+    ]),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -161,7 +182,7 @@ export default {
         ([amount, note]) => {
           const exp = new Date().setMinutes(new Date().getMinutes() + 20);
           this.$store.commit('SET_TIP_DETAILS', { note, amount, exp });
-        }
+        },
       );
     },
     toConfirm() {
@@ -174,9 +195,18 @@ export default {
       const amount = aeToAettos(this.amount);
       this.loading = true;
       try {
-        const { hash } = await this.tipping.call('tip', [this.url, escapeSpecialChars(this.note)], { amount, waitMined: false });
+        const { hash } = await this.tipping.call('tip', [this.url, escapeSpecialChars(this.note)], {
+          amount,
+          waitMined: false,
+        });
         if (hash) {
-          await this.$store.dispatch('setPendingTx', { hash, amount: this.amount, domain: this.url, time: Date.now(), type: 'tip' });
+          await this.$store.dispatch('setPendingTx', {
+            hash,
+            amount: this.amount,
+            domain: this.url,
+            time: Date.now(),
+            type: 'tip',
+          });
           this.$router.push('/account');
         }
       } catch (e) {

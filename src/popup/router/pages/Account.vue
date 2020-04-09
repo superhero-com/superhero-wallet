@@ -3,7 +3,10 @@
     <div class="popup popup-no-padding">
       <div v-show="backup_seed_notif && !tourRunning" class="noti" data-cy="seed-notif">
         <span>
-          {{ $t('pages.account.youNeedTo') }} <a href="#/securitySettings" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a>
+          {{ $t('pages.account.youNeedTo') }}
+          <a href="#/securitySettings" style="text-decoration: underline;">{{
+            $t('pages.account.backup')
+          }}</a>
           {{ $t('pages.account.yourSeedPhrase') }}
         </span>
       </div>
@@ -12,7 +15,13 @@
         <BalanceInfo />
       </div>
       <div class="submenu-bg">
-        <BoxButton data-cy="tip-button" :text="$t('pages.account.send')" accent to="tip" class="tour__step2">
+        <BoxButton
+          data-cy="tip-button"
+          :text="$t('pages.account.send')"
+          accent
+          to="tip"
+          class="tour__step2"
+        >
           <Tip slot="icon" />
         </BoxButton>
         <ClaimTips @setLoading="val => (loading = val)" v-if="IS_EXTENSION" />
@@ -72,7 +81,15 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'activeAccount', 'current', 'network', 'backedUpSeed', 'tourRunning']),
+    ...mapGetters([
+      'account',
+      'balance',
+      'activeAccount',
+      'current',
+      'network',
+      'backedUpSeed',
+      'tourRunning',
+    ]),
     publicKey() {
       return this.account.publicKey;
     },

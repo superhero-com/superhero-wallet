@@ -51,11 +51,13 @@ export async function generateEncryptedWallet(
   privateKey,
   nonce = window.crypto.getRandomValues(new Uint8Array(12)),
   salt = window.crypto.getRandomValues(new Uint8Array(16)),
-  options = {}
+  options = {},
 ) {
   const opt = Object.assign({}, DEFAULTS.crypto, options);
   opt.kdf = 'webCrypto';
-  const ciphertext = Buffer.from(await WebCrypto.encrypt(Buffer.from(privateKey).toString('hex'), password, nonce, salt)).toString('hex');
+  const ciphertext = Buffer.from(
+    await WebCrypto.encrypt(Buffer.from(privateKey).toString('hex'), password, nonce, salt),
+  ).toString('hex');
   const encrypted = Object.assign(
     { name, version: 1, public_key: getAddressFromPriv(privateKey), id: uuid.v4() },
     {
@@ -66,9 +68,12 @@ export async function generateEncryptedWallet(
           ciphertext,
           cipher_params: { nonce: Buffer.from(nonce).toString('hex') },
         },
-        { kdf: opt.kdf, kdf_params: { ...opt.kdf_params, salt: Buffer.from(salt).toString('hex') } }
+        {
+          kdf: opt.kdf,
+          kdf_params: { ...opt.kdf_params, salt: Buffer.from(salt).toString('hex') },
+        },
       ),
-    }
+    },
   );
   return encrypted;
 }

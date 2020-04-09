@@ -18,7 +18,13 @@ export const TX_TYPES = {
   nameUpdate: TX_TYPE.nameUpdate,
 };
 
-export const HDWALLET_METHODS = ['unlockWallet', 'generateWallet', 'getKeypair', 'getAccount', 'isLoggedIn'];
+export const HDWALLET_METHODS = [
+  'unlockWallet',
+  'generateWallet',
+  'getKeypair',
+  'getAccount',
+  'isLoggedIn',
+];
 
 export const AEX2_METHODS = {
   CHANGE_ACCOUNT: 'CHANGE_ACCOUNT',
@@ -83,7 +89,8 @@ export const toMicro = value => value.shiftedBy(-MAGNITUDE_MICRO).toFixed();
 
 export const MIN_SPEND_TX_FEE_MICRO = toMicro(MIN_SPEND_TX_FEE);
 export const MAX_REASONABLE_FEE_MICRO = toMicro(MAX_REASONABLE_FEE);
-export const DEFAULT_NETWORK = typeof process.env.NETWORK !== 'undefined' ? process.env.NETWORK.trim() : 'Mainnet';
+export const DEFAULT_NETWORK =
+  typeof process.env.NETWORK !== 'undefined' ? process.env.NETWORK.trim() : 'Mainnet';
 export const defaultNetworks = {
   Testnet: {
     url: 'https://sdk-testnet.aepps.com/',

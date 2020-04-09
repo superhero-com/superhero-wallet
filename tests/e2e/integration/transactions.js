@@ -30,7 +30,9 @@ describe('Tests cases for transactions page', () => {
 
   it('Render transaction item', () => {
     cy.openTransactions()
-      .request(`https://testnet.aeternal.io/middleware/transactions/account/${testAccount.publicKey}?limit=1`)
+      .request(
+        `https://testnet.aeternal.io/middleware/transactions/account/${testAccount.publicKey}?limit=1`,
+      )
       .then(({ body }) => {
         const {
           time,

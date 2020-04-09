@@ -53,7 +53,12 @@ export default {
         } else if (error.name === 'StreamApiNotSupportedError') {
           this.errorMessage = 'ERROR: Stream API is not supported in this browser';
         }
-        this.$store.dispatch('popupAlert', { name: 'account', type: 'error_qrcode', msg: this.errorMessage, data: this.errorMessage });
+        this.$store.dispatch('popupAlert', {
+          name: 'account',
+          type: 'error_qrcode',
+          msg: this.errorMessage,
+          data: this.errorMessage,
+        });
         this.$router.go(-1);
       }
     },

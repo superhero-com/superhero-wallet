@@ -10,9 +10,16 @@
     <Button half @click="closePopup" slot="buttons">
       {{ popup.buttonsTextPrimary }}
     </Button>
-    <ae-button v-if="popup.secondBtn" class="popup-button" face="round" :fill="popup.buttonsFillSecondary" uppercase @click.native="clickSecondBtn" slot="buttons">{{
-      popup.buttonsTextSecondary
-    }}</ae-button>
+    <ae-button
+      v-if="popup.secondBtn"
+      class="popup-button"
+      face="round"
+      :fill="popup.buttonsFillSecondary"
+      uppercase
+      @click.native="clickSecondBtn"
+      slot="buttons"
+      >{{ popup.buttonsTextSecondary }}</ae-button
+    >
   </ae-modal-light>
 </template>
 
