@@ -8,7 +8,7 @@
             <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
             {{ $t('pages.tipPage.to') }}
           </div>
-          <UrlBadge :type="urlVerified || tourRunning ? 'verified' : 'untrusted'" />
+          <UrlBadge :type="verifiedStatus" />
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
@@ -21,7 +21,7 @@
 
       <div class="url-bar">
         <template v-if="!editUrl">
-          <a class="link-sm text-left" :class="{ untrusted: !urlVerified }" data-cy="tip-url">
+          <a class="link-sm text-left" :class="verifiedStatus" data-cy="tip-url">
             {{ url }}
           </a>
         </template>
@@ -123,6 +123,9 @@ export default {
     urlVerified() {
       return this.url && this.verifiedUrls.includes(this.url);
     },
+    verifiedStatus() {
+      return this.urlVerified || this.tourRunning ? 'verified' : 'untrusted';
+    }
   },
   watch: {
     amount() {
