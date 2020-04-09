@@ -2,9 +2,9 @@
   <Badge :class="type ? `badge-${type}` : ''">
     <template v-if="type === 'verified'">
       <TickIcon />
-      {{ $t(`badges.${type}`) }}
+      {{ $t(`badges.verified`) }}
     </template>
-    <template v-if="type === 'untrusted'"> ! {{ $t(`badges.${type}`) }} </template>
+    <template v-if="type === 'untrusted'"> ! {{ $t(`badges.untrusted`) }} </template>
   </Badge>
 </template>
 
@@ -31,9 +31,11 @@ export default {
 .badge {
   color: #000;
   margin-left: auto;
+
   &.badge-verified {
     background: $accent-color;
   }
+
   &.badge-untrusted {
     background: $untrusted-badge-bg;
   }

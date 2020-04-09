@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="tour__step3 popup" :class="!IS_EXTENSION ? 'tour__step3_mobile' : ''">
-      <p class="primary-title text-left mb-8 f-16" :class="!confirmMode ? 'title-holder' : ''">
+    <div class="tour__step3 popup" :class="{ tour__step3_mobile: !IS_EXTENSION }">
+      <p class="primary-title text-left mb-8 f-16" :class="{ 'title-holder': !confirmMode }">
         <template v-if="!confirmMode">
           <div>
             {{ $t('pages.tipPage.heading') }}
@@ -21,9 +21,9 @@
 
       <div class="url-bar">
         <template v-if="!editUrl">
-          <a class="link-sm text-left" :class="!urlVerified ? 'untrusted' : ''" data-cy="tip-url">{{
-            url
-          }}</a>
+          <a class="link-sm text-left" :class="{ untrusted: !urlVerified }" data-cy="tip-url">
+            {{ url }}
+          </a>
         </template>
         <Input v-else size="m-0 xsm" v-model="url" />
         <button v-if="!confirmMode" @click="editUrl = !editUrl" data-cy="edit-url">

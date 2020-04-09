@@ -4,10 +4,6 @@
   </div>
 </template>
 
-<script>
-export default {};
-</script>
-
 <style land="scss" scoped>
 .badge {
   font-size: 12px;

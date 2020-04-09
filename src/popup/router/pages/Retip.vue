@@ -1,18 +1,16 @@
 <template>
   <div class="popup">
-    <p class="primary-title text-left mb-8 f-16 title-holder">
-      <template>
-        <div>
-          {{ $t('pages.tipPage.heading') }}
-          <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
-          {{ $t('pages.tipPage.to') }}
-        </div>
-        <UrlBadge :type="urlVerified ? 'verified' : 'untrusted'" />
-      </template>
-    </p>
+    <div class="primary-title title-holder">
+      <div>
+        {{ $t('pages.tipPage.heading') }}
+        <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+        {{ $t('pages.tipPage.to') }}
+      </div>
+      <UrlBadge :type="urlVerified ? 'verified' : 'untrusted'" />
+    </div>
 
     <div class="url-bar">
-      <a class="link-sm text-left" :class="!urlVerified ? 'untrusted' : ''">{{ tip.url }}</a>
+      <a class="link-sm text-left" :class="{ untrusted: !urlVerified }">{{ tip.url }}</a>
     </div>
 
     <AmountSend :amountError="amountError" @changeAmount="val => (amount = val)" :value="amount" />
@@ -154,5 +152,8 @@ export default {
 .title-holder {
   display: flex;
   align-items: center;
+  margin-bottom: 8px;
+  margin-top: 16px;
+  font-size: 16px;
 }
 </style>
