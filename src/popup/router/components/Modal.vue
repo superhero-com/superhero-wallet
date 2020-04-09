@@ -2,7 +2,7 @@
   <div class="popup">
     <transition name="modal">
       <div class="modal--mask">
-        <div class="modal--wrapper">
+        <div class="modal--wrapper" @click="$emit('close')">
           <div class="modal--container">
             <!-- <Close class="modal--close" @click="$emit('close')" /> -->
             <div class="modal--header">
@@ -13,7 +13,6 @@
             </div>
             <div class="modal--footer">
               <slot name="footer" />
-              <Button v-if="!footer">OK</Button>
             </div>
           </div>
         </div>
@@ -23,19 +22,14 @@
 </template>
 
 <script>
-import Button from './Button';
 
 export default {
-  components: { Button },
-  computed: {
-    footer() {
-      return !!this.$slots.footer;
-    },
-  },
   mounted() {
     if (document.body.style.overflow) return;
     document.body.style.overflow = 'hidden';
-    this.$once('hook:destroyed', () => { document.body.style.overflow = ''; });
+    this.$once('hook:destroyed', () => {
+      document.body.style.overflow = '';
+    });
   }
 };
 </script>

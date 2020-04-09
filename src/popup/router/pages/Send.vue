@@ -89,7 +89,6 @@
       </div>
     </div>
     <Loader size="big" :loading="loading" type="transparent"></Loader>
-    <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div>
 </template>
 
@@ -227,22 +226,17 @@ export default {
       const amount = aeToAettos(this.form.amount);
       const receiver = this.form.address;
       if (receiver === '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'incorrect_address' });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'incorrect-address' });
         this.loading = false;
         return;
       }
       if (this.form.amount <= 0) {
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'incorrect_amount' });
-        this.loading = false;
-        return;
-      }
-      if (this.tokenSymbol !== 'AE' && this.form.amount % 1 !== 0) {
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'integer_required' });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'incorrect-amount' });
         this.loading = false;
         return;
       }
       if (this.maxValue - this.form.amount <= 0 && this.current.token === 0) {
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'insufficient_balance' });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'insufficient-balance' });
         this.loading = false;
         return;
       }
@@ -255,7 +249,7 @@ export default {
         }
         this.loading = false;
       } catch (e) {
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
         this.loading = false;
       }
     },

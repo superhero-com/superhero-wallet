@@ -24,7 +24,6 @@
         </li>
       </div>
     </div>
-    <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div>
 </template>
 

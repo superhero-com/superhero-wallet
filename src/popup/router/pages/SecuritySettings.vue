@@ -9,7 +9,6 @@
           {{ $t('pages.securitySettings.seedRecoveryBtn') }}
         </Button>
       </div>
-      <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
       <div v-if="loading" class="loading">
         <ae-loader />
       </div>
@@ -37,7 +36,6 @@
         <small>{{ $t('pages.seedPhrase.nextScreen') }}</small>
         <button @click="verifySeed" class="primary-button">{{ $t('pages.seedPhrase.verifySeed') }}</button>
         <button @click="navigateToAccount" class="primary-button">{{ $t('pages.seedPhrase.doneThis') }}</button>
-        <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
       </div>
     </Modal>
     <div v-if="type == 4">

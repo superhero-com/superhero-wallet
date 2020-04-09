@@ -78,7 +78,6 @@
     </div>
     <Loader size="big" :loading="loading" :type="loaderType" :content="loaderContent"></Loader>
     <input type="hidden" class="txHash" :value="hash" />
-    <popup :popupSecondBtnClick="popup.secondBtnClick" :redirect="true"></popup>
   </div>
 </template>
 
@@ -278,7 +277,7 @@ export default {
     async init() {
       this.setReceiver();
       if (this.isLedger && this.data.type !== 'txSign') {
-        this.$store.dispatch('popupAlert', { name: 'account', type: 'ledger_support' }).then(() => {
+        this.$store.dispatch('modals/open', { name: 'default', msg: 'Ledger currently cannot sign this type of transaction! ' }).then(() => {
           if (this.data.popup) {
             setTimeout(() => {
               window.close();
@@ -466,9 +465,8 @@ export default {
             this.loading = false;
             this.hash = result.hash;
             this.$store.commit('SET_TX_QUEUE', result.hash);
-            const txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${result.hash}`;
             const msg = `You have sent ${this.amount} AE`;
-            this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(async () => {
+            this.$store.dispatch('modals/open', { name: 'default', msg }).then(async () => {
               this.$store.commit('SET_AEPP_POPUP', false);
               this.redirectInExtensionAfterAction();
             });
@@ -476,7 +474,7 @@ export default {
         })
         .catch(async () => {
           this.$store.commit('SET_TX_QUEUE', 'error');
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+          this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
           this.loading = false;
         });
     },
@@ -485,14 +483,13 @@ export default {
       const sign = await this.$store.dispatch('ledgerSignTransaction', { tx });
       this.loading = false;
       if (sign.success) {
-        const txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${sign.res.hash}`;
         const msg = `You have sent ${this.amount} AE`;
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(async () => {
+        this.$store.dispatch('modals/open', { name: 'default', msg }).then(async () => {
           this.$store.commit('SET_AEPP_POPUP', false);
           this.redirectInExtensionAfterAction();
         });
       } else {
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' }).then(() => {
+        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' }).then(() => {
           this.redirectInExtensionAfterAction();
         });
       }
@@ -550,7 +547,7 @@ export default {
         this.$store.commit('SET_TX_QUEUE', 'error');
         this.errorTx.error.message = typeof err.message !== 'undefined' ? err.message : err;
         this.sending = true;
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
       }
       this.redirectInExtensionAfterAction();
     },
@@ -566,7 +563,7 @@ export default {
           this.$store.commit('SET_TX_QUEUE', deployed.transaction);
         } catch (err) {
           this.$store.commit('SET_TX_QUEUE', 'error');
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+          this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
         }
       }
 
@@ -579,8 +576,7 @@ export default {
         if (deployed) {
           this.deployed = deployed.address;
           const msg = `Contract deployed at address <br> ${deployed.address}`;
-          const noRedirect = this.data.tx.contractType === 'fungibleToken' && this.data.tx.tokenRegistry;
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_deploy', msg, noRedirect, data: deployed.address });
+          this.$store.dispatch('modals/open', { name: 'default', msg });
         }
         if (this.data.tx.contractType !== 'fungibleToken') {
           this.redirectInExtensionAfterAction();
@@ -620,7 +616,7 @@ export default {
         this.redirectToTxConfirm(tx);
       } catch (err) {
         this.$store.commit('SET_TX_QUEUE', 'error');
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });
+        this.$store.dispatch('modals/open', { name: 'default', msg: err.message });
         this.$store.commit('SET_AEPP_POPUP', false);
         this.$router.push('/names');
       }
@@ -631,7 +627,7 @@ export default {
           await this.sdk.aensBid(this.data.tx.name, this.data.tx.BigNumberAmount);
         } catch (err) {
           this.$store.commit('SET_TX_QUEUE', 'error');
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });
+          this.$store.dispatch('modals/open', { name: 'default', msg: err.message });
         }
       } else {
         try {
@@ -643,7 +639,7 @@ export default {
             msg = this.$t('pages.signTransaction.balanceError');
           }
           this.$store.commit('SET_TX_QUEUE', 'error');
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg });
+          this.$store.dispatch('modals/open', { name: 'default', msg });
         }
       }
       this.$store.commit('SET_AEPP_POPUP', false);
@@ -659,13 +655,10 @@ export default {
           update = await nameObject.update(this.data.tx.pointers, { extendPointers: true });
         }
         this.$store.commit('SET_TX_QUEUE', update.hash);
-        await this.$store.dispatch('popupAlert', {
-          name: 'account',
-          type: 'added_success',
-        });
+        await this.$store.dispatch('modals/open', { name: 'default', msg: 'Successfully added!' });
       } catch (err) {
         this.$store.commit('SET_TX_QUEUE', 'error');
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });
+        this.$store.dispatch('modals/open', { name: 'default', msg: err.message });
       }
       this.$store.commit('SET_AEPP_POPUP', false);
       this.$router.push('/names');
@@ -692,8 +685,7 @@ export default {
               });
               this.$store.commit('SET_TX_QUEUE', call.hash);
               const msg = `You have sent ${this.data.tx.amount} ${this.data.tx.token}`;
-              const txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${call.hash}`;
-              this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(() => {
+              this.$store.dispatch('modals/open', { name: 'default', msg }).then(() => {
                 this.$store.commit('SET_AEPP_POPUP', false);
                 this.$router.push('/account');
               });

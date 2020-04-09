@@ -112,7 +112,6 @@
     </div>
 
     <Loader size="big" :loading="loading || sdk === null" type="transparent" content=""></Loader>
-    <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div>
 </template>
 
@@ -222,22 +221,16 @@ export default {
       this.name = this.name.trim();
       const onlyLettersAndNums = /^[A-Za-z0-9]+$/;
       if (this.name === '') {
-        this.$store.dispatch('popupAlert', {
-          name: 'account',
-          type: 'requiredField',
-        });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'name-exist' });
       } else if (!onlyLettersAndNums.test(this.name)) {
-        this.$store.dispatch('popupAlert', {
-          name: 'account',
-          type: 'only_allowed_chars',
-        });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'only-chars' });
       } else {
         this.loading = true;
         const name = `${this.name}.chain`;
         try {
           await this.sdk.aensQuery(name);
           this.loading = false;
-          this.$store.dispatch('popupAlert', { name: 'account', type: 'name_exist' });
+          this.$store.dispatch('modals/open', { name: 'default', type: 'name-exist' });
         } catch (err) {
           const tx = {
             popup: false,
@@ -280,7 +273,7 @@ export default {
           },
         });
       } catch (e) {
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
       }
     },
     async extend({ name }) {

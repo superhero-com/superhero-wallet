@@ -1,5 +1,4 @@
 import * as types from './mutation-types';
-import { POPUP_PROPS } from '../popup/utils/popup-messages';
 
 export default {
   [types.UPDATE_ACCOUNT](state, payload) {
@@ -10,16 +9,6 @@ export default {
   },
   [types.SWITCH_NETWORK](state, payload) {
     state.current.network = payload;
-  },
-  [types.SHOW_POPUP](state, payload) {
-    Object.assign(state.popup, payload);
-  },
-  [types.DEF_POPUP](state) {
-    state.popup = Object.assign({}, POPUP_PROPS);
-  },
-  [types.HIDE_POPUP](state) {
-    state.popup.show = false;
-    state.popup.secondBtn = false;
   },
   [types.SWITCH_LOGGED_IN](state, payload) {
     state.isLoggedIn = payload;

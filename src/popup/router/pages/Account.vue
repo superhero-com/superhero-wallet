@@ -32,7 +32,6 @@
       <RecentTransactions></RecentTransactions>
     </div>
     <Loader size="big" :loading="loading" type="transparent" />
-    <popup />
   </div>
 </template>
 
@@ -88,7 +87,6 @@ export default {
     setTimeout(() => {
       this.backup_seed_notif = false;
     }, 3000);
-    this.$store.dispatch('modals/open', { name: 'claim' });
   },
 };
 </script>

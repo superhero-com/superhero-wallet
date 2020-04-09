@@ -1,5 +1,5 @@
 <template>
-  <Modal>
+  <Modal >
     <div slot="body">testtt</div>
   </Modal>
 </template>

@@ -24,8 +24,6 @@ export default store => {
     mutations: {
       open(state, modal) {
         state.opened.push(modal);
-        console.log(state);
-        console.log(modals);
       },
       closeByKey(state, key) {
         const idx = state.opened.findIndex(modal => modal.key === key);
@@ -34,8 +32,6 @@ export default store => {
     },
     actions: {
       open({ commit }, { name, allowRedirect, ...props }) {
-        console.log("open");
-        console.log(name);
         if (!modals[name]) return Promise.reject(new Error(`Modal with name "${name}" not registered`));
         const key = modalCounter;
         modalCounter += 1;
