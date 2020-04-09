@@ -611,7 +611,7 @@ export default {
   font-weight: 100;
 }
 .terms--heading {
-  margin: 20px;
+  margin: 25px;
   text-align: center;
 }
 .accordion-item-title {
