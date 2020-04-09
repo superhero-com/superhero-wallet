@@ -23,5 +23,5 @@ export default {
     resolve: { type: Function, required: true },
   },
   components: { Modal, Button, CheckIcon },
-}
+};
 </script>

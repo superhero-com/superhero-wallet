@@ -20,5 +20,5 @@ export default {
     type: { type: String, required: false },
   },
   components: { Modal, Button },
-}
+};
 </script>

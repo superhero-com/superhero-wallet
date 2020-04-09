@@ -46,7 +46,7 @@ export default {
     },
     modals() {
       return this.$store.getters['modals/opened'];
-    }
+    },
   },
   async created() {
     this.$watch(

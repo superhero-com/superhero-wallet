@@ -24,5 +24,5 @@ export default {
     claimAmount: { type: Number, required: true },
   },
   components: { Modal, Button, CheckIcon },
-}
+};
 </script>

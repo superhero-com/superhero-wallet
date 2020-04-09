@@ -41,9 +41,9 @@ export default store => {
             key,
             allowRedirect,
             props: { ...props, resolve, reject },
-          }),
+          })
         ).finally(() => commit('closeByKey', key));
       },
-    }
+    },
   });
 };

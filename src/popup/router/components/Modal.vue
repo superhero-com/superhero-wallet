@@ -22,7 +22,6 @@
 </template>
 
 <script>
-
 export default {
   mounted() {
     if (document.body.style.overflow) return;
@@ -30,7 +29,7 @@ export default {
     this.$once('hook:destroyed', () => {
       document.body.style.overflow = '';
     });
-  }
+  },
 };
 </script>
 <style lang="scss" scoped>
