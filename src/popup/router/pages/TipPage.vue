@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import axios from 'axios';
 import { calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import { escapeSpecialChars, aeToAettos } from '../../utils/helper';
@@ -108,8 +108,8 @@ export default {
       'network',
       'currentCurrency',
       'tip',
-      'tourRunning',
     ]),
+    ...mapState(['tourRunning']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;

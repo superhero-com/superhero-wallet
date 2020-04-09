@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import Arrow from '../../../icons/arrow.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
 import Hamburger from '../../../icons/hamburger.svg?vue-component';
@@ -41,13 +41,8 @@ export default {
     return {};
   },
   computed: {
-    ...mapGetters([
-      'isLoggedIn',
-      'aeppPopup',
-      'notifications',
-      'notificationsCounter',
-      'tourRunning',
-    ]),
+    ...mapGetters(['isLoggedIn', 'aeppPopup', 'notifications', 'notificationsCounter']),
+    ...mapState(['tourRunning']),
     title() {
       return this.$route.meta.title;
     },

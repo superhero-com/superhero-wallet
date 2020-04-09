@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { setTimeout } from 'timers';
 import Tip from '../../../icons/tip-icon.svg?vue-component';
 import Activity from '../../../icons/activity-icon.svg?vue-component';
@@ -81,15 +81,8 @@ export default {
     };
   },
   computed: {
-    ...mapGetters([
-      'account',
-      'balance',
-      'activeAccount',
-      'current',
-      'network',
-      'backedUpSeed',
-      'tourRunning',
-    ]),
+    ...mapGetters(['account', 'balance', 'activeAccount', 'current', 'network', 'backedUpSeed']),
+    ...mapState(['tourRunning']),
     publicKey() {
       return this.account.publicKey;
     },

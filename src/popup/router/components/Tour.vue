@@ -57,7 +57,7 @@
     </div>
     <div
       class="tour-start"
-      v-if="!nodeStatus && home && isLoggedIn && !tourRunning && $store.state.tourStartBar"
+      v-if="!nodeStatus && home && isLoggedIn && !tourRunning && tourStartBar"
       @click="toggleTour"
     >
       <div class="container">
@@ -70,7 +70,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import Hero from '../../../icons/hero.svg?vue-component';
 import StartOnboarding from '../../../icons/start-onboarding.svg?vue-component';
 import Close from '../../../icons/close.svg?vue-component';
@@ -148,7 +148,8 @@ export default {
     ],
   }),
   computed: {
-    ...mapGetters(['tourRunning', 'isLoggedIn', 'nodeStatus']),
+    ...mapGetters(['isLoggedIn', 'nodeStatus']),
+    ...mapState(['tourStartBar', 'tourRunning']),
     tourSteps() {
       return this.steps
         .filter(({ hide }) => !hide)
