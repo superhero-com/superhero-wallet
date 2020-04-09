@@ -70,7 +70,7 @@ router.beforeEach(async (to, from, next) => {
         sign: '/popup-sign-tx',
         askAccounts: '/ask-accounts',
         messageSign: '/message-sign',
-      }[window.POPUP_TYPE]
+      }[window.POPUP_TYPE],
     );
     return;
   }

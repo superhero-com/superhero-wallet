@@ -2,16 +2,26 @@
   <div class="recent-transactions">
     <div class="flex flex flex-align-center flex-justify-between mb-10 mt-20">
       <span class="title">{{ $t('pages.recentTransactions.recentActivity') }}</span>
-      <span data-cy="view-all-transactions" @click="allTransactions" class="viewAll">{{ $t('pages.recentTransactions.viewAll') }}</span>
+      <span data-cy="view-all-transactions" @click="allTransactions" class="viewAll">{{
+        $t('pages.recentTransactions.viewAll')
+      }}</span>
     </div>
     <PendingTxs />
     <div v-if="transactions.latest.length">
       <ae-list class="transactionList">
-        <TransactionItem :recent="true" :dark="true" v-for="transaction in transactions.latest" :key="transaction.id" :transactionData="transaction"></TransactionItem>
+        <TransactionItem
+          :recent="true"
+          :dark="true"
+          v-for="transaction in transactions.latest"
+          :key="transaction.id"
+          :transactionData="transaction"
+        ></TransactionItem>
       </ae-list>
     </div>
     <div v-if="!transactions.latest.length && !transactions.pending.length">
-      <p class="paragraph noTransactions">{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
+      <p class="paragraph noTransactions">
+        {{ $t('pages.recentTransactions.noTransactionsFound') }}
+      </p>
     </div>
     <div class="loader-holder">
       <Loader size="small" :loading="loading"></Loader>

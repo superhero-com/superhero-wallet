@@ -270,7 +270,7 @@ Cypress.Commands.add(
     new Cypress.Promise(async resolve => {
       await browser.storage.local.set({ [key]: value });
       resolve();
-    })
+    }),
 );
 
 Cypress.Commands.add('urlEquals', route => {

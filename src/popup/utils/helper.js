@@ -1,11 +1,26 @@
 import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
-import { MAGNITUDE_EXA, MAGNITUDE_GIGA, MAGNITUDE_PICO, CONNECTION_TYPES, networks, DEFAULT_NETWORK } from './constants';
+import {
+  MAGNITUDE_EXA,
+  MAGNITUDE_GIGA,
+  MAGNITUDE_PICO,
+  CONNECTION_TYPES,
+  networks,
+  DEFAULT_NETWORK,
+} from './constants';
 import { getState } from '../../store/plugins/persistState';
 
-export const aeToAettos = v => formatAmount(v, { denomination: AE_AMOUNT_FORMATS.AE, targetDenomination: AE_AMOUNT_FORMATS.AETTOS });
-export const aettosToAe = v => formatAmount(v, { denomination: AE_AMOUNT_FORMATS.AETTOS, targetDenomination: AE_AMOUNT_FORMATS.AE });
+export const aeToAettos = v =>
+  formatAmount(v, {
+    denomination: AE_AMOUNT_FORMATS.AE,
+    targetDenomination: AE_AMOUNT_FORMATS.AETTOS,
+  });
+export const aettosToAe = v =>
+  formatAmount(v, {
+    denomination: AE_AMOUNT_FORMATS.AETTOS,
+    targetDenomination: AE_AMOUNT_FORMATS.AE,
+  });
 
 const shuffleArray = array => {
   const shuffle = array;
@@ -63,9 +78,17 @@ const detectConnectionType = port => {
   const extensionProtocol = getExtensionProtocol();
   const senderUrl = port.sender.url.split('?');
   let type = CONNECTION_TYPES.OTHER;
-  if (port.name === CONNECTION_TYPES.EXTENSION && (senderUrl[0] === `${extensionProtocol}://${browser.runtime.id}/popup/popup.html` || detectBrowser() === 'Firefox')) {
+  if (
+    port.name === CONNECTION_TYPES.EXTENSION &&
+    (senderUrl[0] === `${extensionProtocol}://${browser.runtime.id}/popup/popup.html` ||
+      detectBrowser() === 'Firefox')
+  ) {
     type = CONNECTION_TYPES.EXTENSION;
-  } else if (port.name === CONNECTION_TYPES.POPUP && (senderUrl[0] === `${extensionProtocol}://${browser.runtime.id}/popup/popup.html` || detectBrowser() === 'Firefox')) {
+  } else if (
+    port.name === CONNECTION_TYPES.POPUP &&
+    (senderUrl[0] === `${extensionProtocol}://${browser.runtime.id}/popup/popup.html` ||
+      detectBrowser() === 'Firefox')
+  ) {
     type = CONNECTION_TYPES.POPUP;
   } else {
     type = CONNECTION_TYPES.OTHER;
@@ -124,7 +147,10 @@ const middleware = async (network, current) => {
 
 const convertAmountToCurrency = (currency, amount) => currency * amount;
 
-const checkAddress = value => Crypto.isAddressValid(value, 'ak') || Crypto.isAddressValid(value, 'ct') || Crypto.isAddressValid(value, 'ok');
+const checkAddress = value =>
+  Crypto.isAddressValid(value, 'ak') ||
+  Crypto.isAddressValid(value, 'ct') ||
+  Crypto.isAddressValid(value, 'ok');
 
 const isInt = n => n % 1 === 0;
 
@@ -220,7 +246,8 @@ const escapeCallParams = params =>
     return p.toString();
   });
 
-export const getAddressByNameEntry = nameEntry => ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === 'account_pubkey')) || {}).id;
+export const getAddressByNameEntry = nameEntry =>
+  ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === 'account_pubkey')) || {}).id;
 
 const toFiatFixedValue = v => (v.e < -2 ? '0.01' : v.toFixed(2));
 
@@ -238,9 +265,13 @@ const prefixes = [
   { name: 'Pico', magnitude: MAGNITUDE_PICO },
 ];
 
-const getNearestPrefix = exponent => prefixes.reduce((p, n) => (Math.abs(n.magnitude - exponent) < Math.abs(p.magnitude - exponent) ? n : p));
+const getNearestPrefix = exponent =>
+  prefixes.reduce((p, n) =>
+    Math.abs(n.magnitude - exponent) < Math.abs(p.magnitude - exponent) ? n : p,
+  );
 
-const getLowerBoundPrefix = exponent => prefixes.find(p => p.magnitude <= exponent) || prefixes[prefixes.length - 1];
+const getLowerBoundPrefix = exponent =>
+  prefixes.find(p => p.magnitude <= exponent) || prefixes[prefixes.length - 1];
 
 export const prefixedAmount = value => {
   const { name, magnitude } = (value.e < 0 ? getNearestPrefix : getLowerBoundPrefix)(value.e);
@@ -274,7 +305,10 @@ const setContractInstance = async (tx, sdk, contractAddress = null) => {
     if (typeof tx.abi_version !== 'undefined' && tx.abi_version !== 3) {
       backend = 'aevm';
     }
-    contractInstance = await sdk.getContractInstance(tx.source, { contractAddress, forceCodeCheck: true });
+    contractInstance = await sdk.getContractInstance(tx.source, {
+      contractAddress,
+      forceCodeCheck: true,
+    });
     contractInstance.setOptions({ backend });
   } catch (e) {
     console.error(`setContractInstance: ${e}`);
@@ -297,7 +331,9 @@ const getUniqueId = (length = 6) => {
   const START_LETTERS_ASCII = 97;
   const ALPHABET_LENGTH = 26;
 
-  return [...new Array(ID_LENGTH)].map(() => String.fromCharCode(START_LETTERS_ASCII + Math.random() * ALPHABET_LENGTH)).join('');
+  return [...new Array(ID_LENGTH)]
+    .map(() => String.fromCharCode(START_LETTERS_ASCII + Math.random() * ALPHABET_LENGTH))
+    .join('');
 };
 
 const getUserNetworks = async () => {

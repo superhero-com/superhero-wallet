@@ -28,13 +28,15 @@ export default {
             await this.tipping.methods
               .unclaimed_for_url(tab.url)
               .then(r => r.decodedResult)
-              .catch(() => 0)
-          )
+              .catch(() => 0),
+          ),
         );
         if (!claimAmount) throw new Error(this.$t('pages.claim.noZeroClaim'));
-        await axios.post(`${TIP_SERVICE}`, { url: tab.url, address: this.account.publicKey }).catch(() => {
-          throw new Error(this.$t('pages.claim.errorClaim'));
-        });
+        await axios
+          .post(`${TIP_SERVICE}`, { url: tab.url, address: this.account.publicKey })
+          .catch(() => {
+            throw new Error(this.$t('pages.claim.errorClaim'));
+          });
         this.$emit('setLoading', false);
         this.$store.dispatch('modals/open', { name: 'claim-success', url: tab.url, claimAmount });
       } catch (e) {

@@ -18,7 +18,7 @@ Vue.prototype.$watchUntilTruly = function watchUntilTruly(getter) {
         resolve();
         defer(() => unwatch());
       },
-      { immediate: true }
+      { immediate: true },
     );
   });
 };

@@ -3,7 +3,11 @@
     <div class="content" :class="{ isLoggedIn }">
       <Arrow v-if="title && !tourRunning" @click="goBack" class="back-arrow" data-cy="back-arrow" />
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
-      <StartOnboarding v-if="!title && isLoggedIn && !tourRunning" class="start-onboarding" @click="$store.commit('SET_TOUR_RUNNING', true)" />
+      <StartOnboarding
+        v-if="!title && isLoggedIn && !tourRunning"
+        class="start-onboarding"
+        @click="$store.commit('SET_TOUR_RUNNING', true)"
+      />
 
       <div class="title">
         <span v-if="title">{{ $t(`pages.titles.${title}`) }}</span>
@@ -11,8 +15,14 @@
       </div>
 
       <div v-if="isLoggedIn">
-        <span class="noti-holder" @click="notifications.length && $router.push('/notifications')" data-cy="noti">
-          <span v-if="notificationsCounter" class="noti-count" data-cy="noti-count">{{ notifications.length }}</span>
+        <span
+          class="noti-holder"
+          @click="notifications.length && $router.push('/notifications')"
+          data-cy="noti"
+        >
+          <span v-if="notificationsCounter" class="noti-count" data-cy="noti-count">{{
+            notifications.length
+          }}</span>
           <Bell />
         </span>
         <button @click="$emit('toggle-sidebar')">
@@ -37,7 +47,13 @@ export default {
     return {};
   },
   computed: {
-    ...mapGetters(['isLoggedIn', 'aeppPopup', 'notifications', 'notificationsCounter', 'tourRunning']),
+    ...mapGetters([
+      'isLoggedIn',
+      'aeppPopup',
+      'notifications',
+      'notificationsCounter',
+      'tourRunning',
+    ]),
     title() {
       return this.$route.meta.title;
     },

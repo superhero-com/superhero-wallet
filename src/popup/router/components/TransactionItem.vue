@@ -5,9 +5,15 @@
         <span class="amount">
           <span data-cy="amount">{{ txAmount }}</span>
           {{ $t('pages.appVUE.aeid') }}
-          <span class="text" data-cy="currency-amount">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span>
+          <span class="text" data-cy="currency-amount"
+            >( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span
+          >
         </span>
-        <span class="status">{{ txType == 'Sent' ? $t('pages.recentTransactions.sentStatus') : $t('pages.recentTransactions.receivedStatus') }}</span>
+        <span class="status">{{
+          txType == 'Sent'
+            ? $t('pages.recentTransactions.sentStatus')
+            : $t('pages.recentTransactions.receivedStatus')
+        }}</span>
         <span class="time" data-cy="time">{{ transactionDate }}</span>
       </div>
       <div class="holder tx-info">

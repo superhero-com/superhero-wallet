@@ -40,7 +40,10 @@ export default {
     }
 
     const { network, current } = store.getters;
-    const node = await Node({ url: network[current.network].internalUrl, internalUrl: network[current.network].internalUrl });
+    const node = await Node({
+      url: network[current.network].internalUrl,
+      internalUrl: network[current.network].internalUrl,
+    });
     const account = MemoryAccount({ keypair });
     try {
       const sdk = await Universal({
@@ -76,7 +79,10 @@ export default {
   async initContractInstances() {
     store.commit(
       'SET_TIPPING',
-      await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, { contractAddress: store.getters.network[store.getters.current.network].tipContract, forceCodeCheck: true })
+      await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, {
+        contractAddress: store.getters.network[store.getters.current.network].tipContract,
+        forceCodeCheck: true,
+      }),
     );
   },
 };

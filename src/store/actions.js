@@ -1,7 +1,13 @@
 import { uniqBy, flatten, uniq } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import * as types from './mutation-types';
-import { convertToAE, stringifyForStorage, parseFromStorage, aettosToAe, getAddressByNameEntry } from '../popup/utils/helper';
+import {
+  convertToAE,
+  stringifyForStorage,
+  parseFromStorage,
+  aettosToAe,
+  getAddressByNameEntry,
+} from '../popup/utils/helper';
 import { BACKEND_URL, DEFAULT_NETWORK } from '../popup/utils/constants';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
 
@@ -28,10 +34,13 @@ export default {
     const { middlewareUrl } = state.network[state.current.network];
     const { publicKey } = state.account;
     try {
-      const tx = await fetch(`${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`, {
-        method: 'GET',
-        mode: 'cors',
-      });
+      const tx = await fetch(
+        `${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`,
+        {
+          method: 'GET',
+          mode: 'cors',
+        },
+      );
       return tx.json();
     } catch (e) {
       return [];
@@ -54,7 +63,11 @@ export default {
         if (publicKey) {
           let names = await Promise.all([
             (async () =>
-              (await state.sdk.api.getPendingAccountTransactionsByPubkey(publicKey).catch(() => ({ transactions: [] }))).transactions
+              (
+                await state.sdk.api
+                  .getPendingAccountTransactionsByPubkey(publicKey)
+                  .catch(() => ({ transactions: [] }))
+              ).transactions
                 .filter(({ tx: { type } }) => type === 'NameClaimTx')
                 .map(({ tx, ...otherTx }) => ({
                   ...otherTx,
@@ -62,7 +75,13 @@ export default {
                   pending: true,
                   owner: tx.accountId,
                 })))(),
-            (async () => uniqBy(await (await fetch(`${middlewareUrl}/middleware/names/reverse/${publicKey}`)).json(), 'name'))(),
+            (async () =>
+              uniqBy(
+                await (
+                  await fetch(`${middlewareUrl}/middleware/names/reverse/${publicKey}`)
+                ).json(),
+                'name',
+              ))(),
             (async () => {
               try {
                 return await state.middleware.getActiveNames({ owner: publicKey });
@@ -76,7 +95,11 @@ export default {
           names = uniqBy(names, 'name');
           if (!process.env.RUNNING_IN_TESTS) {
             if (names.length) {
-              commit(types.SET_ACCOUNT_AENS, { account: index, aename: names[0].name, pending: !!names[0].pending });
+              commit(types.SET_ACCOUNT_AENS, {
+                account: index,
+                aename: names[0].name,
+                pending: !!names[0].pending,
+              });
             } else {
               commit(types.SET_ACCOUNT_AENS, { account: index, aename: null, pending: false });
             }
@@ -84,11 +107,11 @@ export default {
           return names;
         }
         return [];
-      })
+      }),
     );
     await dispatch(
       'setSubAccounts',
-      state.subaccounts.filter(s => s.publicKey)
+      state.subaccounts.filter(s => s.publicKey),
     );
     commit(types.SET_NAMES, { names: Array.prototype.concat.apply([], res) });
   },
@@ -116,13 +139,15 @@ export default {
       await postMessage({
         type: 'getKeypair',
         payload: { activeAccount: idx, account: { publicKey: account.publicKey } },
-      })
+      }),
     );
     return { publicKey, secretKey };
   },
 
   async generateWallet(context, { seed }) {
-    return (await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })).address;
+    return (
+      await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })
+    ).address;
   },
 
   async setLogin({ commit, dispatch }, { keypair }) {
@@ -146,7 +171,9 @@ export default {
     const txs = [...transactions.pending, tx].map(el => {
       const { time, domain } = el;
       const amount = parseFloat(el.amount).toFixed(3);
-      const amountCurrency = parseFloat(current.currencyRate ? amount * current.currencyRate : amount).toFixed(3);
+      const amountCurrency = parseFloat(
+        current.currencyRate ? amount * current.currencyRate : amount,
+      ).toFixed(3);
       return { ...el, amount, time, amountCurrency, domain };
     });
     commit('SET_PENDING_TXS', txs);
@@ -178,7 +205,7 @@ export default {
   async getCurrencies({ state: { nextCurrenciesFetch }, commit, dispatch }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
       const res = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau'
+        'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
       );
       const { aeternity } = await res.json();
       commit('SET_CURRENCIES', aeternity);
@@ -209,7 +236,7 @@ export default {
         } catch (e) {
           return null;
         }
-      })
+      }),
     );
     addresses = [...addresses, ...chainNamesAddresses];
 

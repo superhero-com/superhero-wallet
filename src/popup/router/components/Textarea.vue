@@ -1,5 +1,12 @@
 <template>
-  <textarea class="textarea" :placeholder="placeholder ? placeholder : ''" :class="getClasses" :value="value" @input="$emit('input', $event.target.value)" data-cy="textarea" />
+  <textarea
+    class="textarea"
+    :placeholder="placeholder ? placeholder : ''"
+    :class="getClasses"
+    :value="value"
+    @input="$emit('input', $event.target.value)"
+    data-cy="textarea"
+  />
 </template>
 
 <script>

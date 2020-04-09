@@ -62,9 +62,18 @@ export default class Notification {
         if (tx !== 'error' && tx) {
           await this.client.poll(tx);
           const url = `${this.network.explorerUrl}/transactions/${tx}`;
-          await sendNoti({ title: 'Transaction ready', message: `You can explore your transaction by clicking button below`, contextMessage: url, error: false });
+          await sendNoti({
+            title: 'Transaction ready',
+            message: `You can explore your transaction by clicking button below`,
+            contextMessage: url,
+            error: false,
+          });
         } else {
-          await sendNoti({ title: 'Transaction error', message: 'Transaction cannot be processed ', error: true });
+          await sendNoti({
+            title: 'Transaction error',
+            message: 'Transaction cannot be processed ',
+            error: true,
+          });
         }
 
         await deleteNotification(tx);

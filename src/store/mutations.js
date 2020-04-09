@@ -122,7 +122,10 @@ export default {
     state.connectedAepps = { ...state.connectedAepps, [host]: [account] };
   },
   [types.UPDATE_CONNECTED_AEPP](state, { host, account }) {
-    state.connectedAepps = { ...state.connectedAepps, [host]: [...state.connectedAepps[host].accounts, account] };
+    state.connectedAepps = {
+      ...state.connectedAepps,
+      [host]: [...state.connectedAepps[host].accounts, account],
+    };
   },
   [types.SET_MNEMONIC](state, payload) {
     state.mnemonic = payload;
