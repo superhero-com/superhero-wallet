@@ -20,14 +20,3 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-.welcome-bg {
-  position: fixed;
-  left: 50%;
-  top: 65%;
-  transform: translateX(-50%);
-  -webkit-transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
-  z-index: 0;
-}
-</style>
