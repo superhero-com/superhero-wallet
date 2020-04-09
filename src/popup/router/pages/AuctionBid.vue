@@ -7,7 +7,14 @@
         <hr />
         <!-- <ae-input v-model="auctionInfo.info.name" style="margin: 10px 0 10px 0; pointer-events: none;" label="Name" placeholder="..." error> -->
         <!-- </ae-input> -->
-        <ae-input style="margin: 10px 0 10px 0;color:#000" label="Component" placeholder="0.0" v-model="amount" aemount error>
+        <ae-input
+          style="margin: 10px 0 10px 0;color:#000"
+          label="Component"
+          placeholder="0.0"
+          v-model="amount"
+          aemount
+          error
+        >
           <ae-text slot="header" fill="black">{{ $t('pages.appVUE.aeid') }}</ae-text>
           <ae-toolbar v-if="err.amount" slot="footer">
             {{ errtext.amount }}
@@ -16,13 +23,17 @@
             {{ $t('pages.auctionBid.requiredField') }}
           </ae-toolbar>
         </ae-input>
-        <Button @click="nextStepBiddingHandler" class="danger">{{ $t('pages.auctionBid.next') }}</Button>
+        <Button @click="nextStepBiddingHandler" class="danger">{{
+          $t('pages.auctionBid.next')
+        }}</Button>
 
         <div style="display:inline-block; margin:20px 0; width:100%;">
           <ae-text class="lefttext" align="left">
             {{ $t('pages.auctionBid.current-highest-bid') }}
           </ae-text>
-          <ae-text class="righttext" align="right"> {{ auctionInfo.info.winning_bid }} {{ $t('pages.appVUE.aeid') }} </ae-text>
+          <ae-text class="righttext" align="right">
+            {{ auctionInfo.info.winning_bid }} {{ $t('pages.appVUE.aeid') }}
+          </ae-text>
         </div>
         <div>
           <ae-text class="lefttext" align="left">
@@ -78,7 +89,7 @@ export default {
     this.$watch(
       () => this.auctionInfo.info.name,
       () => this.updateAuctionEntry(),
-      { immediate: true }
+      { immediate: true },
     );
     this.loading = false;
   },
@@ -87,14 +98,18 @@ export default {
       const res = await this.$store.dispatch('names/fetchAuctionEntry', this.auctionInfo.info.name);
       this.expiration = res.expiration;
       this.bids = res.bids;
-      this.highestBid = res.bids.map(({ nameFee }) => nameFee).reduce((a, b) => (a.isGreaterThan(b) ? a : b));
+      this.highestBid = res.bids
+        .map(({ nameFee }) => nameFee)
+        .reduce((a, b) => (a.isGreaterThan(b) ? a : b));
     },
     async nextStepBiddingHandler() {
       if (this.amount === '') {
         this.errtext.amount = 'Please add some amount';
         this.err.amount = true;
       } else if (this.amount <= this.highestBid.multipliedBy(1.05)) {
-        this.errtext.amount = `This field must be more than ${this.highestBid.multipliedBy(1.05).toString()}AE`;
+        this.errtext.amount = `This field must be more than ${this.highestBid
+          .multipliedBy(1.05)
+          .toString()}AE`;
         this.err.amount = true;
       } else {
         const { name } = this.auctionInfo.info;

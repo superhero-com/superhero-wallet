@@ -1,5 +1,11 @@
 <template>
-  <ae-input :label="$t('pages.send.amount')" placeholder="0.0" aemount v-model="amount" class="sendAmount">
+  <ae-input
+    :label="$t('pages.send.amount')"
+    placeholder="0.0"
+    aemount
+    v-model="amount"
+    class="sendAmount"
+  >
     <ae-text slot="header" fill="black"> </ae-text>
     <ae-toolbar slot="footer" class="flex-justify-between" v-if="txFee">
       <span>

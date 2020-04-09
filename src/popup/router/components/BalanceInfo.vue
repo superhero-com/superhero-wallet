@@ -16,7 +16,10 @@
           </ae-button>
           <ul class="sub-dropdown">
             <li class="single-currency" v-for="(rate, currency) in currencies" :key="currency">
-              <ae-button @click="switchCurrency(currency)" :class="current.currency === currency ? 'current' : ''">
+              <ae-button
+                @click="switchCurrency(currency)"
+                :class="current.currency === currency ? 'current' : ''"
+              >
                 {{ currency.toUpperCase() }}
               </ae-button>
             </li>
@@ -36,7 +39,13 @@ export default {
     ExpandedAngleArrow,
   },
   data: () => ({ dropdown: false }),
-  computed: mapGetters(['tokenBalance', 'balanceCurrency', 'current', 'currentCurrency', 'currencies']),
+  computed: mapGetters([
+    'tokenBalance',
+    'balanceCurrency',
+    'current',
+    'currentCurrency',
+    'currencies',
+  ]),
   methods: {
     async switchCurrency(currency) {
       this.$store.commit('SET_CURRENCY', { currency, currencyRate: this.currencies[currency] });

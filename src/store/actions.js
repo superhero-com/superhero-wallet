@@ -2,7 +2,13 @@ import { uniqBy, flatten, uniq } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import * as types from './mutation-types';
 import * as popupMessages from '../popup/utils/popup-messages';
-import { convertToAE, stringifyForStorage, parseFromStorage, aettosToAe, getAddressByNameEntry } from '../popup/utils/helper';
+import {
+  convertToAE,
+  stringifyForStorage,
+  parseFromStorage,
+  aettosToAe,
+  getAddressByNameEntry,
+} from '../popup/utils/helper';
 import { BACKEND_URL, DEFAULT_NETWORK } from '../popup/utils/constants';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
 
@@ -42,7 +48,14 @@ export default {
             });
             break;
           case 'success_transfer':
-            commit(types.SHOW_POPUP, { show: true, secondBtn: true, secondBtnClick: 'showTransaction', ...popupMessages.SUCCESS_TRANSFER, msg: payload.msg, data: payload.data });
+            commit(types.SHOW_POPUP, {
+              show: true,
+              secondBtn: true,
+              secondBtnClick: 'showTransaction',
+              ...popupMessages.SUCCESS_TRANSFER,
+              msg: payload.msg,
+              data: payload.data,
+            });
             break;
           case 'success_deploy':
             commit(types.SHOW_POPUP, {
@@ -69,7 +82,11 @@ export default {
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.TRANSACTION_FAILED });
             break;
           case 'tx_error':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TRANSACTION_FAILED, msg: payload.msg });
+            commit(types.SHOW_POPUP, {
+              show: true,
+              ...popupMessages.TRANSACTION_FAILED,
+              msg: payload.msg,
+            });
             break;
           case 'integer_required':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.INTEGER_REQUIRED });
@@ -108,7 +125,12 @@ export default {
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.AIRGAP_CREATED });
             break;
           case 'confirm_privacy_clear':
-            commit(types.SHOW_POPUP, { show: true, secondBtn: true, secondBtnClick: 'clearPrivacyData', ...popupMessages.CONFIRM_PRIVACY_CLEAR });
+            commit(types.SHOW_POPUP, {
+              show: true,
+              secondBtn: true,
+              secondBtnClick: 'clearPrivacyData',
+              ...popupMessages.CONFIRM_PRIVACY_CLEAR,
+            });
             break;
           case 'ledger_support':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.LEDGER_SUPPORT });
@@ -120,7 +142,12 @@ export default {
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.REVEAL_SEED_IMPOSSIBLE });
             break;
           case 'error_qrcode':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.ERROR_QRCODE, msg: payload.msg, data: payload.data });
+            commit(types.SHOW_POPUP, {
+              show: true,
+              ...popupMessages.ERROR_QRCODE,
+              msg: payload.msg,
+              data: payload.data,
+            });
             break;
           case 'tip_url_verified':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.TIP_URL_VERIFIED });
@@ -142,7 +169,10 @@ export default {
             });
             break;
           case 'cannot_remove':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.REMOVE_USER_NETWORK_ACTIVE_ERROR });
+            commit(types.SHOW_POPUP, {
+              show: true,
+              ...popupMessages.REMOVE_USER_NETWORK_ACTIVE_ERROR,
+            });
             break;
           case 'name_exists':
             commit(types.SHOW_POPUP, { show: true, ...popupMessages.USER_NETWORK_EXISTS_ERROR });
@@ -154,10 +184,18 @@ export default {
       case 'tipping':
         switch (payload.type) {
           case 'claim_error':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.CLAIM_ERROR, msg: payload.msg });
+            commit(types.SHOW_POPUP, {
+              show: true,
+              ...popupMessages.CLAIM_ERROR,
+              msg: payload.msg,
+            });
             break;
           case 'claim_success':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.CLAIM_SUCCESS, msg: payload.msg });
+            commit(types.SHOW_POPUP, {
+              show: true,
+              ...popupMessages.CLAIM_SUCCESS,
+              msg: payload.msg,
+            });
             break;
           default:
             break;
@@ -172,10 +210,13 @@ export default {
     const { middlewareUrl } = state.network[state.current.network];
     const { publicKey } = state.account;
     try {
-      const tx = await fetch(`${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`, {
-        method: 'GET',
-        mode: 'cors',
-      });
+      const tx = await fetch(
+        `${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`,
+        {
+          method: 'GET',
+          mode: 'cors',
+        },
+      );
       return tx.json();
     } catch (e) {
       return [];
@@ -198,7 +239,11 @@ export default {
         if (publicKey) {
           let names = await Promise.all([
             (async () =>
-              (await state.sdk.api.getPendingAccountTransactionsByPubkey(publicKey).catch(() => ({ transactions: [] }))).transactions
+              (
+                await state.sdk.api
+                  .getPendingAccountTransactionsByPubkey(publicKey)
+                  .catch(() => ({ transactions: [] }))
+              ).transactions
                 .filter(({ tx: { type } }) => type === 'NameClaimTx')
                 .map(({ tx, ...otherTx }) => ({
                   ...otherTx,
@@ -206,7 +251,13 @@ export default {
                   pending: true,
                   owner: tx.accountId,
                 })))(),
-            (async () => uniqBy(await (await fetch(`${middlewareUrl}/middleware/names/reverse/${publicKey}`)).json(), 'name'))(),
+            (async () =>
+              uniqBy(
+                await (
+                  await fetch(`${middlewareUrl}/middleware/names/reverse/${publicKey}`)
+                ).json(),
+                'name',
+              ))(),
             (async () => {
               try {
                 return await state.middleware.getActiveNames({ owner: publicKey });
@@ -220,7 +271,11 @@ export default {
           names = uniqBy(names, 'name');
           if (!process.env.RUNNING_IN_TESTS) {
             if (names.length) {
-              commit(types.SET_ACCOUNT_AENS, { account: index, aename: names[0].name, pending: !!names[0].pending });
+              commit(types.SET_ACCOUNT_AENS, {
+                account: index,
+                aename: names[0].name,
+                pending: !!names[0].pending,
+              });
             } else {
               commit(types.SET_ACCOUNT_AENS, { account: index, aename: null, pending: false });
             }
@@ -228,11 +283,11 @@ export default {
           return names;
         }
         return [];
-      })
+      }),
     );
     await dispatch(
       'setSubAccounts',
-      state.subaccounts.filter(s => s.publicKey)
+      state.subaccounts.filter(s => s.publicKey),
     );
     commit(types.SET_NAMES, { names: Array.prototype.concat.apply([], res) });
   },
@@ -260,13 +315,15 @@ export default {
       await postMessage({
         type: 'getKeypair',
         payload: { activeAccount: idx, account: { publicKey: account.publicKey } },
-      })
+      }),
     );
     return { publicKey, secretKey };
   },
 
   async generateWallet(context, { seed }) {
-    return (await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })).address;
+    return (
+      await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })
+    ).address;
   },
 
   async setLogin({ commit, dispatch }, { keypair }) {
@@ -290,7 +347,9 @@ export default {
     const txs = [...transactions.pending, tx].map(el => {
       const { time, domain } = el;
       const amount = parseFloat(el.amount).toFixed(3);
-      const amountCurrency = parseFloat(current.currencyRate ? amount * current.currencyRate : amount).toFixed(3);
+      const amountCurrency = parseFloat(
+        current.currencyRate ? amount * current.currencyRate : amount,
+      ).toFixed(3);
       return { ...el, amount, time, amountCurrency, domain };
     });
     commit('SET_PENDING_TXS', txs);
@@ -322,7 +381,7 @@ export default {
   async getCurrencies({ state: { nextCurrenciesFetch }, commit, dispatch }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
       const res = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau'
+        'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
       );
       const { aeternity } = await res.json();
       commit('SET_CURRENCIES', aeternity);
@@ -353,7 +412,7 @@ export default {
         } catch (e) {
           return null;
         }
-      })
+      }),
     );
     addresses = [...addresses, ...chainNamesAddresses];
 

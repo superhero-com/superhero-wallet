@@ -50,7 +50,7 @@ window.addEventListener(
       sendToBackground(method, data);
     }
   },
-  false
+  false,
 );
 
 const getAddresses = () => {
@@ -88,7 +88,7 @@ window.addEventListener('load', () => {
         sendDomData();
       }
     },
-    false
+    false,
   );
 });
 

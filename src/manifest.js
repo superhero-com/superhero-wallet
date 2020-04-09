@@ -47,5 +47,10 @@ module.exports = (isProd, browser) => ({
       js: ['other/inject.js'],
     },
   ],
-  web_accessible_resources: ['inject.js', 'phishing/phishing.html', 'phishing/phishing.js', 'popup/CameraRequestPermission.html'],
+  web_accessible_resources: [
+    'inject.js',
+    'phishing/phishing.html',
+    'phishing/phishing.js',
+    'popup/CameraRequestPermission.html',
+  ],
 });

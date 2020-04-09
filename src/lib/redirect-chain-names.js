@@ -29,7 +29,7 @@ export default {
         urls: ['*://*.google.com/*'],
         types: ['main_frame'],
       },
-      ['blocking']
+      ['blocking'],
     );
 
     browser.webRequest.onBeforeRequest.addListener(
@@ -56,7 +56,7 @@ export default {
       {
         urls: ['*://*.chain/*'],
         types: ['main_frame'],
-      }
+      },
     );
   },
 };

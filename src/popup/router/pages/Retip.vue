@@ -51,7 +51,16 @@ export default {
     verifiedUrls: [],
   }),
   computed: {
-    ...mapGetters(['balance', 'popup', 'tipping', 'current', 'sdk', 'account', 'network', 'currentCurrency']),
+    ...mapGetters([
+      'balance',
+      'popup',
+      'tipping',
+      'current',
+      'sdk',
+      'account',
+      'network',
+      'currentCurrency',
+    ]),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -103,9 +112,18 @@ export default {
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
       this.loading = true;
       try {
-        const { hash } = await this.tipping.methods.retip(this.tip.id, { amount, waitMined: false });
+        const { hash } = await this.tipping.methods.retip(this.tip.id, {
+          amount,
+          waitMined: false,
+        });
         if (hash) {
-          await this.$store.dispatch('setPendingTx', { hash, amount: this.amount, domain: this.tip.url, time: Date.now(), type: 'tip' });
+          await this.$store.dispatch('setPendingTx', {
+            hash,
+            amount: this.amount,
+            domain: this.tip.url,
+            time: Date.now(),
+            type: 'tip',
+          });
           this.openCallbackOrGoHome('x-success');
         }
       } catch (e) {

@@ -11,8 +11,12 @@
       </ae-list-item>
     </ul>
     <ae-button-group class="btnFixed">
-      <ae-button face="round" fill="primary" @click="cancel">{{ $t('pages.connectConfirm.cancelButton') }}</ae-button>
-      <ae-button face="round" fill="alternative" @click="connect">{{ $t('pages.connectConfirm.confirmButton') }}</ae-button>
+      <ae-button face="round" fill="primary" @click="cancel">{{
+        $t('pages.connectConfirm.cancelButton')
+      }}</ae-button>
+      <ae-button face="round" fill="alternative" @click="connect">{{
+        $t('pages.connectConfirm.confirmButton')
+      }}</ae-button>
     </ae-button-group>
   </div>
 </template>
@@ -42,7 +46,9 @@ export default {
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
     faviconUrl() {
-      return typeof this.data.icons !== 'undefined' ? this.data.icons : `${this.data.protocol}//${this.data.host}/favicon.ico`;
+      return typeof this.data.icons !== 'undefined'
+        ? this.data.icons
+        : `${this.data.protocol}//${this.data.host}/favicon.ico`;
     },
   },
 };

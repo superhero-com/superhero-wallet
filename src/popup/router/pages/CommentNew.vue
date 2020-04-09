@@ -49,7 +49,9 @@ export default {
     async sendComment() {
       this.loading = true;
       try {
-        await Backend.sendTipComment(this.id, this.text, await this.sdk.address(), async data => Buffer.from(await this.sdk.signMessage(data)).toString('hex'));
+        await Backend.sendTipComment(this.id, this.text, await this.sdk.address(), async data =>
+          Buffer.from(await this.sdk.signMessage(data)).toString('hex'),
+        );
         this.openCallbackOrGoHome('x-success');
       } catch (e) {
         this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });

@@ -16,7 +16,13 @@ import {
   resetTippedAmount,
   getContractCallInfo,
 } from '../popup/utils/helper';
-import { DEFAULT_NETWORK, AEX2_METHODS, NO_POPUP_AEPPS, BLACKLIST_AEPPS, MAX_AMOUNT_WITHOUT_CONFIRM } from '../popup/utils/constants';
+import {
+  DEFAULT_NETWORK,
+  AEX2_METHODS,
+  NO_POPUP_AEPPS,
+  BLACKLIST_AEPPS,
+  MAX_AMOUNT_WITHOUT_CONFIRM,
+} from '../popup/utils/constants';
 import { mockLogin } from '../popup/utils';
 import { getState } from '../store/plugins/persistState';
 
@@ -65,12 +71,16 @@ const rpcWallet = {
     return Promise.resolve(true);
   },
   async createWallet() {
-    this.accountKeyPairs = await Promise.all(this.subaccounts.map(async (a, index) => parseFromStorage(await this.controller.getKeypair({ activeAccount: index, account: a }))));
+    this.accountKeyPairs = await Promise.all(
+      this.subaccounts.map(async (a, index) =>
+        parseFromStorage(await this.controller.getKeypair({ activeAccount: index, account: a })),
+      ),
+    );
 
     this.accounts = this.accountKeyPairs.map(a =>
       MemoryAccount({
         keypair: a,
-      })
+      }),
     );
     const context = this;
     try {
@@ -222,7 +232,15 @@ const rpcWallet = {
           info: { icons, name },
         } = aepp;
         const { protocol } = new URL(url);
-        this.popups.setAeppInfo(id, { type, action: { params: action.params, method: action.method }, url, icons, name, protocol, host: extractHostName(url) });
+        this.popups.setAeppInfo(id, {
+          type,
+          action: { params: action.params, method: action.method },
+          url,
+          icons,
+          name,
+          protocol,
+          host: extractHostName(url),
+        });
       } catch (e) {
         console.error(`showPopup: ${e}`);
       }
@@ -230,7 +248,10 @@ const rpcWallet = {
   },
 
   async addConnection(port) {
-    const connection = await BrowserRuntimeConnection({ connectionInfo: { id: port.sender.frameId }, port });
+    const connection = await BrowserRuntimeConnection({
+      connectionInfo: { id: port.sender.frameId },
+      port,
+    });
     this.sdk.addRpcClient(connection);
     this.sdk.shareWalletInfo(port.postMessage.bind(port));
     setTimeout(() => this.sdk.shareWalletInfo(port.postMessage.bind(port)), 3000);
@@ -269,7 +290,9 @@ const rpcWallet = {
       publicKey: payload.address,
     };
     const newAccount = MemoryAccount({
-      keypair: parseFromStorage(await this.controller.getKeypair({ activeAccount: payload.idx, account })),
+      keypair: parseFromStorage(
+        await this.controller.getKeypair({ activeAccount: payload.idx, account }),
+      ),
     });
     this.sdk.addAccount(newAccount);
     this.activeAccount = payload.address;
