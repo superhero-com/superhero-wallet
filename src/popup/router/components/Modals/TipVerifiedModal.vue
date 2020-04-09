@@ -1,5 +1,5 @@
 <template>
-  <Modal @click="resolve">
+  <Modal>
     <div slot="body">
       <span style="display:block;margin-bottom:1rem;">
         <CheckIcon />
