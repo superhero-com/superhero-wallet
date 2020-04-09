@@ -55,6 +55,7 @@ export default new Vuex.Store({
     migrations: {},
     backedUpSeed: null,
     tourRunning: false,
+    tourStartBar: true,
   },
   getters,
   mutations: {

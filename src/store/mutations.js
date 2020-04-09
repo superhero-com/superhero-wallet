@@ -147,4 +147,7 @@ export default {
   [types.SET_TOUR_RUNNING](state, payload) {
     state.tourRunning = payload;
   },
+  [types.SET_TOUR_STATUS_BAR](state, payload) {
+    state.tourStartBar = payload;
+  },
 };

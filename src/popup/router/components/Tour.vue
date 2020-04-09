@@ -55,16 +55,31 @@
         </div>
       </div>
     </div>
+    <div
+      class="tour-start"
+      v-if="!nodeStatus && home && isLoggedIn && !tourRunning && tourStartBar"
+      @click="toggleTour"
+    >
+      <div class="container">
+        <StartOnboarding class="start-onboarding" />
+        <span>{{ $t('onboarding.tutorial') }}</span>
+        <div class="close"><Close /></div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import Hero from '../../../icons/hero.svg?vue-component';
+import StartOnboarding from '../../../icons/start-onboarding.svg?vue-component';
+import Close from '../../../icons/close.svg?vue-component';
 
 export default {
   components: {
     Hero,
+    StartOnboarding,
+    Close,
   },
   data: () => ({
     started: false,
@@ -133,11 +148,14 @@ export default {
     ],
   }),
   computed: {
-    ...mapGetters(['tourRunning']),
+    ...mapGetters(['tourRunning', 'tourStartBar', 'isLoggedIn', 'nodeStatus']),
     tourSteps() {
       return this.steps
         .filter(({ hide }) => !hide)
         .map(step => ({ ...step, params: { ...step.params, enableScrolling: false } }));
+    },
+    home() {
+      return this.$route.path === '/account';
     },
   },
   watch: {
@@ -146,6 +164,10 @@ export default {
     },
   },
   methods: {
+    toggleTour(event) {
+      if (event.target.closest('.close')) this.$store.commit('SET_TOUR_STATUS_BAR', false);
+      else this.$store.commit('SET_TOUR_RUNNING', true);
+    },
     showActions() {
       this.disableScroll();
     },
@@ -202,56 +224,51 @@ export default {
 
 <style lang="scss">
 @import '../../../common/variables';
+.container {
+  max-width: 357px;
+  margin: 0 auto;
+}
 .v-step {
-  background-color: #12121b !important;
+  background-color: $tour-bg-color !important;
   border-radius: 5px !important;
   border: 1px solid $secondary-color;
   padding: 20px 15px 25px 15px !important;
-
   min-width: 345px;
-
   .step-header {
-    background-color: #12121b !important;
+    background-color: $tour-bg-color !important;
     margin-bottom: 18px;
     font-weight: bold;
     font-size: 16px;
     line-height: 21px;
-
     .step-info {
       color: $text-color;
       margin-left: 8px;
     }
   }
-
   .step-content {
     text-align: left;
     font-size: 14px;
     color: $text-color;
     line-height: 20px;
   }
-
   .v-step__arrow {
-    border-color: #12121b !important;
+    border-color: $tour-bg-color !important;
     border: none !important;
     width: 35px !important;
     height: 12px !important;
     z-index: -3;
     background-repeat: no-repeat;
   }
-
   &[x-placement^='top'] {
     margin-bottom: 0.8rem !important;
-
     .v-step__arrow {
       background-image: url('../../../icons/arrow-up.png');
       transform: rotate(180deg);
       bottom: -0.75rem !important;
     }
   }
-
   &[x-placement^='bottom'] {
     margin-top: 0.8rem !important;
-
     .v-step__arrow {
       background-image: url('../../../icons/arrow-up.png');
       top: -0.75rem !important;
@@ -261,11 +278,9 @@ export default {
     margin-top: 2.5rem !important;
   }
 }
-
 .v-tour__target--highlighted {
   box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
   pointer-events: none !important;
-
   &:after {
     content: '';
     border: 1.5px dashed #fff !important;
@@ -278,23 +293,20 @@ export default {
     bottom: 0;
   }
 }
-
 .tour-actions {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 99999;
-  background: #12121b;
+  background: $tour-bg-color;
   padding: 19px;
   padding-top: 0;
   padding-bottom: 25px;
   pointer-events: all;
-
   &.not-started {
     box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
   }
-
   &:before {
     position: absolute;
     top: -90px;
@@ -305,18 +317,11 @@ export default {
     content: '';
     -webkit-clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
     clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
-    background: #12121b;
+    background: $tour-bg-color;
   }
-
-  .container {
-    max-width: 357px;
-    margin: 0 auto;
-  }
-
   .tour-welcome-message {
     display: flex;
     align-items: flex-end;
-
     svg {
       width: 165px;
       margin-left: -51px;
@@ -328,7 +333,6 @@ export default {
       margin-bottom: 10px;
       line-height: 21px;
     }
-
     p {
       font-size: 14px;
       font-weight: normal;
@@ -337,14 +341,46 @@ export default {
       line-height: 20px;
     }
   }
-
   .tour-control-buttons {
     margin-top: 25px;
     display: flex;
     justify-content: space-between;
   }
 }
-
+.tour-start {
+  position: fixed;
+  background: $tour-start-bg-color;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  cursor: pointer;
+  &:hover {
+    background: #2c2c34;
+  }
+  .container {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 20px;
+  }
+  span {
+    color: $accent-color;
+    margin-left: 6px;
+    font-size: 15px;
+    font-weight: bold;
+  }
+  .close {
+    margin-left: auto;
+    height: 100%;
+    align-items: center;
+    width: 30px;
+    text-align: center;
+    svg {
+      margin-top: 11px;
+    }
+  }
+}
 @media screen and (min-width: 780px) {
   .tour-actions:after {
     top: -30px;

@@ -1,5 +1,5 @@
 <template>
-  <div class="recent-transactions">
+  <div class="recent-transactions" v-bind:class="{ 'tour-bar': tourStartBar }">
     <div class="flex flex flex-align-center flex-justify-between mb-10 mt-20">
       <span class="title">{{ $t('pages.recentTransactions.recentActivity') }}</span>
       <span data-cy="view-all-transactions" @click="allTransactions" class="viewAll">{{
@@ -52,7 +52,7 @@ export default {
     this.$once('hook:beforeDestroy', () => clearInterval(this.polling));
   },
   computed: {
-    ...mapGetters(['transactions', 'account', 'sdk', 'current', 'currentCurrency']),
+    ...mapGetters(['transactions', 'account', 'sdk', 'current', 'currentCurrency', 'tourStartBar']),
   },
   allTransactions() {
     this.$router.push('/transactions');
@@ -86,6 +86,9 @@ export default {
   .viewAll {
     color: $accent-color !important;
     cursor: pointer;
+  }
+  &.tour-bar {
+    padding-bottom: 40px;
   }
 }
 .recent-transactions h3,
