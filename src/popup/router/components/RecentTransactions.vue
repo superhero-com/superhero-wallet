@@ -1,5 +1,5 @@
 <template>
-  <div class="recent-transactions">
+  <div class="recent-transactions" :class="{ 'tour-bar': tourStartBar }">
     <div class="flex flex flex-align-center flex-justify-between mb-10 mt-20">
       <span class="title">{{ $t('pages.recentTransactions.recentActivity') }}</span>
       <span data-cy="view-all-transactions" @click="allTransactions" class="viewAll">{{
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
 import PendingTxs from './PendingTxs';
 
@@ -53,6 +53,7 @@ export default {
   },
   computed: {
     ...mapGetters(['transactions', 'account', 'sdk', 'current', 'currentCurrency']),
+    ...mapState(['tourStartBar']),
   },
   allTransactions() {
     this.$router.push('/transactions');
@@ -86,6 +87,9 @@ export default {
   .viewAll {
     color: $accent-color !important;
     cursor: pointer;
+  }
+  &.tour-bar {
+    padding-bottom: 40px;
   }
 }
 .recent-transactions h3,
