@@ -56,7 +56,6 @@
         </Button>
       </template>
 
-      <popup :popupSecondBtnClick="popup.secondBtnClick" />
       <Loader size="big" :loading="loading" type="transparent" content="" />
     </div>
   </div>
@@ -126,7 +125,7 @@ export default {
       this.amountError = !+this.amount || this.amount <= 0;
     },
     urlVerified(val) {
-      if (val) this.$store.dispatch('popupAlert', { name: 'account', type: 'tip_url_verified' });
+      if (val) this.$store.dispatch('modals/open', { name: 'tip-verified' });
     },
     $route: {
       immediate: true,
@@ -210,7 +209,7 @@ export default {
           this.$router.push('/account');
         }
       } catch (e) {
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
       } finally {
         this.loading = false;
       }
