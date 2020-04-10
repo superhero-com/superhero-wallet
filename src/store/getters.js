@@ -114,7 +114,4 @@ export default {
   backedUpSeed({ backedUpSeed }) {
     return backedUpSeed;
   },
-  tourRunning({ tourRunning }) {
-    return tourRunning;
-  },
 };

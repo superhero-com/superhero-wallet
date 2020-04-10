@@ -3,11 +3,6 @@
     <div class="content" :class="{ isLoggedIn }">
       <Arrow v-if="title && !tourRunning" @click="goBack" class="back-arrow" data-cy="back-arrow" />
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
-      <StartOnboarding
-        v-if="!title && isLoggedIn && !tourRunning"
-        class="start-onboarding"
-        @click="$store.commit('SET_TOUR_RUNNING', true)"
-      />
 
       <div class="title">
         <span v-if="title">{{ $t(`pages.titles.${title}`) }}</span>
@@ -34,26 +29,20 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import Arrow from '../../../icons/arrow.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
 import Hamburger from '../../../icons/hamburger.svg?vue-component';
 import Logo from '../../../icons/logo-small.svg?vue-component';
-import StartOnboarding from '../../../icons/start-onboarding.svg?vue-component';
 
 export default {
-  components: { Arrow, Bell, Hamburger, Logo, StartOnboarding },
+  components: { Arrow, Bell, Hamburger, Logo },
   data() {
     return {};
   },
   computed: {
-    ...mapGetters([
-      'isLoggedIn',
-      'aeppPopup',
-      'notifications',
-      'notificationsCounter',
-      'tourRunning',
-    ]),
+    ...mapGetters(['isLoggedIn', 'aeppPopup', 'notifications', 'notificationsCounter']),
+    ...mapState(['tourRunning']),
     title() {
       return this.$route.meta.title;
     },
