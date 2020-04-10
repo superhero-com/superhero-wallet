@@ -40,6 +40,10 @@
     "start": "Start",
     "tutorial": "Tutorial"
   },
+  "badges": {
+    "verified": "Verfied",
+    "untrusted": "Untrusted"
+  },
   "modals": {
     "transaction-failed": {
       "msg": "We cannot process this transaction! Please, try again!"
