@@ -37,7 +37,8 @@
     "skip": "Skip",
     "back": "Back",
     "next": "Next",
-    "start": "Start"
+    "start": "Start",
+    "tutorial": "Tutorial"
   },
   "badges": {
     "verified": "Verfied",
