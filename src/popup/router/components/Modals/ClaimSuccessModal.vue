@@ -1,5 +1,5 @@
 <template>
-  <Modal>
+  <Modal @close="resolve">
     <div slot="body">
       <CheckIcon /> <br />
       <b>{{ $t('pages.claim.url') }}:</b> {{ url }} <br />

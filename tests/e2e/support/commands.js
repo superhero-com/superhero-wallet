@@ -120,7 +120,9 @@ Cypress.Commands.add('shouldRedirect', (url, to) => {
 });
 
 Cypress.Commands.add('openMenu', () => {
-  cy.get('[data-cy=hamburger]').click();
+  cy.get('[data-cy=hamburger]')
+    .click()
+    .wait(1500);
 });
 
 Cypress.Commands.add('closeMenu', (from = 'button') => {
@@ -205,6 +207,17 @@ Cypress.Commands.add('toConfirmTip', (tip = {}) => {
   cy.enterTipDetails({ ...tip })
     .buttonShouldNotBeDisabled('[data-cy=send-tip]')
     .get('[data-cy=send-tip]')
+    .click()
+    .get('.confirmtip-modal--footer')
+    .should('be.visible')
+    .get('[data-cy=cancel-tip]')
+    .click()
+    .wait(1000)
+    .get('[data-cy=send-tip]')
+    .click()
+    .get('.confirmtip-modal--footer')
+    .should('be.visible')
+    .get('[data-cy=to-confirm]')
     .click()
     .get('[data-cy=confirm-tip]')
     .should('be.visible')

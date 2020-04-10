@@ -75,9 +75,6 @@ export default {
     amount() {
       this.amountError = false;
     },
-    urlVerified(val) {
-      if (val) this.$store.dispatch('modals/open', { name: 'tip-verified' });
-    },
   },
   async created() {
     this.loading = true;

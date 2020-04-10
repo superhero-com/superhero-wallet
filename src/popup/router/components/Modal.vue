@@ -2,9 +2,9 @@
   <div class="popup">
     <transition name="modal">
       <div class="modal--mask">
-        <div class="modal--wrapper" @click="$emit('close')">
+        <div class="modal--wrapper">
           <div class="modal--container">
-            <!-- <Close class="modal--close" @click="$emit('close')" /> -->
+            <Close class="modal--close" @click="$emit('close')" />
             <div class="modal--header">
               <slot name="header" />
             </div>
@@ -22,7 +22,12 @@
 </template>
 
 <script>
+import Close from '../../../icons/close.svg?vue-component';
+
 export default {
+  components: {
+    Close,
+  },
   mounted() {
     if (document.body.style.overflow) return;
     document.body.style.overflow = 'hidden';
@@ -32,6 +37,7 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
 @import '../../../common/variables';
 .modal--mask {
@@ -41,50 +47,50 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   display: table;
   transition: opacity 0.3s ease;
-}
-.modal--wrapper {
-  display: table-cell;
-  vertical-align: middle;
-}
-.modal--container {
-  position: relative;
-  width: 90%;
-  margin: 0 auto;
-  padding: 20px;
-  background: #fff;
-  border: 1px solid $tx-border-color;
-  border-radius: 5px;
-  transition: all 0.3s ease;
-}
-.modal--close {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  cursor: pointer;
-}
-.modal--header {
-  color: $white-color;
-  font-size: 16px;
-}
-.modal--body {
-  margin: 20px 0;
-  color: $text-color;
-  font-size: 14px;
-  word-break: break-word;
-  text-align: left;
-}
-.modal--enter {
-  opacity: 0;
-}
-.modal--leave--active {
-  opacity: 0;
-}
-.modal--enter .modal--container,
-.modal--leave--active .modal--container {
-  -webkit-transform: scale(1.1);
-  transform: scale(1.1);
+  .modal--wrapper {
+    display: table-cell;
+    vertical-align: middle;
+  }
+  .modal--container {
+    position: relative;
+    width: 90%;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid $tx-border-color;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+  }
+  .modal--close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
+  }
+  .modal--header {
+    color: $white-color;
+    font-size: 16px;
+  }
+  .modal--body {
+    margin: 20px 0;
+    color: $text-color;
+    font-size: 14px;
+    word-break: break-word;
+    text-align: left;
+  }
+  .modal--enter {
+    opacity: 0;
+  }
+  .modal--leave--active {
+    opacity: 0;
+  }
+  .modal--enter .modal--container,
+  .modal--leave--active .modal--container {
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
+  }
 }
 </style>
