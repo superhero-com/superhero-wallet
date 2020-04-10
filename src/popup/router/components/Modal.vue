@@ -56,10 +56,10 @@ export default {
   }
   .modal--container {
     position: relative;
-    width: 90%;
+    width: 87%;
     margin: 0 auto;
-    padding: 20px;
-    background: #fff;
+    padding: 62px 25px 30px;
+    background: $modal-background;
     border: 1px solid $tx-border-color;
     border-radius: 5px;
     transition: all 0.3s ease;
