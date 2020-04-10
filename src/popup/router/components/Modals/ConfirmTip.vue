@@ -21,6 +21,7 @@
 <script>
 import Modal from '../Modal';
 import Button from '../Button';
+
 export default {
   props: {
     resolve: { type: Function, required: true },
