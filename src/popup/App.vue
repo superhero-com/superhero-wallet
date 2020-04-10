@@ -1,11 +1,16 @@
 <template>
   <ae-main :class="aeppPopup ? 'ae-main-popup ae-main-wave' : waveBg ? 'ae-main-wave' : ''">
-    <Header @toggle-sidebar="showSidebar = !showSidebar" />
+    <Header v-if="!mainLoading" @toggle-sidebar="showSidebar = !showSidebar" />
 
     <router-view :key="$route.fullPath" />
 
     <transition name="slide">
-      <div class="menu-overlay" v-if="showSidebar" @click.self="showSidebar = false" data-cy="menu-overlay">
+      <div
+        class="menu-overlay"
+        v-if="showSidebar"
+        @click.self="showSidebar = false"
+        data-cy="menu-overlay"
+      >
         <SidebarMenu @closeMenu="showSidebar = false" />
       </div>
     </transition>
@@ -13,6 +18,12 @@
     <Loader size="big" :loading="mainLoading" />
     <NodeConnectionStatus />
     <Tour />
+    <Component
+      :is="component"
+      v-for="{ component, key, props } in modals"
+      :key="key"
+      v-bind="props"
+    />
   </ae-main>
 </template>
 
@@ -39,9 +50,24 @@ export default {
     showSidebar: false,
   }),
   computed: {
-    ...mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup', 'notifications', 'notificationsCounter', 'backedUpSeed']),
+    ...mapGetters([
+      'account',
+      'current',
+      'mainLoading',
+      'sdk',
+      'isLoggedIn',
+      'aeppPopup',
+      'notifications',
+      'notificationsCounter',
+      'backedUpSeed',
+    ]),
     waveBg() {
-      return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(this.$route.path);
+      return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(
+        this.$route.path,
+      );
+    },
+    modals() {
+      return this.$store.getters['modals/opened'];
     },
   },
   async created() {
@@ -49,7 +75,7 @@ export default {
       ({ current: { language } }) => [language],
       ([language]) => {
         fetchAndSetLocale(language);
-      }
+      },
     );
 
     this.checkSdkReady();
@@ -75,17 +101,23 @@ export default {
     if (!this.backedUpSeed) {
       this.$store.commit('ADD_NOTIFICATION', {
         title: '',
-        content: `${this.$t('pages.account.youNeedTo')} ${this.$t('pages.account.backup')} ${this.$t('pages.account.yourSeedPhrase')}`,
+        content: `${this.$t('pages.account.youNeedTo')} ${this.$t(
+          'pages.account.backup',
+        )} ${this.$t('pages.account.yourSeedPhrase')}`,
         route: '/securitySettings',
       });
     }
-    if (this.notificationsCounter !== 0) this.$store.commit('SET_NOTIFICATIONS_COUNTER', this.notifications.length);
+    if (this.notificationsCounter !== 0)
+      this.$store.commit('SET_NOTIFICATIONS_COUNTER', this.notifications.length);
   },
   methods: {
     async checkSdkReady() {
       await this.$watchUntilTruly(() => this.sdk);
       if (!window.RUNNING_IN_POPUP && process.env.IS_EXTENSION) {
-        postMessage({ type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
+        postMessage({
+          type: AEX2_METHODS.INIT_RPC_WALLET,
+          payload: { address: this.account.publicKey, network: this.current.network },
+        });
       }
       this.pollData();
     },
@@ -106,7 +138,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 @import '../common/base';
 @import '../common/extension';
 </style>
@@ -116,7 +148,6 @@ export default {
 
 .ae-main {
   position: relative;
-  max-width: 357px;
   min-height: 600px;
   margin: 0 auto;
 
@@ -125,7 +156,7 @@ export default {
     padding-top: 0;
   }
   &.ae-main-wave {
-    background-position: 100% 100% !important;
+    background-position: center bottom !important;
     background-repeat: no-repeat !important;
     background-image: url('../icons/background-big-wave.png') !important;
   }
@@ -161,6 +192,11 @@ export default {
   }
   .slide-leave-to .sidebar-menu {
     opacity: 0;
+  }
+}
+@media screen and (max-width: 380px) {
+  .ae-main.ae-main-wave {
+    background-position: 100% 100% !important;
   }
 }
 </style>

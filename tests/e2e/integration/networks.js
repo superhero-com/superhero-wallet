@@ -32,7 +32,11 @@ describe('Test cases for networks page', () => {
   it("Can't add network with default network name", () => {
     cy.get('[data-cy=to-add]')
       .click()
-      .enterNetworkDetails(network, defaultNetworks[network].url, defaultNetworks[network].middlewareUrl)
+      .enterNetworkDetails(
+        network,
+        defaultNetworks[network].url,
+        defaultNetworks[network].middlewareUrl,
+      )
       .get('[data-cy=connect]')
       .click()
       .buttonShouldBeDisabled('[data-cy=connect]')
@@ -52,11 +56,19 @@ describe('Test cases for networks page', () => {
   });
 
   it('Can add new network', () => {
-    cy.addNetwork('Mainnet', networks[DEFAULT_NETWORK].url, networks[DEFAULT_NETWORK].middlewareUrl);
+    cy.addNetwork(
+      'Mainnet',
+      networks[DEFAULT_NETWORK].url,
+      networks[DEFAULT_NETWORK].middlewareUrl,
+    );
   });
 
   it('Can delete network', () => {
-    cy.selectNetwork('Mainnet', networks[DEFAULT_NETWORK].url, networks[DEFAULT_NETWORK].middlewareUrl)
+    cy.selectNetwork(
+      'Mainnet',
+      networks[DEFAULT_NETWORK].url,
+      networks[DEFAULT_NETWORK].middlewareUrl,
+    )
       .get('[data-cy=more]')
       .click()
       .get('[data-cy=delete]')
@@ -72,7 +84,11 @@ describe('Test cases for networks page', () => {
   });
 
   it('Can select network', () => {
-    cy.selectNetwork('Mainnet', networks[DEFAULT_NETWORK].url, networks[DEFAULT_NETWORK].middlewareUrl)
+    cy.selectNetwork(
+      'Mainnet',
+      networks[DEFAULT_NETWORK].url,
+      networks[DEFAULT_NETWORK].middlewareUrl,
+    )
       .get('[data-cy=back-arrow]')
       .click()
       .get('.transactionList')
@@ -80,17 +96,29 @@ describe('Test cases for networks page', () => {
   });
 
   it("Can't add network with same name", () => {
-    cy.selectNetwork('Mainnet', networks[DEFAULT_NETWORK].url, networks[DEFAULT_NETWORK].middlewareUrl)
+    cy.selectNetwork(
+      'Mainnet',
+      networks[DEFAULT_NETWORK].url,
+      networks[DEFAULT_NETWORK].middlewareUrl,
+    )
       .get('[data-cy=to-add]')
       .click()
-      .enterNetworkDetails('Mainnet', networks[DEFAULT_NETWORK].url, networks[DEFAULT_NETWORK].middlewareUrl)
+      .enterNetworkDetails(
+        'Mainnet',
+        networks[DEFAULT_NETWORK].url,
+        networks[DEFAULT_NETWORK].middlewareUrl,
+      )
       .get('[data-cy=connect]')
       .click()
       .buttonShouldBeDisabled('[data-cy=connect]');
   });
 
   it('Can edit network', () => {
-    cy.selectNetwork('Mainnet', networks[DEFAULT_NETWORK].url, networks[DEFAULT_NETWORK].middlewareUrl)
+    cy.selectNetwork(
+      'Mainnet',
+      networks[DEFAULT_NETWORK].url,
+      networks[DEFAULT_NETWORK].middlewareUrl,
+    )
       .get('[data-cy=more]')
       .click()
       .get('[data-cy=edit]')

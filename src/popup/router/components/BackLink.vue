@@ -1,7 +1,9 @@
 <template>
   <div>
     <div class="actions flex flex-align-center">
-      <button class="back-button" @click="redirect"><ae-icon name="left-more" class="back-icon" /></button>
+      <button class="back-button" @click="redirect">
+        <ae-icon name="left-more" class="back-icon" />
+      </button>
       <h3><slot></slot></h3>
     </div>
   </div>

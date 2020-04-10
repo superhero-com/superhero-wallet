@@ -1,14 +1,16 @@
 <template>
   <div class="popup">
-    <p class="primary-title text-left mb-8 f-16">
-      {{ $t('pages.tipPage.heading') }}
-      <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
-      {{ $t('pages.tipPage.to') }}
-    </p>
+    <div class="primary-title title-holder">
+      <div>
+        {{ $t('pages.tipPage.heading') }}
+        <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+        {{ $t('pages.tipPage.to') }}
+      </div>
+      <UrlBadge :type="urlVerified ? 'verified' : 'untrusted'" />
+    </div>
 
     <div class="url-bar">
-      <a class="link-sm text-left">{{ tip.url }}</a>
-      <CheckIcon v-if="urlVerified" />
+      <a class="link-sm text-left" :class="{ untrusted: !urlVerified }">{{ tip.url }}</a>
     </div>
 
     <AmountSend :amountError="amountError" @changeAmount="val => (amount = val)" :value="amount" />
@@ -23,7 +25,6 @@
       {{ $t('pages.tipPage.cancel') }}
     </Button>
 
-    <popup :popupSecondBtnClick="popup.secondBtnClick" />
     <Loader size="big" :loading="loading" type="transparent" content="" />
   </div>
 </template>
@@ -35,11 +36,11 @@ import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import openUrl from '../../utils/openUrl';
-import CheckIcon from '../../../icons/check-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
+import UrlBadge from '../components/UrlBadge';
 
 export default {
-  components: { AmountSend, CheckIcon },
+  components: { AmountSend, UrlBadge },
   data: () => ({
     tip: {},
     amount: null,
@@ -49,7 +50,16 @@ export default {
     verifiedUrls: [],
   }),
   computed: {
-    ...mapGetters(['balance', 'popup', 'tipping', 'current', 'sdk', 'account', 'network', 'currentCurrency']),
+    ...mapGetters([
+      'balance',
+      'popup',
+      'tipping',
+      'current',
+      'sdk',
+      'account',
+      'network',
+      'currentCurrency',
+    ]),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -66,20 +76,18 @@ export default {
       this.amountError = false;
     },
     urlVerified(val) {
-      if (val) this.$store.dispatch('popupAlert', { name: 'account', type: 'tip_url_verified' });
+      if (val) this.$store.dispatch('modals/open', { name: 'tip-verified' });
     },
   },
   async created() {
     this.loading = true;
     this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
-
     await this.$watchUntilTruly(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
       contractId: this.network[this.current.network].tipContract,
       callerId: this.account.publicKey,
     }).min;
-
     await this.$watchUntilTruly(() => this.tipping);
     const tipId = +this.urlParams.get('id');
     if (!tipId) throw new Error('"id" param is missed');
@@ -97,17 +105,25 @@ export default {
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
       this.amountError = this.amountError || !+this.amount || this.amount <= 0;
       if (this.amountError) return;
-
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
       this.loading = true;
       try {
-        const { hash } = await this.tipping.methods.retip(this.tip.id, { amount, waitMined: false });
+        const { hash } = await this.tipping.methods.retip(this.tip.id, {
+          amount,
+          waitMined: false,
+        });
         if (hash) {
-          await this.$store.dispatch('setPendingTx', { hash, amount: this.amount, domain: this.tip.url, time: Date.now(), type: 'tip' });
+          await this.$store.dispatch('setPendingTx', {
+            hash,
+            amount: this.amount,
+            domain: this.tip.url,
+            time: Date.now(),
+            type: 'tip',
+          });
           this.openCallbackOrGoHome('x-success');
         }
       } catch (e) {
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
       } finally {
         this.loading = false;
       }
@@ -120,12 +136,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../../common/variables';
 .url-bar {
   display: flex;
   align-items: center;
-
   :first-child {
     flex-grow: 1;
+    text-decoration: none;
+    &.untrusted {
+      color: $untrusted-badge-bg;
+    }
   }
+}
+.title-holder {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  margin-top: 16px;
+  font-size: 16px;
 }
 </style>

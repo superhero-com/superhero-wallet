@@ -59,7 +59,9 @@ export default {
     return state.middleware;
   },
   tokenBalance(state) {
-    return state.current.token !== 0 ? state.tokens[state.current.token].balance.toFixed(2) : state.balance.toFixed(2);
+    return state.current.token !== 0
+      ? state.tokens[state.current.token].balance.toFixed(2)
+      : state.balance.toFixed(2);
   },
   tokenSymbol() {
     return 'AE';
@@ -111,8 +113,5 @@ export default {
   },
   backedUpSeed({ backedUpSeed }) {
     return backedUpSeed;
-  },
-  tourRunning({ tourRunning }) {
-    return tourRunning;
   },
 };

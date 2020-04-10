@@ -1,7 +1,6 @@
 <template>
   <div class="popup popup-camera">
     <qrcode-stream @decode="onDecode" @init="onInit"></qrcode-stream>
-    <popup />
   </div>
 </template>
 
@@ -53,7 +52,7 @@ export default {
         } else if (error.name === 'StreamApiNotSupportedError') {
           this.errorMessage = 'ERROR: Stream API is not supported in this browser';
         }
-        this.$store.dispatch('popupAlert', { name: 'account', type: 'error_qrcode', msg: this.errorMessage, data: this.errorMessage });
+        this.$store.dispatch('modals/open', { name: 'default', msg: this.errorMessage });
         this.$router.go(-1);
       }
     },

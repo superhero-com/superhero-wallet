@@ -18,7 +18,13 @@ export const TX_TYPES = {
   nameUpdate: TX_TYPE.nameUpdate,
 };
 
-export const HDWALLET_METHODS = ['unlockWallet', 'generateWallet', 'getKeypair', 'getAccount', 'isLoggedIn'];
+export const HDWALLET_METHODS = [
+  'unlockWallet',
+  'generateWallet',
+  'getKeypair',
+  'getAccount',
+  'isLoggedIn',
+];
 
 export const AEX2_METHODS = {
   CHANGE_ACCOUNT: 'CHANGE_ACCOUNT',
@@ -83,7 +89,8 @@ export const toMicro = value => value.shiftedBy(-MAGNITUDE_MICRO).toFixed();
 
 export const MIN_SPEND_TX_FEE_MICRO = toMicro(MIN_SPEND_TX_FEE);
 export const MAX_REASONABLE_FEE_MICRO = toMicro(MAX_REASONABLE_FEE);
-export const DEFAULT_NETWORK = typeof process.env.NETWORK !== 'undefined' ? process.env.NETWORK.trim() : 'Mainnet';
+export const DEFAULT_NETWORK =
+  typeof process.env.NETWORK !== 'undefined' ? process.env.NETWORK.trim() : 'Mainnet';
 export const defaultNetworks = {
   Testnet: {
     url: 'https://sdk-testnet.aepps.com/',
@@ -113,6 +120,7 @@ export const defaultNetworks = {
 export const networks = {
   [DEFAULT_NETWORK]: { ...defaultNetworks[DEFAULT_NETWORK] },
 };
+export const UI_URL = 'https://youdonotneedacapetobeahero.com/#/';
 export const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
 export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
 export const NO_POPUP_AEPPS = ['youdonotneedacapetobeahero.com', 'superhero.com', 'localhost'];
@@ -150,3 +158,20 @@ contract Tipping =
   stateful entrypoint claim : (string, address, bool) => unit
   entrypoint get_state : () => state
   entrypoint unclaimed_for_url : (string) => int`;
+
+export const IDENTICON_CONFIG = {
+  lightness: {
+    color: [0.4, 1.0],
+    grayscale: [0.5, 1.0],
+  },
+  saturation: {
+    color: 1.0,
+    grayscale: 1.0,
+  },
+  backColor: '#12121bff',
+};
+
+export const IDENTICON_SIZES = {
+  normal: 38,
+  lg: 64,
+};

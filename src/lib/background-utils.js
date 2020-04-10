@@ -1,7 +1,12 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
 import { isEmpty } from 'lodash-es';
-import { setContractInstance, contractCall, getAddressByNameEntry, getActiveNetwork } from '../popup/utils/helper';
+import {
+  setContractInstance,
+  contractCall,
+  getAddressByNameEntry,
+  getActiveNetwork,
+} from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 
 let sdk;
@@ -70,7 +75,8 @@ const getAddress = async name => {
   }
 };
 
-export const getAddressFromChainName = async names => (Array.isArray(names) ? Promise.all(names.map(async n => getAddress(n))) : getAddress(names));
+export const getAddressFromChainName = async names =>
+  Array.isArray(names) ? Promise.all(names.map(async n => getAddress(n))) : getAddress(names);
 
 export const getTippingContractInstance = async tx => {
   if (tippingContract) return tippingContract;
@@ -85,13 +91,21 @@ export const contractCallStatic = async ({ tx, callType }) =>
       const { account } = await getActiveAccount();
       if (typeof callType !== 'undefined' && callType === 'static' && account) {
         const contractInstance = await getTippingContractInstance(tx);
-        const call = await contractCall({ instance: contractInstance, method: tx.method, params: [...tx.params, tx.options] });
+        const call = await contractCall({
+          instance: contractInstance,
+          method: tx.method,
+          params: [...tx.params, tx.options],
+        });
         if (call) {
           resolve(call);
         } else {
           reject(new Error('Contract call failed'));
         }
-      } else if (!controller.isLoggedIn() && typeof callType !== 'undefined' && callType === 'static') {
+      } else if (
+        !controller.isLoggedIn() &&
+        typeof callType !== 'undefined' &&
+        callType === 'static'
+      ) {
         reject(new Error('You need to unlock the wallet first'));
       }
     } catch (e) {

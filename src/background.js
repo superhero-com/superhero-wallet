@@ -6,7 +6,13 @@ import { buildTx } from './popup/utils';
 import WalletController from './wallet-controller';
 import Notification from './notifications';
 import rpcWallet from './lib/rpcWallet';
-import { HDWALLET_METHODS, AEX2_METHODS, NOTIFICATION_METHODS, CONNECTION_TYPES, DEFAULT_NETWORK } from './popup/utils/constants';
+import {
+  HDWALLET_METHODS,
+  AEX2_METHODS,
+  NOTIFICATION_METHODS,
+  CONNECTION_TYPES,
+  DEFAULT_NETWORK,
+} from './popup/utils/constants';
 import { popupProps } from './popup/utils/config';
 import TipClaimRelay from './lib/tip-claim-relay';
 import RedirectChainNames from './lib/redirect-chain-names';
@@ -63,7 +69,11 @@ if (process.env.IS_EXTENSION && require.main.i === module.id) {
         break;
     }
 
-    if (msg.from === 'content' && msg.type === 'readDom' && (msg.data.address || msg.data.chainName)) {
+    if (
+      msg.from === 'content' &&
+      msg.type === 'readDom' &&
+      (msg.data.address || msg.data.chainName)
+    ) {
       const tabs = await browser.tabs.query({ active: true, currentWindow: true });
       tabs.forEach(({ url }) => {
         if (sender.url === url && DEFAULT_NETWORK === 'Mainnet') {

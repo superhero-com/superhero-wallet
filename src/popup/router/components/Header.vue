@@ -1,9 +1,8 @@
 <template>
   <div class="header" v-if="showNavigation && !aeppPopup">
     <div class="content" :class="{ isLoggedIn }">
-      <Arrow v-if="title" @click="goBack" class="back-arrow" data-cy="back-arrow" />
+      <Arrow v-if="title && !tourRunning" @click="goBack" class="back-arrow" data-cy="back-arrow" />
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
-      <StartOnboarding v-if="!title && isLoggedIn" class="start-onboarding" @click="$store.commit('SET_TOUR_RUNNING', true)" />
 
       <div class="title">
         <span v-if="title">{{ $t(`pages.titles.${title}`) }}</span>
@@ -11,8 +10,14 @@
       </div>
 
       <div v-if="isLoggedIn">
-        <span class="noti-holder" @click="notifications.length && $router.push('/notifications')" data-cy="noti">
-          <span v-if="notificationsCounter" class="noti-count" data-cy="noti-count">{{ notifications.length }}</span>
+        <span
+          class="noti-holder"
+          @click="notifications.length && $router.push('/notifications')"
+          data-cy="noti"
+        >
+          <span v-if="notificationsCounter" class="noti-count" data-cy="noti-count">{{
+            notifications.length
+          }}</span>
           <Bell />
         </span>
         <button @click="$emit('toggle-sidebar')">
@@ -24,20 +29,20 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import Arrow from '../../../icons/arrow.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
 import Hamburger from '../../../icons/hamburger.svg?vue-component';
 import Logo from '../../../icons/logo-small.svg?vue-component';
-import StartOnboarding from '../../../icons/start-onboarding.svg?vue-component';
 
 export default {
-  components: { Arrow, Bell, Hamburger, Logo, StartOnboarding },
+  components: { Arrow, Bell, Hamburger, Logo },
   data() {
     return {};
   },
   computed: {
     ...mapGetters(['isLoggedIn', 'aeppPopup', 'notifications', 'notificationsCounter']),
+    ...mapState(['tourRunning']),
     title() {
       return this.$route.meta.title;
     },
@@ -73,13 +78,10 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    .intro_style {
-      position: absolute;
-      left: 20px;
-    }
     &:not(.isLoggedIn) .title {
       margin-left: auto;
       margin-right: auto;
+      font-weight: 500;
     }
 
     .back-arrow {
@@ -95,16 +97,13 @@ export default {
       }
 
       .title {
-        position: absolute;
-        left: 0;
-        right: 0;
-        text-align: center;
-        font-weight: bold;
+        margin-left: auto;
+        margin-right: auto;
+        font-weight: 500;
       }
 
       .start-onboarding {
         margin-left: 13px;
-        margin-right: auto;
         cursor: pointer;
       }
     }

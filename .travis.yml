@@ -9,9 +9,10 @@ cache:
   npm: true
   directories:
     - ~/.cache
- 
+
 script:
   - npm run lint -- --no-fix
+  - npm test
   - npm run build
 
 before_deploy: scripts/before-deploy.sh
@@ -33,3 +34,8 @@ deploy:
     target_branch: master
     on:
       branch: develop
+  - provider: script
+    skip_cleanup: true
+    script: scripts/deploy-stage.sh
+    on:
+      all_branches: true

@@ -1,35 +1,50 @@
 <template>
   <div>
-    <div class="tour__step3 popup">
-      <p class="primary-title text-left mb-8 f-16">
+    <div class="tour__step3 popup" :class="{ tour__step3_mobile: !IS_EXTENSION }">
+      <p class="primary-title text-left mb-8 f-16" :class="{ 'title-holder': !confirmMode }">
         <template v-if="!confirmMode">
-          {{ $t('pages.tipPage.heading') }}
-          <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
-          {{ $t('pages.tipPage.to') }}
+          <div>
+            {{ $t('pages.tipPage.heading') }}
+            <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+            {{ $t('pages.tipPage.to') }}
+          </div>
+          <UrlBadge :type="verifiedStatus" />
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
-          <span class="secondary-text" data-cy="tip-amount">{{ amount }} {{ $t('pages.appVUE.aeid') }}</span>
+          <span class="secondary-text" data-cy="tip-amount"
+            >{{ amount }} {{ $t('pages.appVUE.aeid') }}</span
+          >
           ({{ currencyAmount }} {{ currentCurrency }}) {{ $t('pages.tipPage.to') }}
         </template>
       </p>
 
       <div class="url-bar">
         <template v-if="!editUrl">
-          <a class="link-sm text-left" data-cy="tip-url">{{ url }}</a>
-          <CheckIcon v-if="urlVerified" />
+          <a class="link-sm text-left" :class="verifiedStatus" data-cy="tip-url">
+            {{ url }}
+          </a>
         </template>
         <Input v-else size="m-0 xsm" v-model="url" />
         <button v-if="!confirmMode" @click="editUrl = !editUrl" data-cy="edit-url">
-          <ae-icon :name="editUrl ? 'check' : 'vote'" data-cy="confirm-url" />
+          <ae-icon name="check" data-cy="confirm-url" v-if="editUrl" />
+          <EditIcon data-cy="confirm-url" v-else />
         </button>
       </div>
     </div>
     <div class="popup" data-cy="tip-container">
       <template v-if="!confirmMode">
-        <AmountSend :amountError="amountError" @changeAmount="val => (amount = val)" :value="amount" />
+        <AmountSend
+          :amountError="amountError"
+          @changeAmount="val => (amount = val)"
+          :value="amount"
+        />
         <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
-        <Button @click="toConfirm" :disabled="!note || amountError || noteError || !minCallFee || editUrl" data-cy="send-tip">
+        <Button
+          @click="toConfirm"
+          :disabled="!note || amountError || noteError || !minCallFee || editUrl"
+          data-cy="send-tip"
+        >
           {{ $t('pages.tipPage.next') }}
         </Button>
       </template>
@@ -45,28 +60,29 @@
         </Button>
       </template>
 
-      <popup :popupSecondBtnClick="popup.secondBtnClick" />
       <Loader size="big" :loading="loading" type="transparent" content="" />
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import axios from 'axios';
 import { calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import { escapeSpecialChars, aeToAettos } from '../../utils/helper';
-import CheckIcon from '../../../icons/check-icon.svg?vue-component';
+import EditIcon from '../../../icons/edit-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
 import Input from '../components/Input';
+import UrlBadge from '../components/UrlBadge';
 
 export default {
   components: {
     AmountSend,
     Textarea,
-    CheckIcon,
+    EditIcon,
     Input,
+    UrlBadge,
   },
   data() {
     return {
@@ -85,7 +101,18 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['balance', 'popup', 'tipping', 'current', 'sdk', 'account', 'network', 'currentCurrency', 'tip']),
+    ...mapGetters([
+      'balance',
+      'popup',
+      'tipping',
+      'current',
+      'sdk',
+      'account',
+      'network',
+      'currentCurrency',
+      'tip',
+    ]),
+    ...mapState(['tourRunning']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -96,13 +123,16 @@ export default {
     urlVerified() {
       return this.url && this.verifiedUrls.includes(this.url);
     },
+    verifiedStatus() {
+      return this.urlVerified || this.tourRunning ? 'verified' : 'untrusted';
+    },
   },
   watch: {
     amount() {
       this.amountError = !+this.amount || this.amount <= 0;
     },
     urlVerified(val) {
-      if (val) this.$store.dispatch('popupAlert', { name: 'account', type: 'tip_url_verified' });
+      if (val) this.$store.dispatch('modals/open', { name: 'tip-verified' });
     },
     $route: {
       immediate: true,
@@ -117,7 +147,6 @@ export default {
   },
   async created() {
     await this.persistTipDetails();
-
     if (process.env.IS_EXTENSION) {
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       if (tab) {
@@ -134,7 +163,6 @@ export default {
     } catch (e) {
       console.error(`Can't fetch /verified: ${e}`);
     }
-
     await this.$watchUntilTruly(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
@@ -158,7 +186,7 @@ export default {
         ([amount, note]) => {
           const exp = new Date().setMinutes(new Date().getMinutes() + 20);
           this.$store.commit('SET_TIP_DETAILS', { note, amount, exp });
-        }
+        },
       );
     },
     toConfirm() {
@@ -171,13 +199,22 @@ export default {
       const amount = aeToAettos(this.amount);
       this.loading = true;
       try {
-        const { hash } = await this.tipping.call('tip', [this.url, escapeSpecialChars(this.note)], { amount, waitMined: false });
+        const { hash } = await this.tipping.call('tip', [this.url, escapeSpecialChars(this.note)], {
+          amount,
+          waitMined: false,
+        });
         if (hash) {
-          await this.$store.dispatch('setPendingTx', { hash, amount: this.amount, domain: this.url, time: Date.now(), type: 'tip' });
+          await this.$store.dispatch('setPendingTx', {
+            hash,
+            amount: this.amount,
+            domain: this.url,
+            time: Date.now(),
+            type: 'tip',
+          });
           this.$router.push('/account');
         }
       } catch (e) {
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
       } finally {
         this.loading = false;
       }
@@ -187,20 +224,43 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../../common/variables';
 .tour__step3 {
   margin: 0 10px;
   padding: 12px 10px 4px;
   margin-top: 10px;
+  min-width: auto;
   p {
     margin-top: 0;
+    &.title-holder {
+      display: flex;
+      align-items: center;
+    }
   }
+}
+.tour__step3_mobile.v-tour__target--highlighted {
+  padding-bottom: 25px;
 }
 .url-bar {
   display: flex;
   align-items: center;
-
   :first-child {
     flex-grow: 1;
+    color: $text-color;
+    text-decoration: none;
+    &.untrusted {
+      color: $untrusted-badge-bg;
+    }
+  }
+}
+.ae-icon-check {
+  font-size: 24px;
+  color: #fff !important;
+}
+@media screen and (min-width: 380px) {
+  .tour__step3 {
+    margin: 0 auto;
+    padding: 12px 20px 4px;
   }
 }
 </style>

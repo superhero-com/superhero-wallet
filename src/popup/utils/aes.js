@@ -10,7 +10,11 @@ export default class AES {
   }
 
   incrementCounter(dataByteLength) {
-    this.algorithm.counter.writeUIntBE(this.algorithm.counter.readUIntBE(10, 6) + Math.ceil(dataByteLength / this.BLOCK_SIZE), 10, 6);
+    this.algorithm.counter.writeUIntBE(
+      this.algorithm.counter.readUIntBE(10, 6) + Math.ceil(dataByteLength / this.BLOCK_SIZE),
+      10,
+      6,
+    );
   }
 
   async encrypt(data) {

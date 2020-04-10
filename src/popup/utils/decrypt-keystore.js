@@ -10,7 +10,12 @@ export default async function(encryptedKeystore, key) {
     } else if (encryptedKeystore.crypto.kdf === 'webCrypto') {
       // webCrypto decrypt
 
-      decrypted = await WebCrypto.decrypt(encryptedKeystore.crypto.ciphertext, key, encryptedKeystore.crypto.cipher_params.nonce, encryptedKeystore.crypto.kdf_params.salt);
+      decrypted = await WebCrypto.decrypt(
+        encryptedKeystore.crypto.ciphertext,
+        key,
+        encryptedKeystore.crypto.cipher_params.nonce,
+        encryptedKeystore.crypto.kdf_params.salt,
+      );
     }
 
     return decrypted;

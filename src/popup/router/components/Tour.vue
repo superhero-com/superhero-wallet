@@ -1,12 +1,12 @@
 <!-- eslint-disable vue/no-use-v-if-with-v-for-->
 <template>
   <div>
-    <v-tour name="onboarding" :steps="steps" :options="{ highlight: true }">
+    <v-tour name="onboarding" :steps="tourSteps" :options="{ highlight: true }">
       <template slot-scope="tour">
         <transition name="fade">
           <v-step
-            v-if="tour.currentStep === index"
             v-for="(step, index) of tour.steps"
+            v-if="tour.currentStep === index"
             :key="index"
             :step="step"
             :previous-step="tour.previousStep"
@@ -20,9 +20,14 @@
           >
             <template>
               <div slot="header" class="step-header">
-                {{ $t(`onboarding.step_${tour.currentStep + 1}.title`) }} <span class="step-info"> ({{ tour.currentStep + 1 }}/10) </span>
+                {{ $t(`onboarding.step_${step.step}.title`) }}
+                <span class="step-info"> ({{ step.step }}/10) </span>
               </div>
-              <div slot="content" class="step-content" v-html="$t(`onboarding.step_${tour.currentStep + 1}.content`)"></div>
+              <div
+                slot="content"
+                class="step-content"
+                v-html="$t(`onboarding.step_${step.step}.content`)"
+              ></div>
               <div slot="actions"></div>
             </template>
           </v-step>
@@ -34,97 +39,124 @@
         <div class="tour-welcome-message">
           <Hero />
           <div>
-            <h3>Hey superhero! Welcome onboard.</h3>
-            <p>This short guide will walk you through the Superhero Wallet DApp and its features.</p>
+            <h3>{{ $t('onboarding.heading') }}</h3>
+            <p>{{ $t('onboarding.sub-heading') }}</p>
           </div>
         </div>
         <div class="tour-control-buttons">
-          <Button onboarding class="skip" @click="stop">Skip</Button>
-          <Button v-if="started" onboarding @click="back">Back</Button>
-          <Button v-if="started" onboarding class="next" @click="next">Next</Button>
-          <Button v-if="!started" onboarding class="start" @click="start">Start</Button>
+          <Button onboarding class="skip" @click="stop">{{ $t('onboarding.skip') }}</Button>
+          <Button v-if="started" onboarding @click="back">{{ $t('onboarding.back') }}</Button>
+          <Button v-if="started" onboarding class="next" @click="next">{{
+            $t('onboarding.next')
+          }}</Button>
+          <Button v-if="!started" onboarding class="start" @click="start">{{
+            $t('onboarding.start')
+          }}</Button>
         </div>
+      </div>
+    </div>
+    <div
+      class="tour-start"
+      v-if="!nodeStatus && home && isLoggedIn && !tourRunning && tourStartBar"
+      @click="toggleTour"
+    >
+      <div class="container">
+        <StartOnboarding class="start-onboarding" />
+        <span>{{ $t('onboarding.tutorial') }}</span>
+        <div class="close"><Close /></div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import Hero from '../../../icons/hero.svg?vue-component';
+import StartOnboarding from '../../../icons/start-onboarding.svg?vue-component';
+import Close from '../../../icons/close.svg?vue-component';
 
 export default {
   components: {
     Hero,
+    StartOnboarding,
+    Close,
   },
   data: () => ({
     started: false,
     steps: [
       {
         target: '.tour__step1',
+        step: 1,
         params: {
-          enableScrolling: false,
           placement: 'bottom',
         },
       },
       {
         route: '/account',
         target: '.tour__step2 .button-content',
+        step: 2,
         params: {
-          enableScrolling: false,
           placement: 'top',
         },
       },
       {
         target: '.tour__step3',
+        step: 3,
         params: {
-          enableScrolling: false,
           placement: 'bottom',
         },
         route: '/tip',
       },
       {
         route: '/account',
+        hide: !process.env.IS_EXTENSION,
         target: '.tour__step4 .button-content',
+        step: 4,
         params: {
-          enableScrolling: false,
           placement: 'top',
         },
       },
       {
+        route: '/account',
         target: '.tour__step5 .button-content',
+        step: 5,
         params: {
-          enableScrolling: false,
           placement: 'top',
         },
       },
       {
         target: '.tour__step6 .button-content',
+        step: 6,
         params: {
-          enableScrolling: false,
           placement: 'top',
         },
       },
       {
         target: '.tour__step7 .button-content',
+        step: 7,
         params: {
-          enableScrolling: false,
           placement: 'top',
         },
       },
       {
         target: '.tour__step8 .button-content',
+        step: 8,
         params: {
-          enableScrolling: false,
           placement: 'top',
         },
       },
     ],
   }),
   computed: {
-    ...mapGetters(['tourRunning']),
-    tour() {
-      return this.$tours.onboarding;
+    ...mapGetters(['isLoggedIn', 'nodeStatus']),
+    ...mapState(['tourStartBar', 'tourRunning']),
+    tourSteps() {
+      return this.steps
+        .filter(({ hide }) => !hide)
+        .map(step => ({ ...step, params: { ...step.params, enableScrolling: false } }));
+    },
+    home() {
+      return this.$route.path === '/account';
     },
   },
   watch: {
@@ -133,6 +165,10 @@ export default {
     },
   },
   methods: {
+    toggleTour(event) {
+      if (event.target.closest('.close')) this.$store.commit('SET_TOUR_STATUS_BAR', false);
+      else this.$store.commit('SET_TOUR_RUNNING', true);
+    },
     showActions() {
       this.disableScroll();
     },
@@ -144,6 +180,7 @@ export default {
       this.$tours.onboarding.skip();
       this.$store.commit('SET_TOUR_RUNNING', false);
       this.enableScroll();
+      this.started = false;
     },
     disableScroll() {
       document.documentElement.style.overflow = 'hidden';
@@ -188,19 +225,28 @@ export default {
 
 <style lang="scss">
 @import '../../../common/variables';
+.container {
+  max-width: 357px;
+  margin: 0 auto;
+}
+
 .v-step {
-  background-color: #12121b !important;
+  background-color: $tour-bg-color !important;
   border-radius: 5px !important;
   border: 1px solid $secondary-color;
-  padding: 14px !important;
+  padding: 20px 15px 25px 15px !important;
   min-width: 345px;
 
   .step-header {
-    background-color: #12121b !important;
+    background-color: $tour-bg-color !important;
     margin-bottom: 18px;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 21px;
 
     .step-info {
       color: $text-color;
+      margin-left: 8px;
     }
   }
 
@@ -208,10 +254,11 @@ export default {
     text-align: left;
     font-size: 14px;
     color: $text-color;
+    line-height: 20px;
   }
 
   .v-step__arrow {
-    border-color: #12121b !important;
+    border-color: $tour-bg-color !important;
     border: none !important;
     width: 35px !important;
     height: 12px !important;
@@ -221,7 +268,6 @@ export default {
 
   &[x-placement^='top'] {
     margin-bottom: 0.8rem !important;
-
     .v-step__arrow {
       background-image: url('../../../icons/arrow-up.png');
       transform: rotate(180deg);
@@ -231,12 +277,12 @@ export default {
 
   &[x-placement^='bottom'] {
     margin-top: 0.8rem !important;
-
     .v-step__arrow {
       background-image: url('../../../icons/arrow-up.png');
       top: -0.75rem !important;
     }
   }
+
   &.tip-step[x-placement^='bottom'] {
     margin-top: 2.5rem !important;
   }
@@ -265,7 +311,7 @@ export default {
   left: 0;
   right: 0;
   z-index: 99999;
-  background: #12121b;
+  background: $tour-bg-color;
   padding: 19px;
   padding-top: 0;
   padding-bottom: 25px;
@@ -275,22 +321,17 @@ export default {
     box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
   }
 
-  &:after {
-    content: '';
-    background-image: url('../../../icons/onboarding-bg.png');
+  &:before {
     position: absolute;
-    top: -40px;
-    bottom: 0;
+    top: -90px;
     height: 100%;
     left: 0;
     right: 0;
     z-index: -1;
-    background-repeat: no-repeat;
-    background-position: top center;
-  }
-  .container {
-    max-width: 357px;
-    margin: 0 auto;
+    content: '';
+    -webkit-clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
+    clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
+    background: $tour-bg-color;
   }
 
   .tour-welcome-message {
@@ -302,6 +343,7 @@ export default {
       margin-left: -51px;
       margin-right: 10px;
     }
+
     h3 {
       font-size: 16px;
       margin: 0;
@@ -321,6 +363,53 @@ export default {
   .tour-control-buttons {
     margin-top: 25px;
     display: flex;
+    justify-content: space-between;
+  }
+}
+
+.tour-start {
+  position: fixed;
+  background: $tour-start-bg-color;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  cursor: pointer;
+
+  &:hover {
+    background: #2c2c34;
+  }
+
+  .container {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 20px;
+  }
+
+  span {
+    color: $accent-color;
+    margin-left: 6px;
+    font-size: 15px;
+    font-weight: bold;
+  }
+
+  .close {
+    margin-left: auto;
+    height: 100%;
+    align-items: center;
+    width: 30px;
+    text-align: center;
+
+    svg {
+      margin-top: 11px;
+    }
+  }
+}
+
+@media screen and (min-width: 780px) {
+  .tour-actions:after {
+    top: -30px;
   }
 }
 </style>

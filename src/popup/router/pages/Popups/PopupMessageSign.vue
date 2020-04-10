@@ -16,8 +16,12 @@
       </ae-list-item>
     </ul>
     <div class="btnFixed">
-      <Button half @click="cancel" data-cy="deny" class="reject">{{ $t('pages.signTransaction.reject') }}</Button>
-      <Button half @click="accept" data-cy="accept">{{ $t('pages.signTransaction.confirm') }}</Button>
+      <Button half @click="cancel" data-cy="deny" class="reject">{{
+        $t('pages.signTransaction.reject')
+      }}</Button>
+      <Button half @click="accept" data-cy="accept">{{
+        $t('pages.signTransaction.confirm')
+      }}</Button>
     </div>
   </div>
 </template>
@@ -47,7 +51,9 @@ export default {
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
     faviconUrl() {
-      return typeof this.data.icons !== 'undefined' ? this.data.icons : `${this.data.protocol}//${this.data.host}/favicon.ico`;
+      return typeof this.data.icons !== 'undefined'
+        ? this.data.icons
+        : `${this.data.protocol}//${this.data.host}/favicon.ico`;
     },
   },
 };

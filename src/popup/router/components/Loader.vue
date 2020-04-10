@@ -7,7 +7,9 @@
         <ae-loader v-if="size == 'small'" />
       </div>
       <transition name="fadeOut" v-if="size == 'big'">
-        <span class="mainLoader mainLoaderTransparent" v-if="type == 'transparent'"><ae-loader /></span>
+        <span class="mainLoader mainLoaderTransparent" v-if="type == 'transparent'"
+          ><ae-loader
+        /></span>
         <Welcome class="mainLoader" v-if="type !== 'transparent'" />
       </transition>
     </div>
@@ -59,6 +61,8 @@ export default {
   width: 3em !important;
   height: 3em !important;
   border-radius: 3em !important;
+  padding-top: 50px;
+  padding-top: calc(50px + env(safe-area-inset-top));
 }
 .mainLoader.mainLoaderTransparent {
   opacity: 0.6;

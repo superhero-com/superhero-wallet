@@ -5,12 +5,18 @@
         <span class="amount">
           <span data-cy="amount">{{ txAmount }}</span>
           {{ $t('pages.appVUE.aeid') }}
-          <span class="text" data-cy="currency-amount">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span>
+          <span class="text" data-cy="currency-amount"
+            >( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span
+          >
         </span>
-        <span class="status">{{ txType == 'Sent' ? $t('pages.recentTransactions.sentStatus') : $t('pages.recentTransactions.receivedStatus') }}</span>
+        <span class="status">{{
+          txType == 'Sent'
+            ? $t('pages.recentTransactions.sentStatus')
+            : $t('pages.recentTransactions.receivedStatus')
+        }}</span>
         <span class="time" data-cy="time">{{ transactionDate }}</span>
       </div>
-      <div class="holder">
+      <div class="holder tx-info">
         <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
         <span class="seeTransaction" @click="seeTx(transactionData.hash)">
           <img src="../../../icons/eye.png" />
@@ -105,7 +111,16 @@ export default {
   .holder {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 14px;
+    line-height: 19px;
+    font-weight: 500;
+
+    &.tx-info {
+      line-height: 16px;
+      font-weight: 400;
+    }
+
     .url {
       display: inline-block;
       width: 284px;

@@ -2,7 +2,11 @@
   <div class="popup">
     <p class="regular-text">{{ $t('pages.index.enterSeedPhrase') }}</p>
     <Textarea v-model="mnemonic" :error="errorMsg ? true : false" />
-    <Button @click="importAccount" :disabled="mnemonic && !disabled ? false : true" data-cy="import">
+    <Button
+      @click="importAccount"
+      :disabled="mnemonic && !disabled ? false : true"
+      data-cy="import"
+    >
       {{ $t('pages.index.importAccount') }}
     </Button>
     <div v-if="errorMsg" class="error-msg" v-html="errorMsg"></div>
@@ -51,10 +55,14 @@ export default {
           return setTimeout(() => this.$router.push('/account'), 1000);
         }
         this.disabled = true;
-        this.errorMsg = `${this.$t('pages.index.accountNotFound')} <br> ${this.$t('pages.index.checkSeed')}`;
+        this.errorMsg = `${this.$t('pages.index.accountNotFound')} <br> ${this.$t(
+          'pages.index.checkSeed',
+        )}`;
       } else {
         this.disabled = true;
-        this.errorMsg = `${this.$t('pages.index.accountNotFound')} <br> ${this.$t('pages.index.checkSeed')}`;
+        this.errorMsg = `${this.$t('pages.index.accountNotFound')} <br> ${this.$t(
+          'pages.index.checkSeed',
+        )}`;
       }
       this.loading = false;
       return false;

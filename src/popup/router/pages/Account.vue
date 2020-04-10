@@ -1,9 +1,12 @@
 <template>
   <div class="height-100 primary-bg">
     <div class="popup popup-no-padding">
-      <div v-show="backup_seed_notif" class="noti" data-cy="seed-notif">
+      <div v-show="backup_seed_notif && !tourRunning" class="noti" data-cy="seed-notif">
         <span>
-          {{ $t('pages.account.youNeedTo') }} <a href="#/securitySettings" style="text-decoration: underline;">{{ $t('pages.account.backup') }}</a>
+          {{ $t('pages.account.youNeedTo') }}
+          <a href="#/securitySettings" style="text-decoration: underline;">{{
+            $t('pages.account.backup')
+          }}</a>
           {{ $t('pages.account.yourSeedPhrase') }}
         </span>
       </div>
@@ -12,7 +15,13 @@
         <BalanceInfo />
       </div>
       <div class="submenu-bg">
-        <BoxButton :text="$t('pages.account.send')" accent to="tip" class="tour__step2">
+        <BoxButton
+          data-cy="tip-button"
+          :text="$t('pages.account.send')"
+          accent
+          to="tip"
+          class="tour__step2"
+        >
           <Tip slot="icon" />
         </BoxButton>
         <ClaimTips @setLoading="val => (loading = val)" v-if="IS_EXTENSION" />
@@ -32,12 +41,11 @@
       <RecentTransactions></RecentTransactions>
     </div>
     <Loader size="big" :loading="loading" type="transparent" />
-    <popup />
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { setTimeout } from 'timers';
 import Tip from '../../../icons/tip-icon.svg?vue-component';
 import Activity from '../../../icons/activity-icon.svg?vue-component';
@@ -72,7 +80,8 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'activeAccount', 'current', 'network', 'backedUpSeed', 'tourRunning']),
+    ...mapGetters(['account', 'balance', 'activeAccount', 'current', 'network', 'backedUpSeed']),
+    ...mapState(['tourRunning']),
     publicKey() {
       return this.account.publicKey;
     },
@@ -84,12 +93,10 @@ export default {
     },
   },
   async created() {
-    if (!this.tourRunning) {
-      this.backup_seed_notif = !this.backedUpSeed;
-      setTimeout(() => {
-        if (!this.tourRunning) this.backup_seed_notif = false;
-      }, 3000);
-    }
+    this.backup_seed_notif = !this.backedUpSeed;
+    setTimeout(() => {
+      this.backup_seed_notif = false;
+    }, 3000);
   },
 };
 </script>
@@ -126,5 +133,10 @@ export default {
 }
 .send-tips {
   margin-bottom: 26px;
+}
+.noti {
+  margin-top: 20px;
+  margin-bottom: 0;
+  line-height: 14px;
 }
 </style>

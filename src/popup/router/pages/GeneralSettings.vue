@@ -3,10 +3,17 @@
     <div class="maindiv_input-group-addon">
       <h4>{{ $t('pages.generalSettings.switchLanguage') }}</h4>
       <hr />
-      <small class="sett_info">{{ $t('pages.generalSettings.currentLanguage') }}: {{ this.current.language ? this.current.language : 'en' }}</small>
+      <small class="sett_info"
+        >{{ $t('pages.generalSettings.currentLanguage') }}:
+        {{ this.current.language ? this.current.language : 'en' }}</small
+      >
       <div class="language-settings">
         <li id="languages" class="have-subDropdown" :class="dropdown.languages ? 'show' : ''">
-          <ae-button class="switchlanguageBtn color-grey" extend @click="toggleDropdown($event, '.have-subDropdown')">
+          <ae-button
+            class="switchlanguageBtn color-grey"
+            extend
+            @click="toggleDropdown($event, '.have-subDropdown')"
+          >
             <ae-icon name="globe" />
             {{ $t('pages.generalSettings.switchLanguage') }}
             <ae-icon name="left-more" />
@@ -14,8 +21,16 @@
 
           <!-- Language sub dropdown -->
           <ul class="sub-dropdown">
-            <li style="width: 30%;text-align: center;margin: auto;" v-for="(value, name) in locales" v-bind:key="name">
-              <ae-button v-on:click="switchLanguage(name)" class="" :class="current.language == name ? 'current' : ''">
+            <li
+              style="width: 30%;text-align: center;margin: auto;"
+              v-for="(value, name) in locales"
+              v-bind:key="name"
+            >
+              <ae-button
+                v-on:click="switchLanguage(name)"
+                class=""
+                :class="current.language == name ? 'current' : ''"
+              >
                 <img :src="'../icons/flag_' + name + '.png'" />
                 <span style="margin-left: auto;">{{ languageFullName(name) }}</span>
               </ae-button>
@@ -24,7 +39,6 @@
         </li>
       </div>
     </div>
-    <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
   </div>
 </template>
 
@@ -47,7 +61,9 @@ export default {
   },
   methods: {
     toggleDropdown(event, parentClass) {
-      const dropdownParent = event.target.closest(!parentClass ? '.language-settings' : parentClass);
+      const dropdownParent = event.target.closest(
+        !parentClass ? '.language-settings' : parentClass,
+      );
       this.dropdown[dropdownParent.id] = !this.dropdown[dropdownParent.id];
     },
     async switchLanguage(languageChoose) {
