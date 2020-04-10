@@ -4,14 +4,11 @@
     <BalanceInfo />
     <TransactionFilters @filtrate="filtrate" />
     <ae-list class="all-transactions" data-cy="all-transactions">
-      <div class="date" v-if="pendingTransactions.length">
-        {{ $t('pages.recentTransactions.pendingStatus') }}
-      </div>
       <PendingTxs />
       <TransactionItem
         v-for="transaction in filteredTransactions"
         :key="transaction.id"
-        :transactionData="transaction"
+        :transaction="transaction"
       />
     </ae-list>
     <div v-if="!filteredTransactions.length && !loading">
