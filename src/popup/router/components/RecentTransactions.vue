@@ -14,7 +14,7 @@
           :dark="true"
           v-for="transaction in transactions.latest"
           :key="transaction.id"
-          :transactionData="transaction"
+          :transaction="transaction"
         ></TransactionItem>
       </ae-list>
     </div>

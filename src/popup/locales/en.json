@@ -187,9 +187,6 @@
     "recentTransactions": {
       "recentActivity": "Recent Activity",
       "viewAll": "View all",
-      "pendingStatus": "Pending",
-      "sentStatus": "Sent",
-      "receivedStatus": "Received",
       "noTransactionsFound": "No transactions found!"
     },
     "addFungibleToken": {
@@ -707,7 +704,10 @@
       "nameUpdate": "name update tx",
       "createTx": "create tx",
       "clear": "Clear filter",
-      "apply": "Apply filter"
+      "apply": "Apply filter",
+      "sent": "Sent",
+      "received": "Received",
+      "pending": "Pending"
     },
     "utilities": {
       "heading": "Utilities",

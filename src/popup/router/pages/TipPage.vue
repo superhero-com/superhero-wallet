@@ -206,8 +206,8 @@ export default {
         if (hash) {
           await this.$store.dispatch('setPendingTx', {
             hash,
-            amount: this.amount,
-            domain: this.url,
+            amount,
+            tipUrl: this.url,
             time: Date.now(),
             type: 'tip',
           });

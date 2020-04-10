@@ -50,6 +50,7 @@ import Heart from '../../../icons/heart.svg?vue-component';
 import Textarea from '../components/Textarea';
 import openUrl from '../../utils/openUrl';
 import { TIP_SERVICE, BACKEND_URL, UI_URL } from '../../utils/constants';
+import { aettosToAe } from '../../utils/helper';
 
 export default {
   components: {
@@ -66,7 +67,7 @@ export default {
   computed: {
     ...mapGetters(['current', 'currentCurrency']),
     amountTip() {
-      return this.amount;
+      return (+aettosToAe(this.amount)).toFixed(2);
     },
     getCurrencyAmount() {
       return (this.amountTip * this.current.currencyRate).toFixed(3);
