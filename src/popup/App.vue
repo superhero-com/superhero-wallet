@@ -1,6 +1,6 @@
 <template>
   <ae-main :class="aeppPopup ? 'ae-main-popup ae-main-wave' : waveBg ? 'ae-main-wave' : ''">
-    <Header @toggle-sidebar="showSidebar = !showSidebar" />
+    <Header v-if="!mainLoading" @toggle-sidebar="showSidebar = !showSidebar" />
 
     <router-view :key="$route.fullPath" />
 

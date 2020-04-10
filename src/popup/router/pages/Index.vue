@@ -13,7 +13,7 @@
       /></a>
       <span>Or use a web version</span>
     </div>
-    <CheckBox v-if="!termsAgreed" v-model="terms" data-cy="checkbox" class="mb-25">
+    <CheckBox v-if="!termsAgreed" v-model="terms" data-cy="checkbox" class="checkbox">
       <div class="primary-text">
         {{ $t('pages.index.term1') }}
         <router-link to="/termsOfService" data-cy="terms">{{
@@ -81,5 +81,9 @@ export default {
 }
 .primary-title {
   font-weight: 500;
+}
+.checkbox {
+  margin: 0 auto 25px auto;
+  max-width: 357px;
 }
 </style>

@@ -8,7 +8,7 @@
           name="activeNetwork"
           @click.native="selectNetwork(n.name)"
         />
-        <div class="mr-auto ml-15 text-left">
+        <div class="mr-auto text-left">
           <p class="f-16" data-cy="network-name">{{ n.name }}</p>
           <p class="f-12 url" data-cy="network-url"><b>Url:</b> {{ n.url }}</p>
           <p class="f-12 url" data-cy="network-middleware">

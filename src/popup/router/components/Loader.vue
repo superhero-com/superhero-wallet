@@ -61,6 +61,8 @@ export default {
   width: 3em !important;
   height: 3em !important;
   border-radius: 3em !important;
+  padding-top: 50px;
+  padding-top: calc(50px + env(safe-area-inset-top));
 }
 .mainLoader.mainLoaderTransparent {
   opacity: 0.6;
