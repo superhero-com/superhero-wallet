@@ -14,7 +14,7 @@
       ({{ getCurrencyAmount }} {{ currentCurrency }})
       {{ $t('pages.successTip.to') }}
     </p>
-    <a class="link-sm text-left block" data-cy="tip-url">{{ domain }}</a>
+    <a class="link-sm text-left block" data-cy="tip-url">{{ tipUrl }}</a>
     <br />
     <div>
       <span style="word-break: break-word;font-size: 14px;float: left;">{{
@@ -57,7 +57,7 @@ export default {
     Heart,
     Textarea,
   },
-  props: ['amount', 'domain'],
+  props: ['amount', 'tipUrl'],
   data() {
     return {
       note: this.$t('pages.successTip.notifyMessage'),
@@ -73,7 +73,7 @@ export default {
       return (this.amountTip * this.current.currencyRate).toFixed(3);
     },
     urlVerified() {
-      return this.domain && this.verifiedUrls.includes(this.domain);
+      return this.tipUrl && this.verifiedUrls.includes(this.tipUrl);
     },
   },
   async created() {

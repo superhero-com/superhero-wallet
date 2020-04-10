@@ -36,13 +36,13 @@ export default {
   methods: {
     async checkPendingTxMined() {
       await Promise.all(
-        this.transactions.pending.map(async ({ hash, type, amount, domain }) => {
+        this.transactions.pending.map(async ({ hash, type, amount, tipUrl }) => {
           const mined = await this.$store.state.sdk.poll(hash);
           if (!mined) return;
           const pending = this.transactions.pending.filter(p => p.hash !== hash);
           this.$store.commit('SET_PENDING_TXS', pending);
           if (type === 'tip')
-            this.$router.push({ name: 'success-tip', params: { amount, domain } });
+            this.$router.push({ name: 'success-tip', params: { amount, tipUrl } });
           if (type === 'spend')
             this.$router.push({ name: 'send', params: { redirectstep: 3, successtx: mined } });
         }),
