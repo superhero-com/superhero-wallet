@@ -13,7 +13,7 @@
         <ae-loader />
       </div>
     </div>
-    <Modal v-if="type == 3" :modal="modal">
+    <div v-if="type == 3 && modal.visible">
       <div slot="content">
         <small v-if="seedPhrase == '' && !loading && type == '3'">{{
           $t('pages.securitySettings.seedPhraseWarning')
@@ -49,7 +49,7 @@
           {{ $t('pages.seedPhrase.doneThis') }}
         </button>
       </div>
-    </Modal>
+    </div>
     <div v-if="type == 4">
       <h3 class="phraseTitle">{{ $t('pages.seedPhrase.confirmSeedPhrase') }}</h3>
       <ae-phraser>

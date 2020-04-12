@@ -13,6 +13,7 @@ export default {
     small: Boolean,
     third: Boolean,
     onboarding: Boolean,
+    dark: Boolean,
   },
   computed: {
     getClasses() {
@@ -23,6 +24,7 @@ export default {
       if (this.small) c.push('small');
       if (this.third) c.push('third');
       if (this.onboarding) c.push('onboarding');
+      if (this.dark) c.push('dark');
       return c.join(' ');
     },
   },
@@ -60,6 +62,9 @@ export default {
   // width: 148px !important;
   width: 48% !important;
   margin: 0 !important;
+}
+.primary-button.dark {
+  background: $box-button-color !important;
 }
 .primary-button.small {
   width: auto !important;
