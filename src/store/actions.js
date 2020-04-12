@@ -167,16 +167,8 @@ export default {
     commit('UPDATE_ACCOUNT', keypair);
     commit('SWITCH_LOGGED_IN', true);
   },
-  async setPendingTx({ commit, state: { transactions, current } }, tx) {
-    const txs = [...transactions.pending, tx].map(el => {
-      const { time, domain } = el;
-      const amount = parseFloat(el.amount).toFixed(3);
-      const amountCurrency = parseFloat(
-        current.currencyRate ? amount * current.currencyRate : amount,
-      ).toFixed(3);
-      return { ...el, amount, time, amountCurrency, domain };
-    });
-    commit('SET_PENDING_TXS', txs);
+  async setPendingTx({ commit, state: { transactions } }, tx) {
+    commit('SET_PENDING_TXS', [...transactions.pending, tx]);
   },
   async checkExtensionUpdate({ state: { network } }) {
     const { tipContract } = network[DEFAULT_NETWORK];

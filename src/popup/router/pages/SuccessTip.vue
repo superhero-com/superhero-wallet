@@ -14,7 +14,7 @@
       ({{ getCurrencyAmount }} {{ currentCurrency }})
       {{ $t('pages.successTip.to') }}
     </p>
-    <a class="link-sm text-left block" data-cy="tip-url">{{ domain }}</a>
+    <a class="link-sm text-left block" data-cy="tip-url">{{ tipUrl }}</a>
     <br />
     <div>
       <span style="word-break: break-word;font-size: 14px;float: left;">{{
@@ -50,13 +50,14 @@ import Heart from '../../../icons/heart.svg?vue-component';
 import Textarea from '../components/Textarea';
 import openUrl from '../../utils/openUrl';
 import { TIP_SERVICE, BACKEND_URL, UI_URL } from '../../utils/constants';
+import { aettosToAe } from '../../utils/helper';
 
 export default {
   components: {
     Heart,
     Textarea,
   },
-  props: ['amount', 'domain'],
+  props: ['amount', 'tipUrl'],
   data() {
     return {
       note: this.$t('pages.successTip.notifyMessage'),
@@ -66,13 +67,13 @@ export default {
   computed: {
     ...mapGetters(['current', 'currentCurrency']),
     amountTip() {
-      return this.amount;
+      return (+aettosToAe(this.amount)).toFixed(2);
     },
     getCurrencyAmount() {
       return (this.amountTip * this.current.currencyRate).toFixed(3);
     },
     urlVerified() {
-      return this.domain && this.verifiedUrls.includes(this.domain);
+      return this.tipUrl && this.verifiedUrls.includes(this.tipUrl);
     },
   },
   async created() {

@@ -4,11 +4,9 @@
       <p class="primary-title text-left mb-8 f-16" :class="{ 'title-holder': !confirmMode }">
         <template v-if="!confirmMode">
           <div>
-            {{ $t('pages.tipPage.heading') }}
-            <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
-            {{ $t('pages.tipPage.to') }}
+            {{ $t('pages.tipPage.url') }}
           </div>
-          <UrlBadge :type="verifiedStatus" />
+          <UrlBadge @click.native="showBadgeModal" :type="verifiedStatus" />
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
@@ -41,6 +39,7 @@
         />
         <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
         <Button
+          class="send-tip-button"
           @click="toConfirm"
           :disabled="!note || amountError || noteError || !minCallFee || editUrl"
           data-cy="send-tip"
@@ -131,9 +130,6 @@ export default {
     amount() {
       this.amountError = !+this.amount || this.amount <= 0;
     },
-    urlVerified(val) {
-      if (val) this.$store.dispatch('modals/open', { name: 'tip-verified' });
-    },
     $route: {
       immediate: true,
       handler({ fullPath }) {
@@ -171,6 +167,12 @@ export default {
     }).min;
   },
   methods: {
+    showBadgeModal() {
+      this.$store.dispatch('modals/open', {
+        name: 'tip-badge',
+        verifiedStatus: this.verifiedStatus,
+      });
+    },
     async persistTipDetails() {
       if (this.tip) {
         const { amount, note, exp } = this.tip;
@@ -189,7 +191,15 @@ export default {
         },
       );
     },
-    toConfirm() {
+    async toConfirm() {
+      if (!this.urlVerified) {
+        const allowToConfirm = await this.$store
+          .dispatch('modals/open', { name: 'confirm-tip' })
+          .catch(() => false);
+        if (!allowToConfirm) {
+          return;
+        }
+      }
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
       this.amountError = this.amountError || !+this.amount || this.amount <= 0;
       this.noteError = !this.note || !this.url;
@@ -206,8 +216,8 @@ export default {
         if (hash) {
           await this.$store.dispatch('setPendingTx', {
             hash,
-            amount: this.amount,
-            domain: this.url,
+            amount,
+            tipUrl: this.url,
             time: Date.now(),
             type: 'tip',
           });
@@ -225,6 +235,10 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+.send-tip-button {
+  font-weight: bold !important;
+  font-size: 15px !important;
+}
 .tour__step3 {
   margin: 0 10px;
   padding: 12px 10px 4px;

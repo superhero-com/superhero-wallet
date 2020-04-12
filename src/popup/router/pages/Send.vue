@@ -296,7 +296,7 @@ export default {
         if (hash) {
           await this.$store.dispatch('setPendingTx', {
             hash,
-            amount: this.form.amount,
+            amount,
             time: Date.parse(new Date()),
             type: 'spend',
           });

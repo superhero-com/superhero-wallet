@@ -155,7 +155,7 @@
       "wholeTransaction": "Whole transaction history",
       "latestTransactions": "Latest transactions",
       "noTransactionsFound": "No transactions found!",
-      "tipSomeone": "Send Tips",
+      "tipSomeone": "Send Tip",
       "howToClaim": "How to claim AE",
       "balance": "Balance",
       "copied": "Copied!",
@@ -187,9 +187,6 @@
     "recentTransactions": {
       "recentActivity": "Recent Activity",
       "viewAll": "View all",
-      "pendingStatus": "Pending",
-      "sentStatus": "Sent",
-      "receivedStatus": "Received",
       "noTransactionsFound": "No transactions found!"
     },
     "addFungibleToken": {
@@ -597,6 +594,7 @@
     },
     "tipPage": {
       "back": "Back",
+      "OkButton": "OK",
       "noImage": "No Image",
       "domainVerified": "Verified",
       "domainNotVerified": "Not verified",
@@ -610,6 +608,9 @@
       "tipDetails": "Details",
       "tipWebsite": "Website",
       "heading": "Send",
+      "sendTipConfirmationHeader": "Send Tip Confirmation",
+      "sendTipConfirmationBody": "You are going to send tip to untrusted URL. Third party issues prevent us to ensure that tips will be directly delivered to the URL owner.",
+      "sendTipConfirmationQstn":"Are you sure you would like to send the tip anyway?",
       "headingSending": "Sending",
       "selectTip": "Select amount to tip",
       "tipDomain": "Tip domain",
@@ -621,15 +622,19 @@
       "title": "Title",
       "titlePlaceholder": "Send a message of #support along with your donation...",
       "account": "Account",
-      "next": "Send Tips",
-      "url": "Send a tip to",
+      "next": "Send Tip",
+      "url": "Send Tip to",
       "to": "to",
       "amountPlaceholder": "Enter amount",
       "amountLabel": "Amount",
       "availableLabel": "Available",
       "confirm": "Confirm",
       "cancel": "Cancel",
-      "edit": "Edit AE Details"
+      "edit": "Edit AE Details",
+      "whatIsVerifieddUrl": "What is \"Verified\" URL?",
+      "whatIsUntrustedUrl": "What is \"Untrusted\" URL?",
+      "untrustedUrlInfo": "Third party issues prevent us to ensure that tips will be directly delivered to the URL owner. You are sending the tip at your own risk.",
+      "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed."
     },
     "successTip": {
       "sendMore": "Send More AE",
@@ -707,7 +712,10 @@
       "nameUpdate": "name update tx",
       "createTx": "create tx",
       "clear": "Clear filter",
-      "apply": "Apply filter"
+      "apply": "Apply filter",
+      "sent": "Sent",
+      "received": "Received",
+      "pending": "Pending"
     },
     "utilities": {
       "heading": "Utilities",
