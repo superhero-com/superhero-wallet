@@ -1,6 +1,13 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
-import { setContractInstance, contractCall, getAddressByNameEntry, getActiveNetwork } from '../popup/utils/helper';
+import { isEmpty } from 'lodash-es';
+import {
+  setContractInstance,
+  contractCall,
+  getAddressByNameEntry,
+  getActiveNetwork,
+} from '../popup/utils/helper';
+import { getState } from '../store/plugins/persistState';
 
 let sdk;
 let controller;
@@ -11,9 +18,9 @@ export const setController = contr => {
 };
 
 export const getActiveAccount = async () => {
-  const { userAccount } = await browser.storage.local.get('userAccount');
-  if (userAccount) {
-    return { account: { publicKey: userAccount.publicKey }, activeAccount: 0 };
+  const { account } = await getState();
+  if (!isEmpty(account)) {
+    return { account: { publicKey: account.publicKey }, activeAccount: 0 };
   }
   return false;
 };
@@ -68,7 +75,8 @@ const getAddress = async name => {
   }
 };
 
-export const getAddressFromChainName = async names => (Array.isArray(names) ? Promise.all(names.map(async n => getAddress(n))) : getAddress(names));
+export const getAddressFromChainName = async names =>
+  Array.isArray(names) ? Promise.all(names.map(async n => getAddress(n))) : getAddress(names);
 
 export const getTippingContractInstance = async tx => {
   if (tippingContract) return tippingContract;
@@ -83,13 +91,21 @@ export const contractCallStatic = async ({ tx, callType }) =>
       const { account } = await getActiveAccount();
       if (typeof callType !== 'undefined' && callType === 'static' && account) {
         const contractInstance = await getTippingContractInstance(tx);
-        const call = await contractCall({ instance: contractInstance, method: tx.method, params: [...tx.params, tx.options] });
+        const call = await contractCall({
+          instance: contractInstance,
+          method: tx.method,
+          params: [...tx.params, tx.options],
+        });
         if (call) {
           resolve(call);
         } else {
           reject(new Error('Contract call failed'));
         }
-      } else if (!controller.isLoggedIn() && typeof callType !== 'undefined' && callType === 'static') {
+      } else if (
+        !controller.isLoggedIn() &&
+        typeof callType !== 'undefined' &&
+        callType === 'static'
+      ) {
         reject(new Error('You need to unlock the wallet first'));
       }
     } catch (e) {

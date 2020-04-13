@@ -5,8 +5,8 @@ import store from '../store';
 import router from './router';
 import { i18n } from './utils/i18nHelper';
 import '../lib/initEnv';
-
-global.browser = require('webextension-polyfill');
+import '../lib/initPolyfills';
+import registerModals from './router/modals';
 
 Vue.prototype.$browser = global.browser;
 Vue.prototype.$watchUntilTruly = function watchUntilTruly(getter) {
@@ -18,14 +18,17 @@ Vue.prototype.$watchUntilTruly = function watchUntilTruly(getter) {
         resolve();
         defer(() => unwatch());
       },
-      { immediate: true }
+      { immediate: true },
     );
   });
 };
 
-new Vue({
-  store,
-  router,
-  i18n,
-  render: h => h(App),
-}).$mount('#app');
+(async () => {
+  await registerModals();
+  new Vue({
+    store,
+    router,
+    i18n,
+    render: h => h(App),
+  }).$mount('#app');
+})();

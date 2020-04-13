@@ -42,7 +42,7 @@ a {
 .primary-title {
   color: $white-color;
   font-size: 18px;
-  font-weight: lighter;
+  font-weight: 400;
   margin-bottom:27px;
   margin-left:0 !important;
 }
@@ -99,6 +99,15 @@ a {
 }
 .uppercase {
   text-transform: uppercase;
+}
+.underline {
+  text-decoration: underline;
+}
+.bolder {
+  font-weight: bold;
+}
+.italic {
+  font-style: italic;
 }
 .link-sm {
   font-size:11px;

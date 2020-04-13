@@ -11,8 +11,9 @@
 
     const successUrl = encodeURIComponent(`${window.location.origin}?result=success`);
     const cancelUrl = encodeURIComponent(`${window.location.origin}?result=cancel`);
+    const comment = encodeURIComponent(`This is a test comment! http://example.com`);
 
-    const prefixes = ['superhero:', 'https://mobile.z52da5wt.xyz/'];
+    const prefixes = ['superhero:', 'https://wallet.superhero.com/', 'http://localhost:5000/'];
     const paths = [
       '404',
       'tip',
@@ -24,11 +25,15 @@
       `retip?id=26&x-cancel=${cancelUrl}`,
       `retip?id=25&x-success=${successUrl}&x-cancel=${cancelUrl}`,
       `retip?id=26&x-success=${successUrl}&x-cancel=${cancelUrl}`,
+      `comment?id=26&text=${comment}`,
+      `comment?id=26&text=${comment}&x-success=${successUrl}`,
+      `comment?id=26&text=${comment}&x-cancel=${cancelUrl}`,
+      `comment?id=26&text=${comment}&x-success=${successUrl}&x-cancel=${cancelUrl}`,
     ];
 
     prefixes.forEach(prefix => paths.forEach(path => {
       const url = prefix + path;
-      document.write(`<a href="${url}">${url}</a><br>`);
+      document.write(`<a href="${url}">${url}</a><br><br>`);
     }));
   </script>
 </body>

@@ -2,7 +2,11 @@
   <div class="popup">
     <p class="regular-text">{{ $t('pages.index.enterSeedPhrase') }}</p>
     <Textarea v-model="mnemonic" :error="errorMsg ? true : false" />
-    <Button @click="importAccount" :disabled="mnemonic && !disabled ? false : true" data-cy="import">
+    <Button
+      @click="importAccount"
+      :disabled="mnemonic && !disabled ? false : true"
+      data-cy="import"
+    >
       {{ $t('pages.index.importAccount') }}
     </Button>
     <div v-if="errorMsg" class="error-msg" v-html="errorMsg"></div>
@@ -34,30 +38,34 @@ export default {
   },
   methods: {
     async importAccount() {
+      this.loading = true;
       if (this.mnemonic) {
-        this.loading = true;
         this.mnemonic = this.mnemonic.trim();
         const mnemonic = this.mnemonic.split(' ');
         if (mnemonic.length >= 12 && mnemonic.length <= 24 && validateMnemonic(this.mnemonic)) {
           this.errorMsg = null;
           const seed = mnemonicToSeed(this.mnemonic).toString('hex');
           const address = await this.$store.dispatch('generateWallet', { seed });
-          await browser.storage.local.set({ mnemonic: this.mnemonic });
+          this.$store.commit('SET_MNEMONIC', this.mnemonic);
           const keypair = {
             publicKey: address,
             privateKey: seed,
           };
           await this.$store.dispatch('setLogin', { keypair });
-          this.$router.push('/account');
-        } else {
-          this.loading = false;
-          this.disabled = true;
-          this.errorMsg = `${this.$t('pages.index.accountNotFound')} <br> ${this.$t('pages.index.checkSeed')}`;
+          return setTimeout(() => this.$router.push('/account'), 1000);
         }
+        this.disabled = true;
+        this.errorMsg = `${this.$t('pages.index.accountNotFound')} <br> ${this.$t(
+          'pages.index.checkSeed',
+        )}`;
       } else {
         this.disabled = true;
-        this.errorMsg = `${this.$t('pages.index.accountNotFound')} <br> ${this.$t('pages.index.checkSeed')}`;
+        this.errorMsg = `${this.$t('pages.index.accountNotFound')} <br> ${this.$t(
+          'pages.index.checkSeed',
+        )}`;
       }
+      this.loading = false;
+      return false;
     },
     validateMnemonic() {
       return validateMnemonic(this.mnemonic);

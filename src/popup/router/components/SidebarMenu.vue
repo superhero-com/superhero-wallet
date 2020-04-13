@@ -8,7 +8,9 @@
         <UserAvatar :address="account.publicKey" />
         <div class="ml-8 mr-auto">
           <div class="f-14">{{ $t('pages.appVUE.mainAccount') }}</div>
-          <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">{{ activeAccountName }}</div>
+          <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">
+            {{ activeAccountName }}
+          </div>
         </div>
       </div>
     </li>
@@ -33,7 +35,11 @@
       </router-link>
     </li> -->
     <li>
-      <button :class="showSettingsDropdown && 'opened'" @click="showSettingsDropdown = !showSettingsDropdown" data-cy="settings">
+      <button
+        :class="showSettingsDropdown && 'opened'"
+        @click="showSettingsDropdown = !showSettingsDropdown"
+        data-cy="settings"
+      >
         {{ $t('pages.appVUE.settings') }}
         <Arrow />
       </button>
@@ -134,7 +140,7 @@ export default {
       font-size: 15px;
       line-height: 18px;
       width: 100%;
-      color: $accent-color;
+      color: $secondary-color;
       text-align: left;
       margin: 0;
       padding: 8px 1rem;
@@ -143,7 +149,7 @@ export default {
 
       &.opened,
       &:hover {
-        background-color: $accent-color;
+        background-color: $secondary-color;
         color: $white-color;
       }
 

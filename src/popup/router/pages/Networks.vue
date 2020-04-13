@@ -2,11 +2,18 @@
   <div class="popup">
     <div v-if="mode === 'list'" data-cy="networks">
       <ListItem v-for="(n, key, index) in networks" :key="index" class="network-row">
-        <CheckBox :value="n.name === current.network" type="radio" name="activeNetwork" @click.native="selectNetwork(n.name)" />
-        <div class="mr-auto ml-15 text-left">
+        <CheckBox
+          :value="n.name === current.network"
+          type="radio"
+          name="activeNetwork"
+          @click.native="selectNetwork(n.name)"
+        />
+        <div class="mr-auto text-left">
           <p class="f-16" data-cy="network-name">{{ n.name }}</p>
           <p class="f-12 url" data-cy="network-url"><b>Url:</b> {{ n.url }}</p>
-          <p class="f-12 url" data-cy="network-middleware"><b>MIddleware:</b> {{ n.middlewareUrl }}</p>
+          <p class="f-12 url" data-cy="network-middleware">
+            <b>MIddleware:</b> {{ n.middlewareUrl }}
+          </p>
         </div>
         <ae-dropdown direction="right" v-if="!n.system" data-cy="more">
           <ae-icon name="more" size="20px" slot="button" />
@@ -20,11 +27,23 @@
           </li>
         </ae-dropdown>
       </ListItem>
-      <Button extend @click="mode = 'add'" class="mt-20" data-cy="to-add">{{ $t('pages.network.addNetwork') }}</Button>
+      <Button extend @click="mode = 'add'" class="mt-20" data-cy="to-add">{{
+        $t('pages.network.addNetwork')
+      }}</Button>
     </div>
     <div v-if="mode === 'add' || mode === 'edit'" class="mt-10">
-      <Input :placeholder="$t('pages.network.networkNamePlaceholder')" :label="$t('pages.network.networkNameLabel')" v-model="network.name" data-cy="network" />
-      <Input :placeholder="$t('pages.network.networkUrlPlaceholder')" :label="$t('pages.network.networkUrlLabel')" v-model="network.url" data-cy="url" />
+      <Input
+        :placeholder="$t('pages.network.networkNamePlaceholder')"
+        :label="$t('pages.network.networkNameLabel')"
+        v-model="network.name"
+        data-cy="network"
+      />
+      <Input
+        :placeholder="$t('pages.network.networkUrlPlaceholder')"
+        :label="$t('pages.network.networkUrlLabel')"
+        v-model="network.url"
+        data-cy="url"
+      />
       <Input
         :placeholder="$t('pages.network.networkMiddlewarePlaceholder')"
         :label="$t('pages.network.networkMiddlewareLabel')"
@@ -32,7 +51,15 @@
         data-cy="middleware"
       />
       <Button half @click="cancel" data-cy="cancel">{{ $t('pages.network.cancel') }}</Button>
-      <Button class="danger" half @click="addNetwork" :disabled="!network.name || !network.url || !network.middlewareUrl || network.error !== false" data-cy="connect">
+      <Button
+        class="danger"
+        half
+        @click="addNetwork"
+        :disabled="
+          !network.name || !network.url || !network.middlewareUrl || network.error !== false
+        "
+        data-cy="connect"
+      >
         {{ $t('pages.network.save') }}
       </Button>
       <div v-if="network.error" class="error-msg" v-html="network.error" data-cy="error-msg"></div>
@@ -94,9 +121,12 @@ export default {
       const allNetworks = Object.values(this.networks).filter((n, i) => idx !== i);
       await this.$store.commit(
         'SET_NETWORKS',
-        allNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {})
+        allNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {}),
       );
-      await browser.storage.local.set({ userNetworks: allNetworks.filter(({ name }) => name !== DEFAULT_NETWORK) });
+      this.$store.commit(
+        'SET_USERNETWORKS',
+        allNetworks.filter(({ name }) => name !== DEFAULT_NETWORK),
+      );
     },
     async addNetwork() {
       try {
@@ -108,9 +138,12 @@ export default {
         if (!url.hostname || !middleware.hostname) throw new Error('Invalid hostname');
 
         const exist = (name, idx) =>
-          (this.network.idx ? name === this.network.name && idx !== this.network.idx : name === this.network.name) || this.network.name === DEFAULT_NETWORK;
+          (this.network.idx
+            ? name === this.network.name && idx !== this.network.idx
+            : name === this.network.name) || this.network.name === DEFAULT_NETWORK;
         const allNetworks = Object.values(this.networks);
-        if (allNetworks.find(({ name }, idx) => exist(name, idx))) throw new Error('Network with this name exist');
+        if (allNetworks.find(({ name }, idx) => exist(name, idx)))
+          throw new Error('Network with this name exist');
         const newNetwork = {
           ...defaultNetworks[DEFAULT_NETWORK],
           url: this.network.url,
@@ -122,14 +155,17 @@ export default {
           allNetworks[this.network.idx] = newNetwork;
           await this.$store.commit(
             'SET_NETWORKS',
-            allNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {})
+            allNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {}),
           );
           this.selectNetwork(this.network.name);
         } else {
           allNetworks.push(newNetwork);
           await this.$store.commit('ADD_NETWORK', newNetwork);
         }
-        await browser.storage.local.set({ userNetworks: allNetworks.filter(({ name }) => name !== DEFAULT_NETWORK) });
+        this.$store.commit(
+          'SET_USERNETWORKS',
+          allNetworks.filter(({ name }) => name !== DEFAULT_NETWORK),
+        );
         this.mode = 'list';
       } catch (e) {
         this.network.error = e.message;

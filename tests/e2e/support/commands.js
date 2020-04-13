@@ -1,6 +1,6 @@
 import '../../../src/lib/initPolyfills';
 import uuid from 'uuid';
-import { setPendingTx, formatDate, mockLogin } from '../../../src/popup/utils';
+import { formatDate, mockLogin, mockLogout } from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', onBeforeLoad => {
   cy.visit('chrome/popup/popup', { onBeforeLoad });
@@ -109,6 +109,10 @@ Cypress.Commands.add('login', (options = { balance: 10 }) => {
   cy.openPopup(async () => mockLogin(options));
 });
 
+Cypress.Commands.add('logout', () => {
+  cy.openPopup(async () => mockLogout());
+});
+
 Cypress.Commands.add('shouldRedirect', (url, to) => {
   cy.visit(`chrome/popup/popup#${url}`)
     .url()
@@ -116,7 +120,9 @@ Cypress.Commands.add('shouldRedirect', (url, to) => {
 });
 
 Cypress.Commands.add('openMenu', () => {
-  cy.get('[data-cy=hamburger]').click();
+  cy.get('[data-cy=hamburger]')
+    .click()
+    .wait(1500);
 });
 
 Cypress.Commands.add('closeMenu', (from = 'button') => {
@@ -202,6 +208,17 @@ Cypress.Commands.add('toConfirmTip', (tip = {}) => {
     .buttonShouldNotBeDisabled('[data-cy=send-tip]')
     .get('[data-cy=send-tip]')
     .click()
+    .get('.confirmtip-modal--footer')
+    .should('be.visible')
+    .get('[data-cy=cancel-tip]')
+    .click()
+    .wait(1000)
+    .get('[data-cy=send-tip]')
+    .click()
+    .get('.confirmtip-modal--footer')
+    .should('be.visible')
+    .get('[data-cy=to-confirm]')
+    .click()
     .get('[data-cy=confirm-tip]')
     .should('be.visible')
     .buttonShouldNotBeDisabled('[data-cy=confirm-tip]')
@@ -266,16 +283,7 @@ Cypress.Commands.add(
     new Cypress.Promise(async resolve => {
       await browser.storage.local.set({ [key]: value });
       resolve();
-    })
-);
-
-Cypress.Commands.add(
-  'setPendingTx',
-  tx =>
-    new Cypress.Promise(async resolve => {
-      await setPendingTx(tx);
-      resolve();
-    })
+    }),
 );
 
 Cypress.Commands.add('urlEquals', route => {

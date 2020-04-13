@@ -1,6 +1,9 @@
 function getKeyMaterial(password) {
   const enc = new TextEncoder();
-  return window.crypto.subtle.importKey('raw', enc.encode(password), { name: 'PBKDF2' }, false, ['deriveBits', 'deriveKey']);
+  return window.crypto.subtle.importKey('raw', enc.encode(password), { name: 'PBKDF2' }, false, [
+    'deriveBits',
+    'deriveKey',
+  ]);
 }
 
 function getKey(keyMaterial, salt) {
@@ -14,7 +17,7 @@ function getKey(keyMaterial, salt) {
     keyMaterial,
     { name: 'AES-GCM', length: 256 },
     true,
-    ['encrypt', 'decrypt']
+    ['encrypt', 'decrypt'],
   );
 }
 
@@ -34,7 +37,7 @@ export async function encrypt(message, password, nonce, salt) {
       iv: nonce,
     },
     key,
-    encoded
+    encoded,
   );
 }
 
@@ -49,7 +52,7 @@ export async function decrypt(message, password, nonce, salt) {
         iv: Buffer.from(nonce, 'hex'),
       },
       key,
-      Buffer.from(message, 'hex')
+      Buffer.from(message, 'hex'),
     );
     const dec = new TextDecoder();
     return dec.decode(decrypted);

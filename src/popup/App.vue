@@ -1,17 +1,29 @@
 <template>
   <ae-main :class="aeppPopup ? 'ae-main-popup ae-main-wave' : waveBg ? 'ae-main-wave' : ''">
-    <Header @toggle-sidebar="showSidebar = !showSidebar" />
+    <Header v-if="!mainLoading" @toggle-sidebar="showSidebar = !showSidebar" />
 
     <router-view :key="$route.fullPath" />
 
     <transition name="slide">
-      <div class="menu-overlay" v-if="showSidebar" @click.self="showSidebar = false" data-cy="menu-overlay">
+      <div
+        class="menu-overlay"
+        v-if="showSidebar"
+        @click.self="showSidebar = false"
+        data-cy="menu-overlay"
+      >
         <SidebarMenu @closeMenu="showSidebar = false" />
       </div>
     </transition>
 
     <Loader size="big" :loading="mainLoading" />
     <NodeConnectionStatus />
+    <Tour />
+    <Component
+      :is="component"
+      v-for="{ component, key, props } in modals"
+      :key="key"
+      v-bind="props"
+    />
   </ae-main>
 </template>
 
@@ -19,45 +31,57 @@
 import { mapGetters } from 'vuex';
 import { clearInterval, setInterval } from 'timers';
 import { AEX2_METHODS } from './utils/constants';
-import { postMessage, readWebPageDom } from './utils/connection';
-import { getCurrencies } from './utils/helper';
+import { postMessage } from './utils/connection';
 import { fetchAndSetLocale } from './utils/i18nHelper';
+import { detectBrowser } from './utils/helper';
 import Header from './router/components/Header';
 import SidebarMenu from './router/components/SidebarMenu';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus';
+import Tour from './router/components/Tour';
 
 export default {
   components: {
     Header,
     SidebarMenu,
     NodeConnectionStatus,
+    Tour,
   },
   data: () => ({
     showSidebar: false,
   }),
   computed: {
-    ...mapGetters(['account', 'current', 'mainLoading', 'sdk', 'isLoggedIn', 'aeppPopup', 'notifications']),
+    ...mapGetters([
+      'account',
+      'current',
+      'mainLoading',
+      'sdk',
+      'isLoggedIn',
+      'aeppPopup',
+      'notifications',
+      'notificationsCounter',
+      'backedUpSeed',
+    ]),
     waveBg() {
-      return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(this.$route.path);
+      return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(
+        this.$route.path,
+      );
+    },
+    modals() {
+      return this.$store.getters['modals/opened'];
     },
   },
   async created() {
-    const { language } = await browser.storage.local.get(['language']);
-
-    this.$store.state.current.language = language;
-    if (language) fetchAndSetLocale(language);
-
-    if (process.env.IS_EXTENSION) {
-      readWebPageDom((receiver, sendResponse) => {
-        this.$store.commit('SET_TIPPING_RECEIVER', receiver);
-        sendResponse({ host: receiver.host, received: true });
-      });
-    }
+    this.$watch(
+      ({ current: { language } }) => [language],
+      ([language]) => {
+        fetchAndSetLocale(language);
+      },
+    );
 
     this.checkSdkReady();
-    this.getCurrencies();
+    this.$store.dispatch('getCurrencies');
 
-    if (process.env.IS_EXTENSION) {
+    if (process.env.IS_EXTENSION && detectBrowser() !== 'Firefox') {
       const [update] = await browser.runtime.requestUpdateCheck();
       if (update === 'update_available' && !process.env.RUNNING_IN_TESTS) {
         this.$store.commit('ADD_NOTIFICATION', {
@@ -74,21 +98,26 @@ export default {
         route: '',
       });
     }
-    if (!(await this.$store.dispatch('checkBackupSeed'))) {
+    if (!this.backedUpSeed) {
       this.$store.commit('ADD_NOTIFICATION', {
         title: '',
-        content: `${this.$t('pages.account.youNeedTo')} ${this.$t('pages.account.backup')} ${this.$t('pages.account.yourSeedPhrase')}`,
+        content: `${this.$t('pages.account.youNeedTo')} ${this.$t(
+          'pages.account.backup',
+        )} ${this.$t('pages.account.yourSeedPhrase')}`,
         route: '/securitySettings',
       });
     }
-    const { notifCounter } = await browser.storage.local.get('notifCounter');
-    if (notifCounter !== 0) await browser.storage.local.set({ notifCounter: this.notifications.length });
+    if (this.notificationsCounter !== 0)
+      this.$store.commit('SET_NOTIFICATIONS_COUNTER', this.notifications.length);
   },
   methods: {
     async checkSdkReady() {
       await this.$watchUntilTruly(() => this.sdk);
       if (!window.RUNNING_IN_POPUP && process.env.IS_EXTENSION) {
-        postMessage({ type: AEX2_METHODS.INIT_RPC_WALLET, payload: { address: this.account.publicKey, network: this.current.network } });
+        postMessage({
+          type: AEX2_METHODS.INIT_RPC_WALLET,
+          payload: { address: this.account.publicKey, network: this.current.network },
+        });
       }
       this.pollData();
     },
@@ -104,21 +133,12 @@ export default {
       }, 2500);
       this.$once('hook:beforeDestroy', () => clearInterval(polling));
     },
-    async getCurrencies() {
-      const { currency } = await browser.storage.local.get('currency');
-      const currencies = await getCurrencies();
-      this.$store.commit('SET_CURRENCIES', currencies);
-      this.$store.commit('SET_CURRENCY', {
-        currency: currency || this.current.currency,
-        currencyRate: currency ? currencies[currency] : currencies[this.current.currency],
-      });
-    },
   },
 };
 </script>
 
 <style lang="scss">
-@import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 @import '../common/base';
 @import '../common/extension';
 </style>
@@ -128,7 +148,6 @@ export default {
 
 .ae-main {
   position: relative;
-  max-width: 357px;
   min-height: 600px;
   margin: 0 auto;
 
@@ -137,7 +156,7 @@ export default {
     padding-top: 0;
   }
   &.ae-main-wave {
-    background-position: 100% 100% !important;
+    background-position: center bottom !important;
     background-repeat: no-repeat !important;
     background-image: url('../icons/background-big-wave.png') !important;
   }
@@ -173,6 +192,11 @@ export default {
   }
   .slide-leave-to .sidebar-menu {
     opacity: 0;
+  }
+}
+@media screen and (max-width: 380px) {
+  .ae-main.ae-main-wave {
+    background-position: 100% 100% !important;
   }
 }
 </style>

@@ -12,22 +12,37 @@
         <div class="flex flex-align-center accountTo" v-if="isAddressShow">
           <UserAvatar :address="receiver" />
           <ae-address :value="receiver" v-if="receiver" length="short" class="spendAccountAddr" />
-          <span v-if="!receiver" class="spendAccountAddr">{{ $t('pages.signTransaction.unknownAccount') }}</span>
+          <span v-if="!receiver" class="spendAccountAddr">{{
+            $t('pages.signTransaction.unknownAccount')
+          }}</span>
         </div>
         <div v-else class="flex flex-align-center accountTo">
           <ae-icon name="square" />
-          <span class="spendAccountAddr">{{ data.type == 'contractCreate' ? 'New contract' : 'AENS' }}</span>
+          <span class="spendAccountAddr">{{
+            data.type == 'contractCreate' ? 'New contract' : 'AENS'
+          }}</span>
         </div>
       </ae-list-item>
-      <ae-list-item fill="neutral" class="flex-justify-between flex-align-start flex-direction-column">
+      <ae-list-item
+        fill="neutral"
+        class="flex-justify-between flex-align-start flex-direction-column"
+      >
         <div>
-          <ae-badge v-if="data.type == 'contractCall'">{{ $t('pages.signTransaction.contractCall') }}</ae-badge>
+          <ae-badge v-if="data.type == 'contractCall'">{{
+            $t('pages.signTransaction.contractCall')
+          }}</ae-badge>
           <ae-badge>{{ txType }}</ae-badge>
         </div>
         <div class="balance balanceSpend no-sign" v-if="!isNameTx">{{ amount }} {{ token }}</div>
-        <div class="fiat-rate" v-if="!data.tx.token && !isNameTx">${{ convertCurrency(usdRate, amount) }}</div>
+        <div class="fiat-rate" v-if="!data.tx.token && !isNameTx">
+          ${{ convertCurrency(usdRate, amount) }}
+        </div>
       </ae-list-item>
-      <ae-list-item v-if="data.type == 'nameClaim' || data.type == 'nameUpdate'" fill="neutral" class="flex-justify-between whiteBg  flex-align-center ">
+      <ae-list-item
+        v-if="data.type == 'nameClaim' || data.type == 'nameUpdate'"
+        fill="neutral"
+        class="flex-justify-between whiteBg  flex-align-center "
+      >
         <div class="tx-label">
           {{ $t('pages.signTransaction.name') }}
         </div>
@@ -35,7 +50,11 @@
           <strong>{{ data.tx.name }}</strong>
         </div>
       </ae-list-item>
-      <ae-list-item v-if="data.type == 'nameClaim'" fill="neutral" class="flex-justify-between whiteBg flex-align-center ">
+      <ae-list-item
+        v-if="data.type == 'nameClaim'"
+        fill="neutral"
+        class="flex-justify-between whiteBg flex-align-center "
+      >
         <div class="tx-label ">
           {{ $t('pages.signTransaction.nameSalt') }}
         </div>
@@ -43,7 +62,11 @@
           <strong>{{ data.tx.preclaim.salt }}</strong>
         </div>
       </ae-list-item>
-      <ae-list-item v-if="data.type == 'nameUpdate'" fill="neutral" class="flex-justify-between whiteBg  flex-align-center flex-direction-column">
+      <ae-list-item
+        v-if="data.type == 'nameUpdate'"
+        fill="neutral"
+        class="flex-justify-between whiteBg  flex-align-center flex-direction-column"
+      >
         <div class="tx-label extend text-left">
           {{ $t('pages.signTransaction.nameId') }}
         </div>
@@ -51,7 +74,11 @@
           <strong>{{ data.tx.claim.id }}</strong>
         </div>
       </ae-list-item>
-      <ae-list-item fill="neutral" class="flex-justify-between whiteBg flex-direction-column flex-align-center " v-if="alertMsg == ''">
+      <ae-list-item
+        fill="neutral"
+        class="flex-justify-between whiteBg flex-direction-column flex-align-center "
+        v-if="alertMsg == ''"
+      >
         <div class="flex extend flex-justify-between ">
           <div class="tx-label">{{ $t('pages.signTransaction.fee') }}</div>
           <div class="text-right">
@@ -64,30 +91,42 @@
                     <input class="range-slider__range" type="range"  :min="fee" :max="maxFee" step="0.000001" v-model="selectedFee">
                 </div> -->
       </ae-list-item>
-      <ae-list-item fill="neutral" class="flex-justify-between whiteBg" v-if="alertMsg == '' && !isNameTx">
+      <ae-list-item
+        fill="neutral"
+        class="flex-justify-between whiteBg"
+        v-if="alertMsg == '' && !isNameTx"
+      >
         <div class="tx-label">{{ $t('pages.signTransaction.total') }}</div>
         <div class="text-right">
-          <div class="balance balanceBig balanceTotalSpend no-sign">{{ totalSpend }} {{ token }}</div>
+          <div class="balance balanceBig balanceTotalSpend no-sign">
+            {{ totalSpend }} {{ token }}
+          </div>
           <!-- <div class="fiat-rate" v-if="!data.tx.token">${{convertCurrency(usdRate,totalSpend)}}</div> -->
         </div>
       </ae-list-item>
     </ae-list>
     <div class="btnFixed">
       <Button half @click="cancelTransaction">{{ $t('pages.signTransaction.reject') }}</Button>
-      <Button half @click="signTransaction" class="confirm" :disabled="signDisabled">{{ $t('pages.signTransaction.confirm') }}</Button>
+      <Button half @click="signTransaction" class="confirm" :disabled="signDisabled">{{
+        $t('pages.signTransaction.confirm')
+      }}</Button>
     </div>
     <Loader size="big" :loading="loading" :type="loaderType" :content="loaderContent"></Loader>
     <input type="hidden" class="txHash" :value="hash" />
-    <popup :popupSecondBtnClick="popup.secondBtnClick" :redirect="true"></popup>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
-import { setTxInQueue } from '../../utils';
 import { MAGNITUDE, TX_TYPES, calculateFee } from '../../utils/constants';
-import { convertAmountToCurrency, checkAddress, chekAensName, aettosToAe, aeToAettos } from '../../utils/helper';
+import {
+  convertAmountToCurrency,
+  checkAddress,
+  chekAensName,
+  aettosToAe,
+  aeToAettos,
+} from '../../utils/helper';
 import Button from '../components/Button';
 import UserAvatar from '../components/UserAvatar';
 
@@ -233,7 +272,12 @@ export default {
       return true;
     },
     isNameTx() {
-      return this.data.type === 'namePreClaim' || this.data.type === 'nameBid' || this.data.type === 'nameClaim' || this.data.type === 'nameUpdate';
+      return (
+        this.data.type === 'namePreClaim' ||
+        this.data.type === 'nameBid' ||
+        this.data.type === 'nameClaim' ||
+        this.data.type === 'nameUpdate'
+      );
     },
     convertSelectedFee() {
       return BigNumber(this.selectedFee).shiftedBy(MAGNITUDE);
@@ -255,7 +299,9 @@ export default {
           backend = 'aevm';
         }
         try {
-          this.contractInstance = await this.$helpers.getContractInstance(source, { contractAddress });
+          this.contractInstance = await this.$helpers.getContractInstance(source, {
+            contractAddress,
+          });
           this.contractInstance.setOptions({ backend });
           if (typeof options.waitMined !== 'undefined') {
             this.contractInstance.setOptions({ waitMined: options.waitMined });
@@ -276,27 +322,23 @@ export default {
       }
       return Promise.resolve(false);
     },
-    async setTxInQueue(tx) {
-      const { processingTx } = await browser.storage.local.get('processingTx');
-      let list = [];
-      if (typeof processingTx !== 'undefined' && processingTx.length) {
-        list = [...list, ...processingTx];
-      }
-      list.push(tx);
-      await browser.storage.local.set({ processingTx: list });
-    },
     async init() {
       this.setReceiver();
       if (this.isLedger && this.data.type !== 'txSign') {
-        this.$store.dispatch('popupAlert', { name: 'account', type: 'ledger_support' }).then(() => {
-          if (this.data.popup) {
-            setTimeout(() => {
-              window.close();
-            });
-          } else {
-            this.redirectInExtensionAfterAction();
-          }
-        });
+        this.$store
+          .dispatch('modals/open', {
+            name: 'default',
+            msg: 'Ledger currently cannot sign this type of transaction! ',
+          })
+          .then(() => {
+            if (this.data.popup) {
+              setTimeout(() => {
+                window.close();
+              });
+            } else {
+              this.redirectInExtensionAfterAction();
+            }
+          });
       }
       if (this.data.tx.options && this.data.tx.options.amount) {
         this.data.tx.amount = this.data.tx.options.amount;
@@ -344,7 +386,9 @@ export default {
 
         if (this.data.type === 'contractCreate') {
           this.data.tx.contract = {};
-          this.data.tx.contract.bytecode = (await this.sdk.contractCompile(this.data.tx.source)).bytecode;
+          this.data.tx.contract.bytecode = (
+            await this.sdk.contractCompile(this.data.tx.source)
+          ).bytecode;
           this.txParams = {
             ...this.txParams,
             ownerId: this.account.publicKey,
@@ -359,7 +403,11 @@ export default {
             contractId: this.data.tx.address,
             callerId: this.account.publicKey,
           };
-          await this.setContractInstance(this.data.tx.source, this.data.tx.address, this.data.tx.options);
+          await this.setContractInstance(
+            this.data.tx.source,
+            this.data.tx.address,
+            this.data.tx.options,
+          );
         } else if (this.data.type === 'txSign') {
           let recipientId;
           if (this.data.tx.recipientId.substring(0, 3) === 'ak_') {
@@ -475,36 +523,41 @@ export default {
           if (typeof result === 'object') {
             this.loading = false;
             this.hash = result.hash;
-            setTxInQueue(result.hash);
-            const txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${result.hash}`;
+            this.$store.commit('SET_TX_QUEUE', result.hash);
             const msg = `You have sent ${this.amount} AE`;
-            this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(async () => {
+            this.$store.dispatch('modals/open', { name: 'default', msg }).then(async () => {
               this.$store.commit('SET_AEPP_POPUP', false);
               this.redirectInExtensionAfterAction();
             });
           }
         })
         .catch(async () => {
-          setTxInQueue('error');
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+          this.$store.commit('SET_TX_QUEUE', 'error');
+          this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
           this.loading = false;
         });
     },
     async signSpendTxLedger(amount) {
-      const tx = await this.sdk.spendTx({ senderId: this.account.publicKey, recipientId: this.receiver, amount, fee: this.convertSelectedFee });
+      const tx = await this.sdk.spendTx({
+        senderId: this.account.publicKey,
+        recipientId: this.receiver,
+        amount,
+        fee: this.convertSelectedFee,
+      });
       const sign = await this.$store.dispatch('ledgerSignTransaction', { tx });
       this.loading = false;
       if (sign.success) {
-        const txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${sign.res.hash}`;
         const msg = `You have sent ${this.amount} AE`;
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(async () => {
+        this.$store.dispatch('modals/open', { name: 'default', msg }).then(async () => {
           this.$store.commit('SET_AEPP_POPUP', false);
           this.redirectInExtensionAfterAction();
         });
       } else {
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' }).then(() => {
-          this.redirectInExtensionAfterAction();
-        });
+        this.$store
+          .dispatch('modals/open', { name: 'default', type: 'transaction-failed' })
+          .then(() => {
+            this.redirectInExtensionAfterAction();
+          });
       }
     },
     async contractCallStatic(tx) {
@@ -516,7 +569,11 @@ export default {
         if (tx.options && tx.options.amount) {
           options = { ...options, ...tx.options, amount: aeToAettos(this.data.tx.options.amount) };
         }
-        const call = await this.$helpers.contractCall({ instance: this.contractInstance, method: tx.method, params: [...tx.params, options] });
+        const call = await this.$helpers.contractCall({
+          instance: this.contractInstance,
+          method: tx.method,
+          params: [...tx.params, options],
+        });
         const decoded = await call.decode();
         call.decoded = decoded;
         this.sending = true;
@@ -544,11 +601,19 @@ export default {
 
         options = { ...options, fee: this.convertSelectedFee };
         if (!this.contractInstance) {
-          await this.setContractInstance(this.data.tx.source, this.data.tx.address, this.data.tx.options);
+          await this.setContractInstance(
+            this.data.tx.source,
+            this.data.tx.address,
+            this.data.tx.options,
+          );
         }
-        call = await this.$helpers.contractCall({ instance: this.contractInstance, method: this.data.tx.method, params: [...this.data.tx.params, options] });
+        call = await this.$helpers.contractCall({
+          instance: this.contractInstance,
+          method: this.data.tx.method,
+          params: [...this.data.tx.params, options],
+        });
 
-        setTxInQueue(call.hash);
+        this.$store.commit('SET_TX_QUEUE', call.hash);
         const decoded = await call.decode();
         call.decoded = decoded;
         if (this.data.popup) {
@@ -557,10 +622,10 @@ export default {
           this.port.postMessage({ ...res });
         }
       } catch (err) {
-        setTxInQueue('error');
+        this.$store.commit('SET_TX_QUEUE', 'error');
         this.errorTx.error.message = typeof err.message !== 'undefined' ? err.message : err;
         this.sending = true;
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
       }
       this.redirectInExtensionAfterAction();
     },
@@ -568,15 +633,24 @@ export default {
       let deployed;
       if (this.isLedger) {
         const { ownerId, amount, gas, code, callData, deposit } = this.txParams;
-        const { tx } = await this.sdk[TX_TYPES[this.data.type]]({ ownerId, amount, gas, code, callData, deposit });
+        const { tx } = await this.sdk[TX_TYPES[this.data.type]]({
+          ownerId,
+          amount,
+          gas,
+          code,
+          callData,
+          deposit,
+        });
         await this.$store.dispatch('ledgerSignTransaction', { tx });
       } else {
         try {
-          deployed = await this.contractInstance.deploy([...this.data.tx.init], { fee: this.convertSelectedFee });
-          setTxInQueue(deployed.transaction);
+          deployed = await this.contractInstance.deploy([...this.data.tx.init], {
+            fee: this.convertSelectedFee,
+          });
+          this.$store.commit('SET_TX_QUEUE', deployed.transaction);
         } catch (err) {
-          setTxInQueue('error');
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'transaction_failed' });
+          this.$store.commit('SET_TX_QUEUE', 'error');
+          this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
         }
       }
 
@@ -589,8 +663,7 @@ export default {
         if (deployed) {
           this.deployed = deployed.address;
           const msg = `Contract deployed at address <br> ${deployed.address}`;
-          const noRedirect = this.data.tx.contractType === 'fungibleToken' && this.data.tx.tokenRegistry;
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_deploy', msg, noRedirect, data: deployed.address });
+          this.$store.dispatch('modals/open', { name: 'default', msg });
         }
         if (this.data.tx.contractType !== 'fungibleToken') {
           this.redirectInExtensionAfterAction();
@@ -616,8 +689,10 @@ export default {
     },
     async namePreclaim() {
       try {
-        const preclaim = await this.sdk.aensPreclaim(this.data.tx.name, { fee: this.convertSelectedFee });
-        setTxInQueue(preclaim.hash);
+        const preclaim = await this.sdk.aensPreclaim(this.data.tx.name, {
+          fee: this.convertSelectedFee,
+        });
+        this.$store.commit('SET_TX_QUEUE', preclaim.hash);
         const tx = {
           popup: false,
           tx: {
@@ -629,8 +704,8 @@ export default {
         };
         this.redirectToTxConfirm(tx);
       } catch (err) {
-        setTxInQueue('error');
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });
+        this.$store.commit('SET_TX_QUEUE', 'error');
+        this.$store.dispatch('modals/open', { name: 'default', msg: err.message });
         this.$store.commit('SET_AEPP_POPUP', false);
         this.$router.push('/names');
       }
@@ -640,20 +715,23 @@ export default {
         try {
           await this.sdk.aensBid(this.data.tx.name, this.data.tx.BigNumberAmount);
         } catch (err) {
-          setTxInQueue('error');
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });
+          this.$store.commit('SET_TX_QUEUE', 'error');
+          this.$store.dispatch('modals/open', { name: 'default', msg: err.message });
         }
       } else {
         try {
-          const claim = await this.data.tx.preclaim.claim({ waitMined: false, fee: this.convertSelectedFee });
-          setTxInQueue(claim.hash);
+          const claim = await this.data.tx.preclaim.claim({
+            waitMined: false,
+            fee: this.convertSelectedFee,
+          });
+          this.$store.commit('SET_TX_QUEUE', claim.hash);
         } catch (err) {
           let msg = err.message;
           if (msg.includes('is not enough to execute')) {
             msg = this.$t('pages.signTransaction.balanceError');
           }
-          setTxInQueue('error');
-          this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg });
+          this.$store.commit('SET_TX_QUEUE', 'error');
+          this.$store.dispatch('modals/open', { name: 'default', msg });
         }
       }
       this.$store.commit('SET_AEPP_POPUP', false);
@@ -668,15 +746,11 @@ export default {
         } else if (this.data.nameUpdateType === 'updatePointer') {
           update = await nameObject.update(this.data.tx.pointers, { extendPointers: true });
         }
-        setTxInQueue(update.hash);
-        await this.$store.dispatch('popupAlert', {
-          name: 'account',
-          type: 'added_success',
-        });
-        await this.$store.dispatch('removePendingName', { hash: this.data.tx.hash });
+        this.$store.commit('SET_TX_QUEUE', update.hash);
+        await this.$store.dispatch('modals/open', { name: 'default', msg: 'Successfully added!' });
       } catch (err) {
-        setTxInQueue('error');
-        this.$store.dispatch('popupAlert', { name: 'spend', type: 'tx_error', msg: err.message });
+        this.$store.commit('SET_TX_QUEUE', 'error');
+        this.$store.dispatch('modals/open', { name: 'default', msg: err.message });
       }
       this.$store.commit('SET_AEPP_POPUP', false);
       this.$router.push('/names');
@@ -701,10 +775,9 @@ export default {
                 method: this.data.tx.method,
                 params: [...this.data.tx.params, { fee: this.convertSelectedFee }],
               });
-              setTxInQueue(call.hash);
+              this.$store.commit('SET_TX_QUEUE', call.hash);
               const msg = `You have sent ${this.data.tx.amount} ${this.data.tx.token}`;
-              const txUrl = `${this.network[this.current.network].explorerUrl}/transactions/${call.hash}`;
-              this.$store.dispatch('popupAlert', { name: 'spend', type: 'success_transfer', msg, data: txUrl }).then(() => {
+              this.$store.dispatch('modals/open', { name: 'default', msg }).then(() => {
                 this.$store.commit('SET_AEPP_POPUP', false);
                 this.$router.push('/account');
               });
@@ -733,7 +806,9 @@ export default {
       return byteCode;
     },
     async getDeployedByteCode(address) {
-      const res = await fetch(`https://testnet.mdw.aepps.com/middleware/contracts/transactions/address/${address}`);
+      const res = await fetch(
+        `https://testnet.mdw.aepps.com/middleware/contracts/transactions/address/${address}`,
+      );
       const txs = await res.json();
       const byteCode = txs.transactions.find(tx => tx.tx.type === 'ContractCreateTx');
       return byteCode;

@@ -1,140 +1,170 @@
 <template>
   <div>
-    <ae-list-item fill="neutral" class="list-item-transaction" :class="transactionData.hash">
+    <li fill="neutral" class="list-item-transaction">
       <div class="holder">
         <span class="amount">
           <span data-cy="amount">{{ txAmount }}</span>
           {{ $t('pages.appVUE.aeid') }}
-          <span class="text" data-cy="currency-amount">( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )</span>
+          <span class="text" data-cy="currency-amount">
+            ( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )
+          </span>
         </span>
-        <span class="status">{{ txType == 'Sent' ? $t('pages.recentTransactions.sentStatus') : $t('pages.recentTransactions.receivedStatus') }}</span>
-        <span class="time" data-cy="time">{{ transactionDate }}</span>
+        <span class="status">{{ status }}</span>
+        <span class="time" data-cy="time">{{ transaction.time | formatDate }}</span>
       </div>
-      <div class="holder">
+      <div class="holder tx-info">
         <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
-        <span class="seeTransaction" @click="seeTx(transactionData.hash)">
+        <span class="seeTransaction" @click="seeTx()">
           <img src="../../../icons/eye.png" />
         </span>
       </div>
-    </ae-list-item>
+    </li>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import { convertToAE } from '../../utils/helper';
+import { aettosToAe } from '../../utils/helper';
 import { formatDate } from '../../utils';
 import openUrl from '../../utils/openUrl';
 
 export default {
-  props: ['transactionData', 'recent', 'dark'],
-  data() {
-    return {
-      status: '',
-      tipUrl: null,
-      tipAmount: 0,
-      tipComment: null,
-    };
+  props: {
+    transaction: {
+      type: Object,
+      required: true,
+    },
   },
+  data: () => ({ tip: null }),
+  filters: { formatDate },
   async created() {
-    await this.$watchUntilTruly(() => this.sdk);
-    this.getEventData();
+    if (!this.transaction.pending) {
+      await this.$watchUntilTruly(() => this.sdk);
+      this.getEventData();
+    }
   },
   computed: {
-    ...mapGetters(['account', 'popup', 'sdk', 'current', 'network', 'transactions', 'tipping']),
-    txType() {
+    ...mapGetters(['account', 'sdk', 'current', 'network']),
+    status() {
       if (
-        this.transactionData.tx.sender_id === this.account.publicKey ||
-        this.transactionData.tx.account_id === this.account.publicKey ||
-        this.transactionData.tx.owner_id === this.account.publicKey ||
-        this.transactionData.tx.caller_id === this.account.publicKey
+        this.transaction.tx.sender_id === this.account.publicKey ||
+        this.transaction.tx.account_id === this.account.publicKey ||
+        this.transaction.tx.owner_id === this.account.publicKey ||
+        this.transaction.tx.caller_id === this.account.publicKey
       ) {
-        return 'Sent';
+        return this.$t('pages.transactions.sent');
       }
-      return 'Received';
+      if (this.transaction.pending) {
+        return this.$t('pages.transactions.pending');
+      }
+      return this.$t('pages.transactions.received');
     },
     txAmount() {
-      const amount = this.transactionData.tx.amount ? this.transactionData.tx.amount : 0;
-      return convertToAE(amount).toFixed(3);
+      const amount = this.transaction.tx.amount ? this.transaction.tx.amount : 0;
+      return (+aettosToAe(amount)).toFixed(2);
     },
     txAmountToCurrency() {
-      const amount = this.transactionData.tx.amount ? this.transactionData.tx.amount : 0;
-      const { fee } = this.transactionData.tx;
-      const txamount = (amount + fee) / 10 ** 18;
-      return (txamount * this.current.currencyRate).toFixed(3);
+      const amount = this.transaction.tx.amount ? this.transaction.tx.amount : 0;
+      const fee = this.transaction.tx.fee || 0;
+      const txamount = aettosToAe(amount + fee);
+      return (txamount * this.current.currencyRate).toFixed(2);
     },
-    transactionDate() {
-      return formatDate(this.transactionData.time);
+    tipUrl() {
+      return this.transaction.tipUrl ? this.transaction.tipUrl : this.tip;
     },
   },
   methods: {
     async getEventData() {
-      const { log } = await this.sdk.tx(this.transactionData.hash, true);
-      this.tipUrl = decode(log[0].data).toString();
-      this.tipAmount = convertToAE(log[0].topics[2]);
+      const { log } = await this.sdk.tx(this.transaction.hash, true);
+      if (log && log.length) {
+        this.tip = decode(log[0].data).toString();
+      }
     },
     visitTipUrl() {
       if (this.tipUrl) {
         openUrl(this.tipUrl);
       }
     },
-    seeTx(txHash) {
-      openUrl(`${this.network[this.current.network].explorerUrl}/transactions/${txHash}`);
+    seeTx() {
+      openUrl(
+        `${this.network[this.current.network].explorerUrl}/transactions/${this.transaction.hash}`,
+      );
     },
   },
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import '../../../common/variables';
-.list-item-transaction:first-child {
-  border-top: 1px solid $bg-color !important;
-}
 .list-item-transaction {
   display: inline-block;
-  padding: 5px 0;
-  border-color: $bg-color !important;
+  padding: 10px 0;
+  border-color: $bg-color;
   text-decoration: none;
   list-style: none;
   cursor: default;
   border-top: 1px solid transparent;
 
+  &:first-child {
+    border-top: 1px solid $tx-border-color !important;
+  }
+
   .holder {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 14px;
+    line-height: 19px;
+    font-weight: 500;
+
+    &.tx-info {
+      line-height: 16px;
+      font-weight: 400;
+    }
+
     .url {
       display: inline-block;
       width: 284px;
       white-space: nowrap;
       overflow: hidden !important;
       text-overflow: ellipsis;
-      color: $accent-color;
+      color: $text-color;
       font-size: 12px;
       text-align: left;
       cursor: pointer;
     }
+
     .seeTransaction {
       margin-left: 10px;
       cursor: pointer;
     }
+
     .time {
       color: $text-color !important;
       font-size: 12px;
       padding-top: 1px;
     }
+
     .date {
       color: $text-color !important;
       font-size: 12px;
       padding-top: 1px;
     }
+
     .amount {
       color: $secondary-color !important;
       font-size: 14px;
     }
+
+    .text {
+      color: $white-color !important;
+    }
+
     .status {
-      color: $text-color !important;
+      color: $white-color !important;
+      margin-left: 4px;
+      margin-right: auto;
     }
   }
 }

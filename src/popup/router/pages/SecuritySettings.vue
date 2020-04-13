@@ -9,15 +9,18 @@
           {{ $t('pages.securitySettings.seedRecoveryBtn') }}
         </Button>
       </div>
-      <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
       <div v-if="loading" class="loading">
         <ae-loader />
       </div>
     </div>
-    <Modal v-if="type == 3" :modal="modal">
+    <div v-if="type == 3 && modal.visible">
       <div slot="content">
-        <small v-if="seedPhrase == '' && !loading && type == '3'">{{ $t('pages.securitySettings.seedPhraseWarning') }}</small>
-        <h3 v-if="seedPhrase != '' && type == '3'">{{ $t('pages.securitySettings.seedPhrase') }}</h3>
+        <small v-if="seedPhrase == '' && !loading && type == '3'">{{
+          $t('pages.securitySettings.seedPhraseWarning')
+        }}</small>
+        <h3 v-if="seedPhrase != '' && type == '3'">
+          {{ $t('pages.securitySettings.seedPhrase') }}
+        </h3>
         <Alert :fill="alert.fill" :show="alert.show && !loading">
           <div slot="content">
             {{ alert.content }}
@@ -25,7 +28,11 @@
         </Alert>
         <ae-panel style="margin:0" class="mnemonics">
           <p style="word-spacing: 10px;">{{ seedPhrase }}</p>
-          <ae-button style="float: right;margin: 10px 0 30px 0;" face="toolbar" v-clipboard:copy="seedPhrase">
+          <ae-button
+            style="float: right;margin: 10px 0 30px 0;"
+            face="toolbar"
+            v-clipboard:copy="seedPhrase"
+          >
             <ae-icon name="copy" />
             {{ $t('pages.securitySettings.copy') }}
           </ae-button>
@@ -35,11 +42,14 @@
         </span>
         <p>{{ $t('pages.seedPhrase.dontLose') }}</p>
         <small>{{ $t('pages.seedPhrase.nextScreen') }}</small>
-        <button @click="verifySeed" class="primary-button">{{ $t('pages.seedPhrase.verifySeed') }}</button>
-        <button @click="navigateToAccount" class="primary-button">{{ $t('pages.seedPhrase.doneThis') }}</button>
-        <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
+        <button @click="verifySeed" class="primary-button">
+          {{ $t('pages.seedPhrase.verifySeed') }}
+        </button>
+        <button @click="navigateToAccount" class="primary-button">
+          {{ $t('pages.seedPhrase.doneThis') }}
+        </button>
       </div>
-    </Modal>
+    </div>
     <div v-if="type == 4">
       <h3 class="phraseTitle">{{ $t('pages.seedPhrase.confirmSeedPhrase') }}</h3>
       <ae-phraser>
@@ -60,16 +70,24 @@
         <ae-badge class="seedBadge selected">...</ae-badge>
       </ae-phraser>
       <ae-phraser v-bind="seedError">
-        <ae-badge class="seedBadge" v-for="(seed, index) in selectedSeed" v-bind:key="seed.id" @click.native="removeSeed(seed.parent, index)"
+        <ae-badge
+          class="seedBadge"
+          v-for="(seed, index) in selectedSeed"
+          v-bind:key="seed.id"
+          @click.native="removeSeed(seed.parent, index)"
           >{{ seed.name }} <ae-icon name="close" class="seedClose"
         /></ae-badge>
       </ae-phraser>
-      <button @click="verifyLastStep" class="primary-button" style="width:50%">{{ $t('pages.seedPhrase.verify') }}</button>
+      <button @click="verifyLastStep" class="primary-button" style="width:50%">
+        {{ $t('pages.seedPhrase.verify') }}
+      </button>
     </div>
     <div v-if="seed_verified && type == 5">
       <ae-icon style="color:#e911ff; font-size:100px;" name="check" />
       <p>{{ $t('pages.seedPhrase.seedConfirmed') }}</p>
-      <button @click="navigateToAccount" class="primary-button">{{ $t('pages.seedPhrase.toDashboard') }}</button>
+      <button @click="navigateToAccount" class="primary-button">
+        {{ $t('pages.seedPhrase.toDashboard') }}
+      </button>
     </div>
   </div>
 </template>
@@ -113,7 +131,19 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'network', 'current', 'transactions', 'subaccounts', 'wallet', 'activeAccountName', 'activeAccount', 'popup']),
+    ...mapGetters([
+      'account',
+      'balance',
+      'network',
+      'current',
+      'transactions',
+      'subaccounts',
+      'wallet',
+      'activeAccountName',
+      'activeAccount',
+      'popup',
+      'mnemonic',
+    ]),
   },
   created() {},
   methods: {
@@ -122,11 +152,10 @@ export default {
       this.modal.visible = true;
       this.modal.title = this.$t('pages.securitySettings.showSeedPhrase');
       this.loading = true;
-      const { mnemonic } = await browser.storage.local.get('mnemonic');
-      if (mnemonic) {
-        this.seedPhrase = mnemonic;
-        this.setAlertData('alternative', true, mnemonic);
-        const seedPhraseToArray = mnemonic.split(' ');
+      if (this.mnemonic) {
+        this.seedPhrase = this.mnemonic;
+        this.setAlertData('alternative', true, this.mnemonic);
+        const seedPhraseToArray = this.mnemonic.split(' ');
         this.seeds = this.seeds.map((seed, i) => ({ ...seed, name: seedPhraseToArray[i] }));
       }
     },
@@ -176,7 +205,7 @@ export default {
           this.loading = true;
           this.seed_verified = true;
           this.type = '5';
-          browser.storage.local.set({ backed_up_Seed: true });
+          this.$store.commit('SET_BACKED_UP_SEED', true);
         }
       } else {
         this.seedError = { error: 'Oops! Incorrect length of words!' };

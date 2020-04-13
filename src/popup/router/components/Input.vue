@@ -1,6 +1,8 @@
 <template>
   <div class="text-left" :class="labelPosition ? 'input-group' : ''">
-    <label class="label" v-if="label" :class="labelPosition ? `label-${labelPosition}` : ''">{{ label }}</label>
+    <label class="label" v-if="label" :class="labelPosition ? `label-${labelPosition}` : ''">{{
+      label
+    }}</label>
     <input
       type="text"
       class="input"
@@ -59,10 +61,10 @@ input.input {
   margin-right: auto;
 }
 .input:focus {
-  border-color: $accent-color !important;
+  border-color: $input-focus-color !important;
 }
 .input.has-error {
-  border-color: $secondary-color !important;
+  border-color: $input-error-color !important;
 }
 .input.sm {
   font-size: 14px;

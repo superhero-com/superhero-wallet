@@ -33,15 +33,18 @@
       </ae-list-item>
     </ul>
     <div class="btnFixed">
-      <Button half class="reject" @click="cancel" data-cy="deny">{{ $t('pages.connectConfirm.cancelButton') }}</Button>
-      <Button half @click="connect" data-cy="accept">{{ $t('pages.connectConfirm.confirmButton') }}</Button>
+      <Button half class="reject" @click="cancel" data-cy="deny">{{
+        $t('pages.connectConfirm.cancelButton')
+      }}</Button>
+      <Button half @click="connect" data-cy="accept">{{
+        $t('pages.connectConfirm.confirmButton')
+      }}</Button>
     </div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import { setPermissionForAccount } from '../../../utils/helper';
 import getPopupProps from '../../../utils/getPopupProps';
 import Button from '../../components/Button';
 import UserAvatar from '../../components/UserAvatar';
@@ -65,14 +68,19 @@ export default {
       this.data.reject(false);
     },
     async connect() {
-      await setPermissionForAccount(this.data.host, this.account.publicKey);
+      await this.$store.dispatch('setPermissionForAccount', {
+        host: this.data.host,
+        account: this.account.publicKey,
+      });
       this.data.resolve(true);
     },
   },
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
     faviconUrl() {
-      return typeof this.data.icons !== 'undefined' ? this.data.icons : `${this.data.protocol}//${this.data.host}/favicon.ico`;
+      return typeof this.data.icons !== 'undefined'
+        ? this.data.icons
+        : `${this.data.protocol}//${this.data.host}/favicon.ico`;
     },
   },
 };

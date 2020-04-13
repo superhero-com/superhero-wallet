@@ -1,7 +1,7 @@
 const txs = [
-  { hash: '', amount: 0.1, domain: 'localhost:5000', time: Date.now(), type: 'tip' },
-  { hash: '', amount: 2, domain: 'localhost:8000', time: Date.now(), type: 'tip' },
-  { hash: '', amount: 10, domain: 'localhost:8080', time: Date.now(), type: 'tip' },
+  { hash: 'th_', amount: 0.1, domain: 'localhost:5000', time: Date.now(), type: 'tip' },
+  { hash: 'th_', amount: 2, domain: 'localhost:8000', time: Date.now(), type: 'tip' },
+  { hash: 'th_', amount: 10, domain: 'localhost:8080', time: Date.now(), type: 'tip' },
 ];
 
 describe('Tests cases not connected to specific page', () => {
@@ -25,15 +25,20 @@ describe('Tests cases not connected to specific page', () => {
   ].forEach(({ path, redirect }) => {
     it(`${redirect ? '' : 'no '}redirect to last visited route ${path}`, () => {
       cy.login()
+        .wait(2000)
         .visit(`chrome/popup/popup#${path}`)
+        .wait(2000)
         .visit(`chrome/popup/popup`)
+        .wait(2000)
         .urlEquals(redirect ? path : '/account');
     });
   });
 
   txs.forEach(tx => {
     it('Show pending tx', () => {
-      cy.setPendingTx(tx).login();
+      cy.login({ tx })
+        .get('[data-cy=pending-txs]')
+        .should('be.visible');
     });
   });
 

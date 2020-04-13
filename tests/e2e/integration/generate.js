@@ -1,6 +1,6 @@
 describe('Test cases for generate wallet page', () => {
   beforeEach(() => {
-    cy.openPopup();
+    cy.logout().openPopup();
   });
 
   it('Open generate wallet page', () => {
