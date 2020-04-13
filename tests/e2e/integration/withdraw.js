@@ -10,19 +10,23 @@ describe('Test cases for Withdraw Page', () => {
   });
 
   it('Check Currency Dropdown Button', () => {
-    cy.get('[data-cy=toggle-currency-dropdown]')
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(3000)
+      .get('[data-cy=toggle-currency-dropdown]')
       .should('be.visible')
       .click()
-      .get('#currencies')
+      .get('[data-cy=currency-dropdown]')
       .should('have.class', 'show')
       .get('[data-cy=toggle-currency-dropdown]')
       .click()
-      .get('#currencies')
+      .get('[data-cy=currency-dropdown]')
       .should('not.have.class', 'show');
   });
 
   it('Check copy button', () => {
-    cy.get('[data-cy=copy]')
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(3000)
+      .get('[data-cy=copy]')
       .click()
       .get('.copied-alert')
       .should('contain', 'Copied!');
@@ -40,7 +44,7 @@ describe('Test cases for Withdraw Page', () => {
       .inputShouldHaveError('[data-cy=input-number]')
       .get('[data-cy=amount-currency]')
       .invoke('text')
-      .then(text => expect(text).to.eq('0.000 USD'))
+      .then(text => expect(text).to.eq('0.00 USD'))
       .enterAmountSend(0)
       .get('[data-cy=input-number]')
       .should('have.class', 'has-error')
@@ -66,7 +70,7 @@ describe('Test cases for Withdraw Page', () => {
       .should('have.class', 'disabled')
       .enterAddress('ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
       .should('not.have.class', 'has-error')
-      .enterAmountSend(0.1)
+      .enterAmountSend(0.01)
       .should('not.have.class', 'has-error')
       .get('[data-cy=review-withdraw]')
       .should('not.have.class', 'disabled')
@@ -80,7 +84,7 @@ describe('Test cases for Withdraw Page', () => {
       .should('have.class', 'disabled')
       .enterAddress('ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
       .should('not.have.class', 'has-error')
-      .enterAmountSend(0.1)
+      .enterAmountSend(0.01)
       .should('not.have.class', 'has-error')
       .get('[data-cy=review-withdraw]')
       .should('not.have.class', 'disabled')
@@ -94,7 +98,7 @@ describe('Test cases for Withdraw Page', () => {
       .get('[data-cy=review-receivingAddress]')
       .should('have.text', 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
       .get('[data-cy=review-amount]')
-      .should('have.text', '0.100 AE')
+      .should('have.text', '0.010 AE')
 
       // edit sending address to .chain name
       .get('[data-cy=reivew-editTxDetails-button]')

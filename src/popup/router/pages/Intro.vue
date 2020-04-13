@@ -3,7 +3,8 @@
     <div class="createWallet-holder">
       <div v-show="step === 1">
         <h2>
-          <Claim /> {{ $t('pages.intro.receive') }} <span class="ml-10 secondary-text"> {{ $t('pages.appVUE.aeid') }} </span>
+          <Claim /> {{ $t('pages.intro.receive') }}
+          <span class="ml-10 secondary-text"> {{ $t('pages.appVUE.aeid') }} </span>
         </h2>
         <div class="text-info">
           <span>
@@ -14,7 +15,8 @@
 
       <div v-show="step === 2">
         <h2>
-          <Heart /> {{ $t('pages.send.send') }} <span class="ml-10 secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+          <Heart /> {{ $t('pages.send.send') }}
+          <span class="ml-10 secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
         </h2>
         <div class="text-info">
           <span>
@@ -26,7 +28,9 @@
       <div v-show="step === 3">
         <div class="text-info">
           <span>
-            {{ $t('pages.intro.step3text-1') }} <span class="secondary-text aeid">{{ $t('pages.appVUE.aeid') }}</span> {{ $t('pages.intro.step3text-2') }}
+            {{ $t('pages.intro.step3text-1') }}
+            <span class="secondary-text aeid">{{ $t('pages.appVUE.aeid') }}</span>
+            {{ $t('pages.intro.step3text-2') }}
           </span>
         </div>
         <div class="mt-32 text-left">
@@ -42,8 +46,16 @@
           <li @click="step = 3" :class="step === 3 ? 'current' : ''"><a></a></li>
         </ul>
         <RightArrow @click="step = step + 1" class="right-arrow" v-show="step < 3" data-cy="next" />
-        <button class="skip-button" @click="step = 3" v-show="step < 3" data-cy="skip">{{ $t('pages.intro.skip') }}</button>
-        <Button style="margin-top: 30px;" @click="createWallet" v-if="step === 3" data-cy="generate-wallet">{{ $t('pages.intro.generateWallet') }}</Button>
+        <button class="skip-button" @click="step = 3" v-show="step < 3" data-cy="skip">
+          {{ $t('pages.intro.skip') }}
+        </button>
+        <Button
+          style="margin-top: 30px;"
+          @click="createWallet"
+          v-if="step === 3"
+          data-cy="generate-wallet"
+          >{{ $t('pages.intro.generateWallet') }}</Button
+        >
       </div>
 
       <div v-show="step === 4">
@@ -56,7 +68,9 @@
         </div>
 
         <p class="last-msg-enjoy">{{ $t('pages.intro.step4text-4') }}</p>
-        <Button @click="$router.push('/account')" data-cy="proceed-to-wallet">{{ $t('pages.intro.toHome') }}</Button>
+        <Button @click="$router.push('/account')" data-cy="proceed-to-wallet">{{
+          $t('pages.intro.toHome')
+        }}</Button>
       </div>
     </div>
   </div>
@@ -90,12 +104,12 @@ export default {
       this.mnemonic = generateMnemonic();
       const seed = mnemonicToSeed(this.mnemonic).toString('hex');
       const address = await this.$store.dispatch('generateWallet', { seed });
-      await browser.storage.local.set({ mnemonic: this.mnemonic });
+      this.$store.commit('SET_MNEMONIC', this.mnemonic);
       const keypair = {
         publicKey: address,
         privateKey: seed,
       };
-      this.$store.dispatch('setLogin', { keypair });
+      await this.$store.dispatch('setLogin', { keypair });
       this.next();
     },
     prev() {

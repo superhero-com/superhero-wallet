@@ -1,17 +1,23 @@
 <template>
   <div class="header" v-if="showNavigation && !aeppPopup">
     <div class="content" :class="{ isLoggedIn }">
-      <Arrow v-if="title" @click="goBack" class="back-arrow" data-cy="back-arrow" />
+      <Arrow v-if="title && !tourRunning" @click="goBack" class="back-arrow" data-cy="back-arrow" />
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
 
       <div class="title">
         <span v-if="title">{{ $t(`pages.titles.${title}`) }}</span>
-        <span v-else>{{ $t('pages.appVUE.walletName') }}</span>
+        <span v-else>{{ $t('pages.titles.home') }}</span>
       </div>
 
       <div v-if="isLoggedIn">
-        <span class="noti-holder" @click="notifications.length && $router.push('/notifications')" data-cy="noti">
-          <span v-if="notifCounter" class="noti-count" data-cy="noti-count">{{ notifications.length }}</span>
+        <span
+          class="noti-holder"
+          @click="notifications.length && $router.push('/notifications')"
+          data-cy="noti"
+        >
+          <span v-if="notificationsCounter" class="noti-count" data-cy="noti-count">{{
+            notifications.length
+          }}</span>
           <Bell />
         </span>
         <button @click="$emit('toggle-sidebar')">
@@ -23,7 +29,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import Arrow from '../../../icons/arrow.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
 import Hamburger from '../../../icons/hamburger.svg?vue-component';
@@ -32,18 +38,11 @@ import Logo from '../../../icons/logo-small.svg?vue-component';
 export default {
   components: { Arrow, Bell, Hamburger, Logo },
   data() {
-    return {
-      notifCounter: null,
-    };
-  },
-  created() {
-    setInterval(async () => {
-      const { notifCounter } = await browser.storage.local.get('notifCounter');
-      this.notifCounter = notifCounter;
-    }, 4000);
+    return {};
   },
   computed: {
-    ...mapGetters(['isLoggedIn', 'aeppPopup', 'notifications']),
+    ...mapGetters(['isLoggedIn', 'aeppPopup', 'notifications', 'notificationsCounter']),
+    ...mapState(['tourRunning']),
     title() {
       return this.$route.meta.title;
     },
@@ -79,13 +78,10 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    .intro_style {
-      position: absolute;
-      left: 20px;
-    }
     &:not(.isLoggedIn) .title {
       margin-left: auto;
       margin-right: auto;
+      font-weight: 500;
     }
 
     .back-arrow {
@@ -101,10 +97,14 @@ export default {
       }
 
       .title {
-        position: absolute;
-        left: 0;
-        right: 0;
-        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        font-weight: 500;
+      }
+
+      .start-onboarding {
+        margin-left: 13px;
+        cursor: pointer;
       }
     }
 
@@ -131,9 +131,10 @@ export default {
       height: 16px;
       text-align: center;
       vertical-align: middle;
-      left: -8px;
-      top: 2px;
-      line-height: 16px;
+      left: -10px;
+      top: 0px;
+      line-height: 15px;
+      border: 1px solid $nav-bg-color;
     }
   }
 }

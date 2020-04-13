@@ -1,10 +1,15 @@
-import { uniqBy, flatten } from 'lodash-es';
+import { uniqBy, flatten, uniq } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import * as types from './mutation-types';
-import * as popupMessages from '../popup/utils/popup-messages';
-import { convertToAE, stringifyForStorage, parseFromStorage, aettosToAe } from '../popup/utils/helper';
+import {
+  convertToAE,
+  stringifyForStorage,
+  parseFromStorage,
+  aettosToAe,
+  getAddressByNameEntry,
+} from '../popup/utils/helper';
 import { BACKEND_URL, DEFAULT_NETWORK } from '../popup/utils/constants';
-import { postMessage } from '../popup/utils/connection';
+import { postMessage, postMessageToContent } from '../popup/utils/connection';
 
 export default {
   setAccount({ commit }, payload) {
@@ -18,154 +23,24 @@ export default {
     commit(types.SET_SUBACCOUNTS, payload);
   },
   async switchNetwork({ commit }, payload) {
-    await browser.storage.local.set({ activeNetwork: payload });
     return commit(types.SWITCH_NETWORK, payload);
   },
   async updateBalance({ commit, state }) {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
-    await browser.storage.local.set({ tokenBal: convertToAE(balance).toFixed(3) });
     commit(types.UPDATE_BALANCE, convertToAE(balance));
-  },
-  popupAlert({ commit }, payload) {
-    switch (payload.name) {
-      case 'spend':
-        switch (payload.type) {
-          case 'insufficient_balance':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.INSUFFICIENT_BALANCE });
-            break;
-          case 'confirm_transaction':
-            commit(types.SHOW_POPUP, {
-              show: true,
-              class: payload.type,
-              data: payload.data,
-              secondBtn: true,
-              secondBtnClick: 'confirmTransaction',
-              ...popupMessages.CONFIRM_TRANSACTION,
-            });
-            break;
-          case 'success_transfer':
-            commit(types.SHOW_POPUP, { show: true, secondBtn: true, secondBtnClick: 'showTransaction', ...popupMessages.SUCCESS_TRANSFER, msg: payload.msg, data: payload.data });
-            break;
-          case 'success_deploy':
-            commit(types.SHOW_POPUP, {
-              show: true,
-              secondBtn: true,
-              secondBtnClick: 'copyAddress',
-              buttonsTextSecondary: 'Copy address',
-              ...popupMessages.SUCCESS_DEPLOY,
-              msg: payload.msg,
-              data: payload.data,
-              noRedirect: payload.noRedirect,
-            });
-            break;
-          case 'incorrect_address':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.INCORRECT_ADDRESS });
-            break;
-          case 'tx_limit_per_day':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TX_LIMIT_PER_DAY });
-            break;
-          case 'incorrect_amount':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.INCORRECT_AMOUNT });
-            break;
-          case 'transaction_failed':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TRANSACTION_FAILED });
-            break;
-          case 'tx_error':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TRANSACTION_FAILED, msg: payload.msg });
-            break;
-          case 'integer_required':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.INTEGER_REQUIRED });
-            break;
-          default:
-            break;
-        }
-        break;
-      case 'account':
-        switch (payload.type) {
-          case 'publicKeyCopied':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.PUBLIC_KEY_COPIED });
-            break;
-          case 'seedFastCopy':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.SEED_FAST_COPY });
-            break;
-          case 'requiredField':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.REQUIRED_FIELD });
-            break;
-          case 'added_success':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.SUCCESS_ADDED });
-            break;
-          case 'only_allowed_chars':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.CHARS_ALLOWED });
-            break;
-          case 'not_selected_val':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.NOT_SELECTED_VAL });
-            break;
-          case 'account_already_exist':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.ACCOUNT_ALREADY_EXIST });
-            break;
-          case 'invalid_number':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.REQUIRED_NUMBER });
-            break;
-          case 'airgap_created':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.AIRGAP_CREATED });
-            break;
-          case 'confirm_privacy_clear':
-            commit(types.SHOW_POPUP, { show: true, secondBtn: true, secondBtnClick: 'clearPrivacyData', ...popupMessages.CONFIRM_PRIVACY_CLEAR });
-            break;
-          case 'ledger_support':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.LEDGER_SUPPORT });
-            break;
-          case 'ledger_account_error':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.LEDGER_ACCOUNT_ERROR });
-            break;
-          case 'reveal_seed_phrase_impossible':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.REVEAL_SEED_IMPOSSIBLE });
-            break;
-          case 'error_qrcode':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.ERROR_QRCODE, msg: payload.msg, data: payload.data });
-            break;
-          case 'tip_url_verified':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.TIP_URL_VERIFIED });
-            break;
-          default:
-            break;
-        }
-        break;
-      case 'network':
-        switch (payload.type) {
-          case 'confirm_remove':
-            commit(types.SHOW_POPUP, {
-              show: true,
-              class: payload.type,
-              data: payload.data,
-              secondBtn: true,
-              secondBtnClick: 'removeUserNetwork',
-              ...popupMessages.REMOVE_USER_NETWORK,
-            });
-            break;
-          case 'cannot_remove':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.REMOVE_USER_NETWORK_ACTIVE_ERROR });
-            break;
-          case 'name_exists':
-            commit(types.SHOW_POPUP, { show: true, ...popupMessages.USER_NETWORK_EXISTS_ERROR });
-            break;
-          default:
-            break;
-        }
-        break;
-      default:
-        break;
-    }
   },
   async fetchTransactions({ state }, { limit, page }) {
     if (!state.middleware) return [];
     const { middlewareUrl } = state.network[state.current.network];
     const { publicKey } = state.account;
     try {
-      const tx = await fetch(`${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`, {
-        method: 'GET',
-        mode: 'cors',
-      });
+      const tx = await fetch(
+        `${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`,
+        {
+          method: 'GET',
+          mode: 'cors',
+        },
+      );
       return tx.json();
     } catch (e) {
       return [];
@@ -180,7 +55,7 @@ export default {
   initSdk({ commit }, payload) {
     commit(types.INIT_SDK, payload);
   },
-  async getRegisteredNames({ commit, state }) {
+  async getRegisteredNames({ commit, state, dispatch }) {
     if (!state.middleware) return;
     const { middlewareUrl } = state.network[state.current.network];
     const res = await Promise.all(
@@ -188,7 +63,11 @@ export default {
         if (publicKey) {
           let names = await Promise.all([
             (async () =>
-              (await state.sdk.api.getPendingAccountTransactionsByPubkey(publicKey).catch(() => ({ transactions: [] }))).transactions
+              (
+                await state.sdk.api
+                  .getPendingAccountTransactionsByPubkey(publicKey)
+                  .catch(() => ({ transactions: [] }))
+              ).transactions
                 .filter(({ tx: { type } }) => type === 'NameClaimTx')
                 .map(({ tx, ...otherTx }) => ({
                   ...otherTx,
@@ -196,7 +75,13 @@ export default {
                   pending: true,
                   owner: tx.accountId,
                 })))(),
-            (async () => uniqBy(await (await fetch(`${middlewareUrl}/middleware/names/reverse/${publicKey}`)).json(), 'name'))(),
+            (async () =>
+              uniqBy(
+                await (
+                  await fetch(`${middlewareUrl}/middleware/names/reverse/${publicKey}`)
+                ).json(),
+                'name',
+              ))(),
             (async () => {
               try {
                 return await state.middleware.getActiveNames({ owner: publicKey });
@@ -210,7 +95,11 @@ export default {
           names = uniqBy(names, 'name');
           if (!process.env.RUNNING_IN_TESTS) {
             if (names.length) {
-              commit(types.SET_ACCOUNT_AENS, { account: index, aename: names[0].name, pending: !!names[0].pending });
+              commit(types.SET_ACCOUNT_AENS, {
+                account: index,
+                aename: names[0].name,
+                pending: !!names[0].pending,
+              });
             } else {
               commit(types.SET_ACCOUNT_AENS, { account: index, aename: null, pending: false });
             }
@@ -218,9 +107,12 @@ export default {
           return names;
         }
         return [];
-      })
+      }),
     );
-    await browser.storage.local.set({ subaccounts: state.subaccounts.filter(s => s.publicKey) });
+    await dispatch(
+      'setSubAccounts',
+      state.subaccounts.filter(s => s.publicKey),
+    );
     commit(types.SET_NAMES, { names: Array.prototype.concat.apply([], res) });
   },
   async fetchAuctionEntry({ state: { sdk } }, name) {
@@ -232,13 +124,6 @@ export default {
         nameFee: BigNumber(aettosToAe(tx.nameFee)),
       })),
     };
-  },
-  async removePendingName({ commit, state }, { hash }) {
-    let pending = state.pendingNames;
-    pending = pending.filter(p => p.hash !== hash);
-    await browser.storage.local.set({ pendingNames: { list: pending } });
-    commit(types.SET_PENDING_NAMES, { names: pending });
-    await new Promise(resolve => setTimeout(resolve, 1500));
   },
 
   unlockWallet(context, payload) {
@@ -254,44 +139,36 @@ export default {
       await postMessage({
         type: 'getKeypair',
         payload: { activeAccount: idx, account: { publicKey: account.publicKey } },
-      })
+      }),
     );
     return { publicKey, secretKey };
   },
 
   async generateWallet(context, { seed }) {
-    return (await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })).address;
+    return (
+      await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })
+    ).address;
   },
 
   async setLogin({ commit, dispatch }, { keypair }) {
-    await browser.storage.local.set({ userAccount: keypair, isLogged: true, termsAgreed: true });
+    commit('UPDATE_ACCOUNT', keypair);
 
-    const sub = [];
-    sub.push({
-      name: 'Main Account',
-      publicKey: keypair.publicKey,
-      balance: 0,
-      root: true,
-      aename: null,
-    });
-    await browser.storage.local.set({ subaccounts: sub, activeAccount: 0 });
+    const sub = [
+      {
+        name: 'Main Account',
+        publicKey: keypair.publicKey,
+        balance: 0,
+        root: true,
+        aename: null,
+      },
+    ];
     commit('SET_ACTIVE_ACCOUNT', { publicKey: keypair.publicKey, index: 0 });
     await dispatch('setSubAccounts', sub);
     commit('UPDATE_ACCOUNT', keypair);
     commit('SWITCH_LOGGED_IN', true);
   },
-  async getPendingTxs({ state: { current }, commit }) {
-    const { pendingTxs } = await browser.storage.local.get('pendingTxs');
-    let txs = [];
-    if (pendingTxs && pendingTxs.length) {
-      txs = pendingTxs.map(el => {
-        const { time, domain } = el;
-        const amount = parseFloat(el.amount).toFixed(3);
-        const amountCurrency = parseFloat(current.currencyRate ? amount * current.currencyRate : amount).toFixed(3);
-        return { ...el, amount, time, amountCurrency, domain };
-      });
-    }
-    commit('SET_PENDING_TXS', txs);
+  async setPendingTx({ commit, state: { transactions } }, tx) {
+    commit('SET_PENDING_TXS', [...transactions.pending, tx]);
   },
   async checkExtensionUpdate({ state: { network } }) {
     const { tipContract } = network[DEFAULT_NETWORK];
@@ -305,7 +182,56 @@ export default {
 
     return update;
   },
+  async setCurrency({
+    commit,
+    state: {
+      currencies,
+      current: { currency },
+    },
+  }) {
+    commit('SET_CURRENCY', {
+      currency,
+      currencyRate: currencies[currency],
+    });
+  },
+  async getCurrencies({ state: { nextCurrenciesFetch }, commit, dispatch }) {
+    if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
+      const res = await fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
+      );
+      const { aeternity } = await res.json();
+      commit('SET_CURRENCIES', aeternity);
+      commit('SET_NEXT_CURRENCY_FETCH', new Date().getTime() + 3600000);
+    }
+    dispatch('setCurrency');
+  },
+  async setPermissionForAccount({ commit, state: { connectedAepps } }, { host, account }) {
+    if (connectedAepps[host]) {
+      if (connectedAepps[host].includes(account)) return;
+      commit('UPDATE_CONNECTED_AEPP', { host, account });
+    } else {
+      commit('ADD_CONNECTED_AEPP', { host, account });
+    }
+  },
   async checkBackupSeed() {
     return (await browser.storage.local.get('backed_up_Seed')).backed_up_Seed;
+  },
+  async getWebPageAddresses({ state: { sdk } }) {
+    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+    const { address, chainName } = await postMessageToContent({ method: 'getAddresses' }, tab.id);
+    let addresses = Array.isArray(address) ? address : [address];
+    const chainNames = Array.isArray(chainName) ? chainName : [chainName];
+    const chainNamesAddresses = await Promise.all(
+      chainNames.map(async n => {
+        try {
+          return getAddressByNameEntry(await sdk.api.getNameEntryByName(n));
+        } catch (e) {
+          return null;
+        }
+      }),
+    );
+    addresses = [...addresses, ...chainNamesAddresses];
+
+    return { addresses: uniq(addresses).filter(a => a), tab };
   },
 };

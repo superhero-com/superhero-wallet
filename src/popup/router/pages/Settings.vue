@@ -34,7 +34,17 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'network', 'current', 'transactions', 'subaccounts', 'wallet', 'activeAccountName', 'activeAccount']),
+    ...mapGetters([
+      'account',
+      'balance',
+      'network',
+      'current',
+      'transactions',
+      'subaccounts',
+      'wallet',
+      'activeAccountName',
+      'activeAccount',
+    ]),
   },
   methods: {
     GeneralSettings() {

@@ -2,7 +2,8 @@ import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { Crypto } from '@aeternity/aepp-sdk/es';
 import { generateHDWallet } from '@aeternity/hd-wallet/src';
 
-export const generateHdWallet = seed => generateHDWallet(typeof seed === 'string' ? Buffer.from(seed, 'hex') : seed);
+export const generateHdWallet = seed =>
+  generateHDWallet(typeof seed === 'string' ? Buffer.from(seed, 'hex') : seed);
 
 export const getHdWalletAccount = (wallet, accountIdx = 0) => {
   let w = wallet;
@@ -23,7 +24,13 @@ export const getHdWalletAccount = (wallet, accountIdx = 0) => {
 };
 
 export const derivePasswordKey = async (password, salt) => {
-  const passwordKey = await window.crypto.subtle.importKey('raw', new TextEncoder().encode(password), { name: 'PBKDF2' }, false, ['deriveKey']);
+  const passwordKey = await window.crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveKey'],
+  );
   return window.crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
@@ -34,7 +41,7 @@ export const derivePasswordKey = async (password, salt) => {
     passwordKey,
     { name: 'AES-CTR', length: 128 },
     false,
-    ['encrypt', 'decrypt']
+    ['encrypt', 'decrypt'],
   );
 };
 

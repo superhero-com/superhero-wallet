@@ -31,7 +31,7 @@ describe('Test cases for menu sidebar component', () => {
 
   it('Have account identicon', () => {
     cy.openMenu()
-      .get('.user-avatar')
+      .get('.user-identicon')
       .should('be.visible');
   });
 

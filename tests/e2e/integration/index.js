@@ -8,7 +8,9 @@ describe('Test cases for Front Page', () => {
   });
 
   it('Buttons are disabled', () => {
-    cy.buttonShouldBeDisabled('[data-cy=generate-wallet]').buttonShouldBeDisabled('[data-cy=import-wallet]');
+    cy.buttonShouldBeDisabled('[data-cy=generate-wallet]').buttonShouldBeDisabled(
+      '[data-cy=import-wallet]',
+    );
   });
 
   it('Have create/import wallet buttons', () => {

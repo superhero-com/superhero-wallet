@@ -1,17 +1,27 @@
 <template>
-  <div class="recent-transactions">
-    <div class="flex flex flex-align-center flex-justify-between my-10">
+  <div class="recent-transactions" :class="{ 'tour-bar': tourStartBar }">
+    <div class="flex flex flex-align-center flex-justify-between mb-10 mt-20">
       <span class="title">{{ $t('pages.recentTransactions.recentActivity') }}</span>
-      <span data-cy="view-all-transactions" @click="allTransactions" class="viewAll">{{ $t('pages.recentTransactions.viewAll') }}</span>
+      <span data-cy="view-all-transactions" @click="allTransactions" class="viewAll">{{
+        $t('pages.recentTransactions.viewAll')
+      }}</span>
     </div>
     <PendingTxs />
-    <div v-if="transactions.latest.length && !loading">
+    <div v-if="transactions.latest.length">
       <ae-list class="transactionList">
-        <TransactionItem :recent="true" :dark="true" v-for="transaction in transactions.latest" :key="transaction.id" :transactionData="transaction"></TransactionItem>
+        <TransactionItem
+          :recent="true"
+          :dark="true"
+          v-for="transaction in transactions.latest"
+          :key="transaction.id"
+          :transaction="transaction"
+        ></TransactionItem>
       </ae-list>
     </div>
-    <div v-if="transactions.latest.length == 0 && !loading">
-      <p class="paragraph noTransactions">{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
+    <div v-if="!transactions.latest.length && !transactions.pending.length">
+      <p class="paragraph noTransactions">
+        {{ $t('pages.recentTransactions.noTransactionsFound') }}
+      </p>
     </div>
     <div class="loader-holder">
       <Loader size="small" :loading="loading"></Loader>
@@ -22,7 +32,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
 import PendingTxs from './PendingTxs';
 
@@ -37,12 +47,13 @@ export default {
     };
   },
   created() {
-    this.updateTransactions();
+    if (this.transactions.latest.length) this.loading = false;
     this.polling = setInterval(() => this.updateTransactions(), 5000);
     this.$once('hook:beforeDestroy', () => clearInterval(this.polling));
   },
   computed: {
     ...mapGetters(['transactions', 'account', 'sdk', 'current', 'currentCurrency']),
+    ...mapState(['tourStartBar']),
   },
   allTransactions() {
     this.$router.push('/transactions');
@@ -69,12 +80,16 @@ export default {
   overflow: hidden;
   padding: 0 20px;
   padding-bottom: 20px;
+  background: $transactions-bg;
   .title {
     color: $white-color !important;
   }
   .viewAll {
     color: $accent-color !important;
     cursor: pointer;
+  }
+  &.tour-bar {
+    padding-bottom: 40px;
   }
 }
 .recent-transactions h3,

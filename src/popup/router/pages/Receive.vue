@@ -16,7 +16,6 @@
       <Button @click="purchase">{{ $t('pages.receive.purchase') }}</Button>
       <Button @click="exchange">{{ $t('pages.receive.transferExchange') }}</Button>
       <Button data-cy="home" @click="navigateAccount">{{ $t('pages.receive.home') }}</Button>
-      <popup :popupSecondBtnClick="popup.secondBtnClick"></popup>
     </div>
   </div>
 </template>
@@ -44,7 +43,7 @@ export default {
   },
   methods: {
     copy() {
-      this.$store.dispatch('popupAlert', { name: 'account', type: 'publicKeyCopied' });
+      this.$store.dispatch('modals/open', { name: 'default', msg: 'Copied to clipboard' });
     },
     navigateAccount() {
       this.$router.push('/account');

@@ -2,11 +2,11 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import VueClipboard from 'vue-clipboard2';
 import Components from '@aeternity/aepp-components-3';
+import VueTour from 'vue-tour';
 import routes from './routes';
 import '@aeternity/aepp-components-3/dist/aepp.components.css';
 import LoaderComponent from './components/Loader';
 import TransactionItemComponent from './components/TransactionItem';
-import Popup from './components/Popup';
 import AmountInput from './components/AmountInput';
 import AddressInput from './components/AddressInput';
 import Button from './components/Button';
@@ -22,15 +22,15 @@ const plugin = {
     Vue.prototype.$helpers = helper;
   },
 };
+require('vue-tour/dist/vue-tour.css');
 
 Vue.use(plugin);
 Vue.use(VueRouter);
 Vue.use(VueClipboard);
 Vue.use(Components);
-
+Vue.use(VueTour);
 Vue.component('Loader', LoaderComponent);
 Vue.component('TransactionItem', TransactionItemComponent);
-Vue.component('Popup', Popup);
 Vue.component('Modal', ModalComponent);
 Vue.component('AmountInput', AmountInput);
 Vue.component('AddressInput', AddressInput);
@@ -49,7 +49,8 @@ const unbind = router.beforeEach((to, from, next) => {
 });
 
 router.beforeEach(async (to, from, next) => {
-  if (store.getters.account && store.getters.isLoggedIn) {
+  await helper.pollGetter(() => store.state.isRestored);
+  if (store.getters.isLoggedIn) {
     if (!store.getters.sdk) wallet.initSdk();
     next(to.meta.ifNotAuthOnly ? '/account' : undefined);
     return;
@@ -69,7 +70,7 @@ router.beforeEach(async (to, from, next) => {
         sign: '/popup-sign-tx',
         askAccounts: '/ask-accounts',
         messageSign: '/message-sign',
-      }[window.POPUP_TYPE]
+      }[window.POPUP_TYPE],
     );
     return;
   }
@@ -88,7 +89,7 @@ router.afterEach(to => {
 if (!process.env.IS_EXTENSION) {
   document.addEventListener('deviceready', () => {
     window.IonicDeeplink.onDeepLink(async ({ url }) => {
-      const prefix = ['superhero:', 'https://mobile.z52da5wt.xyz/'].find(p => url.startsWith(p));
+      const prefix = ['superhero:', 'https://wallet.superhero.com/'].find(p => url.startsWith(p));
       if (!prefix) throw new Error(`Unknown url: ${url}`);
       router.push(`/${url.slice(prefix.length)}`);
     });

@@ -3,7 +3,6 @@ if (navigator.userAgent.indexOf('Firefox') !== -1) {
     navigator.mediaDevices
       .getUserMedia({ video: true })
       .then(() => {
-        browser.storage.local.set({ firefoxCameraAllowed: true });
         alert('You have allowed the firefox camera. Now, try again scan QR code');
       })
       .catch(err => {
@@ -27,7 +26,7 @@ if (navigator.userAgent.indexOf('Firefox') !== -1) {
       err => {
         alert(`The following error occurred when trying to use getUserMedia: ${err}`);
         window.close();
-      }
+      },
     );
   } else {
     alert('Sorry, your browser does not support getUserMedia');

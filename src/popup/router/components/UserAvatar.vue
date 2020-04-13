@@ -1,31 +1,50 @@
 <template>
-  <img :src="avatarUrl" class="user-avatar" :class="size" />
+  <img :src="avatarUrl" class="user-avatar" :class="size" @error="error = true" v-if="!error" />
+  <div v-html="identicon" class="user-identicon" :class="size" v-else />
 </template>
 
 <script>
-import { BACKEND_URL } from '../../utils/constants';
+import jdenticon from 'jdenticon';
+import { BACKEND_URL, IDENTICON_CONFIG, IDENTICON_SIZES } from '../../utils/constants';
 
 export default {
   props: {
     address: String,
-    size: String,
+    size: {
+      type: String,
+      default: 'normal',
+    },
   },
+  data: () => ({
+    error: false,
+  }),
   computed: {
     avatarUrl() {
       return `${BACKEND_URL}/profile/image/${this.address}`;
+    },
+    identicon() {
+      jdenticon.config = IDENTICON_CONFIG;
+      return jdenticon.toSvg(this.address, IDENTICON_SIZES[this.size]);
     },
   },
 };
 </script>
 
-<style scoped>
-.user-avatar {
-  width: 38px;
-  height: 38px;
+<style lang="scss" scoped>
+$normal-size: 38px;
+$lg-size: 64px;
+
+.user-avatar,
+.user-identicon {
+  width: $normal-size;
+  height: $normal-size;
   border-radius: 50%;
-}
-.user-avatar.lg {
-  height: 4rem;
-  width: 4rem;
+  overflow: hidden;
+  display: inline-block;
+
+  &.lg {
+    height: $lg-size;
+    width: $lg-size;
+  }
 }
 </style>
