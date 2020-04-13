@@ -410,6 +410,11 @@ export const getActiveNetwork = async () => {
   };
 };
 
+export const getTwitterAccountUrl = url => {
+  const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
+  return match ? match[0] : false;
+};
+
 export {
   shuffleArray,
   convertToAE,

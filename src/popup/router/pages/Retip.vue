@@ -35,6 +35,7 @@ import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
+import { getTwitterAccountUrl } from '../../utils/helper';
 import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';
 import UrlBadge from '../components/UrlBadge';
@@ -65,7 +66,12 @@ export default {
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
     },
     urlVerified() {
-      return this.tip.url && this.verifiedUrls.includes(new URL(this.tip.url).hostname);
+      const twitterProfile = getTwitterAccountUrl(this.url);
+      return (
+        this.url &&
+        (this.verifiedUrls.includes(this.url) ||
+          (twitterProfile && this.verifiedUrls.includes(twitterProfile)))
+      );
     },
     urlParams() {
       return new URL(this.$route.fullPath, window.location).searchParams;

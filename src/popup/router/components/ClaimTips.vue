@@ -34,14 +34,15 @@ export default {
         if (!claimAmount) throw new Error(this.$t('pages.claim.noZeroClaim'));
         await axios
           .post(`${TIP_SERVICE}`, { url: tab.url, address: this.account.publicKey })
-          .catch(() => {
-            throw new Error(this.$t('pages.claim.errorClaim'));
+          .catch(({ response }) => {
+            throw new Error(response.data.error);
           });
         this.$emit('setLoading', false);
         this.$store.dispatch('modals/open', { name: 'claim-success', url: tab.url, claimAmount });
       } catch (e) {
+        const msg = e.message.replace('Error: ', '');
         this.$emit('setLoading', false);
-        this.$store.dispatch('modals/open', { name: 'default', msg: e.message });
+        this.$store.dispatch('modals/open', { name: 'default', msg });
       }
     },
   },
