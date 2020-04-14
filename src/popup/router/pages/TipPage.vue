@@ -128,7 +128,7 @@ export default {
       );
     },
     verifiedStatus() {
-      return this.urlVerified || this.tourRunning ? 'verified' : 'untrusted';
+      return this.urlVerified || this.tourRunning ? 'verified' : 'not-verified';
     },
   },
   watch: {
@@ -267,8 +267,8 @@ export default {
     flex-grow: 1;
     color: $text-color;
     text-decoration: none;
-    &.untrusted {
-      color: $untrusted-badge-bg;
+    &.not-verified {
+      color: $not-verified-badge-bg;
     }
   }
 }
