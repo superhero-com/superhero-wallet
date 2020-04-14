@@ -21,6 +21,8 @@ export default {
   methods: {
     async claimTips() {
       this.$emit('setLoading', true);
+      await this.$watchUntilTruly(() => this.sdk);
+      await this.$watchUntilTruly(() => this.tipping);
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       try {
         const claimAmount = parseFloat(
@@ -35,7 +37,16 @@ export default {
         await axios
           .post(`${TIP_SERVICE}`, { url: tab.url, address: this.account.publicKey })
           .catch(({ response }) => {
-            throw new Error(response.data.error);
+            const { error } = response.data;
+            if (error.includes('MORE_ORACLES_NEEDED'))
+              throw new Error(this.$t('pages.claim.moreOracles'));
+            else if (error.includes('URL_NOT_EXISTING'))
+              throw new Error(this.$t('pages.claim.urlNotExisting'));
+            else if (error.includes('NO_ZERO_AMOUNT_PAYOUT'))
+              throw new Error(this.$t('pages.claim.noZeroClaim'));
+            else if (error.includes('ORACLE_SEVICE_CHECK_CLAIM_FAILED'))
+              throw new Error(this.$t('pages.claim.oracleFailed'));
+            else throw new Error(error);
           });
         this.$emit('setLoading', false);
         this.$store.dispatch('modals/open', { name: 'claim-success', url: tab.url, claimAmount });

@@ -173,7 +173,10 @@
       "ae": "AE tokens",
       "claimed": " Claim request sent! ",
       "url": "URL",
-      "tipsOnUrl": "Tips on this URL"
+      "tipsOnUrl": "Tips on this URL",
+      "urlNotExisting": "Tip for this url does not exist",
+      "moreOracles": "There are not enough active oracles to verify your claim request, please try again later.",
+      "oracleFailed": "Oracle service check claim failed, please try again later."
 
     },
     "accountPassword": {
