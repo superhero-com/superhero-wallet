@@ -6,11 +6,11 @@
         <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
         {{ $t('pages.tipPage.to') }}
       </div>
-      <UrlBadge :type="urlVerified ? 'verified' : 'untrusted'" />
+      <UrlBadge :type="urlVerified ? 'verified' : 'not-verified'" />
     </div>
 
     <div class="url-bar">
-      <a class="link-sm text-left" :class="{ untrusted: !urlVerified }">{{ tip.url }}</a>
+      <a class="link-sm text-left" :class="{ 'not-verified': !urlVerified }">{{ tip.url }}</a>
     </div>
 
     <AmountSend :amountError="amountError" @changeAmount="val => (amount = val)" :value="amount" />
@@ -35,6 +35,7 @@ import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
+import { getTwitterAccountUrl } from '../../utils/helper';
 import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';
 import UrlBadge from '../components/UrlBadge';
@@ -65,7 +66,12 @@ export default {
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
     },
     urlVerified() {
-      return this.tip.url && this.verifiedUrls.includes(new URL(this.tip.url).hostname);
+      const twitterProfile = getTwitterAccountUrl(this.url);
+      return (
+        this.url &&
+        (this.verifiedUrls.includes(this.url) ||
+          (twitterProfile && this.verifiedUrls.includes(twitterProfile)))
+      );
     },
     urlParams() {
       return new URL(this.$route.fullPath, window.location).searchParams;
@@ -140,8 +146,8 @@ export default {
   :first-child {
     flex-grow: 1;
     text-decoration: none;
-    &.untrusted {
-      color: $untrusted-badge-bg;
+    &.not-verified {
+      color: $not-verified-badge-bg;
     }
   }
 }

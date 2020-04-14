@@ -68,7 +68,7 @@
 import { mapGetters, mapState } from 'vuex';
 import axios from 'axios';
 import { calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
-import { escapeSpecialChars, aeToAettos } from '../../utils/helper';
+import { escapeSpecialChars, aeToAettos, getTwitterAccountUrl } from '../../utils/helper';
 import EditIcon from '../../../icons/edit-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
@@ -120,10 +120,15 @@ export default {
       return (this.amount * this.current.currencyRate).toFixed(3);
     },
     urlVerified() {
-      return this.url && this.verifiedUrls.includes(this.url);
+      const twitterProfile = getTwitterAccountUrl(this.url);
+      return (
+        this.url &&
+        (this.verifiedUrls.includes(this.url) ||
+          (twitterProfile && this.verifiedUrls.includes(twitterProfile)))
+      );
     },
     verifiedStatus() {
-      return this.urlVerified || this.tourRunning ? 'verified' : 'untrusted';
+      return this.urlVerified || this.tourRunning ? 'verified' : 'not-verified';
     },
   },
   watch: {
@@ -262,8 +267,8 @@ export default {
     flex-grow: 1;
     color: $text-color;
     text-decoration: none;
-    &.untrusted {
-      color: $untrusted-badge-bg;
+    &.not-verified {
+      color: $not-verified-badge-bg;
     }
   }
 }

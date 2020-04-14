@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="resolve">
+  <Modal @close="resolve" class="default-modal">
     <div v-if="title" slot="header">{{ title || $t(`modals.${type}.title`) }}</div>
     <div slot="body">{{ msg || $t(`modals.${type}.msg`) }}</div>
     <div slot="footer">
@@ -22,3 +22,18 @@ export default {
   components: { Modal, Button },
 };
 </script>
+
+<style lang="scss">
+.default-modal {
+  button {
+    width: 120px !important;
+    font-weight: bold !important;
+  }
+
+  .modal--mask {
+    .modal--body {
+      text-align: center;
+    }
+  }
+}
+</style>
