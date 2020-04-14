@@ -123,7 +123,13 @@ export const networks = {
 export const UI_URL = 'https://beta.superhero.com/#/';
 export const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
 export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
-export const NO_POPUP_AEPPS = ['youdonotneedacapetobeahero.com', 'superhero.com', 'localhost'];
+export const NO_POPUP_AEPPS = [
+  'youdonotneedacapetobeahero.com',
+  'superhero.com',
+  'localhost',
+  'alpha.superhero.com',
+  'beta.superhero.com',
+];
 
 export const BLACKLIST_AEPPS = ['coronanews.org'];
 export const TXS_PER_PAGE = 30;
