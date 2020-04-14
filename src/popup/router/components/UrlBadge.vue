@@ -4,7 +4,7 @@
       <TickIcon />
       {{ $t(`badges.verified`) }}
     </template>
-    <template v-if="type === 'untrusted'"> ! {{ $t(`badges.untrusted`) }} </template>
+    <template v-if="type === 'not-verified'"> ! {{ $t(`badges.notVerified`) }} </template>
   </Badge>
 </template>
 
@@ -36,8 +36,8 @@ export default {
     background: $accent-color;
   }
 
-  &.badge-untrusted {
-    background: $untrusted-badge-bg;
+  &.badge-not-verified {
+    background: $not-verified-badge-bg;
   }
 }
 </style>

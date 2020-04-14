@@ -6,7 +6,7 @@
         {{
           verifiedStatus == 'verified'
             ? $t('pages.tipPage.whatIsVerifieddUrl')
-            : $t('pages.tipPage.whatIsUntrustedUrl')
+            : $t('pages.tipPage.whatIsNotVerifiedUrl')
         }}
       </h4>
     </div>
@@ -14,7 +14,7 @@
       {{
         verifiedStatus == 'verified'
           ? $t('pages.tipPage.verifiedUrlInfo')
-          : $t('pages.tipPage.untrustedUrlInfo')
+          : $t('pages.tipPage.notVerifiedUrlInfo')
       }}
     </div>
     <div slot="footer">
