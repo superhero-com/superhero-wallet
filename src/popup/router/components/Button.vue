@@ -39,7 +39,7 @@ export default {
   width: 270px !important;
   border-radius: 5px;
   font-family: 'Roboto', sans-serif;
-  font-size: 18px;
+  font-size: 15px;
   padding: 0;
   margin: 8px auto;
   color: $button-text-color !important;
