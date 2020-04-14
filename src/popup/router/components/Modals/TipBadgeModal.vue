@@ -2,6 +2,8 @@
   <Modal @close="resolve">
     <div class="badge-modal-header" slot="header">
       <UrlBadge :type="verifiedStatus" />
+    </div>
+    <div slot="body">
       <h4>
         {{
           verifiedStatus == 'verified'
@@ -9,8 +11,6 @@
             : $t('pages.tipPage.whatIsNotVerifiedUrl')
         }}
       </h4>
-    </div>
-    <div slot="body">
       {{
         verifiedStatus == 'verified'
           ? $t('pages.tipPage.verifiedUrlInfo')
