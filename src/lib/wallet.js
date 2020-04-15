@@ -4,12 +4,7 @@ import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import { isEmpty } from 'lodash-es';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
-import {
-  parseFromStorage,
-  middleware,
-  getAllNetworks,
-  getAddressByNameEntry,
-} from '../popup/utils/helper';
+import { parseFromStorage, middleware, getAllNetworks } from '../popup/utils/helper';
 import { TIPPING_CONTRACT } from '../popup/utils/constants';
 
 export default {

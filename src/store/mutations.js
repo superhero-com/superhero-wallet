@@ -141,5 +141,5 @@ export default {
   },
   [types.SET_TIPPING_ADDRESS](state, payload) {
     state.tippingAddress = payload;
-  }
+  },
 };
