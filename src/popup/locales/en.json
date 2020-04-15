@@ -41,7 +41,7 @@
     "tutorial": "Tutorial"
   },
   "badges": {
-    "verified": "Verfied",
+    "verified": "Verified",
     "notVerified": "Not verified"
   },
   "modals": {
@@ -607,7 +607,7 @@
       "tipWebsite": "Website",
       "heading": "Send",
       "sendTipConfirmationHeader": "Send Tip Confirmation",
-      "sendTipConfirmationBody": "You are going to send tip to not verified URL. Third party issues may prevent us to ensure that tips will be directly delivered to the URL owner.",
+      "sendTipConfirmationBody": "You are going to send tip to a not verified URL. Third party issues may prevent us to ensure that tips will be directly delivered to the URL owner.",
       "sendTipConfirmationQstn": "Are you sure you would like to send the tip anyway?",
       "headingSending": "Sending",
       "selectTip": "Select amount to tip",
