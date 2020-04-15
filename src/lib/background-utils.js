@@ -86,7 +86,7 @@ export const getTippingContractInstance = async tx => {
   return tippingContract;
 };
 
-export const getTIppingContractAddress = async address => {
+export const getTippingContractAddress = async address => {
   if (tippingContractAddress) return tippingContractAddress;
   await getSDK();
   tippingContractAddress = address.includes('.chain')

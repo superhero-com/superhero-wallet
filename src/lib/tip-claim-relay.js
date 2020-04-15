@@ -4,7 +4,7 @@ import {
   contractCallStatic,
   getActiveAccount,
   getAddressFromChainName,
-  getTIppingContractAddress,
+  getTippingContractAddress,
 } from './background-utils';
 import { networks, DEFAULT_NETWORK, TIPPING_CONTRACT, TIP_SERVICE } from '../popup/utils/constants';
 
@@ -15,7 +15,7 @@ export default {
 
   async abortIfZeroClaim(url) {
     const tippingAddress = networks[DEFAULT_NETWORK].tipContract;
-    const address = await getTIppingContractAddress(tippingAddress);
+    const address = await getTippingContractAddress(tippingAddress);
     const tx = {
       method: 'unclaimed_for_url',
       address,
