@@ -139,4 +139,7 @@ export default {
   [types.SET_TOUR_STATUS_BAR](state, payload) {
     state.tourStartBar = payload;
   },
+  [types.SET_TIPPING_ADDRESS](state, payload) {
+    state.tippingAddress = payload;
+  }
 };

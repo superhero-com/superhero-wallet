@@ -4,7 +4,12 @@ import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import { isEmpty } from 'lodash-es';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
-import { parseFromStorage, middleware, getAllNetworks } from '../popup/utils/helper';
+import {
+  parseFromStorage,
+  middleware,
+  getAllNetworks,
+  getAddressByNameEntry,
+} from '../popup/utils/helper';
 import { TIPPING_CONTRACT } from '../popup/utils/constants';
 
 export default {
@@ -77,12 +82,17 @@ export default {
     return res.error ? { error: true } : parseFromStorage(res);
   },
   async initContractInstances() {
-    store.commit(
-      'SET_TIPPING',
-      await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, {
-        contractAddress: store.getters.network[store.getters.current.network].tipContract,
-        forceCodeCheck: true,
-      }),
-    );
+    try {
+      const contractAddress = await store.dispatch('getTipContractAddress');
+      store.commit(
+        'SET_TIPPING',
+        await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, {
+          contractAddress,
+          forceCodeCheck: true,
+        }),
+      );
+    } catch (e) {
+      console.error(`Error creating tipping instance: ${e}`);
+    }
   },
 };

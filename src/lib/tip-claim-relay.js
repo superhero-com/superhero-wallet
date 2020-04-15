@@ -1,6 +1,11 @@
 import axios from 'axios';
 import { uniq } from 'lodash-es';
-import { contractCallStatic, getActiveAccount, getAddressFromChainName } from './background-utils';
+import {
+  contractCallStatic,
+  getActiveAccount,
+  getAddressFromChainName,
+  getTIppingContractAddress,
+} from './background-utils';
 import { networks, DEFAULT_NETWORK, TIPPING_CONTRACT, TIP_SERVICE } from '../popup/utils/constants';
 
 export default {
@@ -10,9 +15,10 @@ export default {
 
   async abortIfZeroClaim(url) {
     const tippingAddress = networks[DEFAULT_NETWORK].tipContract;
+    const address = await getTIppingContractAddress(tippingAddress);
     const tx = {
       method: 'unclaimed_for_url',
-      address: tippingAddress,
+      address,
       params: [url],
       source: TIPPING_CONTRACT,
     };

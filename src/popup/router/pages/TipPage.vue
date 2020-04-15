@@ -111,7 +111,7 @@ export default {
       'currentCurrency',
       'tip',
     ]),
-    ...mapState(['tourRunning']),
+    ...mapState(['tourRunning', 'tippingAddress']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -167,7 +167,7 @@ export default {
     await this.$watchUntilTruly(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
-      contractId: this.network[this.current.network].tipContract,
+      contractId: this.tippingAddress,
       callerId: this.account.publicKey,
     }).min;
   },

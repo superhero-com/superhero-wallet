@@ -12,6 +12,7 @@ import { getState } from '../store/plugins/persistState';
 let sdk;
 let controller;
 let tippingContract;
+let tippingContractAddress;
 
 export const setController = contr => {
   controller = contr;
@@ -83,6 +84,15 @@ export const getTippingContractInstance = async tx => {
   await getSDK();
   tippingContract = await setContractInstance(tx, sdk, tx.address);
   return tippingContract;
+};
+
+export const getTIppingContractAddress = async address => {
+  if (tippingContractAddress) return tippingContractAddress;
+  await getSDK();
+  tippingContractAddress = address.includes('.chain')
+    ? getAddressByNameEntry(await sdk.api.getNameEntryByName(address), 'contract_pubkey')
+    : address;
+  return tippingContractAddress;
 };
 
 export const contractCallStatic = async ({ tx, callType }) =>

@@ -234,4 +234,13 @@ export default {
 
     return { addresses: uniq(addresses).filter(a => a), tab };
   },
+
+  async getTipContractAddress({ state: { network, current, sdk }, commit }) {
+    const { tipContract } = network[current.network];
+    const contractAddress = tipContract.includes('.chain')
+      ? getAddressByNameEntry(await sdk.api.getNameEntryByName(tipContract), 'contract_pubkey')
+      : tipContract;
+    commit('SET_TIPPING_ADDRESS', contractAddress);
+    return contractAddress;
+  },
 };
