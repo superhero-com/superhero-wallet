@@ -42,6 +42,7 @@ export default new Vuex.Store({
     txAdvancedMode: false,
     tipping: null,
     tippingReceiver: {},
+    tippingAddress: null,
     mainLoading: true,
     nodeStatus: 'connecting',
     currencies: {},

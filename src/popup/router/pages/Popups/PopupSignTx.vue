@@ -249,7 +249,8 @@ export default {
         },
         this.txType,
       );
-      const { isTip, amount } = getContractCallInfo(tx);
+      const contractAddress = await this.$store.dispatch('getTipContractAddress');
+      const { isTip, amount } = getContractCallInfo(tx, contractAddress);
       if (isTip) {
         await addTipAmount(amount);
       }
