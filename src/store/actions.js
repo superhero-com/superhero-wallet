@@ -170,18 +170,6 @@ export default {
   async setPendingTx({ commit, state: { transactions } }, tx) {
     commit('SET_PENDING_TXS', [...transactions.pending, tx]);
   },
-  async checkExtensionUpdate({ state: { network } }) {
-    const { tipContract } = network[DEFAULT_NETWORK];
-    let update = false;
-    try {
-      const { contractAddress } = await (await fetch(`${BACKEND_URL}/static/contract`)).json();
-      if (tipContract !== contractAddress) update = true;
-    } catch (e) {
-      update = false;
-    }
-
-    return update;
-  },
   async setCurrency({
     commit,
     state: {
