@@ -246,8 +246,8 @@ const escapeCallParams = params =>
     return p.toString();
   });
 
-export const getAddressByNameEntry = nameEntry =>
-  ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === 'account_pubkey')) || {}).id;
+export const getAddressByNameEntry = (nameEntry, pointer = 'account_pubkey') =>
+  ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
 
 const toFiatFixedValue = v => (v.e < -2 ? '0.01' : v.toFixed(2));
 
@@ -357,14 +357,14 @@ const resetTippedAmount = () => browser.storage.local.remove('tippedAmount');
 
 const getTippedAmount = async () => (await browser.storage.local.get('tippedAmount')).tippedAmount;
 
-const getContractCallInfo = transaction => {
+const getContractCallInfo = (transaction, contractAddress = null) => {
   if (!transaction) return { isTip: false, contractId: null, amount: 0 };
 
   const { tipContract } = networks[DEFAULT_NETWORK];
   const { tx } = TxBuilder.unpackTx(transaction);
 
   return {
-    isTip: tx.contractId === tipContract,
+    isTip: tx.contractId === tipContract || tx.contractId === contractAddress,
     contractId: tx.contractId,
     amount: convertToAE(tx.amount),
   };

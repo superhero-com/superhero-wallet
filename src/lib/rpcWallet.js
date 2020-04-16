@@ -15,6 +15,7 @@ import {
   getTippedAmount,
   resetTippedAmount,
   getContractCallInfo,
+  getAddressByNameEntry,
 } from '../popup/utils/helper';
 import {
   DEFAULT_NETWORK,
@@ -64,6 +65,7 @@ const rpcWallet = {
     this.network = network;
     this.compiler = this.nodes[network].compilerUrl;
     this.internalUrl = this.nodes[network].internalUrl;
+    this.tipContractAddress = this.nodes[network].tipContract;
   },
   async initNodes() {
     const nodes = await getActiveNetwork();
@@ -134,6 +136,12 @@ const rpcWallet = {
         this.sdk.selectAccount(this.accountKeyPairs[0].publicKey);
         this.activeAccount = this.accountKeyPairs[0].publicKey;
       }
+      this.tipContractAddress = this.tipContractAddress.includes('.chain')
+        ? getAddressByNameEntry(
+            await this.sdk.api.getNameEntryByName(this.tipContractAddress),
+            'contract_pubkey',
+          )
+        : this.tipContractAddress;
     } catch (e) {
       this.sdk = null;
     }
@@ -150,7 +158,7 @@ const rpcWallet = {
     return extractHostName(url);
   },
   async shouldOpenPopup(aepp, action, cb) {
-    const { isTip, amount } = getContractCallInfo(action.params.tx);
+    const { isTip, amount } = getContractCallInfo(action.params.tx, this.tipContractAddress);
     const origin = this.getAeppOrigin(aepp);
     if (BLACKLIST_AEPPS.includes(origin)) {
       // deny action if in blacklist

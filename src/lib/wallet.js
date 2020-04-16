@@ -77,12 +77,17 @@ export default {
     return res.error ? { error: true } : parseFromStorage(res);
   },
   async initContractInstances() {
-    store.commit(
-      'SET_TIPPING',
-      await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, {
-        contractAddress: store.getters.network[store.getters.current.network].tipContract,
-        forceCodeCheck: true,
-      }),
-    );
+    try {
+      const contractAddress = await store.dispatch('getTipContractAddress');
+      store.commit(
+        'SET_TIPPING',
+        await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, {
+          contractAddress,
+          forceCodeCheck: true,
+        }),
+      );
+    } catch (e) {
+      console.error(`Error creating tipping instance: ${e}`);
+    }
   },
 };

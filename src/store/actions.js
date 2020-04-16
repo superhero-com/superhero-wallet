@@ -8,7 +8,6 @@ import {
   aettosToAe,
   getAddressByNameEntry,
 } from '../popup/utils/helper';
-import { BACKEND_URL, DEFAULT_NETWORK } from '../popup/utils/constants';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
 
 export default {
@@ -170,18 +169,6 @@ export default {
   async setPendingTx({ commit, state: { transactions } }, tx) {
     commit('SET_PENDING_TXS', [...transactions.pending, tx]);
   },
-  async checkExtensionUpdate({ state: { network } }) {
-    const { tipContract } = network[DEFAULT_NETWORK];
-    let update = false;
-    try {
-      const { contractAddress } = await (await fetch(`${BACKEND_URL}/static/contract`)).json();
-      if (tipContract !== contractAddress) update = true;
-    } catch (e) {
-      update = false;
-    }
-
-    return update;
-  },
   async setCurrency({
     commit,
     state: {
@@ -233,5 +220,14 @@ export default {
     addresses = [...addresses, ...chainNamesAddresses];
 
     return { addresses: uniq(addresses).filter(a => a), tab };
+  },
+
+  async getTipContractAddress({ state: { network, current, sdk }, commit }) {
+    const { tipContract } = network[current.network];
+    const contractAddress = tipContract.includes('.chain')
+      ? getAddressByNameEntry(await sdk.api.getNameEntryByName(tipContract), 'contract_pubkey')
+      : tipContract;
+    commit('SET_TIPPING_ADDRESS', contractAddress);
+    return contractAddress;
   },
 };
