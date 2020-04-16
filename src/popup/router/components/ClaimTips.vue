@@ -8,7 +8,7 @@
 import { mapGetters } from 'vuex';
 import axios from 'axios';
 import { aettosToAe } from '../../utils/helper';
-import { TIP_SERVICE } from '../../utils/constants';
+import { TIP_SERVICE, BACKEND_URL } from '../../utils/constants';
 import BoxButton from './BoxButton';
 import Claim from '../../../icons/claim-icon.svg?vue-component';
 
@@ -48,6 +48,8 @@ export default {
               throw new Error(this.$t('pages.claim.oracleFailed'));
             else throw new Error(error);
           });
+        await axios.post(`${BACKEND_URL}/cache/invalidate/tip`).catch();
+        await axios.post(`${BACKEND_URL}/cache/invalidate/oracle`).catch();
         this.$emit('setLoading', false);
         this.$store.dispatch('modals/open', { name: 'claim-success', url: tab.url, claimAmount });
       } catch (e) {
