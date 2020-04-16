@@ -1,4 +1,7 @@
 describe('Tests cases for notifications page and icon', () => {
+  beforeEach(() => {
+    cy.logout().openPopup();
+  });
   it('Have backup seed notification', () => {
     cy.login()
       .get('[data-cy=noti-count]')
@@ -30,12 +33,5 @@ describe('Tests cases for notifications page and icon', () => {
     cy.login({ backupSeed: true })
       .get('[data-cy=noti-count]')
       .should('be.not.visible');
-  });
-
-  it("Click notification icon don't open notifications page", () => {
-    cy.login({ backupSeed: true })
-      .get('[data-cy=noti]')
-      .click()
-      .urlEquals('/account');
   });
 });
