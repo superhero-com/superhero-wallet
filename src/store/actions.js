@@ -8,7 +8,6 @@ import {
   aettosToAe,
   getAddressByNameEntry,
 } from '../popup/utils/helper';
-import { BACKEND_URL, DEFAULT_NETWORK } from '../popup/utils/constants';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
 
 export default {
