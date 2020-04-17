@@ -57,7 +57,7 @@ export default {
       this.$router.push('/securitySettings');
     },
     NetworkSettings() {
-      this.$router.push('/networks')
+      this.$router.push('/networks');
     },
     navigateAccount() {
       this.$router.push('/account');
