@@ -94,7 +94,7 @@
       "about": "About",
       "send": "Send Tips",
       "scanQr": "Scan QR",
-      "terms": "Terms & Conditions",
+      "terms": "Terms of Use",
       "privacy": "Privacy Policy",
       "importAccount": "Retrieve Existing Account",
       "activity": "Activity History",
@@ -142,7 +142,7 @@
     "aboutSettings": {
       "heading": "About",
       "systemName": "SuperHero",
-      "terms": "Terms of Service",
+      "terms": "Terms of Use",
       "privacyPolicy": "Privacy Policy"
     },
     "account": {
@@ -358,9 +358,9 @@
     },
     "index": {
       "term1": "I agree to the SuperHero ",
-      "term2": "Terms of Service",
+      "term2": "Terms of Use",
       "term3": "Privacy Policy",
-      "termsAndConditions": "Terms & Conditions",
+      "termsAndConditions": "Terms of Use",
       "heading": "Social network with a mission",
       "securingAccount": "Securing your account",
       "generateWallet": "Generate New Wallet",
