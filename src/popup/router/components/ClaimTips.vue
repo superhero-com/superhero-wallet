@@ -48,7 +48,7 @@ export default {
               throw new Error(this.$t('pages.claim.oracleFailed'));
             else throw new Error(error);
           });
-        await axios.post(`${BACKEND_URL}/cache/invalidate/tip`).catch();
+        await axios.post(`${BACKEND_URL}/cache/invalidate/tips`).catch();
         await axios.post(`${BACKEND_URL}/cache/invalidate/oracle`).catch();
         this.$emit('setLoading', false);
         this.$store.dispatch('modals/open', { name: 'claim-success', url: tab.url, claimAmount });
