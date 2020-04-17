@@ -89,7 +89,7 @@
     },
     "titles": {
       "settings": "Settings",
-      "general": "General",
+      "general": "Language",
       "security": "Security",
       "about": "About",
       "send": "Send Tips",
@@ -352,7 +352,7 @@
     },
     "generalSettings": {
       "backToSettings": "Back to settings",
-      "heading": "General",
+      "heading": "Language",
       "switchLanguage": "Language",
       "currentLanguage": "Current language"
     },
@@ -494,14 +494,16 @@
     "settings": {
       "backToAccount": "Back to account",
       "heading": "Settings",
-      "tabGeneral": "General",
-      "tabGeneralsmall": "Add name instead address, change your language",
+      "tabGeneral": "Language",
+      "tabGeneralsmall": "Change your language",
       "tabAdvanced": "Advanced",
       "tabAdvancedsmall": "Download your keystore or keypair",
       "tabSecurity": "Security & Privacy",
       "tabSecuritysmall": "Privacy data, Reveal private key",
       "tabAbout": "About",
-      "tabAboutsmall": "Version, support center and contact info"
+      "tabAboutsmall": "Version, support center and contact info",
+      "tabNetworks": "Manage networks",
+      "tabNetworksSmall": "Connect to custom node"
     },
     "signAndVerifyMsg": {
       "backToSignVerifyMsg": "Back to Sign/Verify Message",
