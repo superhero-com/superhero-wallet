@@ -12,10 +12,10 @@
         <i class="arrowright"></i>
         <p class="tabinfo">{{ $t('pages.settings.tabSecuritysmall') }}</p>
       </button>
-      <button class="aboutsett" @click="AboutSettings">
-        <span class="settings-li">{{ $t('pages.settings.tabAbout') }}</span>
+      <button class="aboutsett" @click="NetworkSettings">
+        <span class="settings-li">{{ $t('pages.appVUE.networks') }}</span>
         <i class="arrowright"></i>
-        <p class="tabinfo">{{ $t('pages.settings.tabAboutsmall') }}</p>
+        <p class="tabinfo">{{ $t('pages.settings.tabNetworksSmall') }}</p>
       </button>
     </ae-list>
     <div v-if="loading" class="loading">
@@ -56,8 +56,8 @@ export default {
     SecuritySettings() {
       this.$router.push('/securitySettings');
     },
-    AboutSettings() {
-      this.$router.push('/aboutSettings');
+    NetworkSettings() {
+      this.$router.push('/networks')
     },
     navigateAccount() {
       this.$router.push('/account');
@@ -69,6 +69,7 @@ export default {
 <style lang="scss">
 .settingslist {
   padding: 0 !important;
+  background: #21222a !important;
 }
 .settingslist button {
   transition: 0.4s;
@@ -80,20 +81,20 @@ export default {
   border-bottom: 1px solid #ccc;
 }
 .settingslist button:hover {
-  border-left: 2px solid #ff0d6a;
+  border-left: 2px solid #2a9cff;
   background: rgba(226, 226, 226, 0.5);
   .arrowright {
     right: 20px;
   }
 }
 .settings-li {
-  color: #555;
+  color: white;
   float: left;
   font-size: 18px;
 }
 .arrowright {
   transition: 0.4s;
-  border: solid #565656;
+  border: solid white;
   border-width: 0 4px 4px 0;
   display: inline-block;
   padding: 10px;

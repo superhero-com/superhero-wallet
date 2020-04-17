@@ -34,7 +34,7 @@
         <BoxButton :text="$t('pages.appVUE.withdraw')" to="send" class="tour__step7">
           <Withdraw slot="icon" />
         </BoxButton>
-        <BoxButton :text="$t('pages.appVUE.settings')" to="securitySettings" class="tour__step8">
+        <BoxButton :text="$t('pages.appVUE.settings')" to="settings" class="tour__step8">
           <Settings slot="icon" />
         </BoxButton>
       </div>
