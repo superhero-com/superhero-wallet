@@ -30,7 +30,7 @@ export default {
   },
   data() {
     return {
-      bugReportURL: 'https://thesuperherowallet.typeform.com/to/cnbife',
+      bugReportURL: 'https://thesuperherowallet.typeform.com/to/vh8Ffu',
       extensionVersion: `v.${process.env.npm_package_version}`,
     };
   },

@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
@@ -61,6 +61,7 @@ export default {
       'network',
       'currentCurrency',
     ]),
+    ...mapState(['tippingAddress']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -88,7 +89,7 @@ export default {
     await this.$watchUntilTruly(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
-      contractId: this.network[this.current.network].tipContract,
+      contractId: this.tippingAddress,
       callerId: this.account.publicKey,
     }).min;
     await this.$watchUntilTruly(() => this.tipping);

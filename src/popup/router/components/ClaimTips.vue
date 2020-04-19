@@ -8,7 +8,7 @@
 import { mapGetters } from 'vuex';
 import axios from 'axios';
 import { aettosToAe } from '../../utils/helper';
-import { TIP_SERVICE } from '../../utils/constants';
+import { TIP_SERVICE, BACKEND_URL } from '../../utils/constants';
 import BoxButton from './BoxButton';
 import Claim from '../../../icons/claim-icon.svg?vue-component';
 
@@ -25,6 +25,8 @@ export default {
       await this.$watchUntilTruly(() => this.tipping);
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       try {
+        if (!tab.url || tab.url.indexOf('chrome://') > -1 || tab.url.indexOf('about:newtab') > -1)
+          throw new Error(this.$t('pages.claim.noZeroClaim'));
         const claimAmount = parseFloat(
           aettosToAe(
             await this.tipping.methods
@@ -48,6 +50,8 @@ export default {
               throw new Error(this.$t('pages.claim.oracleFailed'));
             else throw new Error(error);
           });
+        await axios.post(`${BACKEND_URL}/cache/invalidate/tips`).catch();
+        await axios.post(`${BACKEND_URL}/cache/invalidate/oracle`).catch();
         this.$emit('setLoading', false);
         this.$store.dispatch('modals/open', { name: 'claim-success', url: tab.url, claimAmount });
       } catch (e) {

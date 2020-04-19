@@ -17,7 +17,7 @@
       "heading": "About",
       "backToSettings": "Settings",
       "systemName": "SuperHero",
-      "terms": "Terms of Service",
+      "terms": "Terms of Use",
       "privacyPolicy": "Privacy Policy"
     },
     "account": {
@@ -194,7 +194,7 @@
     },
     "index": {
       "term1": "I agree to the SuperHero ",
-      "term2": "Terms of Service",
+      "term2": "Terms of Use",
       "term3": "Privacy Policy",
       "heading": "Welcome to SuperHero, to start interacting with aeternity blockchain: ",
       "securingAccount": "Securing your account",
