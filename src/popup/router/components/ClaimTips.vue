@@ -33,6 +33,8 @@ export default {
         await this.$watchUntilTruly(() => this.tipping);
         const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
         try {
+          if (!tab.url || tab.url.indexOf('chrome://') > -1 || tab.url.indexOf('about:newtab') > -1)
+            throw new Error(this.$t('pages.claim.noZeroClaim'));
           const claimAmount = parseFloat(
             aettosToAe(
               await this.tipping.methods
