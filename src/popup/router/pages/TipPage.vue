@@ -222,6 +222,7 @@ export default {
       this.amountError = this.amountError || !+this.amount || this.amount <= 0;
       this.noteError = !this.note || !this.url;
       this.confirmMode = !this.amountError && !this.noteError && this.validUrl && this.url;
+      if (this.confirmMode) this.editUrl = false;
     },
     async sendTip() {
       const amount = aeToAettos(this.amount);
