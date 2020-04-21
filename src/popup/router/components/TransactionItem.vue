@@ -61,11 +61,12 @@ export default {
       return this.$t('pages.transactions.received');
     },
     txAmount() {
-      const amount = this.transaction.tx.amount ? this.transaction.tx.amount : 0;
-      return (+aettosToAe(amount)).toFixed(2);
+      const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
+      const fee = this.transaction.tx.fee || 0;
+      return (+aettosToAe(amount + fee)).toFixed(2);
     },
     txAmountToCurrency() {
-      const amount = this.transaction.tx.amount ? this.transaction.tx.amount : 0;
+      const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
       const fee = this.transaction.tx.fee || 0;
       const txamount = aettosToAe(amount + fee);
       return (txamount * this.current.currencyRate).toFixed(2);

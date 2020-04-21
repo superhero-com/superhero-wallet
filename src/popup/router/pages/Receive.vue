@@ -35,7 +35,7 @@ export default {
   data() {
     return {
       jellySwapUrl: 'https://app.jelly.market',
-      changellyUrl: 'https://changelly.com/processing',
+      changellyUrl: 'https://changelly.com/buy',
     };
   },
   computed: {

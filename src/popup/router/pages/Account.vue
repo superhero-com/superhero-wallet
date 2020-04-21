@@ -24,7 +24,7 @@
         >
           <Tip slot="icon" />
         </BoxButton>
-        <ClaimTips @setLoading="val => (loading = val)" v-if="IS_EXTENSION" />
+        <ClaimTips @setLoading="val => (loading = val)" />
         <BoxButton text="Activity" to="transactions" class="tour__step5">
           <Activity slot="icon" />
         </BoxButton>
@@ -76,7 +76,6 @@ export default {
     return {
       backup_seed_notif: false,
       loading: false,
-      IS_EXTENSION: process.env.IS_EXTENSION,
     };
   },
   computed: {
