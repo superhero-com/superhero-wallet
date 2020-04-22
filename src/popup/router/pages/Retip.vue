@@ -6,7 +6,7 @@
         <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
         {{ $t('pages.tipPage.to') }}
       </div>
-      <UrlBadge :type="urlVerified ? 'verified' : 'not-verified'" />
+      <UrlBadge v-if="tip.url" :type="urlVerified ? 'verified' : 'not-verified'" />
     </div>
 
     <div class="url-bar">
@@ -67,10 +67,11 @@ export default {
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
     },
     urlVerified() {
-      const twitterProfile = getTwitterAccountUrl(this.url);
+      if (!this.tip.url) return false;
+      const twitterProfile = getTwitterAccountUrl(this.tip.url);
       return (
-        this.url &&
-        (this.verifiedUrls.includes(this.url) ||
+        this.tip.url &&
+        (this.verifiedUrls.includes(this.tip.url) ||
           (twitterProfile && this.verifiedUrls.includes(twitterProfile)))
       );
     },
@@ -87,6 +88,7 @@ export default {
     this.loading = true;
     this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
     await this.$watchUntilTruly(() => this.sdk);
+    await this.$watchUntilTruly(() => this.tippingAddress);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
       contractId: this.tippingAddress,

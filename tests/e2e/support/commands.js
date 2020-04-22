@@ -182,7 +182,7 @@ Cypress.Commands.add('openWithdraw', () => {
     .click();
 });
 
-Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '' }) => {
+Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '', edit = false }) => {
   cy.get('[data-cy=input-number]').clear();
   if (amount || amount === 0) {
     cy.get('[data-cy=input-number]').type(amount);
@@ -191,14 +191,11 @@ Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '' })
   cy.get('[data-cy=textarea]').clear();
   if (note) cy.get('[data-cy=textarea]').type(note);
 
+  if (edit) cy.get('[data-cy=edit-url]').click();
   if (url) {
-    cy.get('[data-cy=edit-url]')
-      .click()
-      .get('[data-cy=input]')
+    cy.get('[data-cy=input]')
       .clear()
-      .type(url)
-      .get('[data-cy=confirm-url]')
-      .click();
+      .type(url);
   }
 });
 
@@ -207,17 +204,6 @@ Cypress.Commands.add('toConfirmTip', (tip = {}) => {
   cy.enterTipDetails({ ...tip })
     .buttonShouldNotBeDisabled('[data-cy=send-tip]')
     .get('[data-cy=send-tip]')
-    .click()
-    .get('.confirmtip-modal--footer')
-    .should('be.visible')
-    .get('[data-cy=cancel-tip]')
-    .click()
-    .wait(1000)
-    .get('[data-cy=send-tip]')
-    .click()
-    .get('.confirmtip-modal--footer')
-    .should('be.visible')
-    .get('[data-cy=to-confirm]')
     .click()
     .get('[data-cy=confirm-tip]')
     .should('be.visible')

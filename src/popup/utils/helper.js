@@ -47,6 +47,11 @@ const convertToAE = balance => +(balance / 10 ** 18).toFixed(7);
 
 const extractHostName = url => new URL(url.includes('://') ? url : `http://${url}`).hostname;
 
+export const validateUrl = url => {
+  const urlRegex = /(https?:\/\/)?([\w-])+\.{1}([a-zA-Z]{2,63})([/\w-]*)*\/?\??([^#\n\r]*)?#?([^\n\r]*)/g;
+  return urlRegex.test(url);
+};
+
 const detectBrowser = () => {
   if ((navigator.userAgent.indexOf('Opera') || navigator.userAgent.indexOf('OPR')) !== -1) {
     return 'Opera';
