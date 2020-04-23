@@ -181,4 +181,3 @@ export const IDENTICON_SIZES = {
   normal: 38,
   lg: 64,
 };
-
