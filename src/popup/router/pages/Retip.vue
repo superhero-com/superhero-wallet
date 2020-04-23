@@ -81,7 +81,7 @@ export default {
   },
   watch: {
     amount() {
-      this.amountError = false;
+      this.amountError = !+this.amount || this.amount < 0.1;
     },
   },
   async created() {
