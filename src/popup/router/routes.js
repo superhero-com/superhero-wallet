@@ -128,6 +128,7 @@ export default [
     component: Retip,
     meta: {
       title: 'send',
+      notPersist: true,
     },
   },
   {
@@ -243,6 +244,7 @@ export default [
     component: CommentNew,
     meta: {
       title: 'comment-new',
+      notPersist: true,
     },
   },
   {

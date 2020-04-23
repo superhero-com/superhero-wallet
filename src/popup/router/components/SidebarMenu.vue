@@ -65,6 +65,11 @@
               {{ $t('pages.appVUE.networks') }}
             </router-link>
           </li>
+          <li>
+            <span data-cy="remove-account" @click="removeAccount">
+              {{ $t('pages.appVUE.removeAccount') }}
+            </span>
+          </li>
         </ul>
       </transition>
     </li>
@@ -97,6 +102,8 @@ import { mapGetters } from 'vuex';
 import Close from '../../../icons/close.svg?vue-component';
 import Arrow from '../../../icons/arrow-current-color.svg?vue-component';
 import UserAvatar from './UserAvatar';
+import { AEX2_METHODS } from '../../utils/constants';
+import { postMessage } from '../../utils/connection';
 
 export default {
   components: { Close, Arrow, UserAvatar },
@@ -108,6 +115,22 @@ export default {
     },
     closeMenu() {
       this.$emit('closeMenu');
+    },
+    async removeAccount() {
+      const remove = await this.$store
+        .dispatch('modals/open', {
+          name: 'confirm',
+          title: this.$t('modals.removeAccount.title'),
+          msg: this.$t('modals.removeAccount.msg'),
+        })
+        .catch(() => false);
+      if (remove) {
+        this.$emit('closeMenu');
+        await this.$store.dispatch('reset');
+        await this.$router.push('/');
+        this.$store.commit('SET_MAIN_LOADING', false);
+        postMessage({ type: AEX2_METHODS.LOGOUT });
+      }
     },
   },
 };
@@ -133,7 +156,8 @@ export default {
     border-bottom: 1px solid $bg-color;
 
     a,
-    button {
+    button,
+    span {
       text-decoration: none;
       display: flex;
       justify-content: space-between;
@@ -146,6 +170,7 @@ export default {
       padding: 8px 1rem;
       white-space: nowrap;
       transition: background-color 0.2s;
+      cursor: pointer;
 
       &.opened,
       &:hover {
@@ -180,7 +205,8 @@ export default {
       }
 
       a,
-      button {
+      button,
+      span {
         padding: 6px 1rem 6px 25px;
       }
     }
