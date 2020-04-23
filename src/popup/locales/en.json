@@ -68,7 +68,7 @@
     },
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",
-      "msg": "This action cannot be undone"
+      "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
     },
     "cancel": "Cancel",
     "confirm": "Confirm"
