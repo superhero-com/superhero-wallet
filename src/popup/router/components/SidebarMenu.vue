@@ -102,10 +102,10 @@ import { mapGetters } from 'vuex';
 import Close from '../../../icons/close.svg?vue-component';
 import Arrow from '../../../icons/arrow-current-color.svg?vue-component';
 import UserAvatar from './UserAvatar';
-import { AEX2_METHODS } from '../../utils/constants';
-import { postMessage } from '../../utils/connection';
+import removeAccountMixin from '../../../mixins/removeAccount';
 
 export default {
+  mixins: [removeAccountMixin],
   components: { Close, Arrow, UserAvatar },
   computed: mapGetters(['account', 'activeAccountName']),
   data: () => ({ showSettingsDropdown: false }),
@@ -115,22 +115,6 @@ export default {
     },
     closeMenu() {
       this.$emit('closeMenu');
-    },
-    async removeAccount() {
-      const remove = await this.$store
-        .dispatch('modals/open', {
-          name: 'confirm',
-          title: this.$t('modals.removeAccount.title'),
-          msg: this.$t('modals.removeAccount.msg'),
-        })
-        .catch(() => false);
-      if (remove) {
-        this.$emit('closeMenu');
-        await this.$store.dispatch('reset');
-        await this.$router.push('/');
-        this.$store.commit('SET_MAIN_LOADING', false);
-        postMessage({ type: AEX2_METHODS.LOGOUT });
-      }
     },
   },
 };
