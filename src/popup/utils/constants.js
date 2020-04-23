@@ -181,3 +181,5 @@ export const IDENTICON_SIZES = {
   normal: 38,
   lg: 64,
 };
+
+export const MIN_TIP_AMOUNT = !process.env.RUNNING_IN_TESTS ? 0.1 : 0.001;
