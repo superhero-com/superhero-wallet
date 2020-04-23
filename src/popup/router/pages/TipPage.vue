@@ -146,7 +146,7 @@ export default {
   },
   watch: {
     amount() {
-      this.amountError = !+this.amount || this.amount <= 0;
+      this.amountError = !+this.amount || this.amount < 0.1;
     },
     $route: {
       immediate: true,
