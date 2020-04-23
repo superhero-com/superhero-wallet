@@ -72,7 +72,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import axios from 'axios';
-import { calculateFee, TX_TYPES, BACKEND_URL, MIN_TIP_AMOUNT } from '../../utils/constants';
+import { calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import {
   escapeSpecialChars,
   aeToAettos,
@@ -121,7 +121,7 @@ export default {
       'currentCurrency',
       'tip',
     ]),
-    ...mapState(['tourRunning', 'tippingAddress']),
+    ...mapState(['tourRunning', 'tippingAddress', 'minTipAmount']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -146,7 +146,7 @@ export default {
   },
   watch: {
     amount() {
-      this.amountError = !+this.amount || this.amount < MIN_TIP_AMOUNT;
+      this.amountError = !+this.amount || this.amount < this.minTipAmount;
     },
     $route: {
       immediate: true,
@@ -219,7 +219,7 @@ export default {
       //   if (!allowToConfirm) return;
       // }
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
-      this.amountError = this.amountError || !+this.amount || this.amount < MIN_TIP_AMOUNT;
+      this.amountError = this.amountError || !+this.amount || this.amount < this.minTipAmount;
       this.noteError = !this.note || !this.url;
       this.confirmMode = !this.amountError && !this.noteError && this.validUrl && this.url;
       if (this.confirmMode) this.editUrl = false;

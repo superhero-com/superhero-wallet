@@ -34,13 +34,7 @@ import { mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
-import {
-  MAGNITUDE,
-  calculateFee,
-  TX_TYPES,
-  BACKEND_URL,
-  MIN_TIP_AMOUNT,
-} from '../../utils/constants';
+import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
 import { getTwitterAccountUrl } from '../../utils/helper';
 import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';
@@ -67,7 +61,7 @@ export default {
       'network',
       'currentCurrency',
     ]),
-    ...mapState(['tippingAddress']),
+    ...mapState(['tippingAddress', 'minTipAmount']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -87,7 +81,7 @@ export default {
   },
   watch: {
     amount() {
-      this.amountError = !+this.amount || this.amount < MIN_TIP_AMOUNT;
+      this.amountError = !+this.amount || this.amount < this.minTipAmount;
     },
   },
   async created() {
@@ -115,7 +109,7 @@ export default {
     },
     async sendTip() {
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
-      this.amountError = this.amountError || !+this.amount || this.amount < MIN_TIP_AMOUNT;
+      this.amountError = this.amountError || !+this.amount || this.amount < this.minTipAmount;
       if (this.amountError) return;
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
       this.loading = true;
