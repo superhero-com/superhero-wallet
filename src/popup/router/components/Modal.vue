@@ -5,13 +5,13 @@
         <div class="modal--wrapper">
           <div class="modal--container">
             <Close class="modal--close" @click="$emit('close')" />
-            <div class="modal--header">
+            <div v-if="$slots.header" class="modal--header">
               <slot name="header" />
             </div>
-            <div class="modal--body">
+            <div v-if="$slots.body" class="modal--body">
               <slot name="body" />
             </div>
-            <div class="modal--footer">
+            <div v-if="$slots.footer" class="modal--footer">
               <slot name="footer" />
             </div>
           </div>
@@ -38,7 +38,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import '../../../common/variables';
 .modal--mask {
   position: fixed;
@@ -72,15 +72,31 @@ export default {
   }
   .modal--header {
     color: $white-color;
-    font-size: 16px;
+    font-size: 17px;
+    font-weight: 500;
+    margin-bottom: 25px;
+    word-break: break-word;
   }
   .modal--body {
-    margin: 20px 0;
+    margin-bottom: 40px;
     color: $text-color;
     font-size: 14px;
     word-break: break-word;
     text-align: left;
   }
+
+  .modal--footer {
+    .modal-confirm-btns {
+      display: flex;
+      justify-content: space-between;
+      button {
+        margin: 0 !important;
+        width: 120px !important;
+        font-weight: 700 !important;
+      }
+    }
+  }
+
   .modal--enter {
     opacity: 0;
   }
