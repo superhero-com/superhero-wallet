@@ -115,15 +115,11 @@ export default {
       this.pollData();
     },
     pollData() {
-      let triggerOnce = false;
       const polling = setInterval(async () => {
         if (!this.isLoggedIn) return;
-        if (!process.env.RUNNING_IN_TESTS) this.$store.dispatch('updateBalance');
-        if (!triggerOnce) {
-          this.$store.dispatch('getRegisteredNames');
-          triggerOnce = true;
-        }
+        if (!process.env.RUNNING_IN_TESTS && this.sdk) this.$store.dispatch('updateBalance');
       }, 2500);
+      this.$store.dispatch('getRegisteredNames');
       this.$once('hook:beforeDestroy', () => clearInterval(polling));
     },
   },

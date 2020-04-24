@@ -1,13 +1,13 @@
 <template>
   <Modal @close="resolve">
-    <h4 class="confirmtip-modal-header" slot="header">
+    <template slot="header">
       {{ $t('pages.tipPage.sendTipConfirmationHeader') }}
-    </h4>
-    <div class="confirmtip-modal--body" slot="body">
+    </template>
+    <template slot="body">
       {{ $t('pages.tipPage.sendTipConfirmationBody') }}
       <p class="confirmation--question">{{ $t('pages.tipPage.sendTipConfirmationQstn') }}</p>
-    </div>
-    <div class="confirmtip-modal--footer" slot="footer">
+    </template>
+    <div class="modal-confirm-btns" slot="footer">
       <Button data-cy="cancel-tip" dark @click="cancelTip">
         {{ $t('pages.tipPage.cancel') }}
       </Button>
@@ -40,25 +40,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.confirmtip-modal-header {
-  margin: 0 !important;
+.confirmation--question {
   font-weight: 500 !important;
-}
-.confirmtip-modal--body {
-  padding-bottom: 20px;
-  .confirmation--question {
-    font-weight: 500 !important;
-    color: #fff !important;
-  }
-}
-.confirmtip-modal--footer {
-  display: flex;
-  justify-content: space-between;
-  button {
-    margin: 0 !important;
-    width: 120px !important;
-    font-weight: 700 !important;
-    font-size: 15px !important;
-  }
+  color: #fff !important;
 }
 </style>

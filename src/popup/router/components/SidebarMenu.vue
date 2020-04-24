@@ -65,6 +65,11 @@
               {{ $t('pages.appVUE.networks') }}
             </router-link>
           </li>
+          <li>
+            <span data-cy="remove-account" @click="removeAccount">
+              {{ $t('pages.appVUE.removeAccount') }}
+            </span>
+          </li>
         </ul>
       </transition>
     </li>
@@ -97,8 +102,10 @@ import { mapGetters } from 'vuex';
 import Close from '../../../icons/close.svg?vue-component';
 import Arrow from '../../../icons/arrow-current-color.svg?vue-component';
 import UserAvatar from './UserAvatar';
+import removeAccountMixin from '../../../mixins/removeAccount';
 
 export default {
+  mixins: [removeAccountMixin],
   components: { Close, Arrow, UserAvatar },
   computed: mapGetters(['account', 'activeAccountName']),
   data: () => ({ showSettingsDropdown: false }),
@@ -133,7 +140,8 @@ export default {
     border-bottom: 1px solid $bg-color;
 
     a,
-    button {
+    button,
+    span {
       text-decoration: none;
       display: flex;
       justify-content: space-between;
@@ -146,6 +154,7 @@ export default {
       padding: 8px 1rem;
       white-space: nowrap;
       transition: background-color 0.2s;
+      cursor: pointer;
 
       &.opened,
       &:hover {
@@ -180,7 +189,8 @@ export default {
       }
 
       a,
-      button {
+      button,
+      span {
         padding: 6px 1rem 6px 25px;
       }
     }
