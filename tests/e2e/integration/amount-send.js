@@ -12,7 +12,7 @@ describe('Test cases AmountSend component', () => {
       .enterAmountSend(0)
       .get('[data-cy=amount-currency]')
       .invoke('text')
-      .then(text => expect(text).to.eq('0.00 USD'));
+      .then(text => expect(text.trim()).to.eq('0.00 USD'));
   });
 
   it('Validate entered amount', () => {
@@ -20,7 +20,7 @@ describe('Test cases AmountSend component', () => {
       .inputShouldHaveError('[data-cy=input-number]')
       .get('[data-cy=amount-currency]')
       .invoke('text')
-      .then(text => expect(text).to.eq('0.00 USD'))
+      .then(text => expect(text.trim()).to.eq('0.00 USD'))
       .enterAmountSend(0)
       .get('[data-cy=input-number]')
       .should('have.class', 'has-error')
@@ -32,10 +32,10 @@ describe('Test cases AmountSend component', () => {
   it('Show correct balance', () => {
     cy.get('[data-cy=balance]')
       .invoke('text')
-      .then(text => expect(text).to.eq(`${balance.toFixed(2)} AE`))
+      .then(text => expect(text.trim()).to.eq(`${balance.toFixed(2)} AE`))
       .wait(2000)
       .get('[data-cy=balance-currency]')
       .invoke('text')
-      .then(text => expect(text).not.to.eq('0.00 USD'));
+      .then(text => expect(text.trim()).not.to.eq('0.00 USD'));
   });
 });
