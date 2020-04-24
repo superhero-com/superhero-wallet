@@ -11,53 +11,55 @@ import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
 
 Vue.use(Vuex);
 
-export default new Vuex.Store({
-  state: {
-    isRestored: false,
-    subaccounts: [],
-    account: {},
-    mnemonic: null,
-    activeAccount: 0,
-    names: [],
-    wallet: [],
-    balance: 0,
-    current: {
-      network: DEFAULT_NETWORK,
-      language: 'en',
-      token: 0,
-      currency: 'usd',
-      currencyRate: 0,
-    },
-    network: networks,
-    userNetworks: [],
-    isLoggedIn: false,
-    transactions: {
-      latest: [],
-      pending: [],
-    },
-    sdk: null,
-    middleware: null,
-    aeppPopup: false,
-    ledgerApi: null,
-    txAdvancedMode: false,
-    tipping: null,
-    tippingReceiver: {},
-    tippingAddress: null,
-    mainLoading: true,
-    nodeStatus: 'connecting',
-    currencies: {},
-    nextCurrenciesFetch: null,
-    minTipAmount: 0.01,
-    notifications: [],
-    notificationsCounter: null,
-    tip: null,
-    txQueue: [],
-    connectedAepps: {},
-    migrations: {},
-    backedUpSeed: null,
-    tourRunning: false,
-    tourStartBar: true,
+const initialState = {
+  isRestored: false,
+  subaccounts: [],
+  account: {},
+  mnemonic: null,
+  activeAccount: 0,
+  names: [],
+  wallet: [],
+  balance: 0,
+  current: {
+    network: DEFAULT_NETWORK,
+    language: 'en',
+    token: 0,
+    currency: 'usd',
+    currencyRate: 0,
   },
+  network: networks,
+  userNetworks: [],
+  isLoggedIn: false,
+  transactions: {
+    latest: [],
+    pending: [],
+  },
+  sdk: null,
+  middleware: null,
+  aeppPopup: false,
+  ledgerApi: null,
+  txAdvancedMode: false,
+  tipping: null,
+  tippingReceiver: {},
+  tippingAddress: null,
+  mainLoading: true,
+  nodeStatus: 'connecting',
+  currencies: {},
+  nextCurrenciesFetch: null,
+  minTipAmount: 0.01,
+  notifications: [],
+  notificationsCounter: null,
+  tip: null,
+  txQueue: [],
+  connectedAepps: {},
+  migrations: {},
+  backedUpSeed: null,
+  tourRunning: false,
+  tourStartBar: true,
+};
+
+export default new Vuex.Store({
+  state: { ...initialState },
   getters,
   mutations: {
     syncState(state, remoteState) {
@@ -74,6 +76,11 @@ export default new Vuex.Store({
     },
     markMigrationAsApplied(state, migrationId) {
       Vue.set(state.migrations, migrationId, true);
+    },
+    resetState(state, remoteState) {
+      Object.entries(mergeWith({}, initialState, remoteState)).forEach(([name, value]) =>
+        Vue.set(state, name, value),
+      );
     },
     ...mutations,
   },

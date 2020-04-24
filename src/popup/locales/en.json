@@ -65,7 +65,13 @@
     },
     "insufficient-balance": {
       "msg": "The requested amount cannot be spent."
-    }
+    },
+    "removeAccount": {
+      "title": "Are you sure you want to remove this account?",
+      "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
+    },
+    "cancel": "Cancel",
+    "confirm": "Confirm"
   },
   "pages": {
     "intro": {
@@ -137,7 +143,8 @@
       "mainAccount": "Main account",
       "reportBug": "Report a bug",
       "names": "Names",
-      "networks": "Networks"
+      "networks": "Networks",
+      "removeAccount": "Remove account"
     },
     "aboutSettings": {
       "heading": "About",
@@ -505,7 +512,9 @@
       "tabAbout": "About",
       "tabAboutsmall": "Version, support center and contact info",
       "tabNetworks": "Manage networks",
-      "tabNetworksSmall": "Connect to custom node"
+      "tabNetworksSmall": "Connect to custom node",
+      "tabRemoveAccount": "Remove account",
+      "tabRemoveAccountSmall": "Remove account from the wallet and delete extension storage"
     },
     "signAndVerifyMsg": {
       "backToSignVerifyMsg": "Back to Sign/Verify Message",

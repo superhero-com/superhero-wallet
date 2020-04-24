@@ -11,8 +11,8 @@ export const getState = async () => {
   return state || {};
 };
 
-export const resetState = () => {
-  browser.storage.remove.local(KEY);
+export const resetState = async () => {
+  await browser.storage.local.remove(KEY);
 };
 
 export default (reducerLoad, reducerSave) => async store => {
@@ -25,9 +25,11 @@ export default (reducerLoad, reducerSave) => async store => {
   });
   store.registerModule('persistState', {
     actions: {
-      reset() {
+      async reset() {
         resetting = true;
-        resetState();
+        await resetState();
+        resetting = false;
+        store.commit('resetState', { isRestored: true });
       },
     },
   });
