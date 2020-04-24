@@ -106,10 +106,14 @@ export default {
     border-radius: 5px;
   }
 
-  .dropdown-container.show ul.sub-dropdown {
-    visibility: visible;
-    max-height: 165px;
-    overflow-y: scroll;
+  .dropdown-container.show {
+    z-index: 1;
+
+    ul.sub-dropdown {
+      visibility: visible;
+      max-height: 165px;
+      overflow-y: scroll;
+    }
   }
 
   .sub-dropdown .single-currency:hover {
