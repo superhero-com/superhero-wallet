@@ -1,31 +1,34 @@
 <template>
-  <div class="flex flex-justify-between flex-align-start mt-25">
-    <Input
-      class="amount-box"
-      type="number"
-      :error="amountError || finalAmount <= 0"
-      v-model="finalAmount"
-      :placeholder="$t('pages.tipPage.amountPlaceholder')"
-      :label="$t('pages.tipPage.amountLabel')"
-    />
-    <div class="ml-15 text-left" style="margin-right:auto">
-      <p class="label hidden">Empty</p>
-      <span class="secondary-text f-14 block l-1" data-cy="amount">
-        {{ $t('pages.appVUE.aeid') }}</span
-      >
-      <span class="f-14 block l-1" data-cy="amount-currency"
-        >{{ getCurrencyAmount }} {{ currentCurrency }}</span
-      >
+  <div class="amount-send-container">
+    <div class="amount-send">
+      <Input
+        class="amount-box"
+        type="number"
+        :error="amountError || finalAmount <= 0"
+        v-model="finalAmount"
+        :placeholder="$t('pages.tipPage.amountPlaceholder')"
+        :label="$t('pages.tipPage.amountLabel')"
+      />
+      <div class="ml-15 text-left" style="margin-right:auto">
+        <p class="label hidden">Empty</p>
+        <span class="secondary-text f-14 block l-1" data-cy="amount">
+          {{ $t('pages.appVUE.aeid') }}
+        </span>
+        <span class="f-14 block l-1" data-cy="amount-currency">
+          {{ getCurrencyAmount }} {{ currentCurrency }}
+        </span>
+      </div>
+      <div class="balance-box">
+        <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
+        <span class="secondary-text f-14 block l-1" data-cy="balance">
+          {{ tokenBalance }} {{ $t('pages.appVUE.aeid') }}
+        </span>
+        <span class="f-14 block l-1" data-cy="balance-currency">
+          {{ balanceCurrency }} {{ currentCurrency }}
+        </span>
+      </div>
     </div>
-    <div class="balance-box">
-      <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
-      <span class="secondary-text f-14 block l-1" data-cy="balance"
-        >{{ tokenBalance }} {{ $t('pages.appVUE.aeid') }}</span
-      >
-      <span class="f-14 block l-1" data-cy="balance-currency"
-        >{{ balanceCurrency }} {{ currentCurrency }}</span
-      >
-    </div>
+    <div v-if="errorMsg" class="error-msg">{{ $t('pages.tipPage.minAmountError') }}</div>
   </div>
 </template>
 
@@ -37,7 +40,7 @@ export default {
   components: {
     Input,
   },
-  props: ['amountError', 'value'],
+  props: ['amountError', 'value', 'errorMsg'],
   data() {
     return {
       finalAmount: null,
@@ -63,3 +66,31 @@ export default {
   },
 };
 </script>
+
+<style lang="scss">
+@import '../../../common/variables';
+
+.amount-send-container {
+  margin-bottom: 22px;
+  margin-top: 25px;
+
+  .amount-send {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    input.input {
+      margin-bottom: 0;
+    }
+  }
+
+  .error-msg {
+    font-weight: normal;
+    color: $input-error-color !important;
+    font-size: 12px;
+    word-break: break-word;
+    margin-top: 10px;
+    text-align: left;
+  }
+}
+</style>

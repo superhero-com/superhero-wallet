@@ -41,6 +41,7 @@
           :amountError="amountError"
           @changeAmount="val => (amount = val)"
           :value="amount"
+          :errorMsg="amount && amount < minTipAmount"
         />
         <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
         <Button
@@ -121,7 +122,7 @@ export default {
       'currentCurrency',
       'tip',
     ]),
-    ...mapState(['tourRunning', 'tippingAddress']),
+    ...mapState(['tourRunning', 'tippingAddress', 'minTipAmount']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -146,7 +147,7 @@ export default {
   },
   watch: {
     amount() {
-      this.amountError = !+this.amount || this.amount <= 0;
+      this.amountError = !+this.amount || this.amount < this.minTipAmount;
     },
     $route: {
       immediate: true,
@@ -219,7 +220,7 @@ export default {
       //   if (!allowToConfirm) return;
       // }
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
-      this.amountError = this.amountError || !+this.amount || this.amount <= 0;
+      this.amountError = this.amountError || !+this.amount || this.amount < this.minTipAmount;
       this.noteError = !this.note || !this.url;
       this.confirmMode = !this.amountError && !this.noteError && this.validUrl && this.url;
       if (this.confirmMode) this.editUrl = false;
