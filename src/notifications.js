@@ -42,9 +42,6 @@ export default class Notification {
   async init() {
     this.client = await getSDK();
     this.network = (await getNodes()).network;
-    setInterval(() => {
-      this.checkTxReady();
-    }, 2000);
     browser.notifications.onButtonClicked.addListener(id => {
       browser.tabs.create({ url: id.split('?')[1], active: true });
     });
