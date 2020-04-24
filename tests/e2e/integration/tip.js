@@ -1,5 +1,5 @@
-const tip = { amount: 0.01, note: '#test', url: 'localhost:500' };
-const tip2 = { amount: 0.01, note: '#test1234', url: 'localhost:500', onTip: true };
+const tip = { amount: 0.01, note: '#test', url: 'example.com', edit: true };
+const tip2 = { amount: 0.01, note: '#test1234', url: 'example.com', onTip: true, edit: true };
 
 describe('Test cases for tip page', () => {
   beforeEach(() => {
@@ -35,7 +35,7 @@ describe('Test cases for tip page', () => {
   it('Validate tip details', () => {
     cy.openTip()
       .buttonShouldBeDisabled('[data-cy=send-tip]')
-      .enterTipDetails({ url: tip.url })
+      .enterTipDetails({ url: tip.url, edit: true })
       .buttonShouldBeDisabled('[data-cy=send-tip]')
       .enterTipDetails({ amount: tip.amount })
       .buttonShouldBeDisabled('[data-cy=send-tip]')
@@ -49,7 +49,7 @@ describe('Test cases for tip page', () => {
       .buttonShouldBeDisabled('[data-cy=send-tip]')
       .enterTipDetails({ amount: 0, note: tip.note })
       .buttonShouldBeDisabled('[data-cy=send-tip]')
-      .enterTipDetails({ ...tip })
+      .enterTipDetails({ ...tip, edit: false })
       .buttonShouldNotBeDisabled('[data-cy=send-tip]');
   });
 

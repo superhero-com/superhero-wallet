@@ -1,6 +1,6 @@
 <template>
   <div class="button-container">
-    <div class="button-content" @click="handleClick">
+    <div class="button-content" @click="handleClick" :class="{ disabled }">
       <slot name="icon" />
       <span class="button-text" :class="accent ? 'button-text-accent' : ''">{{ text }}</span>
     </div>
@@ -16,6 +16,11 @@ export default {
     },
     to: String,
     accent: Boolean,
+    disabled: {
+      type: Boolean,
+      default: false,
+      required: false,
+    },
   },
   methods: {
     handleClick() {
@@ -57,6 +62,11 @@ export default {
       &.button-text-accent {
         color: $accent-color;
       }
+    }
+
+    &.disabled {
+      pointer-events: all;
+      opacity: 0.3;
     }
   }
 }

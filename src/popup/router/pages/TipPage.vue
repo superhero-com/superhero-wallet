@@ -6,7 +6,7 @@
           <div>
             {{ $t('pages.tipPage.url') }}
           </div>
-          <UrlBadge @click.native="showBadgeModal" :type="verifiedStatus" />
+          <UrlBadge v-if="url" @click.native="showBadgeModal" :type="verifiedStatus" />
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
@@ -23,10 +23,15 @@
             {{ url }}
           </a>
         </template>
-        <Input v-else size="m-0 xsm" v-model="url" />
-        <button v-if="!confirmMode" @click="editUrl = !editUrl" data-cy="edit-url">
-          <ae-icon name="check" data-cy="confirm-url" v-if="editUrl" />
-          <EditIcon data-cy="confirm-url" v-else />
+        <Input
+          v-else
+          size="m-0 xsm"
+          v-model="url"
+          :error="url && !validUrl"
+          :placeholder="$t('pages.tipPage.enterUrl')"
+        />
+        <button v-if="!confirmMode && !editUrl" @click="editUrl = !editUrl" data-cy="edit-url">
+          <EditIcon v-if="!editUrl" data-cy="confirm-url" />
         </button>
       </div>
     </div>
@@ -36,12 +41,13 @@
           :amountError="amountError"
           @changeAmount="val => (amount = val)"
           :value="amount"
+          :errorMsg="amount && amount < minTipAmount"
         />
         <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
         <Button
           class="send-tip-button"
           @click="toConfirm"
-          :disabled="!note || amountError || noteError || !minCallFee || editUrl"
+          :disabled="!note || amountError || noteError || !minCallFee || !validUrl || !url"
           data-cy="send-tip"
         >
           {{ $t('pages.tipPage.next') }}
@@ -68,7 +74,12 @@
 import { mapGetters, mapState } from 'vuex';
 import axios from 'axios';
 import { calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
-import { escapeSpecialChars, aeToAettos, getTwitterAccountUrl } from '../../utils/helper';
+import {
+  escapeSpecialChars,
+  aeToAettos,
+  getTwitterAccountUrl,
+  validateUrl,
+} from '../../utils/helper';
 import EditIcon from '../../../icons/edit-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
@@ -111,7 +122,7 @@ export default {
       'currentCurrency',
       'tip',
     ]),
-    ...mapState(['tourRunning', 'tippingAddress']),
+    ...mapState(['tourRunning', 'tippingAddress', 'minTipAmount']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -130,10 +141,13 @@ export default {
     verifiedStatus() {
       return this.urlVerified || this.tourRunning ? 'verified' : 'not-verified';
     },
+    validUrl() {
+      return validateUrl(this.url);
+    },
   },
   watch: {
     amount() {
-      this.amountError = !+this.amount || this.amount <= 0;
+      this.amountError = !+this.amount || this.amount < this.minTipAmount;
     },
     $route: {
       immediate: true,
@@ -165,6 +179,7 @@ export default {
       console.error(`Can't fetch /verified: ${e}`);
     }
     await this.$watchUntilTruly(() => this.sdk);
+    await this.$watchUntilTruly(() => this.tippingAddress);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
       contractId: this.tippingAddress,
@@ -197,18 +212,18 @@ export default {
       );
     },
     async toConfirm() {
-      if (!this.urlVerified) {
-        const allowToConfirm = await this.$store
-          .dispatch('modals/open', { name: 'confirm-tip' })
-          .catch(() => false);
-        if (!allowToConfirm) {
-          return;
-        }
-      }
+      // TODO: check if url cannot be claimed through backend and only then show confirm modal
+      // if (!this.urlVerified) {
+      //   const allowToConfirm = await this.$store
+      //     .dispatch('modals/open', { name: 'confirm-tip' })
+      //     .catch(() => false);
+      //   if (!allowToConfirm) return;
+      // }
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
-      this.amountError = this.amountError || !+this.amount || this.amount <= 0;
+      this.amountError = this.amountError || !+this.amount || this.amount < this.minTipAmount;
       this.noteError = !this.note || !this.url;
-      this.confirmMode = !this.amountError && !this.noteError;
+      this.confirmMode = !this.amountError && !this.noteError && this.validUrl && this.url;
+      if (this.confirmMode) this.editUrl = false;
     },
     async sendTip() {
       const amount = aeToAettos(this.amount);

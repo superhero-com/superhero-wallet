@@ -65,7 +65,13 @@
     },
     "insufficient-balance": {
       "msg": "The requested amount cannot be spent."
-    }
+    },
+    "removeAccount": {
+      "title": "Are you sure you want to remove this account?",
+      "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
+    },
+    "cancel": "Cancel",
+    "confirm": "Confirm"
   },
   "pages": {
     "intro": {
@@ -137,7 +143,8 @@
       "mainAccount": "Main account",
       "reportBug": "Report a bug",
       "names": "Names",
-      "networks": "Networks"
+      "networks": "Networks",
+      "removeAccount": "Remove account"
     },
     "aboutSettings": {
       "heading": "About",
@@ -176,7 +183,9 @@
       "tipsOnUrl": "Tips on this URL",
       "urlNotExisting": "Tip for this url does not exist",
       "moreOracles": "There are not enough active oracles to verify your claim request, please try again later.",
-      "oracleFailed": "Oracle service check claim failed, please try again later."
+      "oracleFailed": "Oracle service check claim failed, please try again later.",
+      "unknownError": "Error occured during claim request, please try again later.",
+      "noMobileClaim": "Claiming is currently only available on the web extension on desktop"
     },
     "accountPassword": {
       "heading": "",
@@ -437,7 +446,7 @@
       "decryptingPrivateKey": "Decrypting private key",
       "showSeedPhrase": "Show seed phrase",
       "seedRecoveryHeading": "Show seed phrase",
-      "seedRecoverySmall": "Reveals your 12 words used for generating your private key",
+      "seedRecoverySmall": "Your seed phrase (also referred to as private key) serves as the keys or a password to access your account. Never disclose this to anyone. And make sure you back it up on a piece of paper that no one else can see—but that you will never lose. Losing these keys means losing access to your wallet and tips",
       "seedRecoveryBtn": "Show seed phrase",
       "seedPhraseWarning": "Do not share your seed with anyone, it can be used to steal all your accounts",
       "seedPhrase": "Your seed phrase",
@@ -503,7 +512,9 @@
       "tabAbout": "About",
       "tabAboutsmall": "Version, support center and contact info",
       "tabNetworks": "Manage networks",
-      "tabNetworksSmall": "Connect to custom node"
+      "tabNetworksSmall": "Connect to custom node",
+      "tabRemoveAccount": "Remove account",
+      "tabRemoveAccountSmall": "Remove account from the wallet and delete extension storage"
     },
     "signAndVerifyMsg": {
       "backToSignVerifyMsg": "Back to Sign/Verify Message",
@@ -630,12 +641,14 @@
       "availableLabel": "Available",
       "confirm": "Confirm",
       "cancel": "Cancel",
-      "edit": "Edit AE Details",
+      "edit": "Edit Tip Details",
       "whatIsVerifieddUrl": "What is \"Verified\" URL?",
       "whatIsNotVerifiedUrl": "What is \"Not verified\" URL?",
+      "enterUrl": "Enter tip url",
       "notClaimableUrlInfo": "Third party issues prevent us to ensure that tips will be directly delivered to the URL owner. You are sending the tip at your own risk.",
       "notVerifiedUrlInfo": "This URL has not yet been verified. The owner of the URL has to create account to claim their tokens.",
-      "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed."
+      "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed.",
+      "minAmountError": "You need to provide more than 0.01 USD in tokens in order to tip"
     },
     "successTip": {
       "sendMore": "Send More AE",
