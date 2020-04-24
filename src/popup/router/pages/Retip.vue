@@ -2,9 +2,7 @@
   <div class="popup">
     <div class="primary-title title-holder">
       <div>
-        {{ $t('pages.tipPage.heading') }}
-        <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
-        {{ $t('pages.tipPage.to') }}
+        {{ $t('pages.tipPage.url') }}
       </div>
       <UrlBadge v-if="tip.url" :type="urlVerified ? 'verified' : 'not-verified'" />
     </div>

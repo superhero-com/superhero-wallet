@@ -10,9 +10,9 @@
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
-          <span class="secondary-text" data-cy="tip-amount"
-            >{{ amount }} {{ $t('pages.appVUE.aeid') }}</span
-          >
+          <span class="secondary-text" data-cy="tip-amount">
+            {{ amount }} {{ $t('pages.appVUE.aeid') }}
+          </span>
           ({{ currencyAmount }} {{ currentCurrency }}) {{ $t('pages.tipPage.to') }}
         </template>
       </p>
@@ -25,14 +25,11 @@
         </template>
         <Input
           v-else
-          size="m-0 xsm"
+          size="m-0 sm"
           v-model="url"
           :error="url && !validUrl"
           :placeholder="$t('pages.tipPage.enterUrl')"
         />
-        <button v-if="!confirmMode && !editUrl" @click="editUrl = !editUrl" data-cy="edit-url">
-          <EditIcon v-if="!editUrl" data-cy="confirm-url" />
-        </button>
       </div>
     </div>
     <div class="popup" data-cy="tip-container">
@@ -59,7 +56,7 @@
         <Button @click="sendTip" :disabled="!tipping" data-cy="confirm-tip">
           {{ $t('pages.tipPage.confirm') }}
         </Button>
-        <Button @click="confirmMode = false" data-cy="edit-tip">
+        <Button @click="toEdit" data-cy="edit-tip">
           {{ $t('pages.tipPage.edit') }}
         </Button>
       </template>
@@ -79,7 +76,6 @@ import {
   getTwitterAccountUrl,
   validateUrl,
 } from '../../utils/helper';
-import EditIcon from '../../../icons/edit-icon.svg?vue-component';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
 import Input from '../components/Input';
@@ -89,7 +85,6 @@ export default {
   components: {
     AmountSend,
     Textarea,
-    EditIcon,
     Input,
     UrlBadge,
   },
@@ -103,7 +98,7 @@ export default {
       noteError: false,
       loading: false,
       minCallFee: null,
-      editUrl: false,
+      editUrl: true,
       verifiedUrls: [],
       IS_EXTENSION: process.env.IS_EXTENSION,
       RUNNING_IN_TESTS: process.env.RUNNING_IN_TESTS,
@@ -170,7 +165,6 @@ export default {
     // if mobile
     if (!this.IS_EXTENSION && !this.RUNNING_IN_TESTS) {
       this.url = '';
-      this.editUrl = true;
     }
     try {
       this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
@@ -247,6 +241,10 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    toEdit() {
+      this.confirmMode = false;
+      this.editUrl = true;
     },
   },
 };

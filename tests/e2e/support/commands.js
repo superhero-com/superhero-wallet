@@ -182,7 +182,7 @@ Cypress.Commands.add('openWithdraw', () => {
     .click();
 });
 
-Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '', edit = false }) => {
+Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '' }) => {
   cy.get('[data-cy=input-number]').clear();
   if (amount || amount === 0) {
     cy.get('[data-cy=input-number]').type(amount);
@@ -191,7 +191,6 @@ Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '', e
   cy.get('[data-cy=textarea]').clear();
   if (note) cy.get('[data-cy=textarea]').type(note);
 
-  if (edit) cy.get('[data-cy=edit-url]').click();
   if (url) {
     cy.get('[data-cy=input]')
       .clear()
