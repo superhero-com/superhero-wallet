@@ -1,5 +1,5 @@
-const tip = { amount: 0.01, note: '#test', url: 'example.com', edit: true };
-const tip2 = { amount: 0.01, note: '#test1234', url: 'example.com', onTip: true, edit: true };
+const tip = { amount: 0.01, note: '#test', url: 'example.com' };
+const tip2 = { amount: 0.01, note: '#test1234', url: 'example.com', onTip: true };
 
 describe('Test cases for tip page', () => {
   beforeEach(() => {
@@ -21,7 +21,7 @@ describe('Test cases for tip page', () => {
     cy.openTip()
       .get('[data-cy=send-tip]')
       .should('be.visible')
-      .get('[data-cy=tip-url]')
+      .get('.url-bar')
       .should('exist')
       .get('[data-cy=textarea]')
       .should('be.visible')
@@ -35,7 +35,7 @@ describe('Test cases for tip page', () => {
   it('Validate tip details', () => {
     cy.openTip()
       .buttonShouldBeDisabled('[data-cy=send-tip]')
-      .enterTipDetails({ url: tip.url, edit: true })
+      .enterTipDetails({ url: tip.url })
       .buttonShouldBeDisabled('[data-cy=send-tip]')
       .enterTipDetails({ amount: tip.amount })
       .buttonShouldBeDisabled('[data-cy=send-tip]')
@@ -49,7 +49,7 @@ describe('Test cases for tip page', () => {
       .buttonShouldBeDisabled('[data-cy=send-tip]')
       .enterTipDetails({ amount: 0, note: tip.note })
       .buttonShouldBeDisabled('[data-cy=send-tip]')
-      .enterTipDetails({ ...tip, edit: false })
+      .enterTipDetails({ ...tip })
       .buttonShouldNotBeDisabled('[data-cy=send-tip]');
   });
 
@@ -62,13 +62,6 @@ describe('Test cases for tip page', () => {
       .should('have.value', tip.amount.toString())
       .get('[data-cy=textarea]')
       .should('have.value', tip.note);
-  });
-
-  it('Edit url disable button', () => {
-    cy.openTip()
-      .get('[data-cy=edit-url]')
-      .click()
-      .buttonShouldBeDisabled('[data-cy=send-tip]');
   });
 
   it('Valid tip details open confirm', () => {

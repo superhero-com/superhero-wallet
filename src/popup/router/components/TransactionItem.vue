@@ -6,7 +6,7 @@
           <span data-cy="amount">{{ txAmount }}</span>
           {{ $t('pages.appVUE.aeid') }}
           <span class="text" data-cy="currency-amount">
-            ( {{ txAmountToCurrency }} {{ current.currency.toUpperCase() }} )
+            ({{ txAmountToCurrency }} {{ current.currency.toUpperCase() }})
           </span>
         </span>
         <span class="status">{{ status }}</span>
