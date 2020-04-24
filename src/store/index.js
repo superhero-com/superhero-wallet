@@ -46,6 +46,7 @@ const initialState = {
   nodeStatus: 'connecting',
   currencies: {},
   nextCurrenciesFetch: null,
+  minTipAmount: 0.01,
   notifications: [],
   notificationsCounter: null,
   tip: null,
@@ -103,6 +104,7 @@ export default new Vuex.Store({
         backedUpSeed,
         account,
         mnemonic,
+        minTipAmount,
       }) => ({
         migrations,
         current,
@@ -119,6 +121,7 @@ export default new Vuex.Store({
         backedUpSeed,
         account,
         mnemonic,
+        minTipAmount,
       }),
     ),
     modals,

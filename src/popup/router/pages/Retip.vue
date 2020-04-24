@@ -2,9 +2,7 @@
   <div class="popup">
     <div class="primary-title title-holder">
       <div>
-        {{ $t('pages.tipPage.heading') }}
-        <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
-        {{ $t('pages.tipPage.to') }}
+        {{ $t('pages.tipPage.url') }}
       </div>
       <UrlBadge v-if="tip.url" :type="urlVerified ? 'verified' : 'not-verified'" />
     </div>
@@ -13,7 +11,12 @@
       <a class="link-sm text-left" :class="{ 'not-verified': !urlVerified }">{{ tip.url }}</a>
     </div>
 
-    <AmountSend :amountError="amountError" @changeAmount="val => (amount = val)" :value="amount" />
+    <AmountSend
+      :amountError="amountError"
+      @changeAmount="val => (amount = val)"
+      :value="amount"
+      :errorMsg="amount && amount < minTipAmount"
+    />
     <div class="tip-note-preview mt-15">
       {{ tip.title }}
     </div>
@@ -61,7 +64,7 @@ export default {
       'network',
       'currentCurrency',
     ]),
-    ...mapState(['tippingAddress']),
+    ...mapState(['tippingAddress', 'minTipAmount']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -81,7 +84,7 @@ export default {
   },
   watch: {
     amount() {
-      this.amountError = false;
+      this.amountError = !+this.amount || this.amount < this.minTipAmount;
     },
   },
   async created() {
@@ -109,7 +112,7 @@ export default {
     },
     async sendTip() {
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
-      this.amountError = this.amountError || !+this.amount || this.amount <= 0;
+      this.amountError = this.amountError || !+this.amount || this.amount < this.minTipAmount;
       if (this.amountError) return;
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
       this.loading = true;

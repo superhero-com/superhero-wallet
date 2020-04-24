@@ -644,10 +644,11 @@
       "edit": "Edit Tip Details",
       "whatIsVerifieddUrl": "What is \"Verified\" URL?",
       "whatIsNotVerifiedUrl": "What is \"Not verified\" URL?",
-      "enterUrl": "Enter tip url",
+      "enterUrl": "Type the URL you want to tip",
       "notClaimableUrlInfo": "Third party issues prevent us to ensure that tips will be directly delivered to the URL owner. You are sending the tip at your own risk.",
       "notVerifiedUrlInfo": "This URL has not yet been verified. The owner of the URL has to create account to claim their tokens.",
-      "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed."
+      "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed.",
+      "minAmountError": "You need to provide more than 0.01 USD in tokens in order to tip"
     },
     "successTip": {
       "sendMore": "Send More AE",
