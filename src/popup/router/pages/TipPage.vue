@@ -41,6 +41,7 @@
           :amountError="amountError"
           @changeAmount="val => (amount = val)"
           :value="amount"
+          :errorMsg="amount && amount < minTipAmount"
         />
         <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
         <Button

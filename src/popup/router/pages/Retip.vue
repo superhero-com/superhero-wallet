@@ -13,7 +13,12 @@
       <a class="link-sm text-left" :class="{ 'not-verified': !urlVerified }">{{ tip.url }}</a>
     </div>
 
-    <AmountSend :amountError="amountError" @changeAmount="val => (amount = val)" :value="amount" />
+    <AmountSend
+      :amountError="amountError"
+      @changeAmount="val => (amount = val)"
+      :value="amount"
+      :errorMsg="amount && amount < minTipAmount"
+    />
     <div class="tip-note-preview mt-15">
       {{ tip.title }}
     </div>
