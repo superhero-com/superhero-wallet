@@ -1,4 +1,3 @@
-import { setInterval } from 'timers';
 import iconUrl from './icons/icon_48.png';
 import { getSDK, getNodes } from './lib/background-utils';
 import { NOTIFICATION_METHODS } from './popup/utils/constants';
