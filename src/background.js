@@ -1,4 +1,5 @@
 import './lib/initPolyfills';
+import uid from 'uuid';
 import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
 import { detectConnectionType } from './popup/utils/helper';
 import { buildTx } from './popup/utils';
@@ -17,7 +18,6 @@ import TipClaimRelay from './lib/tip-claim-relay';
 import RedirectChainNames from './lib/redirect-chain-names';
 import { setController, switchNode } from './lib/background-utils';
 import { PopupConnections } from './lib/popup-connection';
-import uid from 'uuid';
 
 const controller = new WalletController();
 
