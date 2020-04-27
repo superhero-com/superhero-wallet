@@ -1,5 +1,5 @@
-import { setInterval } from 'timers';
 import './lib/initPolyfills';
+import uid from 'uuid';
 import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
 import { detectConnectionType } from './popup/utils/helper';
 import { buildTx } from './popup/utils';
@@ -23,13 +23,6 @@ const controller = new WalletController();
 
 if (process.env.IS_EXTENSION && require.main.i === module.id) {
   RedirectChainNames.init();
-  setInterval(() => {
-    browser.windows.getAll({}).then(wins => {
-      if (wins.length === 0) {
-        sessionStorage.removeItem('phishing_urls');
-      }
-    });
-  }, 5000);
 
   const notification = new Notification();
   setController(controller);
@@ -109,11 +102,15 @@ if (process.env.IS_EXTENSION && require.main.i === module.id) {
 
         popupConnections.addConnection(id, port);
       } else if (connectionType === CONNECTION_TYPES.OTHER) {
-        const check = rpcWallet.sdkReady(() => {
+        // eslint-disable-next-line no-param-reassign
+        port.uuid = uid();
+        if (rpcWallet.sdkReady()) {
           rpcWallet.addConnection(port);
-        });
+        } else {
+          rpcWallet.addConnectionToQueue(port);
+        }
         port.onDisconnect.addListener(() => {
-          clearInterval(check);
+          rpcWallet.removeConnectionFromQueue(port);
         });
       }
     }

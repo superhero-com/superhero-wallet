@@ -1,4 +1,3 @@
-import { setInterval } from 'timers';
 import iconUrl from './icons/icon_48.png';
 import { getSDK, getNodes } from './lib/background-utils';
 import { NOTIFICATION_METHODS } from './popup/utils/constants';
@@ -42,9 +41,6 @@ export default class Notification {
   async init() {
     this.client = await getSDK();
     this.network = (await getNodes()).network;
-    setInterval(() => {
-      this.checkTxReady();
-    }, 2000);
     browser.notifications.onButtonClicked.addListener(id => {
       browser.tabs.create({ url: id.split('?')[1], active: true });
     });
