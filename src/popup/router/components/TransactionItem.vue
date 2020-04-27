@@ -151,6 +151,7 @@ export default {
 
     .address {
       font-size: 9px;
+      letter-spacing: -0.1px;
     }
 
     .seeTransaction {
