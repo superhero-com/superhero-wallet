@@ -1,22 +1,20 @@
 <template>
-  <div :style="fixedheader" class="popup">
-    <div :style="fixedheader" id="filters" class="filters" data-cy="filters">
-      <span
-        class="date d-flex"
-        :class="type == 'date' ? 'active' : ''"
-        @click="filtrateTx('date', date_type)"
-      >
-        <span>{{ $t('pages.transactionDetails.date') }}</span>
-        <FilterArrow :class="direction" />
-      </span>
-      <span
-        v-for="filter in filters"
-        v-bind:key="filter.id"
-        :class="type == filter ? 'active' : filter"
-        @click="filtrateTx(filter)"
-        >{{ $t(`pages.transactionDetails.${filter}`) }}</span
-      >
-    </div>
+  <div id="filters" class="filters" data-cy="filters">
+    <span
+      class="date d-flex"
+      :class="type === 'date' ? 'active' : ''"
+      @click="filtrateTx('date', date_type)"
+    >
+      <span>{{ $t('pages.transactionDetails.date') }}</span>
+      <FilterArrow :class="direction" />
+    </span>
+    <span
+      v-for="filter in filters"
+      v-bind:key="filter.id"
+      :class="type === filter ? 'active' : filter"
+      @click="filtrateTx(filter)"
+      >{{ $t(`pages.transactionDetails.${filter}`) }}</span
+    >
   </div>
 </template>
 
@@ -35,26 +33,12 @@ export default {
       direction: '',
       type: 'date',
       date_type: 'recent',
-      fixedheader: '',
     };
-  },
-  created() {
-    window.addEventListener('scroll', this.handleScroll);
-  },
-  destroyed() {
-    window.removeEventListener('scroll', this.handleScroll);
   },
   computed: {
     ...mapGetters(['account', 'popup', 'sdk', 'current', 'transactions']),
   },
   methods: {
-    handleScroll() {
-      if (window.scrollY > 150) {
-        this.fixedheader = 'position:fixed; top:50px;max-width:357px';
-      } else {
-        this.fixedheader = '';
-      }
-    },
     filtrateTx(type, deteType) {
       switch (type) {
         case 'date':
@@ -111,6 +95,9 @@ export default {
 <style lang="scss" scoped>
 @import '../../../common/variables';
 .filters {
+  position: sticky;
+  top: 50px;
+  top: calc(env(safe-area-inset-top) + 50px);
   background: $filters-bg;
   height: 40px;
   width: 100%;
