@@ -139,6 +139,7 @@ export default {
   position: relative;
   min-height: 600px;
   margin: 0 auto;
+  overflow: visible !important;
 
   &.ae-main-popup {
     background-color: $bg-color !important;
