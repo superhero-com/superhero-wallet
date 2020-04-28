@@ -8,6 +8,7 @@ import {
   getActiveNetwork,
 } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
+import Logger from './logger';
 
 let sdk;
 let controller;
@@ -60,7 +61,7 @@ export const getSDK = async () => {
         compilerUrl: network.compilerUrl,
       });
     } catch (e) {
-      console.error(`getSDK: ${e}`);
+      Logger.write({ e, action: 'init-sdk-background' });
     }
   }
 
@@ -110,6 +111,11 @@ export const contractCallStatic = async ({ tx, callType }) =>
           resolve(call);
         } else {
           reject(new Error('Contract call failed'));
+          Logger.write({
+            msg: 'Contract call failed',
+            tx,
+            action: 'contract-call-background',
+          });
         }
       } else if (
         !controller.isLoggedIn() &&
@@ -117,8 +123,13 @@ export const contractCallStatic = async ({ tx, callType }) =>
         callType === 'static'
       ) {
         reject(new Error('You need to unlock the wallet first'));
+        Logger.write({
+          msg: 'You need to unlock the wallet first',
+          action: 'contract-call-background',
+        });
       }
     } catch (e) {
       reject(e);
+      Logger.write({ e, action: 'contract-call-background' });
     }
   });

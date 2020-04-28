@@ -18,10 +18,12 @@ import TipClaimRelay from './lib/tip-claim-relay';
 import RedirectChainNames from './lib/redirect-chain-names';
 import { setController, switchNode } from './lib/background-utils';
 import { PopupConnections } from './lib/popup-connection';
+import Logger from './lib/logger';
 
 const controller = new WalletController();
 
 if (process.env.IS_EXTENSION && require.main.i === module.id) {
+  Logger.init({ background: true });
   RedirectChainNames.init();
 
   const notification = new Notification();
@@ -29,48 +31,44 @@ if (process.env.IS_EXTENSION && require.main.i === module.id) {
 
   const postPhishingData = async data => {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-    const message = { method: 'phishingCheck', data };
+    const message = { method: 'phishingCheck', ...data };
     tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message));
   };
 
   browser.runtime.onMessage.addListener(async (msg, sender) => {
-    switch (msg.method) {
-      case 'phishingCheck': {
-        const data = { ...msg, extUrl: browser.extension.getURL('./') };
-        const host = new URL(msg.params.href).hostname;
-        data.host = host;
-        const { result } = await phishingCheckUrl(host);
-        if (result === 'blocked') {
-          const whitelist = getPhishingUrls().filter(url => url === host);
-          if (whitelist.length) {
-            data.blocked = false;
-            return postPhishingData(data);
-          }
-          data.blocked = true;
-          return postPhishingData(data);
-        }
-        data.blocked = false;
-        return postPhishingData(data);
+    const { method, params, from, type, data } = msg;
+    if (method === 'phishingCheck') {
+      const host = new URL(params.href).hostname;
+      let blocked = false;
+      const { result } = await phishingCheckUrl(host);
+      if (result === 'blocked') {
+        const whitelist = getPhishingUrls().filter(url => url === host);
+        blocked = !whitelist.length;
       }
-      case 'setPhishingUrl': {
-        const urls = getPhishingUrls();
-        urls.push(msg.params.hostname);
-        setPhishingUrl(urls);
-        break;
-      }
-      default:
-        break;
+      return postPhishingData({
+        ...msg,
+        data: {
+          method,
+          extUrl: browser.extension.getURL('./'),
+          host,
+          href: params.href,
+          blocked,
+        },
+      });
     }
 
-    if (
-      msg.from === 'content' &&
-      msg.type === 'readDom' &&
-      (msg.data.address || msg.data.chainName)
-    ) {
+    if (method === 'setPhishingUrl') {
+      const urls = getPhishingUrls();
+      urls.push(params.hostname);
+      setPhishingUrl(urls);
+      return true;
+    }
+
+    if (from === 'content' && type === 'readDom' && (data.address || data.chainName)) {
       const tabs = await browser.tabs.query({ active: true, currentWindow: true });
       tabs.forEach(({ url }) => {
         if (sender.url === url && DEFAULT_NETWORK === 'Mainnet') {
-          TipClaimRelay.checkUrlHasBalance(url, msg.data);
+          TipClaimRelay.checkUrlHasBalance(url, data);
         }
       });
     }

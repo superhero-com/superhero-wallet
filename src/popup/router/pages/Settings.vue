@@ -21,15 +21,31 @@
         <i class="arrow-right"></i>
         <p class="tab-info">{{ $t('pages.settings.tabRemoveAccountSmall') }}</p>
       </button>
+      <div class="settings-row">
+        <div>
+          <span class="settings-li">{{ $t('pages.settings.tabSaveErrorLog') }}</span>
+          <p class="tab-info">{{ $t('pages.settings.tabSaveErrorLogSmall') }}</p>
+        </div>
+        <CheckBox
+          :value="saveErrorLog"
+          name="saveErrorLog"
+          type="checkbox"
+          @input="val => $store.commit('setSaveErrorLog', val)"
+        />
+      </div>
     </ul>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import removeAccountMixin from '../../../mixins/removeAccount';
+import CheckBox from '../components/CheckBox';
 
 export default {
   mixins: [removeAccountMixin],
+  components: { CheckBox },
+  computed: mapState(['saveErrorLog']),
 };
 </script>
 
@@ -42,7 +58,8 @@ export default {
   margin-top: 30px;
 
   a,
-  button {
+  button,
+  .settings-row {
     text-decoration: none;
     transition: 0.4s;
     position: relative;
@@ -52,6 +69,7 @@ export default {
     font-size: 14px;
     border-bottom: 1px solid #ccc;
     text-align: left;
+    border-left: 2px solid transparent;
 
     &:last-child {
       border-bottom: 0;
@@ -59,10 +77,20 @@ export default {
 
     &:hover {
       border-left: 2px solid #2a9cff;
-      background: rgba(226, 226, 226, 0.5);
+      background: rgba(99, 99, 99, 0.5);
       .arrow-right {
         right: 20px;
       }
+    }
+  }
+
+  .settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .checkmark {
+      margin-right: 0;
     }
   }
 }

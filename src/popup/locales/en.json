@@ -144,7 +144,8 @@
       "reportBug": "Report a bug",
       "names": "Names",
       "networks": "Networks",
-      "removeAccount": "Remove account"
+      "removeAccount": "Remove account",
+      "donateErrorReports": "Donate error reports"
     },
     "aboutSettings": {
       "heading": "About",
@@ -514,7 +515,9 @@
       "tabNetworks": "Manage networks",
       "tabNetworksSmall": "Connect to custom node",
       "tabRemoveAccount": "Remove account",
-      "tabRemoveAccountSmall": "Remove account from the wallet and delete extension storage"
+      "tabRemoveAccountSmall": "Remove account from the wallet and delete extension storage",
+      "tabSaveErrorLog": "Save error log",
+      "tabSaveErrorLogSmall": "This way we can debug easier what is failing"
     },
     "signAndVerifyMsg": {
       "backToSignVerifyMsg": "Back to Sign/Verify Message",
