@@ -222,7 +222,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['current', 'popup', 'names', 'sdk', 'network', 'account', 'middleware']),
+    ...mapGetters(['current', 'names', 'sdk', 'network', 'account', 'middleware']),
     auctions() {
       if (this.filterType === 'soonest') return this.activeAuctions;
       if (this.filterType === 'length')

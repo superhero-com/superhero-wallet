@@ -188,7 +188,6 @@ export default {
       'tokens',
       'tokenBalance',
       'isLedger',
-      'popup',
       'tokenRegistry',
       'tokenRegistryLima',
     ]),
