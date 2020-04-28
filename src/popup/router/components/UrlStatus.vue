@@ -16,10 +16,15 @@ export default {
       required: true,
     },
   },
-  components: {
-    Verified,
-    Blacklisted,
-    NotSupported,
+  computed: {
+    Icon() {
+      switch(this.type) {
+      case 'verified': return Verified;
+      case 'blacklisted': return Blacklisted;
+      case 'not-supported': return NotSupported;
+      default: throw new Error(`Unknown url status: ${this.type}`);
+      }
+    },
   },
 };
 </script>
