@@ -20,7 +20,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import Copyicon from '../../../icons/copy.svg?vue-component';
-import UserAvatar from '../components/UserAvatar';
+import UserAvatar from './UserAvatar';
 
 export default {
   components: { Copyicon, UserAvatar },

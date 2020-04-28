@@ -116,7 +116,6 @@ export default {
     }
   }
 
-
   .sub-dropdown .single-currency:hover {
     background: #33343e;
   }
