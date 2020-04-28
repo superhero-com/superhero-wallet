@@ -1,7 +1,5 @@
 <template>
-  <Blacklisted v-if="type === 'blacklisted'" class="url-status" />
-  <Verified v-else-if="type === 'verified'" class="url-status" />
-  <NotSupported v-else-if="type === 'not-supported'" class="url-status" />
+  <Component :is="Icon" class="url-status" />
 </template>
 
 <script>
