@@ -84,8 +84,8 @@ export default {
 
   .ae-address {
     color: $text-color;
-    font-size: 11px;
-    letter-spacing: -0.1px;
+    font-size: 10px;
+    letter-spacing: -0.2px;
   }
 }
 </style>
