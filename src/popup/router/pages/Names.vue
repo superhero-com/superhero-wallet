@@ -275,7 +275,6 @@ export default {
             pointerError: this.registeredNames[i] ? this.registeredNames[i].pointerError : null,
           }))
         : [];
-      console.log('this.registeredNames =.>', this.registeredNames);
     },
   },
   created() {
@@ -299,7 +298,6 @@ export default {
     async setActiveName(name) {
       const aename = name.name;
       await this.$store.dispatch('setAccountName', { name: aename });
-      // await this.$store.dispatch('setSubAccount', name);
     },
     address(name) {
       return getAddressByNameEntry(name);

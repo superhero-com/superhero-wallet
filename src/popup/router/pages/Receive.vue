@@ -1,7 +1,7 @@
 <template>
   <div class="popup popup-no-padding">
     <div data-cy="top-up-container">
-      <Button data-cy="buyAE" @click="tbd">{{ $t('pages.receive.buyAE') }}</Button>
+      <Button data-cy="buyAE" @click="buyAE">{{ $t('pages.receive.buyAE') }}</Button>
       <p class="primary-title text-left mt-20 f-14 mx-20" style="margin-left:20px !important">
         {{ $t('pages.receive.heading') }}
       </p>
