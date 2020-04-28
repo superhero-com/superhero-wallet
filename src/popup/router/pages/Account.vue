@@ -38,7 +38,7 @@
           <Settings slot="icon" />
         </BoxButton>
       </div>
-      <RecentTransactions></RecentTransactions>
+      <RecentTransactions />
     </div>
     <Loader size="big" :loading="loading" type="transparent" />
   </div>

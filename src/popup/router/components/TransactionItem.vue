@@ -43,7 +43,7 @@ export default {
   data: () => ({ tip: null }),
   filters: { formatDate },
   async created() {
-    if (!this.transaction.pending) {
+    if (!this.transaction.pending && !this.transaction.claim) {
       await this.$watchUntilTruly(() => this.sdk);
       this.getEventData();
     }
@@ -76,7 +76,7 @@ export default {
       return (txamount * this.current.currencyRate).toFixed(2);
     },
     tipUrl() {
-      return this.transaction.tipUrl ? this.transaction.tipUrl : this.tip;
+      return this.transaction.tipUrl || this.tip || this.transaction.url;
     },
     topup() {
       return (

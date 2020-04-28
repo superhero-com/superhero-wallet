@@ -1,4 +1,4 @@
-import { uniqBy, flatten, uniq } from 'lodash-es';
+import { uniqBy, flatten, uniq, orderBy } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import * as types from './mutation-types';
@@ -10,6 +10,7 @@ import {
   getAddressByNameEntry,
 } from '../popup/utils/helper';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
+import { BACKEND_URL } from '../popup/utils/constants';
 
 export default {
   setAccount({ commit }, payload) {
@@ -29,19 +30,32 @@ export default {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
     commit(types.UPDATE_BALANCE, convertToAE(balance));
   },
-  async fetchTransactions({ state }, { limit, page }) {
+  async fetchTransactions({ state }, { limit, page, recent }) {
     if (!state.middleware) return [];
     const { middlewareUrl } = state.network[state.current.network];
     const { publicKey } = state.account;
-    try {
-      return (
-        await axios.get(
-          `${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`,
-        )
-      ).data;
-    } catch (e) {
-      return [];
-    }
+    let txs = await Promise.all([
+      (async () =>
+        (
+          await axios
+            .get(
+              `${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`,
+            )
+            .catch(() => ({ data: [] }))
+        ).data)(),
+      (async () =>
+        (
+          await axios
+            .get(`http://localhost:3000/transactions/${publicKey}`)
+            .catch(() => ({ data: [] }))
+        ).data.map(({ address, amount, ...t }) => ({
+          tx: { address, amount },
+          ...t,
+          claim: true,
+        })))(),
+    ]);
+    txs = orderBy(flatten(txs), ['time'], ['desc']);
+    return recent ? txs.slice(0, limit) : txs;
   },
   updateLatestTransactions({ commit }, payload) {
     commit(types.UPDATE_LATEST_TRANSACTIONS, payload);
