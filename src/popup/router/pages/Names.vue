@@ -22,7 +22,8 @@
             <UserAvatar :address="name.owner" />
             <div style="width:100%;" class="text-left ml-10">
               <div class="">
-                {{ name.name }} <Badge class="active-name" v-if="activeAccountName == name.name">Active</Badge>
+                {{ name.name }}
+                <Badge class="active-name" v-if="activeAccountName == name.name">Active</Badge>
               </div>
               <ae-address :value="name.owner" length="flat" />
               <div v-if="name.addPointer" class="pointer-holder mt-10">
