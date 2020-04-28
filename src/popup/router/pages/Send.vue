@@ -304,6 +304,7 @@ export default {
         }
         this.loading = false;
       } catch (e) {
+        this.$logError({ e, action: 'withdraw' });
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
         this.loading = false;
       }

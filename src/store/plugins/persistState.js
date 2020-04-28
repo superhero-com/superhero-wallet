@@ -30,6 +30,7 @@ export default (reducerLoad, reducerSave) => async store => {
         await resetState();
         resetting = false;
         store.commit('resetState', { isRestored: true });
+        await browser.storage.local.remove('errorLog');
       },
     },
   });

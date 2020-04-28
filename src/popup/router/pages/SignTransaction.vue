@@ -805,14 +805,6 @@ export default {
       const byteCode = await this.sdk.contractCompile(source);
       return byteCode;
     },
-    async getDeployedByteCode(address) {
-      const res = await fetch(
-        `https://testnet.mdw.aepps.com/middleware/contracts/transactions/address/${address}`,
-      );
-      const txs = await res.json();
-      const byteCode = txs.transactions.find(tx => tx.tx.type === 'ContractCreateTx');
-      return byteCode;
-    },
   },
   async beforeDestroy() {
     if (this.data.popup) {

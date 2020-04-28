@@ -7,7 +7,9 @@ import { i18n } from './utils/i18nHelper';
 import '../lib/initEnv';
 import '../lib/initPolyfills';
 import registerModals from './router/modals';
+import Logger from '../lib/logger';
 
+Logger.init();
 Vue.prototype.$browser = global.browser;
 Vue.prototype.$watchUntilTruly = function watchUntilTruly(getter) {
   return new Promise(resolve => {
@@ -21,6 +23,9 @@ Vue.prototype.$watchUntilTruly = function watchUntilTruly(getter) {
       { immediate: true },
     );
   });
+};
+Vue.prototype.$logError = async function logError(error) {
+  return Logger.write(error);
 };
 
 (async () => {

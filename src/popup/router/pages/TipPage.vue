@@ -170,7 +170,7 @@ export default {
     try {
       this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
     } catch (e) {
-      console.error(`Can't fetch /verified: ${e}`);
+      this.$logError({ e, action: 'fetch-verified' });
     }
     await this.$watchUntilTruly(() => this.sdk);
     await this.$watchUntilTruly(() => this.tippingAddress);
@@ -238,6 +238,7 @@ export default {
           this.$router.push('/account');
         }
       } catch (e) {
+        this.$logError({ e, url: this.url, action: 'tip' });
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
       } finally {
         this.loading = false;

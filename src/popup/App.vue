@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { clearInterval, setInterval } from 'timers';
 import { AEX2_METHODS } from './utils/constants';
 import { postMessage } from './utils/connection';
@@ -60,7 +60,9 @@ export default {
       'notifications',
       'notificationsCounter',
       'backedUpSeed',
+      'middleware',
     ]),
+    ...mapState(['isRestored']),
     waveBg() {
       return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(
         this.$route.path,
@@ -71,6 +73,7 @@ export default {
     },
   },
   async created() {
+    await this.$watchUntilTruly(() => this.isRestored);
     this.$watch(
       ({ current: { language } }) => [language],
       ([language]) => {
@@ -102,6 +105,8 @@ export default {
     }
     if (this.notificationsCounter !== 0)
       this.$store.commit('SET_NOTIFICATIONS_COUNTER', this.notifications.length);
+    await this.$watchUntilTruly(() => this.middleware);
+    this.$store.dispatch('getRegisteredNames');
   },
   methods: {
     async checkSdkReady() {
@@ -119,7 +124,6 @@ export default {
         if (!this.isLoggedIn) return;
         if (!process.env.RUNNING_IN_TESTS && this.sdk) this.$store.dispatch('updateBalance');
       }, 2500);
-      this.$store.dispatch('getRegisteredNames');
       this.$once('hook:beforeDestroy', () => clearInterval(polling));
     },
   },
