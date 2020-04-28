@@ -1,11 +1,7 @@
 <template>
   <Modal @close="resolve">
     <template slot="header">
-      <template v-if="status === 'verified'">{{ $t('modals.verified.title') }}</template>
-      <template v-else-if="status === 'not-supported'">{{
-        $t('modals.not-supported.title')
-      }}</template>
-      <template v-else-if="status === 'blacklisted'">{{ $t('modals.blacklisted.title') }}</template>
+      {{ content.title }}      
     </template>
     <div slot="body">
       <template v-if="status === 'verified'">{{ $t('modals.verified.msg') }}</template>
