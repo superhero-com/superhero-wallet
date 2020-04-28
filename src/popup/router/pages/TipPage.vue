@@ -15,7 +15,7 @@
       </p>
 
       <div class="url-bar" :class="editUrl ? 'url-bar--input' : 'url-bar--text'">
-        <UrlStatus v-if="showStatus" @click.native="showStatusModal(urlStatus)" :type="urlStatus" />
+        <UrlStatus v-if="url || tourRunning" :status="urlStatus" />
         <template v-if="!editUrl">
           <a class="link-sm text-left" data-cy="tip-url">
             {{ url }}
@@ -75,7 +75,6 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import tipUrls from '../../../mixins/tipUrls';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { escapeSpecialChars, aeToAettos, validateUrl } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
@@ -90,7 +89,6 @@ export default {
     Input,
     UrlStatus,
   },
-  mixins: [tipUrls],
   data() {
     return {
       url: '',
@@ -114,7 +112,6 @@ export default {
       'current',
       'sdk',
       'account',
-      'network',
       'currentCurrency',
       'tip',
     ]),
@@ -127,10 +124,7 @@ export default {
       return (this.amount * this.current.currencyRate).toFixed(3);
     },
     urlStatus() {
-      return this.tourRunning ? 'verified' : this.getStatus(this.url);
-    },
-    showStatus() {
-      return this.url || this.tourRunning;
+      return this.tourRunning ? 'verified' : this.$store.getters['tipUrl/status'](this.url);
     },
     validUrl() {
       return validateUrl(this.url);
@@ -241,7 +235,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '../../../common/variables';
 
 .send-tip-button {
@@ -274,7 +268,7 @@ export default {
   position: relative;
 
   &.url-bar--input {
-    .url-status {
+    ::v-deep .url-status {
       position: absolute;
       left: 10px;
       top: 48%;
@@ -283,7 +277,7 @@ export default {
       -webkit-transform: translateY(-50%);
     }
 
-    input {
+    ::v-deep input {
       padding-left: 35px;
     }
   }

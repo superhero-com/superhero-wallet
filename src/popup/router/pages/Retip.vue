@@ -5,7 +5,7 @@
     </div>
 
     <div class="url-bar">
-      <UrlStatus v-if="tip.url" @click.native="showStatusModal(urlStatus)" :type="urlStatus" />
+      <UrlStatus v-if="tip.url" :status="urlStatus" />
       <a class="link-sm text-left">{{ tip.url }}</a>
     </div>
 
@@ -33,24 +33,20 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
-import tipUrls from '../../../mixins/tipUrls';
-import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
+import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
 import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';
 import UrlStatus from '../components/UrlStatus';
 
 export default {
   components: { AmountSend, UrlStatus },
-  mixins: [tipUrls],
   data: () => ({
     tip: {},
     amount: null,
     amountError: false,
     loading: false,
     minCallFee: null,
-    verifiedUrls: [],
   }),
   computed: {
     ...mapGetters([
@@ -69,7 +65,7 @@ export default {
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
     },
     urlStatus() {
-      return this.getStatus(this.tip.url);
+      return this.$store.getters['tipUrl/status'](this.url);
     },
     urlParams() {
       return new URL(this.$route.fullPath, window.location).searchParams;
@@ -82,7 +78,6 @@ export default {
   },
   async created() {
     this.loading = true;
-    this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
     await this.$watchUntilTruly(() => this.sdk);
     await this.$watchUntilTruly(() => this.tippingAddress);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {

@@ -1,5 +1,5 @@
 <template>
-  <Component :is="Icon" class="url-status" />
+  <Component :is="Icon" class="url-status" @click="showModal" />
 </template>
 
 <script>
@@ -9,25 +9,37 @@ import NotSupported from '../../../icons/badges/not-supported.svg?vue-component'
 
 export default {
   props: {
-    type: {
+    status: {
       type: String,
       required: true,
     },
   },
   computed: {
     Icon() {
-      switch(this.type) {
-      case 'verified': return Verified;
-      case 'blacklisted': return Blacklisted;
-      case 'not-supported': return NotSupported;
-      default: throw new Error(`Unknown url status: ${this.type}`);
+      switch (this.status) {
+        case 'verified':
+          return Verified;
+        case 'blacklisted':
+          return Blacklisted;
+        case 'not-supported':
+          return NotSupported;
+        default:
+          throw new Error(`Unknown url status: ${this.status}`);
       }
+    },
+  },
+  methods: {
+    showModal() {
+      this.$store.dispatch('modals/open', {
+        name: 'tip-badge',
+        status: this.status,
+      });
     },
   },
 };
 </script>
 
-<style>
+<style scoped>
 .url-status {
   cursor: pointer;
 }

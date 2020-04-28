@@ -1,11 +1,7 @@
 <template>
   <Modal @close="resolve">
-    <template slot="header">
-      {{ content.title }}      
-    </template>
-    <div slot="body">
-      {{ content.msg }}
-    </div>
+    <template slot="header">{{ content.title }}</template>
+    <div slot="body">{{ content.msg }}</div>
     <div slot="footer">
       <Button class="ok-button" @click="resolve">{{ $t('modals.ok') }}</Button>
     </div>
@@ -25,10 +21,14 @@ export default {
   computed: {
     content() {
       switch (this.status) {
-      case 'verified': return this.$i18n('modals.verified');
-      case 'not-supported': return this.$i18n('modals.not-supported');
-      case 'blacklisted': return this.$i18n('modals.blacklisted');
-      default: throw new Error(`Unknown url status: ${this.status}`);
+        case 'verified':
+          return this.$t('modals.verified');
+        case 'not-supported':
+          return this.$t('modals.not-supported');
+        case 'blacklisted':
+          return this.$t('modals.blacklisted');
+        default:
+          throw new Error(`Unknown url status: ${this.status}`);
       }
     },
   },
