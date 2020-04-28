@@ -195,13 +195,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import {
-  fetchData,
-  convertToAE,
-  getAddressByNameEntry,
-  checkAddress,
-  chekAensName,
-} from '../../utils/helper';
+import axios from 'axios';
+import { convertToAE, getAddressByNameEntry, checkAddress, chekAensName } from '../../utils/helper';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import UserAvatar from '../components/UserAvatar';
@@ -293,11 +288,7 @@ export default {
         this.updateAuctionEntry();
       }
       const middleWareBaseUrl = this.network[this.current.network].middlewareUrl;
-      const fetched = await fetchData(
-        `${middleWareBaseUrl}/middleware/names/auctions/active`,
-        'get',
-        '',
-      );
+      const fetched = (await axios(`${middleWareBaseUrl}/middleware/names/auctions/active`)).data;
       this.activeAuctions = fetched;
       this.$store.dispatch('getRegisteredNames');
       this.loading = false;

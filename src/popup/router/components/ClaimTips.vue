@@ -66,6 +66,7 @@ export default {
           this.$store.dispatch('modals/open', { name: 'claim-success', url: tab.url, claimAmount });
         } catch (e) {
           const msg = e.message.replace('Error: ', '');
+          this.$logError({ e, url: tab.url, action: 'claim' });
           this.$emit('setLoading', false);
           this.$store.dispatch('modals/open', { name: 'default', msg });
         }

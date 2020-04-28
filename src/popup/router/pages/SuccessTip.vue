@@ -80,11 +80,15 @@ export default {
     try {
       this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
     } catch (e) {
-      console.error(`Can't fetch /verified: ${e}`);
+      this.$logError({ e, action: 'fetch-verified' });
     }
     const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
     if (addresses.length) {
-      await axios.post(`${TIP_SERVICE}`, { url: tab.url, address: addresses[0] });
+      try {
+        await axios.post(`${TIP_SERVICE}`, { url: tab.url, address: addresses[0] });
+      } catch (e) {
+        this.$logError({ e, url: tab.url, action: 'claim' });
+      }
     }
   },
   methods: {

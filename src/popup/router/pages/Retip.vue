@@ -132,6 +132,7 @@ export default {
           this.openCallbackOrGoHome('x-success');
         }
       } catch (e) {
+        this.$logError({ e, tip: this.tip, action: 'retip' });
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
       } finally {
         this.loading = false;
