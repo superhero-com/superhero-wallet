@@ -21,7 +21,9 @@
           <ae-list-item fill="neutral" v-for="(name, key) in registeredNames" :key="key">
             <UserAvatar :address="name.owner" />
             <div style="width:100%;" class="text-left ml-10">
-              <div class="">{{ name.name }}</div>
+              <div class="">
+                {{ name.name }} <Badge class="active-name" v-if="activeAccountName == name.name">Active</Badge>
+              </div>
               <ae-address :value="name.owner" length="flat" />
               <div v-if="name.addPointer" class="pointer-holder mt-10">
                 <Input
@@ -46,6 +48,12 @@
                 @click="setPointer(key)"
                 :class="name.addPointer ? 'danger' : ''"
                 >{{ $t('pages.namingSystemPage.pointer') }}</Button
+              >
+              <Button
+                :small="!name.addPointer"
+                @click="setActiveName(name, key)"
+                :class="activeAccountName == name.name ? 'active disabled' : ''"
+                >{{ $t('pages.namingSystemPage.active') }}</Button
               >
             </div>
 
@@ -197,12 +205,14 @@ import {
 import Input from '../components/Input';
 import Button from '../components/Button';
 import UserAvatar from '../components/UserAvatar';
+import Badge from '../components/Badge';
 
 export default {
   components: {
     Input,
     Button,
     UserAvatar,
+    Badge,
   },
   data() {
     return {
@@ -227,7 +237,17 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['current', 'popup', 'names', 'sdk', 'network', 'account', 'middleware']),
+    ...mapGetters([
+      'current',
+      'popup',
+      'names',
+      'sdk',
+      'network',
+      'account',
+      'middleware',
+      'subaccounts',
+      'activeAccountName',
+    ]),
     auctions() {
       if (this.filterType === 'soonest') return this.activeAuctions;
       if (this.filterType === 'length')
@@ -259,6 +279,7 @@ export default {
             pointerError: this.registeredNames[i] ? this.registeredNames[i].pointerError : null,
           }))
         : [];
+      console.log('this.registeredNames =.>', this.registeredNames);
     },
   },
   created() {
@@ -283,6 +304,11 @@ export default {
     }, 3000);
   },
   methods: {
+    async setActiveName(name) {
+      const aename = name.name;
+      await this.$store.dispatch('setAccountName', { name: aename });
+      // await this.$store.dispatch('setSubAccount', name);
+    },
     address(name) {
       return getAddressByNameEntry(name);
     },
@@ -426,5 +452,9 @@ export default {
   .pointer-input {
     width: 90%;
   }
+}
+.active-name {
+  float: right;
+  background: #67f7b8;
 }
 </style>

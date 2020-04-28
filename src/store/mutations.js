@@ -42,7 +42,7 @@ export default {
     state.subaccounts[payload.account].balance = payload.balance;
   },
   [types.SET_ACCOUNT_NAME](state, payload) {
-    state.subaccounts[state.activeAccount].name = payload;
+    state.subaccounts[state.activeAccount].aename = payload;
   },
   [types.SET_ACCOUNT_AENS](state, { account, aename, pending }) {
     state.subaccounts[account].aename = aename;

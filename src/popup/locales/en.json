@@ -357,6 +357,7 @@
       "extend": "Extend",
       "namePlaceholder": "Enter .chain name",
       "pointer": "Set Name Pointer",
+      "active": "Set Active",
       "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
     },
     "generalSettings": {
@@ -428,7 +429,7 @@
       "copy": "Copy",
       "home": "Home",
       "transferExchange": "Swap crypto for AE tokens",
-      "purchase": "Purchase AE via credit card"
+      "buyAE": "Buy AE"
     },
     "securitySettings": {
       "backToSettings": "Back to settings",
