@@ -82,15 +82,15 @@ export default {
     color: $text-color;
     font-size: 14px;
     word-break: break-word;
-    text-align: left;
+    text-align: center;
   }
 
   .modal--footer {
     .modal-confirm-btns {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       button {
-        margin: 0 !important;
+        margin: 0 10px !important;
         width: 120px !important;
         font-weight: 700 !important;
       }

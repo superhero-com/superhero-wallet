@@ -63,7 +63,6 @@ export default {
 .header {
   padding-top: env(safe-area-inset-top);
   background-color: $nav-bg-color;
-  border-bottom: 3px solid $nav-border-color;
   position: fixed;
   top: 0;
   left: 0;
