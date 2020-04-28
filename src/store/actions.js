@@ -1,5 +1,6 @@
 import { uniqBy, flatten, uniq } from 'lodash-es';
 import BigNumber from 'bignumber.js';
+import axios from 'axios';
 import * as types from './mutation-types';
 import {
   convertToAE,
@@ -33,14 +34,11 @@ export default {
     const { middlewareUrl } = state.network[state.current.network];
     const { publicKey } = state.account;
     try {
-      const tx = await fetch(
-        `${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`,
-        {
-          method: 'GET',
-          mode: 'cors',
-        },
-      );
-      return tx.json();
+      return (
+        await axios.get(
+          `${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`,
+        )
+      ).data;
     } catch (e) {
       return [];
     }
@@ -74,13 +72,17 @@ export default {
                   pending: true,
                   owner: tx.accountId,
                 })))(),
-            (async () =>
-              uniqBy(
-                await (
-                  await fetch(`${middlewareUrl}/middleware/names/reverse/${publicKey}`)
-                ).json(),
-                'name',
-              ))(),
+            (async () => {
+              try {
+                return uniqBy(
+                  (await axios.get(`${middlewareUrl}/middleware/names/reverse/${publicKey}`)).data,
+                  'name',
+                );
+              } catch (e) {
+                console.error(`middleware.getNames: ${e}`);
+              }
+              return [];
+            })(),
             (async () => {
               try {
                 return await state.middleware.getActiveNames({ owner: publicKey });
@@ -185,12 +187,17 @@ export default {
   },
   async getCurrencies({ state: { nextCurrenciesFetch }, commit, dispatch }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
-      const res = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
-      );
-      const { aeternity } = await res.json();
-      commit('SET_CURRENCIES', aeternity);
-      commit('SET_NEXT_CURRENCY_FETCH', new Date().getTime() + 3600000);
+      try {
+        const { aeternity } = (
+          await axios.get(
+            'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
+          )
+        ).data;
+        commit('SET_CURRENCIES', aeternity);
+        commit('SET_NEXT_CURRENCY_FETCH', new Date().getTime() + 3600000);
+      } catch (e) {
+        console.error(`Cannot fetch currencies: ${e}`);
+      }
     }
     dispatch('setCurrency');
   },

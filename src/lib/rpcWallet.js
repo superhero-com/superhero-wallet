@@ -202,15 +202,16 @@ const rpcWallet = {
     const isConnected = await getAeppAccountPermission(extractHostName(url), this.activeAccount);
     if (!isConnected) {
       try {
-        const a = caller === 'connection' ? action : {};
-        await this.showPopup({ action: a, aepp, type: 'connectConfirm' });
-        if (typeof cb !== 'undefined') {
-          cb();
-        }
+        await this.showPopup({
+          action: caller === 'connection' ? action : {},
+          aepp,
+          type: 'connectConfirm',
+        });
+        if (cb) cb();
       } catch (e) {
         console.error(`checkAeppPermissions: ${e}`);
       }
-    } else if (typeof cb === 'undefined') {
+    } else if (!cb) {
       action.accept();
     } else {
       cb();

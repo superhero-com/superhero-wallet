@@ -6,6 +6,7 @@ import store from '../store';
 import { postMessage } from '../popup/utils/connection';
 import { parseFromStorage, middleware, getAllNetworks } from '../popup/utils/helper';
 import { TIPPING_CONTRACT } from '../popup/utils/constants';
+import Logger from './logger';
 
 export default {
   countError: 0,
@@ -58,10 +59,13 @@ export default {
       await this.initMiddleware();
       store.commit('SET_NODE_STATUS', 'connected');
       setTimeout(() => store.commit('SET_NODE_STATUS', ''), 2000);
-    } catch (error) {
+    } catch (e) {
       this.countError += 1;
       if (this.countError < 3) await this.initSdk();
-      else store.commit('SET_NODE_STATUS', 'error');
+      else {
+        store.commit('SET_NODE_STATUS', 'error');
+        Logger.write({ e, action: 'init-sdk' });
+      }
     }
   },
   async logout() {
@@ -87,7 +91,7 @@ export default {
         }),
       );
     } catch (e) {
-      console.error(`Error creating tipping instance: ${e}`);
+      Logger.write({ e, action: 'init-tip-instance' });
     }
   },
 };
