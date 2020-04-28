@@ -1,12 +1,16 @@
 <template>
   <div>
-    <div class="tour__step3 popup" :class="{ tour__step3_mobile: !IS_EXTENSION }">
+    <div class="tour__step3 popup">
       <p class="primary-title text-left mb-8 f-16" :class="{ 'title-holder': !confirmMode }">
         <template v-if="!confirmMode">
           <div>
             {{ $t('pages.tipPage.url') }}
           </div>
-          <UrlBadge v-if="url" @click.native="showBadgeModal" :type="verifiedStatus" />
+          <UrlBadge
+            v-if="url || tourRunning"
+            @click.native="showBadgeModal"
+            :type="verifiedStatus"
+          />
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
@@ -260,7 +264,7 @@ export default {
 }
 .tour__step3 {
   margin: 0 10px;
-  padding: 12px 10px 4px;
+  padding: 12px 10px 25px;
   margin-top: 10px;
   min-width: auto;
   p {
@@ -270,9 +274,6 @@ export default {
       align-items: center;
     }
   }
-}
-.tour__step3_mobile.v-tour__target--highlighted {
-  padding-bottom: 25px;
 }
 .url-bar {
   display: flex;
@@ -293,7 +294,7 @@ export default {
 @media screen and (min-width: 380px) {
   .tour__step3 {
     margin: 0 auto;
-    padding: 12px 20px 4px;
+    padding: 12px 20px 25px;
   }
 }
 </style>

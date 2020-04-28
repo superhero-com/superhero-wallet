@@ -284,7 +284,7 @@ export default {
   }
 
   &.tip-step[x-placement^='bottom'] {
-    margin-top: 2.5rem !important;
+    margin-top: 1rem !important;
   }
 }
 
@@ -314,7 +314,7 @@ export default {
   background: $tour-bg-color;
   padding: 19px;
   padding-top: 0;
-  padding-bottom: 25px;
+  padding-bottom: 15px;
   pointer-events: all;
 
   &.not-started {
@@ -323,7 +323,7 @@ export default {
 
   &:before {
     position: absolute;
-    top: -90px;
+    top: -80px;
     height: 100%;
     left: 0;
     right: 0;
@@ -411,6 +411,16 @@ export default {
 @media screen and (min-width: 780px) {
   .tour-actions:after {
     top: -30px;
+  }
+
+  .v-step {
+    &[x-placement^='top'] .v-step__arrow {
+      bottom: -0.7rem !important;
+    }
+
+    &[x-placement^='bottom'] .v-step__arrow {
+      top: -0.7rem !important;
+    }
   }
 }
 </style>
