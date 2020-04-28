@@ -10,7 +10,7 @@ export default {
   },
   setListener() {
     browser.webRequest.onBeforeRequest.addListener(
-      async requestDetails => {
+      requestDetails => {
         const url = new URL(requestDetails.url);
         const params = url.searchParams
           .get('q')
@@ -20,10 +20,7 @@ export default {
         if (!q.hostname || !this.supportedDomain(q.hostname) || url.pathname !== '/search') {
           return {};
         }
-
-        chrome.tabs.update({ url: q.toString() });
-
-        return { cancel: true };
+        return { redirectUrl: q.toString() };
       },
       {
         urls: ['*://*.google.com/*'],

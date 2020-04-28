@@ -106,10 +106,10 @@ export default {
     border-radius: 5px;
   }
 
-  .dropdown-container.show {
+  .dropdown-container {
     z-index: 1;
 
-    ul.sub-dropdown {
+    &.show ul.sub-dropdown {
       visibility: visible;
       max-height: 165px;
       overflow-y: scroll;

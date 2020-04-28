@@ -1,5 +1,7 @@
-import axios from 'axios';
 import { uniq } from 'lodash-es';
+import axios from 'axios';
+import Logger from './logger';
+
 import {
   contractCallStatic,
   getActiveAccount,
@@ -48,7 +50,7 @@ export default {
         }
       }
     } catch (e) {
-      console.error(`checkUrlHasBalance: ${e}`);
+      Logger.write({ e, url, action: 'autoclaim' });
     }
   },
 };

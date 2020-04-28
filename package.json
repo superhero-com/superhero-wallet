@@ -59,7 +59,7 @@
     "cordova-plugin-statusbar": "^2.4.3",
     "cordova-plugin-wkwebview-engine": "github:mwchambers/cordova-plugin-wkwebview-engine#da67d6bb6ce8597c38fc69e66b84566e34efea8d",
     "crypto-browserify": "^3.12.0",
-    "detect-browser": "^4.7.0",
+    "detect-browser": "^4.8.0",
     "emailjs-com": "^2.4.0",
     "extensionizer": "^1.0.1",
     "file-saver": "^2.0.2",

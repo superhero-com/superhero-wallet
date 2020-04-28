@@ -2,7 +2,6 @@ import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import { RpcWallet } from '@aeternity/aepp-sdk/es/ae/wallet';
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import Node from '@aeternity/aepp-sdk/es/node';
-import { setInterval, clearInterval } from 'timers';
 import uuid from 'uuid';
 import { isEmpty } from 'lodash-es';
 import {
@@ -60,6 +59,7 @@ const rpcWallet = {
     this.subaccounts = null;
     this.accounts = [];
     this.accountKeyPairs = [];
+    this.connectionsQueue = [];
   },
   initNetwork(network = DEFAULT_NETWORK) {
     this.network = network;
@@ -142,6 +142,7 @@ const rpcWallet = {
             'contract_pubkey',
           )
         : this.tipContractAddress;
+      this.connectionsQueue.forEach(c => this.addConnection(c));
     } catch (e) {
       this.sdk = null;
     }
@@ -181,14 +182,14 @@ const rpcWallet = {
       cb();
     }
   },
-  sdkReady(cb) {
-    const check = setInterval(() => {
-      if (this.sdk) {
-        cb();
-        clearInterval(check);
-      }
-    }, 1000);
-    return check;
+  sdkReady() {
+    return this.sdk;
+  },
+  addConnectionToQueue(port) {
+    this.connectionsQueue.push(port);
+  },
+  removeConnectionFromQueue(port) {
+    this.connectionsQueue = this.connectionsQueue.filter(p => p.uuid !== port.uuid);
   },
   async checkAeppPermissions(aepp, action, caller, cb) {
     const {
@@ -201,15 +202,16 @@ const rpcWallet = {
     const isConnected = await getAeppAccountPermission(extractHostName(url), this.activeAccount);
     if (!isConnected) {
       try {
-        const a = caller === 'connection' ? action : {};
-        await this.showPopup({ action: a, aepp, type: 'connectConfirm' });
-        if (typeof cb !== 'undefined') {
-          cb();
-        }
+        await this.showPopup({
+          action: caller === 'connection' ? action : {},
+          aepp,
+          type: 'connectConfirm',
+        });
+        if (cb) cb();
       } catch (e) {
         console.error(`checkAeppPermissions: ${e}`);
       }
-    } else if (typeof cb === 'undefined') {
+    } else if (!cb) {
       action.accept();
     } else {
       cb();
@@ -256,13 +258,18 @@ const rpcWallet = {
   },
 
   async addConnection(port) {
-    const connection = await BrowserRuntimeConnection({
-      connectionInfo: { id: port.sender.frameId },
-      port,
-    });
-    this.sdk.addRpcClient(connection);
-    this.sdk.shareWalletInfo(port.postMessage.bind(port));
+    try {
+      const connection = await BrowserRuntimeConnection({
+        connectionInfo: { id: port.sender.frameId },
+        port,
+      });
+      this.sdk.addRpcClient(connection);
+      this.sdk.shareWalletInfo(port.postMessage.bind(port));
+    } catch (e) {
+      console.warn(e);
+    }
     setTimeout(() => this.sdk.shareWalletInfo(port.postMessage.bind(port)), 3000);
+    this.removeConnectionFromQueue(port);
   },
   getClientsByCond(condition) {
     const clients = Array.from(this.sdk.getClients().clients.values()).filter(condition);

@@ -56,6 +56,7 @@ const initialState = {
   backedUpSeed: null,
   tourRunning: false,
   tourStartBar: true,
+  saveErrorLog: true,
 };
 
 export default new Vuex.Store({
@@ -105,6 +106,7 @@ export default new Vuex.Store({
         account,
         mnemonic,
         minTipAmount,
+        saveErrorLog,
       }) => ({
         migrations,
         current,
@@ -122,6 +124,7 @@ export default new Vuex.Store({
         account,
         mnemonic,
         minTipAmount,
+        saveErrorLog,
       }),
     ),
     modals,
