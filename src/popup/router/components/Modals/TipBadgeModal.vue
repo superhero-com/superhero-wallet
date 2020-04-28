@@ -4,11 +4,7 @@
       {{ content.title }}      
     </template>
     <div slot="body">
-      <template v-if="status === 'verified'">{{ $t('modals.verified.msg') }}</template>
-      <template v-else-if="status === 'not-supported'">{{
-        $t('modals.not-supported.msg')
-      }}</template>
-      <template v-else-if="status === 'blacklisted'">{{ $t('modals.blacklisted.msg') }}</template>
+      {{ content.msg }}
     </div>
     <div slot="footer">
       <Button class="ok-button" @click="resolve">{{ $t('modals.ok') }}</Button>
