@@ -141,7 +141,6 @@ export default {
       'wallet',
       'activeAccountName',
       'activeAccount',
-      'popup',
       'mnemonic',
     ]),
   },

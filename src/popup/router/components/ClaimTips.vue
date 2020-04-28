@@ -23,7 +23,7 @@ export default {
     Claim,
     BoxButton,
   },
-  computed: mapGetters(['sdk', 'tipping', 'account', 'popup']),
+  computed: mapGetters(['sdk', 'tipping', 'account']),
   data: () => ({ IS_MOBILE: !process.env.IS_EXTENSION }),
   methods: {
     async claimTips() {

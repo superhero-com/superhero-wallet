@@ -56,7 +56,6 @@ export default {
   computed: {
     ...mapGetters([
       'balance',
-      'popup',
       'tipping',
       'current',
       'sdk',

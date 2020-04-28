@@ -202,7 +202,6 @@ export default {
       'tokenBalance',
       'sdk',
       'tokens',
-      'popup',
       'activeAccountName',
     ]),
     amountConvert() {
