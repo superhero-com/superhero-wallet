@@ -9,7 +9,7 @@ import Settings from './pages/Settings';
 import GeneralSettings from './pages/GeneralSettings';
 import SecuritySettings from './pages/SecuritySettings';
 import AboutSettings from './pages/AboutSettings';
-import Tip from './pages/TipPage';
+import Tip from './pages/Tip';
 import Retip from './pages/Retip';
 import QrCodeReader from './pages/QrCodeReader';
 import TermsOfService from './pages/TermsOfService';
