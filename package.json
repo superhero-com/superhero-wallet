@@ -74,6 +74,7 @@
     "rxjs-etc": "^9.7.4",
     "tweetnacl": "^1.0.3",
     "uuid": "^3.3.3",
+    "validator": "^13.0.0",
     "vue": "^2.6.10",
     "vue-awesome": "^3.5.4",
     "vue-clipboard2": "^0.3.1",
