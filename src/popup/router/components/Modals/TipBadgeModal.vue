@@ -22,6 +22,16 @@ export default {
     status: { type: String, required: true },
   },
   components: { Modal, Button },
+  computed: {
+    content() {
+      switch (this.status) {
+      case 'verified': return this.$i18n('modals.verified');
+      case 'not-supported': return this.$i18n('modals.not-supported');
+      case 'blacklisted': return this.$i18n('modals.blacklisted');
+      default: throw new Error(`Unknown url status: ${this.status}`);
+      }
+    },
+  },
 };
 </script>
 
