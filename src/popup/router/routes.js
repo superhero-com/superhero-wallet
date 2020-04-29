@@ -26,6 +26,7 @@ import AuctionBid from './pages/AuctionBid';
 import Networks from './pages/Networks';
 import CommentNew from './pages/CommentNew';
 import NotFound from './pages/NotFound';
+import ClaimTips from './pages/ClaimTips';
 
 export default [
   {
@@ -129,6 +130,14 @@ export default [
     meta: {
       title: 'send',
       notPersist: true,
+    },
+  },
+  {
+    path: '/claim-tips',
+    name: 'claim-tips',
+    component: ClaimTips,
+    meta: {
+      title: 'claim-tips',
     },
   },
   {

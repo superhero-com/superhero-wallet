@@ -118,7 +118,7 @@ export default {
       return this.tourRunning ? 'verified' : this.$store.getters['tipUrl/status'](this.url);
     },
     validUrl() {
-      return validateUrl(this.url);
+      return validateTipUrl(this.url);
     },
   },
   watch: {
