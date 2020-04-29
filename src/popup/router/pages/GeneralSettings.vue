@@ -57,7 +57,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['current', 'popup', 'names', 'sdk']),
+    ...mapGetters(['current', 'names', 'sdk']),
   },
   methods: {
     toggleDropdown(event, parentClass) {

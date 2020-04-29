@@ -202,7 +202,6 @@ export default {
       'tokenBalance',
       'sdk',
       'tokens',
-      'popup',
       'activeAccountName',
     ]),
     amountConvert() {
@@ -255,11 +254,10 @@ export default {
     },
     async fetchFee() {
       await this.$watchUntilTruly(() => this.sdk);
-      const fee = await calculateFee(
+      this.fee = await calculateFee(
         this.current.token === 0 ? TX_TYPES.txSign : TX_TYPES.contractCall,
         { ...(await this.feeParams()) },
       );
-      this.fee = fee;
     },
     async feeParams() {
       return {

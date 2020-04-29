@@ -1,29 +1,29 @@
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import { RpcWallet } from '@aeternity/aepp-sdk/es/ae/wallet';
-import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import Node from '@aeternity/aepp-sdk/es/node';
-import uuid from 'uuid';
+import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import { isEmpty } from 'lodash-es';
-import {
-  parseFromStorage,
-  extractHostName,
-  getAeppAccountPermission,
-  getActiveNetwork,
-  stringifyForStorage,
-  addTipAmount,
-  getTippedAmount,
-  resetTippedAmount,
-  getContractCallInfo,
-  getAddressByNameEntry,
-} from '../popup/utils/helper';
-import {
-  DEFAULT_NETWORK,
-  AEX2_METHODS,
-  NO_POPUP_AEPPS,
-  BLACKLIST_AEPPS,
-  MAX_AMOUNT_WITHOUT_CONFIRM,
-} from '../popup/utils/constants';
+import uuid from 'uuid';
 import { mockLogin } from '../popup/utils';
+import {
+  AEX2_METHODS,
+  BLACKLIST_AEPPS,
+  DEFAULT_NETWORK,
+  MAX_AMOUNT_WITHOUT_CONFIRM,
+  NO_POPUP_AEPPS,
+} from '../popup/utils/constants';
+import {
+  addTipAmount,
+  extractHostName,
+  getActiveNetwork,
+  getAddressByNameEntry,
+  getAeppAccountPermission,
+  getContractCallInfo,
+  getTippedAmount,
+  parseFromStorage,
+  resetTippedAmount,
+  stringifyForStorage,
+} from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 
 global.browser = require('webextension-polyfill');
@@ -90,7 +90,7 @@ const rpcWallet = {
       this.sdk = await RpcWallet({
         nodes: [{ name: this.network, instance: node }],
         compilerUrl: this.compiler,
-        name: 'SuperHero',
+        name: 'Superhero',
         accounts: this.accounts,
         async onConnection(aepp, action) {
           context.shouldOpenPopup(aepp, action, () => {
