@@ -15,7 +15,7 @@
       </p>
 
       <div class="url-bar" :class="editUrl ? 'url-bar--input' : 'url-bar--text'">
-        <UrlStatus v-if="url || tourRunning" :status="urlStatus" />
+        <UrlStatus :status="urlStatus" info />
         <template v-if="!editUrl">
           <a class="link-sm text-left" data-cy="tip-url">
             {{ url }}
@@ -105,15 +105,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters([
-      'balance',
-      'tipping',
-      'current',
-      'sdk',
-      'account',
-      'currentCurrency',
-      'tip',
-    ]),
+    ...mapGetters(['balance', 'tipping', 'current', 'sdk', 'account', 'currentCurrency', 'tip']),
     ...mapState(['tourRunning', 'tippingAddress', 'minTipAmount']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
@@ -183,7 +175,7 @@ export default {
       );
     },
     async toConfirm() {
-      if (this.urlStatus === 'not-supported') {
+      if (this.urlStatus === 'not-verified') {
         const allowToConfirm = await this.$store
           .dispatch('modals/open', { name: 'confirm-tip' })
           .catch(() => false);

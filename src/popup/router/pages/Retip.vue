@@ -5,7 +5,7 @@
     </div>
 
     <div class="url-bar">
-      <UrlStatus v-if="tip.url" :status="urlStatus" />
+      <UrlStatus :status="urlStatus" info />
       <a class="link-sm text-left">{{ tip.url }}</a>
     </div>
 
@@ -64,7 +64,7 @@ export default {
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
     },
     urlStatus() {
-      return this.$store.getters['tipUrl/status'](this.url);
+      return this.$store.getters['tipUrl/status'](this.tip.url);
     },
     urlParams() {
       return new URL(this.$route.fullPath, window.location).searchParams;
@@ -141,6 +141,7 @@ export default {
     flex-grow: 1;
     text-decoration: none;
     width: 90%;
+    margin-left: 10px;
   }
 }
 .section-title {

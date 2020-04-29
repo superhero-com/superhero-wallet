@@ -72,11 +72,11 @@
     },
     "verified": {
       "title": "What is a \"Verified\" URL?",
-      "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page. All tips go directly to the URL owner and can be claimed."
+      "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed."
     },
-    "not-supported": {
-      "title": "What is \"Not Supported\" URL?",
-      "msg": "We can’t guarantee the owner will receive the tip on this site. You can reclaim back AE after one year if unclaimed."
+    "not-verified": {
+      "title": "What is \"Not Verified\" URL?",
+      "msg": "This URL has not yet been verified. The owner of the URL has to create account to claim their tokens. "
     },
     "blacklisted": {
       "title": "What is \"Blacklisted\" URL?",
@@ -84,7 +84,7 @@
     },
     "confirm-tip" :{
       "title": "Send Tip Confirmation",
-      "msg": "You are going to send tip to Not Supported URL. We can't guarantee the owner will receive the tip on this site.",
+      "msg": "You are going to send tip to Not Verified URL. We can't guarantee the owner will receive the tip on this site.",
       "sub-message": "Are you sure you would like to send the tip anyway?",
       "send": "Send Tip"
     },

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26">
+  <g id="Group_688" data-name="Group 688" transform="translate(-281 -229)">
+    <g id="Ellipse_1" data-name="Ellipse 1" transform="translate(281 229)" fill="none" stroke="#67f7b8" stroke-width="2">
+      <circle cx="13" cy="13" r="13" stroke="none"/>
+      <circle cx="13" cy="13" r="12" fill="none"/>
+    </g>
+    <g id="Icon_Tick" data-name="Icon/Tick" transform="translate(286.778 236.222)">
+      <path id="Tick" d="M12.535.373a1.261,1.261,0,0,1,1.792,0,1.281,1.281,0,0,1,.092,1.7l-.092.1L5.906,10.65a1.261,1.261,0,0,1-1.689.093l-.1-.093L.371,6.884a1.281,1.281,0,0,1,0-1.8A1.261,1.261,0,0,1,2.06,4.988l.1.093L5.009,7.944Z" transform="translate(0 0)" fill="#67f7b8"/>
+    </g>
+  </g>
+</svg>

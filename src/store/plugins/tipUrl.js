@@ -13,7 +13,7 @@ export default store =>
     getters: {
       status: ({ verifiedUrls, blacklistedUrls }) => tipUrl => {
         store.dispatch('tipUrl/ensureFetched');
-        if (!tipUrl) return 'not-supported';
+        if (!tipUrl) return 'default';
         const twitterProfile = getTwitterAccountUrl(tipUrl);
         const url = twitterProfile || tipUrl;
         let status;
@@ -22,7 +22,7 @@ export default store =>
         } else if (verifiedUrls.includes(url)) {
           status = 'verified';
         } else {
-          status = 'not-supported';
+          status = 'not-verified';
         }
         return status;
       },
