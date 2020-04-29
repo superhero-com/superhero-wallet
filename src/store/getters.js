@@ -30,9 +30,6 @@ export default {
   current(state) {
     return state.current;
   },
-  popup(state) {
-    return state.popup;
-  },
   isLoggedIn(state) {
     return state.isLoggedIn;
   },

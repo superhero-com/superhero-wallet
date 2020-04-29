@@ -36,7 +36,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'popup', 'sdk', 'current', 'transactions']),
+    ...mapGetters(['account', 'sdk', 'current', 'transactions']),
   },
   methods: {
     filtrateTx(type, deteType) {

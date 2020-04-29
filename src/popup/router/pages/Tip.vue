@@ -107,7 +107,6 @@ export default {
   computed: {
     ...mapGetters([
       'balance',
-      'popup',
       'tipping',
       'current',
       'sdk',
@@ -157,8 +156,7 @@ export default {
     if (!this.IS_EXTENSION && !this.RUNNING_IN_TESTS) {
       this.url = '';
     }
-    await this.$watchUntilTruly(() => this.sdk);
-    await this.$watchUntilTruly(() => this.tippingAddress);
+    await this.$watchUntilTruly(() => this.sdk && this.tippingAddress);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
       contractId: this.tippingAddress,

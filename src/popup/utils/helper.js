@@ -22,7 +22,7 @@ export const aettosToAe = v =>
     targetDenomination: AE_AMOUNT_FORMATS.AE,
   });
 
-const shuffleArray = array => {
+export const shuffleArray = array => {
   const shuffle = array;
   let currentIndex = shuffle.length;
   let temporaryValue;
@@ -43,16 +43,16 @@ const shuffleArray = array => {
   return shuffle;
 };
 
-const convertToAE = balance => +(balance / 10 ** 18).toFixed(7);
+export const convertToAE = balance => +(balance / 10 ** 18).toFixed(7);
 
-const extractHostName = url => new URL(url.includes('://') ? url : `http://${url}`).hostname;
+export const extractHostName = url => new URL(url.includes('://') ? url : `http://${url}`).hostname;
 
 export const validateUrl = url => {
   const urlRegex = /(https?:\/\/)?([\w-])+\.{1}([a-zA-Z]{2,63})([/\w-]*)*\/?\??([^#\n\r]*)?#?([^\n\r]*)/g;
   return urlRegex.test(url);
 };
 
-const detectBrowser = () => {
+export const detectBrowser = () => {
   if ((navigator.userAgent.indexOf('Opera') || navigator.userAgent.indexOf('OPR')) !== -1) {
     return 'Opera';
   }
@@ -79,7 +79,7 @@ const getExtensionProtocol = () => {
   return extensionUrl;
 };
 
-const detectConnectionType = port => {
+export const detectConnectionType = port => {
   const extensionProtocol = getExtensionProtocol();
   const senderUrl = port.sender.url.split('?');
   let type = CONNECTION_TYPES.OTHER;
@@ -101,7 +101,7 @@ const detectConnectionType = port => {
   return type;
 };
 
-const fetchData = (url, method, fetchedData) => {
+export const fetchData = (url, method, fetchedData) => {
   if (method === 'post') {
     return fetch(url, {
       method,
@@ -112,7 +112,7 @@ const fetchData = (url, method, fetchedData) => {
   return fetch(url).then(response => response.json());
 };
 
-const getAeppAccountPermission = async (host, account) => {
+export const getAeppAccountPermission = async (host, account) => {
   const { connectedAepps } = await getState();
   if (!Object.keys(connectedAepps).length) return false;
   if (!connectedAepps[host]) return false;
@@ -127,7 +127,7 @@ export const fetchJson = async (...args) => {
   return response.json();
 };
 
-const middleware = async (network, current) => {
+export const middleware = async (network, current) => {
   const swag = await fetchJson(`${network[current.network].middlewareUrl}/middleware/api`);
   swag.paths['/names/auctions/{name}/info'] = {
     get: {
@@ -150,18 +150,18 @@ const middleware = async (network, current) => {
   })({ swag });
 };
 
-const convertAmountToCurrency = (currency, amount) => currency * amount;
+export const convertAmountToCurrency = (currency, amount) => currency * amount;
 
-const checkAddress = value =>
+export const checkAddress = value =>
   Crypto.isAddressValid(value, 'ak') ||
   Crypto.isAddressValid(value, 'ct') ||
   Crypto.isAddressValid(value, 'ok');
 
-const isInt = n => n % 1 === 0;
+export const isInt = n => n % 1 === 0;
 
-const chekAensName = value => value.endsWith('.test') || value.endsWith('.chain');
+export const chekAensName = value => value.endsWith('.test') || value.endsWith('.chain');
 
-const stringifyForStorage = state =>
+export const stringifyForStorage = state =>
   JSON.stringify(state, (key, value) => {
     if (value instanceof ArrayBuffer) {
       return { type: 'ArrayBuffer', data: Array.from(new Uint8Array(value)) };
@@ -201,7 +201,7 @@ const stringifyForStorage = state =>
     return value;
   });
 
-const parseFromStorage = state =>
+export const parseFromStorage = state =>
   JSON.parse(state, (key, value) => {
     if (value && value.type === 'ArrayBuffer') {
       return new Uint8Array(value.data).buffer;
@@ -243,7 +243,7 @@ const parseFromStorage = state =>
     return value;
   });
 
-const escapeCallParams = params =>
+export const escapeCallParams = params =>
   params.map(p => {
     if (typeof p === 'string' && !checkAddress(p)) {
       return `"${p}"`;
@@ -287,7 +287,13 @@ export const prefixedAmount = value => {
   return `${v}${name ? ' ' : ''}${name}`;
 };
 
-const contractCall = async ({ instance, method, params = [], decode = false, async = true }) => {
+export const contractCall = async ({
+  instance,
+  method,
+  params = [],
+  decode = false,
+  async = true,
+}) => {
   let call;
   try {
     call = await instance.methods[method](...params);
@@ -303,7 +309,7 @@ const contractCall = async ({ instance, method, params = [], decode = false, asy
   return instance.methods[method](...params);
 };
 
-const setContractInstance = async (tx, sdk, contractAddress = null) => {
+export const setContractInstance = async (tx, sdk, contractAddress = null) => {
   let contractInstance = false;
   try {
     let backend = 'fate';
@@ -321,7 +327,7 @@ const setContractInstance = async (tx, sdk, contractAddress = null) => {
   return Promise.resolve(contractInstance);
 };
 
-const getContractInstance = async (source, options = {}) => {
+export const getContractInstance = async (source, options = {}) => {
   try {
     let store = await import('../../store');
     store = store.default;
@@ -331,7 +337,7 @@ const getContractInstance = async (source, options = {}) => {
   }
 };
 
-const getUniqueId = (length = 6) => {
+export const getUniqueId = (length = 6) => {
   const ID_LENGTH = length;
   const START_LETTERS_ASCII = 97;
   const ALPHABET_LENGTH = 26;
@@ -351,18 +357,19 @@ export const getAllNetworks = async () => {
   return { ...userNetworks, ...networks };
 };
 
-const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
+export const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
 
-const addTipAmount = async amount => {
+export const addTipAmount = async amount => {
   const { tippedAmount } = await browser.storage.local.get('tippedAmount');
   return browser.storage.local.set({ tippedAmount: tippedAmount ? tippedAmount + amount : amount });
 };
 
-const resetTippedAmount = () => browser.storage.local.remove('tippedAmount');
+export const resetTippedAmount = () => browser.storage.local.remove('tippedAmount');
 
-const getTippedAmount = async () => (await browser.storage.local.get('tippedAmount')).tippedAmount;
+export const getTippedAmount = async () =>
+  (await browser.storage.local.get('tippedAmount')).tippedAmount;
 
-const getContractCallInfo = (transaction, contractAddress = null) => {
+export const getContractCallInfo = (transaction, contractAddress = null) => {
   if (!transaction) return { isTip: false, contractId: null, amount: 0 };
 
   const { tipContract } = networks[DEFAULT_NETWORK];
@@ -375,7 +382,7 @@ const getContractCallInfo = (transaction, contractAddress = null) => {
   };
 };
 
-const checkHashType = async hash => {
+export const checkHashType = async hash => {
   const accountPublicKeyRegex = RegExp('^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$');
   const transactionHashRegex = RegExp('^th_[1-9A-HJ-NP-Za-km-z]{48,50}$');
   const nameRegex = RegExp('^nm_[1-9A-HJ-NP-Za-km-z]{48,50}$');
@@ -418,34 +425,4 @@ export const getActiveNetwork = async () => {
 export const getTwitterAccountUrl = url => {
   const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
   return match ? match[0] : false;
-};
-
-export {
-  shuffleArray,
-  convertToAE,
-  extractHostName,
-  fetchData,
-  detectBrowser,
-  middleware,
-  convertAmountToCurrency,
-  checkAddress,
-  chekAensName,
-  isInt,
-  stringifyForStorage,
-  parseFromStorage,
-  escapeCallParams,
-  contractCall,
-  setContractInstance,
-  getContractInstance,
-  getAeppAccountPermission,
-  getUniqueId,
-  getUserNetworks,
-  getExtensionProtocol,
-  detectConnectionType,
-  escapeSpecialChars,
-  addTipAmount,
-  getTippedAmount,
-  resetTippedAmount,
-  getContractCallInfo,
-  checkHashType,
 };

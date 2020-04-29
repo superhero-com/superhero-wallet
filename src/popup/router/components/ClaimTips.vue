@@ -23,14 +23,13 @@ export default {
     Claim,
     BoxButton,
   },
-  computed: mapGetters(['sdk', 'tipping', 'account', 'popup']),
+  computed: mapGetters(['sdk', 'tipping', 'account']),
   data: () => ({ IS_MOBILE: !process.env.IS_EXTENSION }),
   methods: {
     async claimTips() {
       if (process.env.IS_EXTENSION) {
         this.$emit('setLoading', true);
-        await this.$watchUntilTruly(() => this.sdk);
-        await this.$watchUntilTruly(() => this.tipping);
+        await this.$watchUntilTruly(() => this.sdk && this.tipping);
         const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
         try {
           if (!tab.url || tab.url.indexOf('chrome://') > -1 || tab.url.indexOf('about:newtab') > -1)

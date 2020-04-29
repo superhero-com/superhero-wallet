@@ -1,27 +1,27 @@
-import IndexComponent from './pages/Index';
-import AccountComponent from './pages/Account';
-import PopupSignTransactionComponent from './pages/Popups/PopupSignTx';
-import PopupConnectComponent from './pages/Popups/PopupConnect';
-import PopupAskAccountsComponent from './pages/Popups/PopupAskAccounts';
-import PopupMessageSignComponent from './pages/Popups/PopupMessageSign';
-import SignTransactionComponent from './pages/SignTransaction';
-import SettingsComponent from './pages/Settings';
-import GeneralSettingsComponent from './pages/GeneralSettings';
-import SecuritySettingsComponent from './pages/SecuritySettings';
-import AboutSettingsComponent from './pages/AboutSettings';
-import TipComponent from './pages/TipPage';
+import Index from './pages/Index';
+import Account from './pages/Account';
+import PopupSignTransaction from './pages/Popups/SignTx';
+import PopupConnect from './pages/Popups/Connect';
+import PopupAskAccounts from './pages/Popups/AskAccounts';
+import PopupMessageSign from './pages/Popups/MessageSign';
+import SignTransaction from './pages/SignTransaction';
+import Settings from './pages/Settings';
+import GeneralSettings from './pages/GeneralSettings';
+import SecuritySettings from './pages/SecuritySettings';
+import AboutSettings from './pages/AboutSettings';
+import Tip from './pages/Tip';
 import Retip from './pages/Retip';
 import QrCodeReader from './pages/QrCodeReader';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import ImportAccount from './pages/ImportAccount';
-import IntroComponent from './pages/Intro';
-import TransactionsComponent from './pages/Transactions';
-import SendComponent from './pages/Send';
-import ReceiveComponent from './pages/Receive';
+import Intro from './pages/Intro';
+import Transactions from './pages/Transactions';
+import Send from './pages/Send';
+import Receive from './pages/Receive';
 import SuccessTip from './pages/SuccessTip';
-import NotificationsPage from './pages/Notifications';
-import NamesPage from './pages/Names';
+import Notifications from './pages/Notifications';
+import Names from './pages/Names';
 import AuctionBid from './pages/AuctionBid';
 import Networks from './pages/Networks';
 import CommentNew from './pages/CommentNew';
@@ -30,7 +30,7 @@ import NotFound from './pages/NotFound';
 export default [
   {
     path: '/',
-    component: IndexComponent,
+    component: Index,
     meta: {
       title: '',
       navigation: false,
@@ -41,12 +41,12 @@ export default [
   {
     path: '/account',
     name: 'account',
-    component: AccountComponent,
+    component: Account,
   },
   {
     name: 'sign',
     path: '/sign-transaction/:type?',
-    component: SignTransactionComponent,
+    component: SignTransaction,
     props: true,
     meta: {
       notPersist: true,
@@ -55,7 +55,7 @@ export default [
   {
     name: 'popup-sign-tx',
     path: '/popup-sign-tx',
-    component: PopupSignTransactionComponent,
+    component: PopupSignTransaction,
     props: true,
     meta: {
       notPersist: true,
@@ -64,7 +64,7 @@ export default [
   {
     name: 'connect',
     path: '/connect',
-    component: PopupConnectComponent,
+    component: PopupConnect,
     props: true,
     meta: {
       notPersist: true,
@@ -73,7 +73,7 @@ export default [
   {
     name: 'ask-accounts',
     path: '/ask-accounts',
-    component: PopupAskAccountsComponent,
+    component: PopupAskAccounts,
     props: true,
     meta: {
       notPersist: true,
@@ -82,7 +82,7 @@ export default [
   {
     name: 'message-sign',
     path: '/message-sign',
-    component: PopupMessageSignComponent,
+    component: PopupMessageSign,
     props: true,
     meta: {
       notPersist: true,
@@ -90,35 +90,35 @@ export default [
   },
   {
     path: '/settings',
-    component: SettingsComponent,
+    component: Settings,
     meta: {
       title: 'settings',
     },
   },
   {
     path: '/generalSettings',
-    component: GeneralSettingsComponent,
+    component: GeneralSettings,
     meta: {
       title: 'general',
     },
   },
   {
     path: '/securitySettings',
-    component: SecuritySettingsComponent,
+    component: SecuritySettings,
     meta: {
       title: 'security',
     },
   },
   {
     path: '/aboutSettings',
-    component: AboutSettingsComponent,
+    component: AboutSettings,
     meta: {
       title: 'about',
     },
   },
   {
     path: '/tip',
-    component: TipComponent,
+    component: Tip,
     meta: {
       title: 'send',
     },
@@ -166,7 +166,7 @@ export default [
   },
   {
     path: '/intro',
-    component: IntroComponent,
+    component: Intro,
     meta: {
       ifNotAuthOnly: true,
       notPersist: true,
@@ -175,7 +175,7 @@ export default [
 
   {
     path: '/transactions',
-    component: TransactionsComponent,
+    component: Transactions,
     meta: {
       title: 'activity',
     },
@@ -184,14 +184,14 @@ export default [
     path: '/send',
     name: 'send',
     props: true,
-    component: SendComponent,
+    component: Send,
     meta: {
       title: 'withdraw',
     },
   },
   {
     path: '/receive',
-    component: ReceiveComponent,
+    component: Receive,
     meta: {
       title: 'topUp',
     },
@@ -208,7 +208,7 @@ export default [
   },
   {
     path: '/notifications',
-    component: NotificationsPage,
+    component: Notifications,
     meta: {
       title: 'notifications',
       notPersist: true,
@@ -216,7 +216,7 @@ export default [
   },
   {
     path: '/names',
-    component: NamesPage,
+    component: Names,
     meta: {
       title: 'names',
     },

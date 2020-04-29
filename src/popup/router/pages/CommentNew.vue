@@ -23,7 +23,7 @@ import openUrl from '../../utils/openUrl';
 export default {
   data: () => ({ id: 0, text: '', loading: false }),
   computed: {
-    ...mapGetters(['sdk', 'popup']),
+    ...mapGetters(['sdk']),
     urlParams() {
       return new URL(this.$route.fullPath, window.location).searchParams;
     },
