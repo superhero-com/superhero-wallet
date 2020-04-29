@@ -53,7 +53,7 @@
               <Button
                 :small="!name.addPointer"
                 @click="setActiveName(name, key)"
-                :class="activeAccountName == name.name ? 'active disabled' : ''"
+                :disabled="activeAccountName == name.name"
                 >{{ $t('pages.namingSystemPage.active') }}</Button
               >
             </div>
