@@ -32,6 +32,7 @@ export default {
   async initMiddleware() {
     const { network, current } = store.getters;
     store.commit('SET_MIDDLEWARE', (await middleware(network, current)).api);
+    store.dispatch('getRegisteredNames');
   },
   async initSdk() {
     const keypair = await this.getKeyPair();
