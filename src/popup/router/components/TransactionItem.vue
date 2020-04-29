@@ -67,12 +67,12 @@ export default {
     txAmount() {
       const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
       const fee = this.transaction.tx.fee || 0;
-      return (+aettosToAe(amount + fee)).toFixed(2);
+      return (+aettosToAe(+amount + fee)).toFixed(2);
     },
     txAmountToCurrency() {
       const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
       const fee = this.transaction.tx.fee || 0;
-      const txamount = aettosToAe(amount + fee);
+      const txamount = +aettosToAe(+amount + fee);
       return (txamount * this.current.currencyRate).toFixed(2);
     },
     tipUrl() {

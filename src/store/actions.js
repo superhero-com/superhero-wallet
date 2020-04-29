@@ -46,7 +46,11 @@ export default {
       (async () =>
         (
           await axios
-            .get(`http://localhost:3000/transactions/${publicKey}`)
+            .get(
+              `${BACKEND_URL}/cache/events/?address=${publicKey}&event=TipWithdrawn${
+                recent ? `&limit=${limit}` : ''
+              }`,
+            )
             .catch(() => ({ data: [] }))
         ).data.map(({ address, amount, ...t }) => ({
           tx: { address, amount },

@@ -118,8 +118,9 @@ export default {
     },
     async getLatest() {
       const transactions = await this.$store.dispatch('fetchTransactions', {
-        limit: TXS_PER_PAGE,
+        limit: 10,
         page: 1,
+        recent: true,
       });
       const diff = differenceWith(transactions, this.transactions, isEqual);
       this.updateTransactions({ latest: true, transactions: diff });
