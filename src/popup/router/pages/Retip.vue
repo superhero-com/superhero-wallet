@@ -1,14 +1,12 @@
 <template>
   <div class="popup">
-    <div class="primary-title title-holder">
-      <div>
-        {{ $t('pages.tipPage.url') }}
-      </div>
-      <UrlBadge v-if="tip.url" :type="urlVerified ? 'verified' : 'not-verified'" />
+    <div class="section-title">
+      {{ $t('pages.tipPage.url') }}
     </div>
 
     <div class="url-bar">
-      <a class="link-sm text-left" :class="{ 'not-verified': !urlVerified }">{{ tip.url }}</a>
+      <UrlStatus :status="urlStatus" info />
+      <a class="link-sm text-left">{{ tip.url }}</a>
     </div>
 
     <AmountSend
@@ -35,23 +33,20 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import axios from 'axios';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
-import { MAGNITUDE, calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
-import { getTwitterAccountUrl } from '../../utils/helper';
+import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
 import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';
-import UrlBadge from '../components/UrlBadge';
+import UrlStatus from '../components/UrlStatus';
 
 export default {
-  components: { AmountSend, UrlBadge },
+  components: { AmountSend, UrlStatus },
   data: () => ({
     tip: {},
     amount: null,
     amountError: false,
     loading: false,
     minCallFee: null,
-    verifiedUrls: [],
   }),
   computed: {
     ...mapGetters([
@@ -68,14 +63,8 @@ export default {
       const calculatedMaxValue = this.balance - this.minCallFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
     },
-    urlVerified() {
-      if (!this.tip.url) return false;
-      const twitterProfile = getTwitterAccountUrl(this.tip.url);
-      return (
-        this.tip.url &&
-        (this.verifiedUrls.includes(this.tip.url) ||
-          (twitterProfile && this.verifiedUrls.includes(twitterProfile)))
-      );
+    urlStatus() {
+      return this.$store.getters['tipUrl/status'](this.tip.url);
     },
     urlParams() {
       return new URL(this.$route.fullPath, window.location).searchParams;
@@ -88,7 +77,6 @@ export default {
   },
   async created() {
     this.loading = true;
-    this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
     await this.$watchUntilTruly(() => this.sdk && this.tippingAddress);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
@@ -148,19 +136,21 @@ export default {
 .url-bar {
   display: flex;
   align-items: center;
-  :first-child {
+
+  a {
+    color: $text-color;
     flex-grow: 1;
     text-decoration: none;
-    &.not-verified {
-      color: $not-verified-badge-bg;
-    }
+    width: 90%;
+    margin-left: 10px;
   }
 }
-.title-holder {
-  display: flex;
-  align-items: center;
+.section-title {
   margin-bottom: 8px;
   margin-top: 16px;
   font-size: 16px;
+  color: $white-color;
+  font-weight: 400;
+  text-align: left;
 }
 </style>

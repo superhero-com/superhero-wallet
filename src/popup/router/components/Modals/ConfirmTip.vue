@@ -1,18 +1,18 @@
 <template>
   <Modal @close="resolve">
     <template slot="header">
-      {{ $t('pages.tipPage.sendTipConfirmationHeader') }}
+      {{ $t('modals.confirm-tip.title') }}
     </template>
     <template slot="body">
-      {{ $t('pages.tipPage.sendTipConfirmationBody') }}
-      <p class="confirmation--question">{{ $t('pages.tipPage.sendTipConfirmationQstn') }}</p>
+      {{ $t('modals.confirm-tip.msg') }}
+      <p class="confirmation--question">{{ $t('modals.confirm-tip.sub-message') }}</p>
     </template>
     <div class="modal-confirm-btns" slot="footer">
       <Button data-cy="cancel-tip" dark @click="cancelTip">
-        {{ $t('pages.tipPage.cancel') }}
+        {{ $t('modals.cancel') }}
       </Button>
       <Button data-cy="to-confirm" @click="toConfirm">
-        {{ $t('pages.tipPage.sendTipBtn') }}
+        {{ $t('modals.confirm-tip.send') }}
       </Button>
     </div>
   </Modal>
