@@ -112,7 +112,6 @@ export default {
   computed: {
     ...mapGetters([
       'balance',
-      'popup',
       'tipping',
       'current',
       'sdk',
@@ -176,8 +175,7 @@ export default {
     } catch (e) {
       this.$logError({ e, action: 'fetch-verified' });
     }
-    await this.$watchUntilTruly(() => this.sdk);
-    await this.$watchUntilTruly(() => this.tippingAddress);
+    await this.$watchUntilTruly(() => this.sdk && this.tippingAddress);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
       contractId: this.tippingAddress,
