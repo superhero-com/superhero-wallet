@@ -76,7 +76,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
-import { escapeSpecialChars, aeToAettos, validateUrl } from '../../utils/helper';
+import { escapeSpecialChars, aeToAettos, validateTipUrl } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
 import Input from '../components/Input';
