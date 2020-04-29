@@ -19,28 +19,34 @@
           data-cy="tip-button"
           :text="$t('pages.account.send')"
           accent
-          to="tip"
+          to="/tip"
           class="tour__step2"
         >
           <Tip slot="icon" />
         </BoxButton>
-        <ClaimTips @setLoading="val => (loading = val)" />
-        <BoxButton text="Activity" to="transactions" class="tour__step5">
+        <BoxButton
+          :text="$t('pages.account.claim')"
+          accent
+          :to="{ name: 'claim-tips' }"
+          class="tour__step4"
+        >
+          <Claim slot="icon" />
+        </BoxButton>
+        <BoxButton text="Activity" to="/transactions" class="tour__step5">
           <Activity slot="icon" />
         </BoxButton>
-        <BoxButton :text="$t('pages.appVUE.topUp')" to="receive" class="tour__step6">
+        <BoxButton :text="$t('pages.appVUE.topUp')" to="/receive" class="tour__step6">
           <Topup slot="icon" />
         </BoxButton>
-        <BoxButton :text="$t('pages.appVUE.withdraw')" to="send" class="tour__step7">
+        <BoxButton :text="$t('pages.appVUE.withdraw')" to="/send" class="tour__step7">
           <Withdraw slot="icon" />
         </BoxButton>
-        <BoxButton :text="$t('pages.appVUE.settings')" to="settings" class="tour__step8">
+        <BoxButton :text="$t('pages.appVUE.settings')" to="/settings" class="tour__step8">
           <Settings slot="icon" />
         </BoxButton>
       </div>
       <RecentTransactions></RecentTransactions>
     </div>
-    <Loader size="big" :loading="loading" type="transparent" />
   </div>
 </template>
 
@@ -48,6 +54,7 @@
 import { mapGetters, mapState } from 'vuex';
 import { setTimeout } from 'timers';
 import Tip from '../../../icons/tip-icon.svg?vue-component';
+import Claim from '../../../icons/claim-icon.svg?vue-component';
 import Activity from '../../../icons/activity-icon.svg?vue-component';
 import Topup from '../../../icons/topup-icon.svg?vue-component';
 import Withdraw from '../../../icons/withdraw-icon.svg?vue-component';
@@ -56,12 +63,12 @@ import RecentTransactions from '../components/RecentTransactions';
 import BalanceInfo from '../components/BalanceInfo';
 import AccountInfo from '../components/AccountInfo';
 import BoxButton from '../components/BoxButton';
-import ClaimTips from '../components/ClaimTips';
 
 export default {
   name: 'Account',
   components: {
     Tip,
+    Claim,
     Activity,
     Topup,
     Withdraw,
@@ -70,12 +77,10 @@ export default {
     BalanceInfo,
     AccountInfo,
     BoxButton,
-    ClaimTips,
   },
   data() {
     return {
       backup_seed_notif: false,
-      loading: false,
     };
   },
   computed: {

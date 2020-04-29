@@ -79,7 +79,7 @@ import {
   escapeSpecialChars,
   aeToAettos,
   getTwitterAccountUrl,
-  validateUrl,
+  validateTipUrl,
 } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
@@ -140,7 +140,7 @@ export default {
       return this.urlVerified || this.tourRunning ? 'verified' : 'not-verified';
     },
     validUrl() {
-      return validateUrl(this.url);
+      return validateTipUrl(this.url);
     },
   },
   watch: {
