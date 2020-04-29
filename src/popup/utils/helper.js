@@ -1,3 +1,4 @@
+import { isFQDN } from 'validator';
 import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
@@ -45,11 +46,17 @@ export const shuffleArray = array => {
 
 export const convertToAE = balance => +(balance / 10 ** 18).toFixed(7);
 
-export const extractHostName = url => new URL(url.includes('://') ? url : `http://${url}`).hostname;
+export const toURL = url => new URL(url.includes('://') ? url : `https://${url}`);
 
-export const validateUrl = url => {
-  const urlRegex = /(https?:\/\/)?([\w-])+\.{1}([a-zA-Z]{2,63})([/\w-]*)*\/?\??([^#\n\r]*)?#?([^\n\r]*)/g;
-  return urlRegex.test(url);
+export const extractHostName = url => toURL(url).hostname;
+
+export const validateTipUrl = urlAsString => {
+  try {
+    const url = toURL(urlAsString);
+    return ['http:', 'https:'].includes(url.protocol) && isFQDN(url.hostname);
+  } catch (e) {
+    return false;
+  }
 };
 
 export const detectBrowser = () => {
