@@ -138,6 +138,7 @@ export default {
   align-items: center;
 
   a {
+    color: $text-color;
     flex-grow: 1;
     text-decoration: none;
     width: 90%;
