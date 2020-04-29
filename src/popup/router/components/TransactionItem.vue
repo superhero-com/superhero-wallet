@@ -19,6 +19,9 @@
       <span v-else-if="withdraw" class="address">
         {{ transaction.tx.recipient_id }}
       </span>
+      <span v-else class="tx-type">
+        {{ transactionType }}
+      </span>
       <span class="seeTransaction" @click="seeTx()">
         <img src="../../../icons/eye.png" />
       </span>
@@ -90,6 +93,9 @@ export default {
         this.transaction.tx.sender_id === this.account.publicKey
       );
     },
+    transactionType() {
+      return this.$t('transaction.type')[this.transaction.tx.type];
+    },
   },
   methods: {
     async getEventData() {
@@ -137,7 +143,8 @@ export default {
     }
 
     .url,
-    .address {
+    .address,
+    .tx-type {
       display: inline-block;
       white-space: nowrap;
       overflow: hidden !important;
