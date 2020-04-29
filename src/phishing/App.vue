@@ -2,19 +2,19 @@
   <div class="content">
     <ae-main>
       <ae-panel class="text-center">
-        <img src="../icons/icon_128.png" alt="SuperHero logo" />
-        <h1><ae-icon fill="primary" face="round" name="info" />SuperHero Phishing Detection</h1>
+        <img src="../icons/icon_128.png" alt="Superhero logo" />
+        <h1><ae-icon fill="primary" face="round" name="info" />Superhero Phishing Detection</h1>
         <p>
-          This domain is currently on the SuperHero domain warning list. This means that based on
-          information available to us, SuperHero believes this domain could currently compromise
-          your security and, as an added safety feature, SuperHero has restricted access to the
+          This domain is currently on the Superhero domain warning list. This means that based on
+          information available to us, Superhero believes this domain could currently compromise
+          your security and, as an added safety feature, Superhero has restricted access to the
           site. To override this, please read the rest of this warning for instructions on how to
           continue at your own risk.
         </p>
         <p>
           There are many reasons sites can appear on our warning list, and our warning list compiles
           from other widely used industry lists. Such reasons can include known fraud or security
-          risks, such as domains that test positive on the <a>SuperHero Phishing Detector</a>.
+          risks, such as domains that test positive on the <a>Superhero Phishing Detector</a>.
           Domains on these warning lists may include outright malicious websites and legitimate
           websites that have been compromised by a malicious actor.
         </p>
