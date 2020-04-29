@@ -91,7 +91,7 @@ export default {
   },
   data() {
     return {
-      url: '',
+      url: null,
       amount: null,
       note: null,
       confirmMode: false,
@@ -146,7 +146,7 @@ export default {
     }
     // if mobile
     if (!this.IS_EXTENSION && !this.RUNNING_IN_TESTS) {
-      this.url = '';
+      this.url = null;
     }
     await this.$watchUntilTruly(() => this.sdk && this.tippingAddress);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {

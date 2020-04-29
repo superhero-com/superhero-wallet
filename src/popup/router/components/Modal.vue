@@ -1,24 +1,22 @@
 <template>
-  <div class="popup">
-    <transition name="modal">
-      <div class="modal--mask">
-        <div class="modal--wrapper">
-          <div class="modal--container">
-            <Close class="modal--close" @click="$emit('close')" />
-            <div v-if="$slots.header" class="modal--header">
-              <slot name="header" />
-            </div>
-            <div v-if="$slots.body" class="modal--body">
-              <slot name="body" />
-            </div>
-            <div v-if="$slots.footer" class="modal--footer">
-              <slot name="footer" />
-            </div>
+  <transition name="modal">
+    <div class="modal--mask">
+      <div class="modal--wrapper">
+        <div class="modal--container">
+          <Close class="modal--close" @click="$emit('close')" />
+          <div v-if="$slots.header" class="modal--header">
+            <slot name="header" />
+          </div>
+          <div v-if="$slots.body" class="modal--body">
+            <slot name="body" />
+          </div>
+          <div v-if="$slots.footer" class="modal--footer">
+            <slot name="footer" />
           </div>
         </div>
       </div>
-    </transition>
-  </div>
+    </div>
+  </transition>
 </template>
 
 <script>
