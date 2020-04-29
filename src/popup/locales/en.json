@@ -70,8 +70,27 @@
       "title": "Are you sure you want to remove this account?",
       "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
     },
+    "verified": {
+      "title": "What is a \"Verified\" URL?",
+      "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed."
+    },
+    "not-verified": {
+      "title": "What is \"Not Verified\" URL?",
+      "msg": "This URL has not yet been verified. The owner of the URL has to create account to claim their tokens. "
+    },
+    "blacklisted": {
+      "title": "What is \"Blacklisted\" URL?",
+      "msg": "The owner will not be able to receive the tip on this site. The URL has been blacklisted and tips can't be sent."
+    },
+    "confirm-tip" :{
+      "title": "Send Tip Confirmation",
+      "msg": "You are going to send tip to Not Verified URL. We can't guarantee the owner will receive the tip on this site.",
+      "sub-message": "Are you sure you would like to send the tip anyway?",
+      "send": "Send Tip"
+    },
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "ok": "OK"
   },
   "pages": {
     "intro": {
@@ -624,9 +643,6 @@
       "tipDetails": "Details",
       "tipWebsite": "Website",
       "heading": "Send",
-      "sendTipConfirmationHeader": "Send Tip Confirmation",
-      "sendTipConfirmationBody": "You are going to send tip to a not verified URL. Third party issues may prevent us to ensure that tips will be directly delivered to the URL owner.",
-      "sendTipConfirmationQstn": "Are you sure you would like to send the tip anyway?",
       "headingSending": "Sending",
       "selectTip": "Select amount to tip",
       "tipDomain": "Tip domain",

@@ -1,8 +1,8 @@
 <template>
   <textarea
     class="textarea"
-    :placeholder="placeholder ? placeholder : ''"
-    :class="getClasses"
+    :placeholder="placeholder"
+    :class="{ 'has-error': error || err, [size]: size }"
     :value="value"
     @input="$emit('input', $event.target.value)"
     data-cy="textarea"
@@ -13,29 +13,19 @@
 import { checkAddress, chekAensName } from '../../utils/helper';
 
 export default {
-  props: ['type', 'value', 'error', 'placeholder', 'size'],
+  props: {
+    type: String,
+    value: String,
+    error: Boolean,
+    placeholder: String,
+    size: String,
+  },
   data: () => ({ err: false }),
   watch: {
     value(val) {
       if (this.type === 'address') {
-        if (!checkAddress(val) && !chekAensName(val)) {
-          this.err = true;
-        } else {
-          this.err = false;
-        }
+        this.err = !checkAddress(val) && !chekAensName(val);
       }
-    },
-  },
-  computed: {
-    getClasses() {
-      let cl = [];
-      if (this.error || this.err) {
-        cl.push('has-error');
-      }
-      if (this.size) {
-        cl = [...cl, ...this.size.split(' ')];
-      }
-      return cl;
     },
   },
 };
@@ -59,17 +49,21 @@ textarea {
   margin-left: auto;
   margin-right: auto;
   word-break: break-word;
-}
-textarea:focus {
-  border-color: $input-focus-color !important;
-}
-textarea.has-error {
-  border-color: $input-error-color !important;
-}
-textarea.sm {
-  font-size: 14px;
-}
-textarea.h-50 {
-  min-height: 100px !important;
+
+  &:focus {
+    border-color: $input-focus-color !important;
+  }
+
+  &.has-error {
+    border-color: $input-error-color !important;
+  }
+
+  &.sm {
+    font-size: 15px;
+  }
+
+  &.h-50 {
+    min-height: 100px !important;
+  }
 }
 </style>

@@ -48,6 +48,7 @@ export default {
   },
   data: () => ({
     showSidebar: false,
+    polling: null,
   }),
   computed: {
     ...mapGetters([
@@ -72,6 +73,12 @@ export default {
       return this.$store.getters['modals/opened'];
     },
   },
+  watch: {
+    isLoggedIn(val) {
+      if (val) this.init();
+      else clearInterval(this.polling);
+    },
+  },
   async created() {
     await this.$watchUntilTruly(() => this.isRestored);
     this.$watch(
@@ -81,7 +88,6 @@ export default {
       },
     );
 
-    this.checkSdkReady();
     this.$store.dispatch('getCurrencies');
 
     if (process.env.IS_EXTENSION && detectBrowser() !== 'Firefox') {
@@ -105,11 +111,9 @@ export default {
     }
     if (this.notificationsCounter !== 0)
       this.$store.commit('SET_NOTIFICATIONS_COUNTER', this.notifications.length);
-    await this.$watchUntilTruly(() => this.middleware);
-    this.$store.dispatch('getRegisteredNames');
   },
   methods: {
-    async checkSdkReady() {
+    async init() {
       await this.$watchUntilTruly(() => this.sdk);
       if (!window.RUNNING_IN_POPUP && process.env.IS_EXTENSION) {
         postMessage({
@@ -120,11 +124,10 @@ export default {
       this.pollData();
     },
     pollData() {
-      const polling = setInterval(async () => {
-        if (!this.isLoggedIn) return;
+      this.polling = setInterval(() => {
         if (!process.env.RUNNING_IN_TESTS && this.sdk) this.$store.dispatch('updateBalance');
       }, 2500);
-      this.$once('hook:beforeDestroy', () => clearInterval(polling));
+      this.$once('hook:beforeDestroy', () => clearInterval(this.polling));
     },
   },
 };

@@ -20,7 +20,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { differenceWith, isEqual } from 'lodash-es';
+import { differenceWith, isEqual, uniqBy, orderBy } from 'lodash-es';
 import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
 import TransactionFilters from '../components/TransactionFilters';
@@ -65,9 +65,7 @@ export default {
             tr => tr.tx.type === 'ContractCallTx' && tr.tx.caller_id === this.publicKey,
           );
         case 'received':
-          return this.transactions.filter(
-            tr => tr.tx.type === 'ContractCallTx' && tr.tx.recipient_id === this.publicKey,
-          );
+          return this.transactions.filter(tr => tr.claim);
         case 'topups':
           return this.transactions.filter(
             tr => tr.tx.type === 'SpendTx' && tr.tx.recipient_id === this.publicKey,
@@ -86,7 +84,7 @@ export default {
   },
   created() {
     this.loadMore(true);
-    this.polling = setInterval(() => this.getLatest(), 5000);
+    this.polling = setInterval(() => this.getLatest(), 10000);
   },
   mounted() {
     const checkLoadMore = () => {
@@ -120,18 +118,24 @@ export default {
     },
     async getLatest() {
       const transactions = await this.$store.dispatch('fetchTransactions', {
-        limit: TXS_PER_PAGE,
+        limit: 10,
         page: 1,
+        recent: true,
       });
       const diff = differenceWith(transactions, this.transactions, isEqual);
       this.updateTransactions({ latest: true, transactions: diff });
     },
     updateTransactions({ transactions, latest }) {
-      if (latest) {
-        this.transactions = [...transactions, ...this.transactions];
-      } else {
-        this.transactions = [...this.transactions, ...transactions];
-      }
+      this.transactions = orderBy(
+        uniqBy(
+          latest
+            ? [...transactions, ...this.transactions]
+            : [...this.transactions, ...transactions],
+          'hash',
+        ),
+        ['time'],
+        ['desc'],
+      );
     },
   },
 };

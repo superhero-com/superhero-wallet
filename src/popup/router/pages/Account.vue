@@ -45,7 +45,7 @@
           <Settings slot="icon" />
         </BoxButton>
       </div>
-      <RecentTransactions></RecentTransactions>
+      <RecentTransactions />
     </div>
   </div>
 </template>
