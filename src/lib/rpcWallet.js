@@ -5,8 +5,25 @@ import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-c
 import { isEmpty } from 'lodash-es';
 import uuid from 'uuid';
 import { mockLogin } from '../popup/utils';
-import { AEX2_METHODS, BLACKLIST_AEPPS, DEFAULT_NETWORK, MAX_AMOUNT_WITHOUT_CONFIRM, NO_POPUP_AEPPS } from '../popup/utils/constants';
-import { addTipAmount, extractHostName, getActiveNetwork, getAddressByNameEntry, getAeppAccountPermission, getContractCallInfo, getTippedAmount, parseFromStorage, resetTippedAmount, stringifyForStorage } from '../popup/utils/helper';
+import {
+  AEX2_METHODS,
+  BLACKLIST_AEPPS,
+  DEFAULT_NETWORK,
+  MAX_AMOUNT_WITHOUT_CONFIRM,
+  NO_POPUP_AEPPS,
+} from '../popup/utils/constants';
+import {
+  addTipAmount,
+  extractHostName,
+  getActiveNetwork,
+  getAddressByNameEntry,
+  getAeppAccountPermission,
+  getContractCallInfo,
+  getTippedAmount,
+  parseFromStorage,
+  resetTippedAmount,
+  stringifyForStorage,
+} from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 
 global.browser = require('webextension-polyfill');
