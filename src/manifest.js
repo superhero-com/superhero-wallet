@@ -1,6 +1,6 @@
 module.exports = (isProd, browser) => ({
-  name: 'SuperHero',
-  description: 'SuperHero Wallet',
+  name: 'Superhero',
+  description: 'Superhero Wallet',
   version: process.env.npm_package_version,
   manifest_version: 2,
   ...(browser === 'firefox' && {
@@ -29,7 +29,7 @@ module.exports = (isProd, browser) => ({
   },
   content_security_policy: `script-src 'self'${isProd ? '' : " 'unsafe-eval'"}; object-src 'self'`,
   browser_action: {
-    default_title: 'SuperHero',
+    default_title: 'Superhero',
     default_popup: 'popup/popup.html',
   },
   background: {
