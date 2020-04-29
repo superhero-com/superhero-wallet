@@ -25,7 +25,7 @@ describe('Tests cases for AEX-2 communication', () => {
         .should('be.visible')
         .get('[data-cy=wallet-name]')
         .should('be.visible')
-        .should('contain', 'SuperHero');
+        .should('contain', 'Superhero');
     });
     it('Sign message', () => {
       cy.get('[data-cy=wallet-sign-msg]')
