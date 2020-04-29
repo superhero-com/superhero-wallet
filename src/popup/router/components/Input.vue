@@ -1,13 +1,13 @@
 <template>
-  <div class="text-left" :class="labelPosition ? 'input-group' : ''">
-    <label class="label" v-if="label" :class="labelPosition ? `label-${labelPosition}` : ''">{{
+  <div class="text-left" :class="{ 'input-group': labelPosition }">
+    <label class="label" v-if="label" :class="{ [`label-${labelPosition}`]: labelPosition }">{{
       label
     }}</label>
     <input
       type="text"
       class="input"
-      :placeholder="placeholder ? placeholder : ''"
-      :class="getClasses"
+      :placeholder="placeholder"
+      :class="{ 'has-error': error || err, [size]: size, 'input-label': labelPosition }"
       :value="value"
       @input="$emit('input', $event.target.value)"
       :data-cy="type ? `input-${type}` : 'input'"
@@ -17,27 +17,19 @@
 
 <script>
 export default {
-  props: ['value', 'error', 'placeholder', 'size', 'type', 'label', 'labelPosition'],
+  props: {
+    value: [String, Number],
+    error: Boolean,
+    placeholder: String,
+    size: String,
+    type: String,
+    label: String,
+    labelPosition: String,
+  },
   data: () => ({ err: false }),
-  created() {},
   watch: {
     value(val) {
       this.err = this.type === 'number' && Number.isNaN(+val);
-    },
-  },
-  computed: {
-    getClasses() {
-      let cl = [];
-      if (this.error || this.err) {
-        cl.push('has-error');
-      }
-      if (this.size) {
-        cl = [...cl, ...this.size.split(' ')];
-      }
-      if (this.labelPosition) {
-        cl.push('input-label');
-      }
-      return cl;
     },
   },
 };

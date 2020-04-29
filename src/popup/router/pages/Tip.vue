@@ -1,16 +1,9 @@
 <template>
   <div>
     <div class="tour__step3 popup">
-      <p class="primary-title text-left mb-8 f-16" :class="{ 'title-holder': !confirmMode }">
+      <p class="primary-title text-left mb-8 f-16">
         <template v-if="!confirmMode">
-          <div>
-            {{ $t('pages.tipPage.url') }}
-          </div>
-          <UrlBadge
-            v-if="url || tourRunning"
-            @click.native="showBadgeModal"
-            :type="verifiedStatus"
-          />
+          {{ $t('pages.tipPage.url') }}
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
@@ -21,9 +14,10 @@
         </template>
       </p>
 
-      <div class="url-bar">
+      <div class="url-bar" :class="editUrl ? 'url-bar--input' : 'url-bar--text'">
+        <UrlStatus :status="urlStatus" info />
         <template v-if="!editUrl">
-          <a class="link-sm text-left" :class="verifiedStatus" data-cy="tip-url">
+          <a class="link-sm text-left" data-cy="tip-url">
             {{ url }}
           </a>
         </template>
@@ -48,7 +42,15 @@
         <Button
           class="send-tip-button"
           @click="toConfirm"
-          :disabled="!note || amountError || noteError || !minCallFee || !validUrl || !url"
+          :disabled="
+            !note ||
+              amountError ||
+              noteError ||
+              !minCallFee ||
+              !validUrl ||
+              !url ||
+              urlStatus === 'blacklisted'
+          "
           data-cy="send-tip"
         >
           {{ $t('pages.tipPage.next') }}
@@ -73,29 +75,23 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import axios from 'axios';
-import { calculateFee, TX_TYPES, BACKEND_URL } from '../../utils/constants';
-import {
-  escapeSpecialChars,
-  aeToAettos,
-  getTwitterAccountUrl,
-  validateUrl,
-} from '../../utils/helper';
+import { calculateFee, TX_TYPES } from '../../utils/constants';
+import { escapeSpecialChars, aeToAettos, validateTipUrl } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
 import Input from '../components/Input';
-import UrlBadge from '../components/UrlBadge';
+import UrlStatus from '../components/UrlStatus';
 
 export default {
   components: {
     AmountSend,
     Textarea,
     Input,
-    UrlBadge,
+    UrlStatus,
   },
   data() {
     return {
-      url: '',
+      url: null,
       amount: null,
       note: null,
       confirmMode: false,
@@ -104,22 +100,12 @@ export default {
       loading: false,
       minCallFee: null,
       editUrl: true,
-      verifiedUrls: [],
       IS_EXTENSION: process.env.IS_EXTENSION,
       RUNNING_IN_TESTS: process.env.RUNNING_IN_TESTS,
     };
   },
   computed: {
-    ...mapGetters([
-      'balance',
-      'tipping',
-      'current',
-      'sdk',
-      'account',
-      'network',
-      'currentCurrency',
-      'tip',
-    ]),
+    ...mapGetters(['balance', 'tipping', 'current', 'sdk', 'account', 'currentCurrency', 'tip']),
     ...mapState(['tourRunning', 'tippingAddress', 'minTipAmount']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;
@@ -128,19 +114,11 @@ export default {
     currencyAmount() {
       return (this.amount * this.current.currencyRate).toFixed(3);
     },
-    urlVerified() {
-      const twitterProfile = getTwitterAccountUrl(this.url);
-      return (
-        this.url &&
-        (this.verifiedUrls.includes(this.url) ||
-          (twitterProfile && this.verifiedUrls.includes(twitterProfile)))
-      );
-    },
-    verifiedStatus() {
-      return this.urlVerified || this.tourRunning ? 'verified' : 'not-verified';
+    urlStatus() {
+      return this.tourRunning ? 'verified' : this.$store.getters['tipUrl/status'](this.url);
     },
     validUrl() {
-      return validateUrl(this.url);
+      return validateTipUrl(this.url);
     },
   },
   watch: {
@@ -168,12 +146,7 @@ export default {
     }
     // if mobile
     if (!this.IS_EXTENSION && !this.RUNNING_IN_TESTS) {
-      this.url = '';
-    }
-    try {
-      this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
-    } catch (e) {
-      this.$logError({ e, action: 'fetch-verified' });
+      this.url = null;
     }
     await this.$watchUntilTruly(() => this.sdk && this.tippingAddress);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
@@ -183,12 +156,6 @@ export default {
     }).min;
   },
   methods: {
-    showBadgeModal() {
-      this.$store.dispatch('modals/open', {
-        name: 'tip-badge',
-        verifiedStatus: this.verifiedStatus,
-      });
-    },
     async persistTipDetails() {
       if (this.tip) {
         const { amount, note, exp } = this.tip;
@@ -208,17 +175,21 @@ export default {
       );
     },
     async toConfirm() {
-      // TODO: check if url cannot be claimed through backend and only then show confirm modal
-      // if (!this.urlVerified) {
-      //   const allowToConfirm = await this.$store
-      //     .dispatch('modals/open', { name: 'confirm-tip' })
-      //     .catch(() => false);
-      //   if (!allowToConfirm) return;
-      // }
+      if (this.urlStatus === 'not-verified') {
+        const allowToConfirm = await this.$store
+          .dispatch('modals/open', { name: 'confirm-tip' })
+          .catch(() => false);
+        if (!allowToConfirm) return;
+      }
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
       this.amountError = this.amountError || !+this.amount || this.amount < this.minTipAmount;
       this.noteError = !this.note || !this.url;
-      this.confirmMode = !this.amountError && !this.noteError && this.validUrl && this.url;
+      this.confirmMode =
+        !this.amountError &&
+        !this.noteError &&
+        this.validUrl &&
+        this.url &&
+        this.urlStatus !== 'blacklisted';
       if (this.confirmMode) this.editUrl = false;
     },
     async sendTip() {
@@ -256,43 +227,69 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .send-tip-button {
   font-weight: bold !important;
   font-size: 15px !important;
 }
+
 .tour__step3 {
-  margin: 0 10px;
-  padding: 12px 10px 25px;
-  margin-top: 10px;
+  margin: 0 auto;
+  padding: 12px 20px 5px;
+  margin-top: 22px;
   min-width: auto;
+
+  &.v-tour__target--highlighted {
+    margin: 10px;
+    min-width: auto !important;
+    padding-bottom: 25px;
+  }
   p {
     margin-top: 0;
+
     &.title-holder {
       display: flex;
       align-items: center;
     }
   }
 }
+
 .url-bar {
-  display: flex;
-  align-items: center;
-  :first-child {
-    flex-grow: 1;
-    color: $text-color;
-    text-decoration: none;
-    &.not-verified {
-      color: $not-verified-badge-bg;
+  position: relative;
+
+  &.url-bar--input {
+    ::v-deep .url-status {
+      position: absolute;
+      left: 10px;
+      top: 48%;
+      transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+      -webkit-transform: translateY(-50%);
+    }
+
+    ::v-deep input {
+      padding-left: 35px;
     }
   }
+
+  &.url-bar--text {
+    display: flex;
+    align-items: center;
+  }
+
+  a {
+    color: $text-color;
+    text-decoration: none;
+    margin-left: 10px;
+    width: 90%;
+  }
 }
-.ae-icon-check {
-  font-size: 24px;
-  color: #fff !important;
-}
+
 @media screen and (min-width: 380px) {
-  .tour__step3 {
-    margin: 0 auto;
-    padding: 12px 20px 25px;
+  .tour__step3.v-tour__target--highlighted {
+    margin: 10px auto 0px auto;
+    min-width: auto !important;
+    padding-bottom: 25px;
   }
 }
 </style>
