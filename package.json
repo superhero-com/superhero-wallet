@@ -2,7 +2,7 @@
   "name": "superhero-wallet",
   "version": "0.0.21",
   "description": "Superhero wallet",
-  "author": "SuperHero",
+  "author": "Superhero",
   "license": "MIT",
   "private": true,
   "scripts": {
