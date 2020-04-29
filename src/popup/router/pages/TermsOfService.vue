@@ -134,7 +134,7 @@
         </p>
         <p>
           The results of the donations and comments are published on the website
-          <a href="https://beta.superhero.com/">beta.superhero.com</a> .
+          <a href="https://superhero.com/">superhero.com</a> .
         </p>
         <p>
           1.5<strong>. &ldquo;&AElig;id&ldquo;, &ldquo;&AElig;ternity token&rdquo;</strong> or
@@ -256,7 +256,7 @@
         </p>
         <p>
           After that, the website -
-          <a href="https://beta.superhero.com/">beta.superhero.com</a>, reflects the
+          <a href="https://superhero.com/">superhero.com</a>, reflects the
           <strong>USERS&rsquo;</strong> donations and comments and gives the possibility for other
           <strong>USERS</strong> to actively donate and comment on the newsfeed of the Website.
         </p>
@@ -451,7 +451,7 @@
         </p>
         <p>
           The <strong>name</strong> can also be used as your profile name on the Superhero website
-          <a href="https://beta.superhero.com/">beta.superhero.com</a>.
+          <a href="https://superhero.com/">superhero.com</a>.
         </p>
       </div>
       <div
