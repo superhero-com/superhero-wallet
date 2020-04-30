@@ -396,6 +396,7 @@
       "goBiddingBtn": "Go for bidding",
       "backButton": "Back",
       "extend": "Extend",
+      "active": "Set Active",
       "namePlaceholder": "Enter .chain name",
       "pointer": "Set Name Pointer",
       "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
