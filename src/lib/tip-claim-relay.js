@@ -1,9 +1,13 @@
 import axios from 'axios';
 import { uniq } from 'lodash-es';
 import { DEFAULT_NETWORK, networks, TIPPING_CONTRACT, TIP_SERVICE } from '../popup/utils/constants';
-import { contractCallStatic, getActiveAccount, getAddressFromChainName, getTippingContractAddress } from './background-utils';
+import {
+  contractCallStatic,
+  getActiveAccount,
+  getAddressFromChainName,
+  getTippingContractAddress,
+} from './background-utils';
 import Logger from './logger';
-
 
 export default {
   checkAddressMatch(account, addresses) {
