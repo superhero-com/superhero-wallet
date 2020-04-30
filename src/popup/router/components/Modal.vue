@@ -74,6 +74,7 @@ export default {
     font-weight: 500;
     margin-bottom: 25px;
     word-break: break-word;
+    text-align: center;
   }
   .modal--body {
     margin-bottom: 40px;

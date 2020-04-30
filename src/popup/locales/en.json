@@ -57,6 +57,9 @@
     "name-exist": {
       "msg": "This name is already registered!"
     },
+    "name-length": {
+      "msg": "Only names with length longer than 13 chars are allowed"
+    },
     "incorrect-address": {
       "msg": "Please make sure that you have entered a valid public address!"
     },
@@ -91,6 +94,26 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "ok": "OK"
+  },
+  "transaction": {
+    "type": {
+      "SpendTx": "Spend",
+      "ContractCreateTx": "Contract create",
+      "ContractCallTx": "Contract call",
+      "NamePreclaimTx": "Preclaim name",
+      "NameClaimTx": "Claim name",
+      "NameUpdateTx": "Update name",
+      "NameTransferTx": "Transfer name",
+      "NameRevokeTx": "Revoke name",
+      "OracleRegisterTx": "Register oracle",
+      "OracleExtendTx": "Extend oracle",
+      "OraclePostQueryTx": "Post query oracle",
+      "OracleRespondTx": "Respond oracle",
+      "ChannelCloseSoloTx": "Solo close channel",
+      "ChannelSlashTx": "Slash channel",
+      "ChannelSettleTx": "Settle channel",
+      "ChannelSnapshotSoloTx": "Solo snapshot channel"
+    }
   },
   "pages": {
     "intro": {
@@ -376,6 +399,7 @@
       "goBiddingBtn": "Go for bidding",
       "backButton": "Back",
       "extend": "Extend",
+      "active": "Set Active",
       "namePlaceholder": "Enter .chain name",
       "pointer": "Set Name Pointer",
       "active": "Set Active",
@@ -450,7 +474,7 @@
       "copy": "Copy",
       "home": "Home",
       "transferExchange": "Swap crypto for AE tokens",
-      "buyAE": "Buy AE"
+      "purchase": "Buy AE tokens"
     },
     "securitySettings": {
       "backToSettings": "Back to settings",

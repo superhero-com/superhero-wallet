@@ -20,8 +20,8 @@
         <ae-list v-if="registeredNames.length">
           <ae-list-item fill="neutral" v-for="(name, key) in registeredNames" :key="key">
             <UserAvatar :address="name.owner" />
-            <div style="width:100%;" class="text-left ml-10">
-              <div class="">
+            <div class="text-left ml-10 wd-100">
+              <div>
                 {{ name.name }}
                 <Badge class="active-name" v-if="activeAccountName == name.name">Active</Badge>
               </div>
@@ -36,26 +36,28 @@
                 />
                 <ae-icon name="close" @click.native="name.addPointer = false" />
               </div>
-              <Button
-                v-if="!name.addPointer"
-                class="danger"
-                :disabled="!address(name)"
-                @click="extend(name)"
-                small
-                >{{ $t('pages.namingSystemPage.extend') }}</Button
-              >
-              <Button
-                :small="!name.addPointer"
-                @click="setPointer(key)"
-                :class="name.addPointer ? 'danger' : ''"
-                >{{ $t('pages.namingSystemPage.pointer') }}</Button
-              >
-              <Button
-                :small="!name.addPointer"
-                @click="setActiveName(name, key)"
-                :disabled="activeAccountName == name.name"
-                >{{ $t('pages.namingSystemPage.active') }}</Button
-              >
+              <div class="flex flex-justify-between">
+                <Button
+                  v-if="!name.addPointer"
+                  class="danger"
+                  :disabled="!address(name)"
+                  @click="extend(name)"
+                  small
+                  >{{ $t('pages.namingSystemPage.extend') }}</Button
+                >
+                <Button
+                  :small="!name.addPointer"
+                  @click="setPointer(key)"
+                  :class="name.addPointer ? 'danger' : ''"
+                  >{{ $t('pages.namingSystemPage.pointer') }}</Button
+                >
+                <Button
+                  :small="!name.addPointer"
+                  @click="setActiveName(name, key)"
+                  :disabled="activeAccountName == name.name"
+                  >{{ $t('pages.namingSystemPage.active') }}</Button
+                >
+              </div>
             </div>
 
             <ae-icon
@@ -324,6 +326,8 @@ export default {
         this.$store.dispatch('modals/open', { name: 'default', type: 'name-exist' });
       } else if (!onlyLettersAndNums.test(this.name)) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'only-chars' });
+      } else if (this.name.length <= 13) {
+        this.$store.dispatch('modals/open', { name: 'default', type: 'name-length' });
       } else {
         this.loading = true;
         const name = `${this.name}.chain`;
@@ -413,6 +417,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.wd-100 {
+  width: 100%;
+}
 .ae-identicon.base {
   width: 2rem;
 }
