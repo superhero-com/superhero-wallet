@@ -26,7 +26,6 @@
 import { mapGetters } from 'vuex';
 import Copyicon from '../../../icons/copy.svg?vue-component';
 import UserAvatar from './UserAvatar';
-import { getState } from '../../../store/plugins/persistState';
 
 export default {
   components: { Copyicon, UserAvatar },
