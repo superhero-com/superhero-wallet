@@ -4,7 +4,7 @@
     :to="to"
     class="primary-button"
     @click="$emit('click')"
-    :class="{ disabled, extend, half, small, onboarding, dark }"
+    :class="{ disabled, extend, half, small, onboarding, dark, third }"
   >
     <slot />
   </Component>
