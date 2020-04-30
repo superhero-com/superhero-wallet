@@ -3,12 +3,7 @@
     <div class="title">
       <div class="account-name" data-cy="account-name">
         <template v-if="chainName">{{ activeAccountName }}</template>
-        <router-link to="/names" v-if="!availNames">Claim your .chain name</router-link>
-        <router-link
-          :to="{ name: 'names', params: { activateName: availNames } }"
-          v-if="availNames && !chainName"
-          >Set your active name</router-link
-        >
+        <router-link to="/names" v-else>Claim your .chain name</router-link>
       </div>
       <div class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</div>
       <button data-cy="copy" @click="copy" v-clipboard:copy="account.publicKey">
@@ -31,17 +26,12 @@ export default {
   components: { Copyicon, UserAvatar },
   data: () => ({
     copied: false,
-    availNames: false,
   }),
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
     chainName() {
       return this.activeAccountName.includes('.chain');
     },
-  },
-  created() {
-    const { names } = this.$store.state;
-    this.availNames = !!names.length;
   },
   methods: {
     copy() {
