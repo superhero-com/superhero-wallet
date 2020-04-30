@@ -72,8 +72,8 @@ export default {
               throw new Error(this.$t('pages.claim.unknownError'));
             else throw new Error(error);
           });
-        await axios.post(`${BACKEND_URL}/cache/invalidate/tips`).catch();
-        await axios.post(`${BACKEND_URL}/cache/invalidate/oracle`).catch();
+        await axios.get(`${BACKEND_URL}/cache/invalidate/tips`).catch(console.error);
+        await axios.get(`${BACKEND_URL}/cache/invalidate/oracle`).catch(console.error);
         this.$store.dispatch('modals/open', { name: 'claim-success', url, claimAmount });
         this.$router.push({ name: 'account' });
       } catch (e) {
