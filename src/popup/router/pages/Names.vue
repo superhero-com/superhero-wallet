@@ -340,6 +340,7 @@ export default {
             tx: {
               name,
               recipientId: '',
+              type: 'NamePreclaimTx',
             },
             type: 'namePreClaim',
           };
@@ -363,6 +364,7 @@ export default {
             name,
             claim: { id, name, pointers },
             ...options,
+            type: 'NameUpdateTx',
           },
           type: 'nameUpdate',
           nameUpdateType: type,
