@@ -1,9 +1,9 @@
-module.exports = (isProd, browser) => ({
-  name: 'SuperHero',
-  description: 'SuperHero Wallet',
+module.exports = (isProd, platform) => ({
+  name: 'Superhero',
+  description: 'Superhero Wallet',
   version: process.env.npm_package_version,
   manifest_version: 2,
-  ...(browser === 'firefox' && {
+  ...(platform === 'extension-firefox' && {
     applications: {
       gecko: {
         strict_min_version: '53.0',
@@ -16,6 +16,7 @@ module.exports = (isProd, browser) => ({
     'videoCapture',
     'activeTab',
     'clipboardWrite',
+    'contextMenus',
     'notifications',
     'tabs',
     'webRequest',
@@ -29,7 +30,7 @@ module.exports = (isProd, browser) => ({
   },
   content_security_policy: `script-src 'self'${isProd ? '' : " 'unsafe-eval'"}; object-src 'self'`,
   browser_action: {
-    default_title: 'SuperHero',
+    default_title: 'Superhero',
     default_popup: 'popup/popup.html',
   },
   background: {
@@ -43,7 +44,7 @@ module.exports = (isProd, browser) => ({
   content_scripts: [
     {
       run_at: 'document_start',
-      all_frames: !isProd && browser === 'chrome',
+      all_frames: !isProd && platform === 'extension-chrome',
       matches: ['https://*/*', 'http://*/*'],
       js: ['other/inject.js'],
     },

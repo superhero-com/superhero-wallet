@@ -2,8 +2,8 @@
 
 export default url => {
   switch (process.env.PLATFORM) {
-    case 'chrome':
-    case 'firefox':
+    case 'extension-chrome':
+    case 'extension-firefox':
       browser.tabs.create({ url, active: true });
       break;
     case 'cordova':

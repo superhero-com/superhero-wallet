@@ -1,7 +1,13 @@
 <template>
-  <button class="primary-button" @click="$emit('click')" :class="getClasses">
-    <slot></slot>
-  </button>
+  <Component
+    :is="to ? 'RouterLink' : 'button'"
+    :to="to"
+    class="primary-button"
+    @click="$emit('click')"
+    :class="{ disabled, extend, half, small, onboarding, dark, third }"
+  >
+    <slot />
+  </Component>
 </template>
 
 <script>
@@ -14,19 +20,7 @@ export default {
     third: Boolean,
     onboarding: Boolean,
     dark: Boolean,
-  },
-  computed: {
-    getClasses() {
-      const c = [];
-      if (this.disabled) c.push('disabled');
-      if (this.extend) c.push('extend');
-      if (this.half) c.push('half');
-      if (this.small) c.push('small');
-      if (this.third) c.push('third');
-      if (this.onboarding) c.push('onboarding');
-      if (this.dark) c.push('dark');
-      return c.join(' ');
-    },
+    to: [String, Object],
   },
 };
 </script>
@@ -35,6 +29,8 @@ export default {
 @import '../../../common/variables';
 
 .primary-button {
+  display: block;
+  text-decoration: none;
   background: $button-color !important;
   width: 270px !important;
   border-radius: 5px;
@@ -62,6 +58,7 @@ export default {
   // width: 148px !important;
   width: 48% !important;
   margin: 0 !important;
+  display: inline-block;
 }
 .primary-button.dark {
   background: $box-button-color !important;
@@ -79,6 +76,7 @@ export default {
   line-height: normal !important;
   padding: 5px;
   word-break: break-word;
+  display: inline-block;
 }
 .primary-button.small.third {
   font-size: 12px;

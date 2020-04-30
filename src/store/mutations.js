@@ -145,4 +145,7 @@ export default {
   setMinTipAmount(state, payload) {
     state.minTipAmount = payload;
   },
+  setSaveErrorLog(state) {
+    state.saveErrorLog = !state.saveErrorLog;
+  },
 };

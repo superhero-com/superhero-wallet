@@ -1,5 +1,6 @@
-import { uniqBy, flatten, uniq } from 'lodash-es';
+import { uniqBy, flatten, uniq, orderBy } from 'lodash-es';
 import BigNumber from 'bignumber.js';
+import axios from 'axios';
 import * as types from './mutation-types';
 import {
   convertToAE,
@@ -9,6 +10,7 @@ import {
   getAddressByNameEntry,
 } from '../popup/utils/helper';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
+import { BACKEND_URL } from '../popup/utils/constants';
 
 export default {
   setAccount({ commit }, payload) {
@@ -28,22 +30,36 @@ export default {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
     commit(types.UPDATE_BALANCE, convertToAE(balance));
   },
-  async fetchTransactions({ state }, { limit, page }) {
+  async fetchTransactions({ state }, { limit, page, recent }) {
     if (!state.middleware) return [];
     const { middlewareUrl } = state.network[state.current.network];
     const { publicKey } = state.account;
-    try {
-      const tx = await fetch(
-        `${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`,
-        {
-          method: 'GET',
-          mode: 'cors',
-        },
-      );
-      return tx.json();
-    } catch (e) {
-      return [];
-    }
+    let txs = await Promise.all([
+      (async () =>
+        (
+          await axios
+            .get(
+              `${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`,
+            )
+            .catch(() => ({ data: [] }))
+        ).data)(),
+      (async () =>
+        (
+          await axios
+            .get(
+              `${BACKEND_URL}/cache/events/?address=${publicKey}&event=TipWithdrawn${
+                recent ? `&limit=${limit}` : ''
+              }`,
+            )
+            .catch(() => ({ data: [] }))
+        ).data.map(({ address, amount, ...t }) => ({
+          tx: { address, amount },
+          ...t,
+          claim: true,
+        })))(),
+    ]);
+    txs = orderBy(flatten(txs), ['time'], ['desc']);
+    return recent ? txs.slice(0, limit) : txs;
   },
   updateLatestTransactions({ commit }, payload) {
     commit(types.UPDATE_LATEST_TRANSACTIONS, payload);
@@ -74,13 +90,17 @@ export default {
                   pending: true,
                   owner: tx.accountId,
                 })))(),
-            (async () =>
-              uniqBy(
-                await (
-                  await fetch(`${middlewareUrl}/middleware/names/reverse/${publicKey}`)
-                ).json(),
-                'name',
-              ))(),
+            (async () => {
+              try {
+                return uniqBy(
+                  (await axios.get(`${middlewareUrl}/middleware/names/reverse/${publicKey}`)).data,
+                  'name',
+                );
+              } catch (e) {
+                console.error(`middleware.getNames: ${e}`);
+              }
+              return [];
+            })(),
             (async () => {
               try {
                 return await state.middleware.getActiveNames({ owner: publicKey });
@@ -185,12 +205,17 @@ export default {
   },
   async getCurrencies({ state: { nextCurrenciesFetch }, commit, dispatch }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
-      const res = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
-      );
-      const { aeternity } = await res.json();
-      commit('SET_CURRENCIES', aeternity);
-      commit('SET_NEXT_CURRENCY_FETCH', new Date().getTime() + 3600000);
+      try {
+        const { aeternity } = (
+          await axios.get(
+            'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
+          )
+        ).data;
+        commit('SET_CURRENCIES', aeternity);
+        commit('SET_NEXT_CURRENCY_FETCH', new Date().getTime() + 3600000);
+      } catch (e) {
+        console.error(`Cannot fetch currencies: ${e}`);
+      }
     }
     dispatch('setCurrency');
   },

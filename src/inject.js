@@ -94,10 +94,9 @@ window.addEventListener('load', () => {
 
 // Handle message from background and redirect to page
 browser.runtime.onMessage.addListener(({ data }) => {
-  const { method, blocked, params, extUrl, host, uuid } = data;
-
+  const { method, blocked, extUrl, host, uuid, href } = data;
   if (method === 'phishingCheck' && blocked) {
-    redirectToWarning(host, params.href, extUrl);
+    redirectToWarning(host, href, extUrl);
   } else if (method === 'getAddresses') {
     browser.runtime.sendMessage({ uuid, data: { ...getAddresses() } });
   }

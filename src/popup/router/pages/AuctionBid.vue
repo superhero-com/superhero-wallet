@@ -78,7 +78,7 @@ export default {
   },
   props: ['auctionInfo'],
   computed: {
-    ...mapGetters(['account', 'current', 'network', 'popup', 'sdk']),
+    ...mapGetters(['account', 'current', 'network', 'sdk']),
   },
   mounted() {
     this.loading = true;

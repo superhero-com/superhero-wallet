@@ -188,7 +188,6 @@ export default {
       'tokens',
       'tokenBalance',
       'isLedger',
-      'popup',
       'tokenRegistry',
       'tokenRegistryLima',
     ]),
@@ -560,33 +559,6 @@ export default {
           });
       }
     },
-    async contractCallStatic(tx) {
-      try {
-        let options = {};
-        if (tx.options) {
-          options = { ...tx.options };
-        }
-        if (tx.options && tx.options.amount) {
-          options = { ...options, ...tx.options, amount: aeToAettos(this.data.tx.options.amount) };
-        }
-        const call = await this.$helpers.contractCall({
-          instance: this.contractInstance,
-          method: tx.method,
-          params: [...tx.params, options],
-        });
-        const decoded = await call.decode();
-        call.decoded = decoded;
-        this.sending = true;
-        this.port.postMessage(call);
-      } catch (err) {
-        this.errorTx.error.message = typeof err.message !== 'undefined' ? err.message : err;
-        this.sending = true;
-        this.port.postMessage(this.errorTx);
-      }
-      setTimeout(() => {
-        window.close();
-      }, 1000);
-    },
     async contractCall() {
       let call;
       try {
@@ -803,14 +775,6 @@ export default {
     },
     async checkSourceByteCode(source) {
       const byteCode = await this.sdk.contractCompile(source);
-      return byteCode;
-    },
-    async getDeployedByteCode(address) {
-      const res = await fetch(
-        `https://testnet.mdw.aepps.com/middleware/contracts/transactions/address/${address}`,
-      );
-      const txs = await res.json();
-      const byteCode = txs.transactions.find(tx => tx.tx.type === 'ContractCreateTx');
       return byteCode;
     },
   },

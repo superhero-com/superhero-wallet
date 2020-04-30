@@ -1,83 +1,74 @@
-import { setInterval } from 'timers';
+import uid from 'uuid';
+import { setController, switchNode } from './lib/background-utils';
 import './lib/initPolyfills';
-import { phishingCheckUrl, getPhishingUrls, setPhishingUrl } from './popup/utils/phishing-detect';
-import { detectConnectionType } from './popup/utils/helper';
-import { buildTx } from './popup/utils';
-import WalletController from './wallet-controller';
-import Notification from './notifications';
+import { PopupConnections } from './lib/popup-connection';
+import RedirectChainNames from './lib/redirect-chain-names';
 import rpcWallet from './lib/rpcWallet';
+import TipClaimRelay from './lib/tip-claim-relay';
+import Notification from './notifications';
+import { buildTx } from './popup/utils';
+import { popupProps } from './popup/utils/config';
 import {
-  HDWALLET_METHODS,
   AEX2_METHODS,
-  NOTIFICATION_METHODS,
   CONNECTION_TYPES,
   DEFAULT_NETWORK,
+  HDWALLET_METHODS,
+  NOTIFICATION_METHODS,
 } from './popup/utils/constants';
-import { popupProps } from './popup/utils/config';
-import TipClaimRelay from './lib/tip-claim-relay';
-import RedirectChainNames from './lib/redirect-chain-names';
-import { setController, switchNode } from './lib/background-utils';
-import { PopupConnections } from './lib/popup-connection';
+import { detectConnectionType } from './popup/utils/helper';
+import { getPhishingUrls, phishingCheckUrl, setPhishingUrl } from './popup/utils/phishing-detect';
+import WalletController from './wallet-controller';
+import Logger from './lib/logger';
 
 const controller = new WalletController();
 
 if (process.env.IS_EXTENSION && require.main.i === module.id) {
+  Logger.init({ background: true });
   RedirectChainNames.init();
-  setInterval(() => {
-    browser.windows.getAll({}).then(wins => {
-      if (wins.length === 0) {
-        sessionStorage.removeItem('phishing_urls');
-      }
-    });
-  }, 5000);
 
   const notification = new Notification();
   setController(controller);
 
   const postPhishingData = async data => {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-    const message = { method: 'phishingCheck', data };
+    const message = { method: 'phishingCheck', ...data };
     tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message));
   };
 
   browser.runtime.onMessage.addListener(async (msg, sender) => {
-    switch (msg.method) {
-      case 'phishingCheck': {
-        const data = { ...msg, extUrl: browser.extension.getURL('./') };
-        const host = new URL(msg.params.href).hostname;
-        data.host = host;
-        const { result } = await phishingCheckUrl(host);
-        if (result === 'blocked') {
-          const whitelist = getPhishingUrls().filter(url => url === host);
-          if (whitelist.length) {
-            data.blocked = false;
-            return postPhishingData(data);
-          }
-          data.blocked = true;
-          return postPhishingData(data);
-        }
-        data.blocked = false;
-        return postPhishingData(data);
+    const { method, params, from, type, data } = msg;
+    if (method === 'phishingCheck') {
+      const host = new URL(params.href).hostname;
+      let blocked = false;
+      const { result } = await phishingCheckUrl(host);
+      if (result === 'blocked') {
+        const whitelist = getPhishingUrls().filter(url => url === host);
+        blocked = !whitelist.length;
       }
-      case 'setPhishingUrl': {
-        const urls = getPhishingUrls();
-        urls.push(msg.params.hostname);
-        setPhishingUrl(urls);
-        break;
-      }
-      default:
-        break;
+      return postPhishingData({
+        ...msg,
+        data: {
+          method,
+          extUrl: browser.extension.getURL('./'),
+          host,
+          href: params.href,
+          blocked,
+        },
+      });
     }
 
-    if (
-      msg.from === 'content' &&
-      msg.type === 'readDom' &&
-      (msg.data.address || msg.data.chainName)
-    ) {
+    if (method === 'setPhishingUrl') {
+      const urls = getPhishingUrls();
+      urls.push(params.hostname);
+      setPhishingUrl(urls);
+      return true;
+    }
+
+    if (from === 'content' && type === 'readDom' && (data.address || data.chainName)) {
       const tabs = await browser.tabs.query({ active: true, currentWindow: true });
       tabs.forEach(({ url }) => {
         if (sender.url === url && DEFAULT_NETWORK === 'Mainnet') {
-          TipClaimRelay.checkUrlHasBalance(url, msg.data);
+          TipClaimRelay.checkUrlHasBalance(url, data);
         }
       });
     }
@@ -109,13 +100,37 @@ if (process.env.IS_EXTENSION && require.main.i === module.id) {
 
         popupConnections.addConnection(id, port);
       } else if (connectionType === CONNECTION_TYPES.OTHER) {
-        const check = rpcWallet.sdkReady(() => {
+        // eslint-disable-next-line no-param-reassign
+        port.uuid = uid();
+        if (rpcWallet.sdkReady()) {
           rpcWallet.addConnection(port);
-        });
+        } else {
+          rpcWallet.addConnectionToQueue(port);
+        }
         port.onDisconnect.addListener(() => {
-          clearInterval(check);
+          rpcWallet.removeConnectionFromQueue(port);
         });
       }
+    }
+  });
+
+  const contextMenuItem = {
+    id: 'superheroTip',
+    title: 'Tip',
+  };
+
+  browser.contextMenus.removeAll();
+  browser.contextMenus.create(contextMenuItem);
+  browser.contextMenus.onClicked.addListener(({ menuItemId, pageUrl }) => {
+    if (menuItemId === 'superheroTip') {
+      const url = `/tip?url=${pageUrl}`;
+      localStorage.setItem('tipUrl', url);
+      browser.windows.create({
+        url: `popup/popup.html#${url}`,
+        type: 'popup',
+        height: 600,
+        width: 375,
+      });
     }
   });
 }

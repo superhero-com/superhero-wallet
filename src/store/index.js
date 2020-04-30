@@ -6,6 +6,7 @@ import mutations from './mutations';
 import actions from './actions';
 import persistState from './plugins/persistState';
 import modals from './plugins/modals';
+import tipUrl from './plugins/tipUrl';
 import runMigrations from './migrations';
 import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
 
@@ -56,6 +57,7 @@ const initialState = {
   backedUpSeed: null,
   tourRunning: false,
   tourStartBar: true,
+  saveErrorLog: true,
 };
 
 export default new Vuex.Store({
@@ -105,6 +107,7 @@ export default new Vuex.Store({
         account,
         mnemonic,
         minTipAmount,
+        saveErrorLog,
       }) => ({
         migrations,
         current,
@@ -122,8 +125,10 @@ export default new Vuex.Store({
         account,
         mnemonic,
         minTipAmount,
+        saveErrorLog,
       }),
     ),
     modals,
+    tipUrl,
   ],
 });

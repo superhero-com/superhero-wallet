@@ -1,30 +1,29 @@
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import { RpcWallet } from '@aeternity/aepp-sdk/es/ae/wallet';
-import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import Node from '@aeternity/aepp-sdk/es/node';
-import { setInterval, clearInterval } from 'timers';
-import uuid from 'uuid';
+import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import { isEmpty } from 'lodash-es';
-import {
-  parseFromStorage,
-  extractHostName,
-  getAeppAccountPermission,
-  getActiveNetwork,
-  stringifyForStorage,
-  addTipAmount,
-  getTippedAmount,
-  resetTippedAmount,
-  getContractCallInfo,
-  getAddressByNameEntry,
-} from '../popup/utils/helper';
-import {
-  DEFAULT_NETWORK,
-  AEX2_METHODS,
-  NO_POPUP_AEPPS,
-  BLACKLIST_AEPPS,
-  MAX_AMOUNT_WITHOUT_CONFIRM,
-} from '../popup/utils/constants';
+import uuid from 'uuid';
 import { mockLogin } from '../popup/utils';
+import {
+  AEX2_METHODS,
+  BLACKLIST_AEPPS,
+  DEFAULT_NETWORK,
+  MAX_AMOUNT_WITHOUT_CONFIRM,
+  NO_POPUP_AEPPS,
+} from '../popup/utils/constants';
+import {
+  addTipAmount,
+  extractHostName,
+  getActiveNetwork,
+  getAddressByNameEntry,
+  getAeppAccountPermission,
+  getContractCallInfo,
+  getTippedAmount,
+  parseFromStorage,
+  resetTippedAmount,
+  stringifyForStorage,
+} from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 
 global.browser = require('webextension-polyfill');
@@ -60,6 +59,7 @@ const rpcWallet = {
     this.subaccounts = null;
     this.accounts = [];
     this.accountKeyPairs = [];
+    this.connectionsQueue = [];
   },
   initNetwork(network = DEFAULT_NETWORK) {
     this.network = network;
@@ -90,7 +90,7 @@ const rpcWallet = {
       this.sdk = await RpcWallet({
         nodes: [{ name: this.network, instance: node }],
         compilerUrl: this.compiler,
-        name: 'SuperHero',
+        name: 'Superhero',
         accounts: this.accounts,
         async onConnection(aepp, action) {
           context.shouldOpenPopup(aepp, action, () => {
@@ -142,6 +142,7 @@ const rpcWallet = {
             'contract_pubkey',
           )
         : this.tipContractAddress;
+      this.connectionsQueue.forEach(c => this.addConnection(c));
     } catch (e) {
       this.sdk = null;
     }
@@ -181,14 +182,14 @@ const rpcWallet = {
       cb();
     }
   },
-  sdkReady(cb) {
-    const check = setInterval(() => {
-      if (this.sdk) {
-        cb();
-        clearInterval(check);
-      }
-    }, 1000);
-    return check;
+  sdkReady() {
+    return this.sdk;
+  },
+  addConnectionToQueue(port) {
+    this.connectionsQueue.push(port);
+  },
+  removeConnectionFromQueue(port) {
+    this.connectionsQueue = this.connectionsQueue.filter(p => p.uuid !== port.uuid);
   },
   async checkAeppPermissions(aepp, action, caller, cb) {
     const {
@@ -201,15 +202,16 @@ const rpcWallet = {
     const isConnected = await getAeppAccountPermission(extractHostName(url), this.activeAccount);
     if (!isConnected) {
       try {
-        const a = caller === 'connection' ? action : {};
-        await this.showPopup({ action: a, aepp, type: 'connectConfirm' });
-        if (typeof cb !== 'undefined') {
-          cb();
-        }
+        await this.showPopup({
+          action: caller === 'connection' ? action : {},
+          aepp,
+          type: 'connectConfirm',
+        });
+        if (cb) cb();
       } catch (e) {
         console.error(`checkAeppPermissions: ${e}`);
       }
-    } else if (typeof cb === 'undefined') {
+    } else if (!cb) {
       action.accept();
     } else {
       cb();
@@ -256,13 +258,18 @@ const rpcWallet = {
   },
 
   async addConnection(port) {
-    const connection = await BrowserRuntimeConnection({
-      connectionInfo: { id: port.sender.frameId },
-      port,
-    });
-    this.sdk.addRpcClient(connection);
-    this.sdk.shareWalletInfo(port.postMessage.bind(port));
+    try {
+      const connection = await BrowserRuntimeConnection({
+        connectionInfo: { id: port.sender.frameId },
+        port,
+      });
+      this.sdk.addRpcClient(connection);
+      this.sdk.shareWalletInfo(port.postMessage.bind(port));
+    } catch (e) {
+      console.warn(e);
+    }
     setTimeout(() => this.sdk.shareWalletInfo(port.postMessage.bind(port)), 3000);
+    this.removeConnectionFromQueue(port);
   },
   getClientsByCond(condition) {
     const clients = Array.from(this.sdk.getClients().clients.values()).filter(condition);

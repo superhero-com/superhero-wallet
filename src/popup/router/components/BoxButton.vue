@@ -1,9 +1,9 @@
 <template>
   <div class="button-container">
-    <div class="button-content" @click="handleClick" :class="{ disabled }">
+    <RouterLink :to="to" class="button-content" :class="{ disabled }">
       <slot name="icon" />
       <span class="button-text" :class="accent ? 'button-text-accent' : ''">{{ text }}</span>
-    </div>
+    </RouterLink>
   </div>
 </template>
 
@@ -14,17 +14,12 @@ export default {
       type: String,
       required: true,
     },
-    to: String,
+    to: [String, Object],
     accent: Boolean,
     disabled: {
       type: Boolean,
       default: false,
       required: false,
-    },
-  },
-  methods: {
-    handleClick() {
-      return this.to ? this.$router.push(`/${this.to}`) : this.$emit('handleClick');
     },
   },
 };
@@ -42,6 +37,9 @@ export default {
     border-radius: 5px;
     padding: 15px 10px;
     border: 1px solid transparent;
+    display: block;
+    color: inherit;
+    text-decoration: none;
 
     &:hover {
       background-color: $secondary-color;

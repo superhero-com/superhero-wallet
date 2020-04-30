@@ -5,8 +5,8 @@
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
 
       <div class="title">
-        <span v-if="title">{{ $t(`pages.titles.${title}`) }}</span>
-        <span v-else>{{ $t('pages.titles.home') }}</span>
+        <span v-show="title">{{ $t(`pages.titles.${title}`) }}</span>
+        <span v-show="!title">{{ $t('pages.titles.home') }}</span>
       </div>
 
       <div v-if="isLoggedIn">
@@ -37,9 +37,6 @@ import Logo from '../../../icons/logo-small.svg?vue-component';
 
 export default {
   components: { Arrow, Bell, Hamburger, Logo },
-  data() {
-    return {};
-  },
   computed: {
     ...mapGetters(['isLoggedIn', 'aeppPopup', 'notifications', 'notificationsCounter']),
     ...mapState(['tourRunning']),
@@ -63,7 +60,6 @@ export default {
 .header {
   padding-top: env(safe-area-inset-top);
   background-color: $nav-bg-color;
-  border-bottom: 3px solid $nav-border-color;
   position: fixed;
   top: 0;
   left: 0;

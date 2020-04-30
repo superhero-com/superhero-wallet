@@ -23,7 +23,7 @@ import openUrl from '../../utils/openUrl';
 export default {
   data: () => ({ id: 0, text: '', loading: false }),
   computed: {
-    ...mapGetters(['sdk', 'popup']),
+    ...mapGetters(['sdk']),
     urlParams() {
       return new URL(this.$route.fullPath, window.location).searchParams;
     },
@@ -54,6 +54,8 @@ export default {
         this.openCallbackOrGoHome('x-success');
       } catch (e) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
+        e.payload = { id: this.id, text: this.text };
+        throw e;
       } finally {
         this.loading = false;
       }

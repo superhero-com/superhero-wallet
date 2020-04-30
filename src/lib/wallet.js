@@ -6,6 +6,7 @@ import store from '../store';
 import { postMessage } from '../popup/utils/connection';
 import { parseFromStorage, middleware, getAllNetworks } from '../popup/utils/helper';
 import { TIPPING_CONTRACT } from '../popup/utils/constants';
+import Logger from './logger';
 
 export default {
   countError: 0,
@@ -31,6 +32,7 @@ export default {
   async initMiddleware() {
     const { network, current } = store.getters;
     store.commit('SET_MIDDLEWARE', (await middleware(network, current)).api);
+    store.dispatch('getRegisteredNames');
   },
   async initSdk() {
     const keypair = await this.getKeyPair();
@@ -58,10 +60,13 @@ export default {
       await this.initMiddleware();
       store.commit('SET_NODE_STATUS', 'connected');
       setTimeout(() => store.commit('SET_NODE_STATUS', ''), 2000);
-    } catch (error) {
+    } catch (e) {
       this.countError += 1;
       if (this.countError < 3) await this.initSdk();
-      else store.commit('SET_NODE_STATUS', 'error');
+      else {
+        store.commit('SET_NODE_STATUS', 'error');
+        Logger.write(e);
+      }
     }
   },
   async logout() {
@@ -77,17 +82,13 @@ export default {
     return res.error ? { error: true } : parseFromStorage(res);
   },
   async initContractInstances() {
-    try {
-      const contractAddress = await store.dispatch('getTipContractAddress');
-      store.commit(
-        'SET_TIPPING',
-        await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, {
-          contractAddress,
-          forceCodeCheck: true,
-        }),
-      );
-    } catch (e) {
-      console.error(`Error creating tipping instance: ${e}`);
-    }
+    const contractAddress = await store.dispatch('getTipContractAddress');
+    store.commit(
+      'SET_TIPPING',
+      await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, {
+        contractAddress,
+        forceCodeCheck: true,
+      }),
+    );
   },
 };

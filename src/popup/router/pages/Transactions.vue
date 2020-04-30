@@ -3,14 +3,14 @@
     <AccountInfo />
     <BalanceInfo />
     <TransactionFilters @filtrate="filtrate" />
-    <ae-list class="all-transactions" data-cy="all-transactions">
+    <ul class="all-transactions" data-cy="all-transactions">
       <PendingTxs />
       <TransactionItem
         v-for="transaction in filteredTransactions"
-        :key="transaction.id"
+        :key="transaction.hash"
         :transaction="transaction"
       />
-    </ae-list>
+    </ul>
     <div v-if="!filteredTransactions.length && !loading">
       <p>{{ $t('pages.transactions.noTransactions') }}</p>
     </div>
@@ -20,7 +20,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { differenceWith, isEqual } from 'lodash-es';
+import { differenceWith, isEqual, uniqBy, orderBy } from 'lodash-es';
 import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
 import TransactionFilters from '../components/TransactionFilters';
@@ -62,31 +62,17 @@ export default {
           break;
         case 'sent':
           return this.transactions.filter(
-            tr =>
-              tr.tx.caller_id !== 'undefined' &&
-              tr.tx.type === 'ContractCallTx' &&
-              tr.tx.caller_id === this.publicKey,
+            tr => tr.tx.type === 'ContractCallTx' && tr.tx.caller_id === this.publicKey,
           );
         case 'received':
-          return this.transactions.filter(
-            tr =>
-              tr.tx.recipient_id !== 'undefined' &&
-              tr.tx.type === 'ContractCallTx' &&
-              tr.tx.recipient_id === this.publicKey,
-          );
+          return this.transactions.filter(tr => tr.claim);
         case 'topups':
           return this.transactions.filter(
-            tr =>
-              tr.tx.recipient_id !== 'undefined' &&
-              tr.tx.type === 'SpendTx' &&
-              tr.tx.recipient_id === this.publicKey,
+            tr => tr.tx.type === 'SpendTx' && tr.tx.recipient_id === this.publicKey,
           );
         case 'withdrawals':
           return this.transactions.filter(
-            tr =>
-              tr.tx.sender_id !== 'undefined' &&
-              tr.tx.type === 'SpendTx' &&
-              tr.tx.sender_id === this.publicKey,
+            tr => tr.tx.sender_id && tr.tx.type === 'SpendTx' && tr.tx.sender_id === this.publicKey,
           );
         case 'all':
           return this.transactions;
@@ -98,7 +84,7 @@ export default {
   },
   created() {
     this.loadMore(true);
-    this.polling = setInterval(() => this.getLatest(), 5000);
+    this.polling = setInterval(() => this.getLatest(), 10000);
   },
   mounted() {
     const checkLoadMore = () => {
@@ -132,18 +118,24 @@ export default {
     },
     async getLatest() {
       const transactions = await this.$store.dispatch('fetchTransactions', {
-        limit: TXS_PER_PAGE,
+        limit: 10,
         page: 1,
+        recent: true,
       });
       const diff = differenceWith(transactions, this.transactions, isEqual);
       this.updateTransactions({ latest: true, transactions: diff });
     },
     updateTransactions({ transactions, latest }) {
-      if (latest) {
-        this.transactions = [...transactions, ...this.transactions];
-      } else {
-        this.transactions = [...this.transactions, ...transactions];
-      }
+      this.transactions = orderBy(
+        uniqBy(
+          latest
+            ? [...transactions, ...this.transactions]
+            : [...this.transactions, ...transactions],
+          'hash',
+        ),
+        ['time'],
+        ['desc'],
+      );
     },
   },
 };
@@ -164,5 +156,7 @@ export default {
 }
 .all-transactions {
   background: $transactions-bg;
+  padding: 0 20px;
+  margin: 0;
 }
 </style>

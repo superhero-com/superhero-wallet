@@ -1,25 +1,32 @@
 <template>
-  <div>
-    <li fill="neutral" class="list-item-transaction">
-      <div class="holder">
-        <span class="amount">
-          <span data-cy="amount">{{ txAmount }}</span>
-          {{ $t('pages.appVUE.aeid') }}
-          <span class="text" data-cy="currency-amount">
-            ({{ txAmountToCurrency }} {{ current.currency.toUpperCase() }})
-          </span>
+  <li class="list-item-transaction">
+    <div class="holder">
+      <span class="amount">
+        <span data-cy="amount">{{ txAmount }}</span>
+        {{ $t('pages.appVUE.aeid') }}
+        <span class="text" data-cy="currency-amount">
+          ({{ txAmountToCurrency }} {{ current.currency.toUpperCase() }})
         </span>
-        <span class="status">{{ status }}</span>
-        <span class="time" data-cy="time">{{ transaction.time | formatDate }}</span>
-      </div>
-      <div class="holder tx-info">
-        <span class="url" @click="visitTipUrl">{{ tipUrl }}</span>
-        <span class="seeTransaction" @click="seeTx()">
-          <img src="../../../icons/eye.png" />
-        </span>
-      </div>
-    </li>
-  </div>
+      </span>
+      <span class="status">{{ status }}</span>
+      <span class="time" data-cy="time">{{ transaction.time | formatDate }}</span>
+    </div>
+    <div class="holder tx-info">
+      <span v-if="tipUrl" class="url" @click="visitTipUrl">{{ tipUrl }}</span>
+      <span v-else-if="topup" class="address">
+        {{ transaction.tx.sender_id }}
+      </span>
+      <span v-else-if="withdraw" class="address">
+        {{ transaction.tx.recipient_id }}
+      </span>
+      <span v-else class="tx-type">
+        {{ transactionType }}
+      </span>
+      <span class="seeTransaction" @click="seeTx()">
+        <img src="../../../icons/eye.png" />
+      </span>
+    </div>
+  </li>
 </template>
 
 <script>
@@ -39,7 +46,7 @@ export default {
   data: () => ({ tip: null }),
   filters: { formatDate },
   async created() {
-    if (!this.transaction.pending) {
+    if (!this.transaction.pending && !this.transaction.claim) {
       await this.$watchUntilTruly(() => this.sdk);
       this.getEventData();
     }
@@ -63,16 +70,31 @@ export default {
     txAmount() {
       const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
       const fee = this.transaction.tx.fee || 0;
-      return (+aettosToAe(amount + fee)).toFixed(2);
+      return (+aettosToAe(+amount + fee)).toFixed(2);
     },
     txAmountToCurrency() {
       const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
       const fee = this.transaction.tx.fee || 0;
-      const txamount = aettosToAe(amount + fee);
+      const txamount = +aettosToAe(+amount + fee);
       return (txamount * this.current.currencyRate).toFixed(2);
     },
     tipUrl() {
-      return this.transaction.tipUrl ? this.transaction.tipUrl : this.tip;
+      return this.transaction.tipUrl || this.tip || this.transaction.url;
+    },
+    topup() {
+      return (
+        this.transaction.tx.type === 'SpendTx' &&
+        this.transaction.tx.recipient_id === this.account.publicKey
+      );
+    },
+    withdraw() {
+      return (
+        this.transaction.tx.type === 'SpendTx' &&
+        this.transaction.tx.sender_id === this.account.publicKey
+      );
+    },
+    transactionType() {
+      return this.$t('transaction.type')[this.transaction.tx.type];
     },
   },
   methods: {
@@ -99,17 +121,13 @@ export default {
 <style lang="scss">
 @import '../../../common/variables';
 .list-item-transaction {
-  display: inline-block;
+  display: block;
   padding: 10px 0;
   border-color: $bg-color;
   text-decoration: none;
   list-style: none;
   cursor: default;
-  border-top: 1px solid transparent;
-
-  &:first-child {
-    border-top: 1px solid $tx-border-color !important;
-  }
+  border-top: 1px solid $tx-border-color !important;
 
   .holder {
     display: flex;
@@ -124,9 +142,10 @@ export default {
       font-weight: 400;
     }
 
-    .url {
+    .url,
+    .address,
+    .tx-type {
       display: inline-block;
-      width: 284px;
       white-space: nowrap;
       overflow: hidden !important;
       text-overflow: ellipsis;
@@ -134,10 +153,16 @@ export default {
       font-size: 12px;
       text-align: left;
       cursor: pointer;
+      margin-right: 10px;
+    }
+
+    .address {
+      font-size: 9px;
+      letter-spacing: -0.1px;
     }
 
     .seeTransaction {
-      margin-left: 10px;
+      margin-left: auto;
       cursor: pointer;
     }
 
