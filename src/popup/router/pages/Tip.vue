@@ -102,6 +102,7 @@ export default {
       editUrl: true,
       IS_EXTENSION: process.env.IS_EXTENSION,
       RUNNING_IN_TESTS: process.env.RUNNING_IN_TESTS,
+      tipFromPopup: false,
     };
   },
   computed: {
@@ -140,7 +141,8 @@ export default {
     await this.persistTipDetails();
     if (process.env.IS_EXTENSION) {
       const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });
-      if (url && !url.includes(browser.runtime.getURL('popup/popup.html'))) {
+      this.tipFromPopup = url.includes(browser.runtime.getURL('popup/popup.html'));
+      if (url && !this.tipFromPopup) {
         this.url = url;
       }
     }
@@ -212,9 +214,10 @@ export default {
         }
       } catch (e) {
         this.$logError({ e, url: this.url, action: 'tip' });
-        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
+        await this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
       } finally {
         this.loading = false;
+        if (this.tipFromPopup) window.close();
       }
     },
     toEdit() {
