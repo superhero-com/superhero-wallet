@@ -41,7 +41,7 @@ export default {
     },
   },
   async created() {
-    const { names } = await getState();
+    const { names } = this.$store.state;
     this.availNames = !!names.length;
   },
   methods: {
