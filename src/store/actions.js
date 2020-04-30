@@ -65,12 +65,16 @@ export default {
     commit(types.UPDATE_LATEST_TRANSACTIONS, payload);
   },
   setAccountName({ commit }, payload) {
-    commit(types.SET_ACCOUNT_NAME, payload);
+    commit(types.SET_ACCOUNT_AENS, {
+      account: 0,
+      aename: payload.name,
+      pending: false,
+    });
   },
   initSdk({ commit }, payload) {
     commit(types.INIT_SDK, payload);
   },
-  async getRegisteredNames({ commit, state, dispatch }) {
+  async getRegisteredNames({ commit, state, getters, dispatch }) {
     if (!state.middleware) return;
     const { middlewareUrl } = state.network[state.current.network];
     const res = await Promise.all(
@@ -114,11 +118,13 @@ export default {
           names = uniqBy(names, 'name');
           if (!process.env.RUNNING_IN_TESTS) {
             if (names.length) {
-              commit(types.SET_ACCOUNT_AENS, {
-                account: index,
-                aename: names[0].name,
-                pending: !!names[0].pending,
-              });
+              if (!getters.activeAccountName.includes('.chain')) {
+                commit(types.SET_ACCOUNT_AENS, {
+                  account: index,
+                  aename: names[0].name,
+                  pending: !!names[0].pending,
+                });
+              }
             } else {
               commit(types.SET_ACCOUNT_AENS, { account: index, aename: null, pending: false });
             }

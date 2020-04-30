@@ -58,6 +58,7 @@ export default {
   // width: 148px !important;
   width: 48% !important;
   margin: 0 !important;
+  display: inline-block;
 }
 .primary-button.dark {
   background: $box-button-color !important;
@@ -75,6 +76,7 @@ export default {
   line-height: normal !important;
   padding: 5px;
   word-break: break-word;
+  display: inline-block;
 }
 .primary-button.small.third {
   font-size: 12px;

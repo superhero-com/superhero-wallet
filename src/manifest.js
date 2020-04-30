@@ -16,6 +16,7 @@ module.exports = (isProd, platform) => ({
     'videoCapture',
     'activeTab',
     'clipboardWrite',
+    'contextMenus',
     'notifications',
     'tabs',
     'webRequest',
