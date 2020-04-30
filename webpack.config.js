@@ -21,7 +21,7 @@ const getConfig = platform => {
     mode: process.env.NODE_ENV,
     context: path.resolve(__dirname, 'src'),
     entry: {
-      ...(['chrome', 'firefox'].includes(platform) && {
+      ...(platform.startsWith('extension-') && {
         'other/background': './background.js',
         'other/inject': './inject.js',
         'popup/popup': './popup/popup.js',
@@ -36,12 +36,13 @@ const getConfig = platform => {
     node: { fs: 'empty', net: 'empty', tls: 'empty' },
     output: {
       filename: '[name].js',
-      publicPath: { web: '/', chrome: '../', firefox: '../' }[platform] || './',
+      publicPath:
+        { web: '/', 'extension-chrome': '../', 'extension-firefox': '../' }[platform] || './',
       path: path.resolve(
         __dirname,
         {
-          chrome: 'dist/chrome',
-          firefox: 'dist/firefox',
+          'extension-chrome': 'dist/chrome',
+          'extension-firefox': 'dist/firefox',
           cordova: 'www',
           web: 'dist/web/root',
           aepp: 'dist/aepp',
@@ -51,7 +52,7 @@ const getConfig = platform => {
     resolve: {
       extensions: ['.js', '.vue'],
     },
-    ...(platform === 'firefox' && {
+    ...(platform === 'extension-firefox' && {
       optimization: {
         splitChunks: {
           cacheGroups: {
@@ -129,14 +130,14 @@ const getConfig = platform => {
         global: 'window',
         'process.env': {
           NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-          IS_EXTENSION: ['chrome', 'firefox'].includes(platform) && !RUNNING_IN_TESTS,
+          IS_EXTENSION: platform.startsWith('extension-') && !RUNNING_IN_TESTS,
           PLATFORM: JSON.stringify(platform),
           npm_package_version: JSON.stringify(process.env.npm_package_version),
           NETWORK: JSON.stringify(process.env.NETWORK),
           RUNNING_IN_TESTS,
         },
       }),
-      ...(['chrome', 'firefox'].includes(platform)
+      ...(platform.startsWith('extension-')
         ? [
             new CopyWebpackPlugin([
               { from: 'popup/popup.html', to: `popup/popup.html`, transform: transformHtml },
@@ -171,7 +172,7 @@ const getConfig = platform => {
             ),
           ]
         : []),
-      ...(platform === 'firefox'
+      ...(platform === 'extension-firefox'
         ? [
             new HtmlWebpackPlugin({
               template: path.join(__dirname, 'src', 'popup', 'popup-firefox.html'),
@@ -197,7 +198,9 @@ const getConfig = platform => {
             }),
           ]
         : []),
-      ...(platform === 'chrome' && process.env.HMR === 'true' && !process.env.RUNNING_IN_TESTS
+      ...(platform === 'extension-chrome' &&
+      process.env.HMR === 'true' &&
+      !process.env.RUNNING_IN_TESTS
         ? [new ChromeExtensionReloader({ port: 9099 })]
         : []),
       ...(['cordova', 'web'].includes(platform)
@@ -227,6 +230,6 @@ const getConfig = platform => {
 };
 
 module.exports = (process.env.RUNNING_IN_TESTS
-  ? ['chrome', 'aepp']
-  : ['chrome', 'firefox', 'cordova', 'web']
+  ? ['extension-chrome', 'aepp']
+  : ['extension-chrome', 'extension-firefox', 'cordova', 'web']
 ).map(p => getConfig(p));

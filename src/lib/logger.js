@@ -60,7 +60,7 @@ export default class Logger {
       },
       appVersion: process.env.npm_package_version,
       browser: detect(),
-      type: process.env.IS_EXTENSION ? 'extension' : process.env.PLATFORM,
+      platform: process.env.PLATFORM,
       time: Date.now(),
     };
     browser.storage.local.set({ errorLog: [...errorLog, log] });
