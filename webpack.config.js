@@ -14,7 +14,8 @@ const parseBool = val => (val ? JSON.parse(val) : false);
 const RUNNING_IN_TESTS = parseBool(process.env.RUNNING_IN_TESTS);
 
 const getConfig = platform => {
-  const transformHtml = content => ejs.render(content.toString(), Object.assign({}, process.env, { PLATFORM: platform }));
+  const transformHtml = content =>
+    ejs.render(content.toString(), Object.assign({}, process.env, { PLATFORM: platform }));
 
   return {
     mode: process.env.NODE_ENV,
@@ -44,7 +45,7 @@ const getConfig = platform => {
           cordova: 'www',
           web: 'dist/web/root',
           aepp: 'dist/aepp',
-        }[platform]
+        }[platform],
       ),
     },
     resolve: {
@@ -139,14 +140,35 @@ const getConfig = platform => {
         ? [
             new CopyWebpackPlugin([
               { from: 'popup/popup.html', to: `popup/popup.html`, transform: transformHtml },
-              { from: 'options/options.html', to: `options/options.html`, transform: transformHtml },
-              { from: 'phishing/phishing.html', to: `phishing/phishing.html`, transform: transformHtml },
-              { from: 'popup/CameraRequestPermission.html', to: `popup/CameraRequestPermission.html`, transform: transformHtml },
-              { from: 'redirect/redirect.html', to: `redirect/index.html`, transform: transformHtml },
+              {
+                from: 'options/options.html',
+                to: `options/options.html`,
+                transform: transformHtml,
+              },
+              {
+                from: 'phishing/phishing.html',
+                to: `phishing/phishing.html`,
+                transform: transformHtml,
+              },
+              {
+                from: 'popup/CameraRequestPermission.html',
+                to: `popup/CameraRequestPermission.html`,
+                transform: transformHtml,
+              },
+              {
+                from: 'redirect/redirect.html',
+                to: `redirect/index.html`,
+                transform: transformHtml,
+              },
               { from: 'icons/icon_48.png', to: `icons/icon_48.png` },
               { from: 'icons/icon_128.png', to: `icons/icon_128.png` },
             ]),
-            new GenerateJsonPlugin('manifest.json', genManifest(process.env.NODE_ENV === 'production', platform), null, 2),
+            new GenerateJsonPlugin(
+              'manifest.json',
+              genManifest(process.env.NODE_ENV === 'production', platform),
+              null,
+              2,
+            ),
           ]
         : []),
       ...(platform === 'firefox'
@@ -154,7 +176,14 @@ const getConfig = platform => {
             new HtmlWebpackPlugin({
               template: path.join(__dirname, 'src', 'popup', 'popup-firefox.html'),
               filename: 'popup/popup.html',
-              excludeChunks: ['background', 'inject', 'options/options', 'phishing/phishing', 'aepp', 'popup/cameraPermission'],
+              excludeChunks: [
+                'background',
+                'inject',
+                'options/options',
+                'phishing/phishing',
+                'aepp',
+                'popup/cameraPermission',
+              ],
             }),
             new HtmlWebpackPlugin({
               template: path.join(__dirname, 'src', 'options', 'options.html'),
@@ -168,14 +197,36 @@ const getConfig = platform => {
             }),
           ]
         : []),
-      ...(platform === 'chrome' && process.env.HMR === 'true' && !process.env.RUNNING_IN_TESTS ? [new ChromeExtensionReloader({ port: 9099 })] : []),
-      ...(['cordova', 'web'].includes(platform) ? [new CopyWebpackPlugin([{ from: 'popup/popup.html', to: `index.html`, transform: transformHtml }])] : []),
-      ...(platform === 'web'
-        ? [new CopyWebpackPlugin([{ from: 'web', to: `../` }]), new CopyWebpackPlugin([{ from: 'popup/popup.html', to: `404.html`, transform: transformHtml }])]
+      ...(platform === 'chrome' && process.env.HMR === 'true' && !process.env.RUNNING_IN_TESTS
+        ? [new ChromeExtensionReloader({ port: 9099 })]
         : []),
-      ...(platform === 'aepp' ? [new CopyWebpackPlugin([{ from: 'aepp/aepp.html', to: `aepp.html`, transform: transformHtml }])] : []),
+      ...(['cordova', 'web'].includes(platform)
+        ? [
+            new CopyWebpackPlugin([
+              { from: 'popup/popup.html', to: `index.html`, transform: transformHtml },
+            ]),
+          ]
+        : []),
+      ...(platform === 'web'
+        ? [
+            new CopyWebpackPlugin([{ from: 'web', to: `../` }]),
+            new CopyWebpackPlugin([
+              { from: 'popup/popup.html', to: `404.html`, transform: transformHtml },
+            ]),
+          ]
+        : []),
+      ...(platform === 'aepp'
+        ? [
+            new CopyWebpackPlugin([
+              { from: 'aepp/aepp.html', to: `aepp.html`, transform: transformHtml },
+            ]),
+          ]
+        : []),
     ],
   };
 };
 
-module.exports = (process.env.RUNNING_IN_TESTS ? ['chrome', 'aepp'] : ['chrome', 'firefox', 'cordova', 'web']).map(p => getConfig(p));
+module.exports = (process.env.RUNNING_IN_TESTS
+  ? ['chrome', 'aepp']
+  : ['chrome', 'firefox', 'cordova', 'web']
+).map(p => getConfig(p));
