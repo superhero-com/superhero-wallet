@@ -1,3 +1,4 @@
+import { pick } from 'lodash-es';
 import Vue from 'vue';
 import { detect } from 'detect-browser';
 import { getState } from '../store/plugins/persistState';
@@ -6,22 +7,19 @@ export default class Logger {
   static init(options = {}) {
     const { background } = options;
     if (!background) {
-      Vue.config.errorHandler = (e, vm, info) => {
+      Vue.config.errorHandler = (error, vm, info) => {
         console.error(info);
-        console.error(e);
-        Logger.write({
-          e,
-          info,
-          type: 'vue-error',
-        });
+        console.error(error);
+        Object.assign(error, { info, type: 'vue-error' });
+        Logger.write(error);
       };
 
-      Vue.config.warnHandler = (e, vm, info) => {
-        console.error(e);
+      Vue.config.warnHandler = (message, vm, info) => {
+        console.error(message);
         console.error(info);
         Logger.write({
-          msg: e,
-          stacktrace: info,
+          message,
+          stack: info,
           type: 'vue-warn',
         });
       };
@@ -30,16 +28,16 @@ export default class Logger {
     window.addEventListener('unhandledrejection', promise => {
       const { stack, message } = promise.reason;
       Logger.write({
-        msg: message,
-        stacktrace: stack,
+        message,
+        stack,
         type: 'unhandledrejection',
       });
     });
 
     window.onerror = (message, source, line, col, error) => {
       Logger.write({
-        msg: message,
-        stacktrace: `${source} ${line}:${col}`,
+        message,
+        stack: `${source} ${line}:${col}`,
         type: 'window-error',
         info: error,
       });
@@ -48,23 +46,16 @@ export default class Logger {
 
   static async write(error) {
     const { saveErrorLog } = await getState();
-    if (!saveErrorLog) return false;
+    if (!saveErrorLog) return;
     const errorLog = await Logger.get();
-    const { e = {}, ...err } = error;
-    const log = {
-      error: {
-        stacktrace: e.stack,
-        msg: e.message,
-        name: e.name,
-        ...err,
-      },
+    const logEntry = {
+      ...pick(error, ['name', ...Object.getOwnPropertyNames(error)]),
       appVersion: process.env.npm_package_version,
       browser: detect(),
       platform: process.env.PLATFORM,
       time: Date.now(),
     };
-    browser.storage.local.set({ errorLog: [...errorLog, log] });
-    return true;
+    browser.storage.local.set({ errorLog: [...errorLog, logEntry] });
   }
 
   static async get() {
