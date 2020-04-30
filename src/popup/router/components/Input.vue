@@ -1,5 +1,5 @@
 <template>
-  <div class="text-left" :class="{ 'input-group': labelPosition }">
+  <div class="input-wrapper text-left" :class="{ 'input-group': labelPosition }">
     <label class="label" v-if="label" :class="{ [`label-${labelPosition}`]: labelPosition }">{{
       label
     }}</label>
