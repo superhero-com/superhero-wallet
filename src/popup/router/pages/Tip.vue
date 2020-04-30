@@ -146,10 +146,6 @@ export default {
         this.url = url;
       }
     }
-    // if mobile
-    if (!this.IS_EXTENSION && !this.RUNNING_IN_TESTS) {
-      this.url = null;
-    }
     await this.$watchUntilTruly(() => this.sdk && this.tippingAddress);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
