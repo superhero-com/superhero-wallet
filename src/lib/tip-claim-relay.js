@@ -26,7 +26,7 @@ export default {
         Logger.write(error);
         return 1;
       });
-    if (claimAmount === 0) throw new Error('No new tips to claims');
+    if (claimAmount === 0) throw new Error('No new tips to claim');
   },
 
   async checkUrlHasBalance(url, { address, chainName }) {
