@@ -57,6 +57,9 @@
     "name-exist": {
       "msg": "This name is already registered!"
     },
+    "name-length": {
+      "msg": "Only names with length longer than 13 chars are allowed"
+    },
     "incorrect-address": {
       "msg": "Please make sure that you have entered a valid public address!"
     },
@@ -396,6 +399,7 @@
       "goBiddingBtn": "Go for bidding",
       "backButton": "Back",
       "extend": "Extend",
+      "active": "Set Active",
       "namePlaceholder": "Enter .chain name",
       "pointer": "Set Name Pointer",
       "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
@@ -469,7 +473,7 @@
       "copy": "Copy",
       "home": "Home",
       "transferExchange": "Swap crypto for AE tokens",
-      "purchase": "Purchase AE via credit card"
+      "purchase": "Buy AE tokens"
     },
     "securitySettings": {
       "backToSettings": "Back to settings",

@@ -20,8 +20,11 @@
         <ae-list v-if="registeredNames.length">
           <ae-list-item fill="neutral" v-for="(name, key) in registeredNames" :key="key">
             <UserAvatar :address="name.owner" />
-            <div style="width:100%;" class="text-left ml-10">
-              <div class="">{{ name.name }}</div>
+            <div class="text-left ml-10 wd-100">
+              <div>
+                {{ name.name }}
+                <Badge class="active-name" v-if="activeAccountName == name.name">Active</Badge>
+              </div>
               <ae-address :value="name.owner" length="flat" />
               <div v-if="name.addPointer" class="pointer-holder mt-10">
                 <Input
@@ -33,20 +36,29 @@
                 />
                 <ae-icon name="close" @click.native="name.addPointer = false" />
               </div>
-              <Button
-                v-if="!name.addPointer"
-                class="danger"
-                :disabled="!address(name)"
-                @click="extend(name)"
-                small
-                >{{ $t('pages.namingSystemPage.extend') }}</Button
-              >
-              <Button
-                :small="!name.addPointer"
-                @click="setPointer(key)"
-                :class="name.addPointer ? 'danger' : ''"
-                >{{ $t('pages.namingSystemPage.pointer') }}</Button
-              >
+
+              <div class="flex flex-justify-between">
+                <Button
+                  v-if="!name.addPointer"
+                  class="danger"
+                  :disabled="!address(name)"
+                  @click="extend(name)"
+                  small
+                  >{{ $t('pages.namingSystemPage.extend') }}</Button
+                >
+                <Button
+                  :small="!name.addPointer"
+                  @click="setPointer(key)"
+                  :class="name.addPointer ? 'danger' : ''"
+                  >{{ $t('pages.namingSystemPage.pointer') }}</Button
+                >
+                <Button
+                  :small="!name.addPointer"
+                  @click="setActiveName(name, key)"
+                  :disabled="activeAccountName == name.name"
+                  >{{ $t('pages.namingSystemPage.active') }}</Button
+                >
+              </div>
             </div>
 
             <ae-icon
@@ -192,12 +204,15 @@ import { convertToAE, getAddressByNameEntry, checkAddress, chekAensName } from '
 import Input from '../components/Input';
 import Button from '../components/Button';
 import UserAvatar from '../components/UserAvatar';
+import Badge from '../components/Badge';
 
 export default {
+  props: ['activateName'],
   components: {
     Input,
     Button,
     UserAvatar,
+    Badge,
   },
   data() {
     return {
@@ -222,7 +237,17 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['current', 'names', 'sdk', 'network', 'account', 'middleware']),
+    ...mapGetters([
+      'current',
+      'popup',
+      'names',
+      'sdk',
+      'network',
+      'account',
+      'middleware',
+      'subaccounts',
+      'activeAccountName',
+    ]),
     auctions() {
       if (this.filterType === 'soonest') return this.activeAuctions;
       if (this.filterType === 'length')
@@ -257,6 +282,7 @@ export default {
     },
   },
   created() {
+    if (this.activateName) this.tab = 'registered';
     this.loading = true;
     this.polling = setInterval(async () => {
       if (!this.middleware) {
@@ -274,6 +300,10 @@ export default {
     }, 3000);
   },
   methods: {
+    async setActiveName(name) {
+      const aename = name.name;
+      await this.$store.dispatch('setAccountName', { name: aename });
+    },
     address(name) {
       return getAddressByNameEntry(name);
     },
@@ -297,6 +327,8 @@ export default {
         this.$store.dispatch('modals/open', { name: 'default', type: 'name-exist' });
       } else if (!onlyLettersAndNums.test(this.name)) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'only-chars' });
+      } else if (this.name.length <= 13) {
+        this.$store.dispatch('modals/open', { name: 'default', type: 'name-length' });
       } else {
         this.loading = true;
         const name = `${this.name}.chain`;
@@ -386,6 +418,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.wd-100 {
+  width: 100%;
+}
 .ae-identicon.base {
   width: 2rem;
 }
@@ -417,5 +452,9 @@ export default {
   .pointer-input {
     width: 90%;
   }
+}
+.active-name {
+  float: right;
+  background: #67f7b8;
 }
 </style>

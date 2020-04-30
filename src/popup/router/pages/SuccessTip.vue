@@ -51,6 +51,7 @@ import Textarea from '../components/Textarea';
 import openUrl from '../../utils/openUrl';
 import { TIP_SERVICE, BACKEND_URL, UI_URL } from '../../utils/constants';
 import { aettosToAe } from '../../utils/helper';
+import Logger from '../../../lib/logger';
 
 export default {
   components: {
@@ -77,18 +78,17 @@ export default {
     },
   },
   async created() {
-    try {
-      this.verifiedUrls = (await axios.get(`${BACKEND_URL}/verified`)).data;
-    } catch (e) {
-      this.$logError({ e, action: 'fetch-verified' });
-    }
+    this.verifiedUrls = (
+      await axios.get(`${BACKEND_URL}/verified`).catch(error => {
+        Logger.write(error);
+        return { data: [] };
+      })
+    ).data;
     const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
     if (addresses.length) {
-      try {
-        await axios.post(`${TIP_SERVICE}`, { url: tab.url, address: addresses[0] });
-      } catch (e) {
-        this.$logError({ e, url: tab.url, action: 'claim' });
-      }
+      await axios
+        .post(TIP_SERVICE, { url: tab.url, address: addresses[0] })
+        .catch(error => Logger.write(error));
     }
   },
   methods: {

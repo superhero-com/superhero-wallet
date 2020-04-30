@@ -65,7 +65,7 @@ export default {
       if (this.countError < 3) await this.initSdk();
       else {
         store.commit('SET_NODE_STATUS', 'error');
-        Logger.write({ e, action: 'init-sdk' });
+        Logger.write(e);
       }
     }
   },
@@ -82,17 +82,13 @@ export default {
     return res.error ? { error: true } : parseFromStorage(res);
   },
   async initContractInstances() {
-    try {
-      const contractAddress = await store.dispatch('getTipContractAddress');
-      store.commit(
-        'SET_TIPPING',
-        await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, {
-          contractAddress,
-          forceCodeCheck: true,
-        }),
-      );
-    } catch (e) {
-      Logger.write({ e, action: 'init-tip-instance' });
-    }
+    const contractAddress = await store.dispatch('getTipContractAddress');
+    store.commit(
+      'SET_TIPPING',
+      await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, {
+        contractAddress,
+        forceCodeCheck: true,
+      }),
+    );
   },
 };
