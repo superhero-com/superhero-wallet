@@ -300,10 +300,10 @@ export default {
           });
           this.$router.push('/account');
         }
-        this.loading = false;
       } catch (e) {
-        this.$logError({ e, action: 'withdraw' });
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
+        throw e;
+      } finally {
         this.loading = false;
       }
     },

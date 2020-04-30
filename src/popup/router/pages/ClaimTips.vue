@@ -78,8 +78,9 @@ export default {
         this.$router.push({ name: 'account' });
       } catch (e) {
         const msg = e.message.replace('Error: ', '');
-        this.$logError({ e, url, action: 'claim' });
         this.$store.dispatch('modals/open', { name: 'default', msg });
+        e.payload = { url };
+        throw e;
       } finally {
         this.loading = false;
       }
