@@ -24,9 +24,6 @@ Vue.prototype.$watchUntilTruly = function watchUntilTruly(getter) {
     );
   });
 };
-Vue.prototype.$logError = async function logError(error) {
-  return Logger.write(error);
-};
 
 (async () => {
   await registerModals();

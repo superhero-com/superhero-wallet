@@ -211,8 +211,9 @@ export default {
           this.$router.push('/account');
         }
       } catch (e) {
-        this.$logError({ e, url: this.url, action: 'tip' });
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
+        e.payload = { url: this.url };
+        throw e;
       } finally {
         this.loading = false;
       }

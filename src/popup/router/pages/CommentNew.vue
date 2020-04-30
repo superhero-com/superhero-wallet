@@ -53,8 +53,9 @@ export default {
         );
         this.openCallbackOrGoHome('x-success');
       } catch (e) {
-        this.$logError({ e, id: this.id, text: this.text, action: 'comment' });
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
+        e.payload = { id: this.id, text: this.text };
+        throw e;
       } finally {
         this.loading = false;
       }

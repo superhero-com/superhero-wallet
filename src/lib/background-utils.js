@@ -61,7 +61,7 @@ export const getSDK = async () => {
         compilerUrl: network.compilerUrl,
       });
     } catch (e) {
-      Logger.write({ e, action: 'init-sdk-background' });
+      Logger.write(e);
     }
   }
 
@@ -96,40 +96,22 @@ export const getTippingContractAddress = async address => {
   return tippingContractAddress;
 };
 
-export const contractCallStatic = async ({ tx, callType }) =>
-  new Promise(async (resolve, reject) => {
-    try {
-      const { account } = await getActiveAccount();
-      if (typeof callType !== 'undefined' && callType === 'static' && account) {
-        const contractInstance = await getTippingContractInstance(tx);
-        const call = await contractCall({
-          instance: contractInstance,
-          method: tx.method,
-          params: [...tx.params, tx.options],
-        });
-        if (call) {
-          resolve(call);
-        } else {
-          reject(new Error('Contract call failed'));
-          Logger.write({
-            msg: 'Contract call failed',
-            tx,
-            action: 'contract-call-background',
-          });
-        }
-      } else if (
-        !controller.isLoggedIn() &&
-        typeof callType !== 'undefined' &&
-        callType === 'static'
-      ) {
-        reject(new Error('You need to unlock the wallet first'));
-        Logger.write({
-          msg: 'You need to unlock the wallet first',
-          action: 'contract-call-background',
-        });
-      }
-    } catch (e) {
-      reject(e);
-      Logger.write({ e, action: 'contract-call-background' });
-    }
-  });
+export const contractCallStatic = async ({ tx, callType }) => {
+  const { account } = await getActiveAccount();
+  if (typeof callType !== 'undefined' && callType === 'static' && account) {
+    const contractInstance = await getTippingContractInstance(tx);
+    const call = await contractCall({
+      instance: contractInstance,
+      method: tx.method,
+      params: [...tx.params, tx.options],
+    });
+    if (call) return call;
+    const error = new Error('Contract call failed');
+    error.payload = { tx };
+    throw error;
+  }
+  if (!controller.isLoggedIn() && typeof callType !== 'undefined' && callType === 'static') {
+    throw new Error('You need to unlock the wallet first');
+  }
+  throw new Error('No data to return');
+};

@@ -1,14 +1,13 @@
-import { uniq } from 'lodash-es';
 import axios from 'axios';
-import Logger from './logger';
-
+import { uniq } from 'lodash-es';
+import { DEFAULT_NETWORK, networks, TIPPING_CONTRACT, TIP_SERVICE } from '../popup/utils/constants';
 import {
   contractCallStatic,
   getActiveAccount,
   getAddressFromChainName,
   getTippingContractAddress,
 } from './background-utils';
-import { networks, DEFAULT_NETWORK, TIPPING_CONTRACT, TIP_SERVICE } from '../popup/utils/constants';
+import Logger from './logger';
 
 export default {
   checkAddressMatch(account, addresses) {
@@ -27,8 +26,11 @@ export default {
 
     const claimAmount = await contractCallStatic({ tx, callType: 'static' })
       .then(r => r.decodedResult)
-      .catch(() => 1);
-    if (claimAmount === 0) throw new Error('No zero amount claims');
+      .catch(error => {
+        Logger.write(error);
+        return 1;
+      });
+    if (claimAmount === 0) throw new Error('No new tips to claim');
   },
 
   async checkUrlHasBalance(url, { address, chainName }) {
@@ -50,7 +52,8 @@ export default {
         }
       }
     } catch (e) {
-      Logger.write({ e, url, action: 'autoclaim' });
+      e.payload = { url };
+      Logger.write(e);
     }
   },
 };
