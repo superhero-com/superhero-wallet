@@ -224,7 +224,9 @@ export default [
     },
   },
   {
+    props: true,
     path: '/names',
+    name: 'names',
     component: Names,
     meta: {
       title: 'names',
