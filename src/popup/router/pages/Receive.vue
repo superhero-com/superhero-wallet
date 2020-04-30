@@ -28,7 +28,7 @@ export default {
   data() {
     return {
       jellySwapUrl: 'https://app.jelly.market',
-      buyAe: '',
+      buyAe: 'https://shop.aeternityuniverse.com',
     };
   },
   computed: {
