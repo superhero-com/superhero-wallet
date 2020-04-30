@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>Hello world!</p>
+    <p>Superhero is Open-source! Visit <a href="superhero.com">Superhero.com</a></p>
   </div>
 </template>
 
