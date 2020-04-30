@@ -139,9 +139,9 @@ export default {
   async created() {
     await this.persistTipDetails();
     if (process.env.IS_EXTENSION) {
-      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-      if (tab) {
-        this.url = tab.url;
+      const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });
+      if (url && !url.includes(browser.runtime.getURL('popup/popup.html'))) {
+        this.url = url;
       }
     }
     // if mobile

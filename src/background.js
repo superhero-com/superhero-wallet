@@ -119,11 +119,18 @@ if (process.env.IS_EXTENSION && require.main.i === module.id) {
     title: 'Tip',
   };
 
+  browser.contextMenus.removeAll();
   browser.contextMenus.create(contextMenuItem);
-  browser.contextMenus.onClicked.addListener(clickData => {
-    if (clickData.menuItemId === 'superheroTip') {
-      alert('tip superhero');
-      // send tip here
+  browser.contextMenus.onClicked.addListener(({ menuItemId, pageUrl }) => {
+    if (menuItemId === 'superheroTip') {
+      const url = `/tip?url=${pageUrl}`;
+      localStorage.setItem('tipUrl', url);
+      browser.windows.create({
+        url: `popup/popup.html#${url}`,
+        type: 'popup',
+        height: 600,
+        width: 375,
+      });
     }
   });
 }

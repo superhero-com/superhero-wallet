@@ -88,19 +88,14 @@ const getExtensionProtocol = () => {
 
 export const detectConnectionType = port => {
   const extensionProtocol = getExtensionProtocol();
-  const senderUrl = port.sender.url.split('?');
+  const [senderUrl] = port.sender.url.split('?');
   let type = CONNECTION_TYPES.OTHER;
-  if (
-    port.name === CONNECTION_TYPES.EXTENSION &&
-    (senderUrl[0] === `${extensionProtocol}://${browser.runtime.id}/popup/popup.html` ||
-      detectBrowser() === 'Firefox')
-  ) {
+  const isExtensionSender =
+    senderUrl.includes(`${extensionProtocol}://${browser.runtime.id}/popup/popup.html`) ||
+    detectBrowser() === 'Firefox';
+  if (port.name === CONNECTION_TYPES.EXTENSION && isExtensionSender) {
     type = CONNECTION_TYPES.EXTENSION;
-  } else if (
-    port.name === CONNECTION_TYPES.POPUP &&
-    (senderUrl[0] === `${extensionProtocol}://${browser.runtime.id}/popup/popup.html` ||
-      detectBrowser() === 'Firefox')
-  ) {
+  } else if (port.name === CONNECTION_TYPES.POPUP && isExtensionSender) {
     type = CONNECTION_TYPES.POPUP;
   } else {
     type = CONNECTION_TYPES.OTHER;
