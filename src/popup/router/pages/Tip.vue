@@ -102,6 +102,7 @@ export default {
       editUrl: true,
       IS_EXTENSION: process.env.IS_EXTENSION,
       RUNNING_IN_TESTS: process.env.RUNNING_IN_TESTS,
+      tipFromPopup: false,
     };
   },
   computed: {
@@ -139,9 +140,10 @@ export default {
   async created() {
     await this.persistTipDetails();
     if (process.env.IS_EXTENSION) {
-      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-      if (tab) {
-        this.url = tab.url;
+      const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });
+      this.tipFromPopup = url.includes(browser.runtime.getURL('popup/popup.html'));
+      if (url && !this.tipFromPopup) {
+        this.url = url;
       }
     }
     // if mobile
@@ -211,11 +213,15 @@ export default {
           this.$router.push('/account');
         }
       } catch (e) {
-        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
+        await this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
         e.payload = { url: this.url };
         throw e;
       } finally {
         this.loading = false;
+        if (this.tipFromPopup) {
+          localStorage.removeItem('lsroute');
+          window.close();
+        }
       }
     },
     toEdit() {
