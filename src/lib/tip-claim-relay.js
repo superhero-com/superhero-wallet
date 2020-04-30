@@ -27,7 +27,10 @@ export default {
 
     const claimAmount = await contractCallStatic({ tx, callType: 'static' })
       .then(r => r.decodedResult)
-      .catch(() => 1);
+      .catch(error => {
+        Logger.write(error);
+        return 1;
+      });
     if (claimAmount === 0) throw new Error('No zero amount claims');
   },
 
@@ -50,7 +53,8 @@ export default {
         }
       }
     } catch (e) {
-      Logger.write({ e, url, action: 'autoclaim' });
+      e.payload = { url };
+      Logger.write(e);
     }
   },
 };

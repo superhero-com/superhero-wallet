@@ -14,13 +14,14 @@ const parseBool = val => (val ? JSON.parse(val) : false);
 const RUNNING_IN_TESTS = parseBool(process.env.RUNNING_IN_TESTS);
 
 const getConfig = platform => {
-  const transformHtml = content => ejs.render(content.toString(), Object.assign({}, process.env, { PLATFORM: platform }));
+  const transformHtml = content =>
+    ejs.render(content.toString(), Object.assign({}, process.env, { PLATFORM: platform }));
 
   return {
     mode: process.env.NODE_ENV,
     context: path.resolve(__dirname, 'src'),
     entry: {
-      ...(['chrome', 'firefox'].includes(platform) && {
+      ...(platform.startsWith('extension-') && {
         'other/background': './background.js',
         'other/inject': './inject.js',
         'popup/popup': './popup/popup.js',
@@ -35,22 +36,23 @@ const getConfig = platform => {
     node: { fs: 'empty', net: 'empty', tls: 'empty' },
     output: {
       filename: '[name].js',
-      publicPath: { web: '/', chrome: '../', firefox: '../' }[platform] || './',
+      publicPath:
+        { web: '/', 'extension-chrome': '../', 'extension-firefox': '../' }[platform] || './',
       path: path.resolve(
         __dirname,
         {
-          chrome: 'dist/chrome',
-          firefox: 'dist/firefox',
+          'extension-chrome': 'dist/chrome',
+          'extension-firefox': 'dist/firefox',
           cordova: 'www',
           web: 'dist/web/root',
           aepp: 'dist/aepp',
-        }[platform]
+        }[platform],
       ),
     },
     resolve: {
       extensions: ['.js', '.vue'],
     },
-    ...(platform === 'firefox' && {
+    ...(platform === 'extension-firefox' && {
       optimization: {
         splitChunks: {
           cacheGroups: {
@@ -128,33 +130,61 @@ const getConfig = platform => {
         global: 'window',
         'process.env': {
           NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-          IS_EXTENSION: ['chrome', 'firefox'].includes(platform) && !RUNNING_IN_TESTS,
+          IS_EXTENSION: platform.startsWith('extension-') && !RUNNING_IN_TESTS,
           PLATFORM: JSON.stringify(platform),
           npm_package_version: JSON.stringify(process.env.npm_package_version),
           NETWORK: JSON.stringify(process.env.NETWORK),
           RUNNING_IN_TESTS,
         },
       }),
-      ...(['chrome', 'firefox'].includes(platform)
+      ...(platform.startsWith('extension-')
         ? [
             new CopyWebpackPlugin([
               { from: 'popup/popup.html', to: `popup/popup.html`, transform: transformHtml },
-              { from: 'options/options.html', to: `options/options.html`, transform: transformHtml },
-              { from: 'phishing/phishing.html', to: `phishing/phishing.html`, transform: transformHtml },
-              { from: 'popup/CameraRequestPermission.html', to: `popup/CameraRequestPermission.html`, transform: transformHtml },
-              { from: 'redirect/redirect.html', to: `redirect/index.html`, transform: transformHtml },
+              {
+                from: 'options/options.html',
+                to: `options/options.html`,
+                transform: transformHtml,
+              },
+              {
+                from: 'phishing/phishing.html',
+                to: `phishing/phishing.html`,
+                transform: transformHtml,
+              },
+              {
+                from: 'popup/CameraRequestPermission.html',
+                to: `popup/CameraRequestPermission.html`,
+                transform: transformHtml,
+              },
+              {
+                from: 'redirect/redirect.html',
+                to: `redirect/index.html`,
+                transform: transformHtml,
+              },
               { from: 'icons/icon_48.png', to: `icons/icon_48.png` },
               { from: 'icons/icon_128.png', to: `icons/icon_128.png` },
             ]),
-            new GenerateJsonPlugin('manifest.json', genManifest(process.env.NODE_ENV === 'production', platform), null, 2),
+            new GenerateJsonPlugin(
+              'manifest.json',
+              genManifest(process.env.NODE_ENV === 'production', platform),
+              null,
+              2,
+            ),
           ]
         : []),
-      ...(platform === 'firefox'
+      ...(platform === 'extension-firefox'
         ? [
             new HtmlWebpackPlugin({
               template: path.join(__dirname, 'src', 'popup', 'popup-firefox.html'),
               filename: 'popup/popup.html',
-              excludeChunks: ['background', 'inject', 'options/options', 'phishing/phishing', 'aepp', 'popup/cameraPermission'],
+              excludeChunks: [
+                'background',
+                'inject',
+                'options/options',
+                'phishing/phishing',
+                'aepp',
+                'popup/cameraPermission',
+              ],
             }),
             new HtmlWebpackPlugin({
               template: path.join(__dirname, 'src', 'options', 'options.html'),
@@ -168,14 +198,38 @@ const getConfig = platform => {
             }),
           ]
         : []),
-      ...(platform === 'chrome' && process.env.HMR === 'true' && !process.env.RUNNING_IN_TESTS ? [new ChromeExtensionReloader({ port: 9099 })] : []),
-      ...(['cordova', 'web'].includes(platform) ? [new CopyWebpackPlugin([{ from: 'popup/popup.html', to: `index.html`, transform: transformHtml }])] : []),
-      ...(platform === 'web'
-        ? [new CopyWebpackPlugin([{ from: 'web', to: `../` }]), new CopyWebpackPlugin([{ from: 'popup/popup.html', to: `404.html`, transform: transformHtml }])]
+      ...(platform === 'extension-chrome' &&
+      process.env.HMR === 'true' &&
+      !process.env.RUNNING_IN_TESTS
+        ? [new ChromeExtensionReloader({ port: 9099 })]
         : []),
-      ...(platform === 'aepp' ? [new CopyWebpackPlugin([{ from: 'aepp/aepp.html', to: `aepp.html`, transform: transformHtml }])] : []),
+      ...(['cordova', 'web'].includes(platform)
+        ? [
+            new CopyWebpackPlugin([
+              { from: 'popup/popup.html', to: `index.html`, transform: transformHtml },
+            ]),
+          ]
+        : []),
+      ...(platform === 'web'
+        ? [
+            new CopyWebpackPlugin([{ from: 'web', to: `../` }]),
+            new CopyWebpackPlugin([
+              { from: 'popup/popup.html', to: `404.html`, transform: transformHtml },
+            ]),
+          ]
+        : []),
+      ...(platform === 'aepp'
+        ? [
+            new CopyWebpackPlugin([
+              { from: 'aepp/aepp.html', to: `aepp.html`, transform: transformHtml },
+            ]),
+          ]
+        : []),
     ],
   };
 };
 
-module.exports = (process.env.RUNNING_IN_TESTS ? ['chrome', 'aepp'] : ['chrome', 'firefox', 'cordova', 'web']).map(p => getConfig(p));
+module.exports = (process.env.RUNNING_IN_TESTS
+  ? ['extension-chrome', 'aepp']
+  : ['extension-chrome', 'extension-firefox', 'cordova', 'web']
+).map(p => getConfig(p));
