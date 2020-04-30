@@ -417,7 +417,7 @@ export default {
 
 <style lang="scss" scoped>
 .wd-100 {
-  width:100%;
+  width: 100%;
 }
 .ae-identicon.base {
   width: 2rem;

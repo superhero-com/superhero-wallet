@@ -6,7 +6,7 @@
       </p>
       <AccountInfo />
       <qrcode-vue :value="account.publicKey" size="140" class="my-25 qrcode"></qrcode-vue>
-      
+
       <Button @click="purchase">{{ $t('pages.receive.purchase') }}</Button>
       <Button @click="exchange">{{ $t('pages.receive.transferExchange') }}</Button>
       <Button data-cy="home" @click="navigateAccount">{{ $t('pages.receive.home') }}</Button>
