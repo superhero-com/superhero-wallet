@@ -218,7 +218,10 @@ export default {
         throw e;
       } finally {
         this.loading = false;
-        if (this.tipFromPopup) window.close();
+        if (this.tipFromPopup) {
+          localStorage.removeItem('lsroute');
+          window.close();
+        }
       }
     },
     toEdit() {
