@@ -207,7 +207,6 @@ import UserAvatar from '../components/UserAvatar';
 import Badge from '../components/Badge';
 
 export default {
-  props: ['activateName'],
   components: {
     Input,
     Button,
@@ -282,7 +281,6 @@ export default {
     },
   },
   created() {
-    if (this.activateName) this.tab = 'registered';
     this.loading = true;
     this.polling = setInterval(async () => {
       if (!this.middleware) {
@@ -342,6 +340,7 @@ export default {
             tx: {
               name,
               recipientId: '',
+              type: 'NamePreclaimTx',
             },
             type: 'namePreClaim',
           };
@@ -365,6 +364,7 @@ export default {
             name,
             claim: { id, name, pointers },
             ...options,
+            type: 'NameUpdateTx',
           },
           type: 'nameUpdate',
           nameUpdateType: type,
