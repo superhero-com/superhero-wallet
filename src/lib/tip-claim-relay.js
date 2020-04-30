@@ -1,14 +1,13 @@
-import { uniq } from 'lodash-es';
 import axios from 'axios';
-import Logger from './logger';
-
+import { uniq } from 'lodash-es';
+import { DEFAULT_NETWORK, networks, TIPPING_CONTRACT, TIP_SERVICE } from '../popup/utils/constants';
 import {
   contractCallStatic,
   getActiveAccount,
   getAddressFromChainName,
   getTippingContractAddress,
 } from './background-utils';
-import { networks, DEFAULT_NETWORK, TIPPING_CONTRACT, TIP_SERVICE } from '../popup/utils/constants';
+import Logger from './logger';
 
 export default {
   checkAddressMatch(account, addresses) {
@@ -31,7 +30,7 @@ export default {
         Logger.write(error);
         return 1;
       });
-    if (claimAmount === 0) throw new Error('No zero amount claims');
+    if (claimAmount === 0) throw new Error('No new tips to claim');
   },
 
   async checkUrlHasBalance(url, { address, chainName }) {
