@@ -327,6 +327,8 @@ export default {
         this.$store.dispatch('modals/open', { name: 'default', type: 'name-exist' });
       } else if (!onlyLettersAndNums.test(this.name)) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'only-chars' });
+      } else if (this.name.length <= 13) {
+        this.$store.dispatch('modals/open', { name: 'default', type: 'name-length' });
       } else {
         this.loading = true;
         const name = `${this.name}.chain`;
@@ -417,7 +419,7 @@ export default {
 
 <style lang="scss" scoped>
 .wd-100 {
-  width:100%;
+  width: 100%;
 }
 .ae-identicon.base {
   width: 2rem;

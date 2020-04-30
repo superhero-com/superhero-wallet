@@ -57,6 +57,9 @@
     "name-exist": {
       "msg": "This name is already registered!"
     },
+    "name-length": {
+      "msg": "Only names with length longer than 13 chars are allowed"
+    },
     "incorrect-address": {
       "msg": "Please make sure that you have entered a valid public address!"
     },
