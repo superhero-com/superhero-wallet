@@ -29,7 +29,7 @@ export default {
   data() {
     return {
       jellySwapUrl: 'https://app.jelly.market',
-      shopUniverse: 'https://shop.aeternityuniverser.com',
+      shopUniverse: 'https://shop.aeternityuniverse.com',
     };
   },
   computed: {
