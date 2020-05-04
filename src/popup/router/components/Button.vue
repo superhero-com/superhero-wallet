@@ -132,5 +132,4 @@ export default {
     margin: 8px 10px;
   }
 }
-
 </style>

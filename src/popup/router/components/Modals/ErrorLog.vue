@@ -34,7 +34,7 @@ export default {
   computed: {
     message() {
       return this.error.message.substr(0, 150);
-    }
+    },
   },
   methods: {
     cancel() {
@@ -44,7 +44,7 @@ export default {
       this.resolve(true);
       this.$router.push({ name: 'donate-error', params: { error: this.error } });
     },
-  }
+  },
 };
 </script>
 

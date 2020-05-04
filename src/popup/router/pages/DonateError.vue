@@ -26,14 +26,14 @@ export default {
     browser() {
       const { name, os, version } = this.error.browser || {};
       return `${name}, Version ${version} (${os})`;
-    }
+    },
   },
   methods: {
     donate() {
       // TODO: make request to donate error here
     },
-  }
-}
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -49,7 +49,7 @@ export default {
 
   .error-info-title {
     text-transform: uppercase;
-    color: #5B5C63;
+    color: #5b5c63;
     text-align: left;
     font-size: 14px;
     margin: 0px 0px 15px;
