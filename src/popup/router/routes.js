@@ -27,6 +27,7 @@ import Networks from './pages/Networks';
 import CommentNew from './pages/CommentNew';
 import NotFound from './pages/NotFound';
 import ClaimTips from './pages/ClaimTips';
+import DonateError from './pages/DonateError';
 
 export default [
   {
@@ -266,4 +267,14 @@ export default [
       ifNotAuth: true,
     },
   },
+  {
+    name: 'donate-error',
+    path: '/donate-error',
+    component: DonateError,
+    props: true,
+    meta: {
+      title: 'donate-error',
+      notPersist: true,
+    }
+  }
 ];

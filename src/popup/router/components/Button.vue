@@ -4,7 +4,7 @@
     :to="to"
     class="primary-button"
     @click="$emit('click')"
-    :class="{ disabled, extend, half, small, onboarding, dark, third }"
+    :class="{ disabled, extend, half, small, onboarding, dark, third, inline }"
   >
     <slot />
   </Component>
@@ -20,6 +20,7 @@ export default {
     third: Boolean,
     onboarding: Boolean,
     dark: Boolean,
+    inline: Boolean,
     to: [String, Object],
   },
 };
@@ -42,78 +43,94 @@ export default {
   font-weight: normal !important;
   line-height: 40px !important;
   max-height: 40px;
-}
-.primary-button span {
-  color: $button-text-color !important;
-}
-.primary-button.disabled {
-  opacity: 0.4;
-  pointer-events: none;
-}
-.primary-button.extend {
-  // width: 304px !important;
-  width: 100% !important;
-}
-.primary-button.half {
-  // width: 148px !important;
-  width: 48% !important;
-  margin: 0 !important;
-  display: inline-block;
-}
-.primary-button.dark {
-  background: $box-button-color !important;
-}
-.primary-button.small {
-  width: auto !important;
-  line-height: 1px !important;
-  padding: 10px;
-  font-size: 12px;
-}
-.primary-button.third {
-  width: 32% !important;
-  margin: 0 !important;
-  max-height: 100px;
-  line-height: normal !important;
-  padding: 5px;
-  word-break: break-word;
-  display: inline-block;
-}
-.primary-button.small.third {
-  font-size: 12px;
-}
-.primary-button.confirm,
-.primary-button.danger {
-  background: $secondary-color !important;
-  color: $white-color !important;
-}
-.primary-button.onboarding {
-  width: 100px !important;
-  font-size: 14px;
-  height: 34px;
-  border-radius: 5px;
-  line-height: 34px !important;
-  background: $box-button-color !important;
-  margin: 0 !important;
-  margin-right: 10px !important;
-  font-weight: 500 !important;
-  color: #fff !important;
 
-  &:last-child {
-    margin-right: 0 !important;
+  span {
+    color: $button-text-color !important;
   }
 
-  &.skip {
-    background: #ff5857 !important;
+  &.disabled {
+    opacity: 0.4;
+    pointer-events: none;
   }
 
-  &.next {
+  &.extend {
+    width: 100% !important;
+  }
+
+  &.half {
+    width: 48% !important;
+    margin: 0 !important;
+    display: inline-block;
+  }
+
+  &.dark {
+    background: $box-button-color !important;
+  }
+
+  &.small {
+    width: auto !important;
+    line-height: 1px !important;
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  &.third {
+    width: 32% !important;
+    margin: 0 !important;
+    max-height: 100px;
+    line-height: normal !important;
+    padding: 5px;
+    word-break: break-word;
+    display: inline-block;
+  }
+
+  &.small.third {
+    font-size: 12px;
+  }
+
+  &.confirm,
+  &.danger {
     background: $secondary-color !important;
+    color: $white-color !important;
   }
 
-  &.start {
-    margin-left: auto !important;
-    margin-right: 0 !important;
-    background: $secondary-color !important;
+  &.onboarding {
+    width: 100px !important;
+    font-size: 14px;
+    height: 34px;
+    border-radius: 5px;
+    line-height: 34px !important;
+    background: $box-button-color !important;
+    margin: 0 !important;
+    margin-right: 10px !important;
+    font-weight: 500 !important;
+    color: #fff !important;
+
+    &:last-child {
+      margin-right: 0 !important;
+    }
+
+    &.skip {
+      background: #ff5857 !important;
+    }
+
+    &.next {
+      background: $secondary-color !important;
+    }
+
+    &.start {
+      margin-left: auto !important;
+      margin-right: 0 !important;
+      background: $secondary-color !important;
+    }
+  }
+
+  &.inline {
+    display: inline-block;
+    padding: 0 20px;
+    width: auto !important;
+    margin: 8px 10px;
   }
 }
+
 </style>
