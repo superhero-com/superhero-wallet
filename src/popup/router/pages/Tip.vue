@@ -144,6 +144,8 @@ export default {
       this.tipFromPopup = url.includes(browser.runtime.getURL('popup/popup.html'));
       if (url && !this.tipFromPopup) {
         this.url = url;
+      } else if (this.tipFromPopup) {
+        localStorage.removeItem('lsroute');
       }
     }
     await this.$watchUntilTruly(() => this.sdk && this.tippingAddress);
@@ -214,10 +216,7 @@ export default {
         throw e;
       } finally {
         this.loading = false;
-        if (this.tipFromPopup) {
-          localStorage.removeItem('lsroute');
-          window.close();
-        }
+        if (this.tipFromPopup) window.close();
       }
     },
     toEdit() {
