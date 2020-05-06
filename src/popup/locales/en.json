@@ -91,6 +91,12 @@
       "sub-message": "Are you sure you would like to send the tip anyway?",
       "send": "Send Tip"
     },
+    "error-log": {
+      "title": "Something went wrong",
+      "sub-title": "Be a Superhero!",
+      "content": "Provide more information about the error  encountered so we can improve our superpowers. No personal data will be collected.",
+      "create-report": "Create report"
+    },
     "cancel": "Cancel",
     "confirm": "Confirm",
     "ok": "OK"
@@ -154,7 +160,8 @@
       "bidding": "Bidding",
       "networks": "Networks",
       "comment-new": "Add comment",
-      "home": "Superhero Home"
+      "home": "Superhero Home",
+      "donate-error": "Donate Data"
     },
     "appVUE": {
       "systemName": "Superhero",
@@ -835,6 +842,15 @@
       "networkMiddlewarePlaceholder": "Enter network middleware url",
       "networkMiddlewareLabel": "Network middleware",
       "save": "Connect"
+    },
+    "donate-error": {
+      "error-report": "Error Report:",
+      "error-placeholder": "Describe what were your actions before the error occurred (optional).",
+      "data-collected": "Data Collected",
+      "browser": "Browser version",
+      "details": "Technical details:",
+      "cancel": "Cancel",
+      "donate": "Donate Data"
     }
   }
 }
