@@ -2,8 +2,8 @@ import '../../../src/lib/initPolyfills';
 import uuid from 'uuid';
 import { formatDate, mockLogin, mockLogout } from '../../../src/popup/utils';
 
-Cypress.Commands.add('openPopup', onBeforeLoad => {
-  cy.visit('chrome/popup/popup', { onBeforeLoad });
+Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
+  cy.visit(`chrome/popup/popup${route ? `#${route}` : ''}`, { onBeforeLoad });
 });
 
 Cypress.Commands.add('openAex2Popup', (type, txType) => {
@@ -105,8 +105,8 @@ Cypress.Commands.add('accordionItemShould', (item, cond) => {
     .should(cond);
 });
 
-Cypress.Commands.add('login', (options = { balance: 10 }) => {
-  cy.openPopup(async () => mockLogin(options));
+Cypress.Commands.add('login', (options = { balance: 10 }, route) => {
+  cy.openPopup(async () => mockLogin(options), route);
 });
 
 Cypress.Commands.add('logout', () => {
