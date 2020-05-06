@@ -65,5 +65,10 @@ textarea {
   &.h-50 {
     min-height: 100px !important;
   }
+
+  &.medium {
+    font-size: 15px;
+    min-height: 150px !important;
+  }
 }
 </style>

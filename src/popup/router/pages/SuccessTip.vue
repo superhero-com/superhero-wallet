@@ -84,11 +84,13 @@ export default {
         return { data: [] };
       })
     ).data;
-    const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
-    if (addresses.length) {
-      await axios
-        .post(TIP_SERVICE, { url: tab.url, address: addresses[0] })
-        .catch(error => Logger.write(error));
+    if (process.env.IS_EXTENSION) {
+      const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
+      if (addresses.length) {
+        await axios
+          .post(TIP_SERVICE, { url: tab.url, address: addresses[0] })
+          .catch(error => Logger.write(error));
+      }
     }
   },
   methods: {
