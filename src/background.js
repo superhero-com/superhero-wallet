@@ -36,6 +36,17 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
     tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message));
   };
 
+  const openTipPopup = pageUrl => {
+    const url = `/tip?url=${pageUrl}`;
+    localStorage.setItem('tipUrl', url);
+    browser.windows.create({
+      url: `popup/popup.html#${url}`,
+      type: 'popup',
+      height: 600,
+      width: 375,
+    });
+  };
+
   browser.runtime.onMessage.addListener(async (msg, sender) => {
     const { method, params, from, type, data } = msg;
     if (method === 'phishingCheck') {
@@ -65,13 +76,13 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
       return true;
     }
 
-    if (from === 'content' && type === 'readDom' && (data.address || data.chainName)) {
-      const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-      tabs.forEach(({ url }) => {
-        if (sender.url === url && DEFAULT_NETWORK === 'Mainnet') {
+    if (from === 'content') {
+      const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });
+      if (type === 'readDom' && (data.address || data.chainName)) {
+        if (sender.url === url && DEFAULT_NETWORK === 'Mainnet')
           TipClaimRelay.checkUrlHasBalance(url, data);
-        }
-      });
+      }
+      if (type === 'openTipPopup') openTipPopup(url);
     }
 
     return true;
@@ -123,16 +134,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
   browser.contextMenus.removeAll();
   browser.contextMenus.create(contextMenuItem);
   browser.contextMenus.onClicked.addListener(({ menuItemId, pageUrl }) => {
-    if (menuItemId === 'superheroTip') {
-      const url = `/tip?url=${pageUrl}`;
-      localStorage.setItem('tipUrl', url);
-      browser.windows.create({
-        url: `popup/popup.html#${url}`,
-        type: 'popup',
-        height: 600,
-        width: 375,
-      });
-    }
+    if (menuItemId === 'superheroTip') openTipPopup(pageUrl);
   });
 }
 

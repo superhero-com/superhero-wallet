@@ -11,16 +11,20 @@ export default {
   setListener() {
     browser.webRequest.onBeforeRequest.addListener(
       requestDetails => {
-        const url = new URL(requestDetails.url);
-        const params = url.searchParams
-          .get('q')
-          .trim()
-          .toLowerCase();
-        const q = new URL(`${url.protocol}//${params}`);
-        if (!q.hostname || !this.supportedDomain(q.hostname) || url.pathname !== '/search') {
+        try {
+          const url = new URL(requestDetails.url);
+          const params = url.searchParams
+            .get('q')
+            .trim()
+            .toLowerCase();
+          const q = new URL(`${url.protocol}//${params}`);
+          if (!q.hostname || !this.supportedDomain(q.hostname) || url.pathname !== '/search') {
+            return {};
+          }
+          return { redirectUrl: q.toString() };
+        } catch (e) {
           return {};
         }
-        return { redirectUrl: q.toString() };
       },
       {
         urls: ['*://*.google.com/*'],
