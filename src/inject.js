@@ -102,6 +102,18 @@ browser.runtime.onMessage.addListener(({ data }) => {
   }
 });
 
+const openTip = async e => {
+  e.preventDefault();
+  browser.runtime.sendMessage({ from: 'content', type: 'openTipPopup' });
+};
+
+const setWidgetClickListner = () => {
+  const link = document.getElementById('superhero-tip-link');
+  if (link) {
+    link.addEventListener('click', openTip);
+  }
+};
+
 /**
  * Aex-2 Aepp communication
  */
@@ -127,5 +139,6 @@ const readyStateCheckInterval = setInterval(() => {
     });
     const bridge = ContentScriptBridge({ pageConnection, extConnection });
     bridge.run();
+    setWidgetClickListner();
   }
 }, 10);
