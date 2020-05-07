@@ -109,7 +109,6 @@ export default {
       },
       {
         route: '/account',
-        hide: !process.env.IS_EXTENSION,
         target: '.tour__step4 .button-content',
         step: 4,
         params: {
