@@ -53,7 +53,7 @@ export default class Logger {
     if (!saveErrorLog) return;
     const errorLog = await Logger.get();
     const logEntry = {
-      ...pick(error, ['name', ...Object.getOwnPropertyNames(error)]),
+      error: { ...pick(error, ['name', ...Object.getOwnPropertyNames(error)]) },
       appVersion: process.env.npm_package_version,
       browser: detect(),
       platform: process.env.PLATFORM,

@@ -28,12 +28,16 @@ export default {
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
-    error: { type: Object, required: true },
+    entry: { type: Object, required: true },
   },
   components: { Modal },
   computed: {
     message() {
-      return this.error.message.substr(0, 150);
+      const { message = '' } = this.error;
+      return message.substr(0, 150);
+    },
+    error() {
+      return this.entry.error;
     },
   },
   methods: {
@@ -42,7 +46,7 @@ export default {
     },
     createReport() {
       this.resolve(true);
-      this.$router.push({ name: 'donate-error', params: { error: this.error } });
+      this.$router.push({ name: 'donate-error', params: { entry: this.entry } });
     },
   },
 };

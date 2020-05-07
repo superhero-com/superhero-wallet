@@ -113,8 +113,8 @@ export default {
     if (this.notificationsCounter !== 0)
       this.$store.commit('SET_NOTIFICATIONS_COUNTER', this.notifications.length);
 
-    EventBus.$on('error', async error => {
-      this.$store.dispatch('modals/open', { name: 'error-log', error }).catch(() => false);
+    EventBus.$on('error', async entry => {
+      this.$store.dispatch('modals/open', { name: 'error-log', entry }).catch(() => false);
     });
   },
   methods: {
