@@ -2,10 +2,14 @@ import { pick } from 'lodash-es';
 import Vue from 'vue';
 import { detect } from 'detect-browser';
 import { getState } from '../store/plugins/persistState';
+import { EventBus } from '../popup/utils/eventBus';
 
 export default class Logger {
+  static background;
+
   static init(options = {}) {
     const { background } = options;
+    Logger.background = background;
     if (!background) {
       Vue.config.errorHandler = (error, vm, info) => {
         console.error(info);
@@ -26,7 +30,7 @@ export default class Logger {
     }
 
     window.addEventListener('unhandledrejection', promise => {
-      const { stack, message } = promise.reason;
+      const { stack, message } = promise.reason || {};
       Logger.write({
         message,
         stack,
@@ -56,6 +60,9 @@ export default class Logger {
       time: Date.now(),
     };
     browser.storage.local.set({ errorLog: [...errorLog, logEntry] });
+    if (!Logger.background) {
+      EventBus.$emit('error', logEntry);
+    }
   }
 
   static async get() {
