@@ -18,7 +18,7 @@
               v-model="form.address"
               placeholder="ak.. / name.chain"
               size="h-50"
-            ></Textarea>
+            />
             <div class="scan" data-cy="scan-button" @click="scan">
               <QrIcon />
               <small>{{ $t('pages.send.scan') }}</small>
