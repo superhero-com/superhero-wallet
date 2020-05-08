@@ -11,6 +11,7 @@ import {
 } from '../popup/utils/helper';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
 import { BACKEND_URL } from '../popup/utils/constants';
+import Backend from '../lib/backend';
 
 export default {
   setAccount({ commit }, payload) {
@@ -64,12 +65,23 @@ export default {
   updateLatestTransactions({ commit }, payload) {
     commit(types.UPDATE_LATEST_TRANSACTIONS, payload);
   },
-  setAccountName({ commit }, payload) {
-    commit(types.SET_ACCOUNT_AENS, {
-      account: 0,
-      aename: payload.name,
-      pending: false,
-    });
+  async setAccountName({ commit, state }, { account = 0, aename = null, pending = false }) {
+    commit(types.SET_ACCOUNT_AENS, { account, aename, pending });
+
+    if (aename) {
+      const response = await Backend.sendProfileData({
+        author: state.account.publicKey,
+        preferredChainName: aename,
+      });
+      const signedChallenge = Buffer.from(await state.sdk.signMessage(response.challenge)).toString(
+        'hex',
+      );
+      const respondChallenge = {
+        challenge: response.challenge,
+        signature: signedChallenge,
+      };
+      await Backend.sendProfileData(respondChallenge);
+    }
   },
   initSdk({ commit }, payload) {
     commit(types.INIT_SDK, payload);
@@ -119,14 +131,14 @@ export default {
           if (!process.env.RUNNING_IN_TESTS) {
             if (names.length) {
               if (!getters.activeAccountName.includes('.chain')) {
-                commit(types.SET_ACCOUNT_AENS, {
+                await dispatch('setAccountName', {
                   account: index,
                   aename: names[0].name,
                   pending: !!names[0].pending,
                 });
               }
             } else {
-              commit(types.SET_ACCOUNT_AENS, { account: index, aename: null, pending: false });
+              dispatch('setAccountName', { account: index });
             }
           }
           return names;
