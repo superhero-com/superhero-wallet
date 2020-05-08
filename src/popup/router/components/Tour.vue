@@ -21,7 +21,7 @@
             <template>
               <div slot="header" class="step-header">
                 {{ $t(`onboarding.step_${step.step}.title`) }}
-                <span class="step-info"> ({{ step.step }}/10) </span>
+                <span class="step-info"> ({{ step.step }}/{{ steps.length }}) </span>
               </div>
               <div
                 slot="content"
