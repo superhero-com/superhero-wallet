@@ -66,11 +66,7 @@ export default {
     commit(types.UPDATE_LATEST_TRANSACTIONS, payload);
   },
   async setAccountName({ commit, state }, { account, aename, pending }) {
-    commit(types.SET_ACCOUNT_AENS, {
-      account,
-      aename,
-      pending,
-    });
+    commit(types.SET_ACCOUNT_AENS, { account, aename, pending });
 
     if (aename) {
       try {
