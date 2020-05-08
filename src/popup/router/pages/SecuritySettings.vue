@@ -144,7 +144,6 @@ export default {
       'mnemonic',
     ]),
   },
-  created() {},
   methods: {
     async seedPhraseRecovery() {
       this.type = '3';

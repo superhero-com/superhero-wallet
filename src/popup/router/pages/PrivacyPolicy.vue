@@ -352,17 +352,6 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {};
-  },
-  created() {},
-  methods: {},
-  computed: {},
-};
-</script>
-
 <style lang="scss" scoped>
 .privacypolicy--content {
   text-align: left;

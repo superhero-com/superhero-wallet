@@ -55,7 +55,6 @@ export default {
   computed: {
     ...mapGetters(['account', 'isLoggedIn', 'wallet', 'tokens']),
   },
-  mounted() {},
   methods: {
     generwateWalletIntro() {
       this.$router.push('/intro');
