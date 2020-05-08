@@ -298,9 +298,8 @@ export default {
     }, 3000);
   },
   methods: {
-    async setActiveName(name) {
-      const aename = name.name;
-      await this.$store.dispatch('setAccountName', { name: aename });
+    setActiveName({ name }) {
+      this.$store.dispatch('setAccountName', { aename: name });
     },
     address(name) {
       return getAddressByNameEntry(name);

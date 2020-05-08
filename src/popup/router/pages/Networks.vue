@@ -105,7 +105,8 @@ export default {
     async selectNetwork(network) {
       await this.$store.dispatch('switchNetwork', network);
       this.$store.commit('SET_NODE_STATUS', 'connecting');
-      postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload: network });
+      if (process.env.IS_EXTENSION)
+        postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload: network });
       await wallet.initSdk();
     },
     cancel() {

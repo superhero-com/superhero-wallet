@@ -16,10 +16,6 @@
       <Button @click="bugReport">
         {{ $t('pages.appVUE.reportBug') }}
       </Button>
-
-      <Button @click="donateErrors">
-        {{ $t('pages.appVUE.donateErrorReports') }}
-      </Button>
     </div>
   </div>
 </template>
@@ -27,7 +23,6 @@
 <script>
 import Logo from '../../../icons/logo.svg?vue-component';
 import openUrl from '../../utils/openUrl';
-import Logger from '../../../lib/logger';
 
 export default {
   components: {
@@ -42,9 +37,6 @@ export default {
   methods: {
     bugReport() {
       openUrl(this.bugReportURL);
-    },
-    async donateErrors() {
-      Logger.sendLog();
     },
   },
 };

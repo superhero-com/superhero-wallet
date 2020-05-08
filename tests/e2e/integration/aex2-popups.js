@@ -2,7 +2,6 @@ import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import { popupProps, txParams } from '../../../src/popup/utils/config';
 
 const popups = ['connectConfirm', 'sign', 'messageSign'];
-
 const txTypes = [TX_TYPE.spend, TX_TYPE.contractCall, TX_TYPE.contractCreate];
 
 describe('Tests cases for AEX-2 popups', () => {
@@ -12,7 +11,7 @@ describe('Tests cases for AEX-2 popups', () => {
 
   popups.forEach(popup => {
     it(`Open ${popup} popup`, () => {
-      cy.openAex2Popup(popup);
+      cy.openAex2Popup(popup, TX_TYPE.spend);
     });
   });
 
@@ -45,7 +44,7 @@ describe('Tests cases for AEX-2 popups', () => {
 
   popups.forEach(popup => {
     it(`${popup} popup send deny action`, () => {
-      cy.openAex2Popup(popup)
+      cy.openAex2Popup(popup, TX_TYPE.spend)
         .get('[data-cy=deny]')
         .click()
         .window()
@@ -57,7 +56,7 @@ describe('Tests cases for AEX-2 popups', () => {
 
   popups.forEach(popup => {
     it(`${popup} popup send accept action`, () => {
-      cy.openAex2Popup(popup)
+      cy.openAex2Popup(popup, TX_TYPE.spend)
         .get('[data-cy=accept]')
         .click()
         .window()

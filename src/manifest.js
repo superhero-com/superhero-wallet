@@ -44,7 +44,7 @@ module.exports = (isProd, platform) => ({
   content_scripts: [
     {
       run_at: 'document_start',
-      all_frames: !isProd && platform === 'extension-chrome',
+      all_frames: true,
       matches: ['https://*/*', 'http://*/*'],
       js: ['other/inject.js'],
     },

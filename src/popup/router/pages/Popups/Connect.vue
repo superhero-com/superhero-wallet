@@ -3,7 +3,7 @@
     <div class="flex identiconContainer">
       <div class="identicon">
         <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
-        <ae-identicon :address="data.host" size="base" v-if="imageError" />
+        <ae-identicon :address="data.host || ''" size="base" v-if="imageError" />
         <div class="accountName" data-cy="name">{{ data.name }}</div>
         <div class="hostname" data-cy="host">{{ data.host }}</div>
       </div>
