@@ -99,7 +99,11 @@ if (!process.env.IS_EXTENSION) {
     window.IonicDeeplink.onDeepLink(async ({ url }) => {
       const prefix = ['superhero:', 'https://wallet.superhero.com/'].find(p => url.startsWith(p));
       if (!prefix) throw new Error(`Unknown url: ${url}`);
-      router.push(`/${url.slice(prefix.length)}`);
+      try {
+        await router.push(`/${url.slice(prefix.length)}`);
+      } catch (error) {
+        if (error.name !== 'NavigationDuplicated') throw error;
+      }
     });
   });
 }
