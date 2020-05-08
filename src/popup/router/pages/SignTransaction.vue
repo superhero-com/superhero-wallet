@@ -105,8 +105,6 @@ export default {
       alertMsg: '',
       loading: false,
       selectedFee: 0,
-      usdRate: 0,
-      receiver: '',
       txParams: {},
     };
   },

@@ -101,7 +101,6 @@ export default {
       minCallFee: null,
       editUrl: true,
       IS_EXTENSION: process.env.IS_EXTENSION,
-      RUNNING_IN_TESTS: process.env.RUNNING_IN_TESTS,
       tipFromPopup: false,
     };
   },

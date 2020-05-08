@@ -95,7 +95,6 @@ export default {
     return {
       mode: 'list',
       network: networkProps,
-      active: 'Testnet',
     };
   },
   computed: mapGetters(['networks', 'current']),
