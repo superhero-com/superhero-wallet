@@ -98,9 +98,7 @@ export default {
       active: 'Testnet',
     };
   },
-  computed: {
-    ...mapGetters(['networks', 'current']),
-  },
+  computed: mapGetters(['networks', 'current']),
   methods: {
     async selectNetwork(network) {
       await this.$store.dispatch('switchNetwork', network);

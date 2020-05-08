@@ -22,9 +22,7 @@ import { mapGetters } from 'vuex';
 
 export default {
   props: ['myTokens', 'txFee', 'amount', 'error'],
-  computed: {
-    ...mapGetters(['current']),
-  },
+  computed: mapGetters(['current']),
   watch: {
     amount(val) {
       this.$emit('update', val);

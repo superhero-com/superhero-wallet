@@ -31,9 +31,7 @@
 import { mapGetters } from 'vuex';
 
 export default {
-  computed: {
-    ...mapGetters(['nodeStatus', 'account', 'isLoggedIn']),
-  },
+  computed: mapGetters(['nodeStatus', 'account', 'isLoggedIn']),
 };
 </script>
 

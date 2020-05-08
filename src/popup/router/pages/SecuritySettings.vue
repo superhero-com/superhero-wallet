@@ -130,20 +130,18 @@ export default {
       seed_verified: false,
     };
   },
-  computed: {
-    ...mapGetters([
-      'account',
-      'balance',
-      'network',
-      'current',
-      'transactions',
-      'subaccounts',
-      'wallet',
-      'activeAccountName',
-      'activeAccount',
-      'mnemonic',
-    ]),
-  },
+  computed: mapGetters([
+    'account',
+    'balance',
+    'network',
+    'current',
+    'transactions',
+    'subaccounts',
+    'wallet',
+    'activeAccountName',
+    'activeAccount',
+    'mnemonic',
+  ]),
   methods: {
     async seedPhraseRecovery() {
       this.type = '3';
