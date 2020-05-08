@@ -58,7 +58,7 @@ export default {
               .catch(() => 1),
           ),
         );
-        if (!claimAmount) throw new Error('No zero amount claims');
+        if (!claimAmount) throw new Error('NO_ZERO_AMOUNT_PAYOUT');
         await axios.post(TIP_SERVICE, { url, address: this.account.publicKey });
         await axios.get(`${BACKEND_URL}/cache/invalidate/tips`).catch(console.error);
         await axios.get(`${BACKEND_URL}/cache/invalidate/oracle`).catch(console.error);
@@ -69,7 +69,10 @@ export default {
         let msg;
         if (error.includes('MORE_ORACLES_NEEDED')) msg = this.$t('pages.claim.moreOracles');
         else if (error.includes('URL_NOT_EXISTING')) msg = this.$t('pages.claim.urlNotExisting');
-        else if (error.includes('NO_ZERO_AMOUNT_PAYOUT') || error.includes('No zero amount claims'))
+        else if (
+          error.includes('NO_ZERO_AMOUNT_PAYOUT') ||
+          e.message.includes('NO_ZERO_AMOUNT_PAYOUT')
+        )
           msg = this.$t('pages.claim.noZeroClaim');
         else if (error.includes('ORACLE_SEVICE_CHECK_CLAIM_FAILED'))
           msg = this.$t('pages.claim.oracleFailed');
