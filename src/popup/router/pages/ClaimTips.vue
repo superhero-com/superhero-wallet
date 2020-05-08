@@ -82,8 +82,6 @@ export default {
       } catch (e) {
         const msg = e.message.replace('Error: ', '');
         this.$store.dispatch('modals/open', { name: 'default', msg });
-        e.payload = { url };
-        throw e;
       } finally {
         this.loading = false;
       }
