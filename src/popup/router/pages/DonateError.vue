@@ -55,7 +55,7 @@ export default {
           ...this.$t('modals.donate-errors-error'),
         });
       } finally {
-        this.$router.push('/');
+        this.$router.push('/account');
       }
     },
   },
