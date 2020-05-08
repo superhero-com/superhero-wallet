@@ -65,7 +65,7 @@ export default {
   updateLatestTransactions({ commit }, payload) {
     commit(types.UPDATE_LATEST_TRANSACTIONS, payload);
   },
-  async setAccountName({ commit, state }, { account, aename, pending }) {
+  async setAccountName({ commit, state }, { account = 0, aename = null, pending = false }) {
     commit(types.SET_ACCOUNT_AENS, { account, aename, pending });
 
     if (aename) {
@@ -142,11 +142,7 @@ export default {
                 });
               }
             } else {
-              dispatch('setAccountName', {
-                account: index,
-                aename: null,
-                pending: false,
-              });
+              dispatch('setAccountName', { account: index });
             }
           }
           return names;

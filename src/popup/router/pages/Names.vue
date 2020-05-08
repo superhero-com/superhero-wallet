@@ -299,7 +299,7 @@ export default {
   },
   methods: {
     setActiveName({ name }) {
-      this.$store.dispatch('setAccountName', { aename: name, account: 0, pending: false });
+      this.$store.dispatch('setAccountName', { aename: name });
     },
     address(name) {
       return getAddressByNameEntry(name);
