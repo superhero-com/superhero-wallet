@@ -1,7 +1,7 @@
 <template>
   <div class="claim-tips popup">
     <p class="primary-title text-left mb-8 f-16">
-      URL to claim tips for
+      {{ $t('pages.claimTips.urlToClaim') }}
     </p>
     <Input size="m-0 sm" v-model="url" :error="!normalizedUrl" />
 
