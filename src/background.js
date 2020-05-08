@@ -21,8 +21,9 @@ import WalletController from './wallet-controller';
 import Logger from './lib/logger';
 
 const controller = new WalletController();
+const inBackground = window.location.href.includes('_generated_background_page.html');
 
-if (process.env.IS_EXTENSION && require.main.i === module.id) {
+if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
   Logger.init({ background: true });
   RedirectChainNames.init();
 
