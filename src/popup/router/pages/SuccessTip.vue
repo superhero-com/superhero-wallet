@@ -80,7 +80,7 @@ export default {
   async created() {
     this.verifiedUrls = (
       await axios.get(`${BACKEND_URL}/verified`).catch(error => {
-        Logger.write(error);
+        Logger.write({ ...error, modal: false });
         return { data: [] };
       })
     ).data;
@@ -89,7 +89,7 @@ export default {
       if (addresses.length) {
         await axios
           .post(TIP_SERVICE, { url: tab.url, address: addresses[0] })
-          .catch(error => Logger.write(error));
+          .catch(error => Logger.write({ ...error, modal: false }));
       }
     }
   },
