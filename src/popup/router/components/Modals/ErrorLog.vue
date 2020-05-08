@@ -33,7 +33,8 @@ export default {
   components: { Modal },
   computed: {
     message() {
-      return this.error.message.substr(0, 150);
+      const { message = '' } = this.error;
+      return message.substr(0, 150);
     },
   },
   methods: {

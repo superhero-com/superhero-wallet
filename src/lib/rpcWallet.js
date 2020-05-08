@@ -93,42 +93,39 @@ const rpcWallet = {
         name: 'Superhero',
         accounts: this.accounts,
         async onConnection(aepp, action) {
-          context.shouldOpenPopup(aepp, action, () => {
-            context.checkAeppPermissions(aepp, action, 'connection');
-          });
+          const open = await context.shouldOpenPopup(aepp, action);
+          if (open) context.checkAeppPermissions(aepp, action, 'connection');
         },
         onDisconnect(msg, client) {
           client.disconnect();
         },
         async onSubscription(aepp, action) {
-          context.shouldOpenPopup(aepp, action, () => {
-            context.checkAeppPermissions(aepp, action, 'subscription');
-          });
+          const open = await context.shouldOpenPopup(aepp, action);
+          if (open) context.checkAeppPermissions(aepp, action, 'subscription');
         },
         async onSign(aepp, action) {
-          context.shouldOpenPopup(aepp, action, () => {
-            context.checkAeppPermissions(aepp, action, 'sign', () => {
-              setTimeout(() => {
-                context.showPopup({ aepp, action, type: 'sign' });
-              }, 2000);
-            });
-          });
+          const open = await context.shouldOpenPopup(aepp, action);
+          if (open) {
+            context.checkAeppPermissions(aepp, action, 'sign', () =>
+              setTimeout(() => context.showPopup({ aepp, action, type: 'sign' }), 2000),
+            );
+          }
         },
         async onMessageSign(aepp, action) {
-          context.shouldOpenPopup(aepp, action, () => {
-            context.checkAeppPermissions(aepp, action, 'messageSign', () => {
-              context.showPopup({ aepp, action, type: 'messageSign' });
-            });
-          });
+          const open = await context.shouldOpenPopup(aepp, action);
+          if (open) {
+            context.checkAeppPermissions(aepp, action, 'messageSign', () =>
+              context.showPopup({ aepp, action, type: 'messageSign' }),
+            );
+          }
         },
-        onAskAccounts(aepp, action) {
-          context.shouldOpenPopup(aepp, action, () => {
-            context.checkAeppPermissions(aepp, action, 'accounts', () => {
-              setTimeout(() => {
-                context.showPopup({ aepp, action, type: 'askAccounts' });
-              }, 2000);
-            });
-          });
+        async onAskAccounts(aepp, action) {
+          const open = await context.shouldOpenPopup(aepp, action);
+          if (open) {
+            context.checkAeppPermissions(aepp, action, 'accounts', () =>
+              setTimeout(() => context.showPopup({ aepp, action, type: 'askAccounts' }), 2000),
+            );
+          }
         },
       });
 
@@ -158,7 +155,7 @@ const rpcWallet = {
     } = aepp;
     return extractHostName(url);
   },
-  async shouldOpenPopup(aepp, action, cb) {
+  async shouldOpenPopup(aepp, action) {
     const { isTip, amount } = getContractCallInfo(action.params.tx, this.tipContractAddress);
     const origin = this.getAeppOrigin(aepp);
     if (BLACKLIST_AEPPS.includes(origin)) {
@@ -168,28 +165,28 @@ const rpcWallet = {
       if (isTip) {
         const tippedAmount = await getTippedAmount();
         if (tippedAmount >= MAX_AMOUNT_WITHOUT_CONFIRM) {
-          cb();
           resetTippedAmount();
-        } else {
-          action.accept();
-          await addTipAmount(amount);
+          return true;
         }
+        action.accept();
+        await addTipAmount(amount);
       } else {
         action.accept();
       }
     } else {
-      // open popup
-      cb();
+      return true;
     }
+    return false;
   },
   sdkReady() {
     return this.sdk;
   },
   addConnectionToQueue(port) {
+    if (!this.connectionsQueue) this.connectionsQueue = [];
     this.connectionsQueue.push(port);
   },
   removeConnectionFromQueue(port) {
-    this.connectionsQueue = this.connectionsQueue.filter(p => p.uuid !== port.uuid);
+    this.connectionsQueue = this.connectionsQueue.filter(p => p.uuid !== port.uuid) || [];
   },
   async checkAeppPermissions(aepp, action, caller, cb) {
     const {
@@ -220,7 +217,26 @@ const rpcWallet = {
 
   async showPopup({ action, aepp, type = 'connectConfirm' }) {
     const id = uuid();
-    const popupUrl = `${browser.runtime.getURL('./popup/popup.html')}?id=${id}&type=${type}`;
+    const {
+      connection: {
+        port: {
+          sender: { url },
+        },
+      },
+      info: { icons, name },
+    } = aepp;
+    const tabs = await browser.tabs.query({ active: true });
+    tabs.forEach(({ url: tabURL, id: tabId }) => {
+      const tabUrl = new URL(tabURL);
+      if (
+        tabUrl.searchParams.get('type') === 'connectConfirm' &&
+        decodeURIComponent(tabUrl.searchParams.get('url')) === url
+      ) {
+        browser.tabs.remove(tabId);
+      }
+    });
+    const extUrl = browser.runtime.getURL('./popup/popup.html');
+    const popupUrl = `${extUrl}?id=${id}&type=${type}&url=${encodeURIComponent(url)}`;
     const popupWindow = await browser.windows.create({
       url: popupUrl,
       type: 'popup',
@@ -233,14 +249,6 @@ const rpcWallet = {
       try {
         this.popups.addPopup(id, this.controller);
         this.popups.addActions(id, { ...action, resolve, reject });
-        const {
-          connection: {
-            port: {
-              sender: { url },
-            },
-          },
-          info: { icons, name },
-        } = aepp;
         const { protocol } = new URL(url);
         this.popups.setAeppInfo(id, {
           type,

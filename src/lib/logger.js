@@ -31,8 +31,13 @@ export default class Logger {
 
     window.addEventListener('unhandledrejection', promise => {
       const { stack, message } = promise.reason || {};
+      if (
+        typeof promise.reason === 'string' &&
+        promise.reason.includes('CompileError: WebAssembly.instantiate()')
+      )
+        return;
       Logger.write({
-        message,
+        message: typeof promise.reason === 'string' ? promise.reason : message,
         stack,
         type: 'unhandledrejection',
       });
