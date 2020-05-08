@@ -19,13 +19,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import axios from 'axios';
-import {
-  aettosToAe,
-  toURL,
-  validateTipUrl,
-  isNotFoundError,
-  isInternalServerError,
-} from '../../utils/helper';
+import { aettosToAe, toURL, validateTipUrl } from '../../utils/helper';
 import { TIP_SERVICE, BACKEND_URL } from '../../utils/constants';
 import Input from '../components/Input';
 
@@ -64,34 +58,26 @@ export default {
               .catch(() => 1),
           ),
         );
-        if (!claimAmount) throw new Error(this.$t('pages.claim.noZeroClaim'));
-        await axios.post(TIP_SERVICE, { url, address: this.account.publicKey }).catch(e => {
-          const { error = '' } = e.response.data;
-          if (error.includes('MORE_ORACLES_NEEDED'))
-            throw new Error(this.$t('pages.claim.moreOracles'));
-          else if (error.includes('URL_NOT_EXISTING'))
-            throw new Error(this.$t('pages.claim.urlNotExisting'));
-          else if (
-            error.includes('NO_ZERO_AMOUNT_PAYOUT') ||
-            error.includes('No zero amount claims')
-          )
-            throw new Error(this.$t('pages.claim.noZeroClaim'));
-          else if (error.includes('ORACLE_SEVICE_CHECK_CLAIM_FAILED'))
-            throw new Error(this.$t('pages.claim.oracleFailed'));
-          else if (error) throw new Error(error);
-          else throw e;
-        });
+        if (!claimAmount) throw new Error('No zero amount claims');
+        await axios.post(TIP_SERVIC, { url, address: this.account.publicKey })
         await axios.get(`${BACKEND_URL}/cache/invalidate/tips`).catch(console.error);
         await axios.get(`${BACKEND_URL}/cache/invalidate/oracle`).catch(console.error);
         this.$store.dispatch('modals/open', { name: 'claim-success', url, claimAmount });
         this.$router.push({ name: 'account' });
       } catch (e) {
-        if (isNotFoundError(e) || isInternalServerError(e)) {
+        const { error = '' } = e.response ? e.response.data : {};
+        let msg;
+        if (error.includes('MORE_ORACLES_NEEDED')) msg = this.$t('pages.claim.moreOracles');
+        else if (error.includes('URL_NOT_EXISTING')) msg = this.$t('pages.claim.urlNotExisting');
+        else if (error.includes('NO_ZERO_AMOUNT_PAYOUT') || error.includes('No zero amount claims'))
+          msg = this.$t('pages.claim.noZeroClaim');
+        else if (error.includes('ORACLE_SEVICE_CHECK_CLAIM_FAILED'))
+          msg = this.$t('pages.claim.oracleFailed');
+        else if (error) msg = error;
+        if (msg) this.$store.dispatch('modals/open', { name: 'default', msg });
+        else {
           e.payload = { url };
           throw e;
-        } else {
-          const msg = e.message.replace('Error: ', '');
-          this.$store.dispatch('modals/open', { name: 'default', msg });
         }
       } finally {
         this.loading = false;
