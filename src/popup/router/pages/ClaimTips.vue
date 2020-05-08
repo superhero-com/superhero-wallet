@@ -59,7 +59,7 @@ export default {
           ),
         );
         if (!claimAmount) throw new Error('No zero amount claims');
-        await axios.post(TIP_SERVIC, { url, address: this.account.publicKey })
+        await axios.post(TIP_SERVICE, { url, address: this.account.publicKey });
         await axios.get(`${BACKEND_URL}/cache/invalidate/tips`).catch(console.error);
         await axios.get(`${BACKEND_URL}/cache/invalidate/oracle`).catch(console.error);
         this.$store.dispatch('modals/open', { name: 'claim-success', url, claimAmount });
