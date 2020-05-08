@@ -2,10 +2,14 @@ import { pick } from 'lodash-es';
 import Vue from 'vue';
 import { detect } from 'detect-browser';
 import { getState } from '../store/plugins/persistState';
+import { EventBus } from '../popup/utils/eventBus';
 
 export default class Logger {
+  static background;
+
   static init(options = {}) {
     const { background } = options;
+    Logger.background = background;
     if (!background) {
       Vue.config.errorHandler = (error, vm, info) => {
         console.error(info);
@@ -26,9 +30,14 @@ export default class Logger {
     }
 
     window.addEventListener('unhandledrejection', promise => {
-      const { stack, message } = promise.reason;
+      const { stack, message } = promise.reason || {};
+      if (
+        typeof promise.reason === 'string' &&
+        promise.reason.includes('CompileError: WebAssembly.instantiate()')
+      )
+        return;
       Logger.write({
-        message,
+        message: typeof promise.reason === 'string' ? promise.reason : message,
         stack,
         type: 'unhandledrejection',
       });
@@ -49,13 +58,16 @@ export default class Logger {
     if (!saveErrorLog) return;
     const errorLog = await Logger.get();
     const logEntry = {
-      ...pick(error, ['name', ...Object.getOwnPropertyNames(error)]),
+      error: { ...pick(error, ['name', ...Object.getOwnPropertyNames(error)]) },
       appVersion: process.env.npm_package_version,
       browser: detect(),
       platform: process.env.PLATFORM,
       time: Date.now(),
     };
     browser.storage.local.set({ errorLog: [...errorLog, logEntry] });
+    if (!Logger.background) {
+      EventBus.$emit('error', logEntry);
+    }
   }
 
   static async get() {

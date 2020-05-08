@@ -18,7 +18,7 @@
             class="spendAccountAddr"
             data-cy="address-receiver"
           />
-          <span v-if="!receiver" class="spendAccountAddr">{{
+          <span v-else class="spendAccountAddr">{{
             $t('pages.signTransaction.unknownAccount')
           }}</span>
         </div>
@@ -199,7 +199,7 @@ export default {
       return true;
     },
     txObject() {
-      return this.unpackedTx.tx;
+      return this.unpackedTx ? this.unpackedTx.tx : {};
     },
     amount() {
       return this.txObject.amount;

@@ -1,4 +1,4 @@
-// copied from https://github.com/aeternity/aepp-raendom/blob/246c75e6fb773cbe8cfe3960975779ab9d81186c/src/utils/backend.js
+// copied from https://github.com/aeternity/superhero-ui/blob/178bc2d63cb362ddc3b2163fed58deb2e253ec00/src/utils/backend.js
 
 const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
 
@@ -25,9 +25,9 @@ export default class Backend {
   static getTipComments = async tipId =>
     backendFetch(`comment/api/tip/${encodeURIComponent(tipId)}`);
 
-  static async sendTipComment(tipId, text, author, signCb) {
+  static async sendTipComment(tipId, text, author, signCb, parentId) {
     const sendComment = async postParam =>
-      backendFetch(`comment/api/`, {
+      backendFetch('comment/api/', {
         method: 'post',
         body: JSON.stringify(postParam),
         headers: { 'Content-Type': 'application/json' },
@@ -38,17 +38,18 @@ export default class Backend {
     const respondChallenge = {
       challenge: responseChallenge.challenge,
       signature: signedChallenge,
+      parentId,
     };
 
     return sendComment(respondChallenge);
   }
 
-  static getAllComments = async () => backendFetch(`comment/api/`);
+  static getAllComments = async () => backendFetch('comment/api/');
 
   static getProfile = async address => backendFetch(`profile/${address}`);
 
   static sendProfileData = async postParam =>
-    backendFetch(`profile`, {
+    backendFetch('profile', {
       method: 'post',
       body: JSON.stringify(postParam),
       headers: { 'Content-Type': 'application/json' },
@@ -60,13 +61,23 @@ export default class Backend {
       body: image ? data : JSON.stringify(data),
     };
     Object.assign(request, !image && { headers: { 'Content-Type': 'application/json' } });
-    console.log(request);
     return wrapTry(fetch(Backend.getProfileImageUrl(address), request));
+  };
+
+  static deleteProfileImage = async (address, postParam = false) => {
+    const request = {
+      method: 'delete',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      ...(postParam && { body: JSON.stringify(postParam) }),
+    };
+    return backendFetch(`profile/image/${address}`, request);
   };
 
   static getProfileImageUrl = address => `${BACKEND_URL}/profile/image/${address}`;
 
-  static getStats = async () => backendFetch(`static/stats/`);
+  static getStats = async () => backendFetch('static/stats/');
 
   static getCacheTipById = async id => backendFetch(`cache/tip?id=${id}`);
 
@@ -80,17 +91,24 @@ export default class Backend {
     return backendFetch(`cache/tips${query}`);
   };
 
-  static getCacheStats = async () => backendFetch(`cache/stats`);
+  static getCacheStats = async () => backendFetch('cache/stats');
 
-  static getCacheChainNames = async () => backendFetch(`cache/chainnames`);
+  static getCacheChainNames = async () => backendFetch('cache/chainnames');
 
-  static getPrice = async () => backendFetch(`cache/price`);
+  static getPrice = async () =>
+    wrapTry(
+      fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,cny',
+      ),
+    );
+  // quick workaround because of CORS issue in the backend.
+  // static getPrice = async () => backendFetch('cache/price');
 
-  static getOracleCache = async () => backendFetch(`cache/oracle`);
+  static getOracleCache = async () => backendFetch('cache/oracle');
 
-  static getTopicsCache = async () => backendFetch(`cache/topics`);
+  static getTopicsCache = async () => backendFetch('cache/topics');
 
-  static cacheInvalidateTips = async () => backendFetch(`cache/invalidate/tips`);
+  static cacheInvalidateTips = async () => backendFetch('cache/invalidate/tips');
 
   static getCommentCountForAddress = async address =>
     backendFetch(`comment/count/author/${address}`);
@@ -98,4 +116,6 @@ export default class Backend {
   static getTipPreviewUrl = previewLink => `${BACKEND_URL}${previewLink}`;
 
   static getProfileImageUrl = address => `${BACKEND_URL}/profile/image/${address}`;
+
+  static getCommentById = async id => backendFetch(`comment/api/${id}`);
 }

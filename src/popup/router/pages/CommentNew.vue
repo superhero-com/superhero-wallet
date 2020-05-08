@@ -21,7 +21,7 @@ import Backend from '../../../lib/backend';
 import openUrl from '../../utils/openUrl';
 
 export default {
-  data: () => ({ id: 0, text: '', loading: false }),
+  data: () => ({ id: 0, parentId: undefined, text: '', loading: false }),
   computed: {
     ...mapGetters(['sdk']),
     urlParams() {
@@ -31,6 +31,7 @@ export default {
   async created() {
     this.loading = true;
     this.id = +this.urlParams.get('id');
+    if (this.urlParams.get('parentId')) this.parentId = +this.urlParams.get('parentId');
     this.text = this.urlParams.get('text');
     if (!this.id || !this.text) {
       this.$router.push('/account');
@@ -48,8 +49,12 @@ export default {
     async sendComment() {
       this.loading = true;
       try {
-        await Backend.sendTipComment(this.id, this.text, await this.sdk.address(), async data =>
-          Buffer.from(await this.sdk.signMessage(data)).toString('hex'),
+        await Backend.sendTipComment(
+          this.id,
+          this.text,
+          await this.sdk.address(),
+          async data => Buffer.from(await this.sdk.signMessage(data)).toString('hex'),
+          this.parentId,
         );
         this.openCallbackOrGoHome('x-success');
       } catch (e) {

@@ -9,8 +9,11 @@
     const result = new URL(window.location).searchParams.get('result');
     if (result) alert(`Result: ${result}`);
 
-    const successUrl = encodeURIComponent(`${window.location.origin}?result=success`);
-    const cancelUrl = encodeURIComponent(`${window.location.origin}?result=cancel`);
+    const currentUrl = new URL(window.location);
+    currentUrl.search = '';
+    const successUrl = encodeURIComponent(`${currentUrl}?result=success`);
+    const cancelUrl = encodeURIComponent(`${currentUrl}?result=cancel`);
+    const callbackParams = `x-success=${successUrl}&x-cancel=${cancelUrl}`;
     const comment = encodeURIComponent(`This is a test comment! http://example.com`);
 
     const prefixes = ['superhero:', 'https://wallet.superhero.com/', 'http://localhost:5000/'];
@@ -19,16 +22,14 @@
       'tip',
       'tip?url=example.com',
       `tip?url=${encodeURIComponent('http://example.com/article?id=123123')}`,
+      `tip?url=${encodeURIComponent('http://example.com/article?id=123123')}&${callbackParams}`,
       'retip',
       `retip?id=26`,
-      `retip?id=26&x-success=${successUrl}`,
-      `retip?id=26&x-cancel=${cancelUrl}`,
-      `retip?id=25&x-success=${successUrl}&x-cancel=${cancelUrl}`,
-      `retip?id=26&x-success=${successUrl}&x-cancel=${cancelUrl}`,
+      `retip?id=25&${callbackParams}`,
+      `retip?id=26&${callbackParams}`,
       `comment?id=26&text=${comment}`,
-      `comment?id=26&text=${comment}&x-success=${successUrl}`,
-      `comment?id=26&text=${comment}&x-cancel=${cancelUrl}`,
-      `comment?id=26&text=${comment}&x-success=${successUrl}&x-cancel=${cancelUrl}`,
+      `comment?id=26&text=${comment}&${callbackParams}`,
+      `comment?id=26&parentId=87&text=${comment}&${callbackParams}`,
     ];
 
     prefixes.forEach(prefix => paths.forEach(path => {
