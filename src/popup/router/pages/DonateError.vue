@@ -1,7 +1,11 @@
 <template>
   <div class="popup donate-error">
     <h1>{{ $t('pages.donate-error.error-report') }}</h1>
-    <Textarea :placeholder="$t('pages.donate-error.error-placeholder')" size="medium" />
+    <Textarea
+      :placeholder="$t('pages.donate-error.error-placeholder')"
+      size="medium"
+      v-model="description"
+    />
     <h1>{{ $t('pages.donate-error.data-collected') }}</h1>
     <h2 class="error-info-title">{{ $t('pages.donate-error.browser') }}</h2>
     <p class="error-info-content">{{ browser }}</p>
@@ -14,23 +18,45 @@
 </template>
 
 <script>
+import axios from 'axios';
 import Textarea from '../components/Textarea';
 import Button from '../components/Button';
+import { BACKEND_URL } from '../../utils/constants';
 
 export default {
   props: {
-    error: { type: Object, default: () => ({}) },
+    entry: { type: Object, default: () => ({}) },
   },
   components: { Textarea, Button },
+  data: () => ({ description: null }),
   computed: {
     browser() {
-      const { name, os, version } = this.error.browser || {};
+      const { name, os, version } = this.entry.browser || {};
       return `${name}, Version ${version} (${os})`;
+    },
+    error() {
+      return this.entry.error;
     },
   },
   methods: {
-    donate() {
-      // TODO: make request to donate error here
+    async donate() {
+      try {
+        await axios.post(`${BACKEND_URL}/errorreport`, {
+          ...this.entry,
+          description: this.description,
+        });
+        await this.$store.dispatch('modals/open', {
+          name: 'default',
+          ...this.$t('modals.donate-errors'),
+        });
+      } catch (e) {
+        await this.$store.dispatch('modals/open', {
+          name: 'default',
+          ...this.$t('modals.donate-errors-error'),
+        });
+      } finally {
+        this.$router.push('/');
+      }
     },
   },
 };

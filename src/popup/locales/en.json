@@ -97,6 +97,14 @@
       "content": "Provide more information about the error  encountered so we can improve our superpowers. No personal data will be collected.",
       "create-report": "Create report"
     },
+    "donate-errors": {
+      "title": "Your Error Report Has Been Sent",
+      "msg": "Thank you for being such a wonderful fellow Superhero!"
+    },
+    "donate-errors-error": {
+      "title": "Your Error Report Was not send",
+      "msg": "There was problem sending your error report"
+    },
     "cancel": "Cancel",
     "confirm": "Confirm",
     "ok": "OK"
