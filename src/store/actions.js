@@ -69,22 +69,18 @@ export default {
     commit(types.SET_ACCOUNT_AENS, { account, aename, pending });
 
     if (aename) {
-      try {
-        const response = await Backend.sendProfileData({
-          author: state.account.publicKey,
-          preferredChainName: aename,
-        });
-        const signedChallenge = Buffer.from(
-          await state.sdk.signMessage(response.challenge),
-        ).toString('hex');
-        const respondChallenge = {
-          challenge: response.challenge,
-          signature: signedChallenge,
-        };
-        await Backend.sendProfileData(respondChallenge);
-      } catch (e) {
-        console.warn(`Cannot set preferred name ${e}`);
-      }
+      const response = await Backend.sendProfileData({
+        author: state.account.publicKey,
+        preferredChainName: aename,
+      });
+      const signedChallenge = Buffer.from(await state.sdk.signMessage(response.challenge)).toString(
+        'hex',
+      );
+      const respondChallenge = {
+        challenge: response.challenge,
+        signature: signedChallenge,
+      };
+      await Backend.sendProfileData(respondChallenge);
     }
   },
   initSdk({ commit }, payload) {
