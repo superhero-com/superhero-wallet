@@ -2,6 +2,7 @@ import { isFQDN } from 'validator';
 import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
+import { get } from 'lodash-es';
 import {
   MAGNITUDE_EXA,
   MAGNITUDE_GIGA,
@@ -428,3 +429,8 @@ export const getTwitterAccountUrl = url => {
   const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
   return match ? match[0] : false;
 };
+
+export const isNotFoundError = error => error.isAxiosError && get(error, 'response.status') === 404;
+
+export const isInternalServerError = error =>
+  error.isAxiosError && [500, 503].includes(get(error, 'response.status'));
