@@ -53,7 +53,7 @@ export default class Logger {
     };
   }
 
-  static async write(error) {
+  static async write({ modal = true, ...error }) {
     const { saveErrorLog } = await getState();
     if (!saveErrorLog) return;
     const errorLog = await Logger.get();
@@ -65,7 +65,7 @@ export default class Logger {
       time: Date.now(),
     };
     browser.storage.local.set({ errorLog: [...errorLog, logEntry] });
-    if (!Logger.background) {
+    if (!Logger.background && modal) {
       EventBus.$emit('error', logEntry);
     }
   }
