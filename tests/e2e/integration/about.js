@@ -1,35 +1,24 @@
-describe('Tests cases for about page', () => {
+describe('AboutSettings', () => {
   beforeEach(() => {
     cy.login();
   });
 
-  it('Open about page ', () => {
-    cy.openMenu()
-      .get('[data-cy=aboutSettings]')
-      .click()
-      .urlEquals('/aboutSettings');
-  });
-
-  it('Return to account page ', () => {
+  it('opens page and go back, opens terms, privacy policy ', () => {
     cy.openMenu()
       .get('[data-cy=aboutSettings]')
       .click()
       .urlEquals('/aboutSettings')
       .goBack()
-      .urlEquals('/account');
-  });
+      .urlEquals('/account')
 
-  it('Open terms of service', () => {
-    cy.openMenu()
+      .openMenu()
       .get('[data-cy=aboutSettings]')
       .click()
       .get('[data-cy=terms]')
       .click()
-      .urlEquals('/termsOfService');
-  });
+      .urlEquals('/termsOfService')
 
-  it('Open privacy policy', () => {
-    cy.openMenu()
+      .openMenu()
       .get('[data-cy=aboutSettings]')
       .click()
       .get('[data-cy=privacy]')

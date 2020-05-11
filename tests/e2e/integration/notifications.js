@@ -2,29 +2,16 @@ describe('Tests cases for notifications page and icon', () => {
   beforeEach(() => {
     cy.logout().openPopup();
   });
-  it('Have backup seed notification', () => {
+
+  it('Have and click notification icon, open notifications page and return', () => {
     cy.login()
       .get('[data-cy=noti-count]')
       .should('be.visible')
-      .should('contain', 1);
-  });
-
-  it('Click notification icon open notifications page', () => {
-    cy.login()
-      .get('[data-cy=noti-count]')
-      .should('contain', 1)
-      .get('[data-cy=noti]')
-      .click()
-      .urlEquals('/notifications');
-  });
-
-  it('Return to account from notifications', () => {
-    cy.login()
-      .get('[data-cy=noti-count]')
       .should('contain', 1)
       .get('[data-cy=noti]')
       .click()
       .urlEquals('/notifications')
+
       .goBack()
       .urlEquals('/account');
   });
