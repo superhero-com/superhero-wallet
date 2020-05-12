@@ -108,6 +108,7 @@ export default new Vuex.Store({
         mnemonic,
         minTipAmount,
         saveErrorLog,
+        tourStartBar,
       }) => ({
         migrations,
         current,
@@ -126,6 +127,7 @@ export default new Vuex.Store({
         mnemonic,
         minTipAmount,
         saveErrorLog,
+        tourStartBar,
       }),
     ),
     modals,
