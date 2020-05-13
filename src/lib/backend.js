@@ -5,9 +5,15 @@ const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
 const wrapTry = async promise => {
   try {
     return Promise.race([
-      promise.then(res => {
+      promise.then(async res => {
+        const response = res.json();
+        const { err, error } = await response;
+        if (err || error) {
+          const e = { message: err || error, type: 'backend' };
+          throw e;
+        }
         if (!res.ok) throw new Error(`Request failed with ${res.status}`);
-        return res.json();
+        return response;
       }),
       new Promise((resolve, reject) => {
         setTimeout(reject, 3000, 'TIMEOUT');
