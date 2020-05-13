@@ -178,6 +178,7 @@ export const IDENTICON_CONFIG = {
 };
 
 export const IDENTICON_SIZES = {
+  small: 30,
   normal: 38,
   lg: 64,
 };
