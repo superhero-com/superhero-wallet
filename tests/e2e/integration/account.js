@@ -21,38 +21,33 @@ describe('Test cases for Account Page', () => {
       .should('contain', 'Copied!');
   });
 
-  it('Check Claim-Name Button And Back to Account', () => {
+  it('Check Claim-Name, Tip, View-All-Tancastions, Dropdown Buttons And Back to Account', () => {
     cy.get('[data-cy="account-name"]')
       .should('be.visible')
       .click()
       .get('[data-cy=names-container]')
       .should('be.visible')
       .get('[data-cy="back-arrow"]')
-      .click();
-  });
+      .click()
 
-  it('Check Tip Button And Back to Account', () => {
-    cy.get('[data-cy=tip-button]')
+      .get('[data-cy=tip-button]')
       .should('be.visible')
       .click()
       .get('[data-cy=tip-container]')
       .should('be.visible')
       .get('[data-cy="back-arrow"]')
-      .click();
-  });
+      .click()
 
-  it('Check View-All-Transactions Button And Back to Account', () => {
-    cy.get('[data-cy=view-all-transactions]')
+      .get('[data-cy=view-all-transactions]')
       .should('be.visible')
       .click()
       .get('[data-cy=all-transactions]')
       .should('exist')
       .get('[data-cy="back-arrow"]')
-      .click();
-  });
+      .click()
 
-  it('Check Currency Dropdown Button And Back to Account', () => {
-    cy.get('[data-cy=toggle-currency-dropdown]')
+      .urlEquals('/account')
+      .get('[data-cy=toggle-currency-dropdown]')
       .should('be.visible')
       .click()
       .get('[data-cy=currency-dropdown]')

@@ -120,9 +120,7 @@ Cypress.Commands.add('shouldRedirect', (url, to) => {
 });
 
 Cypress.Commands.add('openMenu', () => {
-  cy.get('[data-cy=hamburger]')
-    .click()
-    .wait(1500);
+  cy.get('[data-cy=hamburger]', { timeout: 10000 }).click();
 });
 
 Cypress.Commands.add('closeMenu', (from = 'button') => {
@@ -252,8 +250,7 @@ Cypress.Commands.add('pendingTx', (tx = {}) => {
 Cypress.Commands.add('enterAmountSend', (amount = 0) => {
   cy.get('[data-cy=input-number]')
     .clear()
-    .type(amount)
-    .wait(1000);
+    .type(amount);
 });
 
 Cypress.Commands.add('goBack', () => {
@@ -263,8 +260,7 @@ Cypress.Commands.add('goBack', () => {
 Cypress.Commands.add('enterAddress', address => {
   cy.get('[data-cy=address]')
     .clear()
-    .type(address)
-    .wait(1000);
+    .type(address);
 });
 
 Cypress.Commands.add(

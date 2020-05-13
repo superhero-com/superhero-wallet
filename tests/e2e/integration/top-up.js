@@ -3,37 +3,18 @@ describe('Test cases for Top Up Page', () => {
     cy.login();
   });
 
-  it('Go to top-up Page', () => {
+  it('Go to top-up Page, home button works', () => {
     cy.get('[data-cy=hamburger]')
       .click()
       .menuShould('be.visible')
       .get('[data-cy=receive]')
       .click()
       .get('[data-cy=top-up-container]')
-      .should('be.visible');
-  });
+      .should('be.visible')
 
-  it('Check Home button', () => {
-    cy.get('[data-cy=hamburger]')
-      .click()
-      .menuShould('be.visible')
-      .get('[data-cy=receive]')
-      .click()
       .get('[data-cy=home]')
-      .click();
-  });
-
-  it('Check copy button', () => {
-    cy.get('[data-cy=hamburger]')
       .click()
-      .menuShould('be.visible')
-      .get('[data-cy=receive]')
-      .click()
-      .wait(3000)
-      .get('[data-cy=copy]')
-      .click()
-      .get('.copied-alert')
-      .should('contain', 'Copied!');
+      .urlEquals('/account');
   });
 
   it('Check Claim-Name Button', () => {
