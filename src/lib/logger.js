@@ -30,10 +30,11 @@ export default class Logger {
     }
 
     window.addEventListener('unhandledrejection', promise => {
-      const { stack, message } = promise.reason || {};
+      const { stack, message, name } = promise.reason || {};
       if (
-        typeof promise.reason === 'string' &&
-        promise.reason.includes('CompileError: WebAssembly.instantiate()')
+        (typeof promise.reason === 'string' &&
+          promise.reason.includes('CompileError: WebAssembly.instantiate()')) ||
+        name === 'NavigationDuplicated'
       )
         return;
       Logger.write({
@@ -65,7 +66,7 @@ export default class Logger {
       time: Date.now(),
     };
     browser.storage.local.set({ errorLog: [...errorLog, logEntry] });
-    if (!Logger.background && modal) {
+    if (!Logger.background && modal && error.message) {
       EventBus.$emit('error', logEntry);
     }
   }

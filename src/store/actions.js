@@ -65,22 +65,33 @@ export default {
   updateLatestTransactions({ commit }, payload) {
     commit(types.UPDATE_LATEST_TRANSACTIONS, payload);
   },
-  async setAccountName({ commit, state }, { account = 0, aename = null, pending = false }) {
+  async setAccountName(
+    { commit, state, dispatch },
+    { account = 0, aename = null, pending = false, modal = true },
+  ) {
     commit(types.SET_ACCOUNT_AENS, { account, aename, pending });
 
     if (aename) {
-      const response = await Backend.sendProfileData({
-        author: state.account.publicKey,
-        preferredChainName: aename,
-      });
-      const signedChallenge = Buffer.from(await state.sdk.signMessage(response.challenge)).toString(
-        'hex',
-      );
-      const respondChallenge = {
-        challenge: response.challenge,
-        signature: signedChallenge,
-      };
-      await Backend.sendProfileData(respondChallenge);
+      try {
+        const response = await Backend.sendProfileData({
+          author: state.account.publicKey,
+          preferredChainName: aename,
+        });
+        const signedChallenge = Buffer.from(
+          await state.sdk.signMessage(response.challenge),
+        ).toString('hex');
+        const respondChallenge = {
+          challenge: response.challenge,
+          signature: signedChallenge,
+        };
+        await Backend.sendProfileData(respondChallenge);
+      } catch (e) {
+        if (modal) {
+          if (e.type === 'backend')
+            dispatch('modals/open', { name: 'default', title: 'Backend error', msg: e.message });
+          else throw e;
+        }
+      }
     }
   },
   initSdk({ commit }, payload) {
@@ -135,6 +146,7 @@ export default {
                   account: index,
                   aename: names[0].name,
                   pending: !!names[0].pending,
+                  modal: false,
                 });
               }
             } else {

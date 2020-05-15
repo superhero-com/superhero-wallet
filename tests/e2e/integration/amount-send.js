@@ -33,8 +33,7 @@ describe('Test cases AmountSend component', () => {
     cy.get('[data-cy=balance]')
       .invoke('text')
       .then(text => expect(text.trim()).to.eq(`${balance.toFixed(2)} AE`))
-      .wait(2000)
-      .get('[data-cy=balance-currency]')
+      .get('[data-cy=balance-currency]', { timeout: 8000 })
       .invoke('text')
       .then(text => expect(text.trim()).not.to.eq('0.00 USD'));
   });

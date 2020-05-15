@@ -214,7 +214,7 @@
     "account": {
       "heading": "Account",
       "accountName": "Account name",
-      "copy": "Copy address",
+      "copy": "Copy",
       "send": "Send Tip",
       "claim": "Claim Tip",
       "receive": "Receive",
@@ -229,7 +229,8 @@
       "backup": "backup",
       "yourSeedPhrase": "your seed phrase",
       "updateExtension": "New version available! Please update your extension.",
-      "updateAvailable": "New version in store available!"
+      "updateAvailable": "New version in store available!",
+      "claim-name": "Claim your .chain name"
     },
     "claim": {
       "claim": "Claim tips",

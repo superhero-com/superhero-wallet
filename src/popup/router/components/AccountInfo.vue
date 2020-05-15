@@ -2,28 +2,25 @@
   <div class="account-info">
     <div class="title">
       <div class="account-name" data-cy="account-name">
+        <UserAvatar :address="account.publicKey" class="avatar" size="small" />
         <template v-if="chainName">{{ activeAccountName }}</template>
-        <router-link to="/names" v-else>Claim your .chain name</router-link>
+        <router-link to="/names" v-else>{{ $t('pages.account.claim-name') }} </router-link>
       </div>
       <div class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</div>
       <button data-cy="copy" @click="copy" v-clipboard:copy="account.publicKey">
-        <Copyicon />
+        {{ $t('pages.account.copy') }}
       </button>
     </div>
-    <div class="address-holder">
-      <UserAvatar :address="account.publicKey" class="avatar" />
-      <div class="ae-address">{{ account.publicKey }}</div>
-    </div>
+    <div class="ae-address">{{ account.publicKey }}</div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import Copyicon from '../../../icons/copy.svg?vue-component';
 import UserAvatar from './UserAvatar';
 
 export default {
-  components: { Copyicon, UserAvatar },
+  components: { UserAvatar },
   data: () => ({
     copied: false,
   }),
@@ -66,6 +63,13 @@ export default {
       color: #fff;
       line-height: 21px;
       margin-right: auto;
+      display: flex;
+      align-items: center;
+      justify-content: start;
+
+      .avatar {
+        margin-right: 10px;
+      }
     }
 
     .help-icon {
@@ -84,20 +88,10 @@ export default {
     }
   }
 
-  .address-holder {
-    display: flex;
-    align-items: center;
-    justify-content: start;
-
-    .avatar {
-      margin-right: 10px;
-    }
-
-    .ae-address {
-      color: $text-color;
-      font-size: 11px;
-      width: 84%;
-    }
+  .ae-address {
+    color: $text-color;
+    font-size: 10px;
+    letter-spacing: -0.2px;
   }
 }
 </style>

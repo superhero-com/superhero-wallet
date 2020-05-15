@@ -31,6 +31,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$small-size: 30px;
 $normal-size: 38px;
 $lg-size: 64px;
 
@@ -45,6 +46,11 @@ $lg-size: 64px;
   &.lg {
     height: $lg-size;
     width: $lg-size;
+  }
+
+  &.small {
+    height: $small-size;
+    width: $small-size;
   }
 }
 </style>

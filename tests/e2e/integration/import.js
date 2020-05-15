@@ -14,8 +14,7 @@ describe('Test cases for import account page', () => {
 
   it('Rreturn to index', () => {
     cy.openImportWallet()
-      .get('[data-cy=back-arrow]')
-      .click()
+      .goBack()
       .get('textarea')
       .should('not.be.visible')
       .get('[data-cy=checkbox]')

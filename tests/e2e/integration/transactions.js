@@ -7,19 +7,12 @@ describe('Tests cases for transactions page', () => {
     cy.login();
   });
 
-  it('Open transactions', () => {
-    cy.openTransactions();
-  });
-
-  it('Load transactions', () => {
+  it('Load transactions, load additional transactions on scroll', () => {
     cy.openTransactions()
       .get('[data-cy=all-transactions]')
       .children()
       .should('have.length', TXS_PER_PAGE);
-  });
 
-  it('Load transactions on scroll', () => {
-    cy.openTransactions();
     cy.scrollTo('bottom')
       .get('[data-cy=loader]')
       .should('be.visible')

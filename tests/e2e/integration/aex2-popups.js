@@ -9,12 +9,6 @@ describe('Tests cases for AEX-2 popups', () => {
     cy.login();
   });
 
-  popups.forEach(popup => {
-    it(`Open ${popup} popup`, () => {
-      cy.openAex2Popup(popup, TX_TYPE.spend);
-    });
-  });
-
   it('Sign Message popup display correct data', () => {
     const props = popupProps.messageSign;
     const host = `${props.host} (${props.name})`;
@@ -43,7 +37,7 @@ describe('Tests cases for AEX-2 popups', () => {
   });
 
   popups.forEach(popup => {
-    it(`${popup} popup send deny action`, () => {
+    it(`Open${popup} and send deny action`, () => {
       cy.openAex2Popup(popup, TX_TYPE.spend)
         .get('[data-cy=deny]')
         .click()
@@ -55,7 +49,7 @@ describe('Tests cases for AEX-2 popups', () => {
   });
 
   popups.forEach(popup => {
-    it(`${popup} popup send accept action`, () => {
+    it(`Open${popup} and send accept action`, () => {
       cy.openAex2Popup(popup, TX_TYPE.spend)
         .get('[data-cy=accept]')
         .click()

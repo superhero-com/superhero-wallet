@@ -3,15 +3,10 @@ describe('Test cases for generate wallet page', () => {
     cy.logout().openPopup();
   });
 
-  it('Open generate wallet page', () => {
+  it('Opens generate page, skip onboarding after click skip', () => {
     cy.openGenerateWallet()
       .get('[data-cy=onboarding-steps]')
       .should('be.visible')
-      .onboardingSlideShouldBeActive(0);
-  });
-
-  it('Skip onboarding after click skip', () => {
-    cy.openGenerateWallet()
       .onboardingSlideShouldBeActive(0)
       .get('[data-cy=skip]')
       .click()

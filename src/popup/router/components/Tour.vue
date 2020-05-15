@@ -21,7 +21,7 @@
             <template>
               <div slot="header" class="step-header">
                 {{ $t(`onboarding.step_${step.step}.title`) }}
-                <span class="step-info"> ({{ step.step }}/10) </span>
+                <span class="step-info"> ({{ step.step }}/{{ steps.length }}) </span>
               </div>
               <div
                 slot="content"
@@ -288,6 +288,8 @@ export default {
 }
 
 .v-tour__target--highlighted {
+  -webkit-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
+  -moz-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
   box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
   pointer-events: none !important;
 
@@ -317,6 +319,8 @@ export default {
   pointer-events: all;
 
   &.not-started {
+    -webkit-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
+    -moz-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
     box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
   }
 
@@ -329,6 +333,7 @@ export default {
     z-index: -1;
     content: '';
     -webkit-clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
+    -moz-clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
     clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
     background: $tour-bg-color;
   }

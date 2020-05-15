@@ -89,8 +89,7 @@ describe('Test cases for networks page', () => {
       networks[DEFAULT_NETWORK].url,
       networks[DEFAULT_NETWORK].middlewareUrl,
     )
-      .get('[data-cy=back-arrow]')
-      .click()
+      .goBack()
       .get('.transactionList')
       .should('not.be.visible');
   });
@@ -142,8 +141,7 @@ describe('Test cases for networks page', () => {
       .get('[data-cy=network-middleware]')
       .eq(1)
       .should('contain', defaultNetworks[network].middlewareUrl)
-      .get('[data-cy=back-arrow]')
-      .click()
+      .goBack()
       .get('.transactionList')
       .should('be.visible');
   });
