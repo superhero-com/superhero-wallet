@@ -46,8 +46,8 @@ export default {
     return state.activeAccount;
   },
   activeAccountName(state) {
-    const account = state.subaccounts.find(s => s.publicKey === state.account.publicKey);
-    return account.aename ? account.aename : account.name;
+    const account = state.subaccounts.find(s => s.publicKey === state.account.publicKey) || {};
+    return account.aename || account.name || '';
   },
   sdk(state) {
     return state.sdk;
