@@ -276,7 +276,11 @@ const rpcWallet = {
     } catch (e) {
       console.warn(e);
     }
-    setTimeout(() => this.sdk.shareWalletInfo(port.postMessage.bind(port)), 3000);
+    const shareWalletInfo = setInterval(
+      () => this.sdk.shareWalletInfo(port.postMessage.bind(port)),
+      3000,
+    );
+    port.onDisconnect.addListener(() => clearInterval(shareWalletInfo));
     this.removeConnectionFromQueue(port);
   },
   getClientsByCond(condition) {
