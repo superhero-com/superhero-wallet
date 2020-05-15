@@ -55,7 +55,7 @@ window.addEventListener(
 
 const getAddresses = () => {
   const address = document.all[0].outerHTML.match(/(ak_[A-Za-z0-9]{49,50})/g);
-  const chainName = document.all[0].outerHTML.match(/[A-Za-z0-9]+\.chain/g);
+  const chainName = document.all[0].outerHTML.match(/\b[A-Za-z0-9]*\.chain\b/g);
 
   return {
     address,
@@ -63,20 +63,32 @@ const getAddresses = () => {
   };
 };
 
-const sendDomData = () => {
-  const { address, chainName } = getAddresses();
-  if (address || chainName) {
-    setTimeout(() => {
-      browser.runtime.sendMessage({
-        from: 'content',
-        type: 'readDom',
-        data: {
-          address,
-          chainName,
-        },
-      });
-    }, 1000);
+const sendDomData = async ({ interval = 3000, attempts = 3 } = {}) => {
+  const pause = async duration => {
+    await new Promise(resolve => setTimeout(resolve, duration));
+  };
+
+  async function send(attempt) {
+    const { address, chainName } = getAddresses();
+    if (address || chainName) {
+      setTimeout(() => {
+        browser.runtime.sendMessage({
+          from: 'content',
+          type: 'readDom',
+          data: {
+            address,
+            chainName,
+          },
+        });
+      }, 1000);
+    }
+    if (!address && !chainName && attempt > 0) {
+      await pause(interval);
+      send(attempt - 1);
+    }
   }
+
+  send(attempts);
 };
 
 window.addEventListener('load', () => {
@@ -85,7 +97,7 @@ window.addEventListener('load', () => {
     'visibilitychange',
     () => {
       if (!document.hidden) {
-        sendDomData();
+        sendDomData({ attempts: 1 });
       }
     },
     false,
