@@ -66,7 +66,7 @@ export default class Logger {
       time: Date.now(),
     };
     browser.storage.local.set({ errorLog: [...errorLog, logEntry] });
-    if (!Logger.background && modal) {
+    if (!Logger.background && modal && error.message) {
       EventBus.$emit('error', logEntry);
     }
   }
