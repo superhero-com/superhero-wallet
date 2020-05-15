@@ -8,10 +8,6 @@
   </ae-dropdown>
 </template>
 
-<script>
-export default {};
-</script>
-
 <style scoped>
 .ae-dropdown-button {
   width: auto !important;

@@ -247,6 +247,13 @@
       "unknownError": "Error occured during claim request. Please try again later.",
       "noMobileClaim": "Claiming is currently only available on desktop."
     },
+    "claimTips": {
+      "urlToClaim": "URL to claim tips for"
+    },
+    "notFound": {
+      "notFound": "Requested page can't be found",
+      "initialPage": "Open initial page"
+    },
     "accountPassword": {
       "heading": "",
       "passwordSymbolsError": "Required minimum symbols - ",

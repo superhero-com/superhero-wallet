@@ -1,8 +1,8 @@
 <template>
   <div class="not-found">
-    Requested page can't be found
+    {{ $t('pages.notFound.notFound') }}
     <Button @click="$router.push('/')">
-      Open initial page
+      {{ $t('pages.notFound.initialPage') }}
     </Button>
   </div>
 </template>

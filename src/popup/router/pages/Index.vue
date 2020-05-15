@@ -52,10 +52,7 @@ export default {
       IS_WEB: process.env.PLATFORM === 'web',
     };
   },
-  computed: {
-    ...mapGetters(['account', 'isLoggedIn', 'wallet', 'tokens']),
-  },
-  mounted() {},
+  computed: mapGetters(['account', 'isLoggedIn', 'wallet', 'tokens']),
   methods: {
     generwateWalletIntro() {
       this.$router.push('/intro');

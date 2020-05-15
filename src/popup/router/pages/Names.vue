@@ -218,7 +218,6 @@ export default {
       tab: 'claim',
       loading: false,
       name: '',
-      ak_address: '',
       polling: null,
       activeAuctions: null,
       moreAuInfo: {
@@ -227,11 +226,7 @@ export default {
         info: null,
       },
       filterType: 'soonest',
-      bySoonest: true,
-      byCharLength: false,
-      byBid: false,
       bids: null,
-      namesofaddresses: null,
       registeredNames: [],
     };
   },

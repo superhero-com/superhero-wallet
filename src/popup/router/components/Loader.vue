@@ -23,11 +23,7 @@ export default {
   components: {
     Welcome,
   },
-  data() {
-    return {};
-  },
   props: ['loading', 'content', 'size', 'type'],
-  methods: {},
 };
 </script>
 

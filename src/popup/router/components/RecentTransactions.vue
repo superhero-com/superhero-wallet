@@ -13,7 +13,7 @@
           v-for="transaction in transactions.latest"
           :key="transaction.hash"
           :transaction="transaction"
-        ></TransactionItem>
+        />
       </ae-list>
     </div>
     <div v-if="!transactions.latest.length && !transactions.pending.length">

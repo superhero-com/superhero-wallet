@@ -18,7 +18,6 @@ export default {
     Button,
     Claim,
   },
-  created() {},
   methods: {
     openHowToClaimURL() {
       openUrl(`${UI_URL}create-profile`);

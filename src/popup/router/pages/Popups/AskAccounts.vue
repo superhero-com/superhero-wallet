@@ -29,7 +29,6 @@ export default {
   data() {
     return {
       data: {},
-      imageError: false,
     };
   },
   async created() {
