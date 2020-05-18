@@ -11,7 +11,7 @@
         <ae-icon name="check" />
       </div>
       <div class="identicon">
-        <UserAvatar :address="account.publicKey" size="lg" />
+        <UserAvatar :address="account.publicKey" :name="account.name" size="lg" />
         <div class="accountName">{{ activeAccountName }}</div>
       </div>
     </div>
@@ -19,7 +19,7 @@
     <h2>
       <span class="secondary-text" data-cy="aepp">{{ data.host }} ({{ data.name }}) </span>
       {{ $t('pages.connectConfirm.websiteRequestconnect') }}
-      <UserAvatar class="send-account-icon" :address="account.publicKey" />
+      <UserAvatar class="send-account-icon" :address="account.publicKey" :name="account.name" />
       {{ activeAccountName }}
     </h2>
     <ul>

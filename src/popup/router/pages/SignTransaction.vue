@@ -3,7 +3,7 @@
     <ae-list class="spendTxDetailsList">
       <ae-list-item fill="neutral" class="flex-justify-between whiteBg noBorder">
         <div class="flex flex-align-center accountFrom">
-          <UserAvatar :address="account.publicKey" />
+          <UserAvatar :address="account.publicKey" :name="account.name" />
           <span class="spendAccountAddr">{{ activeAccountName }}</span>
         </div>
         <div class="arrowSeprator">

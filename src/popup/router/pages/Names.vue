@@ -19,7 +19,7 @@
         <hr />
         <ae-list v-if="registeredNames.length">
           <ae-list-item fill="neutral" v-for="(name, key) in registeredNames" :key="key">
-            <UserAvatar :address="name.owner" />
+            <UserAvatar :name="name.name" />
             <div class="text-left ml-10 wd-100">
               <div>
                 {{ name.name }}
@@ -113,7 +113,7 @@
             :key="key"
             @click="moreAuctionInfo(key, info)"
           >
-            <UserAvatar class="subAccountIcon" :address="info.winning_bidder" />
+            <UserAvatar class="subAccountIcon" :name="info.name" />
             <div class="auctionInfo">
               <div class="name">{{ info.name }}</div>
               <div class="expiration">Expires in {{ info.expiration }} blocks</div>

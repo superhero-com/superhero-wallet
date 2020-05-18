@@ -15,14 +15,16 @@
     const cancelUrl = encodeURIComponent(`${currentUrl}?result=cancel`);
     const callbackParams = `x-success=${successUrl}&x-cancel=${cancelUrl}`;
     const comment = encodeURIComponent(`This is a test comment! http://example.com`);
+    const url = encodeURIComponent('http://example.com/article?id=123123');
 
     const prefixes = ['superhero:', 'https://wallet.superhero.com/', 'http://localhost:5000/'];
     const paths = [
       '404',
       'tip',
       'tip?url=example.com',
-      `tip?url=${encodeURIComponent('http://example.com/article?id=123123')}`,
-      `tip?url=${encodeURIComponent('http://example.com/article?id=123123')}&${callbackParams}`,
+      `tip?url=${url}`,
+      `tip?url=${url}&${callbackParams}`,
+      `tip?url=${url}&amount=1.1&message=${comment}&${callbackParams}`,
       'retip',
       `retip?id=26`,
       `retip?id=25&${callbackParams}`,
