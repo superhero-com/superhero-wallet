@@ -38,7 +38,12 @@
           :value="amount"
           :errorMsg="amount && amount < minTipAmount"
         />
-        <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
+        <Textarea
+          v-model="note"
+          :placeholder="$t('pages.tipPage.titlePlaceholder')"
+          :error="note.length > 280"
+          size="sm"
+        />
         <Button
           class="send-tip-button"
           @click="toConfirm"
@@ -49,7 +54,8 @@
               !minCallFee ||
               !validUrl ||
               !url ||
-              urlStatus === 'blacklisted'
+              urlStatus === 'blacklisted' ||
+              note.length > 280
           "
           data-cy="send-tip"
         >
@@ -93,7 +99,7 @@ export default {
     return {
       url: null,
       amount: null,
-      note: null,
+      note: '',
       confirmMode: false,
       amountError: false,
       noteError: false,
@@ -183,7 +189,7 @@ export default {
       }
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
       this.amountError = this.amountError || !+this.amount || this.amount < this.minTipAmount;
-      this.noteError = !this.note || !this.url;
+      this.noteError = !this.note || !this.url || this.note.length > 280;
       this.confirmMode =
         !this.amountError &&
         !this.noteError &&
