@@ -2,7 +2,7 @@
   <div class="account-info">
     <div class="title">
       <div class="account-name" data-cy="account-name">
-        <UserAvatar :address="account.publicKey" class="avatar" size="small" />
+        <UserAvatar :address="account.publicKey" :name="account.name" class="avatar" size="small" />
         <template v-if="chainName">{{ activeAccountName }}</template>
         <router-link to="/names" v-else>{{ $t('pages.account.claim-name') }} </router-link>
       </div>
