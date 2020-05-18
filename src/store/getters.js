@@ -1,8 +1,11 @@
 import { DEFAULT_NETWORK } from '../popup/utils/constants';
 
 export default {
-  account(state) {
-    return state.account;
+  account(state, { activeAccountName }) {
+    return {
+      ...state.account,
+      name: activeAccountName.includes('.chain') ? activeAccountName : false,
+    };
   },
   subaccounts(state) {
     return state.subaccounts;

@@ -1,15 +1,29 @@
 <template>
-  <img :src="avatarUrl" class="user-avatar" :class="size" @error="error = true" v-if="!error" />
-  <div v-html="identicon" class="user-identicon" :class="size" v-else />
+  <img v-if="!error" :src="profileImage" class="user-avatar" :class="size" @error="error = true" />
+  <img v-else-if="avatar.type === 'avatar'" :src="avatar.src" class="user-avatar" :class="size" />
+  <div
+    v-else-if="avatar.type === 'identicon'"
+    v-html="avatar.src"
+    class="user-identicon"
+    :class="size"
+  />
 </template>
 
 <script>
 import jdenticon from 'jdenticon';
-import { BACKEND_URL, IDENTICON_CONFIG, IDENTICON_SIZES } from '../../utils/constants';
+import Avatars from '@dicebear/avatars';
+import sprites from '@dicebear/avatars-avataaars-sprites';
+import {
+  BACKEND_URL,
+  IDENTICON_CONFIG,
+  IDENTICON_SIZES,
+  AVATAR_CONFIG,
+} from '../../utils/constants';
 
 export default {
   props: {
     address: String,
+    name: [String, Boolean],
     size: {
       type: String,
       default: 'normal',
@@ -19,12 +33,22 @@ export default {
     error: false,
   }),
   computed: {
-    avatarUrl() {
+    profileImage() {
       return `${BACKEND_URL}/profile/image/${this.address}`;
     },
-    identicon() {
+    avatar() {
+      if (this.name) {
+        const avatars = new Avatars(sprites, AVATAR_CONFIG);
+        return {
+          type: 'avatar',
+          src: avatars.create(this.address),
+        };
+      }
       jdenticon.config = IDENTICON_CONFIG;
-      return jdenticon.toSvg(this.address, IDENTICON_SIZES[this.size]);
+      return {
+        type: 'identicon',
+        src: jdenticon.toSvg(this.address, IDENTICON_SIZES[this.size]),
+      };
     },
   },
 };
