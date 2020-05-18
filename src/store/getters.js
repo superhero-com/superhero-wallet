@@ -1,11 +1,15 @@
+import { isEmpty } from 'lodash-es';
 import { DEFAULT_NETWORK } from '../popup/utils/constants';
 
 export default {
   account(state, { activeAccountName }) {
-    return {
-      ...state.account,
-      name: activeAccountName.includes('.chain') ? activeAccountName : false,
-    };
+    if (!isEmpty(state.account)) {
+      return {
+        ...state.account,
+        name: activeAccountName.includes('.chain') ? activeAccountName : false,
+      };
+    }
+    return state.account;
   },
   subaccounts(state) {
     return state.subaccounts;

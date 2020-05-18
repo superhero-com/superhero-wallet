@@ -41,7 +41,7 @@ export default {
         const avatars = new Avatars(sprites, AVATAR_CONFIG);
         return {
           type: 'avatar',
-          src: avatars.create(this.address),
+          src: avatars.create(this.name),
         };
       }
       jdenticon.config = IDENTICON_CONFIG;
