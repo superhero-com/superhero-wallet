@@ -129,11 +129,20 @@ export default {
     $route: {
       immediate: true,
       handler({ fullPath }) {
-        const urlParam = new URL(fullPath, window.location).searchParams.get('url');
-        const path = urlParam && decodeURIComponent(urlParam);
-        if (!path) return;
-        const url = new URL(/^\w+:\D+/.test(path) ? path : `https://${path}`);
-        this.url = url.toString();
+        const urlParams = new URL(fullPath, window.location).searchParams;
+
+        const tipUrlEncoded = urlParams.get('url');
+        if (tipUrlEncoded) {
+          const tipUrl = decodeURIComponent(tipUrlEncoded);
+          const tipUrlNormalised = new URL(/^\w+:\D+/.test(tipUrl) ? tipUrl : `https://${tipUrl}`);
+          this.url = tipUrlNormalised.toString();
+        }
+
+        const tipMessageEncoded = urlParams.get('message');
+        if (tipMessageEncoded) this.note = decodeURIComponent(tipMessageEncoded);
+
+        const tipAmount = +urlParams.get('amount');
+        if (tipAmount) this.amount = tipAmount.toString();
       },
     },
   },
