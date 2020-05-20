@@ -34,7 +34,6 @@ export default {
     TransactionFilters,
     PendingTxs,
   },
-  props: [''],
   data() {
     return {
       loading: true,

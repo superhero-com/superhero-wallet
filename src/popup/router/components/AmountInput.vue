@@ -21,7 +21,7 @@
 import { mapGetters } from 'vuex';
 
 export default {
-  props: ['myTokens', 'txFee', 'amount', 'error'],
+  props: ['txFee', 'amount', 'error'],
   computed: mapGetters(['current']),
   watch: {
     amount(val) {
