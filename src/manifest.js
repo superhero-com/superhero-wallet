@@ -28,7 +28,7 @@ module.exports = (isProd, platform) => ({
     48: './icons/icon_48.png',
     128: './icons/icon_128.png',
   },
-  content_security_policy: `script-src 'self'${isProd ? '' : " 'unsafe-eval'"}; object-src 'self'`,
+  content_security_policy: `script-src 'self' 'unsafe-eval'; object-src 'self'`,
   browser_action: {
     default_title: 'Superhero',
     default_popup: 'popup/popup.html',
