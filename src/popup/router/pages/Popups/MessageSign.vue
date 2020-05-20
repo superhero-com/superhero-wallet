@@ -27,7 +27,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import getPopupProps from '../../../utils/getPopupProps';
 
 export default {
@@ -49,7 +48,6 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['account', 'activeAccountName']),
     faviconUrl() {
       return typeof this.data.icons !== 'undefined'
         ? this.data.icons

@@ -77,7 +77,7 @@ export default {
     return pick(this.$store.state.observables, ['topBlockHeight']);
   },
   props: ['auctionInfo'],
-  computed: mapGetters(['account', 'current', 'network', 'sdk']),
+  computed: mapGetters(['current']),
   mounted() {
     this.loading = true;
 
@@ -132,9 +132,6 @@ export default {
           },
         });
       }
-    },
-    back() {
-      this.$router.push('/aens');
     },
   },
 };
