@@ -28,6 +28,7 @@ import CommentNew from './pages/CommentNew';
 import NotFound from './pages/NotFound';
 import ClaimTips from './pages/ClaimTips';
 import DonateError from './pages/DonateError';
+import Address from './pages/Address';
 
 export default [
   {
@@ -274,6 +275,15 @@ export default [
     props: true,
     meta: {
       title: 'donate-error',
+      notPersist: true,
+    },
+  },
+  {
+    name: 'address',
+    path: '/address',
+    component: Address,
+    meta: {
+      title: 'address',
       notPersist: true,
     },
   },
