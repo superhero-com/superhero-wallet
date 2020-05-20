@@ -33,7 +33,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
   const postPhishingData = async data => {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     const message = { method: 'phishingCheck', ...data };
-    tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message));
+    tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message).catch(console.log));
   };
 
   const openTipPopup = pageUrl => {
