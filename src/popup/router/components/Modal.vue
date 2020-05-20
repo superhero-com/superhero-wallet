@@ -96,9 +96,7 @@ export default {
     }
   }
 
-  .modal--enter {
-    opacity: 0;
-  }
+  .modal--enter,
   .modal--leave--active {
     opacity: 0;
   }
