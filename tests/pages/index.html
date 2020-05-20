@@ -6,10 +6,19 @@
 </head>
 <body>
   <script>
-    const result = new URL(window.location).searchParams.get('result');
-    if (result) alert(`Result: ${result}`);
-
     const currentUrl = new URL(window.location);
+    document.write(`
+      <table>
+        ${['result', 'address']
+          .map(paramName => `<tr>
+            <td>${paramName}</td>
+            <td>${currentUrl.searchParams.get(paramName)}</td>
+          </tr>`)
+          .join('\n')}
+      </table>
+      <br>
+    `);
+
     currentUrl.search = '';
     const successUrl = encodeURIComponent(`${currentUrl}?result=success`);
     const cancelUrl = encodeURIComponent(`${currentUrl}?result=cancel`);
@@ -32,6 +41,9 @@
       `comment?id=26&text=${comment}`,
       `comment?id=26&text=${comment}&${callbackParams}`,
       `comment?id=26&parentId=87&text=${comment}&${callbackParams}`,
+      `address` +
+        `?x-success=${encodeURIComponent(`${currentUrl}?result=success&address={address}`)}` +
+        `&x-cancel=${cancelUrl}`,
     ];
 
     prefixes.forEach(prefix => paths.forEach(path => {
