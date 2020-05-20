@@ -37,10 +37,11 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
   };
 
   const openTipPopup = pageUrl => {
-    const url = `/tip?url=${pageUrl}`;
-    localStorage.setItem('tipUrl', url);
+    const tipUrl = `/tip?url=${encodeURIComponent(pageUrl)}`;
+    const { href } = new URL(`${browser.extension.getURL('./')}popup/popup.html#${tipUrl}`);
+    localStorage.setItem('tipUrl', tipUrl);
     browser.windows.create({
-      url: `popup/popup.html#${url}`,
+      url: href,
       type: 'popup',
       height: 600,
       width: 375,
