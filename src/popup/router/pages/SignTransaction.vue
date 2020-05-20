@@ -114,7 +114,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['account', 'activeAccountName', 'balance', 'sdk', 'tokenBalance']),
+    ...mapGetters(['account', 'activeAccountName', 'balance', 'sdk']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.fee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -125,9 +125,6 @@ export default {
     fee() {
       return this.txFee.min;
     },
-    maxFee() {
-      return this.txFee.max.toFixed(7);
-    },
     insufficientBalance() {
       return this.maxValue - this.amount <= 0;
     },
@@ -136,14 +133,6 @@ export default {
     },
     txType() {
       return this.$t('transaction.type')[this.data.tx.type];
-    },
-    isNameTx() {
-      return (
-        this.data.type === 'namePreClaim' ||
-        this.data.type === 'nameBid' ||
-        this.data.type === 'nameClaim' ||
-        this.data.type === 'nameUpdate'
-      );
     },
     convertSelectedFee() {
       return BigNumber(this.selectedFee).shiftedBy(MAGNITUDE);

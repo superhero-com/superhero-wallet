@@ -183,7 +183,7 @@ export default {
     this.tx.amount = convertToAE(this.txObject.amount);
   },
   computed: {
-    ...mapGetters(['account', 'activeAccountName', 'balance', 'current', 'network']),
+    ...mapGetters(['account', 'activeAccountName', 'balance']),
     txType() {
       return this.unpackedTx ? this.unpackedTx.txType : null;
     },
@@ -203,9 +203,6 @@ export default {
     },
     amount() {
       return this.txObject.amount;
-    },
-    aeAmount() {
-      return convertToAE(this.txObject.amount);
     },
     receiver() {
       if (this.txType === 'spendTx') {
