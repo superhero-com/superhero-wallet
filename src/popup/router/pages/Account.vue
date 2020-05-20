@@ -84,17 +84,8 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'activeAccount', 'current', 'network', 'backedUpSeed']),
+    ...mapGetters(['account', 'backedUpSeed']),
     ...mapState(['tourRunning']),
-    publicKey() {
-      return this.account.publicKey;
-    },
-    watchToken() {
-      return this.current.token;
-    },
-    cardColor() {
-      return this.isLedger ? 'neutral' : 'primary';
-    },
   },
   async created() {
     this.backup_seed_notif = !this.backedUpSeed;

@@ -23,7 +23,6 @@ import { mapGetters } from 'vuex';
 import FilterArrow from '../../../icons/filter-arrow.svg?vue-component';
 
 export default {
-  props: [''],
   components: {
     FilterArrow,
   },
@@ -35,9 +34,7 @@ export default {
       date_type: 'recent',
     };
   },
-  computed: {
-    ...mapGetters(['account', 'sdk', 'current', 'transactions']),
-  },
+  computed: mapGetters(['account', 'sdk', 'current', 'transactions']),
   methods: {
     filtrateTx(type, deteType) {
       switch (type) {

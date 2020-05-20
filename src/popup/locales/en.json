@@ -169,7 +169,8 @@
       "networks": "Networks",
       "comment-new": "Add comment",
       "home": "Superhero Home",
-      "donate-error": "Donate Data"
+      "donate-error": "Donate Data",
+      "address": "Send Address"
     },
     "appVUE": {
       "systemName": "Superhero",
@@ -246,6 +247,13 @@
       "oracleFailed": "Oracle service check claim failed. Please try again later.",
       "unknownError": "Error occured during claim request. Please try again later.",
       "noMobileClaim": "Claiming is currently only available on desktop."
+    },
+    "claimTips": {
+      "urlToClaim": "URL to claim tips for"
+    },
+    "notFound": {
+      "notFound": "Requested page can't be found",
+      "initialPage": "Open initial page"
     },
     "accountPassword": {
       "heading": "",

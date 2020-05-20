@@ -38,7 +38,12 @@
           :value="amount"
           :errorMsg="amount && amount < minTipAmount"
         />
-        <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
+        <Textarea
+          v-model="note"
+          :placeholder="$t('pages.tipPage.titlePlaceholder')"
+          :error="note.length > 280"
+          size="sm"
+        />
         <Button
           class="send-tip-button"
           @click="toConfirm"
@@ -49,7 +54,8 @@
               !minCallFee ||
               !validUrl ||
               !url ||
-              urlStatus === 'blacklisted'
+              urlStatus === 'blacklisted' ||
+              note.length > 280
           "
           data-cy="send-tip"
         >
@@ -93,7 +99,7 @@ export default {
     return {
       url: null,
       amount: null,
-      note: null,
+      note: '',
       confirmMode: false,
       amountError: false,
       noteError: false,
@@ -101,7 +107,6 @@ export default {
       minCallFee: null,
       editUrl: true,
       IS_EXTENSION: process.env.IS_EXTENSION,
-      RUNNING_IN_TESTS: process.env.RUNNING_IN_TESTS,
       tipFromPopup: false,
     };
   },
@@ -129,11 +134,20 @@ export default {
     $route: {
       immediate: true,
       handler({ fullPath }) {
-        const urlParam = new URL(fullPath, window.location).searchParams.get('url');
-        const path = urlParam && decodeURIComponent(urlParam);
-        if (!path) return;
-        const url = new URL(/^\w+:\D+/.test(path) ? path : `https://${path}`);
-        this.url = url.toString();
+        const urlParams = new URL(fullPath, window.location).searchParams;
+
+        const tipUrlEncoded = urlParams.get('url');
+        if (tipUrlEncoded) {
+          const tipUrl = decodeURIComponent(tipUrlEncoded);
+          const tipUrlNormalised = new URL(/^\w+:\D+/.test(tipUrl) ? tipUrl : `https://${tipUrl}`);
+          this.url = tipUrlNormalised.toString();
+        }
+
+        const tipMessageEncoded = urlParams.get('message');
+        if (tipMessageEncoded) this.note = decodeURIComponent(tipMessageEncoded);
+
+        const tipAmount = +urlParams.get('amount');
+        if (tipAmount) this.amount = tipAmount.toString();
       },
     },
   },
@@ -183,7 +197,7 @@ export default {
       }
       this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
       this.amountError = this.amountError || !+this.amount || this.amount < this.minTipAmount;
-      this.noteError = !this.note || !this.url;
+      this.noteError = !this.note || !this.url || this.note.length > 280;
       this.confirmMode =
         !this.amountError &&
         !this.noteError &&

@@ -18,7 +18,7 @@
               v-model="form.address"
               placeholder="ak.. / name.chain"
               size="h-50"
-            ></Textarea>
+            />
             <div class="scan" data-cy="scan-button" @click="scan">
               <QrIcon />
               <small>{{ $t('pages.send.scan') }}</small>
@@ -190,20 +190,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters([
-      'account',
-      'balance',
-      'network',
-      'current',
-      'wallet',
-      'activeAccount',
-      'subaccounts',
-      'tokenSymbol',
-      'tokenBalance',
-      'sdk',
-      'tokens',
-      'activeAccountName',
-    ]),
+    ...mapGetters(['account', 'balance', 'network', 'current', 'sdk']),
     amountConvert() {
       return (this.form.amount * this.current.currencyRate).toFixed(3);
     },
@@ -213,13 +200,6 @@ export default {
     maxValue() {
       const calculatedMaxValue = this.balance - this.maxFee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
-    },
-    sendSubaccounts() {
-      const subs = this.subaccounts.filter(sub => sub.publicKey !== this.account.publicKey);
-      return subs.length === 0 ? false : subs;
-    },
-    txFee() {
-      return this.fee.min;
     },
     maxFee() {
       return this.fee.max;
@@ -306,13 +286,6 @@ export default {
       } finally {
         this.loading = false;
       }
-    },
-    clearForm() {
-      setTimeout(() => {
-        this.loading = false;
-        this.form.address = '';
-        this.form.amount = '';
-      }, 2000);
     },
     navigateAccount() {
       this.$router.push('/account');

@@ -54,6 +54,26 @@ $ npm run test
 2. Click the `Tools for  all add-ons` button and select `Debug Add-ons`
 3. Click `Load a temorary add-on` navigate to the generated `dist` folder in the cloned repo  or the unacrhived release folder and select the `manifest.json` file.
 
+### Build Cordova version for production
+
+#### iOS
+
+- create Xcode project by `cordova prepare ios`
+- open created project in Xcode
+- open Signing & Capabilities
+- enable signing by the corresponding development team
+- ensure that `applinks:wallet.superhero.com` is in Associated domains feature
+- open Build Settings
+- switch "Code Signing Identity => Release" and "Code Signing Identity => Release => Any iOS SDK" from "iOS Distribution" to "iOS Developer" 
+- choose Product => Archive and follow the instructions
+
+#### Android
+
+build a production version signed by the [corresponding key](https://cordova.apache.org/docs/en/latest/guide/platforms/android/#using-buildjson):
+```bash
+cordova build android --release --buildConfig=myBuildConfig.json
+```
+
 ## Security
 If you discover a security vulnerability within this application, please get in touch with us. All security vulnerabilities will be promptly addressed.
 

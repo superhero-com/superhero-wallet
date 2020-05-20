@@ -32,13 +32,8 @@ export default {
       shopUniverse: 'https://shop.aeternityuniverse.com',
     };
   },
-  computed: {
-    ...mapGetters(['account']),
-  },
+  computed: mapGetters(['account']),
   methods: {
-    copy() {
-      this.$store.dispatch('modals/open', { name: 'default', msg: 'Copied to clipboard' });
-    },
     navigateAccount() {
       this.$router.push('/account');
     },

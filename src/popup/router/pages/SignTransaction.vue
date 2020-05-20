@@ -3,7 +3,7 @@
     <ae-list class="spendTxDetailsList">
       <ae-list-item fill="neutral" class="flex-justify-between whiteBg noBorder">
         <div class="flex flex-align-center accountFrom">
-          <UserAvatar :address="account.publicKey" />
+          <UserAvatar :address="account.publicKey" :name="account.name" />
           <span class="spendAccountAddr">{{ activeAccountName }}</span>
         </div>
         <div class="arrowSeprator">
@@ -105,8 +105,6 @@ export default {
       alertMsg: '',
       loading: false,
       selectedFee: 0,
-      usdRate: 0,
-      receiver: '',
       txParams: {},
     };
   },
@@ -116,7 +114,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['account', 'activeAccountName', 'balance', 'sdk', 'tokenBalance']),
+    ...mapGetters(['account', 'activeAccountName', 'balance', 'sdk']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.fee;
       return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
@@ -127,9 +125,6 @@ export default {
     fee() {
       return this.txFee.min;
     },
-    maxFee() {
-      return this.txFee.max.toFixed(7);
-    },
     insufficientBalance() {
       return this.maxValue - this.amount <= 0;
     },
@@ -138,14 +133,6 @@ export default {
     },
     txType() {
       return this.$t('transaction.type')[this.data.tx.type];
-    },
-    isNameTx() {
-      return (
-        this.data.type === 'namePreClaim' ||
-        this.data.type === 'nameBid' ||
-        this.data.type === 'nameClaim' ||
-        this.data.type === 'nameUpdate'
-      );
     },
     convertSelectedFee() {
       return BigNumber(this.selectedFee).shiftedBy(MAGNITUDE);

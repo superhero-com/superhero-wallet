@@ -3,7 +3,7 @@
     <ae-list class="spendTxDetailsList">
       <ae-list-item fill="neutral" class="flex-justify-between noBorder">
         <div class="flex flex-align-center accountFrom">
-          <UserAvatar :address="account.publicKey" />
+          <UserAvatar :address="account.publicKey" :name="account.name" />
           <span class="spendAccountAddr">{{ activeAccountName }}</span>
         </div>
         <div class="arrowSeprator">
@@ -183,7 +183,7 @@ export default {
     this.tx.amount = convertToAE(this.txObject.amount);
   },
   computed: {
-    ...mapGetters(['account', 'activeAccountName', 'balance', 'current', 'network']),
+    ...mapGetters(['account', 'activeAccountName', 'balance']),
     txType() {
       return this.unpackedTx ? this.unpackedTx.txType : null;
     },
@@ -203,9 +203,6 @@ export default {
     },
     amount() {
       return this.txObject.amount;
-    },
-    aeAmount() {
-      return convertToAE(this.txObject.amount);
     },
     receiver() {
       if (this.txType === 'spendTx') {

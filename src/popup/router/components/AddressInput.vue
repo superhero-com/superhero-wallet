@@ -40,7 +40,6 @@ export default {
   data() {
     return {
       address: null,
-      error: false,
     };
   },
   computed: {
