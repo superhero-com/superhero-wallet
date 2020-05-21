@@ -272,7 +272,10 @@ export default {
   },
   async getWebPageAddresses({ state: { sdk } }) {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-    const { address, chainName } = await postMessageToContent({ method: 'getAddresses' }, tab.id);
+    const { address, chainName } = await postMessageToContent(
+      { method: 'getAddresses' },
+      tab.id,
+    ).catch(() => ({ address: [], chainName: [] }));
     let addresses = Array.isArray(address) ? address : [address];
     const chainNames = Array.isArray(chainName) ? chainName : [chainName];
     const chainNamesAddresses = await Promise.all(
