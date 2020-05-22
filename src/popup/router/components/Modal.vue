@@ -3,7 +3,7 @@
     <div class="modal--mask">
       <div class="modal--wrapper">
         <div class="modal--container">
-          <Close class="modal--close" @click="$emit('close')" />
+          <Close v-if="close" class="modal--close" @click="$emit('close')" />
           <div v-if="$slots.header" class="modal--header">
             <slot name="header" />
           </div>
@@ -23,6 +23,9 @@
 import Close from '../../../icons/close.svg?vue-component';
 
 export default {
+  props: {
+    close: Boolean,
+  },
   components: {
     Close,
   },

@@ -259,7 +259,7 @@ export default {
       }
       this.loading = true;
       try {
-        const { hash } = await this.sdk.spend(amount, receiver, { waitMined: false });
+        const { hash } = await this.sdk.spend(amount, receiver, { waitMined: false, modal: false });
         if (hash) {
           await this.$store.dispatch('setPendingTx', {
             hash,

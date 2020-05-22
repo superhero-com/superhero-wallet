@@ -29,11 +29,6 @@
         {{ $t('pages.appVUE.activity') }}
       </router-link>
     </li>
-    <!-- <li>
-      <router-link to="/account">
-        {{ $t('pages.appVUE.profile') }}
-      </router-link>
-    </li> -->
     <li>
       <button
         :class="showSettingsDropdown && 'opened'"
@@ -45,11 +40,6 @@
       </button>
       <transition name="slide">
         <ul v-if="showSettingsDropdown" data-cy="dropdown">
-          <!-- <li>
-            <router-link>
-              {{ $t('pages.appVUE.general') }}
-            </router-link>
-          </li> -->
           <li>
             <router-link to="/securitySettings" data-cy="securitySettings">
               {{ $t('pages.appVUE.security') }}
@@ -73,14 +63,14 @@
         </ul>
       </transition>
     </li>
-    <!-- <li>
-      <router-link>
-        {{ $t('pages.appVUE.advanced') }}
-      </router-link>
-    </li> -->
     <li>
       <router-link to="/names" data-cy="names">
         {{ $t('pages.appVUE.names') }}
+      </router-link>
+    </li>
+    <li>
+      <router-link to="/tokens" data-cy="tokens">
+        {{ $t('pages.appVUE.tokens') }}
       </router-link>
     </li>
     <li>
@@ -88,12 +78,6 @@
         {{ $t('pages.appVUE.help') }}
       </router-link>
     </li>
-
-    <!-- <li>
-      <router-link>
-        {{ $t('pages.appVUE.versions') }}
-      </router-link>
-    </li> -->
   </ul>
 </template>
 

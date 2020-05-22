@@ -29,6 +29,13 @@ import NotFound from './pages/NotFound';
 import ClaimTips from './pages/ClaimTips';
 import DonateError from './pages/DonateError';
 import Address from './pages/Address';
+import Tokens from './pages/FungibleTokens/Index';
+import DeployToken from './pages/FungibleTokens/Deploy';
+import AddToken from './pages/FungibleTokens/Add';
+import MintToken from './pages/FungibleTokens/Mint';
+import Allowances from './pages/FungibleTokens/Allowances';
+import ManageAllowances from './pages/FungibleTokens/ManageAllowances';
+import AllAllowances from './pages/FungibleTokens/AllAllowances';
 
 export default [
   {
@@ -262,14 +269,6 @@ export default [
     },
   },
   {
-    name: 'not-found',
-    path: '*',
-    component: NotFound,
-    meta: {
-      ifNotAuth: true,
-    },
-  },
-  {
     name: 'donate-error',
     path: '/donate-error',
     component: DonateError,
@@ -286,6 +285,71 @@ export default [
     meta: {
       title: 'address',
       notPersist: true,
+    },
+  },
+  {
+    path: '/tokens',
+    component: Tokens,
+    meta: {
+      title: 'fungible-tokens',
+    },
+  },
+  {
+    path: '/deploy-token',
+    component: DeployToken,
+    meta: {
+      title: 'deploy-token',
+      notPersist: true,
+    },
+  },
+  {
+    path: '/add-token',
+    component: AddToken,
+    meta: {
+      title: 'add-token',
+      notPersist: true,
+    },
+  },
+  {
+    path: '/mint-token',
+    component: MintToken,
+    meta: {
+      title: 'mint-burn-token',
+      notPersist: true,
+    },
+  },
+  {
+    path: '/allowances',
+    component: Allowances,
+    meta: {
+      title: 'allowances',
+      notPersist: true,
+    },
+  },
+  {
+    path: '/manage-allowances/:type',
+    name: 'manage-allowances',
+    component: ManageAllowances,
+    props: true,
+    meta: {
+      title: 'allowances',
+      notPersist: true,
+    },
+  },
+  {
+    path: '/all-allowances',
+    component: AllAllowances,
+    meta: {
+      title: 'allowances',
+      notPersist: true,
+    },
+  },
+  {
+    name: 'not-found',
+    path: '*',
+    component: NotFound,
+    meta: {
+      ifNotAuth: true,
     },
   },
 ];

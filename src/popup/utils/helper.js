@@ -160,6 +160,8 @@ export const checkAddress = value =>
   Crypto.isAddressValid(value, 'ct') ||
   Crypto.isAddressValid(value, 'ok');
 
+export const validateAddress = (address, type) => Crypto.isAddressValid(address, type);
+
 export const isInt = n => n % 1 === 0;
 
 export const chekAensName = value => value.endsWith('.test') || value.endsWith('.chain');
@@ -433,4 +435,4 @@ export const getTwitterAccountUrl = url => {
 export const isNotFoundError = error => error.isAxiosError && get(error, 'response.status') === 404;
 
 export const isInternalServerError = error =>
-  error.isAxiosError && [500, 503].includes(get(error, 'response.status'));
+  error.isAxiosError && [500, 503].includes(get(error, 'response.status')); 
