@@ -32,7 +32,24 @@
     </div>
     <template slot="body">
       <li>
-        <ae-badge>{{ transactionType }}</ae-badge>
+        <ae-badge>{{ txType }}</ae-badge>
+      </li>
+      <li class="flex flex-justify-between">
+        <div class="tx-label">{{ $t('pages.signTransaction.fee') }}</div>
+        <div class="text-right">
+          <div class="balance balanceBig txFee no-sign">
+            {{ toAe(transaction.fee) }} {{ $t('pages.appVUE.aeid') }}
+          </div>
+        </div>
+      </li>
+
+      <li class="flex flex-justify-between">
+        <div class="tx-label">{{ $t('pages.signTransaction.total') }}</div>
+        <div class="text-right">
+          <div class="balance balanceBig balanceTotalSpend no-sign">
+            {{ totalSpend }} {{ $t('pages.appVUE.aeid') }}
+          </div>
+        </div>
       </li>
     </template>
 
@@ -50,6 +67,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { OBJECT_ID_TX_TYPE, TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { aettosToAe } from '../../../utils/helper';
 import Modal from '../Modal';
 import Button from '../Button';
 import UserAvatar from '../UserAvatar';
@@ -88,8 +106,15 @@ export default {
       console.log(this.transaction);
       return this.$t('transaction.type')[this.txType];
     },
+    totalSpend() {
+      const amount = this.transaction.amount || 0;
+      return (parseFloat(amount) + parseFloat(aettosToAe(this.transaction.fee))).toFixed(7);
+    },
   },
   methods: {
+    toAe(balance) {
+      return parseFloat(aettosToAe(balance)).toFixed(7);
+    },
     confirm() {
       this.resolve(this.newFee);
     },
@@ -108,11 +133,14 @@ export default {
     width: 100%;
     height: 100%;
     overflow-y: scroll;
+    padding: 0;
+    border-radius: 0;
 
     .modal--body,
     .modal--header {
-      max-width: 480px;
+      max-width: 357px;
       margin: 0 auto;
+      min-width: 357px;
     }
 
     .modal-confirm-btns {
@@ -123,7 +151,7 @@ export default {
       -ms-transform: translateX(-50%);
       transform: translateX(-50%);
       max-width: 480px;
-      min-width: 480px;
+      min-width: 357px;
 
       button {
         width: 50% !important;

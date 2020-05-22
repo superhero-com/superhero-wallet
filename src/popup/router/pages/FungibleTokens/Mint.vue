@@ -81,14 +81,14 @@ export default {
       this.loading = false;
     },
     async mint() {
-      const instance = await this.sdk.getContractInstance(
-        aeternityTokens.newToken(['allowances', 'swappable', 'burnable', 'mintable']),
-        {
-          contractAddress: this.tokens.find(t => t.contract === this.token).contract,
-        },
-      );
+      const { contract } = this.tokens.find(t => t.contract === this.token);
+      const instance = await this.$store.dispatch('tokens/instance', contract);
       const params = this.type === 'mint' ? [this.address, this.amount] : [this.amount];
-      await instance.methods[this.type](...params);
+      try {
+        await instance.methods[this.type](...params);
+      } catch (e) {
+        console.log(e);
+      }
     },
   },
 };

@@ -79,9 +79,6 @@ export default {
       );
     },
   },
-  async created() {
-    
-  },
   methods: {
     async deploy() {
       const source = aeternityTokens.newToken(this.selectedExtensions);
@@ -93,6 +90,7 @@ export default {
           ...this.token,
           balance: 0,
           contract: address,
+          extensions: this.selectedExtensions,
         });
       } catch (e) {
         console.log(e);

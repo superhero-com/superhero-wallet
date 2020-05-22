@@ -65,12 +65,7 @@ export default {
         this.loading = true;
         const { contract, balance } = this.tokens.find(t => t.contract === this.token) || {};
         if (this.amount > balance) return;
-        const instance = await this.sdk.getContractInstance(
-          aeternityTokens.newToken(['allowances', 'swappable', 'burnable', 'mintable']),
-          {
-            contractAddress: contract,
-          },
-        );
+        const instance = await this.$store.dispatch('tokens/instance', contract);
 
         const { decodedResult: allowance } = await instance.methods.allowance({
           from_account: this.account.publicKey,

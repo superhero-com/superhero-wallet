@@ -103,7 +103,8 @@ export default {
           const {
             decodedResult: { decimals, name, symbol },
           } = await instance.methods.meta_info();
-          this.token = { ...this.token, decimals, name, symbol };
+          const { decodedResult: extensions } = await instance.methods.aex9_extensions();
+          this.token = { ...this.token, decimals, name, symbol, extensions };
           this.loading = false;
           this.step = 'confirm';
           return;

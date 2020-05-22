@@ -44,12 +44,7 @@ export default {
       try {
         const { contract, balance, symbol } =
           this.tokens.find(t => t.contract === this.token) || {};
-        const instance = await this.sdk.getContractInstance(
-          aeternityTokens.newToken(['allowances', 'swappable', 'burnable', 'mintable']),
-          {
-            contractAddress: contract,
-          },
-        );
+        const instance = await this.$store.dispatch('tokens/instance', contract);
 
         const { decodedResult: all } = await instance.methods.allowances();
         if (all.length) {
