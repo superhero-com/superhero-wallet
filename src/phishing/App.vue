@@ -66,12 +66,14 @@ export default {
   methods: {
     continueHost() {
       if (this.href !== '' && this.href != null) {
-        browser.runtime.sendMessage({
-          method: 'setPhishingUrl',
-          params: {
-            hostname: this.hostname,
-          },
-        });
+        browser.runtime
+          .sendMessage({
+            method: 'setPhishingUrl',
+            params: {
+              hostname: this.hostname,
+            },
+          })
+          .catch(console.log);
         setInterval(() => {
           window.location.href = this.href;
         }, 500);
