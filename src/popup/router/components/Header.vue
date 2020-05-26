@@ -1,12 +1,7 @@
 <template>
   <div class="header" v-if="showNavigation && !aeppPopup">
     <div class="content" :class="{ isLoggedIn }">
-      <Arrow
-        v-if="title && !tourRunning"
-        @click="$router.go(-1)"
-        class="back-arrow"
-        data-cy="back-arrow"
-      />
+      <Arrow v-if="title && !tourRunning" @click="back" class="back-arrow" data-cy="back-arrow" />
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
 
       <div class="title">
@@ -53,8 +48,12 @@ export default {
     },
   },
   methods: {
-    goBack() {
-      this.$router.push(this.isLoggedIn ? '/account' : '/');
+    back() {
+      if (this.$store.state.route.from.path === '/') {
+        this.$router.push(this.isLoggedIn ? '/account' : '/');
+        return;
+      }
+      this.$router.go(-1);
     },
   },
 };
