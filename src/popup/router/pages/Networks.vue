@@ -7,6 +7,7 @@
           type="radio"
           name="activeNetwork"
           @click.native="selectNetwork(n.name)"
+          prevent
         />
         <div class="mr-auto text-left">
           <p class="f-16" data-cy="network-name">{{ n.name }}</p>
