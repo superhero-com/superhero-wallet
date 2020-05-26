@@ -1,5 +1,5 @@
 <template>
-  <label class="checkbox-container" @click.prevent>
+  <label class="checkbox-container" @click="handleClick">
     <input :value="val" v-model="checked" @change="onChange" :type="getType" :name="name" />
     <span class="checkmark" :class="{ checked }" />
     <slot class="checkbox-holder" />
@@ -8,7 +8,13 @@
 
 <script>
 export default {
-  props: ['value', 'val', 'type', 'name'],
+  props: {
+    value: [String, Number, Boolean],
+    val: [String, Number, Boolean],
+    type: String,
+    name: String,
+    prevent: Boolean,
+  },
   data() {
     return {
       checkedProxy: false,
@@ -30,6 +36,9 @@ export default {
   methods: {
     onChange() {
       this.$emit('input', this.checkedProxy);
+    },
+    handleClick(e) {
+      if (this.prevent) e.preventDefault();
     },
   },
 };

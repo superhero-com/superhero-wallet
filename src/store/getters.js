@@ -56,6 +56,9 @@ export default {
     const account = state.subaccounts.find(s => s.publicKey === state.account.publicKey) || {};
     return account.aename || account.name || '';
   },
+  allowTipping(state, { mainnet }) {
+    return mainnet || process.env.RUNNING_IN_TESTS;
+  },
   mainnet(state, { network, current }) {
     return network[current.network].networkId === 'ae_mainnet';
   },

@@ -97,7 +97,7 @@ export default {
       network: networkProps,
     };
   },
-  computed: mapGetters(['networks', 'current', 'mainnet']),
+  computed: mapGetters(['networks', 'current', 'allowTipping']),
   methods: {
     async selectNetwork(network) {
       await this.$store.dispatch('switchNetwork', network);
@@ -106,7 +106,7 @@ export default {
         postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload: network });
       const { title, msg } = this.$t('modals.tip-mainnet-warning');
       wallet.initSdk().then(() => {
-        if (!this.mainnet)
+        if (!this.allowTipping)
           this.$store.dispatch('modals/open', {
             name: 'default',
             title,

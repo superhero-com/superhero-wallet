@@ -82,7 +82,7 @@ export default {
     return res.error ? { error: true } : parseFromStorage(res);
   },
   async initContractInstances() {
-    if (!store.getters.mainnet) return;
+    if (!store.getters.mainnet && !process.env.RUNNING_IN_TESTS) return;
     const contractAddress = await store.dispatch('getTipContractAddress');
     store.commit(
       'SET_TIPPING',
