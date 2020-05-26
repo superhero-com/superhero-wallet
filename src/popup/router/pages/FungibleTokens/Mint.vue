@@ -38,7 +38,6 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import * as aeternityTokens from 'aeternity-tokens';
 import { checkAddress } from '../../../utils/helper';
 import Button from '../../components/Button';
 import Dropdown from '../../components/Dropdown';
@@ -81,13 +80,27 @@ export default {
       this.loading = false;
     },
     async mint() {
+      this.loading = true;
       const { contract } = this.tokens.find(t => t.contract === this.token);
       const instance = await this.$store.dispatch('tokens/instance', contract);
       const params = this.type === 'mint' ? [this.address, this.amount] : [this.amount];
       try {
         await instance.methods[this.type](...params);
+        this.$store.dispatch('modals/open', {
+          name: 'default',
+          title: this.$t('modals.mint/burn-token.title', { type: this.type }),
+          msg: this.$t('modals.mint/burn-token.msg', { type: this.type }),
+        });
       } catch (e) {
-        console.log(e);
+        this.$store.dispatch('modals/open', {
+          name: 'default',
+          title: 'Something went wrong',
+          msg: e.message,
+        });
+      } finally {
+        this.loading = false;
+        this.address = null;
+        this.amount = null;
       }
     },
   },

@@ -30,6 +30,7 @@
     <Button @click="deploy" :disabled="!validData || requireBurnable" extend>
       {{ $t('pages.deploy-token.deploy') }}
     </Button>
+    <Loader size="big" :loading="loading" type="transparent" />
   </div>
 </template>
 
@@ -41,19 +42,20 @@ import Button from '../../components/Button';
 import CheckBox from '../../components/CheckBox';
 
 const extensions = ['allowances', 'swappable', 'burnable', 'mintable'];
-
+const initialToken = {
+  name: '',
+  decimals: 18,
+  symbol: '',
+  initialSupply: 0,
+}
 export default {
   components: { Input, Button, CheckBox },
   data() {
     return {
-      token: {
-        name: '',
-        decimals: 18,
-        symbol: '',
-        initialSupply: undefined,
-      },
+      token: { ...initialToken },
       advanced: false,
       extensions: extensions.reduce((a, c) => [...a, { type: c }], []),
+      loading: false,
     };
   },
   computed: {
@@ -81,19 +83,34 @@ export default {
   },
   methods: {
     async deploy() {
+      this.loading = true;
       const source = aeternityTokens.newToken(this.selectedExtensions);
       const instance = await this.sdk.getContractInstance(source);
 
       try {
         const { address } = await instance.deploy(Object.values(this.token));
-        this.$store.dispatch('tokens/add', {
+        await this.$store.dispatch('tokens/add', {
           ...this.token,
           balance: 0,
           contract: address,
           extensions: this.selectedExtensions,
         });
+
+        this.$store.dispatch('modals/open', {
+          name: 'default',
+          title: this.$t('modals.deploy-token.title'),
+          msg: this.$t('modals.deploy-token.msg', { address }),
+        });
       } catch (e) {
-        console.log(e);
+        this.$store.dispatch('modals/open', {
+          name: 'default',
+          title: 'Something went wrong',
+          msg: e.message,
+        });
+      } finally {
+        this.loading = false;
+        this.token = { ...initialToken };
+        this.extensions = this.extensions.map(e => ({ ...e, selected: false }));
       }
     },
   },

@@ -7,8 +7,13 @@
       :selected="token"
       label="Select token"
     />
-    <Input v-model="to" label="Address" :disabled="hasAllowance" />
-    <Input v-model.number="amount" type="number" label="Value" :disabled="hasAllowance" />
+    <Input v-model="to" :label="$t('pages.manage-allowances.address')" :disabled="hasAllowance" />
+    <Input
+      v-model.number="amount"
+      type="number"
+      :label="$t('pages.manage-allowances.amount')"
+      :disabled="hasAllowance"
+    />
     <div v-if="exist">
       {{ $t('pages.manage-allowances.allowance-exist') }}
       <router-link :to="{ name: 'manage-allowances', params: { type: 'change' } }">
@@ -18,12 +23,12 @@
     <Button @click="allowanceAction" extend>
       {{ $t('pages.manage-allowances')[type] }}
     </Button>
+    <Loader size="big" :loading="loading" type="transparent" />
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import * as aeternityTokens from 'aeternity-tokens';
 import { isEmpty } from 'lodash-es';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
@@ -41,6 +46,7 @@ export default {
     to: null,
     amount: null,
     exist: false,
+    loading: false,
   }),
   computed: {
     ...mapGetters(['sdk', 'account']),
@@ -62,11 +68,16 @@ export default {
   methods: {
     async allowanceAction() {
       try {
+        this.exist = false;
         this.loading = true;
         const { contract, balance } = this.tokens.find(t => t.contract === this.token) || {};
-        if (this.amount > balance) return;
+        if (this.amount > balance) {
+          return this.$store.dispatch('modals/open', {
+            name: 'default',
+            ...this.$t('modals.allowances.balance'),
+          });
+        };
         const instance = await this.$store.dispatch('tokens/instance', contract);
-
         const { decodedResult: allowance } = await instance.methods.allowance({
           from_account: this.account.publicKey,
           for_account: this.to,
@@ -81,9 +92,21 @@ export default {
         } else if (this.type === 'change') {
           await instance.methods.change_allowance(this.to, this.amount);
         }
+        this.$store.dispatch('modals/open', {
+          name: 'default',
+          ...this.$t('modals.allowances')[this.type],
+        });
+        this.to = null;
+        this.amount = null;
       } catch (e) {
         if (e.message.includes('ALLOWANCE_ALREADY_EXISTENT')) this.exist = true;
-        console.log(e);
+        this.$store.dispatch('modals/open', {
+          name: 'default',
+          title: 'Something went wrong',
+          msg: e.message,
+        });
+      } finally {
+        this.loading = false;
       }
     },
     changeToken(e) {

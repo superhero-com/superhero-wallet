@@ -48,6 +48,7 @@ export default {
   position: relative;
   min-width: 6rem;
   width: 100%;
+  margin-bottom: 22px;
 
   .display {
     text-align: center;

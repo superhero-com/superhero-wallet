@@ -1,6 +1,12 @@
 <template>
   <div class="popup">
-    <Dropdown :options="tokens" :method="changeToken" :selected="token" v-if="tokens.length" />
+    <Dropdown
+      :options="tokens"
+      :method="changeToken"
+      :selected="token"
+      v-if="tokens.length"
+      :label="$t('pages.allowances.select-token')"
+    />
     <ul v-for="(allowance, index) in allowances" :key="index.id">
       <li>
         <b> {{ $t('pages.allowances.from') }}: </b>
@@ -19,7 +25,6 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import * as aeternityTokens from 'aeternity-tokens';
 import Button from '../../components/Button';
 import Dropdown from '../../components/Dropdown';
 

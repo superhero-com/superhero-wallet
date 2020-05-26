@@ -117,7 +117,33 @@
     },
     "add-token": {
       "title": "Token added",
-      "msg": "Token added succefully"
+      "msg": "Token added successfully"
+    },
+    "deploy-token": {
+      "title": "Token deployed",
+      "msg": "Token deployed successfully at address: {address}"
+    },
+    "mint/burn-token": {
+      "title": "Token {type} ",
+      "msg": "Token {type} successfully"
+    },
+    "allowances": {
+      "create": {
+        "title": "Allowance created",
+        "msg": "Allowance created successfully"
+      },
+      "transfer": {
+        "title": "Allowance tranfered",
+        "msg": "Allowance tranfered successfully"
+      },
+      "change": {
+        "title": "Allowance changed",
+        "msg": "Allowance changed successfully"
+      },
+      "balance": {
+        "title": "something went wrong",
+        "msg": "Insufficient balance"
+      }
     },
     "cancel": "Cancel",
     "confirm": "Confirm"
@@ -332,14 +358,17 @@
       "all-allowances-info": "See all your allowances and take them",
       "from": "From",
       "get-allowance": "Get allowance",
-      "no-allowances-found": "No allowances found"
+      "no-allowances-found": "No allowances found",
+      "select-token": "Select token"
     },
     "manage-allowances": {
       "allowance-exist": "Allowance exist",
       "here": "here",
       "create": "Create allowance",
       "transfer": "Transfer allowance",
-      "change": "Change allowance"
+      "change": "Change allowance",
+      "address": "Address",
+      "amount": "Amount"
     },
     "auctionBid": {
       "backToAuctions": "Back to auctions",

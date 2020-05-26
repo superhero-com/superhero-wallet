@@ -96,6 +96,7 @@ export default {
     async next() {
       if (this.exist) return;
       try {
+        this.loading = true;
         const instance = await this.sdk.getContractInstance(aeternityTokens.newToken(), {
           contractAddress: this.token.contract,
         });
