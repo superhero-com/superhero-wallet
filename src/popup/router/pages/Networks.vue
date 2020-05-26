@@ -104,12 +104,15 @@ export default {
       this.$store.commit('SET_NODE_STATUS', 'connecting');
       if (process.env.IS_EXTENSION)
         postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload: network });
-      await wallet.initSdk();
-      if (!this.mainnet)
-        await this.$store.dispatch('modals/open', {
-          name: 'default',
-          ...this.$t('modals.tip-mainnet-warning'),
-        });
+      const { title, msg } = this.$t('modals.tip-mainnet-warning');
+      wallet.initSdk().then(() => {
+        if (!this.mainnet)
+          this.$store.dispatch('modals/open', {
+            name: 'default',
+            title,
+            msg,
+          });
+      });
     },
     cancel() {
       this.mode = 'list';
