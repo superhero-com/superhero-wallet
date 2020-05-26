@@ -4,7 +4,7 @@
       {{ text }}
     </div>
 
-    <Button @click="sendComment">
+    <Button @click="sendComment" :disabled="!mainnet">
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button @click="cancel">
@@ -23,7 +23,7 @@ import openUrl from '../../utils/openUrl';
 export default {
   data: () => ({ id: 0, parentId: undefined, text: '', loading: false }),
   computed: {
-    ...mapGetters(['sdk']),
+    ...mapGetters(['sdk', 'mainnet']),
     urlParams() {
       return new URL(this.$route.fullPath, window.location).searchParams;
     },

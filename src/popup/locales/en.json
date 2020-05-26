@@ -105,6 +105,10 @@
       "title": "Your Error Report Was not send",
       "msg": "There was problem sending your error report"
     },
+    "tip-mainnet-warning": {
+      "title": "Warning",
+      "msg": "Tip/Claim functionality works only on Mainnet"
+    },
     "cancel": "Cancel",
     "confirm": "Confirm",
     "ok": "OK"

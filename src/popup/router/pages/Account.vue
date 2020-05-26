@@ -19,7 +19,8 @@
           data-cy="tip-button"
           :text="$t('pages.account.send')"
           accent
-          to="/tip"
+          :disabled="!mainnet"
+          :to="mainnet ? { name: 'tip' } : {}"
           class="tour__step2"
         >
           <Tip slot="icon" />
@@ -27,7 +28,8 @@
         <BoxButton
           :text="$t('pages.account.claim')"
           accent
-          :to="{ name: 'claim-tips' }"
+          :to="mainnet ? { name: 'claim-tips' } : {}"
+          :disabled="!mainnet"
           class="tour__step4"
         >
           <Claim slot="icon" />
@@ -84,7 +86,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'backedUpSeed']),
+    ...mapGetters(['account', 'backedUpSeed', 'mainnet']),
     ...mapState(['tourRunning']),
   },
   async created() {

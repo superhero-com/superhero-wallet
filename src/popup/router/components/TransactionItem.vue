@@ -111,7 +111,7 @@ export default {
     },
     seeTx() {
       openUrl(
-        `${this.network[this.current.network].explorerUrl}/transactions/${this.transaction.hash}`,
+        `${this.network[this.current.network].middlewareUrl}/transactions/${this.transaction.hash}`,
       );
     },
   },

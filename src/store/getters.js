@@ -56,6 +56,9 @@ export default {
     const account = state.subaccounts.find(s => s.publicKey === state.account.publicKey) || {};
     return account.aename || account.name || '';
   },
+  mainnet(state, { network, current }) {
+    return network[current.network].networkId === 'ae_mainnet';
+  },
   sdk(state) {
     return state.sdk;
   },

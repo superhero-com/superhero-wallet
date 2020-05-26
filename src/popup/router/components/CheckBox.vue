@@ -1,5 +1,5 @@
 <template>
-  <label class="checkbox-container">
+  <label class="checkbox-container" @click.prevent>
     <input :value="val" v-model="checked" @change="onChange" :type="getType" :name="name" />
     <span class="checkmark" :class="{ checked }" />
     <slot class="checkbox-holder" />

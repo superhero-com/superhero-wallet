@@ -12,7 +12,7 @@
           <p class="f-16" data-cy="network-name">{{ n.name }}</p>
           <p class="f-12 url" data-cy="network-url"><b>Url:</b> {{ n.url }}</p>
           <p class="f-12 url" data-cy="network-middleware">
-            <b>MIddleware:</b> {{ n.middlewareUrl }}
+            <b>Middleware:</b> {{ n.middlewareUrl }}
           </p>
         </div>
         <ae-dropdown direction="right" v-if="!n.system" data-cy="more">
@@ -97,7 +97,7 @@ export default {
       network: networkProps,
     };
   },
-  computed: mapGetters(['networks', 'current']),
+  computed: mapGetters(['networks', 'current', 'mainnet']),
   methods: {
     async selectNetwork(network) {
       await this.$store.dispatch('switchNetwork', network);
@@ -105,6 +105,11 @@ export default {
       if (process.env.IS_EXTENSION)
         postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload: network });
       await wallet.initSdk();
+      if (!this.mainnet)
+        await this.$store.dispatch('modals/open', {
+          name: 'default',
+          ...this.$t('modals.tip-mainnet-warning'),
+        });
     },
     cancel() {
       this.mode = 'list';
