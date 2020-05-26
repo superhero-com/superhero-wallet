@@ -23,10 +23,7 @@ export default store =>
 
         return data;
       },
-      async confirmTxSigning(
-        { dispatch, rootGetters: { sdk } },
-        { txBinary, opt: { modal = true } },
-      ) {
+      async confirmTxSigning({ dispatch }, { txBinary, opt: { modal = true } }) {
         let txObject;
         try {
           txObject = TxBuilder.unpackTx(txBinary, true).tx;

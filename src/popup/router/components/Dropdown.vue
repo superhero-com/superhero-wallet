@@ -5,7 +5,7 @@
       <div class="text-ellipsis" :title="displayValue">
         {{ displayValue }}
       </div>
-      <img src="../../../icons/carret-down.svg">
+      <img src="../../../icons/carret-down.svg" />
       <select v-model="selectedVal" @change="method($event)">
         <option v-for="{ text, value } in options" :key="value" :value="value">{{ text }}</option>
       </select>

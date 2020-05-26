@@ -56,7 +56,9 @@ export default {
   },
   async created() {
     if (this.allowance) {
+      // eslint-disable-next-line camelcase
       const { from_account, amount } = this.allowance;
+      // eslint-disable-next-line camelcase
       this.to = from_account;
       this.amount = amount;
     }
@@ -72,11 +74,12 @@ export default {
         this.loading = true;
         const { contract, balance } = this.tokens.find(t => t.contract === this.token) || {};
         if (this.amount > balance) {
-          return this.$store.dispatch('modals/open', {
+          this.$store.dispatch('modals/open', {
             name: 'default',
             ...this.$t('modals.allowances.balance'),
           });
-        };
+          return;
+        }
         const instance = await this.$store.dispatch('tokens/instance', contract);
         const { decodedResult: allowance } = await instance.methods.allowance({
           from_account: this.account.publicKey,

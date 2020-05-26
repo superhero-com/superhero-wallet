@@ -53,6 +53,7 @@ export default {
 
         const { decodedResult: all } = await instance.methods.allowances();
         if (all.length) {
+          // eslint-disable-next-line camelcase
           const mine = all.filter(([{ for_account }]) => for_account === this.account.publicKey);
           if (mine.length) {
             this.allowances = mine.map(a => ({
@@ -64,8 +65,8 @@ export default {
             }));
           }
         }
-      } catch (e) {
-        console.log(e);
+      } catch (err) {
+        console.log(err);
       }
     },
     getAllowance(allowance) {

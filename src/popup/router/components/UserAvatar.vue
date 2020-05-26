@@ -1,5 +1,11 @@
 <template>
-  <img v-if="!error && !identicon" :src="profileImage" class="user-avatar" :class="size" @error="error = true" />
+  <img
+    v-if="!error && !identicon"
+    :src="profileImage"
+    class="user-avatar"
+    :class="size"
+    @error="error = true"
+  />
   <img v-else-if="avatar.type === 'avatar'" :src="avatar.src" class="user-avatar" :class="size" />
   <div
     v-else-if="avatar.type === 'identicon'"

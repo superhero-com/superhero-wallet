@@ -47,7 +47,7 @@ const initialToken = {
   decimals: 18,
   symbol: '',
   initialSupply: 0,
-}
+};
 export default {
   components: { Input, Button, CheckBox },
   data() {

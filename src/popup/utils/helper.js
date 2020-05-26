@@ -435,4 +435,4 @@ export const getTwitterAccountUrl = url => {
 export const isNotFoundError = error => error.isAxiosError && get(error, 'response.status') === 404;
 
 export const isInternalServerError = error =>
-  error.isAxiosError && [500, 503].includes(get(error, 'response.status')); 
+  error.isAxiosError && [500, 503].includes(get(error, 'response.status'));

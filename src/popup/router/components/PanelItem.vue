@@ -14,7 +14,7 @@ export default {
     info: String,
     to: [String, Object],
   },
-}
+};
 </script>
 
 <style lang="scss">

@@ -79,7 +79,7 @@ export default {
     ...mapGetters('tokens', ['owned']),
     ...mapGetters(['sdk', 'account']),
     tokenBalance() {
-      return (this.token.balance / ( 10 ** this.token.decimals) ).toFixed(3);
+      return (this.token.balance / 10 ** this.token.decimals).toFixed(3);
     },
     validContract() {
       return validateAddress(this.token.contract, 'ct');
