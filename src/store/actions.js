@@ -95,7 +95,7 @@ export default {
       }
     }
   },
-  initSdk({ commit, state: { userNetworks, network, current }, getters: { networks } }, sdk) {
+  initSdk({ commit, state: { userNetworks, network, current } }, sdk) {
     commit(types.INIT_SDK, sdk);
     const networkId = sdk.getNetworkId();
     const name = current.network;

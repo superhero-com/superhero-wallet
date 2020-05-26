@@ -57,7 +57,7 @@ export default {
       'account',
       'network',
       'currentCurrency',
-      'mainnet'
+      'mainnet',
     ]),
     ...mapState(['tippingAddress', 'minTipAmount']),
     maxValue() {
