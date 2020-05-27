@@ -57,7 +57,7 @@ export default class Notification {
       txQueue.forEach(async tx => {
         if (tx !== 'error' && tx) {
           await this.client.poll(tx);
-          const url = `${this.network.explorerUrl}/transactions/${tx}`;
+          const url = `${this.network.middlewareUrl}/transactions/${tx}`;
           await sendNoti({
             title: 'Transaction ready',
             message: `You can explore your transaction by clicking button below`,

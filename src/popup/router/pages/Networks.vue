@@ -7,12 +7,13 @@
           type="radio"
           name="activeNetwork"
           @click.native="selectNetwork(n.name)"
+          prevent
         />
         <div class="mr-auto text-left">
           <p class="f-16" data-cy="network-name">{{ n.name }}</p>
           <p class="f-12 url" data-cy="network-url"><b>Url:</b> {{ n.url }}</p>
           <p class="f-12 url" data-cy="network-middleware">
-            <b>MIddleware:</b> {{ n.middlewareUrl }}
+            <b>Middleware:</b> {{ n.middlewareUrl }}
           </p>
         </div>
         <ae-dropdown direction="right" v-if="!n.system" data-cy="more">
@@ -97,14 +98,22 @@ export default {
       network: networkProps,
     };
   },
-  computed: mapGetters(['networks', 'current']),
+  computed: mapGetters(['networks', 'current', 'allowTipping']),
   methods: {
     async selectNetwork(network) {
       await this.$store.dispatch('switchNetwork', network);
       this.$store.commit('SET_NODE_STATUS', 'connecting');
       if (process.env.IS_EXTENSION)
         postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload: network });
-      await wallet.initSdk();
+      const { title, msg } = this.$t('modals.tip-mainnet-warning');
+      wallet.initSdk().then(() => {
+        if (!this.allowTipping)
+          this.$store.dispatch('modals/open', {
+            name: 'default',
+            title,
+            msg,
+          });
+      });
     },
     cancel() {
       this.mode = 'list';

@@ -19,6 +19,7 @@ import { detectConnectionType } from './popup/utils/helper';
 import { getPhishingUrls, phishingCheckUrl, setPhishingUrl } from './popup/utils/phishing-detect';
 import WalletController from './wallet-controller';
 import Logger from './lib/logger';
+import { getState } from './store/plugins/persistState';
 
 const controller = new WalletController();
 const inBackground = window.location.href.includes('_generated_background_page.html');
@@ -80,7 +81,10 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
     if (from === 'content') {
       const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });
       if (type === 'readDom' && (data.address || data.chainName)) {
-        if (sender.url === url && DEFAULT_NETWORK === 'Mainnet')
+        const {
+          current: { network },
+        } = await getState();
+        if (sender.url === url && (DEFAULT_NETWORK && network) === 'Mainnet')
           TipClaimRelay.checkUrlHasBalance(url, data);
       }
       if (type === 'openTipPopup') openTipPopup(url);

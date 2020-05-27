@@ -24,8 +24,9 @@ export default {
   setSubAccounts({ commit }, payload) {
     commit(types.SET_SUBACCOUNTS, payload);
   },
-  async switchNetwork({ commit }, payload) {
-    return commit(types.SWITCH_NETWORK, payload);
+  switchNetwork({ commit, dispatch }, payload) {
+    commit(types.SWITCH_NETWORK, payload);
+    dispatch('updateLatestTransactions', []);
   },
   async updateBalance({ commit, state }) {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
@@ -94,8 +95,17 @@ export default {
       }
     }
   },
-  initSdk({ commit }, payload) {
-    commit(types.INIT_SDK, payload);
+  initSdk({ commit, state: { userNetworks, network, current } }, sdk) {
+    commit(types.INIT_SDK, sdk);
+    const networkId = sdk.getNetworkId();
+    const name = current.network;
+    const net = { ...network };
+    net[name].networkId = networkId;
+    commit(
+      'SET_USERNETWORKS',
+      userNetworks.map(n => (n.name === name ? { ...n, networkId } : { ...n })),
+    );
+    commit('SET_NETWORKS', net);
   },
   async getRegisteredNames({ commit, state, getters, dispatch }) {
     if (!state.middleware) return;
