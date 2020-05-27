@@ -3,32 +3,24 @@
     <ae-main>
       <ae-panel class="text-center">
         <img src="../icons/icon_128.png" alt="Superhero logo" />
-        <h1><ae-icon fill="primary" face="round" name="info" />Superhero Phishing Detection</h1>
-        <p>
-          This domain is currently on the Superhero domain warning list. This means that based on
-          information available to us, Superhero believes this domain could currently compromise
-          your security and, as an added safety feature, Superhero has restricted access to the
-          site. To override this, please read the rest of this warning for instructions on how to
-          continue at your own risk.
-        </p>
-        <p>
-          There are many reasons sites can appear on our warning list, and our warning list compiles
-          from other widely used industry lists. Such reasons can include known fraud or security
-          risks, such as domains that test positive on the <a>Superhero Phishing Detector</a>.
-          Domains on these warning lists may include outright malicious websites and legitimate
-          websites that have been compromised by a malicious actor.
-        </p>
-        <p>
-          Note that this warning list is compiled on a voluntary basis. This list may be inaccurate
-          or incomplete. Just because a domain does not appear on this list is not an implicit
-          guarantee of that domain's safety. As always, your transactions are your own
-          responsibility. If you wish to interact with any domain on our warning list, you can do so
-          by <a @click.prevent="continueHost">continuing at your own risk</a>.
-        </p>
-        <p>
-          If you think this domain is incorrectly flagged or if a blocked legitimate website has
-          resolved its security issues,<a> please file an issue</a>.
-        </p>
+        <h1><ae-icon fill="primary" face="round" name="info" />{{ $t('phishing.detection') }}</h1>
+        <i18n
+          v-for="(item, index) in $t('phishing.sections').length"
+          :key="index"
+          :path="`phishing.sections[${index}].text`"
+          tag="p"
+        >
+          <template v-slot:insertion>
+            <a>
+              {{ $t(`phishing.sections[${index}].insertion`) }}
+            </a>
+          </template>
+          <template v-slot:continueHost>
+            <a @click.prevent="continueHost">
+              {{ $t(`phishing.sections[${index}].continueHost`) }}
+            </a>
+          </template>
+        </i18n>
       </ae-panel>
     </ae-main>
   </div>

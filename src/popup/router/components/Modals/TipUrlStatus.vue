@@ -6,7 +6,7 @@
     </template>
     <div slot="body">{{ content.msg }}</div>
     <div slot="footer">
-      <Button class="ok-button" @click="resolve">{{ $t('modals.ok') }}</Button>
+      <Button class="ok-button" @click="resolve">{{ $t('ok') }}</Button>
     </div>
   </Modal>
 </template>

@@ -1,3 +1,4 @@
+<!--eslint-disable vue-i18n/no-raw-text-->
 <template>
   <Modal @close="resolve">
     <div slot="body">
@@ -7,7 +8,7 @@
       <span style="color: #2a9cff;">{{ $t('pages.claim.claimed') }}</span>
     </div>
     <div slot="footer">
-      <Button @click="resolve">OK</Button>
+      <Button @click="resolve">{{ $t('ok') }}</Button>
     </div>
   </Modal>
 </template>

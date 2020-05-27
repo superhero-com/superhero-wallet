@@ -11,20 +11,22 @@
         />
         <div class="mr-auto text-left">
           <p class="f-16" data-cy="network-name">{{ n.name }}</p>
-          <p class="f-12 url" data-cy="network-url"><b>Url:</b> {{ n.url }}</p>
+          <p class="f-12 url" data-cy="network-url">
+            <b>{{ $t('pages.network.url') }}</b> {{ n.url }}
+          </p>
           <p class="f-12 url" data-cy="network-middleware">
-            <b>Middleware:</b> {{ n.middlewareUrl }}
+            <b>{{ $t('pages.network.middleware') }}</b> {{ n.middlewareUrl }}
           </p>
         </div>
         <ae-dropdown direction="right" v-if="!n.system" data-cy="more">
           <ae-icon name="more" size="20px" slot="button" />
           <li @click="setNetworkEdit(n, index)" data-cy="edit">
             <ae-icon name="edit" />
-            Edit
+            {{ $t('pages.network.edit') }}
           </li>
           <li @click="deleteNetwork(n, index)" data-cy="delete">
             <ae-icon name="delete" />
-            Delete
+            {{ $t('pages.network.delete') }}
           </li>
         </ae-dropdown>
       </ListItem>

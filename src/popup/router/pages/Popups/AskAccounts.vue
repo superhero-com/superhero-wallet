@@ -1,6 +1,7 @@
 <template>
   <div class="popup">
     <h2>
+      <!--eslint-disable-next-line vue-i18n/no-raw-text-->
       <span class="secondary-text">{{ data.host }} ({{ data.name }}) </span>
       {{ $t('pages.connectConfirm.websiteRequestAccounts') }}
     </h2>
