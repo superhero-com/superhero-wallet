@@ -400,6 +400,7 @@
       "enterAddress": "填写地址"
     },
     "namingSystemPage": {
+      "active": "Active",
       "heading": "命名系统",
       "registerNameRequirement": "只允许数字和字母",
       "registerName": "注册新域名",
@@ -425,7 +426,7 @@
       "goBiddingBtn": "前往竞拍",
       "backButton": "返回",
       "extend": "延伸",
-      "active": "Set Active",
+      "setActive": "Set Active",
       "namePlaceholder": "Enter .chain name",
       "pointer": "Set Name Pointer",
       "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
@@ -708,6 +709,7 @@
       "amountLabel": "数量",
       "empty": "Empty",
       "availableLabel": "有效",
+      "sendToAddress": "Send address to",
       "confirm": "确认",
       "cancel": "Cancel",
       "edit": "编辑❤细节",

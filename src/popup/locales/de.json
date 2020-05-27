@@ -400,6 +400,7 @@
       "enterAddress": "Adresse eingeben"
     },
     "namingSystemPage": {
+      "active": "Active",
       "heading": "Benennungssystem",
       "registerNameRequirement": "Erlaubt nur Buchstaben und Zahlen",
       "registerName": "Registrieren Sie einen neuen Namen",
@@ -425,7 +426,7 @@
       "goBiddingBtn": "Mach mit",
       "backButton": "Zurück",
       "extend": "Extend",
-      "active": "Set Active",
+      "setActive": "Set Active",
       "namePlaceholder": "Enter .chain name",
       "pointer": "Set Name Pointer",
       "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
@@ -708,6 +709,7 @@
       "amountLabel": "Amount",
       "empty": "Empty",
       "availableLabel": "Available",
+      "sendToAddress": "Send address to",
       "confirm": "Confirm",
       "cancel": "Cancel",
       "edit": "Edit Tip Details",

@@ -23,7 +23,9 @@
             <div class="text-left ml-10 wd-100">
               <div>
                 {{ name.name }}
-                <Badge class="active-name" v-if="activeAccountName == name.name">Active</Badge>
+                <Badge class="active-name" v-if="activeAccountName == name.name">
+                  {{ $t('pages.namingSystemPage.active') }}
+                </Badge>
               </div>
               <ae-address :value="name.owner" length="flat" />
               <div v-if="name.addPointer" class="pointer-holder mt-10">
@@ -56,7 +58,7 @@
                   :small="!name.addPointer"
                   @click="setActiveName(name, key)"
                   :disabled="activeAccountName == name.name"
-                  >{{ $t('pages.namingSystemPage.active') }}</Button
+                  >{{ $t('pages.namingSystemPage.setActive') }}</Button
                 >
               </div>
             </div>
