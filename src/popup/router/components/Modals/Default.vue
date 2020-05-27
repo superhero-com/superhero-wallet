@@ -3,7 +3,7 @@
     <div v-if="title" slot="header">{{ title || $t(`modals.${type}.title`) }}</div>
     <div slot="body">{{ msg || $t(`modals.${type}.msg`) }}</div>
     <div slot="footer">
-      <Button @click="resolve">OK</Button>
+      <Button @click="resolve">{{ $t('ok') }}</Button>
     </div>
   </Modal>
 </template>

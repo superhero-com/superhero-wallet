@@ -10,7 +10,7 @@
         :label="$t('pages.tipPage.amountLabel')"
       />
       <div class="ml-15 text-left" style="margin-right:auto">
-        <p class="label hidden">Empty</p>
+        <p class="label hidden">{{ $t('pages.tipPage.empty') }}</p>
         <span class="secondary-text f-14 block l-1" data-cy="amount">
           {{ $t('pages.appVUE.aeid') }}
         </span>

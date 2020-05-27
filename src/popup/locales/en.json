@@ -1,4 +1,5 @@
 {
+  "ok": "OK",
   "onboarding": {
     "step_1": {
       "title": "Your Account Info",
@@ -110,8 +111,7 @@
       "msg": "Tip/Claim functionality works only on Mainnet"
     },
     "cancel": "Cancel",
-    "confirm": "Confirm",
-    "ok": "OK"
+    "confirm": "Confirm"
   },
   "transaction": {
     "type": {
@@ -409,11 +409,13 @@
       "registerName": "Register new name",
       "registeredNames": "Your registered names",
       "seeAllRegisteredNames": "See all registered names",
-      "OkButton": "OK",
       "noNames": "No names found",
       "activeAuctions": "All active auctions",
       "auctionInfo": "Auction info",
       "noAuctions": "No auctions found",
+      "expiresIn": "Expires in",
+      "expiresInColon": "Expires in: ",
+      "blocks": "blocks",
       "yourNamesBtn": "Your names",
       "allActiveAuctionsBtn": "All active auctions",
       "AddNewBtn": "Add new",
@@ -444,6 +446,7 @@
       "term3": "Privacy Policy",
       "termsAndConditions": "Terms of Use",
       "heading": "Social network with a mission",
+      "webVersion": "Or use a web version",
       "securingAccount": "Securing your account",
       "generateWallet": "Generate New Wallet",
       "importWallet": "Retrieve existing account",
@@ -680,7 +683,6 @@
     },
     "tipPage": {
       "back": "Back",
-      "OkButton": "OK",
       "noImage": "No Image",
       "domainVerified": "Verified",
       "domainNotVerified": "Not verified",
@@ -710,6 +712,7 @@
       "to": "to",
       "amountPlaceholder": "Enter amount",
       "amountLabel": "Amount",
+      "empty": "Empty",
       "availableLabel": "Available",
       "confirm": "Confirm",
       "cancel": "Cancel",
@@ -853,6 +856,10 @@
       "message": "Message"
     },
     "network": {
+      "url": "URL:",
+      "edit": "Edit",
+      "delete": "Delete",
+      "middleware": "Middleware:",
       "allNetworks": "Your networks",
       "cancel": "Cancel",
       "addNetwork": "Connect to another node",
@@ -872,6 +879,30 @@
       "details": "Technical details:",
       "cancel": "Cancel",
       "donate": "Donate Data"
-    }
-  }
+    },
+  },
+  "phishing": {
+    "detection": "Superhero Phishing Detection",
+    "sections": [
+      {
+        "text": "This domain is currently on the Superhero domain warning list. This means that based on information available to us, Superhero believes this domain could currently compromise your security and, as an added safety feature, Superhero has restricted access to the site. To override this, please read the rest of this warning for instructions on how to continue at your own risk."
+      },
+      {
+        "text": "There are many reasons sites can appear on our warning list, and our warning list compiles from other widely used industry lists. Such reasons can include known fraud or security risks, such as domains that test positive on the {insertion}. Domains on these warning lists may include outright malicious websites and legitimate websites that have been compromised by a malicious actor.",
+        "insertion": "Superhero Phishing Detector"
+      },
+      {
+        "text": "Note that this warning list is compiled on a voluntary basis. This list may be inaccurate or incomplete. Just because a domain does not appear on this list is not an implicit guarantee of that domain's safety. As always, your transactions are your own responsibility. If you wish to interact with any domain on our warning list, you can do so by {continueHost}.",
+        "continueHost": "continuing at your own risk"
+      },
+      {
+        "text": "If you think this domain is incorrectly flagged or if a blocked legitimate website has resolved its security issues, {insertion}.",
+        "insertion": " please file an issue"
+      }
+    ]
+  },
+  "options": {
+    "text": "Superhero is Open-source! Visit "
+  },
+  "redirecting": "Redirecting"
 }

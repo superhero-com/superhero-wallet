@@ -116,7 +116,10 @@
             <UserAvatar class="subAccountIcon" :name="info.name" />
             <div class="auctionInfo">
               <div class="name">{{ info.name }}</div>
-              <div class="expiration">Expires in {{ info.expiration }} blocks</div>
+              <div class="expiration">
+                {{ $t('pages.namingSystemPage.expiresIn') }}{{ info.expiration }}
+                {{ $t('pages.namingSystemPage.blocks') }}
+              </div>
             </div>
           </ae-list-item>
         </ae-list>
@@ -130,7 +133,8 @@
             </button>
           </div>
           <div>
-            <span>Expires in: </span><b>{{ moreAuInfo.info.expiration }} </b>blocks<br />
+            <span>{{ $t('pages.namingSystemPage.expiresInColon') }}</span>
+            <b>{{ moreAuInfo.info.expiration }} </b>{{ $t('pages.namingSystemPage.blocks') }}<br />
             <hr />
             <span>{{ $t('pages.namingSystemPage.currentBid') }}</span>
             <ae-list-item style="border:none" fill="neutral">
