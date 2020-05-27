@@ -4,6 +4,7 @@
       <div class="flex flex-align-center flex-justify-content-center">
         <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
         <div>
+          <!--eslint-disable-next-line vue-i18n/no-raw-text-->
           <span class="secondary-text" data-cy="host">{{ data.host }} ({{ data.name }}) </span>
           {{ $t('pages.popupMessageSign.heading') }}
         </div>

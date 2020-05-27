@@ -161,6 +161,7 @@
               >
                 <UserAvatar class="subAccountIcon" :address="bid.accountId" />
                 <div class="auctionInfo">
+                  <!--eslint-disable-next-line vue-i18n/no-raw-text-->
                   <div class="name">{{ bid.nameFee.toFixed(3) }} AE</div>
                   <div style="color:#aba9a9" class="expiration">
                     <small>{{ bid.accountId }}</small>

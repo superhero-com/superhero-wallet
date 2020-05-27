@@ -79,6 +79,7 @@
                 >{{ toFixedAmount }} {{ $t('pages.appVUE.aeid') }}</span
               >
               <span class="currencyamount">
+                <!--eslint-disable-line vue-i18n/no-raw-text-->
                 ~
                 <span>{{ amountConvert }} {{ current.currency.toUpperCase() }}</span>
               </span>

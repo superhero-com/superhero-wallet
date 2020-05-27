@@ -1,3 +1,4 @@
+<!--eslint-disable vue-i18n/no-raw-text-->
 <template>
   <Modal @close="resolve">
     <div slot="body">
