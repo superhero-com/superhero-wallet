@@ -190,7 +190,7 @@ Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '' })
   if (note) cy.get('[data-cy=textarea]').type(note);
 
   if (url) {
-    cy.get('[data-cy=input]')
+    cy.get('[data-cy=input-text]')
       .clear()
       .type(url);
   }
