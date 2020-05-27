@@ -1,7 +1,7 @@
 <template>
   <div class="popup">
     <div class="section-title">
-      Send address to
+      {{ $t('pages.tipPage.sendToAddress') }}
     </div>
 
     <div class="url-bar link-sm text-left">

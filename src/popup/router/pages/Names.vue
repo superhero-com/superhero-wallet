@@ -23,7 +23,9 @@
             <div class="text-left ml-10 wd-100">
               <div>
                 {{ name.name }}
-                <Badge class="active-name" v-if="activeAccountName == name.name">Active</Badge>
+                <Badge class="active-name" v-if="activeAccountName == name.name">
+                  {{ $t('pages.namingSystemPage.active') }}
+                </Badge>
               </div>
               <ae-address :value="name.owner" length="flat" />
               <div v-if="name.addPointer" class="pointer-holder mt-10">
@@ -56,7 +58,7 @@
                   :small="!name.addPointer"
                   @click="setActiveName(name, key)"
                   :disabled="activeAccountName == name.name"
-                  >{{ $t('pages.namingSystemPage.active') }}</Button
+                  >{{ $t('pages.namingSystemPage.setActive') }}</Button
                 >
               </div>
             </div>
@@ -116,7 +118,10 @@
             <UserAvatar class="subAccountIcon" :name="info.name" />
             <div class="auctionInfo">
               <div class="name">{{ info.name }}</div>
-              <div class="expiration">Expires in {{ info.expiration }} blocks</div>
+              <div class="expiration">
+                {{ $t('pages.namingSystemPage.expiresIn') }}{{ info.expiration }}
+                {{ $t('pages.namingSystemPage.blocks') }}
+              </div>
             </div>
           </ae-list-item>
         </ae-list>
@@ -130,7 +135,8 @@
             </button>
           </div>
           <div>
-            <span>Expires in: </span><b>{{ moreAuInfo.info.expiration }} </b>blocks<br />
+            <span>{{ $t('pages.namingSystemPage.expiresInColon') }}</span>
+            <b>{{ moreAuInfo.info.expiration }} </b>{{ $t('pages.namingSystemPage.blocks') }}<br />
             <hr />
             <span>{{ $t('pages.namingSystemPage.currentBid') }}</span>
             <ae-list-item style="border:none" fill="neutral">
@@ -155,6 +161,7 @@
               >
                 <UserAvatar class="subAccountIcon" :address="bid.accountId" />
                 <div class="auctionInfo">
+                  <!--eslint-disable-next-line vue-i18n/no-raw-text-->
                   <div class="name">{{ bid.nameFee.toFixed(3) }} AE</div>
                   <div style="color:#aba9a9" class="expiration">
                     <small>{{ bid.accountId }}</small>

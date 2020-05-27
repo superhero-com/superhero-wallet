@@ -1,4 +1,134 @@
 {
+  "ok": "OK",
+  "onboarding": {
+    "step_1": {
+      "title": "Your Account Info",
+      "content": "This block contains information about your wallet account and its status:<br> 1. Your account address and .chain name ( if you already have one ).<br>2. Your current wallet balance. "
+    },
+    "step_2": {
+      "title": "Send Tip",
+      "content": "To send tips, go to the URL you want to tip and open the wallet. You can also copy the URL, click Send Tip, and paste this URL into the wallet. Fill in how much you want to tip and add a message along with that tip. Hit Send and confirm."
+    },
+    "step_3": {
+      "title": "What is \"Verified\" URL",
+      "content": "This simply means that the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed."
+    },
+    "step_4": {
+      "title": "Claim Tip",
+      "content": "Hit this button to trigger tip collection—all tips you’ve received from URLs where you’ve added your AE address will then be added to your balance."
+    },
+    "step_5": {
+      "title": "Activity",
+      "content": "This tab will show you a full log of your previous activity using the Superhero Wallet."
+    },
+    "step_6": {
+      "title": "Top Up",
+      "content": "You can top up your wallet by swapping ETH or BTC into AE, by purchasing AE using your credit card, or by sending AE to your Superhero wallet address from another AE account. It’s very easy."
+    },
+    "step_7": {
+      "title": "Withdraw",
+      "content": "You can easily withdraw your tips by sending them out to AE wallet addresses from your accounts in exchanges or external wallets, provided that they support AE tokens."
+    },
+    "step_8": {
+      "title": "Settings",
+      "content": "You can view your security phrase (also referred to as seedphrase or private keys) and change your language and other settings."
+    },
+    "heading": "Hey superhero! Welcome onboard",
+    "sub-heading": "This short guide will walk you through the Superhero Wallet DApp and its features.",
+    "skip": "Skip",
+    "back": "Back",
+    "next": "Next",
+    "start": "Start",
+    "tutorial": "Tutorial"
+  },
+  "badges": {
+    "verified": "Verified",
+    "notVerified": "Not verified"
+  },
+  "modals": {
+    "transaction-failed": {
+      "msg": "We cannot process this transaction. Please, try again later."
+    },
+    "required": {
+      "msg": "Please fill in all fields."
+    },
+    "only-chars": {
+      "msg": "Only letters and numbers are allowed."
+    },
+    "name-exist": {
+      "msg": "This name is already registered."
+    },
+    "name-length": {
+      "msg": "Only names longer than 13 characters are allowed."
+    },
+    "incorrect-address": {
+      "msg": "Please make sure that you have entered a valid public address."
+    },
+    "incorrect-amount": {
+      "msg": "Please make sure you entered a valid amount."
+    },
+    "insufficient-balance": {
+      "msg": "The requested amount cannot be spent."
+    },
+    "removeAccount": {
+      "title": "Are you sure you want to remove this account?",
+      "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
+    },
+    "verified": {
+      "title": "What is a \"Verified\" URL?",
+      "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed easily."
+    },
+    "not-verified": {
+      "title": "What is \"Not Verified\" URL?",
+      "msg": "This means that the owner of the URL has not created a Superhero wallet yet. They can claim their tips as soon as they make one and add their wallet address to their website. "
+    },
+    "blacklisted": {
+      "title": "What is \"Blacklisted\" URL?",
+      "msg": "The Superhero wallet can tip any public URL. Currently, web pages that require logging in to view information cannot be tipped. We're still working on solutions for this."
+    },
+    "confirm-tip" :{
+      "title": "Send Tip Confirmation",
+      "msg": "You are about to tip a URL that is not Superhero-verified. We cannot guarantee that the owner will claim their tips on this site.",
+      "sub-message": "Are you sure you would like to send the tip anyway? You can still tip them—let them know so they can claim it.",
+      "send": "Send Tip"
+    },
+    "error-log": {
+      "title": "Something went wrong",
+      "sub-title": "Be a Superhero!",
+      "content": "Provide more information about the error  encountered so we can improve our superpowers. No personal data will be collected.",
+      "create-report": "Create report"
+    },
+    "donate-errors": {
+      "title": "Your Error Report Has Been Sent",
+      "msg": "Thank you for being such a wonderful fellow Superhero!"
+    },
+    "donate-errors-error": {
+      "title": "Your Error Report Was not send",
+      "msg": "There was problem sending your error report"
+    },
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "transaction": {
+    "type": {
+      "SpendTx": "Spend",
+      "ContractCreateTx": "Contract create",
+      "ContractCallTx": "Contract call",
+      "NamePreclaimTx": "Preclaim name",
+      "NameClaimTx": "Claim name",
+      "NameUpdateTx": "Update name",
+      "NameTransferTx": "Transfer name",
+      "NameRevokeTx": "Revoke name",
+      "OracleRegisterTx": "Register oracle",
+      "OracleExtendTx": "Extend oracle",
+      "OraclePostQueryTx": "Post query oracle",
+      "OracleRespondTx": "Respond oracle",
+      "ChannelCloseSoloTx": "Solo close channel",
+      "ChannelSlashTx": "Slash channel",
+      "ChannelSettleTx": "Settle channel",
+      "ChannelSnapshotSoloTx": "Solo snapshot channel"
+    }
+  },
   "pages": {
     "intro": {
       "heading": "介绍",
@@ -10,9 +140,11 @@
       "step3text-1": "此钱包不会干涉您❤币的",
       "step3text-2": "发送或接收。 本应用程序是专门为您创建的，因此没有人可以控制您的资金.",
       "createdWallet": "您的钱包已建成!",
+      "step4text-0": "Welcome to the free web.",
       "step4text-1": "欢迎来到更公平的互联网。 这个钱包是专门为您创建的，因此没有人除了您可以控制您的资金.",
       "step4text-2": "与其他货币化平台和支付系统不同，此钱包应用程序的创建者不能-永远也不能剥夺您从您的关注者那里获取奖励的权力.",
-      "enjoy-msg": "享受您的自主权",
+      "step4text-3": "Immortalize messages on the blockchain: comments and messages are timestamped and recorded on the blockchain—forever.",
+      "step4text-4": "Instant, borderless, transactions at near-zero fees.",
       "toHome": "回到主界面",
       "send": "发送❤币",
       "ever": "Ever."
@@ -23,13 +155,22 @@
       "security": "安全",
       "about": "关于",
       "send": "发送❤币",
+      "claim-tips": "Claim Tips",
       "scanQr": "扫描二维码",
       "terms": "服务条款",
       "privacy": "隐私政策",
       "importAccount": "导入账号",
       "activity": "活动",
       "withdraw": "提取",
-      "topUp": "充值"
+      "topUp": "充值",
+      "notifications": "Notifications",
+      "names": "Names",
+      "bidding": "Bidding",
+      "networks": "Networks",
+      "comment-new": "Add comment",
+      "home": "Superhero Home",
+      "donate-error": "Donate Data",
+      "address": "Send Address"
     },
     "appVUE": {
       "systemName": "Superhero",
@@ -59,7 +200,11 @@
       "advanced": "高级",
       "versions": "版本与更新",
       "mainAccount": "主账号",
-      "reportBug": "报告错误"
+      "reportBug": "报告错误",
+      "names": "Names",
+      "networks": "Networks",
+      "removeAccount": "Remove account",
+      "donateErrorReports": "Submit error reports"
     },
     "aboutSettings": {
       "heading": "关于",
@@ -72,6 +217,7 @@
       "accountName": "用户名",
       "copy": "复制地址",
       "send": "发送❤币",
+      "claim": "Claim Tip",
       "receive": "接收",
       "wholeTransaction": "全部交易记录",
       "latestTransactions": "最新交易记录",
@@ -82,7 +228,32 @@
       "copied": "复制到剪贴板",
       "youNeedTo": "你需要",
       "backup": "备份",
-      "yourSeedPhrase": "你的密钥"
+      "yourSeedPhrase": "你的密钥",
+      "updateExtension": "New version available! Please update your extension.",
+      "updateAvailable": "New version in store available!",
+      "claim-name": "Claim your .chain name"
+    },
+    "claim": {
+      "claim": "Claim tips",
+      "noZeroClaim": "There are no tips to be claimed for this URL.",
+      "noAddress": "Address not found",
+      "errorClaim": "Error with claiming",
+      "ae": "AE tokens",
+      "claimed": " Claim request sent! ",
+      "url": "URL",
+      "tipsOnUrl": "Tips on this URL",
+      "urlNotExisting": "No tips for this URL at the moment.",
+      "moreOracles": "There aren't enough active Oracles to verify your claim request. Please try again later.",
+      "oracleFailed": "Oracle service check claim failed. Please try again later.",
+      "unknownError": "Error occured during claim request. Please try again later.",
+      "noMobileClaim": "Claiming is currently only available on desktop."
+    },
+    "claimTips": {
+      "urlToClaim": "URL to claim tips for"
+    },
+    "notFound": {
+      "notFound": "Requested page can't be found",
+      "initialPage": "Open initial page"
     },
     "accountPassword": {
       "heading": "",
@@ -95,9 +266,6 @@
     "recentTransactions": {
       "recentActivity": "近期活动",
       "viewAll": "查看全部",
-      "pendingStatus": "待定",
-      "sentStatus": "已发送",
-      "receivedStatus": "已接受",
       "noTransactionsFound": "没有发现交易！"
     },
     "addFungibleToken": {
@@ -232,16 +400,19 @@
       "enterAddress": "填写地址"
     },
     "namingSystemPage": {
+      "active": "Active",
       "heading": "命名系统",
       "registerNameRequirement": "只允许数字和字母",
       "registerName": "注册新域名",
       "registeredNames": "您已注册的域名",
       "seeAllRegisteredNames": "查看所有注册域名",
-      "OkButton": "OK",
       "noNames": "域名未找到",
       "activeAuctions": "所有有效竞拍",
       "auctionInfo": "竞拍信息",
       "noAuctions": "未查看竞拍",
+      "expiresIn": "Expires in",
+      "expiresInColon": "Expires in: ",
+      "blocks": "blocks",
       "yourNamesBtn": "您的域名",
       "allActiveAuctionsBtn": "所有有效竞拍",
       "AddNewBtn": "新增",
@@ -254,7 +425,11 @@
       "noPreviousBids": "无先前竞拍",
       "goBiddingBtn": "前往竞拍",
       "backButton": "返回",
-      "extend": "延伸"
+      "extend": "延伸",
+      "setActive": "Set Active",
+      "namePlaceholder": "Enter .chain name",
+      "pointer": "Set Name Pointer",
+      "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
     },
     "generalSettings": {
       "backToSettings": "返回设置",
@@ -268,6 +443,7 @@
       "term3": "隐私政策",
       "termsAndConditions": "条款及细则",
       "heading": "开始发送和接收 ",
+      "webVersion": "Or use a web version",
       "securingAccount": "保护您的账户",
       "generateWallet": "生成新钱包",
       "importWallet": "检索现有钱包",
@@ -278,7 +454,9 @@
       "enterSeedPhrase": "输入您的助记词 ",
       "continueButton": "继续",
       "continue": "继续",
-      "importAccount": "导入账号"
+      "importAccount": "导入账号",
+      "accountNotFound": "Account not found.",
+      "checkSeed": "Please check your seed phrase."
     },
     "ledgerSetup": {
       "ledgerConnectSetup": "如何连接Ledger",
@@ -310,7 +488,8 @@
     },
     "privacyPolicy": {
       "backButton": "返回",
-      "heading": "隐私政策"
+      "heading": "隐私政策",
+      "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
     "qrCodeReader": {
       "backToAccount": "返回账户",
@@ -358,7 +537,15 @@
       "recoveryPhrase": "您的助记词",
       "first": "第一步",
       "second": "第二步",
-      "third": "第三步"
+      "third": "第三步",
+      "backupText": "Back up your seed phrase on a piece of paper or file that no one except you will ever see. Make multiple copies.",
+      "dontLose": "Do not lose this seed phrase!",
+      "nextScreen": "To make sure you got it right, you will be asked to recreate this seed phrase in the next screen.",
+      "verifySeed": "Verify seed",
+      "doneThis": "I've already done this",
+      "verify": "Verify",
+      "seedConfirmed": "Seed phrase confirmed.",
+      "toDashboard": "Back to Dashboard"
     },
     "send": {
       "backToAccount": "返回账户",
@@ -396,7 +583,13 @@
       "tabSecurity": "安全&隐私",
       "tabSecuritysmall": "隐私数据，显示私钥",
       "tabAbout": "关于",
-      "tabAboutsmall": "版本，支持中心和联系信息"
+      "tabAboutsmall": "版本，支持中心和联系信息",
+      "tabNetworks": "Manage networks",
+      "tabNetworksSmall": "Connect to custom node",
+      "tabRemoveAccount": "Remove account",
+      "tabRemoveAccountSmall": "Remove account from the wallet and delete extension storage",
+      "tabSaveErrorLog": "Save error log",
+      "tabSaveErrorLogSmall": "This will help us identify what's causing errors."
     },
     "signAndVerifyMsg": {
       "backToSignVerifyMsg": "返回签名/验证消息",
@@ -431,7 +624,10 @@
       "inccorectAddress": "地址不正确",
       "compiledCode": "编译代码",
       "callData": "调用数据",
-      "payload": "Payload"
+      "payload": "Payload",
+      "newContract": "New Contract",
+      "aens": "AENS",
+      "balanceError": "Your account balance is not enough to execute this transaction."
     },
     "signTransactionByQrCode": {
       "backToAccount": "返回账户",
@@ -511,9 +707,19 @@
       "to": "至",
       "amountPlaceholder": "输入数量",
       "amountLabel": "数量",
+      "empty": "Empty",
       "availableLabel": "有效",
+      "sendToAddress": "Send address to",
       "confirm": "确认",
-      "edit": "编辑❤细节"
+      "cancel": "Cancel",
+      "edit": "编辑❤细节",
+      "whatIsVerifieddUrl": "What is \"Verified\" URL?",
+      "whatIsNotVerifiedUrl": "What is \"Not verified\" URL?",
+      "enterUrl": "Type the URL you want to tip",
+      "notClaimableUrlInfo": "Third party issues prevent us from enabling direct delivery of tips to the URL owner. You are sending this tip at your own risk.",
+      "notVerifiedUrlInfo": "This URL has not yet been verified. The owner of the URL has to create account to claim their tokens.",
+      "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed.",
+      "minAmountError": "Tips should be over 0.01 USD in tokens in order to push through."
     },
     "successTip": {
       "sendMore": "发送更多❤币",
@@ -526,7 +732,8 @@
       "successfullySent": "您已成功发送 ",
       "to": "至",
       "note": "注意此URL的所有者尚未创建帐户。 他们可以通过创建钱包轻松地申领代币-就像您一样。",
-      "notify": "通知某人您向此帖子发送了❤币"
+      "notify": "通知某人您向此帖子发送了❤币",
+      "notifyMessage": "I just sent AE to this post! Anyone can start sending and receiving AE through Superhero. Learn more."
     },
     "transactionDetails": {
       "heading": "转账细节",
@@ -564,7 +771,12 @@
       "nameTtl": "域名TTL",
       "pointerId": "指向Id",
       "pointerKey": "指向Key",
-      "moreInfo": "更过信息"
+      "moreInfo": "更过信息",
+      "sent": "Sent",
+      "received": "Received",
+      "withdrawals": "Withdrawals",
+      "topups": "Top ups",
+      "all": "All"
     },
     "transactions": {
       "backToAccount": "返回账号",
@@ -573,6 +785,7 @@
       "loadMore": "导入更多",
       "allLoaded": "已导入所有转账信息！",
       "newTransactions": "新转账信息",
+      "noTransactions": "No transactions found",
       "type": "种类",
       "all": "所有",
       "incoming": "收入",
@@ -584,7 +797,10 @@
       "nameUpdate": "域名更新tx",
       "createTx": "创建tx",
       "clear": "清楚筛选器",
-      "apply": "应用筛选器"
+      "apply": "应用筛选器",
+      "sent": "Sent",
+      "received": "Received",
+      "pending": "Pending"
     },
     "utilities": {
       "heading": "Utilities",
@@ -624,6 +840,65 @@
     "welcome": {
       "send": "发送",
       "across": "跨越全球"
+    },
+    "nodeConnectionStatus": {
+      "error": "Unable to connect to choosen node",
+      "connecting": "Connecting to node...",
+      "connected": "Connected",
+      "init": "Initializing services..."
+    },
+    "popupMessageSign": {
+      "heading": "would like to sign message ",
+      "message": "Message"
+    },
+    "network": {
+      "url": "URL:",
+      "edit": "Edit",
+      "delete": "Delete",
+      "middleware": "Middleware:",
+      "allNetworks": "Your networks",
+      "cancel": "Cancel",
+      "addNetwork": "Connect to another node",
+      "networkNamePlaceholder": "Enter network name",
+      "networkNameLabel": "Network name",
+      "networkUrlPlaceholder": "Enter network url",
+      "networkUrlLabel": "Network Url",
+      "networkMiddlewarePlaceholder": "Enter network middleware url",
+      "networkMiddlewareLabel": "Network middleware",
+      "save": "Connect"
+    },
+    "donate-error": {
+      "error-report": "Error Report:",
+      "error-placeholder": "Describe what were your actions before the error occurred (optional).",
+      "data-collected": "Data Collected",
+      "browser": "Browser version",
+      "details": "Technical details:",
+      "cancel": "Cancel",
+      "donate": "Donate Data"
     }
-  }
+  },
+  "phishing": {
+    "detection": "Superhero Phishing Detection",
+    "sections": [
+      {
+        "text": "This domain is currently on the Superhero domain warning list. This means that based on information available to us, Superhero believes this domain could currently compromise your security and, as an added safety feature, Superhero has restricted access to the site. To override this, please read the rest of this warning for instructions on how to continue at your own risk."
+      },
+      {
+        "text": "There are many reasons sites can appear on our warning list, and our warning list compiles from other widely used industry lists. Such reasons can include known fraud or security risks, such as domains that test positive on the {insertion}. Domains on these warning lists may include outright malicious websites and legitimate websites that have been compromised by a malicious actor.",
+        "insertion": "Superhero Phishing Detector"
+      },
+      {
+        "text": "Note that this warning list is compiled on a voluntary basis. This list may be inaccurate or incomplete. Just because a domain does not appear on this list is not an implicit guarantee of that domain's safety. As always, your transactions are your own responsibility. If you wish to interact with any domain on our warning list, you can do so by {continueHost}.",
+        "continueHost": "continuing at your own risk"
+      },
+      {
+        "text": "If you think this domain is incorrectly flagged or if a blocked legitimate website has resolved its security issues, {insertion}.",
+        "insertion": " please file an issue"
+      }
+    ]
+  },
+  "options": {
+    "text": "Superhero is Open-source! Visit "
+  },
+  "redirecting": "Redirecting"
 }

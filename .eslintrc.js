@@ -12,7 +12,12 @@ module.exports = {
   },
   // https://github.com/vuejs/eslint-plugin-vue#priority-a-essential-error-prevention
   // consider switching to `plugin:vue/strongly-recommended` or `plugin:vue/recommended` for stricter rules.
-  extends: ['plugin:vue/essential', 'airbnb-base', 'plugin:prettier/recommended'],
+  extends: [
+    'plugin:vue-i18n/recommended',
+    'plugin:vue/essential',
+    'airbnb-base',
+    'plugin:prettier/recommended'
+  ],
   // required to lint *.vue files
   plugins: [
     'vue'
@@ -23,7 +28,10 @@ module.exports = {
       webpack: {
         config: './webpack.config.js'
       }
-    }
+    },
+    'vue-i18n': {
+      localeDir: './src/locales/*.json',
+    },
   },
   // add your custom rules here
   rules: {
@@ -34,7 +42,7 @@ module.exports = {
     }],
       // disallow reassignment of function parameters
       // disallow parameter object manipulation except for specific exclusions
-      'no-param-reassign': ['error', {
+    'no-param-reassign': ['error', {
       props: true,
       ignorePropertyModificationsFor: [
         'state', // for vuex state
@@ -42,5 +50,8 @@ module.exports = {
     }],
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    'vue-i18n/no-dynamic-keys': 'error',
+    'vue-i18n/no-unused-keys': 'error',
+    'vue-i18n/no-raw-text': 'error',
   }
 }

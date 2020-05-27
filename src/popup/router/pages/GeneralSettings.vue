@@ -3,6 +3,7 @@
     <h4>{{ $t('pages.generalSettings.switchLanguage') }}</h4>
     <hr />
     <small>
+      <!--eslint-disable-next-line vue-i18n/no-raw-text-->
       {{ $t('pages.generalSettings.currentLanguage') }}:
       {{ current.language || 'en' }}
     </small>

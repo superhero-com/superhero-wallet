@@ -21,6 +21,7 @@
             <template>
               <div slot="header" class="step-header">
                 {{ $t(`onboarding.step_${step.step}.title`) }}
+                <!--eslint-disable-next-line vue-i18n/no-raw-text-->
                 <span class="step-info"> ({{ step.step }}/{{ steps.length }}) </span>
               </div>
               <div

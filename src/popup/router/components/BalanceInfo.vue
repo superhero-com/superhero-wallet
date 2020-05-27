@@ -7,6 +7,7 @@
         <span>{{ $t('pages.appVUE.aeid') }}</span>
       </div>
       <div class="currenciesgroup">
+        <!--eslint-disable-next-line vue-i18n/no-raw-text-->
         <span class="approx-sign">~</span>
         <li data-cy="currency-dropdown" class="dropdown-container" :class="dropdown ? 'show' : ''">
           <ae-button data-cy="toggle-currency-dropdown" @click="dropdown = !dropdown">

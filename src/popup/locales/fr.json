@@ -1,5 +1,177 @@
 {
+  "ok": "OK",
+  "onboarding": {
+    "step_1": {
+      "title": "Your Account Info",
+      "content": "This block contains information about your wallet account and its status:<br> 1. Your account address and .chain name ( if you already have one ).<br>2. Your current wallet balance. "
+    },
+    "step_2": {
+      "title": "Send Tip",
+      "content": "To send tips, go to the URL you want to tip and open the wallet. You can also copy the URL, click Send Tip, and paste this URL into the wallet. Fill in how much you want to tip and add a message along with that tip. Hit Send and confirm."
+    },
+    "step_3": {
+      "title": "What is \"Verified\" URL",
+      "content": "This simply means that the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed."
+    },
+    "step_4": {
+      "title": "Claim Tip",
+      "content": "Hit this button to trigger tip collection—all tips you’ve received from URLs where you’ve added your AE address will then be added to your balance."
+    },
+    "step_5": {
+      "title": "Activity",
+      "content": "This tab will show you a full log of your previous activity using the Superhero Wallet."
+    },
+    "step_6": {
+      "title": "Top Up",
+      "content": "You can top up your wallet by swapping ETH or BTC into AE, by purchasing AE using your credit card, or by sending AE to your Superhero wallet address from another AE account. It’s very easy."
+    },
+    "step_7": {
+      "title": "Withdraw",
+      "content": "You can easily withdraw your tips by sending them out to AE wallet addresses from your accounts in exchanges or external wallets, provided that they support AE tokens."
+    },
+    "step_8": {
+      "title": "Settings",
+      "content": "You can view your security phrase (also referred to as seedphrase or private keys) and change your language and other settings."
+    },
+    "heading": "Hey superhero! Welcome onboard",
+    "sub-heading": "This short guide will walk you through the Superhero Wallet DApp and its features.",
+    "skip": "Skip",
+    "back": "Back",
+    "next": "Next",
+    "start": "Start",
+    "tutorial": "Tutorial"
+  },
+  "badges": {
+    "verified": "Verified",
+    "notVerified": "Not verified"
+  },
+  "modals": {
+    "transaction-failed": {
+      "msg": "We cannot process this transaction. Please, try again later."
+    },
+    "required": {
+      "msg": "Please fill in all fields."
+    },
+    "only-chars": {
+      "msg": "Only letters and numbers are allowed."
+    },
+    "name-exist": {
+      "msg": "This name is already registered."
+    },
+    "name-length": {
+      "msg": "Only names longer than 13 characters are allowed."
+    },
+    "incorrect-address": {
+      "msg": "Please make sure that you have entered a valid public address."
+    },
+    "incorrect-amount": {
+      "msg": "Please make sure you entered a valid amount."
+    },
+    "insufficient-balance": {
+      "msg": "The requested amount cannot be spent."
+    },
+    "removeAccount": {
+      "title": "Are you sure you want to remove this account?",
+      "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
+    },
+    "verified": {
+      "title": "What is a \"Verified\" URL?",
+      "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed easily."
+    },
+    "not-verified": {
+      "title": "What is \"Not Verified\" URL?",
+      "msg": "This means that the owner of the URL has not created a Superhero wallet yet. They can claim their tips as soon as they make one and add their wallet address to their website. "
+    },
+    "blacklisted": {
+      "title": "What is \"Blacklisted\" URL?",
+      "msg": "The Superhero wallet can tip any public URL. Currently, web pages that require logging in to view information cannot be tipped. We're still working on solutions for this."
+    },
+    "confirm-tip" :{
+      "title": "Send Tip Confirmation",
+      "msg": "You are about to tip a URL that is not Superhero-verified. We cannot guarantee that the owner will claim their tips on this site.",
+      "sub-message": "Are you sure you would like to send the tip anyway? You can still tip them—let them know so they can claim it.",
+      "send": "Send Tip"
+    },
+    "error-log": {
+      "title": "Something went wrong",
+      "sub-title": "Be a Superhero!",
+      "content": "Provide more information about the error  encountered so we can improve our superpowers. No personal data will be collected.",
+      "create-report": "Create report"
+    },
+    "donate-errors": {
+      "title": "Your Error Report Has Been Sent",
+      "msg": "Thank you for being such a wonderful fellow Superhero!"
+    },
+    "donate-errors-error": {
+      "title": "Your Error Report Was not send",
+      "msg": "There was problem sending your error report"
+    },
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "transaction": {
+    "type": {
+      "SpendTx": "Spend",
+      "ContractCreateTx": "Contract create",
+      "ContractCallTx": "Contract call",
+      "NamePreclaimTx": "Preclaim name",
+      "NameClaimTx": "Claim name",
+      "NameUpdateTx": "Update name",
+      "NameTransferTx": "Transfer name",
+      "NameRevokeTx": "Revoke name",
+      "OracleRegisterTx": "Register oracle",
+      "OracleExtendTx": "Extend oracle",
+      "OraclePostQueryTx": "Post query oracle",
+      "OracleRespondTx": "Respond oracle",
+      "ChannelCloseSoloTx": "Solo close channel",
+      "ChannelSlashTx": "Slash channel",
+      "ChannelSettleTx": "Settle channel",
+      "ChannelSnapshotSoloTx": "Solo snapshot channel"
+    }
+  },
   "pages": {
+    "intro": {
+      "heading": "Intro",
+      "skip": "Skip",
+      "generateWallet": "Generate Wallet",
+      "receive": "Receive",
+      "step1text": "for creating and curating great content, engaging in meaningful discussions, launching causes for humanity, and for just being a wonderful human being.",
+      "step2text": "to great content creators online, humanitarian causes, and other awesome human beings—for whatever reason.",
+      "step3text-1": "This wallet does not—and will never take commissions off the",
+      "step3text-2": "you send or receive. Superhero was created specifically so that no one but you will have control over your funds.",
+      "createdWallet": "Your wallet has been created!",
+      "step4text-0": "Welcome to the free web.",
+      "step4text-1": "Trustless: no third-party intervention. Transactions are fully P2P.",
+      "step4text-2": "No censorship: there are no custodians to dictate what can and cannot be monetized.",
+      "step4text-3": "Immortalize messages on the blockchain: comments and messages are timestamped and recorded on the blockchain—forever.",
+      "step4text-4": "Instant, borderless, transactions at near-zero fees.",
+      "toHome": "Proceed to your Wallet",
+      "send": "Send",
+      "ever": "Ever."
+    },
+    "titles": {
+      "settings": "Settings",
+      "general": "Language",
+      "security": "Security",
+      "about": "About",
+      "send": "Send Tips",
+      "claim-tips": "Claim Tips",
+      "scanQr": "Scan QR",
+      "terms": "Terms of Use",
+      "privacy": "Privacy Policy",
+      "importAccount": "Retrieve Existing Account",
+      "activity": "Activity History",
+      "withdraw": "Withdraw",
+      "topUp": "Top Up",
+      "notifications": "Notifications",
+      "names": "Names",
+      "bidding": "Bidding",
+      "networks": "Networks",
+      "comment-new": "Add comment",
+      "home": "Superhero Home",
+      "donate-error": "Donate Data",
+      "address": "Send Address"
+    },
     "appVUE": {
       "systemName": "Superhero",
       "manageNetworks": "Gérer les réseaux",
@@ -11,11 +183,31 @@
       "switchToken": "Tokens",
       "utilities": "Utilitaires",
       "settings": "Paramètres",
-      "logout": "Connectez - Out"
+      "logout": "Connectez - Out",
+      "profile": "Profile",
+      "help": "Help",
+      "topUp": "Top Up",
+      "withdraw": "Withdraw",
+      "myTransactions": "My transactions",
+      "activity": "Activity",
+      "dashboard": "Dashboard",
+      "aeid": "AE",
+      "walletName": "Superhero Wallet",
+      "general": "General",
+      "security": "Security",
+      "seedPhrase": "Seed Phrase",
+      "language": "Language",
+      "advanced": "Advanced",
+      "versions": "Version & Updates",
+      "mainAccount": "Main account",
+      "reportBug": "Report a bug",
+      "names": "Names",
+      "networks": "Networks",
+      "removeAccount": "Remove account",
+      "donateErrorReports": "Submit error reports"
     },
     "aboutSettings": {
       "heading": "Sur",
-      "backToSettings": "Paramètres",
       "systemName": "Superhero",
       "terms": "Conditions d'utilisation",
       "privacyPolicy": "Politique de confidentialité"
@@ -25,10 +217,43 @@
       "accountName": "Nom du compte",
       "copy": "Copie",
       "send": "Envoyer",
+      "claim": "Claim Tip",
       "receive": "Recevoir",
       "wholeTransaction": "l'historique des transactions ensemble",
       "latestTransactions": "Les dernières transactions",
-      "noTransactionsFound": "Aucune transaction trouvée!"
+      "noTransactionsFound": "Aucune transaction trouvée!",
+      "tipSomeone": "Send Tip",
+      "howToClaim": "How to claim AE",
+      "balance": "Balance",
+      "copied": "Copied!",
+      "youNeedTo": "You need to",
+      "backup": "backup",
+      "yourSeedPhrase": "your seed phrase",
+      "updateExtension": "New version available! Please update your extension.",
+      "updateAvailable": "New version in store available!",
+      "claim-name": "Claim your .chain name"
+    },
+    "claim": {
+      "claim": "Claim tips",
+      "noZeroClaim": "There are no tips to be claimed for this URL.",
+      "noAddress": "Address not found",
+      "errorClaim": "Error with claiming",
+      "ae": "AE tokens",
+      "claimed": " Claim request sent! ",
+      "url": "URL",
+      "tipsOnUrl": "Tips on this URL",
+      "urlNotExisting": "No tips for this URL at the moment.",
+      "moreOracles": "There aren't enough active Oracles to verify your claim request. Please try again later.",
+      "oracleFailed": "Oracle service check claim failed. Please try again later.",
+      "unknownError": "Error occured during claim request. Please try again later.",
+      "noMobileClaim": "Claiming is currently only available on desktop."
+    },
+    "claimTips": {
+      "urlToClaim": "URL to claim tips for"
+    },
+    "notFound": {
+      "notFound": "Requested page can't be found",
+      "initialPage": "Open initial page"
     },
     "accountPassword": {
       "heading": "",
@@ -37,6 +262,11 @@
       "incorrectPasswordError": "Mot de passe incorrect !",
       "passwordDoesntMatchError": "Le mot de passe ne correspond pas!",
       "securingAccount": "Sécuriser votre compte"
+    },
+    "recentTransactions": {
+      "recentActivity": "Recent Activity",
+      "viewAll": "View all",
+      "noTransactionsFound": "No transactions found!"
     },
     "addFungibleToken": {
       "heading": "Fongibles Tokens",
@@ -116,7 +346,14 @@
       "websiteRequestconnect": "souhaite se connecter à votre compte",
       "websiteRequest": "Ce site demande l'accès pour afficher votre adresse de compte courant. Assurez-vous toujours confiance au site Web vous interagissez avec. ",
       "cancelButton": "Annuler",
-      "confirmButton": "Confirmer"
+      "confirmButton": "Confirmer",
+      "addressLabel": "Address",
+      "transactionLabel": "Transaction",
+      "addressRequest": "This aepp is requesting access to view your current account address",
+      "transactionRequest": "This aepp will prepare a transaction, you are in charge of confirming it.",
+      "websiteRequestAccounts": "would like to get account addresses",
+      "addressesLabel": "Addresses",
+      "addressesRequest": "This aepp is requesting access to view your account addresses"
     },
     "createFungibleToken": {
       "backToFungibleTokens": "Retour à fongibles Tokens",
@@ -163,16 +400,19 @@
       "enterAddress": "Entrer l'adresse"
     },
     "namingSystemPage": {
+      "active": "Active",
       "heading": "Système de dénomination",
       "registerNameRequirement": "Autorisé seulement des lettres et des chiffres",
       "registerName": "Enregistrer un nouveau nom",
       "registeredNames": "Vos noms enregistrés",
       "seeAllRegisteredNames": "Voir tous les noms enregistrés",
-      "OkButton": "OK",
       "noNames": "Aucun nom trouvé",
       "activeAuctions": "Toutes les enchères actives",
       "auctionInfo": "Informations sur les enchères",
       "noAuctions": "Aucune vente aux enchères trouvée",
+      "expiresIn": "Expires in",
+      "expiresInColon": "Expires in: ",
+      "blocks": "blocks",
       "yourNamesBtn": "Vos noms",
       "allActiveAuctionsBtn": "Toutes les enchères actives",
       "AddNewBtn": "Ajouter un nouveau",
@@ -184,7 +424,12 @@
       "previousBids": "Enchères précédentes: ",
       "noPreviousBids": "Aucune offre précédente",
       "goBiddingBtn": "Allez enchérir",
-      "backButton": "Retour"
+      "backButton": "Retour",
+      "extend": "Extend",
+      "setActive": "Set Active",
+      "namePlaceholder": "Enter .chain name",
+      "pointer": "Set Name Pointer",
+      "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
     },
     "generalSettings": {
       "backToSettings": "Retour aux paramètres",
@@ -196,20 +441,22 @@
       "term1": "Je suis d'accord sur le Waellet ",
       "term2": "Conditions d'utilisation",
       "term3": "Politique de confidentialité",
+      "termsAndConditions": "Terms of Use",
       "heading": "Bienvenue à waellet, pour commencer à interagir avec aeternity blockchain: ",
+      "webVersion": "Or use a web version",
       "securingAccount": "Sécuriser votre compte",
       "generateWallet": "Générer portefeuille",
-      "importPrivateKey": "Importation clé secrète",
       "passwordError": "Mot de passe doit être au 4 symboles de peur!",
       "incorrectPasswordError": "Mot de passe incorrect !",
       "loginButton": "S'identifier",
-      "importWaellet": "Importation waellet",
-      "privateKey": "Clé privée",
-      "keystoreJson": "Keystore.json",
+      "importWallet": "Importation waellet",
       "seedPhrase": "Seed phrase",
       "enterSeedPhrase": "Entrez votre mot de graines. Celui que vous avez écrit lors de la création de compte.",
       "continueButton": "Continuer",
-      "chooseFile": "Choisir le fichier"
+      "continue": "Continue",
+      "importAccount": "Import Account",
+      "accountNotFound": "Account not found.",
+      "checkSeed": "Please check your seed phrase."
     },
     "ledgerSetup": {
       "ledgerConnectSetup": "Comment se connecter à partir Ledger",
@@ -245,12 +492,16 @@
     },
     "qrCodeReader": {
       "backToAccount": "Retour à compte",
-      "heading": "Qr Code Scanner"
+      "heading": "Qr Code Scanner",
+      "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
     "receive": {
       "backToAccount": "Retour à compte",
       "heading": "Recevoir des tokens AE",
-      "copy": "Copie"
+      "copy": "Copie",
+      "home": "Home",
+      "transferExchange": "Swap crypto for AE tokens",
+      "purchase": "Buy AE tokens"
     },
     "securitySettings": {
       "backToSettings": "Retour aux paramètres",
@@ -286,7 +537,15 @@
       "recoveryPhrase": "Votre phrase de récupération",
       "first": "première",
       "second": "seconde",
-      "third": "troisième"
+      "third": "troisième",
+      "backupText": "Back up your seed phrase on a piece of paper or file that no one except you will ever see. Make multiple copies.",
+      "dontLose": "Do not lose this seed phrase!",
+      "nextScreen": "To make sure you got it right, you will be asked to recreate this seed phrase in the next screen.",
+      "verifySeed": "Verify seed",
+      "doneThis": "I've already done this",
+      "verify": "Verify",
+      "seedConfirmed": "Seed phrase confirmed.",
+      "toDashboard": "Back to Dashboard"
     },
     "send": {
       "backToAccount": "Retour à compte",
@@ -299,7 +558,20 @@
       "send": "Envoyer",
       "success": "Succès",
       "seeTransactionExplorer": "Voir transaction dans l'explorateur.",
-      "scan": "Balayage"
+      "scan": "Balayage",
+      "cancel": "Cancel",
+      "review": "Review",
+      "reviewtx": "Review Transaction",
+      "checkalert": "Please check the information carefully.",
+      "sendingAddress": "Sending address",
+      "receivingAddress": "Receiving address",
+      "editTxDetails": "Edit Transaction Details",
+      "tx-success": "Transaction Completed",
+      "successalert": "You have successfully sent ",
+      "to": "To",
+      "from": "From",
+      "txhash": "Transaction Hash",
+      "home": "Home"
     },
     "settings": {
       "backToAccount": "Retour à compte",
@@ -311,7 +583,13 @@
       "tabSecurity": "Sécurité et confidentialité",
       "tabSecuritysmall": "Les données de la vie privée, Reveal clé privée",
       "tabAbout": "Sur",
-      "tabAboutsmall": "Version, centre d'assistance et de contact"
+      "tabAboutsmall": "Version, centre d'assistance et de contact",
+      "tabNetworks": "Manage networks",
+      "tabNetworksSmall": "Connect to custom node",
+      "tabRemoveAccount": "Remove account",
+      "tabRemoveAccountSmall": "Remove account from the wallet and delete extension storage",
+      "tabSaveErrorLog": "Save error log",
+      "tabSaveErrorLogSmall": "This will help us identify what's causing errors."
     },
     "signAndVerifyMsg": {
       "backToSignVerifyMsg": "Retour à Signer / Vérifier message",
@@ -343,7 +621,13 @@
       "contractCall": "Appel du contrat",
       "contractCalling": "Appel de la méthode du contrat. S'il vous plaît ne fermez pas la fenêtre",
       "insufficientBalance": "Solde insuffisant",
-      "inccorectAddress": "Adresse incorrecte"
+      "inccorectAddress": "Adresse incorrecte",
+      "compiledCode": "Compiled Code",
+      "callData": "Call Data",
+      "payload": "Payload",
+      "newContract": "New Contract",
+      "aens": "AENS",
+      "balanceError": "Your account balance is not enough to execute this transaction."
     },
     "signTransactionByQrCode": {
       "backToAccount": "Retour à compte",
@@ -403,7 +687,53 @@
       "amountToTip": "Montant de pointe",
       "transactionFee": "Frais de transaction",
       "balance": "Équilibre",
-      "sendTipBtn": "Envoyer une astuce"
+      "sendTipBtn": "Envoyer une astuce",
+      "tipDetails": "Details",
+      "tipWebsite": "Website",
+      "heading": "Send",
+      "headingSending": "Sending",
+      "selectTip": "Select amount to tip",
+      "tipDomain": "Tip domain",
+      "claim": "Claim Tips",
+      "tipsForDomain": "Tips",
+      "tips": "Tips",
+      "noTips": "There are no tips for this url",
+      "claimInfo": "If you've added your wallet address to your URL, you can instantly claim tips by clicking the Claim button below",
+      "title": "Title",
+      "titlePlaceholder": "Send a message of #support along with your donation...",
+      "account": "Account",
+      "next": "Send Tip",
+      "url": "Send Tip to",
+      "to": "to",
+      "amountPlaceholder": "Enter amount",
+      "amountLabel": "Amount",
+      "empty": "Empty",
+      "availableLabel": "Available",
+      "sendToAddress": "Send address to",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "edit": "Edit Tip Details",
+      "whatIsVerifieddUrl": "What is \"Verified\" URL?",
+      "whatIsNotVerifiedUrl": "What is \"Not verified\" URL?",
+      "enterUrl": "Type the URL you want to tip",
+      "notClaimableUrlInfo": "Third party issues prevent us from enabling direct delivery of tips to the URL owner. You are sending this tip at your own risk.",
+      "notVerifiedUrlInfo": "This URL has not yet been verified. The owner of the URL has to create account to claim their tokens.",
+      "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed.",
+      "minAmountError": "Tips should be over 0.01 USD in tokens in order to push through."
+    },
+    "successTip": {
+      "sendMore": "Send More AE",
+      "feed": "View your tip on the feed",
+      "completedHeading": " Transaction Completed.",
+      "sentTo": "Send to: ",
+      "letThemKnow": "Let them know!",
+      "heading": "SEND",
+      "home": "Home",
+      "successfullySent": "You have successfully sent ",
+      "to": "to",
+      "note": "NOTE: The owner of this URL has not created an account yet. They can claim their tokens easily by creating a wallet - the same way you did.",
+      "notify": "Notify the owner that you sent AE to this post",
+      "notifyMessage": "I just sent AE to this post! Anyone can start sending and receiving AE through Superhero. Learn more."
     },
     "transactionDetails": {
       "heading": "Transactions Détails",
@@ -441,7 +771,12 @@
       "nameTtl": "Name TTL",
       "pointerId": "Pointer Id",
       "pointerKey": "Pointer Key",
-      "moreInfo": "Plus d'informations"
+      "moreInfo": "Plus d'informations",
+      "sent": "Sent",
+      "received": "Received",
+      "withdrawals": "Withdrawals",
+      "topups": "Top ups",
+      "all": "All"
     },
     "transactions": {
       "backToAccount": "Retour à compte",
@@ -450,6 +785,7 @@
       "loadMore": "Charger plus",
       "allLoaded": "Toutes les transactions chargées!",
       "newTransactions": "nouvelles transactions",
+      "noTransactions": "No transactions found",
       "type": "Type",
       "all": "Tout",
       "incoming": "Nouveau",
@@ -461,7 +797,10 @@
       "nameUpdate": "nom update tx",
       "createTx": "créer tx",
       "clear": "Supprimer les filtres",
-      "apply": "Appliquer le filtre"
+      "apply": "Appliquer le filtre",
+      "sent": "Sent",
+      "received": "Received",
+      "pending": "Pending"
     },
     "utilities": {
       "heading": "Utilitaires",
@@ -497,6 +836,69 @@
       "label": "Aeternity Adresse",
       "identicon": "Votre identicon",
       "error": "Adresse AE non valide"
+    },
+    "welcome": {
+      "send": "Send",
+      "across": "across the Globe"
+    },
+    "nodeConnectionStatus": {
+      "error": "Unable to connect to choosen node",
+      "connecting": "Connecting to node...",
+      "connected": "Connected",
+      "init": "Initializing services..."
+    },
+    "popupMessageSign": {
+      "heading": "would like to sign message ",
+      "message": "Message"
+    },
+    "network": {
+      "url": "URL:",
+      "edit": "Edit",
+      "delete": "Delete",
+      "middleware": "Middleware:",
+      "allNetworks": "Your networks",
+      "cancel": "Cancel",
+      "addNetwork": "Connect to another node",
+      "networkNamePlaceholder": "Enter network name",
+      "networkNameLabel": "Network name",
+      "networkUrlPlaceholder": "Enter network url",
+      "networkUrlLabel": "Network Url",
+      "networkMiddlewarePlaceholder": "Enter network middleware url",
+      "networkMiddlewareLabel": "Network middleware",
+      "save": "Connect"
+    },
+    "donate-error": {
+      "error-report": "Error Report:",
+      "error-placeholder": "Describe what were your actions before the error occurred (optional).",
+      "data-collected": "Data Collected",
+      "browser": "Browser version",
+      "details": "Technical details:",
+      "cancel": "Cancel",
+      "donate": "Donate Data"
     }
-  }
+  },
+  "phishing": {
+    "detection": "Superhero Phishing Detection",
+    "sections": [
+      {
+        "text": "This domain is currently on the Superhero domain warning list. This means that based on information available to us, Superhero believes this domain could currently compromise your security and, as an added safety feature, Superhero has restricted access to the site. To override this, please read the rest of this warning for instructions on how to continue at your own risk."
+      },
+      {
+        "text": "There are many reasons sites can appear on our warning list, and our warning list compiles from other widely used industry lists. Such reasons can include known fraud or security risks, such as domains that test positive on the {insertion}. Domains on these warning lists may include outright malicious websites and legitimate websites that have been compromised by a malicious actor.",
+        "insertion": "Superhero Phishing Detector"
+      },
+      {
+        "text": "Note that this warning list is compiled on a voluntary basis. This list may be inaccurate or incomplete. Just because a domain does not appear on this list is not an implicit guarantee of that domain's safety. As always, your transactions are your own responsibility. If you wish to interact with any domain on our warning list, you can do so by {continueHost}.",
+        "continueHost": "continuing at your own risk"
+      },
+      {
+        "text": "If you think this domain is incorrectly flagged or if a blocked legitimate website has resolved its security issues, {insertion}.",
+        "insertion": " please file an issue"
+      }
+    ]
+  },
+  "options": {
+    "text": "Superhero is Open-source! Visit "
+  },
+  "redirecting": "Redirecting"
 }

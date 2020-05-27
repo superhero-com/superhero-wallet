@@ -1,3 +1,4 @@
+<!--eslint-disable vue-i18n/no-raw-text-->
 <template>
   <div class="popup text-left terms">
     <!-- header -->

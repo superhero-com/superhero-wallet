@@ -3,7 +3,7 @@
     <div id="info">
       <Logo class="logo" />
       <div class="loader" v-if="!error"></div>
-      <p v-if="!error">Redirecting</p>
+      <p v-if="!error">{{ $t('redirecting') }}</p>
       <p v-if="error">{{ error }}</p>
     </div>
   </div>
