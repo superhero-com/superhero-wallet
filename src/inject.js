@@ -114,16 +114,31 @@ const runContentScript = () => {
     }
   });
 
-  const openTip = async e => {
+  const openTip = async (e, url) => {
     e.preventDefault();
-    browser.runtime.sendMessage({ from: 'content', type: 'openTipPopup' });
+    browser.runtime.sendMessage({ from: 'content', type: 'openTipPopup', url });
   };
 
   const setWidgetClickListner = () => {
-    const link = document.getElementById('superhero-tip-link');
-    if (link) {
-      link.addEventListener('click', openTip);
-    }
+    document.addEventListener(
+      'click',
+      e => {
+        let element;
+        if (e.target.classList && e.target.classList.contains('superhero-button-link'))
+          element = e.target;
+        else if (
+          e.target.closest('.superhero-button-link') &&
+          e.target.closest('.superhero-button-link').classList.contains('superhero-button-link')
+        )
+          element = e.target.closest('.superhero-button-link');
+
+        if (element) {
+          const url = element.getAttribute('data-url');
+          openTip(e, url);
+        }
+      },
+      false,
+    );
   };
 
   /**
