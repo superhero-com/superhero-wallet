@@ -284,7 +284,7 @@ Cypress.Commands.add('openNetworks', () => {
     .urlEquals('/networks');
 });
 
-Cypress.Commands.add('enterNetworkDetails', (network, url, middleware) => {
+Cypress.Commands.add('enterNetworkDetails', (network, url, middleware, compiler) => {
   cy.get('[data-cy=network] input')
     .clear()
     .type(network)
@@ -293,16 +293,19 @@ Cypress.Commands.add('enterNetworkDetails', (network, url, middleware) => {
     .type(url)
     .get('[data-cy=middleware] input')
     .clear()
-    .type(middleware);
+    .type(middleware)
+    .get('[data-cy=compiler] input')
+    .clear()
+    .type(compiler);
 });
 
-Cypress.Commands.add('addNetwork', (network, url, middleware) => {
+Cypress.Commands.add('addNetwork', (network, url, middleware, compiler) => {
   cy.get('[data-cy=to-add]')
     .click()
     .get('[data-cy=connect]')
     .should('be.visible')
     .buttonShouldBeDisabled('[data-cy=connect]')
-    .enterNetworkDetails(network, url, middleware)
+    .enterNetworkDetails(network, url, middleware, compiler)
     .get('[data-cy=connect]')
     .click()
     .get('[data-cy=networks]')
@@ -315,8 +318,8 @@ Cypress.Commands.add('addNetwork', (network, url, middleware) => {
     .should('contain', middleware);
 });
 
-Cypress.Commands.add('selectNetwork', (network, url, middleware) => {
-  cy.addNetwork(network, url, middleware)
+Cypress.Commands.add('selectNetwork', (network, url, middleware, compiler) => {
+  cy.addNetwork(network, url, middleware, compiler)
     .get('[data-cy=networks] .network-row')
     .eq(1)
     .find('.checkmark')
