@@ -54,7 +54,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import * as aeternityTokens from 'aeternity-tokens';
-import { validateAddress } from '../../../utils/helper';
+import { validateAddress, convertToken } from '../../../utils/helper';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import UserAvatar from '../../components/UserAvatar';
@@ -79,7 +79,8 @@ export default {
     ...mapGetters('tokens', ['owned']),
     ...mapGetters(['sdk', 'account']),
     tokenBalance() {
-      return (this.token.balance / 10 ** this.token.decimals).toFixed(3);
+      const { balance, decimals } = this.token;
+      return convertToken(balance, -decimals);
     },
     validContract() {
       return validateAddress(this.token.contract, 'ct');
@@ -117,6 +118,7 @@ export default {
         this.token.balance = balance || 0;
         this.step = 'add';
       } catch (e) {
+        this.loading = false;
         this.$store.dispatch('modals/open', {
           name: 'default',
           title: 'Something went wrong',

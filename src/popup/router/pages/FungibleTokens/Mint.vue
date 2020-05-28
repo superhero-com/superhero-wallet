@@ -81,9 +81,10 @@ export default {
     },
     async mint() {
       this.loading = true;
-      const { contract } = this.tokens.find(t => t.contract === this.token);
+      const { contract, convertBalance } = this.tokens.find(t => t.contract === this.token);
       const instance = await this.$store.dispatch('tokens/instance', contract);
-      const params = this.type === 'mint' ? [this.address, this.amount] : [this.amount];
+      const amount = parseInt(convertBalance(this.amount), 10);
+      const params = this.type === 'mint' ? [this.address, amount] : [amount];
       try {
         await instance.methods[this.type](...params);
         this.$store.dispatch('modals/open', {

@@ -3,6 +3,7 @@ import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 import { get } from 'lodash-es';
+import BigNumber from 'bignumber.js';
 import {
   MAGNITUDE_EXA,
   MAGNITUDE_GIGA,
@@ -23,6 +24,11 @@ export const aettosToAe = v =>
     denomination: AE_AMOUNT_FORMATS.AETTOS,
     targetDenomination: AE_AMOUNT_FORMATS.AE,
   });
+
+export const convertToken = (balance, precision) =>
+  BigNumber(balance)
+    .shiftedBy(precision)
+    .toString();
 
 export const shuffleArray = array => {
   const shuffle = array;

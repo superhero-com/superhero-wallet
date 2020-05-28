@@ -53,13 +53,23 @@
         v-model="network.middlewareUrl"
         data-cy="middleware"
       />
+      <Input
+        :placeholder="$t('pages.network.networkCompilerPlaceholder')"
+        :label="$t('pages.network.networkCompilerLabel')"
+        v-model="network.compilerUrl"
+        data-cy="compiler"
+      />
       <Button half @click="cancel" data-cy="cancel">{{ $t('pages.network.cancel') }}</Button>
       <Button
         class="danger"
         half
         @click="addNetwork"
         :disabled="
-          !network.name || !network.url || !network.middlewareUrl || network.error !== false
+          !network.name ||
+            !network.url ||
+            !network.middlewareUrl ||
+            !network.compilerUrl ||
+            network.error !== false
         "
         data-cy="connect"
       >
@@ -84,6 +94,7 @@ const networkProps = {
   name: null,
   url: null,
   middlewareUrl: null,
+  compilerUrl: null,
   error: false,
 };
 
@@ -143,11 +154,12 @@ export default {
         if (!this.network.name) throw new Error('Enter network name');
         const url = new URL(this.network.url);
         const middleware = new URL(this.network.middlewareUrl);
-
-        if (!url.hostname || !middleware.hostname) throw new Error('Invalid hostname');
+        const compiler = new URL(this.network.compilerUrl);
+        if (!url.hostname || !middleware.hostname || !compiler.hostname)
+          throw new Error('Invalid hostname');
 
         const exist = (name, idx) =>
-          (this.network.idx
+          (this.network.idx >= 0
             ? name === this.network.name && idx !== this.network.idx
             : name === this.network.name) || this.network.name === DEFAULT_NETWORK;
         const allNetworks = Object.values(this.networks);
@@ -158,6 +170,7 @@ export default {
           url: this.network.url,
           internalUrl: this.network.url,
           middlewareUrl: this.network.middlewareUrl,
+          compilerUrl: this.network.compilerUrl,
           name: this.network.name,
         };
         if (this.network.idx >= 0) {

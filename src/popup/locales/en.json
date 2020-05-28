@@ -249,7 +249,8 @@
       "networks": "Networks",
       "removeAccount": "Remove account",
       "donateErrorReports": "Submit error reports",
-      "tokens": "Fungible tokens"
+      "tokens": "Fungible tokens",
+      "manageTokens": "Manage tokens"
     },
     "aboutSettings": {
       "heading": "About",
@@ -901,6 +902,8 @@
       "networkUrlLabel": "Network Url",
       "networkMiddlewarePlaceholder": "Enter network middleware url",
       "networkMiddlewareLabel": "Network middleware",
+      "networkCompilerPlaceholder": "Enter network compiler url",
+      "networkCompilerLabel": "Network compiler",
       "save": "Connect"
     },
     "donate-error": {

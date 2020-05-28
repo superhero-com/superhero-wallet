@@ -9,8 +9,8 @@
     />
     <ul v-for="(allowance, index) in allowances" :key="index.id">
       <li>
-        <b> {{ $t('pages.allowances.from') }}: </b>
-        {{ allowance.from_account }} -
+        <b> {{ $t('pages.allowances.from') }} </b>
+        {{ allowance.from_account }}
         <ae-badge>{{ allowance.amount }} {{ allowance.symbol }}</ae-badge>
       </li>
       <Button @click="getAllowance(allowance)">
@@ -63,14 +63,18 @@ export default {
               symbol,
               balance,
             }));
+          } else {
+            this.allowances = [];
           }
+        } else {
+          this.allowances = [];
         }
       } catch (err) {
         console.log(err);
       }
     },
     getAllowance(allowance) {
-      this.$router.push({ name: 'manage-allowances', params: { allowance, type: 'change' } });
+      this.$router.push({ name: 'manage-allowances', params: { allowance, type: 'transfer' } });
     },
   },
 };

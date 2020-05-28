@@ -62,6 +62,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$x-small-size: 20px;
 $small-size: 30px;
 $normal-size: 38px;
 $lg-size: 64px;
@@ -82,6 +83,11 @@ $lg-size: 64px;
   &.small {
     height: $small-size;
     width: $small-size;
+  }
+
+  &.x-small {
+    height: $x-small-size;
+    width: $x-small-size;
   }
 }
 </style>

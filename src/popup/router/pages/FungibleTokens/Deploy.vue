@@ -91,7 +91,7 @@ export default {
         const { address } = await instance.deploy(Object.values(this.token));
         await this.$store.dispatch('tokens/add', {
           ...this.token,
-          balance: 0,
+          balance: this.token.initialSupply,
           contract: address,
           extensions: this.selectedExtensions,
         });

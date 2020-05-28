@@ -64,13 +64,35 @@
       </transition>
     </li>
     <li>
-      <router-link to="/names" data-cy="names">
-        {{ $t('pages.appVUE.names') }}
-      </router-link>
+      <button
+        :class="showTokensDropdown && 'opened'"
+        @click="showTokensDropdown = !showTokensDropdown"
+      >
+        {{ $t('pages.appVUE.tokens') }}
+        <Arrow />
+      </button>
+      <transition name="slide">
+        <ul v-if="showTokensDropdown">
+          <li v-for="token in owned" :key="token.contract">
+            <span>
+              <UserAvatar :address="token.contract" size="x-small" identicon />
+              <span class="token-info">
+                {{ token.getBalance() }}
+                {{ token.symbol }}
+              </span>
+            </span>
+          </li>
+          <li>
+            <router-link to="/tokens" data-cy="tokens">
+              {{ $t('pages.appVUE.manageTokens') }}
+            </router-link>
+          </li>
+        </ul>
+      </transition>
     </li>
     <li>
-      <router-link to="/tokens" data-cy="tokens">
-        {{ $t('pages.appVUE.tokens') }}
+      <router-link to="/names" data-cy="names">
+        {{ $t('pages.appVUE.names') }}
       </router-link>
     </li>
     <li>
@@ -91,8 +113,24 @@ import removeAccountMixin from '../../../mixins/removeAccount';
 export default {
   mixins: [removeAccountMixin],
   components: { Close, Arrow, UserAvatar },
-  computed: mapGetters(['account', 'activeAccountName']),
-  data: () => ({ showSettingsDropdown: false }),
+  computed: {
+    ...mapGetters('tokens', ['owned']),
+    ...mapGetters(['account', 'activeAccountName']),
+  },
+  data: () => ({ showSettingsDropdown: false, showTokensDropdown: false, balances: null }),
+  watch: {
+    showTokensDropdown(val) {
+      if (val) {
+        this.balances = setInterval(() => this.$store.dispatch('tokens/balances'), 10000);
+      } else {
+        clearInterval(this.balances);
+      }
+    },
+  },
+  created() {
+    console.log(this.owned);
+    this.$once('hook:beforeDestroy', () => clearInterval(this.balances));
+  },
   methods: {
     menuClickHandler({ target }) {
       if (target.tagName === 'A') this.closeMenu();
@@ -123,12 +161,13 @@ export default {
     margin: 0;
     border-bottom: 1px solid $bg-color;
 
-    a,
-    button,
-    span {
+    & > a,
+    & > button,
+    & > span {
       text-decoration: none;
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-size: 15px;
       line-height: 18px;
       width: 100%;
@@ -173,11 +212,16 @@ export default {
         max-height: 0;
       }
 
-      a,
-      button,
-      span {
+      li > a,
+      li > button,
+      li > span {
         padding: 6px 1rem 6px 25px;
       }
+    }
+
+    .token-info {
+      margin-right: auto;
+      margin-left: 5px;
     }
   }
 

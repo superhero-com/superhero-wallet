@@ -1,5 +1,6 @@
 import * as aeternityTokens from 'aeternity-tokens';
 import { isEmpty } from 'lodash-es';
+import { convertToken } from '../../popup/utils/helper';
 
 export default store =>
   store.registerModule('tokens', {
@@ -9,10 +10,26 @@ export default store =>
       contractInstances: {},
     },
     getters: {
-      owned(state, getters, { sdk, account: { publicKey } }) {
-        let network = 'ae_mainnet';
-        if (sdk) network = sdk.getNetworkId();
-        return state.all.filter(t => t.owner === publicKey && t.network === network);
+      owned(state, { getInstance }, { sdk, account: { publicKey }, activeNetwork }) {
+        let { networkId } = activeNetwork;
+        if (sdk) networkId = sdk.getNetworkId();
+        return state.all
+          .filter(({ owner, network }) => owner === publicKey && network === networkId)
+          .map(({ balance, decimals, contract, ...t }) => {
+            const getBalance = (amount, precision) => bal =>
+              parseFloat(convertToken(bal || amount, -precision)).toFixed(2);
+            const convertBalance = precision => bal => convertToken(bal, precision);
+
+            return {
+              ...t,
+              balance,
+              decimals,
+              contract,
+              instance: getInstance(contract),
+              getBalance: getBalance(balance, decimals),
+              convertBalance: convertBalance(decimals),
+            };
+          });
       },
       find: (state, { owned }) => address => owned.find(t => t.contract === address),
       getInstance: state => contract => state.contractInstances[contract],
@@ -21,14 +38,14 @@ export default store =>
       add(state, token) {
         state.all = [...state.all, token];
       },
-      setBalance(state, { contract, token }) {
-        state.all = [...state.all.filter(t => t.contract !== contract), token];
+      setBalance(state, { contract, balance }) {
+        state.all = state.all.map(t => (t.contract === contract ? { ...t, balance } : t));
       },
       setContractInstance(state, { contract, instance }) {
         state.contractInstances[contract] = instance;
       },
-      setExtensions(state, { contract, token }) {
-        state.all = [...state.all.filter(t => t.contract !== contract), token];
+      setExtensions(state, { contract, extensions }) {
+        state.all = state.all.map(t => (t.contract === contract ? { ...t, extensions } : t));
       },
     },
     actions: {
@@ -46,13 +63,12 @@ export default store =>
                 }
                 const instance = await dispatch('instance', contract);
                 const { decodedResult: extensions } = await instance.methods.aex9_extensions();
-                const tokenEntry = { contract, ...token, extensions };
-                commit('setExtensions', { contract, token: tokenEntry });
+                commit('setExtensions', { contract, extensions });
                 if (extensions.includes(extension)) {
                   return { contract, ...token };
                 }
               } catch (error) {
-                // console.log('error ', error);
+                console.log(error);
               }
               return {};
             }),
@@ -63,13 +79,12 @@ export default store =>
       },
       async balances({ rootState: { account }, getters: { owned }, commit, dispatch }) {
         return Promise.all(
-          owned.map(async ({ contract, ...token }) => {
+          owned.map(async ({ contract }) => {
             try {
               const instance = await dispatch('instance', contract);
 
               const { decodedResult: balance } = await instance.methods.balance(account.publicKey);
-              const tokenEntry = { contract, ...token, balance };
-              commit('setBalance', { contract, token: tokenEntry });
+              commit('setBalance', { contract, balance: parseInt(balance, 10) });
             } catch (e) {
               console.log(e);
             }
