@@ -19,7 +19,7 @@
       {{ tip.title }}
     </div>
 
-    <Button @click="sendTip" :disabled="amountError || !minCallFee || !tipping">
+    <Button @click="sendTip" :disabled="amountError || !minCallFee || !tipping || !allowTipping">
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button @click="cancel">
@@ -57,6 +57,7 @@ export default {
       'account',
       'network',
       'currentCurrency',
+      'allowTipping',
     ]),
     ...mapState(['tippingAddress', 'minTipAmount']),
     maxValue() {

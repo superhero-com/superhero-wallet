@@ -12,7 +12,9 @@
         <div class="flex flex-align-center accountTo">
           <ae-icon name="square" />
           <span class="spendAccountAddr">{{
-            data.type == 'contractCreate' ? 'New contract' : 'AENS'
+            data.type == 'contractCreate'
+              ? $t('pages.signTransaction.newContract')
+              : $t('pages.signTransaction.aens')
           }}</span>
         </div>
       </ae-list-item>

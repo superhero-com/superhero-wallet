@@ -1,6 +1,7 @@
 <template>
   <div>
-    <p>Superhero is Open-source! Visit <a href="superhero.com">Superhero.com</a></p>
+    <!--eslint-disable-next-line vue-i18n/no-raw-text-->
+    <p>{{ $t('options.text') }}<a href="superhero.com">Superhero.com</a></p>
   </div>
 </template>
 

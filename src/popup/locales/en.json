@@ -1,4 +1,5 @@
 {
+  "ok": "OK",
   "onboarding": {
     "step_1": {
       "title": "Your Account Info",
@@ -105,9 +106,12 @@
       "title": "Your Error Report Was not send",
       "msg": "There was problem sending your error report"
     },
+    "tip-mainnet-warning": {
+      "title": "Warning",
+      "msg": "Tip/Claim functionality works only on Mainnet"
+    },
     "cancel": "Cancel",
-    "confirm": "Confirm",
-    "ok": "OK"
+    "confirm": "Confirm"
   },
   "transaction": {
     "type": {
@@ -400,16 +404,19 @@
       "enterAddress": "Enter address"
     },
     "namingSystemPage": {
+      "active": "Active",
       "heading": "Naming System",
       "registerNameRequirement": "Allowed only letters and numbers",
       "registerName": "Register new name",
       "registeredNames": "Your registered names",
       "seeAllRegisteredNames": "See all registered names",
-      "OkButton": "OK",
       "noNames": "No names found",
       "activeAuctions": "All active auctions",
       "auctionInfo": "Auction info",
       "noAuctions": "No auctions found",
+      "expiresIn": "Expires in",
+      "expiresInColon": "Expires in: ",
+      "blocks": "blocks",
       "yourNamesBtn": "Your names",
       "allActiveAuctionsBtn": "All active auctions",
       "AddNewBtn": "Add new",
@@ -423,7 +430,7 @@
       "goBiddingBtn": "Go for bidding",
       "backButton": "Back",
       "extend": "Extend",
-      "active": "Set Active",
+      "setActive": "Set Active",
       "namePlaceholder": "Enter .chain name",
       "pointer": "Set Name Pointer",
       "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
@@ -440,6 +447,7 @@
       "term3": "Privacy Policy",
       "termsAndConditions": "Terms of Use",
       "heading": "Social network with a mission",
+      "webVersion": "Or use a web version",
       "securingAccount": "Securing your account",
       "generateWallet": "Generate New Wallet",
       "importWallet": "Retrieve existing account",
@@ -642,7 +650,6 @@
       "company": "company",
       "our-superhero-wallet": "Our Superhero Wallet",
       "section01Content": "THE SOFTWARE IS PROVIDED BY SUPERHERO.COM LVC “AS IS” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.",
-
       "section02Content": "These {terms-of-use} {terms-with-quotes} apply exclusively for the {superHero-wallet} (hereinafter referred to as the “{wallet}“ or the “{application}”) and all the content available on the {website-extension}. Please make sure that you have carefully read the {terms} before using the {application}. Otherwise, by using it, we consider these actions implicit agreement to the {terms-of-use}. These {terms-of-use} represent a binding agreement between you, the legal entity you represent and the legal entity that registered you (collectively „{you}“) and Superhero.com LVC {superhero-we-us-with-quotes} or {our-with-quotes} in connection to your use of the {superHero-wallet} {website-extension}.",
       "superHero-wallet": "Superhero Wallet",
       "wallet": "Wallet",
@@ -651,7 +658,6 @@
       "you": "you",
       "superhero-we-us-with-quotes": "(“Superhero”, “we”, “us”",
       "our-with-quotes": "“our”)",
-
       "section1Title": "1. Definitions",
       "section1Content": "1.1. Superhero.com Establishment (Superhero.com ”, “we”, “us”, “our” or “the company”) ​is a company with email address for communication related to Superhero Wallet: superherowallet@protonmail.com. Superhero.com ​is the company, which created and developed Superhero Wallet​. \n 1.2. ​„USER“ or ​„YOU“ means a natural or legal person, who has downloaded and uses the Superhero Wallet ​website extension. \n 1.3. „​Blockchain​“ means the list of records, also known as ​blocks,​ which are linked with the method of cryptography. The technology allows large groups of people to connect and reach agreement on data, which is afterwards permanently recorded without the presence of central authority. ​USERS can access, create and save information on the aeternity blockchain. The decentralized, distributed and public digital ledger is used for the purpose of recording transactions in blocks of information with the help of ​Validators​, which cannot be altered retroactively. \n 1.4. Superhero Wallet​” (“​WALLET​” or “​the application​”) is a website extension, which allows supporters to send value to content creators, causes, charities, groups, or regular individuals online as a reward for contributing accurate information, relevant insights, quality content. The website extension is a piece of software which acts as an add-on to the web browser Firefox and contributes to the browser’s additional functionality. The application is available at: https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet-extension/ . The results of the donations and comments are published on the website ​https://superhero.com/​ . \n 1.5. “​Validators​” are independent physical persons or entities, which are not in any way part of Superhero.com . ​Their function in the system includes responsibility for ​blocks constitution and broadcast of these ​blocks​ with the​ aeternity ​network. \n 1.6. “​Account address​” is a hashed version of the ​USER’s ​public key​, used to identify USERS​ on ​the application​. \n 1.7. “​Keys​” represent uniquely related private and public cryptographic keys of random numbers used for encryption and decryption of information.",
       "section2Title": "2. GENERAL PROVISIONS",
@@ -676,7 +682,6 @@
     },
     "tipPage": {
       "back": "Back",
-      "OkButton": "OK",
       "noImage": "No Image",
       "domainVerified": "Verified",
       "domainNotVerified": "Not verified",
@@ -706,7 +711,9 @@
       "to": "to",
       "amountPlaceholder": "Enter amount",
       "amountLabel": "Amount",
+      "empty": "Empty",
       "availableLabel": "Available",
+      "sendToAddress": "Send address to",
       "confirm": "Confirm",
       "cancel": "Cancel",
       "edit": "Edit Tip Details",
@@ -849,6 +856,10 @@
       "message": "Message"
     },
     "network": {
+      "url": "URL:",
+      "edit": "Edit",
+      "delete": "Delete",
+      "middleware": "Middleware:",
       "allNetworks": "Your networks",
       "cancel": "Cancel",
       "addNetwork": "Connect to another node",
@@ -869,5 +880,29 @@
       "cancel": "Cancel",
       "donate": "Donate Data"
     }
-  }
+  },
+  "phishing": {
+    "detection": "Superhero Phishing Detection",
+    "sections": [
+      {
+        "text": "This domain is currently on the Superhero domain warning list. This means that based on information available to us, Superhero believes this domain could currently compromise your security and, as an added safety feature, Superhero has restricted access to the site. To override this, please read the rest of this warning for instructions on how to continue at your own risk."
+      },
+      {
+        "text": "There are many reasons sites can appear on our warning list, and our warning list compiles from other widely used industry lists. Such reasons can include known fraud or security risks, such as domains that test positive on the {insertion}. Domains on these warning lists may include outright malicious websites and legitimate websites that have been compromised by a malicious actor.",
+        "insertion": "Superhero Phishing Detector"
+      },
+      {
+        "text": "Note that this warning list is compiled on a voluntary basis. This list may be inaccurate or incomplete. Just because a domain does not appear on this list is not an implicit guarantee of that domain's safety. As always, your transactions are your own responsibility. If you wish to interact with any domain on our warning list, you can do so by {continueHost}.",
+        "continueHost": "continuing at your own risk"
+      },
+      {
+        "text": "If you think this domain is incorrectly flagged or if a blocked legitimate website has resolved its security issues, {insertion}.",
+        "insertion": " please file an issue"
+      }
+    ]
+  },
+  "options": {
+    "text": "Superhero is Open-source! Visit "
+  },
+  "redirecting": "Redirecting"
 }

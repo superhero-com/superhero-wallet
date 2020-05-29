@@ -10,7 +10,11 @@
           <span class="secondary-text" data-cy="tip-amount">
             {{ amount }} {{ $t('pages.appVUE.aeid') }}
           </span>
-          ({{ currencyAmount }} {{ currentCurrency }}) {{ $t('pages.tipPage.to') }}
+          <!--eslint-disable-line vue-i18n/no-raw-text-->
+          ({{ currencyAmount }}
+          <!--eslint-disable-next-line vue-i18n/no-raw-text-->
+          {{ currentCurrency }})
+          {{ $t('pages.tipPage.to') }}
         </template>
       </p>
 

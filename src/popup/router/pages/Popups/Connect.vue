@@ -17,6 +17,7 @@
     </div>
 
     <h2>
+      <!--eslint-disable-next-line vue-i18n/no-raw-text-->
       <span class="secondary-text" data-cy="aepp">{{ data.host }} ({{ data.name }}) </span>
       {{ $t('pages.connectConfirm.websiteRequestconnect') }}
       <UserAvatar class="send-account-icon" :address="account.publicKey" :name="account.name" />

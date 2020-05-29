@@ -121,6 +121,7 @@ export default [
   },
   {
     path: '/tip',
+    name: 'tip',
     component: Tip,
     meta: {
       title: 'send',

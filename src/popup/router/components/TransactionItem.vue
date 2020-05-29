@@ -5,7 +5,10 @@
         <span data-cy="amount">{{ txAmount }}</span>
         {{ $t('pages.appVUE.aeid') }}
         <span class="text" data-cy="currency-amount">
-          ({{ txAmountToCurrency }} {{ current.currency.toUpperCase() }})
+          <!--eslint-disable-line vue-i18n/no-raw-text-->
+          ({{ txAmountToCurrency }}
+          <!--eslint-disable-next-line vue-i18n/no-raw-text-->
+          {{ current.currency.toUpperCase() }})
         </span>
       </span>
       <span class="status">{{ status }}</span>
@@ -111,7 +114,7 @@ export default {
     },
     seeTx() {
       openUrl(
-        `${this.network[this.current.network].explorerUrl}/transactions/${this.transaction.hash}`,
+        `${this.network[this.current.network].middlewareUrl}/transactions/${this.transaction.hash}`,
       );
     },
   },

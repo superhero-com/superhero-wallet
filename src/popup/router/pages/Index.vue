@@ -11,7 +11,7 @@
       <a href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
         ><img src="../../../icons/google-play.svg" alt="Google Play"
       /></a>
-      <span>Or use a web version</span>
+      <span>{{ $t('pages.index.webVersion') }}</span>
     </div>
     <CheckBox v-if="!termsAgreed" v-model="terms" data-cy="checkbox" class="checkbox">
       <div class="primary-text">

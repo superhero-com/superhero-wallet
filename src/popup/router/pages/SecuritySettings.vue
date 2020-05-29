@@ -67,6 +67,7 @@
         <ae-badge class="seedBadge selected">{{ $t('pages.seedPhrase.first') }}</ae-badge>
         <ae-badge class="seedBadge selected">{{ $t('pages.seedPhrase.second') }}</ae-badge>
         <ae-badge class="seedBadge selected">{{ $t('pages.seedPhrase.third') }}</ae-badge>
+        <!--eslint-disable-next-line vue-i18n/no-raw-text-->
         <ae-badge class="seedBadge selected">...</ae-badge>
       </ae-phraser>
       <ae-phraser v-bind="seedError">

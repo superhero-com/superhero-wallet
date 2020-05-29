@@ -42,18 +42,18 @@ export default {
     }
 
     const { network, current } = store.getters;
+    const { internalUrl, compilerUrl } = network[current.network];
     const node = await Node({
-      url: network[current.network].internalUrl,
-      internalUrl: network[current.network].internalUrl,
+      url: internalUrl,
+      internalUrl,
     });
     const account = MemoryAccount({ keypair });
     try {
       const sdk = await Universal({
         nodes: [{ name: current.network, instance: node }],
         accounts: [account],
-        networkId: network[current.network].networkId,
         nativeMode: true,
-        compilerUrl: network[current.network].compilerUrl,
+        compilerUrl,
       });
       await store.dispatch('initSdk', sdk);
       await this.initContractInstances();
@@ -82,6 +82,7 @@ export default {
     return res.error ? { error: true } : parseFromStorage(res);
   },
   async initContractInstances() {
+    if (!store.getters.mainnet && !process.env.RUNNING_IN_TESTS) return;
     const contractAddress = await store.dispatch('getTipContractAddress');
     store.commit(
       'SET_TIPPING',
