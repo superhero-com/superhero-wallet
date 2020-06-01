@@ -305,16 +305,19 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .d-flex {
   display: flex;
 }
+
 .withdraw.step1 {
   textarea {
     width: 250px;
     min-height: 60px !important;
-    margin: 0 20px 0px 0px;
+    margin: 0 20px 0 0;
     font-size: 11px;
   }
+
   small {
     color: $accent-color;
     display: block;
@@ -323,26 +326,32 @@ export default {
     font-size: 12px;
   }
 }
+
 .withdraw.step2 {
   p {
     display: flex;
     justify-content: center;
     line-height: 2rem;
   }
+
   p:not(:first-of-type) {
     color: $text-color;
   }
+
   p > svg {
     margin-right: 10px;
   }
+
   .info-group {
     text-align: left;
     display: block;
-    margin: 20px 0px;
+    margin: 20px 0;
+
     .info-label {
       display: block;
       padding: 10px 0;
     }
+
     .info-span {
       color: $accent-color;
       font-size: 11px;
@@ -354,18 +363,22 @@ export default {
       letter-spacing: -0.3px;
       cursor: pointer;
     }
+
     .amount {
       font-size: 26px;
       color: $secondary-color;
     }
+
     .currencyamount {
       font-size: 18px;
       display: block;
+
       span {
         font-size: 18px;
       }
     }
   }
+
   .text-center {
     text-align: center;
   }

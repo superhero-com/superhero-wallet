@@ -264,6 +264,7 @@ export default {
     min-width: auto !important;
     padding-bottom: 25px;
   }
+
   p {
     margin-top: 0;
 
@@ -307,7 +308,7 @@ export default {
 
 @media screen and (min-width: 380px) {
   .tour__step3.v-tour__target--highlighted {
-    margin: 10px auto 0px auto;
+    margin: 10px auto 0 auto;
     min-width: auto !important;
     padding-bottom: 25px;
   }

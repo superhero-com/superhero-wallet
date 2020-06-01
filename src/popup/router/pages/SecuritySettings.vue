@@ -26,10 +26,10 @@
             {{ alert.content }}
           </div>
         </Alert>
-        <ae-panel style="margin:0" class="mnemonics">
+        <ae-panel style="margin: 0;" class="mnemonics">
           <p style="word-spacing: 10px;">{{ seedPhrase }}</p>
           <ae-button
-            style="float: right;margin: 10px 0 30px 0;"
+            style="float: right; margin: 10px 0 30px 0;"
             face="toolbar"
             v-clipboard:copy="seedPhrase"
           >
@@ -79,12 +79,12 @@
           >{{ seed.name }} <ae-icon name="close" class="seedClose"
         /></ae-badge>
       </ae-phraser>
-      <button @click="verifyLastStep" class="primary-button" style="width:50%">
+      <button @click="verifyLastStep" class="primary-button" style="width: 50%;">
         {{ $t('pages.seedPhrase.verify') }}
       </button>
     </div>
     <div v-if="seed_verified && type == 5">
-      <ae-icon style="color:#e911ff; font-size:100px;" name="check" />
+      <ae-icon style="color: #e911ff; font-size: 100px;" name="check" />
       <p>{{ $t('pages.seedPhrase.seedConfirmed') }}</p>
       <button @click="navigateToAccount" class="primary-button">
         {{ $t('pages.seedPhrase.toDashboard') }}
@@ -214,27 +214,33 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .ae-modal {
   background: $border-color !important;
 }
+
 .mnemonics p,
 .mnemonics button {
   color: #000 !important;
 }
+
 .regbtn {
   background: #ff0d6a;
-  color: #ffffff;
+  color: #fff;
   float: right;
   width: 19%;
   border-radius: 0 !important;
 }
+
 .maindiv_input-group-addon {
   text-align: center;
 }
+
 .maindiv_input-group-addon h4 {
   text-align: left;
   margin: 0 !important;
 }
+
 .input-group-addon {
   background: #ececec;
   border: 1px solid #ccc;
@@ -242,6 +248,7 @@ export default {
   height: 56px;
   float: left;
 }
+
 .addon-input {
   width: 75%;
   outline: none;
@@ -251,28 +258,35 @@ export default {
   text-indent: 5px;
   caret-color: #ff0d6a;
 }
+
 .addon-lbl {
   font-weight: 600;
   color: #828282;
 }
+
 input:active,
 input:focus {
   border: none;
   outline: none;
 }
+
 .notround {
   border-radius: 0 !important;
 }
+
 small {
   word-break: break-word;
 }
+
 .seedBadge {
   user-select: unset;
   cursor: pointer;
   border: 2px solid #edf3f7;
+
   .seedClose {
     margin-left: 5px;
   }
+
   &.selected {
     opacity: 0.4;
     cursor: unset;

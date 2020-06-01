@@ -57,6 +57,7 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .header {
   padding-top: env(safe-area-inset-top);
   background-color: $nav-bg-color;
@@ -74,6 +75,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+
     &:not(.isLoggedIn) .title {
       margin-left: auto;
       margin-right: auto;
@@ -130,7 +132,7 @@ export default {
       text-align: center;
       vertical-align: middle;
       left: -10px;
-      top: 0px;
+      top: 0;
       line-height: 15px;
       border: 1px solid $nav-bg-color;
     }

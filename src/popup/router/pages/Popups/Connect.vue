@@ -89,21 +89,26 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../../common/variables';
+
 .identiconContainer {
   position: relative;
   margin-top: 2rem;
-  &:before {
+
+  &::before {
     content: '';
   }
+
   .identicon {
     width: 50%;
     position: relative;
     z-index: 0;
+
     img {
       height: 4rem;
       position: relative;
       z-index: 1;
     }
+
     .ae-identicon {
       height: 4rem !important;
       position: relative;
@@ -114,8 +119,9 @@ export default {
       box-shadow: 0 0 0 2px $secondary-color;
     }
   }
-  .identicon:first-child:after,
-  .identicon:last-child:after {
+
+  .identicon:first-child::after,
+  .identicon:last-child::after {
     content: '';
     width: 40%;
     border-top: 2px dashed $white-color;
@@ -128,16 +134,20 @@ export default {
     -ms-transform: translateY(-50%);
     -webkit-transform: translateY(-50%);
   }
-  .identicon:first-child:after {
+
+  .identicon:first-child::after {
     right: 0;
     left: auto;
   }
-  .identicon:last-child:after {
+
+  .identicon:last-child::after {
     left: 0;
   }
+
   .separator {
     margin-top: 1rem;
     padding: 0 0.7rem;
+
     .ae-icon {
       background: $accent-color;
       padding: 0.5rem;

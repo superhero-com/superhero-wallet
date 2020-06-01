@@ -142,6 +142,7 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .date {
   background: $button-color;
   padding: 0.5rem 1rem;
@@ -150,9 +151,11 @@ export default {
   font-size: 0.9rem;
   font-family: monospace;
 }
+
 .popup {
   padding: 0;
 }
+
 .all-transactions {
   background: $transactions-bg;
   padding: 0 20px;

@@ -29,9 +29,11 @@ export default {
   -webkit-transform: rotate(180deg);
   font-size: 3rem;
 }
+
 .back-button {
   padding: 0;
 }
+
 h3 {
   margin: 0;
   margin-top: -4px;

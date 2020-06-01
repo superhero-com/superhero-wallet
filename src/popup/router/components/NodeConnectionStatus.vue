@@ -37,6 +37,7 @@ export default {
 
 <style lang="scss">
 @import '../../../common/variables';
+
 .connect-error,
 .connect-node {
   position: fixed;
@@ -51,6 +52,7 @@ export default {
   text-align: center;
   font-size: 14px;
 }
+
 .connect-node {
   background: $nav-bg-color;
 }

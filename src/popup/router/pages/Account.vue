@@ -104,9 +104,11 @@ export default {
 .accountAddress {
   color: $white-color;
 }
+
 .paragraph {
   font-weight: normal;
 }
+
 .transactionHistory {
   margin-top: 1rem;
   width: 100%;
@@ -118,19 +120,23 @@ export default {
   position: relative;
   z-index: 0;
 }
+
 .recent-tx .recent-transactions {
   overflow-y: scroll;
   padding-bottom: 20px;
 }
+
 .submenu-bg {
   background: $submenu-bg;
   padding: 10px;
   display: flex;
   flex-wrap: wrap;
 }
+
 .send-tips {
   margin-bottom: 26px;
 }
+
 .noti {
   margin-top: 20px;
   margin-bottom: 0;

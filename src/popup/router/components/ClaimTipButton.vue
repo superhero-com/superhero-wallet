@@ -28,6 +28,7 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .how-to-url button {
   background: $button-color;
   color: $text-color;
@@ -36,6 +37,7 @@ export default {
   width: 270px;
   line-height: 38px;
 }
+
 .how-to-url svg {
   vertical-align: middle;
 }

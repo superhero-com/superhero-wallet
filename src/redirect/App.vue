@@ -49,9 +49,11 @@ html {
   .logo {
     margin-bottom: 25px;
   }
+
   p {
     font-size: 20px;
   }
+
   .loader {
     border: 8px solid #f3f3f3; /* Light grey */
     border-top: 8px solid #ccc; /* Blue */
@@ -66,6 +68,7 @@ html {
     0% {
       transform: rotate(0deg);
     }
+
     100% {
       transform: rotate(360deg);
     }

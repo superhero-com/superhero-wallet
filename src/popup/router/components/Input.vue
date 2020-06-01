@@ -52,18 +52,23 @@ input.input {
   margin-left: auto;
   margin-right: auto;
 }
+
 .input:focus {
   border-color: $input-focus-color !important;
 }
+
 .input.has-error {
   border-color: $input-error-color !important;
 }
+
 .input.sm {
   font-size: 14px;
 }
+
 .input.xsm {
   font-size: 11px;
 }
+
 .input.big {
   font-size: 2rem;
   font-weight: bold;
@@ -73,25 +78,30 @@ input.input {
   margin-right: 15px;
   padding: 3px 10px;
 }
+
 .input.m-0 {
   margin: 0 !important;
 }
+
 .label {
   font-size: 14px;
   margin: 4px 0;
   display: block;
   font-weight: normal;
 }
+
 .input-group {
   width: 80%;
   position: relative;
   display: inline-block;
   margin: 8px auto;
+
   .input {
     padding-right: 50px;
     margin-bottom: 0;
   }
 }
+
 .label-right {
   position: absolute;
   right: 9px;
