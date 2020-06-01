@@ -244,9 +244,7 @@ export default {
       'names',
       'sdk',
       'network',
-      'account',
       'middleware',
-      'subaccounts',
       'activeAccountName',
     ]),
     auctions() {

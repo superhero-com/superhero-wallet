@@ -49,16 +49,7 @@ export default {
     minCallFee: null,
   }),
   computed: {
-    ...mapGetters([
-      'balance',
-      'tipping',
-      'current',
-      'sdk',
-      'account',
-      'network',
-      'currentCurrency',
-      'allowTipping',
-    ]),
+    ...mapGetters(['balance', 'tipping', 'sdk', 'account', 'allowTipping']),
     ...mapState(['tippingAddress', 'minTipAmount']),
     maxValue() {
       const calculatedMaxValue = this.balance - this.minCallFee;

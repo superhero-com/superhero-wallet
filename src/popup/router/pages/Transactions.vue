@@ -45,7 +45,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'middleware', 'pendingTransactions']),
+    ...mapGetters(['account', 'middleware']),
     publicKey() {
       return this.account.publicKey;
     },

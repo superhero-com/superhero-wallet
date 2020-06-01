@@ -62,7 +62,6 @@ export default {
       'notifications',
       'notificationsCounter',
       'backedUpSeed',
-      'middleware',
     ]),
     ...mapState(['isRestored']),
     waveBg() {
