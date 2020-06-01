@@ -111,7 +111,6 @@ small {
     margin: 0;
     padding: 0 1rem;
     white-space: nowrap;
-    justify-content: unset;
     background-color: #505058 !important;
     border-radius: 4px;
     text-align: center;

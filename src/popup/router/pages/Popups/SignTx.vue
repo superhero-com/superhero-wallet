@@ -314,6 +314,9 @@ export default {
   padding: 0 0.5rem !important;
   font-weight: normal !important;
   font-size: 0.8rem !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .noBorder {
@@ -330,12 +333,6 @@ export default {
   .ae-icon {
     font-size: 2rem;
   }
-}
-
-.spendAccountAddr {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .ae-badge {

@@ -279,6 +279,7 @@ export default {
   position: relative;
 
   &.url-bar--input {
+    /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
     ::v-deep .url-status {
       position: absolute;
       left: 10px;
@@ -288,6 +289,7 @@ export default {
       -webkit-transform: translateY(-50%);
     }
 
+    /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
     ::v-deep input {
       padding-left: 35px;
     }
