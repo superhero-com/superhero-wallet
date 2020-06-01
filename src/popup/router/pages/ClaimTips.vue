@@ -12,7 +12,7 @@
       {{ $t('pages.tipPage.cancel') }}
     </Button>
 
-    <Loader size="big" :loading="loading" type="transparent" content="" />
+    <Loader v-if="loading" />
   </div>
 </template>
 

@@ -15,7 +15,7 @@
       </div>
     </transition>
 
-    <Loader size="big" :loading="mainLoading" />
+    <Loader v-if="mainLoading" type="none" />
     <NodeConnectionStatus />
     <Tour />
     <Component

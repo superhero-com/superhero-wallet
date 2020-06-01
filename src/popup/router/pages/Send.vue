@@ -136,7 +136,7 @@
         </div>
       </div>
     </div>
-    <Loader size="big" :loading="loading" type="transparent"></Loader>
+    <Loader v-if="loading" />
   </div>
 </template>
 

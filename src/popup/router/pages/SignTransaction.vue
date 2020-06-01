@@ -81,7 +81,7 @@
         $t('pages.signTransaction.confirm')
       }}</Button>
     </div>
-    <Loader size="big" :loading="loading" type="transparent" />
+    <Loader v-if="loading" />
   </div>
 </template>
 

@@ -10,7 +10,7 @@
       {{ $t('pages.index.importAccount') }}
     </Button>
     <div v-if="errorMsg" class="error-msg" v-html="errorMsg"></div>
-    <Loader size="big" :loading="loading"></Loader>
+    <Loader v-if="loading" type="none" />
   </div>
 </template>
 

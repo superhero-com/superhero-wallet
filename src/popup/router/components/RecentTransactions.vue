@@ -22,7 +22,7 @@
       </p>
     </div>
     <div class="loader-holder">
-      <Loader size="small" :loading="loading" />
+      <Loader v-if="loading" size="small" type="none" />
     </div>
   </div>
 </template>

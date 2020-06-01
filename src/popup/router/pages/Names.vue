@@ -200,7 +200,7 @@
       </div>
     </div>
 
-    <Loader size="big" :loading="loading || sdk === null" type="transparent" content=""></Loader>
+    <Loader v-if="loading || sdk === null" />
   </div>
 </template>
 

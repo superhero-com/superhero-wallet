@@ -14,7 +14,7 @@
     <div v-if="!filteredTransactions.length && !loading">
       <p>{{ $t('pages.transactions.noTransactions') }}</p>
     </div>
-    <Loader size="small" :loading="loading" v-bind="{ content: '' }"></Loader>
+    <Loader v-if="loading" size="small" type="none" />
   </div>
 </template>
 

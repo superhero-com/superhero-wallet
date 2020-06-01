@@ -78,7 +78,7 @@
         </Button>
       </template>
 
-      <Loader size="big" :loading="loading" type="transparent" content="" />
+      <Loader v-if="loading" />
     </div>
   </div>
 </template>
