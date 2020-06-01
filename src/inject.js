@@ -124,13 +124,18 @@ const runContentScript = () => {
       'click',
       e => {
         let element;
-        if (e.target.classList && e.target.classList.contains('superhero-button-link'))
+        if (
+          e.target.classList &&
+          e.target.classList.contains('link') &&
+          e.target.closest('.superhero-button')
+        )
           element = e.target;
         else if (
-          e.target.closest('.superhero-button-link') &&
-          e.target.closest('.superhero-button-link').classList.contains('superhero-button-link')
+          e.target.closest('.link') &&
+          e.target.closest('.link').classList.contains('link') &&
+          e.target.closest('.superhero-button')
         )
-          element = e.target.closest('.superhero-button-link');
+          element = e.target.closest('.link');
 
         if (element) {
           const url = element.getAttribute('data-url');
