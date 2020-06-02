@@ -23,7 +23,7 @@
         class="flex-justify-between flex-align-start flex-direction-column"
       >
         <div>
-          <ae-badge>{{ txType }}</ae-badge>
+          <ae-badge>{{ $t('transaction.type')[data.tx.type] }}</ae-badge>
         </div>
       </ae-list-item>
       <ae-list-item
@@ -117,24 +117,11 @@ export default {
 
   computed: {
     ...mapGetters(['account', 'activeAccountName', 'balance', 'sdk']),
-    maxValue() {
-      const calculatedMaxValue = this.balance - this.fee;
-      return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
-    },
     amount() {
       return typeof this.data.tx.amount !== 'undefined' ? this.data.tx.amount : 0;
     },
     fee() {
       return this.txFee.min;
-    },
-    insufficientBalance() {
-      return this.maxValue - this.amount <= 0;
-    },
-    watchBalance() {
-      return this.balance;
-    },
-    txType() {
-      return this.$t('transaction.type')[this.data.tx.type];
     },
     convertSelectedFee() {
       return BigNumber(this.selectedFee).shiftedBy(MAGNITUDE);
@@ -196,7 +183,8 @@ export default {
       }, 3500);
     },
     showAlert(balance = false) {
-      if (this.insufficientBalance && this.sdk !== null && !this.loading && balance) {
+      const calculatedMaxValue = this.balance > this.fee ? this.balance - this.fee : 0;
+      if (calculatedMaxValue - this.amount <= 0 && this.sdk !== null && !this.loading && balance) {
         this.alertMsg = this.$t('pages.signTransaction.insufficientBalance');
       } else {
         this.alertMsg = '';

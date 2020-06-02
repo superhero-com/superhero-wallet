@@ -58,7 +58,7 @@
     </div>
     <div
       class="tour-start"
-      v-if="!nodeStatus && home && isLoggedIn && !tourRunning && tourStartBar"
+      v-if="!nodeStatus && $route.path === '/account' && isLoggedIn && !tourRunning && tourStartBar"
       @click="toggleTour"
     >
       <div class="container">
@@ -154,9 +154,6 @@ export default {
       return this.steps
         .filter(({ hide }) => !hide)
         .map(step => ({ ...step, params: { ...step.params, enableScrolling: false } }));
-    },
-    home() {
-      return this.$route.path === '/account';
     },
   },
   watch: {

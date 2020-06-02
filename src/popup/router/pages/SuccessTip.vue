@@ -12,7 +12,8 @@
         >{{ amountTip }} {{ $t('pages.appVUE.aeid') }}
       </span>
       <!--eslint-disable-line vue-i18n/no-raw-text-->
-      ({{ getCurrencyAmount }} {{ currentCurrency }})<!--eslint-disable-line vue-i18n/no-raw-text-->
+      ({{ (amountTip * current.currencyRate).toFixed(3) }}
+      {{ currentCurrency }})<!--eslint-disable-line vue-i18n/no-raw-text-->
       {{ $t('pages.successTip.to') }}
     </p>
     <a class="link-sm text-left block" data-cy="tip-url">{{ tipUrl }}</a>
@@ -23,7 +24,7 @@
       }}</span>
       <Textarea v-model="note" :value="note" size="h-50" />
     </div>
-    <p class="f-14 sub-heading text-left" v-if="!urlVerified">
+    <p class="f-14 sub-heading text-left" v-if="!(tipUrl && verifiedUrls.includes(tipUrl))">
       {{ $t('pages.successTip.note') }}
     </p>
     <p class="f-18 my-35">{{ $t('pages.successTip.letThemKnow') }}</p>
@@ -70,12 +71,6 @@ export default {
     ...mapGetters(['current', 'currentCurrency']),
     amountTip() {
       return (+aettosToAe(this.amount)).toFixed(2);
-    },
-    getCurrencyAmount() {
-      return (this.amountTip * this.current.currencyRate).toFixed(3);
-    },
-    urlVerified() {
-      return this.tipUrl && this.verifiedUrls.includes(this.tipUrl);
     },
   },
   async created() {

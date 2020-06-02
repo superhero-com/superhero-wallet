@@ -46,9 +46,6 @@ export default {
   },
   computed: {
     ...mapGetters(['account', 'middleware']),
-    publicKey() {
-      return this.account.publicKey;
-    },
     filteredTransactions() {
       switch (this.type) {
         case 'date':
@@ -61,17 +58,20 @@ export default {
           break;
         case 'sent':
           return this.transactions.filter(
-            tr => tr.tx.type === 'ContractCallTx' && tr.tx.caller_id === this.publicKey,
+            tr => tr.tx.type === 'ContractCallTx' && tr.tx.caller_id === this.account.publicKey,
           );
         case 'received':
           return this.transactions.filter(tr => tr.claim);
         case 'topups':
           return this.transactions.filter(
-            tr => tr.tx.type === 'SpendTx' && tr.tx.recipient_id === this.publicKey,
+            tr => tr.tx.type === 'SpendTx' && tr.tx.recipient_id === this.account.publicKey,
           );
         case 'withdrawals':
           return this.transactions.filter(
-            tr => tr.tx.sender_id && tr.tx.type === 'SpendTx' && tr.tx.sender_id === this.publicKey,
+            tr =>
+              tr.tx.sender_id &&
+              tr.tx.type === 'SpendTx' &&
+              tr.tx.sender_id === this.account.publicKey,
           );
         default:
           return this.transactions;

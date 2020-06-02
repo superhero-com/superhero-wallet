@@ -201,9 +201,6 @@ export default {
     txObject() {
       return this.unpackedTx ? this.unpackedTx.tx : {};
     },
-    amount() {
-      return this.txObject.amount;
-    },
     receiver() {
       if (this.txType === 'spendTx') {
         return this.txObject.recipientId;
