@@ -37,7 +37,7 @@ describe('Tests cases for AEX-2 popups', () => {
   });
 
   popups.forEach(popup => {
-    it(`Open${popup} and send deny action`, () => {
+    it(`Open ${popup} and send deny action`, () => {
       cy.openAex2Popup(popup, TX_TYPE.spend)
         .get('[data-cy=deny]')
         .click()
@@ -49,7 +49,7 @@ describe('Tests cases for AEX-2 popups', () => {
   });
 
   popups.forEach(popup => {
-    it(`Open${popup} and send accept action`, () => {
+    it(`Open ${popup} and send accept action`, () => {
       cy.openAex2Popup(popup, TX_TYPE.spend)
         .get('[data-cy=accept]')
         .click()
