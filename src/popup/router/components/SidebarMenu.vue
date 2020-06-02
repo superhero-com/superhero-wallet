@@ -128,7 +128,6 @@ export default {
     },
   },
   created() {
-    console.log(this.owned);
     this.$once('hook:beforeDestroy', () => clearInterval(this.balances));
   },
   methods: {

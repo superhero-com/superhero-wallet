@@ -57,7 +57,6 @@ describe('Test cases for networks page', () => {
   });
 
   it('Can add new network', () => {
-    console.log(networks);
     cy.addNetwork(
       'Mainnet',
       networks[DEFAULT_NETWORK].url,

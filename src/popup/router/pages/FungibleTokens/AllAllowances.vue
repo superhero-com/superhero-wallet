@@ -35,9 +35,7 @@ export default {
     token: null,
     allowances: [],
   }),
-  computed: {
-    ...mapGetters(['sdk', 'account']),
-  },
+  computed: mapGetters(['sdk', 'account']),
   async created() {
     await this.$watchUntilTruly(() => this.sdk);
     this.tokens = await this.$store.dispatch('tokens/extension', 'allowances');
@@ -52,6 +50,7 @@ export default {
         const instance = await this.$store.dispatch('tokens/instance', contract);
 
         const { decodedResult: all } = await instance.methods.allowances();
+        this.allowances = [];
         if (all.length) {
           // eslint-disable-next-line camelcase
           const mine = all.filter(([{ for_account }]) => for_account === this.account.publicKey);
@@ -63,11 +62,7 @@ export default {
               symbol,
               balance,
             }));
-          } else {
-            this.allowances = [];
           }
-        } else {
-          this.allowances = [];
         }
       } catch (err) {
         console.log(err);

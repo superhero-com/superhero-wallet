@@ -6,9 +6,6 @@ import { parseFromStorage, aettosToAe, aeToAettos } from '../../popup/utils/help
 export default store =>
   store.registerModule('accounts', {
     namespaced: true,
-    state: {},
-    getters: {},
-    mutations: {},
     actions: {
       async getKeyPair({ rootGetters: { activeAccount, account } }) {
         const res = await postMessage({ type: 'getKeypair', payload: { activeAccount, account } });

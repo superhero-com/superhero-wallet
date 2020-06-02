@@ -84,9 +84,6 @@ export default {
       newFee: this.transaction.fee,
     };
   },
-  created() {
-    console.log(this.transaction);
-  },
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
     receiver() {
@@ -102,8 +99,6 @@ export default {
       return OBJECT_ID_TX_TYPE[this.transaction.tag];
     },
     transactionType() {
-      console.log(this.txType);
-      console.log(this.transaction);
       return this.$t('transaction.type')[this.txType];
     },
     totalSpend() {
