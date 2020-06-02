@@ -10,7 +10,7 @@ export default store =>
       contractInstances: {},
     },
     getters: {
-      owned(state, { getInstance }, { sdk, account: { publicKey }, activeNetwork }) {
+      owned(state, { getInstance }, { sdk, account: { publicKey } }, { activeNetwork }) {
         let { networkId } = activeNetwork;
         if (sdk) networkId = sdk.getNetworkId();
         return state.all
