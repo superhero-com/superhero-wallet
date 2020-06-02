@@ -73,8 +73,6 @@ export default {
           return this.transactions.filter(
             tr => tr.tx.sender_id && tr.tx.type === 'SpendTx' && tr.tx.sender_id === this.publicKey,
           );
-        case 'all':
-          return this.transactions;
         default:
           return this.transactions;
       }
