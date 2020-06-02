@@ -338,10 +338,12 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .balanceSpend {
   font-size: 2rem;
   color: $white-color;
 }
+
 .spendTxDetailsList {
   .balance {
     font-family: Roboto, sans-serif;
@@ -359,14 +361,16 @@ export default {
       font-family: Roboto, sans-serif;
       color: $white-color;
       -webkit-box-shadow: 0 0 0 2px $accent-color;
-      box-shadow: 0px 0px 0px 2px $accent-color;
+      box-shadow: 0 0 0 2px $accent-color;
       border: 2px solid $bg-color;
     }
   }
 }
+
 .spendTxDetailsList .ae-button {
   margin-bottom: 0 !important;
 }
+
 .arrowSeprator {
   margin-right: 1rem;
   background: $accent-color;
@@ -378,48 +382,57 @@ export default {
   vertical-align: middle;
   border: 1px solid $white-color;
   line-height: 20px;
+
   .ae-icon {
     font-size: 1.2rem !important;
     float: none !important;
   }
-  &:after {
+
+  &::after {
     content: '';
   }
 }
+
 .ae-identicon.base {
   border: 0.125rem solid transparent;
   -webkit-box-shadow: 0 0 0 2px $secondary-color;
   box-shadow: 0 0 0 1px $secondary-color;
   width: 2rem;
 }
+
 .spendAccountAddr {
   padding: 0 0.5rem !important;
   font-weight: normal !important;
   font-size: 0.8rem !important;
-}
-.noBorder {
-  border-top: none !important;
-}
-.accountFrom {
-  width: 40%;
-}
-.accountTo {
-  width: 70%;
-  .ae-icon {
-    font-size: 2rem;
-  }
-}
-.spendAccountAddr {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.noBorder {
+  border-top: none !important;
+}
+
+.accountFrom {
+  width: 40%;
+}
+
+.accountTo {
+  width: 70%;
+
+  .ae-icon {
+    font-size: 2rem;
+  }
+}
+
 .extend {
   width: 100%;
 }
+
 .tx-label {
   margin-top: 0.4rem;
 }
+
 .ae-identicon {
   width: auto;
 }

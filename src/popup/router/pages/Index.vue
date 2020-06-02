@@ -72,13 +72,16 @@ export default {
   width: 270px;
   margin: 15px auto;
 }
+
 .primary-text {
   color: $white-color;
   font-size: 0.88rem;
 }
+
 .primary-title {
   font-weight: 500;
 }
+
 .checkbox {
   margin: 0 auto 25px auto;
   max-width: 357px;

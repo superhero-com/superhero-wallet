@@ -29,6 +29,7 @@ export default {
 
 <style lang="scss">
 @import '../../../common/variables';
+
 .fadeOut-enter-active,
 .fadeOut-leave-active {
   transition: all 0.5s ease-in-out;

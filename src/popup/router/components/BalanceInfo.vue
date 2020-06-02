@@ -79,7 +79,7 @@ export default {
 
     .ae-icon {
       font-size: 1.2rem;
-      margin: 10px 0px 0px 0px;
+      margin: 10px 0 0 0;
     }
   }
 
@@ -142,6 +142,7 @@ export default {
     padding: 0;
     margin-top: 10px;
   }
+
   .balance {
     font-size: 26px;
     color: $white-color;
@@ -149,16 +150,20 @@ export default {
     text-align: left;
     margin-left: 20px;
     line-height: 34px;
+
     &,
     .ae-button {
       font-family: 'Roboto', sans-serif;
     }
+
     .amount {
       color: $text-color;
     }
+
     .amount :last-child {
       color: $secondary-color;
     }
+
     .ae-button {
       display: block;
       font-size: 18px;

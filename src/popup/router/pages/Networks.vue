@@ -190,13 +190,16 @@ export default {
   align-items: center;
   width: 100%;
   border-top: 1px solid #100c0d !important;
+
   p {
     margin: 0;
   }
+
   p.url {
     font-weight: normal;
   }
 }
+
 .edit-btn {
   margin-left: 5px;
   margin-right: 0;

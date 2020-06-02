@@ -18,7 +18,7 @@
     <a class="link-sm text-left block" data-cy="tip-url">{{ tipUrl }}</a>
     <br />
     <div>
-      <span style="word-break: break-word;font-size: 14px;float: left;">{{
+      <span style="word-break: break-word; font-size: 14px; float: left;">{{
         $t('pages.successTip.notify')
       }}</span>
       <Textarea v-model="note" :value="note" size="h-50" />

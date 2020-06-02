@@ -8,7 +8,7 @@
         <!-- <ae-input v-model="auctionInfo.info.name" style="margin: 10px 0 10px 0; pointer-events: none;" label="Name" placeholder="..." error> -->
         <!-- </ae-input> -->
         <ae-input
-          style="margin: 10px 0 10px 0;color:#000"
+          style="margin: 10px 0 10px 0; color: #000;"
           label="Component"
           placeholder="0.0"
           v-model="amount"
@@ -27,7 +27,7 @@
           $t('pages.auctionBid.next')
         }}</Button>
 
-        <div style="display:inline-block; margin:20px 0; width:100%;">
+        <div style="display: inline-block; margin: 20px 0; width: 100%;">
           <ae-text class="lefttext" align="left">
             {{ $t('pages.auctionBid.current-highest-bid') }}
           </ae-text>
@@ -142,13 +142,13 @@ export default {
   float: left;
   text-align: left;
   width: 50%;
-  color: #888888;
+  color: #888;
 }
 
 .righttext {
   float: right;
   text-align: right;
   width: 50%;
-  color: #888888;
+  color: #888;
 }
 </style>

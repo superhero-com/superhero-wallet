@@ -82,7 +82,7 @@
         <hr />
 
         <ae-filter-list v-if="!moreAuInfo.visible">
-          <p style="margin:0">{{ $t('pages.namingSystemPage.filtersBy') }}</p>
+          <p style="margin: 0;">{{ $t('pages.namingSystemPage.filtersBy') }}</p>
 
           <Button
             @click="filterType = 'soonest'"
@@ -139,13 +139,13 @@
             <b>{{ moreAuInfo.info.expiration }} </b>{{ $t('pages.namingSystemPage.blocks') }}<br />
             <hr />
             <span>{{ $t('pages.namingSystemPage.currentBid') }}</span>
-            <ae-list-item style="border:none" fill="neutral">
+            <ae-list-item style="border: none;" fill="neutral">
               <UserAvatar class="subAccountIcon" :address="moreAuInfo.info.winning_bidder" />
               <div class="auctionInfo">
                 <div class="name">
                   {{ moreAuInfo.info.winning_bid.toFixed(3) }} {{ $t('pages.appVUE.aeid') }}
                 </div>
-                <div style="color:#aba9a9" class="expiration">
+                <div style="color: #aba9a9;" class="expiration">
                   <small>{{ moreAuInfo.info.winning_bidder }}</small>
                 </div>
               </div>
@@ -156,14 +156,14 @@
               <ae-list-item
                 v-for="(bid, idx) in previousBids"
                 v-bind:key="idx"
-                style="border:none"
+                style="border: none;"
                 fill="neutral"
               >
                 <UserAvatar class="subAccountIcon" :address="bid.accountId" />
                 <div class="auctionInfo">
                   <!--eslint-disable-next-line vue-i18n/no-raw-text-->
                   <div class="name">{{ bid.nameFee.toFixed(3) }} AE</div>
-                  <div style="color:#aba9a9" class="expiration">
+                  <div style="color: #aba9a9;" class="expiration">
                     <small>{{ bid.accountId }}</small>
                   </div>
                 </div>
@@ -422,38 +422,49 @@ export default {
 .wd-100 {
   width: 100%;
 }
+
 .ae-identicon.base {
   width: 2rem;
 }
+
 .seeAllActiveAuctions li {
   margin-bottom: 5px;
+
   .auctionInfo {
     width: 100%;
     text-align: left;
+
     .name {
       font-weight: bold;
     }
   }
 }
+
 .tab-holder {
   margin: 2rem auto;
 }
+
 .au-filter {
   cursor: pointer;
 }
+
 .ae-list .ae-list-item:first-child {
   border-top: none !important;
 }
+
 .ae-address.flat {
   font-size: 12px;
 }
+
 .pointer-holder {
   display: flex;
   justify-content: space-between;
+
   .pointer-input {
     width: 90%;
   }
 }
+
 .active-name {
   float: right;
   background: #67f7b8;

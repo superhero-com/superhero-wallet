@@ -77,6 +77,7 @@ export default {
 
 <style lang="scss">
 @import '../common/variables';
+
 body,
 html,
 .content {
@@ -84,6 +85,7 @@ html,
   padding: 0 !important;
   height: 100% !important;
 }
+
 .ae-panel {
   position: fixed;
   left: 50%;
@@ -95,6 +97,7 @@ html,
   width: 80%;
   max-width: 80% !important;
 }
+
 .ae-icon {
   vertical-align: middle;
   margin-right: 5px;
@@ -102,18 +105,22 @@ html,
   display: inline-block !important;
   margin-top: -5px;
 }
+
 p {
   font-size: 1.2rem;
   text-align: left;
 }
+
 a {
   color: $bg-color;
   text-decoration: underline;
   cursor: pointer;
 }
+
 .text-center {
   text-align: center;
 }
+
 .ae-main {
   background: $bg-color !important;
 }

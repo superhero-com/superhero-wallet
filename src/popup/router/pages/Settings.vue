@@ -78,6 +78,7 @@ export default {
     &:hover {
       border-left: 2px solid #2a9cff;
       background: rgba(99, 99, 99, 0.5);
+
       .arrow-right {
         right: 20px;
       }
@@ -99,6 +100,7 @@ export default {
   color: white;
   font-size: 18px;
 }
+
 .arrow-right {
   transition: 0.4s;
   border: solid white;
@@ -113,6 +115,7 @@ export default {
   margin-top: -15px;
   border-radius: 4px;
 }
+
 .tab-info {
   color: #ccc;
   font-weight: normal;

@@ -38,6 +38,7 @@ export default {
 
 <style lang="scss">
 @import '../../../common/variables';
+
 .modal--mask {
   position: fixed;
   z-index: 9998;
@@ -48,10 +49,12 @@ export default {
   background-color: rgba(0, 0, 0, 0.7);
   display: table;
   transition: opacity 0.3s ease;
+
   .modal--wrapper {
     display: table-cell;
     vertical-align: middle;
   }
+
   .modal--container {
     position: relative;
     width: 87%;
@@ -62,12 +65,14 @@ export default {
     border-radius: 5px;
     transition: all 0.3s ease;
   }
+
   .modal--close {
     position: absolute;
     right: 10px;
     top: 10px;
     cursor: pointer;
   }
+
   .modal--header {
     color: $white-color;
     font-size: 17px;
@@ -76,6 +81,7 @@ export default {
     word-break: break-word;
     text-align: center;
   }
+
   .modal--body {
     margin-bottom: 40px;
     color: $text-color;
@@ -88,6 +94,7 @@ export default {
     .modal-confirm-btns {
       display: flex;
       justify-content: center;
+
       button {
         margin: 0 10px !important;
         width: 120px !important;
@@ -100,6 +107,7 @@ export default {
   .modal--leave--active {
     opacity: 0;
   }
+
   .modal--enter .modal--container,
   .modal--leave--active .modal--container {
     -webkit-transform: scale(1.1);

@@ -358,6 +358,7 @@
   text-align: left;
   word-break: break-word;
   font-weight: 100;
+
   ol {
     list-style: upper-roman;
     padding: 10px;

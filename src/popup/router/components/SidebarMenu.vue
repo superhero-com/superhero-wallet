@@ -183,6 +183,7 @@ export default {
       &.slide-leave-active {
         transition: max-height 0.3s ease-in-out;
       }
+
       &.slide-enter,
       &.slide-leave-to {
         max-height: 0;

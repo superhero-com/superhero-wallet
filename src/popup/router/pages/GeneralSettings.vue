@@ -82,11 +82,12 @@ h4 {
   text-align: left;
   margin: 0 !important;
 }
+
 small {
   color: #9c9c9c;
   text-align: left;
   width: 100%;
-  margin: 0 0px 10px;
+  margin: 0 0 10px;
   display: block;
   word-break: break-word;
 }
@@ -110,7 +111,6 @@ small {
     margin: 0;
     padding: 0 1rem;
     white-space: nowrap;
-    justify-content: unset;
     background-color: #505058 !important;
     border-radius: 4px;
     text-align: center;
@@ -118,6 +118,7 @@ small {
     justify-content: center;
     align-items: center;
   }
+
   ul {
     min-width: 250px;
     box-shadow: none;
@@ -151,11 +152,13 @@ small {
       }
     }
   }
+
   .dropdown.show {
     .sub-dropdown {
       visibility: visible;
       max-height: 210px;
     }
+
     .ae-icon-left-more {
       transform: rotate(90deg);
       -webkit-transform: rotate(90deg);

@@ -10,7 +10,7 @@
     />
     <ae-toolbar slot="footer" align="justify">
       <span v-if="validAddress">
-        <ae-identicon :address="address" size="xs" style="vertical-align: middle" />
+        <ae-identicon :address="address" size="xs" style="vertical-align: middle;" />
         {{ $t('pages.aeAddressInput.identicon') }}
       </span>
       <span v-else-if="!validAddress && address && address.length > 0">{{
@@ -66,6 +66,7 @@ export default {
 .ae-input-container {
   overflow: unset;
 }
+
 .ae-toolbar {
   justify-content: space-between;
 }

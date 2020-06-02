@@ -225,6 +225,7 @@ export default {
 
 <style lang="scss">
 @import '../../../common/variables';
+
 .container {
   max-width: 357px;
   margin: 0 auto;
@@ -268,6 +269,7 @@ export default {
 
   &[x-placement^='top'] {
     margin-bottom: 0.8rem !important;
+
     .v-step__arrow {
       background-image: url('../../../icons/arrow-up.png');
       transform: rotate(180deg);
@@ -277,6 +279,7 @@ export default {
 
   &[x-placement^='bottom'] {
     margin-top: 0.8rem !important;
+
     .v-step__arrow {
       background-image: url('../../../icons/arrow-up.png');
       top: -0.75rem !important;
@@ -294,7 +297,7 @@ export default {
   box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
   pointer-events: none !important;
 
-  &:after {
+  &::after {
     content: '';
     border: 1.5px dashed #fff !important;
     border-radius: 5px;
@@ -325,7 +328,7 @@ export default {
     box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
   }
 
-  &:before {
+  &::before {
     position: absolute;
     top: -80px;
     height: 100%;
@@ -414,7 +417,7 @@ export default {
 }
 
 @media screen and (min-width: 780px) {
-  .tour-actions:after {
+  .tour-actions::after {
     top: -30px;
   }
 

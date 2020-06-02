@@ -135,6 +135,7 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .url-bar {
   display: flex;
   align-items: center;
@@ -147,6 +148,7 @@ export default {
     margin-left: 10px;
   }
 }
+
 .section-title {
   margin-bottom: 8px;
   margin-top: 16px;

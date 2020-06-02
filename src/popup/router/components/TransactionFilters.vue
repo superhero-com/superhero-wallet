@@ -91,6 +91,7 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .filters {
   position: sticky;
   top: 50px;
@@ -103,25 +104,31 @@ export default {
   justify-content: space-between;
   padding: 0 20px;
   font-size: 13px;
+
   span {
     text-transform: capitalize;
     cursor: pointer;
     color: $accent-color !important;
   }
+
   span.all {
     color: $secondary-color !important;
   }
+
   span.active,
   span.active > * {
     color: $white-color !important;
   }
+
   .d-flex {
     display: flex;
+
     svg {
       padding-top: 13px;
       height: 100%;
     }
   }
+
   .rotate {
     transform: rotate(180deg);
   }

@@ -38,16 +38,20 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .sendAmount {
   margin: 15px 0;
 }
+
 .token-symbol {
   margin-right: 2rem;
 }
+
 .ae-dropdown-button {
   width: 16px !important;
   height: 16px !important;
 }
+
 .ae-dropdown {
   margin-bottom: 0 !important;
   width: 4rem;
@@ -55,6 +59,7 @@ export default {
   right: 0;
   top: 0.5rem;
 }
+
 .ae-dropdown .ae-dropdown-button {
   width: 100% !important;
   height: 16px !important;

@@ -976,27 +976,33 @@ export default {
 
 <style lang="scss">
 @import '../../../common/variables';
+
 .terms {
   font-weight: 100;
 }
+
 .terms--heading {
   margin: 20px;
   text-align: center;
 }
+
 .accordion-item-title {
   color: $accent-color;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
+
   .icon {
     width: 25px;
     margin-top: 4px;
   }
+
   span {
     margin-right: auto;
     color: $accent-color;
   }
 }
+
 .accordion-item-content {
   font-size: 14px;
   font-weight: 100;

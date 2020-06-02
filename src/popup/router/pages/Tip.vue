@@ -264,6 +264,7 @@ export default {
     min-width: auto !important;
     padding-bottom: 25px;
   }
+
   p {
     margin-top: 0;
 
@@ -278,6 +279,7 @@ export default {
   position: relative;
 
   &.url-bar--input {
+    /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
     ::v-deep .url-status {
       position: absolute;
       left: 10px;
@@ -287,6 +289,7 @@ export default {
       -webkit-transform: translateY(-50%);
     }
 
+    /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
     ::v-deep input {
       padding-left: 35px;
     }
@@ -307,7 +310,7 @@ export default {
 
 @media screen and (min-width: 380px) {
   .tour__step3.v-tour__target--highlighted {
-    margin: 10px auto 0px auto;
+    margin: 10px auto 0 auto;
     min-width: auto !important;
     padding-bottom: 25px;
   }

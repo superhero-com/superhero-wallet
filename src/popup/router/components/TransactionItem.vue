@@ -123,6 +123,7 @@ export default {
 
 <style lang="scss">
 @import '../../../common/variables';
+
 .list-item-transaction {
   display: block;
   padding: 10px 0;
