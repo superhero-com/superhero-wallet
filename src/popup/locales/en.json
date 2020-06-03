@@ -437,7 +437,7 @@
       "type": "Select type",
       "token": "Select token"
     },
-    "namingSystemPage": {
+    "names": {
       "active": "Active",
       "heading": "Naming System",
       "registerNameRequirement": "Allowed only letters and numbers",
@@ -454,6 +454,9 @@
       "yourNamesBtn": "Your names",
       "allActiveAuctionsBtn": "All active auctions",
       "AddNewBtn": "Add new",
+      "registered": "Your names",
+      "auctions": "All active auctions",
+      "claim": "Add new",
       "filterBySoonest": "Soonest",
       "filterByCharLength": "Name length",
       "filterByBid": "Bid",

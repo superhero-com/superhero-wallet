@@ -2,20 +2,19 @@
   <div class="popup">
     <div data-cy="names-container">
       <div class="tab-holder flex flex-justify-between">
-        <Button :class="tab == 'registered' ? 'danger' : ''" @click="tab = 'registered'" third>{{
-          $t('pages.namingSystemPage.yourNamesBtn')
-        }}</Button>
-        <Button :class="tab == 'auctions' ? 'danger' : ''" @click="tab = 'auctions'" third>{{
-          $t('pages.namingSystemPage.allActiveAuctionsBtn')
-        }}</Button>
-        <Button :class="tab == 'claim' ? 'danger' : ''" @click="tab = 'claim'" third>{{
-          $t('pages.namingSystemPage.AddNewBtn')
-        }}</Button>
+        <Button :class="{ active: tab === 'registered' }" @click="tab = 'registered'" third>
+          {{ $t('pages.names.registered') }}
+        </Button>
+        <Button :class="{ active: tab === 'auctions' }" @click="tab = 'auctions'" third>
+          {{ $t('pages.names.auctions') }}
+        </Button>
+        <Button :class="{ active: tab === 'claim' }" @click="tab = 'claim'" third>
+          {{ $t('pages.names.claim') }}
+        </Button>
       </div>
 
-      <!-- if is clicked Your Names  -->
-      <div class="seeAllRegisteredNames" v-if="tab == 'registered'">
-        <h4>{{ $t('pages.namingSystemPage.registeredNames') }}</h4>
+      <div v-if="tab == 'registered'">
+        <h4>{{ $t('pages.names.registeredNames') }}</h4>
         <hr />
         <ae-list v-if="registeredNames.length">
           <ae-list-item fill="neutral" v-for="(name, key) in registeredNames" :key="key">
@@ -34,7 +33,7 @@
                   v-model="name.pointerAddress"
                   :error="name.pointerError"
                   class="pointer-input"
-                  :placeholder="$t('pages.namingSystemPage.pointerPlaceholder')"
+                  :placeholder="$t('pages.names.pointerPlaceholder')"
                 />
                 <ae-icon name="close" @click.native="name.addPointer = false" />
               </div>
@@ -46,19 +45,19 @@
                   :disabled="!address(name)"
                   @click="extend(name)"
                   small
-                  >{{ $t('pages.namingSystemPage.extend') }}</Button
+                  >{{ $t('pages.names.extend') }}</Button
                 >
                 <Button
                   :small="!name.addPointer"
                   @click="setPointer(key)"
                   :class="name.addPointer ? 'danger' : ''"
-                  >{{ $t('pages.namingSystemPage.pointer') }}</Button
+                  >{{ $t('pages.names.pointer') }}</Button
                 >
                 <Button
                   :small="!name.addPointer"
                   @click="setActiveName(name, key)"
                   :disabled="activeAccountName == name.name"
-                  >{{ $t('pages.namingSystemPage.setActive') }}</Button
+                  >{{ $t('pages.names.active') }}</Button
                 >
               </div>
             </div>
@@ -72,38 +71,38 @@
             />
           </ae-list-item>
         </ae-list>
-        <p v-if="!names.length">{{ $t('pages.namingSystemPage.noNames') }}</p>
+        <p v-if="!all.length">{{ $t('pages.names.noNames') }}</p>
       </div>
 
       <!-- if is clicked All Active  -->
       <div class="seeAllActiveAuctions" v-if="tab == 'auctions'">
-        <h4 v-if="!moreAuInfo.visible">{{ $t('pages.namingSystemPage.activeAuctions') }}</h4>
-        <h4 v-if="moreAuInfo.visible">{{ $t('pages.namingSystemPage.auctionInfo') }}</h4>
+        <h4 v-if="!moreAuInfo.visible">{{ $t('pages.names.activeAuctions') }}</h4>
+        <h4 v-if="moreAuInfo.visible">{{ $t('pages.names.auctionInfo') }}</h4>
         <hr />
 
         <ae-filter-list v-if="!moreAuInfo.visible">
-          <p style="margin: 0;">{{ $t('pages.namingSystemPage.filtersBy') }}</p>
+          <p style="margin:0">{{ $t('pages.names.filtersBy') }}</p>
 
           <Button
             @click="filterType = 'soonest'"
             :class="filterType == 'soonest' ? 'danger' : ''"
             third
             small
-            >{{ $t('pages.namingSystemPage.filterBySoonest') }}</Button
+            >{{ $t('pages.names.filterBySoonest') }}</Button
           >
           <Button
             @click="filterType = 'length'"
             :class="filterType == 'length' ? 'danger' : ''"
             third
             small
-            >{{ $t('pages.namingSystemPage.filterByCharLength') }}</Button
+            >{{ $t('pages.names.filterByCharLength') }}</Button
           >
           <Button
             @click="filterType = 'bid'"
             :class="filterType == 'bid' ? 'danger' : ''"
             third
             small
-            >{{ $t('pages.namingSystemPage.filterByBid') }}</Button
+            >{{ $t('pages.names.filterByBid') }}</Button
           >
         </ae-filter-list>
 
@@ -126,20 +125,20 @@
           </ae-list-item>
         </ae-list>
 
-        <p v-if="activeAuctions == null">{{ $t('pages.namingSystemPage.noAuctions') }}</p>
+        <p v-if="activeAuctions == null">{{ $t('pages.names.noAuctions') }}</p>
 
         <div v-if="moreAuInfo.visible">
           <div class="actions">
             <button class="backbutton toAccount" @click="moreAuInfo.visible = false">
-              <ae-icon name="back" />{{ $t('pages.namingSystemPage.backButton') }}
+              <ae-icon name="back" />{{ $t('pages.names.backButton') }}
             </button>
           </div>
           <div>
             <span>{{ $t('pages.namingSystemPage.expiresInColon') }}</span>
             <b>{{ moreAuInfo.info.expiration }} </b>{{ $t('pages.namingSystemPage.blocks') }}<br />
             <hr />
-            <span>{{ $t('pages.namingSystemPage.currentBid') }}</span>
-            <ae-list-item style="border: none;" fill="neutral">
+            <span>{{ $t('pages.names.currentBid') }}</span>
+            <ae-list-item style="border:none" fill="neutral">
               <UserAvatar class="subAccountIcon" :address="moreAuInfo.info.winning_bidder" />
               <div class="auctionInfo">
                 <div class="name">
@@ -151,7 +150,7 @@
               </div>
             </ae-list-item>
             <hr />
-            <span>{{ $t('pages.namingSystemPage.previousBids') }}</span>
+            <span>{{ $t('pages.names.previousBids') }}</span>
             <div v-if="previousBids">
               <ae-list-item
                 v-for="(bid, idx) in previousBids"
@@ -170,11 +169,11 @@
               </ae-list-item>
             </div>
             <div v-if="!previousBids">
-              <p>{{ $t('pages.namingSystemPage.noPreviousBids') }}</p>
+              <p>{{ $t('pages.names.noPreviousBids') }}</p>
             </div>
             <hr />
             <Button class="danger" extend @click="bidOnThisHandler(moreAuInfo)">{{
-              $t('pages.namingSystemPage.goBiddingBtn')
+              $t('pages.names.goBiddingBtn')
             }}</Button>
           </div>
         </div>
@@ -183,12 +182,12 @@
       <!-- if is clicked Add New Name  -->
       <div class="addNewName" v-if="tab == 'claim'">
         <div class="maindiv_input-group-addon">
-          <h4>{{ $t('pages.namingSystemPage.registerName') }}</h4>
+          <h4>{{ $t('pages.names.registerName') }}</h4>
           <hr />
           <div class="flex flex-align-center flex-justify-content-center">
             <Input
               v-model="name"
-              :placeholder="$t('pages.namingSystemPage.namePlaceholder')"
+              :placeholder="$t('pages.names.namePlaceholder')"
               label=".chain"
               labelPosition="right"
             />
@@ -205,7 +204,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import axios from 'axios';
 import { convertToAE, getAddressByNameEntry, checkAddress, chekAensName } from '../../utils/helper';
 import Input from '../components/Input';
@@ -241,12 +240,12 @@ export default {
     ...mapGetters([
       'current',
       'popup',
-      'names',
       'sdk',
       'network',
       'middleware',
       'activeAccountName',
     ]),
+    ...mapState('names', ['all']),
     auctions() {
       if (this.filterType === 'soonest') return this.activeAuctions;
       if (this.filterType === 'length')
@@ -269,7 +268,7 @@ export default {
     },
   },
   watch: {
-    names(names) {
+    all(names) {
       this.registeredNames = names
         ? names.map((n, i) => ({
             ...n,
@@ -280,7 +279,7 @@ export default {
         : [];
     },
   },
-  created() {
+  async created() {
     this.loading = true;
     this.polling = setInterval(async () => {
       if (!this.middleware) {
@@ -293,13 +292,16 @@ export default {
       const middleWareBaseUrl = this.network[this.current.network].middlewareUrl;
       const fetched = (await axios(`${middleWareBaseUrl}/middleware/names/auctions/active`)).data;
       this.activeAuctions = fetched;
-      this.$store.dispatch('getRegisteredNames');
       this.loading = false;
     }, 3000);
   },
   methods: {
-    setActiveName({ name }) {
-      this.$store.dispatch('setAccountName', { aename: name });
+    async setActiveName({ name }) {
+      this.$store.dispatch('names/setDefault', {
+        address: this.account.publicKey,
+        networkId: this.sdk.getNetworkId(),
+        name,
+      });
     },
     address(name) {
       return getAddressByNameEntry(name);

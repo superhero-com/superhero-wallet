@@ -9,6 +9,7 @@ import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
 import accounts from './plugins/account';
 import tokens from './plugins/tokens';
+import namesModule from './plugins/names';
 import runMigrations from './migrations';
 import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
 
@@ -20,8 +21,6 @@ const initialState = {
   account: {},
   mnemonic: null,
   activeAccount: 0,
-  names: [],
-  wallet: [],
   balance: 0,
   current: {
     network: DEFAULT_NETWORK,
@@ -97,7 +96,7 @@ export default new Vuex.Store({
         subaccounts,
         currencies,
         userNetworks,
-        names,
+        names: { all, defaults },
         nextCurrenciesFetch,
         tip,
         notificationsCounter,
@@ -117,7 +116,7 @@ export default new Vuex.Store({
         subaccounts,
         currencies,
         userNetworks,
-        names,
+        names: { all, defaults },
         nextCurrenciesFetch,
         tip,
         notificationsCounter,
@@ -135,5 +134,6 @@ export default new Vuex.Store({
     tipUrl,
     accounts,
     tokens,
+    namesModule,
   ],
 });

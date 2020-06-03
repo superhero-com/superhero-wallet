@@ -50,6 +50,7 @@ export default {
     return state.activeAccount;
   },
   activeAccountName(state) {
+    //const defaultName = getters['names/getDefault'](account.publicKey);
     const account = state.subaccounts.find(s => s.publicKey === state.account.publicKey) || {};
     return account.aename || account.name || '';
   },
