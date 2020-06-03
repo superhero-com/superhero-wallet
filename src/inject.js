@@ -119,23 +119,22 @@ const runContentScript = () => {
     browser.runtime.sendMessage({ from: 'content', type: 'openTipPopup', url });
   };
 
+  const hasParentWithSelector = (target, selector) =>
+    [...document.querySelectorAll(selector)].some(el => el !== target && el.contains(target));
+
   const setWidgetClickListner = () => {
     document.addEventListener(
       'click',
       e => {
         let element;
-        if (
-          e.target.classList &&
-          e.target.classList.contains('link') &&
-          e.target.closest('.superhero-button')
-        )
+        if (hasParentWithSelector(e.target, '.superhero-button') && e.target.tagName === 'A')
           element = e.target;
         else if (
-          e.target.closest('.link') &&
-          e.target.closest('.link').classList.contains('link') &&
-          e.target.closest('.superhero-button')
+          e.target.closest('a') &&
+          hasParentWithSelector(e.target, '.superhero-button') &&
+          hasParentWithSelector(e.target.closest('a'), '.superhero-button')
         )
-          element = e.target.closest('.link');
+          element = e.target.closest('a');
 
         if (element) {
           const url = element.getAttribute('data-url');
