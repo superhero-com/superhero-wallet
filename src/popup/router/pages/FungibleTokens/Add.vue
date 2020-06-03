@@ -76,7 +76,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters('tokens', ['owned']),
     ...mapGetters(['sdk', 'account']),
     tokenBalance() {
       const { balance, decimals } = this.token;

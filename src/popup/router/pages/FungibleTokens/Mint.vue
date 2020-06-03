@@ -57,8 +57,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters('tokens', ['owned']),
-    ...mapGetters(['sdk', 'account', 'popup']),
+    ...mapGetters(['sdk']),
     invalid() {
       return !this.amount || (this.type === 'mint' && !checkAddress(this.address));
     },

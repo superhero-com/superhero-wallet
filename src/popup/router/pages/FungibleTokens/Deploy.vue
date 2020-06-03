@@ -59,7 +59,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['sdk', 'account', 'balance', 'wallet', 'tokens']),
+    ...mapGetters(['sdk']),
     selectedExtensions() {
       return this.extensions
         .filter(e => e.selected)

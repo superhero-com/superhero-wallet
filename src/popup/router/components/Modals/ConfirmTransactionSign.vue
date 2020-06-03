@@ -79,11 +79,6 @@ export default {
     transaction: { type: Object, required: true },
   },
   components: { Modal, Button, UserAvatar },
-  data() {
-    return {
-      newFee: this.transaction.fee,
-    };
-  },
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
     receiver() {
@@ -98,9 +93,6 @@ export default {
     txType() {
       return OBJECT_ID_TX_TYPE[this.transaction.tag];
     },
-    transactionType() {
-      return this.$t('transaction.type')[this.txType];
-    },
     totalSpend() {
       const amount = this.transaction.amount || 0;
       return (parseFloat(amount) + parseFloat(aettosToAe(this.transaction.fee))).toFixed(7);
@@ -111,7 +103,7 @@ export default {
       return parseFloat(aettosToAe(balance)).toFixed(7);
     },
     confirm() {
-      this.resolve(this.newFee);
+      this.resolve(this.transaction.fee);
     },
     cancel() {
       this.reject(new Error('reject'));
