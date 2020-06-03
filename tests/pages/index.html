@@ -9,7 +9,7 @@
     const currentUrl = new URL(window.location);
     document.write(`
       <table>
-        ${['result', 'address']
+        ${['result', 'address', 'signature']
           .map(paramName => `<tr>
             <td>${paramName}</td>
             <td>${currentUrl.searchParams.get(paramName)}</td>
@@ -23,7 +23,7 @@
     const successUrl = encodeURIComponent(`${currentUrl}?result=success`);
     const cancelUrl = encodeURIComponent(`${currentUrl}?result=cancel`);
     const callbackParams = `x-success=${successUrl}&x-cancel=${cancelUrl}`;
-    const comment = encodeURIComponent(`This is a test comment! http://example.com`);
+    const message = encodeURIComponent(`This is a test message! http://example.com`);
     const url = encodeURIComponent('http://example.com/article?id=123123');
 
     const prefixes = ['superhero:', 'https://wallet.superhero.com/', 'http://localhost:5000/'];
@@ -33,16 +33,20 @@
       'tip?url=example.com',
       `tip?url=${url}`,
       `tip?url=${url}&${callbackParams}`,
-      `tip?url=${url}&amount=1.1&message=${comment}&${callbackParams}`,
+      `tip?url=${url}&amount=1.1&message=${message}&${callbackParams}`,
       'retip',
       `retip?id=26`,
       `retip?id=25&${callbackParams}`,
       `retip?id=26&${callbackParams}`,
-      `comment?id=26&text=${comment}`,
-      `comment?id=26&text=${comment}&${callbackParams}`,
-      `comment?id=26&parentId=87&text=${comment}&${callbackParams}`,
+      `comment?id=26&text=${message}`,
+      `comment?id=26&text=${message}&${callbackParams}`,
+      `comment?id=26&parentId=87&text=${message}&${callbackParams}`,
       `address` +
         `?x-success=${encodeURIComponent(`${currentUrl}?result=success&address={address}`)}` +
+        `&x-cancel=${cancelUrl}`,
+      `sign-message` +
+        `?message=${message}` +
+        `&x-success=${encodeURIComponent(`${currentUrl}?result=success&signature={signature}`)}` +
         `&x-cancel=${cancelUrl}`,
     ];
 
