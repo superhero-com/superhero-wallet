@@ -26,26 +26,21 @@ export default {
     QrcodeVue,
     AccountInfo,
   },
-  data() {
-    return {
-      jellySwapUrl: 'https://app.jelly.market',
-      shopUniverse: 'https://shop.aeternityuniverse.com',
-    };
-  },
   computed: mapGetters(['account']),
   methods: {
     navigateAccount() {
       this.$router.push('/account');
     },
     exchange() {
-      openUrl(this.jellySwapUrl);
+      openUrl('https://app.jelly.market');
     },
     purchase() {
-      openUrl(this.shopUniverse);
+      openUrl('https://shop.aeternityuniverse.com');
     },
   },
 };
 </script>
+
 <style>
 .qrcode canvas {
   border: 5px solid #fff;

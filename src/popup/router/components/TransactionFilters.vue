@@ -19,7 +19,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import FilterArrow from '../../../icons/filter-arrow.svg?vue-component';
 
 export default {
@@ -34,55 +33,18 @@ export default {
       date_type: 'recent',
     };
   },
-  computed: mapGetters(['account', 'sdk', 'current', 'transactions']),
   methods: {
-    filtrateTx(type, deteType) {
-      switch (type) {
-        case 'date':
-          if (deteType === '') {
-            this.date_type = 'recent';
-          } else if (deteType === 'recent') {
-            this.date_type = 'oldest';
-          } else if (deteType === 'oldest') {
-            this.date_type = 'recent';
-          }
-
+    filtrateTx(type, dateType) {
+      this.date_type = '';
+      if (type === 'date')
+        if (dateType === 'recent') {
+          this.date_type = 'oldest';
+          this.direction = 'rotate';
+        } else {
+          this.date_type = 'recent';
           this.direction = '';
-          switch (this.date_type) {
-            case 'oldest':
-              this.direction = 'rotate';
-              break;
-            case 'recent':
-              this.direction = '';
-              break;
-            default:
-              break;
-          }
-          this.type = 'date';
-          break;
-        case 'sent':
-          this.type = 'sent';
-          this.date_type = '';
-          break;
-        case 'received':
-          this.type = 'received';
-          this.date_type = '';
-          break;
-        case 'topups':
-          this.type = 'topups';
-          this.date_type = '';
-          break;
-        case 'withdrawals':
-          this.type = 'withdrawals';
-          this.date_type = '';
-          break;
-        case 'all':
-          this.type = 'all';
-          this.date_type = '';
-          break;
-        default:
-          break;
-      }
+        }
+      this.type = type;
       this.$emit('filtrate', this.type, this.date_type);
     },
   },

@@ -26,7 +26,7 @@
       {{ $t('pages.tipPage.cancel') }}
     </Button>
 
-    <Loader size="big" :loading="loading" type="transparent" content="" />
+    <Loader v-if="loading" />
   </div>
 </template>
 
@@ -49,21 +49,8 @@ export default {
     minCallFee: null,
   }),
   computed: {
-    ...mapGetters([
-      'balance',
-      'tipping',
-      'current',
-      'sdk',
-      'account',
-      'network',
-      'currentCurrency',
-      'allowTipping',
-    ]),
+    ...mapGetters(['balance', 'tipping', 'sdk', 'account', 'allowTipping']),
     ...mapState(['tippingAddress', 'minTipAmount']),
-    maxValue() {
-      const calculatedMaxValue = this.balance - this.minCallFee;
-      return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
-    },
     urlStatus() {
       return this.$store.getters['tipUrl/status'](this.tip.url);
     },
@@ -98,7 +85,9 @@ export default {
       else this.$router.push('/account');
     },
     async sendTip() {
-      this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
+      const calculatedMaxValue =
+        this.balance > this.minCallFee ? this.balance - this.minCallFee : 0;
+      this.amountError = !this.amount || !this.minCallFee || calculatedMaxValue - this.amount <= 0;
       this.amountError = this.amountError || !+this.amount || this.amount < this.minTipAmount;
       if (this.amountError) return;
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);

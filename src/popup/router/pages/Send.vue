@@ -76,12 +76,15 @@
             <label>{{ $t('pages.send.amount') }}</label>
             <div class="text-center">
               <span data-cy="review-amount" class="amount"
-                >{{ toFixedAmount }} {{ $t('pages.appVUE.aeid') }}</span
+                >{{ parseFloat(form.amount).toFixed(3) }} {{ $t('pages.appVUE.aeid') }}</span
               >
               <span class="currencyamount">
                 <!--eslint-disable-line vue-i18n/no-raw-text-->
                 ~
-                <span>{{ amountConvert }} {{ current.currency.toUpperCase() }}</span>
+                <span>
+                  {{ (form.amount * current.currencyRate).toFixed(3) }}
+                  {{ current.currency.toUpperCase() }}
+                </span>
               </span>
             </div>
           </div>
@@ -136,7 +139,7 @@
         </div>
       </div>
     </div>
-    <Loader size="big" :loading="loading" type="transparent"></Loader>
+    <Loader v-if="loading" />
   </div>
 </template>
 
@@ -192,22 +195,6 @@ export default {
   },
   computed: {
     ...mapGetters(['account', 'balance', 'network', 'current', 'sdk']),
-    amountConvert() {
-      return (this.form.amount * this.current.currencyRate).toFixed(3);
-    },
-    toFixedAmount() {
-      return parseFloat(this.form.amount).toFixed(3);
-    },
-    maxValue() {
-      const calculatedMaxValue = this.balance - this.maxFee;
-      return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
-    },
-    maxFee() {
-      return this.fee.max;
-    },
-    activeToken() {
-      return this.current.token;
-    },
     validAddress() {
       return checkAddress(this.form.address) || chekAensName(this.form.address);
     },
@@ -254,6 +241,7 @@ export default {
     async send() {
       const amount = aeToAettos(this.form.amount);
       const receiver = this.form.address;
+      const calculatedMaxValue = this.balance > this.fee.max ? this.balance - this.fee.max : 0;
       if (receiver === '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'incorrect-address' });
         this.loading = false;
@@ -264,7 +252,7 @@ export default {
         this.loading = false;
         return;
       }
-      if (this.maxValue - this.form.amount <= 0 && this.current.token === 0) {
+      if (calculatedMaxValue - this.form.amount <= 0 && this.current.token === 0) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'insufficient-balance' });
         this.loading = false;
         return;

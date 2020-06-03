@@ -3,7 +3,7 @@
     <div class="title">
       <div class="account-name" data-cy="account-name">
         <UserAvatar :address="account.publicKey" :name="account.name" class="avatar" size="small" />
-        <template v-if="chainName">{{ activeAccountName }}</template>
+        <template v-if="activeAccountName.includes('.chain')">{{ activeAccountName }}</template>
         <router-link to="/names" v-else>{{ $t('pages.account.claim-name') }} </router-link>
       </div>
       <div class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</div>
@@ -24,12 +24,7 @@ export default {
   data: () => ({
     copied: false,
   }),
-  computed: {
-    ...mapGetters(['account', 'activeAccountName']),
-    chainName() {
-      return this.activeAccountName.includes('.chain');
-    },
-  },
+  computed: mapGetters(['account', 'activeAccountName']),
   methods: {
     copy() {
       this.copied = true;

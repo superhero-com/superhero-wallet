@@ -34,11 +34,8 @@ export default {
   components: { Modal },
   computed: {
     message() {
-      const { message = '' } = this.error;
+      const { message = '' } = this.entry.error;
       return message.substr(0, 150);
-    },
-    error() {
-      return this.entry.error;
     },
   },
   methods: {
