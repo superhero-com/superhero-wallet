@@ -28,7 +28,7 @@
         </span>
       </div>
     </div>
-    <div v-if="errorMsg" class="error-msg">{{ $t('pages.tipPage.minAmountError') }}</div>
+    <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
   </div>
 </template>
 

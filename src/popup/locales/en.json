@@ -438,39 +438,48 @@
       "token": "Select token"
     },
     "names": {
-      "active": "Active",
-      "heading": "Naming System",
-      "registerNameRequirement": "Allowed only letters and numbers",
-      "registerName": "Register new name",
-      "registeredNames": "Your registered names",
-      "seeAllRegisteredNames": "See all registered names",
-      "noNames": "No names found",
-      "activeAuctions": "All active auctions",
-      "auctionInfo": "Auction info",
-      "noAuctions": "No auctions found",
-      "expiresIn": "Expires in",
-      "expiresInColon": "Expires in: ",
-      "blocks": "blocks",
-      "yourNamesBtn": "Your names",
-      "allActiveAuctionsBtn": "All active auctions",
-      "AddNewBtn": "Add new",
-      "registered": "Your names",
-      "auctions": "All active auctions",
-      "claim": "Add new",
-      "filterBySoonest": "Soonest",
-      "filterByCharLength": "Name length",
-      "filterByBid": "Bid",
-      "filtersBy": "Filters by",
-      "currentBid": "Current bid: ",
-      "previousBids": "Previous bids: ",
-      "noPreviousBids": "No previous bids",
-      "goBiddingBtn": "Go for bidding",
-      "backButton": "Back",
-      "extend": "Extend",
-      "setActive": "Set Active",
-      "namePlaceholder": "Enter .chain name",
-      "pointer": "Set Name Pointer",
-      "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
+      "default": "Default",
+      "balance-error": "Your account balance is not enough to execute this transaction.",
+      "pointer-added": "Name {type} successfully!",
+      "list": {
+        "no-names": "No names found",
+        "button": "Your names"
+      },
+      "details": {
+        "name": "Name",
+        "name-id": "Name ID",
+        "owner": "Owner",
+        "created-height": "Created at height",
+        "expires-height": "Expires at height",
+        "pointer": "Pointer #{id}",
+        "set-default": "Set as default name",
+        "extend": "Extend",
+        "cancel": "Cancel",
+        "set-pointer": "Set name pointer",
+        "address-placeholder": "Enter ak_, ct_, ok_ or .chain name"
+      },
+      "claim": {
+        "name-placeholder": "Enter .chain name",
+        "button": "Claim"
+      },
+      "auctions": {
+        "button": "Auctions",
+        "soonest": "Soonest",
+        "length": "Name length",
+        "bid": "Bid",
+        "expires": "Expires",
+        "no-auctions": "No auctions",
+        "not-found": "Not found",
+        "current-bid": "Current bid",
+        "previous-bids": "Previous bids",
+        "bidding": "Go for biddong",
+        "bid-on": "Bid on",
+        "current-heighest-bid": "Current heighest bid",
+        "remaining-time": "Remaining Time",
+        "add-amount": "Enter amount",
+        "min-bid": "Bid must be more than {minBid} AE",
+        "bid-added": "Bid added successfully"
+      }
     },
     "generalSettings": {
       "backToSettings": "Back to settings",
@@ -943,5 +952,8 @@
   "options": {
     "text": "Superhero is Open-source! Visit "
   },
-  "redirecting": "Redirecting"
+  "redirecting": "Redirecting",
+  "minutes": "{n} minutes | {n} minute | {n} minutes",
+  "hours": "{n} hours | {n} hour | {n} hours",
+  "days": "{n} days | {n} day | {n} days"
 }

@@ -4,7 +4,7 @@
     :to="to"
     class="primary-button"
     @click="$emit('click')"
-    :class="{ disabled, extend, half, small, onboarding, dark, third, inline }"
+    :class="{ disabled, extend, half, small, onboarding, dark, third, inline, inactive }"
   >
     <slot />
   </Component>
@@ -21,6 +21,7 @@ export default {
     onboarding: Boolean,
     dark: Boolean,
     inline: Boolean,
+    inactive: Boolean,
     to: [String, Object],
   },
 };
@@ -130,6 +131,10 @@ export default {
     padding: 0 20px;
     width: auto !important;
     margin: 8px 10px;
+  }
+
+  &.inactive {
+    opacity: 0.4;
   }
 }
 </style>

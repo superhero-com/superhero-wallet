@@ -49,10 +49,8 @@ export default {
   activeAccount(state) {
     return state.activeAccount;
   },
-  activeAccountName(state) {
-    //const defaultName = getters['names/getDefault'](account.publicKey);
-    const account = state.subaccounts.find(s => s.publicKey === state.account.publicKey) || {};
-    return account.aename || account.name || '';
+  activeAccountName({ account }, getters) {
+    return getters['names/getDefault'](account.publicKey) || 'Main account';
   },
   allowTipping(state, { mainnet }) {
     return mainnet || process.env.RUNNING_IN_TESTS;

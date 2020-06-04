@@ -1,17 +1,14 @@
-import { uniqBy, flatten, uniq, orderBy } from 'lodash-es';
-import BigNumber from 'bignumber.js';
+import { flatten, uniq, orderBy } from 'lodash-es';
 import axios from 'axios';
 import * as types from './mutation-types';
 import {
   convertToAE,
   stringifyForStorage,
   parseFromStorage,
-  aettosToAe,
   getAddressByNameEntry,
 } from '../popup/utils/helper';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
 import { BACKEND_URL } from '../popup/utils/constants';
-import Backend from '../lib/backend';
 
 export default {
   setAccount({ commit }, payload) {
@@ -63,35 +60,6 @@ export default {
     txs = orderBy(flatten(txs), ['time'], ['desc']);
     return recent ? txs.slice(0, limit) : txs;
   },
-  async setAccountName(
-    { commit, state, dispatch },
-    { account = 0, aename = null, pending = false, modal = true },
-  ) {
-    commit(types.SET_ACCOUNT_AENS, { account, aename, pending });
-
-    if (aename) {
-      try {
-        const response = await Backend.sendProfileData({
-          author: state.account.publicKey,
-          preferredChainName: aename,
-        });
-        const signedChallenge = Buffer.from(
-          await state.sdk.signMessage(response.challenge),
-        ).toString('hex');
-        const respondChallenge = {
-          challenge: response.challenge,
-          signature: signedChallenge,
-        };
-        await Backend.sendProfileData(respondChallenge);
-      } catch (e) {
-        if (modal) {
-          if (e.type === 'backend')
-            dispatch('modals/open', { name: 'default', title: 'Backend error', msg: e.message });
-          else throw e;
-        }
-      }
-    }
-  },
   initSdk({ commit, state: { userNetworks, network, current } }, sdk) {
     commit(types.INIT_SDK, sdk);
     const networkId = sdk.getNetworkId();
@@ -103,16 +71,6 @@ export default {
       userNetworks.map(n => (n.name === name ? { ...n, networkId } : { ...n })),
     );
     commit('SET_NETWORKS', net);
-  },
-  async fetchAuctionEntry({ state: { sdk } }, name) {
-    const { info, bids } = await sdk.middleware.getAuctionInfoByName(name);
-    return {
-      ...info,
-      bids: bids.map(({ tx }) => ({
-        ...tx,
-        nameFee: BigNumber(aettosToAe(tx.nameFee)),
-      })),
-    };
   },
 
   unlockWallet(context, payload) {
