@@ -32,7 +32,7 @@
         {{ $t('pages.mint-token.mint') }}
       </Button>
     </div>
-    <Loader v-if="loading" size="big" type="transparent" />
+    <Loader v-if="loading" />
   </div>
 </template>
 
