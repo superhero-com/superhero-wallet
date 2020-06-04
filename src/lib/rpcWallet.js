@@ -70,7 +70,7 @@ const rpcWallet = {
   async initNodes() {
     const nodes = await getActiveNetwork();
     this.nodes = nodes.all;
-    return Promise.resolve(true);
+    return nodes;
   },
   async createWallet() {
     this.accountKeyPairs = await Promise.all(
@@ -329,14 +329,14 @@ const rpcWallet = {
     this.addNewNetwork(payload);
   },
   async addNewNetwork(network) {
-    this.initNodes();
+    await this.initNodes();
     this.initNetwork(network);
     const node = await Node({ url: this.internalUrl, internalUrl: this.internalUrl });
     if (this.sdk) {
       try {
         await this.sdk.addNode(network, node, true);
       } catch (e) {
-        console.error(`addNewNetwork: ${e}`);
+        console.warn(`addNewNetwork: ${e}`);
       }
       this.sdk.selectNode(network);
     }

@@ -43,7 +43,7 @@ export const switchNode = async () => {
     try {
       await sdk.addNode(network.name, node, true);
     } catch (e) {
-      console.error(`switchNode: ${e}`);
+      console.warn(`switchNode: ${e}`);
     }
     sdk.selectNode(network.name);
   }
