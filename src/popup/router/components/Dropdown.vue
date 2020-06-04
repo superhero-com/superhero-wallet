@@ -69,9 +69,11 @@ export default {
       position: absolute;
       right: 0.85rem;
     }
+
     &:hover {
       cursor: pointer;
     }
+
     & > div {
       display: inline-block;
     }
