@@ -30,7 +30,7 @@
     <Button @click="deploy" :disabled="!validData || requireBurnable" extend>
       {{ $t('pages.deploy-token.deploy') }}
     </Button>
-    <Loader v-if="loading" size="big" type="transparent" />
+    <Loader v-if="loading" />
   </div>
 </template>
 
