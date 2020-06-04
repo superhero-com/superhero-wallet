@@ -156,7 +156,7 @@ export default {
         background: $secondary-color !important;
         color: $white-color !important;
         -webkit-box-shadow: 0 0 0 2px $secondary-color;
-        box-shadow: 0px 0px 0px 2px $secondary-color;
+        box-shadow: 0 0 0 2px $secondary-color;
         border: 2px solid $bg-color;
       }
     }
@@ -214,11 +214,13 @@ export default {
       vertical-align: middle;
       border: 1px solid $white-color;
       line-height: 20px;
+
       .ae-icon {
         font-size: 1.2rem !important;
         float: none !important;
       }
-      &:after {
+
+      &::after {
         content: '';
       }
     }

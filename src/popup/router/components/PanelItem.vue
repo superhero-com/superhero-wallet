@@ -37,6 +37,7 @@ export default {
   &:hover {
     border-left: 2px solid #2a9cff;
     background: rgba(99, 99, 99, 0.5);
+
     .arrow-right {
       right: 20px;
     }
