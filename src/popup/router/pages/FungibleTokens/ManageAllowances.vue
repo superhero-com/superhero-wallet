@@ -23,7 +23,7 @@
     <Button @click="allowanceAction" extend>
       {{ $t('pages.manage-allowances')[type] }}
     </Button>
-    <Loader size="big" :loading="loading" type="transparent" />
+    <Loader v-if="loading" size="big" type="transparent" />
   </div>
 </template>
 
