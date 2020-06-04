@@ -170,7 +170,8 @@
       "comment-new": "Add comment",
       "home": "Superhero Home",
       "donate-error": "Donate Data",
-      "address": "Send Address"
+      "address": "Send Address",
+      "sign-message": "Sign Message"
     },
     "appVUE": {
       "systemName": "Superhero",

@@ -29,6 +29,7 @@ import NotFound from './pages/NotFound';
 import ClaimTips from './pages/ClaimTips';
 import DonateError from './pages/DonateError';
 import Address from './pages/Address';
+import SignMessage from './pages/SignMessage';
 
 export default [
   {
@@ -285,6 +286,15 @@ export default [
     component: Address,
     meta: {
       title: 'address',
+      notPersist: true,
+    },
+  },
+  {
+    name: 'sign-message',
+    path: '/sign-message',
+    component: SignMessage,
+    meta: {
+      title: 'sign-message',
       notPersist: true,
     },
   },
