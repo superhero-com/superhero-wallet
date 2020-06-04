@@ -47,7 +47,7 @@
         </Button>
       </div>
     </div>
-    <Loader v-if="loading" size="big" type="transparent" />
+    <Loader v-if="loading" />
   </div>
 </template>
 
