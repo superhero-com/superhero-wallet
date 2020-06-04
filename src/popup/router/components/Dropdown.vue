@@ -72,7 +72,6 @@ export default {
     &:hover {
       cursor: pointer;
     }
-  
     & > div {
       display: inline-block;
     }
