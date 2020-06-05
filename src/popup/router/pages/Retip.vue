@@ -96,6 +96,7 @@ export default {
         const { hash } = await this.tipping.methods.retip(this.tip.id, {
           amount,
           waitMined: false,
+          modal: false,
         });
         if (hash) {
           await this.$store.dispatch('setPendingTx', {

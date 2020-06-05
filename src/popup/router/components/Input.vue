@@ -1,16 +1,17 @@
 <template>
   <div class="input-wrapper text-left" :class="{ 'input-group': labelPosition }">
-    <label class="label" v-if="label" :class="{ [`label-${labelPosition}`]: labelPosition }">{{
-      label
-    }}</label>
+    <label class="label" v-if="label" :class="{ [`label-${labelPosition}`]: labelPosition }">
+      {{ label }}
+    </label>
     <input
-      type="text"
+      :type="type"
       class="input"
       :placeholder="placeholder"
       :class="{ 'has-error': error || err, [size]: size, 'input-label': labelPosition }"
       :value="value"
       @input="$emit('input', $event.target.value)"
       :data-cy="type ? `input-${type}` : 'input'"
+      :disabled="disabled"
     />
   </div>
 </template>
@@ -22,9 +23,13 @@ export default {
     error: Boolean,
     placeholder: String,
     size: String,
-    type: String,
+    type: {
+      type: String,
+      default: 'text',
+    },
     label: String,
     labelPosition: String,
+    disabled: Boolean,
   },
   data: () => ({ err: false }),
   watch: {
@@ -51,36 +56,45 @@ input.input {
   min-height: 35px;
   margin-left: auto;
   margin-right: auto;
-}
 
-.input:focus {
-  border-color: $input-focus-color !important;
-}
+  &:focus {
+    border-color: $input-focus-color !important;
+  }
 
-.input.has-error {
-  border-color: $input-error-color !important;
-}
+  &.has-error {
+    border-color: $input-error-color !important;
+  }
 
-.input.sm {
-  font-size: 14px;
-}
+  &.sm {
+    font-size: 14px;
+  }
 
-.input.xsm {
-  font-size: 11px;
-}
+  &.xsm {
+    font-size: 11px;
+  }
 
-.input.big {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 0;
-  height: auto;
-  width: 180px;
-  margin-right: 15px;
-  padding: 3px 10px;
-}
+  &.big {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0;
+    height: auto;
+    width: 180px;
+    margin-right: 15px;
+    padding: 3px 10px;
+  }
 
-.input.m-0 {
-  margin: 0 !important;
+  &.m-0 {
+    margin: 0 !important;
+  }
+
+  &[type='number'] {
+    -moz-appearance: textfield;
+  }
+
+  &[type='number']::-webkit-outer-spin-button,
+  &[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
 }
 
 .label {

@@ -29,11 +29,6 @@
         {{ $t('pages.appVUE.activity') }}
       </router-link>
     </li>
-    <!-- <li>
-      <router-link to="/account">
-        {{ $t('pages.appVUE.profile') }}
-      </router-link>
-    </li> -->
     <li>
       <button
         :class="showSettingsDropdown && 'opened'"
@@ -45,11 +40,6 @@
       </button>
       <transition name="slide">
         <ul v-if="showSettingsDropdown" data-cy="dropdown">
-          <!-- <li>
-            <router-link>
-              {{ $t('pages.appVUE.general') }}
-            </router-link>
-          </li> -->
           <li>
             <router-link to="/securitySettings" data-cy="securitySettings">
               {{ $t('pages.appVUE.security') }}
@@ -73,11 +63,6 @@
         </ul>
       </transition>
     </li>
-    <!-- <li>
-      <router-link>
-        {{ $t('pages.appVUE.advanced') }}
-      </router-link>
-    </li> -->
     <li>
       <router-link to="/names" data-cy="names">
         {{ $t('pages.appVUE.names') }}
@@ -88,12 +73,6 @@
         {{ $t('pages.appVUE.help') }}
       </router-link>
     </li>
-
-    <!-- <li>
-      <router-link>
-        {{ $t('pages.appVUE.versions') }}
-      </router-link>
-    </li> -->
   </ul>
 </template>
 
@@ -107,8 +86,23 @@ import removeAccountMixin from '../../../mixins/removeAccount';
 export default {
   mixins: [removeAccountMixin],
   components: { Close, Arrow, UserAvatar },
-  computed: mapGetters(['account', 'activeAccountName']),
-  data: () => ({ showSettingsDropdown: false }),
+  computed: {
+    ...mapGetters('tokens', ['owned']),
+    ...mapGetters(['account', 'activeAccountName']),
+  },
+  data: () => ({ showSettingsDropdown: false, showTokensDropdown: false, balances: null }),
+  watch: {
+    showTokensDropdown(val) {
+      if (val) {
+        this.balances = setInterval(() => this.$store.dispatch('tokens/balances'), 10000);
+      } else {
+        clearInterval(this.balances);
+      }
+    },
+  },
+  created() {
+    this.$once('hook:beforeDestroy', () => clearInterval(this.balances));
+  },
   methods: {
     menuClickHandler({ target }) {
       if (target.tagName === 'A') this.closeMenu();
@@ -139,12 +133,13 @@ export default {
     margin: 0;
     border-bottom: 1px solid $bg-color;
 
-    a,
-    button,
-    span {
+    & > a,
+    & > button,
+    & > span {
       text-decoration: none;
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-size: 15px;
       line-height: 18px;
       width: 100%;
@@ -189,11 +184,16 @@ export default {
         max-height: 0;
       }
 
-      a,
-      button,
-      span {
+      li > a,
+      li > button,
+      li > span {
         padding: 6px 1rem 6px 25px;
       }
+    }
+
+    .token-info {
+      margin-right: auto;
+      margin-left: 5px;
     }
   }
 

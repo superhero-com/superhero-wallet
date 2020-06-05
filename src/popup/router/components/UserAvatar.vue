@@ -1,5 +1,11 @@
 <template>
-  <img v-if="!error" :src="profileImage" class="user-avatar" :class="size" @error="error = true" />
+  <img
+    v-if="!error && !identicon"
+    :src="profileImage"
+    class="user-avatar"
+    :class="size"
+    @error="error = true"
+  />
   <img v-else-if="avatar.type === 'avatar'" :src="avatar.src" class="user-avatar" :class="size" />
   <div
     v-else-if="avatar.type === 'identicon'"
@@ -28,6 +34,7 @@ export default {
       type: String,
       default: 'normal',
     },
+    identicon: Boolean,
   },
   data: () => ({
     error: false,
@@ -55,6 +62,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$x-small-size: 20px;
 $small-size: 30px;
 $normal-size: 38px;
 $lg-size: 64px;
@@ -75,6 +83,11 @@ $lg-size: 64px;
   &.small {
     height: $small-size;
     width: $small-size;
+  }
+
+  &.x-small {
+    height: $x-small-size;
+    width: $x-small-size;
   }
 }
 </style>

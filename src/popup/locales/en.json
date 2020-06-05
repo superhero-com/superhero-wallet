@@ -110,6 +110,41 @@
       "title": "Warning",
       "msg": "Tip/Claim functionality works only on Mainnet"
     },
+    "confirm-transaction-sign": {
+      "unknown": "Unknown",
+      "contract-create": "Contract create",
+      "aens": "AENS"
+    },
+    "add-token": {
+      "title": "Token added",
+      "msg": "Token added successfully"
+    },
+    "deploy-token": {
+      "title": "Token deployed",
+      "msg": "Token deployed successfully at address: {address}"
+    },
+    "mint/burn-token": {
+      "title": "Token {type} ",
+      "msg": "Token {type} successfully"
+    },
+    "allowances": {
+      "create": {
+        "title": "Allowance created",
+        "msg": "Allowance created successfully"
+      },
+      "transfer": {
+        "title": "Allowance tranfered",
+        "msg": "Allowance tranfered successfully"
+      },
+      "change": {
+        "title": "Allowance changed",
+        "msg": "Allowance changed successfully"
+      },
+      "balance": {
+        "title": "something went wrong",
+        "msg": "Insufficient balance"
+      }
+    },
     "cancel": "Cancel",
     "confirm": "Confirm"
   },
@@ -175,6 +210,11 @@
       "home": "Superhero Home",
       "donate-error": "Donate Data",
       "address": "Send Address",
+      "fungible-tokens": "Fungible tokens",
+      "deploy-token": "Deploy token",
+      "add-token": "Add token",
+      "mint-burn-token": "Mint/Burn token",
+      "allowances": "Allowances",
       "sign-message": "Sign Message"
     },
     "appVUE": {
@@ -209,7 +249,9 @@
       "names": "Names",
       "networks": "Networks",
       "removeAccount": "Remove account",
-      "donateErrorReports": "Submit error reports"
+      "donateErrorReports": "Submit error reports",
+      "tokens": "Fungible tokens",
+      "manageTokens": "Manage tokens"
     },
     "aboutSettings": {
       "heading": "About",
@@ -273,22 +315,15 @@
       "viewAll": "View all",
       "noTransactionsFound": "No transactions found!"
     },
-    "addFungibleToken": {
+    "add-fungible-token": {
       "heading": "Fungible Tokens",
-      "backToFungibleTokens": "Back to Fungible Tokens",
-      "addToken": "Add token",
-      "tokenContractLabel": "Token Contract Address",
-      "tokenSymbolLabel": "Token Symbol",
-      "tokenPrecision": "Decimals of Precision",
+      "add": "Add token",
+      "contract-label": "Token Contract Address",
+      "symbol-label": "Token Symbol",
+      "decimals-label": "Decimals of Precision",
       "next": "Next",
-      "validContractAddressError": "Valid token contract address",
-      "symbolBetween1and12": "Symbol between 1 and 12 characters",
-      "numberBetween0and36": "Number between 0 and 36",
       "token": "Token",
-      "balance": "Balance",
-      "search": "Search",
-      "customToken": "Custom Token",
-      "tokenSearchLabel": "Search Token"
+      "balance": "Balance"
     },
     "advancedSettings": {
       "heading": "Advanced",
@@ -317,26 +352,25 @@
     "allowances": {
       "heading": "Allowances",
       "backToUtilities": "Back to utilities",
-      "createAllowance": "Create allowance",
-      "createAllowanceInfo": "This allows you to create allowance with your new fungible tokens for anyone you want",
-      "createButton": "Create",
-      "transferAllowance": "Transfer allowance",
-      "transferAllowanceInfo": "This allows you to take your whole allowance or part of it from someone",
-      "transferButton": "Transfer",
-      "allAllowances": "All allowances",
-      "allAllowancesInfo": "See all your allowances and take them",
-      "seeAllButton": "See all",
-      "backToAllowances": "Back to Allowances",
-      "chooseToken": "Choose a token",
-      "allowanceExistMsg": "This Allowance already exist. If you want to change it click",
-      "allowanceExistHere": "here",
-      "allowanceFrom": "From",
-      "getAllowance": "Get it",
-      "tokenChoiceRequired": "Please choose a token to see all your allowances!",
-      "noAllowancesFound": "No allowances found!",
-      "changeAllowance": "Change Allowance",
-      "allowedAllowanceAmount": "Current allowed allowance amount is",
-      "changeButton": "Change"
+      "create-allowance": "Create allowance",
+      "create-allowance-info": "This allows you to create allowance with your new fungible tokens for anyone you want",
+      "transfer-allowance": "Transfer allowance",
+      "transfer-allowance-info": "This allows you to take your whole allowance or part of it from someone",
+      "all-allowances": "All allowances",
+      "all-allowances-info": "See all your allowances and take them",
+      "from": "From",
+      "get-allowance": "Get allowance",
+      "no-allowances-found": "No allowances found",
+      "select-token": "Select token"
+    },
+    "manage-allowances": {
+      "allowance-exist": "Allowance exist",
+      "here": "here",
+      "create": "Create allowance",
+      "transfer": "Transfer allowance",
+      "change": "Change allowance",
+      "address": "Address",
+      "amount": "Amount"
     },
     "auctionBid": {
       "backToAuctions": "Back to auctions",
@@ -360,16 +394,6 @@
       "addressesLabel": "Addresses",
       "addressesRequest": "This aepp is requesting access to view your account addresses"
     },
-    "createFungibleToken": {
-      "backToFungibleTokens": "Back to Fungible Tokens",
-      "heading": "Create Fungible Token",
-      "tokenName": "Token Name",
-      "tokenSymbolLabel": "Token Symbol",
-      "initialSupply": "Initial Supply",
-      "tokenPrecision": "Decimals of Precision",
-      "deployTokenContract": "Deploy Token Contract",
-      "registryFee": "Include token in global TokenRegistry (tx fees apply)"
-    },
     "fungibleTokens": {
       "backToAccount": "Back to account",
       "addHeading": "Fungible Tokens",
@@ -385,24 +409,33 @@
       "token": "Token",
       "balance": "Balance"
     },
-    "fungibleTokensPage": {
-      "backToUtilities": "Back to utilities",
-      "heading": "Fungible Tokens",
-      "addFungToken": "Add Fungible Token",
-      "tokenInfo": "This allows you to add token from given deployed fungible token contract",
-      "addTokenButton": "Add Token",
-      "deployInfo": "This allows you to deploy your own fungible token contract",
-      "deployButton": "Deploy Token Contract",
-      "deployFungToken": "Deploy Token"
-    },
-    "mintTokenPage": {
+    "fungible-tokens": {
+      "add": "Add Fungible Token",
+      "add-info": "This allows you to add token from given deployed fungible token contract",
+      "deploy": "Deploy Token",
+      "deploy-info": "This allows you to deploy your own fungible token contract",
+      "allowances": "Allowances",
+      "allowances-info": "Give or take an allowance",
       "mint": "Mint/Burn token",
-      "mintInfo": "This allows you to mint or burn token amount",
-      "mintBtn": "Mint/Burn",
+      "mint-info": "This allows you to mint or burn token amount"
+    },
+    "deploy-token": {
+      "name": "Token name",
+      "symbol": "Token symbol",
+      "initial-supply": "Token initial supply",
+      "decimals": "Token decimals",
+      "registry-fee": "Include token in global TokenRegistry (tx fees apply)",
+      "extensions": "Token extensions",
+      "deploy": "Deploy",
+      "require-burnable": "Attention! Swappable requires burnable!",
+      "advanced": "Advanced"
+    },
+    "mint-token": {
+      "mint": "Mint/Burn token",
       "amount": "Amount",
       "address": "Address",
-      "enterAmount": "Invalid amount",
-      "enterAddress": "Enter address"
+      "type": "Select type",
+      "token": "Select token"
     },
     "namingSystemPage": {
       "active": "Active",
@@ -870,6 +903,8 @@
       "networkUrlLabel": "Network Url",
       "networkMiddlewarePlaceholder": "Enter network middleware url",
       "networkMiddlewareLabel": "Network middleware",
+      "networkCompilerPlaceholder": "Enter network compiler url",
+      "networkCompilerLabel": "Network compiler",
       "save": "Connect"
     },
     "donate-error": {

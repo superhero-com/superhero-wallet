@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="resolve">
+  <Modal @close="resolve" close>
     <template v-if="title" slot="header">{{ title }}</template>
     <template v-if="msg" slot="body"> {{ msg }} </template>
     <div class="modal-confirm-btns" slot="footer">

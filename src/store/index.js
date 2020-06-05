@@ -7,6 +7,8 @@ import actions from './actions';
 import persistState from './plugins/persistState';
 import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
+import accounts from './plugins/account';
+import tokens from './plugins/tokens';
 import runMigrations from './migrations';
 import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
 
@@ -109,6 +111,7 @@ export default new Vuex.Store({
         minTipAmount,
         saveErrorLog,
         tourStartBar,
+        tokens: { all },
       }) => ({
         migrations,
         current,
@@ -128,9 +131,12 @@ export default new Vuex.Store({
         minTipAmount,
         saveErrorLog,
         tourStartBar,
+        tokens: { all },
       }),
     ),
     modals,
     tipUrl,
+    accounts,
+    tokens,
   ],
 });

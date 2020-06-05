@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="resolve" class="default-modal">
+  <Modal @close="resolve" class="default-modal" close>
     <div v-if="title" slot="header">{{ title || $t(`modals.${type}.title`) }}</div>
     <div slot="body">{{ msg || $t(`modals.${type}.msg`) }}</div>
     <div slot="footer">

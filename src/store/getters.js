@@ -26,6 +26,9 @@ export default {
   network(state) {
     return state.network;
   },
+  activeNetwork({ current, network }) {
+    return network[current.network] || {};
+  },
   networks({ network }) {
     const networks = { ...network };
     networks[DEFAULT_NETWORK].system = true;

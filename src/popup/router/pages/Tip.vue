@@ -212,6 +212,7 @@ export default {
         const { hash } = await this.tipping.call('tip', [this.url, escapeSpecialChars(this.note)], {
           amount,
           waitMined: false,
+          modal: false,
         });
         if (hash) {
           await this.$store.dispatch('setPendingTx', {

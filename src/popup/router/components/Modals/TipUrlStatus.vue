@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="resolve">
+  <Modal @close="resolve" close>
     <template slot="header">
       <UrlStatus :status="status" modal />
       {{ content.title }}

@@ -1,4 +1,3 @@
-import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import { isEmpty } from 'lodash-es';
@@ -49,7 +48,33 @@ export default {
     });
     const account = MemoryAccount({ keypair });
     try {
-      const sdk = await Universal({
+      const [Ae, ChainNode, Transaction, Contract, Aens, Oracle, GeneralizeAccount] = (
+        await Promise.all([
+          import('@aeternity/aepp-sdk/es/ae'),
+          import('@aeternity/aepp-sdk/es/chain/node'),
+          import('@aeternity/aepp-sdk/es/tx/tx'),
+          import('@aeternity/aepp-sdk/es/ae/contract'),
+          import('@aeternity/aepp-sdk/es/ae/aens'),
+          import('@aeternity/aepp-sdk/es/ae/oracle'),
+          import('@aeternity/aepp-sdk/es/contract/ga'),
+        ])
+      ).map(module => module.default);
+      const sdk = await Ae.compose(
+        ChainNode,
+        Transaction,
+        Contract,
+        Aens,
+        Oracle,
+        GeneralizeAccount,
+        {
+          methods: {
+            address: async () => store.getters.account.publicKey,
+            sign: data => store.dispatch('accounts/sign', data),
+            signTransaction: (txBase64, opt) =>
+              store.dispatch('accounts/signTransaction', { txBase64, opt }),
+          },
+        },
+      )({
         nodes: [{ name: current.network, instance: node }],
         accounts: [account],
         nativeMode: true,
