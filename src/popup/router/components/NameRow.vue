@@ -22,6 +22,7 @@ export default {
 
 <style lang="scss">
 @import '../../../common/variables';
+
 .name-row {
   text-decoration: none;
   transition: 0.4s;
@@ -34,7 +35,6 @@ export default {
   border-bottom: 1px solid #12121b;
   text-align: left;
   border-left: 2px solid transparent;
-  align-items: center;
   color: $text-color;
   background: #21222a !important;
 
