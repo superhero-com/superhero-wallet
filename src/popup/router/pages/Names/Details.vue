@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import { chekAensName, checkAddress, getAddressByNameEntry } from '../../../utils/helper';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
