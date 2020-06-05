@@ -28,6 +28,7 @@
             data-cy="amount-box"
             @changeAmount="val => (form.amount = val)"
             :value="form.amount"
+            :amountError="form.amount <= 0"
           />
           <div class="flex flex-align-center flex-justify-between">
             <Button data-cy="reject-withdraw" half @click="navigateAccount">{{
@@ -37,7 +38,7 @@
               data-cy="review-withdraw"
               half
               @click="step = 2"
-              :disabled="!form.address || !+form.amount"
+              :disabled="!form.address || !+form.amount || form.amount <= 0"
               >{{ $t('pages.send.review') }}</Button
             >
           </div>

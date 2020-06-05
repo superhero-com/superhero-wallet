@@ -16,12 +16,10 @@ describe('Test cases AmountSend component', () => {
   });
 
   it('Validate entered amount', () => {
-    cy.enterAmountSend('asd')
-      .inputShouldHaveError('[data-cy=input-number]')
-      .get('[data-cy=amount-currency]')
-      .invoke('text')
-      .then(text => expect(text.trim()).to.eq('0.00 USD'))
-      .enterAmountSend(0)
+    cy.enterAmountSend(0)
+      .get('[data-cy=input-number]')
+      .should('have.class', 'has-error')
+      .enterAmountSend(-1)
       .get('[data-cy=input-number]')
       .should('have.class', 'has-error')
       .enterAmountSend(0.1)
