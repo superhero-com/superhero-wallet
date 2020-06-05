@@ -1,9 +1,9 @@
 <template>
   <div class="popup">
     <NameListHeader />
-    <ul v-if="all.length" class="names-list">
+    <ul v-if="owned.length" class="names-list">
       <NameRow
-        v-for="({ name, owner, pending }, key) in all"
+        v-for="({ name, owner, pending }, key) in owned"
         :key="key"
         :to="{ name: 'name-details', params: { name } }"
         :name="name"
@@ -34,7 +34,7 @@ export default {
   components: { NameListHeader, Badge, NameRow },
   computed: {
     ...mapGetters(['activeAccountName']),
-    ...mapState('names', ['all']),
+    ...mapState('names', ['owned']),
   },
   created() {
     this.$store.dispatch('names/fetchOwned');

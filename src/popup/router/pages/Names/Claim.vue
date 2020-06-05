@@ -47,7 +47,6 @@ export default {
           claimTxHash = (await this.sdk.aensClaim(name, salt, { waitMined: false })).hash;
           this.$router.push({ name: 'name-list' });
         } catch (e) {
-          if (e.message === 'Rejected by user') return;
           let msg = e.message;
           if (msg.includes('is not enough to execute')) {
             msg = this.$t('pages.names.balance-error');

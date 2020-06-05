@@ -6,6 +6,7 @@ import ConfirmTip from './components/Modals/ConfirmTip';
 import Confirm from './components/Modals/Confirm';
 import ErrorLog from './components/Modals/ErrorLog';
 import ConfirmTransactionSign from './components/Modals/ConfirmTransactionSign';
+import ConfirmRawSign from './components/Modals/ConfirmRawSign';
 
 export default async () => {
   registerModal({ name: 'default', component: Default });
@@ -15,4 +16,5 @@ export default async () => {
   registerModal({ name: 'confirm', component: Confirm });
   registerModal({ name: 'error-log', component: ErrorLog });
   registerModal({ name: 'confirm-transaction-sign', component: ConfirmTransactionSign });
+  registerModal({ name: 'confirm-raw-sign', component: ConfirmRawSign });
 };

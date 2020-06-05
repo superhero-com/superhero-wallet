@@ -113,7 +113,20 @@
     "confirm-transaction-sign": {
       "unknown": "Unknown",
       "contract-create": "Contract create",
-      "aens": "AENS"
+      "aens": "AENS",
+      "payload": "Payload",
+      "recipientId": "Recipiend Id",
+      "code": "Code",
+      "callData": "Call data",
+      "contractId": "Contract Id",
+      "commitmentId": "Commitment Id",
+      "name": "Name",
+      "nameFee": "Name fee",
+      "nameSalt": "Name salt",
+      "nameId": "Name Id",
+      "pointers": "Pointers",
+      "sign-raw": "Sign raw transaction by",
+      "data-sign": "Data to sign"
     },
     "add-token": {
       "title": "Token added",

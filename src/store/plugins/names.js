@@ -9,20 +9,21 @@ export default store =>
   store.registerModule('names', {
     namespaced: true,
     state: {
-      all: [],
+      owned: [],
       defaults: {},
     },
     getters: {
       getDefault: ({ defaults }, getters, { sdk }, { activeNetwork }) => address => {
+        if (!defaults) return '';
         let { networkId } = activeNetwork;
         if (sdk) networkId = sdk.getNetworkId();
         return defaults[`${address}-${networkId}`];
       },
-      getName: ({ all }) => name => all.find(n => n.name === name),
+      getName: ({ owned }) => name => owned.find(n => n.name === name),
     },
     mutations: {
       set(state, names) {
-        state.all = names;
+        state.owned = names;
       },
       setDefault({ defaults }, { address, networkId, name }) {
         Vue.set(defaults, `${address}-${networkId}`, name);
@@ -84,16 +85,20 @@ export default store =>
       },
       async updatePointer({ rootState: { sdk }, dispatch }, { name, address, type = 'update' }) {
         const nameEntry = await sdk.aensQuery(name);
-        if (type === 'extend') {
-          nameEntry.extendTtl();
-        } else if (type === 'update') {
-          nameEntry.update([address], { extendPointers: true });
+        try {
+          if (type === 'extend') {
+            await nameEntry.extendTtl();
+          } else if (type === 'update') {
+            await nameEntry.update([address], { extendPointers: true });
+          }
+          dispatch(
+            'modals/open',
+            { name: 'default', msg: i18n.t('pages.names.pointer-added', { type }) },
+            { root: true },
+          );
+        } catch (e) {
+          dispatch('modals/open', { name: 'default', msg: e.message }, { root: true });
         }
-        dispatch(
-          'modals/open',
-          { name: 'default', msg: i18n.t('pages.names.pointer-added', { type }) },
-          { root: true },
-        );
       },
       async setDefault({ rootState: { sdk }, commit, dispatch }, { name, address, modal = true }) {
         commit('setDefault', { name, address, networkId: sdk.getNetworkId() });
@@ -102,6 +107,9 @@ export default store =>
             author: address,
             preferredChainName: name,
           });
+          console.log(response.challenge);
+          console.log(await sdk.signMessage('test'));
+          console.log('here');
           const signedChallenge = Buffer.from(await sdk.signMessage(response.challenge)).toString(
             'hex',
           );

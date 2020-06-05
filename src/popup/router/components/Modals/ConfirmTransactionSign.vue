@@ -23,43 +23,46 @@
       </div>
       <div v-else class="to">
         <ae-icon name="square" />
-        <span class="account-address">{{
-          txType === 'contractCreateTx'
-            ? $t('modals.confirm-transaction-sign.contract-create')
-            : $t('modals.confirm-transaction-sign.aens')
-        }}</span>
+        <span class="account-address">
+          {{
+            txType === 'contractCreateTx'
+              ? $t('modals.confirm-transaction-sign.contract-create')
+              : $t('modals.confirm-transaction-sign.aens')
+          }}
+        </span>
       </div>
     </div>
     <template slot="body">
       <li>
         <ae-badge>{{ txType }}</ae-badge>
       </li>
-      <li class="flex flex-justify-between">
-        <div class="tx-label">{{ $t('pages.signTransaction.fee') }}</div>
-        <div class="text-right">
-          <div class="balance balanceBig txFee no-sign">
-            {{ toAe(transaction.fee) }} {{ $t('pages.appVUE.aeid') }}
-          </div>
-        </div>
-      </li>
+      <DetailsRow :label="$t('pages.signTransaction.fee')">
+        <div class="balance no-sign">{{ toAe(transaction.fee) }} {{ $t('pages.appVUE.aeid') }}</div>
+      </DetailsRow>
 
-      <li class="flex flex-justify-between">
-        <div class="tx-label">{{ $t('pages.signTransaction.total') }}</div>
-        <div class="text-right">
-          <div class="balance balanceBig balanceTotalSpend no-sign">
-            {{ totalSpend }} {{ $t('pages.appVUE.aeid') }}
-          </div>
+      <DetailsRow :label="$t('pages.signTransaction.total')">
+        <div class="balance balanceTotalSpend no-sign">
+          {{ totalSpend }} {{ $t('pages.appVUE.aeid') }}
         </div>
-      </li>
+      </DetailsRow>
+
+      <template v-for="field in TX_FIELDS">
+        <DetailsRow
+          v-if="transaction[field]"
+          :key="field"
+          :label="$t('modals.confirm-transaction-sign')[field]"
+          direction="column"
+        >
+          <div>
+            {{ transaction[field] }}
+          </div>
+        </DetailsRow>
+      </template>
     </template>
 
     <div class="modal-confirm-btns" slot="footer">
-      <Button dark @click="cancel">
-        {{ $t('modals.cancel') }}
-      </Button>
-      <Button @click="confirm">
-        {{ $t('modals.confirm') }}
-      </Button>
+      <Button dark @click="cancel"> {{ $t('modals.cancel') }} </Button>
+      <Button @click="confirm"> {{ $t('modals.confirm') }} </Button>
     </div>
   </Modal>
 </template>
@@ -71,6 +74,7 @@ import { aettosToAe } from '../../../utils/helper';
 import Modal from '../Modal';
 import Button from '../Button';
 import UserAvatar from '../UserAvatar';
+import DetailsRow from '../DetailsRow';
 
 export default {
   props: {
@@ -78,7 +82,22 @@ export default {
     reject: { type: Function, required: true },
     transaction: { type: Object, required: true },
   },
-  components: { Modal, Button, UserAvatar },
+  components: { Modal, Button, UserAvatar, DetailsRow },
+  data: () => ({
+    TX_FIELDS: [
+      'payload',
+      'recipientId',
+      'code',
+      'callData',
+      'contractId',
+      'commitmentId',
+      'name',
+      'nameFee',
+      'nameSalt',
+      'nameId',
+      'pointers',
+    ],
+  }),
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
     receiver() {
@@ -86,8 +105,10 @@ export default {
     },
     showAddress() {
       return (
-        this.txType ===
-        (TX_TYPE.contractCreate || TX_TYPE.namePreClaim || TX_TYPE.nameClaim || TX_TYPE.nameUpdate)
+        this.txType === TX_TYPE.contractCreate ||
+        this.txType === TX_TYPE.namePreClaim ||
+        this.txType === TX_TYPE.nameClaim ||
+        this.txType === TX_TYPE.nameUpdate
       );
     },
     txType() {
@@ -106,124 +127,10 @@ export default {
       this.resolve(this.transaction.fee);
     },
     cancel() {
-      this.reject(new Error('reject'));
+      this.reject(new Error('Rejected by user'));
     },
   },
 };
 </script>
 
-<style lang="scss">
-@import '../../../../common/variables';
-
-.confirm-tx-sign-modal {
-  .modal--container {
-    width: 100%;
-    height: 100%;
-    overflow-y: scroll;
-    padding: 0;
-    border-radius: 0;
-
-    .modal--body,
-    .modal--header {
-      max-width: 357px;
-      margin: 0 auto;
-      min-width: 357px;
-    }
-
-    .modal-confirm-btns {
-      position: fixed;
-      bottom: 15px;
-      left: 50%;
-      -webkit-transform: translateX(-50%);
-      -ms-transform: translateX(-50%);
-      transform: translateX(-50%);
-      max-width: 480px;
-      min-width: 357px;
-
-      button {
-        width: 50% !important;
-      }
-    }
-
-    .modal--body {
-      li {
-        list-style-type: none;
-        padding: 10px;
-        text-align: left;
-      }
-
-      .ae-badge {
-        background: $secondary-color !important;
-        color: $white-color !important;
-        -webkit-box-shadow: 0 0 0 2px $secondary-color;
-        box-shadow: 0 0 0 2px $secondary-color;
-        border: 2px solid $bg-color;
-      }
-    }
-  }
-
-  .identicons-holder {
-    display: flex;
-    justify-content: space-between;
-    position: relative;
-
-    .from,
-    .to {
-      display: flex;
-      align-items: center;
-      width: 50%;
-      padding: 10px;
-    }
-
-    .from {
-      // width: 40%;
-      padding-right: 15px;
-      background: #33343e;
-    }
-
-    .to {
-      // width: 70%;
-      padding-left: 15px;
-      background: #33343ea1;
-    }
-
-    .account-address {
-      padding: 0 0.5rem !important;
-      font-weight: normal !important;
-      font-size: 0.8rem !important;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      width: 80%;
-      text-align: left;
-    }
-
-    .arrow-separator {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      -ms-transform: translate(-50%, -50%);
-      -webkit-transform: translate(-50%, -50%);
-      transform: translate(-50%, -50%);
-      background: $button-color;
-      color: $white-color;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      text-align: center;
-      vertical-align: middle;
-      border: 1px solid $white-color;
-      line-height: 20px;
-
-      .ae-icon {
-        font-size: 1.2rem !important;
-        float: none !important;
-      }
-
-      &::after {
-        content: '';
-      }
-    }
-  }
-}
-</style>
+<style lang="scss" src="./SignModal.scss" />

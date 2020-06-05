@@ -65,7 +65,6 @@ export default {
   }),
   computed: {
     ...mapGetters(['sdk', 'account', 'activeAccountName']),
-    ...mapState('names', ['all']),
     nameEntry() {
       return this.$store.getters['names/getName'](this.name);
     },
