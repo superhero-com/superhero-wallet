@@ -123,6 +123,10 @@ const runContentScript = () => {
     [...document.querySelectorAll(selector)].some(el => el !== target && el.contains(target));
 
   const setWidgetClickListner = () => {
+    const link = document.getElementById('superhero-tip-link');
+    if (link) {
+      link.addEventListener('click', openTip);
+    }
     document.addEventListener(
       'click',
       e => {
