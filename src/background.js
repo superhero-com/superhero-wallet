@@ -79,15 +79,15 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
     }
 
     if (from === 'content') {
+      const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });
       if (type === 'readDom' && (data.address || data.chainName)) {
         const {
           current: { network },
         } = await getState();
-        const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });
         if (sender.url === url && (DEFAULT_NETWORK && network) === 'Mainnet')
           TipClaimRelay.checkUrlHasBalance(url, data);
       }
-      if (type === 'openTipPopup') openTipPopup(tipUrl);
+      if (type === 'openTipPopup') openTipPopup(tipUrl || url);
     }
 
     return true;
