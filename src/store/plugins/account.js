@@ -68,7 +68,7 @@ export default store =>
         ).rlpEncoded;
       },
       sign({ dispatch }, data) {
-        dispatch('signWithoutConfirmation', data);
+        return dispatch('signWithoutConfirmation', data);
       },
       async signTransaction({ dispatch, rootGetters: { sdk } }, { txBase64, opt = {} }) {
         const encodedTx = await dispatch('confirmTxSigning', {
