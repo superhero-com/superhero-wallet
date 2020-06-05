@@ -14,7 +14,7 @@ export default store =>
     },
     getters: {
       getDefault: ({ defaults }, getters, { sdk }) => address =>
-        sdk ? defaults[`${address}-${sdk.getNetworkId()}`] : undefined,
+        sdk ? defaults[`${address}-${sdk.getNetworkId()}`] : '',
       getName: ({ all }) => name => all.find(n => n.name === name),
     },
     mutations: {
@@ -53,12 +53,15 @@ export default store =>
         const [names] = await Promise.all([namesPromise]);
         commit('set', names);
         const defaultName = getDefault(rootState.account.publicKey);
-        if (names.length && !defaultName)
-          dispatch('setDefault', {
-            name: names[0].name,
-            address: rootState.account.publicKey,
-            modal: false,
-          });
+        if (names.length && !defaultName) {
+          const claimed = names.filter(n => !n.pending);
+          if (claimed.length)
+            dispatch('setDefault', {
+              name: claimed[0].name,
+              address: rootState.account.publicKey,
+              modal: false,
+            });
+        }
       },
       async fetchAuctions({ rootGetters: { network, current } }) {
         const middleware = network[current.network].middlewareUrl;
@@ -76,7 +79,7 @@ export default store =>
           })),
         };
       },
-      async updatePointer({ rootState: { sdk }, dispatch }, { name, address, type }) {
+      async updatePointer({ rootState: { sdk }, dispatch }, { name, address, type = 'update' }) {
         const nameEntry = await sdk.aensQuery(name);
         if (type === 'extend') {
           nameEntry.extendTtl();

@@ -4,7 +4,6 @@ import PopupSignTransaction from './pages/Popups/SignTx';
 import PopupConnect from './pages/Popups/Connect';
 import PopupAskAccounts from './pages/Popups/AskAccounts';
 import PopupMessageSign from './pages/Popups/MessageSign';
-import SignTransaction from './pages/SignTransaction';
 import Settings from './pages/Settings';
 import GeneralSettings from './pages/GeneralSettings';
 import SecuritySettings from './pages/SecuritySettings';
@@ -58,15 +57,6 @@ export default [
     path: '/account',
     name: 'account',
     component: Account,
-  },
-  {
-    name: 'sign',
-    path: '/sign-transaction/:type?',
-    component: SignTransaction,
-    props: true,
-    meta: {
-      notPersist: true,
-    },
   },
   {
     name: 'popup-sign-tx',

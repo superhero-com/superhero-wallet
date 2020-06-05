@@ -54,10 +54,18 @@ export default {
       display: inline-block;
     }
 
-    .active-name {
+    .active-name,
+    .pending-name {
       float: right;
       background: #2a9cff;
       color: #fff;
+      position: absolute;
+      top: 4px;
+      right: 4px;
+    }
+
+    .pending-name {
+      background: $error-color;
     }
   }
 }
