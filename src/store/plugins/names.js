@@ -13,8 +13,11 @@ export default store =>
       defaults: {},
     },
     getters: {
-      getDefault: ({ defaults }, getters, { sdk }) => address =>
-        sdk ? defaults[`${address}-${sdk.getNetworkId()}`] : '',
+      getDefault: ({ defaults }, getters, { sdk }, { activeNetwork }) => address => {
+        let { networkId } = activeNetwork;
+        if (sdk) networkId = sdk.getNetworkId();
+        return defaults[`${address}-${networkId}`];
+      },
       getName: ({ all }) => name => all.find(n => n.name === name),
     },
     mutations: {

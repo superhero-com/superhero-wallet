@@ -16,7 +16,7 @@
       <li>
         <span>{{ $t('pages.names.details.expires-height') }}</span> {{ nameEntry.expiresAt }}
       </li>
-      <li v-if="nameEntry.pointers" v-for="(pointer, key) in nameEntry.pointers" :key="key">
+      <li v-for="(pointer, key) in nameEntry.pointers" :key="key">
         <span>{{ $t('pages.names.details.pointer', { id: key + 1 }) }}</span>
         {{ pointer.id }}
       </li>

@@ -440,7 +440,7 @@
     "names": {
       "default": "Default",
       "balance-error": "Your account balance is not enough to execute this transaction.",
-      "pointer-added": "Name {type} successfully!",
+      "pointer-added": "Name {type} successfull!",
       "pending-claim": "Pending",
       "list": {
         "no-names": "No names found",

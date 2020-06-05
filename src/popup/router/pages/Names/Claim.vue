@@ -61,7 +61,7 @@ export default {
         try {
           this.$store.dispatch('names/fetchOwned');
           await this.sdk.poll(claimTxHash);
-          const isAuction = MAX_AUCTION_NAME_LENGTH >= this.name.length;
+          const isAuction = MAX_AUCTION_NAME_LENGTH >= name.length;
           if (!isAuction) {
             this.$store.dispatch('names/updatePointer', {
               name,
