@@ -24,7 +24,7 @@ import Close from '../../../icons/close.svg?vue-component';
 
 export default {
   props: {
-    close: { type: Boolean, default: true },
+    close: { type: Boolean },
   },
   components: {
     Close,

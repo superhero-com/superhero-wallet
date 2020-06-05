@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="resolve" class="default-modal">
+  <Modal @close="resolve" class="default-modal" close>
     <template slot="header">
       {{ $t('modals.error-log.title') }}
     </template>

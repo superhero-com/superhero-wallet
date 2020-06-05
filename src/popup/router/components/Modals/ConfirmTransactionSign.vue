@@ -1,5 +1,5 @@
 <template>
-  <Modal class="confirm-tx-sign-modal" :close="false">
+  <Modal class="confirm-tx-sign-modal">
     <div slot="header" class="identicons-holder">
       <div class="from">
         <UserAvatar :address="account.publicKey" :name="account.name" />

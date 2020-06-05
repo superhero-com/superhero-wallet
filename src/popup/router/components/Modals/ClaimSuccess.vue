@@ -1,6 +1,6 @@
 <!--eslint-disable vue-i18n/no-raw-text-->
 <template>
-  <Modal @close="resolve">
+  <Modal @close="resolve" close>
     <div slot="body">
       <CheckIcon /> <br />
       <b>{{ $t('pages.claim.url') }}:</b> {{ url }} <br />
