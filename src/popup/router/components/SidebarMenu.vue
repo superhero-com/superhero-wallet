@@ -64,33 +64,6 @@
       </transition>
     </li>
     <li>
-      <button
-        :class="showTokensDropdown && 'opened'"
-        @click="showTokensDropdown = !showTokensDropdown"
-      >
-        {{ $t('pages.appVUE.tokens') }}
-        <Arrow />
-      </button>
-      <transition name="slide">
-        <ul v-if="showTokensDropdown">
-          <li v-for="token in owned" :key="token.contract">
-            <span>
-              <UserAvatar :address="token.contract" size="x-small" identicon />
-              <span class="token-info">
-                {{ token.getBalance() }}
-                {{ token.symbol }}
-              </span>
-            </span>
-          </li>
-          <li>
-            <router-link to="/tokens" data-cy="tokens">
-              {{ $t('pages.appVUE.manageTokens') }}
-            </router-link>
-          </li>
-        </ul>
-      </transition>
-    </li>
-    <li>
       <router-link to="/names" data-cy="names">
         {{ $t('pages.appVUE.names') }}
       </router-link>
