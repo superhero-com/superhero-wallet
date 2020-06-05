@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "lint:vue": "eslint --ext .js,.vue src tests",
-    "lint:css": "stylelint **/*.{css,scss,vue}",
+    "lint:css": "stylelint src/**/*.{css,scss,vue}",
     "lint": "npm run lint:vue && npm run lint:css",
     "prettier": "prettier \"src/**/*.{js,vue}\" \"tests/**/*.{js,vue}\"",
     "prettier:write": "npm run prettier -- --write",
