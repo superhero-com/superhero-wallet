@@ -214,7 +214,8 @@
       "deploy-token": "Deploy token",
       "add-token": "Add token",
       "mint-burn-token": "Mint/Burn token",
-      "allowances": "Allowances"
+      "allowances": "Allowances",
+      "sign-message": "Sign Message"
     },
     "appVUE": {
       "systemName": "Superhero",

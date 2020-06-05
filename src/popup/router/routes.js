@@ -36,6 +36,7 @@ import MintToken from './pages/FungibleTokens/Mint';
 import Allowances from './pages/FungibleTokens/Allowances';
 import ManageAllowances from './pages/FungibleTokens/ManageAllowances';
 import AllAllowances from './pages/FungibleTokens/AllAllowances';
+import SignMessage from './pages/SignMessage';
 
 export default [
   {
@@ -350,6 +351,15 @@ export default [
     component: NotFound,
     meta: {
       ifNotAuth: true,
+    },
+  },
+  {
+    name: 'sign-message',
+    path: '/sign-message',
+    component: SignMessage,
+    meta: {
+      title: 'sign-message',
+      notPersist: true,
     },
   },
 ];
