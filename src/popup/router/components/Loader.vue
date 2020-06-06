@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="loading" class="loading" data-cy="loader">
+    <div class="loading" data-cy="loader">
       <div class="center">
         <span v-if="content != ''">{{ content }}</span>
         <br v-if="content != ''" />
@@ -23,12 +23,17 @@ export default {
   components: {
     Welcome,
   },
-  props: ['loading', 'content', 'size', 'type'],
+  props: {
+    content: { type: String, default: '' },
+    size: { type: String, default: 'big' },
+    type: { type: String, default: 'transparent' },
+  },
 };
 </script>
 
 <style lang="scss">
 @import '../../../common/variables';
+
 .fadeOut-enter-active,
 .fadeOut-leave-active {
   transition: all 0.5s ease-in-out;

@@ -114,16 +114,39 @@ const runContentScript = () => {
     }
   });
 
-  const openTip = async e => {
+  const openTip = async (e, url) => {
     e.preventDefault();
-    browser.runtime.sendMessage({ from: 'content', type: 'openTipPopup' });
+    browser.runtime.sendMessage({ from: 'content', type: 'openTipPopup', url });
   };
+
+  const hasParentWithSelector = (target, selector) =>
+    [...document.querySelectorAll(selector)].some(el => el !== target && el.contains(target));
 
   const setWidgetClickListner = () => {
     const link = document.getElementById('superhero-tip-link');
     if (link) {
       link.addEventListener('click', openTip);
     }
+    document.addEventListener(
+      'click',
+      e => {
+        let element;
+        if (hasParentWithSelector(e.target, '.superhero-button') && e.target.tagName === 'A')
+          element = e.target;
+        else if (
+          e.target.closest('a') &&
+          hasParentWithSelector(e.target, '.superhero-button') &&
+          hasParentWithSelector(e.target.closest('a'), '.superhero-button')
+        )
+          element = e.target.closest('a');
+
+        if (element) {
+          const url = element.getAttribute('data-url');
+          openTip(e, url);
+        }
+      },
+      false,
+    );
   };
 
   /**

@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="resolve" class="default-modal">
+  <Modal @close="resolve" class="default-modal" close>
     <template slot="header">
       {{ $t('modals.error-log.title') }}
     </template>
@@ -34,11 +34,8 @@ export default {
   components: { Modal },
   computed: {
     message() {
-      const { message = '' } = this.error;
+      const { message = '' } = this.entry.error;
       return message.substr(0, 150);
-    },
-    error() {
-      return this.entry.error;
     },
   },
   methods: {

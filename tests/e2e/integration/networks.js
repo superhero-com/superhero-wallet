@@ -36,6 +36,7 @@ describe('Test cases for networks page', () => {
         network,
         defaultNetworks[network].url,
         defaultNetworks[network].middlewareUrl,
+        defaultNetworks[network].compilerUrl,
       )
       .get('[data-cy=connect]')
       .click()
@@ -47,7 +48,7 @@ describe('Test cases for networks page', () => {
   it("Can't add network with invalid urls", () => {
     cy.get('[data-cy=to-add]')
       .click()
-      .enterNetworkDetails('test', 'test', 'test')
+      .enterNetworkDetails('test', 'test', 'test', 'test')
       .get('[data-cy=connect]')
       .click()
       .buttonShouldBeDisabled('[data-cy=connect]')
@@ -60,6 +61,7 @@ describe('Test cases for networks page', () => {
       'Mainnet',
       networks[DEFAULT_NETWORK].url,
       networks[DEFAULT_NETWORK].middlewareUrl,
+      networks[DEFAULT_NETWORK].compilerUrl,
     );
   });
 
@@ -68,6 +70,7 @@ describe('Test cases for networks page', () => {
       'Mainnet',
       networks[DEFAULT_NETWORK].url,
       networks[DEFAULT_NETWORK].middlewareUrl,
+      networks[DEFAULT_NETWORK].compilerUrl,
     )
       .get('[data-cy=more]')
       .click()
@@ -88,6 +91,7 @@ describe('Test cases for networks page', () => {
       'Mainnet',
       networks[DEFAULT_NETWORK].url,
       networks[DEFAULT_NETWORK].middlewareUrl,
+      networks[DEFAULT_NETWORK].compilerUrl,
     )
       .goBack()
       .get('.transactionList')
@@ -99,6 +103,7 @@ describe('Test cases for networks page', () => {
       'Mainnet',
       networks[DEFAULT_NETWORK].url,
       networks[DEFAULT_NETWORK].middlewareUrl,
+      networks[DEFAULT_NETWORK].compilerUrl,
     )
       .get('[data-cy=to-add]')
       .click()
@@ -106,6 +111,7 @@ describe('Test cases for networks page', () => {
         'Mainnet',
         networks[DEFAULT_NETWORK].url,
         networks[DEFAULT_NETWORK].middlewareUrl,
+        networks[DEFAULT_NETWORK].compilerUrl,
       )
       .get('[data-cy=connect]')
       .click()
@@ -117,6 +123,7 @@ describe('Test cases for networks page', () => {
       'Mainnet',
       networks[DEFAULT_NETWORK].url,
       networks[DEFAULT_NETWORK].middlewareUrl,
+      networks[DEFAULT_NETWORK].compilerUrl,
     )
       .get('[data-cy=more]')
       .click()

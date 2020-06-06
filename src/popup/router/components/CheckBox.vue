@@ -46,6 +46,7 @@ export default {
 
 <style lang="scss">
 @import '../../../common/variables';
+
 .checkbox-container {
   display: flex;
   position: relative;
@@ -78,7 +79,7 @@ export default {
 
   .checkbox-holder {
     position: relative;
-    margin: 0px 10px;
+    margin: 0 10px;
   }
 }
 </style>

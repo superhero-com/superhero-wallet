@@ -50,7 +50,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
   };
 
   browser.runtime.onMessage.addListener(async (msg, sender) => {
-    const { method, params, from, type, data } = msg;
+    const { method, params, from, type, data, url: tipUrl } = msg;
     if (method === 'phishingCheck') {
       const host = new URL(params.href).hostname;
       let blocked = false;
@@ -87,7 +87,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
         if (sender.url === url && (DEFAULT_NETWORK && network) === 'Mainnet')
           TipClaimRelay.checkUrlHasBalance(url, data);
       }
-      if (type === 'openTipPopup') openTipPopup(url);
+      if (type === 'openTipPopup') openTipPopup(tipUrl || url);
     }
 
     return true;

@@ -28,6 +28,7 @@
             data-cy="amount-box"
             @changeAmount="val => (form.amount = val)"
             :value="form.amount"
+            :amountError="form.amount <= 0"
           />
           <div class="flex flex-align-center flex-justify-between">
             <Button data-cy="reject-withdraw" half @click="navigateAccount">{{
@@ -37,7 +38,7 @@
               data-cy="review-withdraw"
               half
               @click="step = 2"
-              :disabled="!form.address || !+form.amount"
+              :disabled="!form.address || !+form.amount || form.amount <= 0"
               >{{ $t('pages.send.review') }}</Button
             >
           </div>
@@ -76,12 +77,15 @@
             <label>{{ $t('pages.send.amount') }}</label>
             <div class="text-center">
               <span data-cy="review-amount" class="amount"
-                >{{ toFixedAmount }} {{ $t('pages.appVUE.aeid') }}</span
+                >{{ parseFloat(form.amount).toFixed(3) }} {{ $t('pages.appVUE.aeid') }}</span
               >
               <span class="currencyamount">
                 <!--eslint-disable-line vue-i18n/no-raw-text-->
                 ~
-                <span>{{ amountConvert }} {{ current.currency.toUpperCase() }}</span>
+                <span>
+                  {{ (form.amount * current.currencyRate).toFixed(3) }}
+                  {{ current.currency.toUpperCase() }}
+                </span>
               </span>
             </div>
           </div>
@@ -136,7 +140,7 @@
         </div>
       </div>
     </div>
-    <Loader size="big" :loading="loading" type="transparent"></Loader>
+    <Loader v-if="loading" />
   </div>
 </template>
 
@@ -192,22 +196,6 @@ export default {
   },
   computed: {
     ...mapGetters(['account', 'balance', 'network', 'current', 'sdk']),
-    amountConvert() {
-      return (this.form.amount * this.current.currencyRate).toFixed(3);
-    },
-    toFixedAmount() {
-      return parseFloat(this.form.amount).toFixed(3);
-    },
-    maxValue() {
-      const calculatedMaxValue = this.balance - this.maxFee;
-      return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
-    },
-    maxFee() {
-      return this.fee.max;
-    },
-    activeToken() {
-      return this.current.token;
-    },
     validAddress() {
       return checkAddress(this.form.address) || chekAensName(this.form.address);
     },
@@ -254,6 +242,7 @@ export default {
     async send() {
       const amount = aeToAettos(this.form.amount);
       const receiver = this.form.address;
+      const calculatedMaxValue = this.balance > this.fee.max ? this.balance - this.fee.max : 0;
       if (receiver === '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'incorrect-address' });
         this.loading = false;
@@ -264,14 +253,14 @@ export default {
         this.loading = false;
         return;
       }
-      if (this.maxValue - this.form.amount <= 0 && this.current.token === 0) {
+      if (calculatedMaxValue - this.form.amount <= 0 && this.current.token === 0) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'insufficient-balance' });
         this.loading = false;
         return;
       }
       this.loading = true;
       try {
-        const { hash } = await this.sdk.spend(amount, receiver, { waitMined: false });
+        const { hash } = await this.sdk.spend(amount, receiver, { waitMined: false, modal: false });
         if (hash) {
           await this.$store.dispatch('setPendingTx', {
             hash,
@@ -305,16 +294,19 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .d-flex {
   display: flex;
 }
+
 .withdraw.step1 {
   textarea {
     width: 250px;
     min-height: 60px !important;
-    margin: 0 20px 0px 0px;
+    margin: 0 20px 0 0;
     font-size: 11px;
   }
+
   small {
     color: $accent-color;
     display: block;
@@ -323,26 +315,32 @@ export default {
     font-size: 12px;
   }
 }
+
 .withdraw.step2 {
   p {
     display: flex;
     justify-content: center;
     line-height: 2rem;
   }
+
   p:not(:first-of-type) {
     color: $text-color;
   }
+
   p > svg {
     margin-right: 10px;
   }
+
   .info-group {
     text-align: left;
     display: block;
-    margin: 20px 0px;
+    margin: 20px 0;
+
     .info-label {
       display: block;
       padding: 10px 0;
     }
+
     .info-span {
       color: $accent-color;
       font-size: 11px;
@@ -354,18 +352,22 @@ export default {
       letter-spacing: -0.3px;
       cursor: pointer;
     }
+
     .amount {
       font-size: 26px;
       color: $secondary-color;
     }
+
     .currencyamount {
       font-size: 18px;
       display: block;
+
       span {
         font-size: 18px;
       }
     }
   }
+
   .text-center {
     text-align: center;
   }

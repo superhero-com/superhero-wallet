@@ -47,11 +47,7 @@ export const ensureContentScriptInitialized = async () => {
     });
     contentPostMessage = async (message, tab) => {
       const id = genUuid();
-      try {
-        await browser.tabs.sendMessage(tab, { data: { ...message, uuid: id } });
-      } catch (e) {
-        return Promise.resolve(e);
-      }
+      await browser.tabs.sendMessage(tab, { data: { ...message, uuid: id } });
       return new Promise((resolve, reject) => {
         pendingMessages[id] = { resolve, reject };
       });

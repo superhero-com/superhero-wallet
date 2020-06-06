@@ -126,27 +126,33 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .createWallet-holder {
   position: relative;
   height: 80vh;
   padding-top: 40px;
+
   h2 {
     display: flex;
     justify-content: center;
     font-size: 18px;
+
     svg {
       margin-right: 10px;
     }
   }
+
   .text-info {
     margin: 10px 0 0 0;
     text-align: center;
+
     span:not(.aeid) {
       color: $text-color;
       font-size: 16px;
       word-break: break-word;
     }
   }
+
   .skip-button {
     color: $accent-color !important;
     font-size: 18px;
@@ -154,29 +160,34 @@ export default {
     text-decoration: underline;
     width: 100%;
   }
+
   .last-msg-enjoy {
     color: $secondary-color !important;
     font-size: 18px;
     width: 100%;
     margin: 10px auto;
   }
+
   .left-arrow {
     left: 20px;
     position: absolute;
     cursor: pointer;
   }
+
   .right-arrow {
     right: 20px;
     position: absolute;
     cursor: pointer;
   }
 }
+
 .dotstyle {
   position: fixed;
   left: 0;
   right: 0;
   top: 50%;
 }
+
 .dotstyle ul {
   position: relative;
   display: inline-block;
@@ -185,6 +196,7 @@ export default {
   list-style: none;
   cursor: default;
 }
+
 .dotstyle button {
   display: block;
 }
@@ -210,6 +222,7 @@ export default {
   cursor: pointer;
   position: absolute;
 }
+
 /* Fill up */
 .dotstyle-fillup li a {
   overflow: hidden;
@@ -237,6 +250,7 @@ export default {
 .dotstyle-fillup li.current a {
   background-color: $secondary-color !important;
 }
+
 .dotstyle-fillup li.current a::after {
   height: 100%;
 }

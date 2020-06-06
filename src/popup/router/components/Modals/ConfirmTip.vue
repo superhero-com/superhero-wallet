@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="resolve">
+  <Modal @close="resolve" close>
     <template slot="header">
       {{ $t('modals.confirm-tip.title') }}
     </template>

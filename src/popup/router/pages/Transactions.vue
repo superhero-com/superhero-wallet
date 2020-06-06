@@ -14,7 +14,7 @@
     <div v-if="!filteredTransactions.length && !loading">
       <p>{{ $t('pages.transactions.noTransactions') }}</p>
     </div>
-    <Loader size="small" :loading="loading" v-bind="{ content: '' }"></Loader>
+    <Loader v-if="loading" size="small" type="none" />
   </div>
 </template>
 
@@ -45,10 +45,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'middleware', 'pendingTransactions']),
-    publicKey() {
-      return this.account.publicKey;
-    },
+    ...mapGetters(['account', 'middleware']),
     filteredTransactions() {
       switch (this.type) {
         case 'date':
@@ -61,20 +58,21 @@ export default {
           break;
         case 'sent':
           return this.transactions.filter(
-            tr => tr.tx.type === 'ContractCallTx' && tr.tx.caller_id === this.publicKey,
+            tr => tr.tx.type === 'ContractCallTx' && tr.tx.caller_id === this.account.publicKey,
           );
         case 'received':
           return this.transactions.filter(tr => tr.claim);
         case 'topups':
           return this.transactions.filter(
-            tr => tr.tx.type === 'SpendTx' && tr.tx.recipient_id === this.publicKey,
+            tr => tr.tx.type === 'SpendTx' && tr.tx.recipient_id === this.account.publicKey,
           );
         case 'withdrawals':
           return this.transactions.filter(
-            tr => tr.tx.sender_id && tr.tx.type === 'SpendTx' && tr.tx.sender_id === this.publicKey,
+            tr =>
+              tr.tx.sender_id &&
+              tr.tx.type === 'SpendTx' &&
+              tr.tx.sender_id === this.account.publicKey,
           );
-        case 'all':
-          return this.transactions;
         default:
           return this.transactions;
       }
@@ -142,6 +140,7 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .date {
   background: $button-color;
   padding: 0.5rem 1rem;
@@ -150,9 +149,11 @@ export default {
   font-size: 0.9rem;
   font-family: monospace;
 }
+
 .popup {
   padding: 0;
 }
+
 .all-transactions {
   background: $transactions-bg;
   padding: 0 20px;

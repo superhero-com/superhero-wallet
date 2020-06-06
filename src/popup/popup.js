@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import { defer } from 'lodash-es';
+import { sync } from 'vuex-router-sync';
 import App from './App';
 import store from '../store';
 import router from './router';
@@ -26,6 +27,7 @@ Vue.prototype.$watchUntilTruly = function watchUntilTruly(getter) {
 
 (async () => {
   await registerModals();
+  sync(store, router);
   new Vue({
     store,
     router,

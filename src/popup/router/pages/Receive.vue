@@ -1,7 +1,7 @@
 <template>
   <div class="popup popup-no-padding">
     <div data-cy="top-up-container">
-      <p class="primary-title text-left mt-20 f-14 mx-20" style="margin-left:20px !important">
+      <p class="primary-title text-left mt-20 f-14 mx-20" style="margin-left: 20px !important;">
         {{ $t('pages.receive.heading') }}
       </p>
       <AccountInfo />
@@ -26,26 +26,21 @@ export default {
     QrcodeVue,
     AccountInfo,
   },
-  data() {
-    return {
-      jellySwapUrl: 'https://app.jelly.market',
-      shopUniverse: 'https://shop.aeternityuniverse.com',
-    };
-  },
   computed: mapGetters(['account']),
   methods: {
     navigateAccount() {
       this.$router.push('/account');
     },
     exchange() {
-      openUrl(this.jellySwapUrl);
+      openUrl('https://app.jelly.market');
     },
     purchase() {
-      openUrl(this.shopUniverse);
+      openUrl('https://shop.aeternityuniverse.com');
     },
   },
 };
 </script>
+
 <style>
 .qrcode canvas {
   border: 5px solid #fff;

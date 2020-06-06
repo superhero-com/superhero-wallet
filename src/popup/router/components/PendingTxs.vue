@@ -16,7 +16,7 @@ import TransactionItem from './TransactionItem';
 export default {
   components: { TransactionItem },
   computed: {
-    ...mapGetters(['transactions', 'currentCurrency']),
+    ...mapGetters(['transactions']),
     filteredPendings() {
       return this.transactions.pending
         .filter(({ amount, hash }) => !Number.isNaN(+amount) && hash)

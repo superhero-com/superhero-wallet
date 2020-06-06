@@ -47,11 +47,13 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../../common/variables';
+
 h2 {
   word-break: break-word;
   line-height: 1.8rem;
   font-size: 1.5rem;
 }
+
 p {
   font-weight: normal;
   word-break: break-word;

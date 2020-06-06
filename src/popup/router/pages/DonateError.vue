@@ -78,7 +78,7 @@ export default {
     color: #5b5c63;
     text-align: left;
     font-size: 14px;
-    margin: 0px 0px 15px;
+    margin: 0 0 15px;
   }
 
   .error-info-content {

@@ -11,7 +11,7 @@
             {{ amount }} {{ $t('pages.appVUE.aeid') }}
           </span>
           <!--eslint-disable-line vue-i18n/no-raw-text-->
-          ({{ currencyAmount }}
+          ({{ (amount * current.currencyRate).toFixed(3) }}
           <!--eslint-disable-next-line vue-i18n/no-raw-text-->
           {{ currentCurrency }})
           {{ $t('pages.tipPage.to') }}
@@ -78,7 +78,7 @@
         </Button>
       </template>
 
-      <Loader size="big" :loading="loading" type="transparent" content="" />
+      <Loader v-if="loading" />
     </div>
   </div>
 </template>
@@ -117,13 +117,6 @@ export default {
   computed: {
     ...mapGetters(['balance', 'tipping', 'current', 'sdk', 'account', 'currentCurrency', 'tip']),
     ...mapState(['tourRunning', 'tippingAddress', 'minTipAmount']),
-    maxValue() {
-      const calculatedMaxValue = this.balance - this.minCallFee;
-      return calculatedMaxValue > 0 ? calculatedMaxValue.toString() : 0;
-    },
-    currencyAmount() {
-      return (this.amount * this.current.currencyRate).toFixed(3);
-    },
     urlStatus() {
       return this.tourRunning ? 'verified' : this.$store.getters['tipUrl/status'](this.url);
     },
@@ -199,7 +192,9 @@ export default {
           .catch(() => false);
         if (!allowToConfirm) return;
       }
-      this.amountError = !this.amount || !this.minCallFee || this.maxValue - this.amount <= 0;
+      const calculatedMaxValue =
+        this.balance > this.minCallFee ? this.balance - this.minCallFee : 0;
+      this.amountError = !this.amount || !this.minCallFee || calculatedMaxValue - this.amount <= 0;
       this.amountError = this.amountError || !+this.amount || this.amount < this.minTipAmount;
       this.noteError = !this.note || !this.url || this.note.length > 280;
       this.confirmMode =
@@ -217,6 +212,7 @@ export default {
         const { hash } = await this.tipping.call('tip', [this.url, escapeSpecialChars(this.note)], {
           amount,
           waitMined: false,
+          modal: false,
         });
         if (hash) {
           await this.$store.dispatch('setPendingTx', {
@@ -264,6 +260,7 @@ export default {
     min-width: auto !important;
     padding-bottom: 25px;
   }
+
   p {
     margin-top: 0;
 
@@ -278,6 +275,7 @@ export default {
   position: relative;
 
   &.url-bar--input {
+    /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
     ::v-deep .url-status {
       position: absolute;
       left: 10px;
@@ -287,6 +285,7 @@ export default {
       -webkit-transform: translateY(-50%);
     }
 
+    /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
     ::v-deep input {
       padding-left: 35px;
     }
@@ -307,7 +306,7 @@ export default {
 
 @media screen and (min-width: 380px) {
   .tour__step3.v-tour__target--highlighted {
-    margin: 10px auto 0px auto;
+    margin: 10px auto 0 auto;
     min-width: auto !important;
     padding-bottom: 25px;
   }

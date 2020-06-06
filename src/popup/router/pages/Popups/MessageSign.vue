@@ -60,9 +60,8 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../../common/variables';
-.identity {
-  img {
-    width: 32px;
-  }
+
+.identity img {
+  width: 32px;
 }
 </style>

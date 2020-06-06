@@ -9,7 +9,7 @@
   font-size: 12px;
   font-weight: bold;
   border-radius: 3px;
-  padding: 0px 5px;
+  padding: 0 5px;
   display: inline-block;
   line-height: 16px;
   cursor: pointer;

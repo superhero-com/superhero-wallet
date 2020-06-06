@@ -1,7 +1,7 @@
 <template>
   <div class="header" v-if="showNavigation && !aeppPopup">
     <div class="content" :class="{ isLoggedIn }">
-      <Arrow v-if="title && !tourRunning" @click="goBack" class="back-arrow" data-cy="back-arrow" />
+      <Arrow v-if="title && !tourRunning" @click="back" class="back-arrow" data-cy="back-arrow" />
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
 
       <div class="title">
@@ -48,8 +48,12 @@ export default {
     },
   },
   methods: {
-    goBack() {
-      this.$router.push(this.isLoggedIn ? '/account' : '/');
+    back() {
+      if (this.$store.state.route.from.path === '/') {
+        this.$router.push(this.isLoggedIn ? '/account' : '/');
+        return;
+      }
+      this.$router.go(-1);
     },
   },
 };
@@ -57,6 +61,7 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .header {
   padding-top: env(safe-area-inset-top);
   background-color: $nav-bg-color;
@@ -74,6 +79,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+
     &:not(.isLoggedIn) .title {
       margin-left: auto;
       margin-right: auto;
@@ -130,7 +136,7 @@ export default {
       text-align: center;
       vertical-align: middle;
       left: -10px;
-      top: 0px;
+      top: 0;
       line-height: 15px;
       border: 1px solid $nav-bg-color;
     }

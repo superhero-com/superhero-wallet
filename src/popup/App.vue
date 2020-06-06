@@ -15,7 +15,7 @@
       </div>
     </transition>
 
-    <Loader size="big" :loading="mainLoading" />
+    <Loader v-if="mainLoading" type="none" />
     <NodeConnectionStatus />
     <Tour />
     <Component
@@ -62,7 +62,6 @@ export default {
       'notifications',
       'notificationsCounter',
       'backedUpSeed',
-      'middleware',
     ]),
     ...mapState(['isRestored']),
     waveBg() {
@@ -126,6 +125,7 @@ export default {
           payload: { address: this.account.publicKey, network: this.current.network },
         });
       }
+
       this.pollData();
     },
     pollData() {
@@ -157,6 +157,7 @@ export default {
     background-color: $bg-color !important;
     padding-top: 0;
   }
+
   &.ae-main-wave {
     background-position: center bottom !important;
     background-repeat: no-repeat !important;
@@ -184,18 +185,22 @@ export default {
     transition-duration: 0.3s;
     transition-timing-function: ease;
   }
+
   .slide-leave-active,
   .slide-leave-active .sidebar-menu {
     transition-duration: 0.2s;
   }
+
   .slide-enter .sidebar-menu,
   .slide-leave-to .sidebar-menu {
     right: -200px;
   }
+
   .slide-leave-to .sidebar-menu {
     opacity: 0;
   }
 }
+
 @media screen and (max-width: 380px) {
   .ae-main.ae-main-wave {
     background-position: 100% 100% !important;

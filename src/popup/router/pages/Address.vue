@@ -51,9 +51,11 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
+
 .url-bar {
   color: $text-color;
 }
+
 .section-title {
   margin-bottom: 8px;
   margin-top: 16px;

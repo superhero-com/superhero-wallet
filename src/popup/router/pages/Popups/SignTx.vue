@@ -41,7 +41,7 @@
         <AmountSend
           :value="tx.amount"
           @changeAmount="val => (tx.amount = val)"
-          style="width:100%;"
+          style="width: 100%;"
         />
       </ae-list-item>
       <ae-list-item
@@ -148,7 +148,7 @@
         $t('pages.signTransaction.confirm')
       }}</Button>
     </div>
-    <Loader size="big" :loading="loading" type="transparent" content=""></Loader>
+    <Loader v-if="loading" />
   </div>
 </template>
 
@@ -200,9 +200,6 @@ export default {
     },
     txObject() {
       return this.unpackedTx ? this.unpackedTx.tx : {};
-    },
-    amount() {
-      return this.txObject.amount;
     },
     receiver() {
       if (this.txType === 'spendTx') {
@@ -262,82 +259,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-@import '../../../../common/variables';
-.balanceSpend {
-  font-size: 2rem;
-  color: $white-color;
-}
-.spendTxDetailsList .ae-list-item {
-  position: relative;
-  cursor: unset;
-  // text-transform: uppercase;
-  font-size: 0.8rem;
-}
-.spendTxDetailsList .ae-button {
-  margin-bottom: 0 !important;
-}
-.arrowSeprator {
-  margin-right: 1rem;
-  background: $accent-color;
-  color: $white-color;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  text-align: center;
-  vertical-align: middle;
-  border: 1px solid $white-color;
-  line-height: 20px;
-  .ae-icon {
-    font-size: 1.2rem !important;
-    float: none !important;
-  }
-  &:after {
-    content: '';
-  }
-}
-.ae-identicon.base {
-  border: 0.125rem solid transparent;
-  -webkit-box-shadow: 0 0 0 2px $secondary-color;
-  box-shadow: 0 0 0 1px $secondary-color;
-  width: 2rem;
-}
-.spendAccountAddr {
-  padding: 0 0.5rem !important;
-  font-weight: normal !important;
-  font-size: 0.8rem !important;
-}
-.noBorder {
-  border-top: none !important;
-}
-.accountFrom {
-  width: 40%;
-}
-.accountTo {
-  width: 70%;
-  .ae-icon {
-    font-size: 2rem;
-  }
-}
-.spendAccountAddr {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.ae-badge {
-  background: $accent-color !important;
-  color: $white-color !important;
-  -webkit-box-shadow: 0 0 0 2px $accent-color;
-  box-shadow: 0px 0px 0px 2px $accent-color;
-  border: 2px solid $bg-color;
-}
-.extend {
-  width: 100%;
-}
-.tx-label {
-  margin-top: 0.4rem;
-}
-.ae-identicon {
-  width: auto;
-}
-</style>
+<style lang="scss" src="../SignTransaction.scss" scoped />
