@@ -54,7 +54,7 @@ const runContentScript = () => {
   );
 
   const getAddresses = () => {
-    const address = document.all[0].outerHTML.match(/(ak_[A-Za-z0-9]{49,50})/g);
+    const address = document.all[0].outerHTML.match(/(ak_[A-Za-z0-9]{48,50})/g);
     const chainName = document.all[0].outerHTML.match(/\b[A-Za-z0-9]*\.chain\b/g);
 
     return {
