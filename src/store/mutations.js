@@ -19,17 +19,11 @@ export default {
   [types.SET_PENDING_TXS](state, payload) {
     state.transactions.pending = payload;
   },
-  [types.RESET_TRANSACTIONS](state) {
-    state.transactions.all = [];
-  },
   [types.SET_SUBACCOUNT](state, payload) {
     state.subaccounts.push(payload);
   },
   [types.SET_SUBACCOUNTS](state, payload) {
     state.subaccounts = payload;
-  },
-  [types.SET_WALLET](state, payload) {
-    state.wallet = payload;
   },
   [types.SET_ACTIVE_ACCOUNT](state, payload) {
     state.account.publicKey = payload.publicKey;
@@ -38,18 +32,9 @@ export default {
   [types.UNSET_SUBACCOUNTS](state) {
     state.subaccounts = [];
   },
-  [types.UPDATE_SUBACCOUNTS_BALANCE](state, payload) {
-    state.subaccounts[payload.account].balance = payload.balance;
-  },
-  [types.SET_ACCOUNT_NAME](state, payload) {
-    state.subaccounts[state.activeAccount].aename = payload;
-  },
   [types.SET_ACCOUNT_AENS](state, { account, aename, pending }) {
     state.subaccounts[account].aename = aename;
     state.subaccounts[account].pending = pending;
-  },
-  [types.SET_PENDING_NAMES](state, { names }) {
-    state.pendingNames = names;
   },
   [types.SET_NAMES](state, { names }) {
     state.names = names;
@@ -75,20 +60,11 @@ export default {
   [types.SET_AEPP_POPUP](state, payload) {
     state.aeppPopup = payload;
   },
-  [types.SET_LEDGER_API](state, { ledger }) {
-    state.ledgerApi = ledger;
-  },
   [types.SET_ENCRYPTED_WALLET](state, payload) {
     state.encryptedWallet = payload;
   },
-  [types.SET_TX_ADVANCED_MODE](state, payload) {
-    state.txAdvancedMode = payload;
-  },
   [types.SET_TIPPING](state, payload) {
     state.tipping = payload;
-  },
-  [types.SET_TIPPING_RECEIVER](state, payload) {
-    state.tippingReceiver = payload;
   },
   [types.SET_MAIN_LOADING](state, payload) {
     state.mainLoading = payload;

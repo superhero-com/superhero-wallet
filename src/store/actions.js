@@ -24,9 +24,9 @@ export default {
   setSubAccounts({ commit }, payload) {
     commit(types.SET_SUBACCOUNTS, payload);
   },
-  switchNetwork({ commit, dispatch }, payload) {
+  switchNetwork({ commit }, payload) {
     commit(types.SWITCH_NETWORK, payload);
-    dispatch('updateLatestTransactions', []);
+    commit(types.UPDATE_LATEST_TRANSACTIONS, []);
   },
   async updateBalance({ commit, state }) {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
@@ -62,9 +62,6 @@ export default {
     ]);
     txs = orderBy(flatten(txs), ['time'], ['desc']);
     return recent ? txs.slice(0, limit) : txs;
-  },
-  updateLatestTransactions({ commit }, payload) {
-    commit(types.UPDATE_LATEST_TRANSACTIONS, payload);
   },
   async setAccountName(
     { commit, state, dispatch },
