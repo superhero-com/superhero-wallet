@@ -107,9 +107,6 @@ export default store =>
             author: address,
             preferredChainName: name,
           });
-          console.log(response.challenge);
-          console.log(await sdk.signMessage('test'));
-          console.log('here');
           const signedChallenge = Buffer.from(await sdk.signMessage(response.challenge)).toString(
             'hex',
           );

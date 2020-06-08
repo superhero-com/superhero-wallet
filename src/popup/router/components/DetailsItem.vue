@@ -1,5 +1,5 @@
 <template>
-  <div class="details-row" :class="{ [direction]: direction }">
+  <div class="details-item" :class="direction">
     <label>{{ label }}</label>
     <slot />
   </div>
@@ -15,7 +15,7 @@ export default {
 </script>
 
 <style lang="scss">
-.details-row {
+.details-item {
   display: flex;
   align-items: center;
   justify-content: space-between;

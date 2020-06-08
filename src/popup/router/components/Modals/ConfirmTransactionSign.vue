@@ -36,18 +36,18 @@
       <li>
         <ae-badge>{{ txType }}</ae-badge>
       </li>
-      <DetailsRow :label="$t('pages.signTransaction.fee')">
+      <DetailsItem :label="$t('pages.signTransaction.fee')">
         <div class="balance no-sign">{{ toAe(transaction.fee) }} {{ $t('pages.appVUE.aeid') }}</div>
-      </DetailsRow>
+      </DetailsItem>
 
-      <DetailsRow :label="$t('pages.signTransaction.total')">
+      <DetailsItem :label="$t('pages.signTransaction.total')">
         <div class="balance balanceTotalSpend no-sign">
           {{ totalSpend }} {{ $t('pages.appVUE.aeid') }}
         </div>
-      </DetailsRow>
+      </DetailsItem>
 
       <template v-for="field in TX_FIELDS">
-        <DetailsRow
+        <DetailsItem
           v-if="transaction[field]"
           :key="field"
           :label="$t('modals.confirm-transaction-sign')[field]"
@@ -56,13 +56,13 @@
           <div>
             {{ transaction[field] }}
           </div>
-        </DetailsRow>
+        </DetailsItem>
       </template>
     </template>
 
     <div class="modal-confirm-btns" slot="footer">
-      <Button dark @click="cancel"> {{ $t('modals.cancel') }} </Button>
-      <Button @click="confirm"> {{ $t('modals.confirm') }} </Button>
+      <Button dark @click="cancel">{{ $t('modals.cancel') }}</Button>
+      <Button @click="confirm">{{ $t('modals.confirm') }}</Button>
     </div>
   </Modal>
 </template>
@@ -74,7 +74,7 @@ import { aettosToAe } from '../../../utils/helper';
 import Modal from '../Modal';
 import Button from '../Button';
 import UserAvatar from '../UserAvatar';
-import DetailsRow from '../DetailsRow';
+import DetailsItem from '../DetailsItem';
 
 export default {
   props: {
@@ -82,7 +82,7 @@ export default {
     reject: { type: Function, required: true },
     transaction: { type: Object, required: true },
   },
-  components: { Modal, Button, UserAvatar, DetailsRow },
+  components: { Modal, Button, UserAvatar, DetailsItem },
   data: () => ({
     TX_FIELDS: [
       'payload',

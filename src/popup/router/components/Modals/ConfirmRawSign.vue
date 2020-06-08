@@ -8,14 +8,14 @@
           {{ account.name || account.publicKey }}
         </span>
       </h3>
-      <DetailsRow :label="$t('modals.confirm-transaction-sign.data-sign')" direction="column">
+      <DetailsItem :label="$t('modals.confirm-transaction-sign.data-sign')" direction="column">
         <div>{{ dataAsString }}</div>
-      </DetailsRow>
+      </DetailsItem>
     </template>
 
     <div class="modal-confirm-btns" slot="footer">
-      <Button dark @click="cancel"> {{ $t('modals.cancel') }} </Button>
-      <Button @click="confirm"> {{ $t('modals.confirm') }} </Button>
+      <Button dark @click="cancel">{{ $t('modals.cancel') }}</Button>
+      <Button @click="confirm">{{ $t('modals.confirm') }}</Button>
     </div>
   </Modal>
 </template>
@@ -25,7 +25,7 @@ import { mapGetters } from 'vuex';
 import Modal from '../Modal';
 import Button from '../Button';
 import UserAvatar from '../UserAvatar';
-import DetailsRow from '../DetailsRow';
+import DetailsItem from '../DetailsItem';
 
 export default {
   props: {
@@ -33,7 +33,7 @@ export default {
     reject: { type: Function, required: true },
     data: { type: [String, Uint8Array], required: true },
   },
-  components: { Modal, Button, UserAvatar, DetailsRow },
+  components: { Modal, Button, UserAvatar, DetailsItem },
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
     dataAsString() {

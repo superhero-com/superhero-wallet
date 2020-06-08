@@ -47,12 +47,14 @@ export default {
   computed: {
     ...mapGetters(['sdk']),
     auctions() {
-      if (this.filter === 'soonest') return this.activeAuctions;
-      if (this.filter === 'length')
-        return this.activeAuctions.map(a => a).sort((a, b) => a.name.length - b.name.length);
-      if (this.filter === 'bid')
-        return this.activeAuctions.map(a => a).sort((a, b) => a.winning_bid - b.winning_bid);
-      return [];
+      switch (this.filter) {
+        case 'length':
+          return this.activeAuctions.map(a => a).sort((a, b) => a.name.length - b.name.length);
+        case 'bid':
+          return this.activeAuctions.map(a => a).sort((a, b) => a.winning_bid - b.winning_bid);
+        default:
+          return this.activeAuctions;
+      }
     },
   },
   async created() {
