@@ -43,8 +43,10 @@
       <b>TERMS</b>, <b>YOU</b> are agreeing to be bound by the modifications. If you don’t agree to
       be bound by the modified <b>TERMS</b>, then you should discontinue any use of the
       <b>Wallet</b>. Please contact <b>Superhero</b> via an email to
-      <a href="mailto:superherowallet@protonmail.com">superherowallet@protonmail.com</a> for the
-      provision of information about the steps for termination of your use. Please check the
+      <a @click="openUrl('mailto:superherowallet@protonmail.com', true)"
+        >superherowallet@protonmail.com</a
+      >
+      for the provision of information about the steps for termination of your use. Please check the
       Effective Date above to determine if there have been any changes since <b>YOU</b> have last
       reviewed these <b>TERMS</b>.
     </p>
@@ -109,33 +111,48 @@
           1) the <strong>application</strong> can act &nbsp;as an add-on to the web browsers
           Firefox, Chrome, Brave and Opera and contributes to the browsers&rsquo; additional
           functionalities. For Firefox:
-          <a href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/"
+          <a
+            @click="
+              openUrl('https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/', true)
+            "
             >https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/</a
           >
           ; for Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <a
-            href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related"
+            @click="
+              openUrl(
+                'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related',
+                true,
+              )
+            "
             >https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related</a
           >;
         </p>
         <p>
           2) the <strong>application</strong> can be accessed and used from any Browser at the
-          address: <a href="https://wallet.superhero.com/">https://wallet.superhero.com/</a> ;
+          address:
+          <a @click="openUrl('https://wallet.superhero.com/', true)"
+            >https://wallet.superhero.com/</a
+          >
+          ;
         </p>
         <p>
           3) the <strong>application</strong> can be downloaded from Google Play and/or App Store.
           For Google Play:
-          <a href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
+          <a
+            @click="
+              openUrl('https://play.google.com/store/apps/details?id=com.superhero.cordova', true)
+            "
             >https://play.google.com/store/apps/details?id=com.superhero.cordova</a
           >
           and for App Store:
-          <a href="https://apps.apple.com/bg/app/superhero-wallet/id1502786641"
+          <a @click="openUrl('https://apps.apple.com/bg/app/superhero-wallet/id1502786641', true)"
             >https://apps.apple.com/bg/app/superhero-wallet/id1502786641</a
           >;
         </p>
         <p>
           The results of the donations and comments are published on the website
-          <a href="https://superhero.com/">superhero.com</a> .
+          <a @click="openUrl('https://superhero.com/', true)">superhero.com</a> .
         </p>
         <p>
           1.5<strong>. &ldquo;&AElig;id&ldquo;, &ldquo;&AElig;ternity token&rdquo;</strong> or
@@ -257,7 +274,7 @@
         </p>
         <p>
           After that, the website -
-          <a href="https://superhero.com/">superhero.com</a>, reflects the
+          <a @click="openUrl('https://superhero.com/', true)">superhero.com</a>, reflects the
           <strong>USERS&rsquo;</strong> donations and comments and gives the possibility for other
           <strong>USERS</strong> to actively donate and comment on the newsfeed of the Website.
         </p>
@@ -281,7 +298,9 @@
           or fiat currencies with <strong>&AElig; tokens</strong> through partnering third-party
           platforms. A full list of these platforms, you can see in our Superhero Tutorial. Our team
           is also ready to provide detailed information when contacted through email at
-          <a href="mailto:superherowallet@protonmail.com">superherowallet@protonmail.com</a>.
+          <a @click="openUrl('mailto:superherowallet@protonmail.com', true)"
+            >superherowallet@protonmail.com</a
+          >.
         </p>
         <p>
           Please bear in mind that the third-party platforms may collect fees. They are unilaterally
@@ -452,7 +471,7 @@
         </p>
         <p>
           The <strong>name</strong> can also be used as your profile name on the Superhero website
-          <a href="https://superhero.com/">superhero.com</a>.
+          <a @click="openUrl('https://superhero.com/', true)">superhero.com</a>.
         </p>
       </div>
       <div
@@ -584,29 +603,43 @@
         </p>
         <p>
           1) downloaded as an add-on (extension) to Firefox:
-          <a href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/"
+          <a
+            @click="
+              openUrl('https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/', true)
+            "
             >https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/</a
           >
           ; to Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <a
-            href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related"
+            @click="
+              openUrl(
+                'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related',
+                true,
+              )
+            "
             >https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related</a
           >;
         </p>
         <p>
           2) accessed from any Browser at the address:
-          <a href="https://wallet.superhero.com/">https://wallet.superhero.com/</a> ;
+          <a @click="openUrl('https://wallet.superhero.com/', true)"
+            >https://wallet.superhero.com/</a
+          >
+          ;
         </p>
         <p>
           3) downloaded from Google Play:&nbsp;&nbsp;&nbsp;&nbsp;
-          <a href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
+          <a
+            @click="
+              openUrl('https://play.google.com/store/apps/details?id=com.superhero.cordova', true)
+            "
             >https://play.google.com/store/apps/details?id=com.superhero.cordova</a
           >
           and
         </p>
         <p>
           from App Store:
-          <a href="https://apps.apple.com/bg/app/superhero-wallet/id1502786641"
+          <a @click="openUrl('https://apps.apple.com/bg/app/superhero-wallet/id1502786641', true)"
             >https://apps.apple.com/bg/app/superhero-wallet/id1502786641</a
           >.
         </p>
@@ -910,6 +943,7 @@
 <script>
 import ArrowDown from '../../../icons/arrow-down.svg?vue-component';
 import ArrowRight from '../../../icons/arrow-right.svg?vue-component';
+import openUrl from '../../utils/openUrl';
 
 export default {
   components: {
@@ -964,6 +998,7 @@ export default {
           open: false,
         },
       ],
+      openUrl,
     };
   },
   methods: {
