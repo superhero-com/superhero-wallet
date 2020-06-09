@@ -7,8 +7,41 @@ import { parseFromStorage, middleware, getAllNetworks } from '../popup/utils/hel
 import { TIPPING_CONTRACT } from '../popup/utils/constants';
 import Logger from './logger';
 
+let countError = 0;
+
+async function initMiddleware() {
+  const { network, current } = store.getters;
+  store.commit('SET_MIDDLEWARE', (await middleware(network, current)).api);
+  store.dispatch('getRegisteredNames');
+}
+
+async function logout() {
+  store.commit('SET_ACTIVE_ACCOUNT', { publicKey: '', index: 0 });
+  store.commit('UNSET_SUBACCOUNTS');
+  store.commit('UPDATE_ACCOUNT', {});
+  store.commit('SWITCH_LOGGED_IN', false);
+}
+
+async function getKeyPair() {
+  const { activeAccount } = store.getters;
+  const { account } = store.getters;
+  const res = await postMessage({ type: 'getKeypair', payload: { activeAccount, account } });
+  return res.error ? { error: true } : parseFromStorage(res);
+}
+
+async function initContractInstances() {
+  if (!store.getters.mainnet && !process.env.RUNNING_IN_TESTS) return;
+  const contractAddress = await store.dispatch('getTipContractAddress');
+  store.commit(
+    'SET_TIPPING',
+    await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, {
+      contractAddress,
+      forceCodeCheck: true,
+    }),
+  );
+}
+
 export default {
-  countError: 0,
   async init() {
     const { account } = store.getters;
     if (isEmpty(account)) {
@@ -28,15 +61,10 @@ export default {
     store.commit('SET_MAIN_LOADING', false);
     return { loggedIn: true };
   },
-  async initMiddleware() {
-    const { network, current } = store.getters;
-    store.commit('SET_MIDDLEWARE', (await middleware(network, current)).api);
-    store.dispatch('getRegisteredNames');
-  },
   async initSdk() {
-    const keypair = await this.getKeyPair();
+    const keypair = await getKeyPair();
     if (keypair.error) {
-      await this.logout();
+      await logout();
       return;
     }
 
@@ -81,40 +109,17 @@ export default {
         compilerUrl,
       });
       await store.dispatch('initSdk', sdk);
-      await this.initContractInstances();
-      await this.initMiddleware();
+      await initContractInstances();
+      await initMiddleware();
       store.commit('SET_NODE_STATUS', 'connected');
       setTimeout(() => store.commit('SET_NODE_STATUS', ''), 2000);
     } catch (e) {
-      this.countError += 1;
-      if (this.countError < 3) await this.initSdk();
+      countError += 1;
+      if (countError < 3) await this.initSdk();
       else {
         store.commit('SET_NODE_STATUS', 'error');
         Logger.write(e);
       }
     }
-  },
-  async logout() {
-    store.commit('SET_ACTIVE_ACCOUNT', { publicKey: '', index: 0 });
-    store.commit('UNSET_SUBACCOUNTS');
-    store.commit('UPDATE_ACCOUNT', {});
-    store.commit('SWITCH_LOGGED_IN', false);
-  },
-  async getKeyPair() {
-    const { activeAccount } = store.getters;
-    const { account } = store.getters;
-    const res = await postMessage({ type: 'getKeypair', payload: { activeAccount, account } });
-    return res.error ? { error: true } : parseFromStorage(res);
-  },
-  async initContractInstances() {
-    if (!store.getters.mainnet && !process.env.RUNNING_IN_TESTS) return;
-    const contractAddress = await store.dispatch('getTipContractAddress');
-    store.commit(
-      'SET_TIPPING',
-      await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, {
-        contractAddress,
-        forceCodeCheck: true,
-      }),
-    );
   },
 };

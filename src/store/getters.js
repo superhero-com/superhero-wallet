@@ -46,12 +46,6 @@ export default {
   transactions(state) {
     return state.transactions;
   },
-  pendingTransactions(state) {
-    return state.transactions.pending;
-  },
-  wallet(state) {
-    return state.wallet;
-  },
   activeAccount(state) {
     return state.activeAccount;
   },
@@ -76,14 +70,8 @@ export default {
       ? state.tokens[state.current.token].balance.toFixed(2)
       : state.balance.toFixed(2);
   },
-  tokenSymbol() {
-    return 'AE';
-  },
   aeppPopup(state) {
     return state.aeppPopup;
-  },
-  ledgerApi(state) {
-    return state.ledgerApi;
   },
   isLedger(state) {
     if (state.subaccounts.length > 0) {
@@ -91,14 +79,8 @@ export default {
     }
     return state.subaccounts;
   },
-  txAdvancedMode({ txAdvancedMode }) {
-    return txAdvancedMode;
-  },
   tipping({ tipping }) {
     return tipping;
-  },
-  tippingReceiver({ tippingReceiver }) {
-    return tippingReceiver;
   },
   mainLoading({ mainLoading }) {
     return mainLoading;

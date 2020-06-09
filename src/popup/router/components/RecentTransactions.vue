@@ -31,6 +31,7 @@
 import { mapGetters, mapState } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
 import PendingTxs from './PendingTxs';
+import { UPDATE_LATEST_TRANSACTIONS } from '../../../store/mutation-types';
 
 export default {
   components: {
@@ -53,8 +54,8 @@ export default {
   },
   methods: {
     async updateTransactions() {
-      this.$store.dispatch(
-        'updateLatestTransactions',
+      this.$store.commit(
+        UPDATE_LATEST_TRANSACTIONS,
         await this.$store.dispatch('fetchTransactions', {
           limit: 3,
           page: 1,
