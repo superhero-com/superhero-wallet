@@ -27,8 +27,8 @@ export default {
   margin-bottom: 30px;
   justify-content: space-between;
 
-  a {
-    line-height: 36px !important;
+  a.primary-button {
+    line-height: 36px;
   }
 }
 </style>

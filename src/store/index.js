@@ -9,7 +9,7 @@ import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
 import accounts from './plugins/account';
 import tokens from './plugins/tokens';
-import namesModule from './plugins/names';
+import names from './plugins/names';
 import runMigrations from './migrations';
 import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
 
@@ -96,7 +96,7 @@ export default new Vuex.Store({
         subaccounts,
         currencies,
         userNetworks,
-        names: { owned, defaults },
+        names: { owned, defaults = {} },
         nextCurrenciesFetch,
         tip,
         notificationsCounter,
@@ -134,6 +134,6 @@ export default new Vuex.Store({
     tipUrl,
     accounts,
     tokens,
-    namesModule,
+    names,
   ],
 });

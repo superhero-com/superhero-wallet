@@ -104,12 +104,12 @@ export default {
       return this.transaction.contractId || this.transaction.recipientId || '';
     },
     showAddress() {
-      return (
-        this.txType === TX_TYPE.contractCreate ||
-        this.txType === TX_TYPE.namePreClaim ||
-        this.txType === TX_TYPE.nameClaim ||
-        this.txType === TX_TYPE.nameUpdate
-      );
+      return [
+        TX_TYPE.contractCreate,
+        TX_TYPE.namePreClaim,
+        TX_TYPE.nameClaim,
+        TX_TYPE.nameUpdate,
+      ].includes(this.txType);
     },
     txType() {
       return OBJECT_ID_TX_TYPE[this.transaction.tag];

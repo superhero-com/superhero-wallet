@@ -22,7 +22,7 @@
         {{ $t('pages.names.auctions.remaining-time') }}
       </span>
       <span>
-        {{ blocksToRelativeTime(expiration - topBlockHeight) }}
+        {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
       </span>
     </div>
     <Loader v-if="loading" />
@@ -64,10 +64,11 @@ export default {
       }
     },
   },
+  filters: { blocksToRelativeTime },
   async created() {
     this.loading = true;
     await this.$watchUntilTruly(() => this.middleware);
-    this.topBlockHeight = await this.$store.dispatch('names/getHeight');
+    this.topBlockHeight = await this.$store.dispatch('getHeight');
     this.updateAuctionEntry();
     this.loading = false;
   },

@@ -25,7 +25,6 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { getAddressByNameEntry } from '../../../utils/helper';
 import NameListHeader from '../../components/NameListHeader';
 import Badge from '../../components/Badge';
 import NameRow from '../../components/NameRow';
@@ -40,11 +39,6 @@ export default {
     this.$store.dispatch('names/fetchOwned');
     const id = setInterval(() => this.$store.dispatch('names/fetchOwned'), 10000);
     this.$once('hook:destroyed', () => clearInterval(id));
-  },
-  methods: {
-    address(name) {
-      return getAddressByNameEntry(name);
-    },
   },
 };
 </script>

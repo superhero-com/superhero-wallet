@@ -42,7 +42,7 @@ export default {
   margin: 8px auto;
   color: $button-text-color !important;
   font-weight: normal !important;
-  line-height: 40px !important;
+  line-height: 40px;
   max-height: 40px;
 
   span {
@@ -70,7 +70,7 @@ export default {
 
   &.small {
     width: auto !important;
-    line-height: 1px !important;
+    line-height: 1px;
     padding: 10px;
     font-size: 12px;
   }
@@ -79,7 +79,7 @@ export default {
     width: 32% !important;
     margin: 0 !important;
     max-height: 100px;
-    line-height: normal !important;
+    line-height: normal;
     padding: 5px;
     word-break: break-word;
     display: inline-block;

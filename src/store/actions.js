@@ -106,7 +106,6 @@ export default {
         publicKey: keypair.publicKey,
         balance: 0,
         root: true,
-        aename: null,
       },
     ];
     commit('SET_ACTIVE_ACCOUNT', { publicKey: keypair.publicKey, index: 0 });
@@ -187,5 +186,8 @@ export default {
       : tipContract;
     commit('SET_TIPPING_ADDRESS', contractAddress);
     return contractAddress;
+  },
+  async getHeight({ state: { sdk } }) {
+    return (await sdk.topBlock()).height;
   },
 };

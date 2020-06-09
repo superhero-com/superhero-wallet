@@ -25,8 +25,9 @@ export default store =>
       set(state, names) {
         state.owned = names;
       },
-      setDefault({ defaults }, { address, networkId, name }) {
-        Vue.set(defaults, `${address}-${networkId}`, name);
+      setDefault(state, { address, networkId, name }) {
+        const nameDefault = { [`${address}-${networkId}`]: name };
+        state.defaults = { ...(state.defaults || {}), ...nameDefault };
       },
     },
     actions: {
@@ -126,9 +127,6 @@ export default store =>
             else throw e;
           }
         }
-      },
-      async getHeight({ rootState: { sdk } }) {
-        return (await sdk.topBlock()).height;
       },
     },
   });

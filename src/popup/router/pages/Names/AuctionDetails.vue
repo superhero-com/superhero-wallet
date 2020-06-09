@@ -5,7 +5,7 @@
     <template v-else>
       <div class="section-title">
         {{ $t('pages.names.auctions.expires') }}
-        {{ blocksToRelativeTime(expiration - topBlockHeight) }}
+        {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
       </div>
 
       <div class="section-title">{{ $t('pages.names.auctions.current-bid') }}</div>
@@ -55,9 +55,10 @@ export default {
       return this.bids.filter(bid => bid !== this.currentBid);
     },
   },
+  filters: { blocksToRelativeTime },
   async mounted() {
     await this.$watchUntilTruly(() => this.sdk);
-    this.topBlockHeight = await this.$store.dispatch('names/getHeight');
+    this.topBlockHeight = await this.$store.dispatch('getHeight');
     const id = setInterval(() => this.updateAuctionEntry(), 3000);
     this.$once('hook:destroyed', () => clearInterval(id));
     this.$watch(

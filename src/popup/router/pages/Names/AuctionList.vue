@@ -22,7 +22,7 @@
         <div class="name">{{ name }}</div>
         <div class="expiration">
           {{ $t('pages.names.auctions.expires') }}
-          {{ blocksToRelativeTime(expiration - topBlockHeight) }}
+          {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
         </div>
       </NameRow>
     </ul>
@@ -57,13 +57,11 @@ export default {
       }
     },
   },
+  filters: { blocksToRelativeTime },
   async created() {
     await this.$watchUntilTruly(() => this.sdk);
-    this.topBlockHeight = await this.$store.dispatch('names/getHeight');
+    this.topBlockHeight = await this.$store.dispatch('getHeight');
     this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');
-  },
-  methods: {
-    blocksToRelativeTime,
   },
 };
 </script>
