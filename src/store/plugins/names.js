@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import { aettosToAe } from '../../popup/utils/helper';
