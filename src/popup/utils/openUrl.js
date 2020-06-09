@@ -1,6 +1,6 @@
 /* globals cordova */
 
-export default url => {
+export default (url, newTab) => {
   switch (process.env.PLATFORM) {
     case 'extension-chrome':
     case 'extension-firefox':
@@ -12,7 +12,11 @@ export default url => {
       });
       break;
     case 'web':
-      window.location = url;
+      if (newTab) {
+        window.open(url);
+      } else {
+        window.location = url;
+      }
       break;
     default:
       throw new Error(`Unknown platform: ${process.env.PLATFORM}`);

@@ -34,29 +34,43 @@
           </p>
           <p>
             1) downloaded as an add-on (extension) to Firefox:
-            <a href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/"
+            <a
+              @click="
+                openUrl('https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/', true)
+              "
               >https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/</a
             >
             ; to Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <a
-              href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related"
+              @click="
+                openUrl(
+                  'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related',
+                  true,
+                )
+              "
               >https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related</a
             >;
           </p>
           <p>
             2) accessed from any Browser at the address:
-            <a href="https://wallet.superhero.com/">https://wallet.superhero.com/</a> ;
+            <a @click="openUrl('https://wallet.superhero.com/', true)"
+              >https://wallet.superhero.com/</a
+            >
+            ;
           </p>
           <p>
             3) downloaded from Google Play:&nbsp;&nbsp;&nbsp;&nbsp;
-            <a href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
+            <a
+              @click="
+                openUrl('https://play.google.com/store/apps/details?id=com.superhero.cordova', true)
+              "
               >https://play.google.com/store/apps/details?id=com.superhero.cordova</a
             >
             and
           </p>
           <p>
             from App Store:
-            <a href="https://apps.apple.com/bg/app/superhero-wallet/id1502786641"
+            <a @click="openUrl('https://apps.apple.com/bg/app/superhero-wallet/id1502786641', true)"
               >https://apps.apple.com/bg/app/superhero-wallet/id1502786641</a
             >.
           </p>
@@ -345,13 +359,25 @@
           <p>
             To contact us with your questions or comments regarding this <strong>Policy</strong>,
             please email us at&nbsp;
-            <a href="mailto:superherowallet@protonmail.com">superherowallet@protonmail.com</a>.
+            <a @click="openUrl('mailto:superherowallet@protonmail.com', true)">
+              superherowallet@protonmail.com</a
+            >.
           </p>
         </li>
       </ol>
     </div>
   </div>
 </template>
+
+<script>
+import openUrl from '../../utils/openUrl';
+
+export default {
+  data: () => ({
+    openUrl,
+  }),
+};
+</script>
 
 <style lang="scss" scoped>
 .privacypolicy--content {
