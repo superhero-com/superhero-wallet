@@ -7,15 +7,17 @@ export default {
       } = store;
       const networks = {
         ...network,
-        ...state.userNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {}),
+        ...(state.userNetworks || []).reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {}),
       };
-
-      const { networkId } = networks[state.current.network];
+      const net = process.env.RUNNING_IN_TESTS ? 'Testnet' : state.current.network;
+      const { networkId } = networks[net];
       setTimeout(() => {
-        state.subaccounts.forEach(({ aename, publicKey }) => {
-          if (aename) commit('names/setDefault', { address: publicKey, name: aename, networkId });
-        });
-        resolve();
+        if (state.subaccounts) {
+          state.subaccounts.forEach(({ aename, publicKey }) => {
+            if (aename) commit('names/setDefault', { address: publicKey, name: aename, networkId });
+          });
+          resolve();
+        }
       }, 1000);
     });
   },
