@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import { aettosToAe } from '../../popup/utils/helper';
@@ -24,9 +25,8 @@ export default store =>
       set(state, names) {
         state.owned = names;
       },
-      setDefault(state, { address, networkId, name }) {
-        const nameDefault = { [`${address}-${networkId}`]: name };
-        state.defaults = { ...(state.defaults || {}), ...nameDefault };
+      setDefault({ defaults }, { address, networkId, name }) {
+        Vue.set(defaults, `${address}-${networkId}`, name);
       },
     },
     actions: {

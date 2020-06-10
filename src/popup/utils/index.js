@@ -37,7 +37,6 @@ export const mockLogin = async (options = {}) => {
       publicKey: keypair.publicKey,
       balance: 10,
       root: true,
-      aename: options.name ? options.name : null,
     },
   ];
   if (options.tx) await browser.storage.local.set({ transactions: { pending: [options.tx] } });

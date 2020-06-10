@@ -96,7 +96,7 @@ export default new Vuex.Store({
         subaccounts,
         currencies,
         userNetworks,
-        names: { owned, defaults = {} },
+        names: { owned, defaults } = {},
         nextCurrenciesFetch,
         tip,
         notificationsCounter,
