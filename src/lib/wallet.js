@@ -12,7 +12,7 @@ let countError = 0;
 async function initMiddleware() {
   const { network, current } = store.getters;
   store.commit('SET_MIDDLEWARE', (await middleware(network, current)).api);
-  store.dispatch('getRegisteredNames');
+  store.dispatch('names/fetchOwned');
 }
 
 async function logout() {

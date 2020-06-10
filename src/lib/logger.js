@@ -34,7 +34,8 @@ export default class Logger {
       if (
         (typeof promise.reason === 'string' &&
           promise.reason.includes('CompileError: WebAssembly.instantiate()')) ||
-        name === 'NavigationDuplicated'
+        name === 'NavigationDuplicated' ||
+        message === 'Rejected by user'
       )
         return;
       Logger.write({

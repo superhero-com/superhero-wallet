@@ -25,8 +25,6 @@ describe('Test cases for Account Page', () => {
     cy.get('[data-cy="account-name"]')
       .should('be.visible')
       .click()
-      .get('[data-cy=names-container]')
-      .should('be.visible')
       .get('[data-cy="back-arrow"]')
       .click()
 

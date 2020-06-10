@@ -4,7 +4,7 @@
     :to="to"
     class="primary-button"
     @click="$emit('click')"
-    :class="{ disabled, extend, half, small, onboarding, dark, third, inline }"
+    :class="{ disabled, extend, half, small, onboarding, dark, third, inline, inactive }"
   >
     <slot />
   </Component>
@@ -21,6 +21,7 @@ export default {
     onboarding: Boolean,
     dark: Boolean,
     inline: Boolean,
+    inactive: Boolean,
     to: [String, Object],
   },
 };
@@ -41,7 +42,7 @@ export default {
   margin: 8px auto;
   color: $button-text-color !important;
   font-weight: normal !important;
-  line-height: 40px !important;
+  line-height: 40px;
   max-height: 40px;
 
   span {
@@ -69,7 +70,7 @@ export default {
 
   &.small {
     width: auto !important;
-    line-height: 1px !important;
+    line-height: 1px;
     padding: 10px;
     font-size: 12px;
   }
@@ -78,7 +79,7 @@ export default {
     width: 32% !important;
     margin: 0 !important;
     max-height: 100px;
-    line-height: normal !important;
+    line-height: normal;
     padding: 5px;
     word-break: break-word;
     display: inline-block;
@@ -130,6 +131,10 @@ export default {
     padding: 0 20px;
     width: auto !important;
     margin: 8px 10px;
+  }
+
+  &.inactive {
+    opacity: 0.4;
   }
 }
 </style>

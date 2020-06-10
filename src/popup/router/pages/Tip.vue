@@ -40,7 +40,7 @@
           :amountError="amountError"
           @changeAmount="val => (amount = val)"
           :value="amount"
-          :errorMsg="amount && amount < minTipAmount"
+          :errorMsg="amount && amount < minTipAmount ? $t('pages.tipPage.minAmountError') : ''"
         />
         <Textarea
           v-model="note"

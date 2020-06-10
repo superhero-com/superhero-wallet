@@ -105,7 +105,7 @@ input.input {
 }
 
 .input-group {
-  width: 80%;
+  width: 85%;
   position: relative;
   display: inline-block;
   margin: 8px auto;

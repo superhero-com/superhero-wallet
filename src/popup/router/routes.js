@@ -4,7 +4,6 @@ import PopupSignTransaction from './pages/Popups/SignTx';
 import PopupConnect from './pages/Popups/Connect';
 import PopupAskAccounts from './pages/Popups/AskAccounts';
 import PopupMessageSign from './pages/Popups/MessageSign';
-import SignTransaction from './pages/SignTransaction';
 import Settings from './pages/Settings';
 import GeneralSettings from './pages/GeneralSettings';
 import SecuritySettings from './pages/SecuritySettings';
@@ -21,8 +20,7 @@ import Send from './pages/Send';
 import Receive from './pages/Receive';
 import SuccessTip from './pages/SuccessTip';
 import Notifications from './pages/Notifications';
-import Names from './pages/Names';
-import AuctionBid from './pages/AuctionBid';
+
 import Networks from './pages/Networks';
 import CommentNew from './pages/CommentNew';
 import NotFound from './pages/NotFound';
@@ -37,6 +35,12 @@ import Allowances from './pages/FungibleTokens/Allowances';
 import ManageAllowances from './pages/FungibleTokens/ManageAllowances';
 import AllAllowances from './pages/FungibleTokens/AllAllowances';
 import SignMessage from './pages/SignMessage';
+import NamesList from './pages/Names/List';
+import NameClaim from './pages/Names/Claim';
+import NamesDetails from './pages/Names/Details';
+import AuctionList from './pages/Names/AuctionList';
+import AuctionDetails from './pages/Names/AuctionDetails';
+import AuctionBid from './pages/Names/AuctionBid';
 
 export default [
   {
@@ -53,15 +57,6 @@ export default [
     path: '/account',
     name: 'account',
     component: Account,
-  },
-  {
-    name: 'sign',
-    path: '/sign-transaction/:type?',
-    component: SignTransaction,
-    props: true,
-    meta: {
-      notPersist: true,
-    },
   },
   {
     name: 'popup-sign-tx',
@@ -236,21 +231,58 @@ export default [
   },
   {
     path: '/names',
-    component: Names,
+    component: NamesList,
     props: true,
-    name: 'names',
+    name: 'name-list',
     meta: {
       title: 'names',
     },
   },
   {
-    name: 'auction-bid',
-    path: '/auction-bid',
-    component: AuctionBid,
+    path: '/names/claim',
+    component: NameClaim,
+    props: true,
+    name: 'name-claim',
+    meta: {
+      title: 'names',
+    },
+  },
+  {
+    path: '/name/:name',
+    component: NamesDetails,
+    props: true,
+    name: 'name-details',
+    meta: {
+      title: 'names',
+      notPersist: true,
+    },
+  },
+  {
+    path: '/names/auctions',
+    component: AuctionList,
+    props: true,
+    name: 'auction-list',
+    meta: {
+      title: 'names',
+    },
+  },
+  {
+    name: 'auction-details',
+    path: '/names/auction/:name',
+    component: AuctionDetails,
     props: true,
     meta: {
       title: 'bidding',
       notPersist: true,
+    },
+  },
+  {
+    path: '/names/bid/:name',
+    component: AuctionBid,
+    props: true,
+    name: 'auction-bid',
+    meta: {
+      title: 'names',
     },
   },
   {
