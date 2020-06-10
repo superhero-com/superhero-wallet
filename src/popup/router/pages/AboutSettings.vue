@@ -3,7 +3,16 @@
     <Logo class="logo" />
     <p>
       {{ $t('pages.aboutSettings.systemName') }}
-      <span class="version">{{ extensionVersion }}</span>
+      <span class="version">
+        <a
+          @click="
+            openUrl(`https://github.com/aeternity/superhero-wallet/commit/${commitHash}`, true)
+          "
+        >
+          {{ commitHash.slice(0, 7) }}</a
+        ><!--eslint-disable-line vue-i18n/no-raw-text-->
+        / {{ extensionVersion }}
+      </span>
     </p>
     <hr />
     <div class="waellet-links">
@@ -32,6 +41,8 @@ export default {
     return {
       bugReportURL: 'https://thesuperherowallet.typeform.com/to/vh8Ffu',
       extensionVersion: `v.${process.env.npm_package_version}`,
+      commitHash: process.env.COMMIT_HASH,
+      openUrl,
     };
   },
   methods: {
