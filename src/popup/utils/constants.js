@@ -126,9 +126,9 @@ export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
 export const NO_POPUP_AEPPS = [
   'youdonotneedacapetobeahero.com',
   'superhero.com',
-  'localhost',
   'alpha.superhero.com',
   'beta.superhero.com',
+  ...(process.env.NODE_ENV === 'development' ? ['localhost'] : []),
 ];
 
 export const BLACKLIST_AEPPS = ['coronanews.org'];

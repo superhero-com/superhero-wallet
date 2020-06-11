@@ -1,6 +1,6 @@
 <template>
   <div class="details-item" :class="direction">
-    <label>{{ label }}</label>
+    <label v-if="label">{{ label }}</label>
     <slot />
   </div>
 </template>
@@ -8,7 +8,7 @@
 <script>
 export default {
   props: {
-    label: { type: String, required: true },
+    label: { type: String, required: false },
     direction: { type: String, required: false },
   },
 };
