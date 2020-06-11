@@ -1,10 +1,17 @@
 import Node from '@aeternity/aepp-sdk/es/node';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
+import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import { isEmpty } from 'lodash-es';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
-import { parseFromStorage, middleware, getAllNetworks } from '../popup/utils/helper';
-import { TIPPING_CONTRACT } from '../popup/utils/constants';
+import {
+  parseFromStorage,
+  middleware,
+  getAllNetworks,
+  IN_FRAME,
+  extractHostName,
+} from '../popup/utils/helper';
+import { TIPPING_CONTRACT, NO_POPUP_AEPPS } from '../popup/utils/constants';
 import Logger from './logger';
 
 let countError = 0;
@@ -76,38 +83,41 @@ export default {
     });
     const account = MemoryAccount({ keypair });
     try {
-      const [Ae, ChainNode, Transaction, Contract, Aens, Oracle, GeneralizeAccount] = (
-        await Promise.all([
-          import('@aeternity/aepp-sdk/es/ae'),
-          import('@aeternity/aepp-sdk/es/chain/node'),
-          import('@aeternity/aepp-sdk/es/tx/tx'),
-          import('@aeternity/aepp-sdk/es/ae/contract'),
-          import('@aeternity/aepp-sdk/es/ae/aens'),
-          import('@aeternity/aepp-sdk/es/ae/oracle'),
-          import('@aeternity/aepp-sdk/es/contract/ga'),
-        ])
-      ).map(module => module.default);
-      const sdk = await Ae.compose(
-        ChainNode,
-        Transaction,
-        Contract,
-        Aens,
-        Oracle,
-        GeneralizeAccount,
-        {
-          methods: {
-            address: async () => store.getters.account.publicKey,
-            sign: data => store.dispatch('accounts/sign', data),
-            signTransaction: (txBase64, opt) =>
-              store.dispatch('accounts/signTransaction', { txBase64, opt }),
-          },
+      const { RpcWallet } = await import('@aeternity/aepp-sdk/es/ae/wallet');
+      const acceptCb = (_, { accept }) => accept();
+      const sdk = await RpcWallet.compose({
+        methods: {
+          address: async () => store.getters.account.publicKey,
+          sign: data => store.dispatch('accounts/sign', data),
+          signTransaction: (txBase64, opt) =>
+            store.dispatch('accounts/signTransaction', { txBase64, opt }),
         },
-      )({
+      })({
         nodes: [{ name: current.network, instance: node }],
         accounts: [account],
         nativeMode: true,
         compilerUrl,
+        name: 'Superhero',
+        onConnection(client, { accept, deny }, origin) {
+          if (NO_POPUP_AEPPS.includes(extractHostName(origin))) accept();
+          else deny();
+        },
+        onSubscription: acceptCb,
+        onSign: acceptCb,
+        onMessageSign: acceptCb,
+        onAskAccounts: acceptCb,
+        onDisconnect(msg, client) {
+          client.disconnect();
+        },
       });
+
+      if (IN_FRAME) {
+        const connection = BrowserWindowMessageConnection({ target: window.parent });
+        sdk.addRpcClient(connection);
+        sdk.shareWalletInfo(connection.sendMessage.bind(connection));
+        setTimeout(() => sdk.shareWalletInfo(connection.sendMessage.bind(connection)), 3000);
+      }
+
       await store.dispatch('initSdk', sdk);
       await initContractInstances();
       await initMiddleware();

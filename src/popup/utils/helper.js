@@ -52,6 +52,8 @@ export const shuffleArray = array => {
   return shuffle;
 };
 
+export const IN_FRAME = window.parent !== window;
+
 export const convertToAE = balance => +(balance / 10 ** 18).toFixed(7);
 
 export const toURL = url => new URL(url.includes('://') ? url : `https://${url}`);
