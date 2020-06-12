@@ -11,21 +11,23 @@
         <p>{{ $t('pages.connectConfirm.addressesRequest') }}</p>
       </ae-list-item>
     </ul>
-    <ae-button-group class="btnFixed">
-      <ae-button face="round" fill="primary" @click="cancel">{{
-        $t('pages.connectConfirm.cancelButton')
-      }}</ae-button>
-      <ae-button face="round" fill="alternative" @click="connect">{{
-        $t('pages.connectConfirm.confirmButton')
-      }}</ae-button>
-    </ae-button-group>
+    <div class="btnFixed">
+      <Button half dark @click="cancel" :disabled="!data.reject">
+        {{ $t('pages.connectConfirm.cancelButton') }}
+      </Button>
+      <Button half @click="connect" :disabled="!data.resolve">
+        {{ $t('pages.connectConfirm.confirmButton') }}
+      </Button>
+    </div>
   </div>
 </template>
 
 <script>
 import getPopupProps from '../../../utils/getPopupProps';
+import Button from '../../components/Button';
 
 export default {
+  components: { Button },
   data() {
     return {
       data: {},
