@@ -40,7 +40,7 @@ export default {
   },
   methods: {
     cancel() {
-      this.reject(new Error('reject'));
+      this.reject(new Error('Rejected by user'));
     },
     createReport() {
       this.resolve(true);

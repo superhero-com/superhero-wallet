@@ -16,7 +16,7 @@ export default store =>
         return Crypto.sign(data, Buffer.from(secretKey, 'hex'));
       },
       async confirmRawDataSigning({ dispatch }, data) {
-        await dispatch('modals/open', { name: 'confirmSign', data }, { root: true });
+        await dispatch('modals/open', { name: 'confirm-raw-sign', data }, { root: true });
 
         return data;
       },

@@ -71,7 +71,7 @@ describe('Tests cases for AEX-2 popups', () => {
       } else if (txType === 'contractCallTx') {
         receiver = tx.contractId;
       } else {
-        receiver = 'New Contract';
+        receiver = 'Contract create';
       }
       cy.openAex2Popup('sign', txType)
         .get('[data-cy=tx-type]')

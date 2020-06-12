@@ -37,14 +37,17 @@ export const mockLogin = async (options = {}) => {
       publicKey: keypair.publicKey,
       balance: 10,
       root: true,
-      aename: options.name ? options.name : null,
     },
   ];
   if (options.tx) await browser.storage.local.set({ transactions: { pending: [options.tx] } });
   if (options.balance) await browser.storage.local.set({ balance: options.balance });
   if (options.lastRoute) await localStorage.setItem('lsroute', options.lastRoute);
   if (options.backupSeed) await browser.storage.local.set({ backed_up_Seed: true });
-
+  if (options.name) {
+    await browser.storage.local.set({
+      state: { names: { defaults: { [`${keypair.publicKey}-ae_uat`]: options.name } } },
+    });
+  }
   await browser.storage.local.set({ subaccounts: sub, mnemonic });
 };
 

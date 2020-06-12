@@ -30,7 +30,7 @@ export default {
       this.resolve(true);
     },
     cancel() {
-      this.reject(new Error('reject'));
+      this.reject(new Error('Rejected by user'));
     },
   },
 };

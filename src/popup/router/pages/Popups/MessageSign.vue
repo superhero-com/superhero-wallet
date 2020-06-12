@@ -17,12 +17,12 @@
       </ae-list-item>
     </ul>
     <div class="btnFixed">
-      <Button half @click="cancel" data-cy="deny" class="reject">{{
-        $t('pages.signTransaction.reject')
-      }}</Button>
-      <Button half @click="accept" data-cy="accept">{{
-        $t('pages.signTransaction.confirm')
-      }}</Button>
+      <Button half dark @click="cancel" :disabled="!data.reject" data-cy="deny">
+        {{ $t('pages.signTransaction.reject') }}
+      </Button>
+      <Button half @click="accept" :disabled="!data.resolve" data-cy="accept">
+        {{ $t('pages.signTransaction.confirm') }}
+      </Button>
     </div>
   </div>
 </template>

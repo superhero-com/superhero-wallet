@@ -1,7 +1,7 @@
+import { detect } from 'detect-browser';
 import iconUrl from './icons/icon_48.png';
 import { getSDK, getNodes } from './lib/background-utils';
 import { NOTIFICATION_METHODS } from './popup/utils/constants';
-import { detectBrowser } from './popup/utils/helper';
 import { getState } from './store/plugins/persistState';
 
 global.browser = require('webextension-polyfill');
@@ -21,7 +21,7 @@ async function sendNoti({ title, message, contextMessage, error }) {
     message,
     priority: 2,
   };
-  if (detectBrowser() !== 'Firefox') {
+  if (detect() !== 'firefox') {
     if (!error) {
       params = {
         ...params,

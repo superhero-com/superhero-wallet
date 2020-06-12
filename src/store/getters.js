@@ -46,18 +46,11 @@ export default {
   transactions(state) {
     return state.transactions;
   },
-  pendingTransactions(state) {
-    return state.transactions.pending;
-  },
-  wallet(state) {
-    return state.wallet;
-  },
   activeAccount(state) {
     return state.activeAccount;
   },
-  activeAccountName(state) {
-    const account = state.subaccounts.find(s => s.publicKey === state.account.publicKey) || {};
-    return account.aename || account.name || '';
+  activeAccountName({ account }, getters) {
+    return getters['names/getDefault'](account.publicKey) || 'Main account';
   },
   allowTipping(state, { mainnet }) {
     return mainnet || process.env.RUNNING_IN_TESTS;
@@ -76,14 +69,8 @@ export default {
       ? state.tokens[state.current.token].balance.toFixed(2)
       : state.balance.toFixed(2);
   },
-  tokenSymbol() {
-    return 'AE';
-  },
   aeppPopup(state) {
     return state.aeppPopup;
-  },
-  ledgerApi(state) {
-    return state.ledgerApi;
   },
   isLedger(state) {
     if (state.subaccounts.length > 0) {
@@ -91,14 +78,8 @@ export default {
     }
     return state.subaccounts;
   },
-  txAdvancedMode({ txAdvancedMode }) {
-    return txAdvancedMode;
-  },
   tipping({ tipping }) {
     return tipping;
-  },
-  tippingReceiver({ tippingReceiver }) {
-    return tippingReceiver;
   },
   mainLoading({ mainLoading }) {
     return mainLoading;

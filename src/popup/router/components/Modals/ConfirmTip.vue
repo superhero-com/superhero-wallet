@@ -33,7 +33,7 @@ export default {
       this.resolve(true);
     },
     cancelTip() {
-      this.reject(new Error('reject'));
+      this.reject(new Error('Rejected by user'));
     },
   },
 };

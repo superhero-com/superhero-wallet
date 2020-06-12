@@ -8,6 +8,9 @@ const ChromeExtensionReloader = require('webpack-chrome-extension-reloader');
 const { VueLoaderPlugin } = require('vue-loader');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const GenerateJsonPlugin = require('generate-json-webpack-plugin');
+const commitHash = require('child_process')
+  .execSync('git rev-parse HEAD')
+  .toString().trim();
 const genManifest = require('./src/manifest');
 
 const parseBool = val => (val ? JSON.parse(val) : false);
@@ -135,6 +138,7 @@ const getConfig = platform => {
           npm_package_version: JSON.stringify(process.env.npm_package_version),
           NETWORK: JSON.stringify(process.env.NETWORK),
           RUNNING_IN_TESTS,
+          COMMIT_HASH: JSON.stringify(commitHash),
         },
       }),
       ...(platform.startsWith('extension-')

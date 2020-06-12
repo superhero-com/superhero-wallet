@@ -138,7 +138,6 @@ export default {
     'current',
     'transactions',
     'subaccounts',
-    'wallet',
     'activeAccountName',
     'activeAccount',
     'mnemonic',

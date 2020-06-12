@@ -42,6 +42,7 @@ export default store => {
       open({ commit }, { name, allowRedirect, ...props }) {
         if (!modals[name])
           return Promise.reject(new Error(`Modal with name "${name}" not registered`));
+        if (props.msg === 'Rejected by user') return Promise.reject(new Error('Rejected by user'));
         const key = modalCounter;
         modalCounter += 1;
         return new Promise((resolve, reject) =>

@@ -16,12 +16,4 @@ describe('Test cases for Top Up Page', () => {
       .click()
       .urlEquals('/account');
   });
-
-  it('Check Claim-Name Button', () => {
-    cy.get('[data-cy="account-name"]')
-      .should('be.visible')
-      .click()
-      .get('[data-cy=names-container]')
-      .should('be.visible');
-  });
 });
