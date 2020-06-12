@@ -21,7 +21,7 @@ async function sendNoti({ title, message, contextMessage, error }) {
     message,
     priority: 2,
   };
-  if (detect() !== 'firefox') {
+  if (detect().name !== 'firefox') {
     if (!error) {
       params = {
         ...params,
