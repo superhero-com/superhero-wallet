@@ -135,7 +135,7 @@ const rpcWallet = {
       }
       this.tipContractAddress = this.tipContractAddress.includes('.chain')
         ? getAddressByNameEntry(
-            await this.sdk.api.getNameEntryByName(this.tipContractAddress),
+            await this.sdk.api.getNameEntryByName(this.tipContractAddress).catch(() => false),
             'contract_pubkey',
           )
         : this.tipContractAddress;

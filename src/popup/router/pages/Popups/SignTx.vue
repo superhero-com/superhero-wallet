@@ -11,13 +11,13 @@
     </SignDetailsList>
 
     <div class="btnFixed">
-      <Button dark half @click="cancel" data-cy="deny">
+      <Button dark half @click="cancel" :disabled="!props.reject" data-cy="deny">
         {{ $t('pages.signTransaction.reject') }}
       </Button>
       <Button
         half
         @click="sign"
-        :disabled="Number.isNaN(+tx.amount) || tx.amount < 0"
+        :disabled="Number.isNaN(+tx.amount) || tx.amount < 0 || !props.resolve"
         data-cy="accept"
       >
         {{ $t('pages.signTransaction.confirm') }}

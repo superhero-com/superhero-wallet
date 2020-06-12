@@ -34,12 +34,12 @@
       </ae-list-item>
     </ul>
     <div class="btnFixed">
-      <Button half class="reject" @click="cancel" data-cy="deny">{{
-        $t('pages.connectConfirm.cancelButton')
-      }}</Button>
-      <Button half @click="connect" data-cy="accept">{{
-        $t('pages.connectConfirm.confirmButton')
-      }}</Button>
+      <Button half dark @click="cancel" :disabled="!data.reject" data-cy="deny">
+        {{ $t('pages.connectConfirm.cancelButton') }}
+      </Button>
+      <Button half @click="connect" :disabled="!data.resolve" data-cy="accept">
+        {{ $t('pages.connectConfirm.confirmButton') }}
+      </Button>
     </div>
   </div>
 </template>
