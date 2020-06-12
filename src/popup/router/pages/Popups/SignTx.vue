@@ -1,176 +1,49 @@
 <template>
   <div class="popup popup-aex2" data-cy="popup-aex2">
-    <ae-list class="spendTxDetailsList">
-      <ae-list-item fill="neutral" class="flex-justify-between noBorder">
-        <div class="flex flex-align-center accountFrom">
-          <UserAvatar :address="account.publicKey" :name="account.name" />
-          <span class="spendAccountAddr">{{ activeAccountName }}</span>
-        </div>
-        <div class="arrowSeprator">
-          <ae-icon name="left-more" />
-        </div>
-        <div class="flex flex-align-center accountTo" v-if="isAddressShow">
-          <UserAvatar :address="receiver" />
-          <ae-address
-            :value="receiver"
-            v-if="receiver"
-            length="short"
-            class="spendAccountAddr"
-            data-cy="address-receiver"
-          />
-          <span v-else class="spendAccountAddr">{{
-            $t('pages.signTransaction.unknownAccount')
-          }}</span>
-        </div>
-        <div v-else class="flex flex-align-center accountTo">
-          <ae-icon name="square" />
-          <span class="spendAccountAddr" data-cy="receiver">{{
-            txType == 'contractCreateTx'
-              ? $t('pages.signTransaction.newContract')
-              : $t('pages.signTransaction.aens')
-          }}</span>
-        </div>
-      </ae-list-item>
-      <ae-list-item
-        fill="neutral"
-        class="flex-justify-between flex-align-start flex-direction-column"
-      >
-        <div class="mt-20">
-          <ae-badge data-cy="tx-type">{{ txType }}</ae-badge>
-        </div>
-        <AmountSend
-          :value="tx.amount"
-          @changeAmount="val => (tx.amount = val)"
-          style="width: 100%;"
-        />
-      </ae-list-item>
-      <ae-list-item
-        v-if="txObject.payload"
-        fill="neutral"
-        class="flex-justify-between flex-align-center flex-direction-column flex-align-start"
-      >
-        <div class="tx-label ">
-          <strong>{{ $t('pages.signTransaction.payload') }}</strong>
-        </div>
-        <div class="text-left">
-          {{ txObject.payload }}
-        </div>
-      </ae-list-item>
+    <SignAccountIdenticons :transaction="transaction" />
 
-      <ae-list-item
-        v-if="txType == 'nameClaimTx' || txType == 'nameUpdateTx'"
-        fill="neutral"
-        class="flex-justify-between  flex-align-center "
-      >
-        <div class="tx-label">
-          <strong>{{ $t('pages.signTransaction.name') }}</strong>
-        </div>
-        <div>
-          {{ txObject.name }}
-        </div>
-      </ae-list-item>
-      <ae-list-item
-        v-if="txType == 'nameClaimTx'"
-        fill="neutral"
-        class="flex-justify-between flex-align-center "
-      >
-        <div class="tx-label ">
-          <strong>{{ $t('pages.signTransaction.nameSalt') }}</strong>
-        </div>
-        <div>
-          {{ txObject.preclaim.salt }}
-        </div>
-      </ae-list-item>
-      <ae-list-item
-        v-if="txType == 'nameUpdateTx'"
-        fill="neutral"
-        class="flex-justify-between  flex-align-center flex-direction-column"
-      >
-        <div class="tx-label extend text-left">
-          <strong>{{ $t('pages.signTransaction.nameId') }}</strong>
-        </div>
-        <div class="text-left">
-          {{ txObject.claim.id }}
-        </div>
-      </ae-list-item>
-      <ae-list-item
-        fill="neutral"
-        class="flex-justify-between flex-direction-column flex-align-center "
-      >
-        <div class="flex extend flex-justify-between ">
-          <div class="tx-label">{{ $t('pages.signTransaction.fee') }}</div>
-          <div class="text-right">
-            <div class="balance balanceBig txFee no-sign" data-cy="fee">
-              {{ toAe(txObject.fee) }} {{ $t('pages.appVUE.aeid') }}
-            </div>
-          </div>
-        </div>
-      </ae-list-item>
+    <SignDetailsList :transaction="transaction">
+      <AmountSend
+        :value="tx.amount"
+        @changeAmount="val => (tx.amount = val)"
+        slot="custom-amount"
+      />
+    </SignDetailsList>
 
-      <ae-list-item fill="neutral" class="flex-justify-between" v-if="!isNameTx">
-        <div class="tx-label">{{ $t('pages.signTransaction.total') }}</div>
-        <div class="text-right">
-          <div class="balance balanceBig balanceTotalSpend no-sign" data-cy="total">
-            {{ totalSpend }} {{ $t('pages.appVUE.aeid') }}
-          </div>
-        </div>
-      </ae-list-item>
-      <ae-list-item
-        v-if="txType == 'contractCreateTx'"
-        fill="neutral"
-        class="flex-justify-between flex-align-center flex-direction-column flex-align-start"
-      >
-        <div class="tx-label ">
-          <strong>{{ $t('pages.signTransaction.compiledCode') }}</strong>
-        </div>
-        <div class="text-left ">
-          {{ txObject.code }}
-        </div>
-      </ae-list-item>
-      <ae-list-item
-        v-if="txType == 'contractCreateTx'"
-        fill="neutral"
-        class="flex-justify-between flex-align-center flex-direction-column flex-align-start"
-      >
-        <div class="tx-label ">
-          <strong>{{ $t('pages.signTransaction.callData') }}</strong>
-        </div>
-        <div class="text-left">
-          {{ txObject.callData }}
-        </div>
-      </ae-list-item>
-    </ae-list>
     <div class="btnFixed">
-      <Button half @click="cancelTransaction" :disabled="editTx" class="reject" data-cy="deny">{{
-        $t('pages.signTransaction.reject')
-      }}</Button>
-      <Button half @click="signTransaction" :disabled="editTx || amountError" data-cy="accept">{{
-        $t('pages.signTransaction.confirm')
-      }}</Button>
+      <Button dark half @click="cancel" data-cy="deny">
+        {{ $t('pages.signTransaction.reject') }}
+      </Button>
+      <Button
+        half
+        @click="sign"
+        :disabled="Number.isNaN(+tx.amount) || tx.amount < 0"
+        data-cy="accept"
+      >
+        {{ $t('pages.signTransaction.confirm') }}
+      </Button>
     </div>
     <Loader v-if="loading" />
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import BigNumber from 'bignumber.js';
+import { OBJECT_ID_TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
-import { convertToAE, getContractCallInfo, addTipAmount } from '../../../utils/helper';
-import { MAGNITUDE } from '../../../utils/constants';
+import { getContractCallInfo, addTipAmount, aettosToAe, aeToAettos } from '../../../utils/helper';
 import Button from '../../components/Button';
 import AmountSend from '../../components/AmountSend';
 import getPopupProps from '../../../utils/getPopupProps';
-import UserAvatar from '../../components/UserAvatar';
+import SignAccountIdenticons from '../../components/SignAccountIdenticons';
+import SignDetailsList from '../../components/SignDetailsList';
 
 export default {
-  components: { Button, AmountSend, UserAvatar },
+  components: { Button, AmountSend, SignAccountIdenticons, SignDetailsList },
   data() {
     return {
       props: {},
       loading: false,
       unpackedTx: null,
-      editTx: false,
       amountError: false,
       tx: {
         amount: 0,
@@ -180,75 +53,49 @@ export default {
   async created() {
     this.props = await getPopupProps();
     this.unpackedTx = TxBuilder.unpackTx(this.props.action.params.tx);
-    this.tx.amount = convertToAE(this.txObject.amount);
+    if (this.txObject.amount >= 0) this.tx.amount = +aettosToAe(this.txObject.amount);
   },
   computed: {
-    ...mapGetters(['account', 'activeAccountName', 'balance']),
-    txType() {
-      return this.unpackedTx ? this.unpackedTx.txType : null;
-    },
-    isAddressShow() {
-      if (
-        this.txType === 'contractCreateTx' ||
-        this.txType === 'namePreClaimTx' ||
-        this.txType === 'nameClaimTx' ||
-        this.txType === 'nameUpdateTx'
-      ) {
-        return false;
-      }
-      return true;
-    },
     txObject() {
       return this.unpackedTx ? this.unpackedTx.tx : {};
     },
-    receiver() {
-      if (this.txType === 'spendTx') {
-        return this.txObject.recipientId;
-      }
-      if (this.txType === 'contractCallTx') {
-        return this.txObject.contractId;
-      }
-      return '';
-    },
-    isNameTx() {
-      return (
-        this.txType === 'namePreClaimTx' ||
-        this.txType === 'nameClaimTx' ||
-        this.txType === 'nameUpdateTx'
-      );
-    },
     totalSpend() {
-      const amount = this.tx.amount ? this.tx.amount : 0;
-      return (parseFloat(amount) + parseFloat(convertToAE(this.txObject.fee))).toFixed(7);
+      const amount = this.tx.amount || 0;
+      return (parseFloat(amount) + parseFloat(+aettosToAe(this.txObject.fee || 0))).toFixed(7);
     },
-  },
-  watch: {
-    'tx.amount': function txAmount(newVal) {
-      this.amountError = Number.isNaN(+newVal);
+    transaction() {
+      return {
+        ...this.txObject,
+        fee: +aettosToAe(this.txObject.fee || 0),
+        txType: OBJECT_ID_TX_TYPE[this.txObject.tag],
+        total: this.totalSpend,
+        nameFee: this.txObject.nameFee && +aettosToAe(this.txObject.nameFee),
+      };
     },
   },
   methods: {
-    toAe(balance) {
-      return convertToAE(balance);
-    },
-    cancelTransaction() {
+    cancel() {
       this.props.reject(false);
     },
-    async signTransaction() {
+    async sign() {
       const { tx } = TxBuilder.buildTx(
         {
           ...this.unpackedTx.tx,
           ...this.tx,
-          amount: BigNumber(this.tx.amount ? this.tx.amount : 0).shiftedBy(MAGNITUDE),
+          amount: +aeToAettos(this.tx.amount || 0),
         },
-        this.txType,
+        OBJECT_ID_TX_TYPE[this.txObject.tag],
       );
-      const contractAddress = await this.$store.dispatch('getTipContractAddress');
-      const { isTip, amount } = getContractCallInfo(tx, contractAddress);
-      if (isTip) {
-        await addTipAmount(amount);
+      const contractAddress = await this.$store
+        .dispatch('getTipContractAddress')
+        .catch(() => false);
+      if (contractAddress) {
+        const { isTip, amount } = getContractCallInfo(tx, contractAddress);
+        if (isTip) {
+          await addTipAmount(amount);
+        }
       }
-      if (parseFloat(this.tx.amount) !== convertToAE(this.unpackedTx.tx.amount)) {
+      if (parseFloat(this.tx.amount) !== +aettosToAe(this.unpackedTx.tx.amount || 0)) {
         this.loading = true;
         this.props.resolve(tx);
       } else {
@@ -259,4 +106,13 @@ export default {
 };
 </script>
 
-<style lang="scss" src="../SignTransaction.scss" scoped />
+<style lang="scss" scoped>
+.amount-send-container {
+  width: 100%;
+  margin: 0;
+}
+
+.popup {
+  padding: 0;
+}
+</style>

@@ -1,64 +1,8 @@
 <template>
   <Modal class="confirm-tx-sign-modal">
-    <div slot="header" class="identicons-holder">
-      <div class="from">
-        <UserAvatar :address="account.publicKey" :name="account.name" />
-        <span class="account-address">{{ activeAccountName }}</span>
-      </div>
-      <div class="arrow-separator">
-        <ae-icon name="left-more" />
-      </div>
-      <div class="to" v-if="!showAddress">
-        <UserAvatar :address="receiver" />
-        <ae-address
-          :value="receiver"
-          v-if="receiver"
-          length="short"
-          class="account-address"
-          data-cy="address-receiver"
-        />
-        <span v-else class="account-address">
-          {{ $t('modals.confirm-transaction-sign.unknown') }}
-        </span>
-      </div>
-      <div v-else class="to">
-        <ae-icon name="square" />
-        <span class="account-address">
-          {{
-            txType === 'contractCreateTx'
-              ? $t('modals.confirm-transaction-sign.contract-create')
-              : $t('modals.confirm-transaction-sign.aens')
-          }}
-        </span>
-      </div>
-    </div>
-    <template slot="body">
-      <li>
-        <ae-badge>{{ txType }}</ae-badge>
-      </li>
-      <DetailsItem :label="$t('pages.signTransaction.fee')">
-        <div class="balance no-sign">{{ toAe(transaction.fee) }} {{ $t('pages.appVUE.aeid') }}</div>
-      </DetailsItem>
+    <SignAccountIdenticons :transaction="tx" slot="header" />
 
-      <DetailsItem :label="$t('pages.signTransaction.total')">
-        <div class="balance balanceTotalSpend no-sign">
-          {{ totalSpend }} {{ $t('pages.appVUE.aeid') }}
-        </div>
-      </DetailsItem>
-
-      <template v-for="field in TX_FIELDS">
-        <DetailsItem
-          v-if="transaction[field]"
-          :key="field"
-          :label="$t('modals.confirm-transaction-sign')[field]"
-          direction="column"
-        >
-          <div>
-            {{ transaction[field] }}
-          </div>
-        </DetailsItem>
-      </template>
-    </template>
+    <SignDetailsList slot="body" :transaction="tx" />
 
     <div class="modal-confirm-btns" slot="footer">
       <Button dark @click="cancel">{{ $t('modals.cancel') }}</Button>
@@ -68,13 +12,11 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import { OBJECT_ID_TX_TYPE, TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
-import { aettosToAe } from '../../../utils/helper';
+import { OBJECT_ID_TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import Modal from '../Modal';
 import Button from '../Button';
-import UserAvatar from '../UserAvatar';
-import DetailsItem from '../DetailsItem';
+import SignAccountIdenticons from '../SignAccountIdenticons';
+import SignDetailsList from '../SignDetailsList';
 
 export default {
   props: {
@@ -82,47 +24,21 @@ export default {
     reject: { type: Function, required: true },
     transaction: { type: Object, required: true },
   },
-  components: { Modal, Button, UserAvatar, DetailsItem },
-  data: () => ({
-    TX_FIELDS: [
-      'payload',
-      'recipientId',
-      'code',
-      'callData',
-      'contractId',
-      'commitmentId',
-      'name',
-      'nameFee',
-      'nameSalt',
-      'nameId',
-      'pointers',
-    ],
-  }),
+  components: { Modal, Button, SignAccountIdenticons, SignDetailsList },
   computed: {
-    ...mapGetters(['account', 'activeAccountName']),
-    receiver() {
-      return this.transaction.contractId || this.transaction.recipientId || '';
-    },
-    showAddress() {
-      return [
-        TX_TYPE.contractCreate,
-        TX_TYPE.namePreClaim,
-        TX_TYPE.nameClaim,
-        TX_TYPE.nameUpdate,
-      ].includes(this.txType);
-    },
-    txType() {
-      return OBJECT_ID_TX_TYPE[this.transaction.tag];
-    },
     totalSpend() {
       const amount = this.transaction.amount || 0;
-      return (parseFloat(amount) + parseFloat(aettosToAe(this.transaction.fee))).toFixed(7);
+      return (parseFloat(amount) + parseFloat(+this.transaction.fee)).toFixed(7);
+    },
+    tx() {
+      return {
+        ...this.transaction,
+        txType: OBJECT_ID_TX_TYPE[this.transaction.tag],
+        total: this.totalSpend,
+      };
     },
   },
   methods: {
-    toAe(balance) {
-      return parseFloat(aettosToAe(balance)).toFixed(7);
-    },
     confirm() {
       this.resolve(this.transaction.fee);
     },
