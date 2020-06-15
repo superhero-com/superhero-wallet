@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="actions flex flex-align-center">
-      <button class="back-button" @click="redirect">
+      <button class="back-button" @click="$router.push(to)">
         <ae-icon name="left-more" class="back-icon" />
       </button>
       <h3><slot></slot></h3>
@@ -13,11 +13,6 @@
 export default {
   props: {
     to: String,
-  },
-  methods: {
-    redirect() {
-      this.$router.push(this.to);
-    },
   },
 };
 </script>

@@ -13,7 +13,11 @@
         {{ allowance.from_account }}
         <ae-badge>{{ allowance.amount }} {{ allowance.symbol }}</ae-badge>
       </li>
-      <Button @click="getAllowance(allowance)">
+      <Button
+        @click="
+          $router.push({ name: 'manage-allowances', params: { allowance, type: 'transfer' } })
+        "
+      >
         {{ $t('pages.allowances.get-allowance') }}
       </Button>
     </ul>
@@ -67,9 +71,6 @@ export default {
       } catch (err) {
         console.log(err);
       }
-    },
-    getAllowance(allowance) {
-      this.$router.push({ name: 'manage-allowances', params: { allowance, type: 'transfer' } });
     },
   },
 };

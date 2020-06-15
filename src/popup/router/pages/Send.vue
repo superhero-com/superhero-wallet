@@ -31,7 +31,7 @@
             :amountError="form.amount <= 0"
           />
           <div class="flex flex-align-center flex-justify-between">
-            <Button data-cy="reject-withdraw" half @click="navigateAccount">{{
+            <Button data-cy="reject-withdraw" half @click="$router.push('/account')">{{
               $t('pages.send.cancel')
             }}</Button>
             <Button
@@ -93,7 +93,7 @@
             $t('pages.send.editTxDetails')
           }}</Button>
           <div class="flex flex-align-center flex-justify-between">
-            <Button data-cy="review-cancel-button" half @click="navigateAccount">{{
+            <Button data-cy="review-cancel-button" half @click="$router.push('/account')">{{
               $t('pages.send.cancel')
             }}</Button>
             <Button
@@ -136,7 +136,7 @@
               successTx.hash
             }}</span>
           </div>
-          <Button @click="navigateAccount">{{ $t('pages.send.home') }}</Button>
+          <Button @click="$router.push('/account')">{{ $t('pages.send.home') }}</Button>
         </div>
       </div>
     </div>
@@ -276,9 +276,6 @@ export default {
       } finally {
         this.loading = false;
       }
-    },
-    navigateAccount() {
-      this.$router.push('/account');
     },
     async openTxExplorer(hash) {
       const { middlewareUrl } = this.network[this.current.network];

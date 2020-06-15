@@ -7,9 +7,15 @@
       <AccountInfo />
       <qrcode-vue :value="account.publicKey" size="140" class="my-25 qrcode"></qrcode-vue>
 
-      <Button @click="purchase">{{ $t('pages.receive.purchase') }}</Button>
-      <Button @click="exchange">{{ $t('pages.receive.transferExchange') }}</Button>
-      <Button data-cy="home" @click="navigateAccount">{{ $t('pages.receive.home') }}</Button>
+      <Button @click="openUrl('https://shop.aeternityuniverse.com')">
+        {{ $t('pages.receive.purchase') }}
+      </Button>
+      <Button @click="openUrl('https://app.jelly.market')">
+        {{ $t('pages.receive.transferExchange') }}
+      </Button>
+      <Button data-cy="home" @click="$router.push('/account')">
+        {{ $t('pages.receive.home') }}
+      </Button>
     </div>
   </div>
 </template>
@@ -26,18 +32,10 @@ export default {
     QrcodeVue,
     AccountInfo,
   },
+  data: () => ({
+    openUrl,
+  }),
   computed: mapGetters(['account']),
-  methods: {
-    navigateAccount() {
-      this.$router.push('/account');
-    },
-    exchange() {
-      openUrl('https://app.jelly.market');
-    },
-    purchase() {
-      openUrl('https://shop.aeternityuniverse.com');
-    },
-  },
 };
 </script>
 

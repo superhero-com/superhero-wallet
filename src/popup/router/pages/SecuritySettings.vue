@@ -45,7 +45,7 @@
         <button @click="verifySeed" class="primary-button">
           {{ $t('pages.seedPhrase.verifySeed') }}
         </button>
-        <button @click="navigateToAccount" class="primary-button">
+        <button @click="$router.push('/account')" class="primary-button">
           {{ $t('pages.seedPhrase.doneThis') }}
         </button>
       </div>
@@ -86,7 +86,7 @@
     <div v-if="seed_verified && type == 5">
       <ae-icon style="color: #e911ff; font-size: 100px;" name="check" />
       <p>{{ $t('pages.seedPhrase.seedConfirmed') }}</p>
-      <button @click="navigateToAccount" class="primary-button">
+      <button @click="$router.push('/account')" class="primary-button">
         {{ $t('pages.seedPhrase.toDashboard') }}
       </button>
     </div>
@@ -154,9 +154,6 @@ export default {
         const seedPhraseToArray = this.mnemonic.split(' ');
         this.seeds = this.seeds.map((seed, i) => ({ ...seed, name: seedPhraseToArray[i] }));
       }
-    },
-    navigateToAccount() {
-      this.$router.push('/account');
     },
     verifySeed() {
       this.type = '4';

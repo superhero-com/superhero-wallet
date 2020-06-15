@@ -18,19 +18,11 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-
 export default {
   props: ['txFee', 'amount', 'error'],
-  computed: mapGetters(['current']),
   watch: {
     amount(val) {
       this.$emit('update', val);
-    },
-  },
-  methods: {
-    setActiveToken(token) {
-      this.current.token = token;
     },
   },
 };
