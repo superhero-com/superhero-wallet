@@ -31,7 +31,7 @@
 <script>
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 import { langs, fetchAndSetLocale } from '../../utils/i18nHelper';
 import Button from '../components/Button';
 
@@ -43,7 +43,7 @@ export default {
       dropdown: false,
     };
   },
-  computed: mapGetters(['current']),
+  computed: mapState(['current']),
   methods: {
     async switchLanguage(languageChoose) {
       fetchAndSetLocale(languageChoose);

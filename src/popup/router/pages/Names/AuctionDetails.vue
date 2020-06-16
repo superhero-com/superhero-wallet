@@ -30,7 +30,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import blocksToRelativeTime from '../../../../filters/blocksToRelativeTime';
 import NameRow from '../../components/NameRow';
 
@@ -45,7 +44,6 @@ export default {
     topBlockHeight: 0,
   }),
   computed: {
-    ...mapGetters(['middleware', 'sdk']),
     currentBid() {
       if (!this.bids) return null;
       return this.bids.reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b));
@@ -57,7 +55,7 @@ export default {
   },
   filters: { blocksToRelativeTime },
   async mounted() {
-    await this.$watchUntilTruly(() => this.sdk);
+    await this.$watchUntilTruly(() => this.$store.state.sdk);
     this.topBlockHeight = await this.$store.dispatch('getHeight');
     const id = setInterval(() => this.updateAuctionEntry(), 3000);
     this.$once('hook:destroyed', () => clearInterval(id));
@@ -69,7 +67,7 @@ export default {
   },
   methods: {
     async updateAuctionEntry() {
-      await this.$watchUntilTruly(() => this.middleware);
+      await this.$watchUntilTruly(() => this.$store.state.middleware);
       const { expiration, bids } = await this.$store.dispatch('names/fetchAuctionEntry', this.name);
       this.expiration = expiration;
       this.bids = bids;

@@ -30,7 +30,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import blocksToRelativeTime from '../../../../filters/blocksToRelativeTime';
 import Button from '../../components/Button';
 import AmountSend from '../../components/AmountSend';
@@ -51,7 +50,6 @@ export default {
   props: {
     name: { type: String, required: true },
   },
-  computed: mapGetters(['middleware', 'sdk']),
   watch: {
     amount(val) {
       if (!+val) {
@@ -67,7 +65,7 @@ export default {
   filters: { blocksToRelativeTime },
   async created() {
     this.loading = true;
-    await this.$watchUntilTruly(() => this.middleware);
+    await this.$watchUntilTruly(() => this.$store.state.middleware);
     this.topBlockHeight = await this.$store.dispatch('getHeight');
     this.updateAuctionEntry();
     this.loading = false;
@@ -81,7 +79,7 @@ export default {
         .reduce((a, b) => (a.isGreaterThan(b) ? a : b));
     },
     async bid() {
-      await this.$watchUntilTruly(() => this.sdk);
+      await this.$watchUntilTruly(() => this.$store.state.sdk);
       if (this.amountError) return;
       this.loading = true;
       try {

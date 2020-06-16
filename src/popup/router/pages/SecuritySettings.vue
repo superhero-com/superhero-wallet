@@ -94,7 +94,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { shuffleArray } from '../../utils/helper';
 
 export default {
@@ -131,17 +131,18 @@ export default {
       seed_verified: false,
     };
   },
-  computed: mapGetters([
-    'account',
-    'balance',
-    'network',
-    'current',
-    'transactions',
-    'subaccounts',
-    'activeAccountName',
-    'activeAccount',
-    'mnemonic',
-  ]),
+  computed: {
+    ...mapState([
+      'balance',
+      'network',
+      'current',
+      'transactions',
+      'activeAccount',
+      'mnemonic',
+      'subaccounts',
+    ]),
+    ...mapGetters(['account', 'activeAccountName']),
+  },
   methods: {
     async seedPhraseRecovery() {
       this.type = '3';

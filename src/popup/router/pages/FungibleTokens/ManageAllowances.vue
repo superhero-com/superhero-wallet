@@ -49,7 +49,7 @@ export default {
     loading: false,
   }),
   computed: {
-    ...mapGetters(['sdk', 'account']),
+    ...mapGetters(['account']),
     hasAllowance() {
       return !isEmpty(this.allowance);
     },
@@ -62,7 +62,7 @@ export default {
       this.to = from_account;
       this.amount = amount;
     }
-    await this.$watchUntilTruly(() => this.sdk);
+    await this.$watchUntilTruly(() => this.$store.state.sdk);
     this.tokens = await this.$store.dispatch('tokens/extension', 'allowances');
     if (this.tokens.length) this.token = this.tokens[0].contract;
     if (this.allowance) this.token = this.allowance.contract;

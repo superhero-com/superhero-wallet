@@ -9,14 +9,14 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
 import TransactionItem from './TransactionItem';
 
 export default {
   components: { TransactionItem },
   computed: {
-    ...mapGetters(['transactions']),
+    ...mapState(['transactions']),
     filteredPendings() {
       return this.transactions.pending
         .filter(({ amount, hash }) => !Number.isNaN(+amount) && hash)

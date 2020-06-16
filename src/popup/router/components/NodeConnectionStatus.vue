@@ -28,10 +28,13 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 
 export default {
-  computed: mapGetters(['nodeStatus', 'account', 'isLoggedIn']),
+  computed: {
+    ...mapState(['nodeStatus', 'isLoggedIn']),
+    ...mapGetters(['account']),
+  },
 };
 </script>
 

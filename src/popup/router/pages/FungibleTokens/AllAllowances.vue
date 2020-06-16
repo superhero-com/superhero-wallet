@@ -28,7 +28,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import Button from '../../components/Button';
 import Dropdown from '../../components/Dropdown';
 
@@ -39,9 +38,8 @@ export default {
     token: null,
     allowances: [],
   }),
-  computed: mapGetters(['sdk', 'account']),
   async created() {
-    await this.$watchUntilTruly(() => this.sdk);
+    await this.$watchUntilTruly(() => this.$store.state.sdk);
     this.tokens = await this.$store.dispatch('tokens/extension', 'allowances');
     if (this.tokens.length) this.token = this.tokens[0].contract;
   },
@@ -56,8 +54,10 @@ export default {
         const { decodedResult: all } = await instance.methods.allowances();
         this.allowances = [];
         if (all.length) {
-          // eslint-disable-next-line camelcase
-          const mine = all.filter(([{ for_account }]) => for_account === this.account.publicKey);
+          const mine = all.filter(
+            // eslint-disable-next-line camelcase
+            ([{ for_account }]) => for_account === this.$store.getters.account.publicKey,
+          );
           if (mine.length) {
             this.allowances = mine.map(a => ({
               contract,

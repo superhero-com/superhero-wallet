@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import ExpandedAngleArrow from '../../../icons/expanded-angle-arrow.svg?vue-component';
 
 export default {
@@ -40,13 +40,10 @@ export default {
     ExpandedAngleArrow,
   },
   data: () => ({ dropdown: false }),
-  computed: mapGetters([
-    'tokenBalance',
-    'balanceCurrency',
-    'current',
-    'currentCurrency',
-    'currencies',
-  ]),
+  computed: {
+    ...mapState(['current', 'currencies']),
+    ...mapGetters(['tokenBalance', 'balanceCurrency', 'currentCurrency']),
+  },
   methods: {
     async switchCurrency(currency) {
       this.$store.commit('SET_CURRENCY', { currency, currencyRate: this.currencies[currency] });

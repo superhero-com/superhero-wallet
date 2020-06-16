@@ -58,10 +58,10 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['tokenBalance', 'balanceCurrency', 'current', 'currentCurrency']),
+    ...mapGetters(['tokenBalance', 'balanceCurrency', 'currentCurrency']),
     getCurrencyAmount() {
       if (!+this.finalAmount) return '0.00';
-      return (this.finalAmount * this.current.currencyRate).toFixed(2);
+      return (this.finalAmount * this.$store.state.current.currencyRate).toFixed(2);
     },
   },
 };

@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { chekAensName, checkAddress, getAddressByNameEntry } from '../../../utils/helper';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
@@ -64,7 +64,8 @@ export default {
     pointerError: null,
   }),
   computed: {
-    ...mapGetters(['sdk', 'account', 'activeAccountName']),
+    ...mapState(['sdk']),
+    ...mapGetters(['account', 'activeAccountName']),
     nameEntry() {
       return this.$store.getters['names/getName'](this.name);
     },

@@ -145,7 +145,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { checkAddress, chekAensName, checkHashType, aeToAettos } from '../../utils/helper';
 import openUrl from '../../utils/openUrl';
@@ -195,7 +195,8 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'network', 'current', 'sdk']),
+    ...mapState(['balance', 'network', 'current', 'sdk']),
+    ...mapGetters(['account']),
     validAddress() {
       return checkAddress(this.form.address) || chekAensName(this.form.address);
     },

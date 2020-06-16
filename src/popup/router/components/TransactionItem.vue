@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import { aettosToAe } from '../../utils/helper';
 import { formatDate } from '../../utils';
@@ -63,7 +63,8 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['account', 'sdk', 'current', 'network']),
+    ...mapState(['sdk', 'current', 'network']),
+    ...mapGetters(['account']),
     status() {
       if (
         this.transaction.tx.sender_id === this.account.publicKey ||
