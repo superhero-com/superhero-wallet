@@ -7,7 +7,6 @@ export const MAGNITUDE_EXA = 18;
 export const MAGNITUDE_GIGA = 9;
 export const MAGNITUDE_MICRO = -6;
 export const MAGNITUDE_PICO = -12;
-export const MINPASSWORDLENGTH = 8;
 export const TX_TYPES = {
   txSign: TX_TYPE.spend,
   contractCall: TX_TYPE.contractCall,
@@ -50,15 +49,6 @@ const STUB_CALLDATA =
 export const MAX_UINT256 = BigNumber(2)
   .exponentiatedBy(256)
   .minus(1);
-const MIN_SPEND_TX_FEE_STRING = TxBuilder.calculateMinFee('spendTx', {
-  params: {
-    senderId: STUB_ADDRESS,
-    recipientId: STUB_ADDRESS,
-    amount: MAX_UINT256,
-    ttl: MAX_UINT256,
-    nonce: MAX_UINT256,
-  },
-});
 
 export const calculateFee = (type, params) => {
   const MIN_FEE = TxBuilder.calculateMinFee(type, {
@@ -82,13 +72,6 @@ export const calculateFee = (type, params) => {
   };
 };
 
-export const MIN_SPEND_TX_FEE = BigNumber(MIN_SPEND_TX_FEE_STRING).shiftedBy(-MAGNITUDE);
-export const MAX_REASONABLE_FEE = MIN_SPEND_TX_FEE.multipliedBy(10);
-
-export const toMicro = value => value.shiftedBy(-MAGNITUDE_MICRO).toFixed();
-
-export const MIN_SPEND_TX_FEE_MICRO = toMicro(MIN_SPEND_TX_FEE);
-export const MAX_REASONABLE_FEE_MICRO = toMicro(MAX_REASONABLE_FEE);
 export const DEFAULT_NETWORK =
   typeof process.env.NETWORK !== 'undefined' ? process.env.NETWORK.trim() : 'Mainnet';
 export const defaultNetworks = {
