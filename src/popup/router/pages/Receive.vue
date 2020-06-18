@@ -7,10 +7,10 @@
       <AccountInfo />
       <qrcode-vue :value="account.publicKey" size="140" class="my-25 qrcode"></qrcode-vue>
 
-      <Button @click="openUrl(buyTokensURL)">
+      <Button @click="openUrl(buyTokensURL, true)">
         {{ $t('pages.receive.purchase') }}
       </Button>
-      <Button @click="openUrl(changeCryptoToAeUrl)">
+      <Button @click="openUrl(changeCryptoToAeUrl, true)">
         {{ $t('pages.receive.transferExchange') }}
       </Button>
       <Button data-cy="home" @click="$router.push('/account')">
