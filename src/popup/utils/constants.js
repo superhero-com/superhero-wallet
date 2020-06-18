@@ -120,6 +120,7 @@ export const TX_LIMIT_PER_DAY = 2000;
 export const MAX_AMOUNT_WITHOUT_CONFIRM = 10;
 export const AENS_DOMAIN = '.chain';
 export const MAX_AUCTION_NAME_LENGTH = 12 + AENS_DOMAIN.length;
+export const MIN_NAME_LENGTH = 14;
 export const TIPPING_CONTRACT = `@compiler >= 4
 
 include "List.aes"

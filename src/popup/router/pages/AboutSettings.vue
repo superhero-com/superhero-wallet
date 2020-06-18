@@ -22,7 +22,7 @@
       <router-link to="/privacyPolicy" data-cy="privacy">{{
         $t('pages.aboutSettings.privacyPolicy')
       }}</router-link>
-      <Button @click="openUrl('https://thesuperherowallet.typeform.com/to/vh8Ffu', true)">
+      <Button @click="openUrl(bugReportUrl, true)">
         {{ $t('pages.appVUE.reportBug') }}
       </Button>
     </div>
@@ -41,6 +41,7 @@ export default {
     return {
       extensionVersion: `v.${process.env.npm_package_version}`,
       commitHash: process.env.COMMIT_HASH,
+      bugReportUrl: process.env.BUG_REPORT_URL,
       openUrl,
     };
   },

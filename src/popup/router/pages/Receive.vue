@@ -7,10 +7,10 @@
       <AccountInfo />
       <qrcode-vue :value="account.publicKey" size="140" class="my-25 qrcode"></qrcode-vue>
 
-      <Button @click="openUrl('https://shop.aeternityuniverse.com')">
+      <Button @click="openUrl(buyTokensURL)">
         {{ $t('pages.receive.purchase') }}
       </Button>
-      <Button @click="openUrl('https://app.jelly.market')">
+      <Button @click="openUrl(changeCryptoToAeUrl)">
         {{ $t('pages.receive.transferExchange') }}
       </Button>
       <Button data-cy="home" @click="$router.push('/account')">
@@ -33,6 +33,8 @@ export default {
     AccountInfo,
   },
   data: () => ({
+    buyTokensURL: process.env.BUY_TOKENS_URL,
+    changeCryptoToAeUrl: process.env.CHANGE_CRYPTO_AE_URL,
     openUrl,
   }),
   computed: mapGetters(['account']),
