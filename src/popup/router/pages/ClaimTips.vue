@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import axios from 'axios';
 import { aettosToAe, toURL, validateTipUrl } from '../../utils/helper';
 import { TIP_SERVICE, BACKEND_URL } from '../../utils/constants';
@@ -30,7 +30,8 @@ export default {
     loading: false,
   }),
   computed: {
-    ...mapGetters(['sdk', 'tipping', 'account', 'allowTipping']),
+    ...mapState(['sdk', 'tipping']),
+    ...mapGetters(['account', 'allowTipping']),
     normalizedUrl() {
       if (!validateTipUrl(this.url)) return '';
       return toURL(this.url).toString();

@@ -115,8 +115,17 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['balance', 'tipping', 'current', 'sdk', 'account', 'currentCurrency', 'tip']),
-    ...mapState(['tourRunning', 'tippingAddress', 'minTipAmount']),
+    ...mapGetters(['account', 'currentCurrency']),
+    ...mapState([
+      'tourRunning',
+      'tippingAddress',
+      'minTipAmount',
+      'current',
+      'balance',
+      'tip',
+      'sdk',
+      'tipping',
+    ]),
     urlStatus() {
       return this.tourRunning ? 'verified' : this.$store.getters['tipUrl/status'](this.url);
     },

@@ -46,8 +46,8 @@ export default {
       else this.$router.push('/account');
     },
     async sendAddress() {
-      await this.$watchUntilTruly(() => this.$store.getters.sdk);
-      const signature = await this.$store.getters.sdk.signMessage(this.urlParams.get('message'));
+      await this.$watchUntilTruly(() => this.$store.state.sdk);
+      const signature = await this.$store.state.sdk.signMessage(this.urlParams.get('message'));
       const signatureHex = Buffer.from(signature).toString('hex');
       openUrl(this.urlParams.get('x-success').replace(/{signature}/g, signatureHex));
     },

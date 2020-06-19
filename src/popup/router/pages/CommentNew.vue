@@ -16,14 +16,15 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import Backend from '../../../lib/backend';
 import openUrl from '../../utils/openUrl';
 
 export default {
   data: () => ({ id: 0, parentId: undefined, text: '', loading: false }),
   computed: {
-    ...mapGetters(['sdk', 'allowTipping']),
+    ...mapState(['sdk']),
+    ...mapGetters(['allowTipping']),
     urlParams() {
       return new URL(this.$route.fullPath, window.location).searchParams;
     },

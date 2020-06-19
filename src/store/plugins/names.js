@@ -67,7 +67,7 @@ export default store =>
             });
         }
       },
-      async fetchAuctions({ rootGetters: { network, current } }) {
+      async fetchAuctions({ rootState: { network, current } }) {
         const middleware = network[current.network].middlewareUrl;
         return (
           await axios(`${middleware}/middleware/names/auctions/active`).catch(() => ({ data: [] }))

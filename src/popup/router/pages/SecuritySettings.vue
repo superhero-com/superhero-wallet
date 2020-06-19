@@ -45,7 +45,7 @@
         <button @click="verifySeed" class="primary-button">
           {{ $t('pages.seedPhrase.verifySeed') }}
         </button>
-        <button @click="navigateToAccount" class="primary-button">
+        <button @click="$router.push('/account')" class="primary-button">
           {{ $t('pages.seedPhrase.doneThis') }}
         </button>
       </div>
@@ -86,7 +86,7 @@
     <div v-if="seed_verified && type == 5">
       <ae-icon style="color: #e911ff; font-size: 100px;" name="check" />
       <p>{{ $t('pages.seedPhrase.seedConfirmed') }}</p>
-      <button @click="navigateToAccount" class="primary-button">
+      <button @click="$router.push('/account')" class="primary-button">
         {{ $t('pages.seedPhrase.toDashboard') }}
       </button>
     </div>
@@ -94,7 +94,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { shuffleArray } from '../../utils/helper';
 
 export default {
@@ -131,17 +131,18 @@ export default {
       seed_verified: false,
     };
   },
-  computed: mapGetters([
-    'account',
-    'balance',
-    'network',
-    'current',
-    'transactions',
-    'subaccounts',
-    'activeAccountName',
-    'activeAccount',
-    'mnemonic',
-  ]),
+  computed: {
+    ...mapState([
+      'balance',
+      'network',
+      'current',
+      'transactions',
+      'activeAccount',
+      'mnemonic',
+      'subaccounts',
+    ]),
+    ...mapGetters(['account', 'activeAccountName']),
+  },
   methods: {
     async seedPhraseRecovery() {
       this.type = '3';
@@ -154,9 +155,6 @@ export default {
         const seedPhraseToArray = this.mnemonic.split(' ');
         this.seeds = this.seeds.map((seed, i) => ({ ...seed, name: seedPhraseToArray[i] }));
       }
-    },
-    navigateToAccount() {
-      this.$router.push('/account');
     },
     verifySeed() {
       this.type = '4';

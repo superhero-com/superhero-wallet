@@ -32,7 +32,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import NameListHeader from '../../components/NameListHeader';
 import NameRow from '../../components/NameRow';
 import blocksToRelativeTime from '../../../../filters/blocksToRelativeTime';
@@ -45,7 +44,6 @@ export default {
     topBlockHeight: 0,
   }),
   computed: {
-    ...mapGetters(['sdk']),
     auctions() {
       switch (this.filter) {
         case 'length':
@@ -59,7 +57,7 @@ export default {
   },
   filters: { blocksToRelativeTime },
   async created() {
-    await this.$watchUntilTruly(() => this.sdk);
+    await this.$watchUntilTruly(() => this.$store.state.sdk);
     this.topBlockHeight = await this.$store.dispatch('getHeight');
     this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');
   },

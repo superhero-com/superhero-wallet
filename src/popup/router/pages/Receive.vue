@@ -7,9 +7,15 @@
       <AccountInfo />
       <qrcode-vue :value="account.publicKey" size="140" class="my-25 qrcode"></qrcode-vue>
 
-      <Button @click="purchase">{{ $t('pages.receive.purchase') }}</Button>
-      <Button @click="exchange">{{ $t('pages.receive.transferExchange') }}</Button>
-      <Button data-cy="home" @click="navigateAccount">{{ $t('pages.receive.home') }}</Button>
+      <Button @click="openUrl(buyTokensURL, true)">
+        {{ $t('pages.receive.purchase') }}
+      </Button>
+      <Button @click="openUrl(changeCryptoToAeUrl, true)">
+        {{ $t('pages.receive.transferExchange') }}
+      </Button>
+      <Button data-cy="home" @click="$router.push('/account')">
+        {{ $t('pages.receive.home') }}
+      </Button>
     </div>
   </div>
 </template>
@@ -19,6 +25,7 @@ import { mapGetters } from 'vuex';
 import QrcodeVue from 'qrcode.vue';
 import AccountInfo from '../components/AccountInfo';
 import openUrl from '../../utils/openUrl';
+import { BUY_TOKENS_URL, CHANGE_CRYPTO_AE_URL } from '../../utils/constants';
 
 export default {
   name: 'Receive',
@@ -26,18 +33,12 @@ export default {
     QrcodeVue,
     AccountInfo,
   },
+  data: () => ({
+    buyTokensURL: BUY_TOKENS_URL,
+    changeCryptoToAeUrl: CHANGE_CRYPTO_AE_URL,
+    openUrl,
+  }),
   computed: mapGetters(['account']),
-  methods: {
-    navigateAccount() {
-      this.$router.push('/account');
-    },
-    exchange() {
-      openUrl('https://app.jelly.market');
-    },
-    purchase() {
-      openUrl('https://shop.aeternityuniverse.com');
-    },
-  },
 };
 </script>
 

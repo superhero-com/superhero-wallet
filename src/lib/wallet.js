@@ -17,7 +17,7 @@ import Logger from './logger';
 let countError = 0;
 
 async function initMiddleware() {
-  const { network, current } = store.getters;
+  const { network, current } = store.state;
   store.commit('SET_MIDDLEWARE', (await middleware(network, current)).api);
   store.dispatch('names/fetchOwned');
 }
@@ -30,7 +30,7 @@ async function logout() {
 }
 
 async function getKeyPair() {
-  const { activeAccount } = store.getters;
+  const { activeAccount } = store.state;
   const { account } = store.getters;
   const res = await postMessage({ type: 'getKeypair', payload: { activeAccount, account } });
   return res.error ? { error: true } : parseFromStorage(res);
@@ -41,7 +41,7 @@ async function initContractInstances() {
   const contractAddress = await store.dispatch('getTipContractAddress');
   store.commit(
     'SET_TIPPING',
-    await store.getters.sdk.getContractInstance(TIPPING_CONTRACT, {
+    await store.state.sdk.getContractInstance(TIPPING_CONTRACT, {
       contractAddress,
       forceCodeCheck: true,
     }),
@@ -75,7 +75,7 @@ export default {
       return;
     }
 
-    const { network, current } = store.getters;
+    const { network, current } = store.state;
     const { internalUrl, compilerUrl } = network[current.network];
     const node = await Node({
       url: internalUrl,

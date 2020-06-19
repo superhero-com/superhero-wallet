@@ -11,7 +11,7 @@
     <Button @click="sendAddress">
       {{ $t('pages.tipPage.confirm') }}
     </Button>
-    <Button @click="cancel">
+    <Button @click="openCallbackOrGoHome('x-cancel')">
       {{ $t('pages.tipPage.cancel') }}
     </Button>
   </div>
@@ -41,9 +41,6 @@ export default {
           .get('x-success')
           .replace(/{address}/g, this.$store.getters.account.publicKey),
       );
-    },
-    cancel() {
-      this.openCallbackOrGoHome('x-cancel');
     },
   },
 };

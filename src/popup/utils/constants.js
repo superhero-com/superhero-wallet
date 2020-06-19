@@ -1,13 +1,12 @@
-import BigNumber from 'bignumber.js';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
-import { TX_TYPE, VM_VERSIONS, ABI_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { ABI_VERSIONS, TX_TYPE, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import BigNumber from 'bignumber.js';
 
 export const MAGNITUDE = 18;
 export const MAGNITUDE_EXA = 18;
 export const MAGNITUDE_GIGA = 9;
 export const MAGNITUDE_MICRO = -6;
 export const MAGNITUDE_PICO = -12;
-export const MINPASSWORDLENGTH = 8;
 export const TX_TYPES = {
   txSign: TX_TYPE.spend,
   contractCall: TX_TYPE.contractCall,
@@ -50,15 +49,6 @@ const STUB_CALLDATA =
 export const MAX_UINT256 = BigNumber(2)
   .exponentiatedBy(256)
   .minus(1);
-const MIN_SPEND_TX_FEE_STRING = TxBuilder.calculateMinFee('spendTx', {
-  params: {
-    senderId: STUB_ADDRESS,
-    recipientId: STUB_ADDRESS,
-    amount: MAX_UINT256,
-    ttl: MAX_UINT256,
-    nonce: MAX_UINT256,
-  },
-});
 
 export const calculateFee = (type, params) => {
   const MIN_FEE = TxBuilder.calculateMinFee(type, {
@@ -82,13 +72,6 @@ export const calculateFee = (type, params) => {
   };
 };
 
-export const MIN_SPEND_TX_FEE = BigNumber(MIN_SPEND_TX_FEE_STRING).shiftedBy(-MAGNITUDE);
-export const MAX_REASONABLE_FEE = MIN_SPEND_TX_FEE.multipliedBy(10);
-
-export const toMicro = value => value.shiftedBy(-MAGNITUDE_MICRO).toFixed();
-
-export const MIN_SPEND_TX_FEE_MICRO = toMicro(MIN_SPEND_TX_FEE);
-export const MAX_REASONABLE_FEE_MICRO = toMicro(MAX_REASONABLE_FEE);
 export const DEFAULT_NETWORK =
   typeof process.env.NETWORK !== 'undefined' ? process.env.NETWORK.trim() : 'Mainnet';
 export const defaultNetworks = {
@@ -137,6 +120,7 @@ export const TX_LIMIT_PER_DAY = 2000;
 export const MAX_AMOUNT_WITHOUT_CONFIRM = 10;
 export const AENS_DOMAIN = '.chain';
 export const MAX_AUCTION_NAME_LENGTH = 12 + AENS_DOMAIN.length;
+export const MIN_NAME_LENGTH = 14;
 export const TIPPING_CONTRACT = `@compiler >= 4
 
 include "List.aes"
@@ -195,3 +179,9 @@ export const IDENTICON_SIZES = {
   normal: 38,
   lg: 64,
 };
+
+export const BUG_REPORT_URL = 'https://thesuperherowallet.typeform.com/to/vh8Ffu';
+
+export const BUY_TOKENS_URL = 'https://shop.aeternityuniverse.com';
+
+export const CHANGE_CRYPTO_AE_URL = 'https://app.jelly.market';

@@ -70,7 +70,7 @@ export default store =>
       sign({ dispatch }, data) {
         return dispatch('signWithoutConfirmation', data);
       },
-      async signTransaction({ dispatch, rootGetters: { sdk } }, { txBase64, opt = {} }) {
+      async signTransaction({ dispatch, rootState: { sdk } }, { txBase64, opt = {} }) {
         const encodedTx = await dispatch('confirmTxSigning', {
           txBinary: Crypto.decodeBase64Check(Crypto.assertedType(txBase64, 'tx')),
           opt,

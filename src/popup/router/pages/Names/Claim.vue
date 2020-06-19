@@ -18,18 +18,18 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 import NameListHeader from '../../components/NameListHeader';
 import Input from '../../components/Input';
-import { MAX_AUCTION_NAME_LENGTH } from '../../../utils/constants';
+import { MAX_AUCTION_NAME_LENGTH, MIN_NAME_LENGTH } from '../../../utils/constants';
 
 export default {
   components: { NameListHeader, Input },
   data: () => ({ name: '', loading: false }),
   computed: {
-    ...mapGetters(['sdk', 'account']),
+    ...mapState(['sdk']),
     validName() {
-      return this.name && /^[A-Za-z0-9]+$/.test(this.name) && this.name.length > 13;
+      return this.name && /^[A-Za-z0-9]+$/.test(this.name) && this.name.length >= MIN_NAME_LENGTH;
     },
   },
   methods: {
@@ -64,7 +64,7 @@ export default {
           if (!isAuction) {
             this.$store.dispatch('names/updatePointer', {
               name,
-              address: this.account.publicKey,
+              address: this.$store.getters.account.publicKey,
             });
           }
         } catch (e) {

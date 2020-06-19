@@ -37,7 +37,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import { checkAddress } from '../../../utils/helper';
 import Button from '../../components/Button';
 import Dropdown from '../../components/Dropdown';
@@ -57,13 +56,12 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['sdk']),
     invalid() {
       return !this.amount || (this.type === 'mint' && !checkAddress(this.address));
     },
   },
   async created() {
-    await this.$watchUntilTruly(() => this.sdk);
+    await this.$watchUntilTruly(() => this.$store.state.sdk);
     this.tokens = await this.$store.dispatch('tokens/extension', 'mintable');
     if (this.tokens.length) this.token = this.tokens[0].contract;
   },
