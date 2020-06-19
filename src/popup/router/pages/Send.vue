@@ -31,7 +31,7 @@
             :amountError="form.amount <= 0"
           />
           <div class="flex flex-align-center flex-justify-between">
-            <Button data-cy="reject-withdraw" half @click="navigateAccount">{{
+            <Button data-cy="reject-withdraw" half @click="$router.push('/account')">{{
               $t('pages.send.cancel')
             }}</Button>
             <Button
@@ -93,7 +93,7 @@
             $t('pages.send.editTxDetails')
           }}</Button>
           <div class="flex flex-align-center flex-justify-between">
-            <Button data-cy="review-cancel-button" half @click="navigateAccount">{{
+            <Button data-cy="review-cancel-button" half @click="$router.push('/account')">{{
               $t('pages.send.cancel')
             }}</Button>
             <Button
@@ -136,7 +136,7 @@
               successTx.hash
             }}</span>
           </div>
-          <Button @click="navigateAccount">{{ $t('pages.send.home') }}</Button>
+          <Button @click="$router.push('/account')">{{ $t('pages.send.home') }}</Button>
         </div>
       </div>
     </div>
@@ -145,7 +145,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { checkAddress, chekAensName, checkHashType, aeToAettos } from '../../utils/helper';
 import openUrl from '../../utils/openUrl';
@@ -195,7 +195,8 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['account', 'balance', 'network', 'current', 'sdk']),
+    ...mapState(['balance', 'network', 'current', 'sdk']),
+    ...mapGetters(['account']),
     validAddress() {
       return checkAddress(this.form.address) || chekAensName(this.form.address);
     },
@@ -276,9 +277,6 @@ export default {
       } finally {
         this.loading = false;
       }
-    },
-    navigateAccount() {
-      this.$router.push('/account');
     },
     async openTxExplorer(hash) {
       const { middlewareUrl } = this.network[this.current.network];

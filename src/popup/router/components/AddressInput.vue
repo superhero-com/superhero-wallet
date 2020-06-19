@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 import { checkAddress } from '../../utils/helper';
 
 export default {
@@ -43,7 +43,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['subaccounts']),
+    ...mapState(['subaccounts']),
     validAddress() {
       if (!this.address) return false;
       return checkAddress(this.address);

@@ -52,18 +52,18 @@ export default {
     polling: null,
   }),
   computed: {
-    ...mapGetters([
-      'account',
+    ...mapGetters(['account']),
+    ...mapState([
+      'isRestored',
       'current',
-      'mainLoading',
       'sdk',
-      'isLoggedIn',
-      'aeppPopup',
-      'notifications',
-      'notificationsCounter',
       'backedUpSeed',
+      'notifications',
+      'isLoggedIn',
+      'mainLoading',
+      'notificationsCounter',
+      'aeppPopup',
     ]),
-    ...mapState(['isRestored']),
     waveBg() {
       return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(
         this.$route.path,

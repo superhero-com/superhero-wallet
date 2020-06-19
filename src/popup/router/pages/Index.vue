@@ -22,20 +22,23 @@
       </div>
     </CheckBox>
     <Button
-      @click="generwateWalletIntro"
+      @click="$router.push('/intro')"
       :disabled="!terms && !termsAgreed"
       data-cy="generate-wallet"
     >
       {{ $t('pages.index.generateWallet') }}
     </Button>
-    <Button @click="importAccount" :disabled="!terms && !termsAgreed" data-cy="import-wallet">
+    <Button
+      @click="$router.push('/importAccount')"
+      :disabled="!terms && !termsAgreed"
+      data-cy="import-wallet"
+    >
       {{ $t('pages.index.importWallet') }}
     </Button>
   </main>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import Logo from '../../../icons/logo.svg?vue-component';
 import CheckBox from '../components/CheckBox';
 
@@ -51,15 +54,6 @@ export default {
       termsAgreed: false,
       IS_WEB: process.env.PLATFORM === 'web',
     };
-  },
-  computed: mapGetters(['account', 'isLoggedIn', 'tokens']),
-  methods: {
-    generwateWalletIntro() {
-      this.$router.push('/intro');
-    },
-    importAccount() {
-      this.$router.push('/importAccount');
-    },
   },
 };
 </script>

@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import axios from 'axios';
 import Heart from '../../../icons/heart.svg?vue-component';
 import Textarea from '../components/Textarea';
@@ -68,7 +68,8 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['current', 'currentCurrency']),
+    ...mapState(['current']),
+    ...mapGetters(['currentCurrency']),
     amountTip() {
       return (+aettosToAe(this.amount)).toFixed(2);
     },

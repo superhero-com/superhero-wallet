@@ -45,7 +45,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'middleware']),
+    ...mapGetters(['account']),
     filteredTransactions() {
       switch (this.type) {
         case 'date':
@@ -103,7 +103,7 @@ export default {
     },
     async loadMore(init = false) {
       if (this.loading && !init) return;
-      await this.$watchUntilTruly(() => this.middleware);
+      await this.$watchUntilTruly(() => this.$store.state.middleware);
       this.loading = true;
       const transactions = await this.$store.dispatch('fetchTransactions', {
         page: this.page,

@@ -35,7 +35,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import * as aeternityTokens from 'aeternity-tokens';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -59,7 +58,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['sdk']),
     selectedExtensions() {
       return this.extensions
         .filter(e => e.selected)
@@ -85,7 +83,7 @@ export default {
     async deploy() {
       this.loading = true;
       const source = aeternityTokens.newToken(this.selectedExtensions);
-      const instance = await this.sdk.getContractInstance(source);
+      const instance = await this.$store.state.sdk.getContractInstance(source);
 
       try {
         const { address } = await instance.deploy(Object.values(this.token));

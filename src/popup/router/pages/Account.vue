@@ -86,8 +86,8 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'backedUpSeed', 'allowTipping']),
-    ...mapState(['tourRunning']),
+    ...mapState(['tourRunning', 'backedUpSeed']),
+    ...mapGetters(['allowTipping']),
   },
   async created() {
     this.backup_seed_notif = !this.backedUpSeed;

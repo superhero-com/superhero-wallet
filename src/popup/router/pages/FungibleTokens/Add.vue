@@ -76,7 +76,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['sdk', 'account']),
+    ...mapGetters(['account']),
     tokenBalance() {
       const { balance, decimals } = this.token;
       return convertToken(balance, -decimals);
@@ -90,16 +90,19 @@ export default {
     },
   },
   async created() {
-    await this.$watchUntilTruly(() => this.sdk);
+    await this.$watchUntilTruly(() => this.$store.state.sdk);
   },
   methods: {
     async next() {
       if (this.exist) return;
       try {
         this.loading = true;
-        const instance = await this.sdk.getContractInstance(aeternityTokens.newToken(), {
-          contractAddress: this.token.contract,
-        });
+        const instance = await this.$store.state.sdk.getContractInstance(
+          aeternityTokens.newToken(),
+          {
+            contractAddress: this.token.contract,
+          },
+        );
         if (this.step === 'search') {
           const {
             decodedResult: { decimals, name, symbol },

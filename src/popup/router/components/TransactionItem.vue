@@ -15,7 +15,7 @@
       <span class="time" data-cy="time">{{ transaction.time | formatDate }}</span>
     </div>
     <div class="holder tx-info">
-      <span v-if="tipUrl" class="url" @click="visitTipUrl">{{ tipUrl }}</span>
+      <span v-if="tipUrl" class="url" @click="tipUrl && openUrl(tipUrl)">{{ tipUrl }}</span>
       <span v-else-if="topup" class="address">
         {{ transaction.tx.sender_id }}
       </span>
@@ -25,7 +25,12 @@
       <span v-else class="tx-type">
         {{ transactionType }}
       </span>
-      <span class="seeTransaction" @click="seeTx()">
+      <span
+        class="seeTransaction"
+        @click="
+          openUrl(`${network[current.network].middlewareUrl}/transactions/${transaction.hash}`)
+        "
+      >
         <img src="../../../icons/eye.png" />
       </span>
     </div>
@@ -33,7 +38,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import { aettosToAe } from '../../utils/helper';
 import { formatDate } from '../../utils';
@@ -46,7 +51,10 @@ export default {
       required: true,
     },
   },
-  data: () => ({ tip: null }),
+  data: () => ({
+    tip: null,
+    openUrl,
+  }),
   filters: { formatDate },
   async created() {
     if (!this.transaction.pending && !this.transaction.claim) {
@@ -55,7 +63,8 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['account', 'sdk', 'current', 'network']),
+    ...mapState(['sdk', 'current', 'network']),
+    ...mapGetters(['account']),
     status() {
       if (
         this.transaction.tx.sender_id === this.account.publicKey ||
@@ -106,16 +115,6 @@ export default {
       if (log && log.length) {
         this.tip = decode(log[0].data).toString();
       }
-    },
-    visitTipUrl() {
-      if (this.tipUrl) {
-        openUrl(this.tipUrl);
-      }
-    },
-    seeTx() {
-      openUrl(
-        `${this.network[this.current.network].middlewareUrl}/transactions/${this.transaction.hash}`,
-      );
     },
   },
 };

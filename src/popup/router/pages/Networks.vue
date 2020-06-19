@@ -81,7 +81,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import CheckBox from '../components/CheckBox';
@@ -111,7 +111,10 @@ export default {
       network: networkProps,
     };
   },
-  computed: mapGetters(['networks', 'current', 'allowTipping']),
+  computed: {
+    ...mapState(['current']),
+    ...mapGetters(['networks', 'allowTipping']),
+  },
   methods: {
     async selectNetwork(network) {
       await this.$store.dispatch('switchNetwork', network);
