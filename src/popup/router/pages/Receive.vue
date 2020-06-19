@@ -25,6 +25,7 @@ import { mapGetters } from 'vuex';
 import QrcodeVue from 'qrcode.vue';
 import AccountInfo from '../components/AccountInfo';
 import openUrl from '../../utils/openUrl';
+import { BUY_TOKENS_URL, CHANGE_CRYPTO_AE_URL } from '../../utils/constants';
 
 export default {
   name: 'Receive',
@@ -33,8 +34,8 @@ export default {
     AccountInfo,
   },
   data: () => ({
-    buyTokensURL: process.env.BUY_TOKENS_URL,
-    changeCryptoToAeUrl: process.env.CHANGE_CRYPTO_AE_URL,
+    buyTokensURL: BUY_TOKENS_URL,
+    changeCryptoToAeUrl: CHANGE_CRYPTO_AE_URL,
     openUrl,
   }),
   computed: mapGetters(['account']),

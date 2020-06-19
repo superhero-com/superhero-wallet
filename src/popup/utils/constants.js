@@ -1,6 +1,6 @@
-import BigNumber from 'bignumber.js';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
-import { TX_TYPE, VM_VERSIONS, ABI_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { ABI_VERSIONS, TX_TYPE, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import BigNumber from 'bignumber.js';
 
 export const MAGNITUDE = 18;
 export const MAGNITUDE_EXA = 18;
@@ -179,3 +179,9 @@ export const IDENTICON_SIZES = {
   normal: 38,
   lg: 64,
 };
+
+export const BUG_REPORT_URL = 'https://thesuperherowallet.typeform.com/to/vh8Ffu';
+
+export const BUY_TOKENS_URL = 'https://shop.aeternityuniverse.com';
+
+export const CHANGE_CRYPTO_AE_URL = 'https://app.jelly.market';
