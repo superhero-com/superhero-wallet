@@ -86,10 +86,7 @@ import removeAccountMixin from '../../../mixins/removeAccount';
 export default {
   mixins: [removeAccountMixin],
   components: { Close, Arrow, UserAvatar },
-  computed: {
-    ...mapGetters('tokens', ['owned']),
-    ...mapGetters(['account', 'activeAccountName']),
-  },
+  computed: mapGetters(['account', 'activeAccountName']),
   data: () => ({ showSettingsDropdown: false, showTokensDropdown: false, balances: null }),
   watch: {
     showTokensDropdown(val) {

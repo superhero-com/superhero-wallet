@@ -50,8 +50,8 @@ const unbind = router.beforeEach((to, from, next) => {
 
 router.beforeEach(async (to, from, next) => {
   await helper.pollGetter(() => store.state.isRestored);
-  if (store.getters.isLoggedIn) {
-    if (!store.getters.sdk) wallet.initSdk();
+  if (store.state.isLoggedIn) {
+    if (!store.state.sdk) wallet.initSdk();
     if (localStorage.tipUrl) {
       next(localStorage.tipUrl);
       delete localStorage.tipUrl;

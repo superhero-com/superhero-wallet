@@ -22,7 +22,7 @@
       <router-link to="/privacyPolicy" data-cy="privacy">{{
         $t('pages.aboutSettings.privacyPolicy')
       }}</router-link>
-      <Button @click="bugReport">
+      <Button @click="openUrl(bugReportUrl, true)">
         {{ $t('pages.appVUE.reportBug') }}
       </Button>
     </div>
@@ -32,6 +32,7 @@
 <script>
 import Logo from '../../../icons/logo.svg?vue-component';
 import openUrl from '../../utils/openUrl';
+import { BUG_REPORT_URL } from '../../utils/constants';
 
 export default {
   components: {
@@ -39,16 +40,11 @@ export default {
   },
   data() {
     return {
-      bugReportURL: 'https://thesuperherowallet.typeform.com/to/vh8Ffu',
       extensionVersion: `v.${process.env.npm_package_version}`,
       commitHash: process.env.COMMIT_HASH,
+      bugReportUrl: BUG_REPORT_URL,
       openUrl,
     };
-  },
-  methods: {
-    bugReport() {
-      openUrl(this.bugReportURL);
-    },
   },
 };
 </script>

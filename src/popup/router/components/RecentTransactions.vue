@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapState } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
 import PendingTxs from './PendingTxs';
 import { UPDATE_LATEST_TRANSACTIONS } from '../../../store/mutation-types';
@@ -48,10 +48,7 @@ export default {
     this.polling = setInterval(() => this.updateTransactions(), 5000);
     this.$once('hook:beforeDestroy', () => clearInterval(this.polling));
   },
-  computed: {
-    ...mapGetters(['transactions']),
-    ...mapState(['tourStartBar']),
-  },
+  computed: mapState(['tourStartBar', 'transactions']),
   methods: {
     async updateTransactions() {
       this.$store.commit(

@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapState } from 'vuex';
 import Hero from '../../../icons/hero.svg?vue-component';
 import StartOnboarding from '../../../icons/start-onboarding.svg?vue-component';
 import Close from '../../../icons/close.svg?vue-component';
@@ -148,8 +148,7 @@ export default {
     ],
   }),
   computed: {
-    ...mapGetters(['isLoggedIn', 'nodeStatus']),
-    ...mapState(['tourStartBar', 'tourRunning']),
+    ...mapState(['tourStartBar', 'tourRunning', 'isLoggedIn', 'nodeStatus']),
     tourSteps() {
       return this.steps
         .filter(({ hide }) => !hide)
@@ -158,16 +157,17 @@ export default {
   },
   watch: {
     tourRunning(val) {
-      if (val) this.showActions();
+      if (val) {
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+        document.body.style.pointerEvents = 'none';
+      }
     },
   },
   methods: {
     toggleTour(event) {
       if (event.target.closest('.close')) this.$store.commit('SET_TOUR_STATUS_BAR', false);
       else this.$store.commit('SET_TOUR_RUNNING', true);
-    },
-    showActions() {
-      this.disableScroll();
     },
     start() {
       this.$tours.onboarding.start();
@@ -178,11 +178,6 @@ export default {
       this.$store.commit('SET_TOUR_RUNNING', false);
       this.enableScroll();
       this.started = false;
-    },
-    disableScroll() {
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
-      document.body.style.pointerEvents = 'none';
     },
     enableScroll() {
       document.documentElement.style.overflow = '';

@@ -12,10 +12,10 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 
 export default {
-  computed: mapGetters(['notifications']),
+  computed: mapState(['notifications']),
   async created() {
     this.$store.commit('SET_NOTIFICATIONS_COUNTER', 0);
   },
