@@ -82,7 +82,7 @@
       "title": "What does it mean when a URL is \"Not Verified\"?",
       "msg": "This means that the owner of the URL has not created a Superhero wallet yet. They can claim their tips as soon as they make one and add their wallet address to their website. "
     },
-    "inaccessible": {
+    "blacklisted": {
       "title": "What is an \"Inaccessible\" URL?",
       "msg": "The Superhero wallet can tip any public URL. Currently, web pages that require logging in to view information cannot be tipped. We're still working on solutions for this."
     },
