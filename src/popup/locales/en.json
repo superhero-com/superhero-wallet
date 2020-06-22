@@ -10,8 +10,8 @@
       "content": "To send tips, go to the URL you want to tip and open the wallet. You can also copy the URL, click Send Tip, and paste this URL into the wallet. Fill in how much you want to tip and add a message along with that tip. Hit Send and confirm."
     },
     "step_3": {
-      "title": "What is \"Verified\" URL",
-      "content": "This simply means that the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed."
+      "title": "What is a \"Verified\" URL",
+      "content": "This simply means that the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and the profile owner can instantly claim tips."
     },
     "step_4": {
       "title": "Claim Tip",
@@ -59,7 +59,7 @@
       "msg": "This name is already registered."
     },
     "name-length": {
-      "msg": "Only names longer than 13 characters are allowed."
+      "msg": "Names on SUPERHERO have to be a minimum of 13 characters."
     },
     "incorrect-address": {
       "msg": "Please make sure that you have entered a valid public address."
@@ -68,7 +68,7 @@
       "msg": "Please make sure you entered a valid amount."
     },
     "insufficient-balance": {
-      "msg": "The requested amount cannot be spent."
+      "msg": "You do not have enough balance for this transaction."
     },
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",
@@ -79,43 +79,43 @@
       "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed easily."
     },
     "not-verified": {
-      "title": "What is \"Not Verified\" URL?",
+      "title": "What does it mean when a URL is \"Not Verified\"?",
       "msg": "This means that the owner of the URL has not created a Superhero wallet yet. They can claim their tips as soon as they make one and add their wallet address to their website. "
     },
-    "blacklisted": {
-      "title": "What is \"Blacklisted\" URL?",
+    "inaccessible": {
+      "title": "What is an \"Inaccessible\" URL?",
       "msg": "The Superhero wallet can tip any public URL. Currently, web pages that require logging in to view information cannot be tipped. We're still working on solutions for this."
     },
     "confirm-tip" :{
       "title": "Send Tip Confirmation",
-      "msg": "You are about to tip a URL that is not Superhero-verified. We cannot guarantee that the owner will claim their tips on this site.",
-      "sub-message": "Are you sure you would like to send the tip anyway? You can still tip them—let them know so they can claim it.",
+      "msg": "The webpage owner has not added a SUPERHERO wallet yet. We cannot guarantee that they will claim their tips.",
+      "sub-message": "You can still tip them—let them know so they can claim it. Would you like to proceed?",
       "send": "Send Tip"
     },
     "error-log": {
       "title": "Something went wrong",
       "sub-title": "Be a Superhero!",
-      "content": "Provide more information about the error  encountered so we can improve our superpowers. No personal data will be collected.",
+      "content": "Please provide more information about the error you encountered so we can improve our superpowers. No personal data will be collected.",
       "create-report": "Create report"
     },
     "donate-errors": {
       "title": "Your Error Report Has Been Sent",
-      "msg": "Thank you for being such a wonderful fellow Superhero!"
+      "msg": "Thank you for being such a helpful Superhero!"
     },
     "donate-errors-error": {
       "title": "Your Error Report Was not send",
-      "msg": "There was problem sending your error report"
+      "msg": "There was problem sending your error report."
     },
     "tip-mainnet-warning": {
       "title": "Warning",
-      "msg": "Tip/Claim functionality works only on Mainnet"
+      "msg": "Tip/Claim functionality works only on Mainnet."
     },
     "confirm-transaction-sign": {
       "unknown": "Unknown",
       "contract-create": "Contract create",
       "aens": "AENS",
       "payload": "Payload",
-      "recipientId": "Recipiend Id",
+      "recipientId": "Recipient Id",
       "code": "Code",
       "callData": "Call data",
       "contractId": "Contract Id",
@@ -146,8 +146,8 @@
         "msg": "Allowance created successfully"
       },
       "transfer": {
-        "title": "Allowance tranfered",
-        "msg": "Allowance tranfered successfully"
+        "title": "Allowance transferred",
+        "msg": "Allowance transferred successfully"
       },
       "change": {
         "title": "Allowance changed",
@@ -186,7 +186,7 @@
       "heading": "Intro",
       "skip": "Skip",
       "generateWallet": "Generate Wallet",
-      "receive": "Receive",
+      "receive": "Receive Tips",
       "step1text": "for creating and curating great content, engaging in meaningful discussions, launching causes for humanity, and for just being a wonderful human being.",
       "step2text": "to great content creators online, humanitarian causes, and other awesome human beings—for whatever reason.",
       "step3text-1": "This wallet does not—and will never take commissions off the",
@@ -290,14 +290,14 @@
       "backup": "backup",
       "yourSeedPhrase": "your seed phrase",
       "updateExtension": "New version available! Please update your extension.",
-      "updateAvailable": "New version in store available!",
+      "updateAvailable": "New version available in the store!",
       "claim-name": "Claim your .chain name"
     },
     "claim": {
       "claim": "Claim tips",
       "noZeroClaim": "There are no tips to be claimed for this URL.",
       "noAddress": "Address not found",
-      "errorClaim": "Error with claiming",
+      "errorClaim": "Error.",
       "ae": "AE tokens",
       "claimed": " Claim request sent! ",
       "url": "URL",
@@ -309,7 +309,7 @@
       "noMobileClaim": "Claiming is currently only available on desktop."
     },
     "claimTips": {
-      "urlToClaim": "URL to claim tips for"
+      "urlToClaim": "Claim tips for this URL:"
     },
     "notFound": {
       "notFound": "Requested page can't be found",
@@ -355,10 +355,10 @@
       "setupSteps3heading": "Write it down in the right order",
       "setupSteps4heading": "Add an aeternity wallet",
       "setupSteps5heading": "Link your aeternity wallet",
-      "setupSteps1": "Turn off the internet connection before opening AirGap",
+      "setupSteps1": "For security, turn off your internet connection before opening AirGap",
       "setupSteps2": "No internet connection means maximum security for the key",
       "setupSteps3": "You will need it for recovery",
-      "setupSteps4": "Tap wallet, add wallet and choose aeternity",
+      "setupSteps4": "Tap wallet, add wallet, and choose aeternity",
       "setupSteps5": "Finish by linking your vault to your aeternity address",
       "linkVault": "Link Vault"
     },
@@ -366,7 +366,7 @@
       "heading": "Allowances",
       "backToUtilities": "Back to utilities",
       "create-allowance": "Create allowance",
-      "create-allowance-info": "This allows you to create allowance with your new fungible tokens for anyone you want",
+      "create-allowance-info": "This allows you to create an allowance with your new fungible tokens for anyone you want",
       "transfer-allowance": "Transfer allowance",
       "transfer-allowance-info": "This allows you to take your whole allowance or part of it from someone",
       "all-allowances": "All allowances",
@@ -453,7 +453,7 @@
     "names": {
       "default": "Default",
       "balance-error": "Your account balance is not enough to execute this transaction.",
-      "pointer-added": "Name {type} successfull!",
+      "pointer-added": "Name {type} successful!",
       "pending-claim": "Pending",
       "list": {
         "no-names": "No names found",
@@ -506,7 +506,7 @@
       "term2": "Terms of Use",
       "term3": "Privacy Policy",
       "termsAndConditions": "Terms of Use",
-      "heading": "Social network with a mission",
+      "heading": "Social platform with no hidden agenda.",
       "webVersion": "Or use a web version",
       "securingAccount": "Securing your account",
       "generateWallet": "Generate New Wallet",
@@ -591,18 +591,18 @@
     },
     "seedPhrase": {
       "securingAccount": "Securing your account",
-      "attentionMsg": "Please make sure to keep your seed phrase safe! Superhero does not store and cannot recover your seed phrase for you. It is your responsibility to keep it safe. If you lose access to your wallet, you will lose all your funds.",
+      "attentionMsg": "Please make sure to keep your seed phrase safe! Superhero does not store and cannot recover your seed phrase for you. It is your responsibility to keep it safe. If you lose access to your seed phrase, you will lose access to your wallet and all your funds.",
       "tips": "Tips on protecting your funds",
       "tip1": "Save a backup in multiple places",
       "tip2": "Remember your password to decrypt your wallet",
       "tip3": "Never share your seed phrase with anyone",
-      "keepCarefully": "Carefully keep this seed phrase safe! Write these 12 words down and keep them in safe place. You need them to recover your account in the future. ",
+      "keepCarefully": "Keep this seed phrase safe! Write these 12 words down and keep them in safe place. You need them to recover your account in the future. ",
       "confirmSeedPhrase": "Confirm your seed phrase. Tap the words below to compose your seed phrase in the correct order.",
       "recoveryPhrase": "Your recovery seed phrase",
       "first": "first",
       "second": "second",
       "third": "third",
-      "backupText": "Back up your seed phrase on a piece of paper or file that no one except you will ever see. Make multiple copies.",
+      "backupText": "Back up your seed phrase on a piece of paper or file that no one but you will ever see. Make multiple copies.",
       "dontLose": "Do not lose this seed phrase!",
       "nextScreen": "To make sure you got it right, you will be asked to recreate this seed phrase in the next screen.",
       "verifySeed": "Verify seed",
@@ -653,7 +653,7 @@
       "tabRemoveAccount": "Remove account",
       "tabRemoveAccountSmall": "Remove account from the wallet and delete extension storage",
       "tabSaveErrorLog": "Save error log",
-      "tabSaveErrorLogSmall": "This will help us identify what's causing errors."
+      "tabSaveErrorLogSmall": "This will help us identify what's causing the errors."
     },
     "signAndVerifyMsg": {
       "backToSignVerifyMsg": "Back to Sign/Verify Message",
@@ -666,7 +666,7 @@
       "enterPassword": "Enter your password",
       "signMessage": "Sign message",
       "signAndVerify": "Sign and verify messages",
-      "signMessageinfo": "This allows you to sign message with your private key",
+      "signMessageinfo": "This allows you to sign messages with your private key",
       "signBtn": "Sign",
       "verifyMessage": "Verify message",
       "verifyMessageinfo": "This allows you to verify signed messages",
