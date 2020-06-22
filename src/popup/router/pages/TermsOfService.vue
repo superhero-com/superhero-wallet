@@ -146,8 +146,8 @@
             >https://play.google.com/store/apps/details?id=com.superhero.cordova</a
           >
           and for App Store:
-          <a @click="openUrl('https://apps.apple.com/bg/app/superhero-wallet/id1502786641', true)"
-            >https://apps.apple.com/bg/app/superhero-wallet/id1502786641</a
+          <a @click="openUrl('https://testflight.apple.com/join/3o5r4dQQ', true)"
+            >https://testflight.apple.com/join/3o5r4dQQ</a
           >;
         </p>
         <p>
@@ -639,8 +639,8 @@
         </p>
         <p>
           from App Store:
-          <a @click="openUrl('https://apps.apple.com/bg/app/superhero-wallet/id1502786641', true)"
-            >https://apps.apple.com/bg/app/superhero-wallet/id1502786641</a
+          <a @click="openUrl('https://testflight.apple.com/join/3o5r4dQQ', true)"
+            >https://testflight.apple.com/join/3o5r4dQQ</a
           >.
         </p>
         <p>
