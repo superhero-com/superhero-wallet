@@ -5,7 +5,7 @@
       {{ $t('pages.index.heading') }}
     </p>
     <div class="install-native-version" v-if="IS_WEB">
-      <a href="https://apps.apple.com/bg/app/superhero-wallet/id1502786641"
+      <a href="https://testflight.apple.com/join/3o5r4dQQ"
         ><img src="../../../icons/app-store.svg" alt="App Store"
       /></a>
       <a href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
