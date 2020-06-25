@@ -1,4 +1,5 @@
 /* eslint-disable no-continue */
+import iconHover from '../icons/twitter-icon-tip-hover.svg';
 import icon from '../icons/twitter-icon-tip.svg';
 
 global.browser = require('webextension-polyfill');
@@ -9,12 +10,22 @@ const buttonContentStyle = `color: rgb(101, 119, 134);
 font-size: 12px;
 font-weight: bold;
 margin-left: 6px;
-position: relative;
-top:-4px`;
+position: relative;`;
+
+const buttonContentStyleHover = `color: #2a9cff;
+font-size: 12px;
+font-weight: bold;
+margin-left: 6px;
+position: relative;`;
 
 const buttonStyles = `background: transparent; 
 border:none; cursor: pointer;
 color:rgb(101, 119, 134);
+outline:none;`;
+
+const buttonStylesHover = `background: transparent; 
+border:none; cursor: pointer;
+color: #2a9cff;
 outline:none;`;
 
 const getTweetId = tweet => {
@@ -41,9 +52,9 @@ const createSuperheroTipAction = (tweet, tweetId, numActions) => {
   // Create the tip button icon
   const buttonIcon = document.createElement('img');
   buttonIcon.src = icon;
-  buttonIcon.setAttribute('style', `height: 16px;`);
+  buttonIcon.setAttribute('style', `height: 16px; vertical-align: middle;`);
 
-  // Creaate the tip button content
+  // Create the tip button content
   const buttonContent = document.createElement('span');
   buttonContent.innerHTML = 'Tip';
   buttonContent.setAttribute('style', buttonContentStyle);
@@ -53,10 +64,45 @@ const createSuperheroTipAction = (tweet, tweetId, numActions) => {
   superheroTipButton.setAttribute('style', buttonStyles);
   superheroTipButton.appendChild(buttonIcon);
   superheroTipButton.appendChild(buttonContent);
+
+  // Events
+  // On click send postMessage for invoking tip with the tweetId
   superheroTipButton.onclick = e => {
     browser.runtime.sendMessage({ from: 'content', type: 'openTipPopup', url: tweetId });
     e.stopPropagation();
   };
+
+  const hoverEnter = () => {
+    buttonIcon.src = iconHover;
+    superheroTipButton.setAttribute('style', buttonStylesHover);
+    buttonContent.setAttribute('style', buttonContentStyleHover);
+  };
+
+  const hoverLeave = () => {
+    buttonIcon.src = icon;
+    superheroTipButton.setAttribute('style', buttonStyles);
+    buttonContent.setAttribute('style', buttonContentStyle);
+  };
+
+  // Change style on mouseenter and mouseleave
+  superheroTipButton.onmouseenter = e => {
+    hoverEnter();
+    e.stopPropagation();
+  };
+  superheroTipButton.onmouseleave = e => {
+    hoverLeave();
+    e.stopPropagation();
+  };
+
+  buttonContent.onmouseenter = e => {
+    hoverEnter();
+    e.stopPropagation();
+  };
+  buttonContent.onmouseleave = e => {
+    hoverLeave();
+    e.stopPropagation();
+  };
+
   const shadowRoot = superheroTipAction.attachShadow({ mode: 'open' });
   shadowRoot.appendChild(superheroTipButton);
 
