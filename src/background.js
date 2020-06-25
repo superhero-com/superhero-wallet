@@ -1,4 +1,5 @@
 import uid from 'uuid';
+import { isEmpty } from 'lodash-es';
 import { setController, switchNode } from './lib/background-utils';
 import './lib/initPolyfills';
 import { PopupConnections } from './lib/popup-connection';
@@ -76,6 +77,11 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
       urls.push(params.hostname);
       setPhishingUrl(urls);
       return true;
+    }
+
+    if (method === 'checkHasAccount') {
+      const { account } = await getState();
+      if (!account || isEmpty(account)) return false;
     }
 
     if (from === 'content') {
