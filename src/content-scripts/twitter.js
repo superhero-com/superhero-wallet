@@ -23,7 +23,7 @@ const getTweetId = tweet => {
     return null;
   }
 
-  return status.href;
+  return status.href.split('/retweets')[0];
 };
 
 const createSuperheroTipAction = (tweet, tweetId, numActions) => {
@@ -33,6 +33,7 @@ const createSuperheroTipAction = (tweet, tweetId, numActions) => {
   superheroTipAction.className = 'action-superhero-tip';
   superheroTipAction.style.display = 'inline-block';
   superheroTipAction.style.minWidth = '80px';
+  superheroTipAction.style.alignSelf = 'center';
   superheroTipAction.style.textAlign = hasUserActions ? 'right' : 'start';
   superheroTipAction.setAttribute('role', 'button');
   superheroTipAction.setAttribute('tabindex', '0');
@@ -65,7 +66,9 @@ const createSuperheroTipAction = (tweet, tweetId, numActions) => {
 const configureSuperheroTipAction = async () => {
   clearTimeout(timeout);
   const check = await browser.runtime.sendMessage({ method: 'checkHasAccount' });
-  const tweets = document.querySelectorAll('[data-testid="tweet"], [data-testid="tweetDetail"]');
+  const tweets = document.querySelectorAll(
+    '[data-testid="tweet"], [data-testid="tweetDetail"], [data-testid="tweet"] + div, [data-testid="tweetDetail"] + div',
+  );
 
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < tweets.length; ++i) {
