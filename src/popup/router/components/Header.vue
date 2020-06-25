@@ -10,11 +10,7 @@
       </div>
 
       <div v-if="isLoggedIn">
-        <span
-          class="noti-holder"
-          @click="notifications.length && $router.push('/notifications')"
-          data-cy="noti"
-        >
+        <span class="noti-holder" @click="toNotifications" data-cy="noti">
           <span v-if="notificationsCounter" class="noti-count" data-cy="noti-count">{{
             notifications.length
           }}</span>
@@ -59,6 +55,11 @@ export default {
         return;
       }
       this.$router.go(-1);
+    },
+    toNotifications() {
+      if (this.notifications.length && this.$store.state.route.fullPath !== '/notifications') {
+        this.$router.push('/notifications');
+      }
     },
   },
 };
