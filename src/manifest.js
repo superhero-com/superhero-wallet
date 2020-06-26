@@ -23,6 +23,8 @@ module.exports = (isProd, platform) => ({
     'webRequestBlocking',
     '*://*.chain/*',
     '*://*.google.com/*',
+    'https://*.twitter.com/*',
+    'https://twitter.com/*',
   ],
   icons: {
     48: './icons/icon_48.png',
@@ -47,6 +49,11 @@ module.exports = (isProd, platform) => ({
       all_frames: true,
       matches: ['https://*/*', 'http://*/*'],
       js: ['other/inject.js'],
+    },
+    {
+      run_at: 'document_start',
+      matches: ['https://*.twitter.com/*', 'https://twitter.com/*'],
+      js: ['other/twitter.js'],
     },
   ],
   web_accessible_resources: [

@@ -26,7 +26,8 @@ const getConfig = platform => {
     entry: {
       ...(platform.startsWith('extension-') && {
         'other/background': './background.js',
-        'other/inject': './inject.js',
+        'other/inject': './content-scripts/inject.js',
+        'other/twitter': './content-scripts/twitter.js',
         'popup/popup': './popup/popup.js',
         'options/options': './options/options.js',
         'phishing/phishing': './phishing/phishing.js',

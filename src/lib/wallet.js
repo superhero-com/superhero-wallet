@@ -99,8 +99,10 @@ export default {
         compilerUrl,
         name: 'Superhero',
         onConnection(client, { accept, deny }, origin) {
-          if (NO_POPUP_AEPPS.includes(extractHostName(origin))) accept();
-          else deny();
+          const isAccept =
+            NO_POPUP_AEPPS.includes(extractHostName(origin)) ||
+            window.confirm(`Allow connection to ${origin}?`);
+          (isAccept ? accept : deny)();
         },
         onSubscription: acceptCb,
         onSign: acceptCb,
