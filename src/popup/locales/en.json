@@ -197,9 +197,16 @@
       "step4text-2": "No censorship: there are no custodians to dictate what can and cannot be monetized.",
       "step4text-3": "Immortalize messages on the blockchain: comments and messages are timestamped and recorded on the blockchain—forever.",
       "step4text-4": "Instant, borderless, transactions at near-zero fees.",
+      "step4text-iframe-1": "But that's not all.",
+      "step4text-iframe-2": "Superhero wallet is also available as browser extension and mobile app so you can use it on your preferred platforms and devices.",
       "toHome": "Proceed to your Wallet",
       "send": "Send",
-      "ever": "Ever."
+      "ever": "Ever.",
+      "wellcome": "Wellcome on board!",
+      "understand": "I understand that this is a cryptocurrency wallet and i am responsible for backing up my account recovery seed phrase.",
+      "extension": "Browser extension",
+      "mobileApp": "Mobile app"
+
     },
     "titles": {
       "settings": "Settings",
