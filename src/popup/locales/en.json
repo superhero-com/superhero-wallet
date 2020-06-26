@@ -228,7 +228,8 @@
       "add-token": "Add token",
       "mint-burn-token": "Mint/Burn token",
       "allowances": "Allowances",
-      "sign-message": "Sign Message"
+      "sign-message": "Sign Message",
+      "invite": "Invite"
     },
     "appVUE": {
       "systemName": "Superhero",
@@ -264,7 +265,8 @@
       "removeAccount": "Remove account",
       "donateErrorReports": "Submit error reports",
       "tokens": "Fungible tokens",
-      "manageTokens": "Manage tokens"
+      "manageTokens": "Manage tokens",
+      "invite": "Invite"
     },
     "aboutSettings": {
       "heading": "About",
@@ -941,6 +943,14 @@
       "details": "Technical details:",
       "cancel": "Cancel",
       "donate": "Donate Data"
+    },
+    "invite": {
+      "generate-link": "Generate invite link",
+      "generate": "Generate",
+      "created-links": "Created invite links",
+      "top-up": "Top up",
+      "close": "Close",
+      "claim": "Claim back"
     }
   },
   "phishing": {
