@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import { Crypto } from '@aeternity/aepp-sdk/es';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
-import { aettosToAe } from '../../popup/utils/helper';
 import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 
 export default {
