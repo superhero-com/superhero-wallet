@@ -2,6 +2,7 @@ import Vue from 'vue';
 import { Crypto } from '@aeternity/aepp-sdk/es';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import { aettosToAe } from '../../popup/utils/helper';
+import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 
 export default {
   namespaced: true,
@@ -50,7 +51,7 @@ export default {
       await Promise.all(
         referrals.map(async ({ publicKey }, idx) => {
           const balance = parseFloat(
-            +aettosToAe(await sdk.balance(publicKey).catch(() => 0)),
+            await sdk.balance(publicKey, { format: AE_AMOUNT_FORMATS.AE }).catch(() => 0),
           ).toFixed(2);
           commit('setBalance', { idx, balance });
           return balance;
