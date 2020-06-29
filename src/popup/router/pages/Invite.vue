@@ -21,16 +21,15 @@
         <span>{{ referral.link }}</span>
         <button class="invite-link-copy" v-clipboard:copy="referral.link"><CopyIcon /></button>
       </div>
-      <AmountSend
-        v-if="referral.topUp"
-        @changeAmount="val => (referral.topUpAmount = val)"
-        :value="referral.topUpAmount"
-      />
       <template v-if="!referral.topUp">
         <Button half dark @click="referral.topUp = true">{{ $t('pages.invite.top-up') }}</Button>
         <Button half @click="claim(referral.link)">{{ $t('pages.invite.claim') }}</Button>
       </template>
       <template v-else>
+        <AmountSend
+          @changeAmount="val => (referral.topUpAmount = val)"
+          :value="referral.topUpAmount"
+        />
         <Button half dark @click="referral.topUp = false">{{ $t('pages.invite.close') }}</Button>
         <Button half @click="topUp(referral)">{{ $t('pages.invite.top-up') }}</Button>
       </template>
