@@ -38,9 +38,6 @@ export default store =>
       add(state, link) {
         state.referrals.unshift(link);
       },
-      reset(state) {
-        state.referrals = [];
-      },
       setClient(state, client) {
         state.client = client;
       },
