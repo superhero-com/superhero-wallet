@@ -15,8 +15,7 @@ export default store =>
     },
     getters: {
       get: state => link => state.referrals.find(r => r.link === link),
-      // eslint-disable-next-line no-unused-vars
-      keypair: state => referral => {
+      keypair: () => referral => {
         const segments = new URL(referral).pathname.split('/');
         const secret = segments[2];
         const { publicKey, secretKey } = Crypto.generateKeyPairFromSecret(
