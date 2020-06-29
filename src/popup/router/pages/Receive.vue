@@ -7,9 +7,6 @@
       <AccountInfo />
       <qrcode-vue :value="account.publicKey" size="140" class="my-25 qrcode"></qrcode-vue>
 
-      <Button @click="openUrl(buyTokensURL, true)">
-        {{ $t('pages.receive.purchase') }}
-      </Button>
       <Button @click="openUrl(changeCryptoToAeUrl, true)">
         {{ $t('pages.receive.transferExchange') }}
       </Button>
@@ -25,7 +22,7 @@ import { mapGetters } from 'vuex';
 import QrcodeVue from 'qrcode.vue';
 import AccountInfo from '../components/AccountInfo';
 import openUrl from '../../utils/openUrl';
-import { BUY_TOKENS_URL, CHANGE_CRYPTO_AE_URL } from '../../utils/constants';
+import { CHANGE_CRYPTO_AE_URL } from '../../utils/constants';
 
 export default {
   name: 'Receive',
@@ -34,7 +31,6 @@ export default {
     AccountInfo,
   },
   data: () => ({
-    buyTokensURL: BUY_TOKENS_URL,
     changeCryptoToAeUrl: CHANGE_CRYPTO_AE_URL,
     openUrl,
   }),
