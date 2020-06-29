@@ -104,7 +104,7 @@ export default {
     },
     async topUp({ link, topUpAmount, publicKey }) {
       this.loading = true;
-      const address = publicKey || this.$store.getters['invites/keypair'](link);
+      const address = publicKey || this.$store.getters['invites/keypair'](link). publicKey;
       try {
         await this.sdk.spend(+aeToAettos(topUpAmount), address, {
           payload: 'referral',
