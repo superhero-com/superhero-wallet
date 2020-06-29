@@ -45,8 +45,8 @@ export default store =>
       setClient(state, client) {
         state.client = client;
       },
-      setBalance(state, { i, balance }) {
-        Vue.set(state.referrals, i, { ...state.referrals[i], balance });
+      setBalance(state, { idx, balance }) {
+        Vue.set(state.referrals[idx], 'balance', balance);
       },
     },
     actions: {
