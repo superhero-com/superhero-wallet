@@ -182,6 +182,4 @@ export const IDENTICON_SIZES = {
 
 export const BUG_REPORT_URL = 'https://thesuperherowallet.typeform.com/to/vh8Ffu';
 
-export const BUY_TOKENS_URL = 'https://shop.aeternityuniverse.com';
-
 export const CHANGE_CRYPTO_AE_URL = 'https://app.jelly.market';
