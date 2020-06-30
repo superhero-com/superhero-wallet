@@ -52,7 +52,6 @@ export default {
             await sdk.balance(publicKey, { format: AE_AMOUNT_FORMATS.AE }).catch(() => 0),
           ).toFixed(2);
           commit('setBalance', { idx, balance });
-          return balance;
         }),
       );
     },
