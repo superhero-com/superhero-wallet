@@ -9,7 +9,6 @@ export default {
     referrals: [],
   },
   getters: {
-    get: state => link => state.referrals.find(r => r.link === link),
     keypair: () => referral => {
       const segments = new URL(referral).pathname.split('/');
       const secret = segments[2];
