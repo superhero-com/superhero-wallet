@@ -1,7 +1,7 @@
 <template>
   <div class="height-100 primary-bg">
     <div class="popup popup-no-padding">
-      <div v-show="backup_seed_notif && !tourRunning" class="noti" data-cy="seed-notif">
+      <div v-show="!this.backedUpSeed && !tourRunning" class="noti" data-cy="seed-notif">
         <span>
           {{ $t('pages.account.youNeedTo') }}
           <a href="#/securitySettings" style="text-decoration: underline;">{{
@@ -54,7 +54,6 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { setTimeout } from 'timers';
 import Tip from '../../../icons/tip-icon.svg?vue-component';
 import Claim from '../../../icons/claim-icon.svg?vue-component';
 import Activity from '../../../icons/activity-icon.svg?vue-component';
@@ -80,20 +79,9 @@ export default {
     AccountInfo,
     BoxButton,
   },
-  data() {
-    return {
-      backup_seed_notif: false,
-    };
-  },
   computed: {
     ...mapState(['tourRunning', 'backedUpSeed']),
     ...mapGetters(['allowTipping']),
-  },
-  async created() {
-    this.backup_seed_notif = !this.backedUpSeed;
-    setTimeout(() => {
-      this.backup_seed_notif = false;
-    }, 3000);
   },
 };
 </script>
