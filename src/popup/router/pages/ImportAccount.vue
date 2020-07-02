@@ -52,6 +52,7 @@ export default {
             privateKey: seed,
           };
           await this.$store.dispatch('setLogin', { keypair });
+          this.$store.commit('SET_BACKED_UP_SEED', true);
           return setTimeout(() => this.$router.push('/account'), 1000);
         }
         this.disabled = true;
