@@ -1,8 +1,9 @@
 <template>
-  <div class="popup">
+  <div :class="['popup', { iframe }]">
     <div class="createWallet-holder">
       <div v-show="step === 1">
-        <h2>
+        <img v-if="iframe" src="../../../icons/iframe/receive.svg" />
+        <h2 v-else>
           <Claim /> {{ $t('pages.intro.receive') }}
           <span class="ml-10 secondary-text"> {{ $t('pages.appVUE.aeid') }} </span>
         </h2>
@@ -14,7 +15,8 @@
       </div>
 
       <div v-show="step === 2">
-        <h2>
+        <img v-if="iframe" src="../../../icons/iframe/send.svg" />
+        <h2 v-else>
           <Heart /> {{ $t('pages.send.send') }}
           <span class="ml-10 secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
         </h2>
@@ -26,14 +28,19 @@
       </div>
 
       <div v-show="step === 3">
+        <img v-if="iframe" src="../../../icons/iframe/power.svg" />
         <div class="text-info">
           <span>
             {{ $t('pages.intro.step3text-1') }}
             <span class="secondary-text aeid">{{ $t('pages.appVUE.aeid') }}</span>
             {{ $t('pages.intro.step3text-2') }}
+            <span class="white" v-if="iframe">
+              <br />
+              {{ $t('pages.intro.ever') }}
+            </span>
           </span>
         </div>
-        <div class="mt-32 text-left">
+        <div v-if="!iframe" class="mt-32 text-left">
           {{ $t('pages.intro.ever') }}
         </div>
       </div>
@@ -59,30 +66,104 @@
       </div>
 
       <div v-show="step === 4">
-        <h2>{{ $t('pages.intro.createdWallet') }}</h2>
-        <h4>{{ $t('pages.intro.step4text-0') }}</h4>
-        <div class="text-info">
-          <span class="mb-4 block">{{ $t('pages.intro.step4text-1') }}</span>
-          <span class="mb-4 block"> {{ $t('pages.intro.step4text-2') }} </span>
-          <span class="mb-4 block"> {{ $t('pages.intro.step4text-3') }} </span>
-        </div>
+        <template v-if="!iframe">
+          <h2>{{ $t('pages.intro.createdWallet') }}</h2>
+          <h4>{{ $t('pages.intro.step4text-0') }}</h4>
+          <div class="text-info">
+            <span class="mb-4 block">{{ $t('pages.intro.step4text-1') }}</span>
+            <span class="mb-4 block"> {{ $t('pages.intro.step4text-2') }} </span>
+            <span class="mb-4 block"> {{ $t('pages.intro.step4text-3') }} </span>
+          </div>
 
-        <p class="last-msg-enjoy">{{ $t('pages.intro.step4text-4') }}</p>
-        <Button @click="$router.push('/account')" data-cy="proceed-to-wallet">{{
-          $t('pages.intro.toHome')
-        }}</Button>
+          <p class="last-msg-enjoy">{{ $t('pages.intro.step4text-4') }}</p>
+        </template>
+        <template v-else>
+          <h2 class="secondary">{{ $t('pages.intro.wellcome') }}</h2>
+          <h4>{{ $t('pages.intro.createdWallet') }}</h4>
+          <CheckBox v-model="understood" data-cy="checkbox" class="iframe checkbox">
+            <div class="undestand">
+              {{ $t('pages.intro.understand') }}
+            </div>
+          </CheckBox>
+        </template>
+        <Button
+          :disabled="iframe && !understood"
+          @click="$router.push('/account')"
+          data-cy="proceed-to-wallet"
+        >
+          {{ $t('pages.intro.toHome') }}
+        </Button>
+        <div v-if="iframe" class="footer">
+          <div>
+            {{ $t('pages.intro.step4text-iframe-1') }}
+            <br />
+            {{ $t('pages.intro.step4text-iframe-2') }}
+          </div>
+          <div class="div-icons">
+            <div class="extension">
+              {{ $t('pages.intro.extension') }}
+              <div>
+                <a
+                  @click="
+                    openUrl(
+                      'https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/',
+                      true,
+                    )
+                  "
+                >
+                  <img
+                    :class="{ disabled: !isFirefox() }"
+                    src="../../../icons/iframe/firefox.svg"
+                  />
+                </a>
+                <a
+                  @click="
+                    openUrl(
+                      'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne',
+                      true,
+                    )
+                  "
+                >
+                  <img :class="{ disabled: isFirefox() }" src="../../../icons/iframe/google.svg" />
+                </a>
+              </div>
+            </div>
+            <div class="mobile-app">
+              {{ $t('pages.intro.mobileApp') }}
+              <div>
+                <a @click="openUrl('https://testflight.apple.com/join/3o5r4dQQ', true)">
+                  <img src="../../../icons/iframe/appStore.svg" />
+                </a>
+                <a
+                  @click="
+                    openUrl(
+                      'https://play.google.com/store/apps/details?id=com.superhero.cordova',
+                      true,
+                    )
+                  "
+                >
+                  <img src="../../../icons/iframe/playStore.svg" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { detect } from 'detect-browser';
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
+import { IN_FRAME } from '../../utils/helper';
+import openUrl from '../../utils/openUrl';
 import Claim from '../../../icons/claim.svg?vue-component';
 import Heart from '../../../icons/heart.svg?vue-component';
 import LeftArrow from '../../../icons/left-arrow.svg?vue-component';
 import RightArrow from '../../../icons/right-arrow.svg?vue-component';
 import Button from '../components/Button';
+import CheckBox from '../components/CheckBox';
 
 export default {
   components: {
@@ -91,12 +172,16 @@ export default {
     Button,
     LeftArrow,
     RightArrow,
+    CheckBox,
   },
   data() {
     return {
       step: 1,
       totalsteps: 4,
       mnemonic: null,
+      understood: !IN_FRAME,
+      iframe: IN_FRAME,
+      openUrl,
     };
   },
   methods: {
@@ -111,6 +196,9 @@ export default {
       };
       await this.$store.dispatch('setLogin', { keypair });
       this.next();
+    },
+    isFirefox() {
+      return detect().name === 'firefox';
     },
     prev() {
       this.step -= 1;
@@ -127,6 +215,28 @@ export default {
 <style lang="scss" scoped>
 @import '../../../common/variables';
 
+.popup.iframe {
+  padding-top: 0;
+  padding-bottom: 0;
+
+  .createWallet-holder {
+    padding-top: 0;
+
+    .text-info {
+      margin: 0;
+    }
+  }
+
+  .dotstyle {
+    top: 78%;
+  }
+
+  h2,
+  h4 {
+    margin: 8px 0;
+  }
+}
+
 .createWallet-holder {
   position: relative;
   height: 80vh;
@@ -136,6 +246,11 @@ export default {
     display: flex;
     justify-content: center;
     font-size: 18px;
+
+    &.secondary {
+      color: $secondary-color;
+      font-size: 22px;
+    }
 
     svg {
       margin-right: 10px;
@@ -151,6 +266,17 @@ export default {
       font-size: 16px;
       word-break: break-word;
     }
+
+    span.white {
+      color: #fff;
+    }
+  }
+
+  .undestand {
+    text-align: left;
+    color: $text-color;
+    font-size: 12px;
+    word-break: break-word;
   }
 
   .skip-button {
@@ -253,5 +379,52 @@ export default {
 
 .dotstyle-fillup li.current a::after {
   height: 100%;
+}
+
+.iframe.checkbox {
+  margin: 20px auto 50px auto;
+  max-width: 270px;
+
+  /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+  ::v-deep .checkmark {
+    width: 50px;
+  }
+}
+
+.footer {
+  background-color: #21222c;
+  margin: 20px -20px 0 -25px;
+  padding: 0 10px;
+  word-break: break-word;
+
+  div {
+    padding: 10px;
+  }
+
+  .div-icons {
+    border-top: 2px solid $nav-bg-color;
+    display: flex;
+    text-align: center;
+    padding-top: 0;
+    padding-bottom: 0;
+
+    .extension {
+      width: 50%;
+      border-right: 1px solid $nav-bg-color;
+    }
+
+    .mobile-app {
+      flex-grow: 1;
+      border-left: 1px solid $nav-bg-color;
+    }
+
+    .mobile-app,
+    .extension {
+      div {
+        display: flex;
+        justify-content: space-around;
+      }
+    }
+  }
 }
 </style>

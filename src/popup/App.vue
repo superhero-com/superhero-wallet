@@ -1,6 +1,14 @@
 <template>
-  <ae-main :class="aeppPopup ? 'ae-main-popup ae-main-wave' : waveBg ? 'ae-main-wave' : ''">
-    <Header v-if="!mainLoading" @toggle-sidebar="showSidebar = !showSidebar" />
+  <ae-main
+    :class="[
+      aeppPopup ? 'ae-main-popup ae-main-wave' : waveBg ? 'ae-main-wave' : '',
+      iframe && ($route.path === '/intro' || $route.path === '/') ? 'iframe' : '',
+    ]"
+  >
+    <Header
+      v-if="!mainLoading && !(iframe && $route.path === '/intro')"
+      @toggle-sidebar="showSidebar = !showSidebar"
+    />
 
     <router-view :key="$route.fullPath" />
 
@@ -16,7 +24,7 @@
     </transition>
 
     <Loader v-if="mainLoading" type="none" />
-    <NodeConnectionStatus />
+    <NodeConnectionStatus v-if="!(iframe && $route.path === '/intro')" />
     <Tour />
     <Component
       :is="component"
@@ -31,6 +39,7 @@
 import { mapGetters, mapState } from 'vuex';
 import { clearInterval, setInterval } from 'timers';
 import { detect } from 'detect-browser';
+import { IN_FRAME } from './utils/helper';
 import { AEX2_METHODS } from './utils/constants';
 import { postMessage } from './utils/connection';
 import { fetchAndSetLocale } from './utils/i18nHelper';
@@ -50,6 +59,7 @@ export default {
   data: () => ({
     showSidebar: false,
     polling: null,
+    iframe: IN_FRAME,
   }),
   computed: {
     ...mapGetters(['account']),
@@ -165,6 +175,10 @@ export default {
 
   padding-top: 50px;
   padding-top: calc(50px + env(safe-area-inset-top));
+
+  &.iframe {
+    padding-top: 0;
+  }
 
   .menu-overlay {
     position: fixed;
