@@ -2,89 +2,89 @@
   "ok": "OK",
   "onboarding": {
     "step_1": {
-      "title": "Your Account Info",
-      "content": "This block contains information about your wallet account and its status:<br> 1. Your account address and .chain name ( if you already have one ).<br>2. Your current wallet balance. "
+      "title": "Información de tu cuenta",
+      "content": "Este bloque contiene información acerca la cuenta de tu billetera y de su estado:<br> 1. La dirección de tu cuenta y el nombre .chain ( si ya tienes uno ).<br>2. Tu saldo actual en la billetera. "
     },
     "step_2": {
-      "title": "Send Tip",
-      "content": "To send tips, go to the URL you want to tip and open the wallet. You can also copy the URL, click Send Tip, and paste this URL into the wallet. Fill in how much you want to tip and add a message along with that tip. Hit Send and confirm."
+      "title": "Enviar Propina",
+      "content": "Para enviar propinas, ve a la URL a la que quieres dar propina y abre la billetera. También puedes copiar la URL, darle click a Enviar Propina y pegar la URL en la billetera. Llenar cúanto quieres dar de propina y agregar un mensaje con esta propina. Dale a Enviar y confirmar."
     },
     "step_3": {
-      "title": "What is \"Verified\" URL",
-      "content": "This simply means that the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed."
+      "title": "Qué es una URL \"Verified\" ",
+      "content": "Esto significa simplemente que el propietario de esta URL ya es un compañero Superhero — ¡y eso es asombroso! Una dirección AE ha sido incluida en la URL y el propietario del perfil reclamar propinas instantáneamente."
     },
     "step_4": {
-      "title": "Claim Tip",
-      "content": "Hit this button to trigger tip collection—all tips you’ve received from URLs where you’ve added your AE address will then be added to your balance."
+      "title": "Reclamar Propina",
+      "content": "Darle a este botón activa la recolección de propinas—todas las propinas que hayas recibido desde una URL en la que hayas agregado tu dirección AE se agregarán a tu saldo."
     },
     "step_5": {
-      "title": "Activity",
-      "content": "This tab will show you a full log of your previous activity using the Superhero Wallet."
+      "title": "Actividad",
+      "content": "Esta pestaña te mostrará un registro completo de toda tu actividad previa usando la Billetera Superhero."
     },
     "step_6": {
-      "title": "Top Up",
-      "content": "You can top up your wallet by swapping ETH or BTC into AE, by purchasing AE using your credit card, or by sending AE to your Superhero wallet address from another AE account. It’s very easy."
+      "title": "Agregar Saldo",
+      "content": "Puedes agregar saldo a tu billetera cambiando ETH o BTC a AE, comprando AE usando tu tarjeta de crédito, o enviando AE a la dirección de tu billetera Superhero desde otra cuenta AE. Es muy fácil."
     },
     "step_7": {
-      "title": "Withdraw",
-      "content": "You can easily withdraw your tips by sending them out to AE wallet addresses from your accounts in exchanges or external wallets, provided that they support AE tokens."
+      "title": "Retiro",
+      "content": "Puedes retirar tus propinas fácilmente enviándolas a direcciones de billeteras AE en cuentas de casas de intercambio o a billeteras externas que provean soporte de tokens AE."
     },
     "step_8": {
-      "title": "Settings",
-      "content": "You can view your security phrase (also referred to as seedphrase or private keys) and change your language and other settings."
+      "title": "Configuración",
+      "content": "Puedes ver tu frase de seguridad (conocida como frase semilla, seedphrase o llave privada), cambiar el idioma y otros ajustes."
     },
-    "heading": "Hey superhero! Welcome onboard",
-    "sub-heading": "This short guide will walk you through the Superhero Wallet DApp and its features.",
-    "skip": "Skip",
-    "back": "Back",
-    "next": "Next",
-    "start": "Start",
+    "heading": "¡Hey superhéroe! Bienvenido a borodo",
+    "sub-heading": "Esta guía corta te llevará a través de la DApp Billetera Superhero Wallet DApp y todas sus funciones.",
+    "skip": "Saltar",
+    "back": "Regresar",
+    "next": "Próximo",
+    "start": "Empezar",
     "tutorial": "Tutorial"
   },
   "badges": {
-    "verified": "Verified",
-    "notVerified": "Not verified"
+    "verified": "Verificado",
+    "notVerified": "No verificado"
   },
   "modals": {
     "transaction-failed": {
-      "msg": "We cannot process this transaction. Please, try again later."
+      "msg": "No podemos procesar esta transacción. Por favor, intente más tarde."
     },
     "required": {
-      "msg": "Please fill in all fields."
+      "msg": "Por favor complete todos los campos."
     },
     "only-chars": {
-      "msg": "Only letters and numbers are allowed."
+      "msg": "Sólo se permiten letras y números."
     },
     "name-exist": {
-      "msg": "This name is already registered."
+      "msg": "Este nombre ya está registrado."
     },
     "name-length": {
-      "msg": "Only names longer than 13 characters are allowed."
+      "msg": "Los nombres en SUPERHERO deben tener mínimo 13 carácteres."
     },
     "incorrect-address": {
-      "msg": "Please make sure that you have entered a valid public address."
+      "msg": "Por favor asegúrate que has colocado una dirección pública válida."
     },
     "incorrect-amount": {
-      "msg": "Please make sure you entered a valid amount."
+      "msg": "Por favor asegúrate que has colocado un monto válido."
     },
     "insufficient-balance": {
-      "msg": "The requested amount cannot be spent."
+      "msg": "No tienes suficiente saldo para esta transacción."
     },
     "removeAccount": {
-      "title": "Are you sure you want to remove this account?",
-      "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
+      "title": "¿Estás seguro que quieres eliminar esta cuenta?",
+      "msg": "Esta acción eliminará tu cuenta de la billetera y borrará su almacenamiento de extensión. Asegúrate que has realizado un respaldo de tu frase semilla antes de proceder. !Esta acción no puede deshacerse!"
     },
     "verified": {
-      "title": "What is a \"Verified\" URL?",
-      "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed easily."
+      "title": "¿Que es una URL \"Verified\" ?",
+      "msg": "Si una URL es marcada como verificada significa que el propietario de esta URL ya es un compañero Superhero — !y eso es asombroso! Una dirección AE ha sido encontrada en la página y las propinas pueden reclamarse fácilmente."
     },
     "not-verified": {
-      "title": "What is \"Not Verified\" URL?",
-      "msg": "This means that the owner of the URL has not created a Superhero wallet yet. They can claim their tips as soon as they make one and add their wallet address to their website. "
+      "title": "¿Qué significa que una URL es \"Not Verified\"?",
+      "msg": "Ésto significa que el propietario de la URL aún no ha creado si billetera Superhero. Ellos pueden reclamar sus propinas tan pronto como tengan una y agregen la dirección de su billetera a sus sitios web. "
     },
     "blacklisted": {
-      "title": "What is \"Blacklisted\" URL?",
-      "msg": "The Superhero wallet can tip any public URL. Currently, web pages that require logging in to view information cannot be tipped. We're still working on solutions for this."
+      "title": "¿Qué es una URL \"Inaccessible\" ?",
+      "msg": "La billetera Superhero puedes dar propinas a cualquier URL pública. En estos momentos, las páginas web que requieren algún tipo de acceso para poder ver información no pueden recibir propinas. Estamos trabajando en soluciones para ésto."
     },
     "confirm-tip" :{
       "title": "Send Tip Confirmation",
