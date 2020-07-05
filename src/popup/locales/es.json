@@ -245,68 +245,68 @@
       "tipsOnUrl": "Propinas en esta URL",
       "urlNotExisting": "No hay propinas para esta URL en este momento.",
       "moreOracles": "No hay suficientes Oráculos activos para verificar tu petición de reclamo. Por favor intenta más tarde.",
-      "oracleFailed": "Chequeo de reclamo del servicio del Orácula falló. Por favor inteta más tarde.",
-      "unknownError": "Error occured during claim request. Please try again later.",
-      "noMobileClaim": "Claiming is currently only available on desktop."
+      "oracleFailed": "Chequeo de reclamo del servicio del Orácula falló. Por favor intenta más tarde.",
+      "unknownError": "un error ocurrió durante la solicitud de reclamo. Por favor intenta más tarde.",
+      "noMobileClaim": "Actualmente los reclamos solo están disponibles en desktop."
     },
     "claimTips": {
-      "urlToClaim": "URL to claim tips for"
+      "urlToClaim": "URL de la cual reclamar propinas"
     },
     "notFound": {
-      "notFound": "Requested page can't be found",
-      "initialPage": "Open initial page"
+      "notFound": "La página solicitada no pudo ser encontrada",
+      "initialPage": "Abrir página inicial"
     },
     "accountPassword": {
       "heading": "",
-      "passwordSymbolsError": "símbolos mínimas requeridas - ",
-      "weakPasswordError": "Demasiado débil contraseña!",
-      "incorrectPasswordError": "Contraseña incorrecta !",
+      "passwordSymbolsError": "se requiere un mínimo de símbolos - ",
+      "weakPasswordError": "!Contraseña demasiado débil!",
+      "incorrectPasswordError": "!Contraseña incorrecta!",
       "passwordDoesntMatchError": "¡Las contraseñas no coinciden!",
-      "securingAccount": "La seguridad de su cuenta"
+      "securingAccount": "Asegurando tu cuenta"
     },
     "recentTransactions": {
-      "recentActivity": "Recent Activity",
-      "viewAll": "View all",
-      "noTransactionsFound": "No transactions found!"
+      "recentActivity": "Actividad Reciente",
+      "viewAll": "Ver todo",
+      "noTransactionsFound": "!No se encontraron transacciones!"
     },
     "addFungibleToken": {
-      "heading": "Fichas fungibles",
-      "backToFungibleTokens": "Volver a fungibles Tokens",
+      "heading": "Tokens fungibles",
+      "backToFungibleTokens": "Regresar a Tokens fungibles",
       "addToken": "Añadir Token",
-      "tokenContractLabel": "Token Contrato de Dirección",
-      "tokenSymbolLabel": "Símbolo de emergencia",
-      "tokenPrecision": "Decimales de precisión",
+      "tokenContractLabel": "Dirección del Contrato del Token",
+      "tokenSymbolLabel": "Símbolo de Token",
+      "tokenPrecision": "Decimales del Token",
       "next": "Próximo",
-      "validContractAddressError": "Dirección válida de contrato de prenda",
-      "symbolBetween1and12": "Símbolo de entre 1 y 12 caracteres",
+      "validContractAddressError": "Dirección de contrato no válida",
+      "symbolBetween1and12": "Símbolo entre 1 y 12 caracteres",
       "numberBetween0and36": "Número entre 0 y 36",
-      "token": "Simbólico",
-      "balance": "Equilibrar",
+      "token": "Simbolo",
+      "balance": "Saldo",
       "search": "Buscar",
       "customToken": "Token personalizado",
-      "tokenSearchLabel": "Token de búsqueda"
+      "tokenSearchLabel": "Búsqueda de Token"
     },
     "advancedSettings": {
       "heading": "Avanzado",
       "backToSettings": "Ajustes",
-      "exportKeypair": "par de claves de exportación",
-      "exportKeystore": "Almacén de claves de exportación"
+      "exportKeypair": "Exportar par de llaves",
+      "exportKeystore": "Exportar claves de almacenaje"
     },
     "airGapSetup": {
       "backToAccount": "Volver a la cuenta",
-      "heading": "Configuración del espacio de aire",
-      "step1heading": "Instalar espacio de aire en su teléfono",
+      "heading": "Configuración de AirGapVault",
+      "step1heading": "Instalar AirGapVault en su teléfono",
       "step1info": "Buscar AirGap.it en la tienda o escanear este código QR",
       "step1buttonNext": "Próximo",
-      "setupSteps1heading": "Abrir espacio de aire en el segundo dispositivo",
+      "setupSteps1heading": "Abrir AirGapVault en el segundo dispositivo",
       "setupSteps2heading": "Crear clave secreta",
       "setupSteps3heading": "Escríbelo en el orden correcto",
       "setupSteps4heading": "Añadir una billetera aeternity",
-      "setupSteps5heading": "Vincular su cartera aeternity",
-      "setupSteps1": "Desactivar la conexión a Internet antes de la apertura del entrehierro",
+      "setupSteps5heading": "Vincular su billetera aeternity",
+      "setupSteps1": "Desactivar la conexión a Internet antes de la apertura de AirGapVault ",
       "setupSteps2": "Sin conexión a Internet significa máxima seguridad de la clave",
       "setupSteps3": "Lo necesitará para la recuperación",
-      "setupSteps4": "Toque cartera, billetera y añadir elegir aeternity",
+      "setupSteps4": "Toque billetera y añadir elegir aeternity",
       "setupSteps5": "Terminar enlazando su bóveda a su dirección aeternity",
       "linkVault": "Еnlace Bóveda"
     },
