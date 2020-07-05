@@ -2,311 +2,312 @@
   "ok": "OK",
   "onboarding": {
     "step_1": {
-      "title": "Your Account Info",
-      "content": "This block contains information about your wallet account and its status:<br> 1. Your account address and .chain name ( if you already have one ).<br>2. Your current wallet balance. "
+      "title": "Información de tu cuenta",
+      "content": "Este bloque contiene información acerca la cuenta de tu billetera y de su estado:<br> 1. La dirección de tu cuenta y el nombre .chain ( si ya tienes uno ).<br>2. Tu saldo actual en la billetera. "
     },
     "step_2": {
-      "title": "Send Tip",
-      "content": "To send tips, go to the URL you want to tip and open the wallet. You can also copy the URL, click Send Tip, and paste this URL into the wallet. Fill in how much you want to tip and add a message along with that tip. Hit Send and confirm."
+      "title": "Enviar Propina",
+      "content": "Para enviar propinas, ve a la URL a la que quieres dar propina y abre la billetera. También puedes copiar la URL, darle click a Enviar Propina y pegar la URL en la billetera. Llenar cúanto quieres dar de propina y agregar un mensaje con esta propina. Dale a Enviar y confirmar."
     },
     "step_3": {
-      "title": "What is \"Verified\" URL",
-      "content": "This simply means that the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed."
+      "title": "Qué es una URL \"Verified\" ",
+      "content": "Esto significa simplemente que el propietario de esta URL ya es un compañero Superhero — ¡y eso es asombroso! Una dirección AE ha sido incluida en la URL y el propietario del perfil reclamar propinas instantáneamente."
     },
     "step_4": {
-      "title": "Claim Tip",
-      "content": "Hit this button to trigger tip collection—all tips you’ve received from URLs where you’ve added your AE address will then be added to your balance."
+      "title": "Reclamar Propina",
+      "content": "Darle a este botón activa la recolección de propinas—todas las propinas que hayas recibido desde una URL en la que hayas agregado tu dirección AE se agregarán a tu saldo."
     },
     "step_5": {
-      "title": "Activity",
-      "content": "This tab will show you a full log of your previous activity using the Superhero Wallet."
+      "title": "Actividad",
+      "content": "Esta pestaña te mostrará un registro completo de toda tu actividad previa usando la Billetera Superhero."
     },
     "step_6": {
-      "title": "Top Up",
-      "content": "You can top up your wallet by swapping ETH or BTC into AE, by purchasing AE using your credit card, or by sending AE to your Superhero wallet address from another AE account. It’s very easy."
+      "title": "Agregar Saldo",
+      "content": "Puedes agregar saldo a tu billetera cambiando ETH o BTC a AE, comprando AE usando tu tarjeta de crédito, o enviando AE a la dirección de tu billetera Superhero desde otra cuenta AE. Es muy fácil."
     },
     "step_7": {
-      "title": "Withdraw",
-      "content": "You can easily withdraw your tips by sending them out to AE wallet addresses from your accounts in exchanges or external wallets, provided that they support AE tokens."
+      "title": "Retiro",
+      "content": "Puedes retirar tus propinas fácilmente enviándolas a direcciones de billeteras AE en cuentas de casas de intercambio o a billeteras externas que provean soporte de tokens AE."
     },
     "step_8": {
-      "title": "Settings",
-      "content": "You can view your security phrase (also referred to as seedphrase or private keys) and change your language and other settings."
+      "title": "Configuración",
+      "content": "Puedes ver tu frase de seguridad (conocida como frase semilla, seedphrase o llave privada), cambiar el idioma y otros ajustes."
     },
-    "heading": "Hey superhero! Welcome onboard",
-    "sub-heading": "This short guide will walk you through the Superhero Wallet DApp and its features.",
-    "skip": "Skip",
-    "back": "Back",
-    "next": "Next",
-    "start": "Start",
+    "heading": "¡Hey superhéroe! Bienvenido a borodo",
+    "sub-heading": "Esta guía corta te llevará a través de la DApp Billetera Superhero Wallet DApp y todas sus funciones.",
+    "skip": "Saltar",
+    "back": "Regresar",
+    "next": "Próximo",
+    "start": "Empezar",
     "tutorial": "Tutorial"
   },
   "badges": {
-    "verified": "Verified",
-    "notVerified": "Not verified"
+    "verified": "Verificado",
+    "notVerified": "No verificado"
   },
   "modals": {
     "transaction-failed": {
-      "msg": "We cannot process this transaction. Please, try again later."
+      "msg": "No podemos procesar esta transacción. Por favor, intente más tarde."
     },
     "required": {
-      "msg": "Please fill in all fields."
+      "msg": "Por favor complete todos los campos."
     },
     "only-chars": {
-      "msg": "Only letters and numbers are allowed."
+      "msg": "Sólo se permiten letras y números."
     },
     "name-exist": {
-      "msg": "This name is already registered."
+      "msg": "Este nombre ya está registrado."
     },
     "name-length": {
-      "msg": "Only names longer than 13 characters are allowed."
+      "msg": "Los nombres en SUPERHERO deben tener mínimo 13 carácteres."
     },
     "incorrect-address": {
-      "msg": "Please make sure that you have entered a valid public address."
+      "msg": "Por favor asegúrate que has colocado una dirección pública válida."
     },
     "incorrect-amount": {
-      "msg": "Please make sure you entered a valid amount."
+      "msg": "Por favor asegúrate que has colocado un monto válido."
     },
     "insufficient-balance": {
-      "msg": "The requested amount cannot be spent."
+      "msg": "No tienes suficiente saldo para esta transacción."
     },
     "removeAccount": {
-      "title": "Are you sure you want to remove this account?",
-      "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
+      "title": "¿Estás seguro que quieres eliminar esta cuenta?",
+      "msg": "Esta acción eliminará tu cuenta de la billetera y borrará su almacenamiento de extensión. Asegúrate que has realizado un respaldo de tu frase semilla antes de proceder. !Esta acción no puede deshacerse!"
     },
     "verified": {
-      "title": "What is a \"Verified\" URL?",
-      "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed easily."
+      "title": "¿Que es una URL \"Verified\" ?",
+      "msg": "Si una URL es marcada como verificada significa que el propietario de esta URL ya es un compañero Superhero — !y eso es asombroso! Una dirección AE ha sido encontrada en la página y las propinas pueden reclamarse fácilmente."
     },
     "not-verified": {
-      "title": "What is \"Not Verified\" URL?",
-      "msg": "This means that the owner of the URL has not created a Superhero wallet yet. They can claim their tips as soon as they make one and add their wallet address to their website. "
+      "title": "¿Qué significa que una URL es \"Not Verified\"?",
+      "msg": "Ésto significa que el propietario de la URL aún no ha creado si billetera Superhero. Ellos pueden reclamar sus propinas tan pronto como tengan una y agregen la dirección de su billetera a sus sitios web. "
     },
     "blacklisted": {
-      "title": "What is \"Blacklisted\" URL?",
-      "msg": "The Superhero wallet can tip any public URL. Currently, web pages that require logging in to view information cannot be tipped. We're still working on solutions for this."
+      "title": "¿Qué es una URL \"Inaccessible\" ?",
+      "msg": "La billetera Superhero puedes dar propinas a cualquier URL pública. En estos momentos, las páginas web que requieren algún tipo de acceso para poder ver información no pueden recibir propinas. Estamos trabajando en soluciones para ésto."
     },
     "confirm-tip" :{
-      "title": "Send Tip Confirmation",
-      "msg": "You are about to tip a URL that is not Superhero-verified. We cannot guarantee that the owner will claim their tips on this site.",
-      "sub-message": "Are you sure you would like to send the tip anyway? You can still tip them—let them know so they can claim it.",
-      "send": "Send Tip"
+      "title": "Enviar Confirmación de Propina",
+      "msg": "Estás a punto de darle una propina a una URL que no está verificada en Superhero. No podemos garantizar que el propietario reclame las propinas de este sitio.",
+      "sub-message": "¿Estás seguro que quieres enviar la propina de todos modos? Puedes darles la propina y hacérselo saber para que puede reclamarla.",
+      "send": "Enviar Propina"
     },
     "error-log": {
-      "title": "Something went wrong",
-      "sub-title": "Be a Superhero!",
-      "content": "Provide more information about the error  encountered so we can improve our superpowers. No personal data will be collected.",
-      "create-report": "Create report"
+      "title": "Algo salió mal",
+      "sub-title": "Se un Superhéroe!",
+      "content": "Provee la información sobre el error encontrado de forma que podamos mejorar nuestros superpoderes. No se recolectará ningun dato personal.",
+      "create-report": "Crear reporte"
     },
     "donate-errors": {
-      "title": "Your Error Report Has Been Sent",
-      "msg": "Thank you for being such a wonderful fellow Superhero!"
+      "title": "Tu Reporte de Error Ha Sido Enviado",
+      "msg": "!Gracuas por ser tan buen compañero Superhéroe!"
     },
     "donate-errors-error": {
-      "title": "Your Error Report Was not send",
-      "msg": "There was problem sending your error report"
+      "title": "Tu reporte de Error No Fue Enviado",
+      "msg": "Hubo un problema enviando tu reporte de error"
     },
-    "cancel": "Cancel",
-    "confirm": "Confirm"
+    "cancel": "Cancelar",
+    "confirm": "Confirmar"
   },
   "transaction": {
     "type": {
-      "SpendTx": "Spend",
-      "ContractCreateTx": "Contract create",
-      "ContractCallTx": "Contract call",
-      "NamePreclaimTx": "Preclaim name",
-      "NameClaimTx": "Claim name",
-      "NameUpdateTx": "Update name",
-      "NameTransferTx": "Transfer name",
-      "NameRevokeTx": "Revoke name",
-      "OracleRegisterTx": "Register oracle",
-      "OracleExtendTx": "Extend oracle",
-      "OraclePostQueryTx": "Post query oracle",
-      "OracleRespondTx": "Respond oracle",
-      "ChannelCloseSoloTx": "Solo close channel",
+      "SpendTx": "Gasto",
+      "ContractCreateTx": "Crear Contrato",
+      "ContractCallTx": "Llamar Contrato",
+      "NamePreclaimTx": "Preclamar nombre",
+      "NameClaimTx": "Reclamar nombre",
+      "NameUpdateTx": "Actualizar nombre",
+      "NameTransferTx": "Transferir nombre",
+      "NameRevokeTx": "Revocar nombre",
+      "OracleRegisterTx": "Registrar oráculo",
+      "OracleExtendTx": "Extender oráculo",
+      "OraclePostQueryTx": "Consulta Post del oráculo",
+      "OracleRespondTx": "Respuesta oráculo",
+      "ChannelCloseSoloTx": "Cierre de canal Solo",
       "ChannelSlashTx": "Slash channel",
-      "ChannelSettleTx": "Settle channel",
-      "ChannelSnapshotSoloTx": "Solo snapshot channel"
+      "ChannelSettleTx": "Establecer canal",
+      "ChannelSnapshotSoloTx": "instantánea de canal Solo"
     }
   },
   "pages": {
     "intro": {
-      "heading": "Intro",
-      "skip": "Skip",
-      "generateWallet": "Generate Wallet",
-      "receive": "Receive",
-      "step1text": "for creating and curating great content, engaging in meaningful discussions, launching causes for humanity, and for just being a wonderful human being.",
-      "step2text": "to great content creators online, humanitarian causes, and other awesome human beings—for whatever reason.",
-      "step3text-1": "This wallet does not—and will never take commissions off the",
-      "step3text-2": "you send or receive. Superhero was created specifically so that no one but you will have control over your funds.",
-      "createdWallet": "Your wallet has been created!",
-      "step4text-0": "Welcome to the free web.",
-      "step4text-1": "Trustless: no third-party intervention. Transactions are fully P2P.",
-      "step4text-2": "No censorship: there are no custodians to dictate what can and cannot be monetized.",
-      "step4text-3": "Immortalize messages on the blockchain: comments and messages are timestamped and recorded on the blockchain—forever.",
-      "step4text-4": "Instant, borderless, transactions at near-zero fees.",
-      "toHome": "Proceed to your Wallet",
-      "send": "Send",
-      "ever": "Ever."
+      "heading": "Introducción",
+      "skip": "Saltar",
+      "generateWallet": "Generar Billetera",
+      "receive": "Receibir",
+      "step1text": "por crear y curar gran conteniso, atraer discusiones significativas, lanzar causas para la humanidad, y sólo por ser un maravilloso ser humano.",
+      "step2text": "para grandes creadores online, causas humanitarias y otros sorprendentes seres humano cualquiera sea la razón.",
+      "step3text-1": "esta billetera no toma ni tomará comisiones de",
+      "step3text-2": "envias y recibes. Superhero fue creado espécificamente para que nadie más excepto tú tengas el contro de tus fondos.",
+      "createdWallet": "¡Tu billetera ha sido creada!",
+      "step4text-0": "Bienvenido a la web libre.",
+      "step4text-1": "Trustless: no hay intervención de terceras partes. Las transacciones son totalemte P2P.",
+      "step4text-2": "Sin censura: no hay custodios que determinen que puede y que no puede ser monetizado.",
+      "step4text-3": "Immortaliza los mensajes en la blockchain: los comentarios y mensajes son marcados y grabados en la blockchain para siempre.",
+      "step4text-4": "Transacciones instantáneas, sin fronteras y con comisiones casi cero.",
+      "toHome": "Procede a tu billetera",
+      "send": "Enviar",
+      "ever": "Siempre."
     },
     "titles": {
-      "settings": "Settings",
-      "general": "Language",
-      "security": "Security",
-      "about": "About",
-      "send": "Send Tips",
-      "claim-tips": "Claim Tips",
-      "scanQr": "Scan QR",
-      "terms": "Terms of Use",
-      "privacy": "Privacy Policy",
-      "importAccount": "Retrieve Existing Account",
-      "activity": "Activity History",
-      "withdraw": "Withdraw",
-      "topUp": "Top Up",
-      "notifications": "Notifications",
-      "names": "Names",
-      "bidding": "Bidding",
+      "settings": "Ajustes",
+      "general": "Idioma",
+      "security": "Securidad",
+      "about": "Acerca",
+      "send": "Enviar Propinas",
+      "claim-tips": "Reclamar Propinas",
+      "scanQr": "Scanear QR",
+      "terms": "Terminos de Uso",
+      "privacy": "Política de Privacidad",
+      "importAccount": "Recupera Cuenta Existente",
+      "activity": "Historia de Actividad",
+      "withdraw": "Retiro",
+      "topUp": "Agregar Saldo",
+      "notifications": "Notificaciones",
+      "names": "Nombres",
+      "bidding": "Subastar",
       "networks": "Networks",
-      "comment-new": "Add comment",
+      "comment-new": "Agregar comentario",
       "home": "Superhero Home",
-      "donate-error": "Donate Data",
-      "address": "Send Address",
-      "sign-message": "Sign Message"
+      "donate-error": "Donar Data",
+      "address": "Dirección de Envio",
+      "sign-message": "Firmar Mensaje"
     },
     "appVUE": {
       "systemName": "Superhero",
       "manageNetworks": "Administrar redes",
       "manageAccounts": "Cuentas de administración",
-      "airGapVault": "Crear una bóveda de entrehierro",
+      "airGapVault": "Crear un AirGapVault",
       "ledgerAccount": "Añadir cuenta Ledger",
       "menu": "Menu",
       "myAccount": "Mi cuenta",
-      "switchToken": "fichas",
+      "switchToken": "Tokens",
       "utilities": "Utilidades",
       "settings": "Ajustes",
       "logout": "spain",
-      "profile": "Profile",
-      "help": "Help",
-      "topUp": "Top Up",
-      "withdraw": "Withdraw",
-      "myTransactions": "My transactions",
-      "activity": "Activity",
-      "dashboard": "Dashboard",
+      "profile": "Perfil",
+      "help": "Ayuda",
+      "topUp": "Agregar Saldo",
+      "withdraw": "Retiro",
+      "myTransactions": "Mis transacciones",
+      "activity": "Actividad",
+      "dashboard": "Panel de control",
       "aeid": "AE",
-      "walletName": "Superhero Wallet",
+      "walletName": "Billetera Superhero",
       "general": "General",
-      "security": "Security",
-      "seedPhrase": "Seed Phrase",
-      "language": "Language",
-      "advanced": "Advanced",
-      "versions": "Version & Updates",
-      "mainAccount": "Main account",
-      "reportBug": "Report a bug",
-      "names": "Names",
+      "security": "Securidad",
+      "seedPhrase": "Frase Semilla",
+      "language": "Idioma",
+      "advanced": "Avanzado",
+      "versions": "Version y Actualizaciones",
+      "mainAccount": "Cuenta principal",
+      "reportBug": "Reportar un bug",
+      "names": "Nombres",
       "networks": "Networks",
-      "removeAccount": "Remove account",
-      "donateErrorReports": "Submit error reports"
+      "removeAccount": "eliminar cuenta",
+      "donateErrorReports": "Enviar reportes de errores"
     },
     "aboutSettings": {
       "heading": "Acerca de",
       "systemName": "Superhero",
-      "terms": "Términos de servicio",
-      "privacyPolicy": "Política de privacidad"
+      "terms": "Términos de Servicio",
+      "privacyPolicy": "Política de Privacidad"
     },
     "account": {
       "heading": "Cuenta",
       "accountName": "Nombre de la cuenta",
-      "copy": "Dupdo",
-      "send": "spanish",
-      "claim": "Claim Tip",
+      "copy": "copiar",
+      "send": "español",
+      "claim": "Reclamar Propina",
       "receive": "Recibir",
-      "wholeTransaction": "historial de transacciones entera",
+      "wholeTransaction": "Historial completo de transacciones",
       "latestTransactions": "Las últimas transacciones ES",
       "noTransactionsFound": "¡No se encontraron transacciones!",
-      "tipSomeone": "Send Tip",
-      "howToClaim": "How to claim AE",
-      "balance": "Balance",
-      "copied": "Copied!",
-      "youNeedTo": "You need to",
-      "backup": "backup",
-      "yourSeedPhrase": "your seed phrase",
-      "updateExtension": "New version available! Please update your extension.",
-      "updateAvailable": "New version in store available!",
-      "claim-name": "Claim your .chain name"
+      "tipSomeone": "Enviar Propina",
+      "howToClaim": "Cómo reclamar AE",
+      "balance": "Saldo",
+      "copied": "¡Copiado!",
+      "youNeedTo": "Necesitas",
+      "backup": "respaldar",
+      "yourSeedPhrase": "tu frase semilla",
+      "updateExtension": "¡Nueva versión disponible! Por favor actualiza tu extensión.",
+      "updateAvailable": "¡Nueva versión disponible en la tienda!",
+      "claim-name": "Reclama tu nombre .chain"
     },
     "claim": {
-      "claim": "Claim tips",
-      "noZeroClaim": "There are no tips to be claimed for this URL.",
-      "noAddress": "Address not found",
-      "errorClaim": "Error with claiming",
-      "ae": "AE tokens",
-      "claimed": " Claim request sent! ",
+      "claim": "Reclamar Propinas",
+      "noZeroClaim": "no hay propinas que reclamar para esta URL.",
+      "noAddress": "Dirección no encontrada",
+      "errorClaim": "Error con el reclamo",
+      "ae": "tokens AE",
+      "claimed": " ¡Petición de reclamo enviada! ",
       "url": "URL",
-      "tipsOnUrl": "Tips on this URL",
-      "urlNotExisting": "No tips for this URL at the moment.",
-      "moreOracles": "There aren't enough active Oracles to verify your claim request. Please try again later.",
-      "oracleFailed": "Oracle service check claim failed. Please try again later.",
-      "unknownError": "Error occured during claim request. Please try again later.",
-      "noMobileClaim": "Claiming is currently only available on desktop."
+      "tipsOnUrl": "Propinas en esta URL",
+      "urlNotExisting": "No hay propinas para esta URL en este momento.",
+      "moreOracles": "No hay suficientes Oráculos activos para verificar tu petición de reclamo. Por favor intenta más tarde.",
+      "oracleFailed": "Chequeo de reclamo del servicio del Orácula falló. Por favor inteta más tarde.",
+      "oracleFailed": "Chequeo de reclamo del servicio del Orácula falló. Por favor intenta más tarde.",
+      "unknownError": "Un error ocurrió durante la solicitud de reclamo. Por favor intenta más tarde.",
+      "noMobileClaim": "Actualmente los reclamos solo están disponibles en desktop."
     },
     "claimTips": {
-      "urlToClaim": "URL to claim tips for"
+      "urlToClaim":  "URL de la cual reclamar propinas"
     },
     "notFound": {
-      "notFound": "Requested page can't be found",
-      "initialPage": "Open initial page"
+      "notFound": "La página solicitada no pudo ser encontrada",
+      "initialPage": "Abrir página inicial"
     },
     "accountPassword": {
       "heading": "",
-      "passwordSymbolsError": "símbolos mínimas requeridas - ",
-      "weakPasswordError": "Demasiado débil contraseña!",
-      "incorrectPasswordError": "Contraseña incorrecta !",
+      "passwordSymbolsError": "se requiere un mínimo de símbolos - ",
+      "weakPasswordError": "!Contraseña demasiado débil!",
+      "incorrectPasswordError": "!Contraseña incorrecta!",
       "passwordDoesntMatchError": "¡Las contraseñas no coinciden!",
-      "securingAccount": "La seguridad de su cuenta"
+      "securingAccount": "Asegurando tu cuenta"
     },
     "recentTransactions": {
-      "recentActivity": "Recent Activity",
-      "viewAll": "View all",
-      "noTransactionsFound": "No transactions found!"
+      "recentActivity": "Actividad Reciente",
+      "viewAll": "Ver todo",
+      "noTransactionsFound": "!No se encontraron transacciones!"
     },
     "addFungibleToken": {
-      "heading": "Fichas fungibles",
-      "backToFungibleTokens": "Volver a fungibles Tokens",
+      "heading": "Tokens fungibles",
+      "backToFungibleTokens": "Regresar a Tokens fungibles",
       "addToken": "Añadir Token",
-      "tokenContractLabel": "Token Contrato de Dirección",
-      "tokenSymbolLabel": "Símbolo de emergencia",
-      "tokenPrecision": "Decimales de precisión",
+      "tokenContractLabel": "Dirección del Contrato del Token",
+      "tokenSymbolLabel": "Símbolo de Token",
+      "tokenPrecision": "Decimales del Token",
       "next": "Próximo",
-      "validContractAddressError": "Dirección válida de contrato de prenda",
-      "symbolBetween1and12": "Símbolo de entre 1 y 12 caracteres",
+      "validContractAddressError": "Dirección de contrato no válida",
+      "symbolBetween1and12": "Símbolo entre 1 y 12 caracteres",
       "numberBetween0and36": "Número entre 0 y 36",
-      "token": "Simbólico",
-      "balance": "Equilibrar",
+      "token": "Simbolo",
+      "balance": "Saldo",
       "search": "Buscar",
       "customToken": "Token personalizado",
-      "tokenSearchLabel": "Token de búsqueda"
+      "tokenSearchLabel": "Búsqueda de Token"
     },
     "advancedSettings": {
       "heading": "Avanzado",
       "backToSettings": "Ajustes",
-      "exportKeypair": "par de claves de exportación",
-      "exportKeystore": "Almacén de claves de exportación"
+      "exportKeypair": "Exportar par de llaves",
+      "exportKeystore": "Exportar claves de almacenaje"
     },
     "airGapSetup": {
       "backToAccount": "Volver a la cuenta",
-      "heading": "Configuración del espacio de aire",
-      "step1heading": "Instalar espacio de aire en su teléfono",
+      "heading": "Configuración de AirGapVault",
+      "step1heading": "Instalar AirGapVault en su teléfono",
       "step1info": "Buscar AirGap.it en la tienda o escanear este código QR",
       "step1buttonNext": "Próximo",
-      "setupSteps1heading": "Abrir espacio de aire en el segundo dispositivo",
+      "setupSteps1heading": "Abrir AirGapVault en el segundo dispositivo",
       "setupSteps2heading": "Crear clave secreta",
       "setupSteps3heading": "Escríbelo en el orden correcto",
       "setupSteps4heading": "Añadir una billetera aeternity",
-      "setupSteps5heading": "Vincular su cartera aeternity",
-      "setupSteps1": "Desactivar la conexión a Internet antes de la apertura del entrehierro",
+      "setupSteps5heading": "Vincular su billetera aeternity",
+      "setupSteps1": "Desactivar la conexión a Internet antes de la apertura de AirGapVault ",
       "setupSteps2": "Sin conexión a Internet significa máxima seguridad de la clave",
       "setupSteps3": "Lo necesitará para la recuperación",
-      "setupSteps4": "Toque cartera, billetera y añadir elegir aeternity",
+      "setupSteps4": "Toque billetera y añadir elegir aeternity",
       "setupSteps5": "Terminar enlazando su bóveda a su dirección aeternity",
       "linkVault": "Еnlace Bóveda"
     },
