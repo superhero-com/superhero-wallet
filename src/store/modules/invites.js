@@ -51,7 +51,7 @@ export default {
 
       return sdkInstance;
     },
-    async getBalances({ rootState: { sdk }, state: { referrals }, commit }) {
+    async updateBalances({ rootState: { sdk }, state: { referrals }, commit }) {
       await Promise.all(
         referrals.map(async ({ publicKey }, idx) => {
           const balance = parseFloat(

@@ -47,7 +47,7 @@ export default {
       this.$emit('loading', true);
       await this.$store.dispatch('invites/claim', this.referral.idx);
       this.$emit('loading', false);
-      this.$store.dispatch('invites/getBalances');
+      this.$store.dispatch('invites/updateBalances');
     },
     async sendTopUp() {
       this.$emit('loading', true);
@@ -57,7 +57,7 @@ export default {
           payload: 'referral',
           denomination: AE_AMOUNT_FORMATS.AE,
         });
-        this.$store.dispatch('invites/getBalances');
+        this.$store.dispatch('invites/updateBalances');
       } catch (e) {
         if (e.message.includes('is not enough to execute')) {
           this.$store.dispatch('modals/open', {

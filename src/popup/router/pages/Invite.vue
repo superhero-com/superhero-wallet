@@ -34,7 +34,7 @@ export default {
   },
   async created() {
     await this.$watchUntilTruly(() => this.sdk);
-    this.$store.dispatch('invites/getBalances');
+    this.$store.dispatch('invites/updateBalances');
   },
   methods: {
     async generate() {
@@ -74,7 +74,7 @@ export default {
         date: Date.now(),
       });
       this.loading = false;
-      this.$store.dispatch('invites/getBalances');
+      this.$store.dispatch('invites/updateBalances');
       this.amount = 0;
     },
   },
