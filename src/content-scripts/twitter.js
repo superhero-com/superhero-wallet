@@ -19,7 +19,7 @@ margin-left: 6px;
 position: relative;`;
 
 const buttonStyles = `background: transparent; 
-border:none; cursor: pointer;
+border:none; cursor: pointer; padding: 0px;
 color:rgb(101, 119, 134);
 outline:none;`;
 
@@ -37,15 +37,11 @@ const getTweetId = tweet => {
   return status.href.split('/retweets')[0];
 };
 
-const createSuperheroTipAction = (tweet, tweetId, numActions) => {
+const createSuperheroTipAction = tweetId => {
   // Create the tip action
-  const hasUserActions = numActions > 3;
   const superheroTipAction = document.createElement('div');
   superheroTipAction.className = 'action-superhero-tip';
-  superheroTipAction.style.display = 'inline-block';
-  superheroTipAction.style.minWidth = '80px';
   superheroTipAction.style.alignSelf = 'center';
-  superheroTipAction.style.textAlign = hasUserActions ? 'right' : 'start';
   superheroTipAction.setAttribute('role', 'button');
   superheroTipAction.setAttribute('tabindex', '0');
 
@@ -116,20 +112,29 @@ const configureSuperheroTipAction = async () => {
     '[data-testid="tweet"], [data-testid="tweetDetail"], [data-testid="tweet"] + div, [data-testid="tweetDetail"] + div',
   );
 
+  let bigTweetSkipped = !document.querySelectorAll('div[aria-label="Timeline: Conversation"]')
+    .length;
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < tweets.length; ++i) {
     const tweetId = getTweetId(tweets[i]);
     if (!tweetId) continue;
     const actions = tweets[i].querySelector('[role="group"]');
     if (!actions) continue;
-    const numActions = actions.querySelectorAll(':scope > div').length || 0;
+    const lastActionNode = actions.querySelector(
+      ':scope > div:not(.action-superhero-tip):last-child',
+    );
+    if (bigTweetSkipped && lastActionNode) {
+      lastActionNode.style.flexBasis = '0px';
+      lastActionNode.style.flexGrow = '1';
+    }
     const superheroTipActions = actions.getElementsByClassName('action-superhero-tip');
 
     if (check && superheroTipActions.length === 0) {
-      actions.appendChild(createSuperheroTipAction(tweets[i], tweetId, numActions));
+      actions.appendChild(createSuperheroTipAction(tweetId));
     } else if (!check && superheroTipActions.length === 1) {
       actions.removeChild(superheroTipActions[0]);
     }
+    bigTweetSkipped = true;
   }
   timeout = setTimeout(configureSuperheroTipAction, 3000);
 };
