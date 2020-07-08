@@ -2,37 +2,39 @@ import Vue from 'vue';
 import Ae from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
-import { Crypto } from '@aeternity/aepp-sdk/es';
 import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 
 export default {
   namespaced: true,
   state: {
-    referrals: [],
+    links: [],
     client: null,
   },
   mutations: {
     add(state, link) {
-      state.referrals.unshift(link);
+      state.links.unshift(link);
     },
     setClient(state, client) {
       state.client = client;
     },
     setBalance(state, { idx, balance }) {
-      Vue.set(state.referrals[idx], 'balance', balance);
+      Vue.set(state.links[idx], 'balance', balance);
     },
   },
   actions: {
-    async claim({ rootState: { account }, state: { referrals }, dispatch }, idx) {
-      const { publicKey, secretKey } = referrals[idx];
+    async claim({ rootState: { account }, state: { links }, dispatch }, idx) {
+      const { publicKey, secretKey } = links[idx];
       const sdk = await dispatch('getClient', { publicKey, secretKey });
       try {
-        return sdk.transferFunds(1, account.publicKey, {
+        sdk.transferFunds(1, account.publicKey, {
           payload: 'referral',
         });
       } catch (e) {
-        dispatch('modals/open', { name: 'default', msg: e.message }, { root: true });
-        return false;
+        if (e.message.includes('is not enough to execute')) {
+          dispatch('modals/open', { name: 'default', msg: e.message }, { root: true });
+          return;
+        }
+        throw e;
       }
     },
     async getClient({ rootState: { network, current }, commit }, keypair) {
@@ -51,9 +53,9 @@ export default {
 
       return sdkInstance;
     },
-    async updateBalances({ rootState: { sdk }, state: { referrals }, commit }) {
+    async updateBalances({ rootState: { sdk }, state: { links }, commit }) {
       await Promise.all(
-        referrals.map(async ({ publicKey }, idx) => {
+        links.map(async ({ publicKey }, idx) => {
           const balance = parseFloat(
             await sdk.balance(publicKey, { format: AE_AMOUNT_FORMATS.AE }).catch(() => 0),
           ).toFixed(2);

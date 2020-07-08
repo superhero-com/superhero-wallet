@@ -8,10 +8,10 @@
     <p class="section-title">
       {{ $t('pages.invite.created-links') }}
     </p>
-    <ReferralItem
-      v-for="(referral, idx) in referrals"
-      :key="referral.link"
-      :referral="{ ...referral, idx }"
+    <InviteItem
+      v-for="(l, idx) in links"
+      :key="l.link"
+      :invite="{ ...l, idx }"
       @loading="val => (loading = val)"
     />
     <Loader v-if="loading" />
@@ -23,14 +23,14 @@ import { mapState } from 'vuex';
 import { Crypto } from '@aeternity/aepp-sdk/es';
 import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 import AmountSend from '../components/AmountSend';
-import ReferralItem from '../components/ReferralItem';
+import InviteItem from '../components/InviteItem';
 
 export default {
-  components: { AmountSend, ReferralItem },
+  components: { AmountSend, InviteItem },
   data: () => ({ amount: 0, loading: false }),
   computed: {
     ...mapState(['sdk']),
-    ...mapState('invites', ['referrals']),
+    ...mapState('invites', ['links']),
   },
   async created() {
     await this.$watchUntilTruly(() => this.sdk);

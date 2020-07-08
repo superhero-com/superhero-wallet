@@ -1,16 +1,16 @@
 <template>
   <div class="invite-row">
     <div class="invite-info">
-      <span class="primary">{{ referral.balance }} {{ $t('pages.appVUE.aeid') }}</span>
+      <span class="primary">{{ invite.balance }} {{ $t('pages.appVUE.aeid') }}</span>
       <!--eslint-disable-line vue-i18n/no-raw-text-->
-      ({{ (referral.balance * current.currencyRate).toFixed(2) }}
+      ({{ (invite.balance * current.currencyRate).toFixed(2) }}
       <!--eslint-disable-next-line vue-i18n/no-raw-text-->
       {{ current.currency.toUpperCase() }})
-      <span class="date">{{ referral.date | formatDate }}</span>
+      <span class="date">{{ invite.date | formatDate }}</span>
     </div>
     <div class="invite-link">
-      <span>{{ referral.link }}</span>
-      <button class="invite-link-copy" v-clipboard:copy="referral.link"><CopyIcon /></button>
+      <span>{{ invite.link }}</span>
+      <button class="invite-link-copy" v-clipboard:copy="invite.link"><CopyIcon /></button>
     </div>
     <template v-if="!topUp">
       <Button half dark @click="topUp = true">{{ $t('pages.invite.top-up') }}</Button>
@@ -34,7 +34,7 @@ import { formatDate } from '../../utils';
 
 export default {
   props: {
-    referral: { type: Object, required: true },
+    invite: { type: Object, required: true },
   },
   components: { Button, AmountSend, CopyIcon },
   filters: { formatDate },
@@ -45,13 +45,13 @@ export default {
   methods: {
     async claim() {
       this.$emit('loading', true);
-      await this.$store.dispatch('invites/claim', this.referral.idx);
+      await this.$store.dispatch('invites/claim', this.invite.idx);
       this.$emit('loading', false);
       this.$store.dispatch('invites/updateBalances');
     },
     async sendTopUp() {
       this.$emit('loading', true);
-      const address = this.referral.publicKey;
+      const address = this.invite.publicKey;
       try {
         await this.sdk.spend(this.topUpAmount, address, {
           payload: 'referral',
