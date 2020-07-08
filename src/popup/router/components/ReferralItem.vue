@@ -59,9 +59,17 @@ export default {
         });
         this.$store.dispatch('invites/getBalances');
       } catch (e) {
-        this.$store.dispatch('modals/open', { name: 'default', msg: e.message });
+        if (e.message.includes('is not enough to execute')) {
+          this.$store.dispatch('modals/open', {
+            name: 'default',
+            msg: this.$t('pages.invite.insufficient-balance'),
+          });
+          return;
+        }
+        throw e;
+      } finally {
+        this.$emit('loading', false);
       }
-      this.$emit('loading', false);
       this.topUpAmount = 0;
       this.topUp = false;
     },

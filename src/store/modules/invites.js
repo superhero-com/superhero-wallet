@@ -1,39 +1,31 @@
 import Vue from 'vue';
-import { Crypto } from '@aeternity/aepp-sdk/es';
+import Ae from '@aeternity/aepp-sdk/es/ae/universal';
+import Node from '@aeternity/aepp-sdk/es/node';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
+import { Crypto } from '@aeternity/aepp-sdk/es';
 import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 
 export default {
   namespaced: true,
   state: {
     referrals: [],
-  },
-  getters: {
-    keypair: () => referral => {
-      const segments = new URL(referral).pathname.split('/');
-      const secret = segments[2];
-      const { publicKey, secretKey } = Crypto.generateKeyPairFromSecret(
-        Crypto.decodeBase58Check(secret),
-      );
-
-      return {
-        publicKey: `ak_${Crypto.encodeBase58Check(Buffer.from(publicKey))}`,
-        secretKey: Buffer.from(secretKey).toString('hex'),
-      };
-    },
+    client: null,
   },
   mutations: {
     add(state, link) {
       state.referrals.unshift(link);
+    },
+    setClient(state, client) {
+      state.client = client;
     },
     setBalance(state, { idx, balance }) {
       Vue.set(state.referrals[idx], 'balance', balance);
     },
   },
   actions: {
-    async claim({ rootState: { account, sdk }, state: { referrals }, dispatch }, idx) {
+    async claim({ rootState: { account }, state: { referrals }, dispatch }, idx) {
       const { publicKey, secretKey } = referrals[idx];
-      await sdk.addAccount(MemoryAccount({ keypair: { publicKey, secretKey } }), { select: true });
+      const sdk = await dispatch('getClient', { publicKey, secretKey });
       try {
         return sdk.transferFunds(1, account.publicKey, {
           payload: 'referral',
@@ -41,9 +33,23 @@ export default {
       } catch (e) {
         dispatch('modals/open', { name: 'default', msg: e.message }, { root: true });
         return false;
-      } finally {
-        sdk.selectAccount(account.publicKey);
       }
+    },
+    async getClient({ rootState: { network, current }, commit }, keypair) {
+      const { internalUrl, compilerUrl } = network[current.network];
+      const node = await Node({
+        url: internalUrl,
+        internalUrl,
+      });
+      const accounts = MemoryAccount({ keypair });
+      const sdkInstance = await Ae({
+        compilerUrl,
+        nodes: [{ name: current.network, instance: node }],
+        accounts: [accounts],
+      });
+      commit('setClient', sdkInstance);
+
+      return sdkInstance;
     },
     async getBalances({ rootState: { sdk }, state: { referrals }, commit }) {
       await Promise.all(

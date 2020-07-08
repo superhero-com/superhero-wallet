@@ -950,7 +950,8 @@
       "created-links": "Created invite links",
       "top-up": "Top up",
       "close": "Close",
-      "claim": "Claim back"
+      "claim": "Claim back",
+      "insufficient-balance": "Insufficient balance"
     }
   },
   "phishing": {

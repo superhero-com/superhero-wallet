@@ -43,14 +43,23 @@ export default {
       const { publicKey, secretKey } = Crypto.generateKeyPair();
       if (this.amount) {
         try {
-          await this.sdk.spend(this.amount, publicKey, {
-            payload: 'referral',
-            denomination: AE_AMOUNT_FORMATS.AE,
-          });
-        } catch (e) {
-          this.$store.dispatch('modals/open', { name: 'default', msg: e.message });
+          try {
+            await this.sdk.spend(this.amount, publicKey, {
+              payload: 'referral',
+              denomination: AE_AMOUNT_FORMATS.AE,
+            });
+          } catch (e) {
+            if (e.message.includes('is not enough to execute')) {
+              this.$store.dispatch('modals/open', {
+                name: 'default',
+                msg: this.$t('pages.invite.insufficient-balance'),
+              });
+              return;
+            }
+            throw e;
+          }
+        } finally {
           this.loading = false;
-          return;
         }
       }
       const link = `https://superhero.com/i/${Crypto.encodeBase58Check(
@@ -66,6 +75,7 @@ export default {
       });
       this.loading = false;
       this.$store.dispatch('invites/getBalances');
+      this.amount = 0;
     },
   },
 };
