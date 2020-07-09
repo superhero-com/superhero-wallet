@@ -130,7 +130,7 @@ export default new Vuex.Store({
         saveErrorLog,
         tourStartBar,
         tokens: { all },
-        invites: { links },
+        invites,
       }),
     ),
     modals,
