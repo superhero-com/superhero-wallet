@@ -43,21 +43,19 @@ export default {
       const { publicKey, secretKey } = Crypto.generateKeyPair();
       if (this.amount) {
         try {
-          try {
-            await this.sdk.spend(this.amount, publicKey, {
-              payload: 'referral',
-              denomination: AE_AMOUNT_FORMATS.AE,
+          await this.sdk.spend(this.amount, publicKey, {
+            payload: 'referral',
+            denomination: AE_AMOUNT_FORMATS.AE,
+          });
+        } catch (e) {
+          if (e.message.includes('is not enough to execute')) {
+            this.$store.dispatch('modals/open', {
+              name: 'default',
+              msg: this.$t('pages.invite.insufficient-balance'),
             });
-          } catch (e) {
-            if (e.message.includes('is not enough to execute')) {
-              this.$store.dispatch('modals/open', {
-                name: 'default',
-                msg: this.$t('pages.invite.insufficient-balance'),
-              });
-              return;
-            }
-            throw e;
+            return;
           }
+          throw e;
         } finally {
           this.loading = false;
         }
