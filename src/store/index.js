@@ -109,7 +109,7 @@ export default new Vuex.Store({
         saveErrorLog,
         tourStartBar,
         tokens: { all },
-        invites: { links },
+        invites,
       }) => ({
         migrations,
         current,
