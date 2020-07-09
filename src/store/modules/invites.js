@@ -25,22 +25,23 @@ export default {
         });
       } catch (e) {
         if (e.message.includes('is not enough to execute')) {
-          dispatch('modals/open', { name: 'default', msg: this.$t('pages.invite.insufficient-balance') }, { root: true });
+          dispatch(
+            'modals/open',
+            { name: 'default', msg: this.$t('pages.invite.insufficient-balance') },
+            { root: true },
+          );
           return;
         }
         throw e;
       }
     },
-    async getClient({ rootState: { network, current }, commit }, keypair) {
-      const { internalUrl, compilerUrl } = network[current.network];
-      const node = await Node({
-        url: internalUrl,
-        internalUrl,
-      });
+    async getClient({ rootState: { network, current, sdk } }, keypair) {
+      const { compilerUrl } = network[current.network];
+      const { instance } = sdk.pool.get(current.network);
       const accounts = MemoryAccount({ keypair });
       return Ae({
         compilerUrl,
-        nodes: [{ name: current.network, instance: node }],
+        nodes: [{ name: current.network, instance }],
         accounts: [accounts],
       });
     },
