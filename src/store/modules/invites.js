@@ -12,9 +12,6 @@ export default {
     add(state, link) {
       state.links.unshift(link);
     },
-    setClient(state, client) {
-      state.client = client;
-    },
     setBalance(state, { idx, balance }) {
       Vue.set(state.links[idx], 'balance', balance);
     },
