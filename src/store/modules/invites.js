@@ -31,7 +31,7 @@ export default {
         });
       } catch (e) {
         if (e.message.includes('is not enough to execute')) {
-          dispatch('modals/open', { name: 'default', msg: e.message }, { root: true });
+          dispatch('modals/open', { name: 'default', msg: this.$t('pages.invite.insufficient-balance') }, { root: true });
           return;
         }
         throw e;
