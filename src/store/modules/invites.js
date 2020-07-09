@@ -6,7 +6,6 @@ export default {
   namespaced: true,
   state: {
     links: [],
-    client: null,
   },
   mutations: {
     add(state, link) {
