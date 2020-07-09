@@ -42,14 +42,11 @@ export default {
         internalUrl,
       });
       const accounts = MemoryAccount({ keypair });
-      const sdkInstance = await Ae({
+      return Ae({
         compilerUrl,
         nodes: [{ name: current.network, instance: node }],
         accounts: [accounts],
       });
-      commit('setClient', sdkInstance);
-
-      return sdkInstance;
     },
     async updateBalances({ rootState: { sdk }, state: { links }, commit }) {
       await Promise.all(
