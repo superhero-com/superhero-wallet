@@ -41,6 +41,7 @@ import NamesDetails from './pages/Names/Details';
 import AuctionList from './pages/Names/AuctionList';
 import AuctionDetails from './pages/Names/AuctionDetails';
 import AuctionBid from './pages/Names/AuctionBid';
+import Invite from './pages/Invite';
 
 export default [
   {
@@ -391,6 +392,15 @@ export default [
     component: SignMessage,
     meta: {
       title: 'sign-message',
+      notPersist: true,
+    },
+  },
+  {
+    name: 'invite',
+    path: '/invite',
+    component: Invite,
+    meta: {
+      title: 'invite',
       notPersist: true,
     },
   },

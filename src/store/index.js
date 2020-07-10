@@ -11,6 +11,7 @@ import accounts from './plugins/account';
 import tokens from './plugins/tokens';
 import names from './plugins/names';
 import runMigrations from './migrations';
+import invitesModule from './modules/invites';
 import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
 
 Vue.use(Vuex);
@@ -108,6 +109,7 @@ export default new Vuex.Store({
         saveErrorLog,
         tourStartBar,
         tokens: { all },
+        invites,
       }) => ({
         migrations,
         current,
@@ -128,6 +130,7 @@ export default new Vuex.Store({
         saveErrorLog,
         tourStartBar,
         tokens: { all },
+        invites,
       }),
     ),
     modals,
@@ -136,4 +139,7 @@ export default new Vuex.Store({
     tokens,
     names,
   ],
+  modules: {
+    invites: invitesModule,
+  },
 });

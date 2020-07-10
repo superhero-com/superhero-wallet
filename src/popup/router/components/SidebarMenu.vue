@@ -69,6 +69,11 @@
       </router-link>
     </li>
     <li>
+      <router-link to="/invite" data-cy="invite">
+        {{ $t('pages.appVUE.invite') }}
+      </router-link>
+    </li>
+    <li>
       <router-link to="/aboutSettings" data-cy="aboutSettings">
         {{ $t('pages.appVUE.help') }}
       </router-link>
