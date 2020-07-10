@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { Universal as Ae, Node, MemoryAccount } from '@aeternity/aepp-sdk/es';
+import { Universal as Ae, MemoryAccount } from '@aeternity/aepp-sdk/es';
 import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 
 export default {
