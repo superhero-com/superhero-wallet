@@ -349,6 +349,7 @@ const rpcWallet = {
         true,
       );
       aepp.disconnect();
+      browser.tabs.reload(aepp.connection.port.sender.tab.id);
       this.sdk.removeRpcClient(aepp.id);
     });
     this.controller.lockWallet();
