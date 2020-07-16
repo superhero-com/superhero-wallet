@@ -342,6 +342,17 @@ const rpcWallet = {
     }
   },
   async [AEX2_METHODS.LOGOUT]() {
+    const { clients: aepps } = this.sdk.getClients();
+    Array.from(aepps.values()).forEach(aepp => {
+      aepp.sendMessage(
+        { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
+        true,
+      );
+      aepp.connection.port.onDisconnect.dispatch();
+      aepp.disconnect();
+      browser.tabs.reload(aepp.connection.port.sender.tab.id);
+      this.sdk.removeRpcClient(aepp.id);
+    });
     this.controller.lockWallet();
     this.initFields();
   },
