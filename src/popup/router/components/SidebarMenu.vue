@@ -92,16 +92,7 @@ export default {
   mixins: [removeAccountMixin],
   components: { Close, Arrow, UserAvatar },
   computed: mapGetters(['account', 'activeAccountName']),
-  data: () => ({ showSettingsDropdown: false, showTokensDropdown: false, balances: null }),
-  watch: {
-    showTokensDropdown(val) {
-      if (val) {
-        this.balances = setInterval(() => this.$store.dispatch('tokens/balances'), 10000);
-      } else {
-        clearInterval(this.balances);
-      }
-    },
-  },
+  data: () => ({ showSettingsDropdown: false, balances: null }),
   created() {
     this.$once('hook:beforeDestroy', () => clearInterval(this.balances));
   },
