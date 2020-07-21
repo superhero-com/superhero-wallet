@@ -29,7 +29,7 @@ export default class Logger {
       };
     }
 
-    window.addEventListener('unhandledrejection', promise => {
+    window.addEventListener('unhandledrejection', async promise => {
       const { stack, message, name } = promise.reason || {};
       if (
         (typeof promise.reason === 'string' &&
@@ -38,11 +38,15 @@ export default class Logger {
         message === 'Rejected by user'
       )
         return;
-      Logger.write({
-        message: typeof promise.reason === 'string' ? promise.reason : message,
-        stack,
-        type: 'unhandledrejection',
-      });
+      try {
+        await Logger.write({
+          message: typeof promise.reason === 'string' ? promise.reason : message,
+          stack,
+          type: 'unhandledrejection',
+        });
+      } catch (error) {
+        console.error('Logger:', error);
+      }
     });
 
     window.onerror = (message, source, line, col, error) => {
