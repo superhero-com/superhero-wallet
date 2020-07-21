@@ -34,15 +34,4 @@ export default (reducerLoad, reducerSave) => async store => {
       },
     },
   });
-  if (process.env.IS_EXTENSION) {
-    browser.storage.onChanged.addListener(async () => {
-      lastEmitedState = reducerLoad(await getState(), store);
-      store.commit('syncState', lastEmitedState);
-    });
-  } else {
-    window.addEventListener('storage', async () => {
-      lastEmitedState = reducerLoad(await getState(), store);
-      store.commit('syncState', lastEmitedState);
-    });
-  }
 };
