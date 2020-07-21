@@ -1,5 +1,5 @@
 <template>
-  <ul class="sidebar-menu" @click="menuClickHandler" data-cy="sidebar-menu">
+  <ul class="sidebar-menu" data-cy="sidebar-menu">
     <li class="menu-close">
       <Close @click="closeMenu" data-cy="close-menu" />
     </li>
@@ -106,11 +106,13 @@ export default {
     this.$once('hook:beforeDestroy', () => clearInterval(this.balances));
   },
   methods: {
-    menuClickHandler({ target }) {
-      if (target.tagName === 'A') this.closeMenu();
-    },
     closeMenu() {
       this.$emit('closeMenu');
+    },
+  },
+  watch: {
+    $route() {
+      this.closeMenu();
     },
   },
 };
