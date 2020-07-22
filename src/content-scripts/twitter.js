@@ -123,7 +123,7 @@ const configureSuperheroTipAction = async () => {
     const lastActionNode = actions.querySelector(
       ':scope > div:not(.action-superhero-tip):last-child',
     );
-    if (bigTweetSkipped && lastActionNode) {
+    if (check && bigTweetSkipped && lastActionNode) {
       lastActionNode.style.flexBasis = '0px';
       lastActionNode.style.flexGrow = '1';
     }
