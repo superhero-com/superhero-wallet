@@ -1,7 +1,7 @@
 import Node from '@aeternity/aepp-sdk/es/node';
 import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
-import { isEmpty } from 'lodash-es';
+import { isEmpty, times } from 'lodash-es';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
 import {
@@ -114,10 +114,23 @@ export default {
       });
 
       if (IN_FRAME) {
-        const connection = BrowserWindowMessageConnection({ target: window.parent });
-        sdk.addRpcClient(connection);
-        sdk.shareWalletInfo(connection.sendMessage.bind(connection));
-        setTimeout(() => sdk.shareWalletInfo(connection.sendMessage.bind(connection)), 3000);
+        const connectedFrames = new Set();
+        const connectToFrame = target => {
+          if (connectedFrames.has(target)) return;
+          connectedFrames.add(target);
+          const connection = BrowserWindowMessageConnection({ target });
+          sdk.addRpcClient(connection);
+          sdk.shareWalletInfo(connection.sendMessage.bind(connection));
+          setTimeout(() => sdk.shareWalletInfo(connection.sendMessage.bind(connection)), 3000);
+        };
+
+        connectToFrame(window.parent);
+        const connectToParentFrames = () =>
+          times(window.parent.frames.length, i => window.parent.frames[i])
+            .filter(frame => frame !== window)
+            .forEach(connectToFrame);
+        connectToParentFrames();
+        setInterval(connectToParentFrames, 3000);
       }
 
       await store.dispatch('initSdk', sdk);

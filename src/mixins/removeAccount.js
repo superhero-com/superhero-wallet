@@ -1,5 +1,6 @@
 import { AEX2_METHODS } from '../popup/utils/constants';
 import { postMessage } from '../popup/utils/connection';
+import { IN_FRAME } from '../popup/utils/helper';
 
 export default {
   methods: {
@@ -13,6 +14,17 @@ export default {
         .catch(() => false);
       if (remove) {
         this.$emit('closeMenu');
+        if (process.env.PLATFORM === 'web' && IN_FRAME) {
+          const { sdk } = this.$store.state;
+          const { clients } = sdk.getClients();
+          Array.from(clients.values()).forEach(aepp => {
+            aepp.sendMessage(
+              { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
+              true,
+            );
+            aepp.disconnect();
+          });
+        }
         await this.$store.dispatch('reset');
         await this.$router.push('/');
         this.$store.commit('SET_MAIN_LOADING', false);
