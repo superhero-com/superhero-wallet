@@ -11,8 +11,8 @@
 
       <div v-if="isLoggedIn">
         <span class="noti-holder" @click="toNotifications" data-cy="noti">
-          <span v-if="notificationsCounter" class="noti-count" data-cy="noti-count">{{
-            notifications.length
+          <span v-if="notificationsCount" class="noti-count" data-cy="noti-count">{{
+            notificationsCount
           }}</span>
           <Bell />
         </span>
@@ -34,18 +34,15 @@ import Logo from '../../../icons/logo-small.svg?vue-component';
 export default {
   components: { Arrow, Bell, Hamburger, Logo },
   computed: {
-    ...mapState([
-      'aeppPopup',
-      'tourRunning',
-      'isLoggedIn',
-      'notifications',
-      'notificationsCounter',
-    ]),
+    ...mapState(['aeppPopup', 'tourRunning', 'isLoggedIn', 'notifications']),
     title() {
       return this.$route.meta.title;
     },
     showNavigation() {
       return this.$route.meta.navigation !== undefined ? this.$route.meta.navigation : true;
+    },
+    notificationsCount() {
+      return this.notifications.filter(n => !n.visited).length;
     },
   },
   methods: {

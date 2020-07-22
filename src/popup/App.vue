@@ -71,7 +71,6 @@ export default {
       'notifications',
       'isLoggedIn',
       'mainLoading',
-      'notificationsCounter',
       'aeppPopup',
     ]),
     waveBg() {
@@ -118,8 +117,6 @@ export default {
         route: '/securitySettings',
       });
     }
-    if (this.notificationsCounter !== 0)
-      this.$store.commit('SET_NOTIFICATIONS_COUNTER', this.notifications.length);
 
     EventBus.$on('error', async entry => {
       this.$store.dispatch('modals/open', { name: 'error-log', entry }).catch(() => false);
