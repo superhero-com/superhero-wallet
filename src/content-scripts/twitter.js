@@ -6,27 +6,18 @@ global.browser = require('webextension-polyfill');
 
 let timeout = null;
 const isInContent = !window.location.href.includes(browser.extension.getURL('./'));
-const buttonContentStyle = `color: rgb(101, 119, 134);
-font-size: 12px;
+const buttonContentStyleCommon = `font-size: 12px;
 font-weight: bold;
 margin-left: 6px;
 position: relative;`;
+const buttonContentStyle = `${buttonContentStyleCommon} color: rgb(101, 119, 134);`;
+const buttonContentStyleHover = `${buttonContentStyleCommon} color: #2a9cff;`;
 
-const buttonContentStyleHover = `color: #2a9cff;
-font-size: 12px;
-font-weight: bold;
-margin-left: 6px;
-position: relative;`;
-
-const buttonStyles = `background: transparent; 
+const buttonStyleCommon = `background: transparent; 
 border:none; cursor: pointer; padding: 0px;
-color:rgb(101, 119, 134);
 outline:none;`;
-
-const buttonStylesHover = `background: transparent; 
-border:none; cursor: pointer;
-color: #2a9cff;
-outline:none;`;
+const buttonStyle = `${buttonStyleCommon} color:rgb(101, 119, 134);`;
+const buttonStyleHover = `${buttonStyleCommon} color: #2a9cff;`;
 
 const getTweetId = tweet => {
   const status = tweet.querySelector("a[href*='/status/']");
@@ -57,7 +48,7 @@ const createSuperheroTipAction = tweetId => {
 
   // Create the tip button
   const superheroTipButton = document.createElement('button');
-  superheroTipButton.setAttribute('style', buttonStyles);
+  superheroTipButton.setAttribute('style', buttonStyle);
   superheroTipButton.appendChild(buttonIcon);
   superheroTipButton.appendChild(buttonContent);
 
@@ -70,13 +61,13 @@ const createSuperheroTipAction = tweetId => {
 
   const hoverEnter = () => {
     buttonIcon.src = iconHover;
-    superheroTipButton.setAttribute('style', buttonStylesHover);
+    superheroTipButton.setAttribute('style', buttonStyleHover);
     buttonContent.setAttribute('style', buttonContentStyleHover);
   };
 
   const hoverLeave = () => {
     buttonIcon.src = icon;
-    superheroTipButton.setAttribute('style', buttonStyles);
+    superheroTipButton.setAttribute('style', buttonStyle);
     buttonContent.setAttribute('style', buttonContentStyle);
   };
 
