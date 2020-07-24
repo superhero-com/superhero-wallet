@@ -3,16 +3,8 @@ import { detect } from 'detect-browser';
 import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
-import { get } from 'lodash-es';
 import BigNumber from 'bignumber.js';
-import {
-  MAGNITUDE_EXA,
-  MAGNITUDE_GIGA,
-  MAGNITUDE_PICO,
-  CONNECTION_TYPES,
-  networks,
-  DEFAULT_NETWORK,
-} from './constants';
+import { CONNECTION_TYPES, networks, DEFAULT_NETWORK } from './constants';
 import { getState } from '../../store/plugins/persistState';
 
 export const aeToAettos = v =>
@@ -95,17 +87,6 @@ export const detectConnectionType = port => {
   return type;
 };
 
-export const fetchData = (url, method, fetchedData) => {
-  if (method === 'post') {
-    return fetch(url, {
-      method,
-      body: fetchedData,
-    }).then(response => response.json());
-  }
-
-  return fetch(url).then(response => response.json());
-};
-
 export const getAeppAccountPermission = async (host, account) => {
   const { connectedAepps } = await getState();
   if (!Object.keys(connectedAepps).length) return false;
@@ -144,16 +125,12 @@ export const middleware = async (network, current) => {
   })({ swag });
 };
 
-export const convertAmountToCurrency = (currency, amount) => currency * amount;
-
 export const checkAddress = value =>
   Crypto.isAddressValid(value, 'ak') ||
   Crypto.isAddressValid(value, 'ct') ||
   Crypto.isAddressValid(value, 'ok');
 
 export const validateAddress = (address, type) => Crypto.isAddressValid(address, type);
-
-export const isInt = n => n % 1 === 0;
 
 export const chekAensName = value => value.endsWith('.test') || value.endsWith('.chain');
 
@@ -239,49 +216,8 @@ export const parseFromStorage = state =>
     return value;
   });
 
-export const escapeCallParams = params =>
-  params.map(p => {
-    if (typeof p === 'string' && !checkAddress(p)) {
-      return `"${p}"`;
-    }
-    return p.toString();
-  });
-
 export const getAddressByNameEntry = (nameEntry, pointer = 'account_pubkey') =>
   ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
-
-const toFiatFixedValue = v => (v.e < -2 ? '0.01' : v.toFixed(2));
-
-export const currencyAmount = (value, { symbol, isCrypto = true }) => {
-  let v;
-  if (typeof value === 'string') v = value;
-  else v = isCrypto ? value.toFixed(8) : toFiatFixedValue(value);
-  return `${!isCrypto ? symbol : ''}${v}${isCrypto ? ` ${symbol}` : ''}`;
-};
-
-const prefixes = [
-  { name: 'Exa', magnitude: MAGNITUDE_EXA },
-  { name: 'Giga', magnitude: MAGNITUDE_GIGA },
-  { name: '', magnitude: 0 },
-  { name: 'Pico', magnitude: MAGNITUDE_PICO },
-];
-
-const getNearestPrefix = exponent =>
-  prefixes.reduce((p, n) =>
-    Math.abs(n.magnitude - exponent) < Math.abs(p.magnitude - exponent) ? n : p,
-  );
-
-const getLowerBoundPrefix = exponent =>
-  prefixes.find(p => p.magnitude <= exponent) || prefixes[prefixes.length - 1];
-
-export const prefixedAmount = value => {
-  const { name, magnitude } = (value.e < 0 ? getNearestPrefix : getLowerBoundPrefix)(value.e);
-  const v = value
-    .shiftedBy(-magnitude)
-    .precision(9 + Math.min(value.e - magnitude, 0))
-    .toFixed();
-  return `${v}${name ? ' ' : ''}${name}`;
-};
 
 export const contractCall = async ({
   instance,
@@ -321,26 +257,6 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
     console.error(`setContractInstance: ${e}`);
   }
   return Promise.resolve(contractInstance);
-};
-
-export const getContractInstance = async (source, options = {}) => {
-  try {
-    let store = await import('../../store');
-    store = store.default;
-    return await store.state.sdk.getContractInstance(source, { ...options, forceCodeCheck: true });
-  } catch (e) {
-    return {};
-  }
-};
-
-export const getUniqueId = (length = 6) => {
-  const ID_LENGTH = length;
-  const START_LETTERS_ASCII = 97;
-  const ALPHABET_LENGTH = 26;
-
-  return [...new Array(ID_LENGTH)]
-    .map(() => String.fromCharCode(START_LETTERS_ASCII + Math.random() * ALPHABET_LENGTH))
-    .join('');
 };
 
 const getUserNetworks = async () => {
@@ -422,8 +338,3 @@ export const getTwitterAccountUrl = url => {
   const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
   return match ? match[0] : false;
 };
-
-export const isNotFoundError = error => error.isAxiosError && get(error, 'response.status') === 404;
-
-export const isInternalServerError = error =>
-  error.isAxiosError && [500, 503].includes(get(error, 'response.status'));

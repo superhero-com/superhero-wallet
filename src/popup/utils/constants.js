@@ -3,10 +3,6 @@ import { ABI_VERSIONS, TX_TYPE, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/bu
 import BigNumber from 'bignumber.js';
 
 export const MAGNITUDE = 18;
-export const MAGNITUDE_EXA = 18;
-export const MAGNITUDE_GIGA = 9;
-export const MAGNITUDE_MICRO = -6;
-export const MAGNITUDE_PICO = -12;
 export const TX_TYPES = {
   txSign: TX_TYPE.spend,
   contractCall: TX_TYPE.contractCall,
@@ -115,7 +111,6 @@ export const NO_POPUP_AEPPS = [
 ];
 
 export const TXS_PER_PAGE = 30;
-export const TX_LIMIT_PER_DAY = 2000;
 export const MAX_AMOUNT_WITHOUT_CONFIRM = 10;
 export const AENS_DOMAIN = '.chain';
 export const MAX_AUCTION_NAME_LENGTH = 12 + AENS_DOMAIN.length;
