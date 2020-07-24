@@ -22,7 +22,6 @@ import SuccessTip from './pages/SuccessTip';
 import Notifications from './pages/Notifications';
 
 import Networks from './pages/Networks';
-import CommentNew from './pages/CommentNew';
 import NotFound from './pages/NotFound';
 import ClaimTips from './pages/ClaimTips';
 import DonateError from './pages/DonateError';
@@ -292,14 +291,6 @@ export default [
     props: true,
     meta: {
       title: 'networks',
-    },
-  },
-  {
-    path: '/comment',
-    component: CommentNew,
-    meta: {
-      title: 'comment-new',
-      notPersist: true,
     },
   },
   {
