@@ -114,7 +114,6 @@ export const NO_POPUP_AEPPS = [
   ...(process.env.NODE_ENV === 'development' ? ['localhost'] : []),
 ];
 
-export const BLACKLIST_AEPPS = ['coronanews.org'];
 export const TXS_PER_PAGE = 30;
 export const TX_LIMIT_PER_DAY = 2000;
 export const MAX_AMOUNT_WITHOUT_CONFIRM = 10;

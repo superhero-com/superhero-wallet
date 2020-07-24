@@ -7,7 +7,6 @@ import uuid from 'uuid';
 import { mockLogin } from '../popup/utils';
 import {
   AEX2_METHODS,
-  BLACKLIST_AEPPS,
   DEFAULT_NETWORK,
   MAX_AMOUNT_WITHOUT_CONFIRM,
   NO_POPUP_AEPPS,
@@ -28,7 +27,7 @@ import { getState } from '../store/plugins/persistState';
 
 global.browser = require('webextension-polyfill');
 
-const rpcWallet = {
+export default {
   async init(walletController, popups) {
     this.popups = popups;
     await this.initNodes();
@@ -158,10 +157,7 @@ const rpcWallet = {
   async shouldOpenPopup(aepp, action) {
     const { isTip, amount } = getContractCallInfo(action.params.tx, this.tipContractAddress);
     const origin = this.getAeppOrigin(aepp);
-    if (BLACKLIST_AEPPS.includes(origin)) {
-      // deny action if in blacklist
-      action.deny();
-    } else if (NO_POPUP_AEPPS.includes(origin)) {
+    if (NO_POPUP_AEPPS.includes(origin)) {
       if (isTip) {
         const tippedAmount = await getTippedAmount();
         if (tippedAmount >= MAX_AMOUNT_WITHOUT_CONFIRM) {
@@ -381,5 +377,3 @@ const rpcWallet = {
     await this.createWallet();
   },
 };
-
-export default rpcWallet;
