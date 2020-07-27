@@ -67,7 +67,7 @@ export const detectConnectionType = port => {
   const [senderUrl] = port.sender.url.split('?');
   let type = CONNECTION_TYPES.OTHER;
   const isExtensionSender =
-    senderUrl.includes(`${extensionProtocol}://${browser.runtime.id}/popup/popup.html`) ||
+    senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/popup/popup.html`) ||
     detect().name === 'firefox';
   if (port.name === CONNECTION_TYPES.EXTENSION && isExtensionSender) {
     type = CONNECTION_TYPES.EXTENSION;
