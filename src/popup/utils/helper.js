@@ -65,18 +65,16 @@ export const validateTipUrl = urlAsString => {
 export const detectConnectionType = port => {
   const extensionProtocol = detect().name === 'firefox' ? 'moz-extension' : 'chrome-extension';
   const [senderUrl] = port.sender.url.split('?');
-  let type = CONNECTION_TYPES.OTHER;
   const isExtensionSender =
     senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/popup/popup.html`) ||
     detect().name === 'firefox';
-  if (port.name === CONNECTION_TYPES.EXTENSION && isExtensionSender) {
-    type = CONNECTION_TYPES.EXTENSION;
-  } else if (port.name === CONNECTION_TYPES.POPUP && isExtensionSender) {
-    type = CONNECTION_TYPES.POPUP;
-  } else {
-    type = CONNECTION_TYPES.OTHER;
+  if (
+    [CONNECTION_TYPES.EXTENSION, CONNECTION_TYPES.POPUP].includes(port.name) &&
+    isExtensionSender
+  ) {
+    return port.name;
   }
-  return type;
+  return CONNECTION_TYPES.OTHER;
 };
 
 export const getAeppAccountPermission = async (host, account) => {
