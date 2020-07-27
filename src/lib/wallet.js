@@ -9,7 +9,8 @@ import {
   middleware,
   getAllNetworks,
   IN_FRAME,
-  extractHostName,
+  toURL,
+  getAeppAccountPermission,
 } from '../popup/utils/helper';
 import { TIPPING_CONTRACT, NO_POPUP_AEPPS } from '../popup/utils/constants';
 import Logger from './logger';
@@ -98,11 +99,34 @@ export default {
         nativeMode: true,
         compilerUrl,
         name: 'Superhero',
-        onConnection(client, { accept, deny }, origin) {
-          const isAccept =
-            NO_POPUP_AEPPS.includes(extractHostName(origin)) ||
-            window.confirm(`Allow connection to ${origin}?`);
-          (isAccept ? accept : deny)();
+        async onConnection({ info: { icons, name } }, { accept, deny }, origin) {
+          const originUrl = toURL(origin);
+          if (
+            NO_POPUP_AEPPS.includes(originUrl.hostname) ||
+            (await getAeppAccountPermission(originUrl.hostname, store.state.account.publicKey))
+          ) {
+            accept();
+            return;
+          }
+          try {
+            await store.dispatch('modals/open', {
+              name: 'confirm-connect',
+              app: {
+                name,
+                icons,
+                protocol: originUrl.protocol,
+                host: originUrl.hostname,
+              },
+            });
+            await store.dispatch('setPermissionForAccount', {
+              host: originUrl.hostname,
+              account: store.state.account.publicKey,
+            });
+            accept();
+          } catch (error) {
+            deny();
+            if (error.message !== 'Rejected by user') throw error;
+          }
         },
         onSubscription: acceptCb,
         onSign: acceptCb,
