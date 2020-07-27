@@ -62,16 +62,8 @@ export const validateTipUrl = urlAsString => {
   }
 };
 
-const getExtensionProtocol = () => {
-  let extensionUrl = 'chrome-extension';
-  if (detect().name === 'firefox') {
-    extensionUrl = 'moz-extension';
-  }
-  return extensionUrl;
-};
-
 export const detectConnectionType = port => {
-  const extensionProtocol = getExtensionProtocol();
+  const extensionProtocol = detect().name === 'firefox' ? 'moz-extension' : 'chrome-extension';
   const [senderUrl] = port.sender.url.split('?');
   let type = CONNECTION_TYPES.OTHER;
   const isExtensionSender =
