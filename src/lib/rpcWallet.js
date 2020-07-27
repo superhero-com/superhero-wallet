@@ -48,9 +48,6 @@ export default {
     this.subaccounts = subaccounts;
     return Promise.resolve(true);
   },
-  initSdk() {
-    this.recreateWallet();
-  },
   initFields() {
     this.sdk = null;
     this.initNetwork();
@@ -71,7 +68,7 @@ export default {
     this.nodes = nodes.all;
     return nodes;
   },
-  async createWallet() {
+  async initSdk() {
     this.accountKeyPairs = await Promise.all(
       this.subaccounts.map(async (a, index) =>
         parseFromStorage(await this.controller.getKeypair({ activeAccount: index, account: a })),
@@ -142,7 +139,6 @@ export default {
     } catch (e) {
       this.sdk = null;
     }
-    return this.sdk;
   },
   getAeppOrigin(aepp) {
     const {
@@ -372,8 +368,5 @@ export default {
       await this.initSubaccounts();
       this.initSdk();
     }
-  },
-  async recreateWallet() {
-    await this.createWallet();
   },
 };
