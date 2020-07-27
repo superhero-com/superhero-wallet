@@ -14,7 +14,7 @@ import {
 import {
   addTipAmount,
   extractHostName,
-  getActiveNetwork,
+  getAllNetworks,
   getAddressByNameEntry,
   getAeppAccountPermission,
   getContractCallInfo,
@@ -64,9 +64,7 @@ export default {
     this.tipContractAddress = this.nodes[network].tipContract;
   },
   async initNodes() {
-    const nodes = await getActiveNetwork();
-    this.nodes = nodes.all;
-    return nodes;
+    this.nodes = await getAllNetworks();
   },
   async initSdk() {
     this.accountKeyPairs = await Promise.all(

@@ -1,5 +1,6 @@
 import { isFQDN } from 'validator';
 import { detect } from 'detect-browser';
+import { get } from 'lodash-es';
 import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
@@ -249,15 +250,10 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
   return Promise.resolve(contractInstance);
 };
 
-const getUserNetworks = async () => {
-  const { userNetworks } = await getState();
-  return !userNetworks ? {} : userNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {});
-};
-
-export const getAllNetworks = async () => {
-  const userNetworks = await getUserNetworks();
-  return { ...userNetworks, ...networks };
-};
+export const getAllNetworks = async () => ({
+  ...get(await getState(), 'userNetworks', []).reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {}),
+  ...networks,
+});
 
 export const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
 
@@ -316,12 +312,7 @@ export const pollGetter = getter =>
 
 export const getActiveNetwork = async () => {
   const all = await getAllNetworks();
-  const { current } = await getState();
-  const networkName = current ? current.network : DEFAULT_NETWORK;
-  return {
-    network: all[networkName],
-    all,
-  };
+  return all[get(await getState(), 'current.network', DEFAULT_NETWORK)];
 };
 
 export const getTwitterAccountUrl = url => {
