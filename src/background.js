@@ -6,7 +6,6 @@ import { PopupConnections } from './lib/popup-connection';
 import RedirectChainNames from './lib/redirect-chain-names';
 import rpcWallet from './lib/rpcWallet';
 import TipClaimRelay from './lib/tip-claim-relay';
-import Notification from './notifications';
 import { buildTx } from './popup/utils';
 import { popupProps } from './popup/utils/config';
 import {
@@ -14,7 +13,6 @@ import {
   CONNECTION_TYPES,
   DEFAULT_NETWORK,
   HDWALLET_METHODS,
-  NOTIFICATION_METHODS,
 } from './popup/utils/constants';
 import { detectConnectionType } from './popup/utils/helper';
 import { getPhishingUrls, phishingCheckUrl, setPhishingUrl } from './popup/utils/phishing-detect';
@@ -29,7 +27,6 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
   Logger.init({ background: true });
   RedirectChainNames.init();
 
-  const notification = new Notification();
   setController(controller);
 
   const postPhishingData = async data => {
@@ -112,9 +109,8 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
           }
           if (AEX2_METHODS[type]) rpcWallet[type](payload);
 
-          if (NOTIFICATION_METHODS[type]) {
+          if (type === 'SWITCH_NETWORK') {
             await switchNode();
-            notification[type]();
           }
         });
       } else if (connectionType === CONNECTION_TYPES.POPUP) {
