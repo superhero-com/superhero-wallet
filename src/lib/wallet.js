@@ -9,12 +9,11 @@ import {
   middleware,
   getAllNetworks,
   IN_FRAME,
-  extractHostName,
+  toURL,
+  getAeppAccountPermission,
 } from '../popup/utils/helper';
 import { TIPPING_CONTRACT, NO_POPUP_AEPPS } from '../popup/utils/constants';
 import Logger from './logger';
-
-let countError = 0;
 
 async function initMiddleware() {
   const { network, current } = store.state;
@@ -48,6 +47,8 @@ async function initContractInstances() {
   );
 }
 
+let initSdkRunning = false;
+
 export default {
   async init() {
     const { account } = store.getters;
@@ -69,6 +70,8 @@ export default {
     return { loggedIn: true };
   },
   async initSdk() {
+    if (initSdkRunning) return;
+    initSdkRunning = true;
     const keypair = await getKeyPair();
     if (keypair.error) {
       await logout();
@@ -98,11 +101,34 @@ export default {
         nativeMode: true,
         compilerUrl,
         name: 'Superhero',
-        onConnection(client, { accept, deny }, origin) {
-          const isAccept =
-            NO_POPUP_AEPPS.includes(extractHostName(origin)) ||
-            window.confirm(`Allow connection to ${origin}?`);
-          (isAccept ? accept : deny)();
+        async onConnection({ info: { icons, name } }, { accept, deny }, origin) {
+          const originUrl = toURL(origin);
+          if (
+            NO_POPUP_AEPPS.includes(originUrl.hostname) ||
+            (await getAeppAccountPermission(originUrl.hostname, store.state.account.publicKey))
+          ) {
+            accept();
+            return;
+          }
+          try {
+            await store.dispatch('modals/open', {
+              name: 'confirm-connect',
+              app: {
+                name,
+                icons,
+                protocol: originUrl.protocol,
+                host: originUrl.hostname,
+              },
+            });
+            await store.dispatch('setPermissionForAccount', {
+              host: originUrl.hostname,
+              account: store.state.account.publicKey,
+            });
+            accept();
+          } catch (error) {
+            deny();
+            if (error.message !== 'Rejected by user') throw error;
+          }
         },
         onSubscription: acceptCb,
         onSign: acceptCb,
@@ -119,6 +145,13 @@ export default {
           if (connectedFrames.has(target)) return;
           connectedFrames.add(target);
           const connection = BrowserWindowMessageConnection({ target });
+          const originalConnect = connection.connect;
+          connection.connect = function connect(onMessage) {
+            originalConnect.call(this, (data, origin, source) => {
+              if (source !== target) return;
+              onMessage(data, origin, source);
+            });
+          };
           sdk.addRpcClient(connection);
           sdk.shareWalletInfo(connection.sendMessage.bind(connection));
           setTimeout(() => sdk.shareWalletInfo(connection.sendMessage.bind(connection)), 3000);
@@ -139,12 +172,10 @@ export default {
       store.commit('SET_NODE_STATUS', 'connected');
       setTimeout(() => store.commit('SET_NODE_STATUS', ''), 2000);
     } catch (e) {
-      countError += 1;
-      if (countError < 3) await this.initSdk();
-      else {
-        store.commit('SET_NODE_STATUS', 'error');
-        Logger.write(e);
-      }
+      store.commit('SET_NODE_STATUS', 'error');
+      Logger.write(e);
+    } finally {
+      initSdkRunning = false;
     }
   },
 };
