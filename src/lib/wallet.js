@@ -15,8 +15,6 @@ import {
 import { TIPPING_CONTRACT, NO_POPUP_AEPPS } from '../popup/utils/constants';
 import Logger from './logger';
 
-let countError = 0;
-
 async function initMiddleware() {
   const { network, current } = store.state;
   store.commit('SET_MIDDLEWARE', (await middleware(network, current)).api);
@@ -49,6 +47,8 @@ async function initContractInstances() {
   );
 }
 
+let initSdkRunning = false;
+
 export default {
   async init() {
     const { account } = store.getters;
@@ -70,6 +70,8 @@ export default {
     return { loggedIn: true };
   },
   async initSdk() {
+    if (initSdkRunning) return;
+    initSdkRunning = true;
     const keypair = await getKeyPair();
     if (keypair.error) {
       await logout();
@@ -163,12 +165,10 @@ export default {
       store.commit('SET_NODE_STATUS', 'connected');
       setTimeout(() => store.commit('SET_NODE_STATUS', ''), 2000);
     } catch (e) {
-      countError += 1;
-      if (countError < 3) await this.initSdk();
-      else {
-        store.commit('SET_NODE_STATUS', 'error');
-        Logger.write(e);
-      }
+      store.commit('SET_NODE_STATUS', 'error');
+      Logger.write(e);
+    } finally {
+      initSdkRunning = false;
     }
   },
 };
