@@ -4,6 +4,7 @@ import { IN_FRAME } from '../../popup/utils/helper';
 const modals = {};
 let modalCounter = 0;
 let lastPopupPromise = Promise.resolve();
+let popupWindow;
 
 export const registerModal = ({ name, ...options }) => {
   if (modals[name]) throw new Error(`Modal with name "${name}" already registered`);
@@ -49,10 +50,11 @@ export default store => {
           });
 
           if (!inPopup) return;
+          if (popupWindow) popupWindow.focus();
           lastPopupPromise
             .catch(() => {})
             .finally(() => {
-              const popupWindow = window.open(
+              popupWindow = window.open(
                 `/web-iframe-popup/${name}`,
                 `popup-${key}`,
                 'height=600,width=375',
