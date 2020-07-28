@@ -3,6 +3,7 @@ import { IN_FRAME } from '../../popup/utils/helper';
 
 const modals = {};
 let modalCounter = 0;
+let lastPopupPromise = Promise.resolve();
 
 export const registerModal = ({ name, ...options }) => {
   if (modals[name]) throw new Error(`Modal with name "${name}" already registered`);
@@ -39,7 +40,7 @@ export default store => {
         const inPopup =
           process.env.PLATFORM === 'web' && IN_FRAME && modals[name].showInPopupIfWebFrame;
 
-        return new Promise((resolve, reject) => {
+        const promise = new Promise((resolve, reject) => {
           commit('open', {
             name,
             key,
@@ -48,14 +49,20 @@ export default store => {
           });
 
           if (!inPopup) return;
-          const popupWindow = window.open(
-            `/web-iframe-popup/${name}`,
-            `popup-${key}`,
-            'height=600,width=375',
-          );
-          if (!popupWindow) reject(new Error("Can't show popup window"));
-          else popupWindow.popupProps = { ...props, resolve, reject };
+          lastPopupPromise
+            .catch(() => {})
+            .finally(() => {
+              const popupWindow = window.open(
+                `/web-iframe-popup/${name}`,
+                `popup-${key}`,
+                'height=600,width=375',
+              );
+              if (!popupWindow) reject(new Error("Can't show popup window"));
+              else popupWindow.popupProps = { ...props, resolve, reject };
+            });
         }).finally(() => commit('closeByKey', key));
+        if (inPopup) lastPopupPromise = promise;
+        return promise;
       },
     },
   });
