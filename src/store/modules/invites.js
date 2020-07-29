@@ -17,7 +17,7 @@ export default {
         nodes: [sdk.pool.get(current.network)],
         accounts: [MemoryAccount({ keypair: { publicKey, secretKey } })],
       });
-      await s.transferFunds(1, account.publicKey, { payload: 'referral' });
+      await s.transferFunds(1, account.publicKey, { payload: 'referral', verify: false });
     },
     async handleNotEnoughFoundsError({ dispatch }, error) {
       if (!error.message.includes('is not enough to execute')) return false;
