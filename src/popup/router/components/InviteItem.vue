@@ -43,9 +43,11 @@ export default {
   computed: {
     ...mapState(['sdk', 'current']),
     link() {
-      return `https://superhero.com/i/${Crypto.encodeBase58Check(
-        Buffer.from(this.secretKey, 'hex'),
-      )}`;
+      const secretKey = Crypto.encodeBase58Check(Buffer.from(this.secretKey, 'hex'));
+      return new URL(
+        this.$router.resolve({ name: 'invite-claim', params: { secretKey } }).href,
+        window.location,
+      );
     },
     address() {
       return Crypto.getAddressFromPriv(this.secretKey);
