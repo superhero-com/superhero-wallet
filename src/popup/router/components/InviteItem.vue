@@ -36,7 +36,6 @@ export default {
   props: {
     secretKey: { type: String, required: true },
     createdAt: { type: Number, required: true },
-    idx: { type: Number, required: true },
   },
   components: { Button, AmountSend, CopyIcon },
   filters: { formatDate },
@@ -72,7 +71,7 @@ export default {
     async claim() {
       this.$emit('loading', true);
       try {
-        await this.$store.dispatch('invites/claim', this.idx);
+        await this.$store.dispatch('invites/claim', this.secretKey);
         await this.updateBalance();
       } catch (error) {
         if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', error)) return;

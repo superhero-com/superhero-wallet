@@ -9,9 +9,9 @@
       {{ $t('pages.invite.created-links') }}
     </p>
     <InviteItem
-      v-for="(link, idx) in invites"
+      v-for="link in invites"
       :key="link.secretKey"
-      v-bind="{ ...link, idx }"
+      v-bind="link"
       @loading="val => (loading = val)"
     />
     <Loader v-if="loading" />

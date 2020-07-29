@@ -10,8 +10,7 @@ export default {
     add: ({ invites }, secretKey) => invites.unshift({ secretKey, createdAt: Date.now() }),
   },
   actions: {
-    async claim({ rootState: { account, current, sdk }, state: { invites } }, idx) {
-      const { secretKey } = invites[idx];
+    async claim({ rootState: { account, current, sdk } }, secretKey) {
       const publicKey = Crypto.getAddressFromPriv(secretKey);
       // TODO: Remove this after merging https://github.com/aeternity/aepp-sdk-js/pull/1060
       const s = await Universal({
