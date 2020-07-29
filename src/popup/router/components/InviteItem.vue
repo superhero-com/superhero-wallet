@@ -17,7 +17,7 @@
       <Button half @click="claim">{{ $t('pages.invite.claim') }}</Button>
     </template>
     <template v-else>
-      <AmountSend @changeAmount="val => (topUpAmount = val)" :value="topUpAmount" />
+      <AmountSend v-model="topUpAmount" />
       <Button half dark @click="topUp = false">{{ $t('pages.invite.close') }}</Button>
       <Button half @click="sendTopUp">{{ $t('pages.invite.top-up') }}</Button>
     </template>

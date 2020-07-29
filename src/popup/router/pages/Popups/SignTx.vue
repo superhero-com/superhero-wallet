@@ -3,11 +3,7 @@
     <SignAccountIdenticons :transaction="transaction" />
 
     <SignDetailsList :transaction="transaction">
-      <AmountSend
-        :value="tx.amount"
-        @changeAmount="val => (tx.amount = val)"
-        slot="custom-amount"
-      />
+      <AmountSend v-model="tx.amount" slot="custom-amount" />
     </SignDetailsList>
 
     <div class="btnFixed">

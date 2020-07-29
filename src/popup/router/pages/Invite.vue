@@ -3,7 +3,7 @@
     <p class="section-title">
       {{ $t('pages.invite.generate-link') }}
     </p>
-    <AmountSend @changeAmount="val => (amount = val)" :value="amount" />
+    <AmountSend v-model="amount" />
     <Button @click="generate" extend>{{ $t('pages.invite.generate') }}</Button>
     <p class="section-title">
       {{ $t('pages.invite.created-links') }}
