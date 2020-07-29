@@ -1,24 +1,16 @@
-import Vue from 'vue';
-import { Universal as Ae, MemoryAccount } from '@aeternity/aepp-sdk/es';
-import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
+import { Universal, MemoryAccount, Crypto } from '@aeternity/aepp-sdk/es';
 
 export default {
   namespaced: true,
   state: {
-    links: [],
+    invites: [],
   },
   mutations: {
-    add(state, link) {
-      state.links.unshift(link);
-    },
-    setBalance(state, { idx, balance }) {
-      Vue.set(state.links[idx], 'balance', balance);
-    },
+    add: ({ invites }, secretKey) => invites.unshift({ secretKey, createdAt: Date.now() }),
   },
   actions: {
-    async claim({ rootState: { account }, state: { links }, dispatch }, idx) {
-      const { publicKey, secretKey } = links[idx];
-      const sdk = await dispatch('getClient', { publicKey, secretKey });
+    async claim({ rootState: { account }, state: { invites }, dispatch }, idx) {
+      const sdk = await dispatch('getClient', invites[idx].secretKey);
       try {
         sdk.transferFunds(1, account.publicKey, {
           payload: 'referral',
@@ -35,25 +27,20 @@ export default {
         throw e;
       }
     },
-    async getClient({ rootState: { network, current, sdk } }, keypair) {
+    async getClient({ rootState: { network, current, sdk } }, secretKey) {
       const { compilerUrl } = network[current.network];
       const { instance } = sdk.pool.get(current.network);
-      const accounts = MemoryAccount({ keypair });
-      return Ae({
+      const accounts = MemoryAccount({
+        keypair: {
+          publicKey: Crypto.getAddressFromPriv(secretKey),
+          secretKey,
+        },
+      });
+      return Universal({
         compilerUrl,
         nodes: [{ name: current.network, instance }],
         accounts: [accounts],
       });
-    },
-    async updateBalances({ rootState: { sdk }, state: { links }, commit }) {
-      await Promise.all(
-        links.map(async ({ publicKey }, idx) => {
-          const balance = parseFloat(
-            await sdk.balance(publicKey, { format: AE_AMOUNT_FORMATS.AE }).catch(() => 0),
-          ).toFixed(2);
-          commit('setBalance', { idx, balance });
-        }),
-      );
     },
   },
 };

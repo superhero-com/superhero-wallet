@@ -9,9 +9,9 @@
       {{ $t('pages.invite.created-links') }}
     </p>
     <InviteItem
-      v-for="(l, idx) in links"
-      :key="l.link"
-      :invite="{ ...l, idx }"
+      v-for="(link, idx) in invites"
+      :key="link.secretKey"
+      v-bind="{ ...link, idx }"
       @loading="val => (loading = val)"
     />
     <Loader v-if="loading" />
@@ -30,20 +30,16 @@ export default {
   data: () => ({ amount: 0, loading: false }),
   computed: {
     ...mapState(['sdk']),
-    ...mapState('invites', ['links']),
-  },
-  async created() {
-    await this.$watchUntilTruly(() => this.sdk);
-    this.$store.dispatch('invites/updateBalances');
+    ...mapState('invites', ['invites']),
   },
   methods: {
     async generate() {
       this.loading = true;
-      await this.$watchUntilTruly(() => this.sdk);
       const { publicKey, secretKey } = Crypto.generateKeyPair();
 
       try {
         if (this.amount > 0) {
+          await this.$watchUntilTruly(() => this.sdk);
           await this.sdk.spend(this.amount, publicKey, {
             payload: 'referral',
             denomination: AE_AMOUNT_FORMATS.AE,
@@ -61,18 +57,8 @@ export default {
       } finally {
         this.loading = false;
       }
-      const link = `https://superhero.com/i/${Crypto.encodeBase58Check(
-        Buffer.from(secretKey, 'hex'),
-      )}`;
 
-      this.$store.commit('invites/add', {
-        link,
-        publicKey,
-        secretKey,
-        balance: 0,
-        date: Date.now(),
-      });
-      this.$store.dispatch('invites/updateBalances');
+      this.$store.commit('invites/add', secretKey);
       this.amount = 0;
     },
   },
