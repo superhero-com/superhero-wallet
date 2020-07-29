@@ -41,7 +41,7 @@ export default {
       this.loading = true;
       await this.$watchUntilTruly(() => this.sdk);
       const { publicKey, secretKey } = Crypto.generateKeyPair();
-      if (this.amount) {
+      if (this.amount > 0) {
         try {
           await this.sdk.spend(this.amount, publicKey, {
             payload: 'referral',
