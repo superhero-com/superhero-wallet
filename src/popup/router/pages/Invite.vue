@@ -41,24 +41,25 @@ export default {
       this.loading = true;
       await this.$watchUntilTruly(() => this.sdk);
       const { publicKey, secretKey } = Crypto.generateKeyPair();
-      if (this.amount > 0) {
-        try {
+
+      try {
+        if (this.amount > 0) {
           await this.sdk.spend(this.amount, publicKey, {
             payload: 'referral',
             denomination: AE_AMOUNT_FORMATS.AE,
           });
-        } catch (e) {
-          if (e.message.includes('is not enough to execute')) {
-            this.$store.dispatch('modals/open', {
-              name: 'default',
-              msg: this.$t('pages.invite.insufficient-balance'),
-            });
-            return;
-          }
-          throw e;
-        } finally {
-          this.loading = false;
         }
+      } catch (e) {
+        if (e.message.includes('is not enough to execute')) {
+          this.$store.dispatch('modals/open', {
+            name: 'default',
+            msg: this.$t('pages.invite.insufficient-balance'),
+          });
+          return;
+        }
+        throw e;
+      } finally {
+        this.loading = false;
       }
       const link = `https://superhero.com/i/${Crypto.encodeBase58Check(
         Buffer.from(secretKey, 'hex'),
@@ -71,7 +72,6 @@ export default {
         balance: 0,
         date: Date.now(),
       });
-      this.loading = false;
       this.$store.dispatch('invites/updateBalances');
       this.amount = 0;
     },
