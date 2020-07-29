@@ -85,11 +85,13 @@ export default {
     async sendTopUp() {
       this.$emit('loading', true);
       try {
-        await this.sdk.spend(this.topUpAmount, this.address, {
-          payload: 'referral',
-          denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-        });
-        await this.updateBalance();
+        if (this.topUpAmount > 0) {
+          await this.sdk.spend(this.topUpAmount, this.address, {
+            payload: 'referral',
+            denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
+          });
+          await this.updateBalance();
+        }
       } catch (error) {
         if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', error)) return;
         throw error;
