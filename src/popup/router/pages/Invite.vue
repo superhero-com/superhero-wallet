@@ -45,15 +45,9 @@ export default {
             denomination: AE_AMOUNT_FORMATS.AE,
           });
         }
-      } catch (e) {
-        if (e.message.includes('is not enough to execute')) {
-          this.$store.dispatch('modals/open', {
-            name: 'default',
-            msg: this.$t('pages.invite.insufficient-balance'),
-          });
-          return;
-        }
-        throw e;
+      } catch (error) {
+        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', error)) return;
+        throw error;
       } finally {
         this.loading = false;
       }

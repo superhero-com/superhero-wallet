@@ -74,6 +74,9 @@ export default {
       try {
         await this.$store.dispatch('invites/claim', this.idx);
         await this.updateBalance();
+      } catch (error) {
+        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', error)) return;
+        throw error;
       } finally {
         this.$emit('loading', false);
       }
@@ -86,15 +89,9 @@ export default {
           denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
         });
         await this.updateBalance();
-      } catch (e) {
-        if (e.message.includes('is not enough to execute')) {
-          await this.$store.dispatch('modals/open', {
-            name: 'default',
-            msg: this.$t('pages.invite.insufficient-balance'),
-          });
-          return;
-        }
-        throw e;
+      } catch (error) {
+        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', error)) return;
+        throw error;
       } finally {
         this.$emit('loading', false);
       }
