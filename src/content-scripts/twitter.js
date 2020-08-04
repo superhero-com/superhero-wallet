@@ -1,4 +1,3 @@
-/* eslint-disable no-continue */
 import iconHover from '../icons/twitter-icon-tip-hover.svg';
 import icon from '../icons/twitter-icon-tip.svg';
 
@@ -105,12 +104,11 @@ const configureSuperheroTipAction = async () => {
 
   let bigTweetSkipped = !document.querySelectorAll('div[aria-label="Timeline: Conversation"]')
     .length;
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < tweets.length; ++i) {
-    const tweetId = getTweetId(tweets[i]);
-    if (!tweetId) continue;
-    const actions = tweets[i].querySelector('[role="group"]');
-    if (!actions) continue;
+  tweets.forEach(tweet => {
+    const tweetId = getTweetId(tweet);
+    if (!tweetId) return;
+    const actions = tweet.querySelector('[role="group"]');
+    if (!actions) return;
     const lastActionNode = actions.querySelector(
       ':scope > div:not(.action-superhero-tip):last-child',
     );
@@ -126,7 +124,7 @@ const configureSuperheroTipAction = async () => {
       actions.removeChild(superheroTipActions[0]);
     }
     bigTweetSkipped = true;
-  }
+  });
   timeout = setTimeout(configureSuperheroTipAction, 3000);
 };
 
