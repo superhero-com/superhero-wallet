@@ -24,7 +24,7 @@ const getTweetId = tweet => {
     return null;
   }
 
-  return status.href.split('/retweets')[0];
+  return status.href.match('.*/status/[0-9]+')[0];
 };
 
 const createSuperheroTipAction = tweetId => {
