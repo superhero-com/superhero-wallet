@@ -24,12 +24,7 @@
               <small>{{ $t('pages.send.scan') }}</small>
             </div>
           </div>
-          <AmountSend
-            data-cy="amount-box"
-            @changeAmount="val => (form.amount = val)"
-            :value="form.amount"
-            :amountError="form.amount <= 0"
-          />
+          <AmountSend data-cy="amount-box" v-model="form.amount" :amountError="form.amount <= 0" />
           <div class="flex flex-align-center flex-justify-between">
             <Button data-cy="reject-withdraw" half @click="$router.push('/account')">{{
               $t('pages.send.cancel')

@@ -77,6 +77,14 @@ export default {
     }
   }
 
+  &.iframe .checkmark {
+    background: no-repeat url('../../../icons/iframe/checkbox-unchecked.svg');
+
+    &.checked {
+      background-image: url('../../../icons/iframe/checkbox-checked.svg');
+    }
+  }
+
   .checkbox-holder {
     position: relative;
     margin: 0 10px;

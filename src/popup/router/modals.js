@@ -15,6 +15,15 @@ export default async () => {
   registerModal({ name: 'confirm-tip', component: ConfirmTip });
   registerModal({ name: 'confirm', component: Confirm });
   registerModal({ name: 'error-log', component: ErrorLog });
-  registerModal({ name: 'confirm-transaction-sign', component: ConfirmTransactionSign });
-  registerModal({ name: 'confirm-raw-sign', component: ConfirmRawSign });
+  registerModal({
+    name: 'confirm-transaction-sign',
+    component: ConfirmTransactionSign,
+    showInPopupIfWebFrame: true,
+  });
+  registerModal({
+    name: 'confirm-raw-sign',
+    component: ConfirmRawSign,
+    showInPopupIfWebFrame: true,
+  });
+  registerModal({ name: 'confirm-connect', showInPopupIfWebFrame: true });
 };

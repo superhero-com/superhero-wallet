@@ -53,6 +53,7 @@ export const shuffleArray = array => {
 };
 
 export const IN_FRAME = window.parent !== window;
+export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');
 
 export const convertToAE = balance => +(balance / 10 ** 18).toFixed(7);
 

@@ -1,22 +1,14 @@
 import Promise from 'bluebird';
+import { IN_FRAME } from '../../popup/utils/helper';
 
 const modals = {};
 let modalCounter = 0;
+let lastPopupPromise = Promise.resolve();
+let popupWindow;
 
-export const registerModal = ({
-  name,
-  component,
-  hidePage = false,
-  allowRedirect = false,
-  dontGrayscalePage = false,
-}) => {
+export const registerModal = ({ name, ...options }) => {
   if (modals[name]) throw new Error(`Modal with name "${name}" already registered`);
-  modals[name] = {
-    component,
-    hidePage,
-    allowRedirect,
-    grayscalePage: !dontGrayscalePage,
-  };
+  modals[name] = options;
 };
 
 export default store => {
@@ -26,8 +18,8 @@ export default store => {
     getters: {
       opened: ({ opened }) =>
         opened
-          .map(({ name, ...other }) => ({ ...modals[name], ...other }))
-          .reduceRight((acc, modal) => (acc.length && acc[0].hidePage ? acc : [modal, ...acc]), []),
+          .filter(({ inPopup }) => !inPopup)
+          .map(({ name, ...other }) => ({ ...modals[name], ...other })),
     },
     mutations: {
       open(state, modal) {
@@ -42,17 +34,37 @@ export default store => {
       open({ commit }, { name, allowRedirect, ...props }) {
         if (!modals[name])
           return Promise.reject(new Error(`Modal with name "${name}" not registered`));
-        if (props.msg === 'Rejected by user') return Promise.reject(new Error('Rejected by user'));
+        if (props.msg === 'Rejected by user') return Promise.reject(new Error('Rejected by user')); // TODO: Move it to the corresponding modal
         const key = modalCounter;
         modalCounter += 1;
-        return new Promise((resolve, reject) =>
+
+        const inPopup =
+          process.env.PLATFORM === 'web' && IN_FRAME && modals[name].showInPopupIfWebFrame;
+
+        const promise = new Promise((resolve, reject) => {
           commit('open', {
             name,
             key,
-            allowRedirect,
+            inPopup,
             props: { ...props, resolve, reject },
-          }),
-        ).finally(() => commit('closeByKey', key));
+          });
+
+          if (!inPopup) return;
+          if (popupWindow) popupWindow.focus();
+          lastPopupPromise
+            .catch(() => {})
+            .finally(() => {
+              popupWindow = window.open(
+                `/web-iframe-popup/${name}`,
+                `popup-${key}`,
+                'height=600,width=375',
+              );
+              if (!popupWindow) reject(new Error("Can't show popup window"));
+              else popupWindow.popupProps = { ...props, resolve, reject };
+            });
+        }).finally(() => commit('closeByKey', key));
+        if (inPopup) lastPopupPromise = promise;
+        return promise;
       },
     },
   });

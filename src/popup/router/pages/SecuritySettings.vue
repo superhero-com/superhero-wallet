@@ -45,7 +45,7 @@
         <button @click="verifySeed" class="primary-button">
           {{ $t('pages.seedPhrase.verifySeed') }}
         </button>
-        <button @click="$router.push('/account')" class="primary-button">
+        <button @click="setBackedUpSeed" class="primary-button">
           {{ $t('pages.seedPhrase.doneThis') }}
         </button>
       </div>
@@ -159,6 +159,10 @@ export default {
     verifySeed() {
       this.type = '4';
       shuffleArray(this.seeds);
+    },
+    setBackedUpSeed() {
+      this.$store.commit('SET_BACKED_UP_SEED', true);
+      this.$router.push('/account');
     },
     setAlertData(fill, show, content) {
       this.alert.fill = fill;

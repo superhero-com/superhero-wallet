@@ -25,12 +25,13 @@ export default store =>
       set(state, names) {
         state.owned = names;
       },
-      setDefault({ defaults }, { address, networkId, name }) {
-        Vue.set(defaults, `${address}-${networkId}`, name);
+      setDefault({ defaults }, { address, networkId, name: { name, revoked } }) {
+        if (revoked) Vue.delete(defaults, `${address}-${networkId}`, name);
+        else Vue.set(defaults, `${address}-${networkId}`, name);
       },
     },
     actions: {
-      async fetchOwned({ rootState, commit, getters: { getDefault }, dispatch }) {
+      async fetchOwned({ state: { owned }, rootState, commit, getters: { getDefault }, dispatch }) {
         if (!rootState.middleware) return;
         const getPendingNameClaimTransactions = address =>
           rootState.sdk.api.getPendingAccountTransactionsByPubkey(address).then(
@@ -54,14 +55,42 @@ export default store =>
           ),
         ).then(names => names.flat(2));
 
-        const [names] = await Promise.all([namesPromise]);
-        commit('set', names);
+        let [names] = await Promise.all([namesPromise]);
+
         const defaultName = getDefault(rootState.account.publicKey);
-        if (names.length && !defaultName) {
+        let defaultNameRevoked = false;
+        if (owned) {
+          names = names.map(name => {
+            const oldName = owned.find(n => n.name === name.name);
+            if (!oldName) return name;
+            const revoked = name.expiresAt < oldName.expiresAt;
+            if (revoked) {
+              if (name.name === defaultName) defaultNameRevoked = true;
+              commit(
+                'ADD_NOTIFICATION',
+                {
+                  title: '',
+                  content: i18n.t('pages.names.revoked-notification', {
+                    name: name.name,
+                    block: name.expiresAt,
+                  }),
+                  route: '',
+                },
+                { root: true },
+              );
+            }
+            return {
+              ...(revoked || oldName.revoked ? { revoked: true } : {}),
+              ...name,
+            };
+          });
+        }
+        commit('set', names);
+        if ((names.length && !defaultName) || defaultNameRevoked) {
           const claimed = names.filter(n => !n.pending);
           if (claimed.length)
             dispatch('setDefault', {
-              name: claimed[0].name,
+              name: claimed[0],
               address: rootState.account.publicKey,
               modal: false,
             });

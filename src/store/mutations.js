@@ -83,10 +83,10 @@ export default {
     state.nextCurrenciesFetch = payload;
   },
   [types.ADD_NOTIFICATION](state, payload) {
-    state.notifications = [...state.notifications, payload];
+    state.notifications = [...state.notifications, { ...payload, visited: false }];
   },
-  [types.SET_NOTIFICATIONS_COUNTER](state, payload) {
-    state.notificationsCounter = payload;
+  [types.SET_NOTIFICATIONS_VISITED](state) {
+    state.notifications = state.notifications.map(n => ({ ...n, visited: true }));
   },
   [types.SET_TIP_DETAILS](state, payload) {
     state.tip = payload;

@@ -197,9 +197,16 @@
       "step4text-2": "No censorship: there are no custodians to dictate what can and cannot be monetized.",
       "step4text-3": "Immortalize messages on the blockchain: comments and messages are timestamped and recorded on the blockchain—forever.",
       "step4text-4": "Instant, borderless, transactions at near-zero fees.",
+      "step4text-iframe-1": "But that's not all.",
+      "step4text-iframe-2": "Superhero wallet is also available as browser extension and mobile app so you can use it on your preferred platforms and devices.",
       "toHome": "Proceed to your Wallet",
       "send": "Send",
-      "ever": "Ever."
+      "ever": "Ever.",
+      "wellcome": "Wellcome on board!",
+      "understand": "I understand that this is a cryptocurrency wallet and i am responsible for backing up my account recovery seed phrase.",
+      "extension": "Browser extension",
+      "mobileApp": "Mobile app"
+
     },
     "titles": {
       "settings": "Settings",
@@ -228,7 +235,8 @@
       "add-token": "Add token",
       "mint-burn-token": "Mint/Burn token",
       "allowances": "Allowances",
-      "sign-message": "Sign Message"
+      "sign-message": "Sign Message",
+      "invite": "Invite"
     },
     "appVUE": {
       "systemName": "Superhero",
@@ -264,7 +272,8 @@
       "removeAccount": "Remove account",
       "donateErrorReports": "Submit error reports",
       "tokens": "Fungible tokens",
-      "manageTokens": "Manage tokens"
+      "manageTokens": "Manage tokens",
+      "invite": "Invite"
     },
     "aboutSettings": {
       "heading": "About",
@@ -455,6 +464,8 @@
       "balance-error": "Your account balance is not enough to execute this transaction.",
       "pointer-added": "Name {type} successful!",
       "pending-claim": "Pending",
+      "revoked": "Revoked",
+      "revoked-notification": "Your name {name} has been revoked at block {block}",
       "list": {
         "no-names": "No names found",
         "button": "Your names"
@@ -941,6 +952,15 @@
       "details": "Technical details:",
       "cancel": "Cancel",
       "donate": "Donate Data"
+    },
+    "invite": {
+      "generate-link": "Generate invite link",
+      "generate": "Generate",
+      "created-links": "Created invite links",
+      "top-up": "Top up",
+      "close": "Close",
+      "claim": "Claim back",
+      "insufficient-balance": "Insufficient balance"
     }
   },
   "phishing": {

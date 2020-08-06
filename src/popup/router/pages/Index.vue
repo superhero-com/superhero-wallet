@@ -1,19 +1,22 @@
 <template>
   <main class="wrapper center">
-    <Logo class="logo" />
-    <p class="primary-title primary-title-small">
-      {{ $t('pages.index.heading') }}
-    </p>
-    <div class="install-native-version" v-if="IS_WEB">
-      <a href="https://testflight.apple.com/join/3o5r4dQQ"
-        ><img src="../../../icons/app-store.svg" alt="App Store"
-      /></a>
-      <a href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
-        ><img src="../../../icons/google-play.svg" alt="Google Play"
-      /></a>
-      <span>{{ $t('pages.index.webVersion') }}</span>
-    </div>
-    <CheckBox v-if="!termsAgreed" v-model="terms" data-cy="checkbox" class="checkbox">
+    <img v-if="IN_FRAME" src="../../../icons/iframe/sendAndReceive.svg" />
+    <template v-else>
+      <Logo class="logo" />
+      <p class="primary-title primary-title-small">
+        {{ $t('pages.index.heading') }}
+      </p>
+      <div class="install-native-version" v-if="IS_WEB">
+        <a href="https://testflight.apple.com/join/3o5r4dQQ"
+          ><img src="../../../icons/app-store.svg" alt="App Store"
+        /></a>
+        <a href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
+          ><img src="../../../icons/google-play.svg" alt="Google Play"
+        /></a>
+        <span>{{ $t('pages.index.webVersion') }}</span>
+      </div>
+    </template>
+    <CheckBox v-if="!termsAgreed" v-model="terms" data-cy="checkbox" class="iframe checkbox">
       <div class="primary-text">
         {{ $t('pages.index.term1') }}
         <router-link to="/termsOfService" data-cy="terms">{{
@@ -40,6 +43,7 @@
 
 <script>
 import Logo from '../../../icons/logo.svg?vue-component';
+import { IN_FRAME } from '../../utils/helper';
 import CheckBox from '../components/CheckBox';
 
 export default {
@@ -53,6 +57,7 @@ export default {
       terms: false,
       termsAgreed: false,
       IS_WEB: process.env.PLATFORM === 'web',
+      IN_FRAME,
     };
   },
 };
@@ -79,5 +84,14 @@ export default {
 .checkbox {
   margin: 0 auto 25px auto;
   max-width: 357px;
+
+  &.iframe {
+    max-width: 270px;
+
+    /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+    ::v-deep .checkmark {
+      margin-right: 5px;
+    }
+  }
 }
 </style>

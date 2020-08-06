@@ -4,10 +4,11 @@
       <Input
         class="amount-box"
         type="number"
-        :error="amountError || finalAmount < 0"
-        v-model="finalAmount"
+        :error="amountError || value < 0"
+        :value="value"
         :placeholder="$t('pages.tipPage.amountPlaceholder')"
         :label="$t('pages.tipPage.amountLabel')"
+        @input="$emit('input', $event)"
       />
       <div class="ml-15 text-left" style="margin-right: auto;">
         <p class="label hidden">{{ $t('pages.tipPage.empty') }}</p>
@@ -15,7 +16,7 @@
           {{ $t('pages.appVUE.aeid') }}
         </span>
         <span class="f-14 block l-1" data-cy="amount-currency">
-          {{ getCurrencyAmount }} {{ currentCurrency }}
+          {{ currencyAmount }} {{ currentCurrency }}
         </span>
       </div>
       <div class="balance-box">
@@ -41,33 +42,16 @@ export default {
     Input,
   },
   props: ['amountError', 'value', 'errorMsg'],
-  data() {
-    return {
-      finalAmount: null,
-    };
-  },
-  created() {
-    if (this.value) this.finalAmount = this.value;
-  },
-  watch: {
-    finalAmount(val) {
-      this.$emit('changeAmount', val);
-    },
-    value(val) {
-      this.finalAmount = val;
-    },
-  },
   computed: {
     ...mapGetters(['tokenBalance', 'balanceCurrency', 'currentCurrency']),
-    getCurrencyAmount() {
-      if (!+this.finalAmount) return '0.00';
-      return (this.finalAmount * this.$store.state.current.currencyRate).toFixed(2);
+    currencyAmount() {
+      return ((this.value || 0) * this.$store.state.current.currencyRate).toFixed(2);
     },
   },
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '../../../common/variables';
 
 .amount-send-container {

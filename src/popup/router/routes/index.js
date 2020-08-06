@@ -1,46 +1,50 @@
-import Index from './pages/Index';
-import Account from './pages/Account';
-import PopupSignTransaction from './pages/Popups/SignTx';
-import PopupConnect from './pages/Popups/Connect';
-import PopupAskAccounts from './pages/Popups/AskAccounts';
-import PopupMessageSign from './pages/Popups/MessageSign';
-import Settings from './pages/Settings';
-import GeneralSettings from './pages/GeneralSettings';
-import SecuritySettings from './pages/SecuritySettings';
-import AboutSettings from './pages/AboutSettings';
-import Tip from './pages/Tip';
-import Retip from './pages/Retip';
-import QrCodeReader from './pages/QrCodeReader';
-import TermsOfService from './pages/TermsOfService';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import ImportAccount from './pages/ImportAccount';
-import Intro from './pages/Intro';
-import Transactions from './pages/Transactions';
-import Send from './pages/Send';
-import Receive from './pages/Receive';
-import SuccessTip from './pages/SuccessTip';
-import Notifications from './pages/Notifications';
+import Index from '../pages/Index';
+import Account from '../pages/Account';
+import PopupSignTransaction from '../pages/Popups/SignTx';
+import PopupConnect from '../pages/Popups/Connect';
+import PopupAskAccounts from '../pages/Popups/AskAccounts';
+import PopupMessageSign from '../pages/Popups/MessageSign';
+import Settings from '../pages/Settings';
+import GeneralSettings from '../pages/GeneralSettings';
+import SecuritySettings from '../pages/SecuritySettings';
+import AboutSettings from '../pages/AboutSettings';
+import Tip from '../pages/Tip';
+import Retip from '../pages/Retip';
+import QrCodeReader from '../pages/QrCodeReader';
+import TermsOfService from '../pages/TermsOfService';
+import PrivacyPolicy from '../pages/PrivacyPolicy';
+import ImportAccount from '../pages/ImportAccount';
+import Intro from '../pages/Intro';
+import Transactions from '../pages/Transactions';
+import Send from '../pages/Send';
+import Receive from '../pages/Receive';
+import SuccessTip from '../pages/SuccessTip';
+import Notifications from '../pages/Notifications';
 
-import Networks from './pages/Networks';
-import CommentNew from './pages/CommentNew';
-import NotFound from './pages/NotFound';
-import ClaimTips from './pages/ClaimTips';
-import DonateError from './pages/DonateError';
-import Address from './pages/Address';
-import Tokens from './pages/FungibleTokens/Index';
-import DeployToken from './pages/FungibleTokens/Deploy';
-import AddToken from './pages/FungibleTokens/Add';
-import MintToken from './pages/FungibleTokens/Mint';
-import Allowances from './pages/FungibleTokens/Allowances';
-import ManageAllowances from './pages/FungibleTokens/ManageAllowances';
-import AllAllowances from './pages/FungibleTokens/AllAllowances';
-import SignMessage from './pages/SignMessage';
-import NamesList from './pages/Names/List';
-import NameClaim from './pages/Names/Claim';
-import NamesDetails from './pages/Names/Details';
-import AuctionList from './pages/Names/AuctionList';
-import AuctionDetails from './pages/Names/AuctionDetails';
-import AuctionBid from './pages/Names/AuctionBid';
+import Networks from '../pages/Networks';
+import CommentNew from '../pages/CommentNew';
+import NotFound from '../pages/NotFound';
+import ClaimTips from '../pages/ClaimTips';
+import DonateError from '../pages/DonateError';
+import Address from '../pages/Address';
+import Tokens from '../pages/FungibleTokens/Index';
+import DeployToken from '../pages/FungibleTokens/Deploy';
+import AddToken from '../pages/FungibleTokens/Add';
+import MintToken from '../pages/FungibleTokens/Mint';
+import Allowances from '../pages/FungibleTokens/Allowances';
+import ManageAllowances from '../pages/FungibleTokens/ManageAllowances';
+import AllAllowances from '../pages/FungibleTokens/AllAllowances';
+import SignMessage from '../pages/SignMessage';
+import NamesList from '../pages/Names/List';
+import NameClaim from '../pages/Names/Claim';
+import NamesDetails from '../pages/Names/Details';
+import AuctionList from '../pages/Names/AuctionList';
+import AuctionDetails from '../pages/Names/AuctionDetails';
+import AuctionBid from '../pages/Names/AuctionBid';
+import Invite from '../pages/Invite';
+import InviteClaim from '../pages/InviteClaim';
+
+import webIframePopups from './web-iframe-popups';
 
 export default [
   {
@@ -394,4 +398,23 @@ export default [
       notPersist: true,
     },
   },
+  {
+    name: 'invite',
+    path: '/invite',
+    component: Invite,
+    meta: {
+      title: 'invite',
+    },
+  },
+  {
+    name: 'invite-claim',
+    path: '/invite/:secretKey',
+    component: InviteClaim,
+    props: true,
+    meta: {
+      title: 'invite',
+      notPersist: true,
+    },
+  },
+  ...webIframePopups,
 ];
