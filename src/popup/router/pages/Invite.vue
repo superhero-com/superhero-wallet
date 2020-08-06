@@ -3,15 +3,15 @@
     <p class="section-title">
       {{ $t('pages.invite.generate-link') }}
     </p>
-    <AmountSend @changeAmount="val => (amount = val)" :value="amount" />
+    <AmountSend v-model="amount" />
     <Button @click="generate" extend>{{ $t('pages.invite.generate') }}</Button>
     <p class="section-title">
       {{ $t('pages.invite.created-links') }}
     </p>
     <InviteItem
-      v-for="(l, idx) in links"
-      :key="l.link"
-      :invite="{ ...l, idx }"
+      v-for="link in invites"
+      :key="link.secretKey"
+      v-bind="link"
       @loading="val => (loading = val)"
     />
     <Loader v-if="loading" />
@@ -30,49 +30,29 @@ export default {
   data: () => ({ amount: 0, loading: false }),
   computed: {
     ...mapState(['sdk']),
-    ...mapState('invites', ['links']),
-  },
-  async created() {
-    await this.$watchUntilTruly(() => this.sdk);
-    this.$store.dispatch('invites/updateBalances');
+    ...mapState('invites', ['invites']),
   },
   methods: {
     async generate() {
       this.loading = true;
-      await this.$watchUntilTruly(() => this.sdk);
       const { publicKey, secretKey } = Crypto.generateKeyPair();
-      if (this.amount) {
-        try {
+
+      try {
+        if (this.amount > 0) {
+          await this.$watchUntilTruly(() => this.sdk);
           await this.sdk.spend(this.amount, publicKey, {
             payload: 'referral',
             denomination: AE_AMOUNT_FORMATS.AE,
           });
-        } catch (e) {
-          if (e.message.includes('is not enough to execute')) {
-            this.$store.dispatch('modals/open', {
-              name: 'default',
-              msg: this.$t('pages.invite.insufficient-balance'),
-            });
-            return;
-          }
-          throw e;
-        } finally {
-          this.loading = false;
         }
+      } catch (error) {
+        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', error)) return;
+        throw error;
+      } finally {
+        this.loading = false;
       }
-      const link = `https://superhero.com/i/${Crypto.encodeBase58Check(
-        Buffer.from(secretKey, 'hex'),
-      )}`;
 
-      this.$store.commit('invites/add', {
-        link,
-        publicKey,
-        secretKey,
-        balance: 0,
-        date: Date.now(),
-      });
-      this.loading = false;
-      this.$store.dispatch('invites/updateBalances');
+      this.$store.commit('invites/add', secretKey);
       this.amount = 0;
     },
   },

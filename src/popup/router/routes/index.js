@@ -42,6 +42,7 @@ import AuctionList from '../pages/Names/AuctionList';
 import AuctionDetails from '../pages/Names/AuctionDetails';
 import AuctionBid from '../pages/Names/AuctionBid';
 import Invite from '../pages/Invite';
+import InviteClaim from '../pages/InviteClaim';
 
 import webIframePopups from './web-iframe-popups';
 
@@ -401,6 +402,15 @@ export default [
     name: 'invite',
     path: '/invite',
     component: Invite,
+    meta: {
+      title: 'invite',
+    },
+  },
+  {
+    name: 'invite-claim',
+    path: '/invite/:secretKey',
+    component: InviteClaim,
+    props: true,
     meta: {
       title: 'invite',
       notPersist: true,
