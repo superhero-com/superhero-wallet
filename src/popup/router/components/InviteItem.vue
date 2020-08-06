@@ -45,8 +45,10 @@ export default {
     link() {
       const secretKey = Crypto.encodeBase58Check(Buffer.from(this.secretKey, 'hex'));
       return new URL(
-        this.$router.resolve({ name: 'invite-claim', params: { secretKey } }).href,
-        window.location,
+        this.$router
+          .resolve({ name: 'invite-claim', params: { secretKey } })
+          .href.replace(/^#/, ''),
+        'https://wallet.superhero.com',
       );
     },
     address() {
