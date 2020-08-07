@@ -579,7 +579,7 @@
     "securitySettings": {
       "backToSettings": "返回在设置",
       "heading": "安全和隐私",
-      "privacyDataHeading": ""隐私数据",
+      "privacyDataHeading": "隐私数据",
       "privacyDataSmall": "清除所有隐私数据，所有网站需要发送请求才能再次查看帐户信息。",
       "privacyDataClearBtn": "清除所有隐私数据",
       "privateKeyHeading": "查看私钥",
