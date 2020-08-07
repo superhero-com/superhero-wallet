@@ -815,7 +815,7 @@
       "fee": "交易费",
       "total": "合计",
       "txFrom": "从",
-      "txTo": ""到",
+      "txTo": "到",
       "txHash": "Tx hash",
       "transactions": "交易",
       "backToTransactions": "返回交易",
