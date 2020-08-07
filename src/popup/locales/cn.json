@@ -675,7 +675,7 @@
       "enterPassword": "输入密码",
       "signMessage": "签名消息",
       "signAndVerify": "签名并验证消息",
-      "signMessageinfo": "这允许你用私钥签名消息"",
+      "signMessageinfo": "这允许你用私钥签名消息",
       "signBtn": "签名",
       "verifyMessage": "验证消息",
       "verifyMessageinfo": "这允许您验证已签名的消息",
