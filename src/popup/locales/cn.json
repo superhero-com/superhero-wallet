@@ -894,7 +894,7 @@
       "heading": "代币迁移",
       "addressLabel": "你的aeternity地址",
       "continue": "继续",
-      "checkContinue": ""我确认我的地址和identicon是正确的",
+      "checkContinue": "我确认我的地址和identicon是正确的",
       "ethPrivateKey": "以太坊私钥",
       "migrateToken": "迁移代币",
       "migrations": "迁移",
