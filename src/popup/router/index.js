@@ -52,11 +52,6 @@ const unbind = router.beforeEach(async (to, from, next) => {
 router.beforeEach(async (to, from, next) => {
   if (store.state.isLoggedIn) {
     if (!store.state.sdk) wallet.initSdk();
-    if (localStorage.tipUrl) {
-      next(localStorage.tipUrl);
-      delete localStorage.tipUrl;
-      return;
-    }
     next(to.meta.ifNotAuthOnly ? '/account' : undefined);
     return;
   }
@@ -67,8 +62,6 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
   wallet.initSdk();
-
-  if (localStorage.tipUrl) delete localStorage.tipUrl;
 
   if (window.RUNNING_IN_POPUP) {
     store.commit('SET_AEPP_POPUP', true);

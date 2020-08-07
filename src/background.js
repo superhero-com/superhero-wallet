@@ -35,17 +35,13 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
     tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message).catch(console.log));
   };
 
-  const openTipPopup = pageUrl => {
-    const tipUrl = `/tip?url=${encodeURIComponent(pageUrl)}`;
-    const { href } = new URL(`${browser.extension.getURL('./')}popup/popup.html#${tipUrl}`);
-    localStorage.setItem('tipUrl', tipUrl);
+  const openTipPopup = pageUrl =>
     browser.windows.create({
-      url: href,
+      url: browser.extension.getURL(`./popup/popup.html#/tip?url=${encodeURIComponent(pageUrl)}`),
       type: 'popup',
       height: 600,
       width: 375,
     });
-  };
 
   browser.runtime.onMessage.addListener(async (msg, sender) => {
     const { method, params, from, type, data, url: tipUrl } = msg;
