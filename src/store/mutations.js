@@ -57,9 +57,6 @@ export default {
   [types.SET_MIDDLEWARE](state, payload) {
     state.middleware = payload;
   },
-  [types.SET_AEPP_POPUP](state, payload) {
-    state.aeppPopup = payload;
-  },
   [types.SET_ENCRYPTED_WALLET](state, payload) {
     state.encryptedWallet = payload;
   },

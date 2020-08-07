@@ -64,7 +64,6 @@ router.beforeEach(async (to, from, next) => {
   wallet.initSdk();
 
   if (window.RUNNING_IN_POPUP) {
-    store.commit('SET_AEPP_POPUP', true);
     next(
       {
         connectConfirm: '/connect',
