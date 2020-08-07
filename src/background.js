@@ -1,4 +1,3 @@
-import uid from 'uuid';
 import { isEmpty } from 'lodash-es';
 import { setController, switchNode } from './lib/background-utils';
 import './lib/initPolyfills';
@@ -94,9 +93,10 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
 
   rpcWallet.init(controller);
   browser.runtime.onConnect.addListener(async port => {
-    if (port.sender.id === browser.runtime.id) {
-      const connectionType = detectConnectionType(port);
-      if (connectionType === CONNECTION_TYPES.EXTENSION) {
+    if (port.sender.id !== browser.runtime.id) return;
+
+    switch (detectConnectionType(port)) {
+      case CONNECTION_TYPES.EXTENSION:
         port.onMessage.addListener(async ({ type, payload, uuid }) => {
           if (HDWALLET_METHODS.includes(type)) {
             port.postMessage({ uuid, res: await controller[type](payload) });
@@ -107,23 +107,15 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
             await switchNode();
           }
         });
-      } else if (connectionType === CONNECTION_TYPES.POPUP) {
-        const url = new URL(port.sender.url);
-        const id = url.searchParams.get('id');
-
-        popupConnections.addConnection(id, port);
-      } else if (connectionType === CONNECTION_TYPES.OTHER) {
-        // eslint-disable-next-line no-param-reassign
-        port.uuid = uid();
-        if (rpcWallet.sdkReady()) {
-          rpcWallet.addConnection(port);
-        } else {
-          rpcWallet.addConnectionToQueue(port);
-        }
-        port.onDisconnect.addListener(() => {
-          rpcWallet.removeConnectionFromQueue(port);
-        });
-      }
+        break;
+      case CONNECTION_TYPES.POPUP:
+        popupConnections.addConnection(new URL(port.sender.url).searchParams.get('id'), port);
+        break;
+      case CONNECTION_TYPES.OTHER:
+        rpcWallet.addConnection(port);
+        break;
+      default:
+        throw new Error('Unknown connection type');
     }
   });
 

@@ -134,6 +134,7 @@ export default {
           )
         : this.tipContractAddress;
       this.connectionsQueue.forEach(c => this.addConnection(c));
+      this.connectionsQueue = [];
     } catch (e) {
       this.sdk = null;
     }
@@ -167,16 +168,6 @@ export default {
       return true;
     }
     return false;
-  },
-  sdkReady() {
-    return this.sdk;
-  },
-  addConnectionToQueue(port) {
-    if (!this.connectionsQueue) this.connectionsQueue = [];
-    this.connectionsQueue.push(port);
-  },
-  removeConnectionFromQueue(port) {
-    this.connectionsQueue = this.connectionsQueue.filter(p => p.uuid !== port.uuid) || [];
   },
   async checkAeppPermissions(aepp, action, caller, cb) {
     const {
@@ -255,9 +246,18 @@ export default {
     });
   },
 
-  async addConnection(port) {
+  addConnection(port) {
+    if (!this.sdk) {
+      if (!this.connectionsQueue) this.connectionsQueue = [];
+      this.connectionsQueue.push(port);
+      port.onDisconnect.addListener(() => {
+        this.connectionsQueue = this.connectionsQueue.filter(p => p !== port);
+      });
+      return;
+    }
+
     try {
-      const connection = await BrowserRuntimeConnection({
+      const connection = BrowserRuntimeConnection({
         connectionInfo: { id: port.sender.frameId },
         port,
       });
@@ -271,7 +271,6 @@ export default {
       3000,
     );
     port.onDisconnect.addListener(() => clearInterval(shareWalletInfo));
-    this.removeConnectionFromQueue(port);
   },
   getAccessForAddress(address) {
     const clients = Array.from(this.sdk.getClients().clients.values()).filter(client =>
