@@ -7,7 +7,6 @@ import uuid from 'uuid';
 import { mockLogin } from '../popup/utils';
 import {
   AEX2_METHODS,
-  BLACKLIST_AEPPS,
   DEFAULT_NETWORK,
   MAX_AMOUNT_WITHOUT_CONFIRM,
   NO_POPUP_AEPPS,
@@ -15,7 +14,7 @@ import {
 import {
   addTipAmount,
   extractHostName,
-  getActiveNetwork,
+  getAllNetworks,
   getAddressByNameEntry,
   getAeppAccountPermission,
   getContractCallInfo,
@@ -28,7 +27,7 @@ import { getState } from '../store/plugins/persistState';
 
 global.browser = require('webextension-polyfill');
 
-const rpcWallet = {
+export default {
   async init(walletController, popups) {
     this.popups = popups;
     await this.initNodes();
@@ -49,9 +48,6 @@ const rpcWallet = {
     this.subaccounts = subaccounts;
     return Promise.resolve(true);
   },
-  initSdk() {
-    this.recreateWallet();
-  },
   initFields() {
     this.sdk = null;
     this.initNetwork();
@@ -68,11 +64,9 @@ const rpcWallet = {
     this.tipContractAddress = this.nodes[network].tipContract;
   },
   async initNodes() {
-    const nodes = await getActiveNetwork();
-    this.nodes = nodes.all;
-    return nodes;
+    this.nodes = await getAllNetworks();
   },
-  async createWallet() {
+  async initSdk() {
     this.accountKeyPairs = await Promise.all(
       this.subaccounts.map(async (a, index) =>
         parseFromStorage(await this.controller.getKeypair({ activeAccount: index, account: a })),
@@ -143,7 +137,6 @@ const rpcWallet = {
     } catch (e) {
       this.sdk = null;
     }
-    return this.sdk;
   },
   getAeppOrigin(aepp) {
     const {
@@ -158,10 +151,7 @@ const rpcWallet = {
   async shouldOpenPopup(aepp, action) {
     const { isTip, amount } = getContractCallInfo(action.params.tx, this.tipContractAddress);
     const origin = this.getAeppOrigin(aepp);
-    if (BLACKLIST_AEPPS.includes(origin)) {
-      // deny action if in blacklist
-      action.deny();
-    } else if (NO_POPUP_AEPPS.includes(origin)) {
+    if (NO_POPUP_AEPPS.includes(origin)) {
       if (isTip) {
         const tippedAmount = await getTippedAmount();
         if (tippedAmount >= MAX_AMOUNT_WITHOUT_CONFIRM) {
@@ -377,9 +367,4 @@ const rpcWallet = {
       this.initSdk();
     }
   },
-  async recreateWallet() {
-    await this.createWallet();
-  },
 };
-
-export default rpcWallet;

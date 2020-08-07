@@ -51,7 +51,7 @@ import axios from 'axios';
 import Heart from '../../../icons/heart.svg?vue-component';
 import Textarea from '../components/Textarea';
 import openUrl from '../../utils/openUrl';
-import { TIP_SERVICE, BACKEND_URL, UI_URL } from '../../utils/constants';
+import { TIP_SERVICE, BACKEND_URL, AGGREGATOR_URL } from '../../utils/constants';
 import { aettosToAe } from '../../utils/helper';
 import Logger from '../../../lib/logger';
 
@@ -92,7 +92,7 @@ export default {
   },
   methods: {
     redirectOnFeed() {
-      openUrl(UI_URL);
+      openUrl(AGGREGATOR_URL);
     },
   },
 };
