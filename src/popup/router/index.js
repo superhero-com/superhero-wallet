@@ -43,13 +43,13 @@ const router = new VueRouter({
 
 const lastRouteKey = 'lsroute';
 
-const unbind = router.beforeEach((to, from, next) => {
+const unbind = router.beforeEach(async (to, from, next) => {
+  await helper.pollGetter(() => store.state.isRestored);
   next((to.path === '/' && localStorage[lastRouteKey]) || undefined);
   unbind();
 });
 
 router.beforeEach(async (to, from, next) => {
-  await helper.pollGetter(() => store.state.isRestored);
   if (store.state.isLoggedIn) {
     if (!store.state.sdk) wallet.initSdk();
     if (localStorage.tipUrl) {
