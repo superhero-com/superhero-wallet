@@ -2,7 +2,7 @@ import uid from 'uuid';
 import { isEmpty } from 'lodash-es';
 import { setController, switchNode } from './lib/background-utils';
 import './lib/initPolyfills';
-import { PopupConnections } from './lib/popup-connection';
+import popupConnections from './lib/popup-connection';
 import RedirectChainNames from './lib/redirect-chain-names';
 import rpcWallet from './lib/rpcWallet';
 import TipClaimRelay from './lib/tip-claim-relay';
@@ -92,9 +92,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
     return true;
   });
 
-  const popupConnections = PopupConnections();
-  popupConnections.init();
-  rpcWallet.init(controller, popupConnections);
+  rpcWallet.init(controller);
   browser.runtime.onConnect.addListener(async port => {
     if (port.sender.id === browser.runtime.id) {
       const connectionType = detectConnectionType(port);

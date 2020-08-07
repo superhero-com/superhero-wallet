@@ -24,12 +24,12 @@ import {
   stringifyForStorage,
 } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
+import popups from './popup-connection';
 
 global.browser = require('webextension-polyfill');
 
 export default {
-  async init(walletController, popups) {
-    this.popups = popups;
+  async init(walletController) {
     await this.initNodes();
     this.initFields();
     this.controller = walletController;
@@ -237,10 +237,10 @@ export default {
 
     return new Promise((resolve, reject) => {
       try {
-        this.popups.addPopup(id, this.controller);
-        this.popups.addActions(id, { ...action, resolve, reject });
+        popups.addPopup(id, this.controller);
+        popups.addActions(id, { ...action, resolve, reject });
         const { protocol } = new URL(url);
-        this.popups.setAeppInfo(id, {
+        popups.setAeppInfo(id, {
           type,
           action: { params: action.params, method: action.method },
           url,
