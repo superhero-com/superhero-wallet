@@ -813,7 +813,7 @@
       "type": "类型",
       "amount": "数量",
       "fee": "交易费",
-      "total": ""合计",
+      "total": "合计",
       "txFrom": "从",
       "txTo": ""到",
       "txHash": "Tx hash",
