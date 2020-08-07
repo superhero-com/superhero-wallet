@@ -931,7 +931,7 @@
       "allNetworks": "你的网络",
       "cancel": "取消",
       "addNetwork": "连接到另一个节点",
-      "networkNamePlaceholder": ""输入网络名称",
+      "networkNamePlaceholder": "输入网络名称",
       "networkNameLabel": "网络名称",
       "networkUrlPlaceholder": "输入网络url",
       "networkUrlLabel": "网络 Url",
