@@ -10,7 +10,7 @@
       @toggle-sidebar="showSidebar = !showSidebar"
     />
 
-    <router-view :key="$route.fullPath" />
+    <RouterView />
 
     <transition name="slide">
       <div
