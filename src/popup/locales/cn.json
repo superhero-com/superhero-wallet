@@ -639,7 +639,7 @@
       "receivingAddress": "接收地址",
       "amount": "数量",
       "editTxDetails": "编辑转账细节",
-      "tx-success": ""完成转账",
+      "tx-success": "完成转账",
       "successalert": "您已成功发送 ",
       "to": "到",
       "from": "从",
