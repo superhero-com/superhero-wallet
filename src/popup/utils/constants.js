@@ -95,7 +95,8 @@ export const defaultNetworks = {
 export const networks = {
   [DEFAULT_NETWORK]: { ...defaultNetworks[DEFAULT_NETWORK] },
 };
-export const UI_URL = 'https://superhero.com/#/';
+
+export const AGGREGATOR_URL = 'https://superhero.com/';
 export const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
 export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
 export const NO_POPUP_AEPPS = [
