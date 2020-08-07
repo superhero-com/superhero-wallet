@@ -1,5 +1,5 @@
 import { isEmpty } from 'lodash-es';
-import { setController, switchNode } from './lib/background-utils';
+import { switchNode } from './lib/background-utils';
 import './lib/initPolyfills';
 import popupConnections from './lib/popup-connection';
 import RedirectChainNames from './lib/redirect-chain-names';
@@ -15,18 +15,15 @@ import {
 } from './popup/utils/constants';
 import { detectConnectionType } from './popup/utils/helper';
 import { getPhishingUrls, phishingCheckUrl, setPhishingUrl } from './popup/utils/phishing-detect';
-import WalletController from './wallet-controller';
+import walletController from './wallet-controller';
 import Logger from './lib/logger';
 import { getState } from './store/plugins/persistState';
 
-const controller = new WalletController();
 const inBackground = window.location.href.includes('_generated_background_page.html');
 
 if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
   Logger.init({ background: true });
   RedirectChainNames.init();
-
-  setController(controller);
 
   const postPhishingData = async data => {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
@@ -91,7 +88,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
     return true;
   });
 
-  rpcWallet.init(controller);
+  rpcWallet.init();
   browser.runtime.onConnect.addListener(async port => {
     if (port.sender.id !== browser.runtime.id) return;
 
@@ -99,7 +96,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
       case CONNECTION_TYPES.EXTENSION:
         port.onMessage.addListener(async ({ type, payload, uuid }) => {
           if (HDWALLET_METHODS.includes(type)) {
-            port.postMessage({ uuid, res: await controller[type](payload) });
+            port.postMessage({ uuid, res: await walletController[type](payload) });
           }
           if (AEX2_METHODS[type]) rpcWallet[type](payload);
 
@@ -134,7 +131,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
 // eslint-disable-next-line import/prefer-default-export
 export const handleMessage = ({ type, payload }) => {
   if (HDWALLET_METHODS.includes(type)) {
-    return controller[type](payload);
+    return walletController[type](payload);
   }
 
   if (process.env.RUNNING_IN_TESTS) {

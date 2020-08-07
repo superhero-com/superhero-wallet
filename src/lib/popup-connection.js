@@ -1,12 +1,12 @@
 import stampit from '@stamp/it';
 import { HDWALLET_METHODS } from '../popup/utils/constants';
+import walletController from '../wallet-controller';
 
 const PopupConnection = stampit({
-  init({ id, connection = {}, actions = {}, controller, aeppInfo = {} }) {
+  init({ id, connection = {}, actions = {}, aeppInfo = {} }) {
     this.id = id;
     this.connection = connection;
     this.actions = actions;
-    this.controller = controller;
     this.aeppInfo = aeppInfo;
   },
   methods: {
@@ -17,7 +17,7 @@ const PopupConnection = stampit({
       };
 
       if (HDWALLET_METHODS.includes(msg.type)) {
-        this.postMessage({ uuid: msg.uuid, res: await this.controller[msg.type](msg.payload) });
+        this.postMessage({ uuid: msg.uuid, res: await walletController[msg.type](msg.payload) });
       } else if (msg.type === 'POPUP_INFO') {
         this.postMessage({ uuid: msg.uuid, res: this.aeppInfo });
       } else if (typeToAction[msg.type]) {
@@ -40,8 +40,8 @@ export default stampit({
     this.popups = new Map();
   },
   methods: {
-    addPopup(id, controller) {
-      this.popups.set(id, PopupConnection({ id, controller }));
+    addPopup(id) {
+      this.popups.set(id, PopupConnection({ id }));
       return this.getPopup(id);
     },
     getPopup(id) {

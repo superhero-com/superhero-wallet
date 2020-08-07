@@ -2,7 +2,7 @@ import { generateHdWallet, getHdWalletAccount } from './popup/utils/hdWallet';
 import { stringifyForStorage, parseFromStorage } from './popup/utils/helper';
 import decryptKeystore from './popup/utils/decrypt-keystore';
 
-export default class WalletController {
+class WalletController {
   constructor() {
     if (!process.env.IS_EXTENSION) return;
     setInterval(() => {
@@ -59,3 +59,5 @@ export default class WalletController {
     return typeof this.wallet !== 'undefined' && this.wallet != null;
   }
 }
+
+export default new WalletController();

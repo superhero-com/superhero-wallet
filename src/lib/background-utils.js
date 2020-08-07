@@ -9,15 +9,11 @@ import {
 } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 import Logger from './logger';
+import walletController from '../wallet-controller';
 
 let sdk;
-let controller;
 let tippingContract;
 let tippingContractAddress;
-
-export const setController = contr => {
-  controller = contr;
-};
 
 export const getActiveAccount = async () => {
   const { account } = await getState();
@@ -101,7 +97,7 @@ export const contractCallStatic = async ({ tx, callType }) => {
     error.payload = { tx };
     throw error;
   }
-  if (!controller.isLoggedIn() && typeof callType !== 'undefined' && callType === 'static') {
+  if (!walletController.isLoggedIn() && typeof callType !== 'undefined' && callType === 'static') {
     throw new Error('You need to unlock the wallet first');
   }
   throw new Error('No data to return');

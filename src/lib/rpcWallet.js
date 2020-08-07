@@ -25,18 +25,18 @@ import {
 } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 import popups from './popup-connection';
+import walletController from '../wallet-controller';
 
 global.browser = require('webextension-polyfill');
 
 export default {
-  async init(walletController) {
+  async init() {
     await this.initNodes();
     this.initFields();
-    this.controller = walletController;
     if (process.env.RUNNING_IN_TESTS) await mockLogin();
     const { account } = await getState();
     if (!isEmpty(account)) {
-      this.controller.generateWallet({ seed: stringifyForStorage(account.privateKey) });
+      walletController.generateWallet({ seed: stringifyForStorage(account.privateKey) });
       const {
         current: { network },
       } = await getState();
@@ -69,7 +69,7 @@ export default {
   async initSdk() {
     this.accountKeyPairs = await Promise.all(
       this.subaccounts.map(async (a, index) =>
-        parseFromStorage(await this.controller.getKeypair({ activeAccount: index, account: a })),
+        parseFromStorage(await walletController.getKeypair({ activeAccount: index, account: a })),
       ),
     );
 
@@ -228,7 +228,7 @@ export default {
 
     return new Promise((resolve, reject) => {
       try {
-        popups.addPopup(id, this.controller);
+        popups.addPopup(id);
         popups.addActions(id, { ...action, resolve, reject });
         const { protocol } = new URL(url);
         popups.setAeppInfo(id, {
@@ -305,7 +305,7 @@ export default {
     };
     const newAccount = MemoryAccount({
       keypair: parseFromStorage(
-        await this.controller.getKeypair({ activeAccount: payload.idx, account }),
+        await walletController.getKeypair({ activeAccount: payload.idx, account }),
       ),
     });
     this.sdk.addAccount(newAccount);
@@ -340,7 +340,7 @@ export default {
       browser.tabs.reload(aepp.connection.port.sender.tab.id);
       this.sdk.removeRpcClient(aepp.id);
     });
-    this.controller.lockWallet();
+    walletController.lockWallet();
     this.initFields();
   },
   async [AEX2_METHODS.INIT_RPC_WALLET]({ address, network }) {
