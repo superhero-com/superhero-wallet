@@ -273,12 +273,10 @@ export default {
     port.onDisconnect.addListener(() => clearInterval(shareWalletInfo));
     this.removeConnectionFromQueue(port);
   },
-  getClientsByCond(condition) {
-    const clients = Array.from(this.sdk.getClients().clients.values()).filter(condition);
-    return clients;
-  },
   getAccessForAddress(address) {
-    const clients = this.getClientsByCond(client => client.isConnected());
+    const clients = Array.from(this.sdk.getClients().clients.values()).filter(client =>
+      client.isConnected(),
+    );
     clients.forEach(async client => {
       const {
         connection: {
