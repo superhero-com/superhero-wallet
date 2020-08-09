@@ -63,7 +63,11 @@ router.beforeEach(async (to, from, next) => {
 
   const { loggedIn } = await wallet.init();
   if (!loggedIn) {
-    next(to.meta.ifNotAuthOnly || to.meta.ifNotAuth ? undefined : '/');
+    if (to.meta.ifNotAuthOnly || to.meta.ifNotAuth) next();
+    else {
+      store.commit('setLoginTargetLocation', to);
+      next('/');
+    }
     return;
   }
   wallet.initSdk();

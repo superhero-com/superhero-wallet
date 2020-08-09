@@ -55,6 +55,7 @@ const initialState = {
   tourRunning: false,
   tourStartBar: true,
   saveErrorLog: true,
+  loginTargetLocation: { name: 'account' },
 };
 
 export default new Vuex.Store({
