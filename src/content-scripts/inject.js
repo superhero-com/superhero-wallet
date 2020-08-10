@@ -3,7 +3,6 @@ import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wa
 import { getBrowserAPI } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/helpers';
 import { MESSAGE_DIRECTION } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/schema';
 import ContentScriptBridge from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/content-script-bridge';
-import { setInterval, clearInterval } from 'timers';
 
 global.browser = require('webextension-polyfill');
 
@@ -122,7 +121,7 @@ const runContentScript = () => {
   const hasParentWithSelector = (target, selector) =>
     [...document.querySelectorAll(selector)].some(el => el !== target && el.contains(target));
 
-  const setWidgetClickListner = () => {
+  const setSuperheroButtonClickListener = () => {
     const link = document.getElementById('superhero-tip-link');
     if (link) {
       link.addEventListener('click', openTip);
@@ -174,7 +173,7 @@ const runContentScript = () => {
       });
       const bridge = ContentScriptBridge({ pageConnection, extConnection });
       bridge.run();
-      setWidgetClickListner();
+      setSuperheroButtonClickListener();
     }
   }, 10);
 };
