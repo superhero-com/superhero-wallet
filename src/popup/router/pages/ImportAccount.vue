@@ -53,7 +53,7 @@ export default {
           };
           await this.$store.dispatch('setLogin', { keypair });
           this.$store.commit('SET_BACKED_UP_SEED', true);
-          return setTimeout(() => this.$router.push('/account'), 1000);
+          return setTimeout(() => this.$router.push(this.$store.state.loginTargetLocation), 1000);
         }
         this.disabled = true;
         this.errorMsg = `${this.$t('pages.index.accountNotFound')} <br> ${this.$t(

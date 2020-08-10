@@ -124,4 +124,7 @@ export default {
   setSaveErrorLog(state) {
     state.saveErrorLog = !state.saveErrorLog;
   },
+  setLoginTargetLocation(state, location) {
+    state.loginTargetLocation = location;
+  },
 };
