@@ -16,7 +16,6 @@ export const SET_NETWORKS = 'SET_NETWORKS';
 export const ADD_NETWORK = 'ADD_NETWORK';
 export const INIT_SDK = 'INIT_SDK';
 export const SET_MIDDLEWARE = 'SET_MIDDLEWARE';
-export const SET_AEPP_POPUP = 'SET_AEPP_POPUP';
 export const SET_ENCRYPTED_WALLET = 'SET_ENCRYPTED_WALLET';
 export const SET_TIPPING = 'SET_TIPPING';
 export const SET_MAIN_LOADING = 'SET_MAIN_LOADING';

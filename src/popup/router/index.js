@@ -3,6 +3,7 @@ import VueRouter from 'vue-router';
 import VueClipboard from 'vue-clipboard2';
 import Components from '@aeternity/aepp-components-3';
 import VueTour from 'vue-tour';
+import 'vue-tour/dist/vue-tour.css';
 import routes from './routes';
 import '@aeternity/aepp-components-3/dist/aepp.components.css';
 import LoaderComponent from './components/Loader';
@@ -22,7 +23,6 @@ const plugin = {
     Vue.prototype.$helpers = helper;
   },
 };
-require('vue-tour/dist/vue-tour.css');
 
 Vue.use(plugin);
 Vue.use(VueRouter);
@@ -43,20 +43,15 @@ const router = new VueRouter({
 
 const lastRouteKey = 'lsroute';
 
-const unbind = router.beforeEach((to, from, next) => {
+const unbind = router.beforeEach(async (to, from, next) => {
+  await helper.pollGetter(() => store.state.isRestored);
   next((to.path === '/' && localStorage[lastRouteKey]) || undefined);
   unbind();
 });
 
 router.beforeEach(async (to, from, next) => {
-  await helper.pollGetter(() => store.state.isRestored);
   if (store.state.isLoggedIn) {
     if (!store.state.sdk) wallet.initSdk();
-    if (localStorage.tipUrl) {
-      next(localStorage.tipUrl);
-      delete localStorage.tipUrl;
-      return;
-    }
     next(to.meta.ifNotAuthOnly ? '/account' : undefined);
     return;
   }
@@ -72,10 +67,7 @@ router.beforeEach(async (to, from, next) => {
   }
   wallet.initSdk();
 
-  if (localStorage.tipUrl) delete localStorage.tipUrl;
-
   if (window.RUNNING_IN_POPUP) {
-    store.commit('SET_AEPP_POPUP', true);
     next(
       {
         connectConfirm: '/connect',

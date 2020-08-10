@@ -9,4 +9,4 @@ window.RUNNING_IN_POPUP =
   url.searchParams.get('id') &&
   (window.location.pathname.includes('popup.html') ||
     (process.env.RUNNING_IN_TESTS && window.location.pathname.includes('popup')));
-window.POPUP_TYPE = url.searchParams.get('type') ? url.searchParams.get('type') : null;
+window.POPUP_TYPE = url.searchParams.get('type') || null;

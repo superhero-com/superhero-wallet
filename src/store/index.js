@@ -38,7 +38,6 @@ const initialState = {
   },
   sdk: null,
   middleware: null,
-  aeppPopup: false,
   tipping: null,
   tippingAddress: null,
   mainLoading: true,

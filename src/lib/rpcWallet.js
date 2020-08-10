@@ -24,19 +24,19 @@ import {
   stringifyForStorage,
 } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
+import popups from './popup-connection';
+import walletController from '../wallet-controller';
 
 global.browser = require('webextension-polyfill');
 
 export default {
-  async init(walletController, popups) {
-    this.popups = popups;
+  async init() {
     await this.initNodes();
     this.initFields();
-    this.controller = walletController;
     if (process.env.RUNNING_IN_TESTS) await mockLogin();
     const { account } = await getState();
     if (!isEmpty(account)) {
-      this.controller.generateWallet({ seed: stringifyForStorage(account.privateKey) });
+      walletController.generateWallet({ seed: stringifyForStorage(account.privateKey) });
       const {
         current: { network },
       } = await getState();
@@ -69,7 +69,7 @@ export default {
   async initSdk() {
     this.accountKeyPairs = await Promise.all(
       this.subaccounts.map(async (a, index) =>
-        parseFromStorage(await this.controller.getKeypair({ activeAccount: index, account: a })),
+        parseFromStorage(await walletController.getKeypair({ activeAccount: index, account: a })),
       ),
     );
 
@@ -134,6 +134,7 @@ export default {
           )
         : this.tipContractAddress;
       this.connectionsQueue.forEach(c => this.addConnection(c));
+      this.connectionsQueue = [];
     } catch (e) {
       this.sdk = null;
     }
@@ -167,16 +168,6 @@ export default {
       return true;
     }
     return false;
-  },
-  sdkReady() {
-    return this.sdk;
-  },
-  addConnectionToQueue(port) {
-    if (!this.connectionsQueue) this.connectionsQueue = [];
-    this.connectionsQueue.push(port);
-  },
-  removeConnectionFromQueue(port) {
-    this.connectionsQueue = this.connectionsQueue.filter(p => p.uuid !== port.uuid) || [];
   },
   async checkAeppPermissions(aepp, action, caller, cb) {
     const {
@@ -237,10 +228,10 @@ export default {
 
     return new Promise((resolve, reject) => {
       try {
-        this.popups.addPopup(id, this.controller);
-        this.popups.addActions(id, { ...action, resolve, reject });
+        popups.addPopup(id);
+        popups.addActions(id, { ...action, resolve, reject });
         const { protocol } = new URL(url);
-        this.popups.setAeppInfo(id, {
+        popups.setAeppInfo(id, {
           type,
           action: { params: action.params, method: action.method },
           url,
@@ -255,9 +246,18 @@ export default {
     });
   },
 
-  async addConnection(port) {
+  addConnection(port) {
+    if (!this.sdk) {
+      if (!this.connectionsQueue) this.connectionsQueue = [];
+      this.connectionsQueue.push(port);
+      port.onDisconnect.addListener(() => {
+        this.connectionsQueue = this.connectionsQueue.filter(p => p !== port);
+      });
+      return;
+    }
+
     try {
-      const connection = await BrowserRuntimeConnection({
+      const connection = BrowserRuntimeConnection({
         connectionInfo: { id: port.sender.frameId },
         port,
       });
@@ -271,14 +271,11 @@ export default {
       3000,
     );
     port.onDisconnect.addListener(() => clearInterval(shareWalletInfo));
-    this.removeConnectionFromQueue(port);
-  },
-  getClientsByCond(condition) {
-    const clients = Array.from(this.sdk.getClients().clients.values()).filter(condition);
-    return clients;
   },
   getAccessForAddress(address) {
-    const clients = this.getClientsByCond(client => client.isConnected());
+    const clients = Array.from(this.sdk.getClients().clients.values()).filter(client =>
+      client.isConnected(),
+    );
     clients.forEach(async client => {
       const {
         connection: {
@@ -308,7 +305,7 @@ export default {
     };
     const newAccount = MemoryAccount({
       keypair: parseFromStorage(
-        await this.controller.getKeypair({ activeAccount: payload.idx, account }),
+        await walletController.getKeypair({ activeAccount: payload.idx, account }),
       ),
     });
     this.sdk.addAccount(newAccount);
@@ -343,7 +340,7 @@ export default {
       browser.tabs.reload(aepp.connection.port.sender.tab.id);
       this.sdk.removeRpcClient(aepp.id);
     });
-    this.controller.lockWallet();
+    walletController.lockWallet();
     this.initFields();
   },
   async [AEX2_METHODS.INIT_RPC_WALLET]({ address, network }) {
