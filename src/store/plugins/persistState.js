@@ -6,10 +6,7 @@ const setState = async state => {
   await browser.storage.local.set({ [KEY]: cloneDeep(state) });
 };
 
-export const getState = async () => {
-  const { [KEY]: state } = await browser.storage.local.get(KEY);
-  return state || {};
-};
+export const getState = async () => (await browser.storage.local.get(KEY))[KEY];
 
 export default (reducerLoad, reducerSave) => async store => {
   store.commit('setState', {

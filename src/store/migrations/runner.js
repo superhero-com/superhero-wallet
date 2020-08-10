@@ -9,7 +9,7 @@ export default (state, store) => {
         ...state,
       }
     : {
-        migrations: migrations.reduce((p, m, id) => ({ ...p, [id]: false }), {}),
+        migrations: migrations.reduce((p, m, id) => ({ ...p, [id]: true }), {}),
       };
 
   const asyncMigrations = [];
