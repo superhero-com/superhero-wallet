@@ -10,7 +10,7 @@ export const getState = async () => (await browser.storage.local.get(KEY))[KEY];
 
 export default (reducerLoad, reducerSave) => async store => {
   store.commit('setState', {
-    ...reducerLoad(await getState(), store),
+    ...(await reducerLoad(await getState())),
     isRestored: true,
   });
   store.subscribe((mutation, state) => setState(reducerSave(state)));
