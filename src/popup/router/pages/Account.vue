@@ -1,12 +1,12 @@
 <template>
   <div class="height-100 primary-bg">
     <div class="popup popup-no-padding">
-      <div v-show="!this.backedUpSeed && !tourRunning" class="noti" data-cy="seed-notif">
+      <div v-if="!backedUpSeed && !tourRunning" class="noti" data-cy="seed-notif">
         <span>
           {{ $t('pages.account.youNeedTo') }}
-          <a href="#/securitySettings" style="text-decoration: underline;">{{
+          <RouterLink :to="{ name: 'settings-security' }">{{
             $t('pages.account.backup')
-          }}</a>
+          }}</RouterLink>
           {{ $t('pages.account.yourSeedPhrase') }}
         </span>
       </div>

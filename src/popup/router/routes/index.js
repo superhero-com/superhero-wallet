@@ -114,6 +114,7 @@ export default [
   },
   {
     path: '/securitySettings',
+    name: 'settings-security',
     component: SecuritySettings,
     meta: {
       title: 'security',

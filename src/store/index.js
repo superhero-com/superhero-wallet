@@ -38,7 +38,6 @@ const initialState = {
   },
   sdk: null,
   middleware: null,
-  aeppPopup: false,
   tipping: null,
   tippingAddress: null,
   mainLoading: true,
@@ -55,6 +54,7 @@ const initialState = {
   tourRunning: false,
   tourStartBar: true,
   saveErrorLog: true,
+  loginTargetLocation: { name: 'account' },
 };
 
 export default new Vuex.Store({

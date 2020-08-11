@@ -7,7 +7,6 @@ import uuid from 'uuid';
 import { mockLogin } from '../popup/utils';
 import {
   AEX2_METHODS,
-  BLACKLIST_AEPPS,
   DEFAULT_NETWORK,
   MAX_AMOUNT_WITHOUT_CONFIRM,
   NO_POPUP_AEPPS,
@@ -15,7 +14,7 @@ import {
 import {
   addTipAmount,
   extractHostName,
-  getActiveNetwork,
+  getAllNetworks,
   getAddressByNameEntry,
   getAeppAccountPermission,
   getContractCallInfo,
@@ -25,19 +24,19 @@ import {
   stringifyForStorage,
 } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
+import popups from './popup-connection';
+import walletController from '../wallet-controller';
 
 global.browser = require('webextension-polyfill');
 
-const rpcWallet = {
-  async init(walletController, popups) {
-    this.popups = popups;
+export default {
+  async init() {
     await this.initNodes();
     this.initFields();
-    this.controller = walletController;
     if (process.env.RUNNING_IN_TESTS) await mockLogin();
     const { account } = await getState();
     if (!isEmpty(account)) {
-      this.controller.generateWallet({ seed: stringifyForStorage(account.privateKey) });
+      walletController.generateWallet({ seed: stringifyForStorage(account.privateKey) });
       const {
         current: { network },
       } = await getState();
@@ -48,9 +47,6 @@ const rpcWallet = {
     const { subaccounts } = await getState();
     this.subaccounts = subaccounts;
     return Promise.resolve(true);
-  },
-  initSdk() {
-    this.recreateWallet();
   },
   initFields() {
     this.sdk = null;
@@ -68,14 +64,12 @@ const rpcWallet = {
     this.tipContractAddress = this.nodes[network].tipContract;
   },
   async initNodes() {
-    const nodes = await getActiveNetwork();
-    this.nodes = nodes.all;
-    return nodes;
+    this.nodes = await getAllNetworks();
   },
-  async createWallet() {
+  async initSdk() {
     this.accountKeyPairs = await Promise.all(
       this.subaccounts.map(async (a, index) =>
-        parseFromStorage(await this.controller.getKeypair({ activeAccount: index, account: a })),
+        parseFromStorage(await walletController.getKeypair({ activeAccount: index, account: a })),
       ),
     );
 
@@ -140,10 +134,10 @@ const rpcWallet = {
           )
         : this.tipContractAddress;
       this.connectionsQueue.forEach(c => this.addConnection(c));
+      this.connectionsQueue = [];
     } catch (e) {
       this.sdk = null;
     }
-    return this.sdk;
   },
   getAeppOrigin(aepp) {
     const {
@@ -158,10 +152,7 @@ const rpcWallet = {
   async shouldOpenPopup(aepp, action) {
     const { isTip, amount } = getContractCallInfo(action.params.tx, this.tipContractAddress);
     const origin = this.getAeppOrigin(aepp);
-    if (BLACKLIST_AEPPS.includes(origin)) {
-      // deny action if in blacklist
-      action.deny();
-    } else if (NO_POPUP_AEPPS.includes(origin)) {
+    if (NO_POPUP_AEPPS.includes(origin)) {
       if (isTip) {
         const tippedAmount = await getTippedAmount();
         if (tippedAmount >= MAX_AMOUNT_WITHOUT_CONFIRM) {
@@ -177,16 +168,6 @@ const rpcWallet = {
       return true;
     }
     return false;
-  },
-  sdkReady() {
-    return this.sdk;
-  },
-  addConnectionToQueue(port) {
-    if (!this.connectionsQueue) this.connectionsQueue = [];
-    this.connectionsQueue.push(port);
-  },
-  removeConnectionFromQueue(port) {
-    this.connectionsQueue = this.connectionsQueue.filter(p => p.uuid !== port.uuid) || [];
   },
   async checkAeppPermissions(aepp, action, caller, cb) {
     const {
@@ -247,10 +228,10 @@ const rpcWallet = {
 
     return new Promise((resolve, reject) => {
       try {
-        this.popups.addPopup(id, this.controller);
-        this.popups.addActions(id, { ...action, resolve, reject });
+        popups.addPopup(id);
+        popups.addActions(id, { ...action, resolve, reject });
         const { protocol } = new URL(url);
-        this.popups.setAeppInfo(id, {
+        popups.setAeppInfo(id, {
           type,
           action: { params: action.params, method: action.method },
           url,
@@ -265,9 +246,18 @@ const rpcWallet = {
     });
   },
 
-  async addConnection(port) {
+  addConnection(port) {
+    if (!this.sdk) {
+      if (!this.connectionsQueue) this.connectionsQueue = [];
+      this.connectionsQueue.push(port);
+      port.onDisconnect.addListener(() => {
+        this.connectionsQueue = this.connectionsQueue.filter(p => p !== port);
+      });
+      return;
+    }
+
     try {
-      const connection = await BrowserRuntimeConnection({
+      const connection = BrowserRuntimeConnection({
         connectionInfo: { id: port.sender.frameId },
         port,
       });
@@ -281,14 +271,11 @@ const rpcWallet = {
       3000,
     );
     port.onDisconnect.addListener(() => clearInterval(shareWalletInfo));
-    this.removeConnectionFromQueue(port);
-  },
-  getClientsByCond(condition) {
-    const clients = Array.from(this.sdk.getClients().clients.values()).filter(condition);
-    return clients;
   },
   getAccessForAddress(address) {
-    const clients = this.getClientsByCond(client => client.isConnected());
+    const clients = Array.from(this.sdk.getClients().clients.values()).filter(client =>
+      client.isConnected(),
+    );
     clients.forEach(async client => {
       const {
         connection: {
@@ -318,7 +305,7 @@ const rpcWallet = {
     };
     const newAccount = MemoryAccount({
       keypair: parseFromStorage(
-        await this.controller.getKeypair({ activeAccount: payload.idx, account }),
+        await walletController.getKeypair({ activeAccount: payload.idx, account }),
       ),
     });
     this.sdk.addAccount(newAccount);
@@ -353,7 +340,7 @@ const rpcWallet = {
       browser.tabs.reload(aepp.connection.port.sender.tab.id);
       this.sdk.removeRpcClient(aepp.id);
     });
-    this.controller.lockWallet();
+    walletController.lockWallet();
     this.initFields();
   },
   async [AEX2_METHODS.INIT_RPC_WALLET]({ address, network }) {
@@ -377,9 +364,4 @@ const rpcWallet = {
       this.initSdk();
     }
   },
-  async recreateWallet() {
-    await this.createWallet();
-  },
 };
-
-export default rpcWallet;
