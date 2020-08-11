@@ -2,7 +2,7 @@
 
 **Superhero is a browser extension that allows you to send and recieve value to URLs and content accross Internet.**
 
-[![Build Status](https://travis-ci.com/aeternity/superhero-wallet.svg?branch=develop)](https://travis-ci.com/aeternity/superhero-wallet)
+[![Build Status](https://travis-ci.com/aeternity/superhero-wallet.svg?branch=develop)](https://travis-ci.com/aeternity/superhero-wallet) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/aeternity/superhero-wallet.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/aeternity/superhero-wallet/context:javascript)
 
 ## Build
 
