@@ -154,9 +154,6 @@ export default {
       commit('ADD_CONNECTED_AEPP', { host, account });
     }
   },
-  async checkBackupSeed() {
-    return (await browser.storage.local.get('backed_up_Seed')).backed_up_Seed;
-  },
   async getWebPageAddresses({ state: { sdk } }) {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
     const { address, chainName } = await postMessageToContent(
