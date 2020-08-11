@@ -90,18 +90,30 @@ router.afterEach(to => {
   else localStorage[lastRouteKey] = to.path;
 });
 
+const deviceReadyPromise = new Promise(resolve =>
+  document.addEventListener('deviceready', resolve),
+);
+
+const routerReadyPromise = new Promise(resolve => {
+  const unbindAfterEach = router.afterEach(() => {
+    resolve();
+    unbindAfterEach();
+  });
+});
+
 if (process.env.PLATFORM === 'cordova') {
-  document.addEventListener('deviceready', () => {
-    window.IonicDeeplink.onDeepLink(async ({ url }) => {
+  (async () => {
+    await Promise.all([deviceReadyPromise, routerReadyPromise]);
+    window.IonicDeeplink.onDeepLink(({ url }) => {
       const prefix = ['superhero:', 'https://wallet.superhero.com/'].find(p => url.startsWith(p));
       if (!prefix) throw new Error(`Unknown url: ${url}`);
       try {
-        await router.push(`/${url.slice(prefix.length)}`);
+        window.location = `#/${url.slice(prefix.length)}`;
       } catch (error) {
         if (error.name !== 'NavigationDuplicated') throw error;
       }
     });
-  });
+  })();
 }
 
 export default router;
