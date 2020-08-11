@@ -17,7 +17,6 @@ Vue.use(Vuex);
 
 const initialState = {
   isRestored: false,
-  subaccounts: [],
   account: {},
   mnemonic: null,
   activeAccount: 0,
@@ -82,7 +81,6 @@ export default new Vuex.Store({
         current,
         transactions,
         balance,
-        subaccounts,
         currencies,
         userNetworks,
         names: { owned, defaults } = {},
@@ -102,7 +100,6 @@ export default new Vuex.Store({
         current,
         transactions,
         balance,
-        subaccounts,
         currencies,
         userNetworks,
         names: { owned, defaults },

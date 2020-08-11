@@ -41,16 +41,10 @@ export default {
       this[AEX2_METHODS.INIT_RPC_WALLET]({ address: account.publicKey, network });
     }
   },
-  async initSubaccounts() {
-    const { subaccounts } = await getState();
-    this.subaccounts = subaccounts;
-    return Promise.resolve(true);
-  },
   initFields() {
     this.sdk = null;
     this.initNetwork();
     this.activeAccount = null;
-    this.subaccounts = null;
     this.accounts = [];
     this.accountKeyPairs = [];
     this.connectionsQueue = [];
@@ -65,17 +59,6 @@ export default {
     this.nodes = await getAllNetworks();
   },
   async initSdk() {
-    this.accountKeyPairs = await Promise.all(
-      this.subaccounts.map(async (a, index) =>
-        parseFromStorage(await walletController.getKeypair({ activeAccount: index, account: a })),
-      ),
-    );
-
-    this.accounts = this.accountKeyPairs.map(a =>
-      MemoryAccount({
-        keypair: a,
-      }),
-    );
     const context = this;
     try {
       const node = await Node({ url: this.internalUrl, internalUrl: this.internalUrl });
@@ -83,7 +66,6 @@ export default {
         nodes: [{ name: this.network, instance: node }],
         compilerUrl: this.compiler,
         name: 'Superhero',
-        accounts: this.accounts,
         async onConnection(aepp, action) {
           const open = await context.shouldOpenPopup(aepp, action);
           if (open) context.checkAeppPermissions(aepp, action, 'connection');
@@ -121,10 +103,6 @@ export default {
         },
       });
 
-      if (!this.activeAccount) {
-        this.sdk.selectAccount(this.accountKeyPairs[0].publicKey);
-        this.activeAccount = this.accountKeyPairs[0].publicKey;
-      }
       this.tipContractAddress = this.tipContractAddress.includes('.chain')
         ? getAddressByNameEntry(
             await this.sdk.api.getNameEntryByName(this.tipContractAddress).catch(() => false),
@@ -358,7 +336,6 @@ export default {
       }
     } else {
       this.initNetwork(network);
-      await this.initSubaccounts();
       this.initSdk();
     }
   },

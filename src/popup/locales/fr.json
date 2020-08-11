@@ -471,7 +471,6 @@
       "backToAccount": "Retour à compte",
       "manageAccounts": "Gérer les comptes",
       "allAccounts": "Tous les comptes",
-      "addNewSubAccount": "Ajouter un sous-compte",
       "account": "Compte",
       "add": "Ajouter",
       "enterName": "Entrez le nom"
@@ -552,7 +551,6 @@
       "backToAccount": "Retour à compte",
       "heading": "Nouveau transfert de",
       "recipient": "Bénéficiaire",
-      "sendSubaccount": "ou choisir subaccount",
       "amount": "Montant",
       "txFee": "Frais min Tx:",
       "maxSpendableValue": "Valeur maximale spendable:",

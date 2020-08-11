@@ -22,7 +22,6 @@ async function initMiddleware() {
 
 async function logout() {
   store.commit('SET_ACTIVE_ACCOUNT', { publicKey: '', index: 0 });
-  store.commit('UNSET_SUBACCOUNTS');
   store.commit('UPDATE_ACCOUNT', {});
   store.commit('SWITCH_LOGGED_IN', false);
 }
