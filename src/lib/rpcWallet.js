@@ -4,7 +4,6 @@ import Node from '@aeternity/aepp-sdk/es/node';
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import { isEmpty } from 'lodash-es';
 import uuid from 'uuid';
-import { mockLogin } from '../popup/utils';
 import {
   AEX2_METHODS,
   DEFAULT_NETWORK,
@@ -33,7 +32,6 @@ export default {
   async init() {
     await this.initNodes();
     this.initFields();
-    if (process.env.RUNNING_IN_TESTS) await mockLogin();
     const { account } = await getState();
     if (!isEmpty(account)) {
       walletController.generateWallet({ seed: stringifyForStorage(account.privateKey) });
