@@ -3,7 +3,7 @@ import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { testAccount, txParams } from './config';
 
 export const formatDate = time =>
-  new Date(parseInt(time, 10)).toLocaleString(navigator.language, {
+  new Date(+time).toLocaleString(navigator.language, {
     timeStyle: 'short',
     dateStyle: 'short',
     hourCycle: 'h23',
