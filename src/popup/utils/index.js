@@ -2,24 +2,11 @@ import { mnemonicToSeed } from '@aeternity/bip39';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { testAccount, txParams } from './config';
 
-export const formatTime = time =>
-  new Date(parseInt(time, 10)).toLocaleTimeString(navigator.language, {
-    timeStyle: 'short',
-    hourCycle: 'h24',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-
 export const formatDate = time =>
-  new Date(parseInt(time, 10)).toLocaleString(navigator.language, {
+  new Date(+time).toLocaleString(navigator.language, {
     timeStyle: 'short',
     dateStyle: 'short',
     hourCycle: 'h23',
-    hour: '2-digit',
-    minute: '2-digit',
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit',
   });
 
 export const mockLogin = async (options = {}) => {
