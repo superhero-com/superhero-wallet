@@ -9,31 +9,18 @@
       @blur="context.focus = false"
     />
     <ae-toolbar slot="footer" align="justify">
-      <span v-if="validAddress">
+      <template v-if="validAddress">
         <ae-identicon :address="address" size="xs" style="vertical-align: middle;" />
         {{ $t('pages.aeAddressInput.identicon') }}
-      </span>
-      <span v-else-if="!validAddress && address && address.length > 0">{{
-        $t('pages.aeAddressInput.error')
-      }}</span>
-      <span v-else>&nbsp;</span>
-      <ae-dropdown v-if="subaccounts && subaccounts.length > 1">
-        <ae-icon name="contacts" size="20px" slot="button" />
-        <li
-          v-for="(account, key) in subaccounts"
-          v-bind:key="key"
-          @click="setAccount(account.publicKey)"
-        >
-          <ae-identicon class="subAccountIcon" :address="account.publicKey" size="base" />
-          {{ account.name }}
-        </li>
-      </ae-dropdown>
+      </template>
+      <template v-else-if="address && address.length > 0">
+        {{ $t('pages.aeAddressInput.error') }}
+      </template>
     </ae-toolbar>
   </ae-input>
 </template>
 
 <script>
-import { mapState } from 'vuex';
 import { checkAddress } from '../../utils/helper';
 
 export default {
@@ -43,7 +30,6 @@ export default {
     };
   },
   computed: {
-    ...mapState(['subaccounts']),
     validAddress() {
       if (!this.address) return false;
       return checkAddress(this.address);

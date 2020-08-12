@@ -35,9 +35,4 @@ export const getLoginState = async ({ backedUpSeed, balance, name, pendingTransa
   };
 };
 
-export const mockLogout = async () => {
-  await browser.storage.local.clear();
-  localStorage.clear();
-};
-
 export const buildTx = txtype => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);

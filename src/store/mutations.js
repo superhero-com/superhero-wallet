@@ -19,22 +19,9 @@ export default {
   [types.SET_PENDING_TXS](state, payload) {
     state.transactions.pending = payload;
   },
-  [types.SET_SUBACCOUNT](state, payload) {
-    state.subaccounts.push(payload);
-  },
-  [types.SET_SUBACCOUNTS](state, payload) {
-    state.subaccounts = payload;
-  },
   [types.SET_ACTIVE_ACCOUNT](state, payload) {
     state.account.publicKey = payload.publicKey;
     state.activeAccount = payload.index;
-  },
-  [types.UNSET_SUBACCOUNTS](state) {
-    state.subaccounts = [];
-  },
-  [types.SET_ACCOUNT_AENS](state, { account, aename, pending }) {
-    state.subaccounts[account].aename = aename;
-    state.subaccounts[account].pending = pending;
   },
   [types.SET_NAMES](state, { names }) {
     state.names = names;

@@ -471,7 +471,6 @@
       "backToAccount": "Torna al conto",
       "manageAccounts": "Gestisci account",
       "allAccounts": "tutti gli account",
-      "addNewSubAccount": "Aggiungi nuovo account secondario",
       "account": "Account",
       "add": "Inserisci",
       "enterName": "Inserisci il nome"
@@ -552,7 +551,6 @@
       "backToAccount": "Torna al conto",
       "heading": "Nuovo Transfer da",
       "recipient": "Destinatario",
-      "sendSubaccount": "o scegliere account secondario",
       "amount": "Quantità",
       "txFee": "Costo Min Tx:",
       "maxSpendableValue": "Valore massimo spendibile:",
