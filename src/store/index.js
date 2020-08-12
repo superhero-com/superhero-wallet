@@ -66,9 +66,6 @@ export default new Vuex.Store({
         Vue.set(state, name, value),
       );
     },
-    markMigrationAsApplied(state, migrationId) {
-      Vue.set(state.migrations, migrationId, true);
-    },
     resetState(state) {
       Object.entries({ ...initialState, isRestored: true }).forEach(([name, value]) =>
         Vue.set(state, name, value),
@@ -79,7 +76,7 @@ export default new Vuex.Store({
   actions,
   plugins: [
     persistState(
-      (state, store) => runMigrations(state, store),
+      runMigrations,
       ({
         migrations,
         current,

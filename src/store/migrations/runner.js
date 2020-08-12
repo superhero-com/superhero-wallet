@@ -2,31 +2,18 @@ const migrations = [];
 
 export const registerMigration = migration => migrations.push(migration);
 
-export default (state, store) => {
-  let newState = state
-    ? {
-        migrations: {},
-        ...state,
-      }
-    : {
-        migrations: migrations.reduce((p, m, id) => ({ ...p, [id]: false }), {}),
-      };
+export default async state => {
+  if (!state) {
+    return {
+      migrations: migrations.reduce((p, m, id) => ({ ...p, [id]: true }), {}),
+    };
+  }
 
-  const asyncMigrations = [];
-
-  migrations.forEach(async (migration, idx) => {
-    if (newState.migrations[idx]) return;
-    const result = migration.migrate(newState, store);
-    if (typeof result.then !== 'function') {
-      newState = result;
-      newState.migrations[idx] = true;
-    } else asyncMigrations.push({ promise: result, idx });
-  });
-
-  asyncMigrations.forEach(async ({ promise, idx }) => {
-    await promise;
-    store.commit('markMigrationAsApplied', idx);
-  });
-
-  return newState;
+  return migrations
+    .filter((migration, idx) => !state.migrations[idx])
+    .reduce(async (acc, migration, idx) => {
+      const migratedState = await migration(await acc);
+      migratedState.migrations[idx] = true;
+      return migratedState;
+    }, Promise.resolve(state));
 };
