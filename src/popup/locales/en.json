@@ -952,13 +952,16 @@
       "donate": "Donate Data"
     },
     "invite": {
-      "generate-link": "Generate invite link",
-      "generate": "Generate",
-      "created-links": "Created invite links",
+      "generate-link": "Generate new invite link",
+      "generate": "Generate Link",
+      "created-links": "Generated invite links",
       "top-up": "Top up",
-      "close": "Close",
-      "claim": "Claim back",
-      "insufficient-balance": "Insufficient balance"
+      "collapse": "Collapse",
+      "claim": "Claim Back",
+      "insufficient-balance": "Insufficient balance",
+      "tip-attached": "Tip attached",
+      "top-up-with": "Top up with",
+      "delete": "Delete"
     }
   },
   "phishing": {

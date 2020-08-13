@@ -4,10 +4,10 @@ import { testAccount, txParams } from './config';
 import runMigrations from '../../store/migrations';
 
 export const formatDate = time =>
+  // TODO: Use the current language from i18n module
   new Date(+time).toLocaleString(navigator.language, {
     timeStyle: 'short',
     dateStyle: 'short',
-    hourCycle: 'h23',
   });
 
 export const getLoginState = async ({ backedUpSeed, balance, name, pendingTransaction }) => {
