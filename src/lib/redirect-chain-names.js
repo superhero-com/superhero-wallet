@@ -1,5 +1,5 @@
 import { getAddressFromChainName } from './background-utils';
-import { UI_URL } from '../popup/utils/constants';
+import { AGGREGATOR_URL } from '../popup/utils/constants';
 
 export default {
   init() {
@@ -46,7 +46,7 @@ export default {
             if (!pubKey) {
               throw new Error(`${host} not found`);
             }
-            const displayUrl = `${UI_URL}user-profile/${pubKey}`;
+            const displayUrl = `${AGGREGATOR_URL}user-profile/${pubKey}`;
             chrome.tabs.update({ url: displayUrl });
           } catch (err) {
             chrome.tabs.update({ url: `/redirect/index.html?error=${err.message}` });

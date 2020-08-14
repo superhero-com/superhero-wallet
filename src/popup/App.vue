@@ -10,7 +10,7 @@
       @toggle-sidebar="showSidebar = !showSidebar"
     />
 
-    <router-view :key="$route.fullPath" />
+    <RouterView />
 
     <transition name="slide">
       <div
@@ -60,6 +60,7 @@ export default {
     showSidebar: false,
     polling: null,
     iframe: IN_FRAME,
+    aeppPopup: window.RUNNING_IN_POPUP,
   }),
   computed: {
     ...mapGetters(['account']),
@@ -71,8 +72,6 @@ export default {
       'notifications',
       'isLoggedIn',
       'mainLoading',
-      'notificationsCounter',
-      'aeppPopup',
     ]),
     waveBg() {
       return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(
@@ -118,8 +117,6 @@ export default {
         route: '/securitySettings',
       });
     }
-    if (this.notificationsCounter !== 0)
-      this.$store.commit('SET_NOTIFICATIONS_COUNTER', this.notifications.length);
 
     EventBus.$on('error', async entry => {
       this.$store.dispatch('modals/open', { name: 'error-log', entry }).catch(() => false);

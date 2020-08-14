@@ -12,12 +12,13 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapMutations } from 'vuex';
 
 export default {
   computed: mapState(['notifications']),
+  methods: mapMutations(['SET_NOTIFICATIONS_VISITED']),
   async created() {
-    this.$store.commit('SET_NOTIFICATIONS_COUNTER', 0);
+    this.SET_NOTIFICATIONS_VISITED();
   },
 };
 </script>

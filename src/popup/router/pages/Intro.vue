@@ -88,7 +88,7 @@
         </template>
         <Button
           :disabled="iframe && !understood"
-          @click="$router.push('/account')"
+          @click="$router.push($store.state.loginTargetLocation)"
           data-cy="proceed-to-wallet"
         >
           {{ $t('pages.intro.toHome') }}

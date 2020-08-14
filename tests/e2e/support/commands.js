@@ -1,6 +1,6 @@
 import '../../../src/lib/initPolyfills';
 import uuid from 'uuid';
-import { formatDate, mockLogin, mockLogout } from '../../../src/popup/utils';
+import { formatDate, getLoginState } from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
   cy.visit(`chrome/popup/popup${route ? `#${route}` : ''}`, { onBeforeLoad });
@@ -106,11 +106,14 @@ Cypress.Commands.add('accordionItemShould', (item, cond) => {
 });
 
 Cypress.Commands.add('login', (options = { balance: 10 }, route) => {
-  cy.openPopup(async () => mockLogin(options), route);
+  cy.openPopup(async contentWindow => {
+    /* eslint-disable-next-line no-param-reassign */
+    contentWindow.localStorage.state = JSON.stringify(await getLoginState(options));
+  }, route);
 });
 
 Cypress.Commands.add('logout', () => {
-  cy.openPopup(async () => mockLogout());
+  cy.openPopup(() => localStorage.clear());
 });
 
 Cypress.Commands.add('shouldRedirect', (url, to) => {

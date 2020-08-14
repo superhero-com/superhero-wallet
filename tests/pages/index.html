@@ -3,22 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <title>Deeplink test page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <style>
+    table td:last-child,
+    a {
+      word-break: break-all;
+    }
+  </style>
 </head>
 <body>
   <script>
     const currentUrl = new URL(window.location);
-    document.write(`
-      <table>
-        ${['result', 'address', 'signature']
-          .map(paramName => `<tr>
-            <td>${paramName}</td>
-            <td>${currentUrl.searchParams.get(paramName)}</td>
-          </tr>`)
-          .join('\n')}
-      </table>
-      <br>
-    `);
-
     currentUrl.search = '';
     const successUrl = encodeURIComponent(`${currentUrl}?result=success`);
     const cancelUrl = encodeURIComponent(`${currentUrl}?result=cancel`);
@@ -48,12 +43,51 @@
         `?message=${message}` +
         `&x-success=${encodeURIComponent(`${currentUrl}?result=success&signature={signature}`)}` +
         `&x-cancel=${cancelUrl}`,
+      `invite/Yqk76XDXNGVMZiCVfzE9NGHwhbXiCAsah2bxVpevCGjdLeeqPaSBVR4CkAdLyb1a7HGn2RD69RDLxYF3rdL3MWouvTyyK`
     ];
 
-    prefixes.forEach(prefix => paths.forEach(path => {
-      const url = prefix + path;
-      document.write(`<a href="${url}">${url}</a><br><br>`);
-    }));
+    function rerenderDocument() {
+      const prefix = localStorage.selectedUrlPrefix || prefixes[0];
+      document.open();
+
+      const currentUrlWithParams = new URL(window.location);
+      document.write(`
+        <table>
+          ${['result', 'address', 'signature']
+          .map(paramName => `<tr>
+              <td>${paramName}</td>
+              <td>${currentUrlWithParams.searchParams.get(paramName)}</td>
+            </tr>`)
+          .join('\n')}
+        </table>
+        <br>
+      `);
+
+      document.write(`
+        Deeplink prefix <select id="prefix">
+          ${prefixes
+          .map(option => `<option value="${option}" ${prefix === option ? 'selected' : ''}>${option}</option>`)
+          .join('')}
+        </select>
+        <br>
+        <br>
+      `);
+      document.querySelector('#prefix').addEventListener(
+        'change',
+        event => {
+          localStorage.selectedUrlPrefix = event.target.value;
+          rerenderDocument();
+        },
+      );
+
+      paths.forEach(path => {
+        const url = prefix + path;
+        document.write(`<a href="${url}">${path}</a><br><br>`);
+      });
+      document.close();
+    }
+
+    rerenderDocument();
   </script>
 </body>
 </html>

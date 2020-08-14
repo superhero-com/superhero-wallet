@@ -1,12 +1,10 @@
-import uid from 'uuid';
 import { isEmpty } from 'lodash-es';
-import { setController, switchNode } from './lib/background-utils';
+import { switchNode } from './lib/background-utils';
 import './lib/initPolyfills';
-import { PopupConnections } from './lib/popup-connection';
+import popupConnections from './lib/popup-connection';
 import RedirectChainNames from './lib/redirect-chain-names';
 import rpcWallet from './lib/rpcWallet';
 import TipClaimRelay from './lib/tip-claim-relay';
-import Notification from './notifications';
 import { buildTx } from './popup/utils';
 import { popupProps } from './popup/utils/config';
 import {
@@ -14,23 +12,18 @@ import {
   CONNECTION_TYPES,
   DEFAULT_NETWORK,
   HDWALLET_METHODS,
-  NOTIFICATION_METHODS,
 } from './popup/utils/constants';
 import { detectConnectionType } from './popup/utils/helper';
 import { getPhishingUrls, phishingCheckUrl, setPhishingUrl } from './popup/utils/phishing-detect';
-import WalletController from './wallet-controller';
+import walletController from './wallet-controller';
 import Logger from './lib/logger';
 import { getState } from './store/plugins/persistState';
 
-const controller = new WalletController();
 const inBackground = window.location.href.includes('_generated_background_page.html');
 
 if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
   Logger.init({ background: true });
   RedirectChainNames.init();
-
-  const notification = new Notification();
-  setController(controller);
 
   const postPhishingData = async data => {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
@@ -38,17 +31,13 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
     tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message).catch(console.log));
   };
 
-  const openTipPopup = pageUrl => {
-    const tipUrl = `/tip?url=${encodeURIComponent(pageUrl)}`;
-    const { href } = new URL(`${browser.extension.getURL('./')}popup/popup.html#${tipUrl}`);
-    localStorage.setItem('tipUrl', tipUrl);
+  const openTipPopup = pageUrl =>
     browser.windows.create({
-      url: href,
+      url: browser.extension.getURL(`./popup/popup.html#/tip?url=${encodeURIComponent(pageUrl)}`),
       type: 'popup',
       height: 600,
       width: 375,
     });
-  };
 
   browser.runtime.onMessage.addListener(async (msg, sender) => {
     const { method, params, from, type, data, url: tipUrl } = msg;
@@ -99,41 +88,31 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
     return true;
   });
 
-  const popupConnections = PopupConnections();
-  popupConnections.init();
-  rpcWallet.init(controller, popupConnections);
+  rpcWallet.init();
   browser.runtime.onConnect.addListener(async port => {
-    if (port.sender.id === browser.runtime.id) {
-      const connectionType = detectConnectionType(port);
-      if (connectionType === CONNECTION_TYPES.EXTENSION) {
+    if (port.sender.id !== browser.runtime.id) return;
+
+    switch (detectConnectionType(port)) {
+      case CONNECTION_TYPES.EXTENSION:
         port.onMessage.addListener(async ({ type, payload, uuid }) => {
           if (HDWALLET_METHODS.includes(type)) {
-            port.postMessage({ uuid, res: await controller[type](payload) });
+            port.postMessage({ uuid, res: await walletController[type](payload) });
           }
           if (AEX2_METHODS[type]) rpcWallet[type](payload);
 
-          if (NOTIFICATION_METHODS[type]) {
+          if (type === 'SWITCH_NETWORK') {
             await switchNode();
-            notification[type]();
           }
         });
-      } else if (connectionType === CONNECTION_TYPES.POPUP) {
-        const url = new URL(port.sender.url);
-        const id = url.searchParams.get('id');
-
-        popupConnections.addConnection(id, port);
-      } else if (connectionType === CONNECTION_TYPES.OTHER) {
-        // eslint-disable-next-line no-param-reassign
-        port.uuid = uid();
-        if (rpcWallet.sdkReady()) {
-          rpcWallet.addConnection(port);
-        } else {
-          rpcWallet.addConnectionToQueue(port);
-        }
-        port.onDisconnect.addListener(() => {
-          rpcWallet.removeConnectionFromQueue(port);
-        });
-      }
+        break;
+      case CONNECTION_TYPES.POPUP:
+        popupConnections.addConnection(new URL(port.sender.url).searchParams.get('id'), port);
+        break;
+      case CONNECTION_TYPES.OTHER:
+        rpcWallet.addConnection(port);
+        break;
+      default:
+        throw new Error('Unknown connection type');
     }
   });
 
@@ -152,7 +131,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
 // eslint-disable-next-line import/prefer-default-export
 export const handleMessage = ({ type, payload }) => {
   if (HDWALLET_METHODS.includes(type)) {
-    return controller[type](payload);
+    return walletController[type](payload);
   }
 
   if (process.env.RUNNING_IN_TESTS) {

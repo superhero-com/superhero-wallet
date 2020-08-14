@@ -8,13 +8,22 @@ import ErrorLog from './components/Modals/ErrorLog';
 import ConfirmTransactionSign from './components/Modals/ConfirmTransactionSign';
 import ConfirmRawSign from './components/Modals/ConfirmRawSign';
 
-export default async () => {
+export default () => {
   registerModal({ name: 'default', component: Default });
   registerModal({ name: 'claim-success', component: ClaimSuccess });
   registerModal({ name: 'tip-url-status', component: TipUrlStatus });
   registerModal({ name: 'confirm-tip', component: ConfirmTip });
   registerModal({ name: 'confirm', component: Confirm });
   registerModal({ name: 'error-log', component: ErrorLog });
-  registerModal({ name: 'confirm-transaction-sign', component: ConfirmTransactionSign });
-  registerModal({ name: 'confirm-raw-sign', component: ConfirmRawSign });
+  registerModal({
+    name: 'confirm-transaction-sign',
+    component: ConfirmTransactionSign,
+    showInPopupIfWebFrame: true,
+  });
+  registerModal({
+    name: 'confirm-raw-sign',
+    component: ConfirmRawSign,
+    showInPopupIfWebFrame: true,
+  });
+  registerModal({ name: 'confirm-connect', showInPopupIfWebFrame: true });
 };

@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { mergeWith } from 'lodash-es';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
@@ -11,13 +10,13 @@ import accounts from './plugins/account';
 import tokens from './plugins/tokens';
 import names from './plugins/names';
 import runMigrations from './migrations';
+import invitesModule from './modules/invites';
 import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
 
 Vue.use(Vuex);
 
 const initialState = {
   isRestored: false,
-  subaccounts: [],
   account: {},
   mnemonic: null,
   activeAccount: 0,
@@ -38,7 +37,6 @@ const initialState = {
   },
   sdk: null,
   middleware: null,
-  aeppPopup: false,
   tipping: null,
   tippingAddress: null,
   mainLoading: true,
@@ -47,7 +45,6 @@ const initialState = {
   nextCurrenciesFetch: null,
   minTipAmount: 0.01,
   notifications: [],
-  notificationsCounter: null,
   tip: null,
   txQueue: [],
   connectedAepps: {},
@@ -56,29 +53,20 @@ const initialState = {
   tourRunning: false,
   tourStartBar: true,
   saveErrorLog: true,
+  loginTargetLocation: { name: 'account' },
 };
 
 export default new Vuex.Store({
   state: { ...initialState },
   getters,
   mutations: {
-    syncState(state, remoteState) {
-      const customizer = (objValue, srcValue) => {
-        if (!Array.isArray(srcValue)) return undefined;
-        if (!Array.isArray(objValue)) return srcValue;
-        return srcValue.map((el, idx) =>
-          el && typeof el === 'object' ? mergeWith({}, objValue[idx], el, customizer) : el,
-        );
-      };
-      Object.entries(mergeWith({}, state, remoteState, customizer)).forEach(([name, value]) =>
+    setState(state, newState) {
+      Object.entries({ ...state, ...newState }).forEach(([name, value]) =>
         Vue.set(state, name, value),
       );
     },
-    markMigrationAsApplied(state, migrationId) {
-      Vue.set(state.migrations, migrationId, true);
-    },
-    resetState(state, remoteState) {
-      Object.entries(mergeWith({}, initialState, remoteState)).forEach(([name, value]) =>
+    resetState(state) {
+      Object.entries({ ...initialState, isRestored: true }).forEach(([name, value]) =>
         Vue.set(state, name, value),
       );
     },
@@ -87,19 +75,17 @@ export default new Vuex.Store({
   actions,
   plugins: [
     persistState(
-      (state, store) => runMigrations(state, store),
+      runMigrations,
       ({
         migrations,
         current,
         transactions,
         balance,
-        subaccounts,
         currencies,
         userNetworks,
         names: { owned, defaults } = {},
         nextCurrenciesFetch,
         tip,
-        notificationsCounter,
         connectedAepps,
         backedUpSeed,
         account,
@@ -108,18 +94,17 @@ export default new Vuex.Store({
         saveErrorLog,
         tourStartBar,
         tokens: { all },
+        invites,
       }) => ({
         migrations,
         current,
         transactions,
         balance,
-        subaccounts,
         currencies,
         userNetworks,
         names: { owned, defaults },
         nextCurrenciesFetch,
         tip,
-        notificationsCounter,
         connectedAepps,
         backedUpSeed,
         account,
@@ -128,6 +113,7 @@ export default new Vuex.Store({
         saveErrorLog,
         tourStartBar,
         tokens: { all },
+        invites,
       }),
     ),
     modals,
@@ -136,4 +122,7 @@ export default new Vuex.Store({
     tokens,
     names,
   ],
+  modules: {
+    invites: invitesModule,
+  },
 });

@@ -1,12 +1,12 @@
 import stampit from '@stamp/it';
 import { HDWALLET_METHODS } from '../popup/utils/constants';
+import walletController from '../wallet-controller';
 
-export const PopupConnection = stampit({
-  init({ id, connection = {}, actions = {}, controller, aeppInfo = {} }) {
+const PopupConnection = stampit({
+  init({ id, connection = {}, actions = {}, aeppInfo = {} }) {
     this.id = id;
     this.connection = connection;
     this.actions = actions;
-    this.controller = controller;
     this.aeppInfo = aeppInfo;
   },
   methods: {
@@ -17,12 +17,12 @@ export const PopupConnection = stampit({
       };
 
       if (HDWALLET_METHODS.includes(msg.type)) {
-        this.postMessage({ uuid: msg.uuid, res: await this.controller[msg.type](msg.payload) });
+        this.postMessage({ uuid: msg.uuid, res: await walletController[msg.type](msg.payload) });
       } else if (msg.type === 'POPUP_INFO') {
         this.postMessage({ uuid: msg.uuid, res: this.aeppInfo });
       } else if (typeToAction[msg.type]) {
         if (this.actions[typeToAction[msg.type]])
-          this.actions[typeToAction[msg.type]](msg.payload ? msg.payload : false);
+          this.actions[typeToAction[msg.type]](msg.payload || false);
         this.actions.resolve(typeToAction[msg.type] !== 'deny');
       }
     },
@@ -35,13 +35,13 @@ export const PopupConnection = stampit({
   },
 });
 
-export const PopupConnections = stampit({
+export default stampit({
+  init() {
+    this.popups = new Map();
+  },
   methods: {
-    init() {
-      this.popups = new Map();
-    },
-    addPopup(id, controller) {
-      this.popups.set(id, PopupConnection({ id, controller }));
+    addPopup(id) {
+      this.popups.set(id, PopupConnection({ id }));
       return this.getPopup(id);
     },
     getPopup(id) {
@@ -70,4 +70,4 @@ export const PopupConnections = stampit({
       this.popups.delete(id);
     },
   },
-});
+})();

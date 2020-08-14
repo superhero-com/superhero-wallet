@@ -235,7 +235,8 @@
       "add-token": "Add token",
       "mint-burn-token": "Mint/Burn token",
       "allowances": "Allowances",
-      "sign-message": "Sign Message"
+      "sign-message": "Sign Message",
+      "invite": "Invite"
     },
     "appVUE": {
       "systemName": "Superhero",
@@ -271,7 +272,8 @@
       "removeAccount": "Remove account",
       "donateErrorReports": "Submit error reports",
       "tokens": "Fungible tokens",
-      "manageTokens": "Manage tokens"
+      "manageTokens": "Manage tokens",
+      "invite": "Invite"
     },
     "aboutSettings": {
       "heading": "About",
@@ -462,6 +464,8 @@
       "balance-error": "Your account balance is not enough to execute this transaction.",
       "pointer-added": "Name {type} successful!",
       "pending-claim": "Pending",
+      "revoked": "Revoked",
+      "revoked-notification": "Your name {name} has been revoked at block {block}",
       "list": {
         "no-names": "No names found",
         "button": "Your names"
@@ -541,7 +545,6 @@
       "backToAccount": "Back to account",
       "manageAccounts": "Manage accounts",
       "allAccounts": "All accounts",
-      "addNewSubAccount": "Add new subaccount",
       "account": "Account",
       "add": "Add",
       "enterName": "Enter name"
@@ -622,7 +625,6 @@
       "backToAccount": "Back to account",
       "heading": "New Transfer from",
       "recipient": "Recipient",
-      "sendSubaccount": "or choose subaccount",
       "txFee": "Min Tx fee:",
       "maxSpendableValue": "Maximum spendable value:",
       "send": "Send",
@@ -948,6 +950,15 @@
       "details": "Technical details:",
       "cancel": "Cancel",
       "donate": "Donate Data"
+    },
+    "invite": {
+      "generate-link": "Generate invite link",
+      "generate": "Generate",
+      "created-links": "Created invite links",
+      "top-up": "Top up",
+      "close": "Close",
+      "claim": "Claim back",
+      "insufficient-balance": "Insufficient balance"
     }
   },
   "phishing": {

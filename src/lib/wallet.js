@@ -1,7 +1,6 @@
-import Node from '@aeternity/aepp-sdk/es/node';
-import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
+import { Node, MemoryAccount, RpcWallet } from '@aeternity/aepp-sdk/es';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
-import { isEmpty } from 'lodash-es';
+import { isEmpty, times } from 'lodash-es';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
 import {
@@ -9,12 +8,11 @@ import {
   middleware,
   getAllNetworks,
   IN_FRAME,
-  extractHostName,
+  toURL,
+  getAeppAccountPermission,
 } from '../popup/utils/helper';
 import { TIPPING_CONTRACT, NO_POPUP_AEPPS } from '../popup/utils/constants';
 import Logger from './logger';
-
-let countError = 0;
 
 async function initMiddleware() {
   const { network, current } = store.state;
@@ -24,7 +22,6 @@ async function initMiddleware() {
 
 async function logout() {
   store.commit('SET_ACTIVE_ACCOUNT', { publicKey: '', index: 0 });
-  store.commit('UNSET_SUBACCOUNTS');
   store.commit('UPDATE_ACCOUNT', {});
   store.commit('SWITCH_LOGGED_IN', false);
 }
@@ -48,6 +45,8 @@ async function initContractInstances() {
   );
 }
 
+let initSdkRunning = false;
+
 export default {
   async init() {
     const { account } = store.getters;
@@ -69,6 +68,8 @@ export default {
     return { loggedIn: true };
   },
   async initSdk() {
+    if (initSdkRunning) return;
+    initSdkRunning = true;
     const keypair = await getKeyPair();
     if (keypair.error) {
       await logout();
@@ -83,7 +84,6 @@ export default {
     });
     const account = MemoryAccount({ keypair });
     try {
-      const { RpcWallet } = await import('@aeternity/aepp-sdk/es/ae/wallet');
       const acceptCb = (_, { accept }) => accept();
       const sdk = await RpcWallet.compose({
         methods: {
@@ -98,11 +98,34 @@ export default {
         nativeMode: true,
         compilerUrl,
         name: 'Superhero',
-        onConnection(client, { accept, deny }, origin) {
-          const isAccept =
-            NO_POPUP_AEPPS.includes(extractHostName(origin)) ||
-            window.confirm(`Allow connection to ${origin}?`);
-          (isAccept ? accept : deny)();
+        async onConnection({ info: { icons, name } }, { accept, deny }, origin) {
+          const originUrl = toURL(origin);
+          if (
+            NO_POPUP_AEPPS.includes(originUrl.hostname) ||
+            (await getAeppAccountPermission(originUrl.hostname, store.state.account.publicKey))
+          ) {
+            accept();
+            return;
+          }
+          try {
+            await store.dispatch('modals/open', {
+              name: 'confirm-connect',
+              app: {
+                name,
+                icons,
+                protocol: originUrl.protocol,
+                host: originUrl.hostname,
+              },
+            });
+            await store.dispatch('setPermissionForAccount', {
+              host: originUrl.hostname,
+              account: store.state.account.publicKey,
+            });
+            accept();
+          } catch (error) {
+            deny();
+            if (error.message !== 'Rejected by user') throw error;
+          }
         },
         onSubscription: acceptCb,
         onSign: acceptCb,
@@ -114,10 +137,30 @@ export default {
       });
 
       if (IN_FRAME) {
-        const connection = BrowserWindowMessageConnection({ target: window.parent });
-        sdk.addRpcClient(connection);
-        sdk.shareWalletInfo(connection.sendMessage.bind(connection));
-        setTimeout(() => sdk.shareWalletInfo(connection.sendMessage.bind(connection)), 3000);
+        const connectedFrames = new Set();
+        const connectToFrame = target => {
+          if (connectedFrames.has(target)) return;
+          connectedFrames.add(target);
+          const connection = BrowserWindowMessageConnection({ target });
+          const originalConnect = connection.connect;
+          connection.connect = function connect(onMessage) {
+            originalConnect.call(this, (data, origin, source) => {
+              if (source !== target) return;
+              onMessage(data, origin, source);
+            });
+          };
+          sdk.addRpcClient(connection);
+          sdk.shareWalletInfo(connection.sendMessage.bind(connection));
+          setTimeout(() => sdk.shareWalletInfo(connection.sendMessage.bind(connection)), 3000);
+        };
+
+        connectToFrame(window.parent);
+        const connectToParentFrames = () =>
+          times(window.parent.frames.length, i => window.parent.frames[i])
+            .filter(frame => frame !== window)
+            .forEach(connectToFrame);
+        connectToParentFrames();
+        setInterval(connectToParentFrames, 3000);
       }
 
       await store.dispatch('initSdk', sdk);
@@ -126,12 +169,10 @@ export default {
       store.commit('SET_NODE_STATUS', 'connected');
       setTimeout(() => store.commit('SET_NODE_STATUS', ''), 2000);
     } catch (e) {
-      countError += 1;
-      if (countError < 3) await this.initSdk();
-      else {
-        store.commit('SET_NODE_STATUS', 'error');
-        Logger.write(e);
-      }
+      store.commit('SET_NODE_STATUS', 'error');
+      Logger.write(e);
+    } finally {
+      initSdkRunning = false;
     }
   },
 };

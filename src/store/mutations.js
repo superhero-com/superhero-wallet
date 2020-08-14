@@ -19,22 +19,9 @@ export default {
   [types.SET_PENDING_TXS](state, payload) {
     state.transactions.pending = payload;
   },
-  [types.SET_SUBACCOUNT](state, payload) {
-    state.subaccounts.push(payload);
-  },
-  [types.SET_SUBACCOUNTS](state, payload) {
-    state.subaccounts = payload;
-  },
   [types.SET_ACTIVE_ACCOUNT](state, payload) {
     state.account.publicKey = payload.publicKey;
     state.activeAccount = payload.index;
-  },
-  [types.UNSET_SUBACCOUNTS](state) {
-    state.subaccounts = [];
-  },
-  [types.SET_ACCOUNT_AENS](state, { account, aename, pending }) {
-    state.subaccounts[account].aename = aename;
-    state.subaccounts[account].pending = pending;
   },
   [types.SET_NAMES](state, { names }) {
     state.names = names;
@@ -56,9 +43,6 @@ export default {
   },
   [types.SET_MIDDLEWARE](state, payload) {
     state.middleware = payload;
-  },
-  [types.SET_AEPP_POPUP](state, payload) {
-    state.aeppPopup = payload;
   },
   [types.SET_ENCRYPTED_WALLET](state, payload) {
     state.encryptedWallet = payload;
@@ -83,10 +67,10 @@ export default {
     state.nextCurrenciesFetch = payload;
   },
   [types.ADD_NOTIFICATION](state, payload) {
-    state.notifications = [...state.notifications, payload];
+    state.notifications = [...state.notifications, { ...payload, visited: false }];
   },
-  [types.SET_NOTIFICATIONS_COUNTER](state, payload) {
-    state.notificationsCounter = payload;
+  [types.SET_NOTIFICATIONS_VISITED](state) {
+    state.notifications = state.notifications.map(n => ({ ...n, visited: true }));
   },
   [types.SET_TIP_DETAILS](state, payload) {
     state.tip = payload;
@@ -123,5 +107,8 @@ export default {
   },
   setSaveErrorLog(state) {
     state.saveErrorLog = !state.saveErrorLog;
+  },
+  setLoginTargetLocation(state, location) {
+    state.loginTargetLocation = location;
   },
 };

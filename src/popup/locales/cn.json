@@ -471,7 +471,6 @@
       "backToAccount": "返回账户",
       "manageAccounts": "管理账户",
       "allAccounts": "所有账户",
-      "addNewSubAccount": "增加新的子账户",
       "account": "账户",
       "add": "增加",
       "enterName": "输入名称"
@@ -552,7 +551,6 @@
       "backToAccount": "返回账户",
       "heading": "新的转账",
       "recipient": "收据",
-      "sendSubaccount": "或选择子帐户",
       "txFee": "最少转账手续费",
       "maxSpendableValue": "最大可转账价值",
       "send": "发送",

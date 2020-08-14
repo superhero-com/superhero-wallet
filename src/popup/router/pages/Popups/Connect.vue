@@ -49,11 +49,17 @@ import { mapGetters } from 'vuex';
 import getPopupProps from '../../../utils/getPopupProps';
 import Button from '../../components/Button';
 import UserAvatar from '../../components/UserAvatar';
+import { IN_POPUP } from '../../../utils/helper';
 
 export default {
   components: {
     Button,
     UserAvatar,
+  },
+  props: {
+    app: { type: Object, default: null },
+    resolve: { type: Function, default: null },
+    reject: { type: Function, default: null },
   },
   data() {
     return {
@@ -62,13 +68,28 @@ export default {
     };
   },
   async created() {
-    this.data = await getPopupProps();
+    this.data =
+      process.env.PLATFORM === 'web' && IN_POPUP
+        ? {
+            ...this.app,
+            resolve: this.resolve,
+            reject: this.reject,
+          }
+        : await getPopupProps();
   },
   methods: {
     async cancel() {
+      if (process.env.PLATFORM === 'web' && IN_POPUP) {
+        this.data.reject(new Error('Rejected by user'));
+        return;
+      }
       this.data.reject(false);
     },
     async connect() {
+      if (process.env.PLATFORM === 'web' && IN_POPUP) {
+        this.data.resolve();
+        return;
+      }
       await this.$store.dispatch('setPermissionForAccount', {
         host: this.data.host,
         account: this.account.publicKey,

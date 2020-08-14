@@ -1,6 +1,6 @@
 {
   "name": "superhero-wallet",
-  "version": "0.2.4",
+  "version": "0.3.2",
   "description": "Superhero wallet",
   "author": "Superhero",
   "license": "MIT",
@@ -12,7 +12,7 @@
     "prettier": "prettier \"src/**/*.{js,vue}\" \"tests/**/*.{js,vue}\"",
     "prettier:write": "npm run prettier -- --write",
     "build": "cross-env NODE_ENV=production webpack --hide-modules",
-    "build:dev": "cross-env NODE_ENV=development webpack --hide-modules",
+    "build:dev": "cross-env NODE_ENV=development webpack --hide-modules -d",
     "build-zip": "node scripts/build-zip.js",
     "watch": "npm run build -- --watch",
     "watch:dev": "cross-env HMR=true npm run build:dev -- --watch",
@@ -25,8 +25,8 @@
     "build:Mainnet": "cross-env NETWORK=Mainnet npm run build",
     "watch:dev:Testnet": "cross-env NETWORK=Testnet npm run watch:dev",
     "watch:dev:Mainnet": "cross-env NETWORK=Mainnet npm run watch:dev",
-    "watch:dev:tests": "cross-env NETWORK=Testnet cross-env RUNNING_IN_TESTS=true npm run watch:dev",
-    "build:tests": "cross-env NETWORK=Testnet cross-env RUNNING_IN_TESTS=true npm run build:dev"
+    "watch:dev:tests": "cross-env NETWORK=Testnet RUNNING_IN_TESTS=true npm run watch:dev",
+    "build:tests": "cross-env NETWORK=Testnet RUNNING_IN_TESTS=true npm run build:dev"
   },
   "dependencies": {
     "@aeternity/aepp-components": "git+https://github.com/aeternity/aepp-components.git#develop",

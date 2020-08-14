@@ -1,4 +1,3 @@
-/* eslint-disable no-continue */
 import iconHover from '../icons/twitter-icon-tip-hover.svg';
 import icon from '../icons/twitter-icon-tip.svg';
 
@@ -6,27 +5,18 @@ global.browser = require('webextension-polyfill');
 
 let timeout = null;
 const isInContent = !window.location.href.includes(browser.extension.getURL('./'));
-const buttonContentStyle = `color: rgb(101, 119, 134);
-font-size: 12px;
+const buttonContentStyleCommon = `font-size: 12px;
 font-weight: bold;
 margin-left: 6px;
 position: relative;`;
+const buttonContentStyle = `${buttonContentStyleCommon} color: rgb(101, 119, 134);`;
+const buttonContentStyleHover = `${buttonContentStyleCommon} color: #2a9cff;`;
 
-const buttonContentStyleHover = `color: #2a9cff;
-font-size: 12px;
-font-weight: bold;
-margin-left: 6px;
-position: relative;`;
-
-const buttonStyles = `background: transparent; 
-border:none; cursor: pointer;
-color:rgb(101, 119, 134);
+const buttonStyleCommon = `background: transparent; 
+border:none; cursor: pointer; padding: 0px;
 outline:none;`;
-
-const buttonStylesHover = `background: transparent; 
-border:none; cursor: pointer;
-color: #2a9cff;
-outline:none;`;
+const buttonStyle = `${buttonStyleCommon} color:rgb(101, 119, 134);`;
+const buttonStyleHover = `${buttonStyleCommon} color: #2a9cff;`;
 
 const getTweetId = tweet => {
   const status = tweet.querySelector("a[href*='/status/']");
@@ -34,18 +24,14 @@ const getTweetId = tweet => {
     return null;
   }
 
-  return status.href.split('/retweets')[0];
+  return status.href.match('.*/status/[0-9]+')[0];
 };
 
-const createSuperheroTipAction = (tweet, tweetId, numActions) => {
+const createSuperheroTipAction = tweetId => {
   // Create the tip action
-  const hasUserActions = numActions > 3;
   const superheroTipAction = document.createElement('div');
   superheroTipAction.className = 'action-superhero-tip';
-  superheroTipAction.style.display = 'inline-block';
-  superheroTipAction.style.minWidth = '80px';
   superheroTipAction.style.alignSelf = 'center';
-  superheroTipAction.style.textAlign = hasUserActions ? 'right' : 'start';
   superheroTipAction.setAttribute('role', 'button');
   superheroTipAction.setAttribute('tabindex', '0');
 
@@ -61,7 +47,7 @@ const createSuperheroTipAction = (tweet, tweetId, numActions) => {
 
   // Create the tip button
   const superheroTipButton = document.createElement('button');
-  superheroTipButton.setAttribute('style', buttonStyles);
+  superheroTipButton.setAttribute('style', buttonStyle);
   superheroTipButton.appendChild(buttonIcon);
   superheroTipButton.appendChild(buttonContent);
 
@@ -74,13 +60,13 @@ const createSuperheroTipAction = (tweet, tweetId, numActions) => {
 
   const hoverEnter = () => {
     buttonIcon.src = iconHover;
-    superheroTipButton.setAttribute('style', buttonStylesHover);
+    superheroTipButton.setAttribute('style', buttonStyleHover);
     buttonContent.setAttribute('style', buttonContentStyleHover);
   };
 
   const hoverLeave = () => {
     buttonIcon.src = icon;
-    superheroTipButton.setAttribute('style', buttonStyles);
+    superheroTipButton.setAttribute('style', buttonStyle);
     buttonContent.setAttribute('style', buttonContentStyle);
   };
 
@@ -116,21 +102,29 @@ const configureSuperheroTipAction = async () => {
     '[data-testid="tweet"], [data-testid="tweetDetail"], [data-testid="tweet"] + div, [data-testid="tweetDetail"] + div',
   );
 
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < tweets.length; ++i) {
-    const tweetId = getTweetId(tweets[i]);
-    if (!tweetId) continue;
-    const actions = tweets[i].querySelector('[role="group"]');
-    if (!actions) continue;
-    const numActions = actions.querySelectorAll(':scope > div').length || 0;
+  let bigTweetSkipped = !document.querySelectorAll('div[aria-label="Timeline: Conversation"]')
+    .length;
+  tweets.forEach(tweet => {
+    const tweetId = getTweetId(tweet);
+    if (!tweetId) return;
+    const actions = tweet.querySelector('[role="group"]');
+    if (!actions) return;
+    const lastActionNode = actions.querySelector(
+      ':scope > div:not(.action-superhero-tip):last-child',
+    );
+    if (check && bigTweetSkipped && lastActionNode) {
+      lastActionNode.style.flexBasis = '0px';
+      lastActionNode.style.flexGrow = '1';
+    }
     const superheroTipActions = actions.getElementsByClassName('action-superhero-tip');
 
     if (check && superheroTipActions.length === 0) {
-      actions.appendChild(createSuperheroTipAction(tweets[i], tweetId, numActions));
+      actions.appendChild(createSuperheroTipAction(tweetId));
     } else if (!check && superheroTipActions.length === 1) {
       actions.removeChild(superheroTipActions[0]);
     }
-  }
+    bigTweetSkipped = true;
+  });
   timeout = setTimeout(configureSuperheroTipAction, 3000);
 };
 

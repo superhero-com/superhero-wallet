@@ -38,8 +38,7 @@
       <template v-if="!confirmMode">
         <AmountSend
           :amountError="amountError"
-          @changeAmount="val => (amount = val)"
-          :value="amount"
+          v-model="amount"
           :errorMsg="amount && amount < minTipAmount ? $t('pages.tipPage.minAmountError') : ''"
         />
         <Textarea

@@ -132,15 +132,7 @@ export default {
     };
   },
   computed: {
-    ...mapState([
-      'balance',
-      'network',
-      'current',
-      'transactions',
-      'activeAccount',
-      'mnemonic',
-      'subaccounts',
-    ]),
+    ...mapState(['balance', 'network', 'current', 'transactions', 'activeAccount', 'mnemonic']),
     ...mapGetters(['account', 'activeAccountName']),
   },
   methods: {

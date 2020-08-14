@@ -35,7 +35,7 @@ const getConfig = platform => {
         'redirect/redirect': './redirect/redirect.js',
       }),
       ...(['cordova', 'web'].includes(platform) && { popup: './popup/popup.js' }),
-      ...(platform === 'aepp' && { aepp: './aepp/aepp.js' }),
+      ...(platform === 'aepp' && { aepp: '../tests/aepp/aepp.js' }),
     },
     node: { fs: 'empty', net: 'empty', tls: 'empty' },
     output: {
@@ -187,7 +187,6 @@ const getConfig = platform => {
                 'inject',
                 'options/options',
                 'phishing/phishing',
-                'aepp',
                 'popup/cameraPermission',
               ],
             }),
@@ -226,7 +225,7 @@ const getConfig = platform => {
       ...(platform === 'aepp'
         ? [
             new CopyWebpackPlugin([
-              { from: 'aepp/aepp.html', to: `aepp.html`, transform: transformHtml },
+              { from: '../tests/aepp/aepp.html', to: `aepp.html`, transform: transformHtml },
             ]),
           ]
         : []),
