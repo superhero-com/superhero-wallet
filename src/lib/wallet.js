@@ -1,11 +1,12 @@
 import { Node, MemoryAccount, RpcWallet } from '@aeternity/aepp-sdk/es';
+import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import { isEmpty, times } from 'lodash-es';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
 import {
   parseFromStorage,
-  middleware,
+  fetchJson,
   getAllNetworks,
   IN_FRAME,
   toURL,
@@ -15,8 +16,28 @@ import { TIPPING_CONTRACT, NO_POPUP_AEPPS } from '../popup/utils/constants';
 import Logger from './logger';
 
 async function initMiddleware() {
-  const { network, current } = store.state;
-  store.commit('SET_MIDDLEWARE', (await middleware(network, current)).api);
+  const { middlewareUrl } = store.getters.activeNetwork;
+  const swag = await fetchJson(`${middlewareUrl}/middleware/api`);
+  swag.paths['/names/auctions/{name}/info'] = {
+    get: {
+      operationId: 'getAuctionInfoByName',
+      parameters: [
+        {
+          in: 'path',
+          name: 'name',
+          required: true,
+          type: 'string',
+        },
+      ],
+    },
+  };
+  const { api: middleware } = await Swagger.compose({
+    methods: {
+      urlFor: path => middlewareUrl + path,
+      axiosError: () => '',
+    },
+  })({ swag });
+  store.commit('SET_MIDDLEWARE', middleware);
   store.dispatch('names/fetchOwned');
 }
 

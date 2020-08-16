@@ -2,7 +2,6 @@ import { isFQDN } from 'validator';
 import { detect } from 'detect-browser';
 import { get } from 'lodash-es';
 import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
-import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 import BigNumber from 'bignumber.js';
 import { CONNECTION_TYPES, networks, DEFAULT_NETWORK } from './constants';
@@ -91,29 +90,6 @@ export const getAeppAccountPermission = async (host, account) => {
 export const fetchJson = async (...args) => {
   const response = await fetch(...args);
   return response.json();
-};
-
-export const middleware = async (network, current) => {
-  const swag = await fetchJson(`${network[current.network].middlewareUrl}/middleware/api`);
-  swag.paths['/names/auctions/{name}/info'] = {
-    get: {
-      operationId: 'getAuctionInfoByName',
-      parameters: [
-        {
-          in: 'path',
-          name: 'name',
-          required: true,
-          type: 'string',
-        },
-      ],
-    },
-  };
-  return Swagger.compose({
-    methods: {
-      urlFor: path => network[current.network].middlewareUrl + path,
-      axiosError: () => '',
-    },
-  })({ swag });
 };
 
 export const checkAddress = value =>
