@@ -86,7 +86,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import CheckBox from '../components/CheckBox';
 import ListItem from '../components/ListItem';
-import { defaultNetworks, DEFAULT_NETWORK, AEX2_METHODS } from '../../utils/constants';
+import { defaultNetwork, AEX2_METHODS } from '../../utils/constants';
 import wallet from '../../../lib/wallet';
 import { postMessage } from '../../utils/connection';
 
@@ -140,7 +140,7 @@ export default {
       this.network = { ...networkProps, ...n, idx };
     },
     async deleteNetwork(network, idx) {
-      if (network.name !== DEFAULT_NETWORK) this.selectNetwork(DEFAULT_NETWORK);
+      if (network.name !== defaultNetwork.name) this.selectNetwork(defaultNetwork.name);
       const allNetworks = Object.values(this.networks).filter((n, i) => idx !== i);
       await this.$store.commit(
         'SET_NETWORKS',
@@ -148,7 +148,7 @@ export default {
       );
       this.$store.commit(
         'SET_USERNETWORKS',
-        allNetworks.filter(({ name }) => name !== DEFAULT_NETWORK),
+        allNetworks.filter(({ name }) => name !== defaultNetwork.name),
       );
     },
     async addNetwork() {
@@ -164,12 +164,13 @@ export default {
         const exist = (name, idx) =>
           (this.network.idx >= 0
             ? name === this.network.name && idx !== this.network.idx
-            : name === this.network.name) || this.network.name === DEFAULT_NETWORK;
+            : name === this.network.name) || this.network.name === defaultNetwork.name;
         const allNetworks = Object.values(this.networks);
         if (allNetworks.find(({ name }, idx) => exist(name, idx)))
           throw new Error('Network with this name exist');
         const newNetwork = {
-          ...defaultNetworks[DEFAULT_NETWORK],
+          ...defaultNetwork,
+          system: false,
           url: this.network.url,
           internalUrl: this.network.url,
           middlewareUrl: this.network.middlewareUrl,
@@ -189,7 +190,7 @@ export default {
         }
         this.$store.commit(
           'SET_USERNETWORKS',
-          allNetworks.filter(({ name }) => name !== DEFAULT_NETWORK),
+          allNetworks.filter(({ name }) => name !== defaultNetwork.name),
         );
         this.mode = 'list';
       } catch (e) {

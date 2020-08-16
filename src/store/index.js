@@ -11,7 +11,7 @@ import tokens from './plugins/tokens';
 import names from './plugins/names';
 import runMigrations from './migrations';
 import invitesModule from './modules/invites';
-import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
+import { defaultNetwork } from '../popup/utils/constants';
 
 Vue.use(Vuex);
 
@@ -22,13 +22,13 @@ const initialState = {
   activeAccount: 0,
   balance: 0,
   current: {
-    network: DEFAULT_NETWORK,
+    network: defaultNetwork.name,
     language: 'en',
     token: 0,
     currency: 'usd',
     currencyRate: 0,
   },
-  network: networks,
+  network: { [defaultNetwork.name]: defaultNetwork },
   userNetworks: [],
   isLoggedIn: false,
   transactions: {

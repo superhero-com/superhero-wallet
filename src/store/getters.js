@@ -1,5 +1,4 @@
 import { isEmpty } from 'lodash-es';
-import { DEFAULT_NETWORK } from '../popup/utils/constants';
 
 export default {
   account(state, { activeAccountName }) {
@@ -22,7 +21,6 @@ export default {
   },
   networks({ network }) {
     const networks = { ...network };
-    networks[DEFAULT_NETWORK].system = true;
     return networks;
   },
   activeAccountName({ account }, getters) {

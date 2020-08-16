@@ -4,7 +4,7 @@ import { get } from 'lodash-es';
 import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 import BigNumber from 'bignumber.js';
-import { CONNECTION_TYPES, networks, DEFAULT_NETWORK } from './constants';
+import { CONNECTION_TYPES, defaultNetwork } from './constants';
 import { getState } from '../../store/plugins/persistState';
 
 export const aeToAettos = v =>
@@ -228,7 +228,7 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
 
 export const getAllNetworks = async () => ({
   ...get(await getState(), 'userNetworks', []).reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {}),
-  ...networks,
+  [defaultNetwork.name]: defaultNetwork,
 });
 
 export const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
@@ -246,7 +246,7 @@ export const getTippedAmount = async () =>
 export const getContractCallInfo = (transaction, contractAddress = null) => {
   if (!transaction) return { isTip: false, contractId: null, amount: 0 };
 
-  const { tipContract } = networks[DEFAULT_NETWORK];
+  const { tipContract } = defaultNetwork;
   const { tx } = TxBuilder.unpackTx(transaction);
 
   return {
@@ -288,7 +288,7 @@ export const pollGetter = getter =>
 
 export const getActiveNetwork = async () => {
   const all = await getAllNetworks();
-  return all[get(await getState(), 'current.network', DEFAULT_NETWORK)];
+  return all[get(await getState(), 'current.network', defaultNetwork.name)];
 };
 
 export const getTwitterAccountUrl = url => {
