@@ -27,9 +27,7 @@
       </span>
       <span
         class="seeTransaction"
-        @click="
-          openUrl(`${network[current.network].middlewareUrl}/transactions/${transaction.hash}`)
-        "
+        @click="openUrl(`${activeNetwork.middlewareUrl}/transactions/${transaction.hash}`)"
       >
         <img src="../../../icons/eye.png" />
       </span>
@@ -63,8 +61,8 @@ export default {
     }
   },
   computed: {
-    ...mapState(['sdk', 'current', 'network']),
-    ...mapGetters(['account']),
+    ...mapState(['sdk', 'current']),
+    ...mapGetters(['account', 'activeNetwork']),
     status() {
       if (
         this.transaction.tx.sender_id === this.account.publicKey ||

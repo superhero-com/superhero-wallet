@@ -97,8 +97,8 @@ export default {
       return;
     }
 
-    const { network, current } = store.state;
-    const { internalUrl, compilerUrl } = network[current.network];
+    const { activeNetwork } = store.getters;
+    const { internalUrl, compilerUrl } = activeNetwork;
     const node = await Node({
       url: internalUrl,
       internalUrl,
@@ -114,7 +114,7 @@ export default {
             store.dispatch('accounts/signTransaction', { txBase64, opt }),
         },
       })({
-        nodes: [{ name: current.network, instance: node }],
+        nodes: [{ name: activeNetwork.name, instance: node }],
         accounts: [account],
         nativeMode: true,
         compilerUrl,

@@ -23,9 +23,9 @@ export default {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
     commit(types.UPDATE_BALANCE, convertToAE(balance));
   },
-  async fetchTransactions({ state }, { limit, page, recent }) {
+  async fetchTransactions({ state, getters: { activeNetwork } }, { limit, page, recent }) {
     if (!state.middleware) return [];
-    const { middlewareUrl } = state.network[state.current.network];
+    const { middlewareUrl } = activeNetwork;
     const { publicKey } = state.account;
     let txs = await Promise.all([
       (async () =>
@@ -160,8 +160,8 @@ export default {
     return { addresses: uniq(addresses).filter(a => a), tab };
   },
 
-  async getTipContractAddress({ state: { network, current, sdk }, commit }) {
-    const { tipContract } = network[current.network];
+  async getTipContractAddress({ state: { sdk }, getters: { activeNetwork }, commit }) {
+    const { tipContract } = activeNetwork;
     const contractAddress = tipContract.includes('.chain')
       ? getAddressByNameEntry(await sdk.api.getNameEntryByName(tipContract), 'contract_pubkey')
       : tipContract;

@@ -90,10 +90,12 @@ export default store =>
             });
         }
       },
-      async fetchAuctions({ rootState: { network, current } }) {
-        const middleware = network[current.network].middlewareUrl;
+      async fetchAuctions({ rootGetters: { activeNetwork } }) {
+        const { middlewareUrl } = activeNetwork;
         return (
-          await axios(`${middleware}/middleware/names/auctions/active`).catch(() => ({ data: [] }))
+          await axios(`${middlewareUrl}/middleware/names/auctions/active`).catch(() => ({
+            data: [],
+          }))
         ).data;
       },
       async fetchAuctionEntry({ rootState: { middleware } }, name) {
