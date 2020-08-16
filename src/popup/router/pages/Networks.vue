@@ -1,30 +1,30 @@
 <template>
   <div class="popup">
     <div v-if="mode === 'list'" data-cy="networks">
-      <ListItem v-for="(n, key, index) in networks" :key="index" class="network-row">
+      <ListItem v-for="network in networks" :key="network.name" class="network-row">
         <CheckBox
-          :value="n.name === current.network"
+          :value="network === activeNetwork"
           type="radio"
           name="activeNetwork"
-          @click.native="selectNetwork(n.name)"
+          @click.native="selectNetwork(network.name)"
           prevent
         />
         <div class="mr-auto text-left">
-          <p class="f-16" data-cy="network-name">{{ n.name }}</p>
+          <p class="f-16" data-cy="network-name">{{ network.name }}</p>
           <p class="f-12 url" data-cy="network-url">
-            <b>{{ $t('pages.network.url') }}</b> {{ n.url }}
+            <b>{{ $t('pages.network.url') }}</b> {{ network.url }}
           </p>
           <p class="f-12 url" data-cy="network-middleware">
-            <b>{{ $t('pages.network.middleware') }}</b> {{ n.middlewareUrl }}
+            <b>{{ $t('pages.network.middleware') }}</b> {{ network.middlewareUrl }}
           </p>
         </div>
-        <ae-dropdown direction="right" v-if="!n.system" data-cy="more">
+        <ae-dropdown direction="right" v-if="network.index !== undefined" data-cy="more">
           <ae-icon name="more" size="20px" slot="button" />
-          <li @click="setNetworkEdit(n, index)" data-cy="edit">
+          <li @click="setNetworkEdit(network)" data-cy="edit">
             <ae-icon name="edit" />
             {{ $t('pages.network.edit') }}
           </li>
-          <li @click="deleteNetwork(n, index)" data-cy="delete">
+          <li @click="deleteNetwork(network.index)" data-cy="delete">
             <ae-icon name="delete" />
             {{ $t('pages.network.delete') }}
           </li>
@@ -63,32 +63,31 @@
       <Button
         class="danger"
         half
-        @click="addNetwork"
+        @click="addOrUpdateNetwork"
         :disabled="
           !network.name ||
             !network.url ||
             !network.middlewareUrl ||
             !network.compilerUrl ||
-            network.error !== false
+            !!network.error
         "
         data-cy="connect"
       >
         {{ $t('pages.network.save') }}
       </Button>
-      <div v-if="network.error" class="error-msg" v-html="network.error" data-cy="error-msg"></div>
+      <div v-if="network.error" class="error-msg" v-html="network.error" data-cy="error-msg" />
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import CheckBox from '../components/CheckBox';
 import ListItem from '../components/ListItem';
-import { defaultNetwork, AEX2_METHODS } from '../../utils/constants';
+import { defaultNetwork } from '../../utils/constants';
 import wallet from '../../../lib/wallet';
-import { postMessage } from '../../utils/connection';
 
 const networkProps = {
   name: null,
@@ -111,47 +110,43 @@ export default {
       network: networkProps,
     };
   },
-  computed: {
-    ...mapState(['current']),
-    ...mapGetters(['networks', 'allowTipping']),
+  computed: mapGetters(['networks', 'activeNetwork', 'allowTipping']),
+  mounted() {
+    this.$watch(
+      ({ network: { name, url, middlewareUrl, compilerUrl } }) => [
+        name,
+        url,
+        middlewareUrl,
+        compilerUrl,
+      ],
+      () => {
+        this.network.error = false;
+      },
+    );
   },
   methods: {
     async selectNetwork(network) {
       await this.$store.dispatch('switchNetwork', network);
-      this.$store.commit('SET_NODE_STATUS', 'connecting');
-      if (process.env.IS_EXTENSION)
-        postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload: network });
-      const { title, msg } = this.$t('modals.tip-mainnet-warning');
-      wallet.initSdk().then(() => {
-        if (!this.allowTipping)
-          this.$store.dispatch('modals/open', {
-            name: 'default',
-            title,
-            msg,
-          });
+      await wallet.initSdk();
+      if (this.allowTipping) return;
+      await this.$store.dispatch('modals/open', {
+        name: 'default',
+        ...this.$t('modals.tip-mainnet-warning'),
       });
     },
     cancel() {
       this.mode = 'list';
       this.network = networkProps;
     },
-    setNetworkEdit(n, idx) {
+    setNetworkEdit(network) {
       this.mode = 'edit';
-      this.network = { ...networkProps, ...n, idx };
+      this.network = { ...networkProps, ...network };
     },
-    async deleteNetwork(network, idx) {
-      if (network.name !== defaultNetwork.name) this.selectNetwork(defaultNetwork.name);
-      const allNetworks = Object.values(this.networks).filter((n, i) => idx !== i);
-      await this.$store.commit(
-        'SET_NETWORKS',
-        allNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {}),
-      );
-      this.$store.commit(
-        'SET_USERNETWORKS',
-        allNetworks.filter(({ name }) => name !== defaultNetwork.name),
-      );
+    async deleteNetwork(networkIndex) {
+      await this.selectNetwork(defaultNetwork.name);
+      await this.$store.commit('deleteUserNetwork', networkIndex);
     },
-    async addNetwork() {
+    async addOrUpdateNetwork() {
       try {
         this.network.error = false;
         if (!this.network.name) throw new Error('Enter network name');
@@ -161,37 +156,22 @@ export default {
         if (!url.hostname || !middleware.hostname || !compiler.hostname)
           throw new Error('Invalid hostname');
 
-        const exist = (name, idx) =>
-          (this.network.idx >= 0
-            ? name === this.network.name && idx !== this.network.idx
-            : name === this.network.name) || this.network.name === defaultNetwork.name;
-        const allNetworks = Object.values(this.networks);
-        if (allNetworks.find(({ name }, idx) => exist(name, idx)))
+        const networkWithSameName = this.networks[this.network.name];
+        if (
+          networkWithSameName &&
+          (this.network.index === undefined || networkWithSameName.index !== this.network.index)
+        )
           throw new Error('Network with this name exist');
-        const newNetwork = {
-          ...defaultNetwork,
-          system: false,
+
+        this.$store.commit('setUserNetwork', {
+          index: this.network.index,
           url: this.network.url,
           internalUrl: this.network.url,
           middlewareUrl: this.network.middlewareUrl,
           compilerUrl: this.network.compilerUrl,
           name: this.network.name,
-        };
-        if (this.network.idx >= 0) {
-          allNetworks[this.network.idx] = newNetwork;
-          await this.$store.commit(
-            'SET_NETWORKS',
-            allNetworks.reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {}),
-          );
-          this.selectNetwork(this.network.name);
-        } else {
-          allNetworks.push(newNetwork);
-          await this.$store.commit('ADD_NETWORK', newNetwork);
-        }
-        this.$store.commit(
-          'SET_USERNETWORKS',
-          allNetworks.filter(({ name }) => name !== defaultNetwork.name),
-        );
+        });
+        await this.selectNetwork(this.network.name);
         this.mode = 'list';
       } catch (e) {
         this.network.error = e.message;

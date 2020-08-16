@@ -7,7 +7,6 @@ import { postMessage } from '../popup/utils/connection';
 import {
   parseFromStorage,
   fetchJson,
-  getAllNetworks,
   IN_FRAME,
   toURL,
   getAeppAccountPermission,
@@ -80,10 +79,6 @@ export default {
     store.commit('SET_ACTIVE_ACCOUNT', { publicKey: address, index: 0 });
 
     store.commit('SWITCH_LOGGED_IN', true);
-
-    /* Get network */
-    const networks = await getAllNetworks();
-    store.commit('SET_NETWORKS', networks);
 
     store.commit('SET_MAIN_LOADING', false);
     return { loggedIn: true };
@@ -184,7 +179,7 @@ export default {
         setInterval(connectToParentFrames, 3000);
       }
 
-      await store.dispatch('initSdk', sdk);
+      await store.commit('initSdk', sdk);
       await initContractInstances();
       await initMiddleware();
       store.commit('SET_NODE_STATUS', 'connected');

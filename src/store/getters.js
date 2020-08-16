@@ -1,4 +1,5 @@
 import { isEmpty } from 'lodash-es';
+import { defaultNetwork } from '../popup/utils/constants';
 
 export default {
   account(state, { activeAccountName }) {
@@ -16,21 +17,23 @@ export default {
   currentCurrency({ current }) {
     return current.currency.toUpperCase();
   },
-  activeNetwork({ current, network }) {
-    return network[current.network] || {};
+  networks({ userNetworks }) {
+    return [
+      defaultNetwork,
+      ...userNetworks.map((network, index) => ({ index, ...network })),
+    ].reduce((acc, n) => ({ ...acc, [n.name]: n }), {});
   },
-  networks({ network }) {
-    const networks = { ...network };
-    return networks;
+  activeNetwork({ current: { network } }, { networks }) {
+    return networks[network];
+  },
+  mainnet(state, { activeNetwork }) {
+    return activeNetwork.networkId === 'ae_mainnet';
   },
   activeAccountName({ account }, getters) {
     return getters['names/getDefault'](account.publicKey) || 'Main account';
   },
   allowTipping(state, { mainnet }) {
     return mainnet || process.env.RUNNING_IN_TESTS;
-  },
-  mainnet({ network, current }) {
-    return network[current.network].networkId === 'ae_mainnet';
   },
   tokenBalance(state) {
     return state.current.token !== 0

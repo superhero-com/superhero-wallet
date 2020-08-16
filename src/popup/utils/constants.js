@@ -64,8 +64,8 @@ export const calculateFee = (type, params) => {
   };
 };
 
-export const defaultNetwork = {
-  ...(process.env.NETWORK === 'Testnet'
+export const defaultNetwork =
+  process.env.NETWORK === 'Testnet'
     ? {
         url: 'https://sdk-testnet.aepps.com/',
         internalUrl: 'https://sdk-testnet.aepps.com/',
@@ -89,9 +89,7 @@ export const defaultNetwork = {
         tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
         tipContract: 'superhero.chain',
         name: 'Mainnet',
-      }),
-  system: true,
-};
+      };
 
 export const AGGREGATOR_URL = 'https://superhero.com/';
 export const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';

@@ -28,7 +28,6 @@ const initialState = {
     currency: 'usd',
     currencyRate: 0,
   },
-  network: { [defaultNetwork.name]: defaultNetwork },
   userNetworks: [],
   isLoggedIn: false,
   transactions: {
