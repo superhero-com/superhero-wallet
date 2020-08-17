@@ -1,36 +1,27 @@
-import { setInterval } from 'timers';
 import { generateHdWallet, getHdWalletAccount } from './popup/utils/hdWallet';
 import { stringifyForStorage, parseFromStorage } from './popup/utils/helper';
 import decryptKeystore from './popup/utils/decrypt-keystore';
 
-export default class WalletController {
-  constructor(tests = false) {
-    this.tests = tests;
-    if (tests && localStorage.getItem('wallet')) {
-      this.wallet = parseFromStorage(localStorage.getItem('wallet'));
-    }
-    if (!tests && process.env.IS_EXTENSION) {
-      setInterval(() => {
-        browser.windows.getAll({}).then(wins => {
-          if (wins.length === 0) {
-            this.lockWallet();
-            sessionStorage.removeItem('phishing_urls');
-          }
-        });
-        if (!this.wallet) {
+class WalletController {
+  constructor() {
+    if (!process.env.IS_EXTENSION) return;
+    setInterval(() => {
+      browser.windows.getAll({}).then(wins => {
+        if (wins.length === 0) {
           this.lockWallet();
+          sessionStorage.removeItem('phishing_urls');
         }
-      }, 5000);
-    }
+      });
+      if (!this.wallet) {
+        this.lockWallet();
+      }
+    }, 5000);
   }
 
   async unlockWallet({ accountPassword, encryptedPrivateKey }) {
     const match = await decryptKeystore(encryptedPrivateKey, accountPassword);
     if (match !== false) {
       this.wallet = generateHdWallet(match);
-      if (this.tests) {
-        localStorage.setItem('wallet', stringifyForStorage(this.wallet));
-      }
       const { address } = getHdWalletAccount(this.wallet);
       return { decrypt: true, address };
     }
@@ -43,9 +34,6 @@ export default class WalletController {
 
   generateWallet({ seed }) {
     this.wallet = generateHdWallet(parseFromStorage(seed));
-    if (this.tests) {
-      localStorage.setItem('wallet', stringifyForStorage(this.wallet));
-    }
     const { address } = getHdWalletAccount(this.wallet);
     return { generate: true, address };
   }
@@ -71,3 +59,5 @@ export default class WalletController {
     return typeof this.wallet !== 'undefined' && this.wallet != null;
   }
 }
+
+export default new WalletController();

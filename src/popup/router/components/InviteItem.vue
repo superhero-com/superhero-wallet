@@ -1,23 +1,23 @@
 <template>
   <div class="invite-row">
     <div class="invite-info">
-      <span class="primary">{{ invite.balance }} {{ $t('pages.appVUE.aeid') }}</span>
+      <span class="primary">{{ balance }} {{ $t('pages.appVUE.aeid') }}</span>
       <!--eslint-disable-line vue-i18n/no-raw-text-->
-      ({{ (invite.balance * current.currencyRate).toFixed(2) }}
+      ({{ (balance * current.currencyRate).toFixed(2) }}
       <!--eslint-disable-next-line vue-i18n/no-raw-text-->
       {{ current.currency.toUpperCase() }})
-      <span class="date">{{ invite.date | formatDate }}</span>
+      <span class="date">{{ createdAt | formatDate }}</span>
     </div>
     <div class="invite-link">
-      <span>{{ invite.link }}</span>
-      <button class="invite-link-copy" v-clipboard:copy="invite.link"><CopyIcon /></button>
+      <span>{{ link }}</span>
+      <button class="invite-link-copy" v-clipboard:copy="link"><CopyIcon /></button>
     </div>
     <template v-if="!topUp">
       <Button half dark @click="topUp = true">{{ $t('pages.invite.top-up') }}</Button>
       <Button half @click="claim">{{ $t('pages.invite.claim') }}</Button>
     </template>
     <template v-else>
-      <AmountSend @changeAmount="val => (topUpAmount = val)" :value="topUpAmount" />
+      <AmountSend v-model="topUpAmount" />
       <Button half dark @click="topUp = false">{{ $t('pages.invite.close') }}</Button>
       <Button half @click="sendTopUp">{{ $t('pages.invite.top-up') }}</Button>
     </template>
@@ -26,7 +26,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
+import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk/es';
 import AmountSend from './AmountSend';
 import Button from './Button';
 import CopyIcon from '../../../icons/copy.svg?vue-component';
@@ -34,39 +34,69 @@ import { formatDate } from '../../utils';
 
 export default {
   props: {
-    invite: { type: Object, required: true },
+    secretKey: { type: String, required: true },
+    createdAt: { type: Number, required: true },
   },
   components: { Button, AmountSend, CopyIcon },
   filters: { formatDate },
-  data: () => ({ topUp: false, topUpAmount: 0 }),
+  data: () => ({ topUp: false, topUpAmount: 0, balance: 0 }),
   computed: {
     ...mapState(['sdk', 'current']),
+    link() {
+      const secretKey = Crypto.encodeBase58Check(Buffer.from(this.secretKey, 'hex'));
+      return new URL(
+        this.$router
+          .resolve({ name: 'invite-claim', params: { secretKey } })
+          .href.replace(/^#/, ''),
+        'https://wallet.superhero.com',
+      );
+    },
+    address() {
+      return Crypto.getAddressFromPriv(this.secretKey);
+    },
+  },
+  watch: {
+    secretKey: {
+      async handler() {
+        await this.updateBalance();
+      },
+      immediate: true,
+    },
   },
   methods: {
+    async updateBalance() {
+      await this.$watchUntilTruly(() => this.sdk);
+      this.balance = parseFloat(
+        await this.sdk
+          .balance(this.address, { format: AmountFormatter.AE_AMOUNT_FORMATS.AE })
+          .catch(() => 0),
+      ).toFixed(2);
+    },
     async claim() {
       this.$emit('loading', true);
-      await this.$store.dispatch('invites/claim', this.invite.idx);
-      this.$emit('loading', false);
-      this.$store.dispatch('invites/updateBalances');
+      try {
+        await this.$store.dispatch('invites/claim', this.secretKey);
+        await this.updateBalance();
+      } catch (error) {
+        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', error)) return;
+        throw error;
+      } finally {
+        this.$emit('loading', false);
+      }
     },
     async sendTopUp() {
       this.$emit('loading', true);
-      const address = this.invite.publicKey;
       try {
-        await this.sdk.spend(this.topUpAmount, address, {
-          payload: 'referral',
-          denomination: AE_AMOUNT_FORMATS.AE,
-        });
-        this.$store.dispatch('invites/updateBalances');
-      } catch (e) {
-        if (e.message.includes('is not enough to execute')) {
-          this.$store.dispatch('modals/open', {
-            name: 'default',
-            msg: this.$t('pages.invite.insufficient-balance'),
+        if (this.topUpAmount > 0) {
+          await this.sdk.spend(this.topUpAmount, this.address, {
+            payload: 'referral',
+            denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
           });
-          return;
+          await this.updateBalance();
         }
-        throw e;
+      } catch (error) {
+        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', error)) return;
+        throw error;
       } finally {
         this.$emit('loading', false);
       }

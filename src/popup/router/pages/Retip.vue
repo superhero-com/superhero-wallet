@@ -11,8 +11,7 @@
 
     <AmountSend
       :amountError="amountError"
-      @changeAmount="val => (amount = val)"
-      :value="amount"
+      v-model="amount"
       :errorMsg="amount && amount < minTipAmount"
     />
     <div class="tip-note-preview mt-15">

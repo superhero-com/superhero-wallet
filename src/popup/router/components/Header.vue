@@ -33,8 +33,11 @@ import Logo from '../../../icons/logo-small.svg?vue-component';
 
 export default {
   components: { Arrow, Bell, Hamburger, Logo },
+  data: () => ({
+    aeppPopup: window.RUNNING_IN_POPUP,
+  }),
   computed: {
-    ...mapState(['aeppPopup', 'tourRunning', 'isLoggedIn', 'notifications']),
+    ...mapState(['tourRunning', 'isLoggedIn', 'notifications']),
     title() {
       return this.$route.meta.title;
     },

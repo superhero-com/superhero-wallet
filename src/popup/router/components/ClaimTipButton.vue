@@ -10,7 +10,7 @@
 import Button from './Button';
 import Claim from '../../../icons/claim.svg?vue-component';
 import openUrl from '../../utils/openUrl';
-import { UI_URL } from '../../utils/constants';
+import { AGGREGATOR_URL } from '../../utils/constants';
 
 export default {
   props: ['styling'],
@@ -20,7 +20,7 @@ export default {
   },
   methods: {
     openHowToClaimURL() {
-      openUrl(`${UI_URL}create-profile`);
+      openUrl(`${AGGREGATOR_URL}create-profile`);
     },
   },
 };

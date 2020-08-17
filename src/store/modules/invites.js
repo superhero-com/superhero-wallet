@@ -1,59 +1,32 @@
-import Vue from 'vue';
-import { Universal as Ae, MemoryAccount } from '@aeternity/aepp-sdk/es';
-import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
+import { Universal, MemoryAccount, Crypto } from '@aeternity/aepp-sdk/es';
+import { i18n } from '../../popup/utils/i18nHelper';
 
 export default {
   namespaced: true,
   state: {
-    links: [],
+    invites: [],
   },
   mutations: {
-    add(state, link) {
-      state.links.unshift(link);
-    },
-    setBalance(state, { idx, balance }) {
-      Vue.set(state.links[idx], 'balance', balance);
-    },
+    add: ({ invites }, secretKey) => invites.unshift({ secretKey, createdAt: Date.now() }),
   },
   actions: {
-    async claim({ rootState: { account }, state: { links }, dispatch }, idx) {
-      const { publicKey, secretKey } = links[idx];
-      const sdk = await dispatch('getClient', { publicKey, secretKey });
-      try {
-        sdk.transferFunds(1, account.publicKey, {
-          payload: 'referral',
-        });
-      } catch (e) {
-        if (e.message.includes('is not enough to execute')) {
-          dispatch(
-            'modals/open',
-            { name: 'default', msg: this.$t('pages.invite.insufficient-balance') },
-            { root: true },
-          );
-          return;
-        }
-        throw e;
-      }
-    },
-    async getClient({ rootState: { network, current, sdk } }, keypair) {
-      const { compilerUrl } = network[current.network];
-      const { instance } = sdk.pool.get(current.network);
-      const accounts = MemoryAccount({ keypair });
-      return Ae({
-        compilerUrl,
-        nodes: [{ name: current.network, instance }],
-        accounts: [accounts],
+    async claim({ rootState: { account, current, sdk } }, secretKey) {
+      const publicKey = Crypto.getAddressFromPriv(secretKey);
+      // TODO: Remove this after merging https://github.com/aeternity/aepp-sdk-js/pull/1060
+      const s = await Universal({
+        nodes: [sdk.pool.get(current.network)],
+        accounts: [MemoryAccount({ keypair: { publicKey, secretKey } })],
       });
+      await s.transferFunds(1, account.publicKey, { payload: 'referral', verify: false });
     },
-    async updateBalances({ rootState: { sdk }, state: { links }, commit }) {
-      await Promise.all(
-        links.map(async ({ publicKey }, idx) => {
-          const balance = parseFloat(
-            await sdk.balance(publicKey, { format: AE_AMOUNT_FORMATS.AE }).catch(() => 0),
-          ).toFixed(2);
-          commit('setBalance', { idx, balance });
-        }),
+    async handleNotEnoughFoundsError({ dispatch }, error) {
+      if (!error.message.includes('is not enough to execute')) return false;
+      await dispatch(
+        'modals/open',
+        { name: 'default', msg: i18n.t('pages.invite.insufficient-balance') },
+        { root: true },
       );
+      return true;
     },
   },
 };

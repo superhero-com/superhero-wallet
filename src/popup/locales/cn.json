@@ -540,12 +540,11 @@
       "ledgerAccountCreate": "点击下方按钮创建第一个帐户"
     },
     "manageAccounts": {
-      "backToAccount": "返回帐户",
-      "manageAccounts": "管理帐户",
-      "allAccounts": "所有帐户",
-      "addNewSubAccount": "添加新的子帐户",
-      "account": "帐户",
-      "add": "添加",
+      "backToAccount": "返回账户",
+      "manageAccounts": "管理账户",
+      "allAccounts": "所有账户",
+      "account": "账户",
+      "add": "增加",
       "enterName": "输入名称"
     },
     "manageNetworks": {
@@ -621,12 +620,11 @@
       "toDashboard": "返回导航"
     },
     "send": {
-      "backToAccount": "返回帐户",
-      "heading": "新转账",
-      "recipient": "接收",
-      "sendSubaccount": "或选择子帐户",
-      "txFee": " 最小TX费:",
-      "maxSpendableValue": "最大可用数量:",
+      "backToAccount": "返回账户",
+      "heading": "新的转账",
+      "recipient": "收据",
+      "txFee": "最少转账手续费",
+      "maxSpendableValue": "最大可转账价值",
       "send": "发送",
       "success": "成功",
       "seeTransactionExplorer": "在浏览器中查看转账。",

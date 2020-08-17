@@ -10,7 +10,7 @@
       @toggle-sidebar="showSidebar = !showSidebar"
     />
 
-    <router-view :key="$route.fullPath" />
+    <RouterView />
 
     <transition name="slide">
       <div
@@ -60,6 +60,7 @@ export default {
     showSidebar: false,
     polling: null,
     iframe: IN_FRAME,
+    aeppPopup: window.RUNNING_IN_POPUP,
   }),
   computed: {
     ...mapGetters(['account']),
@@ -71,7 +72,6 @@ export default {
       'notifications',
       'isLoggedIn',
       'mainLoading',
-      'aeppPopup',
     ]),
     waveBg() {
       return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(

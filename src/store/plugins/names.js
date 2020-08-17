@@ -46,16 +46,10 @@ export default store =>
                 })),
             () => [],
           );
-        const namesPromise = Promise.all(
-          rootState.subaccounts.map(({ publicKey }) =>
-            Promise.all([
-              getPendingNameClaimTransactions(publicKey),
-              rootState.middleware.getActiveNames({ owner: publicKey }),
-            ]),
-          ),
-        ).then(names => names.flat(2));
-
-        let [names] = await Promise.all([namesPromise]);
+        let names = await Promise.all([
+          getPendingNameClaimTransactions(rootState.account.publicKey),
+          rootState.middleware.getActiveNames({ owner: rootState.account.publicKey }),
+        ]).then(arr => arr.flat());
 
         const defaultName = getDefault(rootState.account.publicKey);
         let defaultNameRevoked = false;

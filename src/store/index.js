@@ -17,7 +17,6 @@ Vue.use(Vuex);
 
 const initialState = {
   isRestored: false,
-  subaccounts: [],
   account: {},
   mnemonic: null,
   activeAccount: 0,
@@ -38,7 +37,6 @@ const initialState = {
   },
   sdk: null,
   middleware: null,
-  aeppPopup: false,
   tipping: null,
   tippingAddress: null,
   mainLoading: true,
@@ -55,6 +53,7 @@ const initialState = {
   tourRunning: false,
   tourStartBar: true,
   saveErrorLog: true,
+  loginTargetLocation: { name: 'account' },
 };
 
 export default new Vuex.Store({
@@ -66,9 +65,6 @@ export default new Vuex.Store({
         Vue.set(state, name, value),
       );
     },
-    markMigrationAsApplied(state, migrationId) {
-      Vue.set(state.migrations, migrationId, true);
-    },
     resetState(state) {
       Object.entries({ ...initialState, isRestored: true }).forEach(([name, value]) =>
         Vue.set(state, name, value),
@@ -79,13 +75,12 @@ export default new Vuex.Store({
   actions,
   plugins: [
     persistState(
-      (state, store) => runMigrations(state, store),
+      runMigrations,
       ({
         migrations,
         current,
         transactions,
         balance,
-        subaccounts,
         currencies,
         userNetworks,
         names: { owned, defaults } = {},
@@ -105,7 +100,6 @@ export default new Vuex.Store({
         current,
         transactions,
         balance,
-        subaccounts,
         currencies,
         userNetworks,
         names: { owned, defaults },

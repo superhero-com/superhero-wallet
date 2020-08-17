@@ -3,10 +3,6 @@ import { ABI_VERSIONS, TX_TYPE, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/bu
 import BigNumber from 'bignumber.js';
 
 export const MAGNITUDE = 18;
-export const MAGNITUDE_EXA = 18;
-export const MAGNITUDE_GIGA = 9;
-export const MAGNITUDE_MICRO = -6;
-export const MAGNITUDE_PICO = -12;
 export const TX_TYPES = {
   txSign: TX_TYPE.spend,
   contractCall: TX_TYPE.contractCall,
@@ -31,10 +27,6 @@ export const AEX2_METHODS = {
   SWITCH_NETWORK: 'SWITCH_NETWORK',
   LOGOUT: 'LOGOUT',
   INIT_RPC_WALLET: 'INIT_RPC_WALLET',
-};
-
-export const NOTIFICATION_METHODS = {
-  SWITCH_NETWORK: 'SWITCH_NETWORK',
 };
 
 export const CONNECTION_TYPES = {
@@ -103,7 +95,8 @@ export const defaultNetworks = {
 export const networks = {
   [DEFAULT_NETWORK]: { ...defaultNetworks[DEFAULT_NETWORK] },
 };
-export const UI_URL = 'https://superhero.com/#/';
+
+export const AGGREGATOR_URL = 'https://superhero.com/';
 export const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
 export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
 export const NO_POPUP_AEPPS = [
@@ -114,9 +107,7 @@ export const NO_POPUP_AEPPS = [
   ...(process.env.NODE_ENV === 'development' ? ['localhost'] : []),
 ];
 
-export const BLACKLIST_AEPPS = ['coronanews.org'];
 export const TXS_PER_PAGE = 30;
-export const TX_LIMIT_PER_DAY = 2000;
 export const MAX_AMOUNT_WITHOUT_CONFIRM = 10;
 export const AENS_DOMAIN = '.chain';
 export const MAX_AUCTION_NAME_LENGTH = 12 + AENS_DOMAIN.length;

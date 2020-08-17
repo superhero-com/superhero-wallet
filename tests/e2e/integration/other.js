@@ -29,9 +29,9 @@ describe('Tests cases not connected to specific page', () => {
     });
   });
 
-  txs.forEach(tx => {
+  txs.forEach(pendingTransaction => {
     it('Show pending tx', () => {
-      cy.login({ tx })
+      cy.login({ pendingTransaction })
         .get('[data-cy=pending-txs]')
         .should('be.visible');
     });

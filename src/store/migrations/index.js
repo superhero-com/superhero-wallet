@@ -1,8 +1,8 @@
 import runMigrations, { registerMigration } from './runner';
-import updateState from './update-state';
-import updateDefaultName from './update-default-name';
+import collectState from './00-collect-state';
+import setDefaultNames from './01-set-default-names';
 
-registerMigration(updateState);
-registerMigration(updateDefaultName);
+registerMigration(collectState);
+registerMigration(setDefaultNames);
 
 export default runMigrations;

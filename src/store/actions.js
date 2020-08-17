@@ -15,12 +15,6 @@ export default {
     commit(types.UPDATE_ACCOUNT, payload);
     commit(types.UPDATE_BALANCE);
   },
-  setSubAccount({ commit }, payload) {
-    commit(types.SET_SUBACCOUNT, payload);
-  },
-  setSubAccounts({ commit }, payload) {
-    commit(types.SET_SUBACCOUNTS, payload);
-  },
   switchNetwork({ commit }, payload) {
     commit(types.SWITCH_NETWORK, payload);
     commit(types.UPDATE_LATEST_TRANSACTIONS, []);
@@ -97,19 +91,9 @@ export default {
     ).address;
   },
 
-  async setLogin({ commit, dispatch }, { keypair }) {
+  async setLogin({ commit }, { keypair }) {
     commit('UPDATE_ACCOUNT', keypair);
-
-    const sub = [
-      {
-        name: 'Main Account',
-        publicKey: keypair.publicKey,
-        balance: 0,
-        root: true,
-      },
-    ];
     commit('SET_ACTIVE_ACCOUNT', { publicKey: keypair.publicKey, index: 0 });
-    await dispatch('setSubAccounts', sub);
     commit('UPDATE_ACCOUNT', keypair);
     commit('SWITCH_LOGGED_IN', true);
   },
@@ -153,9 +137,6 @@ export default {
     } else {
       commit('ADD_CONNECTED_AEPP', { host, account });
     }
-  },
-  async checkBackupSeed() {
-    return (await browser.storage.local.get('backed_up_Seed')).backed_up_Seed;
   },
   async getWebPageAddresses({ state: { sdk } }) {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });

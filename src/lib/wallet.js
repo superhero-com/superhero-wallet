@@ -1,5 +1,4 @@
-import Node from '@aeternity/aepp-sdk/es/node';
-import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
+import { Node, MemoryAccount, RpcWallet } from '@aeternity/aepp-sdk/es';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import { isEmpty, times } from 'lodash-es';
 import store from '../store';
@@ -23,7 +22,6 @@ async function initMiddleware() {
 
 async function logout() {
   store.commit('SET_ACTIVE_ACCOUNT', { publicKey: '', index: 0 });
-  store.commit('UNSET_SUBACCOUNTS');
   store.commit('UPDATE_ACCOUNT', {});
   store.commit('SWITCH_LOGGED_IN', false);
 }
@@ -86,7 +84,6 @@ export default {
     });
     const account = MemoryAccount({ keypair });
     try {
-      const { RpcWallet } = await import('@aeternity/aepp-sdk/es/ae/wallet');
       const acceptCb = (_, { accept }) => accept();
       const sdk = await RpcWallet.compose({
         methods: {

@@ -39,10 +39,4 @@ export default {
       ? state.tokens[state.current.token].balance.toFixed(2)
       : state.balance.toFixed(2);
   },
-  isLedger(state) {
-    if (state.subaccounts.length > 0) {
-      return state.subaccounts.find(s => s.publicKey === state.account.publicKey).isLedger;
-    }
-    return state.subaccounts;
-  },
 };

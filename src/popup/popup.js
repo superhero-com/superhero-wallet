@@ -25,14 +25,12 @@ Vue.prototype.$watchUntilTruly = function watchUntilTruly(getter) {
   });
 };
 
-(async () => {
-  await registerModals();
-  sync(store, router);
-  new Vue({
-    store,
-    router,
-    i18n,
-    render: h => h(App),
-  }).$mount('#app');
-  Logger.init();
-})();
+registerModals();
+sync(store, router);
+new Vue({
+  store,
+  router,
+  i18n,
+  render: h => h(App),
+}).$mount('#app');
+Logger.init();
