@@ -114,11 +114,6 @@ main {
   }
 }
 
-.modal-two-buttons .ae-modal-light {
-  position: relative;
-  width: 100%;
-}
-
 .modal-two-buttons .buttons {
   position: absolute;
   left: 0;
@@ -140,26 +135,9 @@ main {
   word-break: break-word;
 }
 
-.ae-overlay .ae-modal-light .buttons {
-  margin-top: 5px !important;
-}
-
 .signature-modal .buttons,
 .seeAllRegisteredNames .buttons {
   display: none !important;
-}
-
-.ae-overlay .ae-modal-light h1 {
-  word-break: break-word;
-}
-
-.ae-overlay .ae-modal-light main {
-  padding-bottom: 1rem;
-}
-
-.ae-modal-light > main > div {
-  word-break: break-word;
-  white-space: pre-line;
 }
 
 .ae-main {
@@ -202,142 +180,14 @@ main {
   }
 }
 
-.customFileUpload {
-  display: block;
-  padding: 0;
-  cursor: pointer;
-  background: $input-background;
-  font-weight: normal;
-  border-radius: 4px;
-
-  .file-toolbar {
-    background: $input-toolbar-background;
-    color: $input-toolbar-color;
-    padding: 0 1rem;
-    margin: 0;
-    font-weight: normal;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    font-size: 0.6875rem;
-    letter-spacing: 0.1em;
-    line-height: 0.75rem;
-    text-transform: uppercase;
-    font-family: "Inter UI", sans-serif;
-    display: flex;
-    flex-direction: row;
-    height: 2rem;
-    align-items: center;
-  }
-
-  .file-label {
-    padding: 0.5rem 1rem;
-    display: inline-block;
-    font-family: "Inter UI", sans-serif;
-    font-size: 0.8125rem;
-    letter-spacing: 0.02em;
-    line-height: 1rem;
-    color: #76818c;
-    padding-bottom: 0;
-  }
-
-  .file-input {
-    font-family: "Inter UI", sans-serif;
-    font-size: 1.0625rem;
-    line-height: 1.5rem;
-    align-self: center;
-    justify-self: center;
-    flex: 0 1 100%;
-    width: 100%;
-    padding: 0.5rem 1rem;
-    background: transparent;
-    border: none;
-    outline: none;
-  }
-}
-
 .ae-overlay {
   z-index: 5;
 }
 
-.transactionList,
-.allTransactions {
-  padding: 0 0 0 0 !important;
-}
-
-.transactionsPadding {
-  padding: 1rem !important;
-  margin-top: 0;
-}
-
-.tabs,
 .date {
   margin-left: rem(-48px);
   margin-right: rem(-48px);
   padding-left: rem(48px);
-}
-
-.tabs {
-  box-shadow: 0 4px 2px -2px rgba(27, 68, 121, 0.1);
-
-  span {
-    cursor: pointer;
-    display: inline-block;
-    width: 32%;
-    font-weight: bold;
-    text-align: center;
-    color: #203040;
-    padding-bottom: 5px;
-
-    &.tab-active {
-      border-bottom: 2px solid $primary-color;
-    }
-  }
-}
-
-@mixin size($width, $height: 0) {
-  @if $height <= 0 {
-    $height: $width;
-  }
-
-  width: $width;
-  height: $height;
-}
-
-// auto hyphens
-@mixin hyphens {
-  word-break: break-all;
-  hyphens: auto;
-}
-
-// border-bottom
-@mixin border-bottom {
-  border-bottom: 1px solid #ccc;
-}
-
-@mixin clearfix {
-  &::after {
-    content: '';
-    display: block;
-    float: none;
-    clear: both;
-  }
-}
-
-.my-2 {
-  margin-top: 2em;
-  margin-bottom: 2em;
-}
-
-.mb-0 {
-  margin-bottom: 0 !important;
-}
-
-.mb-1 {
-  margin-bottom: 1rem;
-}
-
-.mb-5 {
-  margin-bottom: 5rem !important;
 }
 
 .input {
@@ -357,36 +207,16 @@ main {
   max-height: 200px;
 }
 
-.flex-direction-column {
-  flex-direction: column;
-}
-
 .flex {
   display: flex;
-}
-
-.flex-col {
-  width: 100%;
 }
 
 .flex-justify-between {
   justify-content: space-between;
 }
 
-.flex-justify-content-arround {
-  justify-content: space-around;
-}
-
 .flex-justify-content-center {
   justify-content: center;
-}
-
-.flex-justify-content-start {
-  justify-content: flex-start;
-}
-
-.flex-justify-items-left {
-  justify-items: left !important;
 }
 
 .flex-align-center {
@@ -395,21 +225,6 @@ main {
 
 .flex-align-start {
   align-items: flex-start !important;
-}
-
-.transactionOutgoing {
-  background: $color-secondary !important;
-  color: #fff !important;
-}
-
-.transactionIncoming {
-  background: $color-alternative !important;
-  color: #fff !important;
-}
-
-.badgeTransactionType {
-  height: auto !important;
-  padding: 0.2rem 0.5rem !important;
 }
 
 .balance {
@@ -430,39 +245,8 @@ main {
   }
 }
 
-.balanceTotalSpend {
-  color: $secondary-color;
-}
-
-.popup-modal {
-  width: 100%;
-  z-index: 100;
-}
-
-.popup-button { width: 60%; }
-
-.backbutton {
-  color: #62d9cb;
-  text-transform: uppercase;
-  font-weight: 700;
-}
-
-.backbutton .ae-icon {
-  vertical-align: top;
-  line-height: 15px;
-}
-
-.ae-modal-light {
-  width: 100% !important;
-}
-
 .input-container {
   margin: 1.2rem 0;
-}
-
-.alert-card .ae-card-main {
-  justify-content: start !important;
-  align-items: center !important;
 }
 
 .ae-panel {
@@ -472,159 +256,6 @@ main {
 .ae-panel .content > h4 {
   margin: 0;
   text-align: left;
-}
-
-.modaltitle {
-  text-align: center;
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform: none;
-  width: 90%;
-  font-size: 1.5rem;
-  margin: 7px;
-}
-
-/**
-* Slider Styles
-**/
-$shade-10: #2c3e50 !default;
-$shade-1: #d7dcdf !default;
-$shade-0: #fff !default;
-$teal: #1abc9c !default;
-
-$range-handle-color: $shade-10 !default;
-$range-handle-color-hover: $teal !default;
-$range-handle-size: 20px !default;
-
-$range-track-color: $shade-1 !default;
-$range-track-height: 5px !default;
-
-$range-label-color: $shade-10 !default;
-$range-label-width: 60px !default;
-
-.range-slider {
-  width: 100%;
-  position: relative;
-
-  .tipAmount {
-    position: absolute;
-    color: #909090;
-    font-size: 0.9rem;
-  }
-
-  .tipMin {
-    left: 0;
-  }
-
-  .tipMax {
-    right: 0;
-  }
-}
-
-.range-slider__range {
-  -webkit-appearance: none;
-  width: 100%;
-  height: $range-track-height;
-  border-radius: 5px;
-  background: $range-track-color;
-  outline: none;
-  padding: 0;
-  margin: 25px 0;
-
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: $range-handle-size;
-    height: $range-handle-size;
-    border-radius: 50%;
-    background: $primary-color;
-    cursor: pointer;
-    transition: background 0.15s ease-in-out;
-  }
-
-  &:active::-webkit-slider-thumb {
-    background: $primary-color;
-  }
-
-  &::-moz-range-thumb {
-    width: $range-handle-size;
-    height: $range-handle-size;
-    border: 0;
-    border-radius: 50%;
-    background: $primary-color;
-    cursor: pointer;
-    transition: background 0.15s ease-in-out;
-  }
-
-  &:active::-moz-range-thumb {
-    background: $primary-color;
-  }
-}
-
-.range-slider__value {
-  display: inline-block;
-  position: relative;
-  width: $range-label-width;
-  color: $shade-0;
-  line-height: 20px;
-  text-align: center;
-  border-radius: 3px;
-  background: $range-label-color;
-  padding: 5px 10px;
-  margin-left: 8px;
-
-  &::after {
-    position: absolute;
-    top: 8px;
-    left: -7px;
-    width: 0;
-    height: 0;
-    border-top: 7px solid transparent;
-    border-right: 7px solid $range-label-color;
-    border-bottom: 7px solid transparent;
-    content: '';
-  }
-}
-
-::-moz-range-track {
-  background: $range-track-color;
-  border: 0;
-}
-
-input::-moz-focus-inner,
-input::-moz-focus-outer {
-  border: 0;
-}
-
-/**
-* End slider styles
-*/
-
-.dropdown-menu {
-  margin-bottom: 1rem;
-  width: 100%;
-  height: 4rem;
-  background: #ececec;
-  border: 0;
-  font-size: 19px;
-  text-align: center;
-  padding: 10px;
-  outline: none;
-}
-
-.dropdown-menu:active,
-.dropdown-menu:focus {
-  border: none;
-  outline: none;
-  border-left: 2px solid #ff0d6a;
-}
-
-.dropdown-menu option {
-  height: 4rem;
-  padding: 10px;
-  width: 100%;
-  border: none;
 }
 
 .ae-check-button {
@@ -686,93 +317,13 @@ input::-moz-focus-outer {
   line-height: 1rem;
 }
 
-.tokenExtensions .ae-check-button::after {
-  width: 29px;
-  height: 26px;
-  top: 7px;
-}
-
-.tokenExtensions .ae-check-button::before {
-  top: 7px;
-}
-
-.tokenExtensions {
-  width: 100%;
-}
-
-.tokenExtensions .ae-check-button {
-  padding-top: 0.8rem;
-  padding-left: 3rem;
-  word-break: break-word;
-  text-align: left;
-  margin-bottom: 1rem;
-}
-
-.small-checkbox .ae-check-button::after,
-.small-checkbox .ae-check-button::before {
-  left: 0;
-}
-
-.small-checkbox .ae-check-button::after {
-  width: 16px;
-  height: 16px;
-  top: 0;
-  background-size: 0.6rem;
-  padding: 2px;
-}
-
-.small-checkbox .ae-check-button::before {
-  top: 0;
-  width: 16px;
-  height: 16px;
-}
-
-.small-checkbox .ae-check-button {
-  font-family: "Segoe UI", Tahoma, sans-serif;
-  padding-left: 25px;
-  word-break: break-word;
-  text-align: left;
-  margin-bottom: 0;
-  font-size: 1rem;
-}
-
 .mr-auto {
   margin-right: auto;
-}
-
-.custom-dropdown {
-  width: 100%;
-
-  .ae-dropdown-button {
-    width: 100% !important;
-    height: auto;
-    padding: 1rem;
-    border-radius: 6px;
-    background: #ececec !important;
-    text-align: left;
-    display: block;
-    position: relative;
-
-    .ae-icon {
-      position: absolute;
-      right: 6px;
-      font-weight: bold;
-      top: 50%;
-      transform: translateY(-50%) rotate(90deg);
-      -webkit-transform: translateY(-50%) rotate(90deg);
-      -ms-transform: translateY(-50%) rotate(90deg);
-      font-size: 1.4rem;
-    }
-  }
 }
 
 @-moz-document url-prefix() {
   html {
     scrollbar-width: none;
-  }
-
-  .actions .backbutton .ae-icon {
-    vertical-align: middle !important;
   }
 
   .ae-main {
@@ -781,40 +332,9 @@ input::-moz-focus-outer {
   }
 }
 
-.coronaTitle {
-  position: absolute;
-  left: 50%;
-  top: 15px;
-  font-size: 16px;
-  margin-left: -50px;
-}
-
-.ae-header header {
-  position: relative;
-  height: 50px !important;
-}
-
 .ae-identicon.base {
   height: 100%;
   width: 100%;
-}
-
-.desktop-right {
-  width: 100%;
-  display: flex;
-  justify-content: space-evenly;
-}
-
-.desktop-right #account {
-  position: relative;
-  left: 0;
-  top: 0;
-  margin-left: 0;
-  margin-top: 0;
-}
-
-.ae-header header .title {
-  display: none;
 }
 
 input {
@@ -841,40 +361,6 @@ button {
   transition: all 0.2s;
 }
 
-.pageTitle {
-  margin: 0 0 10px;
-}
-
-.ae-header {
-  border-bottom: 1px solid #eee;
-  margin-bottom: 0 !important;
-}
-
-.ae-header.logged {
-  background: #001833;
-}
-
-.ae-header.logged.aeppPopup {
-  margin-bottom: 0 !important;
-}
-
-.ae-header.logged > * {
-  color: #717c87;
-}
-
-.logo_top {
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: center;
-  vertical-align: center;
-}
-
-.logo_top p {
-  color: #ff0d6a;
-  font-size: 20px;
-  line-height: 12px;
-}
-
 .popup {
   padding: 4px 20px;
   text-align: center;
@@ -884,168 +370,16 @@ button {
   max-width: 357px !important;
 }
 
-.subAccountInfo {
-  margin-right: auto;
-  margin-bottom: 0 !important;
-  max-width: 155px;
-}
-
-#network .subAccountInfo {
-  max-width: 195px;
-}
-
-.subAccountIcon,
 .identicon {
   margin-right: 10px;
 }
 
-.subAccountName {
-  text-align: left;
-  color: #000;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  font-weight: bold;
-  margin-bottom: 0 !important;
-  white-space: nowrap;
-}
-
-.subAccountBalance {
-  font-family: monospace;
-  margin-bottom: 0 !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 11px;
-}
-
-.name-pending {
-  width: 24px !important;
-  height: 24px !important;
-  margin-right: 5px;
-  font-size: 0.8rem;
-}
-
-#account .account-btn button {
-  justify-content: unset;
-}
-
-#account .iconBtn,
-#network .iconBtn {
-  padding: 0 !important;
-  height: 30px !important;
-  width: 30px;
-  color: #fff;
-  text-align: center;
-  margin-right: 8px;
-}
-
-#account .iconBtn i,
-#network .iconBtn i {
-  color: #fff !important;
-  font-size: 1.2rem !important;
-  margin: 0;
-  float: none;
-  text-align: center;
-}
-
-.subAccountCheckbox .ae-check-button {
-  float: right;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  padding-left: 0 !important;
-}
-
-.subAccountCheckbox .ae-check-button::before {
-  position: static !important;
-}
-
-.subAccountCheckbox .ae-check-button::after {
-  left: 0 !important;
-  top: 0 !important;
-  width: 28px !important;
-  height: 28px !important;
-}
-
-.subAccountCheckbox > input[type='radio']:checked + .ae-check-button::before,
 .ae-check > input[type='checkbox']:checked + .ae-check-button::before {
   border-color: #dae1ea !important;
 }
 
-#languages .ae-button img {
-  margin-right: 5px;
-}
-
-#languages .ae-button.current {
-  text-decoration: underline;
-}
-
-.Password .passwordStrengthMeter {
-  position: relative;
-  height: 5px;
-}
-
-.Password + .ae-input-container {
-  margin-top: 0 !important;
-}
-
-.Password .passwordStrengthMeter .Password__strength-meter--fill[data-score='0'] {
-  background: $primary-color;
-}
-
-.Password .passwordStrengthMeter .Password__strength-meter--fill[data-score='1'] {
-  background: #d728b3;
-}
-
-.Password .passwordStrengthMeter .Password__strength-meter--fill[data-score='2'] {
-  background: #9d3fc0;
-}
-
-.Password .passwordStrengthMeter .Password__strength-meter--fill[data-score='3'] {
-  background: #1d7fe2;
-}
-
-.Password .passwordStrengthMeter .Password__strength-meter--fill[data-score='4'] {
-  background: $color-alternative;
-}
-
 .actions {
   text-align: left;
-}
-
-.actions .backbutton {
-  padding: 0;
-  color: #9d3fc0 !important;
-}
-
-.token-image {
-  margin-right: 1rem;
-  width: 28px;
-}
-
-.tokenBalance {
-  margin-right: auto;
-}
-
-#tokens .ae-check-button::before {
-  width: 20px !important;
-  height: 20px !important;
-}
-
-#tokens .ae-check-button::after {
-  width: 26px !important;
-  height: 25px !important;
-}
-
-.connect-error {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: $primary-color;
-  color: #fff;
-  padding: 0.3rem;
-  text-align: center;
-  font-weight: bold;
 }
 
 @media screen and (min-width: 780px) {
