@@ -2,10 +2,9 @@
   <div class="invite-row">
     <div class="invite-info">
       <span class="primary">{{ balance }} {{ $t('pages.appVUE.aeid') }}</span>
-      <!--eslint-disable-line vue-i18n/no-raw-text-->
-      ({{ (balance * current.currencyRate).toFixed(2) }}
-      <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-      {{ current.currency.toUpperCase() }})
+      <!--eslint-disable vue-i18n/no-raw-text-->
+      ({{ currentCurrencySymbol + (balance * current.currencyRate).toFixed(2) }})
+      <!--eslint-enable vue-i18n/no-raw-text-->
       <span class="date">{{ createdAt | formatDate }}</span>
     </div>
     <div class="invite-link">
@@ -25,7 +24,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk/es';
 import AmountSend from './AmountSend';
 import Button from './Button';
@@ -42,6 +41,7 @@ export default {
   data: () => ({ topUp: false, topUpAmount: 0, balance: 0 }),
   computed: {
     ...mapState(['sdk', 'current']),
+    ...mapGetters(['currentCurrencySymbol']),
     link() {
       const secretKey = Crypto.encodeBase58Check(Buffer.from(this.secretKey, 'hex'));
       return new URL(

@@ -11,8 +11,8 @@
         <span class="approx-sign">~</span>
         <li data-cy="currency-dropdown" class="dropdown-container" :class="dropdown ? 'show' : ''">
           <ae-button data-cy="toggle-currency-dropdown" @click="dropdown = !dropdown">
+            <span class="currency">{{ currentCurrencySymbol }}</span>
             {{ balanceCurrency }}
-            <span class="currency">{{ currentCurrency }}</span>
             <ExpandedAngleArrow />
           </ae-button>
           <ul class="sub-dropdown">
@@ -42,7 +42,7 @@ export default {
   data: () => ({ dropdown: false }),
   computed: {
     ...mapState(['current', 'currencies']),
-    ...mapGetters(['tokenBalance', 'balanceCurrency', 'currentCurrency']),
+    ...mapGetters(['tokenBalance', 'balanceCurrency', 'currentCurrencySymbol']),
   },
   methods: {
     async switchCurrency(currency) {

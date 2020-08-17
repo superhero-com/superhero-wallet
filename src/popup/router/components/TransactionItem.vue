@@ -5,10 +5,9 @@
         <span data-cy="amount">{{ txAmount }}</span>
         {{ $t('pages.appVUE.aeid') }}
         <span class="text" data-cy="currency-amount">
-          <!--eslint-disable-line vue-i18n/no-raw-text-->
-          ({{ txAmountToCurrency }}
-          <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-          {{ current.currency.toUpperCase() }})
+          <!--eslint-disable vue-i18n/no-raw-text-->
+          ({{ currentCurrencySymbol + txAmountToCurrency }})
+          <!--eslint-enable vue-i18n/no-raw-text-->
         </span>
       </span>
       <span class="status">{{ status }}</span>
@@ -62,7 +61,7 @@ export default {
   },
   computed: {
     ...mapState(['sdk', 'current']),
-    ...mapGetters(['account', 'activeNetwork']),
+    ...mapGetters(['account', 'activeNetwork', 'currentCurrencySymbol']),
     status() {
       if (
         this.transaction.tx.sender_id === this.account.publicKey ||
