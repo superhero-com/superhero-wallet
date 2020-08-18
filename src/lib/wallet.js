@@ -1,12 +1,12 @@
 import { Node, MemoryAccount, RpcWallet } from '@aeternity/aepp-sdk/es';
+import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import { isEmpty, times } from 'lodash-es';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
 import {
   parseFromStorage,
-  middleware,
-  getAllNetworks,
+  fetchJson,
   IN_FRAME,
   toURL,
   getAeppAccountPermission,
@@ -15,8 +15,28 @@ import { TIPPING_CONTRACT, NO_POPUP_AEPPS } from '../popup/utils/constants';
 import Logger from './logger';
 
 async function initMiddleware() {
-  const { network, current } = store.state;
-  store.commit('SET_MIDDLEWARE', (await middleware(network, current)).api);
+  const { middlewareUrl } = store.getters.activeNetwork;
+  const swag = await fetchJson(`${middlewareUrl}/middleware/api`);
+  swag.paths['/names/auctions/{name}/info'] = {
+    get: {
+      operationId: 'getAuctionInfoByName',
+      parameters: [
+        {
+          in: 'path',
+          name: 'name',
+          required: true,
+          type: 'string',
+        },
+      ],
+    },
+  };
+  const { api: middleware } = await Swagger.compose({
+    methods: {
+      urlFor: path => middlewareUrl + path,
+      axiosError: () => '',
+    },
+  })({ swag });
+  store.commit('SET_MIDDLEWARE', middleware);
   store.dispatch('names/fetchOwned');
 }
 
@@ -60,10 +80,6 @@ export default {
 
     store.commit('SWITCH_LOGGED_IN', true);
 
-    /* Get network */
-    const networks = await getAllNetworks();
-    store.commit('SET_NETWORKS', networks);
-
     store.commit('SET_MAIN_LOADING', false);
     return { loggedIn: true };
   },
@@ -76,8 +92,8 @@ export default {
       return;
     }
 
-    const { network, current } = store.state;
-    const { internalUrl, compilerUrl } = network[current.network];
+    const { activeNetwork } = store.getters;
+    const { internalUrl, compilerUrl } = activeNetwork;
     const node = await Node({
       url: internalUrl,
       internalUrl,
@@ -93,7 +109,7 @@ export default {
             store.dispatch('accounts/signTransaction', { txBase64, opt }),
         },
       })({
-        nodes: [{ name: current.network, instance: node }],
+        nodes: [{ name: activeNetwork.name, instance: node }],
         accounts: [account],
         nativeMode: true,
         compilerUrl,
@@ -163,7 +179,7 @@ export default {
         setInterval(connectToParentFrames, 3000);
       }
 
-      await store.dispatch('initSdk', sdk);
+      await store.commit('initSdk', sdk);
       await initContractInstances();
       await initMiddleware();
       store.commit('SET_NODE_STATUS', 'connected');

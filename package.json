@@ -22,9 +22,7 @@
     "start:tests": "cypress run",
     "gen:cordova-resources": "cordova-res",
     "build:Testnet": "cross-env NETWORK=Testnet npm run build",
-    "build:Mainnet": "cross-env NETWORK=Mainnet npm run build",
     "watch:dev:Testnet": "cross-env NETWORK=Testnet npm run watch:dev",
-    "watch:dev:Mainnet": "cross-env NETWORK=Mainnet npm run watch:dev",
     "watch:dev:tests": "cross-env NETWORK=Testnet RUNNING_IN_TESTS=true npm run watch:dev",
     "build:tests": "cross-env NETWORK=Testnet RUNNING_IN_TESTS=true npm run build:dev"
   },

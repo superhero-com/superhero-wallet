@@ -19,14 +19,6 @@ export const getLoginState = async ({ backedUpSeed, balance, name, pendingTransa
   return {
     ...(await runMigrations()),
     account,
-    subaccounts: [
-      {
-        name: 'Main Account',
-        publicKey: account.publicKey,
-        balance: 10,
-        root: true,
-      },
-    ],
     mnemonic,
     backedUpSeed,
     balance,

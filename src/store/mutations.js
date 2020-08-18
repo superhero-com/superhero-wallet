@@ -1,4 +1,5 @@
 import * as types from './mutation-types';
+import { defaultNetwork } from '../popup/utils/constants';
 
 export default {
   [types.UPDATE_ACCOUNT](state, payload) {
@@ -26,19 +27,14 @@ export default {
   [types.SET_NAMES](state, { names }) {
     state.names = names;
   },
-  [types.SET_USERNETWORK](state, payload) {
-    state.userNetworks = { ...state.userNetworks, ...payload };
+  setUserNetwork(state, { index, ...network }) {
+    if (index !== undefined) state.userNetworks[index] = network;
+    else state.userNetworks.push({ ...defaultNetwork, ...network });
   },
-  [types.SET_USERNETWORKS](state, payload) {
-    state.userNetworks = payload;
+  deleteUserNetwork(state, index) {
+    state.userNetworks = state.userNetworks.filter((el, idx) => idx !== index);
   },
-  [types.SET_NETWORKS](state, payload) {
-    state.network = payload;
-  },
-  [types.ADD_NETWORK](state, payload) {
-    state.network = { ...state.network, ...{ [payload.name]: { ...payload } } };
-  },
-  [types.INIT_SDK](state, payload) {
+  initSdk(state, payload) {
     state.sdk = payload;
   },
   [types.SET_MIDDLEWARE](state, payload) {

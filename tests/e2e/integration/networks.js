@@ -1,6 +1,6 @@
-import { defaultNetworks, networks, DEFAULT_NETWORK } from '../../../src/popup/utils/constants';
+process.env.NETWORK = 'Testnet';
+const { defaultNetwork } = require('../../../src/popup/utils/constants');
 
-const network = 'Testnet';
 describe('Test cases for networks page', () => {
   beforeEach(() => {
     cy.login().openNetworks();
@@ -12,11 +12,11 @@ describe('Test cases for networks page', () => {
       .get('[data-cy=networks]')
       .should('be.visible')
       .get('[data-cy=network-name]')
-      .should('contain', network)
+      .should('contain', defaultNetwork.name)
       .get('[data-cy=network-url]')
-      .should('contain', defaultNetworks[network].url)
+      .should('contain', defaultNetwork.url)
       .get('[data-cy=network-middleware]')
-      .should('contain', defaultNetworks[network].middlewareUrl);
+      .should('contain', defaultNetwork.middlewareUrl);
   });
 
   it('Can cancel add network', () => {
@@ -33,10 +33,10 @@ describe('Test cases for networks page', () => {
     cy.get('[data-cy=to-add]')
       .click()
       .enterNetworkDetails(
-        network,
-        defaultNetworks[network].url,
-        defaultNetworks[network].middlewareUrl,
-        defaultNetworks[network].compilerUrl,
+        defaultNetwork.name,
+        defaultNetwork.url,
+        defaultNetwork.middlewareUrl,
+        defaultNetwork.compilerUrl,
       )
       .get('[data-cy=connect]')
       .click()
@@ -59,18 +59,18 @@ describe('Test cases for networks page', () => {
   it('Can add new network', () => {
     cy.addNetwork(
       'Mainnet',
-      networks[DEFAULT_NETWORK].url,
-      networks[DEFAULT_NETWORK].middlewareUrl,
-      networks[DEFAULT_NETWORK].compilerUrl,
+      defaultNetwork.url,
+      defaultNetwork.middlewareUrl,
+      defaultNetwork.compilerUrl,
     );
   });
 
   it('Can delete network', () => {
     cy.selectNetwork(
       'Mainnet',
-      networks[DEFAULT_NETWORK].url,
-      networks[DEFAULT_NETWORK].middlewareUrl,
-      networks[DEFAULT_NETWORK].compilerUrl,
+      defaultNetwork.url,
+      defaultNetwork.middlewareUrl,
+      defaultNetwork.compilerUrl,
     )
       .get('[data-cy=more]')
       .click()
@@ -89,9 +89,9 @@ describe('Test cases for networks page', () => {
   it('Can select network', () => {
     cy.selectNetwork(
       'Mainnet',
-      networks[DEFAULT_NETWORK].url,
-      networks[DEFAULT_NETWORK].middlewareUrl,
-      networks[DEFAULT_NETWORK].compilerUrl,
+      defaultNetwork.url,
+      defaultNetwork.middlewareUrl,
+      defaultNetwork.compilerUrl,
     )
       .goBack()
       .get('.transactionList')
@@ -101,17 +101,17 @@ describe('Test cases for networks page', () => {
   it("Can't add network with same name", () => {
     cy.selectNetwork(
       'Mainnet',
-      networks[DEFAULT_NETWORK].url,
-      networks[DEFAULT_NETWORK].middlewareUrl,
-      networks[DEFAULT_NETWORK].compilerUrl,
+      defaultNetwork.url,
+      defaultNetwork.middlewareUrl,
+      defaultNetwork.compilerUrl,
     )
       .get('[data-cy=to-add]')
       .click()
       .enterNetworkDetails(
         'Mainnet',
-        networks[DEFAULT_NETWORK].url,
-        networks[DEFAULT_NETWORK].middlewareUrl,
-        networks[DEFAULT_NETWORK].compilerUrl,
+        defaultNetwork.url,
+        defaultNetwork.middlewareUrl,
+        defaultNetwork.compilerUrl,
       )
       .get('[data-cy=connect]')
       .click()
@@ -121,9 +121,9 @@ describe('Test cases for networks page', () => {
   it('Can edit network', () => {
     cy.selectNetwork(
       'Mainnet',
-      networks[DEFAULT_NETWORK].url,
-      networks[DEFAULT_NETWORK].middlewareUrl,
-      networks[DEFAULT_NETWORK].compilerUrl,
+      defaultNetwork.url,
+      defaultNetwork.middlewareUrl,
+      defaultNetwork.compilerUrl,
     )
       .get('[data-cy=more]')
       .click()
@@ -133,21 +133,21 @@ describe('Test cases for networks page', () => {
       .get('[data-cy=network] input')
       .should('have.value', 'Mainnet')
       .get('[data-cy=url] input')
-      .should('have.value', networks[DEFAULT_NETWORK].url)
+      .should('have.value', defaultNetwork.url)
       .clear()
-      .type(defaultNetworks[network].url)
+      .type(defaultNetwork.url)
       .get('[data-cy=middleware] input ')
-      .should('have.value', networks[DEFAULT_NETWORK].middlewareUrl)
+      .should('have.value', defaultNetwork.middlewareUrl)
       .clear()
-      .type(defaultNetworks[network].middlewareUrl)
+      .type(defaultNetwork.middlewareUrl)
       .get('[data-cy=connect]')
       .click()
       .get('[data-cy=network-url]')
       .eq(1)
-      .should('contain', defaultNetworks[network].url)
+      .should('contain', defaultNetwork.url)
       .get('[data-cy=network-middleware]')
       .eq(1)
-      .should('contain', defaultNetworks[network].middlewareUrl)
+      .should('contain', defaultNetwork.middlewareUrl)
       .goBack()
       .get('.transactionList')
       .should('be.visible');

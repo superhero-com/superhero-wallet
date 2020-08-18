@@ -8,7 +8,7 @@ import {
   getAddressByNameEntry,
 } from '../popup/utils/helper';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
-import { BACKEND_URL } from '../popup/utils/constants';
+import { BACKEND_URL, AEX2_METHODS } from '../popup/utils/constants';
 
 export default {
   setAccount({ commit }, payload) {
@@ -18,14 +18,16 @@ export default {
   switchNetwork({ commit }, payload) {
     commit(types.SWITCH_NETWORK, payload);
     commit(types.UPDATE_LATEST_TRANSACTIONS, []);
+    commit(types.SET_NODE_STATUS, 'connecting');
+    if (process.env.IS_EXTENSION) postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload });
   },
   async updateBalance({ commit, state }) {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
     commit(types.UPDATE_BALANCE, convertToAE(balance));
   },
-  async fetchTransactions({ state }, { limit, page, recent }) {
+  async fetchTransactions({ state, getters: { activeNetwork } }, { limit, page, recent }) {
     if (!state.middleware) return [];
-    const { middlewareUrl } = state.network[state.current.network];
+    const { middlewareUrl } = activeNetwork;
     const { publicKey } = state.account;
     let txs = await Promise.all([
       (async () =>
@@ -53,18 +55,6 @@ export default {
     ]);
     txs = orderBy(flatten(txs), ['time'], ['desc']);
     return recent ? txs.slice(0, limit) : txs;
-  },
-  initSdk({ commit, state: { userNetworks, network, current } }, sdk) {
-    commit(types.INIT_SDK, sdk);
-    const networkId = sdk.getNetworkId();
-    const name = current.network;
-    const net = { ...network };
-    net[name].networkId = networkId;
-    commit(
-      'SET_USERNETWORKS',
-      userNetworks.map(n => (n.name === name ? { ...n, networkId } : { ...n })),
-    );
-    commit('SET_NETWORKS', net);
   },
 
   unlockWallet(context, payload) {
@@ -160,8 +150,8 @@ export default {
     return { addresses: uniq(addresses).filter(a => a), tab };
   },
 
-  async getTipContractAddress({ state: { network, current, sdk }, commit }) {
-    const { tipContract } = network[current.network];
+  async getTipContractAddress({ state: { sdk }, getters: { activeNetwork }, commit }) {
+    const { tipContract } = activeNetwork;
     const contractAddress = tipContract.includes('.chain')
       ? getAddressByNameEntry(await sdk.api.getNameEntryByName(tipContract), 'contract_pubkey')
       : tipContract;

@@ -190,8 +190,8 @@ export default {
     },
   },
   computed: {
-    ...mapState(['balance', 'network', 'current', 'sdk']),
-    ...mapGetters(['account']),
+    ...mapState(['balance', 'current', 'sdk']),
+    ...mapGetters(['account', 'activeNetwork']),
     validAddress() {
       return checkAddress(this.form.address) || chekAensName(this.form.address);
     },
@@ -274,7 +274,7 @@ export default {
       }
     },
     async openTxExplorer(hash) {
-      const { middlewareUrl } = this.network[this.current.network];
+      const { middlewareUrl } = this.activeNetwork;
       const { endpoint, valid } = await checkHashType(hash);
       if (valid) {
         const url = `${middlewareUrl}/${endpoint}/${hash}`;

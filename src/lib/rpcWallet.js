@@ -6,7 +6,7 @@ import { isEmpty } from 'lodash-es';
 import uuid from 'uuid';
 import {
   AEX2_METHODS,
-  DEFAULT_NETWORK,
+  defaultNetwork,
   MAX_AMOUNT_WITHOUT_CONFIRM,
   NO_POPUP_AEPPS,
 } from '../popup/utils/constants';
@@ -49,7 +49,7 @@ export default {
     this.accountKeyPairs = [];
     this.connectionsQueue = [];
   },
-  initNetwork(network = DEFAULT_NETWORK) {
+  initNetwork(network = defaultNetwork.name) {
     this.network = network;
     this.compiler = this.nodes[network].compilerUrl;
     this.internalUrl = this.nodes[network].internalUrl;
