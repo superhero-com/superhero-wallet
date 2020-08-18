@@ -16,7 +16,7 @@
           {{ $t('pages.appVUE.aeid') }}
         </span>
         <span class="f-14 block l-1" data-cy="amount-currency">
-          {{ currentCurrencySymbol + currencyAmount }}
+          {{ formatCurrency(currencyAmount) }}
         </span>
       </div>
       <div class="balance-box">
@@ -25,7 +25,7 @@
           {{ tokenBalance }} {{ $t('pages.appVUE.aeid') }}
         </span>
         <span class="f-14 block l-1" data-cy="balance-currency">
-          {{ currentCurrencySymbol + balanceCurrency }}
+          {{ formatCurrency(balanceCurrency) }}
         </span>
       </div>
     </div>
@@ -43,7 +43,7 @@ export default {
   },
   props: ['amountError', 'value', 'errorMsg'],
   computed: {
-    ...mapGetters(['tokenBalance', 'balanceCurrency', 'currentCurrencySymbol']),
+    ...mapGetters(['tokenBalance', 'balanceCurrency', 'formatCurrency']),
     currencyAmount() {
       return ((this.value || 0) * this.$store.state.current.currencyRate).toFixed(2);
     },

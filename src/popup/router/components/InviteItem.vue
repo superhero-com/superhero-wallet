@@ -3,7 +3,7 @@
     <div class="invite-info">
       <span class="primary">{{ balance }} {{ $t('pages.appVUE.aeid') }}</span>
       <!--eslint-disable vue-i18n/no-raw-text-->
-      ({{ currentCurrencySymbol + (balance * current.currencyRate).toFixed(2) }})
+      ({{ formatCurrency((balance * current.currencyRate).toFixed(2)) }})
       <!--eslint-enable vue-i18n/no-raw-text-->
       <span class="date">{{ createdAt | formatDate }}</span>
     </div>
@@ -41,7 +41,7 @@ export default {
   data: () => ({ topUp: false, topUpAmount: 0, balance: 0 }),
   computed: {
     ...mapState(['sdk', 'current']),
-    ...mapGetters(['currentCurrencySymbol']),
+    ...mapGetters(['formatCurrency']),
     link() {
       const secretKey = Crypto.encodeBase58Check(Buffer.from(this.secretKey, 'hex'));
       return new URL(

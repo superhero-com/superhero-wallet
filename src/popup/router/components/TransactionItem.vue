@@ -6,7 +6,7 @@
         {{ $t('pages.appVUE.aeid') }}
         <span class="text" data-cy="currency-amount">
           <!--eslint-disable vue-i18n/no-raw-text-->
-          ({{ currentCurrencySymbol + txAmountToCurrency }})
+          ({{ formatCurrency(txAmountToCurrency) }})
           <!--eslint-enable vue-i18n/no-raw-text-->
         </span>
       </span>
@@ -61,7 +61,7 @@ export default {
   },
   computed: {
     ...mapState(['sdk', 'current']),
-    ...mapGetters(['account', 'activeNetwork', 'currentCurrencySymbol']),
+    ...mapGetters(['account', 'activeNetwork', 'formatCurrency']),
     status() {
       if (
         this.transaction.tx.sender_id === this.account.publicKey ||

@@ -14,15 +14,8 @@ export default {
   balanceCurrency({ current, balance }) {
     return (current.currencyRate * balance).toFixed(2);
   },
-  currentCurrencySymbol({ current: { currency } }) {
-    return (
-      {
-        eur: '€',
-        usd: '$',
-        cny: '¥',
-      }[currency] || `${currency.toUpperCase()} `
-    );
-  },
+  formatCurrency: ({ current: { currency } }) => value =>
+    new Intl.NumberFormat('en', { style: 'currency', currency }).format(value),
   networks({ userNetworks }) {
     return [
       defaultNetwork,

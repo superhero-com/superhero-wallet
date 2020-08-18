@@ -12,7 +12,7 @@
         >{{ amountTip }} {{ $t('pages.appVUE.aeid') }}
       </span>
       <!--eslint-disable vue-i18n/no-raw-text-->
-      ({{ currentCurrencySymbol + (amountTip * current.currencyRate).toFixed(3) }})
+      ({{ formatCurrency((amountTip * current.currencyRate).toFixed(3)) }})
       <!--eslint-enable vue-i18n/no-raw-text-->
       {{ $t('pages.successTip.to') }}
     </p>
@@ -69,7 +69,7 @@ export default {
   },
   computed: {
     ...mapState(['current']),
-    ...mapGetters(['currentCurrencySymbol']),
+    ...mapGetters(['formatCurrency']),
     amountTip() {
       return (+aettosToAe(this.amount)).toFixed(2);
     },

@@ -78,7 +78,7 @@
                 <!--eslint-disable-line vue-i18n/no-raw-text-->
                 ~
                 <span>
-                  {{ currentCurrencySymbol + (form.amount * current.currencyRate).toFixed(3) }}
+                  {{ formatCurrency((form.amount * current.currencyRate).toFixed(3)) }}
                 </span>
               </span>
             </div>
@@ -190,7 +190,7 @@ export default {
   },
   computed: {
     ...mapState(['balance', 'current', 'sdk']),
-    ...mapGetters(['account', 'activeNetwork', 'currentCurrencySymbol']),
+    ...mapGetters(['account', 'activeNetwork', 'formatCurrency']),
     validAddress() {
       return checkAddress(this.form.address) || chekAensName(this.form.address);
     },

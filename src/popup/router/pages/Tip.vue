@@ -11,7 +11,7 @@
             {{ amount }} {{ $t('pages.appVUE.aeid') }}
           </span>
           <!--eslint-disable vue-i18n/no-raw-text-->
-          ({{ currentCurrencySymbol + (amount * current.currencyRate).toFixed(3) }})
+          ({{ formatCurrency((amount * current.currencyRate).toFixed(3)) }})
           <!--eslint-enable vue-i18n/no-raw-text-->
           {{ $t('pages.tipPage.to') }}
         </template>
@@ -113,7 +113,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'currentCurrencySymbol']),
+    ...mapGetters(['account', 'formatCurrency']),
     ...mapState([
       'tourRunning',
       'tippingAddress',
