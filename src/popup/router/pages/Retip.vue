@@ -48,8 +48,8 @@ export default {
     minCallFee: null,
   }),
   computed: {
-    ...mapGetters(['account', 'allowTipping']),
-    ...mapState(['tippingAddress', 'minTipAmount', 'balance', 'tipping', 'sdk']),
+    ...mapGetters(['account', 'allowTipping', 'minTipAmount']),
+    ...mapState(['tippingAddress', 'balance', 'tipping', 'sdk']),
     urlStatus() {
       return this.$store.getters['tipUrl/status'](this.tip.url);
     },

@@ -16,6 +16,7 @@ export default {
   },
   formatCurrency: ({ current: { currency } }) => value =>
     new Intl.NumberFormat('en', { style: 'currency', currency }).format(value),
+  minTipAmount: ({ currencies: { usd } }) => 0.01 / usd,
   networks({ userNetworks }) {
     return [
       defaultNetwork,

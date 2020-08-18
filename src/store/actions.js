@@ -93,8 +93,6 @@ export default {
       currency,
       currencyRate: currencies[currency],
     });
-    if (!process.env.RUNNING_IN_TESTS)
-      commit('setMinTipAmount', +(0.01 * (1 / currencies.usd)).toFixed(2));
   },
   async getCurrencies({ state: { nextCurrenciesFetch }, commit, dispatch }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
