@@ -26,7 +26,6 @@ const initialState = {
     language: 'en',
     token: 0,
     currency: 'usd',
-    currencyRate: 0,
   },
   userNetworks: [],
   isLoggedIn: false,

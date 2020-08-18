@@ -45,7 +45,7 @@ export default {
   computed: {
     ...mapGetters(['tokenBalance', 'balanceCurrency', 'formatCurrency']),
     currencyAmount() {
-      return ((this.value || 0) * this.$store.state.current.currencyRate).toFixed(2);
+      return ((this.value || 0) * this.$store.getters.currentCurrencyRate).toFixed(2);
     },
   },
 };

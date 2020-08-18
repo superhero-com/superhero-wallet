@@ -11,7 +11,7 @@
             {{ amount }} {{ $t('pages.appVUE.aeid') }}
           </span>
           <!--eslint-disable vue-i18n/no-raw-text-->
-          ({{ formatCurrency((amount * current.currencyRate).toFixed(3)) }})
+          ({{ formatCurrency((amount * currentCurrencyRate).toFixed(3)) }})
           <!--eslint-enable vue-i18n/no-raw-text-->
           {{ $t('pages.tipPage.to') }}
         </template>
@@ -113,8 +113,8 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'formatCurrency', 'minTipAmount']),
-    ...mapState(['tourRunning', 'tippingAddress', 'current', 'balance', 'tip', 'sdk', 'tipping']),
+    ...mapGetters(['account', 'formatCurrency', 'minTipAmount', 'currentCurrencyRate']),
+    ...mapState(['tourRunning', 'tippingAddress', 'balance', 'tip', 'sdk', 'tipping']),
     urlStatus() {
       return this.tourRunning ? 'verified' : this.$store.getters['tipUrl/status'](this.url);
     },

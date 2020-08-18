@@ -45,7 +45,7 @@ export default {
   },
   methods: {
     async switchCurrency(currency) {
-      this.$store.commit('SET_CURRENCY', { currency, currencyRate: this.currencies[currency] });
+      this.$store.commit('setCurrentCurrency', currency);
       this.dropdown = false;
     },
   },
