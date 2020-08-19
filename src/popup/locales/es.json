@@ -67,7 +67,7 @@
     "incorrect-amount": {
       "msg": "Por favor asegúrate que has colocado un monto válido."
     },
-       "insufficient-balance": {
+    "insufficient-balance": {
       "msg": "No tienes suficiente saldo para esta transacción."
     },
     "removeAccount": {
@@ -106,9 +106,6 @@
       "title": "Tu reporte de Error No Fue Enviado",
       "msg": "Hubo un problema enviando tu reporte de error"
     },
-    "cancel": "Cancelar",
-    "confirm": "Confirmar"
-  },
     "tip-mainnet-warning": {
       "title": "Advertencia",
       "msg": "La función de Propina/Reclamo sólo trabaja en la red Principal (Mainnet)."
@@ -202,7 +199,7 @@
       "step4text-4": "Transacciones instantáneas, sin fronteras y con comisiones casi cero.",
       "toHome": "Procede a tu billetera",
       "send": "Enviar",
-      "ever": "Siempre."
+      "ever": "Siempre.",
       "wellcome": "!Bienveniso abordo!",
       "understand": "Yo entiendo que esta es una billetera de criptoactivos y yo soy el responsable por respaldar la frase de recuepración de mi cuenta.",
       "extension": "Extensión del Navegador",
@@ -270,7 +267,7 @@
       "names": "Nombres",
       "networks": "Redes",
       "removeAccount": "Eliminar cuenta",
-      "donateErrorReports": "Enviar reportes de errores"
+      "donateErrorReports": "Enviar reportes de errores",
       "tokens": "Tokens Fungibles",
       "manageTokens": "Manejar tokens"
     },
@@ -283,7 +280,7 @@
     "account": {
       "heading": "Cuenta",
       "accountName": "Nombre de la cuenta",
-      "copy": "Copiar"
+      "copy": "Copiar",
       "send": "Enviar Propina",
       "claim": "Reclamar Propina",
       "receive": "Recibir",
@@ -414,7 +411,7 @@
       "websiteRequestAccounts": "le gustaría obtener direcciones de cuenta",
       "addressesLabel": "Direcciones",
       "addressesRequest": "Esta aepp está solicitando acceso para ver las direcciones de tu cuenta"
-    }
+    },
     "fungibleTokens": {
       "backToAccount": "Regresar a cuenta",
       "addHeading": "Tokens Fungibles",
@@ -739,7 +736,7 @@
       "section6Title": "6. IMPUESTOS Y COMISIONES",
       "section6Content": "La Billetera no cobra ninguna comisión o impuesto por el uso de ​la aplicación​- ​es libre de cargos. Sin embargo, los impuestos y las comisiones son pagables por las transacciones en la blockchain de Superhero.com incluyendo pero no limitado a comisiones de minería, impuesto de gas, comisión de transacción. Los montos de los impuestos y las comisiones se fijan unilateralmente. \n Adicionalmente, dependiendo del territorio del punto de acceso, la transferencia y recepción de fondos a través de la aplicación pueden ser objeto de impuestos y comisiones por pagos por parte de la autoridad puública en diferentes paises dependiendo de las regulaciones legales. Los ​USUARIOS están obligados a informarse acerca de tales requerimientos y son responsables individualmente por sus donaciones.",
       "section7Title": "7. PLATAFORMAS DE TERCERAS PARTES",
-      "section7Content": "Para donar, los ​USUARIOS deben copiar y pegar en la Sección "Enviar propina a" la URL del sitio web a la que les gustaría donar. Por favor ten en mente que las aplicación está creada para que la gente estimule la información precisa, transparente, útil y certera a nivel mundial. Por lo tanto, los ​USUARIOS son totalmente responsables por cualquier uso de la ​Billetera en violación con el propósito de la misma y los presentes Términos. Superhero.com ​no controla los sitios web a los que se envian las donaciones. Superhero.com ​no es responsable de ninguna manera del contenido en esos sitios web.",
+      "section7Content": "Para donar, los ​USUARIOS deben copiar y pegar en la Sección “Enviar propina a“ la URL del sitio web a la que les gustaría donar. Por favor ten en mente que las aplicación está creada para que la gente estimule la información precisa, transparente, útil y certera a nivel mundial. Por lo tanto, los ​USUARIOS son totalmente responsables por cualquier uso de la ​Billetera en violación con el propósito de la misma y los presentes Términos. Superhero.com ​no controla los sitios web a los que se envian las donaciones. Superhero.com ​no es responsable de ninguna manera del contenido en esos sitios web.",
       "section8Title": "8. LICENCIA",
       "section8Content": "La aplicación está creada, desarrollada y operada por Superhero.com ​. Cada componente en la aplicación incluyendo pero no limitado logos, marcas comerciales y otra propiedad intelectual mostrada en al aplicación son considerados como propiedad de Superhero.com ​y están protegidos por la legislación de propiedad intelectual aplicable. Está prohibido el uso de cualquier propiedad intelectual de Superhero.com ​antes de tener el consentimiento explícito de este Superhero.com. \n Ninguno de los elementos mencionados arriba puede ser editado, descargado, reproducido y usado para propósitos comerciales, distribuido y transmitido de ninguna manera y/o medio ya sea, parcial o totalmente, sin el previo consentimiento explícito y por escrito de Superhero.com. \n Superhero.com ​se reserva el derecho para tomar cualquier acción legal necesaria contra infracciones a la propiedad intelectual.",
       "section9Title": "9. DERECHOS DE PROPIEDAD INTELECTUAL",
