@@ -2,6 +2,10 @@
   align-self: center;
   white-space: nowrap;
 
+  &.small-tweet {
+    margin-left: calc(1em + 20px);
+  }
+
   button {
     background: transparent;
     border: none;

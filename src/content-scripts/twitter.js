@@ -25,17 +25,11 @@ const configureSuperheroTipAction = async () => {
     if (!tweetId) return;
     const actions = tweet.querySelector('[role="group"]');
     if (!actions) return;
-    const lastActionNode = actions.querySelector(
-      ':scope > div:not(.action-superhero-tip):last-child',
-    );
-    if (check && bigTweetSkipped && lastActionNode) {
-      lastActionNode.style.flexBasis = '0px';
-      lastActionNode.style.flexGrow = '1';
-    }
-    const superheroTipActions = actions.getElementsByClassName('action-superhero-tip');
-
+    const superheroTipActions = actions.querySelectorAll('.action-superhero-tip');
     if (check && superheroTipActions.length === 0) {
-      actions.appendChild(createSuperheroTipAction(tweetId));
+      const superheroTipAction = createSuperheroTipAction(tweetId);
+      if (bigTweetSkipped) superheroTipAction.classList.add('small-tweet');
+      actions.appendChild(superheroTipAction);
     } else if (!check && superheroTipActions.length === 1) {
       actions.removeChild(superheroTipActions[0]);
     }
