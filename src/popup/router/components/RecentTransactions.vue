@@ -93,6 +93,7 @@ export default {
 .recent-transactions p,
 .recent-transactions .transactionList {
   color: $white-color !important;
+  padding: 0 !important;
 }
 
 .all-transactions {
