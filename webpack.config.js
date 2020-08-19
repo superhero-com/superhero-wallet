@@ -28,6 +28,7 @@ const getConfig = platform => {
         'other/background': './background.js',
         'other/inject': './content-scripts/inject.js',
         'other/twitter': './content-scripts/twitter.js',
+        'other/youtube': './content-scripts/youtube.js',
         'popup/popup': './popup/popup.js',
         'options/options': './options/options.js',
         'phishing/phishing': './phishing/phishing.js',
@@ -184,6 +185,7 @@ const getConfig = platform => {
               filename: 'popup/popup.html',
               excludeChunks: [
                 'other/background',
+                'other/youtube',
                 'other/twitter',
                 'other/inject',
                 'options/options',

@@ -21,10 +21,12 @@ module.exports = (isProd, platform) => ({
     'tabs',
     'webRequest',
     'webRequestBlocking',
+    'webNavigation',
     '*://*.chain/*',
     '*://*.google.com/*',
     'https://*.twitter.com/*',
     'https://twitter.com/*',
+    'https://*.youtube.com/watch?v=*',
   ],
   icons: {
     48: './icons/icon_48.png',
@@ -55,6 +57,12 @@ module.exports = (isProd, platform) => ({
       matches: ['https://*.twitter.com/*', 'https://twitter.com/*'],
       js: ['other/twitter.js'],
       css: ['other/twitter.css'],
+    },
+    {
+      run_at: 'document_start',
+      matches: ['https://*.youtube.com/watch?v=*'],
+      js: ['other/youtube.js'],
+      css: ['other/youtube.css'],
     },
   ],
   web_accessible_resources: [
