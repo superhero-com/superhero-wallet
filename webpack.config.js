@@ -183,8 +183,9 @@ const getConfig = platform => {
               template: path.join(__dirname, 'src', 'popup', 'popup-firefox.html'),
               filename: 'popup/popup.html',
               excludeChunks: [
-                'background',
-                'inject',
+                'other/background',
+                'other/twitter',
+                'other/inject',
                 'options/options',
                 'phishing/phishing',
                 'popup/cameraPermission',

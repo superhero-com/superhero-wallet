@@ -44,13 +44,11 @@ const configureSuperheroTipAction = async () => {
   timeout = setTimeout(configureSuperheroTipAction, 3000);
 };
 
-if (isInContent) {
-  document.addEventListener('visibilitychange', () => {
-    clearTimeout(timeout);
-    if (!document.hidden) {
-      timeout = setTimeout(configureSuperheroTipAction, 3000);
-    }
-  });
+document.addEventListener('visibilitychange', () => {
+  clearTimeout(timeout);
+  if (!document.hidden) {
+    timeout = setTimeout(configureSuperheroTipAction, 3000);
+  }
+});
 
-  configureSuperheroTipAction();
-}
+configureSuperheroTipAction();
