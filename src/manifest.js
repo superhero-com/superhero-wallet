@@ -54,6 +54,7 @@ module.exports = (isProd, platform) => ({
       run_at: 'document_start',
       matches: ['https://*.twitter.com/*', 'https://twitter.com/*'],
       js: ['other/twitter.js'],
+      css: ['other/twitter.css'],
     },
   ],
   web_accessible_resources: [
