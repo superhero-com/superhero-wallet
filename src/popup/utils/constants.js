@@ -67,11 +67,11 @@ export const calculateFee = (type, params) => {
 export const defaultNetwork =
   process.env.NETWORK === 'Testnet'
     ? {
-        url: 'https://sdk-testnet.aepps.com/',
-        internalUrl: 'https://sdk-testnet.aepps.com/',
+        url: 'https://testnet.aeternity.io',
+        internalUrl: 'https://testnet.aeternity.io',
         networkId: 'ae_uat',
-        middlewareUrl: 'https://testnet.aeternal.io',
-        explorerUrl: 'https://testnet.aeternal.io',
+        middlewareUrl: 'https://testnet.aeternity.io',
+        explorerUrl: 'https://testnet.aeternity.io',
         compilerUrl: 'https://latest.compiler.aepps.com',
         tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
         tokenRegistryLima: 'ct_Dnwribmd21YrxSQnqXCB5vTFPrgYJx2eg2TrbLvbdyEbTMejw',
@@ -82,8 +82,8 @@ export const defaultNetwork =
         url: 'https://mainnet.aeternity.io',
         internalUrl: 'https://mainnet.aeternity.io',
         networkId: 'ae_mainnet',
-        middlewareUrl: 'https://mainnet.aeternal.io',
-        explorerUrl: 'https://mainnet.aeternal.io',
+        middlewareUrl: 'https://mainnet.aeternity.io',
+        explorerUrl: 'https://mainnet.aeternity.io',
         compilerUrl: 'https://compiler.aepps.com',
         tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
         tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
