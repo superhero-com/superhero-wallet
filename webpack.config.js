@@ -11,6 +11,7 @@ const GenerateJsonPlugin = require('generate-json-webpack-plugin');
 const commitHash = require('child_process')
   .execSync('git rev-parse HEAD')
   .toString().trim();
+const sass = require('node-sass');
 const genManifest = require('./src/manifest');
 
 const parseBool = val => (val ? JSON.parse(val) : false);
@@ -169,6 +170,17 @@ const getConfig = platform => {
               },
               { from: 'icons/icon_48.png', to: `icons/icon_48.png` },
               { from: 'icons/icon_128.png', to: `icons/icon_128.png` },
+              {
+                from: path.join(__dirname, 'src/content-scripts/tipButton.scss'),
+                to: path.join(
+                  __dirname,
+                  {
+                    'extension-chrome': 'dist/chrome/other/tipButton.css',
+                    'extension-firefox': 'dist/firefox/other/tipButton.css',
+                  }[platform],
+                ),
+                transform: (_, f) => sass.renderSync({ file: f }).css.toString(),
+              },
             ]),
             new GenerateJsonPlugin(
               'manifest.json',

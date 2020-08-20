@@ -1,7 +1,12 @@
 import icon from '../icons/twitter-icon-tip.svg';
-import './tipButton.scss';
 
 global.browser = require('webextension-polyfill');
+
+const style = document.createElement('link');
+style.rel = 'stylesheet';
+style.type = 'text/css';
+style.href = browser.extension.getURL('other/tipButton.css');
+(document.head || document.documentElement).appendChild(style);
 
 export default url => {
   // Create the tip action

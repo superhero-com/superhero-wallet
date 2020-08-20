@@ -56,13 +56,11 @@ module.exports = (isProd, platform) => ({
       run_at: 'document_start',
       matches: ['https://*.twitter.com/*', 'https://twitter.com/*'],
       js: ['other/twitter.js'],
-      css: ['other/twitter.css'],
     },
     {
       run_at: 'document_start',
       matches: ['https://*.youtube.com/watch?v=*'],
       js: ['other/youtube.js'],
-      css: ['other/youtube.css'],
     },
   ],
   web_accessible_resources: [
@@ -70,5 +68,6 @@ module.exports = (isProd, platform) => ({
     'phishing/phishing.html',
     'phishing/phishing.js',
     'popup/CameraRequestPermission.html',
+    'other/tipButton.css',
   ],
 });
