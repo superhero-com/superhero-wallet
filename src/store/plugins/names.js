@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import { aettosToAe } from '../../popup/utils/helper';
 import Backend from '../../lib/backend';
@@ -90,13 +89,8 @@ export default store =>
             });
         }
       },
-      async fetchAuctions({ rootGetters: { activeNetwork } }) {
-        const { middlewareUrl } = activeNetwork;
-        return (
-          await axios(`${middlewareUrl}/middleware/names/auctions/active`).catch(() => ({
-            data: [],
-          }))
-        ).data;
+      async fetchAuctions({ rootState: { middleware } }) {
+        return middleware.getActiveNameAuctions();
       },
       async fetchAuctionEntry({ rootState: { middleware } }, name) {
         const { info, bids } = await middleware.getAuctionInfoByName(name);

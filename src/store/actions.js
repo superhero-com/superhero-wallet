@@ -25,19 +25,11 @@ export default {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
     commit(types.UPDATE_BALANCE, convertToAE(balance));
   },
-  async fetchTransactions({ state, getters: { activeNetwork } }, { limit, page, recent }) {
+  async fetchTransactions({ state }, { limit, page, recent }) {
     if (!state.middleware) return [];
-    const { middlewareUrl } = activeNetwork;
     const { publicKey } = state.account;
     let txs = await Promise.all([
-      (async () =>
-        (
-          await axios
-            .get(
-              `${middlewareUrl}/middleware/transactions/account/${publicKey}?page=${page}&limit=${limit}`,
-            )
-            .catch(() => ({ data: [] }))
-        ).data)(),
+      state.middleware.getTxByAccount(publicKey, { limit, page }),
       (async () =>
         (
           await axios
