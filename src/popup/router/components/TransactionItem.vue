@@ -60,8 +60,8 @@ export default {
     }
   },
   computed: {
-    ...mapState(['sdk', 'current']),
-    ...mapGetters(['account', 'activeNetwork', 'formatCurrency']),
+    ...mapState(['sdk']),
+    ...mapGetters(['account', 'activeNetwork', 'formatCurrency', 'currentCurrencyRate']),
     status() {
       if (
         this.transaction.tx.sender_id === this.account.publicKey ||
@@ -85,7 +85,7 @@ export default {
       const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
       const fee = this.transaction.tx.fee || 0;
       const txamount = +aettosToAe(+amount + fee);
-      return (txamount * this.current.currencyRate).toFixed(2);
+      return (txamount * this.currentCurrencyRate).toFixed(2);
     },
     tipUrl() {
       return this.transaction.tipUrl || this.tip || this.transaction.url;

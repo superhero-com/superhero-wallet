@@ -12,7 +12,7 @@
         >{{ amountTip }} {{ $t('pages.appVUE.aeid') }}
       </span>
       <!--eslint-disable vue-i18n/no-raw-text-->
-      ({{ formatCurrency((amountTip * current.currencyRate).toFixed(3)) }})
+      ({{ formatCurrency((amountTip * currentCurrencyRate).toFixed(3)) }})
       <!--eslint-enable vue-i18n/no-raw-text-->
       {{ $t('pages.successTip.to') }}
     </p>
@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import axios from 'axios';
 import Heart from '../../../icons/heart.svg?vue-component';
 import Textarea from '../components/Textarea';
@@ -68,8 +68,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['current']),
-    ...mapGetters(['formatCurrency']),
+    ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
     amountTip() {
       return (+aettosToAe(this.amount)).toFixed(2);
     },

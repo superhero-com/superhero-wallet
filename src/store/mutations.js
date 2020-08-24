@@ -52,9 +52,8 @@ export default {
   [types.SET_NODE_STATUS](state, payload) {
     state.nodeStatus = payload;
   },
-  [types.SET_CURRENCY](state, { currency, currencyRate }) {
+  setCurrentCurrency(state, currency) {
     state.current.currency = currency;
-    state.current.currencyRate = currencyRate;
   },
   [types.SET_CURRENCIES](state, payload) {
     state.currencies = payload;
@@ -97,9 +96,6 @@ export default {
   },
   [types.SET_TIPPING_ADDRESS](state, payload) {
     state.tippingAddress = payload;
-  },
-  setMinTipAmount(state, payload) {
-    state.minTipAmount = payload;
   },
   setSaveErrorLog(state) {
     state.saveErrorLog = !state.saveErrorLog;

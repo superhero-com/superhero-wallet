@@ -82,21 +82,7 @@ export default {
   async setPendingTx({ commit, state: { transactions } }, tx) {
     commit('SET_PENDING_TXS', [...transactions.pending, tx]);
   },
-  async setCurrency({
-    commit,
-    state: {
-      currencies,
-      current: { currency },
-    },
-  }) {
-    commit('SET_CURRENCY', {
-      currency,
-      currencyRate: currencies[currency],
-    });
-    if (!process.env.RUNNING_IN_TESTS)
-      commit('setMinTipAmount', +(0.01 * (1 / currencies.usd)).toFixed(2));
-  },
-  async getCurrencies({ state: { nextCurrenciesFetch }, commit, dispatch }) {
+  async getCurrencies({ state: { nextCurrenciesFetch }, commit }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
       try {
         const { aeternity } = (
@@ -110,7 +96,6 @@ export default {
         console.error(`Cannot fetch currencies: ${e}`);
       }
     }
-    dispatch('setCurrency');
   },
   async setPermissionForAccount({ commit, state: { connectedAepps } }, { host, account }) {
     if (connectedAepps[host]) {

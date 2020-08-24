@@ -11,11 +11,13 @@ export default {
     }
     return state.account;
   },
-  balanceCurrency({ current, balance }) {
-    return (current.currencyRate * balance).toFixed(2);
+  currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,
+  balanceCurrency({ balance }, { currentCurrencyRate }) {
+    return (currentCurrencyRate * balance).toFixed(2);
   },
   formatCurrency: ({ current: { currency } }) => value =>
     new Intl.NumberFormat('en', { style: 'currency', currency }).format(value),
+  minTipAmount: ({ currencies: { usd } }) => 0.01 / usd,
   networks({ userNetworks }) {
     return [
       defaultNetwork,
