@@ -1,7 +1,7 @@
 <template>
   <div class="invite popup">
     <p class="section-title">
-      <Invite class="invite-icon" />
+      <NewInviteLink class="invite-icon" />
       {{ $t('pages.invite.generate-link') }}
     </p>
     <AmountSend v-model="amount" :label="$t('pages.invite.tip-attached')" />
@@ -31,9 +31,10 @@ import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter
 import AmountSend from '../components/AmountSend';
 import InviteItem from '../components/InviteItem';
 import Invite from '../../../icons/invite.svg?vue-component';
+import NewInviteLink from '../../../icons/new-invite-link.svg?vue-component';
 
 export default {
-  components: { AmountSend, InviteItem, Invite },
+  components: { AmountSend, InviteItem, Invite, NewInviteLink },
   data: () => ({ amount: 0, loading: false }),
   computed: {
     ...mapState(['sdk', 'balance']),
