@@ -16,7 +16,8 @@ export default {
     return (currentCurrencyRate * balance).toFixed(2);
   },
   formatCurrency: ({ current: { currency } }) => value =>
-    new Intl.NumberFormat('en', { style: 'currency', currency }).format(value),
+    // TODO: Use the current language from i18n module
+    new Intl.NumberFormat(navigator.language, { style: 'currency', currency }).format(value),
   minTipAmount: ({ currencies: { usd } }) => 0.01 / usd,
   networks({ userNetworks }) {
     return [

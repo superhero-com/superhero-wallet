@@ -85,11 +85,15 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+    color: $white-1;
+
+    .title {
+      font-size: 18px;
+    }
 
     &:not(.isLoggedIn) .title {
       margin-left: auto;
       margin-right: auto;
-      font-weight: 500;
     }
 
     .back-arrow {
@@ -109,7 +113,6 @@ export default {
         left: 0;
         right: 0;
         text-align: center;
-        font-weight: 500;
       }
 
       .start-onboarding {

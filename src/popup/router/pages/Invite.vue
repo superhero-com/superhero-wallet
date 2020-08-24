@@ -1,19 +1,25 @@
 <template>
-  <div class="popup">
+  <div class="invite popup">
     <p class="section-title">
+      <Invite class="invite-icon" />
       {{ $t('pages.invite.generate-link') }}
     </p>
-    <AmountSend v-model="amount" />
-    <Button @click="generate" extend>{{ $t('pages.invite.generate') }}</Button>
-    <p class="section-title">
-      {{ $t('pages.invite.created-links') }}
-    </p>
-    <InviteItem
-      v-for="link in invites"
-      :key="link.secretKey"
-      v-bind="link"
-      @loading="val => (loading = val)"
-    />
+    <AmountSend v-model="amount" :label="$t('pages.invite.tip-attached')" />
+    <Button bold :disabled="balance < amount" @click="generate">{{
+      $t('pages.invite.generate')
+    }}</Button>
+    <div class="generated-links">
+      <p class="section-title">
+        <Invite class="invite-icon" />
+        {{ $t('pages.invite.created-links') }}
+      </p>
+      <InviteItem
+        v-for="link in invites"
+        :key="link.secretKey"
+        v-bind="link"
+        @loading="val => (loading = val)"
+      />
+    </div>
     <Loader v-if="loading" />
   </div>
 </template>
@@ -24,12 +30,13 @@ import { Crypto } from '@aeternity/aepp-sdk/es';
 import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 import AmountSend from '../components/AmountSend';
 import InviteItem from '../components/InviteItem';
+import Invite from '../../../icons/invite.svg?vue-component';
 
 export default {
-  components: { AmountSend, InviteItem },
+  components: { AmountSend, InviteItem, Invite },
   data: () => ({ amount: 0, loading: false }),
   computed: {
-    ...mapState(['sdk']),
+    ...mapState(['sdk', 'balance']),
     ...mapState('invites', ['invites']),
   },
   methods: {
@@ -60,9 +67,36 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.section-title {
-  font-size: 16px;
-  text-align: left;
-  margin-bottom: 0;
+@import '../../../common/variables';
+
+.invite.popup {
+  background-color: $black-1;
+
+  .section-title {
+    font-size: 17px;
+    text-align: left;
+    margin-bottom: 0;
+    color: $gray-1;
+    font-weight: 400;
+  }
+
+  .invite-icon {
+    vertical-align: sub;
+    margin-right: 7px;
+  }
+
+  .amount-send-container {
+    margin: 10px 0 0 0;
+  }
+
+  .generated-links {
+    background-color: $transactions-bg;
+    margin: 0 -20px;
+
+    .section-title {
+      padding: 15px 20px;
+      border-bottom: 2px solid $black-1;
+    }
+  }
 }
 </style>
