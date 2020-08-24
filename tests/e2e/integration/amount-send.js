@@ -8,11 +8,11 @@ describe('Test cases AmountSend component', () => {
     cy.enterAmountSend(5)
       .get('[data-cy=amount-currency]')
       .invoke('text')
-      .then(text => expect(text).not.to.eq('0.00 USD'))
+      .then(text => expect(text).not.to.eq('$0.00'))
       .enterAmountSend(0)
       .get('[data-cy=amount-currency]')
       .invoke('text')
-      .then(text => expect(text.trim()).to.eq('0.00 USD'));
+      .then(text => expect(text.trim()).to.eq('$0.00'));
   });
 
   it('Validate entered amount', () => {
@@ -33,6 +33,6 @@ describe('Test cases AmountSend component', () => {
       .then(text => expect(text.trim()).to.eq(`${balance.toFixed(2)} AE`))
       .get('[data-cy=balance-currency]', { timeout: 8000 })
       .invoke('text')
-      .then(text => expect(text.trim()).not.to.eq('0.00 USD'));
+      .then(text => expect(text.trim()).not.to.eq('$0.00'));
   });
 });

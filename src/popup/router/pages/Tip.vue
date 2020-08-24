@@ -10,10 +10,9 @@
           <span class="secondary-text" data-cy="tip-amount">
             {{ amount }} {{ $t('pages.appVUE.aeid') }}
           </span>
-          <!--eslint-disable-line vue-i18n/no-raw-text-->
-          ({{ (amount * current.currencyRate).toFixed(3) }}
-          <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-          {{ currentCurrency }})
+          <!--eslint-disable vue-i18n/no-raw-text-->
+          ({{ formatCurrency((amount * current.currencyRate).toFixed(3)) }})
+          <!--eslint-enable vue-i18n/no-raw-text-->
           {{ $t('pages.tipPage.to') }}
         </template>
       </p>
@@ -114,7 +113,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'currentCurrency']),
+    ...mapGetters(['account', 'formatCurrency']),
     ...mapState([
       'tourRunning',
       'tippingAddress',

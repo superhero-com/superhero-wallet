@@ -11,9 +11,9 @@
       <span class="secondary-text" data-cy="tip-amount"
         >{{ amountTip }} {{ $t('pages.appVUE.aeid') }}
       </span>
-      <!--eslint-disable-line vue-i18n/no-raw-text-->
-      ({{ (amountTip * current.currencyRate).toFixed(3) }}
-      {{ currentCurrency }})<!--eslint-disable-line vue-i18n/no-raw-text-->
+      <!--eslint-disable vue-i18n/no-raw-text-->
+      ({{ formatCurrency((amountTip * current.currencyRate).toFixed(3)) }})
+      <!--eslint-enable vue-i18n/no-raw-text-->
       {{ $t('pages.successTip.to') }}
     </p>
     <a class="link-sm text-left block" data-cy="tip-url">{{ tipUrl }}</a>
@@ -69,7 +69,7 @@ export default {
   },
   computed: {
     ...mapState(['current']),
-    ...mapGetters(['currentCurrency']),
+    ...mapGetters(['formatCurrency']),
     amountTip() {
       return (+aettosToAe(this.amount)).toFixed(2);
     },
