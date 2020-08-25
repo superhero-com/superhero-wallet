@@ -1,0 +1,48 @@
+.action-superhero-tip {
+  align-self: center;
+  white-space: nowrap;
+
+  &.small-tweet {
+    margin-left: calc(1em + 20px);
+  }
+
+  &.youtube {
+    margin-left: 9px;
+    height: 20px;
+  }
+
+  button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    outline: none;
+
+    &,
+    span {
+      color: rgb(101, 119, 134);
+    }
+
+    img {
+      height: 16px;
+      vertical-align: middle;
+    }
+
+    span {
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 6px;
+      position: relative;
+    }
+
+    &:hover {
+      span {
+        color: #2a9cff;
+      }
+
+      img {
+        filter: invert(52%) sepia(46%) saturate(3166%) hue-rotate(186deg) brightness(100%) contrast(104%);
+      }
+    }
+  }
+}

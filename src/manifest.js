@@ -21,10 +21,12 @@ module.exports = (isProd, platform) => ({
     'tabs',
     'webRequest',
     'webRequestBlocking',
+    'webNavigation',
     '*://*.chain/*',
     '*://*.google.com/*',
     'https://*.twitter.com/*',
     'https://twitter.com/*',
+    'https://*.youtube.com/watch?v=*',
   ],
   icons: {
     48: './icons/icon_48.png',
@@ -55,11 +57,17 @@ module.exports = (isProd, platform) => ({
       matches: ['https://*.twitter.com/*', 'https://twitter.com/*'],
       js: ['other/twitter.js'],
     },
+    {
+      run_at: 'document_start',
+      matches: ['https://*.youtube.com/watch?v=*'],
+      js: ['other/youtube.js'],
+    },
   ],
   web_accessible_resources: [
     'inject.js',
     'phishing/phishing.html',
     'phishing/phishing.js',
     'popup/CameraRequestPermission.html',
+    'other/tipButton.css',
   ],
 });

@@ -116,6 +116,15 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
     title: 'Tip',
   };
 
+  browser.webNavigation.onHistoryStateUpdated.addListener(async ({ tabId, url }) => {
+    if (
+      (({ origin, pathname }) => origin + pathname)(new URL(url)) !==
+      'https://www.youtube.com/watch'
+    )
+      return;
+    browser.tabs.executeScript(tabId, { file: 'other/youtube.js' });
+  });
+
   browser.contextMenus.removeAll();
   browser.contextMenus.create(contextMenuItem);
   browser.contextMenus.onClicked.addListener(({ menuItemId, pageUrl }) => {

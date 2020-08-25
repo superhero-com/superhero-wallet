@@ -6,7 +6,6 @@ import ContentScriptBridge from '@aeternity/aepp-sdk/es/utils/aepp-wallet-commun
 
 global.browser = require('webextension-polyfill');
 
-const isInContent = !window.location.href.includes(browser.extension.getURL('./'));
 const runContentScript = () => {
   const redirectToWarning = (hostname, href, extUrl = '') => {
     window.stop();
@@ -157,4 +156,4 @@ const runContentScript = () => {
   }, 10);
 };
 
-if (isInContent) runContentScript();
+runContentScript();
