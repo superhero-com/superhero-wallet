@@ -112,20 +112,6 @@ const runContentScript = () => {
     }
   });
 
-  const setSuperheroButtonClickListener = () =>
-    document.addEventListener('click', event => {
-      if (!event.target.closest('.superhero-button')) return;
-      const link = event.target.closest('a');
-      if (!link) return;
-
-      event.preventDefault();
-      browser.runtime.sendMessage({
-        from: 'content',
-        type: 'openTipPopup',
-        url: link.dataset.url,
-      });
-    });
-
   /**
    * Aex-2 Aepp communication
    */
@@ -151,7 +137,6 @@ const runContentScript = () => {
       });
       const bridge = ContentScriptBridge({ pageConnection, extConnection });
       bridge.run();
-      setSuperheroButtonClickListener();
     }
   }, 10);
 };
