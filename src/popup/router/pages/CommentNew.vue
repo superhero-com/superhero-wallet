@@ -25,15 +25,12 @@ export default {
   computed: {
     ...mapState(['sdk']),
     ...mapGetters(['allowTipping']),
-    urlParams() {
-      return new URL(this.$route.fullPath, window.location).searchParams;
-    },
   },
   async created() {
     this.loading = true;
-    this.id = +this.urlParams.get('id');
-    if (this.urlParams.get('parentId')) this.parentId = +this.urlParams.get('parentId');
-    this.text = this.urlParams.get('text');
+    this.id = +this.$route.query.id;
+    if (this.$route.query.parentId) this.parentId = +this.$route.query.parentId;
+    this.text = this.$route.query.text;
     if (!this.id || !this.text) {
       this.$router.push('/account');
       throw new Error('CommentNew: Invalid arguments');
@@ -43,7 +40,7 @@ export default {
   },
   methods: {
     openCallbackOrGoHome(paramName) {
-      const callbackUrl = this.urlParams.get(paramName);
+      const callbackUrl = this.$route.query[paramName];
       if (callbackUrl) openUrl(decodeURIComponent(callbackUrl));
       else this.$router.push('/account');
     },

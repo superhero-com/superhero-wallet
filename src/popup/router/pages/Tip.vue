@@ -128,20 +128,18 @@ export default {
     },
     $route: {
       immediate: true,
-      handler({ fullPath }) {
-        const urlParams = new URL(fullPath, window.location).searchParams;
-
-        const tipUrlEncoded = urlParams.get('url');
+      handler({ query }) {
+        const tipUrlEncoded = query.url;
         if (tipUrlEncoded) {
           const tipUrl = decodeURIComponent(tipUrlEncoded);
           const tipUrlNormalised = new URL(/^\w+:\D+/.test(tipUrl) ? tipUrl : `https://${tipUrl}`);
           this.url = tipUrlNormalised.toString();
         }
 
-        const tipMessageEncoded = urlParams.get('message');
+        const tipMessageEncoded = query.message;
         if (tipMessageEncoded) this.note = decodeURIComponent(tipMessageEncoded);
 
-        const tipAmount = +urlParams.get('amount');
+        const tipAmount = +query.amount;
         if (tipAmount) this.amount = tipAmount.toString();
       },
     },

@@ -53,9 +53,6 @@ export default {
     urlStatus() {
       return this.$store.getters['tipUrl/status'](this.tip.url);
     },
-    urlParams() {
-      return new URL(this.$route.fullPath, window.location).searchParams;
-    },
   },
   watch: {
     amount() {
@@ -71,7 +68,7 @@ export default {
       callerId: this.account.publicKey,
     }).min;
     await this.$watchUntilTruly(() => this.tipping);
-    const tipId = +this.urlParams.get('id');
+    const tipId = +this.$route.query.id;
     if (!tipId) throw new Error('"id" param is missed');
     const { decodedResult } = await this.tipping.methods.get_state();
     this.tip = tipping.getTipsRetips(decodedResult).tips.find(({ id }) => id === tipId);
@@ -79,7 +76,7 @@ export default {
   },
   methods: {
     openCallbackOrGoHome(paramName) {
-      const callbackUrl = this.urlParams.get(paramName);
+      const callbackUrl = this.$route.query[paramName];
       if (callbackUrl) openUrl(decodeURIComponent(callbackUrl));
       else this.$router.push('/account');
     },

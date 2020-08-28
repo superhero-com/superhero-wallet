@@ -22,24 +22,19 @@ import openUrl from '../../utils/openUrl';
 
 export default {
   computed: {
-    urlParams() {
-      return new URL(this.$route.fullPath, window.location).searchParams;
-    },
     callbackOrigin() {
-      return new URL(this.urlParams.get('x-success')).origin;
+      return new URL(this.$route.query['x-success']).origin;
     },
   },
   methods: {
     openCallbackOrGoHome(paramName) {
-      const callbackUrl = this.urlParams.get(paramName);
+      const callbackUrl = this.$route.query[paramName];
       if (callbackUrl) openUrl(callbackUrl);
       else this.$router.push('/account');
     },
     sendAddress() {
       openUrl(
-        this.urlParams
-          .get('x-success')
-          .replace(/{address}/g, this.$store.getters.account.publicKey),
+        this.$route.query['x-success'].replace(/{address}/g, this.$store.getters.account.publicKey),
       );
     },
   },

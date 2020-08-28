@@ -15,7 +15,7 @@
     </div>
 
     <div class="tip-note-preview mt-15">
-      {{ urlParams.get('message') }}
+      {{ $route.query.message }}
     </div>
 
     <Button @click="sendAddress">
@@ -32,24 +32,21 @@ import openUrl from '../../utils/openUrl';
 
 export default {
   computed: {
-    urlParams() {
-      return new URL(this.$route.fullPath, window.location).searchParams;
-    },
     callbackOrigin() {
-      return new URL(this.urlParams.get('x-success')).origin;
+      return new URL(this.$route.query['x-success']).origin;
     },
   },
   methods: {
     openCallbackOrGoHome(paramName) {
-      const callbackUrl = this.urlParams.get(paramName);
+      const callbackUrl = this.$route.query[paramName];
       if (callbackUrl) openUrl(callbackUrl);
       else this.$router.push('/account');
     },
     async sendAddress() {
       await this.$watchUntilTruly(() => this.$store.state.sdk);
-      const signature = await this.$store.state.sdk.signMessage(this.urlParams.get('message'));
+      const signature = await this.$store.state.sdk.signMessage(this.$route.query.message);
       const signatureHex = Buffer.from(signature).toString('hex');
-      openUrl(this.urlParams.get('x-success').replace(/{signature}/g, signatureHex));
+      openUrl(this.$route.query['x-success'].replace(/{signature}/g, signatureHex));
     },
     cancel() {
       this.openCallbackOrGoHome('x-cancel');
