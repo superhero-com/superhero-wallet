@@ -21,35 +21,23 @@
     <Button @click="sendAddress">
       {{ $t('pages.tipPage.confirm') }}
     </Button>
-    <Button @click="cancel">
+    <Button @click="openCallbackOrGoHome(false)">
       {{ $t('pages.tipPage.cancel') }}
     </Button>
   </div>
 </template>
 
 <script>
-import openUrl from '../../utils/openUrl';
+import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
-  computed: {
-    callbackOrigin() {
-      return new URL(this.$route.query['x-success']).origin;
-    },
-  },
+  mixins: [deeplinkApi],
   methods: {
-    openCallbackOrGoHome(paramName) {
-      const callbackUrl = this.$route.query[paramName];
-      if (callbackUrl) openUrl(callbackUrl);
-      else this.$router.push('/account');
-    },
     async sendAddress() {
       await this.$watchUntilTruly(() => this.$store.state.sdk);
       const signature = await this.$store.state.sdk.signMessage(this.$route.query.message);
       const signatureHex = Buffer.from(signature).toString('hex');
-      openUrl(this.$route.query['x-success'].replace(/{signature}/g, signatureHex));
-    },
-    cancel() {
-      this.openCallbackOrGoHome('x-cancel');
+      this.openCallbackOrGoHome(true, { signature: signatureHex });
     },
   },
 };

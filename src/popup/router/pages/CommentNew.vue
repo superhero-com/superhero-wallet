@@ -7,7 +7,7 @@
     <Button @click="sendComment" :disabled="!allowTipping">
       {{ $t('pages.tipPage.confirm') }}
     </Button>
-    <Button @click="cancel">
+    <Button @click="openCallbackOrGoHome(false)">
       {{ $t('pages.tipPage.cancel') }}
     </Button>
 
@@ -18,9 +18,10 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import Backend from '../../../lib/backend';
-import openUrl from '../../utils/openUrl';
+import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
+  mixins: [deeplinkApi],
   data: () => ({ id: 0, parentId: undefined, text: '', loading: false }),
   computed: {
     ...mapState(['sdk']),
@@ -39,11 +40,6 @@ export default {
     this.loading = false;
   },
   methods: {
-    openCallbackOrGoHome(paramName) {
-      const callbackUrl = this.$route.query[paramName];
-      if (callbackUrl) openUrl(decodeURIComponent(callbackUrl));
-      else this.$router.push('/account');
-    },
     async sendComment() {
       this.loading = true;
       try {
@@ -54,7 +50,7 @@ export default {
           async data => Buffer.from(await this.sdk.signMessage(data)).toString('hex'),
           this.parentId,
         );
-        this.openCallbackOrGoHome('x-success');
+        this.openCallbackOrGoHome(true);
       } catch (e) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
         e.payload = { id: this.id, text: this.text };
@@ -62,9 +58,6 @@ export default {
       } finally {
         this.loading = false;
       }
-    },
-    cancel() {
-      this.openCallbackOrGoHome('x-cancel');
     },
   },
 };

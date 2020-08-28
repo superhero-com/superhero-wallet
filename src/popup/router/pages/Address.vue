@@ -8,36 +8,20 @@
       {{ callbackOrigin }}
     </div>
 
-    <Button @click="sendAddress">
+    <Button @click="openCallbackOrGoHome(true, { address: $store.getters.account.publicKey })">
       {{ $t('pages.tipPage.confirm') }}
     </Button>
-    <Button @click="openCallbackOrGoHome('x-cancel')">
+    <Button @click="openCallbackOrGoHome(false)">
       {{ $t('pages.tipPage.cancel') }}
     </Button>
   </div>
 </template>
 
 <script>
-import openUrl from '../../utils/openUrl';
+import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
-  computed: {
-    callbackOrigin() {
-      return new URL(this.$route.query['x-success']).origin;
-    },
-  },
-  methods: {
-    openCallbackOrGoHome(paramName) {
-      const callbackUrl = this.$route.query[paramName];
-      if (callbackUrl) openUrl(callbackUrl);
-      else this.$router.push('/account');
-    },
-    sendAddress() {
-      openUrl(
-        this.$route.query['x-success'].replace(/{address}/g, this.$store.getters.account.publicKey),
-      );
-    },
-  },
+  mixins: [deeplinkApi],
 };
 </script>
 
