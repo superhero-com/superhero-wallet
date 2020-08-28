@@ -27,6 +27,7 @@ module.exports = (isProd, platform) => ({
     'https://*.twitter.com/*',
     'https://twitter.com/*',
     'https://*.youtube.com/watch?v=*',
+    'https://wallet.superhero.com/*',
   ],
   icons: {
     48: './icons/icon_48.png',
@@ -69,5 +70,6 @@ module.exports = (isProd, platform) => ({
     'phishing/phishing.js',
     'popup/CameraRequestPermission.html',
     'other/tipButton.css',
+    'popup/popup.html',
   ],
 });
