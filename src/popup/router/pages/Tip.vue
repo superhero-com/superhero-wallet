@@ -47,7 +47,6 @@
           size="sm"
         />
         <Button
-          class="send-tip-button"
           @click="toConfirm"
           :disabled="
             !note ||
@@ -59,9 +58,13 @@
               urlStatus === 'blacklisted' ||
               note.length > 280
           "
+          bold
           data-cy="send-tip"
         >
           {{ $t('pages.tipPage.next') }}
+        </Button>
+        <Button bold @click="openCallbackOrGoHome(false)">
+          {{ $t('pages.tipPage.cancel') }}
         </Button>
       </template>
       <template v-else>
@@ -83,6 +86,7 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
+import deeplinkApi from '../../../mixins/deeplinkApi';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { escapeSpecialChars, aeToAettos, validateTipUrl } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
@@ -91,6 +95,7 @@ import Input from '../components/Input';
 import UrlStatus from '../components/UrlStatus';
 
 export default {
+  mixins: [deeplinkApi],
   components: {
     AmountSend,
     Textarea,
@@ -218,7 +223,7 @@ export default {
             time: Date.now(),
             type: 'tip',
           });
-          this.$router.push('/account');
+          this.openCallbackOrGoHome(true);
         }
       } catch (e) {
         await this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
@@ -239,11 +244,6 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../common/variables';
-
-.send-tip-button {
-  font-weight: bold !important;
-  font-size: 15px !important;
-}
 
 .tour__step3 {
   margin: 0 auto;
