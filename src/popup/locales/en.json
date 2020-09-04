@@ -466,6 +466,7 @@
       "pending-claim": "Pending",
       "revoked": "Revoked",
       "revoked-notification": "Your name {name} has been revoked at block {block}",
+      "auto-extend": "Auto-extend",
       "list": {
         "no-names": "No names found",
         "button": "Your names"

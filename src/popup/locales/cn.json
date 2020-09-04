@@ -464,6 +464,7 @@
       "balance-error": "你的帐户余额不足以支付这笔交易。",
       "pointer-added": "名称{type} 成功！",
       "pending-claim": "待定",
+      "auto-extend": "Auto-extend",
       "list": {
         "no-names": "未发现名称",
         "button": "你的名称"

@@ -3,8 +3,8 @@
     <NameListHeader />
     <ul v-if="owned.length" class="names-list">
       <NameRow
-        v-for="({ name, owner, pending, revoked }, key) in owned"
-        :key="key"
+        v-for="({ name, owner, pending, revoked, autoExtend }, index) in owned"
+        :key="index"
         :to="{ name: 'name-details', params: { name } }"
         :name="name"
         :address="owner"
@@ -20,6 +20,12 @@
           {{ $t('pages.names.revoked') }}
         </Badge>
         <span class="address">{{ owner }}</span>
+        <CheckBox
+          :value="autoExtend"
+          @input="value => $store.commit('names/setAutoExtend', { index, value })"
+        >
+          {{ $t('pages.names.auto-extend') }}
+        </CheckBox>
       </NameRow>
     </ul>
     <p v-else>{{ $t('pages.names.list.no-names') }}</p>
@@ -31,9 +37,10 @@ import { mapState, mapGetters } from 'vuex';
 import NameListHeader from '../../components/NameListHeader';
 import Badge from '../../components/Badge';
 import NameRow from '../../components/NameRow';
+import CheckBox from '../../components/CheckBox';
 
 export default {
-  components: { NameListHeader, Badge, NameRow },
+  components: { NameListHeader, Badge, NameRow, CheckBox },
   computed: {
     ...mapGetters(['activeAccountName']),
     ...mapState('names', ['owned']),

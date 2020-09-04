@@ -38,6 +38,7 @@ async function initMiddleware() {
   })({ swag });
   store.commit('SET_MIDDLEWARE', middleware);
   store.dispatch('names/fetchOwned');
+  store.dispatch('names/extendNames');
 }
 
 async function logout() {
