@@ -1,5 +1,5 @@
 import { isEmpty } from 'lodash-es';
-import { defaultNetwork } from '../popup/utils/constants';
+import { defaultNetworks } from '../popup/utils/constants';
 
 export default {
   account(state, { activeAccountName }) {
@@ -21,7 +21,7 @@ export default {
   minTipAmount: ({ currencies: { usd } }) => 0.01 / usd,
   networks({ userNetworks }) {
     return [
-      defaultNetwork,
+      ...defaultNetworks,
       ...userNetworks.map((network, index) => ({ index, ...network })),
     ].reduce((acc, n) => ({ ...acc, [n.name]: n }), {});
   },

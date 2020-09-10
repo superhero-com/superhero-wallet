@@ -64,32 +64,35 @@ export const calculateFee = (type, params) => {
   };
 };
 
+export const defaultNetworks = [
+  {
+    url: 'https://testnet.aeternity.io',
+    internalUrl: 'https://testnet.aeternity.io',
+    networkId: 'ae_uat',
+    middlewareUrl: 'https://testnet.aeternity.io',
+    explorerUrl: 'https://testnet.aeternity.io',
+    compilerUrl: 'https://latest.compiler.aepps.com',
+    tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
+    tokenRegistryLima: 'ct_Dnwribmd21YrxSQnqXCB5vTFPrgYJx2eg2TrbLvbdyEbTMejw',
+    tipContract: 'ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj',
+    name: 'Testnet',
+  },
+  {
+    url: 'https://mainnet.aeternity.io',
+    internalUrl: 'https://mainnet.aeternity.io',
+    networkId: 'ae_mainnet',
+    middlewareUrl: 'https://mainnet.aeternity.io',
+    explorerUrl: 'https://mainnet.aeternity.io',
+    compilerUrl: 'https://compiler.aepps.com',
+    tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
+    tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
+    tipContract: 'superhero.chain',
+    name: 'Mainnet',
+  },
+];
+
 export const defaultNetwork =
-  process.env.NETWORK === 'Testnet'
-    ? {
-        url: 'https://testnet.aeternity.io',
-        internalUrl: 'https://testnet.aeternity.io',
-        networkId: 'ae_uat',
-        middlewareUrl: 'https://testnet.aeternity.io',
-        explorerUrl: 'https://testnet.aeternity.io',
-        compilerUrl: 'https://latest.compiler.aepps.com',
-        tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
-        tokenRegistryLima: 'ct_Dnwribmd21YrxSQnqXCB5vTFPrgYJx2eg2TrbLvbdyEbTMejw',
-        tipContract: 'ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj',
-        name: 'Testnet',
-      }
-    : {
-        url: 'https://mainnet.aeternity.io',
-        internalUrl: 'https://mainnet.aeternity.io',
-        networkId: 'ae_mainnet',
-        middlewareUrl: 'https://mainnet.aeternity.io',
-        explorerUrl: 'https://mainnet.aeternity.io',
-        compilerUrl: 'https://compiler.aepps.com',
-        tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
-        tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
-        tipContract: 'superhero.chain',
-        name: 'Mainnet',
-      };
+  process.env.NETWORK === 'Testnet' ? defaultNetworks[0] : defaultNetworks[1];
 
 export const AGGREGATOR_URL = 'https://superhero.com/';
 export const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
