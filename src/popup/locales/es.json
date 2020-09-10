@@ -459,6 +459,7 @@
       "balance-error": "El saldo de tu cuenta no es sufciente para ejecutar esta transacción.",
       "pointer-added": "!Nombre {type} exitoso!",
       "pending-claim": "Pendiente",
+      "auto-extend": "Auto-extend",
       "list": {
         "no-names": "No se encontraron nombres",
         "button": "Tus nombres"

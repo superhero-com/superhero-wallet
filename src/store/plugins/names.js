@@ -3,6 +3,7 @@ import BigNumber from 'bignumber.js';
 import { aettosToAe } from '../../popup/utils/helper';
 import Backend from '../../lib/backend';
 import { i18n } from '../../popup/utils/i18nHelper';
+import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
 
 export default store =>
   store.registerModule('names', {
@@ -27,6 +28,9 @@ export default store =>
       setDefault({ defaults }, { address, networkId, name: { name, revoked } }) {
         if (revoked) Vue.delete(defaults, `${address}-${networkId}`, name);
         else Vue.set(defaults, `${address}-${networkId}`, name);
+      },
+      setAutoExtend(state, { index, value }) {
+        Vue.set(state.owned[index], 'autoExtend', value);
       },
     },
     actions: {
@@ -74,6 +78,7 @@ export default store =>
             }
             return {
               ...(revoked || oldName.revoked ? { revoked: true } : {}),
+              autoExtend: oldName.autoExtend,
               ...name,
             };
           });
@@ -145,6 +150,15 @@ export default store =>
             else throw e;
           }
         }
+      },
+      async extendNames({ rootState: { sdk }, state: { owned }, dispatch }) {
+        const height = await sdk.height();
+        owned.forEach(
+          ({ name, expiresAt, autoExtend }) =>
+            autoExtend &&
+            expiresAt - height < AUTO_EXTEND_NAME_BLOCKS_INTERVAL &&
+            dispatch('updatePointer', { name, type: 'extend' }),
+        );
       },
     },
   });
