@@ -21,7 +21,7 @@
     <Button @click="sendTip" :disabled="amountError || !minCallFee || !tipping || !allowTipping">
       {{ $t('pages.tipPage.confirm') }}
     </Button>
-    <Button @click="cancel">
+    <Button @click="openCallbackOrGoHome(false)">
       {{ $t('pages.tipPage.cancel') }}
     </Button>
 
@@ -34,11 +34,12 @@ import { mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
-import openUrl from '../../utils/openUrl';
+import deeplinkApi from '../../../mixins/deeplinkApi';
 import AmountSend from '../components/AmountSend';
 import UrlStatus from '../components/UrlStatus';
 
 export default {
+  mixins: [deeplinkApi],
   components: { AmountSend, UrlStatus },
   data: () => ({
     tip: {},
@@ -52,9 +53,6 @@ export default {
     ...mapState(['tippingAddress', 'balance', 'tipping', 'sdk']),
     urlStatus() {
       return this.$store.getters['tipUrl/status'](this.tip.url);
-    },
-    urlParams() {
-      return new URL(this.$route.fullPath, window.location).searchParams;
     },
   },
   watch: {
@@ -71,18 +69,13 @@ export default {
       callerId: this.account.publicKey,
     }).min;
     await this.$watchUntilTruly(() => this.tipping);
-    const tipId = +this.urlParams.get('id');
+    const tipId = +this.$route.query.id;
     if (!tipId) throw new Error('"id" param is missed');
     const { decodedResult } = await this.tipping.methods.get_state();
     this.tip = tipping.getTipsRetips(decodedResult).tips.find(({ id }) => id === tipId);
     this.loading = false;
   },
   methods: {
-    openCallbackOrGoHome(paramName) {
-      const callbackUrl = this.urlParams.get(paramName);
-      if (callbackUrl) openUrl(decodeURIComponent(callbackUrl));
-      else this.$router.push('/account');
-    },
     async sendTip() {
       const calculatedMaxValue =
         this.balance > this.minCallFee ? this.balance - this.minCallFee : 0;
@@ -105,7 +98,7 @@ export default {
             time: Date.now(),
             type: 'tip',
           });
-          this.openCallbackOrGoHome('x-success');
+          this.openCallbackOrGoHome(true);
         }
       } catch (e) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
@@ -114,9 +107,6 @@ export default {
       } finally {
         this.loading = false;
       }
-    },
-    cancel() {
-      this.openCallbackOrGoHome('x-cancel');
     },
   },
 };
