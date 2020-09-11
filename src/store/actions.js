@@ -1,6 +1,5 @@
 import { flatten, uniq, orderBy } from 'lodash-es';
 import axios from 'axios';
-import * as types from './mutation-types';
 import {
   convertToAE,
   stringifyForStorage,
@@ -12,18 +11,18 @@ import { BACKEND_URL, AEX2_METHODS } from '../popup/utils/constants';
 
 export default {
   setAccount({ commit }, payload) {
-    commit(types.UPDATE_ACCOUNT, payload);
-    commit(types.UPDATE_BALANCE);
+    commit('updateAccount', payload);
+    commit('updateBalance');
   },
   switchNetwork({ commit }, payload) {
-    commit(types.SWITCH_NETWORK, payload);
-    commit(types.UPDATE_LATEST_TRANSACTIONS, []);
-    commit(types.SET_NODE_STATUS, 'connecting');
+    commit('switchNetwork', payload);
+    commit('updateLatestTransactions', []);
+    commit('setNodeStatus', 'connecting');
     if (process.env.IS_EXTENSION) postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload });
   },
   async updateBalance({ commit, state }) {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
-    commit(types.UPDATE_BALANCE, convertToAE(balance));
+    commit('updateBalance', convertToAE(balance));
   },
   async fetchTransactions({ state }, { limit, page, recent }) {
     if (!state.middleware) return [];
@@ -74,13 +73,13 @@ export default {
   },
 
   async setLogin({ commit }, { keypair }) {
-    commit('UPDATE_ACCOUNT', keypair);
-    commit('SET_ACTIVE_ACCOUNT', { publicKey: keypair.publicKey, index: 0 });
-    commit('UPDATE_ACCOUNT', keypair);
-    commit('SWITCH_LOGGED_IN', true);
+    commit('updateAccount', keypair);
+    commit('setActiveAccount', { publicKey: keypair.publicKey, index: 0 });
+    commit('updateAccount', keypair);
+    commit('switchLoggedIn', true);
   },
   async setPendingTx({ commit, state: { transactions } }, tx) {
-    commit('SET_PENDING_TXS', [...transactions.pending, tx]);
+    commit('setPendingTxs', [...transactions.pending, tx]);
   },
   async getCurrencies({ state: { nextCurrenciesFetch }, commit }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
@@ -90,8 +89,8 @@ export default {
             'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
           )
         ).data;
-        commit('SET_CURRENCIES', aeternity);
-        commit('SET_NEXT_CURRENCY_FETCH', new Date().getTime() + 3600000);
+        commit('setCurrencies', aeternity);
+        commit('setNextCurrencyFetch', new Date().getTime() + 3600000);
       } catch (e) {
         console.error(`Cannot fetch currencies: ${e}`);
       }
@@ -100,9 +99,9 @@ export default {
   async setPermissionForAccount({ commit, state: { connectedAepps } }, { host, account }) {
     if (connectedAepps[host]) {
       if (connectedAepps[host].includes(account)) return;
-      commit('UPDATE_CONNECTED_AEPP', { host, account });
+      commit('updateConnectedAepp', { host, account });
     } else {
-      commit('ADD_CONNECTED_AEPP', { host, account });
+      commit('addConnectedAepp', { host, account });
     }
   },
   async getWebPageAddresses({ state: { sdk } }) {
@@ -132,7 +131,7 @@ export default {
     const contractAddress = tipContract.includes('.chain')
       ? getAddressByNameEntry(await sdk.api.getNameEntryByName(tipContract), 'contract_pubkey')
       : tipContract;
-    commit('SET_TIPPING_ADDRESS', contractAddress);
+    commit('setTippingAddress', contractAddress);
     return contractAddress;
   },
   async getHeight({ state: { sdk } }) {

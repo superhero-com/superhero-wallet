@@ -153,7 +153,7 @@ export default {
       shuffleArray(this.seeds);
     },
     setBackedUpSeed() {
-      this.$store.commit('SET_BACKED_UP_SEED', true);
+      this.$store.commit('setBackedUpSeed', true);
       this.$router.push('/account');
     },
     setAlertData(fill, show, content) {
@@ -195,7 +195,7 @@ export default {
           this.loading = true;
           this.seed_verified = true;
           this.type = '5';
-          this.$store.commit('SET_BACKED_UP_SEED', true);
+          this.$store.commit('setBackedUpSeed', true);
         }
       } else {
         this.seedError = { error: 'Oops! Incorrect length of words!' };

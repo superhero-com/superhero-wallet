@@ -172,14 +172,14 @@ export default {
           this.amount = parseFloat(amount);
           this.note = note;
         } else {
-          this.$store.commit('SET_TIP_DETAILS', null);
+          this.$store.commit('setTipDetails', null);
         }
       }
       this.$watch(
         ({ amount, note }) => [amount, note],
         ([amount, note]) => {
           const exp = new Date().setMinutes(new Date().getMinutes() + 20);
-          this.$store.commit('SET_TIP_DETAILS', { note, amount, exp });
+          this.$store.commit('setTipDetails', { note, amount, exp });
         },
       );
     },
