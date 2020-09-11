@@ -4,7 +4,7 @@ import { get } from 'lodash-es';
 import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 import BigNumber from 'bignumber.js';
-import { CONNECTION_TYPES, defaultNetwork } from './constants';
+import { CONNECTION_TYPES, defaultNetworks, defaultNetwork } from './constants';
 import { getState } from '../../store/plugins/persistState';
 
 export const aeToAettos = v =>
@@ -226,10 +226,11 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
   return Promise.resolve(contractInstance);
 };
 
-export const getAllNetworks = async () => ({
-  ...get(await getState(), 'userNetworks', []).reduce((p, n) => ({ ...p, [n.name]: { ...n } }), {}),
-  [defaultNetwork.name]: defaultNetwork,
-});
+export const getAllNetworks = async () =>
+  [defaultNetworks, ...get(await getState(), 'userNetworks', [])].reduce(
+    (p, n) => ({ ...p, [n.name]: { ...n } }),
+    {},
+  );
 
 export const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
 
