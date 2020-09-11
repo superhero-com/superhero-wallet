@@ -67,21 +67,15 @@ export default {
   }
 
   .checkmark {
-    background: no-repeat url('../../../icons/checkbox-unchecked.svg');
+    background-color: #272831;
+    border: 1.3px solid #515259;
+    border-radius: 2px;
     height: 20px;
     width: 20px;
     margin-right: 15px;
 
     &.checked {
       background-image: url('../../../icons/checkbox-checked.svg');
-    }
-  }
-
-  &.iframe .checkmark {
-    background: no-repeat url('../../../icons/iframe/checkbox-unchecked.svg');
-
-    &.checked {
-      background-image: url('../../../icons/iframe/checkbox-checked.svg');
     }
   }
 

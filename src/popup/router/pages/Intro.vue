@@ -80,7 +80,7 @@
         <template v-else>
           <h2 class="secondary">{{ $t('pages.intro.wellcome') }}</h2>
           <h4>{{ $t('pages.intro.createdWallet') }}</h4>
-          <CheckBox v-model="understood" data-cy="checkbox" class="iframe checkbox">
+          <CheckBox v-model="understood" data-cy="checkbox">
             <div class="undestand">
               {{ $t('pages.intro.understand') }}
             </div>
@@ -381,7 +381,7 @@ export default {
   height: 100%;
 }
 
-.iframe.checkbox {
+.checkbox-container {
   margin: 20px auto 50px auto;
   max-width: 270px;
 
