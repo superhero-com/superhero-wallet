@@ -16,9 +16,9 @@ import { mapState, mapMutations } from 'vuex';
 
 export default {
   computed: mapState(['notifications']),
-  methods: mapMutations(['SET_NOTIFICATIONS_VISITED']),
+  methods: mapMutations(['setNotificationsVisited']),
   async created() {
-    this.SET_NOTIFICATIONS_VISITED();
+    this.setNotificationsVisited();
   },
 };
 </script>

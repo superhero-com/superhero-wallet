@@ -22,7 +22,7 @@ export default {
     };
   },
   created() {
-    this.$store.commit('SET_MAIN_LOADING', true);
+    this.$store.commit('setMainLoading', true);
   },
   methods: {
     onDecode(address) {
@@ -34,9 +34,9 @@ export default {
       const url = browser.extension.getURL('./popup/CameraRequestPermission.html');
       try {
         await promise;
-        this.$store.commit('SET_MAIN_LOADING', false);
+        this.$store.commit('setMainLoading', false);
       } catch (error) {
-        this.$store.commit('SET_MAIN_LOADING', false);
+        this.$store.commit('setMainLoading', false);
         openUrl(url);
         if (error.name === 'NotAllowedError') {
           this.errorMessage = 'ERROR: you need to grant camera access permisson';

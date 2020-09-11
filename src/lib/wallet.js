@@ -36,15 +36,15 @@ async function initMiddleware() {
       axiosError: () => '',
     },
   })({ swag });
-  store.commit('SET_MIDDLEWARE', middleware);
+  store.commit('setMiddleware', middleware);
   store.dispatch('names/fetchOwned');
   store.dispatch('names/extendNames');
 }
 
 async function logout() {
-  store.commit('SET_ACTIVE_ACCOUNT', { publicKey: '', index: 0 });
-  store.commit('UPDATE_ACCOUNT', {});
-  store.commit('SWITCH_LOGGED_IN', false);
+  store.commit('setActiveAccount', { publicKey: '', index: 0 });
+  store.commit('updateAccount', {});
+  store.commit('switchLoggedIn', false);
 }
 
 async function getKeyPair() {
@@ -58,7 +58,7 @@ async function initContractInstances() {
   if (!store.getters.mainnet && !process.env.RUNNING_IN_TESTS) return;
   const contractAddress = await store.dispatch('getTipContractAddress');
   store.commit(
-    'SET_TIPPING',
+    'setTipping',
     await store.state.sdk.getContractInstance(TIPPING_CONTRACT, {
       contractAddress,
       forceCodeCheck: true,
@@ -72,16 +72,16 @@ export default {
   async init() {
     const { account } = store.getters;
     if (isEmpty(account)) {
-      store.commit('SET_MAIN_LOADING', false);
+      store.commit('setMainLoading', false);
       return { loggedIn: false };
     }
     const address = await store.dispatch('generateWallet', { seed: account.privateKey });
-    store.commit('UPDATE_ACCOUNT', account);
-    store.commit('SET_ACTIVE_ACCOUNT', { publicKey: address, index: 0 });
+    store.commit('updateAccount', account);
+    store.commit('setActiveAccount', { publicKey: address, index: 0 });
 
-    store.commit('SWITCH_LOGGED_IN', true);
+    store.commit('switchLoggedIn', true);
 
-    store.commit('SET_MAIN_LOADING', false);
+    store.commit('setMainLoading', false);
     return { loggedIn: true };
   },
   async initSdk() {
@@ -183,10 +183,10 @@ export default {
       await store.commit('initSdk', sdk);
       await initContractInstances();
       await initMiddleware();
-      store.commit('SET_NODE_STATUS', 'connected');
-      setTimeout(() => store.commit('SET_NODE_STATUS', ''), 2000);
+      store.commit('setNodeStatus', 'connected');
+      setTimeout(() => store.commit('setNodeStatus', ''), 2000);
     } catch (e) {
-      store.commit('SET_NODE_STATUS', 'error');
+      store.commit('setNodeStatus', 'error');
       Logger.write(e);
     } finally {
       initSdkRunning = false;

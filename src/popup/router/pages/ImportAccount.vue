@@ -46,13 +46,13 @@ export default {
           this.errorMsg = null;
           const seed = mnemonicToSeed(this.mnemonic).toString('hex');
           const address = await this.$store.dispatch('generateWallet', { seed });
-          this.$store.commit('SET_MNEMONIC', this.mnemonic);
+          this.$store.commit('setMnemonic', this.mnemonic);
           const keypair = {
             publicKey: address,
             privateKey: seed,
           };
           await this.$store.dispatch('setLogin', { keypair });
-          this.$store.commit('SET_BACKED_UP_SEED', true);
+          this.$store.commit('setBackedUpSeed', true);
           return setTimeout(() => this.$router.push(this.$store.state.loginTargetLocation), 1000);
         }
         this.disabled = true;

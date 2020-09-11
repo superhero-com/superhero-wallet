@@ -64,7 +64,7 @@ export default store =>
             if (revoked) {
               if (name.name === defaultName) defaultNameRevoked = true;
               commit(
-                'ADD_NOTIFICATION',
+                'addNotification',
                 {
                   title: '',
                   content: i18n.t('pages.names.revoked-notification', {
