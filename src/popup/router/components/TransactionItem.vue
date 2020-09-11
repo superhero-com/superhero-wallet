@@ -16,10 +16,10 @@
     <div class="holder tx-info">
       <span v-if="tipUrl" class="url" @click="tipUrl && openUrl(tipUrl)">{{ tipUrl }}</span>
       <span v-else-if="topup" class="address">
-        {{ transaction.tx.sender_id }}
+        {{ transaction.tx.senderId }}
       </span>
       <span v-else-if="withdraw" class="address">
-        {{ transaction.tx.recipient_id }}
+        {{ transaction.tx.recipientId }}
       </span>
       <span v-else class="tx-type">
         {{ transactionType }}
@@ -64,10 +64,10 @@ export default {
     ...mapGetters(['account', 'activeNetwork', 'formatCurrency', 'currentCurrencyRate']),
     status() {
       if (
-        this.transaction.tx.sender_id === this.account.publicKey ||
-        this.transaction.tx.account_id === this.account.publicKey ||
-        this.transaction.tx.owner_id === this.account.publicKey ||
-        this.transaction.tx.caller_id === this.account.publicKey
+        this.transaction.tx.senderId === this.account.publicKey ||
+        this.transaction.tx.accountId === this.account.publicKey ||
+        this.transaction.tx.ownerId === this.account.publicKey ||
+        this.transaction.tx.callerId === this.account.publicKey
       ) {
         return this.$t('pages.transactions.sent');
       }
@@ -93,13 +93,13 @@ export default {
     topup() {
       return (
         this.transaction.tx.type === 'SpendTx' &&
-        this.transaction.tx.recipient_id === this.account.publicKey
+        this.transaction.tx.recipientId === this.account.publicKey
       );
     },
     withdraw() {
       return (
         this.transaction.tx.type === 'SpendTx' &&
-        this.transaction.tx.sender_id === this.account.publicKey
+        this.transaction.tx.senderId === this.account.publicKey
       );
     },
     transactionType() {

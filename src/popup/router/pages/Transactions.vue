@@ -58,20 +58,20 @@ export default {
           break;
         case 'sent':
           return this.transactions.filter(
-            tr => tr.tx.type === 'ContractCallTx' && tr.tx.caller_id === this.account.publicKey,
+            tr => tr.tx.type === 'ContractCallTx' && tr.tx.callerId === this.account.publicKey,
           );
         case 'received':
           return this.transactions.filter(tr => tr.claim);
         case 'topups':
           return this.transactions.filter(
-            tr => tr.tx.type === 'SpendTx' && tr.tx.recipient_id === this.account.publicKey,
+            tr => tr.tx.type === 'SpendTx' && tr.tx.recipientId === this.account.publicKey,
           );
         case 'withdrawals':
           return this.transactions.filter(
             tr =>
-              tr.tx.sender_id &&
+              tr.tx.senderId &&
               tr.tx.type === 'SpendTx' &&
-              tr.tx.sender_id === this.account.publicKey,
+              tr.tx.senderId === this.account.publicKey,
           );
         default:
           return this.transactions;
