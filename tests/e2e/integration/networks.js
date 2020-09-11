@@ -58,7 +58,7 @@ describe('Test cases for networks page', () => {
 
   it('Can add new network', () => {
     cy.addNetwork(
-      'Mainnet',
+      'Newnetwork',
       defaultNetwork.url,
       defaultNetwork.middlewareUrl,
       defaultNetwork.compilerUrl,
@@ -67,7 +67,7 @@ describe('Test cases for networks page', () => {
 
   it('Can delete network', () => {
     cy.selectNetwork(
-      'Mainnet',
+      'Newnetwork',
       defaultNetwork.url,
       defaultNetwork.middlewareUrl,
       defaultNetwork.compilerUrl,
@@ -77,7 +77,7 @@ describe('Test cases for networks page', () => {
       .get('[data-cy=delete]')
       .should('be.visible')
       .click()
-      .get('[data-cy=networks]')
+      .get('[data-cy=networks] .network-row')
       .children()
       .should('have.length', 2)
       .get('[data-cy=networks] .network-row')
@@ -88,7 +88,7 @@ describe('Test cases for networks page', () => {
 
   it('Can select network', () => {
     cy.selectNetwork(
-      'Mainnet',
+      'Newnetwork',
       defaultNetwork.url,
       defaultNetwork.middlewareUrl,
       defaultNetwork.compilerUrl,
@@ -100,7 +100,7 @@ describe('Test cases for networks page', () => {
 
   it("Can't add network with same name", () => {
     cy.selectNetwork(
-      'Mainnet',
+      'Newnetwork',
       defaultNetwork.url,
       defaultNetwork.middlewareUrl,
       defaultNetwork.compilerUrl,
@@ -108,7 +108,7 @@ describe('Test cases for networks page', () => {
       .get('[data-cy=to-add]')
       .click()
       .enterNetworkDetails(
-        'Mainnet',
+        'Newnetwork',
         defaultNetwork.url,
         defaultNetwork.middlewareUrl,
         defaultNetwork.compilerUrl,
@@ -120,7 +120,7 @@ describe('Test cases for networks page', () => {
 
   it('Can edit network', () => {
     cy.selectNetwork(
-      'Mainnet',
+      'Newnetwork',
       defaultNetwork.url,
       defaultNetwork.middlewareUrl,
       defaultNetwork.compilerUrl,
@@ -131,7 +131,7 @@ describe('Test cases for networks page', () => {
       .should('be.visible')
       .click()
       .get('[data-cy=network] input')
-      .should('have.value', 'Mainnet')
+      .should('have.value', 'Newnetwork')
       .get('[data-cy=url] input')
       .should('have.value', defaultNetwork.url)
       .clear()
@@ -143,10 +143,10 @@ describe('Test cases for networks page', () => {
       .get('[data-cy=connect]')
       .click()
       .get('[data-cy=network-url]')
-      .eq(1)
+      .eq(2)
       .should('contain', defaultNetwork.url)
       .get('[data-cy=network-middleware]')
-      .eq(1)
+      .eq(2)
       .should('contain', defaultNetwork.middlewareUrl)
       .goBack()
       .get('.transactionList')
