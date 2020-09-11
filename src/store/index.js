@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import VueRx from 'vue-rx';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
@@ -14,6 +15,7 @@ import invitesModule from './modules/invites';
 import { defaultNetwork } from '../popup/utils/constants';
 
 Vue.use(Vuex);
+Vue.use(VueRx);
 
 const initialState = {
   isRestored: false,
