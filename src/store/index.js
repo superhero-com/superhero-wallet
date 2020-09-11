@@ -4,6 +4,7 @@ import VueRx from 'vue-rx';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
+import observables from './plugins/observables';
 import persistState from './plugins/persistState';
 import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
@@ -113,6 +114,7 @@ export default new Vuex.Store({
         invites,
       }),
     ),
+    observables,
     modals,
     tipUrl,
     accounts,
