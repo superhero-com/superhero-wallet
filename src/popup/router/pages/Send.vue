@@ -273,10 +273,10 @@ export default {
       }
     },
     async openTxExplorer(hash) {
-      const { middlewareUrl } = this.activeNetwork;
+      const { explorerUrl } = this.activeNetwork;
       const { endpoint, valid } = await checkHashType(hash);
       if (valid) {
-        const url = `${middlewareUrl}/${endpoint}/${hash}`;
+        const url = `${explorerUrl}/${endpoint}/${hash}`;
         openUrl(url);
       }
     },

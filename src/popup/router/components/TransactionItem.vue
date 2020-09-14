@@ -26,7 +26,7 @@
       </span>
       <span
         class="seeTransaction"
-        @click="openUrl(`${activeNetwork.middlewareUrl}/transactions/${transaction.hash}`)"
+        @click="openUrl(`${activeNetwork.explorerUrl}/transactions/${transaction.hash}`)"
       >
         <img src="../../../icons/eye.png" />
       </span>
