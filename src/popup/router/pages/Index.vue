@@ -16,7 +16,7 @@
         <span>{{ $t('pages.index.webVersion') }}</span>
       </div>
     </template>
-    <CheckBox v-if="!termsAgreed" v-model="terms" data-cy="checkbox" class="iframe checkbox">
+    <CheckBox v-if="!termsAgreed" v-model="terms" data-cy="checkbox">
       <div class="primary-text">
         {{ $t('pages.index.term1') }}
         <router-link to="/termsOfService" data-cy="terms">{{
@@ -81,17 +81,13 @@ export default {
   font-weight: 500;
 }
 
-.checkbox {
+.checkbox-container {
   margin: 0 auto 25px auto;
-  max-width: 357px;
+  max-width: 270px;
 
-  &.iframe {
-    max-width: 270px;
-
-    /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
-    ::v-deep .checkmark {
-      margin-right: 5px;
-    }
+  /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+  ::v-deep .checkmark {
+    margin-right: 5px;
   }
 }
 </style>
