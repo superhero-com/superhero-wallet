@@ -479,7 +479,7 @@
       },
       "claim": {
         "name-placeholder": "Introduce nombre .chain",
-        "button": "Reclamar"
+        "button": "Registrar"
       },
       "auctions": {
         "button": "Subastas",

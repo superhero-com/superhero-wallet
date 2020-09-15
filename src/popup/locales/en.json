@@ -486,7 +486,7 @@
       },
       "claim": {
         "name-placeholder": "Enter .chain name",
-        "button": "Claim"
+        "button": "Register"
       },
       "auctions": {
         "button": "Auctions",
