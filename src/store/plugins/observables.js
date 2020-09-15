@@ -4,9 +4,8 @@ import { refCountDelay } from 'rxjs-etc/operators';
 import Backend from '../../lib/backend';
 
 export default store => {
-
   const watchAsObservable = (getter, options) =>
-  // eslint-disable-next-line no-underscore-dangle
+    // eslint-disable-next-line no-underscore-dangle
     store._watcherVM.$watchAsObservable(() => getter(store.state, store.getters), options);
 
   const sdk$ = watchAsObservable(({ sdk }) => (sdk && sdk.then ? null : sdk), {
@@ -21,11 +20,34 @@ export default store => {
       refCountDelay(1000),
     );
 
+  const normalizeNotification = async ({ entityId, entityType, ...otherNotification }) => {
+    const record =
+      entityType === 'TIP'
+        ? await Backend.getCacheTipById(entityId)
+        : await Backend.getCommentById(entityId);
+
+    return {
+      entityId,
+      entityType,
+      ...otherNotification,
+      sender: entityType === 'TIP' ? record.sender : record.author,
+      chainName: entityType === 'TIP' ? record.chainName : record.Profile.preferredChainName,
+      path:
+        entityType === 'TIP'
+          ? `https://superhero.com/tip/${record.id}`
+          : `https://superhero.com/tip/${record.tipId}/comment/${record.id}`,
+    };
+  };
 
   const notifications$ = createSdkObservable(
     async sdk =>
-      await Backend.getAllNotifications(await sdk.address(), async data =>
-        Buffer.from(await sdk.signMessage(data)).toString('hex'),
+      // eslint-disable-next-line no-return-await
+      await Promise.all(
+        (
+          await Backend.getAllNotifications(store.state.account.publicKey, async data =>
+            Buffer.from(await sdk.signMessage(data)).toString('hex'),
+          )
+        ).map(normalizeNotification),
       ),
     [],
   );
