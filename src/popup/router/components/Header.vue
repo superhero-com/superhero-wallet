@@ -11,9 +11,9 @@
 
       <div v-if="isLoggedIn">
         <span class="noti-holder" @click="toNotifications" data-cy="noti">
-          <span v-if="notificationsCount" class="noti-count" data-cy="noti-count">{{
-            notificationsCount
-          }}</span>
+          <span v-if="notificationsCount" class="noti-count" data-cy="noti-count">
+            {{ notificationsCount }}
+          </span>
           <Bell />
         </span>
         <button @click="$emit('toggle-sidebar')">
@@ -36,6 +36,11 @@ export default {
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,
   }),
+  subscriptions() {
+    return {
+      superheroNotifications: this.$store.state.observables.notifications,
+    };
+  },
   computed: {
     ...mapState(['tourRunning', 'isLoggedIn', 'notifications']),
     title() {
@@ -45,7 +50,9 @@ export default {
       return this.$route.meta.navigation !== undefined ? this.$route.meta.navigation : true;
     },
     notificationsCount() {
-      return this.notifications.filter(n => !n.visited).length;
+      return [...this.notifications, ...this.superheroNotifications].filter(
+        n => n.status === 'CREATED',
+      ).length;
     },
   },
   methods: {
@@ -57,7 +64,7 @@ export default {
       this.$router.go(-1);
     },
     toNotifications() {
-      if (this.notifications.length && this.$store.state.route.fullPath !== '/notifications') {
+      if (this.notificationsCount && this.$store.state.route.fullPath !== '/notifications') {
         this.$router.push('/notifications');
       }
     },
