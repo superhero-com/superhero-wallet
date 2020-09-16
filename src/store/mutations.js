@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import { defaultNetwork } from '../popup/utils/constants';
 
 export default {
@@ -61,10 +62,19 @@ export default {
     state.nextCurrenciesFetch = payload;
   },
   addNotification(state, payload) {
-    state.notifications = [...state.notifications, { ...payload, visited: false }];
+    state.notifications = [
+      ...state.notifications,
+      {
+        ...payload,
+        wallet: true,
+        status: 'CREATED',
+        createdAt: new Date().toISOString(),
+      },
+    ];
   },
-  setNotificationsVisited(state) {
-    state.notifications = state.notifications.map(n => ({ ...n, visited: true }));
+  setNotificationsVisited(state, createdAt) {
+    const index = state.notifications.findIndex(n => n.createdAt === createdAt);
+    Vue.set(state.notifications[index], 'status', 'READ');
   },
   setTipDetails(state, payload) {
     state.tip = payload;

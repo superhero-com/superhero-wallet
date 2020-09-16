@@ -564,6 +564,19 @@
       "addnetworkURL": "Add Node URL",
       "add": "Add"
     },
+    "notifications": {
+      "new": "New",
+      "wallet": "Wallet",
+      "superhero": "Superhero.com",
+      "read": "Read",
+      "markAsRead": "Mark as Read",
+      "commentOnComment": "replied to your comment.",
+      "commentOnTip": "commented on your tip.",
+      "tipOnComment": "tipped on your comment",
+      "retipOnTip": "retipped your tip.",
+      "claimOfTip": "claimed your tip.",
+      "claimOfRetip": "claimed your retip."
+    },
     "privacyPolicy": {
       "backButton": "Back",
       "heading": "Privacy Policy",

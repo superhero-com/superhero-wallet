@@ -50,6 +50,24 @@ export default class Backend {
     return sendComment(respondChallenge);
   }
 
+  static async modifyNotification(notifId, status, author, signCb) {
+    const modifyNotif = async postParam =>
+      backendFetch(`notification/${notifId}`, {
+        method: 'post',
+        body: JSON.stringify(postParam),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+    const responseChallenge = await modifyNotif({ author, status });
+    const signedChallenge = await signCb(responseChallenge.challenge);
+    const respondChallenge = {
+      challenge: responseChallenge.challenge,
+      signature: signedChallenge,
+    };
+
+    return modifyNotif(respondChallenge);
+  }
+
   static getAllComments = async () => backendFetch('comment/api/');
 
   static getProfile = async address => backendFetch(`profile/${address}`);

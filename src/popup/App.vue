@@ -102,19 +102,17 @@ export default {
       const [update] = await browser.runtime.requestUpdateCheck();
       if (update === 'update_available' && !process.env.RUNNING_IN_TESTS) {
         this.$store.commit('addNotification', {
-          title: '',
-          content: this.$t('pages.account.updateAvailable'),
-          route: '',
+          text: this.$t('pages.account.updateAvailable'),
+          path: '',
         });
       }
     }
     if (!this.backedUpSeed) {
       this.$store.commit('addNotification', {
-        title: '',
-        content: `${this.$t('pages.account.youNeedTo')} ${this.$t(
-          'pages.account.backup',
-        )} ${this.$t('pages.account.yourSeedPhrase')}`,
-        route: '/securitySettings',
+        text: `
+          ${this.$t('pages.account.youNeedTo')} ${this.$t('pages.account.backup')}
+          ${this.$t('pages.account.yourSeedPhrase')}`,
+        path: '/securitySettings',
       });
     }
 
