@@ -45,6 +45,7 @@ const initialState = {
   currencies: {},
   nextCurrenciesFetch: null,
   notifications: [],
+  notificationSettings: [],
   tip: null,
   txQueue: [],
   connectedAepps: {},
@@ -94,6 +95,7 @@ export default new Vuex.Store({
         tourStartBar,
         tokens: { all },
         invites,
+        notificationSettings,
       }) => ({
         migrations,
         current,
@@ -112,6 +114,7 @@ export default new Vuex.Store({
         tourStartBar,
         tokens: { all },
         invites,
+        notificationSettings,
       }),
     ),
     observables,

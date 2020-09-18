@@ -76,6 +76,9 @@ export default {
     const index = state.notifications.findIndex(n => n.createdAt === createdAt);
     Vue.set(state.notifications[index], 'status', 'READ');
   },
+  setNotificationSettings(state, payload) {
+    state.notificationSettings = payload;
+  },
   setTipDetails(state, payload) {
     state.tip = payload;
   },

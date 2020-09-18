@@ -40,7 +40,7 @@ import { mapGetters, mapState } from 'vuex';
 import { clearInterval, setInterval } from 'timers';
 import { detect } from 'detect-browser';
 import { IN_FRAME } from './utils/helper';
-import { AEX2_METHODS } from './utils/constants';
+import { AEX2_METHODS, NOTIFICATION_SETTINGS } from './utils/constants';
 import { postMessage } from './utils/connection';
 import { fetchAndSetLocale } from './utils/i18nHelper';
 import Header from './router/components/Header';
@@ -114,6 +114,9 @@ export default {
           ${this.$t('pages.account.yourSeedPhrase')}`,
         path: '/securitySettings',
       });
+    }
+    if (this.$store.state.notificationSettings.length === 0) {
+      this.$store.commit('setNotificationSettings', NOTIFICATION_SETTINGS);
     }
 
     EventBus.$on('error', async entry => {

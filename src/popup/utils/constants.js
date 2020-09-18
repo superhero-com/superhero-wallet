@@ -1,6 +1,7 @@
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { ABI_VERSIONS, TX_TYPE, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import BigNumber from 'bignumber.js';
+import { i18n } from './i18nHelper';
 
 export const MAGNITUDE = 18;
 export const TX_TYPES = {
@@ -173,3 +174,26 @@ export const IDENTICON_SIZES = {
 export const BUG_REPORT_URL = 'https://thesuperherowallet.typeform.com/to/vh8Ffu';
 
 export const CHANGE_CRYPTO_AE_URL = 'https://app.jelly.market';
+
+export const NOTIFICATION_SETTINGS = [
+  {
+    text: i18n.t('pages.notification-settings.commentOnTip'),
+    checked: true,
+    type: 'COMMENT_ON_TIP',
+  },
+  {
+    text: i18n.t('pages.notification-settings.commentOnComment'),
+    checked: false,
+    type: 'COMMENT_ON_COMMENT',
+  },
+  {
+    text: i18n.t('pages.notification-settings.retipOnTip'),
+    checked: true,
+    type: 'RETIP_ON_TIP',
+  },
+  {
+    text: i18n.t('pages.notification-settings.wallet'),
+    checked: true,
+    type: 'wallet',
+  },
+];
