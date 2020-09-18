@@ -227,7 +227,7 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
 };
 
 export const getAllNetworks = async () =>
-  [defaultNetworks, ...get(await getState(), 'userNetworks', [])].reduce(
+  [...defaultNetworks, ...get(await getState(), 'userNetworks', [])].reduce(
     (p, n) => ({ ...p, [n.name]: { ...n } }),
     {},
   );
