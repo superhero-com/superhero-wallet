@@ -143,8 +143,8 @@ export default {
       this.network = { ...networkProps, ...network };
     },
     async deleteNetwork(networkIndex) {
+      this.$store.commit('deleteUserNetwork', networkIndex);
       await this.selectNetwork(defaultNetwork.name);
-      await this.$store.commit('deleteUserNetwork', networkIndex);
     },
     async addOrUpdateNetwork() {
       try {
