@@ -72,9 +72,9 @@ export default {
       },
     ];
   },
-  setNotificationsVisited(state, createdAt) {
+  setNotificationsStatus(state, { createdAt, status }) {
     const index = state.notifications.findIndex(n => n.createdAt === createdAt);
-    Vue.set(state.notifications[index], 'status', 'READ');
+    Vue.set(state.notifications[index], 'status', status);
   },
   setNotificationSettings(state, payload) {
     state.notificationSettings = payload;

@@ -32,8 +32,12 @@
       @click="onClickHandler(notification)"
     >
       <ThreeDotsMenu>
-        <div class="mark-as-read" @click="markAsRead(notification)">
-          {{ $t('pages.notifications.markAsRead') }}
+        <div class="mark-as-read" @click="modifyNotificationStatus(notification)">
+          {{
+            notification.status === 'READ'
+              ? $t('pages.notifications.markAsUnread')
+              : $t('pages.notifications.markAsRead')
+          }}
         </div>
       </ThreeDotsMenu>
     </NotificationItem>
@@ -76,22 +80,23 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(['setNotificationsVisited']),
-    async markAsRead(notification) {
+    ...mapMutations(['setNotificationsStatus']),
+    async modifyNotificationStatus(notification) {
+      const status = notification.status === 'READ' ? 'CREATED' : 'READ';
       if (notification.wallet) {
-        this.setNotificationsVisited(notification.createdAt);
+        this.setNotificationsStatus({ createdAt: notification.createdAt, status });
       } else {
         await Backend.modifyNotification(
           notification.id,
-          'READ',
+          status,
           this.$store.state.account.publicKey,
           async data => Buffer.from(await this.$store.state.sdk.signMessage(data)).toString('hex'),
         );
-        this.observableNotifications.find(n => n.id === notification.id).status = 'READ';
+        this.observableNotifications.find(n => n.id === notification.id).status = status;
       }
     },
     async onClickHandler(notification) {
-      await this.markAsRead(notification);
+      await this.modifyNotificationStatus(notification);
       if (/^\w+:\D+/.test(notification.path)) {
         openUrl(notification.path, true);
       } else {

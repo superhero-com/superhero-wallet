@@ -571,6 +571,7 @@
       "superhero": "Superhero.com",
       "read": "Read",
       "markAsRead": "Mark as Read",
+      "markAsUnread": "Mark as Unread",
       "commentOnComment": "replied to your comment.",
       "commentOnTip": "commented on your tip.",
       "tipOnComment": "tipped on your comment",
