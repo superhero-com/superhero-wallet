@@ -53,12 +53,21 @@ export default {
     direction: '',
   }),
   computed: {
-    ...mapState(['notifications']),
+    ...mapState(['notifications', 'notificationSettings']),
     filteredNotifications() {
-      return [...this.observableNotifications, ...this.notifications].filter(
+      return [...this.observableNotifications, ...this.notifications]
+        .filter(
           n =>
             (this.direction === 'read' && n.status === 'READ') ||
-            (n.status === 'CREATED' && 
+            !this.notificationSettings
+              .filter(s => !s.checked)
+              .map(s => s.type)
+              .includes(n.type),
+        )
+        .filter(
+          n =>
+            (this.direction === 'read' && n.status === 'READ') ||
+            (n.status === 'CREATED' &&
               ((this.direction === 'wallet' && n.wallet) ||
                 (this.direction === 'superhero' && n.sender) ||
                 this.direction === '')),
