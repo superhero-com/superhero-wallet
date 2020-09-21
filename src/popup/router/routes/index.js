@@ -10,7 +10,6 @@ import SecuritySettings from '../pages/SecuritySettings';
 import AboutSettings from '../pages/AboutSettings';
 import Tip from '../pages/Tip';
 import Retip from '../pages/Retip';
-import QrCodeReader from '../pages/QrCodeReader';
 import TermsOfService from '../pages/TermsOfService';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
 import ImportAccount from '../pages/ImportAccount';
@@ -149,16 +148,6 @@ export default [
     component: ClaimTips,
     meta: {
       title: 'claim-tips',
-    },
-  },
-  {
-    path: '/qrCodeReader',
-    name: 'qrCodeReader',
-    props: true,
-    component: QrCodeReader,
-    meta: {
-      title: 'scanQr',
-      notPersist: true,
     },
   },
   {

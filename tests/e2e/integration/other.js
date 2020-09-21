@@ -11,7 +11,6 @@ describe('Tests cases not connected to specific page', () => {
     { path: '/ask-accounts', redirect: false },
     { path: '/message-sign', redirect: false },
     { path: '/success-tip', redirect: false },
-    { path: '/qrCodeReader', redirect: false },
     { path: '/intro', redirect: false },
     { path: '/notifications', redirect: false },
     { path: '/tip', redirect: true },

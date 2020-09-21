@@ -37,6 +37,7 @@
     "@stamp/it": "^1.1.0",
     "@vue/cli-plugin-e2e-cypress": "^3.12.1",
     "@vue/cli-service": "^3.12.0",
+    "@zxing/library": "^0.17.1",
     "aepp-raendom": "github:aeternity/aepp-raendom#feature/layout-superhero",
     "aeternity-tokens": "^1.0.2",
     "axios": "^0.19.0",
@@ -46,6 +47,7 @@
     "cordova-ios": "^5.1.1",
     "cordova-plugin-headercolor": "^1.0.0",
     "cordova-plugin-inappbrowser": "^3.2.0",
+    "cordova-plugin-qrscanner": "^3.0.1",
     "cordova-plugin-splashscreen": "^5.0.4",
     "cordova-plugin-statusbar": "^2.4.3",
     "cordova-plugin-wkwebview-engine": "github:mwchambers/cordova-plugin-wkwebview-engine#da67d6bb6ce8597c38fc69e66b84566e34efea8d",
@@ -60,7 +62,6 @@
     "vue": "^2.6.10",
     "vue-clipboard2": "^0.3.1",
     "vue-i18n": "^8.21.0",
-    "vue-qrcode-reader": "^2.3.12",
     "vue-router": "^3.4.3",
     "vue-tour": "^1.5.0",
     "vuex": "^3.5.1",
@@ -130,7 +131,8 @@
       "ionic-plugin-deeplinks": {
         "URL_SCHEME": "superhero",
         "DEEPLINK_HOST": "wallet.superhero.com"
-      }
+      },
+      "cordova-plugin-qrscanner": {}
     },
     "platforms": [
       "android",

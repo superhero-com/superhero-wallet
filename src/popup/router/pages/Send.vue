@@ -208,12 +208,10 @@ export default {
     this.fetchFee();
   },
   methods: {
-    scan() {
-      this.$router.push({
-        name: 'qrCodeReader',
-        params: {
-          type: 'send',
-        },
+    async scan() {
+      this.form.address = await this.$store.dispatch('modals/open', {
+        name: 'read-qr-code',
+        title: this.$t('pages.send.scanAddress'),
       });
     },
     async fetchFee() {
