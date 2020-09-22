@@ -299,8 +299,8 @@
       "backup": "backup",
       "yourSeedPhrase": "your seed phrase",
       "updateExtension": "New version available! Please update your extension.",
-      "updateAvailable": "New version available in the store!",
-      "claim-name": "Claim your .chain name"
+      "updateAvailable": "New version is available in the store!",
+      "claim-name": "Register the name"
     },
     "claim": {
       "claim": "Claim tips",
