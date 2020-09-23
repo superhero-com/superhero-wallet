@@ -62,6 +62,6 @@ describe('Test cases for Account Page', () => {
   it('Account info contain claim name message', () => {
     cy.get('[data-cy=account-name]')
       .should('be.visible')
-      .contains('Claim your .chain name');
+      .contains('Register a name');
   });
 });
