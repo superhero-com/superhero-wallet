@@ -179,17 +179,24 @@ export default {
   .notification-item {
     margin-top: 0.2rem;
     background-color: #1d1e27;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     padding-top: 0.9rem;
     text-align: left;
     cursor: pointer;
 
     .three-dots {
+      color: #515259;
       font-size: 1.5rem;
-      line-height: 1.2rem;
+      line-height: 0;
+      text-align: right;
+
+      &:hover {
+        color: #fff;
+      }
 
       .mark-as-read {
         font-size: 0.9rem;
+        line-height: 1.2rem;
       }
     }
   }

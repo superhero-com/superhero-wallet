@@ -1,21 +1,28 @@
 <template>
-  <div class="notification-item">
-    <div @click="$emit('click', $event)">
-      <UserAvatar v-if="!wallet" :address="address" />
-      <img v-else-if="wallet" src="../../../icons/logo-small.svg" />
-      <div class="author-name">
-        <span v-if="name" class="chain-name" :class="{ wallet }">
+  <div class="notification-item" @click="$emit('click', $event)">
+    <div class="first-row">
+      <img v-if="wallet" src="../../../icons/logo-small.svg" />
+      <UserAvatar v-else :address="address" />
+      <div class="address-and-menu">
+        <span @click.stop>
+          <slot />
+        </span>
+        <span v-if="!wallet">
           {{ name }}
         </span>
-        <span class="notification-text">
-          {{ text }}
+        <span :class="['address', { wallet }]">
+          {{ wallet ? text : address }}
         </span>
       </div>
     </div>
-    <span class="right">
-      <FormatDate v-bind="$attrs" />
-      <slot />
-    </span>
+    <div class="second-row">
+      <span v-if="!wallet" class="notification-text">
+        {{ text }}
+      </span>
+      <span :class="['format-date', { wallet }]">
+        <FormatDate v-bind="$attrs" />
+      </span>
+    </div>
   </div>
 </template>
 
@@ -42,58 +49,60 @@ export default {
 @import '../../../common/variables';
 
 .notification-item {
-  align-items: center;
-  color: $gray-2;
   display: flex;
-  font-size: 0.8rem;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
   padding: 0 1rem 0.9rem 1rem;
 
-  .right {
-    min-width: 4.5rem;
-    font-size: 0.8rem;
-    display: flex;
-    align-items: flex-end;
-    flex-direction: column-reverse;
-  }
-
-  .notification-text,
-  .chain-name {
-    display: inline-block;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .first-row {
     width: 100%;
-    word-break: break-word;
-  }
-
-  .chain-name:not(.wallet),
-  .chain-name:not(.wallet) .notification-text {
-    white-space: nowrap;
-  }
-
-  .user-avatar,
-  .user-identicon,
-  img {
-    margin-right: 0.25rem;
-  }
-
-  > div {
-    text-decoration: none;
-    color: $text-color;
     display: flex;
-    margin-right: 1.3rem;
-    overflow: hidden;
+
+    .user-avatar,
+    .user-identicon,
+    img {
+      overflow: inherit;
+    }
+
+    .address-and-menu {
+      margin-left: 0.5rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+
+      .address {
+        font-size: 0.55rem;
+        color: $text-color;
+
+        &.wallet {
+          font-size: inherit;
+          margin-right: 4rem;
+          word-break: break-word;
+        }
+      }
+    }
   }
 
-  .chain-name:not(.wallet) {
-    color: #fff;
-  }
-
-  .author-name {
+  .second-row {
+    margin-top: 0.25rem;
+    width: 100%;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    overflow: hidden;
+    justify-content: space-between;
+
+    .notification-text {
+      color: $text-color;
+    }
+
+    .format-date {
+      color: #727278;
+      font-size: 0.75rem;
+
+      &.wallet {
+        width: 100%;
+        text-align: right;
+        margin-top: -1.4rem;
+      }
+    }
   }
 }
 </style>
