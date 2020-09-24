@@ -584,7 +584,10 @@
       "commentOnTip": "Someone commented on your tip or post.",
       "commentOnComment": "Someone replied to your comment.",
       "retipOnTip": "Someone retipped to your tip.",
-      "wallet": "Wallet notifications (always on)."
+      "wallet": "Wallet notifications (always on).",
+      "tipOnComment": "Someone tipped to your comment.",
+      "claimOfTip": "Someone claimed your tip.",
+      "claimOfRetip": "Someone claimed your retip."
     },
     "privacyPolicy": {
       "backButton": "Back",

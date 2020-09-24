@@ -196,4 +196,19 @@ export const NOTIFICATION_SETTINGS = [
     checked: true,
     type: 'wallet',
   },
+  {
+    text: i18n.t('pages.notification-settings.tipOnComment'),
+    checked: true,
+    type: 'TIP_ON_COMMENT',
+  },
+  {
+    text: i18n.t('pages.notification-settings.claimOfTip'),
+    checked: true,
+    type: 'CLAIM_OF_TIP',
+  },
+  {
+    text: i18n.t('pages.notification-settings.claimOfRetip'),
+    checked: true,
+    type: 'CLAIM_OF_RETIP',
+  },
 ];
