@@ -7,6 +7,7 @@ import Confirm from './components/Modals/Confirm';
 import ErrorLog from './components/Modals/ErrorLog';
 import ConfirmTransactionSign from './components/Modals/ConfirmTransactionSign';
 import ConfirmRawSign from './components/Modals/ConfirmRawSign';
+import QrCodeReader from './components/Modals/QrCodeReader';
 
 export default () => {
   registerModal({ name: 'default', component: Default });
@@ -26,4 +27,5 @@ export default () => {
     showInPopupIfWebFrame: true,
   });
   registerModal({ name: 'confirm-connect', showInPopupIfWebFrame: true });
+  registerModal({ name: 'read-qr-code', component: QrCodeReader });
 };

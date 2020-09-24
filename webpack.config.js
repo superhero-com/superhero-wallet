@@ -170,6 +170,7 @@ const getConfig = platform => {
               },
               { from: 'icons/icon_48.png', to: `icons/icon_48.png` },
               { from: 'icons/icon_128.png', to: `icons/icon_128.png` },
+              { from: 'icons/request_permission.jpg', to: `icons/request_permission.jpg` },
               {
                 from: path.join(__dirname, 'src/content-scripts/tipButton.scss'),
                 to: path.join(

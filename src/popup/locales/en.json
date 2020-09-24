@@ -158,6 +158,9 @@
         "msg": "Insufficient balance"
       }
     },
+    "qrCodeReader": {
+      "cameraNotAllowed": "ERROR: you need to grant camera access permisson"
+    },
     "cancel": "Cancel",
     "confirm": "Confirm"
   },
@@ -299,8 +302,8 @@
       "backup": "backup",
       "yourSeedPhrase": "your seed phrase",
       "updateExtension": "New version available! Please update your extension.",
-      "updateAvailable": "New version available in the store!",
-      "claim-name": "Claim your .chain name"
+      "updateAvailable": "New version is available in the store!",
+      "claim-name": "Register a name"
     },
     "claim": {
       "claim": "Claim tips",
@@ -566,10 +569,6 @@
       "heading": "Privacy Policy",
       "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
-    "qrCodeReader": {
-      "backToAccount": "Back to account",
-      "heading": "Qr Code Scanner"
-    },
     "receive": {
       "backToAccount": "Back to account",
       "heading": "To receive tokens, provide this address or have the payor scan the QR code below.",
@@ -645,7 +644,8 @@
       "to": "To",
       "from": "From",
       "txhash": "Transaction Hash",
-      "home": "Home"
+      "home": "Home",
+      "scanAddress": "Scan AE Address"
     },
     "settings": {
       "backToAccount": "Back to account",
