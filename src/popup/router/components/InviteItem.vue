@@ -1,31 +1,42 @@
 <template>
   <div class="invite-row">
     <div class="invite-info">
-      <span class="primary">{{ balance }} {{ $t('pages.appVUE.aeid') }}</span>
-      <!--eslint-disable-line vue-i18n/no-raw-text-->
-      ({{ (balance * current.currencyRate).toFixed(2) }}
-      <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-      {{ current.currency.toUpperCase() }})
+      <span class="balance-display">
+        {{ inviteLinkBalance }}
+        <span>{{ $t('pages.appVUE.aeid') }}</span>
+      </span>
+      <!--eslint-disable vue-i18n/no-raw-text-->
+      ({{ formatCurrency((inviteLinkBalance * currentCurrencyRate).toFixed(2)) }})
+      <!--eslint-enable vue-i18n/no-raw-text-->
       <span class="date">{{ createdAt | formatDate }}</span>
     </div>
     <div class="invite-link">
       <span>{{ link }}</span>
       <button class="invite-link-copy" v-clipboard:copy="link"><CopyIcon /></button>
     </div>
-    <template v-if="!topUp">
-      <Button half dark @click="topUp = true">{{ $t('pages.invite.top-up') }}</Button>
-      <Button half @click="claim">{{ $t('pages.invite.claim') }}</Button>
-    </template>
+    <div class="centered-buttons" v-if="!topUp">
+      <Button v-if="inviteLinkBalance > 0" bold @click="claim">{{
+        $t('pages.invite.claim')
+      }}</Button>
+      <Button v-else bold dark @click="deleteItem">{{ $t('pages.invite.delete') }}</Button>
+      <Button bold :disabled="balance < topUpAmount" @click="topUp = true">{{
+        $t('pages.invite.top-up')
+      }}</Button>
+    </div>
     <template v-else>
-      <AmountSend v-model="topUpAmount" />
-      <Button half dark @click="topUp = false">{{ $t('pages.invite.close') }}</Button>
-      <Button half @click="sendTopUp">{{ $t('pages.invite.top-up') }}</Button>
+      <AmountSend v-model="topUpAmount" :label="$t('pages.invite.top-up-with')" />
+      <div class="centered-buttons">
+        <Button bold dark @click="resetTopUpChanges">{{ $t('pages.invite.collapse') }}</Button>
+        <Button bold :disabled="balance < topUpAmount" @click="sendTopUp">{{
+          $t('pages.invite.top-up')
+        }}</Button>
+      </div>
     </template>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk/es';
 import AmountSend from './AmountSend';
 import Button from './Button';
@@ -39,9 +50,10 @@ export default {
   },
   components: { Button, AmountSend, CopyIcon },
   filters: { formatDate },
-  data: () => ({ topUp: false, topUpAmount: 0, balance: 0 }),
+  data: () => ({ topUp: false, topUpAmount: 0, inviteLinkBalance: 0 }),
   computed: {
-    ...mapState(['sdk', 'current']),
+    ...mapState(['sdk', 'balance']),
+    ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
     link() {
       const secretKey = Crypto.encodeBase58Check(Buffer.from(this.secretKey, 'hex'));
       return new URL(
@@ -64,9 +76,12 @@ export default {
     },
   },
   methods: {
+    deleteItem() {
+      this.$store.commit('invites/delete', this.secretKey);
+    },
     async updateBalance() {
       await this.$watchUntilTruly(() => this.sdk);
-      this.balance = parseFloat(
+      this.inviteLinkBalance = parseFloat(
         await this.sdk
           .balance(this.address, { format: AmountFormatter.AE_AMOUNT_FORMATS.AE })
           .catch(() => 0),
@@ -84,6 +99,10 @@ export default {
         this.$emit('loading', false);
       }
     },
+    resetTopUpChanges() {
+      this.topUpAmount = 0;
+      this.topUp = false;
+    },
     async sendTopUp() {
       this.$emit('loading', true);
       try {
@@ -100,8 +119,7 @@ export default {
       } finally {
         this.$emit('loading', false);
       }
-      this.topUpAmount = 0;
-      this.topUp = false;
+      this.resetTopUpChanges();
     },
   },
 };
@@ -113,48 +131,63 @@ export default {
 .invite-row {
   padding: 1rem;
   width: 100%;
-  border-bottom: 1px solid #12121b;
+  border-bottom: 2px solid $black-1;
   text-align: left;
-  color: #bcbcc4;
-  background: #21222a;
+  color: $text-color;
   position: relative;
 
   .invite-link {
     margin-bottom: 5px;
-    font-size: 12px;
-    color: $text-color;
+    font-size: 11px;
+    display: flex;
 
     span {
-      width: 260px;
-      display: inline-block;
+      margin-left: 5px;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
+      color: $white-1;
     }
   }
 
   .invite-link-copy {
     padding: 0;
+    color: $gray-2;
   }
 
   .invite-info {
-    font-size: 14px;
-    font-weight: bold;
-    color: $white-color;
+    font-size: 13px;
     display: flex;
     align-items: center;
     margin-bottom: 10px;
+    color: $gray-2;
 
-    .primary {
-      color: $secondary-color;
+    .balance-display {
+      color: $white-1;
       margin-right: 5px;
+
+      span {
+        color: $secondary-color;
+      }
     }
 
     .date {
-      font-size: 12px;
-      font-weight: normal;
+      font-size: 11px;
       margin-left: auto;
       color: $text-color;
+    }
+  }
+
+  .amount-send-container {
+    margin: 0;
+  }
+
+  .centered-buttons {
+    display: flex;
+
+    > .primary-button {
+      margin-right: 20px;
+      width: 120px !important;
     }
   }
 }

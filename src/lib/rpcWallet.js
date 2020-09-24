@@ -4,10 +4,9 @@ import Node from '@aeternity/aepp-sdk/es/node';
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import { isEmpty } from 'lodash-es';
 import uuid from 'uuid';
-import { mockLogin } from '../popup/utils';
 import {
   AEX2_METHODS,
-  DEFAULT_NETWORK,
+  defaultNetwork,
   MAX_AMOUNT_WITHOUT_CONFIRM,
   NO_POPUP_AEPPS,
 } from '../popup/utils/constants';
@@ -33,7 +32,6 @@ export default {
   async init() {
     await this.initNodes();
     this.initFields();
-    if (process.env.RUNNING_IN_TESTS) await mockLogin();
     const { account } = await getState();
     if (!isEmpty(account)) {
       walletController.generateWallet({ seed: stringifyForStorage(account.privateKey) });
@@ -43,21 +41,15 @@ export default {
       this[AEX2_METHODS.INIT_RPC_WALLET]({ address: account.publicKey, network });
     }
   },
-  async initSubaccounts() {
-    const { subaccounts } = await getState();
-    this.subaccounts = subaccounts;
-    return Promise.resolve(true);
-  },
   initFields() {
     this.sdk = null;
     this.initNetwork();
     this.activeAccount = null;
-    this.subaccounts = null;
     this.accounts = [];
     this.accountKeyPairs = [];
     this.connectionsQueue = [];
   },
-  initNetwork(network = DEFAULT_NETWORK) {
+  initNetwork(network = defaultNetwork.name) {
     this.network = network;
     this.compiler = this.nodes[network].compilerUrl;
     this.internalUrl = this.nodes[network].internalUrl;
@@ -67,17 +59,6 @@ export default {
     this.nodes = await getAllNetworks();
   },
   async initSdk() {
-    this.accountKeyPairs = await Promise.all(
-      this.subaccounts.map(async (a, index) =>
-        parseFromStorage(await walletController.getKeypair({ activeAccount: index, account: a })),
-      ),
-    );
-
-    this.accounts = this.accountKeyPairs.map(a =>
-      MemoryAccount({
-        keypair: a,
-      }),
-    );
     const context = this;
     try {
       const node = await Node({ url: this.internalUrl, internalUrl: this.internalUrl });
@@ -85,7 +66,6 @@ export default {
         nodes: [{ name: this.network, instance: node }],
         compilerUrl: this.compiler,
         name: 'Superhero',
-        accounts: this.accounts,
         async onConnection(aepp, action) {
           const open = await context.shouldOpenPopup(aepp, action);
           if (open) context.checkAeppPermissions(aepp, action, 'connection');
@@ -123,10 +103,6 @@ export default {
         },
       });
 
-      if (!this.activeAccount) {
-        this.sdk.selectAccount(this.accountKeyPairs[0].publicKey);
-        this.activeAccount = this.accountKeyPairs[0].publicKey;
-      }
       this.tipContractAddress = this.tipContractAddress.includes('.chain')
         ? getAddressByNameEntry(
             await this.sdk.api.getNameEntryByName(this.tipContractAddress).catch(() => false),
@@ -360,7 +336,6 @@ export default {
       }
     } else {
       this.initNetwork(network);
-      await this.initSubaccounts();
       this.initSdk();
     }
   },

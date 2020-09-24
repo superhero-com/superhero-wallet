@@ -101,7 +101,7 @@ export default {
     if (process.env.IS_EXTENSION && detect().name !== 'firefox') {
       const [update] = await browser.runtime.requestUpdateCheck();
       if (update === 'update_available' && !process.env.RUNNING_IN_TESTS) {
-        this.$store.commit('ADD_NOTIFICATION', {
+        this.$store.commit('addNotification', {
           title: '',
           content: this.$t('pages.account.updateAvailable'),
           route: '',
@@ -109,7 +109,7 @@ export default {
       }
     }
     if (!this.backedUpSeed) {
-      this.$store.commit('ADD_NOTIFICATION', {
+      this.$store.commit('addNotification', {
         title: '',
         content: `${this.$t('pages.account.youNeedTo')} ${this.$t(
           'pages.account.backup',

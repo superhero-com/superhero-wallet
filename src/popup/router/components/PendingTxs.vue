@@ -40,7 +40,7 @@ export default {
           const mined = await this.$store.state.sdk.poll(hash);
           if (!mined) return;
           const pending = this.transactions.pending.filter(p => p.hash !== hash);
-          this.$store.commit('SET_PENDING_TXS', pending);
+          this.$store.commit('setPendingTxs', pending);
           if (type === 'tip')
             this.$router.push({ name: 'success-tip', params: { amount, tipUrl } });
           if (type === 'spend')

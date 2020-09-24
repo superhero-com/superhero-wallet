@@ -27,7 +27,7 @@ export default {
         }
         await this.$store.dispatch('reset');
         await this.$router.push('/');
-        this.$store.commit('SET_MAIN_LOADING', false);
+        this.$store.commit('setMainLoading', false);
         if (process.env.IS_EXTENSION) postMessage({ type: AEX2_METHODS.LOGOUT });
       }
     },

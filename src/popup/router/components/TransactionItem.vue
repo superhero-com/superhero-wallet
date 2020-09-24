@@ -5,10 +5,9 @@
         <span data-cy="amount">{{ txAmount }}</span>
         {{ $t('pages.appVUE.aeid') }}
         <span class="text" data-cy="currency-amount">
-          <!--eslint-disable-line vue-i18n/no-raw-text-->
-          ({{ txAmountToCurrency }}
-          <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-          {{ current.currency.toUpperCase() }})
+          <!--eslint-disable vue-i18n/no-raw-text-->
+          ({{ formatCurrency(txAmountToCurrency) }})
+          <!--eslint-enable vue-i18n/no-raw-text-->
         </span>
       </span>
       <span class="status">{{ status }}</span>
@@ -17,19 +16,17 @@
     <div class="holder tx-info">
       <span v-if="tipUrl" class="url" @click="tipUrl && openUrl(tipUrl)">{{ tipUrl }}</span>
       <span v-else-if="topup" class="address">
-        {{ transaction.tx.sender_id }}
+        {{ transaction.tx.senderId }}
       </span>
       <span v-else-if="withdraw" class="address">
-        {{ transaction.tx.recipient_id }}
+        {{ transaction.tx.recipientId }}
       </span>
       <span v-else class="tx-type">
         {{ transactionType }}
       </span>
       <span
         class="seeTransaction"
-        @click="
-          openUrl(`${network[current.network].middlewareUrl}/transactions/${transaction.hash}`)
-        "
+        @click="openUrl(`${activeNetwork.explorerUrl}/transactions/${transaction.hash}`)"
       >
         <img src="../../../icons/eye.png" />
       </span>
@@ -63,14 +60,14 @@ export default {
     }
   },
   computed: {
-    ...mapState(['sdk', 'current', 'network']),
-    ...mapGetters(['account']),
+    ...mapState(['sdk']),
+    ...mapGetters(['account', 'activeNetwork', 'formatCurrency', 'currentCurrencyRate']),
     status() {
       if (
-        this.transaction.tx.sender_id === this.account.publicKey ||
-        this.transaction.tx.account_id === this.account.publicKey ||
-        this.transaction.tx.owner_id === this.account.publicKey ||
-        this.transaction.tx.caller_id === this.account.publicKey
+        this.transaction.tx.senderId === this.account.publicKey ||
+        this.transaction.tx.accountId === this.account.publicKey ||
+        this.transaction.tx.ownerId === this.account.publicKey ||
+        this.transaction.tx.callerId === this.account.publicKey
       ) {
         return this.$t('pages.transactions.sent');
       }
@@ -88,7 +85,7 @@ export default {
       const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
       const fee = this.transaction.tx.fee || 0;
       const txamount = +aettosToAe(+amount + fee);
-      return (txamount * this.current.currencyRate).toFixed(2);
+      return (txamount * this.currentCurrencyRate).toFixed(2);
     },
     tipUrl() {
       return this.transaction.tipUrl || this.tip || this.transaction.url;
@@ -96,13 +93,13 @@ export default {
     topup() {
       return (
         this.transaction.tx.type === 'SpendTx' &&
-        this.transaction.tx.recipient_id === this.account.publicKey
+        this.transaction.tx.recipientId === this.account.publicKey
       );
     },
     withdraw() {
       return (
         this.transaction.tx.type === 'SpendTx' &&
-        this.transaction.tx.sender_id === this.account.publicKey
+        this.transaction.tx.senderId === this.account.publicKey
       );
     },
     transactionType() {

@@ -97,7 +97,7 @@ const deviceReadyPromise = new Promise(resolve =>
 const routerReadyPromise = new Promise(resolve => {
   const unbindAfterEach = router.afterEach(() => {
     resolve();
-    unbindAfterEach();
+    setTimeout(unbindAfterEach);
   });
 });
 

@@ -64,14 +64,12 @@ export const calculateFee = (type, params) => {
   };
 };
 
-export const DEFAULT_NETWORK =
-  typeof process.env.NETWORK !== 'undefined' ? process.env.NETWORK.trim() : 'Mainnet';
-export const defaultNetworks = {
-  Testnet: {
-    url: 'https://sdk-testnet.aepps.com/',
-    internalUrl: 'https://sdk-testnet.aepps.com/',
+export const defaultNetworks = [
+  {
+    url: 'https://testnet.aeternity.io',
+    internalUrl: 'https://testnet.aeternity.io',
     networkId: 'ae_uat',
-    middlewareUrl: 'https://testnet.aeternal.io',
+    middlewareUrl: 'https://testnet.aeternity.io',
     explorerUrl: 'https://testnet.aeternal.io',
     compilerUrl: 'https://latest.compiler.aepps.com',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
@@ -79,11 +77,11 @@ export const defaultNetworks = {
     tipContract: 'ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj',
     name: 'Testnet',
   },
-  Mainnet: {
+  {
     url: 'https://mainnet.aeternity.io',
     internalUrl: 'https://mainnet.aeternity.io',
     networkId: 'ae_mainnet',
-    middlewareUrl: 'https://mainnet.aeternal.io',
+    middlewareUrl: 'https://mainnet.aeternity.io',
     explorerUrl: 'https://mainnet.aeternal.io',
     compilerUrl: 'https://compiler.aepps.com',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
@@ -91,10 +89,10 @@ export const defaultNetworks = {
     tipContract: 'superhero.chain',
     name: 'Mainnet',
   },
-};
-export const networks = {
-  [DEFAULT_NETWORK]: { ...defaultNetworks[DEFAULT_NETWORK] },
-};
+];
+
+export const defaultNetwork =
+  process.env.NETWORK === 'Testnet' ? defaultNetworks[0] : defaultNetworks[1];
 
 export const AGGREGATOR_URL = 'https://superhero.com/';
 export const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
@@ -112,6 +110,7 @@ export const MAX_AMOUNT_WITHOUT_CONFIRM = 10;
 export const AENS_DOMAIN = '.chain';
 export const MAX_AUCTION_NAME_LENGTH = 12 + AENS_DOMAIN.length;
 export const MIN_NAME_LENGTH = 14;
+export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 100;
 export const TIPPING_CONTRACT = `@compiler >= 4
 
 include "List.aes"

@@ -166,8 +166,8 @@ export default {
   },
   methods: {
     toggleTour(event) {
-      if (event.target.closest('.close')) this.$store.commit('SET_TOUR_STATUS_BAR', false);
-      else this.$store.commit('SET_TOUR_RUNNING', true);
+      if (event.target.closest('.close')) this.$store.commit('setTourStatusBar', false);
+      else this.$store.commit('setTourRunning', true);
     },
     start() {
       this.$tours.onboarding.start();
@@ -175,7 +175,7 @@ export default {
     },
     stop() {
       this.$tours.onboarding.skip();
-      this.$store.commit('SET_TOUR_RUNNING', false);
+      this.$store.commit('setTourRunning', false);
       this.enableScroll();
       this.started = false;
     },
@@ -206,7 +206,7 @@ export default {
         this.$tours.onboarding.nextStep();
       } else {
         this.$tours.onboarding.finish();
-        this.$store.commit('SET_TOUR_RUNNING', false);
+        this.$store.commit('setTourRunning', false);
         this.enableScroll();
         this.started = false;
       }

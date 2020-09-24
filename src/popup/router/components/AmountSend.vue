@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO: Rename the root class to "amount-send" -->
   <div class="amount-send-container">
     <div class="amount-send">
       <Input
@@ -7,7 +8,7 @@
         :error="amountError || value < 0"
         :value="value"
         :placeholder="$t('pages.tipPage.amountPlaceholder')"
-        :label="$t('pages.tipPage.amountLabel')"
+        :label="label || $t('pages.tipPage.amountLabel')"
         @input="$emit('input', $event)"
       />
       <div class="ml-15 text-left" style="margin-right: auto;">
@@ -15,8 +16,8 @@
         <span class="secondary-text f-14 block l-1" data-cy="amount">
           {{ $t('pages.appVUE.aeid') }}
         </span>
-        <span class="f-14 block l-1" data-cy="amount-currency">
-          {{ currencyAmount }} {{ currentCurrency }}
+        <span class="f-14 block l-1 amount-currency" data-cy="amount-currency">
+          {{ formatCurrency(currencyAmount) }}
         </span>
       </div>
       <div class="balance-box">
@@ -24,8 +25,8 @@
         <span class="secondary-text f-14 block l-1" data-cy="balance">
           {{ tokenBalance }} {{ $t('pages.appVUE.aeid') }}
         </span>
-        <span class="f-14 block l-1" data-cy="balance-currency">
-          {{ balanceCurrency }} {{ currentCurrency }}
+        <span class="f-14 block l-1 amount-currency" data-cy="balance-currency">
+          {{ formatCurrency(balanceCurrency) }}
         </span>
       </div>
     </div>
@@ -41,11 +42,11 @@ export default {
   components: {
     Input,
   },
-  props: ['amountError', 'value', 'errorMsg'],
+  props: ['amountError', 'value', 'errorMsg', 'label'],
   computed: {
-    ...mapGetters(['tokenBalance', 'balanceCurrency', 'currentCurrency']),
+    ...mapGetters(['tokenBalance', 'balanceCurrency', 'formatCurrency']),
     currencyAmount() {
-      return ((this.value || 0) * this.$store.state.current.currencyRate).toFixed(2);
+      return ((this.value || 0) * this.$store.getters.currentCurrencyRate).toFixed(2);
     },
   },
 };
@@ -65,6 +66,15 @@ export default {
 
     input.input {
       margin-bottom: 0;
+    }
+
+    .amount-currency {
+      color: $text-color;
+    }
+
+    .balance-box,
+    .amount-box {
+      color: $white-color;
     }
   }
 

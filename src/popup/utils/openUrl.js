@@ -12,7 +12,7 @@ export default (url, newTab) => {
       });
       break;
     case 'web':
-      if (newTab) {
+      if (newTab || window.parent) {
         window.open(url);
       } else {
         window.location = url;

@@ -11,7 +11,6 @@ describe('Tests cases not connected to specific page', () => {
     { path: '/ask-accounts', redirect: false },
     { path: '/message-sign', redirect: false },
     { path: '/success-tip', redirect: false },
-    { path: '/qrCodeReader', redirect: false },
     { path: '/intro', redirect: false },
     { path: '/notifications', redirect: false },
     { path: '/tip', redirect: true },
@@ -29,9 +28,9 @@ describe('Tests cases not connected to specific page', () => {
     });
   });
 
-  txs.forEach(tx => {
+  txs.forEach(pendingTransaction => {
     it('Show pending tx', () => {
-      cy.login({ tx })
+      cy.login({ pendingTransaction })
         .get('[data-cy=pending-txs]')
         .should('be.visible');
     });

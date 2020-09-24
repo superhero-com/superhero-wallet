@@ -4,7 +4,18 @@
     :to="to"
     class="primary-button"
     @click="$emit('click')"
-    :class="{ disabled, extend, half, small, onboarding, dark, third, inline, inactive }"
+    :class="{
+      disabled,
+      extend,
+      half,
+      small,
+      onboarding,
+      dark,
+      third,
+      inline,
+      inactive,
+      bold,
+    }"
   >
     <slot />
   </Component>
@@ -23,6 +34,7 @@ export default {
     inline: Boolean,
     inactive: Boolean,
     to: [String, Object],
+    bold: Boolean,
   },
 };
 </script>
@@ -34,14 +46,14 @@ export default {
   display: block;
   text-decoration: none;
   background: $button-color !important;
-  width: 270px !important;
+  width: 270px;
   border-radius: 5px;
   font-family: 'Roboto', sans-serif;
   font-size: 15px;
   padding: 0;
   margin: 8px auto;
   color: $button-text-color !important;
-  font-weight: normal !important;
+  font-weight: normal;
   line-height: 40px;
   max-height: 40px;
 
@@ -131,6 +143,10 @@ export default {
     padding: 0 20px;
     width: auto !important;
     margin: 8px 10px;
+  }
+
+  &.bold {
+    font-weight: 500;
   }
 
   &.inactive {

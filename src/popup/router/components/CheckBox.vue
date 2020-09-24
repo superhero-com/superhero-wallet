@@ -1,5 +1,5 @@
 <template>
-  <label class="checkbox-container" @click="handleClick">
+  <label class="checkbox-container" @click.stop="handleClick">
     <input :value="val" v-model="checked" @change="onChange" :type="getType" :name="name" />
     <span class="checkmark" :class="{ checked }" />
     <slot class="checkbox-holder" />
@@ -67,21 +67,15 @@ export default {
   }
 
   .checkmark {
-    background: no-repeat url('../../../icons/checkbox-unchecked.svg');
+    background-color: #272831;
+    border: 1.3px solid #515259;
+    border-radius: 2px;
     height: 20px;
     width: 20px;
     margin-right: 15px;
 
     &.checked {
       background-image: url('../../../icons/checkbox-checked.svg');
-    }
-  }
-
-  &.iframe .checkmark {
-    background: no-repeat url('../../../icons/iframe/checkbox-unchecked.svg');
-
-    &.checked {
-      background-image: url('../../../icons/iframe/checkbox-checked.svg');
     }
   }
 

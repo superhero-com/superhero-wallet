@@ -7,12 +7,7 @@ import rpcWallet from './lib/rpcWallet';
 import TipClaimRelay from './lib/tip-claim-relay';
 import { buildTx } from './popup/utils';
 import { popupProps } from './popup/utils/config';
-import {
-  AEX2_METHODS,
-  CONNECTION_TYPES,
-  DEFAULT_NETWORK,
-  HDWALLET_METHODS,
-} from './popup/utils/constants';
+import { AEX2_METHODS, CONNECTION_TYPES, HDWALLET_METHODS } from './popup/utils/constants';
 import { detectConnectionType } from './popup/utils/helper';
 import { getPhishingUrls, phishingCheckUrl, setPhishingUrl } from './popup/utils/phishing-detect';
 import walletController from './wallet-controller';
@@ -79,7 +74,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
         const {
           current: { network },
         } = await getState();
-        if (sender.url === url && (DEFAULT_NETWORK && network) === 'Mainnet')
+        if (sender.url === url && network === 'Mainnet')
           TipClaimRelay.checkUrlHasBalance(url, data);
       }
       if (type === 'openTipPopup') openTipPopup(tipUrl || url);
@@ -120,6 +115,15 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
     id: 'superheroTip',
     title: 'Tip',
   };
+
+  browser.webNavigation.onHistoryStateUpdated.addListener(async ({ tabId, url }) => {
+    if (
+      (({ origin, pathname }) => origin + pathname)(new URL(url)) !==
+      'https://www.youtube.com/watch'
+    )
+      return;
+    browser.tabs.executeScript(tabId, { file: 'other/youtube.js' });
+  });
 
   browser.contextMenus.removeAll();
   browser.contextMenus.create(contextMenuItem);

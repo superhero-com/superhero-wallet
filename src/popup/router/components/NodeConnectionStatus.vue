@@ -38,7 +38,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '../../../common/variables';
 
 .connect-error,
@@ -54,6 +54,10 @@ export default {
   z-index: 5;
   text-align: center;
   font-size: 14px;
+}
+
+.connect-error {
+  font-weight: bold;
 }
 
 .connect-node {

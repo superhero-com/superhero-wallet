@@ -1,5 +1,5 @@
 import { isEmpty } from 'lodash-es';
-import { DEFAULT_NETWORK } from '../popup/utils/constants';
+import { defaultNetworks } from '../popup/utils/constants';
 
 export default {
   account(state, { activeAccountName }) {
@@ -11,19 +11,25 @@ export default {
     }
     return state.account;
   },
-  balanceCurrency({ current, balance }) {
-    return (current.currencyRate * balance).toFixed(2);
+  currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,
+  balanceCurrency({ balance }, { currentCurrencyRate }) {
+    return (currentCurrencyRate * balance).toFixed(2);
   },
-  currentCurrency({ current }) {
-    return current.currency.toUpperCase();
+  formatCurrency: ({ current: { currency } }) => value =>
+    // TODO: Use the current language from i18n module
+    new Intl.NumberFormat(navigator.language, { style: 'currency', currency }).format(value),
+  minTipAmount: ({ currencies: { usd } }) => 0.01 / usd,
+  networks({ userNetworks }) {
+    return [
+      ...defaultNetworks,
+      ...userNetworks.map((network, index) => ({ index, ...network })),
+    ].reduce((acc, n) => ({ ...acc, [n.name]: n }), {});
   },
-  activeNetwork({ current, network }) {
-    return network[current.network] || {};
+  activeNetwork({ current: { network } }, { networks }) {
+    return networks[network];
   },
-  networks({ network }) {
-    const networks = { ...network };
-    networks[DEFAULT_NETWORK].system = true;
-    return networks;
+  mainnet(state, { activeNetwork }) {
+    return activeNetwork.networkId === 'ae_mainnet';
   },
   activeAccountName({ account }, getters) {
     return getters['names/getDefault'](account.publicKey) || 'Main account';
@@ -31,18 +37,9 @@ export default {
   allowTipping(state, { mainnet }) {
     return mainnet || process.env.RUNNING_IN_TESTS;
   },
-  mainnet({ network, current }) {
-    return network[current.network].networkId === 'ae_mainnet';
-  },
   tokenBalance(state) {
     return state.current.token !== 0
       ? state.tokens[state.current.token].balance.toFixed(2)
       : state.balance.toFixed(2);
-  },
-  isLedger(state) {
-    if (state.subaccounts.length > 0) {
-      return state.subaccounts.find(s => s.publicKey === state.account.publicKey).isLedger;
-    }
-    return state.subaccounts;
   },
 };

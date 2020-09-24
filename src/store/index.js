@@ -11,25 +11,22 @@ import tokens from './plugins/tokens';
 import names from './plugins/names';
 import runMigrations from './migrations';
 import invitesModule from './modules/invites';
-import { networks, DEFAULT_NETWORK } from '../popup/utils/constants';
+import { defaultNetwork } from '../popup/utils/constants';
 
 Vue.use(Vuex);
 
 const initialState = {
   isRestored: false,
-  subaccounts: [],
   account: {},
   mnemonic: null,
   activeAccount: 0,
   balance: 0,
   current: {
-    network: DEFAULT_NETWORK,
+    network: defaultNetwork.name,
     language: 'en',
     token: 0,
     currency: 'usd',
-    currencyRate: 0,
   },
-  network: networks,
   userNetworks: [],
   isLoggedIn: false,
   transactions: {
@@ -44,7 +41,6 @@ const initialState = {
   nodeStatus: 'connecting',
   currencies: {},
   nextCurrenciesFetch: null,
-  minTipAmount: 0.01,
   notifications: [],
   tip: null,
   txQueue: [],
@@ -66,9 +62,6 @@ export default new Vuex.Store({
         Vue.set(state, name, value),
       );
     },
-    markMigrationAsApplied(state, migrationId) {
-      Vue.set(state.migrations, migrationId, true);
-    },
     resetState(state) {
       Object.entries({ ...initialState, isRestored: true }).forEach(([name, value]) =>
         Vue.set(state, name, value),
@@ -79,13 +72,12 @@ export default new Vuex.Store({
   actions,
   plugins: [
     persistState(
-      (state, store) => runMigrations(state, store),
+      runMigrations,
       ({
         migrations,
         current,
         transactions,
         balance,
-        subaccounts,
         currencies,
         userNetworks,
         names: { owned, defaults } = {},
@@ -95,7 +87,6 @@ export default new Vuex.Store({
         backedUpSeed,
         account,
         mnemonic,
-        minTipAmount,
         saveErrorLog,
         tourStartBar,
         tokens: { all },
@@ -105,7 +96,6 @@ export default new Vuex.Store({
         current,
         transactions,
         balance,
-        subaccounts,
         currencies,
         userNetworks,
         names: { owned, defaults },
@@ -115,7 +105,6 @@ export default new Vuex.Store({
         backedUpSeed,
         account,
         mnemonic,
-        minTipAmount,
         saveErrorLog,
         tourStartBar,
         tokens: { all },

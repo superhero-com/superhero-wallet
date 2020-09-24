@@ -11,6 +11,7 @@ const GenerateJsonPlugin = require('generate-json-webpack-plugin');
 const commitHash = require('child_process')
   .execSync('git rev-parse HEAD')
   .toString().trim();
+const sass = require('node-sass');
 const genManifest = require('./src/manifest');
 
 const parseBool = val => (val ? JSON.parse(val) : false);
@@ -28,6 +29,7 @@ const getConfig = platform => {
         'other/background': './background.js',
         'other/inject': './content-scripts/inject.js',
         'other/twitter': './content-scripts/twitter.js',
+        'other/youtube': './content-scripts/youtube.js',
         'popup/popup': './popup/popup.js',
         'options/options': './options/options.js',
         'phishing/phishing': './phishing/phishing.js',
@@ -168,6 +170,18 @@ const getConfig = platform => {
               },
               { from: 'icons/icon_48.png', to: `icons/icon_48.png` },
               { from: 'icons/icon_128.png', to: `icons/icon_128.png` },
+              { from: 'icons/request_permission.jpg', to: `icons/request_permission.jpg` },
+              {
+                from: path.join(__dirname, 'src/content-scripts/tipButton.scss'),
+                to: path.join(
+                  __dirname,
+                  {
+                    'extension-chrome': 'dist/chrome/other/tipButton.css',
+                    'extension-firefox': 'dist/firefox/other/tipButton.css',
+                  }[platform],
+                ),
+                transform: (_, f) => sass.renderSync({ file: f }).css.toString(),
+              },
             ]),
             new GenerateJsonPlugin(
               'manifest.json',
@@ -183,8 +197,10 @@ const getConfig = platform => {
               template: path.join(__dirname, 'src', 'popup', 'popup-firefox.html'),
               filename: 'popup/popup.html',
               excludeChunks: [
-                'background',
-                'inject',
+                'other/background',
+                'other/youtube',
+                'other/twitter',
+                'other/inject',
                 'options/options',
                 'phishing/phishing',
                 'popup/cameraPermission',

@@ -231,8 +231,8 @@
       "backup": "backup",
       "yourSeedPhrase": "your seed phrase",
       "updateExtension": "New version available! Please update your extension.",
-      "updateAvailable": "New version in store available!",
-      "claim-name": "Claim your .chain name"
+      "updateAvailable": "New version in the store is available!",
+      "claim-name": "Register a name"
     },
     "claim": {
       "claim": "Claim tips",
@@ -471,7 +471,6 @@
       "backToAccount": "Back to account",
       "manageAccounts": "Manage accounts",
       "allAccounts": "All accounts",
-      "addNewSubAccount": "Add new subaccount",
       "account": "Account",
       "add": "Add",
       "enterName": "Enter name"
@@ -552,7 +551,6 @@
       "backToAccount": "Back to account",
       "heading": "New Transfer from",
       "recipient": "Recipient",
-      "sendSubaccount": "or choose subaccount",
       "txFee": "Min Tx fee:",
       "maxSpendableValue": "Maximum spendable value:",
       "send": "Send",

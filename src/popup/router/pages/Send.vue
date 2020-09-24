@@ -78,8 +78,7 @@
                 <!--eslint-disable-line vue-i18n/no-raw-text-->
                 ~
                 <span>
-                  {{ (form.amount * current.currencyRate).toFixed(3) }}
-                  {{ current.currency.toUpperCase() }}
+                  {{ formatCurrency((form.amount * currentCurrencyRate).toFixed(3)) }}
                 </span>
               </span>
             </div>
@@ -190,8 +189,8 @@ export default {
     },
   },
   computed: {
-    ...mapState(['balance', 'network', 'current', 'sdk']),
-    ...mapGetters(['account']),
+    ...mapState(['balance', 'current', 'sdk']),
+    ...mapGetters(['account', 'activeNetwork', 'formatCurrency', 'currentCurrencyRate']),
     validAddress() {
       return checkAddress(this.form.address) || chekAensName(this.form.address);
     },
@@ -209,12 +208,10 @@ export default {
     this.fetchFee();
   },
   methods: {
-    scan() {
-      this.$router.push({
-        name: 'qrCodeReader',
-        params: {
-          type: 'send',
-        },
+    async scan() {
+      this.form.address = await this.$store.dispatch('modals/open', {
+        name: 'read-qr-code',
+        title: this.$t('pages.send.scanAddress'),
       });
     },
     async fetchFee() {
@@ -274,10 +271,10 @@ export default {
       }
     },
     async openTxExplorer(hash) {
-      const { middlewareUrl } = this.network[this.current.network];
+      const { explorerUrl } = this.activeNetwork;
       const { endpoint, valid } = await checkHashType(hash);
       if (valid) {
-        const url = `${middlewareUrl}/${endpoint}/${hash}`;
+        const url = `${explorerUrl}/${endpoint}/${hash}`;
         openUrl(url);
       }
     },

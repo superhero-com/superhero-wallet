@@ -1,122 +1,100 @@
-import * as types from './mutation-types';
+import { defaultNetwork } from '../popup/utils/constants';
 
 export default {
-  [types.UPDATE_ACCOUNT](state, payload) {
+  updateAccount(state, payload) {
     state.account = payload;
   },
-  [types.UPDATE_BALANCE](state, payload) {
+  updateBalance(state, payload) {
     state.balance = payload;
   },
-  [types.SWITCH_NETWORK](state, payload) {
+  switchNetwork(state, payload) {
     state.current.network = payload;
   },
-  [types.SWITCH_LOGGED_IN](state, payload) {
+  switchLoggedIn(state, payload) {
     state.isLoggedIn = payload;
   },
-  [types.UPDATE_LATEST_TRANSACTIONS](state, payload) {
+  updateLatestTransactions(state, payload) {
     state.transactions.latest = payload;
   },
-  [types.SET_PENDING_TXS](state, payload) {
+  setPendingTxs(state, payload) {
     state.transactions.pending = payload;
   },
-  [types.SET_SUBACCOUNT](state, payload) {
-    state.subaccounts.push(payload);
-  },
-  [types.SET_SUBACCOUNTS](state, payload) {
-    state.subaccounts = payload;
-  },
-  [types.SET_ACTIVE_ACCOUNT](state, payload) {
+  setActiveAccount(state, payload) {
     state.account.publicKey = payload.publicKey;
     state.activeAccount = payload.index;
   },
-  [types.UNSET_SUBACCOUNTS](state) {
-    state.subaccounts = [];
-  },
-  [types.SET_ACCOUNT_AENS](state, { account, aename, pending }) {
-    state.subaccounts[account].aename = aename;
-    state.subaccounts[account].pending = pending;
-  },
-  [types.SET_NAMES](state, { names }) {
+  setNames(state, { names }) {
     state.names = names;
   },
-  [types.SET_USERNETWORK](state, payload) {
-    state.userNetworks = { ...state.userNetworks, ...payload };
+  setUserNetwork(state, { index, ...network }) {
+    if (index !== undefined) state.userNetworks[index] = network;
+    else state.userNetworks.push({ ...defaultNetwork, ...network });
   },
-  [types.SET_USERNETWORKS](state, payload) {
-    state.userNetworks = payload;
+  deleteUserNetwork(state, index) {
+    state.userNetworks = state.userNetworks.filter((el, idx) => idx !== index);
   },
-  [types.SET_NETWORKS](state, payload) {
-    state.network = payload;
-  },
-  [types.ADD_NETWORK](state, payload) {
-    state.network = { ...state.network, ...{ [payload.name]: { ...payload } } };
-  },
-  [types.INIT_SDK](state, payload) {
+  initSdk(state, payload) {
     state.sdk = payload;
   },
-  [types.SET_MIDDLEWARE](state, payload) {
+  setMiddleware(state, payload) {
     state.middleware = payload;
   },
-  [types.SET_ENCRYPTED_WALLET](state, payload) {
+  setEncryptedWallet(state, payload) {
     state.encryptedWallet = payload;
   },
-  [types.SET_TIPPING](state, payload) {
+  setTipping(state, payload) {
     state.tipping = payload;
   },
-  [types.SET_MAIN_LOADING](state, payload) {
+  setMainLoading(state, payload) {
     state.mainLoading = payload;
   },
-  [types.SET_NODE_STATUS](state, payload) {
+  setNodeStatus(state, payload) {
     state.nodeStatus = payload;
   },
-  [types.SET_CURRENCY](state, { currency, currencyRate }) {
+  setCurrentCurrency(state, currency) {
     state.current.currency = currency;
-    state.current.currencyRate = currencyRate;
   },
-  [types.SET_CURRENCIES](state, payload) {
+  setCurrencies(state, payload) {
     state.currencies = payload;
   },
-  [types.SET_NEXT_CURRENCY_FETCH](state, payload) {
+  setNextCurrencyFetch(state, payload) {
     state.nextCurrenciesFetch = payload;
   },
-  [types.ADD_NOTIFICATION](state, payload) {
+  addNotification(state, payload) {
     state.notifications = [...state.notifications, { ...payload, visited: false }];
   },
-  [types.SET_NOTIFICATIONS_VISITED](state) {
+  setNotificationsVisited(state) {
     state.notifications = state.notifications.map(n => ({ ...n, visited: true }));
   },
-  [types.SET_TIP_DETAILS](state, payload) {
+  setTipDetails(state, payload) {
     state.tip = payload;
   },
-  [types.SET_TX_QUEUE](state, payload) {
+  setTxQueue(state, payload) {
     state.txQueue = [...state.txQueue, payload];
   },
-  [types.ADD_CONNECTED_AEPP](state, { host, account }) {
+  addConnectedAepp(state, { host, account }) {
     state.connectedAepps = { ...state.connectedAepps, [host]: [account] };
   },
-  [types.UPDATE_CONNECTED_AEPP](state, { host, account }) {
+  updateConnectedAepp(state, { host, account }) {
     state.connectedAepps = {
       ...state.connectedAepps,
       [host]: [...state.connectedAepps[host].accounts, account],
     };
   },
-  [types.SET_MNEMONIC](state, payload) {
+  setMnemonic(state, payload) {
     state.mnemonic = payload;
   },
-  [types.SET_BACKED_UP_SEED](state, payload) {
+  setBackedUpSeed(state, payload) {
     state.backedUpSeed = payload;
   },
-  [types.SET_TOUR_RUNNING](state, payload) {
+  setTourRunning(state, payload) {
     state.tourRunning = payload;
   },
-  [types.SET_TOUR_STATUS_BAR](state, payload) {
+  setTourStatusBar(state, payload) {
     state.tourStartBar = payload;
   },
-  [types.SET_TIPPING_ADDRESS](state, payload) {
+  setTippingAddress(state, payload) {
     state.tippingAddress = payload;
-  },
-  setMinTipAmount(state, payload) {
-    state.minTipAmount = payload;
   },
   setSaveErrorLog(state) {
     state.saveErrorLog = !state.saveErrorLog;

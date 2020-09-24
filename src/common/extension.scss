@@ -43,10 +43,6 @@ a {
   background: $bg-color;
 }
 
-.secondary-bg {
-  background: $nav-bg-color;
-}
-
 .text {
   color: $text-color;
 }
@@ -73,10 +69,6 @@ a {
   color: $secondary-color !important;
 }
 
-.accent-text {
-  color: $accent-color;
-}
-
 .regular-text {
   font-size: $font-size;
   text-align: left;
@@ -87,26 +79,10 @@ a {
   margin: 60px 0;
 }
 
-.ae-header {
-  background: $nav-bg-color !important;
-  border-color: $nav-border-color !important;
-}
-
 .error-msg {
   color: $input-error-color !important;
   margin-top: 22px;
   font-size: 0.88rem;
-}
-
-.nav-title {
-  .title-text {
-    margin-left: 15px;
-    font-weight: lighter;
-  }
-}
-
-.arrow-back {
-  cursor: pointer;
 }
 
 .heading-1 {

@@ -1,9 +1,9 @@
 import Vue from 'vue';
-import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import { aettosToAe } from '../../popup/utils/helper';
 import Backend from '../../lib/backend';
 import { i18n } from '../../popup/utils/i18nHelper';
+import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
 
 export default store =>
   store.registerModule('names', {
@@ -29,6 +29,9 @@ export default store =>
         if (revoked) Vue.delete(defaults, `${address}-${networkId}`, name);
         else Vue.set(defaults, `${address}-${networkId}`, name);
       },
+      setAutoExtend(state, { index, value }) {
+        Vue.set(state.owned[index], 'autoExtend', value);
+      },
     },
     actions: {
       async fetchOwned({ state: { owned }, rootState, commit, getters: { getDefault }, dispatch }) {
@@ -46,16 +49,10 @@ export default store =>
                 })),
             () => [],
           );
-        const namesPromise = Promise.all(
-          rootState.subaccounts.map(({ publicKey }) =>
-            Promise.all([
-              getPendingNameClaimTransactions(publicKey),
-              rootState.middleware.getActiveNames({ owner: publicKey }),
-            ]),
-          ),
-        ).then(names => names.flat(2));
-
-        let [names] = await Promise.all([namesPromise]);
+        let names = await Promise.all([
+          getPendingNameClaimTransactions(rootState.account.publicKey),
+          rootState.middleware.getActiveNames({ owner: rootState.account.publicKey }),
+        ]).then(arr => arr.flat());
 
         const defaultName = getDefault(rootState.account.publicKey);
         let defaultNameRevoked = false;
@@ -67,7 +64,7 @@ export default store =>
             if (revoked) {
               if (name.name === defaultName) defaultNameRevoked = true;
               commit(
-                'ADD_NOTIFICATION',
+                'addNotification',
                 {
                   title: '',
                   content: i18n.t('pages.names.revoked-notification', {
@@ -81,6 +78,7 @@ export default store =>
             }
             return {
               ...(revoked || oldName.revoked ? { revoked: true } : {}),
+              autoExtend: oldName.autoExtend,
               ...name,
             };
           });
@@ -96,11 +94,8 @@ export default store =>
             });
         }
       },
-      async fetchAuctions({ rootState: { network, current } }) {
-        const middleware = network[current.network].middlewareUrl;
-        return (
-          await axios(`${middleware}/middleware/names/auctions/active`).catch(() => ({ data: [] }))
-        ).data;
+      async fetchAuctions({ rootState: { middleware } }) {
+        return middleware.getActiveNameAuctions();
       },
       async fetchAuctionEntry({ rootState: { middleware } }, name) {
         const { info, bids } = await middleware.getAuctionInfoByName(name);
@@ -155,6 +150,15 @@ export default store =>
             else throw e;
           }
         }
+      },
+      async extendNames({ rootState: { sdk }, state: { owned }, dispatch }) {
+        const height = await sdk.height();
+        owned.forEach(
+          ({ name, expiresAt, autoExtend }) =>
+            autoExtend &&
+            expiresAt - height < AUTO_EXTEND_NAME_BLOCKS_INTERVAL &&
+            dispatch('updatePointer', { name, type: 'extend' }),
+        );
       },
     },
   });
