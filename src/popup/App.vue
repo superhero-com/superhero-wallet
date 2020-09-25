@@ -48,6 +48,7 @@ import SidebarMenu from './router/components/SidebarMenu';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus';
 import Tour from './router/components/Tour';
 import { EventBus } from './utils/eventBus';
+import Backend from '../lib/backend';
 
 export default {
   components: {
@@ -118,6 +119,8 @@ export default {
     if (this.$store.state.notificationSettings.length === 0) {
       this.$store.commit('setNotificationSettings', NOTIFICATION_SETTINGS);
     }
+
+    this.$store.commit('setChainNames', await Backend.getCacheChainNames());
 
     EventBus.$on('error', async entry => {
       this.$store.dispatch('modals/open', { name: 'error-log', entry }).catch(() => false);

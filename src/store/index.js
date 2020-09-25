@@ -46,6 +46,7 @@ const initialState = {
   nextCurrenciesFetch: null,
   notifications: [],
   notificationSettings: [],
+  chainNames: null,
   tip: null,
   txQueue: [],
   connectedAepps: {},

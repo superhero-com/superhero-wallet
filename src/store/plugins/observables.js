@@ -20,35 +20,26 @@ export default store => {
       refCountDelay(1000),
     );
 
-  const normalizeNotification = async ({ entityId, entityType, ...otherNotification }) => {
-    const record =
+  const normalizeNotification = ({ entityId, sourceId, entityType, sender, ...other }) => ({
+    sourceId,
+    entityId,
+    entityType,
+    ...other,
+    sender,
+    chainName: store.state.chainNames[sender],
+    path:
       entityType === 'TIP'
-        ? await Backend.getCacheTipById(entityId)
-        : await Backend.getCommentById(entityId);
-
-    return {
-      entityId,
-      entityType,
-      ...otherNotification,
-      sender: entityType === 'TIP' ? record.sender : record.author,
-      chainName: entityType === 'TIP' ? record.chainName : record.Profile.preferredChainName,
-      path:
-        entityType === 'TIP'
-          ? `https://superhero.com/tip/${record.id}`
-          : `https://superhero.com/tip/${record.tipId}/comment/${record.id}`,
-    };
-  };
+        ? `https://superhero.com/tip/${entityId}`
+        : `https://superhero.com/tip/${sourceId}/comment/${entityId}`,
+  });
 
   const notifications$ = createSdkObservable(
     async sdk =>
-      // eslint-disable-next-line no-return-await
-      await Promise.all(
-        (
-          await Backend.getAllNotifications(store.state.account.publicKey, async data =>
-            Buffer.from(await sdk.signMessage(data)).toString('hex'),
-          )
-        ).map(normalizeNotification),
-      ),
+      (
+        await Backend.getAllNotifications(store.state.account.publicKey, async data =>
+          Buffer.from(await sdk.signMessage(data)).toString('hex'),
+        )
+      ).map(normalizeNotification),
     [],
   );
 

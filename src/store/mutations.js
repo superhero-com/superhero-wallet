@@ -79,6 +79,9 @@ export default {
   setNotificationSettings(state, payload) {
     state.notificationSettings = payload;
   },
+  setChainNames(state, payload) {
+    state.chainNames = payload;
+  },
   setTipDetails(state, payload) {
     state.tip = payload;
   },

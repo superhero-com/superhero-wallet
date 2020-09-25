@@ -16,7 +16,7 @@ const wrapTry = async promise => {
         return response;
       }),
       new Promise((resolve, reject) => {
-        setTimeout(reject, 20000, 'TIMEOUT');
+        setTimeout(reject, 3000, 'TIMEOUT');
       }),
     ]);
   } catch (e) {
