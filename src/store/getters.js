@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash-es';
+import { isEmpty, get } from 'lodash-es';
 import { defaultNetworks } from '../popup/utils/constants';
 
 export default {
@@ -32,7 +32,7 @@ export default {
     return activeNetwork.networkId === 'ae_mainnet';
   },
   activeAccountName({ account }, getters) {
-    return getters['names/getDefault'](account.publicKey) || 'Main account';
+    return getters['names/getDefault'](get(account, 'publicKey')) || 'Main account';
   },
   allowTipping(state, { mainnet }) {
     return mainnet || process.env.RUNNING_IN_TESTS;
