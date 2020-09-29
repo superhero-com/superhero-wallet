@@ -1,7 +1,5 @@
 // copied from https://github.com/aeternity/superhero-ui/blob/178bc2d63cb362ddc3b2163fed58deb2e253ec00/src/utils/backend.js
 
-const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
-
 const wrapTry = async promise => {
   try {
     return Promise.race([
@@ -25,15 +23,20 @@ const wrapTry = async promise => {
   }
 };
 
-const backendFetch = (path, ...args) => wrapTry(fetch(`${BACKEND_URL}/${path}`, ...args));
-
 export default class Backend {
-  static getTipComments = async tipId =>
-    backendFetch(`comment/api/tip/${encodeURIComponent(tipId)}`);
+  backendUrl = 'https://raendom-backend.z52da5wt.xyz';
 
-  static async sendTipComment(tipId, text, author, signCb, parentId) {
+  constructor(url) {
+    this.backendUrl = url || this.backendUrl;
+  }
+
+  backendFetch = (path, ...args) => wrapTry(fetch(`${this.backendUrl}/${path}`, ...args));
+
+  getTipComments = async tipId => this.backendFetch(`comment/api/tip/${encodeURIComponent(tipId)}`);
+
+  async sendTipComment(tipId, text, author, signCb, parentId) {
     const sendComment = async postParam =>
-      backendFetch('comment/api/', {
+      this.backendFetch('comment/api/', {
         method: 'post',
         body: JSON.stringify(postParam),
         headers: { 'Content-Type': 'application/json' },
@@ -68,9 +71,9 @@ export default class Backend {
     return modifyNotif(respondChallenge);
   }
 
-  static getAllComments = async () => backendFetch('comment/api/');
+  getAllComments = async () => this.backendFetch('comment/api/');
 
-  static getProfile = async address => backendFetch(`profile/${address}`);
+  getProfile = async address => this.backendFetch(`profile/${address}`);
 
   static async getAllNotifications(address, signCb) {
     const responseChallenge = await backendFetch(`notification/user/${address}`);
@@ -87,23 +90,23 @@ export default class Backend {
     return wrapTry(fetch(url.toString()));
   }
 
-  static sendProfileData = async postParam =>
-    backendFetch('profile', {
+  sendProfileData = async postParam =>
+    this.backendFetch('profile', {
       method: 'post',
       body: JSON.stringify(postParam),
       headers: { 'Content-Type': 'application/json' },
     });
 
-  static setProfileImage = async (address, data, image = true) => {
+  setProfileImage = async (address, data, image = true) => {
     const request = {
       method: 'post',
       body: image ? data : JSON.stringify(data),
     };
     Object.assign(request, !image && { headers: { 'Content-Type': 'application/json' } });
-    return wrapTry(fetch(Backend.getProfileImageUrl(address), request));
+    return wrapTry(fetch(this.getProfileImageUrl(address), request));
   };
 
-  static deleteProfileImage = async (address, postParam = false) => {
+  deleteProfileImage = async (address, postParam = false) => {
     const request = {
       method: 'delete',
       headers: {
@@ -111,28 +114,28 @@ export default class Backend {
       },
       ...(postParam && { body: JSON.stringify(postParam) }),
     };
-    return backendFetch(`profile/image/${address}`, request);
+    return this.backendFetch(`profile/image/${address}`, request);
   };
 
-  static getProfileImageUrl = address => `${BACKEND_URL}/profile/image/${address}`;
+  getProfileImageUrl = address => `${this.backendUrl}/profile/image/${address}`;
 
-  static getStats = async () => backendFetch('static/stats/');
+  getStats = async () => this.backendFetch('static/stats/');
 
-  static getCacheTipById = async id => backendFetch(`cache/tip?id=${id}`);
+  getCacheTipById = async id => this.backendFetch(`cache/tip?id=${id}`);
 
-  static getCacheUserStats = async address => backendFetch(`cache/userStats?address=${address}`);
+  getCacheUserStats = async address => this.backendFetch(`cache/userStats?address=${address}`);
 
-  static getCacheTips = async (ordering, page, address = null, search = null) => {
+  getCacheTips = async (ordering, page, address = null, search = null) => {
     let query = `?ordering=${ordering}&page=${page}`;
     if (address) query += `&address=${address}`;
     if (search) query += `&search=${encodeURIComponent(search)}`;
 
-    return backendFetch(`cache/tips${query}`);
+    return this.backendFetch(`cache/tips${query}`);
   };
 
-  static getCacheStats = async () => backendFetch('cache/stats');
+  getCacheStats = async () => this.backendFetch('cache/stats');
 
-  static getCacheChainNames = async () => backendFetch('cache/chainnames');
+  getCacheChainNames = async () => this.backendFetch('cache/chainnames');
 
   static getPrice = async () =>
     wrapTry(
@@ -143,18 +146,42 @@ export default class Backend {
   // quick workaround because of CORS issue in the backend.
   // static getPrice = async () => backendFetch('cache/price');
 
-  static getOracleCache = async () => backendFetch('cache/oracle');
+  getOracleCache = async () => this.backendFetch('cache/oracle');
 
-  static getTopicsCache = async () => backendFetch('cache/topics');
+  getTopicsCache = async () => this.backendFetch('cache/topics');
 
-  static cacheInvalidateTips = async () => backendFetch('cache/invalidate/tips');
+  cacheInvalidateTips = async () => this.backendFetch('cache/invalidate/tips');
 
-  static getCommentCountForAddress = async address =>
-    backendFetch(`comment/count/author/${address}`);
+  cacheInvalidateOracle = async () => this.backendFetch('cache/invalidate/oracle');
 
-  static getTipPreviewUrl = previewLink => `${BACKEND_URL}${previewLink}`;
+  getCommentCountForAddress = async address => this.backendFetch(`comment/count/author/${address}`);
 
-  static getProfileImageUrl = address => `${BACKEND_URL}/profile/image/${address}`;
+  getTipPreviewUrl = previewLink => `${this.backendUrl}${previewLink}`;
 
-  static getCommentById = async id => backendFetch(`comment/api/${id}`);
+  getProfileImageUrl = address => `${this.backendUrl}/profile/image/${address}`;
+
+  getCommentById = async id => this.backendFetch(`comment/api/${id}`);
+
+  claimTips = async postParam =>
+    this.backendFetch('claim/submit', {
+      method: 'post',
+      body: JSON.stringify(postParam),
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+  donateError = async postParam =>
+    this.backendFetch('errorreport', {
+      method: 'post',
+      body: JSON.stringify(postParam),
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+  getVerifiedUrls = async () => this.backendFetch('verified');
+
+  getGraylistedUrls = async () => this.backendFetch('static/wallet/graylist');
+
+  getTxEvents = async (address, recent, limit) =>
+    this.backendFetch(
+      `cache/events/?address=${address}&event=TipWithdrawn${recent ? `&limit=${limit}` : ``}`,
+    );
 }
