@@ -1,6 +1,7 @@
 import { isEmpty } from 'lodash-es';
-import { switchNode } from './lib/background-utils';
 import './lib/initPolyfills';
+import initDeeplinkHandler from './lib/deeplink-handler';
+import { switchNode } from './lib/background-utils';
 import popupConnections from './lib/popup-connection';
 import RedirectChainNames from './lib/redirect-chain-names';
 import rpcWallet from './lib/rpcWallet';
@@ -19,6 +20,7 @@ const inBackground = window.location.href.includes('_generated_background_page.h
 if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
   Logger.init({ background: true });
   RedirectChainNames.init();
+  initDeeplinkHandler();
 
   const postPhishingData = async data => {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
