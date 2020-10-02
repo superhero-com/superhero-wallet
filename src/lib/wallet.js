@@ -154,30 +154,44 @@ export default {
       });
 
       if (IN_FRAME) {
-        const connectedFrames = new Set();
-        const connectToFrame = target => {
-          if (connectedFrames.has(target)) return;
-          connectedFrames.add(target);
-          const connection = BrowserWindowMessageConnection({ target });
-          const originalConnect = connection.connect;
-          connection.connect = function connect(onMessage) {
-            originalConnect.call(this, (data, origin, source) => {
-              if (source !== target) return;
-              onMessage(data, origin, source);
-            });
-          };
-          sdk.addRpcClient(connection);
-          sdk.shareWalletInfo(connection.sendMessage.bind(connection));
-          setTimeout(() => sdk.shareWalletInfo(connection.sendMessage.bind(connection)), 3000);
+        const getArrayOfAvailableFrames = () => [
+          window.parent,
+          ...times(window.parent.frames.length, i => window.parent.frames[i]),
+        ];
+        const executeAndSetInterval = (handler, timeout) => {
+          handler();
+          return setInterval(handler, timeout);
         };
 
-        connectToFrame(window.parent);
-        const connectToParentFrames = () =>
-          times(window.parent.frames.length, i => window.parent.frames[i])
-            .filter(frame => frame !== window)
-            .forEach(connectToFrame);
-        connectToParentFrames();
-        setInterval(connectToParentFrames, 3000);
+        const connectedFrames = new Set();
+        executeAndSetInterval(
+          () =>
+            getArrayOfAvailableFrames()
+              .filter(frame => frame !== window)
+              .forEach(target => {
+                if (connectedFrames.has(target)) return;
+                connectedFrames.add(target);
+                const connection = BrowserWindowMessageConnection({ target });
+                const originalConnect = connection.connect;
+                let intervalId;
+                connection.connect = function connect(onMessage) {
+                  originalConnect.call(this, (data, origin, source) => {
+                    if (source !== target) return;
+                    clearInterval(intervalId);
+                    onMessage(data, origin, source);
+                  });
+                };
+                sdk.addRpcClient(connection);
+                intervalId = executeAndSetInterval(() => {
+                  if (!getArrayOfAvailableFrames().includes(target)) {
+                    clearInterval(intervalId);
+                    return;
+                  }
+                  sdk.shareWalletInfo(connection.sendMessage.bind(connection));
+                }, 3000);
+              }),
+          3000,
+        );
       }
 
       await store.commit('initSdk', sdk);
