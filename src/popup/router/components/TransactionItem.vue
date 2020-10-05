@@ -14,7 +14,7 @@
       <span class="time" data-cy="time">{{ transaction.time | formatDate }}</span>
     </div>
     <div class="holder tx-info">
-      <span v-if="tipUrl" class="url" @click="tipUrl && openUrl(tipUrl)">{{ tipUrl }}</span>
+      <span v-if="tipUrl" class="url" @click="tipUrl && openUrl(tipUrl, true)">{{ tipUrl }}</span>
       <span v-else-if="topup" class="address">
         {{ transaction.tx.senderId }}
       </span>
@@ -26,7 +26,7 @@
       </span>
       <span
         class="seeTransaction"
-        @click="openUrl(`${activeNetwork.explorerUrl}/transactions/${transaction.hash}`)"
+        @click="openUrl(`${activeNetwork.explorerUrl}/transactions/${transaction.hash}`, true)"
       >
         <img src="../../../icons/eye.png" />
       </span>

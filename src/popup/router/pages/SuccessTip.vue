@@ -91,7 +91,7 @@ export default {
   },
   methods: {
     redirectOnFeed() {
-      openUrl(AGGREGATOR_URL);
+      openUrl(AGGREGATOR_URL, true);
     },
   },
 };

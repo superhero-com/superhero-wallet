@@ -275,7 +275,7 @@ export default {
       const { endpoint, valid } = await checkHashType(hash);
       if (valid) {
         const url = `${explorerUrl}/${endpoint}/${hash}`;
-        openUrl(url);
+        openUrl(url, true);
       }
     },
   },

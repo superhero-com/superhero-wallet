@@ -20,7 +20,7 @@ export default {
   },
   methods: {
     openHowToClaimURL() {
-      openUrl(`${AGGREGATOR_URL}create-profile`);
+      openUrl(`${AGGREGATOR_URL}create-profile`, true);
     },
   },
 };
