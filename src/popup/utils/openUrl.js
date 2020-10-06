@@ -17,7 +17,7 @@ export default (url, newTab) => {
       });
       break;
     case 'web':
-      openUrlWeb(url, newTab || window.parent);
+      openUrlWeb(url, newTab);
       break;
     default:
       throw new Error(`Unknown platform: ${process.env.PLATFORM}`);
