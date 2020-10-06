@@ -106,10 +106,6 @@
       "title": "Tu reporte de Error No Fue Enviado",
       "msg": "Hubo un problema enviando tu reporte de error"
     },
-    "tip-mainnet-warning": {
-      "title": "Advertencia",
-      "msg": "La función de Propina/Reclamo sólo trabaja en la red Principal (Mainnet)."
-    },
     "confirm-transaction-sign": {
       "unknown": "Desconocido",
       "contract-create": "Crear contrato",

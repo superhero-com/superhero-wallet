@@ -29,17 +29,18 @@ export default {
   activeNetwork({ current: { network } }, { networks }) {
     return networks[network];
   },
-  mainnet(state, { activeNetwork }) {
-    return activeNetwork.networkId === 'ae_mainnet';
-  },
   backendInstance(state, { activeNetwork }) {
     return new Backend(activeNetwork.backendUrl);
   },
   activeAccountName({ account }, getters) {
     return getters['names/getDefault'](get(account, 'publicKey')) || 'Main account';
   },
-  allowTipping(state, { mainnet }) {
-    return mainnet || process.env.RUNNING_IN_TESTS;
+  tippingSupported(state, { activeNetwork }) {
+    return (
+      activeNetwork.networkId === 'ae_mainnet' ||
+      activeNetwork.networkId === 'ae_uat' ||
+      process.env.RUNNING_IN_TESTS
+    );
   },
   tokenBalance(state) {
     return state.current.token !== 0

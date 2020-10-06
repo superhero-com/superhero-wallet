@@ -1,4 +1,4 @@
-// copied from https://github.com/aeternity/superhero-ui/blob/178bc2d63cb362ddc3b2163fed58deb2e253ec00/src/utils/backend.js
+import { defaultNetwork } from '../popup/utils/constants';
 
 const wrapTry = async promise => {
   try {
@@ -24,7 +24,7 @@ const wrapTry = async promise => {
 };
 
 export default class Backend {
-  backendUrl = 'https://raendom-backend.z52da5wt.xyz';
+  backendUrl = defaultNetwork.backendUrl;
 
   constructor(url) {
     this.backendUrl = url || this.backendUrl;

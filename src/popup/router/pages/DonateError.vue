@@ -18,10 +18,9 @@
 </template>
 
 <script>
-import axios from 'axios';
+import { mapGetters } from 'vuex';
 import Textarea from '../components/Textarea';
 import Button from '../components/Button';
-import { BACKEND_URL } from '../../utils/constants';
 
 export default {
   props: {
@@ -30,6 +29,7 @@ export default {
   components: { Textarea, Button },
   data: () => ({ description: null }),
   computed: {
+    ...mapGetters(['backendInstance']),
     browser() {
       const { name, os, version } = this.entry.browser || {};
       return `${name}, Version ${version} (${os})`;
@@ -41,10 +41,7 @@ export default {
   methods: {
     async donate() {
       try {
-        await axios.post(`${BACKEND_URL}/errorreport`, {
-          ...this.entry,
-          description: this.description,
-        });
+        await this.backendInstance.donateError({ ...this.entry, description: this.description });
         await this.$store.dispatch('modals/open', {
           name: 'default',
           ...this.$t('modals.donate-errors'),

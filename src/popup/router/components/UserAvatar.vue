@@ -16,15 +16,12 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import jdenticon from 'jdenticon';
 import Avatars from '@dicebear/avatars';
 import sprites from '@dicebear/avatars-avataaars-sprites';
-import {
-  BACKEND_URL,
-  IDENTICON_CONFIG,
-  IDENTICON_SIZES,
-  AVATAR_CONFIG,
-} from '../../utils/constants';
+
+import { IDENTICON_CONFIG, IDENTICON_SIZES, AVATAR_CONFIG } from '../../utils/constants';
 
 export default {
   props: {
@@ -40,8 +37,9 @@ export default {
     error: false,
   }),
   computed: {
+    ...mapGetters(['backendInstance']),
     profileImage() {
-      return `${BACKEND_URL}/profile/image/${this.address}`;
+      return this.backendInstance.getProfileImageUrl(this.address);
     },
     avatar() {
       if (this.name) {

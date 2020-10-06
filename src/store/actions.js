@@ -7,7 +7,7 @@ import {
   getAddressByNameEntry,
 } from '../popup/utils/helper';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
-import { BACKEND_URL, AEX2_METHODS } from '../popup/utils/constants';
+import { AEX2_METHODS } from '../popup/utils/constants';
 
 export default {
   setAccount({ commit }, payload) {
@@ -24,25 +24,21 @@ export default {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
     commit('updateBalance', convertToAE(balance));
   },
-  async fetchTransactions({ state }, { limit, page, recent }) {
+  async fetchTransactions({ state, getters }, { limit, page, recent }) {
     if (!state.middleware) return [];
     const { publicKey } = state.account;
     let txs = await Promise.all([
       state.middleware.getTxByAccount(publicKey, { limit, page }),
-      (async () =>
-        (
-          await axios
-            .get(
-              `${BACKEND_URL}/cache/events/?address=${publicKey}&event=TipWithdrawn${
-                recent ? `&limit=${limit}` : ''
-              }`,
-            )
-            .catch(() => ({ data: [] }))
-        ).data.map(({ address, amount, ...t }) => ({
+      (async () => {
+        const transactionsFromEvents = await getters.backendInstance
+          .getTxEvents(publicKey, recent, limit)
+          .catch(() => []);
+        return transactionsFromEvents.map(({ address, amount, ...t }) => ({
           tx: { address, amount },
           ...t,
           claim: true,
-        })))(),
+        }));
+      })(),
     ]);
     txs = orderBy(flatten(txs), ['time'], ['desc']);
     return recent ? txs.slice(0, limit) : txs;

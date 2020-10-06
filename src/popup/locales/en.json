@@ -108,7 +108,7 @@
     },
     "tip-mainnet-warning": {
       "title": "Warning",
-      "msg": "Tip/Claim functionality works only on Mainnet."
+      "msg": "Tip/Claim functionality works on the predefined networks."
     },
     "confirm-transaction-sign": {
       "unknown": "Unknown",
@@ -966,6 +966,10 @@
       "networkMiddlewareLabel": "Network middleware",
       "networkCompilerPlaceholder": "Enter network compiler url",
       "networkCompilerLabel": "Network compiler",
+      "backendUrlPlaceholder": "Enter backend url",
+      "backendUrlLabel": "Backend URL",
+      "showTippingConfig": "Show Tipping Configuration",
+      "hideTippingConfig": "Hide Tipping Configuration",
       "save": "Connect"
     },
     "donate-error": {

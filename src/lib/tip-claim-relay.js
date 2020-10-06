@@ -1,6 +1,5 @@
-import axios from 'axios';
 import { uniq } from 'lodash-es';
-import { defaultNetwork, TIPPING_CONTRACT, TIP_SERVICE } from '../popup/utils/constants';
+import { defaultNetwork, TIPPING_CONTRACT } from '../popup/utils/constants';
 import {
   contractCallStatic,
   getActiveAccount,
@@ -8,6 +7,7 @@ import {
   getTippingContractAddress,
 } from './background-utils';
 import Logger from './logger';
+import getters from '../store/getters';
 
 export default {
   checkAddressMatch(account, addresses) {
@@ -47,8 +47,7 @@ export default {
 
         if (this.checkAddressMatch(account.publicKey, uniq(addresses))) {
           await this.abortIfZeroClaim(url);
-
-          await axios.post(`${TIP_SERVICE}`, { url, address: account.publicKey });
+          await getters.backendInstance.claimTips({ url, address: account.publicKey });
         }
       }
     } catch (e) {

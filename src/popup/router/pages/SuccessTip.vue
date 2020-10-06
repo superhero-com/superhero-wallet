@@ -47,11 +47,10 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import axios from 'axios';
 import Heart from '../../../icons/heart.svg?vue-component';
 import Textarea from '../components/Textarea';
 import openUrl from '../../utils/openUrl';
-import { TIP_SERVICE, BACKEND_URL, AGGREGATOR_URL } from '../../utils/constants';
+import { AGGREGATOR_URL } from '../../utils/constants';
 import { aettosToAe } from '../../utils/helper';
 import Logger from '../../../lib/logger';
 
@@ -68,23 +67,21 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
+    ...mapGetters(['formatCurrency', 'currentCurrencyRate', 'backendInstance']),
     amountTip() {
       return (+aettosToAe(this.amount)).toFixed(2);
     },
   },
   async created() {
-    this.verifiedUrls = (
-      await axios.get(`${BACKEND_URL}/verified`).catch(error => {
-        Logger.write({ ...error, modal: false });
-        return { data: [] };
-      })
-    ).data;
+    this.verifiedUrls = await this.backendInstance.getVerifiedUrls().catch(error => {
+      Logger.write({ ...error, modal: false });
+      return [];
+    });
     if (process.env.IS_EXTENSION) {
       const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
       if (addresses.length) {
-        await axios
-          .post(TIP_SERVICE, { url: tab.url, address: addresses[0] })
+        await this.backendInstance
+          .claimTips({ url: tab.url, address: addresses[0] })
           .catch(error => Logger.write({ ...error, modal: false }));
       }
     }

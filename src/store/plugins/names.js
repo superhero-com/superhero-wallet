@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import BigNumber from 'bignumber.js';
 import { aettosToAe } from '../../popup/utils/helper';
-import Backend from '../../lib/backend';
 import { i18n } from '../../popup/utils/i18nHelper';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
 
@@ -124,10 +123,13 @@ export default store =>
           dispatch('modals/open', { name: 'default', msg: e.message }, { root: true });
         }
       },
-      async setDefault({ rootState: { sdk }, commit, dispatch }, { name, address, modal = true }) {
+      async setDefault(
+        { rootState: { sdk }, commit, dispatch, getters: { backendInstance } },
+        { name, address, modal = true },
+      ) {
         commit('setDefault', { name, address, networkId: sdk.getNetworkId() });
         try {
-          const response = await Backend.sendProfileData({
+          const response = await backendInstance.sendProfileData({
             author: address,
             preferredChainName: name.name,
           });
@@ -138,7 +140,7 @@ export default store =>
             challenge: response.challenge,
             signature: signedChallenge,
           };
-          await Backend.sendProfileData(respondChallenge);
+          await backendInstance.sendProfileData(respondChallenge);
         } catch (e) {
           if (modal) {
             if (e.type === 'backend')

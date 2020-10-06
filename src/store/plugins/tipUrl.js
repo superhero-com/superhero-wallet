@@ -1,5 +1,3 @@
-import axios from 'axios';
-import { BACKEND_URL } from '../../popup/utils/constants';
 import { getTwitterAccountUrl } from '../../popup/utils/helper';
 
 export default store =>
@@ -38,10 +36,12 @@ export default store =>
     actions: {
       async ensureFetched({ state: { verifiedUrls, blacklistedUrls }, commit }) {
         if (verifiedUrls.length && blacklistedUrls.length) return;
-        const [{ data: verified }, { data: graylist }] = await Promise.all([
-          axios.get(`${BACKEND_URL}/verified`),
-          axios.get(`${BACKEND_URL}/static/wallet/graylist`),
+
+        const [verified, graylist] = await Promise.all([
+          store.getters.backendInstance.getVerifiedUrls(),
+          store.getters.backendInstance.getGraylistedUrls(),
         ]);
+
         commit('setVerified', verified);
         commit('setBlacklisted', graylist);
       },

@@ -106,10 +106,6 @@
       "title": "你的错误报告未被发送",
       "msg": "发送你的错误报告时发生了某个问题。"
     },
-    "tip-mainnet-warning": {
-      "title": "警告",
-      "msg": "打赏/领赏功能只能在主网上执行。"
-    },
     "confirm-transaction-sign": {
       "unknown": "Unknown",
       "contract-create": "合约创建",
