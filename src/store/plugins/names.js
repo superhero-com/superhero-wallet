@@ -129,7 +129,7 @@ export default store =>
         try {
           const response = await Backend.sendProfileData({
             author: address,
-            preferredChainName: name,
+            preferredChainName: name.name,
           });
           const signedChallenge = Buffer.from(await sdk.signMessage(response.challenge)).toString(
             'hex',
