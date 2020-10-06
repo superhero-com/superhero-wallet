@@ -84,8 +84,8 @@ export default {
       await this.$watchUntilTruly(() => this.sdk);
       this.$store.dispatch('names/setDefault', {
         address: this.account.publicKey,
-        networkId: this.sdk.getNetworkId(),
-        name: this.name,
+        name: { name: this.name },
+        modal: false,
       });
     },
     async extend() {
