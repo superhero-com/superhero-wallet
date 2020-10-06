@@ -40,7 +40,7 @@ import { mapGetters, mapState } from 'vuex';
 import { clearInterval, setInterval } from 'timers';
 import { detect } from 'detect-browser';
 import { IN_FRAME } from './utils/helper';
-import { AEX2_METHODS } from './utils/constants';
+import { AEX2_METHODS, NOTIFICATION_SETTINGS } from './utils/constants';
 import { postMessage } from './utils/connection';
 import { fetchAndSetLocale } from './utils/i18nHelper';
 import Header from './router/components/Header';
@@ -48,6 +48,7 @@ import SidebarMenu from './router/components/SidebarMenu';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus';
 import Tour from './router/components/Tour';
 import { EventBus } from './utils/eventBus';
+import Backend from '../lib/backend';
 
 export default {
   components: {
@@ -102,21 +103,24 @@ export default {
       const [update] = await browser.runtime.requestUpdateCheck();
       if (update === 'update_available' && !process.env.RUNNING_IN_TESTS) {
         this.$store.commit('addNotification', {
-          title: '',
-          content: this.$t('pages.account.updateAvailable'),
-          route: '',
+          text: this.$t('pages.account.updateAvailable'),
+          path: '',
         });
       }
     }
     if (!this.backedUpSeed) {
       this.$store.commit('addNotification', {
-        title: '',
-        content: `${this.$t('pages.account.youNeedTo')} ${this.$t(
-          'pages.account.backup',
-        )} ${this.$t('pages.account.yourSeedPhrase')}`,
-        route: '/securitySettings',
+        text: `
+          ${this.$t('pages.account.youNeedTo')} ${this.$t('pages.account.backup')}
+          ${this.$t('pages.account.yourSeedPhrase')}`,
+        path: '/securitySettings',
       });
     }
+    if (this.$store.state.notificationSettings.length === 0) {
+      this.$store.commit('setNotificationSettings', NOTIFICATION_SETTINGS);
+    }
+
+    this.$store.commit('setChainNames', await Backend.getCacheChainNames());
 
     EventBus.$on('error', async entry => {
       this.$store.dispatch('modals/open', { name: 'error-log', entry }).catch(() => false);

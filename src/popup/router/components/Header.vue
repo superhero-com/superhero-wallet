@@ -10,15 +10,22 @@
       </div>
 
       <div v-if="isLoggedIn">
-        <span class="noti-holder" @click="toNotifications" data-cy="noti">
-          <span v-if="notificationsCount" class="noti-count" data-cy="noti-count">{{
-            notificationsCount
-          }}</span>
-          <Bell />
-        </span>
-        <button @click="$emit('toggle-sidebar')">
-          <Hamburger data-cy="hamburger" />
-        </button>
+        <Settings
+          v-if="$route.path === '/notifications'"
+          class="settings"
+          @click="$router.push('/notification-settings')"
+        />
+        <template v-else-if="$route.path !== '/notification-settings'">
+          <span class="noti-holder" @click="toNotifications" data-cy="noti">
+            <span v-if="notificationsCount" class="noti-count" data-cy="noti-count">
+              {{ notificationsCount }}
+            </span>
+            <Bell />
+          </span>
+          <button @click="$emit('toggle-sidebar')">
+            <Hamburger data-cy="hamburger" />
+          </button>
+        </template>
       </div>
     </div>
   </div>
@@ -30,12 +37,18 @@ import Arrow from '../../../icons/arrow.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
 import Hamburger from '../../../icons/hamburger.svg?vue-component';
 import Logo from '../../../icons/logo-small.svg?vue-component';
+import Settings from '../../../icons/settings.svg?vue-component';
 
 export default {
-  components: { Arrow, Bell, Hamburger, Logo },
+  components: { Arrow, Bell, Hamburger, Logo, Settings },
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,
   }),
+  subscriptions() {
+    return {
+      superheroNotifications: this.$store.state.observables.notifications,
+    };
+  },
   computed: {
     ...mapState(['tourRunning', 'isLoggedIn', 'notifications']),
     title() {
@@ -45,7 +58,9 @@ export default {
       return this.$route.meta.navigation !== undefined ? this.$route.meta.navigation : true;
     },
     notificationsCount() {
-      return this.notifications.filter(n => !n.visited).length;
+      return [...this.notifications, ...this.superheroNotifications].filter(
+        n => n.status === 'CREATED',
+      ).length;
     },
   },
   methods: {
@@ -57,7 +72,7 @@ export default {
       this.$router.go(-1);
     },
     toNotifications() {
-      if (this.notifications.length && this.$store.state.route.fullPath !== '/notifications') {
+      if (this.notificationsCount && this.$store.state.route.fullPath !== '/notifications') {
         this.$router.push('/notifications');
       }
     },
@@ -96,7 +111,8 @@ export default {
       margin-right: auto;
     }
 
-    .back-arrow {
+    .back-arrow,
+    .settings {
       cursor: pointer;
     }
 

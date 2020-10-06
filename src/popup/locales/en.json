@@ -226,6 +226,7 @@
       "withdraw": "Withdraw",
       "topUp": "Top Up",
       "notifications": "Notifications",
+      "notification-settings": "Notification Preference",
       "names": "Names",
       "bidding": "Bidding",
       "networks": "Networks",
@@ -563,6 +564,30 @@
       "addnetworkName": "Add Node name",
       "addnetworkURL": "Add Node URL",
       "add": "Add"
+    },
+    "notifications": {
+      "new": "New",
+      "wallet": "Wallet",
+      "superhero": "Superhero.com",
+      "read": "Read",
+      "markAsRead": "Mark as Read",
+      "markAsUnread": "Mark as Unread",
+      "commentOnComment": "replied to your comment.",
+      "commentOnTip": "commented on your tip.",
+      "tipOnComment": "tipped on your comment",
+      "retipOnTip": "retipped your tip.",
+      "claimOfTip": "claimed your tip.",
+      "claimOfRetip": "claimed your retip."
+    },
+    "notification-settings": {
+      "header": "Select which notification to receive",
+      "commentOnTip": "Someone commented on your tip or post.",
+      "commentOnComment": "Someone replied to your comment.",
+      "retipOnTip": "Someone retipped to your tip.",
+      "wallet": "Wallet notifications (always on).",
+      "tipOnComment": "Someone tipped to your comment.",
+      "claimOfTip": "Someone claimed your tip.",
+      "claimOfRetip": "Someone claimed your retip."
     },
     "privacyPolicy": {
       "backButton": "Back",

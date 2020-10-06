@@ -19,6 +19,7 @@ import Send from '../pages/Send';
 import Receive from '../pages/Receive';
 import SuccessTip from '../pages/SuccessTip';
 import Notifications from '../pages/Notifications';
+import NotificationSettings from '../pages/NotificationSettings';
 
 import Networks from '../pages/Networks';
 import CommentNew from '../pages/CommentNew';
@@ -217,9 +218,19 @@ export default [
   },
   {
     path: '/notifications',
+    name: 'notifications',
     component: Notifications,
     meta: {
       title: 'notifications',
+      notPersist: true,
+    },
+  },
+  {
+    path: '/notification-settings',
+    name: 'notification-settings',
+    component: NotificationSettings,
+    meta: {
+      title: 'notification-settings',
       notPersist: true,
     },
   },
