@@ -78,7 +78,6 @@ export default {
   margin: 0 auto 25px auto;
   max-width: 270px;
 
-  /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
   ::v-deep .checkmark {
     margin-right: 5px;
   }
