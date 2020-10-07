@@ -42,12 +42,12 @@ describe('Test cases for Withdraw Page', () => {
       .should('be.visible')
 
       // check on step2 if everything is OK
-      .get('[data-cy=review-sendingAddress]')
-      .should('have.text', publicKey)
-      .get('[data-cy=review-receivingAddress]')
-      .should('have.text', 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
+      .get('[data-cy=review-sender] > span')
+      .should('contain', publicKey)
+      .get('[data-cy=review-recipient] > span')
+      .should('contain', 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
       .get('[data-cy=review-amount]')
-      .should('have.text', '0.200 AE')
+      .should('contain', '0.200 AE')
 
       // edit sending address to .chain name
       .get('[data-cy=reivew-editTxDetails-button]')
@@ -55,8 +55,8 @@ describe('Test cases for Withdraw Page', () => {
       .enterAddress('vmangelovv.chain')
       .get('[data-cy=review-withdraw]')
       .click()
-      .get('[data-cy=review-receivingAddress]')
-      .should('have.text', 'vmangelovv.chain')
+      .get('[data-cy=review-recipient] > span')
+      .should('contain', 'vmangelovv.chain')
 
       // send
       .get('[data-cy="review-send-button"]')

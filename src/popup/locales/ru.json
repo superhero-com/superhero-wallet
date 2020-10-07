@@ -548,7 +548,6 @@
     "send": {
       "backToAccount": "Back to account",
       "heading": "New Transfer from",
-      "recipient": "Recipient",
       "txFee": "Min Tx fee:",
       "maxSpendableValue": "Maximum spendable value:",
       "send": "Send",
@@ -559,15 +558,15 @@
       "review": "Review",
       "reviewtx": "Review Transaction",
       "checkalert": "Please check the information carefully.",
-      "sendingAddress": "Sending address",
-      "receivingAddress": "Receiving address",
+      "sender": "Sending address",
+      "recipient": "Receiving address",
       "amount": "Amount",
       "editTxDetails": "Edit Transaction Details",
       "tx-success": "Transaction Completed",
       "successalert": "You have successfully sent ",
       "to": "To",
       "from": "From",
-      "txhash": "Transaction Hash",
+      "hash": "Transaction Hash",
       "home": "Home"
     },
     "settings": {
