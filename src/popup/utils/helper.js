@@ -248,3 +248,15 @@ export const getTwitterAccountUrl = (url) => {
   const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
   return match ? match[0] : false;
 };
+
+export const isNotFoundError = (error) => error.isAxiosError && error?.response.status === 404;
+
+// eslint-disable-next-line no-console
+export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
+
+export const setBalanceLocalStorage = (balance) => {
+  localStorage.rxjs = JSON.stringify({ ...JSON.parse(localStorage.rxjs || '{}'), balance });
+};
+
+export const getBalanceLocalStorage = () =>
+  localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : 0;

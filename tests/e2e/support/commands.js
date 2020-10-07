@@ -92,7 +92,7 @@ Cypress.Commands.add('accordionItemShould', (item, cond) => {
     .should(cond);
 });
 
-Cypress.Commands.add('login', (options = { balance: 10 }, route) => {
+Cypress.Commands.add('login', (options = {}, route) => {
   cy.openPopup(async (contentWindow) => {
     /* eslint-disable-next-line no-param-reassign */
     contentWindow.localStorage.state = JSON.stringify(await getLoginState(options));

@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import tipping from 'tipping-contract/util/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
@@ -49,6 +50,9 @@ export default {
     amount: '',
     loading: false,
   }),
+  subscriptions() {
+    return pick(this.$store.state.observables, ['balance']);
+  },
   computed: {
     ...mapGetters(['tippingSupported']),
     ...mapState('fungibleTokens', ['selectedToken']),
@@ -58,7 +62,7 @@ export default {
       urlStatus(state, getters) {
         return getters['tipUrl/status'](this.tip.url);
       },
-      validationStatus({ sdk, balance }, { account, minTipAmount }) {
+      validationStatus({ sdk }, { account, minTipAmount }) {
         if (!sdk || !this.tippingContract) {
           return { error: true };
         }
@@ -75,8 +79,8 @@ export default {
         });
         if (
           this.selectedToken
-            ? this.selectedToken.convertedBalance < this.amount || balance < fee
-            : balance < fee + this.amount
+            ? this.selectedToken.convertedBalance < this.amount || this.balance < fee
+            : this.balance < fee + this.amount
         ) {
           return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
         }

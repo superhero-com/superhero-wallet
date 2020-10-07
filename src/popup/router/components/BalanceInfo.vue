@@ -11,7 +11,7 @@
             is-custom
           />
           <span class="display-value text-ellipsis">{{
-            selectedToken ? selectedToken.convertedBalance : tokenBalance
+            selectedToken ? selectedToken.convertedBalance : tokenBalance.toFixed(2)
           }}</span>
           <span class="token-symbol">{{
             !selectedToken ? $t('pages.appVUE.aeid') : selectedToken.symbol
@@ -38,6 +38,7 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import ExpandedAngleArrow from '../../../icons/expanded-angle-arrow.svg?vue-component';
 import Dropdown from './Dropdown';
@@ -47,10 +48,13 @@ export default {
     ExpandedAngleArrow,
     Dropdown,
   },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+  },
   computed: {
     ...mapState(['current', 'currencies']),
     ...mapState('fungibleTokens', ['tokenBalances', 'selectedToken']),
-    ...mapGetters(['tokenBalance', 'balanceCurrency', 'formatCurrency']),
+    ...mapGetters(['formatCurrency']),
     tokenBalancesOptions() {
       return [
         {

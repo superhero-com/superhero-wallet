@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapState } from 'vuex';
 import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk/es';
 import TokenAmount from './TokenAmount';
@@ -46,8 +47,11 @@ export default {
   components: { TokenAmount, Button, AmountSend, CopyIcon },
   filters: { formatDate },
   data: () => ({ topUp: false, topUpAmount: 0, inviteLinkBalance: 0 }),
+  subscriptions() {
+    return pick(this.$store.state.observables, ['balance']);
+  },
   computed: {
-    ...mapState(['sdk', 'balance']),
+    ...mapState(['sdk']),
     link() {
       const secretKey = Crypto.encodeBase58Check(Buffer.from(this.secretKey, 'hex'));
       return new URL(

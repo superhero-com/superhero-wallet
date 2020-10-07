@@ -2,7 +2,6 @@ import { flatten, uniq, orderBy } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import {
-  convertToAE,
   stringifyForStorage,
   parseFromStorage,
   getAddressByNameEntry,
@@ -19,10 +18,6 @@ export default {
     commit('updateLatestTransactions', []);
     commit('setNodeStatus', 'connecting');
     if (process.env.IS_EXTENSION) postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload });
-  },
-  async updateBalance({ commit, state }) {
-    const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
-    commit('updateBalance', convertToAE(balance));
   },
   async fetchTransactions({ state, getters }, { limit, page, recent }) {
     if (!state.middleware) return [];

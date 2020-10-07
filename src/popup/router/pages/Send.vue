@@ -122,6 +122,7 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { checkAddress, chekAensName, aeToAettos, convertToken } from '../../utils/helper';
@@ -169,9 +170,12 @@ export default {
       this.fetchFee();
     },
   },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['balance']);
+  },
   computed: {
     ...mapState('fungibleTokens', ['selectedToken', 'availableTokens']),
-    ...mapState(['balance', 'current', 'sdk']),
+    ...mapState(['current', 'sdk']),
     ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate']),
     validAddress() {
       return checkAddress(this.form.address) || chekAensName(this.form.address);
