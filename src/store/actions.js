@@ -111,9 +111,6 @@ export default {
 
     return { addresses: uniq(addresses).filter((a) => a), tab };
   },
-  async getHeight({ state: { sdk } }) {
-    return (await sdk.topBlock()).height;
-  },
   async claimTips({ getters: { activeNetwork } }, { url, address }) {
     return postJson(`${activeNetwork.backendUrl}/claim/submit`, { body: { url, address } });
   },

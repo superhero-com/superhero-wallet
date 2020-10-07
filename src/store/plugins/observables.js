@@ -73,6 +73,7 @@ export default (store) => {
   store.state.observables = {
     notifications: notifications$,
     balance: balance$,
+    topBlockHeight: createSdkObservable(async (sdk) => (await sdk.topBlock()).height, 0),
     tokenBalance: watchAsObservable(
       ({ fungibleTokens: { selectedToken } }, tokens) => tokens?.[selectedToken]?.balance,
       { immediate: true },
