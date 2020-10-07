@@ -16,7 +16,7 @@
         <span>{{ $t('pages.index.webVersion') }}</span>
       </div>
     </template>
-    <CheckBox v-if="!termsAgreed" v-model="terms" data-cy="checkbox">
+    <CheckBox v-model="termsAgreed" data-cy="checkbox">
       <div class="primary-text">
         {{ $t('pages.index.term1') }}
         <router-link to="/termsOfService" data-cy="terms">{{
@@ -24,16 +24,12 @@
         }}</router-link>
       </div>
     </CheckBox>
-    <Button
-      @click="$router.push('/intro')"
-      :disabled="!terms && !termsAgreed"
-      data-cy="generate-wallet"
-    >
+    <Button @click="$router.push('/intro')" :disabled="!termsAgreed" data-cy="generate-wallet">
       {{ $t('pages.index.generateWallet') }}
     </Button>
     <Button
       @click="$router.push('/importAccount')"
-      :disabled="!terms && !termsAgreed"
+      :disabled="!termsAgreed"
       data-cy="import-wallet"
     >
       {{ $t('pages.index.importWallet') }}
@@ -52,14 +48,11 @@ export default {
     Logo,
     CheckBox,
   },
-  data() {
-    return {
-      terms: false,
-      termsAgreed: false,
-      IS_WEB: process.env.PLATFORM === 'web',
-      IN_FRAME,
-    };
-  },
+  data: () => ({
+    termsAgreed: false,
+    IS_WEB: process.env.PLATFORM === 'web',
+    IN_FRAME,
+  }),
 };
 </script>
 
