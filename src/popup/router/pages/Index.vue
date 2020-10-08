@@ -8,10 +8,10 @@
       </p>
       <div class="install-native-version" v-if="IS_WEB">
         <a href="https://testflight.apple.com/join/3o5r4dQQ"
-          ><img src="../../../icons/app-store.svg" alt="App Store"
+          ><img src="../../../icons/platforms/app-store.svg" alt="App Store"
         /></a>
         <a href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
-          ><img src="../../../icons/google-play.svg" alt="Google Play"
+          ><img src="../../../icons/platforms/google-play.svg" alt="Google Play"
         /></a>
         <span>{{ $t('pages.index.webVersion') }}</span>
       </div>

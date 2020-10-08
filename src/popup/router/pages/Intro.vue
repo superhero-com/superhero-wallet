@@ -113,7 +113,7 @@
                 >
                   <img
                     :class="{ disabled: !isFirefox() }"
-                    src="../../../icons/iframe/firefox.svg"
+                    src="../../../icons/platforms/firefox.svg"
                   />
                 </a>
                 <a
@@ -124,7 +124,10 @@
                     )
                   "
                 >
-                  <img :class="{ disabled: isFirefox() }" src="../../../icons/iframe/google.svg" />
+                  <img
+                    :class="{ disabled: isFirefox() }"
+                    src="../../../icons/platforms/chrome.svg"
+                  />
                 </a>
               </div>
             </div>
@@ -132,7 +135,7 @@
               {{ $t('pages.intro.mobileApp') }}
               <div>
                 <a @click="openUrl('https://testflight.apple.com/join/3o5r4dQQ', true)">
-                  <img src="../../../icons/iframe/appStore.svg" />
+                  <img src="../../../icons/platforms/app-store.svg" />
                 </a>
                 <a
                   @click="
@@ -142,7 +145,7 @@
                     )
                   "
                 >
-                  <img src="../../../icons/iframe/playStore.svg" />
+                  <img src="../../../icons/platforms/google-play.svg" />
                 </a>
               </div>
             </div>
@@ -406,6 +409,11 @@ export default {
     text-align: center;
     padding-top: 0;
     padding-bottom: 0;
+
+    img {
+      height: 40px;
+      width: 40px;
+    }
 
     .extension {
       width: 50%;
