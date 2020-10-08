@@ -45,7 +45,7 @@ export default {
 .primary-button {
   display: block;
   text-decoration: none;
-  background: $button-color !important;
+  background-color: $button-color;
   width: 270px;
   border-radius: 5px;
   font-family: 'Roboto', sans-serif;

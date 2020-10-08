@@ -93,80 +93,26 @@
         >
           {{ $t('pages.intro.toHome') }}
         </Button>
-        <div v-if="iframe" class="footer">
-          <div>
-            {{ $t('pages.intro.step4text-iframe-1') }}
-            <br />
-            {{ $t('pages.intro.step4text-iframe-2') }}
-          </div>
-          <div class="div-icons">
-            <div class="extension">
-              {{ $t('pages.intro.extension') }}
-              <div>
-                <a
-                  @click="
-                    openUrl(
-                      'https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/',
-                      true,
-                    )
-                  "
-                >
-                  <img
-                    :class="{ disabled: !isFirefox() }"
-                    src="../../../icons/platforms/firefox.svg"
-                  />
-                </a>
-                <a
-                  @click="
-                    openUrl(
-                      'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne',
-                      true,
-                    )
-                  "
-                >
-                  <img
-                    :class="{ disabled: isFirefox() }"
-                    src="../../../icons/platforms/chrome.svg"
-                  />
-                </a>
-              </div>
-            </div>
-            <div class="mobile-app">
-              {{ $t('pages.intro.mobileApp') }}
-              <div>
-                <a @click="openUrl('https://testflight.apple.com/join/3o5r4dQQ', true)">
-                  <img src="../../../icons/platforms/app-store.svg" />
-                </a>
-                <a
-                  @click="
-                    openUrl(
-                      'https://play.google.com/store/apps/details?id=com.superhero.cordova',
-                      true,
-                    )
-                  "
-                >
-                  <img src="../../../icons/platforms/google-play.svg" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Platforms v-if="iframe">
+          {{ $t('pages.intro.step4text-iframe-1') }}
+          <br />
+          {{ $t('pages.intro.step4text-iframe-2') }}
+        </Platforms>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { detect } from 'detect-browser';
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
 import { IN_FRAME } from '../../utils/helper';
-import openUrl from '../../utils/openUrl';
 import Claim from '../../../icons/claim.svg?vue-component';
 import Heart from '../../../icons/heart.svg?vue-component';
 import LeftArrow from '../../../icons/left-arrow.svg?vue-component';
 import RightArrow from '../../../icons/right-arrow.svg?vue-component';
 import Button from '../components/Button';
 import CheckBox from '../components/CheckBox';
+import Platforms from '../components/Platforms';
 
 export default {
   components: {
@@ -176,6 +122,7 @@ export default {
     LeftArrow,
     RightArrow,
     CheckBox,
+    Platforms,
   },
   data() {
     return {
@@ -184,7 +131,6 @@ export default {
       mnemonic: null,
       understood: !IN_FRAME,
       iframe: IN_FRAME,
-      openUrl,
     };
   },
   methods: {
@@ -199,9 +145,6 @@ export default {
       };
       await this.$store.dispatch('setLogin', { keypair });
       this.next();
-    },
-    isFirefox() {
-      return detect().name === 'firefox';
     },
     prev() {
       this.step -= 1;
@@ -393,45 +336,7 @@ export default {
   }
 }
 
-.footer {
-  background-color: #21222c;
+.platforms {
   margin: 20px -20px 0 -25px;
-  padding: 0 10px;
-  word-break: break-word;
-
-  div {
-    padding: 10px;
-  }
-
-  .div-icons {
-    border-top: 2px solid $nav-bg-color;
-    display: flex;
-    text-align: center;
-    padding-top: 0;
-    padding-bottom: 0;
-
-    img {
-      height: 40px;
-      width: 40px;
-    }
-
-    .extension {
-      width: 50%;
-      border-right: 1px solid $nav-bg-color;
-    }
-
-    .mobile-app {
-      flex-grow: 1;
-      border-left: 1px solid $nav-bg-color;
-    }
-
-    .mobile-app,
-    .extension {
-      div {
-        display: flex;
-        justify-content: space-around;
-      }
-    }
-  }
 }
 </style>
