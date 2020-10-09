@@ -13,6 +13,7 @@ import tokens from './plugins/tokens';
 import names from './plugins/names';
 import runMigrations from './migrations';
 import invitesModule from './modules/invites';
+import permissionsModule from './modules/permissions';
 import { defaultNetwork } from '../popup/utils/constants';
 
 Vue.use(Vuex);
@@ -97,6 +98,7 @@ export default new Vuex.Store({
         tokens: { all },
         invites,
         notificationSettings,
+        permissions,
       }) => ({
         migrations,
         current,
@@ -116,6 +118,7 @@ export default new Vuex.Store({
         tokens: { all },
         invites,
         notificationSettings,
+        permissions,
       }),
     ),
     observables,
@@ -127,5 +130,6 @@ export default new Vuex.Store({
   ],
   modules: {
     invites: invitesModule,
+    permissions: permissionsModule,
   },
 });
