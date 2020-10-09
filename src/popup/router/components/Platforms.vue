@@ -13,7 +13,7 @@
             "
           >
             <img
-              :class="{ disabled: !isFirefox() }"
+              :class="{ disabled: !isFirefox() || IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/firefox.svg"
               alt="Firefox"
             />
@@ -27,7 +27,7 @@
             "
           >
             <img
-              :class="{ disabled: isFirefox() }"
+              :class="{ disabled: isFirefox() || IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/chrome.svg"
               alt="Chrome"
             />
@@ -38,14 +38,22 @@
         {{ $t('pages.index.platforms.mobile-app') }}
         <div>
           <a @click="openUrl('https://testflight.apple.com/join/3o5r4dQQ', true)">
-            <img src="../../../icons/platforms/app-store.svg" alt="App Store" />
+            <img
+              :class="{ disabled: !IS_IOS || !IS_MOBILE_DEVICE }"
+              src="../../../icons/platforms/app-store.svg"
+              alt="App Store"
+            />
           </a>
           <a
             @click="
               openUrl('https://play.google.com/store/apps/details?id=com.superhero.cordova', true)
             "
           >
-            <img src="../../../icons/platforms/google-play.svg" alt="Google Play" />
+            <img
+              :class="{ disabled: IS_IOS || !IS_MOBILE_DEVICE }"
+              src="../../../icons/platforms/google-play.svg"
+              alt="Google Play"
+            />
           </a>
         </div>
       </div>
@@ -59,6 +67,8 @@ import openUrl from '../../utils/openUrl';
 
 export default {
   data: () => ({
+    IS_IOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
+    IS_MOBILE_DEVICE: navigator.userAgent.includes('Mobi'),
     openUrl,
   }),
   methods: {
