@@ -21,6 +21,7 @@ import SuccessTip from '../pages/SuccessTip';
 import Notifications from '../pages/Notifications';
 import NotificationSettings from '../pages/NotificationSettings';
 
+import PermissionsSettings from '../pages/PermissionsSettings';
 import Networks from '../pages/Networks';
 import CommentNew from '../pages/CommentNew';
 import NotFound from '../pages/NotFound';
@@ -296,6 +297,14 @@ export default [
     props: true,
     meta: {
       title: 'networks',
+    },
+  },
+  {
+    path: '/permissions-settings',
+    component: PermissionsSettings,
+    name: 'permissions-settings',
+    meta: {
+      title: 'permissionsSettings',
     },
   },
   {

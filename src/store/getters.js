@@ -12,9 +12,9 @@ export default {
     return state.account;
   },
   currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,
-  balanceCurrency({ balance }, { currentCurrencyRate }) {
-    return (currentCurrencyRate * balance).toFixed(2);
-  },
+  convertToCurrency: (state, { currentCurrencyRate }) => value =>
+    (currentCurrencyRate * value).toFixed(2),
+  balanceCurrency: ({ balance }, { convertToCurrency }) => convertToCurrency(balance),
   formatCurrency: ({ current: { currency } }) => value =>
     // TODO: Use the current language from i18n module
     new Intl.NumberFormat(navigator.language, { style: 'currency', currency }).format(value),
