@@ -28,4 +28,5 @@ export default () => {
   });
   registerModal({ name: 'confirm-connect', showInPopupIfWebFrame: true });
   registerModal({ name: 'read-qr-code', component: QrCodeReader });
+  registerModal({ name: 'confirm-message-sign', showInPopupIfWebFrame: true });
 };

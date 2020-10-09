@@ -13,6 +13,7 @@ import {
 } from '../popup/utils/helper';
 import { TIPPING_CONTRACT, NO_POPUP_AEPPS } from '../popup/utils/constants';
 import Logger from './logger';
+import { checkPermissions } from '../store/modules/permissions';
 
 async function initMiddleware() {
   const { middlewareUrl } = store.getters.activeNetwork;
@@ -115,13 +116,17 @@ export default {
         nativeMode: true,
         compilerUrl,
         name: 'Superhero',
-        async onConnection({ info: { icons, name } }, { accept, deny }, origin) {
+        async onConnection({ info: { icons, name } }, action, origin) {
           const originUrl = toURL(origin);
           if (
-            NO_POPUP_AEPPS.includes(originUrl.hostname) ||
-            (await getAeppAccountPermission(originUrl.hostname, store.state.account.publicKey))
+            (NO_POPUP_AEPPS.includes(originUrl.hostname) ||
+              (await getAeppAccountPermission(
+                originUrl.hostname,
+                store.state.account.publicKey,
+              ))) &&
+            !(await checkPermissions(action))
           ) {
-            accept();
+            action.accept();
             return;
           }
           try {
@@ -138,15 +143,31 @@ export default {
               host: originUrl.hostname,
               account: store.state.account.publicKey,
             });
-            accept();
+            action.accept();
           } catch (error) {
-            deny();
+            action.deny();
             if (error.message !== 'Rejected by user') throw error;
           }
         },
         onSubscription: acceptCb,
         onSign: acceptCb,
-        onMessageSign: acceptCb,
+        async onMessageSign(aepp, action, origin) {
+          if (!(await checkPermissions(action))) {
+            action.accept();
+            return;
+          }
+          try {
+            await store.dispatch('modals/open', {
+              name: 'confirm-message-sign',
+              message: action.params.message,
+              origin,
+            });
+            action.accept();
+          } catch (error) {
+            action.deny();
+            if (error.message !== 'Rejected by user') throw error;
+          }
+        },
         onAskAccounts: acceptCb,
         onDisconnect(msg, client) {
           client.disconnect();
