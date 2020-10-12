@@ -38,7 +38,6 @@ export default {
     color: #fff;
   }
 
-  /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
   ::v-deep .not-bootstrap-modal-content {
     font-size: 0.75rem;
     border-radius: 0.25rem;

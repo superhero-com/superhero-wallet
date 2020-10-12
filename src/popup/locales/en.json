@@ -206,10 +206,7 @@
       "send": "Send",
       "ever": "Ever.",
       "wellcome": "Wellcome on board!",
-      "understand": "I understand that this is a cryptocurrency wallet and i am responsible for backing up my account recovery seed phrase.",
-      "extension": "Browser extension",
-      "mobileApp": "Mobile app"
-
+      "understand": "I understand that this is a cryptocurrency wallet and I am responsible for backing up my account recovery seed phrase."
     },
     "titles": {
       "settings": "Settings",
@@ -523,7 +520,12 @@
       "term3": "Privacy Policy",
       "termsAndConditions": "Terms of Use",
       "heading": "Social platform with no hidden agenda.",
-      "webVersion": "Or use a web version",
+      "platforms": {
+        "heading": "Superhero wallet is available as browser extension and mobile app so you can use it on your preferred platforms and devices.",
+        "browser-extension": "Browser extension",
+        "mobile-app": "Mobile app"
+      },
+      "webVersion": "Or use our web version",
       "securingAccount": "Securing your account",
       "generateWallet": "Generate New Wallet",
       "importWallet": "Retrieve existing account",
