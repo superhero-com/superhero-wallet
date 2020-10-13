@@ -1,7 +1,6 @@
 import { BehaviorSubject, timer } from 'rxjs';
 import { multicast, pluck, switchMap, map } from 'rxjs/operators';
 import { refCountDelay } from 'rxjs-etc/operators';
-import Backend from '../../lib/backend';
 
 export default store => {
   const watchAsObservable = (getter, options) =>
@@ -34,12 +33,10 @@ export default store => {
   });
 
   const notifications$ = createSdkObservable(
-    async sdk =>
-      (
-        await Backend.getAllNotifications(store.state.account.publicKey, async data =>
-          Buffer.from(await sdk.signMessage(data)).toString('hex'),
-        )
-      ).map(normalizeNotification),
+    async () =>
+      (await store.dispatch('getAllNotifications', store.state.account.publicKey)).map(
+        normalizeNotification,
+      ),
     [],
   );
 

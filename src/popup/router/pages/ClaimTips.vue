@@ -29,7 +29,7 @@ export default {
   }),
   computed: {
     ...mapState(['sdk', 'tipping']),
-    ...mapGetters(['account', 'tippingSupported', 'backendInstance']),
+    ...mapGetters(['account', 'tippingSupported']),
     normalizedUrl() {
       if (!validateTipUrl(this.url)) return '';
       return toURL(this.url).toString();
@@ -58,9 +58,9 @@ export default {
           ),
         );
         if (!claimAmount) throw new Error('NO_ZERO_AMOUNT_PAYOUT');
-        await this.backendInstance.claimTips({ url, address: this.account.publicKey });
-        await this.backendInstance.cacheInvalidateOracle();
-        await this.backendInstance.cacheInvalidateTips();
+        await this.$store.dispatch('claimTips', { url, address: this.account.publicKey });
+        await this.$store.dispatch('cacheInvalidateOracle');
+        await this.$store.dispatch('cacheInvalidateTips');
         this.$store.dispatch('modals/open', { name: 'claim-success', url, claimAmount });
         this.$router.push({ name: 'account' });
       } catch (e) {

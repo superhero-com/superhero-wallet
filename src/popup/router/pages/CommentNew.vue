@@ -24,7 +24,7 @@ export default {
   data: () => ({ id: 0, parentId: undefined, text: '', loading: false }),
   computed: {
     ...mapState(['sdk']),
-    ...mapGetters(['tippingSupported', 'backendInstance']),
+    ...mapGetters(['tippingSupported']),
   },
   async created() {
     this.loading = true;
@@ -42,13 +42,12 @@ export default {
     async sendComment() {
       this.loading = true;
       try {
-        await this.backendInstance.sendTipComment(
+        await this.$store.dispatch('sendTipComment', [
           this.id,
           this.text,
           await this.sdk.address(),
-          async data => Buffer.from(await this.sdk.signMessage(data)).toString('hex'),
           this.parentId,
-        );
+        ]);
         this.openCallbackOrGoHome(true);
       } catch (e) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });

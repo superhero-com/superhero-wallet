@@ -60,13 +60,15 @@
         data-cy="compiler"
       />
       <button class="text-left expand" @click="backendUrlInputExpanded = !backendUrlInputExpanded">
-        <img :class="{ 'expanded' : backendUrlInputExpanded }" src="../../../icons/carret-down.svg" />
+        <img :class="{ expanded: backendUrlInputExpanded }" src="../../../icons/carret-down.svg" />
         <span>{{
-          backendUrlInputExpanded ? $t('pages.network.hideTippingConfig') : $t('pages.network.showTippingConfig')
+          backendUrlInputExpanded
+            ? $t('pages.network.hideTippingConfig')
+            : $t('pages.network.showTippingConfig')
         }}</span>
       </button>
       <Input
-        v-show="backendUrlInputExpanded"
+        v-if="backendUrlInputExpanded"
         :placeholder="$t('pages.network.backendUrlPlaceholder')"
         :label="$t('pages.network.backendUrlLabel')"
         v-model="network.backendUrl"
@@ -218,7 +220,6 @@ export default {
 }
 
 .network {
-
   .edit-btn {
     margin-left: 5px;
     margin-right: 0;
@@ -226,7 +227,6 @@ export default {
 
   .expand {
     font-size: 14px;
-    cursor: pointer;
     color: $white-1;
     width: 100%;
     padding: 0;

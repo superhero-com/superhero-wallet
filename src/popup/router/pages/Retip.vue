@@ -18,7 +18,10 @@
       {{ tip.title }}
     </div>
 
-    <Button @click="sendTip" :disabled="amountError || !minCallFee || !tipping || !tippingSupported">
+    <Button
+      @click="sendTip"
+      :disabled="amountError || !minCallFee || !tipping || !tippingSupported"
+    >
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button @click="openCallbackOrGoHome(false)">

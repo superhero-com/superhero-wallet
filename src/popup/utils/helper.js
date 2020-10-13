@@ -92,6 +92,14 @@ export const fetchJson = async (...args) => {
   return response.json();
 };
 
+export const postJson = (url, options) =>
+  fetchJson(url, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+    body: options.body && JSON.stringify(options.body),
+  });
+
 export const checkAddress = value =>
   Crypto.isAddressValid(value, 'ak') ||
   Crypto.isAddressValid(value, 'ct') ||

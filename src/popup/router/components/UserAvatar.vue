@@ -1,17 +1,12 @@
 <template>
   <img
-    v-if="!error && !identicon"
-    :src="profileImage"
-    class="user-avatar"
-    :class="size"
+    :src="
+      typeof profileImage === 'string' && profileImage.length > 0 && !error
+        ? profileImage
+        : avatar.src
+    "
+    :class="[size, avatar.type === 'identicon' ? 'user-identicon' : 'user-avatar']"
     @error="error = true"
-  />
-  <img v-else-if="avatar.type === 'avatar'" :src="avatar.src" class="user-avatar" :class="size" />
-  <div
-    v-else-if="avatar.type === 'identicon'"
-    v-html="avatar.src"
-    class="user-identicon"
-    :class="size"
   />
 </template>
 
@@ -37,9 +32,9 @@ export default {
     error: false,
   }),
   computed: {
-    ...mapGetters(['backendInstance']),
+    ...mapGetters(['getProfileImage']),
     profileImage() {
-      return this.backendInstance.getProfileImageUrl(this.address);
+      return this.getProfileImage(this.address);
     },
     avatar() {
       if (this.name) {
@@ -52,7 +47,9 @@ export default {
       jdenticon.config = IDENTICON_CONFIG;
       return {
         type: 'identicon',
-        src: jdenticon.toSvg(this.address, IDENTICON_SIZES[this.size]),
+        src: `data:image/svg+xml;base64,${btoa(
+          jdenticon.toSvg(this.address, IDENTICON_SIZES[this.size]),
+        )}`,
       };
     },
   },
