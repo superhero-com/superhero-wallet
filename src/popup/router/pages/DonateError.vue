@@ -18,10 +18,8 @@
 </template>
 
 <script>
-import axios from 'axios';
 import Textarea from '../components/Textarea';
 import Button from '../components/Button';
-import { BACKEND_URL } from '../../utils/constants';
 
 export default {
   props: {
@@ -41,10 +39,7 @@ export default {
   methods: {
     async donate() {
       try {
-        await axios.post(`${BACKEND_URL}/errorreport`, {
-          ...this.entry,
-          description: this.description,
-        });
+        await this.$store.dispatch('donateError', { ...this.entry, description: this.description });
         await this.$store.dispatch('modals/open', {
           name: 'default',
           ...this.$t('modals.donate-errors'),

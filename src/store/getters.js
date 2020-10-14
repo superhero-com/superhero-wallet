@@ -28,14 +28,15 @@ export default {
   activeNetwork({ current: { network } }, { networks }) {
     return networks[network];
   },
-  mainnet(state, { activeNetwork }) {
-    return activeNetwork.networkId === 'ae_mainnet';
-  },
+  getProfileImage: (_, { activeNetwork }) => address =>
+    `${activeNetwork.backendUrl}/profile/image/${address}`,
   activeAccountName({ account }, getters) {
     return getters['names/getDefault'](get(account, 'publicKey')) || 'Main account';
   },
-  allowTipping(state, { mainnet }) {
-    return mainnet || process.env.RUNNING_IN_TESTS;
+  tippingSupported(state, { activeNetwork }) {
+    return (
+      ['ae_mainnet', 'ae_uat'].includes(activeNetwork.networkId) || process.env.RUNNING_IN_TESTS
+    );
   },
   tokenBalance(state) {
     return state.current.token !== 0

@@ -34,7 +34,7 @@
         $t('pages.network.addNetwork')
       }}</Button>
     </div>
-    <div v-if="mode === 'add' || mode === 'edit'" class="mt-10">
+    <div v-if="mode === 'add' || mode === 'edit'" class="mt-10 network">
       <Input
         :placeholder="$t('pages.network.networkNamePlaceholder')"
         :label="$t('pages.network.networkNameLabel')"
@@ -59,6 +59,20 @@
         v-model="network.compilerUrl"
         data-cy="compiler"
       />
+      <button class="text-left expand" @click="backendUrlInputExpanded = !backendUrlInputExpanded">
+        <img :class="{ expanded: backendUrlInputExpanded }" src="../../../icons/carret-down.svg" />
+        <span>{{
+          backendUrlInputExpanded
+            ? $t('pages.network.hideTippingConfig')
+            : $t('pages.network.showTippingConfig')
+        }}</span>
+      </button>
+      <Input
+        v-if="backendUrlInputExpanded"
+        :placeholder="$t('pages.network.backendUrlPlaceholder')"
+        :label="$t('pages.network.backendUrlLabel')"
+        v-model="network.backendUrl"
+      />
       <Button half @click="cancel" data-cy="cancel">{{ $t('pages.network.cancel') }}</Button>
       <Button
         class="danger"
@@ -69,6 +83,7 @@
             !network.url ||
             !network.middlewareUrl ||
             !network.compilerUrl ||
+            !network.backendUrl ||
             !!network.error
         "
         data-cy="connect"
@@ -94,6 +109,7 @@ const networkProps = {
   url: null,
   middlewareUrl: null,
   compilerUrl: null,
+  backendUrl: defaultNetwork.backendUrl,
   error: false,
 };
 
@@ -108,16 +124,18 @@ export default {
     return {
       mode: 'list',
       network: networkProps,
+      backendUrlInputExpanded: false,
     };
   },
-  computed: mapGetters(['networks', 'activeNetwork', 'allowTipping']),
+  computed: mapGetters(['networks', 'activeNetwork', 'tippingSupported']),
   mounted() {
     this.$watch(
-      ({ network: { name, url, middlewareUrl, compilerUrl } }) => [
+      ({ network: { name, url, middlewareUrl, compilerUrl, backendUrl } }) => [
         name,
         url,
         middlewareUrl,
         compilerUrl,
+        backendUrl,
       ],
       () => {
         this.network.error = false;
@@ -128,7 +146,7 @@ export default {
     async selectNetwork(network) {
       await this.$store.dispatch('switchNetwork', network);
       await wallet.initSdk();
-      if (this.allowTipping) return;
+      if (this.tippingSupported) return;
       await this.$store.dispatch('modals/open', {
         name: 'default',
         ...this.$t('modals.tip-mainnet-warning'),
@@ -153,7 +171,8 @@ export default {
         const url = new URL(this.network.url);
         const middleware = new URL(this.network.middlewareUrl);
         const compiler = new URL(this.network.compilerUrl);
-        if (!url.hostname || !middleware.hostname || !compiler.hostname)
+        const backendUrl = new URL(this.network.backendUrl);
+        if (!url.hostname || !middleware.hostname || !compiler.hostname || !backendUrl.hostname)
           throw new Error('Invalid hostname');
 
         const networkWithSameName = this.networks[this.network.name];
@@ -170,6 +189,7 @@ export default {
           middlewareUrl: this.network.middlewareUrl,
           compilerUrl: this.network.compilerUrl,
           name: this.network.name,
+          backendUrl: this.network.backendUrl,
         });
         await this.selectNetwork(this.network.name);
         this.mode = 'list';
@@ -181,6 +201,8 @@ export default {
 };
 </script>
 <style lang="scss">
+@import '../../../common/variables';
+
 .network-row li {
   display: flex;
   justify-content: space-between;
@@ -197,8 +219,35 @@ export default {
   }
 }
 
-.edit-btn {
-  margin-left: 5px;
-  margin-right: 0;
+.network {
+  .edit-btn {
+    margin-left: 5px;
+    margin-right: 0;
+  }
+
+  .expand {
+    font-size: 14px;
+    color: $white-1;
+    width: 100%;
+    padding: 0;
+
+    span {
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    img {
+      transform: rotate(-90deg);
+      vertical-align: middle;
+
+      &.expanded {
+        transform: none;
+      }
+    }
+  }
+
+  .primary-button {
+    margin-top: 20px;
+  }
 }
 </style>

@@ -73,6 +73,7 @@ export const defaultNetworks = [
     middlewareUrl: 'https://testnet.aeternity.io',
     explorerUrl: 'https://testnet.aeternal.io',
     compilerUrl: 'https://latest.compiler.aepps.com',
+    backendUrl: 'https://test-tipping.aeternity.art',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_Dnwribmd21YrxSQnqXCB5vTFPrgYJx2eg2TrbLvbdyEbTMejw',
     tipContract: 'ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj',
@@ -85,6 +86,7 @@ export const defaultNetworks = [
     middlewareUrl: 'https://mainnet.aeternity.io',
     explorerUrl: 'https://mainnet.aeternal.io',
     compilerUrl: 'https://compiler.aepps.com',
+    backendUrl: 'https://raendom-backend.z52da5wt.xyz',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tipContract: 'superhero.chain',
@@ -96,8 +98,6 @@ export const defaultNetwork =
   process.env.NETWORK === 'Testnet' ? defaultNetworks[0] : defaultNetworks[1];
 
 export const AGGREGATOR_URL = 'https://superhero.com/';
-export const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
-export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
 export const NO_POPUP_AEPPS = [
   'youdonotneedacapetobeahero.com',
   'superhero.com',

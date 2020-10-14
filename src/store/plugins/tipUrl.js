@@ -1,6 +1,4 @@
-import axios from 'axios';
-import { BACKEND_URL } from '../../popup/utils/constants';
-import { getTwitterAccountUrl } from '../../popup/utils/helper';
+import { getTwitterAccountUrl, fetchJson } from '../../popup/utils/helper';
 
 export default store =>
   store.registerModule('tipUrl', {
@@ -36,12 +34,14 @@ export default store =>
       },
     },
     actions: {
-      async ensureFetched({ state: { verifiedUrls, blacklistedUrls }, commit }) {
+      async ensureFetched({ state: { verifiedUrls, blacklistedUrls }, commit, rootGetters }) {
         if (verifiedUrls.length && blacklistedUrls.length) return;
-        const [{ data: verified }, { data: graylist }] = await Promise.all([
-          axios.get(`${BACKEND_URL}/verified`),
-          axios.get(`${BACKEND_URL}/static/wallet/graylist`),
+
+        const [verified, graylist] = await Promise.all([
+          fetchJson(`${rootGetters.activeNetwork.backendUrl}/verified`),
+          fetchJson(`${rootGetters.activeNetwork.backendUrl}/static/wallet/graylist`),
         ]);
+
         commit('setVerified', verified);
         commit('setBlacklisted', graylist);
       },

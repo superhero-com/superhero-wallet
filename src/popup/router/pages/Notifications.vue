@@ -48,7 +48,6 @@
 import { mapState, mapMutations } from 'vuex';
 import NotificationItem from '../components/NotificationItem';
 import ThreeDotsMenu from '../components/ThreeDotsMenu';
-import Backend from '../../../lib/backend';
 import openUrl from '../../utils/openUrl';
 
 export default {
@@ -86,12 +85,11 @@ export default {
       if (notification.wallet) {
         this.setNotificationsStatus({ createdAt: notification.createdAt, status });
       } else {
-        await Backend.modifyNotification(
+        await this.$store.dispatch('modifyNotification', [
           notification.id,
           status,
           this.$store.state.account.publicKey,
-          async data => Buffer.from(await this.$store.state.sdk.signMessage(data)).toString('hex'),
-        );
+        ]);
         this.observableNotifications.find(n => n.id === notification.id).status = status;
       }
     },

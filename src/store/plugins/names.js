@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import BigNumber from 'bignumber.js';
-import { aettosToAe } from '../../popup/utils/helper';
-import Backend from '../../lib/backend';
+import { aettosToAe, postJson } from '../../popup/utils/helper';
 import { i18n } from '../../popup/utils/i18nHelper';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
 
@@ -124,12 +123,18 @@ export default store =>
           dispatch('modals/open', { name: 'default', msg: e.message }, { root: true });
         }
       },
-      async setDefault({ rootState: { sdk }, commit, dispatch }, { name, address, modal = true }) {
+      async setDefault(
+        { rootState: { sdk }, commit, dispatch, rootGetters: { activeNetwork } },
+        { name, address, modal = true },
+      ) {
         commit('setDefault', { name, address, networkId: sdk.getNetworkId() });
+
         try {
-          const response = await Backend.sendProfileData({
-            author: address,
-            preferredChainName: name.name,
+          const response = await postJson(`${activeNetwork.backendUrl}/profile`, {
+            body: {
+              author: address,
+              preferredChainName: name.name,
+            },
           });
           const signedChallenge = Buffer.from(await sdk.signMessage(response.challenge)).toString(
             'hex',
@@ -138,7 +143,9 @@ export default store =>
             challenge: response.challenge,
             signature: signedChallenge,
           };
-          await Backend.sendProfileData(respondChallenge);
+          await postJson(`${activeNetwork.backendUrl}/profile`, {
+            body: respondChallenge,
+          });
         } catch (e) {
           if (modal) {
             if (e.type === 'backend')

@@ -55,7 +55,7 @@ async function getKeyPair() {
 }
 
 async function initContractInstances() {
-  if (!store.getters.mainnet && !process.env.RUNNING_IN_TESTS) return;
+  if (!store.getters.tippingSupported && !process.env.RUNNING_IN_TESTS) return;
   const contractAddress = await store.dispatch('getTipContractAddress');
   store.commit(
     'setTipping',

@@ -24,7 +24,7 @@
       }}</span>
       <Textarea v-model="note" :value="note" size="h-50" />
     </div>
-    <p class="f-14 sub-heading text-left" v-if="!(tipUrl && verifiedUrls.includes(tipUrl))">
+    <p class="f-14 sub-heading text-left" v-if="!(tipUrl && isVerifiedUrl)">
       {{ $t('pages.successTip.note') }}
     </p>
     <p class="f-18 my-35">{{ $t('pages.successTip.letThemKnow') }}</p>
@@ -47,11 +47,10 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import axios from 'axios';
 import Heart from '../../../icons/heart.svg?vue-component';
 import Textarea from '../components/Textarea';
 import openUrl from '../../utils/openUrl';
-import { TIP_SERVICE, BACKEND_URL, AGGREGATOR_URL } from '../../utils/constants';
+import { AGGREGATOR_URL } from '../../utils/constants';
 import { aettosToAe } from '../../utils/helper';
 import Logger from '../../../lib/logger';
 
@@ -64,7 +63,6 @@ export default {
   data() {
     return {
       note: this.$t('pages.successTip.notifyMessage'),
-      verifiedUrls: [],
     };
   },
   computed: {
@@ -72,19 +70,16 @@ export default {
     amountTip() {
       return (+aettosToAe(this.amount)).toFixed(2);
     },
+    isVerifiedUrl() {
+      return this.$store.getters['tipUrl/status'](this.tipUrl) === 'verified';
+    },
   },
   async created() {
-    this.verifiedUrls = (
-      await axios.get(`${BACKEND_URL}/verified`).catch(error => {
-        Logger.write({ ...error, modal: false });
-        return { data: [] };
-      })
-    ).data;
     if (process.env.IS_EXTENSION) {
       const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
       if (addresses.length) {
-        await axios
-          .post(TIP_SERVICE, { url: tab.url, address: addresses[0] })
+        await this.$store
+          .dispatch('claimTips', { url: tab.url, address: addresses[0] })
           .catch(error => Logger.write({ ...error, modal: false }));
       }
     }
