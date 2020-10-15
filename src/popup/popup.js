@@ -10,7 +10,6 @@ import '../lib/initPolyfills';
 import registerModals from './router/modals';
 import Logger from '../lib/logger';
 
-Vue.prototype.$browser = global.browser;
 Vue.prototype.$watchUntilTruly = function watchUntilTruly(getter) {
   return new Promise(resolve => {
     const unwatch = this.$watch(

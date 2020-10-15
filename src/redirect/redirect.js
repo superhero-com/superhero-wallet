@@ -4,8 +4,6 @@ import { i18n } from '../popup/utils/i18nHelper';
 
 global.browser = require('webextension-polyfill');
 
-Vue.prototype.$browser = global.browser;
-
 export default new Vue({
   el: '#app',
   i18n,
