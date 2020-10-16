@@ -284,7 +284,7 @@ export default {
         await walletController.getKeypair({ activeAccount: payload.idx, account }),
       ),
     });
-    this.sdk.addAccount(newAccount);
+    this.sdk.addAccount(newAccount, { select: true });
     this.activeAccount = payload.address;
     this.getAccessForAddress(payload.address);
   },
@@ -326,19 +326,19 @@ export default {
     if (!this.nodes[network]) {
       await this.initNodes();
     }
-    if (this.sdk) {
-      try {
-        this.sdk.selectAccount(this.activeAccount);
-      } catch (e) {
-        this[AEX2_METHODS.ADD_ACCOUNT]({ address, idx: 0 });
-      }
-
-      if (this.network !== network) {
-        this.addNewNetwork(network);
-      }
-    } else {
+    if (!this.sdk) {
       this.initNetwork(network);
-      this.initSdk();
+      await this.initSdk();
+    }
+
+    try {
+      this.sdk.selectAccount(this.activeAccount);
+    } catch (e) {
+      this[AEX2_METHODS.ADD_ACCOUNT]({ address, idx: 0 });
+    }
+
+    if (this.network !== network) {
+      await this.addNewNetwork(network);
     }
   },
 };
