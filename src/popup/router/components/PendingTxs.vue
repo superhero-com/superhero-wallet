@@ -10,7 +10,6 @@
 
 <script>
 import { mapState } from 'vuex';
-import { setInterval, clearInterval } from 'timers';
 import TransactionItem from './TransactionItem';
 
 export default {

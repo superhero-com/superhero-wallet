@@ -37,7 +37,6 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { clearInterval, setInterval } from 'timers';
 import { detect } from 'detect-browser';
 import { IN_FRAME } from './utils/helper';
 import { AEX2_METHODS, NOTIFICATION_SETTINGS } from './utils/constants';
