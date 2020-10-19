@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { defer } from 'lodash-es';
-import { sync } from 'vuex-router-sync';
+import sync from '../lib/vuexRouterSync';
 import App from './App';
 import store from '../store';
 import router from './router';

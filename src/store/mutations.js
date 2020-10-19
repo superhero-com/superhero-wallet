@@ -17,8 +17,11 @@ export default {
   updateLatestTransactions(state, payload) {
     state.transactions.latest = payload;
   },
-  setPendingTxs(state, payload) {
-    state.transactions.pending = payload;
+  addPendingTransaction(state, payload) {
+    state.transactions.pending.push(payload);
+  },
+  removePendingTransactionByHash(state, hash) {
+    state.transactions.pending = state.transactions.pending.filter(t => t.hash !== hash);
   },
   setActiveAccount(state, payload) {
     state.account.publicKey = payload.publicKey;
