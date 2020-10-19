@@ -33,7 +33,7 @@
           <div>
             <div class="token-title">{{ $t('pages.add-fungible-token.token') }}</div>
             <div>
-              <UserAvatar :address="token.contract" identicon />
+              <UserAvatar :address="token.contract" />
               <div>{{ token.symbol }}</div>
             </div>
           </div>

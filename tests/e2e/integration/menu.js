@@ -14,7 +14,7 @@ describe('Test cases for menu sidebar component', () => {
   it('Identicon is shown, menu is closing, links have correct href, do not have chain name, toggle dropdown', () => {
     cy.openMenu()
       .menuShould('be.visible')
-      .get('.user-identicon')
+      .get('.user-avatar')
       .should('be.visible')
 
       .toggleDropdown()
