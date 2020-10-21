@@ -1,58 +1,35 @@
 <template>
   <img
-    :src="
-      typeof profileImage === 'string' && profileImage.length > 0 && !error
-        ? profileImage
-        : avatar.src
-    "
-    :class="[size, avatar.type === 'identicon' ? 'user-identicon' : 'user-avatar']"
+    class="user-avatar"
+    :src="error ? avatar : profileImage"
+    :class="size"
     @error="error = true"
   />
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import jdenticon from 'jdenticon';
-import Avatars from '@dicebear/avatars';
-import sprites from '@dicebear/avatars-avataaars-sprites';
-
-import { IDENTICON_CONFIG, IDENTICON_SIZES, AVATAR_CONFIG } from '../../utils/constants';
+import { mapState } from 'vuex';
 
 export default {
   props: {
-    address: String,
-    name: [String, Boolean],
+    address: { type: String, required: true },
+    name: { type: [String, Boolean], default: '' }, // TODO: Name shouldn't be boolean
     size: {
       type: String,
       default: 'normal',
     },
-    identicon: Boolean,
   },
   data: () => ({
     error: false,
   }),
-  computed: {
-    ...mapGetters(['getProfileImage']),
-    profileImage() {
-      return this.getProfileImage(this.address);
+  computed: mapState({
+    profileImage(state, { getProfileImage }) {
+      return getProfileImage(this.address);
     },
-    avatar() {
-      if (this.name) {
-        const avatars = new Avatars(sprites, AVATAR_CONFIG);
-        return {
-          type: 'avatar',
-          src: avatars.create(this.name),
-        };
-      }
-      jdenticon.config = IDENTICON_CONFIG;
-      return {
-        type: 'identicon',
-        src: `data:image/svg+xml;base64,${btoa(
-          jdenticon.toSvg(this.address, IDENTICON_SIZES[this.size]),
-        )}`,
-      };
+    avatar(state, { getAvatar }) {
+      return getAvatar(this.name || this.address);
     },
-  },
+  }),
 };
 </script>
 
@@ -62,8 +39,7 @@ $small-size: 30px;
 $normal-size: 38px;
 $lg-size: 64px;
 
-.user-avatar,
-.user-identicon {
+.user-avatar {
   width: $normal-size;
   height: $normal-size;
   border-radius: 50%;

@@ -59,7 +59,6 @@ export default {
     display: flex;
 
     .user-avatar,
-    .user-identicon,
     img {
       overflow: inherit;
     }
