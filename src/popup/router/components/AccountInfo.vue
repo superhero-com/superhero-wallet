@@ -2,7 +2,7 @@
   <div class="account-info">
     <div class="title">
       <div class="account-name" data-cy="account-name">
-        <UserAvatar :address="account.publicKey" :name="account.name" class="avatar" size="small" />
+        <Avatar :address="account.publicKey" :name="account.name" class="avatar" size="small" />
         <template v-if="activeAccountName.includes('.chain')">{{ activeAccountName }}</template>
         <router-link class="claim-chainname" to="/names" v-else
           >{{ $t('pages.account.claim-name') }}
@@ -19,10 +19,10 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import UserAvatar from './UserAvatar';
+import Avatar from './Avatar';
 
 export default {
-  components: { UserAvatar },
+  components: { Avatar },
   data: () => ({
     copied: false,
   }),

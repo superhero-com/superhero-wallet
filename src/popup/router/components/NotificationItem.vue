@@ -2,7 +2,7 @@
   <div class="notification-item" @click="$emit('click', $event)">
     <div class="first-row">
       <img v-if="wallet" src="../../../icons/logo-small.svg" />
-      <UserAvatar v-else :address="address" />
+      <Avatar v-else :address="address" />
       <div class="address-and-menu">
         <span @click.stop>
           <slot />
@@ -28,12 +28,12 @@
 
 <script>
 import FormatDate from './FormatDate';
-import UserAvatar from './UserAvatar';
+import Avatar from './Avatar';
 
 export default {
   components: {
     FormatDate,
-    UserAvatar,
+    Avatar,
   },
   props: {
     address: { type: String, default: '' },
@@ -58,7 +58,7 @@ export default {
     width: 100%;
     display: flex;
 
-    .user-avatar,
+    .avatar,
     img {
       overflow: inherit;
     }

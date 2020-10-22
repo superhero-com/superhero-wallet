@@ -7,11 +7,7 @@
       params: { id: tokenData.contract },
     }"
   >
-    <TokensAvatar
-      class="token-image"
-      :address="tokenData.contract"
-      :src="tokenData.image || null"
-    />
+    <Avatar class="token-image" :address="tokenData.contract" :src="tokenData.image || null" />
     <div class="token-info">
       <div>
         <div class="first-cell title text-ellipsis" :title="tokenData.name">
@@ -47,12 +43,12 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import TokensAvatar from './TokensAvatar';
+import Avatar from '../Avatar';
 import FormatFiatCurrency from '../FormatFiatCurrency';
 
 export default {
   components: {
-    TokensAvatar,
+    Avatar,
     FormatFiatCurrency,
   },
   props: {

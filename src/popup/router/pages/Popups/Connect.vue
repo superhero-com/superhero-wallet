@@ -11,7 +11,7 @@
         <ae-icon name="check" />
       </div>
       <div class="identicon">
-        <UserAvatar :address="account.publicKey" :name="account.name" size="lg" />
+        <Avatar :address="account.publicKey" :name="account.name" size="lg" />
         <div class="accountName">{{ activeAccountName }}</div>
       </div>
     </div>
@@ -20,7 +20,7 @@
       <!--eslint-disable-next-line vue-i18n/no-raw-text-->
       <span class="secondary-text" data-cy="aepp">{{ data.host }} ({{ data.name }}) </span>
       {{ $t('pages.connectConfirm.websiteRequestconnect') }}
-      <UserAvatar class="send-account-icon" :address="account.publicKey" :name="account.name" />
+      <Avatar class="send-account-icon" :address="account.publicKey" :name="account.name" />
       {{ activeAccountName }}
     </h2>
     <ul>
@@ -48,13 +48,13 @@
 import { mapGetters } from 'vuex';
 import getPopupProps from '../../../utils/getPopupProps';
 import Button from '../../components/Button';
-import UserAvatar from '../../components/UserAvatar';
+import Avatar from '../../components/Avatar';
 import { IN_POPUP } from '../../../utils/helper';
 
 export default {
   components: {
     Button,
-    UserAvatar,
+    Avatar,
   },
   props: {
     app: { type: Object, default: null },
