@@ -3,22 +3,23 @@ describe('Test cases for Account Page', () => {
     cy.login();
   });
 
-  it('Check if button for seed phrase backup disappear', () => {
-    cy.get('[data-cy=seed-notif]').should('not.be.visible');
-  });
+  it('Checks dissapearing seed phrase backup button, opens/close sidebar, checks copy button, contains a claim name message', () => {
+    cy.get('[data-cy=seed-notif]')
+      .should('not.be.visible')
 
-  it('Sidebar open and close', () => {
-    cy.openMenu()
+      .openMenu()
       .menuShould('be.visible')
       .closeMenu()
-      .menuShould('not.be.visible');
-  });
+      .menuShould('not.be.visible')
 
-  it('Check copy button', () => {
-    cy.get('[data-cy=copy]')
+      .get('[data-cy=copy]')
       .click()
       .get('.copied-alert')
-      .should('contain', 'Copied!');
+      .should('contain', 'Copied!')
+
+      .get('[data-cy=account-name]')
+      .should('be.visible')
+      .contains('Register a name');
   });
 
   it('Check Claim-Name, Tip, View-All-Tancastions, Dropdown Buttons And Back to Account', () => {
@@ -57,11 +58,5 @@ describe('Test cases for Account Page', () => {
       .click()
       .get('[data-cy=currency-dropdown]')
       .should('not.have.class', 'show');
-  });
-
-  it('Account info contain claim name message', () => {
-    cy.get('[data-cy=account-name]')
-      .should('be.visible')
-      .contains('Register a name');
   });
 });

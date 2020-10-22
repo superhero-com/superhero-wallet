@@ -3,17 +3,24 @@ describe('Test cases for import account page', () => {
     cy.logout().openPopup();
   });
 
-  it('Open import account page', () => {
+  it('Opens import account page, shows error on wrongf seed, returns to index', () => {
     cy.openImportWallet()
       .get('textarea')
       .should('be.visible')
       .get('[data-cy=import]')
       .should('be.visible')
-      .should('have.class', 'disabled');
-  });
+      .should('have.class', 'disabled')
 
-  it('Return to index', () => {
-    cy.openImportWallet()
+      .enterSeedPhrase('test')
+      .inputShouldHaveError('textarea')
+      .shouldHasErrorMessage('.error-msg')
+      .buttonShouldBeDisabled('[data-cy=import]')
+
+      .enterSeedPhrase('gentle kid gap')
+      .inputShouldHaveError('textarea')
+      .shouldHasErrorMessage('.error-msg')
+      .buttonShouldBeDisabled('[data-cy=import]')
+
       .goBack()
       .get('textarea')
       .should('not.be.visible')
@@ -21,28 +28,18 @@ describe('Test cases for import account page', () => {
       .should('be.visible');
   });
 
-  it('Wrong seed shows error message', () => {
-    cy.enterSeedPhrase('test')
-      .inputShouldHaveError('textarea')
-      .shouldHasErrorMessage('.error-msg')
-      .buttonShouldBeDisabled('[data-cy=import]');
-  });
-
-  it('Wrong seed shows error message', () => {
-    cy.enterSeedPhrase('gentle kid gap')
-      .inputShouldHaveError('textarea')
-      .shouldHasErrorMessage('.error-msg')
-      .buttonShouldBeDisabled('[data-cy=import]');
-  });
-
   it('Enter correct seed redirects to account', () => {
-    cy.enterSeedPhrase('media view gym mystery all fault truck target envelope kit drop fade')
+    cy.openAndEnterSeedPhrase(
+      'media view gym mystery all fault truck target envelope kit drop fade',
+    )
       .get('[data-cy=balance-info]')
       .should('be.visible');
   });
 
   it('Enter seed phrase with spaces redirects to account', () => {
-    cy.enterSeedPhrase(' media view gym mystery all fault truck target envelope kit drop fade ')
+    cy.openAndEnterSeedPhrase(
+      ' media view gym mystery all fault truck target envelope kit drop fade ',
+    )
       .get('[data-cy=balance-info]')
       .should('be.visible');
   });

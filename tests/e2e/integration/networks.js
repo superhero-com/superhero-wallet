@@ -6,31 +6,17 @@ describe('Test cases for networks page', () => {
     cy.login().openNetworks();
   });
 
-  it('Open networks page', () => {
-    cy.get('[data-cy=to-add]')
-      .should('be.visible')
-      .get('[data-cy=networks]')
+  it('Opens network page, cancels/adds network, can not add network with default name/invalid url', () => {
+    cy.get('[data-cy=networks]')
       .should('be.visible')
       .get('[data-cy=network-name]')
       .should('contain', defaultNetwork.name)
       .get('[data-cy=network-url]')
       .should('contain', defaultNetwork.url)
       .get('[data-cy=network-middleware]')
-      .should('contain', defaultNetwork.middlewareUrl);
-  });
+      .should('contain', defaultNetwork.middlewareUrl)
 
-  it('Can cancel add network', () => {
-    cy.get('[data-cy=to-add]')
-      .click()
-      .get('[data-cy=cancel]')
-      .should('be.visible')
-      .click()
-      .get('[data-cy=cancel]')
-      .should('not.be.visible');
-  });
-
-  it("Can't add network with default network name", () => {
-    cy.get('[data-cy=to-add]')
+      .get('[data-cy=to-add]')
       .click()
       .enterNetworkDetails(
         defaultNetwork.name,
@@ -42,89 +28,36 @@ describe('Test cases for networks page', () => {
       .click()
       .buttonShouldBeDisabled('[data-cy=connect]')
       .get('[data-cy=error-msg]')
-      .should('exist');
-  });
+      .should('exist')
 
-  it("Can't add network with invalid urls", () => {
-    cy.get('[data-cy=to-add]')
-      .click()
       .enterNetworkDetails('test', 'test', 'test', 'test')
       .get('[data-cy=connect]')
       .click()
       .buttonShouldBeDisabled('[data-cy=connect]')
       .get('[data-cy=error-msg]')
-      .should('exist');
+      .should('exist')
+
+      .get('[data-cy=cancel]')
+      .should('be.visible')
+      .click()
+      .get('[data-cy=cancel]')
+      .should('not.be.visible');
   });
 
-  it('Can add new network', () => {
+  it('Can add, select, edit, delete new network, can not add network with the same name', () => {
     cy.addNetwork(
       'Newnetwork',
       defaultNetwork.url,
       defaultNetwork.middlewareUrl,
       defaultNetwork.compilerUrl,
-    );
-  });
-
-  it('Can delete network', () => {
-    cy.selectNetwork(
-      'Newnetwork',
-      defaultNetwork.url,
-      defaultNetwork.middlewareUrl,
-      defaultNetwork.compilerUrl,
     )
-      .get('[data-cy=more]')
-      .click()
-      .get('[data-cy=delete]')
-      .should('be.visible')
-      .click()
-      .get('[data-cy=networks] .network-row')
-      .children()
-      .should('have.length', 2)
-      .get('[data-cy=networks] .network-row')
-      .eq(0)
-      .find('.checkmark')
-      .should('have.class', 'checked');
-  });
 
-  it('Can select network', () => {
-    cy.selectNetwork(
-      'Newnetwork',
-      defaultNetwork.url,
-      defaultNetwork.middlewareUrl,
-      defaultNetwork.compilerUrl,
-    )
+      .selectNetwork()
       .goBack()
       .get('.transactionList')
-      .should('not.be.visible');
-  });
+      .should('not.be.visible')
 
-  it("Can't add network with same name", () => {
-    cy.selectNetwork(
-      'Newnetwork',
-      defaultNetwork.url,
-      defaultNetwork.middlewareUrl,
-      defaultNetwork.compilerUrl,
-    )
-      .get('[data-cy=to-add]')
-      .click()
-      .enterNetworkDetails(
-        'Newnetwork',
-        defaultNetwork.url,
-        defaultNetwork.middlewareUrl,
-        defaultNetwork.compilerUrl,
-      )
-      .get('[data-cy=connect]')
-      .click()
-      .buttonShouldBeDisabled('[data-cy=connect]');
-  });
-
-  it('Can edit network', () => {
-    cy.selectNetwork(
-      'Newnetwork',
-      defaultNetwork.url,
-      defaultNetwork.middlewareUrl,
-      defaultNetwork.compilerUrl,
-    )
+      .openNetworks()
       .get('[data-cy=more]')
       .click()
       .get('[data-cy=edit]')
@@ -150,6 +83,34 @@ describe('Test cases for networks page', () => {
       .should('contain', defaultNetwork.middlewareUrl)
       .goBack()
       .get('.transactionList')
-      .should('be.visible');
+      .should('be.visible')
+
+      .openNetworks()
+      .get('[data-cy=to-add]')
+      .click()
+      .enterNetworkDetails(
+        'Newnetwork',
+        defaultNetwork.url,
+        defaultNetwork.middlewareUrl,
+        defaultNetwork.compilerUrl,
+      )
+      .get('[data-cy=connect]')
+      .click()
+      .buttonShouldBeDisabled('[data-cy=connect]')
+      .get('[data-cy=cancel]')
+      .click()
+
+      .get('[data-cy=more]')
+      .click()
+      .get('[data-cy=delete]')
+      .should('be.visible')
+      .click()
+      .get('[data-cy=networks] .network-row')
+      .children()
+      .should('have.length', 2)
+      .get('[data-cy=networks] .network-row')
+      .eq(0)
+      .find('.checkmark')
+      .should('have.class', 'checked');
   });
 });
