@@ -46,6 +46,9 @@ export default {
   setTipping(state, payload) {
     state.tipping = payload;
   },
+  setTippingV2(state, payload) {
+    state.tippingV2 = payload;
+  },
   setMainLoading(state, payload) {
     state.mainLoading = payload;
   },
@@ -111,6 +114,9 @@ export default {
   },
   setTippingAddress(state, payload) {
     state.tippingAddress = payload;
+  },
+  setTippingAddressV2(state, payload) {
+    state.tippingAddressV2 = payload;
   },
   setSaveErrorLog(state) {
     state.saveErrorLog = !state.saveErrorLog;

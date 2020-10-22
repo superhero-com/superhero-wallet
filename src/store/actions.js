@@ -123,7 +123,6 @@ export default {
 
     return { addresses: uniq(addresses).filter(a => a), tab };
   },
-
   async getTipContractAddress({ state: { sdk }, getters: { activeNetwork }, commit }) {
     const { tipContract } = activeNetwork;
     const contractAddress = tipContract.includes('.chain')
@@ -132,6 +131,12 @@ export default {
     commit('setTippingAddress', contractAddress);
     return contractAddress;
   },
+  async getTipContractAddressV2({ getters: { activeNetwork }, commit }) {
+    const { tipContractV2 } = activeNetwork;
+    commit('setTippingAddressV2', tipContractV2);
+    return tipContractV2;
+  },
+
   async getHeight({ state: { sdk } }) {
     return (await sdk.topBlock()).height;
   },

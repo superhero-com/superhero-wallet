@@ -18,10 +18,7 @@ export const aettosToAe = v =>
     targetDenomination: AE_AMOUNT_FORMATS.AE,
   });
 
-export const convertToken = (balance, precision) =>
-  BigNumber(balance)
-    .shiftedBy(precision)
-    .toString();
+export const convertToken = (balance, precision) => BigNumber(balance).shiftedBy(precision);
 
 export const shuffleArray = array => {
   const shuffle = array;
@@ -303,4 +300,9 @@ export const getActiveNetwork = async () => {
 export const getTwitterAccountUrl = url => {
   const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
   return match ? match[0] : false;
+};
+
+export const removeDuplicates = arr => {
+  const convertResultToSet = new Set([...arr]);
+  return [...convertResultToSet];
 };
