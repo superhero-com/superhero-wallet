@@ -904,7 +904,7 @@
       "error": "No puede conectarse al nodo elegido",
       "connecting": "Conectando al nodo...",
       "connected": "Conectado",
-      "init": "Iniciando servicios..."
+      "initServices": "Iniciando servicios..."
     },
     "popupMessageSign": {
       "heading": "gustaría firmar mensaje ",

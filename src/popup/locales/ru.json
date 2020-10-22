@@ -839,7 +839,7 @@
       "error": "Unable to connect to choosen node",
       "connecting": "Connecting to node...",
       "connected": "Connected",
-      "init": "Initializing services..."
+      "initServices": "Initializing services..."
     },
     "popupMessageSign": {
       "heading": "would like to sign message ",

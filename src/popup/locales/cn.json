@@ -906,7 +906,7 @@
       "error": "无法连接到所选节点",
       "connecting": "连接节点中...",
       "connected": "已连接",
-      "init": "初始化服务..."
+      "initServices": "初始化服务..."
     },
     "popupMessageSign": {
       "heading": "想要签名消息",
