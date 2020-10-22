@@ -21,6 +21,7 @@ describe('Tests cases not connected to specific page', () => {
     { path: '/transactions', redirect: true },
   ].forEach(({ path, redirect }) => {
     it(`${redirect ? '' : 'no '}redirect to last visited route ${path}`, () => {
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
       cy.login({}, path)
         .wait(500)
         .visit(`chrome/popup/popup`)
