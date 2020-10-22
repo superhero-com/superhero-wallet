@@ -12,7 +12,7 @@ describe('Test cases for import account page', () => {
       .should('have.class', 'disabled');
   });
 
-  it('Rreturn to index', () => {
+  it('Return to index', () => {
     cy.openImportWallet()
       .goBack()
       .get('textarea')
