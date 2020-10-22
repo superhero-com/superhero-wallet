@@ -23,7 +23,7 @@ describe('Tests cases not connected to specific page', () => {
     it(`${redirect ? '' : 'no '}redirect to last visited route ${path}`, () => {
       // eslint-disable-next-line cypress/no-unnecessary-waiting
       cy.login({}, path)
-        .wait(500)
+        .get('[data-cy=connect-node]')
         .visit(`chrome/popup/popup`)
         .urlEquals(redirect ? path : '/account');
     });
