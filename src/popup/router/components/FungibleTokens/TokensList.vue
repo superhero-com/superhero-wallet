@@ -1,6 +1,6 @@
 <template>
   <div v-if="filteredResults.length > 0">
-    <TokenDisplay
+    <TokensListItem
       v-for="value in filteredResults"
       :key="value.contract || value.id"
       :tokenData="value"
@@ -11,11 +11,11 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import TokenDisplay from './TokenDisplay';
+import TokensListItem from './TokensListItem';
 
 export default {
   components: {
-    TokenDisplay,
+    TokensListItem,
   },
   props: {
     showMyTokens: { type: Boolean },
