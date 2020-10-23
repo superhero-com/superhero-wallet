@@ -1,5 +1,5 @@
 <template>
-  <span class="fiat">{{ formattedBalance }}</span>
+  <span class="format-fiat-currency">{{ formattedBalance }}</span>
 </template>
 
 <script>
@@ -21,7 +21,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../common/variables';
 
-.fiat {
+.format-fiat-currency {
   color: $gray-2;
   font-size: 13px;
 }

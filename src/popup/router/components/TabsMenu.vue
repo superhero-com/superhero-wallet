@@ -1,10 +1,10 @@
 <template>
   <div class="tabs-menu">
     <button
-      :class="{ active: selected === value }"
-      v-for="{ text, value } in tabOptions"
-      :key="value"
-      @click="(selected = value), method($event, value)"
+      :class="{ active: name === value }"
+      v-for="{ text, name } in tabOptions"
+      :key="name"
+      @click="$emit('input', name)"
     >
       {{ text }}
     </button>
@@ -15,13 +15,7 @@
 export default {
   props: {
     tabOptions: { type: Array, default: null },
-    activeTab: { type: [String, Number], default: '' },
-    method: { type: Function, required: true },
-  },
-  data() {
-    return {
-      selected: this.activeTab,
-    };
+    value: { type: [String, Number], default: '' },
   },
 };
 </script>

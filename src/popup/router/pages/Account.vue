@@ -40,6 +40,9 @@
         <BoxButton :text="$t('pages.appVUE.invite')" :to="{ name: 'invite' }">
           <Invite slot="icon" />
         </BoxButton>
+        <BoxButton :text="$t('pages.appVUE.tokens')" :to="{ name: 'tokens-preview' }">
+          <Tokens slot="icon" />
+        </BoxButton>
         <BoxButton :text="$t('pages.appVUE.topUp')" to="/receive" class="tour__step6">
           <Topup slot="icon" />
         </BoxButton>

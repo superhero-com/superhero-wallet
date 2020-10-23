@@ -23,7 +23,7 @@
         </Button>
       </div>
     </div>
-    <TabsMenu :method="selectTab" :tabOptions="tabs" :activeTab="tabs[0].value" />
+    <TabsMenu v-model="activeTab" :tabOptions="tabs" />
     <div class="token-info">
       <div class="section-title">
         {{ $t('pages.token-details.token-details') }}
@@ -82,20 +82,13 @@ export default {
       activeTab: 'details',
       tabs: [
         {
-          value: 'details',
+          name: 'details',
           text: this.$t('pages.token-details.details'),
         },
       ],
     };
   },
-  computed: {
-    ...mapGetters(['tippingSupported', 'formatCurrency']),
-  },
-  methods: {
-    selectTab(event, tabValue) {
-      this.activeTab = tabValue;
-    },
-  },
+  computed: mapGetters(['tippingSupported', 'formatCurrency']),
 };
 </script>
 
