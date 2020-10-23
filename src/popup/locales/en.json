@@ -227,6 +227,7 @@
       "names": "Names",
       "bidding": "Bidding",
       "networks": "Networks",
+      "permissionsSettings": "Permissions settings",
       "comment-new": "Add comment",
       "home": "Superhero Home",
       "donate-error": "Donate Data",
@@ -994,6 +995,13 @@
       "tip-attached": "Tip attached",
       "top-up-with": "Top up with",
       "delete": "Delete"
+    },
+    "permissions": {
+      "login": "Don't ask for login requests",
+      "message-sign": "Don't ask for message signing",
+      "transaction-sign": "Limit for spending without asking per day",
+      "spent-today": "Spent today",
+      "left-today": "Left today"
     }
   },
   "phishing": {

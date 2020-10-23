@@ -56,6 +56,11 @@
             </router-link>
           </li>
           <li>
+            <router-link :to="{ name: 'permissions-settings' }">
+              {{ $t('pages.titles.permissionsSettings') }}
+            </router-link>
+          </li>
+          <li>
             <span data-cy="remove-account" @click="removeAccount">
               {{ $t('pages.appVUE.removeAccount') }}
             </span>

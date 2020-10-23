@@ -3,12 +3,14 @@ import { IN_POPUP } from '../../utils/helper';
 import ConfirmConnect from '../pages/Popups/Connect';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign';
+import MessageSign from '../pages/Popups/MessageSign';
 
 export default process.env.PLATFORM === 'web' && IN_POPUP
   ? [
       { name: 'confirm-connect', component: ConfirmConnect },
       { name: 'confirm-raw-sign', component: ConfirmRawSign },
       { name: 'confirm-transaction-sign', component: ConfirmTransactionSign },
+      { name: 'confirm-message-sign', component: MessageSign },
     ].map(({ name, component }) => ({
       name: `web-iframe-popup-${name}`,
       path: `/web-iframe-popup/${name}`,

@@ -4,8 +4,10 @@
       <div class="flex flex-align-center flex-justify-content-center">
         <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
         <div>
-          <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-          <span class="secondary-text" data-cy="host">{{ data.host }} ({{ data.name }}) </span>
+          <span class="secondary-text" data-cy="host">
+            <!--eslint-disable-next-line vue-i18n/no-raw-text-->
+            {{ data.host }} {{ data.name ? `(${data.name})` : '' }}
+          </span>
           {{ $t('pages.popupMessageSign.heading') }}
         </div>
       </div>
@@ -13,7 +15,9 @@
     <ul>
       <ae-list-item fill="neutral" class="permission-set">
         <h4>{{ $t('pages.popupMessageSign.message') }}</h4>
-        <p v-if="data.action" data-cy="message">{{ data.action.params.message }}</p>
+        <p v-if="message || data.action" data-cy="message">
+          {{ message || data.action.params.message }}
+        </p>
       </ae-list-item>
     </ul>
     <div class="btnFixed">
@@ -29,8 +33,15 @@
 
 <script>
 import getPopupProps from '../../../utils/getPopupProps';
+import { IN_POPUP } from '../../../utils/helper';
 
 export default {
+  props: {
+    message: { type: String, default: null },
+    origin: { type: String, default: null },
+    resolve: { type: Function, default: null },
+    reject: { type: Function, default: null },
+  },
   data() {
     return {
       data: {},
@@ -38,7 +49,15 @@ export default {
     };
   },
   async created() {
-    this.data = await getPopupProps();
+    this.data =
+      process.env.PLATFORM === 'web' && IN_POPUP
+        ? {
+            resolve: this.resolve,
+            reject: this.reject,
+            message: this.message,
+            host: this.origin,
+          }
+        : await getPopupProps();
   },
   methods: {
     cancel() {
