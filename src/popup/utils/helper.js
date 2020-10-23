@@ -301,8 +301,3 @@ export const getTwitterAccountUrl = url => {
   const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
   return match ? match[0] : false;
 };
-
-export const removeDuplicates = arr => {
-  const convertResultToSet = new Set([...arr]);
-  return [...convertResultToSet];
-};

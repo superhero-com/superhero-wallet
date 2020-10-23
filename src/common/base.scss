@@ -382,6 +382,12 @@ button {
   text-align: left;
 }
 
+.text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 @media screen and (min-width: 780px) {
   @-moz-document url-prefix() {
     .ae-main {

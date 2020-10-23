@@ -789,7 +789,6 @@
       "minAmountError": "小费的代币价值必须超过0.01美元才能发送。"
     },
     "successTip": {
-      "sendMore": "发送更多AE",
       "feed": "在赠送中查看小费",
       "completedHeading": " 交易完成。",
       "sentTo": "发送到: ",
@@ -799,8 +798,7 @@
       "successfullySent": "你已成功发送 ",
       "to": "到",
       "note": "请注意:这个URL的所有者还没有创建一个帐户。他们可以通过创造一个钱包来轻松申领代币——就像你做的那样。",
-      "notify": "通知URL的主人您发送了AE到这个帖子",
-      "notifyMessage": "我刚才向这个帖子发送了小费！任何人都可以通过超级英雄发送和接收AE。了解更多。"
+      "notify": "通知URL的主人您发送了AE到这个帖子"
     },
     "transactionDetails": {
       "heading": "交易细节",

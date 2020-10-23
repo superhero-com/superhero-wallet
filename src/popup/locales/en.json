@@ -232,7 +232,7 @@
       "home": "Superhero Home",
       "donate-error": "Donate Data",
       "address": "Send Address",
-      "fungible-tokens": "Fungible tokens",
+      "fungible-tokens": "Tokens",
       "deploy-token": "Deploy token",
       "add-token": "Add token",
       "mint-burn-token": "Mint/Burn token",
@@ -273,7 +273,7 @@
       "networks": "Networks",
       "removeAccount": "Remove account",
       "donateErrorReports": "Submit error reports",
-      "tokens": "Fungible tokens",
+      "tokens": "Tokens",
       "manageTokens": "Manage tokens",
       "invite": "Invite"
     },
@@ -441,7 +441,37 @@
       "allowances": "Allowances",
       "allowances-info": "Give or take an allowance",
       "mint": "Mint/Burn token",
-      "mint-info": "This allows you to mint or burn token amount"
+      "mint-info": "This allows you to mint or burn token amount",
+      "tokens": "Tokens",
+      "searchPlaceholder": "Search by token name or community...",
+      "all": "All",
+      "myTokens": "My Tokens",
+      "mcap": "MCap",
+      "price": "Price",
+      "not-available": "N/A",
+      "no-results": "There are no tokens to display"
+    },
+    "token-details": {
+      "details": "Details",
+      "send": "Send",
+      "receive": "Receive",
+      "tip": "Tip",
+      "token-details": "Token Details",
+      "token-description": "Token Description",
+      "symbol": "Symbol",
+      "community": "Community",
+      "decimals": "Decimals",
+      "contract": "Contract",
+      "available-supply": "Available supply",
+      "total-supply": "Total supply",
+      "max-supply": "Max supply",
+      "price-ae": "Price (AE)",
+      "price": "Price",
+      "volume": "Total Volume",
+      "market-cap": "Market Cap",
+      "atl-change": "All time low",
+      "ath-change": "All time high",
+      "chart": "Chart"
     },
     "deploy-token": {
       "name": "Token name",
@@ -824,7 +854,7 @@
       "minAmountError": "Tips should be over 0.01 USD in tokens in order to push through."
     },
     "successTip": {
-      "sendMore": "Send More AE",
+      "sendMore": "Send more tips",
       "feed": "View your tip on the feed",
       "completedHeading": " Transaction Completed.",
       "sentTo": "Send to: ",
@@ -834,8 +864,9 @@
       "successfullySent": "You have successfully sent ",
       "to": "to",
       "note": "NOTE: The owner of this URL has not created an account yet. They can claim their tokens easily by creating a wallet - the same way you did.",
-      "notify": "Notify the owner that you sent AE to this post",
-      "notifyMessage": "I just sent AE to this post! Anyone can start sending and receiving AE through Superhero. Learn more."
+      "notify": "Notify the owner that you sent",
+      "notifyTo": "to this post",
+      "notifyMessage": "I just sent you %{amount} for your wonderful post! Start receiving and sending more tips through Superhero.com. Learn more."
     },
     "transactionDetails": {
       "heading": "Transactions Details",
