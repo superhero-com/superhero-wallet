@@ -1,7 +1,8 @@
 <template>
   <div class="dropdown">
+    <div v-if="openDropdown" @click="openDropdown = false" class="dropdown-overlay"></div>
     <label v-if="label" class="label">{{ label }}</label>
-    <div class="display">
+    <div v-if="!isCustom" class="display">
       <div class="text-ellipsis" :title="displayValue">
         {{ displayValue }}
       </div>
@@ -10,27 +11,53 @@
         <option v-for="{ text, value } in options" :key="value" :value="value">{{ text }}</option>
       </select>
     </div>
+    <div
+      class="custom"
+      v-else
+      @click.stop="openDropdown = !openDropdown"
+      :class="{ show: openDropdown }"
+      data-cy="custom-dropdown"
+    >
+      <ae-button>
+        {{ displayValue }}
+        <ExpandedAngleArrow />
+      </ae-button>
+      <ul class="list">
+        <li class="list-item" v-for="{ text, value } in options" :key="value" :value="value">
+          <ae-button @click="(selectedVal = value), method(value)">
+            {{ text }}
+          </ae-button>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script>
+import ExpandedAngleArrow from '../../../icons/expanded-angle-arrow.svg?vue-component';
+
 export default {
   name: 'VueDropdown',
+  components: {
+    ExpandedAngleArrow,
+  },
   props: {
     options: { type: Array, default: null },
     selected: { type: [String, Number], default: '' },
     method: { type: Function, required: true },
     label: { type: String },
+    isCustom: { type: Boolean },
   },
   data() {
     return {
       selectedVal: this.selected,
       optionsVal: this.options,
+      openDropdown: false,
     };
   },
   computed: {
     displayValue() {
-      const { text } = this.optionsVal.find(({ value }) => value === this.selectedVal) || {};
+      const { text } = this.options.find(({ value }) => value === this.selectedVal) || {};
       return text || '';
     },
   },
@@ -101,5 +128,67 @@ export default {
     -moz-appearance: none;
     appearance: none;
   }
+}
+
+.custom {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 500;
+  position: relative;
+
+  svg {
+    margin-left: 5px;
+  }
+
+  li {
+    list-style-type: none;
+
+    .ae-icon {
+      font-size: 1.2rem;
+      margin: 10px 0 0 0;
+    }
+  }
+
+  button {
+    font-size: 15px;
+    width: 100%;
+    color: $text-color;
+    text-align: left;
+    margin: 0;
+    padding: 0 5px !important;
+  }
+
+  ul {
+    margin: 0;
+    box-shadow: none;
+    visibility: hidden;
+    max-height: 0;
+    padding: 0;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    background: $nav-bg-color;
+    border: 1px solid $secondary-color;
+    border-radius: 5px;
+  }
+
+  &.show ul.list {
+    visibility: visible;
+    max-height: 165px;
+    overflow-y: scroll;
+    position: relative;
+    z-index: 10;
+  }
+
+  .list-item:hover {
+    background: $box-button-color;
+  }
+}
+
+.dropdown-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 </style>
