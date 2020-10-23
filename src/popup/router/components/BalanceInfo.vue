@@ -7,18 +7,18 @@
             v-if="tokenBalancesOptions.length"
             :options="tokenBalancesOptions"
             :method="changeToken"
-            :selected="token"
+            :selected="currentToken"
             is-custom
           />
           <span class="display-value text-ellipsis">{{
-            Object.keys(selectedToken).length ? selectedToken.convertedBalance : tokenBalance
+            selectedToken ? selectedToken.convertedBalance : tokenBalance
           }}</span>
           <span class="token-symbol">{{
-            !Object.keys(selectedToken).length ? $t('pages.appVUE.aeid') : selectedToken.symbol
+            !selectedToken ? $t('pages.appVUE.aeid') : selectedToken.symbol
           }}</span>
           <ExpandedAngleArrow class="expand-arrow" />
         </div>
-        <div v-if="token === 'default'" class="currenciesgroup">
+        <div v-if="currentToken === 'default'" class="currenciesgroup">
           <div class="balance-dropdown" data-cy="currency-dropdown">
             <Dropdown
               :options="currenciesOptions"
@@ -50,7 +50,6 @@ export default {
   data() {
     return {
       currency: '',
-      token: 'default',
     };
   },
   computed: {
@@ -72,23 +71,22 @@ export default {
         value: currencyKey,
       }));
     },
-  },
-  created() {
-    this.token = Object.keys(this.selectedToken).length ? this.selectedToken.value : 'default';
+    currentToken() {
+      return this.selectedToken ? this.selectedToken.value : 'default';
+    },
   },
   methods: {
     async switchCurrency(selectedCurrency) {
       this.$store.commit('setCurrentCurrency', selectedCurrency);
     },
     changeToken(value) {
-      this.token = value;
       this.$store.commit(
         'fungibleTokens/setSelectedToken',
-        value !== 'default' ? this.getSelectedToken() : {},
+        value !== 'default' ? this.getSelectedToken(value) : null,
       );
     },
-    getSelectedToken() {
-      return this.tokenBalances.find(({ value }) => value === this.token) || {};
+    getSelectedToken(changedToken) {
+      return this.tokenBalances.find(({ value }) => value === changedToken) || null;
     },
   },
 };

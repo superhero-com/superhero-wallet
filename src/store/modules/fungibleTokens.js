@@ -11,11 +11,6 @@ export default {
     selectedToken: null,
     aePublicData: {},
   },
-  getters: {
-    isFungibleToken({ selectedToken }) {
-      return Object.keys(selectedToken).length > 0;
-    },
-  },
   mutations: {
     setSelectedToken(state, payload) {
       state.selectedToken = payload;
