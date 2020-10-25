@@ -1,4 +1,6 @@
 import { flatten, uniq, orderBy } from 'lodash-es';
+import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
+import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import {
   convertToAE,
   stringifyForStorage,
@@ -123,20 +125,6 @@ export default {
 
     return { addresses: uniq(addresses).filter(a => a), tab };
   },
-  async getTipContractAddress({ state: { sdk }, getters: { activeNetwork }, commit }) {
-    const { tipContract } = activeNetwork;
-    const contractAddress = tipContract.includes('.chain')
-      ? getAddressByNameEntry(await sdk.api.getNameEntryByName(tipContract), 'contract_pubkey')
-      : tipContract;
-    commit('setTippingAddress', contractAddress);
-    return contractAddress;
-  },
-  async getTipContractAddressV2({ getters: { activeNetwork }, commit }) {
-    const { tipContractV2 } = activeNetwork;
-    commit('setTippingAddressV2', tipContractV2);
-    return tipContractV2;
-  },
-
   async getHeight({ state: { sdk } }) {
     return (await sdk.topBlock()).height;
   },
@@ -207,5 +195,23 @@ export default {
       url.searchParams.append(key, respondChallenge[key]),
     );
     return fetchJson(url.toString());
+  },
+  async initContractInstances({
+    state: { sdk },
+    getters: { activeNetwork, tippingSupported },
+    commit,
+  }) {
+    if (!tippingSupported && !process.env.RUNNING_IN_TESTS) return;
+    const contractInstanceV1 = await sdk.getContractInstance(TIPPING_V1_INTERFACE, {
+      contractAddress: activeNetwork.tipContractV1,
+      forceCodeCheck: true,
+    });
+    const contractInstanceV2 = activeNetwork.tipContractV2
+      ? await sdk.getContractInstance(TIPPING_V2_INTERFACE, {
+          contractAddress: activeNetwork.tipContractV2,
+          forceCodeCheck: true,
+        })
+      : null;
+    commit('setTipping', [contractInstanceV1, contractInstanceV2]);
   },
 };

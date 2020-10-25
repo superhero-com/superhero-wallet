@@ -20,7 +20,7 @@
 
     <Button
       @click="sendTip"
-      :disabled="amountError || !minCallFee || !tipping || !tippingSupported"
+      :disabled="amountError || !minCallFee || !tippingV1 || !tippingSupported"
     >
       {{ $t('pages.tipPage.confirm') }}
     </Button>
@@ -52,8 +52,8 @@ export default {
     minCallFee: null,
   }),
   computed: {
-    ...mapGetters(['account', 'tippingSupported', 'minTipAmount']),
-    ...mapState(['tippingAddress', 'balance', 'tipping', 'sdk']),
+    ...mapGetters(['account', 'tippingSupported', 'minTipAmount', 'activeNetwork']),
+    ...mapState(['balance', 'tippingV1', 'sdk']),
     urlStatus() {
       return this.$store.getters['tipUrl/status'](this.tip.url);
     },
@@ -65,16 +65,16 @@ export default {
   },
   async created() {
     this.loading = true;
-    await this.$watchUntilTruly(() => this.sdk && this.tippingAddress);
+    await this.$watchUntilTruly(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
-      contractId: this.tippingAddress,
+      contractId: this.activeNetwork.tipContractV1,
       callerId: this.account.publicKey,
     }).min;
-    await this.$watchUntilTruly(() => this.tipping);
+    await this.$watchUntilTruly(() => this.tippingV1);
     const tipId = +this.$route.query.id;
     if (!tipId) throw new Error('"id" param is missed');
-    const { decodedResult } = await this.tipping.methods.get_state();
+    const { decodedResult } = await this.tippingV1.methods.get_state();
     this.tip = tipping.getTipsRetips(decodedResult).tips.find(({ id }) => id === tipId);
     this.loading = false;
   },
@@ -88,7 +88,7 @@ export default {
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
       this.loading = true;
       try {
-        const { hash } = await this.tipping.methods.retip(this.tip.id, {
+        const { hash } = await this.tippingV1.methods.retip(this.tip.id, {
           amount,
           waitMined: false,
           modal: false,

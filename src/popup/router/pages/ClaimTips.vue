@@ -28,7 +28,7 @@ export default {
     loading: false,
   }),
   computed: {
-    ...mapState(['sdk', 'tipping']),
+    ...mapState(['sdk', 'tippingV1']),
     ...mapGetters(['account', 'tippingSupported']),
     normalizedUrl() {
       if (!validateTipUrl(this.url)) return '';
@@ -47,11 +47,11 @@ export default {
     async claimTips() {
       const url = this.normalizedUrl;
       this.loading = true;
-      await this.$watchUntilTruly(() => this.sdk && this.tipping);
+      await this.$watchUntilTruly(() => this.sdk && this.tippingV1);
       try {
         const claimAmount = parseFloat(
           aettosToAe(
-            await this.tipping.methods
+            await this.tippingV1.methods
               .unclaimed_for_url(url)
               .then(r => r.decodedResult)
               .catch(() => 1),

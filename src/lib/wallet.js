@@ -2,8 +2,6 @@ import { Node, MemoryAccount, RpcWallet } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import { isEmpty, times, camelCase } from 'lodash-es';
-import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
-import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
 import {
@@ -95,22 +93,6 @@ async function getKeyPair() {
   return res.error ? { error: true } : parseFromStorage(res);
 }
 
-async function initContractInstances() {
-  if (!store.getters.tippingSupported && !process.env.RUNNING_IN_TESTS) return;
-  const contractAddress = await store.dispatch('getTipContractAddress');
-  const contractAddressV2 = await store.dispatch('getTipContractAddressV2');
-  const contractInstance = await store.state.sdk.getContractInstance(TIPPING_V1_INTERFACE, {
-    contractAddress,
-    forceCodeCheck: true,
-  });
-  const contractInstanceV2 = await store.state.sdk.getContractInstance(TIPPING_V2_INTERFACE, {
-    contractAddress: contractAddressV2,
-    forceCodeCheck: true,
-  });
-  store.commit('setTipping', contractInstance);
-  store.commit('setTippingV2', contractInstanceV2);
-}
-
 let initSdkRunning = false;
 
 export default {
@@ -148,7 +130,6 @@ export default {
     try {
       const acceptCb = (_, { accept }) => accept();
 
-      store.dispatch('fungibleTokens/getAvailableTokens');
       const sdk = await RpcWallet.compose({
         methods: {
           address: async () => store.getters.account.publicKey,
@@ -262,9 +243,10 @@ export default {
       }
 
       await store.commit('initSdk', sdk);
-      await initContractInstances();
+      await store.dispatch('initContractInstances');
       await initMiddleware();
       store.commit('setNodeStatus', 'connected');
+      await store.dispatch('fungibleTokens/getAvailableTokens');
       store.dispatch('fungibleTokens/loadTokenBalances', keypair.publicKey);
       setTimeout(() => store.commit('setNodeStatus', ''), 2000);
     } catch (e) {

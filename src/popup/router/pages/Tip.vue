@@ -132,17 +132,14 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['account', 'formatCurrency', 'minTipAmount', 'currentCurrencyRate']),
-    ...mapState([
-      'tourRunning',
-      'tippingAddressV2',
-      'tippingAddress',
-      'balance',
-      'tip',
-      'sdk',
-      'tipping',
-      'tippingV2',
+    ...mapGetters([
+      'account',
+      'formatCurrency',
+      'minTipAmount',
+      'currentCurrencyRate',
+      'activeNetwork',
     ]),
+    ...mapState(['tourRunning', 'balance', 'tip', 'sdk', 'tippingV1', 'tippingV2']),
     ...mapState('fungibleTokens', ['selectedToken', 'tokenBalances']),
     urlStatus() {
       return this.tourRunning ? 'verified' : this.$store.getters['tipUrl/status'](this.url);
@@ -184,10 +181,10 @@ export default {
         localStorage.removeItem('lsroute');
       }
     }
-    await this.$watchUntilTruly(() => this.sdk && this.tippingAddress);
+    await this.$watchUntilTruly(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
-      contractId: this.tippingAddress,
+      contractId: this.activeNetwork.tipContractV1,
       callerId: this.account.publicKey,
     }).min;
   },
@@ -240,11 +237,15 @@ export default {
       const amount = aeToAettos(this.amount);
       this.loading = true;
       try {
-        const { hash } = await this.tipping.call('tip', [this.url, escapeSpecialChars(this.note)], {
-          amount,
-          waitMined: false,
-          modal: false,
-        });
+        const { hash } = await this.tippingV1.call(
+          'tip',
+          [this.url, escapeSpecialChars(this.note)],
+          {
+            amount,
+            waitMined: false,
+            modal: false,
+          },
+        );
         if (hash) {
           await this.$store.dispatch('setPendingTx', {
             hash,
@@ -268,7 +269,7 @@ export default {
       const tokenContract = await this.getFungibleTokenContract();
       const { decodedResult } = await tokenContract.methods.allowance({
         from_account: this.account.publicKey,
-        for_account: this.tippingAddressV2.replace('ct_', 'ak_'),
+        for_account: this.activeNetwork.tipContractV2.replace('ct_', 'ak_'),
       });
 
       const allowanceAmount =
@@ -280,7 +281,7 @@ export default {
           : convertToken(this.amount, this.selectedToken.decimals).toFixed();
       return tokenContract.methods[
         decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
-      ](this.tippingAddressV2.replace('ct_', 'ak_'), allowanceAmount);
+      ](this.activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
     },
     async sendFungibleTokenTip() {
       this.loading = true;

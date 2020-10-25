@@ -18,6 +18,9 @@ export default {
     setAvailableTokens(state, payload) {
       state.availableTokens = payload;
     },
+    resetTokenBalances(state) {
+      state.tokenBalances = [];
+    },
     addTokenBalance(state, payload) {
       state.tokenBalances = unionBy([payload], state.tokenBalances, 'contract');
     },
@@ -30,7 +33,6 @@ export default {
       const availableTokens = await fetchJson(
         `${activeNetwork.backendUrl}/tokenCache/tokenInfo`,
       ).catch(e => console.log(e));
-
       return commit('setAvailableTokens', availableTokens || {});
     },
     async tokenBalance({ rootState: { sdk } }, [token, address]) {
@@ -48,7 +50,9 @@ export default {
       const tokens = await fetchJson(
         `${activeNetwork.backendUrl}/tokenCache/balances?address=${address}`,
       ).catch(e => console.log(e));
-      if (!tokens) {
+      if (!Object.keys(tokens).length) {
+        commit('resetTokenBalances');
+        commit('setSelectedToken', null);
         return;
       }
       await Promise.all(
@@ -70,6 +74,7 @@ export default {
             updatedTokenInfo[contract] = { ...objectStructure };
             commit('setAvailableTokens', updatedTokenInfo);
           }
+
           return commit('addTokenBalance', objectStructure);
         }),
       );
