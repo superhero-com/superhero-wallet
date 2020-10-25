@@ -22,7 +22,7 @@ export default {
     searchTerm: { type: String, default: '' },
   },
   computed: {
-    ...mapState('fungibleTokens', ['tokenBalances', 'tokenInfo', 'aeTokenInfo']),
+    ...mapState('fungibleTokens', ['tokenBalances', 'availableTokens', 'aePublicData']),
     ...mapGetters(['tokenBalance', 'balanceCurrency']),
 
     /**
@@ -30,9 +30,9 @@ export default {
      */
     aeternityToken() {
       const aeInformation =
-        this.aeTokenInfo && Object.keys(this.aeTokenInfo).length > 0
+        this.aePublicData && Object.keys(this.aePublicData).length > 0
           ? {
-              ...this.aeTokenInfo,
+              ...this.aePublicData,
               convertedBalance: this.tokenBalance,
               symbol: 'AE',
               balanceCurrency: this.balanceCurrency,
@@ -45,7 +45,7 @@ export default {
      * Converts the token information object into a searchable list
      */
     convertedTokenInfo() {
-      return Object.entries(this.tokenInfo).map(([contract, tokenData]) => ({
+      return Object.entries(this.availableTokens).map(([contract, tokenData]) => ({
         name: tokenData.name,
         symbol: tokenData.symbol,
         contract,

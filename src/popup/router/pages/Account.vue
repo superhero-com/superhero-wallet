@@ -68,6 +68,7 @@ import Invite from '../../../icons/invite.svg?vue-component';
 import Withdraw from '../../../icons/withdraw-icon.svg?vue-component';
 import Settings from '../../../icons/settings-icon.svg?vue-component';
 import RecentTransactions from '../components/RecentTransactions';
+import Tokens from '../../../icons/tokens.svg?vue-component';
 import BalanceInfo from '../components/BalanceInfo';
 import AccountInfo from '../components/AccountInfo';
 import BoxButton from '../components/BoxButton';
@@ -86,6 +87,7 @@ export default {
     AccountInfo,
     BoxButton,
     Invite,
+    Tokens,
   },
   computed: {
     ...mapState(['tourRunning', 'backedUpSeed']),

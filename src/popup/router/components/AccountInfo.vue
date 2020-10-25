@@ -4,7 +4,9 @@
       <div class="account-name" data-cy="account-name">
         <UserAvatar :address="account.publicKey" :name="account.name" class="avatar" size="small" />
         <template v-if="activeAccountName.includes('.chain')">{{ activeAccountName }}</template>
-        <router-link to="/names" v-else>{{ $t('pages.account.claim-name') }} </router-link>
+        <router-link class="claim-chainname" to="/names" v-else
+          >{{ $t('pages.account.claim-name') }}
+        </router-link>
       </div>
       <div class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</div>
       <button data-cy="copy" @click="copy" v-clipboard:copy="account.publicKey">
@@ -87,6 +89,10 @@ export default {
     color: $text-color;
     font-size: 10px;
     letter-spacing: -0.2px;
+  }
+
+  .claim-chainname {
+    color: $white-1;
   }
 }
 </style>

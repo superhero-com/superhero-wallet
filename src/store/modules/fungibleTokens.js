@@ -6,10 +6,10 @@ import { fetchJson, convertToken } from '../../popup/utils/helper';
 export default {
   namespaced: true,
   state: {
-    tokenInfo: {},
+    availableTokens: {},
     tokenBalances: [],
-    selectedToken: {},
-    aeTokenInfo: {},
+    selectedToken: null,
+    aePublicData: {},
   },
   getters: {
     isFungibleToken({ selectedToken }) {
@@ -20,23 +20,23 @@ export default {
     setSelectedToken(state, payload) {
       state.selectedToken = payload;
     },
-    setTokenInfo(state, payload) {
-      state.tokenInfo = payload;
+    setAvailableTokens(state, payload) {
+      state.availableTokens = payload;
     },
     addTokenBalance(state, payload) {
       state.tokenBalances = unionBy([payload], state.tokenBalances, 'contract');
     },
-    setPublicAeTokenInfo(state, payload) {
-      state.aeTokenInfo = payload;
+    setAePublicData(state, payload) {
+      state.aePublicData = payload;
     },
   },
   actions: {
-    async getTokenInfo({ rootGetters: { activeNetwork }, commit }) {
-      const tokensInfo = await fetchJson(
+    async getAvailableTokens({ rootGetters: { activeNetwork }, commit }) {
+      const availableTokens = await fetchJson(
         `${activeNetwork.backendUrl}/tokenCache/tokenInfo`,
       ).catch(e => console.log(e));
 
-      return commit('setTokenInfo', tokensInfo || {});
+      return commit('setAvailableTokens', availableTokens || {});
     },
     async tokenBalance({ rootState: { sdk } }, [token, address]) {
       const tokenContract = await sdk.getContractInstance(FUNGIBLE_TOKEN_CONTRACT, {
@@ -47,7 +47,7 @@ export default {
       return new BigNumber(decodedResult || 0).toFixed();
     },
     async loadTokenBalances(
-      { rootGetters: { activeNetwork }, state: { tokenInfo }, commit, dispatch },
+      { rootGetters: { activeNetwork }, state: { availableTokens }, commit, dispatch },
       address,
     ) {
       const tokens = await fetchJson(
@@ -70,20 +70,20 @@ export default {
             balance,
             convertedBalance,
           };
-          if (Object.keys(tokenInfo[contract].length > 0)) {
-            const updatedTokenInfo = { ...tokenInfo };
+          if (Object.keys(availableTokens[contract].length > 0)) {
+            const updatedTokenInfo = { ...availableTokens };
             updatedTokenInfo[contract] = { ...objectStructure };
-            commit('setTokenInfo', updatedTokenInfo);
+            commit('setAvailableTokens', updatedTokenInfo);
           }
           return commit('addTokenBalance', objectStructure);
         }),
       );
     },
-    async aeternityInfo({ rootState: { current }, commit }) {
-      const aeternityInfo = await fetchJson(
+    async getAeternityData({ rootState: { current }, commit }) {
+      const [aeternityData] = await fetchJson(
         `https://api.coingecko.com/api/v3/coins/markets?ids=aeternity&vs_currency=${current.currency}`,
-      ).catch(e => console.log(e));
-      return commit('setPublicAeTokenInfo', aeternityInfo ? aeternityInfo[0] : {});
+      );
+      return commit('setAePublicData', aeternityData);
     },
   },
 };

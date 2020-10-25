@@ -4,7 +4,7 @@
     class="token-row"
     :to="{
       name: 'token-details',
-      params: { contract: tokenData.contract, data: tokenData, customTitle: tokenData.name },
+      params: { id: tokenData.contract },
     }"
   >
     <TokensAvatar

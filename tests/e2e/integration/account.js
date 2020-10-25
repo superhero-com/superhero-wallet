@@ -48,15 +48,13 @@ describe('Test cases for Account Page', () => {
       .urlEquals('/account')
       .get('[data-cy=view-all-transactions]')
       .should('be.visible')
-      .get('[data-cy=toggle-currency-dropdown]')
+      .get('[data-cy=currency-dropdown] [data-cy=custom-dropdown]')
       .should('be.visible')
       .click()
-      .get('[data-cy=currency-dropdown]')
+      .get('[data-cy=currency-dropdown] [data-cy=custom-dropdown]')
       .should('have.class', 'show')
-      .get('[data-cy=toggle-currency-dropdown]')
-      .should('be.visible')
       .click()
-      .get('[data-cy=currency-dropdown]')
+      .get('[data-cy=currency-dropdown] [data-cy=custom-dropdown]')
       .should('not.have.class', 'show');
   });
 });

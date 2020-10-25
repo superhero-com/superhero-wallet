@@ -38,6 +38,7 @@ const initialState = {
     latest: [],
     pending: [],
   },
+  pageTitle: '',
   sdk: null,
   middleware: null,
   tipping: null,
@@ -102,6 +103,7 @@ export default new Vuex.Store({
         invites,
         notificationSettings,
         permissions,
+        fungibleTokens,
       }) => ({
         migrations,
         current,
@@ -122,6 +124,7 @@ export default new Vuex.Store({
         invites,
         notificationSettings,
         permissions,
+        fungibleTokens,
       }),
     ),
     observables,

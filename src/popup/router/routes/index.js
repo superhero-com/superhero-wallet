@@ -347,16 +347,9 @@ export default [
     name: 'token-details',
     path: '/tokens/:id',
     component: TokenDetails,
+    props: true,
     meta: {
       title: 'token-details',
-      notPersist: true,
-    },
-    beforeEnter: (to, from, next) => {
-      if (to.name === 'token-details' && from.name !== 'tokens') {
-        next('/');
-        return;
-      }
-      next();
     },
   },
   {

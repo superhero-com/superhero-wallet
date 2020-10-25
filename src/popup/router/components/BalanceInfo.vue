@@ -1,30 +1,37 @@
 <template>
   <div class="external-svg" data-cy="balance-info">
-    <span class="title">{{ $t('pages.account.balance') }}</span>
     <div class="balance no-sign">
       <div class="amount">
-        <span>{{ tokenBalance }}</span>
-        <span>{{ $t('pages.appVUE.aeid') }}</span>
-      </div>
-      <div class="currenciesgroup">
-        <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-        <span class="approx-sign">~</span>
-        <li data-cy="currency-dropdown" class="dropdown-container" :class="dropdown ? 'show' : ''">
-          <ae-button data-cy="toggle-currency-dropdown" @click="dropdown = !dropdown">
-            {{ formatCurrency(balanceCurrency) }}
-            <ExpandedAngleArrow />
-          </ae-button>
-          <ul class="sub-dropdown">
-            <li class="single-currency" v-for="(rate, currency) in currencies" :key="currency">
-              <ae-button
-                @click="switchCurrency(currency)"
-                :class="current.currency === currency ? 'current' : ''"
-              >
-                {{ currency.toUpperCase() }}
-              </ae-button>
-            </li>
-          </ul>
-        </li>
+        <div class="balance-dropdown" data-cy="tokens-dropdown">
+          <Dropdown
+            v-if="tokenBalancesOptions.length"
+            :options="tokenBalancesOptions"
+            :method="changeToken"
+            :selected="token"
+            is-custom
+          />
+          <span class="display-value text-ellipsis">{{
+            Object.keys(selectedToken).length ? selectedToken.convertedBalance : tokenBalance
+          }}</span>
+          <span class="token-symbol">{{
+            !Object.keys(selectedToken).length ? $t('pages.appVUE.aeid') : selectedToken.symbol
+          }}</span>
+          <ExpandedAngleArrow class="expand-arrow" />
+        </div>
+        <div v-if="token === 'default'" class="currenciesgroup">
+          <div class="balance-dropdown" data-cy="currency-dropdown">
+            <Dropdown
+              :options="currenciesOptions"
+              :method="switchCurrency"
+              :selected="currency ? current.currency : currency"
+              is-custom
+            />
+            <!--eslint-disable-next-line vue-i18n/no-raw-text-->
+            <span class="approx-sign">~</span>
+            <span class="display-value text-ellipsis">{{ formatCurrency(balanceCurrency) }}</span>
+            <ExpandedAngleArrow class="expand-arrow" />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -33,20 +40,55 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import ExpandedAngleArrow from '../../../icons/expanded-angle-arrow.svg?vue-component';
+import Dropdown from './Dropdown';
 
 export default {
   components: {
     ExpandedAngleArrow,
+    Dropdown,
   },
-  data: () => ({ dropdown: false }),
+  data() {
+    return {
+      currency: '',
+      token: 'default',
+    };
+  },
   computed: {
     ...mapState(['current', 'currencies']),
+    ...mapState('fungibleTokens', ['tokenBalances', 'selectedToken']),
     ...mapGetters(['tokenBalance', 'balanceCurrency', 'formatCurrency']),
+    tokenBalancesOptions() {
+      return [
+        {
+          value: 'default',
+          text: `${this.tokenBalance} ${this.$t('pages.appVUE.aeid')}`,
+        },
+        ...this.tokenBalances,
+      ];
+    },
+    currenciesOptions() {
+      return Object.keys(this.currencies).map(currencyKey => ({
+        text: currencyKey.toUpperCase(),
+        value: currencyKey,
+      }));
+    },
+  },
+  created() {
+    this.token = Object.keys(this.selectedToken).length ? this.selectedToken.value : 'default';
   },
   methods: {
-    async switchCurrency(currency) {
-      this.$store.commit('setCurrentCurrency', currency);
-      this.dropdown = false;
+    async switchCurrency(selectedCurrency) {
+      this.$store.commit('setCurrentCurrency', selectedCurrency);
+    },
+    changeToken(value) {
+      this.token = value;
+      this.$store.commit(
+        'fungibleTokens/setSelectedToken',
+        value !== 'default' ? this.getSelectedToken() : {},
+      );
+    },
+    getSelectedToken() {
+      return this.tokenBalances.find(({ value }) => value === this.token) || {};
     },
   },
 };
@@ -66,52 +108,37 @@ export default {
     color: $text-color;
   }
 
-  li {
-    list-style-type: none;
+  .balance-dropdown {
+    margin-left: auto;
+  }
+}
 
-    .ae-icon {
-      font-size: 1.2rem;
-      margin: 10px 0 0 0;
-    }
+.balance-dropdown {
+  position: relative;
+
+  .dropdown {
+    position: absolute;
+    left: 0;
   }
 
-  button {
-    font-size: 14px;
-    width: 100%;
-    color: $black-color;
-    text-align: left;
-    margin: 0;
-    white-space: nowrap;
-    justify-content: unset;
-    padding: 0 5px !important;
+  .custom > button,
+  .custom > button:active:not(:disabled) {
+    opacity: 0;
   }
 
-  ul {
-    margin: 0;
-    box-shadow: none;
-    visibility: hidden;
-    max-height: 0;
-    padding: 0;
-    overflow: hidden;
-    transition: all 0.3s ease-in-out;
-    background: $nav-bg-color;
-    border: 1px solid $secondary-color;
-    border-radius: 5px;
+  .token-symbol {
+    color: $secondary-color;
   }
 
-  .dropdown-container {
-    z-index: 1;
-
-    &.show ul.sub-dropdown {
-      visibility: visible;
-      max-height: 165px;
-      overflow-y: scroll;
-    }
+  :last-child {
+    vertical-align: middle;
   }
+}
 
-  .sub-dropdown .single-currency:hover {
-    background: #33343e;
-  }
+.display-value {
+  display: inline-block;
+  max-width: 200px;
+  vertical-align: text-top;
 }
 
 .tour__step1:not(.v-tour__target--highlighted) .external-svg {
@@ -128,40 +155,26 @@ export default {
   padding: 0 20px 10px 20px;
   margin-top: 15px;
 
-  .title {
-    color: $white-color !important;
-    font-size: 16px;
-    padding: 0;
-    margin-top: 10px;
-  }
-
   .balance {
     font-size: 26px;
     color: $white-color;
     font-weight: normal;
-    text-align: left;
-    margin-left: 20px;
+    text-align: right;
     line-height: 34px;
-
-    &,
-    .ae-button {
-      font-family: 'Roboto', sans-serif;
-    }
+    margin: 0 auto;
 
     .amount {
       color: $text-color;
     }
-
-    .amount :last-child {
-      color: $secondary-color;
-    }
-
-    .ae-button {
-      display: block;
-      font-size: 18px;
-      color: $text-color !important;
-      font-weight: 500;
-    }
   }
+}
+
+.expand-arrow {
+  color: $gray-2;
+}
+
+.approx-sign,
+.expand-arrow {
+  margin: 0 -7px;
 }
 </style>
