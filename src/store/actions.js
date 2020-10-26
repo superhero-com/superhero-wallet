@@ -29,7 +29,7 @@ export default {
     if (!state.middleware) return [];
     const { publicKey } = state.account;
     let txs = await Promise.all([
-      state.middleware.getTxByAccount(publicKey, { limit, page }),
+      state.middleware.getTxByAccount(publicKey, limit, page).then(({ data }) => data),
       fetchJson(
         `${getters.activeNetwork.backendUrl}/cache/events/?address=${publicKey}&event=TipWithdrawn${
           recent ? `&limit=${limit}` : ``

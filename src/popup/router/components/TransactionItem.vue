@@ -11,7 +11,7 @@
         </span>
       </span>
       <span class="status">{{ status }}</span>
-      <span class="time" data-cy="time">{{ transaction.time | formatDate }}</span>
+      <span class="time" data-cy="time">{{ transaction.microTime | formatDate }}</span>
     </div>
     <div class="holder tx-info">
       <span v-if="tipUrl" class="url" @click="tipUrl && openUrl(tipUrl, true)">{{ tipUrl }}</span>

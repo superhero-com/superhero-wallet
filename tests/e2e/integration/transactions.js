@@ -24,13 +24,14 @@ describe('Tests cases for transactions page', () => {
   it('Render transaction item', () => {
     cy.openTransactions()
       .request(
-        `https://testnet.aeternity.io/middleware/transactions/account/${testAccount.publicKey}?limit=1`,
+        `https://testnet.aeternity.io/mdw/txs/backward?account=${testAccount.publicKey}&limit=1`,
       )
       .then(({ body }) => {
         const {
-          time,
+          // eslint-disable-next-line camelcase
+          micro_time,
           tx: { amount },
-        } = body[0];
+        } = body.data[0];
         cy.get('[data-cy=all-transactions] > li')
           .eq(0)
           .then(e => {
@@ -39,7 +40,7 @@ describe('Tests cases for transactions page', () => {
               .should('contain', amount / 10 ** 18);
             cy.wrap(e)
               .find('[data-cy=time]')
-              .should('contain', formatDate(time));
+              .should('contain', formatDate(micro_time));
             cy.wrap(e)
               .find('[data-cy=currency-amount]')
               .should('be.visible');
