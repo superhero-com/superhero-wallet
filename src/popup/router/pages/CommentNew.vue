@@ -29,7 +29,7 @@ export default {
   },
   async created() {
     this.loading = true;
-    this.id = +this.$route.query.id;
+    this.id = this.$route.query.id;
     if (this.$route.query.parentId) this.parentId = +this.$route.query.parentId;
     this.text = this.$route.query.text;
     if (!this.id || !this.text) {
