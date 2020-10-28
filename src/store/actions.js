@@ -154,14 +154,13 @@ export default {
     const sendComment = async postParam =>
       postJson(`${activeNetwork.backendUrl}/comment/api/`, { body: postParam });
 
-    const responseChallenge = await sendComment({ tipId, text, author });
+    const responseChallenge = await sendComment({ tipId, text, author, parentId });
     const signedChallenge = Buffer.from(
       await sdk.signMessage(responseChallenge.challenge),
     ).toString('hex');
     const respondChallenge = {
       challenge: responseChallenge.challenge,
       signature: signedChallenge,
-      parentId,
     };
     return sendComment(respondChallenge);
   },

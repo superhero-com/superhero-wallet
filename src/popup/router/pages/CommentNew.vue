@@ -16,6 +16,7 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
@@ -28,7 +29,7 @@ export default {
   },
   async created() {
     this.loading = true;
-    this.id = +this.$route.query.id;
+    this.id = this.$route.query.id;
     if (this.$route.query.parentId) this.parentId = +this.$route.query.parentId;
     this.text = this.$route.query.text;
     if (!this.id || !this.text) {
@@ -51,7 +52,7 @@ export default {
         this.openCallbackOrGoHome(true);
       } catch (e) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
-        e.payload = { id: this.id, text: this.text };
+        e.payload = pick(this, ['id', 'parentId', 'text']);
         throw e;
       } finally {
         this.loading = false;
