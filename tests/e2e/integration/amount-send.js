@@ -22,7 +22,7 @@ describe('Test cases AmountSend component', () => {
       .enterAmountSend(-1)
       .get('[data-cy=input-number]')
       .should('have.class', 'has-error')
-      .enterAmountSend(0.1)
+      .enterAmountSend(0.2)
       .get('[data-cy=input-number]')
       .should('not.have.class', 'has-error');
   });
