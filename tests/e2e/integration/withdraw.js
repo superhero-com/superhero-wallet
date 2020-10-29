@@ -34,7 +34,7 @@ describe('Test cases for Withdraw Page', () => {
       .enterAmountSend(0)
       .get('[data-cy=input-number]')
       .should('have.class', 'has-error')
-      .enterAmountSend(0.1)
+      .enterAmountSend(0.2)
       .get('[data-cy=input-number]')
       .should('not.have.class', 'has-error')
       .enterAddress('asd')
