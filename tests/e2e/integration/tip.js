@@ -38,7 +38,6 @@ describe('Test cases for tip page', () => {
       .enterTipDetails({ ...tip })
       .buttonShouldNotBeDisabled('[data-cy=send-tip]')
 
-      .enterTipDetails({ ...tip })
       .goBack()
       .get('[data-cy=tip-container]')
       .should('not.be.visible')

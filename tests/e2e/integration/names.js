@@ -1,18 +1,13 @@
 const name = 'test.chain';
 describe('Test cases for names', () => {
-  beforeEach(() => {
-    cy.login({ name });
-  });
-
-  it('Sidebar menu show .chain name', () => {
-    cy.openMenu()
+  it('Contains .chain name in sidebar menu and account info', () => {
+    cy.login({ name })
+      .openMenu()
       .get('[data-cy=chain-name]')
       .should('be.visible')
-      .contains(name);
-  });
+      .contains(name)
 
-  it('Account info contain .chain name', () => {
-    cy.get('[data-cy=account-name]')
+      .get('[data-cy=account-name]')
       .should('be.visible')
       .contains(name);
   });

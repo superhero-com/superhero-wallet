@@ -1,51 +1,37 @@
 describe('Test cases for Front Page', () => {
-  beforeEach(() => {
-    cy.openPopup();
-  });
+  it('Opens Index page, agrees, disagrees on terms, opens generate and import wallets', () => {
+    cy.openPopup()
+      .get('[data-cy=checkbox]')
+      .should('be.visible')
 
-  it('Have terms checkbox', () => {
-    cy.get('[data-cy=checkbox]').should('be.visible');
-  });
+      .buttonShouldBeDisabled('[data-cy=generate-wallet]')
+      .buttonShouldBeDisabled('[data-cy=import-wallet]')
 
-  it('Buttons are disabled', () => {
-    cy.buttonShouldBeDisabled('[data-cy=generate-wallet]').buttonShouldBeDisabled(
-      '[data-cy=import-wallet]',
-    );
-  });
+      .get('[data-cy=generate-wallet]')
+      .should('be.visible')
+      .get('[data-cy=import-wallet]')
+      .should('be.visible')
 
-  it('Have create/import wallet buttons', () => {
-    cy.get('[data-cy=generate-wallet]').should('be.visible');
-    cy.get('[data-cy=import-wallet]').should('be.visible');
-  });
-
-  it('Terms agree activate buttons', () => {
-    cy.termsAgree()
+      .termsAgree()
       .buttonShouldNotBeDisabled('[data-cy=generate-wallet]')
-      .buttonShouldNotBeDisabled('[data-cy=import-wallet]');
-  });
+      .buttonShouldNotBeDisabled('[data-cy=import-wallet]')
 
-  it('Terms uncheck disable buttons', () => {
-    cy.termsAgree()
       .termsAgree()
       .buttonShouldBeDisabled('[data-cy=generate-wallet]')
-      .buttonShouldBeDisabled('[data-cy=import-wallet]');
-  });
+      .buttonShouldBeDisabled('[data-cy=import-wallet]')
 
-  it('Open terms and conditions', () => {
-    cy.openTerms()
+      .openTerms()
       .get('[data-cy=terms]')
-      .should('not.exist');
-  });
+      .should('not.exist')
 
-  it('Open generate wallet page', () => {
-    cy.openGenerateWallet()
-      .get('[data-cy=generate-wallet]')
-      .should('not.exist');
-  });
-
-  it('Open import wallet page', () => {
-    cy.openImportWallet()
+      .goBack()
+      .openImportWallet()
       .get('[data-cy=import-wallet]')
+      .should('not.exist')
+
+      .goBack()
+      .openGenerateWallet()
+      .get('[data-cy=generate-wallet]')
       .should('not.exist');
   });
 });
