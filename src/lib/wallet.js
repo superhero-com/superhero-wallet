@@ -1,7 +1,7 @@
 import { Node, MemoryAccount, RpcWallet } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
-import { isEmpty, times } from 'lodash-es';
+import { isEmpty, times, camelCase } from 'lodash-es';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
 import {
@@ -17,18 +17,51 @@ import { checkPermissions } from '../store/modules/permissions';
 
 async function initMiddleware() {
   const { middlewareUrl } = store.getters.activeNetwork;
-  const swag = await fetchJson(`${middlewareUrl}/middleware/api`);
-  swag.paths['/names/auctions/{name}/info'] = {
-    get: {
-      operationId: 'getAuctionInfoByName',
-      parameters: [
-        {
-          in: 'path',
-          name: 'name',
-          required: true,
-          type: 'string',
-        },
-      ],
+  const swag = await fetchJson(`${middlewareUrl}/swagger/swagger.json`);
+  swag.paths = {
+    ...swag.paths,
+    'name/auction/{name}': {
+      get: {
+        operationId: 'getAuctionInfoByName',
+        parameters: [
+          {
+            in: 'path',
+            name: 'name',
+            required: true,
+            type: 'string',
+          },
+        ],
+      },
+    },
+    'names/auctions': {
+      get: {
+        operationId: 'getActiveNameAuctions',
+      },
+    },
+    'txs/backward': {
+      get: {
+        operationId: 'getTxByAccount',
+        parameters: [
+          {
+            in: 'query',
+            name: 'account',
+            required: true,
+            type: 'string',
+          },
+          {
+            in: 'query',
+            name: 'limit',
+            required: true,
+            type: 'integer',
+          },
+          {
+            in: 'query',
+            name: 'page',
+            required: true,
+            type: 'integer',
+          },
+        ],
+      },
     },
   };
   const { api: middleware } = await Swagger.compose({
@@ -37,7 +70,11 @@ async function initMiddleware() {
       axiosError: () => '',
     },
   })({ swag });
-  store.commit('setMiddleware', middleware);
+
+  store.commit(
+    'setMiddleware',
+    Object.entries(middleware).reduce((m, [k, v]) => ({ ...m, [camelCase(k)]: v }), {}),
+  );
   store.dispatch('names/fetchOwned');
   store.dispatch('names/extendNames');
 }
