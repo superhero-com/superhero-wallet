@@ -70,6 +70,7 @@ export default {
 
   .primary-button {
     width: 282px;
+    font-weight: 600;
 
     &:hover {
       background: #4aabff;

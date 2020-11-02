@@ -5,7 +5,9 @@
     </div>
     <div class="div-icons">
       <div class="extension">
-        {{ $t('pages.index.platforms.browser-extension') }}
+        <div>
+          {{ $t('pages.index.platforms.browser-extension') }}
+        </div>
         <div>
           <a
             @click="
@@ -35,7 +37,9 @@
         </div>
       </div>
       <div class="mobile-app">
-        {{ $t('pages.index.platforms.mobile-app') }}
+        <div>
+          {{ $t('pages.index.platforms.mobile-app') }}
+        </div>
         <div>
           <a @click="openUrl('https://testflight.apple.com/join/3o5r4dQQ', true)">
             <img
@@ -83,17 +87,16 @@ export default {
 @import '../../../common/variables';
 
 .platforms {
+  font-size: 15px;
   background-color: #21222c;
-  padding: 0 10px;
   word-break: break-word;
 
-  .text,
-  .div-icons {
-    padding: 10px;
+  .text {
+    padding: 15px;
   }
 
   .div-icons {
-    border-top: 2px solid $nav-bg-color;
+    border-top: 1px solid $bg-color;
     display: flex;
     text-align: center;
     padding-top: 0;
@@ -101,28 +104,42 @@ export default {
 
     .extension {
       width: 50%;
-      border-right: 1px solid $nav-bg-color;
+      border-right: 1px solid $bg-color;
     }
 
     .mobile-app {
       flex-grow: 1;
-      border-left: 1px solid $nav-bg-color;
     }
 
     .mobile-app,
     .extension {
+      padding: 15px 0;
+
       div {
         display: flex;
         justify-content: space-around;
-        padding: 10px 0;
 
-        a img {
-          height: 45px;
-          width: 45px;
+        + div {
+          padding-top: 15px;
+        }
+
+        a {
           padding: 5px;
+          border-radius: 10px;
+          height: 52px;
+          width: 52px;
+
+          img {
+            height: 40px;
+            width: 40px;
+          }
 
           &:hover {
             background-color: #32333c;
+
+            img {
+              opacity: 1;
+            }
           }
         }
       }
