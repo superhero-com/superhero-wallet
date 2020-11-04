@@ -23,7 +23,7 @@
             <Dropdown
               :options="currenciesOptions"
               :method="switchCurrency"
-              :selected="currency ? current.currency : currency"
+              :selected="current.currency"
               is-custom
             />
             <!--eslint-disable-next-line vue-i18n/no-raw-text-->
@@ -46,11 +46,6 @@ export default {
   components: {
     ExpandedAngleArrow,
     Dropdown,
-  },
-  data() {
-    return {
-      currency: '',
-    };
   },
   computed: {
     ...mapState(['current', 'currencies']),
