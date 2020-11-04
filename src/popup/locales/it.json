@@ -836,7 +836,7 @@
       "across": "across the Globe"
     },
     "nodeConnectionStatus": {
-      "error": "Unable to connect to choosen node",
+      "error": "Unable to connect to chosen node",
       "connecting": "Connecting to node...",
       "connected": "Connected",
       "initServices": "Initializing services..."
