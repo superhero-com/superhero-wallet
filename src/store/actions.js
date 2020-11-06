@@ -39,12 +39,13 @@ export default {
           response.map(({ address, amount, ...t }) => ({
             tx: { address, amount },
             ...t,
+            microTime: t.time,
             claim: true,
           })),
         )
         .catch(() => []),
     ]);
-    txs = orderBy(flatten(txs), ['time'], ['desc']);
+    txs = orderBy(flatten(txs), ['microTime'], ['desc']);
     return recent ? txs.slice(0, limit) : txs;
   },
 
