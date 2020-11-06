@@ -110,7 +110,7 @@ export default {
     ...mapGetters(['tippingSupported', 'formatCurrency', 'tokenBalance', 'balanceCurrency']),
     ...mapState('fungibleTokens', ['tokenBalances', 'availableTokens', 'aePublicData']),
     tokenData() {
-      if (!this.id) {
+      if (this.id === 'aeternity') {
         return {
           ...this.aePublicData,
           symbol: 'AE',

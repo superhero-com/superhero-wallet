@@ -36,7 +36,7 @@ export default {
               convertedBalance: this.tokenBalance,
               symbol: 'AE',
               balanceCurrency: this.balanceCurrency,
-              contract: '',
+              contract: 'aeternity',
             }
           : null;
       return aeInformation;

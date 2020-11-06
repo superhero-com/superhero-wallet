@@ -7,7 +7,11 @@
       params: { id: tokenData.contract },
     }"
   >
-    <Avatar class="token-image" :address="tokenData.contract" :src="tokenData.image || null" />
+    <Avatar
+      class="token-image"
+      :address="tokenData.contract !== 'aeternity' ? tokenData.contract : ''"
+      :src="tokenData.image || null"
+    />
     <div class="token-info">
       <div>
         <div class="first-cell title text-ellipsis" :title="tokenData.name">
