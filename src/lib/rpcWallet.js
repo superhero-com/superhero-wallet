@@ -43,7 +43,7 @@ export default {
   initNetwork(network = defaultNetwork.name) {
     this.network = network;
     this.compiler = this.nodes[network].compilerUrl;
-    this.internalUrl = this.nodes[network].internalUrl;
+    this.url = this.nodes[network].url;
   },
   async initNodes() {
     this.nodes = await getAllNetworks();
@@ -51,7 +51,7 @@ export default {
   async initSdk() {
     const context = this;
     try {
-      const node = await Node({ url: this.internalUrl, internalUrl: this.internalUrl });
+      const node = await Node({ url: this.url });
       this.sdk = await RpcWallet({
         nodes: [{ name: this.network, instance: node }],
         compilerUrl: this.compiler,
@@ -264,7 +264,7 @@ export default {
   async addNewNetwork(network) {
     await this.initNodes();
     this.initNetwork(network);
-    const node = await Node({ url: this.internalUrl, internalUrl: this.internalUrl });
+    const node = await Node({ url: this.url });
     if (this.sdk) {
       try {
         await this.sdk.addNode(network, node, true);

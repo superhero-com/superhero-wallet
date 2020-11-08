@@ -25,7 +25,7 @@ export const getActiveAccount = async () => {
 export const switchNode = async () => {
   if (sdk) {
     const network = await getActiveNetwork();
-    const node = await Node({ url: network.internalUrl, internalUrl: network.internalUrl });
+    const node = await Node({ url: network.url });
     try {
       await sdk.addNode(network.name, node, true);
     } catch (e) {
@@ -39,7 +39,7 @@ export const getSDK = async () => {
   if (!sdk) {
     try {
       const network = await getActiveNetwork();
-      const node = await Node({ url: network.internalUrl, internalUrl: network.internalUrl });
+      const node = await Node({ url: network.url });
       sdk = await Universal({
         nodes: [{ name: network.name, instance: node }],
         networkId: network.networkId,

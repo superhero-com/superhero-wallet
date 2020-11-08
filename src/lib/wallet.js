@@ -121,11 +121,8 @@ export default {
     }
 
     const { activeNetwork } = store.getters;
-    const { internalUrl, compilerUrl } = activeNetwork;
-    const node = await Node({
-      url: internalUrl,
-      internalUrl,
-    });
+    const { url, compilerUrl } = activeNetwork;
+    const node = await Node({ url });
     const account = MemoryAccount({ keypair });
     try {
       const acceptCb = (_, { accept }) => accept();
