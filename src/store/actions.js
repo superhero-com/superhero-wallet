@@ -51,10 +51,6 @@ export default {
     return recent ? txs.slice(0, limit) : txs;
   },
 
-  unlockWallet(context, payload) {
-    return postMessage({ type: 'unlockWallet', payload });
-  },
-
   async getAccount(context, { idx }) {
     return (await postMessage({ type: 'getAccount', payload: { idx } })).address;
   },
