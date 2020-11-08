@@ -2,25 +2,6 @@ import { generateHdWallet, getHdWalletAccount } from './popup/utils/hdWallet';
 import { stringifyForStorage, parseFromStorage } from './popup/utils/helper';
 
 class WalletController {
-  constructor() {
-    if (!process.env.IS_EXTENSION) return;
-    setInterval(() => {
-      browser.windows.getAll({}).then(wins => {
-        if (wins.length === 0) {
-          this.lockWallet();
-          sessionStorage.removeItem('phishing_urls');
-        }
-      });
-      if (!this.wallet) {
-        this.lockWallet();
-      }
-    }, 5000);
-  }
-
-  lockWallet() {
-    this.wallet = null;
-  }
-
   generateWallet({ seed }) {
     this.wallet = generateHdWallet(parseFromStorage(seed));
     const { address } = getHdWalletAccount(this.wallet);

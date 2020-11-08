@@ -296,7 +296,7 @@ export default {
       browser.tabs.reload(aepp.connection.port.sender.tab.id);
       this.sdk.removeRpcClient(aepp.id);
     });
-    walletController.lockWallet();
+    delete walletController.wallet;
     this.initFields();
   },
   async [AEX2_METHODS.INIT_RPC_WALLET]({ address, network }) {
