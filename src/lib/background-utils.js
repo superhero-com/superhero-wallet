@@ -13,7 +13,6 @@ import walletController from '../wallet-controller';
 
 let sdk;
 let tippingContract;
-let tippingContractAddress;
 
 export const getActiveAccount = async () => {
   const { account } = await getState();
@@ -72,15 +71,6 @@ export const getTippingContractInstance = async tx => {
   await getSDK();
   tippingContract = await setContractInstance(tx, sdk, tx.address);
   return tippingContract;
-};
-
-export const getTippingContractAddress = async address => {
-  if (tippingContractAddress) return tippingContractAddress;
-  await getSDK();
-  tippingContractAddress = address.includes('.chain')
-    ? getAddressByNameEntry(await sdk.api.getNameEntryByName(address), 'contract_pubkey')
-    : address;
-  return tippingContractAddress;
 };
 
 export const contractCallStatic = async ({ tx, callType }) => {

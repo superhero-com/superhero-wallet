@@ -8,7 +8,6 @@ import { AEX2_METHODS, defaultNetwork, NO_POPUP_AEPPS } from '../popup/utils/con
 import {
   extractHostName,
   getAllNetworks,
-  getAddressByNameEntry,
   getAeppAccountPermission,
   parseFromStorage,
   stringifyForStorage,
@@ -45,7 +44,6 @@ export default {
     this.network = network;
     this.compiler = this.nodes[network].compilerUrl;
     this.internalUrl = this.nodes[network].internalUrl;
-    this.tipContractAddress = this.nodes[network].tipContract;
   },
   async initNodes() {
     this.nodes = await getAllNetworks();
@@ -95,12 +93,6 @@ export default {
         },
       });
 
-      this.tipContractAddress = this.tipContractAddress.includes('.chain')
-        ? getAddressByNameEntry(
-            await this.sdk.api.getNameEntryByName(this.tipContractAddress).catch(() => false),
-            'contract_pubkey',
-          )
-        : this.tipContractAddress;
       this.connectionsQueue.forEach(c => this.addConnection(c));
       this.connectionsQueue = [];
     } catch (e) {
