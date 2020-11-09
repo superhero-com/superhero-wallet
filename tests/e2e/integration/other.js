@@ -5,31 +5,31 @@ const txs = [
 ];
 
 describe('Tests cases not connected to specific page', () => {
-  [
-    { path: '/popup-sign-tx', redirect: false },
-    { path: '/connect', redirect: false },
-    { path: '/ask-accounts', redirect: false },
-    { path: '/message-sign', redirect: false },
-    { path: '/success-tip', redirect: false },
-    { path: '/intro', redirect: false },
-    { path: '/notifications', redirect: false },
-    { path: '/tip', redirect: true },
-    { path: '/receive', redirect: true },
-    { path: '/send', redirect: true },
-    { path: '/names', redirect: true },
-    { path: '/aboutSettings', redirect: true },
-    { path: '/transactions', redirect: true },
-  ].forEach(({ path, redirect }) => {
-    it(`${redirect ? '' : 'no '}redirect to last visited route ${path}`, () => {
+  it(`(not) redirects to last visited routes`, () => {
+    [
+      { path: '/popup-sign-tx', redirect: false },
+      { path: '/connect', redirect: false },
+      { path: '/ask-accounts', redirect: false },
+      { path: '/message-sign', redirect: false },
+      { path: '/success-tip', redirect: false },
+      { path: '/intro', redirect: false },
+      { path: '/notifications', redirect: false },
+      { path: '/tip', redirect: true },
+      { path: '/receive', redirect: true },
+      { path: '/send', redirect: true },
+      { path: '/names', redirect: true },
+      { path: '/aboutSettings', redirect: true },
+      { path: '/transactions', redirect: true },
+    ].forEach(({ path, redirect }) => {
       cy.login({}, path)
-        .wait(500)
+        .get('[data-cy=connect-node]')
         .visit(`chrome/popup/popup`)
         .urlEquals(redirect ? path : '/account');
     });
   });
 
-  txs.forEach(pendingTransaction => {
-    it('Show pending tx', () => {
+  it('Shows pending tx', () => {
+    txs.forEach(pendingTransaction => {
       cy.login({ pendingTransaction })
         .get('[data-cy=pending-txs]')
         .should('be.visible');

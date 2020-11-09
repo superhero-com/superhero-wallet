@@ -19,8 +19,8 @@
           data-cy="tip-button"
           :text="$t('pages.account.send')"
           accent
-          :disabled="!allowTipping"
-          :to="allowTipping ? { name: 'tip' } : {}"
+          :disabled="!tippingSupported"
+          :to="tippingSupported ? { name: 'tip' } : {}"
           class="tour__step2"
         >
           <Tip slot="icon" />
@@ -28,8 +28,8 @@
         <BoxButton
           :text="$t('pages.account.claim')"
           accent
-          :to="allowTipping ? { name: 'claim-tips' } : {}"
-          :disabled="!allowTipping"
+          :to="tippingSupported ? { name: 'claim-tips' } : {}"
+          :disabled="!tippingSupported"
           class="tour__step4"
         >
           <Claim slot="icon" />
@@ -86,7 +86,7 @@ export default {
   },
   computed: {
     ...mapState(['tourRunning', 'backedUpSeed']),
-    ...mapGetters(['allowTipping']),
+    ...mapGetters(['tippingSupported']),
   },
 };
 </script>

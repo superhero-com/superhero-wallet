@@ -1,63 +1,35 @@
 <template>
   <img
-    v-if="!error && !identicon"
-    :src="profileImage"
     class="user-avatar"
+    :src="error ? avatar : profileImage"
     :class="size"
     @error="error = true"
-  />
-  <img v-else-if="avatar.type === 'avatar'" :src="avatar.src" class="user-avatar" :class="size" />
-  <div
-    v-else-if="avatar.type === 'identicon'"
-    v-html="avatar.src"
-    class="user-identicon"
-    :class="size"
   />
 </template>
 
 <script>
-import jdenticon from 'jdenticon';
-import Avatars from '@dicebear/avatars';
-import sprites from '@dicebear/avatars-avataaars-sprites';
-import {
-  BACKEND_URL,
-  IDENTICON_CONFIG,
-  IDENTICON_SIZES,
-  AVATAR_CONFIG,
-} from '../../utils/constants';
+import { mapState } from 'vuex';
 
 export default {
   props: {
-    address: String,
-    name: [String, Boolean],
+    address: { type: String, required: true },
+    name: { type: [String, Boolean], default: '' }, // TODO: Name shouldn't be boolean
     size: {
       type: String,
       default: 'normal',
     },
-    identicon: Boolean,
   },
   data: () => ({
     error: false,
   }),
-  computed: {
-    profileImage() {
-      return `${BACKEND_URL}/profile/image/${this.address}`;
+  computed: mapState({
+    profileImage(state, { getProfileImage }) {
+      return getProfileImage(this.address);
     },
-    avatar() {
-      if (this.name) {
-        const avatars = new Avatars(sprites, AVATAR_CONFIG);
-        return {
-          type: 'avatar',
-          src: avatars.create(this.name),
-        };
-      }
-      jdenticon.config = IDENTICON_CONFIG;
-      return {
-        type: 'identicon',
-        src: jdenticon.toSvg(this.address, IDENTICON_SIZES[this.size]),
-      };
+    avatar(state, { getAvatar }) {
+      return getAvatar(this.name || this.address);
     },
-  },
+  }),
 };
 </script>
 
@@ -67,13 +39,13 @@ $small-size: 30px;
 $normal-size: 38px;
 $lg-size: 64px;
 
-.user-avatar,
-.user-identicon {
+.user-avatar {
   width: $normal-size;
   height: $normal-size;
   border-radius: 50%;
   overflow: hidden;
   display: inline-block;
+  object-fit: cover;
 
   &.lg {
     height: $lg-size;

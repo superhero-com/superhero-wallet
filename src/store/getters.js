@@ -12,9 +12,9 @@ export default {
     return state.account;
   },
   currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,
-  balanceCurrency({ balance }, { currentCurrencyRate }) {
-    return (currentCurrencyRate * balance).toFixed(2);
-  },
+  convertToCurrency: (state, { currentCurrencyRate }) => value =>
+    (currentCurrencyRate * value).toFixed(2),
+  balanceCurrency: ({ balance }, { convertToCurrency }) => convertToCurrency(balance),
   formatCurrency: ({ current: { currency } }) => value =>
     // TODO: Use the current language from i18n module
     new Intl.NumberFormat(navigator.language, { style: 'currency', currency }).format(value),
@@ -28,14 +28,16 @@ export default {
   activeNetwork({ current: { network } }, { networks }) {
     return networks[network];
   },
-  mainnet(state, { activeNetwork }) {
-    return activeNetwork.networkId === 'ae_mainnet';
-  },
+  getProfileImage: (_, { activeNetwork }) => address =>
+    `${activeNetwork.backendUrl}/profile/image/${address}`,
+  getAvatar: () => address => `https://avatars.z52da5wt.xyz/${address}`,
   activeAccountName({ account }, getters) {
     return getters['names/getDefault'](get(account, 'publicKey')) || 'Main account';
   },
-  allowTipping(state, { mainnet }) {
-    return mainnet || process.env.RUNNING_IN_TESTS;
+  tippingSupported(state, { activeNetwork }) {
+    return (
+      ['ae_mainnet', 'ae_uat'].includes(activeNetwork.networkId) || process.env.RUNNING_IN_TESTS
+    );
   },
   tokenBalance(state) {
     return state.current.token !== 0

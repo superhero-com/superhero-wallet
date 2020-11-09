@@ -18,7 +18,10 @@
       {{ tip.title }}
     </div>
 
-    <Button @click="sendTip" :disabled="amountError || !minCallFee || !tipping || !allowTipping">
+    <Button
+      @click="sendTip"
+      :disabled="amountError || !minCallFee || !tipping || !tippingSupported"
+    >
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button @click="openCallbackOrGoHome(false)">
@@ -49,7 +52,7 @@ export default {
     minCallFee: null,
   }),
   computed: {
-    ...mapGetters(['account', 'allowTipping', 'minTipAmount']),
+    ...mapGetters(['account', 'tippingSupported', 'minTipAmount']),
     ...mapState(['tippingAddress', 'balance', 'tipping', 'sdk']),
     urlStatus() {
       return this.$store.getters['tipUrl/status'](this.tip.url);

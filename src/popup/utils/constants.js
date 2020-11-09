@@ -1,6 +1,7 @@
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { ABI_VERSIONS, TX_TYPE, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import BigNumber from 'bignumber.js';
+import { i18n } from './i18nHelper';
 
 export const MAGNITUDE = 18;
 export const TX_TYPES = {
@@ -69,9 +70,10 @@ export const defaultNetworks = [
     url: 'https://testnet.aeternity.io',
     internalUrl: 'https://testnet.aeternity.io',
     networkId: 'ae_uat',
-    middlewareUrl: 'https://testnet.aeternity.io',
+    middlewareUrl: 'https://testnet.aeternity.io/mdw',
     explorerUrl: 'https://testnet.aeternal.io',
     compilerUrl: 'https://latest.compiler.aepps.com',
+    backendUrl: 'https://test-tipping.aeternity.art',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_Dnwribmd21YrxSQnqXCB5vTFPrgYJx2eg2TrbLvbdyEbTMejw',
     tipContract: 'ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj',
@@ -81,9 +83,10 @@ export const defaultNetworks = [
     url: 'https://mainnet.aeternity.io',
     internalUrl: 'https://mainnet.aeternity.io',
     networkId: 'ae_mainnet',
-    middlewareUrl: 'https://mainnet.aeternity.io',
+    middlewareUrl: 'https://mainnet.aeternity.io/mdw',
     explorerUrl: 'https://mainnet.aeternal.io',
     compilerUrl: 'https://compiler.aepps.com',
+    backendUrl: 'https://raendom-backend.z52da5wt.xyz',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tipContract: 'superhero.chain',
@@ -95,8 +98,6 @@ export const defaultNetwork =
   process.env.NETWORK === 'Testnet' ? defaultNetworks[0] : defaultNetworks[1];
 
 export const AGGREGATOR_URL = 'https://superhero.com/';
-export const BACKEND_URL = 'https://raendom-backend.z52da5wt.xyz';
-export const TIP_SERVICE = `${BACKEND_URL}/claim/submit`;
 export const NO_POPUP_AEPPS = [
   'youdonotneedacapetobeahero.com',
   'superhero.com',
@@ -107,6 +108,7 @@ export const NO_POPUP_AEPPS = [
 
 export const TXS_PER_PAGE = 30;
 export const MAX_AMOUNT_WITHOUT_CONFIRM = 10;
+export const LIMIT_KEY = 'limit';
 export const AENS_DOMAIN = '.chain';
 export const MAX_AUCTION_NAME_LENGTH = 12 + AENS_DOMAIN.length;
 export const MIN_NAME_LENGTH = 14;
@@ -141,35 +143,44 @@ contract Tipping =
   entrypoint get_state : () => state
   entrypoint unclaimed_for_url : (string) => int`;
 
-export const IDENTICON_CONFIG = {
-  lightness: {
-    color: [0.4, 1.0],
-    grayscale: [0.5, 1.0],
-  },
-  saturation: {
-    color: 1.0,
-    grayscale: 1.0,
-  },
-  backColor: '#12121bff',
-};
-
-export const AVATAR_CONFIG = {
-  mode: 'exclude',
-  accessoriesChance: 28,
-  facialHairChance: 27,
-  eyes: ['cry', 'close'],
-  eyebrow: ['angry', 'sad', 'unibrow'],
-  mouth: ['concerned', 'vomit', 'disbelief', 'grimace', 'sad', 'scream'],
-  base64: true,
-};
-
-export const IDENTICON_SIZES = {
-  'x-small': 20,
-  small: 30,
-  normal: 38,
-  lg: 64,
-};
-
 export const BUG_REPORT_URL = 'https://thesuperherowallet.typeform.com/to/vh8Ffu';
 
 export const CHANGE_CRYPTO_AE_URL = 'https://app.jelly.market';
+
+export const NOTIFICATION_SETTINGS = [
+  {
+    text: i18n.t('pages.notification-settings.commentOnTip'),
+    checked: true,
+    type: 'COMMENT_ON_TIP',
+  },
+  {
+    text: i18n.t('pages.notification-settings.commentOnComment'),
+    checked: false,
+    type: 'COMMENT_ON_COMMENT',
+  },
+  {
+    text: i18n.t('pages.notification-settings.retipOnTip'),
+    checked: true,
+    type: 'RETIP_ON_TIP',
+  },
+  {
+    text: i18n.t('pages.notification-settings.wallet'),
+    checked: true,
+    type: 'wallet',
+  },
+  {
+    text: i18n.t('pages.notification-settings.tipOnComment'),
+    checked: true,
+    type: 'TIP_ON_COMMENT',
+  },
+  {
+    text: i18n.t('pages.notification-settings.claimOfTip'),
+    checked: true,
+    type: 'CLAIM_OF_TIP',
+  },
+  {
+    text: i18n.t('pages.notification-settings.claimOfRetip'),
+    checked: true,
+    type: 'CLAIM_OF_RETIP',
+  },
+];

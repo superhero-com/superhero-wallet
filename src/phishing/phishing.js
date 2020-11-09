@@ -5,8 +5,6 @@ import '@aeternity/aepp-components-3/dist/aepp.components.css';
 
 global.browser = require('webextension-polyfill');
 
-Vue.prototype.$browser = global.browser;
-
 Vue.use(Components);
 
 export default new Vue({

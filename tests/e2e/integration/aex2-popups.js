@@ -9,7 +9,7 @@ describe('Tests cases for AEX-2 popups', () => {
     cy.login();
   });
 
-  it('Sign Message popup display correct data', () => {
+  it('Sign Message popup, Conncet display correct data', () => {
     const props = popupProps.messageSign;
     const host = `${props.host} (${props.name})`;
     cy.openAex2Popup('messageSign')
@@ -19,25 +19,23 @@ describe('Tests cases for AEX-2 popups', () => {
       .get('[data-cy=message]')
       .should('be.visible')
       .should('contain', props.action.params.message);
-  });
 
-  it('Connect Popup display correct data', () => {
-    const props = popupProps.connectConfirm;
-    const host = `${props.host} (${props.name})`;
+    const props1 = popupProps.connectConfirm;
+    const host1 = `${props.host} (${props1.name})`;
     cy.openAex2Popup('connectConfirm')
       .get('[data-cy=aepp]')
       .should('be.visible')
-      .should('contain', host)
+      .should('contain', host1)
       .get('[data-cy=host]')
       .should('be.visible')
-      .should('contain', props.host)
+      .should('contain', props1.host)
       .get('[data-cy=name]')
       .should('be.visible')
-      .should('contain', props.name);
+      .should('contain', props1.name);
   });
 
-  popups.forEach(popup => {
-    it(`Open ${popup} and send deny action`, () => {
+  it('Opens connectConfirm, sign, messageSign popups and send accept/deny action', () => {
+    popups.forEach(popup => {
       cy.openAex2Popup(popup, TX_TYPE.spend)
         .get('[data-cy=deny]')
         .click()
@@ -46,10 +44,8 @@ describe('Tests cases for AEX-2 popups', () => {
           expect(win.reject).to.equal('send');
         });
     });
-  });
 
-  popups.forEach(popup => {
-    it(`Open ${popup} and send accept action`, () => {
+    popups.forEach(popup => {
       cy.openAex2Popup(popup, TX_TYPE.spend)
         .get('[data-cy=accept]')
         .click()

@@ -108,7 +108,7 @@
     },
     "tip-mainnet-warning": {
       "title": "Warning",
-      "msg": "Tip/Claim functionality works only on Mainnet."
+      "msg": "Tip/Claim functionality works on the predefined networks."
     },
     "confirm-transaction-sign": {
       "unknown": "Unknown",
@@ -206,10 +206,7 @@
       "send": "Send",
       "ever": "Ever.",
       "wellcome": "Wellcome on board!",
-      "understand": "I understand that this is a cryptocurrency wallet and i am responsible for backing up my account recovery seed phrase.",
-      "extension": "Browser extension",
-      "mobileApp": "Mobile app"
-
+      "understand": "I understand that this is a cryptocurrency wallet and I am responsible for backing up my account recovery seed phrase."
     },
     "titles": {
       "settings": "Settings",
@@ -226,9 +223,11 @@
       "withdraw": "Withdraw",
       "topUp": "Top Up",
       "notifications": "Notifications",
+      "notification-settings": "Notification Preference",
       "names": "Names",
       "bidding": "Bidding",
       "networks": "Networks",
+      "permissionsSettings": "Permissions settings",
       "comment-new": "Add comment",
       "home": "Superhero Home",
       "donate-error": "Donate Data",
@@ -501,7 +500,7 @@
         "not-found": "Not found",
         "current-bid": "Current bid",
         "previous-bids": "Previous bids",
-        "bidding": "Go for biddong",
+        "bidding": "Go for bidding",
         "bid-on": "Bid on",
         "current-heighest-bid": "Current heighest bid",
         "remaining-time": "Remaining Time",
@@ -522,7 +521,12 @@
       "term3": "Privacy Policy",
       "termsAndConditions": "Terms of Use",
       "heading": "Social platform with no hidden agenda.",
-      "webVersion": "Or use a web version",
+      "platforms": {
+        "heading": "Superhero wallet is available as browser extension and mobile app so you can use it on your preferred platforms and devices.",
+        "browser-extension": "Browser extension",
+        "mobile-app": "Mobile app"
+      },
+      "webVersion": "Or use our web version",
       "securingAccount": "Securing your account",
       "generateWallet": "Generate New Wallet",
       "importWallet": "Retrieve existing account",
@@ -563,6 +567,30 @@
       "addnetworkName": "Add Node name",
       "addnetworkURL": "Add Node URL",
       "add": "Add"
+    },
+    "notifications": {
+      "new": "New",
+      "wallet": "Wallet",
+      "superhero": "Superhero.com",
+      "read": "Read",
+      "markAsRead": "Mark as Read",
+      "markAsUnread": "Mark as Unread",
+      "commentOnComment": "replied to your comment.",
+      "commentOnTip": "commented on your tip.",
+      "tipOnComment": "tipped on your comment",
+      "retipOnTip": "retipped your tip.",
+      "claimOfTip": "claimed your tip.",
+      "claimOfRetip": "claimed your retip."
+    },
+    "notification-settings": {
+      "header": "Select which notification to receive",
+      "commentOnTip": "Someone commented on your tip or post.",
+      "commentOnComment": "Someone replied to your comment.",
+      "retipOnTip": "Someone retipped to your tip.",
+      "wallet": "Wallet notifications (always on).",
+      "tipOnComment": "Someone tipped to your comment.",
+      "claimOfTip": "Someone claimed your tip.",
+      "claimOfRetip": "Someone claimed your retip."
     },
     "privacyPolicy": {
       "backButton": "Back",
@@ -941,6 +969,10 @@
       "networkMiddlewareLabel": "Network middleware",
       "networkCompilerPlaceholder": "Enter network compiler url",
       "networkCompilerLabel": "Network compiler",
+      "backendUrlPlaceholder": "Enter backend url",
+      "backendUrlLabel": "Backend URL",
+      "showTippingConfig": "Show Tipping Configuration",
+      "hideTippingConfig": "Hide Tipping Configuration",
       "save": "Connect"
     },
     "donate-error": {
@@ -963,6 +995,13 @@
       "tip-attached": "Tip attached",
       "top-up-with": "Top up with",
       "delete": "Delete"
+    },
+    "permissions": {
+      "login": "Don't ask for login requests",
+      "message-sign": "Don't ask for message signing",
+      "transaction-sign": "Limit for spending without asking per day",
+      "spent-today": "Spent today",
+      "left-today": "Left today"
     }
   },
   "phishing": {

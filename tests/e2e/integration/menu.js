@@ -14,7 +14,7 @@ describe('Test cases for menu sidebar component', () => {
   it('Identicon is shown, menu is closing, links have correct href, do not have chain name, toggle dropdown', () => {
     cy.openMenu()
       .menuShould('be.visible')
-      .get('.user-identicon')
+      .get('.user-avatar')
       .should('be.visible')
 
       .toggleDropdown()
@@ -40,8 +40,8 @@ describe('Test cases for menu sidebar component', () => {
     cy.closeMenu('overlay').menuShould('not.be.visible');
   });
 
-  [...links, ...dropdownLinks].forEach(page => {
-    it(`Open ${page} page and return to account page`, () => {
+  it(`Opens each page and returns to account page`, () => {
+    [...links, ...dropdownLinks].forEach(page => {
       cy.openMenuPage(page, dropdownLinks.includes(page))
         .get('[data-cy=back-arrow]')
         .should('be.visible')

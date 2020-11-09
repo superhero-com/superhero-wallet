@@ -1,5 +1,5 @@
-const tip = { amount: 0.1, note: '#test', url: 'example.com' };
-const tip2 = { amount: 0.1, note: '#test1234', url: 'example.com', onTip: true };
+const tip = { amount: 0.2, note: '#test', url: 'example.com' };
+const tip2 = { amount: 0.2, note: '#test1234', url: 'example.com', onTip: true };
 
 describe('Test cases for tip page', () => {
   beforeEach(() => {
@@ -38,7 +38,6 @@ describe('Test cases for tip page', () => {
       .enterTipDetails({ ...tip })
       .buttonShouldNotBeDisabled('[data-cy=send-tip]')
 
-      .enterTipDetails({ ...tip })
       .goBack()
       .get('[data-cy=tip-container]')
       .should('not.be.visible')

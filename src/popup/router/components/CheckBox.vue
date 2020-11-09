@@ -1,7 +1,14 @@
 <template>
   <label class="checkbox-container" @click.stop="handleClick">
-    <input :value="val" v-model="checked" @change="onChange" :type="getType" :name="name" />
-    <span class="checkmark" :class="{ checked }" />
+    <input
+      :disabled="disabled"
+      :value="val"
+      v-model="checked"
+      @change="onChange"
+      :type="getType"
+      :name="name"
+    />
+    <span class="checkmark" :class="{ checked, disabled }" />
     <slot class="checkbox-holder" />
   </label>
 </template>
@@ -14,6 +21,7 @@ export default {
     type: String,
     name: String,
     prevent: Boolean,
+    disabled: Boolean,
   },
   data() {
     return {
@@ -68,7 +76,7 @@ export default {
 
   .checkmark {
     background-color: #272831;
-    border: 1.3px solid #515259;
+    border: 1.3px solid $border-track-color;
     border-radius: 2px;
     height: 20px;
     width: 20px;
@@ -76,6 +84,10 @@ export default {
 
     &.checked {
       background-image: url('../../../icons/checkbox-checked.svg');
+
+      &.disabled {
+        filter: brightness(0.8);
+      }
     }
   }
 

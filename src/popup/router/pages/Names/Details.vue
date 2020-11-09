@@ -5,7 +5,7 @@
         <span>{{ $t('pages.names.details.name') }}</span> {{ name }}
       </li>
       <li>
-        <span>{{ $t('pages.names.details.name') }}</span> {{ nameEntry.nameHash }}
+        <span>{{ $t('pages.names.details.name') }}</span> {{ nameHash }}
       </li>
       <li>
         <span>{{ $t('pages.names.details.owner') }}</span> {{ nameEntry.owner }}
@@ -16,9 +16,9 @@
       <li>
         <span>{{ $t('pages.names.details.expires-height') }}</span> {{ nameEntry.expiresAt }}
       </li>
-      <li v-for="(pointer, key) in nameEntry.pointers" :key="key">
-        <span>{{ $t('pages.names.details.pointer', { id: key + 1 }) }}</span>
-        {{ pointer.id }}
+      <li v-for="(pointer, key, index) in nameEntry.pointers" :key="key">
+        <span>{{ $t('pages.names.details.pointer', { id: index + 1 }) }}</span>
+        {{ pointer }}
       </li>
     </ul>
     <Input
@@ -62,6 +62,7 @@ export default {
     pointer: '',
     addPointer: false,
     pointerError: null,
+    nameHash: '',
   }),
   computed: {
     ...mapState(['sdk']),
@@ -73,10 +74,19 @@ export default {
       return chekAensName(this.pointer) || checkAddress(this.pointer);
     },
     hasPointer() {
-      return getAddressByNameEntry(this.nameEntry);
+      return this.nameEntry.pointers.accountPubkey;
     },
   },
-  created() {
+  watch: {
+    name: {
+      async handler() {
+        this.nameHash = (await this.sdk.api.getNameEntryByName(this.name)).id;
+      },
+      immediate: true,
+    },
+  },
+  async created() {
+    await this.$watchUntilTruly(() => this.sdk);
     this.$store.dispatch('names/fetchOwned');
   },
   methods: {
@@ -84,8 +94,8 @@ export default {
       await this.$watchUntilTruly(() => this.sdk);
       this.$store.dispatch('names/setDefault', {
         address: this.account.publicKey,
-        networkId: this.sdk.getNetworkId(),
-        name: this.name,
+        name: { name: this.name },
+        modal: false,
       });
     },
     async extend() {

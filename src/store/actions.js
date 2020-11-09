@@ -1,13 +1,14 @@
 import { flatten, uniq, orderBy } from 'lodash-es';
-import axios from 'axios';
 import {
   convertToAE,
   stringifyForStorage,
   parseFromStorage,
   getAddressByNameEntry,
+  fetchJson,
+  postJson,
 } from '../popup/utils/helper';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
-import { BACKEND_URL, AEX2_METHODS } from '../popup/utils/constants';
+import { AEX2_METHODS } from '../popup/utils/constants';
 
 export default {
   setAccount({ commit }, payload) {
@@ -24,25 +25,24 @@ export default {
     const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
     commit('updateBalance', convertToAE(balance));
   },
-  async fetchTransactions({ state }, { limit, page, recent }) {
+  async fetchTransactions({ state, getters }, { limit, page, recent }) {
     if (!state.middleware) return [];
     const { publicKey } = state.account;
     let txs = await Promise.all([
-      state.middleware.getTxByAccount(publicKey, { limit, page }),
-      (async () =>
-        (
-          await axios
-            .get(
-              `${BACKEND_URL}/cache/events/?address=${publicKey}&event=TipWithdrawn${
-                recent ? `&limit=${limit}` : ''
-              }`,
-            )
-            .catch(() => ({ data: [] }))
-        ).data.map(({ address, amount, ...t }) => ({
-          tx: { address, amount },
-          ...t,
-          claim: true,
-        })))(),
+      state.middleware.getTxByAccount(publicKey, limit, page).then(({ data }) => data),
+      fetchJson(
+        `${getters.activeNetwork.backendUrl}/cache/events/?address=${publicKey}&event=TipWithdrawn${
+          recent ? `&limit=${limit}` : ``
+        }`,
+      )
+        .then(response =>
+          response.map(({ address, amount, ...t }) => ({
+            tx: { address, amount },
+            ...t,
+            claim: true,
+          })),
+        )
+        .catch(() => []),
     ]);
     txs = orderBy(flatten(txs), ['time'], ['desc']);
     return recent ? txs.slice(0, limit) : txs;
@@ -84,11 +84,9 @@ export default {
   async getCurrencies({ state: { nextCurrenciesFetch }, commit }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
       try {
-        const { aeternity } = (
-          await axios.get(
-            'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
-          )
-        ).data;
+        const { aeternity } = await fetchJson(
+          'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
+        );
         commit('setCurrencies', aeternity);
         commit('setNextCurrencyFetch', new Date().getTime() + 3600000);
       } catch (e) {
@@ -136,5 +134,73 @@ export default {
   },
   async getHeight({ state: { sdk } }) {
     return (await sdk.topBlock()).height;
+  },
+  async claimTips({ getters: { activeNetwork } }, { url, address }) {
+    return postJson(`${activeNetwork.backendUrl}/claim/submit`, { body: { url, address } });
+  },
+  async cacheInvalidateOracle({ getters: { activeNetwork } }) {
+    return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/oracle`);
+  },
+  async cacheInvalidateTips({ getters: { activeNetwork } }) {
+    return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/tips`);
+  },
+  async donateError({ getters: { activeNetwork } }, { error, description }) {
+    return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: { ...error, description } });
+  },
+  async sendTipComment(
+    { state: { sdk }, getters: { activeNetwork } },
+    [tipId, text, author, parentId],
+  ) {
+    const sendComment = async postParam =>
+      postJson(`${activeNetwork.backendUrl}/comment/api/`, { body: postParam });
+
+    const responseChallenge = await sendComment({ tipId, text, author, parentId });
+    const signedChallenge = Buffer.from(
+      await sdk.signMessage(responseChallenge.challenge),
+    ).toString('hex');
+    const respondChallenge = {
+      challenge: responseChallenge.challenge,
+      signature: signedChallenge,
+    };
+    return sendComment(respondChallenge);
+  },
+  async modifyNotification(
+    { state: { sdk }, getters: { activeNetwork } },
+    [notifId, status, author],
+  ) {
+    const backendMethod = async postParam =>
+      postJson(`${activeNetwork.backendUrl}/notification/${notifId}`, { body: postParam });
+
+    const responseChallenge = await backendMethod({ author, status });
+    const signedChallenge = Buffer.from(
+      await sdk.signMessage(responseChallenge.challenge),
+    ).toString('hex');
+    const respondChallenge = {
+      challenge: responseChallenge.challenge,
+      signature: signedChallenge,
+    };
+
+    return backendMethod(respondChallenge);
+  },
+  async getCacheChainNames({ getters: { activeNetwork } }) {
+    return fetchJson(`${activeNetwork.backendUrl}/cache/chainnames`);
+  },
+  async getAllNotifications({ state: { sdk }, getters: { activeNetwork } }, address) {
+    const responseChallenge = await fetchJson(
+      `${activeNetwork.backendUrl}/notification/user/${address}`,
+    );
+    const signedChallenge = Buffer.from(
+      await sdk.signMessage(responseChallenge.challenge),
+    ).toString('hex');
+
+    const respondChallenge = {
+      challenge: responseChallenge.challenge,
+      signature: signedChallenge,
+    };
+    const url = new URL(`${activeNetwork.backendUrl}/notification/user/${address}`);
+    Object.keys(respondChallenge).forEach(key =>
+      url.searchParams.append(key, respondChallenge[key]),
+    );
+    return fetchJson(url.toString());
   },
 };

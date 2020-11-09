@@ -49,11 +49,15 @@ Cypress.Commands.add('openTerms', () => {
 });
 
 Cypress.Commands.add('enterSeedPhrase', seed => {
-  cy.openImportWallet()
-    .get('textarea')
+  cy.get('textarea')
+    .clear()
     .type(seed)
     .get('[data-cy=import]')
     .click();
+});
+
+Cypress.Commands.add('openAndEnterSeedPhrase', seed => {
+  cy.openImportWallet().enterSeedPhrase(seed);
 });
 
 Cypress.Commands.add('inputShouldHaveError', input => {
@@ -321,9 +325,8 @@ Cypress.Commands.add('addNetwork', (network, url, middleware, compiler) => {
     .should('contain', middleware);
 });
 
-Cypress.Commands.add('selectNetwork', (network, url, middleware, compiler) => {
-  cy.addNetwork(network, url, middleware, compiler)
-    .get('[data-cy=networks] .network-row')
+Cypress.Commands.add('selectNetwork', () => {
+  cy.get('[data-cy=networks] .network-row')
     .eq(1)
     .find('.checkmark')
     .click()

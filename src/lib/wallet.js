@@ -1,7 +1,7 @@
 import { Node, MemoryAccount, RpcWallet } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
-import { isEmpty, times } from 'lodash-es';
+import { isEmpty, times, camelCase } from 'lodash-es';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
 import {
@@ -13,21 +13,55 @@ import {
 } from '../popup/utils/helper';
 import { TIPPING_CONTRACT, NO_POPUP_AEPPS } from '../popup/utils/constants';
 import Logger from './logger';
+import { checkPermissions } from '../store/modules/permissions';
 
 async function initMiddleware() {
   const { middlewareUrl } = store.getters.activeNetwork;
-  const swag = await fetchJson(`${middlewareUrl}/middleware/api`);
-  swag.paths['/names/auctions/{name}/info'] = {
-    get: {
-      operationId: 'getAuctionInfoByName',
-      parameters: [
-        {
-          in: 'path',
-          name: 'name',
-          required: true,
-          type: 'string',
-        },
-      ],
+  const swag = await fetchJson(`${middlewareUrl}/swagger/swagger.json`);
+  swag.paths = {
+    ...swag.paths,
+    'name/auction/{name}': {
+      get: {
+        operationId: 'getAuctionInfoByName',
+        parameters: [
+          {
+            in: 'path',
+            name: 'name',
+            required: true,
+            type: 'string',
+          },
+        ],
+      },
+    },
+    'names/auctions': {
+      get: {
+        operationId: 'getActiveNameAuctions',
+      },
+    },
+    'txs/backward': {
+      get: {
+        operationId: 'getTxByAccount',
+        parameters: [
+          {
+            in: 'query',
+            name: 'account',
+            required: true,
+            type: 'string',
+          },
+          {
+            in: 'query',
+            name: 'limit',
+            required: true,
+            type: 'integer',
+          },
+          {
+            in: 'query',
+            name: 'page',
+            required: true,
+            type: 'integer',
+          },
+        ],
+      },
     },
   };
   const { api: middleware } = await Swagger.compose({
@@ -36,7 +70,11 @@ async function initMiddleware() {
       axiosError: () => '',
     },
   })({ swag });
-  store.commit('setMiddleware', middleware);
+
+  store.commit(
+    'setMiddleware',
+    Object.entries(middleware).reduce((m, [k, v]) => ({ ...m, [camelCase(k)]: v }), {}),
+  );
   store.dispatch('names/fetchOwned');
   store.dispatch('names/extendNames');
 }
@@ -55,7 +93,7 @@ async function getKeyPair() {
 }
 
 async function initContractInstances() {
-  if (!store.getters.mainnet && !process.env.RUNNING_IN_TESTS) return;
+  if (!store.getters.tippingSupported && !process.env.RUNNING_IN_TESTS) return;
   const contractAddress = await store.dispatch('getTipContractAddress');
   store.commit(
     'setTipping',
@@ -115,13 +153,17 @@ export default {
         nativeMode: true,
         compilerUrl,
         name: 'Superhero',
-        async onConnection({ info: { icons, name } }, { accept, deny }, origin) {
+        async onConnection({ info: { icons, name } }, action, origin) {
           const originUrl = toURL(origin);
           if (
-            NO_POPUP_AEPPS.includes(originUrl.hostname) ||
-            (await getAeppAccountPermission(originUrl.hostname, store.state.account.publicKey))
+            (NO_POPUP_AEPPS.includes(originUrl.hostname) ||
+              (await getAeppAccountPermission(
+                originUrl.hostname,
+                store.state.account.publicKey,
+              ))) &&
+            !(await checkPermissions(action))
           ) {
-            accept();
+            action.accept();
             return;
           }
           try {
@@ -138,15 +180,31 @@ export default {
               host: originUrl.hostname,
               account: store.state.account.publicKey,
             });
-            accept();
+            action.accept();
           } catch (error) {
-            deny();
+            action.deny();
             if (error.message !== 'Rejected by user') throw error;
           }
         },
         onSubscription: acceptCb,
         onSign: acceptCb,
-        onMessageSign: acceptCb,
+        async onMessageSign(aepp, action, origin) {
+          if (!(await checkPermissions(action))) {
+            action.accept();
+            return;
+          }
+          try {
+            await store.dispatch('modals/open', {
+              name: 'confirm-message-sign',
+              message: action.params.message,
+              origin,
+            });
+            action.accept();
+          } catch (error) {
+            action.deny();
+            if (error.message !== 'Rejected by user') throw error;
+          }
+        },
         onAskAccounts: acceptCb,
         onDisconnect(msg, client) {
           client.disconnect();

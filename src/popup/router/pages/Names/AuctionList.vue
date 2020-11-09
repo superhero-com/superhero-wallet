@@ -14,10 +14,11 @@
 
     <ul v-if="activeAuctions.length" class="auctions-list">
       <NameRow
-        v-for="({ name, expiration }, key) in auctions"
+        v-for="({ name, expiration, lastBid }, key) in auctions"
         :key="key"
         :to="{ name: 'auction-details', params: { name } }"
         :name="name"
+        :address="lastBid.accountId"
       >
         <div class="name">{{ name }}</div>
         <div class="expiration">
@@ -47,9 +48,9 @@ export default {
     auctions() {
       switch (this.filter) {
         case 'length':
-          return this.activeAuctions.map(a => a).sort((a, b) => a.name.length - b.name.length);
+          return [...this.activeAuctions].sort((a, b) => a.name.length - b.name.length);
         case 'bid':
-          return this.activeAuctions.map(a => a).sort((a, b) => a.winning_bid - b.winning_bid);
+          return [...this.activeAuctions].sort((a, b) => a.lastBid.nameFee - b.lastBid.nameFee);
         default:
           return this.activeAuctions;
       }

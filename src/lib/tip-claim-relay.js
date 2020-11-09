@@ -1,6 +1,6 @@
-import axios from 'axios';
 import { uniq } from 'lodash-es';
-import { defaultNetwork, TIPPING_CONTRACT, TIP_SERVICE } from '../popup/utils/constants';
+import { postJson } from '../popup/utils/helper';
+import { defaultNetwork, TIPPING_CONTRACT } from '../popup/utils/constants';
 import {
   contractCallStatic,
   getActiveAccount,
@@ -47,8 +47,11 @@ export default {
 
         if (this.checkAddressMatch(account.publicKey, uniq(addresses))) {
           await this.abortIfZeroClaim(url);
-
-          await axios.post(`${TIP_SERVICE}`, { url, address: account.publicKey });
+          // This check is only used on mainnet
+          const { backendUrl } = defaultNetwork;
+          await postJson(`${backendUrl}/claim/submit`, {
+            body: { url, address: account.publicKey },
+          });
         }
       }
     } catch (e) {

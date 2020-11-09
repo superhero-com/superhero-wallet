@@ -4,27 +4,19 @@ import Node from '@aeternity/aepp-sdk/es/node';
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import { isEmpty } from 'lodash-es';
 import uuid from 'uuid';
+import { AEX2_METHODS, defaultNetwork, NO_POPUP_AEPPS } from '../popup/utils/constants';
 import {
-  AEX2_METHODS,
-  defaultNetwork,
-  MAX_AMOUNT_WITHOUT_CONFIRM,
-  NO_POPUP_AEPPS,
-} from '../popup/utils/constants';
-import {
-  addTipAmount,
   extractHostName,
   getAllNetworks,
   getAddressByNameEntry,
   getAeppAccountPermission,
-  getContractCallInfo,
-  getTippedAmount,
   parseFromStorage,
-  resetTippedAmount,
   stringifyForStorage,
 } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 import popups from './popup-connection';
 import walletController from '../wallet-controller';
+import { checkPermissions } from '../store/modules/permissions';
 
 global.browser = require('webextension-polyfill');
 
@@ -126,23 +118,9 @@ export default {
     return extractHostName(url);
   },
   async shouldOpenPopup(aepp, action) {
-    const { isTip, amount } = getContractCallInfo(action.params.tx, this.tipContractAddress);
-    const origin = this.getAeppOrigin(aepp);
-    if (NO_POPUP_AEPPS.includes(origin)) {
-      if (isTip) {
-        const tippedAmount = await getTippedAmount();
-        if (tippedAmount >= MAX_AMOUNT_WITHOUT_CONFIRM) {
-          resetTippedAmount();
-          return true;
-        }
-        action.accept();
-        await addTipAmount(amount);
-      } else {
-        action.accept();
-      }
-    } else {
+    if (!NO_POPUP_AEPPS.includes(this.getAeppOrigin(aepp)) || (await checkPermissions(action)))
       return true;
-    }
+    action.accept();
     return false;
   },
   async checkAeppPermissions(aepp, action, caller, cb) {
@@ -261,7 +239,7 @@ export default {
         },
       } = client;
       const isConnected = await getAeppAccountPermission(extractHostName(url), address);
-      if (!isConnected) {
+      if ((await checkPermissions({ method: 'address.subscribe' })) && !isConnected) {
         const accept = await this.showPopup({ action: {}, aepp: client, type: 'connectConfirm' });
         if (accept) {
           this.sdk.selectAccount(address);
@@ -284,7 +262,7 @@ export default {
         await walletController.getKeypair({ activeAccount: payload.idx, account }),
       ),
     });
-    this.sdk.addAccount(newAccount);
+    this.sdk.addAccount(newAccount, { select: true });
     this.activeAccount = payload.address;
     this.getAccessForAddress(payload.address);
   },
@@ -307,10 +285,12 @@ export default {
   async [AEX2_METHODS.LOGOUT]() {
     const { clients: aepps } = this.sdk.getClients();
     Array.from(aepps.values()).forEach(aepp => {
-      aepp.sendMessage(
-        { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
-        true,
-      );
+      if (aepp.info.status !== 'DISCONNECTED') {
+        aepp.sendMessage(
+          { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
+          true,
+        );
+      }
       aepp.connection.port.onDisconnect.dispatch();
       aepp.disconnect();
       browser.tabs.reload(aepp.connection.port.sender.tab.id);
@@ -324,19 +304,19 @@ export default {
     if (!this.nodes[network]) {
       await this.initNodes();
     }
-    if (this.sdk) {
-      try {
-        this.sdk.selectAccount(this.activeAccount);
-      } catch (e) {
-        this[AEX2_METHODS.ADD_ACCOUNT]({ address, idx: 0 });
-      }
-
-      if (this.network !== network) {
-        this.addNewNetwork(network);
-      }
-    } else {
+    if (!this.sdk) {
       this.initNetwork(network);
-      this.initSdk();
+      await this.initSdk();
+    }
+
+    try {
+      this.sdk.selectAccount(this.activeAccount);
+    } catch (e) {
+      this[AEX2_METHODS.ADD_ACCOUNT]({ address, idx: 0 });
+    }
+
+    if (this.network !== network) {
+      await this.addNewNetwork(network);
     }
   },
 };

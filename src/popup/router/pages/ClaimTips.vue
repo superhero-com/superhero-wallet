@@ -5,7 +5,7 @@
     </p>
     <Input size="m-0 sm" v-model="url" :error="!normalizedUrl" />
 
-    <Button @click="claimTips" :disabled="!normalizedUrl || !allowTipping">
+    <Button @click="claimTips" :disabled="!normalizedUrl || !tippingSupported">
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button :to="{ name: 'account' }">
@@ -18,9 +18,7 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import axios from 'axios';
 import { aettosToAe, toURL, validateTipUrl } from '../../utils/helper';
-import { TIP_SERVICE, BACKEND_URL } from '../../utils/constants';
 import Input from '../components/Input';
 
 export default {
@@ -31,7 +29,7 @@ export default {
   }),
   computed: {
     ...mapState(['sdk', 'tipping']),
-    ...mapGetters(['account', 'allowTipping']),
+    ...mapGetters(['account', 'tippingSupported']),
     normalizedUrl() {
       if (!validateTipUrl(this.url)) return '';
       return toURL(this.url).toString();
@@ -60,9 +58,9 @@ export default {
           ),
         );
         if (!claimAmount) throw new Error('NO_ZERO_AMOUNT_PAYOUT');
-        await axios.post(TIP_SERVICE, { url, address: this.account.publicKey });
-        await axios.get(`${BACKEND_URL}/cache/invalidate/tips`).catch(console.error);
-        await axios.get(`${BACKEND_URL}/cache/invalidate/oracle`).catch(console.error);
+        await this.$store.dispatch('claimTips', { url, address: this.account.publicKey });
+        await this.$store.dispatch('cacheInvalidateOracle');
+        await this.$store.dispatch('cacheInvalidateTips');
         this.$store.dispatch('modals/open', { name: 'claim-success', url, claimAmount });
         this.$router.push({ name: 'account' });
       } catch (e) {

@@ -1,8 +1,10 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import VueRx from 'vue-rx';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
+import observables from './plugins/observables';
 import persistState from './plugins/persistState';
 import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
@@ -11,9 +13,11 @@ import tokens from './plugins/tokens';
 import names from './plugins/names';
 import runMigrations from './migrations';
 import invitesModule from './modules/invites';
+import permissionsModule from './modules/permissions';
 import { defaultNetwork } from '../popup/utils/constants';
 
 Vue.use(Vuex);
+Vue.use(VueRx);
 
 const initialState = {
   isRestored: false,
@@ -42,6 +46,8 @@ const initialState = {
   currencies: {},
   nextCurrenciesFetch: null,
   notifications: [],
+  notificationSettings: [],
+  chainNames: null,
   tip: null,
   txQueue: [],
   connectedAepps: {},
@@ -91,6 +97,8 @@ export default new Vuex.Store({
         tourStartBar,
         tokens: { all },
         invites,
+        notificationSettings,
+        permissions,
       }) => ({
         migrations,
         current,
@@ -109,8 +117,11 @@ export default new Vuex.Store({
         tourStartBar,
         tokens: { all },
         invites,
+        notificationSettings,
+        permissions,
       }),
     ),
+    observables,
     modals,
     tipUrl,
     accounts,
@@ -119,5 +130,6 @@ export default new Vuex.Store({
   ],
   modules: {
     invites: invitesModule,
+    permissions: permissionsModule,
   },
 });

@@ -1,32 +1,20 @@
 const publicKey = 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5';
 
 describe('Test cases for Withdraw Page', () => {
-  beforeEach(() => {
-    cy.login().openWithdraw();
-  });
-
-  it('opens Withdraw page; buttons: dropdown, scan - works', () => {
-    cy.get('[data-cy=send-container]')
+  it('Opens Withdraw page, uses scan button, validates entered amount, reviews and sends ', () => {
+    cy.login()
+      .openWithdraw()
+      .get('[data-cy=send-container]')
       .should('be.visible')
-
-      .get('[data-cy=toggle-currency-dropdown]')
-      .should('be.visible')
-      .click()
-      .get('[data-cy=currency-dropdown]')
-      .should('have.class', 'show')
-      .get('[data-cy=toggle-currency-dropdown]')
-      .click()
-      .get('[data-cy=currency-dropdown]')
-      .should('not.have.class', 'show')
 
       .get('[data-cy=scan-button]')
       .click()
       .get('.primary-title')
-      .should('be.visible');
-  });
+      .should('be.visible')
+      .get('.modal--close')
+      .click()
 
-  it('Validate entered amount', () => {
-    cy.enterAmountSend('asd')
+      .enterAmountSend('asd')
       .inputShouldHaveError('[data-cy=input-number]')
       .get('[data-cy=amount-currency]')
       .invoke('text')
@@ -34,27 +22,19 @@ describe('Test cases for Withdraw Page', () => {
       .enterAmountSend(0)
       .get('[data-cy=input-number]')
       .should('have.class', 'has-error')
-      .enterAmountSend(0.1)
+      .enterAmountSend(0.2)
       .get('[data-cy=input-number]')
       .should('not.have.class', 'has-error')
       .enterAddress('asd')
       .inputShouldHaveError('[data-cy=address]')
       .enterAddress(0)
       .inputShouldHaveError('[data-cy=address]')
+      .enterAddress('vmangelovv.chain')
+      .should('not.have.class', 'has-error')
       .enterAddress('ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
       .get('[data-cy=address]')
       .should('not.have.class', 'has-error')
-      .enterAddress('vmangelovv.chain')
-      .should('not.have.class', 'has-error');
-  });
 
-  it('Continue to step 2(Review) if all inputs are valid, valid AND send', () => {
-    cy.get('[data-cy=review-withdraw]')
-      .should('have.class', 'disabled')
-      .enterAddress('ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
-      .should('not.have.class', 'has-error')
-      .enterAmountSend(0.01)
-      .should('not.have.class', 'has-error')
       .get('[data-cy=review-withdraw]')
       .should('not.have.class', 'disabled')
       .click()
@@ -67,14 +47,13 @@ describe('Test cases for Withdraw Page', () => {
       .get('[data-cy=review-receivingAddress]')
       .should('have.text', 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
       .get('[data-cy=review-amount]')
-      .should('have.text', '0.010 AE')
+      .should('have.text', '0.200 AE')
 
       // edit sending address to .chain name
       .get('[data-cy=reivew-editTxDetails-button]')
       .click()
       .enterAddress('vmangelovv.chain')
       .get('[data-cy=review-withdraw]')
-      .should('not.have.class', 'disabled')
       .click()
       .get('[data-cy=review-receivingAddress]')
       .should('have.text', 'vmangelovv.chain')
