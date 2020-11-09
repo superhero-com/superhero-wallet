@@ -6,13 +6,11 @@
         {{ $t('pages.fungible-tokens.tokens') }}
       </a>
     </div>
-    <div class="search" :class="{ focused }">
+    <div class="search">
       <input
         v-model="searchTerm"
         :placeholder="$t('pages.fungible-tokens.searchPlaceholder')"
         type="text"
-        @focus="focused = true"
-        @blur="focused = false"
       />
       <Eraser v-if="searchTerm.length > 0" class="eracer-icon" @click="searchTerm = ''" />
       <Search v-else class="search-icon" />
@@ -43,7 +41,6 @@ export default {
       activeItem: 'tokens',
       searchTerm: '',
       activeTab: 'all',
-      focused: false,
       tabs: [
         {
           name: 'all',
@@ -96,9 +93,10 @@ export default {
 .search {
   display: flex;
   align-items: center;
+  border: 1px solid transparent;
 
-  &.focused {
-    border: 1px solid $secondary-color;
+  &:focus-within {
+    border-color: $secondary-color;
   }
 
   input {
