@@ -1,20 +1,17 @@
 <template>
-  <div id="filters" class="filters" data-cy="filters">
-    <span
-      class="date d-flex"
-      :class="type === 'date' ? 'active' : ''"
-      @click="filtrateTx('date', date_type)"
-    >
+  <div class="filters" data-cy="filters">
+    <button @click="$emit('input', { ...value, latestFirst: !value.latestFirst })">
       <span>{{ $t('pages.transactionDetails.date') }}</span>
-      <FilterArrow :class="direction" />
-    </span>
-    <span
+      <FilterArrow :class="{ rotate: !value.latestFirst }" />
+    </button>
+    <button
       v-for="filter in filters"
-      v-bind:key="filter.id"
-      :class="type === filter ? 'active' : filter"
-      @click="filtrateTx(filter)"
-      >{{ $t(`pages.transactionDetails.${filter}`) }}</span
+      :key="filter"
+      :class="{ active: value.type === filter }"
+      @click="$emit('input', { ...value, type: filter })"
     >
+      {{ $t(`pages.transactionDetails.${filter}`) }}
+    </button>
   </div>
 </template>
 
@@ -22,32 +19,13 @@
 import FilterArrow from '../../../icons/filter-arrow.svg?vue-component';
 
 export default {
-  components: {
-    FilterArrow,
+  components: { FilterArrow },
+  props: {
+    value: { type: Object, required: true },
   },
-  data() {
-    return {
-      filters: ['sent', 'received', 'withdrawals', 'topups', 'all'],
-      direction: '',
-      type: 'date',
-      date_type: 'recent',
-    };
-  },
-  methods: {
-    filtrateTx(type, dateType) {
-      this.date_type = '';
-      if (type === 'date')
-        if (dateType === 'recent') {
-          this.date_type = 'oldest';
-          this.direction = 'rotate';
-        } else {
-          this.date_type = 'recent';
-          this.direction = '';
-        }
-      this.type = type;
-      this.$emit('filtrate', this.type, this.date_type);
-    },
-  },
+  data: () => ({
+    filters: ['sent', 'claimed', 'withdrawals', 'topups', 'all'],
+  }),
 };
 </script>
 
@@ -67,32 +45,30 @@ export default {
   padding: 0 20px;
   font-size: 13px;
 
-  span {
+  button {
     text-transform: capitalize;
-    cursor: pointer;
-    color: $accent-color !important;
-  }
-
-  span.all {
-    color: $secondary-color !important;
-  }
-
-  span.active,
-  span.active > * {
-    color: $white-color !important;
-  }
-
-  .d-flex {
-    display: flex;
+    padding: 0;
+    color: $accent-color;
 
     svg {
-      padding-top: 13px;
-      height: 100%;
-    }
-  }
+      height: 1em;
 
-  .rotate {
-    transform: rotate(180deg);
+      &.rotate {
+        transform: rotate(180deg);
+      }
+    }
+
+    &:last-child {
+      color: $secondary-color;
+    }
+
+    &.active {
+      color: $white-color;
+    }
+
+    * {
+      vertical-align: middle;
+    }
   }
 }
 </style>
