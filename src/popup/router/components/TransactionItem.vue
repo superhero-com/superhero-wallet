@@ -56,10 +56,9 @@ export default {
     ...mapGetters(['account', 'activeNetwork', 'formatCurrency', 'currentCurrencyRate']),
     status() {
       if (
-        this.transaction.tx.senderId === this.account.publicKey ||
-        this.transaction.tx.accountId === this.account.publicKey ||
-        this.transaction.tx.ownerId === this.account.publicKey ||
-        this.transaction.tx.callerId === this.account.publicKey
+        ['senderId', 'accountId', 'ownerId', 'callerId']
+          .map(key => this.transaction.tx[key])
+          .includes(this.account.publicKey)
       ) {
         return this.$t('pages.transactions.sent');
       }
