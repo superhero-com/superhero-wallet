@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import { aettosToAe } from '../../utils/helper';
 import { formatDate } from '../../utils';
@@ -49,18 +49,10 @@ export default {
     },
   },
   data: () => ({
-    tip: null,
     openUrl,
   }),
   filters: { formatDate },
-  async created() {
-    if (!this.transaction.pending && !this.transaction.claim) {
-      await this.$watchUntilTruly(() => this.sdk);
-      this.getEventData();
-    }
-  },
   computed: {
-    ...mapState(['sdk']),
     ...mapGetters(['account', 'activeNetwork', 'formatCurrency', 'currentCurrencyRate']),
     status() {
       if (
@@ -88,7 +80,15 @@ export default {
       return (txamount * this.currentCurrencyRate).toFixed(2);
     },
     tipUrl() {
-      return this.transaction.tipUrl || this.tip || this.transaction.url;
+      return (
+        this.transaction.tipUrl ||
+        this.transaction.url ||
+        (!this.transaction.pending &&
+          !this.transaction.claim &&
+          this.transaction.tx.log?.[0] &&
+          decode(this.transaction.tx.log[0].data).toString()) ||
+        ''
+      );
     },
     topup() {
       return (
@@ -104,14 +104,6 @@ export default {
     },
     transactionType() {
       return this.$t('transaction.type')[this.transaction.tx.type];
-    },
-  },
-  methods: {
-    async getEventData() {
-      const { log } = await this.sdk.tx(this.transaction.hash, true);
-      if (log && log.length) {
-        this.tip = decode(log[0].data).toString();
-      }
     },
   },
 };
