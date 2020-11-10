@@ -76,7 +76,8 @@ export const defaultNetworks = [
     backendUrl: 'https://test-tipping.aeternity.art',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_Dnwribmd21YrxSQnqXCB5vTFPrgYJx2eg2TrbLvbdyEbTMejw',
-    tipContract: 'ct_YpQpntd6fi6r3VXnGW7vJiwPYtiKvutUDY35L4PiqkbKEVRqj',
+    tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd',
+    tipContractV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu',
     name: 'Testnet',
   },
   {
@@ -89,7 +90,7 @@ export const defaultNetworks = [
     backendUrl: 'https://raendom-backend.z52da5wt.xyz',
     tokenRegistry: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
     tokenRegistryLima: 'ct_UAzV9RcXEMsFcUCmrPN4iphbZroM7EHk3wvdidDYgZGGBo3hV',
-    tipContract: 'superhero.chain',
+    tipContractV1: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z',
     name: 'Mainnet',
   },
 ];
@@ -113,35 +114,6 @@ export const AENS_DOMAIN = '.chain';
 export const MAX_AUCTION_NAME_LENGTH = 12 + AENS_DOMAIN.length;
 export const MIN_NAME_LENGTH = 14;
 export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 100;
-export const TIPPING_CONTRACT = `@compiler >= 4
-
-include "List.aes"
-include "Func.aes"
-include "Option.aes"
-
-contract OracleService =
-  record success_claim = { success : bool, caller : address, percentage : int }
-
-  stateful entrypoint check_persist_claim : (string, address, bool) => success_claim
-  payable stateful entrypoint query_oracle : (string, address) => unit
-
-contract Tipping =
-  type tip_id = int
-  type url_id = int
-  type retip_id = int
-  type url = string
-  type claim_gen = int
-
-  record tip = { sender : address, title : string, claim_gen : claim_gen, timestamp : int, url_id : url_id, amount : int }
-  record retip = { sender : address, amount : int, claim_gen : claim_gen, tip_id : tip_id }
-  record state = { urls : map(url, url_id), claims : map(url_id, claim_gen * int), url_index : map(url_id, url), tips : map(tip_id, tip), retips : map(retip_id, retip), owner : address, oracle_service : OracleService }
-
-  payable stateful entrypoint tip : (string, string) => unit
-  payable stateful entrypoint retip : (tip_id) => unit
-  payable stateful entrypoint pre_claim : (string, address) => unit
-  stateful entrypoint claim : (string, address, bool) => unit
-  entrypoint get_state : () => state
-  entrypoint unclaimed_for_url : (string) => int`;
 
 export const BUG_REPORT_URL = 'https://thesuperherowallet.typeform.com/to/vh8Ffu';
 

@@ -223,7 +223,6 @@
       "home": "Superhero Inicio",
       "donate-error": "Donar Data",
       "address": "Dirección de Envio",
-      "fungible-tokens": "Tokens fungibles",
       "deploy-token": "Desplegar token",
       "add-token": "Agregar token",
       "mint-burn-token": "Crear/Quemar token",
@@ -787,7 +786,6 @@
       "minAmountError": "Las Propinas deberían tener un valor sobre los 0.01 USD en tokens para que puedan ser enviadas."
     },
     "successTip": {
-      "sendMore": "Enviar más AE",
       "feed": "Ver tu propina en el listado",
       "completedHeading": " Transacción Completada.",
       "sentTo": "Enviar a: ",
@@ -797,8 +795,7 @@
       "successfullySent": "Has enviado exitosamente ",
       "to": "para",
       "note": "NOTA: El propietario de esta URL aún no ha creado una cuenta. Ellos pueden reclamar sus tokens fácilmente creando una billetera - de la misma forma en que tú lo hiciste.",
-      "notify": "Notificar al propietario que has enviado AE a esta publicación",
-      "notifyMessage": "!Acabo de enviar AE a esta publicación! Cualquiera puede empezar a enviar y recibir AE a través de Superhero.com. Conoce más."
+      "notify": "Notificar al propietario que has enviado AE a esta publicación"
     },
     "transactionDetails": {
       "heading": "Detalles de Transacciones",

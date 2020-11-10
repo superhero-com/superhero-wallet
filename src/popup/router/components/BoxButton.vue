@@ -31,6 +31,7 @@ export default {
   width: 33%;
   display: inline-block;
   padding: 10px;
+  color: $gray-1;
 
   .button-content {
     background: $box-button-color;
@@ -44,10 +45,6 @@ export default {
     &:hover {
       background-color: $secondary-color;
       cursor: pointer;
-    }
-
-    &:hover .button-text {
-      color: $white-color !important;
     }
 
     .button-text {
@@ -66,6 +63,10 @@ export default {
       pointer-events: all;
       opacity: 0.3;
     }
+  }
+
+  &:hover {
+    color: $white-1;
   }
 }
 </style>

@@ -33,7 +33,7 @@
           <div>
             <div class="token-title">{{ $t('pages.add-fungible-token.token') }}</div>
             <div>
-              <UserAvatar :address="token.contract" />
+              <Avatar :address="token.contract" />
               <div>{{ token.symbol }}</div>
             </div>
           </div>
@@ -57,7 +57,7 @@ import * as aeternityTokens from 'aeternity-tokens';
 import { validateAddress, convertToken } from '../../../utils/helper';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import UserAvatar from '../../components/UserAvatar';
+import Avatar from '../../components/Avatar';
 
 const initialToken = {
   contract: '',
@@ -67,7 +67,7 @@ const initialToken = {
   name: '',
 };
 export default {
-  components: { Input, Button, UserAvatar },
+  components: { Input, Button, Avatar },
   data() {
     return {
       token: { ...initialToken },

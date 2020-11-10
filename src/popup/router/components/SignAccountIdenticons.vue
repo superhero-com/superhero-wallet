@@ -1,14 +1,14 @@
 <template>
   <div class="identicons-holder">
     <div class="from">
-      <UserAvatar :address="account.publicKey" :name="account.name" />
+      <Avatar :address="account.publicKey" :name="account.name" />
       <span class="account-address" :title="activeAccountName">{{ activeAccountName }}</span>
     </div>
     <div class="arrow-separator">
       <ae-icon name="left-more" />
     </div>
     <div class="to" v-if="!showAddress">
-      <UserAvatar :address="receiver" />
+      <Avatar :address="receiver" />
       <ae-address
         :value="receiver"
         v-if="receiver"
@@ -36,13 +36,13 @@
 <script>
 import { mapGetters } from 'vuex';
 import { OBJECT_ID_TX_TYPE, TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
-import UserAvatar from './UserAvatar';
+import Avatar from './Avatar';
 
 export default {
   props: {
     transaction: { type: Object, required: true },
   },
-  components: { UserAvatar },
+  components: { Avatar },
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
     receiver() {
