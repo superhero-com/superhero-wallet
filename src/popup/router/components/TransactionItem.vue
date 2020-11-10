@@ -2,11 +2,11 @@
   <li class="list-item-transaction">
     <div class="holder">
       <span class="amount">
-        <span data-cy="amount">{{ txAmount }}</span>
+        <span data-cy="amount">{{ txAmount | formatAmount }}</span>
         {{ $t('pages.appVUE.aeid') }}
         <span class="text" data-cy="currency-amount">
           <!--eslint-disable vue-i18n/no-raw-text-->
-          ({{ formatCurrency(txAmountToCurrency) }})
+          ({{ txAmountCurrency }})
           <!--eslint-enable vue-i18n/no-raw-text-->
         </span>
       </span>
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import { aettosToAe } from '../../utils/helper';
 import { formatDate } from '../../utils';
@@ -51,9 +51,17 @@ export default {
   data: () => ({
     openUrl,
   }),
-  filters: { formatDate },
+  filters: {
+    formatDate,
+    formatAmount: number => number.toFixed(2),
+  },
   computed: {
-    ...mapGetters(['account', 'activeNetwork', 'formatCurrency', 'currentCurrencyRate']),
+    ...mapGetters(['account', 'activeNetwork']),
+    ...mapState({
+      txAmountCurrency(state, { convertToCurrencyFormatted }) {
+        return convertToCurrencyFormatted(this.txAmount);
+      },
+    }),
     status() {
       if (
         ['senderId', 'accountId', 'ownerId', 'callerId']
@@ -70,13 +78,7 @@ export default {
     txAmount() {
       const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
       const fee = this.transaction.tx.fee || 0;
-      return (+aettosToAe(+amount + fee)).toFixed(2);
-    },
-    txAmountToCurrency() {
-      const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
-      const fee = this.transaction.tx.fee || 0;
-      const txamount = +aettosToAe(+amount + fee);
-      return (txamount * this.currentCurrencyRate).toFixed(2);
+      return +aettosToAe(+amount + fee);
     },
     tipUrl() {
       return (
