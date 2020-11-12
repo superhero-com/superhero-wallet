@@ -109,7 +109,6 @@
     "vue-loader": "^15.9.3",
     "vue-svg-loader": "^0.15.0",
     "vue-template-compiler": "^2.6.12",
-    "web-ext-types": "^2.1.0",
     "webpack": "^4.44.2",
     "webpack-bundle-analyzer": "^3.9.0",
     "webpack-chrome-extension-reloader": "^0.8.3",
