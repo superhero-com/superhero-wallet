@@ -53,7 +53,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import * as aeternityTokens from 'aeternity-tokens';
+import { newToken } from 'aeternity-tokens';
 import { validateAddress, convertToken } from '../../../utils/helper';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -97,12 +97,9 @@ export default {
       if (this.exist) return;
       try {
         this.loading = true;
-        const instance = await this.$store.state.sdk.getContractInstance(
-          aeternityTokens.newToken(),
-          {
-            contractAddress: this.token.contract,
-          },
-        );
+        const instance = await this.$store.state.sdk.getContractInstance(newToken(), {
+          contractAddress: this.token.contract,
+        });
         if (this.step === 'search') {
           const {
             decodedResult: { decimals, name, symbol },
