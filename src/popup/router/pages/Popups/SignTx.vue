@@ -24,10 +24,9 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
 import { OBJECT_ID_TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
-import { getContractCallInfo, addTipAmount, aettosToAe, aeToAettos } from '../../../utils/helper';
+import { aettosToAe, aeToAettos } from '../../../utils/helper';
 import Button from '../../components/Button';
 import AmountSend from '../../components/AmountSend';
 import getPopupProps from '../../../utils/getPopupProps';
@@ -53,8 +52,6 @@ export default {
     if (this.txObject.amount >= 0) this.tx.amount = +aettosToAe(this.txObject.amount);
   },
   computed: {
-    ...mapState('fungibleTokens', ['selectedToken']),
-    ...mapGetters(['activeNetwork']),
     txObject() {
       return this.unpackedTx ? this.unpackedTx.tx : {};
     },
@@ -85,15 +82,6 @@ export default {
         },
         OBJECT_ID_TX_TYPE[this.txObject.tag],
       );
-      const contractAddress = this.selectedToken
-        ? this.activeNetwork.tipContractV2
-        : this.activeNetwork.tipContractV1;
-      if (contractAddress) {
-        const { isTip, amount } = getContractCallInfo(tx, contractAddress);
-        if (isTip) {
-          await addTipAmount(amount);
-        }
-      }
       if (parseFloat(this.tx.amount) !== +aettosToAe(this.unpackedTx.tx.amount || 0)) {
         this.loading = true;
         this.props.resolve(tx);
