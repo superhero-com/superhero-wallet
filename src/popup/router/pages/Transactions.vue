@@ -72,8 +72,8 @@ export default {
     this.loadMore(true);
     const polling = setInterval(() => this.getLatest(), 10000);
     const checkLoadMore = () => {
-      const { scrollHeight, clientHeight } = document.documentElement;
-      if (scrollHeight - window.scrollY === clientHeight) {
+      const { scrollHeight, scrollTop, clientHeight } = document.documentElement;
+      if (scrollHeight - scrollTop <= clientHeight + 100) {
         setTimeout(() => this.loadMore(), 1500);
       }
     };
