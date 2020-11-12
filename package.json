@@ -48,7 +48,6 @@
     "detect-browser": "^4.8.0",
     "lodash-es": "^4.17.15",
     "qrcode.vue": "^1.6.3",
-    "request": "^2.88.2",
     "rxjs": "^6.6.3",
     "rxjs-etc": "^10.4.0",
     "tipping-contract": "github:aeternity/tipping-contract#develop",
