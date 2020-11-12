@@ -51,7 +51,6 @@
     "rxjs": "^6.6.3",
     "rxjs-etc": "^10.4.0",
     "tipping-contract": "github:aeternity/tipping-contract#develop",
-    "tweetnacl": "^1.0.3",
     "uuid": "^3.3.3",
     "validator": "^13.1.17",
     "vue": "^2.6.12",
