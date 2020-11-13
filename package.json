@@ -37,6 +37,8 @@
     "@vue/cli-service": "^3.12.0",
     "@zxing/library": "^0.17.1",
     "aepp-raendom": "github:aeternity/aepp-raendom#feature/layout-superhero",
+    "tipping-contract": "github:aeternity/tipping-contract#develop",
+    "aeternity-fungible-token": "github:mradkov/aeternity-fungible-token",
     "aeternity-tokens": "^1.0.2",
     "bignumber.js": "^8.1.1",
     "bluebird": "^3.7.1",

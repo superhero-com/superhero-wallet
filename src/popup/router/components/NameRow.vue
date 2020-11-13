@@ -1,6 +1,6 @@
 <template>
   <Component :is="to ? 'RouterLink' : 'li'" :to="to" class="name-row" @click="$emit('click')">
-    <UserAvatar :name="name" :address="address" />
+    <Avatar :name="name" :address="address" />
     <div class="name-info">
       <slot />
     </div>
@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import UserAvatar from './UserAvatar';
+import Avatar from './Avatar';
 
 export default {
   props: {
@@ -16,7 +16,7 @@ export default {
     address: String,
     to: [String, Object],
   },
-  components: { UserAvatar },
+  components: { Avatar },
 };
 </script>
 

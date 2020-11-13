@@ -5,7 +5,7 @@
     </li>
     <li class="account-icon-holder">
       <div class="flex flex-align-center flex-justify-between">
-        <UserAvatar :address="account.publicKey" :name="account.name" />
+        <Avatar :address="account.publicKey" :name="account.name" />
         <div class="ml-8 mr-auto">
           <div class="f-14">{{ $t('pages.appVUE.mainAccount') }}</div>
           <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">
@@ -90,12 +90,12 @@
 import { mapGetters } from 'vuex';
 import Close from '../../../icons/close.svg?vue-component';
 import Arrow from '../../../icons/arrow-current-color.svg?vue-component';
-import UserAvatar from './UserAvatar';
+import Avatar from './Avatar';
 import removeAccountMixin from '../../../mixins/removeAccount';
 
 export default {
   mixins: [removeAccountMixin],
-  components: { Close, Arrow, UserAvatar },
+  components: { Close, Arrow, Avatar },
   computed: mapGetters(['account', 'activeAccountName']),
   data: () => ({ showSettingsDropdown: false, showTokensDropdown: false, balances: null }),
   watch: {

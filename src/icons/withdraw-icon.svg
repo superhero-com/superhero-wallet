@@ -1,17 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24.5" height="24.5" viewBox="0 0 24.5 24.5">
-  <g id="Group_620" data-name="Group 620" transform="translate(738.25 0.25)">
-    <g id="buy_1_" data-name="buy (1)" transform="translate(-738 0)">
+<svg xmlns="http://www.w3.org/2000/svg" width="20.5" height="20.5" viewBox="0 0 20.5 20.5">
+  <g id="Group_1297" data-name="Group 1297" transform="translate(0.25 0.25)">
+    <g id="buy_1_" data-name="buy (1)">
       <g id="Group_606" data-name="Group 606">
         <g id="Group_605" data-name="Group 605">
-          <path id="Path_383" data-name="Path 383" d="M12.023,266.125a10.033,10.033,0,0,1-8.7-4.969H6.55v-1.875H0v6.563H1.871v-3.472A11.98,11.98,0,0,0,12.023,268a11.817,11.817,0,0,0,8.447-3.517A11.965,11.965,0,0,0,23.953,256H22.082A10.1,10.1,0,0,1,12.023,266.125Z" transform="translate(0 -244)" fill="#fff" stroke="#fff" stroke-width="0.5"/>
-          <path id="Path_384" data-name="Path 384" d="M22.129,2.655V6.127A11.977,11.977,0,0,0,0,12.5H1.871A10.105,10.105,0,0,1,20.679,7.343H17.45V9.218H24V2.655Z" transform="translate(0 -0.499)" fill="#fff" stroke="#fff" stroke-width="0.5"/>
+          <path id="Path_383" data-name="Path 383" d="M10.019,264.438A8.361,8.361,0,0,1,2.767,260.3H5.458v-1.562H0V264.2H1.559V261.31a9.984,9.984,0,0,0,8.46,4.69,9.847,9.847,0,0,0,7.039-2.931,9.971,9.971,0,0,0,2.9-7.069H18.4A8.419,8.419,0,0,1,10.019,264.438Z" transform="translate(0 -246)" fill="currentColor" stroke="#babac0" stroke-width="0.5"/>
+          <path id="Path_384" data-name="Path 384" d="M18.441,2.3V5.189A9.981,9.981,0,0,0,0,10.5H1.559A8.421,8.421,0,0,1,17.233,6.2H14.542V7.765H20V2.3Z" transform="translate(0 -0.499)" fill="currentColor" stroke="currentColor" stroke-width="0.5"/>
         </g>
       </g>
     </g>
-    <g id="Group_607" data-name="Group 607" transform="translate(1.27 0.294)">
-      <g id="Union_1" data-name="Union 1" transform="translate(-732.27 10.296)" fill="#fff">
-        <path d="M 9.750030517578125 2.25 L 0.250030517578125 2.25 L 0.250030517578125 0.25 L 9.750030517578125 0.25 L 9.750030517578125 2.25 Z" stroke="none"/>
-        <path d="M 0.500030517578125 0.5 L 0.500030517578125 2 L 9.500030517578125 2 L 9.500030517578125 0.5 L 0.500030517578125 0.5 M 3.0517578125e-05 0 L 10.00003051757813 0 L 10.00003051757813 2.5 L 3.0517578125e-05 2.5 L 3.0517578125e-05 0 Z" stroke="none" fill="#fff"/>
+    <g id="Group_607" data-name="Group 607" transform="translate(5.833 8.824)">
+      <g id="Union_1" data-name="Union 1" fill="currentColor">
+        <path d="M 8.08333683013916 1.833336591720581 L 0.2499965131282806 1.833336591720581 L 0.2499965131282806 0.2499966323375702 L 8.08333683013916 0.2499966323375702 L 8.08333683013916 1.833336591720581 Z" stroke="none"/>
+        <path d="M 0.4999966621398926 0.4999966621398926 L 0.4999966621398926 1.583336591720581 L 7.833336353302002 1.583336591720581 L 7.833336353302002 0.4999966621398926 L 0.4999966621398926 0.4999966621398926 M -3.814697265625e-06 -3.337860107421875e-06 L 8.33333683013916 -3.337860107421875e-06 L 8.33333683013916 2.083336591720581 L -3.814697265625e-06 2.083336591720581 L -3.814697265625e-06 -3.337860107421875e-06 Z" stroke="none" fill="currentColor"/>
       </g>
     </g>
   </g>

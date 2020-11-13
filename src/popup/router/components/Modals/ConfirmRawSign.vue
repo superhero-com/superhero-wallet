@@ -4,7 +4,7 @@
       <h3>
         {{ $t('modals.confirm-transaction-sign.sign-raw') }} <br />
         <span class="name-holder">
-          <UserAvatar :address="account.publicKey" :name="account.name" size="small" />
+          <Avatar :address="account.publicKey" :name="account.name" size="small" />
           {{ account.name || account.publicKey }}
         </span>
       </h3>
@@ -24,7 +24,7 @@
 import { mapGetters } from 'vuex';
 import Modal from '../Modal';
 import Button from '../Button';
-import UserAvatar from '../UserAvatar';
+import Avatar from '../Avatar';
 import DetailsItem from '../DetailsItem';
 
 export default {
@@ -33,7 +33,7 @@ export default {
     reject: { type: Function, required: true },
     data: { type: [String, Uint8Array], required: true },
   },
-  components: { Modal, Button, UserAvatar, DetailsItem },
+  components: { Modal, Button, Avatar, DetailsItem },
   computed: {
     ...mapGetters(['account', 'activeAccountName']),
     dataAsString() {

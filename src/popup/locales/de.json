@@ -721,7 +721,6 @@
       "minAmountError": "Tips should be over 0.01 USD in tokens in order to push through."
     },
     "successTip": {
-      "sendMore": "Send More AE",
       "feed": "View your tip on the feed",
       "completedHeading": " Transaction Completed.",
       "sentTo": "Send to: ",
@@ -731,8 +730,7 @@
       "successfullySent": "You have successfully sent ",
       "to": "to",
       "note": "NOTE: The owner of this URL has not created an account yet. They can claim their tokens easily by creating a wallet - the same way you did.",
-      "notify": "Notify the owner that you sent AE to this post",
-      "notifyMessage": "I just sent AE to this post! Anyone can start sending and receiving AE through Superhero. Learn more."
+      "notify": "Notify the owner that you sent AE to this post"
     },
     "transactionDetails": {
       "heading": "Transaktionen Einzelheiten",

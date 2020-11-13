@@ -21,7 +21,7 @@
     <NotificationItem
       v-for="notification in filteredNotifications"
       :key="notification.id"
-      :address="notification.sender"
+      :address="notification.sender || ''"
       :name="
         notification.wallet ? notification.title : notification.chainName || 'Fellow Superhero'
       "

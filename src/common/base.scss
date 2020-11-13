@@ -357,8 +357,6 @@ button {
   background: none;
   border: none;
   color: #717c87;
-  cursor: pointer;
-  transition: all 0.2s;
 }
 
 .popup {
@@ -380,6 +378,12 @@ button {
 
 .actions {
   text-align: left;
+}
+
+.text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media screen and (min-width: 780px) {

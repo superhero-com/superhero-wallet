@@ -1,6 +1,7 @@
 import { uniq } from 'lodash-es';
+import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import { postJson } from '../popup/utils/helper';
-import { defaultNetwork, TIPPING_CONTRACT } from '../popup/utils/constants';
+import { defaultNetwork } from '../popup/utils/constants';
 import {
   contractCallStatic,
   getActiveAccount,
@@ -21,7 +22,7 @@ export default {
       method: 'unclaimed_for_url',
       address,
       params: [url],
-      source: TIPPING_CONTRACT,
+      source: TIPPING_V1_INTERFACE,
     };
 
     const claimAmount = await contractCallStatic({ tx, callType: 'static' })

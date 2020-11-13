@@ -28,7 +28,8 @@ import NotFound from '../pages/NotFound';
 import ClaimTips from '../pages/ClaimTips';
 import DonateError from '../pages/DonateError';
 import Address from '../pages/Address';
-import Tokens from '../pages/FungibleTokens/Index';
+import TokensPreview from '../pages/FungibleTokens/TokensPreview';
+import TokenDetails from '../pages/FungibleTokens/TokenDetails';
 import DeployToken from '../pages/FungibleTokens/Deploy';
 import AddToken from '../pages/FungibleTokens/Add';
 import MintToken from '../pages/FungibleTokens/Mint';
@@ -335,10 +336,20 @@ export default [
     },
   },
   {
+    name: 'tokens-preview',
     path: '/tokens',
-    component: Tokens,
+    component: TokensPreview,
     meta: {
-      title: 'fungible-tokens',
+      title: 'tokens-preview',
+    },
+  },
+  {
+    name: 'token-details',
+    path: '/tokens/:id',
+    component: TokenDetails,
+    props: true,
+    meta: {
+      title: 'token-details',
     },
   },
   {

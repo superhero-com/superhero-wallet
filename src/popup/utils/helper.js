@@ -18,10 +18,7 @@ export const aettosToAe = v =>
     targetDenomination: AE_AMOUNT_FORMATS.AE,
   });
 
-export const convertToken = (balance, precision) =>
-  BigNumber(balance)
-    .shiftedBy(precision)
-    .toString();
+export const convertToken = (balance, precision) => BigNumber(balance).shiftedBy(precision);
 
 export const shuffleArray = array => {
   const shuffle = array;

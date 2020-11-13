@@ -2,7 +2,7 @@
   <div class="popup">
     <AccountInfo />
     <BalanceInfo />
-    <TransactionFilters @filtrate="filtrate" />
+    <TransactionFilters v-model="displayMode" />
     <ul class="all-transactions" data-cy="all-transactions">
       <PendingTxs />
       <TransactionItem
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 import { differenceWith, isEqual, uniqBy, orderBy } from 'lodash-es';
 import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
@@ -37,70 +37,53 @@ export default {
   data() {
     return {
       loading: true,
-      polling: null,
-      type: '',
-      dateType: '',
       transactions: [],
       page: 1,
+      displayMode: { latestFirst: true, type: 'all' },
     };
   },
-  computed: {
-    ...mapGetters(['account']),
-    filteredTransactions() {
-      switch (this.type) {
-        case 'date':
-          if (this.dateType === 'recent') {
-            return this.transactions.slice().sort((a, b) => new Date(b.time) - new Date(a.time));
+  computed: mapState({
+    filteredTransactions(state, { account: { publicKey } }) {
+      return this.transactions
+        .filter(tr => {
+          switch (this.displayMode.type) {
+            case 'sent':
+              return tr.tx.type === 'ContractCallTx' && tr.tx.callerId === publicKey;
+            case 'claimed':
+              return tr.claim;
+            case 'topups':
+              return tr.tx.type === 'SpendTx' && tr.tx.recipientId === publicKey;
+            case 'withdrawals':
+              return tr.tx.type === 'SpendTx' && tr.tx.senderId === publicKey;
+            case 'all':
+              return true;
+            default:
+              throw new Error(`Unknown display mode type: ${this.displayMode.type}`);
           }
-          if (this.dateType === 'oldest') {
-            return this.transactions.slice().sort((a, b) => new Date(a.time) - new Date(b.time));
-          }
-          break;
-        case 'sent':
-          return this.transactions.filter(
-            tr => tr.tx.type === 'ContractCallTx' && tr.tx.callerId === this.account.publicKey,
-          );
-        case 'received':
-          return this.transactions.filter(tr => tr.claim);
-        case 'topups':
-          return this.transactions.filter(
-            tr => tr.tx.type === 'SpendTx' && tr.tx.recipientId === this.account.publicKey,
-          );
-        case 'withdrawals':
-          return this.transactions.filter(
-            tr =>
-              tr.tx.senderId &&
-              tr.tx.type === 'SpendTx' &&
-              tr.tx.senderId === this.account.publicKey,
-          );
-        default:
-          return this.transactions;
-      }
-      return this.transactions;
+        })
+        .sort((a, b) => {
+          const arr = [a, b].map(e => new Date(e.microTime));
+          if (this.displayMode.latestFirst) arr.reverse();
+          return arr[0] - arr[1];
+        });
     },
-  },
-  created() {
-    this.loadMore(true);
-    this.polling = setInterval(() => this.getLatest(), 10000);
-  },
+  }),
   mounted() {
+    this.loadMore(true);
+    const polling = setInterval(() => this.getLatest(), 10000);
     const checkLoadMore = () => {
-      const { scrollHeight, clientHeight } = document.documentElement;
-      if (scrollHeight - window.scrollY === clientHeight) {
+      const { scrollHeight, scrollTop, clientHeight } = document.documentElement;
+      if (scrollHeight - scrollTop <= clientHeight + 100) {
         setTimeout(() => this.loadMore(), 1500);
       }
     };
     window.addEventListener('scroll', checkLoadMore);
     this.$once('hook:destroyed', () => {
       window.removeEventListener('scroll', checkLoadMore);
-      clearInterval(this.polling);
+      clearInterval(polling);
     });
   },
   methods: {
-    async filtrate(type, dateType) {
-      this.type = type;
-      this.dateType = dateType;
-    },
     async loadMore(init = false) {
       if (this.loading && !init) return;
       await this.$watchUntilTruly(() => this.$store.state.middleware);
