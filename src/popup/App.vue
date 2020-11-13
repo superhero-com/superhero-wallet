@@ -19,7 +19,7 @@
         @click.self="showSidebar = false"
         data-cy="menu-overlay"
       >
-        <SidebarMenu @closeMenu="showSidebar = false" />
+        <SidebarMenu @close="showSidebar = false" />
       </div>
     </transition>
 

@@ -13,7 +13,7 @@ export default {
         })
         .catch(() => false);
       if (remove) {
-        this.$emit('closeMenu');
+        this.$emit('close');
         if (process.env.PLATFORM === 'web' && IN_FRAME) {
           const { sdk } = this.$store.state;
           const { clients } = sdk.getClients();
