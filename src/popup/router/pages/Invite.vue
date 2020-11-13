@@ -29,12 +29,13 @@ import { mapState } from 'vuex';
 import { Crypto } from '@aeternity/aepp-sdk/es';
 import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 import AmountSend from '../components/AmountSend';
+import Button from '../components/Button';
 import InviteItem from '../components/InviteItem';
 import Invite from '../../../icons/invite.svg?vue-component';
 import NewInviteLink from '../../../icons/new-invite-link.svg?vue-component';
 
 export default {
-  components: { AmountSend, InviteItem, Invite, NewInviteLink },
+  components: { AmountSend, Button, InviteItem, Invite, NewInviteLink },
   data: () => ({ amount: 0, loading: false }),
   computed: {
     ...mapState(['sdk', 'balance']),

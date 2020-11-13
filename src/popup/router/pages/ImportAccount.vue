@@ -17,11 +17,10 @@
 <script>
 import { mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
 import Textarea from '../components/Textarea';
+import Button from '../components/Button';
 
 export default {
-  components: {
-    Textarea,
-  },
+  components: { Textarea, Button },
   data() {
     return {
       mnemonic: null,

@@ -145,6 +145,7 @@ import { checkAddress, chekAensName, checkHashType, aeToAettos } from '../../uti
 import openUrl from '../../utils/openUrl';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
+import Button from '../components/Button';
 import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
 import QrIcon from '../../../icons/qr-code.svg?vue-component';
@@ -156,6 +157,7 @@ export default {
   components: {
     AmountSend,
     Textarea,
+    Button,
     AccountInfo,
     BalanceInfo,
     QrIcon,

@@ -32,9 +32,10 @@
 <script>
 import blocksToRelativeTime from '../../../../filters/blocksToRelativeTime';
 import NameRow from '../../components/NameRow';
+import Button from '../../components/Button';
 
 export default {
-  components: { NameRow },
+  components: { NameRow, Button },
   props: {
     name: { type: String, required: true },
   },

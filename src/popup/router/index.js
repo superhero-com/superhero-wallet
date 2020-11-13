@@ -7,7 +7,6 @@ import 'vue-tour/dist/vue-tour.css';
 import routes from './routes';
 import '@aeternity/aepp-components-3/dist/aepp.components.css';
 import LoaderComponent from './components/Loader';
-import Button from './components/Button';
 
 import * as helper from '../utils/helper';
 import store from '../../store';
@@ -26,7 +25,6 @@ Vue.use(VueClipboard);
 Vue.use(Components);
 Vue.use(VueTour);
 Vue.component('Loader', LoaderComponent);
-Vue.component('Button', Button);
 
 const router = new VueRouter({
   routes,

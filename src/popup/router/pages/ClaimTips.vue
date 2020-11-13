@@ -20,9 +20,10 @@
 import { mapGetters, mapState } from 'vuex';
 import { aettosToAe, toURL, validateTipUrl } from '../../utils/helper';
 import Input from '../components/Input';
+import Button from '../components/Button';
 
 export default {
-  components: { Input },
+  components: { Input, Button },
   data: () => ({
     url: '',
     loading: false,

@@ -7,6 +7,14 @@
   </div>
 </template>
 
+<script>
+import Button from '../components/Button';
+
+export default {
+  components: { Button },
+};
+</script>
+
 <style lang="scss" scoped>
 .not-found {
   margin: 20px auto;
