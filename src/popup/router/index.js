@@ -8,8 +8,6 @@ import routes from './routes';
 import '@aeternity/aepp-components-3/dist/aepp.components.css';
 import LoaderComponent from './components/Loader';
 import TransactionItemComponent from './components/TransactionItem';
-import AmountInput from './components/AmountInput';
-import AddressInput from './components/AddressInput';
 import Button from './components/Button';
 import ModalComponent from './components/Modal';
 
@@ -32,8 +30,6 @@ Vue.use(VueTour);
 Vue.component('Loader', LoaderComponent);
 Vue.component('TransactionItem', TransactionItemComponent);
 Vue.component('Modal', ModalComponent);
-Vue.component('AmountInput', AmountInput);
-Vue.component('AddressInput', AddressInput);
 Vue.component('Button', Button);
 
 const router = new VueRouter({
