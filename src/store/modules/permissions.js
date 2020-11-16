@@ -10,7 +10,7 @@ export const setLimitLeft = async (limitLeft, firstAskedOn) =>
 
 export const getLimitLeft = async () => (await browser.storage.local.get(LIMIT_KEY))[LIMIT_KEY];
 
-export const checkPermissions = async ({ method, params }) => {
+export const checkPermissions = async (method, params = {}) => {
   const permissionsMethods = {
     'connection.open': 'address',
     'address.subscribe': 'address',
@@ -23,18 +23,14 @@ export const checkPermissions = async ({ method, params }) => {
 
   if (typeof value !== 'number') return value;
 
-  const {
-    txObject: {
-      params: { amount },
-    },
-  } = params;
+  const { amount = 0, fee = 0, nameFee = 0 } = params;
   let { limitLeft = value, firstAskedOn = new Date().toJSON() } = (await getLimitLeft()) || {};
 
   if (new Date() - new Date(firstAskedOn) >= 24 * 60 * 60 * 1000) {
     firstAskedOn = new Date().toJSON();
     limitLeft = value;
   }
-  limitLeft -= aettosToAe(amount);
+  limitLeft -= aettosToAe(amount + fee + nameFee);
   if (limitLeft < 0) limitLeft = 0;
   await setLimitLeft(limitLeft, firstAskedOn);
 
