@@ -8,7 +8,6 @@ import { AEX2_METHODS, defaultNetwork, NO_POPUP_AEPPS } from '../popup/utils/con
 import {
   extractHostName,
   getAllNetworks,
-  getAddressByNameEntry,
   getAeppAccountPermission,
   parseFromStorage,
   stringifyForStorage,
@@ -44,8 +43,7 @@ export default {
   initNetwork(network = defaultNetwork.name) {
     this.network = network;
     this.compiler = this.nodes[network].compilerUrl;
-    this.internalUrl = this.nodes[network].internalUrl;
-    this.tipContractAddress = this.nodes[network].tipContract;
+    this.url = this.nodes[network].url;
   },
   async initNodes() {
     this.nodes = await getAllNetworks();
@@ -53,7 +51,7 @@ export default {
   async initSdk() {
     const context = this;
     try {
-      const node = await Node({ url: this.internalUrl, internalUrl: this.internalUrl });
+      const node = await Node({ url: this.url });
       this.sdk = await RpcWallet({
         nodes: [{ name: this.network, instance: node }],
         compilerUrl: this.compiler,
@@ -95,12 +93,6 @@ export default {
         },
       });
 
-      this.tipContractAddress = this.tipContractAddress.includes('.chain')
-        ? getAddressByNameEntry(
-            await this.sdk.api.getNameEntryByName(this.tipContractAddress).catch(() => false),
-            'contract_pubkey',
-          )
-        : this.tipContractAddress;
       this.connectionsQueue.forEach(c => this.addConnection(c));
       this.connectionsQueue = [];
     } catch (e) {
@@ -272,7 +264,7 @@ export default {
   async addNewNetwork(network) {
     await this.initNodes();
     this.initNetwork(network);
-    const node = await Node({ url: this.internalUrl, internalUrl: this.internalUrl });
+    const node = await Node({ url: this.url });
     if (this.sdk) {
       try {
         await this.sdk.addNode(network, node, true);
@@ -296,7 +288,7 @@ export default {
       browser.tabs.reload(aepp.connection.port.sender.tab.id);
       this.sdk.removeRpcClient(aepp.id);
     });
-    walletController.lockWallet();
+    delete walletController.wallet;
     this.initFields();
   },
   async [AEX2_METHODS.INIT_RPC_WALLET]({ address, network }) {
