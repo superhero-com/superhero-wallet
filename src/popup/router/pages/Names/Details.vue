@@ -74,13 +74,15 @@ export default {
       return chekAensName(this.pointer) || checkAddress(this.pointer);
     },
     hasPointer() {
-      return this.nameEntry.pointers.accountPubkey;
+      return this.nameEntry?.pointers?.accountPubkey;
     },
   },
   watch: {
     name: {
       async handler() {
-        this.nameHash = (await this.sdk.api.getNameEntryByName(this.name)).id;
+        this.nameHash = this.nameEntry.pending
+          ? this.nameEntry.nameHash
+          : (await this.sdk.api.getNameEntryByName(this.name)).id;
       },
       immediate: true,
     },
