@@ -48,20 +48,20 @@ export default store =>
                 })),
             () => [],
           );
-        let names = await Promise.all([
-          getPendingNameClaimTransactions(rootState.account.publicKey),
-          rootState.middleware.getOwnedBy(rootState.account.publicKey).then(({ active }) => active),
-        ]).then(arr => arr.flat());
+        const pendingNames = await getPendingNameClaimTransactions(rootState.account.publicKey);
+        let ownedNames = await rootState.middleware
+          .getOwnedBy(rootState.account.publicKey)
+          .then(({ active }) => active);
 
         const defaultName = getDefault(rootState.account.publicKey);
         let defaultNameRevoked = false;
         if (owned) {
-          names = names
-            .map(({ owner, createdAtHeight, expiresAt, pointers, info, name }) => ({
-              createdAtHeight: createdAtHeight || info.activeFrom,
-              expiresAt: expiresAt || info.expireHeight,
-              owner: owner || info.ownership.current,
-              pointers: pointers || info.pointers,
+          ownedNames = [...ownedNames]
+            .map(({ info, name }) => ({
+              createdAtHeight: info.activeFrom,
+              expiresAt: info.expireHeight,
+              owner: info.ownership.current,
+              pointers: info.pointers,
               name,
             }))
             .map(name => {
@@ -90,15 +90,13 @@ export default store =>
               };
             });
         }
-        commit('set', names);
-        if ((names.length && !defaultName) || defaultNameRevoked) {
-          const claimed = names.filter(n => !n.pending);
-          if (claimed.length)
-            dispatch('setDefault', {
-              name: claimed[0],
-              address: rootState.account.publicKey,
-              modal: false,
-            });
+        commit('set', [...pendingNames, ...ownedNames]);
+        if ((ownedNames.length && !defaultName) || defaultNameRevoked) {
+          dispatch('setDefault', {
+            name: ownedNames[0],
+            address: rootState.account.publicKey,
+            modal: false,
+          });
         }
       },
       async fetchAuctions({ rootState: { middleware } }) {

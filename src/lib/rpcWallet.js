@@ -110,7 +110,10 @@ export default {
     return extractHostName(url);
   },
   async shouldOpenPopup(aepp, action) {
-    if (!NO_POPUP_AEPPS.includes(this.getAeppOrigin(aepp)) || (await checkPermissions(action)))
+    if (
+      !NO_POPUP_AEPPS.includes(this.getAeppOrigin(aepp)) ||
+      (await checkPermissions(action.method))
+    )
       return true;
     action.accept();
     return false;
@@ -231,7 +234,7 @@ export default {
         },
       } = client;
       const isConnected = await getAeppAccountPermission(extractHostName(url), address);
-      if ((await checkPermissions({ method: 'address.subscribe' })) && !isConnected) {
+      if ((await checkPermissions('address.subscribe')) && !isConnected) {
         const accept = await this.showPopup({ action: {}, aepp: client, type: 'connectConfirm' });
         if (accept) {
           this.sdk.selectAccount(address);

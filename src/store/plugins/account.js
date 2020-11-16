@@ -57,11 +57,7 @@ export default store =>
           },
         };
         const fee =
-          modal &&
-          (await checkPermissions({
-            method: 'transaction.sign',
-            params: { txObject: { params: { amount: txObject.amount } } },
-          }))
+          modal && (await checkPermissions('transaction.sign', txObject))
             ? aeToAettos(await dispatch('modals/open', confirmProps, { root: true }))
             : txObject.fee;
         return TxBuilder.buildTx(

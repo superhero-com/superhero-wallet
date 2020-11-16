@@ -148,7 +148,7 @@ export default {
                 originUrl.hostname,
                 store.state.account.publicKey,
               ))) &&
-            !(await checkPermissions(action))
+            !(await checkPermissions(action.method))
           ) {
             action.accept();
             return;
@@ -176,7 +176,7 @@ export default {
         onSubscription: acceptCb,
         onSign: acceptCb,
         async onMessageSign(aepp, action, origin) {
-          if (!(await checkPermissions(action))) {
+          if (!(await checkPermissions(action.method))) {
             action.accept();
             return;
           }
