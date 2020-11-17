@@ -1,4 +1,3 @@
-import Promise from 'bluebird';
 import { IN_FRAME } from '../../popup/utils/helper';
 
 const modals = {};

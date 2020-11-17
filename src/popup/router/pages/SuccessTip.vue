@@ -59,12 +59,14 @@ import { AGGREGATOR_URL } from '../../utils/constants';
 import { aettosToAe } from '../../utils/helper';
 import Logger from '../../../lib/logger';
 import FormatFiatCurrency from '../components/FormatFiatCurrency';
+import Button from '../components/Button';
 
 export default {
   components: {
     Heart,
     Textarea,
     FormatFiatCurrency,
+    Button,
   },
   props: ['amount', 'tipUrl'],
   computed: {

@@ -32,10 +32,12 @@
 </template>
 
 <script>
+import Button from '../../components/Button';
 import getPopupProps from '../../../utils/getPopupProps';
 import { IN_POPUP } from '../../../utils/helper';
 
 export default {
+  components: { Button },
   props: {
     message: { type: String, default: null },
     origin: { type: String, default: null },

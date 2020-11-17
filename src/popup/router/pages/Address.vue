@@ -18,9 +18,11 @@
 </template>
 
 <script>
+import Button from '../components/Button';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
+  components: { Button },
   mixins: [deeplinkApi],
 };
 </script>

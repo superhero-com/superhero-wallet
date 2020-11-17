@@ -1,4 +1,4 @@
-import * as aeternityTokens from 'aeternity-tokens';
+import { newToken } from 'aeternity-tokens';
 import { isEmpty } from 'lodash-es';
 import { convertToken } from '../../popup/utils/helper';
 
@@ -95,7 +95,7 @@ export default store =>
         let instance = getInstance(contract);
         if (!instance) {
           instance = await sdk.getContractInstance(
-            aeternityTokens.newToken(['allowances', 'swappable', 'burnable', 'mintable']),
+            newToken(['allowances', 'swappable', 'burnable', 'mintable']),
             {
               contractAddress: contract,
             },

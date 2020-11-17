@@ -40,10 +40,11 @@ import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 import AmountSend from '../components/AmountSend';
 import UrlStatus from '../components/UrlStatus';
+import Button from '../components/Button';
 
 export default {
   mixins: [deeplinkApi],
-  components: { AmountSend, UrlStatus },
+  components: { AmountSend, UrlStatus, Button },
   data: () => ({
     tip: {},
     amount: null,

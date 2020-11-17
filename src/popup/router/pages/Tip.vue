@@ -106,6 +106,7 @@ import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
 import Input from '../components/Input';
 import UrlStatus from '../components/UrlStatus';
+import Button from '../components/Button';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
@@ -115,6 +116,7 @@ export default {
     Textarea,
     Input,
     UrlStatus,
+    Button,
   },
   data() {
     return {

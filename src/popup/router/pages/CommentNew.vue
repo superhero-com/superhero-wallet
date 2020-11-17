@@ -18,9 +18,11 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
+import Button from '../components/Button';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
+  components: { Button },
   mixins: [deeplinkApi],
   data: () => ({ id: 0, parentId: undefined, text: '', loading: false }),
   computed: {

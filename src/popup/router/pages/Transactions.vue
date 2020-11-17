@@ -24,6 +24,7 @@ import { differenceWith, isEqual, uniqBy, orderBy } from 'lodash-es';
 import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
 import TransactionFilters from '../components/TransactionFilters';
+import TransactionItem from '../components/TransactionItem';
 import PendingTxs from '../components/PendingTxs';
 import { TXS_PER_PAGE } from '../../utils/constants';
 
@@ -32,6 +33,7 @@ export default {
     AccountInfo,
     BalanceInfo,
     TransactionFilters,
+    TransactionItem,
     PendingTxs,
   },
   data() {

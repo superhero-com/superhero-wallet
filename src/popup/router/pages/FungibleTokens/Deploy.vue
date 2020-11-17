@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import * as aeternityTokens from 'aeternity-tokens';
+import { newToken } from 'aeternity-tokens';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import CheckBox from '../../components/CheckBox';
@@ -82,7 +82,7 @@ export default {
   methods: {
     async deploy() {
       this.loading = true;
-      const source = aeternityTokens.newToken(this.selectedExtensions);
+      const source = newToken(this.selectedExtensions);
       const instance = await this.$store.state.sdk.getContractInstance(source);
 
       try {
