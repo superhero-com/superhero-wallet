@@ -18,6 +18,8 @@ export default {
   formatCurrency: ({ current: { currency } }) => value =>
     // TODO: Use the current language from i18n module
     new Intl.NumberFormat(navigator.language, { style: 'currency', currency }).format(value),
+  convertToCurrencyFormatted: (state, { convertToCurrency, formatCurrency }) => value =>
+    formatCurrency(convertToCurrency(value)),
   minTipAmount: ({ currencies: { usd } }) => 0.01 / usd,
   networks({ userNetworks }) {
     return [

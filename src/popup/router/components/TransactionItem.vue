@@ -2,11 +2,11 @@
   <li class="list-item-transaction">
     <div class="holder">
       <span class="amount">
-        <span data-cy="amount">{{ txAmount }}</span>
+        <span data-cy="amount">{{ txAmount | formatAmount }}</span>
         {{ $t('pages.appVUE.aeid') }}
         <span class="text" data-cy="currency-amount">
           <!--eslint-disable vue-i18n/no-raw-text-->
-          ({{ formatCurrency(txAmountToCurrency) }})
+          ({{ txAmountCurrency }})
           <!--eslint-enable vue-i18n/no-raw-text-->
         </span>
       </span>
@@ -49,25 +49,24 @@ export default {
     },
   },
   data: () => ({
-    tip: null,
     openUrl,
   }),
-  filters: { formatDate },
-  async created() {
-    if (!this.transaction.pending && !this.transaction.claim) {
-      await this.$watchUntilTruly(() => this.sdk);
-      this.getEventData();
-    }
+  filters: {
+    formatDate,
+    formatAmount: number => number.toFixed(2),
   },
   computed: {
-    ...mapState(['sdk']),
-    ...mapGetters(['account', 'activeNetwork', 'formatCurrency', 'currentCurrencyRate']),
+    ...mapGetters(['account', 'activeNetwork']),
+    ...mapState({
+      txAmountCurrency(state, { convertToCurrencyFormatted }) {
+        return convertToCurrencyFormatted(this.txAmount);
+      },
+    }),
     status() {
       if (
-        this.transaction.tx.senderId === this.account.publicKey ||
-        this.transaction.tx.accountId === this.account.publicKey ||
-        this.transaction.tx.ownerId === this.account.publicKey ||
-        this.transaction.tx.callerId === this.account.publicKey
+        ['senderId', 'accountId', 'ownerId', 'callerId']
+          .map(key => this.transaction.tx[key])
+          .includes(this.account.publicKey)
       ) {
         return this.$t('pages.transactions.sent');
       }
@@ -79,16 +78,18 @@ export default {
     txAmount() {
       const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
       const fee = this.transaction.tx.fee || 0;
-      return (+aettosToAe(+amount + fee)).toFixed(2);
-    },
-    txAmountToCurrency() {
-      const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
-      const fee = this.transaction.tx.fee || 0;
-      const txamount = +aettosToAe(+amount + fee);
-      return (txamount * this.currentCurrencyRate).toFixed(2);
+      return +aettosToAe(+amount + fee);
     },
     tipUrl() {
-      return this.transaction.tipUrl || this.tip || this.transaction.url;
+      return (
+        this.transaction.tipUrl ||
+        this.transaction.url ||
+        (!this.transaction.pending &&
+          !this.transaction.claim &&
+          this.transaction.tx.log?.[0] &&
+          decode(this.transaction.tx.log[0].data).toString()) ||
+        ''
+      );
     },
     topup() {
       return (
@@ -104,14 +105,6 @@ export default {
     },
     transactionType() {
       return this.$t('transaction.type')[this.transaction.tx.type];
-    },
-  },
-  methods: {
-    async getEventData() {
-      const { log } = await this.sdk.tx(this.transaction.hash, true);
-      if (log && log.length) {
-        this.tip = decode(log[0].data).toString();
-      }
     },
   },
 };
