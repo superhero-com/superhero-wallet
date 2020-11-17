@@ -48,55 +48,59 @@ export default store =>
                 })),
             () => [],
           );
-        const pendingNames = await getPendingNameClaimTransactions(rootState.account.publicKey);
-        let ownedNames = await rootState.middleware
-          .getOwnedBy(rootState.account.publicKey)
-          .then(({ active }) => active);
 
         const defaultName = getDefault(rootState.account.publicKey);
         let defaultNameRevoked = false;
-        if (owned) {
-          ownedNames = [...ownedNames]
-            .map(({ info, name }) => ({
-              createdAtHeight: info.activeFrom,
-              expiresAt: info.expireHeight,
-              owner: info.ownership.current,
-              pointers: info.pointers,
-              name,
-            }))
-            .map(name => {
-              const oldName = owned.find(n => n.name === name.name);
-              if (!oldName) return name;
-              const revoked = name.expiresAt < oldName.expiresAt;
-              if (revoked) {
-                if (name.name === defaultName) defaultNameRevoked = true;
-                commit(
-                  'addNotification',
-                  {
-                    title: '',
-                    content: i18n.t('pages.names.revoked-notification', {
-                      name: name.name,
-                      block: name.expiresAt,
-                    }),
-                    route: '',
-                  },
-                  { root: true },
-                );
-              }
-              return {
-                ...(revoked || oldName.revoked ? { revoked: true } : {}),
-                autoExtend: oldName.autoExtend,
-                ...name,
-              };
+        const names = await Promise.all([
+          getPendingNameClaimTransactions(rootState.account.publicKey),
+          rootState.middleware.getOwnedBy(rootState.account.publicKey).then(({ active }) =>
+            owned
+              ? active
+                  .map(({ info, name }) => ({
+                    createdAtHeight: info.activeFrom,
+                    expiresAt: info.expireHeight,
+                    owner: info.ownership.current,
+                    pointers: info.pointers,
+                    name,
+                  }))
+                  .map(name => {
+                    const oldName = owned.find(n => n.name === name.name);
+                    if (!oldName) return name;
+                    const revoked = name.expiresAt < oldName.expiresAt;
+                    if (revoked) {
+                      if (name.name === defaultName) defaultNameRevoked = true;
+                      commit(
+                        'addNotification',
+                        {
+                          title: '',
+                          content: i18n.t('pages.names.revoked-notification', {
+                            name: name.name,
+                            block: name.expiresAt,
+                          }),
+                          route: '',
+                        },
+                        { root: true },
+                      );
+                    }
+                    return {
+                      ...(revoked || oldName.revoked ? { revoked: true } : {}),
+                      autoExtend: oldName.autoExtend,
+                      ...name,
+                    };
+                  })
+              : active,
+          ),
+        ]).then(arr => arr.flat());
+
+        commit('set', names);
+        if ((names.length && !defaultName) || defaultNameRevoked) {
+          const claimed = names.filter(n => !n.pending);
+          if (claimed.length)
+            dispatch('setDefault', {
+              name: claimed[0],
+              address: rootState.account.publicKey,
+              modal: false,
             });
-        }
-        commit('set', [...pendingNames, ...ownedNames]);
-        if ((ownedNames.length && !defaultName) || defaultNameRevoked) {
-          dispatch('setDefault', {
-            name: ownedNames[0],
-            address: rootState.account.publicKey,
-            modal: false,
-          });
         }
       },
       async fetchAuctions({ rootState: { middleware } }) {
