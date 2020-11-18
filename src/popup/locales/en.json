@@ -718,6 +718,7 @@
       "tabAboutsmall": "Version, support center, and contact info",
       "tabNetworks": "Manage networks",
       "tabNetworksSmall": "Connect to custom node",
+      "tabPermissionsSettingsSmall": "Manage popups appearance for various requests",
       "tabRemoveAccount": "Remove account",
       "tabRemoveAccountSmall": "Remove account from the wallet and delete extension storage",
       "tabSaveErrorLog": "Save error log",
