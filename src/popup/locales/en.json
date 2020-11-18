@@ -1055,9 +1055,6 @@
       }
     ]
   },
-  "options": {
-    "text": "Superhero is Open-source! Visit "
-  },
   "redirecting": "Redirecting",
   "minutes": "{n} minutes | {n} minute | {n} minutes",
   "hours": "{n} hours | {n} hour | {n} hours",

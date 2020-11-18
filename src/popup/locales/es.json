@@ -961,9 +961,6 @@
       }
     ]
   },
-  "options": {
-    "text": "!Superhero es Código Abierto! Visítalo "
-  },
   "redirecting": "Redirigiendo",
   "minutes": "{n} minutos | {n} minuto | {n} minutos",
   "hours": "{n} horas | {n} hora | {n} horas",

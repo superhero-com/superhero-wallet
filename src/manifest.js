@@ -42,10 +42,6 @@ module.exports = (isProd, platform) => ({
     scripts: ['other/background.js'],
     persistent: true,
   },
-  options_ui: {
-    page: 'options/options.html',
-    chrome_style: true,
-  },
   content_scripts: [
     {
       run_at: 'document_start',
