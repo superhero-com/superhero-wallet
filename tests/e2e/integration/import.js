@@ -3,7 +3,7 @@ describe('Test cases for import account page', () => {
     cy.logout().openPopup();
   });
 
-  it('Opens import account page, shows error on wrongf seed, returns to index', () => {
+  it('Opens import account page, shows error on wrong seed, returns to index', () => {
     cy.openImportWallet()
       .get('textarea')
       .should('be.visible')
