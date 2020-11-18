@@ -21,10 +21,11 @@
 import { mapState } from 'vuex';
 import NameListHeader from '../../components/NameListHeader';
 import Input from '../../components/Input';
+import Button from '../../components/Button';
 import { MAX_AUCTION_NAME_LENGTH, MIN_NAME_LENGTH } from '../../../utils/constants';
 
 export default {
-  components: { NameListHeader, Input },
+  components: { NameListHeader, Input, Button },
   data: () => ({ name: '', loading: false }),
   computed: {
     ...mapState(['sdk']),

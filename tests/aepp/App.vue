@@ -31,12 +31,10 @@ import Node from '@aeternity/aepp-sdk/es/node';
 const networks = {
   Mainnet: {
     NODE_URL: 'https://mainnet.aeternity.io',
-    NODE_INTERNAL_URL: 'https://mainnet.aeternity.io',
     COMPILER_URL: 'https://compiler.aepps.com',
   },
   Testnet: {
     NODE_URL: 'https://testnet.aeternity.io',
-    NODE_INTERNAL_URL: 'https://testnet.aeternity.io',
     COMPILER_URL: 'https://latest.compiler.aepps.com',
   },
 };
@@ -80,7 +78,6 @@ contract Example =
     async initClient() {
       const node = await Node({
         url: networks[process.env.NETWORK].NODE_URL,
-        internalUrl: networks[process.env.NETWORK].NODE_INTERNAL_URL,
       });
       this.client = await RpcAepp({
         name: 'AEPP',

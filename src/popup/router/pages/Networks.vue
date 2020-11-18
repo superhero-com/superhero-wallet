@@ -185,7 +185,6 @@ export default {
         this.$store.commit('setUserNetwork', {
           index: this.network.index,
           url: this.network.url,
-          internalUrl: this.network.url,
           middlewareUrl: this.network.middlewareUrl,
           compilerUrl: this.network.compilerUrl,
           name: this.network.name,

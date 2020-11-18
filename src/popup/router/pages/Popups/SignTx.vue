@@ -26,7 +26,7 @@
 <script>
 import { OBJECT_ID_TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
-import { getContractCallInfo, addTipAmount, aettosToAe, aeToAettos } from '../../../utils/helper';
+import { aettosToAe, aeToAettos } from '../../../utils/helper';
 import Button from '../../components/Button';
 import AmountSend from '../../components/AmountSend';
 import getPopupProps from '../../../utils/getPopupProps';
@@ -82,15 +82,6 @@ export default {
         },
         OBJECT_ID_TX_TYPE[this.txObject.tag],
       );
-      const contractAddress = await this.$store
-        .dispatch('getTipContractAddress')
-        .catch(() => false);
-      if (contractAddress) {
-        const { isTip, amount } = getContractCallInfo(tx, contractAddress);
-        if (isTip) {
-          await addTipAmount(amount);
-        }
-      }
       if (parseFloat(this.tx.amount) !== +aettosToAe(this.unpackedTx.tx.amount || 0)) {
         this.loading = true;
         this.props.resolve(tx);

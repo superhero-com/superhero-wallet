@@ -31,11 +31,10 @@
 import { mapState } from 'vuex';
 import { setInterval, clearInterval } from 'timers';
 import PendingTxs from './PendingTxs';
+import TransactionItem from './TransactionItem';
 
 export default {
-  components: {
-    PendingTxs,
-  },
+  components: { PendingTxs, TransactionItem },
   data() {
     return {
       polling: null,

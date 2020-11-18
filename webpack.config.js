@@ -31,7 +31,6 @@ const getConfig = platform => {
         'other/twitter': './content-scripts/twitter.js',
         'other/youtube': './content-scripts/youtube.js',
         'popup/popup': './popup/popup.js',
-        'options/options': './options/options.js',
         'phishing/phishing': './phishing/phishing.js',
         'popup/cameraPermission': './popup/cameraPermission.js',
         'redirect/redirect': './redirect/redirect.js',
@@ -146,43 +145,6 @@ const getConfig = platform => {
       }),
       ...(platform.startsWith('extension-')
         ? [
-            new CopyWebpackPlugin([
-              { from: 'popup/popup.html', to: `popup/popup.html`, transform: transformHtml },
-              {
-                from: 'options/options.html',
-                to: `options/options.html`,
-                transform: transformHtml,
-              },
-              {
-                from: 'phishing/phishing.html',
-                to: `phishing/phishing.html`,
-                transform: transformHtml,
-              },
-              {
-                from: 'popup/CameraRequestPermission.html',
-                to: `popup/CameraRequestPermission.html`,
-                transform: transformHtml,
-              },
-              {
-                from: 'redirect/redirect.html',
-                to: `redirect/index.html`,
-                transform: transformHtml,
-              },
-              { from: 'icons/icon_48.png', to: `icons/icon_48.png` },
-              { from: 'icons/icon_128.png', to: `icons/icon_128.png` },
-              { from: 'icons/request_permission.jpg', to: `icons/request_permission.jpg` },
-              {
-                from: path.join(__dirname, 'src/content-scripts/tipButton.scss'),
-                to: path.join(
-                  __dirname,
-                  {
-                    'extension-chrome': 'dist/chrome/other/tipButton.css',
-                    'extension-firefox': 'dist/firefox/other/tipButton.css',
-                  }[platform],
-                ),
-                transform: (_, f) => sass.renderSync({ file: f }).css.toString(),
-              },
-            ]),
             new GenerateJsonPlugin(
               'manifest.json',
               genManifest(process.env.NODE_ENV === 'production', platform),
@@ -201,15 +163,9 @@ const getConfig = platform => {
                 'other/youtube',
                 'other/twitter',
                 'other/inject',
-                'options/options',
                 'phishing/phishing',
                 'popup/cameraPermission',
               ],
-            }),
-            new HtmlWebpackPlugin({
-              template: path.join(__dirname, 'src', 'options', 'options.html'),
-              filename: 'options/options.html',
-              chunks: ['options/options'],
             }),
             new HtmlWebpackPlugin({
               template: path.join(__dirname, 'src', 'phishing', 'phishing.html'),
@@ -223,28 +179,56 @@ const getConfig = platform => {
       !process.env.RUNNING_IN_TESTS
         ? [new ChromeExtensionReloader({ port: 9099 })]
         : []),
-      ...(['cordova', 'web'].includes(platform)
-        ? [
-            new CopyWebpackPlugin([
-              { from: 'popup/popup.html', to: `index.html`, transform: transformHtml },
-            ]),
-          ]
-        : []),
-      ...(platform === 'web'
-        ? [
-            new CopyWebpackPlugin([{ from: 'web', to: `../` }]),
-            new CopyWebpackPlugin([
-              { from: 'popup/popup.html', to: `404.html`, transform: transformHtml },
-            ]),
-          ]
-        : []),
-      ...(platform === 'aepp'
-        ? [
-            new CopyWebpackPlugin([
-              { from: '../tests/aepp/aepp.html', to: `aepp.html`, transform: transformHtml },
-            ]),
-          ]
-        : []),
+      new CopyWebpackPlugin({
+        patterns: [
+          ...(platform.startsWith('extension-')
+            ? [
+                { from: 'popup/popup.html', to: `popup/popup.html`, transform: transformHtml },
+                {
+                  from: 'phishing/phishing.html',
+                  to: `phishing/phishing.html`,
+                  transform: transformHtml,
+                },
+                {
+                  from: 'popup/CameraRequestPermission.html',
+                  to: `popup/CameraRequestPermission.html`,
+                  transform: transformHtml,
+                },
+                {
+                  from: 'redirect/redirect.html',
+                  to: `redirect/index.html`,
+                  transform: transformHtml,
+                },
+                { from: 'icons/icon_48.png', to: `icons/icon_48.png` },
+                { from: 'icons/icon_128.png', to: `icons/icon_128.png` },
+                { from: 'icons/request_permission.jpg', to: `icons/request_permission.jpg` },
+                {
+                  from: path.join(__dirname, 'src/content-scripts/tipButton.scss'),
+                  to: path.join(
+                    __dirname,
+                    {
+                      'extension-chrome': 'dist/chrome/other/tipButton.css',
+                      'extension-firefox': 'dist/firefox/other/tipButton.css',
+                    }[platform],
+                  ),
+                  transform: (_, f) => sass.renderSync({ file: f }).css.toString(),
+                },
+              ]
+            : []),
+          ...(['cordova', 'web'].includes(platform)
+            ? [{ from: 'popup/popup.html', to: `index.html`, transform: transformHtml }]
+            : []),
+          ...(platform === 'web'
+            ? [
+                { from: 'web', to: `../` },
+                { from: 'popup/popup.html', to: `404.html`, transform: transformHtml },
+              ]
+            : []),
+          ...(platform === 'aepp'
+            ? [{ from: '../tests/aepp/aepp.html', to: `aepp.html`, transform: transformHtml }]
+            : []),
+        ],
+      }),
     ],
   };
 };

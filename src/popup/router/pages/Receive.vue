@@ -21,15 +21,13 @@
 import { mapGetters } from 'vuex';
 import QrcodeVue from 'qrcode.vue';
 import AccountInfo from '../components/AccountInfo';
+import Button from '../components/Button';
 import openUrl from '../../utils/openUrl';
 import { CHANGE_CRYPTO_AE_URL } from '../../utils/constants';
 
 export default {
   name: 'Receive',
-  components: {
-    QrcodeVue,
-    AccountInfo,
-  },
+  components: { QrcodeVue, AccountInfo, Button },
   data: () => ({
     changeCryptoToAeUrl: CHANGE_CRYPTO_AE_URL,
     openUrl,

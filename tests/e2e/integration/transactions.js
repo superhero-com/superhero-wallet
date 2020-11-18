@@ -28,8 +28,7 @@ describe('Tests cases for transactions page', () => {
       )
       .then(({ body }) => {
         const {
-          // eslint-disable-next-line camelcase
-          micro_time,
+          micro_time: time,
           tx: { amount },
         } = body.data[0];
         cy.get('[data-cy=all-transactions] > li')
@@ -40,7 +39,7 @@ describe('Tests cases for transactions page', () => {
               .should('contain', amount / 10 ** 18);
             cy.wrap(e)
               .find('[data-cy=time]')
-              .should('contain', formatDate(micro_time));
+              .should('contain', formatDate(time));
             cy.wrap(e)
               .find('[data-cy=currency-amount]')
               .should('be.visible');

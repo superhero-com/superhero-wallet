@@ -1,10 +1,5 @@
 <template>
-  <img
-    class="user-avatar"
-    :src="error ? avatar : profileImage"
-    :class="size"
-    @error="error = true"
-  />
+  <img class="avatar" :src="error ? avatar : profileImage" :class="size" @error="error = true" />
 </template>
 
 <script>
@@ -18,12 +13,16 @@ export default {
       type: String,
       default: 'normal',
     },
+    src: { type: String },
   },
   data: () => ({
     error: false,
   }),
   computed: mapState({
     profileImage(state, { getProfileImage }) {
+      if (this.address.startsWith('ct_') || this.address === '') {
+        return this.src || '';
+      }
       return getProfileImage(this.address);
     },
     avatar(state, { getAvatar }) {
@@ -36,16 +35,18 @@ export default {
 <style lang="scss" scoped>
 $x-small-size: 20px;
 $small-size: 30px;
+$mid-size: 36px;
 $normal-size: 38px;
+$x-lg-size: 56px;
 $lg-size: 64px;
 
-.user-avatar {
+.avatar {
   width: $normal-size;
   height: $normal-size;
   border-radius: 50%;
   overflow: hidden;
   display: inline-block;
-  object-fit: cover;
+  object-fit: scale-down;
 
   &.lg {
     height: $lg-size;
@@ -60,6 +61,16 @@ $lg-size: 64px;
   &.x-small {
     height: $x-small-size;
     width: $x-small-size;
+  }
+
+  &.mid {
+    height: $mid-size;
+    width: $mid-size;
+  }
+
+  &.xlg {
+    height: $x-lg-size;
+    width: $x-lg-size;
   }
 }
 </style>

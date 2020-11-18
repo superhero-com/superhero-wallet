@@ -14,19 +14,20 @@
       <div class="ml-15 text-left" style="margin-right: auto;">
         <p class="label hidden">{{ $t('pages.tipPage.empty') }}</p>
         <span class="secondary-text f-14 block l-1" data-cy="amount">
-          {{ $t('pages.appVUE.aeid') }}
+          {{ selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid') }}
         </span>
         <span class="f-14 block l-1 amount-currency" data-cy="amount-currency">
-          {{ formatCurrency(currencyAmount) }}
+          {{ selectedToken ? formatCurrency(0) : formatCurrency(currencyAmount) }}
         </span>
       </div>
       <div class="balance-box">
         <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
         <span class="secondary-text f-14 block l-1" data-cy="balance">
-          {{ tokenBalance }} {{ $t('pages.appVUE.aeid') }}
+          {{ selectedToken ? selectedToken.convertedBalance : tokenBalance }}
+          {{ selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid') }}
         </span>
         <span class="f-14 block l-1 amount-currency" data-cy="balance-currency">
-          {{ formatCurrency(balanceCurrency) }}
+          {{ selectedToken ? formatCurrency(0) : formatCurrency(balanceCurrency) }}
         </span>
       </div>
     </div>
@@ -35,7 +36,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import Input from './Input';
 
 export default {
@@ -45,6 +46,7 @@ export default {
   props: ['amountError', 'value', 'errorMsg', 'label'],
   computed: {
     ...mapGetters(['tokenBalance', 'balanceCurrency', 'formatCurrency']),
+    ...mapState('fungibleTokens', ['selectedToken']),
     currencyAmount() {
       return ((this.value || 0) * this.$store.getters.currentCurrencyRate).toFixed(2);
     },

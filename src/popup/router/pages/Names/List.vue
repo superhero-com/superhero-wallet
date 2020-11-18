@@ -22,7 +22,8 @@
         <span class="address">{{ owner }}</span>
         <CheckBox
           :value="autoExtend"
-          @input="value => $store.commit('names/setAutoExtend', { index, value })"
+          prevent
+          @click.native="$store.commit('names/setAutoExtend', { index, value: !autoExtend })"
         >
           {{ $t('pages.names.auto-extend') }}
         </CheckBox>

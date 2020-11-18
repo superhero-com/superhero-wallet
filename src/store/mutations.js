@@ -43,8 +43,9 @@ export default {
   setEncryptedWallet(state, payload) {
     state.encryptedWallet = payload;
   },
-  setTipping(state, payload) {
-    state.tipping = payload;
+  setTipping(state, [tippingV1, tippingV2]) {
+    state.tippingV1 = tippingV1 || null;
+    state.tippingV2 = tippingV2 || null;
   },
   setMainLoading(state, payload) {
     state.mainLoading = payload;
@@ -54,6 +55,9 @@ export default {
   },
   setCurrentCurrency(state, currency) {
     state.current.currency = currency;
+  },
+  setPageTitle(state, title) {
+    state.pageTitle = title;
   },
   setCurrencies(state, payload) {
     state.currencies = payload;
@@ -108,9 +112,6 @@ export default {
   },
   setTourStatusBar(state, payload) {
     state.tourStartBar = payload;
-  },
-  setTippingAddress(state, payload) {
-    state.tippingAddress = payload;
   },
   setSaveErrorLog(state) {
     state.saveErrorLog = !state.saveErrorLog;

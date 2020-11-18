@@ -24,6 +24,7 @@
 
 <script>
 import Modal from '../Modal';
+import Button from '../Button';
 
 export default {
   props: {
@@ -31,7 +32,7 @@ export default {
     reject: { type: Function, required: true },
     entry: { type: Object, required: true },
   },
-  components: { Modal },
+  components: { Modal, Button },
   computed: {
     message() {
       const { message = '' } = this.entry.error;

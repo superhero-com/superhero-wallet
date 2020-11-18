@@ -30,14 +30,13 @@
 </template>
 
 <script>
+import Button from '../components/Button';
 import Logo from '../../../icons/logo.svg?vue-component';
 import openUrl from '../../utils/openUrl';
 import { BUG_REPORT_URL } from '../../utils/constants';
 
 export default {
-  components: {
-    Logo,
-  },
+  components: { Button, Logo },
   data() {
     return {
       extensionVersion: `v.${process.env.npm_package_version}`,

@@ -72,12 +72,14 @@
 
 <script>
 import { mapState } from 'vuex';
+import Button from './Button';
 import Hero from '../../../icons/hero.svg?vue-component';
 import StartOnboarding from '../../../icons/start-onboarding.svg?vue-component';
 import Close from '../../../icons/close.svg?vue-component';
 
 export default {
   components: {
+    Button,
     Hero,
     StartOnboarding,
     Close,

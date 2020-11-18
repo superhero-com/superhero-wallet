@@ -17,6 +17,11 @@
         :info="$t('pages.settings.tabNetworksSmall')"
       />
       <PanelItem
+        to="/permissions-settings"
+        :title="$t('pages.titles.permissionsSettings')"
+        :info="$t('pages.settings.tabPermissionsSettingsSmall')"
+      />
+      <PanelItem
         @click="removeAccount"
         :title="$t('pages.settings.tabRemoveAccount')"
         :info="$t('pages.settings.tabRemoveAccountSmall')"

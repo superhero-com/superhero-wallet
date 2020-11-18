@@ -1,7 +1,7 @@
 import { isFQDN } from 'validator';
 import { detect } from 'detect-browser';
 import { get } from 'lodash-es';
-import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
+import { Crypto } from '@aeternity/aepp-sdk/es';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 import BigNumber from 'bignumber.js';
 import { CONNECTION_TYPES, defaultNetworks, defaultNetwork } from './constants';
@@ -18,10 +18,7 @@ export const aettosToAe = v =>
     targetDenomination: AE_AMOUNT_FORMATS.AE,
   });
 
-export const convertToken = (balance, precision) =>
-  BigNumber(balance)
-    .shiftedBy(precision)
-    .toString();
+export const convertToken = (balance, precision) => BigNumber(balance).shiftedBy(precision);
 
 export const shuffleArray = array => {
   const shuffle = array;
@@ -241,29 +238,6 @@ export const getAllNetworks = async () =>
   );
 
 export const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
-
-export const addTipAmount = async amount => {
-  const { tippedAmount } = await browser.storage.local.get('tippedAmount');
-  return browser.storage.local.set({ tippedAmount: tippedAmount ? tippedAmount + amount : amount });
-};
-
-export const resetTippedAmount = () => browser.storage.local.remove('tippedAmount');
-
-export const getTippedAmount = async () =>
-  (await browser.storage.local.get('tippedAmount')).tippedAmount;
-
-export const getContractCallInfo = (transaction, contractAddress = null) => {
-  if (!transaction) return { isTip: false, contractId: null, amount: 0 };
-
-  const { tipContract } = defaultNetwork;
-  const { tx } = TxBuilder.unpackTx(transaction);
-
-  return {
-    isTip: tx.contractId === tipContract || tx.contractId === contractAddress,
-    contractId: tx.contractId,
-    amount: convertToAE(tx.amount),
-  };
-};
 
 export const checkHashType = async hash => {
   const accountPublicKeyRegex = RegExp('^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$');

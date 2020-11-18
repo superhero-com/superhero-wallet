@@ -13,7 +13,6 @@ import walletController from '../wallet-controller';
 
 let sdk;
 let tippingContract;
-let tippingContractAddress;
 
 export const getActiveAccount = async () => {
   const { account } = await getState();
@@ -26,7 +25,7 @@ export const getActiveAccount = async () => {
 export const switchNode = async () => {
   if (sdk) {
     const network = await getActiveNetwork();
-    const node = await Node({ url: network.internalUrl, internalUrl: network.internalUrl });
+    const node = await Node({ url: network.url });
     try {
       await sdk.addNode(network.name, node, true);
     } catch (e) {
@@ -40,7 +39,7 @@ export const getSDK = async () => {
   if (!sdk) {
     try {
       const network = await getActiveNetwork();
-      const node = await Node({ url: network.internalUrl, internalUrl: network.internalUrl });
+      const node = await Node({ url: network.url });
       sdk = await Universal({
         nodes: [{ name: network.name, instance: node }],
         networkId: network.networkId,
@@ -72,15 +71,6 @@ export const getTippingContractInstance = async tx => {
   await getSDK();
   tippingContract = await setContractInstance(tx, sdk, tx.address);
   return tippingContract;
-};
-
-export const getTippingContractAddress = async address => {
-  if (tippingContractAddress) return tippingContractAddress;
-  await getSDK();
-  tippingContractAddress = address.includes('.chain')
-    ? getAddressByNameEntry(await sdk.api.getNameEntryByName(address), 'contract_pubkey')
-    : address;
-  return tippingContractAddress;
 };
 
 export const contractCallStatic = async ({ tx, callType }) => {

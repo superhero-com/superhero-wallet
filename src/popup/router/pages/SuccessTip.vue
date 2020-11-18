@@ -8,20 +8,25 @@
     </h3>
     <p class="primary-title text-left mb-8 f-16">
       {{ $t('pages.successTip.successfullySent') }}
-      <span class="secondary-text" data-cy="tip-amount"
-        >{{ amountTip }} {{ $t('pages.appVUE.aeid') }}
+      <span data-cy="tip-amount"
+        >{{ selectedToken ? amount : amountTip }}
+        <span class="symbol">{{
+          selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid')
+        }}</span>
       </span>
-      <!--eslint-disable vue-i18n/no-raw-text-->
-      ({{ formatCurrency((amountTip * currentCurrencyRate).toFixed(3)) }})
-      <!--eslint-enable vue-i18n/no-raw-text-->
+      <FormatFiatCurrency :balance="amountTip * currentCurrencyRate" />
       {{ $t('pages.successTip.to') }}
     </p>
     <a class="link-sm text-left block" data-cy="tip-url">{{ tipUrl }}</a>
     <br />
     <div>
-      <span style="word-break: break-word; font-size: 14px; float: left;">{{
-        $t('pages.successTip.notify')
+      {{ $t('pages.successTip.notify') }}
+      {{ selectedToken ? amount : amountTip }}
+      <span class="symbol">{{
+        selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid')
       }}</span>
+      <FormatFiatCurrency :balance="amountTip * currentCurrencyRate" />
+      {{ $t('pages.successTip.notifyTo') }}
       <Textarea v-model="note" :value="note" size="h-50" />
     </div>
     <p class="f-14 sub-heading text-left" v-if="!(tipUrl && isVerifiedUrl)">
@@ -46,32 +51,44 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import Heart from '../../../icons/heart.svg?vue-component';
 import Textarea from '../components/Textarea';
 import openUrl from '../../utils/openUrl';
 import { AGGREGATOR_URL } from '../../utils/constants';
 import { aettosToAe } from '../../utils/helper';
 import Logger from '../../../lib/logger';
+import FormatFiatCurrency from '../components/FormatFiatCurrency';
+import Button from '../components/Button';
 
 export default {
   components: {
     Heart,
     Textarea,
+    FormatFiatCurrency,
+    Button,
   },
   props: ['amount', 'tipUrl'],
-  data() {
-    return {
-      note: this.$t('pages.successTip.notifyMessage'),
-    };
-  },
   computed: {
     ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
+    ...mapState('fungibleTokens', ['selectedToken']),
     amountTip() {
       return (+aettosToAe(this.amount)).toFixed(2);
     },
     isVerifiedUrl() {
       return this.$store.getters['tipUrl/status'](this.tipUrl) === 'verified';
+    },
+    formatReceivedTokensForLocale() {
+      return {
+        amount: this.selectedToken
+          ? `${this.amount} ${this.selectedToken.symbol}`
+          : `${this.amountTip} AE (~${this.formatCurrency(
+              (this.amountTip * this.currentCurrencyRate).toFixed(3),
+            )})`,
+      };
+    },
+    note() {
+      return this.$t('pages.successTip.notifyMessage', this.formatReceivedTokensForLocale);
     },
   },
   async created() {
@@ -91,3 +108,11 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+@import '../../../common/variables';
+
+.symbol {
+  color: $secondary-color;
+}
+</style>

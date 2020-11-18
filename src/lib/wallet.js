@@ -11,7 +11,8 @@ import {
   toURL,
   getAeppAccountPermission,
 } from '../popup/utils/helper';
-import { TIPPING_CONTRACT, NO_POPUP_AEPPS } from '../popup/utils/constants';
+import { NO_POPUP_AEPPS } from '../popup/utils/constants';
+
 import Logger from './logger';
 import { checkPermissions } from '../store/modules/permissions';
 
@@ -92,18 +93,6 @@ async function getKeyPair() {
   return res.error ? { error: true } : parseFromStorage(res);
 }
 
-async function initContractInstances() {
-  if (!store.getters.tippingSupported && !process.env.RUNNING_IN_TESTS) return;
-  const contractAddress = await store.dispatch('getTipContractAddress');
-  store.commit(
-    'setTipping',
-    await store.state.sdk.getContractInstance(TIPPING_CONTRACT, {
-      contractAddress,
-      forceCodeCheck: true,
-    }),
-  );
-}
-
 let initSdkRunning = false;
 
 export default {
@@ -132,14 +121,12 @@ export default {
     }
 
     const { activeNetwork } = store.getters;
-    const { internalUrl, compilerUrl } = activeNetwork;
-    const node = await Node({
-      url: internalUrl,
-      internalUrl,
-    });
+    const { url, compilerUrl } = activeNetwork;
+    const node = await Node({ url });
     const account = MemoryAccount({ keypair });
     try {
       const acceptCb = (_, { accept }) => accept();
+
       const sdk = await RpcWallet.compose({
         methods: {
           address: async () => store.getters.account.publicKey,
@@ -161,7 +148,7 @@ export default {
                 originUrl.hostname,
                 store.state.account.publicKey,
               ))) &&
-            !(await checkPermissions(action))
+            !(await checkPermissions(action.method))
           ) {
             action.accept();
             return;
@@ -189,7 +176,7 @@ export default {
         onSubscription: acceptCb,
         onSign: acceptCb,
         async onMessageSign(aepp, action, origin) {
-          if (!(await checkPermissions(action))) {
+          if (!(await checkPermissions(action.method))) {
             action.accept();
             return;
           }
@@ -253,9 +240,11 @@ export default {
       }
 
       await store.commit('initSdk', sdk);
-      await initContractInstances();
+      await store.dispatch('initContractInstances');
       await initMiddleware();
       store.commit('setNodeStatus', 'connected');
+      await store.dispatch('fungibleTokens/getAvailableTokens');
+      store.dispatch('fungibleTokens/loadTokenBalances', keypair.publicKey);
       setTimeout(() => store.commit('setNodeStatus', ''), 2000);
     } catch (e) {
       store.commit('setNodeStatus', 'error');

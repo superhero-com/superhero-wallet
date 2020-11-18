@@ -14,6 +14,7 @@ import names from './plugins/names';
 import runMigrations from './migrations';
 import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
+import fungibleTokensModule from './modules/fungibleTokens';
 import { defaultNetwork } from '../popup/utils/constants';
 
 Vue.use(Vuex);
@@ -37,10 +38,11 @@ const initialState = {
     latest: [],
     pending: [],
   },
+  pageTitle: '',
   sdk: null,
   middleware: null,
-  tipping: null,
-  tippingAddress: null,
+  tippingV1: null,
+  tippingV2: null,
   mainLoading: true,
   nodeStatus: 'connecting',
   currencies: {},
@@ -99,6 +101,7 @@ export default new Vuex.Store({
         invites,
         notificationSettings,
         permissions,
+        fungibleTokens,
       }) => ({
         migrations,
         current,
@@ -119,6 +122,7 @@ export default new Vuex.Store({
         invites,
         notificationSettings,
         permissions,
+        fungibleTokens,
       }),
     ),
     observables,
@@ -131,5 +135,6 @@ export default new Vuex.Store({
   modules: {
     invites: invitesModule,
     permissions: permissionsModule,
+    fungibleTokens: fungibleTokensModule,
   },
 });

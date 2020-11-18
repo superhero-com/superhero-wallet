@@ -96,8 +96,10 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { shuffleArray } from '../../utils/helper';
+import Button from '../components/Button';
 
 export default {
+  components: { Button },
   data() {
     return {
       loading: false,

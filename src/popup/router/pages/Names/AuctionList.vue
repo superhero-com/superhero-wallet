@@ -34,11 +34,12 @@
 
 <script>
 import NameListHeader from '../../components/NameListHeader';
+import Button from '../../components/Button';
 import NameRow from '../../components/NameRow';
 import blocksToRelativeTime from '../../../../filters/blocksToRelativeTime';
 
 export default {
-  components: { NameListHeader, NameRow },
+  components: { NameListHeader, Button, NameRow },
   data: () => ({
     filter: 'soonest',
     activeAuctions: [],

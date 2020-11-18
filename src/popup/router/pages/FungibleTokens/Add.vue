@@ -33,7 +33,7 @@
           <div>
             <div class="token-title">{{ $t('pages.add-fungible-token.token') }}</div>
             <div>
-              <UserAvatar :address="token.contract" />
+              <Avatar :address="token.contract" />
               <div>{{ token.symbol }}</div>
             </div>
           </div>
@@ -53,11 +53,11 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import * as aeternityTokens from 'aeternity-tokens';
+import { newToken } from 'aeternity-tokens';
 import { validateAddress, convertToken } from '../../../utils/helper';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import UserAvatar from '../../components/UserAvatar';
+import Avatar from '../../components/Avatar';
 
 const initialToken = {
   contract: '',
@@ -67,7 +67,7 @@ const initialToken = {
   name: '',
 };
 export default {
-  components: { Input, Button, UserAvatar },
+  components: { Input, Button, Avatar },
   data() {
     return {
       token: { ...initialToken },
@@ -97,12 +97,9 @@ export default {
       if (this.exist) return;
       try {
         this.loading = true;
-        const instance = await this.$store.state.sdk.getContractInstance(
-          aeternityTokens.newToken(),
-          {
-            contractAddress: this.token.contract,
-          },
-        );
+        const instance = await this.$store.state.sdk.getContractInstance(newToken(), {
+          contractAddress: this.token.contract,
+        });
         if (this.step === 'search') {
           const {
             decodedResult: { decimals, name, symbol },
