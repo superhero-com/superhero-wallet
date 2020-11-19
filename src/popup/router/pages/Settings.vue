@@ -35,7 +35,6 @@
           slot="content"
           :value="saveErrorLog"
           name="saveErrorLog"
-          type="checkbox"
           @input="val => $store.commit('setSaveErrorLog', val)"
         />
       </PanelItem>

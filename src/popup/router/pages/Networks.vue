@@ -6,8 +6,7 @@
           :value="network === activeNetwork"
           type="radio"
           name="activeNetwork"
-          @click.native="selectNetwork(network.name)"
-          prevent
+          @input="selectNetwork(network.name)"
         />
         <div class="mr-auto text-left">
           <p class="f-16" data-cy="network-name">{{ network.name }}</p>

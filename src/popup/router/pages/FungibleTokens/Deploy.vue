@@ -16,7 +16,7 @@
 
     <label class="label text-left">{{ $t('pages.deploy-token.extensions') }}</label>
     <div v-for="ext in extensions" :key="ext.type" class="extensions">
-      <CheckBox v-model="ext.selected" :val="ext.type">
+      <CheckBox v-model="ext.selected">
         {{ ext.type }}
       </CheckBox>
     </div>

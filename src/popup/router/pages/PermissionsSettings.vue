@@ -3,16 +3,14 @@
     <ListItem class="permission-row">
       <CheckBox
         :value="!permissions.address"
-        @click.native="changePermission('address', !permissions.address)"
-        prevent
+        @input="changePermission('address', !permissions.address)"
       />
       <p :class="{ checked: !permissions.address }">{{ $t('pages.permissions.login') }}</p>
     </ListItem>
     <ListItem class="permission-row">
       <CheckBox
         :value="!permissions.messageSign"
-        @click.native="changePermission('messageSign', !permissions.messageSign)"
-        prevent
+        @input="changePermission('messageSign', !permissions.messageSign)"
       />
       <p :class="{ checked: !permissions.messageSign }">
         {{ $t('pages.permissions.message-sign') }}
