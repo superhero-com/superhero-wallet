@@ -21,13 +21,9 @@
         <h3 v-if="seedPhrase != '' && type == '3'">
           {{ $t('pages.securitySettings.seedPhrase') }}
         </h3>
-        <ae-panel style="margin: 0;" class="mnemonics">
-          <p style="word-spacing: 10px;">{{ seedPhrase }}</p>
-          <ae-button
-            style="float: right; margin: 10px 0 30px 0;"
-            face="toolbar"
-            v-clipboard:copy="seedPhrase"
-          >
+        <ae-panel class="mnemonics">
+          <p>{{ seedPhrase }}</p>
+          <ae-button face="toolbar" v-clipboard:copy="seedPhrase">
             <ae-icon name="copy" />
             {{ $t('pages.securitySettings.copy') }}
           </ae-button>
@@ -74,12 +70,12 @@
           >{{ seed.name }} <ae-icon name="close" class="seedClose"
         /></ae-badge>
       </ae-phraser>
-      <button @click="verifyLastStep" class="primary-button" style="width: 50%;">
+      <button @click="verifyLastStep" class="primary-button verify">
         {{ $t('pages.seedPhrase.verify') }}
       </button>
     </div>
     <div v-if="seed_verified && type == 5">
-      <ae-icon style="color: #e911ff; font-size: 100px;" name="check" />
+      <ae-icon class="verifed" name="check" />
       <p>{{ $t('pages.seedPhrase.seedConfirmed') }}</p>
       <button @click="$router.push('/account')" class="primary-button">
         {{ $t('pages.seedPhrase.toDashboard') }}
@@ -209,9 +205,22 @@ export default {
   background: $border-color !important;
 }
 
-.mnemonics p,
-.mnemonics button {
-  color: #000 !important;
+.mnemonics {
+  margin: 0;
+
+  p {
+    word-spacing: 10px;
+  }
+
+  button {
+    float: right;
+    margin: 10px 0 30px 0;
+  }
+
+  p,
+  button {
+    color: #000 !important;
+  }
 }
 
 .regbtn {
@@ -266,6 +275,15 @@ input:focus {
 
 small {
   word-break: break-word;
+}
+
+.primary-button.verify {
+  width: 50%;
+}
+
+.ae-icon.verifed {
+  color: #e911ff;
+  font-size: 100px;
 }
 
 .seedBadge {

@@ -11,7 +11,7 @@
         :label="label || $t('pages.tipPage.amountLabel')"
         @input="$emit('input', $event)"
       />
-      <div class="ml-15 text-left" style="margin-right: auto;">
+      <div class="ml-15 text-left">
         <p class="label hidden">{{ $t('pages.tipPage.empty') }}</p>
         <span class="secondary-text f-14 block l-1" data-cy="amount">
           {{ selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid') }}
@@ -65,6 +65,10 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+
+    .ml-15.text-left {
+      margin-right: auto;
+    }
 
     input.input {
       margin-bottom: 0;
