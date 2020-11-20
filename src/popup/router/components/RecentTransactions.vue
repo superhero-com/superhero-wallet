@@ -29,7 +29,6 @@
 
 <script>
 import { mapState } from 'vuex';
-import { setInterval, clearInterval } from 'timers';
 import PendingTxs from './PendingTxs';
 import TransactionItem from './TransactionItem';
 

@@ -249,7 +249,7 @@ export default {
           },
         );
         if (hash) {
-          await this.$store.dispatch('setPendingTx', {
+          await this.$store.dispatch('handlePendingTransaction', {
             hash,
             amount,
             tipUrl: this.url,

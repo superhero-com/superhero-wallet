@@ -11,6 +11,7 @@ import tipUrl from './plugins/tipUrl';
 import accounts from './plugins/account';
 import tokens from './plugins/tokens';
 import names from './plugins/names';
+import pendingTransactionHandler from './plugins/pendingTransactionHandler';
 import runMigrations from './migrations';
 import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
@@ -131,6 +132,7 @@ export default new Vuex.Store({
     accounts,
     tokens,
     names,
+    pendingTransactionHandler,
   ],
   modules: {
     invites: invitesModule,

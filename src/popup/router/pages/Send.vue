@@ -257,7 +257,7 @@ export default {
       try {
         const { hash } = await this.sdk.spend(amount, receiver, { waitMined: false, modal: false });
         if (hash) {
-          await this.$store.dispatch('setPendingTx', {
+          await this.$store.dispatch('handlePendingTransaction', {
             hash,
             amount,
             time: Date.parse(new Date()),

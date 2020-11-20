@@ -77,9 +77,6 @@ export default {
     commit('updateAccount', keypair);
     commit('switchLoggedIn', true);
   },
-  async setPendingTx({ commit, state: { transactions } }, tx) {
-    commit('setPendingTxs', [...transactions.pending, tx]);
-  },
   async getCurrencies({ state: { nextCurrenciesFetch }, commit }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
       try {
