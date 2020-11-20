@@ -4,7 +4,7 @@ import { aettosToAe, postJson } from '../../popup/utils/helper';
 import { i18n } from '../../popup/utils/i18nHelper';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
 
-export default store =>
+export default store => {
   store.registerModule('names', {
     namespaced: true,
     state: {
@@ -179,14 +179,24 @@ export default store =>
           }
         }
       },
-      async extendNames({ rootState: { sdk }, state: { owned }, dispatch }) {
-        const height = await sdk.height();
-        owned.forEach(
-          ({ name, expiresAt, autoExtend }) =>
-            autoExtend &&
-            expiresAt - height < AUTO_EXTEND_NAME_BLOCKS_INTERVAL &&
-            dispatch('updatePointer', { name, type: 'extend' }),
-        );
-      },
     },
   });
+
+  store.watch(
+    ({ middleware }) => middleware,
+    async middleware => {
+      if (!middleware) return;
+
+      await store.dispatch('names/fetchOwned');
+
+      const height = await store.state.sdk.height();
+      await Promise.all(
+        store.state.names.owned
+          .filter(({ autoExtend }) => autoExtend)
+          .filter(({ expiresAt }) => expiresAt - height < AUTO_EXTEND_NAME_BLOCKS_INTERVAL)
+          .map(({ name }) => store.dispatch('names/updatePointer', { name, type: 'extend' })),
+      );
+    },
+    { immediate: true },
+  );
+};
