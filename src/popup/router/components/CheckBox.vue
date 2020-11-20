@@ -1,14 +1,13 @@
 <template>
-  <label class="checkbox-container" @click.stop="handleClick">
+  <label class="checkbox-container">
     <input
       :disabled="disabled"
-      :value="val"
-      v-model="checked"
-      @change="onChange"
-      :type="getType"
+      :value="value"
+      :type="type"
       :name="name"
+      @change="$emit('input', $event.target.checked)"
     />
-    <span class="checkmark" :class="{ checked, disabled }" />
+    <span class="checkmark" :class="{ checked: value, disabled }" />
     <slot class="checkbox-holder" />
   </label>
 </template>
@@ -16,38 +15,10 @@
 <script>
 export default {
   props: {
-    value: [String, Number, Boolean],
-    val: [String, Number, Boolean],
-    type: String,
-    name: String,
-    prevent: Boolean,
-    disabled: Boolean,
-  },
-  data() {
-    return {
-      checkedProxy: false,
-    };
-  },
-  computed: {
-    checked: {
-      get() {
-        return this.value;
-      },
-      set(val) {
-        this.checkedProxy = val;
-      },
-    },
-    getType() {
-      return !this.type ? 'checkbox' : this.type;
-    },
-  },
-  methods: {
-    onChange() {
-      this.$emit('input', this.checkedProxy);
-    },
-    handleClick(e) {
-      if (this.prevent) e.preventDefault();
-    },
+    value: { type: [String, Number, Boolean], default: '' },
+    type: { type: String, default: 'checkbox' },
+    name: { type: String },
+    disabled: { type: Boolean },
   },
 };
 </script>
