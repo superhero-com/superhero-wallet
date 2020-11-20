@@ -76,8 +76,6 @@ async function initMiddleware() {
     'setMiddleware',
     Object.entries(middleware).reduce((m, [k, v]) => ({ ...m, [camelCase(k)]: v }), {}),
   );
-  store.dispatch('names/fetchOwned');
-  store.dispatch('names/extendNames');
 }
 
 async function logout() {
