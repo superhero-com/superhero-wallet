@@ -21,11 +21,6 @@
         <h3 v-if="seedPhrase != '' && type == '3'">
           {{ $t('pages.securitySettings.seedPhrase') }}
         </h3>
-        <Alert :fill="alert.fill" :show="alert.show && !loading">
-          <div slot="content">
-            {{ alert.content }}
-          </div>
-        </Alert>
         <ae-panel style="margin: 0;" class="mnemonics">
           <p style="word-spacing: 10px;">{{ seedPhrase }}</p>
           <ae-button
