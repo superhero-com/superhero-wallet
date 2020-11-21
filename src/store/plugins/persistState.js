@@ -1,10 +1,10 @@
 import { cloneDeep } from 'lodash-es';
+import { detect } from 'detect-browser';
 
 const KEY = 'state';
 
-const setState = async (state) => {
-  await browser.storage.local.set({ [KEY]: cloneDeep(state) });
-};
+const setState = (state) =>
+  browser.storage.local.set({ [KEY]: detect().name === 'firefox' ? cloneDeep(state) : state });
 
 export const getState = async () => (await browser.storage.local.get(KEY))[KEY];
 
