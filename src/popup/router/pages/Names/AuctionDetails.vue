@@ -51,7 +51,7 @@ export default {
     },
     previousBids() {
       if (!this.bids) return null;
-      return this.bids.filter(bid => bid !== this.currentBid);
+      return this.bids.filter((bid) => bid !== this.currentBid);
     },
   },
   filters: { blocksToRelativeTime },

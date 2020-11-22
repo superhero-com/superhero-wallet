@@ -10,7 +10,7 @@ export const registerModal = ({ name, ...options }) => {
   modals[name] = options;
 };
 
-export default store => {
+export default (store) => {
   store.registerModule('modals', {
     namespaced: true,
     state: { opened: [] },
@@ -25,7 +25,7 @@ export default store => {
         state.opened.push(modal);
       },
       closeByKey(state, key) {
-        const idx = state.opened.findIndex(modal => modal.key === key);
+        const idx = state.opened.findIndex((modal) => modal.key === key);
         state.opened.splice(idx, 1);
       },
     },

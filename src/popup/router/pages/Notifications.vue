@@ -60,15 +60,15 @@ export default {
     filteredNotifications() {
       return [...this.observableNotifications, ...this.notifications]
         .filter(
-          n =>
+          (n) =>
             (this.direction === 'read' && n.status === 'READ') ||
             !this.notificationSettings
-              .filter(s => !s.checked)
-              .map(s => s.type)
+              .filter((s) => !s.checked)
+              .map((s) => s.type)
               .includes(n.type),
         )
         .filter(
-          n =>
+          (n) =>
             (this.direction === 'read' && n.status === 'READ') ||
             (n.status === 'CREATED' &&
               ((this.direction === 'wallet' && n.wallet) ||
@@ -90,7 +90,7 @@ export default {
           status,
           this.$store.state.account.publicKey,
         ]);
-        this.observableNotifications.find(n => n.id === notification.id).status = status;
+        this.observableNotifications.find((n) => n.id === notification.id).status = status;
       }
     },
     async onClickHandler(notification) {

@@ -16,10 +16,10 @@ export default process.env.PLATFORM === 'web' && IN_POPUP
       path: `/web-iframe-popup/${name}`,
       component: {
         functional: true,
-        render: createElement => {
+        render: (createElement) => {
           const unloadHandler = () => window.popupProps.reject(new Error('Rejected by user'));
           window.addEventListener('beforeunload', unloadHandler);
-          const closingWrapper = f => (...args) => {
+          const closingWrapper = (f) => (...args) => {
             f(...args);
             window.removeEventListener('beforeunload', unloadHandler);
             window.close();

@@ -93,7 +93,7 @@ export default {
         },
       });
 
-      this.connectionsQueue.forEach(c => this.addConnection(c));
+      this.connectionsQueue.forEach((c) => this.addConnection(c));
       this.connectionsQueue = [];
     } catch (e) {
       this.sdk = null;
@@ -200,7 +200,7 @@ export default {
       if (!this.connectionsQueue) this.connectionsQueue = [];
       this.connectionsQueue.push(port);
       port.onDisconnect.addListener(() => {
-        this.connectionsQueue = this.connectionsQueue.filter(p => p !== port);
+        this.connectionsQueue = this.connectionsQueue.filter((p) => p !== port);
       });
       return;
     }
@@ -222,10 +222,10 @@ export default {
     port.onDisconnect.addListener(() => clearInterval(shareWalletInfo));
   },
   getAccessForAddress(address) {
-    const clients = Array.from(this.sdk.getClients().clients.values()).filter(client =>
+    const clients = Array.from(this.sdk.getClients().clients.values()).filter((client) =>
       client.isConnected(),
     );
-    clients.forEach(async client => {
+    clients.forEach(async (client) => {
       const {
         connection: {
           port: {
@@ -279,7 +279,7 @@ export default {
   },
   async [AEX2_METHODS.LOGOUT]() {
     const { clients: aepps } = this.sdk.getClients();
-    Array.from(aepps.values()).forEach(aepp => {
+    Array.from(aepps.values()).forEach((aepp) => {
       if (aepp.info.status !== 'DISCONNECTED') {
         aepp.sendMessage(
           { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },

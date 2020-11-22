@@ -4,7 +4,7 @@ import { aettosToAe, postJson } from '../../popup/utils/helper';
 import { i18n } from '../../popup/utils/i18nHelper';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
 
-export default store => {
+export default (store) => {
   store.registerModule('names', {
     namespaced: true,
     state: {
@@ -12,13 +12,13 @@ export default store => {
       defaults: {},
     },
     getters: {
-      getDefault: ({ defaults }, getters, { sdk }, { activeNetwork }) => address => {
+      getDefault: ({ defaults }, getters, { sdk }, { activeNetwork }) => (address) => {
         if (!defaults) return '';
         let { networkId } = activeNetwork;
         if (sdk) networkId = sdk.getNetworkId();
         return defaults[`${address}-${networkId}`];
       },
-      getName: ({ owned }) => name => owned.find(n => n.name === name),
+      getName: ({ owned }) => (name) => owned.find((n) => n.name === name),
     },
     mutations: {
       set(state, names) {
@@ -35,7 +35,7 @@ export default store => {
     actions: {
       async fetchOwned({ state: { owned }, rootState, commit, getters: { getDefault }, dispatch }) {
         if (!rootState.middleware) return;
-        const getPendingNameClaimTransactions = address =>
+        const getPendingNameClaimTransactions = (address) =>
           rootState.sdk.api.getPendingAccountTransactionsByPubkey(address).then(
             ({ transactions }) =>
               transactions
@@ -63,8 +63,8 @@ export default store => {
                     pointers: info.pointers,
                     name,
                   }))
-                  .map(name => {
-                    const oldName = owned.find(n => n.name === name.name);
+                  .map((name) => {
+                    const oldName = owned.find((n) => n.name === name.name);
                     if (!oldName) return name;
                     const revoked = name.expiresAt < oldName.expiresAt;
                     if (revoked) {
@@ -90,11 +90,11 @@ export default store => {
                   })
               : active,
           ),
-        ]).then(arr => arr.flat());
+        ]).then((arr) => arr.flat());
 
         commit('set', names);
         if ((names.length && !defaultName) || defaultNameRevoked) {
-          const claimed = names.filter(n => !n.pending);
+          const claimed = names.filter((n) => !n.pending);
           if (claimed.length)
             dispatch('setDefault', {
               name: claimed[0],
@@ -117,7 +117,7 @@ export default store => {
         return {
           expiration: info.auctionEnd,
           bids: await Promise.all(
-            info.bids.map(async index => {
+            info.bids.map(async (index) => {
               const { tx } = await middleware.getTxByIndex(index);
               return {
                 accountId: tx.accountId,
@@ -184,7 +184,7 @@ export default store => {
 
   store.watch(
     ({ middleware }) => middleware,
-    async middleware => {
+    async (middleware) => {
       if (!middleware) return;
 
       await store.dispatch('names/fetchOwned');

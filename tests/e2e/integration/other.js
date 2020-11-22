@@ -29,16 +29,12 @@ describe('Tests cases not connected to specific page', () => {
   });
 
   it('Shows pending tx', () => {
-    txs.forEach(pendingTransaction => {
-      cy.login({ pendingTransaction })
-        .get('[data-cy=pending-txs]')
-        .should('be.visible');
+    txs.forEach((pendingTransaction) => {
+      cy.login({ pendingTransaction }).get('[data-cy=pending-txs]').should('be.visible');
     });
   });
 
   it('Connection message disappear', () => {
-    cy.login()
-      .get('[data-cy=connect-node]')
-      .should('not.be.visible');
+    cy.login().get('[data-cy=connect-node]').should('not.be.visible');
   });
 });

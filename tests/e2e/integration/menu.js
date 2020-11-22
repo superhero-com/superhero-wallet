@@ -31,17 +31,15 @@ describe('Test cases for menu sidebar component', () => {
       .openMenu()
       .menuShould('be.visible')
       .wrap(links)
-      .each(link => {
-        cy.get(`[data-cy=${link}]`)
-          .should('have.attr', 'href')
-          .and('include', `/${link}`);
+      .each((link) => {
+        cy.get(`[data-cy=${link}]`).should('have.attr', 'href').and('include', `/${link}`);
       });
 
     cy.closeMenu('overlay').menuShould('not.be.visible');
   });
 
   it(`Opens each page and returns to account page`, () => {
-    [...links, ...dropdownLinks].forEach(page => {
+    [...links, ...dropdownLinks].forEach((page) => {
       cy.openMenuPage(page, dropdownLinks.includes(page))
         .get('[data-cy=back-arrow]')
         .should('be.visible')

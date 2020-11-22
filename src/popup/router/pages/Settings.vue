@@ -35,7 +35,7 @@
           slot="content"
           :value="saveErrorLog"
           name="saveErrorLog"
-          @input="val => $store.commit('setSaveErrorLog', val)"
+          @input="(val) => $store.commit('setSaveErrorLog', val)"
         />
       </PanelItem>
     </Panel>

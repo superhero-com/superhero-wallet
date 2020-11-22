@@ -53,7 +53,7 @@ export default {
   }),
   filters: {
     formatDate,
-    formatAmount: number => number.toFixed(2),
+    formatAmount: (number) => number.toFixed(2),
   },
   computed: {
     ...mapGetters(['account', 'activeNetwork']),
@@ -65,7 +65,7 @@ export default {
     status() {
       if (
         ['senderId', 'accountId', 'ownerId', 'callerId']
-          .map(key => this.transaction.tx[key])
+          .map((key) => this.transaction.tx[key])
           .includes(this.account.publicKey)
       ) {
         return this.$t('pages.transactions.sent');

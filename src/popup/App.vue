@@ -121,7 +121,7 @@ export default {
 
     this.$store.commit('setChainNames', await this.$store.dispatch('getCacheChainNames'));
 
-    EventBus.$on('error', async entry => {
+    EventBus.$on('error', async (entry) => {
       this.$store.dispatch('modals/open', { name: 'error-log', entry }).catch(() => false);
     });
   },

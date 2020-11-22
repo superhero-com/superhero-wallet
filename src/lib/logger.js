@@ -29,7 +29,7 @@ export default class Logger {
       };
     }
 
-    window.addEventListener('unhandledrejection', async promise => {
+    window.addEventListener('unhandledrejection', async (promise) => {
       const { stack, message, name } = promise.reason || {};
       if (
         (typeof promise.reason === 'string' &&

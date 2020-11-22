@@ -1,4 +1,4 @@
-export default store => {
+export default (store) => {
   const waitTransactionMined = async ({ hash, type, amount, tipUrl }) => {
     try {
       const transaction = await store.state.sdk.poll(hash);

@@ -47,7 +47,7 @@ export default {
   computed: mapState({
     filteredTransactions(state, { account: { publicKey } }) {
       return this.transactions
-        .filter(tr => {
+        .filter((tr) => {
           switch (this.displayMode.type) {
             case 'sent':
               return tr.tx.type === 'ContractCallTx' && tr.tx.callerId === publicKey;
@@ -64,7 +64,7 @@ export default {
           }
         })
         .sort((a, b) => {
-          const arr = [a, b].map(e => new Date(e.microTime));
+          const arr = [a, b].map((e) => new Date(e.microTime));
           if (this.displayMode.latestFirst) arr.reverse();
           return arr[0] - arr[1];
         });

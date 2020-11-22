@@ -48,7 +48,7 @@ export default {
       this.token = e.target.value;
       try {
         const { contract, balance, symbol } =
-          this.tokens.find(t => t.contract === this.token) || {};
+          this.tokens.find((t) => t.contract === this.token) || {};
         const instance = await this.$store.dispatch('tokens/instance', contract);
 
         const { decodedResult: all } = await instance.methods.allowances();
@@ -59,7 +59,7 @@ export default {
             ([{ for_account }]) => for_account === this.$store.getters.account.publicKey,
           );
           if (mine.length) {
-            this.allowances = mine.map(a => ({
+            this.allowances = mine.map((a) => ({
               contract,
               from_account: a[0].from_account,
               amount: a[1],

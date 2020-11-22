@@ -7,5 +7,5 @@ global.browser = require('webextension-polyfill');
 export default new Vue({
   el: '#app',
   i18n,
-  render: h => h(App),
+  render: (h) => h(App),
 });

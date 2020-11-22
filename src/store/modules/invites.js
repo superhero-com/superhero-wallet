@@ -9,7 +9,7 @@ export default {
   mutations: {
     add: ({ invites }, secretKey) => invites.unshift({ secretKey, createdAt: Date.now() }),
     delete(state, secretKey) {
-      state.invites = state.invites.filter(invite => invite.secretKey !== secretKey);
+      state.invites = state.invites.filter((invite) => invite.secretKey !== secretKey);
     },
   },
   actions: {

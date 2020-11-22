@@ -1,8 +1,8 @@
 const migrations = [];
 
-export const registerMigration = migration => migrations.push(migration);
+export const registerMigration = (migration) => migrations.push(migration);
 
-export default async state => {
+export default async (state) => {
   if (!state) {
     return {
       migrations: migrations.reduce((p, m, id) => ({ ...p, [id]: true }), {}),

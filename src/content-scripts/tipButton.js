@@ -8,7 +8,7 @@ style.type = 'text/css';
 style.href = browser.extension.getURL('other/tipButton.css');
 (document.head || document.documentElement).appendChild(style);
 
-export default url => {
+export default (url) => {
   // Create the tip action
   const superheroTipAction = document.createElement('div');
   superheroTipAction.className = 'action-superhero-tip';
@@ -30,7 +30,7 @@ export default url => {
 
   // Events
   // On click send postMessage for invoking tip with the tweetId
-  superheroTipButton.onclick = e => {
+  superheroTipButton.onclick = (e) => {
     browser.runtime.sendMessage({ from: 'content', type: 'openTipPopup', url });
     e.stopPropagation();
   };

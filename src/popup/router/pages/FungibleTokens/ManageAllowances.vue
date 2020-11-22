@@ -72,7 +72,7 @@ export default {
       try {
         this.exist = false;
         this.loading = true;
-        const { contract, balance } = this.tokens.find(t => t.contract === this.token) || {};
+        const { contract, balance } = this.tokens.find((t) => t.contract === this.token) || {};
         if (this.amount > balance) {
           this.$store.dispatch('modals/open', {
             name: 'default',

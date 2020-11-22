@@ -11,10 +11,10 @@ import registerModals from './router/modals';
 import Logger from '../lib/logger';
 
 Vue.prototype.$watchUntilTruly = function watchUntilTruly(getter) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const unwatch = this.$watch(
       getter,
-      value => {
+      (value) => {
         if (!value) return;
         resolve();
         defer(unwatch);
@@ -30,6 +30,6 @@ new Vue({
   store,
   router,
   i18n,
-  render: h => h(App),
+  render: (h) => h(App),
 }).$mount('#app');
 Logger.init();

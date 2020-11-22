@@ -67,7 +67,7 @@ async function initMiddleware() {
   };
   const { api: middleware } = await Swagger.compose({
     methods: {
-      urlFor: path => middlewareUrl + path,
+      urlFor: (path) => middlewareUrl + path,
       axiosError: () => '',
     },
   })({ swag });
@@ -128,7 +128,7 @@ export default {
       const sdk = await RpcWallet.compose({
         methods: {
           address: async () => store.getters.account.publicKey,
-          sign: data => store.dispatch('accounts/sign', data),
+          sign: (data) => store.dispatch('accounts/sign', data),
           signTransaction: (txBase64, opt) =>
             store.dispatch('accounts/signTransaction', { txBase64, opt }),
         },
@@ -199,7 +199,7 @@ export default {
       if (IN_FRAME) {
         const getArrayOfAvailableFrames = () => [
           window.parent,
-          ...times(window.parent.frames.length, i => window.parent.frames[i]),
+          ...times(window.parent.frames.length, (i) => window.parent.frames[i]),
         ];
         const executeAndSetInterval = (handler, timeout) => {
           handler();
@@ -210,8 +210,8 @@ export default {
         executeAndSetInterval(
           () =>
             getArrayOfAvailableFrames()
-              .filter(frame => frame !== window)
-              .forEach(target => {
+              .filter((frame) => frame !== window)
+              .forEach((target) => {
                 if (connectedFrames.has(target)) return;
                 connectedFrames.add(target);
                 const connection = BrowserWindowMessageConnection({ target });

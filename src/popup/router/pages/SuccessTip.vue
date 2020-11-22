@@ -97,7 +97,7 @@ export default {
       if (addresses.length) {
         await this.$store
           .dispatch('claimTips', { url: tab.url, address: addresses[0] })
-          .catch(error => Logger.write({ ...error, modal: false }));
+          .catch((error) => Logger.write({ ...error, modal: false }));
       }
     }
   },

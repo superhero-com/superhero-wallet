@@ -5,7 +5,7 @@ if (navigator.userAgent.indexOf('Firefox') !== -1) {
       .then(() => {
         alert('You have allowed the firefox camera. Now, try again scan QR code');
       })
-      .catch(err => {
+      .catch((err) => {
         alert(err);
       });
   } else {
@@ -23,7 +23,7 @@ if (navigator.userAgent.indexOf('Firefox') !== -1) {
         window.close();
       },
 
-      err => {
+      (err) => {
         alert(`The following error occurred when trying to use getUserMedia: ${err}`);
         window.close();
       },

@@ -12,13 +12,13 @@ export default {
     return state.account;
   },
   currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,
-  convertToCurrency: (state, { currentCurrencyRate }) => value =>
+  convertToCurrency: (state, { currentCurrencyRate }) => (value) =>
     (currentCurrencyRate * value).toFixed(2),
   balanceCurrency: ({ balance }, { convertToCurrency }) => convertToCurrency(balance),
-  formatCurrency: ({ current: { currency } }) => value =>
+  formatCurrency: ({ current: { currency } }) => (value) =>
     // TODO: Use the current language from i18n module
     new Intl.NumberFormat(navigator.language, { style: 'currency', currency }).format(value),
-  convertToCurrencyFormatted: (state, { convertToCurrency, formatCurrency }) => value =>
+  convertToCurrencyFormatted: (state, { convertToCurrency, formatCurrency }) => (value) =>
     formatCurrency(convertToCurrency(value)),
   minTipAmount: ({ currencies: { usd } }) => 0.01 / usd,
   networks({ userNetworks }) {
@@ -30,9 +30,9 @@ export default {
   activeNetwork({ current: { network } }, { networks }) {
     return networks[network];
   },
-  getProfileImage: (_, { activeNetwork }) => address =>
+  getProfileImage: (_, { activeNetwork }) => (address) =>
     `${activeNetwork.backendUrl}/profile/image/${address}`,
-  getAvatar: () => address => `https://avatars.z52da5wt.xyz/${address}`,
+  getAvatar: () => (address) => `https://avatars.z52da5wt.xyz/${address}`,
   activeAccountName({ account }, getters) {
     return getters['names/getDefault'](get(account, 'publicKey')) || 'Main account';
   },

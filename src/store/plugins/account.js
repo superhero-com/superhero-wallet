@@ -4,7 +4,7 @@ import { postMessage } from '../../popup/utils/connection';
 import { parseFromStorage, aettosToAe, aeToAettos } from '../../popup/utils/helper';
 import { checkPermissions } from '../modules/permissions';
 
-export default store =>
+export default (store) =>
   store.registerModule('accounts', {
     namespaced: true,
     actions: {

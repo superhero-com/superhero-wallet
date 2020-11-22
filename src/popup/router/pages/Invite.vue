@@ -17,7 +17,7 @@
         v-for="link in invites"
         :key="link.secretKey"
         v-bind="link"
-        @loading="val => (loading = val)"
+        @loading="(val) => (loading = val)"
       />
     </div>
     <Loader v-if="loading" />

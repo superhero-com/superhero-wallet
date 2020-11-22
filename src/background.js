@@ -22,13 +22,13 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
   RedirectChainNames.init();
   initDeeplinkHandler();
 
-  const postPhishingData = async data => {
+  const postPhishingData = async (data) => {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     const message = { method: 'phishingCheck', ...data };
     tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message).catch(console.log));
   };
 
-  const openTipPopup = pageUrl =>
+  const openTipPopup = (pageUrl) =>
     browser.windows.create({
       url: browser.extension.getURL(`./popup/popup.html#/tip?url=${encodeURIComponent(pageUrl)}`),
       type: 'popup',
@@ -43,7 +43,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
       let blocked = false;
       const { result } = await phishingCheckUrl(host);
       if (result === 'blocked') {
-        const whitelist = getPhishingUrls().filter(url => url === host);
+        const whitelist = getPhishingUrls().filter((url) => url === host);
         blocked = !whitelist.length;
       }
       return postPhishingData({
@@ -86,7 +86,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
   });
 
   rpcWallet.init();
-  browser.runtime.onConnect.addListener(async port => {
+  browser.runtime.onConnect.addListener(async (port) => {
     if (port.sender.id !== browser.runtime.id) return;
 
     switch (detectConnectionType(port)) {
