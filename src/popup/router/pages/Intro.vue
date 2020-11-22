@@ -57,10 +57,10 @@
           {{ $t('pages.intro.skip') }}
         </button>
         <Button
-          style="margin-top: 30px;"
           @click="createWallet"
           v-if="step === 3"
           data-cy="generate-wallet"
+          class="generate-wallet"
           >{{ $t('pages.intro.generateWallet') }}</Button
         >
       </div>
@@ -296,10 +296,16 @@ export default {
 }
 
 /* Fill up */
-.dotstyle-fillup li a {
-  overflow: hidden;
-  background-color: $text-color !important;
-  transition: background 0.3s;
+.dotstyle-fillup {
+  .generate-wallet {
+    margin-top: 30px;
+  }
+
+  li a {
+    overflow: hidden;
+    background-color: $text-color !important;
+    transition: background 0.3s;
+  }
 }
 
 .dotstyle-fillup li a::after {
