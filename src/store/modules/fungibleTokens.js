@@ -32,7 +32,7 @@ export default {
     async getAvailableTokens({ rootGetters: { activeNetwork }, commit }) {
       const availableTokens = await fetchJson(
         `${activeNetwork.backendUrl}/tokenCache/tokenInfo`,
-      ).catch(e => console.log(e));
+      ).catch((e) => console.log(e));
       return commit('setAvailableTokens', availableTokens || {});
     },
     async tokenBalance({ rootState: { sdk } }, [token, address]) {
@@ -49,7 +49,7 @@ export default {
     ) {
       const tokens = await fetchJson(
         `${activeNetwork.backendUrl}/tokenCache/balances?address=${address}`,
-      ).catch(e => console.log(e));
+      ).catch((e) => console.log(e));
       if (!Object.keys(tokens).length) {
         commit('resetTokenBalances');
         commit('setSelectedToken', null);

@@ -18,7 +18,7 @@ const ensureBackgroundInitialised = async () => {
       }
       pendingRequests[uuid].resolve(res);
     });
-    internalPostMessage = message => {
+    internalPostMessage = (message) => {
       const id = genUuid();
       background.postMessage({ ...message, uuid: id });
       return new Promise((resolve, reject) => {

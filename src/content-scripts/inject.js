@@ -23,7 +23,7 @@ const runContentScript = () => {
   };
 
   const sendToBackground = (method, params) =>
-    new Promise(resolve => {
+    new Promise((resolve) => {
       browser.runtime
         .sendMessage({
           jsonrpc: '2.0',
@@ -31,7 +31,7 @@ const runContentScript = () => {
           method,
           params,
         })
-        .then(res => resolve(res));
+        .then((res) => resolve(res));
     });
 
   sendToBackground('phishingCheck', { href: window.location.href });
@@ -62,8 +62,8 @@ const runContentScript = () => {
   };
 
   const sendDomData = async ({ interval = 3000, attempts = 3 } = {}) => {
-    const pause = async duration => {
-      await new Promise(resolve => setTimeout(resolve, duration));
+    const pause = async (duration) => {
+      await new Promise((resolve) => setTimeout(resolve, duration));
     };
 
     async function send(attempt) {

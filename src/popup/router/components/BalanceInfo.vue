@@ -61,7 +61,7 @@ export default {
       ];
     },
     currenciesOptions() {
-      return Object.keys(this.currencies).map(currencyKey => ({
+      return Object.keys(this.currencies).map((currencyKey) => ({
         text: currencyKey.toUpperCase(),
         value: currencyKey,
       }));

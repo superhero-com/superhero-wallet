@@ -21,7 +21,7 @@ export default {
     state.transactions.pending.push(payload);
   },
   removePendingTransactionByHash(state, hash) {
-    state.transactions.pending = state.transactions.pending.filter(t => t.hash !== hash);
+    state.transactions.pending = state.transactions.pending.filter((t) => t.hash !== hash);
   },
   setActiveAccount(state, payload) {
     state.account.publicKey = payload.publicKey;
@@ -80,7 +80,7 @@ export default {
     ];
   },
   setNotificationsStatus(state, { createdAt, status }) {
-    const index = state.notifications.findIndex(n => n.createdAt === createdAt);
+    const index = state.notifications.findIndex((n) => n.createdAt === createdAt);
     Vue.set(state.notifications[index], 'status', status);
   },
   setNotificationSettings(state, payload) {

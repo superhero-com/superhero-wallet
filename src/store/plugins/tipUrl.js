@@ -1,6 +1,6 @@
 import { getTwitterAccountUrl, fetchJson } from '../../popup/utils/helper';
 
-export default store =>
+export default (store) =>
   store.registerModule('tipUrl', {
     namespaced: true,
     state: {
@@ -9,13 +9,13 @@ export default store =>
     },
 
     getters: {
-      status: ({ verifiedUrls, blacklistedUrls }) => tipUrl => {
+      status: ({ verifiedUrls, blacklistedUrls }) => (tipUrl) => {
         store.dispatch('tipUrl/ensureFetched');
         if (!tipUrl) return 'default';
         const twitterProfile = getTwitterAccountUrl(tipUrl);
         const url = twitterProfile || tipUrl;
         let status;
-        if (blacklistedUrls.some(u => url.includes(u))) {
+        if (blacklistedUrls.some((u) => url.includes(u))) {
           status = 'blacklisted';
         } else if (verifiedUrls.includes(url)) {
           status = 'verified';

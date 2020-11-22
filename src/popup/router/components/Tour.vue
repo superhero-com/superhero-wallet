@@ -154,7 +154,7 @@ export default {
     tourSteps() {
       return this.steps
         .filter(({ hide }) => !hide)
-        .map(step => ({ ...step, params: { ...step.params, enableScrolling: false } }));
+        .map((step) => ({ ...step, params: { ...step.params, enableScrolling: false } }));
     },
   },
   watch: {

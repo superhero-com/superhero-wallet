@@ -79,11 +79,11 @@
         @click="addOrUpdateNetwork"
         :disabled="
           !network.name ||
-            !network.url ||
-            !network.middlewareUrl ||
-            !network.compilerUrl ||
-            !network.backendUrl ||
-            !!network.error
+          !network.url ||
+          !network.middlewareUrl ||
+          !network.compilerUrl ||
+          !network.backendUrl ||
+          !!network.error
         "
         data-cy="connect"
       >

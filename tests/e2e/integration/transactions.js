@@ -33,16 +33,12 @@ describe('Tests cases for transactions page', () => {
         } = body.data[0];
         cy.get('[data-cy=all-transactions] > li')
           .eq(0)
-          .then(e => {
+          .then((e) => {
             cy.wrap(e)
               .find('[data-cy=amount]')
               .should('contain', amount / 10 ** 18);
-            cy.wrap(e)
-              .find('[data-cy=time]')
-              .should('contain', formatDate(time));
-            cy.wrap(e)
-              .find('[data-cy=currency-amount]')
-              .should('be.visible');
+            cy.wrap(e).find('[data-cy=time]').should('contain', formatDate(time));
+            cy.wrap(e).find('[data-cy=currency-amount]').should('be.visible');
           });
       });
   });

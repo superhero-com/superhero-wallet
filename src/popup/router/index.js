@@ -75,16 +75,16 @@ router.beforeEach(async (to, from, next) => {
   next();
 });
 
-router.afterEach(to => {
+router.afterEach((to) => {
   if (to.meta.notPersist) delete localStorage[lastRouteKey];
   else localStorage[lastRouteKey] = to.path;
 });
 
-const deviceReadyPromise = new Promise(resolve =>
+const deviceReadyPromise = new Promise((resolve) =>
   document.addEventListener('deviceready', resolve),
 );
 
-const routerReadyPromise = new Promise(resolve => {
+const routerReadyPromise = new Promise((resolve) => {
   const unbindAfterEach = router.afterEach(() => {
     resolve();
     setTimeout(unbindAfterEach);
@@ -95,7 +95,7 @@ if (process.env.PLATFORM === 'cordova') {
   (async () => {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
     window.IonicDeeplink.onDeepLink(({ url }) => {
-      const prefix = ['superhero:', 'https://wallet.superhero.com/'].find(p => url.startsWith(p));
+      const prefix = ['superhero:', 'https://wallet.superhero.com/'].find((p) => url.startsWith(p));
       if (!prefix) throw new Error(`Unknown url: ${url}`);
       try {
         window.location = `#/${url.slice(prefix.length)}`;

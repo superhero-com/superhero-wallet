@@ -58,13 +58,13 @@
           @click="toConfirm"
           :disabled="
             !note ||
-              amountError ||
-              noteError ||
-              !minCallFee ||
-              !validUrl ||
-              !url ||
-              urlStatus === 'blacklisted' ||
-              note.length > 280
+            amountError ||
+            noteError ||
+            !minCallFee ||
+            !validUrl ||
+            !url ||
+            urlStatus === 'blacklisted' ||
+            note.length > 280
           "
           bold
           data-cy="send-tip"

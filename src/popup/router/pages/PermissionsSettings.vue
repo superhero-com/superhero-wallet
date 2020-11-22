@@ -22,7 +22,7 @@
         :value="permissions.transactionSignLimit || ''"
         :error="error"
         placeholder="no limit"
-        @input="value => changePermission('transactionSignLimit', value)"
+        @input="(value) => changePermission('transactionSignLimit', value)"
       />
     </ListItem>
     <div>
@@ -31,7 +31,7 @@
         min="0"
         :max="tokenBalance"
         step="0.1"
-        @input="value => changePermission('transactionSignLimit', value)"
+        @input="(value) => changePermission('transactionSignLimit', value)"
       />
     </div>
     <ListItem class="permission-row">

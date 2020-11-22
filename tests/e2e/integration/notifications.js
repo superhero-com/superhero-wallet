@@ -17,8 +17,6 @@ describe('Tests cases for notifications page and icon', () => {
   });
 
   it("Don't have backup seed notification", () => {
-    cy.login({ backedUpSeed: true })
-      .get('[data-cy=noti-count]')
-      .should('be.not.visible');
+    cy.login({ backedUpSeed: true }).get('[data-cy=noti-count]').should('be.not.visible');
   });
 });

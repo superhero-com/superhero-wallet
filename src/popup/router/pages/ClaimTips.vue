@@ -54,7 +54,7 @@ export default {
           aettosToAe(
             await this.tippingV1.methods
               .unclaimed_for_url(url)
-              .then(r => r.decodedResult)
+              .then((r) => r.decodedResult)
               .catch(() => 1),
           ),
         );

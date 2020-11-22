@@ -13,11 +13,11 @@ export default {
         })
         .catch(() => false);
       if (remove) {
-        this.$emit('closeMenu');
+        this.$emit('close');
         if (process.env.PLATFORM === 'web' && IN_FRAME) {
           const { sdk } = this.$store.state;
           const { clients } = sdk.getClients();
-          Array.from(clients.values()).forEach(aepp => {
+          Array.from(clients.values()).forEach((aepp) => {
             aepp.sendMessage(
               { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
               true,

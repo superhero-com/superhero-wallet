@@ -1,4 +1,4 @@
-export default async state => {
+export default async (state) => {
   const {
     userAccount: account,
     subaccounts,

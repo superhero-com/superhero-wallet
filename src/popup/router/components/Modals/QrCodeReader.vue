@@ -17,7 +17,7 @@ import { BrowserQRCodeReader } from '@zxing/library/esm5/browser/BrowserQRCodeRe
 import Modal from '../Modal';
 import openUrl from '../../../utils/openUrl';
 
-const handleUnknownError = error => console.log(error);
+const handleUnknownError = (error) => console.log(error);
 
 export default {
   components: { Modal },
@@ -51,10 +51,7 @@ export default {
                 reject();
               }
               if (navigator.mediaDevices.getUserMedia)
-                navigator.mediaDevices
-                  .getUserMedia({ video: true })
-                  .then(resolve)
-                  .catch(reject);
+                navigator.mediaDevices.getUserMedia({ video: true }).then(resolve).catch(reject);
               else reject(new Error('Sorry, your browser does not support getUserMedia'));
             });
           } catch {
@@ -88,7 +85,7 @@ export default {
 
     const status =
       navigator.permissions &&
-      (await navigator.permissions.query({ name: 'camera' }).catch(error => {
+      (await navigator.permissions.query({ name: 'camera' }).catch((error) => {
         const firefoxExceptionMessage =
           "'name' member of PermissionDescriptor 'camera' is not a valid value for enumeration PermissionName.";
         if (error.message !== firefoxExceptionMessage) handleUnknownError(error);

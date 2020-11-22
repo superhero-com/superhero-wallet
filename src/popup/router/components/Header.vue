@@ -58,7 +58,7 @@ export default {
     },
     notificationsCount() {
       return [...this.notifications, ...this.superheroNotifications].filter(
-        n => n.status === 'CREATED',
+        (n) => n.status === 'CREATED',
       ).length;
     },
   },

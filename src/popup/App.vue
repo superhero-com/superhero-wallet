@@ -19,7 +19,7 @@
         @click.self="showSidebar = false"
         data-cy="menu-overlay"
       >
-        <SidebarMenu @closeMenu="showSidebar = false" />
+        <SidebarMenu @close="showSidebar = false" />
       </div>
     </transition>
 
@@ -121,7 +121,7 @@ export default {
 
     this.$store.commit('setChainNames', await this.$store.dispatch('getCacheChainNames'));
 
-    EventBus.$on('error', async entry => {
+    EventBus.$on('error', async (entry) => {
       this.$store.dispatch('modals/open', { name: 'error-log', entry }).catch(() => false);
     });
   },

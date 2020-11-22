@@ -35,28 +35,28 @@ describe('Tests cases for AEX-2 popups', () => {
   });
 
   it('Opens connectConfirm, sign, messageSign popups and send accept/deny action', () => {
-    popups.forEach(popup => {
+    popups.forEach((popup) => {
       cy.openAex2Popup(popup, TX_TYPE.spend)
         .get('[data-cy=deny]')
         .click()
         .window()
-        .then(win => {
+        .then((win) => {
           expect(win.reject).to.equal('send');
         });
     });
 
-    popups.forEach(popup => {
+    popups.forEach((popup) => {
       cy.openAex2Popup(popup, TX_TYPE.spend)
         .get('[data-cy=accept]')
         .click()
         .window()
-        .then(win => {
+        .then((win) => {
           expect(win.resolve).to.equal('send');
         });
     });
   });
 
-  txTypes.forEach(txType => {
+  txTypes.forEach((txType) => {
     it(`Sign Popup display correct ${txType} data`, () => {
       const tx = txParams[txType];
       const amount = tx.amount / 10 ** 18;
@@ -84,9 +84,7 @@ describe('Tests cases for AEX-2 popups', () => {
           .invoke('attr', 'title')
           .should('contain', receiver);
       } else {
-        cy.get('[data-cy=receiver]')
-          .should('be.visible')
-          .should('contain', receiver);
+        cy.get('[data-cy=receiver]').should('be.visible').should('contain', receiver);
       }
 
       cy.get('[data-cy=fee]')

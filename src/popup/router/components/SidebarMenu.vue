@@ -115,7 +115,7 @@ export default {
       if (target.tagName === 'A') this.closeMenu();
     },
     closeMenu() {
-      this.$emit('closeMenu');
+      this.$emit('close');
     },
   },
 };

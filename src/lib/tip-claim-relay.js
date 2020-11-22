@@ -19,8 +19,8 @@ export default {
     };
 
     const claimAmount = await contractCallStatic({ tx, callType: 'static' })
-      .then(r => r.decodedResult)
-      .catch(error => {
+      .then((r) => r.decodedResult)
+      .catch((error) => {
         Logger.write(error);
         return 1;
       });

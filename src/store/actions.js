@@ -37,7 +37,7 @@ export default {
           recent ? `&limit=${limit}` : ``
         }`,
       )
-        .then(response =>
+        .then((response) =>
           response.map(({ address, amount, ...t }) => ({
             tx: { address, amount },
             ...t,
@@ -107,7 +107,7 @@ export default {
     let addresses = Array.isArray(address) ? address : [address];
     const chainNames = Array.isArray(chainName) ? chainName : [chainName];
     const chainNamesAddresses = await Promise.all(
-      chainNames.map(async n => {
+      chainNames.map(async (n) => {
         try {
           return getAddressByNameEntry(await sdk.api.getNameEntryByName(n));
         } catch (e) {
@@ -117,7 +117,7 @@ export default {
     );
     addresses = [...addresses, ...chainNamesAddresses];
 
-    return { addresses: uniq(addresses).filter(a => a), tab };
+    return { addresses: uniq(addresses).filter((a) => a), tab };
   },
   async getHeight({ state: { sdk } }) {
     return (await sdk.topBlock()).height;
@@ -138,7 +138,7 @@ export default {
     { state: { sdk }, getters: { activeNetwork } },
     [tipId, text, author, parentId],
   ) {
-    const sendComment = async postParam =>
+    const sendComment = async (postParam) =>
       postJson(`${activeNetwork.backendUrl}/comment/api/`, { body: postParam });
 
     const responseChallenge = await sendComment({ tipId, text, author, parentId });
@@ -155,7 +155,7 @@ export default {
     { state: { sdk }, getters: { activeNetwork } },
     [notifId, status, author],
   ) {
-    const backendMethod = async postParam =>
+    const backendMethod = async (postParam) =>
       postJson(`${activeNetwork.backendUrl}/notification/${notifId}`, { body: postParam });
 
     const responseChallenge = await backendMethod({ author, status });
@@ -185,7 +185,7 @@ export default {
       signature: signedChallenge,
     };
     const url = new URL(`${activeNetwork.backendUrl}/notification/user/${address}`);
-    Object.keys(respondChallenge).forEach(key =>
+    Object.keys(respondChallenge).forEach((key) =>
       url.searchParams.append(key, respondChallenge[key]),
     );
     return fetchJson(url.toString());

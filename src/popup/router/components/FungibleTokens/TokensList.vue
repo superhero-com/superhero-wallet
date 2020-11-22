@@ -63,7 +63,7 @@ export default {
         ? [...(this.aeternityToken ? [this.aeternityToken] : []), ...this.tokenBalances]
         : tokensInfo
       ).filter(
-        token =>
+        (token) =>
           !searchTerm ||
           token.symbol.toLowerCase().includes(searchTerm) ||
           token.name.toLowerCase().includes(searchTerm) ||

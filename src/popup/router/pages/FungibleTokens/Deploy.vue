@@ -60,7 +60,7 @@ export default {
   computed: {
     selectedExtensions() {
       return this.extensions
-        .filter(e => e.selected)
+        .filter((e) => e.selected)
         .reduce((a, { type }) => {
           a.push(type);
           return a;
@@ -108,7 +108,7 @@ export default {
       } finally {
         this.loading = false;
         this.token = { ...initialToken };
-        this.extensions = this.extensions.map(e => ({ ...e, selected: false }));
+        this.extensions = this.extensions.map((e) => ({ ...e, selected: false }));
       }
     },
   },

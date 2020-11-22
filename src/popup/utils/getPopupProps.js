@@ -14,7 +14,7 @@ export default async () => {
   };
   window.addEventListener('beforeunload', unloadHandler, true);
 
-  const closingWrapper = f => async (...args) => {
+  const closingWrapper = (f) => async (...args) => {
     resolved = true;
     window.removeEventListener('beforeunload', unloadHandler, true);
     if (process.env.RUNNING_IN_TESTS) {

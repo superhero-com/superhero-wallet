@@ -155,9 +155,9 @@ export default {
       this.alert.content = content;
     },
     selectSeed(seed, index, id) {
-      if (!this.selectedSeed.find(s => s.parent === id)) {
+      if (!this.selectedSeed.find((s) => s.parent === id)) {
         this.selectedSeed.push({ name: seed, parent: id });
-        this.seeds.find(s => s.id === id).selected = true;
+        this.seeds.find((s) => s.id === id).selected = true;
       }
       if (this.selectedSeed.length === 12) {
         this.buttonFill = 'primary';
@@ -166,7 +166,7 @@ export default {
       }
     },
     removeSeed(parent, index) {
-      this.seeds.find(s => s.id === parent).selected = false;
+      this.seeds.find((s) => s.id === parent).selected = false;
       this.selectedSeed.splice(index, 1);
       if (this.selectedSeed.length === 12) {
         this.buttonFill = 'primary';

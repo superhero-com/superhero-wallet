@@ -2,7 +2,7 @@ import { newToken } from 'aeternity-tokens';
 import { isEmpty } from 'lodash-es';
 import { convertToken } from '../../popup/utils/helper';
 
-export default store =>
+export default (store) =>
   store.registerModule('tokens', {
     namespaced: true,
     state: {
@@ -16,9 +16,9 @@ export default store =>
         return state.all
           .filter(({ owner, network }) => owner === publicKey && network === networkId)
           .map(({ balance, decimals, contract, ...t }) => {
-            const getBalance = (amount, precision) => bal =>
+            const getBalance = (amount, precision) => (bal) =>
               parseFloat(convertToken(bal || amount, -precision)).toFixed(2);
-            const convertBalance = precision => bal => convertToken(bal, precision);
+            const convertBalance = (precision) => (bal) => convertToken(bal, precision);
 
             return {
               ...t,
@@ -31,21 +31,21 @@ export default store =>
             };
           });
       },
-      find: (state, { owned }) => address => owned.find(t => t.contract === address),
-      getInstance: state => contract => state.contractInstances[contract],
+      find: (state, { owned }) => (address) => owned.find((t) => t.contract === address),
+      getInstance: (state) => (contract) => state.contractInstances[contract],
     },
     mutations: {
       add(state, token) {
         state.all = [...state.all, token];
       },
       setBalance(state, { contract, balance }) {
-        state.all = state.all.map(t => (t.contract === contract ? { ...t, balance } : t));
+        state.all = state.all.map((t) => (t.contract === contract ? { ...t, balance } : t));
       },
       setContractInstance(state, { contract, instance }) {
         state.contractInstances[contract] = instance;
       },
       setExtensions(state, { contract, extensions }) {
-        state.all = state.all.map(t => (t.contract === contract ? { ...t, extensions } : t));
+        state.all = state.all.map((t) => (t.contract === contract ? { ...t, extensions } : t));
       },
     },
     actions: {
@@ -74,8 +74,8 @@ export default store =>
             }),
           )
         )
-          .filter(t => !isEmpty(t))
-          .map(t => ({ ...t, text: t.name, value: t.contract }));
+          .filter((t) => !isEmpty(t))
+          .map((t) => ({ ...t, text: t.name, value: t.contract }));
       },
       async balances({ rootState: { account }, getters: { owned }, commit, dispatch }) {
         return Promise.all(

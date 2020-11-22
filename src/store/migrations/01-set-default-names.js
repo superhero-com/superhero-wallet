@@ -1,4 +1,4 @@
-export default state => {
+export default (state) => {
   const newState = { ...state };
 
   if (state.subaccounts) {

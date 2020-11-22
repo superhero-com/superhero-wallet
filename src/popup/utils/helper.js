@@ -7,12 +7,12 @@ import BigNumber from 'bignumber.js';
 import { CONNECTION_TYPES, defaultNetworks, defaultNetwork } from './constants';
 import { getState } from '../../store/plugins/persistState';
 
-export const aeToAettos = v =>
+export const aeToAettos = (v) =>
   formatAmount(v, {
     denomination: AE_AMOUNT_FORMATS.AE,
     targetDenomination: AE_AMOUNT_FORMATS.AETTOS,
   });
-export const aettosToAe = v =>
+export const aettosToAe = (v) =>
   formatAmount(v, {
     denomination: AE_AMOUNT_FORMATS.AETTOS,
     targetDenomination: AE_AMOUNT_FORMATS.AE,
@@ -20,7 +20,7 @@ export const aettosToAe = v =>
 
 export const convertToken = (balance, precision) => BigNumber(balance).shiftedBy(precision);
 
-export const shuffleArray = array => {
+export const shuffleArray = (array) => {
   const shuffle = array;
   let currentIndex = shuffle.length;
   let temporaryValue;
@@ -44,13 +44,13 @@ export const shuffleArray = array => {
 export const IN_FRAME = window.parent !== window;
 export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');
 
-export const convertToAE = balance => +(balance / 10 ** 18).toFixed(7);
+export const convertToAE = (balance) => +(balance / 10 ** 18).toFixed(7);
 
-export const toURL = url => new URL(url.includes('://') ? url : `https://${url}`);
+export const toURL = (url) => new URL(url.includes('://') ? url : `https://${url}`);
 
-export const extractHostName = url => toURL(url).hostname;
+export const extractHostName = (url) => toURL(url).hostname;
 
-export const validateTipUrl = urlAsString => {
+export const validateTipUrl = (urlAsString) => {
   try {
     const url = toURL(urlAsString);
     return ['http:', 'https:'].includes(url.protocol) && isFQDN(url.hostname);
@@ -59,7 +59,7 @@ export const validateTipUrl = urlAsString => {
   }
 };
 
-export const detectConnectionType = port => {
+export const detectConnectionType = (port) => {
   const extensionProtocol = detect().name === 'firefox' ? 'moz-extension' : 'chrome-extension';
   const [senderUrl] = port.sender.url.split('?');
   const isExtensionSender =
@@ -97,16 +97,16 @@ export const postJson = (url, options) =>
     body: options.body && JSON.stringify(options.body),
   });
 
-export const checkAddress = value =>
+export const checkAddress = (value) =>
   Crypto.isAddressValid(value, 'ak') ||
   Crypto.isAddressValid(value, 'ct') ||
   Crypto.isAddressValid(value, 'ok');
 
 export const validateAddress = (address, type) => Crypto.isAddressValid(address, type);
 
-export const chekAensName = value => value.endsWith('.test') || value.endsWith('.chain');
+export const chekAensName = (value) => value.endsWith('.test') || value.endsWith('.chain');
 
-export const stringifyForStorage = state =>
+export const stringifyForStorage = (state) =>
   JSON.stringify(state, (key, value) => {
     if (value instanceof ArrayBuffer) {
       return { type: 'ArrayBuffer', data: Array.from(new Uint8Array(value)) };
@@ -146,7 +146,7 @@ export const stringifyForStorage = state =>
     return value;
   });
 
-export const parseFromStorage = state =>
+export const parseFromStorage = (state) =>
   JSON.parse(state, (key, value) => {
     if (value && value.type === 'ArrayBuffer') {
       return new Uint8Array(value.data).buffer;
@@ -237,9 +237,10 @@ export const getAllNetworks = async () =>
     {},
   );
 
-export const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
+export const escapeSpecialChars = (str) =>
+  str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
 
-export const checkHashType = async hash => {
+export const checkHashType = async (hash) => {
   const accountPublicKeyRegex = RegExp('^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$');
   const transactionHashRegex = RegExp('^th_[1-9A-HJ-NP-Za-km-z]{48,50}$');
   const nameRegex = RegExp('^nm_[1-9A-HJ-NP-Za-km-z]{48,50}$');
@@ -260,8 +261,8 @@ export const checkHashType = async hash => {
 };
 
 // TODO: Use proper promises/reactivity instead of polling pattern
-export const pollGetter = getter =>
-  new Promise(resolve => {
+export const pollGetter = (getter) =>
+  new Promise((resolve) => {
     const id = setInterval(() => {
       if (!getter()) return;
       clearInterval(id);
@@ -274,7 +275,7 @@ export const getActiveNetwork = async () => {
   return all[get(await getState(), 'current.network', defaultNetwork.name)];
 };
 
-export const getTwitterAccountUrl = url => {
+export const getTwitterAccountUrl = (url) => {
   const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
   return match ? match[0] : false;
 };

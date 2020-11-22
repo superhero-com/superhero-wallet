@@ -2,13 +2,13 @@ import { cloneDeep } from 'lodash-es';
 
 const KEY = 'state';
 
-const setState = async state => {
+const setState = async (state) => {
   await browser.storage.local.set({ [KEY]: cloneDeep(state) });
 };
 
 export const getState = async () => (await browser.storage.local.get(KEY))[KEY];
 
-export default (reducerLoad, reducerSave) => async store => {
+export default (reducerLoad, reducerSave) => async (store) => {
   store.commit('setState', {
     ...(await reducerLoad(await getState())),
     isRestored: true,

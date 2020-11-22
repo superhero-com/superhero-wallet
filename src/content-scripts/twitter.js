@@ -2,7 +2,7 @@ import createSuperheroTipAction from './tipButton';
 
 let timeout = null;
 
-const getTweetId = tweet => {
+const getTweetId = (tweet) => {
   const status = tweet.querySelector("a[href*='/status/']");
   if (!status || !status.href) {
     return null;
@@ -20,7 +20,7 @@ const configureSuperheroTipAction = async () => {
 
   let bigTweetSkipped = !document.querySelectorAll('div[aria-label="Timeline: Conversation"]')
     .length;
-  tweets.forEach(tweet => {
+  tweets.forEach((tweet) => {
     const tweetId = getTweetId(tweet);
     if (!tweetId) return;
     const actions = tweet.querySelector('[role="group"]');

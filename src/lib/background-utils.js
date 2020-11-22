@@ -54,7 +54,7 @@ export const getSDK = async () => {
   return sdk;
 };
 
-const getAddress = async name => {
+const getAddress = async (name) => {
   await getSDK();
   try {
     return getAddressByNameEntry(await sdk.api.getNameEntryByName(name));
@@ -63,10 +63,10 @@ const getAddress = async name => {
   }
 };
 
-export const getAddressFromChainName = async names =>
-  Array.isArray(names) ? Promise.all(names.map(async n => getAddress(n))) : getAddress(names);
+export const getAddressFromChainName = async (names) =>
+  Array.isArray(names) ? Promise.all(names.map(async (n) => getAddress(n))) : getAddress(names);
 
-export const getTippingContractInstance = async tx => {
+export const getTippingContractInstance = async (tx) => {
   if (tippingContract) return tippingContract;
   await getSDK();
   tippingContract = await setContractInstance(tx, sdk, tx.address);
