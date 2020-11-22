@@ -585,11 +585,9 @@
       "showPrivateKey": "显示私钥",
       "incorrectPassword": "密码错误",
       "decryptingPrivateKey": "解密私钥",
-      "showSeedPhrase": "显示助记词",
       "seedRecoveryHeading": "显示助记词",
       "seedRecoverySmall": "你的助记词（也被称为私钥）是访问你的帐户的钥匙或密码。请不要向任何人展示。并请确定你已在没有其他人可以看到同时你自己永远不会丢失的纸上备份了助记词。丢失了钥匙意味着不能再访问你的钱包和小费",
       "seedRecoveryBtn": "显示助记词",
-      "seedPhraseWarning": "不要向任何人展示你的私钥，私钥可以用于从你所有的帐户里盗窃",
       "seedPhrase": "你的助记词",
       "copy": "复制到剪贴板"
     },

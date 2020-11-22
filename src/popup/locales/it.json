@@ -517,11 +517,9 @@
       "showPrivateKey": "Mostra chiave privata",
       "incorrectPassword": "Password errata",
       "decryptingPrivateKey": "Decifrare la chiave privata",
-      "showSeedPhrase": "Mostra la frase seme",
       "seedRecoveryHeading": "Mostra la frase seme",
       "seedRecoverySmall": "Rivela le tue 12 parole usate per generare la tua chiave privata",
       "seedRecoveryBtn": "Mostra la frase seme",
-      "seedPhraseWarning": "Non condividere il tuo seme con nessuno, può essere usato per rubare tutti i tuoi account",
       "seedPhrase": "La tua frase iniziale",
       "copy": "Copia negli appunti"
     },

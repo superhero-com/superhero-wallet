@@ -517,11 +517,9 @@
       "showPrivateKey": "Afficher une clé privée",
       "incorrectPassword": "Mot de passe incorrect",
       "decryptingPrivateKey": "Décryptage clé privée",
-      "showSeedPhrase": "Afficher la phrase de départ",
       "seedRecoveryHeading": "Afficher la phrase de départ",
       "seedRecoverySmall": "Révèle vos 12 mots utilisés pour générer votre clé privée",
       "seedRecoveryBtn": "Afficher la phrase de départ",
-      "seedPhraseWarning": "Ne partagez votre graine avec personne, elle peut être utilisée pour voler tous vos comptes",
       "seedPhrase": "Votre phrase de graine",
       "copy": "Copier dans le presse-papier"
     },

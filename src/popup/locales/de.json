@@ -517,11 +517,9 @@
       "showPrivateKey": "Anzeigen Private Key",
       "incorrectPassword": "Falsches Passwort",
       "decryptingPrivateKey": "Entschlüsseln private Schlüssel",
-      "showSeedPhrase": "Startphrase anzeigen",
       "seedRecoveryHeading": "Startphrase anzeigen",
       "seedRecoverySmall": "Zeigt Ihre 12 Wörter an, die zum Generieren Ihres privaten Schlüssels verwendet wurden",
       "seedRecoveryBtn": "Startphrase anzeigen",
-      "seedPhraseWarning": "Teilen Sie Ihren Samen mit niemandem, er kann verwendet werden, um alle Ihre Konten zu stehlen",
       "seedPhrase": "Ihre Ausgangssprache",
       "copy": "Kopieren to clipboard"
     },
