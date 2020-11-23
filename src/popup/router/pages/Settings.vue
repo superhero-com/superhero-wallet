@@ -22,7 +22,7 @@
         :info="$t('pages.settings.tabPermissionsSettingsSmall')"
       />
       <PanelItem
-        @click="removeAccount"
+        @click="requestResetting"
         :title="$t('pages.settings.tabRemoveAccount')"
         :info="$t('pages.settings.tabRemoveAccountSmall')"
       />
@@ -37,16 +37,17 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex';
-import removeAccountMixin from '../../../mixins/removeAccount';
+import { mapState, mapMutations, mapActions } from 'vuex';
 import CheckBox from '../components/CheckBox';
 import Panel from '../components/Panel';
 import PanelItem from '../components/PanelItem';
 
 export default {
-  mixins: [removeAccountMixin],
   components: { CheckBox, Panel, PanelItem },
   computed: mapState(['saveErrorLog']),
-  methods: mapMutations(['setSaveErrorLog']),
+  methods: {
+    ...mapMutations(['setSaveErrorLog']),
+    ...mapActions(['requestResetting']),
+  },
 };
 </script>

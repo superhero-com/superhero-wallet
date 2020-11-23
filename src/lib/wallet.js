@@ -93,6 +93,23 @@ async function getKeyPair() {
 
 let initSdkRunning = false;
 
+if (IN_FRAME) {
+  store.registerModule('sdk', {
+    actions: {
+      async reset({ sdk }) {
+        const { clients } = sdk.getClients();
+        Array.from(clients.values()).forEach((aepp) => {
+          aepp.sendMessage(
+            { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
+            true,
+          );
+          aepp.disconnect();
+        });
+      },
+    },
+  });
+}
+
 export default {
   async init() {
     const { account } = store.getters;

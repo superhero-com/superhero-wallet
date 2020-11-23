@@ -6,19 +6,31 @@ const setState = async (state) => {
   await browser.storage.local.set({ [KEY]: cloneDeep(state) });
 };
 
-export const getState = async () => (await browser.storage.local.get(KEY))[KEY];
+const getStateRaw = async () => (await browser.storage.local.get(KEY))[KEY];
+
+// TODO: Avoid direct localStorage access outside of this module
+export const getState = async () => (await getStateRaw()) || {};
 
 export default (reducerLoad, reducerSave) => async (store) => {
   store.commit('setState', {
-    ...(await reducerLoad(await getState())),
+    ...(await reducerLoad(await getStateRaw())),
     isRestored: true,
   });
-  store.subscribe((mutation, state) => setState(reducerSave(state)));
+  const dontSaveState = store.subscribe((mutation, state) => setState(reducerSave(state)));
   store.registerModule('persistState', {
     actions: {
       async reset() {
-        store.commit('resetState');
-        await browser.storage.local.remove('errorLog');
+        dontSaveState();
+        await browser.storage.local.clear();
+        if (process.env.IS_EXTENSION) browser.runtime.sendMessage({ method: 'reload' });
+        const location = {
+          'extension-chrome': './popup.html',
+          'extension-firefox': './popup.html',
+          cordova: './index.html',
+          web: '/',
+        }[process.env.PLATFORM];
+        if (!location) throw new Error('Unknown platform');
+        window.location = location;
       },
     },
   });
