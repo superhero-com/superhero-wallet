@@ -46,7 +46,8 @@ $lg-size: 64px;
   border-radius: 50%;
   overflow: hidden;
   display: inline-block;
-  object-fit: scale-down;
+  object-fit: cover;
+  flex-shrink: 0;
 
   &.lg {
     height: $lg-size;
