@@ -7,8 +7,8 @@
           <div v-if="$slots.header" class="modal--header">
             <slot name="header" />
           </div>
-          <div v-if="$slots.body" class="modal--body">
-            <slot name="body" />
+          <div v-if="$slots.default" class="modal--body">
+            <slot />
           </div>
           <div v-if="$slots.footer" class="modal--footer">
             <slot name="footer" />

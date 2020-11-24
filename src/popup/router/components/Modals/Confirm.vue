@@ -1,7 +1,7 @@
 <template>
   <Modal @close="cancel" close>
     <template v-if="title" slot="header">{{ title }}</template>
-    <template v-if="msg" slot="body">{{ msg }}</template>
+    <template v-if="msg">{{ msg }}</template>
     <div slot="footer">
       <Button dark @click="cancel">
         {{ $t('modals.cancel') }}

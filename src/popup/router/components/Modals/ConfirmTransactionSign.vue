@@ -2,7 +2,7 @@
   <Modal class="confirm-tx-sign-modal">
     <SignAccountIdenticons :transaction="tx" slot="header" />
 
-    <SignDetailsList slot="body" :transaction="tx" />
+    <SignDetailsList :transaction="tx" />
 
     <div slot="footer">
       <Button dark @click="cancel">{{ $t('modals.cancel') }}</Button>

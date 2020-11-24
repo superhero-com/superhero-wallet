@@ -3,10 +3,10 @@
     <template slot="header">
       {{ $t('modals.confirm-tip.title') }}
     </template>
-    <template slot="body">
-      {{ $t('modals.confirm-tip.msg') }}
-      <p class="confirmation--question">{{ $t('modals.confirm-tip.sub-message') }}</p>
-    </template>
+
+    {{ $t('modals.confirm-tip.msg') }}
+    <p class="confirmation--question">{{ $t('modals.confirm-tip.sub-message') }}</p>
+
     <div slot="footer">
       <Button dark @click="cancelTip">
         {{ $t('modals.cancel') }}

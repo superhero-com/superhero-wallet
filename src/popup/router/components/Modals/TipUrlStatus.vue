@@ -4,7 +4,9 @@
       <UrlStatus :status="status" modal />
       {{ content.title }}
     </template>
-    <div slot="body">{{ content.msg }}</div>
+
+    {{ content.msg }}
+
     <div slot="footer">
       <Button class="ok-button" @click="resolve">{{ $t('ok') }}</Button>
     </div>

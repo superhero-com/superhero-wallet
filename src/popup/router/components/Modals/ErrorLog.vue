@@ -3,14 +3,14 @@
     <template slot="header">
       {{ $t('modals.error-log.title') }}
     </template>
-    <template slot="body">
-      <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-      <div class="error-msg">{{ message }}...</div>
-      <div>
-        <span>{{ $t('modals.error-log.sub-title') }}</span>
-        {{ $t('modals.error-log.content') }}
-      </div>
-    </template>
+
+    <!--eslint-disable-next-line vue-i18n/no-raw-text-->
+    <div class="error-msg">{{ message }}...</div>
+    <div>
+      <span>{{ $t('modals.error-log.sub-title') }}</span>
+      {{ $t('modals.error-log.content') }}
+    </div>
+
     <div slot="footer">
       <Button dark @click="cancel">
         {{ $t('modals.cancel') }}

@@ -1,12 +1,11 @@
 <!--eslint-disable vue-i18n/no-raw-text-->
 <template>
   <Modal @close="resolve" close>
-    <div slot="body">
-      <CheckIcon /> <br />
-      <b>{{ $t('pages.claim.url') }}:</b> {{ url }} <br />
-      <b>{{ $t('pages.claim.tipsOnUrl') }}:</b> {{ claimAmount }} {{ $t('pages.claim.ae') }} <br />
-      <span class="claimed">{{ $t('pages.claim.claimed') }}</span>
-    </div>
+    <CheckIcon /> <br />
+    <b>{{ $t('pages.claim.url') }}:</b> {{ url }} <br />
+    <b>{{ $t('pages.claim.tipsOnUrl') }}:</b> {{ claimAmount }} {{ $t('pages.claim.ae') }} <br />
+    <span class="claimed">{{ $t('pages.claim.claimed') }}</span>
+
     <div slot="footer">
       <Button @click="resolve">{{ $t('ok') }}</Button>
     </div>
