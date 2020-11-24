@@ -177,7 +177,7 @@ Cypress.Commands.add('toConfirmTip', (tip = {}) => {
     .buttonShouldNotBeDisabled('[data-cy=send-tip]')
     .get('[data-cy=send-tip]')
     .click()
-    .get('.modal--wrapper')
+    .get('.modal .container')
     .should('be.visible')
     .get('[data-cy=to-confirm]')
     .should('be.visible')

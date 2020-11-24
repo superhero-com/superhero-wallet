@@ -11,7 +11,7 @@ describe('Test cases for Withdraw Page', () => {
       .click()
       .get('.primary-title')
       .should('be.visible')
-      .get('.modal--close')
+      .get('.modal .close')
       .click()
 
       .enterAmountSend('asd')

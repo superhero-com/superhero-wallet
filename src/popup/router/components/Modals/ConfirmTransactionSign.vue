@@ -4,10 +4,10 @@
 
     <SignDetailsList :transaction="tx" />
 
-    <div slot="footer">
+    <template slot="footer">
       <Button dark @click="cancel">{{ $t('modals.cancel') }}</Button>
       <Button @click="confirm">{{ $t('modals.confirm') }}</Button>
-    </div>
+    </template>
   </Modal>
 </template>
 

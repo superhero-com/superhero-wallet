@@ -7,9 +7,7 @@
 
     {{ content.msg }}
 
-    <div slot="footer">
-      <Button class="ok-button" @click="resolve">{{ $t('ok') }}</Button>
-    </div>
+    <Button slot="footer" class="ok-button" @click="resolve">{{ $t('ok') }}</Button>
   </Modal>
 </template>
 

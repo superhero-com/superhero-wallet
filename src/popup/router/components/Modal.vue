@@ -1,18 +1,18 @@
 <template>
-  <transition name="modal">
-    <div class="modal--mask">
-      <div class="modal--wrapper">
-        <div class="modal--container">
-          <Close v-if="close" class="modal--close" @click="$emit('close')" />
-          <div v-if="$slots.header" class="modal--header">
-            <slot name="header" />
-          </div>
-          <div v-if="$slots.default" class="modal--body">
-            <slot />
-          </div>
-          <div v-if="$slots.footer" class="modal--footer">
-            <slot name="footer" />
-          </div>
+  <transition appear>
+    <div class="modal">
+      <div class="container">
+        <button v-if="close" class="close" @click="$emit('close')">
+          <Close />
+        </button>
+        <div v-if="$slots.header" class="header">
+          <slot name="header" />
+        </div>
+        <div v-if="$slots.default" class="body">
+          <slot />
+        </div>
+        <div v-if="$slots.footer" class="footer">
+          <slot name="footer" />
         </div>
       </div>
     </div>
@@ -23,12 +23,8 @@
 import Close from '../../../icons/close.svg?vue-component';
 
 export default {
-  props: {
-    close: { type: Boolean },
-  },
-  components: {
-    Close,
-  },
+  props: { close: Boolean },
+  components: { Close },
   mounted() {
     if (document.body.style.overflow) return;
     document.body.style.overflow = 'hidden';
@@ -42,7 +38,7 @@ export default {
 <style lang="scss">
 @import '../../../common/variables';
 
-.modal--mask {
+.modal {
   position: fixed;
   z-index: 9998;
   top: 0;
@@ -50,69 +46,73 @@ export default {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.7);
-  display: table;
-  transition: opacity 0.3s ease;
+  display: flex;
 
-  .modal--wrapper {
-    display: table-cell;
-    vertical-align: middle;
-  }
-
-  .modal--container {
+  .container {
     position: relative;
     width: 87%;
-    margin: 0 auto;
+    margin: auto;
     padding: 62px 25px 30px;
     background: $modal-background;
     border: 1px solid $tx-border-color;
     border-radius: 5px;
-    transition: all 0.3s ease;
-  }
 
-  .modal--close {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    cursor: pointer;
-  }
+    .close {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      // TODO: Extract to ButtonPlain
+      background: none;
+      border: none;
+      outline: none;
+      padding: 0;
+    }
 
-  .modal--header {
-    color: $white-color;
-    font-size: 17px;
-    font-weight: 500;
-    margin-bottom: 25px;
-    word-break: break-word;
-    text-align: center;
-  }
+    .header {
+      color: $white-color;
+      font-size: 17px;
+      font-weight: 500;
+      margin-bottom: 25px;
+      word-break: break-word;
+      text-align: center;
+    }
 
-  .modal--body {
-    margin-bottom: 40px;
-    color: $text-color;
-    font-size: 14px;
-    word-break: break-word;
-    text-align: center;
-  }
+    .body {
+      margin-bottom: 40px;
+      color: $text-color;
+      font-size: 14px;
+      word-break: break-word;
+      text-align: center;
+    }
 
-  .modal--footer {
-    display: flex;
-    justify-content: center;
+    .footer {
+      display: flex;
+      justify-content: center;
 
-    button {
-      margin: 0 10px !important;
-      width: 120px !important;
-      font-weight: 700 !important;
+      .primary-button {
+        margin: 0 10px;
+        width: 120px;
+        font-weight: 700;
+      }
     }
   }
 
-  .modal--enter,
-  .modal--leave--active {
-    opacity: 0;
+  &.v-enter-active,
+  &.v-leave-active {
+    transition: opacity 0.3s;
+
+    .container {
+      transition: transform 0.3s;
+    }
   }
 
-  .modal--enter .modal--container,
-  .modal--leave--active .modal--container {
-    -webkit-transform: scale(1.1);
-    transform: scale(1.1);
+  &.v-enter,
+  &.v-leave-to {
+    opacity: 0;
+
+    .container {
+      transform: scale(1.1);
+    }
   }
 }
 </style>

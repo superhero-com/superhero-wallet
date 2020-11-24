@@ -1,5 +1,5 @@
 <template>
-  <Modal @close="resolve" class="default-modal" close>
+  <Modal @close="resolve" close>
     <template slot="header">
       {{ $t('modals.error-log.title') }}
     </template>
@@ -11,14 +11,14 @@
       {{ $t('modals.error-log.content') }}
     </div>
 
-    <div slot="footer">
+    <template slot="footer">
       <Button dark @click="cancel">
         {{ $t('modals.cancel') }}
       </Button>
       <Button @click="createReport">
         {{ $t('modals.error-log.create-report') }}
       </Button>
-    </div>
+    </template>
   </Modal>
 </template>
 

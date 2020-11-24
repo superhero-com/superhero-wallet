@@ -6,9 +6,7 @@
     <b>{{ $t('pages.claim.tipsOnUrl') }}:</b> {{ claimAmount }} {{ $t('pages.claim.ae') }} <br />
     <span class="claimed">{{ $t('pages.claim.claimed') }}</span>
 
-    <div slot="footer">
-      <Button @click="resolve">{{ $t('ok') }}</Button>
-    </div>
+    <Button slot="footer" @click="resolve">{{ $t('ok') }}</Button>
   </Modal>
 </template>
 

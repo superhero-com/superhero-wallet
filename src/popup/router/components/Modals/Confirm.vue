@@ -2,14 +2,14 @@
   <Modal @close="cancel" close>
     <template v-if="title" slot="header">{{ title }}</template>
     <template v-if="msg">{{ msg }}</template>
-    <div slot="footer">
+    <template slot="footer">
       <Button dark @click="cancel">
         {{ $t('modals.cancel') }}
       </Button>
       <Button data-cy="to-confirm" @click="resolve">
         {{ $t('modals.confirm') }}
       </Button>
-    </div>
+    </template>
   </Modal>
 </template>
 
