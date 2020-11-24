@@ -1,12 +1,12 @@
 <template>
-  <Modal @close="resolve" close>
+  <Modal @close="cancel" close>
     <template v-if="title" slot="header">{{ title }}</template>
     <template v-if="msg" slot="body"> {{ msg }} </template>
     <div class="modal-confirm-btns" slot="footer">
       <Button dark @click="cancel">
         {{ $t('modals.cancel') }}
       </Button>
-      <Button data-cy="to-confirm" @click="confirm">
+      <Button data-cy="to-confirm" @click="resolve">
         {{ $t('modals.confirm') }}
       </Button>
     </div>
@@ -26,9 +26,6 @@ export default {
   },
   components: { Modal, Button },
   methods: {
-    confirm() {
-      this.resolve(true);
-    },
     cancel() {
       this.reject(new Error('Rejected by user'));
     },
