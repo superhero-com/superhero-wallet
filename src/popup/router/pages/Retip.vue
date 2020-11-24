@@ -32,7 +32,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import tipping from 'aepp-raendom/src/utils/tippingContractUtil';
+import tipping from 'tipping-contract/util/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 import AmountSend from '../components/AmountSend';
@@ -46,34 +46,34 @@ export default {
     tip: {},
     amount: '',
     loading: false,
+    minCallFee: null,
+    tippingContract: null
   }),
   computed: {
-    ...mapGetters(['tippingSupported']),
-    ...mapState({
-      tippingV1: 'tippingV1',
-      urlStatus(state, getters) {
-        return getters['tipUrl/status'](this.tip.url);
-      },
-      isMinTipAmountError(state, { minTipAmount }) {
-        return this.amount < minTipAmount;
-      },
-      isAmountValid({ sdk, balance }, { account, activeNetwork }) {
-        if (!sdk) return false;
-        const fee = calculateFee(TX_TYPES.contractCall, {
-          ...sdk.Ae.defaults,
-          contractId: activeNetwork.tipContractV1,
-          callerId: account.publicKey,
-        });
-        return !this.isMinTipAmountError && balance - fee - this.amount >= 0;
-      },
-    }),
+    ...mapGetters(['account', 'tippingSupported', 'minTipAmount', 'activeNetwork']),
+    ...mapState(['balance', 'tippingV1', 'tippingV2', 'sdk']),
+    urlStatus() {
+      return this.$store.getters['tipUrl/status'](this.tip.url);
+    },
+  },
+  watch: {
+    amount() {
+      this.amountError = !+this.amount || this.amount < this.minTipAmount;
+    },
   },
   async created() {
     this.loading = true;
-    await this.$watchUntilTruly(() => this.tippingV1);
-    const tipId = +this.$route.query.id;
+    await this.$watchUntilTruly(() => this.sdk);
+    this.minCallFee = calculateFee(TX_TYPES.contractCall, {
+      ...this.sdk.Ae.defaults,
+      contractId: this.activeNetwork.tipContractV1,
+      callerId: this.account.publicKey,
+    }).min;
+    await this.$watchUntilTruly(() => this.tippingV1, this.tippingV2);
+    const tipId = +this.$route.query.id || this.$route.query.id;
     if (!tipId) throw new Error('"id" param is missed');
-    const { decodedResult } = await this.tippingV1.methods.get_state();
+    this.tippingContract = typeof tipId === 'string' ? this.tippingV2 : this.tippingV1;
+    const { decodedResult } = await this.tippingContract.methods.get_state();
     this.tip = tipping.getTipsRetips(decodedResult).tips.find(({ id }) => id === tipId);
     this.loading = false;
   },
@@ -82,7 +82,7 @@ export default {
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
       this.loading = true;
       try {
-        const { hash } = await this.tippingV1.methods.retip(this.tip.id, {
+        const { hash } = await this.tippingContract.methods.retip(this.tip.id, {
           amount,
           waitMined: false,
           modal: false,
