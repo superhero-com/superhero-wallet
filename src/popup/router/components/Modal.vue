@@ -94,15 +94,13 @@ export default {
   }
 
   .modal--footer {
-    .modal-confirm-btns {
-      display: flex;
-      justify-content: center;
+    display: flex;
+    justify-content: center;
 
-      button {
-        margin: 0 10px !important;
-        width: 120px !important;
-        font-weight: 700 !important;
-      }
+    button {
+      margin: 0 10px !important;
+      width: 120px !important;
+      font-weight: 700 !important;
     }
   }
 

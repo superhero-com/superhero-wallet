@@ -1,8 +1,8 @@
 <template>
   <Modal @close="cancel" close>
     <template v-if="title" slot="header">{{ title }}</template>
-    <template v-if="msg" slot="body"> {{ msg }} </template>
-    <div class="modal-confirm-btns" slot="footer">
+    <template v-if="msg" slot="body">{{ msg }}</template>
+    <div slot="footer">
       <Button dark @click="cancel">
         {{ $t('modals.cancel') }}
       </Button>

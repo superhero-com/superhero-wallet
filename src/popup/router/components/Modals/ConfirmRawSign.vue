@@ -13,7 +13,7 @@
       </DetailsItem>
     </template>
 
-    <div class="modal-confirm-btns" slot="footer">
+    <div slot="footer">
       <Button dark @click="cancel">{{ $t('modals.cancel') }}</Button>
       <Button @click="confirm">{{ $t('modals.confirm') }}</Button>
     </div>

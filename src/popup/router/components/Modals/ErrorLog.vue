@@ -11,7 +11,7 @@
         {{ $t('modals.error-log.content') }}
       </div>
     </template>
-    <div class="modal-confirm-btns" slot="footer">
+    <div slot="footer">
       <Button dark @click="cancel">
         {{ $t('modals.cancel') }}
       </Button>
