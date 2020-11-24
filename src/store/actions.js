@@ -13,10 +13,6 @@ import { postMessage, postMessageToContent } from '../popup/utils/connection';
 import { AEX2_METHODS } from '../popup/utils/constants';
 
 export default {
-  setAccount({ commit }, payload) {
-    commit('updateAccount', payload);
-    commit('updateBalance');
-  },
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
     commit('updateLatestTransactions', []);
