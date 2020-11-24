@@ -51,7 +51,7 @@ export default {
             privateKey: seed,
           };
           await this.$store.dispatch('setLogin', { keypair });
-          this.$store.commit('setBackedUpSeed', true);
+          this.$store.commit('setBackedUpSeed');
           return setTimeout(() => this.$router.push(this.$store.state.loginTargetLocation), 1000);
         }
         this.disabled = true;

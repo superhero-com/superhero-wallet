@@ -107,8 +107,8 @@ export default {
   setMnemonic(state, payload) {
     state.mnemonic = payload;
   },
-  setBackedUpSeed(state, payload) {
-    state.backedUpSeed = payload;
+  setBackedUpSeed(state) {
+    state.backedUpSeed = true;
   },
   setTourRunning(state, payload) {
     state.tourRunning = payload;

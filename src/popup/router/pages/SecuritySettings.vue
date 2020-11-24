@@ -1,198 +1,114 @@
 <template>
   <div class="popup">
-    <div data-cy="seed-phrase-backup-window" v-if="type == ''">
-      <div class="maindiv_input-group-addon">
-        <h4>{{ $t('pages.securitySettings.seedRecoveryHeading') }}</h4>
-        <hr />
-        <small class="sett_info">{{ $t('pages.securitySettings.seedRecoverySmall') }}</small>
-        <Button @click="seedPhraseRecovery">
-          {{ $t('pages.securitySettings.seedRecoveryBtn') }}
-        </Button>
-      </div>
-      <div v-if="loading" class="loading">
-        <ae-loader />
-      </div>
-    </div>
-    <div v-if="type == 3 && modal.visible">
-      <div slot="content">
-        <small v-if="seedPhrase == '' && !loading && type == '3'">{{
-          $t('pages.securitySettings.seedPhraseWarning')
-        }}</small>
-        <h3 v-if="seedPhrase != '' && type == '3'">
-          {{ $t('pages.securitySettings.seedPhrase') }}
-        </h3>
-        <ae-panel class="mnemonics">
-          <p>{{ seedPhrase }}</p>
-          <ae-button face="toolbar" v-clipboard:copy="seedPhrase">
-            <ae-icon name="copy" />
-            {{ $t('pages.securitySettings.copy') }}
-          </ae-button>
-        </ae-panel>
-        <span>
-          {{ $t('pages.seedPhrase.backupText') }}
-        </span>
-        <p>{{ $t('pages.seedPhrase.dontLose') }}</p>
-        <small>{{ $t('pages.seedPhrase.nextScreen') }}</small>
-        <button @click="verifySeed" class="primary-button">
-          {{ $t('pages.seedPhrase.verifySeed') }}
-        </button>
-        <button @click="setBackedUpSeed" class="primary-button">
-          {{ $t('pages.seedPhrase.doneThis') }}
-        </button>
-      </div>
-    </div>
-    <div v-if="type == 4">
-      <h3 class="phraseTitle">{{ $t('pages.seedPhrase.confirmSeedPhrase') }}</h3>
+    <template v-if="view === 'warning'">
+      <h3>{{ $t('pages.securitySettings.seedRecoveryHeading') }}</h3>
+      {{ $t('pages.securitySettings.seedRecoverySmall') }}
+      <Button @click="view = 'show'">
+        {{ $t('pages.securitySettings.seedRecoveryBtn') }}
+      </Button>
+    </template>
+
+    <template v-else-if="view === 'show'">
+      <h3>{{ $t('pages.securitySettings.seedPhrase') }}</h3>
+      <ae-panel class="mnemonics">
+        <p>{{ mnemonic }}</p>
+        <ae-button face="toolbar" v-clipboard:copy="mnemonic">
+          <ae-icon name="copy" />
+          {{ $t('pages.securitySettings.copy') }}
+        </ae-button>
+      </ae-panel>
+      {{ $t('pages.seedPhrase.backupText') }}
+      <p>{{ $t('pages.seedPhrase.dontLose') }}</p>
+      <small>{{ $t('pages.seedPhrase.nextScreen') }}</small>
+      <Button @click="view = 'verify'">
+        {{ $t('pages.seedPhrase.verifySeed') }}
+      </Button>
+      <Button @click="setBackedUpSeed">
+        {{ $t('pages.seedPhrase.doneThis') }}
+      </Button>
+    </template>
+
+    <template v-else-if="view === 'verify'">
+      <h3>{{ $t('pages.seedPhrase.confirmSeedPhrase') }}</h3>
       <ae-phraser>
         <ae-badge
-          class="seedBadge"
-          :class="{ selected: seed.selected }"
-          v-for="(seed, index) in seeds"
-          v-bind:key="seed.id"
-          @click.native="selectSeed(seed.name, index, seed.id)"
-          >{{ seed.name }}</ae-badge
+          :class="{ selected: selectedWordIds.includes(index) }"
+          v-for="(word, index) in mnemonicShuffled"
+          :key="index"
+          @click.native="!selectedWordIds.includes(index) && selectedWordIds.push(index)"
         >
+          {{ word }}
+        </ae-badge>
       </ae-phraser>
-      <div class="phraseSubTitle">{{ $t('pages.seedPhrase.recoveryPhrase') }}</div>
-      <ae-phraser v-if="selectedSeed.length == 0" class="phraser">
-        <ae-badge class="seedBadge selected">{{ $t('pages.seedPhrase.first') }}</ae-badge>
-        <ae-badge class="seedBadge selected">{{ $t('pages.seedPhrase.second') }}</ae-badge>
-        <ae-badge class="seedBadge selected">{{ $t('pages.seedPhrase.third') }}</ae-badge>
-        <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-        <ae-badge class="seedBadge selected">...</ae-badge>
-      </ae-phraser>
-      <ae-phraser v-bind="seedError">
+      {{ $t('pages.seedPhrase.recoveryPhrase') }}
+      <ae-phraser :error="error">
+        <template v-if="selectedWordIds.length === 0">
+          <ae-badge class="selected">{{ $t('pages.seedPhrase.first') }}</ae-badge>
+          <ae-badge class="selected">{{ $t('pages.seedPhrase.second') }}</ae-badge>
+          <ae-badge class="selected">{{ $t('pages.seedPhrase.third') }}</ae-badge>
+          <!--eslint-disable-next-line vue-i18n/no-raw-text-->
+          <ae-badge class="selected">...</ae-badge>
+        </template>
         <ae-badge
-          class="seedBadge"
-          v-for="(seed, index) in selectedSeed"
-          v-bind:key="seed.id"
-          @click.native="removeSeed(seed.parent, index)"
-          >{{ seed.name }} <ae-icon name="close" class="seedClose"
-        /></ae-badge>
+          v-else
+          v-for="(id, index) in selectedWordIds"
+          :key="id"
+          @click.native="selectedWordIds.splice(index, 1)"
+        >
+          {{ mnemonicShuffled[id] }} <ae-icon name="close" />
+        </ae-badge>
       </ae-phraser>
-      <button @click="verifyLastStep" class="primary-button verify">
+      <Button @click="verifyLastStep">
         {{ $t('pages.seedPhrase.verify') }}
-      </button>
-    </div>
-    <div v-if="seed_verified && type == 5">
-      <ae-icon class="verifed" name="check" />
+      </Button>
+    </template>
+
+    <template v-else-if="view === 'verified'">
+      <ae-icon name="check" />
       <p>{{ $t('pages.seedPhrase.seedConfirmed') }}</p>
-      <button @click="$router.push('/account')" class="primary-button">
+      <Button @click="setBackedUpSeed">
         {{ $t('pages.seedPhrase.toDashboard') }}
-      </button>
-    </div>
+      </Button>
+    </template>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
-import { shuffleArray } from '../../utils/helper';
+import { mapState } from 'vuex';
+import { shuffle } from 'lodash-es';
 import Button from '../components/Button';
 
 export default {
   components: { Button },
-  data() {
-    return {
-      loading: false,
-      modal: {
-        visible: false,
-        title: '',
-      },
-      seedPhrase: '',
-      alert: {
-        fill: 'neutral',
-        show: false,
-        content: '',
-      },
-      type: '',
-      seeds: [
-        { id: 0, name: 'volcano', selected: false },
-        { id: 1, name: 'entire', selected: false },
-        { id: 2, name: 'magnet', selected: false },
-        { id: 3, name: 'glow', selected: false },
-        { id: 4, name: 'zero', selected: false },
-        { id: 5, name: 'crack', selected: false },
-        { id: 6, name: 'arena', selected: false },
-        { id: 7, name: 'episode', selected: false },
-        { id: 8, name: 'shrimp', selected: false },
-        { id: 9, name: 'buffalo', selected: false },
-        { id: 10, name: 'tiny', selected: false },
-        { id: 11, name: 'aunt', selected: false },
-      ],
-      selectedSeed: [],
-      seedError: {},
-      seed_verified: false,
-    };
-  },
-  computed: {
-    ...mapState(['balance', 'network', 'current', 'transactions', 'activeAccount', 'mnemonic']),
-    ...mapGetters(['account', 'activeAccountName']),
+  data: () => ({
+    view: 'warning',
+    selectedWordIds: [],
+    error: false,
+  }),
+  computed: mapState({
+    mnemonic: 'mnemonic',
+    mnemonicShuffled: ({ mnemonic }) => shuffle(mnemonic.split(' ')),
+  }),
+  watch: {
+    selectedWordIds() {
+      this.error = false;
+    },
   },
   methods: {
-    async seedPhraseRecovery() {
-      this.type = '3';
-      this.modal.visible = true;
-      this.modal.title = this.$t('pages.securitySettings.showSeedPhrase');
-      this.loading = true;
-      if (this.mnemonic) {
-        this.seedPhrase = this.mnemonic;
-        this.setAlertData('alternative', true, this.mnemonic);
-        const seedPhraseToArray = this.mnemonic.split(' ');
-        this.seeds = this.seeds.map((seed, i) => ({ ...seed, name: seedPhraseToArray[i] }));
-      }
-    },
-    verifySeed() {
-      this.type = '4';
-      shuffleArray(this.seeds);
-    },
     setBackedUpSeed() {
-      this.$store.commit('setBackedUpSeed', true);
-      this.$router.push('/account');
-    },
-    setAlertData(fill, show, content) {
-      this.alert.fill = fill;
-      this.alert.show = show;
-      this.alert.content = content;
-    },
-    selectSeed(seed, index, id) {
-      if (!this.selectedSeed.find((s) => s.parent === id)) {
-        this.selectedSeed.push({ name: seed, parent: id });
-        this.seeds.find((s) => s.id === id).selected = true;
-      }
-      if (this.selectedSeed.length === 12) {
-        this.buttonFill = 'primary';
-      } else {
-        this.buttonFill = '';
-      }
-    },
-    removeSeed(parent, index) {
-      this.seeds.find((s) => s.id === parent).selected = false;
-      this.selectedSeed.splice(index, 1);
-      if (this.selectedSeed.length === 12) {
-        this.buttonFill = 'primary';
-      } else {
-        this.buttonFill = '';
-      }
-      this.seedError = {};
+      this.$store.commit('setBackedUpSeed');
+      this.$router.push({ name: 'account' });
     },
     verifyLastStep() {
-      const seed = this.seeds.slice();
-      const sorted = seed.sort((a, b) => (a.id > b.id ? 1 : -1));
-      const originalSeed = sorted.map(({ name }) => name).join(',');
-      const selectSeed = this.selectedSeed.map(({ name }) => name).join(',');
-      if (this.selectedSeed.length === 12) {
-        if (originalSeed !== selectSeed) {
-          this.seedError = { error: 'Oops! Incorrect seed phrase!' };
-        } else {
-          this.seedError = {};
-          this.loading = true;
-          this.seed_verified = true;
-          this.type = '5';
-          this.$store.commit('setBackedUpSeed', true);
-        }
-      } else {
-        this.seedError = { error: 'Oops! Incorrect length of words!' };
+      const mnemonicSelected = this.selectedWordIds
+        .map((idx) => this.mnemonicShuffled[idx])
+        .join(' ');
+      if (this.mnemonic !== mnemonicSelected) {
+        this.error = 'Oops! Incorrect seed phrase!';
+        return;
       }
+      this.error = false;
+      this.view = 'verified';
     },
   },
 };
@@ -201,10 +117,6 @@ export default {
 <style lang="scss" scoped>
 @import '../../../common/variables';
 
-.ae-modal {
-  background: $border-color !important;
-}
-
 .mnemonics {
   margin: 0;
 
@@ -212,86 +124,28 @@ export default {
     word-spacing: 10px;
   }
 
-  button {
+  .ae-button {
     float: right;
     margin: 10px 0 30px 0;
   }
 
   p,
-  button {
-    color: #000 !important;
+  .ae-button.toolbar {
+    color: #000;
   }
 }
 
-.regbtn {
-  background: #ff0d6a;
-  color: #fff;
-  float: right;
-  width: 19%;
-  border-radius: 0 !important;
-}
-
-.maindiv_input-group-addon {
-  text-align: center;
-}
-
-.maindiv_input-group-addon h4 {
-  text-align: left;
-  margin: 0 !important;
-}
-
-.input-group-addon {
-  background: #ececec;
-  border: 1px solid #ccc;
-  width: 79%;
-  height: 56px;
-  float: left;
-}
-
-.addon-input {
-  width: 75%;
-  outline: none;
-  color: #828282;
-  padding: 0;
-  height: 55px;
-  text-indent: 5px;
-  caret-color: #ff0d6a;
-}
-
-.addon-lbl {
-  font-weight: 600;
-  color: #828282;
-}
-
-input:active,
-input:focus {
-  border: none;
-  outline: none;
-}
-
-.notround {
-  border-radius: 0 !important;
-}
-
-small {
-  word-break: break-word;
-}
-
-.primary-button.verify {
-  width: 50%;
-}
-
-.ae-icon.verifed {
+.ae-icon.ae-icon-check {
   color: #e911ff;
   font-size: 100px;
 }
 
-.seedBadge {
+.ae-badge {
   user-select: unset;
   cursor: pointer;
   border: 2px solid #edf3f7;
 
-  .seedClose {
+  .ae-icon-close {
     margin-left: 5px;
   }
 

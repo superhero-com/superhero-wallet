@@ -581,11 +581,9 @@
       "showPrivateKey": "Mostrar clave privada",
       "incorrectPassword": "Contraseña incorrecta",
       "decryptingPrivateKey": "Desencriptar la clave privada",
-      "showSeedPhrase": "Mostrar frase semilla",
       "seedRecoveryHeading": "Mostrar frase semilla",
       "seedRecoverySmall": "Tu frase semilla (conocida también como llave privada) sirve como la llave o contraseña para acceder a tu cuenta. No la reveles nunca a a nadie. Asegúrate de respaldarla en un pedazo de papel que nadie pueda ver pero que tu nunca vayas a perder. Perder esta llave significa perder el acceso a tu billetera y propinas",
       "seedRecoveryBtn": "Mostrar frase semilla",
-      "seedPhraseWarning": "No compartas esta frase semilla con nadie, puede ser usada para robar todas tus cuentas",
       "seedPhrase": "Tu frase semilla",
       "copy": "Copiar al portapapeles"
     },
