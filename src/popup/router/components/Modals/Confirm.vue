@@ -3,7 +3,7 @@
     <template v-if="title" slot="header">{{ title }}</template>
     <template v-if="msg" slot="body"> {{ msg }} </template>
     <div class="modal-confirm-btns" slot="footer">
-      <Button data-cy="cancel-tip" dark @click="cancel">
+      <Button dark @click="cancel">
         {{ $t('modals.cancel') }}
       </Button>
       <Button data-cy="to-confirm" @click="confirm">

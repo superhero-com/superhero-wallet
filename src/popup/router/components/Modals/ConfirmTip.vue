@@ -8,7 +8,7 @@
       <p class="confirmation--question">{{ $t('modals.confirm-tip.sub-message') }}</p>
     </template>
     <div class="modal-confirm-btns" slot="footer">
-      <Button data-cy="cancel-tip" dark @click="cancelTip">
+      <Button dark @click="cancelTip">
         {{ $t('modals.cancel') }}
       </Button>
       <Button data-cy="to-confirm" @click="toConfirm">
