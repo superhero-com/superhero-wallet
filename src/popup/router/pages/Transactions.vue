@@ -20,7 +20,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import { differenceWith, isEqual, uniqBy, orderBy } from 'lodash-es';
+import { uniqBy } from 'lodash-es';
 import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
 import TransactionFilters from '../components/TransactionFilters';
@@ -73,19 +73,20 @@ export default {
   mounted() {
     this.loadMore(true);
     const polling = setInterval(() => this.getLatest(), 10000);
-    const checkLoadMore = () => {
+    window.addEventListener('scroll', this.checkLoadMore);
+    this.$once('hook:destroyed', () => {
+      window.removeEventListener('scroll', this.checkLoadMore);
+      clearInterval(polling);
+    });
+    this.$watch(({ displayMode }) => displayMode, this.checkLoadMore);
+  },
+  methods: {
+    checkLoadMore() {
       const { scrollHeight, scrollTop, clientHeight } = document.documentElement;
       if (scrollHeight - scrollTop <= clientHeight + 100) {
         setTimeout(() => this.loadMore(), 1500);
       }
-    };
-    window.addEventListener('scroll', checkLoadMore);
-    this.$once('hook:destroyed', () => {
-      window.removeEventListener('scroll', checkLoadMore);
-      clearInterval(polling);
-    });
-  },
-  methods: {
+    },
     async loadMore(init = false) {
       if (this.loading && !init) return;
       await this.$watchUntilTruly(() => this.$store.state.middleware);
@@ -94,9 +95,12 @@ export default {
         page: this.page,
         limit: TXS_PER_PAGE,
       });
-      this.updateTransactions({ transactions });
+      this.updateTransactions(transactions);
       this.loading = false;
-      if (transactions.length) this.page += 1;
+      if (transactions.length) {
+        this.page += 1;
+        this.checkLoadMore();
+      }
     },
     async getLatest() {
       const transactions = await this.$store.dispatch('fetchTransactions', {
@@ -104,20 +108,10 @@ export default {
         page: 1,
         recent: true,
       });
-      const diff = differenceWith(transactions, this.transactions, isEqual);
-      this.updateTransactions({ latest: true, transactions: diff });
+      this.updateTransactions(transactions);
     },
-    updateTransactions({ transactions, latest }) {
-      this.transactions = orderBy(
-        uniqBy(
-          latest
-            ? [...transactions, ...this.transactions]
-            : [...this.transactions, ...transactions],
-          'hash',
-        ),
-        ['time'],
-        ['desc'],
-      );
+    updateTransactions(transactions) {
+      this.transactions = uniqBy([...this.transactions, ...transactions], 'hash');
     },
   },
 };
