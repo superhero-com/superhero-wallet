@@ -31,11 +31,13 @@ const router = new VueRouter({
   mode: process.env.PLATFORM === 'web' ? 'history' : 'hash',
 });
 
-const lastRouteKey = 'lsroute';
+const lastRouteKey = 'last-path';
 
 const unbind = router.beforeEach(async (to, from, next) => {
   await helper.pollGetter(() => store.state.isRestored);
-  next((to.path === '/' && localStorage[lastRouteKey]) || undefined);
+  next(
+    (to.path === '/' && (await browser.storage.local.get(lastRouteKey))[lastRouteKey]) || undefined,
+  );
   unbind();
 });
 
@@ -75,9 +77,9 @@ router.beforeEach(async (to, from, next) => {
   next();
 });
 
-router.afterEach((to) => {
-  if (to.meta.notPersist) delete localStorage[lastRouteKey];
-  else localStorage[lastRouteKey] = to.path;
+router.afterEach(async (to) => {
+  if (to.meta.notPersist) await browser.storage.local.remove(lastRouteKey);
+  else await browser.storage.local.set({ [lastRouteKey]: to.path });
 });
 
 const deviceReadyPromise = new Promise((resolve) =>

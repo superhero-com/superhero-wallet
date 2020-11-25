@@ -277,7 +277,7 @@ export default {
       this.sdk.selectNode(network);
     }
   },
-  async [AEX2_METHODS.LOGOUT]() {
+  async disconnect() {
     const { clients: aepps } = this.sdk.getClients();
     Array.from(aepps.values()).forEach((aepp) => {
       if (aepp.info.status !== 'DISCONNECTED') {
@@ -291,8 +291,6 @@ export default {
       browser.tabs.reload(aepp.connection.port.sender.tab.id);
       this.sdk.removeRpcClient(aepp.id);
     });
-    delete walletController.wallet;
-    this.initFields();
   },
   async [AEX2_METHODS.INIT_RPC_WALLET]({ address, network }) {
     this.activeAccount = address;

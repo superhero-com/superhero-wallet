@@ -38,6 +38,13 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
 
   browser.runtime.onMessage.addListener(async (msg, sender) => {
     const { method, params, from, type, data, url: tipUrl } = msg;
+
+    if (method === 'reload') {
+      rpcWallet.disconnect();
+      window.location.reload();
+      return null;
+    }
+
     if (method === 'phishingCheck') {
       const host = new URL(params.href).hostname;
       let blocked = false;

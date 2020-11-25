@@ -91,10 +91,8 @@ import { mapGetters } from 'vuex';
 import Close from '../../../icons/close.svg?vue-component';
 import Arrow from '../../../icons/arrow-current-color.svg?vue-component';
 import Avatar from './Avatar';
-import removeAccountMixin from '../../../mixins/removeAccount';
 
 export default {
-  mixins: [removeAccountMixin],
   components: { Close, Arrow, Avatar },
   computed: mapGetters(['account', 'activeAccountName']),
   data: () => ({ showSettingsDropdown: false, showTokensDropdown: false, balances: null }),
@@ -116,6 +114,10 @@ export default {
     },
     closeMenu() {
       this.$emit('close');
+    },
+    async removeAccount() {
+      await this.$store.dispatch('requestResetting');
+      this.closeMenu();
     },
   },
 };

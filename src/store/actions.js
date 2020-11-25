@@ -9,6 +9,7 @@ import {
   fetchJson,
   postJson,
 } from '../popup/utils/helper';
+import { i18n } from '../popup/utils/i18nHelper';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
 import { AEX2_METHODS } from '../popup/utils/constants';
 
@@ -207,5 +208,13 @@ export default {
         })
       : null;
     commit('setTipping', [contractInstanceV1, contractInstanceV2]);
+  },
+  async requestResetting({ dispatch }) {
+    await dispatch('modals/open', {
+      name: 'confirm',
+      title: i18n.t('modals.removeAccount.title'),
+      msg: i18n.t('modals.removeAccount.msg'),
+    });
+    await dispatch('reset');
   },
 };

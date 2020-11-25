@@ -180,7 +180,7 @@ export default {
       if (url && !this.tipFromPopup) {
         this.url = url;
       } else if (this.tipFromPopup) {
-        localStorage.removeItem('lsroute');
+        await browser.storage.local.remove('last-path');
       }
     }
     await this.$watchUntilTruly(() => this.sdk);

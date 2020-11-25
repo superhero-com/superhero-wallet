@@ -21,58 +21,51 @@ import { defaultNetwork } from '../popup/utils/constants';
 Vue.use(Vuex);
 Vue.use(VueRx);
 
-const initialState = {
-  isRestored: false,
-  account: {},
-  mnemonic: null,
-  activeAccount: 0,
-  balance: 0,
-  current: {
-    network: defaultNetwork.name,
-    language: 'en',
-    token: 0,
-    currency: 'usd',
-  },
-  userNetworks: [],
-  isLoggedIn: false,
-  transactions: {
-    latest: [],
-    pending: [],
-  },
-  pageTitle: '',
-  sdk: null,
-  middleware: null,
-  tippingV1: null,
-  tippingV2: null,
-  mainLoading: true,
-  nodeStatus: 'connecting',
-  currencies: {},
-  nextCurrenciesFetch: null,
-  notifications: [],
-  notificationSettings: [],
-  chainNames: null,
-  tip: null,
-  txQueue: [],
-  connectedAepps: {},
-  migrations: {},
-  backedUpSeed: null,
-  tourRunning: false,
-  tourStartBar: true,
-  saveErrorLog: true,
-  loginTargetLocation: { name: 'account' },
-};
-
 export default new Vuex.Store({
-  state: { ...initialState },
+  state: {
+    isRestored: false,
+    account: {},
+    mnemonic: null,
+    activeAccount: 0,
+    balance: 0,
+    current: {
+      network: defaultNetwork.name,
+      language: 'en',
+      token: 0,
+      currency: 'usd',
+    },
+    userNetworks: [],
+    isLoggedIn: false,
+    transactions: {
+      latest: [],
+      pending: [],
+    },
+    pageTitle: '',
+    sdk: null,
+    middleware: null,
+    tippingV1: null,
+    tippingV2: null,
+    mainLoading: true,
+    nodeStatus: 'connecting',
+    currencies: {},
+    nextCurrenciesFetch: null,
+    notifications: [],
+    notificationSettings: [],
+    chainNames: null,
+    tip: null,
+    txQueue: [],
+    connectedAepps: {},
+    migrations: {},
+    backedUpSeed: null,
+    tourRunning: false,
+    tourStartBar: true,
+    saveErrorLog: true,
+    loginTargetLocation: { name: 'account' },
+  },
   getters,
   mutations: {
     setState(state, newState) {
       Object.entries({ ...state, ...newState }).forEach(([name, value]) =>
-        Vue.set(state, name, value),
-      );
-    },
-    resetState(state) {
-      Object.entries({ ...initialState, isRestored: true }).forEach(([name, value]) =>
         Vue.set(state, name, value),
       );
     },
