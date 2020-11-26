@@ -48,6 +48,7 @@ export default {
     }
 
     .address {
+      word-break: break-all;
       font-size: 12px;
       line-height: 14px;
       font-family: IBM Plex Mono, monospace;
