@@ -25,7 +25,7 @@ export default (store) => {
         state.owned = names;
       },
       setDefault({ defaults }, { address, networkId, name: { name, revoked } }) {
-        if (revoked) Vue.delete(defaults, `${address}-${networkId}`, name);
+        if (revoked) Vue.delete(defaults, `${address}-${networkId}`);
         else Vue.set(defaults, `${address}-${networkId}`, name);
       },
       setAutoExtend(state, { index, value }) {
@@ -119,6 +119,12 @@ export default (store) => {
               modal: false,
             });
           }
+        } else if (defaultName) {
+          commit('setDefault', {
+            address: account.publicKey,
+            name: { revoked: true },
+            networkId: sdk.getNetworkId(),
+          });
         }
       },
       async fetchAuctions({ rootState: { middleware } }) {
