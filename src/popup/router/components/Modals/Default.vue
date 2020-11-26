@@ -1,10 +1,8 @@
 <template>
-  <Modal @close="resolve" class="default-modal" close>
-    <div v-if="title" slot="header">{{ title || $t(`modals.${type}.title`) }}</div>
-    <div slot="body">{{ msg || $t(`modals.${type}.msg`) }}</div>
-    <div slot="footer">
-      <Button @click="resolve">{{ $t('ok') }}</Button>
-    </div>
+  <Modal @close="resolve" class="default" close>
+    <template v-if="title" slot="header">{{ title }}</template>
+    {{ msg || $t(`modals.${type}.msg`) }}
+    <Button slot="footer" @click="resolve">{{ $t('ok') }}</Button>
   </Modal>
 </template>
 
@@ -22,18 +20,3 @@ export default {
   components: { Modal, Button },
 };
 </script>
-
-<style lang="scss">
-.default-modal {
-  button {
-    width: 120px !important;
-    font-weight: bold !important;
-  }
-
-  .modal--mask {
-    .modal--body {
-      text-align: center;
-    }
-  }
-}
-</style>

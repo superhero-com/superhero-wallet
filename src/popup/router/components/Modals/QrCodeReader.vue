@@ -1,7 +1,8 @@
 <template>
   <Modal v-if="browserReader || !cameraAllowed" @close="resolve" close>
     <template slot="header">{{ title }}</template>
-    <div class="qr-code-reader" slot="body">
+
+    <div class="qr-code-reader">
       <div v-show="cameraAllowed">
         <video v-show="cameraAllowed" ref="qrCodeVideo" />
       </div>
