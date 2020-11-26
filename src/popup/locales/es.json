@@ -612,7 +612,6 @@
     "send": {
       "backToAccount": "Regresar a la cuenta",
       "heading": "Nueva transferencia de",
-      "recipient": "Receptor",
       "sendSubaccount": "o escoja subcuenta",
       "txFee": "Comisión mínima de transacción:",
       "maxSpendableValue": "Máximo valor utilizable:",
@@ -624,15 +623,15 @@
       "review": "Revisar",
       "reviewtx": "Revisar Transacción",
       "checkalert": "Por favor chequea cuidadosamente la información.",
-      "sendingAddress": "Dirección de envio",
-      "receivingAddress": "Dirección de recepción",
+      "sender": "Dirección de envio",
+      "recipient": "Dirección de recepción",
       "amount": "Monto",
       "editTxDetails": "Editar Detalles de la Transacción",
       "tx-success": "Transacción Completada",
       "successalert": "Haz realizado un envio exitosamente ",
       "to": "Para",
       "from": "De",
-      "txhash": "Hash de la Transacción",
+      "hash": "Hash de la Transacción",
       "home": "Inicio"
     },
     "settings": {
@@ -905,7 +904,7 @@
       "error": "No puede conectarse al nodo elegido",
       "connecting": "Conectando al nodo...",
       "connected": "Conectado",
-      "init": "Iniciando servicios..."
+      "initServices": "Iniciando servicios..."
     },
     "popupMessageSign": {
       "heading": "gustaría firmar mensaje ",

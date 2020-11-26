@@ -616,7 +616,6 @@
     "send": {
       "backToAccount": "返回账户",
       "heading": "新的转账",
-      "recipient": "收据",
       "txFee": "最少转账手续费",
       "maxSpendableValue": "最大可转账价值",
       "send": "发送",
@@ -627,15 +626,15 @@
       "review": "接收",
       "reviewtx": "接收转账",
       "checkalert": "清仔细核对转账信息。",
-      "sendingAddress": "发送地址",
-      "receivingAddress": "接收地址",
+      "sender": "发送地址",
+      "recipient": "接收地址",
       "amount": "数量",
       "editTxDetails": "编辑转账细节",
       "tx-success": "完成转账",
       "successalert": "您已成功发送 ",
       "to": "到",
       "from": "从",
-      "txhash": "转账Hash",
+      "hash": "转账Hash",
       "home": "主页"
     },
     "settings": {
@@ -907,7 +906,7 @@
       "error": "无法连接到所选节点",
       "connecting": "连接节点中...",
       "connected": "已连接",
-      "init": "初始化服务..."
+      "initServices": "初始化服务..."
     },
     "popupMessageSign": {
       "heading": "想要签名消息",

@@ -50,30 +50,21 @@
           <p class="primary-title primary-title-darker text-left my-5 f-16">
             {{ $t('pages.send.checkalert') }}
           </p>
-          <div class="info-group">
-            <label class="info-label">{{ $t('pages.send.sendingAddress') }}</label>
-            <span
-              data-cy="review-sendingAddress"
-              class="info-span"
-              @click="openTxExplorer(account.publicKey)"
-              >{{ account.publicKey }}</span
-            >
-          </div>
-          <div class="info-group">
-            <label class="info-label">{{ $t('pages.send.receivingAddress') }}</label>
-            <span
-              data-cy="review-receivingAddress"
-              class="info-span"
-              @click="openTxExplorer(form.address)"
-              >{{ form.address }}</span
-            >
-          </div>
-          <div class="info-group">
-            <label>{{ $t('pages.send.amount') }}</label>
+          <InfoGroup
+            :value="account.publicKey"
+            :label="$t('pages.send.sender')"
+            data-cy="review-sender"
+          />
+          <InfoGroup
+            :value="form.address"
+            :label="$t('pages.send.recipient')"
+            data-cy="review-recipient"
+          />
+          <InfoGroup :label="$t('pages.send.amount')">
             <div class="text-center">
-              <span data-cy="review-amount" class="amount"
-                >{{ parseFloat(form.amount).toFixed(3) }} {{ $t('pages.appVUE.aeid') }}</span
-              >
+              <span data-cy="review-amount" class="amount">
+                {{ parseFloat(form.amount).toFixed(3) }} {{ $t('pages.appVUE.aeid') }}
+              </span>
               <span class="currencyamount">
                 <!--eslint-disable-line vue-i18n/no-raw-text-->
                 ~
@@ -82,7 +73,7 @@
                 </span>
               </span>
             </div>
-          </div>
+          </InfoGroup>
           <Button data-cy="reivew-editTxDetails-button" @click="step = 1" extend>{{
             $t('pages.send.editTxDetails')
           }}</Button>
@@ -114,22 +105,9 @@
               {{ successTx.amount }} {{ $t('pages.appVUE.aeid') }}</span
             >
           </p>
-          <div class="info-group">
-            <label class="info-label">{{ $t('pages.send.to') }}</label>
-            <span class="info-span" @click="openTxExplorer(successTx.to)">{{ successTx.to }}</span>
-          </div>
-          <div class="info-group">
-            <label class="info-label">{{ $t('pages.send.from') }}</label>
-            <span class="info-span" @click="openTxExplorer(successTx.from)">{{
-              successTx.from
-            }}</span>
-          </div>
-          <div class="info-group">
-            <label class="info-label">{{ $t('pages.send.txhash') }}</label>
-            <span class="info-span" @click="openTxExplorer(successTx.hash)">{{
-              successTx.hash
-            }}</span>
-          </div>
+          <InfoGroup :value="successTx.to" :label="$t('pages.send.to')" />
+          <InfoGroup :value="successTx.from" :label="$t('pages.send.from')" />
+          <InfoGroup :value="successTx.hash" :label="$t('pages.send.hash')" />
           <Button @click="$router.push('/account')">{{ $t('pages.send.home') }}</Button>
         </div>
       </div>
@@ -141,9 +119,9 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
-import { checkAddress, chekAensName, checkHashType, aeToAettos } from '../../utils/helper';
-import openUrl from '../../utils/openUrl';
+import { checkAddress, chekAensName, aeToAettos } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
+import InfoGroup from '../components/InfoGroup';
 import Textarea from '../components/Textarea';
 import Button from '../components/Button';
 import AccountInfo from '../components/AccountInfo';
@@ -163,6 +141,7 @@ export default {
     QrIcon,
     AlertExclamination,
     Heart,
+    InfoGroup,
   },
   data() {
     return {
@@ -186,15 +165,18 @@ export default {
   },
   props: ['address', 'redirectstep', 'successtx'],
   watch: {
-    activeToken() {
+    token() {
       this.fetchFee();
     },
   },
   computed: {
     ...mapState(['balance', 'current', 'sdk']),
-    ...mapGetters(['account', 'activeNetwork', 'formatCurrency', 'currentCurrencyRate']),
+    ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate']),
     validAddress() {
       return checkAddress(this.form.address) || chekAensName(this.form.address);
+    },
+    token() {
+      return this.current.token;
     },
   },
   created() {
@@ -219,14 +201,9 @@ export default {
     async fetchFee() {
       await this.$watchUntilTruly(() => this.sdk);
       this.fee = await calculateFee(
-        this.current.token === 0 ? TX_TYPES.txSign : TX_TYPES.contractCall,
-        { ...(await this.feeParams()) },
+        this.token === 0 ? TX_TYPES.txSign : TX_TYPES.contractCall,
+        this.sdk.Ae.defaults,
       );
-    },
-    async feeParams() {
-      return {
-        ...this.sdk.Ae.defaults,
-      };
     },
     setTxDetails(tx) {
       this.successTx.amount = parseFloat(tx.tx.amount / 10 ** 18).toFixed(3);
@@ -238,19 +215,16 @@ export default {
       const amount = aeToAettos(this.form.amount);
       const receiver = this.form.address;
       const calculatedMaxValue = this.balance > this.fee.max ? this.balance - this.fee.max : 0;
+      let errorModalType = '';
       if (receiver === '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
-        this.$store.dispatch('modals/open', { name: 'default', type: 'incorrect-address' });
-        this.loading = false;
-        return;
+        errorModalType = 'incorrect-address';
       }
-      if (this.form.amount <= 0) {
-        this.$store.dispatch('modals/open', { name: 'default', type: 'incorrect-amount' });
-        this.loading = false;
-        return;
+      if (this.form.amount <= 0) errorModalType = 'incorrect-amount';
+      if (calculatedMaxValue - this.form.amount <= 0 && this.token === 0) {
+        errorModalType = 'insufficient-balance';
       }
-      if (calculatedMaxValue - this.form.amount <= 0 && this.current.token === 0) {
-        this.$store.dispatch('modals/open', { name: 'default', type: 'insufficient-balance' });
-        this.loading = false;
+      if (errorModalType) {
+        this.$store.dispatch('modals/open', { name: 'default', type: errorModalType });
         return;
       }
       this.loading = true;
@@ -270,14 +244,6 @@ export default {
         throw e;
       } finally {
         this.loading = false;
-      }
-    },
-    async openTxExplorer(hash) {
-      const { explorerUrl } = this.activeNetwork;
-      const { endpoint, valid } = await checkHashType(hash);
-      if (valid) {
-        const url = `${explorerUrl}/${endpoint}/${hash}`;
-        openUrl(url, true);
       }
     },
   },
@@ -324,27 +290,6 @@ export default {
   }
 
   .info-group {
-    text-align: left;
-    display: block;
-    margin: 20px 0;
-
-    .info-label {
-      display: block;
-      padding: 10px 0;
-    }
-
-    .info-span {
-      color: $accent-color;
-      font-size: 11px;
-      display: inline-block;
-      width: 300px;
-      white-space: nowrap;
-      // overflow: hidden !important;
-      // text-overflow: ellipsis;
-      letter-spacing: -0.3px;
-      cursor: pointer;
-    }
-
     .amount {
       font-size: 26px;
       color: $secondary-color;

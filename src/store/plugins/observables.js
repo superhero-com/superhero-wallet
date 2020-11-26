@@ -25,7 +25,7 @@ export default (store) => {
     entityType,
     ...other,
     sender,
-    chainName: store.state.chainNames[sender],
+    chainName: store.state.chainNames?.[sender],
     path:
       entityType === 'TIP'
         ? `https://superhero.com/tip/${entityId}`

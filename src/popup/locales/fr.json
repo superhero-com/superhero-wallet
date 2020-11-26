@@ -548,7 +548,6 @@
     "send": {
       "backToAccount": "Retour à compte",
       "heading": "Nouveau transfert de",
-      "recipient": "Bénéficiaire",
       "amount": "Montant",
       "txFee": "Frais min Tx:",
       "maxSpendableValue": "Valeur maximale spendable:",
@@ -560,14 +559,14 @@
       "review": "Review",
       "reviewtx": "Review Transaction",
       "checkalert": "Please check the information carefully.",
-      "sendingAddress": "Sending address",
-      "receivingAddress": "Receiving address",
+      "sender": "Sending address",
+      "recipient": "Receiving address",
       "editTxDetails": "Edit Transaction Details",
       "tx-success": "Transaction Completed",
       "successalert": "You have successfully sent ",
       "to": "To",
       "from": "From",
-      "txhash": "Transaction Hash",
+      "hash": "Transaction Hash",
       "home": "Home"
     },
     "settings": {
@@ -837,10 +836,10 @@
       "across": "across the Globe"
     },
     "nodeConnectionStatus": {
-      "error": "Unable to connect to choosen node",
+      "error": "Unable to connect to chosen node",
       "connecting": "Connecting to node...",
       "connected": "Connected",
-      "init": "Initializing services..."
+      "initServices": "Initializing services..."
     },
     "popupMessageSign": {
       "heading": "would like to sign message ",

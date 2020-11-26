@@ -34,7 +34,7 @@
         >
           <Claim slot="icon" />
         </BoxButton>
-        <BoxButton text="Activity" to="/transactions" class="tour__step5">
+        <BoxButton :text="$t('pages.appVUE.activity')" to="/transactions" class="tour__step5">
           <Activity slot="icon" />
         </BoxButton>
         <BoxButton :text="$t('pages.appVUE.invite')" :to="{ name: 'invite' }">
