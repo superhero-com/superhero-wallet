@@ -143,6 +143,7 @@ export default {
   margin: 0;
 
   li {
+    word-break: break-all;
     list-style: none;
     text-align: left;
     font-size: 12px;
