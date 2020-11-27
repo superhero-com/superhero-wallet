@@ -84,13 +84,6 @@ export const defaultNetwork =
   process.env.NETWORK === 'Testnet' ? defaultNetworks[0] : defaultNetworks[1];
 
 export const AGGREGATOR_URL = 'https://superhero.com/';
-export const NO_POPUP_AEPPS = [
-  'youdonotneedacapetobeahero.com',
-  'superhero.com',
-  'alpha.superhero.com',
-  'beta.superhero.com',
-  ...(process.env.NODE_ENV === 'development' ? ['localhost'] : []),
-];
 
 export const TXS_PER_PAGE = 30;
 export const MAX_AMOUNT_WITHOUT_CONFIRM = 10;

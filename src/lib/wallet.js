@@ -11,7 +11,6 @@ import {
   toURL,
   getAeppAccountPermission,
 } from '../popup/utils/helper';
-import { NO_POPUP_AEPPS } from '../popup/utils/constants';
 
 import Logger from './logger';
 import { checkPermissions } from '../store/modules/permissions';
@@ -158,11 +157,7 @@ export default {
         async onConnection({ info: { icons, name } }, action, origin) {
           const originUrl = toURL(origin);
           if (
-            (NO_POPUP_AEPPS.includes(originUrl.hostname) ||
-              (await getAeppAccountPermission(
-                originUrl.hostname,
-                store.state.account.publicKey,
-              ))) &&
+            (await getAeppAccountPermission(originUrl.hostname, store.state.account.publicKey)) &&
             !(await checkPermissions(action.method))
           ) {
             action.accept();

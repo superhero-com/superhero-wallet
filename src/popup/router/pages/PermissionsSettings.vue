@@ -95,19 +95,18 @@ export default {
   },
   methods: {
     async changePermission(name, value) {
-      // eslint-disable-next-line no-restricted-globals
-      if (isNaN(value) || !isFinite(value) || value < 0) {
-        this.error = true;
-        return;
+      let newValue = value;
+      if (name === 'transactionSignLimit') {
+        if (Number.isNaN(newValue) || !Number.isFinite(newValue) || newValue < 0) {
+          this.error = true;
+          return;
+        }
+        newValue = +value;
+        this.limitLeft = newValue;
+        await setLimitLeft(newValue, undefined);
       }
       this.error = false;
-      if (name === 'transactionSignLimit') {
-        // eslint-disable-next-line no-param-reassign
-        value = +value;
-        this.limitLeft = value;
-        await setLimitLeft(value, undefined);
-      }
-      this.$store.commit('permissions/setPermissionValue', { name, value });
+      this.$store.commit('permissions/setPermissionValue', { name, value: newValue });
     },
   },
 };

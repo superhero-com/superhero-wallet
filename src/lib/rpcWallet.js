@@ -4,7 +4,7 @@ import Node from '@aeternity/aepp-sdk/es/node';
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import { isEmpty } from 'lodash-es';
 import uuid from 'uuid';
-import { AEX2_METHODS, defaultNetwork, NO_POPUP_AEPPS } from '../popup/utils/constants';
+import { AEX2_METHODS, defaultNetwork } from '../popup/utils/constants';
 import {
   extractHostName,
   getAllNetworks,
@@ -110,11 +110,7 @@ export default {
     return extractHostName(url);
   },
   async shouldOpenPopup(aepp, action) {
-    if (
-      !NO_POPUP_AEPPS.includes(this.getAeppOrigin(aepp)) ||
-      (await checkPermissions(action.method))
-    )
-      return true;
+    if (await checkPermissions(action.method)) return true;
     action.accept();
     return false;
   },
