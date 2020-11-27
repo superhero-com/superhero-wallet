@@ -23,7 +23,7 @@
         {{ $t('pages.permissions.transaction-sign') }}
         <Input
           :value="permissions.transactionSignLimit || ''"
-          :error="error"
+          :error="transactionSignLimitError"
           placeholder="no limit"
           @input="(value) => changePermission('transactionSignLimit', value)"
         />
@@ -67,7 +67,7 @@ export default {
     TokenAmount,
   },
   data: () => ({
-    error: false,
+    transactionSignLimitError: false,
     limitLeft: 0,
   }),
   computed: {
@@ -87,13 +87,13 @@ export default {
       if (name === 'transactionSignLimit') {
         newValue = +value;
         if (Number.isNaN(newValue) || newValue < 0) {
-          this.error = true;
+          this.transactionSignLimitError = true;
           return;
         }
         this.limitLeft = newValue;
         await setLimitLeft(newValue, undefined);
       }
-      this.error = false;
+      this.transactionSignLimitError = false;
       this.$store.commit('permissions/setPermissionValue', { name, value: newValue });
     },
   },
