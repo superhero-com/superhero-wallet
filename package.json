@@ -35,7 +35,6 @@
     "@zxing/library": "^0.17.1",
     "aepp-raendom": "github:aeternity/aepp-raendom#feature/layout-superhero",
     "aeternity-fungible-token": "github:mradkov/aeternity-fungible-token",
-    "aeternity-tokens": "^1.0.2",
     "bignumber.js": "^8.1.1",
     "cordova-android": "^9.0.0",
     "cordova-ios": "^6.1.1",
