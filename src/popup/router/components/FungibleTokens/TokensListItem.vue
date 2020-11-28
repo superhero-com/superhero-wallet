@@ -26,11 +26,7 @@
         </div>
       </div>
       <div>
-        <div class="amount">
-          {{ tokenData.convertedBalance || '0.00' }}
-          <span class="symbol">{{ tokenData.symbol }}</span>
-          <FormatFiatCurrency :balance="tokenData.balanceCurrency || 0" />
-        </div>
+        <TokenAmount :amount="+tokenData.convertedBalance || 0" :symbol="tokenData.symbol" />
         <div>
           <label>{{ $t('pages.fungible-tokens.price') }}</label>
           {{
@@ -47,13 +43,10 @@
 <script>
 import { mapGetters } from 'vuex';
 import Avatar from '../Avatar';
-import FormatFiatCurrency from '../FormatFiatCurrency';
+import TokenAmount from '../TokenAmount';
 
 export default {
-  components: {
-    Avatar,
-    FormatFiatCurrency,
-  },
+  components: { Avatar, TokenAmount },
   props: {
     tokenData: Object,
     name: String,
@@ -91,14 +84,6 @@ export default {
 
       .title {
         font-size: 14px;
-      }
-
-      .amount {
-        color: $white-color;
-
-        .symbol {
-          color: $secondary-color;
-        }
       }
 
       label {

@@ -8,24 +8,19 @@
     </h3>
     <p class="primary-title text-left mb-8 f-16">
       {{ $t('pages.successTip.successfullySent') }}
-      <span data-cy="tip-amount"
-        >{{ selectedToken ? amount : amountTip }}
-        <span class="symbol">{{
-          selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid')
-        }}</span>
-      </span>
-      <FormatFiatCurrency :balance="amountTip * currentCurrencyRate" />
+      <TokenAmount
+        v-bind="selectedToken ? { amount, symbol: selectedToken.symbol } : { amount: amountTip }"
+        data-cy="tip-amount"
+      />
       {{ $t('pages.successTip.to') }}
     </p>
     <a class="link-sm text-left block" data-cy="tip-url">{{ tipUrl }}</a>
     <br />
     <div>
       {{ $t('pages.successTip.notify') }}
-      {{ selectedToken ? amount : amountTip }}
-      <span class="symbol">{{
-        selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid')
-      }}</span>
-      <FormatFiatCurrency :balance="amountTip * currentCurrencyRate" />
+      <TokenAmount
+        v-bind="selectedToken ? { amount, symbol: selectedToken.symbol } : { amount: amountTip }"
+      />
       {{ $t('pages.successTip.notifyTo') }}
       <Textarea v-model="note" :value="note" size="h-50" />
     </div>
@@ -58,14 +53,14 @@ import openUrl from '../../utils/openUrl';
 import { AGGREGATOR_URL } from '../../utils/constants';
 import { aettosToAe } from '../../utils/helper';
 import Logger from '../../../lib/logger';
-import FormatFiatCurrency from '../components/FormatFiatCurrency';
+import TokenAmount from '../components/TokenAmount';
 import Button from '../components/Button';
 
 export default {
   components: {
     Heart,
     Textarea,
-    FormatFiatCurrency,
+    TokenAmount,
     Button,
   },
   props: ['amount', 'tipUrl'],
@@ -73,7 +68,7 @@ export default {
     ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
     ...mapState('fungibleTokens', ['selectedToken']),
     amountTip() {
-      return (+aettosToAe(this.amount)).toFixed(2);
+      return +aettosToAe(this.amount);
     },
     isVerifiedUrl() {
       return this.$store.getters['tipUrl/status'](this.tipUrl) === 'verified';
@@ -82,8 +77,8 @@ export default {
       return {
         amount: this.selectedToken
           ? `${this.amount} ${this.selectedToken.symbol}`
-          : `${this.amountTip} AE (~${this.formatCurrency(
-              (this.amountTip * this.currentCurrencyRate).toFixed(3),
+          : `${+this.amountTip.toFixed(2)} AE (~${this.formatCurrency(
+              (this.amountTip * this.currentCurrencyRate).toFixed(2),
             )})`,
       };
     },
@@ -108,11 +103,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-@import '../../../common/variables';
-
-.symbol {
-  color: $secondary-color;
-}
-</style>
