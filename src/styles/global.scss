@@ -32,7 +32,9 @@ body {
 }
 
 a {
-  color: $main-color;
+  color: $accent-color;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 p {
@@ -364,6 +366,8 @@ button {
   text-align: center;
   font-size: 16px;
   max-width: 357px !important;
+  margin: 0 auto;
+  position: relative;
 }
 
 .identicon {
@@ -408,8 +412,6 @@ button {
   }
 }
 
-@import './variables';
-
 html,
 body {
   height: 100%;
@@ -424,12 +426,6 @@ body,
   background: $bg-color !important;
 }
 
-.popup {
-  max-width: 357px !important;
-  margin: 0 auto;
-  position: relative;
-}
-
 .popup-no-padding {
   padding: 4px 0;
 }
@@ -441,12 +437,6 @@ body,
 .disabled {
   opacity: 0.4;
   pointer-events: none;
-}
-
-a {
-  color: $accent-color;
-  text-decoration: underline;
-  cursor: pointer;
 }
 
 .primary-bg {
@@ -713,8 +703,4 @@ a {
   .mt-#{$i} { @include margin-top($i); }
   .mx-#{$i} { @include margin-x($i); }
   .my-#{$i} { @include margin-y($i); }
-}
-
-.mr-auto {
-  margin-right: auto;
 }
