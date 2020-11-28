@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import BigNumber from 'bignumber.js';
-import { aettosToAe, postJson } from '../../popup/utils/helper';
+import { aettosToAe, fetchJson, postJson } from '../../popup/utils/helper';
 import { i18n } from '../../popup/utils/i18nHelper';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
 
@@ -25,7 +25,7 @@ export default (store) => {
         state.owned = names;
       },
       setDefault({ defaults }, { address, networkId, name: { name, revoked } }) {
-        if (revoked) Vue.delete(defaults, `${address}-${networkId}`, name);
+        if (revoked) Vue.delete(defaults, `${address}-${networkId}`);
         else Vue.set(defaults, `${address}-${networkId}`, name);
       },
       setAutoExtend(state, { index, value }) {
@@ -33,10 +33,17 @@ export default (store) => {
       },
     },
     actions: {
-      async fetchOwned({ state: { owned }, rootState, commit, getters: { getDefault }, dispatch }) {
-        if (!rootState.middleware) return;
+      async fetchOwned({
+        state: { owned },
+        rootGetters: { activeNetwork },
+        rootState: { sdk, middleware, account },
+        commit,
+        getters: { getDefault },
+        dispatch,
+      }) {
+        if (!middleware) return;
         const getPendingNameClaimTransactions = (address) =>
-          rootState.sdk.api.getPendingAccountTransactionsByPubkey(address).then(
+          sdk.api.getPendingAccountTransactionsByPubkey(address).then(
             ({ transactions }) =>
               transactions
                 .filter(({ tx: { type } }) => type === 'NameClaimTx')
@@ -49,11 +56,10 @@ export default (store) => {
             () => [],
           );
 
-        const defaultName = getDefault(rootState.account.publicKey);
-        let defaultNameRevoked = false;
+        const defaultName = getDefault(account.publicKey);
         const names = await Promise.all([
-          getPendingNameClaimTransactions(rootState.account.publicKey),
-          rootState.middleware.getOwnedBy(rootState.account.publicKey).then(({ active }) =>
+          getPendingNameClaimTransactions(account.publicKey),
+          middleware.getOwnedBy(account.publicKey).then(({ active }) =>
             owned
               ? active
                   .map(({ info, name }) => ({
@@ -67,8 +73,7 @@ export default (store) => {
                     const oldName = owned.find((n) => n.name === name.name);
                     if (!oldName) return name;
                     const revoked = name.expiresAt < oldName.expiresAt;
-                    if (revoked) {
-                      if (name.name === defaultName) defaultNameRevoked = true;
+                    if (revoked)
                       commit(
                         'addNotification',
                         {
@@ -81,7 +86,6 @@ export default (store) => {
                         },
                         { root: true },
                       );
-                    }
                     return {
                       ...(revoked || oldName.revoked ? { revoked: true } : {}),
                       autoExtend: oldName.autoExtend,
@@ -93,14 +97,34 @@ export default (store) => {
         ]).then((arr) => arr.flat());
 
         commit('set', names);
-        if ((names.length && !defaultName) || defaultNameRevoked) {
-          const claimed = names.filter((n) => !n.pending);
-          if (claimed.length)
+
+        const claimed = names.filter((n) => !n.pending && !n.revoked);
+        if (claimed.length) {
+          const { preferredChainName: nameFromBackend } = await fetchJson(
+            `${activeNetwork.backendUrl}/profile/${account.publicKey}`,
+          );
+          const prefferedName = claimed.find(({ name }) => name === nameFromBackend);
+
+          if (nameFromBackend && prefferedName) {
+            if (nameFromBackend === defaultName) return;
+            commit('setDefault', {
+              address: account.publicKey,
+              name: prefferedName,
+              networkId: sdk.getNetworkId(),
+            });
+          } else {
             dispatch('setDefault', {
               name: claimed[0],
-              address: rootState.account.publicKey,
+              address: account.publicKey,
               modal: false,
             });
+          }
+        } else if (defaultName) {
+          commit('setDefault', {
+            address: account.publicKey,
+            name: { revoked: true },
+            networkId: sdk.getNetworkId(),
+          });
         }
       },
       async fetchAuctions({ rootState: { middleware } }) {
