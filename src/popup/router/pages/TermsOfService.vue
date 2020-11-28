@@ -1010,7 +1010,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .terms {
   font-weight: 100;

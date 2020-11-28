@@ -48,7 +48,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../common/variables';
+@import '../../../../styles/variables';
 
 h2 {
   word-break: break-word;

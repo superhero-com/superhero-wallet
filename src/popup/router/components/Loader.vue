@@ -32,7 +32,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .fadeOut-enter-active,
 .fadeOut-leave-active {

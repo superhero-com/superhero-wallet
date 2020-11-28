@@ -56,7 +56,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../common/variables';
+@import '../../../../styles/variables';
 
 .tokens-list-item {
   background-color: $black-1;

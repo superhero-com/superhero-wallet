@@ -52,7 +52,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../common/variables';
+@import '../../../../styles/variables';
 
 .error-msg {
   color: $error-color;

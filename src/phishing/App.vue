@@ -74,7 +74,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../common/variables';
+@import '../styles/variables';
 
 body,
 html,
