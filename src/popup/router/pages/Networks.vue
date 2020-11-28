@@ -1,13 +1,13 @@
 <template>
   <div v-if="mode === 'list'" class="popup" data-cy="networks">
-    <ListItem v-for="network in networks" :key="network.name" class="network-row">
+    <div v-for="network in networks" :key="network.name" class="network-row">
       <CheckBox
         :value="network === activeNetwork"
         type="radio"
         name="activeNetwork"
         @input="selectNetwork(network.name)"
       />
-      <div class="mr-auto text-left">
+      <div>
         <p class="f-16" data-cy="network-name">{{ network.name }}</p>
         <p class="f-12 url" data-cy="network-url">
           <b>{{ $t('pages.network.url') }}</b> {{ network.url }}
@@ -27,7 +27,7 @@
           {{ $t('pages.network.delete') }}
         </li>
       </ae-dropdown>
-    </ListItem>
+    </div>
     <Button extend @click="mode = 'add'" class="mt-20" data-cy="to-add">{{
       $t('pages.network.addNetwork')
     }}</Button>
@@ -97,7 +97,6 @@ import { mapGetters } from 'vuex';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import CheckBox from '../components/CheckBox';
-import ListItem from '../components/ListItem';
 import { defaultNetwork } from '../../utils/constants';
 import wallet from '../../../lib/wallet';
 
@@ -114,7 +113,6 @@ export default {
   components: {
     Button,
     Input,
-    ListItem,
     CheckBox,
   },
   data() {
@@ -196,15 +194,16 @@ export default {
   },
 };
 </script>
-<style lang="scss">
+
+<style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.network-row li {
+.network-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  width: 100%;
-  border-top: 1px solid #100c0d !important;
+  border-top: 1px solid #100c0d;
+  padding: 12px 0;
+  text-align: left;
 
   p {
     margin: 0;

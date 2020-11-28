@@ -106,7 +106,6 @@ describe('Test cases for networks page', () => {
       .should('be.visible')
       .click()
       .get('[data-cy=networks] .network-row')
-      .children()
       .should('have.length', 2)
       .get('[data-cy=networks] .network-row')
       .eq(0)
