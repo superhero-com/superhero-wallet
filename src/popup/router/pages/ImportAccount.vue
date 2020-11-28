@@ -73,3 +73,13 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+@import '../../../styles/variables';
+
+.regular-text {
+  font-size: $font-size;
+  text-align: left;
+  font-weight: normal;
+}
+</style>
