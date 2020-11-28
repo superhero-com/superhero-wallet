@@ -1,96 +1,94 @@
 <template>
-  <div class="popup">
-    <div v-if="mode === 'list'" data-cy="networks">
-      <ListItem v-for="network in networks" :key="network.name" class="network-row">
-        <CheckBox
-          :value="network === activeNetwork"
-          type="radio"
-          name="activeNetwork"
-          @input="selectNetwork(network.name)"
-        />
-        <div class="mr-auto text-left">
-          <p class="f-16" data-cy="network-name">{{ network.name }}</p>
-          <p class="f-12 url" data-cy="network-url">
-            <b>{{ $t('pages.network.url') }}</b> {{ network.url }}
-          </p>
-          <p class="f-12 url" data-cy="network-middleware">
-            <b>{{ $t('pages.network.middleware') }}</b> {{ network.middlewareUrl }}
-          </p>
-        </div>
-        <ae-dropdown direction="right" v-if="network.index !== undefined" data-cy="more">
-          <ae-icon name="more" size="20px" slot="button" />
-          <li @click="setNetworkEdit(network)" data-cy="edit">
-            <ae-icon name="edit" />
-            {{ $t('pages.network.edit') }}
-          </li>
-          <li @click="deleteNetwork(network.index)" data-cy="delete">
-            <ae-icon name="delete" />
-            {{ $t('pages.network.delete') }}
-          </li>
-        </ae-dropdown>
-      </ListItem>
-      <Button extend @click="mode = 'add'" class="mt-20" data-cy="to-add">{{
-        $t('pages.network.addNetwork')
-      }}</Button>
-    </div>
-    <div v-if="mode === 'add' || mode === 'edit'" class="mt-10 network">
-      <Input
-        :placeholder="$t('pages.network.networkNamePlaceholder')"
-        :label="$t('pages.network.networkNameLabel')"
-        v-model="network.name"
-        data-cy="network"
+  <div v-if="mode === 'list'" class="popup" data-cy="networks">
+    <ListItem v-for="network in networks" :key="network.name" class="network-row">
+      <CheckBox
+        :value="network === activeNetwork"
+        type="radio"
+        name="activeNetwork"
+        @input="selectNetwork(network.name)"
       />
-      <Input
-        :placeholder="$t('pages.network.networkUrlPlaceholder')"
-        :label="$t('pages.network.networkUrlLabel')"
-        v-model="network.url"
-        data-cy="url"
-      />
-      <Input
-        :placeholder="$t('pages.network.networkMiddlewarePlaceholder')"
-        :label="$t('pages.network.networkMiddlewareLabel')"
-        v-model="network.middlewareUrl"
-        data-cy="middleware"
-      />
-      <Input
-        :placeholder="$t('pages.network.networkCompilerPlaceholder')"
-        :label="$t('pages.network.networkCompilerLabel')"
-        v-model="network.compilerUrl"
-        data-cy="compiler"
-      />
-      <button class="text-left expand" @click="backendUrlInputExpanded = !backendUrlInputExpanded">
-        <img :class="{ expanded: backendUrlInputExpanded }" src="../../../icons/carret-down.svg" />
-        <span>{{
-          backendUrlInputExpanded
-            ? $t('pages.network.hideTippingConfig')
-            : $t('pages.network.showTippingConfig')
-        }}</span>
-      </button>
-      <Input
-        v-if="backendUrlInputExpanded"
-        :placeholder="$t('pages.network.backendUrlPlaceholder')"
-        :label="$t('pages.network.backendUrlLabel')"
-        v-model="network.backendUrl"
-      />
-      <Button half @click="cancel" data-cy="cancel">{{ $t('pages.network.cancel') }}</Button>
-      <Button
-        class="danger"
-        half
-        @click="addOrUpdateNetwork"
-        :disabled="
-          !network.name ||
-          !network.url ||
-          !network.middlewareUrl ||
-          !network.compilerUrl ||
-          !network.backendUrl ||
-          !!network.error
-        "
-        data-cy="connect"
-      >
-        {{ $t('pages.network.save') }}
-      </Button>
-      <div v-if="network.error" class="error-msg" v-html="network.error" data-cy="error-msg" />
-    </div>
+      <div class="mr-auto text-left">
+        <p class="f-16" data-cy="network-name">{{ network.name }}</p>
+        <p class="f-12 url" data-cy="network-url">
+          <b>{{ $t('pages.network.url') }}</b> {{ network.url }}
+        </p>
+        <p class="f-12 url" data-cy="network-middleware">
+          <b>{{ $t('pages.network.middleware') }}</b> {{ network.middlewareUrl }}
+        </p>
+      </div>
+      <ae-dropdown direction="right" v-if="network.index !== undefined" data-cy="more">
+        <ae-icon name="more" size="20px" slot="button" />
+        <li @click="setNetworkEdit(network)" data-cy="edit">
+          <ae-icon name="edit" />
+          {{ $t('pages.network.edit') }}
+        </li>
+        <li @click="deleteNetwork(network.index)" data-cy="delete">
+          <ae-icon name="delete" />
+          {{ $t('pages.network.delete') }}
+        </li>
+      </ae-dropdown>
+    </ListItem>
+    <Button extend @click="mode = 'add'" class="mt-20" data-cy="to-add">{{
+      $t('pages.network.addNetwork')
+    }}</Button>
+  </div>
+  <div v-else-if="mode === 'add' || mode === 'edit'" class="mt-10 popup network">
+    <Input
+      :placeholder="$t('pages.network.networkNamePlaceholder')"
+      :label="$t('pages.network.networkNameLabel')"
+      v-model="network.name"
+      data-cy="network"
+    />
+    <Input
+      :placeholder="$t('pages.network.networkUrlPlaceholder')"
+      :label="$t('pages.network.networkUrlLabel')"
+      v-model="network.url"
+      data-cy="url"
+    />
+    <Input
+      :placeholder="$t('pages.network.networkMiddlewarePlaceholder')"
+      :label="$t('pages.network.networkMiddlewareLabel')"
+      v-model="network.middlewareUrl"
+      data-cy="middleware"
+    />
+    <Input
+      :placeholder="$t('pages.network.networkCompilerPlaceholder')"
+      :label="$t('pages.network.networkCompilerLabel')"
+      v-model="network.compilerUrl"
+      data-cy="compiler"
+    />
+    <button class="text-left expand" @click="backendUrlInputExpanded = !backendUrlInputExpanded">
+      <img :class="{ expanded: backendUrlInputExpanded }" src="../../../icons/carret-down.svg" />
+      <span>{{
+        backendUrlInputExpanded
+          ? $t('pages.network.hideTippingConfig')
+          : $t('pages.network.showTippingConfig')
+      }}</span>
+    </button>
+    <Input
+      v-if="backendUrlInputExpanded"
+      :placeholder="$t('pages.network.backendUrlPlaceholder')"
+      :label="$t('pages.network.backendUrlLabel')"
+      v-model="network.backendUrl"
+    />
+    <Button half @click="cancel" data-cy="cancel">{{ $t('pages.network.cancel') }}</Button>
+    <Button
+      class="danger"
+      half
+      @click="addOrUpdateNetwork"
+      :disabled="
+        !network.name ||
+        !network.url ||
+        !network.middlewareUrl ||
+        !network.compilerUrl ||
+        !network.backendUrl ||
+        !!network.error
+      "
+      data-cy="connect"
+    >
+      {{ $t('pages.network.save') }}
+    </Button>
+    <div v-if="network.error" class="error-msg" v-html="network.error" data-cy="error-msg" />
   </div>
 </template>
 
