@@ -285,9 +285,8 @@
       "howToClaim": "Cómo reclamar AE",
       "balance": "Saldo",
       "copied": "¡Copiado!",
-      "youNeedTo": "Necesitas",
+      "seedNotification": "Necesitas {0} tu frase semilla",
       "backup": "respaldar",
-      "yourSeedPhrase": "tu frase semilla",
       "updateExtension": "¡Nueva versión disponible! Por favor actualiza tu extensión.",
       "updateAvailable": "¡Nueva versión disponible en la tienda!",
       "claim-name": "Reclama tu nombre .chain"
