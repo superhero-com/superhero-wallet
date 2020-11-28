@@ -101,7 +101,7 @@ const getConfig = platform => {
           use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader?indentedSyntax'],
         },
         {
-          test: /\.(png|jpg|gif|svg|ico)$/,
+          test: /\.(png|jpg|gif|svg|ico|woff2|woff)$/,
           oneOf: [
             {
               test: /\.svg$/,
