@@ -2,7 +2,7 @@
 <template>
   <div class="popup text-left terms">
     <!-- header -->
-    <h1 class="terms--heading heading-1 uppercase bolder">TERMS OF USE</h1>
+    <h1 class="heading-1 bolder">TERMS OF USE</h1>
     <p class="italic">The present <b>TERMS OF USE</b> are effective since 9th April 2020.</p>
     <p class="italic">
       <b>Superhero.com LVC</b> reserves its right to modify and update these
@@ -56,11 +56,7 @@
     </p>
 
     <div v-for="(item, index) in details" :key="index">
-      <p
-        class="accordion-item-title uppercase flex flex-justify-between flex-align-start"
-        @click="toggleAccordionItem(index)"
-        data-cy="accordion-item"
-      >
+      <p class="accordion-item-title" @click="toggleAccordionItem(index)" data-cy="accordion-item">
         <ArrowDown class="icon" v-if="item.open" data-cy="accordion-item-open" />
         <ArrowRight class="icon" v-else data-cy="accordion-item-close" />
         <span>{{ item.title }}</span>
@@ -1009,37 +1005,53 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '../../../styles/variables';
 
 .terms {
   font-weight: 100;
-}
 
-.terms--heading {
-  margin: 20px;
-  text-align: center;
-}
-
-.accordion-item-title {
-  color: $accent-color;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-
-  .icon {
-    width: 25px;
-    margin-top: 4px;
+  .italic {
+    font-style: italic;
   }
 
-  span {
-    margin-right: auto;
+  .underline {
+    text-decoration: underline;
+  }
+
+  .bolder {
+    font-weight: bold;
+  }
+
+  h1 {
+    margin: 20px;
+    text-align: center;
+  }
+
+  .accordion-item-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     color: $accent-color;
-  }
-}
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-transform: uppercase;
 
-.accordion-item-content {
-  font-size: 14px;
-  font-weight: 100;
+    .icon {
+      width: 25px;
+      margin-top: 4px;
+    }
+
+    span {
+      margin-right: auto;
+      color: $accent-color;
+    }
+  }
+
+  .accordion-item-content {
+    font-size: 14px;
+    font-weight: 100;
+  }
 }
 </style>
