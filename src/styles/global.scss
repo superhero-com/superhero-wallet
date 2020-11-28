@@ -307,29 +307,6 @@ main {
   background: $accent-color !important;
 }
 
-.token-action-holder {
-  background-color: #ececec;
-}
-
-.custom-ae-input-header {
-  position: relative;
-  display: flex;
-  flex: 0 0;
-  justify-content: space-between;
-  align-items: center;
-  align-self: flex-start;
-  width: 100%;
-  padding: 0.5rem 1rem 0 1rem;
-}
-
-.custom-ae-input-label {
-  color: #76818c;
-  font-family: "Inter UI", sans-serif;
-  font-size: 0.8125rem;
-  letter-spacing: 0.02em;
-  line-height: 1rem;
-}
-
 @-moz-document url-prefix() {
   html {
     scrollbar-width: none;
@@ -460,12 +437,6 @@ body,
   font-weight: 400;
   margin-bottom: 27px;
   margin-left: 0;
-}
-
-.primary-title-small {
-  color: #bcbcc4 !important;
-  font-size: 16px;
-  margin-top: 0;
 }
 
 .secondary-text {
