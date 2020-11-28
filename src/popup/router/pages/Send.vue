@@ -256,6 +256,10 @@ export default {
   display: flex;
 }
 
+.primary-title-darker {
+  color: $text-color;
+}
+
 .withdraw.step1 {
   textarea {
     width: 250px;
