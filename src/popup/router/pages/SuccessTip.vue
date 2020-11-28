@@ -103,3 +103,13 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+@import '../../../styles/variables';
+
+.sub-heading {
+  font-size: 14px;
+  font-weight: normal;
+  margin: 8px 0;
+}
+</style>
