@@ -103,13 +103,13 @@ export default (store) => {
           const { preferredChainName: nameFromBackend } = await fetchJson(
             `${activeNetwork.backendUrl}/profile/${account.publicKey}`,
           );
-          const prefferedName = claimed.find(({ name }) => name === nameFromBackend);
+          const preferredName = claimed.find(({ name }) => name === nameFromBackend);
 
-          if (nameFromBackend && prefferedName) {
+          if (nameFromBackend && preferredName) {
             if (nameFromBackend === defaultName) return;
             commit('setDefault', {
               address: account.publicKey,
-              name: prefferedName,
+              name: preferredName,
               networkId: sdk.getNetworkId(),
             });
           } else {
