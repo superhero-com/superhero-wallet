@@ -116,7 +116,6 @@ export default (store) => {
             dispatch('setDefault', {
               name: claimed[0].name,
               address: account.publicKey,
-              modal: false,
             });
           }
         } else if (defaultName) {
@@ -165,39 +164,26 @@ export default (store) => {
         }
       },
       async setDefault(
-        { rootState: { sdk }, commit, dispatch, rootGetters: { activeNetwork } },
-        { name, address, modal = true },
+        { rootState: { sdk }, commit, rootGetters: { activeNetwork } },
+        { name, address },
       ) {
+        const response = await postJson(`${activeNetwork.backendUrl}/profile`, {
+          body: {
+            author: address,
+            preferredChainName: name,
+          },
+        });
+        const signedChallenge = Buffer.from(await sdk.signMessage(response.challenge)).toString(
+          'hex',
+        );
+        const respondChallenge = {
+          challenge: response.challenge,
+          signature: signedChallenge,
+        };
+        await postJson(`${activeNetwork.backendUrl}/profile`, {
+          body: respondChallenge,
+        });
         commit('setDefault', { name, address });
-
-        try {
-          const response = await postJson(`${activeNetwork.backendUrl}/profile`, {
-            body: {
-              author: address,
-              preferredChainName: name,
-            },
-          });
-          const signedChallenge = Buffer.from(await sdk.signMessage(response.challenge)).toString(
-            'hex',
-          );
-          const respondChallenge = {
-            challenge: response.challenge,
-            signature: signedChallenge,
-          };
-          await postJson(`${activeNetwork.backendUrl}/profile`, {
-            body: respondChallenge,
-          });
-        } catch (e) {
-          if (modal) {
-            if (e.type === 'backend')
-              dispatch(
-                'modals/open',
-                { name: 'default', title: 'Backend error', msg: e.message },
-                { root: true },
-              );
-            else throw e;
-          }
-        }
       },
     },
   });
