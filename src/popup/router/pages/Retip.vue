@@ -1,5 +1,6 @@
 <template>
   <div class="popup">
+    <BalanceInfo />
     <div class="section-title">
       {{ $t('pages.tipPage.url') }}
     </div>
@@ -38,10 +39,11 @@ import deeplinkApi from '../../../mixins/deeplinkApi';
 import AmountSend from '../components/AmountSend';
 import UrlStatus from '../components/UrlStatus';
 import Button from '../components/Button';
+import BalanceInfo from '../components/BalanceInfo';
 
 export default {
   mixins: [deeplinkApi],
-  components: { AmountSend, UrlStatus, Button },
+  components: { AmountSend, UrlStatus, Button, BalanceInfo },
   data: () => ({
     tip: {},
     amount: '',
