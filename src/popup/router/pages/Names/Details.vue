@@ -96,7 +96,7 @@ export default {
       await this.$watchUntilTruly(() => this.sdk);
       this.$store.dispatch('names/setDefault', {
         address: this.account.publicKey,
-        name: { name: this.name },
+        name: this.name,
         modal: false,
       });
     },

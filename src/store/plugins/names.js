@@ -24,10 +24,10 @@ export default (store) => {
       set(state, names) {
         state.owned = names;
       },
-      setDefault({ defaults }, { address, name: { name, revoked } }) {
+      setDefault({ defaults }, { address, name }) {
         const networkId = store.state.sdk.getNetworkId();
-        if (revoked) Vue.delete(defaults, `${address}-${networkId}`);
-        else Vue.set(defaults, `${address}-${networkId}`, name);
+        if (name) Vue.set(defaults, `${address}-${networkId}`, name);
+        else Vue.delete(defaults, `${address}-${networkId}`);
       },
       setAutoExtend(state, { index, value }) {
         Vue.set(state.owned[index], 'autoExtend', value);
@@ -110,20 +110,17 @@ export default (store) => {
             if (nameFromBackend === defaultName) return;
             commit('setDefault', {
               address: account.publicKey,
-              name: preferredName,
+              name: preferredName.name,
             });
           } else {
             dispatch('setDefault', {
-              name: claimed[0],
+              name: claimed[0].name,
               address: account.publicKey,
               modal: false,
             });
           }
         } else if (defaultName) {
-          commit('setDefault', {
-            address: account.publicKey,
-            name: { revoked: true },
-          });
+          commit('setDefault', { address: account.publicKey });
         }
       },
       async fetchAuctions({ rootState: { middleware } }) {
@@ -177,7 +174,7 @@ export default (store) => {
           const response = await postJson(`${activeNetwork.backendUrl}/profile`, {
             body: {
               author: address,
-              preferredChainName: name.name,
+              preferredChainName: name,
             },
           });
           const signedChallenge = Buffer.from(await sdk.signMessage(response.challenge)).toString(
