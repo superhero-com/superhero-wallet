@@ -40,7 +40,6 @@ export default {
       props: {},
       loading: false,
       unpackedTx: null,
-      amountError: false,
       tx: {
         amount: 0,
       },
