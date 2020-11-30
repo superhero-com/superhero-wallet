@@ -128,8 +128,8 @@ export default {
   async cacheInvalidateTips({ getters: { activeNetwork } }) {
     return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/tips`);
   },
-  async donateError({ getters: { activeNetwork } }, { error, description }) {
-    return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: { ...error, description } });
+  async donateError({ getters: { activeNetwork } }, error) {
+    return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: error });
   },
   async sendTipComment(
     { state: { sdk }, getters: { activeNetwork } },
