@@ -34,11 +34,6 @@ async function initMiddleware() {
         ],
       },
     },
-    'names/auctions': {
-      get: {
-        operationId: 'getActiveNameAuctions',
-      },
-    },
     'txs/backward': {
       get: {
         operationId: 'getTxByAccount',
