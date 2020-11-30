@@ -11,16 +11,14 @@ cache:
     - ~/.cache
 
 script:
-  - npm run lint -- --no-fix
-  - npm test
+  - npm run lint -- --no-fix && npm test
   - npm run build
+  - if ! $TRAVIS_PULL_REQUEST ; then
+      ./scripts/before-deploy.sh;
+      ./scripts/deploy-stage.sh;
+    fi
 
 deploy:
-  - provider: script
-    skip_cleanup: true
-    script: scripts/before-deploy.sh
-    on:
-      all_branches: true
   - provider: pages
     skip_cleanup: true
     github_token: $GITHUB_TOKEN
@@ -44,8 +42,3 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
-  - provider: script
-    skip_cleanup: true
-    script: scripts/deploy-stage.sh
-    on:
-      all_branches: true
