@@ -47,13 +47,16 @@ export default {
     amount: '',
     loading: false,
     minCallFee: null,
-    tippingContract: null
+    tippingContract: null,
   }),
   computed: {
     ...mapGetters(['account', 'tippingSupported', 'minTipAmount', 'activeNetwork']),
     ...mapState(['balance', 'tippingV1', 'tippingV2', 'sdk']),
     urlStatus() {
       return this.$store.getters['tipUrl/status'](this.tip.url);
+    },
+    shouldUseV2Contract() {
+      return this.$route.query.id.includes('_v2') || this.$route.query.id.includes('_v3');
     },
   },
   watch: {
@@ -66,15 +69,18 @@ export default {
     await this.$watchUntilTruly(() => this.sdk);
     this.minCallFee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
-      contractId: this.activeNetwork.tipContractV1,
+      contractId: this.shouldUseV2Contract
+        ? this.activeNetwork.tipContractV2
+        : this.activeNetwork.tipContractV1,
       callerId: this.account.publicKey,
     }).min;
     await this.$watchUntilTruly(() => this.tippingV1, this.tippingV2);
-    const tipId = +this.$route.query.id || this.$route.query.id;
+    const tipId = this.$route.query.id;
     if (!tipId) throw new Error('"id" param is missed');
-    this.tippingContract = typeof tipId === 'string' ? this.tippingV2 : this.tippingV1;
-    const { decodedResult } = await this.tippingContract.methods.get_state();
-    this.tip = tipping.getTipsRetips(decodedResult).tips.find(({ id }) => id === tipId);
+    this.tippingContract = this.shouldUseV2Contract ? this.tippingV2 : this.tippingV1;
+    const state = await this.tippingContract.methods.get_state();
+    const tipsAndRetips = await tipping.getTipsRetips(state);
+    this.tip = tipsAndRetips.tips.find(({ id }) => id === tipId);
     this.loading = false;
   },
   methods: {
@@ -82,11 +88,14 @@ export default {
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
       this.loading = true;
       try {
-        const { hash } = await this.tippingContract.methods.retip(this.tip.id, {
-          amount,
-          waitMined: false,
-          modal: false,
-        });
+        const { hash } = await this.tippingContract.methods.retip(
+          Number(this.tip.id.split('_')[0]),
+          {
+            amount,
+            waitMined: false,
+            modal: false,
+          },
+        );
         if (hash) {
           this.$store.commit('addPendingTransaction', {
             hash,
