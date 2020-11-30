@@ -24,7 +24,8 @@ export default (store) => {
       set(state, names) {
         state.owned = names;
       },
-      setDefault({ defaults }, { address, networkId, name: { name, revoked } }) {
+      setDefault({ defaults }, { address, name: { name, revoked } }) {
+        const networkId = store.state.sdk.getNetworkId();
         if (revoked) Vue.delete(defaults, `${address}-${networkId}`);
         else Vue.set(defaults, `${address}-${networkId}`, name);
       },
@@ -110,7 +111,6 @@ export default (store) => {
             commit('setDefault', {
               address: account.publicKey,
               name: preferredName,
-              networkId: sdk.getNetworkId(),
             });
           } else {
             dispatch('setDefault', {
@@ -123,7 +123,6 @@ export default (store) => {
           commit('setDefault', {
             address: account.publicKey,
             name: { revoked: true },
-            networkId: sdk.getNetworkId(),
           });
         }
       },
@@ -172,7 +171,7 @@ export default (store) => {
         { rootState: { sdk }, commit, dispatch, rootGetters: { activeNetwork } },
         { name, address, modal = true },
       ) {
-        commit('setDefault', { name, address, networkId: sdk.getNetworkId() });
+        commit('setDefault', { name, address });
 
         try {
           const response = await postJson(`${activeNetwork.backendUrl}/profile`, {
