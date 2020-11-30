@@ -1,5 +1,6 @@
 <template>
   <div>
+    <BalanceInfo />
     <div class="tour__step3 popup">
       <p class="primary-title text-left mb-8 f-16">
         <template v-if="!confirmMode">
@@ -101,6 +102,7 @@ import Input from '../components/Input';
 import UrlStatus from '../components/UrlStatus';
 import Button from '../components/Button';
 import TokenAmount from '../components/TokenAmount';
+import BalanceInfo from '../components/BalanceInfo';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
@@ -112,6 +114,7 @@ export default {
     UrlStatus,
     Button,
     TokenAmount,
+    BalanceInfo,
   },
   data() {
     return {
