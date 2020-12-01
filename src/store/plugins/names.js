@@ -103,7 +103,7 @@ export default (store) => {
         if (claimed.length) {
           const { preferredChainName: nameFromBackend } = await fetchJson(
             `${activeNetwork.backendUrl}/profile/${account.publicKey}`,
-          );
+          ).catch(() => ({}));
           const preferredName = claimed.find(({ name }) => name === nameFromBackend);
 
           if (nameFromBackend && preferredName) {
