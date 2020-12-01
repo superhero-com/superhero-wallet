@@ -15,7 +15,7 @@
               :type="address"
               data-cy="address"
               :error="form.address && !validAddress"
-              v-model="form.address"
+              v-model.trim="form.address"
               placeholder="ak.. / name.chain"
               size="h-50"
             />
