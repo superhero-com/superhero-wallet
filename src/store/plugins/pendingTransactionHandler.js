@@ -21,12 +21,8 @@ export default (store) => {
 
   store.state.transactions.pending.forEach(waitTransactionMined);
 
-  store.registerModule('pending-transactions', {
-    actions: {
-      async handlePendingTransaction({ commit }, transaction) {
-        commit('addPendingTransaction', transaction);
-        waitTransactionMined(transaction);
-      },
-    },
+  store.subscribe(async (mutation) => {
+    if (mutation.type !== 'addPendingTransaction') return;
+    await waitTransactionMined(mutation.payload);
   });
 };
