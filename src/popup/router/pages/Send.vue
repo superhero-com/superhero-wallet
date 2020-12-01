@@ -234,7 +234,7 @@ export default {
           await this.$store.dispatch('handlePendingTransaction', {
             hash,
             amount,
-            time: Date.parse(new Date()),
+            microTime: Date.now(),
             type: 'spend',
           });
           this.$router.push('/account');

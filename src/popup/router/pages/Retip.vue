@@ -99,7 +99,7 @@ export default {
             hash,
             amount: this.amount,
             domain: this.tip.url,
-            time: Date.now(),
+            microTime: Date.now(),
             type: 'tip',
           });
           this.openCallbackOrGoHome(true);

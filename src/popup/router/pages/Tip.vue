@@ -253,7 +253,7 @@ export default {
             hash,
             amount,
             tipUrl: this.url,
-            time: Date.now(),
+            microTime: Date.now(),
             type: 'tip',
           });
           this.openCallbackOrGoHome(true);
