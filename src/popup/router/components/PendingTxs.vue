@@ -18,8 +18,8 @@ export default {
     transactions: ({ transactions: { pending } }) =>
       pending
         .filter(({ amount, hash }) => !Number.isNaN(+amount) && hash)
-        .map(({ time, hash, tipUrl, ...tx }) => ({
-          time,
+        .map(({ microTime, hash, tipUrl, ...tx }) => ({
+          microTime,
           hash,
           tipUrl,
           tx,

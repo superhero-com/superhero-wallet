@@ -18,7 +18,7 @@ export default {
     state.transactions.latest = payload;
   },
   addPendingTransaction(state, payload) {
-    state.transactions.pending.push(payload);
+    state.transactions.pending.push({ ...payload, microTime: Date.now() });
   },
   removePendingTransactionByHash(state, hash) {
     state.transactions.pending = state.transactions.pending.filter((t) => t.hash !== hash);
