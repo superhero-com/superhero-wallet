@@ -51,7 +51,6 @@ export default {
   data() {
     return {
       selectedVal: this.selected,
-      optionsVal: this.options,
       openDropdown: false,
     };
   },

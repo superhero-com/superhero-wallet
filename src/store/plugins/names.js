@@ -129,7 +129,9 @@ export default (store) => {
       },
       async fetchAuctions({ rootState: { middleware } }) {
         if (!middleware) return [];
-        return (await middleware.getActiveNameAuctions()).data.map(({ name, info }) => ({
+        return (
+          await middleware.getAllAuctions({ by: 'expiration', direction: 'forward' })
+        ).data.map(({ name, info }) => ({
           name,
           expiration: info.auctionEnd,
           lastBid: info.lastBid.tx,

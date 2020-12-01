@@ -5,7 +5,7 @@
         <span>{{ $t('pages.names.details.name') }}</span> {{ name }}
       </li>
       <li>
-        <span>{{ $t('pages.names.details.name') }}</span> {{ nameHash }}
+        <span>{{ $t('pages.names.details.name-id') }}</span> {{ nameHash }}
       </li>
       <li>
         <span>{{ $t('pages.names.details.owner') }}</span> {{ nameEntry.owner }}
