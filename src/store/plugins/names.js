@@ -100,24 +100,19 @@ export default (store) => {
         commit('set', names);
 
         const claimed = names.filter((n) => !n.pending && !n.revoked).map(({ name }) => name);
-        if (claimed.length) {
-          const { preferredChainName: defaultNameBackend } = await fetchJson(
-            `${activeNetwork.backendUrl}/profile/${account.publicKey}`,
-          ).catch(() => ({}));
-          if (claimed.includes(defaultNameBackend)) {
-            if (defaultNameBackend === defaultName) return;
-            commit('setDefault', {
-              address: account.publicKey,
-              name: defaultNameBackend,
-            });
-          } else {
-            dispatch('setDefault', {
-              name: claimed[0],
-              address: account.publicKey,
-            });
-          }
-        } else if (defaultName) {
-          commit('setDefault', { address: account.publicKey });
+        if (!claimed.length) {
+          if (defaultName) commit('setDefault', { address: account.publicKey });
+          return;
+        }
+        const { preferredChainName: defaultNameBackend } = await fetchJson(
+          `${activeNetwork.backendUrl}/profile/${account.publicKey}`,
+        ).catch(() => {});
+        if (!claimed.includes(defaultNameBackend)) {
+          await dispatch('setDefault', { address: account.publicKey, name: claimed[0] });
+          return;
+        }
+        if (defaultName !== defaultNameBackend) {
+          commit('setDefault', { address: account.publicKey, name: defaultNameBackend });
         }
       },
       async fetchAuctions({ rootState: { middleware } }) {
