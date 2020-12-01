@@ -55,7 +55,7 @@
             !note ||
             amountError ||
             noteError ||
-            !minCallFee ||
+            !fee ||
             !validUrl ||
             !url ||
             urlStatus === 'blacklisted' ||
@@ -124,7 +124,7 @@ export default {
       amountError: false,
       noteError: false,
       loading: false,
-      minCallFee: null,
+      fee: null,
       editUrl: true,
       IS_EXTENSION: process.env.IS_EXTENSION,
       tipFromPopup: false,
@@ -175,11 +175,11 @@ export default {
       }
     }
     await this.$watchUntilTruly(() => this.sdk);
-    this.minCallFee = calculateFee(TX_TYPES.contractCall, {
+    this.fee = calculateFee(TX_TYPES.contractCall, {
       ...this.sdk.Ae.defaults,
       contractId: this.activeNetwork.tipContractV1,
       callerId: this.account.publicKey,
-    }).min;
+    });
   },
   methods: {
     async persistTipDetails() {
@@ -207,12 +207,9 @@ export default {
           .catch(() => false);
         if (!allowToConfirm) return;
       }
-      const calculatedMaxValue =
-        this.balance > this.minCallFee ? this.balance - this.minCallFee : 0;
+      const calculatedMaxValue = this.balance > this.fee ? this.balance - this.fee : 0;
       this.amountError =
-        !this.amount ||
-        !this.minCallFee ||
-        (!this.selectedToken && calculatedMaxValue - this.amount <= 0);
+        !this.amount || !this.fee || (!this.selectedToken && calculatedMaxValue - this.amount <= 0);
       this.amountError =
         this.amountError ||
         !+this.amount ||
