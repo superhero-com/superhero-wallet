@@ -1,67 +1,47 @@
 <template>
-  <li class="list-item-transaction">
-    <div class="holder">
-      <span class="amount">
-        <span data-cy="amount">{{ txAmount | formatAmount }}</span>
-        {{ $t('pages.appVUE.aeid') }}
-        <span class="text" data-cy="currency-amount">
-          <!--eslint-disable vue-i18n/no-raw-text-->
-          ({{ txAmountCurrency }})
-          <!--eslint-enable vue-i18n/no-raw-text-->
-        </span>
-      </span>
-      <span class="status">{{ status }}</span>
-      <span class="time" data-cy="time">{{ transaction.microTime | formatDate }}</span>
+  <div class="transaction-item">
+    <div>
+      <div class="status"><TokenAmount data-cy="amount" :amount="txAmount" /> {{ status }}</div>
+      <span data-cy="time">{{ transaction.microTime | formatDate }}</span>
     </div>
-    <div class="holder tx-info">
-      <span v-if="tipUrl" class="url" @click="tipUrl && openUrl(tipUrl, true)">{{ tipUrl }}</span>
-      <span v-else-if="topup" class="address">
-        {{ transaction.tx.senderId }}
+    <div class="details">
+      <button v-if="tipUrl" class="url" @click="openUrl(tipUrl, true)">{{ tipUrl }}</button>
+      <span v-else-if="topup || withdraw" class="address">
+        {{ topup ? transaction.tx.senderId : transaction.tx.recipientId }}
       </span>
-      <span v-else-if="withdraw" class="address">
-        {{ transaction.tx.recipientId }}
-      </span>
-      <span v-else class="tx-type">
+      <span v-else>
         {{ transactionType }}
       </span>
-      <span
-        class="seeTransaction"
+      <button
         @click="openUrl(`${activeNetwork.explorerUrl}/transactions/${transaction.hash}`, true)"
       >
         <img src="../../../icons/eye.png" />
-      </span>
+      </button>
     </div>
-  </li>
+  </div>
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import { aettosToAe } from '../../utils/helper';
 import { formatDate } from '../../utils';
+import TokenAmount from './TokenAmount';
 import openUrl from '../../utils/openUrl';
 
 export default {
+  components: { TokenAmount },
   props: {
     transaction: {
       type: Object,
       required: true,
     },
   },
-  data: () => ({
-    openUrl,
-  }),
   filters: {
     formatDate,
-    formatAmount: (number) => number.toFixed(2),
   },
   computed: {
     ...mapGetters(['account', 'activeNetwork']),
-    ...mapState({
-      txAmountCurrency(state, { convertToCurrencyFormatted }) {
-        return convertToCurrencyFormatted(this.txAmount);
-      },
-    }),
     status() {
       if (
         ['senderId', 'accountId', 'ownerId', 'callerId']
@@ -107,83 +87,58 @@ export default {
       return this.$t('transaction.type')[this.transaction.tx.type];
     },
   },
+  methods: {
+    openUrl,
+  },
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '../../../common/variables';
 
-.list-item-transaction {
-  display: block;
+.transaction-item {
   padding: 10px 0;
   border-color: $bg-color;
-  text-decoration: none;
-  list-style: none;
-  cursor: default;
-  border-top: 1px solid $tx-border-color !important;
+  border-top: 1px solid $tx-border-color;
 
-  .holder {
+  > div {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 14px;
     line-height: 19px;
+    color: $text-color;
+    font-size: 12px;
     font-weight: 500;
 
-    &.tx-info {
+    &.details {
       line-height: 16px;
       font-weight: 400;
     }
 
-    .url,
-    .address,
-    .tx-type {
-      display: inline-block;
-      white-space: nowrap;
-      overflow: hidden !important;
-      text-overflow: ellipsis;
-      color: $text-color;
-      font-size: 12px;
-      text-align: left;
+    .status {
+      font-size: 14px;
+      color: $white-color;
+    }
+
+    button {
+      border: none;
+      outline: none;
+      background: none;
+      font: inherit;
+      color: inherit;
+      padding: 0;
       cursor: pointer;
-      margin-right: 10px;
+    }
+
+    .url {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .address {
       font-size: 9px;
       letter-spacing: -0.1px;
-    }
-
-    .seeTransaction {
-      margin-left: auto;
-      cursor: pointer;
-    }
-
-    .time {
-      color: $text-color !important;
-      font-size: 12px;
-      padding-top: 1px;
-    }
-
-    .date {
-      color: $text-color !important;
-      font-size: 12px;
-      padding-top: 1px;
-    }
-
-    .amount {
-      color: $secondary-color !important;
-      font-size: 14px;
-    }
-
-    .text {
-      color: $white-color !important;
-    }
-
-    .status {
-      color: $white-color !important;
-      margin-left: 4px;
-      margin-right: auto;
     }
   }
 }

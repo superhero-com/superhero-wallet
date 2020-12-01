@@ -13,7 +13,7 @@ export default {
   },
   currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,
   convertToCurrency: (state, { currentCurrencyRate }) => (value) =>
-    (currentCurrencyRate * value).toFixed(2),
+    +(currentCurrencyRate * value).toFixed(2),
   balanceCurrency: ({ balance }, { convertToCurrency }) => convertToCurrency(balance),
   formatCurrency: ({ current: { currency } }) => (value) =>
     // TODO: Use the current language from i18n module
@@ -41,9 +41,7 @@ export default {
       ['ae_mainnet', 'ae_uat'].includes(activeNetwork.networkId) || process.env.RUNNING_IN_TESTS
     );
   },
-  tokenBalance(state) {
-    return state.current.token !== 0
-      ? state.tokens[state.current.token].balance.toFixed(2)
-      : state.balance.toFixed(2);
+  tokenBalance({ current: { token }, balance, tokens }) {
+    return +(token !== 0 ? tokens[token].balance : balance).toFixed(2);
   },
 };

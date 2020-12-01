@@ -7,16 +7,11 @@
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
-          <span class="secondary-text" data-cy="tip-amount">
-            {{ amount }} {{ selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid') }}
-          </span>
-          <!--eslint-disable vue-i18n/no-raw-text-->
-          ({{
-            selectedToken
-              ? formatCurrency(0)
-              : formatCurrency((amount * currentCurrencyRate).toFixed(3))
-          }})
-          <!--eslint-enable vue-i18n/no-raw-text-->
+          <TokenAmount
+            data-cy="tip-amount"
+            :amount="+amount"
+            v-bind="selectedToken ? { symbol: selectedToken.symbol } : {}"
+          />
           {{ $t('pages.tipPage.to') }}
         </template>
       </p>
@@ -107,6 +102,7 @@ import Textarea from '../components/Textarea';
 import Input from '../components/Input';
 import UrlStatus from '../components/UrlStatus';
 import Button from '../components/Button';
+import TokenAmount from '../components/TokenAmount';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
@@ -117,6 +113,7 @@ export default {
     Input,
     UrlStatus,
     Button,
+    TokenAmount,
   },
   data() {
     return {
@@ -134,13 +131,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters([
-      'account',
-      'formatCurrency',
-      'minTipAmount',
-      'currentCurrencyRate',
-      'activeNetwork',
-    ]),
+    ...mapGetters(['account', 'minTipAmount', 'activeNetwork']),
     ...mapState(['tourRunning', 'balance', 'tip', 'sdk', 'tippingV1', 'tippingV2']),
     ...mapState('fungibleTokens', ['selectedToken', 'tokenBalances']),
     urlStatus() {

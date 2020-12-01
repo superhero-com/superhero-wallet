@@ -1,13 +1,7 @@
 <template>
   <div class="invite-row">
     <div class="invite-info">
-      <span class="balance-display">
-        {{ inviteLinkBalance }}
-        <span>{{ $t('pages.appVUE.aeid') }}</span>
-      </span>
-      <!--eslint-disable vue-i18n/no-raw-text-->
-      ({{ formatCurrency((inviteLinkBalance * currentCurrencyRate).toFixed(2)) }})
-      <!--eslint-enable vue-i18n/no-raw-text-->
+      <TokenAmount :amount="inviteLinkBalance" />
       <span class="date">{{ createdAt | formatDate }}</span>
     </div>
     <div class="invite-link">
@@ -36,8 +30,9 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk/es';
+import TokenAmount from './TokenAmount';
 import AmountSend from './AmountSend';
 import Button from './Button';
 import CopyIcon from '../../../icons/copy.svg?vue-component';
@@ -48,12 +43,11 @@ export default {
     secretKey: { type: String, required: true },
     createdAt: { type: Number, required: true },
   },
-  components: { Button, AmountSend, CopyIcon },
+  components: { TokenAmount, Button, AmountSend, CopyIcon },
   filters: { formatDate },
   data: () => ({ topUp: false, topUpAmount: 0, inviteLinkBalance: 0 }),
   computed: {
     ...mapState(['sdk', 'balance']),
-    ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
     link() {
       const secretKey = Crypto.encodeBase58Check(Buffer.from(this.secretKey, 'hex'));
       return new URL(
@@ -85,7 +79,7 @@ export default {
         await this.sdk
           .balance(this.address, { format: AmountFormatter.AE_AMOUNT_FORMATS.AE })
           .catch(() => 0),
-      ).toFixed(2);
+      );
     },
     async claim() {
       this.$emit('loading', true);
@@ -162,18 +156,12 @@ export default {
     margin-bottom: 10px;
     color: $gray-2;
 
-    .balance-display {
-      color: $white-1;
-      margin-right: 5px;
-
-      span {
-        color: $secondary-color;
-      }
+    .token-amount {
+      flex-grow: 1;
     }
 
     .date {
       font-size: 11px;
-      margin-left: auto;
       color: $text-color;
     }
   }

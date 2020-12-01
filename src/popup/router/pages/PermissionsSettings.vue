@@ -36,29 +36,15 @@
     </div>
     <ListItem class="permission-row">
       <p class="text-left grow">{{ $t('pages.permissions.spent-today') }}</p>
-      <span class="tokens">
-        {{ (permissions.transactionSignLimit - limitLeft).toFixed(2) }}
-        <span class="secondary-text">&nbsp;{{ $t('pages.appVUE.aeid') }}</span>
-      </span>
-      <span class="currency">{{
-        `(${formatCurrency(convertToCurrency(permissions.transactionSignLimit - limitLeft))})`
-      }}</span>
+      <TokenAmount :amount="permissions.transactionSignLimit - limitLeft" />
     </ListItem>
     <ListItem class="permission-row">
       <p class="text-left grow">{{ $t('pages.permissions.left-today') }}</p>
-      <span class="tokens">
-        {{ limitLeft.toFixed(2) }}
-        <span class="secondary-text">&nbsp;{{ $t('pages.appVUE.aeid') }}</span>
-      </span>
-      <span class="currency">{{ `(${formatCurrency(convertToCurrency(limitLeft))})` }}</span>
+      <TokenAmount :amount="limitLeft" />
     </ListItem>
     <ListItem class="permission-row">
       <p class="text-left grow">{{ $t('pages.account.balance') }}</p>
-      <span class="tokens">
-        {{ tokenBalance }}
-        <span class="secondary-text">&nbsp;{{ $t('pages.appVUE.aeid') }}</span>
-      </span>
-      <span class="currency">{{ `(${formatCurrency(balanceCurrency)})` }}</span>
+      <TokenAmount :amount="tokenBalance" />
     </ListItem>
   </div>
 </template>
@@ -69,6 +55,7 @@ import CheckBox from '../components/CheckBox';
 import ListItem from '../components/ListItem';
 import Input from '../components/Input';
 import RangeInput from '../components/RangeInput';
+import TokenAmount from '../components/TokenAmount';
 import { getLimitLeft, setLimitLeft } from '../../../store/modules/permissions';
 
 export default {
@@ -77,6 +64,7 @@ export default {
     CheckBox,
     Input,
     RangeInput,
+    TokenAmount,
   },
   data: () => ({
     error: false,
@@ -169,11 +157,6 @@ export default {
       &.grow {
         flex-grow: 1;
       }
-    }
-
-    .currency {
-      margin-left: 4px;
-      color: $gray-2;
     }
   }
 
