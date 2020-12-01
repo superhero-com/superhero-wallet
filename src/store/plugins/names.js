@@ -24,9 +24,10 @@ export default (store) => {
       set(state, names) {
         state.owned = names;
       },
-      setDefault({ defaults }, { address, networkId, name: { name, revoked } }) {
-        if (revoked) Vue.delete(defaults, `${address}-${networkId}`);
-        else Vue.set(defaults, `${address}-${networkId}`, name);
+      setDefault({ defaults }, { address, name }) {
+        const networkId = store.state.sdk.getNetworkId();
+        if (name) Vue.set(defaults, `${address}-${networkId}`, name);
+        else Vue.delete(defaults, `${address}-${networkId}`);
       },
       setAutoExtend(state, { index, value }) {
         Vue.set(state.owned[index], 'autoExtend', value);
@@ -98,33 +99,20 @@ export default (store) => {
 
         commit('set', names);
 
-        const claimed = names.filter((n) => !n.pending && !n.revoked);
-        if (claimed.length) {
-          const { preferredChainName: nameFromBackend } = await fetchJson(
-            `${activeNetwork.backendUrl}/profile/${account.publicKey}`,
-          );
-          const prefferedName = claimed.find(({ name }) => name === nameFromBackend);
-
-          if (nameFromBackend && prefferedName) {
-            if (nameFromBackend === defaultName) return;
-            commit('setDefault', {
-              address: account.publicKey,
-              name: prefferedName,
-              networkId: sdk.getNetworkId(),
-            });
-          } else {
-            dispatch('setDefault', {
-              name: claimed[0],
-              address: account.publicKey,
-              modal: false,
-            });
-          }
-        } else if (defaultName) {
-          commit('setDefault', {
-            address: account.publicKey,
-            name: { revoked: true },
-            networkId: sdk.getNetworkId(),
-          });
+        const claimed = names.filter((n) => !n.pending && !n.revoked).map(({ name }) => name);
+        if (!claimed.length) {
+          if (defaultName) commit('setDefault', { address: account.publicKey });
+          return;
+        }
+        const { preferredChainName: defaultNameBackend } = await fetchJson(
+          `${activeNetwork.backendUrl}/profile/${account.publicKey}`,
+        ).catch(() => {});
+        if (!claimed.includes(defaultNameBackend)) {
+          await dispatch('setDefault', { address: account.publicKey, name: claimed[0] });
+          return;
+        }
+        if (defaultName !== defaultNameBackend) {
+          commit('setDefault', { address: account.publicKey, name: defaultNameBackend });
         }
       },
       async fetchAuctions({ rootState: { middleware } }) {
@@ -171,39 +159,26 @@ export default (store) => {
         }
       },
       async setDefault(
-        { rootState: { sdk }, commit, dispatch, rootGetters: { activeNetwork } },
-        { name, address, modal = true },
+        { rootState: { sdk }, commit, rootGetters: { activeNetwork } },
+        { name, address },
       ) {
-        commit('setDefault', { name, address, networkId: sdk.getNetworkId() });
-
-        try {
-          const response = await postJson(`${activeNetwork.backendUrl}/profile`, {
-            body: {
-              author: address,
-              preferredChainName: name.name,
-            },
-          });
-          const signedChallenge = Buffer.from(await sdk.signMessage(response.challenge)).toString(
-            'hex',
-          );
-          const respondChallenge = {
-            challenge: response.challenge,
-            signature: signedChallenge,
-          };
-          await postJson(`${activeNetwork.backendUrl}/profile`, {
-            body: respondChallenge,
-          });
-        } catch (e) {
-          if (modal) {
-            if (e.type === 'backend')
-              dispatch(
-                'modals/open',
-                { name: 'default', title: 'Backend error', msg: e.message },
-                { root: true },
-              );
-            else throw e;
-          }
-        }
+        const response = await postJson(`${activeNetwork.backendUrl}/profile`, {
+          body: {
+            author: address,
+            preferredChainName: name,
+          },
+        });
+        const signedChallenge = Buffer.from(await sdk.signMessage(response.challenge)).toString(
+          'hex',
+        );
+        const respondChallenge = {
+          challenge: response.challenge,
+          signature: signedChallenge,
+        };
+        await postJson(`${activeNetwork.backendUrl}/profile`, {
+          body: respondChallenge,
+        });
+        commit('setDefault', { name, address });
       },
     },
   });
