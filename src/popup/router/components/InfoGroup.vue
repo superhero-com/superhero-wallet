@@ -35,7 +35,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .info-group {
   text-align: left;

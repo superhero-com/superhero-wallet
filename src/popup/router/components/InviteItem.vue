@@ -120,7 +120,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .invite-row {
   padding: 1rem;

@@ -46,6 +46,7 @@
     "cordova-plugin-statusbar": "^2.4.3",
     "cordova-plugin-wkwebview-engine": "github:mwchambers/cordova-plugin-wkwebview-engine#da67d6bb6ce8597c38fc69e66b84566e34efea8d",
     "detect-browser": "^4.8.0",
+    "fontsource-roboto": "^3.0.3",
     "lodash-es": "^4.17.15",
     "qrcode.vue": "^1.6.3",
     "rxjs": "^6.6.3",

@@ -4,9 +4,9 @@
       <Close @click="closeMenu" data-cy="close-menu" />
     </li>
     <li class="account-icon-holder">
-      <div class="flex flex-align-center flex-justify-between">
+      <div class="flex flex-align-center">
         <Avatar :address="account.publicKey" :name="account.name" />
-        <div class="ml-8 mr-auto">
+        <div class="ml-8">
           <div class="f-14">{{ $t('pages.appVUE.mainAccount') }}</div>
           <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">
             {{ activeAccountName }}
@@ -124,7 +124,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .sidebar-menu {
   position: fixed;

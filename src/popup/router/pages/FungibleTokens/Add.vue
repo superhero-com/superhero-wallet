@@ -140,7 +140,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../common/variables';
+@import '../../../../styles/variables';
 
 .token-title {
   font-size: 1.1rem;

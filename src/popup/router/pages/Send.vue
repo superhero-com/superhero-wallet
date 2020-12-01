@@ -250,10 +250,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .d-flex {
   display: flex;
+}
+
+.primary-title-darker {
+  color: $text-color;
 }
 
 .withdraw.step1 {

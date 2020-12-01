@@ -80,7 +80,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .header {
   padding-top: env(safe-area-inset-top);

@@ -1,15 +1,16 @@
 <template>
   <div class="height-100 primary-bg">
     <div class="popup popup-no-padding">
-      <div v-if="!backedUpSeed && !tourRunning" class="noti" data-cy="seed-notif">
-        <span>
-          {{ $t('pages.account.youNeedTo') }}
-          <RouterLink :to="{ name: 'settings-security' }">{{
-            $t('pages.account.backup')
-          }}</RouterLink>
-          {{ $t('pages.account.yourSeedPhrase') }}
-        </span>
-      </div>
+      <i18n
+        v-if="!backedUpSeed"
+        path="pages.account.seedNotification"
+        tag="div"
+        class="seed-backup-notification"
+      >
+        <RouterLink :to="{ name: 'settings-security' }">{{
+          $t('pages.account.backup')
+        }}</RouterLink>
+      </i18n>
       <div class="tour__step1">
         <AccountInfo />
         <BalanceInfo />
@@ -97,7 +98,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .accountAddress {
   color: $white-color;
@@ -135,9 +136,10 @@ export default {
   margin-bottom: 26px;
 }
 
-.noti {
+.seed-backup-notification {
+  font-size: 14px;
   margin-top: 20px;
-  margin-bottom: 0;
   line-height: 14px;
+  color: $accent-color;
 }
 </style>

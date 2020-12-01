@@ -1,31 +1,33 @@
 <template>
   <div class="popup">
-    <ListItem class="permission-row">
+    <div class="permission-row">
       <CheckBox
         :value="!permissions.address"
         @input="changePermission('address', !permissions.address)"
       />
-      <p :class="{ checked: !permissions.address }">{{ $t('pages.permissions.login') }}</p>
-    </ListItem>
-    <ListItem class="permission-row">
+      <span :class="{ highlight: !permissions.address }">{{ $t('pages.permissions.login') }}</span>
+    </div>
+
+    <div class="permission-row">
       <CheckBox
         :value="!permissions.messageSign"
         @input="changePermission('messageSign', !permissions.messageSign)"
       />
-      <p :class="{ checked: !permissions.messageSign }">
+      <span :class="{ highlight: !permissions.messageSign }">
         {{ $t('pages.permissions.message-sign') }}
-      </p>
-    </ListItem>
-    <ListItem class="permission-row">
-      <p class="text-left">{{ $t('pages.permissions.transaction-sign') }}</p>
-      <Input
-        :value="permissions.transactionSignLimit || ''"
-        :error="error"
-        placeholder="no limit"
-        @input="(value) => changePermission('transactionSignLimit', value)"
-      />
-    </ListItem>
-    <div>
+      </span>
+    </div>
+
+    <div class="transaction-sign-limit">
+      <div class="permission-row">
+        {{ $t('pages.permissions.transaction-sign') }}
+        <Input
+          :value="permissions.transactionSignLimit || ''"
+          :error="error"
+          placeholder="no limit"
+          @input="(value) => changePermission('transactionSignLimit', value)"
+        />
+      </div>
       <RangeInput
         :value="permissions.transactionSignLimit"
         min="0"
@@ -33,26 +35,25 @@
         step="0.1"
         @input="(value) => changePermission('transactionSignLimit', value)"
       />
+      <div class="permission-row">
+        {{ $t('pages.permissions.spent-today') }}
+        <TokenAmount :amount="permissions.transactionSignLimit - limitLeft" />
+      </div>
+      <div class="permission-row">
+        {{ $t('pages.permissions.left-today') }}
+        <TokenAmount :amount="limitLeft" />
+      </div>
+      <div class="permission-row">
+        {{ $t('pages.account.balance') }}
+        <TokenAmount :amount="tokenBalance" />
+      </div>
     </div>
-    <ListItem class="permission-row">
-      <p class="text-left grow">{{ $t('pages.permissions.spent-today') }}</p>
-      <TokenAmount :amount="permissions.transactionSignLimit - limitLeft" />
-    </ListItem>
-    <ListItem class="permission-row">
-      <p class="text-left grow">{{ $t('pages.permissions.left-today') }}</p>
-      <TokenAmount :amount="limitLeft" />
-    </ListItem>
-    <ListItem class="permission-row">
-      <p class="text-left grow">{{ $t('pages.account.balance') }}</p>
-      <TokenAmount :amount="tokenBalance" />
-    </ListItem>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import CheckBox from '../components/CheckBox';
-import ListItem from '../components/ListItem';
 import Input from '../components/Input';
 import RangeInput from '../components/RangeInput';
 import TokenAmount from '../components/TokenAmount';
@@ -60,7 +61,6 @@ import { getLimitLeft, setLimitLeft } from '../../../store/modules/permissions';
 
 export default {
   components: {
-    ListItem,
     CheckBox,
     Input,
     RangeInput,
@@ -101,67 +101,61 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables.scss';
+@import '../../../styles/variables.scss';
 
 .popup {
+  font-size: 15px;
+  text-align: left;
+  color: $text-color;
+
   .permission-row {
-    margin: 30px 0 14px;
-    padding: 0;
+    display: flex;
+    margin: 30px 0;
 
-    &:nth-child(2),
-    &:last-child {
-      margin: 0 -12px;
-      padding: 0 12px 30px;
-      border-bottom: 1px solid $border-color;
+    + .permission-row {
+      margin-top: -16px;
     }
 
-    &:nth-last-child(2) {
-      margin-top: 0;
+    + .range-input {
+      display: block;
+      margin: -16px 0 0 0;
     }
 
-    /deep/ .ae-list-item {
-      padding: 0;
-      align-items: flex-start;
-      border: none;
-
-      .input-wrapper {
-        position: relative;
-
-        .input {
-          margin: 4px 0 0 30px;
-          padding-right: 35px;
-          width: 120px;
-        }
-
-        &::after {
-          content: 'AE';
-          position: absolute;
-          top: 10px;
-          left: 120px;
-          color: $secondary-color;
-          font-size: 15px;
-        }
-      }
-    }
-
-    p {
-      margin: 0;
-      font-size: 15px;
+    .highlight {
+      font-weight: 700;
       color: $white-1;
+    }
 
-      &:not(.checked) {
-        font-weight: normal;
-        color: $text-color;
-      }
-
-      &.grow {
-        flex-grow: 1;
-      }
+    .token-amount {
+      margin-left: auto;
+      color: $white-1;
     }
   }
 
-  .range-input {
-    margin: 0;
+  .transaction-sign-limit {
+    margin: 0 -12px;
+    padding: 0 12px;
+    border: 1px solid $border-color;
+    border-left: 0;
+    border-right: 0;
+
+    .input-wrapper {
+      position: relative;
+
+      ::v-deep .input {
+        margin: 4px 0 0 30px;
+        padding-right: 35px;
+        width: 120px;
+      }
+
+      &::after {
+        content: 'AE';
+        position: absolute;
+        top: 10px;
+        left: 120px;
+        color: $secondary-color;
+      }
+    }
   }
 }
 </style>

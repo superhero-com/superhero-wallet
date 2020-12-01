@@ -21,7 +21,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .name-row {
   text-decoration: none;

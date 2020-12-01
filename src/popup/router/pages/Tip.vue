@@ -329,7 +329,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .tour__step3 {
   margin: 0 auto;

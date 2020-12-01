@@ -109,9 +109,7 @@ export default {
     }
     if (!this.backedUpSeed) {
       this.$store.commit('addNotification', {
-        text: `
-          ${this.$t('pages.account.youNeedTo')} ${this.$t('pages.account.backup')}
-          ${this.$t('pages.account.yourSeedPhrase')}`,
+        text: this.$t('pages.account.seedNotification', [this.$t('pages.account.backup')]),
         path: '/securitySettings',
       });
     }
@@ -147,14 +145,8 @@ export default {
 };
 </script>
 
-<style lang="scss">
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
-@import '../common/base';
-@import '../common/extension';
-</style>
-
 <style lang="scss" scoped>
-@import '../common/variables';
+@import '../styles/variables';
 
 .ae-main {
   position: relative;
@@ -220,3 +212,5 @@ export default {
   }
 }
 </style>
+
+<style lang="scss" src="../styles/global.scss" />

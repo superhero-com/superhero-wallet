@@ -227,9 +227,8 @@
       "howToClaim": "How to claim AE",
       "balance": "Balance",
       "copied": "Copied!",
-      "youNeedTo": "You need to",
+      "seedNotification": "You need to {0} your seed phrase",
       "backup": "backup",
-      "yourSeedPhrase": "your seed phrase",
       "updateExtension": "New version available! Please update your extension.",
       "updateAvailable": "New version in the store is available!",
       "claim-name": "Register a name"
