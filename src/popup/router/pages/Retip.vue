@@ -95,11 +95,10 @@ export default {
           modal: false,
         });
         if (hash) {
-          await this.$store.dispatch('handlePendingTransaction', {
+          this.$store.commit('addPendingTransaction', {
             hash,
             amount: this.amount,
             domain: this.tip.url,
-            microTime: Date.now(),
             type: 'tip',
           });
           this.openCallbackOrGoHome(true);

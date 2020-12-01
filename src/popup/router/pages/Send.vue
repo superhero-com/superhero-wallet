@@ -231,10 +231,9 @@ export default {
       try {
         const { hash } = await this.sdk.spend(amount, receiver, { waitMined: false, modal: false });
         if (hash) {
-          await this.$store.dispatch('handlePendingTransaction', {
+          this.$store.commit('addPendingTransaction', {
             hash,
             amount,
-            microTime: Date.now(),
             type: 'spend',
           });
           this.$router.push('/account');

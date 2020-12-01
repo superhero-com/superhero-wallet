@@ -249,11 +249,10 @@ export default {
           },
         );
         if (hash) {
-          await this.$store.dispatch('handlePendingTransaction', {
+          this.$store.commit('addPendingTransaction', {
             hash,
             amount,
             tipUrl: this.url,
-            microTime: Date.now(),
             type: 'tip',
           });
           this.openCallbackOrGoHome(true);
