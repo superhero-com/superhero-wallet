@@ -85,11 +85,11 @@ export default {
     async changePermission(name, value) {
       let newValue = value;
       if (name === 'transactionSignLimit') {
-        if (Number.isNaN(newValue) || !Number.isFinite(newValue) || newValue < 0) {
+        newValue = +value;
+        if (Number.isNaN(newValue) || newValue < 0) {
           this.error = true;
           return;
         }
-        newValue = +value;
         this.limitLeft = newValue;
         await setLimitLeft(newValue, undefined);
       }
