@@ -10,18 +10,15 @@
     </div>
 
     <AmountSend
-      :amountError="amountError"
+      :amountError="amount && !isAmountValid"
       v-model="amount"
-      :errorMsg="amount && amount < minTipAmount"
+      :errorMsg="amount && isMinTipAmountError ? $t('pages.tipPage.minAmountError') : ''"
     />
     <div class="tip-note-preview mt-15">
       {{ tip.title }}
     </div>
 
-    <Button
-      @click="sendTip"
-      :disabled="amountError || !minCallFee || !tippingV1 || !tippingSupported"
-    >
+    <Button @click="sendTip" :disabled="!isAmountValid || !tippingV1 || !tippingSupported">
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button @click="openCallbackOrGoHome(false)">
@@ -47,31 +44,32 @@ export default {
   components: { AmountSend, UrlStatus, Button },
   data: () => ({
     tip: {},
-    amount: null,
-    amountError: false,
+    amount: '',
     loading: false,
-    minCallFee: null,
   }),
   computed: {
-    ...mapGetters(['account', 'tippingSupported', 'minTipAmount', 'activeNetwork']),
-    ...mapState(['balance', 'tippingV1', 'sdk']),
-    urlStatus() {
-      return this.$store.getters['tipUrl/status'](this.tip.url);
-    },
-  },
-  watch: {
-    amount() {
-      this.amountError = !+this.amount || this.amount < this.minTipAmount;
-    },
+    ...mapGetters(['tippingSupported']),
+    ...mapState({
+      tippingV1: 'tippingV1',
+      urlStatus(state, getters) {
+        return getters['tipUrl/status'](this.tip.url);
+      },
+      isMinTipAmountError(state, { minTipAmount }) {
+        return this.amount < minTipAmount;
+      },
+      isAmountValid({ sdk, balance }, { account, activeNetwork }) {
+        if (!sdk) return false;
+        const fee = calculateFee(TX_TYPES.contractCall, {
+          ...sdk.Ae.defaults,
+          contractId: activeNetwork.tipContractV1,
+          callerId: account.publicKey,
+        }).min;
+        return !this.isMinTipAmountError && balance - fee - this.amount >= 0;
+      },
+    }),
   },
   async created() {
     this.loading = true;
-    await this.$watchUntilTruly(() => this.sdk);
-    this.minCallFee = calculateFee(TX_TYPES.contractCall, {
-      ...this.sdk.Ae.defaults,
-      contractId: this.activeNetwork.tipContractV1,
-      callerId: this.account.publicKey,
-    }).min;
     await this.$watchUntilTruly(() => this.tippingV1);
     const tipId = +this.$route.query.id;
     if (!tipId) throw new Error('"id" param is missed');
@@ -81,11 +79,6 @@ export default {
   },
   methods: {
     async sendTip() {
-      const calculatedMaxValue =
-        this.balance > this.minCallFee ? this.balance - this.minCallFee : 0;
-      this.amountError = !this.amount || !this.minCallFee || calculatedMaxValue - this.amount <= 0;
-      this.amountError = this.amountError || !+this.amount || this.amount < this.minTipAmount;
-      if (this.amountError) return;
       const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
       this.loading = true;
       try {
