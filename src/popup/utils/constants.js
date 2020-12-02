@@ -48,12 +48,7 @@ export const calculateFee = (type, params) => {
       ...params,
     },
   });
-  const min = BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE);
-  const max = min.multipliedBy(10);
-  return {
-    min,
-    max,
-  };
+  return BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE);
 };
 
 export const defaultNetworks = [

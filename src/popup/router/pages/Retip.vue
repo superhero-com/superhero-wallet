@@ -63,7 +63,7 @@ export default {
           ...sdk.Ae.defaults,
           contractId: activeNetwork.tipContractV1,
           callerId: account.publicKey,
-        }).min;
+        });
         return !this.isMinTipAmountError && balance - fee - this.amount >= 0;
       },
     }),

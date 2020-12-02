@@ -151,10 +151,7 @@ export default {
         amount: '',
       },
       loading: false,
-      fee: {
-        min: 0,
-        max: 0,
-      },
+      fee: 0,
       successTx: {
         amount: '',
         from: '',
@@ -214,7 +211,7 @@ export default {
     async send() {
       const amount = aeToAettos(this.form.amount);
       const receiver = this.form.address;
-      const calculatedMaxValue = this.balance > this.fee.max ? this.balance - this.fee.max : 0;
+      const calculatedMaxValue = this.balance > this.fee ? this.balance - this.fee : 0;
       let errorModalType = '';
       if (receiver === '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
         errorModalType = 'incorrect-address';
