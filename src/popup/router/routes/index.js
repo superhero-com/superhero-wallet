@@ -30,12 +30,6 @@ import DonateError from '../pages/DonateError';
 import Address from '../pages/Address';
 import TokensPreview from '../pages/FungibleTokens/TokensPreview';
 import TokenDetails from '../pages/FungibleTokens/TokenDetails';
-import DeployToken from '../pages/FungibleTokens/Deploy';
-import AddToken from '../pages/FungibleTokens/Add';
-import MintToken from '../pages/FungibleTokens/Mint';
-import Allowances from '../pages/FungibleTokens/Allowances';
-import ManageAllowances from '../pages/FungibleTokens/ManageAllowances';
-import AllAllowances from '../pages/FungibleTokens/AllAllowances';
 import SignMessage from '../pages/SignMessage';
 import NamesList from '../pages/Names/List';
 import NameClaim from '../pages/Names/Claim';
@@ -350,56 +344,6 @@ export default [
     props: true,
     meta: {
       title: 'token-details',
-    },
-  },
-  {
-    path: '/deploy-token',
-    component: DeployToken,
-    meta: {
-      title: 'deploy-token',
-      notPersist: true,
-    },
-  },
-  {
-    path: '/add-token',
-    component: AddToken,
-    meta: {
-      title: 'add-token',
-      notPersist: true,
-    },
-  },
-  {
-    path: '/mint-token',
-    component: MintToken,
-    meta: {
-      title: 'mint-burn-token',
-      notPersist: true,
-    },
-  },
-  {
-    path: '/allowances',
-    component: Allowances,
-    meta: {
-      title: 'allowances',
-      notPersist: true,
-    },
-  },
-  {
-    path: '/manage-allowances/:type',
-    name: 'manage-allowances',
-    component: ManageAllowances,
-    props: true,
-    meta: {
-      title: 'allowances',
-      notPersist: true,
-    },
-  },
-  {
-    path: '/all-allowances',
-    component: AllAllowances,
-    meta: {
-      title: 'allowances',
-      notPersist: true,
     },
   },
   {

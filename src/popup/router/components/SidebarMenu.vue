@@ -95,19 +95,7 @@ import Avatar from './Avatar';
 export default {
   components: { Close, Arrow, Avatar },
   computed: mapGetters(['account', 'activeAccountName']),
-  data: () => ({ showSettingsDropdown: false, showTokensDropdown: false, balances: null }),
-  watch: {
-    showTokensDropdown(val) {
-      if (val) {
-        this.balances = setInterval(() => this.$store.dispatch('tokens/balances'), 10000);
-      } else {
-        clearInterval(this.balances);
-      }
-    },
-  },
-  created() {
-    this.$once('hook:beforeDestroy', () => clearInterval(this.balances));
-  },
+  data: () => ({ showSettingsDropdown: false }),
   methods: {
     menuClickHandler({ target }) {
       if (target.tagName === 'A') this.closeMenu();

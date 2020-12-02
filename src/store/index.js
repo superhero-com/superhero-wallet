@@ -9,7 +9,6 @@ import persistState from './plugins/persistState';
 import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
 import accounts from './plugins/account';
-import tokens from './plugins/tokens';
 import names from './plugins/names';
 import pendingTransactionHandler from './plugins/pendingTransactionHandler';
 import runMigrations from './migrations';
@@ -91,7 +90,6 @@ export default new Vuex.Store({
         mnemonic,
         saveErrorLog,
         tourStartBar,
-        tokens: { all },
         invites,
         notificationSettings,
         permissions,
@@ -112,7 +110,6 @@ export default new Vuex.Store({
         mnemonic,
         saveErrorLog,
         tourStartBar,
-        tokens: { all },
         invites,
         notificationSettings,
         permissions,
@@ -123,7 +120,6 @@ export default new Vuex.Store({
     modals,
     tipUrl,
     accounts,
-    tokens,
     names,
     pendingTransactionHandler,
   ],
