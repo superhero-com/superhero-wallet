@@ -10,16 +10,12 @@
       <a class="link-sm text-left">{{ tip.url }}</a>
     </div>
 
-    <AmountSend
-      :amountError="amount && !isAmountValid"
-      v-model="amount"
-      :errorMsg="amount && isMinTipAmountError ? $t('pages.tipPage.minAmountError') : ''"
-    />
+    <AmountSend :amountError="amount && !isAmountValid" v-model="amount" :errorMsg="errorMessage" />
     <div class="tip-note-preview mt-15">
       {{ tip.title }}
     </div>
 
-    <Button @click="sendTip" :disabled="!isAmountValid || !tippingV1 || !tippingSupported">
+    <Button @click="sendTip" :disabled="!isAmountValid || !tippingSupported">
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button @click="openCallbackOrGoHome(false)">
@@ -32,9 +28,9 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import BigNumber from 'bignumber.js';
 import tipping from 'tipping-contract/util/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
+import { convertToken } from '../../utils/helper';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 import AmountSend from '../components/AmountSend';
 import UrlStatus from '../components/UrlStatus';
@@ -48,38 +44,51 @@ export default {
     tip: {},
     amount: '',
     loading: false,
-    minCallFee: null,
-    tippingContract: null,
   }),
   computed: {
-    ...mapGetters(['account', 'tippingSupported', 'minTipAmount', 'activeNetwork']),
-    ...mapState(['balance', 'tippingV1', 'tippingV2', 'sdk']),
-    urlStatus() {
-      return this.$store.getters['tipUrl/status'](this.tip.url);
+    ...mapGetters(['tippingSupported']),
+    ...mapState('fungibleTokens', ['selectedToken']),
+    ...mapState({
+      tippingV1: 'tippingV1',
+      tippingV2: 'tippingV2',
+      urlStatus(state, getters) {
+        return getters['tipUrl/status'](this.tip.url);
+      },
+      isMinTipAmountError(state, { minTipAmount }) {
+        return this.amount < minTipAmount;
+      },
+      isAmountValid({ sdk, balance }, { account }) {
+        if (!sdk || !this.tippingContract) return false;
+        const fee = calculateFee(TX_TYPES.contractCall, {
+          ...sdk.Ae.defaults,
+          contractId: this.tippingContract.deployInfo.address,
+          callerId: account.publicKey,
+        });
+        if (this.selectedToken) {
+          return balance - fee >= 0 && this.selectedToken.convertedBalance > this.amount;
+        }
+        return !this.isMinTipAmountError && balance - fee - this.amount >= 0;
+      },
+    }),
+    tippingContract() {
+      return this.$route.query.id.includes('_v2') || this.$route.query.id.includes('_v3')
+        ? this.tippingV2
+        : this.tippingV1;
     },
-    shouldUseV2Contract() {
-      return this.$route.query.id.includes('_v2') || this.$route.query.id.includes('_v3');
-    },
-  },
-  watch: {
-    amount() {
-      this.amountError = !+this.amount || this.amount < this.minTipAmount;
+    errorMessage() {
+      if (this.selectedToken) {
+        return this.selectedToken.convertedBalance < this.amount
+          ? this.$t('pages.tipPage.insufficientBalance')
+          : '';
+      }
+      return this.amount && this.isMinTipAmountError ? this.$t('pages.tipPage.minAmountError') : '';
     },
   },
   async created() {
     this.loading = true;
-    await this.$watchUntilTruly(() => this.sdk);
-    this.minCallFee = calculateFee(TX_TYPES.contractCall, {
-      ...this.sdk.Ae.defaults,
-      contractId: this.shouldUseV2Contract
-        ? this.activeNetwork.tipContractV2
-        : this.activeNetwork.tipContractV1,
-      callerId: this.account.publicKey,
-    }).min;
-    await this.$watchUntilTruly(() => this.tippingV1, this.tippingV2);
+    await this.$watchUntilTruly(() => this.tippingV1);
     const tipId = this.$route.query.id;
     if (!tipId) throw new Error('"id" param is missed');
-    this.tippingContract = this.shouldUseV2Contract ? this.tippingV2 : this.tippingV1;
     const state = await this.tippingContract.methods.get_state();
     const tipsAndRetips = await tipping.getTipsRetips(state);
     this.tip = tipsAndRetips.tips.find(({ id }) => id === tipId);
@@ -87,26 +96,36 @@ export default {
   },
   methods: {
     async sendTip() {
-      const amount = BigNumber(this.amount).shiftedBy(MAGNITUDE);
+      const amount = convertToken(
+        this.amount,
+        this.selectedToken ? this.selectedToken.decimals : MAGNITUDE,
+      ).toFixed();
       this.loading = true;
       try {
-        const { hash } = await this.tippingContract.methods.retip(
-          Number(this.tip.id.split('_')[0]),
-          {
+        let retipResponse = null;
+        if (this.selectedToken) {
+          await this.$store.dispatch('fungibleTokens/createOrChangeAllowance', this.amount);
+          retipResponse = await this.tippingV2.methods.retip_token(
+            +this.tip.id.split('_')[0],
+            this.selectedToken.contract,
+            amount,
+            {
+              waitMined: false,
+            },
+          );
+        } else {
+          retipResponse = await this.tippingContract.methods.retip(+this.tip.id.split('_')[0], {
             amount,
             waitMined: false,
-            modal: false,
-          },
-        );
-        if (hash) {
-          this.$store.commit('addPendingTransaction', {
-            hash,
-            amount: this.amount,
-            domain: this.tip.url,
-            type: 'tip',
           });
-          this.openCallbackOrGoHome(true);
         }
+        this.$store.commit('addPendingTransaction', {
+          hash: retipResponse.hash,
+          amount: this.amount,
+          domain: this.tip.url,
+          type: 'tip',
+        });
+        this.openCallbackOrGoHome(true);
       } catch (e) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
         e.payload = this.tip;

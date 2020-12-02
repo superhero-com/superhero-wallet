@@ -848,7 +848,8 @@
       "notClaimableUrlInfo": "Third party issues prevent us from enabling direct delivery of tips to the URL owner. You are sending this tip at your own risk.",
       "notVerifiedUrlInfo": "This URL has not yet been verified. The owner of the URL has to create account to claim their tokens.",
       "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed.",
-      "minAmountError": "Tips should be over 0.01 USD in tokens in order to push through."
+      "minAmountError": "Tips should be over 0.01 USD in tokens in order to push through.",
+      "insufficientBalance": "The token balance should be greater than the tip token value."
     },
     "successTip": {
       "sendMore": "Send more tips",
