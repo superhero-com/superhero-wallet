@@ -33,7 +33,7 @@
               data-cy="review-withdraw"
               half
               @click="step = 2"
-              :disabled="!form.address || !+form.amount || form.amount <= 0"
+              :disabled="!validAddress || !+form.amount || form.amount <= 0"
               >{{ $t('pages.send.review') }}</Button
             >
           </div>
