@@ -41,7 +41,6 @@ import { detect } from 'detect-browser';
 import { IN_FRAME } from './utils/helper';
 import { AEX2_METHODS, NOTIFICATION_SETTINGS } from './utils/constants';
 import { postMessage } from './utils/connection';
-import { fetchAndSetLocale } from './utils/i18nHelper';
 import Header from './router/components/Header';
 import SidebarMenu from './router/components/SidebarMenu';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus';
@@ -89,12 +88,6 @@ export default {
   },
   async created() {
     await this.$watchUntilTruly(() => this.isRestored);
-    this.$watch(
-      ({ current: { language } }) => [language],
-      ([language]) => {
-        fetchAndSetLocale(language);
-      },
-    );
 
     this.$store.dispatch('getCurrencies');
     this.$store.dispatch('fungibleTokens/getAeternityData');

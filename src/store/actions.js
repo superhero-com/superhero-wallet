@@ -9,7 +9,7 @@ import {
   fetchJson,
   postJson,
 } from '../popup/utils/helper';
-import { i18n } from '../popup/utils/i18nHelper';
+import { i18n } from './plugins/languages';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
 import { AEX2_METHODS } from '../popup/utils/constants';
 

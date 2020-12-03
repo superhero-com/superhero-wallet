@@ -1,5 +1,5 @@
 import { Universal, MemoryAccount, Crypto } from '@aeternity/aepp-sdk/es';
-import { i18n } from '../../popup/utils/i18nHelper';
+import { i18n } from '../plugins/languages';
 
 export default {
   namespaced: true,
