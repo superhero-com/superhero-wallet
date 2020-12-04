@@ -15,7 +15,7 @@ import {
 import { getState } from '../store/plugins/persistState';
 import popups from './popup-connection';
 import walletController from './wallet-controller';
-import { checkPermissions } from '../store/modules/permissions';
+import store from './store';
 
 global.browser = require('webextension-polyfill');
 
@@ -110,7 +110,8 @@ export default {
     return extractHostName(url);
   },
   async shouldOpenPopup(aepp, action) {
-    if (await checkPermissions(action.method)) return true;
+    if (await store.dispatch('permissions/checkPermissions', { method: action.method }))
+      return true;
     action.accept();
     return false;
   },
@@ -230,7 +231,10 @@ export default {
         },
       } = client;
       const isConnected = await getAeppAccountPermission(extractHostName(url), address);
-      if ((await checkPermissions('address.subscribe')) && !isConnected) {
+      if (
+        (await store.dispatch('permissions/checkPermissions', { method: 'address.subscribe' })) &&
+        !isConnected
+      ) {
         const accept = await this.showPopup({ action: {}, aepp: client, type: 'connectConfirm' });
         if (accept) {
           this.sdk.selectAccount(address);

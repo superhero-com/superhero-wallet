@@ -11,9 +11,7 @@ import {
   toURL,
   getAeppAccountPermission,
 } from '../popup/utils/helper';
-
 import Logger from './logger';
-import { checkPermissions } from '../store/modules/permissions';
 
 async function initMiddleware() {
   const { middlewareUrl } = store.getters.activeNetwork;
@@ -153,7 +151,7 @@ export default {
           const originUrl = toURL(origin);
           if (
             (await getAeppAccountPermission(originUrl.hostname, store.state.account.publicKey)) &&
-            !(await checkPermissions(action.method))
+            !(await store.dispatch('permissions/checkPermissions', { method: action.method }))
           ) {
             action.accept();
             return;
@@ -181,7 +179,7 @@ export default {
         onSubscription: acceptCb,
         onSign: acceptCb,
         async onMessageSign(aepp, action, origin) {
-          if (!(await checkPermissions(action.method))) {
+          if (!(await store.dispatch('permissions/checkPermissions', { method: action.method }))) {
             action.accept();
             return;
           }

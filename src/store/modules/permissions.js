@@ -1,41 +1,4 @@
-import Vue from 'vue';
-import { getState } from '../plugins/persistState';
-import { LIMIT_KEY } from '../../popup/utils/constants';
 import { aettosToAe } from '../../popup/utils/helper';
-
-export const setLimitLeft = async (limitLeft, firstAskedOn) =>
-  browser.storage.local.set({
-    [LIMIT_KEY]: { limitLeft, firstAskedOn },
-  });
-
-export const getLimitLeft = async () => (await browser.storage.local.get(LIMIT_KEY))[LIMIT_KEY];
-
-export const checkPermissions = async (method, params = {}) => {
-  const permissionsMethods = {
-    'connection.open': 'address',
-    'address.subscribe': 'address',
-    'message.sign': 'messageSign',
-    'transaction.sign': 'transactionSignLimit',
-  };
-
-  const { permissions } = await getState();
-  const value = permissions?.[permissionsMethods[method]];
-
-  if (typeof value !== 'number') return value;
-
-  const { amount = 0, fee = 0, nameFee = 0 } = params;
-  let { limitLeft = value, firstAskedOn = new Date().toJSON() } = (await getLimitLeft()) || {};
-
-  if (new Date() - new Date(firstAskedOn) >= 24 * 60 * 60 * 1000) {
-    firstAskedOn = new Date().toJSON();
-    limitLeft = value;
-  }
-  limitLeft -= aettosToAe(amount + fee + nameFee);
-  if (limitLeft < 0) limitLeft = 0;
-  await setLimitLeft(limitLeft, firstAskedOn);
-
-  return limitLeft === 0;
-};
 
 export default {
   namespaced: true,
@@ -44,11 +7,49 @@ export default {
     address: true,
     messageSign: true,
     transactionSignLimit: 0,
+    transactionSignLimitLeft: 0,
+    transactionSignFirstAskedOn: null,
   },
 
   mutations: {
-    setPermissionValue(state, { name, value }) {
-      Vue.set(state, name, value);
+    togglePermission(state, name) {
+      state[name] = !state[name];
+    },
+    setTransactionSignLimit(state, value) {
+      state.transactionSignLimit = value;
+      state.transactionSignLimitLeft = value;
+      state.transactionSignFirstAskedOn = new Date();
+    },
+    setTransactionSignLimitLeft(state, value) {
+      state.transactionSignLimitLeft = value;
+    },
+    resetTransactionSignLimitLeft(state) {
+      state.transactionSignLimitLeft = state.transactionSignLimit;
+      state.transactionSignFirstAskedOn = new Date();
+    },
+  },
+
+  actions: {
+    checkTransactionSignPermission({ state, commit }, { amount = 0, fee = 0, nameFee = 0 }) {
+      const { transactionSignLimit, transactionSignFirstAskedOn } = state;
+      if (!transactionSignLimit) return true;
+      if (new Date() - new Date(transactionSignFirstAskedOn) >= 24 * 60 * 60 * 1000) {
+        commit('resetTransactionSignLimitLeft');
+      }
+
+      const limitLeft = state.transactionSignLimitLeft - aettosToAe(amount + fee + nameFee);
+      if (limitLeft < 0) return true;
+      commit('setTransactionSignLimitLeft', limitLeft);
+      return false;
+    },
+    checkPermissions({ dispatch, state }, { method, params = {} }) {
+      if (method === 'transaction.sign') return dispatch('checkTransactionSignPermission', params);
+      const permissionsMethods = {
+        'connection.open': 'address',
+        'address.subscribe': 'address',
+        'message.sign': 'messageSign',
+      };
+      return state[permissionsMethods[method]];
     },
   },
 };
