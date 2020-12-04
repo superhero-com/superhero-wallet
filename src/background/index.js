@@ -1,4 +1,5 @@
 import { isEmpty } from 'lodash-es';
+import '../lib/initEnv';
 import '../lib/initPolyfills';
 import initDeeplinkHandler from './deeplink-handler';
 import { switchNode } from './utils';
@@ -15,9 +16,7 @@ import walletController from './wallet-controller';
 import Logger from '../lib/logger';
 import { getState } from '../store/plugins/persistState';
 
-const inBackground = window.location.href.includes('_generated_background_page.html');
-
-if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
+if (window.IS_EXTENSION_BACKGROUND) {
   Logger.init({ background: true });
   RedirectChainNames.init();
   initDeeplinkHandler();

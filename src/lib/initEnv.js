@@ -10,3 +10,5 @@ window.RUNNING_IN_POPUP =
   (window.location.pathname.includes('popup.html') ||
     (process.env.RUNNING_IN_TESTS && window.location.pathname.includes('popup')));
 window.POPUP_TYPE = url.searchParams.get('type') || null;
+window.IS_EXTENSION_BACKGROUND =
+  process.env.IS_EXTENSION && window.location.href.endsWith('_generated_background_page.html');
