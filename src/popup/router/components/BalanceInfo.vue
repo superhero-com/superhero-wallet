@@ -1,34 +1,32 @@
 <template>
   <div class="external-svg" data-cy="balance-info">
     <div class="balance no-sign">
-      <div class="amount">
-        <div class="balance-dropdown" data-cy="tokens-dropdown">
+      <div class="balance-dropdown" data-cy="tokens-dropdown">
+        <Dropdown
+          v-if="tokenBalancesOptions.length"
+          :options="tokenBalancesOptions"
+          :method="changeToken"
+          :selected="currentToken"
+          is-custom
+        />
+        <span class="display-value text-ellipsis">{{
+          selectedToken ? selectedToken.convertedBalance : tokenBalance.toFixed(2)
+        }}</span>
+        <span class="token-symbol">{{ !selectedToken ? $t('ae') : selectedToken.symbol }}</span>
+        <ExpandedAngleArrow class="expand-arrow" />
+      </div>
+      <div v-if="currentToken === 'default'" class="currenciesgroup">
+        <div class="balance-dropdown" data-cy="currency-dropdown">
           <Dropdown
-            v-if="tokenBalancesOptions.length"
-            :options="tokenBalancesOptions"
-            :method="changeToken"
-            :selected="currentToken"
+            :options="currenciesOptions"
+            :method="switchCurrency"
+            :selected="current.currency"
             is-custom
           />
-          <span class="display-value text-ellipsis">{{
-            selectedToken ? selectedToken.convertedBalance : tokenBalance.toFixed(2)
-          }}</span>
-          <span class="token-symbol">{{ !selectedToken ? $t('ae') : selectedToken.symbol }}</span>
+          <!--eslint-disable-next-line vue-i18n/no-raw-text-->
+          <span class="approx-sign">~</span>
+          <span class="display-value text-ellipsis">{{ formatCurrency(balanceCurrency) }}</span>
           <ExpandedAngleArrow class="expand-arrow" />
-        </div>
-        <div v-if="currentToken === 'default'" class="currenciesgroup">
-          <div class="balance-dropdown" data-cy="currency-dropdown">
-            <Dropdown
-              :options="currenciesOptions"
-              :method="switchCurrency"
-              :selected="current.currency"
-              is-custom
-            />
-            <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-            <span class="approx-sign">~</span>
-            <span class="display-value text-ellipsis">{{ formatCurrency(balanceCurrency) }}</span>
-            <ExpandedAngleArrow class="expand-arrow" />
-          </div>
         </div>
       </div>
     </div>
@@ -152,15 +150,11 @@ export default {
 
   .balance {
     font-size: 26px;
-    color: $white-color;
+    color: $text-color;
     font-weight: normal;
     text-align: right;
     line-height: 34px;
     margin: 0 auto;
-
-    .amount {
-      color: $text-color;
-    }
   }
 }
 

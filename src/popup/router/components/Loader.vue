@@ -1,18 +1,16 @@
 <template>
-  <div>
-    <div class="loading" data-cy="loader">
-      <div class="center">
-        <span v-if="content != ''">{{ content }}</span>
-        <br v-if="content != ''" />
-        <ae-loader v-if="size == 'small'" />
-      </div>
-      <transition name="fadeOut" v-if="size == 'big'">
-        <span v-if="type == 'transparent'" class="main-loader main-loader-transparent">
-          <ae-loader />
-        </span>
-        <Welcome v-else class="main-loader main-loader-solid" />
-      </transition>
+  <div class="loading" data-cy="loader">
+    <div class="center">
+      <span v-if="content != ''">{{ content }}</span>
+      <br v-if="content != ''" />
+      <ae-loader v-if="size == 'small'" />
     </div>
+    <transition name="fadeOut" v-if="size == 'big'">
+      <span v-if="type == 'transparent'" class="main-loader main-loader-transparent">
+        <ae-loader />
+      </span>
+      <Welcome v-else class="main-loader main-loader-solid" />
+    </transition>
   </div>
 </template>
 

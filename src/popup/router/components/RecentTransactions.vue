@@ -21,9 +21,7 @@
         {{ $t('pages.recentTransactions.noTransactionsFound') }}
       </p>
     </div>
-    <div class="loader-holder">
-      <Loader v-if="loading" size="small" type="none" />
-    </div>
+    <Loader v-if="loading" size="small" type="none" />
   </div>
 </template>
 
