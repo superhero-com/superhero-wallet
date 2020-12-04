@@ -9,7 +9,7 @@ import persistState from './plugins/persistState';
 import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
 import accounts from './plugins/account';
-import names from './plugins/names';
+import namesPlugin from './plugins/names';
 import pendingTransactionHandler from './plugins/pendingTransactionHandler';
 import runMigrations from './migrations';
 import invitesModule from './modules/invites';
@@ -74,7 +74,7 @@ export default new Vuex.Store({
         balance,
         currencies,
         userNetworks,
-        names: { owned, defaults } = {},
+        names,
         nextCurrenciesFetch,
         tip,
         connectedAepps,
@@ -94,7 +94,7 @@ export default new Vuex.Store({
         balance,
         currencies,
         userNetworks,
-        names: { owned, defaults },
+        names,
         nextCurrenciesFetch,
         tip,
         connectedAepps,
@@ -113,7 +113,7 @@ export default new Vuex.Store({
     modals,
     tipUrl,
     accounts,
-    names,
+    namesPlugin,
     pendingTransactionHandler,
   ],
   modules: {
