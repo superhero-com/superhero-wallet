@@ -1,19 +1,19 @@
 import { isEmpty } from 'lodash-es';
-import './lib/initPolyfills';
-import initDeeplinkHandler from './lib/deeplink-handler';
-import { switchNode } from './lib/background-utils';
-import popupConnections from './lib/popup-connection';
-import RedirectChainNames from './lib/redirect-chain-names';
-import rpcWallet from './lib/rpcWallet';
-import TipClaimRelay from './lib/tip-claim-relay';
-import { buildTx } from './popup/utils';
-import { popupProps } from './popup/utils/config';
-import { AEX2_METHODS, CONNECTION_TYPES, HDWALLET_METHODS } from './popup/utils/constants';
-import { detectConnectionType } from './popup/utils/helper';
-import { getPhishingUrls, phishingCheckUrl, setPhishingUrl } from './popup/utils/phishing-detect';
+import '../lib/initPolyfills';
+import initDeeplinkHandler from './deeplink-handler';
+import { switchNode } from './utils';
+import popupConnections from './popup-connection';
+import RedirectChainNames from './redirect-chain-names';
+import wallet from './wallet';
+import TipClaimRelay from './tip-claim-relay';
+import { buildTx } from '../popup/utils';
+import { popupProps } from '../popup/utils/config';
+import { AEX2_METHODS, CONNECTION_TYPES, HDWALLET_METHODS } from '../popup/utils/constants';
+import { detectConnectionType } from '../popup/utils/helper';
+import { getPhishingUrls, phishingCheckUrl, setPhishingUrl } from '../popup/utils/phishing-detect';
 import walletController from './wallet-controller';
-import Logger from './lib/logger';
-import { getState } from './store/plugins/persistState';
+import Logger from '../lib/logger';
+import { getState } from '../store/plugins/persistState';
 
 const inBackground = window.location.href.includes('_generated_background_page.html');
 
@@ -40,7 +40,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
     const { method, params, from, type, data, url: tipUrl } = msg;
 
     if (method === 'reload') {
-      rpcWallet.disconnect();
+      wallet.disconnect();
       window.location.reload();
       return null;
     }
@@ -92,7 +92,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
     return true;
   });
 
-  rpcWallet.init();
+  wallet.init();
   browser.runtime.onConnect.addListener(async (port) => {
     if (port.sender.id !== browser.runtime.id) return;
 
@@ -102,7 +102,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
           if (HDWALLET_METHODS.includes(type)) {
             port.postMessage({ uuid, res: await walletController[type](payload) });
           }
-          if (AEX2_METHODS[type]) rpcWallet[type](payload);
+          if (AEX2_METHODS[type]) wallet[type](payload);
 
           if (type === 'SWITCH_NETWORK') {
             await switchNode();
@@ -113,7 +113,7 @@ if (process.env.IS_EXTENSION && require.main.i === module.id && inBackground) {
         popupConnections.addConnection(new URL(port.sender.url).searchParams.get('id'), port);
         break;
       case CONNECTION_TYPES.OTHER:
-        rpcWallet.addConnection(port);
+        wallet.addConnection(port);
         break;
       default:
         throw new Error('Unknown connection type');

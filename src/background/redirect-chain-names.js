@@ -1,4 +1,4 @@
-import { getAddressFromChainName } from './background-utils';
+import { getAddressFromChainName } from './utils';
 import { AGGREGATOR_URL } from '../popup/utils/constants';
 
 export default {

@@ -14,7 +14,7 @@ import {
 } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 import popups from './popup-connection';
-import walletController from '../wallet-controller';
+import walletController from './wallet-controller';
 import { checkPermissions } from '../store/modules/permissions';
 
 global.browser = require('webextension-polyfill');

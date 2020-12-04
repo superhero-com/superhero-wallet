@@ -2,8 +2,8 @@ import { uniq } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import { postJson } from '../popup/utils/helper';
 import { defaultNetwork } from '../popup/utils/constants';
-import { contractCallStatic, getActiveAccount, getAddressFromChainName } from './background-utils';
-import Logger from './logger';
+import { contractCallStatic, getActiveAccount, getAddressFromChainName } from './utils';
+import Logger from '../lib/logger';
 
 export default {
   checkAddressMatch(account, addresses) {
