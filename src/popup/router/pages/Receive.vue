@@ -1,5 +1,5 @@
 <template>
-  <div class="popup popup-no-padding" data-cy="top-up-container">
+  <div class="popup popup-no-padding top-up-container" data-cy="top-up-container">
     <p class="primary-title text-left mt-20 f-14 mx-20">
       {{ $t('pages.receive.heading') }}
     </p>
@@ -40,7 +40,7 @@ export default {
     margin-left: 20px;
   }
 
-  .qrcode canvas {
+  ::v-deep .qrcode canvas {
     border: 5px solid #fff;
   }
 }
