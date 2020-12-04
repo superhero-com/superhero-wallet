@@ -1,6 +1,6 @@
 <template>
-  <div class="external-svg" data-cy="balance-info">
-    <div class="balance no-sign">
+  <div class="balance-info" data-cy="balance-info">
+    <div class="balance-wrapper">
       <div class="balance-dropdown" data-cy="tokens-dropdown">
         <Dropdown
           v-if="tokenBalancesOptions.length"
@@ -9,25 +9,27 @@
           :selected="currentToken"
           is-custom
         />
-        <span class="display-value text-ellipsis">{{
-          selectedToken ? selectedToken.convertedBalance : tokenBalance.toFixed(2)
-        }}</span>
+        <span class="display-value text-ellipsis">
+          {{ selectedToken ? selectedToken.convertedBalance : tokenBalance.toFixed(2) }}
+        </span>
         <span class="token-symbol">{{ !selectedToken ? $t('ae') : selectedToken.symbol }}</span>
         <ExpandedAngleArrow class="expand-arrow" />
       </div>
-      <div v-if="currentToken === 'default'" class="currenciesgroup">
-        <div class="balance-dropdown" data-cy="currency-dropdown">
-          <Dropdown
-            :options="currenciesOptions"
-            :method="switchCurrency"
-            :selected="current.currency"
-            is-custom
-          />
-          <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-          <span class="approx-sign">~</span>
-          <span class="display-value text-ellipsis">{{ formatCurrency(balanceCurrency) }}</span>
-          <ExpandedAngleArrow class="expand-arrow" />
-        </div>
+      <div
+        v-if="currentToken === 'default'"
+        class="currenciesgroup balance-dropdown"
+        data-cy="currency-dropdown"
+      >
+        <Dropdown
+          :options="currenciesOptions"
+          :method="switchCurrency"
+          :selected="current.currency"
+          is-custom
+        />
+        <!--eslint-disable-next-line vue-i18n/no-raw-text-->
+        <span class="approx-sign">~</span>
+        <span class="display-value text-ellipsis">{{ formatCurrency(balanceCurrency) }}</span>
+        <ExpandedAngleArrow class="expand-arrow" />
       </div>
     </div>
   </div>
@@ -92,7 +94,6 @@ export default {
 
 .currenciesgroup {
   font-size: 18px;
-  display: flex;
   line-height: 24px;
   font-weight: 500;
 
@@ -100,18 +101,15 @@ export default {
     margin-top: 3px;
     color: $text-color;
   }
-
-  .balance-dropdown {
-    margin-left: auto;
-  }
 }
 
 .balance-dropdown {
+  margin-left: auto;
   position: relative;
+  width: max-content;
 
   .dropdown {
     position: absolute;
-    left: 0;
   }
 
   .custom > button,
@@ -122,10 +120,6 @@ export default {
   .token-symbol {
     color: $secondary-color;
   }
-
-  :last-child {
-    vertical-align: middle;
-  }
 }
 
 .display-value {
@@ -134,36 +128,27 @@ export default {
   vertical-align: text-top;
 }
 
-.tour__step1:not(.v-tour__target--highlighted) .external-svg {
+.tour__step1:not(.v-tour__target--highlighted) .balance-info {
   z-index: 5;
 }
 
-.external-svg {
+.balance-info {
   height: 76px;
-  position: relative;
-  text-align: center;
   background-image: url('../../../icons/acc_balance.png');
   border-bottom: 2px solid $transactions-bg;
   display: flex;
   padding: 0 20px 10px 20px;
   margin-top: 15px;
+  color: $text-color;
+  font-size: 26px;
+  line-height: 34px;
 
-  .balance {
-    font-size: 26px;
-    color: $text-color;
-    font-weight: normal;
-    text-align: right;
-    line-height: 34px;
+  .balance-wrapper {
     margin: 0 auto;
   }
 }
 
 .expand-arrow {
   color: $gray-2;
-}
-
-.approx-sign,
-.expand-arrow {
-  margin: 0 -7px;
 }
 </style>
