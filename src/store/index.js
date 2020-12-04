@@ -62,14 +62,7 @@ export default new Vuex.Store({
     loginTargetLocation: { name: 'account' },
   },
   getters,
-  mutations: {
-    setState(state, newState) {
-      Object.entries({ ...state, ...newState }).forEach(([name, value]) =>
-        Vue.set(state, name, value),
-      );
-    },
-    ...mutations,
-  },
+  mutations,
   actions,
   plugins: [
     persistState(

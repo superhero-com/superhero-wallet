@@ -12,8 +12,10 @@ const getStateRaw = async () => (await browser.storage.local.get(KEY))[KEY];
 export const getState = async () => (await getStateRaw()) || {};
 
 export default (reducerLoad, reducerSave) => async (store) => {
-  store.commit('setState', {
-    ...(await reducerLoad(await getStateRaw())),
+  const loadedState = await reducerLoad(await getStateRaw());
+  store.replaceState({
+    ...store.state,
+    ...loadedState,
     isRestored: true,
   });
   const dontSaveState = store.subscribe((mutation, state) => setState(reducerSave(state)));
