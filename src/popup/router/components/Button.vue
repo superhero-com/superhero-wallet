@@ -57,10 +57,6 @@ export default {
   line-height: 40px;
   max-height: 40px;
 
-  span {
-    color: $button-text-color !important;
-  }
-
   &.disabled {
     opacity: 0.4;
     pointer-events: none;
