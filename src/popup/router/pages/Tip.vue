@@ -266,11 +266,10 @@ export default {
           convertToken(this.amount, this.selectedToken.decimals).toFixed(),
         );
         if (hash) {
-          await this.$store.dispatch('setPendingTx', {
+          this.$store.commit('addPendingTransaction', {
             hash,
             amount: this.amount,
             tipUrl: this.url,
-            time: Date.now(),
             type: 'tip',
           });
           await this.$store.dispatch('fungibleTokens/loadTokenBalances', this.account.publicKey);
