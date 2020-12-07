@@ -89,44 +89,8 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '../../../styles/variables';
-
-.currenciesgroup {
-  font-size: 18px;
-  line-height: 24px;
-  font-weight: 500;
-
-  .approx-sign {
-    margin-top: 3px;
-    color: $text-color;
-  }
-}
-
-.balance-dropdown {
-  margin-left: auto;
-  position: relative;
-  width: max-content;
-
-  .dropdown {
-    position: absolute;
-  }
-
-  .custom > button,
-  .custom > button:active:not(:disabled) {
-    opacity: 0;
-  }
-
-  .token-symbol {
-    color: $secondary-color;
-  }
-}
-
-.display-value {
-  display: inline-block;
-  max-width: 200px;
-  vertical-align: text-top;
-}
 
 .balance-info {
   height: 76px;
@@ -141,10 +105,46 @@ export default {
 
   .balance-wrapper {
     margin: 0 auto;
-  }
-}
 
-.expand-arrow {
-  color: $gray-2;
+    .balance-dropdown {
+      margin-left: auto;
+      position: relative;
+      width: max-content;
+
+      .dropdown {
+        position: absolute;
+
+        ::v-deep .custom > button,
+        .custom > button:active:not(:disabled) {
+          opacity: 0;
+        }
+      }
+
+      .token-symbol {
+        color: $secondary-color;
+      }
+
+      &.currenciesgroup {
+        font-size: 18px;
+        line-height: 24px;
+        font-weight: 500;
+
+        .approx-sign {
+          margin-top: 3px;
+          color: $text-color;
+        }
+      }
+
+      .display-value {
+        display: inline-block;
+        max-width: 200px;
+        vertical-align: text-top;
+      }
+
+      .expand-arrow {
+        color: $gray-2;
+      }
+    }
+  }
 }
 </style>
