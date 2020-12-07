@@ -107,5 +107,15 @@ export default {
         decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
       ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
     },
+    async transfer({ rootState: { sdk }, state: { selectedToken } }, [toAccount, amount, option]) {
+      const tokenContract = await sdk.getContractInstance(FUNGIBLE_TOKEN_CONTRACT, {
+        contractAddress: selectedToken.contract,
+      });
+      return tokenContract.methods.transfer(
+        toAccount,
+        convertToken(amount, selectedToken.decimals).toFixed(),
+        option,
+      );
+    },
   },
 };

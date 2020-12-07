@@ -1,5 +1,5 @@
 export default (store) => {
-  const waitTransactionMined = async ({ hash, type, amount, tipUrl }) => {
+  const waitTransactionMined = async ({ hash, type, amount, tipUrl, recipientId }) => {
     try {
       const transaction = await store.state.sdk.poll(hash);
       switch (type) {
@@ -10,6 +10,12 @@ export default (store) => {
           store.dispatch('router/push', {
             name: 'send',
             params: { redirectstep: 3, successtx: transaction },
+          });
+          break;
+        case 'spendToken':
+          store.dispatch('router/push', {
+            name: 'send',
+            params: { redirectstep: 3, successtx: { ...transaction, amount, recipientId } },
           });
           break;
         default:

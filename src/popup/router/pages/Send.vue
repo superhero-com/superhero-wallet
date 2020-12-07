@@ -7,7 +7,9 @@
         <div class="popup withdraw step1">
           <p class="primary-title text-left mb-8 f-16">
             {{ $t('pages.tipPage.heading') }}
-            <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+            <span class="secondary-text">{{
+              selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid')
+            }}</span>
             {{ $t('pages.tipPage.to') }}
           </p>
           <div class="d-flex">
@@ -62,10 +64,11 @@
           />
           <InfoGroup :label="$t('pages.send.amount')">
             <div class="text-center">
-              <span data-cy="review-amount" class="amount">
-                {{ parseFloat(form.amount).toFixed(3) }} {{ $t('pages.appVUE.aeid') }}
-              </span>
-              <span class="currencyamount">
+              <span data-cy="review-amount" class="amount"
+                >{{ parseFloat(form.amount).toFixed(3) }}
+                {{ selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid') }}</span
+              >
+              <span v-if="!selectedToken" class="currencyamount">
                 <!--eslint-disable-line vue-i18n/no-raw-text-->
                 ~
                 <span>
@@ -95,14 +98,16 @@
         <div class="popup withdraw step2">
           <h3 class="heading-1 my-15 center">
             <div class="flex flex-align-center flex-justify-content-center">
-              <Heart />
               <span class="ml-7">{{ $t('pages.send.tx-success') }}</span>
             </div>
           </h3>
           <p class="primary-title primary-title-darker text-left my-5 f-16">
             <span>{{ $t('pages.send.successalert') }}</span>
             <span class="secondary-text ml-5">
-              {{ successTx.amount }} {{ $t('pages.appVUE.aeid') }}</span
+              {{ successTx.amount }}
+              {{
+                successTx.token ? availableTokens[successTx.token].symbol : $t('pages.appVUE.aeid')
+              }}</span
             >
           </p>
           <InfoGroup :value="successTx.to" :label="$t('pages.send.to')" />
@@ -119,7 +124,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
-import { checkAddress, chekAensName, aeToAettos } from '../../utils/helper';
+import { checkAddress, chekAensName, aeToAettos, convertToken } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
 import InfoGroup from '../components/InfoGroup';
 import Textarea from '../components/Textarea';
@@ -128,7 +133,6 @@ import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
 import QrIcon from '../../../icons/qr-code.svg?vue-component';
 import AlertExclamination from '../../../icons/alert-exclamation.svg?vue-component';
-import Heart from '../../../icons/heart.svg?vue-component';
 
 export default {
   name: 'Send',
@@ -140,7 +144,6 @@ export default {
     BalanceInfo,
     QrIcon,
     AlertExclamination,
-    Heart,
     InfoGroup,
   },
   data() {
@@ -162,18 +165,16 @@ export default {
   },
   props: ['address', 'redirectstep', 'successtx'],
   watch: {
-    token() {
+    selectedToken() {
       this.fetchFee();
     },
   },
   computed: {
+    ...mapState('fungibleTokens', ['selectedToken', 'availableTokens']),
     ...mapState(['balance', 'current', 'sdk']),
     ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate']),
     validAddress() {
       return checkAddress(this.form.address) || chekAensName(this.form.address);
-    },
-    token() {
-      return this.current.token;
     },
   },
   created() {
@@ -197,19 +198,35 @@ export default {
     },
     async fetchFee() {
       await this.$watchUntilTruly(() => this.sdk);
-      this.fee = await calculateFee(
-        this.token === 0 ? TX_TYPES.txSign : TX_TYPES.contractCall,
-        this.sdk.Ae.defaults,
-      );
+      this.fee = calculateFee(!this.selectedToken ? TX_TYPES.txSign : TX_TYPES.contractCall, {
+        ...this.sdk.Ae.defaults,
+        ...(this.selectedToken && {
+          callerId: this.account.publicKey,
+          contractId: this.selectedToken.contract,
+        }),
+      });
     },
     setTxDetails(tx) {
+      if (tx.tx.type === 'ContractCallTx') {
+        this.successTx.amount = convertToken(
+          tx.amount,
+          -this.availableTokens[tx.contractId].decimals,
+        );
+        this.successTx.token = tx.contractId;
+        this.successTx.to = tx.recipientId;
+        this.successTx.from = tx.callerId;
+        this.successTx.hash = tx.hash;
+        return;
+      }
       this.successTx.amount = parseFloat(tx.tx.amount / 10 ** 18).toFixed(3);
       this.successTx.to = tx.tx.recipientId;
       this.successTx.from = tx.tx.senderId;
       this.successTx.hash = tx.hash;
     },
     async send() {
-      const amount = aeToAettos(this.form.amount);
+      const amount = !this.selectedToken
+        ? aeToAettos(this.form.amount)
+        : convertToken(this.form.amount, this.selectedToken.decimals);
       const receiver = this.form.address;
       const calculatedMaxValue = this.balance > this.fee ? this.balance - this.fee : 0;
       let errorModalType = '';
@@ -217,7 +234,11 @@ export default {
         errorModalType = 'incorrect-address';
       }
       if (this.form.amount <= 0) errorModalType = 'incorrect-amount';
-      if (calculatedMaxValue - this.form.amount <= 0 && this.token === 0) {
+      if (
+        (calculatedMaxValue - this.form.amount <= 0 && !this.selectedToken) ||
+        (this.selectedToken &&
+          (this.selectedToken.convertedBalance < this.form.amount || this.balance < this.fee))
+      ) {
         errorModalType = 'insufficient-balance';
       }
       if (errorModalType) {
@@ -226,15 +247,30 @@ export default {
       }
       this.loading = true;
       try {
-        const { hash } = await this.sdk.spend(amount, receiver, { waitMined: false, modal: false });
-        if (hash) {
+        if (this.selectedToken) {
+          const { hash } = await this.$store.dispatch('fungibleTokens/transfer', [
+            receiver,
+            this.form.amount,
+            { waitMined: false, modal: false },
+          ]);
+          this.$store.commit('addPendingTransaction', {
+            hash,
+            amount,
+            type: 'spendToken',
+            recipientId: receiver,
+          });
+        } else {
+          const { hash } = await this.sdk.spend(amount, receiver, {
+            waitMined: false,
+            modal: false,
+          });
           this.$store.commit('addPendingTransaction', {
             hash,
             amount,
             type: 'spend',
           });
-          this.$router.push('/account');
         }
+        this.$router.push('/account');
       } catch (e) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
         throw e;
