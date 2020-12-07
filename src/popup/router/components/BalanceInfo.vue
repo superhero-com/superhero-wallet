@@ -128,10 +128,6 @@ export default {
   vertical-align: text-top;
 }
 
-.tour__step1:not(.v-tour__target--highlighted) .balance-info {
-  z-index: 5;
-}
-
 .balance-info {
   height: 76px;
   background-image: url('../../../icons/acc_balance.png');
