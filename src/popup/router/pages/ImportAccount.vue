@@ -1,16 +1,18 @@
 <template>
   <div class="popup">
-    <p class="regular-text">{{ $t('pages.index.enterSeedPhrase') }}</p>
-    <Textarea v-model="mnemonic" :error="errorMsg ? true : false" />
-    <Button
-      @click="importAccount"
-      :disabled="mnemonic && !disabled ? false : true"
-      data-cy="import"
-    >
-      {{ $t('pages.index.importAccount') }}
-    </Button>
-    <div v-if="errorMsg" class="error-msg" v-html="errorMsg"></div>
     <Loader v-if="loading" type="none" />
+    <template v-else>
+      <p class="regular-text">{{ $t('pages.index.enterSeedPhrase') }}</p>
+      <Textarea v-model="mnemonic" :error="errorMsg ? true : false" />
+      <Button
+        @click="importAccount"
+        :disabled="mnemonic && !disabled ? false : true"
+        data-cy="import"
+      >
+        {{ $t('pages.index.importAccount') }}
+      </Button>
+      <div v-if="errorMsg" class="error-msg" v-html="errorMsg"></div>
+    </template>
   </div>
 </template>
 
