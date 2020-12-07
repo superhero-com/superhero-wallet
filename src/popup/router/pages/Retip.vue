@@ -10,12 +10,16 @@
       <a class="link-sm text-left">{{ tip.url }}</a>
     </div>
 
-    <AmountSend :amountError="amount && !isAmountValid" v-model="amount" :errorMsg="errorMessage" />
+    <AmountSend
+      :amountError="amount && validationStatus.error"
+      v-model="amount"
+      :errorMsg="validationStatus.msg"
+    />
     <div class="tip-note-preview mt-15">
       {{ tip.title }}
     </div>
 
-    <Button @click="sendTip" :disabled="!isAmountValid || !tippingSupported">
+    <Button @click="sendTip" :disabled="!tippingSupported || validationStatus.error">
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button @click="openCallbackOrGoHome(false)">
@@ -54,34 +58,35 @@ export default {
       urlStatus(state, getters) {
         return getters['tipUrl/status'](this.tip.url);
       },
-      isMinTipAmountError(state, { minTipAmount }) {
-        return this.amount < minTipAmount;
-      },
-      isAmountValid({ sdk, balance }, { account }) {
-        if (!sdk || !this.tippingContract) return false;
+      validationStatus({ sdk, balance }, { account, minTipAmount }) {
+        if (!sdk || !this.tippingContract) {
+          return { error: true };
+        }
+        if (this.selectedToken && this.$route.query.id.includes('_v1')) {
+          return { error: true, msg: this.$t('pages.tipPage.v1FungibleTokenTipError') };
+        }
+        if (!this.selectedToken && this.amount < minTipAmount) {
+          return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
+        }
         const fee = calculateFee(TX_TYPES.contractCall, {
           ...sdk.Ae.defaults,
           contractId: this.tippingContract.deployInfo.address,
           callerId: account.publicKey,
         });
-        if (this.selectedToken) {
-          return balance - fee >= 0 && this.selectedToken.convertedBalance > this.amount;
+        if (
+          this.selectedToken
+            ? this.selectedToken.convertedBalance < this.amount || balance < fee
+            : balance < fee + this.amount
+        ) {
+          return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
         }
-        return !this.isMinTipAmountError && balance - fee - this.amount >= 0;
+        return { error: false };
       },
     }),
     tippingContract() {
       return this.$route.query.id.includes('_v2') || this.$route.query.id.includes('_v3')
         ? this.tippingV2
         : this.tippingV1;
-    },
-    errorMessage() {
-      if (this.selectedToken) {
-        return this.selectedToken.convertedBalance < this.amount
-          ? this.$t('pages.tipPage.insufficientBalance')
-          : '';
-      }
-      return this.amount && this.isMinTipAmountError ? this.$t('pages.tipPage.minAmountError') : '';
     },
   },
   async created() {
