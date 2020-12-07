@@ -95,7 +95,6 @@ export default {
         },
       },
       {
-        route: '/account',
         target: '.tour__step2 .button-content',
         step: 2,
         params: {
@@ -119,7 +118,6 @@ export default {
         },
       },
       {
-        route: '/account',
         target: '.tour__step5 .button-content',
         step: 5,
         params: {
