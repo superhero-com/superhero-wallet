@@ -4,7 +4,7 @@
   </ul>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .panel-list {
   padding: 0 !important;
   background: #21222a !important;

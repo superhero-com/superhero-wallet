@@ -20,7 +20,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '../../../styles/variables';
 
 .name-row {
@@ -38,7 +38,7 @@ export default {
   color: $text-color;
   background: #21222a !important;
 
-  .name-info {
+  .name-info ::v-deep {
     margin-left: 10px;
     width: 90%;
     margin-right: auto;

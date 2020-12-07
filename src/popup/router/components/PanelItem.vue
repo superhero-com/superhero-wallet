@@ -17,7 +17,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .panel-item {
   text-decoration: none;
   transition: 0.4s;
@@ -55,7 +55,7 @@ export default {
     top: 50%;
     margin-top: -15px;
 
-    .checkmark {
+    ::v-deep .checkmark {
       margin-right: 0;
     }
   }
