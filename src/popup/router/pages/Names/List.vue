@@ -57,6 +57,6 @@ export default {
 
 <style scoped>
 .names-list {
-  padding: 0 !important;
+  padding: 0;
 }
 </style>

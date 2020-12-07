@@ -59,7 +59,7 @@ export default {
 
 h4 {
   text-align: left;
-  margin: 0 !important;
+  margin: 0;
 }
 
 small {
@@ -90,7 +90,7 @@ small {
     margin: 0;
     padding: 0 1rem;
     white-space: nowrap;
-    background-color: #505058 !important;
+    background-color: #505058;
     border-radius: 4px;
     text-align: center;
     display: inline-flex;

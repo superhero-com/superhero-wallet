@@ -52,7 +52,7 @@ export default {
   font-size: 15px;
   padding: 0;
   margin: 8px auto;
-  color: $button-text-color !important;
+  color: $button-text-color;
   font-weight: normal;
   line-height: 40px;
   max-height: 40px;
@@ -63,29 +63,29 @@ export default {
   }
 
   &.extend {
-    width: 100% !important;
+    width: 100%;
   }
 
   &.half {
-    width: 48% !important;
-    margin: 0 !important;
+    width: 48%;
+    margin: 0;
     display: inline-block;
   }
 
   &.dark {
-    background: $box-button-color !important;
+    background: $box-button-color;
   }
 
   &.small {
-    width: auto !important;
+    width: auto;
     line-height: 1px;
     padding: 10px;
     font-size: 12px;
   }
 
   &.third {
-    width: 32% !important;
-    margin: 0 !important;
+    width: 32%;
+    margin: 0;
     max-height: 100px;
     line-height: normal;
     padding: 5px;
@@ -99,45 +99,45 @@ export default {
 
   &.confirm,
   &.danger {
-    background: $secondary-color !important;
-    color: $white-color !important;
+    background: $secondary-color;
+    color: $white-color;
   }
 
   &.onboarding {
-    width: 100px !important;
+    width: 100px;
     font-size: 14px;
     height: 34px;
     border-radius: 5px;
-    line-height: 34px !important;
-    background: $box-button-color !important;
-    margin: 0 !important;
-    margin-right: 10px !important;
-    font-weight: 500 !important;
-    color: #fff !important;
+    line-height: 34px;
+    background: $box-button-color;
+    margin: 0;
+    margin-right: 10px;
+    font-weight: 500;
+    color: #fff;
 
     &:last-child {
-      margin-right: 0 !important;
+      margin-right: 0;
     }
 
     &.skip {
-      background: #ff5857 !important;
+      background: #ff5857;
     }
 
     &.next {
-      background: $secondary-color !important;
+      background: $secondary-color;
     }
 
     &.start {
-      margin-left: auto !important;
-      margin-right: 0 !important;
-      background: $secondary-color !important;
+      margin-left: auto;
+      margin-right: 0;
+      background: $secondary-color;
     }
   }
 
   &.inline {
     display: inline-block;
     padding: 0 20px;
-    width: auto !important;
+    width: auto;
     margin: 8px 10px;
   }
 

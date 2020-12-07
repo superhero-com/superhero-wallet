@@ -297,9 +297,9 @@ export default {
 }
 
 .withdraw.step1 {
-  textarea {
+  .d-flex .textarea {
     width: 250px;
-    min-height: 60px !important;
+    min-height: 60px;
     margin: 0 20px 0 0;
     font-size: 11px;
   }

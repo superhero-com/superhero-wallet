@@ -222,7 +222,7 @@ export default {
   }
 
   .skip-button {
-    color: $accent-color !important;
+    color: $accent-color;
     font-size: 18px;
     margin-top: 30px;
     text-decoration: underline;
@@ -230,7 +230,7 @@ export default {
   }
 
   .last-msg-enjoy {
-    color: $secondary-color !important;
+    color: $secondary-color;
     font-size: 18px;
     width: 100%;
     margin: 10px auto;
@@ -299,7 +299,7 @@ export default {
 
   li a {
     overflow: hidden;
-    background-color: $text-color !important;
+    background-color: $text-color;
     transition: background 0.3s;
   }
 }
@@ -322,7 +322,7 @@ export default {
 }
 
 .dotstyle-fillup li.current a {
-  background-color: $secondary-color !important;
+  background-color: $secondary-color;
 }
 
 .dotstyle-fillup li.current a::after {

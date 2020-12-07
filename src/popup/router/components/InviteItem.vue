@@ -179,7 +179,7 @@ export default {
 
     > .primary-button {
       margin-right: 20px;
-      width: 120px !important;
+      width: 120px;
     }
   }
 }

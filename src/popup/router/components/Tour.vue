@@ -218,16 +218,16 @@ export default {
 
 <style lang="scss">
 .v-tour__target--highlighted {
-  -webkit-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
-  -moz-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
-  box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
-  pointer-events: none !important;
+  -webkit-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6);
+  -moz-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6);
+  box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6);
+  pointer-events: none;
 
   &::after {
     content: '';
-    border: 1.5px dashed #fff !important;
+    border: 1.5px dashed #fff;
     border-radius: 5px;
-    background: rgba(42, 156, 255, 0.25) !important;
+    background: rgba(42, 156, 255, 0.25);
     position: absolute;
     left: 0;
     right: 0;
@@ -246,14 +246,14 @@ export default {
 }
 
 .tour .v-tour .v-step {
-  background-color: $tour-bg-color !important;
-  border-radius: 5px !important;
+  background-color: $tour-bg-color;
+  border-radius: 5px;
   border: 1px solid $secondary-color;
-  padding: 20px 15px 25px 15px !important;
+  padding: 20px 15px 25px 15px;
   min-width: 345px;
 
   .step-header {
-    background-color: $tour-bg-color !important;
+    background-color: $tour-bg-color;
     margin-bottom: 18px;
     font-weight: bold;
     font-size: 16px;
@@ -273,35 +273,35 @@ export default {
   }
 
   .v-step__arrow {
-    border-color: $tour-bg-color !important;
-    border: none !important;
-    width: 35px !important;
-    height: 12px !important;
+    border-color: $tour-bg-color;
+    border: none;
+    width: 35px;
+    height: 12px;
     z-index: -3;
     background-repeat: no-repeat;
   }
 
   &[x-placement^='top'] {
-    margin-bottom: 0.8rem !important;
+    margin-bottom: 0.8rem;
 
     .v-step__arrow {
       background-image: url('../../../icons/arrow-up.png');
       transform: rotate(180deg);
-      bottom: -0.75rem !important;
+      bottom: -0.75rem;
     }
   }
 
   &[x-placement^='bottom'] {
-    margin-top: 0.8rem !important;
+    margin-top: 0.8rem;
 
     .v-step__arrow {
       background-image: url('../../../icons/arrow-up.png');
-      top: -0.75rem !important;
+      top: -0.75rem;
     }
   }
 
   &.tip-step[x-placement^='bottom'] {
-    margin-top: 1rem !important;
+    margin-top: 1rem;
   }
 }
 
@@ -318,9 +318,9 @@ export default {
   pointer-events: all;
 
   &.not-started {
-    -webkit-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
-    -moz-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
-    box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
+    -webkit-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6);
+    -moz-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6);
+    box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6);
   }
 
   &::before {
@@ -418,11 +418,11 @@ export default {
 
   .tour .v-tour .v-step {
     &[x-placement^='top'] .v-step__arrow {
-      bottom: -0.7rem !important;
+      bottom: -0.7rem;
     }
 
     &[x-placement^='bottom'] .v-step__arrow {
-      top: -0.7rem !important;
+      top: -0.7rem;
     }
   }
 }

@@ -38,9 +38,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.ok-button {
-  width: 120px !important;
-}
-</style>

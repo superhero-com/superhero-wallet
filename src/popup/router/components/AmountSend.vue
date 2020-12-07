@@ -100,7 +100,7 @@ export default {
 
   .error-msg {
     font-weight: normal;
-    color: $input-error-color !important;
+    color: $input-error-color;
     font-size: 12px;
     word-break: break-word;
     margin-top: 10px;
