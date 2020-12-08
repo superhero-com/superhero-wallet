@@ -64,11 +64,10 @@ export default {
   },
   methods: {
     back() {
-      if (this.$store.state.route.from.path === '/') {
-        this.$router.push(this.isLoggedIn ? '/account' : '/');
-        return;
-      }
-      this.$router.go(-1);
+      const fallBackRoute = this.isLoggedIn ? '/account' : '/';
+      this.$router.push(
+        this.$route.fullPath.substr(0, this.$route.fullPath.lastIndexOf('/')) || fallBackRoute,
+      );
     },
     toNotifications() {
       if (this.notificationsCount && this.$store.state.route.fullPath !== '/notifications') {
