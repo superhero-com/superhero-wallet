@@ -35,22 +35,22 @@
         >
           <Claim slot="icon" />
         </BoxButton>
-        <BoxButton :text="$t('pages.appVUE.activity')" to="/transactions" class="tour__step5">
+        <BoxButton :text="$t('pages.account.activity')" to="/transactions" class="tour__step5">
           <Activity slot="icon" />
         </BoxButton>
-        <BoxButton :text="$t('pages.appVUE.invite')" :to="{ name: 'invite' }">
+        <BoxButton :text="$t('pages.titles.invite')" :to="{ name: 'invite' }">
           <Invite slot="icon" />
         </BoxButton>
-        <BoxButton :text="$t('pages.appVUE.tokens')" :to="{ name: 'tokens-preview' }">
+        <BoxButton :text="$t('pages.titles.tokens-preview')" :to="{ name: 'tokens-preview' }">
           <Tokens slot="icon" />
         </BoxButton>
-        <BoxButton :text="$t('pages.appVUE.topUp')" to="/receive" class="tour__step6">
+        <BoxButton :text="$t('pages.titles.topUp')" to="/receive" class="tour__step6">
           <Topup slot="icon" />
         </BoxButton>
-        <BoxButton :text="$t('pages.appVUE.withdraw')" to="/send" class="tour__step7">
+        <BoxButton :text="$t('pages.titles.withdraw')" to="/send" class="tour__step7">
           <Withdraw slot="icon" />
         </BoxButton>
-        <BoxButton :text="$t('pages.appVUE.settings')" to="/settings" class="tour__step8">
+        <BoxButton :text="$t('pages.titles.settings')" to="/settings" class="tour__step8">
           <Settings slot="icon" />
         </BoxButton>
       </div>

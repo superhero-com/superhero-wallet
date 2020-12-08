@@ -14,7 +14,7 @@
       <div class="ml-15 text-left">
         <p class="label hidden">{{ $t('pages.tipPage.empty') }}</p>
         <span class="secondary-text f-14 block l-1" data-cy="amount">
-          {{ selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid') }}
+          {{ selectedToken ? selectedToken.symbol : $t('ae') }}
         </span>
         <span class="f-14 block l-1 amount-currency" data-cy="amount-currency">
           {{ selectedToken ? formatCurrency(0) : formatCurrency(currencyAmount) }}
@@ -24,7 +24,7 @@
         <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
         <span class="secondary-text f-14 block l-1" data-cy="balance">
           {{ selectedToken ? selectedToken.convertedBalance : tokenBalance.toFixed(2) }}
-          {{ selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid') }}
+          {{ selectedToken ? selectedToken.symbol : $t('ae') }}
         </span>
         <span class="f-14 block l-1 amount-currency" data-cy="balance-currency">
           {{ selectedToken ? formatCurrency(0) : formatCurrency(balanceCurrency) }}

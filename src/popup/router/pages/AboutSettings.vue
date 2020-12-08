@@ -23,7 +23,7 @@
         $t('pages.aboutSettings.privacyPolicy')
       }}</router-link>
       <Button @click="openUrl(bugReportUrl, true)">
-        {{ $t('pages.appVUE.reportBug') }}
+        {{ $t('pages.aboutSettings.reportBug') }}
       </Button>
     </div>
   </div>

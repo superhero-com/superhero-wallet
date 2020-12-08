@@ -1,5 +1,7 @@
 {
   "ok": "OK",
+  "ae": "AE",
+  "mainAccount": "Main account",
   "onboarding": {
     "step_1": {
       "title": "Your Account Info",
@@ -240,51 +242,16 @@
       "sign-message": "Sign Message",
       "invite": "Invite"
     },
-    "appVUE": {
-      "systemName": "Superhero",
-      "manageNetworks": "Manage networks",
-      "manageAccounts": "Manage accounts",
-      "airGapVault": "Create a vault for AirGap",
-      "ledgerAccount": "Add Ledger Account",
-      "menu": "Menu",
-      "myAccount": "My Account",
-      "switchToken": "Tokens",
-      "utilities": "Utilities",
-      "settings": "Settings",
-      "logout": "Logout",
-      "profile": "Profile",
-      "help": "Help",
-      "topUp": "Top Up",
-      "withdraw": "Withdraw",
-      "myTransactions": "My transactions",
-      "activity": "Activity",
-      "dashboard": "Dashboard",
-      "aeid": "AE",
-      "walletName": "Superhero Wallet",
-      "general": "General",
-      "security": "Security",
-      "seedPhrase": "Seed Phrase",
-      "language": "Language",
-      "advanced": "Advanced",
-      "versions": "Version & Updates",
-      "mainAccount": "Main account",
-      "reportBug": "Report a bug",
-      "names": "Names",
-      "networks": "Networks",
-      "removeAccount": "Remove account",
-      "donateErrorReports": "Submit error reports",
-      "tokens": "Tokens",
-      "manageTokens": "Manage tokens",
-      "invite": "Invite"
-    },
     "aboutSettings": {
       "heading": "About",
       "systemName": "Superhero",
       "terms": "Terms of Use",
-      "privacyPolicy": "Privacy Policy"
+      "privacyPolicy": "Privacy Policy",
+      "reportBug": "Report a bug"
     },
     "account": {
       "heading": "Account",
+      "activity": "Activity",
       "accountName": "Account name",
       "copy": "Copy",
       "send": "Send Tip",

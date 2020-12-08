@@ -7,7 +7,7 @@
       <div class="flex flex-align-center">
         <Avatar :address="account.publicKey" :name="account.name" />
         <div class="ml-8">
-          <div class="f-14">{{ $t('pages.appVUE.mainAccount') }}</div>
+          <div class="f-14">{{ $t('mainAccount') }}</div>
           <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">
             {{ activeAccountName }}
           </div>
@@ -16,17 +16,17 @@
     </li>
     <li>
       <router-link to="/receive" data-cy="receive">
-        {{ $t('pages.appVUE.topUp') }}
+        {{ $t('pages.titles.topUp') }}
       </router-link>
     </li>
     <li>
       <router-link to="/send" data-cy="send">
-        {{ $t('pages.appVUE.withdraw') }}
+        {{ $t('pages.titles.withdraw') }}
       </router-link>
     </li>
     <li>
       <router-link to="/transactions" data-cy="transactions">
-        {{ $t('pages.appVUE.activity') }}
+        {{ $t('pages.account.activity') }}
       </router-link>
     </li>
     <li>
@@ -35,24 +35,24 @@
         @click="showSettingsDropdown = !showSettingsDropdown"
         data-cy="settings"
       >
-        {{ $t('pages.appVUE.settings') }}
+        {{ $t('pages.titles.settings') }}
         <Arrow />
       </button>
       <transition name="slide">
         <ul v-if="showSettingsDropdown" data-cy="dropdown">
           <li>
             <router-link to="/securitySettings" data-cy="securitySettings">
-              {{ $t('pages.appVUE.security') }}
+              {{ $t('pages.titles.security') }}
             </router-link>
           </li>
           <li>
             <router-link to="/generalSettings" data-cy="generalSettings">
-              {{ $t('pages.appVUE.language') }}
+              {{ $t('pages.titles.general') }}
             </router-link>
           </li>
           <li>
             <router-link to="/networks" data-cy="networks">
-              {{ $t('pages.appVUE.networks') }}
+              {{ $t('pages.titles.networks') }}
             </router-link>
           </li>
           <li>
@@ -62,7 +62,7 @@
           </li>
           <li>
             <span data-cy="remove-account" @click="removeAccount">
-              {{ $t('pages.appVUE.removeAccount') }}
+              {{ $t('pages.settings.tabRemoveAccount') }}
             </span>
           </li>
         </ul>
@@ -70,17 +70,17 @@
     </li>
     <li>
       <router-link to="/names" data-cy="names">
-        {{ $t('pages.appVUE.names') }}
+        {{ $t('pages.titles.names') }}
       </router-link>
     </li>
     <li>
       <router-link to="/invite" data-cy="invite">
-        {{ $t('pages.appVUE.invite') }}
+        {{ $t('pages.titles.invite') }}
       </router-link>
     </li>
     <li>
       <router-link to="/aboutSettings" data-cy="aboutSettings">
-        {{ $t('pages.appVUE.help') }}
+        {{ $t('pages.aboutSettings.heading') }}
       </router-link>
     </li>
   </ul>

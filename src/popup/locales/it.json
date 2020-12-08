@@ -1,5 +1,7 @@
 {
   "ok": "OK",
+  "ae": "AE",
+  "mainAccount": "Main account",
   "onboarding": {
     "step_1": {
       "title": "Your Account Info",
@@ -173,48 +175,16 @@
       "address": "Send Address",
       "sign-message": "Sign Message"
     },
-    "appVUE": {
-      "systemName": "Superhero",
-      "manageNetworks": "Gestisci reti",
-      "manageAccounts": "Gestisci account",
-      "airGapVault": "Creare un deposito per il traferro",
-      "ledgerAccount": "Aggiungere Ledger account",
-      "menu": "Menu",
-      "myAccount": "Il mio account",
-      "switchToken": "Tokens",
-      "utilities": "Utilità",
-      "settings": "impostazioni",
-      "logout": "Disconnettersi",
-      "profile": "Profile",
-      "help": "Help",
-      "topUp": "Top Up",
-      "withdraw": "Withdraw",
-      "myTransactions": "My transactions",
-      "activity": "Activity",
-      "dashboard": "Dashboard",
-      "aeid": "AE",
-      "walletName": "Superhero Wallet",
-      "general": "General",
-      "security": "Security",
-      "seedPhrase": "Seed Phrase",
-      "language": "Language",
-      "advanced": "Advanced",
-      "versions": "Version & Updates",
-      "mainAccount": "Main account",
-      "reportBug": "Report a bug",
-      "names": "Names",
-      "networks": "Networks",
-      "removeAccount": "Remove account",
-      "donateErrorReports": "Submit error reports"
-    },
     "aboutSettings": {
       "heading": "Di",
       "systemName": "Superhero",
       "terms": "Termini di servizio",
-      "privacyPolicy": "politica sulla riservatezza"
+      "privacyPolicy": "politica sulla riservatezza",
+      "reportBug": "Report a bug"
     },
     "account": {
       "heading": "Account",
+      "activity": "Activity",
       "accountName": "Nome utente",
       "copy": "copia",
       "send": "Inviare",

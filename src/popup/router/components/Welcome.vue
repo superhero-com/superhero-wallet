@@ -3,7 +3,7 @@
     <Logo class="logo" />
     <p class="f-24 primary-title">
       {{ $t('pages.welcome.send') }}
-      <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+      <span class="secondary-text">{{ $t('ae') }}</span>
       {{ $t('pages.welcome.across') }}
     </p>
   </div>

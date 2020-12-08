@@ -9,13 +9,11 @@
     </DetailsItem>
 
     <DetailsItem :label="$t('pages.signTransaction.fee')" data-cy="fee">
-      <div class="balance no-sign">
-        {{ parseFloat(transaction.fee).toFixed(7) }} {{ $t('pages.appVUE.aeid') }}
-      </div>
+      <div class="balance no-sign">{{ parseFloat(transaction.fee).toFixed(7) }} {{ $t('ae') }}</div>
     </DetailsItem>
 
     <DetailsItem :label="$t('pages.signTransaction.total')" data-cy="total">
-      <div class="balance no-sign">{{ transaction.total }} {{ $t('pages.appVUE.aeid') }}</div>
+      <div class="balance no-sign">{{ transaction.total }} {{ $t('ae') }}</div>
     </DetailsItem>
 
     <template v-for="field in TX_FIELDS">

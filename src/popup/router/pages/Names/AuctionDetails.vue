@@ -11,14 +11,14 @@
       <div class="section-title">{{ $t('pages.names.auctions.current-bid') }}</div>
 
       <NameRow :address="currentBid.accountId">
-        <div class="name">{{ currentBid.nameFee.toFixed(3) }} {{ $t('pages.appVUE.aeid') }}</div>
+        <div class="name">{{ currentBid.nameFee.toFixed(3) }} {{ $t('ae') }}</div>
         <span class="address">{{ currentBid.accountId }}</span>
       </NameRow>
 
       <template v-if="previousBids">
         <div class="section-title">{{ $t('pages.names.auctions.previous-bids') }}</div>
         <NameRow v-for="(bid, idx) in previousBids" :key="idx" :address="bid.accountId">
-          <div class="name">{{ bid.nameFee.toFixed(3) }} {{ $t('pages.appVUE.aeid') }}</div>
+          <div class="name">{{ bid.nameFee.toFixed(3) }} {{ $t('ae') }}</div>
           <span class="address">{{ bid.accountId }}</span>
         </NameRow>
       </template>
