@@ -71,7 +71,7 @@ export default {
       'mainLoading',
     ]),
     waveBg() {
-      return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(
+      return ['/intro', '/popup-sign-tx', '/connect', '/import-account', '/receive'].includes(
         this.$route.path,
       );
     },

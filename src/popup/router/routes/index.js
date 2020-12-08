@@ -179,7 +179,7 @@ export default [
     },
   },
   {
-    path: '/importAccount',
+    path: '/import-account',
     component: ImportAccount,
     meta: {
       title: 'importAccount',

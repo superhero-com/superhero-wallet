@@ -27,7 +27,7 @@
       {{ $t('pages.index.generateWallet') }}
     </Button>
     <Button
-      @click="$router.push('/importAccount')"
+      @click="$router.push('/import-account')"
       :disabled="!termsAgreed"
       data-cy="import-wallet"
     >
