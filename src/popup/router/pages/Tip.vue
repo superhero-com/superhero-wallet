@@ -93,8 +93,6 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
-import BigNumber from 'bignumber.js';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { escapeSpecialChars, aeToAettos, validateTipUrl, convertToken } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
@@ -254,27 +252,9 @@ export default {
         if (this.tipFromPopup) window.close();
       }
     },
-    async createOrChangeAllowance() {
-      const tokenContract = await this.getFungibleTokenContract();
-      const { decodedResult } = await tokenContract.methods.allowance({
-        from_account: this.account.publicKey,
-        for_account: this.activeNetwork.tipContractV2.replace('ct_', 'ak_'),
-      });
-
-      const allowanceAmount =
-        decodedResult !== undefined
-          ? new BigNumber(decodedResult)
-              .multipliedBy(-1)
-              .plus(convertToken(this.amount, this.selectedToken.decimals))
-              .toNumber()
-          : convertToken(this.amount, this.selectedToken.decimals).toFixed();
-      return tokenContract.methods[
-        decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
-      ](this.activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
-    },
     async sendFungibleTokenTip() {
       this.loading = true;
-      await this.createOrChangeAllowance();
+      await this.$store.dispatch('fungibleTokens/createOrChangeAllowance', this.amount);
       try {
         const { hash } = await this.tippingV2.methods.tip_token(
           this.url,
@@ -309,17 +289,6 @@ export default {
     toEdit() {
       this.confirmMode = false;
       this.editUrl = true;
-    },
-    async getFungibleTokenContract() {
-      const contractInstance = await this.$store.state.sdk.getContractInstance(
-        FUNGIBLE_TOKEN_CONTRACT,
-        {
-          contractAddress: this.selectedToken.contract,
-          forceCodeCheck: true,
-        },
-      );
-
-      return contractInstance;
     },
   },
 };

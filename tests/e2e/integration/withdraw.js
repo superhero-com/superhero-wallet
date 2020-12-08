@@ -47,7 +47,7 @@ describe('Test cases for Withdraw Page', () => {
       .get('[data-cy=review-recipient] > span')
       .should('contain', 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
       .get('[data-cy=review-amount]')
-      .should('contain', '0.200 AE')
+      .contains('0.200 AE')
 
       // edit sending address to .chain name
       .get('[data-cy=reivew-editTxDetails-button]')

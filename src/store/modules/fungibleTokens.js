@@ -85,5 +85,37 @@ export default {
       );
       return commit('setAePublicData', aeternityData);
     },
+    async createOrChangeAllowance(
+      { rootState: { sdk }, state: { selectedToken }, rootGetters: { activeNetwork, account } },
+      amount,
+    ) {
+      const tokenContract = await sdk.getContractInstance(FUNGIBLE_TOKEN_CONTRACT, {
+        contractAddress: selectedToken.contract,
+      });
+      const { decodedResult } = await tokenContract.methods.allowance({
+        from_account: account.publicKey,
+        for_account: activeNetwork.tipContractV2.replace('ct_', 'ak_'),
+      });
+      const allowanceAmount =
+        decodedResult !== undefined
+          ? new BigNumber(decodedResult)
+              .multipliedBy(-1)
+              .plus(convertToken(amount, selectedToken.decimals))
+              .toNumber()
+          : convertToken(amount, selectedToken.decimals).toFixed();
+      return tokenContract.methods[
+        decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
+      ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
+    },
+    async transfer({ rootState: { sdk }, state: { selectedToken } }, [toAccount, amount, option]) {
+      const tokenContract = await sdk.getContractInstance(FUNGIBLE_TOKEN_CONTRACT, {
+        contractAddress: selectedToken.contract,
+      });
+      return tokenContract.methods.transfer(
+        toAccount,
+        convertToken(amount, selectedToken.decimals).toFixed(),
+        option,
+      );
+    },
   },
 };
