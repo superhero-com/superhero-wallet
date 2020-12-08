@@ -133,7 +133,7 @@ export default {
       if (process.env.PLATFORM === 'cordova') {
         if (document.head.contains(this.style)) document.head.removeChild(this.style);
         document.querySelector('.popup').style.display = '';
-        document.querySelector('.header .content div:not(.title)').style.display = 'none';
+        document.querySelector('.header .content div:not(.title)').style.display = '';
         document.querySelector('.header .title').innerText = this.headerText;
         window.QRScanner.destroy();
       } else this.browserReader.reset();
