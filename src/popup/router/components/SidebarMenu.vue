@@ -41,17 +41,17 @@
       <transition name="slide">
         <ul v-if="showSettingsDropdown" data-cy="dropdown">
           <li>
-            <router-link to="/securitySettings" data-cy="securitySettings">
+            <router-link to="/settings/security" data-cy="securitySettings">
               {{ $t('pages.titles.security') }}
             </router-link>
           </li>
           <li>
-            <router-link to="/generalSettings" data-cy="generalSettings">
+            <router-link to="/settings/general" data-cy="generalSettings">
               {{ $t('pages.titles.general') }}
             </router-link>
           </li>
           <li>
-            <router-link to="/networks" data-cy="networks">
+            <router-link to="/settings/networks" data-cy="networks">
               {{ $t('pages.titles.networks') }}
             </router-link>
           </li>

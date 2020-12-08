@@ -12,9 +12,9 @@
         <Settings
           v-if="$route.path === '/notifications'"
           class="settings"
-          @click="$router.push('/notification-settings')"
+          @click="$router.push('/notifications/settings')"
         />
-        <template v-else-if="$route.path !== '/notification-settings'">
+        <template v-else-if="$route.path !== '/notifications/settings'">
           <span class="noti-holder" @click="toNotifications" data-cy="noti">
             <span v-if="notificationsCount" class="noti-count" data-cy="noti-count">
               {{ notificationsCount }}

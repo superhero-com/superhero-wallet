@@ -17,7 +17,7 @@
     <CheckBox v-model="termsAgreed" data-cy="checkbox">
       <span>
         {{ $t('pages.index.term1') }}
-        <RouterLink to="/termsOfService" data-cy="terms">
+        <RouterLink to="/about/termsOfService" data-cy="terms">
           {{ $t('pages.index.termsAndConditions') }}
         </RouterLink>
       </span>

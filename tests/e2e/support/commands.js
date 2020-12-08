@@ -248,7 +248,7 @@ Cypress.Commands.add('urlEquals', (route) => {
 });
 
 Cypress.Commands.add('openNetworks', () => {
-  cy.openMenu().toggleDropdown().get('[data-cy=networks]').click().urlEquals('/networks');
+  cy.openMenu().toggleDropdown().get('[data-cy=networks]').click().urlEquals('/settings/networks');
 });
 
 Cypress.Commands.add('enterNetworkDetails', (network, url, middleware, compiler) => {

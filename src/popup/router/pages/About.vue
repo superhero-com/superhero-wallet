@@ -16,8 +16,10 @@
     </p>
     <hr />
     <div class="waellet-links">
-      <router-link to="/termsOfService" data-cy="terms">{{ $t('pages.about.terms') }}</router-link>
-      <router-link to="/privacyPolicy" data-cy="privacy">{{
+      <router-link to="/about/termsOfService" data-cy="terms">{{
+        $t('pages.about.terms')
+      }}</router-link>
+      <router-link to="/about/privacyPolicy" data-cy="privacy">{{
         $t('pages.about.privacyPolicy')
       }}</router-link>
       <Button @click="openUrl(bugReportUrl, true)">

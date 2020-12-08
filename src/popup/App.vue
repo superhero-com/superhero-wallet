@@ -101,7 +101,7 @@ export default {
     if (!this.backedUpSeed) {
       this.$store.commit('addNotification', {
         text: this.$t('pages.account.seedNotification', [this.$t('pages.account.backup')]),
-        path: '/securitySettings',
+        path: '/settings/security',
       });
     }
     if (this.$store.state.notificationSettings.length === 0) {

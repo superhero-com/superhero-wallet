@@ -16,13 +16,13 @@ describe('About', () => {
       .click()
       .get('[data-cy=terms]')
       .click()
-      .urlEquals('/termsOfService')
+      .urlEquals('/about/termsOfService')
 
       .openMenu()
       .get('[data-cy=about]')
       .click()
       .get('[data-cy=privacy]')
       .click()
-      .urlEquals('/privacyPolicy');
+      .urlEquals('/about/privacyPolicy');
   });
 });
