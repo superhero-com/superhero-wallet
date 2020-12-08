@@ -2,7 +2,7 @@
   <div class="popup">
     <Panel>
       <PanelItem
-        to="/settings/general"
+        to="/settings/language"
         :title="$t('pages.settings.tabGeneral')"
         :info="$t('pages.settings.tabGeneralsmall')"
       />

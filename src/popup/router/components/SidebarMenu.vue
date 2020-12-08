@@ -46,8 +46,8 @@
             </router-link>
           </li>
           <li>
-            <router-link to="/settings/general" data-cy="generalSettings">
-              {{ $t('pages.titles.general') }}
+            <router-link to="/settings/language" data-cy="languageSettings">
+              {{ $t('pages.titles.language') }}
             </router-link>
           </li>
           <li>

@@ -5,7 +5,7 @@ import PopupConnect from '../pages/Popups/Connect';
 import PopupAskAccounts from '../pages/Popups/AskAccounts';
 import PopupMessageSign from '../pages/Popups/MessageSign';
 import Settings from '../pages/Settings';
-import GeneralSettings from '../pages/GeneralSettings';
+import LanguageSettings from '../pages/LanguageSettings';
 import SecuritySettings from '../pages/SecuritySettings';
 import About from '../pages/About';
 import Tip from '../pages/Tip';
@@ -102,10 +102,10 @@ export default [
     },
   },
   {
-    path: '/settings/general',
-    component: GeneralSettings,
+    path: '/settings/language',
+    component: LanguageSettings,
     meta: {
-      title: 'general',
+      title: 'language',
     },
   },
   {
