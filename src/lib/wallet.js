@@ -151,7 +151,7 @@ export default {
           const originUrl = toURL(origin);
           if (
             (await getAeppAccountPermission(originUrl.hostname, store.state.account.publicKey)) &&
-            !(await store.dispatch('permissions/checkPermissions', { method: action.method }))
+            !(await store.dispatch('permissions/checkPermissions', { ...action }))
           ) {
             action.accept();
             return;
@@ -179,7 +179,7 @@ export default {
         onSubscription: acceptCb,
         onSign: acceptCb,
         async onMessageSign(aepp, action, origin) {
-          if (!(await store.dispatch('permissions/checkPermissions', { method: action.method }))) {
+          if (!(await store.dispatch('permissions/checkPermissions', { ...action }))) {
             action.accept();
             return;
           }
