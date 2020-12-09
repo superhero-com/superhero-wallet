@@ -88,7 +88,7 @@ async function getKeyPair() {
 let initSdkRunning = false;
 
 if (IN_FRAME) {
-  store.registerModule('sdk', {
+  store.registerModule('sdk-frame-reset', {
     actions: {
       async reset({ sdk }) {
         const { clients } = sdk.getClients();
