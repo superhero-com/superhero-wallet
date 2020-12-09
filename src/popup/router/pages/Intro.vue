@@ -34,13 +34,9 @@
             {{ $t('pages.intro.step3text-1') }}
             <span class="secondary-text aeid">{{ $t('pages.appVUE.aeid') }}</span>
             {{ $t('pages.intro.step3text-2') }}
-            <span class="white" v-if="iframe">
-              <br />
-              {{ $t('pages.intro.ever') }}
-            </span>
           </span>
         </div>
-        <div v-if="!iframe" class="mt-32 text-left">
+        <div class="mt-32">
           {{ $t('pages.intro.ever') }}
         </div>
       </div>
@@ -161,25 +157,29 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.popup.iframe {
-  padding-top: 0;
-  padding-bottom: 0;
+.popup {
+  padding: 4px 16px;
 
-  .createWallet-holder {
+  &.iframe {
     padding-top: 0;
+    padding-bottom: 0;
 
-    .text-info {
-      margin: 0;
+    .createWallet-holder {
+      padding-top: 0;
+
+      .text-info {
+        margin: 0;
+      }
     }
-  }
 
-  .dotstyle {
-    top: 78%;
-  }
+    .dotstyle {
+      top: 78%;
+    }
 
-  h2,
-  h4 {
-    margin: 8px 0;
+    h2,
+    h4 {
+      margin: 8px 0;
+    }
   }
 }
 
@@ -211,10 +211,6 @@ export default {
       color: $text-color;
       font-size: 16px;
       word-break: break-word;
-    }
-
-    span.white {
-      color: #fff;
     }
   }
 
