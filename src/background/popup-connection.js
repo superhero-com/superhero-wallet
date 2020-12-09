@@ -1,6 +1,6 @@
 import stampit from '@stamp/it';
 import { HDWALLET_METHODS } from '../popup/utils/constants';
-import walletController from '../wallet-controller';
+import walletController from './wallet-controller';
 
 const PopupConnection = stampit({
   init({ id, connection = {}, actions = {}, aeppInfo = {} }) {

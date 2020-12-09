@@ -1,19 +1,13 @@
 <template>
   <div class="popup">
     <div class="permission-row">
-      <CheckBox
-        :value="!permissions.address"
-        @input="changePermission('address', !permissions.address)"
-      />
-      <span :class="{ highlight: !permissions.address }">{{ $t('pages.permissions.login') }}</span>
+      <CheckBox :value="!address" @input="togglePermission('address')" />
+      <span :class="{ highlight: !address }">{{ $t('pages.permissions.login') }}</span>
     </div>
 
     <div class="permission-row">
-      <CheckBox
-        :value="!permissions.messageSign"
-        @input="changePermission('messageSign', !permissions.messageSign)"
-      />
-      <span :class="{ highlight: !permissions.messageSign }">
+      <CheckBox :value="!messageSign" @input="togglePermission('messageSign')" />
+      <span :class="{ highlight: !messageSign }">
         {{ $t('pages.permissions.message-sign') }}
       </span>
     </div>
@@ -22,26 +16,26 @@
       <div class="permission-row">
         {{ $t('pages.permissions.transaction-sign') }}
         <Input
-          :value="permissions.transactionSignLimit || ''"
-          :error="error"
+          :value="transactionSignLimit || ''"
+          :error="transactionSignLimitError"
           placeholder="no limit"
-          @input="(value) => changePermission('transactionSignLimit', value)"
+          @input="setTransactionSignLimit"
         />
       </div>
       <RangeInput
-        :value="permissions.transactionSignLimit"
+        :value="transactionSignLimit"
         min="0"
         :max="tokenBalance"
         step="0.1"
-        @input="(value) => changePermission('transactionSignLimit', value)"
+        @input="setTransactionSignLimit"
       />
       <div class="permission-row">
         {{ $t('pages.permissions.spent-today') }}
-        <TokenAmount :amount="permissions.transactionSignLimit - limitLeft" />
+        <TokenAmount :amount="transactionSignLimit - transactionSignLimitLeft" />
       </div>
       <div class="permission-row">
         {{ $t('pages.permissions.left-today') }}
-        <TokenAmount :amount="limitLeft" />
+        <TokenAmount :amount="transactionSignLimitLeft" />
       </div>
       <div class="permission-row">
         {{ $t('pages.account.balance') }}
@@ -52,12 +46,11 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState, mapMutations } from 'vuex';
 import CheckBox from '../components/CheckBox';
 import Input from '../components/Input';
 import RangeInput from '../components/RangeInput';
 import TokenAmount from '../components/TokenAmount';
-import { getLimitLeft, setLimitLeft } from '../../../store/modules/permissions';
 
 export default {
   components: {
@@ -67,34 +60,24 @@ export default {
     TokenAmount,
   },
   data: () => ({
-    error: false,
-    limitLeft: 0,
+    transactionSignLimitError: false,
   }),
   computed: {
-    ...mapGetters(['tokenBalance', 'convertToCurrency', 'balanceCurrency', 'formatCurrency']),
-    permissions() {
-      return this.$store.state.permissions;
-    },
-  },
-  async mounted() {
-    const storageLimitLeft = (await getLimitLeft())?.limitLeft;
-    this.limitLeft =
-      storageLimitLeft === undefined ? this.permissions.transactionSignLimit : storageLimitLeft;
+    ...mapGetters(['tokenBalance']),
+    ...mapState('permissions', [
+      'address',
+      'messageSign',
+      'transactionSignLimit',
+      'transactionSignLimitLeft',
+    ]),
   },
   methods: {
-    async changePermission(name, value) {
-      let newValue = value;
-      if (name === 'transactionSignLimit') {
-        newValue = +value;
-        if (Number.isNaN(newValue) || newValue < 0) {
-          this.error = true;
-          return;
-        }
-        this.limitLeft = newValue;
-        await setLimitLeft(newValue, undefined);
-      }
-      this.error = false;
-      this.$store.commit('permissions/setPermissionValue', { name, value: newValue });
+    ...mapMutations('permissions', ['togglePermission']),
+    setTransactionSignLimit(rawValue) {
+      const value = +rawValue;
+      this.transactionSignLimitError = Number.isNaN(value) || value < 0;
+      if (this.transactionSignLimitError) return;
+      this.$store.commit('permissions/setTransactionSignLimit', value);
     },
   },
 };

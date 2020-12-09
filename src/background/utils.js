@@ -8,8 +8,8 @@ import {
   getActiveNetwork,
 } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
-import Logger from './logger';
-import walletController from '../wallet-controller';
+import Logger from '../lib/logger';
+import walletController from './wallet-controller';
 
 let sdk;
 let tippingContract;

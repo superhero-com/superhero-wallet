@@ -14,8 +14,8 @@ import {
 } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 import popups from './popup-connection';
-import walletController from '../wallet-controller';
-import { checkPermissions } from '../store/modules/permissions';
+import walletController from './wallet-controller';
+import store from './store';
 
 global.browser = require('webextension-polyfill');
 
@@ -57,18 +57,21 @@ export default {
         compilerUrl: this.compiler,
         name: 'Superhero',
         async onConnection(aepp, action) {
-          const open = await context.shouldOpenPopup(aepp, action);
+          const open = await context.shouldOpenPopup(aepp, { ...action });
           if (open) context.checkAeppPermissions(aepp, action, 'connection');
         },
         onDisconnect(msg, client) {
           client.disconnect();
         },
         async onSubscription(aepp, action) {
-          const open = await context.shouldOpenPopup(aepp, action);
+          const open = await context.shouldOpenPopup(aepp, { ...action });
           if (open) context.checkAeppPermissions(aepp, action, 'subscription');
         },
         async onSign(aepp, action) {
-          const open = await context.shouldOpenPopup(aepp, action);
+          const open = await context.shouldOpenPopup(aepp, {
+            ...action,
+            params: action.params.txObject.params,
+          });
           if (open) {
             context.checkAeppPermissions(aepp, action, 'sign', () =>
               setTimeout(() => context.showPopup({ aepp, action, type: 'sign' }), 2000),
@@ -76,7 +79,7 @@ export default {
           }
         },
         async onMessageSign(aepp, action) {
-          const open = await context.shouldOpenPopup(aepp, action);
+          const open = await context.shouldOpenPopup(aepp, { ...action });
           if (open) {
             context.checkAeppPermissions(aepp, action, 'messageSign', () =>
               context.showPopup({ aepp, action, type: 'messageSign' }),
@@ -84,7 +87,7 @@ export default {
           }
         },
         async onAskAccounts(aepp, action) {
-          const open = await context.shouldOpenPopup(aepp, action);
+          const open = await context.shouldOpenPopup(aepp, { ...action });
           if (open) {
             context.checkAeppPermissions(aepp, action, 'accounts', () =>
               setTimeout(() => context.showPopup({ aepp, action, type: 'askAccounts' }), 2000),
@@ -109,9 +112,9 @@ export default {
     } = aepp;
     return extractHostName(url);
   },
-  async shouldOpenPopup(aepp, action) {
-    if (await checkPermissions(action.method)) return true;
-    action.accept();
+  async shouldOpenPopup(aepp, { accept, method, params }) {
+    if (await store.dispatch('permissions/checkPermissions', { method, params })) return true;
+    accept();
     return false;
   },
   async checkAeppPermissions(aepp, action, caller, cb) {
@@ -230,7 +233,10 @@ export default {
         },
       } = client;
       const isConnected = await getAeppAccountPermission(extractHostName(url), address);
-      if ((await checkPermissions('address.subscribe')) && !isConnected) {
+      if (
+        (await store.dispatch('permissions/checkPermissions', { method: 'address.subscribe' })) &&
+        !isConnected
+      ) {
         const accept = await this.showPopup({ action: {}, aepp: client, type: 'connectConfirm' });
         if (accept) {
           this.sdk.selectAccount(address);

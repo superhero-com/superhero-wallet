@@ -81,8 +81,6 @@ export const defaultNetwork =
 export const AGGREGATOR_URL = 'https://superhero.com/';
 
 export const TXS_PER_PAGE = 30;
-export const MAX_AMOUNT_WITHOUT_CONFIRM = 10;
-export const LIMIT_KEY = 'limit';
 export const AENS_DOMAIN = '.chain';
 export const MAX_AUCTION_NAME_LENGTH = 12 + AENS_DOMAIN.length;
 export const MIN_NAME_LENGTH = 14;

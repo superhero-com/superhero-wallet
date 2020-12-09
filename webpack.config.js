@@ -26,7 +26,7 @@ const getConfig = platform => {
     context: path.resolve(__dirname, 'src'),
     entry: {
       ...(platform.startsWith('extension-') && {
-        'other/background': './background.js',
+        'other/background': './background/index.js',
         'other/inject': './content-scripts/inject.js',
         'other/twitter': './content-scripts/twitter.js',
         'other/youtube': './content-scripts/youtube.js',

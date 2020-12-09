@@ -2,7 +2,6 @@ import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import { OBJECT_ID_TX_TYPE, TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import { postMessage } from '../../popup/utils/connection';
 import { parseFromStorage, aettosToAe, aeToAettos } from '../../popup/utils/helper';
-import { checkPermissions } from '../modules/permissions';
 
 export default (store) =>
   store.registerModule('accounts', {
@@ -57,7 +56,11 @@ export default (store) =>
           },
         };
         const fee =
-          modal && (await checkPermissions('transaction.sign', txObject))
+          modal &&
+          (await store.dispatch('permissions/checkPermissions', {
+            method: 'transaction.sign',
+            params: txObject,
+          }))
             ? aeToAettos(await dispatch('modals/open', confirmProps, { root: true }))
             : txObject.fee;
         return TxBuilder.buildTx(

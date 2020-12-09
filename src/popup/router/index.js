@@ -34,7 +34,8 @@ const router = new VueRouter({
 const lastRouteKey = 'last-path';
 
 const unbind = router.beforeEach(async (to, from, next) => {
-  await helper.pollGetter(() => store.state.isRestored);
+  // eslint-disable-next-line no-underscore-dangle
+  await store._watcherVM.$watchUntilTruly(() => store.state.isRestored);
   next(
     (to.path === '/' && (await browser.storage.local.get(lastRouteKey))[lastRouteKey]) || undefined,
   );
