@@ -235,7 +235,7 @@
       "sign-message": "签名信息",
       "invite": "邀请"
     },
-    "aboutSettings": {
+    "about": {
       "heading": "关于",
       "systemName": "超级英雄",
       "terms": "使用条款",

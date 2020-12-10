@@ -1,4 +1,4 @@
-const links = ['receive', 'send', 'transactions', 'names', 'aboutSettings'];
+const links = ['receive', 'send', 'transactions', 'names', 'about'];
 
 const dropdownLinks = ['securitySettings', 'generalSettings', 'networks'];
 

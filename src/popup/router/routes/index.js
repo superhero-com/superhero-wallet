@@ -7,7 +7,7 @@ import PopupMessageSign from '../pages/Popups/MessageSign';
 import Settings from '../pages/Settings';
 import GeneralSettings from '../pages/GeneralSettings';
 import SecuritySettings from '../pages/SecuritySettings';
-import AboutSettings from '../pages/AboutSettings';
+import About from '../pages/About';
 import Tip from '../pages/Tip';
 import Retip from '../pages/Retip';
 import TermsOfService from '../pages/TermsOfService';
@@ -117,8 +117,8 @@ export default [
     },
   },
   {
-    path: '/aboutSettings',
-    component: AboutSettings,
+    path: '/about',
+    component: About,
     meta: {
       title: 'about',
     },

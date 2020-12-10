@@ -175,7 +175,7 @@
       "address": "Send Address",
       "sign-message": "Sign Message"
     },
-    "aboutSettings": {
+    "about": {
       "heading": "Über",
       "systemName": "Superhero",
       "terms": "Nutzungsbedingungen",

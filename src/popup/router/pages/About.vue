@@ -2,7 +2,7 @@
   <div class="popup">
     <Logo class="logo" />
     <p>
-      {{ $t('pages.aboutSettings.systemName') }}
+      {{ $t('pages.about.systemName') }}
       <span class="version">
         <a
           @click="
@@ -16,14 +16,12 @@
     </p>
     <hr />
     <div class="waellet-links">
-      <router-link to="/termsOfService" data-cy="terms">{{
-        $t('pages.aboutSettings.terms')
-      }}</router-link>
+      <router-link to="/termsOfService" data-cy="terms">{{ $t('pages.about.terms') }}</router-link>
       <router-link to="/privacyPolicy" data-cy="privacy">{{
-        $t('pages.aboutSettings.privacyPolicy')
+        $t('pages.about.privacyPolicy')
       }}</router-link>
       <Button @click="openUrl(bugReportUrl, true)">
-        {{ $t('pages.aboutSettings.reportBug') }}
+        {{ $t('pages.about.reportBug') }}
       </Button>
     </div>
   </div>

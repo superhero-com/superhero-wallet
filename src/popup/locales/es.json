@@ -231,7 +231,7 @@
       "allowances": "Asignaciones",
       "sign-message": "Firmar Mensaje"
     },
-    "aboutSettings": {
+    "about": {
       "heading": "Acerca de",
       "systemName": "Superhero",
       "terms": "Términos de Servicio",
