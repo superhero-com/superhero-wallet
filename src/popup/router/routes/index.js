@@ -137,6 +137,7 @@ export default [
     component: About,
     meta: {
       title: 'about',
+      ifNotAuth: true,
     },
   },
   {
