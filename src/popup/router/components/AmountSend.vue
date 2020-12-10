@@ -23,7 +23,7 @@
       <div class="balance-box">
         <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
         <span class="secondary-text f-14 block l-1" data-cy="balance">
-          {{ selectedToken ? selectedToken.convertedBalance : tokenBalance }}
+          {{ selectedToken ? selectedToken.convertedBalance : tokenBalance.toFixed(2) }}
           {{ selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid') }}
         </span>
         <span class="f-14 block l-1 amount-currency" data-cy="balance-currency">
@@ -36,6 +36,7 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import Input from './Input';
 
@@ -44,8 +45,11 @@ export default {
     Input,
   },
   props: ['amountError', 'value', 'errorMsg', 'label'],
+  subscriptions() {
+    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+  },
   computed: {
-    ...mapGetters(['tokenBalance', 'balanceCurrency', 'formatCurrency']),
+    ...mapGetters(['formatCurrency']),
     ...mapState('fungibleTokens', ['selectedToken']),
     currencyAmount() {
       return ((this.value || 0) * this.$store.getters.currentCurrencyRate).toFixed(2);

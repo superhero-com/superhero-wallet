@@ -46,7 +46,8 @@
 </template>
 
 <script>
-import { mapGetters, mapState, mapMutations } from 'vuex';
+import { pick } from 'lodash-es';
+import { mapState, mapMutations } from 'vuex';
 import CheckBox from '../components/CheckBox';
 import Input from '../components/Input';
 import RangeInput from '../components/RangeInput';
@@ -62,8 +63,10 @@ export default {
   data: () => ({
     transactionSignLimitError: false,
   }),
+  subscriptions() {
+    return pick(this.$store.state.observables, ['tokenBalance']);
+  },
   computed: {
-    ...mapGetters(['tokenBalance']),
     ...mapState('permissions', [
       'address',
       'messageSign',

@@ -57,7 +57,6 @@ export default {
   },
   data: () => ({
     showSidebar: false,
-    polling: null,
     iframe: IN_FRAME,
     aeppPopup: window.RUNNING_IN_POPUP,
   }),
@@ -84,7 +83,6 @@ export default {
   watch: {
     isLoggedIn(val) {
       if (val) this.init();
-      else clearInterval(this.polling);
     },
   },
   async created() {
@@ -132,14 +130,6 @@ export default {
           payload: { address: this.account.publicKey, network: this.current.network },
         });
       }
-
-      this.pollData();
-    },
-    pollData() {
-      this.polling = setInterval(() => {
-        if (!process.env.RUNNING_IN_TESTS && this.sdk) this.$store.dispatch('updateBalance');
-      }, 2500);
-      this.$once('hook:beforeDestroy', () => clearInterval(this.polling));
     },
   },
 };

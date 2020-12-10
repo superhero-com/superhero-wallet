@@ -26,7 +26,6 @@ export default new Vuex.Store({
     account: {},
     mnemonic: null,
     activeAccount: 0,
-    balance: 0,
     current: {
       network: defaultNetwork.name,
       language: 'en',
@@ -71,7 +70,6 @@ export default new Vuex.Store({
         migrations,
         current,
         transactions,
-        balance,
         currencies,
         userNetworks,
         names,
@@ -91,7 +89,6 @@ export default new Vuex.Store({
         migrations,
         current,
         transactions,
-        balance,
         currencies,
         userNetworks,
         names,

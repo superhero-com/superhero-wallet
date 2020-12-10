@@ -60,6 +60,7 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import TabsMenu from '../../components/TabsMenu';
 import Avatar from '../../components/Avatar';
@@ -89,6 +90,9 @@ export default {
       ],
     };
   },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+  },
   created() {
     this.$store.commit(
       'setPageTitle',
@@ -96,7 +100,7 @@ export default {
     );
   },
   computed: {
-    ...mapGetters(['tippingSupported', 'formatCurrency', 'tokenBalance', 'balanceCurrency']),
+    ...mapGetters(['tippingSupported', 'formatCurrency']),
     ...mapState('fungibleTokens', ['tokenBalances', 'availableTokens', 'aePublicData']),
     tokenData() {
       if (this.id === 'aeternity') {

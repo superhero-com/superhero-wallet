@@ -93,6 +93,7 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { escapeSpecialChars, aeToAettos, validateTipUrl, convertToken } from '../../utils/helper';
@@ -131,9 +132,12 @@ export default {
       tipFromPopup: false,
     };
   },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['balance']);
+  },
   computed: {
     ...mapGetters(['account', 'minTipAmount', 'activeNetwork']),
-    ...mapState(['tourRunning', 'balance', 'tip', 'sdk', 'tippingV1', 'tippingV2']),
+    ...mapState(['tourRunning', 'tip', 'sdk', 'tippingV1', 'tippingV2']),
     ...mapState('fungibleTokens', ['selectedToken', 'tokenBalances']),
     urlStatus() {
       return this.tourRunning ? 'verified' : this.$store.getters['tipUrl/status'](this.url);

@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import blocksToRelativeTime from '../../../../filters/blocksToRelativeTime';
 import NameRow from '../../components/NameRow';
 import Button from '../../components/Button';
@@ -42,8 +43,10 @@ export default {
   data: () => ({
     expiration: 0,
     bids: null,
-    topBlockHeight: 0,
   }),
+  subscriptions() {
+    return pick(this.$store.state.observables, ['topBlockHeight']);
+  },
   computed: {
     currentBid() {
       if (!this.bids) return null;
@@ -56,8 +59,6 @@ export default {
   },
   filters: { blocksToRelativeTime },
   async mounted() {
-    await this.$watchUntilTruly(() => this.$store.state.sdk);
-    this.topBlockHeight = await this.$store.dispatch('getHeight');
     const id = setInterval(() => this.updateAuctionEntry(), 3000);
     this.$once('hook:destroyed', () => clearInterval(id));
     this.$watch(

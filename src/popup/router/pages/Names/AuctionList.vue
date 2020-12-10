@@ -33,6 +33,7 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import NameListHeader from '../../components/NameListHeader';
 import Button from '../../components/Button';
 import NameRow from '../../components/NameRow';
@@ -43,8 +44,10 @@ export default {
   data: () => ({
     filter: 'soonest',
     activeAuctions: [],
-    topBlockHeight: 0,
   }),
+  subscriptions() {
+    return pick(this.$store.state.observables, ['topBlockHeight']);
+  },
   computed: {
     auctions() {
       switch (this.filter) {
@@ -60,7 +63,6 @@ export default {
   filters: { blocksToRelativeTime },
   async created() {
     await this.$watchUntilTruly(() => this.$store.state.sdk);
-    this.topBlockHeight = await this.$store.dispatch('getHeight');
     this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');
   },
 };
