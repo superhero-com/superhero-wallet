@@ -13,7 +13,7 @@
       />
       <PanelItem
         to="/networks"
-        :title="$t('pages.appVUE.networks')"
+        :title="$t('pages.titles.networks')"
         :info="$t('pages.settings.tabNetworksSmall')"
       />
       <PanelItem

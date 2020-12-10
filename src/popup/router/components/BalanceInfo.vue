@@ -13,9 +13,7 @@
           <span class="display-value text-ellipsis">{{
             selectedToken ? selectedToken.convertedBalance : tokenBalance.toFixed(2)
           }}</span>
-          <span class="token-symbol">{{
-            !selectedToken ? $t('pages.appVUE.aeid') : selectedToken.symbol
-          }}</span>
+          <span class="token-symbol">{{ !selectedToken ? $t('ae') : selectedToken.symbol }}</span>
           <ExpandedAngleArrow class="expand-arrow" />
         </div>
         <div v-if="currentToken === 'default'" class="currenciesgroup">
@@ -59,7 +57,7 @@ export default {
       return [
         {
           value: 'default',
-          text: `${this.tokenBalance} ${this.$t('pages.appVUE.aeid')}`,
+          text: `${this.tokenBalance} ${this.$t('ae')}`,
         },
         ...this.tokenBalances,
       ];

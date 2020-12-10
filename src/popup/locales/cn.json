@@ -1,5 +1,7 @@
 {
   "ok": "好的",
+  "ae": "AE",
+  "mainAccount": "主账户",
   "onboarding": {
     "step_1": {
       "title": "你的账户信息",
@@ -233,51 +235,16 @@
       "sign-message": "签名信息",
       "invite": "邀请"
     },
-    "appVUE": {
-      "systemName": "超级英雄",
-      "manageNetworks": "管理网络",
-      "manageAccounts": "管理帐户",
-      "airGapVault": "为AirGap创建一个保险库",
-      "ledgerAccount": "添加分类帐户",
-      "menu": "菜单",
-      "myAccount": "我的帐户",
-      "switchToken": "代币",
-      "utilities": "公用事务",
-      "settings": "设置",
-      "logout": "退出",
-      "profile": "剖面",
-      "help": "帮助",
-      "topUp": "充值",
-      "withdraw": "提币",
-      "myTransactions": "我的交易",
-      "activity": "活跃度",
-      "dashboard": "仪表板",
-      "aeid": "AE",
-      "walletName": "超级英雄钱包",
-      "general": "概况",
-      "security": "安全",
-      "seedPhrase": "助记词",
-      "language": "语言",
-      "advanced": "高级",
-      "versions": "版本& 更新",
-      "mainAccount": "主账户",
-      "reportBug": "报告bug",
-      "names": "名称",
-      "networks": "网络",
-      "removeAccount": "移除帐户",
-      "donateErrorReports": "提交错误报告",
-      "tokens": "可替代的代币",
-      "manageTokens": "管理代币",
-      "invite": "邀请"
-    },
     "aboutSettings": {
       "heading": "关于",
       "systemName": "超级英雄",
       "terms": "使用条款",
-      "privacyPolicy": "隐私政策"
+      "privacyPolicy": "隐私政策",
+      "reportBug": "报告bug"
     },
     "account": {
       "heading": "帐户",
+      "activity": "活跃度",
       "accountName": "帐户名称",
       "copy": "复制",
       "send": "打赏",

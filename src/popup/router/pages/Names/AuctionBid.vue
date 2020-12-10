@@ -10,7 +10,7 @@
       <span>
         {{ $t('pages.names.auctions.current-heighest-bid') }}
       </span>
-      <span> {{ highestBid }} {{ $t('pages.appVUE.aeid') }} </span>
+      <span> {{ highestBid }} {{ $t('ae') }} </span>
     </div>
     <div class="details-row">
       <span>

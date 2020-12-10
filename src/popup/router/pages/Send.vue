@@ -8,7 +8,7 @@
           <p class="primary-title text-left mb-8 f-16">
             {{ $t('pages.tipPage.heading') }}
             <span class="secondary-text">{{
-              selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid')
+              selectedToken ? selectedToken.symbol : $t('ae')
             }}</span>
             {{ $t('pages.tipPage.to') }}
           </p>
@@ -66,7 +66,7 @@
             <div class="text-center">
               <span data-cy="review-amount" class="amount"
                 >{{ parseFloat(form.amount).toFixed(3) }}
-                {{ selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid') }}</span
+                {{ selectedToken ? selectedToken.symbol : $t('ae') }}</span
               >
               <span v-if="!selectedToken" class="currencyamount">
                 <!--eslint-disable-line vue-i18n/no-raw-text-->
@@ -105,9 +105,7 @@
             <span>{{ $t('pages.send.successalert') }}</span>
             <span class="secondary-text ml-5">
               {{ successTx.amount }}
-              {{
-                successTx.token ? availableTokens[successTx.token].symbol : $t('pages.appVUE.aeid')
-              }}</span
+              {{ successTx.token ? availableTokens[successTx.token].symbol : $t('ae') }}</span
             >
           </p>
           <InfoGroup :value="successTx.to" :label="$t('pages.send.to')" />

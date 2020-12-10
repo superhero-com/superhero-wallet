@@ -1,5 +1,7 @@
 {
   "ok": "OK",
+  "ae": "AE",
+  "mainAccount": "Cuenta principal",
   "onboarding": {
     "step_1": {
       "title": "Información de tu cuenta",
@@ -229,50 +231,16 @@
       "allowances": "Asignaciones",
       "sign-message": "Firmar Mensaje"
     },
-    "appVUE": {
-      "systemName": "Superhero",
-      "manageNetworks": "Administrar redes",
-      "manageAccounts": "Cuentas de administración",
-      "airGapVault": "Crear una Bóveda AirGap",
-      "ledgerAccount": "Añadir cuenta Ledger",
-      "menu": "Menu",
-      "myAccount": "Mi cuenta",
-      "switchToken": "Tokens",
-      "utilities": "Utilidades",
-      "settings": "Ajustes",
-      "logout": "Salir",
-      "profile": "Perfil",
-      "help": "Ayuda",
-      "topUp": "Agregar Saldo",
-      "withdraw": "Retiro",
-      "myTransactions": "Mis transacciones",
-      "activity": "Actividad",
-      "dashboard": "Panel de control",
-      "aeid": "AE",
-      "walletName": "Billetera Superhero",
-      "general": "General",
-      "security": "Securidad",
-      "seedPhrase": "Frase Semilla",
-      "language": "Idioma",
-      "advanced": "Avanzado",
-      "versions": "Version y Actualizaciones",
-      "mainAccount": "Cuenta principal",
-      "reportBug": "Reportar un bug",
-      "names": "Nombres",
-      "networks": "Redes",
-      "removeAccount": "Eliminar cuenta",
-      "donateErrorReports": "Enviar reportes de errores",
-      "tokens": "Tokens Fungibles",
-      "manageTokens": "Manejar tokens"
-    },
     "aboutSettings": {
       "heading": "Acerca de",
       "systemName": "Superhero",
       "terms": "Términos de Servicio",
-      "privacyPolicy": "Política de Privacidad"
+      "privacyPolicy": "Política de Privacidad",
+      "reportBug": "Reportar un bug"
     },
     "account": {
       "heading": "Cuenta",
+      "activity": "Actividad",
       "accountName": "Nombre de la cuenta",
       "copy": "Copiar",
       "send": "Enviar Propina",

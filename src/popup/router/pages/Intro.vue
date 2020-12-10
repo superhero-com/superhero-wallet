@@ -5,7 +5,7 @@
         <img v-if="iframe" src="../../../icons/iframe/receive.svg" />
         <h2 v-else>
           <Claim /> {{ $t('pages.intro.receive') }}
-          <span class="ml-10 secondary-text"> {{ $t('pages.appVUE.aeid') }} </span>
+          <span class="ml-10 secondary-text"> {{ $t('ae') }} </span>
         </h2>
         <div class="text-info">
           <span>
@@ -18,7 +18,7 @@
         <img v-if="iframe" src="../../../icons/iframe/send.svg" />
         <h2 v-else>
           <Heart /> {{ $t('pages.send.send') }}
-          <span class="ml-10 secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+          <span class="ml-10 secondary-text">{{ $t('ae') }}</span>
         </h2>
         <div class="text-info">
           <span>
@@ -32,7 +32,7 @@
         <div class="text-info">
           <span>
             {{ $t('pages.intro.step3text-1') }}
-            <span class="secondary-text aeid">{{ $t('pages.appVUE.aeid') }}</span>
+            <span class="secondary-text aeid">{{ $t('ae') }}</span>
             {{ $t('pages.intro.step3text-2') }}
           </span>
         </div>
