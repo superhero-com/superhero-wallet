@@ -168,6 +168,7 @@ export default {
     background: $nav-bg-color;
     border: 1px solid $secondary-color;
     border-radius: 5px;
+    scrollbar-width: none;
   }
 
   &.show ul.list {
