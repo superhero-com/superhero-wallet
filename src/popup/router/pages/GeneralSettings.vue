@@ -5,7 +5,7 @@
     <small>
       <!--eslint-disable-next-line vue-i18n/no-raw-text-->
       {{ $t('pages.generalSettings.currentLanguage') }}:
-      {{ current.language || 'en' }}
+      {{ active.name || 'en' }}
     </small>
     <div class="language-settings">
       <div class="dropdown" :class="{ show: dropdown }">
@@ -16,10 +16,10 @@
         </Button>
 
         <ul class="sub-dropdown">
-          <li v-for="(value, name) in locales" :key="name">
-            <div @click="switchLanguage(name)" :class="{ current: current.language == name }">
-              <img :src="flag(name)" />
-              <span>{{ languageFullName(name) }}</span>
+          <li v-for="{ code, name } in list" :key="code">
+            <div @click="switchLanguage(code)" :class="{ active: active == name }">
+              <img :src="flag(code)" />
+              <span>{{ name }}</span>
             </div>
           </li>
         </ul>
@@ -31,45 +31,24 @@
 <script>
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
-import { mapState } from 'vuex';
-import { langs, fetchAndSetLocale } from '../../utils/i18nHelper';
+import { mapGetters } from 'vuex';
 import Button from '../components/Button';
 
 export default {
   components: { Button },
   data() {
     return {
-      locales: langs,
       dropdown: false,
     };
   },
-  computed: mapState(['current']),
+  computed: mapGetters('languages', ['list', 'active']),
   methods: {
-    async switchLanguage(languageChoose) {
-      fetchAndSetLocale(languageChoose);
+    async switchLanguage(code) {
       this.dropdown = false;
-      this.$store.state.current.language = languageChoose;
+      this.$store.commit('languages/setActiveCode', code);
     },
-    languageFullName(name) {
-      switch (name) {
-        case 'en':
-          return 'English';
-        case 'es':
-          return 'Spanish';
-        case 'de':
-          return 'German';
-        case 'fr':
-          return 'French';
-        case 'cn':
-          return '中文';
-        case 'it':
-          return 'Italian';
-        default:
-          return 'English';
-      }
-    },
-    flag(lang) {
-      return require(`../../../icons/flag_${lang}.png`);
+    flag(code) {
+      return require(`../../../icons/flag_${code}.png`);
     },
   },
 };
@@ -143,7 +122,7 @@ small {
         align-items: center;
       }
 
-      .current {
+      .active {
         text-decoration: underline;
       }
 

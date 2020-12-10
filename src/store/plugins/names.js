@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import BigNumber from 'bignumber.js';
 import { aettosToAe, fetchJson, postJson } from '../../popup/utils/helper';
-import { i18n } from '../../popup/utils/i18nHelper';
+import { i18n } from './languages';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
 
 export default (store) => {

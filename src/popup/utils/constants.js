@@ -1,7 +1,7 @@
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { ABI_VERSIONS, TX_TYPE, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import BigNumber from 'bignumber.js';
-import { i18n } from './i18nHelper';
+import { i18n } from '../../store/plugins/languages';
 
 export const MAGNITUDE = 18;
 export const TX_TYPES = {

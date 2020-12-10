@@ -11,6 +11,7 @@ import tipUrl from './plugins/tipUrl';
 import accounts from './plugins/account';
 import namesPlugin from './plugins/names';
 import pendingTransactionHandler from './plugins/pendingTransactionHandler';
+import languagesPlugin from './plugins/languages';
 import runMigrations from './migrations';
 import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
@@ -28,7 +29,6 @@ export default new Vuex.Store({
     activeAccount: 0,
     current: {
       network: defaultNetwork.name,
-      language: 'en',
       token: 0,
       currency: 'usd',
     },
@@ -73,6 +73,7 @@ export default new Vuex.Store({
         currencies,
         userNetworks,
         names,
+        languages,
         nextCurrenciesFetch,
         tip,
         connectedAepps,
@@ -92,6 +93,7 @@ export default new Vuex.Store({
         currencies,
         userNetworks,
         names,
+        languages,
         nextCurrenciesFetch,
         tip,
         connectedAepps,
@@ -112,6 +114,7 @@ export default new Vuex.Store({
     accounts,
     namesPlugin,
     pendingTransactionHandler,
+    languagesPlugin,
   ],
   modules: {
     invites: invitesModule,
