@@ -55,14 +55,9 @@ export default (store) =>
             nameFee: txObject.nameFee && +aettosToAe(txObject.nameFee),
           },
         };
-        const fee =
-          modal &&
-          (await store.dispatch('permissions/checkPermissions', {
-            method: 'transaction.sign',
-            params: txObject,
-          }))
-            ? aeToAettos(await dispatch('modals/open', confirmProps, { root: true }))
-            : txObject.fee;
+        const fee = modal
+          ? aeToAettos(await dispatch('modals/open', confirmProps, { root: true }))
+          : txObject.fee;
         return TxBuilder.buildTx(
           {
             ...txObject,

@@ -1,21 +1,16 @@
-import MemoryAccount from '@aeternity/aepp-sdk/es/account/memory';
 import { RpcWallet } from '@aeternity/aepp-sdk/es/ae/wallet';
+import { Crypto } from '@aeternity/aepp-sdk/es';
 import Node from '@aeternity/aepp-sdk/es/node';
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import { isEmpty } from 'lodash-es';
 import uuid from 'uuid';
 import { AEX2_METHODS, defaultNetwork } from '../popup/utils/constants';
-import {
-  extractHostName,
-  getAllNetworks,
-  getAeppAccountPermission,
-  parseFromStorage,
-  stringifyForStorage,
-} from '../popup/utils/helper';
+import { getAllNetworks, stringifyForStorage, getAeppUrl } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 import popups from './popup-connection';
 import walletController from './wallet-controller';
 import store from './store';
+import { App } from '../store/modules/permissions';
 
 global.browser = require('webextension-polyfill');
 
@@ -29,15 +24,12 @@ export default {
       const {
         current: { network },
       } = await getState();
-      this[AEX2_METHODS.INIT_RPC_WALLET]({ address: account.publicKey, network });
+      this[AEX2_METHODS.INIT_RPC_WALLET](network);
     }
   },
   initFields() {
     this.sdk = null;
     this.initNetwork();
-    this.activeAccount = null;
-    this.accounts = [];
-    this.accountKeyPairs = [];
     this.connectionsQueue = [];
   },
   initNetwork(network = defaultNetwork.name) {
@@ -52,48 +44,81 @@ export default {
     const context = this;
     try {
       const node = await Node({ url: this.url });
-      this.sdk = await RpcWallet({
+      const cbAccept = (_, { accept }) => accept();
+      const signCb = async (type, aepp, action) => {
+        const { method, params } = action;
+        if (
+          (await store.dispatch('permissions/checkPermissions', {
+            host: getAeppUrl(aepp).hostname,
+            method,
+            params: params?.txObject?.params,
+          })) ||
+          (await context.showPopup(aepp, type, method, params))
+        ) {
+          action.accept.apply(null, [
+            ...(method === 'message.sign' ? [] : [null]),
+            { onAccount: { sign: () => {}, address: () => {} } },
+          ]);
+          return;
+        }
+        action.deny();
+      };
+
+      this.sdk = await RpcWallet.compose({
+        methods: {
+          getApp(aeppUrl) {
+            const hostPermissions = store.state.permissions[aeppUrl.hostname];
+            if (!hostPermissions) store.commit('permissions/addHost', aeppUrl.hostname);
+            return new App(aeppUrl);
+          },
+          async address(...args) {
+            const address = store.state.account.publicKey;
+            const app = args[args.length - 1];
+            if (
+              app instanceof App &&
+              !(await store.dispatch('permissions/requestAddressForHost', {
+                host: app.host.hostname,
+                address,
+                connectionPopupCb: async () => context.showPopup(app.host.href),
+              }))
+            )
+              return Promise.reject(new Error('Rejected by user'));
+            return address;
+          },
+          sign: (data) => {
+            const { secretKey } = JSON.parse(
+              walletController.getKeypair({
+                activeAccount: store.state.activeAccount,
+                account: store.state.account,
+              }),
+            );
+            return Crypto.sign(data, Buffer.from(new Uint8Array(secretKey.data), 'hex'));
+          },
+        },
+      })({
         nodes: [{ name: this.network, instance: node }],
         compilerUrl: this.compiler,
         name: 'Superhero',
-        async onConnection(aepp, action) {
-          const open = await context.shouldOpenPopup(aepp, { ...action });
-          if (open) context.checkAeppPermissions(aepp, action, 'connection');
-        },
-        onDisconnect(msg, client) {
+        onConnection: cbAccept,
+        onDisconnect(_, client) {
           client.disconnect();
         },
-        async onSubscription(aepp, action) {
-          const open = await context.shouldOpenPopup(aepp, { ...action });
-          if (open) context.checkAeppPermissions(aepp, action, 'subscription');
-        },
-        async onSign(aepp, action) {
-          const open = await context.shouldOpenPopup(aepp, {
-            ...action,
-            params: action.params.txObject.params,
+        async onSubscription(aepp, { accept, deny }) {
+          const address = await this.address(this.getApp(getAeppUrl(aepp)));
+          if (!address) {
+            deny();
+            return;
+          }
+          accept({
+            accounts: {
+              current: { [address]: {} },
+              connected: {},
+            },
           });
-          if (open) {
-            context.checkAeppPermissions(aepp, action, 'sign', () =>
-              setTimeout(() => context.showPopup({ aepp, action, type: 'sign' }), 2000),
-            );
-          }
         },
-        async onMessageSign(aepp, action) {
-          const open = await context.shouldOpenPopup(aepp, { ...action });
-          if (open) {
-            context.checkAeppPermissions(aepp, action, 'messageSign', () =>
-              context.showPopup({ aepp, action, type: 'messageSign' }),
-            );
-          }
-        },
-        async onAskAccounts(aepp, action) {
-          const open = await context.shouldOpenPopup(aepp, { ...action });
-          if (open) {
-            context.checkAeppPermissions(aepp, action, 'accounts', () =>
-              setTimeout(() => context.showPopup({ aepp, action, type: 'askAccounts' }), 2000),
-            );
-          }
-        },
+        onSign: signCb.bind(null, 'sign'),
+        onMessageSign: signCb.bind(null, 'messageSign'),
+        onAskAccounts: cbAccept,
       });
 
       this.connectionsQueue.forEach((c) => this.addConnection(c));
@@ -102,91 +127,43 @@ export default {
       this.sdk = null;
     }
   },
-  getAeppOrigin(aepp) {
-    const {
-      connection: {
-        port: {
-          sender: { url },
-        },
-      },
-    } = aepp;
-    return extractHostName(url);
-  },
-  async shouldOpenPopup(aepp, { accept, method, params }) {
-    if (await store.dispatch('permissions/checkPermissions', { method, params })) return true;
-    accept();
-    return false;
-  },
-  async checkAeppPermissions(aepp, action, caller, cb) {
-    const {
-      connection: {
-        port: {
-          sender: { url },
-        },
-      },
-    } = aepp;
-    const isConnected = await getAeppAccountPermission(extractHostName(url), this.activeAccount);
-    if (!isConnected) {
-      try {
-        await this.showPopup({
-          action: caller === 'connection' ? action : {},
-          aepp,
-          type: 'connectConfirm',
-        });
-        if (cb) cb();
-      } catch (e) {
-        console.error(`checkAeppPermissions: ${e}`);
-      }
-    } else if (!cb) {
-      action.accept();
-    } else {
-      cb();
-    }
-  },
 
-  async showPopup({ action, aepp, type = 'connectConfirm' }) {
+  async showPopup(aepp, type = 'connectConfirm', method = '', params = {}) {
     const id = uuid();
-    const {
-      connection: {
-        port: {
-          sender: { url },
-        },
-      },
-      info: { icons, name },
-    } = aepp;
+    const { href, protocol, host } = typeof aepp === 'object' ? getAeppUrl(aepp) : new URL(aepp);
     const tabs = await browser.tabs.query({ active: true });
     tabs.forEach(({ url: tabURL, id: tabId }) => {
       const tabUrl = new URL(tabURL);
       if (
         tabUrl.searchParams.get('type') === 'connectConfirm' &&
-        decodeURIComponent(tabUrl.searchParams.get('url')) === url
+        decodeURIComponent(tabUrl.searchParams.get('url')) === href
       ) {
         browser.tabs.remove(tabId);
       }
     });
+
     const extUrl = browser.runtime.getURL('./popup/popup.html');
-    const popupUrl = `${extUrl}?id=${id}&type=${type}&url=${encodeURIComponent(url)}`;
+    const popupUrl = `${extUrl}?id=${id}&type=${type}&url=${encodeURIComponent(href)}`;
     const popupWindow = await browser.windows.create({
       url: popupUrl,
       type: 'popup',
       height: 600,
       width: 375,
     });
-    if (!popupWindow) return action.deny();
 
     return new Promise((resolve, reject) => {
       try {
+        if (!popupWindow) reject();
         popups.addPopup(id);
-        popups.addActions(id, { ...action, resolve, reject });
-        const { protocol } = new URL(url);
+        popups.addActions(id, { resolve, reject });
         popups.setAeppInfo(id, {
           type,
-          action: { params: action.params, method: action.method },
-          url,
-          icons,
-          name,
+          action: { params, method },
+          url: href,
+          icons: aepp?.icons || [],
+          name: aepp?.name || host,
           protocol,
-          host: extractHostName(url),
+          host,
         });
       } catch (e) {
         console.error(`showPopup: ${e}`);
@@ -220,49 +197,6 @@ export default {
     );
     port.onDisconnect.addListener(() => clearInterval(shareWalletInfo));
   },
-  getAccessForAddress(address) {
-    const clients = Array.from(this.sdk.getClients().clients.values()).filter((client) =>
-      client.isConnected(),
-    );
-    clients.forEach(async (client) => {
-      const {
-        connection: {
-          port: {
-            sender: { url },
-          },
-        },
-      } = client;
-      const isConnected = await getAeppAccountPermission(extractHostName(url), address);
-      if (
-        (await store.dispatch('permissions/checkPermissions', { method: 'address.subscribe' })) &&
-        !isConnected
-      ) {
-        const accept = await this.showPopup({ action: {}, aepp: client, type: 'connectConfirm' });
-        if (accept) {
-          this.sdk.selectAccount(address);
-        }
-      } else {
-        this.sdk.selectAccount(address);
-      }
-    });
-  },
-  [AEX2_METHODS.CHANGE_ACCOUNT](payload) {
-    this.activeAccount = payload;
-    this.getAccessForAddress(payload);
-  },
-  async [AEX2_METHODS.ADD_ACCOUNT](payload) {
-    const account = {
-      publicKey: payload.address,
-    };
-    const newAccount = MemoryAccount({
-      keypair: parseFromStorage(
-        await walletController.getKeypair({ activeAccount: payload.idx, account }),
-      ),
-    });
-    this.sdk.addAccount(newAccount, { select: true });
-    this.activeAccount = payload.address;
-    this.getAccessForAddress(payload.address);
-  },
   async [AEX2_METHODS.SWITCH_NETWORK](payload) {
     this.addNewNetwork(payload);
   },
@@ -294,20 +228,13 @@ export default {
       this.sdk.removeRpcClient(aepp.id);
     });
   },
-  async [AEX2_METHODS.INIT_RPC_WALLET]({ address, network }) {
-    this.activeAccount = address;
+  async [AEX2_METHODS.INIT_RPC_WALLET](network) {
     if (!this.nodes[network]) {
       await this.initNodes();
     }
     if (!this.sdk) {
       this.initNetwork(network);
       await this.initSdk();
-    }
-
-    try {
-      this.sdk.selectAccount(this.activeAccount);
-    } catch (e) {
-      this[AEX2_METHODS.ADD_ACCOUNT]({ address, idx: 0 });
     }
 
     if (this.network !== network) {

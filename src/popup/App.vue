@@ -120,7 +120,7 @@ export default {
       if (!window.RUNNING_IN_POPUP && process.env.IS_EXTENSION) {
         postMessage({
           type: AEX2_METHODS.INIT_RPC_WALLET,
-          payload: { address: this.account.publicKey, network: this.current.network },
+          payload: this.current.network,
         });
       }
     },

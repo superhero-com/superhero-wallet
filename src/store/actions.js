@@ -82,14 +82,6 @@ export default {
       }
     }
   },
-  async setPermissionForAccount({ commit, state: { connectedAepps } }, { host, account }) {
-    if (connectedAepps[host]) {
-      if (connectedAepps[host].includes(account)) return;
-      commit('updateConnectedAepp', { host, account });
-    } else {
-      commit('addConnectedAepp', { host, account });
-    }
-  },
   async getWebPageAddresses({ state: { sdk } }) {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
     const { address, chainName } = await postMessageToContent(

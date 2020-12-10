@@ -90,10 +90,6 @@ export default {
         this.data.resolve();
         return;
       }
-      await this.$store.dispatch('setPermissionForAccount', {
-        host: this.data.host,
-        account: this.account.publicKey,
-      });
       this.data.resolve(true);
     },
   },
