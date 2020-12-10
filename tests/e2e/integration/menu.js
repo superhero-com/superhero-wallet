@@ -1,6 +1,6 @@
 const links = ['receive', 'send', 'transactions', 'names', 'about'];
 
-const dropdownLinks = ['securitySettings', 'lanugageSettings', 'networks'];
+const dropdownLinks = ['security', 'language', 'networks'];
 
 describe('Test cases for menu sidebar component', () => {
   beforeEach(() => {
@@ -38,9 +38,9 @@ describe('Test cases for menu sidebar component', () => {
     cy.closeMenu('overlay').menuShould('not.be.visible');
   });
 
-  it(`Opens each page and returns to account page`, () => {
-    [...links, ...dropdownLinks].forEach((page) => {
-      cy.openMenuPage(page, dropdownLinks.includes(page))
+  it(`Opens each non-dropdown page and returns to account page`, () => {
+    links.forEach((page) => {
+      cy.openMenuPage(page)
         .get('[data-cy=back-arrow]')
         .should('be.visible')
         .click()
@@ -48,6 +48,19 @@ describe('Test cases for menu sidebar component', () => {
         .should('be.visible')
         .get('[data-cy=back-arrow]')
         .should('not.be.visible');
+    });
+  });
+
+  it(`Opens each dropdown page and returns to settings page`, () => {
+    dropdownLinks.forEach((page) => {
+      cy.openMenuPage(page, true)
+        .get('[data-cy=back-arrow]')
+        .should('be.visible')
+        .click()
+        .url()
+        .should('contain', '/settings')
+        .get('[data-cy=back-arrow]')
+        .should('be.visible');
     });
   });
 });
