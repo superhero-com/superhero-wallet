@@ -5,9 +5,9 @@ import PopupConnect from '../pages/Popups/Connect';
 import PopupAskAccounts from '../pages/Popups/AskAccounts';
 import PopupMessageSign from '../pages/Popups/MessageSign';
 import Settings from '../pages/Settings';
-import GeneralSettings from '../pages/GeneralSettings';
+import LanguageSettings from '../pages/LanguageSettings';
 import SecuritySettings from '../pages/SecuritySettings';
-import AboutSettings from '../pages/AboutSettings';
+import About from '../pages/About';
 import Tip from '../pages/Tip';
 import Retip from '../pages/Retip';
 import TermsOfService from '../pages/TermsOfService';
@@ -102,14 +102,14 @@ export default [
     },
   },
   {
-    path: '/generalSettings',
-    component: GeneralSettings,
+    path: '/settings/language',
+    component: LanguageSettings,
     meta: {
-      title: 'general',
+      title: 'language',
     },
   },
   {
-    path: '/securitySettings',
+    path: '/settings/security',
     name: 'settings-security',
     component: SecuritySettings,
     meta: {
@@ -117,10 +117,42 @@ export default [
     },
   },
   {
-    path: '/aboutSettings',
-    component: AboutSettings,
+    path: '/settings/networks',
+    component: Networks,
+    props: true,
+    meta: {
+      title: 'networks',
+    },
+  },
+  {
+    path: '/settings/permissions',
+    component: PermissionsSettings,
+    name: 'permissions-settings',
+    meta: {
+      title: 'permissionsSettings',
+    },
+  },
+  {
+    path: '/about',
+    component: About,
     meta: {
       title: 'about',
+      ifNotAuth: true,
+    },
+  },
+  {
+    path: '/about/termsOfService',
+    component: TermsOfService,
+    meta: {
+      title: 'terms',
+      ifNotAuth: true,
+    },
+  },
+  {
+    path: '/about/privacyPolicy',
+    component: PrivacyPolicy,
+    meta: {
+      title: 'privacy',
     },
   },
   {
@@ -148,22 +180,7 @@ export default [
     },
   },
   {
-    path: '/termsOfService',
-    component: TermsOfService,
-    meta: {
-      title: 'terms',
-      ifNotAuth: true,
-    },
-  },
-  {
-    path: '/privacyPolicy',
-    component: PrivacyPolicy,
-    meta: {
-      title: 'privacy',
-    },
-  },
-  {
-    path: '/importAccount',
+    path: '/import-account',
     component: ImportAccount,
     meta: {
       title: 'importAccount',
@@ -222,7 +239,7 @@ export default [
     },
   },
   {
-    path: '/notification-settings',
+    path: '/notifications/settings',
     name: 'notification-settings',
     component: NotificationSettings,
     meta: {
@@ -249,16 +266,6 @@ export default [
     },
   },
   {
-    path: '/name/:name',
-    component: NamesDetails,
-    props: true,
-    name: 'name-details',
-    meta: {
-      title: 'names',
-      notPersist: true,
-    },
-  },
-  {
     path: '/names/auctions',
     component: AuctionList,
     props: true,
@@ -268,8 +275,18 @@ export default [
     },
   },
   {
+    path: '/names/:name',
+    component: NamesDetails,
+    props: true,
+    name: 'name-details',
+    meta: {
+      title: 'names',
+      notPersist: true,
+    },
+  },
+  {
     name: 'auction-details',
-    path: '/names/auction/:name',
+    path: '/names/auctions/:name',
     component: AuctionDetails,
     props: true,
     meta: {
@@ -278,28 +295,12 @@ export default [
     },
   },
   {
-    path: '/names/bid/:name',
+    path: '/names/auctions/:name/bid',
     component: AuctionBid,
     props: true,
     name: 'auction-bid',
     meta: {
       title: 'names',
-    },
-  },
-  {
-    path: '/networks',
-    component: Networks,
-    props: true,
-    meta: {
-      title: 'networks',
-    },
-  },
-  {
-    path: '/permissions-settings',
-    component: PermissionsSettings,
-    name: 'permissions-settings',
-    meta: {
-      title: 'permissionsSettings',
     },
   },
   {

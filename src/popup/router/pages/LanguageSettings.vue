@@ -1,17 +1,17 @@
 <template>
   <div class="popup">
-    <h4>{{ $t('pages.generalSettings.switchLanguage') }}</h4>
+    <h4>{{ $t('pages.languageSettings.switchLanguage') }}</h4>
     <hr />
     <small>
       <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-      {{ $t('pages.generalSettings.currentLanguage') }}:
+      {{ $t('pages.languageSettings.currentLanguage') }}:
       {{ active.name || 'en' }}
     </small>
     <div class="language-settings">
       <div class="dropdown" :class="{ show: dropdown }">
         <Button extend @click="dropdown = !dropdown">
           <ae-icon name="globe" />
-          {{ $t('pages.generalSettings.switchLanguage') }}
+          {{ $t('pages.languageSettings.switchLanguage') }}
           <ae-icon name="left-more" />
         </Button>
 

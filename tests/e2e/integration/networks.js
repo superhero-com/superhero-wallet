@@ -54,6 +54,7 @@ describe('Test cases for networks page', () => {
 
       .selectNetwork()
       .goBack()
+      .goBack()
       .get('.transactionList')
       .should('not.be.visible')
 
@@ -81,6 +82,7 @@ describe('Test cases for networks page', () => {
       .get('[data-cy=network-middleware]')
       .eq(2)
       .should('contain', defaultNetwork.middlewareUrl)
+      .goBack()
       .goBack()
       .get('.transactionList')
       .should('be.visible')

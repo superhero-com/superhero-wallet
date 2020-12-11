@@ -205,7 +205,7 @@
     },
     "titles": {
       "settings": "Ajustes",
-      "general": "Idioma",
+      "language": "Idioma",
       "security": "Securidad",
       "about": "Acerca",
       "send": "Enviar Propinas",
@@ -231,7 +231,7 @@
       "allowances": "Asignaciones",
       "sign-message": "Firmar Mensaje"
     },
-    "aboutSettings": {
+    "about": {
       "heading": "Acerca de",
       "systemName": "Superhero",
       "terms": "Términos de Servicio",
@@ -462,7 +462,7 @@
         "bid-added": "Oferta agregada exitosamente"
       }
     },
-    "generalSettings": {
+    "languageSettings": {
       "backToSettings": "Volver a ajustes",
       "heading": "Idioma",
       "switchLanguage": "Idioma",

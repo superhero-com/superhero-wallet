@@ -2,22 +2,22 @@
   <div class="popup">
     <Panel>
       <PanelItem
-        to="/generalSettings"
+        to="/settings/language"
         :title="$t('pages.settings.tabGeneral')"
         :info="$t('pages.settings.tabGeneralsmall')"
       />
       <PanelItem
-        to="/securitySettings"
+        to="/settings/security"
         :title="$t('pages.settings.tabSecurity')"
         :info="$t('pages.settings.tabSecuritysmall')"
       />
       <PanelItem
-        to="/networks"
+        to="/settings/networks"
         :title="$t('pages.titles.networks')"
         :info="$t('pages.settings.tabNetworksSmall')"
       />
       <PanelItem
-        to="/permissions-settings"
+        to="/settings/permissions"
         :title="$t('pages.titles.permissionsSettings')"
         :info="$t('pages.settings.tabPermissionsSettingsSmall')"
       />

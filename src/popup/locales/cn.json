@@ -208,7 +208,7 @@
     },
     "titles": {
       "settings": "设置",
-      "general": "语言",
+      "language": "语言",
       "security": "安全",
       "about": "关于",
       "send": "打赏",
@@ -235,7 +235,7 @@
       "sign-message": "签名信息",
       "invite": "邀请"
     },
-    "aboutSettings": {
+    "about": {
       "heading": "关于",
       "systemName": "超级英雄",
       "terms": "使用条款",
@@ -466,7 +466,7 @@
         "bid-added": "加价成功"
       }
     },
-    "generalSettings": {
+    "languageSettings": {
       "backToSettings": "返回设置",
       "heading": "语言",
       "switchLanguage": "语言",

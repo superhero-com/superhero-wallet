@@ -126,14 +126,16 @@ Cypress.Commands.add('menuShould', (cond) => {
 });
 
 Cypress.Commands.add('openMenuPage', (page, dropdown = false) => {
+  let url = `${Cypress.config().popupUrl}/popup#/`;
   cy.openMenu();
   if (dropdown) {
+    url += 'settings/';
     cy.toggleDropdown();
   }
   cy.get(`[data-cy=${page}]`)
     .click()
     .url()
-    .should('eq', `${Cypress.config().popupUrl}/popup#/${page}`)
+    .should('eq', `${url}${page}`)
     .menuShould('not.be.visible');
 });
 
@@ -248,7 +250,7 @@ Cypress.Commands.add('urlEquals', (route) => {
 });
 
 Cypress.Commands.add('openNetworks', () => {
-  cy.openMenu().toggleDropdown().get('[data-cy=networks]').click().urlEquals('/networks');
+  cy.openMenu().toggleDropdown().get('[data-cy=networks]').click().urlEquals('/settings/networks');
 });
 
 Cypress.Commands.add('enterNetworkDetails', (network, url, middleware, compiler) => {
