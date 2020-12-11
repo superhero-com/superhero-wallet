@@ -1,5 +1,5 @@
 <template>
-  <div class="primary-bg popup popup-no-padding">
+  <div class="primary-bg popup popup-no-padding account">
     <i18n
       v-if="!backedUpSeed"
       path="pages.account.seedNotification"
@@ -96,46 +96,19 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.accountAddress {
-  color: $white-color;
-}
+.account {
+  .submenu-bg {
+    background: $submenu-bg;
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+  }
 
-.paragraph {
-  font-weight: normal;
-}
-
-.transactionHistory {
-  margin-top: 1rem;
-  width: 100%;
-}
-
-.recent-tx {
-  margin-top: 130px;
-  height: 500px;
-  position: relative;
-  z-index: 0;
-}
-
-.recent-tx .recent-transactions {
-  overflow-y: scroll;
-  padding-bottom: 20px;
-}
-
-.submenu-bg {
-  background: $submenu-bg;
-  padding: 10px;
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.send-tips {
-  margin-bottom: 26px;
-}
-
-.seed-backup-notification {
-  font-size: 14px;
-  margin-top: 20px;
-  line-height: 14px;
-  color: $accent-color;
+  .seed-backup-notification {
+    font-size: 14px;
+    margin-top: 20px;
+    line-height: 14px;
+    color: $accent-color;
+  }
 }
 </style>

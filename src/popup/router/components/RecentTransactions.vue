@@ -82,6 +82,10 @@ export default {
   &.tour-bar {
     padding-bottom: 40px;
   }
+
+  div > p {
+    font-weight: normal;
+  }
 }
 
 .recent-transactions h3,
