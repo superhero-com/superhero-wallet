@@ -55,7 +55,7 @@ describe('Test cases for networks page', () => {
       .selectNetwork()
       .goBack()
       .goBack()
-      .get('.transactionList')
+      .get('.transaction-list')
       .should('not.be.visible')
 
       .openNetworks()
@@ -84,7 +84,7 @@ describe('Test cases for networks page', () => {
       .should('contain', defaultNetwork.middlewareUrl)
       .goBack()
       .goBack()
-      .get('.transactionList')
+      .get('.transaction-list')
       .should('be.visible')
 
       .openNetworks()
