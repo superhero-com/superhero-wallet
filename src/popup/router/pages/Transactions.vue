@@ -38,7 +38,7 @@ export default {
   },
   data() {
     return {
-      loading: true,
+      loading: false,
       transactions: [],
       page: 1,
       displayMode: { latestFirst: true, type: 'all' },
@@ -71,7 +71,7 @@ export default {
     },
   }),
   mounted() {
-    this.loadMore(true);
+    this.loadMore();
     const polling = setInterval(() => this.getLatest(), 10000);
     window.addEventListener('scroll', this.checkLoadMore);
     this.$once('hook:destroyed', () => {
@@ -87,28 +87,38 @@ export default {
         setTimeout(() => this.loadMore(), 1500);
       }
     },
-    async loadMore(init = false) {
-      if (this.loading && !init) return;
-      await this.$watchUntilTruly(() => this.$store.state.middleware);
+    async loadMore() {
+      if (this.loading) return;
       this.loading = true;
-      const transactions = await this.$store.dispatch('fetchTransactions', {
-        page: this.page,
-        limit: TXS_PER_PAGE,
-      });
-      this.updateTransactions(transactions);
-      this.loading = false;
+      let transactions;
+      try {
+        await this.$watchUntilTruly(() => this.$store.state.middleware);
+        transactions = await this.$store.dispatch('fetchTransactions', {
+          page: this.page,
+          limit: TXS_PER_PAGE,
+        });
+        this.updateTransactions(transactions);
+      } finally {
+        this.loading = false;
+      }
       if (transactions.length) {
         this.page += 1;
         this.checkLoadMore();
       }
     },
     async getLatest() {
-      const transactions = await this.$store.dispatch('fetchTransactions', {
-        limit: 10,
-        page: 1,
-        recent: true,
-      });
-      this.updateTransactions(transactions);
+      if (this.loading) return;
+      this.loading = true;
+      try {
+        const transactions = await this.$store.dispatch('fetchTransactions', {
+          limit: 10,
+          page: 1,
+          recent: true,
+        });
+        this.updateTransactions(transactions);
+      } finally {
+        this.loading = false;
+      }
     },
     updateTransactions(transactions) {
       this.transactions = uniqBy([...this.transactions, ...transactions], 'hash');
