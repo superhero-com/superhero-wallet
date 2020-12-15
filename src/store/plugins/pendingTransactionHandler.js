@@ -1,4 +1,4 @@
-export default (store) => {
+export default async (store) => {
   const waitTransactionMined = async ({ hash, type, amount, tipUrl, recipientId }) => {
     try {
       const transaction = await store.state.sdk.poll(hash);
@@ -24,7 +24,8 @@ export default (store) => {
       store.commit('removePendingTransactionByHash', hash);
     }
   };
-
+  // eslint-disable-next-line no-underscore-dangle
+  await store._watcherVM.$watchUntilTruly(() => store.state.sdk);
   store.state.transactions.pending.forEach(waitTransactionMined);
 
   store.subscribe(async (mutation) => {
