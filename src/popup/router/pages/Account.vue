@@ -44,6 +44,9 @@
       <BoxButton :text="$t('pages.titles.tokens-preview')" :to="{ name: 'tokens-preview' }">
         <Tokens slot="icon" />
       </BoxButton>
+      <BoxButton :text="$t('pages.titles.names')" to="/names">
+        <Names slot="icon" />
+      </BoxButton>
       <BoxButton :text="$t('pages.titles.invite')" :to="{ name: 'invite' }">
         <Invite slot="icon" />
       </BoxButton>
@@ -60,6 +63,7 @@ import { mapGetters, mapState } from 'vuex';
 import Tip from '../../../icons/tip-icon.svg?vue-component';
 import Claim from '../../../icons/claim-icon.svg?vue-component';
 import Activity from '../../../icons/activity-icon.svg?vue-component';
+import Names from '../../../icons/names.svg?vue-component';
 import Topup from '../../../icons/topup-icon.svg?vue-component';
 import Invite from '../../../icons/invite.svg?vue-component';
 import Withdraw from '../../../icons/withdraw-icon.svg?vue-component';
@@ -76,6 +80,7 @@ export default {
     Tip,
     Claim,
     Activity,
+    Names,
     Topup,
     Withdraw,
     Settings,
