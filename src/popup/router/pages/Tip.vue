@@ -76,7 +76,7 @@
           {{ note }}
         </div>
         <Button
-          @click="selectedToken ? sendFungibleTokenTip() : sendTip()"
+          @click="sendTip"
           :disabled="selectedToken ? !tippingV2 : !tippingV1"
           data-cy="confirm-tip"
         >
@@ -232,57 +232,37 @@ export default {
       const amount = aeToAettos(this.amount);
       this.loading = true;
       try {
-        const { hash } = await this.tippingV1.call(
-          'tip',
-          [this.url, escapeSpecialChars(this.note)],
-          {
-            amount,
-            waitMined: false,
-            modal: false,
-          },
-        );
-        if (hash) {
-          this.$store.commit('addPendingTransaction', {
-            hash,
-            amount,
-            tipUrl: this.url,
-            type: 'tip',
-          });
-          this.openCallbackOrGoHome(true);
-        }
-      } catch (e) {
-        await this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
-        e.payload = { url: this.url };
-        throw e;
-      } finally {
-        this.loading = false;
-        if (this.tipFromPopup) window.close();
-      }
-    },
-    async sendFungibleTokenTip() {
-      this.loading = true;
-      await this.$store.dispatch('fungibleTokens/createOrChangeAllowance', this.amount);
-      try {
-        const { hash } = await this.tippingV2.methods.tip_token(
-          this.url,
-          escapeSpecialChars(this.note),
-          this.selectedToken.contract,
-          convertToken(this.amount, this.selectedToken.decimals).toFixed(),
-        );
-        if (hash) {
-          this.$store.commit('addPendingTransaction', {
-            hash,
-            amount: this.amount,
-            tipUrl: this.url,
-            type: 'tip',
-          });
+        let txResult = null;
+
+        if (this.selectedToken) {
+          await this.$store.dispatch('fungibleTokens/createOrChangeAllowance', this.amount);
+          txResult = await this.tippingV2.methods.tip_token(
+            this.url,
+            escapeSpecialChars(this.note),
+            this.selectedToken.contract,
+            convertToken(this.amount, this.selectedToken.decimals).toFixed(),
+          );
+
           await this.$store.dispatch('fungibleTokens/loadTokenBalances', this.account.publicKey);
           this.$store.commit(
             'fungibleTokens/setSelectedToken',
             this.tokenBalances.find(({ value }) => value === this.selectedToken.value),
           );
-          this.openCallbackOrGoHome(true);
+        } else {
+          txResult = await this.tippingV1.call('tip', [this.url, escapeSpecialChars(this.note)], {
+            amount,
+            waitMined: false,
+            modal: false,
+          });
         }
+
+        this.$store.commit('addPendingTransaction', {
+          hash: txResult.hash,
+          amount: this.selectedToken ? this.amount : amount,
+          tipUrl: this.url,
+          type: 'tip',
+        });
+        this.openCallbackOrGoHome(true);
       } catch (e) {
         await this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
         e.payload = { url: this.url };
