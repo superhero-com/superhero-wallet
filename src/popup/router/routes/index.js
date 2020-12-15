@@ -22,6 +22,7 @@ import Notifications from '../pages/Notifications';
 import NotificationSettings from '../pages/NotificationSettings';
 
 import PermissionsSettings from '../pages/PermissionsSettings';
+import PermissionsDetails from '../pages/PermissionsDetails';
 import Networks from '../pages/Networks';
 import CommentNew from '../pages/CommentNew';
 import NotFound from '../pages/NotFound';
@@ -130,6 +131,14 @@ export default [
     name: 'permissions-settings',
     meta: {
       title: 'permissionsSettings',
+    },
+  },
+  {
+    path: '/settings/permissions/:host',
+    component: PermissionsDetails,
+    name: 'permissions-details',
+    meta: {
+      title: 'permissionsDetails',
     },
   },
   {

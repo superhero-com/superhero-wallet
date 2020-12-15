@@ -230,6 +230,7 @@
       "bidding": "Bidding",
       "networks": "Networks",
       "permissionsSettings": "Permissions settings",
+      "permissionsDetails": "Permissions details",
       "comment-new": "Add comment",
       "home": "Superhero Home",
       "donate-error": "Donate Data",
@@ -998,7 +999,9 @@
       "message-sign": "Don't ask for message signing",
       "transaction-sign": "Limit for spending without asking per day",
       "spent-today": "Spent today",
-      "left-today": "Left today"
+      "left-today": "Left today",
+      "delete": "Remove permissions",
+      "empty": "You aren't connected to any aepps"
     }
   },
   "phishing": {

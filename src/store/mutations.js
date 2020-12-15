@@ -95,15 +95,6 @@ export default {
   setTxQueue(state, payload) {
     state.txQueue = [...state.txQueue, payload];
   },
-  addConnectedAepp(state, { host, account }) {
-    state.connectedAepps = { ...state.connectedAepps, [host]: [account] };
-  },
-  updateConnectedAepp(state, { host, account }) {
-    state.connectedAepps = {
-      ...state.connectedAepps,
-      [host]: [...state.connectedAepps[host].accounts, account],
-    };
-  },
   setMnemonic(state, payload) {
     state.mnemonic = payload;
   },

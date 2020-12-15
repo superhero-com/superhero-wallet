@@ -53,16 +53,6 @@ export const detectConnectionType = (port) => {
   return CONNECTION_TYPES.OTHER;
 };
 
-export const getAeppAccountPermission = async (host, account) => {
-  const { connectedAepps } = await getState();
-  if (!Object.keys(connectedAepps).length) return false;
-  if (!connectedAepps[host]) return false;
-  if (connectedAepps[host].includes(account)) {
-    return true;
-  }
-  return false;
-};
-
 export const fetchJson = async (...args) => {
   const response = await fetch(...args);
   return response.json();
@@ -260,3 +250,5 @@ export const setBalanceLocalStorage = (balance) => {
 
 export const getBalanceLocalStorage = () =>
   localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : 0;
+
+export const getAeppUrl = (v) => new URL(v.connection.port.sender.url);

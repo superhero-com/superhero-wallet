@@ -4,14 +4,9 @@ import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aep
 import { isEmpty, times, camelCase } from 'lodash-es';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
-import {
-  parseFromStorage,
-  fetchJson,
-  IN_FRAME,
-  toURL,
-  getAeppAccountPermission,
-} from '../popup/utils/helper';
+import { parseFromStorage, fetchJson, IN_FRAME, getAeppUrl } from '../popup/utils/helper';
 import Logger from './logger';
+import { App } from '../store/modules/permissions';
 
 async function initMiddleware() {
   const { middlewareUrl } = store.getters.activeNetwork;
@@ -133,10 +128,64 @@ export default {
     const account = MemoryAccount({ keypair });
     try {
       const acceptCb = (_, { accept }) => accept();
+      const signCb = async (aepp, action, origin) => {
+        const { method, params } = action;
+        try {
+          if (
+            await store.dispatch('permissions/checkPermissions', {
+              host: getAeppUrl(aepp).hostname,
+              method,
+              params: params?.txObject?.params,
+            })
+          ) {
+            await store.dispatch('modals/open', {
+              name: 'confirm-message-sign',
+              message: action.params.message,
+              origin,
+            });
+            action.accept.apply(null, [
+              ...(method === 'message.sign' ? [] : [null]),
+              { onAccount: { sign: () => {}, address: () => {} } },
+            ]);
+          }
+        } catch (error) {
+          action.deny();
+          if (error.message !== 'Rejected by user') throw error;
+        }
+      };
 
       const sdk = await RpcWallet.compose({
         methods: {
-          address: async () => store.getters.account.publicKey,
+          getApp(aeppUrl) {
+            const hostPermissions = store.state.permissions[aeppUrl.hostname];
+            if (!hostPermissions) store.commit('permissions/addHost', aeppUrl.hostname);
+            return new App(aeppUrl);
+          },
+          async address(...args) {
+            const address = store.state.account.publicKey;
+            const app = args[args.length - 1];
+            if (app instanceof App) {
+              const { host, hostname, protocol } = app.host;
+              if (
+                !(await store.dispatch('permissions/requestAddressForHost', {
+                  host: hostname,
+                  address,
+                  connectionPopupCb: async () =>
+                    store.dispatch('modals/open', {
+                      name: 'confirm-connect',
+                      app: {
+                        name: hostname,
+                        icons: [],
+                        protocol,
+                        host,
+                      },
+                    }),
+                }))
+              )
+                return Promise.reject(new Error('Rejected by user'));
+            }
+            return address;
+          },
           sign: (data) => store.dispatch('accounts/sign', data),
           signTransaction: (txBase64, opt) =>
             store.dispatch('accounts/signTransaction', { txBase64, opt }),
@@ -147,54 +196,22 @@ export default {
         nativeMode: true,
         compilerUrl,
         name: 'Superhero',
-        async onConnection({ info: { icons, name } }, action, origin) {
-          const originUrl = toURL(origin);
-          if (
-            (await getAeppAccountPermission(originUrl.hostname, store.state.account.publicKey)) &&
-            !(await store.dispatch('permissions/checkPermissions', { ...action }))
-          ) {
-            action.accept();
+        onConnection: acceptCb,
+        async onSubscription(aepp, { accept, deny }) {
+          const address = await this.address(this.getApp(getAeppUrl(aepp)));
+          if (!address) {
+            deny();
             return;
           }
-          try {
-            await store.dispatch('modals/open', {
-              name: 'confirm-connect',
-              app: {
-                name,
-                icons,
-                protocol: originUrl.protocol,
-                host: originUrl.hostname,
-              },
-            });
-            await store.dispatch('setPermissionForAccount', {
-              host: originUrl.hostname,
-              account: store.state.account.publicKey,
-            });
-            action.accept();
-          } catch (error) {
-            action.deny();
-            if (error.message !== 'Rejected by user') throw error;
-          }
+          accept({
+            accounts: {
+              current: { [address]: {} },
+              connected: {},
+            },
+          });
         },
-        onSubscription: acceptCb,
-        onSign: acceptCb,
-        async onMessageSign(aepp, action, origin) {
-          if (!(await store.dispatch('permissions/checkPermissions', { ...action }))) {
-            action.accept();
-            return;
-          }
-          try {
-            await store.dispatch('modals/open', {
-              name: 'confirm-message-sign',
-              message: action.params.message,
-              origin,
-            });
-            action.accept();
-          } catch (error) {
-            action.deny();
-            if (error.message !== 'Rejected by user') throw error;
-          }
-        },
+        onSign: signCb,
+        onMessageSign: signCb,
         onAskAccounts: acceptCb,
         onDisconnect(msg, client) {
           client.disconnect();
