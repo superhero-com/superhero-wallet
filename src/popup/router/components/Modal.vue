@@ -35,7 +35,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '../../../styles/variables';
 
 .modal {
@@ -89,7 +89,7 @@ export default {
       display: flex;
       justify-content: center;
 
-      .primary-button {
+      ::v-deep .primary-button {
         margin: 0 10px;
         width: 120px;
         font-weight: 700;

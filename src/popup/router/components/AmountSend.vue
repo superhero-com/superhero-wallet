@@ -86,6 +86,16 @@ export default {
     .amount-box {
       color: $white-color;
     }
+
+    .ml-15,
+    .balance-box {
+      .label {
+        font-size: 14px;
+        margin: 4px 0;
+        display: block;
+        font-weight: normal;
+      }
+    }
   }
 
   .error-msg {

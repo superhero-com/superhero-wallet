@@ -1,19 +1,17 @@
 <template>
-  <div class="popup popup-no-padding">
-    <div data-cy="top-up-container">
-      <p class="primary-title text-left mt-20 f-14 mx-20">
-        {{ $t('pages.receive.heading') }}
-      </p>
-      <AccountInfo />
-      <qrcode-vue :value="account.publicKey" size="140" class="my-25 qrcode"></qrcode-vue>
+  <div class="popup popup-no-padding top-up-container" data-cy="top-up-container">
+    <p class="primary-title text-left mt-20 f-14 mx-20">
+      {{ $t('pages.receive.heading') }}
+    </p>
+    <AccountInfo />
+    <qrcode-vue :value="account.publicKey" size="140" class="my-25 qrcode"></qrcode-vue>
 
-      <Button @click="openUrl(changeCryptoToAeUrl, true)">
-        {{ $t('pages.receive.transferExchange') }}
-      </Button>
-      <Button data-cy="home" @click="$router.push('/account')">
-        {{ $t('pages.receive.home') }}
-      </Button>
-    </div>
+    <Button @click="openUrl(changeCryptoToAeUrl, true)">
+      {{ $t('pages.receive.transferExchange') }}
+    </Button>
+    <Button data-cy="home" @click="$router.push('/account')">
+      {{ $t('pages.receive.home') }}
+    </Button>
   </div>
 </template>
 
@@ -42,7 +40,7 @@ export default {
     margin-left: 20px;
   }
 
-  .qrcode canvas {
+  ::v-deep .qrcode canvas {
     border: 5px solid #fff;
   }
 }

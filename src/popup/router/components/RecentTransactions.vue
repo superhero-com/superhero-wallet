@@ -2,13 +2,13 @@
   <div class="recent-transactions" :class="{ 'tour-bar': tourStartBar }">
     <div class="flex flex flex-align-center flex-justify-between mb-10 mt-20">
       <span class="title">{{ $t('pages.recentTransactions.recentActivity') }}</span>
-      <router-link to="/transactions" data-cy="view-all-transactions" class="viewAll">
+      <router-link to="/transactions" data-cy="view-all-transactions" class="view-all">
         {{ $t('pages.recentTransactions.viewAll') }}
       </router-link>
     </div>
     <PendingTxs />
     <div v-if="transactions.latest.length">
-      <ae-list class="transactionList">
+      <ae-list class="transaction-list">
         <TransactionItem
           v-for="transaction in transactions.latest"
           :key="transaction.hash"
@@ -21,9 +21,7 @@
         {{ $t('pages.recentTransactions.noTransactionsFound') }}
       </p>
     </div>
-    <div class="loader-holder">
-      <Loader v-if="loading" size="small" type="none" />
-    </div>
+    <Loader v-if="loading" size="small" type="none" />
   </div>
 </template>
 
@@ -66,17 +64,10 @@ export default {
 @import '../../../styles/variables';
 
 .recent-transactions {
-  overflow: hidden;
-  padding: 0 20px;
-  padding-bottom: 20px;
-  background: $transactions-bg;
+  padding: 0 20px 20px 20px;
 
-  .title {
-    color: $white-color !important;
-  }
-
-  .viewAll {
-    color: $accent-color !important;
+  .view-all {
+    color: $accent-color;
     cursor: pointer;
     text-decoration: none;
   }
@@ -84,18 +75,9 @@ export default {
   &.tour-bar {
     padding-bottom: 40px;
   }
-}
 
-.recent-transactions h3,
-.recent-transactions p,
-.recent-transactions .transactionList {
-  color: $white-color !important;
-  padding: 0 !important;
-}
-
-.all-transactions {
-  height: auto !important;
-  padding: 5px 10px !important;
-  width: auto !important;
+  div > p {
+    font-weight: normal;
+  }
 }
 </style>

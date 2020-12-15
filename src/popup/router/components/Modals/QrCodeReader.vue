@@ -146,7 +146,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .qr-code-reader video {
   max-width: 70vw;
 }

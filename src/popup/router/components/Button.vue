@@ -39,7 +39,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '../../../styles/variables';
 
 .primary-button {
@@ -56,10 +56,6 @@ export default {
   font-weight: normal;
   line-height: 40px;
   max-height: 40px;
-
-  span {
-    color: $button-text-color !important;
-  }
 
   &.disabled {
     opacity: 0.4;
