@@ -21,7 +21,7 @@
     </li>
     <li>
       <router-link to="/send" data-cy="send">
-        {{ $t('pages.titles.withdraw') }}
+        {{ $t('pages.titles.send') }}
       </router-link>
     </li>
     <li>

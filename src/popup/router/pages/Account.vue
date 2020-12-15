@@ -15,7 +15,7 @@
     <div class="submenu-bg">
       <BoxButton
         data-cy="tip-button"
-        :text="$t('pages.account.send')"
+        :text="$t('pages.account.tip')"
         accent
         :disabled="!tippingSupported"
         :to="tippingSupported ? { name: 'tip' } : {}"
@@ -32,20 +32,23 @@
       >
         <Claim slot="icon" />
       </BoxButton>
+      <BoxButton :text="$t('pages.titles.topUp')" to="/receive" class="tour__step6">
+        <Topup slot="icon" />
+      </BoxButton>
+      <BoxButton :text="$t('pages.titles.send')" to="/send" class="tour__step7">
+        <Withdraw slot="icon" />
+      </BoxButton>
       <BoxButton :text="$t('pages.account.activity')" to="/transactions" class="tour__step5">
         <Activity slot="icon" />
-      </BoxButton>
-      <BoxButton :text="$t('pages.titles.invite')" :to="{ name: 'invite' }">
-        <Invite slot="icon" />
       </BoxButton>
       <BoxButton :text="$t('pages.titles.tokens-preview')" :to="{ name: 'tokens-preview' }">
         <Tokens slot="icon" />
       </BoxButton>
-      <BoxButton :text="$t('pages.titles.topUp')" to="/receive" class="tour__step6">
-        <Topup slot="icon" />
+      <BoxButton :text="$t('pages.titles.names')" to="/names">
+        <Names slot="icon" />
       </BoxButton>
-      <BoxButton :text="$t('pages.titles.withdraw')" to="/send" class="tour__step7">
-        <Withdraw slot="icon" />
+      <BoxButton :text="$t('pages.titles.invite')" :to="{ name: 'invite' }">
+        <Invite slot="icon" />
       </BoxButton>
       <BoxButton :text="$t('pages.titles.settings')" to="/settings" class="tour__step8">
         <Settings slot="icon" />
@@ -60,6 +63,7 @@ import { mapGetters, mapState } from 'vuex';
 import Tip from '../../../icons/tip-icon.svg?vue-component';
 import Claim from '../../../icons/claim-icon.svg?vue-component';
 import Activity from '../../../icons/activity-icon.svg?vue-component';
+import Names from '../../../icons/names.svg?vue-component';
 import Topup from '../../../icons/topup-icon.svg?vue-component';
 import Invite from '../../../icons/invite.svg?vue-component';
 import Withdraw from '../../../icons/withdraw-icon.svg?vue-component';
@@ -76,6 +80,7 @@ export default {
     Tip,
     Claim,
     Activity,
+    Names,
     Topup,
     Withdraw,
     Settings,

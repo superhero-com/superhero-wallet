@@ -169,14 +169,14 @@ export default [
     name: 'tip',
     component: Tip,
     meta: {
-      title: 'send',
+      title: 'send-tips',
     },
   },
   {
     path: '/retip',
     component: Retip,
     meta: {
-      title: 'send',
+      title: 'send-tips',
       notPersist: true,
     },
   },
@@ -218,7 +218,7 @@ export default [
     props: true,
     component: Send,
     meta: {
-      title: 'withdraw',
+      title: 'send',
     },
   },
   {
