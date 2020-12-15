@@ -14,8 +14,7 @@ export default class Logger {
       Vue.config.errorHandler = (error, vm, info) => {
         console.error(info);
         console.error(error);
-        Object.assign(error, { info, type: 'vue-error' });
-        Logger.write(error);
+        Logger.write({ message: error.toString(), info, type: 'vue-error' });
       };
 
       Vue.config.warnHandler = (message, vm, info) => {
