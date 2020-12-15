@@ -15,7 +15,7 @@
     <div class="submenu-bg">
       <BoxButton
         data-cy="tip-button"
-        :text="$t('pages.account.send')"
+        :text="$t('pages.account.tip')"
         accent
         :disabled="!tippingSupported"
         :to="tippingSupported ? { name: 'tip' } : {}"
@@ -35,7 +35,7 @@
       <BoxButton :text="$t('pages.titles.topUp')" to="/receive" class="tour__step6">
         <Topup slot="icon" />
       </BoxButton>
-      <BoxButton :text="$t('pages.titles.withdraw')" to="/send" class="tour__step7">
+      <BoxButton :text="$t('pages.titles.send')" to="/send" class="tour__step7">
         <Withdraw slot="icon" />
       </BoxButton>
       <BoxButton :text="$t('pages.account.activity')" to="/transactions" class="tour__step5">
