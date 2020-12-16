@@ -7,7 +7,7 @@
           :amount="txAmount"
           :symbol="contractCallData ? availableTokens[contractCallData.token].symbol : 'AE'"
         />
-        {{ status }}
+        <span :class="status.value">{{ status.text }}</span>
       </div>
       <span data-cy="time">{{ transaction.microTime | formatDate }}</span>
     </div>
@@ -22,9 +22,10 @@
         {{ transactionType }}
       </span>
       <button
+        class="open-explorer"
         @click="openUrl(`${activeNetwork.explorerUrl}/transactions/${transaction.hash}`, true)"
       >
-        <img src="../../../icons/eye.png" />
+        <Eye />
       </button>
     </div>
   </div>
@@ -37,9 +38,10 @@ import { aettosToAe, categorizeContractCallTxObject, convertToken } from '../../
 import { formatDate } from '../../utils';
 import TokenAmount from './TokenAmount';
 import openUrl from '../../utils/openUrl';
+import Eye from '../../../icons/eye.svg?vue-component';
 
 export default {
-  components: { TokenAmount },
+  components: { TokenAmount, Eye },
   props: {
     transaction: {
       type: Object,
@@ -58,12 +60,12 @@ export default {
           .map((key) => this.transaction.tx[key])
           .includes(this.account.publicKey)
       ) {
-        return this.$t('pages.transactions.sent');
+        return { text: this.$t('pages.transactions.sent'), value: 'sent' };
       }
       if (this.transaction.pending) {
-        return this.$t('pages.transactions.pending');
+        return { text: this.$t('pages.transactions.pending'), value: 'pending' };
       }
-      return this.$t('pages.transactions.received');
+      return { text: this.$t('pages.transactions.received'), value: 'received' };
     },
     contractCallData() {
       return categorizeContractCallTxObject(this.transaction);
@@ -143,6 +145,14 @@ export default {
     .status {
       font-size: 14px;
       color: $white-color;
+
+      .sent {
+        color: #a32e2d;
+      }
+
+      .received {
+        color: #00804e;
+      }
     }
 
     button {
@@ -164,6 +174,14 @@ export default {
     .address {
       font-size: 9px;
       letter-spacing: -0.1px;
+    }
+  }
+
+  .open-explorer {
+    color: $gray-2;
+
+    &:hover {
+      color: $white-1;
     }
   }
 }
