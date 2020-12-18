@@ -261,6 +261,7 @@ export default {
             type: 'spendToken',
             recipientId: receiver,
           });
+          await this.$store.dispatch('fungibleTokens/loadTokenBalances', this.account.publicKey);
         } else {
           const { hash } = await this.sdk.spend(amount, receiver, {
             waitMined: false,
