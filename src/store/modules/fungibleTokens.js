@@ -44,17 +44,20 @@ export default {
       return new BigNumber(decodedResult || 0).toFixed();
     },
     async loadTokenBalances(
-      { rootGetters: { activeNetwork }, state: { availableTokens }, commit, dispatch },
+      {
+        rootGetters: { activeNetwork },
+        state: { availableTokens, selectedToken },
+        commit,
+        dispatch,
+      },
       address,
     ) {
       const tokens = await fetchJson(
         `${activeNetwork.backendUrl}/tokenCache/balances?address=${address}`,
       ).catch((e) => console.log(e));
-      if (!Object.keys(tokens).length) {
-        commit('resetTokenBalances');
-        commit('setSelectedToken', null);
-        return;
-      }
+
+      commit('resetTokenBalances');
+
       await Promise.all(
         Object.entries(tokens).map(async ([contract, tokenData]) => {
           const balance = await dispatch('tokenBalance', [contract, address]);
@@ -74,10 +77,17 @@ export default {
             updatedTokenInfo[contract] = { ...objectStructure };
             commit('setAvailableTokens', updatedTokenInfo);
           }
-
+          if (selectedToken && selectedToken.contract === objectStructure.contract) {
+            commit('setSelectedToken', null);
+            commit('setSelectedToken', objectStructure);
+          }
           return commit('addTokenBalance', objectStructure);
         }),
       );
+
+      if (selectedToken && !tokens[selectedToken.contract]) {
+        commit('setSelectedToken', null);
+      }
     },
     async getAeternityData({ rootState: { current }, commit }) {
       const [aeternityData] = await fetchJson(
