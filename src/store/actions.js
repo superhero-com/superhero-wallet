@@ -1,16 +1,16 @@
-import { flatten, uniq, orderBy } from 'lodash-es';
+import { flatten, orderBy, uniq } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
-import {
-  stringifyForStorage,
-  parseFromStorage,
-  getAddressByNameEntry,
-  fetchJson,
-  postJson,
-} from '../popup/utils/helper';
-import { i18n } from './plugins/languages';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
 import { AEX2_METHODS } from '../popup/utils/constants';
+import {
+  fetchJson,
+  getAddressByNameEntry,
+  parseFromStorage,
+  postJson,
+  stringifyForStorage
+} from '../popup/utils/helper';
+import { i18n } from './plugins/languages';
 
 export default {
   switchNetwork({ commit }, payload) {
@@ -111,6 +111,9 @@ export default {
   },
   async cacheInvalidateTips({ getters: { activeNetwork } }) {
     return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/tips`);
+  },
+  async cacheInvalidateFT({ getters: { activeNetwork } }, contract) {
+    return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/token/${contract}`);
   },
   async donateError({ getters: { activeNetwork } }, error) {
     return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: error });
