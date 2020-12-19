@@ -241,7 +241,7 @@ export default {
       }
       if (
         this.selectedToken &&
-        (this.selectedToken.convertedBalance < this.form.amount || this.balance < this.fee)
+        Number(this.selectedToken.convertedBalance) < Number(this.form.amount)
       ) {
         errorModalType = 'insufficient-balance';
       }
@@ -255,7 +255,7 @@ export default {
           const { hash } = await this.$store.dispatch('fungibleTokens/transfer', [
             receiver,
             this.form.amount,
-            { waitMined: false, modal: false },
+            { waitMined: true, modal: false },
           ]);
           this.$store.commit('addPendingTransaction', {
             hash,
@@ -263,11 +263,7 @@ export default {
             type: 'spendToken',
             recipientId: receiver,
           });
-
-          // TODO: rework this
-          setInterval(async () => {
-            await this.$store.dispatch('fungibleTokens/getAvailableTokens');
-          }, 5000);
+          await this.$store.dispatch('fungibleTokens/getAvailableTokens');
           await this.$store.dispatch('fungibleTokens/loadTokenBalances', this.account.publicKey);
         } else {
           const { hash } = await this.sdk.spend(amount, receiver, {
