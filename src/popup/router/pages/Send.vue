@@ -236,10 +236,12 @@ export default {
         errorModalType = 'incorrect-address';
       }
       if (this.form.amount <= 0) errorModalType = 'incorrect-amount';
+      if (calculatedMaxValue - this.form.amount <= 0 && !this.selectedToken) {
+        errorModalType = 'insufficient-balance';
+      }
       if (
-        (calculatedMaxValue - this.form.amount <= 0 && !this.selectedToken) ||
-        (this.selectedToken &&
-          (this.selectedToken.convertedBalance < this.form.amount || this.balance < this.fee))
+        this.selectedToken &&
+        (this.selectedToken.convertedBalance < this.form.amount || this.balance < this.fee)
       ) {
         errorModalType = 'insufficient-balance';
       }
@@ -261,6 +263,11 @@ export default {
             type: 'spendToken',
             recipientId: receiver,
           });
+
+          // TODO: rework this
+          setInterval(async () => {
+            await this.$store.dispatch('fungibleTokens/getAvailableTokens');
+          }, 5000);
           await this.$store.dispatch('fungibleTokens/loadTokenBalances', this.account.publicKey);
         } else {
           const { hash } = await this.sdk.spend(amount, receiver, {

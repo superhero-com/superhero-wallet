@@ -1,16 +1,20 @@
-import { Node, RpcWallet } from '@aeternity/aepp-sdk/es';
-import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
+import { MemoryAccount, Node, RpcWallet } from '@aeternity/aepp-sdk/es';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
-import { isEmpty, times, camelCase } from 'lodash-es';
-import store from '../store';
+import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
+import { camelCase, isEmpty, times } from 'lodash-es';
 import { postMessage } from '../popup/utils/connection';
-import { parseFromStorage, fetchJson, IN_FRAME } from '../popup/utils/helper';
-import Logger from './logger';
+import { fetchJson, getAeppUrl, IN_FRAME, parseFromStorage } from '../popup/utils/helper';
+import store from '../store';
 import { App } from '../store/modules/permissions';
+import Logger from './logger';
 
 async function initMiddleware() {
   const { middlewareUrl } = store.getters.activeNetwork;
-  const swag = await fetchJson(`${middlewareUrl}/swagger/swagger.json`);
+
+  const swagUrl = `https://raw.githubusercontent.com/aeternity/ae_mdw/master/priv/static/swagger.json`;
+  // `${middlewareUrl}/swagger/swagger.json`
+
+  const swag = await fetchJson(swagUrl);
   swag.paths = {
     ...swag.paths,
     'name/auction/{name}': {
