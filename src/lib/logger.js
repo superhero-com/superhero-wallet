@@ -14,7 +14,8 @@ export default class Logger {
       Vue.config.errorHandler = (error, vm, info) => {
         console.error(info);
         console.error(error);
-        Logger.write({ message: error.toString(), info, type: 'vue-error' });
+        if (error.message !== 'Rejected by user')
+          Logger.write({ message: error.toString(), info, type: 'vue-error' });
       };
 
       Vue.config.warnHandler = (message, vm, info) => {
