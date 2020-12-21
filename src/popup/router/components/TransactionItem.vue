@@ -1,13 +1,22 @@
 <template>
   <div class="transaction-item">
     <div>
-      <div class="status"><TokenAmount data-cy="amount" :amount="txAmount" /> {{ status }}</div>
+      <div class="status">
+        <TokenAmount
+          data-cy="amount"
+          :amount="txAmount"
+          :symbol="contractCallData ? availableTokens[contractCallData.token].symbol : 'AE'"
+        />
+        {{ status }}
+      </div>
       <span data-cy="time">{{ transaction.microTime | formatDate }}</span>
     </div>
     <div class="details">
-      <button v-if="tipUrl" class="url" @click="openUrl(tipUrl, true)">{{ tipUrl }}</button>
-      <span v-else-if="topup || withdraw" class="address">
-        {{ topup ? transaction.tx.senderId : transaction.tx.recipientId }}
+      <button v-if="tipUrl" class="url" @click="openUrl(tipUrl, true)">
+        {{ tipUrl }}
+      </button>
+      <span v-else-if="address" class="address">
+        {{ address }}
       </span>
       <span v-else>
         {{ transactionType }}
@@ -22,9 +31,9 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import { aettosToAe } from '../../utils/helper';
+import { aettosToAe, categorizeContractCallTxObject, convertToken } from '../../utils/helper';
 import { formatDate } from '../../utils';
 import TokenAmount from './TokenAmount';
 import openUrl from '../../utils/openUrl';
@@ -42,6 +51,7 @@ export default {
   },
   computed: {
     ...mapGetters(['account', 'activeNetwork']),
+    ...mapState('fungibleTokens', ['availableTokens']),
     status() {
       if (
         ['senderId', 'accountId', 'ownerId', 'callerId']
@@ -55,7 +65,16 @@ export default {
       }
       return this.$t('pages.transactions.received');
     },
+    contractCallData() {
+      return categorizeContractCallTxObject(this.transaction);
+    },
     txAmount() {
+      if (this.contractCallData) {
+        return +convertToken(
+          this.contractCallData.amount,
+          -this.availableTokens[this.contractCallData.token].decimals,
+        );
+      }
       const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
       const fee = this.transaction.tx.fee || 0;
       return +aettosToAe(+amount + fee);
@@ -68,6 +87,7 @@ export default {
           !this.transaction.claim &&
           this.transaction.tx.log?.[0] &&
           decode(this.transaction.tx.log[0].data).toString()) ||
+        this.contractCallData?.url ||
         ''
       );
     },
@@ -85,6 +105,11 @@ export default {
     },
     transactionType() {
       return this.$t('transaction.type')[this.transaction.tx.type];
+    },
+    address() {
+      return this.topup
+        ? this.transaction.tx.senderId
+        : this.contractCallData?.to || this.transaction.tx.recipientId;
     },
   },
   methods: {
