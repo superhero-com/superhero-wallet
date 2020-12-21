@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-use-v-if-with-v-for-->
 <template>
-  <div>
+  <div class="tour">
     <v-tour name="onboarding" :steps="tourSteps" :options="{ highlight: true }">
       <template slot-scope="tour">
         <transition name="fade">
@@ -217,6 +217,27 @@ export default {
 </script>
 
 <style lang="scss">
+.v-tour__target--highlighted {
+  -webkit-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
+  -moz-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
+  box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
+  pointer-events: none !important;
+
+  &::after {
+    content: '';
+    border: 1.5px dashed #fff !important;
+    border-radius: 5px;
+    background: rgba(42, 156, 255, 0.25) !important;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+}
+</style>
+
+<style lang="scss" scoped>
 @import '../../../styles/variables';
 
 .container {
@@ -224,7 +245,7 @@ export default {
   margin: 0 auto;
 }
 
-.v-step {
+.tour .v-tour .v-step {
   background-color: $tour-bg-color !important;
   border-radius: 5px !important;
   border: 1px solid $secondary-color;
@@ -281,25 +302,6 @@ export default {
 
   &.tip-step[x-placement^='bottom'] {
     margin-top: 1rem !important;
-  }
-}
-
-.v-tour__target--highlighted {
-  -webkit-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
-  -moz-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
-  box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6) !important;
-  pointer-events: none !important;
-
-  &::after {
-    content: '';
-    border: 1.5px dashed #fff !important;
-    border-radius: 5px;
-    background: rgba(42, 156, 255, 0.25) !important;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
   }
 }
 
@@ -414,7 +416,7 @@ export default {
     top: -30px;
   }
 
-  .v-step {
+  .tour .v-tour .v-step {
     &[x-placement^='top'] .v-step__arrow {
       bottom: -0.7rem !important;
     }
