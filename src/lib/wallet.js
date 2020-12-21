@@ -1,10 +1,10 @@
-import { Node, MemoryAccount, RpcWallet } from '@aeternity/aepp-sdk/es';
+import { Node, RpcWallet } from '@aeternity/aepp-sdk/es';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import { isEmpty, times, camelCase } from 'lodash-es';
 import store from '../store';
 import { postMessage } from '../popup/utils/connection';
-import { parseFromStorage, fetchJson, IN_FRAME, getAeppUrl } from '../popup/utils/helper';
+import { parseFromStorage, fetchJson, IN_FRAME } from '../popup/utils/helper';
 import Logger from './logger';
 import { App } from '../store/modules/permissions';
 
@@ -125,33 +125,43 @@ export default {
     const { activeNetwork } = store.getters;
     const { url, compilerUrl } = activeNetwork;
     const node = await Node({ url });
-    const account = MemoryAccount({ keypair });
     try {
       const acceptCb = (_, { accept }) => accept();
-      const signCb = async (aepp, action, origin) => {
+      const signCb = async (_, action, origin) => {
         const { method, params } = action;
         try {
-          if (
-            await store.dispatch('permissions/checkPermissions', {
-              host: getAeppUrl(aepp).hostname,
-              method,
-              params: params?.txObject?.params,
-            })
-          ) {
-            await store.dispatch('modals/open', {
-              name: 'confirm-message-sign',
-              message: action.params.message,
-              origin,
-            });
-            action.accept.apply(null, [
-              ...(method === 'message.sign' ? [] : [null]),
-              { onAccount: { sign: () => {}, address: () => {} } },
-            ]);
+          const permission = await store.dispatch('permissions/checkPermissions', {
+            host: new URL(origin).hostname,
+            method,
+            params: params?.txObject?.params,
+          });
+          if (method === 'message.sign') {
+            if (!permission)
+              await store.dispatch('modals/open', {
+                name: 'confirm-message-sign',
+                message: params.message,
+                origin,
+              });
+            action.accept({ onAccount: { sign: () => {}, address: () => {} } });
+            return;
           }
+          action.accept(null, {
+            onAccount: {
+              sign: async () =>
+                store.dispatch('accounts/signTransaction', {
+                  txBase64: params.tx,
+                  opt: {
+                    modal: !permission,
+                  },
+                }),
+              address: () => {},
+            },
+          });
         } catch (error) {
           action.deny();
           if (error.message !== 'Rejected by user') throw error;
         }
+        action.deny();
       };
 
       const sdk = await RpcWallet.compose({
@@ -188,17 +198,18 @@ export default {
           },
           sign: (data) => store.dispatch('accounts/sign', data),
           signTransaction: (txBase64, opt) =>
-            store.dispatch('accounts/signTransaction', { txBase64, opt }),
+            opt.onAccount
+              ? opt.onAccount.sign()
+              : store.dispatch('accounts/signTransaction', { txBase64, opt }),
         },
       })({
         nodes: [{ name: activeNetwork.name, instance: node }],
-        accounts: [account],
         nativeMode: true,
         compilerUrl,
         name: 'Superhero',
         onConnection: acceptCb,
-        async onSubscription(aepp, { accept, deny }) {
-          const address = await this.address(this.getApp(getAeppUrl(aepp)));
+        async onSubscription(_, { accept, deny }, origin) {
+          const address = await this.address(this.getApp(new URL(origin)));
           if (!address) {
             deny();
             return;
