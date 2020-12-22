@@ -24,47 +24,17 @@
             {{ url }}
           </a>
         </template>
-        <Input
-          v-else
-          size="m-0 sm"
-          v-model="url"
-          :error="url && !validUrl"
-          :placeholder="$t('pages.tipPage.enterUrl')"
-        />
+        <Input v-else size="m-0 sm" v-model="url" :placeholder="$t('pages.tipPage.enterUrl')" />
       </div>
     </div>
     <div class="popup" data-cy="tip-container">
       <template v-if="!confirmMode">
-        <AmountSend
-          :amountError="amountError"
-          v-model="amount"
-          :errorMsg="
-            amount && !selectedToken && amount < minTipAmount
-              ? $t('pages.tipPage.minAmountError')
-              : ''
-          "
-        />
-        <Textarea
-          v-model="note"
-          :placeholder="$t('pages.tipPage.titlePlaceholder')"
-          :error="note.length > 280"
-          size="sm"
-        />
-        <Button
-          @click="toConfirm"
-          :disabled="
-            !note ||
-            amountError ||
-            noteError ||
-            !fee ||
-            !validUrl ||
-            !url ||
-            urlStatus === 'blacklisted' ||
-            note.length > 280
-          "
-          bold
-          data-cy="send-tip"
-        >
+        <AmountSend v-model="amount" />
+        <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
+        <div class="validation-msg">
+          {{ validationStatus.msg }}
+        </div>
+        <Button @click="toConfirm" :disabled="validationStatus.error" bold data-cy="send-tip">
           {{ $t('pages.tipPage.next') }}
         </Button>
         <Button bold @click="openCallbackOrGoHome(false)">
@@ -123,10 +93,7 @@ export default {
       amount: null,
       note: '',
       confirmMode: false,
-      amountError: false,
-      noteError: false,
       loading: false,
-      fee: null,
       editUrl: true,
       IS_EXTENSION: process.env.IS_EXTENSION,
       tipFromPopup: false,
@@ -136,7 +103,7 @@ export default {
     return pick(this.$store.state.observables, ['balance']);
   },
   computed: {
-    ...mapGetters(['account', 'minTipAmount', 'activeNetwork']),
+    ...mapGetters(['account']),
     ...mapState(['tourRunning', 'tip', 'sdk', 'tippingV1', 'tippingV2']),
     ...mapState('fungibleTokens', ['selectedToken', 'tokenBalances']),
     urlStatus() {
@@ -145,11 +112,52 @@ export default {
     validUrl() {
       return validateTipUrl(this.url);
     },
+    tippingContract() {
+      return this.tippingV2 || this.tippingV1;
+    },
+    ...mapState({
+      validationStatus({ sdk }, { account, minTipAmount }) {
+        if (!sdk || !this.tippingContract) {
+          return { error: true };
+        }
+        if (!this.url || !this.validUrl) {
+          return { error: true, msg: this.$t('pages.tipPage.enterUrl') };
+        }
+        if (this.urlStatus === 'blacklisted') {
+          return { error: true, msg: this.$t('pages.tipPage.blacklistedUrl') };
+        }
+        if (this.selectedToken && !this.tippingV2) {
+          return { error: true, msg: this.$t('pages.tipPage.v1FungibleTokenTipError') };
+        }
+        if (!this.amount) {
+          return { error: true, msg: this.$t('pages.tipPage.requiredAmountError') };
+        }
+        if (!this.selectedToken && this.amount < minTipAmount) {
+          return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
+        }
+        const fee = calculateFee(TX_TYPES.contractCall, {
+          ...sdk.Ae.defaults,
+          contractId: this.tippingContract.deployInfo.address,
+          callerId: account.publicKey,
+        });
+        if (
+          this.selectedToken
+            ? this.selectedToken.convertedBalance < this.amount || this.balance < fee
+            : this.balance < fee + this.amount
+        ) {
+          return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
+        }
+        if (!this.note) {
+          return { error: true, msg: this.$t('pages.tipPage.titlePlaceholder') };
+        }
+        if (this.note.length > 280) {
+          return { error: true, msg: this.$t('pages.tipPage.maxNoteLengthError') };
+        }
+        return { error: false };
+      },
+    }),
   },
   watch: {
-    amount() {
-      this.amountError = !+this.amount || (!this.selectedToken && this.amount < this.minTipAmount);
-    },
     $route: {
       immediate: true,
       handler({ query }) {
@@ -179,12 +187,6 @@ export default {
         await browser.storage.local.remove('last-path');
       }
     }
-    await this.$watchUntilTruly(() => this.sdk);
-    this.fee = calculateFee(TX_TYPES.contractCall, {
-      ...this.sdk.Ae.defaults,
-      contractId: this.activeNetwork.tipContractV1,
-      callerId: this.account.publicKey,
-    });
   },
   methods: {
     async persistTipDetails() {
@@ -212,20 +214,7 @@ export default {
           .catch(() => false);
         if (!allowToConfirm) return;
       }
-      const calculatedMaxValue = this.balance > this.fee ? this.balance - this.fee : 0;
-      this.amountError =
-        !this.amount || !this.fee || (!this.selectedToken && calculatedMaxValue - this.amount <= 0);
-      this.amountError =
-        this.amountError ||
-        !+this.amount ||
-        (!this.selectedToken && this.amount < this.minTipAmount);
-      this.noteError = !this.note || !this.url || this.note.length > 280;
-      this.confirmMode =
-        !this.amountError &&
-        !this.noteError &&
-        this.validUrl &&
-        this.url &&
-        this.urlStatus !== 'blacklisted';
+      this.confirmMode = !this.validationStatus.error;
       if (this.confirmMode) this.editUrl = false;
     },
     async sendTip() {
@@ -249,11 +238,15 @@ export default {
             this.tokenBalances.find(({ value }) => value === this.selectedToken.value),
           );
         } else {
-          txResult = await this.tippingV1.call('tip', [this.url, escapeSpecialChars(this.note)], {
-            amount,
-            waitMined: false,
-            modal: false,
-          });
+          txResult = await this.tippingContract.call(
+            'tip',
+            [this.url, escapeSpecialChars(this.note)],
+            {
+              amount,
+              waitMined: false,
+              modal: false,
+            },
+          );
         }
 
         this.$store.commit('addPendingTransaction', {
@@ -334,6 +327,12 @@ export default {
     margin-left: 10px;
     width: 90%;
   }
+}
+
+.validation-msg {
+  color: #ff8c2a;
+  font-size: 15px;
+  min-height: 45px;
 }
 
 @media screen and (min-width: 380px) {
