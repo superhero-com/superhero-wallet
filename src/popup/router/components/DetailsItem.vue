@@ -16,6 +16,7 @@ export default {
 
 <style lang="scss" scoped>
 .details-item {
+  word-break: break-all;
   display: flex;
   align-items: center;
   justify-content: space-between;
