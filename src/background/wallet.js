@@ -74,7 +74,7 @@ export default {
           },
           async address(...args) {
             const address = store.state.account.publicKey;
-            const app = args[args.length - 1];
+            const app = args.pop();
             if (
               app instanceof App &&
               !(await store.dispatch('permissions/requestAddressForHost', {
