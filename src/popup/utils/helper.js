@@ -252,3 +252,32 @@ export const getBalanceLocalStorage = () =>
   localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : 0;
 
 export const getAeppUrl = (v) => new URL(v.connection.port.sender.url);
+
+export const categorizeContractCallTxObject = (transaction) => {
+  if (transaction.tx.type !== 'ContractCallTx') return null;
+  switch (transaction.tx.function) {
+    case 'transfer':
+    case 'change_allowance':
+    case 'create_allowance':
+      return {
+        to: transaction.tx.arguments[0].value,
+        amount: transaction.tx.arguments[1].value,
+        token: transaction.tx.contractId,
+      };
+    case 'tip_token':
+      return {
+        url: transaction.tx.arguments[0].value,
+        note: transaction.tx.arguments[1].value,
+        amount: transaction.tx.arguments[3].value,
+        token: transaction.tx.arguments[2].value,
+      };
+    case 'retip_token':
+      return {
+        url: transaction.tx.arguments[0].value,
+        amount: transaction.tx.arguments[2].value,
+        token: transaction.tx.arguments[1].value,
+      };
+    default:
+      return null;
+  }
+};
