@@ -5,7 +5,7 @@ import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-c
 import { isEmpty } from 'lodash-es';
 import uuid from 'uuid';
 import { AEX2_METHODS, defaultNetwork } from '../popup/utils/constants';
-import { getAllNetworks, stringifyForStorage, getAeppUrl } from '../popup/utils/helper';
+import { getAllNetworks, stringifyForStorage } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 import popups from './popup-connection';
 import walletController from './wallet-controller';
@@ -40,6 +40,7 @@ export default {
   async initNodes() {
     this.nodes = await getAllNetworks();
   },
+  getAeppUrl: (v) => new URL(v.connection.port.sender.url),
   async initSdk() {
     const context = this;
     try {
@@ -49,7 +50,7 @@ export default {
         const { method, params } = action;
         if (
           (await store.dispatch('permissions/checkPermissions', {
-            host: getAeppUrl(aepp).hostname,
+            host: context.getAeppUrl(aepp).hostname,
             method,
             params: params?.txObject?.params,
           })) ||
@@ -104,7 +105,7 @@ export default {
           client.disconnect();
         },
         async onSubscription(aepp, { accept, deny }) {
-          const address = await this.address(this.getApp(getAeppUrl(aepp)));
+          const address = await this.address(this.getApp(context.getAeppUrl(aepp)));
           if (!address) {
             deny();
             return;
@@ -130,7 +131,8 @@ export default {
 
   async showPopup(aepp, type = 'connectConfirm', method = '', params = {}) {
     const id = uuid();
-    const { href, protocol, host } = typeof aepp === 'object' ? getAeppUrl(aepp) : new URL(aepp);
+    const { href, protocol, host } =
+      typeof aepp === 'object' ? this.getAeppUrl(aepp) : new URL(aepp);
     const tabs = await browser.tabs.query({ active: true });
     tabs.forEach(({ url: tabURL, id: tabId }) => {
       const tabUrl = new URL(tabURL);
