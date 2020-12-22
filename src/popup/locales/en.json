@@ -818,7 +818,10 @@
       "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed.",
       "minAmountError": "Tips should be over 0.01 USD in tokens in order to push through.",
       "insufficientBalance": "The token balance should be greater than the tip token value.",
-      "v1FungibleTokenTipError": "This post could only be tipped with AE tokens."
+      "v1FungibleTokenTipError": "This post could only be tipped with AE tokens.",
+      "maxNoteLengthError": "Please enter a message below 280 characters.",
+      "blacklistedUrl": "This URL is not public and the funds could not be claimed.",
+      "requiredAmountError": "Please enter a tip amount."
     },
     "successTip": {
       "sendMore": "Send more tips",

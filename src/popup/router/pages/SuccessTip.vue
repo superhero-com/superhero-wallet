@@ -9,7 +9,9 @@
     <p class="primary-title text-left mb-8 f-16">
       {{ $t('pages.successTip.successfullySent') }}
       <TokenAmount
-        v-bind="selectedToken ? { amount, symbol: selectedToken.symbol } : { amount: amountTip }"
+        v-bind="
+          selectedToken ? { amount: +amount, symbol: selectedToken.symbol } : { amount: amountTip }
+        "
         data-cy="tip-amount"
       />
       {{ $t('pages.successTip.to') }}
@@ -19,7 +21,9 @@
     <div>
       {{ $t('pages.successTip.notify') }}
       <TokenAmount
-        v-bind="selectedToken ? { amount, symbol: selectedToken.symbol } : { amount: amountTip }"
+        v-bind="
+          selectedToken ? { amount: +amount, symbol: selectedToken.symbol } : { amount: amountTip }
+        "
       />
       {{ $t('pages.successTip.notifyTo') }}
       <Textarea v-model="note" :value="note" size="h-50" />

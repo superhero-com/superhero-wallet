@@ -1,7 +1,7 @@
 describe('Test cases AmountSend component', () => {
   it('Calculates currency on enter amount, validates entered amount, shows correct balance', () => {
     cy.login()
-      .openTip()
+      .openWithdraw()
       .enterAmountSend(5)
       .get('[data-cy=amount-currency]')
       .invoke('text')
