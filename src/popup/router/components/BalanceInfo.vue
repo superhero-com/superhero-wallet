@@ -10,7 +10,7 @@
           is-custom
         />
         <span class="display-value text-ellipsis">
-          {{ selectedToken ? selectedToken.convertedBalance : tokenBalance.toFixed(2) }}
+          {{ selectedToken ? selectedToken.convertedBalance : tokenBalance }}
         </span>
         <span class="token-symbol">{{ !selectedToken ? $t('ae') : selectedToken.symbol }}</span>
         <ExpandedAngleArrow class="expand-arrow" />

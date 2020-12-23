@@ -1,7 +1,7 @@
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
 import { unionBy } from 'lodash-es';
-import { fetchJson, convertToken } from '../../popup/utils/helper';
+import { convertToken, fetchJson } from '../../popup/utils/helper';
 
 export default {
   namespaced: true,
@@ -72,7 +72,7 @@ export default {
             balance,
             convertedBalance,
           };
-          if (Object.keys(availableTokens[contract].length > 0)) {
+          if (availableTokens[contract]) {
             const updatedTokenInfo = { ...availableTokens };
             updatedTokenInfo[contract] = { ...objectStructure };
             commit('setAvailableTokens', updatedTokenInfo);

@@ -122,6 +122,7 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
+import BigNumber from 'bignumber.js';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { checkAddress, chekAensName, aeToAettos, convertToken } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
@@ -228,18 +229,18 @@ export default {
     async send() {
       const amount = !this.selectedToken
         ? aeToAettos(this.form.amount)
-        : convertToken(this.form.amount, this.selectedToken.decimals);
+        : new BigNumber(this.form.amount);
       const receiver = this.form.address;
-      const calculatedMaxValue = this.balance > this.fee ? this.balance - this.fee : 0;
       let errorModalType = '';
       if (receiver === '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
         errorModalType = 'incorrect-address';
       }
       if (this.form.amount <= 0) errorModalType = 'incorrect-amount';
       if (
-        (calculatedMaxValue - this.form.amount <= 0 && !this.selectedToken) ||
+        (this.balance - this.fee - this.form.amount <= 0 && !this.selectedToken) ||
         (this.selectedToken &&
-          (this.selectedToken.convertedBalance < this.form.amount || this.balance < this.fee))
+          convertToken(this.selectedToken.balance, -this.selectedToken.decimals) < amount) ||
+        this.fee > this.balance
       ) {
         errorModalType = 'insufficient-balance';
       }
@@ -253,7 +254,7 @@ export default {
           const { hash } = await this.$store.dispatch('fungibleTokens/transfer', [
             receiver,
             this.form.amount,
-            { waitMined: false, modal: false },
+            { waitMined: true, modal: false },
           ]);
           this.$store.commit('addPendingTransaction', {
             hash,
@@ -261,7 +262,9 @@ export default {
             type: 'spendToken',
             recipientId: receiver,
           });
+          await this.$store.dispatch('fungibleTokens/getAvailableTokens');
           await this.$store.dispatch('fungibleTokens/loadTokenBalances', this.account.publicKey);
+          await this.$store.dispatch('cacheInvalidateFT', this.selectedToken.contract);
         } else {
           const { hash } = await this.sdk.spend(amount, receiver, {
             waitMined: false,

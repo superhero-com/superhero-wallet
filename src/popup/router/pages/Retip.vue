@@ -33,6 +33,7 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
+import BigNumber from 'bignumber.js';
 import tipping from 'tipping-contract/util/tippingContractUtil';
 import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
@@ -47,7 +48,7 @@ export default {
   components: { AmountSend, UrlStatus, Button, BalanceInfo },
   data: () => ({
     tip: {},
-    amount: '',
+    amount: null,
     loading: false,
   }),
   subscriptions() {
@@ -62,6 +63,7 @@ export default {
       urlStatus(state, getters) {
         return getters['tipUrl/status'](this.tip.url);
       },
+
       validationStatus({ sdk }, { account, minTipAmount }) {
         if (!sdk || !this.tippingContract) {
           return { error: true };
@@ -69,7 +71,10 @@ export default {
         if (this.selectedToken && this.$route.query.id.includes('_v1')) {
           return { error: true, msg: this.$t('pages.tipPage.v1FungibleTokenTipError') };
         }
-        if (!this.selectedToken && this.amount < minTipAmount) {
+        if (!+this.amount) {
+          return { error: true, msg: this.$t('pages.tipPage.requiredAmountError') };
+        }
+        if (!this.selectedToken && +this.amount < minTipAmount) {
           return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
         }
         const fee = calculateFee(TX_TYPES.contractCall, {
@@ -79,8 +84,9 @@ export default {
         });
         if (
           this.selectedToken
-            ? this.selectedToken.convertedBalance < this.amount || this.balance < fee
-            : this.balance < fee + this.amount
+            ? convertToken(this.selectedToken.balance, -this.selectedToken.decimals) <
+                this.amountBigNumber || this.balance < fee
+            : this.balance - fee - this.amountBigNumber <= 0
         ) {
           return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
         }
@@ -91,6 +97,9 @@ export default {
       return this.$route.query.id.includes('_v2') || this.$route.query.id.includes('_v3')
         ? this.tippingV2
         : this.tippingV1;
+    },
+    amountBigNumber() {
+      return new BigNumber(this.amount || 0);
     },
   },
   async created() {
