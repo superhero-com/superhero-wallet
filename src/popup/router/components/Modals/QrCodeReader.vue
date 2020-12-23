@@ -115,9 +115,7 @@ export default {
             this.style = document.createElement('style');
             this.style.type = 'text/css';
             this.style.appendChild(
-              document.createTextNode(
-                'html, body, .ae-main { background: transparent !important }',
-              ),
+              document.createTextNode('html, body, .ae-main { background: transparent }'),
             );
             document.head.appendChild(this.style);
             document.querySelector('.popup').style.display = 'none';

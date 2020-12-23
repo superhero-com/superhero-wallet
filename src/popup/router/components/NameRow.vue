@@ -36,7 +36,7 @@ export default {
   text-align: left;
   border-left: 2px solid transparent;
   color: $text-color;
-  background: #21222a !important;
+  background: #21222a;
 
   .name-info ::v-deep {
     margin-left: 10px;

@@ -41,7 +41,7 @@ export default {
 
 <style lang="scss" scoped>
 .confirmation--question {
-  font-weight: 500 !important;
-  color: #fff !important;
+  font-weight: 500;
+  color: #fff;
 }
 </style>

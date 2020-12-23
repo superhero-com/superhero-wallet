@@ -89,7 +89,7 @@ export default {
     min-height: 2.2rem;
     display: flex;
     align-items: center;
-    border: 2px solid #33343e !important;
+    border: 2px solid #33343e;
 
     img {
       position: absolute;
@@ -154,7 +154,7 @@ export default {
     color: $text-color;
     text-align: left;
     margin: 0;
-    padding: 0 5px !important;
+    padding: 0 5px;
   }
 
   ul {

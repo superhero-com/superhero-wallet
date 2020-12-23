@@ -33,7 +33,7 @@ export default {
 <style lang="scss">
 body,
 html {
-  background: #16161d !important;
+  background: #16161d;
 }
 
 #info {

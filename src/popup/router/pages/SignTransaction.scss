@@ -12,7 +12,7 @@
 }
 
 .spendTxDetailsList .ae-button {
-  margin-bottom: 0 !important;
+  margin-bottom: 0;
 }
 
 .arrowSeprator {
@@ -28,8 +28,8 @@
   line-height: 20px;
 
   .ae-icon {
-    font-size: 1.2rem !important;
-    float: none !important;
+    font-size: 1.2rem;
+    float: none;
   }
 
   &::after {
@@ -45,16 +45,16 @@
 }
 
 .spendAccountAddr {
-  padding: 0 0.5rem !important;
-  font-weight: normal !important;
-  font-size: 0.8rem !important;
+  padding: 0 0.5rem;
+  font-weight: normal;
+  font-size: 0.8rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .noBorder {
-  border-top: none !important;
+  border-top: none;
 }
 
 .accountFrom {
@@ -70,8 +70,8 @@
 }
 
 .ae-badge {
-  background: $accent-color !important;
-  color: $white-color !important;
+  background: $accent-color;
+  color: $white-color;
   -webkit-box-shadow: 0 0 0 2px $accent-color;
   box-shadow: 0 0 0 2px $accent-color;
   border: 2px solid $bg-color;

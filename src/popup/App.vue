@@ -1,6 +1,7 @@
 <template>
-  <ae-main
+  <div
     :class="[
+      'ae-main',
       aeppPopup ? 'ae-main-popup ae-main-wave' : waveBg ? 'ae-main-wave' : '',
       iframe && ($route.path === '/intro' || $route.path === '/') ? 'iframe' : '',
     ]"
@@ -32,7 +33,7 @@
       :key="key"
       v-bind="props"
     />
-  </ae-main>
+  </div>
 </template>
 
 <script>
@@ -128,6 +129,17 @@ export default {
 };
 </script>
 
+<style lang="scss">
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  height: 1px;
+}
+</style>
+
 <style lang="scss" scoped>
 @import '../styles/variables';
 
@@ -135,17 +147,17 @@ export default {
   position: relative;
   min-height: 600px;
   margin: 0 auto;
-  overflow: visible !important;
+  overflow: visible;
 
   &.ae-main-popup {
-    background-color: $bg-color !important;
+    background-color: $bg-color;
     padding-top: 0;
   }
 
   &.ae-main-wave {
-    background-position: center bottom !important;
-    background-repeat: no-repeat !important;
-    background-image: url('../icons/background-big-wave.png') !important;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-image: url('../icons/background-big-wave.png');
   }
 
   padding-top: 50px;
@@ -191,7 +203,7 @@ export default {
 
 @media screen and (max-width: 380px) {
   .ae-main.ae-main-wave {
-    background-position: 100% 100% !important;
+    background-position: 100% 100%;
   }
 }
 </style>

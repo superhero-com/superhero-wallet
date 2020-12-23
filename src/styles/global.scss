@@ -55,12 +55,12 @@ p {
 }
 
 .ae-input-container.focus {
-  caret-color: $primary-color !important;
-  border-left: 2px solid $primary-color !important;
+  caret-color: $primary-color;
+  border-left: 2px solid $primary-color;
 }
 
 .ae-input-container.focus .ae-input-label {
-  color: $primary-color !important;
+  color: $primary-color;
   white-space: nowrap;
 }
 
@@ -71,7 +71,7 @@ p {
 }
 
 .sendContent .ae-dropdown {
-  margin-bottom: 0 !important;
+  margin-bottom: 0;
   width: 4rem;
   position: absolute;
   right: 0;
@@ -80,12 +80,12 @@ p {
 
 .sendContent .ae-dropdown .ae-dropdown-button,
 .sendAmount .ae-dropdown .ae-dropdown-button {
-  width: 100% !important;
-  height: 16px !important;
+  width: 100%;
+  height: 16px;
   font-size: 1.3rem;
 }
 
-.loading {
+.loader {
   display: flex;
   flex-flow: row wrap;
   justify-content: center;
@@ -100,12 +100,12 @@ p {
 }
 
 .text-left {
-  text-align: left !important;
+  text-align: left;
 }
 
 .ae-input-container {
   .ae-input-box {
-    background: $input-background !important;
+    background: $input-background;
   }
 
   .ae-toolbar {
@@ -123,39 +123,39 @@ p {
 
 .modal-two-buttons .buttons button {
   height: 56px;
-  border-radius: 0 !important;
+  border-radius: 0;
 }
 
 .modal-two-buttons .buttons button:first-child {
-  border-bottom-left-radius: 10px !important;
+  border-bottom-left-radius: 10px;
 }
 
 .modal-two-buttons .buttons button:last-child {
-  border-bottom-right-radius: 10px !important;
+  border-bottom-right-radius: 10px;
   word-break: break-word;
 }
 
 .signature-modal .buttons,
 .seeAllRegisteredNames .buttons {
-  display: none !important;
+  display: none;
 }
 
 .ae-main {
-  padding-bottom: 0 !important;
+  padding-bottom: 0;
 }
 
 .ae-button.ledger {
-  background: $ledger-color !important;
+  background: $ledger-color;
 }
 
 .ae-button {
-  border-radius: 8px !important;
+  border-radius: 8px;
   height: 52px;
   padding: 0 2.5rem;
 }
 
 .btnFixed {
-  position: fixed !important;
+  position: fixed;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
@@ -168,15 +168,15 @@ p {
   padding: 10px 0;
 
   button {
-    margin-bottom: 0 !important;
+    margin-bottom: 0;
   }
 
   .ae-button.round {
-    padding: 0 0.5rem !important;
+    padding: 0 0.5rem;
   }
 
   button .ae-icon {
-    font-size: 1.5rem !important;
+    font-size: 1.5rem;
   }
 }
 
@@ -193,7 +193,7 @@ p {
 .input {
   outline: none;
   resize: none;
-  background: #f7fafc !important;
+  background: #f7fafc;
   border: none;
   padding-left: 1rem;
 }
@@ -224,7 +224,7 @@ p {
 }
 
 .flex-align-start {
-  align-items: flex-start !important;
+  align-items: flex-start;
 }
 
 .balance {
@@ -250,7 +250,7 @@ p {
 }
 
 .ae-panel {
-  margin: 1.5rem 0 !important;
+  margin: 1.5rem 0;
 }
 
 .ae-panel .content > h4 {
@@ -259,7 +259,7 @@ p {
 }
 
 .ae-check-button {
-  padding-left: 2.5rem !important;
+  padding-left: 2.5rem;
   word-break: break-word;
   text-align: left;
   margin-bottom: 1rem;
@@ -268,30 +268,30 @@ p {
 }
 
 .ae-check-button::after {
-  width: 26px !important;
-  height: 26px !important;
-  top: 50% !important;
+  width: 26px;
+  height: 26px;
+  top: 50%;
   transform: translateY(-50%);
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
 }
 
 .ae-check-button::before {
-  border-color: $accent-color !important;
-  top: 50% !important;
-  border-radius: 4px !important;
+  border-color: $accent-color;
+  top: 50%;
+  border-radius: 4px;
   transform: translateY(-50%);
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
-  width: 18px !important;
-  height: 18px !important;
-  background: transparent !important;
-  border-width: 3px !important;
+  width: 18px;
+  height: 18px;
+  background: transparent;
+  border-width: 3px;
 }
 
 .ae-check > input[type="checkbox"]:checked + span.ae-check-button::before {
-  border-color: $accent-color !important;
-  background: $accent-color !important;
+  border-color: $accent-color;
+  background: $accent-color;
 }
 
 @-moz-document url-prefix() {
@@ -336,7 +336,7 @@ button {
   padding: 4px 20px;
   text-align: center;
   font-size: 16px;
-  max-width: 357px !important;
+  max-width: 357px;
   margin: 0 auto;
   position: relative;
 }
@@ -346,7 +346,7 @@ button {
 }
 
 .ae-check > input[type='checkbox']:checked + .ae-check-button::before {
-  border-color: #dae1ea !important;
+  border-color: #dae1ea;
 }
 
 .actions {
@@ -394,7 +394,7 @@ body,
   font-family: 'Roboto', sans-serif;
   font-size: $font-size;
   color: $white-color;
-  background: $bg-color !important;
+  background: $bg-color;
 }
 
 .popup-no-padding {
@@ -402,7 +402,7 @@ body,
 }
 
 #app {
-  font-family: 'Roboto', sans-serif !important;
+  font-family: 'Roboto', sans-serif;
 }
 
 .disabled {
@@ -427,7 +427,7 @@ body,
 }
 
 .secondary-text {
-  color: $secondary-color !important;
+  color: $secondary-color;
 }
 
 .logo {
@@ -435,7 +435,7 @@ body,
 }
 
 .error-msg {
-  color: $input-error-color !important;
+  color: $input-error-color;
   margin-top: 22px;
   font-size: 0.88rem;
 }
@@ -528,14 +528,14 @@ body,
   }
 
   ul li {
-    border-width: 1px !important;
-    border-color: #424242 !important;
+    border-width: 1px;
+    border-color: #424242;
   }
 
   .permission-set {
     flex-direction: column;
     text-align: left;
-    cursor: unset !important;
+    cursor: unset;
 
     h4 {
       display: block;

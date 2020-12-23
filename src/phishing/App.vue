@@ -79,9 +79,9 @@ export default {
 body,
 html,
 .content {
-  margin: 0 !important;
-  padding: 0 !important;
-  height: 100% !important;
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
 .ae-panel {
@@ -93,14 +93,14 @@ html,
   -webkit-transform: translate(-50%, -50%);
   padding: 15px;
   width: 80%;
-  max-width: 80% !important;
+  max-width: 80%;
 }
 
 .ae-icon {
   vertical-align: middle;
   margin-right: 5px;
-  line-height: 32px !important;
-  display: inline-block !important;
+  line-height: 32px;
+  display: inline-block;
   margin-top: -5px;
 }
 
@@ -120,6 +120,6 @@ a {
 }
 
 .ae-main {
-  background: $bg-color !important;
+  background: $bg-color;
 }
 </style>

@@ -76,6 +76,17 @@ export default {
     align-items: center;
     width: 50%;
     padding: 10px;
+
+    .account-address {
+      padding: 0 0.5rem;
+      font-weight: normal;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 80%;
+      text-align: left;
+    }
   }
 
   .from {
@@ -86,17 +97,6 @@ export default {
   .to {
     padding-left: 15px;
     background: #33343ea1;
-  }
-
-  .account-address {
-    padding: 0 0.5rem !important;
-    font-weight: normal !important;
-    font-size: 0.8rem !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 80%;
-    text-align: left;
   }
 
   .arrow-separator {
@@ -117,8 +117,8 @@ export default {
     line-height: 20px;
 
     .ae-icon {
-      font-size: 1.2rem !important;
-      float: none !important;
+      font-size: 1.2rem;
+      float: none;
     }
 
     &::after {

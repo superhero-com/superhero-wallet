@@ -127,7 +127,7 @@ export default {
     }
 
     .ae-identicon {
-      height: 4rem !important;
+      height: 4rem;
       position: relative;
       z-index: 1;
       width: auto;
