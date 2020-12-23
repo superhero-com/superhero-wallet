@@ -1,9 +1,9 @@
-import { MemoryAccount, Node, RpcWallet } from '@aeternity/aepp-sdk/es';
+import { Node, RpcWallet } from '@aeternity/aepp-sdk/es';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { camelCase, isEmpty, times } from 'lodash-es';
 import { postMessage } from '../popup/utils/connection';
-import { fetchJson, getAeppUrl, IN_FRAME, parseFromStorage } from '../popup/utils/helper';
+import { parseFromStorage, fetchJson, IN_FRAME } from '../popup/utils/helper';
 import store from '../store';
 import { App } from '../store/modules/permissions';
 import Logger from './logger';

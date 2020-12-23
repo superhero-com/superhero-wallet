@@ -4,7 +4,7 @@ import { refCountDelay } from 'rxjs-etc/operators';
 import {
   isNotFoundError,
   handleUnknownError,
-  convertToAE,
+  aettosToAe,
   setBalanceLocalStorage,
   getBalanceLocalStorage,
 } from '../../popup/utils/helper';
@@ -38,7 +38,7 @@ export default (store) => {
       }),
     ),
     map((balanceAettos) => {
-      const balance = convertToAE(balanceAettos);
+      const balance = aettosToAe(balanceAettos);
       if (balance !== getBalanceLocalStorage()) {
         setBalanceLocalStorage(balance);
       }

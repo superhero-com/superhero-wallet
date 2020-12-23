@@ -8,7 +8,7 @@ import {
   getAddressByNameEntry,
   parseFromStorage,
   postJson,
-  stringifyForStorage
+  stringifyForStorage,
 } from '../popup/utils/helper';
 import { i18n } from './plugins/languages';
 

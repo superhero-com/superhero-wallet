@@ -23,7 +23,7 @@
       <div class="balance-box">
         <p class="label">{{ $t('pages.tipPage.availableLabel') }}</p>
         <span class="secondary-text f-14 block l-1" data-cy="balance">
-          {{ selectedToken ? selectedToken.convertedBalance : tokenBalance.toFixed(2) }}
+          {{ selectedToken ? selectedToken.convertedBalance : tokenBalance }}
           {{ selectedToken ? selectedToken.symbol : $t('ae') }}
         </span>
         <span class="f-14 block l-1 amount-currency" data-cy="balance-currency">

@@ -72,7 +72,7 @@ export default {
             balance,
             convertedBalance,
           };
-          if (availableTokens[contract] && Object.keys(availableTokens[contract].length > 0)) {
+          if (availableTokens[contract]) {
             const updatedTokenInfo = { ...availableTokens };
             updatedTokenInfo[contract] = { ...objectStructure };
             commit('setAvailableTokens', updatedTokenInfo);
