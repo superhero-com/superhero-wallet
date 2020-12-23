@@ -995,7 +995,8 @@
       "insufficient-balance": "Insufficient balance",
       "tip-attached": "Tip attached",
       "top-up-with": "Top up with",
-      "delete": "Delete"
+      "delete": "Delete",
+      "copied": "Copied!"
     },
     "permissions": {
       "login": "Don't ask for login requests",

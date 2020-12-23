@@ -6,7 +6,8 @@
     </div>
     <div class="invite-link">
       <span>{{ link }}</span>
-      <button class="invite-link-copy" v-clipboard:copy="link"><CopyIcon /></button>
+      <div class="copied-alert" v-if="copied">{{ $t('pages.invite.copied') }}</div>
+      <button class="invite-link-copy" @click="copy" v-clipboard:copy="link"><CopyIcon /></button>
     </div>
     <div class="centered-buttons" v-if="!topUp">
       <Button v-if="inviteLinkBalance > 0" bold @click="claim">{{
@@ -46,7 +47,7 @@ export default {
   },
   components: { TokenAmount, Button, AmountSend, CopyIcon },
   filters: { formatDate },
-  data: () => ({ topUp: false, topUpAmount: 0, inviteLinkBalance: 0 }),
+  data: () => ({ topUp: false, topUpAmount: 0, inviteLinkBalance: 0, copied: false }),
   subscriptions() {
     return pick(this.$store.state.observables, ['balance']);
   },
@@ -74,6 +75,12 @@ export default {
     },
   },
   methods: {
+    copy() {
+      this.copied = true;
+      setTimeout(() => {
+        this.copied = false;
+      }, 3000);
+    },
     deleteItem() {
       this.$store.commit('invites/delete', this.secretKey);
     },
@@ -181,6 +188,11 @@ export default {
       margin-right: 20px;
       width: 120px;
     }
+  }
+
+  .copied-alert {
+    color: $button-color;
+    margin-right: 7px;
   }
 }
 </style>
