@@ -78,11 +78,14 @@ export default {
     async requestAddressForHost({ state, commit, dispatch }, { host, address, connectionPopupCb }) {
       if (state[host]?.addresses?.includes(address)) return true;
 
-      if (
-        !(await dispatch('checkPermissions', { host, method: 'connection.open' })) &&
-        !(await connectionPopupCb())
-      )
+      try {
+        if (!(await dispatch('checkPermissions', { host, method: 'connection.open' }))) {
+          const cp = await connectionPopupCb();
+          if (cp !== undefined && !cp) return false;
+        }
+      } catch {
         return false;
+      }
       commit('addAddressToHost', { host, address });
 
       return true;
