@@ -138,7 +138,7 @@ export default {
     },
     cancelReading() {
       this.stopReading();
-      this.reject(new Error('Cancelled by user'));
+      this.reject(new Error('Rejected by user'));
     },
   },
 };
