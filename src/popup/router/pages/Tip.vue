@@ -65,7 +65,6 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import BigNumber from 'bignumber.js';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { escapeSpecialChars, aeToAettos, validateTipUrl, convertToken } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
@@ -116,9 +115,6 @@ export default {
     tippingContract() {
       return this.tippingV2 || this.tippingV1;
     },
-    amountBigNumber() {
-      return new BigNumber(this.amount || 0);
-    },
     ...mapState({
       validationStatus({ sdk }, { account, minTipAmount }) {
         if (!sdk || !this.tippingContract) {
@@ -146,9 +142,8 @@ export default {
         });
         if (
           this.selectedToken
-            ? convertToken(this.selectedToken.balance, -this.selectedToken.decimals) <
-                this.amountBigNumber || this.balance < fee
-            : this.balance - fee - this.amountBigNumber <= 0
+            ? +this.selectedToken.convertedBalance < +this.amount || this.balance < fee
+            : this.balance < fee + +this.amount
         ) {
           return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
         }
