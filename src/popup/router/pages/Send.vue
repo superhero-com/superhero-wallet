@@ -122,7 +122,6 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import BigNumber from 'bignumber.js';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { checkAddress, chekAensName, aeToAettos, convertToken } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
@@ -229,7 +228,7 @@ export default {
     async send() {
       const amount = !this.selectedToken
         ? aeToAettos(this.form.amount)
-        : new BigNumber(this.form.amount);
+        : convertToken(this.form.amount, this.selectedToken.decimals);
       const receiver = this.form.address;
       let errorModalType = '';
       if (receiver === '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
@@ -238,8 +237,7 @@ export default {
       if (this.form.amount <= 0) errorModalType = 'incorrect-amount';
       if (
         (this.balance - this.fee - this.form.amount <= 0 && !this.selectedToken) ||
-        (this.selectedToken &&
-          convertToken(this.selectedToken.balance, -this.selectedToken.decimals) < amount) ||
+        (this.selectedToken && +this.selectedToken.convertedBalance < +this.form.amount) ||
         this.fee > this.balance
       ) {
         errorModalType = 'insufficient-balance';
