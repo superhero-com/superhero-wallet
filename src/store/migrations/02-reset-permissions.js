@@ -1,4 +1,4 @@
-export default async (state) => {
+export default (state) => {
   const newState = { ...state };
   newState.permissions = Object.fromEntries(
     ['superhero.com', 'localhost'].map((domain) => [
