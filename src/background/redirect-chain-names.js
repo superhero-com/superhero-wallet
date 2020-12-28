@@ -1,4 +1,4 @@
-import { getAddressFromChainName } from './background-utils';
+import { getAddressFromChainName } from './utils';
 import { AGGREGATOR_URL } from '../popup/utils/constants';
 
 export default {
@@ -10,13 +10,10 @@ export default {
   },
   setListener() {
     browser.webRequest.onBeforeRequest.addListener(
-      requestDetails => {
+      (requestDetails) => {
         try {
           const url = new URL(requestDetails.url);
-          const params = url.searchParams
-            .get('q')
-            .trim()
-            .toLowerCase();
+          const params = url.searchParams.get('q').trim().toLowerCase();
           const q = new URL(`${url.protocol}//${params}`);
           if (!q.hostname || !this.supportedDomain(q.hostname) || url.pathname !== '/search') {
             return {};
@@ -34,7 +31,7 @@ export default {
     );
 
     browser.webRequest.onBeforeRequest.addListener(
-      requestDetails => {
+      (requestDetails) => {
         chrome.tabs.update({ url: '/redirect/index.html' }, async () => {
           try {
             const url = new URL(requestDetails.url);

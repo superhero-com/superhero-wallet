@@ -12,9 +12,9 @@
         <Settings
           v-if="$route.path === '/notifications'"
           class="settings"
-          @click="$router.push('/notification-settings')"
+          @click="$router.push('/notifications/settings')"
         />
-        <template v-else-if="$route.path !== '/notification-settings'">
+        <template v-else-if="$route.path !== '/notifications/settings'">
           <span class="noti-holder" @click="toNotifications" data-cy="noti">
             <span v-if="notificationsCount" class="noti-count" data-cy="noti-count">
               {{ notificationsCount }}
@@ -58,17 +58,16 @@ export default {
     },
     notificationsCount() {
       return [...this.notifications, ...this.superheroNotifications].filter(
-        n => n.status === 'CREATED',
+        (n) => n.status === 'CREATED',
       ).length;
     },
   },
   methods: {
     back() {
-      if (this.$store.state.route.from.path === '/') {
-        this.$router.push(this.isLoggedIn ? '/account' : '/');
-        return;
-      }
-      this.$router.go(-1);
+      const fallBackRoute = this.isLoggedIn ? '/account' : '/';
+      this.$router.push(
+        this.$route.fullPath.substr(0, this.$route.fullPath.lastIndexOf('/')) || fallBackRoute,
+      );
     },
     toNotifications() {
       if (this.notificationsCount && this.$store.state.route.fullPath !== '/notifications') {
@@ -80,7 +79,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .header {
   padding-top: env(safe-area-inset-top);

@@ -1,5 +1,7 @@
 {
   "ok": "OK",
+  "ae": "AE",
+  "mainAccount": "Cuenta principal",
   "onboarding": {
     "step_1": {
       "title": "Información de tu cuenta",
@@ -203,17 +205,17 @@
     },
     "titles": {
       "settings": "Ajustes",
-      "general": "Idioma",
+      "language": "Idioma",
       "security": "Securidad",
       "about": "Acerca",
-      "send": "Enviar Propinas",
+      "send": "Enviar",
+      "send-tips": "Enviar Propinas",
       "claim-tips": "Reclamar Propinas",
       "scanQr": "Scanear QR",
       "terms": "Términos de Uso",
       "privacy": "Política de Privacidad",
       "importAccount": "Recuperar Cuenta Existente",
       "activity": "Historial de Actividad",
-      "withdraw": "Retiro",
       "topUp": "Agregar Saldo",
       "notifications": "Notificaciones",
       "names": "Nombres",
@@ -229,53 +231,18 @@
       "allowances": "Asignaciones",
       "sign-message": "Firmar Mensaje"
     },
-    "appVUE": {
-      "systemName": "Superhero",
-      "manageNetworks": "Administrar redes",
-      "manageAccounts": "Cuentas de administración",
-      "airGapVault": "Crear una Bóveda AirGap",
-      "ledgerAccount": "Añadir cuenta Ledger",
-      "menu": "Menu",
-      "myAccount": "Mi cuenta",
-      "switchToken": "Tokens",
-      "utilities": "Utilidades",
-      "settings": "Ajustes",
-      "logout": "Salir",
-      "profile": "Perfil",
-      "help": "Ayuda",
-      "topUp": "Agregar Saldo",
-      "withdraw": "Retiro",
-      "myTransactions": "Mis transacciones",
-      "activity": "Actividad",
-      "dashboard": "Panel de control",
-      "aeid": "AE",
-      "walletName": "Billetera Superhero",
-      "general": "General",
-      "security": "Securidad",
-      "seedPhrase": "Frase Semilla",
-      "language": "Idioma",
-      "advanced": "Avanzado",
-      "versions": "Version y Actualizaciones",
-      "mainAccount": "Cuenta principal",
-      "reportBug": "Reportar un bug",
-      "names": "Nombres",
-      "networks": "Redes",
-      "removeAccount": "Eliminar cuenta",
-      "donateErrorReports": "Enviar reportes de errores",
-      "tokens": "Tokens Fungibles",
-      "manageTokens": "Manejar tokens"
-    },
-    "aboutSettings": {
+    "about": {
       "heading": "Acerca de",
       "systemName": "Superhero",
       "terms": "Términos de Servicio",
-      "privacyPolicy": "Política de Privacidad"
+      "privacyPolicy": "Política de Privacidad",
+      "reportBug": "Reportar un bug"
     },
     "account": {
       "heading": "Cuenta",
+      "activity": "Actividad",
       "accountName": "Nombre de la cuenta",
       "copy": "Copiar",
-      "send": "Enviar Propina",
       "claim": "Reclamar Propina",
       "receive": "Recibir",
       "wholeTransaction": "Historial completo de transacciones",
@@ -285,9 +252,8 @@
       "howToClaim": "Cómo reclamar AE",
       "balance": "Saldo",
       "copied": "¡Copiado!",
-      "youNeedTo": "Necesitas",
+      "seedNotification": "Necesitas {0} tu frase semilla",
       "backup": "respaldar",
-      "yourSeedPhrase": "tu frase semilla",
       "updateExtension": "¡Nueva versión disponible! Por favor actualiza tu extensión.",
       "updateAvailable": "¡Nueva versión disponible en la tienda!",
       "claim-name": "Reclama tu nombre .chain"
@@ -495,7 +461,7 @@
         "bid-added": "Oferta agregada exitosamente"
       }
     },
-    "generalSettings": {
+    "languageSettings": {
       "backToSettings": "Volver a ajustes",
       "heading": "Idioma",
       "switchLanguage": "Idioma",
@@ -581,11 +547,9 @@
       "showPrivateKey": "Mostrar clave privada",
       "incorrectPassword": "Contraseña incorrecta",
       "decryptingPrivateKey": "Desencriptar la clave privada",
-      "showSeedPhrase": "Mostrar frase semilla",
       "seedRecoveryHeading": "Mostrar frase semilla",
       "seedRecoverySmall": "Tu frase semilla (conocida también como llave privada) sirve como la llave o contraseña para acceder a tu cuenta. No la reveles nunca a a nadie. Asegúrate de respaldarla en un pedazo de papel que nadie pueda ver pero que tu nunca vayas a perder. Perder esta llave significa perder el acceso a tu billetera y propinas",
       "seedRecoveryBtn": "Mostrar frase semilla",
-      "seedPhraseWarning": "No compartas esta frase semilla con nadie, puede ser usada para robar todas tus cuentas",
       "seedPhrase": "Tu frase semilla",
       "copy": "Copiar al portapapeles"
     },
@@ -614,7 +578,6 @@
     "send": {
       "backToAccount": "Regresar a la cuenta",
       "heading": "Nueva transferencia de",
-      "recipient": "Receptor",
       "sendSubaccount": "o escoja subcuenta",
       "txFee": "Comisión mínima de transacción:",
       "maxSpendableValue": "Máximo valor utilizable:",
@@ -626,15 +589,15 @@
       "review": "Revisar",
       "reviewtx": "Revisar Transacción",
       "checkalert": "Por favor chequea cuidadosamente la información.",
-      "sendingAddress": "Dirección de envio",
-      "receivingAddress": "Dirección de recepción",
+      "sender": "Dirección de envio",
+      "recipient": "Dirección de recepción",
       "amount": "Monto",
       "editTxDetails": "Editar Detalles de la Transacción",
       "tx-success": "Transacción Completada",
       "successalert": "Haz realizado un envio exitosamente ",
       "to": "Para",
       "from": "De",
-      "txhash": "Hash de la Transacción",
+      "hash": "Hash de la Transacción",
       "home": "Inicio"
     },
     "settings": {
@@ -907,7 +870,7 @@
       "error": "No puede conectarse al nodo elegido",
       "connecting": "Conectando al nodo...",
       "connected": "Conectado",
-      "init": "Iniciando servicios..."
+      "initServices": "Iniciando servicios..."
     },
     "popupMessageSign": {
       "heading": "gustaría firmar mensaje ",

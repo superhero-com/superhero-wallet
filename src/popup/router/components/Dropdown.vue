@@ -51,7 +51,6 @@ export default {
   data() {
     return {
       selectedVal: this.selected,
-      optionsVal: this.options,
       openDropdown: false,
     };
   },
@@ -65,7 +64,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .label {
   text-align: left;
@@ -90,7 +89,7 @@ export default {
     min-height: 2.2rem;
     display: flex;
     align-items: center;
-    border: 2px solid #33343e !important;
+    border: 2px solid #33343e;
 
     img {
       position: absolute;
@@ -155,7 +154,7 @@ export default {
     color: $text-color;
     text-align: left;
     margin: 0;
-    padding: 0 5px !important;
+    padding: 0 5px;
   }
 
   ul {
@@ -169,6 +168,7 @@ export default {
     background: $nav-bg-color;
     border: 1px solid $secondary-color;
     border-radius: 5px;
+    scrollbar-width: none;
   }
 
   &.show ul.list {

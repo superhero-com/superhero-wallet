@@ -2,17 +2,13 @@
   <!-- remove when we'll be sure about the wording -->
   <!-- eslint-disable vue-i18n/no-raw-text -->
   <div class="popup">
-    <div class="section-title">
-      Sign message for
-    </div>
+    <div class="section-title">Sign message for</div>
 
     <div class="url-bar link-sm text-left">
       {{ callbackOrigin }}
     </div>
 
-    <div class="section-title">
-      Message
-    </div>
+    <div class="section-title">Message</div>
 
     <div class="tip-note-preview mt-15">
       {{ $route.query.message }}
@@ -46,7 +42,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .url-bar {
   color: $text-color;

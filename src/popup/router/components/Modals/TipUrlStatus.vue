@@ -4,10 +4,10 @@
       <UrlStatus :status="status" modal />
       {{ content.title }}
     </template>
-    <div slot="body">{{ content.msg }}</div>
-    <div slot="footer">
-      <Button class="ok-button" @click="resolve">{{ $t('ok') }}</Button>
-    </div>
+
+    {{ content.msg }}
+
+    <Button slot="footer" class="ok-button" @click="resolve">{{ $t('ok') }}</Button>
   </Modal>
 </template>
 
@@ -38,9 +38,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.ok-button {
-  width: 120px !important;
-}
-</style>

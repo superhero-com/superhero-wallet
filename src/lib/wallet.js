@@ -1,24 +1,20 @@
-import { Node, MemoryAccount, RpcWallet } from '@aeternity/aepp-sdk/es';
-import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
+import { Node, RpcWallet } from '@aeternity/aepp-sdk/es';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
-import { isEmpty, times, camelCase } from 'lodash-es';
-import store from '../store';
+import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
+import { camelCase, isEmpty, times } from 'lodash-es';
 import { postMessage } from '../popup/utils/connection';
-import {
-  parseFromStorage,
-  fetchJson,
-  IN_FRAME,
-  toURL,
-  getAeppAccountPermission,
-} from '../popup/utils/helper';
-import { NO_POPUP_AEPPS } from '../popup/utils/constants';
-
+import { parseFromStorage, fetchJson, IN_FRAME } from '../popup/utils/helper';
+import store from '../store';
+import { App } from '../store/modules/permissions';
 import Logger from './logger';
-import { checkPermissions } from '../store/modules/permissions';
 
 async function initMiddleware() {
   const { middlewareUrl } = store.getters.activeNetwork;
-  const swag = await fetchJson(`${middlewareUrl}/swagger/swagger.json`);
+
+  const swagUrl = `https://raw.githubusercontent.com/aeternity/ae_mdw/master/priv/static/swagger.json`;
+  // `${middlewareUrl}/swagger/swagger.json`
+
+  const swag = await fetchJson(swagUrl);
   swag.paths = {
     ...swag.paths,
     'name/auction/{name}': {
@@ -32,11 +28,6 @@ async function initMiddleware() {
             type: 'string',
           },
         ],
-      },
-    },
-    'names/auctions': {
-      get: {
-        operationId: 'getActiveNameAuctions',
       },
     },
     'txs/backward': {
@@ -67,7 +58,7 @@ async function initMiddleware() {
   };
   const { api: middleware } = await Swagger.compose({
     methods: {
-      urlFor: path => middlewareUrl + path,
+      urlFor: (path) => middlewareUrl + path,
       axiosError: () => '',
     },
   })({ swag });
@@ -76,8 +67,6 @@ async function initMiddleware() {
     'setMiddleware',
     Object.entries(middleware).reduce((m, [k, v]) => ({ ...m, [camelCase(k)]: v }), {}),
   );
-  store.dispatch('names/fetchOwned');
-  store.dispatch('names/extendNames');
 }
 
 async function logout() {
@@ -94,6 +83,23 @@ async function getKeyPair() {
 }
 
 let initSdkRunning = false;
+
+if (IN_FRAME) {
+  store.registerModule('sdk-frame-reset', {
+    actions: {
+      async reset({ sdk }) {
+        const { clients } = sdk.getClients();
+        Array.from(clients.values()).forEach((aepp) => {
+          aepp.sendMessage(
+            { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
+            true,
+          );
+          aepp.disconnect();
+        });
+      },
+    },
+  });
+}
 
 export default {
   async init() {
@@ -123,75 +129,104 @@ export default {
     const { activeNetwork } = store.getters;
     const { url, compilerUrl } = activeNetwork;
     const node = await Node({ url });
-    const account = MemoryAccount({ keypair });
     try {
       const acceptCb = (_, { accept }) => accept();
+      const signCb = async (_, action, origin) => {
+        const { method, params } = action;
+        try {
+          const permission = await store.dispatch('permissions/checkPermissions', {
+            host: new URL(origin).hostname,
+            method,
+            params: params?.txObject?.params,
+          });
+          if (method === 'message.sign') {
+            if (!permission)
+              await store.dispatch('modals/open', {
+                name: 'confirm-message-sign',
+                message: params.message,
+                origin,
+              });
+            action.accept({ onAccount: { sign: () => {}, address: () => {} } });
+            return;
+          }
+          action.accept(null, {
+            onAccount: {
+              sign: async () =>
+                store.dispatch('accounts/signTransaction', {
+                  txBase64: params.tx,
+                  opt: {
+                    modal: !permission,
+                  },
+                }),
+              address: () => {},
+            },
+          });
+        } catch (error) {
+          action.deny();
+          if (error.message !== 'Rejected by user') throw error;
+        }
+        action.deny();
+      };
 
       const sdk = await RpcWallet.compose({
         methods: {
-          address: async () => store.getters.account.publicKey,
-          sign: data => store.dispatch('accounts/sign', data),
+          getApp(aeppUrl) {
+            const hostPermissions = store.state.permissions[aeppUrl.hostname];
+            if (!hostPermissions) store.commit('permissions/addHost', aeppUrl.hostname);
+            return new App(aeppUrl);
+          },
+          async address(...args) {
+            const address = store.state.account.publicKey;
+            const app = args.pop();
+            if (app instanceof App) {
+              const { host, hostname, protocol } = app.host;
+              if (
+                !(await store.dispatch('permissions/requestAddressForHost', {
+                  host: hostname,
+                  address,
+                  connectionPopupCb: async () =>
+                    store.dispatch('modals/open', {
+                      name: 'confirm-connect',
+                      app: {
+                        name: hostname,
+                        icons: [],
+                        protocol,
+                        host,
+                      },
+                    }),
+                }))
+              )
+                return Promise.reject(new Error('Rejected by user'));
+            }
+            return address;
+          },
+          sign: (data) => store.dispatch('accounts/sign', data),
           signTransaction: (txBase64, opt) =>
-            store.dispatch('accounts/signTransaction', { txBase64, opt }),
+            opt.onAccount
+              ? opt.onAccount.sign()
+              : store.dispatch('accounts/signTransaction', { txBase64, opt }),
         },
       })({
         nodes: [{ name: activeNetwork.name, instance: node }],
-        accounts: [account],
         nativeMode: true,
         compilerUrl,
         name: 'Superhero',
-        async onConnection({ info: { icons, name } }, action, origin) {
-          const originUrl = toURL(origin);
-          if (
-            (NO_POPUP_AEPPS.includes(originUrl.hostname) ||
-              (await getAeppAccountPermission(
-                originUrl.hostname,
-                store.state.account.publicKey,
-              ))) &&
-            !(await checkPermissions(action.method))
-          ) {
-            action.accept();
+        onConnection: acceptCb,
+        async onSubscription(_, { accept, deny }, origin) {
+          const address = await this.address(this.getApp(new URL(origin)));
+          if (!address) {
+            deny();
             return;
           }
-          try {
-            await store.dispatch('modals/open', {
-              name: 'confirm-connect',
-              app: {
-                name,
-                icons,
-                protocol: originUrl.protocol,
-                host: originUrl.hostname,
-              },
-            });
-            await store.dispatch('setPermissionForAccount', {
-              host: originUrl.hostname,
-              account: store.state.account.publicKey,
-            });
-            action.accept();
-          } catch (error) {
-            action.deny();
-            if (error.message !== 'Rejected by user') throw error;
-          }
+          accept({
+            accounts: {
+              current: { [address]: {} },
+              connected: {},
+            },
+          });
         },
-        onSubscription: acceptCb,
-        onSign: acceptCb,
-        async onMessageSign(aepp, action, origin) {
-          if (!(await checkPermissions(action.method))) {
-            action.accept();
-            return;
-          }
-          try {
-            await store.dispatch('modals/open', {
-              name: 'confirm-message-sign',
-              message: action.params.message,
-              origin,
-            });
-            action.accept();
-          } catch (error) {
-            action.deny();
-            if (error.message !== 'Rejected by user') throw error;
-          }
-        },
+        onSign: signCb,
+        onMessageSign: signCb,
         onAskAccounts: acceptCb,
         onDisconnect(msg, client) {
           client.disconnect();
@@ -201,7 +236,7 @@ export default {
       if (IN_FRAME) {
         const getArrayOfAvailableFrames = () => [
           window.parent,
-          ...times(window.parent.frames.length, i => window.parent.frames[i]),
+          ...times(window.parent.frames.length, (i) => window.parent.frames[i]),
         ];
         const executeAndSetInterval = (handler, timeout) => {
           handler();
@@ -212,8 +247,8 @@ export default {
         executeAndSetInterval(
           () =>
             getArrayOfAvailableFrames()
-              .filter(frame => frame !== window)
-              .forEach(target => {
+              .filter((frame) => frame !== window)
+              .forEach((target) => {
                 if (connectedFrames.has(target)) return;
                 connectedFrames.add(target);
                 const connection = BrowserWindowMessageConnection({ target });

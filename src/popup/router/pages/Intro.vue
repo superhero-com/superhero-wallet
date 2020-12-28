@@ -5,7 +5,7 @@
         <img v-if="iframe" src="../../../icons/iframe/receive.svg" />
         <h2 v-else>
           <Claim /> {{ $t('pages.intro.receive') }}
-          <span class="ml-10 secondary-text"> {{ $t('pages.appVUE.aeid') }} </span>
+          <span class="ml-10 secondary-text"> {{ $t('ae') }} </span>
         </h2>
         <div class="text-info">
           <span>
@@ -18,7 +18,7 @@
         <img v-if="iframe" src="../../../icons/iframe/send.svg" />
         <h2 v-else>
           <Heart /> {{ $t('pages.send.send') }}
-          <span class="ml-10 secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+          <span class="ml-10 secondary-text">{{ $t('ae') }}</span>
         </h2>
         <div class="text-info">
           <span>
@@ -32,15 +32,11 @@
         <div class="text-info">
           <span>
             {{ $t('pages.intro.step3text-1') }}
-            <span class="secondary-text aeid">{{ $t('pages.appVUE.aeid') }}</span>
+            <span class="secondary-text aeid">{{ $t('ae') }}</span>
             {{ $t('pages.intro.step3text-2') }}
-            <span class="white" v-if="iframe">
-              <br />
-              {{ $t('pages.intro.ever') }}
-            </span>
           </span>
         </div>
-        <div v-if="!iframe" class="mt-32 text-left">
+        <div class="mt-32">
           {{ $t('pages.intro.ever') }}
         </div>
       </div>
@@ -57,10 +53,10 @@
           {{ $t('pages.intro.skip') }}
         </button>
         <Button
-          style="margin-top: 30px;"
           @click="createWallet"
           v-if="step === 3"
           data-cy="generate-wallet"
+          class="generate-wallet"
           >{{ $t('pages.intro.generateWallet') }}</Button
         >
       </div>
@@ -159,27 +155,31 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
-.popup.iframe {
-  padding-top: 0;
-  padding-bottom: 0;
+.popup {
+  padding: 4px 16px;
 
-  .createWallet-holder {
+  &.iframe {
     padding-top: 0;
+    padding-bottom: 0;
 
-    .text-info {
-      margin: 0;
+    .createWallet-holder {
+      padding-top: 0;
+
+      .text-info {
+        margin: 0;
+      }
     }
-  }
 
-  .dotstyle {
-    top: 78%;
-  }
+    .dotstyle {
+      top: 78%;
+    }
 
-  h2,
-  h4 {
-    margin: 8px 0;
+    h2,
+    h4 {
+      margin: 8px 0;
+    }
   }
 }
 
@@ -212,10 +212,6 @@ export default {
       font-size: 16px;
       word-break: break-word;
     }
-
-    span.white {
-      color: #fff;
-    }
   }
 
   .undestand {
@@ -226,7 +222,7 @@ export default {
   }
 
   .skip-button {
-    color: $accent-color !important;
+    color: $accent-color;
     font-size: 18px;
     margin-top: 30px;
     text-decoration: underline;
@@ -234,7 +230,7 @@ export default {
   }
 
   .last-msg-enjoy {
-    color: $secondary-color !important;
+    color: $secondary-color;
     font-size: 18px;
     width: 100%;
     margin: 10px auto;
@@ -296,10 +292,16 @@ export default {
 }
 
 /* Fill up */
-.dotstyle-fillup li a {
-  overflow: hidden;
-  background-color: $text-color !important;
-  transition: background 0.3s;
+.dotstyle-fillup {
+  .generate-wallet {
+    margin-top: 30px;
+  }
+
+  li a {
+    overflow: hidden;
+    background-color: $text-color;
+    transition: background 0.3s;
+  }
 }
 
 .dotstyle-fillup li a::after {
@@ -320,7 +322,7 @@ export default {
 }
 
 .dotstyle-fillup li.current a {
-  background-color: $secondary-color !important;
+  background-color: $secondary-color;
 }
 
 .dotstyle-fillup li.current a::after {

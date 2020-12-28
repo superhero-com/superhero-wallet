@@ -20,7 +20,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import { differenceWith, isEqual, uniqBy, orderBy } from 'lodash-es';
+import { uniqBy } from 'lodash-es';
 import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
 import TransactionFilters from '../components/TransactionFilters';
@@ -38,7 +38,7 @@ export default {
   },
   data() {
     return {
-      loading: true,
+      loading: false,
       transactions: [],
       page: 1,
       displayMode: { latestFirst: true, type: 'all' },
@@ -47,7 +47,7 @@ export default {
   computed: mapState({
     filteredTransactions(state, { account: { publicKey } }) {
       return this.transactions
-        .filter(tr => {
+        .filter((tr) => {
           switch (this.displayMode.type) {
             case 'sent':
               return tr.tx.type === 'ContractCallTx' && tr.tx.callerId === publicKey;
@@ -64,67 +64,71 @@ export default {
           }
         })
         .sort((a, b) => {
-          const arr = [a, b].map(e => new Date(e.microTime));
+          const arr = [a, b].map((e) => new Date(e.microTime));
           if (this.displayMode.latestFirst) arr.reverse();
           return arr[0] - arr[1];
         });
     },
   }),
   mounted() {
-    this.loadMore(true);
+    this.loadMore();
     const polling = setInterval(() => this.getLatest(), 10000);
-    const checkLoadMore = () => {
+    window.addEventListener('scroll', this.checkLoadMore);
+    this.$once('hook:destroyed', () => {
+      window.removeEventListener('scroll', this.checkLoadMore);
+      clearInterval(polling);
+    });
+    this.$watch(({ displayMode }) => displayMode, this.checkLoadMore);
+  },
+  methods: {
+    checkLoadMore() {
       const { scrollHeight, scrollTop, clientHeight } = document.documentElement;
       if (scrollHeight - scrollTop <= clientHeight + 100) {
         setTimeout(() => this.loadMore(), 1500);
       }
-    };
-    window.addEventListener('scroll', checkLoadMore);
-    this.$once('hook:destroyed', () => {
-      window.removeEventListener('scroll', checkLoadMore);
-      clearInterval(polling);
-    });
-  },
-  methods: {
-    async loadMore(init = false) {
-      if (this.loading && !init) return;
-      await this.$watchUntilTruly(() => this.$store.state.middleware);
+    },
+    async loadMore() {
+      if (this.loading) return;
       this.loading = true;
-      const transactions = await this.$store.dispatch('fetchTransactions', {
-        page: this.page,
-        limit: TXS_PER_PAGE,
-      });
-      this.updateTransactions({ transactions });
-      this.loading = false;
-      if (transactions.length) this.page += 1;
+      let transactions;
+      try {
+        await this.$watchUntilTruly(() => this.$store.state.middleware);
+        transactions = await this.$store.dispatch('fetchTransactions', {
+          page: this.page,
+          limit: TXS_PER_PAGE,
+        });
+        this.updateTransactions(transactions);
+      } finally {
+        this.loading = false;
+      }
+      if (transactions.length) {
+        this.page += 1;
+        this.checkLoadMore();
+      }
     },
     async getLatest() {
-      const transactions = await this.$store.dispatch('fetchTransactions', {
-        limit: 10,
-        page: 1,
-        recent: true,
-      });
-      const diff = differenceWith(transactions, this.transactions, isEqual);
-      this.updateTransactions({ latest: true, transactions: diff });
+      if (this.loading) return;
+      this.loading = true;
+      try {
+        const transactions = await this.$store.dispatch('fetchTransactions', {
+          limit: 10,
+          page: 1,
+          recent: true,
+        });
+        this.updateTransactions(transactions);
+      } finally {
+        this.loading = false;
+      }
     },
-    updateTransactions({ transactions, latest }) {
-      this.transactions = orderBy(
-        uniqBy(
-          latest
-            ? [...transactions, ...this.transactions]
-            : [...this.transactions, ...transactions],
-          'hash',
-        ),
-        ['time'],
-        ['desc'],
-      );
+    updateTransactions(transactions) {
+      this.transactions = uniqBy([...this.transactions, ...transactions], 'hash');
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .date {
   background: $button-color;

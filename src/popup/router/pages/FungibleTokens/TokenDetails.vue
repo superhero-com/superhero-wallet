@@ -8,18 +8,7 @@
           :src="tokenData.image || null"
           size="xlg"
         />
-        <div class="amount">
-          <span class="text-ellipsis max-space" :title="tokenData.convertedBalance || '0.00'">{{
-            tokenData.convertedBalance || '0.00'
-          }}</span>
-          <span class="symbol text-ellipsis max-space" :title="tokenData.symbol">{{
-            tokenData.symbol
-          }}</span>
-          <FormatFiatCurrency
-            class="text-ellipsis max-space"
-            :balance="tokenData.balanceCurrency"
-          />
-        </div>
+        <TokenAmount :amount="+tokenData.convertedBalance || 0" :symbol="tokenData.symbol" />
       </div>
       <div class="token-actions">
         <Button bold :to="{ name: 'send' }">
@@ -71,10 +60,11 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import TabsMenu from '../../components/TabsMenu';
 import Avatar from '../../components/Avatar';
-import FormatFiatCurrency from '../../components/FormatFiatCurrency';
+import TokenAmount from '../../components/TokenAmount';
 import DetailsRow from '../../components/FungibleTokens/DetailsRow';
 import Button from '../../components/Button';
 
@@ -82,7 +72,7 @@ export default {
   components: {
     Avatar,
     TabsMenu,
-    FormatFiatCurrency,
+    TokenAmount,
     Button,
     DetailsRow,
   },
@@ -100,6 +90,9 @@ export default {
       ],
     };
   },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+  },
   created() {
     this.$store.commit(
       'setPageTitle',
@@ -107,7 +100,7 @@ export default {
     );
   },
   computed: {
-    ...mapGetters(['tippingSupported', 'formatCurrency', 'tokenBalance', 'balanceCurrency']),
+    ...mapGetters(['tippingSupported', 'formatCurrency']),
     ...mapState('fungibleTokens', ['tokenBalances', 'availableTokens', 'aePublicData']),
     tokenData() {
       if (this.id === 'aeternity') {
@@ -134,7 +127,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../common/variables';
+@import '../../../../styles/variables';
 
 .token-details {
   max-width: 357px;
@@ -151,25 +144,15 @@ export default {
   justify-content: center;
   align-items: center;
   margin-bottom: 20px;
-}
 
-.amount {
-  font-size: 18px;
-  color: $white-1;
-  margin-left: 10px;
+  .token-amount {
+    font-size: 18px;
+    margin-left: 10px;
 
-  .symbol {
-    color: $secondary-color;
-  }
-
-  .max-space {
-    display: inline-block;
-    max-width: 100px;
-  }
-
-  .format-fiat-currency {
-    font-size: 16px;
-    display: block;
+    ::v-deep .fiat {
+      display: block;
+      font-size: 16px;
+    }
   }
 }
 

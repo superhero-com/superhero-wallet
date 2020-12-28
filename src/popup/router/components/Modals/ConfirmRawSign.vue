@@ -1,22 +1,20 @@
 <template>
   <Modal class="confirm-tx-sign-modal">
-    <template slot="body">
-      <h3>
-        {{ $t('modals.confirm-transaction-sign.sign-raw') }} <br />
-        <span class="name-holder">
-          <Avatar :address="account.publicKey" :name="account.name" size="small" />
-          {{ account.name || account.publicKey }}
-        </span>
-      </h3>
-      <DetailsItem :label="$t('modals.confirm-transaction-sign.data-sign')" direction="column">
-        <div>{{ dataAsString }}</div>
-      </DetailsItem>
-    </template>
+    <h3>
+      {{ $t('modals.confirm-transaction-sign.sign-raw') }} <br />
+      <span class="name-holder">
+        <Avatar :address="account.publicKey" :name="account.name" size="small" />
+        {{ account.name || account.publicKey }}
+      </span>
+    </h3>
+    <DetailsItem :label="$t('modals.confirm-transaction-sign.data-sign')" direction="column">
+      <div>{{ dataAsString }}</div>
+    </DetailsItem>
 
-    <div class="modal-confirm-btns" slot="footer">
+    <template slot="footer">
       <Button dark @click="cancel">{{ $t('modals.cancel') }}</Button>
       <Button @click="confirm">{{ $t('modals.confirm') }}</Button>
-    </div>
+    </template>
   </Modal>
 </template>
 

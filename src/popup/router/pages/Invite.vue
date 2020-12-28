@@ -17,7 +17,7 @@
         v-for="link in invites"
         :key="link.secretKey"
         v-bind="link"
-        @loading="val => (loading = val)"
+        @loading="(val) => (loading = val)"
       />
     </div>
     <Loader v-if="loading" />
@@ -25,6 +25,7 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapState } from 'vuex';
 import { Crypto } from '@aeternity/aepp-sdk/es';
 import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
@@ -37,8 +38,11 @@ import NewInviteLink from '../../../icons/new-invite-link.svg?vue-component';
 export default {
   components: { AmountSend, Button, InviteItem, Invite, NewInviteLink },
   data: () => ({ amount: 0, loading: false }),
+  subscriptions() {
+    return pick(this.$store.state.observables, ['balance']);
+  },
   computed: {
-    ...mapState(['sdk', 'balance']),
+    ...mapState(['sdk']),
     ...mapState('invites', ['invites']),
   },
   methods: {
@@ -69,7 +73,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .invite.popup {
   background-color: $black-1;

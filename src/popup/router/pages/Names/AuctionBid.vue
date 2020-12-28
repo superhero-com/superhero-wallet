@@ -10,7 +10,7 @@
       <span>
         {{ $t('pages.names.auctions.current-heighest-bid') }}
       </span>
-      <span> {{ highestBid }} {{ $t('pages.appVUE.aeid') }} </span>
+      <span> {{ highestBid }} {{ $t('ae') }} </span>
     </div>
     <div class="details-row">
       <span>
@@ -25,6 +25,7 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import blocksToRelativeTime from '../../../../filters/blocksToRelativeTime';
 import Button from '../../components/Button';
 import AmountSend from '../../components/AmountSend';
@@ -38,12 +39,14 @@ export default {
       expiration: 0,
       highestBid: null,
       amount: 0,
-      topBlockHeight: 0,
       amountError: null,
     };
   },
   props: {
     name: { type: String, required: true },
+  },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['topBlockHeight']);
   },
   watch: {
     amount(val) {
@@ -61,18 +64,14 @@ export default {
   async created() {
     this.loading = true;
     await this.$watchUntilTruly(() => this.$store.state.middleware);
-    this.topBlockHeight = await this.$store.dispatch('getHeight');
-    this.updateAuctionEntry();
+    const res = await this.$store.dispatch('names/fetchAuctionEntry', this.name);
+    this.expiration = res.expiration;
+    this.highestBid = res.bids
+      .map(({ nameFee }) => nameFee)
+      .reduce((a, b) => (a.isGreaterThan(b) ? a : b));
     this.loading = false;
   },
   methods: {
-    async updateAuctionEntry() {
-      const res = await this.$store.dispatch('names/fetchAuctionEntry', this.name);
-      this.expiration = res.expiration;
-      this.highestBid = res.bids
-        .map(({ nameFee }) => nameFee)
-        .reduce((a, b) => (a.isGreaterThan(b) ? a : b));
-    },
     async bid() {
       await this.$watchUntilTruly(() => this.$store.state.sdk);
       if (this.amountError) return;

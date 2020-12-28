@@ -1,31 +1,23 @@
-import { flatten, uniq, orderBy } from 'lodash-es';
+import { flatten, orderBy, uniq } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
-import {
-  convertToAE,
-  stringifyForStorage,
-  parseFromStorage,
-  getAddressByNameEntry,
-  fetchJson,
-  postJson,
-} from '../popup/utils/helper';
 import { postMessage, postMessageToContent } from '../popup/utils/connection';
 import { AEX2_METHODS } from '../popup/utils/constants';
+import {
+  fetchJson,
+  getAddressByNameEntry,
+  parseFromStorage,
+  postJson,
+  stringifyForStorage,
+} from '../popup/utils/helper';
+import { i18n } from './plugins/languages';
 
 export default {
-  setAccount({ commit }, payload) {
-    commit('updateAccount', payload);
-    commit('updateBalance');
-  },
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
     commit('updateLatestTransactions', []);
     commit('setNodeStatus', 'connecting');
     if (process.env.IS_EXTENSION) postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload });
-  },
-  async updateBalance({ commit, state }) {
-    const balance = await state.sdk.balance(state.account.publicKey).catch(() => 0);
-    commit('updateBalance', convertToAE(balance));
   },
   async fetchTransactions({ state, getters }, { limit, page, recent }) {
     if (!state.middleware) return [];
@@ -37,7 +29,7 @@ export default {
           recent ? `&limit=${limit}` : ``
         }`,
       )
-        .then(response =>
+        .then((response) =>
           response.map(({ address, amount, ...t }) => ({
             tx: { address, amount },
             ...t,
@@ -77,9 +69,6 @@ export default {
     commit('updateAccount', keypair);
     commit('switchLoggedIn', true);
   },
-  async setPendingTx({ commit, state: { transactions } }, tx) {
-    commit('setPendingTxs', [...transactions.pending, tx]);
-  },
   async getCurrencies({ state: { nextCurrenciesFetch }, commit }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
       try {
@@ -93,14 +82,6 @@ export default {
       }
     }
   },
-  async setPermissionForAccount({ commit, state: { connectedAepps } }, { host, account }) {
-    if (connectedAepps[host]) {
-      if (connectedAepps[host].includes(account)) return;
-      commit('updateConnectedAepp', { host, account });
-    } else {
-      commit('addConnectedAepp', { host, account });
-    }
-  },
   async getWebPageAddresses({ state: { sdk } }) {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
     const { address, chainName } = await postMessageToContent(
@@ -110,7 +91,7 @@ export default {
     let addresses = Array.isArray(address) ? address : [address];
     const chainNames = Array.isArray(chainName) ? chainName : [chainName];
     const chainNamesAddresses = await Promise.all(
-      chainNames.map(async n => {
+      chainNames.map(async (n) => {
         try {
           return getAddressByNameEntry(await sdk.api.getNameEntryByName(n));
         } catch (e) {
@@ -120,10 +101,7 @@ export default {
     );
     addresses = [...addresses, ...chainNamesAddresses];
 
-    return { addresses: uniq(addresses).filter(a => a), tab };
-  },
-  async getHeight({ state: { sdk } }) {
-    return (await sdk.topBlock()).height;
+    return { addresses: uniq(addresses).filter((a) => a), tab };
   },
   async claimTips({ getters: { activeNetwork } }, { url, address }) {
     return postJson(`${activeNetwork.backendUrl}/claim/submit`, { body: { url, address } });
@@ -134,14 +112,17 @@ export default {
   async cacheInvalidateTips({ getters: { activeNetwork } }) {
     return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/tips`);
   },
-  async donateError({ getters: { activeNetwork } }, { error, description }) {
-    return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: { ...error, description } });
+  async cacheInvalidateFT({ getters: { activeNetwork } }, contract) {
+    return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/token/${contract}`);
+  },
+  async donateError({ getters: { activeNetwork } }, error) {
+    return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: error });
   },
   async sendTipComment(
     { state: { sdk }, getters: { activeNetwork } },
     [tipId, text, author, parentId],
   ) {
-    const sendComment = async postParam =>
+    const sendComment = async (postParam) =>
       postJson(`${activeNetwork.backendUrl}/comment/api/`, { body: postParam });
 
     const responseChallenge = await sendComment({ tipId, text, author, parentId });
@@ -158,7 +139,7 @@ export default {
     { state: { sdk }, getters: { activeNetwork } },
     [notifId, status, author],
   ) {
-    const backendMethod = async postParam =>
+    const backendMethod = async (postParam) =>
       postJson(`${activeNetwork.backendUrl}/notification/${notifId}`, { body: postParam });
 
     const responseChallenge = await backendMethod({ author, status });
@@ -188,7 +169,7 @@ export default {
       signature: signedChallenge,
     };
     const url = new URL(`${activeNetwork.backendUrl}/notification/user/${address}`);
-    Object.keys(respondChallenge).forEach(key =>
+    Object.keys(respondChallenge).forEach((key) =>
       url.searchParams.append(key, respondChallenge[key]),
     );
     return fetchJson(url.toString());
@@ -210,5 +191,13 @@ export default {
         })
       : null;
     commit('setTipping', [contractInstanceV1, contractInstanceV2]);
+  },
+  async requestResetting({ dispatch }) {
+    await dispatch('modals/open', {
+      name: 'confirm',
+      title: i18n.t('modals.removeAccount.title'),
+      msg: i18n.t('modals.removeAccount.msg'),
+    });
+    await dispatch('reset');
   },
 };

@@ -3,18 +3,18 @@
     <template slot="header">
       {{ $t('modals.confirm-tip.title') }}
     </template>
-    <template slot="body">
-      {{ $t('modals.confirm-tip.msg') }}
-      <p class="confirmation--question">{{ $t('modals.confirm-tip.sub-message') }}</p>
-    </template>
-    <div class="modal-confirm-btns" slot="footer">
-      <Button data-cy="cancel-tip" dark @click="cancelTip">
+
+    {{ $t('modals.confirm-tip.msg') }}
+    <p class="confirmation--question">{{ $t('modals.confirm-tip.sub-message') }}</p>
+
+    <template slot="footer">
+      <Button dark @click="cancelTip">
         {{ $t('modals.cancel') }}
       </Button>
       <Button data-cy="to-confirm" @click="toConfirm">
         {{ $t('modals.confirm-tip.send') }}
       </Button>
-    </div>
+    </template>
   </Modal>
 </template>
 
@@ -41,7 +41,7 @@ export default {
 
 <style lang="scss" scoped>
 .confirmation--question {
-  font-weight: 500 !important;
-  color: #fff !important;
+  font-weight: 500;
+  color: #fff;
 }
 </style>

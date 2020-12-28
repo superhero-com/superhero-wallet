@@ -22,8 +22,9 @@
         <span class="address">{{ owner }}</span>
         <CheckBox
           :value="autoExtend"
-          prevent
-          @click.native="$store.commit('names/setAutoExtend', { index, value: !autoExtend })"
+          @click.native.prevent="
+            $store.commit('names/setAutoExtend', { index, value: !autoExtend })
+          "
         >
           {{ $t('pages.names.auto-extend') }}
         </CheckBox>
@@ -56,6 +57,6 @@ export default {
 
 <style scoped>
 .names-list {
-  padding: 0 !important;
+  padding: 0;
 }
 </style>

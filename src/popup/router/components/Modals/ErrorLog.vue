@@ -1,24 +1,24 @@
 <template>
-  <Modal @close="resolve" class="default-modal" close>
+  <Modal @close="resolve" close>
     <template slot="header">
       {{ $t('modals.error-log.title') }}
     </template>
-    <template slot="body">
-      <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-      <div class="error-msg">{{ message }}...</div>
-      <div>
-        <span>{{ $t('modals.error-log.sub-title') }}</span>
-        {{ $t('modals.error-log.content') }}
-      </div>
-    </template>
-    <div class="modal-confirm-btns" slot="footer">
+
+    <!--eslint-disable-next-line vue-i18n/no-raw-text-->
+    <div class="error-msg">{{ message }}...</div>
+    <div>
+      <span>{{ $t('modals.error-log.sub-title') }}</span>
+      {{ $t('modals.error-log.content') }}
+    </div>
+
+    <template slot="footer">
       <Button dark @click="cancel">
         {{ $t('modals.cancel') }}
       </Button>
       <Button @click="createReport">
         {{ $t('modals.error-log.create-report') }}
       </Button>
-    </div>
+    </template>
   </Modal>
 </template>
 
@@ -52,7 +52,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../common/variables';
+@import '../../../../styles/variables';
 
 .error-msg {
   color: $error-color;

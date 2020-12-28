@@ -1,16 +1,18 @@
 <template>
   <div class="popup">
-    <p class="regular-text">{{ $t('pages.index.enterSeedPhrase') }}</p>
-    <Textarea v-model="mnemonic" :error="errorMsg ? true : false" />
-    <Button
-      @click="importAccount"
-      :disabled="mnemonic && !disabled ? false : true"
-      data-cy="import"
-    >
-      {{ $t('pages.index.importAccount') }}
-    </Button>
-    <div v-if="errorMsg" class="error-msg" v-html="errorMsg"></div>
     <Loader v-if="loading" type="none" />
+    <template v-else>
+      <p class="regular-text">{{ $t('pages.index.enterSeedPhrase') }}</p>
+      <Textarea v-model="mnemonic" :error="errorMsg ? true : false" />
+      <Button
+        @click="importAccount"
+        :disabled="mnemonic && !disabled ? false : true"
+        data-cy="import"
+      >
+        {{ $t('pages.index.importAccount') }}
+      </Button>
+      <div v-if="errorMsg" class="error-msg" v-html="errorMsg"></div>
+    </template>
   </div>
 </template>
 
@@ -51,7 +53,7 @@ export default {
             privateKey: seed,
           };
           await this.$store.dispatch('setLogin', { keypair });
-          this.$store.commit('setBackedUpSeed', true);
+          this.$store.commit('setBackedUpSeed');
           return setTimeout(() => this.$router.push(this.$store.state.loginTargetLocation), 1000);
         }
         this.disabled = true;
@@ -73,3 +75,13 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+@import '../../../styles/variables';
+
+.regular-text {
+  font-size: $font-size;
+  text-align: left;
+  font-weight: normal;
+}
+</style>

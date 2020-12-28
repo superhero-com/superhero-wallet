@@ -11,14 +11,14 @@ describe('Test cases for Withdraw Page', () => {
       .click()
       .get('.primary-title')
       .should('be.visible')
-      .get('.modal--close')
+      .get('.modal .close')
       .click()
 
       .enterAmountSend('asd')
       .inputShouldHaveError('[data-cy=input-number]')
       .get('[data-cy=amount-currency]')
       .invoke('text')
-      .then(text => expect(text.trim()).to.eq('$0.00'))
+      .then((text) => expect(text.trim()).to.eq('$0.00'))
       .enterAmountSend(0)
       .get('[data-cy=input-number]')
       .should('have.class', 'has-error')
@@ -42,12 +42,12 @@ describe('Test cases for Withdraw Page', () => {
       .should('be.visible')
 
       // check on step2 if everything is OK
-      .get('[data-cy=review-sendingAddress]')
-      .should('have.text', publicKey)
-      .get('[data-cy=review-receivingAddress]')
-      .should('have.text', 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
+      .get('[data-cy=review-sender] > span')
+      .should('contain', publicKey)
+      .get('[data-cy=review-recipient] > span')
+      .should('contain', 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
       .get('[data-cy=review-amount]')
-      .should('have.text', '0.200 AE')
+      .contains('0.200 AE')
 
       // edit sending address to .chain name
       .get('[data-cy=reivew-editTxDetails-button]')
@@ -55,8 +55,8 @@ describe('Test cases for Withdraw Page', () => {
       .enterAddress('vmangelovv.chain')
       .get('[data-cy=review-withdraw]')
       .click()
-      .get('[data-cy=review-receivingAddress]')
-      .should('have.text', 'vmangelovv.chain')
+      .get('[data-cy=review-recipient] > span')
+      .should('contain', 'vmangelovv.chain')
 
       // send
       .get('[data-cy="review-send-button"]')

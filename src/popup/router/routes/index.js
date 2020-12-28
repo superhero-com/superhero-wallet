@@ -5,9 +5,9 @@ import PopupConnect from '../pages/Popups/Connect';
 import PopupAskAccounts from '../pages/Popups/AskAccounts';
 import PopupMessageSign from '../pages/Popups/MessageSign';
 import Settings from '../pages/Settings';
-import GeneralSettings from '../pages/GeneralSettings';
+import LanguageSettings from '../pages/LanguageSettings';
 import SecuritySettings from '../pages/SecuritySettings';
-import AboutSettings from '../pages/AboutSettings';
+import About from '../pages/About';
 import Tip from '../pages/Tip';
 import Retip from '../pages/Retip';
 import TermsOfService from '../pages/TermsOfService';
@@ -22,6 +22,7 @@ import Notifications from '../pages/Notifications';
 import NotificationSettings from '../pages/NotificationSettings';
 
 import PermissionsSettings from '../pages/PermissionsSettings';
+import PermissionsDetails from '../pages/PermissionsDetails';
 import Networks from '../pages/Networks';
 import CommentNew from '../pages/CommentNew';
 import NotFound from '../pages/NotFound';
@@ -30,12 +31,6 @@ import DonateError from '../pages/DonateError';
 import Address from '../pages/Address';
 import TokensPreview from '../pages/FungibleTokens/TokensPreview';
 import TokenDetails from '../pages/FungibleTokens/TokenDetails';
-import DeployToken from '../pages/FungibleTokens/Deploy';
-import AddToken from '../pages/FungibleTokens/Add';
-import MintToken from '../pages/FungibleTokens/Mint';
-import Allowances from '../pages/FungibleTokens/Allowances';
-import ManageAllowances from '../pages/FungibleTokens/ManageAllowances';
-import AllAllowances from '../pages/FungibleTokens/AllAllowances';
 import SignMessage from '../pages/SignMessage';
 import NamesList from '../pages/Names/List';
 import NameClaim from '../pages/Names/Claim';
@@ -108,14 +103,14 @@ export default [
     },
   },
   {
-    path: '/generalSettings',
-    component: GeneralSettings,
+    path: '/settings/language',
+    component: LanguageSettings,
     meta: {
-      title: 'general',
+      title: 'language',
     },
   },
   {
-    path: '/securitySettings',
+    path: '/settings/security',
     name: 'settings-security',
     component: SecuritySettings,
     meta: {
@@ -123,10 +118,50 @@ export default [
     },
   },
   {
-    path: '/aboutSettings',
-    component: AboutSettings,
+    path: '/settings/networks',
+    component: Networks,
+    props: true,
+    meta: {
+      title: 'networks',
+    },
+  },
+  {
+    path: '/settings/permissions',
+    component: PermissionsSettings,
+    name: 'permissions-settings',
+    meta: {
+      title: 'permissionsSettings',
+    },
+  },
+  {
+    path: '/settings/permissions/:host',
+    component: PermissionsDetails,
+    name: 'permissions-details',
+    meta: {
+      title: 'permissionsDetails',
+    },
+  },
+  {
+    path: '/about',
+    component: About,
     meta: {
       title: 'about',
+      ifNotAuth: true,
+    },
+  },
+  {
+    path: '/about/termsOfService',
+    component: TermsOfService,
+    meta: {
+      title: 'terms',
+      ifNotAuth: true,
+    },
+  },
+  {
+    path: '/about/privacyPolicy',
+    component: PrivacyPolicy,
+    meta: {
+      title: 'privacy',
     },
   },
   {
@@ -134,14 +169,14 @@ export default [
     name: 'tip',
     component: Tip,
     meta: {
-      title: 'send',
+      title: 'send-tips',
     },
   },
   {
     path: '/retip',
     component: Retip,
     meta: {
-      title: 'send',
+      title: 'send-tips',
       notPersist: true,
     },
   },
@@ -154,22 +189,7 @@ export default [
     },
   },
   {
-    path: '/termsOfService',
-    component: TermsOfService,
-    meta: {
-      title: 'terms',
-      ifNotAuth: true,
-    },
-  },
-  {
-    path: '/privacyPolicy',
-    component: PrivacyPolicy,
-    meta: {
-      title: 'privacy',
-    },
-  },
-  {
-    path: '/importAccount',
+    path: '/import-account',
     component: ImportAccount,
     meta: {
       title: 'importAccount',
@@ -198,7 +218,7 @@ export default [
     props: true,
     component: Send,
     meta: {
-      title: 'withdraw',
+      title: 'send',
     },
   },
   {
@@ -228,7 +248,7 @@ export default [
     },
   },
   {
-    path: '/notification-settings',
+    path: '/notifications/settings',
     name: 'notification-settings',
     component: NotificationSettings,
     meta: {
@@ -255,16 +275,6 @@ export default [
     },
   },
   {
-    path: '/name/:name',
-    component: NamesDetails,
-    props: true,
-    name: 'name-details',
-    meta: {
-      title: 'names',
-      notPersist: true,
-    },
-  },
-  {
     path: '/names/auctions',
     component: AuctionList,
     props: true,
@@ -274,8 +284,18 @@ export default [
     },
   },
   {
+    path: '/names/:name',
+    component: NamesDetails,
+    props: true,
+    name: 'name-details',
+    meta: {
+      title: 'names',
+      notPersist: true,
+    },
+  },
+  {
     name: 'auction-details',
-    path: '/names/auction/:name',
+    path: '/names/auctions/:name',
     component: AuctionDetails,
     props: true,
     meta: {
@@ -284,28 +304,12 @@ export default [
     },
   },
   {
-    path: '/names/bid/:name',
+    path: '/names/auctions/:name/bid',
     component: AuctionBid,
     props: true,
     name: 'auction-bid',
     meta: {
       title: 'names',
-    },
-  },
-  {
-    path: '/networks',
-    component: Networks,
-    props: true,
-    meta: {
-      title: 'networks',
-    },
-  },
-  {
-    path: '/permissions-settings',
-    component: PermissionsSettings,
-    name: 'permissions-settings',
-    meta: {
-      title: 'permissionsSettings',
     },
   },
   {
@@ -350,56 +354,6 @@ export default [
     props: true,
     meta: {
       title: 'token-details',
-    },
-  },
-  {
-    path: '/deploy-token',
-    component: DeployToken,
-    meta: {
-      title: 'deploy-token',
-      notPersist: true,
-    },
-  },
-  {
-    path: '/add-token',
-    component: AddToken,
-    meta: {
-      title: 'add-token',
-      notPersist: true,
-    },
-  },
-  {
-    path: '/mint-token',
-    component: MintToken,
-    meta: {
-      title: 'mint-burn-token',
-      notPersist: true,
-    },
-  },
-  {
-    path: '/allowances',
-    component: Allowances,
-    meta: {
-      title: 'allowances',
-      notPersist: true,
-    },
-  },
-  {
-    path: '/manage-allowances/:type',
-    name: 'manage-allowances',
-    component: ManageAllowances,
-    props: true,
-    meta: {
-      title: 'allowances',
-      notPersist: true,
-    },
-  },
-  {
-    path: '/all-allowances',
-    component: AllAllowances,
-    meta: {
-      title: 'allowances',
-      notPersist: true,
     },
   },
   {

@@ -1,4 +1,15 @@
-
+@import '~fontsource-roboto/100-normal.css';
+@import '~fontsource-roboto/300-normal.css';
+@import '~fontsource-roboto/400-normal.css';
+@import '~fontsource-roboto/500-normal.css';
+@import '~fontsource-roboto/700-normal.css';
+@import '~fontsource-roboto/900-normal.css';
+@import '~fontsource-roboto/100-italic.css';
+@import '~fontsource-roboto/300-italic.css';
+@import '~fontsource-roboto/400-italic.css';
+@import '~fontsource-roboto/500-italic.css';
+@import '~fontsource-roboto/700-italic.css';
+@import '~fontsource-roboto/900-italic.css';
 @import './variables';
 
 ::-webkit-scrollbar {
@@ -32,7 +43,9 @@ body {
 }
 
 a {
-  color: $main-color;
+  color: $accent-color;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 p {
@@ -42,12 +55,12 @@ p {
 }
 
 .ae-input-container.focus {
-  caret-color: $primary-color !important;
-  border-left: 2px solid $primary-color !important;
+  caret-color: $primary-color;
+  border-left: 2px solid $primary-color;
 }
 
 .ae-input-container.focus .ae-input-label {
-  color: $primary-color !important;
+  color: $primary-color;
   white-space: nowrap;
 }
 
@@ -58,7 +71,7 @@ p {
 }
 
 .sendContent .ae-dropdown {
-  margin-bottom: 0 !important;
+  margin-bottom: 0;
   width: 4rem;
   position: absolute;
   right: 0;
@@ -67,25 +80,12 @@ p {
 
 .sendContent .ae-dropdown .ae-dropdown-button,
 .sendAmount .ae-dropdown .ae-dropdown-button {
-  width: 100% !important;
-  height: 16px !important;
+  width: 100%;
+  height: 16px;
   font-size: 1.3rem;
 }
 
-.wrapper {
-  max-width: 357px;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  margin: 0 auto;
-  padding: 0 18px;
-}
-
-main {
-  padding-top: 1rem;
-  padding-bottom: 2rem;
-}
-
-.loading {
+.loader {
   display: flex;
   flex-flow: row wrap;
   justify-content: center;
@@ -100,12 +100,12 @@ main {
 }
 
 .text-left {
-  text-align: left !important;
+  text-align: left;
 }
 
 .ae-input-container {
   .ae-input-box {
-    background: $input-background !important;
+    background: $input-background;
   }
 
   .ae-toolbar {
@@ -123,39 +123,39 @@ main {
 
 .modal-two-buttons .buttons button {
   height: 56px;
-  border-radius: 0 !important;
+  border-radius: 0;
 }
 
 .modal-two-buttons .buttons button:first-child {
-  border-bottom-left-radius: 10px !important;
+  border-bottom-left-radius: 10px;
 }
 
 .modal-two-buttons .buttons button:last-child {
-  border-bottom-right-radius: 10px !important;
+  border-bottom-right-radius: 10px;
   word-break: break-word;
 }
 
 .signature-modal .buttons,
 .seeAllRegisteredNames .buttons {
-  display: none !important;
+  display: none;
 }
 
 .ae-main {
-  padding-bottom: 0 !important;
+  padding-bottom: 0;
 }
 
 .ae-button.ledger {
-  background: $ledger-color !important;
+  background: $ledger-color;
 }
 
 .ae-button {
-  border-radius: 8px !important;
+  border-radius: 8px;
   height: 52px;
   padding: 0 2.5rem;
 }
 
 .btnFixed {
-  position: fixed !important;
+  position: fixed;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
@@ -168,15 +168,15 @@ main {
   padding: 10px 0;
 
   button {
-    margin-bottom: 0 !important;
+    margin-bottom: 0;
   }
 
   .ae-button.round {
-    padding: 0 0.5rem !important;
+    padding: 0 0.5rem;
   }
 
   button .ae-icon {
-    font-size: 1.5rem !important;
+    font-size: 1.5rem;
   }
 }
 
@@ -193,7 +193,7 @@ main {
 .input {
   outline: none;
   resize: none;
-  background: #f7fafc !important;
+  background: #f7fafc;
   border: none;
   padding-left: 1rem;
 }
@@ -224,7 +224,7 @@ main {
 }
 
 .flex-align-start {
-  align-items: flex-start !important;
+  align-items: flex-start;
 }
 
 .balance {
@@ -250,7 +250,7 @@ main {
 }
 
 .ae-panel {
-  margin: 1.5rem 0 !important;
+  margin: 1.5rem 0;
 }
 
 .ae-panel .content > h4 {
@@ -259,7 +259,7 @@ main {
 }
 
 .ae-check-button {
-  padding-left: 2.5rem !important;
+  padding-left: 2.5rem;
   word-break: break-word;
   text-align: left;
   margin-bottom: 1rem;
@@ -268,57 +268,30 @@ main {
 }
 
 .ae-check-button::after {
-  width: 26px !important;
-  height: 26px !important;
-  top: 50% !important;
+  width: 26px;
+  height: 26px;
+  top: 50%;
   transform: translateY(-50%);
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
 }
 
 .ae-check-button::before {
-  border-color: $accent-color !important;
-  top: 50% !important;
-  border-radius: 4px !important;
+  border-color: $accent-color;
+  top: 50%;
+  border-radius: 4px;
   transform: translateY(-50%);
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
-  width: 18px !important;
-  height: 18px !important;
-  background: transparent !important;
-  border-width: 3px !important;
+  width: 18px;
+  height: 18px;
+  background: transparent;
+  border-width: 3px;
 }
 
 .ae-check > input[type="checkbox"]:checked + span.ae-check-button::before {
-  border-color: $accent-color !important;
-  background: $accent-color !important;
-}
-
-.token-action-holder {
-  background-color: #ececec;
-}
-
-.custom-ae-input-header {
-  position: relative;
-  display: flex;
-  flex: 0 0;
-  justify-content: space-between;
-  align-items: center;
-  align-self: flex-start;
-  width: 100%;
-  padding: 0.5rem 1rem 0 1rem;
-}
-
-.custom-ae-input-label {
-  color: #76818c;
-  font-family: "Inter UI", sans-serif;
-  font-size: 0.8125rem;
-  letter-spacing: 0.02em;
-  line-height: 1rem;
-}
-
-.mr-auto {
-  margin-right: auto;
+  border-color: $accent-color;
+  background: $accent-color;
 }
 
 @-moz-document url-prefix() {
@@ -363,9 +336,9 @@ button {
   padding: 4px 20px;
   text-align: center;
   font-size: 16px;
-  word-break: break-all;
-  word-wrap: break-word;
-  max-width: 357px !important;
+  max-width: 357px;
+  margin: 0 auto;
+  position: relative;
 }
 
 .identicon {
@@ -373,7 +346,7 @@ button {
 }
 
 .ae-check > input[type='checkbox']:checked + .ae-check-button::before {
-  border-color: #dae1ea !important;
+  border-color: #dae1ea;
 }
 
 .actions {
@@ -408,4 +381,225 @@ button {
       margin: 0 auto;
     }
   }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+html,
+body,
+.ae-main {
+  font-family: 'Roboto', sans-serif;
+  font-size: $font-size;
+  color: $white-color;
+  background: $bg-color;
+}
+
+.popup-no-padding {
+  padding: 4px 0;
+}
+
+#app {
+  font-family: 'Roboto', sans-serif;
+}
+
+.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.primary-bg {
+  background: $bg-color;
+}
+
+.text {
+  color: $text-color;
+}
+
+.primary-title {
+  color: $white-color;
+  font-size: 18px;
+  font-weight: 400;
+  margin-bottom: 27px;
+  margin-left: 0;
+}
+
+.secondary-text {
+  color: $secondary-color;
+}
+
+.logo {
+  margin: 60px 0;
+}
+
+.error-msg {
+  color: $input-error-color;
+  margin-top: 22px;
+  font-size: 0.88rem;
+}
+
+.heading-1 {
+  font-size: 18px;
+  font-weight: normal;
+  margin: 8px 0;
+}
+
+.link-sm {
+  font-size: 11px;
+  margin: 8px 0;
+}
+
+.block {
+  display: block;
+}
+
+/* Font size 14 */
+.f-12 {
+  font-size: 12px;
+}
+
+.f-14 {
+  font-size: 14px;
+}
+
+.f-16 {
+  font-size: 16px;
+}
+
+.f-18 {
+  font-size: 18px;
+}
+
+.f-24 {
+  font-size: 24px;
+}
+
+.l-1 {
+  line-height: 1.2;
+}
+
+.balance-box {
+  width: 80px;
+  text-align: left;
+  border-left: 1px solid $border-color;
+  padding-left: 10px;
+}
+
+.amount-box {
+  width: 120px;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.tip-note-preview {
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px dashed $text-color;
+  margin-top: 5px;
+  margin-bottom: 30px;
+  text-align: left;
+  word-break: break-word;
+}
+
+/**
+* POPUP WINDWOS
+*/
+.popup-aex2 {
+  max-height: 600px;
+  min-height: 600px;
+  margin-bottom: 55px;
+  position: relative;
+  // overflow-y:scroll;
+  h2 {
+    word-break: break-word;
+    line-height: 1.8rem;
+    font-size: 1.2rem;
+  }
+
+  p {
+    font-weight: normal;
+    word-break: break-word;
+    font-size: 0.9rem;
+  }
+
+  ul li {
+    border-width: 1px;
+    border-color: #424242;
+  }
+
+  .permission-set {
+    flex-direction: column;
+    text-align: left;
+    cursor: unset;
+
+    h4 {
+      display: block;
+      width: 100%;
+      margin: 0;
+    }
+
+    p {
+      display: block;
+      width: 100%;
+      margin: 0;
+    }
+  }
+
+  ul {
+    padding: 0;
+  }
+
+  .accountName {
+    font-size: 0.8rem;
+    word-break: break-word;
+    white-space: nowrap;
+  }
+
+  .hostname {
+    font-size: 0.65rem;
+    word-break: break-word;
+  }
+}
+
+/**
+* Dynamic Margins Utilities Classes
+*/
+@mixin margin-left($i) {
+  margin-left: $i + px;
+}
+
+@mixin margin-right($i) {
+  margin-right: $i + px;
+}
+
+@mixin margin-bottom($i) {
+  margin-bottom: $i + px;
+}
+
+@mixin margin-top($i) {
+  margin-top: $i + px;
+}
+
+@mixin margin-x($i) {
+  margin-left: $i + px;
+  margin-right: $i + px;
+}
+
+@mixin margin-y($i) {
+  margin-top: $i + px;
+  margin-bottom: $i + px;
+}
+
+@for $i from 1 through 40 {
+  .ml-#{$i} { @include margin-left($i); }
+  .mr-#{$i} { @include margin-right($i); }
+  .mb-#{$i} { @include margin-bottom($i); }
+  .mt-#{$i} { @include margin-top($i); }
+  .mx-#{$i} { @include margin-x($i); }
+  .my-#{$i} { @include margin-y($i); }
 }

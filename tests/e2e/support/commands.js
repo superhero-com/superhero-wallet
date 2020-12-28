@@ -18,7 +18,7 @@ Cypress.Commands.add('openAex2Popup', (type, txType) => {
     .should('be.visible');
 });
 
-Cypress.Commands.add('openAepp', onBeforeLoad => {
+Cypress.Commands.add('openAepp', (onBeforeLoad) => {
   cy.visit('aepp/aepp', { onBeforeLoad })
     .get('[data-cy=wallet-found]')
     .should('be.visible')
@@ -31,61 +31,46 @@ Cypress.Commands.add('termsAgree', () => {
 });
 
 Cypress.Commands.add('openGenerateWallet', () => {
-  cy.termsAgree()
-    .get('[data-cy=generate-wallet]')
-    .click();
+  cy.termsAgree().get('[data-cy=generate-wallet]').click();
 });
 
 Cypress.Commands.add('openImportWallet', () => {
-  cy.termsAgree()
-    .get('[data-cy=import-wallet]')
-    .click();
+  cy.termsAgree().get('[data-cy=import-wallet]').click();
 });
 
 Cypress.Commands.add('openTerms', () => {
-  cy.get('[data-cy=terms]')
-    .should('be.visible')
-    .click();
+  cy.get('[data-cy=terms]').should('be.visible').click();
 });
 
-Cypress.Commands.add('enterSeedPhrase', seed => {
-  cy.get('textarea')
-    .clear()
-    .type(seed)
-    .get('[data-cy=import]')
-    .click();
+Cypress.Commands.add('enterSeedPhrase', (seed) => {
+  cy.get('textarea').clear().type(seed).get('[data-cy=import]').click();
 });
 
-Cypress.Commands.add('openAndEnterSeedPhrase', seed => {
+Cypress.Commands.add('openAndEnterSeedPhrase', (seed) => {
   cy.openImportWallet().enterSeedPhrase(seed);
 });
 
-Cypress.Commands.add('inputShouldHaveError', input => {
+Cypress.Commands.add('inputShouldHaveError', (input) => {
   cy.get(input).should('have.class', 'has-error');
 });
 
-Cypress.Commands.add('buttonShouldBeDisabled', button => {
+Cypress.Commands.add('buttonShouldBeDisabled', (button) => {
   cy.get(button).should('have.class', 'disabled');
 });
 
-Cypress.Commands.add('buttonShouldNotBeDisabled', button => {
+Cypress.Commands.add('buttonShouldNotBeDisabled', (button) => {
   cy.get(button).should('not.have.class', 'disabled');
 });
 
-Cypress.Commands.add('shouldHasErrorMessage', el => {
-  cy.get(el)
-    .should('exist')
-    .should('be.visible');
+Cypress.Commands.add('shouldHasErrorMessage', (el) => {
+  cy.get(el).should('exist').should('be.visible');
 });
 
-Cypress.Commands.add('onboardingSlideShouldBeActive', slide => {
-  cy.get('[data-cy=onboarding-steps]')
-    .find('ul li')
-    .eq(slide)
-    .should('have.class', 'current');
+Cypress.Commands.add('onboardingSlideShouldBeActive', (slide) => {
+  cy.get('[data-cy=onboarding-steps]').find('ul li').eq(slide).should('have.class', 'current');
 });
 
-Cypress.Commands.add('clickDotNavigationMakeSlideActive', slide => {
+Cypress.Commands.add('clickDotNavigationMakeSlideActive', (slide) => {
   cy.get('[data-cy=onboarding-steps]')
     .find('ul li')
     .eq(slide)
@@ -93,10 +78,8 @@ Cypress.Commands.add('clickDotNavigationMakeSlideActive', slide => {
     .onboardingSlideShouldBeActive(slide);
 });
 
-Cypress.Commands.add('toggleAccordionItem', item => {
-  cy.get('[data-cy=accordion-item]')
-    .eq(item)
-    .click();
+Cypress.Commands.add('toggleAccordionItem', (item) => {
+  cy.get('[data-cy=accordion-item]').eq(item).click();
 });
 
 Cypress.Commands.add('accordionItemShould', (item, cond) => {
@@ -109,8 +92,8 @@ Cypress.Commands.add('accordionItemShould', (item, cond) => {
     .should(cond);
 });
 
-Cypress.Commands.add('login', (options = { balance: 10 }, route) => {
-  cy.openPopup(async contentWindow => {
+Cypress.Commands.add('login', (options = {}, route) => {
+  cy.openPopup(async (contentWindow) => {
     /* eslint-disable-next-line no-param-reassign */
     contentWindow.localStorage.state = JSON.stringify(await getLoginState(options));
   }, route);
@@ -132,42 +115,35 @@ Cypress.Commands.add('openMenu', () => {
 
 Cypress.Commands.add('closeMenu', (from = 'button') => {
   if (from === 'button') {
-    cy.get('[data-cy=close-menu]')
-      .should('be.visible')
-      .click();
+    cy.get('[data-cy=close-menu]').should('be.visible').click();
   } else if (from === 'overlay') {
-    cy.get('[data-cy=menu-overlay]')
-      .should('be.visible')
-      .click('left');
+    cy.get('[data-cy=menu-overlay]').should('be.visible').click('left');
   }
 });
 
-Cypress.Commands.add('menuShould', cond => {
-  cy.get('[data-cy=sidebar-menu]')
-    .should(cond)
-    .get('[data-cy=close-menu]')
-    .should(cond);
+Cypress.Commands.add('menuShould', (cond) => {
+  cy.get('[data-cy=sidebar-menu]').should(cond).get('[data-cy=close-menu]').should(cond);
 });
 
 Cypress.Commands.add('openMenuPage', (page, dropdown = false) => {
+  let url = `${Cypress.config().popupUrl}/popup#/`;
   cy.openMenu();
   if (dropdown) {
+    url += 'settings/';
     cy.toggleDropdown();
   }
   cy.get(`[data-cy=${page}]`)
     .click()
     .url()
-    .should('eq', `${Cypress.config().popupUrl}/popup#/${page}`)
+    .should('eq', `${url}${page}`)
     .menuShould('not.be.visible');
 });
 
 Cypress.Commands.add('toggleDropdown', () => {
-  cy.get('[data-cy=settings]')
-    .click()
-    .get('[data-cy=dropdown]');
+  cy.get('[data-cy=settings]').click().get('[data-cy=dropdown]');
 });
 
-Cypress.Commands.add('dropdownShould', cond => {
+Cypress.Commands.add('dropdownShould', (cond) => {
   cy.get('[data-cy=dropdown]').should(cond);
 });
 
@@ -180,11 +156,7 @@ Cypress.Commands.add('openTip', () => {
 });
 
 Cypress.Commands.add('openWithdraw', () => {
-  cy.get('[data-cy=hamburger]')
-    .click()
-    .menuShould('be.visible')
-    .get('[data-cy=send]')
-    .click();
+  cy.get('[data-cy=hamburger]').click().menuShould('be.visible').get('[data-cy=send]').click();
 });
 
 Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '' }) => {
@@ -197,9 +169,7 @@ Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '' })
   if (note) cy.get('[data-cy=textarea]').type(note);
 
   if (url) {
-    cy.get('[data-cy=input-text]')
-      .clear()
-      .type(url);
+    cy.get('[data-cy=input-text]').clear().type(url);
   }
 });
 
@@ -209,7 +179,7 @@ Cypress.Commands.add('toConfirmTip', (tip = {}) => {
     .buttonShouldNotBeDisabled('[data-cy=send-tip]')
     .get('[data-cy=send-tip]')
     .click()
-    .get('.modal--wrapper')
+    .get('.modal .container')
     .should('be.visible')
     .get('[data-cy=to-confirm]')
     .should('be.visible')
@@ -246,7 +216,7 @@ Cypress.Commands.add('sendTip', (tip = {}) => {
 });
 
 Cypress.Commands.add('pendingTx', (tx = {}) => {
-  cy.pendingTxItem().then(txItem => {
+  cy.pendingTxItem().then((txItem) => {
     txItem.find('[data-cy=amount]').should('contain', tx.amount);
     txItem.find('[data-cy=status]').should('contain', 'Pending');
     if (tx.url) txItem.find('[data-cy=url]').should('contain', tx.url);
@@ -255,40 +225,32 @@ Cypress.Commands.add('pendingTx', (tx = {}) => {
 });
 
 Cypress.Commands.add('enterAmountSend', (amount = 0) => {
-  cy.get('[data-cy=input-number]')
-    .clear()
-    .type(amount);
+  cy.get('[data-cy=input-number]').clear().type(amount);
 });
 
 Cypress.Commands.add('goBack', () => {
   cy.get('[data-cy=back-arrow]').click();
 });
 
-Cypress.Commands.add('enterAddress', address => {
-  cy.get('[data-cy=address]')
-    .clear()
-    .type(address);
+Cypress.Commands.add('enterAddress', (address) => {
+  cy.get('[data-cy=address]').clear().type(address);
 });
 
 Cypress.Commands.add(
   'storageSet',
   (key, value) =>
-    new Cypress.Promise(async resolve => {
+    new Cypress.Promise(async (resolve) => {
       await browser.storage.local.set({ [key]: value });
       resolve();
     }),
 );
 
-Cypress.Commands.add('urlEquals', route => {
+Cypress.Commands.add('urlEquals', (route) => {
   cy.url().should('eq', `${Cypress.config().popupUrl}/popup#${route}`);
 });
 
 Cypress.Commands.add('openNetworks', () => {
-  cy.openMenu()
-    .toggleDropdown()
-    .get('[data-cy=networks]')
-    .click()
-    .urlEquals('/networks');
+  cy.openMenu().toggleDropdown().get('[data-cy=networks]').click().urlEquals('/settings/networks');
 });
 
 Cypress.Commands.add('enterNetworkDetails', (network, url, middleware, compiler) => {

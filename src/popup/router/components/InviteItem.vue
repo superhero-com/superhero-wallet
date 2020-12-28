@@ -1,18 +1,13 @@
 <template>
   <div class="invite-row">
     <div class="invite-info">
-      <span class="balance-display">
-        {{ inviteLinkBalance }}
-        <span>{{ $t('pages.appVUE.aeid') }}</span>
-      </span>
-      <!--eslint-disable vue-i18n/no-raw-text-->
-      ({{ formatCurrency((inviteLinkBalance * currentCurrencyRate).toFixed(2)) }})
-      <!--eslint-enable vue-i18n/no-raw-text-->
+      <TokenAmount :amount="inviteLinkBalance" />
       <span class="date">{{ createdAt | formatDate }}</span>
     </div>
     <div class="invite-link">
       <span>{{ link }}</span>
-      <button class="invite-link-copy" v-clipboard:copy="link"><CopyIcon /></button>
+      <div class="copied-alert" v-if="copied">{{ $t('pages.invite.copied') }}</div>
+      <button class="invite-link-copy" @click="copy" v-clipboard:copy="link"><CopyIcon /></button>
     </div>
     <div class="centered-buttons" v-if="!topUp">
       <Button v-if="inviteLinkBalance > 0" bold @click="claim">{{
@@ -36,8 +31,10 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { pick } from 'lodash-es';
+import { mapState } from 'vuex';
 import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk/es';
+import TokenAmount from './TokenAmount';
 import AmountSend from './AmountSend';
 import Button from './Button';
 import CopyIcon from '../../../icons/copy.svg?vue-component';
@@ -48,12 +45,14 @@ export default {
     secretKey: { type: String, required: true },
     createdAt: { type: Number, required: true },
   },
-  components: { Button, AmountSend, CopyIcon },
+  components: { TokenAmount, Button, AmountSend, CopyIcon },
   filters: { formatDate },
-  data: () => ({ topUp: false, topUpAmount: 0, inviteLinkBalance: 0 }),
+  data: () => ({ topUp: false, topUpAmount: 0, inviteLinkBalance: 0, copied: false }),
+  subscriptions() {
+    return pick(this.$store.state.observables, ['balance']);
+  },
   computed: {
-    ...mapState(['sdk', 'balance']),
-    ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
+    ...mapState(['sdk']),
     link() {
       const secretKey = Crypto.encodeBase58Check(Buffer.from(this.secretKey, 'hex'));
       return new URL(
@@ -76,6 +75,12 @@ export default {
     },
   },
   methods: {
+    copy() {
+      this.copied = true;
+      setTimeout(() => {
+        this.copied = false;
+      }, 3000);
+    },
     deleteItem() {
       this.$store.commit('invites/delete', this.secretKey);
     },
@@ -85,7 +90,7 @@ export default {
         await this.sdk
           .balance(this.address, { format: AmountFormatter.AE_AMOUNT_FORMATS.AE })
           .catch(() => 0),
-      ).toFixed(2);
+      );
     },
     async claim() {
       this.$emit('loading', true);
@@ -126,7 +131,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .invite-row {
   padding: 1rem;
@@ -162,18 +167,12 @@ export default {
     margin-bottom: 10px;
     color: $gray-2;
 
-    .balance-display {
-      color: $white-1;
-      margin-right: 5px;
-
-      span {
-        color: $secondary-color;
-      }
+    .token-amount {
+      flex-grow: 1;
     }
 
     .date {
       font-size: 11px;
-      margin-left: auto;
       color: $text-color;
     }
   }
@@ -187,8 +186,13 @@ export default {
 
     > .primary-button {
       margin-right: 20px;
-      width: 120px !important;
+      width: 120px;
     }
+  }
+
+  .copied-alert {
+    color: $button-color;
+    margin-right: 7px;
   }
 }
 </style>

@@ -17,7 +17,7 @@
     <CheckBox v-model="termsAgreed" data-cy="checkbox">
       <span>
         {{ $t('pages.index.term1') }}
-        <RouterLink to="/termsOfService" data-cy="terms">
+        <RouterLink to="/about/termsOfService" data-cy="terms">
           {{ $t('pages.index.termsAndConditions') }}
         </RouterLink>
       </span>
@@ -27,7 +27,7 @@
       {{ $t('pages.index.generateWallet') }}
     </Button>
     <Button
-      @click="$router.push('/importAccount')"
+      @click="$router.push('/import-account')"
       :disabled="!termsAgreed"
       data-cy="import-wallet"
     >
@@ -55,7 +55,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .index {
   .checkbox-container {

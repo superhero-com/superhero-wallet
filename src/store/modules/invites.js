@@ -1,5 +1,5 @@
 import { Universal, MemoryAccount, Crypto } from '@aeternity/aepp-sdk/es';
-import { i18n } from '../../popup/utils/i18nHelper';
+import { i18n } from '../plugins/languages';
 
 export default {
   namespaced: true,
@@ -9,7 +9,7 @@ export default {
   mutations: {
     add: ({ invites }, secretKey) => invites.unshift({ secretKey, createdAt: Date.now() }),
     delete(state, secretKey) {
-      state.invites = state.invites.filter(invite => invite.secretKey !== secretKey);
+      state.invites = state.invites.filter((invite) => invite.secretKey !== secretKey);
     },
   },
   actions: {

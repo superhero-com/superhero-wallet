@@ -11,14 +11,14 @@
       <div class="section-title">{{ $t('pages.names.auctions.current-bid') }}</div>
 
       <NameRow :address="currentBid.accountId">
-        <div class="name">{{ currentBid.nameFee.toFixed(3) }} {{ $t('pages.appVUE.aeid') }}</div>
+        <div class="name">{{ currentBid.nameFee.toFixed(3) }} {{ $t('ae') }}</div>
         <span class="address">{{ currentBid.accountId }}</span>
       </NameRow>
 
       <template v-if="previousBids">
         <div class="section-title">{{ $t('pages.names.auctions.previous-bids') }}</div>
         <NameRow v-for="(bid, idx) in previousBids" :key="idx" :address="bid.accountId">
-          <div class="name">{{ bid.nameFee.toFixed(3) }} {{ $t('pages.appVUE.aeid') }}</div>
+          <div class="name">{{ bid.nameFee.toFixed(3) }} {{ $t('ae') }}</div>
           <span class="address">{{ bid.accountId }}</span>
         </NameRow>
       </template>
@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import blocksToRelativeTime from '../../../../filters/blocksToRelativeTime';
 import NameRow from '../../components/NameRow';
 import Button from '../../components/Button';
@@ -42,8 +43,10 @@ export default {
   data: () => ({
     expiration: 0,
     bids: null,
-    topBlockHeight: 0,
   }),
+  subscriptions() {
+    return pick(this.$store.state.observables, ['topBlockHeight']);
+  },
   computed: {
     currentBid() {
       if (!this.bids) return null;
@@ -51,13 +54,11 @@ export default {
     },
     previousBids() {
       if (!this.bids) return null;
-      return this.bids.filter(bid => bid !== this.currentBid);
+      return this.bids.filter((bid) => bid !== this.currentBid);
     },
   },
   filters: { blocksToRelativeTime },
   async mounted() {
-    await this.$watchUntilTruly(() => this.$store.state.sdk);
-    this.topBlockHeight = await this.$store.dispatch('getHeight');
     const id = setInterval(() => this.updateAuctionEntry(), 3000);
     this.$once('hook:destroyed', () => clearInterval(id));
     this.$watch(

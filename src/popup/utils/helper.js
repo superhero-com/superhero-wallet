@@ -7,12 +7,12 @@ import BigNumber from 'bignumber.js';
 import { CONNECTION_TYPES, defaultNetworks, defaultNetwork } from './constants';
 import { getState } from '../../store/plugins/persistState';
 
-export const aeToAettos = v =>
+export const aeToAettos = (v) =>
   formatAmount(v, {
     denomination: AE_AMOUNT_FORMATS.AE,
     targetDenomination: AE_AMOUNT_FORMATS.AETTOS,
   });
-export const aettosToAe = v =>
+export const aettosToAe = (v) =>
   formatAmount(v, {
     denomination: AE_AMOUNT_FORMATS.AETTOS,
     targetDenomination: AE_AMOUNT_FORMATS.AE,
@@ -20,37 +20,16 @@ export const aettosToAe = v =>
 
 export const convertToken = (balance, precision) => BigNumber(balance).shiftedBy(precision);
 
-export const shuffleArray = array => {
-  const shuffle = array;
-  let currentIndex = shuffle.length;
-  let temporaryValue;
-  let randomIndex;
-
-  // While there remain elements to shuffle...
-  while (currentIndex !== 0) {
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-
-    // And swap it with the current element.
-    temporaryValue = shuffle[currentIndex];
-    shuffle[currentIndex] = shuffle[randomIndex];
-    shuffle[randomIndex] = temporaryValue;
-  }
-
-  return shuffle;
-};
-
 export const IN_FRAME = window.parent !== window;
 export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');
 
-export const convertToAE = balance => +(balance / 10 ** 18).toFixed(7);
+export const convertToAE = (balance) => +(balance / 10 ** 18).toFixed(7);
 
-export const toURL = url => new URL(url.includes('://') ? url : `https://${url}`);
+export const toURL = (url) => new URL(url.includes('://') ? url : `https://${url}`);
 
-export const extractHostName = url => toURL(url).hostname;
+export const extractHostName = (url) => toURL(url).hostname;
 
-export const validateTipUrl = urlAsString => {
+export const validateTipUrl = (urlAsString) => {
   try {
     const url = toURL(urlAsString);
     return ['http:', 'https:'].includes(url.protocol) && isFQDN(url.hostname);
@@ -59,7 +38,7 @@ export const validateTipUrl = urlAsString => {
   }
 };
 
-export const detectConnectionType = port => {
+export const detectConnectionType = (port) => {
   const extensionProtocol = detect().name === 'firefox' ? 'moz-extension' : 'chrome-extension';
   const [senderUrl] = port.sender.url.split('?');
   const isExtensionSender =
@@ -72,16 +51,6 @@ export const detectConnectionType = port => {
     return port.name;
   }
   return CONNECTION_TYPES.OTHER;
-};
-
-export const getAeppAccountPermission = async (host, account) => {
-  const { connectedAepps } = await getState();
-  if (!Object.keys(connectedAepps).length) return false;
-  if (!connectedAepps[host]) return false;
-  if (connectedAepps[host].includes(account)) {
-    return true;
-  }
-  return false;
 };
 
 export const fetchJson = async (...args) => {
@@ -97,16 +66,16 @@ export const postJson = (url, options) =>
     body: options.body && JSON.stringify(options.body),
   });
 
-export const checkAddress = value =>
+export const checkAddress = (value) =>
   Crypto.isAddressValid(value, 'ak') ||
   Crypto.isAddressValid(value, 'ct') ||
   Crypto.isAddressValid(value, 'ok');
 
 export const validateAddress = (address, type) => Crypto.isAddressValid(address, type);
 
-export const chekAensName = value => value.endsWith('.test') || value.endsWith('.chain');
+export const chekAensName = (value) => value.endsWith('.test') || value.endsWith('.chain');
 
-export const stringifyForStorage = state =>
+export const stringifyForStorage = (state) =>
   JSON.stringify(state, (key, value) => {
     if (value instanceof ArrayBuffer) {
       return { type: 'ArrayBuffer', data: Array.from(new Uint8Array(value)) };
@@ -146,7 +115,7 @@ export const stringifyForStorage = state =>
     return value;
   });
 
-export const parseFromStorage = state =>
+export const parseFromStorage = (state) =>
   JSON.parse(state, (key, value) => {
     if (value && value.type === 'ArrayBuffer') {
       return new Uint8Array(value.data).buffer;
@@ -237,9 +206,10 @@ export const getAllNetworks = async () =>
     {},
   );
 
-export const escapeSpecialChars = str => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
+export const escapeSpecialChars = (str) =>
+  str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
 
-export const checkHashType = async hash => {
+export const checkHashType = async (hash) => {
   const accountPublicKeyRegex = RegExp('^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$');
   const transactionHashRegex = RegExp('^th_[1-9A-HJ-NP-Za-km-z]{48,50}$');
   const nameRegex = RegExp('^nm_[1-9A-HJ-NP-Za-km-z]{48,50}$');
@@ -259,22 +229,55 @@ export const checkHashType = async hash => {
   return { valid, endpoint };
 };
 
-// TODO: Use proper promises/reactivity instead of polling pattern
-export const pollGetter = getter =>
-  new Promise(resolve => {
-    const id = setInterval(() => {
-      if (!getter()) return;
-      clearInterval(id);
-      resolve();
-    }, 300);
-  });
-
 export const getActiveNetwork = async () => {
   const all = await getAllNetworks();
   return all[get(await getState(), 'current.network', defaultNetwork.name)];
 };
 
-export const getTwitterAccountUrl = url => {
+export const getTwitterAccountUrl = (url) => {
   const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
   return match ? match[0] : false;
+};
+
+export const isNotFoundError = (error) => error.isAxiosError && error?.response.status === 404;
+
+// eslint-disable-next-line no-console
+export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
+
+export const setBalanceLocalStorage = (balance) => {
+  localStorage.rxjs = JSON.stringify({ ...JSON.parse(localStorage.rxjs || '{}'), balance });
+};
+
+export const getBalanceLocalStorage = () =>
+  localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : 0;
+
+export const getAeppUrl = (v) => new URL(v.connection.port.sender.url);
+
+export const categorizeContractCallTxObject = (transaction) => {
+  if (transaction.tx.type !== 'ContractCallTx') return null;
+  switch (transaction.tx.function) {
+    case 'transfer':
+    case 'change_allowance':
+    case 'create_allowance':
+      return {
+        to: transaction.tx.arguments[0].value,
+        amount: transaction.tx.arguments[1].value,
+        token: transaction.tx.contractId,
+      };
+    case 'tip_token':
+      return {
+        url: transaction.tx.arguments[0].value,
+        note: transaction.tx.arguments[1].value,
+        amount: transaction.tx.arguments[3].value,
+        token: transaction.tx.arguments[2].value,
+      };
+    case 'retip_token':
+      return {
+        url: transaction.tx.arguments[0].value,
+        amount: transaction.tx.arguments[2].value,
+        token: transaction.tx.arguments[1].value,
+      };
+    default:
+      return null;
+  }
 };

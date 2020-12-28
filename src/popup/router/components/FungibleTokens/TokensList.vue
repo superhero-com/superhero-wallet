@@ -10,7 +10,8 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { pick } from 'lodash-es';
+import { mapState } from 'vuex';
 import TokensListItem from './TokensListItem';
 
 export default {
@@ -21,9 +22,11 @@ export default {
     showMyTokens: { type: Boolean },
     searchTerm: { type: String, default: '' },
   },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+  },
   computed: {
     ...mapState('fungibleTokens', ['tokenBalances', 'availableTokens', 'aePublicData']),
-    ...mapGetters(['tokenBalance', 'balanceCurrency']),
 
     /**
      * Returns the default aeternity meta information
@@ -63,7 +66,7 @@ export default {
         ? [...(this.aeternityToken ? [this.aeternityToken] : []), ...this.tokenBalances]
         : tokensInfo
       ).filter(
-        token =>
+        (token) =>
           !searchTerm ||
           token.symbol.toLowerCase().includes(searchTerm) ||
           token.name.toLowerCase().includes(searchTerm) ||

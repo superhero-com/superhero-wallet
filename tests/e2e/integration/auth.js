@@ -6,8 +6,8 @@ describe('Test cases for login functionality', () => {
 
       .shouldRedirect('/intro', '/account')
       .shouldRedirect('/', '/account')
-      .shouldRedirect('/importAccount', '/account')
-      .shouldRedirect('/termsOfService', '/termsOfService')
+      .shouldRedirect('/import-account', '/account')
+      .shouldRedirect('/about/termsOfService', '/about/termsOfService')
 
       .logout()
       .shouldRedirect('/account', '/')
@@ -16,7 +16,7 @@ describe('Test cases for login functionality', () => {
       .shouldRedirect('/settings', '/')
       .shouldRedirect('/send', '/')
       .shouldRedirect('/receive', '/')
-      .shouldRedirect('/importAccount', '/importAccount')
-      .shouldRedirect('/termsOfService', '/termsOfService');
+      .shouldRedirect('/import-account', '/import-account')
+      .shouldRedirect('/about/termsOfService', '/about/termsOfService');
   });
 });

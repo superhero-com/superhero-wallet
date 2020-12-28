@@ -17,8 +17,11 @@ export default {
   updateLatestTransactions(state, payload) {
     state.transactions.latest = payload;
   },
-  setPendingTxs(state, payload) {
-    state.transactions.pending = payload;
+  addPendingTransaction(state, payload) {
+    state.transactions.pending.push({ ...payload, microTime: Date.now() });
+  },
+  removePendingTransactionByHash(state, hash) {
+    state.transactions.pending = state.transactions.pending.filter((t) => t.hash !== hash);
   },
   setActiveAccount(state, payload) {
     state.account.publicKey = payload.publicKey;
@@ -77,7 +80,7 @@ export default {
     ];
   },
   setNotificationsStatus(state, { createdAt, status }) {
-    const index = state.notifications.findIndex(n => n.createdAt === createdAt);
+    const index = state.notifications.findIndex((n) => n.createdAt === createdAt);
     Vue.set(state.notifications[index], 'status', status);
   },
   setNotificationSettings(state, payload) {
@@ -92,20 +95,11 @@ export default {
   setTxQueue(state, payload) {
     state.txQueue = [...state.txQueue, payload];
   },
-  addConnectedAepp(state, { host, account }) {
-    state.connectedAepps = { ...state.connectedAepps, [host]: [account] };
-  },
-  updateConnectedAepp(state, { host, account }) {
-    state.connectedAepps = {
-      ...state.connectedAepps,
-      [host]: [...state.connectedAepps[host].accounts, account],
-    };
-  },
   setMnemonic(state, payload) {
     state.mnemonic = payload;
   },
-  setBackedUpSeed(state, payload) {
-    state.backedUpSeed = payload;
+  setBackedUpSeed(state) {
+    state.backedUpSeed = true;
   },
   setTourRunning(state, payload) {
     state.tourRunning = payload;

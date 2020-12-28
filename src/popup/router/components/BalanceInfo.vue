@@ -1,43 +1,42 @@
 <template>
-  <div class="external-svg" data-cy="balance-info">
-    <div class="balance no-sign">
-      <div class="amount">
-        <div class="balance-dropdown" data-cy="tokens-dropdown">
-          <Dropdown
-            v-if="tokenBalancesOptions.length"
-            :options="tokenBalancesOptions"
-            :method="changeToken"
-            :selected="currentToken"
-            is-custom
-          />
-          <span class="display-value text-ellipsis">{{
-            selectedToken ? selectedToken.convertedBalance : tokenBalance
-          }}</span>
-          <span class="token-symbol">{{
-            !selectedToken ? $t('pages.appVUE.aeid') : selectedToken.symbol
-          }}</span>
-          <ExpandedAngleArrow class="expand-arrow" />
-        </div>
-        <div v-if="currentToken === 'default'" class="currenciesgroup">
-          <div class="balance-dropdown" data-cy="currency-dropdown">
-            <Dropdown
-              :options="currenciesOptions"
-              :method="switchCurrency"
-              :selected="current.currency"
-              is-custom
-            />
-            <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-            <span class="approx-sign">~</span>
-            <span class="display-value text-ellipsis">{{ formatCurrency(balanceCurrency) }}</span>
-            <ExpandedAngleArrow class="expand-arrow" />
-          </div>
-        </div>
+  <div class="balance-info" data-cy="balance-info">
+    <div class="balance-wrapper">
+      <div class="balance-dropdown" data-cy="tokens-dropdown">
+        <Dropdown
+          v-if="tokenBalancesOptions.length"
+          :options="tokenBalancesOptions"
+          :method="changeToken"
+          :selected="currentToken"
+          is-custom
+        />
+        <span class="display-value text-ellipsis">
+          {{ selectedToken ? selectedToken.convertedBalance : tokenBalance.toFixed(2) }}
+        </span>
+        <span class="token-symbol">{{ !selectedToken ? $t('ae') : selectedToken.symbol }}</span>
+        <ExpandedAngleArrow class="expand-arrow" />
+      </div>
+      <div
+        v-if="currentToken === 'default'"
+        class="currenciesgroup balance-dropdown"
+        data-cy="currency-dropdown"
+      >
+        <Dropdown
+          :options="currenciesOptions"
+          :method="switchCurrency"
+          :selected="current.currency"
+          is-custom
+        />
+        <!--eslint-disable-next-line vue-i18n/no-raw-text-->
+        <span class="approx-sign">~</span>
+        <span class="display-value text-ellipsis">{{ formatCurrency(balanceCurrency) }}</span>
+        <ExpandedAngleArrow class="expand-arrow" />
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import ExpandedAngleArrow from '../../../icons/expanded-angle-arrow.svg?vue-component';
 import Dropdown from './Dropdown';
@@ -47,21 +46,24 @@ export default {
     ExpandedAngleArrow,
     Dropdown,
   },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+  },
   computed: {
     ...mapState(['current', 'currencies']),
     ...mapState('fungibleTokens', ['tokenBalances', 'selectedToken']),
-    ...mapGetters(['tokenBalance', 'balanceCurrency', 'formatCurrency']),
+    ...mapGetters(['formatCurrency']),
     tokenBalancesOptions() {
       return [
         {
           value: 'default',
-          text: `${this.tokenBalance} ${this.$t('pages.appVUE.aeid')}`,
+          text: `${this.tokenBalance} ${this.$t('ae')}`,
         },
         ...this.tokenBalances,
       ];
     },
     currenciesOptions() {
-      return Object.keys(this.currencies).map(currencyKey => ({
+      return Object.keys(this.currencies).map((currencyKey) => ({
         text: currencyKey.toUpperCase(),
         value: currencyKey,
       }));
@@ -87,87 +89,62 @@ export default {
 };
 </script>
 
-<style lang="scss">
-@import '../../../common/variables';
+<style lang="scss" scoped>
+@import '../../../styles/variables';
 
-.currenciesgroup {
-  font-size: 18px;
-  display: flex;
-  line-height: 24px;
-  font-weight: 500;
-
-  .approx-sign {
-    margin-top: 3px;
-    color: $text-color;
-  }
-
-  .balance-dropdown {
-    margin-left: auto;
-  }
-}
-
-.balance-dropdown {
-  position: relative;
-
-  .dropdown {
-    position: absolute;
-    left: 0;
-  }
-
-  .custom > button,
-  .custom > button:active:not(:disabled) {
-    opacity: 0;
-  }
-
-  .token-symbol {
-    color: $secondary-color;
-  }
-
-  :last-child {
-    vertical-align: middle;
-  }
-}
-
-.display-value {
-  display: inline-block;
-  max-width: 200px;
-  vertical-align: text-top;
-}
-
-.tour__step1:not(.v-tour__target--highlighted) .external-svg {
-  z-index: 5;
-}
-
-.external-svg {
+.balance-info {
   height: 76px;
-  position: relative;
-  text-align: center;
   background-image: url('../../../icons/acc_balance.png');
   border-bottom: 2px solid $transactions-bg;
   display: flex;
   padding: 0 20px 10px 20px;
   margin-top: 15px;
+  color: $text-color;
+  font-size: 26px;
+  line-height: 34px;
 
-  .balance {
-    font-size: 26px;
-    color: $white-color;
-    font-weight: normal;
-    text-align: right;
-    line-height: 34px;
+  .balance-wrapper {
     margin: 0 auto;
 
-    .amount {
-      color: $text-color;
+    .balance-dropdown {
+      margin-left: auto;
+      position: relative;
+      width: max-content;
+
+      .dropdown {
+        position: absolute;
+
+        ::v-deep .custom > button,
+        .custom > button:active:not(:disabled) {
+          opacity: 0;
+        }
+      }
+
+      .token-symbol {
+        color: $secondary-color;
+      }
+
+      &.currenciesgroup {
+        font-size: 18px;
+        line-height: 24px;
+        font-weight: 500;
+
+        .approx-sign {
+          margin-top: 3px;
+          color: $text-color;
+        }
+      }
+
+      .display-value {
+        display: inline-block;
+        max-width: 200px;
+        vertical-align: text-top;
+      }
+
+      .expand-arrow {
+        color: $gray-2;
+      }
     }
   }
-}
-
-.expand-arrow {
-  color: $gray-2;
-}
-
-.approx-sign,
-.expand-arrow {
-  margin: 0 -7px;
 }
 </style>

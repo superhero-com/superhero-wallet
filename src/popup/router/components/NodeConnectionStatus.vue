@@ -1,29 +1,10 @@
 <template>
-  <div>
-    <div class="connect-error" v-if="nodeStatus == 'error' && account.publicKey && isLoggedIn">
-      {{ $t('pages.nodeConnectionStatus.error') }}
-    </div>
-    <div
-      class="connect-node"
-      data-cy="connect-node"
-      v-if="nodeStatus == 'connecting' && account.publicKey && isLoggedIn"
-    >
-      {{ $t('pages.nodeConnectionStatus.connecting') }}
-    </div>
-    <div
-      class="connect-node"
-      data-cy="connect-node"
-      v-if="nodeStatus == 'connected' && account.publicKey && isLoggedIn"
-    >
-      {{ $t('pages.nodeConnectionStatus.connected') }}
-    </div>
-    <div
-      class="connect-node"
-      data-cy="connect-node"
-      v-if="nodeStatus == 'initServices' && account.publicKey && isLoggedIn"
-    >
-      {{ $t('pages.nodeConnectionStatus.init') }}
-    </div>
+  <div
+    v-if="nodeStatus && account.publicKey && isLoggedIn"
+    :data-cy="nodeStatus !== 'error' ? 'connect-node' : ''"
+    :class="`connect-${nodeStatus === 'error' ? 'error' : 'node'}`"
+  >
+    {{ statuses[nodeStatus] }}
   </div>
 </template>
 
@@ -31,6 +12,16 @@
 import { mapGetters, mapState } from 'vuex';
 
 export default {
+  data() {
+    return {
+      statuses: {
+        initServices: this.$t('pages.nodeConnectionStatus.initServices'),
+        connecting: this.$t('pages.nodeConnectionStatus.connecting'),
+        connected: this.$t('pages.nodeConnectionStatus.connected'),
+        error: this.$t('pages.nodeConnectionStatus.error'),
+      },
+    };
+  },
   computed: {
     ...mapState(['nodeStatus', 'isLoggedIn']),
     ...mapGetters(['account']),
@@ -39,7 +30,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .connect-error,
 .connect-node {

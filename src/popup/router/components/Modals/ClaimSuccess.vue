@@ -1,15 +1,12 @@
 <!--eslint-disable vue-i18n/no-raw-text-->
 <template>
   <Modal @close="resolve" close>
-    <div slot="body">
-      <CheckIcon /> <br />
-      <b>{{ $t('pages.claim.url') }}:</b> {{ url }} <br />
-      <b>{{ $t('pages.claim.tipsOnUrl') }}:</b> {{ claimAmount }} {{ $t('pages.claim.ae') }} <br />
-      <span style="color: #2a9cff;">{{ $t('pages.claim.claimed') }}</span>
-    </div>
-    <div slot="footer">
-      <Button @click="resolve">{{ $t('ok') }}</Button>
-    </div>
+    <CheckIcon /> <br />
+    <b>{{ $t('pages.claim.url') }}:</b> {{ url }} <br />
+    <b>{{ $t('pages.claim.tipsOnUrl') }}:</b> {{ claimAmount }} {{ $t('pages.claim.ae') }} <br />
+    <span class="claimed">{{ $t('pages.claim.claimed') }}</span>
+
+    <Button slot="footer" @click="resolve">{{ $t('ok') }}</Button>
   </Modal>
 </template>
 
@@ -27,3 +24,11 @@ export default {
   components: { Modal, Button, CheckIcon },
 };
 </script>
+
+<style lang="scss" scoped>
+@import '../../../../styles/variables';
+
+.claimed {
+  color: $secondary-color;
+}
+</style>

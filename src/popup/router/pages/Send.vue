@@ -7,7 +7,9 @@
         <div class="popup withdraw step1">
           <p class="primary-title text-left mb-8 f-16">
             {{ $t('pages.tipPage.heading') }}
-            <span class="secondary-text">{{ $t('pages.appVUE.aeid') }}</span>
+            <span class="secondary-text">{{
+              selectedToken ? selectedToken.symbol : $t('ae')
+            }}</span>
             {{ $t('pages.tipPage.to') }}
           </p>
           <div class="d-flex">
@@ -15,7 +17,7 @@
               :type="address"
               data-cy="address"
               :error="form.address && !validAddress"
-              v-model="form.address"
+              v-model.trim="form.address"
               placeholder="ak.. / name.chain"
               size="h-50"
             />
@@ -50,31 +52,23 @@
           <p class="primary-title primary-title-darker text-left my-5 f-16">
             {{ $t('pages.send.checkalert') }}
           </p>
-          <div class="info-group">
-            <label class="info-label">{{ $t('pages.send.sendingAddress') }}</label>
-            <span
-              data-cy="review-sendingAddress"
-              class="info-span"
-              @click="openTxExplorer(account.publicKey)"
-              >{{ account.publicKey }}</span
-            >
-          </div>
-          <div class="info-group">
-            <label class="info-label">{{ $t('pages.send.receivingAddress') }}</label>
-            <span
-              data-cy="review-receivingAddress"
-              class="info-span"
-              @click="openTxExplorer(form.address)"
-              >{{ form.address }}</span
-            >
-          </div>
-          <div class="info-group">
-            <label>{{ $t('pages.send.amount') }}</label>
+          <InfoGroup
+            :value="account.publicKey"
+            :label="$t('pages.send.sender')"
+            data-cy="review-sender"
+          />
+          <InfoGroup
+            :value="form.address"
+            :label="$t('pages.send.recipient')"
+            data-cy="review-recipient"
+          />
+          <InfoGroup :label="$t('pages.send.amount')">
             <div class="text-center">
               <span data-cy="review-amount" class="amount"
-                >{{ parseFloat(form.amount).toFixed(3) }} {{ $t('pages.appVUE.aeid') }}</span
+                >{{ parseFloat(form.amount).toFixed(3) }}
+                {{ selectedToken ? selectedToken.symbol : $t('ae') }}</span
               >
-              <span class="currencyamount">
+              <span v-if="!selectedToken" class="currencyamount">
                 <!--eslint-disable-line vue-i18n/no-raw-text-->
                 ~
                 <span>
@@ -82,7 +76,7 @@
                 </span>
               </span>
             </div>
-          </div>
+          </InfoGroup>
           <Button data-cy="reivew-editTxDetails-button" @click="step = 1" extend>{{
             $t('pages.send.editTxDetails')
           }}</Button>
@@ -104,32 +98,19 @@
         <div class="popup withdraw step2">
           <h3 class="heading-1 my-15 center">
             <div class="flex flex-align-center flex-justify-content-center">
-              <Heart />
               <span class="ml-7">{{ $t('pages.send.tx-success') }}</span>
             </div>
           </h3>
           <p class="primary-title primary-title-darker text-left my-5 f-16">
             <span>{{ $t('pages.send.successalert') }}</span>
             <span class="secondary-text ml-5">
-              {{ successTx.amount }} {{ $t('pages.appVUE.aeid') }}</span
+              {{ successTx.amount }}
+              {{ successTx.token ? availableTokens[successTx.token].symbol : $t('ae') }}</span
             >
           </p>
-          <div class="info-group">
-            <label class="info-label">{{ $t('pages.send.to') }}</label>
-            <span class="info-span" @click="openTxExplorer(successTx.to)">{{ successTx.to }}</span>
-          </div>
-          <div class="info-group">
-            <label class="info-label">{{ $t('pages.send.from') }}</label>
-            <span class="info-span" @click="openTxExplorer(successTx.from)">{{
-              successTx.from
-            }}</span>
-          </div>
-          <div class="info-group">
-            <label class="info-label">{{ $t('pages.send.txhash') }}</label>
-            <span class="info-span" @click="openTxExplorer(successTx.hash)">{{
-              successTx.hash
-            }}</span>
-          </div>
+          <InfoGroup :value="successTx.to" :label="$t('pages.send.to')" />
+          <InfoGroup :value="successTx.from" :label="$t('pages.send.from')" />
+          <InfoGroup :value="successTx.hash" :label="$t('pages.send.hash')" />
           <Button @click="$router.push('/account')">{{ $t('pages.send.home') }}</Button>
         </div>
       </div>
@@ -139,18 +120,18 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
-import { checkAddress, chekAensName, checkHashType, aeToAettos } from '../../utils/helper';
-import openUrl from '../../utils/openUrl';
+import { checkAddress, chekAensName, aeToAettos, convertToken } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
+import InfoGroup from '../components/InfoGroup';
 import Textarea from '../components/Textarea';
 import Button from '../components/Button';
 import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
 import QrIcon from '../../../icons/qr-code.svg?vue-component';
 import AlertExclamination from '../../../icons/alert-exclamation.svg?vue-component';
-import Heart from '../../../icons/heart.svg?vue-component';
 
 export default {
   name: 'Send',
@@ -162,7 +143,7 @@ export default {
     BalanceInfo,
     QrIcon,
     AlertExclamination,
-    Heart,
+    InfoGroup,
   },
   data() {
     return {
@@ -172,10 +153,7 @@ export default {
         amount: '',
       },
       loading: false,
-      fee: {
-        min: 0,
-        max: 0,
-      },
+      fee: 0,
       successTx: {
         amount: '',
         from: '',
@@ -186,13 +164,17 @@ export default {
   },
   props: ['address', 'redirectstep', 'successtx'],
   watch: {
-    activeToken() {
+    selectedToken() {
       this.fetchFee();
     },
   },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['balance']);
+  },
   computed: {
-    ...mapState(['balance', 'current', 'sdk']),
-    ...mapGetters(['account', 'activeNetwork', 'formatCurrency', 'currentCurrencyRate']),
+    ...mapState('fungibleTokens', ['selectedToken', 'availableTokens']),
+    ...mapState(['current', 'sdk']),
+    ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate']),
     validAddress() {
       return checkAddress(this.form.address) || chekAensName(this.form.address);
     },
@@ -218,53 +200,81 @@ export default {
     },
     async fetchFee() {
       await this.$watchUntilTruly(() => this.sdk);
-      this.fee = await calculateFee(
-        this.current.token === 0 ? TX_TYPES.txSign : TX_TYPES.contractCall,
-        { ...(await this.feeParams()) },
-      );
-    },
-    async feeParams() {
-      return {
+      this.fee = calculateFee(!this.selectedToken ? TX_TYPES.txSign : TX_TYPES.contractCall, {
         ...this.sdk.Ae.defaults,
-      };
+        ...(this.selectedToken && {
+          callerId: this.account.publicKey,
+          contractId: this.selectedToken.contract,
+        }),
+      });
     },
     setTxDetails(tx) {
+      if (tx.tx.type === 'ContractCallTx') {
+        this.successTx.amount = convertToken(
+          tx.amount,
+          -this.availableTokens[tx.contractId].decimals,
+        );
+        this.successTx.token = tx.contractId;
+        this.successTx.to = tx.recipientId;
+        this.successTx.from = tx.callerId;
+        this.successTx.hash = tx.hash;
+        return;
+      }
       this.successTx.amount = parseFloat(tx.tx.amount / 10 ** 18).toFixed(3);
       this.successTx.to = tx.tx.recipientId;
       this.successTx.from = tx.tx.senderId;
       this.successTx.hash = tx.hash;
     },
     async send() {
-      const amount = aeToAettos(this.form.amount);
+      const amount = !this.selectedToken
+        ? aeToAettos(this.form.amount)
+        : convertToken(this.form.amount, this.selectedToken.decimals);
       const receiver = this.form.address;
-      const calculatedMaxValue = this.balance > this.fee.max ? this.balance - this.fee.max : 0;
+      let errorModalType = '';
       if (receiver === '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
-        this.$store.dispatch('modals/open', { name: 'default', type: 'incorrect-address' });
-        this.loading = false;
-        return;
+        errorModalType = 'incorrect-address';
       }
-      if (this.form.amount <= 0) {
-        this.$store.dispatch('modals/open', { name: 'default', type: 'incorrect-amount' });
-        this.loading = false;
-        return;
+      if (this.form.amount <= 0) errorModalType = 'incorrect-amount';
+      if (
+        (this.balance - this.fee - this.form.amount <= 0 && !this.selectedToken) ||
+        (this.selectedToken && +this.selectedToken.convertedBalance < +this.form.amount) ||
+        this.fee > this.balance
+      ) {
+        errorModalType = 'insufficient-balance';
       }
-      if (calculatedMaxValue - this.form.amount <= 0 && this.current.token === 0) {
-        this.$store.dispatch('modals/open', { name: 'default', type: 'insufficient-balance' });
-        this.loading = false;
+      if (errorModalType) {
+        this.$store.dispatch('modals/open', { name: 'default', type: errorModalType });
         return;
       }
       this.loading = true;
       try {
-        const { hash } = await this.sdk.spend(amount, receiver, { waitMined: false, modal: false });
-        if (hash) {
-          await this.$store.dispatch('setPendingTx', {
+        if (this.selectedToken) {
+          const { hash } = await this.$store.dispatch('fungibleTokens/transfer', [
+            receiver,
+            this.form.amount,
+            { waitMined: true, modal: false },
+          ]);
+          this.$store.commit('addPendingTransaction', {
             hash,
             amount,
-            time: Date.parse(new Date()),
+            type: 'spendToken',
+            recipientId: receiver,
+          });
+          await this.$store.dispatch('fungibleTokens/getAvailableTokens');
+          await this.$store.dispatch('fungibleTokens/loadTokenBalances', this.account.publicKey);
+          await this.$store.dispatch('cacheInvalidateFT', this.selectedToken.contract);
+        } else {
+          const { hash } = await this.sdk.spend(amount, receiver, {
+            waitMined: false,
+            modal: false,
+          });
+          this.$store.commit('addPendingTransaction', {
+            hash,
+            amount,
             type: 'spend',
           });
-          this.$router.push('/account');
         }
+        this.$router.push('/account');
       } catch (e) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
         throw e;
@@ -272,29 +282,25 @@ export default {
         this.loading = false;
       }
     },
-    async openTxExplorer(hash) {
-      const { explorerUrl } = this.activeNetwork;
-      const { endpoint, valid } = await checkHashType(hash);
-      if (valid) {
-        const url = `${explorerUrl}/${endpoint}/${hash}`;
-        openUrl(url, true);
-      }
-    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .d-flex {
   display: flex;
 }
 
+.primary-title-darker {
+  color: $text-color;
+}
+
 .withdraw.step1 {
-  textarea {
+  .d-flex .textarea {
     width: 250px;
-    min-height: 60px !important;
+    min-height: 60px;
     margin: 0 20px 0 0;
     font-size: 11px;
   }
@@ -324,27 +330,6 @@ export default {
   }
 
   .info-group {
-    text-align: left;
-    display: block;
-    margin: 20px 0;
-
-    .info-label {
-      display: block;
-      padding: 10px 0;
-    }
-
-    .info-span {
-      color: $accent-color;
-      font-size: 11px;
-      display: inline-block;
-      width: 300px;
-      white-space: nowrap;
-      // overflow: hidden !important;
-      // text-overflow: ellipsis;
-      letter-spacing: -0.3px;
-      cursor: pointer;
-    }
-
     .amount {
       font-size: 26px;
       color: $secondary-color;

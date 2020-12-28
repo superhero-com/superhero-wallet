@@ -1,5 +1,6 @@
 <template>
   <div>
+    <BalanceInfo />
     <div class="tour__step3 popup">
       <p class="primary-title text-left mb-8 f-16">
         <template v-if="!confirmMode">
@@ -7,16 +8,11 @@
         </template>
         <template v-else>
           {{ $t('pages.tipPage.headingSending') }}
-          <span class="secondary-text" data-cy="tip-amount">
-            {{ amount }} {{ selectedToken ? selectedToken.symbol : $t('pages.appVUE.aeid') }}
-          </span>
-          <!--eslint-disable vue-i18n/no-raw-text-->
-          ({{
-            selectedToken
-              ? formatCurrency(0)
-              : formatCurrency((amount * currentCurrencyRate).toFixed(3))
-          }})
-          <!--eslint-enable vue-i18n/no-raw-text-->
+          <TokenAmount
+            data-cy="tip-amount"
+            :amount="+amount"
+            v-bind="selectedToken ? { symbol: selectedToken.symbol } : {}"
+          />
           {{ $t('pages.tipPage.to') }}
         </template>
       </p>
@@ -28,47 +24,17 @@
             {{ url }}
           </a>
         </template>
-        <Input
-          v-else
-          size="m-0 sm"
-          v-model="url"
-          :error="url && !validUrl"
-          :placeholder="$t('pages.tipPage.enterUrl')"
-        />
+        <Input v-else size="m-0 sm" v-model="url" :placeholder="$t('pages.tipPage.enterUrl')" />
       </div>
     </div>
     <div class="popup" data-cy="tip-container">
       <template v-if="!confirmMode">
-        <AmountSend
-          :amountError="amountError"
-          v-model="amount"
-          :errorMsg="
-            amount && !selectedToken && amount < minTipAmount
-              ? $t('pages.tipPage.minAmountError')
-              : ''
-          "
-        />
-        <Textarea
-          v-model="note"
-          :placeholder="$t('pages.tipPage.titlePlaceholder')"
-          :error="note.length > 280"
-          size="sm"
-        />
-        <Button
-          @click="toConfirm"
-          :disabled="
-            !note ||
-              amountError ||
-              noteError ||
-              !minCallFee ||
-              !validUrl ||
-              !url ||
-              urlStatus === 'blacklisted' ||
-              note.length > 280
-          "
-          bold
-          data-cy="send-tip"
-        >
+        <AmountSend v-model="amount" />
+        <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
+        <div class="validation-msg">
+          {{ validationStatus.msg }}
+        </div>
+        <Button @click="toConfirm" :disabled="validationStatus.error" bold data-cy="send-tip">
           {{ $t('pages.tipPage.next') }}
         </Button>
         <Button bold @click="openCallbackOrGoHome(false)">
@@ -80,7 +46,7 @@
           {{ note }}
         </div>
         <Button
-          @click="selectedToken ? sendFungibleTokenTip() : sendTip()"
+          @click="sendTip"
           :disabled="selectedToken ? !tippingV2 : !tippingV1"
           data-cy="confirm-tip"
         >
@@ -97,9 +63,8 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
-import BigNumber from 'bignumber.js';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { escapeSpecialChars, aeToAettos, validateTipUrl, convertToken } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
@@ -107,6 +72,8 @@ import Textarea from '../components/Textarea';
 import Input from '../components/Input';
 import UrlStatus from '../components/UrlStatus';
 import Button from '../components/Button';
+import TokenAmount from '../components/TokenAmount';
+import BalanceInfo from '../components/BalanceInfo';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
@@ -117,6 +84,8 @@ export default {
     Input,
     UrlStatus,
     Button,
+    TokenAmount,
+    BalanceInfo,
   },
   data() {
     return {
@@ -124,24 +93,18 @@ export default {
       amount: null,
       note: '',
       confirmMode: false,
-      amountError: false,
-      noteError: false,
       loading: false,
-      minCallFee: null,
       editUrl: true,
       IS_EXTENSION: process.env.IS_EXTENSION,
       tipFromPopup: false,
     };
   },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['balance']);
+  },
   computed: {
-    ...mapGetters([
-      'account',
-      'formatCurrency',
-      'minTipAmount',
-      'currentCurrencyRate',
-      'activeNetwork',
-    ]),
-    ...mapState(['tourRunning', 'balance', 'tip', 'sdk', 'tippingV1', 'tippingV2']),
+    ...mapGetters(['account']),
+    ...mapState(['tourRunning', 'tip', 'sdk', 'tippingV1', 'tippingV2']),
     ...mapState('fungibleTokens', ['selectedToken', 'tokenBalances']),
     urlStatus() {
       return this.tourRunning ? 'verified' : this.$store.getters['tipUrl/status'](this.url);
@@ -149,11 +112,52 @@ export default {
     validUrl() {
       return validateTipUrl(this.url);
     },
+    tippingContract() {
+      return this.tippingV2 || this.tippingV1;
+    },
+    ...mapState({
+      validationStatus({ sdk }, { account, minTipAmount }) {
+        if (!sdk || !this.tippingContract) {
+          return { error: true };
+        }
+        if (!this.url || !this.validUrl) {
+          return { error: true, msg: this.$t('pages.tipPage.enterUrl') };
+        }
+        if (this.urlStatus === 'blacklisted') {
+          return { error: true, msg: this.$t('pages.tipPage.blacklistedUrl') };
+        }
+        if (this.selectedToken && !this.tippingV2) {
+          return { error: true, msg: this.$t('pages.tipPage.v1FungibleTokenTipError') };
+        }
+        if (!+this.amount) {
+          return { error: true, msg: this.$t('pages.tipPage.requiredAmountError') };
+        }
+        if (!this.selectedToken && this.amount < minTipAmount) {
+          return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
+        }
+        const fee = calculateFee(TX_TYPES.contractCall, {
+          ...sdk.Ae.defaults,
+          contractId: this.tippingContract.deployInfo.address,
+          callerId: account.publicKey,
+        });
+        if (
+          this.selectedToken
+            ? +this.selectedToken.convertedBalance < +this.amount || this.balance < fee
+            : this.balance < fee + +this.amount
+        ) {
+          return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
+        }
+        if (!this.note) {
+          return { error: true, msg: this.$t('pages.tipPage.titlePlaceholder') };
+        }
+        if (this.note.length > 280) {
+          return { error: true, msg: this.$t('pages.tipPage.maxNoteLengthError') };
+        }
+        return { error: false };
+      },
+    }),
   },
   watch: {
-    amount() {
-      this.amountError = !+this.amount || (!this.selectedToken && this.amount < this.minTipAmount);
-    },
     $route: {
       immediate: true,
       handler({ query }) {
@@ -180,15 +184,9 @@ export default {
       if (url && !this.tipFromPopup) {
         this.url = url;
       } else if (this.tipFromPopup) {
-        localStorage.removeItem('lsroute');
+        await browser.storage.local.remove('last-path');
       }
     }
-    await this.$watchUntilTruly(() => this.sdk);
-    this.minCallFee = calculateFee(TX_TYPES.contractCall, {
-      ...this.sdk.Ae.defaults,
-      contractId: this.activeNetwork.tipContractV1,
-      callerId: this.account.publicKey,
-    }).min;
   },
   methods: {
     async persistTipDetails() {
@@ -216,100 +214,48 @@ export default {
           .catch(() => false);
         if (!allowToConfirm) return;
       }
-      const calculatedMaxValue =
-        this.balance > this.minCallFee ? this.balance - this.minCallFee : 0;
-      this.amountError =
-        !this.amount ||
-        !this.minCallFee ||
-        (!this.selectedToken && calculatedMaxValue - this.amount <= 0);
-      this.amountError =
-        this.amountError ||
-        !+this.amount ||
-        (!this.selectedToken && this.amount < this.minTipAmount);
-      this.noteError = !this.note || !this.url || this.note.length > 280;
-      this.confirmMode =
-        !this.amountError &&
-        !this.noteError &&
-        this.validUrl &&
-        this.url &&
-        this.urlStatus !== 'blacklisted';
+      this.confirmMode = !this.validationStatus.error;
       if (this.confirmMode) this.editUrl = false;
     },
     async sendTip() {
       const amount = aeToAettos(this.amount);
       this.loading = true;
       try {
-        const { hash } = await this.tippingV1.call(
-          'tip',
-          [this.url, escapeSpecialChars(this.note)],
-          {
-            amount,
-            waitMined: false,
-            modal: false,
-          },
-        );
-        if (hash) {
-          await this.$store.dispatch('setPendingTx', {
-            hash,
-            amount,
-            tipUrl: this.url,
-            time: Date.now(),
-            type: 'tip',
-          });
-          this.openCallbackOrGoHome(true);
-        }
-      } catch (e) {
-        await this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
-        e.payload = { url: this.url };
-        throw e;
-      } finally {
-        this.loading = false;
-        if (this.tipFromPopup) window.close();
-      }
-    },
-    async createOrChangeAllowance() {
-      const tokenContract = await this.getFungibleTokenContract();
-      const { decodedResult } = await tokenContract.methods.allowance({
-        from_account: this.account.publicKey,
-        for_account: this.activeNetwork.tipContractV2.replace('ct_', 'ak_'),
-      });
+        let txResult = null;
 
-      const allowanceAmount =
-        decodedResult !== undefined
-          ? new BigNumber(decodedResult)
-              .multipliedBy(-1)
-              .plus(convertToken(this.amount, this.selectedToken.decimals))
-              .toNumber()
-          : convertToken(this.amount, this.selectedToken.decimals).toFixed();
-      return tokenContract.methods[
-        decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
-      ](this.activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
-    },
-    async sendFungibleTokenTip() {
-      this.loading = true;
-      await this.createOrChangeAllowance();
-      try {
-        const { hash } = await this.tippingV2.methods.tip_token(
-          this.url,
-          escapeSpecialChars(this.note),
-          this.selectedToken.contract,
-          convertToken(this.amount, this.selectedToken.decimals).toFixed(),
-        );
-        if (hash) {
-          await this.$store.dispatch('setPendingTx', {
-            hash,
-            amount: this.amount,
-            tipUrl: this.url,
-            time: Date.now(),
-            type: 'tip',
-          });
+        if (this.selectedToken) {
+          await this.$store.dispatch('fungibleTokens/createOrChangeAllowance', this.amount);
+          txResult = await this.tippingV2.methods.tip_token(
+            this.url,
+            escapeSpecialChars(this.note),
+            this.selectedToken.contract,
+            convertToken(this.amount, this.selectedToken.decimals).toFixed(),
+          );
+
           await this.$store.dispatch('fungibleTokens/loadTokenBalances', this.account.publicKey);
           this.$store.commit(
             'fungibleTokens/setSelectedToken',
             this.tokenBalances.find(({ value }) => value === this.selectedToken.value),
           );
-          this.openCallbackOrGoHome(true);
+        } else {
+          txResult = await this.tippingContract.call(
+            'tip',
+            [this.url, escapeSpecialChars(this.note)],
+            {
+              amount,
+              waitMined: false,
+              modal: false,
+            },
+          );
         }
+
+        this.$store.commit('addPendingTransaction', {
+          hash: txResult.hash,
+          amount: this.selectedToken ? this.amount : amount,
+          tipUrl: this.url,
+          type: 'tip',
+        });
+        this.openCallbackOrGoHome(true);
       } catch (e) {
         await this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
         e.payload = { url: this.url };
@@ -323,23 +269,12 @@ export default {
       this.confirmMode = false;
       this.editUrl = true;
     },
-    async getFungibleTokenContract() {
-      const contractInstance = await this.$store.state.sdk.getContractInstance(
-        FUNGIBLE_TOKEN_CONTRACT,
-        {
-          contractAddress: this.selectedToken.contract,
-          forceCodeCheck: true,
-        },
-      );
-
-      return contractInstance;
-    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .tour__step3 {
   margin: 0 auto;
@@ -349,7 +284,7 @@ export default {
 
   &.v-tour__target--highlighted {
     margin: 10px;
-    min-width: auto !important;
+    min-width: auto;
     padding-bottom: 25px;
   }
 
@@ -394,10 +329,16 @@ export default {
   }
 }
 
+.validation-msg {
+  color: #ff8c2a;
+  font-size: 15px;
+  min-height: 45px;
+}
+
 @media screen and (min-width: 380px) {
   .tour__step3.v-tour__target--highlighted {
     margin: 10px auto 0 auto;
-    min-width: auto !important;
+    min-width: auto;
     padding-bottom: 25px;
   }
 }

@@ -1,10 +1,10 @@
 import Vue from 'vue';
 import BigNumber from 'bignumber.js';
-import { aettosToAe, postJson } from '../../popup/utils/helper';
-import { i18n } from '../../popup/utils/i18nHelper';
+import { aettosToAe, fetchJson, postJson } from '../../popup/utils/helper';
+import { i18n } from './languages';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
 
-export default store =>
+export default (store) => {
   store.registerModule('names', {
     namespaced: true,
     state: {
@@ -12,31 +12,39 @@ export default store =>
       defaults: {},
     },
     getters: {
-      getDefault: ({ defaults }, getters, { sdk }, { activeNetwork }) => address => {
+      getDefault: ({ defaults }, getters, { sdk }, { activeNetwork }) => (address) => {
         if (!defaults) return '';
         let { networkId } = activeNetwork;
         if (sdk) networkId = sdk.getNetworkId();
         return defaults[`${address}-${networkId}`];
       },
-      getName: ({ owned }) => name => owned.find(n => n.name === name),
+      getName: ({ owned }) => (name) => owned.find((n) => n.name === name),
     },
     mutations: {
       set(state, names) {
         state.owned = names;
       },
-      setDefault({ defaults }, { address, networkId, name: { name, revoked } }) {
-        if (revoked) Vue.delete(defaults, `${address}-${networkId}`, name);
-        else Vue.set(defaults, `${address}-${networkId}`, name);
+      setDefault({ defaults }, { address, name }) {
+        const networkId = store.state.sdk.getNetworkId();
+        if (name) Vue.set(defaults, `${address}-${networkId}`, name);
+        else Vue.delete(defaults, `${address}-${networkId}`);
       },
       setAutoExtend(state, { index, value }) {
         Vue.set(state.owned[index], 'autoExtend', value);
       },
     },
     actions: {
-      async fetchOwned({ state: { owned }, rootState, commit, getters: { getDefault }, dispatch }) {
-        if (!rootState.middleware) return;
-        const getPendingNameClaimTransactions = address =>
-          rootState.sdk.api.getPendingAccountTransactionsByPubkey(address).then(
+      async fetchOwned({
+        state: { owned },
+        rootGetters: { activeNetwork },
+        rootState: { sdk, middleware, account },
+        commit,
+        getters: { getDefault },
+        dispatch,
+      }) {
+        if (!middleware) return;
+        const getPendingNameClaimTransactions = (address) =>
+          sdk.api.getPendingAccountTransactionsByPubkey(address).then(
             ({ transactions }) =>
               transactions
                 .filter(({ tx: { type } }) => type === 'NameClaimTx')
@@ -49,11 +57,10 @@ export default store =>
             () => [],
           );
 
-        const defaultName = getDefault(rootState.account.publicKey);
-        let defaultNameRevoked = false;
+        const defaultName = getDefault(account.publicKey);
         const names = await Promise.all([
-          getPendingNameClaimTransactions(rootState.account.publicKey),
-          rootState.middleware.getOwnedBy(rootState.account.publicKey).then(({ active }) =>
+          getPendingNameClaimTransactions(account.publicKey),
+          middleware.getOwnedBy(account.publicKey).then(({ active }) =>
             owned
               ? active
                   .map(({ info, name }) => ({
@@ -63,12 +70,11 @@ export default store =>
                     pointers: info.pointers,
                     name,
                   }))
-                  .map(name => {
-                    const oldName = owned.find(n => n.name === name.name);
+                  .map((name) => {
+                    const oldName = owned.find((n) => n.name === name.name);
                     if (!oldName) return name;
                     const revoked = name.expiresAt < oldName.expiresAt;
-                    if (revoked) {
-                      if (name.name === defaultName) defaultNameRevoked = true;
+                    if (revoked)
                       commit(
                         'addNotification',
                         {
@@ -81,7 +87,6 @@ export default store =>
                         },
                         { root: true },
                       );
-                    }
                     return {
                       ...(revoked || oldName.revoked ? { revoked: true } : {}),
                       autoExtend: oldName.autoExtend,
@@ -90,22 +95,31 @@ export default store =>
                   })
               : active,
           ),
-        ]).then(arr => arr.flat());
+        ]).then((arr) => arr.flat());
 
         commit('set', names);
-        if ((names.length && !defaultName) || defaultNameRevoked) {
-          const claimed = names.filter(n => !n.pending);
-          if (claimed.length)
-            dispatch('setDefault', {
-              name: claimed[0],
-              address: rootState.account.publicKey,
-              modal: false,
-            });
+
+        const claimed = names.filter((n) => !n.pending && !n.revoked).map(({ name }) => name);
+        if (!claimed.length) {
+          if (defaultName) commit('setDefault', { address: account.publicKey });
+          return;
+        }
+        const { preferredChainName: defaultNameBackend } = await fetchJson(
+          `${activeNetwork.backendUrl}/profile/${account.publicKey}`,
+        ).catch(() => {});
+        if (!claimed.includes(defaultNameBackend)) {
+          await dispatch('setDefault', { address: account.publicKey, name: claimed[0] });
+          return;
+        }
+        if (defaultName !== defaultNameBackend) {
+          commit('setDefault', { address: account.publicKey, name: defaultNameBackend });
         }
       },
       async fetchAuctions({ rootState: { middleware } }) {
         if (!middleware) return [];
-        return (await middleware.getActiveNameAuctions()).data.map(({ name, info }) => ({
+        return (
+          await middleware.getAllAuctions({ by: 'expiration', direction: 'forward' })
+        ).data.map(({ name, info }) => ({
           name,
           expiration: info.auctionEnd,
           lastBid: info.lastBid.tx,
@@ -117,7 +131,7 @@ export default store =>
         return {
           expiration: info.auctionEnd,
           bids: await Promise.all(
-            info.bids.map(async index => {
+            info.bids.map(async (index) => {
               const { tx } = await middleware.getTxByIndex(index);
               return {
                 accountId: tx.accountId,
@@ -145,48 +159,45 @@ export default store =>
         }
       },
       async setDefault(
-        { rootState: { sdk }, commit, dispatch, rootGetters: { activeNetwork } },
-        { name, address, modal = true },
+        { rootState: { sdk }, commit, rootGetters: { activeNetwork } },
+        { name, address },
       ) {
-        commit('setDefault', { name, address, networkId: sdk.getNetworkId() });
-
-        try {
-          const response = await postJson(`${activeNetwork.backendUrl}/profile`, {
-            body: {
-              author: address,
-              preferredChainName: name.name,
-            },
-          });
-          const signedChallenge = Buffer.from(await sdk.signMessage(response.challenge)).toString(
-            'hex',
-          );
-          const respondChallenge = {
-            challenge: response.challenge,
-            signature: signedChallenge,
-          };
-          await postJson(`${activeNetwork.backendUrl}/profile`, {
-            body: respondChallenge,
-          });
-        } catch (e) {
-          if (modal) {
-            if (e.type === 'backend')
-              dispatch(
-                'modals/open',
-                { name: 'default', title: 'Backend error', msg: e.message },
-                { root: true },
-              );
-            else throw e;
-          }
-        }
-      },
-      async extendNames({ rootState: { sdk }, state: { owned }, dispatch }) {
-        const height = await sdk.height();
-        owned.forEach(
-          ({ name, expiresAt, autoExtend }) =>
-            autoExtend &&
-            expiresAt - height < AUTO_EXTEND_NAME_BLOCKS_INTERVAL &&
-            dispatch('updatePointer', { name, type: 'extend' }),
+        const response = await postJson(`${activeNetwork.backendUrl}/profile`, {
+          body: {
+            author: address,
+            preferredChainName: name,
+          },
+        });
+        const signedChallenge = Buffer.from(await sdk.signMessage(response.challenge)).toString(
+          'hex',
         );
+        const respondChallenge = {
+          challenge: response.challenge,
+          signature: signedChallenge,
+        };
+        await postJson(`${activeNetwork.backendUrl}/profile`, {
+          body: respondChallenge,
+        });
+        commit('setDefault', { name, address });
       },
     },
   });
+
+  store.watch(
+    ({ middleware }) => middleware,
+    async (middleware) => {
+      if (!middleware) return;
+
+      await store.dispatch('names/fetchOwned');
+
+      const height = await store.state.sdk.height();
+      await Promise.all(
+        store.state.names.owned
+          .filter(({ autoExtend }) => autoExtend)
+          .filter(({ expiresAt }) => expiresAt - height < AUTO_EXTEND_NAME_BLOCKS_INTERVAL)
+          .map(({ name }) => store.dispatch('names/updatePointer', { name, type: 'extend' })),
+      );
+    },
+    { immediate: true },
+  );
+};

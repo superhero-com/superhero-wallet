@@ -1,5 +1,7 @@
 {
   "ok": "OK",
+  "ae": "AE",
+  "mainAccount": "Main account",
   "onboarding": {
     "step_1": {
       "title": "Your Account Info",
@@ -151,17 +153,17 @@
     },
     "titles": {
       "settings": "Settings",
-      "general": "Language",
+      "language": "Language",
       "security": "Security",
       "about": "About",
-      "send": "Send Tips",
+      "send": "Send",
+      "send-tips": "Send Tips",
       "claim-tips": "Claim Tips",
       "scanQr": "Scan QR",
       "terms": "Terms of Use",
       "privacy": "Privacy Policy",
       "importAccount": "Retrieve Existing Account",
       "activity": "Activity History",
-      "withdraw": "Withdraw",
       "topUp": "Top Up",
       "notifications": "Notifications",
       "names": "Names",
@@ -173,51 +175,18 @@
       "address": "Send Address",
       "sign-message": "Sign Message"
     },
-    "appVUE": {
-      "systemName": "Superhero",
-      "manageNetworks": "Manage networks",
-      "manageAccounts": "Manage accounts",
-      "airGapVault": "Create a vault for AirGap",
-      "ledgerAccount": "Add Ledger Account",
-      "menu": "Menu",
-      "myAccount": "My Account",
-      "switchToken": "Tokens",
-      "utilities": "Utilities",
-      "settings": "Settings",
-      "logout": "Logout",
-      "profile": "Profile",
-      "help": "Help",
-      "topUp": "Top Up",
-      "withdraw": "Withdraw",
-      "myTransactions": "My transactions",
-      "activity": "Activity",
-      "dashboard": "Dashboard",
-      "aeid": "AE",
-      "walletName": "Superhero Wallet",
-      "general": "General",
-      "security": "Security",
-      "seedPhrase": "Seed Phrase",
-      "language": "Language",
-      "advanced": "Advanced",
-      "versions": "Version & Updates",
-      "mainAccount": "Main account",
-      "reportBug": "Report a bug",
-      "names": "Names",
-      "networks": "Networks",
-      "removeAccount": "Remove account",
-      "donateErrorReports": "Submit error reports"
-    },
-    "aboutSettings": {
+    "about": {
       "heading": "About",
       "systemName": "Superhero",
       "terms": "Terms of Use",
-      "privacyPolicy": "Privacy Policy"
+      "privacyPolicy": "Privacy Policy",
+      "reportBug": "Report a bug"
     },
     "account": {
       "heading": "Account",
+      "activity": "Activity",
       "accountName": "Account name",
       "copy": "Copy",
-      "send": "Send Tip",
       "claim": "Claim Tip",
       "receive": "Receive",
       "wholeTransaction": "Full transaction history",
@@ -227,9 +196,8 @@
       "howToClaim": "How to claim AE",
       "balance": "Balance",
       "copied": "Copied!",
-      "youNeedTo": "You need to",
+      "seedNotification": "You need to {0} your seed phrase",
       "backup": "backup",
-      "yourSeedPhrase": "your seed phrase",
       "updateExtension": "New version available! Please update your extension.",
       "updateAvailable": "New version in the store is available!",
       "claim-name": "Register a name"
@@ -432,7 +400,7 @@
       "pointer": "Set Name Pointer",
       "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
     },
-    "generalSettings": {
+    "languageSettings": {
       "backToSettings": "Back to settings",
       "heading": "Language",
       "switchLanguage": "Language",
@@ -517,11 +485,9 @@
       "showPrivateKey": "Show Private Key",
       "incorrectPassword": "Incorrect Password",
       "decryptingPrivateKey": "Decrypting private key",
-      "showSeedPhrase": "Show seed phrase",
       "seedRecoveryHeading": "Show seed phrase",
       "seedRecoverySmall": "Your seed phrase (also referred to as private key) serves as the keys or a password to access your account. Never disclose this to anyone. And make sure you back it up on a piece of paper that no one else can see—but that you will never lose. Losing these keys means losing access to your wallet and tips",
       "seedRecoveryBtn": "Show seed phrase",
-      "seedPhraseWarning": "Do not share your seed phrase with anyone, it can be used to steal all your accounts",
       "seedPhrase": "Your seed phrase",
       "copy": "Copy to clipboard"
     },
@@ -550,7 +516,6 @@
     "send": {
       "backToAccount": "Back to account",
       "heading": "New Transfer from",
-      "recipient": "Recipient",
       "txFee": "Min Tx fee:",
       "maxSpendableValue": "Maximum spendable value:",
       "send": "Send",
@@ -561,15 +526,15 @@
       "review": "Review",
       "reviewtx": "Review Transaction",
       "checkalert": "Please check the information carefully.",
-      "sendingAddress": "Sending address",
-      "receivingAddress": "Receiving address",
+      "sender": "Sending address",
+      "recipient": "Receiving address",
       "amount": "Amount",
       "editTxDetails": "Edit Transaction Details",
       "tx-success": "Transaction Completed",
       "successalert": "You have successfully sent ",
       "to": "To",
       "from": "From",
-      "txhash": "Transaction Hash",
+      "hash": "Transaction Hash",
       "home": "Home"
     },
     "settings": {
@@ -839,10 +804,10 @@
       "across": "across the Globe"
     },
     "nodeConnectionStatus": {
-      "error": "Unable to connect to choosen node",
+      "error": "Unable to connect to chosen node",
       "connecting": "Connecting to node...",
       "connected": "Connected",
-      "init": "Initializing services..."
+      "initServices": "Initializing services..."
     },
     "popupMessageSign": {
       "heading": "would like to sign message ",

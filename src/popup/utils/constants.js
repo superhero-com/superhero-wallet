@@ -1,7 +1,7 @@
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { ABI_VERSIONS, TX_TYPE, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import BigNumber from 'bignumber.js';
-import { i18n } from './i18nHelper';
+import { i18n } from '../../store/plugins/languages';
 
 export const MAGNITUDE = 18;
 export const TX_TYPES = {
@@ -20,7 +20,6 @@ export const AEX2_METHODS = {
   CHANGE_ACCOUNT: 'CHANGE_ACCOUNT',
   ADD_ACCOUNT: 'ADD_ACCOUNT',
   SWITCH_NETWORK: 'SWITCH_NETWORK',
-  LOGOUT: 'LOGOUT',
   INIT_RPC_WALLET: 'INIT_RPC_WALLET',
 };
 
@@ -33,9 +32,7 @@ export const CONNECTION_TYPES = {
 const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
 const STUB_CALLDATA =
   'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
-export const MAX_UINT256 = BigNumber(2)
-  .exponentiatedBy(256)
-  .minus(1);
+export const MAX_UINT256 = BigNumber(2).exponentiatedBy(256).minus(1);
 
 export const calculateFee = (type, params) => {
   const MIN_FEE = TxBuilder.calculateMinFee(type, {
@@ -51,12 +48,7 @@ export const calculateFee = (type, params) => {
       ...params,
     },
   });
-  const min = BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE);
-  const max = min.multipliedBy(10);
-  return {
-    min,
-    max,
-  };
+  return BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE);
 };
 
 export const defaultNetworks = [
@@ -87,21 +79,12 @@ export const defaultNetwork =
   process.env.NETWORK === 'Testnet' ? defaultNetworks[0] : defaultNetworks[1];
 
 export const AGGREGATOR_URL = 'https://superhero.com/';
-export const NO_POPUP_AEPPS = [
-  'youdonotneedacapetobeahero.com',
-  'superhero.com',
-  'alpha.superhero.com',
-  'beta.superhero.com',
-  ...(process.env.NODE_ENV === 'development' ? ['localhost'] : []),
-];
 
 export const TXS_PER_PAGE = 30;
-export const MAX_AMOUNT_WITHOUT_CONFIRM = 10;
-export const LIMIT_KEY = 'limit';
 export const AENS_DOMAIN = '.chain';
 export const MAX_AUCTION_NAME_LENGTH = 12 + AENS_DOMAIN.length;
 export const MIN_NAME_LENGTH = 14;
-export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 100;
+export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 
 export const BUG_REPORT_URL = 'https://thesuperherowallet.typeform.com/to/vh8Ffu';
 

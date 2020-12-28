@@ -24,8 +24,8 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-@import '../../../common/variables';
+<style lang="scss" scoped>
+@import '../../../styles/variables';
 
 .button-container {
   width: 33%;

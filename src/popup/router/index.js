@@ -31,11 +31,14 @@ const router = new VueRouter({
   mode: process.env.PLATFORM === 'web' ? 'history' : 'hash',
 });
 
-const lastRouteKey = 'lsroute';
+const lastRouteKey = 'last-path';
 
 const unbind = router.beforeEach(async (to, from, next) => {
-  await helper.pollGetter(() => store.state.isRestored);
-  next((to.path === '/' && localStorage[lastRouteKey]) || undefined);
+  // eslint-disable-next-line no-underscore-dangle
+  await store._watcherVM.$watchUntilTruly(() => store.state.isRestored);
+  next(
+    (to.path === '/' && (await browser.storage.local.get(lastRouteKey))[lastRouteKey]) || undefined,
+  );
   unbind();
 });
 
@@ -75,16 +78,16 @@ router.beforeEach(async (to, from, next) => {
   next();
 });
 
-router.afterEach(to => {
-  if (to.meta.notPersist) delete localStorage[lastRouteKey];
-  else localStorage[lastRouteKey] = to.path;
+router.afterEach(async (to) => {
+  if (to.meta.notPersist) await browser.storage.local.remove(lastRouteKey);
+  else await browser.storage.local.set({ [lastRouteKey]: to.path });
 });
 
-const deviceReadyPromise = new Promise(resolve =>
+const deviceReadyPromise = new Promise((resolve) =>
   document.addEventListener('deviceready', resolve),
 );
 
-const routerReadyPromise = new Promise(resolve => {
+const routerReadyPromise = new Promise((resolve) => {
   const unbindAfterEach = router.afterEach(() => {
     resolve();
     setTimeout(unbindAfterEach);
@@ -95,7 +98,7 @@ if (process.env.PLATFORM === 'cordova') {
   (async () => {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
     window.IonicDeeplink.onDeepLink(({ url }) => {
-      const prefix = ['superhero:', 'https://wallet.superhero.com/'].find(p => url.startsWith(p));
+      const prefix = ['superhero:', 'https://wallet.superhero.com/'].find((p) => url.startsWith(p));
       if (!prefix) throw new Error(`Unknown url: ${url}`);
       try {
         window.location = `#/${url.slice(prefix.length)}`;

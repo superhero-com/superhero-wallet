@@ -4,7 +4,9 @@ module.exports = {
   env: {
     'cypress/globals': true,
   },
-  rules: {
-    strict: 'off',
+  settings: {
+    'import/resolver': {
+      node: {},
+    },
   },
 };

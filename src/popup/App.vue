@@ -1,6 +1,7 @@
 <template>
-  <ae-main
+  <div
     :class="[
+      'ae-main',
       aeppPopup ? 'ae-main-popup ae-main-wave' : waveBg ? 'ae-main-wave' : '',
       iframe && ($route.path === '/intro' || $route.path === '/') ? 'iframe' : '',
     ]"
@@ -19,7 +20,7 @@
         @click.self="showSidebar = false"
         data-cy="menu-overlay"
       >
-        <SidebarMenu @closeMenu="showSidebar = false" />
+        <SidebarMenu @close="showSidebar = false" />
       </div>
     </transition>
 
@@ -32,17 +33,15 @@
       :key="key"
       v-bind="props"
     />
-  </ae-main>
+  </div>
 </template>
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { clearInterval, setInterval } from 'timers';
 import { detect } from 'detect-browser';
 import { IN_FRAME } from './utils/helper';
 import { AEX2_METHODS, NOTIFICATION_SETTINGS } from './utils/constants';
 import { postMessage } from './utils/connection';
-import { fetchAndSetLocale } from './utils/i18nHelper';
 import Header from './router/components/Header';
 import SidebarMenu from './router/components/SidebarMenu';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus';
@@ -58,7 +57,6 @@ export default {
   },
   data: () => ({
     showSidebar: false,
-    polling: null,
     iframe: IN_FRAME,
     aeppPopup: window.RUNNING_IN_POPUP,
   }),
@@ -74,7 +72,7 @@ export default {
       'mainLoading',
     ]),
     waveBg() {
-      return ['/intro', '/popup-sign-tx', '/connect', '/importAccount', '/receive'].includes(
+      return ['/intro', '/popup-sign-tx', '/connect', '/import-account', '/receive'].includes(
         this.$route.path,
       );
     },
@@ -85,17 +83,10 @@ export default {
   watch: {
     isLoggedIn(val) {
       if (val) this.init();
-      else clearInterval(this.polling);
     },
   },
   async created() {
     await this.$watchUntilTruly(() => this.isRestored);
-    this.$watch(
-      ({ current: { language } }) => [language],
-      ([language]) => {
-        fetchAndSetLocale(language);
-      },
-    );
 
     this.$store.dispatch('getCurrencies');
     this.$store.dispatch('fungibleTokens/getAeternityData');
@@ -110,10 +101,8 @@ export default {
     }
     if (!this.backedUpSeed) {
       this.$store.commit('addNotification', {
-        text: `
-          ${this.$t('pages.account.youNeedTo')} ${this.$t('pages.account.backup')}
-          ${this.$t('pages.account.yourSeedPhrase')}`,
-        path: '/securitySettings',
+        text: this.$t('pages.account.seedNotification', [this.$t('pages.account.backup')]),
+        path: '/settings/security',
       });
     }
     if (this.$store.state.notificationSettings.length === 0) {
@@ -122,7 +111,7 @@ export default {
 
     this.$store.commit('setChainNames', await this.$store.dispatch('getCacheChainNames'));
 
-    EventBus.$on('error', async entry => {
+    EventBus.$on('error', async (entry) => {
       this.$store.dispatch('modals/open', { name: 'error-log', entry }).catch(() => false);
     });
   },
@@ -132,46 +121,43 @@ export default {
       if (!window.RUNNING_IN_POPUP && process.env.IS_EXTENSION) {
         postMessage({
           type: AEX2_METHODS.INIT_RPC_WALLET,
-          payload: { address: this.account.publicKey, network: this.current.network },
+          payload: this.current.network,
         });
       }
-
-      this.pollData();
-    },
-    pollData() {
-      this.polling = setInterval(() => {
-        if (!process.env.RUNNING_IN_TESTS && this.sdk) this.$store.dispatch('updateBalance');
-      }, 2500);
-      this.$once('hook:beforeDestroy', () => clearInterval(this.polling));
     },
   },
 };
 </script>
 
 <style lang="scss">
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
-@import '../common/base';
-@import '../common/extension';
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  height: 1px;
+}
 </style>
 
 <style lang="scss" scoped>
-@import '../common/variables';
+@import '../styles/variables';
 
 .ae-main {
   position: relative;
   min-height: 600px;
   margin: 0 auto;
-  overflow: visible !important;
+  overflow: visible;
 
   &.ae-main-popup {
-    background-color: $bg-color !important;
+    background-color: $bg-color;
     padding-top: 0;
   }
 
   &.ae-main-wave {
-    background-position: center bottom !important;
-    background-repeat: no-repeat !important;
-    background-image: url('../icons/background-big-wave.png') !important;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-image: url('../icons/background-big-wave.png');
   }
 
   padding-top: 50px;
@@ -217,7 +203,9 @@ export default {
 
 @media screen and (max-width: 380px) {
   .ae-main.ae-main-wave {
-    background-position: 100% 100% !important;
+    background-position: 100% 100%;
   }
 }
 </style>
+
+<style lang="scss" src="../styles/global.scss" />

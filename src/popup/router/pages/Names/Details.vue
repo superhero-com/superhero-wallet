@@ -5,7 +5,7 @@
         <span>{{ $t('pages.names.details.name') }}</span> {{ name }}
       </li>
       <li>
-        <span>{{ $t('pages.names.details.name') }}</span> {{ nameHash }}
+        <span>{{ $t('pages.names.details.name-id') }}</span> {{ nameHash }}
       </li>
       <li>
         <span>{{ $t('pages.names.details.owner') }}</span> {{ nameEntry.owner }}
@@ -94,10 +94,9 @@ export default {
   methods: {
     async setDefault() {
       await this.$watchUntilTruly(() => this.sdk);
-      this.$store.dispatch('names/setDefault', {
+      await this.$store.dispatch('names/setDefault', {
         address: this.account.publicKey,
-        name: { name: this.name },
-        modal: false,
+        name: this.name,
       });
     },
     async extend() {
@@ -143,6 +142,7 @@ export default {
   margin: 0;
 
   li {
+    word-break: break-all;
     list-style: none;
     text-align: left;
     font-size: 12px;

@@ -4,10 +4,10 @@
       <Close @click="closeMenu" data-cy="close-menu" />
     </li>
     <li class="account-icon-holder">
-      <div class="flex flex-align-center flex-justify-between">
+      <div class="flex flex-align-center">
         <Avatar :address="account.publicKey" :name="account.name" />
-        <div class="ml-8 mr-auto">
-          <div class="f-14">{{ $t('pages.appVUE.mainAccount') }}</div>
+        <div class="ml-8">
+          <div class="f-14">{{ $t('mainAccount') }}</div>
           <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">
             {{ activeAccountName }}
           </div>
@@ -16,17 +16,17 @@
     </li>
     <li>
       <router-link to="/receive" data-cy="receive">
-        {{ $t('pages.appVUE.topUp') }}
+        {{ $t('pages.titles.topUp') }}
       </router-link>
     </li>
     <li>
       <router-link to="/send" data-cy="send">
-        {{ $t('pages.appVUE.withdraw') }}
+        {{ $t('pages.titles.send') }}
       </router-link>
     </li>
     <li>
       <router-link to="/transactions" data-cy="transactions">
-        {{ $t('pages.appVUE.activity') }}
+        {{ $t('pages.account.activity') }}
       </router-link>
     </li>
     <li>
@@ -35,24 +35,24 @@
         @click="showSettingsDropdown = !showSettingsDropdown"
         data-cy="settings"
       >
-        {{ $t('pages.appVUE.settings') }}
+        {{ $t('pages.titles.settings') }}
         <Arrow />
       </button>
       <transition name="slide">
         <ul v-if="showSettingsDropdown" data-cy="dropdown">
           <li>
-            <router-link to="/securitySettings" data-cy="securitySettings">
-              {{ $t('pages.appVUE.security') }}
+            <router-link to="/settings/security" data-cy="security">
+              {{ $t('pages.titles.security') }}
             </router-link>
           </li>
           <li>
-            <router-link to="/generalSettings" data-cy="generalSettings">
-              {{ $t('pages.appVUE.language') }}
+            <router-link to="/settings/language" data-cy="language">
+              {{ $t('pages.titles.language') }}
             </router-link>
           </li>
           <li>
-            <router-link to="/networks" data-cy="networks">
-              {{ $t('pages.appVUE.networks') }}
+            <router-link to="/settings/networks" data-cy="networks">
+              {{ $t('pages.titles.networks') }}
             </router-link>
           </li>
           <li>
@@ -62,7 +62,7 @@
           </li>
           <li>
             <span data-cy="remove-account" @click="removeAccount">
-              {{ $t('pages.appVUE.removeAccount') }}
+              {{ $t('pages.settings.tabRemoveAccount') }}
             </span>
           </li>
         </ul>
@@ -70,17 +70,17 @@
     </li>
     <li>
       <router-link to="/names" data-cy="names">
-        {{ $t('pages.appVUE.names') }}
+        {{ $t('pages.titles.names') }}
       </router-link>
     </li>
     <li>
       <router-link to="/invite" data-cy="invite">
-        {{ $t('pages.appVUE.invite') }}
+        {{ $t('pages.titles.invite') }}
       </router-link>
     </li>
     <li>
-      <router-link to="/aboutSettings" data-cy="aboutSettings">
-        {{ $t('pages.appVUE.help') }}
+      <router-link to="/about" data-cy="about">
+        {{ $t('pages.about.heading') }}
       </router-link>
     </li>
   </ul>
@@ -91,38 +91,28 @@ import { mapGetters } from 'vuex';
 import Close from '../../../icons/close.svg?vue-component';
 import Arrow from '../../../icons/arrow-current-color.svg?vue-component';
 import Avatar from './Avatar';
-import removeAccountMixin from '../../../mixins/removeAccount';
 
 export default {
-  mixins: [removeAccountMixin],
   components: { Close, Arrow, Avatar },
   computed: mapGetters(['account', 'activeAccountName']),
-  data: () => ({ showSettingsDropdown: false, showTokensDropdown: false, balances: null }),
-  watch: {
-    showTokensDropdown(val) {
-      if (val) {
-        this.balances = setInterval(() => this.$store.dispatch('tokens/balances'), 10000);
-      } else {
-        clearInterval(this.balances);
-      }
-    },
-  },
-  created() {
-    this.$once('hook:beforeDestroy', () => clearInterval(this.balances));
-  },
+  data: () => ({ showSettingsDropdown: false }),
   methods: {
     menuClickHandler({ target }) {
       if (target.tagName === 'A') this.closeMenu();
     },
     closeMenu() {
-      this.$emit('closeMenu');
+      this.$emit('close');
+    },
+    async removeAccount() {
+      await this.$store.dispatch('requestResetting');
+      this.closeMenu();
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables';
+@import '../../../styles/variables';
 
 .sidebar-menu {
   position: fixed;

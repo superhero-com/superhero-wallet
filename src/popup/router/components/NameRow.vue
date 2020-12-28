@@ -20,8 +20,8 @@ export default {
 };
 </script>
 
-<style lang="scss">
-@import '../../../common/variables';
+<style lang="scss" scoped>
+@import '../../../styles/variables';
 
 .name-row {
   text-decoration: none;
@@ -36,9 +36,9 @@ export default {
   text-align: left;
   border-left: 2px solid transparent;
   color: $text-color;
-  background: #21222a !important;
+  background: #21222a;
 
-  .name-info {
+  .name-info ::v-deep {
     margin-left: 10px;
     width: 90%;
     margin-right: auto;
@@ -48,6 +48,7 @@ export default {
     }
 
     .address {
+      word-break: break-all;
       font-size: 12px;
       line-height: 14px;
       font-family: IBM Plex Mono, monospace;

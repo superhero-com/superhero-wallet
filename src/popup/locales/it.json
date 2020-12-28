@@ -1,5 +1,7 @@
 {
   "ok": "OK",
+  "ae": "AE",
+  "mainAccount": "Main account",
   "onboarding": {
     "step_1": {
       "title": "Your Account Info",
@@ -151,17 +153,17 @@
     },
     "titles": {
       "settings": "Settings",
-      "general": "Language",
+      "language": "Language",
       "security": "Security",
       "about": "About",
-      "send": "Send Tips",
+      "send": "Send",
+      "send-tips": "Send Tips",
       "claim-tips": "Claim Tips",
       "scanQr": "Scan QR",
       "terms": "Terms of Use",
       "privacy": "Privacy Policy",
       "importAccount": "Retrieve Existing Account",
       "activity": "Activity History",
-      "withdraw": "Withdraw",
       "topUp": "Top Up",
       "notifications": "Notifications",
       "names": "Names",
@@ -173,51 +175,18 @@
       "address": "Send Address",
       "sign-message": "Sign Message"
     },
-    "appVUE": {
-      "systemName": "Superhero",
-      "manageNetworks": "Gestisci reti",
-      "manageAccounts": "Gestisci account",
-      "airGapVault": "Creare un deposito per il traferro",
-      "ledgerAccount": "Aggiungere Ledger account",
-      "menu": "Menu",
-      "myAccount": "Il mio account",
-      "switchToken": "Tokens",
-      "utilities": "Utilità",
-      "settings": "impostazioni",
-      "logout": "Disconnettersi",
-      "profile": "Profile",
-      "help": "Help",
-      "topUp": "Top Up",
-      "withdraw": "Withdraw",
-      "myTransactions": "My transactions",
-      "activity": "Activity",
-      "dashboard": "Dashboard",
-      "aeid": "AE",
-      "walletName": "Superhero Wallet",
-      "general": "General",
-      "security": "Security",
-      "seedPhrase": "Seed Phrase",
-      "language": "Language",
-      "advanced": "Advanced",
-      "versions": "Version & Updates",
-      "mainAccount": "Main account",
-      "reportBug": "Report a bug",
-      "names": "Names",
-      "networks": "Networks",
-      "removeAccount": "Remove account",
-      "donateErrorReports": "Submit error reports"
-    },
-    "aboutSettings": {
+    "about": {
       "heading": "Di",
       "systemName": "Superhero",
       "terms": "Termini di servizio",
-      "privacyPolicy": "politica sulla riservatezza"
+      "privacyPolicy": "politica sulla riservatezza",
+      "reportBug": "Report a bug"
     },
     "account": {
       "heading": "Account",
+      "activity": "Activity",
       "accountName": "Nome utente",
       "copy": "copia",
-      "send": "Inviare",
       "claim": "Claim Tip",
       "receive": "Ricevere",
       "wholeTransaction": "Tutta la cronologia delle transazioni",
@@ -227,9 +196,8 @@
       "howToClaim": "How to claim AE",
       "balance": "Balance",
       "copied": "Copied!",
-      "youNeedTo": "You need to",
+      "seedNotification": "You need to {0} your seed phrase",
       "backup": "backup",
-      "yourSeedPhrase": "your seed phrase",
       "updateExtension": "New version available! Please update your extension.",
       "updateAvailable": "New version in store available!",
       "claim-name": "Claim your .chain name"
@@ -432,7 +400,7 @@
       "pointer": "Set Name Pointer",
       "pointerPlaceholder": "Enter ak_, ct_, ok_ or .chain name"
     },
-    "generalSettings": {
+    "languageSettings": {
       "backToSettings": "Torna alle impostazioni",
       "heading": "Generale",
       "switchLanguage": "linguaggio",
@@ -517,11 +485,9 @@
       "showPrivateKey": "Mostra chiave privata",
       "incorrectPassword": "Password errata",
       "decryptingPrivateKey": "Decifrare la chiave privata",
-      "showSeedPhrase": "Mostra la frase seme",
       "seedRecoveryHeading": "Mostra la frase seme",
       "seedRecoverySmall": "Rivela le tue 12 parole usate per generare la tua chiave privata",
       "seedRecoveryBtn": "Mostra la frase seme",
-      "seedPhraseWarning": "Non condividere il tuo seme con nessuno, può essere usato per rubare tutti i tuoi account",
       "seedPhrase": "La tua frase iniziale",
       "copy": "Copia negli appunti"
     },
@@ -550,7 +516,6 @@
     "send": {
       "backToAccount": "Torna al conto",
       "heading": "Nuovo Transfer da",
-      "recipient": "Destinatario",
       "amount": "Quantità",
       "txFee": "Costo Min Tx:",
       "maxSpendableValue": "Valore massimo spendibile:",
@@ -562,14 +527,14 @@
       "review": "Review",
       "reviewtx": "Review Transaction",
       "checkalert": "Please check the information carefully.",
-      "sendingAddress": "Sending address",
-      "receivingAddress": "Receiving address",
+      "sender": "Sending address",
+      "recipient": "Receiving address",
       "editTxDetails": "Edit Transaction Details",
       "tx-success": "Transaction Completed",
       "successalert": "You have successfully sent ",
       "to": "To",
       "from": "From",
-      "txhash": "Transaction Hash",
+      "hash": "Transaction Hash",
       "home": "Home"
     },
     "settings": {
@@ -839,10 +804,10 @@
       "across": "across the Globe"
     },
     "nodeConnectionStatus": {
-      "error": "Unable to connect to choosen node",
+      "error": "Unable to connect to chosen node",
       "connecting": "Connecting to node...",
       "connected": "Connected",
-      "init": "Initializing services..."
+      "initServices": "Initializing services..."
     },
     "popupMessageSign": {
       "heading": "would like to sign message ",

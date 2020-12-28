@@ -9,8 +9,9 @@ import persistState from './plugins/persistState';
 import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
 import accounts from './plugins/account';
-import tokens from './plugins/tokens';
-import names from './plugins/names';
+import namesPlugin from './plugins/names';
+import pendingTransactionHandler from './plugins/pendingTransactionHandler';
+import languagesPlugin from './plugins/languages';
 import runMigrations from './migrations';
 import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
@@ -20,63 +21,47 @@ import { defaultNetwork } from '../popup/utils/constants';
 Vue.use(Vuex);
 Vue.use(VueRx);
 
-const initialState = {
-  isRestored: false,
-  account: {},
-  mnemonic: null,
-  activeAccount: 0,
-  balance: 0,
-  current: {
-    network: defaultNetwork.name,
-    language: 'en',
-    token: 0,
-    currency: 'usd',
-  },
-  userNetworks: [],
-  isLoggedIn: false,
-  transactions: {
-    latest: [],
-    pending: [],
-  },
-  pageTitle: '',
-  sdk: null,
-  middleware: null,
-  tippingV1: null,
-  tippingV2: null,
-  mainLoading: true,
-  nodeStatus: 'connecting',
-  currencies: {},
-  nextCurrenciesFetch: null,
-  notifications: [],
-  notificationSettings: [],
-  chainNames: null,
-  tip: null,
-  txQueue: [],
-  connectedAepps: {},
-  migrations: {},
-  backedUpSeed: null,
-  tourRunning: false,
-  tourStartBar: true,
-  saveErrorLog: true,
-  loginTargetLocation: { name: 'account' },
-};
-
 export default new Vuex.Store({
-  state: { ...initialState },
-  getters,
-  mutations: {
-    setState(state, newState) {
-      Object.entries({ ...state, ...newState }).forEach(([name, value]) =>
-        Vue.set(state, name, value),
-      );
+  state: {
+    isRestored: false,
+    account: {},
+    mnemonic: null,
+    activeAccount: 0,
+    current: {
+      network: defaultNetwork.name,
+      token: 0,
+      currency: 'usd',
     },
-    resetState(state) {
-      Object.entries({ ...initialState, isRestored: true }).forEach(([name, value]) =>
-        Vue.set(state, name, value),
-      );
+    userNetworks: [],
+    isLoggedIn: false,
+    transactions: {
+      latest: [],
+      pending: [],
     },
-    ...mutations,
+    pageTitle: '',
+    sdk: null,
+    middleware: null,
+    tippingV1: null,
+    tippingV2: null,
+    mainLoading: true,
+    nodeStatus: 'connecting',
+    currencies: {},
+    nextCurrenciesFetch: null,
+    notifications: [],
+    notificationSettings: [],
+    chainNames: null,
+    tip: null,
+    txQueue: [],
+    connectedAepps: {},
+    migrations: {},
+    backedUpSeed: null,
+    tourRunning: false,
+    tourStartBar: true,
+    saveErrorLog: true,
+    loginTargetLocation: { name: 'account' },
   },
+  getters,
+  mutations,
   actions,
   plugins: [
     persistState(
@@ -85,19 +70,17 @@ export default new Vuex.Store({
         migrations,
         current,
         transactions,
-        balance,
         currencies,
         userNetworks,
-        names: { owned, defaults } = {},
+        names,
+        languages,
         nextCurrenciesFetch,
         tip,
-        connectedAepps,
         backedUpSeed,
         account,
         mnemonic,
         saveErrorLog,
         tourStartBar,
-        tokens: { all },
         invites,
         notificationSettings,
         permissions,
@@ -106,19 +89,17 @@ export default new Vuex.Store({
         migrations,
         current,
         transactions,
-        balance,
         currencies,
         userNetworks,
-        names: { owned, defaults },
+        names,
+        languages,
         nextCurrenciesFetch,
         tip,
-        connectedAepps,
         backedUpSeed,
         account,
         mnemonic,
         saveErrorLog,
         tourStartBar,
-        tokens: { all },
         invites,
         notificationSettings,
         permissions,
@@ -129,8 +110,9 @@ export default new Vuex.Store({
     modals,
     tipUrl,
     accounts,
-    tokens,
-    names,
+    namesPlugin,
+    pendingTransactionHandler,
+    languagesPlugin,
   ],
   modules: {
     invites: invitesModule,

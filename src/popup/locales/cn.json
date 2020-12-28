@@ -1,5 +1,7 @@
 {
   "ok": "好的",
+  "ae": "AE",
+  "mainAccount": "主账户",
   "onboarding": {
     "step_1": {
       "title": "你的账户信息",
@@ -206,17 +208,17 @@
     },
     "titles": {
       "settings": "设置",
-      "general": "语言",
+      "language": "语言",
       "security": "安全",
       "about": "关于",
-      "send": "打赏",
+      "send": "发送",
+      "send-tips": "打赏",
       "claim-tips": "领赏",
       "scanQr": "扫描二维码",
       "terms": "使用条款",
       "privacy": "隐私政策",
       "importAccount": "检索现有帐户",
       "activity": "历史活跃度",
-      "withdraw": "提币",
       "topUp": "充值",
       "notifications": "通知",
       "names": "名称",
@@ -233,54 +235,18 @@
       "sign-message": "签名信息",
       "invite": "邀请"
     },
-    "appVUE": {
-      "systemName": "超级英雄",
-      "manageNetworks": "管理网络",
-      "manageAccounts": "管理帐户",
-      "airGapVault": "为AirGap创建一个保险库",
-      "ledgerAccount": "添加分类帐户",
-      "menu": "菜单",
-      "myAccount": "我的帐户",
-      "switchToken": "代币",
-      "utilities": "公用事务",
-      "settings": "设置",
-      "logout": "退出",
-      "profile": "剖面",
-      "help": "帮助",
-      "topUp": "充值",
-      "withdraw": "提币",
-      "myTransactions": "我的交易",
-      "activity": "活跃度",
-      "dashboard": "仪表板",
-      "aeid": "AE",
-      "walletName": "超级英雄钱包",
-      "general": "概况",
-      "security": "安全",
-      "seedPhrase": "助记词",
-      "language": "语言",
-      "advanced": "高级",
-      "versions": "版本& 更新",
-      "mainAccount": "主账户",
-      "reportBug": "报告bug",
-      "names": "名称",
-      "networks": "网络",
-      "removeAccount": "移除帐户",
-      "donateErrorReports": "提交错误报告",
-      "tokens": "可替代的代币",
-      "manageTokens": "管理代币",
-      "invite": "邀请"
-    },
-    "aboutSettings": {
+    "about": {
       "heading": "关于",
       "systemName": "超级英雄",
       "terms": "使用条款",
-      "privacyPolicy": "隐私政策"
+      "privacyPolicy": "隐私政策",
+      "reportBug": "报告bug"
     },
     "account": {
       "heading": "帐户",
+      "activity": "活跃度",
       "accountName": "帐户名称",
       "copy": "复制",
-      "send": "打赏",
       "claim": "领赏",
       "receive": "接收",
       "wholeTransaction": "所有转帐记录",
@@ -290,9 +256,8 @@
       "howToClaim": "如何领取AE",
       "balance": "余额",
       "copied": "已复制!",
-      "youNeedTo": "你需要",
+      "seedNotification": "你需要 {0} 你的助记词",
       "backup": "备份",
-      "yourSeedPhrase": "你的助记词",
       "updateExtension": "有新版本!请更新扩展",
       "updateAvailable": "商店中有新版本!",
       "claim-name": "申明你的.chain名称"
@@ -500,7 +465,7 @@
         "bid-added": "加价成功"
       }
     },
-    "generalSettings": {
+    "languageSettings": {
       "backToSettings": "返回设置",
       "heading": "语言",
       "switchLanguage": "语言",
@@ -585,11 +550,9 @@
       "showPrivateKey": "显示私钥",
       "incorrectPassword": "密码错误",
       "decryptingPrivateKey": "解密私钥",
-      "showSeedPhrase": "显示助记词",
       "seedRecoveryHeading": "显示助记词",
       "seedRecoverySmall": "你的助记词（也被称为私钥）是访问你的帐户的钥匙或密码。请不要向任何人展示。并请确定你已在没有其他人可以看到同时你自己永远不会丢失的纸上备份了助记词。丢失了钥匙意味着不能再访问你的钱包和小费",
       "seedRecoveryBtn": "显示助记词",
-      "seedPhraseWarning": "不要向任何人展示你的私钥，私钥可以用于从你所有的帐户里盗窃",
       "seedPhrase": "你的助记词",
       "copy": "复制到剪贴板"
     },
@@ -618,7 +581,6 @@
     "send": {
       "backToAccount": "返回账户",
       "heading": "新的转账",
-      "recipient": "收据",
       "txFee": "最少转账手续费",
       "maxSpendableValue": "最大可转账价值",
       "send": "发送",
@@ -629,15 +591,15 @@
       "review": "接收",
       "reviewtx": "接收转账",
       "checkalert": "清仔细核对转账信息。",
-      "sendingAddress": "发送地址",
-      "receivingAddress": "接收地址",
+      "sender": "发送地址",
+      "recipient": "接收地址",
       "amount": "数量",
       "editTxDetails": "编辑转账细节",
       "tx-success": "完成转账",
       "successalert": "您已成功发送 ",
       "to": "到",
       "from": "从",
-      "txhash": "转账Hash",
+      "hash": "转账Hash",
       "home": "主页"
     },
     "settings": {
@@ -909,7 +871,7 @@
       "error": "无法连接到所选节点",
       "connecting": "连接节点中...",
       "connected": "已连接",
-      "init": "初始化服务..."
+      "initServices": "初始化服务..."
     },
     "popupMessageSign": {
       "heading": "想要签名消息",

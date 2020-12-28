@@ -1,6 +1,6 @@
-import { i18n } from '../popup/utils/i18nHelper';
+import { i18n } from '../store/plugins/languages';
 
-export default blocks => {
+export default (blocks) => {
   const minutes = blocks * 3;
   const minutesPerHour = 60;
   const minutesPerDay = minutesPerHour * 24;

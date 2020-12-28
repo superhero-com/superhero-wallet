@@ -17,7 +17,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../common/variables.scss';
+@import '../../../styles/variables.scss';
 
 .range-input {
   -webkit-appearance: none;

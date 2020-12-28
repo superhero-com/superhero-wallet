@@ -3,7 +3,7 @@ import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { testAccount, txParams } from './config';
 import runMigrations from '../../store/migrations';
 
-export const formatDate = time =>
+export const formatDate = (time) =>
   // TODO: Use the current language from i18n module
   new Date(+time).toLocaleString(navigator.language, {
     timeStyle: 'short',
@@ -27,4 +27,4 @@ export const getLoginState = async ({ backedUpSeed, balance, name, pendingTransa
   };
 };
 
-export const buildTx = txtype => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);
+export const buildTx = (txtype) => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);

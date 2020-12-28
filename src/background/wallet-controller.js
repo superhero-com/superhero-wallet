@@ -1,5 +1,5 @@
-import { generateHdWallet, getHdWalletAccount } from './popup/utils/hdWallet';
-import { stringifyForStorage, parseFromStorage } from './popup/utils/helper';
+import { generateHdWallet, getHdWalletAccount } from '../popup/utils/hdWallet';
+import { stringifyForStorage, parseFromStorage } from '../popup/utils/helper';
 
 class WalletController {
   generateWallet({ seed }) {

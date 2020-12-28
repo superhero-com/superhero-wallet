@@ -25,6 +25,7 @@ describe('Test cases for Front Page', () => {
       .should('not.exist')
 
       .goBack()
+      .goBack()
       .openImportWallet()
       .get('[data-cy=import-wallet]')
       .should('not.exist')

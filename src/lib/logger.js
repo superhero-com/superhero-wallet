@@ -14,8 +14,8 @@ export default class Logger {
       Vue.config.errorHandler = (error, vm, info) => {
         console.error(info);
         console.error(error);
-        Object.assign(error, { info, type: 'vue-error' });
-        Logger.write(error);
+        if (error.message !== 'Rejected by user')
+          Logger.write({ message: error.toString(), info, type: 'vue-error' });
       };
 
       Vue.config.warnHandler = (message, vm, info) => {
@@ -29,7 +29,7 @@ export default class Logger {
       };
     }
 
-    window.addEventListener('unhandledrejection', async promise => {
+    window.addEventListener('unhandledrejection', async (promise) => {
       const { stack, message, name } = promise.reason || {};
       if (
         (typeof promise.reason === 'string' &&

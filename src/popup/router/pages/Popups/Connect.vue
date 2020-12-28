@@ -90,10 +90,6 @@ export default {
         this.data.resolve();
         return;
       }
-      await this.$store.dispatch('setPermissionForAccount', {
-        host: this.data.host,
-        account: this.account.publicKey,
-      });
       this.data.resolve(true);
     },
   },
@@ -109,7 +105,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../common/variables';
+@import '../../../../styles/variables';
 
 .identiconContainer {
   position: relative;
@@ -131,7 +127,7 @@ export default {
     }
 
     .ae-identicon {
-      height: 4rem !important;
+      height: 4rem;
       position: relative;
       z-index: 1;
       width: auto;

@@ -1,7 +1,8 @@
 <template>
   <Modal v-if="browserReader || !cameraAllowed" @close="resolve" close>
     <template slot="header">{{ title }}</template>
-    <div class="qr-code-reader" slot="body">
+
+    <div class="qr-code-reader">
       <div v-show="cameraAllowed">
         <video v-show="cameraAllowed" ref="qrCodeVideo" />
       </div>
@@ -17,7 +18,7 @@ import { BrowserQRCodeReader } from '@zxing/library/esm5/browser/BrowserQRCodeRe
 import Modal from '../Modal';
 import openUrl from '../../../utils/openUrl';
 
-const handleUnknownError = error => console.log(error);
+const handleUnknownError = (error) => console.log(error);
 
 export default {
   components: { Modal },
@@ -51,10 +52,7 @@ export default {
                 reject();
               }
               if (navigator.mediaDevices.getUserMedia)
-                navigator.mediaDevices
-                  .getUserMedia({ video: true })
-                  .then(resolve)
-                  .catch(reject);
+                navigator.mediaDevices.getUserMedia({ video: true }).then(resolve).catch(reject);
               else reject(new Error('Sorry, your browser does not support getUserMedia'));
             });
           } catch {
@@ -88,7 +86,7 @@ export default {
 
     const status =
       navigator.permissions &&
-      (await navigator.permissions.query({ name: 'camera' }).catch(error => {
+      (await navigator.permissions.query({ name: 'camera' }).catch((error) => {
         const firefoxExceptionMessage =
           "'name' member of PermissionDescriptor 'camera' is not a valid value for enumeration PermissionName.";
         if (error.message !== firefoxExceptionMessage) handleUnknownError(error);
@@ -117,9 +115,7 @@ export default {
             this.style = document.createElement('style');
             this.style.type = 'text/css';
             this.style.appendChild(
-              document.createTextNode(
-                'html, body, .ae-main { background: transparent !important }',
-              ),
+              document.createTextNode('html, body, .ae-main { background: transparent }'),
             );
             document.head.appendChild(this.style);
             document.querySelector('.popup').style.display = 'none';
@@ -135,20 +131,20 @@ export default {
       if (process.env.PLATFORM === 'cordova') {
         if (document.head.contains(this.style)) document.head.removeChild(this.style);
         document.querySelector('.popup').style.display = '';
-        document.querySelector('.header .content div:not(.title)').style.display = 'none';
+        document.querySelector('.header .content div:not(.title)').style.display = '';
         document.querySelector('.header .title').innerText = this.headerText;
         window.QRScanner.destroy();
       } else this.browserReader.reset();
     },
     cancelReading() {
       this.stopReading();
-      this.reject(new Error('Cancelled by user'));
+      this.reject(new Error('Rejected by user'));
     },
   },
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .qr-code-reader video {
   max-width: 70vw;
 }

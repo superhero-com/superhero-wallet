@@ -22,7 +22,6 @@ describe('Test cases for Terms & Conditions page', () => {
       .goBack()
       .get('[data-cy=accordion-item]')
       .should('not.be.visible')
-      .get('[data-cy=checkbox]')
-      .should('be.visible');
+      .urlEquals('/about');
   });
 });

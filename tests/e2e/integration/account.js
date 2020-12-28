@@ -4,8 +4,8 @@ describe('Test cases for Account Page', () => {
   });
 
   it('Checks dissapearing seed phrase backup button, opens/close sidebar, checks copy button, contains a claim name message', () => {
-    cy.get('[data-cy=seed-notif]')
-      .should('not.be.visible')
+    cy.get('.seed-backup-notification')
+      .should('be.visible')
 
       .openMenu()
       .menuShould('be.visible')
