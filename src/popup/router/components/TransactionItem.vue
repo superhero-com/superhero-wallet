@@ -139,6 +139,7 @@ export default {
     .status {
       font-size: 14px;
       color: $white-color;
+      text-align: left;
 
       .sent {
         color: #a32e2d;
