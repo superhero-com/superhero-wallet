@@ -99,12 +99,6 @@ export default {
         this.transaction.tx.recipientId === this.account.publicKey
       );
     },
-    withdraw() {
-      return (
-        this.transaction.tx.type === 'SpendTx' &&
-        this.transaction.tx.senderId === this.account.publicKey
-      );
-    },
     transactionType() {
       return this.$t('transaction.type')[this.transaction.tx.type];
     },

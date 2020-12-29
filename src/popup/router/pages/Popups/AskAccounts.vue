@@ -11,7 +11,7 @@
         <p>{{ $t('pages.connectConfirm.addressesRequest') }}</p>
       </ae-list-item>
     </ul>
-    <div class="btnFixed">
+    <div class="button-fixed">
       <Button half dark @click="cancel" :disabled="!data.reject">
         {{ $t('pages.connectConfirm.cancelButton') }}
       </Button>
