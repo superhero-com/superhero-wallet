@@ -8,7 +8,8 @@
   "scripts": {
     "lint:vue": "eslint --ext .js,.vue src tests",
     "lint:css": "stylelint src/**/*.{css,scss,vue}",
-    "lint": "npm run lint:vue && npm run lint:css",
+    "lint:commit": "commitlint --from develop --verbose",
+    "lint": "npm run lint:commit && npm run lint:vue && npm run lint:css",
     "prettier": "prettier \"src/**/*.{js,vue}\" \"tests/**/*.{js,vue}\"",
     "prettier:write": "npm run prettier -- --write",
     "build": "cross-env NODE_ENV=production webpack --hide-modules",
@@ -69,6 +70,8 @@
     "@babel/plugin-proposal-class-properties": "^7.12.1",
     "@babel/plugin-proposal-optional-chaining": "^7.12.7",
     "@babel/preset-env": "^7.12.11",
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
     "@cypress/webpack-preprocessor": "^4.1.5",
     "archiver": "^3.1.1",
     "babel-eslint": "^10.1.0",
