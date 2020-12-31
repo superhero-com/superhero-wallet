@@ -7,6 +7,9 @@ jobs:
       APP_NAME: wallet
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 100
+      - run: git fetch --depth=1 origin develop && git branch develop origin/develop
       - uses: actions/setup-node@v2
         with:
           node-version: 14.x

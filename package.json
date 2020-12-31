@@ -8,7 +8,8 @@
   "scripts": {
     "lint:vue": "eslint --ext .js,.vue src tests",
     "lint:css": "stylelint src/**/*.{css,scss,vue}",
-    "lint": "npm run lint:vue && npm run lint:css",
+    "lint:commit": "commitlint --from develop --verbose",
+    "lint": "npm run lint:commit && npm run lint:vue && npm run lint:css",
     "prettier": "prettier \"src/**/*.{js,vue}\" \"tests/**/*.{js,vue}\"",
     "prettier:write": "npm run prettier -- --write",
     "build": "cross-env NODE_ENV=production webpack --hide-modules",
@@ -24,7 +25,8 @@
     "build:Testnet": "cross-env NETWORK=Testnet npm run build",
     "watch:dev:Testnet": "cross-env NETWORK=Testnet npm run watch:dev",
     "watch:dev:tests": "cross-env NETWORK=Testnet RUNNING_IN_TESTS=true npm run watch:dev",
-    "build:tests": "cross-env NETWORK=Testnet RUNNING_IN_TESTS=true npm run build:dev"
+    "build:tests": "cross-env NETWORK=Testnet RUNNING_IN_TESTS=true npm run build:dev",
+    "release": "standard-version"
   },
   "dependencies": {
     "@aeternity/aepp-components-3": "3.0.0-alpha.9",
@@ -68,6 +70,8 @@
     "@babel/plugin-proposal-class-properties": "^7.12.1",
     "@babel/plugin-proposal-optional-chaining": "^7.12.7",
     "@babel/preset-env": "^7.12.11",
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
     "@cypress/webpack-preprocessor": "^4.1.5",
     "archiver": "^3.1.1",
     "babel-eslint": "^10.1.0",
@@ -102,6 +106,7 @@
     "prettier": "^2.2.1",
     "sass-loader": "^7.3.1",
     "serve": "^11.3.2",
+    "standard-version": "^9.0.0",
     "start-server-and-test": "^1.11.6",
     "stylelint": "^13.8.0",
     "stylelint-config-standard": "^20.0.0",
@@ -112,7 +117,8 @@
     "webpack": "^4.44.2",
     "webpack-bundle-analyzer": "^3.9.0",
     "webpack-chrome-extension-reloader": "^0.8.3",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "^3.3.12",
+    "xml-js": "^1.6.11"
   },
   "cordova": {
     "plugins": {
