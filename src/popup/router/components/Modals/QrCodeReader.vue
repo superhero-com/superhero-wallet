@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { BrowserQRCodeReader } from '@zxing/library/esm5/browser/BrowserQRCodeReader';
+import { BrowserQRCodeReader } from '@zxing/library/esm/browser/BrowserQRCodeReader';
 import Modal from '../Modal';
 import openUrl from '../../../utils/openUrl';
 
