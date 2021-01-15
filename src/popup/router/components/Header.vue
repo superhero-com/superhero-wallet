@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapMutations } from 'vuex';
 import Arrow from '../../../icons/arrow.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
 import Hamburger from '../../../icons/hamburger.svg?vue-component';
@@ -63,14 +63,22 @@ export default {
     },
   },
   methods: {
+    ...mapMutations(['setNotificationsStatus']),
     back() {
       const fallBackRoute = this.isLoggedIn ? '/account' : '/';
       this.$router.push(
         this.$route.fullPath.substr(0, this.$route.fullPath.lastIndexOf('/')) || fallBackRoute,
       );
     },
-    toNotifications() {
-      if (this.notificationsCount && this.$store.state.route.fullPath !== '/notifications') {
+    async toNotifications() {
+      this.notifications.forEach((n) =>
+        this.setNotificationsStatus({ createdAt: n.createdAt, status: 'PEEKED' }),
+      );
+      await this.$store.dispatch('modifyNotifications', [
+        this.superheroNotifications.filter((n) => n.status === 'CREATED').map((n) => n.id),
+        'PEEKED',
+      ]);
+      if (this.$store.state.route.fullPath !== '/notifications') {
         this.$router.push('/notifications');
       }
     },

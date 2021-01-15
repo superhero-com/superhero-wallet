@@ -1,5 +1,5 @@
 <template>
-  <div class="notification-item" @click="$emit('click', $event)">
+  <div :class="['notification-item', status]" @click="$emit('click')">
     <div class="first-row">
       <img v-if="wallet" src="../../../icons/logo-small.svg" />
       <Avatar v-else :address="address" />
@@ -14,6 +14,15 @@
           {{ wallet ? text : address }}
         </span>
       </div>
+      <ThreeDotsMenu @click.native.stop>
+        <div class="mark-as-read" @click="$emit('toggle-read')">
+          {{
+            status === 'read'
+              ? $t('pages.notifications.markAsUnread')
+              : $t('pages.notifications.markAsRead')
+          }}
+        </div>
+      </ThreeDotsMenu>
     </div>
     <div class="second-row">
       <span v-if="!wallet" class="notification-text">
@@ -29,11 +38,13 @@
 <script>
 import FormatDate from './FormatDate';
 import Avatar from './Avatar';
+import ThreeDotsMenu from './ThreeDotsMenu';
 
 export default {
   components: {
     FormatDate,
     Avatar,
+    ThreeDotsMenu,
   },
   props: {
     address: { type: String, default: '' },
@@ -41,6 +52,10 @@ export default {
     text: { type: String, default: '' },
     to: { type: [String, Object, URL], required: true },
     wallet: { type: Boolean },
+    status: {
+      type: String,
+      validator: (value) => ['created', 'peeked', 'read'].includes(value),
+    },
   },
 };
 </script>
@@ -52,11 +67,39 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 1rem 0.9rem 1rem;
+  padding: 0.9rem 1rem;
+  margin-top: 0.1rem;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+
+  &.created,
+  &.peeked {
+    background-color: #141414;
+
+    .three-dots,
+    .format-date {
+      color: #1161fe;
+    }
+  }
+
+  &.read {
+    background-color: #0f0f0f;
+
+    .three-dots,
+    .format-date {
+      color: #787878;
+    }
+
+    .three-dots:hover {
+      color: #babac0;
+    }
+  }
 
   .first-row {
     width: 100%;
     display: flex;
+    justify-content: space-between;
 
     .avatar,
     img {
@@ -64,10 +107,10 @@ export default {
     }
 
     .address-and-menu {
-      margin-left: 0.5rem;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
+      flex-grow: 1;
+      margin-left: 5px;
+      min-width: 0;
+      overflow-wrap: break-word;
 
       .address {
         font-size: 0.55rem;
@@ -89,18 +132,43 @@ export default {
     justify-content: space-between;
 
     .notification-text {
+      word-break: break-all;
       color: $text-color;
     }
 
     .format-date {
-      color: #727278;
+      flex-basis: 100px;
+      text-align: right;
+      align-self: flex-end;
       font-size: 0.75rem;
+      white-space: nowrap;
 
       &.wallet {
         width: 100%;
         text-align: right;
         margin-top: -1.4rem;
       }
+    }
+  }
+
+  .three-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: -3px;
+    height: 30px;
+    padding: 2px;
+    font-size: 1.5rem;
+
+    &:hover {
+      box-sizing: border-box;
+      border-radius: 50%;
+      background-color: #0a0a0a;
+    }
+
+    .mark-as-read {
+      font-size: 0.9rem;
+      line-height: 1.2rem;
     }
   }
 }

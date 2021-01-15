@@ -15,12 +15,10 @@
     position: fixed;
     right: 0;
     top: 0;
-    z-index: 500;
   }
 
   .not-bootstrap-modal-content {
     position: absolute;
-    z-index: 500;
   }
 }
 </style>

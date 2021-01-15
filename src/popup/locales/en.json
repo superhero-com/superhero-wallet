@@ -563,10 +563,9 @@
       "add": "Add"
     },
     "notifications": {
-      "new": "New",
+      "all": "All",
       "wallet": "Wallet",
       "superhero": "Superhero.com",
-      "read": "Read",
       "markAsRead": "Mark as Read",
       "markAsUnread": "Mark as Unread",
       "commentOnComment": "replied to your comment.",
