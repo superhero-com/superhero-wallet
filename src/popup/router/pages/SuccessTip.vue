@@ -26,7 +26,9 @@
         "
       />
       {{ $t('pages.successTip.notifyTo') }}
-      <Textarea v-model="note" :value="note" size="h-50" />
+      <div class="note">
+        {{ note }}
+      </div>
     </div>
     <p class="f-14 sub-heading text-left" v-if="!(tipUrl && isVerifiedUrl)">
       {{ $t('pages.successTip.note') }}
@@ -52,7 +54,6 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import Heart from '../../../icons/heart.svg?vue-component';
-import Textarea from '../components/Textarea';
 import openUrl from '../../utils/openUrl';
 import { AGGREGATOR_URL } from '../../utils/constants';
 import { aettosToAe } from '../../utils/helper';
@@ -63,7 +64,6 @@ import Button from '../components/Button';
 export default {
   components: {
     Heart,
-    Textarea,
     TokenAmount,
     Button,
   },
@@ -115,5 +115,15 @@ export default {
   font-size: 14px;
   font-weight: normal;
   margin: 8px 0;
+}
+
+.note {
+  color: $text-color;
+  font-size: $font-size;
+  min-height: 100px;
+  border-radius: 5px;
+  border: 2px solid $border-color;
+  background: $input-bg-color;
+  padding: 15px;
 }
 </style>
