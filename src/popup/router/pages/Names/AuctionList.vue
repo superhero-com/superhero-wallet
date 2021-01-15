@@ -37,7 +37,7 @@ import { pick } from 'lodash-es';
 import NameListHeader from '../../components/NameListHeader';
 import Button from '../../components/Button';
 import NameRow from '../../components/NameRow';
-import blocksToRelativeTime from '../../../../filters/blocksToRelativeTime';
+import { blocksToRelativeTime } from '../../../../filters/toRelativeTime';
 
 export default {
   components: { NameListHeader, Button, NameRow },
