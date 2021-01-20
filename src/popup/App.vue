@@ -155,6 +155,7 @@ body {
   }
 
   &.ae-main-wave {
+    height: 100%;
     background-position: center bottom;
     background-repeat: no-repeat;
     background-image: url('../icons/background-big-wave.png');
