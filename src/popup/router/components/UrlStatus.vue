@@ -1,5 +1,5 @@
 <template>
-  <Component :is="Icon" class="url-status" @click="showModal" :class="{ modal }" />
+  <Component :is="Icon" class="url-status" @click="showModal" :class="{ modal, info }" />
 </template>
 
 <script>
@@ -7,9 +7,6 @@ import Verified from '../../../icons/badges/verified.svg?vue-component';
 import Blacklisted from '../../../icons/badges/blacklisted.svg?vue-component';
 import NotVerified from '../../../icons/badges/not-verified.svg?vue-component';
 import Default from '../../../icons/badges/default.svg?vue-component';
-import VerifiedBig from '../../../icons/badges/verified-big.svg?vue-component';
-import BlacklistedBig from '../../../icons/badges/blacklisted-big.svg?vue-component';
-import NotVerifieddBig from '../../../icons/badges/not-verified-big.svg?vue-component';
 
 export default {
   props: {
@@ -28,11 +25,11 @@ export default {
     Icon() {
       switch (this.status) {
         case 'verified':
-          return this.info ? Verified : VerifiedBig;
+          return Verified;
         case 'blacklisted':
-          return this.info ? Blacklisted : BlacklistedBig;
+          return Blacklisted;
         case 'not-verified':
-          return this.info ? NotVerified : NotVerifieddBig;
+          return NotVerified;
         case 'default':
           return Default;
         default:
@@ -57,7 +54,14 @@ export default {
 .url-status {
   cursor: pointer;
 
+  &.info {
+    width: 18px;
+    height: 18px;
+  }
+
   &.modal {
+    width: 26px;
+    height: 26px;
     cursor: unset;
     position: absolute;
     left: 50%;
