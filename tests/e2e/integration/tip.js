@@ -40,7 +40,7 @@ describe('Test cases for tip page', () => {
 
       .goBack()
       .get('[data-cy=tip-container]')
-      .should('not.be.visible')
+      .should('not.exist')
       .openTip()
       .get('[data-cy=input-number]')
       .should('have.value', tip.amount.toString())

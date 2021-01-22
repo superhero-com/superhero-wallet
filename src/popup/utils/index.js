@@ -10,7 +10,13 @@ export const formatDate = (time) =>
     dateStyle: 'short',
   });
 
-export const getLoginState = async ({ backedUpSeed, balance, name, pendingTransaction }) => {
+export const getLoginState = async ({
+  backedUpSeed,
+  balance,
+  name,
+  pendingTransaction,
+  network,
+}) => {
   const { mnemonic, publicKey } = testAccount;
   const account = {
     publicKey,
@@ -21,6 +27,7 @@ export const getLoginState = async ({ backedUpSeed, balance, name, pendingTransa
     account,
     mnemonic,
     backedUpSeed,
+    current: { network: network || 'Testnet', token: 0, currency: 'usd' },
     balance,
     ...(name && { names: { defaults: { [`${account.publicKey}-ae_uat`]: name } } }),
     ...(pendingTransaction && { transactions: { latest: [], pending: [pendingTransaction] } }),

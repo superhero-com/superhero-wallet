@@ -10,7 +10,7 @@ describe('Test cases for Account Page', () => {
       .openMenu()
       .menuShould('be.visible')
       .closeMenu()
-      .menuShould('not.be.visible')
+      .menuShould('not.exist')
 
       .get('[data-cy=copy]')
       .click()
