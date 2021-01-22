@@ -8,7 +8,8 @@
       :key="setting.type"
       :class="['iframe', { unchecked: !setting.checked }]"
       :disabled="setting.type === 'wallet'"
-      v-model="setting.checked"
+      :value="setting.checked"
+      @input="toggleNotificationSetting(setting.type)"
     >
       {{ setting.text }}
     </CheckBox>
@@ -16,12 +17,13 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapMutations, mapState } from 'vuex';
 import CheckBox from '../components/CheckBox';
 
 export default {
   components: { CheckBox },
   computed: mapState(['notificationSettings']),
+  methods: mapMutations(['toggleNotificationSetting']),
 };
 </script>
 
