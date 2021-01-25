@@ -74,6 +74,12 @@ export default {
       margin-right: auto;
     }
 
+    .copied-alert,
+    button {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
     .copied-alert {
       color: $button-color;
       margin-right: 7px;
@@ -81,6 +87,7 @@ export default {
     }
 
     button {
+      font-family: inherit;
       padding: 0;
     }
   }
