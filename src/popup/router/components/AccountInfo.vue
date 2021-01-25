@@ -3,13 +3,15 @@
     <div class="title">
       <div class="account-name" data-cy="account-name">
         <Avatar :address="account.publicKey" :name="account.name" class="avatar" size="small" />
-        <template v-if="activeAccountName.includes('.chain')">{{ activeAccountName }}</template>
+        <span class="chainname" v-if="activeAccountName.includes('.chain')">{{
+          activeAccountName
+        }}</span>
         <router-link class="claim-chainname" to="/names" v-else
           >{{ $t('pages.account.claim-name') }}
         </router-link>
       </div>
       <div class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</div>
-      <button data-cy="copy" @click="copy" v-clipboard:copy="account.publicKey">
+      <button v-else data-cy="copy" @click="copy" v-clipboard:copy="account.publicKey">
         {{ $t('pages.account.copy') }}
       </button>
     </div>
@@ -48,6 +50,7 @@ export default {
   .title {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     margin-bottom: 4px;
     line-height: 21px;
 
@@ -59,10 +62,15 @@ export default {
       font-weight: 400;
       color: #fff;
       line-height: 21px;
-      margin-right: auto;
+      margin-right: 10px;
       display: flex;
       align-items: center;
       justify-content: start;
+      overflow: hidden;
+
+      .chainname {
+        overflow: scroll;
+      }
 
       .avatar {
         margin-right: 10px;
@@ -82,7 +90,6 @@ export default {
 
     .copied-alert {
       color: $button-color;
-      margin-right: 7px;
       margin-left: auto;
     }
 
