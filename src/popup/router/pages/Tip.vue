@@ -143,7 +143,7 @@ export default {
         if (
           this.selectedToken
             ? +this.selectedToken.convertedBalance < +this.amount || this.balance < fee
-            : this.balance < fee + +this.amount
+            : this.balance < +fee + +this.amount
         ) {
           return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
         }
