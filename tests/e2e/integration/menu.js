@@ -20,13 +20,13 @@ describe('Test cases for menu sidebar component', () => {
       .toggleDropdown()
       .dropdownShould('be.visible')
       .toggleDropdown()
-      .dropdownShould('not.be.visible')
+      .dropdownShould('not.exist')
 
       .get('[data-cy=chain-name]')
       .should('not.exist')
 
       .closeMenu()
-      .menuShould('not.be.visible')
+      .menuShould('not.exist')
 
       .openMenu()
       .menuShould('be.visible')
@@ -35,7 +35,7 @@ describe('Test cases for menu sidebar component', () => {
         cy.get(`[data-cy=${link}]`).should('have.attr', 'href').and('include', `/${link}`);
       });
 
-    cy.closeMenu('overlay').menuShould('not.be.visible');
+    cy.closeMenu('overlay').menuShould('not.exist');
   });
 
   it(`Opens each non-dropdown page and returns to account page`, () => {
@@ -47,7 +47,7 @@ describe('Test cases for menu sidebar component', () => {
         .get('[data-cy=balance-info]')
         .should('be.visible')
         .get('[data-cy=back-arrow]')
-        .should('not.be.visible');
+        .should('not.exist');
     });
   });
 

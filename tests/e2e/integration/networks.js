@@ -41,7 +41,7 @@ describe('Test cases for networks page', () => {
       .should('be.visible')
       .click()
       .get('[data-cy=cancel]')
-      .should('not.be.visible');
+      .should('not.exist');
   });
 
   it('Can add, select, edit, delete new network, can not add network with the same name', () => {
@@ -56,7 +56,7 @@ describe('Test cases for networks page', () => {
       .goBack()
       .goBack()
       .get('.transaction-list')
-      .should('not.be.visible')
+      .should('not.exist')
 
       .openNetworks()
       .get('[data-cy=more]')
@@ -85,7 +85,7 @@ describe('Test cases for networks page', () => {
       .goBack()
       .goBack()
       .get('.transaction-list')
-      .should('be.visible')
+      .should('exist')
 
       .openNetworks()
       .get('[data-cy=to-add]')
