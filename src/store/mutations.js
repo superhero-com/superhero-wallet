@@ -64,7 +64,7 @@ export default {
       ...state.notifications,
       {
         ...payload,
-        wallet: true,
+        type: 'wallet',
         status: 'CREATED',
         createdAt: new Date().toISOString(),
       },

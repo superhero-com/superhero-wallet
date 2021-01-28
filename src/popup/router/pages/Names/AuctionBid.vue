@@ -26,7 +26,7 @@
 
 <script>
 import { pick } from 'lodash-es';
-import blocksToRelativeTime from '../../../../filters/blocksToRelativeTime';
+import { blocksToRelativeTime } from '../../../../filters/toRelativeTime';
 import Button from '../../components/Button';
 import AmountSend from '../../components/AmountSend';
 import { aeToAettos } from '../../../utils/helper';
