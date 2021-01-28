@@ -11,7 +11,7 @@
         </router-link>
       </div>
       <div class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</div>
-      <button v-else data-cy="copy" @click="copy" v-clipboard:copy="account.publicKey">
+      <button v-show="!copied" data-cy="copy" @click="copy" v-clipboard:copy="account.publicKey">
         {{ $t('pages.account.copy') }}
       </button>
     </div>
