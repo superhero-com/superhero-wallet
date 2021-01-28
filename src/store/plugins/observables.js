@@ -1,10 +1,11 @@
 import { BehaviorSubject, timer } from 'rxjs';
 import { multicast, pluck, switchMap, map, filter } from 'rxjs/operators';
 import { refCountDelay } from 'rxjs-etc/operators';
+import { asBigNumber } from '@aeternity/aepp-sdk/es/utils/bignumber';
 import {
   isNotFoundError,
   handleUnknownError,
-  convertToAE,
+  aettosToAe,
   setBalanceLocalStorage,
   getBalanceLocalStorage,
 } from '../../popup/utils/helper';
@@ -38,13 +39,13 @@ export default (store) => {
       }),
     ),
     map((balanceAettos) => {
-      const balance = convertToAE(balanceAettos);
+      const balance = aettosToAe(balanceAettos);
       if (balance !== getBalanceLocalStorage()) {
         setBalanceLocalStorage(balance);
       }
-      return balance;
+      return asBigNumber(balance);
     }),
-    multicast(new BehaviorSubject(getBalanceLocalStorage())),
+    multicast(new BehaviorSubject(asBigNumber(getBalanceLocalStorage()))),
     refCountDelay(1000),
   );
 
@@ -81,7 +82,7 @@ export default (store) => {
       pluck('newValue'),
       switchMap((p) => timer(0, 3000).pipe(map(() => p))),
       switchMap((tokenBalance) => (tokenBalance ? Promise.resolve(tokenBalance) : balance$)),
-      multicast(new BehaviorSubject(0)),
+      multicast(new BehaviorSubject(asBigNumber(0))),
       refCountDelay(1000),
     ),
     balanceCurrency: watchAsObservable((state, getters) => getters.currentCurrencyRate, {

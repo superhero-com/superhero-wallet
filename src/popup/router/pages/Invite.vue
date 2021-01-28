@@ -5,7 +5,7 @@
       {{ $t('pages.invite.generate-link') }}
     </p>
     <AmountSend v-model="amount" :label="$t('pages.invite.tip-attached')" />
-    <Button bold :disabled="balance < amount" @click="generate">{{
+    <Button bold :disabled="!sufficientBalance" @click="generate">{{
       $t('pages.invite.generate')
     }}</Button>
     <div class="generated-links">
@@ -44,6 +44,9 @@ export default {
   computed: {
     ...mapState(['sdk']),
     ...mapState('invites', ['invites']),
+    sufficientBalance() {
+      return this.balance.comparedTo(this.amount) !== -1;
+    },
   },
   methods: {
     async generate() {

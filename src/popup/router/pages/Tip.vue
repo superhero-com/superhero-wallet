@@ -142,8 +142,9 @@ export default {
         });
         if (
           this.selectedToken
-            ? +this.selectedToken.convertedBalance < +this.amount || this.balance < fee
-            : this.balance < fee + +this.amount
+            ? +this.selectedToken.convertedBalance < +this.amount ||
+              this.balance.comparedTo(fee) === -1
+            : this.balance.comparedTo(fee.plus(this.amount)) === -1
         ) {
           return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
         }
