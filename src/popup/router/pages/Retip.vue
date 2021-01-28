@@ -83,7 +83,7 @@ export default {
         });
         if (
           this.selectedToken
-            ? +this.selectedToken.convertedBalance < +this.amount ||
+            ? this.selectedToken.balance.comparedTo(this.amount) === -1 ||
               this.balance.comparedTo(fee) === -1
             : this.balance.comparedTo(fee.plus(this.amount)) === -1
         ) {
