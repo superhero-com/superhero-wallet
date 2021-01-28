@@ -31,6 +31,8 @@ export default {
           return this.$t('modals.not-verified');
         case 'blacklisted':
           return this.$t('modals.blacklisted');
+        case 'not-secure':
+          return this.$t('modals.not-secure');
         default:
           throw new Error(`Unknown url status: ${this.status}`);
       }

@@ -1,4 +1,4 @@
-import { getTwitterAccountUrl, fetchJson } from '../../popup/utils/helper';
+import { getTwitterAccountUrl, fetchJson, validateTipUrl } from '../../popup/utils/helper';
 
 export default (store) =>
   store.registerModule('tipUrl', {
@@ -19,6 +19,8 @@ export default (store) =>
           status = 'blacklisted';
         } else if (verifiedUrls.includes(url)) {
           status = 'verified';
+        } else if (validateTipUrl(url) && url.startsWith('http:')) {
+          status = 'not-secure';
         } else {
           status = 'not-verified';
         }

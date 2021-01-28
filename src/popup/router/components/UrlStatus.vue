@@ -5,6 +5,7 @@
 <script>
 import Verified from '../../../icons/badges/verified.svg?vue-component';
 import Blacklisted from '../../../icons/badges/blacklisted.svg?vue-component';
+import NotSecure from '../../../icons/badges/not-secure.svg?vue-component';
 import NotVerified from '../../../icons/badges/not-verified.svg?vue-component';
 import Default from '../../../icons/badges/default.svg?vue-component';
 
@@ -28,6 +29,8 @@ export default {
           return Verified;
         case 'blacklisted':
           return Blacklisted;
+        case 'not-secure':
+          return NotSecure;
         case 'not-verified':
           return NotVerified;
         case 'default':
