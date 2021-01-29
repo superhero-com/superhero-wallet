@@ -22,7 +22,7 @@ import { mapState } from 'vuex';
 import NameListHeader from '../../components/NameListHeader';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import { MAX_AUCTION_NAME_LENGTH, MIN_NAME_LENGTH } from '../../../utils/constants';
+import { MAX_AUCTION_NAME_LENGTH } from '../../../utils/constants';
 
 export default {
   components: { NameListHeader, Input, Button },
@@ -30,7 +30,7 @@ export default {
   computed: {
     ...mapState(['sdk']),
     validName() {
-      return this.name && /^[A-Za-z0-9]+$/.test(this.name) && this.name.length >= MIN_NAME_LENGTH;
+      return this.name && /^[A-Za-z0-9]+$/.test(this.name);
     },
   },
   methods: {
