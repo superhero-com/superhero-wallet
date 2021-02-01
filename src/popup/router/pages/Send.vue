@@ -12,11 +12,11 @@
             }}</span>
             {{ $t('pages.tipPage.to') }}
           </p>
-          <div class="d-flex">
+          <div :class="['d-flex', { 'error-below': form.address.length > 0 && !validAddress }]">
             <Textarea
               :type="address"
               data-cy="address"
-              :error="form.address && !validAddress"
+              :error="form.address.length > 0 && !validAddress"
               v-model.trim="form.address"
               placeholder="ak.. / name.chain"
               size="h-50"
@@ -26,7 +26,14 @@
               <small>{{ $t('pages.send.scan') }}</small>
             </div>
           </div>
-          <AmountSend data-cy="amount-box" v-model="form.amount" :amountError="form.amount <= 0" />
+          <div class="error" v-show="form.address.length > 0 && !validAddress">
+            {{ $t('pages.send.error') }}
+          </div>
+          <AmountSend
+            data-cy="amount-box"
+            v-model="form.amount"
+            :amountError="form.amount.length > 0 && form.amount <= 0"
+          />
           <div class="flex flex-align-center flex-justify-between">
             <Button data-cy="reject-withdraw" half @click="$router.push('/account')">{{
               $t('pages.send.cancel')
@@ -35,7 +42,7 @@
               data-cy="review-withdraw"
               half
               @click="step = 2"
-              :disabled="!form.address || !+form.amount || form.amount <= 0"
+              :disabled="!validAddress || !+form.amount || form.amount <= 0"
               >{{ $t('pages.send.review') }}</Button
             >
           </div>
@@ -197,6 +204,7 @@ export default {
         name: 'read-qr-code',
         title: this.$t('pages.send.scanAddress'),
       });
+      if (!this.form.address) this.form.address = '';
     },
     async fetchFee() {
       await this.$watchUntilTruly(() => this.sdk);
@@ -289,20 +297,33 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.d-flex {
-  display: flex;
-}
-
 .primary-title-darker {
   color: $text-color;
 }
 
 .withdraw.step1 {
-  .d-flex .textarea {
-    width: 250px;
-    min-height: 60px;
-    margin: 0 20px 0 0;
-    font-size: 11px;
+  .d-flex {
+    display: flex;
+    padding-bottom: 24px;
+
+    &.error-below {
+      padding-bottom: 0;
+    }
+
+    .textarea {
+      width: 250px;
+      min-height: 60px;
+      margin: 0 20px 0 0;
+      font-size: 11px;
+    }
+  }
+
+  .error {
+    padding-top: 8px;
+    line-height: 16px;
+    color: #ff4746;
+    font-size: 12px;
+    text-align: left;
   }
 
   small {
