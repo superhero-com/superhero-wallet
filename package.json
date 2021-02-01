@@ -8,7 +8,7 @@
   "scripts": {
     "lint:vue": "eslint --ext .js,.vue src tests",
     "lint:css": "stylelint src/**/*.{css,scss,vue}",
-    "lint:commit": "commitlint --from 151392b0 --verbose",
+    "lint:commit": "commitlint --from develop --verbose",
     "lint": "npm run lint:commit && npm run lint:vue && npm run lint:css",
     "prettier": "prettier \"src/**/*.{js,vue}\" \"tests/**/*.{js,vue}\"",
     "prettier:write": "npm run prettier -- --write",
