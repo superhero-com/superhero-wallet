@@ -39,7 +39,7 @@ module.exports = (isProd, platform) => ({
     default_popup: 'popup/popup.html',
   },
   background: {
-    scripts: ['other/background.js'],
+    scripts: ['background.js'],
     persistent: true,
   },
   content_scripts: [
