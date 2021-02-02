@@ -1,18 +1,28 @@
 $base-font-size: 16px;
 $font-sans: 'IBM Plex Sans', sans-serif;
-$main-font-color: #333;
 
-$main-color: #08c;
+$color-white: #fff;
+$color-black: #000;
+$color-blue: #1161fe;
+$color-blue-hover: #0e52d8;
+$color-blue-alpha-15: rgba(17, 97, 254, 0.15);
+$color-green: #00ff9d;
+$color-green-hover: #00dc87;
+$color-green-alpha-10: rgba(0, 255, 157, 0.1);
+$color-light-grey: #babac0;
+$color-dark-grey: #787878;
 
-$input-background: #ececec;
-$input-toolbar-background: #e0e0e0;
-$input-toolbar-color: #000;
-$primary-color: #ff0d6a;
-$input-border-color: #b300ff;
+$color-border: #232323;
+$color-border-hover: #2f2f2f;
+$color-bg-1: #0f0f0f;
+$color-bg-2: #141414;
+$color-bg-3: #090909;
+$color-hover: #191919;
+
+$color-warning: #ffaa29;
+$color-error: #ff4746;
+
 $color-neutral-negative-1: #76818c;
-$color-neutral-negative-2: #203040;
-$color-alternative: #14ccb7;
-$color-secondary: #6948a1;
 $ledger-color: #203040;
 
 /** Colors for new designs */
@@ -52,4 +62,3 @@ $black-2: #1c1c24;
 $black-3: #2a2b35;
 $white-1: #fff;
 $border-track-color: #515259;
-$font-size: 16px;

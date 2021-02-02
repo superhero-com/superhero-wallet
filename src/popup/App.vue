@@ -151,6 +151,8 @@ body {
 
   @extend %face-sans-16-regular;
 
+  color: $white-color;
+
   &.ae-main-popup {
     background-color: $bg-color;
     padding-top: 0;
