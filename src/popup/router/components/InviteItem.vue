@@ -14,15 +14,13 @@
         $t('pages.invite.claim')
       }}</Button>
       <Button v-else bold dark @click="deleteItem">{{ $t('pages.invite.delete') }}</Button>
-      <Button bold :disabled="balance < topUpAmount" @click="topUp = true">{{
-        $t('pages.invite.top-up')
-      }}</Button>
+      <Button bold @click="topUp = true">{{ $t('pages.invite.top-up') }}</Button>
     </div>
     <template v-else>
       <AmountSend v-model="topUpAmount" :label="$t('pages.invite.top-up-with')" />
       <div class="centered-buttons">
         <Button bold dark @click="resetTopUpChanges">{{ $t('pages.invite.collapse') }}</Button>
-        <Button bold :disabled="balance < topUpAmount" @click="sendTopUp">{{
+        <Button bold :disabled="!sufficientBalance" @click="sendTopUp">{{
           $t('pages.invite.top-up')
         }}</Button>
       </div>
@@ -64,6 +62,9 @@ export default {
     },
     address() {
       return Crypto.getAddressFromPriv(this.secretKey);
+    },
+    sufficientBalance() {
+      return this.balance.comparedTo(this.topUpAmount) !== -1;
     },
   },
   watch: {

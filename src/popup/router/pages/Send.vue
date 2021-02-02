@@ -236,9 +236,10 @@ export default {
       }
       if (this.form.amount <= 0) errorModalType = 'incorrect-amount';
       if (
-        (this.balance - this.fee - this.form.amount <= 0 && !this.selectedToken) ||
-        (this.selectedToken && +this.selectedToken.convertedBalance < +this.form.amount) ||
-        this.fee > this.balance
+        this.selectedToken
+          ? this.selectedToken.balance.comparedTo(this.form.amount) === -1 ||
+            this.balance.comparedTo(this.fee) === -1
+          : this.balance.comparedTo(this.fee.plus(this.form.amount)) === -1
       ) {
         errorModalType = 'insufficient-balance';
       }

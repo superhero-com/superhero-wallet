@@ -249,7 +249,7 @@ export const setBalanceLocalStorage = (balance) => {
 };
 
 export const getBalanceLocalStorage = () =>
-  localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : 0;
+  localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : '0';
 
 export const getAeppUrl = (v) => new URL(v.connection.port.sender.url);
 

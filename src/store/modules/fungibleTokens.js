@@ -41,7 +41,7 @@ export default {
       });
 
       const { decodedResult } = await tokenContract.methods.balance(address);
-      return new BigNumber(decodedResult || 0).toFixed();
+      return new BigNumber(decodedResult || 0);
     },
     async loadTokenBalances(
       {
@@ -60,8 +60,9 @@ export default {
 
       await Promise.all(
         Object.entries(tokens).map(async ([contract, tokenData]) => {
-          const balance = await dispatch('tokenBalance', [contract, address]);
-          const convertedBalance = convertToken(balance, -tokenData.decimals).toFixed(2);
+          const tokenBalance = await dispatch('tokenBalance', [contract, address]);
+          const balance = convertToken(tokenBalance, -tokenData.decimals);
+          const convertedBalance = balance.toFixed(2);
           const objectStructure = {
             value: contract,
             text: `${convertedBalance} ${tokenData.symbol}`,
