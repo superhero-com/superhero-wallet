@@ -13,7 +13,8 @@
 @import './variables';
 
 ::-webkit-scrollbar {
-  display: none;
+  width: 1px;
+  background-color: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
