@@ -68,6 +68,10 @@ export default {
       justify-content: start;
       overflow: hidden;
 
+      ::-webkit-scrollbar {
+        display: none;
+      }
+
       .chainname {
         overflow: scroll;
         scrollbar-width: none;
