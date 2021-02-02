@@ -160,7 +160,7 @@ export default {
   display: flex;
   align-items: center;
 
-  .primary-button {
+  .button {
     width: auto;
     padding: 0 25px;
     display: inline-block;

@@ -185,7 +185,7 @@ export default {
   .centered-buttons {
     display: flex;
 
-    > .primary-button {
+    > .button {
       margin-right: 20px;
       width: 120px;
     }
