@@ -70,6 +70,7 @@ export default {
 
       .chainname {
         overflow: scroll;
+        scrollbar-width: none;
       }
 
       .avatar {
