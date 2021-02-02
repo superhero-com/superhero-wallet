@@ -667,7 +667,8 @@
       "from": "From",
       "hash": "Transaction Hash",
       "home": "Home",
-      "scanAddress": "Scan AE Address"
+      "scanAddress": "Scan AE Address",
+      "error": "Invalid AE address or AENS name"
     },
     "settings": {
       "backToAccount": "Back to account",
