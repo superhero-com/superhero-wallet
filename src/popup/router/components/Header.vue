@@ -90,7 +90,9 @@ export default {
 @import '../../../styles/variables';
 
 .header {
-  padding-top: env(safe-area-inset-top);
+  height: calc(50px + env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
   background-color: $nav-bg-color;
   position: fixed;
   top: 0;
@@ -99,10 +101,11 @@ export default {
   z-index: 8;
 
   .content {
-    height: 50px;
+    width: 100%;
     max-width: 357px;
     margin: 0 auto;
     padding: 0 10px;
+    padding-top: env(safe-area-inset-top);
     display: flex;
     justify-content: center;
     align-items: center;
