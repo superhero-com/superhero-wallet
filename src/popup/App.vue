@@ -141,13 +141,15 @@ body {
 </style>
 
 <style lang="scss" scoped>
-@import '../styles/variables';
+@import '../styles/typography';
 
 .ae-main {
   position: relative;
   min-height: 600px;
   margin: 0 auto;
   overflow: visible;
+
+  @extend %face-sans-16-regular;
 
   &.ae-main-popup {
     background-color: $bg-color;

@@ -46,7 +46,7 @@
     "cordova-plugin-splashscreen": "^6.0.0",
     "cordova-plugin-statusbar": "^2.4.3",
     "detect-browser": "^5.2.0",
-    "fontsource-roboto": "^3.1.5",
+    "fontsource-ibm-plex-sans": "^3.1.5",
     "lodash-es": "^4.17.20",
     "qrcode.vue": "^1.7.0",
     "rxjs": "^6.6.3",

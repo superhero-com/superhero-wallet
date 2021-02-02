@@ -119,7 +119,7 @@ export default {
 
 .note {
   color: $text-color;
-  font-size: $font-size;
+  font-size: $base-font-size;
   min-height: 100px;
   border-radius: 5px;
   border: 2px solid $border-color;
