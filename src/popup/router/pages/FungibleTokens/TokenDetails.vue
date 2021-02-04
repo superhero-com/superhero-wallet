@@ -62,6 +62,7 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
+import { ellipseStringMid } from '../../../utils/helper';
 import TabsMenu from '../../components/TabsMenu';
 import Avatar from '../../components/Avatar';
 import TokenAmount from '../../components/TokenAmount';
@@ -96,12 +97,15 @@ export default {
   created() {
     this.$store.commit(
       'setPageTitle',
-      this.availableTokens[this.id] ? this.availableTokens[this.id].name : 'Aeternity',
+      this.fungibleToken ? ellipseStringMid(this.fungibleToken.name, 22) : 'Aeternity',
     );
   },
   computed: {
     ...mapGetters(['tippingSupported', 'formatCurrency']),
     ...mapState('fungibleTokens', ['tokenBalances', 'availableTokens', 'aePublicData']),
+    fungibleToken() {
+      return this.availableTokens[this.id];
+    },
     tokenData() {
       if (this.id === 'aeternity') {
         return {
@@ -114,7 +118,7 @@ export default {
       }
       return (
         this.tokenBalances.find(({ contract }) => contract === this.id) || {
-          ...this.availableTokens[this.id],
+          ...this.fungibleToken,
           contract: this.id,
         }
       );

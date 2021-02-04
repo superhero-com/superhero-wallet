@@ -14,7 +14,7 @@
     <div class="details">
       <div>
         <div class="title text-ellipsis" :title="tokenData.name">
-          {{ tokenData.name }}
+          {{ ellipseStringMid(tokenData.name, 30) }}
         </div>
         <div>
           <label>{{ $t('pages.fungible-tokens.mcap') }}</label>
@@ -42,6 +42,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { ellipseStringMid } from '../../../utils/helper';
 import Avatar from '../Avatar';
 import TokenAmount from '../TokenAmount';
 
@@ -52,6 +53,7 @@ export default {
     name: String,
   },
   computed: mapGetters(['formatCurrency']),
+  methods: { ellipseStringMid },
 };
 </script>
 
