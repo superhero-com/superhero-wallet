@@ -132,7 +132,7 @@ export default {
     justify-content: space-between;
 
     .notification-text {
-      word-break: break-all;
+      word-break: break-word;
       color: $text-color;
     }
 
