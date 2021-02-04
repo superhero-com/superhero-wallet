@@ -83,8 +83,9 @@ export default {
         });
         if (
           this.selectedToken
-            ? +this.selectedToken.convertedBalance < +this.amount || this.balance < fee
-            : this.balance < fee + +this.amount
+            ? this.selectedToken.balance.comparedTo(this.amount) === -1 ||
+              this.balance.comparedTo(fee) === -1
+            : this.balance.comparedTo(fee.plus(this.amount)) === -1
         ) {
           return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
         }
@@ -134,7 +135,7 @@ export default {
         }
         this.$store.commit('addPendingTransaction', {
           hash: retipResponse.hash,
-          amount: this.amount,
+          amount,
           domain: this.tip.url,
           type: 'tip',
         });

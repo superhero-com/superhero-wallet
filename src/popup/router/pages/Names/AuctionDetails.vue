@@ -31,7 +31,7 @@
 
 <script>
 import { pick } from 'lodash-es';
-import blocksToRelativeTime from '../../../../filters/blocksToRelativeTime';
+import { blocksToRelativeTime } from '../../../../filters/toRelativeTime';
 import NameRow from '../../components/NameRow';
 import Button from '../../components/Button';
 

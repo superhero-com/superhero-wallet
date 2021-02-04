@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapMutations } from 'vuex';
 import Arrow from '../../../icons/arrow.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
 import Hamburger from '../../../icons/hamburger.svg?vue-component';
@@ -63,14 +63,22 @@ export default {
     },
   },
   methods: {
+    ...mapMutations(['setNotificationsStatus']),
     back() {
       const fallBackRoute = this.isLoggedIn ? '/account' : '/';
       this.$router.push(
         this.$route.fullPath.substr(0, this.$route.fullPath.lastIndexOf('/')) || fallBackRoute,
       );
     },
-    toNotifications() {
-      if (this.notificationsCount && this.$store.state.route.fullPath !== '/notifications') {
+    async toNotifications() {
+      this.notifications.forEach((n) =>
+        this.setNotificationsStatus({ createdAt: n.createdAt, status: 'PEEKED' }),
+      );
+      await this.$store.dispatch('modifyNotifications', [
+        this.superheroNotifications.filter((n) => n.status === 'CREATED').map((n) => n.id),
+        'PEEKED',
+      ]);
+      if (this.$store.state.route.fullPath !== '/notifications') {
         this.$router.push('/notifications');
       }
     },
@@ -82,7 +90,9 @@ export default {
 @import '../../../styles/variables';
 
 .header {
-  padding-top: env(safe-area-inset-top);
+  height: calc(50px + env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
   background-color: $nav-bg-color;
   position: fixed;
   top: 0;
@@ -91,10 +101,11 @@ export default {
   z-index: 8;
 
   .content {
-    height: 50px;
+    width: 100%;
     max-width: 357px;
     margin: 0 auto;
     padding: 0 10px;
+    padding-top: env(safe-area-inset-top);
     display: flex;
     justify-content: center;
     align-items: center;

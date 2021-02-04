@@ -99,12 +99,6 @@ export default {
         });
       }
     }
-    if (!this.backedUpSeed) {
-      this.$store.commit('addNotification', {
-        text: this.$t('pages.account.seedNotification', [this.$t('pages.account.backup')]),
-        path: '/settings/security',
-      });
-    }
     if (this.$store.state.notificationSettings.length === 0) {
       this.$store.commit('setNotificationSettings', NOTIFICATION_SETTINGS);
     }
@@ -117,6 +111,12 @@ export default {
   },
   methods: {
     async init() {
+      if (!this.backedUpSeed) {
+        this.$store.commit('addNotification', {
+          text: this.$t('pages.account.seedNotification', [this.$t('pages.account.backup')]),
+          path: '/settings/security',
+        });
+      }
       await this.$watchUntilTruly(() => this.sdk);
       if (!window.RUNNING_IN_POPUP && process.env.IS_EXTENSION) {
         postMessage({
@@ -155,6 +155,7 @@ body {
   }
 
   &.ae-main-wave {
+    height: 100%;
     background-position: center bottom;
     background-repeat: no-repeat;
     background-image: url('../icons/background-big-wave.png');

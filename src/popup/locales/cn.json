@@ -88,7 +88,11 @@
       "title": "什么是 \"难以接近的\" URL?",
       "msg": "超级英雄钱包可以打赏任何公开URL。当前，需要登陆才能查看信息的网页还不能被打赏。我们依然在寻找解决方案。"
     },
-    "confirm-tip" :{
+    "not-secure": {
+      "title": "Superhero Wallet is marking HTTP sites as \"Not secure\" - please, use URLs with HTTPS, only.",
+      "msg": "The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
+    },
+    "confirm-tip": {
       "title": "打赏确认",
       "msg": "没有添加超级英雄钱包的网页主人。我们无法保证他们会领取他们的小费。",
       "sub-message": "你可以继续给他们打赏——告知他们被打赏了并来领取小费。你想继续吗？",
@@ -204,7 +208,6 @@
       "understand": "我知道这是一个加密钱包并且我有责任备份我的钱包助记词。",
       "extension": "浏览器拓展",
       "mobileApp": "移动app"
-
     },
     "titles": {
       "settings": "设置",
@@ -249,11 +252,8 @@
       "copy": "复制",
       "claim": "领赏",
       "receive": "接收",
-      "wholeTransaction": "所有转帐记录",
       "latestTransactions": "最新转帐",
       "noTransactionsFound": "未发现转帐！",
-      "tipSomeone": "打赏",
-      "howToClaim": "如何领取AE",
       "balance": "余额",
       "copied": "已复制!",
       "seedNotification": "你需要 {0} 你的助记词",

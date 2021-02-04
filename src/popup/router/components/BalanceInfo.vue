@@ -57,7 +57,7 @@ export default {
       return [
         {
           value: 'default',
-          text: `${this.tokenBalance} ${this.$t('ae')}`,
+          text: `${this.tokenBalance.toFixed(2)} ${this.$t('ae')}`,
         },
         ...this.tokenBalances,
       ];

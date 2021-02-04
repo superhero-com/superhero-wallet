@@ -24,7 +24,7 @@
       <RangeInput
         :value="transactionSignLimit"
         min="0"
-        :max="tokenBalance"
+        :max="+tokenBalance"
         step="0.1"
         @input="setTransactionSignLimit"
       />
@@ -38,7 +38,7 @@
       </div>
       <div class="permission-row">
         {{ $t('pages.account.balance') }}
-        <TokenAmount :amount="tokenBalance" />
+        <TokenAmount :amount="+tokenBalance" />
       </div>
     </div>
     <Button bold @click="removePermissions">

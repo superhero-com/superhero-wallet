@@ -2,20 +2,13 @@
   <div class="popup">
     <div class="tabs">
       <button :class="{ active: direction === '' }" @click="direction = ''">
-        {{ $t('pages.notifications.new') }}
+        {{ $t('pages.notifications.all') }}
+      </button>
+      <button :class="{ active: direction === 'superhero' }" @click="direction = 'superhero'">
+        {{ $t('pages.notifications.superhero') }}
       </button>
       <button :class="{ active: direction === 'wallet' }" @click="direction = 'wallet'">
         {{ $t('pages.notifications.wallet') }}
-      </button>
-      <button
-        class="superhero"
-        :class="{ active: direction === 'superhero' }"
-        @click="direction = 'superhero'"
-      >
-        {{ $t('pages.notifications.superhero') }}
-      </button>
-      <button :class="{ active: direction === 'read' }" @click="direction = 'read'">
-        {{ $t('pages.notifications.read') }}
       </button>
     </div>
     <NotificationItem
@@ -28,30 +21,21 @@
       :text="notificationText(notification)"
       :date="new Date(notification.createdAt)"
       :to="notification.path"
+      :status="notification.status.toLocaleLowerCase()"
       v-bind="notification.wallet && { wallet: true }"
       @click="onClickHandler(notification)"
-    >
-      <ThreeDotsMenu>
-        <div class="mark-as-read" @click="modifyNotificationStatus(notification)">
-          {{
-            notification.status === 'READ'
-              ? $t('pages.notifications.markAsUnread')
-              : $t('pages.notifications.markAsRead')
-          }}
-        </div>
-      </ThreeDotsMenu>
-    </NotificationItem>
+      @toggle-read="modifyNotificationStatus(notification)"
+    />
   </div>
 </template>
 
 <script>
 import { mapState, mapMutations } from 'vuex';
 import NotificationItem from '../components/NotificationItem';
-import ThreeDotsMenu from '../components/ThreeDotsMenu';
 import openUrl from '../../utils/openUrl';
 
 export default {
-  components: { NotificationItem, ThreeDotsMenu },
+  components: { NotificationItem },
   data: () => ({
     direction: '',
   }),
@@ -61,19 +45,17 @@ export default {
       return [...this.observableNotifications, ...this.notifications]
         .filter(
           (n) =>
-            (this.direction === 'read' && n.status === 'READ') ||
-            !this.notificationSettings
-              .filter((s) => !s.checked)
-              .map((s) => s.type)
-              .includes(n.type),
+            this.direction === '' ||
+            (this.direction === 'superhero' && n.type !== 'wallet') ||
+            (this.direction === 'wallet' && n.type === 'wallet'),
         )
         .filter(
           (n) =>
-            (this.direction === 'read' && n.status === 'READ') ||
-            (n.status === 'CREATED' &&
-              ((this.direction === 'wallet' && n.wallet) ||
-                (this.direction === 'superhero' && n.sender) ||
-                this.direction === '')),
+            n.status === 'READ' ||
+            this.notificationSettings
+              .filter((s) => s.checked)
+              .map((s) => s.type)
+              .includes(n.type),
         )
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     },
@@ -82,14 +64,10 @@ export default {
     ...mapMutations(['setNotificationsStatus']),
     async modifyNotificationStatus(notification) {
       const status = notification.status === 'READ' ? 'CREATED' : 'READ';
-      if (notification.wallet) {
+      if (notification.type === 'wallet') {
         this.setNotificationsStatus({ createdAt: notification.createdAt, status });
       } else {
-        await this.$store.dispatch('modifyNotification', [
-          notification.id,
-          status,
-          this.$store.state.account.publicKey,
-        ]);
+        await this.$store.dispatch('modifyNotification', [notification.id, status]);
         this.observableNotifications.find((n) => n.id === notification.id).status = status;
       }
     },
@@ -102,7 +80,6 @@ export default {
       }
     },
     notificationText(notification) {
-      if (notification.wallet) return notification.text;
       switch (notification.type) {
         case 'COMMENT_ON_COMMENT':
           return this.$t('pages.notifications.commentOnComment');
@@ -116,6 +93,8 @@ export default {
           return this.$t('pages.notifications.claimOfTip');
         case 'CLAIM_OF_RETIP':
           return this.$t('pages.notifications.claimOfRetip');
+        case 'wallet':
+          return notification.text;
         default:
           throw new Error(`Unknown notification status: ${notification.type}`);
       }
@@ -137,64 +116,29 @@ export default {
     position: sticky;
     top: 50px;
     z-index: 100;
-    background-color: #272831;
-    display: flex;
-    align-items: center;
+    background-color: #141414;
     padding: 0 1rem;
+    text-align: left;
 
     button {
       display: inline-block;
       background: transparent;
       text-align: center;
-      flex-grow: 1;
       font-size: 0.95rem;
       cursor: pointer;
-      color: #727278;
+      color: #787878;
       font-weight: 600;
       padding: 0.95rem 0;
       margin-left: 1rem;
-      border-bottom: 0.1rem solid transparent;
-
-      &:first-child {
-        margin-left: 0;
-      }
-
-      &.superhero {
-        flex-grow: 2;
-      }
+      border-bottom: 0.2rem solid transparent;
 
       &:hover {
-        color: #d9d9d9;
+        color: #babac0;
       }
 
       &.active {
         color: #67f7b8;
         border-bottom-color: #67f7b8;
-      }
-    }
-  }
-
-  .notification-item {
-    margin-top: 0.2rem;
-    background-color: #1d1e27;
-    font-size: 0.95rem;
-    padding-top: 0.9rem;
-    text-align: left;
-    cursor: pointer;
-
-    .three-dots {
-      color: #515259;
-      font-size: 1.5rem;
-      line-height: 0;
-      text-align: right;
-
-      &:hover {
-        color: #fff;
-      }
-
-      .mark-as-read {
-        font-size: 0.9rem;
-        line-height: 1.2rem;
       }
     }
   }

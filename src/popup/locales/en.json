@@ -88,7 +88,11 @@
       "title": "What is an \"Inaccessible\" URL?",
       "msg": "The Superhero wallet can tip any public URL. Currently, web pages that require logging in to view information cannot be tipped. We're still working on solutions for this."
     },
-    "confirm-tip" :{
+    "not-secure": {
+      "title": "Superhero Wallet is marking HTTP sites as \"Not secure\" - please, use URLs with HTTPS, only.",
+      "msg": "The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
+    },
+    "confirm-tip": {
       "title": "Send Tip Confirmation",
       "msg": "The webpage owner has not added a SUPERHERO wallet yet. We cannot guarantee that they will claim their tips.",
       "sub-message": "You can still tip them—let them know so they can claim it. Would you like to proceed?",
@@ -258,11 +262,8 @@
       "tip": "Tip",
       "claim": "Claim Tip",
       "receive": "Receive",
-      "wholeTransaction": "Full transaction history",
       "latestTransactions": "Latest transactions",
       "noTransactionsFound": "No transactions found!",
-      "tipSomeone": "Send Tip",
-      "howToClaim": "How to claim AE",
       "balance": "Balance",
       "copied": "Copied!",
       "seedNotification": "You need to {0} your seed phrase",
@@ -566,10 +567,9 @@
       "add": "Add"
     },
     "notifications": {
-      "new": "New",
+      "all": "All",
       "wallet": "Wallet",
       "superhero": "Superhero.com",
-      "read": "Read",
       "markAsRead": "Mark as Read",
       "markAsUnread": "Mark as Unread",
       "commentOnComment": "replied to your comment.",
@@ -667,7 +667,8 @@
       "from": "From",
       "hash": "Transaction Hash",
       "home": "Home",
-      "scanAddress": "Scan AE Address"
+      "scanAddress": "Scan AE Address",
+      "error": "Invalid AE address or AENS name"
     },
     "settings": {
       "backToAccount": "Back to account",
@@ -1029,6 +1030,7 @@
     ]
   },
   "redirecting": "Redirecting",
+  "seconds": "{n} seconds | {n} second | {n} seconds",
   "minutes": "{n} minutes | {n} minute | {n} minutes",
   "hours": "{n} hours | {n} hour | {n} hours",
   "days": "{n} days | {n} day | {n} days"

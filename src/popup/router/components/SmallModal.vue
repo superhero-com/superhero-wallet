@@ -10,17 +10,16 @@
 <style lang="scss" scoped>
 .not-bootstrap-modal {
   .overlay {
+    position: fixed;
     bottom: 0;
     left: 0;
-    position: fixed;
     right: 0;
     top: 0;
-    z-index: 500;
+    z-index: 1;
   }
 
   .not-bootstrap-modal-content {
     position: absolute;
-    z-index: 500;
   }
 }
 </style>

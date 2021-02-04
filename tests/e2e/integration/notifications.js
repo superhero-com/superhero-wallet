@@ -1,10 +1,6 @@
 describe('Tests cases for notifications page and icon', () => {
-  beforeEach(() => {
-    cy.logout().openPopup();
-  });
-
   it('Have and click notification icon, open notifications page and return', () => {
-    cy.login()
+    cy.login({ network: 'Mainnet' })
       .get('[data-cy=noti-count]')
       .should('be.visible')
       .should('contain', 1)
@@ -17,6 +13,8 @@ describe('Tests cases for notifications page and icon', () => {
   });
 
   it("Don't have backup seed notification", () => {
-    cy.login({ backedUpSeed: true }).get('[data-cy=noti-count]').should('be.not.visible');
+    cy.login({ backedUpSeed: true, network: 'Mainnet' })
+      .get('[data-cy=noti-count]')
+      .should('not.exist');
   });
 });

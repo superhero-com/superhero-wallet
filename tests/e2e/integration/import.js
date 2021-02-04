@@ -23,7 +23,7 @@ describe('Test cases for import account page', () => {
 
       .goBack()
       .get('textarea')
-      .should('not.be.visible')
+      .should('not.exist')
       .get('[data-cy=checkbox]')
       .should('be.visible');
   });

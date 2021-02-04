@@ -6,7 +6,7 @@
       <AmountSend v-model="tx.amount" slot="custom-amount" />
     </SignDetailsList>
 
-    <div class="btnFixed">
+    <div class="button-fixed">
       <Button dark half @click="cancel" :disabled="!props.reject" data-cy="deny">
         {{ $t('pages.signTransaction.reject') }}
       </Button>

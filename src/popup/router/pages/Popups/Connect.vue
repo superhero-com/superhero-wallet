@@ -1,10 +1,10 @@
 <template>
   <div class="popup popup-aex2" data-cy="popup-aex2">
-    <div class="flex identiconContainer">
+    <div class="flex identicon-container">
       <div class="identicon">
         <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
         <ae-identicon :address="data.host || ''" size="base" v-if="imageError" />
-        <div class="accountName" data-cy="name">{{ data.name }}</div>
+        <div class="account-name" data-cy="name">{{ data.name }}</div>
         <div class="hostname" data-cy="host">{{ data.host }}</div>
       </div>
       <div class="separator">
@@ -12,7 +12,7 @@
       </div>
       <div class="identicon">
         <Avatar :address="account.publicKey" :name="account.name" size="lg" />
-        <div class="accountName">{{ activeAccountName }}</div>
+        <div class="account-name">{{ activeAccountName }}</div>
       </div>
     </div>
 
@@ -33,7 +33,7 @@
         <p>{{ $t('pages.connectConfirm.transactionRequest') }}</p>
       </ae-list-item>
     </ul>
-    <div class="btnFixed">
+    <div class="button-fixed">
       <Button half dark @click="cancel" :disabled="!data.reject" data-cy="deny">
         {{ $t('pages.connectConfirm.cancelButton') }}
       </Button>
@@ -107,7 +107,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../../styles/variables';
 
-.identiconContainer {
+.identicon-container {
   position: relative;
   margin-top: 2rem;
 

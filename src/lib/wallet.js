@@ -3,7 +3,7 @@ import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aep
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { camelCase, isEmpty, times } from 'lodash-es';
 import { postMessage } from '../popup/utils/connection';
-import { parseFromStorage, fetchJson, IN_FRAME } from '../popup/utils/helper';
+import { fetchJson, IN_FRAME, parseFromStorage } from '../popup/utils/helper';
 import store from '../store';
 import { App } from '../store/modules/permissions';
 import Logger from './logger';
@@ -11,8 +11,7 @@ import Logger from './logger';
 async function initMiddleware() {
   const { middlewareUrl } = store.getters.activeNetwork;
 
-  const swagUrl = `https://raw.githubusercontent.com/aeternity/ae_mdw/master/priv/static/swagger.json`;
-  // `${middlewareUrl}/swagger/swagger.json`
+  const swagUrl = `${middlewareUrl}/swagger/swagger.json`;
 
   const swag = await fetchJson(swagUrl);
   swag.paths = {

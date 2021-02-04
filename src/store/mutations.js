@@ -5,9 +5,6 @@ export default {
   updateAccount(state, payload) {
     state.account = payload;
   },
-  updateBalance(state, payload) {
-    state.balance = payload;
-  },
   switchNetwork(state, payload) {
     state.current.network = payload;
   },
@@ -27,9 +24,6 @@ export default {
     state.account.publicKey = payload.publicKey;
     state.activeAccount = payload.index;
   },
-  setNames(state, { names }) {
-    state.names = names;
-  },
   setUserNetwork(state, { index, ...network }) {
     if (index !== undefined) state.userNetworks[index] = network;
     else state.userNetworks.push({ ...defaultNetwork, ...network });
@@ -42,9 +36,6 @@ export default {
   },
   setMiddleware(state, payload) {
     state.middleware = payload;
-  },
-  setEncryptedWallet(state, payload) {
-    state.encryptedWallet = payload;
   },
   setTipping(state, [tippingV1, tippingV2]) {
     state.tippingV1 = tippingV1 || null;
@@ -73,7 +64,7 @@ export default {
       ...state.notifications,
       {
         ...payload,
-        wallet: true,
+        type: 'wallet',
         status: 'CREATED',
         createdAt: new Date().toISOString(),
       },
@@ -86,14 +77,19 @@ export default {
   setNotificationSettings(state, payload) {
     state.notificationSettings = payload;
   },
+  toggleNotificationSetting(state, type) {
+    const index = state.notificationSettings.findIndex((n) => n.type === type);
+    Vue.set(
+      state.notificationSettings[index],
+      'checked',
+      !state.notificationSettings[index].checked,
+    );
+  },
   setChainNames(state, payload) {
     state.chainNames = payload;
   },
   setTipDetails(state, payload) {
     state.tip = payload;
-  },
-  setTxQueue(state, payload) {
-    state.txQueue = [...state.txQueue, payload];
   },
   setMnemonic(state, payload) {
     state.mnemonic = payload;

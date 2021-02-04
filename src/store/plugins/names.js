@@ -106,7 +106,9 @@ export default (store) => {
         }
         const { preferredChainName: defaultNameBackend } = await fetchJson(
           `${activeNetwork.backendUrl}/profile/${account.publicKey}`,
-        ).catch(() => {});
+        ).catch(() => {
+          return {};
+        });
         if (!claimed.includes(defaultNameBackend)) {
           await dispatch('setDefault', { address: account.publicKey, name: claimed[0] });
           return;

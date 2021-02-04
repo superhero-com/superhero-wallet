@@ -88,7 +88,11 @@
       "title": "What is \"Blacklisted\" URL?",
       "msg": "The Superhero wallet can tip any public URL. Currently, web pages that require logging in to view information cannot be tipped. We're still working on solutions for this."
     },
-    "confirm-tip" :{
+    "not-secure": {
+      "title": "Superhero Wallet is marking HTTP sites as \"Not secure\" - please, use URLs with HTTPS, only.",
+      "msg": "The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
+    },
+    "confirm-tip": {
       "title": "Send Tip Confirmation",
       "msg": "You are about to tip a URL that is not Superhero-verified. We cannot guarantee that the owner will claim their tips on this site.",
       "sub-message": "Are you sure you would like to send the tip anyway? You can still tip them—let them know so they can claim it.",
@@ -189,11 +193,8 @@
       "copy": "Copie",
       "claim": "Claim Tip",
       "receive": "Recevoir",
-      "wholeTransaction": "l'historique des transactions ensemble",
       "latestTransactions": "Les dernières transactions",
       "noTransactionsFound": "Aucune transaction trouvée!",
-      "tipSomeone": "Send Tip",
-      "howToClaim": "How to claim AE",
       "balance": "Balance",
       "copied": "Copied!",
       "seedNotification": "You need to {0} your seed phrase",
@@ -374,7 +375,6 @@
       "registerNameRequirement": "Autorisé seulement des lettres et des chiffres",
       "registerName": "Enregistrer un nouveau nom",
       "registeredNames": "Vos noms enregistrés",
-      "seeAllRegisteredNames": "Voir tous les noms enregistrés",
       "noNames": "Aucun nom trouvé",
       "activeAuctions": "Toutes les enchères actives",
       "auctionInfo": "Informations sur les enchères",

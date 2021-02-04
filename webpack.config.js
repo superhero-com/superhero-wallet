@@ -26,7 +26,7 @@ const getConfig = platform => {
     context: path.resolve(__dirname, 'src'),
     entry: {
       ...(platform.startsWith('extension-') && {
-        'other/background': './background/index.js',
+        background: './background/index.js',
         'other/inject': './content-scripts/inject.js',
         'other/twitter': './content-scripts/twitter.js',
         'other/youtube': './content-scripts/youtube.js',
@@ -159,7 +159,7 @@ const getConfig = platform => {
               template: path.join(__dirname, 'src', 'popup', 'popup-firefox.html'),
               filename: 'popup/popup.html',
               excludeChunks: [
-                'other/background',
+                'background',
                 'other/youtube',
                 'other/twitter',
                 'other/inject',

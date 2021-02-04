@@ -244,12 +244,19 @@ export const isNotFoundError = (error) => error.isAxiosError && error?.response.
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
 
+export const ellipseStringMid = (str, allowedLength) => {
+  if (str.length > allowedLength) {
+    return `${str.substr(0, (allowedLength / 3) * 2)}...${str.substr(-allowedLength / 3)}`;
+  }
+  return str;
+};
+
 export const setBalanceLocalStorage = (balance) => {
   localStorage.rxjs = JSON.stringify({ ...JSON.parse(localStorage.rxjs || '{}'), balance });
 };
 
 export const getBalanceLocalStorage = () =>
-  localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : 0;
+  localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : '0';
 
 export const getAeppUrl = (v) => new URL(v.connection.port.sender.url);
 

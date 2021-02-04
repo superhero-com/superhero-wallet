@@ -89,7 +89,7 @@ Cypress.Commands.add('accordionItemShould', (item, cond) => {
     .get('[data-cy=accordion-item]')
     .eq(item)
     .find('[data-cy=accordion-item-open]')
-    .should(cond);
+    .should(cond === 'not.be.visible' ? 'not.exist' : cond);
 });
 
 Cypress.Commands.add('login', (options = {}, route) => {
@@ -132,11 +132,7 @@ Cypress.Commands.add('openMenuPage', (page, dropdown = false) => {
     url += 'settings/';
     cy.toggleDropdown();
   }
-  cy.get(`[data-cy=${page}]`)
-    .click()
-    .url()
-    .should('eq', `${url}${page}`)
-    .menuShould('not.be.visible');
+  cy.get(`[data-cy=${page}]`).click().url().should('eq', `${url}${page}`).menuShould('not.exist');
 });
 
 Cypress.Commands.add('toggleDropdown', () => {

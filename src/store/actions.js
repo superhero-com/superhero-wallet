@@ -136,13 +136,19 @@ export default {
     return sendComment(respondChallenge);
   },
   async modifyNotification(
-    { state: { sdk }, getters: { activeNetwork } },
-    [notifId, status, author],
+    {
+      state: {
+        sdk,
+        account: { publicKey },
+      },
+      getters: { activeNetwork },
+    },
+    [notifId, status],
   ) {
     const backendMethod = async (postParam) =>
       postJson(`${activeNetwork.backendUrl}/notification/${notifId}`, { body: postParam });
 
-    const responseChallenge = await backendMethod({ author, status });
+    const responseChallenge = await backendMethod({ author: publicKey, status });
     const signedChallenge = Buffer.from(
       await sdk.signMessage(responseChallenge.challenge),
     ).toString('hex');
@@ -151,7 +157,32 @@ export default {
       signature: signedChallenge,
     };
 
-    return backendMethod(respondChallenge);
+    backendMethod(respondChallenge);
+  },
+  async modifyNotifications(
+    {
+      state: {
+        sdk,
+        account: { publicKey },
+      },
+      getters: { activeNetwork },
+    },
+    [ids, status],
+  ) {
+    if (!ids.length) return;
+    const backendMethod = async (postParam) =>
+      postJson(`${activeNetwork.backendUrl}/notification`, { body: postParam });
+
+    const responseChallenge = await backendMethod({ ids, status, author: publicKey });
+    const signedChallenge = Buffer.from(
+      await sdk.signMessage(responseChallenge.challenge),
+    ).toString('hex');
+    const respondChallenge = {
+      challenge: responseChallenge.challenge,
+      signature: signedChallenge,
+    };
+
+    backendMethod(respondChallenge);
   },
   async getCacheChainNames({ getters: { activeNetwork } }) {
     return fetchJson(`${activeNetwork.backendUrl}/cache/chainnames`);

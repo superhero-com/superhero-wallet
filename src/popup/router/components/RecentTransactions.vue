@@ -17,7 +17,7 @@
       </ae-list>
     </div>
     <div v-if="!transactions.latest.length && !transactions.pending.length">
-      <p class="paragraph noTransactions">
+      <p class="paragraph">
         {{ $t('pages.recentTransactions.noTransactionsFound') }}
       </p>
     </div>
