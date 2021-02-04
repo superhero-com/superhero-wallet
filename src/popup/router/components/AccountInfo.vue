@@ -4,7 +4,7 @@
       <div class="account-name" data-cy="account-name">
         <Avatar :address="account.publicKey" :name="account.name" class="avatar" size="small" />
         <span class="chainname" v-if="activeAccountName.includes('.chain')">{{
-          activeAccountName
+          ellipseStringMid(activeAccountName, 30)
         }}</span>
         <router-link class="claim-chainname" to="/names" v-else
           >{{ $t('pages.account.claim-name') }}
@@ -21,6 +21,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { ellipseStringMid } from '../../utils/helper';
 import Avatar from './Avatar';
 
 export default {
@@ -30,6 +31,7 @@ export default {
   }),
   computed: mapGetters(['account', 'activeAccountName']),
   methods: {
+    ellipseStringMid,
     copy() {
       this.copied = true;
       setTimeout(() => {
