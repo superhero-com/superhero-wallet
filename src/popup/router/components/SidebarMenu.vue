@@ -1,219 +1,223 @@
 <template>
-  <ul class="sidebar-menu" @click="menuClickHandler" data-cy="sidebar-menu">
-    <li class="menu-close">
-      <Close @click="closeMenu" data-cy="close-menu" />
-    </li>
-    <li class="account-icon-holder">
-      <div class="flex flex-align-center">
-        <Avatar :address="account.publicKey" :name="account.name" />
-        <div class="ml-8">
-          <div class="f-14">{{ $t('mainAccount') }}</div>
-          <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">
-            <TruncateMid :str="activeAccountName" />
-          </div>
+  <div class="sidebar-menu" data-cy="sidebar-menu">
+    <button @click="$emit('close')" data-cy="close-menu">
+      <Menu />
+      <MenuHover class="hover" />
+    </button>
+    <div class="account">
+      <Avatar :address="account.publicKey" :name="account.name" />
+      <div class="account-info">
+        <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">
+          <TruncateMid :str="activeAccountName" />
         </div>
+        <div class="account-type">{{ $t('mainAccount') }}</div>
       </div>
-    </li>
-    <li>
-      <router-link to="/receive" data-cy="receive">
-        {{ $t('pages.titles.topUp') }}
-      </router-link>
-    </li>
-    <li>
-      <router-link to="/send" data-cy="send">
-        {{ $t('pages.titles.send') }}
-      </router-link>
-    </li>
-    <li>
-      <router-link to="/transactions" data-cy="transactions">
-        {{ $t('pages.account.activity') }}
-      </router-link>
-    </li>
-    <li>
-      <button
-        :class="showSettingsDropdown && 'opened'"
-        @click="showSettingsDropdown = !showSettingsDropdown"
-        data-cy="settings"
-      >
-        {{ $t('pages.titles.settings') }}
-        <Arrow />
-      </button>
-      <transition name="slide">
-        <ul v-if="showSettingsDropdown" data-cy="dropdown">
-          <li>
-            <router-link to="/settings/security" data-cy="security">
-              {{ $t('pages.titles.security') }}
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/settings/language" data-cy="language">
-              {{ $t('pages.titles.language') }}
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/settings/networks" data-cy="networks">
-              {{ $t('pages.titles.networks') }}
-            </router-link>
-          </li>
-          <li>
-            <router-link :to="{ name: 'permissions-settings' }">
-              {{ $t('pages.titles.permissionsSettings') }}
-            </router-link>
-          </li>
-          <li>
-            <span data-cy="remove-account" @click="removeAccount">
-              {{ $t('pages.settings.tabRemoveAccount') }}
-            </span>
-          </li>
-        </ul>
-      </transition>
-    </li>
-    <li>
-      <router-link to="/names" data-cy="names">
-        {{ $t('pages.titles.names') }}
-      </router-link>
-    </li>
-    <li>
-      <router-link to="/invite" data-cy="invite">
-        {{ $t('pages.titles.invite') }}
-      </router-link>
-    </li>
-    <li>
-      <router-link to="/about" data-cy="about">
-        {{ $t('pages.about.heading') }}
-      </router-link>
-    </li>
-  </ul>
+    </div>
+    <ul @click="$emit('close')">
+      <li>
+        <router-link to="/">
+          {{ $t('pages.titles.balances') }}
+          <Balances />
+        </router-link>
+      </li>
+      <li>
+        <router-link to="/">
+          {{ $t('pages.titles.payments') }}
+          <Payments />
+        </router-link>
+      </li>
+      <li>
+        <router-link to="/tip">
+          {{ $t('pages.tipPage.tips') }}
+          <Tips />
+        </router-link>
+      </li>
+      <li>
+        <router-link to="/transactions" data-cy="transactions">
+          {{ $t('pages.titles.tx-history') }}
+          <TxHistory />
+        </router-link>
+      </li>
+      <li>
+        <router-link to="/names" data-cy="names">
+          {{ $t('pages.titles.names') }}
+          <Names />
+        </router-link>
+      </li>
+      <li>
+        <router-link to="/invite" data-cy="invite">
+          {{ $t('pages.titles.invite') }}
+          <Invite />
+        </router-link>
+      </li>
+      <li>
+        <router-link to="/settings" data-cy="settings">
+          {{ $t('pages.titles.settings') }}
+          <Settings />
+        </router-link>
+      </li>
+      <li>
+        <router-link to="/about" data-cy="about">
+          {{ $t('pages.about.heading') }}
+          <About />
+        </router-link>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import Close from '../../../icons/close.svg?vue-component';
-import Arrow from '../../../icons/arrow-current-color.svg?vue-component';
+import Menu from '../../../icons/menu.svg?vue-component';
+import MenuHover from '../../../icons/menu-hover.svg?vue-component';
+import Balances from '../../../icons/sidebar-menu/balances.svg?vue-component';
+import Payments from '../../../icons/sidebar-menu/payments.svg?vue-component';
+import Tips from '../../../icons/sidebar-menu/tips.svg?vue-component';
+import TxHistory from '../../../icons/sidebar-menu/tx-history.svg?vue-component';
+import Names from '../../../icons/sidebar-menu/names.svg?vue-component';
+import Invite from '../../../icons/sidebar-menu/invite.svg?vue-component';
+import Settings from '../../../icons/settings.svg?vue-component';
+import About from '../../../icons/sidebar-menu/about.svg?vue-component';
 import Avatar from './Avatar';
 import TruncateMid from './TruncateMid';
 
 export default {
-  components: { Close, Arrow, Avatar, TruncateMid },
-  computed: mapGetters(['account', 'activeAccountName']),
-  data: () => ({ showSettingsDropdown: false }),
-  methods: {
-    menuClickHandler({ target }) {
-      if (target.tagName === 'A') this.closeMenu();
-    },
-    closeMenu() {
-      this.$emit('close');
-    },
-    async removeAccount() {
-      await this.$store.dispatch('requestResetting');
-      this.closeMenu();
-    },
+  components: {
+    Menu,
+    MenuHover,
+    Avatar,
+    TruncateMid,
+    Balances,
+    Payments,
+    Tips,
+    TxHistory,
+    Names,
+    Invite,
+    Settings,
+    About,
   },
+  computed: mapGetters(['account', 'activeAccountName']),
 };
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/typography';
 
 .sidebar-menu {
   position: fixed;
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: $nav-bg-color;
-  margin: 0;
-  padding: 0;
+  background-color: $color-bg-3;
   padding-top: env(safe-area-inset-top);
-  list-style: none;
+  box-shadow: -4px 0 6px rgba(0, 0, 0, 0.25);
+  border-radius: 0 10px 10px 0;
+  text-align: right;
 
-  li {
-    margin: 0;
-    border-bottom: 1px solid $bg-color;
+  .account {
+    margin: 12px 14px 24px 16px;
+    display: flex;
+    text-align: left;
+    font-size: 14px;
+    line-height: 14px;
 
-    & > a,
-    & > button,
-    & > span {
-      text-decoration: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 15px;
-      line-height: 18px;
-      width: 100%;
-      color: $secondary-color;
-      text-align: left;
-      margin: 0;
-      padding: 8px 1rem;
-      white-space: nowrap;
-      transition: background-color 0.2s;
-      cursor: pointer;
-
-      &.opened,
-      &:hover {
-        background-color: $secondary-color;
-        color: $white-color;
-      }
-
-      &.opened svg {
-        transform: rotate(90deg);
-      }
-
-      svg {
-        width: 9px;
-        vertical-align: middle;
-      }
+    .avatar {
+      margin-right: 8px;
+      width: 32px;
+      height: 32px;
     }
 
-    ul {
-      list-style: none;
-      background: $submenu-bg;
-      padding: 0;
-      max-height: 300px;
-      overflow: hidden;
+    .account-info {
+      max-width: 110px;
 
-      &.slide-enter-active,
-      &.slide-leave-active {
-        transition: max-height 0.3s ease-in-out;
+      .name {
+        font-weight: 500;
+        margin-bottom: 4px;
       }
 
-      &.slide-enter,
-      &.slide-leave-to {
-        max-height: 0;
+      .account-type {
+        opacity: 0.5;
       }
-
-      li > a,
-      li > button,
-      li > span {
-        padding: 6px 1rem 6px 25px;
-      }
-    }
-
-    .token-info {
-      margin-right: auto;
-      margin-left: 5px;
     }
   }
 
-  .menu-close {
-    padding: 10px;
-    text-align: right;
-    border-bottom: none;
-
-    .ae-icon {
-      font-size: 40px;
-      cursor: pointer;
-    }
+  & > button {
+    margin: 4px 4px 0 0;
+    height: 32px;
+    width: 32px;
+    color: white;
+    cursor: pointer;
 
     svg {
-      cursor: pointer;
+      opacity: 0.7;
+    }
+
+    &:hover {
+      svg {
+        display: none;
+
+        &.hover {
+          opacity: 1;
+          color: $color-blue;
+          display: inline;
+        }
+      }
+    }
+
+    &:active {
+      svg {
+        opacity: 1;
+        color: $color-blue;
+        display: inline;
+
+        &.hover {
+          display: none;
+        }
+      }
+    }
+
+    .hover {
+      display: none;
     }
   }
 
-  .account-icon-holder {
-    padding: 0.5rem 1rem 20px 1rem;
+  ul {
+    padding: 0;
+    list-style: none;
 
-    .flex .ml-8 {
-      max-width: 110px;
+    li {
+      color: $color-light-grey;
+
+      &:hover {
+        border-radius: 5px;
+        background: rgba(17, 97, 254, 0.15);
+        color: $color-blue;
+
+        a svg {
+          opacity: 1;
+        }
+      }
+
+      &:active {
+        border-radius: 5px;
+        background: rgba(17, 97, 254, 0.05);
+      }
+
+      a {
+        padding: 8px 18px 8px 16px;
+        text-decoration: none;
+        display: flex;
+        justify-content: space-between;
+        color: inherit;
+
+        @extend %face-sans-16-medium;
+
+        svg {
+          width: 24px;
+          height: 24px;
+          opacity: 0.7;
+        }
+      }
     }
   }
 }
