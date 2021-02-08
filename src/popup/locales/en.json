@@ -168,7 +168,11 @@
       "cameraNotAllowed": "ERROR: you need to grant camera access permisson"
     },
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "mobile-share-error": {
+      "title": "Only URLs can be tipped at the moment!",
+      "msg": "More options are currently being developed - coming to you soon!"
+    }
   },
   "transaction": {
     "type": {

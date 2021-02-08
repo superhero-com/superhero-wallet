@@ -168,6 +168,7 @@ export default [
     path: '/tip',
     name: 'tip',
     component: Tip,
+    props: true,
     meta: {
       title: 'send-tips',
     },

@@ -7,6 +7,7 @@ import 'vue-tour/dist/vue-tour.css';
 import routes from './routes';
 import '@aeternity/aepp-components-3/dist/aepp.components.css';
 import LoaderComponent from './components/Loader';
+import { i18n } from '../../store/plugins/languages';
 
 import * as helper from '../utils/helper';
 import store from '../../store';
@@ -104,6 +105,16 @@ if (process.env.PLATFORM === 'cordova') {
         window.location = `#/${url.slice(prefix.length)}`;
       } catch (error) {
         if (error.name !== 'NavigationDuplicated') throw error;
+      }
+    });
+
+    window.cordova.openwith.init();
+    window.cordova.openwith.addHandler((intent) => {
+      const url = intent.items.find(({ type }) => type.includes('url'))?.data;
+      if (url) {
+        router.push({ name: 'tip', params: { tipUrl: url } });
+      } else {
+        store.dispatch('modals/open', { name: 'default', ...i18n.t('modals.mobile-share-error') });
       }
     });
   })();
