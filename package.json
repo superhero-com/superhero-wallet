@@ -79,6 +79,7 @@
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^6.4.1",
     "cordova": "^10.0.0",
+    "cordova-plugin-openwith": "git+https://github.com/aeternity/cordova-plugin-openwith.git",
     "cordova-plugin-whitelist": "^1.3.4",
     "cordova-res": "^0.15.2",
     "core-js": "^3.8.2",
@@ -131,7 +132,12 @@
         "URL_SCHEME": "superhero",
         "DEEPLINK_HOST": "wallet.superhero.com"
       },
-      "cordova-plugin-qrscanner": {}
+      "cordova-plugin-qrscanner": {},
+      "cordova-plugin-openwith": {
+        "IOS_URL_SCHEME": "hf938wofijfjhsdlsf23",
+        "IOS_BUNDLE_IDENTIFIER": "com.superhero.cordova",
+        "DISPLAY_NAME": "Superhero"
+      }
     },
     "platforms": [
       "android",

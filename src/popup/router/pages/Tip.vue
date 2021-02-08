@@ -87,6 +87,7 @@ export default {
     TokenAmount,
     BalanceInfo,
   },
+  props: { tipUrl: String },
   data() {
     return {
       url: null,
@@ -188,6 +189,7 @@ export default {
         await browser.storage.local.remove('last-path');
       }
     }
+    if (this.$props.tipUrl) this.url = this.$props.tipUrl;
   },
   methods: {
     async persistTipDetails() {
