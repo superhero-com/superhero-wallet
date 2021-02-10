@@ -15,7 +15,7 @@
             "
           >
             <img
-              :class="{ disabled: !isFirefox() || IS_MOBILE_DEVICE }"
+              :class="{ grey: !isFirefox() || IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/firefox.svg"
               alt="Firefox"
             />
@@ -29,7 +29,7 @@
             "
           >
             <img
-              :class="{ disabled: isFirefox() || IS_MOBILE_DEVICE }"
+              :class="{ grey: isFirefox() || IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/chrome.svg"
               alt="Chrome"
             />
@@ -43,7 +43,7 @@
         <div>
           <a @click="openUrl('https://testflight.apple.com/join/3o5r4dQQ', true)">
             <img
-              :class="{ disabled: !IS_IOS || !IS_MOBILE_DEVICE }"
+              :class="{ grey: !IS_IOS || !IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/app-store.svg"
               alt="App Store"
             />
@@ -54,7 +54,7 @@
             "
           >
             <img
-              :class="{ disabled: IS_IOS || !IS_MOBILE_DEVICE }"
+              :class="{ grey: IS_IOS || !IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/google-play.svg"
               alt="Google Play"
             />
@@ -84,19 +84,37 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/typography';
 
 .platforms {
   font-size: 15px;
-  background-color: #21222c;
+  background-color: $color-black;
   word-break: break-word;
 
+  @extend %face-sans-15-regular;
+
+  line-height: 24px;
+
+  &:hover {
+    background-color: $color-bg-3;
+
+    .text {
+      line-height: 24px;
+      padding-bottom: 0;
+      padding-top: 0;
+    }
+  }
+
   .text {
-    padding: 15px;
+    margin: 8px auto 24px auto;
+    width: 248px;
+    padding: 8px;
+    line-height: 20px;
+    color: $color-light-grey;
   }
 
   .div-icons {
-    border-top: 1px solid $bg-color;
+    border-top: 1px solid $color-border-hover;
     display: flex;
     text-align: center;
     padding-top: 0;
@@ -104,7 +122,7 @@ export default {
 
     .extension {
       width: 50%;
-      border-right: 1px solid $bg-color;
+      border-right: 1px solid $color-border-hover;
     }
 
     .mobile-app {
@@ -113,32 +131,34 @@ export default {
 
     .mobile-app,
     .extension {
-      padding: 15px 0;
+      padding-top: 15px;
 
       div {
         display: flex;
-        justify-content: space-around;
+        justify-content: center;
 
         + div {
           padding-top: 15px;
+          padding-bottom: 12px;
         }
 
         a {
-          padding: 5px;
-          border-radius: 10px;
-          height: 52px;
-          width: 52px;
+          &:first-of-type {
+            margin-right: 32px;
+          }
 
           img {
             height: 40px;
             width: 40px;
-          }
 
-          &:hover {
-            background-color: #32333c;
+            &.grey {
+              filter: grayscale(1);
+              opacity: 0.8;
 
-            img {
-              opacity: 1;
+              &:hover {
+                filter: none;
+                opacity: 1;
+              }
             }
           }
         }

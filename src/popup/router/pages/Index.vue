@@ -155,7 +155,7 @@ export default {
     }
 
     .platforms {
-      border-radius: 10px;
+      border-radius: 6px;
       margin: 16px auto 0 auto;
       padding-top: 8px;
       max-width: 312px;
