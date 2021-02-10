@@ -301,3 +301,14 @@ Cypress.Commands.add('openTransactions', () => {
     .get('[data-cy=filters]')
     .should('be.visible');
 });
+
+Cypress.Commands.add('truncateStringShouldContain', (elem, string) => {
+  cy.get(elem)
+    .should('be.visible')
+    .then(($els) => {
+      const win = $els[0].ownerDocument.defaultView;
+      const before = win.getComputedStyle($els[0], 'before').getPropertyValue('content');
+      const after = win.getComputedStyle($els[0], 'after').getPropertyValue('content');
+      expect(string).to.eq(`${before.replace(/['"]+/g, '')}${after.replace(/['"]+/g, '')}`);
+    });
+});

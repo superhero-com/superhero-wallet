@@ -9,7 +9,7 @@
         <div class="ml-8">
           <div class="f-14">{{ $t('mainAccount') }}</div>
           <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">
-            {{ activeAccountName }}
+            <TruncateMid :str="activeAccountName" />
           </div>
         </div>
       </div>
@@ -91,9 +91,10 @@ import { mapGetters } from 'vuex';
 import Close from '../../../icons/close.svg?vue-component';
 import Arrow from '../../../icons/arrow-current-color.svg?vue-component';
 import Avatar from './Avatar';
+import TruncateMid from './TruncateMid';
 
 export default {
-  components: { Close, Arrow, Avatar },
+  components: { Close, Arrow, Avatar, TruncateMid },
   computed: mapGetters(['account', 'activeAccountName']),
   data: () => ({ showSettingsDropdown: false }),
   methods: {
@@ -116,7 +117,6 @@ export default {
 
 .sidebar-menu {
   position: fixed;
-  min-width: 200px;
   right: 0;
   top: 0;
   bottom: 0;
@@ -211,6 +211,10 @@ export default {
 
   .account-icon-holder {
     padding: 0.5rem 1rem 20px 1rem;
+
+    .flex .ml-8 {
+      max-width: 110px;
+    }
   }
 }
 </style>

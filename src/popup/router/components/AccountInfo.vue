@@ -3,9 +3,11 @@
     <div class="title">
       <div class="account-name" data-cy="account-name">
         <Avatar :address="account.publicKey" :name="account.name" class="avatar" size="small" />
-        <span class="chainname" v-if="activeAccountName.includes('.chain')">{{
-          ellipseStringMid(activeAccountName, 30)
-        }}</span>
+        <TruncateMid
+          v-if="activeAccountName.includes('.chain')"
+          :str="activeAccountName"
+          class="chainname"
+        />
         <router-link class="claim-chainname" to="/names" v-else
           >{{ $t('pages.account.claim-name') }}
         </router-link>
@@ -21,17 +23,16 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { ellipseStringMid } from '../../utils/helper';
 import Avatar from './Avatar';
+import TruncateMid from './TruncateMid';
 
 export default {
-  components: { Avatar },
+  components: { Avatar, TruncateMid },
   data: () => ({
     copied: false,
   }),
   computed: mapGetters(['account', 'activeAccountName']),
   methods: {
-    ellipseStringMid,
     copy() {
       this.copied = true;
       setTimeout(() => {
@@ -75,8 +76,7 @@ export default {
       }
 
       .chainname {
-        overflow: scroll;
-        scrollbar-width: none;
+        width: 230px;
       }
 
       .avatar {
