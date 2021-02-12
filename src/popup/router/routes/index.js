@@ -65,6 +65,7 @@ export default [
     props: true,
     meta: {
       notPersist: true,
+      hideTabBar: true,
     },
   },
   {
@@ -75,6 +76,7 @@ export default [
     meta: {
       notPersist: true,
       notRebrand: true,
+      hideTabBar: true,
     },
   },
   {
@@ -85,6 +87,7 @@ export default [
     meta: {
       notPersist: true,
       notRebrand: true,
+      hideTabBar: true,
     },
   },
   {

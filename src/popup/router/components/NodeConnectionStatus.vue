@@ -35,7 +35,7 @@ export default {
 .connect-error,
 .connect-node {
   position: sticky;
-  bottom: 0;
+  bottom: 48px;
   left: 0;
   right: 0;
   background: $secondary-color;
