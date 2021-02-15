@@ -6,13 +6,6 @@
   padding: 0;
   border-radius: 0;
 
-  .body,
-  .header {
-    max-width: 357px;
-    margin: 0 auto;
-    min-width: 357px;
-  }
-
   .footer {
     position: fixed;
     bottom: 0;
@@ -20,8 +13,7 @@
     -webkit-transform: translateX(-50%);
     -ms-transform: translateX(-50%);
     transform: translateX(-50%);
-    max-width: 480px;
-    min-width: 357px;
+    min-width: $container-width;
     padding-bottom: 15px;
     padding-top: 15px;
     background: $modal-background;

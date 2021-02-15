@@ -102,7 +102,7 @@ export default {
 
   .content {
     width: 100%;
-    max-width: 357px;
+    max-width: $container-width;
     margin: 0 auto;
     padding: 0 10px;
     padding-top: env(safe-area-inset-top);
