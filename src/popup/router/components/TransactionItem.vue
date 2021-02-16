@@ -55,15 +55,15 @@ export default {
     ...mapGetters(['account', 'activeNetwork']),
     ...mapState('fungibleTokens', ['availableTokens']),
     status() {
+      if (this.transaction.pending) {
+        return { text: this.$t('pages.transactions.pending'), value: 'pending' };
+      }
       if (
         ['senderId', 'accountId', 'ownerId', 'callerId']
           .map((key) => this.transaction.tx[key])
           .includes(this.account.publicKey)
       ) {
         return { text: this.$t('pages.transactions.sent'), value: 'sent' };
-      }
-      if (this.transaction.pending) {
-        return { text: this.$t('pages.transactions.pending'), value: 'pending' };
       }
       return { text: this.$t('pages.transactions.received'), value: 'received' };
     },
