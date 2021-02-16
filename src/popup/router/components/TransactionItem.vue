@@ -9,7 +9,9 @@
         />
         <span :class="status.value">{{ status.text }}</span>
       </div>
-      <span data-cy="time">{{ transaction.microTime | formatDate }}</span>
+      <span v-if="status.value !== 'pending'" data-cy="time">
+        {{ transaction.microTime | formatDate }}
+      </span>
     </div>
     <div class="details">
       <button v-if="tipUrl" class="url" @click="openUrl(tipUrl, true)">
