@@ -239,7 +239,7 @@ export const getTwitterAccountUrl = (url) => {
   return match ? match[0] : false;
 };
 
-export const isNotFoundError = (error) => error.isAxiosError && error?.response.status === 404;
+export const isNotFoundError = (error) => error.isAxiosError && error?.response?.status === 404;
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
