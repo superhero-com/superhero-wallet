@@ -4,11 +4,7 @@ describe('Test cases for names', () => {
     cy.login({ name })
       .openMenu()
       .get('[data-cy=chain-name]')
-      .should('be.visible')
-      .contains(name)
-
-      .get('[data-cy=account-name]')
-      .should('be.visible')
-      .contains(name);
+      .truncateStringShouldContain('[data-cy=chain-name] .truncate-mid', name)
+      .truncateStringShouldContain('[data-cy=account-name] .truncate-mid', name);
   });
 });

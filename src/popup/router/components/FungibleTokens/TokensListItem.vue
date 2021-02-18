@@ -13,9 +13,7 @@
     />
     <div class="details">
       <div>
-        <div class="title text-ellipsis" :title="tokenData.name">
-          {{ ellipseStringMid(tokenData.name, 30) }}
-        </div>
+        <TruncateMid :str="tokenData.name" />
         <div>
           <label>{{ $t('pages.fungible-tokens.mcap') }}</label>
           {{
@@ -42,18 +40,17 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { ellipseStringMid } from '../../../utils/helper';
 import Avatar from '../Avatar';
+import TruncateMid from '../TruncateMid';
 import TokenAmount from '../TokenAmount';
 
 export default {
-  components: { Avatar, TokenAmount },
+  components: { Avatar, TruncateMid, TokenAmount },
   props: {
     tokenData: Object,
     name: String,
   },
   computed: mapGetters(['formatCurrency']),
-  methods: { ellipseStringMid },
 };
 </script>
 
@@ -77,6 +74,10 @@ export default {
   .details {
     margin-left: 7px;
     flex-grow: 1;
+
+    .truncate-mid {
+      max-width: 215px;
+    }
 
     > div {
       display: flex;

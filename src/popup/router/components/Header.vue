@@ -4,9 +4,10 @@
       <Arrow v-if="title && !tourRunning" @click="back" class="back-arrow" data-cy="back-arrow" />
       <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
 
-      <div class="title">
-        {{ pageTitle || (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home') }}
-      </div>
+      <TruncateMid
+        :str="pageTitle || (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home')"
+        class="title"
+      />
 
       <div v-if="isLoggedIn">
         <Settings
@@ -37,9 +38,10 @@ import Bell from '../../../icons/bell.svg?vue-component';
 import Hamburger from '../../../icons/hamburger.svg?vue-component';
 import Logo from '../../../icons/logo-small.svg?vue-component';
 import Settings from '../../../icons/settings.svg?vue-component';
+import TruncateMid from './TruncateMid';
 
 export default {
-  components: { Arrow, Bell, Hamburger, Logo, Settings },
+  components: { Arrow, Bell, Hamburger, Logo, Settings, TruncateMid },
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,
   }),
@@ -113,6 +115,8 @@ export default {
 
     .title {
       font-size: 16px;
+      margin: 0 auto;
+      max-width: 185px;
     }
 
     &:not(.isLoggedIn) .title {
