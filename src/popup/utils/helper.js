@@ -241,6 +241,9 @@ export const getTwitterAccountUrl = (url) => {
 
 export const isNotFoundError = (error) => error.isAxiosError && error?.response?.status === 404;
 
+export const isAccountNotFoundError = (error) =>
+  isNotFoundError(error) && error?.response?.data?.reason === 'Account not found';
+
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
 
