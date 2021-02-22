@@ -11,6 +11,8 @@ describe('Test cases for Withdraw Page', () => {
       .click()
       .get('.primary-title')
       .should('be.visible')
+      .get('.qr-code-reader video')
+      .should('be.visible')
       .get('.modal .close')
       .click()
 
