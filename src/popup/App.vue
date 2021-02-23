@@ -130,24 +130,37 @@ export default {
 </script>
 
 <style lang="scss">
-html {
-  height: 100%;
+@import '../styles/variables';
+
+html,
+body {
+  width: $container-width;
+  height: 600px;
 }
 
 body {
-  min-height: 100%;
-  height: 1px;
+  margin: 0;
+  background-color: $color-black;
+}
+
+@media screen and (min-width: $container-width) {
+  html {
+    margin: 0 auto;
+  }
 }
 </style>
 
 <style lang="scss" scoped>
-@import '../styles/variables';
+@import '../styles/typography';
 
 .ae-main {
   position: relative;
-  min-height: 600px;
   margin: 0 auto;
   overflow: visible;
+
+  @extend %face-sans-16-regular;
+
+  color: $white-color;
 
   &.ae-main-popup {
     background-color: $bg-color;

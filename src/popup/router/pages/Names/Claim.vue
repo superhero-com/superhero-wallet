@@ -90,7 +90,7 @@ export default {
     margin-left: 0;
   }
 
-  .primary-button {
+  .button {
     margin-right: 0;
   }
 }

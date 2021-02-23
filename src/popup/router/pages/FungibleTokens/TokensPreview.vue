@@ -59,11 +59,6 @@ export default {
 <style lang="scss" scoped>
 @import '../../../../styles/variables';
 
-.tokens-preview {
-  max-width: 357px;
-  margin: 0 auto;
-}
-
 .menu {
   margin-top: 3px;
   padding: 7px;

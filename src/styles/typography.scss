@@ -1,0 +1,112 @@
+@import '~fontsource-ibm-plex-sans/300-normal.css';
+@import '~fontsource-ibm-plex-sans/400-normal.css';
+@import '~fontsource-ibm-plex-sans/400-italic.css';
+@import '~fontsource-ibm-plex-sans/500-normal.css';
+@import '~fontsource-ibm-plex-sans/700-normal.css';
+@import '~fontsource-ibm-plex-sans/700-italic.css';
+@import 'variables';
+
+%face-sans-20-bold {
+  font-family: $font-sans;
+  font-weight: bold;
+  font-size: 20px;
+  line-height: 26px;
+}
+
+%face-sans-20-medium {
+  font-family: $font-sans;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 26px;
+}
+
+%face-sans-bold-20-regular {
+  font-family: $font-sans;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: 26px;
+}
+
+%face-sans-17-medium {
+  font-family: $font-sans;
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 22px;
+}
+
+%face-sans-16-bold {
+  font-family: $font-sans;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 18px;
+}
+
+%face-sans-16-medium {
+  font-family: $font-sans;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 21px;
+}
+
+%face-sans-16-regular {
+  font-family: $font-sans;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: 21px;
+}
+
+%face-sans-15-bold {
+  font-family: $font-sans;
+  font-weight: bold;
+  font-size: 15px;
+  line-height: 19px;
+}
+
+%face-sans-15-medium {
+  font-family: $font-sans;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 19px;
+}
+
+%face-sans-15-regular {
+  font-family: $font-sans;
+  font-weight: normal;
+  font-size: 15px;
+  line-height: 19px;
+}
+
+%face-sans-14-medium {
+  font-family: $font-sans;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 23px;
+}
+
+%face-sans-14-regular {
+  font-family: $font-sans;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 23px;
+}
+
+%face-sans-12-regular {
+  font-family: $font-sans;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+%face-sans-11-regular {
+  font-family: $font-sans;
+  font-weight: normal;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+%face-sans-10-medium {
+  font-family: $font-sans;
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 13px;
+}

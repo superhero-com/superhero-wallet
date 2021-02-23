@@ -80,7 +80,7 @@ export default {
 @import '../../../styles/variables';
 
 .regular-text {
-  font-size: $font-size;
+  font-size: $base-font-size;
   text-align: left;
   font-weight: normal;
 }

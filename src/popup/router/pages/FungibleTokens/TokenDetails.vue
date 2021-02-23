@@ -129,11 +129,6 @@ export default {
 <style lang="scss" scoped>
 @import '../../../../styles/variables';
 
-.token-details {
-  max-width: 357px;
-  margin: 0 auto;
-}
-
 .token-header {
   background-color: $black-1;
   padding: 20px 30px;
@@ -160,7 +155,7 @@ export default {
   display: flex;
   align-items: center;
 
-  .primary-button {
+  .button {
     width: auto;
     padding: 0 25px;
     display: inline-block;

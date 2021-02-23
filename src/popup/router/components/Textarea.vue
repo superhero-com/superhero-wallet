@@ -32,7 +32,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/typography';
 
 .textarea {
   display: block;
@@ -43,8 +43,9 @@ export default {
   padding: 15px;
   margin-bottom: 22px;
   color: $text-color;
-  font-family: 'Roboto', sans-serif;
-  font-size: $font-size;
+
+  @extend %face-sans-16-regular;
+
   min-height: 200px;
   margin-left: auto;
   margin-right: auto;

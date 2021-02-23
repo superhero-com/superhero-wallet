@@ -2,20 +2,23 @@
   <Component
     :is="to ? 'RouterLink' : 'button'"
     :to="to"
-    class="primary-button"
+    class="button"
     @click="$emit('click')"
-    :class="{
-      disabled,
-      extend,
-      half,
-      small,
-      onboarding,
-      dark,
-      third,
-      inline,
-      inactive,
-      bold,
-    }"
+    :class="[
+      fill,
+      {
+        disabled,
+        extend,
+        half,
+        small,
+        onboarding,
+        dark,
+        third,
+        inline,
+        inactive,
+        bold,
+      },
+    ]"
   >
     <slot />
   </Component>
@@ -24,6 +27,11 @@
 <script>
 export default {
   props: {
+    fill: {
+      type: String,
+      validator: (value) => ['primary', 'secondary'].includes(value),
+      default: 'primary',
+    },
     disabled: Boolean,
     extend: Boolean,
     half: Boolean,
@@ -40,22 +48,58 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/typography';
 
-.primary-button {
+.button {
   display: block;
+  position: relative;
   text-decoration: none;
-  background-color: $button-color;
-  width: 270px;
-  border-radius: 5px;
-  font-family: 'Roboto', sans-serif;
-  font-size: 15px;
+  width: 280px;
+  border-radius: 6px;
+
+  @extend %face-sans-16-bold;
+
   padding: 0;
   margin: 8px auto;
   color: $button-text-color;
-  font-weight: normal;
+  height: 40px;
   line-height: 40px;
-  max-height: 40px;
+
+  &.primary {
+    background-color: $color-blue;
+
+    &:hover {
+      background-color: $color-blue-hover;
+    }
+
+    &:active {
+      background: rgba(14, 82, 216, 0.9);
+    }
+  }
+
+  &.secondary {
+    background-color: $color-black;
+
+    &:hover {
+      background-color: $color-hover;
+    }
+
+    &:active {
+      background: rgba(25, 25, 25, 0.8);
+    }
+  }
+
+  &:focus-visible::before {
+    content: '';
+    position: absolute;
+    margin: -8px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 4px solid rgba(17, 97, 254, 0.44);
+    border-radius: 10px;
+  }
 
   &.disabled {
     opacity: 0.4;
@@ -84,16 +128,13 @@ export default {
   }
 
   &.third {
+    display: inline-block;
     width: 32%;
     margin: 0;
-    max-height: 100px;
-    line-height: normal;
-    padding: 5px;
-    word-break: break-word;
-    display: inline-block;
   }
 
   &.small.third {
+    height: 24px;
     font-size: 12px;
   }
 

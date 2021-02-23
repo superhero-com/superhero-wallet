@@ -68,7 +68,7 @@ export default {
     }
   }
 
-  .primary-button {
+  .button {
     width: 282px;
     font-weight: 600;
 

@@ -241,7 +241,7 @@ export default {
     }
   }
 
-  .primary-button {
+  .button {
     margin-top: 20px;
   }
 }
