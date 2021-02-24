@@ -32,10 +32,15 @@
       >
         <Claim slot="icon" />
       </BoxButton>
-      <BoxButton :text="$t('pages.titles.topUp')" to="/receive" class="tour__step6">
+      <BoxButton
+        :text="$t('pages.titles.topUp')"
+        to="/receive"
+        class="tour__step6"
+        data-cy="receive"
+      >
         <Topup slot="icon" />
       </BoxButton>
-      <BoxButton :text="$t('pages.titles.send')" to="/send" class="tour__step7">
+      <BoxButton :text="$t('pages.titles.send')" to="/send" class="tour__step7" data-cy="send">
         <Withdraw slot="icon" />
       </BoxButton>
       <BoxButton :text="$t('pages.account.activity')" to="/transactions" class="tour__step5">
@@ -50,7 +55,12 @@
       <BoxButton :text="$t('pages.titles.invite')" :to="{ name: 'invite' }">
         <Invite slot="icon" />
       </BoxButton>
-      <BoxButton :text="$t('pages.titles.settings')" to="/settings" class="tour__step8">
+      <BoxButton
+        :text="$t('pages.titles.settings')"
+        to="/settings"
+        class="tour__step8"
+        data-cy="settings"
+      >
         <Settings slot="icon" />
       </BoxButton>
     </div>

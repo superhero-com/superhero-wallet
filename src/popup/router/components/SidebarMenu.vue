@@ -27,7 +27,7 @@
         </router-link>
       </li>
       <li>
-        <router-link to="/tip">
+        <router-link to="/tip" data-cy="tip">
           {{ $t('pages.tipPage.tips') }}
           <Tips />
         </router-link>
