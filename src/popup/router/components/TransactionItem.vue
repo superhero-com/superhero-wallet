@@ -1,49 +1,31 @@
 <template>
   <div class="transaction-item">
-    <div>
-      <div class="status">
-        <TokenAmount
-          data-cy="amount"
-          :amount="txAmount"
-          :symbol="contractCallData ? availableTokens[contractCallData.token].symbol : 'AE'"
-        />
-        <span :class="status.value">{{ status.text }}</span>
-      </div>
-      <span v-if="status.value !== 'pending'" data-cy="time">
-        {{ transaction.microTime | formatDate }}
-      </span>
+    <div class="left">
+      <Pending v-if="transaction.pending" class="icon" />
+      <TokenAmount
+        :amount="amount"
+        :symbol="symbol"
+        :direction="direction"
+        :altText="txType"
+        data-cy="amount"
+      />
     </div>
-    <div class="details">
-      <button v-if="tipUrl" class="url" @click="openUrl(tipUrl, true)">
-        {{ tipUrl }}
-      </button>
-      <span v-else-if="address" class="address">
-        {{ address }}
-      </span>
-      <span v-else>
-        {{ transactionType }}
-      </span>
-      <button
-        class="open-explorer"
-        @click="openUrl(`${activeNetwork.explorerUrl}/transactions/${transaction.hash}`, true)"
-      >
-        <Eye />
-      </button>
+    <div class="right" v-if="!transaction.pending">
+      <span data-cy="date">{{ transaction.microTime | formatDate }}</span>
+      <span data-cy="time">{{ transaction.microTime | formatTime }}</span>
     </div>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import { aettosToAe, categorizeContractCallTxObject, convertToken } from '../../utils/helper';
-import { formatDate } from '../../utils';
+import { formatDate, formatTime } from '../../utils';
+import Pending from '../../../icons/animated-pending.svg?vue-component';
 import TokenAmount from './TokenAmount';
-import openUrl from '../../utils/openUrl';
-import Eye from '../../../icons/eye.svg?vue-component';
 
 export default {
-  components: { TokenAmount, Eye },
+  components: { TokenAmount, Pending },
   props: {
     transaction: {
       type: Object,
@@ -52,27 +34,19 @@ export default {
   },
   filters: {
     formatDate,
+    formatTime,
   },
   computed: {
     ...mapGetters(['account', 'activeNetwork']),
     ...mapState('fungibleTokens', ['availableTokens']),
-    status() {
-      if (this.transaction.pending) {
-        return { text: this.$t('pages.transactions.pending'), value: 'pending' };
-      }
-      if (
-        ['senderId', 'accountId', 'ownerId', 'callerId']
-          .map((key) => this.transaction.tx[key])
-          .includes(this.account.publicKey)
-      ) {
-        return { text: this.$t('pages.transactions.sent'), value: 'sent' };
-      }
-      return { text: this.$t('pages.transactions.received'), value: 'received' };
+    direction() {
+      return ['senderId', 'accountId', 'ownerId', 'callerId']
+        .map((key) => this.transaction.tx[key])
+        .includes(this.account.publicKey)
+        ? 'sent'
+        : 'received';
     },
-    contractCallData() {
-      return categorizeContractCallTxObject(this.transaction);
-    },
-    txAmount() {
+    amount() {
       if (this.contractCallData) {
         return +convertToken(
           this.contractCallData.amount,
@@ -83,102 +57,65 @@ export default {
       const fee = this.transaction.tx.fee || 0;
       return +aettosToAe(+amount + fee);
     },
-    tipUrl() {
-      return (
-        this.transaction.tipUrl ||
-        this.transaction.url ||
-        (!this.transaction.pending &&
-          !this.transaction.claim &&
-          this.transaction.tx.log?.[0] &&
-          decode(this.transaction.tx.log[0].data).toString()) ||
-        this.contractCallData?.url ||
-        ''
-      );
+    symbol() {
+      return this.contractCallData
+        ? this.availableTokens[this.contractCallData.token].symbol
+        : 'AE';
     },
-    topup() {
-      return (
-        this.transaction.tx.type === 'SpendTx' &&
-        this.transaction.tx.recipientId === this.account.publicKey
-      );
+    txType() {
+      return this.symbol === 'AE' ? this.transaction.tx.type : null;
     },
-    transactionType() {
-      return this.$t('transaction.type')[this.transaction.tx.type];
+    contractCallData() {
+      return categorizeContractCallTxObject(this.transaction);
     },
-    address() {
-      return this.topup
-        ? this.transaction.tx.senderId
-        : this.contractCallData?.to || this.transaction.tx.recipientId;
-    },
-  },
-  methods: {
-    openUrl,
   },
 };
 </script>
 
 <style lang="scss" scoped>
 @import '../../../styles/variables';
+@import '../../../styles/typography';
 
 .transaction-item {
-  padding: 10px 0;
-  border-color: $bg-color;
-  border-top: 1px solid $tx-border-color;
+  padding: 0 16px;
+  border-radius: 4px;
+  background: $color-bg-1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
 
-  > div {
+  &:hover {
+    background: $color-hover;
+  }
+
+  .left {
+    padding: 12px 0;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    line-height: 19px;
-    color: $text-color;
-    font-size: 12px;
-    font-weight: 500;
 
-    &.details {
-      line-height: 16px;
-      font-weight: 400;
-    }
-
-    .status {
-      font-size: 14px;
-      color: $white-color;
-      text-align: left;
-
-      .sent {
-        color: #a32e2d;
-      }
-
-      .received {
-        color: #00804e;
-      }
-    }
-
-    button {
-      border: none;
-      outline: none;
-      background: none;
-      font: inherit;
-      color: inherit;
-      padding: 0;
-      cursor: pointer;
-    }
-
-    .url {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .address {
-      font-size: 9px;
-      letter-spacing: -0.1px;
+    .icon {
+      width: 24px;
+      height: 24px;
+      fill: $color-white;
+      margin-right: 2px;
     }
   }
 
-  .open-explorer {
-    color: $gray-2;
+  .right {
+    @extend %face-sans-12-medium;
 
-    &:hover {
-      color: $white-1;
+    > span {
+      display: block;
+      text-align: right;
+    }
+
+    :nth-child(1) {
+      color: $color-white;
+    }
+
+    :nth-child(2) {
+      color: $color-dark-grey;
     }
   }
 }

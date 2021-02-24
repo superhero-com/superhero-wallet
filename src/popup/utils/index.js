@@ -5,9 +5,15 @@ import runMigrations from '../../store/migrations';
 
 export const formatDate = (time) =>
   // TODO: Use the current language from i18n module
-  new Date(+time).toLocaleString(navigator.language, {
+  new Date(+time).toLocaleDateString(navigator.language, {
+    year: '2-digit',
+    month: '2-digit',
+    day: '2-digit',
+  });
+
+export const formatTime = (time) =>
+  new Date(+time).toLocaleTimeString(navigator.language, {
     timeStyle: 'short',
-    dateStyle: 'short',
   });
 
 export const getLoginState = async ({

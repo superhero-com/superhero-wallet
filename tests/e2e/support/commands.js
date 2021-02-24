@@ -1,6 +1,6 @@
 import '../../../src/lib/initPolyfills';
 import uuid from 'uuid';
-import { formatDate, getLoginState } from '../../../src/popup/utils';
+import { formatDate, formatTime, getLoginState } from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
   cy.visit(`chrome/popup/popup${route ? `#${route}` : ''}`, { onBeforeLoad });
@@ -208,7 +208,10 @@ Cypress.Commands.add('pendingTx', (tx = {}) => {
     txItem.find('[data-cy=amount]').should('contain', tx.amount);
     txItem.find('[data-cy=status]').should('contain', 'Pending');
     if (tx.url) txItem.find('[data-cy=url]').should('contain', tx.url);
-    if (tx.time) txItem.find('[data-cy=time]').should('contain', formatDate(tx.time));
+    if (tx.time) {
+      txItem.find('[data-cy=date]').should('contain', formatDate(tx.time));
+      txItem.find('[data-cy=time]').should('contain', formatTime(tx.time));
+    }
   });
 });
 

@@ -1,9 +1,8 @@
 <template>
-  <span class="token-amount">
+  <span class="token-amount" :class="direction">
     {{ amountRounded }}
     <span class="symbol">{{ symbol }}</span>
-    <!-- eslint-disable-next-line vue-i18n/no-raw-text -->
-    <span v-if="amountFiat" class="fiat">({{ amountFiat }})</span>
+    <span v-if="text" class="text">{{ text }}</span>
   </span>
 </template>
 
@@ -14,33 +13,67 @@ export default {
   props: {
     amount: { type: Number, required: true },
     symbol: { type: String, default: 'AE' },
+    altText: { type: String },
+    direction: {
+      type: String,
+      validator: (value) => ['sent', 'received'].includes(value),
+    },
   },
   computed: {
     amountRounded() {
-      return +this.amount.toFixed(2);
+      return +this.amount.toFixed(this.amount < 0.01 ? 9 : 2);
     },
     ...mapState({
-      amountFiat(state, { convertToCurrencyFormatted }) {
-        if (!this.amountRounded || this.symbol !== 'AE') return false;
-        return convertToCurrencyFormatted(this.amount);
+      amountFiat(state, { convertToCurrency, formatCurrency }) {
+        if (this.symbol !== 'AE') return false;
+        const converted = convertToCurrency(this.amount);
+        if (converted < 0.01) return false;
+        return formatCurrency(converted);
       },
     }),
+    text() {
+      if (this.amountFiat) return `(≈${this.amountFiat})`;
+      if (this.altText) return `(${this.altText})`;
+      return false;
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
 @import '../../../styles/variables';
+@import '../../../styles/typography';
 
 .token-amount {
+  @extend %face-sans-14-regular;
+
   color: $white-color;
+  line-height: 24px;
 
   .symbol {
-    color: $secondary-color;
+    @extend %face-sans-14-medium;
+
+    color: $color-blue;
   }
 
-  .fiat {
+  .text {
     color: $gray-2;
+  }
+
+  &.sent {
+    color: $color-error;
+
+    &::before {
+      content: '-';
+    }
+  }
+
+  &.received {
+    color: $color-green-hover;
+
+    &::before {
+      content: '+';
+    }
   }
 }
 </style>
