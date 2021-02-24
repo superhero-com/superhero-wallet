@@ -1,6 +1,6 @@
 import { TXS_PER_PAGE } from '../../../src/popup/utils/constants';
 import { testAccount } from '../../../src/popup/utils/config';
-import { formatDate } from '../../../src/popup/utils';
+import { formatDate, formatTime } from '../../../src/popup/utils';
 
 describe('Tests cases for transactions page', () => {
   beforeEach(() => {
@@ -37,8 +37,8 @@ describe('Tests cases for transactions page', () => {
             cy.wrap(e)
               .find('[data-cy=amount]')
               .should('contain', amount / 10 ** 18);
-            cy.wrap(e).find('[data-cy=time]').should('contain', formatDate(time));
-            cy.wrap(e).find('[data-cy=amount] .fiat').should('be.visible');
+            cy.wrap(e).find('[data-cy=date]').should('contain', formatDate(time));
+            cy.wrap(e).find('[data-cy=time]').should('contain', formatTime(time));
           });
       });
   });

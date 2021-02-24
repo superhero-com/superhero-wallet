@@ -1,0 +1,21 @@
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<style type="text/css">
+	.st0{fill:#ffffff;}
+</style>
+<g id="Side_1">
+		<animate attributeName="opacity" calcMode="linear" begin="0s" dur="1s" values=".66;.33;.33;.66" repeatCount="indefinite" restart="always"/>
+	<path class="st0" d="M11,22l-7.339-4.4c-0.168-0.099-0.307-0.24-0.403-0.409C3.051,17.022,3,16.831,3,16.636V8.779l7.74,4.463
+		c0.081,0.047,0.168,0.083,0.259,0.106v8.649L11,22z"/>
+</g>
+<g id="Side_2">
+<animate attributeName="opacity" calcMode="linear" begin="0s" dur="1s" values=".33;.66;.33;.33" repeatCount="indefinite" restart="always"/>
+	<path class="st0" d="M13,22v-8.733l0.054-0.029L21,8.661v7.975c-0.001,0.195-0.052,0.387-0.149,0.556s-0.236,0.311-0.404,0.411
+		L13.002,22H13z"/>
+</g>
+<g id="Side_3">
+<animate attributeName="opacity" calcMode="linear" begin="0s" dur="1s" values=".33;.33;.66;.33" repeatCount="indefinite" restart="always"/>
+	<path class="st0" d="M3.243,6.614c0.096-0.121,0.216-0.222,0.353-0.294l7.875-4.188C11.634,2.045,11.816,2,12,2
+		s0.366,0.045,0.529,0.132l7.875,4.188c0.106,0.056,0.202,0.128,0.285,0.215l-8.634,4.978c-0.056,0.032-0.108,0.07-0.156,0.112
+		c-0.048-0.042-0.101-0.08-0.156-0.112L3.243,6.614z"/>
+</g>
+</svg>
