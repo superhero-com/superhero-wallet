@@ -46,8 +46,8 @@ export default {
   }
 
   .checkmark {
-    background-color: #272831;
-    border: 1.3px solid $border-track-color;
+    background-color: $color-black;
+    border: 1.3px solid $color-border;
     border-radius: 2px;
     height: 20px;
     width: 20px;

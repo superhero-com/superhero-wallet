@@ -525,13 +525,15 @@
       "term2": "Terms of Use",
       "term3": "Privacy Policy",
       "termsAndConditions": "Terms of Use",
-      "heading": "Social platform with no hidden agenda.",
+      "heading": "Social Media with no hidden Agenda",
+      "ready": "Ready to go?",
+      "go": "Go!",
       "platforms": {
         "heading": "Superhero wallet is available as browser extension and mobile app so you can use it on your preferred platforms and devices.",
         "browser-extension": "Browser extension",
         "mobile-app": "Mobile app"
       },
-      "webVersion": "Or use our web version",
+      "webVersion": "Or continue with our web version",
       "securingAccount": "Securing your account",
       "generateWallet": "Generate New Wallet",
       "importWallet": "Retrieve existing account",

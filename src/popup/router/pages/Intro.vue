@@ -328,7 +328,14 @@ export default {
   }
 
   .platforms {
-    margin: 20px -20px 0 -25px;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+
+    .text:hover {
+      margin-bottom: 20px;
+    }
   }
 }
 </style>
