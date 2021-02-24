@@ -219,6 +219,9 @@
       "understand": "I understand that this is a cryptocurrency wallet and I am responsible for backing up my account recovery seed phrase."
     },
     "titles": {
+      "tx-history": "Tx history",
+      "payments": "Payments",
+      "balances": "Balances",
       "settings": "Settings",
       "language": "Language",
       "security": "Security",

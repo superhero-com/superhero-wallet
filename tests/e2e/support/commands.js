@@ -125,22 +125,14 @@ Cypress.Commands.add('menuShould', (cond) => {
   cy.get('[data-cy=sidebar-menu]').should(cond).get('[data-cy=close-menu]').should(cond);
 });
 
-Cypress.Commands.add('openMenuPage', (page, dropdown = false) => {
-  let url = `${Cypress.config().popupUrl}/popup#/`;
+Cypress.Commands.add('openMenuPage', (page) => {
+  const url = `${Cypress.config().popupUrl}/popup#/`;
   cy.openMenu();
-  if (dropdown) {
-    url += 'settings/';
-    cy.toggleDropdown();
-  }
-  cy.get(`[data-cy=${page}]`).click().url().should('eq', `${url}${page}`).menuShould('not.exist');
-});
-
-Cypress.Commands.add('toggleDropdown', () => {
-  cy.get('[data-cy=settings]').click().get('[data-cy=dropdown]');
-});
-
-Cypress.Commands.add('dropdownShould', (cond) => {
-  cy.get('[data-cy=dropdown]').should(cond);
+  cy.get(`[data-cy=sidebar-menu] [data-cy=${page}]`)
+    .click()
+    .url()
+    .should('eq', `${url}${page}`)
+    .menuShould('not.exist');
 });
 
 Cypress.Commands.add('openTip', () => {
@@ -152,7 +144,7 @@ Cypress.Commands.add('openTip', () => {
 });
 
 Cypress.Commands.add('openWithdraw', () => {
-  cy.get('[data-cy=hamburger]').click().menuShould('be.visible').get('[data-cy=send]').click();
+  cy.get('[data-cy=send]').click();
 });
 
 Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '' }) => {
@@ -246,7 +238,11 @@ Cypress.Commands.add('urlEquals', (route) => {
 });
 
 Cypress.Commands.add('openNetworks', () => {
-  cy.openMenu().toggleDropdown().get('[data-cy=networks]').click().urlEquals('/settings/networks');
+  cy.get('[data-cy=settings]')
+    .click()
+    .get('[data-cy=networks]')
+    .click()
+    .urlEquals('/settings/networks');
 });
 
 Cypress.Commands.add('enterNetworkDetails', (network, url, middleware, compiler) => {
