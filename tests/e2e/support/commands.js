@@ -238,7 +238,9 @@ Cypress.Commands.add('urlEquals', (route) => {
 });
 
 Cypress.Commands.add('openNetworks', () => {
-  cy.get('[data-cy=settings]')
+  cy.get('[data-cy=hamburger]')
+    .click()
+    .get('[data-cy=settings]')
     .click()
     .get('[data-cy=networks]')
     .click()
