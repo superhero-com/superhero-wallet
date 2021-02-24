@@ -1,29 +1,46 @@
 <template>
   <div class="header" v-if="showNavigation && !aeppPopup">
-    <div class="content" :class="{ isLoggedIn }">
-      <Arrow v-if="title && !tourRunning" @click="back" class="back-arrow" data-cy="back-arrow" />
-      <Logo :class="$route.path === '/intro' && !isLoggedIn ? 'intro_style' : ''" v-else />
+    <div class="content">
+      <div class="left">
+        <Logo class="logo" v-if="isLoggedIn" />
+        <button v-if="title && !tourRunning" @click="back" class="icon-btn back">
+          <Back data-cy="back-arrow" />
+        </button>
+      </div>
 
-      <TruncateMid
-        :str="pageTitle || (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home')"
-        class="title"
-      />
-
-      <div v-if="isLoggedIn">
-        <Settings
-          v-if="$route.path === '/notifications'"
-          class="settings"
-          @click="$router.push('/notifications/settings')"
+      <div class="title">
+        <TruncateMid
+          :str="pageTitle || (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home')"
+          class="text"
         />
-        <template v-else-if="$route.path !== '/notifications/settings'">
-          <span class="noti-holder" @click="toNotifications" data-cy="noti">
-            <span v-if="notificationsCount" class="noti-count" data-cy="noti-count">
+      </div>
+
+      <div class="right">
+        <template v-if="isLoggedIn">
+          <span
+            v-if="!$route.path.startsWith('/notifications')"
+            @click="toNotifications"
+            class="notifications"
+            data-cy="noti"
+          >
+            <button class="icon-btn">
+              <Bell />
+            </button>
+            <span v-if="notificationsCount" class="badge" data-cy="noti-count">
               {{ notificationsCount }}
             </span>
-            <Bell />
           </span>
-          <button @click="$emit('toggle-sidebar')">
-            <Hamburger data-cy="hamburger" />
+
+          <button
+            v-if="$route.path === '/notifications'"
+            @click="$router.push('/notifications/settings')"
+            class="icon-btn settings"
+          >
+            <Settings />
+          </button>
+
+          <button @click="$emit('toggle-sidebar')" class="icon-btn">
+            <Menu data-cy="hamburger" />
           </button>
         </template>
       </div>
@@ -33,15 +50,15 @@
 
 <script>
 import { mapState, mapMutations } from 'vuex';
-import Arrow from '../../../icons/arrow.svg?vue-component';
-import Bell from '../../../icons/bell.svg?vue-component';
-import Hamburger from '../../../icons/hamburger.svg?vue-component';
 import Logo from '../../../icons/logo-small.svg?vue-component';
-import Settings from '../../../icons/settings.svg?vue-component';
+import Back from '../../../icons/back.svg?vue-component';
+import Bell from '../../../icons/bell.svg?vue-component';
+import Settings from '../../../icons/notif-settings.svg?vue-component';
+import Menu from '../../../icons/menu.svg?vue-component';
 import TruncateMid from './TruncateMid';
 
 export default {
-  components: { Arrow, Bell, Hamburger, Logo, Settings, TruncateMid },
+  components: { Logo, Back, Bell, Settings, Menu, TruncateMid },
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,
   }),
@@ -89,94 +106,111 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/typography';
 
 .header {
-  height: calc(50px + env(safe-area-inset-top));
-  display: flex;
-  align-items: center;
-  background-color: $nav-bg-color;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 8;
+  height: calc(50px + env(safe-area-inset-top));
+  background-color: $color-black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   .content {
-    width: 100%;
+    flex: 1;
     max-width: $container-width;
-    margin: 0 auto;
+    height: 50px;
     padding: 0 10px;
     padding-top: env(safe-area-inset-top);
     display: flex;
-    justify-content: center;
     align-items: center;
-    color: $white-1;
+
+    .left,
+    .right {
+      flex-basis: 80px;
+      display: flex;
+      align-items: center;
+    }
+
+    .right {
+      justify-content: flex-end;
+    }
 
     .title {
-      font-size: 16px;
-      margin: 0 auto;
-      max-width: 185px;
+      flex: 1 0;
+
+      .text {
+        max-width: 180px;
+        padding: 0 4px;
+        display: flex;
+        justify-content: center;
+
+        @extend %face-sans-16-medium;
+
+        color: $color-white;
+      }
     }
 
-    &:not(.isLoggedIn) .title {
-      margin-left: auto;
-      margin-right: auto;
+    .logo {
+      width: 36px;
+      height: 26px;
     }
 
-    .back-arrow,
-    .settings {
+    .back {
+      margin-left: 10px;
+    }
+
+    .settings,
+    .notifications {
+      margin-right: 10px;
+    }
+
+    .icon-btn {
       cursor: pointer;
-    }
-
-    &.isLoggedIn {
-      justify-content: space-between;
-      position: relative;
-
-      > :not(.title) {
-        z-index: 1;
-      }
-
-      .title {
-        position: absolute;
-        left: 0;
-        right: 0;
-        text-align: center;
-      }
-
-      .start-onboarding {
-        margin-left: 13px;
-        cursor: pointer;
-      }
-    }
-
-    svg {
-      vertical-align: middle;
-    }
-
-    button {
+      width: 32px;
+      height: 32px;
       padding: 0;
-      margin-left: 5px;
+      opacity: 0.7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      svg {
+        width: 24px;
+        height: 24px;
+
+        path {
+          fill: $color-white;
+        }
+      }
+
+      &:hover {
+        opacity: 1;
+        border-radius: 50%;
+        background-color: $color-hover;
+      }
     }
 
-    .noti-holder {
+    .notifications {
       position: relative;
       cursor: pointer;
-    }
 
-    .noti-count {
-      position: absolute;
-      background: $secondary-color;
-      font-size: 12px;
-      border-radius: 50%;
-      width: 16px;
-      height: 16px;
-      text-align: center;
-      vertical-align: middle;
-      left: -10px;
-      top: 0;
-      line-height: 15px;
-      border: 1px solid $nav-bg-color;
+      .badge {
+        position: absolute;
+        left: -2px;
+        top: 20%;
+        width: 14px;
+        height: 14px;
+        background: $color-blue;
+        border-radius: 50%;
+        text-align: center;
+        font-size: 12px;
+        line-height: 14px;
+      }
     }
   }
 }
