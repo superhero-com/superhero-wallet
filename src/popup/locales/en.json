@@ -310,9 +310,10 @@
       "securingAccount": "Securing your account"
     },
     "recentTransactions": {
-      "recentActivity": "Recent Activity",
+      "title": "Recent transactions",
       "viewAll": "View all",
-      "noTransactionsFound": "No transactions found!"
+      "viewMore": "View full transaction history",
+      "noTransactionsFound": "There are no recent transactions for this account."
     },
     "add-fungible-token": {
       "heading": "Fungible Tokens",

@@ -1,41 +1,45 @@
 <template>
   <div class="recent-transactions" :class="{ 'tour-bar': tourStartBar }">
-    <div class="flex flex flex-align-center flex-justify-between mb-10 mt-20">
-      <span class="title">{{ $t('pages.recentTransactions.recentActivity') }}</span>
+    <div class="header">
+      <span class="title">{{ $t('pages.recentTransactions.title') }}</span>
       <router-link to="/transactions" data-cy="view-all-transactions" class="view-all">
-        {{ $t('pages.recentTransactions.viewAll') }}
+        <Activity class="icon" />
       </router-link>
     </div>
     <PendingTxs />
-    <div v-if="transactions.latest.length">
-      <ae-list class="transaction-list">
-        <TransactionItem
-          v-for="transaction in transactions.latest"
-          :key="transaction.hash"
-          :transaction="transaction"
-        />
-      </ae-list>
+    <div v-if="transactions.latest.length" class="transaction-list">
+      <TransactionItem
+        v-for="transaction in transactions.latest"
+        :key="transaction.hash"
+        :transaction="transaction"
+      />
     </div>
-    <div v-if="!transactions.latest.length && !transactions.pending.length">
-      <p class="paragraph">
-        {{ $t('pages.recentTransactions.noTransactionsFound') }}
-      </p>
+    <router-link v-if="transactions.latest.length > 6" to="/transactions" class="view-more">
+      <Visible class="icon" />
+      <span class="text">{{ $t('pages.recentTransactions.viewMore') }}</span>
+    </router-link>
+    <img v-if="loading" :src="icons.AnimatedSpinner" class="spinner" />
+    <div v-else-if="!transactions.latest.length && !transactions.pending.length" class="message">
+      <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
     </div>
-    <Loader v-if="loading" size="small" type="none" />
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
+import Activity from '../../../icons/activity.svg?vue-component';
+import Visible from '../../../icons/visible.svg?vue-component';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg';
 import PendingTxs from './PendingTxs';
 import TransactionItem from './TransactionItem';
 
 export default {
-  components: { PendingTxs, TransactionItem },
+  components: { PendingTxs, TransactionItem, Activity, Visible },
   data() {
     return {
       polling: null,
       loading: true,
+      icons: { AnimatedSpinner },
     };
   },
   created() {
@@ -49,7 +53,7 @@ export default {
       this.$store.commit(
         'updateLatestTransactions',
         await this.$store.dispatch('fetchTransactions', {
-          limit: 3,
+          limit: 10,
           page: 1,
           recent: true,
         }),
@@ -62,22 +66,133 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../styles/variables';
+@import '../../../styles/typography';
 
 .recent-transactions {
-  padding: 0 20px 20px 20px;
+  height: 220px;
+  background: $color-bg-3;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
 
-  .view-all {
-    color: $accent-color;
-    cursor: pointer;
-    text-decoration: none;
+  .header {
+    padding: 18px 16px 8px 16px;
+    margin-bottom: 1px;
+    background: $color-bg-2;
+    border-radius: 0 0 4px 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .title {
+      @extend %face-sans-15-medium;
+
+      color: $color-dark-grey;
+      line-height: 24px;
+    }
+
+    .view-all {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: none;
+
+      .icon {
+        fill: $color-white;
+        opacity: 0.7;
+      }
+
+      &:hover .icon {
+        opacity: 1;
+
+        path {
+          fill: $color-green-hover;
+        }
+      }
+    }
+  }
+
+  .transaction-list > div {
+    margin-bottom: 1px;
+  }
+
+  .message,
+  .spinner {
+    padding-bottom: 8px;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .message > p {
+    padding: 0 64px;
+
+    @extend %face-sans-15-medium;
+
+    color: $color-light-grey;
+    line-height: 24px;
+    text-align: center;
+  }
+
+  .spinner {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto;
+  }
+
+  .view-more {
+    padding: 12px 16px;
+    border-radius: 4px;
+    background: $color-bg-1;
+    display: flex;
+    align-items: center;
+
+    .text {
+      @extend %face-sans-14-medium;
+
+      line-height: 24px;
+      color: $color-green;
+      padding-left: 4px;
+    }
+
+    .icon {
+      width: 24px;
+      height: 24px;
+      opacity: 0.7;
+    }
+
+    &:hover {
+      background: $color-hover;
+
+      .text {
+        color: $color-green-hover;
+      }
+
+      .icon {
+        opacity: 1;
+
+        path {
+          fill: $color-green;
+        }
+      }
+    }
+
+    &:active {
+      background: $color-bg-1;
+
+      .text {
+        opacity: 0.7;
+      }
+
+      .icon {
+        opacity: 0.44;
+      }
+    }
   }
 
   &.tour-bar {
     padding-bottom: 40px;
-  }
-
-  div > p {
-    font-weight: normal;
   }
 }
 </style>
