@@ -32,12 +32,6 @@ p {
   margin-left: 3px;
 }
 
-.invisible {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
 .loader {
   display: flex;
   flex-flow: row wrap;
@@ -48,20 +42,12 @@ p {
   text-align: center;
 }
 
-.text-right {
-  text-align: right;
-}
-
 .text-left {
   text-align: left;
 }
 
 .ae-main {
   padding-bottom: 0;
-}
-
-.ae-button.ledger {
-  background: $ledger-color;
 }
 
 .ae-button {
@@ -155,17 +141,8 @@ p {
   }
 }
 
-.input-container {
-  margin: 1.2rem 0;
-}
-
 .ae-panel {
   margin: 1.5rem 0;
-}
-
-.ae-panel .content > h4 {
-  margin: 0;
-  text-align: left;
 }
 
 .ae-identicon.base {
@@ -211,10 +188,6 @@ button {
   border-color: #dae1ea;
 }
 
-.actions {
-  text-align: left;
-}
-
 .text-ellipsis {
   white-space: nowrap;
   overflow: hidden;
@@ -248,10 +221,6 @@ button {
 
 .secondary-text {
   color: $secondary-color;
-}
-
-.logo {
-  margin: 60px 0;
 }
 
 .error-msg {
