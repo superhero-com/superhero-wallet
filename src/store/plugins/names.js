@@ -37,29 +37,26 @@ export default (store) => {
       async fetchOwned({
         state: { owned },
         rootGetters: { activeNetwork },
-        rootState: { sdk, middleware, account },
+        rootState: { middleware, account },
         commit,
         getters: { getDefault },
         dispatch,
       }) {
         if (!middleware) return;
-        const getPendingNameClaimTransactions = (address) =>
-          sdk.api.getPendingAccountTransactionsByPubkey(address).then(
-            ({ transactions }) =>
-              transactions
-                .filter(({ tx: { type } }) => type === 'NameClaimTx')
-                .map(({ tx, ...otherTx }) => ({
-                  ...otherTx,
-                  ...tx,
-                  pending: true,
-                  owner: tx.accountId,
-                })),
-            () => [],
+        const getPendingNameClaimTransactions = () =>
+          dispatch('fetchPendingTransactions', {}, { root: true }).then((transactions) =>
+            transactions
+              .filter(({ tx: { type } }) => type === 'NameClaimTx')
+              .map(({ tx, ...otherTx }) => ({
+                ...otherTx,
+                ...tx,
+                owner: tx.accountId,
+              })),
           );
 
         const defaultName = getDefault(account.publicKey);
         const names = await Promise.all([
-          getPendingNameClaimTransactions(account.publicKey),
+          getPendingNameClaimTransactions(),
           middleware.getOwnedBy(account.publicKey).then(({ active }) =>
             owned
               ? active

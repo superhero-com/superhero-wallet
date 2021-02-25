@@ -9,6 +9,8 @@ import {
   parseFromStorage,
   postJson,
   stringifyForStorage,
+  handleUnknownError,
+  isAccountNotFoundError,
 } from '../popup/utils/helper';
 import { i18n } from './plugins/languages';
 
@@ -19,11 +21,30 @@ export default {
     commit('setNodeStatus', 'connecting');
     if (process.env.IS_EXTENSION) postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload });
   },
-  async fetchTransactions({ state, getters }, { limit, page, recent }) {
+  async fetchPendingTransactions({
+    state: {
+      sdk,
+      account: { publicKey },
+    },
+  }) {
+    return (
+      await sdk.api.getPendingAccountTransactionsByPubkey(publicKey).then(
+        (r) => r.transactions,
+        (error) => {
+          if (!isAccountNotFoundError(error)) {
+            handleUnknownError(error);
+          }
+          return [];
+        },
+      )
+    ).map((transaction) => ({ ...transaction, pending: true }));
+  },
+  async fetchTransactions({ state, getters, dispatch }, { limit, page, recent }) {
     if (!state.middleware) return [];
     const { publicKey } = state.account;
     let txs = await Promise.all([
       state.middleware.getTxByAccount(publicKey, limit, page).then(({ data }) => data),
+      dispatch('fetchPendingTransactions'),
       fetchJson(
         `${getters.activeNetwork.backendUrl}/cache/events/?address=${publicKey}&event=TipWithdrawn${
           recent ? `&limit=${limit}` : ``

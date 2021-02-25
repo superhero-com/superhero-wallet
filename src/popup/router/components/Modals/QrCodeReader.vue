@@ -14,7 +14,6 @@
 </template>
 
 <script>
-import { BrowserQRCodeReader } from '@zxing/library/esm/browser/BrowserQRCodeReader';
 import Modal from '../Modal';
 import openUrl from '../../../utils/openUrl';
 
@@ -30,7 +29,7 @@ export default {
   data: () => ({
     // allow camera while QRScanner is loading to not show cameraNotAllowed before actual check
     cameraAllowed: process.env.PLATFORM === 'cordova',
-    browserReader: !(process.env.PLATFORM === 'cordova') && new BrowserQRCodeReader(),
+    browserReader: null,
     style: null,
     headerText: '',
   }),
@@ -84,6 +83,7 @@ export default {
       return;
     }
 
+    await this.initBrowserReader();
     const status =
       navigator.permissions &&
       (await navigator.permissions.query({ name: 'camera' }).catch((error) => {
@@ -105,6 +105,10 @@ export default {
     this.stopReading();
   },
   methods: {
+    async initBrowserReader() {
+      const { BrowserQRCodeReader } = await import('@zxing/library');
+      this.browserReader = new BrowserQRCodeReader();
+    },
     async scan() {
       return process.env.PLATFORM === 'cordova'
         ? new Promise((resolve, reject) => {

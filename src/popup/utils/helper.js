@@ -239,17 +239,13 @@ export const getTwitterAccountUrl = (url) => {
   return match ? match[0] : false;
 };
 
-export const isNotFoundError = (error) => error.isAxiosError && error?.response.status === 404;
+export const isNotFoundError = (error) => error.isAxiosError && error?.response?.status === 404;
+
+export const isAccountNotFoundError = (error) =>
+  isNotFoundError(error) && error?.response?.data?.reason === 'Account not found';
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
-
-export const ellipseStringMid = (str, allowedLength) => {
-  if (str.length > allowedLength) {
-    return `${str.substr(0, (allowedLength / 3) * 2)}...${str.substr(-allowedLength / 3)}`;
-  }
-  return str;
-};
 
 export const setBalanceLocalStorage = (balance) => {
   localStorage.rxjs = JSON.stringify({ ...JSON.parse(localStorage.rxjs || '{}'), balance });

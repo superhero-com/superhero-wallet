@@ -9,7 +9,7 @@
         :name="name"
         :address="owner"
       >
-        <span class="name">{{ ellipseStringMid(name, 30) }}</span>
+        <TruncateMid :str="name" class="name" />
         <Badge v-if="activeAccountName == name" class="active-name">
           {{ $t('pages.names.default') }}
         </Badge>
@@ -36,20 +36,17 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { ellipseStringMid } from '../../../utils/helper';
 import NameListHeader from '../../components/NameListHeader';
 import Badge from '../../components/Badge';
 import NameRow from '../../components/NameRow';
+import TruncateMid from '../../components/TruncateMid';
 import CheckBox from '../../components/CheckBox';
 
 export default {
-  components: { NameListHeader, Badge, NameRow, CheckBox },
+  components: { NameListHeader, Badge, NameRow, CheckBox, TruncateMid },
   computed: {
     ...mapGetters(['activeAccountName']),
     ...mapState('names', ['owned']),
-  },
-  methods: {
-    ellipseStringMid,
   },
   created() {
     this.$store.dispatch('names/fetchOwned');
