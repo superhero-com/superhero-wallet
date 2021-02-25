@@ -1,5 +1,5 @@
 <template>
-  <div class="primary-bg popup popup-no-padding account">
+  <div class="popup popup-no-padding account">
     <div class="plate">
       <i18n
         v-if="!backedUpSeed"
@@ -46,15 +46,23 @@ export default {
 @import '../../../styles/variables';
 
 .account {
+  overflow-x: hidden;
+
   .plate {
-    width: 362px;
-    background: linear-gradient(180deg, $color-bg-3 0%, $color-black 100%);
+    position: relative;
+    width: calc(2px + #{$container-width});
+    margin-left: -1px;
     border: 1px solid rgba($color-border, 0.5);
     border-radius: 0 0 10px 10px;
+    background: linear-gradient(180deg, $color-bg-3 0%, $color-black 100%);
   }
 
   .menu-carousel {
     padding: 24px;
+  }
+
+  .recent-transactions {
+    margin-top: -10px;
   }
 
   .seed-backup-notification {
