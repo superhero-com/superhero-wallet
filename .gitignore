@@ -13,4 +13,5 @@ tests/e2e/screenshots
 /www
 /platforms
 /plugins
-/resources/*/
+/resources/*/icon
+/resources/*/splash
