@@ -39,8 +39,9 @@
             <Settings />
           </button>
 
-          <button @click="$emit('toggle-sidebar')" class="icon-btn">
-            <Menu data-cy="hamburger" />
+          <button @click="$emit('toggle-sidebar')" class="icon-btn menu" data-cy="hamburger">
+            <Menu />
+            <MenuHover class="hover" />
           </button>
         </template>
       </div>
@@ -55,10 +56,11 @@ import Back from '../../../icons/back.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
 import Settings from '../../../icons/notif-settings.svg?vue-component';
 import Menu from '../../../icons/menu.svg?vue-component';
+import MenuHover from '../../../icons/menu-hover.svg?vue-component';
 import TruncateMid from './TruncateMid';
 
 export default {
-  components: { Logo, Back, Bell, Settings, Menu, TruncateMid },
+  components: { Logo, Back, Bell, Settings, Menu, MenuHover, TruncateMid },
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,
   }),
@@ -182,9 +184,10 @@ export default {
       svg {
         width: 24px;
         height: 24px;
+        color: $color-white;
 
-        path {
-          fill: $color-white;
+        &.hover {
+          display: none;
         }
       }
 
@@ -192,6 +195,14 @@ export default {
         opacity: 1;
         border-radius: 50%;
         background-color: $color-hover;
+
+        &:not(:active).menu svg {
+          display: none;
+
+          &.hover {
+            display: inline;
+          }
+        }
       }
     }
 
