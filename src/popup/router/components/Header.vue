@@ -15,10 +15,10 @@
     </div>
 
     <div class="title">
-      <TruncateMid
-        :str="pageTitle || (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home')"
-        class="text"
-      />
+      <TruncateMid v-if="pageTitle" :str="pageTitle" class="text" />
+      <span v-else class="text">
+        {{ (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home') }}
+      </span>
     </div>
 
     <div v-if="isLoggedIn" class="right">
