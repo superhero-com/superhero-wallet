@@ -1,6 +1,6 @@
 <template>
   <Modal class="confirm-tx-sign-modal">
-    <SignAccountIdenticons :transaction="tx" slot="header" />
+    <SignAccountIdenticons v-bind="transaction" slot="header" />
 
     <SignDetailsList :transaction="tx" />
 

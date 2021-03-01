@@ -1,6 +1,6 @@
 <template>
   <div class="popup popup-aex2" data-cy="popup-aex2">
-    <SignAccountIdenticons :transaction="transaction" />
+    <SignAccountIdenticons v-bind="transaction" />
 
     <SignDetailsList :transaction="transaction">
       <AmountSend v-model="tx.amount" slot="custom-amount" />
