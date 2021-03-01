@@ -66,7 +66,6 @@ router.beforeEach(async (to, from, next) => {
       {
         connectConfirm: '/connect',
         sign: '/popup-sign-tx',
-        askAccounts: '/ask-accounts',
         messageSign: '/message-sign',
       }[window.POPUP_TYPE],
     );

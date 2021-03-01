@@ -9,7 +9,6 @@ describe('Tests cases not connected to specific page', () => {
     [
       { path: '/popup-sign-tx', redirect: false },
       { path: '/connect', redirect: false },
-      { path: '/ask-accounts', redirect: false },
       { path: '/message-sign', redirect: false },
       { path: '/success-tip', redirect: false },
       { path: '/intro', redirect: false },
