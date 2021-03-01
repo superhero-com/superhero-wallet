@@ -149,6 +149,8 @@ export default {
     cursor: pointer;
 
     svg {
+      width: 24px;
+      height: 24px;
       opacity: 0.7;
     }
 

@@ -156,8 +156,8 @@ export default {
     }
 
     .logo {
-      width: 36px;
-      height: 26px;
+      width: 34px;
+      height: 24px;
     }
 
     .back {
