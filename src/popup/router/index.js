@@ -10,6 +10,7 @@ import LoaderComponent from './components/Loader';
 import { i18n } from '../../store/plugins/languages';
 
 import * as helper from '../utils/helper';
+import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
 import wallet from '../../lib/wallet';
 
@@ -62,13 +63,14 @@ router.beforeEach(async (to, from, next) => {
   wallet.initSdk();
 
   if (window.RUNNING_IN_POPUP) {
-    next(
-      {
-        connectConfirm: '/connect',
-        sign: '/popup-sign-tx',
-        messageSign: '/message-sign',
+    next({
+      name: {
+        connectConfirm: 'connect',
+        sign: 'popup-sign-tx',
+        messageSign: 'message-sign',
       }[window.POPUP_TYPE],
-    );
+      params: await getPopupProps(),
+    });
     return;
   }
   if (to.meta.ifNotAuthOnly) {

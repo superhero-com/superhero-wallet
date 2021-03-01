@@ -3,9 +3,9 @@
     <div class="flex identicon-container">
       <div class="identicon">
         <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
-        <ae-identicon :address="data.host || ''" size="base" v-if="imageError" />
-        <div class="account-name" data-cy="name">{{ data.name }}</div>
-        <div class="hostname" data-cy="host">{{ data.host }}</div>
+        <ae-identicon :address="app.host || ''" size="base" v-if="imageError" />
+        <div class="account-name" data-cy="name">{{ app.name }}</div>
+        <div class="hostname" data-cy="host">{{ app.host }}</div>
       </div>
       <div class="separator">
         <ae-icon name="check" />
@@ -18,7 +18,7 @@
 
     <h2>
       <!--eslint-disable-next-line vue-i18n/no-raw-text-->
-      <span class="secondary-text" data-cy="aepp">{{ data.host }} ({{ data.name }}) </span>
+      <span class="secondary-text" data-cy="aepp">{{ app.host }} ({{ app.name }}) </span>
       {{ $t('pages.connectConfirm.websiteRequestconnect') }}
       <Avatar class="send-account-icon" :address="account.publicKey" :name="account.name" />
       {{ activeAccountName }}
@@ -34,10 +34,10 @@
       </ae-list-item>
     </ul>
     <div class="button-fixed">
-      <Button half dark @click="cancel" :disabled="!data.reject" data-cy="deny">
+      <Button half dark @click="cancel" data-cy="deny">
         {{ $t('pages.connectConfirm.cancelButton') }}
       </Button>
-      <Button half @click="connect" :disabled="!data.resolve" data-cy="accept">
+      <Button half @click="resolve()" data-cy="accept">
         {{ $t('pages.connectConfirm.confirmButton') }}
       </Button>
     </div>
@@ -46,61 +46,20 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import getPopupProps from '../../../utils/getPopupProps';
 import Button from '../../components/Button';
 import Avatar from '../../components/Avatar';
-import { IN_POPUP } from '../../../utils/helper';
+import mixin from './mixin';
 
 export default {
+  mixins: [mixin],
   components: {
     Button,
     Avatar,
   },
-  props: {
-    app: { type: Object, default: null },
-    resolve: { type: Function, default: null },
-    reject: { type: Function, default: null },
-  },
-  data() {
-    return {
-      data: {},
-      imageError: false,
-    };
-  },
-  async mounted() {
-    this.data =
-      process.env.PLATFORM === 'web' && IN_POPUP
-        ? {
-            ...this.app,
-            resolve: this.resolve,
-            reject: this.reject,
-          }
-        : await getPopupProps();
-  },
-  methods: {
-    async cancel() {
-      if (process.env.PLATFORM === 'web' && IN_POPUP) {
-        this.data.reject(new Error('Rejected by user'));
-        return;
-      }
-      this.data.reject(false);
-    },
-    async connect() {
-      if (process.env.PLATFORM === 'web' && IN_POPUP) {
-        this.data.resolve();
-        return;
-      }
-      this.data.resolve(true);
-    },
-  },
-  computed: {
-    ...mapGetters(['account', 'activeAccountName']),
-    faviconUrl() {
-      return typeof this.data.icons !== 'undefined'
-        ? this.data.icons
-        : `${this.data.protocol}//${this.data.host}/favicon.ico`;
-    },
-  },
+  data: () => ({
+    imageError: false,
+  }),
+  computed: mapGetters(['account', 'activeAccountName']),
 };
 </script>
 

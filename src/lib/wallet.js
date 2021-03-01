@@ -133,8 +133,9 @@ export default {
       const signCb = async (_, action, origin) => {
         const { method, params } = action;
         try {
+          const originUrl = new URL(origin);
           const permission = await store.dispatch('permissions/checkPermissions', {
-            host: new URL(origin).hostname,
+            host: originUrl.hostname,
             method,
             params: params?.txObject?.params,
           });
@@ -143,7 +144,11 @@ export default {
               await store.dispatch('modals/open', {
                 name: 'confirm-message-sign',
                 message: params.message,
-                origin,
+                app: {
+                  name: originUrl.host,
+                  host: originUrl.host,
+                  protocol: originUrl.protocol,
+                },
               });
             action.accept({ onAccount: { sign: () => {}, address: () => {} } });
             return;

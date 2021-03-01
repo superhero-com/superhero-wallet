@@ -7,9 +7,6 @@ const txs = [
 describe('Tests cases not connected to specific page', () => {
   it(`(not) redirects to last visited routes`, () => {
     [
-      { path: '/popup-sign-tx', redirect: false },
-      { path: '/connect', redirect: false },
-      { path: '/message-sign', redirect: false },
       { path: '/success-tip', redirect: false },
       { path: '/intro', redirect: false },
       { path: '/notifications', redirect: false },
