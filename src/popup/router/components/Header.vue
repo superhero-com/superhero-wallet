@@ -2,7 +2,14 @@
   <div class="header" v-if="showNavigation && !aeppPopup">
     <div class="content">
       <div class="left">
-        <Logo class="logo" v-if="isLoggedIn" />
+        <button
+          v-if="isLoggedIn"
+          @click="$router.push('/account')"
+          :disabled="$route.path === '/account'"
+          class="home-button"
+        >
+          <Logo />
+        </button>
         <button v-if="title && !tourRunning" @click="back" class="icon-btn back">
           <Back data-cy="back-arrow" />
         </button>
@@ -157,9 +164,30 @@ export default {
       }
     }
 
-    .logo {
-      width: 34px;
-      height: 24px;
+    .left .home-button {
+      padding: 4px 0;
+      height: 32px;
+
+      &:not(:disabled) {
+        svg {
+          cursor: pointer;
+        }
+
+        &:hover svg {
+          color: $color-blue-hover;
+        }
+
+        &:active svg {
+          color: $color-blue-hover;
+          opacity: 0.9;
+        }
+      }
+
+      svg {
+        width: 34px;
+        height: 24px;
+        color: $color-blue;
+      }
     }
 
     .back {
