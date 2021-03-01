@@ -1,7 +1,7 @@
 import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import { OBJECT_ID_TX_TYPE, TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import { postMessage } from '../../popup/utils/connection';
-import { parseFromStorage, aettosToAe, aeToAettos } from '../../popup/utils/helper';
+import { parseFromStorage } from '../../popup/utils/helper';
 
 export default (store) =>
   store.registerModule('accounts', {
@@ -40,32 +40,14 @@ export default (store) =>
           return dispatch('confirmRawDataSigning', txBinary);
         }
 
-        const confirmProps = {
-          name: 'confirm-transaction-sign',
-          transaction: {
-            ...txObject,
-            amount: txObject.amount && +aettosToAe(txObject.amount),
-            fee: +aettosToAe(txObject.fee),
-            minFee: +aettosToAe(
-              TxBuilder.calculateFee(0, OBJECT_ID_TX_TYPE[txObject.tag], {
-                gas: txObject.gas,
-                params: txObject,
-              }),
-            ),
-            nameFee: txObject.nameFee && +aettosToAe(txObject.nameFee),
-          },
-        };
-        const fee = modal
-          ? aeToAettos(await dispatch('modals/open', confirmProps, { root: true }))
-          : txObject.fee;
-        return TxBuilder.buildTx(
-          {
-            ...txObject,
-            fee,
-          },
-          OBJECT_ID_TX_TYPE[txObject.tag],
-          { vsn: txObject.VSN },
-        ).rlpEncoded;
+        if (modal) {
+          await dispatch(
+            'modals/open',
+            { name: 'confirm-transaction-sign', transaction: txObject },
+            { root: true },
+          );
+        }
+        return txBinary;
       },
       sign({ dispatch }, data) {
         return dispatch('signWithoutConfirmation', data);

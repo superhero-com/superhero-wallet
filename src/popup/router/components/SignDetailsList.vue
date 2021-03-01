@@ -1,19 +1,19 @@
 <template>
   <div class="sign-details-list">
     <DetailsItem data-cy="tx-type">
-      <ae-badge>{{ transaction.txType }}</ae-badge>
+      <ae-badge>{{ txWithTotal.txType }}</ae-badge>
     </DetailsItem>
 
-    <DetailsItem v-if="$slots['custom-amount']">
-      <slot name="custom-amount" />
+    <DetailsItem>
+      <AmountSend v-if="txWithTotal.amount" :value="txWithTotal.amount" readonly />
     </DetailsItem>
 
     <DetailsItem :label="$t('pages.signTransaction.fee')" data-cy="fee">
-      <div class="balance no-sign">{{ parseFloat(transaction.fee).toFixed(7) }} {{ $t('ae') }}</div>
+      <div class="balance no-sign">{{ txWithTotal.fee.toFixed(7) }} {{ $t('ae') }}</div>
     </DetailsItem>
 
     <DetailsItem :label="$t('pages.signTransaction.total')" data-cy="total">
-      <div class="balance no-sign">{{ transaction.total }} {{ $t('ae') }}</div>
+      <div class="balance no-sign">{{ txWithTotal.total }} {{ $t('ae') }}</div>
     </DetailsItem>
 
     <template v-for="field in TX_FIELDS">
@@ -30,10 +30,13 @@
 </template>
 
 <script>
+import { OBJECT_ID_TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { aettosToAe } from '../../utils/helper';
 import DetailsItem from './DetailsItem';
+import AmountSend from './AmountSend';
 
 export default {
-  components: { DetailsItem },
+  components: { DetailsItem, AmountSend },
   props: {
     transaction: { type: Object, required: true },
   },
@@ -52,6 +55,24 @@ export default {
       'pointers',
     ],
   }),
+  computed: {
+    txWithTotal() {
+      const amount = this.transaction.amount && +aettosToAe(this.transaction.amount);
+      const fee = +aettosToAe(this.transaction.fee);
+      const nameFee = this.transaction.nameFee && +aettosToAe(this.transaction.nameFee);
+      return {
+        ...this.transaction,
+        amount,
+        fee,
+        nameFee,
+        total: [amount, fee, nameFee]
+          .map((a) => a || 0)
+          .reduce((a, b) => a + b)
+          .toFixed(7),
+        txType: OBJECT_ID_TX_TYPE[this.transaction.tag],
+      };
+    },
+  },
 };
 </script>
 
@@ -73,6 +94,11 @@ export default {
     -webkit-box-shadow: 0 0 0 2px $secondary-color;
     box-shadow: 0 0 0 2px $secondary-color;
     border: 2px solid $bg-color;
+  }
+
+  .amount-send-container {
+    width: 100%;
+    margin: 0;
   }
 }
 </style>

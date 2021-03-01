@@ -1,6 +1,6 @@
 import Index from '../pages/Index';
 import Account from '../pages/Account';
-import PopupSignTransaction from '../pages/Popups/SignTx';
+import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign';
 import PopupConnect from '../pages/Popups/Connect';
 import PopupMessageSign from '../pages/Popups/MessageSign';
 import Settings from '../pages/Settings';
@@ -61,7 +61,7 @@ export default [
   {
     name: 'popup-sign-tx',
     path: '/popup-sign-tx',
-    component: PopupSignTransaction,
+    component: ConfirmTransactionSign,
     props: true,
     meta: {
       notPersist: true,
