@@ -90,10 +90,6 @@ export default {
       &:hover:not(.agreed),
       &:active:not(.agreed) {
         color: $color-light-grey;
-
-        ::v-deep .checkmark {
-          border-color: $color-border-hover;
-        }
       }
 
       ::v-deep .checkmark {
