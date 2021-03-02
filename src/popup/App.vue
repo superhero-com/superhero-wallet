@@ -174,8 +174,8 @@ body {
     background-image: url('../icons/background-big-wave.png');
   }
 
-  padding-top: 50px;
-  padding-top: calc(50px + env(safe-area-inset-top));
+  padding-top: 48px;
+  padding-top: calc(48px + env(safe-area-inset-top));
 
   &.iframe {
     padding-top: 0;

@@ -1,57 +1,51 @@
 <template>
   <div class="header" v-if="showNavigation && !aeppPopup">
-    <div class="content">
-      <div class="left">
-        <button
-          v-if="isLoggedIn"
-          @click="$router.push('/account')"
-          :disabled="$route.path === '/account'"
-          class="home-button"
-        >
-          <Logo />
-        </button>
-        <button v-if="title && !tourRunning" @click="back" class="icon-btn back">
-          <Back data-cy="back-arrow" />
-        </button>
-      </div>
+    <div v-if="isLoggedIn || (title && !tourRunning)" class="left">
+      <RouterLink
+        v-if="isLoggedIn"
+        to="/account"
+        :disabled="$route.path === '/account'"
+        class="home-button"
+      >
+        <Logo />
+      </RouterLink>
+      <button v-if="title && !tourRunning" @click="back" class="icon-btn back">
+        <Back data-cy="back-arrow" />
+      </button>
+    </div>
 
-      <div class="title">
-        <TruncateMid
-          :str="pageTitle || (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home')"
-          class="text"
-        />
-      </div>
+    <div class="title">
+      <TruncateMid
+        :str="pageTitle || (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home')"
+        class="text"
+      />
+    </div>
 
-      <div class="right">
-        <template v-if="isLoggedIn">
-          <span
-            v-if="!$route.path.startsWith('/notifications')"
-            @click="toNotifications"
-            class="notifications"
-            data-cy="noti"
-          >
-            <button class="icon-btn">
-              <Bell />
-            </button>
-            <span v-if="notificationsCount" class="badge" data-cy="noti-count">
-              {{ notificationsCount }}
-            </span>
-          </span>
+    <div v-if="isLoggedIn" class="right">
+      <button
+        v-if="!$route.path.startsWith('/notifications')"
+        @click="toNotifications"
+        class="notifications icon-btn"
+        data-cy="noti"
+      >
+        <Bell />
+        <span v-if="notificationsCount" class="badge" data-cy="noti-count">
+          {{ notificationsCount }}
+        </span>
+      </button>
 
-          <button
-            v-if="$route.path === '/notifications'"
-            @click="$router.push('/notifications/settings')"
-            class="icon-btn settings"
-          >
-            <Settings />
-          </button>
+      <RouterLink
+        v-if="$route.path === '/notifications'"
+        to="/notifications/settings"
+        class="icon-btn settings"
+      >
+        <Settings />
+      </RouterLink>
 
-          <button @click="$emit('toggle-sidebar')" class="icon-btn menu" data-cy="hamburger">
-            <Menu />
-            <MenuHover class="hover" />
-          </button>
-        </template>
-      </div>
+      <button @click="$emit('toggle-sidebar')" class="icon-btn menu" data-cy="hamburger">
+        <Menu />
+        <MenuHover class="hover" />
+      </button>
     </div>
   </div>
 </template>
@@ -118,138 +112,136 @@ export default {
 @import '../../../styles/typography';
 
 .header {
+  width: 360px;
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 8;
-  height: calc(50px + env(safe-area-inset-top));
+  height: calc(48px + env(safe-area-inset-top));
   background-color: $color-black;
   display: flex;
-  justify-content: center;
+  padding: 8px 16px 8px 8px;
+  padding-top: calc(8px + env(safe-area-inset-top));
   align-items: center;
 
-  .content {
-    flex: 1;
-    max-width: $container-width;
-    height: 50px;
-    padding: 0 10px;
-    padding-top: env(safe-area-inset-top);
+  .left {
     display: flex;
-    align-items: center;
+    flex-basis: 88px;
+  }
 
-    .left,
-    .right {
-      flex-basis: 80px;
-      display: flex;
-      align-items: center;
-    }
+  .right {
+    display: flex;
+    flex-basis: 82px;
+    justify-content: flex-end;
+  }
 
-    .right {
-      justify-content: flex-end;
-    }
+  .title {
+    min-width: 166px;
 
-    .title {
-      flex: 1 0;
-
-      .text {
-        max-width: 180px;
-        padding: 0 4px;
-        display: flex;
-        justify-content: center;
-
-        @extend %face-sans-16-medium;
-
-        color: $color-white;
-      }
-    }
-
-    .left .home-button {
-      padding: 4px 0;
-      height: 32px;
-
-      &:not(:disabled) {
-        svg {
-          cursor: pointer;
-        }
-
-        &:hover svg {
-          color: $color-blue-hover;
-        }
-
-        &:active svg {
-          color: $color-blue-hover;
-          opacity: 0.9;
-        }
-      }
-
-      svg {
-        width: 34px;
-        height: 24px;
-        color: $color-blue;
-      }
-    }
-
-    .back {
-      margin-left: 10px;
-    }
-
-    .settings,
-    .notifications {
-      margin-right: 10px;
-    }
-
-    .icon-btn {
-      cursor: pointer;
-      width: 32px;
-      height: 32px;
-      padding: 0;
-      opacity: 0.7;
+    .text {
+      padding: 0 4px;
       display: flex;
       justify-content: center;
-      align-items: center;
 
+      @extend %face-sans-16-medium;
+
+      line-height: 24px;
+      color: $color-white;
+    }
+  }
+
+  .left .home-button {
+    padding: 4px 0;
+    height: 32px;
+
+    &:not(:disabled) {
       svg {
-        width: 24px;
-        height: 24px;
-        color: $color-white;
-
-        &.hover {
-          display: none;
-        }
+        cursor: pointer;
       }
 
-      &:hover {
-        opacity: 1;
-        border-radius: 50%;
-        background-color: $color-hover;
+      &:hover svg {
+        color: $color-blue-hover;
+      }
 
-        &:not(:active).menu svg {
-          display: none;
-
-          &.hover {
-            display: inline;
-          }
-        }
+      &:active svg {
+        color: $color-blue-hover;
+        opacity: 0.9;
       }
     }
 
-    .notifications {
-      position: relative;
-      cursor: pointer;
+    svg {
+      width: 34px;
+      height: 24px;
+      color: $color-blue;
+    }
+  }
 
-      .badge {
-        position: absolute;
-        left: -2px;
-        top: 20%;
-        width: 14px;
-        height: 14px;
-        background: $color-blue;
-        border-radius: 50%;
-        text-align: center;
-        font-size: 12px;
-        line-height: 14px;
+  .home-button + .back {
+    margin-left: 22px;
+  }
+
+  .title:only-child {
+    flex-grow: 2;
+    margin-left: 8px;
+  }
+
+  .settings,
+  .notifications {
+    margin-right: 8px;
+  }
+
+  .icon-btn {
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    svg {
+      width: 24px;
+      height: 24px;
+      color: $color-white;
+      opacity: 0.7;
+
+      &.hover {
+        display: none;
       }
+    }
+
+    &:hover {
+      border-radius: 50%;
+      background-color: $color-hover;
+
+      svg {
+        opacity: 1;
+      }
+
+      &:not(:active).menu svg {
+        display: none;
+
+        &.hover {
+          display: inline;
+        }
+      }
+    }
+  }
+
+  .notifications {
+    position: relative;
+
+    .badge {
+      color: $color-white;
+      position: absolute;
+      left: -2px;
+      top: 20%;
+      width: 14px;
+      height: 14px;
+      background: $color-blue;
+      border-radius: 50%;
+      text-align: center;
+      font-size: 12px;
+      line-height: 14px;
     }
   }
 }
