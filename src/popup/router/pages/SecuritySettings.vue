@@ -131,7 +131,7 @@ export default {
 
   p,
   .ae-button.toolbar {
-    color: #000;
+    color: $bg-color;
   }
 }
 
