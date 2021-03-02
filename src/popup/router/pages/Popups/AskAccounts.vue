@@ -33,7 +33,7 @@ export default {
       data: {},
     };
   },
-  async created() {
+  async mounted() {
     this.data = await getPopupProps();
   },
   methods: {

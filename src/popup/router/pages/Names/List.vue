@@ -48,7 +48,7 @@ export default {
     ...mapGetters(['activeAccountName']),
     ...mapState('names', ['owned']),
   },
-  created() {
+  mounted() {
     this.$store.dispatch('names/fetchOwned');
     const id = setInterval(() => this.$store.dispatch('names/fetchOwned'), 10000);
     this.$once('hook:destroyed', () => clearInterval(id));

@@ -85,7 +85,7 @@ export default {
       if (val) this.init();
     },
   },
-  async created() {
+  async mounted() {
     await this.$watchUntilTruly(() => this.isRestored);
 
     this.$store.dispatch('getCurrencies');

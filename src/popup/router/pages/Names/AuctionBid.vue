@@ -61,7 +61,7 @@ export default {
     },
   },
   filters: { blocksToRelativeTime },
-  async created() {
+  async mounted() {
     this.loading = true;
     await this.$watchUntilTruly(() => this.$store.state.middleware);
     const res = await this.$store.dispatch('names/fetchAuctionEntry', this.name);

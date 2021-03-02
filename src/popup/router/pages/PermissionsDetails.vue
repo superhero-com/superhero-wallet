@@ -70,7 +70,7 @@ export default {
   subscriptions() {
     return pick(this.$store.state.observables, ['tokenBalance']);
   },
-  created() {
+  mounted() {
     if (!this.$store.state.permissions[this.host]) this.$router.replace({ name: 'not-found' });
   },
   computed: {

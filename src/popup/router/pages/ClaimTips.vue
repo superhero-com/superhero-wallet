@@ -36,7 +36,7 @@ export default {
       return toURL(this.url).toString();
     },
   },
-  async created() {
+  async mounted() {
     if (process.env.IS_EXTENSION) {
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       if (tab && validateTipUrl(tab.url)) {

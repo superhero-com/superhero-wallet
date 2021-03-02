@@ -87,7 +87,7 @@ export default {
       immediate: true,
     },
   },
-  async created() {
+  async mounted() {
     await this.$watchUntilTruly(() => this.sdk);
     this.$store.dispatch('names/fetchOwned');
   },

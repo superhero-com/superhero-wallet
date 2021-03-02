@@ -50,7 +50,7 @@ export default {
       imageError: false,
     };
   },
-  async created() {
+  async mounted() {
     this.data =
       process.env.PLATFORM === 'web' && IN_POPUP
         ? {

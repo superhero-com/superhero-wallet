@@ -2,6 +2,9 @@ describe('Test cases AmountSend component', () => {
   it('Calculates currency on enter amount, validates entered amount, shows correct balance', () => {
     cy.login()
       .openWithdraw()
+      .get('[data-cy=balance-currency]')
+      .invoke('text')
+      .then((text) => expect(text).not.to.eq('$0.00'))
       .enterAmountSend(5)
       .get('[data-cy=amount-currency]')
       .invoke('text')

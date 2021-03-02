@@ -90,7 +90,7 @@ export default {
       return this.$t('pages.successTip.notifyMessage', this.formatReceivedTokensForLocale);
     },
   },
-  async created() {
+  async mounted() {
     if (process.env.IS_EXTENSION) {
       const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
       if (addresses.length) {

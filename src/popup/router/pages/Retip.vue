@@ -98,7 +98,7 @@ export default {
         : this.tippingV1;
     },
   },
-  async created() {
+  async mounted() {
     this.loading = true;
     await this.$watchUntilTruly(() => this.tippingV1);
     const tipId = this.$route.query.id;
