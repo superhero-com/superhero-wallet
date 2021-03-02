@@ -17,15 +17,14 @@ export default (store) =>
       },
       async confirmRawDataSigning({ dispatch }, data) {
         await dispatch('modals/open', { name: 'confirm-raw-sign', data }, { root: true });
-
-        return data;
       },
-      async confirmTxSigning({ dispatch }, { txBinary, opt: { modal = true } }) {
+      async confirmTxSigning({ dispatch }, encodedTx) {
         let txObject;
         try {
-          txObject = TxBuilder.unpackTx(txBinary, true).tx;
+          txObject = TxBuilder.unpackTx(encodedTx, true).tx;
         } catch (e) {
-          return dispatch('confirmRawDataSigning', txBinary);
+          await dispatch('confirmRawDataSigning', encodedTx);
+          return;
         }
         const SUPPORTED_TX_TYPES = [
           TX_TYPE.spend,
@@ -37,26 +36,22 @@ export default (store) =>
           TX_TYPE.nameTransfer,
         ];
         if (!SUPPORTED_TX_TYPES.includes(OBJECT_ID_TX_TYPE[txObject.tag])) {
-          return dispatch('confirmRawDataSigning', txBinary);
+          await dispatch('confirmRawDataSigning', encodedTx);
+          return;
         }
 
-        if (modal) {
-          await dispatch(
-            'modals/open',
-            { name: 'confirm-transaction-sign', transaction: txObject },
-            { root: true },
-          );
-        }
-        return txBinary;
+        await dispatch(
+          'modals/open',
+          { name: 'confirm-transaction-sign', transaction: txObject },
+          { root: true },
+        );
       },
       sign({ dispatch }, data) {
         return dispatch('signWithoutConfirmation', data);
       },
-      async signTransaction({ dispatch, rootState: { sdk } }, { txBase64, opt = {} }) {
-        const encodedTx = await dispatch('confirmTxSigning', {
-          txBinary: Crypto.decodeBase64Check(Crypto.assertedType(txBase64, 'tx')),
-          opt,
-        });
+      async signTransaction({ dispatch, rootState: { sdk } }, { txBase64, opt: { modal = true } }) {
+        const encodedTx = Crypto.decodeBase64Check(Crypto.assertedType(txBase64, 'tx'));
+        if (modal) await dispatch('confirmTxSigning', encodedTx);
         const signature = await dispatch(
           'signWithoutConfirmation',
           Buffer.concat([Buffer.from(sdk.getNetworkId()), encodedTx]),
