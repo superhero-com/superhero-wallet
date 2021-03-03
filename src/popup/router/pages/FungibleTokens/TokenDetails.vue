@@ -174,18 +174,18 @@ export default {
   background-color: $black-2;
 }
 
-.contract /deep/.text,
-.community /deep/.text {
+.contract ::v-deep .text,
+.community ::v-deep .text {
   color: $accent-color;
 }
 
-.contract /deep/.text {
+.contract ::v-deep .text {
   font-size: 9px;
   display: flex;
   align-items: center;
 }
 
-.community /deep/.text {
+.community ::v-deep .text {
   font-size: 13px;
 }
 </style>

@@ -11,7 +11,7 @@ const GenerateJsonPlugin = require('generate-json-webpack-plugin');
 const commitHash = require('child_process')
   .execSync('git rev-parse HEAD')
   .toString().trim();
-const sass = require('node-sass');
+const sass = require('sass');
 const genManifest = require('./src/manifest');
 
 const parseBool = val => (val ? JSON.parse(val) : false);
