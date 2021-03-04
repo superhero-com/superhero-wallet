@@ -93,7 +93,7 @@ export default {
   subscriptions() {
     return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
   },
-  created() {
+  mounted() {
     this.$store.commit('setPageTitle', this.fungibleToken ? this.fungibleToken.name : 'Aeternity');
   },
   computed: {

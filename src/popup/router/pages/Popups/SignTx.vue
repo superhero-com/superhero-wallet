@@ -45,7 +45,7 @@ export default {
       },
     };
   },
-  async created() {
+  async mounted() {
     this.props = await getPopupProps();
     this.unpackedTx = TxBuilder.unpackTx(this.props.action.params.tx);
     if (this.txObject.amount >= 0) this.tx.amount = +aettosToAe(this.txObject.amount);

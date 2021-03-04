@@ -186,7 +186,7 @@ export default {
       return checkAddress(this.form.address) || chekAensName(this.form.address);
     },
   },
-  created() {
+  async mounted() {
     if (this.redirectstep && this.successtx) {
       this.step = 3;
       this.setTxDetails(this.successtx);
@@ -194,8 +194,6 @@ export default {
     if (typeof this.address !== 'undefined') {
       this.form.address = this.address;
     }
-  },
-  async mounted() {
     this.fetchFee();
   },
   methods: {

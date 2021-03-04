@@ -66,7 +66,7 @@ contract Example =
       contractAddress: 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio',
     };
   },
-  async created() {
+  async mounted() {
     this.initClient();
     setInterval(async () => {
       if (this.client && !this.wallet.found) {

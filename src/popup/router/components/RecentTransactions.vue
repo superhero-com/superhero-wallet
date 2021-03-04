@@ -42,7 +42,7 @@ export default {
       icons: { AnimatedSpinner },
     };
   },
-  created() {
+  mounted() {
     if (this.transactions.latest.length) this.loading = false;
     this.polling = setInterval(() => this.updateTransactions(), 5000);
     this.$once('hook:beforeDestroy', () => clearInterval(this.polling));

@@ -178,7 +178,7 @@ export default {
       },
     },
   },
-  async created() {
+  async mounted() {
     await this.persistTipDetails();
     if (process.env.IS_EXTENSION) {
       const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });

@@ -61,7 +61,7 @@ export default {
     },
   },
   filters: { blocksToRelativeTime },
-  async created() {
+  async mounted() {
     await this.$watchUntilTruly(() => this.$store.state.sdk);
     this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');
   },
