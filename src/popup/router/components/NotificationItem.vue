@@ -75,24 +75,24 @@ export default {
 
   &.created,
   &.peeked {
-    background-color: #141414;
+    background-color: $color-bg-2;
 
     .three-dots,
     .format-date {
-      color: #1161fe;
+      color: $color-blue;
     }
   }
 
   &.read {
-    background-color: #0f0f0f;
+    background-color: $color-bg-1;
 
     .three-dots,
     .format-date {
-      color: #787878;
+      color: $color-dark-grey;
     }
 
     .three-dots:hover {
-      color: #babac0;
+      color: $color-light-grey;
     }
   }
 
@@ -163,7 +163,7 @@ export default {
     &:hover {
       box-sizing: border-box;
       border-radius: 50%;
-      background-color: #0a0a0a;
+      background-color: $nav-bg-color;
     }
 
     .mark-as-read {

@@ -109,6 +109,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../../styles/variables';
+
 .popup {
   padding: 0;
 
@@ -116,7 +118,7 @@ export default {
     position: sticky;
     top: 50px;
     z-index: 100;
-    background-color: #141414;
+    background-color: $color-bg-2;
     padding: 0 1rem;
     text-align: left;
 
@@ -126,19 +128,19 @@ export default {
       text-align: center;
       font-size: 0.95rem;
       cursor: pointer;
-      color: #787878;
+      color: $color-dark-grey;
       font-weight: 600;
       padding: 0.95rem 0;
       margin-left: 1rem;
       border-bottom: 0.2rem solid transparent;
 
       &:hover {
-        color: #babac0;
+        color: $color-light-grey;
       }
 
       &.active {
-        color: #67f7b8;
-        border-bottom-color: #67f7b8;
+        color: $accent-color;
+        border-bottom-color: $accent-color;
       }
     }
   }

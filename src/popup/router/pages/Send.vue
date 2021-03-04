@@ -320,7 +320,7 @@ export default {
   .error {
     padding-top: 8px;
     line-height: 16px;
-    color: #ff4746;
+    color: $color-error;
     font-size: 12px;
     text-align: left;
   }
