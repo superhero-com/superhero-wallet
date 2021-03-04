@@ -109,6 +109,12 @@ const getConfig = platform => {
               loader: 'vue-svg-loader',
             },
             {
+              test: /\.svg$/,
+              resourceQuery: /skip-optimize/,
+              loader: 'vue-svg-loader',
+              options: { svgo: false },
+            },
+            {
               loader: 'url-loader',
               options: {
                 name: '[name].[contenthash].[ext]',
