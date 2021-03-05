@@ -948,52 +948,9 @@ export default {
   },
   data() {
     return {
-      details: [
-        {
-          title: this.$t('pages.termsOfService.section1Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section2Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section3Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section4Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section5Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section6Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section7Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section8Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section9Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section10Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section11Title'),
-          open: false,
-        },
-      ],
+      details: Object.entries(this.$t('pages.termsOfService'))
+        .filter(([k]) => /section[0-9]+Title/.test(k))
+        .map(([, title]) => ({ title, open: false })),
       openUrl,
     };
   },
