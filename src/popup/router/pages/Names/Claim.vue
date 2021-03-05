@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="claim">
     <NameListHeader />
     <div class="claim-name-holder">
       <Input
@@ -80,18 +80,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.claim-name-holder {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 30px;
+.claim {
+  .claim-name-holder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
 
-  .input-group {
-    margin-left: 0;
-  }
+    .input-group {
+      margin-left: 0;
+    }
 
-  .button {
-    margin-right: 0;
+    .button {
+      margin-right: 0;
+    }
   }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="mode === 'list'" class="popup" data-cy="networks">
+  <div v-if="mode === 'list'" class="networks" data-cy="networks">
     <div v-for="network in networks" :key="network.name" class="network-row">
       <CheckBox
         :value="network === activeNetwork"
@@ -32,7 +32,7 @@
       $t('pages.network.addNetwork')
     }}</Button>
   </div>
-  <div v-else-if="mode === 'add' || mode === 'edit'" class="mt-10 popup network">
+  <div v-else-if="mode === 'add' || mode === 'edit'" class="mt-10 network">
     <Input
       :placeholder="$t('pages.network.networkNamePlaceholder')"
       :label="$t('pages.network.networkNameLabel')"
@@ -198,7 +198,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.network-row {
+.networks .network-row {
   display: flex;
   align-items: center;
   border-top: 1px solid #100c0d;

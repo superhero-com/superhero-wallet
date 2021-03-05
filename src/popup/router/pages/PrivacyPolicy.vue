@@ -1,6 +1,6 @@
 <!--eslint-disable vue-i18n/no-raw-text-->
 <template>
-  <div class="popup privacypolicy--content">
+  <div class="privacy-policy">
     <h2>{{ $t('pages.privacyPolicy.heading') }}</h2>
     <p><em>The present Privacy Policy is effective since on 9th April 2020.</em></p>
     <ol>
@@ -374,7 +374,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.privacypolicy--content {
+.privacy-policy {
   text-align: left;
   word-break: break-word;
   font-weight: 100;

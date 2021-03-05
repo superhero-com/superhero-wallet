@@ -1,5 +1,5 @@
 <template>
-  <div class="popup donate-error">
+  <div class="donate-error">
     <h1>{{ $t('pages.donate-error.error-report') }}</h1>
     <Textarea
       :placeholder="$t('pages.donate-error.error-placeholder')"

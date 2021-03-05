@@ -1,6 +1,6 @@
 <!--eslint-disable vue-i18n/no-raw-text-->
 <template>
-  <div class="popup text-left terms">
+  <div class="terms-of-service text-left">
     <!-- header -->
     <h1 class="heading-1 bolder">TERMS OF USE</h1>
     <p class="italic">The present <b>TERMS OF USE</b> are effective since 9th April 2020.</p>
@@ -1008,7 +1008,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.terms {
+.terms-of-service {
   font-weight: 100;
 
   .italic {

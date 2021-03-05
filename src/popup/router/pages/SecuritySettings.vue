@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="security-settings">
     <template v-if="view === 'warning'">
       <h3>{{ $t('pages.securitySettings.seedRecoveryHeading') }}</h3>
       {{ $t('pages.securitySettings.seedRecoverySmall') }}
@@ -117,44 +117,46 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.mnemonics {
-  margin: 0;
+.security-settings {
+  .mnemonics {
+    margin: 0;
 
-  p {
-    word-spacing: 10px;
+    p {
+      word-spacing: 10px;
+    }
+
+    .ae-button {
+      float: right;
+      margin: 10px 0 30px 0;
+    }
+
+    p,
+    .ae-button.toolbar {
+      color: $bg-color;
+    }
   }
 
-  .ae-button {
-    float: right;
-    margin: 10px 0 30px 0;
+  .ae-icon.ae-icon-check {
+    color: #e911ff;
+    font-size: 100px;
   }
 
-  p,
-  .ae-button.toolbar {
-    color: $bg-color;
-  }
-}
+  .ae-badge {
+    user-select: unset;
+    cursor: pointer;
+    border: 2px solid #edf3f7;
 
-.ae-icon.ae-icon-check {
-  color: #e911ff;
-  font-size: 100px;
-}
+    .ae-icon-close {
+      margin-left: 5px;
+    }
 
-.ae-badge {
-  user-select: unset;
-  cursor: pointer;
-  border: 2px solid #edf3f7;
-
-  .ae-icon-close {
-    margin-left: 5px;
-  }
-
-  &.selected {
-    opacity: 0.4;
-    cursor: unset;
-    background: transparent;
-    border: 2px solid #c1c1c1;
-    color: #fff;
+    &.selected {
+      opacity: 0.4;
+      cursor: unset;
+      background: transparent;
+      border: 2px solid #c1c1c1;
+      color: #fff;
+    }
   }
 }
 </style>

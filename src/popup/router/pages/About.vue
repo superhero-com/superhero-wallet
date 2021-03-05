@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="about">
     <Logo class="logo" />
     <p>
       {{ $t('pages.about.systemName') }}
@@ -49,12 +49,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.version {
-  color: #909090;
-}
+.about {
+  .version {
+    color: #909090;
+  }
 
-.waellet-links a {
-  font-weight: bold;
-  display: block;
+  .waellet-links a {
+    font-weight: bold;
+    display: block;
+  }
 }
 </style>

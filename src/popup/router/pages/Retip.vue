@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="retip">
     <BalanceInfo />
     <div class="section-title">
       {{ $t('pages.tipPage.url') }}
@@ -155,25 +155,27 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.url-bar {
-  display: flex;
-  align-items: center;
+.retip {
+  .url-bar {
+    display: flex;
+    align-items: center;
 
-  a {
-    color: $text-color;
-    flex-grow: 1;
-    text-decoration: none;
-    width: 90%;
-    margin-left: 10px;
+    a {
+      color: $text-color;
+      flex-grow: 1;
+      text-decoration: none;
+      width: 90%;
+      margin-left: 10px;
+    }
   }
-}
 
-.section-title {
-  margin-bottom: 8px;
-  margin-top: 16px;
-  font-size: 16px;
-  color: $white-color;
-  font-weight: 400;
-  text-align: left;
+  .section-title {
+    margin-bottom: 8px;
+    margin-top: 16px;
+    font-size: 16px;
+    color: $white-color;
+    font-weight: 400;
+    text-align: left;
+  }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="popup notification-settings">
+  <div class="notification-settings">
     <div class="header">
       {{ $t('pages.notification-settings.header') }}
     </div>
@@ -30,7 +30,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.popup.notification-settings {
+.notification-settings {
   padding: 0;
   font-size: 0.95rem;
 

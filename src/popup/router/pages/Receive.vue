@@ -1,5 +1,5 @@
 <template>
-  <div class="popup popup-no-padding top-up-container" data-cy="top-up-container">
+  <div class="receive" data-cy="top-up-container">
     <p class="primary-title text-left mt-20 f-14 mx-20">
       {{ $t('pages.receive.heading') }}
     </p>
@@ -35,13 +35,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.top-up-container {
+@import '../../../styles/variables.scss';
+
+.receive {
   p.primary-title {
     margin-left: 20px;
   }
 
   ::v-deep .qrcode canvas {
-    border: 5px solid #fff;
+    border: 5px solid $color-white;
   }
 }
 </style>

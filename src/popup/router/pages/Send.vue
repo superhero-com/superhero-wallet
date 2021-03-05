@@ -1,10 +1,10 @@
 <template>
-  <div class="popup popup-no-padding">
+  <div class="send">
     <div data-cy="send-container">
       <div v-if="step == 1">
         <AccountInfo />
         <BalanceInfo />
-        <div class="popup withdraw step1">
+        <div class="withdraw step1">
           <p class="primary-title text-left mb-8 f-16">
             {{ $t('pages.tipPage.heading') }}
             <span class="secondary-text">{{
@@ -49,7 +49,7 @@
         </div>
       </div>
       <div v-if="step == 2">
-        <div class="popup withdraw step2">
+        <div class="withdraw step2">
           <h3 class="heading-1 my-15 center">
             <div class="flex flex-align-center flex-justify-content-center">
               <AlertExclamination />
@@ -102,7 +102,7 @@
         </div>
       </div>
       <div v-if="step == 3">
-        <div class="popup withdraw step2">
+        <div class="withdraw step2">
           <h3 class="heading-1 my-15 center">
             <div class="flex flex-align-center flex-justify-content-center">
               <span class="ml-7">{{ $t('pages.send.tx-success') }}</span>
@@ -296,77 +296,79 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.primary-title-darker {
-  color: $text-color;
-}
-
-.withdraw.step1 {
-  .d-flex {
-    display: flex;
-    padding-bottom: 24px;
-
-    &.error-below {
-      padding-bottom: 0;
-    }
-
-    .textarea {
-      width: 250px;
-      min-height: 60px;
-      margin: 0 20px 0 0;
-      font-size: 11px;
-    }
-  }
-
-  .error {
-    padding-top: 8px;
-    line-height: 16px;
-    color: $color-error;
-    font-size: 12px;
-    text-align: left;
-  }
-
-  small {
-    color: $accent-color;
-    display: block;
-    width: 100%;
-    padding-top: 5px;
-    font-size: 12px;
-  }
-}
-
-.withdraw.step2 {
-  p {
-    display: flex;
-    justify-content: center;
-    line-height: 2rem;
-  }
-
-  p:not(:first-of-type) {
+.send {
+  .primary-title-darker {
     color: $text-color;
   }
 
-  p > svg {
-    margin-right: 10px;
-  }
+  .withdraw.step1 {
+    .d-flex {
+      display: flex;
+      padding-bottom: 24px;
 
-  .info-group {
-    .amount {
-      font-size: 26px;
-      color: $secondary-color;
-    }
+      &.error-below {
+        padding-bottom: 0;
+      }
 
-    .currencyamount {
-      font-size: 18px;
-      display: block;
-
-      span {
-        font-size: 18px;
+      .textarea {
+        width: 250px;
+        min-height: 60px;
+        margin: 0 20px 0 0;
+        font-size: 11px;
       }
     }
+
+    .error {
+      padding-top: 8px;
+      line-height: 16px;
+      color: $color-error;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    small {
+      color: $accent-color;
+      display: block;
+      width: 100%;
+      padding-top: 5px;
+      font-size: 12px;
+    }
   }
 
-  .text-center {
-    text-align: center;
+  .withdraw.step2 {
+    p {
+      display: flex;
+      justify-content: center;
+      line-height: 2rem;
+    }
+
+    p:not(:first-of-type) {
+      color: $text-color;
+    }
+
+    p > svg {
+      margin-right: 10px;
+    }
+
+    .info-group {
+      .amount {
+        font-size: 26px;
+        color: $secondary-color;
+      }
+
+      .currencyamount {
+        font-size: 18px;
+        display: block;
+
+        span {
+          font-size: 18px;
+        }
+      }
+    }
+
+    .text-center {
+      text-align: center;
+    }
   }
 }
 </style>

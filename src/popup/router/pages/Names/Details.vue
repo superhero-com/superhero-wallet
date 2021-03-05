@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="details">
     <ul v-if="!addPointer" class="name-details">
       <li>
         <span>{{ $t('pages.names.details.name') }}</span> {{ name }}
@@ -137,7 +137,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.name-details {
+.details .name-details {
   padding: 0;
   margin: 0;
 

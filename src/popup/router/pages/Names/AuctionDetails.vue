@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="auction-details">
     <Loader v-if="bids === null" />
     <p v-else-if="bids.length === 0">{{ $t('pages.names.auctions.not-found') }}</p>
     <template v-else>
@@ -80,7 +80,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.section-title {
+.auction-details .section-title {
   text-align: left;
   margin-top: 15px;
   margin-bottom: 5px;
