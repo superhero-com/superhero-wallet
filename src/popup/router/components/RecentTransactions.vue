@@ -18,7 +18,7 @@
       <Visible class="icon" />
       <span class="text">{{ $t('pages.recentTransactions.viewMore') }}</span>
     </router-link>
-    <img v-if="loading" :src="icons.AnimatedSpinner" class="spinner" />
+    <AnimatedSpinner v-if="loading" class="spinner" />
     <div v-else-if="!transactions.latest.length && !transactions.pending.length" class="message">
       <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
     </div>
@@ -29,17 +29,16 @@
 import { mapState } from 'vuex';
 import Activity from '../../../icons/activity.svg?vue-component';
 import Visible from '../../../icons/visible.svg?vue-component';
-import AnimatedSpinner from '../../../icons/animated-spinner.svg';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import PendingTxs from './PendingTxs';
 import TransactionItem from './TransactionItem';
 
 export default {
-  components: { PendingTxs, TransactionItem, Activity, Visible },
+  components: { PendingTxs, TransactionItem, Activity, Visible, AnimatedSpinner },
   data() {
     return {
       polling: null,
       loading: true,
-      icons: { AnimatedSpinner },
     };
   },
   mounted() {
@@ -139,6 +138,7 @@ export default {
     width: 56px;
     height: 56px;
     margin: 0 auto;
+    color: $color-white;
   }
 
   .view-more {
