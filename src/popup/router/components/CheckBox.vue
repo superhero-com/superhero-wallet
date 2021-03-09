@@ -37,6 +37,16 @@ export default {
   -ms-user-select: none;
   user-select: none;
 
+  &:hover .checkmark {
+    border-color: $color-border-hover;
+    background-color: $color-bg-3;
+  }
+
+  &:active .checkmark {
+    border-color: $color-border-hover;
+    background-color: $color-black;
+  }
+
   input {
     position: absolute;
     opacity: 0;

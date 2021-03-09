@@ -97,19 +97,12 @@ export default {
 
   &:hover {
     background-color: $color-bg-3;
-
-    .text {
-      line-height: 24px;
-      padding-bottom: 0;
-      padding-top: 0;
-    }
   }
 
   .text {
-    margin: 8px auto 24px auto;
+    margin: 8px auto 16px auto;
     width: 248px;
-    padding: 8px;
-    line-height: 20px;
+    padding: 4px 8px;
     color: $color-light-grey;
   }
 
