@@ -17,6 +17,7 @@
 
 <script>
 import { mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
+import { deferPromised } from '../../utils/index';
 import Textarea from '../components/Textarea';
 import Button from '../components/Button';
 
@@ -44,7 +45,7 @@ export default {
         return;
       }
       this.loading = true;
-      const seed = mnemonicToSeed(mnemonic).toString('hex');
+      const seed = (await deferPromised(mnemonicToSeed, mnemonic)).toString('hex');
       const address = await this.$store.dispatch('generateWallet', { seed });
       this.$store.commit('setMnemonic', this.mnemonic);
       this.$store.commit('setBackedUpSeed');
