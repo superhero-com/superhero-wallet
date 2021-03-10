@@ -46,7 +46,6 @@ import Header from './router/components/Header';
 import SidebarMenu from './router/components/SidebarMenu';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus';
 import Tour from './router/components/Tour';
-import { EventBus } from './utils/eventBus';
 
 export default {
   components: {
@@ -104,10 +103,6 @@ export default {
     }
 
     this.$store.commit('setChainNames', await this.$store.dispatch('getCacheChainNames'));
-
-    EventBus.$on('error', async (entry) => {
-      this.$store.dispatch('modals/open', { name: 'error-log', entry }).catch(() => false);
-    });
   },
   methods: {
     async init() {
