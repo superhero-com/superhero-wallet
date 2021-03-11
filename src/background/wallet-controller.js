@@ -8,12 +8,6 @@ class WalletController {
     return { generate: true, address };
   }
 
-  getAccount({ idx }) {
-    return {
-      address: getHdWalletAccount(this.wallet, idx).address,
-    };
-  }
-
   isLoggedIn() {
     return typeof this.wallet !== 'undefined' && this.wallet != null;
   }

@@ -63,10 +63,6 @@ export default {
     return recent ? txs.slice(0, limit) : txs;
   },
 
-  async getAccount(context, { idx }) {
-    return (await postMessage({ type: 'getAccount', payload: { idx } })).address;
-  },
-
   async generateWallet(context, { seed }) {
     return (
       await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })
