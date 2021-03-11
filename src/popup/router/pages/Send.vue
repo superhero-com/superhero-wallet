@@ -60,7 +60,7 @@
             {{ $t('pages.send.checkalert') }}
           </p>
           <InfoGroup
-            :value="account.publicKey"
+            :value="account.address"
             :label="$t('pages.send.sender')"
             data-cy="review-sender"
           />
@@ -209,7 +209,7 @@ export default {
       this.fee = calculateFee(!this.selectedToken ? TX_TYPES.txSign : TX_TYPES.contractCall, {
         ...this.sdk.Ae.defaults,
         ...(this.selectedToken && {
-          callerId: this.account.publicKey,
+          callerId: this.account.address,
           contractId: this.selectedToken.contract,
         }),
       });

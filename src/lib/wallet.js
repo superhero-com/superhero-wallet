@@ -69,7 +69,7 @@ async function initMiddleware() {
 }
 
 async function logout() {
-  store.commit('setActiveAccount', { publicKey: '', index: 0 });
+  store.commit('setActiveAccount', { address: '', index: 0 });
   store.commit('updateAccount', {});
   store.commit('switchLoggedIn', false);
 }
@@ -109,7 +109,7 @@ export default {
     }
     const address = await store.dispatch('generateWallet', { seed: account.privateKey });
     store.commit('updateAccount', account);
-    store.commit('setActiveAccount', { publicKey: address, index: 0 });
+    store.commit('setActiveAccount', { address, index: 0 });
 
     store.commit('switchLoggedIn', true);
 
@@ -180,7 +180,7 @@ export default {
             return new App(aeppUrl);
           },
           async address(...args) {
-            const address = store.state.account.publicKey;
+            const { address } = store.state.account;
             const app = args.pop();
             if (app instanceof App) {
               const { host, hostname, protocol } = app.host;

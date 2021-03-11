@@ -21,7 +21,7 @@ export default {
     state.transactions.pending = state.transactions.pending.filter((t) => t.hash !== hash);
   },
   setActiveAccount(state, payload) {
-    state.account.publicKey = payload.publicKey;
+    state.account.address = payload.address;
     state.activeAccount = payload.index;
   },
   setUserNetwork(state, { index, ...network }) {

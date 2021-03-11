@@ -21,7 +21,7 @@ describe('Tests cases for AEX-2 communication', () => {
     it('Connect to extension and get wallet info', () => {
       cy.get('[data-cy=wallet-address]')
         .should('be.visible')
-        .should('contain', testAccount.publicKey)
+        .should('contain', testAccount.address)
         .get('[data-cy=wallet-balance]')
         .should('be.visible')
         .get('[data-cy=wallet-name]')

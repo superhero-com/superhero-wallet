@@ -11,7 +11,7 @@ class WalletController {
   getKeypair({ activeAccount, account }) {
     try {
       return stringifyForStorage({
-        publicKey: account.publicKey,
+        address: account.address,
         secretKey: getHdWalletAccount(this.wallet, activeAccount).secretKey,
       });
     } catch (e) {

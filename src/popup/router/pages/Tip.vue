@@ -139,7 +139,7 @@ export default {
         const fee = calculateFee(TX_TYPES.contractCall, {
           ...sdk.Ae.defaults,
           contractId: this.tippingContract.deployInfo.address,
-          callerId: account.publicKey,
+          callerId: account.address,
         });
         if (
           this.selectedToken

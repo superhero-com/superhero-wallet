@@ -59,7 +59,7 @@ export default {
           ),
         );
         if (!claimAmount) throw new Error('NO_ZERO_AMOUNT_PAYOUT');
-        await this.$store.dispatch('claimTips', { url, address: this.account.publicKey });
+        await this.$store.dispatch('claimTips', { url, address: this.account.address });
         await this.$store.dispatch('cacheInvalidateOracle');
         await this.$store.dispatch('cacheInvalidateTips');
         this.$store.dispatch('modals/open', { name: 'claim-success', url, claimAmount });

@@ -24,11 +24,11 @@ export default {
   async fetchPendingTransactions({
     state: {
       sdk,
-      account: { publicKey },
+      account: { address },
     },
   }) {
     return (
-      await sdk.api.getPendingAccountTransactionsByPubkey(publicKey).then(
+      await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
         (r) => r.transactions,
         (error) => {
           if (!isAccountNotFoundError(error)) {
@@ -41,17 +41,17 @@ export default {
   },
   async fetchTransactions({ state, getters, dispatch }, { limit, page, recent }) {
     if (!state.middleware) return [];
-    const { publicKey } = state.account;
+    const { address } = state.account;
     let txs = await Promise.all([
-      state.middleware.getTxByAccount(publicKey, limit, page).then(({ data }) => data),
+      state.middleware.getTxByAccount(address, limit, page).then(({ data }) => data),
       dispatch('fetchPendingTransactions'),
       fetchJson(
-        `${getters.activeNetwork.backendUrl}/cache/events/?address=${publicKey}&event=TipWithdrawn${
+        `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${
           recent ? `&limit=${limit}` : ``
         }`,
       )
         .then((response) =>
-          response.map(({ address, amount, ...t }) => ({
+          response.map(({ amount, ...t }) => ({
             tx: { address, amount },
             ...t,
             microTime: t.time,
@@ -69,13 +69,13 @@ export default {
   },
 
   async getKeyPair({ state: { account } }, { idx }) {
-    const { publicKey, secretKey } = parseFromStorage(
+    const { address, secretKey } = parseFromStorage(
       await postMessage({
         type: 'getKeypair',
-        payload: { activeAccount: idx, account: { publicKey: account.publicKey } },
+        payload: { activeAccount: idx, account: { address: account.address } },
       }),
     );
-    return { publicKey, secretKey };
+    return { address, secretKey };
   },
 
   async generateWallet(context, { seed }) {
@@ -86,7 +86,7 @@ export default {
 
   async setLogin({ commit }, { keypair }) {
     commit('updateAccount', keypair);
-    commit('setActiveAccount', { publicKey: keypair.publicKey, index: 0 });
+    commit('setActiveAccount', { address: keypair.address, index: 0 });
     commit('updateAccount', keypair);
     commit('switchLoggedIn', true);
   },
@@ -160,7 +160,7 @@ export default {
     {
       state: {
         sdk,
-        account: { publicKey },
+        account: { address },
       },
       getters: { activeNetwork },
     },
@@ -169,7 +169,7 @@ export default {
     const backendMethod = async (postParam) =>
       postJson(`${activeNetwork.backendUrl}/notification/${notifId}`, { body: postParam });
 
-    const responseChallenge = await backendMethod({ author: publicKey, status });
+    const responseChallenge = await backendMethod({ author: address, status });
     const signedChallenge = Buffer.from(
       await sdk.signMessage(responseChallenge.challenge),
     ).toString('hex');
@@ -184,7 +184,7 @@ export default {
     {
       state: {
         sdk,
-        account: { publicKey },
+        account: { address },
       },
       getters: { activeNetwork },
     },
@@ -194,7 +194,7 @@ export default {
     const backendMethod = async (postParam) =>
       postJson(`${activeNetwork.backendUrl}/notification`, { body: postParam });
 
-    const responseChallenge = await backendMethod({ ids, status, author: publicKey });
+    const responseChallenge = await backendMethod({ ids, status, author: address });
     const signedChallenge = Buffer.from(
       await sdk.signMessage(responseChallenge.challenge),
     ).toString('hex');
@@ -210,7 +210,7 @@ export default {
   },
   async getAllNotifications({ state: { sdk }, getters: { activeNetwork, account } }) {
     const responseChallenge = await fetchJson(
-      `${activeNetwork.backendUrl}/notification/user/${account.publicKey}`,
+      `${activeNetwork.backendUrl}/notification/user/${account.address}`,
     );
     const signedChallenge = Buffer.from(
       await sdk.signMessage(responseChallenge.challenge),
@@ -220,7 +220,7 @@ export default {
       challenge: responseChallenge.challenge,
       signature: signedChallenge,
     };
-    const url = new URL(`${activeNetwork.backendUrl}/notification/user/${account.publicKey}`);
+    const url = new URL(`${activeNetwork.backendUrl}/notification/user/${account.address}`);
     Object.keys(respondChallenge).forEach((key) =>
       url.searchParams.append(key, respondChallenge[key]),
     );

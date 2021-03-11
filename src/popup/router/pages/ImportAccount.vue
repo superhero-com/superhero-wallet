@@ -51,7 +51,7 @@ export default {
       this.$store.commit('setBackedUpSeed');
       await this.$store.dispatch('setLogin', {
         keypair: {
-          publicKey: address,
+          address,
           privateKey: seed,
         },
       });

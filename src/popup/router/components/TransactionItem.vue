@@ -42,7 +42,7 @@ export default {
     direction() {
       return ['senderId', 'accountId', 'ownerId', 'callerId']
         .map((key) => this.transaction.tx[key])
-        .includes(this.account.publicKey)
+        .includes(this.account.address)
         ? 'sent'
         : 'received';
     },

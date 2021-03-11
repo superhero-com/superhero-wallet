@@ -3,8 +3,8 @@
     <h3>
       {{ $t('modals.confirm-transaction-sign.sign-raw') }} <br />
       <span class="name-holder">
-        <Avatar :address="account.publicKey" :name="account.name" size="small" />
-        {{ account.name || account.publicKey }}
+        <Avatar :address="account.address" :name="account.name" size="small" />
+        {{ account.name || account.address }}
       </span>
     </h3>
     <DetailsItem :label="$t('modals.confirm-transaction-sign.data-sign')" direction="column">

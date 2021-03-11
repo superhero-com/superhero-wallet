@@ -11,7 +11,7 @@
         <ae-icon name="check" />
       </div>
       <div class="identicon">
-        <Avatar :address="account.publicKey" :name="account.name" size="lg" />
+        <Avatar :address="account.address" :name="account.name" size="lg" />
         <div class="account-name">{{ account.name || account.type }}</div>
       </div>
     </div>
@@ -20,7 +20,7 @@
       <!--eslint-disable-next-line vue-i18n/no-raw-text-->
       <span class="secondary-text" data-cy="aepp">{{ app.host }} ({{ app.name }}) </span>
       {{ $t('pages.connectConfirm.websiteRequestconnect') }}
-      <Avatar class="send-account-icon" :address="account.publicKey" :name="account.name" />
+      <Avatar class="send-account-icon" :address="account.address" :name="account.name" />
       {{ account.name || account.type }}
     </h2>
     <ul>

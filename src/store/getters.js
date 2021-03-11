@@ -6,7 +6,7 @@ export default {
     if (!isEmpty(account)) {
       return {
         ...account,
-        name: getters['names/getDefault'](account.publicKey),
+        name: getters['names/getDefault'](account.address),
         type: 'Main account',
       };
     }

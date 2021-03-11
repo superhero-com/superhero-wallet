@@ -4,7 +4,7 @@
       {{ $t('pages.receive.heading') }}
     </p>
     <AccountInfo />
-    <qrcode-vue :value="account.publicKey" size="140" class="my-25 qrcode"></qrcode-vue>
+    <qrcode-vue :value="account.address" size="140" class="my-25 qrcode"></qrcode-vue>
 
     <Button @click="openUrl(changeCryptoToAeUrl, true)">
       {{ $t('pages.receive.transferExchange') }}

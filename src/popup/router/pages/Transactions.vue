@@ -45,18 +45,18 @@ export default {
     };
   },
   computed: mapState({
-    filteredTransactions(state, { account: { publicKey } }) {
+    filteredTransactions(state, { account: { address } }) {
       return this.transactions
         .filter((tr) => {
           switch (this.displayMode.type) {
             case 'sent':
-              return tr.tx.type === 'ContractCallTx' && tr.tx.callerId === publicKey;
+              return tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address;
             case 'claimed':
               return tr.claim;
             case 'topups':
-              return tr.tx.type === 'SpendTx' && tr.tx.recipientId === publicKey;
+              return tr.tx.type === 'SpendTx' && tr.tx.recipientId === address;
             case 'withdrawals':
-              return tr.tx.type === 'SpendTx' && tr.tx.senderId === publicKey;
+              return tr.tx.type === 'SpendTx' && tr.tx.senderId === address;
             case 'all':
               return true;
             default:

@@ -73,7 +73,7 @@ export default {
             return new App(aeppUrl);
           },
           async address(...args) {
-            const address = store.state.account.publicKey;
+            const { address } = store.state.account;
             const app = args.pop();
             if (
               app instanceof App &&

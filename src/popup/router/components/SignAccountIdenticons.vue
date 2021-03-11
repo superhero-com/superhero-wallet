@@ -1,7 +1,7 @@
 <template>
   <div class="identicons-holder">
     <div class="from">
-      <Avatar :address="account.publicKey" :name="account.name" />
+      <Avatar :address="account.address" :name="account.name" />
       <span class="account-address">{{ account.name || account.type }}</span>
     </div>
     <div class="arrow-separator">

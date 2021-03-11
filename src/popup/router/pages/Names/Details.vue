@@ -95,7 +95,7 @@ export default {
     async setDefault() {
       await this.$watchUntilTruly(() => this.sdk);
       await this.$store.dispatch('names/setDefault', {
-        address: this.account.publicKey,
+        address: this.account.address,
         name: this.name,
       });
     },

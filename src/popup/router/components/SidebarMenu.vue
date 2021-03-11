@@ -5,7 +5,7 @@
       <MenuHover class="hover" />
     </button>
     <div class="account">
-      <Avatar :address="account.publicKey" :name="account.name" />
+      <Avatar :address="account.address" :name="account.name" />
       <div class="account-info">
         <div class="f-12" v-if="account.name" data-cy="chain-name">
           <TruncateMid :str="account.name" />

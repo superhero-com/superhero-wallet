@@ -8,7 +8,7 @@
       {{ callbackOrigin }}
     </div>
 
-    <Button @click="openCallbackOrGoHome(true, { address: $store.getters.account.publicKey })">
+    <Button @click="openCallbackOrGoHome(true, { address: $store.getters.account.address })">
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button @click="openCallbackOrGoHome(false)">

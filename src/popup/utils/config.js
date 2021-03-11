@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 
 export const testAccount = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
-  publicKey: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
+  address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
 };
 
 export const popupProps = {
@@ -98,18 +98,18 @@ const commonParams = {
 };
 export const txParams = {
   [TX_TYPE.contractCreate]: {
-    ownerId: testAccount.publicKey,
+    ownerId: testAccount.address,
     code:
       'cb_+LBGA6DK15BWhAK4E5OWH1kkfhQIx/qEDTVv8hrfY/bk13cN88C4g7hT/iiALJYANwGXQDcAGgaCAAEDP/5E1kQfADcANwAaDoKfAYEKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqgEDP/6LoCthADcAl0ABAoKqLwMRKIAsliVzZXRfYnl0ZXMRRNZEHxFpbml0EYugK2ElZ2V0X2J5dGVzgi8AhTQuMi4wABHX/Rk=',
     ...commonParams,
   },
   [TX_TYPE.contractCall]: {
     contractId: 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio',
-    callerId: testAccount.publicKey,
+    callerId: testAccount.address,
     ...commonParams,
   },
   [TX_TYPE.spend]: {
-    senderId: testAccount.publicKey,
+    senderId: testAccount.address,
     recipientId,
     ...commonParams,
   },

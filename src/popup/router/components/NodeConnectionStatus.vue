@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="nodeStatus && account.publicKey && isLoggedIn"
+    v-if="nodeStatus && account.address && isLoggedIn"
     :data-cy="nodeStatus !== 'error' ? 'connect-node' : ''"
     :class="`connect-${nodeStatus === 'error' ? 'error' : 'node'}`"
   >
