@@ -23,9 +23,9 @@ export const getLoginState = async ({
   pendingTransaction,
   network,
 }) => {
-  const { mnemonic, publicKey } = testAccount;
+  const { mnemonic, address } = testAccount;
   const account = {
-    publicKey,
+    address,
     privateKey: mnemonicToSeed(mnemonic).toString('hex'),
   };
   return {
@@ -35,7 +35,7 @@ export const getLoginState = async ({
     backedUpSeed,
     current: { network: network || 'Testnet', token: 0, currency: 'usd' },
     balance,
-    ...(name && { names: { defaults: { [`${account.publicKey}-ae_uat`]: name } } }),
+    ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
     ...(pendingTransaction && { transactions: { latest: [], pending: [pendingTransaction] } }),
   };
 };

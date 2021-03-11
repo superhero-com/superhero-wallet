@@ -1,8 +1,8 @@
 <template>
   <div class="identicons-holder">
     <div class="from">
-      <Avatar :address="account.publicKey" :name="account.name" />
-      <span class="account-address" :title="activeAccountName">{{ activeAccountName }}</span>
+      <Avatar :address="account.address" :name="account.name" />
+      <span class="account-address">{{ account.name || account.type }}</span>
     </div>
     <div class="arrow-separator">
       <ae-icon name="left-more" />
@@ -46,7 +46,7 @@ export default {
   },
   components: { Avatar },
   computed: {
-    ...mapGetters(['account', 'activeAccountName']),
+    ...mapGetters(['account']),
     receiver() {
       return this.recipientId || this.contractId;
     },

@@ -30,7 +30,7 @@ export default {
   async checkUrlHasBalance(url, { address, chainName }) {
     try {
       const { account } = await getActiveAccount();
-      if (account && account.publicKey) {
+      if (account && account.address) {
         let addresses = [address];
         if (Array.isArray(address)) addresses = address;
 
@@ -39,12 +39,12 @@ export default {
           addresses = [...addresses, ...pubKeys];
         }
 
-        if (this.checkAddressMatch(account.publicKey, uniq(addresses))) {
+        if (this.checkAddressMatch(account.address, uniq(addresses))) {
           await this.abortIfZeroClaim(url);
           // This check is only used on mainnet
           const { backendUrl } = defaultNetwork;
           await postJson(`${backendUrl}/claim/submit`, {
-            body: { url, address: account.publicKey },
+            body: { url, address: account.address },
           });
         }
       }

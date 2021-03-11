@@ -139,7 +139,7 @@ export default {
         const fee = calculateFee(TX_TYPES.contractCall, {
           ...sdk.Ae.defaults,
           contractId: this.tippingContract.deployInfo.address,
-          callerId: account.publicKey,
+          callerId: account.address,
         });
         if (
           this.selectedToken
@@ -235,7 +235,7 @@ export default {
             convertToken(this.amount, this.selectedToken.decimals).toFixed(),
           );
 
-          await this.$store.dispatch('fungibleTokens/loadTokenBalances', this.account.publicKey);
+          await this.$store.dispatch('fungibleTokens/loadTokenBalances');
           this.$store.commit(
             'fungibleTokens/setSelectedToken',
             this.tokenBalances.find(({ value }) => value === this.selectedToken.value),

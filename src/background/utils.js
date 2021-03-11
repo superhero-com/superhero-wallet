@@ -17,7 +17,7 @@ let tippingContract;
 export const getActiveAccount = async () => {
   const { account } = await getState();
   if (!isEmpty(account)) {
-    return { account: { publicKey: account.publicKey }, activeAccount: 0 };
+    return { account: { address: account.address }, activeAccount: 0 };
   }
   return false;
 };

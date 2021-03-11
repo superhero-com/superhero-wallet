@@ -66,7 +66,14 @@ export default new Vuex.Store({
   actions,
   plugins: [
     persistState(
-      runMigrations,
+      async (state) => {
+        const migratedState = await runMigrations(state);
+        if (!migratedState?.account?.publicKey) return migratedState;
+        return {
+          ...migratedState,
+          account: { ...migratedState.account, address: migratedState.account.publicKey },
+        };
+      },
       ({
         migrations,
         current,
@@ -97,7 +104,7 @@ export default new Vuex.Store({
         nextCurrenciesFetch,
         tip,
         backedUpSeed,
-        account,
+        account: { ...account, publicKey: account.address },
         mnemonic,
         saveErrorLog,
         tourStartBar,

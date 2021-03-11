@@ -31,7 +31,7 @@ export default (store) => {
   const balance$ = sdk$.pipe(
     switchMap((sdk) => timer(0, 3000).pipe(map(() => sdk))),
     switchMap((sdk) =>
-      sdk.balance(store.state.account.publicKey).catch((error) => {
+      sdk.balance(store.state.account.address).catch((error) => {
         if (!isNotFoundError(error)) {
           handleUnknownError(error);
         }
@@ -63,10 +63,7 @@ export default (store) => {
   });
 
   const notifications$ = createSdkObservable(
-    async () =>
-      (await store.dispatch('getAllNotifications', store.state.account.publicKey)).map(
-        normalizeNotification,
-      ),
+    async () => (await store.dispatch('getAllNotifications')).map(normalizeNotification),
     [],
   );
 

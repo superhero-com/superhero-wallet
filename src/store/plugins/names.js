@@ -54,10 +54,10 @@ export default (store) => {
               })),
           );
 
-        const defaultName = getDefault(account.publicKey);
+        const defaultName = getDefault(account.address);
         const names = await Promise.all([
           getPendingNameClaimTransactions(),
-          middleware.getOwnedBy(account.publicKey).then(({ active }) =>
+          middleware.getOwnedBy(account.address).then(({ active }) =>
             owned
               ? active
                   .map(({ info, name }) => ({
@@ -98,20 +98,20 @@ export default (store) => {
 
         const claimed = names.filter((n) => !n.pending && !n.revoked).map(({ name }) => name);
         if (!claimed.length) {
-          if (defaultName) commit('setDefault', { address: account.publicKey });
+          if (defaultName) commit('setDefault', { address: account.address });
           return;
         }
         const { preferredChainName: defaultNameBackend } = await fetchJson(
-          `${activeNetwork.backendUrl}/profile/${account.publicKey}`,
+          `${activeNetwork.backendUrl}/profile/${account.address}`,
         ).catch(() => {
           return {};
         });
         if (!claimed.includes(defaultNameBackend)) {
-          await dispatch('setDefault', { address: account.publicKey, name: claimed[0] });
+          await dispatch('setDefault', { address: account.address, name: claimed[0] });
           return;
         }
         if (defaultName !== defaultNameBackend) {
-          commit('setDefault', { address: account.publicKey, name: defaultNameBackend });
+          commit('setDefault', { address: account.address, name: defaultNameBackend });
         }
       },
       async fetchAuctions({ rootState: { middleware } }) {

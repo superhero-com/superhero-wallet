@@ -134,7 +134,7 @@ export default {
       const address = await this.$store.dispatch('generateWallet', { seed });
       this.$store.commit('setMnemonic', this.mnemonic);
       const keypair = {
-        publicKey: address,
+        address,
         privateKey: seed,
       };
       await this.$store.dispatch('setLogin', { keypair });

@@ -10,7 +10,7 @@
         :address="owner"
       >
         <TruncateMid :str="name" class="name" />
-        <Badge v-if="activeAccountName == name" class="active-name">
+        <Badge v-if="account.name === name" class="active-name">
           {{ $t('pages.names.default') }}
         </Badge>
         <Badge v-if="pending" class="pending-name">
@@ -45,7 +45,7 @@ import CheckBox from '../../components/CheckBox';
 export default {
   components: { NameListHeader, Badge, NameRow, CheckBox, TruncateMid },
   computed: {
-    ...mapGetters(['activeAccountName']),
+    ...mapGetters(['account']),
     ...mapState('names', ['owned']),
   },
   mounted() {

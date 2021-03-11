@@ -24,7 +24,7 @@ describe('Tests cases for transactions page', () => {
   it('Render transaction item', () => {
     cy.openTransactions()
       .request(
-        `https://testnet.aeternity.io/mdw/txs/backward?account=${testAccount.publicKey}&limit=1`,
+        `https://testnet.aeternity.io/mdw/txs/backward?account=${testAccount.address}&limit=1`,
       )
       .then(({ body }) => {
         const {

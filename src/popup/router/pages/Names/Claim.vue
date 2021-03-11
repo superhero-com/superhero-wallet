@@ -65,7 +65,7 @@ export default {
           if (!isAuction) {
             this.$store.dispatch('names/updatePointer', {
               name,
-              address: this.$store.getters.account.publicKey,
+              address: this.$store.getters.account.address,
             });
           }
         } catch (e) {
