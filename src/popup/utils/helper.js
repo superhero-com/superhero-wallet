@@ -121,7 +121,7 @@ export const getAllNetworks = async () =>
 export const escapeSpecialChars = (str) =>
   str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
 
-export const checkHashType = async (hash) => {
+export const checkHashType = (hash) => {
   const accountPublicKeyRegex = RegExp('^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$');
   const transactionHashRegex = RegExp('^th_[1-9A-HJ-NP-Za-km-z]{48,50}$');
   const nameRegex = RegExp('^nm_[1-9A-HJ-NP-Za-km-z]{48,50}$');

@@ -13,22 +13,17 @@
 <script>
 import { mapGetters } from 'vuex';
 import openUrl from '../../utils/openUrl';
-import { checkHashType } from '../../utils/helper';
 
 export default {
   props: {
     value: { type: String, default: '' },
     label: { type: String, default: '' },
   },
-  computed: mapGetters(['activeNetwork']),
+  computed: mapGetters(['getExplorerPath']),
   methods: {
     async openTxExplorer() {
-      const { explorerUrl } = this.activeNetwork;
-      const { endpoint, valid } = await checkHashType(this.value);
-      if (valid) {
-        const url = `${explorerUrl}/${endpoint}/${this.value}`;
-        openUrl(url, true);
-      }
+      const url = this.getExplorerPath(this.value);
+      if (url) openUrl(url, true);
     },
   },
 };

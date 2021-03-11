@@ -3,6 +3,7 @@ import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { Crypto } from '@aeternity/aepp-sdk/es';
 import { defaultNetworks } from '../popup/utils/constants';
+import { checkHashType } from '../popup/utils/helper';
 
 const getHdWalletAccount = (wallet, accountIdx = 0) => {
   const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
@@ -49,5 +50,9 @@ export default {
     return (
       ['ae_mainnet', 'ae_uat'].includes(activeNetwork.networkId) || process.env.RUNNING_IN_TESTS
     );
+  },
+  getExplorerPath: (_, { activeNetwork: { explorerUrl } }) => (hash) => {
+    const { endpoint, valid } = checkHashType(hash);
+    return valid ? `${explorerUrl}/${endpoint}/${hash}` : null;
   },
 };
