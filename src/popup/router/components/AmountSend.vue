@@ -9,6 +9,7 @@
         :value="value"
         :placeholder="$t('pages.tipPage.amountPlaceholder')"
         :label="label || $t('pages.tipPage.amountLabel')"
+        :disabled="readonly"
         @input="$emit('input', $event)"
       />
       <div class="ml-15 text-left">
@@ -44,7 +45,13 @@ export default {
   components: {
     Input,
   },
-  props: ['amountError', 'value', 'errorMsg', 'label'],
+  props: {
+    amountError: Boolean,
+    value: [String, Number],
+    errorMsg: String,
+    label: String,
+    readonly: Boolean,
+  },
   subscriptions() {
     return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
   },

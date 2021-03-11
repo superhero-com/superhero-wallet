@@ -150,7 +150,7 @@ export const handleMessage = ({ type, payload }) => {
     if (type === 'POPUP_INFO') {
       if (payload.txType) {
         const props = popupProps.base;
-        props.action.params.tx = buildTx(payload.txType).tx;
+        props.transaction = buildTx(payload.txType).txObject;
         return props;
       }
       return popupProps[payload.popupType];

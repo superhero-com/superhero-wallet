@@ -11,27 +11,27 @@ describe('Tests cases for AEX-2 popups', () => {
 
   it('Sign Message popup, Conncet display correct data', () => {
     const props = popupProps.messageSign;
-    const host = `${props.host} (${props.name})`;
+    const host = `${props.app.host} (${props.app.name})`;
     cy.openAex2Popup('messageSign')
       .get('[data-cy=host]')
       .should('be.visible')
       .should('contain', host)
       .get('[data-cy=message]')
       .should('be.visible')
-      .should('contain', props.action.params.message);
+      .should('contain', props.message);
 
     const props1 = popupProps.connectConfirm;
-    const host1 = `${props.host} (${props1.name})`;
+    const host1 = `${props.app.host} (${props1.app.name})`;
     cy.openAex2Popup('connectConfirm')
       .get('[data-cy=aepp]')
       .should('be.visible')
       .should('contain', host1)
       .get('[data-cy=host]')
       .should('be.visible')
-      .should('contain', props1.host)
+      .should('contain', props1.app.host)
       .get('[data-cy=name]')
       .should('be.visible')
-      .should('contain', props1.name);
+      .should('contain', props1.app.name);
   });
 
   it('Opens connectConfirm, sign, messageSign popups and send accept/deny action', () => {

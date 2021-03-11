@@ -158,14 +158,18 @@ export default {
         if (!popupWindow) reject();
         popups.addPopup(id);
         popups.addActions(id, { resolve, reject });
-        popups.setAeppInfo(id, {
+        popups.setProps(id, {
           type,
           action: { params, method },
-          url: href,
-          icons: aepp?.icons || [],
-          name: aepp?.name || host,
-          protocol,
-          host,
+          app: {
+            url: href,
+            icons: aepp?.icons || [],
+            name: aepp?.name || host,
+            protocol,
+            host,
+          },
+          ...(params.message && { message: params.message }),
+          ...(params.txObject && { transaction: params.txObject.params }),
         });
       } catch (e) {
         console.error(`showPopup: ${e}`);

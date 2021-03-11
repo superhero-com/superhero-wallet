@@ -1,8 +1,7 @@
 import Index from '../pages/Index';
 import Account from '../pages/Account';
-import PopupSignTransaction from '../pages/Popups/SignTx';
+import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign';
 import PopupConnect from '../pages/Popups/Connect';
-import PopupAskAccounts from '../pages/Popups/AskAccounts';
 import PopupMessageSign from '../pages/Popups/MessageSign';
 import Settings from '../pages/Settings';
 import LanguageSettings from '../pages/LanguageSettings';
@@ -62,7 +61,7 @@ export default [
   {
     name: 'popup-sign-tx',
     path: '/popup-sign-tx',
-    component: PopupSignTransaction,
+    component: ConfirmTransactionSign,
     props: true,
     meta: {
       notPersist: true,
@@ -72,15 +71,6 @@ export default [
     name: 'connect',
     path: '/connect',
     component: PopupConnect,
-    props: true,
-    meta: {
-      notPersist: true,
-    },
-  },
-  {
-    name: 'ask-accounts',
-    path: '/ask-accounts',
-    component: PopupAskAccounts,
     props: true,
     meta: {
       notPersist: true,

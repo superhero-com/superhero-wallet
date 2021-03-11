@@ -3,11 +3,11 @@ import { HDWALLET_METHODS } from '../popup/utils/constants';
 import walletController from './wallet-controller';
 
 const PopupConnection = stampit({
-  init({ id, connection = {}, actions = {}, aeppInfo = {} }) {
+  init({ id, connection = {}, actions = {}, props = {} }) {
     this.id = id;
     this.connection = connection;
     this.actions = actions;
-    this.aeppInfo = aeppInfo;
+    this.props = props;
   },
   methods: {
     async messageHandler(msg) {
@@ -19,7 +19,7 @@ const PopupConnection = stampit({
       if (HDWALLET_METHODS.includes(msg.type)) {
         this.postMessage({ uuid: msg.uuid, res: await walletController[msg.type](msg.payload) });
       } else if (msg.type === 'POPUP_INFO') {
-        this.postMessage({ uuid: msg.uuid, res: this.aeppInfo });
+        this.postMessage({ uuid: msg.uuid, res: this.props });
       } else if (typeToAction[msg.type]) {
         if (this.actions[typeToAction[msg.type]])
           this.actions[typeToAction[msg.type]](msg.payload || false);
@@ -61,9 +61,9 @@ export default stampit({
         this.removePopup(id);
       });
     },
-    setAeppInfo(id, aepp) {
+    setProps(id, aepp) {
       const popup = this.getPopup(id);
-      popup.aeppInfo = aepp;
+      popup.props = aepp;
       this.popups.set(id, popup);
     },
     removePopup(id) {
