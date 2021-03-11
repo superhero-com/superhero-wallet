@@ -2,8 +2,7 @@ import { Node, RpcWallet } from '@aeternity/aepp-sdk/es';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
 import { camelCase, isEmpty, times } from 'lodash-es';
-import { postMessage } from '../popup/utils/connection';
-import { fetchJson, IN_FRAME, parseFromStorage } from '../popup/utils/helper';
+import { fetchJson, IN_FRAME } from '../popup/utils/helper';
 import store from '../store';
 import { App } from '../store/modules/permissions';
 import Logger from './logger';
@@ -68,19 +67,6 @@ async function initMiddleware() {
   );
 }
 
-async function logout() {
-  store.commit('setActiveAccount', { address: '', index: 0 });
-  store.commit('updateAccount', {});
-  store.commit('switchLoggedIn', false);
-}
-
-async function getKeyPair() {
-  const { activeAccount } = store.state;
-  const { account } = store.getters;
-  const res = await postMessage({ type: 'getKeypair', payload: { activeAccount, account } });
-  return res.error ? { error: true } : parseFromStorage(res);
-}
-
 let initSdkRunning = false;
 
 if (IN_FRAME) {
@@ -119,11 +105,6 @@ export default {
   async initSdk() {
     if (initSdkRunning) return;
     initSdkRunning = true;
-    const keypair = await getKeyPair();
-    if (keypair.error) {
-      await logout();
-      return;
-    }
 
     const { activeNetwork } = store.getters;
     const { url, compilerUrl } = activeNetwork;

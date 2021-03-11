@@ -6,7 +6,6 @@ import { AEX2_METHODS } from '../popup/utils/constants';
 import {
   fetchJson,
   getAddressByNameEntry,
-  parseFromStorage,
   postJson,
   stringifyForStorage,
   handleUnknownError,
@@ -66,16 +65,6 @@ export default {
 
   async getAccount(context, { idx }) {
     return (await postMessage({ type: 'getAccount', payload: { idx } })).address;
-  },
-
-  async getKeyPair({ state: { account } }, { idx }) {
-    const { address, secretKey } = parseFromStorage(
-      await postMessage({
-        type: 'getKeypair',
-        payload: { activeAccount: idx, account: { address: account.address } },
-      }),
-    );
-    return { address, secretKey };
   },
 
   async generateWallet(context, { seed }) {
