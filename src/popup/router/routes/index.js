@@ -14,6 +14,7 @@ import PrivacyPolicy from '../pages/PrivacyPolicy';
 import ImportAccount from '../pages/ImportAccount';
 import Intro from '../pages/Intro';
 import Transactions from '../pages/Transactions';
+import TransactionDetails from '../pages/TransactionDetails';
 import Send from '../pages/Send';
 import Receive from '../pages/Receive';
 import SuccessTip from '../pages/SuccessTip';
@@ -217,6 +218,16 @@ export default [
     component: Transactions,
     meta: {
       title: 'activity',
+    },
+  },
+  {
+    name: 'tx-details',
+    path: '/transactions/:hash',
+    component: TransactionDetails,
+    props: true,
+    meta: {
+      title: 'tx-details',
+      notPersist: true,
     },
   },
   {

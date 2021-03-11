@@ -1,5 +1,5 @@
 <template>
-  <span class="token-amount" :class="direction">
+  <span class="token-amount" :class="[direction, { large }]">
     {{ amountRounded }}
     <span class="symbol">{{ symbol }}</span>
     <span v-if="text" class="text">{{ text }}</span>
@@ -14,10 +14,12 @@ export default {
     amount: { type: Number, required: true },
     symbol: { type: String, default: 'AE' },
     altText: { type: String },
+    hideFiat: { type: Boolean },
     direction: {
       type: String,
       validator: (value) => ['sent', 'received'].includes(value),
     },
+    large: { type: Boolean },
   },
   computed: {
     amountRounded() {
@@ -27,7 +29,7 @@ export default {
       amountFiat(state, { convertToCurrency, formatCurrency }) {
         if (this.symbol !== 'AE') return false;
         const converted = convertToCurrency(this.amount);
-        if (converted < 0.01) return false;
+        if (converted < 0.01 || this.hideFiat) return false;
         return formatCurrency(converted);
       },
     }),
@@ -73,6 +75,18 @@ export default {
 
     &::before {
       content: '+';
+    }
+  }
+
+  &.large {
+    @extend %face-sans-20-regular;
+
+    .symbol {
+      font: inherit;
+    }
+
+    .text {
+      @extend %face-sans-16-regular;
     }
   }
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="transaction-item">
+  <div class="transaction-item" @click="handleClick">
     <div class="left">
       <Pending v-if="transaction.pending" class="icon" />
       <TokenAmount
@@ -19,6 +19,7 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
+import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import { aettosToAe, categorizeContractCallTxObject, convertToken } from '../../utils/helper';
 import { formatDate, formatTime } from '../../utils';
 import Pending from '../../../icons/animated-pending.svg?vue-component';
@@ -68,6 +69,38 @@ export default {
     contractCallData() {
       return categorizeContractCallTxObject(this.transaction);
     },
+    tipUrl() {
+      return (
+        this.transaction.tipUrl ||
+        this.transaction.url ||
+        (!this.transaction.pending &&
+          !this.transaction.claim &&
+          this.transaction.tx.log?.[0] &&
+          decode(this.transaction.tx.log[0].data).toString()) ||
+        this.contractCallData?.url ||
+        ''
+      );
+    },
+  },
+  methods: {
+    handleClick() {
+      this.$router.push({
+        name: 'tx-details',
+        params: {
+          tx: this.transaction.tx,
+          hash: this.transaction.hash,
+          microTime: this.transaction.microTime,
+          blockHeight: this.transaction.blockHeight,
+          pending: this.transaction.pending,
+          amount: this.amount,
+          symbol: this.symbol,
+          direction: this.direction,
+          txType: this.txType,
+          contractCallData: this.contractCallData,
+          tipUrl: this.tipUrl,
+        },
+      });
+    },
   },
 };
 </script>
@@ -97,7 +130,7 @@ export default {
     .icon {
       width: 24px;
       height: 24px;
-      fill: $color-white;
+      color: $color-white;
       margin-right: 2px;
     }
   }
