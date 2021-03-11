@@ -36,7 +36,7 @@ describe('Tests cases for AEX-2 popups', () => {
 
   it('Opens connectConfirm, sign, messageSign popups and send accept/deny action', () => {
     popups.forEach((popup) => {
-      cy.openAex2Popup(popup, TX_TYPE.spend)
+      cy.openAex2Popup(popup, popup === 'sign' && TX_TYPE.spend)
         .get('[data-cy=deny]')
         .click()
         .window()
@@ -46,7 +46,7 @@ describe('Tests cases for AEX-2 popups', () => {
     });
 
     popups.forEach((popup) => {
-      cy.openAex2Popup(popup, TX_TYPE.spend)
+      cy.openAex2Popup(popup, popup === 'sign' && TX_TYPE.spend)
         .get('[data-cy=accept]')
         .click()
         .window()

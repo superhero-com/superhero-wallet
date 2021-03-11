@@ -9,9 +9,8 @@ Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
 Cypress.Commands.add('openAex2Popup', (type, txType) => {
   const id = uuid();
   const params = `?id=${id}&type=${type}`;
-  const onBeforeLoad = async () => {
-    if (txType) await browser.storage.local.set({ txType });
-  };
+  const onBeforeLoad = () =>
+    txType ? browser.storage.local.set({ txType }) : browser.storage.local.remove('txType');
   cy.visit(`chrome/popup/popup${params}`, { onBeforeLoad })
     .get('[data-cy=popup-aex2]')
     .should('exist')
