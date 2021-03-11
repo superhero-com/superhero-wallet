@@ -3,79 +3,53 @@
     <div class="header">
       <TokenAmount :amount="amount" :symbol="symbol" :direction="direction" large />
     </div>
-
     <div class="content">
       <div class="visual-overview"><!-- TODO --></div>
-
       <div class="data-grid">
-        <div class="data-item span-2-columns" v-if="tipUrl">
-          <span class="label">
-            {{ $t('pages.transactionDetails.tipUrl') }}
-            <CopyButton :value="tipUrl" message="URL copied" />
-          </span>
-          <div class="value">
-            <a @click="openTipUrl">{{ tipUrl }}</a>
-          </div>
-        </div>
-
-        <div class="data-item span-2-columns">
-          <span class="label">
-            {{ $t('pages.transactionDetails.hash') }}
-            <CopyButton :value="hash" message="Hash copied" />
-          </span>
-          <div class="value small">{{ hash }}</div>
-        </div>
-
-        <div class="data-item">
-          <span class="label">{{ $t('pages.transactionDetails.timestamp') }}</span>
-          <div class="value">
-            {{ microTime | formatDate }}
-            <span class="secondary">{{ microTime | formatTime }}</span>
-          </div>
-        </div>
-
-        <div class="data-item" v-if="blockHeight">
-          <span class="label">{{ $t('pages.transactionDetails.blockHeight') }}</span>
-          <span class="value">{{ blockHeight }}</span>
-        </div>
-
-        <div class="data-item" v-if="tx.gas">
-          <span class="label">{{ $t('pages.transactionDetails.gas') }}</span>
-          <span class="value">{{ tx.gas }}</span>
-        </div>
-
-        <div class="data-item" v-if="tx.gasPrice">
-          <span class="label">{{ $t('pages.transactionDetails.gasPrice') }}</span>
-          <div class="value">
-            <TokenAmount :amount="tx.gasPrice" symbol="ættos" hideFiat />
-          </div>
-        </div>
-
-        <div class="data-item">
-          <span class="label">{{ $t('pages.transactionDetails.amount') }}</span>
-          <div class="value">
-            <TokenAmount :amount="amount" :symbol="symbol" hideFiat />
-          </div>
-        </div>
-
-        <div class="data-item" v-if="tx.nonce">
-          <span class="label">{{ $t('pages.transactionDetails.nonce') }}</span>
-          <span class="value">{{ tx.nonce }}</span>
-        </div>
-
-        <div class="data-item" v-if="pending">
-          <span class="label">{{ $t('pages.transactionDetails.status') }}</span>
-          <span class="value highlight">{{ $t('pages.transactionDetails.pending') }}</span>
-        </div>
-
-        <div class="data-item span-2-columns" v-if="tx.fee">
-          <span class="label">{{ $t('pages.transactionDetails.fee') }}</span>
-          <div class="value">
-            <TokenAmount :amount="tx.fee" symbol="ættos" hideFiat />
-          </div>
-        </div>
+        <InfoBox
+          v-if="tipUrl"
+          :label="$t('pages.transactionDetails.tipUrl')"
+          class="span-2-columns"
+        >
+          <CopyButton slot="label" :value="tipUrl" message="URL copied" />
+          <a slot="value" @click="openTipUrl">{{ tipUrl }}</a>
+        </InfoBox>
+        <InfoBox
+          :value="hash"
+          :label="$t('pages.transactionDetails.hash')"
+          class="span-2-columns"
+          small
+        >
+          <CopyButton slot="label" :value="hash" message="Hash copied" />
+        </InfoBox>
+        <InfoBox
+          :value="microTime | formatDate"
+          :secondary="microTime | formatTime"
+          :label="$t('pages.transactionDetails.timestamp')"
+        />
+        <InfoBox
+          v-if="blockHeight"
+          :value="blockHeight"
+          :label="$t('pages.transactionDetails.blockHeight')"
+        />
+        <InfoBox v-if="tx.gas" :value="tx.gas" :label="$t('pages.transactionDetails.gas')" />
+        <InfoBox v-if="tx.gasPrice" :label="$t('pages.transactionDetails.gasPrice')">
+          <TokenAmount slot="value" :amount="tx.gasPrice" symbol="ættos" hideFiat />
+        </InfoBox>
+        <InfoBox :label="$t('pages.transactionDetails.amount')">
+          <TokenAmount slot="value" :amount="amount" :symbol="symbol" hideFiat />
+        </InfoBox>
+        <InfoBox v-if="tx.nonce" :value="tx.nonce" :label="$t('pages.transactionDetails.nonce')" />
+        <InfoBox
+          v-if="pending"
+          :value="$t('pages.transactionDetails.pending')"
+          :label="$t('pages.transactionDetails.status')"
+          highlight
+        />
+        <InfoBox v-if="tx.fee" :label="$t('pages.transactionDetails.fee')" class="span-2-columns">
+          <TokenAmount slot="value" :amount="tx.fee" symbol="ættos" hideFiat />
+        </InfoBox>
       </div>
-
       <div class="action-row">
         <a @click="openExplorer">
           <AnimatedPending v-if="pending" />
@@ -92,13 +66,20 @@ import { mapGetters } from 'vuex';
 import { formatDate, formatTime } from '../../utils';
 import openUrl from '../../utils/openUrl';
 import TokenAmount from '../components/TokenAmount';
+import InfoBox from '../components/InfoBox';
 import CopyButton from '../components/CopyButton';
 import AnimatedPending from '../../../icons/animated-pending.svg?vue-component';
 import BlockIcon from '../../../icons/block.svg?vue-component';
 
 export default {
   name: 'TransactionDetails',
-  components: { TokenAmount, CopyButton, AnimatedPending, BlockIcon },
+  components: {
+    TokenAmount,
+    InfoBox,
+    CopyButton,
+    AnimatedPending,
+    BlockIcon,
+  },
   props: {
     tx: { type: Object, required: true },
     hash: { type: String, required: true },
@@ -182,56 +163,6 @@ export default {
 
       .span-2-columns {
         grid-column-end: span 2;
-      }
-    }
-
-    .data-item {
-      .label {
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-
-        @extend %face-sans-15-medium;
-
-        line-height: 16px;
-        color: $color-dark-grey;
-      }
-
-      .value {
-        @extend %face-sans-14-regular;
-
-        color: $color-white;
-        line-height: 24px;
-        margin-bottom: 8px;
-
-        .secondary {
-          color: $color-light-grey;
-          margin-left: 4px;
-        }
-
-        &.small {
-          @extend %face-sans-11-regular;
-        }
-
-        &.highlight {
-          color: $color-error;
-        }
-
-        a {
-          color: $color-green;
-
-          &:hover {
-            color: $color-green-hover;
-          }
-
-          &:active {
-            opacity: 0.7;
-          }
-        }
-      }
-
-      .copy-button {
-        margin-left: 8px;
       }
     }
 
