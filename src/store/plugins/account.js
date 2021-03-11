@@ -1,19 +1,12 @@
 import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
 import { OBJECT_ID_TX_TYPE, TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
-import { postMessage } from '../../popup/utils/connection';
-import { parseFromStorage } from '../../popup/utils/helper';
 
 export default (store) =>
   store.registerModule('accounts', {
     namespaced: true,
     actions: {
-      async getKeyPair({ rootGetters: { activeAccount, account } }) {
-        const res = await postMessage({ type: 'getKeypair', payload: { activeAccount, account } });
-        return res.error ? { error: true } : parseFromStorage(res);
-      },
-      async signWithoutConfirmation({ dispatch }, data) {
-        const { secretKey } = await dispatch('getKeyPair');
-        return Crypto.sign(data, Buffer.from(secretKey, 'hex'));
+      signWithoutConfirmation({ rootGetters: { account } }, data) {
+        return Crypto.sign(data, account.secretKey);
       },
       async confirmRawDataSigning({ dispatch }, data) {
         await dispatch('modals/open', { name: 'confirm-raw-sign', data }, { root: true });

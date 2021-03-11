@@ -102,7 +102,7 @@ if (IN_FRAME) {
 
 export default {
   async init() {
-    const { account } = store.getters;
+    const { account } = store.state;
     if (isEmpty(account)) {
       store.commit('setMainLoading', false);
       return { loggedIn: false };

@@ -86,15 +86,7 @@ export default {
               return Promise.reject(new Error('Rejected by user'));
             return address;
           },
-          sign: (data) => {
-            const { secretKey } = JSON.parse(
-              walletController.getKeypair({
-                activeAccount: store.state.activeAccount,
-                account: store.state.account,
-              }),
-            );
-            return Crypto.sign(data, Buffer.from(new Uint8Array(secretKey.data), 'hex'));
-          },
+          sign: (data) => Crypto.sign(data, store.getters.account.secretKey),
         },
       })({
         nodes: [{ name: this.network, instance: node }],
