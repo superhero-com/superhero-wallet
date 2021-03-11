@@ -41,3 +41,14 @@ export const getLoginState = async ({
 };
 
 export const buildTx = (txtype) => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);
+
+export const deferPromised = (func, ...args) =>
+  new Promise((resolve, reject) =>
+    setTimeout(() => {
+      try {
+        resolve(func(...args));
+      } catch (error) {
+        reject(error);
+      }
+    }),
+  );
