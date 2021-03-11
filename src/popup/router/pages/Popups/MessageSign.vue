@@ -39,7 +39,6 @@ export default {
   mixins: [mixin],
   components: { Button },
   props: {
-    name: { type: String, default: null },
     message: { type: String, required: true },
   },
   data: () => ({ imageError: false }),
