@@ -283,7 +283,7 @@ export default {
       await initMiddleware();
       store.commit('setNodeStatus', 'connected');
       await store.dispatch('fungibleTokens/getAvailableTokens');
-      store.dispatch('fungibleTokens/loadTokenBalances', keypair.publicKey);
+      store.dispatch('fungibleTokens/loadTokenBalances');
       setTimeout(() => store.commit('setNodeStatus', ''), 2000);
     } catch (e) {
       store.commit('setNodeStatus', 'error');

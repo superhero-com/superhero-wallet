@@ -268,7 +268,7 @@ export default {
             recipientId: receiver,
           });
           await this.$store.dispatch('fungibleTokens/getAvailableTokens');
-          await this.$store.dispatch('fungibleTokens/loadTokenBalances', this.account.publicKey);
+          await this.$store.dispatch('fungibleTokens/loadTokenBalances');
           await this.$store.dispatch('cacheInvalidateFT', this.selectedToken.contract);
         } else {
           const { hash } = await this.sdk.spend(amount, receiver, {

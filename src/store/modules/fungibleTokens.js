@@ -43,24 +43,21 @@ export default {
       const { decodedResult } = await tokenContract.methods.balance(address);
       return new BigNumber(decodedResult || 0);
     },
-    async loadTokenBalances(
-      {
-        rootGetters: { activeNetwork },
-        state: { availableTokens, selectedToken },
-        commit,
-        dispatch,
-      },
-      address,
-    ) {
+    async loadTokenBalances({
+      rootGetters: { activeNetwork, account },
+      state: { availableTokens, selectedToken },
+      commit,
+      dispatch,
+    }) {
       const tokens = await fetchJson(
-        `${activeNetwork.backendUrl}/tokenCache/balances?address=${address}`,
+        `${activeNetwork.backendUrl}/tokenCache/balances?address=${account.publicKey}`,
       ).catch((e) => console.log(e));
 
       commit('resetTokenBalances');
 
       await Promise.all(
         Object.entries(tokens).map(async ([contract, tokenData]) => {
-          const tokenBalance = await dispatch('tokenBalance', [contract, address]);
+          const tokenBalance = await dispatch('tokenBalance', [contract, account.publicKey]);
           const balance = convertToken(tokenBalance, -tokenData.decimals);
           const convertedBalance = balance.toFixed(2);
           const objectStructure = {

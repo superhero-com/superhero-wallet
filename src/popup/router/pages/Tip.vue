@@ -235,7 +235,7 @@ export default {
             convertToken(this.amount, this.selectedToken.decimals).toFixed(),
           );
 
-          await this.$store.dispatch('fungibleTokens/loadTokenBalances', this.account.publicKey);
+          await this.$store.dispatch('fungibleTokens/loadTokenBalances');
           this.$store.commit(
             'fungibleTokens/setSelectedToken',
             this.tokenBalances.find(({ value }) => value === this.selectedToken.value),
