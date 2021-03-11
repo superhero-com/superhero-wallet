@@ -13,6 +13,7 @@ export default window.IS_EXTENSION_BACKGROUND
       getters: {
         'names/getDefault': () => (address) => `placeholder name for ${address}`,
         account: getters.account,
+        isLoggedIn: getters.isLoggedIn,
       },
     })
   : null;

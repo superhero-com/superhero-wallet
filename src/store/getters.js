@@ -15,7 +15,7 @@ const getHdWalletAccount = (wallet, accountIdx = 0) => {
 
 export default {
   account({ mnemonic }, getters) {
-    if (!mnemonic) return {};
+    if (!mnemonic) return {}; // TODO: Return null
     const account = getHdWalletAccount(generateHdWallet(mnemonicToSeed(mnemonic)));
     return {
       ...account,
@@ -23,6 +23,7 @@ export default {
       type: 'Main account',
     };
   },
+  isLoggedIn: (state, { account }) => Object.keys(account).length > 0,
   currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,
   convertToCurrency: (state, { currentCurrencyRate }) => (value) =>
     +(currentCurrencyRate * value).toFixed(2),

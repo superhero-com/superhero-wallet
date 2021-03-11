@@ -7,10 +7,6 @@ class WalletController {
     const { address } = getHdWalletAccount(this.wallet);
     return { generate: true, address };
   }
-
-  isLoggedIn() {
-    return typeof this.wallet !== 'undefined' && this.wallet != null;
-  }
 }
 
 export default new WalletController();

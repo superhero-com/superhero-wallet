@@ -14,7 +14,7 @@ export const TX_TYPES = {
   nameUpdate: TX_TYPE.nameUpdate,
 };
 
-export const HDWALLET_METHODS = ['generateWallet', 'isLoggedIn'];
+export const HDWALLET_METHODS = ['generateWallet'];
 
 export const AEX2_METHODS = {
   CHANGE_ACCOUNT: 'CHANGE_ACCOUNT',
