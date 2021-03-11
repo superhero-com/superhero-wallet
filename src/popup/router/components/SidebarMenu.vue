@@ -21,7 +21,7 @@
         </router-link>
       </li>
       <li>
-        <router-link to="/">
+        <router-link to="/send">
           {{ $t('pages.titles.payments') }}
           <Payments />
         </router-link>
