@@ -208,9 +208,9 @@ export default {
   async getCacheChainNames({ getters: { activeNetwork } }) {
     return fetchJson(`${activeNetwork.backendUrl}/cache/chainnames`);
   },
-  async getAllNotifications({ state: { sdk }, getters: { activeNetwork } }, address) {
+  async getAllNotifications({ state: { sdk }, getters: { activeNetwork, account } }) {
     const responseChallenge = await fetchJson(
-      `${activeNetwork.backendUrl}/notification/user/${address}`,
+      `${activeNetwork.backendUrl}/notification/user/${account.publicKey}`,
     );
     const signedChallenge = Buffer.from(
       await sdk.signMessage(responseChallenge.challenge),
@@ -220,7 +220,7 @@ export default {
       challenge: responseChallenge.challenge,
       signature: signedChallenge,
     };
-    const url = new URL(`${activeNetwork.backendUrl}/notification/user/${address}`);
+    const url = new URL(`${activeNetwork.backendUrl}/notification/user/${account.publicKey}`);
     Object.keys(respondChallenge).forEach((key) =>
       url.searchParams.append(key, respondChallenge[key]),
     );

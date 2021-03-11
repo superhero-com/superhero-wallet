@@ -63,10 +63,7 @@ export default (store) => {
   });
 
   const notifications$ = createSdkObservable(
-    async () =>
-      (await store.dispatch('getAllNotifications', store.state.account.publicKey)).map(
-        normalizeNotification,
-      ),
+    async () => (await store.dispatch('getAllNotifications')).map(normalizeNotification),
     [],
   );
 
