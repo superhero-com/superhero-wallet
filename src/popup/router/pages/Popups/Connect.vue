@@ -12,7 +12,7 @@
       </div>
       <div class="identicon">
         <Avatar :address="account.publicKey" :name="account.name" size="lg" />
-        <div class="account-name">{{ activeAccountName }}</div>
+        <div class="account-name">{{ account.name || account.type }}</div>
       </div>
     </div>
 
@@ -21,7 +21,7 @@
       <span class="secondary-text" data-cy="aepp">{{ app.host }} ({{ app.name }}) </span>
       {{ $t('pages.connectConfirm.websiteRequestconnect') }}
       <Avatar class="send-account-icon" :address="account.publicKey" :name="account.name" />
-      {{ activeAccountName }}
+      {{ account.name || account.type }}
     </h2>
     <ul>
       <ae-list-item fill="neutral" class="permission-set">
@@ -59,7 +59,7 @@ export default {
   data: () => ({
     imageError: false,
   }),
-  computed: mapGetters(['account', 'activeAccountName']),
+  computed: mapGetters(['account']),
 };
 </script>
 

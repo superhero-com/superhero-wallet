@@ -7,8 +7,8 @@
     <div class="account">
       <Avatar :address="account.publicKey" :name="account.name" />
       <div class="account-info">
-        <div class="f-12" v-if="activeAccountName.includes('.chain')" data-cy="chain-name">
-          <TruncateMid :str="activeAccountName" />
+        <div class="f-12" v-if="account.name" data-cy="chain-name">
+          <TruncateMid :str="account.name" />
         </div>
         <div class="account-type">{{ $t('mainAccount') }}</div>
       </div>
@@ -96,7 +96,7 @@ export default {
     Settings,
     About,
   },
-  computed: mapGetters(['account', 'activeAccountName']),
+  computed: mapGetters(['account']),
 };
 </script>
 

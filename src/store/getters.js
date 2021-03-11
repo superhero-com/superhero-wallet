@@ -1,15 +1,16 @@
-import { isEmpty, get } from 'lodash-es';
+import { isEmpty } from 'lodash-es';
 import { defaultNetworks } from '../popup/utils/constants';
 
 export default {
-  account(state, { activeAccountName }) {
-    if (!isEmpty(state.account)) {
+  account({ account }, getters) {
+    if (!isEmpty(account)) {
       return {
-        ...state.account,
-        name: activeAccountName.includes('.chain') ? activeAccountName : false,
+        ...account,
+        name: getters['names/getDefault'](account.publicKey),
+        type: 'Main account',
       };
     }
-    return state.account;
+    return account;
   },
   currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,
   convertToCurrency: (state, { currentCurrencyRate }) => (value) =>
@@ -32,9 +33,6 @@ export default {
   getProfileImage: (_, { activeNetwork }) => (address) =>
     `${activeNetwork.backendUrl}/profile/image/${address}`,
   getAvatar: () => (address) => `https://avatars.z52da5wt.xyz/${address}`,
-  activeAccountName({ account }, getters) {
-    return getters['names/getDefault'](get(account, 'publicKey')) || 'Main account';
-  },
   tippingSupported(state, { activeNetwork }) {
     return (
       ['ae_mainnet', 'ae_uat'].includes(activeNetwork.networkId) || process.env.RUNNING_IN_TESTS

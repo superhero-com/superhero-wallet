@@ -33,7 +33,7 @@ export default {
   },
   components: { Modal, Button, Avatar, DetailsItem },
   computed: {
-    ...mapGetters(['account', 'activeAccountName']),
+    ...mapGetters(['account']),
     dataAsString() {
       if (typeof this.data === 'string') return this.data;
       return Buffer.from(this.data).toString('hex');

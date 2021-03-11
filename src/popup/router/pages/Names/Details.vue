@@ -31,7 +31,7 @@
       v-if="!addPointer"
       extend
       @click="setDefault"
-      :disabled="activeAccountName === name || !hasPointer"
+      :disabled="account.name === name || !hasPointer"
     >
       {{ $t('pages.names.details.set-default') }}
     </Button>
@@ -66,7 +66,7 @@ export default {
   }),
   computed: {
     ...mapState(['sdk']),
-    ...mapGetters(['account', 'activeAccountName']),
+    ...mapGetters(['account']),
     nameEntry() {
       return this.$store.getters['names/getName'](this.name);
     },
