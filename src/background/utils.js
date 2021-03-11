@@ -1,26 +1,16 @@
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
-import { isEmpty } from 'lodash-es';
 import {
   setContractInstance,
   contractCall,
   getAddressByNameEntry,
   getActiveNetwork,
 } from '../popup/utils/helper';
-import { getState } from '../store/plugins/persistState';
 import Logger from '../lib/logger';
 import store from './store';
 
 let sdk;
 let tippingContract;
-
-export const getActiveAccount = async () => {
-  const { account } = await getState();
-  if (!isEmpty(account)) {
-    return { account: { address: account.address }, activeAccount: 0 };
-  }
-  return false;
-};
 
 export const switchNode = async () => {
   if (sdk) {
@@ -74,7 +64,7 @@ export const getTippingContractInstance = async (tx) => {
 };
 
 export const contractCallStatic = async ({ tx, callType }) => {
-  const { account } = await getActiveAccount();
+  const { account } = store.getters;
   if (typeof callType !== 'undefined' && callType === 'static' && account) {
     const contractInstance = await getTippingContractInstance(tx);
     const call = await contractCall({
