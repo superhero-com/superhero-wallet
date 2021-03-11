@@ -241,7 +241,7 @@ export default {
 @import '../../../styles/variables';
 
 .container {
-  max-width: $container-width;
+  max-width: $extension-width;
   margin: 0 auto;
 }
 
