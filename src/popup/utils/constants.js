@@ -14,7 +14,7 @@ export const TX_TYPES = {
   nameUpdate: TX_TYPE.nameUpdate,
 };
 
-export const HDWALLET_METHODS = ['generateWallet'];
+export const HDWALLET_METHODS = [''];
 
 export const AEX2_METHODS = {
   CHANGE_ACCOUNT: 'CHANGE_ACCOUNT',

@@ -7,7 +7,6 @@ import {
   fetchJson,
   getAddressByNameEntry,
   postJson,
-  stringifyForStorage,
   handleUnknownError,
   isAccountNotFoundError,
 } from '../popup/utils/helper';
@@ -61,12 +60,6 @@ export default {
     ]);
     txs = orderBy(flatten(txs), ['microTime'], ['desc']);
     return recent ? txs.slice(0, limit) : txs;
-  },
-
-  async generateWallet(context, { seed }) {
-    return (
-      await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })
-    ).address;
   },
 
   async setLogin({ commit }, { keypair }) {

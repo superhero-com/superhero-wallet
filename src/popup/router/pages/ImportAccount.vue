@@ -46,12 +46,11 @@ export default {
       }
       this.loading = true;
       const seed = (await deferPromised(mnemonicToSeed, mnemonic)).toString('hex');
-      const address = await this.$store.dispatch('generateWallet', { seed });
       this.$store.commit('setMnemonic', this.mnemonic);
       this.$store.commit('setBackedUpSeed');
       await this.$store.dispatch('setLogin', {
         keypair: {
-          address,
+          address: this.$store.getters.account.address,
           privateKey: seed,
         },
       });

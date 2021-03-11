@@ -93,7 +93,7 @@ export default {
       store.commit('setMainLoading', false);
       return { loggedIn: false };
     }
-    const address = await store.dispatch('generateWallet', { seed: account.privateKey });
+    const { address } = store.getters.account;
     store.commit('updateAccount', account);
     store.commit('setActiveAccount', { address, index: 0 });
 

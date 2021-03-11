@@ -122,19 +122,17 @@ export default {
     return {
       step: 1,
       totalsteps: 4,
-      mnemonic: null,
       understood: !IN_FRAME,
       iframe: IN_FRAME,
     };
   },
   methods: {
     async createWallet() {
-      this.mnemonic = generateMnemonic();
-      const seed = mnemonicToSeed(this.mnemonic).toString('hex');
-      const address = await this.$store.dispatch('generateWallet', { seed });
-      this.$store.commit('setMnemonic', this.mnemonic);
+      const mnemonic = generateMnemonic();
+      const seed = mnemonicToSeed(mnemonic).toString('hex');
+      this.$store.commit('setMnemonic', mnemonic);
       const keypair = {
-        address,
+        address: this.$store.getters.account.address,
         privateKey: seed,
       };
       await this.$store.dispatch('setLogin', { keypair });

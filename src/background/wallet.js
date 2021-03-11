@@ -5,10 +5,9 @@ import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-c
 import { isEmpty } from 'lodash-es';
 import uuid from 'uuid';
 import { AEX2_METHODS, defaultNetwork } from '../popup/utils/constants';
-import { getAllNetworks, stringifyForStorage } from '../popup/utils/helper';
+import { getAllNetworks } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 import popups from './popup-connection';
-import walletController from './wallet-controller';
 import store from './store';
 import { App } from '../store/modules/permissions';
 
@@ -20,7 +19,6 @@ export default {
     this.initFields();
     const { account } = await getState();
     if (!isEmpty(account)) {
-      walletController.generateWallet({ seed: stringifyForStorage(account.privateKey) });
       const {
         current: { network },
       } = await getState();
