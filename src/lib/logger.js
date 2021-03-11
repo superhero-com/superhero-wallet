@@ -2,7 +2,7 @@ import { pick } from 'lodash-es';
 import Vue from 'vue';
 import { detect } from 'detect-browser';
 import { getState } from '../store/plugins/persistState';
-import { EventBus } from '../popup/utils/eventBus';
+import { openErrorModal } from '../store/plugins/openErrorModal';
 
 export default class Logger {
   static background;
@@ -72,7 +72,7 @@ export default class Logger {
     };
     browser.storage.local.set({ errorLog: [...errorLog, logEntry] });
     if (!Logger.background && modal && error.message) {
-      EventBus.$emit('error', logEntry);
+      openErrorModal(logEntry);
     }
   }
 

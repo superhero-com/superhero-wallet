@@ -12,6 +12,7 @@ import accounts from './plugins/account';
 import namesPlugin from './plugins/names';
 import pendingTransactionHandler from './plugins/pendingTransactionHandler';
 import languagesPlugin from './plugins/languages';
+import openErrorModalPlugin from './plugins/openErrorModal';
 import runMigrations from './migrations';
 import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
@@ -113,6 +114,7 @@ export default new Vuex.Store({
     namesPlugin,
     pendingTransactionHandler,
     languagesPlugin,
+    openErrorModalPlugin,
   ],
   modules: {
     invites: invitesModule,
