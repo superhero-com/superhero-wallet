@@ -117,7 +117,7 @@ export default {
   top: 0;
   z-index: 8;
   height: calc(48px + env(safe-area-inset-top));
-  background-color: $color-black;
+  background-color: $color-bg-3;
   display: flex;
   padding: 8px 16px 8px 8px;
   padding-top: calc(8px + env(safe-area-inset-top));
