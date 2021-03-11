@@ -1,12 +1,7 @@
 <template>
   <div class="header" v-if="showNavigation && !aeppPopup">
     <div v-if="isLoggedIn || (title && !tourRunning)" class="left">
-      <RouterLink
-        v-if="isLoggedIn"
-        to="/account"
-        :disabled="$route.path === '/account'"
-        class="home-button"
-      >
+      <RouterLink v-if="isLoggedIn" to="/account" class="home-button">
         <Logo />
       </RouterLink>
       <button v-if="title && !tourRunning" @click="back" class="icon-btn back">
