@@ -11,21 +11,23 @@
         {{ $t('pages.notifications.wallet') }}
       </button>
     </div>
-    <NotificationItem
-      v-for="notification in filteredNotifications"
-      :key="notification.id"
-      :address="notification.sender || ''"
-      :name="
-        notification.wallet ? notification.title : notification.chainName || 'Fellow Superhero'
-      "
-      :text="notificationText(notification)"
-      :date="new Date(notification.createdAt)"
-      :to="notification.path"
-      :status="notification.status.toLocaleLowerCase()"
-      v-bind="notification.wallet && { wallet: true }"
-      @click="onClickHandler(notification)"
-      @toggle-read="modifyNotificationStatus(notification)"
-    />
+    <div class="list">
+      <NotificationItem
+        v-for="notification in filteredNotifications"
+        :key="notification.id"
+        :address="notification.sender || ''"
+        :name="
+          notification.wallet ? notification.title : notification.chainName || 'Fellow Superhero'
+        "
+        :text="notificationText(notification)"
+        :date="new Date(notification.createdAt)"
+        :to="notification.path"
+        :status="notification.status.toLocaleLowerCase()"
+        v-bind="notification.wallet && { wallet: true }"
+        @click="onClickHandler(notification)"
+        @toggle-read="modifyNotificationStatus(notification)"
+      />
+    </div>
   </div>
 </template>
 
@@ -115,9 +117,10 @@ export default {
 
   .tabs {
     position: sticky;
-    top: 50px;
-    z-index: 100;
+    top: 48px;
+    z-index: 1;
     background-color: $color-bg-2;
+    box-shadow: 0 -1px 0 $color-black;
     padding: 0 1rem;
     text-align: left;
 
@@ -142,6 +145,10 @@ export default {
         border-bottom-color: $accent-color;
       }
     }
+  }
+
+  .list {
+    overflow: scroll;
   }
 }
 </style>

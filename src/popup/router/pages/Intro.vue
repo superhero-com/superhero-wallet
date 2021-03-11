@@ -152,7 +152,6 @@ export default {
   height: 80vh;
 
   &.iframe {
-    padding-top: 0;
     padding-bottom: 0;
 
     .text-info {
@@ -230,7 +229,7 @@ export default {
   }
 
   .dotstyle {
-    position: fixed;
+    position: sticky;
     left: 0;
     right: 0;
     top: 50%;

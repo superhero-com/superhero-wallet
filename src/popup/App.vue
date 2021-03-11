@@ -1,11 +1,16 @@
 <template>
-  <div id="app">
-    <Header v-if="showHeader" @toggle-sidebar="showSidebar = !showSidebar" />
+  <div
+    id="app"
+    :class="{
+      'not-rebrand': $route.meta.notRebrand,
+      'show-sidebar': showSidebar,
+      'show-header': showStatusAndHeader,
+      'scroll-content': $route.meta.scrollContent,
+    }"
+  >
+    <Header @toggle-sidebar="showSidebar = !showSidebar" />
 
-    <RouterView
-      :class="{ 'not-rebrand': $route.meta.notRebrand, 'show-header': showHeader }"
-      class="main"
-    />
+    <RouterView :class="{ 'show-header': showStatusAndHeader }" class="main" />
 
     <transition name="slide">
       <div
@@ -18,7 +23,7 @@
       </div>
     </transition>
 
-    <NodeConnectionStatus v-if="showConnectionStatus" />
+    <NodeConnectionStatus v-if="showStatusAndHeader" />
     <Component
       :is="component"
       v-for="{ component, key, props } in modals"
@@ -31,7 +36,6 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { detect } from 'detect-browser';
-import { IN_FRAME } from './utils/helper';
 import { NOTIFICATION_SETTINGS } from './utils/constants';
 import Header from './router/components/Header';
 import SidebarMenu from './router/components/SidebarMenu';
@@ -49,11 +53,8 @@ export default {
   computed: {
     ...mapGetters(['account', 'isLoggedIn']),
     ...mapState(['isRestored', 'current', 'sdk', 'backedUpSeed', 'notifications']),
-    showConnectionStatus() {
-      return !(IN_FRAME && this.$route.path === '/intro');
-    },
-    showHeader() {
-      return !window.RUNNING_IN_POPUP && this.showConnectionStatus;
+    showStatusAndHeader() {
+      return !['/', '/intro'].includes(this.$route.path);
     },
     modals() {
       return this.$store.getters['modals/opened'];
@@ -98,51 +99,113 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../styles/variables';
-
-html,
-body {
-  width: $container-width;
-  height: 600px;
-}
+@import '../styles/mixins';
 
 body {
   margin: 0;
   background-color: $color-black;
 }
 
-@media screen and (min-width: $container-width) {
-  html {
-    margin: 0 auto;
+@include desktop {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 }
 </style>
 
 <style lang="scss" scoped>
 @import '../styles/typography';
+@import '../styles/mixins';
 
 #app {
   position: relative;
   margin: 0 auto;
-  overflow: visible;
+  width: $extension-width;
+  height: 600px;
+  overflow: hidden;
+
+  &.scroll-content {
+    overflow: scroll;
+  }
+
+  @include mobile {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  @include desktop {
+    border: 1px solid $color-border;
+  }
+
+  border-radius: 10px;
 
   @extend %face-sans-16-regular;
 
   color: $white-color;
 
+  &.show-sidebar {
+    overflow-y: hidden;
+  }
+
+  &.show-header .main {
+    padding-top: 48px;
+    padding-top: calc(48px + env(safe-area-inset-top));
+
+    @include desktop {
+      padding-top: 0;
+    }
+  }
+
   .main {
-    &.not-rebrand {
-      padding: 4px 20px;
+    height: 100%;
+
+    @include mobile {
+      min-height: 600px;
+    }
+
+    @include desktop {
+      min-height: calc(100% - 48px);
+      min-height: calc(100% - 48px - env(safe-area-inset-top));
+    }
+  }
+
+  &.not-rebrand {
+    overflow: scroll;
+
+    @include mobile {
+      overflow: visible;
+    }
+
+    .main {
+      height: auto;
       text-align: center;
       font-size: 16px;
       margin: 0 auto;
+      padding-left: 20px;
+      padding-right: 20px;
       position: relative;
-    }
 
-    &.show-header {
-      padding-top: 48px;
-      padding-top: calc(48px + env(safe-area-inset-top));
+      &.transactions,
+      &.tokens-preview,
+      &.token-details {
+        padding-left: 0;
+        padding-right: 0;
+      }
     }
+  }
+
+  &:not(.not-rebrand) .main {
+    display: flex;
+    flex-direction: column;
   }
 
   .menu-overlay {
@@ -151,6 +214,14 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
+
+    @include desktop {
+      position: sticky;
+      height: 100%;
+      display: flex;
+      flex-direction: row-reverse;
+    }
+
     background: rgba(#000, 0.6);
     z-index: 10;
   }

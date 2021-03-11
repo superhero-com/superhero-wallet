@@ -1,6 +1,6 @@
 <template>
-  <div class="account" :class="{ 'has-reminder': !backedUpSeed }">
-    <Plate>
+  <div class="account">
+    <div class="plate">
       <i18n
         v-if="!backedUpSeed"
         path="pages.account.seedNotification"
@@ -16,7 +16,7 @@
         <BalanceInfo />
       </div>
       <MenuCarousel />
-    </Plate>
+    </div>
     <RecentTransactions />
   </div>
 </template>
@@ -27,7 +27,6 @@ import RecentTransactions from '../components/RecentTransactions';
 import BalanceInfo from '../components/BalanceInfo';
 import AccountInfo from '../components/AccountInfo';
 import MenuCarousel from '../components/MenuCarousel';
-import Plate from '../components/Plate';
 
 export default {
   name: 'Account',
@@ -36,7 +35,6 @@ export default {
     BalanceInfo,
     AccountInfo,
     MenuCarousel,
-    Plate,
   },
   computed: {
     ...mapState(['tourRunning', 'backedUpSeed']),
@@ -48,17 +46,18 @@ export default {
 @import '../../../styles/variables';
 
 .account {
-  .menu-carousel {
-    padding: 24px;
+  overflow-x: hidden;
+
+  .plate {
+    position: relative;
+    margin-left: -1px;
+    border: 1px solid rgba($color-border, 0.5);
+    border-radius: 0 0 10px 10px;
+    background: linear-gradient(180deg, $color-bg-3 0%, $color-black 100%);
   }
 
   .recent-transactions {
     margin-top: -10px;
-    padding-top: 279px;
-  }
-
-  &.has-reminder .recent-transactions {
-    padding-top: 313px;
   }
 
   .seed-backup-notification {

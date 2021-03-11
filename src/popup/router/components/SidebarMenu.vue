@@ -104,7 +104,7 @@ export default {
 @import '../../../styles/typography';
 
 .sidebar-menu {
-  position: fixed;
+  position: absolute;
   right: 0;
   top: 0;
   bottom: 0;

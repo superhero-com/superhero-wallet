@@ -34,8 +34,8 @@ export default {
 
 .filters {
   position: sticky;
-  top: 50px;
-  top: calc(env(safe-area-inset-top) + 50px);
+  top: 48px;
+  top: calc(env(safe-area-inset-top) + 48px);
   background: $filters-bg;
   height: 40px;
   width: 100%;

@@ -142,7 +142,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/mixins';
 @import '../../../styles/typography';
 
 .transaction-details {
@@ -155,6 +155,11 @@ export default {
     justify-content: center;
     height: 92px;
     width: #{2px + $extension-width};
+
+    @include mobile {
+      width: 100%;
+    }
+
     margin: -1px 0 0 -1px;
     border: 1px solid rgba($color-border, 0.5);
     border-radius: 0 0 10px 10px;

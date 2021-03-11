@@ -59,6 +59,10 @@ export default {
 <style lang="scss" scoped>
 @import '../../../../styles/variables';
 
+::v-deep {
+  text-align: left;
+}
+
 .menu {
   margin-top: 3px;
   padding: 7px;

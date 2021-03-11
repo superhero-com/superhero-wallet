@@ -34,14 +34,14 @@ export default {
 
 .connect-error,
 .connect-node {
-  position: fixed;
+  position: sticky;
   bottom: 0;
   left: 0;
   right: 0;
   background: $secondary-color;
   color: $white-color;
-  padding: 0.3rem;
-  padding-bottom: calc(0.3rem + env(safe-area-inset-bottom));
+  line-height: 2em;
+  padding-bottom: calc(env(safe-area-inset-bottom));
   z-index: 5;
   text-align: center;
   font-size: 14px;
