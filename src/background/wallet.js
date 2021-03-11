@@ -17,7 +17,7 @@ export default {
   async init() {
     await this.initNodes();
     this.initFields();
-    const { account } = await getState();
+    const { account } = store.getters;
     if (!isEmpty(account)) {
       const {
         current: { network },

@@ -1,4 +1,3 @@
-import { isEmpty } from 'lodash-es';
 import '../lib/initEnv';
 import '../lib/initPolyfills';
 import initDeeplinkHandler from './deeplink-handler';
@@ -14,6 +13,7 @@ import { detectConnectionType } from '../popup/utils/helper';
 import { getPhishingUrls, phishingCheckUrl, setPhishingUrl } from '../popup/utils/phishing-detect';
 import Logger from '../lib/logger';
 import { getState } from '../store/plugins/persistState';
+import store from './store';
 
 if (window.IS_EXTENSION_BACKGROUND) {
   Logger.init({ background: true });
@@ -71,8 +71,7 @@ if (window.IS_EXTENSION_BACKGROUND) {
     }
 
     if (method === 'checkHasAccount') {
-      const { account } = await getState();
-      if (!account || isEmpty(account)) return false;
+      return store.getters.isLoggedIn;
     }
 
     if (from === 'content') {
