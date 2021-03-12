@@ -98,7 +98,7 @@
 </template>
 
 <script>
-import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
+import { generateMnemonic } from '@aeternity/bip39';
 import { IN_FRAME } from '../../utils/helper';
 import Claim from '../../../icons/claim.svg?vue-component';
 import Heart from '../../../icons/heart.svg?vue-component';
@@ -128,14 +128,7 @@ export default {
   },
   methods: {
     async createWallet() {
-      const mnemonic = generateMnemonic();
-      const seed = mnemonicToSeed(mnemonic).toString('hex');
-      this.$store.commit('setMnemonic', mnemonic);
-      const keypair = {
-        address: this.$store.getters.account.address,
-        privateKey: seed,
-      };
-      await this.$store.dispatch('setLogin', { keypair });
+      this.$store.commit('setMnemonic', generateMnemonic());
       this.next();
     },
     prev() {

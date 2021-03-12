@@ -5,9 +5,6 @@ export default {
   switchNetwork(state, payload) {
     state.current.network = payload;
   },
-  switchLoggedIn(state, payload) {
-    state.isLoggedIn = payload;
-  },
   updateLatestTransactions(state, payload) {
     state.transactions.latest = payload;
   },

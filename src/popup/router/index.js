@@ -45,7 +45,7 @@ const unbind = router.beforeEach(async (to, from, next) => {
 });
 
 router.beforeEach(async (to, from, next) => {
-  if (store.state.isLoggedIn) {
+  if (store.getters.isLoggedIn) {
     if (!store.state.sdk) wallet.initSdk();
     next(to.meta.ifNotAuthOnly ? '/account' : undefined);
     return;

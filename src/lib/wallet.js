@@ -89,7 +89,6 @@ if (IN_FRAME) {
 export default {
   async init() {
     const { isLoggedIn } = store.getters;
-    store.commit('switchLoggedIn', isLoggedIn);
     store.commit('setMainLoading', false);
     return { loggedIn: isLoggedIn };
   },

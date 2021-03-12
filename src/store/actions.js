@@ -62,9 +62,6 @@ export default {
     return recent ? txs.slice(0, limit) : txs;
   },
 
-  async setLogin({ commit }) {
-    commit('switchLoggedIn', true);
-  },
   async getCurrencies({ state: { nextCurrenciesFetch }, commit }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
       try {

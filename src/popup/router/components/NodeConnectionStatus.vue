@@ -23,8 +23,8 @@ export default {
     };
   },
   computed: {
-    ...mapState(['nodeStatus', 'isLoggedIn']),
-    ...mapGetters(['account']),
+    ...mapState(['nodeStatus']),
+    ...mapGetters(['account', 'isLoggedIn']),
   },
 };
 </script>

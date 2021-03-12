@@ -32,7 +32,6 @@ export default new Vuex.Store({
       currency: 'usd',
     },
     userNetworks: [],
-    isLoggedIn: false,
     transactions: {
       latest: [],
       pending: [],

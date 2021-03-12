@@ -16,8 +16,7 @@
 </template>
 
 <script>
-import { mnemonicToSeed, validateMnemonic } from '@aeternity/bip39';
-import { deferPromised } from '../../utils/index';
+import { validateMnemonic } from '@aeternity/bip39';
 import Textarea from '../components/Textarea';
 import Button from '../components/Button';
 
@@ -45,15 +44,8 @@ export default {
         return;
       }
       this.loading = true;
-      const seed = (await deferPromised(mnemonicToSeed, mnemonic)).toString('hex');
       this.$store.commit('setMnemonic', this.mnemonic);
       this.$store.commit('setBackedUpSeed');
-      await this.$store.dispatch('setLogin', {
-        keypair: {
-          address: this.$store.getters.account.address,
-          privateKey: seed,
-        },
-      });
       await this.$router.push(this.$store.state.loginTargetLocation);
     },
   },

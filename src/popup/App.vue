@@ -60,16 +60,8 @@ export default {
     aeppPopup: window.RUNNING_IN_POPUP,
   }),
   computed: {
-    ...mapGetters(['account']),
-    ...mapState([
-      'isRestored',
-      'current',
-      'sdk',
-      'backedUpSeed',
-      'notifications',
-      'isLoggedIn',
-      'mainLoading',
-    ]),
+    ...mapGetters(['account', 'isLoggedIn']),
+    ...mapState(['isRestored', 'current', 'sdk', 'backedUpSeed', 'notifications', 'mainLoading']),
     waveBg() {
       return ['/intro', '/popup-sign-tx', '/connect', '/import-account', '/receive'].includes(
         this.$route.path,
