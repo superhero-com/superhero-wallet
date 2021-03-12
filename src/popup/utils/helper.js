@@ -73,7 +73,7 @@ export const checkAddress = (value) =>
 
 export const validateAddress = (address, type) => Crypto.isAddressValid(address, type);
 
-export const chekAensName = (value) => value.endsWith('.test') || value.endsWith('.chain');
+export const checkAensName = (value) => value.endsWith('.test') || value.endsWith('.chain');
 
 export const stringifyForStorage = (state) =>
   JSON.stringify(state, (key, value) => {
