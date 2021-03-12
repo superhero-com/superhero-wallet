@@ -12,7 +12,7 @@
           class="span-2-columns"
         >
           <CopyButton slot="label" :value="tipUrl" message="URL copied" />
-          <a slot="value" @click="openTipUrl">{{ tipUrl }}</a>
+          <LinkButton slot="value" :to="tipUrl">{{ tipUrl }}</LinkButton>
         </InfoBox>
         <InfoBox
           :value="hash"
@@ -50,12 +50,12 @@
           <TokenAmount slot="value" :amount="tx.fee" symbol="ættos" hideFiat />
         </InfoBox>
       </div>
-      <div class="action-row">
-        <a @click="openExplorer">
+      <div class="explorer">
+        <LinkButton :to="getExplorerPath(hash)">
           <AnimatedPending v-if="pending" />
           <BlockIcon v-else />
           {{ $t('pages.transactionDetails.explorer') }}
-        </a>
+        </LinkButton>
       </div>
     </div>
   </div>
@@ -64,9 +64,9 @@
 <script>
 import { mapGetters } from 'vuex';
 import { formatDate, formatTime } from '../../utils';
-import openUrl from '../../utils/openUrl';
 import TokenAmount from '../components/TokenAmount';
 import InfoBox from '../components/InfoBox';
+import LinkButton from '../components/LinkButton';
 import CopyButton from '../components/CopyButton';
 import AnimatedPending from '../../../icons/animated-pending.svg?vue-component';
 import BlockIcon from '../../../icons/block.svg?vue-component';
@@ -76,6 +76,7 @@ export default {
   components: {
     TokenAmount,
     InfoBox,
+    LinkButton,
     CopyButton,
     AnimatedPending,
     BlockIcon,
@@ -101,15 +102,6 @@ export default {
     next();
   },
   computed: mapGetters(['getExplorerPath']),
-  methods: {
-    openExplorer() {
-      const url = this.getExplorerPath(this.hash);
-      if (url) openUrl(url, true);
-    },
-    openTipUrl() {
-      openUrl(this.tipUrl, true);
-    },
-  },
 };
 </script>
 
@@ -166,50 +158,13 @@ export default {
       }
     }
 
-    .action-row {
+    .explorer {
       height: 56px;
       margin: 0 16px;
       padding: 8px 0 24px 0;
 
-      a {
-        display: inline-flex;
-        align-items: center;
-
+      .link-button {
         @extend %face-sans-14-medium;
-
-        color: $color-green;
-
-        svg {
-          width: 24px;
-          height: 24px;
-          margin-right: 4px;
-          opacity: 0.44;
-          color: $color-white;
-        }
-
-        &:hover {
-          color: $color-green-hover;
-
-          svg {
-            opacity: 1;
-
-            path {
-              color: $color-green;
-            }
-          }
-        }
-
-        &:active {
-          opacity: 0.7;
-
-          svg {
-            opacity: 0.7;
-
-            path {
-              color: $color-green;
-            }
-          }
-        }
       }
     }
   }

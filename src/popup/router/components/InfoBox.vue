@@ -68,18 +68,6 @@ export default {
     &.highlight {
       color: $color-error;
     }
-
-    a {
-      color: $color-green;
-
-      &:hover {
-        color: $color-green-hover;
-      }
-
-      &:active {
-        opacity: 0.7;
-      }
-    }
   }
 }
 </style>
