@@ -98,7 +98,7 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import CheckBox from '../components/CheckBox';
 import { defaultNetwork } from '../../utils/constants';
-import wallet from '../../../lib/wallet';
+import initSdk from '../../../lib/wallet';
 
 const networkProps = {
   name: null,
@@ -140,7 +140,7 @@ export default {
   methods: {
     async selectNetwork(network) {
       await this.$store.dispatch('switchNetwork', network);
-      await wallet.initSdk();
+      await initSdk();
       if (this.tippingSupported) return;
       await this.$store.dispatch('modals/open', {
         name: 'default',
