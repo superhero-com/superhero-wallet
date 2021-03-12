@@ -7,7 +7,7 @@
     ]"
   >
     <Header
-      v-if="!mainLoading && !(iframe && $route.path === '/intro')"
+      v-if="!(iframe && $route.path === '/intro')"
       @toggle-sidebar="showSidebar = !showSidebar"
     />
 
@@ -24,7 +24,6 @@
       </div>
     </transition>
 
-    <Loader v-if="mainLoading" type="none" />
     <NodeConnectionStatus v-if="!(iframe && $route.path === '/intro')" />
     <Tour />
     <Component
@@ -61,7 +60,7 @@ export default {
   }),
   computed: {
     ...mapGetters(['account', 'isLoggedIn']),
-    ...mapState(['isRestored', 'current', 'sdk', 'backedUpSeed', 'notifications', 'mainLoading']),
+    ...mapState(['isRestored', 'current', 'sdk', 'backedUpSeed', 'notifications']),
     waveBg() {
       return ['/intro', '/popup-sign-tx', '/connect', '/import-account', '/receive'].includes(
         this.$route.path,

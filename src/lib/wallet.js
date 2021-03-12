@@ -88,9 +88,7 @@ if (IN_FRAME) {
 
 export default {
   async init() {
-    const { isLoggedIn } = store.getters;
-    store.commit('setMainLoading', false);
-    return { loggedIn: isLoggedIn };
+    return { loggedIn: store.getters.isLoggedIn };
   },
   async initSdk() {
     if (initSdkRunning) return;

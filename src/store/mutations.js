@@ -31,9 +31,6 @@ export default {
     state.tippingV1 = tippingV1 || null;
     state.tippingV2 = tippingV2 || null;
   },
-  setMainLoading(state, payload) {
-    state.mainLoading = payload;
-  },
   setNodeStatus(state, payload) {
     state.nodeStatus = payload;
   },
