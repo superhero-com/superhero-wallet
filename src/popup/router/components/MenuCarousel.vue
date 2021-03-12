@@ -1,34 +1,24 @@
 <template>
-  <div class="menu-carousel">
-    <flickity class="carousel" ref="flickity" :options="flickityOptions">
-      <BoxButton to="/tokens" :text="$t('pages.titles.balances')">
-        <Balances slot="icon" />
-      </BoxButton>
-      <BoxButton to="/send" :text="$t('pages.titles.payments')" class="tour__step7" data-cy="send">
-        <Payments slot="icon" />
-      </BoxButton>
-      <BoxButton to="/tip" :text="$t('pages.titles.tips')" class="tour__step2" data-cy="tip-button">
-        <Tips slot="icon" />
-      </BoxButton>
-      <BoxButton to="/transactions" :text="$t('pages.titles.tx-history')" class="tour__step5">
-        <Activity slot="icon" />
-      </BoxButton>
-      <BoxButton to="/names" :text="$t('pages.titles.names')" class="cell">
-        <Names slot="icon" />
-      </BoxButton>
-      <BoxButton to="/invite" :text="$t('pages.titles.invite')">
-        <Invites slot="icon" />
-      </BoxButton>
-    </flickity>
-    <div class="navigation">
-      <button v-show="!hasMore" @click="previous" class="button">
-        <Arrow class="icon" />
-      </button>
-      <button v-show="hasMore" @click="next" class="button">
-        <Arrow class="icon" />
-      </button>
-    </div>
-  </div>
+  <flickity class="menu-carousel" ref="flickity" :options="flickityOptions">
+    <BoxButton to="/tokens" :text="$t('pages.titles.balances')">
+      <Balances slot="icon" />
+    </BoxButton>
+    <BoxButton to="/send" :text="$t('pages.titles.payments')" class="tour__step7" data-cy="send">
+      <Payments slot="icon" />
+    </BoxButton>
+    <BoxButton to="/tip" :text="$t('pages.titles.tips')" class="tour__step2" data-cy="tip-button">
+      <Tips slot="icon" />
+    </BoxButton>
+    <BoxButton to="/transactions" :text="$t('pages.titles.tx-history')" class="tour__step5">
+      <Activity slot="icon" />
+    </BoxButton>
+    <BoxButton to="/names" :text="$t('pages.titles.names')" class="cell">
+      <Names slot="icon" />
+    </BoxButton>
+    <BoxButton to="/invite" :text="$t('pages.titles.invite')">
+      <Invites slot="icon" />
+    </BoxButton>
+  </flickity>
 </template>
 
 <script>
@@ -40,14 +30,12 @@ import Tips from '../../../icons/tips.svg?vue-component';
 import Activity from '../../../icons/activity.svg?vue-component';
 import Names from '../../../icons/names.svg?vue-component';
 import Invites from '../../../icons/invites.svg?vue-component';
-import Arrow from '../../../icons/chevron-next.svg?vue-component';
 
 export default {
   name: 'MenuCarousel',
   components: {
     Flickity,
     BoxButton,
-    Arrow,
     Balances,
     Payments,
     Tips,
@@ -59,7 +47,7 @@ export default {
     return {
       flickityOptions: {
         initialIndex: 0,
-        prevNextButtons: false,
+        prevNextButtons: true,
         pageDots: false,
         freeScroll: false,
         draggable: process.env.PLATFORM === 'cordova',
@@ -69,80 +57,54 @@ export default {
         friction: 1,
         cellAlign: 'left',
       },
-      hasMore: false,
     };
-  },
-  methods: {
-    next() {
-      this.$refs.flickity.next();
-    },
-    previous() {
-      this.$refs.flickity.previous();
-    },
-  },
-  mounted() {
-    this.hasMore = this.$refs.flickity.slides().length > 0;
-    this.$refs.flickity.flickity().on('change', (index) => {
-      this.hasMore = index < this.$refs.flickity.slides().length - 1;
-    });
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/mixins';
 
 .menu-carousel {
-  position: relative;
-  display: flex;
-  justify-content: center;
+  flex: 1;
+  z-index: 1;
+  padding: 24px 12px;
 
-  .carousel {
-    flex: 1;
-    z-index: 1;
-
-    .box-button {
-      padding-right: 16px;
-
-      &:nth-of-type(4) {
-        padding-left: 16px;
+  ::v-deep {
+    .flickity-slider {
+      @include mobile {
+        width: 97%;
       }
     }
-  }
 
-  .navigation {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    .button {
+    .flickity-button {
       width: 24px;
       height: 64px;
       padding: 0;
-      background: $color-bg-2;
-      border-radius: 6px 0 0 6px;
+      background: #171717;
       cursor: pointer;
 
-      &:nth-child(1) {
-        transform: rotate(-180deg);
+      &.previous {
+        left: 0;
+        border-radius: 0 6px 6px 0;
       }
 
-      &:nth-child(2) {
-        align-self: flex-end;
+      &.next {
+        left: calc(100% - 24px);
+        border-radius: 6px 0 0 6px;
       }
 
-      .icon {
-        width: 24px;
-        height: 24px;
+      .flickity-button-icon {
+        fill: $color-white;
         opacity: 0.44;
       }
 
+      &:disabled {
+        display: none;
+      }
+
       &:hover {
-        background: $color-blue-alpha-15;
+        background: $color-blue-hover-dark;
 
         .icon {
           opacity: 1;
@@ -154,8 +116,22 @@ export default {
       }
 
       &:active {
-        background-color: rgba($color-blue-alpha-15, 0.1);
+        background-color: rgba($color-blue-hover-dark, 0.1);
       }
+    }
+  }
+
+  .box-button {
+    display: flex;
+    justify-content: center;
+    width: 104px;
+
+    @include mobile {
+      width: 25%;
+    }
+
+    @media (min-width: $extension-width + 2) and (max-width: 400px) {
+      width: 33%;
     }
   }
 }
