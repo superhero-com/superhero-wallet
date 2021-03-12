@@ -71,7 +71,7 @@ export default {
             return new App(aeppUrl);
           },
           async address(...args) {
-            const { address } = store.state.account;
+            const { address } = store.getters.account;
             const app = args.pop();
             if (
               app instanceof App &&

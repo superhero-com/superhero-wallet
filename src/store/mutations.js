@@ -2,9 +2,6 @@ import Vue from 'vue';
 import { defaultNetwork } from '../popup/utils/constants';
 
 export default {
-  updateAccount(state, payload) {
-    state.account = payload;
-  },
   switchNetwork(state, payload) {
     state.current.network = payload;
   },
@@ -19,10 +16,6 @@ export default {
   },
   removePendingTransactionByHash(state, hash) {
     state.transactions.pending = state.transactions.pending.filter((t) => t.hash !== hash);
-  },
-  setActiveAccount(state, payload) {
-    state.account.address = payload.address;
-    state.activeAccount = payload.index;
   },
   setUserNetwork(state, { index, ...network }) {
     if (index !== undefined) state.userNetworks[index] = network;

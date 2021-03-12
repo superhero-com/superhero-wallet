@@ -25,9 +25,7 @@ Vue.use(VueRx);
 export default new Vuex.Store({
   state: {
     isRestored: false,
-    account: {},
     mnemonic: null,
-    activeAccount: 0,
     current: {
       network: defaultNetwork.name,
       token: 0,
@@ -66,14 +64,7 @@ export default new Vuex.Store({
   actions,
   plugins: [
     persistState(
-      async (state) => {
-        const migratedState = await runMigrations(state);
-        if (!migratedState?.account?.publicKey) return migratedState;
-        return {
-          ...migratedState,
-          account: { ...migratedState.account, address: migratedState.account.publicKey },
-        };
-      },
+      runMigrations,
       ({
         migrations,
         current,
@@ -85,7 +76,6 @@ export default new Vuex.Store({
         nextCurrenciesFetch,
         tip,
         backedUpSeed,
-        account,
         mnemonic,
         saveErrorLog,
         tourStartBar,
@@ -104,7 +94,6 @@ export default new Vuex.Store({
         nextCurrenciesFetch,
         tip,
         backedUpSeed,
-        account: { ...account, publicKey: account.address },
         mnemonic,
         saveErrorLog,
         tourStartBar,

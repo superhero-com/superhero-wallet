@@ -1,7 +1,7 @@
 import { Node, RpcWallet } from '@aeternity/aepp-sdk/es';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
-import { camelCase, isEmpty, times } from 'lodash-es';
+import { camelCase, times } from 'lodash-es';
 import { fetchJson, IN_FRAME } from '../popup/utils/helper';
 import store from '../store';
 import { App } from '../store/modules/permissions';
@@ -88,19 +88,10 @@ if (IN_FRAME) {
 
 export default {
   async init() {
-    const { account } = store.state;
-    if (isEmpty(account)) {
-      store.commit('setMainLoading', false);
-      return { loggedIn: false };
-    }
-    const { address } = store.getters.account;
-    store.commit('updateAccount', account);
-    store.commit('setActiveAccount', { address, index: 0 });
-
-    store.commit('switchLoggedIn', true);
-
+    const { isLoggedIn } = store.getters;
+    store.commit('switchLoggedIn', isLoggedIn);
     store.commit('setMainLoading', false);
-    return { loggedIn: true };
+    return { loggedIn: isLoggedIn };
   },
   async initSdk() {
     if (initSdkRunning) return;
@@ -161,7 +152,7 @@ export default {
             return new App(aeppUrl);
           },
           async address(...args) {
-            const { address } = store.state.account;
+            const { address } = store.getters.account;
             const app = args.pop();
             if (app instanceof App) {
               const { host, hostname, protocol } = app.host;
