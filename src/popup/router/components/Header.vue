@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex';
+import { mapState, mapGetters, mapMutations } from 'vuex';
 import Logo from '../../../icons/logo-small.svg?vue-component';
 import Back from '../../../icons/back.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
@@ -66,7 +66,8 @@ export default {
     };
   },
   computed: {
-    ...mapState(['tourRunning', 'isLoggedIn', 'notifications', 'pageTitle']),
+    ...mapGetters(['isLoggedIn']),
+    ...mapState(['tourRunning', 'notifications', 'pageTitle']),
     title() {
       return this.$route.meta.title;
     },

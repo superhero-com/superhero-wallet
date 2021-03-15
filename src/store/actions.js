@@ -6,9 +6,7 @@ import { AEX2_METHODS } from '../popup/utils/constants';
 import {
   fetchJson,
   getAddressByNameEntry,
-  parseFromStorage,
   postJson,
-  stringifyForStorage,
   handleUnknownError,
   isAccountNotFoundError,
 } from '../popup/utils/helper';
@@ -22,8 +20,8 @@ export default {
     if (process.env.IS_EXTENSION) postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload });
   },
   async fetchPendingTransactions({
-    state: {
-      sdk,
+    state: { sdk },
+    getters: {
       account: { address },
     },
   }) {
@@ -41,7 +39,7 @@ export default {
   },
   async fetchTransactions({ state, getters, dispatch }, { limit, page, recent }) {
     if (!state.middleware) return [];
-    const { address } = state.account;
+    const { address } = getters.account;
     let txs = await Promise.all([
       state.middleware.getTxByAccount(address, limit, page).then(({ data }) => data),
       dispatch('fetchPendingTransactions'),
@@ -64,32 +62,6 @@ export default {
     return recent ? txs.slice(0, limit) : txs;
   },
 
-  async getAccount(context, { idx }) {
-    return (await postMessage({ type: 'getAccount', payload: { idx } })).address;
-  },
-
-  async getKeyPair({ state: { account } }, { idx }) {
-    const { address, secretKey } = parseFromStorage(
-      await postMessage({
-        type: 'getKeypair',
-        payload: { activeAccount: idx, account: { address: account.address } },
-      }),
-    );
-    return { address, secretKey };
-  },
-
-  async generateWallet(context, { seed }) {
-    return (
-      await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })
-    ).address;
-  },
-
-  async setLogin({ commit }, { keypair }) {
-    commit('updateAccount', keypair);
-    commit('setActiveAccount', { address: keypair.address, index: 0 });
-    commit('updateAccount', keypair);
-    commit('switchLoggedIn', true);
-  },
   async getCurrencies({ state: { nextCurrenciesFetch }, commit }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
       try {
@@ -158,11 +130,11 @@ export default {
   },
   async modifyNotification(
     {
-      state: {
-        sdk,
+      state: { sdk },
+      getters: {
+        activeNetwork,
         account: { address },
       },
-      getters: { activeNetwork },
     },
     [notifId, status],
   ) {
@@ -182,11 +154,11 @@ export default {
   },
   async modifyNotifications(
     {
-      state: {
-        sdk,
+      state: { sdk },
+      getters: {
+        activeNetwork,
         account: { address },
       },
-      getters: { activeNetwork },
     },
     [ids, status],
   ) {

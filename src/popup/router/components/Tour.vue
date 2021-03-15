@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import Button from './Button';
 import Hero from '../../../icons/hero.svg?vue-component';
 import StartOnboarding from '../../../icons/start-onboarding.svg?vue-component';
@@ -149,7 +149,8 @@ export default {
     ],
   }),
   computed: {
-    ...mapState(['tourStartBar', 'tourRunning', 'isLoggedIn', 'nodeStatus']),
+    ...mapState(['tourStartBar', 'tourRunning', 'nodeStatus']),
+    ...mapGetters(['isLoggedIn']),
     tourSteps() {
       return this.steps
         .filter(({ hide }) => !hide)

@@ -15,7 +15,7 @@
     </div>
     <ul @click="$emit('close')">
       <li>
-        <router-link to="/">
+        <router-link to="/tokens">
           {{ $t('pages.titles.balances') }}
           <Balances />
         </router-link>

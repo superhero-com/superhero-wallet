@@ -23,11 +23,7 @@ export const convertToken = (balance, precision) => BigNumber(balance).shiftedBy
 export const IN_FRAME = window.parent !== window;
 export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');
 
-export const convertToAE = (balance) => +(balance / 10 ** 18).toFixed(7);
-
 export const toURL = (url) => new URL(url.includes('://') ? url : `https://${url}`);
-
-export const extractHostName = (url) => toURL(url).hostname;
 
 export const validateTipUrl = (urlAsString) => {
   try {
@@ -71,91 +67,7 @@ export const checkAddress = (value) =>
   Crypto.isAddressValid(value, 'ct') ||
   Crypto.isAddressValid(value, 'ok');
 
-export const validateAddress = (address, type) => Crypto.isAddressValid(address, type);
-
-export const chekAensName = (value) => value.endsWith('.test') || value.endsWith('.chain');
-
-export const stringifyForStorage = (state) =>
-  JSON.stringify(state, (key, value) => {
-    if (value instanceof ArrayBuffer) {
-      return { type: 'ArrayBuffer', data: Array.from(new Uint8Array(value)) };
-    }
-    if (value instanceof Uint8Array) {
-      return { type: 'Uint8Array', data: Array.from(value) };
-    }
-
-    if (value instanceof Int8Array) {
-      return { type: 'Int8Array', data: Array.from(value) };
-    }
-
-    if (value instanceof Int16Array) {
-      return { type: 'Int16Array', data: Array.from(value) };
-    }
-
-    if (value instanceof Uint16Array) {
-      return { type: 'Uint16Array', data: Array.from(value) };
-    }
-
-    if (value instanceof Int32Array) {
-      return { type: 'Int32Array', data: Array.from(value) };
-    }
-
-    if (value instanceof Uint32Array) {
-      return { type: 'Uint32Array', data: Array.from(value) };
-    }
-
-    if (value instanceof Float32Array) {
-      return { type: 'Float32Array', data: Array.from(value) };
-    }
-
-    if (value instanceof Float64Array) {
-      return { type: 'Float64Array', data: Array.from(value) };
-    }
-
-    return value;
-  });
-
-export const parseFromStorage = (state) =>
-  JSON.parse(state, (key, value) => {
-    if (value && value.type === 'ArrayBuffer') {
-      return new Uint8Array(value.data).buffer;
-    }
-    if (value && value.type === 'Uint8Array') {
-      return new Uint8Array(value.data);
-    }
-    if (value && value.type === 'Buffer') {
-      return new Uint8Array(value.data);
-    }
-    if (value && value.type === 'Int8Array') {
-      return new Int8Array(value.data);
-    }
-
-    if (value && value.type === 'Int16Array') {
-      return new Int16Array(value.data);
-    }
-
-    if (value && value.type === 'Uint16Array') {
-      return new Uint16Array(value.data);
-    }
-
-    if (value && value.type === 'Int32Array') {
-      return new Int32Array(value.data);
-    }
-
-    if (value && value.type === 'Uint32Array') {
-      return new Uint32Array(value.data);
-    }
-
-    if (value && value.type === 'Float32Array') {
-      return new Float32Array(value.data);
-    }
-
-    if (value && value.type === 'Float64Array') {
-      return new Float64Array(value.data);
-    }
-
-    return value;
-  });
+export const checkAensName = (value) => value.endsWith('.chain');
 
 export const getAddressByNameEntry = (nameEntry, pointer = 'account_pubkey') =>
   ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
@@ -253,8 +165,6 @@ export const setBalanceLocalStorage = (balance) => {
 
 export const getBalanceLocalStorage = () =>
   localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : '0';
-
-export const getAeppUrl = (v) => new URL(v.connection.port.sender.url);
 
 export const categorizeContractCallTxObject = (transaction) => {
   if (transaction.tx.type !== 'ContractCallTx') return null;

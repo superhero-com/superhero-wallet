@@ -1,4 +1,3 @@
-import { isEmpty } from 'lodash-es';
 import '../lib/initEnv';
 import '../lib/initPolyfills';
 import initDeeplinkHandler from './deeplink-handler';
@@ -9,12 +8,12 @@ import wallet from './wallet';
 import TipClaimRelay from './tip-claim-relay';
 import { buildTx } from '../popup/utils';
 import { popupProps } from '../popup/utils/config';
-import { AEX2_METHODS, CONNECTION_TYPES, HDWALLET_METHODS } from '../popup/utils/constants';
+import { AEX2_METHODS, CONNECTION_TYPES } from '../popup/utils/constants';
 import { detectConnectionType } from '../popup/utils/helper';
 import { getPhishingUrls, phishingCheckUrl, setPhishingUrl } from '../popup/utils/phishing-detect';
-import walletController from './wallet-controller';
 import Logger from '../lib/logger';
 import { getState } from '../store/plugins/persistState';
+import store from './store';
 
 if (window.IS_EXTENSION_BACKGROUND) {
   Logger.init({ background: true });
@@ -72,8 +71,7 @@ if (window.IS_EXTENSION_BACKGROUND) {
     }
 
     if (method === 'checkHasAccount') {
-      const { account } = await getState();
-      if (!account || isEmpty(account)) return false;
+      return store.getters.isLoggedIn;
     }
 
     if (from === 'content') {
@@ -97,10 +95,7 @@ if (window.IS_EXTENSION_BACKGROUND) {
 
     switch (detectConnectionType(port)) {
       case CONNECTION_TYPES.EXTENSION:
-        port.onMessage.addListener(async ({ type, payload, uuid }) => {
-          if (HDWALLET_METHODS.includes(type)) {
-            port.postMessage({ uuid, res: await walletController[type](payload) });
-          }
+        port.onMessage.addListener(async ({ type, payload }) => {
           if (AEX2_METHODS[type]) wallet[type](payload);
 
           if (type === 'SWITCH_NETWORK') {
@@ -142,10 +137,6 @@ if (window.IS_EXTENSION_BACKGROUND) {
 
 // eslint-disable-next-line import/prefer-default-export
 export const handleMessage = ({ type, payload }) => {
-  if (HDWALLET_METHODS.includes(type)) {
-    return walletController[type](payload);
-  }
-
   if (process.env.RUNNING_IN_TESTS) {
     if (type === 'POPUP_INFO') {
       if (payload.txType) {

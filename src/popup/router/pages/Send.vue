@@ -130,7 +130,7 @@
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { calculateFee, TX_TYPES } from '../../utils/constants';
-import { checkAddress, chekAensName, aeToAettos, convertToken } from '../../utils/helper';
+import { checkAddress, checkAensName, aeToAettos, convertToken } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
 import InfoGroup from '../components/InfoGroup';
 import Textarea from '../components/Textarea';
@@ -183,7 +183,7 @@ export default {
     ...mapState(['current', 'sdk']),
     ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate']),
     validAddress() {
-      return checkAddress(this.form.address) || chekAensName(this.form.address);
+      return checkAddress(this.form.address) || checkAensName(this.form.address);
     },
   },
   async mounted() {
@@ -237,7 +237,7 @@ export default {
         : convertToken(this.form.amount, this.selectedToken.decimals);
       const receiver = this.form.address;
       let errorModalType = '';
-      if (receiver === '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
+      if (receiver === '' || (!checkAddress(receiver) && !checkAensName(receiver))) {
         errorModalType = 'incorrect-address';
       }
       if (this.form.amount <= 0) errorModalType = 'incorrect-amount';

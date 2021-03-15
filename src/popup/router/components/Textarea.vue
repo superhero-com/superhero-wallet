@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { checkAddress, chekAensName } from '../../utils/helper';
+import { checkAddress, checkAensName } from '../../utils/helper';
 
 export default {
   props: {
@@ -24,7 +24,7 @@ export default {
   watch: {
     value(val) {
       if (this.type === 'address') {
-        this.err = !checkAddress(val) && !chekAensName(val);
+        this.err = !checkAddress(val) && !checkAensName(val);
       }
     },
   },

@@ -36,8 +36,8 @@ export default (store) => {
     actions: {
       async fetchOwned({
         state: { owned },
-        rootGetters: { activeNetwork },
-        rootState: { middleware, account },
+        rootGetters: { activeNetwork, account },
+        rootState: { middleware },
         commit,
         getters: { getDefault },
         dispatch,

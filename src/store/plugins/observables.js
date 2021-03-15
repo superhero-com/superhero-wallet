@@ -31,7 +31,7 @@ export default (store) => {
   const balance$ = sdk$.pipe(
     switchMap((sdk) => timer(0, 3000).pipe(map(() => sdk))),
     switchMap((sdk) =>
-      sdk.balance(store.state.account.address).catch((error) => {
+      sdk.balance(store.getters.account.address).catch((error) => {
         if (!isNotFoundError(error)) {
           handleUnknownError(error);
         }

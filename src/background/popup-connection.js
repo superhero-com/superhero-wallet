@@ -1,6 +1,4 @@
 import stampit from '@stamp/it';
-import { HDWALLET_METHODS } from '../popup/utils/constants';
-import walletController from './wallet-controller';
 
 const PopupConnection = stampit({
   init({ id, connection = {}, actions = {}, props = {} }) {
@@ -16,9 +14,7 @@ const PopupConnection = stampit({
         ACTION_ACCEPT: 'accept',
       };
 
-      if (HDWALLET_METHODS.includes(msg.type)) {
-        this.postMessage({ uuid: msg.uuid, res: await walletController[msg.type](msg.payload) });
-      } else if (msg.type === 'POPUP_INFO') {
+      if (msg.type === 'POPUP_INFO') {
         this.postMessage({ uuid: msg.uuid, res: this.props });
       } else if (typeToAction[msg.type]) {
         if (this.actions[typeToAction[msg.type]])

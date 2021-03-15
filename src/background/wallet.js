@@ -5,10 +5,9 @@ import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-c
 import { isEmpty } from 'lodash-es';
 import uuid from 'uuid';
 import { AEX2_METHODS, defaultNetwork } from '../popup/utils/constants';
-import { getAllNetworks, stringifyForStorage } from '../popup/utils/helper';
+import { getAllNetworks } from '../popup/utils/helper';
 import { getState } from '../store/plugins/persistState';
 import popups from './popup-connection';
-import walletController from './wallet-controller';
 import store from './store';
 import { App } from '../store/modules/permissions';
 
@@ -18,9 +17,8 @@ export default {
   async init() {
     await this.initNodes();
     this.initFields();
-    const { account } = await getState();
+    const { account } = store.getters;
     if (!isEmpty(account)) {
-      walletController.generateWallet({ seed: stringifyForStorage(account.privateKey) });
       const {
         current: { network },
       } = await getState();
@@ -73,7 +71,7 @@ export default {
             return new App(aeppUrl);
           },
           async address(...args) {
-            const { address } = store.state.account;
+            const { address } = store.getters.account;
             const app = args.pop();
             if (
               app instanceof App &&
@@ -86,15 +84,7 @@ export default {
               return Promise.reject(new Error('Rejected by user'));
             return address;
           },
-          sign: (data) => {
-            const { secretKey } = JSON.parse(
-              walletController.getKeypair({
-                activeAccount: store.state.activeAccount,
-                account: store.state.account,
-              }),
-            );
-            return Crypto.sign(data, Buffer.from(new Uint8Array(secretKey.data), 'hex'));
-          },
+          sign: (data) => Crypto.sign(data, store.getters.account.secretKey),
         },
       })({
         nodes: [{ name: this.network, instance: node }],

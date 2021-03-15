@@ -49,7 +49,7 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { chekAensName, checkAddress, getAddressByNameEntry } from '../../../utils/helper';
+import { checkAensName, checkAddress, getAddressByNameEntry } from '../../../utils/helper';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 
@@ -71,7 +71,7 @@ export default {
       return this.$store.getters['names/getName'](this.name);
     },
     validPointer() {
-      return chekAensName(this.pointer) || checkAddress(this.pointer);
+      return checkAensName(this.pointer) || checkAddress(this.pointer);
     },
     hasPointer() {
       return this.nameEntry?.pointers?.accountPubkey;
@@ -110,7 +110,7 @@ export default {
         this.pointerError = !this.validPointer;
         if (this.pointerError) return;
 
-        if (chekAensName(this.pointer)) {
+        if (checkAensName(this.pointer)) {
           try {
             const nameEntry = await this.sdk.aensQuery(this.pointer);
             const address = getAddressByNameEntry(nameEntry);

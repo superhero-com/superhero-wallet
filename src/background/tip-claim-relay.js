@@ -2,8 +2,9 @@ import { uniq } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import { postJson } from '../popup/utils/helper';
 import { defaultNetwork } from '../popup/utils/constants';
-import { contractCallStatic, getActiveAccount, getAddressFromChainName } from './utils';
+import { contractCallStatic, getAddressFromChainName } from './utils';
 import Logger from '../lib/logger';
+import store from './store';
 
 export default {
   checkAddressMatch(account, addresses) {
@@ -29,7 +30,7 @@ export default {
 
   async checkUrlHasBalance(url, { address, chainName }) {
     try {
-      const { account } = await getActiveAccount();
+      const { account } = store.getters;
       if (account && account.address) {
         let addresses = [address];
         if (Array.isArray(address)) addresses = address;

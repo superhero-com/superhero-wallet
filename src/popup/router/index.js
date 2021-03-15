@@ -12,7 +12,7 @@ import { i18n } from '../../store/plugins/languages';
 import * as helper from '../utils/helper';
 import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
-import wallet from '../../lib/wallet';
+import initSdk from '../../lib/wallet';
 
 const plugin = {
   install() {
@@ -45,14 +45,9 @@ const unbind = router.beforeEach(async (to, from, next) => {
 });
 
 router.beforeEach(async (to, from, next) => {
-  if (store.state.isLoggedIn) {
-    if (!store.state.sdk) wallet.initSdk();
-    next(to.meta.ifNotAuthOnly ? '/account' : undefined);
-    return;
-  }
+  const { isLoggedIn } = store.getters;
 
-  const { loggedIn } = await wallet.init();
-  if (!loggedIn) {
+  if (!isLoggedIn) {
     if (to.meta.ifNotAuthOnly || to.meta.ifNotAuth) next();
     else {
       store.commit('setLoginTargetLocation', to);
@@ -60,24 +55,22 @@ router.beforeEach(async (to, from, next) => {
     }
     return;
   }
-  wallet.initSdk();
+
+  if (!store.state.sdk) initSdk();
 
   if (window.RUNNING_IN_POPUP) {
-    next({
-      name: {
-        connectConfirm: 'connect',
-        sign: 'popup-sign-tx',
-        messageSign: 'message-sign',
-      }[window.POPUP_TYPE],
-      params: await getPopupProps(),
-    });
-    return;
+    const name = {
+      connectConfirm: 'connect',
+      sign: 'popup-sign-tx',
+      messageSign: 'message-sign',
+    }[window.POPUP_TYPE];
+    if (name !== to.name) {
+      next({ name, params: await getPopupProps() });
+      return;
+    }
   }
-  if (to.meta.ifNotAuthOnly) {
-    next('/account');
-    return;
-  }
-  next();
+
+  next(to.meta.ifNotAuthOnly ? '/account' : undefined);
 });
 
 router.afterEach(async (to) => {
