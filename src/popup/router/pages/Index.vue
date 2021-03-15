@@ -13,7 +13,7 @@
         <span class="web">{{ $t('pages.index.webVersion') }}</span>
       </template>
       <template v-else-if="!IN_FRAME">
-        <img :src="AnimatedSpinner" />
+        <AnimatedSpinner class="spinner" />
         <span class="go">{{ termsAgreed ? $t('pages.index.go') : $t('pages.index.ready') }}</span>
       </template>
     </div>
@@ -51,12 +51,11 @@ import Button from '../components/Button';
 import Platforms from '../components/Platforms';
 
 export default {
-  components: { SuperheroLogo, CheckBox, Button, Platforms },
+  components: { SuperheroLogo, CheckBox, Button, Platforms, AnimatedSpinner },
   data: () => ({
     termsAgreed: false,
     IS_WEB: process.env.PLATFORM === 'web',
     IN_FRAME,
-    AnimatedSpinner,
   }),
 };
 </script>
@@ -145,9 +144,10 @@ export default {
       }
     }
 
-    img {
+    .spinner {
       width: 296px;
       height: 296px;
+      color: $color-blue;
     }
 
     .platforms {
