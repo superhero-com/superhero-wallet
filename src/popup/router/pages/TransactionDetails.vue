@@ -25,13 +25,14 @@
           <CopyButton slot="label" :value="hash" message="Hash copied" />
         </InfoBox>
         <InfoBox
+          v-if="microTime"
           :value="microTime | formatDate"
           :secondary="microTime | formatTime"
           :label="$t('pages.transactionDetails.timestamp')"
           data-cy="timestamp"
         />
         <InfoBox
-          v-if="blockHeight"
+          v-if="blockHeight && blockHeight > 0"
           :value="blockHeight"
           :label="$t('pages.transactionDetails.blockHeight')"
           data-cy="block-height"
@@ -59,13 +60,6 @@
           data-cy="nonce"
         />
         <InfoBox
-          v-if="pending"
-          :value="$t('pages.transactionDetails.pending')"
-          :label="$t('pages.transactionDetails.status')"
-          data-cy="status"
-          highlight
-        />
-        <InfoBox
           v-if="tx.fee"
           :label="$t('pages.transactionDetails.fee')"
           class="span-2-columns"
@@ -73,6 +67,13 @@
         >
           <TokenAmount slot="value" :amount="tx.fee" symbol="ættos" hideFiat />
         </InfoBox>
+        <InfoBox
+          v-if="pending"
+          :value="$t('pages.transactionDetails.pending')"
+          :label="$t('pages.transactionDetails.status')"
+          data-cy="status"
+          highlight
+        />
       </div>
       <div class="explorer">
         <LinkButton :to="getExplorerPath(hash)">
