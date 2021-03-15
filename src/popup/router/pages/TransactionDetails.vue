@@ -10,6 +10,7 @@
           v-if="tipUrl"
           :label="$t('pages.transactionDetails.tipUrl')"
           class="span-2-columns"
+          data-cy="tip-url"
         >
           <CopyButton slot="label" :value="tipUrl" message="URL copied" />
           <LinkButton slot="value" :to="tipUrl">{{ tipUrl }}</LinkButton>
@@ -18,6 +19,7 @@
           :value="hash"
           :label="$t('pages.transactionDetails.hash')"
           class="span-2-columns"
+          data-cy="hash"
           small
         >
           <CopyButton slot="label" :value="hash" message="Hash copied" />
@@ -26,27 +28,49 @@
           :value="microTime | formatDate"
           :secondary="microTime | formatTime"
           :label="$t('pages.transactionDetails.timestamp')"
+          data-cy="timestamp"
         />
         <InfoBox
           v-if="blockHeight"
           :value="blockHeight"
           :label="$t('pages.transactionDetails.blockHeight')"
+          data-cy="block-height"
         />
-        <InfoBox v-if="tx.gas" :value="tx.gas" :label="$t('pages.transactionDetails.gas')" />
-        <InfoBox v-if="tx.gasPrice" :label="$t('pages.transactionDetails.gasPrice')">
+        <InfoBox
+          v-if="tx.gasUsed"
+          :value="tx.gasUsed"
+          :label="$t('pages.transactionDetails.gas')"
+          data-cy="gas"
+        />
+        <InfoBox
+          v-if="tx.gasPrice"
+          :label="$t('pages.transactionDetails.gasPrice')"
+          data-cy="gas-price"
+        >
           <TokenAmount slot="value" :amount="tx.gasPrice" symbol="ættos" hideFiat />
         </InfoBox>
-        <InfoBox :label="$t('pages.transactionDetails.amount')">
+        <InfoBox :label="$t('pages.transactionDetails.amount')" data-cy="amount">
           <TokenAmount slot="value" :amount="amount" :symbol="symbol" hideFiat />
         </InfoBox>
-        <InfoBox v-if="tx.nonce" :value="tx.nonce" :label="$t('pages.transactionDetails.nonce')" />
+        <InfoBox
+          v-if="tx.nonce"
+          :value="tx.nonce"
+          :label="$t('pages.transactionDetails.nonce')"
+          data-cy="nonce"
+        />
         <InfoBox
           v-if="pending"
           :value="$t('pages.transactionDetails.pending')"
           :label="$t('pages.transactionDetails.status')"
+          data-cy="status"
           highlight
         />
-        <InfoBox v-if="tx.fee" :label="$t('pages.transactionDetails.fee')" class="span-2-columns">
+        <InfoBox
+          v-if="tx.fee"
+          :label="$t('pages.transactionDetails.fee')"
+          class="span-2-columns"
+          data-cy="fee"
+        >
           <TokenAmount slot="value" :amount="tx.fee" symbol="ættos" hideFiat />
         </InfoBox>
       </div>
@@ -84,7 +108,7 @@ export default {
   props: {
     tx: { type: Object, required: true },
     hash: { type: String, required: true },
-    microTime: { type: Number, required: true },
+    microTime: { type: Number, required: false },
     blockHeight: { type: Number },
     amount: { type: Number, required: true },
     symbol: { type: String, required: true },
