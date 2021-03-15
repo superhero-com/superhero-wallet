@@ -319,6 +319,7 @@ export default [
     meta: {
       title: 'donate-error',
       notPersist: true,
+      ifNotAuth: true,
     },
   },
   {
