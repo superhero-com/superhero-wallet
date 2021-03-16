@@ -119,6 +119,15 @@ body {
     align-items: center;
   }
 }
+
+* {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 </style>
 
 <style lang="scss" scoped>
