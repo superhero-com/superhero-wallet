@@ -32,7 +32,7 @@
 <script>
 import { OBJECT_ID_TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import { aettosToAe } from '../../utils/helper';
-import DetailsItem from './DetailsItem';
+import DetailsItem from './DetailsItemOld';
 import AmountSend from './AmountSend';
 
 export default {
