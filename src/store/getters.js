@@ -12,6 +12,7 @@ import {
   aettosToAe,
   categorizeContractCallTxObject,
 } from '../popup/utils/helper';
+import { i18n } from './plugins/languages';
 
 const getHdWalletAccount = (wallet, accountIdx = 0) => {
   const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
@@ -34,7 +35,7 @@ export default {
       .map((account) => ({
         ...account,
         name: getters['names/getDefault'](account.address),
-        type: 'Main account',
+        type: i18n.t('mainAccount'),
       }));
   },
   account({ accountSelectedIdx }, { accounts }) {
