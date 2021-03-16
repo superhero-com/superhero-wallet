@@ -1,3 +1,4 @@
+import { times } from 'lodash-es';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
@@ -22,14 +23,22 @@ const getHdWalletAccount = (wallet, accountIdx = 0) => {
 };
 
 export default {
-  account({ mnemonic }, getters) {
-    if (!mnemonic) return {}; // TODO: Return null
-    const account = getHdWalletAccount(generateHdWallet(mnemonicToSeed(mnemonic)));
-    return {
-      ...account,
-      name: getters['names/getDefault'](account.address),
-      type: 'Main account',
-    };
+  wallet({ mnemonic }) {
+    if (!mnemonic) return null;
+    return generateHdWallet(mnemonicToSeed(mnemonic));
+  },
+  accounts({ accountCount }, getters) {
+    if (!getters.wallet) return [];
+    return times(accountCount)
+      .map((idx) => getHdWalletAccount(getters.wallet, idx))
+      .map((account) => ({
+        ...account,
+        name: getters['names/getDefault'](account.address),
+        type: 'Main account',
+      }));
+  },
+  account({ accountSelectedIdx }, { accounts }) {
+    return accounts[accountSelectedIdx] || {}; // TODO: Return null
   },
   isLoggedIn: (state, { account }) => Object.keys(account).length > 0,
   currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,

@@ -14,6 +14,17 @@
       <div class="tour__step1">
         <AccountInfo />
         <BalanceInfo />
+        <button
+          v-for="(account, idx) in accounts"
+          :key="account.address"
+          :disabled="idx === accountSelectedIdx"
+          @click="selectAccount(idx)"
+        >
+          {{ account.address }}<br />
+          {{ account.name }}
+        </button>
+        <!--eslint-disable-next-line vue-i18n/no-raw-text-->
+        <button @click="createAccount">Create account</button>
       </div>
       <MenuCarousel />
     </Plate>
@@ -22,7 +33,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters, mapMutations } from 'vuex';
 import Plate from '../components/Plate';
 import RecentTransactions from '../components/RecentTransactions';
 import BalanceInfo from '../components/BalanceInfo';
@@ -39,8 +50,10 @@ export default {
     MenuCarousel,
   },
   computed: {
-    ...mapState(['tourRunning', 'backedUpSeed']),
+    ...mapState(['tourRunning', 'backedUpSeed', 'accountSelectedIdx']),
+    ...mapGetters(['accounts']),
   },
+  methods: mapMutations(['createAccount', 'selectAccount']),
 };
 </script>
 

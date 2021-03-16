@@ -96,4 +96,10 @@ export default {
   setLoginTargetLocation(state, location) {
     state.loginTargetLocation = location;
   },
+  createAccount(state) {
+    state.accountCount += 1;
+  },
+  selectAccount(state, idx) {
+    state.accountSelectedIdx = idx;
+  },
 };
