@@ -1,5 +1,5 @@
 <template>
-  <div class="popup popup-no-padding account">
+  <div class="account">
     <div class="plate">
       <i18n
         v-if="!backedUpSeed"
@@ -67,6 +67,7 @@ export default {
 
   .seed-backup-notification {
     font-size: 14px;
+    text-align: center;
     margin-top: 20px;
     line-height: 14px;
     color: $accent-color;

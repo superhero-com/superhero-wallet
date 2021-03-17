@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="notifications">
     <div class="tabs">
       <button :class="{ active: direction === '' }" @click="direction = ''">
         {{ $t('pages.notifications.all') }}
@@ -111,7 +111,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.popup {
+.notifications {
   padding: 0;
 
   .tabs {

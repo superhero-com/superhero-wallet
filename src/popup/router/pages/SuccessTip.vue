@@ -1,5 +1,5 @@
 <template>
-  <div class="popup" data-cy="success-tip">
+  <div class="success-tip" data-cy="success-tip">
     <h3 class="heading-1 mb-25 mt-15 center">
       <div class="flex flex-align-center flex-justify-content-center">
         <Heart />
@@ -111,19 +111,21 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.sub-heading {
-  font-size: 14px;
-  font-weight: normal;
-  margin: 8px 0;
-}
+.success-tip {
+  .sub-heading {
+    font-size: 14px;
+    font-weight: normal;
+    margin: 8px 0;
+  }
 
-.note {
-  color: $text-color;
-  font-size: $base-font-size;
-  min-height: 100px;
-  border-radius: 5px;
-  border: 2px solid $border-color;
-  background: $input-bg-color;
-  padding: 15px;
+  .note {
+    color: $text-color;
+    font-size: $base-font-size;
+    min-height: 100px;
+    border-radius: 5px;
+    border: 2px solid $border-color;
+    background: $input-bg-color;
+    padding: 15px;
+  }
 }
 </style>

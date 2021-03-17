@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="tip">
     <BalanceInfo />
-    <div class="tour__step3 popup">
+    <div class="tour__step3">
       <p class="primary-title text-left mb-8 f-16">
         <template v-if="!confirmMode">
           {{ $t('pages.tipPage.url') }}
@@ -27,7 +27,7 @@
         <Input v-else size="m-0 sm" v-model="url" :placeholder="$t('pages.tipPage.enterUrl')" />
       </div>
     </div>
-    <div class="popup" data-cy="tip-container">
+    <div data-cy="tip-container">
       <template v-if="!confirmMode">
         <AmountSend v-model="amount" />
         <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
@@ -279,70 +279,71 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.tour__step3 {
-  margin: 0 auto;
-  padding: 12px 20px 5px;
-  margin-top: 22px;
-  min-width: auto;
-
-  &.v-tour__target--highlighted {
-    margin: 10px;
+.tip {
+  .tour__step3 {
+    margin: 0 auto;
+    margin-top: 22px;
     min-width: auto;
-    padding-bottom: 25px;
+
+    &.v-tour__target--highlighted {
+      margin: 10px;
+      min-width: auto;
+      padding-bottom: 25px;
+    }
+
+    p {
+      margin-top: 0;
+
+      &.title-holder {
+        display: flex;
+        align-items: center;
+      }
+    }
   }
 
-  p {
-    margin-top: 0;
+  .url-bar {
+    position: relative;
 
-    &.title-holder {
+    &.url-bar--input {
+      ::v-deep .url-status {
+        position: absolute;
+        left: 10px;
+        top: 48%;
+        transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        -webkit-transform: translateY(-50%);
+      }
+
+      ::v-deep input {
+        padding-left: 35px;
+      }
+    }
+
+    &.url-bar--text {
       display: flex;
       align-items: center;
     }
-  }
-}
 
-.url-bar {
-  position: relative;
-
-  &.url-bar--input {
-    ::v-deep .url-status {
-      position: absolute;
-      left: 10px;
-      top: 48%;
-      transform: translateY(-50%);
-      -ms-transform: translateY(-50%);
-      -webkit-transform: translateY(-50%);
-    }
-
-    ::v-deep input {
-      padding-left: 35px;
+    a {
+      color: $text-color;
+      text-decoration: none;
+      margin-left: 10px;
+      width: 90%;
     }
   }
 
-  &.url-bar--text {
-    display: flex;
-    align-items: center;
+  .validation-msg {
+    color: #ff8c2a;
+    font-size: 15px;
+    min-height: 45px;
   }
 
-  a {
-    color: $text-color;
-    text-decoration: none;
-    margin-left: 10px;
-    width: 90%;
-  }
-}
-
-.validation-msg {
-  color: #ff8c2a;
-  font-size: 15px;
-  min-height: 45px;
-}
-
-@media screen and (min-width: 380px) {
-  .tour__step3.v-tour__target--highlighted {
-    margin: 10px auto 0 auto;
-    min-width: auto;
-    padding-bottom: 25px;
+  @media screen and (min-width: 380px) {
+    .tour__step3.v-tour__target--highlighted {
+      margin: 10px auto 0 auto;
+      min-width: auto;
+      padding-bottom: 25px;
+    }
   }
 }
 </style>

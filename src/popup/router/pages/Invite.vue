@@ -1,5 +1,5 @@
 <template>
-  <div class="invite popup">
+  <div class="invite">
     <p class="section-title">
       <NewInviteLink class="invite-icon" />
       {{ $t('pages.invite.generate-link') }}
@@ -78,7 +78,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.invite.popup {
+.invite {
   background-color: $black-1;
 
   .section-title {

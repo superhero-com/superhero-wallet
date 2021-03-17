@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="permissions-details">
     <p>{{ host }}</p>
     <div class="permission-row">
       <CheckBox :value="address" @input="togglePermission({ host, name: 'address' })" />
@@ -109,7 +109,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables.scss';
 
-.popup {
+.permissions-details {
   font-size: 15px;
   text-align: left;
   color: $text-color;

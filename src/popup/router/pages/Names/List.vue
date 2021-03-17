@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="list">
     <NameListHeader />
     <ul v-if="owned.length" class="names-list">
       <NameRow
@@ -57,7 +57,7 @@ export default {
 </script>
 
 <style scoped>
-.names-list {
+.list .names-list {
   padding: 0;
 }
 </style>

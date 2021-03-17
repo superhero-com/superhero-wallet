@@ -1,6 +1,6 @@
 <!--eslint-disable vue-i18n/no-raw-text-->
 <template>
-  <div class="popup text-left terms">
+  <div class="terms-of-service text-left">
     <!-- header -->
     <h1 class="heading-1 bolder">TERMS OF USE</h1>
     <p class="italic">The present <b>TERMS OF USE</b> are effective since 9th April 2020.</p>
@@ -948,52 +948,9 @@ export default {
   },
   data() {
     return {
-      details: [
-        {
-          title: this.$t('pages.termsOfService.section1Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section2Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section3Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section4Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section5Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section6Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section7Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section8Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section9Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section10Title'),
-          open: false,
-        },
-        {
-          title: this.$t('pages.termsOfService.section11Title'),
-          open: false,
-        },
-      ],
+      details: Object.entries(this.$t('pages.termsOfService'))
+        .filter(([k]) => /section[0-9]+Title/.test(k))
+        .map(([, title]) => ({ title, open: false })),
       openUrl,
     };
   },
@@ -1008,7 +965,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.terms {
+.terms-of-service {
   font-weight: 100;
 
   .italic {

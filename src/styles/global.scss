@@ -46,10 +46,6 @@ p {
   text-align: left;
 }
 
-.ae-main {
-  padding-bottom: 0;
-}
-
 .ae-button {
   border-radius: 8px;
   height: 52px;
@@ -172,14 +168,6 @@ button {
   color: #717c87;
 }
 
-.popup {
-  padding: 4px 20px;
-  text-align: center;
-  font-size: 16px;
-  margin: 0 auto;
-  position: relative;
-}
-
 .identicon {
   margin-right: 10px;
 }
@@ -192,10 +180,6 @@ button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.popup-no-padding {
-  padding: 4px 0;
 }
 
 #app {
@@ -293,66 +277,6 @@ button {
   margin-bottom: 30px;
   text-align: left;
   word-break: break-word;
-}
-
-/**
-* POPUP WINDWOS
-*/
-.popup-aex2 {
-  max-height: 600px;
-  min-height: 600px;
-  margin-bottom: 55px;
-  position: relative;
-  // overflow-y:scroll;
-  h2 {
-    word-break: break-word;
-    line-height: 1.8rem;
-    font-size: 1.2rem;
-  }
-
-  p {
-    font-weight: normal;
-    word-break: break-word;
-    font-size: 0.9rem;
-  }
-
-  ul li {
-    border-width: 1px;
-    border-color: #424242;
-  }
-
-  .permission-set {
-    flex-direction: column;
-    text-align: left;
-    cursor: unset;
-
-    h4 {
-      display: block;
-      width: 100%;
-      margin: 0;
-    }
-
-    p {
-      display: block;
-      width: 100%;
-      margin: 0;
-    }
-  }
-
-  ul {
-    padding: 0;
-  }
-
-  .account-name {
-    font-size: 0.8rem;
-    word-break: break-word;
-    white-space: nowrap;
-  }
-
-  .hostname {
-    font-size: 0.65rem;
-    word-break: break-word;
-  }
 }
 
 /**

@@ -74,6 +74,7 @@ export default [
     props: true,
     meta: {
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -83,6 +84,7 @@ export default [
     props: true,
     meta: {
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -90,6 +92,7 @@ export default [
     component: Settings,
     meta: {
       title: 'settings',
+      notRebrand: true,
     },
   },
   {
@@ -97,6 +100,7 @@ export default [
     component: LanguageSettings,
     meta: {
       title: 'language',
+      notRebrand: true,
     },
   },
   {
@@ -105,6 +109,7 @@ export default [
     component: SecuritySettings,
     meta: {
       title: 'security',
+      notRebrand: true,
     },
   },
   {
@@ -113,6 +118,7 @@ export default [
     props: true,
     meta: {
       title: 'networks',
+      notRebrand: true,
     },
   },
   {
@@ -121,6 +127,7 @@ export default [
     name: 'permissions-settings',
     meta: {
       title: 'permissionsSettings',
+      notRebrand: true,
     },
   },
   {
@@ -129,6 +136,7 @@ export default [
     name: 'permissions-details',
     meta: {
       title: 'permissionsDetails',
+      notRebrand: true,
     },
   },
   {
@@ -137,6 +145,7 @@ export default [
     meta: {
       title: 'about',
       ifNotAuth: true,
+      notRebrand: true,
     },
   },
   {
@@ -145,6 +154,7 @@ export default [
     meta: {
       title: 'terms',
       ifNotAuth: true,
+      notRebrand: true,
     },
   },
   {
@@ -152,6 +162,7 @@ export default [
     component: PrivacyPolicy,
     meta: {
       title: 'privacy',
+      notRebrand: true,
     },
   },
   {
@@ -161,6 +172,7 @@ export default [
     props: true,
     meta: {
       title: 'send-tips',
+      notRebrand: true,
     },
   },
   {
@@ -169,6 +181,7 @@ export default [
     meta: {
       title: 'send-tips',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -177,6 +190,7 @@ export default [
     component: ClaimTips,
     meta: {
       title: 'claim-tips',
+      notRebrand: true,
     },
   },
   {
@@ -185,6 +199,7 @@ export default [
     meta: {
       title: 'importAccount',
       ifNotAuthOnly: true,
+      notRebrand: true,
     },
   },
   {
@@ -193,6 +208,7 @@ export default [
     meta: {
       ifNotAuthOnly: true,
       notPersist: true,
+      notRebrand: true,
     },
   },
 
@@ -210,6 +226,7 @@ export default [
     component: Send,
     meta: {
       title: 'send',
+      notRebrand: true,
     },
   },
   {
@@ -217,6 +234,7 @@ export default [
     component: Receive,
     meta: {
       title: 'topUp',
+      notRebrand: true,
     },
   },
   {
@@ -227,6 +245,7 @@ export default [
     meta: {
       title: 'send',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -245,6 +264,7 @@ export default [
     meta: {
       title: 'notification-settings',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -254,6 +274,7 @@ export default [
     name: 'name-list',
     meta: {
       title: 'names',
+      notRebrand: true,
     },
   },
   {
@@ -263,6 +284,7 @@ export default [
     name: 'name-claim',
     meta: {
       title: 'names',
+      notRebrand: true,
     },
   },
   {
@@ -272,6 +294,7 @@ export default [
     name: 'auction-list',
     meta: {
       title: 'names',
+      notRebrand: true,
     },
   },
   {
@@ -282,6 +305,7 @@ export default [
     meta: {
       title: 'names',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -292,6 +316,7 @@ export default [
     meta: {
       title: 'bidding',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -301,6 +326,7 @@ export default [
     name: 'auction-bid',
     meta: {
       title: 'names',
+      notRebrand: true,
     },
   },
   {
@@ -309,6 +335,7 @@ export default [
     meta: {
       title: 'comment-new',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -320,6 +347,7 @@ export default [
       title: 'donate-error',
       notPersist: true,
       ifNotAuth: true,
+      notRebrand: true,
     },
   },
   {
@@ -329,6 +357,7 @@ export default [
     meta: {
       title: 'address',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -354,6 +383,7 @@ export default [
     component: NotFound,
     meta: {
       ifNotAuth: true,
+      notRebrand: true,
     },
   },
   {
@@ -363,6 +393,7 @@ export default [
     meta: {
       title: 'sign-message',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -371,6 +402,7 @@ export default [
     component: Invite,
     meta: {
       title: 'invite',
+      notRebrand: true,
     },
   },
   {
@@ -381,6 +413,7 @@ export default [
     meta: {
       title: 'invite',
       notPersist: true,
+      notRebrand: true,
     },
   },
   ...webIframePopups,

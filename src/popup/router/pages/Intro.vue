@@ -1,5 +1,5 @@
 <template>
-  <div :class="['popup', 'intro', { iframe }]">
+  <div :class="['intro', { iframe }]">
     <div v-show="step === 1">
       <img v-if="iframe" src="../../../icons/iframe/receive.svg" />
       <h2 v-else>

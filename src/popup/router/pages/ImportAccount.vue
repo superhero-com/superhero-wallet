@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="import-account">
     <p class="regular-text">{{ $t('pages.index.enterSeedPhrase') }}</p>
     <Textarea v-model="mnemonic" :error="error" />
     <Button @click="importAccount" :disabled="!mnemonic || error" data-cy="import">
@@ -50,7 +50,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.regular-text {
+.import-account .regular-text {
   font-size: $base-font-size;
   text-align: left;
   font-weight: normal;

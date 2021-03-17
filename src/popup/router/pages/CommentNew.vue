@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="comment-new">
     <div class="tip-note-preview mt-15">
       {{ text }}
     </div>

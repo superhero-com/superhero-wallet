@@ -1,5 +1,5 @@
 <template>
-  <div class="claim-tips popup">
+  <div class="claim-tips">
     <p class="primary-title text-left mb-8 f-16">
       {{ $t('pages.claimTips.urlToClaim') }}
     </p>

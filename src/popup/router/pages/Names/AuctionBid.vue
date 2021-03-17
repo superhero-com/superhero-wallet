@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="auction-bid">
     <h4>{{ $t('pages.names.auctions.bid-on') }} {{ name }}</h4>
     <AmountSend :amountError="!+amount" v-model="amount" :errorMsg="amountError" />
     <Button extend @click="bid" :disabled="!!amountError || !+amount">
@@ -99,7 +99,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.details-row {
+.auction-bid .details-row {
   display: flex;
   justify-content: space-between;
   margin: 5px 0;

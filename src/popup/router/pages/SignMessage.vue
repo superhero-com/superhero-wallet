@@ -1,7 +1,7 @@
 <template>
   <!-- remove when we'll be sure about the wording -->
   <!-- eslint-disable vue-i18n/no-raw-text -->
-  <div class="popup">
+  <div class="sign-message">
     <div class="section-title">Sign message for</div>
 
     <div class="url-bar link-sm text-left">
@@ -44,16 +44,18 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.url-bar {
-  color: $text-color;
-}
+.sign-message {
+  .url-bar {
+    color: $text-color;
+  }
 
-.section-title {
-  margin-bottom: 8px;
-  margin-top: 16px;
-  font-size: 16px;
-  color: $white-color;
-  font-weight: 400;
-  text-align: left;
+  .section-title {
+    margin-bottom: 8px;
+    margin-top: 16px;
+    font-size: 16px;
+    color: $white-color;
+    font-weight: 400;
+    text-align: left;
+  }
 }
 </style>

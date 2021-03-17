@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="transactions">
     <AccountInfo />
     <BalanceInfo />
     <TransactionFilters v-model="displayMode" />
@@ -130,22 +130,20 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.date {
-  background: $button-color;
-  padding: 0.5rem 1rem;
-  color: $white-color;
-  text-transform: uppercase;
-  font-size: 0.9rem;
-  font-family: monospace;
-}
+.transactions {
+  .date {
+    background: $button-color;
+    padding: 0.5rem 1rem;
+    color: $white-color;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    font-family: monospace;
+  }
 
-.popup {
-  padding: 0;
-}
-
-.all-transactions {
-  background: $transactions-bg;
-  padding: 0 20px;
-  margin: 0;
+  .all-transactions {
+    background: $transactions-bg;
+    padding: 0 20px;
+    margin: 0;
+  }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="popup popup-aex2" data-cy="popup-aex2">
+  <div class="message-sign popup-aex2" data-cy="popup-aex2">
     <h2 class="identity">
       <div class="flex flex-align-center flex-justify-content-center">
         <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
@@ -48,7 +48,8 @@ export default {
 <style lang="scss" scoped>
 @import '../../../../styles/variables';
 
-.identity img {
+.message-sign .identity img {
   width: 32px;
 }
 </style>
+<style lang="scss" src="./AexPopup.scss" scoped />

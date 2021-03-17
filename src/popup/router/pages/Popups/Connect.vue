@@ -1,5 +1,5 @@
 <template>
-  <div class="popup popup-aex2" data-cy="popup-aex2">
+  <div class="connect popup-aex2" data-cy="popup-aex2">
     <div class="flex identicon-container">
       <div class="identicon">
         <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
@@ -66,7 +66,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../../styles/variables';
 
-.identicon-container {
+.connect .identicon-container {
   position: relative;
   margin-top: 2rem;
 
@@ -133,3 +133,4 @@ export default {
   }
 }
 </style>
+<style lang="scss" src="./AexPopup.scss" scoped />

@@ -1,17 +1,11 @@
 <template>
-  <div
-    :class="[
-      'ae-main',
-      aeppPopup ? 'ae-main-popup ae-main-wave' : waveBg ? 'ae-main-wave' : '',
-      iframe && ($route.path === '/intro' || $route.path === '/') ? 'iframe' : '',
-    ]"
-  >
-    <Header
-      v-if="!(iframe && $route.path === '/intro')"
-      @toggle-sidebar="showSidebar = !showSidebar"
-    />
+  <div id="app">
+    <Header v-if="showHeader" @toggle-sidebar="showSidebar = !showSidebar" />
 
-    <RouterView />
+    <RouterView
+      :class="{ 'not-rebrand': $route.meta.notRebrand, 'show-header': showHeader }"
+      class="main"
+    />
 
     <transition name="slide">
       <div
@@ -24,8 +18,7 @@
       </div>
     </transition>
 
-    <NodeConnectionStatus v-if="!(iframe && $route.path === '/intro')" />
-    <Tour />
+    <NodeConnectionStatus v-if="showConnectionStatus" />
     <Component
       :is="component"
       v-for="{ component, key, props } in modals"
@@ -44,27 +37,24 @@ import { postMessage } from './utils/connection';
 import Header from './router/components/Header';
 import SidebarMenu from './router/components/SidebarMenu';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus';
-import Tour from './router/components/Tour';
 
 export default {
   components: {
     Header,
     SidebarMenu,
     NodeConnectionStatus,
-    Tour,
   },
   data: () => ({
     showSidebar: false,
-    iframe: IN_FRAME,
-    aeppPopup: window.RUNNING_IN_POPUP,
   }),
   computed: {
     ...mapGetters(['account', 'isLoggedIn']),
     ...mapState(['isRestored', 'current', 'sdk', 'backedUpSeed', 'notifications']),
-    waveBg() {
-      return ['/intro', '/popup-sign-tx', '/connect', '/import-account', '/receive'].includes(
-        this.$route.path,
-      );
+    showConnectionStatus() {
+      return !(IN_FRAME && this.$route.path === '/intro');
+    },
+    showHeader() {
+      return !window.RUNNING_IN_POPUP && this.showConnectionStatus;
     },
     modals() {
       return this.$store.getters['modals/opened'];
@@ -139,7 +129,7 @@ body {
 <style lang="scss" scoped>
 @import '../styles/typography';
 
-.ae-main {
+#app {
   position: relative;
   margin: 0 auto;
   overflow: visible;
@@ -148,23 +138,19 @@ body {
 
   color: $white-color;
 
-  &.ae-main-popup {
-    background-color: $bg-color;
-    padding-top: 0;
-  }
+  .main {
+    &.not-rebrand {
+      padding: 4px 20px;
+      text-align: center;
+      font-size: 16px;
+      margin: 0 auto;
+      position: relative;
+    }
 
-  &.ae-main-wave {
-    height: 100%;
-    background-position: center bottom;
-    background-repeat: no-repeat;
-    background-image: url('../icons/background-big-wave.png');
-  }
-
-  padding-top: 48px;
-  padding-top: calc(48px + env(safe-area-inset-top));
-
-  &.iframe {
-    padding-top: 0;
+    &.show-header {
+      padding-top: 48px;
+      padding-top: calc(48px + env(safe-area-inset-top));
+    }
   }
 
   .menu-overlay {
@@ -198,12 +184,6 @@ body {
 
   .slide-leave-to .sidebar-menu {
     opacity: 0;
-  }
-}
-
-@media screen and (max-width: 380px) {
-  .ae-main.ae-main-wave {
-    background-position: 100% 100%;
   }
 }
 </style>

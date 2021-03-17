@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="settings">
     <Panel>
       <PanelItem
         to="/settings/language"
