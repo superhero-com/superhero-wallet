@@ -31,6 +31,7 @@ Vue.component('Loader', LoaderComponent);
 const router = new VueRouter({
   routes,
   mode: process.env.PLATFORM === 'web' ? 'history' : 'hash',
+  scrollBehavior: (to, from, savedPosition) => savedPosition || { x: 0, y: 0 },
 });
 
 const lastRouteKey = 'last-path';
