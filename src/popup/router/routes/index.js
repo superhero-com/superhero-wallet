@@ -227,7 +227,6 @@ export default [
     props: true,
     meta: {
       title: 'tx-details',
-      notPersist: true,
     },
   },
   {

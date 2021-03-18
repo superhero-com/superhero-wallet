@@ -25,50 +25,50 @@
           <CopyButton slot="label" :value="hash" message="Hash copied" />
         </DetailsItem>
         <DetailsItem
-          v-if="microTime"
-          :value="microTime | formatDate"
-          :secondary="microTime | formatTime"
+          v-if="transaction.microTime"
+          :value="transaction.microTime | formatDate"
+          :secondary="transaction.microTime | formatTime"
           :label="$t('pages.transactionDetails.timestamp')"
           data-cy="timestamp"
         />
         <DetailsItem
-          v-if="blockHeight && blockHeight > 0"
-          :value="blockHeight"
+          v-if="transaction.blockHeight && transaction.blockHeight > 0"
+          :value="transaction.blockHeight"
           :label="$t('pages.transactionDetails.blockHeight')"
           data-cy="block-height"
         />
         <DetailsItem
-          v-if="tx.gasUsed"
-          :value="tx.gasUsed"
+          v-if="transaction.tx.gasUsed"
+          :value="transaction.tx.gasUsed"
           :label="$t('pages.transactionDetails.gas')"
           data-cy="gas"
         />
         <DetailsItem
-          v-if="tx.gasPrice"
+          v-if="transaction.tx.gasPrice"
           :label="$t('pages.transactionDetails.gasPrice')"
           data-cy="gas-price"
         >
-          <TokenAmount slot="value" :amount="tx.gasPrice" symbol="ættos" hideFiat />
+          <TokenAmount slot="value" :amount="transaction.tx.gasPrice" symbol="ættos" hideFiat />
         </DetailsItem>
         <DetailsItem :label="$t('pages.transactionDetails.amount')" data-cy="amount">
           <TokenAmount slot="value" :amount="amount" :symbol="symbol" hideFiat />
         </DetailsItem>
         <DetailsItem
-          v-if="tx.nonce"
-          :value="tx.nonce"
+          v-if="transaction.tx.nonce"
+          :value="transaction.tx.nonce"
           :label="$t('pages.transactionDetails.nonce')"
           data-cy="nonce"
         />
         <DetailsItem
-          v-if="tx.fee"
+          v-if="transaction.tx.fee"
           :label="$t('pages.transactionDetails.fee')"
           class="span-2-columns"
           data-cy="fee"
         >
-          <TokenAmount slot="value" :amount="tx.fee" symbol="ættos" hideFiat />
+          <TokenAmount slot="value" :amount="transaction.tx.fee" symbol="ættos" hideFiat />
         </DetailsItem>
         <DetailsItem
-          v-if="pending"
+          v-if="transaction.pending"
           :value="$t('pages.transactionDetails.pending')"
           :label="$t('pages.transactionDetails.status')"
           data-cy="status"
@@ -77,7 +77,7 @@
       </div>
       <div class="explorer">
         <LinkButton :to="getExplorerPath(hash)">
-          <AnimatedPending v-if="pending" />
+          <AnimatedPending v-if="transaction.pending" />
           <BlockIcon v-else />
           {{ $t('pages.transactionDetails.explorer') }}
         </LinkButton>
@@ -107,26 +107,37 @@ export default {
     BlockIcon,
   },
   props: {
-    tx: { type: Object, required: true },
     hash: { type: String, required: true },
-    microTime: { type: Number, required: false },
-    blockHeight: { type: Number },
-    amount: { type: Number, required: true },
-    symbol: { type: String, required: true },
-    direction: { type: String, required: true },
-    txType: { type: String },
-    tipUrl: { type: String },
-    pending: { type: Boolean },
   },
   filters: {
     formatDate,
     formatTime,
   },
-  beforeRouteEnter(to, from, next) {
-    if (!to.params.tx) next({ path: '/transactions', replace: true });
-    next();
+  computed: {
+    ...mapGetters([
+      'getTx',
+      'getTxSymbol',
+      'getTxAmountTotal',
+      'getTxDirection',
+      'getTxTipUrl',
+      'getExplorerPath',
+    ]),
+    transaction() {
+      return this.getTx(this.hash);
+    },
+    amount() {
+      return this.getTxAmountTotal(this.transaction);
+    },
+    symbol() {
+      return this.getTxSymbol(this.transaction);
+    },
+    direction() {
+      return this.getTxDirection(this.transaction);
+    },
+    tipUrl() {
+      return this.getTxTipUrl(this.transaction);
+    },
   },
-  computed: mapGetters(['getExplorerPath']),
 };
 </script>
 

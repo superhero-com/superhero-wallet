@@ -2,8 +2,15 @@ import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { Crypto } from '@aeternity/aepp-sdk/es';
+import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
+import { asBigNumber } from '@aeternity/aepp-sdk/es/utils/bignumber';
 import { defaultNetworks } from '../popup/utils/constants';
-import { checkHashType } from '../popup/utils/helper';
+import {
+  checkHashType,
+  convertToken,
+  aettosToAe,
+  categorizeContractCallTxObject,
+} from '../popup/utils/helper';
 
 const getHdWalletAccount = (wallet, accountIdx = 0) => {
   const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
@@ -54,5 +61,45 @@ export default {
   getExplorerPath: (_, { activeNetwork: { explorerUrl } }) => (hash) => {
     const { endpoint, valid } = checkHashType(hash);
     return valid ? `${explorerUrl}/${endpoint}/${hash}` : null;
+  },
+  getTx: ({ transactions }) => (hash) => {
+    return transactions.latest.concat(transactions.pending).find((tx) => tx.hash === hash);
+  },
+  getTxType: (_, { getTxSymbol }) => (transaction) => {
+    return getTxSymbol(transaction) === 'AE' ? transaction.tx.type : null;
+  },
+  getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
+    const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
+    return contractCallData ? availableTokens[contractCallData.token].symbol : 'AE';
+  },
+  getTxAmountTotal: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
+    const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
+    if (contractCallData)
+      return +convertToken(
+        contractCallData.amount,
+        -availableTokens[contractCallData.token].decimals,
+      );
+    return +aettosToAe(
+      asBigNumber(transaction.tx.amount || transaction.tx.name_fee || 0).plus(
+        transaction.tx.fee || 0,
+      ),
+    );
+  },
+  getTxDirection: (_, { account: { address } }) => ({ tx }) => {
+    return ['senderId', 'accountId', 'ownerId', 'callerId'].map((key) => tx[key]).includes(address)
+      ? 'sent'
+      : 'received';
+  },
+  getTxTipUrl: () => (transaction) => {
+    return (
+      transaction.tipUrl ||
+      transaction.url ||
+      (!transaction.pending &&
+        !transaction.claim &&
+        transaction.tx.log?.[0] &&
+        decode(transaction.tx.log[0].data).toString()) ||
+      categorizeContractCallTxObject(transaction)?.url ||
+      ''
+    );
   },
 };
