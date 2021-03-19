@@ -1,11 +1,9 @@
 import { isFQDN } from 'validator';
 import { detect } from 'detect-browser';
-import { get } from 'lodash-es';
 import { Crypto } from '@aeternity/aepp-sdk/es';
 import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
 import BigNumber from 'bignumber.js';
-import { CONNECTION_TYPES, defaultNetworks, defaultNetwork } from './constants';
-import { getState } from '../../store/plugins/persistState';
+import { CONNECTION_TYPES } from './constants';
 
 export const aeToAettos = (v) =>
   formatAmount(v, {
@@ -40,10 +38,7 @@ export const detectConnectionType = (port) => {
   const isExtensionSender =
     senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/popup/popup.html`) ||
     detect().name === 'firefox';
-  if (
-    [CONNECTION_TYPES.EXTENSION, CONNECTION_TYPES.POPUP].includes(port.name) &&
-    isExtensionSender
-  ) {
+  if (CONNECTION_TYPES.POPUP === port.name && isExtensionSender) {
     return port.name;
   }
   return CONNECTION_TYPES.OTHER;
@@ -112,12 +107,6 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
   return Promise.resolve(contractInstance);
 };
 
-export const getAllNetworks = async () =>
-  [...defaultNetworks, ...get(await getState(), 'userNetworks', [])].reduce(
-    (p, n) => ({ ...p, [n.name]: { ...n } }),
-    {},
-  );
-
 export const escapeSpecialChars = (str) =>
   str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
 
@@ -139,11 +128,6 @@ export const checkHashType = (hash) => {
   }
 
   return { valid, endpoint };
-};
-
-export const getActiveNetwork = async () => {
-  const all = await getAllNetworks();
-  return all[get(await getState(), 'current.network', defaultNetwork.name)];
 };
 
 export const getTwitterAccountUrl = (url) => {

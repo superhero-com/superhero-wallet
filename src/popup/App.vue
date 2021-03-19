@@ -32,8 +32,7 @@
 import { mapGetters, mapState } from 'vuex';
 import { detect } from 'detect-browser';
 import { IN_FRAME } from './utils/helper';
-import { AEX2_METHODS, NOTIFICATION_SETTINGS } from './utils/constants';
-import { postMessage } from './utils/connection';
+import { NOTIFICATION_SETTINGS } from './utils/constants';
 import Header from './router/components/Header';
 import SidebarMenu from './router/components/SidebarMenu';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus';
@@ -91,13 +90,6 @@ export default {
         this.$store.commit('addNotification', {
           text: this.$t('pages.account.seedNotification', [this.$t('pages.account.backup')]),
           path: '/settings/security',
-        });
-      }
-      await this.$watchUntilTruly(() => this.sdk);
-      if (!window.RUNNING_IN_POPUP && process.env.IS_EXTENSION) {
-        postMessage({
-          type: AEX2_METHODS.INIT_RPC_WALLET,
-          payload: this.current.network,
         });
       }
     },
