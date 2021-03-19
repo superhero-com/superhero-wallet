@@ -2,6 +2,7 @@
   "ok": "OK",
   "ae": "AE",
   "mainAccount": "Main account",
+  "subaccountName": "Sub-account #{idx}",
   "onboarding": {
     "step_1": {
       "title": "Your Account Info",
@@ -75,6 +76,10 @@
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",
       "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
+    },
+    "removeSubaccount": {
+      "title": "Remove sub-account?",
+      "msg": "This sub-account will be removed from your wallet and deleted from storage. It will still remain stored on the blockchain and you will be able to restore it with your seed phrase. Make sure you have backed up your seed phrase before you proceed. This action cannot be undone!"
     },
     "verified": {
       "title": "What is a \"Verified\" URL?",
@@ -222,6 +227,7 @@
       "tx-history": "Tx history",
       "payments": "Payments",
       "balances": "Balances",
+      "accounts": "Accounts",
       "tips": "Tips",
       "settings": "Settings",
       "language": "Language",
@@ -278,7 +284,11 @@
       "backup": "backup",
       "updateExtension": "New version available! Please update your extension.",
       "updateAvailable": "New version is available in the store!",
-      "claim-name": "Register a name"
+      "claim-name": "Claim your .chain name",
+      "address-copied": "Address copied"
+    },
+    "accounts": {
+      "showWallet": "Show on Wallet Home"
     },
     "claim": {
       "claim": "Claim tips",

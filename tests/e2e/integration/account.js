@@ -14,16 +14,16 @@ describe('Test cases for Account Page', () => {
 
       .get('[data-cy=copy]')
       .click()
-      .get('.copied-alert')
-      .should('contain', 'Copied!')
+      .get('.copied > .text')
+      .should('contain', 'Address copied')
 
-      .get('[data-cy=account-name]')
+      .get('[data-cy=claim-name]')
       .should('be.visible')
-      .contains('Register a name');
+      .contains('Claim your .chain name');
   });
 
   it('Check Claim-Name, Tip, View-All-Tancastions, Dropdown Buttons And Back to Account', () => {
-    cy.get('[data-cy="account-name"]')
+    cy.get('[data-cy="claim-name"]')
       .should('be.visible')
       .click()
       .get('[data-cy="back-arrow"]')

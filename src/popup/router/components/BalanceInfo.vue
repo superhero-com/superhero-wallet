@@ -92,11 +92,8 @@ export default {
 @import '../../../styles/variables';
 
 .balance-info {
-  height: 76px;
-  border-bottom: 2px solid $transactions-bg;
+  height: 55px;
   display: flex;
-  padding: 0 20px 10px 20px;
-  margin-top: 15px;
   color: $text-color;
   font-size: 26px;
   line-height: 34px;

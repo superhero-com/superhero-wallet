@@ -97,9 +97,23 @@ export default {
     state.loginTargetLocation = location;
   },
   createAccount(state) {
+    state.accs.push({
+      idx: state.accountCount,
+      color:
+        // eslint-disable-next-line no-bitwise
+        state.accountCount === 1 ? '#00FF9D' : `#${((Math.random() * 0xffffff) << 0).toString(16)}`,
+      shift: Math.floor(Math.random() * 100),
+    });
     state.accountCount += 1;
+  },
+  deleteAccount(state, idx) {
+    if (state.accountSelectedIdx === idx) state.accountSelectedIdx = idx - 1;
+    Vue.delete(state.accs, idx);
   },
   selectAccount(state, idx) {
     state.accountSelectedIdx = idx;
+  },
+  setAccountLocalName(state, { name, idx }) {
+    Vue.set(state.accs[idx], 'localName', name);
   },
 };

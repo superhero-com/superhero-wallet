@@ -2,7 +2,7 @@
   <div class="identicons-holder">
     <div class="from">
       <Avatar :address="account.address" :name="account.name" />
-      <span class="account-address">{{ account.name || account.type }}</span>
+      <span class="account-address">{{ account.name || account.localName }}</span>
     </div>
     <div class="arrow-separator">
       <ae-icon name="left-more" />

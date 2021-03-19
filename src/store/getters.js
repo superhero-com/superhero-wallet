@@ -1,4 +1,3 @@
-import { times } from 'lodash-es';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
@@ -28,14 +27,20 @@ export default {
     if (!mnemonic) return null;
     return generateHdWallet(mnemonicToSeed(mnemonic));
   },
-  accounts({ accountCount }, getters) {
+  accounts({ accs }, getters) {
     if (!getters.wallet) return [];
-    return times(accountCount)
-      .map((idx) => getHdWalletAccount(getters.wallet, idx))
-      .map((account) => ({
+    return accs
+      .map(({ idx, ...acc }) => ({
+        idx,
+        ...acc,
+        ...getHdWalletAccount(getters.wallet, idx),
+      }))
+      .map(({ idx, localName, ...account }) => ({
+        idx,
         ...account,
         name: getters['names/getDefault'](account.address),
-        type: i18n.t('mainAccount'),
+        localName:
+          localName || (idx === 0 ? i18n.t('mainAccount') : i18n.t('subaccountName', { idx })),
       }));
   },
   account({ accountSelectedIdx }, { accounts }) {

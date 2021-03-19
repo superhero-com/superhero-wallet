@@ -58,6 +58,7 @@ export default new Vuex.Store({
     loginTargetLocation: { name: 'account' },
     accountCount: 1,
     accountSelectedIdx: 0,
+    accs: [{ idx: 0, color: '#1161FE', shift: 0 }],
   },
   getters,
   mutations,
@@ -85,6 +86,7 @@ export default new Vuex.Store({
         fungibleTokens,
         accountCount,
         accountSelectedIdx,
+        accs,
       }) => ({
         migrations,
         current,
@@ -105,6 +107,7 @@ export default new Vuex.Store({
         fungibleTokens,
         accountCount,
         accountSelectedIdx,
+        accs,
       }),
     ),
     observables,
