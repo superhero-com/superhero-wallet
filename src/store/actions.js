@@ -16,7 +16,6 @@ export default {
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
     commit('updateLatestTransactions', []);
-    commit('setNodeStatus', 'connecting');
     if (process.env.IS_EXTENSION) postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload });
   },
   async fetchPendingTransactions({
