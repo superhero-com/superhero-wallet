@@ -1,23 +1,23 @@
 <template>
   <div class="account-switcher" :class="{ 'notification-above': notification }">
-    <div :class="['cards-wrapper', { 'menu-under': accounts.length > 1 }]" :style="cssVars">
+    <div :class="['cards-wrapper', { 'menu-under': filteredAccounts.length > 1 }]" :style="cssVars">
       <AccountCard
-        v-for="(account, idx) in accounts"
+        v-for="(account, idx) in filteredAccounts"
         :key="account.address"
-        :account-idx="idx"
         v-bind="account"
+        :account-idx="account.i"
         :left="idx > 0 && filteredAccounts.length > 1"
         :right="idx < filteredAccounts.length - 1"
-        @left="selectAccount(idx - 1)"
-        @right="selectAccount(idx + 1)"
+        @left="selectAccount(filteredAccounts[idx - 1].i)"
+        @right="selectAccount(filteredAccounts[idx + 1].i)"
       />
     </div>
-    <div v-if="accounts.length > 1" class="buttons">
+    <div v-if="filteredAccounts.length > 1" class="buttons">
       <button
-        v-for="(value, idx) in accounts.length"
+        v-for="(account, idx) in filteredAccounts"
         :key="idx"
-        @click="selectAccount(idx)"
-        :class="{ selected: idx === accountSelectedIdx }"
+        @click="selectAccount(account.i)"
+        :class="{ selected: account.i === accountSelectedIdx }"
       />
     </div>
   </div>
@@ -35,9 +35,15 @@ export default {
     ...mapGetters(['accounts']),
     cssVars() {
       return {
-        '--accountSelectedIdx': this.accountSelectedIdx,
-        '--accountCount': this.accountCount,
+        '--accountSelectedIdx': this.selectedCardNumber,
+        '--accountCount': this.filteredAccounts.length,
       };
+    },
+    filteredAccounts() {
+      return this.accounts.map((a, index) => ({ ...a, i: index })).filter((a) => a.showed);
+    },
+    selectedCardNumber() {
+      return this.filteredAccounts.findIndex((a) => a.i === this.accountSelectedIdx);
     },
   },
   methods: mapMutations(['selectAccount']),

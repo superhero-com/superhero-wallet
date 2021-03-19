@@ -58,7 +58,7 @@ export default new Vuex.Store({
     loginTargetLocation: { name: 'account' },
     accountCount: 1,
     accountSelectedIdx: 0,
-    accs: [{ idx: 0, color: '#1161FE', shift: 0 }],
+    accs: [{ idx: 0, color: '#1161FE', shift: 0, showed: true }],
   },
   getters,
   mutations,

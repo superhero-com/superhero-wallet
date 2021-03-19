@@ -1,8 +1,10 @@
 <template>
   <div :class="['account-info', { edit, copied }]">
     <div class="account-buttons">
-      <button v-if="idx !== 0" class="remove" @click="remove"><Remove /></button>
-      <RouterLink to="/accounts"><Settings /></RouterLink>
+      <button v-if="idx !== 0 && $route.path === '/accounts'" class="remove" @click="remove">
+        <Remove />
+      </button>
+      <RouterLink v-if="$route.path !== '/accounts'" to="/accounts"><Settings /></RouterLink>
       <button v-if="idx === 0" @click="createAccount">
         <Add />
       </button>
@@ -22,7 +24,9 @@
             <span class="text-ellipsis">
               {{ accounts[idx].localName }}
             </span>
-            <button v-if="idx !== 0" @click="editLocalName"><Edit /></button>
+            <button v-if="idx !== 0 && $route.path === '/accounts'" @click="editLocalName">
+              <Edit />
+            </button>
           </template>
           <template v-else>
             <input v-model="customAccountName" :maxlength="maxCustomNameLength" type="text" />
