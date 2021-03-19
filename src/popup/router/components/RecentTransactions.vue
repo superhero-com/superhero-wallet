@@ -68,14 +68,12 @@ export default {
 @import '../../../styles/typography';
 
 .recent-transactions {
-  height: 220px;
   background: $color-bg-3;
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
 
   .header {
-    padding: 18px 16px 8px 16px;
+    padding: 21px 16px 11px 16px;
     margin-bottom: 1px;
     background: $color-bg-2;
     border-radius: 0 0 4px 4px;
@@ -118,6 +116,7 @@ export default {
 
   .message,
   .spinner {
+    min-height: 174px;
     padding-bottom: 8px;
     flex-grow: 1;
     display: flex;
