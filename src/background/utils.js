@@ -1,34 +1,32 @@
+import { isEqual } from 'lodash-es';
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
-import {
-  setContractInstance,
-  contractCall,
-  getAddressByNameEntry,
-  getActiveNetwork,
-} from '../popup/utils/helper';
+import { setContractInstance, contractCall, getAddressByNameEntry } from '../popup/utils/helper';
 import Logger from '../lib/logger';
 import store from './store';
 
 let sdk;
 let tippingContract;
 
-export const switchNode = async () => {
-  if (sdk) {
-    const network = await getActiveNetwork();
-    const node = await Node({ url: network.url });
-    try {
-      await sdk.addNode(network.name, node, true);
-    } catch (e) {
-      console.warn(`switchNode: ${e}`);
-    }
-    sdk.selectNode(network.name);
-  }
-};
+(async () => {
+  if (!window.IS_EXTENSION_BACKGROUND) return;
+  await store.dispatch('ensureRestored');
+  store.watch(
+    (state, { activeNetwork }) => activeNetwork,
+    async (network, oldNetwork) => {
+      if (isEqual(network, oldNetwork)) return;
+      if (!sdk) return;
+      sdk.pool.delete(network.name);
+      sdk.addNode(network.name, await Node({ url: network.url }), true);
+    },
+  );
+})();
 
 export const getSDK = async () => {
   if (!sdk) {
     try {
-      const network = await getActiveNetwork();
+      await store.dispatch('ensureRestored');
+      const network = store.getters.activeNetwork;
       const node = await Node({ url: network.url });
       sdk = await Universal({
         nodes: [{ name: network.name, instance: node }],

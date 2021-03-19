@@ -1,7 +1,6 @@
 import '../lib/initEnv';
 import '../lib/initPolyfills';
 import initDeeplinkHandler from './deeplink-handler';
-import { switchNode } from './utils';
 import popupConnections from './popup-connection';
 import RedirectChainNames from './redirect-chain-names';
 import wallet from './wallet';
@@ -97,10 +96,6 @@ if (window.IS_EXTENSION_BACKGROUND) {
       case CONNECTION_TYPES.EXTENSION:
         port.onMessage.addListener(async ({ type, payload }) => {
           if (AEX2_METHODS[type]) wallet[type](payload);
-
-          if (type === 'SWITCH_NETWORK') {
-            await switchNode();
-          }
         });
         break;
       case CONNECTION_TYPES.POPUP:

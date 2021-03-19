@@ -6,7 +6,7 @@ import getters from '../store/getters';
 
 Vue.use(Vuex);
 
-export default window.IS_EXTENSION_BACKGROUND
+const store = window.IS_EXTENSION_BACKGROUND
   ? new Vuex.Store({
       plugins: [persistState()],
       modules: { permissions },
@@ -14,6 +14,16 @@ export default window.IS_EXTENSION_BACKGROUND
         'names/getDefault': () => (address) => `placeholder name for ${address}`,
         account: getters.account,
         isLoggedIn: getters.isLoggedIn,
+        networks: getters.networks,
+        activeNetwork: getters.activeNetwork,
+      },
+      actions: {
+        async ensureRestored() {
+          // eslint-disable-next-line no-underscore-dangle
+          await store._watcherVM.$watchUntilTruly(() => store.state.isRestored);
+        },
       },
     })
   : null;
+
+export default store;
