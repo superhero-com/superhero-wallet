@@ -42,9 +42,9 @@ export default {
       extensionVersion: `v.${process.env.npm_package_version}`,
       commitHash: process.env.COMMIT_HASH,
       bugReportUrl: BUG_REPORT_URL,
-      openUrl,
     };
   },
+  methods: { openUrl },
 };
 </script>
 

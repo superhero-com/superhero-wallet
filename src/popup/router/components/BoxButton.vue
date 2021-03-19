@@ -1,7 +1,7 @@
 <template>
   <div class="box-button">
     <RouterLink :to="to">
-      <component :is="icon" class="icon" />
+      <slot name="icon" />
       <span class="text">{{ text }}</span>
     </RouterLink>
   </div>
@@ -10,9 +10,8 @@
 <script>
 export default {
   props: {
-    text: { type: String, required: true },
-    icon: { type: Object, required: true },
     to: { type: String, required: true },
+    text: { type: String, required: true },
   },
 };
 </script>
@@ -34,7 +33,7 @@ export default {
     user-select: none;
     cursor: pointer;
 
-    .icon {
+    ::v-deep svg {
       width: 24px;
       height: 24px;
       opacity: 0.7;
@@ -50,7 +49,7 @@ export default {
     &:hover {
       background: $color-blue-alpha-15;
 
-      .icon {
+      ::v-deep svg {
         opacity: 1;
 
         path {
