@@ -50,7 +50,7 @@ Cypress.Commands.add('openAndEnterSeedPhrase', (seed) => {
 });
 
 Cypress.Commands.add('inputShouldHaveError', (input) => {
-  cy.get(input).should('have.class', 'has-error');
+  cy.get(input).should('have.class', 'error');
 });
 
 Cypress.Commands.add('buttonShouldBeDisabled', (button) => {

@@ -33,25 +33,25 @@
     }}</Button>
   </div>
   <div v-else-if="mode === 'add' || mode === 'edit'" class="mt-10 network">
-    <Input
+    <InputField
       :placeholder="$t('pages.network.networkNamePlaceholder')"
       :label="$t('pages.network.networkNameLabel')"
       v-model="network.name"
       data-cy="network"
     />
-    <Input
+    <InputField
       :placeholder="$t('pages.network.networkUrlPlaceholder')"
       :label="$t('pages.network.networkUrlLabel')"
       v-model="network.url"
       data-cy="url"
     />
-    <Input
+    <InputField
       :placeholder="$t('pages.network.networkMiddlewarePlaceholder')"
       :label="$t('pages.network.networkMiddlewareLabel')"
       v-model="network.middlewareUrl"
       data-cy="middleware"
     />
-    <Input
+    <InputField
       :placeholder="$t('pages.network.networkCompilerPlaceholder')"
       :label="$t('pages.network.networkCompilerLabel')"
       v-model="network.compilerUrl"
@@ -65,7 +65,7 @@
           : $t('pages.network.showTippingConfig')
       }}</span>
     </button>
-    <Input
+    <InputField
       v-if="backendUrlInputExpanded"
       :placeholder="$t('pages.network.backendUrlPlaceholder')"
       :label="$t('pages.network.backendUrlLabel')"
@@ -95,7 +95,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import Button from '../components/Button';
-import Input from '../components/Input';
+import InputField from '../components/InputField';
 import CheckBox from '../components/CheckBox';
 import { defaultNetwork } from '../../utils/constants';
 
@@ -111,7 +111,7 @@ const networkProps = {
 export default {
   components: {
     Button,
-    Input,
+    InputField,
     CheckBox,
   },
   data() {

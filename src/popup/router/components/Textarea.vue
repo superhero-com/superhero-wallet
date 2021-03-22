@@ -2,7 +2,7 @@
   <textarea
     class="textarea"
     :placeholder="placeholder"
-    :class="{ 'has-error': error || err, [size]: size }"
+    :class="{ error: error || err, [size]: size }"
     :value="value"
     @input="$emit('input', $event.target.value)"
     data-cy="textarea"
@@ -55,7 +55,7 @@ export default {
     border-color: $input-focus-color;
   }
 
-  &.has-error {
+  &.error {
     border-color: $input-error-color;
   }
 

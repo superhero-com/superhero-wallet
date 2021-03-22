@@ -14,7 +14,7 @@
     <div class="transaction-sign-limit">
       <div class="permission-row">
         {{ $t('pages.permissions.transaction-sign') }}
-        <Input
+        <InputField
           :value="transactionSignLimit || ''"
           :error="transactionSignLimitError"
           placeholder="no limit"
@@ -51,7 +51,7 @@
 import { pick } from 'lodash-es';
 import { mapState, mapMutations } from 'vuex';
 import CheckBox from '../components/CheckBox';
-import Input from '../components/Input';
+import InputField from '../components/InputField';
 import RangeInput from '../components/RangeInput';
 import TokenAmount from '../components/TokenAmount';
 import Button from '../components/Button';
@@ -59,7 +59,7 @@ import Button from '../components/Button';
 export default {
   components: {
     CheckBox,
-    Input,
+    InputField,
     RangeInput,
     TokenAmount,
     Button,

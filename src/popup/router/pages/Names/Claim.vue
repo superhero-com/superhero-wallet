@@ -2,13 +2,13 @@
   <div class="claim">
     <NameListHeader />
     <div class="claim-name-holder">
-      <Input
+      <InputField
         v-model="name"
         :placeholder="$t('pages.names.claim.name-placeholder')"
-        label=".chain"
-        labelPosition="right"
         :error="!validName"
-      />
+      >
+        <span slot="right">.chain</span>
+      </InputField>
       <Button small @click="claim" :disabled="!sdk || !validName">
         <ae-icon name="plus" />
       </Button>
@@ -20,12 +20,12 @@
 <script>
 import { mapState } from 'vuex';
 import NameListHeader from '../../components/NameListHeader';
-import Input from '../../components/Input';
+import InputField from '../../components/InputField';
 import Button from '../../components/Button';
 import { MAX_AUCTION_NAME_LENGTH } from '../../../utils/constants';
 
 export default {
-  components: { NameListHeader, Input, Button },
+  components: { NameListHeader, InputField, Button },
   data: () => ({ name: '', loading: false }),
   computed: {
     ...mapState(['sdk']),
@@ -80,6 +80,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../../../styles/typography';
+
 .claim {
   .claim-name-holder {
     display: flex;
@@ -87,8 +89,10 @@ export default {
     align-items: center;
     margin-top: 30px;
 
-    .input-group {
-      margin-left: 0;
+    .input-field span {
+      @extend %face-sans-14-regular;
+
+      color: $color-dark-grey;
     }
 
     .button {

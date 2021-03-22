@@ -21,7 +21,7 @@
         {{ pointer }}
       </li>
     </ul>
-    <Input
+    <InputField
       v-if="addPointer"
       v-model="pointer"
       :error="!validPointer"
@@ -51,13 +51,13 @@
 import { mapGetters, mapState } from 'vuex';
 import { checkAensName, checkAddress, getAddressByNameEntry } from '../../../utils/helper';
 import Button from '../../components/Button';
-import Input from '../../components/Input';
+import InputField from '../../components/InputField';
 
 export default {
   props: {
     name: { type: String, required: true },
   },
-  components: { Button, Input },
+  components: { Button, InputField },
   data: () => ({
     pointer: '',
     addPointer: false,

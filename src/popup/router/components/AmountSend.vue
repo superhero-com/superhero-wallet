@@ -2,7 +2,7 @@
   <!-- TODO: Rename the root class to "amount-send" -->
   <div class="amount-send-container">
     <div class="amount-send">
-      <Input
+      <InputField
         class="amount-box"
         type="number"
         :error="amountError || value < 0"
@@ -39,11 +39,11 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import Input from './Input';
+import InputField from './InputField';
 
 export default {
   components: {
-    Input,
+    InputField,
   },
   props: {
     amountError: Boolean,
@@ -81,7 +81,7 @@ export default {
       margin-right: auto;
     }
 
-    input.input {
+    .input-field {
       margin-bottom: 0;
     }
 
@@ -98,7 +98,7 @@ export default {
     .balance-box {
       .label {
         font-size: 14px;
-        margin: 4px 0;
+        margin: 8px 0;
         display: block;
         font-weight: normal;
       }
