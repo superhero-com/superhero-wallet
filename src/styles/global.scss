@@ -72,14 +72,6 @@ p {
   padding-left: rem(48px);
 }
 
-.input {
-  outline: none;
-  resize: none;
-  background: #f7fafc;
-  border: none;
-  padding-left: 1rem;
-}
-
 .textarea {
   outline: none;
   resize: none;
@@ -136,18 +128,6 @@ p {
   width: 100%;
 }
 
-input {
-  background: transparent;
-  border: none;
-  border-bottom: 1px;
-  height: 25px;
-  line-height: 25px;
-}
-
-input:focus {
-  border-bottom: 1px solid #ddd;
-}
-
 button:focus {
   outline: none;
 }
@@ -160,10 +140,6 @@ button {
 
 .identicon {
   margin-right: 10px;
-}
-
-.ae-check > input[type='checkbox']:checked + .ae-check-button::before {
-  border-color: #dae1ea;
 }
 
 .text-ellipsis {
