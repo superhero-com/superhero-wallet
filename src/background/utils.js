@@ -9,7 +9,6 @@ let sdk;
 let tippingContract;
 
 (async () => {
-  if (!window.IS_EXTENSION_BACKGROUND) return;
   await store.dispatch('ensureRestored');
   store.watch(
     (state, { activeNetwork }) => activeNetwork,

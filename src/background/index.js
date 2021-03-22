@@ -9,99 +9,95 @@ import Logger from '../lib/logger';
 import { getState } from '../store/plugins/persistState';
 import store from './store';
 
-if (window.IS_EXTENSION_BACKGROUND) {
-  Logger.init({ background: true });
-  RedirectChainNames.init();
-  initDeeplinkHandler();
+Logger.init({ background: true });
+RedirectChainNames.init();
+initDeeplinkHandler();
 
-  const postPhishingData = async (data) => {
-    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-    const message = { method: 'phishingCheck', ...data };
-    tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message).catch(console.log));
-  };
+const postPhishingData = async (data) => {
+  const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+  const message = { method: 'phishingCheck', ...data };
+  tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message).catch(console.log));
+};
 
-  const openTipPopup = (pageUrl) =>
-    browser.windows.create({
-      url: browser.extension.getURL(`./popup/popup.html#/tip?url=${encodeURIComponent(pageUrl)}`),
-      type: 'popup',
-      height: 600,
-      width: 375,
+const openTipPopup = (pageUrl) =>
+  browser.windows.create({
+    url: browser.extension.getURL(`./popup/popup.html#/tip?url=${encodeURIComponent(pageUrl)}`),
+    type: 'popup',
+    height: 600,
+    width: 375,
+  });
+
+browser.runtime.onMessage.addListener(async (msg, sender) => {
+  const { method, params, from, type, data, url: tipUrl } = msg;
+
+  if (method === 'reload') {
+    wallet.disconnect();
+    window.location.reload();
+    return null;
+  }
+
+  if (method === 'phishingCheck') {
+    const host = new URL(params.href).hostname;
+    let blocked = false;
+    const { result } = await phishingCheckUrl(host);
+    if (result === 'blocked') {
+      const whitelist = getPhishingUrls().filter((url) => url === host);
+      blocked = !whitelist.length;
+    }
+    return postPhishingData({
+      ...msg,
+      data: {
+        method,
+        extUrl: browser.extension.getURL('./'),
+        host,
+        href: params.href,
+        blocked,
+      },
     });
+  }
 
-  browser.runtime.onMessage.addListener(async (msg, sender) => {
-    const { method, params, from, type, data, url: tipUrl } = msg;
-
-    if (method === 'reload') {
-      wallet.disconnect();
-      window.location.reload();
-      return null;
-    }
-
-    if (method === 'phishingCheck') {
-      const host = new URL(params.href).hostname;
-      let blocked = false;
-      const { result } = await phishingCheckUrl(host);
-      if (result === 'blocked') {
-        const whitelist = getPhishingUrls().filter((url) => url === host);
-        blocked = !whitelist.length;
-      }
-      return postPhishingData({
-        ...msg,
-        data: {
-          method,
-          extUrl: browser.extension.getURL('./'),
-          host,
-          href: params.href,
-          blocked,
-        },
-      });
-    }
-
-    if (method === 'setPhishingUrl') {
-      const urls = getPhishingUrls();
-      urls.push(params.hostname);
-      setPhishingUrl(urls);
-      return true;
-    }
-
-    if (method === 'checkHasAccount') {
-      return store.getters.isLoggedIn;
-    }
-
-    if (from === 'content') {
-      const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });
-      if (type === 'readDom' && (data.address || data.chainName)) {
-        const {
-          current: { network },
-        } = await getState();
-        if (sender.url === url && network === 'Mainnet')
-          TipClaimRelay.checkUrlHasBalance(url, data);
-      }
-      if (type === 'openTipPopup') openTipPopup(tipUrl || url);
-    }
-
+  if (method === 'setPhishingUrl') {
+    const urls = getPhishingUrls();
+    urls.push(params.hostname);
+    setPhishingUrl(urls);
     return true;
-  });
+  }
 
-  wallet.init();
+  if (method === 'checkHasAccount') {
+    return store.getters.isLoggedIn;
+  }
 
-  const contextMenuItem = {
-    id: 'superheroTip',
-    title: 'Tip',
-  };
+  if (from === 'content') {
+    const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });
+    if (type === 'readDom' && (data.address || data.chainName)) {
+      const {
+        current: { network },
+      } = await getState();
+      if (sender.url === url && network === 'Mainnet') TipClaimRelay.checkUrlHasBalance(url, data);
+    }
+    if (type === 'openTipPopup') openTipPopup(tipUrl || url);
+  }
 
-  browser.webNavigation.onHistoryStateUpdated.addListener(async ({ tabId, url }) => {
-    if (
-      (({ origin, pathname }) => origin + pathname)(new URL(url)) !==
-      'https://www.youtube.com/watch'
-    )
-      return;
-    browser.tabs.executeScript(tabId, { file: 'other/youtube.js' });
-  });
+  return true;
+});
 
-  browser.contextMenus.removeAll();
-  browser.contextMenus.create(contextMenuItem);
-  browser.contextMenus.onClicked.addListener(({ menuItemId, pageUrl }) => {
-    if (menuItemId === 'superheroTip') openTipPopup(pageUrl);
-  });
-}
+wallet.init();
+
+const contextMenuItem = {
+  id: 'superheroTip',
+  title: 'Tip',
+};
+
+browser.webNavigation.onHistoryStateUpdated.addListener(async ({ tabId, url }) => {
+  if (
+    (({ origin, pathname }) => origin + pathname)(new URL(url)) !== 'https://www.youtube.com/watch'
+  )
+    return;
+  browser.tabs.executeScript(tabId, { file: 'other/youtube.js' });
+});
+
+browser.contextMenus.removeAll();
+browser.contextMenus.create(contextMenuItem);
+browser.contextMenus.onClicked.addListener(({ menuItemId, pageUrl }) => {
+  if (menuItemId === 'superheroTip') openTipPopup(pageUrl);
+});
