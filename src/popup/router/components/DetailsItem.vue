@@ -1,39 +1,73 @@
 <template>
-  <div class="details-item" :class="direction">
-    <label v-if="label">{{ label }}</label>
-    <slot />
+  <div class="details-item">
+    <div class="label">
+      {{ label }}
+      <span v-if="$slots.label" :class="{ indent: label }">
+        <slot name="label" />
+      </span>
+    </div>
+    <div class="value" :class="{ small, highlight }">
+      {{ value }}
+      <span class="secondary" v-if="secondary">
+        {{ secondary }}
+      </span>
+      <slot v-if="$slots.value" name="value" />
+    </div>
   </div>
 </template>
 
 <script>
 export default {
+  name: 'DetailsItem',
   props: {
-    label: { type: String, required: false },
-    direction: { type: String, required: false },
+    label: { type: String, default: '' },
+    value: { type: [String, Number], default: '' },
+    secondary: { type: String },
+    small: { type: Boolean },
+    highlight: { type: Boolean },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.details-item {
-  word-break: break-all;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 10px 0;
-  border-bottom: 1px solid #12121b;
-  padding: 10px;
-  font-size: 14px;
+@import '../../../styles/variables';
+@import '../../../styles/typography';
 
-  &.column {
-    flex-direction: column;
-    align-items: start;
-    text-align: left;
+.details-item {
+  .label {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+
+    @extend %face-sans-15-medium;
+
+    line-height: 16px;
+    color: $color-dark-grey;
+
+    .indent {
+      margin-left: 8px;
+    }
   }
 
-  label {
-    font-weight: bold;
-    font-size: 16px;
+  .value {
+    @extend %face-sans-14-regular;
+
+    color: $color-white;
+    line-height: 24px;
+    margin-bottom: 8px;
+
+    .secondary {
+      color: $color-light-grey;
+      margin-left: 4px;
+    }
+
+    &.small {
+      @extend %face-sans-11-regular;
+    }
+
+    &.highlight {
+      color: $color-error;
+    }
   }
 }
 </style>

@@ -35,7 +35,7 @@ import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk/es';
 import TokenAmount from './TokenAmount';
 import AmountSend from './AmountSend';
 import Button from './Button';
-import CopyIcon from '../../../icons/copy.svg?vue-component';
+import CopyIcon from '../../../icons/copy-old.svg?vue-component';
 import { formatDate } from '../../utils';
 
 export default {

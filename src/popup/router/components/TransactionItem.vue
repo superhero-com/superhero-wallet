@@ -1,12 +1,15 @@
 <template>
-  <div class="transaction-item">
+  <div
+    class="transaction-item"
+    @click="$router.push({ name: 'tx-details', params: { hash: transaction.hash } })"
+  >
     <div class="left">
       <Pending v-if="transaction.pending" class="icon" />
       <TokenAmount
-        :amount="amount"
-        :symbol="symbol"
-        :direction="direction"
-        :altText="txType"
+        :amount="getTxAmountTotal(transaction)"
+        :symbol="getTxSymbol(transaction)"
+        :direction="getTxDirection(transaction)"
+        :altText="getTxType(transaction)"
         data-cy="amount"
       />
     </div>
@@ -18,8 +21,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
-import { aettosToAe, categorizeContractCallTxObject, convertToken } from '../../utils/helper';
+import { mapGetters } from 'vuex';
 import { formatDate, formatTime } from '../../utils';
 import Pending from '../../../icons/animated-pending.svg?vue-component';
 import TokenAmount from './TokenAmount';
@@ -36,39 +38,13 @@ export default {
     formatDate,
     formatTime,
   },
-  computed: {
-    ...mapGetters(['account', 'activeNetwork']),
-    ...mapState('fungibleTokens', ['availableTokens']),
-    direction() {
-      return ['senderId', 'accountId', 'ownerId', 'callerId']
-        .map((key) => this.transaction.tx[key])
-        .includes(this.account.address)
-        ? 'sent'
-        : 'received';
-    },
-    amount() {
-      if (this.contractCallData) {
-        return +convertToken(
-          this.contractCallData.amount,
-          -this.availableTokens[this.contractCallData.token].decimals,
-        );
-      }
-      const amount = this.transaction.tx.amount || this.transaction.tx.name_fee || 0;
-      const fee = this.transaction.tx.fee || 0;
-      return +aettosToAe(+amount + fee);
-    },
-    symbol() {
-      return this.contractCallData
-        ? this.availableTokens[this.contractCallData.token].symbol
-        : 'AE';
-    },
-    txType() {
-      return this.symbol === 'AE' ? this.transaction.tx.type : null;
-    },
-    contractCallData() {
-      return categorizeContractCallTxObject(this.transaction);
-    },
-  },
+  computed: mapGetters([
+    'getTxAmountTotal',
+    'getTxSymbol',
+    'getTxType',
+    'getTxDirection',
+    'getTxTipUrl',
+  ]),
 };
 </script>
 
@@ -97,7 +73,7 @@ export default {
     .icon {
       width: 24px;
       height: 24px;
-      fill: $color-white;
+      color: $color-white;
       margin-right: 2px;
     }
   }

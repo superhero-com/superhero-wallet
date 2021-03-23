@@ -253,7 +253,8 @@
       "mint-burn-token": "Mint/Burn token",
       "allowances": "Allowances",
       "sign-message": "Sign Message",
-      "invite": "Invite"
+      "invite": "Invite",
+      "tx-details": "Tx Details"
     },
     "about": {
       "heading": "About",
@@ -854,14 +855,14 @@
       "date": "Date",
       "type": "Type",
       "amount": "Amount",
-      "fee": "Transaction fee",
+      "fee": "Tx fee",
       "total": "Total",
       "txFrom": "From",
       "txTo": "To",
       "txHash": "Tx hash",
       "transactions": "Transactions",
       "backToTransactions": "Back to Transactions",
-      "explorer": "View in explorer",
+      "explorer": "View Tx in blockchain explorer",
       "txName": "Name",
       "txAccount": "Account",
       "name": "Name",
@@ -870,7 +871,7 @@
       "copy": "Copy",
       "contractId": "Contract Id",
       "advancedMode": "Advanced Mode",
-      "blockHeight": "Block Height",
+      "blockHeight": "Block height",
       "signatures": "Signatures",
       "nonce": "Nonce",
       "callData": "Call Data",
@@ -890,7 +891,12 @@
       "claimed": "Claimed",
       "withdrawals": "Withdrawals",
       "topups": "Top ups",
-      "all": "All"
+      "all": "All",
+      "hash": "Hash",
+      "status": "Status",
+      "pending": "Pending",
+      "tipUrl": "Tipped URL",
+      "timestamp": "Timestamp"
     },
     "transactions": {
       "backToAccount": "Back to account",

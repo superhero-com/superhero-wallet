@@ -23,7 +23,7 @@ import { mapGetters } from 'vuex';
 import Modal from '../Modal';
 import Button from '../Button';
 import Avatar from '../Avatar';
-import DetailsItem from '../DetailsItem';
+import DetailsItem from '../DetailsItemOld';
 
 export default {
   props: {
