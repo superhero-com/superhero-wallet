@@ -15,7 +15,9 @@
     <div class="title">
       <Avatar :address="accounts[idx].address" :name="accounts[idx].name" />
       <div class="account-name" data-cy="account-name">
-        <TruncateMid v-if="accounts[idx].name" :str="accounts[idx].name" class="chainname" />
+        <a v-if="accounts[idx].name" :href="explorerUrl" target="_blank">
+          <TruncateMid :str="accounts[idx].name" class="chainname" />
+        </a>
         <router-link v-else to="/names" data-cy="claim-name" class="claim-chainname">
           {{ $t('pages.account.claim-name') }}
         </router-link>
@@ -37,7 +39,9 @@
         <label v-if="edit">{{ customAccountName.length }}/{{ maxCustomNameLength }}</label>
       </div>
     </div>
-    <a v-if="!copied" class="ae-address">{{ accounts[idx].address }}</a>
+    <a v-if="!copied" :href="explorerUrl" target="_blank" class="ae-address">
+      {{ accounts[idx].address }}
+    </a>
     <div v-else class="copied">
       <span />
       <span class="text">{{ $t('pages.account.address-copied') }}</span>
@@ -73,6 +77,10 @@ export default {
     ...mapGetters(['accounts']),
     idx() {
       return this.accountIdx === -1 ? this.accountSelectedIdx : this.accountIdx;
+    },
+    explorerUrl() {
+      const { address } = this.accounts[this.idx];
+      return `https://explorer.aeternity.io/account/transactions/${address}`;
     },
   },
   methods: {
@@ -174,11 +182,19 @@ export default {
       flex-direction: column;
       justify-content: flex-start;
 
-      .chainname {
+      a .chainname {
         @extend %face-sans-17-medium;
 
         max-width: 150px;
         line-height: 16px;
+        color: $color-white;
+
+        &:hover {
+          &::before,
+          &::after {
+            text-decoration: underline;
+          }
+        }
       }
 
       a {
