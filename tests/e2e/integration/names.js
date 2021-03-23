@@ -4,9 +4,9 @@ describe('Test cases for names', () => {
   it('Contains .chain name in sidebar menu and account info', () => {
     cy.login({ name })
       .get('[data-cy=account-name]')
-      .truncateStringShouldContain('[data-cy=account-name] .truncate-mid', resultName)
+      .truncateStringShouldContain('[data-cy=account-name] .overflowable-text', resultName)
       .openMenu()
       .get('[data-cy=chain-name]')
-      .truncateStringShouldContain('[data-cy=chain-name] .truncate-mid', resultName);
+      .truncateStringShouldContain('[data-cy=chain-name] .overflowable-text', resultName);
   });
 });

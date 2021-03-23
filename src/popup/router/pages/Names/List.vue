@@ -9,7 +9,7 @@
         :name="name"
         :address="owner"
       >
-        <TruncateMid :str="name" class="name" />
+        <OverflowableText :text="name" class="name" />
         <Badge v-if="account.name === name" class="active-name">
           {{ $t('pages.names.default') }}
         </Badge>
@@ -36,11 +36,11 @@ import { mapState, mapGetters } from 'vuex';
 import NameListHeader from '../../components/NameListHeader';
 import Badge from '../../components/Badge';
 import NameRow from '../../components/NameRow';
-import TruncateMid from '../../components/TruncateMid';
+import OverflowableText from '../../components/OverflowableText';
 import CheckBox from '../../components/CheckBox';
 
 export default {
-  components: { NameListHeader, Badge, NameRow, CheckBox, TruncateMid },
+  components: { NameListHeader, Badge, NameRow, CheckBox, OverflowableText },
   computed: {
     ...mapGetters(['account']),
     ...mapState('names', ['owned']),

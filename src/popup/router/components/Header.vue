@@ -10,7 +10,7 @@
     </div>
 
     <div :class="{ 'not-logged-in': !isLoggedIn }" class="title">
-      <TruncateMid v-if="pageTitle" :str="pageTitle" class="text" />
+      <OverflowableText v-if="pageTitle" :text="pageTitle" class="text" />
       <span v-else class="text">
         {{ (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home') }}
       </span>
@@ -53,10 +53,10 @@ import Bell from '../../../icons/bell.svg?vue-component';
 import Settings from '../../../icons/notif-settings.svg?vue-component';
 import Menu from '../../../icons/menu.svg?vue-component';
 import MenuHover from '../../../icons/menu-hover.svg?vue-component';
-import TruncateMid from './TruncateMid';
+import OverflowableText from './OverflowableText';
 
 export default {
-  components: { Logo, Back, Bell, Settings, Menu, MenuHover, TruncateMid },
+  components: { Logo, Back, Bell, Settings, Menu, MenuHover, OverflowableText },
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,
   }),

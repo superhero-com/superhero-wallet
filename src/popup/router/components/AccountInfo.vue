@@ -3,7 +3,7 @@
     <div class="title">
       <div class="account-name" data-cy="account-name">
         <Avatar :address="account.address" :name="account.name" class="avatar" size="small" />
-        <TruncateMid v-if="account.name" :str="account.name" class="chainname" />
+        <OverflowableText v-if="account.name" :text="account.name" class="chainname" />
         <router-link class="claim-chainname" to="/names" v-else
           >{{ $t('pages.account.claim-name') }}
         </router-link>
@@ -25,10 +25,10 @@
 <script>
 import { mapGetters } from 'vuex';
 import Avatar from './Avatar';
-import TruncateMid from './TruncateMid';
+import OverflowableText from './OverflowableText';
 
 export default {
-  components: { Avatar, TruncateMid },
+  components: { Avatar, OverflowableText },
   data: () => ({
     copied: false,
   }),

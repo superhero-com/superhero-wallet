@@ -8,7 +8,7 @@
       <Avatar :address="account.address" :name="account.name" />
       <div class="account-info">
         <div class="f-12" v-if="account.name" data-cy="chain-name">
-          <TruncateMid :str="account.name" />
+          <OverflowableText :text="account.name" />
         </div>
         <div class="account-type">{{ $t('mainAccount') }}</div>
       </div>
@@ -79,14 +79,14 @@ import Invite from '../../../icons/sidebar-menu/invite.svg?vue-component';
 import Settings from '../../../icons/settings.svg?vue-component';
 import About from '../../../icons/sidebar-menu/about.svg?vue-component';
 import Avatar from './Avatar';
-import TruncateMid from './TruncateMid';
+import OverflowableText from './OverflowableText';
 
 export default {
   components: {
     Menu,
     MenuHover,
     Avatar,
-    TruncateMid,
+    OverflowableText,
     Balances,
     Payments,
     Tips,
