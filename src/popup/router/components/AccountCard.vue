@@ -4,7 +4,7 @@
     :style="cssVar"
   >
     <AccountInfo v-bind="$attrs" />
-    <BalanceInfo />
+    <BalanceInfo v-bind="$attrs" />
     <div class="arrows">
       <button @click="$emit('left')"><Arrow v-if="left" /></button>
       <button @click="$emit('right')"><Arrow v-if="right" /></button>

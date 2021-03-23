@@ -10,7 +10,7 @@
           is-custom
         />
         <span class="display-value text-ellipsis">
-          {{ selectedToken ? selectedToken.convertedBalance : tokenBalance.toFixed(2) }}
+          {{ selectedToken ? selectedToken.convertedBalance : balances[idx].toFixed(2) }}
         </span>
         <span class="token-symbol">{{ !selectedToken ? $t('ae') : selectedToken.symbol }}</span>
         <ExpandedAngleArrow class="expand-arrow" />
@@ -27,7 +27,9 @@
           is-custom
         />
         <span class="approx-sign">~</span>
-        <span class="display-value text-ellipsis">{{ formatCurrency(balanceCurrency) }}</span>
+        <span class="display-value text-ellipsis">{{
+          formatCurrency(balances[idx] * currentCurrencyRate)
+        }}</span>
         <ExpandedAngleArrow class="expand-arrow" />
       </div>
     </div>
@@ -45,18 +47,21 @@ export default {
     ExpandedAngleArrow,
     Dropdown,
   },
+  props: {
+    accountIdx: { type: Number, default: -1 },
+  },
   subscriptions() {
-    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+    return pick(this.$store.state.observables, ['balances']);
   },
   computed: {
-    ...mapState(['current', 'currencies']),
+    ...mapState(['current', 'currencies', 'accountSelectedIdx']),
     ...mapState('fungibleTokens', ['tokenBalances', 'selectedToken']),
-    ...mapGetters(['formatCurrency']),
+    ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
     tokenBalancesOptions() {
       return [
         {
           value: 'default',
-          text: `${this.tokenBalance.toFixed(2)} ${this.$t('ae')}`,
+          text: `${this.balances[this.idx].toFixed(2)} ${this.$t('ae')}`,
         },
         ...this.tokenBalances,
       ];
@@ -69,6 +74,9 @@ export default {
     },
     currentToken() {
       return this.selectedToken ? this.selectedToken.value : 'default';
+    },
+    idx() {
+      return this.accountIdx === -1 ? this.accountSelectedIdx : this.accountIdx;
     },
   },
   methods: {
