@@ -951,10 +951,10 @@ export default {
       details: Object.entries(this.$t('pages.termsOfService'))
         .filter(([k]) => /section[0-9]+Title/.test(k))
         .map(([, title]) => ({ title, open: false })),
-      openUrl,
     };
   },
   methods: {
+    openUrl,
     toggleAccordionItem(index) {
       this.details[index].open = !this.details[index].open;
     },

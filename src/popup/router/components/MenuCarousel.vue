@@ -1,29 +1,24 @@
 <template>
   <div class="menu-carousel">
     <flickity class="carousel" ref="flickity" :options="flickityOptions">
-      <BoxButton :text="$t('pages.titles.balances')" :icon="icons.Balances" to="/tokens" />
-      <BoxButton
-        :text="$t('pages.titles.payments')"
-        :icon="icons.Payments"
-        to="/send"
-        class="tour__step7"
-        data-cy="send"
-      />
-      <BoxButton
-        :text="$t('pages.titles.tips')"
-        :icon="icons.Tips"
-        to="/tip"
-        class="tour__step2"
-        data-cy="tip-button"
-      />
-      <BoxButton
-        :text="$t('pages.titles.tx-history')"
-        :icon="icons.Activity"
-        to="/transactions"
-        class="tour__step5"
-      />
-      <BoxButton :text="$t('pages.titles.names')" :icon="icons.Names" to="/names" class="cell" />
-      <BoxButton :text="$t('pages.titles.invite')" :icon="icons.Invites" to="/invite" />
+      <BoxButton to="/tokens" :text="$t('pages.titles.balances')">
+        <Balances slot="icon" />
+      </BoxButton>
+      <BoxButton to="/send" :text="$t('pages.titles.payments')" class="tour__step7" data-cy="send">
+        <Payments slot="icon" />
+      </BoxButton>
+      <BoxButton to="/tip" :text="$t('pages.titles.tips')" class="tour__step2" data-cy="tip-button">
+        <Tips slot="icon" />
+      </BoxButton>
+      <BoxButton to="/transactions" :text="$t('pages.titles.tx-history')" class="tour__step5">
+        <Activity slot="icon" />
+      </BoxButton>
+      <BoxButton to="/names" :text="$t('pages.titles.names')" class="cell">
+        <Names slot="icon" />
+      </BoxButton>
+      <BoxButton to="/invite" :text="$t('pages.titles.invite')">
+        <Invites slot="icon" />
+      </BoxButton>
     </flickity>
     <div class="navigation">
       <button v-show="!hasMore" @click="previous" class="button">
@@ -49,10 +44,19 @@ import Arrow from '../../../icons/chevron-next.svg?vue-component';
 
 export default {
   name: 'MenuCarousel',
-  components: { Flickity, BoxButton, Arrow },
+  components: {
+    Flickity,
+    BoxButton,
+    Arrow,
+    Balances,
+    Payments,
+    Tips,
+    Activity,
+    Names,
+    Invites,
+  },
   data() {
     return {
-      icons: { Balances, Payments, Tips, Activity, Names, Invites },
       flickityOptions: {
         initialIndex: 0,
         prevNextButtons: false,
