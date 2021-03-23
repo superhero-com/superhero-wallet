@@ -1,4 +1,3 @@
-<!--eslint-disable vue-i18n/no-raw-text-->
 <template>
   <div class="privacy-policy">
     <h2>{{ $t('pages.privacyPolicy.heading') }}</h2>

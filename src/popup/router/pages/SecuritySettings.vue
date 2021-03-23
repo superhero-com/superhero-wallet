@@ -46,7 +46,6 @@
           <ae-badge class="selected">{{ $t('pages.seedPhrase.first') }}</ae-badge>
           <ae-badge class="selected">{{ $t('pages.seedPhrase.second') }}</ae-badge>
           <ae-badge class="selected">{{ $t('pages.seedPhrase.third') }}</ae-badge>
-          <!--eslint-disable-next-line vue-i18n/no-raw-text-->
           <ae-badge class="selected">...</ae-badge>
         </template>
         <ae-badge

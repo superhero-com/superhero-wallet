@@ -1,6 +1,4 @@
 <template>
-  <!-- remove when we'll be sure about the wording -->
-  <!-- eslint-disable vue-i18n/no-raw-text -->
   <div class="sign-message">
     <div class="section-title">Sign message for</div>
 

@@ -1,4 +1,3 @@
-<!-- eslint-disable vue-i18n/no-raw-text -->
 <template>
   <div>
     <p data-cy="wallet-found" v-if="wallet.found">Wallet found</p>
