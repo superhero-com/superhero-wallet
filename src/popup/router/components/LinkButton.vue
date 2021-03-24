@@ -13,8 +13,11 @@ export default {
     to: { type: String, required: true },
   },
   methods: {
-    handleClick() {
-      if (process.env.PLATFORM === 'cordova') openUrl(this.to);
+    handleClick(e) {
+      if (process.env.PLATFORM === 'cordova') {
+        e.preventDefault();
+        openUrl(this.to);
+      }
     },
   },
 };
