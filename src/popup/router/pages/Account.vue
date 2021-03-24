@@ -48,17 +48,18 @@ export default {
 @import '../../../styles/variables';
 
 .account {
+  .plate {
+    position: sticky;
+    top: 48px;
+    z-index: 1;
+  }
+
   .menu-carousel {
     padding: 24px;
   }
 
   .recent-transactions {
     margin-top: -10px;
-    padding-top: 279px;
-  }
-
-  &.has-reminder .recent-transactions {
-    padding-top: 313px;
   }
 
   .seed-backup-notification {
