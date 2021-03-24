@@ -171,6 +171,7 @@ const getConfig = platform => {
                 'other/inject',
                 'phishing/phishing',
                 'popup/cameraPermission',
+                'redirect/redirect',
               ],
             }),
             new HtmlWebpackPlugin({
