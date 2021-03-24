@@ -9,9 +9,6 @@
     <Button @click="openUrl(changeCryptoToAeUrl, true)">
       {{ $t('pages.receive.transferExchange') }}
     </Button>
-    <Button data-cy="home" @click="$router.push('/account')">
-      {{ $t('pages.receive.home') }}
-    </Button>
   </div>
 </template>
 
