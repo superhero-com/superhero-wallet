@@ -8,7 +8,7 @@
     <Button bold :disabled="!sufficientBalance" @click="generate">{{
       $t('pages.invite.generate')
     }}</Button>
-    <div class="generated-links">
+    <div v-if="invites.length > 0" class="generated-links">
       <p class="section-title">
         <Invite class="invite-icon" />
         {{ $t('pages.invite.created-links') }}
