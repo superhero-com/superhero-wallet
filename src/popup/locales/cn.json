@@ -236,6 +236,7 @@
       "mint-burn-token": "铸造/销毁代币",
       "allowances": "津贴",
       "sign-message": "签名信息",
+      "sign-transaction": "Sign Transaction",
       "invite": "邀请"
     },
     "about": {

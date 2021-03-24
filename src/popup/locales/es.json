@@ -233,7 +233,8 @@
       "add-token": "Agregar token",
       "mint-burn-token": "Crear/Quemar token",
       "allowances": "Asignaciones",
-      "sign-message": "Firmar Mensaje"
+      "sign-message": "Firmar Mensaje",
+      "sign-transaction": "Sign Transaction"
     },
     "about": {
       "heading": "Acerca de",

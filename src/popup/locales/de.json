@@ -177,7 +177,8 @@
       "home": "Superhero Home",
       "donate-error": "Donate Data",
       "address": "Send Address",
-      "sign-message": "Sign Message"
+      "sign-message": "Sign Message",
+      "sign-transaction": "Sign Transaction"
     },
     "about": {
       "heading": "Über",
