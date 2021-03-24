@@ -53,7 +53,7 @@ describe('Test cases for Account Page', () => {
       .click()
       .get('[data-cy=currency-dropdown] [data-cy=custom-dropdown]')
       .should('have.class', 'show')
-      .click()
+      .click({ force: true }) // TODO: remove force
       .get('[data-cy=currency-dropdown] [data-cy=custom-dropdown]')
       .should('not.have.class', 'show');
   });
