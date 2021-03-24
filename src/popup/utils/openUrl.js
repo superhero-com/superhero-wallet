@@ -13,7 +13,7 @@ export default (url, newTab) => {
     }
     case 'cordova':
       document.addEventListener('deviceready', () => {
-        cordova.InAppBrowser.open(url, '_system');
+        cordova.InAppBrowser.open(url, '_blank');
       });
       break;
     case 'web':
