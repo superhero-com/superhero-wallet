@@ -296,7 +296,7 @@
       "noMobileClaim": "Claiming is currently only available on desktop."
     },
     "claimTips": {
-      "urlToClaim": "Claim tips for this URL:"
+      "urlToClaim": "Claim tips from this URL:"
     },
     "notFound": {
       "notFound": "Requested page can't be found",
