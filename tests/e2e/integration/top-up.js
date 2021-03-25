@@ -7,8 +7,7 @@ describe('Test cases for Top Up Page', () => {
       .get('[data-cy=top-up-container]')
       .should('be.visible')
 
-      .get('[data-cy=home]')
-      .click()
+      .goBack()
       .urlEquals('/account');
   });
 });
