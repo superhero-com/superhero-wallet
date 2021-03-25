@@ -1,8 +1,7 @@
 import { flatten, orderBy, uniq } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
-import { postMessage, postMessageToContent } from '../popup/utils/connection';
-import { AEX2_METHODS } from '../popup/utils/constants';
+import { postMessageToContent } from '../popup/utils/connection';
 import {
   fetchJson,
   getAddressByNameEntry,
@@ -16,8 +15,6 @@ export default {
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
     commit('updateLatestTransactions', []);
-    commit('setNodeStatus', 'connecting');
-    if (process.env.IS_EXTENSION) postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload });
   },
   async fetchPendingTransactions({
     state: { sdk },

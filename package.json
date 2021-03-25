@@ -24,7 +24,7 @@
     "gen:cordova-resources": "cordova-res --icon-background-source '#161620'",
     "build:Testnet": "cross-env NETWORK=Testnet npm run build",
     "watch:dev:Testnet": "cross-env NETWORK=Testnet npm run watch:dev",
-    "watch:dev:tests": "cross-env NETWORK=Testnet RUNNING_IN_TESTS=true npm run watch:dev",
+    "watch:tests": "cross-env NETWORK=Testnet RUNNING_IN_TESTS=true npm run watch:dev",
     "build:tests": "cross-env NETWORK=Testnet RUNNING_IN_TESTS=true npm run build:dev",
     "release": "standard-version"
   },
@@ -33,7 +33,6 @@
     "@aeternity/aepp-sdk": "^7.7.0",
     "@aeternity/bip39": "^0.1.0",
     "@aeternity/hd-wallet": "^0.2.0",
-    "@stamp/it": "^1.1.0",
     "@zxing/library": "^0.18.3",
     "aepp-raendom": "github:aeternity/aepp-raendom#feature/layout-superhero",
     "aeternity-fungible-token": "github:mradkov/aeternity-fungible-token",

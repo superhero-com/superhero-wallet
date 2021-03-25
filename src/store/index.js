@@ -41,7 +41,7 @@ export default new Vuex.Store({
     middleware: null,
     tippingV1: null,
     tippingV2: null,
-    nodeStatus: 'connecting',
+    nodeStatus: '',
     currencies: {},
     nextCurrenciesFetch: null,
     notifications: [],

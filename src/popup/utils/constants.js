@@ -14,15 +14,7 @@ export const TX_TYPES = {
   nameUpdate: TX_TYPE.nameUpdate,
 };
 
-export const AEX2_METHODS = {
-  CHANGE_ACCOUNT: 'CHANGE_ACCOUNT',
-  ADD_ACCOUNT: 'ADD_ACCOUNT',
-  SWITCH_NETWORK: 'SWITCH_NETWORK',
-  INIT_RPC_WALLET: 'INIT_RPC_WALLET',
-};
-
 export const CONNECTION_TYPES = {
-  EXTENSION: 'EXTENSION',
   POPUP: 'POPUP',
   OTHER: 'OTHER',
 };

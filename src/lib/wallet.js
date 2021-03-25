@@ -1,7 +1,7 @@
 import { Node, RpcWallet } from '@aeternity/aepp-sdk/es';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
-import { camelCase, times } from 'lodash-es';
+import { camelCase, isEqual, times } from 'lodash-es';
 import { fetchJson, IN_FRAME } from '../popup/utils/helper';
 import store from '../store';
 import { App } from '../store/modules/permissions';
@@ -90,6 +90,7 @@ export default async function initSdk() {
   if (initSdkRunning) return;
   initSdkRunning = true;
 
+  store.commit('setNodeStatus', 'connecting');
   const { activeNetwork } = store.getters;
   const { url, compilerUrl } = activeNetwork;
   const node = await Node({ url });
@@ -247,9 +248,27 @@ export default async function initSdk() {
     await store.dispatch('initContractInstances');
     await initMiddleware();
     store.commit('setNodeStatus', 'connected');
+    setTimeout(() => store.commit('setNodeStatus', ''), 2000);
     await store.dispatch('fungibleTokens/getAvailableTokens');
     store.dispatch('fungibleTokens/loadTokenBalances');
-    setTimeout(() => store.commit('setNodeStatus', ''), 2000);
+
+    store.watch(
+      (state, getters) => getters.activeNetwork,
+      async (network, oldNetwork) => {
+        if (isEqual(network, oldNetwork)) return;
+        try {
+          store.commit('setNodeStatus', 'connecting');
+          sdk.pool.delete(network.name);
+          sdk.addNode(network.name, await Node({ url: network.url }), true);
+          await initMiddleware();
+          store.commit('setNodeStatus', 'connected');
+          setTimeout(() => store.commit('setNodeStatus', ''), 2000);
+        } catch (error) {
+          store.commit('setNodeStatus', 'error');
+          Logger.write(error);
+        }
+      },
+    );
   } catch (e) {
     store.commit('setNodeStatus', 'error');
     Logger.write(e);
