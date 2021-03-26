@@ -58,39 +58,34 @@ export default (store) => {
         const names = await Promise.all([
           getPendingNameClaimTransactions(),
           middleware.getOwnedBy(account.address).then(({ active }) =>
-            owned
-              ? active
-                  .map(({ info, name }) => ({
-                    createdAtHeight: info.activeFrom,
-                    expiresAt: info.expireHeight,
-                    owner: info.ownership.current,
-                    pointers: info.pointers,
-                    name,
-                  }))
-                  .map((name) => {
-                    const oldName = owned.find((n) => n.name === name.name);
-                    if (!oldName) return name;
-                    const revoked = name.expiresAt < oldName.expiresAt;
-                    if (revoked)
-                      commit(
-                        'addNotification',
-                        {
-                          title: '',
-                          content: i18n.t('pages.names.revoked-notification', {
-                            name: name.name,
-                            block: name.expiresAt,
-                          }),
-                          route: '',
-                        },
-                        { root: true },
-                      );
-                    return {
-                      ...(revoked || oldName.revoked ? { revoked: true } : {}),
-                      autoExtend: oldName.autoExtend,
-                      ...name,
-                    };
-                  })
-              : active,
+            active
+              .map(({ info, name }) => ({
+                createdAtHeight: info.activeFrom,
+                expiresAt: info.expireHeight,
+                owner: info.ownership.current,
+                pointers: info.pointers,
+                revoked: info.revoke,
+                name,
+              }))
+              .map((name) => {
+                if (name.revoked)
+                  commit(
+                    'addNotification',
+                    {
+                      title: '',
+                      content: i18n.t('pages.names.revoked-notification', {
+                        name: name.name,
+                        block: name.expiresAt,
+                      }),
+                      route: '',
+                    },
+                    { root: true },
+                  );
+                return {
+                  autoExtend: owned.find((n) => n.name === name.name)?.autoExtend,
+                  ...name,
+                };
+              })
           ),
         ]).then((arr) => arr.flat());
 
