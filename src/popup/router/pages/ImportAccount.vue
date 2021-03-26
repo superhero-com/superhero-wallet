@@ -39,7 +39,7 @@ export default {
         this.error = true;
         return;
       }
-      this.$store.commit('setMnemonic', this.mnemonic);
+      this.$store.commit('setMnemonic', mnemonic);
       this.$store.commit('setBackedUpSeed');
       await this.$router.push(this.$store.state.loginTargetLocation);
     },
