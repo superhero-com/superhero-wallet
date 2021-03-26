@@ -29,7 +29,7 @@ export default {
 .checkbox-container {
   display: flex;
   position: relative;
-  height: 20px;
+  align-items: center;
   cursor: pointer;
   justify-content: start;
   -webkit-user-select: none;
