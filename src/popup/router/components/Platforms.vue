@@ -93,8 +93,6 @@ export default {
 
   @extend %face-sans-15-regular;
 
-  line-height: 24px;
-
   &:hover {
     background-color: $color-bg-3;
   }

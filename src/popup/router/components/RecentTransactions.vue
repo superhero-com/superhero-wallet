@@ -85,7 +85,6 @@ export default {
       @extend %face-sans-15-medium;
 
       color: $color-dark-grey;
-      line-height: 24px;
     }
 
     .view-all {
@@ -129,7 +128,6 @@ export default {
     @extend %face-sans-15-medium;
 
     color: $color-light-grey;
-    line-height: 24px;
     text-align: center;
   }
 
@@ -150,7 +148,6 @@ export default {
     .text {
       @extend %face-sans-14-medium;
 
-      line-height: 24px;
       color: $color-green;
       padding-left: 4px;
     }

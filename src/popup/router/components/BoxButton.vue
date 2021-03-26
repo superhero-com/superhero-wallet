@@ -42,7 +42,6 @@ export default {
     .text {
       @extend %face-sans-15-medium;
 
-      line-height: 24px;
       color: $color-dark-grey;
     }
 
