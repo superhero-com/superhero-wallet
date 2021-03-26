@@ -473,8 +473,6 @@
       "balance-error": "Your account balance is not enough to execute this transaction.",
       "pointer-added": "Name {type} successful!",
       "pending-claim": "Pending",
-      "revoked": "Revoked",
-      "revoked-notification": "Your name {name} has been revoked at block {block}",
       "auto-extend": "Auto-extend",
       "list": {
         "no-names": "No names found",

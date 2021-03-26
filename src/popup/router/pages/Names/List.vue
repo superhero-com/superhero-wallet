@@ -3,7 +3,7 @@
     <NameListHeader />
     <ul v-if="owned.length" class="names-list">
       <NameRow
-        v-for="({ name, owner, pending, revoked, autoExtend }, index) in owned"
+        v-for="({ name, owner, pending, autoExtend }, index) in owned"
         :key="index"
         :to="{ name: 'name-details', params: { name } }"
         :name="name"
@@ -15,9 +15,6 @@
         </Badge>
         <Badge v-if="pending" class="pending-name">
           {{ $t('pages.names.pending-claim') }}
-        </Badge>
-        <Badge v-if="revoked" class="revoked-name">
-          {{ $t('pages.names.revoked') }}
         </Badge>
         <span class="address">{{ owner }}</span>
         <CheckBox
