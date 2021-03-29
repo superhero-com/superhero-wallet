@@ -2,7 +2,6 @@
   <div class="about">
     <Logo class="logo" />
     <p>
-      {{ $t('pages.about.systemName') }}
       <span class="version">
         <a
           @click="
@@ -50,6 +49,10 @@ export default {
 
 <style lang="scss" scoped>
 .about {
+  .logo {
+    margin-top: 16px;
+  }
+
   .version {
     color: #909090;
   }

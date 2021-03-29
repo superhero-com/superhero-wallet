@@ -2,7 +2,7 @@
   <div class="index">
     <img v-if="IN_FRAME" src="../../../icons/iframe/sendAndReceive.svg" />
     <div v-else class="not-iframe">
-      <SuperheroLogo />
+      <Logo />
       <span class="heading">
         {{ $t('pages.index.heading') }}
       </span>
@@ -45,13 +45,13 @@
 <script>
 import { IN_FRAME } from '../../utils/helper';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
-import SuperheroLogo from '../../../icons/superhero-logo.svg?vue-component';
+import Logo from '../../../icons/logo.svg?vue-component';
 import CheckBox from '../components/CheckBox';
 import Button from '../components/Button';
 import Platforms from '../components/Platforms';
 
 export default {
-  components: { SuperheroLogo, CheckBox, Button, Platforms, AnimatedSpinner },
+  components: { Logo, CheckBox, Button, Platforms, AnimatedSpinner },
   data: () => ({
     termsAgreed: false,
     IS_WEB: process.env.PLATFORM === 'web',
