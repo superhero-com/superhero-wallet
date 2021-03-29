@@ -97,7 +97,7 @@ export default {
   methods: {
     setBackedUpSeed() {
       this.$store.commit('setBackedUpSeed');
-      this.$router.push({ name: 'account' });
+      this.$router.push({ name: 'settings' });
     },
     verifyLastStep() {
       const mnemonicSelected = this.selectedWordIds

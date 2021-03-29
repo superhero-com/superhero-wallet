@@ -1,46 +1,44 @@
-import Index from '../pages/Index';
-import Account from '../pages/Account';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign';
-import PopupConnect from '../pages/Popups/Connect';
-import PopupMessageSign from '../pages/Popups/MessageSign';
-import Settings from '../pages/Settings';
-import LanguageSettings from '../pages/LanguageSettings';
-import SecuritySettings from '../pages/SecuritySettings';
 import About from '../pages/About';
-import Tip from '../pages/Tip';
-import Retip from '../pages/Retip';
-import TermsOfService from '../pages/TermsOfService';
-import PrivacyPolicy from '../pages/PrivacyPolicy';
-import ImportAccount from '../pages/ImportAccount';
-import Intro from '../pages/Intro';
-import Transactions from '../pages/Transactions';
-import TransactionDetails from '../pages/TransactionDetails';
-import Send from '../pages/Send';
-import Receive from '../pages/Receive';
-import SuccessTip from '../pages/SuccessTip';
-import Notifications from '../pages/Notifications';
-import NotificationSettings from '../pages/NotificationSettings';
-
-import PermissionsSettings from '../pages/PermissionsSettings';
-import PermissionsDetails from '../pages/PermissionsDetails';
-import Networks from '../pages/Networks';
-import CommentNew from '../pages/CommentNew';
-import NotFound from '../pages/NotFound';
-import ClaimTips from '../pages/ClaimTips';
-import DonateError from '../pages/DonateError';
+import Account from '../pages/Account';
 import Address from '../pages/Address';
-import TokensPreview from '../pages/FungibleTokens/TokensPreview';
+import ClaimTips from '../pages/ClaimTips';
+import CommentNew from '../pages/CommentNew';
+import DonateError from '../pages/DonateError';
 import TokenDetails from '../pages/FungibleTokens/TokenDetails';
-import SignMessage from '../pages/SignMessage';
-import NamesList from '../pages/Names/List';
-import NameClaim from '../pages/Names/Claim';
-import NamesDetails from '../pages/Names/Details';
-import AuctionList from '../pages/Names/AuctionList';
-import AuctionDetails from '../pages/Names/AuctionDetails';
-import AuctionBid from '../pages/Names/AuctionBid';
+import TokensPreview from '../pages/FungibleTokens/TokensPreview';
+import ImportAccount from '../pages/ImportAccount';
+import Index from '../pages/Index';
+import Intro from '../pages/Intro';
 import Invite from '../pages/Invite';
 import InviteClaim from '../pages/InviteClaim';
-
+import LanguageSettings from '../pages/LanguageSettings';
+import AuctionBid from '../pages/Names/AuctionBid';
+import AuctionDetails from '../pages/Names/AuctionDetails';
+import AuctionList from '../pages/Names/AuctionList';
+import NameClaim from '../pages/Names/Claim';
+import NamesDetails from '../pages/Names/Details';
+import NamesList from '../pages/Names/List';
+import Networks from '../pages/Networks';
+import NotFound from '../pages/NotFound';
+import Notifications from '../pages/Notifications';
+import NotificationSettings from '../pages/NotificationSettings';
+import PermissionsDetails from '../pages/PermissionsDetails';
+import PermissionsSettings from '../pages/PermissionsSettings';
+import PopupConnect from '../pages/Popups/Connect';
+import PopupMessageSign from '../pages/Popups/MessageSign';
+import PrivacyPolicy from '../pages/PrivacyPolicy';
+import Receive from '../pages/Receive';
+import Retip from '../pages/Retip';
+import SecuritySettings from '../pages/SecuritySettings';
+import Send from '../pages/Send';
+import Settings from '../pages/Settings';
+import SignMessage from '../pages/SignMessage';
+import SuccessTip from '../pages/SuccessTip';
+import TermsOfService from '../pages/TermsOfService';
+import Tip from '../pages/Tip';
+import TransactionDetails from '../pages/TransactionDetails';
+import Transactions from '../pages/Transactions';
 import webIframePopups from './web-iframe-popups';
 
 export default [
@@ -90,6 +88,7 @@ export default [
   },
   {
     path: '/settings',
+    name: 'settings',
     component: Settings,
     meta: {
       title: 'settings',
