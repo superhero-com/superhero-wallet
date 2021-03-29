@@ -57,22 +57,6 @@ const getConfig = platform => {
     resolve: {
       extensions: ['.js', '.vue'],
     },
-    ...(platform === 'extension-firefox' && {
-      optimization: {
-        splitChunks: {
-          cacheGroups: {
-            vendor: {
-              name: 'vendor',
-              test: /[\\/]node_modules[\\/]/,
-              chunks(chunk) {
-                return chunk.name === 'popup/popup';
-              },
-              maxSize: 3999999,
-            },
-          },
-        },
-      },
-    }),
     module: {
       rules: [
         {
@@ -157,28 +141,6 @@ const getConfig = platform => {
               null,
               2,
             ),
-          ]
-        : []),
-      ...(platform === 'extension-firefox'
-        ? [
-            new HtmlWebpackPlugin({
-              template: path.join(__dirname, 'src', 'popup', 'popup-firefox.html'),
-              filename: 'popup/popup.html',
-              excludeChunks: [
-                'background',
-                'other/youtube',
-                'other/twitter',
-                'other/inject',
-                'phishing/phishing',
-                'popup/cameraPermission',
-                'redirect/redirect',
-              ],
-            }),
-            new HtmlWebpackPlugin({
-              template: path.join(__dirname, 'src', 'phishing', 'phishing.html'),
-              filename: 'phishing/phishing.html',
-              chunks: ['phishing/phishing'],
-            }),
           ]
         : []),
       ...(platform === 'extension-chrome' &&
