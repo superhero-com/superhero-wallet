@@ -15,7 +15,7 @@ export default {
     state.transactions.pending = state.transactions.pending.filter((t) => t.hash !== hash);
   },
   setUserNetwork(state, { index, ...network }) {
-    if (index !== undefined) state.userNetworks[index] = network;
+    if (index !== undefined) Vue.set(state.userNetworks, index, network);
     else state.userNetworks.push({ ...defaultNetwork, ...network });
   },
   deleteUserNetwork(state, index) {
