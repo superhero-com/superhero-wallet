@@ -1,21 +1,14 @@
 <template>
-  <a class="link-button" :href="to" target="blank" @click="handleClick">
+  <a class="link-button" :href="to" target="blank">
     <slot />
   </a>
 </template>
 
 <script>
-import openUrl from '../../utils/openUrl';
-
 export default {
   name: 'LinkButton',
   props: {
     to: { type: String, required: true },
-  },
-  methods: {
-    handleClick() {
-      if (process.env.PLATFORM === 'cordova') openUrl(this.to);
-    },
   },
 };
 </script>

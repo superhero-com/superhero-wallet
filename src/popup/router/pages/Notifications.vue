@@ -32,7 +32,6 @@
 <script>
 import { mapState, mapMutations } from 'vuex';
 import NotificationItem from '../components/NotificationItem';
-import openUrl from '../../utils/openUrl';
 
 export default {
   components: { NotificationItem },
@@ -74,7 +73,7 @@ export default {
     async onClickHandler(notification) {
       await this.modifyNotificationStatus(notification);
       if (/^\w+:\D+/.test(notification.path)) {
-        openUrl(notification.path, true);
+        window.open(notification.path, '_blank');
       } else {
         this.$router.push(notification.path);
       }

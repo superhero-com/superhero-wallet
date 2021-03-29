@@ -44,7 +44,7 @@
         </Button>
       </div>
       <br />
-      <Button @click="redirectOnFeed" extend>
+      <Button :to="AGGREGATOR_URL" extend>
         {{ $t('pages.successTip.feed') }}
       </Button>
     </div>
@@ -54,7 +54,6 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import Heart from '../../../icons/heart.svg?vue-component';
-import openUrl from '../../utils/openUrl';
 import { AGGREGATOR_URL } from '../../utils/constants';
 import { aettosToAe } from '../../utils/helper';
 import Logger from '../../../lib/logger';
@@ -67,6 +66,7 @@ export default {
     TokenAmount,
     Button,
   },
+  data: () => ({ AGGREGATOR_URL }),
   props: ['amount', 'tipUrl'],
   computed: {
     ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
@@ -99,11 +99,6 @@ export default {
           .catch((error) => Logger.write({ ...error, modal: false }));
       }
     }
-  },
-  methods: {
-    redirectOnFeed() {
-      openUrl(AGGREGATOR_URL, true);
-    },
   },
 };
 </script>

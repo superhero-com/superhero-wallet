@@ -1,5 +1,3 @@
-import openUrl from '../popup/utils/openUrl';
-
 export default {
   computed: {
     callbackOrigin() {
@@ -17,7 +15,7 @@ export default {
         (url, [key, value]) => url.replace(new RegExp(`{${key}}`, 'g'), value),
         this.$route.query[isSuccess ? 'x-success' : 'x-cancel'],
       );
-      openUrl(callbackUrl);
+      window.open(callbackUrl, '_blank');
     },
   },
 };

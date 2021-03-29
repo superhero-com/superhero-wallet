@@ -10,9 +10,8 @@
         </div>
         <div>
           <a
-            @click="
-              openUrl('https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/', true)
-            "
+            href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/"
+            target="_blank"
           >
             <img
               :class="{ grey: !isFirefox() || IS_MOBILE_DEVICE }"
@@ -21,12 +20,8 @@
             />
           </a>
           <a
-            @click="
-              openUrl(
-                'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne',
-                true,
-              )
-            "
+            href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne"
+            target="_blank"
           >
             <img
               :class="{ grey: isFirefox() || IS_MOBILE_DEVICE }"
@@ -41,7 +36,7 @@
           {{ $t('pages.index.platforms.mobile-app') }}
         </div>
         <div>
-          <a @click="openUrl('https://testflight.apple.com/join/3o5r4dQQ', true)">
+          <a href="https://testflight.apple.com/join/3o5r4dQQ" target="_blank">
             <img
               :class="{ grey: !IS_IOS || !IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/app-store.svg"
@@ -49,9 +44,8 @@
             />
           </a>
           <a
-            @click="
-              openUrl('https://play.google.com/store/apps/details?id=com.superhero.cordova', true)
-            "
+            href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
+            target="_blank"
           >
             <img
               :class="{ grey: IS_IOS || !IS_MOBILE_DEVICE }"
@@ -67,13 +61,11 @@
 
 <script>
 import { detect } from 'detect-browser';
-import openUrl from '../../utils/openUrl';
 
 export default {
   data: () => ({
     IS_IOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
     IS_MOBILE_DEVICE: navigator.userAgent.includes('Mobi'),
-    openUrl,
   }),
   methods: {
     isFirefox() {

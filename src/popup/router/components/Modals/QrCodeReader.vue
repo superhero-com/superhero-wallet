@@ -15,7 +15,6 @@
 
 <script>
 import Modal from '../Modal';
-import openUrl from '../../../utils/openUrl';
 
 const handleUnknownError = (error) => console.log(error);
 
@@ -47,7 +46,10 @@ export default {
           try {
             await new Promise((resolve, reject) => {
               if (process.env.IS_EXTENSION) {
-                openUrl(browser.extension.getURL('./popup/CameraRequestPermission.html'));
+                window.open(
+                  browser.extension.getURL('./popup/CameraRequestPermission.html'),
+                  '_blank',
+                );
                 reject();
               }
               if (navigator.mediaDevices.getUserMedia)
