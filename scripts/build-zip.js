@@ -6,12 +6,8 @@ const archiver = require('archiver');
 
 const DEST_DIR = [
   {
-    name: 'chrome',
-    dir: path.join(__dirname, '../dist/chrome'),
-  },
-  {
-    name: 'firefox',
-    dir: path.join(__dirname, '../dist/firefox'),
+    name: 'extension',
+    dir: path.join(__dirname, '../dist/extension'),
   },
   {
     name: 'web',
@@ -53,7 +49,7 @@ const buildZip = (src, dist, zipFilename) => {
 };
 
 const main = () => {
-  DEST_DIR.forEach((build, index) => {
+  DEST_DIR.forEach((build) => {
     const { name, version } = extractExtensionData();
     const zipFilename = `${name}-${build.name}-v${version}.zip`;
 

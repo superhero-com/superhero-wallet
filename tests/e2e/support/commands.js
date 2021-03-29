@@ -3,7 +3,7 @@ import uuid from 'uuid';
 import { formatDate, formatTime, getLoginState } from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
-  cy.visit(`chrome/popup/popup${route ? `#${route}` : ''}`, { onBeforeLoad });
+  cy.visit(`extension/popup/popup${route ? `#${route}` : ''}`, { onBeforeLoad });
 });
 
 Cypress.Commands.add('openAex2Popup', (type, txType) => {
@@ -11,7 +11,7 @@ Cypress.Commands.add('openAex2Popup', (type, txType) => {
   const params = `?id=${id}&type=${type}`;
   const onBeforeLoad = () =>
     txType ? browser.storage.local.set({ txType }) : browser.storage.local.remove('txType');
-  cy.visit(`chrome/popup/popup${params}`, { onBeforeLoad })
+  cy.visit(`extension/popup/popup${params}`, { onBeforeLoad })
     .get('[data-cy=popup-aex2]')
     .should('exist')
     .should('be.visible');
@@ -103,7 +103,7 @@ Cypress.Commands.add('logout', () => {
 });
 
 Cypress.Commands.add('shouldRedirect', (url, to) => {
-  cy.visit(`chrome/popup/popup#${url}`)
+  cy.visit(`extension/popup/popup#${url}`)
     .url()
     .should('eq', `${Cypress.config().popupUrl}/popup#${to}`);
 });

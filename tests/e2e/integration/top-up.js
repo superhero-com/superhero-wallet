@@ -3,7 +3,7 @@ describe('Test cases for Top Up Page', () => {
     cy.login()
       // TODO: update once Payments page is implemented
       // and button to Receive page is available
-      .visit('chrome/popup/popup#/receive')
+      .visit('extension/popup/popup#/receive')
       .get('[data-cy=top-up-container]')
       .should('be.visible')
 
