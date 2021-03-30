@@ -1,9 +1,12 @@
 <template>
   <Component
-    :is="to ? 'RouterLink' : 'button'"
-    :to="to"
+    :is="component"
+    v-bind="{
+      ...$attrs,
+      ...(component === 'a' ? { href: to, target: '_blank' } : { to }),
+    }"
+    v-on="$listeners"
     class="button"
-    @click="$emit('click')"
     :class="[
       fill,
       {
@@ -43,6 +46,19 @@ export default {
     inactive: Boolean,
     to: [String, Object],
     bold: Boolean,
+  },
+  computed: {
+    isLinkOnSameHost() {
+      return (
+        typeof this.to === 'object' ||
+        new URL(this.to, window.location).host === window.location.host
+      );
+    },
+    component() {
+      if (!this.to) return 'button';
+      if (this.isLinkOnSameHost) return 'RouterLink';
+      return 'a';
+    },
   },
 };
 </script>

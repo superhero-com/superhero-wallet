@@ -117,7 +117,7 @@
           <InfoGroup :value="successTx.to" :label="$t('pages.send.to')" />
           <InfoGroup :value="successTx.from" :label="$t('pages.send.from')" />
           <InfoGroup :value="successTx.hash" :label="$t('pages.send.hash')" />
-          <Button @click="$router.push('/account')">{{ $t('pages.send.home') }}</Button>
+          <Button to="/account">{{ $t('pages.send.home') }}</Button>
         </div>
       </div>
     </div>

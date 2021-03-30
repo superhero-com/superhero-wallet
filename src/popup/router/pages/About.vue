@@ -4,9 +4,8 @@
     <p>
       <span class="version">
         <a
-          @click="
-            openUrl(`https://github.com/aeternity/superhero-wallet/commit/${commitHash}`, true)
-          "
+          :href="`https://github.com/aeternity/superhero-wallet/commit/${commitHash}`"
+          target="_blank"
         >
           {{ commitHash.slice(0, 7) }}</a
         >
@@ -21,7 +20,7 @@
       <router-link to="/about/privacyPolicy" data-cy="privacy">{{
         $t('pages.about.privacyPolicy')
       }}</router-link>
-      <Button @click="openUrl(bugReportUrl, true)">
+      <Button :to="BUG_REPORT_URL">
         {{ $t('pages.about.reportBug') }}
       </Button>
     </div>
@@ -31,7 +30,6 @@
 <script>
 import Button from '../components/Button';
 import Logo from '../../../icons/logo.svg?vue-component';
-import openUrl from '../../utils/openUrl';
 import { BUG_REPORT_URL } from '../../utils/constants';
 
 export default {
@@ -40,10 +38,9 @@ export default {
     return {
       extensionVersion: `v.${process.env.npm_package_version}`,
       commitHash: process.env.COMMIT_HASH,
-      bugReportUrl: BUG_REPORT_URL,
+      BUG_REPORT_URL,
     };
   },
-  methods: { openUrl },
 };
 </script>
 

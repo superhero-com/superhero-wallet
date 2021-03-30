@@ -6,7 +6,7 @@
     <AccountInfo />
     <qrcode-vue :value="account.address" size="140" class="my-25 qrcode"></qrcode-vue>
 
-    <Button @click="openUrl(changeCryptoToAeUrl, true)">
+    <Button :to="CHANGE_CRYPTO_AE_URL">
       {{ $t('pages.receive.transferExchange') }}
     </Button>
   </div>
@@ -17,15 +17,13 @@ import { mapGetters } from 'vuex';
 import QrcodeVue from 'qrcode.vue';
 import AccountInfo from '../components/AccountInfo';
 import Button from '../components/Button';
-import openUrl from '../../utils/openUrl';
 import { CHANGE_CRYPTO_AE_URL } from '../../utils/constants';
 
 export default {
   name: 'Receive',
   components: { QrcodeVue, AccountInfo, Button },
   data: () => ({
-    changeCryptoToAeUrl: CHANGE_CRYPTO_AE_URL,
-    openUrl,
+    CHANGE_CRYPTO_AE_URL,
   }),
   computed: mapGetters(['account']),
 };
