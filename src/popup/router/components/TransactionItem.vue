@@ -1,7 +1,7 @@
 <template>
-  <div
+  <RouterLink
     class="transaction-item"
-    @click="$router.push({ name: 'tx-details', params: { hash: transaction.hash } })"
+    :to="{ name: 'tx-details', params: { hash: transaction.hash } }"
   >
     <div class="left">
       <Pending v-if="transaction.pending" class="icon" />
@@ -17,7 +17,7 @@
       <span data-cy="date">{{ transaction.microTime | formatDate }}</span>
       <span data-cy="time">{{ transaction.microTime | formatTime }}</span>
     </div>
-  </div>
+  </RouterLink>
 </template>
 
 <script>
@@ -59,7 +59,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  cursor: pointer;
+  text-decoration: none;
 
   &:hover {
     background: $color-hover;

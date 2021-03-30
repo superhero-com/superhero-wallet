@@ -31,7 +31,7 @@ describe('Tests cases for transactions page', () => {
           micro_time: time,
           tx: { amount },
         } = body.data[0];
-        cy.get('[data-cy=all-transactions] > div')
+        cy.get('[data-cy=all-transactions] > a')
           .eq(0)
           .then((e) => {
             cy.wrap(e)
