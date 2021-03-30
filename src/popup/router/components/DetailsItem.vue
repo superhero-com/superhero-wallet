@@ -53,7 +53,6 @@ export default {
     @extend %face-sans-14-regular;
 
     color: $color-white;
-    line-height: 24px;
     margin-bottom: 8px;
 
     .secondary {
