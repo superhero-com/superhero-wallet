@@ -13,7 +13,7 @@ export default {
     },
   },
   actions: {
-    async claim({ rootState: { account, current, sdk } }, secretKey) {
+    async claim({ rootState: { current, sdk }, rootGetters: { account } }, secretKey) {
       const publicKey = Crypto.getAddressFromPriv(secretKey);
       // TODO: Remove this after merging https://github.com/aeternity/aepp-sdk-js/pull/1060
       const s = await Universal({
