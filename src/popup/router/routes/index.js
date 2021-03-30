@@ -162,6 +162,7 @@ export default [
     component: PrivacyPolicy,
     meta: {
       title: 'privacy',
+      ifNotAuth: true,
       notRebrand: true,
     },
   },
