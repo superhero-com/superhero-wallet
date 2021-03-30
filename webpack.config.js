@@ -210,14 +210,8 @@ const getConfig = platform => {
                 { from: 'icons/icon_128.png', to: `icons/icon_128.png` },
                 { from: 'icons/request_permission.jpg', to: `icons/request_permission.jpg` },
                 {
-                  from: path.join(__dirname, 'src/content-scripts/tipButton.scss'),
-                  to: path.join(
-                    __dirname,
-                    {
-                      'extension-chrome': 'dist/chrome/other/tipButton.css',
-                      'extension-firefox': 'dist/firefox/other/tipButton.css',
-                    }[platform],
-                  ),
+                  from: 'content-scripts/tipButton.scss',
+                  to: 'other/tipButton.css',
                   transform: (_, f) => sass.renderSync({ file: f }).css.toString(),
                 },
               ]
