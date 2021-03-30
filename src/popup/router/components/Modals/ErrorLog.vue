@@ -4,7 +4,6 @@
       {{ $t('modals.error-log.title') }}
     </template>
 
-    <!--eslint-disable-next-line vue-i18n/no-raw-text-->
     <div class="error-msg">{{ message }}...</div>
     <div>
       <span>{{ $t('modals.error-log.sub-title') }}</span>

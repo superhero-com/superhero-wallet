@@ -5,7 +5,6 @@
         <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
         <div>
           <span class="secondary-text" data-cy="host">
-            <!--eslint-disable-next-line vue-i18n/no-raw-text-->
             {{ app.host }} {{ app.name ? `(${app.name})` : '' }}
           </span>
           {{ $t('pages.popupMessageSign.heading') }}

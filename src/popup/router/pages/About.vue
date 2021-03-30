@@ -9,7 +9,7 @@
           "
         >
           {{ commitHash.slice(0, 7) }}</a
-        ><!--eslint-disable-line vue-i18n/no-raw-text-->
+        >
         / {{ extensionVersion }}
       </span>
     </p>

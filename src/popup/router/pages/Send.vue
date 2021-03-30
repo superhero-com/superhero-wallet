@@ -76,7 +76,6 @@
                 {{ selectedToken ? selectedToken.symbol : $t('ae') }}</span
               >
               <span v-if="!selectedToken" class="currencyamount">
-                <!--eslint-disable-line vue-i18n/no-raw-text-->
                 ~
                 <span>
                   {{ formatCurrency((form.amount * currentCurrencyRate).toFixed(3)) }}

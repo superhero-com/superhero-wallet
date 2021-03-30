@@ -1,6 +1,5 @@
 <template>
   <div class="three-dots" :class="{ active: showMenu }" @click="showMenu = !showMenu">
-    <!--eslint-disable-line vue-i18n/no-raw-text-->
     •••
     <SmallModal v-if="showMenu" @close="showMenu = false">
       <slot />
