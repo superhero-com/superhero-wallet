@@ -44,6 +44,7 @@ import webIframePopups from './web-iframe-popups';
 export default [
   {
     path: '/',
+    name: 'index',
     component: Index,
     meta: {
       title: '',
