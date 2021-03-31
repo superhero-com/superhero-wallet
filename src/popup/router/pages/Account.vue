@@ -1,6 +1,6 @@
 <template>
   <div class="account">
-    <div class="plate">
+    <Plate>
       <i18n
         v-if="!backedUpSeed"
         path="pages.account.seedNotification"
@@ -16,13 +16,14 @@
         <BalanceInfo />
       </div>
       <MenuCarousel />
-    </div>
+    </Plate>
     <RecentTransactions />
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
+import Plate from '../components/Plate';
 import RecentTransactions from '../components/RecentTransactions';
 import BalanceInfo from '../components/BalanceInfo';
 import AccountInfo from '../components/AccountInfo';
@@ -31,6 +32,7 @@ import MenuCarousel from '../components/MenuCarousel';
 export default {
   name: 'Account',
   components: {
+    Plate,
     RecentTransactions,
     BalanceInfo,
     AccountInfo,
@@ -46,16 +48,6 @@ export default {
 @import '../../../styles/variables';
 
 .account {
-  overflow-x: hidden;
-
-  .plate {
-    position: relative;
-    margin-left: -1px;
-    border: 1px solid rgba($color-border, 0.5);
-    border-radius: 0 0 10px 10px;
-    background: linear-gradient(180deg, $color-bg-3 0%, $color-black 100%);
-  }
-
   .recent-transactions {
     margin-top: -10px;
   }

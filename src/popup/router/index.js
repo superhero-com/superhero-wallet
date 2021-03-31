@@ -33,6 +33,7 @@ const router = new VueRouter({
   mode: process.env.PLATFORM === 'web' ? 'history' : 'hash',
   scrollBehavior: (to, from, savedPosition) => savedPosition || { x: 0, y: 0 },
 });
+router.afterEach(() => document.querySelector('#app').scroll(0, 0));
 
 const lastRouteKey = 'last-path';
 

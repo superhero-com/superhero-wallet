@@ -5,7 +5,6 @@
       'not-rebrand': $route.meta.notRebrand,
       'show-sidebar': showSidebar,
       'show-header': showStatusAndHeader,
-      'scroll-content': $route.meta.scrollContent,
     }"
   >
     <Header @toggle-sidebar="showSidebar = !showSidebar" />
@@ -139,11 +138,7 @@ body {
   margin: 0 auto;
   width: $extension-width;
   height: 600px;
-  overflow: hidden;
-
-  &.scroll-content {
-    overflow: scroll;
-  }
+  overflow: auto;
 
   @include mobile {
     width: 100%;
@@ -171,25 +166,18 @@ body {
 
     @include desktop {
       padding-top: 0;
-    }
-  }
-
-  .main {
-    height: 100%;
-
-    @include mobile {
-      min-height: 600px;
-    }
-
-    @include desktop {
       min-height: calc(100% - 48px);
       min-height: calc(100% - 48px - env(safe-area-inset-top));
     }
   }
 
-  &.not-rebrand {
-    overflow: scroll;
+  .main {
+    @include mobile {
+      min-height: 600px;
+    }
+  }
 
+  &.not-rebrand {
     @include mobile {
       overflow: visible;
     }
@@ -210,11 +198,6 @@ body {
         padding-right: 0;
       }
     }
-  }
-
-  &:not(.not-rebrand) .main {
-    display: flex;
-    flex-direction: column;
   }
 
   .menu-overlay {

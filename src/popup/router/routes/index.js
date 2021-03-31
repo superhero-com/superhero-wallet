@@ -229,7 +229,6 @@ export default [
     props: true,
     meta: {
       title: 'tx-details',
-      scrollContent: true,
     },
   },
   {
