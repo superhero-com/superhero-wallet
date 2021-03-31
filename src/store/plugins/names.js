@@ -58,36 +58,29 @@ export default (store) => {
         const names = await Promise.all([
           getPendingNameClaimTransactions(),
           middleware.getOwnedBy(account.address).then(({ active }) =>
-            active
-              .map(({ info, name }) => ({
-                createdAtHeight: info.activeFrom,
-                expiresAt: info.expireHeight,
-                owner: info.ownership.current,
-                pointers: info.pointers,
-                revoked: info.revoke,
-                name,
-              }))
-              .map((name) => {
-                if (name.revoked)
-                  commit(
-                    'addNotification',
-                    {
-                      title: '',
-                      content: i18n.t('pages.names.revoked-notification', {
-                        name: name.name,
-                        block: name.expiresAt,
-                      }),
-                      route: '',
-                    },
-                    { root: true },
-                  );
-                return {
-                  autoExtend: owned.find((n) => n.name === name.name)?.autoExtend,
-                  ...name,
-                };
-              })
+            active.map(({ info, name }) => ({
+              createdAtHeight: info.activeFrom,
+              expiresAt: info.expireHeight,
+              owner: info.ownership.current,
+              pointers: info.pointers,
+              revoked: info.revoke,
+              autoExtend: owned.find((n) => n.name === name)?.autoExtend,
+              name,
+            })),
           ),
         ]).then((arr) => arr.flat());
+
+        names.forEach(({ name, revoked, expiresAt: block }) => {
+          if (revoked)
+            commit(
+              'addNotification',
+              {
+                text: i18n.t('pages.names.revoked-notification', { name, block }),
+                path: `/names/${name}`,
+              },
+              { root: true },
+            );
+        });
 
         commit('set', names);
 
