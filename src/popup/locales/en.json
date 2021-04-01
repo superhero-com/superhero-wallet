@@ -1061,5 +1061,6 @@
   "seconds": "{n} seconds | {n} second | {n} seconds",
   "minutes": "{n} minutes | {n} minute | {n} minutes",
   "hours": "{n} hours | {n} hour | {n} hours",
-  "days": "{n} days | {n} day | {n} days"
+  "days": "{n} days | {n} day | {n} days",
+  "addressCopied": "Address copied"
 }
