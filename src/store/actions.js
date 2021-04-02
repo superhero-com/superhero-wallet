@@ -19,12 +19,7 @@ export default {
     commit('switchNetwork', payload);
     commit('setTransactions', []);
   },
-  async fetchPendingTransactions({
-    state: { sdk, transactions },
-    getters: {
-      account: { address },
-    },
-  }) {
+  async fetchPendingTransactions({ state: { sdk, transactions } }, address) {
     return (
       await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
         (r) => r.transactions,
@@ -46,7 +41,7 @@ export default {
       state.middleware.getTxByAccount(address, limit, page)
         .then(({ data }) => data)
         .catch(() => []),
-      dispatch('fetchPendingTransactions'),
+      dispatch('fetchPendingTransactions', address),
       fetchJson(
         `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${
           recent ? `&limit=${limit}` : ''
