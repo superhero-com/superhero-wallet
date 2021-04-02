@@ -215,9 +215,10 @@ export default {
     };
   },
   computed: {
-    ...mapState('fungibleTokens', ['selectedToken', 'availableTokens']),
+    ...mapState('fungibleTokens', ['availableTokens']),
     ...mapState(['current', 'sdk']),
     ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate']),
+    ...mapGetters('fungibleTokens', ['selectedToken']),
     validAddress() {
       return checkAddress(this.form.address)
         || (!this.selectedToken && checkAensName(this.form.address));

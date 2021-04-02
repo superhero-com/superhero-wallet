@@ -1,6 +1,7 @@
+import Vue from 'vue';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
-import Vue from 'vue';
+import { unionBy, isEqual } from 'lodash-es';
 import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
 
 export default (store) => {
@@ -8,25 +9,46 @@ export default (store) => {
     namespaced: true,
     state: {
       availableTokens: {},
-      tokenBalances: [],
-      selectedToken: null,
+      tokens: {},
       aePublicData: {},
     },
+    getters: {
+      getTokenBalance: ({ tokens }) => (address) => tokens?.[address]?.tokenBalances || [],
+      getSelectedToken: ({ tokens }) => (address) => tokens?.[address]?.selectedToken,
+      tokenBalances: (
+        state, { getTokenBalance }, rootState, { account: { address } },
+      ) => getTokenBalance(address),
+      selectedToken: (
+        state, { getSelectedToken }, rootState, { account: { address } },
+      ) => getSelectedToken(address),
+    },
     mutations: {
-      setSelectedToken(state, payload) {
-        state.selectedToken = payload;
+      setSelectedToken(state, { address, token }) {
+        if (!(address in state.tokens)) {
+          Vue.set(state.tokens, address, { selectedToken: null, tokenBalances: [] });
+        }
+        Vue.set(state.tokens[address], 'selectedToken', token);
       },
       setAvailableTokens(state, payload) {
         state.availableTokens = payload;
       },
-      resetTokenBalances(state) {
-        state.tokenBalances = [];
+      resetTokenBalances(state, address) {
+        if (address in state.tokens) {
+          state.tokens[address].tokenBalances = [];
+        }
       },
-      updateAvailableToken(state, token) {
-        Vue.set(state.availableTokens, token.contract, token);
+      resetTokens(state) {
+        state.tokens = {};
       },
-      addTokenBalance(state, payload) {
-        state.tokenBalances.push(payload);
+      addTokenBalance(state, { address, token }) {
+        if (!(address in state.tokens)) {
+          Vue.set(state.tokens, address, { selectedToken: null, tokenBalances: [] });
+        }
+        Vue.set(
+          state.tokens[address],
+          'tokenBalances',
+          unionBy([token], state.tokens[address].tokenBalances, 'contract'),
+        );
       },
       setAePublicData(state, payload) {
         state.aePublicData = payload;
@@ -44,35 +66,41 @@ export default (store) => {
         return commit('setAvailableTokens', availableTokens);
       },
       async loadTokenBalances({
-        rootGetters: { activeNetwork, account },
-        state: { availableTokens, selectedToken },
+        rootGetters: { activeNetwork, accounts },
+        state: { availableTokens },
         commit,
       }) {
-        const tokens = await fetchJson(
-          `${activeNetwork.middlewareUrl}/aex9/balances/account/${account.address}`,
-        ).catch(handleUnknownError);
+        accounts.map(async ({ address }) => {
+          const tokens = await fetchJson(
+            `${activeNetwork.middlewareUrl}/aex9/balances/account/${address}`,
+          ).catch(handleUnknownError);
 
-        commit('resetTokenBalances');
+          const selectedToken = store.state.fungibleTokens.tokens[address]?.selectedToken;
 
-        tokens.map(({ amount, contract_id: contract }) => {
-          const token = availableTokens[contract];
-          const balance = convertToken(amount, -token.decimals);
-          const convertedBalance = balance.toFixed(2);
-          const objectStructure = {
-            ...token,
-            value: contract,
-            text: `${convertedBalance} ${token.symbol}`,
-            contract,
-            balance,
-            convertedBalance,
-          };
+          commit('resetTokenBalances', address);
 
-          commit('updateAvailableToken', objectStructure);
-          return commit('addTokenBalance', objectStructure);
+          tokens.filter(({ amount }) => amount).map(({ amount, contract_id: contract }) => {
+            const token = availableTokens[contract];
+            const balance = convertToken(amount, -token.decimals);
+            const convertedBalance = balance.toFixed(2);
+            const objectStructure = {
+              ...token,
+              value: contract,
+              text: `${convertedBalance} ${token.symbol}`,
+              contract,
+              balance,
+              convertedBalance,
+            };
+
+            return commit('addTokenBalance', { address, token: objectStructure });
+          });
+          commit('setSelectedToken',
+            {
+              address,
+              token: (store.state.fungibleTokens.tokens?.[address]?.tokenBalances || [])
+                .find((t) => t.contract === selectedToken?.contract),
+            });
         });
-        commit('setSelectedToken',
-          store.state.fungibleTokens.tokenBalances
-            .find((t) => t.contract === selectedToken?.contract));
       },
       async getAeternityData({ rootState: { current }, commit }) {
         const [aeternityData] = await fetchJson(
@@ -84,9 +112,10 @@ export default (store) => {
         return commit('setAePublicData', aeternityData);
       },
       async createOrChangeAllowance(
-        { rootState: { sdk }, state: { selectedToken }, rootGetters: { activeNetwork, account } },
+        { rootState: { sdk }, state: { tokens }, rootGetters: { activeNetwork, account } },
         amount,
       ) {
+        const { selectedToken } = tokens[account.address];
         const tokenContract = await sdk.getContractInstance(FUNGIBLE_TOKEN_CONTRACT, {
           contractAddress: selectedToken.contract,
         });
@@ -105,15 +134,15 @@ export default (store) => {
         ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
       },
       async transfer(
-        { rootState: { sdk }, state: { selectedToken } },
+        { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
         [toAccount, amount, option],
       ) {
         const tokenContract = await sdk.getContractInstance(FUNGIBLE_TOKEN_CONTRACT, {
-          contractAddress: selectedToken.contract,
+          contractAddress: tokens[account.address].selectedToken.contract,
         });
         return tokenContract.methods.transfer(
           toAccount,
-          convertToken(amount, selectedToken.decimals).toFixed(),
+          convertToken(amount, tokens[account.address].selectedToken.decimals).toFixed(),
           option,
         );
       },
@@ -126,6 +155,23 @@ export default (store) => {
       if (!middleware) return;
 
       await store.dispatch('fungibleTokens/getAvailableTokens');
+      await store.dispatch('fungibleTokens/loadTokenBalances');
+    },
+    { immediate: true },
+  );
+
+  store.watch(
+    (state, { activeNetwork }) => activeNetwork,
+    async (network, oldNetwork) => {
+      if (isEqual(network, oldNetwork)) return;
+      store.commit('fungibleTokens/resetTokens');
+    },
+  );
+
+  store.watch(
+    ({ accountCount }) => accountCount,
+    async () => {
+      if (!store.state.middleware) return;
       await store.dispatch('fungibleTokens/loadTokenBalances');
     },
     { immediate: true },

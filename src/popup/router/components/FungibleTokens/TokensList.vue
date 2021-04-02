@@ -16,7 +16,7 @@
 
 <script>
 import { pick } from 'lodash-es';
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import TokensListItem from './TokensListItem';
 
 export default {
@@ -31,7 +31,8 @@ export default {
     return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
   },
   computed: {
-    ...mapState('fungibleTokens', ['tokenBalances', 'availableTokens', 'aePublicData']),
+    ...mapState('fungibleTokens', ['availableTokens', 'aePublicData']),
+    ...mapGetters('fungibleTokens', ['tokenBalances']),
 
     /**
      * Returns the default aeternity meta information
@@ -52,13 +53,20 @@ export default {
      * Converts the token information object into a searchable list
      */
     convertedTokenInfo() {
-      return Object.entries(this.availableTokens).map(([contract, tokenData]) => ({
+      const tokens = Object.entries(this.availableTokens).map(([contract, tokenData]) => ({
         name: tokenData.name,
         symbol: tokenData.symbol,
         contract,
         decimals: tokenData.decimals,
         convertedBalance: tokenData.convertedBalance,
       }));
+      this.tokenBalances.forEach((b) => {
+        const index = tokens.findIndex((t) => t.contract === b.contract);
+        if (index !== -1) {
+          tokens[index] = b;
+        }
+      });
+      return tokens;
     },
     filteredResults() {
       const tokensInfo = [

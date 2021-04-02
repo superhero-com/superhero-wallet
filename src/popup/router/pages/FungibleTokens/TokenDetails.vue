@@ -135,7 +135,8 @@ export default {
   },
   computed: {
     ...mapGetters(['tippingSupported', 'formatCurrency']),
-    ...mapState('fungibleTokens', ['tokenBalances', 'availableTokens', 'aePublicData']),
+    ...mapState('fungibleTokens', ['aePublicData', 'availableTokens']),
+    ...mapGetters('fungibleTokens', ['tokenBalances']),
     fungibleToken() {
       return this.availableTokens[this.id];
     },

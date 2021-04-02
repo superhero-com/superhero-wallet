@@ -67,8 +67,8 @@ export default {
   },
   computed: {
     ...mapState(['current', 'currencies', 'accountSelectedIdx']),
-    ...mapState('fungibleTokens', ['tokenBalances', 'selectedToken']),
-    ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
+    ...mapGetters('fungibleTokens', ['getTokenBalance', 'getSelectedToken']),
+    ...mapGetters(['formatCurrency', 'currentCurrencyRate', 'accounts']),
     tokenBalancesOptions() {
       return [
         {
@@ -90,19 +90,22 @@ export default {
     idx() {
       return this.accountIdx === -1 ? this.accountSelectedIdx : this.accountIdx;
     },
+    tokenBalances() {
+      return this.getTokenBalance(this.accounts[this.idx].address);
+    },
+    selectedToken() {
+      return this.getSelectedToken(this.accounts[this.idx].address);
+    },
   },
   methods: {
     async switchCurrency(selectedCurrency) {
       this.$store.commit('setCurrentCurrency', selectedCurrency);
     },
-    changeToken(value) {
-      this.$store.commit(
-        'fungibleTokens/setSelectedToken',
-        value !== 'default' ? this.getSelectedToken(value) : null,
-      );
-    },
-    getSelectedToken(changedToken) {
-      return this.tokenBalances.find(({ value }) => value === changedToken) || null;
+    changeToken(token) {
+      this.$store.commit('fungibleTokens/setSelectedToken', {
+        address: this.accounts[this.idx].address,
+        token: token !== 'default' ? this.tokenBalances.find(({ value }) => value === token) : null,
+      });
     },
   },
 };
