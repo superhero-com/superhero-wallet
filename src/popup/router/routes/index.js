@@ -219,6 +219,7 @@ export default [
     component: Transactions,
     meta: {
       title: 'activity',
+      notRebrand: true,
     },
   },
   {
@@ -377,6 +378,7 @@ export default [
     component: TokensPreview,
     meta: {
       title: 'tokens-preview',
+      notRebrand: true,
     },
   },
   {
@@ -386,6 +388,7 @@ export default [
     props: true,
     meta: {
       title: 'token-details',
+      notRebrand: true,
     },
   },
   {

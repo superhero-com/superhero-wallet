@@ -73,8 +73,11 @@ export default {
   mounted() {
     this.loadMore();
     const polling = setInterval(() => this.getLatest(), 10000);
+
+    document.querySelector('#app').addEventListener('scroll', this.checkLoadMore);
     window.addEventListener('scroll', this.checkLoadMore);
     this.$once('hook:destroyed', () => {
+      document.querySelector('#app').removeEventListener('scroll', this.checkLoadMore);
       window.removeEventListener('scroll', this.checkLoadMore);
       clearInterval(polling);
     });
@@ -82,7 +85,10 @@ export default {
   },
   methods: {
     checkLoadMore() {
-      const { scrollHeight, scrollTop, clientHeight } = document.documentElement;
+      const { scrollHeight, scrollTop, clientHeight } =
+        document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION
+          ? document.querySelector('#app')
+          : document.documentElement;
       if (scrollHeight - scrollTop <= clientHeight + 100) {
         setTimeout(() => this.loadMore(), 1500);
       }
@@ -143,8 +149,8 @@ export default {
 
   .all-transactions {
     background: $transactions-bg;
-    padding: 0 20px;
     margin: 0;
+    padding: 0;
   }
 }
 </style>

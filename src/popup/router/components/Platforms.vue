@@ -90,7 +90,7 @@ export default {
   }
 
   .text {
-    margin: 8px auto 16px auto;
+    margin: 8px auto;
     width: 248px;
     padding: 4px 8px;
     color: $color-light-grey;

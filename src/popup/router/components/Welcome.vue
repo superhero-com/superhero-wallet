@@ -23,7 +23,7 @@ export default {
 @import '../../../styles/variables';
 
 .welcome {
-  max-width: $container-width;
+  max-width: $extension-width;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0 auto;

@@ -129,6 +129,10 @@ export default {
 <style lang="scss" scoped>
 @import '../../../../styles/variables';
 
+::v-deep {
+  text-align: left;
+}
+
 .token-header {
   background-color: $black-1;
   padding: 20px 30px;

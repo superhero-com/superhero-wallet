@@ -351,8 +351,13 @@
 </template>
 
 <style lang="scss" scoped>
-.privacy-policy {
+::v-deep {
   text-align: left;
+}
+
+.privacy-policy {
+  padding-left: 20px;
+  padding-right: 20px;
   word-break: break-word;
   font-weight: 100;
 

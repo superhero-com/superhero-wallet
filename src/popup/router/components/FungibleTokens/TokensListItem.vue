@@ -81,6 +81,7 @@ export default {
 
     > div {
       display: flex;
+      justify-content: space-between;
       line-height: 17px;
       font-size: 13px;
       color: $gray-1;

@@ -79,7 +79,6 @@ export default {
 
 <style lang="scss" scoped>
 .tokens-msg {
-  text-align: center;
   margin-top: 15px;
 }
 </style>

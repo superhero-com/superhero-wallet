@@ -1,5 +1,5 @@
 <template>
-  <div class="account" :class="{ 'has-reminder': !backedUpSeed }">
+  <div class="account">
     <Plate>
       <i18n
         v-if="!backedUpSeed"
@@ -23,20 +23,20 @@
 
 <script>
 import { mapState } from 'vuex';
+import Plate from '../components/Plate';
 import RecentTransactions from '../components/RecentTransactions';
 import BalanceInfo from '../components/BalanceInfo';
 import AccountInfo from '../components/AccountInfo';
 import MenuCarousel from '../components/MenuCarousel';
-import Plate from '../components/Plate';
 
 export default {
   name: 'Account',
   components: {
+    Plate,
     RecentTransactions,
     BalanceInfo,
     AccountInfo,
     MenuCarousel,
-    Plate,
   },
   computed: {
     ...mapState(['tourRunning', 'backedUpSeed']),
@@ -48,17 +48,8 @@ export default {
 @import '../../../styles/variables';
 
 .account {
-  .menu-carousel {
-    padding: 24px;
-  }
-
   .recent-transactions {
     margin-top: -10px;
-    padding-top: 279px;
-  }
-
-  &.has-reminder .recent-transactions {
-    padding-top: 313px;
   }
 
   .seed-backup-notification {

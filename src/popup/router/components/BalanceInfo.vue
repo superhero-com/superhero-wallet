@@ -93,7 +93,6 @@ export default {
 
 .balance-info {
   height: 76px;
-  background-image: url('../../../icons/acc_balance.png');
   border-bottom: 2px solid $transactions-bg;
   display: flex;
   padding: 0 20px 10px 20px;

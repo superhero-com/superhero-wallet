@@ -1,8 +1,8 @@
 <template>
   <div class="transaction-details">
-    <div class="header">
+    <Plate class="header">
       <TokenAmount :amount="amount" :symbol="symbol" :direction="direction" large />
-    </div>
+    </Plate>
     <div class="content">
       <div class="visual-overview"><!-- TODO --></div>
       <div class="data-grid">
@@ -89,6 +89,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { formatDate, formatTime } from '../../utils';
+import Plate from '../components/Plate';
 import TokenAmount from '../components/TokenAmount';
 import DetailsItem from '../components/DetailsItem';
 import LinkButton from '../components/LinkButton';
@@ -99,6 +100,7 @@ import BlockIcon from '../../../icons/block.svg?vue-component';
 export default {
   name: 'TransactionDetails',
   components: {
+    Plate,
     TokenAmount,
     DetailsItem,
     LinkButton,
@@ -142,23 +144,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/mixins';
 @import '../../../styles/typography';
 
 .transaction-details {
   overflow-x: hidden;
 
   .header {
-    position: fixed;
+    position: sticky;
+    top: 0;
     z-index: 1;
     display: flex;
     justify-content: center;
     height: 92px;
-    width: #{2px + $container-width};
-    margin: -1px 0 0 -1px;
-    border: 1px solid rgba($color-border, 0.5);
-    border-radius: 0 0 10px 10px;
-    background: linear-gradient(180deg, $color-bg-3 0%, $color-black 100%);
+    width: #{2px + $extension-width};
+
+    @include mobile {
+      width: 100%;
+    }
 
     .token-amount {
       text-align: center;
@@ -174,7 +177,6 @@ export default {
 
   .content {
     margin-top: -10px;
-    padding-top: 92px;
     background: $color-bg-3;
 
     .visual-overview {

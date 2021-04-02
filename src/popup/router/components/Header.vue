@@ -9,7 +9,7 @@
       </button>
     </div>
 
-    <div class="title">
+    <div :class="{ 'not-logged-in': !isLoggedIn }" class="title">
       <TruncateMid v-if="pageTitle" :str="pageTitle" class="text" />
       <span v-else class="text">
         {{ (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home') }}
@@ -106,10 +106,16 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../styles/typography';
+@import '../../../styles/mixins';
 
 .header {
-  width: 360px;
   position: fixed;
+  width: 360px;
+
+  @include desktop {
+    position: sticky;
+  }
+
   top: 0;
   z-index: 8;
   height: calc(48px + env(safe-area-inset-top));
@@ -118,6 +124,12 @@ export default {
   padding: 8px 16px 8px 8px;
   padding-top: calc(8px + env(safe-area-inset-top));
   align-items: center;
+
+  @include mobile {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
 
   .left {
     display: flex;
@@ -132,6 +144,12 @@ export default {
 
   .title {
     min-width: 166px;
+
+    &.not-logged-in:not(:only-child) {
+      width: 100%;
+      position: absolute;
+      z-index: -1;
+    }
 
     .text {
       padding: 0 4px;

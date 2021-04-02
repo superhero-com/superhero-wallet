@@ -64,7 +64,7 @@ export default {
 @import '../../../styles/typography';
 
 .index {
-  margin-top: -10px;
+  margin-top: 42px;
   text-align: center;
 
   .terms-agreement {
@@ -104,10 +104,6 @@ export default {
   .button {
     width: 280px;
     font-weight: 700;
-
-    &:first-of-type {
-      margin-bottom: 24px;
-    }
   }
 
   .not-iframe {
@@ -145,14 +141,14 @@ export default {
     }
 
     .spinner {
-      width: 296px;
-      height: 296px;
+      width: 256px;
+      height: 256px;
       color: $color-blue;
     }
 
     .platforms {
       border-radius: 6px;
-      margin: 16px auto 0 auto;
+      margin: 8px auto 0 auto;
       padding-top: 8px;
       max-width: 312px;
 

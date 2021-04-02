@@ -71,6 +71,8 @@ export default {
   background: $color-bg-3;
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
+  overflow-y: scroll;
 
   .header {
     padding: 21px 16px 11px 16px;
@@ -185,10 +187,6 @@ export default {
         opacity: 0.44;
       }
     }
-  }
-
-  &.tour-bar {
-    padding-bottom: 40px;
   }
 }
 </style>
