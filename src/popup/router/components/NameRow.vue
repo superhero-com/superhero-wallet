@@ -56,8 +56,7 @@ export default {
     }
 
     .active-name,
-    .pending-name,
-    .revoked-name {
+    .pending-name {
       float: right;
       background: #2a9cff;
       color: #fff;
@@ -68,10 +67,6 @@ export default {
 
     .pending-name {
       background: $error-color;
-    }
-
-    .revoked-name {
-      background: #ffa857;
     }
   }
 }
