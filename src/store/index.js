@@ -16,7 +16,7 @@ import openErrorModalPlugin from './plugins/openErrorModal';
 import runMigrations from './migrations';
 import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
-import fungibleTokensModule from './modules/fungibleTokens';
+import fungibleTokensPlugin from './plugins/fungibleTokens';
 import { defaultNetwork } from '../popup/utils/constants';
 
 Vue.use(Vuex);
@@ -117,6 +117,7 @@ export default new Vuex.Store({
     tipUrl,
     accounts,
     namesPlugin,
+    fungibleTokensPlugin,
     pendingTransactionHandler,
     languagesPlugin,
     openErrorModalPlugin,
@@ -124,6 +125,5 @@ export default new Vuex.Store({
   modules: {
     invites: invitesModule,
     permissions: permissionsModule,
-    fungibleTokens: fungibleTokensModule,
   },
 });
