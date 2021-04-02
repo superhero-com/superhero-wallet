@@ -18,13 +18,14 @@
       </p>
 
       <div class="url-bar" :class="editUrl ? 'url-bar--input' : 'url-bar--text'">
-        <UrlStatus :status="urlStatus" info />
         <template v-if="!editUrl">
           <a class="link-sm text-left" data-cy="tip-url">
             {{ url }}
           </a>
         </template>
-        <Input v-else size="m-0 sm" v-model="url" :placeholder="$t('pages.tipPage.enterUrl')" />
+        <InputField v-else v-model="url" :placeholder="$t('pages.tipPage.enterUrl')">
+          <UrlStatus slot="left" :status="urlStatus" info />
+        </InputField>
       </div>
     </div>
     <div data-cy="tip-container">
@@ -69,7 +70,7 @@ import { calculateFee, TX_TYPES } from '../../utils/constants';
 import { escapeSpecialChars, aeToAettos, validateTipUrl, convertToken } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
-import Input from '../components/Input';
+import InputField from '../components/InputField';
 import UrlStatus from '../components/UrlStatus';
 import Button from '../components/Button';
 import TokenAmount from '../components/TokenAmount';
@@ -81,7 +82,7 @@ export default {
   components: {
     AmountSend,
     Textarea,
-    Input,
+    InputField,
     UrlStatus,
     Button,
     TokenAmount,
@@ -303,21 +304,6 @@ export default {
 
   .url-bar {
     position: relative;
-
-    &.url-bar--input {
-      ::v-deep .url-status {
-        position: absolute;
-        left: 10px;
-        top: 48%;
-        transform: translateY(-50%);
-        -ms-transform: translateY(-50%);
-        -webkit-transform: translateY(-50%);
-      }
-
-      ::v-deep input {
-        padding-left: 35px;
-      }
-    }
 
     &.url-bar--text {
       display: flex;

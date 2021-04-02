@@ -1,7 +1,7 @@
 <template>
   <div class="auction-bid">
     <h4>{{ $t('pages.names.auctions.bid-on') }} {{ name }}</h4>
-    <AmountSend :amountError="!+amount" v-model="amount" :errorMsg="amountError" />
+    <AmountSend :amountError="!+amount" v-model="amount" :errorMsg="amountError || ''" />
     <Button extend @click="bid" :disabled="!!amountError || !+amount">
       {{ $t('pages.names.auctions.bid') }}
     </Button>

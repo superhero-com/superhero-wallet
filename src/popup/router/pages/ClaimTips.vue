@@ -3,7 +3,7 @@
     <p class="primary-title text-left mb-8 f-16">
       {{ $t('pages.claimTips.urlToClaim') }}
     </p>
-    <Input size="m-0 sm" v-model="url" :error="!normalizedUrl" />
+    <InputField v-model="url" :error="!normalizedUrl" />
 
     <Button @click="claimTips" :disabled="!normalizedUrl || !tippingSupported">
       {{ $t('pages.tipPage.confirm') }}
@@ -19,11 +19,11 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { aettosToAe, toURL, validateTipUrl } from '../../utils/helper';
-import Input from '../components/Input';
+import InputField from '../components/InputField';
 import Button from '../components/Button';
 
 export default {
-  components: { Input, Button },
+  components: { InputField, Button },
   data: () => ({
     url: '',
     loading: false,
@@ -91,7 +91,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.claim-tips .input-wrapper {
+.claim-tips .input-field {
   margin: 20px 0;
 }
 </style>
