@@ -210,6 +210,7 @@ export default {
         text-decoration: none;
         display: flex;
         justify-content: space-between;
+        align-items: center;
         color: inherit;
 
         @extend %face-sans-16-medium;
