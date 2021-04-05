@@ -296,7 +296,7 @@ Cypress.Commands.add('openTransactions', () => {
     .click()
     .get('[data-cy=loader]')
     .should('be.visible')
-    .get('[data-cy=all-transactions]')
+    .get('[data-cy=list]')
     .should('be.visible')
     .get('[data-cy=filters]')
     .should('be.visible');

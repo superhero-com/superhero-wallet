@@ -886,15 +886,14 @@
       "pointerKey": "Pointer Key",
       "moreInfo": "More Info",
       "sent": "Sent",
-      "claimed": "Claimed",
-      "withdrawals": "Withdrawals",
-      "topups": "Top ups",
       "all": "All",
       "hash": "Hash",
       "status": "Status",
       "pending": "Pending",
       "tipUrl": "Tipped URL",
-      "timestamp": "Timestamp"
+      "timestamp": "Timestamp",
+      "received": "Received",
+      "tips": "Tips"
     },
     "transactions": {
       "backToAccount": "Back to account",
@@ -918,7 +917,8 @@
       "apply": "Apply filter",
       "sent": "Sent",
       "received": "Received",
-      "pending": "Pending"
+      "pending": "Pending",
+      "search": "Search by token"
     },
     "utilities": {
       "heading": "Utilities",
