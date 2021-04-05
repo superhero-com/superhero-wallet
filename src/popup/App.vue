@@ -5,6 +5,7 @@
       'not-rebrand': $route.meta.notRebrand,
       'show-sidebar': showSidebar,
       'show-header': showStatusAndHeader,
+      'hide-tab-bar': $route.meta.hideTabBar,
     }"
   >
     <Header @toggle-sidebar="showSidebar = !showSidebar" />
@@ -23,6 +24,7 @@
     </transition>
 
     <NodeConnectionStatus v-if="showStatusAndHeader" />
+    <TabBar v-if="isLoggedIn && $route.path !== '/intro'" />
     <Component
       :is="component"
       v-for="{ component, key, props } in modals"
@@ -39,12 +41,14 @@ import { NOTIFICATION_SETTINGS } from './utils/constants';
 import Header from './router/components/Header';
 import SidebarMenu from './router/components/SidebarMenu';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus';
+import TabBar from './router/components/TabBar';
 
 export default {
   components: {
     Header,
     SidebarMenu,
     NodeConnectionStatus,
+    TabBar,
   },
   data: () => ({
     showSidebar: false,
@@ -239,6 +243,15 @@ body {
 
   .slide-leave-to .sidebar-menu {
     opacity: 0;
+  }
+
+  .tab-bar {
+    position: sticky;
+    bottom: 0;
+  }
+
+  &.hide-tab-bar .tab-bar {
+    display: none;
   }
 }
 </style>
