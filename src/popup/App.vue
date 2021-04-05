@@ -151,7 +151,7 @@ body {
   }
 
   @include desktop {
-    border: 1px solid $color-border;
+    box-shadow: $color-border 0 0 0 1px;
   }
 
   border-radius: 10px;
