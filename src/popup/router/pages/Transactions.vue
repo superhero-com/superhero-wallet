@@ -2,8 +2,9 @@
   <div class="transactions">
     <AccountInfo />
     <BalanceInfo />
+    <SearchBar v-model="searchTerm" :placeholder="$t('pages.transactions.search')" />
     <TransactionFilters v-model="displayMode" />
-    <ul class="all-transactions" data-cy="all-transactions">
+    <ul class="list" data-cy="list">
       <PendingTxs />
       <TransactionItem
         v-for="transaction in filteredTransactions"
@@ -19,10 +20,11 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { uniqBy } from 'lodash-es';
 import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
+import SearchBar from '../components/SearchBar';
 import TransactionFilters from '../components/TransactionFilters';
 import TransactionItem from '../components/TransactionItem';
 import PendingTxs from '../components/PendingTxs';
@@ -32,6 +34,7 @@ export default {
   components: {
     AccountInfo,
     BalanceInfo,
+    SearchBar,
     TransactionFilters,
     TransactionItem,
     PendingTxs,
@@ -42,34 +45,43 @@ export default {
       transactions: [],
       page: 1,
       displayMode: { latestFirst: true, type: 'all' },
+      searchTerm: '',
     };
   },
-  computed: mapState({
-    filteredTransactions(state, { account: { address } }) {
-      return this.transactions
-        .filter((tr) => {
-          switch (this.displayMode.type) {
-            case 'sent':
-              return tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address;
-            case 'claimed':
-              return tr.claim;
-            case 'topups':
-              return tr.tx.type === 'SpendTx' && tr.tx.recipientId === address;
-            case 'withdrawals':
-              return tr.tx.type === 'SpendTx' && tr.tx.senderId === address;
-            case 'all':
-              return true;
-            default:
-              throw new Error(`Unknown display mode type: ${this.displayMode.type}`);
-          }
-        })
-        .sort((a, b) => {
-          const arr = [a, b].map((e) => new Date(e.microTime));
-          if (this.displayMode.latestFirst) arr.reverse();
-          return arr[0] - arr[1];
-        });
-    },
-  }),
+  computed: {
+    ...mapState({
+      filteredTransactions(state, { account: { address } }) {
+        return this.transactions
+          .filter((tr) => {
+            switch (this.displayMode.type) {
+              case 'all':
+                return true;
+              case 'sent':
+                return tr.tx.type === 'SpendTx' && tr.tx.senderId === address;
+              case 'received':
+                return tr.tx.type === 'SpendTx' && tr.tx.recipientId === address;
+              case 'tips':
+                return (tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address) || tr.claim;
+              default:
+                throw new Error(`Unknown display mode type: ${this.displayMode.type}`);
+            }
+          })
+          .filter(
+            (tr) =>
+              !this.searchTerm ||
+              this.getTxSymbol(tr)
+                .toLocaleLowerCase()
+                .includes(this.searchTerm.toLocaleLowerCase()),
+          )
+          .sort((a, b) => {
+            const arr = [a, b].map((e) => new Date(e.microTime));
+            if (this.displayMode.latestFirst) arr.reverse();
+            return arr[0] - arr[1];
+          });
+      },
+    }),
+    ...mapGetters(['getTxSymbol']),
+  },
   mounted() {
     this.loadMore();
     const polling = setInterval(() => this.getLatest(), 10000);
@@ -137,20 +149,9 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.transactions {
-  .date {
-    background: $button-color;
-    padding: 0.5rem 1rem;
-    color: $white-color;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    font-family: monospace;
-  }
-
-  .all-transactions {
-    background: $transactions-bg;
-    margin: 0;
-    padding: 0;
-  }
+.transactions .list {
+  background: $color-black;
+  padding: 0;
+  margin: 0;
 }
 </style>

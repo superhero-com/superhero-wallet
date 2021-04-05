@@ -8,15 +8,12 @@ describe('Tests cases for transactions page', () => {
   });
 
   it('Load transactions, load additional transactions on scroll', () => {
-    cy.openTransactions()
-      .get('[data-cy=all-transactions]')
-      .children()
-      .should('have.length', TXS_PER_PAGE);
+    cy.openTransactions().get('[data-cy=list]').children().should('have.length', TXS_PER_PAGE);
 
     cy.scrollTo('bottom')
       .get('[data-cy=loader]')
       .should('be.visible')
-      .get('[data-cy=all-transactions]')
+      .get('[data-cy=list]')
       .children()
       .should('have.length', TXS_PER_PAGE * 2);
   });
@@ -31,7 +28,7 @@ describe('Tests cases for transactions page', () => {
           micro_time: time,
           tx: { amount },
         } = body.data[0];
-        cy.get('[data-cy=all-transactions] > a')
+        cy.get('[data-cy=list] > a')
           .eq(0)
           .then((e) => {
             cy.wrap(e)

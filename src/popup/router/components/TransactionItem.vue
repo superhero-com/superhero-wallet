@@ -54,6 +54,7 @@ export default {
 
 .transaction-item {
   padding: 0 16px;
+  margin: 1px 0;
   border-radius: 4px;
   background: $color-bg-1;
   display: flex;
