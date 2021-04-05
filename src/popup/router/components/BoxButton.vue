@@ -46,7 +46,7 @@ export default {
     }
 
     &:hover {
-      background: $color-blue-hover-dark;
+      background: rgba($color-blue, 0.15);
 
       ::v-deep svg {
         opacity: 1;
@@ -62,7 +62,7 @@ export default {
     }
 
     &:active {
-      background-color: rgba($color-blue-hover-dark, 0.1);
+      background-color: rgba($color-blue, 0.1);
     }
   }
 }
