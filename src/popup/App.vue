@@ -164,6 +164,10 @@ body {
     overflow-y: hidden;
   }
 
+  .main {
+    min-height: 600px;
+  }
+
   &.show-header .main {
     padding-top: 48px;
     padding-top: calc(48px + env(safe-area-inset-top));
@@ -175,19 +179,12 @@ body {
     }
   }
 
-  .main {
-    @include mobile {
-      min-height: 600px;
-    }
-  }
-
   &.not-rebrand {
     @include mobile {
       overflow: visible;
     }
 
     .main {
-      height: auto;
       text-align: center;
       font-size: 16px;
       margin: 0 auto;
