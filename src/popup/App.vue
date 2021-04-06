@@ -57,7 +57,7 @@ export default {
     ...mapGetters(['account', 'isLoggedIn']),
     ...mapState(['isRestored', 'current', 'sdk', 'backedUpSeed', 'notifications']),
     showStatusAndHeader() {
-      return !['/', '/intro'].includes(this.$route.path);
+      return !['/', '/intro'].includes(this.$route.path) && !this.$route.params.app;
     },
     modals() {
       return this.$store.getters['modals/opened'];
