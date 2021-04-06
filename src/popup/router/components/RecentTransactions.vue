@@ -76,7 +76,6 @@ export default {
 
   .header {
     padding: 21px 16px 11px 16px;
-    margin-bottom: 1px;
     background: $color-bg-2;
     border-radius: 0 0 4px 4px;
     display: flex;

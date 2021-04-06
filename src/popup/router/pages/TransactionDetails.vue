@@ -157,7 +157,6 @@ export default {
     display: flex;
     justify-content: center;
     height: 92px;
-    width: #{2px + $extension-width};
 
     @include mobile {
       width: 100%;
