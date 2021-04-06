@@ -128,7 +128,8 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import { calculateFee, TX_TYPES } from '../../utils/constants';
+import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { calculateFee } from '../../utils/constants';
 import { checkAddress, checkAensName, aeToAettos, convertToken } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
 import InfoGroup from '../components/InfoGroup';
@@ -205,7 +206,7 @@ export default {
     },
     async fetchFee() {
       await this.$watchUntilTruly(() => this.sdk);
-      this.fee = calculateFee(!this.selectedToken ? TX_TYPES.txSign : TX_TYPES.contractCall, {
+      this.fee = calculateFee(!this.selectedToken ? TX_TYPE.spend : TX_TYPE.contractCall, {
         ...this.sdk.Ae.defaults,
         ...(this.selectedToken && {
           callerId: this.account.address,

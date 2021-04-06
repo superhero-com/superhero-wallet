@@ -1,18 +1,9 @@
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
-import { ABI_VERSIONS, TX_TYPE, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { ABI_VERSIONS, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import BigNumber from 'bignumber.js';
 import { i18n } from '../../store/plugins/languages';
 
 export const MAGNITUDE = 18;
-export const TX_TYPES = {
-  txSign: TX_TYPE.spend,
-  contractCall: TX_TYPE.contractCall,
-  contractCreate: TX_TYPE.contractCreate,
-  namePreClaim: TX_TYPE.namePreClaim,
-  nameClaim: TX_TYPE.nameClaim,
-  nameBid: TX_TYPE.nameClaim,
-  nameUpdate: TX_TYPE.nameUpdate,
-};
 
 export const CONNECTION_TYPES = {
   POPUP: 'POPUP',
