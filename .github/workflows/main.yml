@@ -6,12 +6,15 @@ jobs:
     env:
       APP_NAME: wallet
     steps:
+      - if: github.ref != 'refs/heads/develop'
+        uses: actions/checkout@v2
+        with:
+          ref: develop
       - uses: actions/checkout@v2
         with:
           fetch-depth: 100
-      - name: Fetch develop branch to lint commit messages from there
-        if: github.ref != 'refs/heads/develop'
-        run: git fetch --depth=1 origin develop && git branch develop origin/develop
+      - if: github.ref != 'refs/heads/develop'
+        run: git branch develop origin/develop
       - uses: actions/setup-node@v2
         with:
           node-version: 14.x
