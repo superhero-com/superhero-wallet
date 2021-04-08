@@ -29,8 +29,10 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .pending-txs {
-  margin-bottom: 1px;
+  .transaction-item {
+    margin-bottom: 0;
+  }
 }
 </style>
