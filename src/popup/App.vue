@@ -109,12 +109,12 @@ body {
   background-color: $color-black;
 }
 
-@include desktop {
-  html,
-  body {
-    height: 100%;
-  }
+html,
+body {
+  height: 100vh;
+}
 
+@include desktop {
   body {
     display: flex;
     flex-direction: column;
@@ -166,6 +166,11 @@ body {
 
   .main {
     min-height: 600px;
+
+    @include mobile {
+      padding-bottom: 48px;
+      padding-bottom: calc(48px + env(safe-area-inset-bottom));
+    }
   }
 
   &.show-header .main {
@@ -252,8 +257,16 @@ body {
     }
   }
 
-  &.hide-tab-bar .tab-bar {
-    display: none;
+  &.hide-tab-bar {
+    .main {
+      @include mobile {
+        padding-bottom: 0;
+      }
+    }
+
+    .tab-bar {
+      display: none;
+    }
   }
 }
 </style>
