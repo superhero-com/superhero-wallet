@@ -63,7 +63,9 @@ export default {
     return valid ? `${explorerUrl}/${endpoint}/${hash}` : null;
   },
   getTx: ({ transactions }) => (hash) => {
-    return transactions.latest.concat(transactions.pending).find((tx) => tx.hash === hash);
+    return transactions.latest
+      .concat(transactions.pending.map((t) => ({ ...t, pending: true })))
+      .find((tx) => tx.hash === hash);
   },
   getTxType: (_, { getTxSymbol }) => (transaction) => {
     return getTxSymbol(transaction) === 'AE' ? transaction.tx.type : null;
@@ -80,9 +82,10 @@ export default {
         -availableTokens[contractCallData.token].decimals,
       );
     return +aettosToAe(
-      asBigNumber(transaction.tx.amount || transaction.tx.name_fee || 0).plus(
-        transaction.tx.fee || 0,
-      ),
+      asBigNumber(
+        // eslint-disable-next-line camelcase
+        transaction.amount || transaction.tx?.amount || transaction.tx?.name_fee || 0,
+      ).plus(transaction.fee || transaction.tx?.fee || 0),
     );
   },
   getTxDirection: (_, { account: { address } }) => ({ tx }) => {
