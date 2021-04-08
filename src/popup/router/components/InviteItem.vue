@@ -7,7 +7,9 @@
     <div class="invite-link">
       <span>{{ link }}</span>
       <div class="copied-alert" v-if="copied">{{ $t('pages.invite.copied') }}</div>
-      <button class="invite-link-copy" @click="copy" v-clipboard:copy="link"><CopyIcon /></button>
+      <button class="invite-link-copy" v-clipboard:success="copy" v-clipboard:copy="link">
+        <CopyIcon />
+      </button>
     </div>
     <div class="centered-buttons" v-if="!topUp">
       <Button v-if="inviteLinkBalance > 0" bold @click="claim">{{

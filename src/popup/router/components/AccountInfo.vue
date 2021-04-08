@@ -9,7 +9,12 @@
         </router-link>
       </div>
       <div class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</div>
-      <button v-show="!copied" data-cy="copy" @click="copy" v-clipboard:copy="account.address">
+      <button
+        v-show="!copied"
+        data-cy="copy"
+        v-clipboard:success="copy"
+        v-clipboard:copy="account.address"
+      >
         {{ $t('pages.account.copy') }}
       </button>
     </div>
