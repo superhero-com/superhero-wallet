@@ -1,29 +1,45 @@
 <template>
-  <flickity class="menu-carousel" ref="flickity" :options="flickityOptions">
-    <BoxButton to="/tokens" :text="$t('pages.titles.balances')">
-      <Balances slot="icon" />
-    </BoxButton>
-    <BoxButton to="/send" :text="$t('pages.titles.payments')" class="tour__step7" data-cy="send">
-      <Payments slot="icon" />
-    </BoxButton>
-    <BoxButton to="/tip" :text="$t('pages.titles.tips')" class="tour__step2" data-cy="tip-button">
-      <Tips slot="icon" />
-    </BoxButton>
-    <BoxButton to="/transactions" :text="$t('pages.titles.tx-history')" class="tour__step5">
-      <Activity slot="icon" />
-    </BoxButton>
-    <BoxButton to="/names" :text="$t('pages.titles.names')" class="cell">
-      <Names slot="icon" />
-    </BoxButton>
-    <BoxButton to="/invite" :text="$t('pages.titles.invite')">
-      <Invites slot="icon" />
-    </BoxButton>
-  </flickity>
+  <div class="menu-carousel">
+    <button class="prev" ref="prev" @click="calcTransform(1)"><Arrow /></button>
+    <div class="viewport" ref="viewport">
+      <div class="content" ref="content">
+        <BoxButton to="/tokens" :text="$t('pages.titles.balances')">
+          <Balances slot="icon" />
+        </BoxButton>
+        <BoxButton
+          to="/send"
+          :text="$t('pages.titles.payments')"
+          class="tour__step7"
+          data-cy="send"
+        >
+          <Payments slot="icon" />
+        </BoxButton>
+        <BoxButton
+          to="/tip"
+          :text="$t('pages.titles.tips')"
+          class="tour__step2"
+          data-cy="tip-button"
+        >
+          <Tips slot="icon" />
+        </BoxButton>
+        <BoxButton to="/transactions" :text="$t('pages.titles.tx-history')" class="tour__step5">
+          <Activity slot="icon" />
+        </BoxButton>
+        <BoxButton to="/names" :text="$t('pages.titles.names')" class="cell">
+          <Names slot="icon" />
+        </BoxButton>
+        <BoxButton to="/invite" :text="$t('pages.titles.invite')">
+          <Invites slot="icon" />
+        </BoxButton>
+      </div>
+    </div>
+    <button class="next" ref="next" @click="calcTransform(-1)"><Arrow /></button>
+  </div>
 </template>
 
 <script>
-import Flickity from 'vue-flickity';
 import BoxButton from './BoxButton';
+import Arrow from '../../../icons/chevron-next.svg?vue-component';
 import Balances from '../../../icons/balances.svg?vue-component';
 import Payments from '../../../icons/payments.svg?vue-component';
 import Tips from '../../../icons/tips.svg?vue-component';
@@ -34,8 +50,8 @@ import Invites from '../../../icons/invites.svg?vue-component';
 export default {
   name: 'MenuCarousel',
   components: {
-    Flickity,
     BoxButton,
+    Arrow,
     Balances,
     Payments,
     Tips,
@@ -43,21 +59,26 @@ export default {
     Names,
     Invites,
   },
-  data() {
-    return {
-      flickityOptions: {
-        initialIndex: 0,
-        prevNextButtons: true,
-        pageDots: false,
-        freeScroll: false,
-        draggable: process.env.PLATFORM === 'cordova',
-        groupCells: 3,
-        contain: true,
-        selectedAttraction: 0.15,
-        friction: 1,
-        cellAlign: 'left',
-      },
-    };
+  methods: {
+    calcTransform(direction) {
+      const transform = +/translateX\((-?[0-9]+)px\)/.exec(this.$refs.content.style.transform)[1];
+      const viewportWidth = this.$refs.viewport.offsetWidth;
+
+      const delta = transform + viewportWidth * direction;
+      const showPrev = delta < 0;
+      const showNext = delta >= -(this.$refs.content.offsetWidth - viewportWidth);
+
+      this.$refs.prev.style.display = showPrev ? 'inline-block' : 'none';
+      this.$refs.viewport.style.marginLeft = showPrev ? '0' : '16px';
+      this.$refs.next.style.display = showNext ? 'inline-block' : 'none';
+      this.$refs.viewport.style.marginRight = showNext ? '0' : '16px';
+      this.$refs.content.style.transform = `translateX(${delta}px)`;
+    },
+  },
+  mounted() {
+    this.$refs.prev.style.display = 'none';
+    this.$refs.viewport.style.marginLeft = '16px';
+    this.$refs.content.style.transform = 'translateX(0)';
   },
 };
 </script>
@@ -66,73 +87,66 @@ export default {
 @import '../../../styles/mixins';
 
 .menu-carousel {
-  flex: 1;
-  z-index: 1;
-  padding: 24px 12px;
+  display: flex;
+  padding: 24px 0;
 
-  ::v-deep {
-    .flickity-slider {
-      @include mobile {
-        width: 97%;
-      }
-    }
+  .viewport {
+    overflow: hidden;
+    width: calc(100% - 48px);
 
-    .flickity-button {
-      width: 24px;
-      height: 64px;
-      padding: 0;
-      background: #171717;
-      cursor: pointer;
+    .content {
+      display: flex;
+      white-space: nowrap;
+      transition-property: transform;
+      transition-duration: 0.5s;
 
-      &.previous {
-        left: 0;
-        border-radius: 0 6px 6px 0;
-      }
+      .box-button {
+        display: inline-flex;
+        justify-content: center;
+        flex: 0 0 auto;
+        width: 104px;
 
-      &.next {
-        left: calc(100% - 24px);
-        border-radius: 6px 0 0 6px;
-      }
-
-      .flickity-button-icon {
-        fill: $color-white;
-        opacity: 0.44;
-      }
-
-      &:disabled {
-        display: none;
-      }
-
-      &:hover {
-        background: $color-blue-hover-dark;
-
-        .icon {
-          opacity: 1;
-
-          path {
-            fill: $color-blue;
-          }
+        @include mobile {
+          width: 25%;
         }
-      }
 
-      &:active {
-        background-color: rgba($color-blue-hover-dark, 0.1);
+        @media (min-width: $extension-width + 2) and (max-width: 400px) {
+          width: 33%;
+        }
       }
     }
   }
 
-  .box-button {
-    display: flex;
-    justify-content: center;
-    width: 104px;
+  .prev,
+  .next {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 64px;
+    padding: 0;
+    background: $color-bg-2;
+    border-radius: 6px 0 0 6px;
+    cursor: pointer;
 
-    @include mobile {
-      width: 25%;
+    svg {
+      opacity: 0.44;
     }
 
-    @media (min-width: $extension-width + 2) and (max-width: 400px) {
-      width: 33%;
+    &:hover {
+      background: $color-blue-alpha-15;
     }
+
+    &:active {
+      background-color: rgba($color-blue-alpha-15, 0.1);
+    }
+  }
+
+  .prev {
+    margin-right: 8px;
+    transform: rotate(-180deg);
+  }
+
+  .next {
+    margin-left: 8px;
   }
 }
 </style>
