@@ -30,11 +30,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/mixins';
 
 .connect-error,
 .connect-node {
   position: sticky;
+
+  @include mobile {
+    position: fixed;
+    width: 100%;
+  }
+
   bottom: 48px;
   left: 0;
   right: 0;

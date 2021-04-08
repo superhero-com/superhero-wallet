@@ -245,6 +245,11 @@ body {
   .tab-bar {
     position: sticky;
     bottom: 0;
+
+    @include mobile {
+      position: fixed;
+      width: 100%;
+    }
   }
 
   &.hide-tab-bar .tab-bar {
