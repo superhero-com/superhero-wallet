@@ -90,6 +90,9 @@ export default {
       },
       immediate: true,
     },
+    nameEntry(entry) {
+      if (!entry) this.$router.push('/names');
+    },
   },
   async mounted() {
     await this.$watchUntilTruly(() => this.sdk);
