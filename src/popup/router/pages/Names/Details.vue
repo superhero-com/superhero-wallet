@@ -41,7 +41,11 @@
     <Button v-if="addPointer" dark extend @click="addPointer = false">
       {{ $t('pages.names.details.cancel') }}
     </Button>
-    <Button extend @click="setPointer" :disabled="addPointer && !validPointer">
+    <Button
+      extend
+      @click="setPointer"
+      :disabled="(addPointer && !validPointer) || nameEntry.pending"
+    >
       {{ $t('pages.names.details.set-pointer') }}
     </Button>
   </div>
@@ -85,6 +89,9 @@ export default {
           : (await this.sdk.api.getNameEntryByName(this.name)).id;
       },
       immediate: true,
+    },
+    nameEntry(entry) {
+      if (!entry) this.$router.push('/names');
     },
   },
   async mounted() {
