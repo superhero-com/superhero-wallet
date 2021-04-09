@@ -266,6 +266,11 @@ export default {
             amount,
             type: 'spendToken',
             recipientId: receiver,
+            tx: {
+              senderId: this.account.address,
+              contractId: this.selectedToken.contract,
+              type: TX_TYPE.contractCall,
+            },
           });
           await this.$store.dispatch('fungibleTokens/getAvailableTokens');
           await this.$store.dispatch('fungibleTokens/loadTokenBalances');
@@ -279,6 +284,11 @@ export default {
             hash,
             amount,
             type: 'spend',
+            tx: {
+              senderId: this.account.address,
+              recipientId: this.form.address,
+              type: TX_TYPE.spend,
+            },
           });
         }
         this.$router.push('/account');

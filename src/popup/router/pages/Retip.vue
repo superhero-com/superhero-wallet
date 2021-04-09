@@ -139,6 +139,11 @@ export default {
           amount,
           domain: this.tip.url,
           type: 'tip',
+          tx: {
+            senderId: this.account.address,
+            contractId: this.tippingContract.deployInfo.address,
+            type: TX_TYPE.contractCall,
+          },
         });
         this.openCallbackOrGoHome(true);
       } catch (e) {
