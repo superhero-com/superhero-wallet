@@ -165,7 +165,9 @@ body {
   }
 
   .main {
-    min-height: 600px;
+    @include desktop {
+      min-height: 100%;
+    }
 
     @include mobile {
       padding-bottom: 48px;
@@ -248,12 +250,12 @@ body {
   }
 
   .tab-bar {
-    position: sticky;
+    position: fixed;
+    width: 100%;
     bottom: 0;
 
-    @include mobile {
-      position: fixed;
-      width: 100%;
+    @include desktop {
+      position: sticky;
     }
   }
 
