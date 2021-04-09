@@ -144,10 +144,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/mixins';
 
 .intro {
   padding: 40px 16px 4px 16px;
+
+  @include mobile {
+    padding-top: 48px;
+    padding-top: calc(env(safe-area-inset-top) + 48px);
+  }
+
   position: relative;
   height: 80vh;
 
