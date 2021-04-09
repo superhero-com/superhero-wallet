@@ -36,6 +36,7 @@ export default {
 .tab-bar {
   display: flex;
   background-color: $color-bg-3;
+  padding-bottom: env(safe-area-inset-bottom);
 
   > a {
     height: 48px;

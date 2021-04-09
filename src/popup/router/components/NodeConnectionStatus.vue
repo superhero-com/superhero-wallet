@@ -30,18 +30,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/mixins';
 
 .connect-error,
 .connect-node {
-  position: sticky;
+  position: fixed;
+  width: 100%;
+
+  @include desktop {
+    position: sticky;
+  }
+
   bottom: 48px;
   left: 0;
   right: 0;
   background: $secondary-color;
   color: $white-color;
   line-height: 2em;
-  padding-bottom: calc(env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
   z-index: 5;
   text-align: center;
   font-size: 14px;

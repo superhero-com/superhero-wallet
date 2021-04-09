@@ -109,12 +109,12 @@ body {
   background-color: $color-black;
 }
 
-@include desktop {
-  html,
-  body {
-    height: 100%;
-  }
+html,
+body {
+  height: 100vh;
+}
 
+@include desktop {
   body {
     display: flex;
     flex-direction: column;
@@ -165,7 +165,14 @@ body {
   }
 
   .main {
-    min-height: 600px;
+    @include desktop {
+      min-height: 100%;
+    }
+
+    @include mobile {
+      padding-bottom: 48px;
+      padding-bottom: calc(48px + env(safe-area-inset-bottom));
+    }
   }
 
   &.show-header .main {
@@ -243,12 +250,25 @@ body {
   }
 
   .tab-bar {
-    position: sticky;
+    position: fixed;
+    width: 100%;
     bottom: 0;
+
+    @include desktop {
+      position: sticky;
+    }
   }
 
-  &.hide-tab-bar .tab-bar {
-    display: none;
+  &.hide-tab-bar {
+    .main {
+      @include mobile {
+        padding-bottom: 0;
+      }
+    }
+
+    .tab-bar {
+      display: none;
+    }
   }
 }
 </style>

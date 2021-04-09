@@ -37,6 +37,7 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../../styles/typography';
+@import '../../../styles/mixins';
 
 .filters {
   position: sticky;
@@ -52,6 +53,10 @@ export default {
   .filter {
     display: flex;
     align-items: center;
+
+    @include mobile {
+      padding: 0;
+    }
 
     @extend %face-sans-15-medium;
 
