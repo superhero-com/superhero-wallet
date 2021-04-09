@@ -1,4 +1,3 @@
-<!-- eslint-disable vue-i18n/no-raw-text -->
 <template>
   <div>
     <p data-cy="wallet-found" v-if="wallet.found">Wallet found</p>
@@ -66,7 +65,7 @@ contract Example =
       contractAddress: 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio',
     };
   },
-  async created() {
+  async mounted() {
     this.initClient();
     setInterval(async () => {
       if (this.client && !this.wallet.found) {

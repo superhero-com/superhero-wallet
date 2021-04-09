@@ -11,7 +11,7 @@ const GenerateJsonPlugin = require('generate-json-webpack-plugin');
 const commitHash = require('child_process')
   .execSync('git rev-parse HEAD')
   .toString().trim();
-const sass = require('node-sass');
+const sass = require('sass');
 const genManifest = require('./src/manifest');
 
 const parseBool = val => (val ? JSON.parse(val) : false);
@@ -109,6 +109,12 @@ const getConfig = platform => {
               loader: 'vue-svg-loader',
             },
             {
+              test: /\.svg$/,
+              resourceQuery: /skip-optimize/,
+              loader: 'vue-svg-loader',
+              options: { svgo: false },
+            },
+            {
               loader: 'url-loader',
               options: {
                 name: '[name].[contenthash].[ext]',
@@ -165,6 +171,7 @@ const getConfig = platform => {
                 'other/inject',
                 'phishing/phishing',
                 'popup/cameraPermission',
+                'redirect/redirect',
               ],
             }),
             new HtmlWebpackPlugin({
@@ -203,14 +210,8 @@ const getConfig = platform => {
                 { from: 'icons/icon_128.png', to: `icons/icon_128.png` },
                 { from: 'icons/request_permission.jpg', to: `icons/request_permission.jpg` },
                 {
-                  from: path.join(__dirname, 'src/content-scripts/tipButton.scss'),
-                  to: path.join(
-                    __dirname,
-                    {
-                      'extension-chrome': 'dist/chrome/other/tipButton.css',
-                      'extension-firefox': 'dist/firefox/other/tipButton.css',
-                    }[platform],
-                  ),
+                  from: 'content-scripts/tipButton.scss',
+                  to: 'other/tipButton.css',
                   transform: (_, f) => sass.renderSync({ file: f }).css.toString(),
                 },
               ]

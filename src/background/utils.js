@@ -1,44 +1,31 @@
+import { isEqual } from 'lodash-es';
 import Universal from '@aeternity/aepp-sdk/es/ae/universal';
 import Node from '@aeternity/aepp-sdk/es/node';
-import { isEmpty } from 'lodash-es';
-import {
-  setContractInstance,
-  contractCall,
-  getAddressByNameEntry,
-  getActiveNetwork,
-} from '../popup/utils/helper';
-import { getState } from '../store/plugins/persistState';
+import { setContractInstance, contractCall, getAddressByNameEntry } from '../popup/utils/helper';
 import Logger from '../lib/logger';
-import walletController from './wallet-controller';
+import store from './store';
 
 let sdk;
 let tippingContract;
 
-export const getActiveAccount = async () => {
-  const { account } = await getState();
-  if (!isEmpty(account)) {
-    return { account: { publicKey: account.publicKey }, activeAccount: 0 };
-  }
-  return false;
-};
-
-export const switchNode = async () => {
-  if (sdk) {
-    const network = await getActiveNetwork();
-    const node = await Node({ url: network.url });
-    try {
-      await sdk.addNode(network.name, node, true);
-    } catch (e) {
-      console.warn(`switchNode: ${e}`);
-    }
-    sdk.selectNode(network.name);
-  }
-};
+(async () => {
+  await store.dispatch('ensureRestored');
+  store.watch(
+    (state, { activeNetwork }) => activeNetwork,
+    async (network, oldNetwork) => {
+      if (isEqual(network, oldNetwork)) return;
+      if (!sdk) return;
+      sdk.pool.delete(network.name);
+      sdk.addNode(network.name, await Node({ url: network.url }), true);
+    },
+  );
+})();
 
 export const getSDK = async () => {
   if (!sdk) {
     try {
-      const network = await getActiveNetwork();
+      await store.dispatch('ensureRestored');
+      const network = store.getters.activeNetwork;
       const node = await Node({ url: network.url });
       sdk = await Universal({
         nodes: [{ name: network.name, instance: node }],
@@ -74,7 +61,7 @@ export const getTippingContractInstance = async (tx) => {
 };
 
 export const contractCallStatic = async ({ tx, callType }) => {
-  const { account } = await getActiveAccount();
+  const { account } = store.getters;
   if (typeof callType !== 'undefined' && callType === 'static' && account) {
     const contractInstance = await getTippingContractInstance(tx);
     const call = await contractCall({
@@ -87,7 +74,7 @@ export const contractCallStatic = async ({ tx, callType }) => {
     error.payload = { tx };
     throw error;
   }
-  if (!walletController.isLoggedIn() && typeof callType !== 'undefined' && callType === 'static') {
+  if (!store.getters.isLoggedIn && typeof callType !== 'undefined' && callType === 'static') {
     throw new Error('You need to unlock the wallet first');
   }
   throw new Error('No data to return');

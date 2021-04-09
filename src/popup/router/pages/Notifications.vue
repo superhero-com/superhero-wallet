@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="notifications">
     <div class="tabs">
       <button :class="{ active: direction === '' }" @click="direction = ''">
         {{ $t('pages.notifications.all') }}
@@ -11,28 +11,29 @@
         {{ $t('pages.notifications.wallet') }}
       </button>
     </div>
-    <NotificationItem
-      v-for="notification in filteredNotifications"
-      :key="notification.id"
-      :address="notification.sender || ''"
-      :name="
-        notification.wallet ? notification.title : notification.chainName || 'Fellow Superhero'
-      "
-      :text="notificationText(notification)"
-      :date="new Date(notification.createdAt)"
-      :to="notification.path"
-      :status="notification.status.toLocaleLowerCase()"
-      v-bind="notification.wallet && { wallet: true }"
-      @click="onClickHandler(notification)"
-      @toggle-read="modifyNotificationStatus(notification)"
-    />
+    <div class="list">
+      <NotificationItem
+        v-for="notification in filteredNotifications"
+        :key="notification.id"
+        :address="notification.sender || ''"
+        :name="
+          notification.wallet ? notification.title : notification.chainName || 'Fellow Superhero'
+        "
+        :text="notificationText(notification)"
+        :date="new Date(notification.createdAt)"
+        :to="notification.path"
+        :status="notification.status.toLocaleLowerCase()"
+        v-bind="notification.wallet && { wallet: true }"
+        @click="onClickHandler(notification)"
+        @toggle-read="modifyNotificationStatus(notification)"
+      />
+    </div>
   </div>
 </template>
 
 <script>
 import { mapState, mapMutations } from 'vuex';
 import NotificationItem from '../components/NotificationItem';
-import openUrl from '../../utils/openUrl';
 
 export default {
   components: { NotificationItem },
@@ -74,7 +75,7 @@ export default {
     async onClickHandler(notification) {
       await this.modifyNotificationStatus(notification);
       if (/^\w+:\D+/.test(notification.path)) {
-        openUrl(notification.path, true);
+        window.open(notification.path, '_blank');
       } else {
         this.$router.push(notification.path);
       }
@@ -109,14 +110,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.popup {
+@import '../../../styles/variables';
+
+.notifications {
   padding: 0;
 
   .tabs {
     position: sticky;
-    top: 50px;
-    z-index: 100;
-    background-color: #141414;
+    top: 48px;
+    z-index: 1;
+    background-color: $color-bg-2;
+    box-shadow: 0 -1px 0 $color-black;
     padding: 0 1rem;
     text-align: left;
 
@@ -126,21 +130,25 @@ export default {
       text-align: center;
       font-size: 0.95rem;
       cursor: pointer;
-      color: #787878;
+      color: $color-dark-grey;
       font-weight: 600;
       padding: 0.95rem 0;
       margin-left: 1rem;
       border-bottom: 0.2rem solid transparent;
 
       &:hover {
-        color: #babac0;
+        color: $color-light-grey;
       }
 
       &.active {
-        color: #67f7b8;
-        border-bottom-color: #67f7b8;
+        color: $accent-color;
+        border-bottom-color: $accent-color;
       }
     }
+  }
+
+  .list {
+    overflow: scroll;
   }
 }
 </style>

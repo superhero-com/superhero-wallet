@@ -12,6 +12,7 @@ import accounts from './plugins/account';
 import namesPlugin from './plugins/names';
 import pendingTransactionHandler from './plugins/pendingTransactionHandler';
 import languagesPlugin from './plugins/languages';
+import openErrorModalPlugin from './plugins/openErrorModal';
 import runMigrations from './migrations';
 import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
@@ -24,16 +25,13 @@ Vue.use(VueRx);
 export default new Vuex.Store({
   state: {
     isRestored: false,
-    account: {},
     mnemonic: null,
-    activeAccount: 0,
     current: {
       network: defaultNetwork.name,
       token: 0,
       currency: 'usd',
     },
     userNetworks: [],
-    isLoggedIn: false,
     transactions: {
       latest: [],
       pending: [],
@@ -43,8 +41,7 @@ export default new Vuex.Store({
     middleware: null,
     tippingV1: null,
     tippingV2: null,
-    mainLoading: true,
-    nodeStatus: 'connecting',
+    nodeStatus: '',
     currencies: {},
     nextCurrenciesFetch: null,
     notifications: [],
@@ -77,7 +74,6 @@ export default new Vuex.Store({
         nextCurrenciesFetch,
         tip,
         backedUpSeed,
-        account,
         mnemonic,
         saveErrorLog,
         tourStartBar,
@@ -96,7 +92,6 @@ export default new Vuex.Store({
         nextCurrenciesFetch,
         tip,
         backedUpSeed,
-        account,
         mnemonic,
         saveErrorLog,
         tourStartBar,
@@ -113,6 +108,7 @@ export default new Vuex.Store({
     namesPlugin,
     pendingTransactionHandler,
     languagesPlugin,
+    openErrorModalPlugin,
   ],
   modules: {
     invites: invitesModule,

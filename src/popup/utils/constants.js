@@ -1,30 +1,11 @@
 import { TxBuilder } from '@aeternity/aepp-sdk/es';
-import { ABI_VERSIONS, TX_TYPE, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { ABI_VERSIONS, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import BigNumber from 'bignumber.js';
 import { i18n } from '../../store/plugins/languages';
 
 export const MAGNITUDE = 18;
-export const TX_TYPES = {
-  txSign: TX_TYPE.spend,
-  contractCall: TX_TYPE.contractCall,
-  contractCreate: TX_TYPE.contractCreate,
-  namePreClaim: TX_TYPE.namePreClaim,
-  nameClaim: TX_TYPE.nameClaim,
-  nameBid: TX_TYPE.nameClaim,
-  nameUpdate: TX_TYPE.nameUpdate,
-};
-
-export const HDWALLET_METHODS = ['generateWallet', 'getKeypair', 'getAccount', 'isLoggedIn'];
-
-export const AEX2_METHODS = {
-  CHANGE_ACCOUNT: 'CHANGE_ACCOUNT',
-  ADD_ACCOUNT: 'ADD_ACCOUNT',
-  SWITCH_NETWORK: 'SWITCH_NETWORK',
-  INIT_RPC_WALLET: 'INIT_RPC_WALLET',
-};
 
 export const CONNECTION_TYPES = {
-  EXTENSION: 'EXTENSION',
   POPUP: 'POPUP',
   OTHER: 'OTHER',
 };

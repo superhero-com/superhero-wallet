@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="tip">
     <BalanceInfo />
-    <div class="tour__step3 popup">
+    <div class="tour__step3">
       <p class="primary-title text-left mb-8 f-16">
         <template v-if="!confirmMode">
           {{ $t('pages.tipPage.url') }}
@@ -18,16 +18,17 @@
       </p>
 
       <div class="url-bar" :class="editUrl ? 'url-bar--input' : 'url-bar--text'">
-        <UrlStatus :status="urlStatus" info />
         <template v-if="!editUrl">
           <a class="link-sm text-left" data-cy="tip-url">
             {{ url }}
           </a>
         </template>
-        <Input v-else size="m-0 sm" v-model="url" :placeholder="$t('pages.tipPage.enterUrl')" />
+        <InputField v-else v-model="url" :placeholder="$t('pages.tipPage.enterUrl')">
+          <UrlStatus slot="left" :status="urlStatus" info />
+        </InputField>
       </div>
     </div>
-    <div class="popup" data-cy="tip-container">
+    <div data-cy="tip-container">
       <template v-if="!confirmMode">
         <AmountSend v-model="amount" />
         <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
@@ -65,11 +66,12 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import { calculateFee, TX_TYPES } from '../../utils/constants';
+import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { calculateFee } from '../../utils/constants';
 import { escapeSpecialChars, aeToAettos, validateTipUrl, convertToken } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
-import Input from '../components/Input';
+import InputField from '../components/InputField';
 import UrlStatus from '../components/UrlStatus';
 import Button from '../components/Button';
 import TokenAmount from '../components/TokenAmount';
@@ -81,7 +83,7 @@ export default {
   components: {
     AmountSend,
     Textarea,
-    Input,
+    InputField,
     UrlStatus,
     Button,
     TokenAmount,
@@ -136,10 +138,10 @@ export default {
         if (!this.selectedToken && this.amount < minTipAmount) {
           return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
         }
-        const fee = calculateFee(TX_TYPES.contractCall, {
+        const fee = calculateFee(TX_TYPE.contractCall, {
           ...sdk.Ae.defaults,
           contractId: this.tippingContract.deployInfo.address,
-          callerId: account.publicKey,
+          callerId: account.address,
         });
         if (
           this.selectedToken
@@ -178,7 +180,7 @@ export default {
       },
     },
   },
-  async created() {
+  async mounted() {
     await this.persistTipDetails();
     if (process.env.IS_EXTENSION) {
       const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });
@@ -235,7 +237,7 @@ export default {
             convertToken(this.amount, this.selectedToken.decimals).toFixed(),
           );
 
-          await this.$store.dispatch('fungibleTokens/loadTokenBalances', this.account.publicKey);
+          await this.$store.dispatch('fungibleTokens/loadTokenBalances');
           this.$store.commit(
             'fungibleTokens/setSelectedToken',
             this.tokenBalances.find(({ value }) => value === this.selectedToken.value),
@@ -257,6 +259,11 @@ export default {
           amount: this.selectedToken ? this.amount : amount,
           tipUrl: this.url,
           type: 'tip',
+          tx: {
+            senderId: this.account.address,
+            contractId: this.tippingContract.deployInfo.address,
+            type: TX_TYPE.contractCall,
+          },
         });
         this.openCallbackOrGoHome(true);
       } catch (e) {
@@ -279,70 +286,56 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.tour__step3 {
-  margin: 0 auto;
-  padding: 12px 20px 5px;
-  margin-top: 22px;
-  min-width: auto;
-
-  &.v-tour__target--highlighted {
-    margin: 10px;
+.tip {
+  .tour__step3 {
+    margin: 0 auto;
+    margin-top: 22px;
     min-width: auto;
-    padding-bottom: 25px;
+
+    &.v-tour__target--highlighted {
+      margin: 10px;
+      min-width: auto;
+      padding-bottom: 25px;
+    }
+
+    p {
+      margin-top: 0;
+
+      &.title-holder {
+        display: flex;
+        align-items: center;
+      }
+    }
   }
 
-  p {
-    margin-top: 0;
+  .url-bar {
+    position: relative;
 
-    &.title-holder {
+    &.url-bar--text {
       display: flex;
       align-items: center;
     }
-  }
-}
 
-.url-bar {
-  position: relative;
-
-  &.url-bar--input {
-    ::v-deep .url-status {
-      position: absolute;
-      left: 10px;
-      top: 48%;
-      transform: translateY(-50%);
-      -ms-transform: translateY(-50%);
-      -webkit-transform: translateY(-50%);
-    }
-
-    ::v-deep input {
-      padding-left: 35px;
+    a {
+      color: $text-color;
+      text-decoration: none;
+      margin-left: 10px;
+      width: 90%;
     }
   }
 
-  &.url-bar--text {
-    display: flex;
-    align-items: center;
+  .validation-msg {
+    color: #ff8c2a;
+    font-size: 15px;
+    min-height: 45px;
   }
 
-  a {
-    color: $text-color;
-    text-decoration: none;
-    margin-left: 10px;
-    width: 90%;
-  }
-}
-
-.validation-msg {
-  color: #ff8c2a;
-  font-size: 15px;
-  min-height: 45px;
-}
-
-@media screen and (min-width: 380px) {
-  .tour__step3.v-tour__target--highlighted {
-    margin: 10px auto 0 auto;
-    min-width: auto;
-    padding-bottom: 25px;
+  @media screen and (min-width: 380px) {
+    .tour__step3.v-tour__target--highlighted {
+      margin: 10px auto 0 auto;
+      min-width: auto;
+      padding-bottom: 25px;
+    }
   }
 }
 </style>

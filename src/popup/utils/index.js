@@ -5,9 +5,15 @@ import runMigrations from '../../store/migrations';
 
 export const formatDate = (time) =>
   // TODO: Use the current language from i18n module
-  new Date(+time).toLocaleString(navigator.language, {
+  new Date(+time).toLocaleDateString(navigator.language, {
+    year: '2-digit',
+    month: '2-digit',
+    day: '2-digit',
+  });
+
+export const formatTime = (time) =>
+  new Date(+time).toLocaleTimeString(navigator.language, {
     timeStyle: 'short',
-    dateStyle: 'short',
   });
 
 export const getLoginState = async ({
@@ -17,9 +23,9 @@ export const getLoginState = async ({
   pendingTransaction,
   network,
 }) => {
-  const { mnemonic, publicKey } = testAccount;
+  const { mnemonic, address } = testAccount;
   const account = {
-    publicKey,
+    address,
     privateKey: mnemonicToSeed(mnemonic).toString('hex'),
   };
   return {
@@ -29,9 +35,20 @@ export const getLoginState = async ({
     backedUpSeed,
     current: { network: network || 'Testnet', token: 0, currency: 'usd' },
     balance,
-    ...(name && { names: { defaults: { [`${account.publicKey}-ae_uat`]: name } } }),
+    ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
     ...(pendingTransaction && { transactions: { latest: [], pending: [pendingTransaction] } }),
   };
 };
 
 export const buildTx = (txtype) => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);
+
+export const deferPromised = (func, ...args) =>
+  new Promise((resolve, reject) =>
+    setTimeout(() => {
+      try {
+        resolve(func(...args));
+      } catch (error) {
+        reject(error);
+      }
+    }),
+  );

@@ -1,9 +1,10 @@
 <template>
-  <div class="popup">
+  <div class="transactions">
     <AccountInfo />
     <BalanceInfo />
+    <SearchBar v-model="searchTerm" :placeholder="$t('pages.transactions.search')" />
     <TransactionFilters v-model="displayMode" />
-    <ul class="all-transactions" data-cy="all-transactions">
+    <ul class="list" data-cy="list">
       <PendingTxs />
       <TransactionItem
         v-for="transaction in filteredTransactions"
@@ -19,10 +20,11 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { uniqBy } from 'lodash-es';
 import AccountInfo from '../components/AccountInfo';
 import BalanceInfo from '../components/BalanceInfo';
+import SearchBar from '../components/SearchBar';
 import TransactionFilters from '../components/TransactionFilters';
 import TransactionItem from '../components/TransactionItem';
 import PendingTxs from '../components/PendingTxs';
@@ -32,6 +34,7 @@ export default {
   components: {
     AccountInfo,
     BalanceInfo,
+    SearchBar,
     TransactionFilters,
     TransactionItem,
     PendingTxs,
@@ -42,39 +45,51 @@ export default {
       transactions: [],
       page: 1,
       displayMode: { latestFirst: true, type: 'all' },
+      searchTerm: '',
     };
   },
-  computed: mapState({
-    filteredTransactions(state, { account: { publicKey } }) {
-      return this.transactions
-        .filter((tr) => {
-          switch (this.displayMode.type) {
-            case 'sent':
-              return tr.tx.type === 'ContractCallTx' && tr.tx.callerId === publicKey;
-            case 'claimed':
-              return tr.claim;
-            case 'topups':
-              return tr.tx.type === 'SpendTx' && tr.tx.recipientId === publicKey;
-            case 'withdrawals':
-              return tr.tx.type === 'SpendTx' && tr.tx.senderId === publicKey;
-            case 'all':
-              return true;
-            default:
-              throw new Error(`Unknown display mode type: ${this.displayMode.type}`);
-          }
-        })
-        .sort((a, b) => {
-          const arr = [a, b].map((e) => new Date(e.microTime));
-          if (this.displayMode.latestFirst) arr.reverse();
-          return arr[0] - arr[1];
-        });
-    },
-  }),
+  computed: {
+    ...mapState({
+      filteredTransactions(state, { account: { address } }) {
+        return this.transactions
+          .filter((tr) => {
+            switch (this.displayMode.type) {
+              case 'all':
+                return true;
+              case 'sent':
+                return tr.tx.type === 'SpendTx' && tr.tx.senderId === address;
+              case 'received':
+                return tr.tx.type === 'SpendTx' && tr.tx.recipientId === address;
+              case 'tips':
+                return (tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address) || tr.claim;
+              default:
+                throw new Error(`Unknown display mode type: ${this.displayMode.type}`);
+            }
+          })
+          .filter(
+            (tr) =>
+              !this.searchTerm ||
+              this.getTxSymbol(tr)
+                .toLocaleLowerCase()
+                .includes(this.searchTerm.toLocaleLowerCase()),
+          )
+          .sort((a, b) => {
+            const arr = [a, b].map((e) => new Date(e.microTime));
+            if (this.displayMode.latestFirst) arr.reverse();
+            return arr[0] - arr[1];
+          });
+      },
+    }),
+    ...mapGetters(['getTxSymbol']),
+  },
   mounted() {
     this.loadMore();
     const polling = setInterval(() => this.getLatest(), 10000);
+
+    document.querySelector('#app').addEventListener('scroll', this.checkLoadMore);
     window.addEventListener('scroll', this.checkLoadMore);
     this.$once('hook:destroyed', () => {
+      document.querySelector('#app').removeEventListener('scroll', this.checkLoadMore);
       window.removeEventListener('scroll', this.checkLoadMore);
       clearInterval(polling);
     });
@@ -82,7 +97,10 @@ export default {
   },
   methods: {
     checkLoadMore() {
-      const { scrollHeight, scrollTop, clientHeight } = document.documentElement;
+      const { scrollHeight, scrollTop, clientHeight } =
+        document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION
+          ? document.querySelector('#app')
+          : document.documentElement;
       if (scrollHeight - scrollTop <= clientHeight + 100) {
         setTimeout(() => this.loadMore(), 1500);
       }
@@ -122,6 +140,7 @@ export default {
     },
     updateTransactions(transactions) {
       this.transactions = uniqBy([...this.transactions, ...transactions], 'hash');
+      this.$store.commit('updateLatestTransactions', this.transactions);
     },
   },
 };
@@ -130,22 +149,9 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.date {
-  background: $button-color;
-  padding: 0.5rem 1rem;
-  color: $white-color;
-  text-transform: uppercase;
-  font-size: 0.9rem;
-  font-family: monospace;
-}
-
-.popup {
+.transactions .list {
+  background: $color-black;
   padding: 0;
-}
-
-.all-transactions {
-  background: $transactions-bg;
-  padding: 0 20px;
   margin: 0;
 }
 </style>

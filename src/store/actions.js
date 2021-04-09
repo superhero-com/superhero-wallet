@@ -1,14 +1,11 @@
 import { flatten, orderBy, uniq } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
-import { postMessage, postMessageToContent } from '../popup/utils/connection';
-import { AEX2_METHODS } from '../popup/utils/constants';
+import { postMessageToContent } from '../popup/utils/connection';
 import {
   fetchJson,
   getAddressByNameEntry,
-  parseFromStorage,
   postJson,
-  stringifyForStorage,
   handleUnknownError,
   isAccountNotFoundError,
 } from '../popup/utils/helper';
@@ -18,17 +15,15 @@ export default {
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
     commit('updateLatestTransactions', []);
-    commit('setNodeStatus', 'connecting');
-    if (process.env.IS_EXTENSION) postMessage({ type: AEX2_METHODS.SWITCH_NETWORK, payload });
   },
   async fetchPendingTransactions({
-    state: {
-      sdk,
-      account: { publicKey },
+    state: { sdk },
+    getters: {
+      account: { address },
     },
   }) {
     return (
-      await sdk.api.getPendingAccountTransactionsByPubkey(publicKey).then(
+      await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
         (r) => r.transactions,
         (error) => {
           if (!isAccountNotFoundError(error)) {
@@ -41,17 +36,17 @@ export default {
   },
   async fetchTransactions({ state, getters, dispatch }, { limit, page, recent }) {
     if (!state.middleware) return [];
-    const { publicKey } = state.account;
+    const { address } = getters.account;
     let txs = await Promise.all([
-      state.middleware.getTxByAccount(publicKey, limit, page).then(({ data }) => data),
+      state.middleware.getTxByAccount(address, limit, page).then(({ data }) => data),
       dispatch('fetchPendingTransactions'),
       fetchJson(
-        `${getters.activeNetwork.backendUrl}/cache/events/?address=${publicKey}&event=TipWithdrawn${
+        `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${
           recent ? `&limit=${limit}` : ``
         }`,
       )
         .then((response) =>
-          response.map(({ address, amount, ...t }) => ({
+          response.map(({ amount, ...t }) => ({
             tx: { address, amount },
             ...t,
             microTime: t.time,
@@ -64,32 +59,6 @@ export default {
     return recent ? txs.slice(0, limit) : txs;
   },
 
-  async getAccount(context, { idx }) {
-    return (await postMessage({ type: 'getAccount', payload: { idx } })).address;
-  },
-
-  async getKeyPair({ state: { account } }, { idx }) {
-    const { publicKey, secretKey } = parseFromStorage(
-      await postMessage({
-        type: 'getKeypair',
-        payload: { activeAccount: idx, account: { publicKey: account.publicKey } },
-      }),
-    );
-    return { publicKey, secretKey };
-  },
-
-  async generateWallet(context, { seed }) {
-    return (
-      await postMessage({ type: 'generateWallet', payload: { seed: stringifyForStorage(seed) } })
-    ).address;
-  },
-
-  async setLogin({ commit }, { keypair }) {
-    commit('updateAccount', keypair);
-    commit('setActiveAccount', { publicKey: keypair.publicKey, index: 0 });
-    commit('updateAccount', keypair);
-    commit('switchLoggedIn', true);
-  },
   async getCurrencies({ state: { nextCurrenciesFetch }, commit }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
       try {
@@ -158,18 +127,18 @@ export default {
   },
   async modifyNotification(
     {
-      state: {
-        sdk,
-        account: { publicKey },
+      state: { sdk },
+      getters: {
+        activeNetwork,
+        account: { address },
       },
-      getters: { activeNetwork },
     },
     [notifId, status],
   ) {
     const backendMethod = async (postParam) =>
       postJson(`${activeNetwork.backendUrl}/notification/${notifId}`, { body: postParam });
 
-    const responseChallenge = await backendMethod({ author: publicKey, status });
+    const responseChallenge = await backendMethod({ author: address, status });
     const signedChallenge = Buffer.from(
       await sdk.signMessage(responseChallenge.challenge),
     ).toString('hex');
@@ -182,11 +151,11 @@ export default {
   },
   async modifyNotifications(
     {
-      state: {
-        sdk,
-        account: { publicKey },
+      state: { sdk },
+      getters: {
+        activeNetwork,
+        account: { address },
       },
-      getters: { activeNetwork },
     },
     [ids, status],
   ) {
@@ -194,7 +163,7 @@ export default {
     const backendMethod = async (postParam) =>
       postJson(`${activeNetwork.backendUrl}/notification`, { body: postParam });
 
-    const responseChallenge = await backendMethod({ ids, status, author: publicKey });
+    const responseChallenge = await backendMethod({ ids, status, author: address });
     const signedChallenge = Buffer.from(
       await sdk.signMessage(responseChallenge.challenge),
     ).toString('hex');
@@ -208,9 +177,9 @@ export default {
   async getCacheChainNames({ getters: { activeNetwork } }) {
     return fetchJson(`${activeNetwork.backendUrl}/cache/chainnames`);
   },
-  async getAllNotifications({ state: { sdk }, getters: { activeNetwork } }, address) {
+  async getAllNotifications({ state: { sdk }, getters: { activeNetwork, account } }) {
     const responseChallenge = await fetchJson(
-      `${activeNetwork.backendUrl}/notification/user/${address}`,
+      `${activeNetwork.backendUrl}/notification/user/${account.address}`,
     );
     const signedChallenge = Buffer.from(
       await sdk.signMessage(responseChallenge.challenge),
@@ -220,7 +189,7 @@ export default {
       challenge: responseChallenge.challenge,
       signature: signedChallenge,
     };
-    const url = new URL(`${activeNetwork.backendUrl}/notification/user/${address}`);
+    const url = new URL(`${activeNetwork.backendUrl}/notification/user/${account.address}`);
     Object.keys(respondChallenge).forEach((key) =>
       url.searchParams.append(key, respondChallenge[key]),
     );

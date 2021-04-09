@@ -7,7 +7,9 @@
     <div class="invite-link">
       <span>{{ link }}</span>
       <div class="copied-alert" v-if="copied">{{ $t('pages.invite.copied') }}</div>
-      <button class="invite-link-copy" @click="copy" v-clipboard:copy="link"><CopyIcon /></button>
+      <button class="invite-link-copy" v-clipboard:success="copy" v-clipboard:copy="link">
+        <CopyIcon />
+      </button>
     </div>
     <div class="centered-buttons" v-if="!topUp">
       <Button v-if="inviteLinkBalance > 0" bold @click="claim">{{
@@ -35,7 +37,7 @@ import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk/es';
 import TokenAmount from './TokenAmount';
 import AmountSend from './AmountSend';
 import Button from './Button';
-import CopyIcon from '../../../icons/copy.svg?vue-component';
+import CopyIcon from '../../../icons/copy-old.svg?vue-component';
 import { formatDate } from '../../utils';
 
 export default {
@@ -185,7 +187,7 @@ export default {
   .centered-buttons {
     display: flex;
 
-    > .primary-button {
+    > .button {
       margin-right: 20px;
       width: 120px;
     }

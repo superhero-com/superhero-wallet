@@ -1,14 +1,16 @@
 <template>
-  <div class="invite popup">
-    <p class="section-title">
-      <NewInviteLink class="invite-icon" />
-      {{ $t('pages.invite.generate-link') }}
-    </p>
-    <AmountSend v-model="amount" :label="$t('pages.invite.tip-attached')" />
-    <Button bold :disabled="!sufficientBalance" @click="generate">{{
-      $t('pages.invite.generate')
-    }}</Button>
-    <div class="generated-links">
+  <div class="invite">
+    <div class="top">
+      <p class="section-title">
+        <NewInviteLink class="invite-icon" />
+        {{ $t('pages.invite.generate-link') }}
+      </p>
+      <AmountSend v-model="amount" :label="$t('pages.invite.tip-attached')" />
+      <Button bold :disabled="!sufficientBalance" @click="generate">{{
+        $t('pages.invite.generate')
+      }}</Button>
+    </div>
+    <div v-if="invites.length > 0" class="generated-links">
       <p class="section-title">
         <Invite class="invite-icon" />
         {{ $t('pages.invite.created-links') }}
@@ -78,12 +80,17 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.invite.popup {
-  background-color: $black-1;
+.invite {
+  .top {
+    margin: 0 -20px;
+    padding: 20px;
+    background-color: $black-1;
+  }
 
   .section-title {
     font-size: 17px;
     text-align: left;
+    margin-top: 0;
     margin-bottom: 0;
     color: $gray-1;
     font-weight: 400;

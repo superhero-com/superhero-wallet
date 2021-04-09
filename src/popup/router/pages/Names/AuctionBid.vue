@@ -1,7 +1,7 @@
 <template>
-  <div class="popup">
+  <div class="auction-bid">
     <h4>{{ $t('pages.names.auctions.bid-on') }} {{ name }}</h4>
-    <AmountSend :amountError="!+amount" v-model="amount" :errorMsg="amountError" />
+    <AmountSend :amountError="!+amount" v-model="amount" :errorMsg="amountError || ''" />
     <Button extend @click="bid" :disabled="!!amountError || !+amount">
       {{ $t('pages.names.auctions.bid') }}
     </Button>
@@ -61,7 +61,7 @@ export default {
     },
   },
   filters: { blocksToRelativeTime },
-  async created() {
+  async mounted() {
     this.loading = true;
     await this.$watchUntilTruly(() => this.$store.state.middleware);
     const res = await this.$store.dispatch('names/fetchAuctionEntry', this.name);
@@ -99,7 +99,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.details-row {
+.auction-bid .details-row {
   display: flex;
   justify-content: space-between;
   margin: 5px 0;

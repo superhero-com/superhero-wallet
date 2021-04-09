@@ -22,7 +22,7 @@ export default {
       error: null,
     };
   },
-  created() {
+  mounted() {
     const url = new URL(window.location.href);
     const error = url.searchParams.get('error');
     if (error) this.error = error;

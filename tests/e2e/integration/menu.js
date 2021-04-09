@@ -1,6 +1,4 @@
-const links = ['receive', 'send', 'transactions', 'names', 'about'];
-
-const dropdownLinks = ['security', 'language', 'networks'];
+const links = ['settings', 'tip', 'invite', 'transactions', 'names', 'about'];
 
 describe('Test cases for menu sidebar component', () => {
   beforeEach(() => {
@@ -11,16 +9,11 @@ describe('Test cases for menu sidebar component', () => {
     cy.get('[data-cy=hamburger]').should('be.visible');
   });
 
-  it('Identicon is shown, menu is closing, links have correct href, do not have chain name, toggle dropdown', () => {
+  it('Identicon is shown, menu is closing, links have correct href, do not have chain name', () => {
     cy.openMenu()
       .menuShould('be.visible')
       .get('.avatar')
       .should('be.visible')
-
-      .toggleDropdown()
-      .dropdownShould('be.visible')
-      .toggleDropdown()
-      .dropdownShould('not.exist')
 
       .get('[data-cy=chain-name]')
       .should('not.exist')
@@ -29,10 +22,11 @@ describe('Test cases for menu sidebar component', () => {
       .menuShould('not.exist')
 
       .openMenu()
-      .menuShould('be.visible')
       .wrap(links)
       .each((link) => {
-        cy.get(`[data-cy=${link}]`).should('have.attr', 'href').and('include', `/${link}`);
+        cy.get(`[data-cy=sidebar-menu] [data-cy=${link}]`)
+          .should('have.attr', 'href')
+          .and('include', `/${link}`);
       });
 
     cy.closeMenu('overlay').menuShould('not.exist');
@@ -48,19 +42,6 @@ describe('Test cases for menu sidebar component', () => {
         .should('be.visible')
         .get('[data-cy=back-arrow]')
         .should('not.exist');
-    });
-  });
-
-  it(`Opens each dropdown page and returns to settings page`, () => {
-    dropdownLinks.forEach((page) => {
-      cy.openMenuPage(page, true)
-        .get('[data-cy=back-arrow]')
-        .should('be.visible')
-        .click()
-        .url()
-        .should('contain', '/settings')
-        .get('[data-cy=back-arrow]')
-        .should('be.visible');
     });
   });
 });

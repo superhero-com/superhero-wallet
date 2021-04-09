@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="details">
     <ul v-if="!addPointer" class="name-details">
       <li>
         <span>{{ $t('pages.names.details.name') }}</span> {{ name }}
@@ -21,7 +21,7 @@
         {{ pointer }}
       </li>
     </ul>
-    <Input
+    <InputField
       v-if="addPointer"
       v-model="pointer"
       :error="!validPointer"
@@ -31,7 +31,7 @@
       v-if="!addPointer"
       extend
       @click="setDefault"
-      :disabled="activeAccountName === name || !hasPointer"
+      :disabled="account.name === name || !hasPointer"
     >
       {{ $t('pages.names.details.set-default') }}
     </Button>
@@ -41,7 +41,11 @@
     <Button v-if="addPointer" dark extend @click="addPointer = false">
       {{ $t('pages.names.details.cancel') }}
     </Button>
-    <Button extend @click="setPointer" :disabled="addPointer && !validPointer">
+    <Button
+      extend
+      @click="setPointer"
+      :disabled="(addPointer && !validPointer) || nameEntry.pending"
+    >
       {{ $t('pages.names.details.set-pointer') }}
     </Button>
   </div>
@@ -49,15 +53,15 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { chekAensName, checkAddress, getAddressByNameEntry } from '../../../utils/helper';
+import { checkAensName, checkAddress, getAddressByNameEntry } from '../../../utils/helper';
 import Button from '../../components/Button';
-import Input from '../../components/Input';
+import InputField from '../../components/InputField';
 
 export default {
   props: {
     name: { type: String, required: true },
   },
-  components: { Button, Input },
+  components: { Button, InputField },
   data: () => ({
     pointer: '',
     addPointer: false,
@@ -66,12 +70,12 @@ export default {
   }),
   computed: {
     ...mapState(['sdk']),
-    ...mapGetters(['account', 'activeAccountName']),
+    ...mapGetters(['account']),
     nameEntry() {
       return this.$store.getters['names/getName'](this.name);
     },
     validPointer() {
-      return chekAensName(this.pointer) || checkAddress(this.pointer);
+      return checkAensName(this.pointer) || checkAddress(this.pointer);
     },
     hasPointer() {
       return this.nameEntry?.pointers?.accountPubkey;
@@ -86,8 +90,11 @@ export default {
       },
       immediate: true,
     },
+    nameEntry(entry) {
+      if (!entry) this.$router.push('/names');
+    },
   },
-  async created() {
+  async mounted() {
     await this.$watchUntilTruly(() => this.sdk);
     this.$store.dispatch('names/fetchOwned');
   },
@@ -95,7 +102,7 @@ export default {
     async setDefault() {
       await this.$watchUntilTruly(() => this.sdk);
       await this.$store.dispatch('names/setDefault', {
-        address: this.account.publicKey,
+        address: this.account.address,
         name: this.name,
       });
     },
@@ -110,7 +117,7 @@ export default {
         this.pointerError = !this.validPointer;
         if (this.pointerError) return;
 
-        if (chekAensName(this.pointer)) {
+        if (checkAensName(this.pointer)) {
           try {
             const nameEntry = await this.sdk.aensQuery(this.pointer);
             const address = getAddressByNameEntry(nameEntry);
@@ -137,7 +144,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.name-details {
+.details .name-details {
   padding: 0;
   margin: 0;
 

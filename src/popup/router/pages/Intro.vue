@@ -1,5 +1,5 @@
 <template>
-  <div :class="['popup', 'intro', { iframe }]">
+  <div :class="['intro', { iframe }]">
     <div v-show="step === 1">
       <img v-if="iframe" src="../../../icons/iframe/receive.svg" />
       <h2 v-else>
@@ -98,7 +98,7 @@
 </template>
 
 <script>
-import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
+import { generateMnemonic } from '@aeternity/bip39';
 import { IN_FRAME } from '../../utils/helper';
 import Claim from '../../../icons/claim.svg?vue-component';
 import Heart from '../../../icons/heart.svg?vue-component';
@@ -122,22 +122,13 @@ export default {
     return {
       step: 1,
       totalsteps: 4,
-      mnemonic: null,
       understood: !IN_FRAME,
       iframe: IN_FRAME,
     };
   },
   methods: {
     async createWallet() {
-      this.mnemonic = generateMnemonic();
-      const seed = mnemonicToSeed(this.mnemonic).toString('hex');
-      const address = await this.$store.dispatch('generateWallet', { seed });
-      this.$store.commit('setMnemonic', this.mnemonic);
-      const keypair = {
-        publicKey: address,
-        privateKey: seed,
-      };
-      await this.$store.dispatch('setLogin', { keypair });
+      this.$store.commit('setMnemonic', generateMnemonic());
       this.next();
     },
     prev() {
@@ -153,15 +144,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/mixins';
 
 .intro {
   padding: 40px 16px 4px 16px;
+
+  @include mobile {
+    padding-top: 48px;
+    padding-top: calc(env(safe-area-inset-top) + 48px);
+  }
+
   position: relative;
   height: 80vh;
 
   &.iframe {
-    padding-top: 0;
     padding-bottom: 0;
 
     .text-info {
@@ -239,7 +235,7 @@ export default {
   }
 
   .dotstyle {
-    position: fixed;
+    position: sticky;
     left: 0;
     right: 0;
     top: 50%;
@@ -328,7 +324,14 @@ export default {
   }
 
   .platforms {
-    margin: 20px -20px 0 -25px;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+
+    .text:hover {
+      margin-bottom: 20px;
+    }
   }
 }
 </style>

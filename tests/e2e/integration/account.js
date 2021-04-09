@@ -40,7 +40,7 @@ describe('Test cases for Account Page', () => {
       .get('[data-cy=view-all-transactions]')
       .should('be.visible')
       .click()
-      .get('[data-cy=all-transactions]')
+      .get('[data-cy=list]')
       .should('exist')
       .get('[data-cy="back-arrow"]')
       .click()

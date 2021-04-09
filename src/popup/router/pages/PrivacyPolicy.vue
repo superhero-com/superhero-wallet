@@ -1,6 +1,5 @@
-<!--eslint-disable vue-i18n/no-raw-text-->
 <template>
-  <div class="popup privacypolicy--content">
+  <div class="privacy-policy">
     <h2>{{ $t('pages.privacyPolicy.heading') }}</h2>
     <p><em>The present Privacy Policy is effective since on 9th April 2020.</em></p>
     <ol>
@@ -33,43 +32,33 @@
         </p>
         <p>
           1) downloaded as an add-on (extension) to Firefox:
-          <a
-            @click="
-              openUrl('https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/', true)
-            "
+          <a href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/" target="_blank"
             >https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/</a
           >
           ; to Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <a
-            @click="
-              openUrl(
-                'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related',
-                true,
-              )
-            "
+            href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related"
+            target="_blank"
             >https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related</a
           >;
         </p>
         <p>
           2) accessed from any Browser at the address:
-          <a @click="openUrl('https://wallet.superhero.com/', true)"
-            >https://wallet.superhero.com/</a
-          >
+          <a href="https://wallet.superhero.com/" target="_blank">https://wallet.superhero.com/</a>
           ;
         </p>
         <p>
           3) downloaded from Google Play:&nbsp;&nbsp;&nbsp;&nbsp;
           <a
-            @click="
-              openUrl('https://play.google.com/store/apps/details?id=com.superhero.cordova', true)
-            "
+            href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
+            target="_blank"
             >https://play.google.com/store/apps/details?id=com.superhero.cordova</a
           >
           and
         </p>
         <p>
           from App Store:
-          <a @click="openUrl('https://testflight.apple.com/join/3o5r4dQQ', true)"
+          <a href="https://testflight.apple.com/join/3o5r4dQQ" target="_blank"
             >https://testflight.apple.com/join/3o5r4dQQ</a
           >.
         </p>
@@ -354,28 +343,21 @@
         <p>
           To contact us with your questions or comments regarding this <strong>Policy</strong>,
           please email us at&nbsp;
-          <a @click="openUrl('mailto:superherowallet@protonmail.com', true)">
-            superherowallet@protonmail.com</a
-          >.
+          <a href="mailto:superherowallet@protonmail.com">superherowallet@protonmail.com</a>.
         </p>
       </li>
     </ol>
   </div>
 </template>
 
-<script>
-import openUrl from '../../utils/openUrl';
-
-export default {
-  data: () => ({
-    openUrl,
-  }),
-};
-</script>
-
 <style lang="scss" scoped>
-.privacypolicy--content {
+::v-deep {
   text-align: left;
+}
+
+.privacy-policy {
+  padding-left: 20px;
+  padding-right: 20px;
   word-break: break-word;
   font-weight: 100;
 

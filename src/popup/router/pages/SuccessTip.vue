@@ -1,5 +1,5 @@
 <template>
-  <div class="popup" data-cy="success-tip">
+  <div class="success-tip" data-cy="success-tip">
     <h3 class="heading-1 mb-25 mt-15 center">
       <div class="flex flex-align-center flex-justify-content-center">
         <Heart />
@@ -44,7 +44,7 @@
         </Button>
       </div>
       <br />
-      <Button @click="redirectOnFeed" extend>
+      <Button :to="AGGREGATOR_URL" extend>
         {{ $t('pages.successTip.feed') }}
       </Button>
     </div>
@@ -54,7 +54,6 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import Heart from '../../../icons/heart.svg?vue-component';
-import openUrl from '../../utils/openUrl';
 import { AGGREGATOR_URL } from '../../utils/constants';
 import { aettosToAe } from '../../utils/helper';
 import Logger from '../../../lib/logger';
@@ -67,6 +66,7 @@ export default {
     TokenAmount,
     Button,
   },
+  data: () => ({ AGGREGATOR_URL }),
   props: ['amount', 'tipUrl'],
   computed: {
     ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
@@ -90,7 +90,7 @@ export default {
       return this.$t('pages.successTip.notifyMessage', this.formatReceivedTokensForLocale);
     },
   },
-  async created() {
+  async mounted() {
     if (process.env.IS_EXTENSION) {
       const { addresses, tab } = await this.$store.dispatch('getWebPageAddresses');
       if (addresses.length) {
@@ -100,30 +100,27 @@ export default {
       }
     }
   },
-  methods: {
-    redirectOnFeed() {
-      openUrl(AGGREGATOR_URL, true);
-    },
-  },
 };
 </script>
 
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.sub-heading {
-  font-size: 14px;
-  font-weight: normal;
-  margin: 8px 0;
-}
+.success-tip {
+  .sub-heading {
+    font-size: 14px;
+    font-weight: normal;
+    margin: 8px 0;
+  }
 
-.note {
-  color: $text-color;
-  font-size: $font-size;
-  min-height: 100px;
-  border-radius: 5px;
-  border: 2px solid $border-color;
-  background: $input-bg-color;
-  padding: 15px;
+  .note {
+    color: $text-color;
+    font-size: $base-font-size;
+    min-height: 100px;
+    border-radius: 5px;
+    border: 2px solid $border-color;
+    background: $input-bg-color;
+    padding: 15px;
+  }
 }
 </style>

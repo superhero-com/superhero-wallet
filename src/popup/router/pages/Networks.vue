@@ -1,5 +1,5 @@
 <template>
-  <div v-if="mode === 'list'" class="popup" data-cy="networks">
+  <div v-if="mode === 'list'" class="networks" data-cy="networks">
     <div v-for="network in networks" :key="network.name" class="network-row">
       <CheckBox
         :value="network === activeNetwork"
@@ -32,26 +32,26 @@
       $t('pages.network.addNetwork')
     }}</Button>
   </div>
-  <div v-else-if="mode === 'add' || mode === 'edit'" class="mt-10 popup network">
-    <Input
+  <div v-else-if="mode === 'add' || mode === 'edit'" class="mt-10 network">
+    <InputField
       :placeholder="$t('pages.network.networkNamePlaceholder')"
       :label="$t('pages.network.networkNameLabel')"
       v-model="network.name"
       data-cy="network"
     />
-    <Input
+    <InputField
       :placeholder="$t('pages.network.networkUrlPlaceholder')"
       :label="$t('pages.network.networkUrlLabel')"
       v-model="network.url"
       data-cy="url"
     />
-    <Input
+    <InputField
       :placeholder="$t('pages.network.networkMiddlewarePlaceholder')"
       :label="$t('pages.network.networkMiddlewareLabel')"
       v-model="network.middlewareUrl"
       data-cy="middleware"
     />
-    <Input
+    <InputField
       :placeholder="$t('pages.network.networkCompilerPlaceholder')"
       :label="$t('pages.network.networkCompilerLabel')"
       v-model="network.compilerUrl"
@@ -65,7 +65,7 @@
           : $t('pages.network.showTippingConfig')
       }}</span>
     </button>
-    <Input
+    <InputField
       v-if="backendUrlInputExpanded"
       :placeholder="$t('pages.network.backendUrlPlaceholder')"
       :label="$t('pages.network.backendUrlLabel')"
@@ -95,10 +95,9 @@
 <script>
 import { mapGetters } from 'vuex';
 import Button from '../components/Button';
-import Input from '../components/Input';
+import InputField from '../components/InputField';
 import CheckBox from '../components/CheckBox';
 import { defaultNetwork } from '../../utils/constants';
-import wallet from '../../../lib/wallet';
 
 const networkProps = {
   name: null,
@@ -112,7 +111,7 @@ const networkProps = {
 export default {
   components: {
     Button,
-    Input,
+    InputField,
     CheckBox,
   },
   data() {
@@ -140,7 +139,6 @@ export default {
   methods: {
     async selectNetwork(network) {
       await this.$store.dispatch('switchNetwork', network);
-      await wallet.initSdk();
       if (this.tippingSupported) return;
       await this.$store.dispatch('modals/open', {
         name: 'default',
@@ -198,7 +196,7 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.network-row {
+.networks .network-row {
   display: flex;
   align-items: center;
   border-top: 1px solid #100c0d;
@@ -241,7 +239,7 @@ export default {
     }
   }
 
-  .primary-button {
+  .button {
     margin-top: 20px;
   }
 }

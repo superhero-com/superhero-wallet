@@ -2,14 +2,8 @@ import Vue from 'vue';
 import { defaultNetwork } from '../popup/utils/constants';
 
 export default {
-  updateAccount(state, payload) {
-    state.account = payload;
-  },
   switchNetwork(state, payload) {
     state.current.network = payload;
-  },
-  switchLoggedIn(state, payload) {
-    state.isLoggedIn = payload;
   },
   updateLatestTransactions(state, payload) {
     state.transactions.latest = payload;
@@ -20,12 +14,8 @@ export default {
   removePendingTransactionByHash(state, hash) {
     state.transactions.pending = state.transactions.pending.filter((t) => t.hash !== hash);
   },
-  setActiveAccount(state, payload) {
-    state.account.publicKey = payload.publicKey;
-    state.activeAccount = payload.index;
-  },
   setUserNetwork(state, { index, ...network }) {
-    if (index !== undefined) state.userNetworks[index] = network;
+    if (index !== undefined) Vue.set(state.userNetworks, index, network);
     else state.userNetworks.push({ ...defaultNetwork, ...network });
   },
   deleteUserNetwork(state, index) {
@@ -40,9 +30,6 @@ export default {
   setTipping(state, [tippingV1, tippingV2]) {
     state.tippingV1 = tippingV1 || null;
     state.tippingV2 = tippingV2 || null;
-  },
-  setMainLoading(state, payload) {
-    state.mainLoading = payload;
   },
   setNodeStatus(state, payload) {
     state.nodeStatus = payload;

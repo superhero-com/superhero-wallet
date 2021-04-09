@@ -6,15 +6,7 @@
         {{ $t('pages.fungible-tokens.tokens') }}
       </a>
     </div>
-    <div class="search">
-      <input
-        v-model="searchTerm"
-        :placeholder="$t('pages.fungible-tokens.searchPlaceholder')"
-        type="text"
-      />
-      <Eraser v-if="searchTerm.length > 0" class="eracer-icon" @click="searchTerm = ''" />
-      <Search v-else class="search-icon" />
-    </div>
+    <SearchBar v-model="searchTerm" :placeholder="$t('pages.fungible-tokens.searchPlaceholder')" />
     <TabsMenu v-model="activeTab" :tabOptions="tabs" />
     <TokensList :show-my-tokens="activeTab === tabs[1].name" :searchTerm="searchTerm" />
   </div>
@@ -24,15 +16,13 @@
 import TabsMenu from '../../components/TabsMenu';
 import TokensList from '../../components/FungibleTokens/TokensList';
 import TokenPiles from '../../../../icons/token-piles.svg?vue-component';
-import Search from '../../../../icons/search.svg?vue-component';
-import Eraser from '../../../../icons/eraser.svg?vue-component';
+import SearchBar from '../../components/SearchBar';
 
 export default {
   name: 'fungible-tokens',
   components: {
     TokenPiles,
-    Search,
-    Eraser,
+    SearchBar,
     TabsMenu,
     TokensList,
   },
@@ -59,9 +49,8 @@ export default {
 <style lang="scss" scoped>
 @import '../../../../styles/variables';
 
-.tokens-preview {
-  max-width: 357px;
-  margin: 0 auto;
+::v-deep {
+  text-align: left;
 }
 
 .menu {
@@ -87,49 +76,6 @@ export default {
   &.active {
     color: $accent-color;
     background-color: $black-3;
-  }
-}
-
-.search {
-  display: flex;
-  align-items: center;
-  border: 1px solid transparent;
-
-  &:focus-within {
-    border-color: $secondary-color;
-  }
-
-  input {
-    font-size: 14px;
-    color: $white-1;
-    height: 40px;
-    padding: 0 15px;
-    flex-grow: 1;
-
-    &::placeholder {
-      color: $gray-2;
-    }
-
-    &:focus {
-      outline: none;
-      border: none;
-
-      ~ .search-icon {
-        display: none;
-      }
-    }
-
-    ~ * {
-      margin-right: 15px;
-    }
-  }
-
-  .search-icon {
-    color: $accent-color;
-  }
-
-  .eracer-icon :hover {
-    cursor: pointer;
   }
 }
 </style>

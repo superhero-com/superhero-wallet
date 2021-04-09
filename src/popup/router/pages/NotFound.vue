@@ -1,7 +1,7 @@
 <template>
   <div class="not-found">
     {{ $t('pages.notFound.notFound') }}
-    <Button @click="$router.push('/')">
+    <Button :to="{ name: 'index' }">
       {{ $t('pages.notFound.initialPage') }}
     </Button>
   </div>

@@ -3,8 +3,8 @@
     <h3>
       {{ $t('modals.confirm-transaction-sign.sign-raw') }} <br />
       <span class="name-holder">
-        <Avatar :address="account.publicKey" :name="account.name" size="small" />
-        {{ account.name || account.publicKey }}
+        <Avatar :address="account.address" :name="account.name" size="small" />
+        {{ account.name || account.address }}
       </span>
     </h3>
     <DetailsItem :label="$t('modals.confirm-transaction-sign.data-sign')" direction="column">
@@ -23,7 +23,7 @@ import { mapGetters } from 'vuex';
 import Modal from '../Modal';
 import Button from '../Button';
 import Avatar from '../Avatar';
-import DetailsItem from '../DetailsItem';
+import DetailsItem from '../DetailsItemOld';
 
 export default {
   props: {
@@ -33,7 +33,7 @@ export default {
   },
   components: { Modal, Button, Avatar, DetailsItem },
   computed: {
-    ...mapGetters(['account', 'activeAccountName']),
+    ...mapGetters(['account']),
     dataAsString() {
       if (typeof this.data === 'string') return this.data;
       return Buffer.from(this.data).toString('hex');

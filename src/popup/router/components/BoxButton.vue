@@ -1,8 +1,8 @@
 <template>
-  <div class="button-container">
-    <RouterLink :to="to" class="button-content" :class="{ disabled }">
+  <div class="box-button">
+    <RouterLink :to="to">
       <slot name="icon" />
-      <span class="button-text" :class="accent ? 'button-text-accent' : ''">{{ text }}</span>
+      <span class="text">{{ text }}</span>
     </RouterLink>
   </div>
 </template>
@@ -10,63 +10,60 @@
 <script>
 export default {
   props: {
-    text: {
-      type: String,
-      required: true,
-    },
-    to: [String, Object],
-    accent: Boolean,
-    disabled: {
-      type: Boolean,
-      default: false,
-      required: false,
-    },
+    to: { type: String, required: true },
+    text: { type: String, required: true },
   },
 };
 </script>
 <style lang="scss" scoped>
 @import '../../../styles/variables';
+@import '../../../styles/typography';
 
-.button-container {
-  width: 33%;
-  display: inline-block;
-  padding: 10px;
-  color: $gray-1;
-
-  .button-content {
-    background: $box-button-color;
-    border-radius: 5px;
-    padding: 15px 10px;
-    border: 1px solid transparent;
-    display: block;
-    color: inherit;
+.box-button {
+  a {
+    width: 88px;
+    height: 64px;
+    background: $color-bg-2;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-decoration: none;
+    user-select: none;
+    cursor: pointer;
 
-    &:hover {
-      background-color: $secondary-color;
-      cursor: pointer;
+    ::v-deep svg {
+      width: 24px;
+      height: 24px;
+      opacity: 0.7;
     }
 
-    .button-text {
-      font-size: 15px;
-      display: block;
-      font-weight: bold;
-      margin-top: 5px;
-      line-height: 20px;
+    .text {
+      @extend %face-sans-15-medium;
 
-      &.button-text-accent {
-        color: $accent-color;
+      color: $color-dark-grey;
+    }
+
+    &:hover {
+      background: rgba($color-blue, 0.15);
+
+      ::v-deep svg {
+        opacity: 1;
+
+        path {
+          fill: $color-blue;
+        }
+      }
+
+      .text {
+        color: $color-blue;
       }
     }
 
-    &.disabled {
-      pointer-events: all;
-      opacity: 0.3;
+    &:active {
+      background-color: rgba($color-blue, 0.1);
     }
-  }
-
-  &:hover {
-    color: $white-1;
   }
 }
 </style>

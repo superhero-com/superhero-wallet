@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="auction-list">
     <NameListHeader />
 
     <Button @click="filter = 'soonest'" :inactive="filter !== 'soonest'" third small>
@@ -12,7 +12,7 @@
       {{ $t('pages.names.auctions.bid') }}
     </Button>
 
-    <ul v-if="activeAuctions.length" class="auctions-list">
+    <ul v-if="activeAuctions.length" class="list">
       <NameRow
         v-for="({ name, expiration, lastBid }, key) in auctions"
         :key="key"
@@ -61,7 +61,7 @@ export default {
     },
   },
   filters: { blocksToRelativeTime },
-  async created() {
+  async mounted() {
     await this.$watchUntilTruly(() => this.$store.state.sdk);
     this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');
   },
@@ -69,7 +69,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.auctions-list {
+.auction-list .list {
   padding: 0;
   margin-top: 10px;
 }

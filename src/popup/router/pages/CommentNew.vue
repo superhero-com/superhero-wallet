@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="comment-new">
     <div class="tip-note-preview mt-15">
       {{ text }}
     </div>
@@ -29,7 +29,7 @@ export default {
     ...mapState(['sdk']),
     ...mapGetters(['tippingSupported']),
   },
-  async created() {
+  async mounted() {
     this.loading = true;
     this.id = this.$route.query.id;
     if (this.$route.query.parentId) this.parentId = +this.$route.query.parentId;

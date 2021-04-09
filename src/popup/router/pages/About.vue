@@ -1,16 +1,14 @@
 <template>
-  <div class="popup">
+  <div class="about">
     <Logo class="logo" />
     <p>
-      {{ $t('pages.about.systemName') }}
       <span class="version">
         <a
-          @click="
-            openUrl(`https://github.com/aeternity/superhero-wallet/commit/${commitHash}`, true)
-          "
+          :href="`https://github.com/aeternity/superhero-wallet/commit/${commitHash}`"
+          target="_blank"
         >
           {{ commitHash.slice(0, 7) }}</a
-        ><!--eslint-disable-line vue-i18n/no-raw-text-->
+        >
         / {{ extensionVersion }}
       </span>
     </p>
@@ -22,7 +20,7 @@
       <router-link to="/about/privacyPolicy" data-cy="privacy">{{
         $t('pages.about.privacyPolicy')
       }}</router-link>
-      <Button @click="openUrl(bugReportUrl, true)">
+      <Button :to="BUG_REPORT_URL">
         {{ $t('pages.about.reportBug') }}
       </Button>
     </div>
@@ -32,7 +30,6 @@
 <script>
 import Button from '../components/Button';
 import Logo from '../../../icons/logo.svg?vue-component';
-import openUrl from '../../utils/openUrl';
 import { BUG_REPORT_URL } from '../../utils/constants';
 
 export default {
@@ -41,20 +38,25 @@ export default {
     return {
       extensionVersion: `v.${process.env.npm_package_version}`,
       commitHash: process.env.COMMIT_HASH,
-      bugReportUrl: BUG_REPORT_URL,
-      openUrl,
+      BUG_REPORT_URL,
     };
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.version {
-  color: #909090;
-}
+.about {
+  .logo {
+    margin-top: 16px;
+  }
 
-.waellet-links a {
-  font-weight: bold;
-  display: block;
+  .version {
+    color: #909090;
+  }
+
+  .waellet-links a {
+    font-weight: bold;
+    display: block;
+  }
 }
 </style>

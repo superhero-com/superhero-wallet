@@ -1,0 +1,57 @@
+.popup-aex2 {
+  padding-top: env(safe-area-inset-top);
+  max-height: 600px;
+  min-height: 600px;
+  margin-bottom: 55px;
+  position: relative;
+  // overflow-y:scroll;
+  h2 {
+    word-break: break-word;
+    line-height: 1.8rem;
+    font-size: 1.2rem;
+  }
+
+  p {
+    font-weight: normal;
+    word-break: break-word;
+    font-size: 0.9rem;
+  }
+
+  ul li {
+    border-width: 1px;
+    border-color: #424242;
+  }
+
+  .permission-set {
+    flex-direction: column;
+    text-align: left;
+    cursor: unset;
+
+    h4 {
+      display: block;
+      width: 100%;
+      margin: 0;
+    }
+
+    p {
+      display: block;
+      width: 100%;
+      margin: 0;
+    }
+  }
+
+  ul {
+    padding: 0;
+  }
+
+  .account-name {
+    font-size: 0.8rem;
+    word-break: break-word;
+    white-space: nowrap;
+  }
+
+  .hostname {
+    font-size: 0.65rem;
+    word-break: break-word;
+  }
+}

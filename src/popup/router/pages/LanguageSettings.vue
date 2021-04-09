@@ -1,13 +1,12 @@
 <template>
-  <div class="popup">
+  <div class="language-settings">
     <h4>{{ $t('pages.languageSettings.switchLanguage') }}</h4>
     <hr />
     <small>
-      <!--eslint-disable-next-line vue-i18n/no-raw-text-->
       {{ $t('pages.languageSettings.currentLanguage') }}:
       {{ active.name || 'en' }}
     </small>
-    <div class="language-settings">
+    <div class="settings">
       <div class="dropdown" :class="{ show: dropdown }">
         <Button extend @click="dropdown = !dropdown">
           <ae-icon name="globe" />
@@ -57,91 +56,93 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-h4 {
-  text-align: left;
-  margin: 0;
-}
-
-small {
-  color: #9c9c9c;
-  text-align: left;
-  width: 100%;
-  margin: 0 0 10px;
-  display: block;
-  word-break: break-word;
-}
-
 .language-settings {
-  li {
-    list-style-type: none;
-    color: #717c87;
+  h4 {
+    text-align: left;
     margin: 0;
   }
 
-  .ae-icon {
-    font-size: 1.2rem;
-    margin-right: 10px;
-  }
-
-  button {
-    font-size: 14px;
+  small {
+    color: #9c9c9c;
+    text-align: left;
     width: 100%;
-    color: $button-text-color;
-    margin: 0;
-    padding: 0 1rem;
-    white-space: nowrap;
-    background-color: #505058;
-    border-radius: 4px;
-    text-align: center;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
+    margin: 0 0 10px;
+    display: block;
+    word-break: break-word;
   }
 
-  ul {
-    min-width: 250px;
-    box-shadow: none;
-    visibility: hidden;
-    max-height: 0;
-    padding: 0;
-    overflow: hidden;
-    transition: all 0.3s ease-in-out;
-    right: 0;
-
+  .settings {
     li {
-      width: 30%;
+      list-style-type: none;
+      color: #717c87;
+      margin: 0;
+    }
+
+    .ae-icon {
+      font-size: 1.2rem;
+      margin-right: 10px;
+    }
+
+    button {
+      font-size: 14px;
+      width: 100%;
+      color: $button-text-color;
+      margin: 0;
+      padding: 0 1rem;
+      white-space: nowrap;
+      background-color: #505058;
+      border-radius: 4px;
       text-align: center;
-      margin: auto;
-      color: #fff;
-      cursor: pointer;
-
-      div {
-        width: 100%;
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .active {
-        text-decoration: underline;
-      }
-
-      span {
-        margin-left: auto;
-      }
-    }
-  }
-
-  .dropdown.show {
-    .sub-dropdown {
-      visibility: visible;
-      max-height: 210px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
     }
 
-    .ae-icon-left-more {
-      transform: rotate(90deg);
-      -webkit-transform: rotate(90deg);
-      -ms-transform: rotate(90deg);
+    ul {
+      min-width: 250px;
+      box-shadow: none;
+      visibility: hidden;
+      max-height: 0;
+      padding: 0;
+      overflow: hidden;
+      transition: all 0.3s ease-in-out;
+      right: 0;
+
+      li {
+        width: 30%;
+        text-align: center;
+        margin: auto;
+        color: #fff;
+        cursor: pointer;
+
+        div {
+          width: 100%;
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .active {
+          text-decoration: underline;
+        }
+
+        span {
+          margin-left: auto;
+        }
+      }
+    }
+
+    .dropdown.show {
+      .sub-dropdown {
+        visibility: visible;
+        max-height: 210px;
+      }
+
+      .ae-icon-left-more {
+        transform: rotate(90deg);
+        -webkit-transform: rotate(90deg);
+        -ms-transform: rotate(90deg);
+      }
     }
   }
 }

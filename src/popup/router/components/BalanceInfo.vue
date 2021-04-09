@@ -26,7 +26,6 @@
           :selected="current.currency"
           is-custom
         />
-        <!--eslint-disable-next-line vue-i18n/no-raw-text-->
         <span class="approx-sign">~</span>
         <span class="display-value text-ellipsis">{{ formatCurrency(balanceCurrency) }}</span>
         <ExpandedAngleArrow class="expand-arrow" />
@@ -94,7 +93,6 @@ export default {
 
 .balance-info {
   height: 76px;
-  background-image: url('../../../icons/acc_balance.png');
   border-bottom: 2px solid $transactions-bg;
   display: flex;
   padding: 0 20px 10px 20px;

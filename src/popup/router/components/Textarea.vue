@@ -2,7 +2,7 @@
   <textarea
     class="textarea"
     :placeholder="placeholder"
-    :class="{ 'has-error': error || err, [size]: size }"
+    :class="{ error: error || err, [size]: size }"
     :value="value"
     @input="$emit('input', $event.target.value)"
     data-cy="textarea"
@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { checkAddress, chekAensName } from '../../utils/helper';
+import { checkAddress, checkAensName } from '../../utils/helper';
 
 export default {
   props: {
@@ -24,7 +24,7 @@ export default {
   watch: {
     value(val) {
       if (this.type === 'address') {
-        this.err = !checkAddress(val) && !chekAensName(val);
+        this.err = !checkAddress(val) && !checkAensName(val);
       }
     },
   },
@@ -32,7 +32,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/typography';
 
 .textarea {
   display: block;
@@ -43,8 +43,9 @@ export default {
   padding: 15px;
   margin-bottom: 22px;
   color: $text-color;
-  font-family: 'Roboto', sans-serif;
-  font-size: $font-size;
+
+  @extend %face-sans-16-regular;
+
   min-height: 200px;
   margin-left: auto;
   margin-right: auto;
@@ -54,7 +55,7 @@ export default {
     border-color: $input-focus-color;
   }
 
-  &.has-error {
+  &.error {
     border-color: $input-error-color;
   }
 

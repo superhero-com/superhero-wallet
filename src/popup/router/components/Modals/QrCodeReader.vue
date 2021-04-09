@@ -15,7 +15,6 @@
 
 <script>
 import Modal from '../Modal';
-import openUrl from '../../../utils/openUrl';
 
 const handleUnknownError = (error) => console.log(error);
 
@@ -47,7 +46,10 @@ export default {
           try {
             await new Promise((resolve, reject) => {
               if (process.env.IS_EXTENSION) {
-                openUrl(browser.extension.getURL('./popup/CameraRequestPermission.html'));
+                window.open(
+                  browser.extension.getURL('./popup/CameraRequestPermission.html'),
+                  '_blank',
+                );
                 reject();
               }
               if (navigator.mediaDevices.getUserMedia)
@@ -119,10 +121,10 @@ export default {
             this.style = document.createElement('style');
             this.style.type = 'text/css';
             this.style.appendChild(
-              document.createTextNode('html, body, .ae-main { background: transparent }'),
+              document.createTextNode('html, body, #app { background: transparent }'),
             );
             document.head.appendChild(this.style);
-            document.querySelector('.popup').style.display = 'none';
+            document.querySelector('.main').style.display = 'none';
             document.querySelector('.header .content div:not(.title)').style.display = 'none';
             this.headerText = document.querySelector('.header .title').innerText;
             document.querySelector('.header .title').innerText = 'Scan QR';
@@ -134,7 +136,7 @@ export default {
     stopReading() {
       if (process.env.PLATFORM === 'cordova') {
         if (document.head.contains(this.style)) document.head.removeChild(this.style);
-        document.querySelector('.popup').style.display = '';
+        document.querySelector('.main').style.display = '';
         document.querySelector('.header .content div:not(.title)').style.display = '';
         document.querySelector('.header .title').innerText = this.headerText;
         window.QRScanner.destroy();

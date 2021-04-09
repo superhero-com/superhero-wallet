@@ -219,6 +219,10 @@
       "understand": "I understand that this is a cryptocurrency wallet and I am responsible for backing up my account recovery seed phrase."
     },
     "titles": {
+      "tx-history": "Tx history",
+      "payments": "Payments",
+      "balances": "Balances",
+      "tips": "Tips",
       "settings": "Settings",
       "language": "Language",
       "security": "Security",
@@ -240,7 +244,7 @@
       "permissionsSettings": "Permissions settings",
       "permissionsDetails": "Permissions details",
       "comment-new": "Add comment",
-      "home": "Superhero Home",
+      "home": "Wallet Home",
       "donate-error": "Donate Data",
       "address": "Send Address",
       "tokens-preview": "Tokens",
@@ -249,7 +253,8 @@
       "mint-burn-token": "Mint/Burn token",
       "allowances": "Allowances",
       "sign-message": "Sign Message",
-      "invite": "Invite"
+      "invite": "Invite",
+      "tx-details": "Tx Details"
     },
     "about": {
       "heading": "About",
@@ -263,7 +268,6 @@
       "activity": "Activity",
       "accountName": "Account name",
       "copy": "Copy",
-      "tip": "Tip",
       "claim": "Claim Tip",
       "receive": "Receive",
       "latestTransactions": "Latest transactions",
@@ -292,7 +296,7 @@
       "noMobileClaim": "Claiming is currently only available on desktop."
     },
     "claimTips": {
-      "urlToClaim": "Claim tips for this URL:"
+      "urlToClaim": "Claim tips from this URL:"
     },
     "notFound": {
       "notFound": "Requested page can't be found",
@@ -307,9 +311,10 @@
       "securingAccount": "Securing your account"
     },
     "recentTransactions": {
-      "recentActivity": "Recent Activity",
+      "title": "Recent transactions",
       "viewAll": "View all",
-      "noTransactionsFound": "No transactions found!"
+      "viewMore": "View full transaction history",
+      "noTransactionsFound": "There are no recent transactions for this account."
     },
     "add-fungible-token": {
       "heading": "Fungible Tokens",
@@ -468,8 +473,6 @@
       "balance-error": "Your account balance is not enough to execute this transaction.",
       "pointer-added": "Name {type} successful!",
       "pending-claim": "Pending",
-      "revoked": "Revoked",
-      "revoked-notification": "Your name {name} has been revoked at block {block}",
       "auto-extend": "Auto-extend",
       "list": {
         "no-names": "No names found",
@@ -522,13 +525,15 @@
       "term2": "Terms of Use",
       "term3": "Privacy Policy",
       "termsAndConditions": "Terms of Use",
-      "heading": "Social platform with no hidden agenda.",
+      "heading": "Social Media with no hidden Agenda",
+      "ready": "Ready to go?",
+      "go": "Go!",
       "platforms": {
         "heading": "Superhero wallet is available as browser extension and mobile app so you can use it on your preferred platforms and devices.",
         "browser-extension": "Browser extension",
         "mobile-app": "Mobile app"
       },
-      "webVersion": "Or use our web version",
+      "webVersion": "Or continue with our web version",
       "securingAccount": "Securing your account",
       "generateWallet": "Generate New Wallet",
       "importWallet": "Retrieve existing account",
@@ -848,14 +853,14 @@
       "date": "Date",
       "type": "Type",
       "amount": "Amount",
-      "fee": "Transaction fee",
+      "fee": "Tx fee",
       "total": "Total",
       "txFrom": "From",
       "txTo": "To",
       "txHash": "Tx hash",
       "transactions": "Transactions",
       "backToTransactions": "Back to Transactions",
-      "explorer": "View in explorer",
+      "explorer": "View Tx in blockchain explorer",
       "txName": "Name",
       "txAccount": "Account",
       "name": "Name",
@@ -864,7 +869,7 @@
       "copy": "Copy",
       "contractId": "Contract Id",
       "advancedMode": "Advanced Mode",
-      "blockHeight": "Block Height",
+      "blockHeight": "Block height",
       "signatures": "Signatures",
       "nonce": "Nonce",
       "callData": "Call Data",
@@ -881,10 +886,14 @@
       "pointerKey": "Pointer Key",
       "moreInfo": "More Info",
       "sent": "Sent",
-      "claimed": "Claimed",
-      "withdrawals": "Withdrawals",
-      "topups": "Top ups",
-      "all": "All"
+      "all": "All",
+      "hash": "Hash",
+      "status": "Status",
+      "pending": "Pending",
+      "tipUrl": "Tipped URL",
+      "timestamp": "Timestamp",
+      "received": "Received",
+      "tips": "Tips"
     },
     "transactions": {
       "backToAccount": "Back to account",
@@ -908,7 +917,8 @@
       "apply": "Apply filter",
       "sent": "Sent",
       "received": "Received",
-      "pending": "Pending"
+      "pending": "Pending",
+      "search": "Search by token"
     },
     "utilities": {
       "heading": "Utilities",

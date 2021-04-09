@@ -13,14 +13,14 @@ export default {
     },
   },
   actions: {
-    async claim({ rootState: { account, current, sdk } }, secretKey) {
+    async claim({ rootState: { current, sdk }, rootGetters: { account } }, secretKey) {
       const publicKey = Crypto.getAddressFromPriv(secretKey);
       // TODO: Remove this after merging https://github.com/aeternity/aepp-sdk-js/pull/1060
       const s = await Universal({
         nodes: [sdk.pool.get(current.network)],
         accounts: [MemoryAccount({ keypair: { publicKey, secretKey } })],
       });
-      await s.transferFunds(1, account.publicKey, { payload: 'referral', verify: false });
+      await s.transferFunds(1, account.address, { payload: 'referral', verify: false });
     },
     async handleNotEnoughFoundsError({ dispatch }, error) {
       if (!error.message.includes('is not enough to execute')) return false;

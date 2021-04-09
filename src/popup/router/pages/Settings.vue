@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="settings">
     <Panel>
       <PanelItem
         to="/settings/language"
@@ -15,6 +15,7 @@
         to="/settings/networks"
         :title="$t('pages.titles.networks')"
         :info="$t('pages.settings.tabNetworksSmall')"
+        data-cy="networks"
       />
       <PanelItem
         to="/settings/permissions"

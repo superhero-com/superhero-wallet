@@ -89,7 +89,7 @@ export default {
       display: flex;
       justify-content: center;
 
-      ::v-deep .primary-button {
+      ::v-deep .button {
         margin: 0 10px;
         width: 120px;
         font-weight: 700;

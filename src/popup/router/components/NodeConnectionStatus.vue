@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="nodeStatus && account.publicKey && isLoggedIn"
+    v-if="nodeStatus && account.address && isLoggedIn"
     :data-cy="nodeStatus !== 'error' ? 'connect-node' : ''"
     :class="`connect-${nodeStatus === 'error' ? 'error' : 'node'}`"
   >
@@ -23,25 +23,31 @@ export default {
     };
   },
   computed: {
-    ...mapState(['nodeStatus', 'isLoggedIn']),
-    ...mapGetters(['account']),
+    ...mapState(['nodeStatus']),
+    ...mapGetters(['account', 'isLoggedIn']),
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/mixins';
 
 .connect-error,
 .connect-node {
   position: fixed;
-  bottom: 0;
+  width: 100%;
+
+  @include desktop {
+    position: sticky;
+  }
+
+  bottom: 48px;
   left: 0;
   right: 0;
   background: $secondary-color;
   color: $white-color;
-  padding: 0.3rem;
-  padding-bottom: calc(0.3rem + env(safe-area-inset-bottom));
+  line-height: 2em;
+  padding-bottom: env(safe-area-inset-bottom);
   z-index: 5;
   text-align: center;
   font-size: 14px;

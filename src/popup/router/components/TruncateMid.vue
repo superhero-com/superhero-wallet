@@ -1,7 +1,7 @@
 <template>
   <span
     :data-content-start="str.substr(0, str.length / 2)"
-    :data-content-end="str.substr(str.length / 2)"
+    :data-content-end="`\u200E${str.substr(str.length / 2)}`"
     class="truncate-mid"
   />
 </template>
@@ -28,12 +28,12 @@ export default {
 
   &::before {
     content: attr(data-content-start);
-    text-overflow: ellipsis;
   }
 
   &::after {
     content: attr(data-content-end);
     direction: rtl;
+    text-overflow: ellipsis;
   }
 }
 </style>

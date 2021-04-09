@@ -4,33 +4,25 @@
     <template v-if="$slots.default">
       <slot />
     </template>
-    <span v-else @click="openTxExplorer">
+    <a v-else :href="explorerPath" target="_blank">
       {{ value }}
-    </span>
+    </a>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import openUrl from '../../utils/openUrl';
-import { checkHashType } from '../../utils/helper';
+import { mapState } from 'vuex';
 
 export default {
   props: {
     value: { type: String, default: '' },
     label: { type: String, default: '' },
   },
-  computed: mapGetters(['activeNetwork']),
-  methods: {
-    async openTxExplorer() {
-      const { explorerUrl } = this.activeNetwork;
-      const { endpoint, valid } = await checkHashType(this.value);
-      if (valid) {
-        const url = `${explorerUrl}/${endpoint}/${this.value}`;
-        openUrl(url, true);
-      }
+  computed: mapState({
+    explorerPath(state, { getExplorerPath }) {
+      return getExplorerPath(this.value);
     },
-  },
+  }),
 };
 </script>
 
@@ -41,19 +33,15 @@ export default {
   text-align: left;
   margin: 20px 0;
 
-  & > label {
+  label {
     display: block;
     padding: 10px 0;
   }
 
-  & > span {
+  a {
     color: $accent-color;
     font-size: 11px;
-    display: inline-block;
-    width: 300px;
-    white-space: nowrap;
     letter-spacing: -0.3px;
-    cursor: pointer;
   }
 }
 </style>

@@ -2,22 +2,23 @@
   <div class="account-info">
     <div class="title">
       <div class="account-name" data-cy="account-name">
-        <Avatar :address="account.publicKey" :name="account.name" class="avatar" size="small" />
-        <TruncateMid
-          v-if="activeAccountName.includes('.chain')"
-          :str="activeAccountName"
-          class="chainname"
-        />
+        <Avatar :address="account.address" :name="account.name" class="avatar" size="small" />
+        <TruncateMid v-if="account.name" :str="account.name" class="chainname" />
         <router-link class="claim-chainname" to="/names" v-else
           >{{ $t('pages.account.claim-name') }}
         </router-link>
       </div>
       <div class="copied-alert" v-if="copied">{{ $t('pages.account.copied') }}</div>
-      <button v-show="!copied" data-cy="copy" @click="copy" v-clipboard:copy="account.publicKey">
+      <button
+        v-show="!copied"
+        data-cy="copy"
+        v-clipboard:success="copy"
+        v-clipboard:copy="account.address"
+      >
         {{ $t('pages.account.copy') }}
       </button>
     </div>
-    <div class="ae-address">{{ account.publicKey }}</div>
+    <div class="ae-address">{{ account.address }}</div>
   </div>
 </template>
 
@@ -31,7 +32,7 @@ export default {
   data: () => ({
     copied: false,
   }),
-  computed: mapGetters(['account', 'activeAccountName']),
+  computed: mapGetters(['account']),
   methods: {
     copy() {
       this.copied = true;

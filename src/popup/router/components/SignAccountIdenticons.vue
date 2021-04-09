@@ -1,8 +1,8 @@
 <template>
   <div class="identicons-holder">
     <div class="from">
-      <Avatar :address="account.publicKey" :name="account.name" />
-      <span class="account-address" :title="activeAccountName">{{ activeAccountName }}</span>
+      <Avatar :address="account.address" :name="account.name" />
+      <span class="account-address">{{ account.name || account.type }}</span>
     </div>
     <div class="arrow-separator">
       <ae-icon name="left-more" />
@@ -40,13 +40,15 @@ import Avatar from './Avatar';
 
 export default {
   props: {
-    transaction: { type: Object, required: true },
+    recipientId: { type: String, default: '' },
+    contractId: { type: String, default: '' },
+    tag: { type: String, required: true },
   },
   components: { Avatar },
   computed: {
-    ...mapGetters(['account', 'activeAccountName']),
+    ...mapGetters(['account']),
     receiver() {
-      return this.transaction.recipientId || this.transaction.contractId || '';
+      return this.recipientId || this.contractId;
     },
     showAddress() {
       return [
@@ -54,10 +56,10 @@ export default {
         TX_TYPE.namePreClaim,
         TX_TYPE.nameClaim,
         TX_TYPE.nameUpdate,
-      ].includes(this.transaction.txType);
+      ].includes(this.txType);
     },
     txType() {
-      return OBJECT_ID_TX_TYPE[this.transaction.tag];
+      return OBJECT_ID_TX_TYPE[this.tag];
     },
   },
 };

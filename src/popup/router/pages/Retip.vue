@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="retip">
     <BalanceInfo />
     <div class="section-title">
       {{ $t('pages.tipPage.url') }}
@@ -33,8 +33,9 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
+import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import tipping from 'tipping-contract/util/tippingContractUtil';
-import { MAGNITUDE, calculateFee, TX_TYPES } from '../../utils/constants';
+import { MAGNITUDE, calculateFee } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 import AmountSend from '../components/AmountSend';
@@ -76,10 +77,10 @@ export default {
         if (!this.selectedToken && +this.amount < minTipAmount) {
           return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
         }
-        const fee = calculateFee(TX_TYPES.contractCall, {
+        const fee = calculateFee(TX_TYPE.contractCall, {
           ...sdk.Ae.defaults,
           contractId: this.tippingContract.deployInfo.address,
-          callerId: account.publicKey,
+          callerId: account.address,
         });
         if (
           this.selectedToken
@@ -98,7 +99,7 @@ export default {
         : this.tippingV1;
     },
   },
-  async created() {
+  async mounted() {
     this.loading = true;
     await this.$watchUntilTruly(() => this.tippingV1);
     const tipId = this.$route.query.id;
@@ -138,6 +139,11 @@ export default {
           amount,
           domain: this.tip.url,
           type: 'tip',
+          tx: {
+            senderId: this.account.address,
+            contractId: this.tippingContract.deployInfo.address,
+            type: TX_TYPE.contractCall,
+          },
         });
         this.openCallbackOrGoHome(true);
       } catch (e) {
@@ -155,25 +161,27 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.url-bar {
-  display: flex;
-  align-items: center;
+.retip {
+  .url-bar {
+    display: flex;
+    align-items: center;
 
-  a {
-    color: $text-color;
-    flex-grow: 1;
-    text-decoration: none;
-    width: 90%;
-    margin-left: 10px;
+    a {
+      color: $text-color;
+      flex-grow: 1;
+      text-decoration: none;
+      width: 90%;
+      margin-left: 10px;
+    }
   }
-}
 
-.section-title {
-  margin-bottom: 8px;
-  margin-top: 16px;
-  font-size: 16px;
-  color: $white-color;
-  font-weight: 400;
-  text-align: left;
+  .section-title {
+    margin-bottom: 8px;
+    margin-top: 16px;
+    font-size: 16px;
+    color: $white-color;
+    font-weight: 400;
+    text-align: left;
+  }
 }
 </style>

@@ -1,23 +1,20 @@
 <template>
-  <div class="popup">
+  <div class="list">
     <NameListHeader />
     <ul v-if="owned.length" class="names-list">
       <NameRow
-        v-for="({ name, owner, pending, revoked, autoExtend }, index) in owned"
+        v-for="({ name, owner, pending, autoExtend }, index) in owned"
         :key="index"
         :to="{ name: 'name-details', params: { name } }"
         :name="name"
         :address="owner"
       >
         <TruncateMid :str="name" class="name" />
-        <Badge v-if="activeAccountName == name" class="active-name">
+        <Badge v-if="account.name === name" class="active-name">
           {{ $t('pages.names.default') }}
         </Badge>
         <Badge v-if="pending" class="pending-name">
           {{ $t('pages.names.pending-claim') }}
-        </Badge>
-        <Badge v-if="revoked" class="revoked-name">
-          {{ $t('pages.names.revoked') }}
         </Badge>
         <span class="address">{{ owner }}</span>
         <CheckBox
@@ -45,10 +42,10 @@ import CheckBox from '../../components/CheckBox';
 export default {
   components: { NameListHeader, Badge, NameRow, CheckBox, TruncateMid },
   computed: {
-    ...mapGetters(['activeAccountName']),
+    ...mapGetters(['account']),
     ...mapState('names', ['owned']),
   },
-  created() {
+  mounted() {
     this.$store.dispatch('names/fetchOwned');
     const id = setInterval(() => this.$store.dispatch('names/fetchOwned'), 10000);
     this.$once('hook:destroyed', () => clearInterval(id));
@@ -57,7 +54,7 @@ export default {
 </script>
 
 <style scoped>
-.names-list {
+.list .names-list {
   padding: 0;
 }
 </style>

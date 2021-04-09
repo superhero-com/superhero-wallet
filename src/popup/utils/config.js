@@ -3,51 +3,58 @@ import BigNumber from 'bignumber.js';
 
 export const testAccount = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
-  publicKey: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
+  address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
 };
 
 export const popupProps = {
   connectConfirm: {
     type: 'connectConfirm',
-    action: {
-      params: { name: 'AEPP', networkId: 'ae_uat', version: 1 },
-      method: 'connection.open',
+    app: {
+      url: 'http://localhost:5000/aepp/aepp',
+      name: 'AEPP',
+      protocol: 'http:',
+      host: 'localhost',
     },
-    url: 'http://localhost:5000/aepp/aepp',
-    name: 'AEPP',
-    protocol: 'http:',
-    host: 'localhost',
   },
   messageSign: {
     type: 'messageSign',
-    action: { params: { message: 'test' }, method: 'message.sign' },
-    url: 'http://localhost:5000/aepp/aepp',
-    name: 'AEPP',
-    protocol: 'http:',
-    host: 'localhost',
+    app: {
+      url: 'http://localhost:5000/aepp/aepp',
+      name: 'AEPP',
+      protocol: 'http:',
+      host: 'localhost',
+    },
+    message: 'test',
   },
   sign: {
     type: 'sign',
-    action: {
-      params: {
-        tx:
-          'tx_+FkMAaEB3CgyWh2tdZqs4BJVyb/oKE3hK81oYzteWEKnjfZSZ2ehAaH5Fh3pFTFpn4Qi3igqgWqqC8mMZN/OgZ74yFfWCM/thwONfqTGgACGD0w2IAgAAIG+gKIX7fM=',
-        returnSigned: false,
-      },
-      method: 'transaction.sign',
+    app: {
+      url: 'http://localhost:5000/aepp/aepp',
+      name: 'AEPP',
+      protocol: 'http:',
+      host: 'localhost',
     },
-    url: 'http://localhost:5000/aepp/aepp',
-    name: 'AEPP',
-    protocol: 'http:',
-    host: 'localhost',
+    transaction: {
+      tag: '12',
+      VSN: '1',
+      senderId: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
+      recipientId: 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q',
+      amount: '1000000000000000',
+      fee: '16820000000000',
+      ttl: '0',
+      nonce: '190',
+      payload: 'ba_Xfbg4g==',
+    },
   },
   base: {
     type: 'sign',
     action: { params: { returnSigned: false }, method: 'transaction.sign' },
-    url: 'http://localhost:5000/aepp/aepp',
-    name: 'AEPP',
-    protocol: 'http:',
-    host: 'localhost',
+    app: {
+      url: 'http://localhost:5000/aepp/aepp',
+      name: 'AEPP',
+      protocol: 'http:',
+      host: 'localhost',
+    },
   },
 };
 
@@ -91,18 +98,18 @@ const commonParams = {
 };
 export const txParams = {
   [TX_TYPE.contractCreate]: {
-    ownerId: testAccount.publicKey,
+    ownerId: testAccount.address,
     code:
       'cb_+LBGA6DK15BWhAK4E5OWH1kkfhQIx/qEDTVv8hrfY/bk13cN88C4g7hT/iiALJYANwGXQDcAGgaCAAEDP/5E1kQfADcANwAaDoKfAYEKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqgEDP/6LoCthADcAl0ABAoKqLwMRKIAsliVzZXRfYnl0ZXMRRNZEHxFpbml0EYugK2ElZ2V0X2J5dGVzgi8AhTQuMi4wABHX/Rk=',
     ...commonParams,
   },
   [TX_TYPE.contractCall]: {
     contractId: 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio',
-    callerId: testAccount.publicKey,
+    callerId: testAccount.address,
     ...commonParams,
   },
   [TX_TYPE.spend]: {
-    senderId: testAccount.publicKey,
+    senderId: testAccount.address,
     recipientId,
     ...commonParams,
   },

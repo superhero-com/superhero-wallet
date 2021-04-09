@@ -36,8 +36,8 @@ export default (store) => {
     actions: {
       async fetchOwned({
         state: { owned },
-        rootGetters: { activeNetwork },
-        rootState: { middleware, account },
+        rootGetters: { activeNetwork, account },
+        rootState: { middleware },
         commit,
         getters: { getDefault },
         dispatch,
@@ -54,64 +54,39 @@ export default (store) => {
               })),
           );
 
-        const defaultName = getDefault(account.publicKey);
+        const defaultName = getDefault(account.address);
         const names = await Promise.all([
           getPendingNameClaimTransactions(),
-          middleware.getOwnedBy(account.publicKey).then(({ active }) =>
-            owned
-              ? active
-                  .map(({ info, name }) => ({
-                    createdAtHeight: info.activeFrom,
-                    expiresAt: info.expireHeight,
-                    owner: info.ownership.current,
-                    pointers: info.pointers,
-                    name,
-                  }))
-                  .map((name) => {
-                    const oldName = owned.find((n) => n.name === name.name);
-                    if (!oldName) return name;
-                    const revoked = name.expiresAt < oldName.expiresAt;
-                    if (revoked)
-                      commit(
-                        'addNotification',
-                        {
-                          title: '',
-                          content: i18n.t('pages.names.revoked-notification', {
-                            name: name.name,
-                            block: name.expiresAt,
-                          }),
-                          route: '',
-                        },
-                        { root: true },
-                      );
-                    return {
-                      ...(revoked || oldName.revoked ? { revoked: true } : {}),
-                      autoExtend: oldName.autoExtend,
-                      ...name,
-                    };
-                  })
-              : active,
+          middleware.getOwnedBy(account.address).then(({ active }) =>
+            active.map(({ info, name }) => ({
+              createdAtHeight: info.activeFrom,
+              expiresAt: info.expireHeight,
+              owner: info.ownership.current,
+              pointers: info.pointers,
+              autoExtend: owned.find((n) => n.name === name)?.autoExtend,
+              name,
+            })),
           ),
         ]).then((arr) => arr.flat());
 
         commit('set', names);
 
-        const claimed = names.filter((n) => !n.pending && !n.revoked).map(({ name }) => name);
+        const claimed = names.filter((n) => !n.pending).map(({ name }) => name);
         if (!claimed.length) {
-          if (defaultName) commit('setDefault', { address: account.publicKey });
+          if (defaultName) commit('setDefault', { address: account.address });
           return;
         }
         const { preferredChainName: defaultNameBackend } = await fetchJson(
-          `${activeNetwork.backendUrl}/profile/${account.publicKey}`,
+          `${activeNetwork.backendUrl}/profile/${account.address}`,
         ).catch(() => {
           return {};
         });
         if (!claimed.includes(defaultNameBackend)) {
-          await dispatch('setDefault', { address: account.publicKey, name: claimed[0] });
+          await dispatch('setDefault', { address: account.address, name: claimed[0] });
           return;
         }
         if (defaultName !== defaultNameBackend) {
-          commit('setDefault', { address: account.publicKey, name: defaultNameBackend });
+          commit('setDefault', { address: account.address, name: defaultNameBackend });
         }
       },
       async fetchAuctions({ rootState: { middleware } }) {

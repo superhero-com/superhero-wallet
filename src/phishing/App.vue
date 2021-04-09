@@ -35,7 +35,7 @@ export default {
       hostname: null,
     };
   },
-  created() {
+  mounted() {
     const uri = window.location.href.split('#');
     if (typeof uri[1] !== 'undefined') {
       const url = uri[1].split('&');

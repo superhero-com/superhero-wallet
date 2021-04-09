@@ -1,51 +1,50 @@
-import Index from '../pages/Index';
-import Account from '../pages/Account';
-import PopupSignTransaction from '../pages/Popups/SignTx';
-import PopupConnect from '../pages/Popups/Connect';
-import PopupAskAccounts from '../pages/Popups/AskAccounts';
-import PopupMessageSign from '../pages/Popups/MessageSign';
-import Settings from '../pages/Settings';
-import LanguageSettings from '../pages/LanguageSettings';
-import SecuritySettings from '../pages/SecuritySettings';
+import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign';
 import About from '../pages/About';
-import Tip from '../pages/Tip';
-import Retip from '../pages/Retip';
-import TermsOfService from '../pages/TermsOfService';
-import PrivacyPolicy from '../pages/PrivacyPolicy';
-import ImportAccount from '../pages/ImportAccount';
-import Intro from '../pages/Intro';
-import Transactions from '../pages/Transactions';
-import Send from '../pages/Send';
-import Receive from '../pages/Receive';
-import SuccessTip from '../pages/SuccessTip';
-import Notifications from '../pages/Notifications';
-import NotificationSettings from '../pages/NotificationSettings';
-
-import PermissionsSettings from '../pages/PermissionsSettings';
-import PermissionsDetails from '../pages/PermissionsDetails';
-import Networks from '../pages/Networks';
-import CommentNew from '../pages/CommentNew';
-import NotFound from '../pages/NotFound';
-import ClaimTips from '../pages/ClaimTips';
-import DonateError from '../pages/DonateError';
+import Account from '../pages/Account';
 import Address from '../pages/Address';
-import TokensPreview from '../pages/FungibleTokens/TokensPreview';
+import ClaimTips from '../pages/ClaimTips';
+import CommentNew from '../pages/CommentNew';
+import DonateError from '../pages/DonateError';
 import TokenDetails from '../pages/FungibleTokens/TokenDetails';
-import SignMessage from '../pages/SignMessage';
-import NamesList from '../pages/Names/List';
-import NameClaim from '../pages/Names/Claim';
-import NamesDetails from '../pages/Names/Details';
-import AuctionList from '../pages/Names/AuctionList';
-import AuctionDetails from '../pages/Names/AuctionDetails';
-import AuctionBid from '../pages/Names/AuctionBid';
+import TokensPreview from '../pages/FungibleTokens/TokensPreview';
+import ImportAccount from '../pages/ImportAccount';
+import Index from '../pages/Index';
+import Intro from '../pages/Intro';
 import Invite from '../pages/Invite';
 import InviteClaim from '../pages/InviteClaim';
-
+import LanguageSettings from '../pages/LanguageSettings';
+import AuctionBid from '../pages/Names/AuctionBid';
+import AuctionDetails from '../pages/Names/AuctionDetails';
+import AuctionList from '../pages/Names/AuctionList';
+import NameClaim from '../pages/Names/Claim';
+import NamesDetails from '../pages/Names/Details';
+import NamesList from '../pages/Names/List';
+import Networks from '../pages/Networks';
+import NotFound from '../pages/NotFound';
+import Notifications from '../pages/Notifications';
+import NotificationSettings from '../pages/NotificationSettings';
+import PermissionsDetails from '../pages/PermissionsDetails';
+import PermissionsSettings from '../pages/PermissionsSettings';
+import PopupConnect from '../pages/Popups/Connect';
+import PopupMessageSign from '../pages/Popups/MessageSign';
+import PrivacyPolicy from '../pages/PrivacyPolicy';
+import Receive from '../pages/Receive';
+import Retip from '../pages/Retip';
+import SecuritySettings from '../pages/SecuritySettings';
+import Send from '../pages/Send';
+import Settings from '../pages/Settings';
+import SignMessage from '../pages/SignMessage';
+import SuccessTip from '../pages/SuccessTip';
+import TermsOfService from '../pages/TermsOfService';
+import Tip from '../pages/Tip';
+import TransactionDetails from '../pages/TransactionDetails';
+import Transactions from '../pages/Transactions';
 import webIframePopups from './web-iframe-popups';
 
 export default [
   {
     path: '/',
+    name: 'index',
     component: Index,
     meta: {
       title: '',
@@ -62,10 +61,11 @@ export default [
   {
     name: 'popup-sign-tx',
     path: '/popup-sign-tx',
-    component: PopupSignTransaction,
+    component: ConfirmTransactionSign,
     props: true,
     meta: {
       notPersist: true,
+      hideTabBar: true,
     },
   },
   {
@@ -75,15 +75,8 @@ export default [
     props: true,
     meta: {
       notPersist: true,
-    },
-  },
-  {
-    name: 'ask-accounts',
-    path: '/ask-accounts',
-    component: PopupAskAccounts,
-    props: true,
-    meta: {
-      notPersist: true,
+      notRebrand: true,
+      hideTabBar: true,
     },
   },
   {
@@ -93,13 +86,17 @@ export default [
     props: true,
     meta: {
       notPersist: true,
+      notRebrand: true,
+      hideTabBar: true,
     },
   },
   {
     path: '/settings',
+    name: 'settings',
     component: Settings,
     meta: {
       title: 'settings',
+      notRebrand: true,
     },
   },
   {
@@ -107,6 +104,7 @@ export default [
     component: LanguageSettings,
     meta: {
       title: 'language',
+      notRebrand: true,
     },
   },
   {
@@ -115,6 +113,7 @@ export default [
     component: SecuritySettings,
     meta: {
       title: 'security',
+      notRebrand: true,
     },
   },
   {
@@ -123,6 +122,7 @@ export default [
     props: true,
     meta: {
       title: 'networks',
+      notRebrand: true,
     },
   },
   {
@@ -131,6 +131,7 @@ export default [
     name: 'permissions-settings',
     meta: {
       title: 'permissionsSettings',
+      notRebrand: true,
     },
   },
   {
@@ -139,6 +140,7 @@ export default [
     name: 'permissions-details',
     meta: {
       title: 'permissionsDetails',
+      notRebrand: true,
     },
   },
   {
@@ -147,6 +149,7 @@ export default [
     meta: {
       title: 'about',
       ifNotAuth: true,
+      notRebrand: true,
     },
   },
   {
@@ -155,6 +158,7 @@ export default [
     meta: {
       title: 'terms',
       ifNotAuth: true,
+      notRebrand: true,
     },
   },
   {
@@ -162,6 +166,8 @@ export default [
     component: PrivacyPolicy,
     meta: {
       title: 'privacy',
+      ifNotAuth: true,
+      notRebrand: true,
     },
   },
   {
@@ -171,6 +177,7 @@ export default [
     props: true,
     meta: {
       title: 'send-tips',
+      notRebrand: true,
     },
   },
   {
@@ -179,6 +186,7 @@ export default [
     meta: {
       title: 'send-tips',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -187,6 +195,7 @@ export default [
     component: ClaimTips,
     meta: {
       title: 'claim-tips',
+      notRebrand: true,
     },
   },
   {
@@ -195,6 +204,7 @@ export default [
     meta: {
       title: 'importAccount',
       ifNotAuthOnly: true,
+      notRebrand: true,
     },
   },
   {
@@ -203,6 +213,7 @@ export default [
     meta: {
       ifNotAuthOnly: true,
       notPersist: true,
+      notRebrand: true,
     },
   },
 
@@ -211,6 +222,16 @@ export default [
     component: Transactions,
     meta: {
       title: 'activity',
+      notRebrand: true,
+    },
+  },
+  {
+    name: 'tx-details',
+    path: '/transactions/:hash',
+    component: TransactionDetails,
+    props: true,
+    meta: {
+      title: 'tx-details',
     },
   },
   {
@@ -220,6 +241,7 @@ export default [
     component: Send,
     meta: {
       title: 'send',
+      notRebrand: true,
     },
   },
   {
@@ -227,6 +249,7 @@ export default [
     component: Receive,
     meta: {
       title: 'topUp',
+      notRebrand: true,
     },
   },
   {
@@ -237,6 +260,7 @@ export default [
     meta: {
       title: 'send',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -255,6 +279,7 @@ export default [
     meta: {
       title: 'notification-settings',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -264,6 +289,7 @@ export default [
     name: 'name-list',
     meta: {
       title: 'names',
+      notRebrand: true,
     },
   },
   {
@@ -273,6 +299,7 @@ export default [
     name: 'name-claim',
     meta: {
       title: 'names',
+      notRebrand: true,
     },
   },
   {
@@ -282,6 +309,7 @@ export default [
     name: 'auction-list',
     meta: {
       title: 'names',
+      notRebrand: true,
     },
   },
   {
@@ -292,6 +320,7 @@ export default [
     meta: {
       title: 'names',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -302,6 +331,7 @@ export default [
     meta: {
       title: 'bidding',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -311,6 +341,7 @@ export default [
     name: 'auction-bid',
     meta: {
       title: 'names',
+      notRebrand: true,
     },
   },
   {
@@ -319,6 +350,7 @@ export default [
     meta: {
       title: 'comment-new',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -329,6 +361,8 @@ export default [
     meta: {
       title: 'donate-error',
       notPersist: true,
+      ifNotAuth: true,
+      notRebrand: true,
     },
   },
   {
@@ -338,6 +372,7 @@ export default [
     meta: {
       title: 'address',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -346,6 +381,7 @@ export default [
     component: TokensPreview,
     meta: {
       title: 'tokens-preview',
+      notRebrand: true,
     },
   },
   {
@@ -355,6 +391,7 @@ export default [
     props: true,
     meta: {
       title: 'token-details',
+      notRebrand: true,
     },
   },
   {
@@ -363,6 +400,7 @@ export default [
     component: NotFound,
     meta: {
       ifNotAuth: true,
+      notRebrand: true,
     },
   },
   {
@@ -372,6 +410,7 @@ export default [
     meta: {
       title: 'sign-message',
       notPersist: true,
+      notRebrand: true,
     },
   },
   {
@@ -380,6 +419,7 @@ export default [
     component: Invite,
     meta: {
       title: 'invite',
+      notRebrand: true,
     },
   },
   {
@@ -390,6 +430,7 @@ export default [
     meta: {
       title: 'invite',
       notPersist: true,
+      notRebrand: true,
     },
   },
   ...webIframePopups,

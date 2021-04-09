@@ -29,13 +29,23 @@ export default {
 .checkbox-container {
   display: flex;
   position: relative;
-  height: 20px;
+  align-items: center;
   cursor: pointer;
   justify-content: start;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+
+  &:hover .checkmark {
+    border-color: $color-border-hover;
+    background-color: $color-bg-3;
+  }
+
+  &:active .checkmark {
+    border-color: $color-border-hover;
+    background-color: $color-black;
+  }
 
   input {
     position: absolute;
@@ -46,8 +56,8 @@ export default {
   }
 
   .checkmark {
-    background-color: #272831;
-    border: 1.3px solid $border-track-color;
+    background-color: $color-black;
+    border: 1.3px solid $color-border;
     border-radius: 2px;
     height: 20px;
     width: 20px;

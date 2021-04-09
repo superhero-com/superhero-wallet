@@ -1,10 +1,10 @@
 <template>
-  <div class="popup popup-no-padding">
+  <div class="send">
     <div data-cy="send-container">
       <div v-if="step == 1">
         <AccountInfo />
         <BalanceInfo />
-        <div class="popup withdraw step1">
+        <div class="withdraw step1">
           <p class="primary-title text-left mb-8 f-16">
             {{ $t('pages.tipPage.heading') }}
             <span class="secondary-text">{{
@@ -49,7 +49,7 @@
         </div>
       </div>
       <div v-if="step == 2">
-        <div class="popup withdraw step2">
+        <div class="withdraw step2">
           <h3 class="heading-1 my-15 center">
             <div class="flex flex-align-center flex-justify-content-center">
               <AlertExclamination />
@@ -60,7 +60,7 @@
             {{ $t('pages.send.checkalert') }}
           </p>
           <InfoGroup
-            :value="account.publicKey"
+            :value="account.address"
             :label="$t('pages.send.sender')"
             data-cy="review-sender"
           />
@@ -76,7 +76,6 @@
                 {{ selectedToken ? selectedToken.symbol : $t('ae') }}</span
               >
               <span v-if="!selectedToken" class="currencyamount">
-                <!--eslint-disable-line vue-i18n/no-raw-text-->
                 ~
                 <span>
                   {{ formatCurrency((form.amount * currentCurrencyRate).toFixed(3)) }}
@@ -102,7 +101,7 @@
         </div>
       </div>
       <div v-if="step == 3">
-        <div class="popup withdraw step2">
+        <div class="withdraw step2">
           <h3 class="heading-1 my-15 center">
             <div class="flex flex-align-center flex-justify-content-center">
               <span class="ml-7">{{ $t('pages.send.tx-success') }}</span>
@@ -118,7 +117,7 @@
           <InfoGroup :value="successTx.to" :label="$t('pages.send.to')" />
           <InfoGroup :value="successTx.from" :label="$t('pages.send.from')" />
           <InfoGroup :value="successTx.hash" :label="$t('pages.send.hash')" />
-          <Button @click="$router.push('/account')">{{ $t('pages.send.home') }}</Button>
+          <Button to="/account">{{ $t('pages.send.home') }}</Button>
         </div>
       </div>
     </div>
@@ -129,8 +128,9 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import { calculateFee, TX_TYPES } from '../../utils/constants';
-import { checkAddress, chekAensName, aeToAettos, convertToken } from '../../utils/helper';
+import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { calculateFee } from '../../utils/constants';
+import { checkAddress, checkAensName, aeToAettos, convertToken } from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
 import InfoGroup from '../components/InfoGroup';
 import Textarea from '../components/Textarea';
@@ -183,10 +183,10 @@ export default {
     ...mapState(['current', 'sdk']),
     ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate']),
     validAddress() {
-      return checkAddress(this.form.address) || chekAensName(this.form.address);
+      return checkAddress(this.form.address) || checkAensName(this.form.address);
     },
   },
-  created() {
+  async mounted() {
     if (this.redirectstep && this.successtx) {
       this.step = 3;
       this.setTxDetails(this.successtx);
@@ -194,8 +194,6 @@ export default {
     if (typeof this.address !== 'undefined') {
       this.form.address = this.address;
     }
-  },
-  async mounted() {
     this.fetchFee();
   },
   methods: {
@@ -208,10 +206,10 @@ export default {
     },
     async fetchFee() {
       await this.$watchUntilTruly(() => this.sdk);
-      this.fee = calculateFee(!this.selectedToken ? TX_TYPES.txSign : TX_TYPES.contractCall, {
+      this.fee = calculateFee(!this.selectedToken ? TX_TYPE.spend : TX_TYPE.contractCall, {
         ...this.sdk.Ae.defaults,
         ...(this.selectedToken && {
-          callerId: this.account.publicKey,
+          callerId: this.account.address,
           contractId: this.selectedToken.contract,
         }),
       });
@@ -239,7 +237,7 @@ export default {
         : convertToken(this.form.amount, this.selectedToken.decimals);
       const receiver = this.form.address;
       let errorModalType = '';
-      if (receiver === '' || (!checkAddress(receiver) && !chekAensName(receiver))) {
+      if (receiver === '' || (!checkAddress(receiver) && !checkAensName(receiver))) {
         errorModalType = 'incorrect-address';
       }
       if (this.form.amount <= 0) errorModalType = 'incorrect-amount';
@@ -268,9 +266,14 @@ export default {
             amount,
             type: 'spendToken',
             recipientId: receiver,
+            tx: {
+              senderId: this.account.address,
+              contractId: this.selectedToken.contract,
+              type: TX_TYPE.contractCall,
+            },
           });
           await this.$store.dispatch('fungibleTokens/getAvailableTokens');
-          await this.$store.dispatch('fungibleTokens/loadTokenBalances', this.account.publicKey);
+          await this.$store.dispatch('fungibleTokens/loadTokenBalances');
           await this.$store.dispatch('cacheInvalidateFT', this.selectedToken.contract);
         } else {
           const { hash } = await this.sdk.spend(amount, receiver, {
@@ -281,6 +284,11 @@ export default {
             hash,
             amount,
             type: 'spend',
+            tx: {
+              senderId: this.account.address,
+              recipientId: this.form.address,
+              type: TX_TYPE.spend,
+            },
           });
         }
         this.$router.push('/account');
@@ -298,77 +306,79 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.primary-title-darker {
-  color: $text-color;
-}
-
-.withdraw.step1 {
-  .d-flex {
-    display: flex;
-    padding-bottom: 24px;
-
-    &.error-below {
-      padding-bottom: 0;
-    }
-
-    .textarea {
-      width: 250px;
-      min-height: 60px;
-      margin: 0 20px 0 0;
-      font-size: 11px;
-    }
-  }
-
-  .error {
-    padding-top: 8px;
-    line-height: 16px;
-    color: #ff4746;
-    font-size: 12px;
-    text-align: left;
-  }
-
-  small {
-    color: $accent-color;
-    display: block;
-    width: 100%;
-    padding-top: 5px;
-    font-size: 12px;
-  }
-}
-
-.withdraw.step2 {
-  p {
-    display: flex;
-    justify-content: center;
-    line-height: 2rem;
-  }
-
-  p:not(:first-of-type) {
+.send {
+  .primary-title-darker {
     color: $text-color;
   }
 
-  p > svg {
-    margin-right: 10px;
-  }
+  .withdraw.step1 {
+    .d-flex {
+      display: flex;
+      padding-bottom: 24px;
 
-  .info-group {
-    .amount {
-      font-size: 26px;
-      color: $secondary-color;
-    }
+      &.error-below {
+        padding-bottom: 0;
+      }
 
-    .currencyamount {
-      font-size: 18px;
-      display: block;
-
-      span {
-        font-size: 18px;
+      .textarea {
+        width: 250px;
+        min-height: 60px;
+        margin: 0 20px 0 0;
+        font-size: 11px;
       }
     }
+
+    .error {
+      padding-top: 8px;
+      line-height: 16px;
+      color: $color-error;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    small {
+      color: $accent-color;
+      display: block;
+      width: 100%;
+      padding-top: 5px;
+      font-size: 12px;
+    }
   }
 
-  .text-center {
-    text-align: center;
+  .withdraw.step2 {
+    p {
+      display: flex;
+      justify-content: center;
+      line-height: 2rem;
+    }
+
+    p:not(:first-of-type) {
+      color: $text-color;
+    }
+
+    p > svg {
+      margin-right: 10px;
+    }
+
+    .info-group {
+      .amount {
+        font-size: 26px;
+        color: $secondary-color;
+      }
+
+      .currencyamount {
+        font-size: 18px;
+        display: block;
+
+        span {
+          font-size: 18px;
+        }
+      }
+    }
+
+    .text-center {
+      text-align: center;
+    }
   }
 }
 </style>

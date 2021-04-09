@@ -22,6 +22,7 @@ export default {
 .range-input {
   -webkit-appearance: none;
   width: 100%;
+  height: 25px;
   cursor: pointer;
   background: transparent;
   filter: brightness(85%);

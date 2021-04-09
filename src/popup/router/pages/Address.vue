@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="address">
     <div class="section-title">
       {{ $t('pages.tipPage.sendToAddress') }}
     </div>
@@ -8,7 +8,7 @@
       {{ callbackOrigin }}
     </div>
 
-    <Button @click="openCallbackOrGoHome(true, { address: $store.getters.account.publicKey })">
+    <Button @click="openCallbackOrGoHome(true, { address: $store.getters.account.address })">
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button @click="openCallbackOrGoHome(false)">
@@ -30,16 +30,18 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.url-bar {
-  color: $text-color;
-}
+.address {
+  .url-bar {
+    color: $text-color;
+  }
 
-.section-title {
-  margin-bottom: 8px;
-  margin-top: 16px;
-  font-size: 16px;
-  color: $white-color;
-  font-weight: 400;
-  text-align: left;
+  .section-title {
+    margin-bottom: 8px;
+    margin-top: 16px;
+    font-size: 16px;
+    color: $white-color;
+    font-weight: 400;
+    text-align: left;
+  }
 }
 </style>

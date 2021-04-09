@@ -21,7 +21,6 @@
             <template>
               <div slot="header" class="step-header">
                 {{ $t(`onboarding.step_${step.step}.title`) }}
-                <!--eslint-disable-next-line vue-i18n/no-raw-text-->
                 <span class="step-info"> ({{ step.step }}/{{ steps.length }}) </span>
               </div>
               <div
@@ -71,7 +70,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import Button from './Button';
 import Hero from '../../../icons/hero.svg?vue-component';
 import StartOnboarding from '../../../icons/start-onboarding.svg?vue-component';
@@ -149,7 +148,8 @@ export default {
     ],
   }),
   computed: {
-    ...mapState(['tourStartBar', 'tourRunning', 'isLoggedIn', 'nodeStatus']),
+    ...mapState(['tourStartBar', 'tourRunning', 'nodeStatus']),
+    ...mapGetters(['isLoggedIn']),
     tourSteps() {
       return this.steps
         .filter(({ hide }) => !hide)
@@ -241,7 +241,7 @@ export default {
 @import '../../../styles/variables';
 
 .container {
-  max-width: 357px;
+  max-width: $extension-width;
   margin: 0 auto;
 }
 

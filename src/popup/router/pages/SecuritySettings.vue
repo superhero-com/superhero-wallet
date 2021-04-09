@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="security-settings">
     <template v-if="view === 'warning'">
       <h3>{{ $t('pages.securitySettings.seedRecoveryHeading') }}</h3>
       {{ $t('pages.securitySettings.seedRecoverySmall') }}
@@ -46,7 +46,6 @@
           <ae-badge class="selected">{{ $t('pages.seedPhrase.first') }}</ae-badge>
           <ae-badge class="selected">{{ $t('pages.seedPhrase.second') }}</ae-badge>
           <ae-badge class="selected">{{ $t('pages.seedPhrase.third') }}</ae-badge>
-          <!--eslint-disable-next-line vue-i18n/no-raw-text-->
           <ae-badge class="selected">...</ae-badge>
         </template>
         <ae-badge
@@ -97,7 +96,7 @@ export default {
   methods: {
     setBackedUpSeed() {
       this.$store.commit('setBackedUpSeed');
-      this.$router.push({ name: 'account' });
+      this.$router.push({ name: 'settings' });
     },
     verifyLastStep() {
       const mnemonicSelected = this.selectedWordIds
@@ -117,44 +116,46 @@ export default {
 <style lang="scss" scoped>
 @import '../../../styles/variables';
 
-.mnemonics {
-  margin: 0;
+.security-settings {
+  .mnemonics {
+    margin: 0;
 
-  p {
-    word-spacing: 10px;
+    p {
+      word-spacing: 10px;
+    }
+
+    .ae-button {
+      float: right;
+      margin: 10px 0 30px 0;
+    }
+
+    p,
+    .ae-button.toolbar {
+      color: $bg-color;
+    }
   }
 
-  .ae-button {
-    float: right;
-    margin: 10px 0 30px 0;
+  .ae-icon.ae-icon-check {
+    color: #e911ff;
+    font-size: 100px;
   }
 
-  p,
-  .ae-button.toolbar {
-    color: #000;
-  }
-}
+  .ae-badge {
+    user-select: unset;
+    cursor: pointer;
+    border: 2px solid #edf3f7;
 
-.ae-icon.ae-icon-check {
-  color: #e911ff;
-  font-size: 100px;
-}
+    .ae-icon-close {
+      margin-left: 5px;
+    }
 
-.ae-badge {
-  user-select: unset;
-  cursor: pointer;
-  border: 2px solid #edf3f7;
-
-  .ae-icon-close {
-    margin-left: 5px;
-  }
-
-  &.selected {
-    opacity: 0.4;
-    cursor: unset;
-    background: transparent;
-    border: 2px solid #c1c1c1;
-    color: #fff;
+    &.selected {
+      opacity: 0.4;
+      cursor: unset;
+      background: transparent;
+      border: 2px solid #c1c1c1;
+      color: #fff;
+    }
   }
 }
 </style>

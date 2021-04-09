@@ -93,7 +93,7 @@ export default {
   subscriptions() {
     return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
   },
-  created() {
+  mounted() {
     this.$store.commit('setPageTitle', this.fungibleToken ? this.fungibleToken.name : 'Aeternity');
   },
   computed: {
@@ -129,9 +129,8 @@ export default {
 <style lang="scss" scoped>
 @import '../../../../styles/variables';
 
-.token-details {
-  max-width: 357px;
-  margin: 0 auto;
+::v-deep {
+  text-align: left;
 }
 
 .token-header {
@@ -160,7 +159,7 @@ export default {
   display: flex;
   align-items: center;
 
-  .primary-button {
+  .button {
     width: auto;
     padding: 0 25px;
     display: inline-block;
@@ -179,18 +178,18 @@ export default {
   background-color: $black-2;
 }
 
-.contract /deep/.text,
-.community /deep/.text {
+.contract ::v-deep .text,
+.community ::v-deep .text {
   color: $accent-color;
 }
 
-.contract /deep/.text {
+.contract ::v-deep .text {
   font-size: 9px;
   display: flex;
   align-items: center;
 }
 
-.community /deep/.text {
+.community ::v-deep .text {
   font-size: 13px;
 }
 </style>

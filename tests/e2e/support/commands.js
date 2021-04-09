@@ -1,6 +1,6 @@
 import '../../../src/lib/initPolyfills';
 import uuid from 'uuid';
-import { formatDate, getLoginState } from '../../../src/popup/utils';
+import { formatDate, formatTime, getLoginState } from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
   cy.visit(`chrome/popup/popup${route ? `#${route}` : ''}`, { onBeforeLoad });
@@ -9,9 +9,8 @@ Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
 Cypress.Commands.add('openAex2Popup', (type, txType) => {
   const id = uuid();
   const params = `?id=${id}&type=${type}`;
-  const onBeforeLoad = async () => {
-    if (txType) await browser.storage.local.set({ txType });
-  };
+  const onBeforeLoad = () =>
+    txType ? browser.storage.local.set({ txType }) : browser.storage.local.remove('txType');
   cy.visit(`chrome/popup/popup${params}`, { onBeforeLoad })
     .get('[data-cy=popup-aex2]')
     .should('exist')
@@ -51,7 +50,7 @@ Cypress.Commands.add('openAndEnterSeedPhrase', (seed) => {
 });
 
 Cypress.Commands.add('inputShouldHaveError', (input) => {
-  cy.get(input).should('have.class', 'has-error');
+  cy.get(input).should('have.class', 'error');
 });
 
 Cypress.Commands.add('buttonShouldBeDisabled', (button) => {
@@ -125,22 +124,14 @@ Cypress.Commands.add('menuShould', (cond) => {
   cy.get('[data-cy=sidebar-menu]').should(cond).get('[data-cy=close-menu]').should(cond);
 });
 
-Cypress.Commands.add('openMenuPage', (page, dropdown = false) => {
-  let url = `${Cypress.config().popupUrl}/popup#/`;
+Cypress.Commands.add('openMenuPage', (page) => {
+  const url = `${Cypress.config().popupUrl}/popup#/`;
   cy.openMenu();
-  if (dropdown) {
-    url += 'settings/';
-    cy.toggleDropdown();
-  }
-  cy.get(`[data-cy=${page}]`).click().url().should('eq', `${url}${page}`).menuShould('not.exist');
-});
-
-Cypress.Commands.add('toggleDropdown', () => {
-  cy.get('[data-cy=settings]').click().get('[data-cy=dropdown]');
-});
-
-Cypress.Commands.add('dropdownShould', (cond) => {
-  cy.get('[data-cy=dropdown]').should(cond);
+  cy.get(`[data-cy=sidebar-menu] [data-cy=${page}]`)
+    .click()
+    .url()
+    .should('eq', `${url}${page}`)
+    .menuShould('not.exist');
 });
 
 Cypress.Commands.add('openTip', () => {
@@ -152,7 +143,7 @@ Cypress.Commands.add('openTip', () => {
 });
 
 Cypress.Commands.add('openWithdraw', () => {
-  cy.get('[data-cy=hamburger]').click().menuShould('be.visible').get('[data-cy=send]').click();
+  cy.get('[data-cy=send]').click();
 });
 
 Cypress.Commands.add('enterTipDetails', ({ url = '', amount = null, note = '' }) => {
@@ -216,7 +207,10 @@ Cypress.Commands.add('pendingTx', (tx = {}) => {
     txItem.find('[data-cy=amount]').should('contain', tx.amount);
     txItem.find('[data-cy=status]').should('contain', 'Pending');
     if (tx.url) txItem.find('[data-cy=url]').should('contain', tx.url);
-    if (tx.time) txItem.find('[data-cy=time]').should('contain', formatDate(tx.time));
+    if (tx.time) {
+      txItem.find('[data-cy=date]').should('contain', formatDate(tx.time));
+      txItem.find('[data-cy=time]').should('contain', formatTime(tx.time));
+    }
   });
 });
 
@@ -246,7 +240,13 @@ Cypress.Commands.add('urlEquals', (route) => {
 });
 
 Cypress.Commands.add('openNetworks', () => {
-  cy.openMenu().toggleDropdown().get('[data-cy=networks]').click().urlEquals('/settings/networks');
+  cy.get('[data-cy=hamburger]')
+    .click()
+    .get('[data-cy=settings]')
+    .click()
+    .get('[data-cy=networks]')
+    .click()
+    .urlEquals('/settings/networks');
 });
 
 Cypress.Commands.add('enterNetworkDetails', (network, url, middleware, compiler) => {
@@ -296,7 +296,7 @@ Cypress.Commands.add('openTransactions', () => {
     .click()
     .get('[data-cy=loader]')
     .should('be.visible')
-    .get('[data-cy=all-transactions]')
+    .get('[data-cy=list]')
     .should('be.visible')
     .get('[data-cy=filters]')
     .should('be.visible');

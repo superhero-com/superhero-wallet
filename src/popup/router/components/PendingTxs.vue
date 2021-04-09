@@ -1,5 +1,5 @@
 <template>
-  <div v-if="transactions.length" data-cy="pending-txs">
+  <div v-if="transactions.length" class="pending-txs" data-cy="pending-txs">
     <TransactionItem
       v-for="transaction in transactions"
       :key="transaction.hash"
@@ -28,3 +28,11 @@ export default {
   }),
 };
 </script>
+
+<style lang="scss" scoped>
+.pending-txs {
+  .transaction-item {
+    margin-bottom: 0;
+  }
+}
+</style>

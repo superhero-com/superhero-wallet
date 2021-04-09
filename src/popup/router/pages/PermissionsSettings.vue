@@ -1,5 +1,5 @@
 <template>
-  <div class="popup">
+  <div class="permissions-settings">
     <Panel v-if="hosts.length">
       <PanelItem
         v-for="host in hosts"
