@@ -130,18 +130,19 @@
       "contract-create": "Contract create",
       "aens": "AENS",
       "payload": "Payload",
-      "recipientId": "Recipient Id",
+      "recipientId": "Recipient ID",
       "code": "Code",
       "callData": "Call data",
-      "contractId": "Contract Id",
-      "commitmentId": "Commitment Id",
+      "contractId": "Contract ID",
+      "commitmentId": "Commitment ID",
       "name": "Name",
       "nameFee": "Name fee",
       "nameSalt": "Name salt",
-      "nameId": "Name Id",
+      "nameId": "Name ID",
       "pointers": "Pointers",
       "sign-raw": "Sign raw transaction by",
-      "data-sign": "Data to sign"
+      "data-sign": "Data to sign",
+      "nonce": "Nonce"
     },
     "add-token": {
       "title": "Token added",
@@ -755,7 +756,8 @@
       "payload": "Payload",
       "newContract": "New Contract",
       "aens": "AENS",
-      "balanceError": "Your account balance is not enough to execute this transaction."
+      "balanceError": "Your account balance is not enough to execute this transaction.",
+      "advanced": "Advanced transaction details"
     },
     "signTransactionByQrCode": {
       "backToAccount": "Back to account",
@@ -1069,5 +1071,6 @@
   "minutes": "{n} minutes | {n} minute | {n} minutes",
   "hours": "{n} hours | {n} hour | {n} hours",
   "days": "{n} days | {n} day | {n} days",
-  "addressCopied": "Address copied"
+  "addressCopied": "Address copied",
+  "copied": "Copied"
 }

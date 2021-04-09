@@ -1,6 +1,9 @@
 <template>
   <div class="overview">
-    <span class="title">
+    <span
+      class="title"
+      data-cy="title"
+    >
       {{ title }}
     </span>
 
@@ -30,7 +33,10 @@
     </div>
 
     <div class="details">
-      <div class="sender">
+      <div
+        class="sender"
+        data-cy="sender"
+      >
         <a
           :href="sender.url"
           target="_blank"
@@ -40,7 +46,10 @@
         </a>
         <CopyAddress :value="sender.address" />
       </div>
-      <div class="recipient">
+      <div
+        class="recipient"
+        data-cy="recipient"
+      >
         <a
           v-if="recipient.url"
           :href="recipient.url"
