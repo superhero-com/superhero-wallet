@@ -36,6 +36,8 @@
 </template>
 
 <script>
+import { handleUnknownError } from '../popup/utils/helper';
+
 export default {
   name: 'App',
   data() {
@@ -72,7 +74,7 @@ export default {
               hostname: this.hostname,
             },
           })
-          .catch(console.log);
+          .catch(handleUnknownError);
         setInterval(() => {
           window.location.href = this.href;
         }, 500);

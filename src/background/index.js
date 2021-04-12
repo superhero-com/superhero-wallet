@@ -4,6 +4,7 @@ import initDeeplinkHandler from './deeplink-handler';
 import RedirectChainNames from './redirect-chain-names';
 import * as wallet from './wallet';
 import TipClaimRelay from './tip-claim-relay';
+import { handleUnknownError } from '../popup/utils/helper';
 import { getPhishingUrls, phishingCheckUrl, setPhishingUrl } from '../popup/utils/phishing-detect';
 import Logger from '../lib/logger';
 import { getState } from '../store/plugins/persistState';
@@ -16,7 +17,7 @@ initDeeplinkHandler();
 const postPhishingData = async (data) => {
   const tabs = await browser.tabs.query({ active: true, currentWindow: true });
   const message = { method: 'phishingCheck', ...data };
-  tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message).catch(console.log));
+  tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message).catch(handleUnknownError));
 };
 
 const openTipPopup = (pageUrl) => browser.windows.create({

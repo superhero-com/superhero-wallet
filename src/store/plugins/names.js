@@ -54,14 +54,15 @@ export default (store) => {
         const defaultName = getDefault(account.address);
         const names = await Promise.all([
           getPendingNameClaimTransactions(),
-          middleware.getOwnedBy(account.address).then(({ active }) => active.map(({ info, name }) => ({
-            createdAtHeight: info.activeFrom,
-            expiresAt: info.expireHeight,
-            owner: info.ownership.current,
-            pointers: info.pointers,
-            autoExtend: owned.find((n) => n.name === name)?.autoExtend,
-            name,
-          }))),
+          middleware.getOwnedBy(account.address)
+            .then(({ active }) => active.map(({ info, name }) => ({
+              createdAtHeight: info.activeFrom,
+              expiresAt: info.expireHeight,
+              owner: info.ownership.current,
+              pointers: info.pointers,
+              autoExtend: owned.find((n) => n.name === name)?.autoExtend,
+              name,
+            }))),
         ]).then((arr) => arr.flat());
 
         commit('set', names);

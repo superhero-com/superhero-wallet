@@ -123,7 +123,7 @@ export default {
     BalanceInfo,
   },
   mixins: [deeplinkApi],
-  props: { tipUrl: String },
+  props: { tipUrl: { type: String, default: '' } },
   data() {
     return {
       url: null,

@@ -61,7 +61,8 @@ export default {
         commit('resetTransactionSignLimitLeft', host);
       }
 
-      const limitLeft = state[host]?.transactionSignLimitLeft - aettosToAe(+amount + +fee + +nameFee);
+      const limitLeft = state[host]?.transactionSignLimitLeft
+        - aettosToAe(+amount + +fee + +nameFee);
       if (limitLeft < 0) return false;
       commit('setTransactionSignLimitLeft', { host, value: limitLeft });
       return true;

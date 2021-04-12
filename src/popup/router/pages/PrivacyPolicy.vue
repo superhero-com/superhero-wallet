@@ -7,7 +7,8 @@
         <h3><strong>Introduction</strong></h3>
         <p>
           <strong>Superhero.com Establishment (&ldquo;Superhero&rdquo;, &ldquo;we&rdquo;,
-            &ldquo;us&rdquo;, &ldquo;our&rdquo; </strong>or<strong> &ldquo;the company&rdquo;</strong>) is a company with seat and registered
+            &ldquo;us&rdquo;, &ldquo;our&rdquo; </strong>or<strong> &ldquo;the company&rdquo;
+          </strong>) is a company with seat and registered
           address at: Dr. Grass Str. 12, 9490 Vaduz, Liechtenstein, with email address for
           communication related to the <strong>Superhero Wallet</strong>:
           superherowallet@protonmail.com. <strong>Superhero</strong> is the company, which created
@@ -20,7 +21,7 @@
         <p>
           This <strong>Privacy Policy</strong> (&ldquo;<strong>Policy</strong>&rdquo;) is applicable
           for the <strong>Superhero </strong>developed software program
-          <strong>Superhero Wallet</strong><strong> (</strong>the
+          <strong>Superhero Wallet (</strong>the
           <strong>&ldquo;Wallet&rdquo; </strong>or the
           <strong>&ldquo;application&rdquo;), </strong>designed for end users, which allows
           supporters to send value to content creators, causes, charities, groups or regular
@@ -129,8 +130,8 @@
             collection of the information on the blockchain.</strong>
         </p>
         <p>
-          <strong>The Wallet is a software solution which facilitates the peer-to-peer transfer of tokens
-            between USERS and their interaction with </strong><strong>&AElig;ternity</strong><strong> blockchain.</strong>
+          <strong>The Wallet is a software solution which facilitates the peer-to-peer transfer
+            of tokens between USERS and their interaction with &AElig;ternity blockchain.</strong>
           <strong>USERS</strong> understand and agree that <strong>Superhero</strong> does not
           determine the purposes and means of <strong>processing</strong> of
           <strong>personal data</strong> and does not conduct any

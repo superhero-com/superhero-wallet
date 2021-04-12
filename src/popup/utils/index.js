@@ -3,9 +3,9 @@ import { TxBuilder } from '@aeternity/aepp-sdk/es';
 import { testAccount, txParams } from './config';
 import runMigrations from '../../store/migrations';
 
-export const formatDate = (time) =>
-  // TODO: Use the current language from i18n module
-  new Date(+time).toLocaleDateString(navigator.language, {
+// TODO: Use the current language from i18n module
+export const formatDate = (time) => new Date(+time)
+  .toLocaleDateString(navigator.language, {
     year: '2-digit',
     month: '2-digit',
     day: '2-digit',

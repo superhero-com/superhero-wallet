@@ -1,7 +1,7 @@
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
 import { unionBy } from 'lodash-es';
-import { convertToken, fetchJson } from '../../popup/utils/helper';
+import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
 
 export default {
   namespaced: true,
@@ -32,7 +32,7 @@ export default {
     async getAvailableTokens({ rootGetters: { activeNetwork }, commit }) {
       const availableTokens = await fetchJson(
         `${activeNetwork.backendUrl}/tokenCache/tokenInfo`,
-      ).catch((e) => console.log(e));
+      ).catch(handleUnknownError);
       return commit('setAvailableTokens', availableTokens || {});
     },
     async tokenBalance({ rootState: { sdk } }, [token, address]) {
@@ -51,7 +51,7 @@ export default {
     }) {
       const tokens = await fetchJson(
         `${activeNetwork.backendUrl}/tokenCache/balances?address=${account.address}`,
-      ).catch((e) => console.log(e));
+      ).catch(handleUnknownError);
 
       commit('resetTokenBalances');
 

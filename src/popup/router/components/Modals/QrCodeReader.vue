@@ -61,8 +61,9 @@ export default {
                 );
                 reject();
               }
-              if (navigator.mediaDevices.getUserMedia) navigator.mediaDevices.getUserMedia({ video: true }).then(resolve).catch(reject);
-              else reject(new Error('Sorry, your browser does not support getUserMedia'));
+              if (navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true }).then(resolve, reject);
+              } else reject(new Error('Sorry, your browser does not support getUserMedia'));
             });
           } catch {
             this.cameraAllowed = false;
@@ -79,9 +80,10 @@ export default {
   async mounted() {
     if (process.env.PLATFORM === 'cordova') {
       try {
-        await new Promise((resolve, reject) => window.QRScanner.prepare((error, status) => (!error && status.authorized
-          ? resolve()
-          : reject(error || new Error('Denied to use the camera')))));
+        await new Promise((resolve, reject) => window.QRScanner.prepare((error, status) => (
+          !error && status.authorized
+            ? resolve() : reject(error || new Error('Denied to use the camera'))
+        )));
       } catch {
         this.cameraAllowed = false;
       }

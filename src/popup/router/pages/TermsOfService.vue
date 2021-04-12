@@ -87,7 +87,8 @@
         <p>
           1.1.
           <strong>Superhero.com Establishment (&ldquo;Superhero&rdquo;, &ldquo;we&rdquo;,
-            &ldquo;us&rdquo;, &ldquo;our&rdquo; </strong>or<strong> &ldquo;the company&rdquo;</strong>) is a company with seat and registered
+            &ldquo;us&rdquo;, &ldquo;our&rdquo;</strong> or <strong>&ldquo;the company&rdquo;
+          </strong>) is a company with seat and registered
           address at: Dr. Grass Str. 12, 9490 Vaduz, Liechtenstein, with email address for
           communication related to the <strong>Superhero Wallet</strong>:
           superherowallet@protonmail.com. <strong>Superhero</strong> is the company, which created
@@ -178,7 +179,9 @@
           <em>blocks</em> with the <strong>Aeternity</strong> <strong>blockchain</strong>.
         </p>
         <p>
-          1.7. &ldquo;<strong>Account address</strong>&rdquo; or &ldquo;<strong>Wallet address</strong>&rdquo; is a hashed version of the <strong>USER&rsquo;s public key</strong>, used to
+          1.7. &ldquo;<strong>Account address</strong>&rdquo; or
+          &ldquo;<strong>Wallet address</strong>&rdquo; is a hashed version of the
+          <strong>USER&rsquo;s public key</strong>, used to
           identify <strong>USERS</strong> on the <strong>application</strong>.
         </p>
         <p>
@@ -216,10 +219,11 @@
         <p>
           The <strong>Wallet</strong> is a software solution, the interface is provided with the
           purpose of facilitating the interaction between the <strong>USERS</strong> and the
-          protocols of the <strong>A</strong><strong>eternity blockchain,</strong> to manage your
+          protocols of the <strong>Aeternity blockchain,</strong> to manage your
           <strong>account</strong> and your <strong>&AElig; tokens. </strong>The Protocols represent
           a system that is implemented with the purpose of reaching consensus between
-          <strong>USERS</strong> and validating transactions on the <strong>A</strong><strong>eternity blockchain.</strong> <strong>Superhero</strong> does not in any way
+          <strong>USERS</strong> and validating transactions on the
+          <strong>Aeternity blockchain. Superhero</strong> does not in any way
           control the blockchain due to the fact it is decentralized and all transactions are
           executed between <strong>USERS</strong> in a peer-to-peer manner in which
           <strong>Superhero</strong> is not involved.
@@ -323,10 +327,11 @@
           disposal for further assistance.
         </p>
         <p>
-          <strong>2.6. Transactions on the application and </strong><strong>&AElig; claims</strong>
+          <strong>2.6. Transactions on the application and &AElig; claims</strong>
         </p>
         <p>
-          <strong><u>Transactions on the application</u></strong><strong>: USERS</strong> can browse through their transaction history.
+          <strong><u>Transactions on the application</u>: USERS</strong>
+          can browse through their transaction history.
           <strong>The Wallet</strong> displays the <strong>USER&rsquo;s</strong> tokens.
           <strong>USERS</strong> are in charge of the safe storage, sending and receiving of funds.
           The application is built for small transactions. High volume transactions or storage can
@@ -352,10 +357,14 @@
           without any control or interference conducted by <strong>Superhero</strong> under any
           form. The <u>smart contracts</u> are a specific feature of the decentralized public
           ledger. If the websites/platforms/organizations/people who are tipped, do not have a
-          <strong>Superhero Wallet, </strong>the sent tip is stored in the so called &ldquo;<u>Tipping Smart Contract</u>&rdquo;. The <u>Oracles</u> &ndash; also a function of the decentralized blockchain
+          <strong>Superhero Wallet, </strong>the sent tip is stored in the so called
+          &ldquo;<u>Tipping Smart Contract</u>&rdquo;. The <u>Oracles</u> &ndash; also
+          a function of the decentralized blockchain
           &ndash; follows when the receiver of the tip will generate a <strong>Wallet</strong>. If
           the receiver of the tip creates a <strong>Wallet,</strong> they can claim the
-          <strong>&AElig; tokens </strong>initially tipped and stored in the &ldquo;<u>Tipping Smart Contract</u>&rdquo;. The receiver of the tip has the right to access and claim the
+          <strong>&AElig; tokens </strong>initially tipped and stored in the
+          &ldquo;<u>Tipping Smart Contract</u>&rdquo;.
+          The receiver of the tip has the right to access and claim the
           <strong>&AElig; tokens</strong> in a time frame of 1 (one) year from the moment of
           tipping. After the lapse of this 1 (one) year, the receiver loses their right to gain the
           <strong>&AElig; tokens</strong>. Within the second year from the moment of tipping, only
@@ -369,7 +378,9 @@
           that if the <strong>tokens</strong> are not claimed, they can be stored in the
           <u>smart contract</u> without limitation of time and without any purpose. This is why,
           after the lapse of the two years in which the receiver and the sender of the tips could
-          claim the <strong>tokens</strong> but have not<strong>,</strong> the &ldquo;<u>Tipping Smart Contract</u>&rdquo; sends the <strong>&AElig; tokens</strong> to an <strong>address</strong> of
+          claim the <strong>tokens</strong> but have not<strong>,</strong> the
+          &ldquo;<u>Tipping Smart Contract</u>&rdquo; sends the <strong>&AElig; tokens</strong>
+          to an <strong>address</strong> of
           <strong>Superhero</strong>. Once the <strong>tokens</strong> are received by
           <strong>Superhero</strong>, receivers and senders of the tip accept and agree that they
           shall not have any claims over the <strong>tokens</strong> and
@@ -565,15 +576,15 @@
           access to the <strong>account</strong>, once the <strong>USER</strong> has lost access to
           the original <strong>Wallet</strong> for any reason (migrating to a new device,
           reinstalling browser, etc.). <strong>Superhero</strong>
-          <strong>does not collect the private keys or the seed phrases and shall not be treated under
-            any circumstances as a custodian wallet provider. WE HIGHLY RECOMMEND ALL USERS TO SET
-            UP A SEED PHRASE AND PROTECT IT.</strong>
+          <strong>does not collect the private keys or the seed phrases and shall not be treated
+            under any circumstances as a custodian wallet provider. WE HIGHLY RECOMMEND ALL USERS TO
+            SET UP A SEED PHRASE AND PROTECT IT.</strong>
           <strong>USERS</strong> should store their seed phrase offline safely. Please bear in mind
           that if a <strong>USER</strong> has not set up a seed phrase for backup or they have
           forgotten the seed phrase and its exact wording, the access to their
           <strong>accounts</strong> can be permanently restricted. The lack of access does not mean
-          in any way that the <strong>&AElig; </strong><strong>tokens</strong> are lost. The
-          <strong>&AElig; </strong><strong>tokens</strong> remain available, however, they cannot be
+          in any way that the <strong>&AElig; tokens</strong> are lost. The
+          <strong>&AElig; tokens</strong> remain available, however, they cannot be
           controlled, transferred and any other action with them cannot be undertaken.
           <strong>Superhero</strong> shall not be held liable in any case of lost, forgotten or
           misspelled seed phrases. In addition, <strong>USERS</strong> must not share their seed
@@ -587,7 +598,8 @@
           only in case the <strong>USER</strong> has a seed phrase.
         </p>
         <p>
-          <strong><u>Decentralization and Control </u></strong><strong><u>Transparency Disclaimer</u></strong>: <strong>Blockchain</strong> technology is decentralized by nature - which means that
+          <strong><u>Decentralization and Control </u><u>Transparency Disclaimer</u></strong>:
+          <strong>Blockchain</strong> technology is decentralized by nature - which means that
           the makers of the <strong>Wallet</strong> cannot access or freeze your
           <strong>account</strong>; recover or reset your seed phrase; reverse, cancel or refund
           transactions. Only <strong>USERS</strong> are in charge of the safe storage and sending of
@@ -598,7 +610,9 @@
           from the use of the <strong>application</strong>.
         </p>
         <p>
-          <strong><u>Access and Connectivity Disclaimer</u></strong>: The <strong>application</strong> can be downloaded or used from the following places:
+          <strong><u>Access and Connectivity Disclaimer</u></strong>: The
+          <strong>application</strong> can be downloaded
+          or used from the following places:
         </p>
         <p>
           1) downloaded as an add-on (extension) to Firefox:
@@ -700,9 +714,10 @@
           by them.
         </p>
         <p>
-          <strong><u>Risks</u></strong>: <strong>USERS</strong> understand and agree with the risks related to the
+          <strong><u>Risks</u></strong>: <strong>USERS</strong> understand and
+          agree with the risks related to the
           <strong>&AElig;ternity blockchain</strong> contribution and/or with the allocation, use
-          and ownership of <strong>&AElig;</strong><strong> tokens</strong> and guarantee to relieve
+          and ownership of <strong>&AElig; tokens</strong> and guarantee to relieve
           of responsibility <strong>Superhero</strong> in these cases.
         </p>
         <p>The risks mentioned within the present <strong>TERMS</strong> are not comprehensive:</p>
@@ -712,11 +727,11 @@
             due to the open-source, decentralized, public, permissionless cloud concept, the
             software, the blockchain technology, incorporating all elements and the
             <strong>application</strong> are in a constant development process. There is no warranty
-            that the receipt and transfer of <strong>&AElig;</strong><strong> tokens</strong> shall
+            that the receipt and transfer of <strong>&AElig; tokens</strong> shall
             be uninterrupted or error-free at all times. <strong>USERS</strong> accept and guarantee
             to dispense of responsibility <strong>Superhero</strong> for any software or technology
             weaknesses, malfunctions, vulnerabilities or bugs, which can cause complete or partial
-            loss of <strong>&AElig;</strong><strong> tokens</strong>.
+            loss of <strong>&AElig; tokens</strong>.
           </li>
           <li>
             <u>Risk of theft:</u> <strong>USERS</strong> understand and accept that due to the
@@ -724,7 +739,7 @@
             <strong>application</strong>, the <strong>&AElig;ternity blockchain</strong> and the
             other blockchain technology related elements may be exposed to hacker attacks or other
             harmful individuals. These actions could result including but not limited to theft or
-            loss of <strong>&AElig;</strong><strong> tokens</strong>.
+            loss of <strong>&AElig; tokens</strong>.
           </li>
           <li>
             <u>Risk of mining attacks</u>: <strong>USERS</strong> understand and accept that due to

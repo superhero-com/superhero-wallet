@@ -106,9 +106,9 @@ export default {
   },
   methods: {
     checkLoadMore() {
-      const { scrollHeight, scrollTop, clientHeight } = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION
-        ? document.querySelector('#app')
-        : document.documentElement;
+      const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
+      const { scrollHeight, scrollTop, clientHeight } = isDesktop
+        ? document.querySelector('#app') : document.documentElement;
       if (scrollHeight - scrollTop <= clientHeight + 100) {
         setTimeout(() => this.loadMore(), 1500);
       }

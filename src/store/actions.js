@@ -66,7 +66,7 @@ export default {
         commit('setCurrencies', aeternity);
         commit('setNextCurrencyFetch', new Date().getTime() + 3600000);
       } catch (e) {
-        console.error(`Cannot fetch currencies: ${e}`);
+        handleUnknownError(e);
       }
     }
   },
@@ -187,7 +187,8 @@ export default {
       signature: signedChallenge,
     };
     const url = new URL(`${activeNetwork.backendUrl}/notification/user/${account.address}`);
-    Object.keys(respondChallenge).forEach((key) => url.searchParams.append(key, respondChallenge[key]));
+    Object.keys(respondChallenge)
+      .forEach((key) => url.searchParams.append(key, respondChallenge[key]));
     return fetchJson(url.toString());
   },
   async initContractInstances({

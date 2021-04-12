@@ -57,21 +57,17 @@ export default {
   height: 169px;
   width: 312px;
   border-radius: 6px;
-  // stylelint-disable-next-line declaration-colon-newline-after
-  background: url('../../../icons/account-card/account-bg-pattern.svg'),
-    linear-gradient(rgb(10, 14, 22), rgb(10, 14, 22));
-  background-position: calc(var(--shift) * 15px) calc(var(--shift) * 20px), center, center, center;
+  background-image: url('../../../icons/account-card/account-bg-pattern.svg');
+  background-color: #0a0e16;
+  background-position: calc(var(--shift) * 15px) calc(var(--shift) * 20px);
 
   &.subaccount {
-    background: url('../../../icons/account-card/subaccount-bg-pattern.svg'), $color-bg-1;
-    background-position: calc(var(--shift) * 15px) calc(var(--shift) * 20px), center, center, center;
-  }
+    background-image: url('../../../icons/account-card/subaccount-bg-pattern.svg');
+    background-color: $color-bg-1;
 
-  &.first-subaccount.subaccount {
-    // stylelint-disable-next-line declaration-colon-newline-after
-    background: url('../../../icons/account-card/subaccount-bg-pattern.svg'),
-      linear-gradient(rgb(19, 27, 42), rgb(19, 27, 42));
-    background-position: calc(var(--shift) * 15px) calc(var(--shift) * 20px), center, center, center;
+    &.first-subaccount {
+      background-color: #131b2a;
+    }
   }
 
   &:hover {

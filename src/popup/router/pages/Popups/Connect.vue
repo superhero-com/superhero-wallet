@@ -47,7 +47,7 @@
       <span
         class="secondary-text"
         data-cy="aepp"
-      >{{ app.host }} ({{ app.name }}) </span>
+      >{{ app.host }} ({{ app.name }})</span>
       {{ $t('pages.connectConfirm.websiteRequestconnect') }}
       <Avatar
         class="send-account-icon"

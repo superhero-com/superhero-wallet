@@ -19,7 +19,8 @@ global.browser = process.env.IS_EXTENSION
           );
         },
         set(object) {
-          Object.entries(object).forEach(([key, value]) => localStorage.setItem(key, JSON.stringify(value)));
+          Object.entries(object)
+            .forEach(([key, value]) => localStorage.setItem(key, JSON.stringify(value)));
           return Promise.resolve();
         },
         remove(key) {

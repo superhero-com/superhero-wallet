@@ -14,9 +14,9 @@ import {
 } from '../../popup/utils/helper';
 
 export default (store) => {
-  const watchAsObservable = (getter, options) =>
-    // eslint-disable-next-line no-underscore-dangle
-    store._watcherVM.$watchAsObservable(() => getter(store.state, store.getters), options);
+  // eslint-disable-next-line no-underscore-dangle
+  const watchAsObservable = (getter, options) => store._watcherVM
+    .$watchAsObservable(() => getter(store.state, store.getters), options);
 
   const sdk$ = watchAsObservable(({ sdk }) => sdk, { immediate: true }).pipe(
     pluck('newValue'),

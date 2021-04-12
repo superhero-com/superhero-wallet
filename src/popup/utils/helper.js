@@ -5,6 +5,9 @@ import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/am
 import BigNumber from 'bignumber.js';
 import { CONNECTION_TYPES } from './constants';
 
+// eslint-disable-next-line no-console
+export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
+
 export const aeToAettos = (v) => formatAmount(v, {
   denomination: AE_AMOUNT_FORMATS.AE,
   targetDenomination: AE_AMOUNT_FORMATS.AETTOS,
@@ -98,7 +101,7 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
     });
     contractInstance.setOptions({ backend });
   } catch (e) {
-    console.error(`setContractInstance: ${e}`);
+    handleUnknownError(e);
   }
   return Promise.resolve(contractInstance);
 };
@@ -133,9 +136,6 @@ export const getTwitterAccountUrl = (url) => {
 export const isNotFoundError = (error) => error.isAxiosError && error?.response?.status === 404;
 
 export const isAccountNotFoundError = (error) => isNotFoundError(error) && error?.response?.data?.reason === 'Account not found';
-
-// eslint-disable-next-line no-console
-export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
 
 export const setBalanceLocalStorage = (balance) => {
   localStorage.rxjs = JSON.stringify({ ...JSON.parse(localStorage.rxjs || '{}'), balance });

@@ -134,6 +134,7 @@ contract Example =
         compilerUrl: networks[process.env.NETWORK].COMPILER_URL,
         onNetworkChange(params) {
           if (this.getNetworkId() !== params.networkId) {
+            // eslint-disable-next-line no-alert
             alert(
               `Connected network ${this.getNetworkId()} is not supported with wallet network ${
                 params.networkId
