@@ -5,7 +5,7 @@ export default {
   switchNetwork(state, payload) {
     state.current.network = payload;
   },
-  updateLatestTransactions(state, payload) {
+  setTransactions(state, payload) {
     state.transactions.latest = payload;
   },
   addPendingTransaction(state, payload) {

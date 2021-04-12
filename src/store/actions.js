@@ -14,7 +14,7 @@ import { i18n } from './plugins/languages';
 export default {
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
-    commit('updateLatestTransactions', []);
+    commit('setTransactions', []);
   },
   async fetchPendingTransactions({
     state: { sdk },

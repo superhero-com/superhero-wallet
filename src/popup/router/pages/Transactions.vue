@@ -140,7 +140,7 @@ export default {
     },
     updateTransactions(transactions) {
       this.transactions = uniqBy([...this.transactions, ...transactions], 'hash');
-      this.$store.commit('updateLatestTransactions', this.transactions);
+      this.$store.commit('setTransactions', this.transactions);
     },
   },
 };

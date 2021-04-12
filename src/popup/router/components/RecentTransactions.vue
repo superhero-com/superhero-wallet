@@ -50,7 +50,7 @@ export default {
   methods: {
     async updateTransactions() {
       this.$store.commit(
-        'updateLatestTransactions',
+        'setTransactions',
         await this.$store.dispatch('fetchTransactions', {
           limit: 10,
           page: 1,
