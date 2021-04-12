@@ -8,7 +8,7 @@
       'hide-tab-bar': $route.meta.hideTabBar,
     }"
   >
-    <Header @toggle-sidebar="showSidebar = !showSidebar" />
+    <Header v-if="showStatusAndHeader" @toggle-sidebar="showSidebar = !showSidebar" />
 
     <RouterView
       :class="{ 'show-header': showStatusAndHeader }"
@@ -60,7 +60,11 @@ export default {
     ...mapGetters(['account', 'isLoggedIn']),
     ...mapState(['isRestored', 'current', 'sdk', 'backedUpSeed', 'notifications']),
     showStatusAndHeader() {
-      return !['/', '/intro'].includes(this.$route.path) && !this.$route.params.app;
+      return !(
+        ['/', '/intro'].includes(this.$route.path)
+        || this.$route.path.startsWith('/web-iframe-popup')
+        || this.$route.params.app
+      );
     },
     modals() {
       return this.$store.getters['modals/opened'];
@@ -194,12 +198,16 @@ body {
       overflow: visible;
     }
 
+    .main,
+    .popup-aex2 {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
     .main {
       text-align: center;
       font-size: 16px;
       margin: 0 auto;
-      padding-left: 20px;
-      padding-right: 20px;
       position: relative;
 
       &.transactions,
