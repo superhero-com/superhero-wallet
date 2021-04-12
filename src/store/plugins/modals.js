@@ -15,10 +15,9 @@ export default (store) => {
     namespaced: true,
     state: { opened: [] },
     getters: {
-      opened: ({ opened }) =>
-        opened
-          .filter(({ inPopup }) => !inPopup)
-          .map(({ name, ...other }) => ({ ...modals[name], ...other })),
+      opened: ({ opened }) => opened
+        .filter(({ inPopup }) => !inPopup)
+        .map(({ name, ...other }) => ({ ...modals[name], ...other })),
     },
     mutations: {
       open(state, modal) {
@@ -31,14 +30,12 @@ export default (store) => {
     },
     actions: {
       open({ commit }, { name, allowRedirect, ...props }) {
-        if (!modals[name])
-          return Promise.reject(new Error(`Modal with name "${name}" not registered`));
+        if (!modals[name]) return Promise.reject(new Error(`Modal with name "${name}" not registered`));
         if (props.msg === 'Rejected by user') return Promise.reject(new Error('Rejected by user')); // TODO: Move it to the corresponding modal
         const key = modalCounter;
         modalCounter += 1;
 
-        const inPopup =
-          process.env.PLATFORM === 'web' && IN_FRAME && modals[name].showInPopupIfWebFrame;
+        const inPopup = process.env.PLATFORM === 'web' && IN_FRAME && modals[name].showInPopupIfWebFrame;
 
         const promise = new Promise((resolve, reject) => {
           commit('open', {

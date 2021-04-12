@@ -5,7 +5,7 @@
     v-bind="$attrs"
     type="range"
     @input="$emit($event.type, +$event.target.value)"
-  />
+  >
 </template>
 
 <script>

@@ -1,6 +1,9 @@
 <template>
   <div class="not-bootstrap-modal">
-    <div class="overlay" @click.stop="$emit('close')" />
+    <div
+      class="overlay"
+      @click.stop="$emit('close')"
+    />
     <div class="not-bootstrap-modal-content">
       <slot />
     </div>

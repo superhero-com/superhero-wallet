@@ -2,20 +2,29 @@
   <div class="content">
     <ae-main>
       <ae-panel class="text-center">
-        <img src="../icons/icon_128.png" alt="Superhero logo" />
-        <h1><ae-icon fill="primary" face="round" name="info" />{{ $t('phishing.detection') }}</h1>
+        <img
+          src="../icons/icon_128.png"
+          alt="Superhero logo"
+        >
+        <h1>
+          <ae-icon
+            fill="primary"
+            face="round"
+            name="info"
+          />{{ $t('phishing.detection') }}
+        </h1>
         <i18n
           v-for="(item, index) in $t('phishing.sections').length"
           :key="index"
           :path="`phishing.sections[${index}].text`"
           tag="p"
         >
-          <template v-slot:insertion>
+          <template #insertion>
             <a>
               {{ $t(`phishing.sections[${index}].insertion`) }}
             </a>
           </template>
-          <template v-slot:continueHost>
+          <template #continueHost>
             <a @click.prevent="continueHost">
               {{ $t(`phishing.sections[${index}].continueHost`) }}
             </a>
@@ -27,6 +36,8 @@
 </template>
 
 <script>
+import { handleUnknownError } from '../popup/utils/helper';
+
 export default {
   name: 'App',
   data() {
@@ -63,7 +74,7 @@ export default {
               hostname: this.hostname,
             },
           })
-          .catch(console.log);
+          .catch(handleUnknownError);
         setInterval(() => {
           window.location.href = this.href;
         }, 500);

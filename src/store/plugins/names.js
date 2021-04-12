@@ -43,30 +43,26 @@ export default (store) => {
         dispatch,
       }) {
         if (!middleware) return;
-        const getPendingNameClaimTransactions = () =>
-          dispatch('fetchPendingTransactions', {}, { root: true }).then((transactions) =>
-            transactions
-              .filter(({ tx: { type } }) => type === 'NameClaimTx')
-              .map(({ tx, ...otherTx }) => ({
-                ...otherTx,
-                ...tx,
-                owner: tx.accountId,
-              })),
-          );
+        const getPendingNameClaimTransactions = () => dispatch('fetchPendingTransactions', {}, { root: true }).then((transactions) => transactions
+          .filter(({ tx: { type } }) => type === 'NameClaimTx')
+          .map(({ tx, ...otherTx }) => ({
+            ...otherTx,
+            ...tx,
+            owner: tx.accountId,
+          })));
 
         const defaultName = getDefault(account.address);
         const names = await Promise.all([
           getPendingNameClaimTransactions(),
-          middleware.getOwnedBy(account.address).then(({ active }) =>
-            active.map(({ info, name }) => ({
+          middleware.getOwnedBy(account.address)
+            .then(({ active }) => active.map(({ info, name }) => ({
               createdAtHeight: info.activeFrom,
               expiresAt: info.expireHeight,
               owner: info.ownership.current,
               pointers: info.pointers,
               autoExtend: owned.find((n) => n.name === name)?.autoExtend,
               name,
-            })),
-          ),
+            }))),
         ]).then((arr) => arr.flat());
 
         commit('set', names);
@@ -78,9 +74,7 @@ export default (store) => {
         }
         const { preferredChainName: defaultNameBackend } = await fetchJson(
           `${activeNetwork.backendUrl}/profile/${account.address}`,
-        ).catch(() => {
-          return {};
-        });
+        ).catch(() => ({}));
         if (!claimed.includes(defaultNameBackend)) {
           await dispatch('setDefault', { address: account.address, name: claimed[0] });
           return;

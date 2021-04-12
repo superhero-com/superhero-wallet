@@ -1,7 +1,10 @@
 <template>
   <div class="list">
     <NameListHeader />
-    <ul v-if="owned.length" class="names-list">
+    <ul
+      v-if="owned.length"
+      class="names-list"
+    >
       <NameRow
         v-for="({ name, owner, pending, autoExtend }, index) in owned"
         :key="index"
@@ -9,11 +12,20 @@
         :name="name"
         :address="owner"
       >
-        <TruncateMid :str="name" class="name" />
-        <Badge v-if="account.name === name" class="active-name">
+        <TruncateMid
+          :str="name"
+          class="name"
+        />
+        <Badge
+          v-if="account.name === name"
+          class="active-name"
+        >
           {{ $t('pages.names.default') }}
         </Badge>
-        <Badge v-if="pending" class="pending-name">
+        <Badge
+          v-if="pending"
+          class="pending-name"
+        >
           {{ $t('pages.names.pending-claim') }}
         </Badge>
         <span class="address">{{ owner }}</span>
@@ -27,7 +39,9 @@
         </CheckBox>
       </NameRow>
     </ul>
-    <p v-else>{{ $t('pages.names.list.no-names') }}</p>
+    <p v-else>
+      {{ $t('pages.names.list.no-names') }}
+    </p>
   </div>
 </template>
 
@@ -40,7 +54,9 @@ import TruncateMid from '../../components/TruncateMid';
 import CheckBox from '../../components/CheckBox';
 
 export default {
-  components: { NameListHeader, Badge, NameRow, CheckBox, TruncateMid },
+  components: {
+    NameListHeader, Badge, NameRow, CheckBox, TruncateMid,
+  },
   computed: {
     ...mapGetters(['account']),
     ...mapState('names', ['owned']),

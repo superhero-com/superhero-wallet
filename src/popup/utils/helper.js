@@ -5,16 +5,17 @@ import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/am
 import BigNumber from 'bignumber.js';
 import { CONNECTION_TYPES } from './constants';
 
-export const aeToAettos = (v) =>
-  formatAmount(v, {
-    denomination: AE_AMOUNT_FORMATS.AE,
-    targetDenomination: AE_AMOUNT_FORMATS.AETTOS,
-  });
-export const aettosToAe = (v) =>
-  formatAmount(v, {
-    denomination: AE_AMOUNT_FORMATS.AETTOS,
-    targetDenomination: AE_AMOUNT_FORMATS.AE,
-  });
+// eslint-disable-next-line no-console
+export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
+
+export const aeToAettos = (v) => formatAmount(v, {
+  denomination: AE_AMOUNT_FORMATS.AE,
+  targetDenomination: AE_AMOUNT_FORMATS.AETTOS,
+});
+export const aettosToAe = (v) => formatAmount(v, {
+  denomination: AE_AMOUNT_FORMATS.AETTOS,
+  targetDenomination: AE_AMOUNT_FORMATS.AE,
+});
 
 export const convertToken = (balance, precision) => BigNumber(balance).shiftedBy(precision);
 
@@ -35,9 +36,8 @@ export const validateTipUrl = (urlAsString) => {
 export const detectConnectionType = (port) => {
   const extensionProtocol = detect().name === 'firefox' ? 'moz-extension' : 'chrome-extension';
   const [senderUrl] = port.sender.url.split('?');
-  const isExtensionSender =
-    senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/popup/popup.html`) ||
-    detect().name === 'firefox';
+  const isExtensionSender = senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/popup/popup.html`)
+    || detect().name === 'firefox';
   if (CONNECTION_TYPES.POPUP === port.name && isExtensionSender) {
     return port.name;
   }
@@ -49,23 +49,20 @@ export const fetchJson = async (...args) => {
   return response.json();
 };
 
-export const postJson = (url, options) =>
-  fetchJson(url, {
-    method: 'post',
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-    body: options.body && JSON.stringify(options.body),
-  });
+export const postJson = (url, options) => fetchJson(url, {
+  method: 'post',
+  headers: { 'Content-Type': 'application/json' },
+  ...options,
+  body: options.body && JSON.stringify(options.body),
+});
 
-export const checkAddress = (value) =>
-  Crypto.isAddressValid(value, 'ak') ||
-  Crypto.isAddressValid(value, 'ct') ||
-  Crypto.isAddressValid(value, 'ok');
+export const checkAddress = (value) => Crypto.isAddressValid(value, 'ak')
+  || Crypto.isAddressValid(value, 'ct')
+  || Crypto.isAddressValid(value, 'ok');
 
 export const checkAensName = (value) => value.endsWith('.chain');
 
-export const getAddressByNameEntry = (nameEntry, pointer = 'account_pubkey') =>
-  ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
+export const getAddressByNameEntry = (nameEntry, pointer = 'account_pubkey') => ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
 
 export const contractCall = async ({
   instance,
@@ -80,7 +77,9 @@ export const contractCall = async ({
   } catch (e) {
     if (e.message.indexOf('wrong_abi_version') > -1) {
       instance.setOptions({ backend: 'aevm' });
-      return contractCall({ instance, method, params, decode, async });
+      return contractCall({
+        instance, method, params, decode, async,
+      });
     }
     throw e.message;
   }
@@ -102,13 +101,12 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
     });
     contractInstance.setOptions({ backend });
   } catch (e) {
-    console.error(`setContractInstance: ${e}`);
+    handleUnknownError(e);
   }
   return Promise.resolve(contractInstance);
 };
 
-export const escapeSpecialChars = (str) =>
-  str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
+export const escapeSpecialChars = (str) => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
 
 export const checkHashType = (hash) => {
   const accountPublicKeyRegex = RegExp('^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$');
@@ -137,18 +135,13 @@ export const getTwitterAccountUrl = (url) => {
 
 export const isNotFoundError = (error) => error.isAxiosError && error?.response?.status === 404;
 
-export const isAccountNotFoundError = (error) =>
-  isNotFoundError(error) && error?.response?.data?.reason === 'Account not found';
-
-// eslint-disable-next-line no-console
-export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
+export const isAccountNotFoundError = (error) => isNotFoundError(error) && error?.response?.data?.reason === 'Account not found';
 
 export const setBalanceLocalStorage = (balance) => {
   localStorage.rxjs = JSON.stringify({ ...JSON.parse(localStorage.rxjs || '{}'), balance });
 };
 
-export const getBalanceLocalStorage = () =>
-  localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : '0';
+export const getBalanceLocalStorage = () => (localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : '0');
 
 export const categorizeContractCallTxObject = (transaction) => {
   if (transaction.tx.type !== 'ContractCallTx') return null;

@@ -23,8 +23,8 @@ const showPopup = async (aepp, type, params) => {
   tabs.forEach(({ url: tabURL, id: tabId }) => {
     const tabUrl = new URL(tabURL);
     if (
-      tabUrl.searchParams.get('type') === 'connectConfirm' &&
-      decodeURIComponent(tabUrl.searchParams.get('url')) === href
+      tabUrl.searchParams.get('type') === 'connectConfirm'
+      && decodeURIComponent(tabUrl.searchParams.get('url')) === href
     ) {
       browser.tabs.remove(tabId);
     }
@@ -66,8 +66,8 @@ const signCb = async (type, aepp, action) => {
       host: getAeppUrl(aepp).hostname,
       method,
       params: params?.txObject?.params,
-    })) ||
-    (await showPopup(aepp, type, params).then(
+    }))
+    || (await showPopup(aepp, type, params).then(
       () => true,
       () => false,
     ))
@@ -147,14 +147,13 @@ export async function init() {
         const { address } = store.getters.account;
         const app = args.pop();
         if (
-          app instanceof App &&
-          !(await store.dispatch('permissions/requestAddressForHost', {
+          app instanceof App
+          && !(await store.dispatch('permissions/requestAddressForHost', {
             host: app.host.hostname,
             address,
             connectionPopupCb: async () => showPopup(app.host.href, 'connectConfirm'),
           }))
-        )
-          return Promise.reject(new Error('Rejected by user'));
+        ) return Promise.reject(new Error('Rejected by user'));
         return address;
       },
       sign: (data) => Crypto.sign(data, store.getters.account.secretKey),

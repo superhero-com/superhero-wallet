@@ -1,8 +1,17 @@
 <template>
-  <div :class="['notification-item', status]" @click="$emit('click')">
+  <div
+    :class="['notification-item', status]"
+    @click="$emit('click')"
+  >
     <div class="first-row">
-      <img v-if="wallet" src="../../../icons/logo-small.svg" />
-      <Avatar v-else :address="address" />
+      <img
+        v-if="wallet"
+        src="../../../icons/logo-small.svg"
+      >
+      <Avatar
+        v-else
+        :address="address"
+      />
       <div class="address-and-menu">
         <span @click.stop>
           <slot />
@@ -15,7 +24,10 @@
         </span>
       </div>
       <ThreeDotsMenu @click.native.stop>
-        <div class="mark-as-read" @click="$emit('toggle-read')">
+        <div
+          class="mark-as-read"
+          @click="$emit('toggle-read')"
+        >
           {{
             status === 'read'
               ? $t('pages.notifications.markAsUnread')
@@ -25,7 +37,10 @@
       </ThreeDotsMenu>
     </div>
     <div class="second-row">
-      <span v-if="!wallet" class="notification-text">
+      <span
+        v-if="!wallet"
+        class="notification-text"
+      >
         {{ text }}
       </span>
       <span :class="['format-date', { wallet }]">

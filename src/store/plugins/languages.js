@@ -43,10 +43,9 @@ export default (store) => {
       activeCode: store.state.languages?.activeCode || preferredLocale,
     },
     getters: {
-      list: () =>
-        Object.entries(languages)
-          .map(([code, { name }]) => ({ code, name }))
-          .sort(),
+      list: () => Object.entries(languages)
+        .map(([code, { name }]) => ({ code, name }))
+        .sort(),
       active: ({ activeCode }, { list }) => list.find(({ code }) => code === activeCode),
     },
     mutations: {

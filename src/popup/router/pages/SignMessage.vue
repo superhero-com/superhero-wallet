@@ -1,12 +1,16 @@
 <template>
   <div class="sign-message">
-    <div class="section-title">Sign message for</div>
+    <div class="section-title">
+      Sign message for
+    </div>
 
     <div class="url-bar link-sm text-left">
       {{ callbackOrigin }}
     </div>
 
-    <div class="section-title">Message</div>
+    <div class="section-title">
+      Message
+    </div>
 
     <div class="tip-note-preview mt-15">
       {{ $route.query.message }}

@@ -2,9 +2,16 @@
   <div>
     <div id="info">
       <Logo class="logo" />
-      <div class="loader" v-if="!error"></div>
-      <p v-if="!error">{{ $t('redirecting') }}</p>
-      <p v-if="error">{{ error }}</p>
+      <div
+        v-if="!error"
+        class="loader"
+      />
+      <p v-if="!error">
+        {{ $t('redirecting') }}
+      </p>
+      <p v-if="error">
+        {{ error }}
+      </p>
     </div>
   </div>
 </template>

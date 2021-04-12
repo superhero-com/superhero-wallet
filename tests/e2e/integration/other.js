@@ -1,11 +1,17 @@
 const txs = [
-  { hash: 'th_', amount: 0.1, domain: 'localhost:5000', time: Date.now(), type: 'tip' },
-  { hash: 'th_', amount: 2, domain: 'localhost:8000', time: Date.now(), type: 'tip' },
-  { hash: 'th_', amount: 10, domain: 'localhost:8080', time: Date.now(), type: 'tip' },
+  {
+    hash: 'th_', amount: 0.1, domain: 'localhost:5000', time: Date.now(), type: 'tip',
+  },
+  {
+    hash: 'th_', amount: 2, domain: 'localhost:8000', time: Date.now(), type: 'tip',
+  },
+  {
+    hash: 'th_', amount: 10, domain: 'localhost:8080', time: Date.now(), type: 'tip',
+  },
 ];
 
 describe('Tests cases not connected to specific page', () => {
-  it(`(not) redirects to last visited routes`, () => {
+  it('(not) redirects to last visited routes', () => {
     [
       { path: '/success-tip', redirect: false },
       { path: '/intro', redirect: false },
@@ -19,7 +25,7 @@ describe('Tests cases not connected to specific page', () => {
     ].forEach(({ path, redirect }) => {
       cy.login({}, path)
         .get('[data-cy=connect-node]')
-        .visit(`extension/popup/popup`)
+        .visit('extension/popup/popup')
         .urlEquals(redirect ? path : '/account');
     });
   });

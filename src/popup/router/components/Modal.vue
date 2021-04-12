@@ -2,16 +2,29 @@
   <transition appear>
     <div class="modal">
       <div class="container">
-        <button v-if="close" class="close" @click="$emit('close')">
+        <button
+          v-if="close"
+          class="close"
+          @click="$emit('close')"
+        >
           <Close />
         </button>
-        <div v-if="$slots.header" class="header">
+        <div
+          v-if="$slots.header"
+          class="header"
+        >
           <slot name="header" />
         </div>
-        <div v-if="$slots.default" class="body">
+        <div
+          v-if="$slots.default"
+          class="body"
+        >
           <slot />
         </div>
-        <div v-if="$slots.footer" class="footer">
+        <div
+          v-if="$slots.footer"
+          class="footer"
+        >
           <slot name="footer" />
         </div>
       </div>
@@ -23,8 +36,8 @@
 import Close from '../../../icons/close.svg?vue-component';
 
 export default {
-  props: { close: Boolean },
   components: { Close },
+  props: { close: Boolean },
   mounted() {
     if (document.body.style.overflow) return;
     document.body.style.overflow = 'hidden';

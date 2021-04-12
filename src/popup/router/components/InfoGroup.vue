@@ -4,7 +4,11 @@
     <template v-if="$slots.default">
       <slot />
     </template>
-    <a v-else :href="explorerPath" target="_blank">
+    <a
+      v-else
+      :href="explorerPath"
+      target="_blank"
+    >
       {{ value }}
     </a>
   </div>

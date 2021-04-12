@@ -1,29 +1,46 @@
 <template>
   <div class="auction-details">
     <Loader v-if="bids === null" />
-    <p v-else-if="bids.length === 0">{{ $t('pages.names.auctions.not-found') }}</p>
+    <p v-else-if="bids.length === 0">
+      {{ $t('pages.names.auctions.not-found') }}
+    </p>
     <template v-else>
       <div class="section-title">
         {{ $t('pages.names.auctions.expires') }}
         {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
       </div>
 
-      <div class="section-title">{{ $t('pages.names.auctions.current-bid') }}</div>
+      <div class="section-title">
+        {{ $t('pages.names.auctions.current-bid') }}
+      </div>
 
       <NameRow :address="currentBid.accountId">
-        <div class="name">{{ currentBid.nameFee.toFixed(3) }} {{ $t('ae') }}</div>
+        <div class="name">
+          {{ currentBid.nameFee.toFixed(3) }} {{ $t('ae') }}
+        </div>
         <span class="address">{{ currentBid.accountId }}</span>
       </NameRow>
 
       <template v-if="previousBids">
-        <div class="section-title">{{ $t('pages.names.auctions.previous-bids') }}</div>
-        <NameRow v-for="(bid, idx) in previousBids" :key="idx" :address="bid.accountId">
-          <div class="name">{{ bid.nameFee.toFixed(3) }} {{ $t('ae') }}</div>
+        <div class="section-title">
+          {{ $t('pages.names.auctions.previous-bids') }}
+        </div>
+        <NameRow
+          v-for="(bid, idx) in previousBids"
+          :key="idx"
+          :address="bid.accountId"
+        >
+          <div class="name">
+            {{ bid.nameFee.toFixed(3) }} {{ $t('ae') }}
+          </div>
           <span class="address">{{ bid.accountId }}</span>
         </NameRow>
       </template>
     </template>
-    <Button extend :to="{ name: 'auction-bid', params: { name } }">
+    <Button
+      extend
+      :to="{ name: 'auction-bid', params: { name } }"
+    >
       {{ $t('pages.names.auctions.bidding') }}
     </Button>
   </div>
@@ -37,6 +54,7 @@ import Button from '../../components/Button';
 
 export default {
   components: { NameRow, Button },
+  filters: { blocksToRelativeTime },
   props: {
     name: { type: String, required: true },
   },
@@ -57,7 +75,6 @@ export default {
       return this.bids.filter((bid) => bid !== this.currentBid);
     },
   },
-  filters: { blocksToRelativeTime },
   async mounted() {
     const id = setInterval(() => this.updateAuctionEntry(), 3000);
     this.$once('hook:destroyed', () => clearInterval(id));

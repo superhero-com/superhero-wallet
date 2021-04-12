@@ -2,16 +2,28 @@
   <div class="details-item">
     <div class="label">
       {{ label }}
-      <span v-if="$slots.label" :class="{ indent: label }">
+      <span
+        v-if="$slots.label"
+        :class="{ indent: label }"
+      >
         <slot name="label" />
       </span>
     </div>
-    <div class="value" :class="{ small, highlight }">
+    <div
+      class="value"
+      :class="{ small, highlight }"
+    >
       {{ value }}
-      <span class="secondary" v-if="secondary">
+      <span
+        v-if="secondary"
+        class="secondary"
+      >
         {{ secondary }}
       </span>
-      <slot v-if="$slots.value" name="value" />
+      <slot
+        v-if="$slots.value"
+        name="value"
+      />
     </div>
   </div>
 </template>

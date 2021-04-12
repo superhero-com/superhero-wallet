@@ -1,13 +1,22 @@
 <template>
   <div class="notifications">
     <div class="tabs">
-      <button :class="{ active: direction === '' }" @click="direction = ''">
+      <button
+        :class="{ active: direction === '' }"
+        @click="direction = ''"
+      >
         {{ $t('pages.notifications.all') }}
       </button>
-      <button :class="{ active: direction === 'superhero' }" @click="direction = 'superhero'">
+      <button
+        :class="{ active: direction === 'superhero' }"
+        @click="direction = 'superhero'"
+      >
         {{ $t('pages.notifications.superhero') }}
       </button>
-      <button :class="{ active: direction === 'wallet' }" @click="direction = 'wallet'">
+      <button
+        :class="{ active: direction === 'wallet' }"
+        @click="direction = 'wallet'"
+      >
         {{ $t('pages.notifications.wallet') }}
       </button>
     </div>
@@ -45,15 +54,13 @@ export default {
     filteredNotifications() {
       return [...this.observableNotifications, ...this.notifications]
         .filter(
-          (n) =>
-            this.direction === '' ||
-            (this.direction === 'superhero' && n.type !== 'wallet') ||
-            (this.direction === 'wallet' && n.type === 'wallet'),
+          (n) => this.direction === ''
+            || (this.direction === 'superhero' && n.type !== 'wallet')
+            || (this.direction === 'wallet' && n.type === 'wallet'),
         )
         .filter(
-          (n) =>
-            n.status === 'READ' ||
-            this.notificationSettings
+          (n) => n.status === 'READ'
+            || this.notificationSettings
               .filter((s) => s.checked)
               .map((s) => s.type)
               .includes(n.type),

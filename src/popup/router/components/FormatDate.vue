@@ -1,5 +1,8 @@
 <template>
-  <time :datetime="isoFormattedDateAndTime" :title="wholeDateAndTime">
+  <time
+    :datetime="isoFormattedDateAndTime"
+    :title="wholeDateAndTime"
+  >
     {{ formatDate }}
   </time>
 </template>

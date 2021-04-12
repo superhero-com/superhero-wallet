@@ -1,21 +1,49 @@
 <template>
-  <flickity class="menu-carousel" ref="flickity" :options="flickityOptions">
-    <BoxButton to="/tokens" :text="$t('pages.titles.balances')">
+  <flickity
+    ref="flickity"
+    class="menu-carousel"
+    :options="flickityOptions"
+  >
+    <BoxButton
+      to="/tokens"
+      :text="$t('pages.titles.balances')"
+    >
       <Balances slot="icon" />
     </BoxButton>
-    <BoxButton to="/send" :text="$t('pages.titles.payments')" class="tour__step7" data-cy="send">
+    <BoxButton
+      to="/send"
+      :text="$t('pages.titles.payments')"
+      class="tour__step7"
+      data-cy="send"
+    >
       <Payments slot="icon" />
     </BoxButton>
-    <BoxButton to="/tip" :text="$t('pages.titles.tips')" class="tour__step2" data-cy="tip-button">
+    <BoxButton
+      to="/tip"
+      :text="$t('pages.titles.tips')"
+      class="tour__step2"
+      data-cy="tip-button"
+    >
       <Tips slot="icon" />
     </BoxButton>
-    <BoxButton to="/transactions" :text="$t('pages.titles.tx-history')" class="tour__step5">
+    <BoxButton
+      to="/transactions"
+      :text="$t('pages.titles.tx-history')"
+      class="tour__step5"
+    >
       <Activity slot="icon" />
     </BoxButton>
-    <BoxButton to="/names" :text="$t('pages.titles.names')" class="cell">
+    <BoxButton
+      to="/names"
+      :text="$t('pages.titles.names')"
+      class="cell"
+    >
       <Names slot="icon" />
     </BoxButton>
-    <BoxButton to="/invite" :text="$t('pages.titles.invite')">
+    <BoxButton
+      to="/invite"
+      :text="$t('pages.titles.invite')"
+    >
       <Invites slot="icon" />
     </BoxButton>
   </flickity>

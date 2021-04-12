@@ -4,8 +4,8 @@
     :placeholder="placeholder"
     :class="{ error: error || err, [size]: size }"
     :value="value"
-    @input="$emit('input', $event.target.value)"
     data-cy="textarea"
+    @input="$emit('input', $event.target.value)"
   />
 </template>
 

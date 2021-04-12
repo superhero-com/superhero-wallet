@@ -4,16 +4,22 @@
     :to="{ name: 'tx-details', params: { hash: transaction.hash } }"
   >
     <div class="left">
-      <Pending v-if="transaction.pending" class="icon" />
+      <Pending
+        v-if="transaction.pending"
+        class="icon"
+      />
       <TokenAmount
         :amount="getTxAmountTotal(transaction)"
         :symbol="getTxSymbol(transaction)"
         :direction="getTxDirection(transaction)"
-        :altText="getTxType(transaction)"
+        :alt-text="getTxType(transaction)"
         data-cy="amount"
       />
     </div>
-    <div class="right" v-if="!transaction.pending">
+    <div
+      v-if="!transaction.pending"
+      class="right"
+    >
       <span data-cy="date">{{ transaction.microTime | formatDate }}</span>
       <span data-cy="time">{{ transaction.microTime | formatTime }}</span>
     </div>
@@ -28,15 +34,15 @@ import TokenAmount from './TokenAmount';
 
 export default {
   components: { TokenAmount, Pending },
+  filters: {
+    formatDate,
+    formatTime,
+  },
   props: {
     transaction: {
       type: Object,
       required: true,
     },
-  },
-  filters: {
-    formatDate,
-    formatTime,
   },
   computed: mapGetters([
     'getTxAmountTotal',

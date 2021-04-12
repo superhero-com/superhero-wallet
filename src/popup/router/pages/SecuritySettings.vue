@@ -12,7 +12,10 @@
       <h3>{{ $t('pages.securitySettings.seedPhrase') }}</h3>
       <ae-panel class="mnemonics">
         <p>{{ mnemonic }}</p>
-        <ae-button face="toolbar" v-clipboard:copy="mnemonic">
+        <ae-button
+          v-clipboard:copy="mnemonic"
+          face="toolbar"
+        >
           <ae-icon name="copy" />
           {{ $t('pages.securitySettings.copy') }}
         </ae-button>
@@ -32,9 +35,9 @@
       <h3>{{ $t('pages.seedPhrase.confirmSeedPhrase') }}</h3>
       <ae-phraser>
         <ae-badge
-          :class="{ selected: selectedWordIds.includes(index) }"
           v-for="(word, index) in mnemonicShuffled"
           :key="index"
+          :class="{ selected: selectedWordIds.includes(index) }"
           @click.native="!selectedWordIds.includes(index) && selectedWordIds.push(index)"
         >
           {{ word }}
@@ -43,14 +46,22 @@
       {{ $t('pages.seedPhrase.recoveryPhrase') }}
       <ae-phraser :error="error">
         <template v-if="selectedWordIds.length === 0">
-          <ae-badge class="selected">{{ $t('pages.seedPhrase.first') }}</ae-badge>
-          <ae-badge class="selected">{{ $t('pages.seedPhrase.second') }}</ae-badge>
-          <ae-badge class="selected">{{ $t('pages.seedPhrase.third') }}</ae-badge>
-          <ae-badge class="selected">...</ae-badge>
+          <ae-badge class="selected">
+            {{ $t('pages.seedPhrase.first') }}
+          </ae-badge>
+          <ae-badge class="selected">
+            {{ $t('pages.seedPhrase.second') }}
+          </ae-badge>
+          <ae-badge class="selected">
+            {{ $t('pages.seedPhrase.third') }}
+          </ae-badge>
+          <ae-badge class="selected">
+            ...
+          </ae-badge>
         </template>
         <ae-badge
-          v-else
           v-for="(id, index) in selectedWordIds"
+          v-else
           :key="id"
           @click.native="selectedWordIds.splice(index, 1)"
         >

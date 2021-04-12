@@ -1,11 +1,24 @@
 <template>
   <div class="accounts">
     <div class="temp">
-      <AccountCard :account-idx="0" v-bind="accounts[0]" />
+      <AccountCard
+        :account-idx="0"
+        v-bind="accounts[0]"
+      />
     </div>
-    <div class="card-wrapper" v-for="(account, idx) in accounts.slice(1)" :key="idx + 1">
-      <AccountCard :account-idx="idx + 1" v-bind="account" />
-      <CheckBox :value="account.showed" @input="toggleAccountShowed(account.showed, idx + 1)">
+    <div
+      v-for="(account, idx) in accounts.slice(1)"
+      :key="idx + 1"
+      class="card-wrapper"
+    >
+      <AccountCard
+        :account-idx="idx + 1"
+        v-bind="account"
+      />
+      <CheckBox
+        :value="account.showed"
+        @input="toggleAccountShowed(account.showed, idx + 1)"
+      >
         {{ $t('pages.accounts.showWallet') }}
       </CheckBox>
     </div>

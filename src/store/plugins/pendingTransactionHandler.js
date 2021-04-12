@@ -1,5 +1,7 @@
 export default async (store) => {
-  const waitTransactionMined = async ({ hash, type, amount, tipUrl, recipientId }) => {
+  const waitTransactionMined = async ({
+    hash, type, amount, tipUrl, recipientId,
+  }) => {
     try {
       const transaction = await store.state.sdk.poll(hash);
       switch (type) {

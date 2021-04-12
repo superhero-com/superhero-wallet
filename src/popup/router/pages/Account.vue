@@ -11,7 +11,10 @@
           {{ $t('pages.account.backup') }}
         </RouterLink>
       </i18n>
-      <AccountSwitcher :notification="!backedUpSeed" class="tour__step1" />
+      <AccountSwitcher
+        :notification="!backedUpSeed"
+        class="tour__step1"
+      />
       <MenuCarousel />
     </Plate>
     <RecentTransactions />

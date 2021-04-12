@@ -10,14 +10,17 @@
   >
     <Header @toggle-sidebar="showSidebar = !showSidebar" />
 
-    <RouterView :class="{ 'show-header': showStatusAndHeader }" class="main" />
+    <RouterView
+      :class="{ 'show-header': showStatusAndHeader }"
+      class="main"
+    />
 
     <transition name="slide">
       <div
-        class="menu-overlay"
         v-if="showSidebar"
-        @click.self="showSidebar = false"
+        class="menu-overlay"
         data-cy="menu-overlay"
+        @click.self="showSidebar = false"
       >
         <SidebarMenu @close="showSidebar = false" />
       </div>

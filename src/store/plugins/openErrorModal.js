@@ -6,5 +6,4 @@ export default (s) => {
   store = s;
 };
 
-export const openErrorModal = (entry) =>
-  store?.dispatch('modals/open', { name: 'error-log', entry }).catch(handleUnknownError);
+export const openErrorModal = (entry) => store?.dispatch('modals/open', { name: 'error-log', entry }).catch(handleUnknownError);

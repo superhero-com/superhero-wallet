@@ -3,9 +3,15 @@
     <p class="primary-title text-left mb-8 f-16">
       {{ $t('pages.claimTips.urlToClaim') }}
     </p>
-    <InputField v-model="url" :error="!normalizedUrl" />
+    <InputField
+      v-model="url"
+      :error="!normalizedUrl"
+    />
 
-    <Button @click="claimTips" :disabled="!normalizedUrl || !tippingSupported">
+    <Button
+      :disabled="!normalizedUrl || !tippingSupported"
+      @click="claimTips"
+    >
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button :to="{ name: 'account' }">
@@ -70,12 +76,10 @@ export default {
         if (error.includes('MORE_ORACLES_NEEDED')) msg = this.$t('pages.claim.moreOracles');
         else if (error.includes('URL_NOT_EXISTING')) msg = this.$t('pages.claim.urlNotExisting');
         else if (
-          error.includes('NO_ZERO_AMOUNT_PAYOUT') ||
-          e.message.includes('NO_ZERO_AMOUNT_PAYOUT')
-        )
-          msg = this.$t('pages.claim.noZeroClaim');
-        else if (error.includes('ORACLE_SEVICE_CHECK_CLAIM_FAILED'))
-          msg = this.$t('pages.claim.oracleFailed');
+          error.includes('NO_ZERO_AMOUNT_PAYOUT')
+          || e.message.includes('NO_ZERO_AMOUNT_PAYOUT')
+        ) msg = this.$t('pages.claim.noZeroClaim');
+        else if (error.includes('ORACLE_SEVICE_CHECK_CLAIM_FAILED')) msg = this.$t('pages.claim.oracleFailed');
         else if (error) msg = error;
         if (msg) this.$store.dispatch('modals/open', { name: 'default', msg });
         else {

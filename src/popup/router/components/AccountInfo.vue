@@ -1,24 +1,58 @@
 <template>
   <div :class="['account-info', { edit, copied }]">
     <div class="account-buttons">
-      <button v-if="idx !== 0 && $route.path === '/accounts'" class="remove" @click="remove">
+      <button
+        v-if="idx !== 0 && $route.path === '/accounts'"
+        class="remove"
+        @click="remove"
+      >
         <Remove />
       </button>
-      <RouterLink v-if="$route.path !== '/accounts'" to="/accounts"><Settings /></RouterLink>
-      <button v-if="idx === 0" @click="createAccount">
+      <RouterLink
+        v-if="$route.path !== '/accounts'"
+        to="/accounts"
+      >
+        <Settings />
+      </RouterLink>
+      <button
+        v-if="idx === 0"
+        @click="createAccount"
+      >
         <Add />
       </button>
-      <button data-cy="copy" @click="copy" v-clipboard:copy="accounts[idx].address">
+      <button
+        v-clipboard:copy="accounts[idx].address"
+        data-cy="copy"
+        @click="copy"
+      >
         <Copy />
       </button>
     </div>
     <div class="title">
-      <Avatar :address="accounts[idx].address" :name="accounts[idx].name" />
-      <div class="account-name" data-cy="account-name">
-        <a v-if="accounts[idx].name" :href="explorerUrl" target="_blank">
-          <TruncateMid :str="accounts[idx].name" class="chainname" />
+      <Avatar
+        :address="accounts[idx].address"
+        :name="accounts[idx].name"
+      />
+      <div
+        class="account-name"
+        data-cy="account-name"
+      >
+        <a
+          v-if="accounts[idx].name"
+          :href="explorerUrl"
+          target="_blank"
+        >
+          <TruncateMid
+            :str="accounts[idx].name"
+            class="chainname"
+          />
         </a>
-        <router-link v-else to="/names" data-cy="claim-name" class="claim-chainname">
+        <router-link
+          v-else
+          to="/names"
+          data-cy="claim-name"
+          class="claim-chainname"
+        >
           {{ $t('pages.account.claim-name') }}
         </router-link>
         <div class="account-type-name">
@@ -26,23 +60,43 @@
             <span class="text-ellipsis">
               {{ accounts[idx].localName }}
             </span>
-            <button v-if="idx !== 0 && $route.path === '/accounts'" @click="editLocalName">
+            <button
+              v-if="idx !== 0 && $route.path === '/accounts'"
+              @click="editLocalName"
+            >
               <Edit />
             </button>
           </template>
           <template v-else>
-            <input v-model="customAccountName" :maxlength="maxCustomNameLength" type="text" />
-            <button class="save" @click="saveLocalName(customAccountName)"><Save /></button>
+            <input
+              v-model="customAccountName"
+              :maxlength="maxCustomNameLength"
+              type="text"
+            >
+            <button
+              class="save"
+              @click="saveLocalName(customAccountName)"
+            >
+              <Save />
+            </button>
           </template>
         </div>
         <!-- eslint-disable-next-line vue-i18n/no-raw-text-->
         <label v-if="edit">{{ customAccountName.length }}/{{ maxCustomNameLength }}</label>
       </div>
     </div>
-    <a v-if="!copied" :href="explorerUrl" target="_blank" class="ae-address">
+    <a
+      v-if="!copied"
+      :href="explorerUrl"
+      target="_blank"
+      class="ae-address"
+    >
       {{ accounts[idx].address }}
     </a>
-    <div v-else class="copied">
+    <div
+      v-else
+      class="copied"
+    >
       <span />
       <span class="text">{{ $t('pages.account.address-copied') }}</span>
       <span />
@@ -62,7 +116,9 @@ import Edit from '../../../icons/account-card/btn-edit.svg?vue-component';
 import Save from '../../../icons/account-card/btn-save.svg?vue-component';
 
 export default {
-  components: { Avatar, Add, Copy, Settings, Remove, Edit, Save, TruncateMid },
+  components: {
+    Avatar, Add, Copy, Settings, Remove, Edit, Save, TruncateMid,
+  },
   props: {
     accountIdx: { type: Number, default: -1 },
   },

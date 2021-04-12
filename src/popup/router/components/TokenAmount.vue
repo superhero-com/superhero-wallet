@@ -1,8 +1,14 @@
 <template>
-  <span class="token-amount" :class="[direction, { large }]">
+  <span
+    class="token-amount"
+    :class="[direction, { large }]"
+  >
     {{ amountRounded }}
     <span class="symbol">{{ symbol }}</span>
-    <span v-if="text" class="text">{{ text }}</span>
+    <span
+      v-if="text"
+      class="text"
+    >{{ text }}</span>
   </span>
 </template>
 

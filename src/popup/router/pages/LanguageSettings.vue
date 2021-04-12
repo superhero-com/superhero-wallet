@@ -1,23 +1,35 @@
 <template>
   <div class="language-settings">
     <h4>{{ $t('pages.languageSettings.switchLanguage') }}</h4>
-    <hr />
+    <hr>
     <small>
       {{ $t('pages.languageSettings.currentLanguage') }}:
       {{ active.name || 'en' }}
     </small>
     <div class="settings">
-      <div class="dropdown" :class="{ show: dropdown }">
-        <Button extend @click="dropdown = !dropdown">
+      <div
+        class="dropdown"
+        :class="{ show: dropdown }"
+      >
+        <Button
+          extend
+          @click="dropdown = !dropdown"
+        >
           <ae-icon name="globe" />
           {{ $t('pages.languageSettings.switchLanguage') }}
           <ae-icon name="left-more" />
         </Button>
 
         <ul class="sub-dropdown">
-          <li v-for="{ code, name } in list" :key="code">
-            <div @click="switchLanguage(code)" :class="{ active: active == name }">
-              <img :src="flag(code)" />
+          <li
+            v-for="{ code, name } in list"
+            :key="code"
+          >
+            <div
+              :class="{ active: active == name }"
+              @click="switchLanguage(code)"
+            >
+              <img :src="flag(code)">
               <span>{{ name }}</span>
             </div>
           </li>

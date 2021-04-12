@@ -1,17 +1,25 @@
 <template>
-  <Modal @close="resolve" close>
+  <Modal
+    close
+    @close="resolve"
+  >
     <template slot="header">
       {{ $t('modals.error-log.title') }}
     </template>
 
-    <div class="error-msg">{{ message }}...</div>
+    <div class="error-msg">
+      {{ message }}...
+    </div>
     <div>
       <span>{{ $t('modals.error-log.sub-title') }}</span>
       {{ $t('modals.error-log.content') }}
     </div>
 
     <template slot="footer">
-      <Button dark @click="cancel">
+      <Button
+        dark
+        @click="cancel"
+      >
         {{ $t('modals.cancel') }}
       </Button>
       <Button @click="createReport">
@@ -26,12 +34,12 @@ import Modal from '../Modal';
 import Button from '../Button';
 
 export default {
+  components: { Modal, Button },
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
     entry: { type: Object, required: true },
   },
-  components: { Modal, Button },
   computed: {
     message() {
       const { message = '' } = this.entry.error;

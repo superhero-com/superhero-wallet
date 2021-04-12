@@ -139,7 +139,7 @@ const getConfig = (platform) => {
             ),
           ]
         : []),
-      ...(process.env.HMR === 'true' && !process.env.RUNNING_IN_TESTS
+      ...(process.env.HMR === 'true' && !process.env.RUNNING_IN_TESTS && platform === 'extension'
         ? [new ChromeExtensionReloader({ port: 9099 })]
         : []),
       new CopyWebpackPlugin({

@@ -1,7 +1,14 @@
 <template>
-  <div class="three-dots" :class="{ active: showMenu }" @click="showMenu = !showMenu">
+  <div
+    class="three-dots"
+    :class="{ active: showMenu }"
+    @click="showMenu = !showMenu"
+  >
     •••
-    <SmallModal v-if="showMenu" @close="showMenu = false">
+    <SmallModal
+      v-if="showMenu"
+      @close="showMenu = false"
+    >
       <slot />
     </SmallModal>
   </div>

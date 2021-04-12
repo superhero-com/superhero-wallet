@@ -1,28 +1,43 @@
 <template>
   <div class="identicons-holder">
     <div class="from">
-      <Avatar :address="account.address" :name="account.name" />
+      <Avatar
+        :address="account.address"
+        :name="account.name"
+      />
       <span class="account-address">{{ account.name || account.localName }}</span>
     </div>
     <div class="arrow-separator">
       <ae-icon name="left-more" />
     </div>
-    <div class="to" v-if="!showAddress">
+    <div
+      v-if="!showAddress"
+      class="to"
+    >
       <Avatar :address="receiver" />
       <ae-address
-        :value="receiver"
         v-if="receiver"
+        :value="receiver"
         length="short"
         class="account-address"
         data-cy="address-receiver"
       />
-      <span v-else class="account-address">
+      <span
+        v-else
+        class="account-address"
+      >
         {{ $t('modals.confirm-transaction-sign.unknown') }}
       </span>
     </div>
-    <div v-else class="to">
+    <div
+      v-else
+      class="to"
+    >
       <ae-icon name="square" />
-      <span class="account-address" data-cy="receiver">
+      <span
+        class="account-address"
+        data-cy="receiver"
+      >
         {{
           txType === 'contractCreateTx'
             ? $t('modals.confirm-transaction-sign.contract-create')
@@ -39,12 +54,12 @@ import { OBJECT_ID_TX_TYPE, TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/sc
 import Avatar from './Avatar';
 
 export default {
+  components: { Avatar },
   props: {
     recipientId: { type: String, default: '' },
     contractId: { type: String, default: '' },
     tag: { type: String, required: true },
   },
-  components: { Avatar },
   computed: {
     ...mapGetters(['account']),
     receiver() {

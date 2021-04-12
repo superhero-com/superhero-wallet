@@ -22,17 +22,16 @@ const runContentScript = () => {
     window.location.href = redirectUrl;
   };
 
-  const sendToBackground = (method, params) =>
-    new Promise((resolve) => {
-      browser.runtime
-        .sendMessage({
-          jsonrpc: '2.0',
-          id: params.id || null,
-          method,
-          params,
-        })
-        .then((res) => resolve(res));
-    });
+  const sendToBackground = (method, params) => new Promise((resolve) => {
+    browser.runtime
+      .sendMessage({
+        jsonrpc: '2.0',
+        id: params.id || null,
+        method,
+        params,
+      })
+      .then((res) => resolve(res));
+  });
 
   sendToBackground('phishingCheck', { href: window.location.href });
 
@@ -104,7 +103,9 @@ const runContentScript = () => {
 
   // Handle message from background and redirect to page
   browser.runtime.onMessage.addListener(({ data }) => {
-    const { method, blocked, extUrl, host, uuid, href } = data;
+    const {
+      method, blocked, extUrl, host, uuid, href,
+    } = data;
     if (method === 'phishingCheck' && blocked) {
       redirectToWarning(host, href, extUrl);
     } else if (method === 'getAddresses') {

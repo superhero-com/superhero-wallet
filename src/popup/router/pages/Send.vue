@@ -14,37 +14,51 @@
           </p>
           <div :class="['d-flex', { 'error-below': form.address.length > 0 && !validAddress }]">
             <Textarea
+              v-model.trim="form.address"
               :type="address"
               data-cy="address"
               :error="form.address.length > 0 && !validAddress"
-              v-model.trim="form.address"
               placeholder="ak.. / name.chain"
               size="h-50"
             />
-            <div class="scan" data-cy="scan-button" @click="scan">
+            <div
+              class="scan"
+              data-cy="scan-button"
+              @click="scan"
+            >
               <QrIcon />
               <small>{{ $t('pages.send.scan') }}</small>
             </div>
           </div>
-          <div class="error" v-show="form.address.length > 0 && !validAddress">
+          <div
+            v-show="form.address.length > 0 && !validAddress"
+            class="error"
+          >
             {{ $t('pages.send.error') }}
           </div>
           <AmountSend
-            data-cy="amount-box"
             v-model="form.amount"
-            :amountError="form.amount.length > 0 && form.amount <= 0"
+            data-cy="amount-box"
+            :amount-error="form.amount.length > 0 && form.amount <= 0"
           />
           <div class="flex flex-align-center flex-justify-between">
-            <Button data-cy="reject-withdraw" half @click="$router.push('/account')">{{
-              $t('pages.send.cancel')
-            }}</Button>
+            <Button
+              data-cy="reject-withdraw"
+              half
+              @click="$router.push('/account')"
+            >
+              {{
+                $t('pages.send.cancel')
+              }}
+            </Button>
             <Button
               data-cy="review-withdraw"
               half
-              @click="step = 2"
               :disabled="!validAddress || !+form.amount || form.amount <= 0"
-              >{{ $t('pages.send.review') }}</Button
+              @click="step = 2"
             >
+              {{ $t('pages.send.review') }}
+            </Button>
           </div>
         </div>
       </div>
@@ -71,11 +85,15 @@
           />
           <InfoGroup :label="$t('pages.send.amount')">
             <div class="text-center">
-              <span data-cy="review-amount" class="amount"
-                >{{ parseFloat(form.amount).toFixed(3) }}
-                {{ selectedToken ? selectedToken.symbol : $t('ae') }}</span
+              <span
+                data-cy="review-amount"
+                class="amount"
+              >{{ parseFloat(form.amount).toFixed(3) }}
+                {{ selectedToken ? selectedToken.symbol : $t('ae') }}</span>
+              <span
+                v-if="!selectedToken"
+                class="currencyamount"
               >
-              <span v-if="!selectedToken" class="currencyamount">
                 ~
                 <span>
                   {{ formatCurrency((form.amount * currentCurrencyRate).toFixed(3)) }}
@@ -83,20 +101,33 @@
               </span>
             </div>
           </InfoGroup>
-          <Button data-cy="reivew-editTxDetails-button" @click="step = 1" extend>{{
-            $t('pages.send.editTxDetails')
-          }}</Button>
+          <Button
+            data-cy="reivew-editTxDetails-button"
+            extend
+            @click="step = 1"
+          >
+            {{
+              $t('pages.send.editTxDetails')
+            }}
+          </Button>
           <div class="flex flex-align-center flex-justify-between">
-            <Button data-cy="review-cancel-button" half @click="$router.push('/account')">{{
-              $t('pages.send.cancel')
-            }}</Button>
+            <Button
+              data-cy="review-cancel-button"
+              half
+              @click="$router.push('/account')"
+            >
+              {{
+                $t('pages.send.cancel')
+              }}
+            </Button>
             <Button
               data-cy="review-send-button"
               half
-              @click="send"
               :disabled="sdk ? false : true"
-              >{{ $t('pages.send.send') }}</Button
+              @click="send"
             >
+              {{ $t('pages.send.send') }}
+            </Button>
           </div>
         </div>
       </div>
@@ -111,13 +142,23 @@
             <span>{{ $t('pages.send.successalert') }}</span>
             <span class="secondary-text ml-5">
               {{ successTx.amount }}
-              {{ successTx.token ? availableTokens[successTx.token].symbol : $t('ae') }}</span
-            >
+              {{ successTx.token ? availableTokens[successTx.token].symbol : $t('ae') }}</span>
           </p>
-          <InfoGroup :value="successTx.to" :label="$t('pages.send.to')" />
-          <InfoGroup :value="successTx.from" :label="$t('pages.send.from')" />
-          <InfoGroup :value="successTx.hash" :label="$t('pages.send.hash')" />
-          <Button to="/account">{{ $t('pages.send.home') }}</Button>
+          <InfoGroup
+            :value="successTx.to"
+            :label="$t('pages.send.to')"
+          />
+          <InfoGroup
+            :value="successTx.from"
+            :label="$t('pages.send.from')"
+          />
+          <InfoGroup
+            :value="successTx.hash"
+            :label="$t('pages.send.hash')"
+          />
+          <Button to="/account">
+            {{ $t('pages.send.home') }}
+          </Button>
         </div>
       </div>
     </div>
@@ -130,7 +171,9 @@ import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import { calculateFee } from '../../utils/constants';
-import { checkAddress, checkAensName, aeToAettos, convertToken } from '../../utils/helper';
+import {
+  checkAddress, checkAensName, aeToAettos, convertToken,
+} from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
 import InfoGroup from '../components/InfoGroup';
 import Textarea from '../components/Textarea';
@@ -152,6 +195,7 @@ export default {
     AlertExclamination,
     InfoGroup,
   },
+  props: ['address', 'redirectstep', 'successtx'],
   data() {
     return {
       step: 1,
@@ -169,7 +213,6 @@ export default {
       },
     };
   },
-  props: ['address', 'redirectstep', 'successtx'],
   watch: {
     selectedToken() {
       this.fetchFee();
@@ -243,8 +286,8 @@ export default {
       if (this.form.amount <= 0) errorModalType = 'incorrect-amount';
       if (
         this.selectedToken
-          ? this.selectedToken.balance.comparedTo(this.form.amount) === -1 ||
-            this.balance.comparedTo(this.fee) === -1
+          ? this.selectedToken.balance.comparedTo(this.form.amount) === -1
+            || this.balance.comparedTo(this.fee) === -1
           : this.balance.comparedTo(this.fee.plus(this.form.amount)) === -1
       ) {
         errorModalType = 'insufficient-balance';

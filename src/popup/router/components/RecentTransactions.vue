@@ -1,25 +1,45 @@
 <template>
-  <div class="recent-transactions" :class="{ 'tour-bar': tourStartBar }">
+  <div
+    class="recent-transactions"
+    :class="{ 'tour-bar': tourStartBar }"
+  >
     <div class="header">
       <span class="title">{{ $t('pages.recentTransactions.title') }}</span>
-      <router-link to="/transactions" data-cy="view-all-transactions" class="view-all">
+      <router-link
+        to="/transactions"
+        data-cy="view-all-transactions"
+        class="view-all"
+      >
         <Activity class="icon" />
       </router-link>
     </div>
     <PendingTxs />
-    <div v-if="transactions.latest.length" class="transaction-list">
+    <div
+      v-if="transactions.latest.length"
+      class="transaction-list"
+    >
       <TransactionItem
         v-for="transaction in transactions.latest"
         :key="transaction.hash"
         :transaction="transaction"
       />
     </div>
-    <router-link v-if="transactions.latest.length > 6" to="/transactions" class="view-more">
+    <router-link
+      v-if="transactions.latest.length > 6"
+      to="/transactions"
+      class="view-more"
+    >
       <Visible class="icon" />
       <span class="text">{{ $t('pages.recentTransactions.viewMore') }}</span>
     </router-link>
-    <AnimatedSpinner v-if="loading" class="spinner" />
-    <div v-else-if="!transactions.latest.length && !transactions.pending.length" class="message">
+    <AnimatedSpinner
+      v-if="loading"
+      class="spinner"
+    />
+    <div
+      v-else-if="!transactions.latest.length && !transactions.pending.length"
+      class="message"
+    >
       <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
     </div>
   </div>
@@ -34,7 +54,9 @@ import PendingTxs from './PendingTxs';
 import TransactionItem from './TransactionItem';
 
 export default {
-  components: { PendingTxs, TransactionItem, Activity, Visible, AnimatedSpinner },
+  components: {
+    PendingTxs, TransactionItem, Activity, Visible, AnimatedSpinner,
+  },
   data() {
     return {
       polling: null,

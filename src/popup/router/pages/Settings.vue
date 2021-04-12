@@ -23,15 +23,19 @@
         :info="$t('pages.settings.tabPermissionsSettingsSmall')"
       />
       <PanelItem
-        @click="requestResetting"
         :title="$t('pages.settings.tabRemoveAccount')"
         :info="$t('pages.settings.tabRemoveAccountSmall')"
+        @click="requestResetting"
       />
       <PanelItem
         :title="$t('pages.settings.tabSaveErrorLog')"
         :info="$t('pages.settings.tabSaveErrorLogSmall')"
       >
-        <CheckBox slot="content" :value="saveErrorLog" @input="setSaveErrorLog" />
+        <CheckBox
+          slot="content"
+          :value="saveErrorLog"
+          @input="setSaveErrorLog"
+        />
       </PanelItem>
     </Panel>
   </div>

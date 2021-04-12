@@ -3,10 +3,15 @@
     <TokensListItem
       v-for="value in filteredResults"
       :key="value.contract || value.id"
-      :tokenData="value"
+      :token-data="value"
     />
   </div>
-  <div v-else class="tokens-msg">{{ $t('pages.fungible-tokens.no-results') }}</div>
+  <div
+    v-else
+    class="tokens-msg"
+  >
+    {{ $t('pages.fungible-tokens.no-results') }}
+  </div>
 </template>
 
 <script>
@@ -32,16 +37,15 @@ export default {
      * Returns the default aeternity meta information
      */
     aeternityToken() {
-      const aeInformation =
-        this.aePublicData && Object.keys(this.aePublicData).length > 0
-          ? {
-              ...this.aePublicData,
-              convertedBalance: this.tokenBalance,
-              symbol: 'AE',
-              balanceCurrency: this.balanceCurrency,
-              contract: 'aeternity',
-            }
-          : null;
+      const aeInformation = this.aePublicData && Object.keys(this.aePublicData).length > 0
+        ? {
+          ...this.aePublicData,
+          convertedBalance: this.tokenBalance,
+          symbol: 'AE',
+          balanceCurrency: this.balanceCurrency,
+          contract: 'aeternity',
+        }
+        : null;
       return aeInformation;
     },
     /**
@@ -66,11 +70,10 @@ export default {
         ? [...(this.aeternityToken ? [this.aeternityToken] : []), ...this.tokenBalances]
         : tokensInfo
       ).filter(
-        (token) =>
-          !searchTerm ||
-          token.symbol.toLowerCase().includes(searchTerm) ||
-          token.name.toLowerCase().includes(searchTerm) ||
-          token.contract.toLowerCase().includes(searchTerm),
+        (token) => !searchTerm
+          || token.symbol.toLowerCase().includes(searchTerm)
+          || token.name.toLowerCase().includes(searchTerm)
+          || token.contract.toLowerCase().includes(searchTerm),
       );
     },
   },

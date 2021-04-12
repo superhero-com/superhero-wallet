@@ -9,8 +9,7 @@ Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
 Cypress.Commands.add('openAex2Popup', (type, txType) => {
   const id = uuid();
   const params = `?id=${id}&type=${type}`;
-  const onBeforeLoad = () =>
-    txType ? browser.storage.local.set({ txType }) : browser.storage.local.remove('txType');
+  const onBeforeLoad = () => (txType ? browser.storage.local.set({ txType }) : browser.storage.local.remove('txType'));
   cy.visit(`extension/popup/popup${params}`, { onBeforeLoad })
     .get('[data-cy=popup-aex2]')
     .should('exist')
@@ -42,7 +41,8 @@ Cypress.Commands.add('openTerms', () => {
 });
 
 Cypress.Commands.add('enterSeedPhrase', (seed) => {
-  cy.get('textarea').clear().type(seed).get('[data-cy=import]').click();
+  cy.get('textarea').clear().type(seed).get('[data-cy=import]')
+    .click();
 });
 
 Cypress.Commands.add('openAndEnterSeedPhrase', (seed) => {
@@ -228,11 +228,10 @@ Cypress.Commands.add('enterAddress', (address) => {
 
 Cypress.Commands.add(
   'storageSet',
-  (key, value) =>
-    new Cypress.Promise(async (resolve) => {
-      await browser.storage.local.set({ [key]: value });
-      resolve();
-    }),
+  (key, value) => new Cypress.Promise(async (resolve) => {
+    await browser.storage.local.set({ [key]: value });
+    resolve();
+  }),
 );
 
 Cypress.Commands.add('urlEquals', (route) => {

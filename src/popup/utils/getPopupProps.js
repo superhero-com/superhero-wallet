@@ -4,25 +4,25 @@ import { buildTx } from './index';
 
 const internalPostMessage = process.env.RUNNING_IN_TESTS
   ? async ({ type }) => {
-      switch (type) {
-        case 'getProps': {
-          const { txType } = await browser.storage.local.get('txType');
-          if (txType) {
-            const props = popupProps.base;
-            props.transaction = buildTx(txType).txObject;
-            return props;
-          }
-          return popupProps[window.POPUP_TYPE];
+    switch (type) {
+      case 'getProps': {
+        const { txType } = await browser.storage.local.get('txType');
+        if (txType) {
+          const props = popupProps.base;
+          props.transaction = buildTx(txType).txObject;
+          return props;
         }
-        case 'resolve':
-        case 'reject':
-          window[type] = 'send';
-          break;
-        default:
-          throw new Error(`Unknown type: ${type}`);
+        return popupProps[window.POPUP_TYPE];
       }
-      return null;
+      case 'resolve':
+      case 'reject':
+        window[type] = 'send';
+        break;
+      default:
+        throw new Error(`Unknown type: ${type}`);
     }
+    return null;
+  }
   : postMessage;
 
 export default async () => {

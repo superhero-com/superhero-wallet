@@ -1,9 +1,22 @@
 <template>
-  <Component :is="to ? 'RouterLink' : 'button'" :to="to" @click="$emit('click')" class="panel-item">
+  <Component
+    :is="to ? 'RouterLink' : 'button'"
+    :to="to"
+    class="panel-item"
+    @click="$emit('click')"
+  >
     <span class="panel-item-title">{{ title }}</span>
-    <p class="panel-item-info">{{ info }}</p>
-    <slot v-if="$slots['content']" name="content" />
-    <i v-else class="panel-item-arrow-right" />
+    <p class="panel-item-info">
+      {{ info }}
+    </p>
+    <slot
+      v-if="$slots['content']"
+      name="content"
+    />
+    <i
+      v-else
+      class="panel-item-arrow-right"
+    />
   </Component>
 </template>
 
