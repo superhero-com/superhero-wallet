@@ -7,14 +7,11 @@
         tag="div"
         class="seed-backup-notification"
       >
-        <RouterLink :to="{ name: 'settings-security' }">{{
-          $t('pages.account.backup')
-        }}</RouterLink>
+        <RouterLink :to="{ name: 'settings-security' }">
+          {{ $t('pages.account.backup') }}
+        </RouterLink>
       </i18n>
-      <div class="tour__step1">
-        <AccountInfo />
-        <BalanceInfo />
-      </div>
+      <AccountSwitcher :notification="!backedUpSeed" class="tour__step1" />
       <MenuCarousel />
     </Plate>
     <RecentTransactions />
@@ -25,8 +22,7 @@
 import { mapState } from 'vuex';
 import Plate from '../components/Plate';
 import RecentTransactions from '../components/RecentTransactions';
-import BalanceInfo from '../components/BalanceInfo';
-import AccountInfo from '../components/AccountInfo';
+import AccountSwitcher from '../components/AccountSwitcher';
 import MenuCarousel from '../components/MenuCarousel';
 
 export default {
@@ -34,13 +30,10 @@ export default {
   components: {
     Plate,
     RecentTransactions,
-    BalanceInfo,
-    AccountInfo,
+    AccountSwitcher,
     MenuCarousel,
   },
-  computed: {
-    ...mapState(['tourRunning', 'backedUpSeed']),
-  },
+  computed: mapState(['tourRunning', 'backedUpSeed']),
 };
 </script>
 
@@ -55,9 +48,9 @@ export default {
   .seed-backup-notification {
     font-size: 14px;
     text-align: center;
-    margin-top: 20px;
+    margin-top: 2px;
     line-height: 14px;
-    color: $accent-color;
+    color: $color-green;
   }
 }
 </style>

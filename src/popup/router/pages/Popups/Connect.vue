@@ -12,7 +12,7 @@
       </div>
       <div class="identicon">
         <Avatar :address="account.address" :name="account.name" size="lg" />
-        <div class="account-name">{{ account.name || account.type }}</div>
+        <div class="account-name">{{ account.name || account.localName }}</div>
       </div>
     </div>
 
@@ -20,7 +20,7 @@
       <span class="secondary-text" data-cy="aepp">{{ app.host }} ({{ app.name }}) </span>
       {{ $t('pages.connectConfirm.websiteRequestconnect') }}
       <Avatar class="send-account-icon" :address="account.address" :name="account.name" />
-      {{ account.name || account.type }}
+      {{ account.name || account.localName }}
     </h2>
     <ul>
       <ae-list-item fill="neutral" class="permission-set">

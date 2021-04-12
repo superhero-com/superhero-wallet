@@ -1,6 +1,7 @@
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign';
 import About from '../pages/About';
 import Account from '../pages/Account';
+import Accounts from '../pages/Accounts';
 import Address from '../pages/Address';
 import ClaimTips from '../pages/ClaimTips';
 import CommentNew from '../pages/CommentNew';
@@ -57,6 +58,14 @@ export default [
     path: '/account',
     name: 'account',
     component: Account,
+  },
+  {
+    path: '/accounts',
+    name: 'accounts',
+    component: Accounts,
+    meta: {
+      title: 'accounts',
+    },
   },
   {
     name: 'popup-sign-tx',

@@ -11,6 +11,7 @@ import {
   aettosToAe,
   categorizeContractCallTxObject,
 } from '../popup/utils/helper';
+import { i18n } from './plugins/languages';
 
 const getHdWalletAccount = (wallet, accountIdx = 0) => {
   const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
@@ -22,14 +23,28 @@ const getHdWalletAccount = (wallet, accountIdx = 0) => {
 };
 
 export default {
-  account({ mnemonic }, getters) {
-    if (!mnemonic) return {}; // TODO: Return null
-    const account = getHdWalletAccount(generateHdWallet(mnemonicToSeed(mnemonic)));
-    return {
-      ...account,
-      name: getters['names/getDefault'](account.address),
-      type: 'Main account',
-    };
+  wallet({ mnemonic }) {
+    if (!mnemonic) return null;
+    return generateHdWallet(mnemonicToSeed(mnemonic));
+  },
+  accounts({ accs }, getters) {
+    if (!getters.wallet) return [];
+    return accs
+      .map(({ idx, ...acc }) => ({
+        idx,
+        ...acc,
+        ...getHdWalletAccount(getters.wallet, idx),
+      }))
+      .map(({ idx, localName, ...account }) => ({
+        idx,
+        ...account,
+        name: getters['names/getDefault'](account.address),
+        localName:
+          localName || (idx === 0 ? i18n.t('mainAccount') : i18n.t('subaccountName', { idx })),
+      }));
+  },
+  account({ accountSelectedIdx }, { accounts }) {
+    return accounts[accountSelectedIdx] || {}; // TODO: Return null
   },
   isLoggedIn: (state, { account }) => Object.keys(account).length > 0,
   currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,

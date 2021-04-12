@@ -1,6 +1,7 @@
-import { BehaviorSubject, timer } from 'rxjs';
+import { BehaviorSubject, timer, combineLatest } from 'rxjs';
 import { multicast, pluck, switchMap, map, filter } from 'rxjs/operators';
 import { refCountDelay } from 'rxjs-etc/operators';
+import { memoize } from 'lodash-es';
 import { asBigNumber } from '@aeternity/aepp-sdk/es/utils/bignumber';
 import {
   isNotFoundError,
@@ -28,25 +29,48 @@ export default (store) => {
       refCountDelay(1000),
     );
 
-  const balance$ = sdk$.pipe(
-    switchMap((sdk) => timer(0, 3000).pipe(map(() => sdk))),
-    switchMap((sdk) =>
-      sdk.balance(store.getters.account.address).catch((error) => {
-        if (!isNotFoundError(error)) {
-          handleUnknownError(error);
+  const getAccountBalance = memoize((address) =>
+    sdk$.pipe(
+      switchMap((sdk) => timer(0, 3000).pipe(map(() => sdk))),
+      switchMap((sdk) =>
+        sdk.balance(address).catch((error) => {
+          if (!isNotFoundError(error)) {
+            handleUnknownError(error);
+          }
+          return 0;
+        }),
+      ),
+      map((balanceAettos) => {
+        const balance = aettosToAe(balanceAettos);
+        if (balance !== getBalanceLocalStorage()) {
+          setBalanceLocalStorage(balance);
         }
-        return 0;
+        return asBigNumber(balance);
       }),
+      multicast(new BehaviorSubject(asBigNumber(getBalanceLocalStorage()))),
+      refCountDelay(1000),
     ),
-    map((balanceAettos) => {
-      const balance = aettosToAe(balanceAettos);
-      if (balance !== getBalanceLocalStorage()) {
-        setBalanceLocalStorage(balance);
-      }
-      return asBigNumber(balance);
-    }),
-    multicast(new BehaviorSubject(asBigNumber(getBalanceLocalStorage()))),
-    refCountDelay(1000),
+  );
+
+  const balance$ = watchAsObservable(
+    ({ accountSelectedIdx }, { accounts }) => accounts[accountSelectedIdx],
+    {
+      immediate: true,
+    },
+  ).pipe(
+    pluck('newValue'),
+    switchMap(({ address }) => getAccountBalance(address)),
+  );
+
+  const balances$ = watchAsObservable((state, getters) => getters.accounts, {
+    immediate: true,
+  }).pipe(
+    pluck('newValue'),
+    switchMap((acs) =>
+      acs.length
+        ? combineLatest(acs.map(({ address }) => getAccountBalance(address)))
+        : Promise.resolve([]),
+    ),
   );
 
   const normalizeNotification = ({ entityId, sourceId, entityType, sender, ...other }) => ({
@@ -71,6 +95,7 @@ export default (store) => {
   store.state.observables = {
     notifications: notifications$,
     balance: balance$,
+    balances: balances$,
     topBlockHeight: createSdkObservable(async (sdk) => (await sdk.topBlock()).height, 0),
     tokenBalance: watchAsObservable(
       ({ fungibleTokens: { selectedToken } }, tokens) => tokens?.[selectedToken]?.balance,

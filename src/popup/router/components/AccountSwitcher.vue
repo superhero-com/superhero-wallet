@@ -1,0 +1,124 @@
+<template>
+  <div class="account-switcher" :class="{ 'notification-above': notification }">
+    <div :class="['cards-wrapper', { 'menu-under': filteredAccounts.length > 1 }]" :style="cssVars">
+      <AccountCard
+        v-for="(account, idx) in filteredAccounts"
+        :key="account.address"
+        v-bind="account"
+        :account-idx="account.i"
+        :left="idx > 0 && filteredAccounts.length > 1"
+        :right="idx < filteredAccounts.length - 1"
+        @left="selectAccount(filteredAccounts[idx - 1].i)"
+        @right="selectAccount(filteredAccounts[idx + 1].i)"
+      />
+    </div>
+    <div v-if="filteredAccounts.length > 1" class="buttons">
+      <button
+        v-for="(account, idx) in filteredAccounts"
+        :key="idx"
+        @click="selectAccount(account.i)"
+        :class="{ selected: account.i === accountSelectedIdx }"
+      />
+    </div>
+  </div>
+</template>
+
+<script>
+import { mapState, mapGetters, mapMutations } from 'vuex';
+import AccountCard from './AccountCard';
+
+export default {
+  components: { AccountCard },
+  props: { notification: Boolean },
+  computed: {
+    ...mapState(['accountCount', 'accountSelectedIdx']),
+    ...mapGetters(['accounts']),
+    cssVars() {
+      return {
+        '--accountSelectedIdx': this.selectedCardNumber,
+        '--accountCount': this.filteredAccounts.length,
+      };
+    },
+    filteredAccounts() {
+      return this.accounts.map((a, index) => ({ ...a, i: index })).filter((a) => a.showed);
+    },
+    selectedCardNumber() {
+      return this.filteredAccounts.findIndex((a) => a.i === this.accountSelectedIdx);
+    },
+  },
+  methods: mapMutations(['selectAccount']),
+};
+</script>
+
+<style lang="scss" scoped>
+@import '../../../styles/variables';
+
+.account-switcher {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0 0 10px 10px;
+  padding-top: 32px;
+
+  &.notification-above {
+    margin-top: 16px;
+  }
+
+  .cards-wrapper {
+    display: flex;
+    width: calc(var(--accountCount) * (312px + 8px) + 24px + 24px);
+    margin-bottom: 16px;
+    transition: margin-left 0.5s ease-out;
+    margin-left: calc(var(--accountSelectedIdx) * (-312px - 8px));
+
+    .account-card {
+      margin-right: 8px;
+
+      &:first-of-type {
+        margin-left: 24px;
+      }
+
+      &:last-of-type {
+        margin-right: 24px;
+      }
+    }
+
+    &.menu-under {
+      margin-bottom: 8px;
+    }
+  }
+
+  .buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    button {
+      padding: 0;
+      width: 32px;
+      height: 16px;
+      background: $color-bg-3;
+      border: 1px solid $color-border;
+      box-sizing: border-box;
+      box-shadow: inset 0 0 6px rgb(0 0 0 / 25%);
+      border-radius: 8px;
+      cursor: pointer;
+      margin-right: 8px;
+
+      &:hover:not(.selected) {
+        border-color: $color-border-hover;
+      }
+
+      &:last-of-type {
+        margin-right: 0;
+      }
+
+      &.selected {
+        cursor: default;
+        background: radial-gradient(50% 50% at 50% 50%, #00fd9c 0%, rgba(0, 253, 156, 0.8) 100%);
+        border: 2px solid rgba(5, 87, 56);
+        box-shadow: 0 0 6px rgb(0 253 156 / 44%);
+      }
+    }
+  }
+}
+</style>

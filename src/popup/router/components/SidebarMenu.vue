@@ -10,7 +10,7 @@
         <div class="f-12" v-if="account.name" data-cy="chain-name">
           <TruncateMid :str="account.name" />
         </div>
-        <div class="account-type">{{ $t('mainAccount') }}</div>
+        <div class="account-type">{{ account.localName }}</div>
       </div>
     </div>
     <ul @click="$emit('close')">

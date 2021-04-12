@@ -2,6 +2,7 @@
   "ok": "OK",
   "ae": "AE",
   "mainAccount": "Main account",
+  "subaccountName": "Sub-account #{idx}",
   "onboarding": {
     "step_1": {
       "title": "Your Account Info",
@@ -76,6 +77,10 @@
       "title": "Are you sure you want to remove this account?",
       "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
     },
+    "removeSubaccount": {
+      "title": "Remove sub-account?",
+      "msg": "This sub-account will be removed from your wallet and deleted from storage. It will still remain stored on the blockchain and you will be able to restore it with your seed phrase. Make sure you have backed up your seed phrase before you proceed. This action cannot be undone!"
+    },
     "verified": {
       "title": "What is a \"Verified\" URL?",
       "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed easily."
@@ -91,6 +96,10 @@
     "not-secure": {
       "title": "Superhero Wallet is marking HTTP sites as \"Not secure\" - please, use URLs with HTTPS, only.",
       "msg": "The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
+    },
+    "switcherAccsLimit": {
+      "title": "Unable to show this account.",
+      "msg": "You've reached the limit of showed accounts, uncheck other account, if you want to show this one."
     },
     "confirm-tip": {
       "title": "Send Tip Confirmation",
@@ -222,6 +231,7 @@
       "tx-history": "Tx history",
       "payments": "Payments",
       "balances": "Balances",
+      "accounts": "Accounts",
       "tips": "Tips",
       "settings": "Settings",
       "language": "Language",
@@ -278,7 +288,11 @@
       "backup": "backup",
       "updateExtension": "New version available! Please update your extension.",
       "updateAvailable": "New version is available in the store!",
-      "claim-name": "Register a name"
+      "claim-name": "Claim your .chain name",
+      "address-copied": "Address copied"
+    },
+    "accounts": {
+      "showWallet": "Show on Wallet Home"
     },
     "claim": {
       "claim": "Claim tips",
