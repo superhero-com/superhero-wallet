@@ -5,15 +5,29 @@
     </DetailsItem>
 
     <DetailsItem>
-      <AmountSend v-if="txWithTotal.amount" :value="txWithTotal.amount" readonly />
+      <AmountSend
+        v-if="txWithTotal.amount"
+        :value="txWithTotal.amount"
+        readonly
+      />
     </DetailsItem>
 
-    <DetailsItem :label="$t('pages.signTransaction.fee')" data-cy="fee">
-      <div class="balance no-sign">{{ txWithTotal.fee.toFixed(7) }} {{ $t('ae') }}</div>
+    <DetailsItem
+      :label="$t('pages.signTransaction.fee')"
+      data-cy="fee"
+    >
+      <div class="balance no-sign">
+        {{ txWithTotal.fee.toFixed(7) }} {{ $t('ae') }}
+      </div>
     </DetailsItem>
 
-    <DetailsItem :label="$t('pages.signTransaction.total')" data-cy="total">
-      <div class="balance no-sign">{{ txWithTotal.total }} {{ $t('ae') }}</div>
+    <DetailsItem
+      :label="$t('pages.signTransaction.total')"
+      data-cy="total"
+    >
+      <div class="balance no-sign">
+        {{ txWithTotal.total }} {{ $t('ae') }}
+      </div>
     </DetailsItem>
 
     <template v-for="field in TX_FIELDS">

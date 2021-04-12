@@ -48,13 +48,11 @@ export default {
   },
   isLoggedIn: (state, { account }) => Object.keys(account).length > 0,
   currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,
-  convertToCurrency: (state, { currentCurrencyRate }) => (value) =>
-    +(currentCurrencyRate * value).toFixed(2),
+  convertToCurrency: (state, { currentCurrencyRate }) => (value) => +(currentCurrencyRate * value).toFixed(2),
   formatCurrency: ({ current: { currency } }) => (value) =>
     // TODO: Use the current language from i18n module
     new Intl.NumberFormat(navigator.language, { style: 'currency', currency }).format(value),
-  convertToCurrencyFormatted: (state, { convertToCurrency, formatCurrency }) => (value) =>
-    formatCurrency(convertToCurrency(value)),
+  convertToCurrencyFormatted: (state, { convertToCurrency, formatCurrency }) => (value) => formatCurrency(convertToCurrency(value)),
   minTipAmount: ({ currencies: { usd } }) => 0.01 / usd,
   networks({ userNetworks }) {
     return [
@@ -65,8 +63,7 @@ export default {
   activeNetwork({ current: { network } }, { networks }) {
     return networks[network];
   },
-  getProfileImage: (_, { activeNetwork }) => (address) =>
-    `${activeNetwork.backendUrl}/profile/image/${address}`,
+  getProfileImage: (_, { activeNetwork }) => (address) => `${activeNetwork.backendUrl}/profile/image/${address}`,
   getAvatar: () => (address) => `https://avatars.z52da5wt.xyz/${address}`,
   tippingSupported(state, { activeNetwork }) {
     return (
@@ -77,25 +74,22 @@ export default {
     const { endpoint, valid } = checkHashType(hash);
     return valid ? `${explorerUrl}/${endpoint}/${hash}` : null;
   },
-  getTx: ({ transactions }) => (hash) => {
-    return transactions.latest
-      .concat(transactions.pending.map((t) => ({ ...t, pending: true })))
-      .find((tx) => tx.hash === hash);
-  },
-  getTxType: (_, { getTxSymbol }) => (transaction) => {
-    return getTxSymbol(transaction) === 'AE' ? transaction.tx.type : null;
-  },
+  getTx: ({ transactions }) => (hash) => transactions.latest
+    .concat(transactions.pending.map((t) => ({ ...t, pending: true })))
+    .find((tx) => tx.hash === hash),
+  getTxType: (_, { getTxSymbol }) => (transaction) => (getTxSymbol(transaction) === 'AE' ? transaction.tx.type : null),
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
     return contractCallData ? availableTokens[contractCallData.token].symbol : 'AE';
   },
   getTxAmountTotal: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    if (contractCallData)
+    if (contractCallData) {
       return +convertToken(
         contractCallData.amount,
         -availableTokens[contractCallData.token].decimals,
       );
+    }
     return +aettosToAe(
       asBigNumber(
         // eslint-disable-next-line camelcase
@@ -103,21 +97,17 @@ export default {
       ).plus(transaction.fee || transaction.tx?.fee || 0),
     );
   },
-  getTxDirection: (_, { account: { address } }) => ({ tx }) => {
-    return ['senderId', 'accountId', 'ownerId', 'callerId'].map((key) => tx[key]).includes(address)
-      ? 'sent'
-      : 'received';
-  },
-  getTxTipUrl: () => (transaction) => {
-    return (
-      transaction.tipUrl ||
-      transaction.url ||
-      (!transaction.pending &&
-        !transaction.claim &&
-        transaction.tx.log?.[0] &&
-        decode(transaction.tx.log[0].data).toString()) ||
-      categorizeContractCallTxObject(transaction)?.url ||
-      ''
-    );
-  },
+  getTxDirection: (_, { account: { address } }) => ({ tx }) => (['senderId', 'accountId', 'ownerId', 'callerId'].map((key) => tx[key]).includes(address)
+    ? 'sent'
+    : 'received'),
+  getTxTipUrl: () => (transaction) => (
+    transaction.tipUrl
+      || transaction.url
+      || (!transaction.pending
+        && !transaction.claim
+        && transaction.tx.log?.[0]
+        && decode(transaction.tx.log[0].data).toString())
+      || categorizeContractCallTxObject(transaction)?.url
+      || ''
+  ),
 };

@@ -9,7 +9,9 @@
         :title="host"
       />
     </Panel>
-    <div v-else>{{ $t('pages.permissions.empty') }}</div>
+    <div v-else>
+      {{ $t('pages.permissions.empty') }}
+    </div>
   </div>
 </template>
 

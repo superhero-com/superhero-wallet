@@ -1,7 +1,11 @@
 <template>
   <div class="details-row">
-    <div class="title text-ellipsis">{{ label }}</div>
-    <div class="text">{{ text }}</div>
+    <div class="title text-ellipsis">
+      {{ label }}
+    </div>
+    <div class="text">
+      {{ text }}
+    </div>
   </div>
 </template>
 

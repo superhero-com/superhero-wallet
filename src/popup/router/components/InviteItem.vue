@@ -6,25 +6,70 @@
     </div>
     <div class="invite-link">
       <span>{{ link }}</span>
-      <div class="copied-alert" v-if="copied">{{ $t('pages.invite.copied') }}</div>
-      <button class="invite-link-copy" v-clipboard:success="copy" v-clipboard:copy="link">
+      <div
+        v-if="copied"
+        class="copied-alert"
+      >
+        {{ $t('pages.invite.copied') }}
+      </div>
+      <button
+        v-clipboard:success="copy"
+        v-clipboard:copy="link"
+        class="invite-link-copy"
+      >
         <CopyIcon />
       </button>
     </div>
-    <div class="centered-buttons" v-if="!topUp">
-      <Button v-if="inviteLinkBalance > 0" bold @click="claim">{{
-        $t('pages.invite.claim')
-      }}</Button>
-      <Button v-else bold dark @click="deleteItem">{{ $t('pages.invite.delete') }}</Button>
-      <Button bold @click="topUp = true">{{ $t('pages.invite.top-up') }}</Button>
+    <div
+      v-if="!topUp"
+      class="centered-buttons"
+    >
+      <Button
+        v-if="inviteLinkBalance > 0"
+        bold
+        @click="claim"
+      >
+        {{
+          $t('pages.invite.claim')
+        }}
+      </Button>
+      <Button
+        v-else
+        bold
+        dark
+        @click="deleteItem"
+      >
+        {{ $t('pages.invite.delete') }}
+      </Button>
+      <Button
+        bold
+        @click="topUp = true"
+      >
+        {{ $t('pages.invite.top-up') }}
+      </Button>
     </div>
     <template v-else>
-      <AmountSend v-model="topUpAmount" :label="$t('pages.invite.top-up-with')" />
+      <AmountSend
+        v-model="topUpAmount"
+        :label="$t('pages.invite.top-up-with')"
+      />
       <div class="centered-buttons">
-        <Button bold dark @click="resetTopUpChanges">{{ $t('pages.invite.collapse') }}</Button>
-        <Button bold :disabled="!sufficientBalance" @click="sendTopUp">{{
-          $t('pages.invite.top-up')
-        }}</Button>
+        <Button
+          bold
+          dark
+          @click="resetTopUpChanges"
+        >
+          {{ $t('pages.invite.collapse') }}
+        </Button>
+        <Button
+          bold
+          :disabled="!sufficientBalance"
+          @click="sendTopUp"
+        >
+          {{
+            $t('pages.invite.top-up')
+          }}
+        </Button>
       </div>
     </template>
   </div>
@@ -41,13 +86,17 @@ import CopyIcon from '../../../icons/copy-old.svg?vue-component';
 import { formatDate } from '../../utils';
 
 export default {
+  components: {
+    TokenAmount, Button, AmountSend, CopyIcon,
+  },
+  filters: { formatDate },
   props: {
     secretKey: { type: String, required: true },
     createdAt: { type: Number, required: true },
   },
-  components: { TokenAmount, Button, AmountSend, CopyIcon },
-  filters: { formatDate },
-  data: () => ({ topUp: false, topUpAmount: 0, inviteLinkBalance: 0, copied: false }),
+  data: () => ({
+    topUp: false, topUpAmount: 0, inviteLinkBalance: 0, copied: false,
+  }),
   subscriptions() {
     return pick(this.$store.state.observables, ['balance']);
   },

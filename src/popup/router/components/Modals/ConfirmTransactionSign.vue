@@ -1,14 +1,27 @@
 <template>
-  <Modal class="confirm-tx-sign-modal" data-cy="popup-aex2">
-    <SignAccountIdenticons v-bind="transaction" slot="header" />
+  <Modal
+    class="confirm-tx-sign-modal"
+    data-cy="popup-aex2"
+  >
+    <SignAccountIdenticons
+      v-bind="transaction"
+      slot="header"
+    />
 
     <SignDetailsList :transaction="transaction" />
 
     <template slot="footer">
-      <Button dark @click="cancel()" data-cy="deny">
+      <Button
+        dark
+        data-cy="deny"
+        @click="cancel()"
+      >
         {{ $t('pages.signTransaction.reject') }}
       </Button>
-      <Button @click="resolve()" data-cy="accept">
+      <Button
+        data-cy="accept"
+        @click="resolve()"
+      >
         {{ $t('pages.signTransaction.confirm') }}
       </Button>
     </template>
@@ -23,8 +36,10 @@ import SignDetailsList from '../SignDetailsList';
 import mixin from '../../pages/Popups/mixin';
 
 export default {
+  components: {
+    Modal, Button, SignAccountIdenticons, SignDetailsList,
+  },
   mixins: [mixin],
-  components: { Modal, Button, SignAccountIdenticons, SignDetailsList },
   props: {
     transaction: { type: Object, required: true },
   },

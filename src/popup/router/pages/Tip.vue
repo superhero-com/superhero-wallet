@@ -17,43 +17,75 @@
         </template>
       </p>
 
-      <div class="url-bar" :class="editUrl ? 'url-bar--input' : 'url-bar--text'">
+      <div
+        class="url-bar"
+        :class="editUrl ? 'url-bar--input' : 'url-bar--text'"
+      >
         <template v-if="!editUrl">
-          <a class="link-sm text-left" data-cy="tip-url">
+          <a
+            class="link-sm text-left"
+            data-cy="tip-url"
+          >
             {{ url }}
           </a>
         </template>
-        <InputField v-else v-model="url" :placeholder="$t('pages.tipPage.enterUrl')">
-          <UrlStatus slot="left" :status="urlStatus" info />
+        <InputField
+          v-else
+          v-model="url"
+          :placeholder="$t('pages.tipPage.enterUrl')"
+        >
+          <UrlStatus
+            slot="left"
+            :status="urlStatus"
+            info
+          />
         </InputField>
       </div>
     </div>
     <div data-cy="tip-container">
       <template v-if="!confirmMode">
         <AmountSend v-model="amount" />
-        <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
+        <Textarea
+          v-model="note"
+          :placeholder="$t('pages.tipPage.titlePlaceholder')"
+          size="sm"
+        />
         <div class="validation-msg">
           {{ validationStatus.msg }}
         </div>
-        <Button @click="toConfirm" :disabled="validationStatus.error" bold data-cy="send-tip">
+        <Button
+          :disabled="validationStatus.error"
+          bold
+          data-cy="send-tip"
+          @click="toConfirm"
+        >
           {{ $t('pages.tipPage.next') }}
         </Button>
-        <Button bold @click="openCallbackOrGoHome(false)">
+        <Button
+          bold
+          @click="openCallbackOrGoHome(false)"
+        >
           {{ $t('pages.tipPage.cancel') }}
         </Button>
       </template>
       <template v-else>
-        <div class="tip-note-preview mt-15" data-cy="tip-note">
+        <div
+          class="tip-note-preview mt-15"
+          data-cy="tip-note"
+        >
           {{ note }}
         </div>
         <Button
-          @click="sendTip"
           :disabled="selectedToken ? !tippingV2 : !tippingV1"
           data-cy="confirm-tip"
+          @click="sendTip"
         >
           {{ $t('pages.tipPage.confirm') }}
         </Button>
-        <Button @click="toEdit" data-cy="edit-tip">
+        <Button
+          data-cy="edit-tip"
+          @click="toEdit"
+        >
           {{ $t('pages.tipPage.edit') }}
         </Button>
       </template>
@@ -68,7 +100,9 @@ import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import { calculateFee } from '../../utils/constants';
-import { escapeSpecialChars, aeToAettos, validateTipUrl, convertToken } from '../../utils/helper';
+import {
+  escapeSpecialChars, aeToAettos, validateTipUrl, convertToken,
+} from '../../utils/helper';
 import AmountSend from '../components/AmountSend';
 import Textarea from '../components/Textarea';
 import InputField from '../components/InputField';
@@ -79,7 +113,6 @@ import BalanceInfo from '../components/BalanceInfo';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
-  mixins: [deeplinkApi],
   components: {
     AmountSend,
     Textarea,
@@ -89,6 +122,7 @@ export default {
     TokenAmount,
     BalanceInfo,
   },
+  mixins: [deeplinkApi],
   props: { tipUrl: String },
   data() {
     return {
@@ -145,8 +179,8 @@ export default {
         });
         if (
           this.selectedToken
-            ? this.selectedToken.balance.comparedTo(this.amount) === -1 ||
-              this.balance.comparedTo(fee) === -1
+            ? this.selectedToken.balance.comparedTo(this.amount) === -1
+              || this.balance.comparedTo(fee) === -1
             : this.balance.comparedTo(fee.plus(this.amount)) === -1
         ) {
           return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };

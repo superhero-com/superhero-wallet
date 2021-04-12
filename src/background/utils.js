@@ -50,8 +50,7 @@ const getAddress = async (name) => {
   }
 };
 
-export const getAddressFromChainName = async (names) =>
-  Array.isArray(names) ? Promise.all(names.map(async (n) => getAddress(n))) : getAddress(names);
+export const getAddressFromChainName = async (names) => (Array.isArray(names) ? Promise.all(names.map(async (n) => getAddress(n))) : getAddress(names));
 
 export const getTippingContractInstance = async (tx) => {
   if (tippingContract) return tippingContract;

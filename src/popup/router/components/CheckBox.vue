@@ -6,8 +6,11 @@
       :type="type"
       :name="name"
       @change="$emit('input', $event.target.checked)"
+    >
+    <span
+      class="checkmark"
+      :class="{ checked: value, disabled }"
     />
-    <span class="checkmark" :class="{ checked: value, disabled }" />
     <slot class="checkbox-holder" />
   </label>
 </template>

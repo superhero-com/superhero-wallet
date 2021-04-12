@@ -26,7 +26,9 @@ import Tips from '../../../icons/sidebar-menu/tips.svg?vue-component';
 import Settings from '../../../icons/settings.svg?vue-component';
 
 export default {
-  components: { Home, Balances, Payments, Tips, Settings },
+  components: {
+    Home, Balances, Payments, Tips, Settings,
+  },
 };
 </script>
 

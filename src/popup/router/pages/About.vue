@@ -7,19 +7,28 @@
           :href="`https://github.com/aeternity/superhero-wallet/commit/${commitHash}`"
           target="_blank"
         >
-          {{ commitHash.slice(0, 7) }}</a
-        >
+          {{ commitHash.slice(0, 7) }}</a>
         / {{ extensionVersion }}
       </span>
     </p>
-    <hr />
+    <hr>
     <div class="waellet-links">
-      <router-link to="/about/termsOfService" data-cy="terms">{{
-        $t('pages.about.terms')
-      }}</router-link>
-      <router-link to="/about/privacyPolicy" data-cy="privacy">{{
-        $t('pages.about.privacyPolicy')
-      }}</router-link>
+      <router-link
+        to="/about/termsOfService"
+        data-cy="terms"
+      >
+        {{
+          $t('pages.about.terms')
+        }}
+      </router-link>
+      <router-link
+        to="/about/privacyPolicy"
+        data-cy="privacy"
+      >
+        {{
+          $t('pages.about.privacyPolicy')
+        }}
+      </router-link>
       <Button :to="BUG_REPORT_URL">
         {{ $t('pages.about.reportBug') }}
       </Button>

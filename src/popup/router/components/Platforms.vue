@@ -17,7 +17,7 @@
               :class="{ grey: !isFirefox() || IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/firefox.svg"
               alt="Firefox"
-            />
+            >
           </a>
           <a
             href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne"
@@ -27,7 +27,7 @@
               :class="{ grey: isFirefox() || IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/chrome.svg"
               alt="Chrome"
-            />
+            >
           </a>
         </div>
       </div>
@@ -36,12 +36,15 @@
           {{ $t('pages.index.platforms.mobile-app') }}
         </div>
         <div>
-          <a href="https://testflight.apple.com/join/3o5r4dQQ" target="_blank">
+          <a
+            href="https://testflight.apple.com/join/3o5r4dQQ"
+            target="_blank"
+          >
             <img
               :class="{ grey: !IS_IOS || !IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/app-store.svg"
               alt="App Store"
-            />
+            >
           </a>
           <a
             href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
@@ -51,7 +54,7 @@
               :class="{ grey: IS_IOS || !IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/google-play.svg"
               alt="Google Play"
-            />
+            >
           </a>
         </div>
       </div>

@@ -6,10 +6,8 @@
       <li class="first">
         <h3><strong>Introduction</strong></h3>
         <p>
-          <strong
-            >Superhero.com Establishment (&ldquo;Superhero&rdquo;, &ldquo;we&rdquo;,
-            &ldquo;us&rdquo;, &ldquo;our&rdquo; </strong
-          >or<strong> &ldquo;the company&rdquo;</strong>) is a company with seat and registered
+          <strong>Superhero.com Establishment (&ldquo;Superhero&rdquo;, &ldquo;we&rdquo;,
+            &ldquo;us&rdquo;, &ldquo;our&rdquo; </strong>or<strong> &ldquo;the company&rdquo;</strong>) is a company with seat and registered
           address at: Dr. Grass Str. 12, 9490 Vaduz, Liechtenstein, with email address for
           communication related to the <strong>Superhero Wallet</strong>:
           superherowallet@protonmail.com. <strong>Superhero</strong> is the company, which created
@@ -32,19 +30,22 @@
         </p>
         <p>
           1) downloaded as an add-on (extension) to Firefox:
-          <a href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/" target="_blank"
-            >https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/</a
-          >
+          <a
+            href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/"
+            target="_blank"
+          >https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/</a>
           ; to Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <a
             href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related"
             target="_blank"
-            >https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related</a
-          >;
+          >https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related</a>;
         </p>
         <p>
           2) accessed from any Browser at the address:
-          <a href="https://wallet.superhero.com/" target="_blank">https://wallet.superhero.com/</a>
+          <a
+            href="https://wallet.superhero.com/"
+            target="_blank"
+          >https://wallet.superhero.com/</a>
           ;
         </p>
         <p>
@@ -52,15 +53,15 @@
           <a
             href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
             target="_blank"
-            >https://play.google.com/store/apps/details?id=com.superhero.cordova</a
-          >
+          >https://play.google.com/store/apps/details?id=com.superhero.cordova</a>
           and
         </p>
         <p>
           from App Store:
-          <a href="https://testflight.apple.com/join/3o5r4dQQ" target="_blank"
-            >https://testflight.apple.com/join/3o5r4dQQ</a
-          >.
+          <a
+            href="https://testflight.apple.com/join/3o5r4dQQ"
+            target="_blank"
+          >https://testflight.apple.com/join/3o5r4dQQ</a>.
         </p>
         <p>
           If you have any questions regarding this <strong>Policy</strong>, please contact us at
@@ -121,19 +122,15 @@
       <li class="third">
         <h3><strong>Personal data collection disclaimer</strong></h3>
         <p>
-          <strong
-            >Please bear in mind that once the information or personal data under any form is
+          <strong>Please bear in mind that once the information or personal data under any form is
             submitted and written on the &AElig;ternity blockchain, it cannot be amended, corrected
             or deleted. Superhero cannot change, restore, delete or amend in any way the
             above-mentioned information and therefore, shall not be held liable in any way for the
-            collection of the information on the blockchain.</strong
-          >
+            collection of the information on the blockchain.</strong>
         </p>
         <p>
-          <strong
-            >The Wallet is a software solution which facilitates the peer-to-peer transfer of tokens
-            between USERS and their interaction with </strong
-          ><strong>&AElig;ternity</strong><strong> blockchain.</strong>
+          <strong>The Wallet is a software solution which facilitates the peer-to-peer transfer of tokens
+            between USERS and their interaction with </strong><strong>&AElig;ternity</strong><strong> blockchain.</strong>
           <strong>USERS</strong> understand and agree that <strong>Superhero</strong> does not
           determine the purposes and means of <strong>processing</strong> of
           <strong>personal data</strong> and does not conduct any

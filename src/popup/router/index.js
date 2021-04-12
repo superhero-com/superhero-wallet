@@ -80,9 +80,7 @@ router.afterEach(async (to) => {
   else await browser.storage.local.set({ [lastRouteKey]: to.path });
 });
 
-const deviceReadyPromise = new Promise((resolve) =>
-  document.addEventListener('deviceready', resolve),
-);
+const deviceReadyPromise = new Promise((resolve) => document.addEventListener('deviceready', resolve));
 
 const routerReadyPromise = new Promise((resolve) => {
   const unbindAfterEach = router.afterEach(() => {

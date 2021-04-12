@@ -11,10 +11,9 @@ export const formatDate = (time) =>
     day: '2-digit',
   });
 
-export const formatTime = (time) =>
-  new Date(+time).toLocaleTimeString(navigator.language, {
-    timeStyle: 'short',
-  });
+export const formatTime = (time) => new Date(+time).toLocaleTimeString(navigator.language, {
+  timeStyle: 'short',
+});
 
 export const getLoginState = async ({
   backedUpSeed,
@@ -42,13 +41,10 @@ export const getLoginState = async ({
 
 export const buildTx = (txtype) => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);
 
-export const deferPromised = (func, ...args) =>
-  new Promise((resolve, reject) =>
-    setTimeout(() => {
-      try {
-        resolve(func(...args));
-      } catch (error) {
-        reject(error);
-      }
-    }),
-  );
+export const deferPromised = (func, ...args) => new Promise((resolve, reject) => setTimeout(() => {
+  try {
+    resolve(func(...args));
+  } catch (error) {
+    reject(error);
+  }
+}));

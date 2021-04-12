@@ -5,7 +5,6 @@
       ...$attrs,
       ...(component === 'a' ? { href: to, target: '_blank' } : { to }),
     }"
-    v-on="$listeners"
     class="button"
     :class="[
       fill,
@@ -22,6 +21,7 @@
         bold,
       },
     ]"
+    v-on="$listeners"
   >
     <slot />
   </Component>
@@ -50,8 +50,8 @@ export default {
   computed: {
     isLinkOnSameHost() {
       return (
-        typeof this.to === 'object' ||
-        new URL(this.to, window.location).host === window.location.host
+        typeof this.to === 'object'
+        || new URL(this.to, window.location).host === window.location.host
       );
     },
     component() {

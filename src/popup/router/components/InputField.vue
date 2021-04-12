@@ -1,20 +1,30 @@
 <template>
   <div class="input-field">
-    <label class="label" v-if="label">
+    <label
+      v-if="label"
+      class="label"
+    >
       {{ label }}
     </label>
-    <div :class="{ error }" class="container" data-cy="input-wrapper">
-      <slot v-if="!error" name="left" />
+    <div
+      :class="{ error }"
+      class="container"
+      data-cy="input-wrapper"
+    >
+      <slot
+        v-if="!error"
+        name="left"
+      />
       <Error v-else />
       <input
         :type="type"
         class="input"
         :placeholder="placeholder"
         :value="value"
-        @input="$emit('input', $event.target.value)"
         :data-cy="type ? `input-${type}` : 'input'"
         :disabled="disabled"
-      />
+        @input="$emit('input', $event.target.value)"
+      >
       <slot name="right" />
     </div>
   </div>

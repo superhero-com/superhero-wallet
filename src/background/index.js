@@ -19,16 +19,17 @@ const postPhishingData = async (data) => {
   tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message).catch(console.log));
 };
 
-const openTipPopup = (pageUrl) =>
-  browser.windows.create({
-    url: browser.extension.getURL(`./popup/popup.html#/tip?url=${encodeURIComponent(pageUrl)}`),
-    type: 'popup',
-    height: 600,
-    width: 375,
-  });
+const openTipPopup = (pageUrl) => browser.windows.create({
+  url: browser.extension.getURL(`./popup/popup.html#/tip?url=${encodeURIComponent(pageUrl)}`),
+  type: 'popup',
+  height: 600,
+  width: 375,
+});
 
 browser.runtime.onMessage.addListener(async (msg, sender) => {
-  const { method, params, from, type, data, url: tipUrl } = msg;
+  const {
+    method, params, from, type, data, url: tipUrl,
+  } = msg;
 
   if (method === 'reload') {
     wallet.disconnect();
@@ -91,8 +92,7 @@ const contextMenuItem = {
 browser.webNavigation.onHistoryStateUpdated.addListener(async ({ tabId, url }) => {
   if (
     (({ origin, pathname }) => origin + pathname)(new URL(url)) !== 'https://www.youtube.com/watch'
-  )
-    return;
+  ) return;
   browser.tabs.executeScript(tabId, { file: 'other/youtube.js' });
 });
 

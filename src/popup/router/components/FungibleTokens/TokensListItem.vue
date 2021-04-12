@@ -24,7 +24,10 @@
         </div>
       </div>
       <div>
-        <TokenAmount :amount="+tokenData.convertedBalance || 0" :symbol="tokenData.symbol" />
+        <TokenAmount
+          :amount="+tokenData.convertedBalance || 0"
+          :symbol="tokenData.symbol"
+        />
         <div>
           <label>{{ $t('pages.fungible-tokens.price') }}</label>
           {{

@@ -1,7 +1,19 @@
 <template>
-  <InputField class="search-bar" v-bind="$attrs" v-on="$listeners" @input="$emit('input', $event)">
-    <Search slot="right" v-if="!$attrs.value" />
-    <Eraser slot="right" v-else @click="$emit('input', '')" />
+  <InputField
+    class="search-bar"
+    v-bind="$attrs"
+    v-on="$listeners"
+    @input="$emit('input', $event)"
+  >
+    <Search
+      v-if="!$attrs.value"
+      slot="right"
+    />
+    <Eraser
+      v-else
+      slot="right"
+      @click="$emit('input', '')"
+    />
   </InputField>
 </template>
 

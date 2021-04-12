@@ -1,9 +1,9 @@
 <template>
   <div class="tabs-menu">
     <button
-      :class="{ active: name === value }"
       v-for="{ text, name } in tabOptions"
       :key="name"
+      :class="{ active: name === value }"
       @click="$emit('input', name)"
     >
       {{ text }}

@@ -1,5 +1,8 @@
 <template>
-  <div class="details-item" :class="direction">
+  <div
+    class="details-item"
+    :class="direction"
+  >
     <label v-if="label">{{ label }}</label>
     <slot />
   </div>

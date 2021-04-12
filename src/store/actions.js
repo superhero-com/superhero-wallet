@@ -42,17 +42,15 @@ export default {
       dispatch('fetchPendingTransactions'),
       fetchJson(
         `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${
-          recent ? `&limit=${limit}` : ``
+          recent ? `&limit=${limit}` : ''
         }`,
       )
-        .then((response) =>
-          response.map(({ amount, ...t }) => ({
-            tx: { address, amount },
-            ...t,
-            microTime: t.time,
-            claim: true,
-          })),
-        )
+        .then((response) => response.map(({ amount, ...t }) => ({
+          tx: { address, amount },
+          ...t,
+          microTime: t.time,
+          claim: true,
+        })))
         .catch(() => []),
     ]);
     txs = orderBy(flatten(txs), ['microTime'], ['desc']);
@@ -112,10 +110,11 @@ export default {
     { state: { sdk }, getters: { activeNetwork } },
     [tipId, text, author, parentId],
   ) {
-    const sendComment = async (postParam) =>
-      postJson(`${activeNetwork.backendUrl}/comment/api/`, { body: postParam });
+    const sendComment = async (postParam) => postJson(`${activeNetwork.backendUrl}/comment/api/`, { body: postParam });
 
-    const responseChallenge = await sendComment({ tipId, text, author, parentId });
+    const responseChallenge = await sendComment({
+      tipId, text, author, parentId,
+    });
     const signedChallenge = Buffer.from(
       await sdk.signMessage(responseChallenge.challenge),
     ).toString('hex');
@@ -135,8 +134,7 @@ export default {
     },
     [notifId, status],
   ) {
-    const backendMethod = async (postParam) =>
-      postJson(`${activeNetwork.backendUrl}/notification/${notifId}`, { body: postParam });
+    const backendMethod = async (postParam) => postJson(`${activeNetwork.backendUrl}/notification/${notifId}`, { body: postParam });
 
     const responseChallenge = await backendMethod({ author: address, status });
     const signedChallenge = Buffer.from(
@@ -160,8 +158,7 @@ export default {
     [ids, status],
   ) {
     if (!ids.length) return;
-    const backendMethod = async (postParam) =>
-      postJson(`${activeNetwork.backendUrl}/notification`, { body: postParam });
+    const backendMethod = async (postParam) => postJson(`${activeNetwork.backendUrl}/notification`, { body: postParam });
 
     const responseChallenge = await backendMethod({ ids, status, author: address });
     const signedChallenge = Buffer.from(
@@ -190,9 +187,7 @@ export default {
       signature: signedChallenge,
     };
     const url = new URL(`${activeNetwork.backendUrl}/notification/user/${account.address}`);
-    Object.keys(respondChallenge).forEach((key) =>
-      url.searchParams.append(key, respondChallenge[key]),
-    );
+    Object.keys(respondChallenge).forEach((key) => url.searchParams.append(key, respondChallenge[key]));
     return fetchJson(url.toString());
   },
   async initContractInstances({
@@ -207,9 +202,9 @@ export default {
     });
     const contractInstanceV2 = activeNetwork.tipContractV2
       ? await sdk.getContractInstance(TIPPING_V2_INTERFACE, {
-          contractAddress: activeNetwork.tipContractV2,
-          forceCodeCheck: true,
-        })
+        contractAddress: activeNetwork.tipContractV2,
+        forceCodeCheck: true,
+      })
       : null;
     commit('setTipping', [contractInstanceV1, contractInstanceV2]);
   },

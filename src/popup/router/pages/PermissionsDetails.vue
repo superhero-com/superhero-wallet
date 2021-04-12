@@ -2,12 +2,18 @@
   <div class="permissions-details">
     <p>{{ host }}</p>
     <div class="permission-row">
-      <CheckBox :value="address" @input="togglePermission({ host, name: 'address' })" />
+      <CheckBox
+        :value="address"
+        @input="togglePermission({ host, name: 'address' })"
+      />
       <span :class="{ highlight: address }">{{ $t('pages.permissions.login') }}</span>
     </div>
 
     <div class="permission-row">
-      <CheckBox :value="messageSign" @input="togglePermission({ host, name: 'messageSign' })" />
+      <CheckBox
+        :value="messageSign"
+        @input="togglePermission({ host, name: 'messageSign' })"
+      />
       <span :class="{ highlight: messageSign }"> {{ $t('pages.permissions.message-sign') }}</span>
     </div>
 
@@ -41,7 +47,10 @@
         <TokenAmount :amount="+tokenBalance" />
       </div>
     </div>
-    <Button bold @click="removePermissions">
+    <Button
+      bold
+      @click="removePermissions"
+    >
       {{ $t('pages.permissions.delete') }}
     </Button>
   </div>

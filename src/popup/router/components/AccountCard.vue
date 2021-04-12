@@ -6,8 +6,12 @@
     <AccountInfo v-bind="$attrs" />
     <BalanceInfo v-bind="$attrs" />
     <div class="arrows">
-      <button @click="$emit('left')"><Arrow v-if="left" /></button>
-      <button @click="$emit('right')"><Arrow v-if="right" /></button>
+      <button @click="$emit('left')">
+        <Arrow v-if="left" />
+      </button>
+      <button @click="$emit('right')">
+        <Arrow v-if="right" />
+      </button>
     </div>
     <Triangle class="triangle" />
   </div>

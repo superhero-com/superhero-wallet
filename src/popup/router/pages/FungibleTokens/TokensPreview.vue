@@ -1,14 +1,26 @@
 <template>
   <div class="tokens-preview">
     <div class="menu">
-      <a class="menu-item" :class="{ active: activeItem === 'tokens' }">
+      <a
+        class="menu-item"
+        :class="{ active: activeItem === 'tokens' }"
+      >
         <TokenPiles />
         {{ $t('pages.fungible-tokens.tokens') }}
       </a>
     </div>
-    <SearchBar v-model="searchTerm" :placeholder="$t('pages.fungible-tokens.searchPlaceholder')" />
-    <TabsMenu v-model="activeTab" :tabOptions="tabs" />
-    <TokensList :show-my-tokens="activeTab === tabs[1].name" :searchTerm="searchTerm" />
+    <SearchBar
+      v-model="searchTerm"
+      :placeholder="$t('pages.fungible-tokens.searchPlaceholder')"
+    />
+    <TabsMenu
+      v-model="activeTab"
+      :tab-options="tabs"
+    />
+    <TokensList
+      :show-my-tokens="activeTab === tabs[1].name"
+      :search-term="searchTerm"
+    />
   </div>
 </template>
 
@@ -19,7 +31,7 @@ import TokenPiles from '../../../../icons/token-piles.svg?vue-component';
 import SearchBar from '../../components/SearchBar';
 
 export default {
-  name: 'fungible-tokens',
+  name: 'FungibleTokens',
   components: {
     TokenPiles,
     SearchBar,

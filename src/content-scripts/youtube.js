@@ -6,11 +6,10 @@ setTimeout(async () => {
   );
   const superheroTipActions = buttons.querySelectorAll('.action-superhero-tip');
   if (
-    !(await browser.runtime.sendMessage({ method: 'checkHasAccount' })) ||
-    !buttons ||
-    superheroTipActions.length
-  )
-    return;
+    !(await browser.runtime.sendMessage({ method: 'checkHasAccount' }))
+    || !buttons
+    || superheroTipActions.length
+  ) return;
   const superheroTipAction = createSuperheroTipAction(window.location.href);
   superheroTipAction.classList.add('youtube');
   buttons.append(superheroTipAction);

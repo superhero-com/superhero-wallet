@@ -1,6 +1,9 @@
 <template>
   <div class="details">
-    <ul v-if="!addPointer" class="name-details">
+    <ul
+      v-if="!addPointer"
+      class="name-details"
+    >
       <li>
         <span>{{ $t('pages.names.details.name') }}</span> {{ name }}
       </li>
@@ -16,7 +19,10 @@
       <li>
         <span>{{ $t('pages.names.details.expires-height') }}</span> {{ nameEntry.expiresAt }}
       </li>
-      <li v-for="(pointer, key, index) in nameEntry.pointers" :key="key">
+      <li
+        v-for="(pointer, key, index) in nameEntry.pointers"
+        :key="key"
+      >
         <span>{{ $t('pages.names.details.pointer', { id: index + 1 }) }}</span>
         {{ pointer }}
       </li>
@@ -30,21 +36,31 @@
     <Button
       v-if="!addPointer"
       extend
-      @click="setDefault"
       :disabled="account.name === name || !hasPointer"
+      @click="setDefault"
     >
       {{ $t('pages.names.details.set-default') }}
     </Button>
-    <Button v-if="!addPointer" extend @click="extend" :disabled="!hasPointer">
+    <Button
+      v-if="!addPointer"
+      extend
+      :disabled="!hasPointer"
+      @click="extend"
+    >
       {{ $t('pages.names.details.extend') }}
     </Button>
-    <Button v-if="addPointer" dark extend @click="addPointer = false">
+    <Button
+      v-if="addPointer"
+      dark
+      extend
+      @click="addPointer = false"
+    >
       {{ $t('pages.names.details.cancel') }}
     </Button>
     <Button
       extend
-      @click="setPointer"
       :disabled="(addPointer && !validPointer) || nameEntry.pending"
+      @click="setPointer"
     >
       {{ $t('pages.names.details.set-pointer') }}
     </Button>
@@ -58,10 +74,10 @@ import Button from '../../components/Button';
 import InputField from '../../components/InputField';
 
 export default {
+  components: { Button, InputField },
   props: {
     name: { type: String, required: true },
   },
-  components: { Button, InputField },
   data: () => ({
     pointer: '',
     addPointer: false,

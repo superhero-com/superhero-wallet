@@ -1,15 +1,24 @@
 <template>
-  <div class="loader" data-cy="loader">
+  <div
+    class="loader"
+    data-cy="loader"
+  >
     <div class="center">
       <span v-if="content !== ''">{{ content }}</span>
-      <br v-if="content !== ''" />
+      <br v-if="content !== ''">
       <ae-loader v-if="size === 'small'" />
     </div>
     <transition v-if="size === 'big'">
-      <span v-if="type === 'transparent'" class="main-loader main-loader-transparent">
+      <span
+        v-if="type === 'transparent'"
+        class="main-loader main-loader-transparent"
+      >
         <ae-loader />
       </span>
-      <Welcome v-else class="main-loader main-loader-solid" />
+      <Welcome
+        v-else
+        class="main-loader main-loader-solid"
+      />
     </transition>
   </div>
 </template>

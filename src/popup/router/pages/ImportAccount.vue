@@ -1,12 +1,24 @@
 <template>
   <div class="import-account">
-    <p class="regular-text">{{ $t('pages.index.enterSeedPhrase') }}</p>
-    <Textarea v-model="mnemonic" :error="error" />
-    <Button @click="importAccount" :disabled="!mnemonic || error" data-cy="import">
+    <p class="regular-text">
+      {{ $t('pages.index.enterSeedPhrase') }}
+    </p>
+    <Textarea
+      v-model="mnemonic"
+      :error="error"
+    />
+    <Button
+      :disabled="!mnemonic || error"
+      data-cy="import"
+      @click="importAccount"
+    >
       {{ $t('pages.index.importAccount') }}
     </Button>
-    <div v-if="error" class="error-msg">
-      {{ $t('pages.index.accountNotFound') }}<br />
+    <div
+      v-if="error"
+      class="error-msg"
+    >
+      {{ $t('pages.index.accountNotFound') }}<br>
       {{ $t('pages.index.checkSeed') }}
     </div>
   </div>

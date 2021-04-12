@@ -1,7 +1,11 @@
 <!-- eslint-disable vue/no-use-v-if-with-v-for-->
 <template>
   <div class="tour">
-    <v-tour name="onboarding" :steps="tourSteps" :options="{ highlight: true }">
+    <v-tour
+      name="onboarding"
+      :steps="tourSteps"
+      :options="{ highlight: true }"
+    >
       <template slot-scope="tour">
         <transition name="fade">
           <v-step
@@ -19,7 +23,10 @@
             :class="tour.currentStep === 2 ? 'tip-step' : ''"
           >
             <template>
-              <div slot="header" class="step-header">
+              <div
+                slot="header"
+                class="step-header"
+              >
                 {{ $t(`onboarding.step_${step.step}.title`) }}
                 <span class="step-info"> ({{ step.step }}/{{ steps.length }}) </span>
               </div>
@@ -27,14 +34,18 @@
                 slot="content"
                 class="step-content"
                 v-html="$t(`onboarding.step_${step.step}.content`)"
-              ></div>
-              <div slot="actions"></div>
+              />
+              <div slot="actions" />
             </template>
           </v-step>
         </transition>
       </template>
     </v-tour>
-    <div class="tour-actions" v-if="tourRunning" :class="!started ? 'not-started' : ''">
+    <div
+      v-if="tourRunning"
+      class="tour-actions"
+      :class="!started ? 'not-started' : ''"
+    >
       <div class="container">
         <div class="tour-welcome-message">
           <Hero />
@@ -44,26 +55,54 @@
           </div>
         </div>
         <div class="tour-control-buttons">
-          <Button onboarding class="skip" @click="stop">{{ $t('onboarding.skip') }}</Button>
-          <Button v-if="started" onboarding @click="back">{{ $t('onboarding.back') }}</Button>
-          <Button v-if="started" onboarding class="next" @click="next">{{
-            $t('onboarding.next')
-          }}</Button>
-          <Button v-if="!started" onboarding class="start" @click="start">{{
-            $t('onboarding.start')
-          }}</Button>
+          <Button
+            onboarding
+            class="skip"
+            @click="stop"
+          >
+            {{ $t('onboarding.skip') }}
+          </Button>
+          <Button
+            v-if="started"
+            onboarding
+            @click="back"
+          >
+            {{ $t('onboarding.back') }}
+          </Button>
+          <Button
+            v-if="started"
+            onboarding
+            class="next"
+            @click="next"
+          >
+            {{
+              $t('onboarding.next')
+            }}
+          </Button>
+          <Button
+            v-if="!started"
+            onboarding
+            class="start"
+            @click="start"
+          >
+            {{
+              $t('onboarding.start')
+            }}
+          </Button>
         </div>
       </div>
     </div>
     <div
-      class="tour-start"
       v-if="!nodeStatus && $route.path === '/account' && isLoggedIn && !tourRunning && tourStartBar"
+      class="tour-start"
       @click="toggleTour"
     >
       <div class="container">
         <StartOnboarding class="start-onboarding" />
         <span>{{ $t('onboarding.tutorial') }}</span>
-        <div class="close"><Close /></div>
+        <div class="close">
+          <Close />
+        </div>
       </div>
     </div>
   </div>

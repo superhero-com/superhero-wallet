@@ -1,5 +1,7 @@
 const tip = { amount: 0.2, note: '#test', url: 'example.com' };
-const tip2 = { amount: 0.2, note: '#test1234', url: 'example.com', onTip: true };
+const tip2 = {
+  amount: 0.2, note: '#test1234', url: 'example.com', onTip: true,
+};
 
 describe('Test cases for tip page', () => {
   beforeEach(() => {

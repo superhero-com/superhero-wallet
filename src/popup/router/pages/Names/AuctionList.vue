@@ -2,17 +2,35 @@
   <div class="auction-list">
     <NameListHeader />
 
-    <Button @click="filter = 'soonest'" :inactive="filter !== 'soonest'" third small>
+    <Button
+      :inactive="filter !== 'soonest'"
+      third
+      small
+      @click="filter = 'soonest'"
+    >
       {{ $t('pages.names.auctions.soonest') }}
     </Button>
-    <Button @click="filter = 'length'" :inactive="filter !== 'length'" third small>
+    <Button
+      :inactive="filter !== 'length'"
+      third
+      small
+      @click="filter = 'length'"
+    >
       {{ $t('pages.names.auctions.length') }}
     </Button>
-    <Button @click="filter = 'bid'" :inactive="filter !== 'bid'" third small>
+    <Button
+      :inactive="filter !== 'bid'"
+      third
+      small
+      @click="filter = 'bid'"
+    >
       {{ $t('pages.names.auctions.bid') }}
     </Button>
 
-    <ul v-if="activeAuctions.length" class="list">
+    <ul
+      v-if="activeAuctions.length"
+      class="list"
+    >
       <NameRow
         v-for="({ name, expiration, lastBid }, key) in auctions"
         :key="key"
@@ -20,7 +38,9 @@
         :name="name"
         :address="lastBid.accountId"
       >
-        <div class="name">{{ name }}</div>
+        <div class="name">
+          {{ name }}
+        </div>
         <div class="expiration">
           {{ $t('pages.names.auctions.expires') }}
           {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
@@ -28,7 +48,9 @@
       </NameRow>
     </ul>
 
-    <p v-else>{{ $t('pages.names.auctions.no-auctions') }}</p>
+    <p v-else>
+      {{ $t('pages.names.auctions.no-auctions') }}
+    </p>
   </div>
 </template>
 
@@ -41,6 +63,7 @@ import { blocksToRelativeTime } from '../../../../filters/toRelativeTime';
 
 export default {
   components: { NameListHeader, Button, NameRow },
+  filters: { blocksToRelativeTime },
   data: () => ({
     filter: 'soonest',
     activeAuctions: [],
@@ -60,7 +83,6 @@ export default {
       }
     },
   },
-  filters: { blocksToRelativeTime },
   async mounted() {
     await this.$watchUntilTruly(() => this.$store.state.sdk);
     this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');

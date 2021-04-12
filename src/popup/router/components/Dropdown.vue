@@ -1,29 +1,56 @@
 <template>
   <div class="dropdown">
-    <div v-if="openDropdown" @click="openDropdown = false" class="dropdown-overlay"></div>
-    <label v-if="label" class="label">{{ label }}</label>
-    <div v-if="!isCustom" class="display">
-      <div class="text-ellipsis" :title="displayValue">
+    <div
+      v-if="openDropdown"
+      class="dropdown-overlay"
+      @click="openDropdown = false"
+    />
+    <label
+      v-if="label"
+      class="label"
+    >{{ label }}</label>
+    <div
+      v-if="!isCustom"
+      class="display"
+    >
+      <div
+        class="text-ellipsis"
+        :title="displayValue"
+      >
         {{ displayValue }}
       </div>
-      <img src="../../../icons/carret-down.svg" />
-      <select v-model="selectedVal" @change="method($event)">
-        <option v-for="{ text, value } in options" :key="value" :value="value">{{ text }}</option>
+      <img src="../../../icons/carret-down.svg">
+      <select
+        v-model="selectedVal"
+        @change="method($event)"
+      >
+        <option
+          v-for="{ text, value } in options"
+          :key="value"
+          :value="value"
+        >
+          {{ text }}
+        </option>
       </select>
     </div>
     <div
-      class="custom"
       v-else
-      @click.stop="openDropdown = !openDropdown"
+      class="custom"
       :class="{ show: openDropdown }"
       data-cy="custom-dropdown"
+      @click.stop="openDropdown = !openDropdown"
     >
       <ae-button>
         {{ displayValue }}
         <ExpandedAngleArrow />
       </ae-button>
       <ul class="list">
-        <li class="list-item" v-for="{ text, value } in options" :key="value" :value="value">
+        <li
+          v-for="{ text, value } in options"
+          :key="value"
+          class="list-item"
+          :value="value"
+        >
           <ae-button @click="(selectedVal = value), method(value)">
             {{ text }}
           </ae-button>

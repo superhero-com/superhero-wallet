@@ -6,20 +6,26 @@
     </div>
 
     <div class="url-bar">
-      <UrlStatus :status="urlStatus" info />
+      <UrlStatus
+        :status="urlStatus"
+        info
+      />
       <a class="link-sm text-left">{{ tip.url }}</a>
     </div>
 
     <AmountSend
-      :amountError="amount && validationStatus.error"
       v-model="amount"
-      :errorMsg="validationStatus.msg"
+      :amount-error="amount && validationStatus.error"
+      :error-msg="validationStatus.msg"
     />
     <div class="tip-note-preview mt-15">
       {{ tip.title }}
     </div>
 
-    <Button @click="sendTip" :disabled="!tippingSupported || validationStatus.error">
+    <Button
+      :disabled="!tippingSupported || validationStatus.error"
+      @click="sendTip"
+    >
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button @click="openCallbackOrGoHome(false)">
@@ -44,8 +50,10 @@ import Button from '../components/Button';
 import BalanceInfo from '../components/BalanceInfo';
 
 export default {
+  components: {
+    AmountSend, UrlStatus, Button, BalanceInfo,
+  },
   mixins: [deeplinkApi],
-  components: { AmountSend, UrlStatus, Button, BalanceInfo },
   data: () => ({
     tip: {},
     amount: '',
@@ -84,8 +92,8 @@ export default {
         });
         if (
           this.selectedToken
-            ? this.selectedToken.balance.comparedTo(this.amount) === -1 ||
-              this.balance.comparedTo(fee) === -1
+            ? this.selectedToken.balance.comparedTo(this.amount) === -1
+              || this.balance.comparedTo(fee) === -1
             : this.balance.comparedTo(fee.plus(this.amount)) === -1
         ) {
           return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };

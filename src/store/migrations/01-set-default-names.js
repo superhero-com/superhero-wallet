@@ -9,11 +9,12 @@ export default (state) => {
     };
     const { networkId } = networks[state.current.network];
     state.subaccounts.forEach(({ aename, publicKey }) => {
-      if (aename)
+      if (aename) {
         newState.names.defaults = {
           ...newState.names.defaults,
           [`${publicKey}-${networkId}`]: aename,
         };
+      }
     });
   }
 

@@ -9,7 +9,11 @@
       >
         <span slot="right">.chain</span>
       </InputField>
-      <Button small @click="claim" :disabled="!sdk || !validName">
+      <Button
+        small
+        :disabled="!sdk || !validName"
+        @click="claim"
+      >
         <ae-icon name="plus" />
       </Button>
     </div>

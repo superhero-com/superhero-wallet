@@ -1,6 +1,12 @@
 <template>
-  <div class="account-switcher" :class="{ 'notification-above': notification }">
-    <div :class="['cards-wrapper', { 'menu-under': filteredAccounts.length > 1 }]" :style="cssVars">
+  <div
+    class="account-switcher"
+    :class="{ 'notification-above': notification }"
+  >
+    <div
+      :class="['cards-wrapper', { 'menu-under': filteredAccounts.length > 1 }]"
+      :style="cssVars"
+    >
       <AccountCard
         v-for="(account, idx) in filteredAccounts"
         :key="account.address"
@@ -12,12 +18,15 @@
         @right="selectAccount(filteredAccounts[idx + 1].i)"
       />
     </div>
-    <div v-if="filteredAccounts.length > 1" class="buttons">
+    <div
+      v-if="filteredAccounts.length > 1"
+      class="buttons"
+    >
       <button
         v-for="(account, idx) in filteredAccounts"
         :key="idx"
-        @click="selectAccount(account.i)"
         :class="{ selected: account.i === accountSelectedIdx }"
+        @click="selectAccount(account.i)"
       />
     </div>
   </div>

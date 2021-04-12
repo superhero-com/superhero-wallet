@@ -2,8 +2,7 @@ import { testAccount } from '../../../src/popup/utils/config';
 
 require('chai').should();
 
-const messageSig =
-  'f85fd998cdf48c96ddf52d3a62edc3245a196db97d6898a45083e74b587dae4ba5d4baa4c6c247e109af4930ca117b72f849732f6586782ca8845a11cbf6f400';
+const messageSig = 'f85fd998cdf48c96ddf52d3a62edc3245a196db97d6898a45083e74b587dae4ba5d4baa4c6c247e109af4930ca117b72f849732f6586782ca8845a11cbf6f400';
 describe('Tests cases for AEX-2 communication', () => {
   beforeEach(() => {
     cy.openAepp();

@@ -1,7 +1,14 @@
 <template>
-  <button v-clipboard:success="copy" v-clipboard:copy="value" class="copy-button">
+  <button
+    v-clipboard:success="copy"
+    v-clipboard:copy="value"
+    class="copy-button"
+  >
     <CopyIcon />
-    <span class="message" v-if="copied">{{ message }}</span>
+    <span
+      v-if="copied"
+      class="message"
+    >{{ message }}</span>
   </button>
 </template>
 

@@ -1,10 +1,17 @@
 <template>
-  <div class="receive" data-cy="top-up-container">
+  <div
+    class="receive"
+    data-cy="top-up-container"
+  >
     <p class="primary-title text-left mt-20 f-14 mx-20">
       {{ $t('pages.receive.heading') }}
     </p>
     <AccountInfo />
-    <qrcode-vue :value="account.address" size="140" class="my-25 qrcode"></qrcode-vue>
+    <qrcode-vue
+      :value="account.address"
+      size="140"
+      class="my-25 qrcode"
+    />
 
     <Button :to="CHANGE_CRYPTO_AE_URL">
       {{ $t('pages.receive.transferExchange') }}

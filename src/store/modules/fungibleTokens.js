@@ -104,13 +104,12 @@ export default {
         from_account: account.address,
         for_account: activeNetwork.tipContractV2.replace('ct_', 'ak_'),
       });
-      const allowanceAmount =
-        decodedResult !== undefined
-          ? new BigNumber(decodedResult)
-              .multipliedBy(-1)
-              .plus(convertToken(amount, selectedToken.decimals))
-              .toNumber()
-          : convertToken(amount, selectedToken.decimals).toFixed();
+      const allowanceAmount = decodedResult !== undefined
+        ? new BigNumber(decodedResult)
+          .multipliedBy(-1)
+          .plus(convertToken(amount, selectedToken.decimals))
+          .toNumber()
+        : convertToken(amount, selectedToken.decimals).toFixed();
       return tokenContract.methods[
         decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
       ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);

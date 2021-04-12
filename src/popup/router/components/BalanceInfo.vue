@@ -1,7 +1,13 @@
 <template>
-  <div class="balance-info" data-cy="balance-info">
+  <div
+    class="balance-info"
+    data-cy="balance-info"
+  >
     <div class="balance-wrapper">
-      <div class="balance-dropdown" data-cy="tokens-dropdown">
+      <div
+        class="balance-dropdown"
+        data-cy="tokens-dropdown"
+      >
         <Dropdown
           v-if="tokenBalancesOptions.length"
           :options="tokenBalancesOptions"

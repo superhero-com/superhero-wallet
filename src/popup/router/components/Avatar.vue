@@ -1,5 +1,10 @@
 <template>
-  <img class="avatar" :src="error ? avatar : profileImage" :class="size" @error="error = true" />
+  <img
+    class="avatar"
+    :src="error ? avatar : profileImage"
+    :class="size"
+    @error="error = true"
+  >
 </template>
 
 <script>

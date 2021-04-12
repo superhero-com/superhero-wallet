@@ -5,12 +5,24 @@
         <NewInviteLink class="invite-icon" />
         {{ $t('pages.invite.generate-link') }}
       </p>
-      <AmountSend v-model="amount" :label="$t('pages.invite.tip-attached')" />
-      <Button bold :disabled="!sufficientBalance" @click="generate">{{
-        $t('pages.invite.generate')
-      }}</Button>
+      <AmountSend
+        v-model="amount"
+        :label="$t('pages.invite.tip-attached')"
+      />
+      <Button
+        bold
+        :disabled="!sufficientBalance"
+        @click="generate"
+      >
+        {{
+          $t('pages.invite.generate')
+        }}
+      </Button>
     </div>
-    <div v-if="invites.length > 0" class="generated-links">
+    <div
+      v-if="invites.length > 0"
+      class="generated-links"
+    >
       <p class="section-title">
         <Invite class="invite-icon" />
         {{ $t('pages.invite.created-links') }}
@@ -38,7 +50,9 @@ import Invite from '../../../icons/invite.svg?vue-component';
 import NewInviteLink from '../../../icons/new-invite-link.svg?vue-component';
 
 export default {
-  components: { AmountSend, Button, InviteItem, Invite, NewInviteLink },
+  components: {
+    AmountSend, Button, InviteItem, Invite, NewInviteLink,
+  },
   data: () => ({ amount: 0, loading: false }),
   subscriptions() {
     return pick(this.$store.state.observables, ['balance']);

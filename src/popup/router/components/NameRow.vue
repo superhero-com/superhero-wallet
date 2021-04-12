@@ -1,6 +1,14 @@
 <template>
-  <Component :is="to ? 'RouterLink' : 'li'" :to="to" class="name-row" @click="$emit('click')">
-    <Avatar :name="name" :address="address" />
+  <Component
+    :is="to ? 'RouterLink' : 'li'"
+    :to="to"
+    class="name-row"
+    @click="$emit('click')"
+  >
+    <Avatar
+      :name="name"
+      :address="address"
+    />
     <div class="name-info">
       <slot />
     </div>
@@ -11,12 +19,12 @@
 import Avatar from './Avatar';
 
 export default {
+  components: { Avatar },
   props: {
     name: String,
     address: String,
     to: [String, Object],
   },
-  components: { Avatar },
 };
 </script>
 

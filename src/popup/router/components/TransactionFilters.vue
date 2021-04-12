@@ -1,5 +1,8 @@
 <template>
-  <div class="filters" data-cy="filters">
+  <div
+    class="filters"
+    data-cy="filters"
+  >
     <button
       v-for="filter in filters"
       :key="filter"

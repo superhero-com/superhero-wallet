@@ -2,9 +2,15 @@
   <div class="transactions">
     <AccountInfo />
     <BalanceInfo />
-    <SearchBar v-model="searchTerm" :placeholder="$t('pages.transactions.search')" />
+    <SearchBar
+      v-model="searchTerm"
+      :placeholder="$t('pages.transactions.search')"
+    />
     <TransactionFilters v-model="displayMode" />
-    <ul class="list" data-cy="list">
+    <ul
+      class="list"
+      data-cy="list"
+    >
       <PendingTxs />
       <TransactionItem
         v-for="transaction in filteredTransactions"
@@ -15,7 +21,11 @@
     <div v-if="!filteredTransactions.length && !loading">
       <p>{{ $t('pages.transactions.noTransactions') }}</p>
     </div>
-    <Loader v-if="loading" size="small" type="none" />
+    <Loader
+      v-if="loading"
+      size="small"
+      type="none"
+    />
   </div>
 </template>
 
@@ -67,9 +77,8 @@ export default {
             }
           })
           .filter(
-            (tr) =>
-              !this.searchTerm ||
-              this.getTxSymbol(tr)
+            (tr) => !this.searchTerm
+              || this.getTxSymbol(tr)
                 .toLocaleLowerCase()
                 .includes(this.searchTerm.toLocaleLowerCase()),
           )
@@ -97,10 +106,9 @@ export default {
   },
   methods: {
     checkLoadMore() {
-      const { scrollHeight, scrollTop, clientHeight } =
-        document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION
-          ? document.querySelector('#app')
-          : document.documentElement;
+      const { scrollHeight, scrollTop, clientHeight } = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION
+        ? document.querySelector('#app')
+        : document.documentElement;
       if (scrollHeight - scrollTop <= clientHeight + 100) {
         setTimeout(() => this.loadMore(), 1500);
       }

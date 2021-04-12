@@ -1,30 +1,61 @@
 <template>
-  <div class="header" v-if="showNavigation && !aeppPopup">
-    <div v-if="isLoggedIn || (title && !tourRunning)" class="left">
-      <RouterLink v-if="isLoggedIn" to="/account" class="home-button">
+  <div
+    v-if="showNavigation && !aeppPopup"
+    class="header"
+  >
+    <div
+      v-if="isLoggedIn || (title && !tourRunning)"
+      class="left"
+    >
+      <RouterLink
+        v-if="isLoggedIn"
+        to="/account"
+        class="home-button"
+      >
         <Logo />
       </RouterLink>
-      <button v-if="title && !tourRunning" @click="back" class="icon-btn back">
+      <button
+        v-if="title && !tourRunning"
+        class="icon-btn back"
+        @click="back"
+      >
         <Back data-cy="back-arrow" />
       </button>
     </div>
 
-    <div :class="{ 'not-logged-in': !isLoggedIn }" class="title">
-      <TruncateMid v-if="pageTitle" :str="pageTitle" class="text" />
-      <span v-else class="text">
+    <div
+      :class="{ 'not-logged-in': !isLoggedIn }"
+      class="title"
+    >
+      <TruncateMid
+        v-if="pageTitle"
+        :str="pageTitle"
+        class="text"
+      />
+      <span
+        v-else
+        class="text"
+      >
         {{ (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home') }}
       </span>
     </div>
 
-    <div v-if="isLoggedIn" class="right">
+    <div
+      v-if="isLoggedIn"
+      class="right"
+    >
       <button
         v-if="!$route.path.startsWith('/notifications')"
-        @click="toNotifications"
         class="notifications icon-btn"
         data-cy="noti"
+        @click="toNotifications"
       >
         <Bell />
-        <span v-if="notificationsCount" class="badge" data-cy="noti-count">
+        <span
+          v-if="notificationsCount"
+          class="badge"
+          data-cy="noti-count"
+        >
           {{ notificationsCount }}
         </span>
       </button>
@@ -37,7 +68,11 @@
         <Settings />
       </RouterLink>
 
-      <button @click="$emit('toggle-sidebar')" class="icon-btn menu" data-cy="hamburger">
+      <button
+        class="icon-btn menu"
+        data-cy="hamburger"
+        @click="$emit('toggle-sidebar')"
+      >
         <Menu />
         <MenuHover class="hover" />
       </button>
@@ -56,7 +91,9 @@ import MenuHover from '../../../icons/menu-hover.svg?vue-component';
 import TruncateMid from './TruncateMid';
 
 export default {
-  components: { Logo, Back, Bell, Settings, Menu, MenuHover, TruncateMid },
+  components: {
+    Logo, Back, Bell, Settings, Menu, MenuHover, TruncateMid,
+  },
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,
   }),
@@ -89,9 +126,7 @@ export default {
       );
     },
     async toNotifications() {
-      this.notifications.forEach((n) =>
-        this.setNotificationsStatus({ createdAt: n.createdAt, status: 'PEEKED' }),
-      );
+      this.notifications.forEach((n) => this.setNotificationsStatus({ createdAt: n.createdAt, status: 'PEEKED' }));
       await this.$store.dispatch('modifyNotifications', [
         this.superheroNotifications.filter((n) => n.status === 'CREATED').map((n) => n.id),
         'PEEKED',

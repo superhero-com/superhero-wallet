@@ -1,42 +1,91 @@
 <template>
-  <div class="connect popup-aex2" data-cy="popup-aex2">
+  <div
+    class="connect popup-aex2"
+    data-cy="popup-aex2"
+  >
     <div class="flex identicon-container">
       <div class="identicon">
-        <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
-        <ae-identicon :address="app.host || ''" size="base" v-if="imageError" />
-        <div class="account-name" data-cy="name">{{ app.name }}</div>
-        <div class="hostname" data-cy="host">{{ app.host }}</div>
+        <img
+          v-if="!imageError"
+          :src="faviconUrl"
+          @error="imageError = true"
+        >
+        <ae-identicon
+          v-if="imageError"
+          :address="app.host || ''"
+          size="base"
+        />
+        <div
+          class="account-name"
+          data-cy="name"
+        >
+          {{ app.name }}
+        </div>
+        <div
+          class="hostname"
+          data-cy="host"
+        >
+          {{ app.host }}
+        </div>
       </div>
       <div class="separator">
         <ae-icon name="check" />
       </div>
       <div class="identicon">
-        <Avatar :address="account.address" :name="account.name" size="lg" />
-        <div class="account-name">{{ account.name || account.localName }}</div>
+        <Avatar
+          :address="account.address"
+          :name="account.name"
+          size="lg"
+        />
+        <div class="account-name">
+          {{ account.name || account.localName }}
+        </div>
       </div>
     </div>
 
     <h2>
-      <span class="secondary-text" data-cy="aepp">{{ app.host }} ({{ app.name }}) </span>
+      <span
+        class="secondary-text"
+        data-cy="aepp"
+      >{{ app.host }} ({{ app.name }}) </span>
       {{ $t('pages.connectConfirm.websiteRequestconnect') }}
-      <Avatar class="send-account-icon" :address="account.address" :name="account.name" />
+      <Avatar
+        class="send-account-icon"
+        :address="account.address"
+        :name="account.name"
+      />
       {{ account.name || account.localName }}
     </h2>
     <ul>
-      <ae-list-item fill="neutral" class="permission-set">
+      <ae-list-item
+        fill="neutral"
+        class="permission-set"
+      >
         <h4>{{ $t('pages.connectConfirm.addressLabel') }}</h4>
         <p>{{ $t('pages.connectConfirm.addressRequest') }}</p>
       </ae-list-item>
-      <ae-list-item fill="neutral" class="permission-set">
+      <ae-list-item
+        fill="neutral"
+        class="permission-set"
+      >
         <h4>{{ $t('pages.connectConfirm.transactionLabel') }}</h4>
         <p>{{ $t('pages.connectConfirm.transactionRequest') }}</p>
       </ae-list-item>
     </ul>
     <div class="button-fixed">
-      <Button half dark @click="cancel" data-cy="deny">
+      <Button
+        half
+        dark
+        data-cy="deny"
+        @click="cancel"
+      >
         {{ $t('pages.connectConfirm.cancelButton') }}
       </Button>
-      <Button half @click="resolve()" data-cy="accept">
+      <Button
+        half
+        data-cy="accept"
+        @click="resolve()"
+      >
         {{ $t('pages.connectConfirm.confirmButton') }}
       </Button>
     </div>
@@ -50,11 +99,11 @@ import Avatar from '../../components/Avatar';
 import mixin from './mixin';
 
 export default {
-  mixins: [mixin],
   components: {
     Button,
     Avatar,
   },
+  mixins: [mixin],
   data: () => ({
     imageError: false,
   }),
