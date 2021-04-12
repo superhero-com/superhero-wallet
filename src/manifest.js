@@ -1,15 +1,13 @@
-module.exports = (isProd, platform) => ({
+module.exports = (isProd) => ({
   name: 'Superhero',
   description: 'Superhero Wallet',
   version: process.env.npm_package_version,
   manifest_version: 2,
-  ...(platform === 'extension-firefox' && {
-    applications: {
-      gecko: {
-        strict_min_version: '53.0',
-      },
+  applications: {
+    gecko: {
+      strict_min_version: '53.0',
     },
-  }),
+  },
   permissions: [
     'storage',
     'unlimitedStorage',
