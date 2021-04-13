@@ -130,9 +130,8 @@ export default (store) => {
         { rootState: { sdk }, commit, rootGetters: { activeNetwork } },
         { name, address },
       ) {
-        const response = await postJson(`${activeNetwork.backendUrl}/profile`, {
+        const response = await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
           body: {
-            author: address,
             preferredChainName: name,
           },
         });
@@ -143,7 +142,7 @@ export default (store) => {
           challenge: response.challenge,
           signature: signedChallenge,
         };
-        await postJson(`${activeNetwork.backendUrl}/profile`, {
+        await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
           body: respondChallenge,
         });
         commit('setDefault', { name, address });
