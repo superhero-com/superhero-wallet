@@ -67,7 +67,7 @@ import { detect } from 'detect-browser';
 
 export default {
   data: () => ({
-    IS_MOBILE_DEVICE: navigator.userAgent.includes('Mobi'),
+    IS_MOBILE_DEVICE: window.IS_MOBILE_DEVICE,
     IS_IOS: window.IS_IOS,
   }),
   methods: {

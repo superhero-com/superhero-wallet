@@ -14,6 +14,7 @@ window.RUNNING_IN_POPUP = url.searchParams.get('id')
 window.POPUP_TYPE = url.searchParams.get('type') || null;
 window.IS_EXTENSION_BACKGROUND = process.env.IS_EXTENSION && window.location.href.endsWith('_generated_background_page.html');
 window.IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+window.IS_MOBILE_DEVICE = navigator.userAgent.includes('Mobi');
 
 Vue.prototype.$watchUntilTruly = function watchUntilTruly(getter) {
   return new Promise((resolve) => {
