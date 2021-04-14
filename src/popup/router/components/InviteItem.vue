@@ -36,7 +36,7 @@
       <Button
         v-else
         bold
-        dark
+        fill="secondary"
         @click="deleteItem"
       >
         {{ $t('pages.invite.delete') }}
@@ -57,7 +57,7 @@
       <div class="centered-buttons">
         <Button
           bold
-          dark
+          fill="secondary"
           @click="resetTopUpChanges"
         >
           {{ $t('pages.invite.collapse') }}

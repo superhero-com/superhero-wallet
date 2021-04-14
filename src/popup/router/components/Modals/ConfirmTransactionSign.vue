@@ -56,8 +56,8 @@
 
     <template slot="footer">
       <Button
-        dark
         third
+        fill="secondary"
         data-cy="deny"
         @click="cancel()"
       >

@@ -23,7 +23,7 @@
       {{ error.stack }}
     </p>
     <Button
-      dark
+      fill="secondary"
       inline
       to="/"
     >

@@ -38,7 +38,7 @@
     <div class="button-fixed">
       <Button
         half
-        dark
+        fill="secondary"
         data-cy="deny"
         @click="cancel()"
       >
