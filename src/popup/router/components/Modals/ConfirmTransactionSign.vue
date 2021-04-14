@@ -10,7 +10,7 @@
       <DetailsItem :label="$t('pages.signTransaction.fee')">
         <TokenAmount
           slot="value"
-          :amount="+aettosToAe(transaction.fee)"
+          :amount="getTxFee(transaction)"
           hide-fiat
           data-cy="fee"
         />
@@ -76,7 +76,6 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { aettosToAe } from '../../../utils/helper';
 import Modal from '../Modal';
 import Button from '../Button';
 import TransactionOverview from '../TransactionOverview';
@@ -117,8 +116,7 @@ export default {
       'pointers',
     ],
   }),
-  computed: mapGetters(['getTxSymbol', 'getTxAmountTotal']),
-  methods: { aettosToAe },
+  computed: mapGetters(['getTxSymbol', 'getTxAmountTotal', 'getTxFee']),
 };
 </script>
 
