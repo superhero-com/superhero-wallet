@@ -110,11 +110,12 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../styles/mixins';
+@use '../styles/variables';
+@use '../styles/mixins';
 
 body {
   margin: 0;
-  background-color: $color-black;
+  background-color: variables.$color-black;
 }
 
 html,
@@ -122,7 +123,7 @@ body {
   height: var(--height);
 }
 
-@include desktop {
+@include mixins.desktop {
   body {
     display: flex;
     flex-direction: column;
@@ -142,31 +143,32 @@ body {
 </style>
 
 <style lang="scss" scoped>
-@import '../styles/typography';
-@import '../styles/mixins';
+@use '../styles/variables';
+@use '../styles/typography';
+@use '../styles/mixins';
 
 #app {
   position: relative;
   margin: 0 auto;
-  width: $extension-width;
+  width: variables.$extension-width;
   height: 600px;
   overflow: auto;
 
-  @include mobile {
+  @include mixins.mobile {
     width: 100%;
     height: 100%;
     overflow: visible;
   }
 
-  @include desktop {
-    box-shadow: $color-border 0 0 0 1px;
+  @include mixins.desktop {
+    box-shadow: variables.$color-border 0 0 0 1px;
   }
 
   border-radius: 10px;
 
   @extend %face-sans-16-regular;
 
-  color: $white-color;
+  color: variables.$white-color;
 
   &.show-sidebar {
     overflow-y: hidden;
@@ -176,7 +178,7 @@ body {
     padding-bottom: 48px;
     padding-bottom: calc(48px + env(safe-area-inset-bottom));
 
-    @include desktop {
+    @include mixins.desktop {
       min-height: 100%;
       padding-bottom: 0;
     }
@@ -186,7 +188,7 @@ body {
     padding-top: 48px;
     padding-top: calc(48px + env(safe-area-inset-top));
 
-    @include desktop {
+    @include mixins.desktop {
       padding-top: 0;
       min-height: calc(100% - 48px);
       min-height: calc(100% - 48px - env(safe-area-inset-top));
@@ -194,7 +196,7 @@ body {
   }
 
   &.not-rebrand {
-    @include mobile {
+    @include mixins.mobile {
       overflow: visible;
     }
 
@@ -226,7 +228,7 @@ body {
     left: 0;
     right: 0;
 
-    @include desktop {
+    @include mixins.desktop {
       position: sticky;
       height: 100%;
       display: flex;
@@ -265,7 +267,7 @@ body {
     width: 100%;
     bottom: 0;
 
-    @include desktop {
+    @include mixins.desktop {
       position: sticky;
     }
   }
