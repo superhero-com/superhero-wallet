@@ -4,47 +4,34 @@
     class="menu-carousel"
     :options="flickityOptions"
   >
-    <BoxButton
-      to="/tokens"
-      :text="$t('pages.titles.balances')"
-    >
-      <Balances slot="icon" />
+    <BoxButton to="/tokens">
+      <Balances /> {{ $t('pages.titles.balances') }}
     </BoxButton>
     <BoxButton
       to="/send"
-      :text="$t('pages.titles.payments')"
       class="tour__step7"
       data-cy="send"
     >
-      <Payments slot="icon" />
+      <Payments /> {{ $t('pages.titles.payments') }}
     </BoxButton>
     <BoxButton
       to="/tip"
-      :text="$t('pages.titles.tips')"
       class="tour__step2"
       data-cy="tip-button"
     >
-      <Tips slot="icon" />
+      <Tips /> {{ $t('pages.titles.tips') }}
     </BoxButton>
     <BoxButton
       to="/transactions"
-      :text="$t('pages.titles.tx-history')"
       class="tour__step5"
     >
-      <Activity slot="icon" />
+      <Activity /> {{ $t('pages.titles.tx-history') }}
     </BoxButton>
-    <BoxButton
-      to="/names"
-      :text="$t('pages.titles.names')"
-      class="cell"
-    >
-      <Names slot="icon" />
+    <BoxButton to="/names">
+      <Names /> {{ $t('pages.titles.names') }}
     </BoxButton>
-    <BoxButton
-      to="/invite"
-      :text="$t('pages.titles.invite')"
-    >
-      <Invites slot="icon" />
+    <BoxButton to="/invite">
+      <Invites /> {{ $t('pages.titles.invite') }}
     </BoxButton>
   </flickity>
 </template>
@@ -96,15 +83,9 @@ export default {
 .menu-carousel {
   flex: 1;
   z-index: 1;
-  padding: 24px 12px;
+  padding: 24px 18px;
 
   ::v-deep {
-    .flickity-slider {
-      @include mobile {
-        width: 97%;
-      }
-    }
-
     .flickity-button {
       width: 24px;
       height: 64px;
@@ -150,16 +131,14 @@ export default {
   }
 
   .box-button {
-    display: flex;
-    justify-content: center;
-    width: 104px;
+    margin-left: 18px;
 
     @include mobile {
-      width: 25%;
+      margin-left: calc(25% - 88px);
     }
 
     @media (min-width: $extension-width + 2) and (max-width: 400px) {
-      width: 33%;
+      margin-left: calc(33% - 88px);
     }
   }
 }
