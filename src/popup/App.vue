@@ -173,13 +173,12 @@ body {
   }
 
   .main {
+    padding-bottom: 48px;
+    padding-bottom: calc(48px + env(safe-area-inset-bottom));
+
     @include desktop {
       min-height: 100%;
-    }
-
-    @include mobile {
-      padding-bottom: 48px;
-      padding-bottom: calc(48px + env(safe-area-inset-bottom));
+      padding-bottom: 0;
     }
   }
 
@@ -273,9 +272,7 @@ body {
 
   &.hide-tab-bar {
     .main {
-      @include mobile {
-        padding-bottom: 0;
-      }
+      padding-bottom: 0;
     }
 
     .tab-bar {
