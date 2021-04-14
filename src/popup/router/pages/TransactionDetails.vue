@@ -9,9 +9,7 @@
       />
     </Plate>
     <div class="content">
-      <div class="visual-overview">
-        <!-- TODO -->
-      </div>
+      <TransactionOverview v-bind="transaction" />
       <div class="data-grid">
         <DetailsItem
           v-if="tipUrl"
@@ -127,6 +125,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { formatDate, formatTime } from '../../utils';
+import TransactionOverview from '../components/TransactionOverview';
 import Plate from '../components/Plate';
 import TokenAmount from '../components/TokenAmount';
 import DetailsItem from '../components/DetailsItem';
@@ -138,6 +137,7 @@ import BlockIcon from '../../../icons/block.svg?vue-component';
 export default {
   name: 'TransactionDetails',
   components: {
+    TransactionOverview,
     Plate,
     TokenAmount,
     DetailsItem,
@@ -216,8 +216,8 @@ export default {
     margin-top: -10px;
     background: $color-bg-3;
 
-    .visual-overview {
-      margin: 18px 0 8px 0;
+    .transaction-overview {
+      padding: 26px 16px 16px 16px;
     }
 
     .data-grid {
@@ -226,7 +226,7 @@ export default {
       grid-auto-rows: 64px;
       row-gap: 8px;
       column-gap: 24px;
-      margin: 0 16px 8px 16px;
+      padding: 8px 16px;
 
       .span-2-columns {
         grid-column-end: span 2;
