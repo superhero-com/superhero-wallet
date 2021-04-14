@@ -73,6 +73,10 @@ export default {
     },
   },
   async mounted() {
+    document.documentElement.style.setProperty(
+      '--height',
+      process.env.PLATFORM === 'cordova' && window.IS_IOS ? '100vh' : '100%',
+    );
     await this.$watchUntilTruly(() => this.isRestored);
 
     this.$store.dispatch('getCurrencies');
@@ -115,7 +119,7 @@ body {
 
 html,
 body {
-  height: 100vh;
+  height: var(--height);
 }
 
 @include desktop {
