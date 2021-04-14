@@ -1,6 +1,7 @@
 <template>
   <Modal
-    class="confirm-tx-sign-modal"
+    full-screen
+    class="confirm-transaction-sign"
     data-cy="popup-aex2"
   >
     <TransactionOverview :tx="transaction" />
@@ -56,12 +57,14 @@
     <template slot="footer">
       <Button
         dark
+        third
         data-cy="deny"
         @click="cancel()"
       >
         {{ $t('pages.signTransaction.reject') }}
       </Button>
       <Button
+        third
         data-cy="accept"
         @click="resolve()"
       >
@@ -119,13 +122,11 @@ export default {
 };
 </script>
 
-<style lang="scss" src="./SignModal.scss" />
-
 <style lang="scss" scoped>
 @import '../../../../styles/variables';
 @import '../../../../styles/typography';
 
-.confirm-tx-sign-modal {
+.confirm-transaction-sign {
   .transaction-overview {
     padding: 16px;
   }

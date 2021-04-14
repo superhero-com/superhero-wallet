@@ -1,5 +1,8 @@
 <template>
-  <Modal class="confirm-tx-sign-modal">
+  <Modal
+    full-screen
+    class="confirm-raw-sign"
+  >
     <h3>
       {{ $t('modals.confirm-transaction-sign.sign-raw') }} <br>
       <span class="name-holder">
@@ -20,12 +23,16 @@
 
     <template slot="footer">
       <Button
+        third
         dark
         @click="cancel"
       >
         {{ $t('modals.cancel') }}
       </Button>
-      <Button @click="confirm">
+      <Button
+        third
+        @click="confirm"
+      >
         {{ $t('modals.confirm') }}
       </Button>
     </template>
@@ -66,4 +73,12 @@ export default {
 };
 </script>
 
-<style lang="scss" src="./SignModal.scss" />
+<style lang="scss" scoped>
+.confirm-raw-sign {
+  .name-holder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+</style>

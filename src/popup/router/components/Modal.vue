@@ -1,6 +1,9 @@
 <template>
   <transition appear>
-    <div class="modal">
+    <div
+      class="modal"
+      :class="{'full-screen': fullScreen}"
+    >
       <div class="container">
         <button
           v-if="close"
@@ -37,7 +40,10 @@ import Close from '../../../icons/close.svg?vue-component';
 
 export default {
   components: { Close },
-  props: { close: Boolean },
+  props: {
+    close: Boolean,
+    fullScreen: Boolean,
+  },
   mounted() {
     if (document.body.style.overflow) return;
     document.body.style.overflow = 'hidden';
@@ -107,6 +113,26 @@ export default {
         width: 120px;
         font-weight: 700;
       }
+    }
+  }
+
+  &.full-screen .container {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border-radius: 0;
+
+    .body {
+      height: 100%;
+      padding-bottom: 80px;
+      overflow-y: scroll;
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      padding: 24px 0;
     }
   }
 
