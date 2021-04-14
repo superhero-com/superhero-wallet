@@ -1,6 +1,7 @@
 import { flatten, orderBy, uniq } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
+import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import { postMessageToContent } from '../popup/utils/connection';
 import {
   fetchJson,
@@ -46,12 +47,16 @@ export default {
         }`,
       )
         .then((response) => response.map(({ amount, ...t }) => ({
-          tx: { address, amount },
+          tx: {
+            address,
+            amount,
+            contractId: t.contract,
+            type: TX_TYPE.contractCall,
+          },
           ...t,
           microTime: t.time,
           claim: true,
-        })))
-        .catch(() => []),
+        }))).catch(() => []),
     ]);
     txs = orderBy(flatten(txs), ['microTime'], ['desc']);
     return recent ? txs.slice(0, limit) : txs;
