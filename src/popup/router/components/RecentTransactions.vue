@@ -19,7 +19,7 @@
       class="transaction-list"
     >
       <TransactionItem
-        v-for="transaction in transactions.latest"
+        v-for="transaction in transactions.latest.slice(0, limit)"
         :key="transaction.hash"
         :transaction="transaction"
       />
@@ -61,6 +61,7 @@ export default {
     return {
       polling: null,
       loading: true,
+      limit: 10,
     };
   },
   mounted() {
@@ -72,9 +73,9 @@ export default {
   methods: {
     async updateTransactions() {
       this.$store.commit(
-        'updateLatestTransactions',
+        'setTransactions',
         await this.$store.dispatch('fetchTransactions', {
-          limit: 10,
+          limit: this.limit,
           page: 1,
           recent: true,
         }),
