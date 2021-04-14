@@ -186,7 +186,8 @@ export default {
 @import '../../../styles/typography';
 
 .transaction-details {
-  overflow-x: hidden;
+  height: 100%;
+  background-color: $color-bg-3;
 
   .header {
     position: sticky;
@@ -214,7 +215,6 @@ export default {
 
   .content {
     margin-top: -10px;
-    background: $color-bg-3;
 
     .visual-overview {
       margin: 18px 0 8px 0;
