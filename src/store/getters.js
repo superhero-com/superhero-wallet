@@ -95,8 +95,8 @@ export default {
     }
     return +aettosToAe(
       asBigNumber(
-        // eslint-disable-next-line camelcase
-        transaction.amount || transaction.tx?.amount || transaction.tx?.name_fee || 0,
+        transaction.amount || transaction.tx?.amount
+        || transaction.nameFee || transaction.tx?.nameFee || 0,
       ).plus(transaction.fee || transaction.tx?.fee || 0),
     );
   },
