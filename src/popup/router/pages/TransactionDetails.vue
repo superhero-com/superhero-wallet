@@ -1,6 +1,6 @@
 <template>
   <div class="transaction-details">
-    <Plate class="header">
+    <Plate>
       <TokenAmount
         :amount="amount"
         :symbol="symbol"
@@ -188,19 +188,10 @@ export default {
 .transaction-details {
   overflow-x: hidden;
 
-  .header {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    display: flex;
-    justify-content: center;
-    height: 92px;
-
-    @include mobile {
-      width: 100%;
-    }
-
+  .plate {
     .token-amount {
+      display: block;
+      height: 52px;
       text-align: center;
       margin: 16px 0 24px 0;
 
@@ -213,7 +204,7 @@ export default {
   }
 
   .content {
-    margin-top: -10px;
+    margin-top: 8px;
     background: $color-bg-3;
 
     .visual-overview {
