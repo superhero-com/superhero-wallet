@@ -6,22 +6,18 @@ jobs:
     env:
       APP_NAME: wallet
     steps:
-      - if: github.ref != 'refs/heads/develop'
+      - if: github.ref != 'refs/heads/master'
         uses: actions/checkout@v2
         with:
-          ref: develop
+          ref: master
       - uses: actions/checkout@v2
         with:
           fetch-depth: 100
-      - if: github.ref != 'refs/heads/develop'
-        run: git branch develop origin/develop
+      - if: github.ref != 'refs/heads/master'
+        run: git branch master origin/master
       - uses: actions/setup-node@v2
         with:
           node-version: 14.x
-      - uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
       - run: npm ci
       - run: npm run lint
       - run: npm test
