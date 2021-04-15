@@ -55,7 +55,6 @@ export default {
 
 .accounts {
   min-height: 600px;
-  background-color: $color-bg-3;
   padding-bottom: 16px;
 
   .header {
