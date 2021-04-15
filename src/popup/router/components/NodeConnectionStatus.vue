@@ -42,12 +42,12 @@ export default {
   }
 
   bottom: 48px;
+  bottom: calc(48px + env(safe-area-inset-bottom));
   left: 0;
   right: 0;
   background: $secondary-color;
   color: $white-color;
   line-height: 2em;
-  padding-bottom: env(safe-area-inset-bottom);
   z-index: 5;
   text-align: center;
   font-size: 14px;

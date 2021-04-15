@@ -67,8 +67,8 @@ import { detect } from 'detect-browser';
 
 export default {
   data: () => ({
-    IS_IOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
     IS_MOBILE_DEVICE: navigator.userAgent.includes('Mobi'),
+    IS_IOS: window.IS_IOS,
   }),
   methods: {
     isFirefox() {
