@@ -40,8 +40,6 @@ describe('Test cases for generate wallet page', () => {
 
       .get('[data-cy=generate-wallet]')
       .click()
-      .get('[data-cy=hamburger')
-      .should('be.visible')
       .get('[data-cy=proceed-to-wallet]')
       .should('be.visible')
 
