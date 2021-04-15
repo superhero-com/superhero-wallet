@@ -20,7 +20,7 @@
     "test": "start-server-and-test start http://localhost:4999 start:tests",
     "start": "npm run build:tests && serve -l 4999",
     "start:ci": "serve",
-    "start:tests": "cypress run",
+    "start:tests": "cypress run --browser electron",
     "gen:cordova-resources": "cordova-res --icon-background-source '#090909'",
     "build:Testnet": "cross-env NETWORK=Testnet npm run build",
     "watch:dev:Testnet": "cross-env NETWORK=Testnet npm run watch:dev",
