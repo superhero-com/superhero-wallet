@@ -1,6 +1,6 @@
 {
   "name": "superhero-wallet",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Superhero wallet",
   "author": "Superhero",
   "license": "MIT",
@@ -8,7 +8,7 @@
   "scripts": {
     "lint:vue": "eslint --ext .js,.vue src tests",
     "lint:css": "stylelint src/**/*.{css,scss,vue}",
-    "lint:commit": "commitlint --from develop --verbose",
+    "lint:commit": "commitlint --from master --verbose",
     "lint": "npm run lint:commit && npm run lint:vue && npm run lint:css",
     "prettier": "prettier \"src/**/*.{js,vue}\" \"tests/**/*.{js,vue}\"",
     "prettier:write": "npm run prettier -- --write",
@@ -20,7 +20,7 @@
     "test": "start-server-and-test start http://localhost:4999 start:tests",
     "start": "npm run build:tests && serve -l 4999",
     "start:ci": "serve",
-    "start:tests": "cypress run",
+    "start:tests": "cypress run --browser electron",
     "gen:cordova-resources": "cordova-res --icon-background-source '#090909'",
     "build:Testnet": "cross-env NETWORK=Testnet npm run build",
     "watch:dev:Testnet": "cross-env NETWORK=Testnet npm run watch:dev",

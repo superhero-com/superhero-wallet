@@ -38,7 +38,10 @@ export default {
     if (!state.middleware) return [];
     const { address } = getters.account;
     let txs = await Promise.all([
-      state.middleware.getTxByAccount(address, limit, page).then(({ data }) => data),
+      state.middleware
+        .getTxByAccount(address, limit, page)
+        .then(({ data }) => data)
+        .catch(() => []),
       dispatch('fetchPendingTransactions'),
       fetchJson(
         `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${

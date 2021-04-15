@@ -8,7 +8,7 @@
       'hide-tab-bar': $route.meta.hideTabBar,
     }"
   >
-    <Header @toggle-sidebar="showSidebar = !showSidebar" />
+    <Header v-if="showStatusAndHeader" @toggle-sidebar="showSidebar = !showSidebar" />
 
     <RouterView :class="{ 'show-header': showStatusAndHeader }" class="main" />
 
@@ -57,7 +57,11 @@ export default {
     ...mapGetters(['account', 'isLoggedIn']),
     ...mapState(['isRestored', 'current', 'sdk', 'backedUpSeed', 'notifications']),
     showStatusAndHeader() {
-      return !['/', '/intro'].includes(this.$route.path) && !this.$route.params.app;
+      return !(
+        ['/', '/intro'].includes(this.$route.path) ||
+        this.$route.path.startsWith('/web-iframe-popup') ||
+        this.$route.params.app
+      );
     },
     modals() {
       return this.$store.getters['modals/opened'];
@@ -69,6 +73,10 @@ export default {
     },
   },
   async mounted() {
+    document.documentElement.style.setProperty(
+      '--height',
+      process.env.PLATFORM === 'cordova' && window.IS_IOS ? '100vh' : '100%',
+    );
     await this.$watchUntilTruly(() => this.isRestored);
 
     this.$store.dispatch('getCurrencies');
@@ -111,7 +119,7 @@ body {
 
 html,
 body {
-  height: 100vh;
+  height: var(--height);
 }
 
 @include desktop {
@@ -165,13 +173,12 @@ body {
   }
 
   .main {
+    padding-bottom: 48px;
+    padding-bottom: calc(48px + env(safe-area-inset-bottom));
+
     @include desktop {
       min-height: 100%;
-    }
-
-    @include mobile {
-      padding-bottom: 48px;
-      padding-bottom: calc(48px + env(safe-area-inset-bottom));
+      padding-bottom: 0;
     }
   }
 
@@ -191,12 +198,16 @@ body {
       overflow: visible;
     }
 
+    .main,
+    .popup-aex2 {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
     .main {
       text-align: center;
       font-size: 16px;
       margin: 0 auto;
-      padding-left: 20px;
-      padding-right: 20px;
       position: relative;
 
       &.transactions,
@@ -261,9 +272,7 @@ body {
 
   &.hide-tab-bar {
     .main {
-      @include mobile {
-        padding-bottom: 0;
-      }
+      padding-bottom: 0;
     }
 
     .tab-bar {
