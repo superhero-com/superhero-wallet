@@ -52,6 +52,15 @@
       </li>
       <li>
         <router-link
+          to="/claim-tips"
+          data-cy="claim-tips"
+        >
+          {{ $t('pages.tipPage.claim') }}
+          <ClaimTips />
+        </router-link>
+      </li>
+      <li>
+        <router-link
           to="/transactions"
           data-cy="transactions"
         >
@@ -106,6 +115,7 @@ import MenuHover from '../../../icons/menu-hover.svg?vue-component';
 import Balances from '../../../icons/sidebar-menu/balances.svg?vue-component';
 import Payments from '../../../icons/sidebar-menu/payments.svg?vue-component';
 import Tips from '../../../icons/sidebar-menu/tips.svg?vue-component';
+import ClaimTips from '../../../icons/sidebar-menu/claim-tips.svg?vue-component';
 import TxHistory from '../../../icons/sidebar-menu/tx-history.svg?vue-component';
 import Names from '../../../icons/sidebar-menu/names.svg?vue-component';
 import Invite from '../../../icons/sidebar-menu/invite.svg?vue-component';
@@ -123,6 +133,7 @@ export default {
     Balances,
     Payments,
     Tips,
+    ClaimTips,
     TxHistory,
     Names,
     Invite,
