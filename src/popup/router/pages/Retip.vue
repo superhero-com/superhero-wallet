@@ -63,7 +63,7 @@ export default {
     return pick(this.$store.state.observables, ['balance']);
   },
   computed: {
-    ...mapGetters(['tippingSupported']),
+    ...mapGetters(['account', 'tippingSupported']),
     ...mapState('fungibleTokens', ['selectedToken']),
     ...mapState({
       tippingV1: 'tippingV1',
