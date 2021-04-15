@@ -36,6 +36,8 @@ export default process.env.PLATFORM === 'web' && IN_POPUP
     },
     meta: {
       notPersist: true,
+      notRebrand: true,
+      hideTabBar: true,
     },
   }))
   : [];
