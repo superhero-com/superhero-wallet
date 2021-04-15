@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.1](https://github.com/aeternity/superhero-wallet/compare/v0.6.0...v0.6.1) (2021-04-15)
+
+
+### Features
+
+* **claim:** add claim tips menu entry ([ba58bba](https://github.com/aeternity/superhero-wallet/commit/ba58bba9a06008b705be0dd4c0c7f3235435cfdd))
+* **icons:** update rebranded icons ([dfe2f10](https://github.com/aeternity/superhero-wallet/commit/dfe2f10c34424e0ed287a32d66ad5e285db26e5f))
+
+
+### Bug Fixes
+
+* **commitlint:** run commitlint from master ([6d8f8ff](https://github.com/aeternity/superhero-wallet/commit/6d8f8ff9555d2ddf9f09e73621e861f5b30ab289))
+* **height:** use viewport height only for ios cordova ([350a8ab](https://github.com/aeternity/superhero-wallet/commit/350a8ab77532f1224ac520082f9a07a729f0aaf0))
+* **mobile/extension:** use padding-bottom if bottom elements visible ([d585315](https://github.com/aeternity/superhero-wallet/commit/d585315a2ca20cef5f4623539b958ecbee862390))
+* **notifications:** use first name in the list if chainNames presented ([4bad5e7](https://github.com/aeternity/superhero-wallet/commit/4bad5e726a34581ae8d54f8e145315b1b2641942))
+* **retip:** add missing account getter ([84b8801](https://github.com/aeternity/superhero-wallet/commit/84b88014aad06c55901bc0154d62e5aa1c14eb00))
+* **status:** position NodeConnectionStatus properly ([5eb84f9](https://github.com/aeternity/superhero-wallet/commit/5eb84f9560bad9716d0a23c87413ca06768e562c))
+* **tests:** remove header check in last intro screen ([35f07ac](https://github.com/aeternity/superhero-wallet/commit/35f07ac4d57d8aa4fb73e6bcd6b9fbbb7cb732dc))
+* **web-iframe-popups:** make iframe popups notRebranded ([ecc4acb](https://github.com/aeternity/superhero-wallet/commit/ecc4acbac49fb46845a769bc02858bf211dcbb74))
+
+
+### Maintenance
+
+* **tx:** return empty tx list if getTxByAccount returns error ([2b22dc2](https://github.com/aeternity/superhero-wallet/commit/2b22dc25045a7cf4f78fe5f94eb22227e9a4f5d8))
+
 ## [0.6.0](https://github.com/aeternity/superhero-wallet/compare/v0.5.6...v0.6.0) (2021-04-08)
 
 
