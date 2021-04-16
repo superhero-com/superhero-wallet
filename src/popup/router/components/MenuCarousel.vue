@@ -78,7 +78,7 @@ export default {
         prevNextButtons: true,
         pageDots: false,
         freeScroll: false,
-        draggable: process.env.PLATFORM === 'cordova',
+        draggable: window.IS_MOBILE_DEVICE,
         groupCells: 3,
         contain: true,
         selectedAttraction: 0.15,
