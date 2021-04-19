@@ -52,13 +52,15 @@ export default {
      * Converts the token information object into a searchable list
      */
     convertedTokenInfo() {
-      return Object.entries(this.availableTokens).map(([contract, tokenData]) => ({
-        name: tokenData.name,
-        symbol: tokenData.symbol,
-        contract,
-        decimals: tokenData.decimals,
-        convertedBalance: tokenData.convertedBalance,
-      }));
+      return Object.entries(this.availableTokens)
+        .filter(([, tokenData]) => tokenData)
+        .map(([contract, tokenData]) => ({
+          name: tokenData.name,
+          symbol: tokenData.symbol,
+          contract,
+          decimals: tokenData.decimals,
+          convertedBalance: tokenData.convertedBalance,
+        }));
     },
     filteredResults() {
       const tokensInfo = [
