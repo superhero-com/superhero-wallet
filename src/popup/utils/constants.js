@@ -48,7 +48,7 @@ export const defaultNetworks = [
     middlewareUrl: 'https://testnet.aeternity.io/mdw',
     explorerUrl: 'https://testnet.aeternal.io',
     compilerUrl: 'https://latest.compiler.aepps.com',
-    backendUrl: 'https://test-tipping.aeternity.art',
+    backendUrl: 'https://testnet.superhero.aeternity.art',
     tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd',
     tipContractV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu',
     name: 'Testnet',
