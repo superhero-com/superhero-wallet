@@ -118,6 +118,10 @@ body {
   background-color: variables.$color-black;
 }
 
+body.color-bg-3 {
+  background-color: variables.$color-bg-3;
+}
+
 html,
 body {
   height: var(--height);
