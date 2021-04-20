@@ -29,7 +29,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/typography';
 
 .name-row {
   text-decoration: none;
@@ -57,9 +57,10 @@ export default {
 
     .address {
       word-break: break-all;
-      font-size: 12px;
+
+      @extend %face-sans-12-regular;
+
       line-height: 14px;
-      font-family: IBM Plex Mono, monospace;
       display: inline-block;
     }
 

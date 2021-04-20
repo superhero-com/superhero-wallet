@@ -21,7 +21,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/typography';
 
 .tabs-menu {
   padding: 0 15px;
@@ -34,6 +34,8 @@ export default {
     text-decoration: none;
     color: $color-dark-grey;
     display: inline-block;
+
+    @extend %face-sans-15-medium;
 
     &:hover {
       color: $color-light-grey;
