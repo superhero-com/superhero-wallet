@@ -118,6 +118,10 @@ body {
   background-color: variables.$color-black;
 }
 
+body.color-bg-3 {
+  background-color: variables.$color-bg-3;
+}
+
 html,
 body {
   height: var(--height);
@@ -184,14 +188,18 @@ body {
     }
   }
 
-  &.show-header .main {
-    padding-top: 48px;
-    padding-top: calc(48px + env(safe-area-inset-top));
+  &.show-header {
+    background: variables.$color-bg-3;
 
-    @include mixins.desktop {
-      padding-top: 0;
-      min-height: calc(100% - 48px);
-      min-height: calc(100% - 48px - env(safe-area-inset-top));
+    .main {
+      padding-top: 48px;
+      padding-top: calc(48px + env(safe-area-inset-top));
+
+      @include mixins.desktop {
+        padding-top: 0;
+        min-height: calc(100% - 48px);
+        min-height: calc(100% - 48px - env(safe-area-inset-top));
+      }
     }
   }
 

@@ -111,6 +111,14 @@ if (process.env.PLATFORM === 'cordova') {
         store.dispatch('modals/open', { name: 'default', ...i18n.t('modals.mobile-share-error') });
       }
     });
+
+    router.afterEach((to) => {
+      if (['/', '/intro'].includes(to.path)) {
+        document.body.classList.remove('color-bg-3');
+      } else {
+        document.body.classList.add('color-bg-3');
+      }
+    });
   })();
 }
 
