@@ -154,7 +154,7 @@ export default {
   bottom: 0;
   background-color: $color-bg-3;
   padding-top: env(safe-area-inset-top);
-  box-shadow: -4px 0 6px rgba(0, 0, 0, 0.25);
+  box-shadow: -4px 0 6px rgba($color-black, 0.25);
   border-radius: 0 10px 10px 0;
   text-align: right;
 

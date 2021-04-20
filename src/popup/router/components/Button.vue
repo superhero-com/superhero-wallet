@@ -77,7 +77,7 @@ export default {
 
   padding: 0;
   margin: 8px auto;
-  color: $button-text-color;
+  color: $color-white;
   height: 40px;
   line-height: 40px;
 
@@ -89,7 +89,7 @@ export default {
     }
 
     &:active {
-      background: rgba(14, 82, 216, 0.9);
+      background: rgba($color-blue, 0.9);
     }
   }
 
@@ -101,7 +101,7 @@ export default {
     }
 
     &:active {
-      background: rgba(25, 25, 25, 0.8);
+      background: rgba($color-bg-3, 0.8);
     }
   }
 
@@ -113,7 +113,7 @@ export default {
     left: 0;
     right: 0;
     bottom: 0;
-    border: 4px solid rgba(17, 97, 254, 0.44);
+    border: 4px solid rgba($color-blue, 0.44);
     border-radius: 10px;
   }
 
@@ -133,7 +133,7 @@ export default {
   }
 
   &.dark {
-    background: $box-button-color;
+    background: $color-bg-2;
   }
 
   &.small {
@@ -156,8 +156,8 @@ export default {
 
   &.confirm,
   &.danger {
-    background: $secondary-color;
-    color: $white-color;
+    background: $color-blue;
+    color: $color-white;
   }
 
   &.onboarding {
@@ -166,28 +166,28 @@ export default {
     height: 34px;
     border-radius: 5px;
     line-height: 34px;
-    background: $box-button-color;
+    background: $color-bg-2;
     margin: 0;
     margin-right: 10px;
     font-weight: 500;
-    color: #fff;
+    color: $color-white;
 
     &:last-child {
       margin-right: 0;
     }
 
     &.skip {
-      background: #ff5857;
+      background: $color-error;
     }
 
     &.next {
-      background: $secondary-color;
+      background: $color-blue;
     }
 
     &.start {
       margin-left: auto;
       margin-right: 0;
-      background: $secondary-color;
+      background: $color-blue;
     }
   }
 

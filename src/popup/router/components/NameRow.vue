@@ -40,11 +40,11 @@ export default {
   display: flex;
   align-items: center;
   font-size: 14px;
-  border-bottom: 1px solid #12121b;
+  border-bottom: 1px solid $color-bg-3;
   text-align: left;
   border-left: 2px solid transparent;
-  color: $text-color;
-  background: #21222a;
+  color: $color-white;
+  background: $color-bg-1;
 
   .name-info ::v-deep {
     margin-left: 10px;
@@ -66,15 +66,15 @@ export default {
     .active-name,
     .pending-name {
       float: right;
-      background: #2a9cff;
-      color: #fff;
+      background: $color-blue;
+      color: $color-white;
       position: absolute;
       top: 4px;
       right: 4px;
     }
 
     .pending-name {
-      background: $error-color;
+      background: $color-error;
     }
   }
 }

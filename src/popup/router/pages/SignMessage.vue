@@ -48,14 +48,14 @@ export default {
 
 .sign-message {
   .url-bar {
-    color: $text-color;
+    color: $color-white;
   }
 
   .section-title {
     margin-bottom: 8px;
     margin-top: 16px;
     font-size: 16px;
-    color: $white-color;
+    color: $color-white;
     font-weight: 400;
     text-align: left;
   }

@@ -351,7 +351,7 @@ export default {
     }
 
     a {
-      color: $text-color;
+      color: $color-white;
       text-decoration: none;
       margin-left: 10px;
       width: 90%;
@@ -359,7 +359,7 @@ export default {
   }
 
   .validation-msg {
-    color: #ff8c2a;
+    color: $color-error;
     font-size: 15px;
     min-height: 45px;
   }

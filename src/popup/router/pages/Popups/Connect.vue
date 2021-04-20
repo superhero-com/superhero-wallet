@@ -139,8 +139,8 @@ export default {
       z-index: 1;
       width: auto;
       border: 0.125rem solid transparent;
-      -webkit-box-shadow: 0 0 0 2px $secondary-color;
-      box-shadow: 0 0 0 2px $secondary-color;
+      -webkit-box-shadow: 0 0 0 2px $color-blue;
+      box-shadow: 0 0 0 2px $color-blue;
     }
   }
 
@@ -148,7 +148,7 @@ export default {
   .identicon:last-child::after {
     content: '';
     width: 40%;
-    border-top: 2px dashed $white-color;
+    border-top: 2px dashed $color-white;
     height: 1px;
     display: inline-block;
     position: absolute;
@@ -173,9 +173,9 @@ export default {
     padding: 0 0.7rem;
 
     .ae-icon {
-      background: $accent-color;
+      background: $color-green;
       padding: 0.5rem;
-      color: $white-color;
+      color: $color-white;
       border-radius: 50%;
     }
   }

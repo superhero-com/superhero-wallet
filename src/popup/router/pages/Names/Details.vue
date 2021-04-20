@@ -160,6 +160,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "../../../../styles/variables";
+
 .details .name-details {
   padding: 0;
   margin: 0;
@@ -169,7 +171,7 @@ export default {
     list-style: none;
     text-align: left;
     font-size: 12px;
-    border-bottom: 1px solid #47475c;
+    border-bottom: 1px solid $color-border;
     padding-bottom: 10px;
     padding-top: 5px;
 

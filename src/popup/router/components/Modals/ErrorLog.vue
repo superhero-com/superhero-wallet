@@ -62,7 +62,7 @@ export default {
 @import '../../../../styles/variables';
 
 .error-msg {
-  color: $error-color;
+  color: $color-error;
   margin-bottom: 30px;
 }
 

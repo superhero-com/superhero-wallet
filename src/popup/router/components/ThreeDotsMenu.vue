@@ -36,7 +36,7 @@ export default {
   position: relative;
 
   &.active {
-    background-color: $black-1;
+    background-color: $color-bg-3;
   }
 
   &:hover {
@@ -47,7 +47,7 @@ export default {
   ::v-deep .not-bootstrap-modal-content {
     font-size: 0.75rem;
     border-radius: 0.25rem;
-    color: #d9d9d9;
+    color: $color-light-grey;
     background-color: $color-black;
     padding: 0.5rem;
     top: 1.2rem;

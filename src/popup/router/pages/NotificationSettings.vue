@@ -39,16 +39,16 @@ export default {
     text-align: left;
     align-items: center;
     padding: 1.5rem 0.7rem;
-    border-bottom: 2px solid #1c1c24;
+    border-bottom: 2px solid $color-border;
 
     &.unchecked {
-      color: $text-color;
+      color: $color-white;
     }
   }
 
   .header {
     padding: 0.75rem;
-    color: $gray-1;
+    color: $color-light-grey;
     font-size: 1.05rem;
   }
 }

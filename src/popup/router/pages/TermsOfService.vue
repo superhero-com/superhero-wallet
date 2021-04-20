@@ -996,7 +996,7 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    color: $accent-color;
+    color: $color-green;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -1009,7 +1009,7 @@ export default {
 
     span {
       margin-right: auto;
-      color: $accent-color;
+      color: $color-green;
     }
   }
 

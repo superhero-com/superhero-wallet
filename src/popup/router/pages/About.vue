@@ -54,13 +54,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "../../../styles/variables";
+
 .about {
   .logo {
     margin-top: 16px;
   }
 
   .version {
-    color: #909090;
+    color: $color-dark-grey;
   }
 
   .waellet-links a {

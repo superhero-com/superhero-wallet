@@ -174,7 +174,7 @@ export default {
 }
 
 .token-header {
-  background-color: $black-1;
+  background-color: $color-black;
   padding: 20px 30px;
 }
 
@@ -207,20 +207,20 @@ export default {
 }
 
 .section-title {
-  color: $gray-1;
+  color: $color-light-grey;
   font-weight: 500;
   font-size: 15px;
   padding: 12px 15px;
-  background-color: $black-2;
+  background-color: $color-bg-3;
 }
 
 .token-info > div:nth-child(odd) {
-  background-color: $black-2;
+  background-color: $color-bg-3;
 }
 
 .contract ::v-deep .text,
 .community ::v-deep .text {
-  color: $accent-color;
+  color: $color-green;
 }
 
 .contract ::v-deep .text {

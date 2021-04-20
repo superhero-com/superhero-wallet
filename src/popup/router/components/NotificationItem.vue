@@ -129,7 +129,7 @@ export default {
 
       .address {
         font-size: 0.55rem;
-        color: $text-color;
+        color: $color-white;
 
         &.wallet {
           font-size: inherit;
@@ -148,7 +148,7 @@ export default {
 
     .notification-text {
       word-break: break-word;
-      color: $text-color;
+      color: $color-white;
     }
 
     .format-date {
@@ -178,7 +178,7 @@ export default {
     &:hover {
       box-sizing: border-box;
       border-radius: 50%;
-      background-color: $nav-bg-color;
+      background-color: $color-bg-3;
     }
 
     .mark-as-read {

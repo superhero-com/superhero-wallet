@@ -112,12 +112,12 @@ export default {
     }
 
     .amount-currency {
-      color: $text-color;
+      color: $color-white;
     }
 
     .balance-box,
     .amount-box {
-      color: $white-color;
+      color: $color-white;
     }
 
     .ml-15,
@@ -133,7 +133,7 @@ export default {
 
   .error-msg {
     font-weight: normal;
-    color: $input-error-color;
+    color: $color-error;
     font-size: 12px;
     word-break: break-word;
     margin-top: 10px;

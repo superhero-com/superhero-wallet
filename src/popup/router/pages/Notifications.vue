@@ -149,8 +149,8 @@ export default {
       }
 
       &.active {
-        color: $accent-color;
-        border-bottom-color: $accent-color;
+        color: $color-green;
+        border-bottom-color: $color-green;
       }
     }
   }

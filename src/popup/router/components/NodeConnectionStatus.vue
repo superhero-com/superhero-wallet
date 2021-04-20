@@ -46,8 +46,8 @@ export default {
   bottom: calc(48px + env(safe-area-inset-bottom));
   left: 0;
   right: 0;
-  background: $secondary-color;
-  color: $white-color;
+  background: $color-blue;
+  color: $color-white;
   line-height: 2em;
   z-index: 5;
   text-align: center;
@@ -59,6 +59,6 @@ export default {
 }
 
 .connect-node {
-  background: $nav-bg-color;
+  background: $color-bg-3;
 }
 </style>

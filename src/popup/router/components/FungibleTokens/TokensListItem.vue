@@ -61,7 +61,7 @@ export default {
 @import '../../../../styles/variables';
 
 .tokens-list-item {
-  background-color: $black-1;
+  background-color: $color-bg-1;
   margin-bottom: 3px;
   height: 50px;
   display: flex;
@@ -87,14 +87,14 @@ export default {
       justify-content: space-between;
       line-height: 17px;
       font-size: 13px;
-      color: $gray-1;
+      color: $color-light-grey;
 
       .title {
         font-size: 14px;
       }
 
       label {
-        color: $gray-3;
+        color: $color-dark-grey;
       }
 
       :nth-child(1) {

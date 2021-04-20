@@ -91,14 +91,14 @@ export default {
 
   .error-info-title {
     text-transform: uppercase;
-    color: #5b5c63;
+    color: $color-dark-grey;
     text-align: left;
     font-size: 14px;
     margin: 0 0 15px;
   }
 
   .error-info-content {
-    color: $text-color;
+    color: $color-white;
     font-size: 15px;
     margin: 0;
     text-align: left;

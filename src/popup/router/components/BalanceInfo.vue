@@ -108,7 +108,7 @@ export default {
 .balance-info {
   height: 55px;
   display: flex;
-  color: $text-color;
+  color: $color-white;
   font-size: 26px;
   line-height: 34px;
 
@@ -130,7 +130,7 @@ export default {
       }
 
       .token-symbol {
-        color: $secondary-color;
+        color: $color-blue;
       }
 
       &.currenciesgroup {
@@ -140,7 +140,7 @@ export default {
 
         .approx-sign {
           margin-top: 3px;
-          color: $text-color;
+          color: $color-white;
         }
       }
 
@@ -151,7 +151,7 @@ export default {
       }
 
       .expand-arrow {
-        color: $gray-2;
+        color: $color-dark-grey;
       }
     }
   }

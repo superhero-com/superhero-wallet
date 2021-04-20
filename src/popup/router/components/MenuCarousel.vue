@@ -91,7 +91,7 @@ export default {
       width: 24px;
       height: 64px;
       padding: 0;
-      background: #171717;
+      background: $color-bg-2;
       cursor: pointer;
 
       &.previous {

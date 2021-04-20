@@ -38,9 +38,11 @@ export default {
 </script>
 
 <style lang="scss">
+@import "../styles/variables";
+
 body,
 html {
-  background: #16161d;
+  background: $color-black;
 }
 
 #info {
@@ -51,7 +53,7 @@ html {
   transform: translate(-50%, -50%);
   -webkit-transform: translate(-50%, -50%);
   text-align: center;
-  color: #fff;
+  color: $color-white;
 
   .logo {
     margin-bottom: 25px;
@@ -62,8 +64,8 @@ html {
   }
 
   .loader {
-    border: 8px solid #f3f3f3; /* Light grey */
-    border-top: 8px solid #ccc; /* Blue */
+    border: 8px solid $color-light-grey;
+    border-top: 8px solid $color-blue;
     border-radius: 50%;
     width: 70px;
     height: 70px;

@@ -256,6 +256,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import "../../../styles/variables";
+
 .v-tour__target--highlighted {
   -webkit-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6);
   -moz-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6);
@@ -264,7 +266,7 @@ export default {
 
   &::after {
     content: '';
-    border: 1.5px dashed #fff;
+    border: 1.5px dashed $color-white;
     border-radius: 5px;
     background: rgba(42, 156, 255, 0.25);
     position: absolute;
@@ -285,21 +287,21 @@ export default {
 }
 
 .tour .v-tour .v-step {
-  background-color: $tour-bg-color;
+  background-color: $color-bg-3;
   border-radius: 5px;
-  border: 1px solid $secondary-color;
+  border: 1px solid $color-blue;
   padding: 20px 15px 25px 15px;
   min-width: 345px;
 
   .step-header {
-    background-color: $tour-bg-color;
+    background-color: $color-bg-3;
     margin-bottom: 18px;
     font-weight: bold;
     font-size: 16px;
     line-height: 21px;
 
     .step-info {
-      color: $text-color;
+      color: $color-white;
       margin-left: 8px;
     }
   }
@@ -307,12 +309,12 @@ export default {
   .step-content {
     text-align: left;
     font-size: 14px;
-    color: $text-color;
+    color: $color-white;
     line-height: 20px;
   }
 
   .v-step__arrow {
-    border-color: $tour-bg-color;
+    border-color: $color-bg-3;
     border: none;
     width: 35px;
     height: 12px;
@@ -350,7 +352,7 @@ export default {
   left: 0;
   right: 0;
   z-index: 99999;
-  background: $tour-bg-color;
+  background: $color-bg-3;
   padding: 19px;
   padding-top: 0;
   padding-bottom: 15px;
@@ -373,7 +375,7 @@ export default {
     -webkit-clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
     -moz-clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
     clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
-    background: $tour-bg-color;
+    background: $color-bg-3;
   }
 
   .tour-welcome-message {
@@ -397,7 +399,7 @@ export default {
       font-size: 14px;
       font-weight: normal;
       margin: 0;
-      color: $text-color;
+      color: $color-white;
       line-height: 20px;
     }
   }
@@ -411,7 +413,7 @@ export default {
 
 .tour-start {
   position: fixed;
-  background: $tour-start-bg-color;
+  background: $color-border;
   bottom: 0;
   left: 0;
   right: 0;
@@ -420,7 +422,7 @@ export default {
   cursor: pointer;
 
   &:hover {
-    background: #2c2c34;
+    background: $color-bg-1;
   }
 
   .container {
@@ -431,7 +433,7 @@ export default {
   }
 
   span {
-    color: $accent-color;
+    color: $color-green;
     margin-left: 6px;
     font-size: 15px;
     font-weight: bold;

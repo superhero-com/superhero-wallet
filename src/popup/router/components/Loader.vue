@@ -49,7 +49,7 @@ export default {
   }
 
   .ae-loader {
-    border: 0.2em solid $secondary-color;
+    border: 0.2em solid $color-blue;
     border-left-color: transparent;
     border-right-color: transparent;
   }
@@ -58,7 +58,7 @@ export default {
     position: fixed;
     width: 100%;
     height: 100%;
-    background-color: $bg-color;
+    background-color: $color-bg-3;
     top: 0;
     z-index: 8;
 

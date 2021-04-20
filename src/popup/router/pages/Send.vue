@@ -351,7 +351,7 @@ export default {
 
 .send {
   .primary-title-darker {
-    color: $text-color;
+    color: $color-white;
   }
 
   .withdraw.step1 {
@@ -380,7 +380,7 @@ export default {
     }
 
     small {
-      color: $accent-color;
+      color: $color-green;
       display: block;
       width: 100%;
       padding-top: 5px;
@@ -396,7 +396,7 @@ export default {
     }
 
     p:not(:first-of-type) {
-      color: $text-color;
+      color: $color-white;
     }
 
     p > svg {
@@ -406,7 +406,7 @@ export default {
     .info-group {
       .amount {
         font-size: 26px;
-        color: $secondary-color;
+        color: $color-blue;
       }
 
       .currencyamount {

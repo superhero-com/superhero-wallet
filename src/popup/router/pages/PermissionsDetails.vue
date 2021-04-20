@@ -121,7 +121,7 @@ export default {
 .permissions-details {
   font-size: 15px;
   text-align: left;
-  color: $text-color;
+  color: $color-white;
 
   p {
     text-align: center;
@@ -142,19 +142,19 @@ export default {
 
     .highlight {
       font-weight: 700;
-      color: $white-1;
+      color: $color-white;
     }
 
     .token-amount {
       margin-left: auto;
-      color: $white-1;
+      color: $color-white;
     }
   }
 
   .transaction-sign-limit {
     margin: 0 -12px;
     padding: 0 12px;
-    border: 1px solid $border-color;
+    border: 1px solid $color-border;
     border-left: 0;
     border-right: 0;
 
@@ -172,7 +172,7 @@ export default {
         position: absolute;
         top: 10px;
         left: 120px;
-        color: $secondary-color;
+        color: $color-blue;
       }
     }
   }
