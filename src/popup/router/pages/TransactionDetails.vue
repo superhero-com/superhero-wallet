@@ -186,12 +186,7 @@ export default {
 @import '../../../styles/typography';
 
 .transaction-details {
-  overflow-x: hidden;
-
   .header {
-    position: sticky;
-    top: 0;
-    z-index: 1;
     display: flex;
     justify-content: center;
     height: 92px;
