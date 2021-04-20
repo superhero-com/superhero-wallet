@@ -281,6 +281,8 @@ export default {
         }
 
         input {
+          border: none;
+          background: transparent;
           padding: 0;
           color: $color-white;
           height: initial;
