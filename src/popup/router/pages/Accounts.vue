@@ -1,11 +1,11 @@
 <template>
   <div class="accounts">
-    <div class="temp">
+    <Plate class="header">
       <AccountCard
         :account-idx="0"
         v-bind="accounts[0]"
       />
-    </div>
+    </Plate>
     <div
       v-for="(account, idx) in accounts.slice(1)"
       :key="idx + 1"
@@ -28,10 +28,11 @@
 <script>
 import { mapGetters } from 'vuex';
 import AccountCard from '../components/AccountCard';
+import Plate from '../components/Plate';
 import CheckBox from '../components/CheckBox';
 
 export default {
-  components: { AccountCard, CheckBox },
+  components: { AccountCard, Plate, CheckBox },
   computed: mapGetters(['accounts']),
   methods: {
     async toggleAccountShowed(isShowed, index) {
@@ -57,14 +58,11 @@ export default {
   background-color: $color-bg-3;
   padding-bottom: 16px;
 
-  .temp {
+  .header {
     display: flex;
     justify-content: center;
     padding-top: 16px;
     padding-bottom: 24px;
-    border-bottom: 0.5px solid $color-border;
-    border-radius: 0 0 10px 10px;
-    background: linear-gradient(180deg, $color-bg-3 0%, $color-black 100%);
   }
 
   .card-wrapper {
