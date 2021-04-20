@@ -20,13 +20,13 @@
           class="secondary-text f-14 block l-1"
           data-cy="amount"
         >
-          {{ selectedToken ? selectedToken.symbol : $t('ae') }}
+          {{ fungibleToken ? fungibleToken.symbol : $t('ae') }}
         </span>
         <span
           class="f-14 block l-1 amount-currency"
           data-cy="amount-currency"
         >
-          {{ selectedToken ? formatCurrency(0) : formatCurrency(currencyAmount) }}
+          {{ fungibleToken ? formatCurrency(0) : formatCurrency(currencyAmount) }}
         </span>
       </div>
       <div class="balance-box">
@@ -37,14 +37,14 @@
           class="secondary-text f-14 block l-1"
           data-cy="balance"
         >
-          {{ selectedToken ? selectedToken.convertedBalance : tokenBalance.toFixed(2) }}
-          {{ selectedToken ? selectedToken.symbol : $t('ae') }}
+          {{ fungibleToken ? fungibleToken.convertedBalance : tokenBalance.toFixed(2) }}
+          {{ fungibleToken ? fungibleToken.symbol : $t('ae') }}
         </span>
         <span
           class="f-14 block l-1 amount-currency"
           data-cy="balance-currency"
         >
-          {{ selectedToken ? formatCurrency(0) : formatCurrency(balanceCurrency) }}
+          {{ fungibleToken ? formatCurrency(0) : formatCurrency(balanceCurrency) }}
         </span>
       </div>
     </div>
@@ -72,13 +72,18 @@ export default {
     errorMsg: String,
     label: String,
     readonly: Boolean,
+    nativeToken: Boolean,
   },
   subscriptions() {
     return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
   },
   computed: {
     ...mapGetters(['formatCurrency']),
-    ...mapState('fungibleTokens', ['selectedToken']),
+    ...mapState({
+      fungibleToken({ fungibleTokens }) {
+        return this.nativeToken ? null : fungibleTokens.selectedToken;
+      },
+    }),
     currencyAmount() {
       return ((this.value || 0) * this.$store.getters.currentCurrencyRate).toFixed(2);
     },

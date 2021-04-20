@@ -8,6 +8,7 @@
       <AmountSend
         v-if="txWithTotal.amount"
         :value="txWithTotal.amount"
+        native-token
         readonly
       />
     </DetailsItem>

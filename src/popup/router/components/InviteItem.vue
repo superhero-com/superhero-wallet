@@ -51,6 +51,7 @@
     <template v-else>
       <AmountSend
         v-model="topUpAmount"
+        native-token
         :label="$t('pages.invite.top-up-with')"
       />
       <div class="centered-buttons">
