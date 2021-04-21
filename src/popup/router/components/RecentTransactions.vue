@@ -64,12 +64,19 @@ export default {
       limit: 10,
     };
   },
+  computed: mapState(['tourStartBar', 'transactions', 'accountSelectedIdx']),
+  watch: {
+    accountSelectedIdx() {
+      this.$store.commit('setTransactions', []);
+      this.loading = true;
+      this.updateTransactions();
+    },
+  },
   mounted() {
     if (this.transactions.latest.length) this.loading = false;
     this.polling = setInterval(() => this.updateTransactions(), 5000);
     this.$once('hook:beforeDestroy', () => clearInterval(this.polling));
   },
-  computed: mapState(['tourStartBar', 'transactions']),
   methods: {
     async updateTransactions() {
       this.$store.commit(
