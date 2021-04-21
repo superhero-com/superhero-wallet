@@ -44,7 +44,7 @@
     </div>
     <div data-cy="tip-container">
       <template v-if="!confirmMode">
-        <AmountSend v-model="amount" />
+        <AmountInput v-model="amount" />
         <Textarea
           v-model="note"
           :placeholder="$t('pages.tipPage.titlePlaceholder')"
@@ -103,7 +103,7 @@ import { calculateFee } from '../../utils/constants';
 import {
   escapeSpecialChars, aeToAettos, validateTipUrl, convertToken,
 } from '../../utils/helper';
-import AmountSend from '../components/AmountSend';
+import AmountInput from '../components/AmountInput';
 import Textarea from '../components/Textarea';
 import InputField from '../components/InputField';
 import UrlStatus from '../components/UrlStatus';
@@ -114,7 +114,7 @@ import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
   components: {
-    AmountSend,
+    AmountInput,
     Textarea,
     InputField,
     UrlStatus,
@@ -356,6 +356,10 @@ export default {
       margin-left: 10px;
       width: 90%;
     }
+  }
+
+  .amount-input {
+    margin-bottom: 24px;
   }
 
   .validation-msg {

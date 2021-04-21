@@ -36,10 +36,9 @@
           >
             {{ $t('pages.send.error') }}
           </div>
-          <AmountSend
+          <AmountInput
             v-model="form.amount"
-            data-cy="amount-box"
-            :amount-error="form.amount.length > 0 && form.amount <= 0"
+            :error="form.amount.length > 0 && form.amount <= 0"
           />
           <div class="flex flex-align-center flex-justify-between">
             <Button
@@ -174,7 +173,7 @@ import { calculateFee } from '../../utils/constants';
 import {
   checkAddress, checkAensName, aeToAettos, convertToken,
 } from '../../utils/helper';
-import AmountSend from '../components/AmountSend';
+import AmountInput from '../components/AmountInput';
 import InfoGroup from '../components/InfoGroup';
 import Textarea from '../components/Textarea';
 import Button from '../components/Button';
@@ -186,7 +185,7 @@ import AlertExclamination from '../../../icons/alert-exclamation.svg?vue-compone
 export default {
   name: 'Send',
   components: {
-    AmountSend,
+    AmountInput,
     Textarea,
     Button,
     AccountInfo,
@@ -377,6 +376,10 @@ export default {
       color: $color-error;
       font-size: 12px;
       text-align: left;
+    }
+
+    .amount-input {
+      margin-bottom: 24px;
     }
 
     small {

@@ -669,7 +669,6 @@
       "next": "Send Tip",
       "url": "Send Tip to",
       "to": "to",
-      "amountPlaceholder": "Enter amount",
       "amountLabel": "Amount",
       "empty": "Empty",
       "availableLabel": "Available",

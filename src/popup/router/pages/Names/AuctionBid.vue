@@ -1,10 +1,10 @@
 <template>
   <div class="auction-bid">
     <h4>{{ $t('pages.names.auctions.bid-on') }} {{ name }}</h4>
-    <AmountSend
+    <AmountInput
       v-model="amount"
-      :amount-error="!+amount"
-      :error-msg="amountError || ''"
+      :error="!+amount"
+      :error-message="amountError || ''"
     />
     <Button
       extend
@@ -36,11 +36,11 @@
 import { pick } from 'lodash-es';
 import { blocksToRelativeTime } from '../../../../filters/toRelativeTime';
 import Button from '../../components/Button';
-import AmountSend from '../../components/AmountSend';
+import AmountInput from '../../components/AmountInput';
 import { aeToAettos } from '../../../utils/helper';
 
 export default {
-  components: { Button, AmountSend },
+  components: { Button, AmountInput },
   filters: { blocksToRelativeTime },
   props: {
     name: { type: String, required: true },

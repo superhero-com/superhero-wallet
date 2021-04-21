@@ -733,7 +733,6 @@
       "next": "发送小费",
       "url": "发送小费到",
       "to": "到",
-      "amountPlaceholder": "输入数量",
       "amountLabel": "数量",
       "empty": "清空",
       "availableLabel": "可用的",
