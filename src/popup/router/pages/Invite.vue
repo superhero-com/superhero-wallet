@@ -7,6 +7,7 @@
       </p>
       <AmountSend
         v-model="amount"
+        native-token
         :label="$t('pages.invite.tip-attached')"
       />
       <Button
