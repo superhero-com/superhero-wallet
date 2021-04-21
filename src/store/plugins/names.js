@@ -39,10 +39,9 @@ export default (store) => {
     actions: {
       async fetchOwned({
         state: { owned },
-        rootGetters: { activeNetwork, accounts },
+        rootGetters: { accounts },
         rootState: { middleware },
         commit,
-        getters: { getDefault },
         dispatch,
       }) {
         if (!middleware) return;
@@ -69,28 +68,6 @@ export default (store) => {
         ).then((arr) => arr.flat(2));
 
         commit('set', names);
-
-        const claimed = names.filter((n) => !n.pending).map(({ name }) => name);
-        accounts.forEach(async ({ address }) => {
-          const defaultName = getDefault(address);
-          if (!claimed.length) {
-            if (defaultName) commit('setDefault', { address });
-            return;
-          }
-          const { preferredChainName: defaultNameBackend } = await fetchJson(
-            `${activeNetwork.backendUrl}/profile/${address}`,
-          ).catch(() => ({}));
-          if (!claimed.includes(defaultNameBackend)) {
-            await dispatch('setDefault', {
-              address,
-              name: names.filter((n) => !n.pending && n.owner === address)[0]?.name,
-            });
-            return;
-          }
-          if (defaultName !== defaultNameBackend) {
-            commit('setDefault', { address, name: defaultNameBackend });
-          }
-        });
       },
       async fetchAuctions({ rootState: { middleware } }) {
         if (!middleware) return [];
@@ -135,6 +112,16 @@ export default (store) => {
           dispatch('modals/open', { name: 'default', msg: e.message }, { root: true });
         }
       },
+      async setDefaults(
+        { rootGetters: { activeNetwork, accounts }, commit },
+      ) {
+        await Promise.all(accounts.map(async ({ address }) => {
+          const { preferredChainName: defaultNameBackend } = await fetchJson(
+            `${activeNetwork.backendUrl}/profile/${address}`,
+          ).catch(() => null);
+          commit('setDefault', { address, name: defaultNameBackend });
+        }));
+      },
       async setDefault(
         { rootState: { sdk }, commit, rootGetters: { activeNetwork } },
         { name, address },
@@ -173,6 +160,7 @@ export default (store) => {
       if (!middleware) return;
 
       await store.dispatch('names/fetchOwned');
+      await store.dispatch('names/setDefaults');
 
       const height = await store.state.sdk.height();
       await Promise.all(
@@ -190,6 +178,7 @@ export default (store) => {
     async () => {
       if (!store.state.middleware) return;
       await store.dispatch('names/fetchOwned');
+      await store.dispatch('names/setDefaults');
     },
     { immediate: true },
   );
