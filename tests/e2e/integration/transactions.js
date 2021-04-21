@@ -1,42 +1,17 @@
 import { TXS_PER_PAGE } from '../../../src/popup/utils/constants';
-import { testAccount } from '../../../src/popup/utils/config';
-import { formatDate, formatTime } from '../../../src/popup/utils';
 
 describe('Tests cases for transactions page', () => {
-  beforeEach(() => {
-    cy.login();
-  });
-
   it('Load transactions, load additional transactions on scroll', () => {
-    cy.openTransactions().get('[data-cy=list]').children().should('have.length', TXS_PER_PAGE);
-
+    cy.login()
+      .openTransactions()
+      .get('[data-cy=list]')
+      .children()
+      .should((el) => expect(el).to.have.length.greaterThan(1));
     cy.scrollTo('bottom')
       .get('[data-cy=loader]')
       .should('be.visible')
       .get('[data-cy=list]')
       .children()
-      .should('have.length', TXS_PER_PAGE * 2);
-  });
-
-  it('Render transaction item', () => {
-    cy.openTransactions()
-      .request(
-        `https://testnet.aeternity.io/mdw/txs/backward?account=${testAccount.address}&limit=1`,
-      )
-      .then(({ body }) => {
-        const {
-          micro_time: time,
-          tx: { amount },
-        } = body.data[0];
-        cy.get('[data-cy=list] > a')
-          .eq(0)
-          .then((e) => {
-            cy.wrap(e)
-              .find('[data-cy=amount]')
-              .should('contain', amount / 10 ** 18);
-            cy.wrap(e).find('[data-cy=date]').should('contain', formatDate(time));
-            cy.wrap(e).find('[data-cy=time]').should('contain', formatTime(time));
-          });
-      });
+      .should((el) => expect(el).to.have.length.greaterThan(TXS_PER_PAGE + 1));
   });
 });
