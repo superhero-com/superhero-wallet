@@ -146,7 +146,7 @@ export default {
         params: {
           placement: 'bottom',
         },
-        route: '/tip',
+        route: '/tips',
       },
       {
         route: '/account',

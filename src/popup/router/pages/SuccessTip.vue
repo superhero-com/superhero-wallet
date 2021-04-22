@@ -50,7 +50,7 @@
         <Button
           half
           data-cy="to-tips"
-          @click="$router.push('/tip')"
+          @click="$router.push('/tips')"
         >
           {{ $t('pages.successTip.sendMore') }}
         </Button>

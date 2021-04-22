@@ -1,5 +1,5 @@
 <template>
-  <div class="claim-tips">
+  <div class="tips-claim">
     <p class="primary-title text-left mb-8 f-16">
       {{ $t('pages.claimTips.urlToClaim') }}
     </p>
@@ -95,7 +95,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.claim-tips .input-field {
+.tips-claim .input-field {
   margin: 20px 0;
 }
 </style>

@@ -71,7 +71,7 @@ describe('Test cases for tip page', () => {
       .click()
       .get('[data-cy=tip-container]')
       .should('be.visible')
-      .urlEquals('/tip');
+      .urlEquals('/tips');
   });
 
   it('Redirect to account page from success tip', () => {

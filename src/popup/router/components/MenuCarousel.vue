@@ -8,14 +8,14 @@
       <Balances /> {{ $t('pages.titles.balances') }}
     </BoxButton>
     <BoxButton
-      to="/send"
+      :to="{ name: 'payments-send' }"
       class="tour__step7"
       data-cy="send"
     >
       <Payments /> {{ $t('pages.titles.payments') }}
     </BoxButton>
     <BoxButton
-      to="/tip"
+      :to="{ name: 'tips-send' }"
       class="tour__step2"
       data-cy="tip-button"
     >

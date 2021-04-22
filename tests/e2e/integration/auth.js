@@ -12,9 +12,9 @@ describe('Test cases for login functionality', () => {
       .logout()
       .shouldRedirect('/account', '/')
       .shouldRedirect('/intro', '/intro')
-      .shouldRedirect('/tip', '/')
+      .shouldRedirect('/tips', '/')
       .shouldRedirect('/settings', '/')
-      .shouldRedirect('/send', '/')
+      .shouldRedirect('/payments', '/')
       .shouldRedirect('/receive', '/')
       .shouldRedirect('/import-account', '/import-account')
       .shouldRedirect('/about/termsOfService', '/about/termsOfService');

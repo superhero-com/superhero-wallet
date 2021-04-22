@@ -1,4 +1,4 @@
-const links = ['settings', 'tip', 'invite', 'transactions', 'names', 'about'];
+const links = ['settings', 'tips', 'invite', 'transactions', 'names', 'about'];
 
 describe('Test cases for menu sidebar component', () => {
   beforeEach(() => {

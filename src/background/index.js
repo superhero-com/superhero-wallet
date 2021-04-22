@@ -21,7 +21,7 @@ const postPhishingData = async (data) => {
 };
 
 const openTipPopup = (pageUrl) => browser.windows.create({
-  url: browser.extension.getURL(`./popup/popup.html#/tip?url=${encodeURIComponent(pageUrl)}`),
+  url: browser.extension.getURL(`./popup/popup.html#/tips?url=${encodeURIComponent(pageUrl)}`),
   type: 'popup',
   height: 600,
   width: 375,
