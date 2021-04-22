@@ -38,7 +38,7 @@ export default {
 .tab-bar {
   display: flex;
   background-color: variables.$color-bg-3;
-  padding-bottom: env(safe-area-inset-bottom);
+  border-bottom: env(safe-area-inset-bottom) solid variables.$color-bg-2;
 
   > a {
     height: 48px;
@@ -48,7 +48,7 @@ export default {
     align-items: center;
     border-radius: 2px 2px 0 0;
     background-color: variables.$color-bg-2;
-    border: 1px solid variables.$color-bg-3;
+    margin: 1px;
     color: variables.$color-white;
 
     svg {
