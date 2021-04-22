@@ -11,6 +11,8 @@ const store = new Vuex.Store({
   modules: { permissions },
   getters: {
     'names/getDefault': () => (address) => `placeholder name for ${address}`,
+    wallet: getters.wallet,
+    accounts: getters.accounts,
     account: getters.account,
     isLoggedIn: getters.isLoggedIn,
     networks: getters.networks,
