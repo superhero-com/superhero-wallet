@@ -24,20 +24,20 @@ export default {
 .details-row {
   font-size: 15px;
   padding: 9px 15px;
-  background-color: $bg-color;
+  background-color: $color-bg-3;
   display: flex;
 
   .title {
-    color: $gray-2;
+    color: $color-dark-grey;
     font-weight: 500;
     width: 100%;
   }
 
   .text {
-    color: $white-1;
+    color: $color-white;
 
     .primary {
-      color: $accent-color;
+      color: $color-green;
     }
   }
 }

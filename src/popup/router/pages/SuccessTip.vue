@@ -136,12 +136,12 @@ export default {
   }
 
   .note {
-    color: $text-color;
+    color: $color-white;
     font-size: $base-font-size;
     min-height: 100px;
     border-radius: 5px;
-    border: 2px solid $border-color;
-    background: $input-bg-color;
+    border: 2px solid $color-border;
+    background: $color-bg-2;
     padding: 15px;
   }
 }

@@ -261,7 +261,7 @@ export default {
 .networks .network-row {
   display: flex;
   align-items: center;
-  border-top: 1px solid #100c0d;
+  border-top: 1px solid $color-border;
   padding: 12px 0;
   text-align: left;
 
@@ -282,7 +282,7 @@ export default {
 
   .expand {
     font-size: 14px;
-    color: $white-1;
+    color: $color-white;
     width: 100%;
     padding: 0;
 

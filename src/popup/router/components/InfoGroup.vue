@@ -43,7 +43,7 @@ export default {
   }
 
   a {
-    color: $accent-color;
+    color: $color-green;
     font-size: 11px;
     letter-spacing: -0.3px;
   }

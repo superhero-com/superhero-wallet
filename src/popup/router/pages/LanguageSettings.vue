@@ -75,7 +75,7 @@ export default {
   }
 
   small {
-    color: #9c9c9c;
+    color: $color-light-grey;
     text-align: left;
     width: 100%;
     margin: 0 0 10px;
@@ -86,7 +86,6 @@ export default {
   .settings {
     li {
       list-style-type: none;
-      color: #717c87;
       margin: 0;
     }
 
@@ -98,11 +97,11 @@ export default {
     button {
       font-size: 14px;
       width: 100%;
-      color: $button-text-color;
+      color: $color-white;
       margin: 0;
       padding: 0 1rem;
       white-space: nowrap;
-      background-color: #505058;
+      background-color: $color-bg-2;
       border-radius: 4px;
       text-align: center;
       display: inline-flex;
@@ -124,7 +123,7 @@ export default {
         width: 30%;
         text-align: center;
         margin: auto;
-        color: #fff;
+        color: $color-white;
         cursor: pointer;
 
         div {

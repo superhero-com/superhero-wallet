@@ -1,3 +1,5 @@
+@import "../../../../styles/variables";
+
 .popup-aex2 {
   padding-top: env(safe-area-inset-top);
   max-height: 600px;
@@ -19,7 +21,7 @@
 
   ul li {
     border-width: 1px;
-    border-color: #424242;
+    border-color: $color-border;
   }
 
   .permission-set {

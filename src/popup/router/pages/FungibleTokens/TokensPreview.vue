@@ -68,11 +68,11 @@ export default {
 .menu {
   margin-top: 3px;
   padding: 7px;
-  background-color: $black-2;
+  background-color: $color-bg-3;
 }
 
 .menu-item {
-  color: $gray-2;
+  color: $color-dark-grey;
   padding: 10px 18px;
   font-size: 15px;
   font-weight: 500;
@@ -86,8 +86,8 @@ export default {
   }
 
   &.active {
-    color: $accent-color;
-    background-color: $black-3;
+    color: $color-green;
+    background-color: $color-bg-3;
   }
 }
 </style>

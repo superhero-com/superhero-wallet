@@ -189,9 +189,9 @@ export default {
 .invite-row {
   padding: 1rem;
   width: 100%;
-  border-bottom: 2px solid $black-1;
+  border-bottom: 2px solid $color-border;
   text-align: left;
-  color: $text-color;
+  color: $color-white;
   position: relative;
 
   .invite-link {
@@ -204,13 +204,13 @@ export default {
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
-      color: $white-1;
+      color: $color-white;
     }
   }
 
   .invite-link-copy {
     padding: 0;
-    color: $gray-2;
+    color: $color-dark-grey;
   }
 
   .invite-info {
@@ -218,7 +218,7 @@ export default {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-    color: $gray-2;
+    color: $color-dark-grey;
 
     .token-amount {
       flex-grow: 1;
@@ -226,7 +226,7 @@ export default {
 
     .date {
       font-size: 11px;
-      color: $text-color;
+      color: $color-white;
     }
   }
 
@@ -244,7 +244,7 @@ export default {
   }
 
   .copied-alert {
-    color: $button-color;
+    color: $color-blue;
     margin-right: 7px;
   }
 }

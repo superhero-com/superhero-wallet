@@ -50,7 +50,6 @@ p {
   -webkit-transform: translateX(-50%);
   -ms-transform: translateX(-50%);
   width: $extension-width;
-  background: $bg-color;
   padding: 10px 0;
 
   button {
@@ -103,11 +102,11 @@ p {
 
 .balance {
   font-weight: bold;
-  color: $color-neutral-negative-1;
+  color: $color-light-grey;
   font-family: monospace;
 
   &.invert {
-    color: #fff;
+    color: $color-white;
   }
 
   &::after {
@@ -135,7 +134,7 @@ button:focus {
 button {
   background: none;
   border: none;
-  color: #717c87;
+  color: $color-light-grey;
 }
 
 .identicon {
@@ -157,12 +156,8 @@ button {
   pointer-events: none;
 }
 
-.primary-bg {
-  background: $bg-color;
-}
-
 .primary-title {
-  color: $white-color;
+  color: $color-white;
   font-size: 18px;
   font-weight: 400;
   margin-bottom: 27px;
@@ -170,11 +165,11 @@ button {
 }
 
 .secondary-text {
-  color: $secondary-color;
+  color: $color-blue;
 }
 
 .error-msg {
-  color: $input-error-color;
+  color: $color-error;
   margin-top: 22px;
   font-size: 0.88rem;
 }
@@ -222,7 +217,7 @@ button {
 .balance-box {
   width: 80px;
   text-align: left;
-  border-left: 1px solid $border-color;
+  border-left: 1px solid $color-border;
   padding-left: 10px;
 }
 
@@ -238,7 +233,7 @@ button {
   border-radius: 5px;
   padding: 10px;
   font-size: 14px;
-  border: 1px dashed $text-color;
+  border: 1px dashed $color-white;
   margin-top: 5px;
   margin-bottom: 30px;
   text-align: left;

@@ -31,6 +31,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "../../../styles/variables";
+
 .panel-item {
   text-decoration: none;
   transition: 0.4s;
@@ -39,7 +41,7 @@ export default {
   width: 100%;
   display: block;
   font-size: 14px;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid $color-light-grey;
   text-align: left;
   border-left: 2px solid transparent;
 
@@ -48,8 +50,8 @@ export default {
   }
 
   &:hover {
-    border-left: 2px solid #2a9cff;
-    background: rgba(99, 99, 99, 0.5);
+    border-left: 2px solid $color-blue;
+    background: rgba($color-dark-grey, 0.5);
 
     .arrow-right {
       right: 20px;
@@ -85,7 +87,7 @@ export default {
   }
 
   .panel-item-info {
-    color: #ccc;
+    color: $color-light-grey;
     font-weight: normal;
     margin: 5px 0;
     width: 90%;

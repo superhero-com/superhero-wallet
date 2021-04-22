@@ -99,7 +99,7 @@ export default {
   .top {
     margin: 0 -20px;
     padding: 20px;
-    background-color: $black-1;
+    background-color: $color-black;
   }
 
   .section-title {
@@ -107,7 +107,7 @@ export default {
     text-align: left;
     margin-top: 0;
     margin-bottom: 0;
-    color: $gray-1;
+    color: $color-light-grey;
     font-weight: 400;
   }
 
@@ -121,12 +121,12 @@ export default {
   }
 
   .generated-links {
-    background-color: $transactions-bg;
+    background-color: $color-bg-3;
     margin: 0 -20px;
 
     .section-title {
       padding: 15px 20px;
-      border-bottom: 2px solid $black-1;
+      border-bottom: 2px solid $color-border;
     }
   }
 }

@@ -175,7 +175,7 @@ export default {
     align-items: center;
 
     a {
-      color: $text-color;
+      color: $color-white;
       flex-grow: 1;
       text-decoration: none;
       width: 90%;
@@ -187,7 +187,7 @@ export default {
     margin-bottom: 8px;
     margin-top: 16px;
     font-size: 16px;
-    color: $white-color;
+    color: $color-white;
     font-weight: 400;
     text-align: left;
   }

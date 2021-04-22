@@ -121,7 +121,7 @@ p {
 }
 
 a {
-  color: $bg-color;
+  color: $color-bg-3;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -131,6 +131,6 @@ a {
 }
 
 .ae-main {
-  background: $bg-color;
+  background: $color-bg-3;
 }
 </style>

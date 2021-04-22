@@ -104,11 +104,11 @@ export default {
   }
 
   .ae-badge {
-    background: $secondary-color;
-    color: $white-color;
-    -webkit-box-shadow: 0 0 0 2px $secondary-color;
-    box-shadow: 0 0 0 2px $secondary-color;
-    border: 2px solid $bg-color;
+    background: $color-blue;
+    color: $color-white;
+    -webkit-box-shadow: 0 0 0 2px $color-blue;
+    box-shadow: 0 0 0 2px $color-blue;
+    border: 2px solid $color-bg-3;
   }
 
   .amount-send-container {

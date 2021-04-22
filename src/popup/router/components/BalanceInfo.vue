@@ -103,19 +103,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@import '../../../styles/typography';
 
 .balance-info {
   height: 55px;
   display: flex;
-  color: $text-color;
-  font-size: 26px;
-  line-height: 34px;
+  color: $color-white;
 
   .balance-wrapper {
     margin: 0 auto;
 
     .balance-dropdown {
+      margin-top: 6px;
       margin-left: auto;
       position: relative;
       width: max-content;
@@ -123,35 +122,50 @@ export default {
       .dropdown {
         position: absolute;
 
-        ::v-deep .custom > button,
-        .custom > button:active:not(:disabled) {
-          opacity: 0;
+        ::v-deep {
+          .custom > button,
+          .custom > button:active:not(:disabled) {
+            opacity: 0;
+          }
+
+          .custom > button,
+          .custom .list .ae-button {
+            @extend %face-sans-16-regular;
+          }
         }
       }
 
       .token-symbol {
-        color: $secondary-color;
+        color: $color-blue;
       }
 
       &.currenciesgroup {
-        font-size: 18px;
-        line-height: 24px;
-        font-weight: 500;
+        margin-top: 6px;
 
         .approx-sign {
           margin-top: 3px;
-          color: $text-color;
+          color: $color-white;
         }
+
+        span {
+          @extend %face-sans-16-regular;
+        }
+      }
+
+      .display-value,
+      .token-symbol {
+        @extend %face-sans-20-regular;
+
+        vertical-align: text-top;
       }
 
       .display-value {
         display: inline-block;
         max-width: 200px;
-        vertical-align: text-top;
       }
 
       .expand-arrow {
-        color: $gray-2;
+        color: $color-dark-grey;
       }
     }
   }

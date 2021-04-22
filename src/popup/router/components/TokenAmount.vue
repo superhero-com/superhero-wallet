@@ -55,7 +55,7 @@ export default {
 .token-amount {
   @extend %face-sans-14-regular;
 
-  color: $white-color;
+  color: $color-white;
   line-height: 24px;
 
   .symbol {
@@ -65,7 +65,7 @@ export default {
   }
 
   .text {
-    color: $gray-2;
+    color: $color-dark-grey;
   }
 
   &.sent {

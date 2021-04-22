@@ -18,13 +18,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "../../../styles/variables";
+
 .details-item {
   word-break: break-all;
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin: 10px 0;
-  border-bottom: 1px solid #12121b;
+  border-bottom: 1px solid $color-border;
   padding: 10px;
   font-size: 14px;
 

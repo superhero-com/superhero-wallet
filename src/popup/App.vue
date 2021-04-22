@@ -172,7 +172,7 @@ body {
 
   @extend %face-sans-16-regular;
 
-  color: variables.$white-color;
+  color: variables.$color-white;
 
   &.show-sidebar {
     overflow-y: hidden;
@@ -243,7 +243,7 @@ body {
       flex-direction: row-reverse;
     }
 
-    background: rgba(#000, 0.6);
+    background: rgba(variables.$color-black, 0.6);
     z-index: 10;
   }
 

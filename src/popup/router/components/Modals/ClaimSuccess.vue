@@ -36,6 +36,6 @@ export default {
 @import '../../../../styles/variables';
 
 .claimed {
-  color: $secondary-color;
+  color: $color-blue;
 }
 </style>
