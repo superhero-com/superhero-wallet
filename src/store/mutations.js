@@ -1,3 +1,4 @@
+/* eslint no-param-reassign: ["error", { "ignorePropertyModificationsFor": ["state"] }] */
 import Vue from 'vue';
 import { defaultNetwork } from '../popup/utils/constants';
 
@@ -120,5 +121,11 @@ export default {
   toggleAccountShowed(state, idx) {
     if (state.accountSelectedIdx === idx) state.accountSelectedIdx = 0;
     Vue.set(state.accs[idx], 'showed', !state.accs[idx].showed);
+  },
+  setSdkAccounts({ sdk }, list) {
+    sdk.accounts = list.reduce((p, { address }) => ({ ...p, [address]: {} }), {});
+  },
+  selectSdkAccount({ sdk }, address) {
+    sdk.selectAccount(address);
   },
 };
