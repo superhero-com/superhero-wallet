@@ -13,10 +13,10 @@
       <a class="link-sm text-left">{{ tip.url }}</a>
     </div>
 
-    <AmountSend
+    <AmountInput
       v-model="amount"
       :amount-error="amount && validationStatus.error"
-      :error-msg="validationStatus.msg"
+      :error-message="validationStatus.msg"
     />
     <div class="tip-note-preview mt-15">
       {{ tip.title }}
@@ -44,14 +44,14 @@ import tipping from 'tipping-contract/util/tippingContractUtil';
 import { MAGNITUDE, calculateFee } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
 import deeplinkApi from '../../../mixins/deeplinkApi';
-import AmountSend from '../components/AmountSend';
+import AmountInput from '../components/AmountInput';
 import UrlStatus from '../components/UrlStatus';
 import Button from '../components/Button';
 import BalanceInfo from '../components/BalanceInfo';
 
 export default {
   components: {
-    AmountSend, UrlStatus, Button, BalanceInfo,
+    AmountInput, UrlStatus, Button, BalanceInfo,
   },
   mixins: [deeplinkApi],
   data: () => ({

@@ -5,7 +5,7 @@
     </DetailsItem>
 
     <DetailsItem>
-      <AmountSend
+      <AmountInput
         v-if="txWithTotal.amount"
         :value="txWithTotal.amount"
         native-token
@@ -48,10 +48,10 @@
 import { OBJECT_ID_TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
 import { aettosToAe } from '../../utils/helper';
 import DetailsItem from './DetailsItemOld';
-import AmountSend from './AmountSend';
+import AmountInput from './AmountInput';
 
 export default {
-  components: { DetailsItem, AmountSend },
+  components: { DetailsItem, AmountInput },
   props: {
     transaction: { type: Object, required: true },
   },
@@ -111,7 +111,7 @@ export default {
     border: 2px solid $color-bg-3;
   }
 
-  .amount-send-container {
+  .amount-input {
     width: 100%;
     margin: 0;
   }

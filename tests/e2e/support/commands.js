@@ -214,7 +214,7 @@ Cypress.Commands.add('pendingTx', (tx = {}) => {
   });
 });
 
-Cypress.Commands.add('enterAmountSend', (amount = 0) => {
+Cypress.Commands.add('enterAmountInput', (amount = 0) => {
   cy.get('[data-cy=input-number]').clear().type(amount);
 });
 

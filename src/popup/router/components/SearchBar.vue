@@ -32,7 +32,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.search-bar ::v-deep .container {
+.search-bar ::v-deep .wrapper:not(:focus-within) {
   border-radius: 0;
 }
 </style>

@@ -49,7 +49,7 @@
       </Button>
     </div>
     <template v-else>
-      <AmountSend
+      <AmountInput
         v-model="topUpAmount"
         native-token
         :label="$t('pages.invite.top-up-with')"
@@ -81,14 +81,14 @@ import { pick } from 'lodash-es';
 import { mapState } from 'vuex';
 import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk/es';
 import TokenAmount from './TokenAmount';
-import AmountSend from './AmountSend';
+import AmountInput from './AmountInput';
 import Button from './Button';
 import CopyIcon from '../../../icons/copy-old.svg?vue-component';
 import { formatDate } from '../../utils';
 
 export default {
   components: {
-    TokenAmount, Button, AmountSend, CopyIcon,
+    TokenAmount, Button, AmountInput, CopyIcon,
   },
   filters: { formatDate },
   props: {
@@ -230,7 +230,7 @@ export default {
     }
   }
 
-  .amount-send-container {
+  .amount-input {
     margin: 0;
   }
 
