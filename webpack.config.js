@@ -106,6 +106,10 @@ const getConfig = (platform) => {
         },
       ],
     },
+    stats: {
+      entrypoints: false,
+      children: false,
+    },
     plugins: [
       new CleanWebpackPlugin({
         cleanStaleWebpackAssets: false,
