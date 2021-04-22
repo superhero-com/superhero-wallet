@@ -65,19 +65,11 @@ const getConfig = (platform) => {
         },
         {
           test: /\.css$/,
-          use: [MiniCssExtractPlugin.loader, { loader: 'css-loader', options: { minimize: true } }],
+          use: [MiniCssExtractPlugin.loader, 'css-loader'],
         },
         {
           test: /\.scss$/,
-          use: [
-            MiniCssExtractPlugin.loader,
-            { loader: 'css-loader', options: { minimize: true } },
-            { loader: 'sass-loader', options: { minimize: true } },
-          ],
-        },
-        {
-          test: /\.sass$/,
-          use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader?indentedSyntax'],
+          use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
         },
         {
           test: /\.(png|jpg|gif|svg|ico|woff2|woff)$/,
