@@ -41,6 +41,8 @@ export default {
   border-bottom: env(safe-area-inset-bottom) solid variables.$color-bg-2;
 
   > a {
+    $sideBorderWidth: calc(1px - min(env(safe-area-inset-bottom), 1px));
+
     height: 48px;
     display: flex;
     flex-grow: 1;
@@ -48,8 +50,16 @@ export default {
     align-items: center;
     border-radius: 2px 2px 0 0;
     background-color: variables.$color-bg-2;
-    margin: 1px;
+    margin: 1px 1px $sideBorderWidth;
     color: variables.$color-white;
+
+    &:first-child {
+      margin-left: $sideBorderWidth;
+    }
+
+    &:last-child {
+      margin-right: $sideBorderWidth;
+    }
 
     svg {
       width: 24px;
