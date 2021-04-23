@@ -46,7 +46,7 @@ export default {
 
     height: 48px;
     display: flex;
-    flex-grow: 1;
+    flex: 1 0;
     justify-content: center;
     align-items: center;
     border-radius: 2px 2px 0 0;
@@ -70,6 +70,14 @@ export default {
       }
     }
 
+    &:hover {
+      background-color: variables.$color-hover;
+    }
+
+    &:active {
+      background-color: variables.$color-bg-1;
+    }
+
     svg {
       width: 24px;
       height: 24px;
@@ -77,24 +85,17 @@ export default {
     }
 
     &.router-link-active {
-      background-color: variables.$color-bg-1;
       color: variables.$color-blue;
-    }
 
-    &.router-link-active,
-    &:hover:not(.router-link-active),
-    &:active:not(.router-link-active) {
-      svg {
-        opacity: 1;
+      &,
+      &:hover,
+      &:active {
+        background-color: variables.$color-bg-1;
+
+        svg {
+          opacity: 1;
+        }
       }
-    }
-
-    &:hover:not(.router-link-active) {
-      background-color: variables.$color-hover;
-    }
-
-    &:active:not(.router-link-active) {
-      background-color: variables.$color-bg-1;
     }
   }
 }
