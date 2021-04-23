@@ -34,6 +34,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/mixins';
 
 .tab-bar {
   display: flex;
@@ -55,10 +56,18 @@ export default {
 
     &:first-child {
       margin-left: $sideBorderWidth;
+
+      @include mixins.desktop {
+        border-bottom-left-radius: 10px;
+      }
     }
 
     &:last-child {
       margin-right: $sideBorderWidth;
+
+      @include mixins.desktop {
+        border-bottom-right-radius: 10px;
+      }
     }
 
     svg {
