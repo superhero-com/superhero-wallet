@@ -56,6 +56,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/mixins';
 
 .modal {
   position: fixed;
@@ -121,18 +122,31 @@ export default {
     height: 100%;
     padding: 0;
     border-radius: 0;
+    display: flex;
+    flex-direction: column;
+
+    @include mixins.desktop {
+      width: variables.$extension-width;
+      height: 600px;
+      border-radius: 10px;
+      box-shadow: variables.$color-border 0 0 0 1px;
+    }
 
     .body {
       height: 100%;
-      padding-bottom: 80px;
+      margin-bottom: 0;
       overflow-y: scroll;
     }
 
     .footer {
-      position: fixed;
+      position: sticky;
       bottom: 0;
       width: 100%;
       padding: 24px 0;
+
+      @include mixins.desktop {
+        border-radius: 0 0 10px 10px;
+      }
     }
   }
 
