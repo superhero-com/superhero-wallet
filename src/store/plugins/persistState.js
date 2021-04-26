@@ -1,5 +1,6 @@
 import { cloneDeep, isEqual } from 'lodash-es';
 import { detect } from 'detect-browser';
+import stateReducer from '../utils';
 
 const KEY = 'state';
 
@@ -14,7 +15,7 @@ const saverName = process.env.IS_EXTENSION && (window.IS_EXTENSION_BACKGROUND ? 
 
 export default (
   reducerLoad = (state) => state || {},
-  reducerSave = ({ isRestored, ...state }) => state,
+  reducerSave = ({ isRestored, ...state }) => stateReducer(state),
 ) => async (store) => {
   const { persistStateSavedBy: _, ...loadedState } = await reducerLoad(await getStateRaw());
   store.replaceState({

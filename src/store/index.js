@@ -18,6 +18,7 @@ import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
 import fungibleTokensPlugin from './plugins/fungibleTokens';
 import { defaultNetwork } from '../popup/utils/constants';
+import stateReducer from './utils';
 
 Vue.use(Vuex);
 Vue.use(VueRx);
@@ -68,49 +69,7 @@ export default new Vuex.Store({
   plugins: [
     persistState(
       runMigrations,
-      ({
-        migrations,
-        current,
-        transactions,
-        currencies,
-        userNetworks,
-        names,
-        languages,
-        nextCurrenciesFetch,
-        tip,
-        backedUpSeed,
-        mnemonic,
-        saveErrorLog,
-        tourStartBar,
-        invites,
-        notificationSettings,
-        permissions,
-        fungibleTokens: { availableTokens, aePublicData, tokens = {} } = {},
-        accountCount,
-        accountSelectedIdx,
-        accs,
-      }) => ({
-        migrations,
-        current,
-        transactions,
-        currencies,
-        userNetworks,
-        names,
-        languages,
-        nextCurrenciesFetch,
-        tip,
-        backedUpSeed,
-        mnemonic,
-        saveErrorLog,
-        tourStartBar,
-        invites,
-        notificationSettings,
-        permissions,
-        fungibleTokens: { availableTokens, aePublicData, tokens },
-        accountCount,
-        accountSelectedIdx,
-        accs,
-      }),
+      stateReducer,
     ),
     observables,
     modals,
