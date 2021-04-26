@@ -184,14 +184,12 @@ export default [
   {
     path: '/tips',
     component: Tips,
-    meta: {
-      title: 'tips',
-    },
     children: [{
       path: '',
       name: 'tips-send',
       component: TipsSend,
       meta: {
+        title: 'tips',
         notRebrand: true,
       },
     }, {
@@ -199,6 +197,7 @@ export default [
       name: 'tips-claim',
       component: TipsClaim,
       meta: {
+        title: 'tips',
         notRebrand: true,
       },
     }],
@@ -251,14 +250,12 @@ export default [
   {
     path: '/payments',
     component: Payments,
-    meta: {
-      title: 'payments',
-    },
     children: [{
       path: '',
       name: 'payments-send',
       component: PaymentsSend,
       meta: {
+        title: 'payments',
         notRebrand: true,
       },
     }, {
@@ -266,6 +263,7 @@ export default [
       name: 'payments-receive',
       component: PaymentsReceive,
       meta: {
+        title: 'payments',
         notRebrand: true,
       },
     }],

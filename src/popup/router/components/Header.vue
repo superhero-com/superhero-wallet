@@ -121,8 +121,10 @@ export default {
     ...mapMutations(['setNotificationsStatus']),
     back() {
       const fallBackRoute = this.isLoggedIn ? '/account' : '/';
+      let { fullPath } = this.$route;
+      fullPath = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
       this.$router.push(
-        this.$route.fullPath.substr(0, this.$route.fullPath.lastIndexOf('/')) || fallBackRoute,
+        fullPath.substr(0, fullPath.lastIndexOf('/')) || fallBackRoute,
       );
     },
     async toNotifications() {
