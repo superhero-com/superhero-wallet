@@ -21,29 +21,30 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .tabs-menu {
   padding: 0 15px;
-  background-color: $color-bg-3;
+  background-color: variables.$color-bg-3;
 
   button {
     font-size: 16px;
     padding: 5.5px 0;
     margin-right: 17px;
     text-decoration: none;
-    color: $color-dark-grey;
+    color: variables.$color-dark-grey;
     display: inline-block;
 
     @extend %face-sans-15-medium;
 
     &:hover {
-      color: $color-light-grey;
+      color: variables.$color-light-grey;
     }
 
     &.active {
-      color: $color-green;
-      border-bottom: 1px solid $color-green;
+      color: variables.$color-green;
+      border-bottom: 1px solid variables.$color-green;
     }
 
     &:last-child {

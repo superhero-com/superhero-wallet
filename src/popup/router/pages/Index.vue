@@ -80,7 +80,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .index {
   margin-top: 42px;
@@ -99,7 +100,7 @@ export default {
 
     .checkbox-container {
       margin-right: 4px;
-      color: $color-dark-grey;
+      color: variables.$color-dark-grey;
 
       &.agreed {
         color: white;
@@ -107,7 +108,7 @@ export default {
 
       &:hover:not(.agreed),
       &:active:not(.agreed) {
-        color: $color-light-grey;
+        color: variables.$color-light-grey;
       }
 
       ::v-deep .checkmark {
@@ -116,7 +117,7 @@ export default {
     }
 
     a:hover {
-      color: $color-green-hover;
+      color: variables.$color-green-hover;
     }
   }
 
@@ -139,7 +140,7 @@ export default {
       &.heading {
         @extend %face-sans-16-medium;
 
-        color: $color-blue;
+        color: variables.$color-blue;
         padding: 5.5px 0;
         margin: 0 auto;
       }
@@ -162,7 +163,7 @@ export default {
     .spinner {
       width: 256px;
       height: 256px;
-      color: $color-blue;
+      color: variables.$color-blue;
     }
 
     .platforms {

@@ -39,7 +39,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .loader {
   .center {
@@ -49,7 +49,7 @@ export default {
   }
 
   .ae-loader {
-    border: 0.2em solid $color-blue;
+    border: 0.2em solid variables.$color-blue;
     border-left-color: transparent;
     border-right-color: transparent;
   }
@@ -58,7 +58,7 @@ export default {
     position: fixed;
     width: 100%;
     height: 100%;
-    background-color: $color-bg-3;
+    background-color: variables.$color-bg-3;
     top: 0;
     z-index: 8;
 

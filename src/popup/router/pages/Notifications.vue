@@ -118,7 +118,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .notifications {
   padding: 0;
@@ -127,8 +127,8 @@ export default {
     position: sticky;
     top: 48px;
     z-index: 1;
-    background-color: $color-bg-2;
-    box-shadow: 0 -1px 0 $color-black;
+    background-color: variables.$color-bg-2;
+    box-shadow: 0 -1px 0 variables.$color-black;
     padding: 0 1rem;
     text-align: left;
 
@@ -138,19 +138,19 @@ export default {
       text-align: center;
       font-size: 0.95rem;
       cursor: pointer;
-      color: $color-dark-grey;
+      color: variables.$color-dark-grey;
       font-weight: 600;
       padding: 0.95rem 0;
       margin-left: 1rem;
       border-bottom: 0.2rem solid transparent;
 
       &:hover {
-        color: $color-light-grey;
+        color: variables.$color-light-grey;
       }
 
       &.active {
-        color: $color-green;
-        border-bottom-color: $color-green;
+        color: variables.$color-green;
+        border-bottom-color: variables.$color-green;
       }
     }
   }

@@ -40,7 +40,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .amount-input {
   white-space: nowrap;
@@ -48,11 +49,11 @@ export default {
   .token {
     margin-right: 2px;
     font-weight: 500;
-    color: $color-blue;
+    color: variables.$color-blue;
   }
 
   .amount {
-    color: $color-dark-grey;
+    color: variables.$color-dark-grey;
   }
 }
 </style>

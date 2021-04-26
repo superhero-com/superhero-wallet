@@ -41,7 +41,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .account {
   .recent-transactions {
@@ -53,7 +53,7 @@ export default {
     text-align: center;
     margin-top: 2px;
     line-height: 14px;
-    color: $color-green;
+    color: variables.$color-green;
   }
 }
 </style>

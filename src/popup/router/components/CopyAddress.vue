@@ -27,20 +27,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .copy-address {
   .address {
     @extend %face-sans-11-regular;
 
-    color: $color-light-grey;
+    color: variables.$color-light-grey;
     word-break: break-all;
     cursor: pointer;
     display: block;
 
     &:hover {
-      color: $color-white;
+      color: variables.$color-white;
     }
   }
 
@@ -55,7 +55,7 @@ export default {
       padding: 0 8px;
       font-size: 14px;
       line-height: 16px;
-      color: $color-blue;
+      color: variables.$color-blue;
       text-align: center;
       user-select: none;
     }
@@ -63,7 +63,7 @@ export default {
     .line {
       flex: 1;
       height: 50%;
-      border-bottom: 1px dashed $color-blue;
+      border-bottom: 1px dashed variables.$color-blue;
     }
   }
 }

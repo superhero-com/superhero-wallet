@@ -1,4 +1,4 @@
-@import '../../../../styles/variables';
+@use '../../../../styles/variables';
 
 .confirm-tx-sign-modal.modal .container {
   width: 100%;
@@ -13,10 +13,10 @@
     -webkit-transform: translateX(-50%);
     -ms-transform: translateX(-50%);
     transform: translateX(-50%);
-    min-width: $extension-width;
+    min-width: variables.$extension-width;
     padding-bottom: 15px;
     padding-top: 15px;
-    background: $color-bg-1;
+    background: variables.$color-bg-1;
 
     .button {
       width: 50%;

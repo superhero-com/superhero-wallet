@@ -184,14 +184,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .invite-row {
   padding: 1rem;
   width: 100%;
-  border-bottom: 2px solid $color-border;
+  border-bottom: 2px solid variables.$color-border;
   text-align: left;
-  color: $color-white;
+  color: variables.$color-white;
   position: relative;
 
   .invite-link {
@@ -204,13 +204,13 @@ export default {
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
-      color: $color-white;
+      color: variables.$color-white;
     }
   }
 
   .invite-link-copy {
     padding: 0;
-    color: $color-dark-grey;
+    color: variables.$color-dark-grey;
   }
 
   .invite-info {
@@ -218,7 +218,7 @@ export default {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-    color: $color-dark-grey;
+    color: variables.$color-dark-grey;
 
     .token-amount {
       flex-grow: 1;
@@ -226,7 +226,7 @@ export default {
 
     .date {
       font-size: 11px;
-      color: $color-white;
+      color: variables.$color-white;
     }
   }
 
@@ -244,7 +244,7 @@ export default {
   }
 
   .copied-alert {
-    color: $color-blue;
+    color: variables.$color-blue;
     margin-right: 7px;
   }
 }

@@ -15,40 +15,40 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .box-button {
   width: 88px;
   height: 64px;
-  background: $color-bg-2;
+  background: variables.$color-bg-2;
   border-radius: 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  color: $color-dark-grey;
+  color: variables.$color-dark-grey;
 
   @extend %face-sans-15-medium;
 
   ::v-deep svg {
     width: 24px;
     height: 24px;
-    color: $color-light-grey;
+    color: variables.$color-light-grey;
   }
 
   &:hover {
-    background: rgba($color-blue, 0.15);
+    background: rgba(variables.$color-blue, 0.15);
 
     &,
     ::v-deep svg {
-      color: $color-blue;
+      color: variables.$color-blue;
     }
   }
 
   &:active {
-    background-color: rgba($color-blue, 0.1);
+    background-color: rgba(variables.$color-blue, 0.1);
   }
 }
 </style>

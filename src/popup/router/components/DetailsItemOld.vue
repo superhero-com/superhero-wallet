@@ -18,7 +18,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "../../../styles/variables";
+@use "../../../styles/variables";
 
 .details-item {
   word-break: break-all;
@@ -26,7 +26,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   margin: 10px 0;
-  border-bottom: 1px solid $color-border;
+  border-bottom: 1px solid variables.$color-border;
   padding: 10px;
   font-size: 14px;
 

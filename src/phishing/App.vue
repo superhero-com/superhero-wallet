@@ -85,7 +85,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../styles/variables';
+@use '../styles/variables';
 
 body,
 html,
@@ -121,7 +121,7 @@ p {
 }
 
 a {
-  color: $color-bg-3;
+  color: variables.$color-bg-3;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -131,6 +131,6 @@ a {
 }
 
 .ae-main {
-  background: $color-bg-3;
+  background: variables.$color-bg-3;
 }
 </style>

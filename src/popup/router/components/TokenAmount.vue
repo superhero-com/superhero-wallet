@@ -49,27 +49,27 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .token-amount {
   @extend %face-sans-14-regular;
 
-  color: $color-white;
+  color: variables.$color-white;
   line-height: 24px;
 
   .symbol {
     @extend %face-sans-14-medium;
 
-    color: $color-blue;
+    color: variables.$color-blue;
   }
 
   .text {
-    color: $color-dark-grey;
+    color: variables.$color-dark-grey;
   }
 
   &.sent {
-    color: $color-error;
+    color: variables.$color-error;
 
     &::before {
       content: '-';
@@ -77,7 +77,7 @@ export default {
   }
 
   &.received {
-    color: $color-green-hover;
+    color: variables.$color-green-hover;
 
     &::before {
       content: '+';

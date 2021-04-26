@@ -126,7 +126,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .success-tip {
   .sub-heading {
@@ -136,12 +136,12 @@ export default {
   }
 
   .note {
-    color: $color-white;
-    font-size: $base-font-size;
+    color: variables.$color-white;
+    font-size: variables.$base-font-size;
     min-height: 100px;
     border-radius: 5px;
-    border: 2px solid $color-border;
-    background: $color-bg-2;
+    border: 2px solid variables.$color-border;
+    background: variables.$color-bg-2;
     padding: 15px;
   }
 }

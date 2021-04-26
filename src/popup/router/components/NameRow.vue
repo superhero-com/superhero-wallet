@@ -29,7 +29,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .name-row {
   text-decoration: none;
@@ -40,11 +41,11 @@ export default {
   display: flex;
   align-items: center;
   font-size: 14px;
-  border-bottom: 1px solid $color-bg-3;
+  border-bottom: 1px solid variables.$color-bg-3;
   text-align: left;
   border-left: 2px solid transparent;
-  color: $color-white;
-  background: $color-bg-1;
+  color: variables.$color-white;
+  background: variables.$color-bg-1;
 
   .name-info ::v-deep {
     margin-left: 10px;
@@ -67,15 +68,15 @@ export default {
     .active-name,
     .pending-name {
       float: right;
-      background: $color-blue;
-      color: $color-white;
+      background: variables.$color-blue;
+      color: variables.$color-white;
       position: absolute;
       top: 4px;
       right: 4px;
     }
 
     .pending-name {
-      background: $color-error;
+      background: variables.$color-error;
     }
   }
 }

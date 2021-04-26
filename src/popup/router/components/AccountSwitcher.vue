@@ -60,7 +60,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .account-switcher {
   display: flex;
@@ -105,8 +105,8 @@ export default {
       padding: 0;
       width: 32px;
       height: 16px;
-      background: $color-bg-3;
-      border: 1px solid $color-border;
+      background: variables.$color-bg-3;
+      border: 1px solid variables.$color-border;
       box-sizing: border-box;
       box-shadow: inset 0 0 6px rgb(0 0 0 / 25%);
       border-radius: 8px;
@@ -114,7 +114,7 @@ export default {
       margin-right: 8px;
 
       &:hover:not(.selected) {
-        border-color: $color-border-hover;
+        border-color: variables.$color-border-hover;
       }
 
       &:last-of-type {

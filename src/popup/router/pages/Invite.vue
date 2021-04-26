@@ -93,13 +93,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .invite {
   .top {
     margin: 0 -20px;
     padding: 20px;
-    background-color: $color-black;
+    background-color: variables.$color-black;
   }
 
   .section-title {
@@ -107,7 +107,7 @@ export default {
     text-align: left;
     margin-top: 0;
     margin-bottom: 0;
-    color: $color-light-grey;
+    color: variables.$color-light-grey;
     font-weight: 400;
   }
 
@@ -121,12 +121,12 @@ export default {
   }
 
   .generated-links {
-    background-color: $color-bg-3;
+    background-color: variables.$color-bg-3;
     margin: 0 -20px;
 
     .section-title {
       padding: 15px 20px;
-      border-bottom: 2px solid $color-border;
+      border-bottom: 2px solid variables.$color-border;
     }
   }
 }

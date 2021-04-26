@@ -182,8 +182,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/mixins';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
+@use '../../../styles/mixins';
 
 .transaction-details {
   .header {
@@ -191,7 +192,7 @@ export default {
     justify-content: center;
     height: 92px;
 
-    @include mobile {
+    @include mixins.mobile {
       width: 100%;
     }
 
@@ -209,7 +210,7 @@ export default {
 
   .content {
     margin-top: -10px;
-    background: $color-bg-3;
+    background: variables.$color-bg-3;
 
     .transaction-overview {
       padding: 26px 16px 16px 16px;

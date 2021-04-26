@@ -125,7 +125,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .security-settings {
   .mnemonics {
@@ -142,7 +142,7 @@ export default {
 
     p,
     .ae-button.toolbar {
-      color: $color-bg-3;
+      color: variables.$color-bg-3;
     }
   }
 
@@ -154,7 +154,7 @@ export default {
   .ae-badge {
     user-select: unset;
     cursor: pointer;
-    border: 2px solid $color-light-grey;
+    border: 2px solid variables.$color-light-grey;
 
     .ae-icon-close {
       margin-left: 5px;
@@ -164,8 +164,8 @@ export default {
       opacity: 0.4;
       cursor: unset;
       background: transparent;
-      border: 2px solid $color-light-grey;
-      color: $color-white;
+      border: 2px solid variables.$color-light-grey;
+      color: variables.$color-white;
     }
   }
 }

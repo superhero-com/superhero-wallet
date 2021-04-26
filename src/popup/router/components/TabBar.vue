@@ -33,11 +33,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .tab-bar {
   display: flex;
-  background-color: $color-bg-3;
+  background-color: variables.$color-bg-3;
   padding-bottom: env(safe-area-inset-bottom);
 
   > a {
@@ -47,9 +47,9 @@ export default {
     justify-content: center;
     align-items: center;
     border-radius: 2px 2px 0 0;
-    background-color: $color-bg-2;
-    border: 1px solid $color-bg-3;
-    color: $color-white;
+    background-color: variables.$color-bg-2;
+    border: 1px solid variables.$color-bg-3;
+    color: variables.$color-white;
 
     svg {
       width: 24px;
@@ -58,8 +58,8 @@ export default {
     }
 
     &.router-link-active {
-      background-color: $color-bg-1;
-      color: $color-blue;
+      background-color: variables.$color-bg-1;
+      color: variables.$color-blue;
     }
 
     &.router-link-active,
@@ -71,11 +71,11 @@ export default {
     }
 
     &:hover:not(.router-link-active) {
-      background-color: $color-hover;
+      background-color: variables.$color-hover;
     }
 
     &:active:not(.router-link-active) {
-      background-color: $color-bg-1;
+      background-color: variables.$color-bg-1;
     }
   }
 }

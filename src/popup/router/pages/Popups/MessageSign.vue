@@ -70,7 +70,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../styles/variables';
+@use '../../../../styles/variables';
 
 .message-sign .identity img {
   width: 32px;

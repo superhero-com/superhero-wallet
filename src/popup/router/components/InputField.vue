@@ -58,7 +58,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .input-field {
   .label {
@@ -67,7 +68,7 @@ export default {
 
     @extend %face-sans-15-medium;
 
-    color: $color-dark-grey;
+    color: variables.$color-dark-grey;
     text-align: left;
   }
 
@@ -76,19 +77,19 @@ export default {
     align-items: center;
     padding: 8px 16px;
     height: 40px;
-    background-color: $color-bg-2;
+    background-color: variables.$color-bg-2;
     border: 1px solid transparent;
     border-left: 0;
     border-right: 0;
     border-radius: 6px;
 
     &:focus-within {
-      border-color: $color-blue;
-      background-color: $color-black;
+      border-color: variables.$color-blue;
+      background-color: variables.$color-black;
     }
 
     &.error {
-      border-color: $color-error;
+      border-color: variables.$color-error;
     }
 
     svg {
@@ -111,7 +112,7 @@ export default {
 
       @extend %face-sans-14-regular;
 
-      color: $color-light-grey;
+      color: variables.$color-light-grey;
 
       &[type='number'] {
         -moz-appearance: textfield;
@@ -130,7 +131,7 @@ export default {
     @extend %face-sans-12-regular;
 
     text-align: left;
-    color: $color-error;
+    color: variables.$color-error;
   }
 }
 </style>

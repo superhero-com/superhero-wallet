@@ -33,9 +33,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../styles/variables';
+@use '../../../../styles/variables';
 
 .claimed {
-  color: $color-blue;
+  color: variables.$color-blue;
 }
 </style>

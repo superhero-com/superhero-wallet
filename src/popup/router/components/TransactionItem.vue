@@ -55,21 +55,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .transaction-item {
   padding: 0 16px;
   margin: 1px 0;
   border-radius: 4px;
-  background: $color-bg-1;
+  background: variables.$color-bg-1;
   display: flex;
   justify-content: space-between;
   align-items: center;
   text-decoration: none;
 
   &:hover {
-    background: $color-hover;
+    background: variables.$color-hover;
   }
 
   .left {
@@ -80,7 +80,7 @@ export default {
     .icon {
       width: 24px;
       height: 24px;
-      color: $color-white;
+      color: variables.$color-white;
       margin-right: 2px;
     }
   }
@@ -94,11 +94,11 @@ export default {
     }
 
     :nth-child(1) {
-      color: $color-white;
+      color: variables.$color-white;
     }
 
     :nth-child(2) {
-      color: $color-dark-grey;
+      color: variables.$color-dark-grey;
     }
   }
 }

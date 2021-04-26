@@ -66,7 +66,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .language-settings {
   h4 {
@@ -75,7 +75,7 @@ export default {
   }
 
   small {
-    color: $color-light-grey;
+    color: variables.$color-light-grey;
     text-align: left;
     width: 100%;
     margin: 0 0 10px;
@@ -97,11 +97,11 @@ export default {
     button {
       font-size: 14px;
       width: 100%;
-      color: $color-white;
+      color: variables.$color-white;
       margin: 0;
       padding: 0 1rem;
       white-space: nowrap;
-      background-color: $color-bg-2;
+      background-color: variables.$color-bg-2;
       border-radius: 4px;
       text-align: center;
       display: inline-flex;
@@ -123,7 +123,7 @@ export default {
         width: 30%;
         text-align: center;
         margin: auto;
-        color: $color-white;
+        color: variables.$color-white;
         cursor: pointer;
 
         div {

@@ -91,7 +91,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .label {
   text-align: left;
@@ -107,16 +107,16 @@ export default {
   .display {
     text-align: center;
     position: relative;
-    color: $color-white;
+    color: variables.$color-white;
     font-size: 0.75rem;
-    background-color: $color-bg-2;
+    background-color: variables.$color-bg-2;
     padding: 0.6rem 2.2rem 0.6rem 0.85rem;
     border-radius: 0.25rem;
     line-height: 0.9rem;
     min-height: 2.2rem;
     display: flex;
     align-items: center;
-    border: 2px solid $color-border;
+    border: 2px solid variables.$color-border;
 
     img {
       position: absolute;
@@ -146,9 +146,9 @@ export default {
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
-    color: $color-dark-grey;
+    color: variables.$color-dark-grey;
     vertical-align: middle;
-    border: 1px solid $color-light-grey;
+    border: 1px solid variables.$color-light-grey;
     border-radius: 0.25rem;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -178,7 +178,7 @@ export default {
   button {
     font-size: 15px;
     width: 100%;
-    color: $color-white;
+    color: variables.$color-white;
     text-align: left;
     margin: 0;
     padding: 0 5px;
@@ -192,8 +192,8 @@ export default {
     padding: 0;
     overflow: hidden;
     transition: all 0.3s ease-in-out;
-    background: $color-bg-3;
-    border: 1px solid $color-blue;
+    background: variables.$color-bg-3;
+    border: 1px solid variables.$color-blue;
     border-radius: 5px;
     scrollbar-width: none;
   }
@@ -207,7 +207,7 @@ export default {
   }
 
   .list-item:hover {
-    background: $color-bg-2;
+    background: variables.$color-bg-2;
   }
 }
 

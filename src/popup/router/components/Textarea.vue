@@ -32,16 +32,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .textarea {
   display: block;
   width: 100%;
   border-radius: 5px;
-  background: $color-bg-2;
+  background: variables.$color-bg-2;
   padding: 15px;
   margin-bottom: 22px;
-  color: $color-white;
+  color: variables.$color-white;
 
   @extend %face-sans-16-regular;
 
@@ -51,11 +52,11 @@ export default {
   word-break: break-word;
 
   &:focus {
-    border-color: $color-blue;
+    border-color: variables.$color-blue;
   }
 
   &.error {
-    border-color: $color-error;
+    border-color: variables.$color-error;
   }
 
   &.sm {

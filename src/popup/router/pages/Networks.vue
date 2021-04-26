@@ -256,12 +256,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .networks .network-row {
   display: flex;
   align-items: center;
-  border-top: 1px solid $color-border;
+  border-top: 1px solid variables.$color-border;
   padding: 12px 0;
   text-align: left;
 
@@ -282,7 +282,7 @@ export default {
 
   .expand {
     font-size: 14px;
-    color: $color-white;
+    color: variables.$color-white;
     width: 100%;
     padding: 0;
 

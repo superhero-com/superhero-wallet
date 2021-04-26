@@ -59,10 +59,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../styles/variables';
+@use '../../../../styles/variables';
 
 .error-msg {
-  color: $color-error;
+  color: variables.$color-error;
   margin-bottom: 30px;
 }
 

@@ -78,8 +78,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/mixins';
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
 
 .menu-carousel {
   flex: 1;
@@ -91,7 +91,7 @@ export default {
       width: 24px;
       height: 64px;
       padding: 0;
-      background: $color-bg-2;
+      background: variables.$color-bg-2;
       cursor: pointer;
 
       &.previous {
@@ -105,7 +105,7 @@ export default {
       }
 
       .flickity-button-icon {
-        fill: $color-white;
+        fill: variables.$color-white;
         opacity: 0.44;
       }
 
@@ -114,19 +114,19 @@ export default {
       }
 
       &:hover {
-        background: $color-blue-hover-dark;
+        background: variables.$color-blue-hover-dark;
 
         .icon {
           opacity: 1;
 
           path {
-            fill: $color-blue;
+            fill: variables.$color-blue;
           }
         }
       }
 
       &:active {
-        background-color: rgba($color-blue-hover-dark, 0.1);
+        background-color: rgba(variables.$color-blue-hover-dark, 0.1);
       }
     }
   }
@@ -134,11 +134,11 @@ export default {
   .box-button {
     margin-left: 18px;
 
-    @include mobile {
+    @include mixins.mobile {
       margin-left: calc(25% - 88px);
     }
 
-    @media (min-width: $extension-width + 2) and (max-width: 400px) {
+    @media (min-width: variables.$extension-width + 2) and (max-width: 400px) {
       margin-left: calc(33% - 88px);
     }
   }

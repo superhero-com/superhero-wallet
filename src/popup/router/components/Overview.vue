@@ -91,14 +91,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .overview {
   .title {
     @extend %face-sans-15-regular;
 
-    color: $color-white;
+    color: variables.$color-white;
     text-align: center;
     display: block;
     margin-bottom: -8px;
@@ -112,14 +112,14 @@ export default {
       width: 56px;
       height: 56px;
       padding: 8px;
-      border: 2px solid $color-blue;
+      border: 2px solid variables.$color-blue;
       border-radius: 100px;
     }
 
     .icon {
       width: 36px;
       height: 36px;
-      color: $color-white;
+      color: variables.$color-white;
     }
 
     .mid {
@@ -133,12 +133,12 @@ export default {
         transform: translate(-50%, -50%);
         width: 15px;
         height: 17px;
-        color: $color-blue;
+        color: variables.$color-blue;
       }
 
       .line {
         height: calc(50% + 1px);
-        border-bottom: 2px solid $color-blue;
+        border-bottom: 2px solid variables.$color-blue;
       }
     }
   }
@@ -166,7 +166,7 @@ export default {
       margin-bottom: 4px;
       font-size: 15px;
       line-height: 16px;
-      color: $color-white;
+      color: variables.$color-white;
 
       &:hover .truncate-mid {
         &::before,

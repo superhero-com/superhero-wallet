@@ -168,7 +168,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .account-info {
   padding: 20px 20px 0 20px;
@@ -186,7 +187,7 @@ export default {
       margin-bottom: 0;
 
       .account-name .account-type-name {
-        border-bottom: 1px solid $color-blue;
+        border-bottom: 1px solid variables.$color-blue;
       }
     }
   }
@@ -196,7 +197,7 @@ export default {
 
     a,
     button {
-      color: $color-white;
+      color: variables.$color-white;
       opacity: 0.7;
       float: right;
       padding: 0;
@@ -210,10 +211,10 @@ export default {
 
       &:hover {
         opacity: 1;
-        color: $color-green;
+        color: variables.$color-green;
 
         &.remove {
-          color: $color-error;
+          color: variables.$color-error;
         }
       }
     }
@@ -232,7 +233,7 @@ export default {
     }
 
     .account-name {
-      color: $color-white;
+      color: variables.$color-white;
       margin-right: auto;
       display: flex;
       flex-direction: column;
@@ -243,7 +244,7 @@ export default {
 
         max-width: 150px;
         line-height: 16px;
-        color: $color-white;
+        color: variables.$color-white;
 
         &:hover {
           &::before,
@@ -284,7 +285,7 @@ export default {
           border: none;
           background: transparent;
           padding: 0;
-          color: $color-white;
+          color: variables.$color-white;
           height: initial;
 
           @extend %face-sans-14-medium;
@@ -310,7 +311,7 @@ export default {
 
           &:hover {
             opacity: 1;
-            color: $color-blue;
+            color: variables.$color-blue;
           }
         }
       }
@@ -326,13 +327,13 @@ export default {
 
   .ae-address {
     text-decoration: none;
-    color: $color-light-grey;
+    color: variables.$color-light-grey;
     letter-spacing: -0.4px;
 
     @extend %face-sans-10-medium;
 
     &:hover {
-      color: $color-white;
+      color: variables.$color-white;
     }
   }
 
@@ -346,13 +347,13 @@ export default {
 
       &:not(.text) {
         height: 0;
-        border-bottom: 1px dashed $color-blue;
+        border-bottom: 1px dashed variables.$color-blue;
         margin: 0 8px;
       }
 
       &.text {
         white-space: nowrap;
-        color: $color-blue;
+        color: variables.$color-blue;
 
         @extend %face-sans-14-regular;
       }

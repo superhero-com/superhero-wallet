@@ -37,7 +37,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables.scss';
+@use '../../../styles/variables.scss';
 
 .receive {
   p.primary-title {
@@ -45,7 +45,7 @@ export default {
   }
 
   ::v-deep .qrcode canvas {
-    border: 5px solid $color-white;
+    border: 5px solid variables.$color-white;
   }
 }
 </style>

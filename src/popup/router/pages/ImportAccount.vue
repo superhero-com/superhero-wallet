@@ -60,10 +60,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .import-account .regular-text {
-  font-size: $base-font-size;
+  font-size: variables.$base-font-size;
   text-align: left;
   font-weight: normal;
 }

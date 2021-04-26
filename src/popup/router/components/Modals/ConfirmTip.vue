@@ -51,10 +51,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "../../../../styles/variables";
+@use "../../../../styles/variables";
 
 .confirmation--question {
   font-weight: 500;
-  color: $color-white;
+  color: variables.$color-white;
 }
 </style>
