@@ -19,7 +19,7 @@ describe('Test cases for Withdraw Page', () => {
       .enterAmountInput('asd')
       .get('[data-cy=amount-currency]')
       .invoke('text')
-      .then((text) => expect(text.trim()).to.eq('($0.00)'))
+      .should((text) => expect(text.trim()).to.eq('($0.00)'))
       .enterAmountInput(0)
       .inputShouldHaveError('[data-cy=input-wrapper]')
       .enterAmountInput(0.2)

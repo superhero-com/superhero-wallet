@@ -44,7 +44,7 @@ describe('Tests cases for AEX-2 communication', () => {
         .get('[data-cy=send-res]')
         .should('be.visible')
         .invoke('text')
-        .then((text) => {
+        .should((text) => {
           const res = JSON.parse(text);
           res.should.be.a('Object');
           res.should.have.property('hash');
@@ -61,7 +61,7 @@ describe('Tests cases for AEX-2 communication', () => {
         .get('[data-cy=contract-call-res]')
         .should('be.visible')
         .invoke('text')
-        .then((text) => {
+        .should((text) => {
           const res = JSON.parse(text);
           res.should.be.a('Object');
           res.should.have.property('hash');
@@ -76,7 +76,7 @@ describe('Tests cases for AEX-2 communication', () => {
         .get('[data-cy=contract-call-static-res]')
         .should('be.visible')
         .invoke('text')
-        .then((text) => {
+        .should((text) => {
           const res = JSON.parse(text);
           res.should.be.a('Object');
           res.should.have.property('hash');

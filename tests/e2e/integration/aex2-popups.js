@@ -40,7 +40,7 @@ describe('Tests cases for AEX-2 popups', () => {
         .get('[data-cy=deny]')
         .click()
         .window()
-        .then((win) => {
+        .should((win) => {
           expect(win.reject).to.equal('send');
         });
     });
@@ -50,7 +50,7 @@ describe('Tests cases for AEX-2 popups', () => {
         .get('[data-cy=accept]')
         .click()
         .window()
-        .then((win) => {
+        .should((win) => {
           expect(win.resolve).to.equal('send');
         });
     });

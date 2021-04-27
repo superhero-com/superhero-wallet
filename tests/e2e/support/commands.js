@@ -203,7 +203,7 @@ Cypress.Commands.add('sendTip', (tip = {}) => {
 });
 
 Cypress.Commands.add('pendingTx', (tx = {}) => {
-  cy.pendingTxItem().then((txItem) => {
+  cy.pendingTxItem().should((txItem) => {
     txItem.find('[data-cy=amount]').should('contain', tx.amount);
     txItem.find('[data-cy=status]').should('contain', 'Pending');
     if (tx.url) txItem.find('[data-cy=url]').should('contain', tx.url);
@@ -304,7 +304,7 @@ Cypress.Commands.add('openTransactions', () => {
 Cypress.Commands.add('truncateStringShouldContain', (elem, string) => {
   cy.get(elem)
     .should('be.visible')
-    .then(($els) => {
+    .should(($els) => {
       const win = $els[0].ownerDocument.defaultView;
       const before = win.getComputedStyle($els[0], 'before').getPropertyValue('content');
       const after = win.getComputedStyle($els[0], 'after').getPropertyValue('content');
