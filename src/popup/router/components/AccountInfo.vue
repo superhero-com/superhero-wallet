@@ -176,10 +176,6 @@ export default {
   text-align: left;
   margin-bottom: 4px;
 
-  &.copied {
-    margin-bottom: 2px;
-  }
-
   &.edit {
     margin-bottom: -2px;
 
@@ -266,7 +262,7 @@ export default {
       .claim-chainname {
         @extend %face-sans-14-medium;
 
-        line-height: 16px;
+        line-height: 21px;
       }
 
       .account-type-name {
@@ -326,6 +322,7 @@ export default {
   }
 
   .ae-address {
+    display: block;
     text-decoration: none;
     color: variables.$color-light-grey;
     letter-spacing: -0.4px;
@@ -353,9 +350,12 @@ export default {
 
       &.text {
         white-space: nowrap;
+        text-align: center;
         color: variables.$color-blue;
 
         @extend %face-sans-14-regular;
+
+        line-height: 16px;
       }
     }
   }
