@@ -26,6 +26,10 @@ module.exports = (isProd) => ({
     'https://twitter.com/*',
     'https://*.youtube.com/watch?v=*',
     'https://wallet.superhero.com/*',
+    'https://*.aeternity.io/*',
+    'https://*.aeternity.art/*',
+    'https://raendom-backend.z52da5wt.xyz/*',
+    'https://compiler.aepps.com/*',
   ],
   icons: {
     48: './icons/icon_48.png',
