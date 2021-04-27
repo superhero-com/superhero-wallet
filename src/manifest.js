@@ -20,6 +20,7 @@ module.exports = (isProd) => ({
     'webRequest',
     'webRequestBlocking',
     'webNavigation',
+    '*://localhost/*',
     '*://*.chain/*',
     '*://*.google.com/*',
     'https://*.twitter.com/*',
