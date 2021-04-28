@@ -1,6 +1,6 @@
-import { Node, RpcWallet } from '@aeternity/aepp-sdk/es';
-import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
-import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
+import { Node, RpcWallet, genSwaggerClient } from '@aeternity/aepp-sdk';
+import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
+import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { camelCase, isEqual, times } from 'lodash-es';
 import { fetchJson, IN_FRAME } from '../popup/utils/helper';
 import store from '../store';
@@ -12,9 +12,9 @@ async function initMiddleware() {
 
   const swagUrl = `${middlewareUrl}/swagger/swagger.json`;
 
-  const swag = await fetchJson(swagUrl);
-  swag.paths = {
-    ...swag.paths,
+  const spec = await fetchJson(swagUrl);
+  spec.paths = {
+    ...spec.paths,
     'name/auction/{name}': {
       get: {
         operationId: 'getAuctionInfoByName',
@@ -54,17 +54,12 @@ async function initMiddleware() {
       },
     },
   };
-  const { api: middleware } = await Swagger.compose({
-    methods: {
-      urlFor: (path) => middlewareUrl + path,
-      axiosError: () => '',
-    },
-  })({ swag });
-
-  store.commit(
-    'setMiddleware',
-    Object.entries(middleware).reduce((m, [k, v]) => ({ ...m, [camelCase(k)]: v }), {}),
+  spec.basePath = '/mdw//';
+  const middleware = mapObject(
+    (await genSwaggerClient(middlewareUrl, { spec })).api,
+    ([k, v]) => [camelCase(k), v],
   );
+  store.commit('setMiddleware', middleware);
 }
 
 let initSdkRunning = false;
@@ -174,8 +169,8 @@ export default async function initSdk() {
           : store.dispatch('accounts/signTransaction', { txBase64, opt })),
       },
     })({
+      address: store.getters.account.address,
       nodes: [{ name: activeNetwork.name, instance: node }],
-      nativeMode: true,
       compilerUrl,
       name: 'Superhero',
       onConnection: acceptCb,

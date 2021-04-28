@@ -1,5 +1,5 @@
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { TxBuilder } from '@aeternity/aepp-sdk/es';
+import { TxBuilder } from '@aeternity/aepp-sdk';
 import { testAccount, txParams } from './config';
 import runMigrations from '../../store/migrations';
 

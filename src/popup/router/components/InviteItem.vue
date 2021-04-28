@@ -79,7 +79,7 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapState } from 'vuex';
-import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk/es';
+import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk';
 import TokenAmount from './TokenAmount';
 import AmountInput from './AmountInput';
 import Button from './Button';

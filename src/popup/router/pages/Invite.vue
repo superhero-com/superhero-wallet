@@ -42,8 +42,7 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapState } from 'vuex';
-import { Crypto } from '@aeternity/aepp-sdk/es';
-import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
+import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 import AmountInput from '../components/AmountInput';
 import Button from '../components/Button';
 import InviteItem from '../components/InviteItem';
@@ -75,7 +74,7 @@ export default {
           await this.$watchUntilTruly(() => this.sdk);
           await this.sdk.spend(this.amount, publicKey, {
             payload: 'referral',
-            denomination: AE_AMOUNT_FORMATS.AE,
+            denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
           });
         }
       } catch (error) {

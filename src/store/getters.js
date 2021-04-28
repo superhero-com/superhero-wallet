@@ -1,9 +1,8 @@
+import BigNumber from 'bignumber.js';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { Crypto } from '@aeternity/aepp-sdk/es';
-import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import { asBigNumber } from '@aeternity/aepp-sdk/es/utils/bignumber';
+import { Crypto, TxBuilderHelper } from '@aeternity/aepp-sdk';
 import { defaultNetworks } from '../popup/utils/constants';
 import {
   checkHashType,
@@ -94,14 +93,14 @@ export default {
       );
     }
     return +aettosToAe(
-      asBigNumber(
+      new BigNumber(
         transaction.amount || transaction.tx?.amount
         || transaction.nameFee || transaction.tx?.nameFee || 0,
       ).plus(transaction.fee || transaction.tx?.fee || 0),
     );
   },
   getTxFee: () => (transaction) => +aettosToAe(
-    asBigNumber(transaction.fee || transaction.tx?.fee || 0)
+    new BigNumber(transaction.fee || transaction.tx?.fee || 0)
       .plus(transaction.nameFee || transaction.tx?.nameFee || 0),
   ),
   getTxDirection: (_, { account: { address } }) => ({ tx }) => (['senderId', 'accountId', 'ownerId', 'callerId'].map((key) => tx[key]).includes(address)
@@ -113,7 +112,7 @@ export default {
       || (!transaction.pending
         && !transaction.claim
         && transaction.tx.log?.[0]
-        && decode(transaction.tx.log[0].data).toString())
+        && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
       || categorizeContractCallTxObject(transaction)?.url
       || ''
   ),

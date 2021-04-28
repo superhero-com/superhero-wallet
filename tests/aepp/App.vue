@@ -72,10 +72,9 @@
 </template>
 
 <script>
-import { RpcAepp } from '@aeternity/aepp-sdk/es';
+import { RpcAepp, Node } from '@aeternity/aepp-sdk';
 import Detector from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/wallet-detector';
 import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
-import Node from '@aeternity/aepp-sdk/es/node';
 
 const networks = {
   Mainnet: {

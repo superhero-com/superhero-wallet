@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { Crypto } from '@aeternity/aepp-sdk/es';
+import { Crypto } from '@aeternity/aepp-sdk';
 
 export default {
   props: {

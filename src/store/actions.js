@@ -1,7 +1,7 @@
 import { flatten, orderBy, uniq } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
-import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import { postMessageToContent } from '../popup/utils/connection';
 import {
   fetchJson,
@@ -53,7 +53,7 @@ export default {
             address,
             amount,
             contractId: t.contract,
-            type: TX_TYPE.contractCall,
+            type: SCHEMA.TX_TYPE.contractCall,
           },
           ...t,
           microTime: t.time,

@@ -1,5 +1,4 @@
-import { Crypto, TxBuilder } from '@aeternity/aepp-sdk/es';
-import { OBJECT_ID_TX_TYPE, TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 
 export default (store) => store.registerModule('accounts', {
   namespaced: true,
@@ -19,15 +18,15 @@ export default (store) => store.registerModule('accounts', {
         return;
       }
       const SUPPORTED_TX_TYPES = [
-        TX_TYPE.spend,
-        TX_TYPE.contractCreate,
-        TX_TYPE.contractCall,
-        TX_TYPE.namePreClaim,
-        TX_TYPE.nameClaim,
-        TX_TYPE.nameUpdate,
-        TX_TYPE.nameTransfer,
+        SCHEMA.TX_TYPE.spend,
+        SCHEMA.TX_TYPE.contractCreate,
+        SCHEMA.TX_TYPE.contractCall,
+        SCHEMA.TX_TYPE.namePreClaim,
+        SCHEMA.TX_TYPE.nameClaim,
+        SCHEMA.TX_TYPE.nameUpdate,
+        SCHEMA.TX_TYPE.nameTransfer,
       ];
-      if (!SUPPORTED_TX_TYPES.includes(OBJECT_ID_TX_TYPE[txObject.tag])) {
+      if (!SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag])) {
         await dispatch('confirmRawDataSigning', encodedTx);
         return;
       }
@@ -48,7 +47,7 @@ export default (store) => store.registerModule('accounts', {
         'signWithoutConfirmation',
         Buffer.concat([Buffer.from(sdk.getNetworkId()), encodedTx]),
       );
-      return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, TX_TYPE.signed).tx;
+      return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
     },
   },
 });

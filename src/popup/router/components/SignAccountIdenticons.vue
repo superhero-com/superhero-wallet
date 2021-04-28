@@ -50,7 +50,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { OBJECT_ID_TX_TYPE, TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import Avatar from './Avatar';
 
 export default {
@@ -67,14 +67,14 @@ export default {
     },
     showAddress() {
       return [
-        TX_TYPE.contractCreate,
-        TX_TYPE.namePreClaim,
-        TX_TYPE.nameClaim,
-        TX_TYPE.nameUpdate,
+        SCHEMA.TX_TYPE.contractCreate,
+        SCHEMA.TX_TYPE.namePreClaim,
+        SCHEMA.TX_TYPE.nameClaim,
+        SCHEMA.TX_TYPE.nameUpdate,
       ].includes(this.txType);
     },
     txType() {
-      return OBJECT_ID_TX_TYPE[this.tag];
+      return SCHEMA.OBJECT_ID_TX_TYPE[this.tag];
     },
   },
 };
