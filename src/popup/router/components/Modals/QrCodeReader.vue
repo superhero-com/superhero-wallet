@@ -24,8 +24,7 @@
 
 <script>
 import Modal from '../Modal';
-
-const handleUnknownError = (error) => console.log(error);
+import { handleUnknownError } from '../../../utils/helper';
 
 export default {
   components: { Modal },
