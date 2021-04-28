@@ -8,7 +8,10 @@
       'hide-tab-bar': $route.meta.hideTabBar,
     }"
   >
-    <Header v-if="showStatusAndHeader" @toggle-sidebar="showSidebar = !showSidebar" />
+    <Header
+      v-if="showStatusAndHeader"
+      @toggle-sidebar="showSidebar = !showSidebar"
+    />
 
     <RouterView
       :class="{ 'show-header': showStatusAndHeader }"

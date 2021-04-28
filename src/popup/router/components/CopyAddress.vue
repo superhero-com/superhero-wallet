@@ -1,11 +1,21 @@
 <template>
-  <div v-clipboard:copy="value" v-clipboard:success="copy" class="copy-address">
-    <div v-if="copied" class="copied">
+  <div
+    v-clipboard:copy="value"
+    v-clipboard:success="copy"
+    class="copy-address"
+  >
+    <div
+      v-if="copied"
+      class="copied"
+    >
       <div class="line" />
       <span class="text">{{ $t('addressCopied') }}</span>
       <div class="line" />
     </div>
-    <span v-else class="address">{{ value }}</span>
+    <span
+      v-else
+      class="address"
+    >{{ value }}</span>
   </div>
 </template>
 
