@@ -127,9 +127,7 @@ export default {
           );
           document.head.appendChild(this.style);
           document.querySelector('.main').style.display = 'none';
-          document.querySelector('.header .content div:not(.title)').style.display = 'none';
-          this.headerText = document.querySelector('.header .title').innerText;
-          document.querySelector('.header .title').innerText = 'Scan QR';
+          this.$store.commit('setPageTitle', 'Scan QR');
         })
         : (
           await this.browserReader.decodeFromInputVideoDevice(undefined, this.$refs.qrCodeVideo)
@@ -139,8 +137,7 @@ export default {
       if (process.env.PLATFORM === 'cordova') {
         if (document.head.contains(this.style)) document.head.removeChild(this.style);
         document.querySelector('.main').style.display = '';
-        document.querySelector('.header .content div:not(.title)').style.display = '';
-        document.querySelector('.header .title').innerText = this.headerText;
+        this.$store.commit('setPageTitle', '');
         window.QRScanner.destroy();
       } else this.browserReader.reset();
     },
