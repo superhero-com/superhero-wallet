@@ -4,7 +4,7 @@
     class="menu-carousel"
     :options="flickityOptions"
   >
-    <BoxButton to="/tokens">
+    <BoxButton v-if="UNFINISHED_FEATURES" to="/tokens">
       <Balances /> {{ $t('pages.titles.balances') }}
     </BoxButton>
     <BoxButton
@@ -72,6 +72,7 @@ export default {
         friction: 1,
         cellAlign: 'left',
       },
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
 };

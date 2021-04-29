@@ -9,13 +9,13 @@
         <Remove />
       </button>
       <RouterLink
-        v-if="$route.path !== '/accounts'"
+        v-if="UNFINISHED_FEATURES && $route.path !== '/accounts'"
         to="/accounts"
       >
         <Settings />
       </RouterLink>
       <button
-        v-if="idx === 0"
+        v-if="UNFINISHED_FEATURES && idx === 0"
         @click="createAccount"
       >
         <Add />
@@ -127,6 +127,7 @@ export default {
     edit: false,
     customAccountName: '',
     maxCustomNameLength: 22,
+    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
   }),
   computed: {
     ...mapState(['accountCount', 'accountSelectedIdx']),
@@ -238,7 +239,7 @@ export default {
       a .chainname {
         @extend %face-sans-17-medium;
 
-        max-width: 150px;
+        width: 220px;
         line-height: 16px;
         color: variables.$color-white;
 
@@ -252,7 +253,7 @@ export default {
 
       a {
         text-decoration: none;
-        max-width: 150px;
+        width: 220px;
 
         &:hover {
           text-decoration: underline;
