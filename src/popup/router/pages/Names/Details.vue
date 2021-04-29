@@ -51,7 +51,7 @@
     </Button>
     <Button
       v-if="addPointer"
-      dark
+      fill="secondary"
       extend
       @click="addPointer = false"
     >

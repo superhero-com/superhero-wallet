@@ -14,7 +14,7 @@
 
     <template slot="footer">
       <Button
-        dark
+        fill="secondary"
         @click="cancelTip"
       >
         {{ $t('modals.cancel') }}

@@ -95,11 +95,15 @@ export default {
     }
     return +aettosToAe(
       asBigNumber(
-        // eslint-disable-next-line camelcase
-        transaction.amount || transaction.tx?.amount || transaction.tx?.name_fee || 0,
+        transaction.amount || transaction.tx?.amount
+        || transaction.nameFee || transaction.tx?.nameFee || 0,
       ).plus(transaction.fee || transaction.tx?.fee || 0),
     );
   },
+  getTxFee: () => (transaction) => +aettosToAe(
+    asBigNumber(transaction.fee || transaction.tx?.fee || 0)
+      .plus(transaction.nameFee || transaction.tx?.nameFee || 0),
+  ),
   getTxDirection: (_, { account: { address } }) => ({ tx }) => (['senderId', 'accountId', 'ownerId', 'callerId'].map((key) => tx[key]).includes(address)
     ? 'sent'
     : 'received'),

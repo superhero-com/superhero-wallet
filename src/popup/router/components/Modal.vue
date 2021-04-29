@@ -1,6 +1,9 @@
 <template>
   <transition appear>
-    <div class="modal">
+    <div
+      class="modal"
+      :class="{'full-screen': fullScreen}"
+    >
       <div class="container">
         <button
           v-if="close"
@@ -37,7 +40,10 @@ import Close from '../../../icons/close.svg?vue-component';
 
 export default {
   components: { Close },
-  props: { close: Boolean },
+  props: {
+    close: Boolean,
+    fullScreen: Boolean,
+  },
   mounted() {
     if (document.body.style.overflow) return;
     document.body.style.overflow = 'hidden';
@@ -50,6 +56,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/mixins';
 
 .modal {
   position: fixed;
@@ -106,6 +113,41 @@ export default {
         margin: 0 10px;
         width: 120px;
         font-weight: 700;
+      }
+    }
+  }
+
+  &.full-screen .container {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    padding-top: env(safe-area-inset-top);
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+
+    @include mixins.desktop {
+      width: variables.$extension-width;
+      height: 600px;
+      border-radius: 10px;
+      box-shadow: variables.$color-border 0 0 0 1px;
+    }
+
+    .body {
+      height: 100%;
+      margin-bottom: 0;
+      overflow-y: scroll;
+    }
+
+    .footer {
+      position: sticky;
+      bottom: 0;
+      width: 100%;
+      padding: 24px 0;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom));
+
+      @include mixins.desktop {
+        border-radius: 0 0 10px 10px;
       }
     }
   }
