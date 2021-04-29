@@ -22,11 +22,17 @@ export default {
       });
       await s.transferFunds(1, account.address, { payload: 'referral', verify: false });
     },
-    async handleNotEnoughFoundsError({ dispatch }, error) {
-      if (!error.message.includes('is not enough to execute')) return false;
+    async handleNotEnoughFoundsError({ dispatch }, { error, isInviteError = false }) {
+      if (!isInviteError && !error.message.includes('is not enough to execute')) return false;
+      if (isInviteError && !error.message.includes('Transaction build error')) return false;
       await dispatch(
         'modals/open',
-        { name: 'default', msg: i18n.t('pages.invite.insufficient-balance') },
+        {
+          name: 'default',
+          msg: isInviteError
+            ? i18n.t('pages.invite.insufficient-ivnite-balance')
+            : i18n.t('pages.invite.insufficient-balance'),
+        },
         { root: true },
       );
       return true;

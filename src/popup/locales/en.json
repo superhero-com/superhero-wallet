@@ -1029,6 +1029,7 @@
       "collapse": "Collapse",
       "claim": "Claim Back",
       "insufficient-balance": "Insufficient balance",
+      "insufficient-ivnite-balance": "This invite Link expired and the Tokens are already claimed.",
       "tip-attached": "Tip attached",
       "top-up-with": "Top up with",
       "delete": "Delete",
