@@ -44,18 +44,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .sign-message {
   .url-bar {
-    color: $color-white;
+    color: variables.$color-white;
   }
 
   .section-title {
     margin-bottom: 8px;
     margin-top: 16px;
     font-size: 16px;
-    color: $color-white;
+    color: variables.$color-white;
     font-weight: 400;
     text-align: left;
   }

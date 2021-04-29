@@ -167,14 +167,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../styles/variables';
+@use '../../../../styles/variables';
 
 ::v-deep {
   text-align: left;
 }
 
 .token-header {
-  background-color: $color-black;
+  background-color: variables.$color-black;
   padding: 20px 30px;
 }
 
@@ -207,20 +207,20 @@ export default {
 }
 
 .section-title {
-  color: $color-light-grey;
+  color: variables.$color-light-grey;
   font-weight: 500;
   font-size: 15px;
   padding: 12px 15px;
-  background-color: $color-bg-3;
+  background-color: variables.$color-bg-3;
 }
 
 .token-info > div:nth-child(odd) {
-  background-color: $color-bg-3;
+  background-color: variables.$color-bg-3;
 }
 
 .contract ::v-deep .text,
 .community ::v-deep .text {
-  color: $color-green;
+  color: variables.$color-green;
 }
 
 .contract ::v-deep .text {

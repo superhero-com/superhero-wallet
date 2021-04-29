@@ -140,27 +140,28 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
-@import '../../../styles/mixins';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
+@use '../../../styles/mixins';
 
 .header {
   position: fixed;
   width: 360px;
 
-  @include desktop {
+  @include mixins.desktop {
     position: sticky;
   }
 
   top: 0;
   z-index: 8;
   height: calc(48px + env(safe-area-inset-top));
-  background-color: $color-bg-3;
+  background-color: variables.$color-bg-3;
   display: flex;
   padding: 8px 16px 8px 8px;
   padding-top: calc(8px + env(safe-area-inset-top));
   align-items: center;
 
-  @include mobile {
+  @include mixins.mobile {
     display: flex;
     justify-content: space-between;
     width: 100%;
@@ -194,7 +195,7 @@ export default {
       @extend %face-sans-16-medium;
 
       line-height: 24px;
-      color: $color-white;
+      color: variables.$color-white;
     }
   }
 
@@ -208,11 +209,11 @@ export default {
       }
 
       &:hover svg {
-        color: $color-blue-hover;
+        color: variables.$color-blue-hover;
       }
 
       &:active svg {
-        color: $color-blue-hover;
+        color: variables.$color-blue-hover;
         opacity: 0.9;
       }
     }
@@ -220,7 +221,7 @@ export default {
     svg {
       width: 34px;
       height: 24px;
-      color: $color-blue;
+      color: variables.$color-blue;
     }
   }
 
@@ -250,7 +251,7 @@ export default {
     svg {
       width: 24px;
       height: 24px;
-      color: $color-white;
+      color: variables.$color-white;
       opacity: 0.7;
 
       &.hover {
@@ -260,7 +261,7 @@ export default {
 
     &:hover {
       border-radius: 50%;
-      background-color: $color-hover;
+      background-color: variables.$color-hover;
 
       svg {
         opacity: 1;
@@ -280,13 +281,13 @@ export default {
     position: relative;
 
     .badge {
-      color: $color-white;
+      color: variables.$color-white;
       position: absolute;
       left: -2px;
       top: 20%;
       width: 14px;
       height: 14px;
-      background: $color-blue;
+      background: variables.$color-blue;
       border-radius: 50%;
       text-align: center;
       font-size: 12px;

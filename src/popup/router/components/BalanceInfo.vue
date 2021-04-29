@@ -103,12 +103,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .balance-info {
   height: 55px;
   display: flex;
-  color: $color-white;
+  color: variables.$color-white;
 
   .balance-wrapper {
     margin: 0 auto;
@@ -136,7 +137,7 @@ export default {
       }
 
       .token-symbol {
-        color: $color-blue;
+        color: variables.$color-blue;
       }
 
       &.currenciesgroup {
@@ -144,7 +145,7 @@ export default {
 
         .approx-sign {
           margin-top: 3px;
-          color: $color-white;
+          color: variables.$color-white;
         }
 
         span {
@@ -165,7 +166,7 @@ export default {
       }
 
       .expand-arrow {
-        color: $color-dark-grey;
+        color: variables.$color-dark-grey;
       }
     }
   }

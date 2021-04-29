@@ -92,7 +92,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .sign-details-list {
   padding-bottom: 60px;
@@ -104,11 +104,11 @@ export default {
   }
 
   .ae-badge {
-    background: $color-blue;
-    color: $color-white;
-    -webkit-box-shadow: 0 0 0 2px $color-blue;
-    box-shadow: 0 0 0 2px $color-blue;
-    border: 2px solid $color-bg-3;
+    background: variables.$color-blue;
+    color: variables.$color-white;
+    -webkit-box-shadow: 0 0 0 2px variables.$color-blue;
+    box-shadow: 0 0 0 2px variables.$color-blue;
+    border: 2px solid variables.$color-bg-3;
   }
 
   .amount-input {

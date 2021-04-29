@@ -17,7 +17,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables.scss';
+@use '../../../styles/variables';
 
 .range-input {
   -webkit-appearance: none;
@@ -29,9 +29,9 @@ export default {
   overflow: hidden;
 
   $colors: (
-    track-color: $color-dark-grey,
-    progress-color: $color-green,
-    thumb-color: $color-green,
+    track-color: variables.$color-dark-grey,
+    progress-color: variables.$color-green,
+    thumb-color: variables.$color-green,
   );
 
   @mixin range-track($background-color) {
@@ -60,7 +60,7 @@ export default {
       border: 4px solid map-get($colors, track-color);
       border-radius: 48px;
       background: map-get($colors, thumb-color);
-      box-shadow: 0 0 8px $color-black;
+      box-shadow: 0 0 8px variables.$color-black;
       cursor: pointer;
     }
   }

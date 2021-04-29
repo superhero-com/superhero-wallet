@@ -49,7 +49,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .modal {
   position: fixed;
@@ -58,7 +58,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba($color-black, 0.7);
+  background-color: rgba(variables.$color-black, 0.7);
   display: flex;
 
   .container {
@@ -66,8 +66,8 @@ export default {
     width: 87%;
     margin: auto;
     padding: 62px 25px 30px;
-    background: $color-bg-1;
-    border: 1px solid $color-border;
+    background: variables.$color-bg-1;
+    border: 1px solid variables.$color-border;
     border-radius: 5px;
 
     .close {
@@ -82,7 +82,7 @@ export default {
     }
 
     .header {
-      color: $color-white;
+      color: variables.$color-white;
       font-size: 17px;
       font-weight: 500;
       margin-bottom: 25px;
@@ -92,7 +92,7 @@ export default {
 
     .body {
       margin-bottom: 40px;
-      color: $color-white;
+      color: variables.$color-white;
       font-size: 14px;
       word-break: break-word;
       text-align: center;

@@ -94,11 +94,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .recent-transactions {
-  background: $color-bg-3;
+  background: variables.$color-bg-3;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -106,7 +106,7 @@ export default {
 
   .header {
     padding: 21px 16px 11px 16px;
-    background: $color-bg-2;
+    background: variables.$color-bg-2;
     border-radius: 0 0 4px 4px;
     display: flex;
     justify-content: space-between;
@@ -115,7 +115,7 @@ export default {
     .title {
       @extend %face-sans-15-medium;
 
-      color: $color-dark-grey;
+      color: variables.$color-dark-grey;
     }
 
     .view-all {
@@ -126,7 +126,7 @@ export default {
       text-decoration: none;
 
       .icon {
-        fill: $color-white;
+        fill: variables.$color-white;
         opacity: 0.7;
       }
 
@@ -134,7 +134,7 @@ export default {
         opacity: 1;
 
         path {
-          fill: $color-green-hover;
+          fill: variables.$color-green-hover;
         }
       }
     }
@@ -158,7 +158,7 @@ export default {
 
     @extend %face-sans-15-medium;
 
-    color: $color-light-grey;
+    color: variables.$color-light-grey;
     text-align: center;
   }
 
@@ -166,20 +166,20 @@ export default {
     width: 56px;
     height: 56px;
     margin: 0 auto;
-    color: $color-white;
+    color: variables.$color-white;
   }
 
   .view-more {
     padding: 12px 16px;
     border-radius: 4px;
-    background: $color-bg-1;
+    background: variables.$color-bg-1;
     display: flex;
     align-items: center;
 
     .text {
       @extend %face-sans-14-medium;
 
-      color: $color-green;
+      color: variables.$color-green;
       padding-left: 4px;
     }
 
@@ -190,23 +190,23 @@ export default {
     }
 
     &:hover {
-      background: $color-hover;
+      background: variables.$color-hover;
 
       .text {
-        color: $color-green-hover;
+        color: variables.$color-green-hover;
       }
 
       .icon {
         opacity: 1;
 
         path {
-          fill: $color-green;
+          fill: variables.$color-green;
         }
       }
     }
 
     &:active {
-      background: $color-bg-1;
+      background: variables.$color-bg-1;
 
       .text {
         opacity: 0.7;

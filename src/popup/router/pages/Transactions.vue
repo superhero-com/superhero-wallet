@@ -155,10 +155,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .transactions .list {
-  background: $color-black;
+  background: variables.$color-black;
   padding: 0;
   margin: 0;
 }

@@ -1,4 +1,4 @@
-@import "../../../../styles/variables";
+@use "../../../../styles/variables";
 
 .popup-aex2 {
   padding-top: env(safe-area-inset-top);
@@ -21,7 +21,7 @@
 
   ul li {
     border-width: 1px;
-    border-color: $color-border;
+    border-color: variables.$color-border;
   }
 
   .permission-set {

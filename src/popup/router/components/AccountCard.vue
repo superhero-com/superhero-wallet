@@ -49,7 +49,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .account-card {
   display: flex;
@@ -63,7 +63,7 @@ export default {
 
   &.subaccount {
     background-image: url('../../../icons/account-card/subaccount-bg-pattern.svg');
-    background-color: $color-bg-1;
+    background-color: variables.$color-bg-1;
 
     &.first-subaccount {
       background-color: #131b2a;
@@ -96,7 +96,7 @@ export default {
     button {
       padding: 0;
       opacity: 0.33;
-      color: $color-white;
+      color: variables.$color-white;
       cursor: pointer;
 
       svg {

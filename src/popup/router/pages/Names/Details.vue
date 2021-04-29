@@ -160,7 +160,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "../../../../styles/variables";
+@use "../../../../styles/variables";
 
 .details .name-details {
   padding: 0;
@@ -171,7 +171,7 @@ export default {
     list-style: none;
     text-align: left;
     font-size: 12px;
-    border-bottom: 1px solid $color-border;
+    border-bottom: 1px solid variables.$color-border;
     padding-bottom: 10px;
     padding-top: 5px;
 

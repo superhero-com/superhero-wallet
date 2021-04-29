@@ -145,16 +145,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .sidebar-menu {
   position: absolute;
   right: 0;
   top: 0;
   bottom: 0;
-  background-color: $color-bg-3;
+  background-color: variables.$color-bg-3;
   padding-top: env(safe-area-inset-top);
-  box-shadow: -4px 0 6px rgba($color-black, 0.25);
+  box-shadow: -4px 0 6px rgba(variables.$color-black, 0.25);
   border-radius: 0 10px 10px 0;
   text-align: right;
 
@@ -204,7 +205,7 @@ export default {
 
         &.hover {
           opacity: 1;
-          color: $color-blue;
+          color: variables.$color-blue;
           display: inline;
         }
       }
@@ -213,7 +214,7 @@ export default {
     &:active {
       svg {
         opacity: 1;
-        color: $color-blue;
+        color: variables.$color-blue;
         display: inline;
 
         &.hover {
@@ -232,12 +233,12 @@ export default {
     list-style: none;
 
     li {
-      color: $color-light-grey;
+      color: variables.$color-light-grey;
 
       &:hover {
         border-radius: 5px;
         background: rgba(17, 97, 254, 0.15);
-        color: $color-blue;
+        color: variables.$color-blue;
 
         a svg {
           opacity: 1;

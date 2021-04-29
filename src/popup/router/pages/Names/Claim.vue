@@ -84,7 +84,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../styles/typography';
+@use '../../../../styles/variables';
+@use '../../../../styles/typography';
 
 .claim {
   .claim-name-holder {
@@ -96,7 +97,7 @@ export default {
     .input-field span {
       @extend %face-sans-14-regular;
 
-      color: $color-dark-grey;
+      color: variables.$color-dark-grey;
     }
 
     .button {

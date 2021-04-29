@@ -64,7 +64,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .button {
   display: block;
@@ -77,31 +78,31 @@ export default {
 
   padding: 0;
   margin: 8px auto;
-  color: $color-white;
+  color: variables.$color-white;
   height: 40px;
   line-height: 40px;
 
   &.primary {
-    background-color: $color-blue;
+    background-color: variables.$color-blue;
 
     &:hover {
-      background-color: $color-blue-hover;
+      background-color: variables.$color-blue-hover;
     }
 
     &:active {
-      background: rgba($color-blue, 0.9);
+      background: rgba(variables.$color-blue, 0.9);
     }
   }
 
   &.secondary {
-    background-color: $color-black;
+    background-color: variables.$color-black;
 
     &:hover {
-      background-color: $color-hover;
+      background-color: variables.$color-hover;
     }
 
     &:active {
-      background: rgba($color-bg-3, 0.8);
+      background: rgba(variables.$color-bg-3, 0.8);
     }
   }
 
@@ -113,7 +114,7 @@ export default {
     left: 0;
     right: 0;
     bottom: 0;
-    border: 4px solid rgba($color-blue, 0.44);
+    border: 4px solid rgba(variables.$color-blue, 0.44);
     border-radius: 10px;
   }
 
@@ -133,7 +134,7 @@ export default {
   }
 
   &.dark {
-    background: $color-bg-2;
+    background: variables.$color-bg-2;
   }
 
   &.small {
@@ -156,8 +157,8 @@ export default {
 
   &.confirm,
   &.danger {
-    background: $color-blue;
-    color: $color-white;
+    background: variables.$color-blue;
+    color: variables.$color-white;
   }
 
   &.onboarding {
@@ -166,28 +167,28 @@ export default {
     height: 34px;
     border-radius: 5px;
     line-height: 34px;
-    background: $color-bg-2;
+    background: variables.$color-bg-2;
     margin: 0;
     margin-right: 10px;
     font-weight: 500;
-    color: $color-white;
+    color: variables.$color-white;
 
     &:last-child {
       margin-right: 0;
     }
 
     &.skip {
-      background: $color-error;
+      background: variables.$color-error;
     }
 
     &.next {
-      background: $color-blue;
+      background: variables.$color-blue;
     }
 
     &.start {
       margin-left: auto;
       margin-right: 0;
-      background: $color-blue;
+      background: variables.$color-blue;
     }
   }
 

@@ -58,10 +58,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../styles/variables';
+@use '../../../../styles/variables';
 
 .tokens-list-item {
-  background-color: $color-bg-1;
+  background-color: variables.$color-bg-1;
   margin-bottom: 3px;
   height: 50px;
   display: flex;
@@ -87,14 +87,14 @@ export default {
       justify-content: space-between;
       line-height: 17px;
       font-size: 13px;
-      color: $color-light-grey;
+      color: variables.$color-light-grey;
 
       .title {
         font-size: 14px;
       }
 
       label {
-        color: $color-dark-grey;
+        color: variables.$color-dark-grey;
       }
 
       :nth-child(1) {

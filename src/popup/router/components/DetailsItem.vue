@@ -42,8 +42,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .details-item {
   .label {
@@ -54,7 +54,7 @@ export default {
     @extend %face-sans-15-medium;
 
     line-height: 16px;
-    color: $color-dark-grey;
+    color: variables.$color-dark-grey;
 
     .indent {
       margin-left: 8px;
@@ -64,11 +64,11 @@ export default {
   .value {
     @extend %face-sans-14-regular;
 
-    color: $color-white;
+    color: variables.$color-white;
     margin-bottom: 8px;
 
     .secondary {
-      color: $color-light-grey;
+      color: variables.$color-light-grey;
       margin-left: 4px;
     }
 
@@ -77,7 +77,7 @@ export default {
     }
 
     &.highlight {
-      color: $color-error;
+      color: variables.$color-error;
     }
   }
 }

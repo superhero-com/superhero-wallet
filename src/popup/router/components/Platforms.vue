@@ -79,28 +79,29 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .platforms {
   font-size: 15px;
-  background-color: $color-black;
+  background-color: variables.$color-black;
   word-break: break-word;
 
   @extend %face-sans-15-regular;
 
   &:hover {
-    background-color: $color-bg-3;
+    background-color: variables.$color-bg-3;
   }
 
   .text {
     margin: 8px auto;
     width: 248px;
     padding: 4px 8px;
-    color: $color-light-grey;
+    color: variables.$color-light-grey;
   }
 
   .div-icons {
-    border-top: 1px solid $color-border-hover;
+    border-top: 1px solid variables.$color-border-hover;
     display: flex;
     text-align: center;
     padding-top: 0;
@@ -108,7 +109,7 @@ export default {
 
     .extension {
       width: 50%;
-      border-right: 1px solid $color-border-hover;
+      border-right: 1px solid variables.$color-border-hover;
     }
 
     .mobile-app {

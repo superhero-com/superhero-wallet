@@ -54,7 +54,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "../../../styles/variables";
+@use "../../../styles/variables";
 
 .about {
   .logo {
@@ -62,7 +62,7 @@ export default {
   }
 
   .version {
-    color: $color-dark-grey;
+    color: variables.$color-dark-grey;
   }
 
   .waellet-links a {

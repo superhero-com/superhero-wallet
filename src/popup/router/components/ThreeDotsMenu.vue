@@ -30,25 +30,25 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .three-dots {
   position: relative;
 
   &.active {
-    background-color: $color-bg-3;
+    background-color: variables.$color-bg-3;
   }
 
   &:hover {
     cursor: pointer;
-    color: $color-white;
+    color: variables.$color-white;
   }
 
   ::v-deep .not-bootstrap-modal-content {
     font-size: 0.75rem;
     border-radius: 0.25rem;
-    color: $color-light-grey;
-    background-color: $color-black;
+    color: variables.$color-light-grey;
+    background-color: variables.$color-black;
     padding: 0.5rem;
     top: 1.2rem;
     right: 0;
@@ -63,7 +63,7 @@ export default {
 
       &:hover {
         cursor: pointer;
-        color: $color-white;
+        color: variables.$color-white;
       }
     }
   }

@@ -318,7 +318,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .tip {
   .tour__step3 {
@@ -351,7 +351,7 @@ export default {
     }
 
     a {
-      color: $color-white;
+      color: variables.$color-white;
       text-decoration: none;
       margin-left: 10px;
       width: 90%;
@@ -363,7 +363,7 @@ export default {
   }
 
   .validation-msg {
-    color: $color-error;
+    color: variables.$color-error;
     font-size: 15px;
     min-height: 45px;
   }

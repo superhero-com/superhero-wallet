@@ -19,25 +19,25 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../styles/variables';
+@use '../../../../styles/variables';
 
 .details-row {
   font-size: 15px;
   padding: 9px 15px;
-  background-color: $color-bg-3;
+  background-color: variables.$color-bg-3;
   display: flex;
 
   .title {
-    color: $color-dark-grey;
+    color: variables.$color-dark-grey;
     font-weight: 500;
     width: 100%;
   }
 
   .text {
-    color: $color-white;
+    color: variables.$color-white;
 
     .primary {
-      color: $color-green;
+      color: variables.$color-green;
     }
   }
 }

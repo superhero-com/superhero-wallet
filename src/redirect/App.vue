@@ -38,11 +38,11 @@ export default {
 </script>
 
 <style lang="scss">
-@import "../styles/variables";
+@use "../styles/variables";
 
 body,
 html {
-  background: $color-black;
+  background: variables.$color-black;
 }
 
 #info {
@@ -53,7 +53,7 @@ html {
   transform: translate(-50%, -50%);
   -webkit-transform: translate(-50%, -50%);
   text-align: center;
-  color: $color-white;
+  color: variables.$color-white;
 
   .logo {
     margin-bottom: 25px;
@@ -64,8 +64,8 @@ html {
   }
 
   .loader {
-    border: 8px solid $color-light-grey;
-    border-top: 8px solid $color-blue;
+    border: 8px solid variables.$color-light-grey;
+    border-top: 8px solid variables.$color-blue;
     border-radius: 50%;
     width: 70px;
     height: 70px;

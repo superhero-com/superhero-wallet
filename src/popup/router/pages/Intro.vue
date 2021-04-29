@@ -195,13 +195,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/mixins';
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
 
 .intro {
   padding: 40px 16px 4px 16px;
 
-  @include mobile {
+  @include mixins.mobile {
     padding-top: 48px;
     padding-top: calc(env(safe-area-inset-top) + 48px);
   }
@@ -232,7 +232,7 @@ export default {
     font-size: 18px;
 
     &.secondary {
-      color: $color-blue;
+      color: variables.$color-blue;
       font-size: 22px;
     }
 
@@ -246,7 +246,7 @@ export default {
     text-align: center;
 
     span:not(.aeid) {
-      color: $color-white;
+      color: variables.$color-white;
       font-size: 16px;
       word-break: break-word;
     }
@@ -254,13 +254,13 @@ export default {
 
   .undestand {
     text-align: left;
-    color: $color-white;
+    color: variables.$color-white;
     font-size: 12px;
     word-break: break-word;
   }
 
   .skip-button {
-    color: $color-green;
+    color: variables.$color-green;
     font-size: 18px;
     margin-top: 30px;
     text-decoration: underline;
@@ -268,7 +268,7 @@ export default {
   }
 
   .last-msg-enjoy {
-    color: $color-blue;
+    color: variables.$color-blue;
     font-size: 18px;
     width: 100%;
     margin: 10px auto;
@@ -336,7 +336,7 @@ export default {
 
     li a {
       overflow: hidden;
-      background-color: $color-white;
+      background-color: variables.$color-white;
       transition: background 0.3s;
     }
   }
@@ -348,17 +348,17 @@ export default {
     height: 0;
     left: 0;
     width: 100%;
-    box-shadow: 0 0 1px $color-light-grey;
+    box-shadow: 0 0 1px variables.$color-light-grey;
     transition: height 0.3s;
   }
 
   .dotstyle-fillup li a:hover,
   .dotstyle-fillup li a:focus {
-    background-color: rgba($color-black, 0.2);
+    background-color: rgba(variables.$color-black, 0.2);
   }
 
   .dotstyle-fillup li.current a {
-    background-color: $color-blue;
+    background-color: variables.$color-blue;
   }
 
   .dotstyle-fillup li.current a::after {

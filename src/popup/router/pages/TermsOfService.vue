@@ -970,7 +970,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .terms-of-service {
   font-weight: 100;
@@ -996,7 +996,7 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    color: $color-green;
+    color: variables.$color-green;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -1009,7 +1009,7 @@ export default {
 
     span {
       margin-right: auto;
-      color: $color-green;
+      color: variables.$color-green;
     }
   }
 

@@ -59,7 +59,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../styles/variables';
+@use '../../../../styles/variables';
 
 ::v-deep {
   text-align: left;
@@ -68,11 +68,11 @@ export default {
 .menu {
   margin-top: 3px;
   padding: 7px;
-  background-color: $color-bg-3;
+  background-color: variables.$color-bg-3;
 }
 
 .menu-item {
-  color: $color-dark-grey;
+  color: variables.$color-dark-grey;
   padding: 10px 18px;
   font-size: 15px;
   font-weight: 500;
@@ -86,8 +86,8 @@ export default {
   }
 
   &.active {
-    color: $color-green;
-    background-color: $color-bg-3;
+    color: variables.$color-green;
+    background-color: variables.$color-bg-3;
   }
 }
 </style>

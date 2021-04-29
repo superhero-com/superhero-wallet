@@ -346,11 +346,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .send {
   .primary-title-darker {
-    color: $color-white;
+    color: variables.$color-white;
   }
 
   .withdraw.step1 {
@@ -373,7 +373,7 @@ export default {
     .error {
       padding-top: 8px;
       line-height: 16px;
-      color: $color-error;
+      color: variables.$color-error;
       font-size: 12px;
       text-align: left;
     }
@@ -383,7 +383,7 @@ export default {
     }
 
     small {
-      color: $color-green;
+      color: variables.$color-green;
       display: block;
       width: 100%;
       padding-top: 5px;
@@ -399,7 +399,7 @@ export default {
     }
 
     p:not(:first-of-type) {
-      color: $color-white;
+      color: variables.$color-white;
     }
 
     p > svg {
@@ -409,7 +409,7 @@ export default {
     .info-group {
       .amount {
         font-size: 26px;
-        color: $color-blue;
+        color: variables.$color-blue;
       }
 
       .currencyamount {

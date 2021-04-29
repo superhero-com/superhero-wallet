@@ -76,7 +76,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .notification-item {
   display: flex;
@@ -90,24 +90,24 @@ export default {
 
   &.created,
   &.peeked {
-    background-color: $color-bg-2;
+    background-color: variables.$color-bg-2;
 
     .three-dots,
     .format-date {
-      color: $color-blue;
+      color: variables.$color-blue;
     }
   }
 
   &.read {
-    background-color: $color-bg-1;
+    background-color: variables.$color-bg-1;
 
     .three-dots,
     .format-date {
-      color: $color-dark-grey;
+      color: variables.$color-dark-grey;
     }
 
     .three-dots:hover {
-      color: $color-light-grey;
+      color: variables.$color-light-grey;
     }
   }
 
@@ -129,7 +129,7 @@ export default {
 
       .address {
         font-size: 0.55rem;
-        color: $color-white;
+        color: variables.$color-white;
 
         &.wallet {
           font-size: inherit;
@@ -148,7 +148,7 @@ export default {
 
     .notification-text {
       word-break: break-word;
-      color: $color-white;
+      color: variables.$color-white;
     }
 
     .format-date {
@@ -178,7 +178,7 @@ export default {
     &:hover {
       box-sizing: border-box;
       border-radius: 50%;
-      background-color: $color-bg-3;
+      background-color: variables.$color-bg-3;
     }
 
     .mark-as-read {

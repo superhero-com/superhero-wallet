@@ -116,12 +116,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables.scss';
+@use '../../../styles/variables.scss';
 
 .permissions-details {
   font-size: 15px;
   text-align: left;
-  color: $color-white;
+  color: variables.$color-white;
 
   p {
     text-align: center;
@@ -142,19 +142,19 @@ export default {
 
     .highlight {
       font-weight: 700;
-      color: $color-white;
+      color: variables.$color-white;
     }
 
     .token-amount {
       margin-left: auto;
-      color: $color-white;
+      color: variables.$color-white;
     }
   }
 
   .transaction-sign-limit {
     margin: 0 -12px;
     padding: 0 12px;
-    border: 1px solid $color-border;
+    border: 1px solid variables.$color-border;
     border-left: 0;
     border-right: 0;
 
@@ -172,7 +172,7 @@ export default {
         position: absolute;
         top: 10px;
         left: 120px;
-        color: $color-blue;
+        color: variables.$color-blue;
       }
     }
   }

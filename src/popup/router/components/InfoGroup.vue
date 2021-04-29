@@ -31,7 +31,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .info-group {
   text-align: left;
@@ -43,7 +43,7 @@ export default {
   }
 
   a {
-    color: $color-green;
+    color: variables.$color-green;
     font-size: 11px;
     letter-spacing: -0.3px;
   }

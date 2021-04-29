@@ -80,7 +80,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .identicons-holder {
   display: flex;
@@ -108,12 +108,12 @@ export default {
 
   .from {
     padding-right: 15px;
-    background: $color-border;
+    background: variables.$color-border;
   }
 
   .to {
     padding-left: 15px;
-    background: $color-border;
+    background: variables.$color-border;
   }
 
   .arrow-separator {
@@ -123,14 +123,14 @@ export default {
     -ms-transform: translate(-50%, -50%);
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
-    background: $color-blue;
-    color: $color-white;
+    background: variables.$color-blue;
+    color: variables.$color-white;
     border-radius: 50%;
     width: 20px;
     height: 20px;
     text-align: center;
     vertical-align: middle;
-    border: 1px solid $color-white;
+    border: 1px solid variables.$color-white;
     line-height: 20px;
 
     .ae-icon {

@@ -1,4 +1,4 @@
-@import '../styles/variables';
+@use '../styles/variables';
 
 .action-superhero-tip {
   align-self: center;
@@ -22,7 +22,7 @@
 
     &,
     span {
-      color: $color-light-grey;
+      color: variables.$color-light-grey;
     }
 
     img {
@@ -39,7 +39,7 @@
 
     &:hover {
       span {
-        color: $color-blue;
+        color: variables.$color-blue;
       }
 
       img {
