@@ -151,7 +151,7 @@ export default {
         await this.$store.dispatch('invites/claim', this.secretKey);
         await this.updateBalance();
       } catch (error) {
-        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', error)) return;
+        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) return;
         throw error;
       } finally {
         this.$emit('loading', false);
