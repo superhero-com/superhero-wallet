@@ -5,11 +5,11 @@ describe('Test cases Amount component', () => {
       .enterAmountInput(5)
       .get('[data-cy=amount-currency]')
       .invoke('text')
-      .then((text) => expect(text).not.to.eq('($0.00)'))
+      .should((text) => expect(text.trim()).not.to.eq('($0.00)'))
       .enterAmountInput(0)
       .get('[data-cy=amount-currency]')
       .invoke('text')
-      .then((text) => expect(text.trim()).to.eq('($0.00)'))
+      .should((text) => expect(text.trim()).to.eq('($0.00)'))
 
       .enterAmountInput(0)
       .get('[data-cy=input-wrapper]')
