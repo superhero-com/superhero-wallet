@@ -65,8 +65,7 @@ export default {
               .map((s) => s.type)
               .includes(n.type),
         )
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .map((n) => (n.chainName ? { ...n, chainName: n.chainName?.[0] } : n));
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     },
   },
   methods: {
