@@ -3,7 +3,6 @@ import About from '../pages/About';
 import Account from '../pages/Account';
 import Accounts from '../pages/Accounts';
 import Address from '../pages/Address';
-import ClaimTips from '../pages/ClaimTips';
 import CommentNew from '../pages/CommentNew';
 import DonateError from '../pages/DonateError';
 import TokenDetails from '../pages/FungibleTokens/TokenDetails';
@@ -29,15 +28,18 @@ import PermissionsSettings from '../pages/PermissionsSettings';
 import PopupConnect from '../pages/Popups/Connect';
 import PopupMessageSign from '../pages/Popups/MessageSign';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
-import Receive from '../pages/Receive';
 import Retip from '../pages/Retip';
 import SecuritySettings from '../pages/SecuritySettings';
-import Send from '../pages/Send';
+import Payments from '../pages/Payments';
+import PaymentsSend from '../pages/PaymentsSend';
+import PaymentsReceive from '../pages/PaymentsReceive';
 import Settings from '../pages/Settings';
 import SignMessage from '../pages/SignMessage';
 import SuccessTip from '../pages/SuccessTip';
 import TermsOfService from '../pages/TermsOfService';
-import Tip from '../pages/Tip';
+import Tips from '../pages/Tips';
+import TipsSend from '../pages/TipsSend';
+import TipsClaim from '../pages/TipsClaim';
 import TransactionDetails from '../pages/TransactionDetails';
 import Transactions from '../pages/Transactions';
 import webIframePopups from './web-iframe-popups';
@@ -180,14 +182,25 @@ export default [
     },
   },
   {
-    path: '/tip',
-    name: 'tip',
-    component: Tip,
-    props: true,
-    meta: {
-      title: 'send-tips',
-      notRebrand: true,
-    },
+    path: '/tips',
+    component: Tips,
+    children: [{
+      path: '',
+      name: 'tips-send',
+      component: TipsSend,
+      meta: {
+        title: 'tips',
+        notRebrand: true,
+      },
+    }, {
+      path: 'claim',
+      name: 'tips-claim',
+      component: TipsClaim,
+      meta: {
+        title: 'tips',
+        notRebrand: true,
+      },
+    }],
   },
   {
     path: '/retip',
@@ -195,15 +208,6 @@ export default [
     meta: {
       title: 'send-tips',
       notPersist: true,
-      notRebrand: true,
-    },
-  },
-  {
-    path: '/claim-tips',
-    name: 'claim-tips',
-    component: ClaimTips,
-    meta: {
-      title: 'claim-tips',
       notRebrand: true,
     },
   },
@@ -244,22 +248,25 @@ export default [
     },
   },
   {
-    path: '/send',
-    name: 'send',
-    props: true,
-    component: Send,
-    meta: {
-      title: 'send',
-      notRebrand: true,
-    },
-  },
-  {
-    path: '/receive',
-    component: Receive,
-    meta: {
-      title: 'topUp',
-      notRebrand: true,
-    },
+    path: '/payments',
+    component: Payments,
+    children: [{
+      path: '',
+      name: 'payments-send',
+      component: PaymentsSend,
+      meta: {
+        title: 'payments',
+        notRebrand: true,
+      },
+    }, {
+      path: 'receive',
+      name: 'payments-receive',
+      component: PaymentsReceive,
+      meta: {
+        title: 'payments',
+        notRebrand: true,
+      },
+    }],
   },
   {
     path: '/success-tip',

@@ -16,7 +16,7 @@
       <div class="token-actions">
         <Button
           bold
-          :to="{ name: 'send' }"
+          :to="{ name: 'payments-send' }"
         >
           {{ $t('pages.token-details.send') }}
         </Button>
@@ -29,7 +29,7 @@
         <Button
           bold
           :disabled="!tippingSupported"
-          :to="{ name: 'tip' }"
+          :to="{ name: 'tips-send' }"
         >
           {{ $t('pages.token-details.tip') }}
         </Button>

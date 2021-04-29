@@ -1,9 +1,7 @@
 <template>
-  <div class="send">
+  <div class="payments-send">
     <div data-cy="send-container">
       <div v-if="step == 1">
-        <AccountInfo />
-        <BalanceInfo />
         <div class="withdraw step1">
           <p class="primary-title text-left mb-8 f-16">
             {{ $t('pages.tipPage.heading') }}
@@ -177,19 +175,15 @@ import AmountInput from '../components/AmountInput';
 import InfoGroup from '../components/InfoGroup';
 import Textarea from '../components/Textarea';
 import Button from '../components/Button';
-import AccountInfo from '../components/AccountInfo';
-import BalanceInfo from '../components/BalanceInfo';
 import QrIcon from '../../../icons/qr-code.svg?vue-component';
 import AlertExclamination from '../../../icons/alert-exclamation.svg?vue-component';
 
 export default {
-  name: 'Send',
+  name: 'PaymentsSend',
   components: {
     AmountInput,
     Textarea,
     Button,
-    AccountInfo,
-    BalanceInfo,
     QrIcon,
     AlertExclamination,
     InfoGroup,
@@ -348,7 +342,7 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 
-.send {
+.payments-send {
   .primary-title-darker {
     color: variables.$color-white;
   }

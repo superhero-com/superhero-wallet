@@ -6,10 +6,10 @@
     <RouterLink to="/tokens">
       <Balances />
     </RouterLink>
-    <RouterLink to="/send">
+    <RouterLink to="/payments">
       <Payments />
     </RouterLink>
-    <RouterLink to="/tip">
+    <RouterLink to="/tips">
       <Tips />
     </RouterLink>
     <RouterLink to="/settings">

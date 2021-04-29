@@ -1,6 +1,5 @@
 <template>
-  <div class="tip">
-    <BalanceInfo />
+  <div class="tips-send">
     <div class="tour__step3">
       <p class="primary-title text-left mb-8 f-16">
         <template v-if="!confirmMode">
@@ -109,7 +108,6 @@ import InputField from '../components/InputField';
 import UrlStatus from '../components/UrlStatus';
 import Button from '../components/Button';
 import TokenAmount from '../components/TokenAmount';
-import BalanceInfo from '../components/BalanceInfo';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
@@ -120,7 +118,6 @@ export default {
     UrlStatus,
     Button,
     TokenAmount,
-    BalanceInfo,
   },
   mixins: [deeplinkApi],
   props: { tipUrl: { type: String, default: '' } },
@@ -320,7 +317,7 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 
-.tip {
+.tips-send {
   .tour__step3 {
     margin: 0 auto;
     margin-top: 22px;
