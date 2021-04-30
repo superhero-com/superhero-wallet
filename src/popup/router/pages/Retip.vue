@@ -39,7 +39,7 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import tipping from 'tipping-contract/util/tippingContractUtil';
 import { MAGNITUDE, calculateFee } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
@@ -85,7 +85,7 @@ export default {
         if (!this.selectedToken && +this.amount < minTipAmount) {
           return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
         }
-        const fee = calculateFee(TX_TYPE.contractCall, {
+        const fee = calculateFee(SCHEMA.TX_TYPE.contractCall, {
           ...sdk.Ae.defaults,
           contractId: this.tippingContract.deployInfo.address,
           callerId: account.address,
@@ -150,7 +150,7 @@ export default {
           tx: {
             senderId: this.account.address,
             contractId: this.tippingContract.deployInfo.address,
-            type: TX_TYPE.contractCall,
+            type: SCHEMA.TX_TYPE.contractCall,
           },
         });
         this.openCallbackOrGoHome(true);

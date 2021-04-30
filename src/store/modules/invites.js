@@ -1,4 +1,4 @@
-import { Universal, MemoryAccount, Crypto } from '@aeternity/aepp-sdk/es';
+import { Universal, MemoryAccount, Crypto } from '@aeternity/aepp-sdk';
 import { i18n } from '../plugins/languages';
 
 export default {

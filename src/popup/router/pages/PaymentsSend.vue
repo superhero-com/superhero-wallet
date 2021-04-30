@@ -166,7 +166,7 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import { calculateFee } from '../../utils/constants';
 import {
   checkAddress, checkAensName, aeToAettos, convertToken,
@@ -242,13 +242,15 @@ export default {
     },
     async fetchFee() {
       await this.$watchUntilTruly(() => this.sdk);
-      this.fee = calculateFee(!this.selectedToken ? TX_TYPE.spend : TX_TYPE.contractCall, {
-        ...this.sdk.Ae.defaults,
-        ...(this.selectedToken && {
-          callerId: this.account.address,
-          contractId: this.selectedToken.contract,
-        }),
-      });
+      this.fee = calculateFee(
+        !this.selectedToken ? SCHEMA.TX_TYPE.spend : SCHEMA.TX_TYPE.contractCall, {
+          ...this.sdk.Ae.defaults,
+          ...(this.selectedToken && {
+            callerId: this.account.address,
+            contractId: this.selectedToken.contract,
+          }),
+        },
+      );
     },
     setTxDetails(tx) {
       if (tx.tx.type === 'ContractCallTx') {
@@ -305,7 +307,7 @@ export default {
             tx: {
               senderId: this.account.address,
               contractId: this.selectedToken.contract,
-              type: TX_TYPE.contractCall,
+              type: SCHEMA.TX_TYPE.contractCall,
             },
           });
           await this.$store.dispatch('fungibleTokens/getAvailableTokens');
@@ -323,7 +325,7 @@ export default {
             tx: {
               senderId: this.account.address,
               recipientId: this.form.address,
-              type: TX_TYPE.spend,
+              type: SCHEMA.TX_TYPE.spend,
             },
           });
         }

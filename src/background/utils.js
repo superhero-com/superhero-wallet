@@ -1,6 +1,5 @@
 import { isEqual } from 'lodash-es';
-import Universal from '@aeternity/aepp-sdk/es/ae/universal';
-import Node from '@aeternity/aepp-sdk/es/node';
+import { Universal, Node } from '@aeternity/aepp-sdk';
 import { setContractInstance, contractCall, getAddressByNameEntry } from '../popup/utils/helper';
 import Logger from '../lib/logger';
 import store from './store';

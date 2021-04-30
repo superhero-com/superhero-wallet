@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@aeternity/aepp-components-3": "3.0.0-alpha.9",
-    "@aeternity/aepp-sdk": "^7.7.0",
+    "@aeternity/aepp-sdk": "github:aeternity/aepp-sdk-js#b337d059b90c16397fda322ee45a4430c520ce63",
     "@aeternity/bip39": "^0.1.0",
     "@aeternity/hd-wallet": "^0.2.0",
     "@zxing/library": "^0.18.3",
@@ -104,6 +104,7 @@
     "start-server-and-test": "^1.11.7",
     "stylelint": "^13.8.0",
     "stylelint-config-standard": "^20.0.0",
+    "terser-webpack-plugin": "^1.4.5",
     "url-loader": "^4.1.1",
     "vue-loader": "^15.9.6",
     "vue-svg-loader": "^0.16.0",

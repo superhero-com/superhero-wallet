@@ -1,4 +1,4 @@
-import { TX_TYPE, VM_VERSIONS, ABI_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 
 export const testAccount = {
@@ -91,24 +91,24 @@ const commonParams = {
     type: 'delta',
     value: 10,
   },
-  ctVersion: { abiVersion: ABI_VERSIONS.SOPHIA, vmVersion: VM_VERSIONS.SOPHIA },
-  abiVersion: ABI_VERSIONS.SOPHIA,
+  ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
+  abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
   callData:
     'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF',
 };
 export const txParams = {
-  [TX_TYPE.contractCreate]: {
+  [SCHEMA.TX_TYPE.contractCreate]: {
     ownerId: testAccount.address,
     code:
       'cb_+LBGA6DK15BWhAK4E5OWH1kkfhQIx/qEDTVv8hrfY/bk13cN88C4g7hT/iiALJYANwGXQDcAGgaCAAEDP/5E1kQfADcANwAaDoKfAYEKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqgEDP/6LoCthADcAl0ABAoKqLwMRKIAsliVzZXRfYnl0ZXMRRNZEHxFpbml0EYugK2ElZ2V0X2J5dGVzgi8AhTQuMi4wABHX/Rk=',
     ...commonParams,
   },
-  [TX_TYPE.contractCall]: {
+  [SCHEMA.TX_TYPE.contractCall]: {
     contractId: 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio',
     callerId: testAccount.address,
     ...commonParams,
   },
-  [TX_TYPE.spend]: {
+  [SCHEMA.TX_TYPE.spend]: {
     senderId: testAccount.address,
     recipientId,
     ...commonParams,

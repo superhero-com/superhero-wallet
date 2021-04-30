@@ -1,20 +1,19 @@
 import { isFQDN } from 'validator';
 import { detect } from 'detect-browser';
-import { Crypto } from '@aeternity/aepp-sdk/es';
-import { AE_AMOUNT_FORMATS, formatAmount } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
+import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import { CONNECTION_TYPES } from './constants';
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
 
-export const aeToAettos = (v) => formatAmount(v, {
-  denomination: AE_AMOUNT_FORMATS.AE,
-  targetDenomination: AE_AMOUNT_FORMATS.AETTOS,
+export const aeToAettos = (v) => AmountFormatter.formatAmount(v, {
+  denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
+  targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
 });
-export const aettosToAe = (v) => formatAmount(v, {
-  denomination: AE_AMOUNT_FORMATS.AETTOS,
-  targetDenomination: AE_AMOUNT_FORMATS.AE,
+export const aettosToAe = (v) => AmountFormatter.formatAmount(v, {
+  denomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
+  targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
 });
 
 export const convertToken = (balance, precision) => BigNumber(balance).shiftedBy(precision);

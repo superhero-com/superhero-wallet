@@ -4,7 +4,7 @@ import {
 } from 'rxjs/operators';
 import { refCountDelay } from 'rxjs-etc/operators';
 import { memoize } from 'lodash-es';
-import { asBigNumber } from '@aeternity/aepp-sdk/es/utils/bignumber';
+import BigNumber from 'bignumber.js';
 import {
   isNotFoundError,
   handleUnknownError,
@@ -43,9 +43,9 @@ export default (store) => {
       if (balance !== getBalanceLocalStorage()) {
         setBalanceLocalStorage(balance);
       }
-      return asBigNumber(balance);
+      return new BigNumber(balance);
     }),
-    multicast(new BehaviorSubject(asBigNumber(getBalanceLocalStorage()))),
+    multicast(new BehaviorSubject(new BigNumber(getBalanceLocalStorage()))),
     refCountDelay(1000),
   ));
 
@@ -101,7 +101,7 @@ export default (store) => {
       pluck('newValue'),
       switchMap((p) => timer(0, 3000).pipe(map(() => p))),
       switchMap((tokenBalance) => (tokenBalance ? Promise.resolve(tokenBalance) : balance$)),
-      multicast(new BehaviorSubject(asBigNumber(0))),
+      multicast(new BehaviorSubject(new BigNumber(0))),
       refCountDelay(1000),
     ),
     balanceCurrency: watchAsObservable((state, getters) => getters.currentCurrencyRate, {

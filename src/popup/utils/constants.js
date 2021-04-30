@@ -1,18 +1,17 @@
-import { TxBuilder } from '@aeternity/aepp-sdk/es';
-import { TX_TYPE, ABI_VERSIONS, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import { i18n } from '../../store/plugins/languages';
 
 export const MAGNITUDE = 18;
 
 export const TX_TYPE_MDW = {
-  SpendTx: TX_TYPE.spend,
-  ContractCallTx: TX_TYPE.contractCall,
-  ContractCreateTx: TX_TYPE.contractCreate,
-  NamePreclaimTx: TX_TYPE.namePreClaim,
-  NameClaimTx: TX_TYPE.nameClaim,
-  NameBidTx: TX_TYPE.nameClaim,
-  NameUpdateTx: TX_TYPE.nameUpdate,
+  SpendTx: SCHEMA.TX_TYPE.spend,
+  ContractCallTx: SCHEMA.TX_TYPE.contractCall,
+  ContractCreateTx: SCHEMA.TX_TYPE.contractCreate,
+  NamePreclaimTx: SCHEMA.TX_TYPE.namePreClaim,
+  NameClaimTx: SCHEMA.TX_TYPE.nameClaim,
+  NameBidTx: SCHEMA.TX_TYPE.nameClaim,
+  NameUpdateTx: SCHEMA.TX_TYPE.nameUpdate,
 };
 
 export const CONNECTION_TYPES = {
@@ -32,8 +31,8 @@ export const calculateFee = (type, params) => {
       amount: MAX_UINT256,
       ttl: MAX_UINT256,
       nonce: MAX_UINT256,
-      ctVersion: { abiVersion: ABI_VERSIONS.SOPHIA, vmVersion: VM_VERSIONS.SOPHIA },
-      abiVersion: ABI_VERSIONS.SOPHIA,
+      ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
+      abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
       callData: STUB_CALLDATA,
       ...params,
     },

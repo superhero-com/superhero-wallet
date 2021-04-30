@@ -7,6 +7,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ChromeExtensionReloader = require('webpack-chrome-extension-reloader');
 const { VueLoaderPlugin } = require('vue-loader');
 const GenerateJsonPlugin = require('generate-json-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin')
 const commitHash = require('child_process').execSync('git rev-parse HEAD').toString().trim();
 const sass = require('sass');
 const genManifest = require('./src/manifest');
@@ -36,6 +37,13 @@ const getConfig = (platform) => {
       ...(platform === 'aepp' && { aepp: '../tests/aepp/aepp.js' }),
     },
     node: { fs: 'empty', net: 'empty', tls: 'empty' },
+    ...platform === 'extension' && {
+      optimization: {
+        minimizer: [
+          new TerserPlugin({ terserOptions: { output: { ascii_only: true } } }),
+        ],
+      },
+    },
     output: {
       filename: '[name].js',
       publicPath: { web: '/', extension: '../' }[platform] || './',
