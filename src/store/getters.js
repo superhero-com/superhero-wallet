@@ -83,11 +83,11 @@ export default {
   getTxType: (_, { getTxSymbol }) => (transaction) => (getTxSymbol(transaction) === 'AE' ? transaction.tx.type : null),
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    return contractCallData ? availableTokens[contractCallData.token].symbol : 'AE';
+    return contractCallData ? availableTokens[contractCallData.token]?.symbol : 'AE';
   },
   getTxAmountTotal: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    if (contractCallData) {
+    if (contractCallData && availableTokens[contractCallData.token]) {
       return +convertToken(
         contractCallData.amount,
         -availableTokens[contractCallData.token].decimals,
