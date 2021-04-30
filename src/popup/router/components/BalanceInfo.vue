@@ -108,6 +108,7 @@ export default {
 
 .balance-info {
   height: 55px;
+  margin-bottom: 15px;
   display: flex;
   color: variables.$color-white;
 

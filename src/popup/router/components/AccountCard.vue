@@ -78,6 +78,10 @@ export default {
     padding: 8px 8px 0 8px;
   }
 
+  .balance-info {
+    margin-bottom: 0;
+  }
+
   .triangle {
     height: 23px;
     width: 23px;

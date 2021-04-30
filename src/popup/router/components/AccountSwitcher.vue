@@ -75,6 +75,7 @@ export default {
   .cards-wrapper {
     display: flex;
     width: calc(var(--accountCount) * (312px + 8px) + 24px + 24px);
+    align-self: center;
     margin-bottom: 16px;
     transition: margin-left 0.5s ease-out;
     margin-left: calc(var(--accountSelectedIdx) * (-312px - 8px));
@@ -92,6 +93,7 @@ export default {
     }
 
     &.menu-under {
+      align-self: flex-start;
       margin-bottom: 8px;
     }
   }

@@ -3,6 +3,7 @@
     <Logo class="logo" />
     <p>
       <span class="version">
+        commit
         <a
           :href="`https://github.com/aeternity/superhero-wallet/commit/${commitHash}`"
           target="_blank"
@@ -13,6 +14,10 @@
     </p>
     <hr>
     <div class="waellet-links">
+      <a
+        href="https://superhero.com/faq"
+        target="_blank"
+      >FAQ</a>
       <router-link
         to="/about/termsOfService"
         data-cy="terms"
