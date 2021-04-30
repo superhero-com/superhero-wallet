@@ -34,22 +34,49 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/mixins';
 
 .tab-bar {
   display: flex;
   background-color: variables.$color-bg-3;
-  padding-bottom: env(safe-area-inset-bottom);
+  border-bottom: env(safe-area-inset-bottom) solid variables.$color-bg-2;
 
   > a {
+    $sideBorderWidth: calc(1px - min(env(safe-area-inset-bottom), 1px));
+
     height: 48px;
     display: flex;
-    flex-grow: 1;
+    flex: 1 0;
     justify-content: center;
     align-items: center;
     border-radius: 2px 2px 0 0;
     background-color: variables.$color-bg-2;
-    border: 1px solid variables.$color-bg-3;
+    margin: 1px 1px $sideBorderWidth;
     color: variables.$color-white;
+
+    &:first-child {
+      margin-left: $sideBorderWidth;
+
+      @include mixins.desktop {
+        border-bottom-left-radius: 10px;
+      }
+    }
+
+    &:last-child {
+      margin-right: $sideBorderWidth;
+
+      @include mixins.desktop {
+        border-bottom-right-radius: 10px;
+      }
+    }
+
+    &:hover {
+      background-color: variables.$color-hover;
+    }
+
+    &:active {
+      background-color: variables.$color-bg-1;
+    }
 
     svg {
       width: 24px;
@@ -58,24 +85,17 @@ export default {
     }
 
     &.router-link-active {
-      background-color: variables.$color-bg-1;
       color: variables.$color-blue;
-    }
 
-    &.router-link-active,
-    &:hover:not(.router-link-active),
-    &:active:not(.router-link-active) {
-      svg {
-        opacity: 1;
+      &,
+      &:hover,
+      &:active {
+        background-color: variables.$color-bg-1;
+
+        svg {
+          opacity: 1;
+        }
       }
-    }
-
-    &:hover:not(.router-link-active) {
-      background-color: variables.$color-hover;
-    }
-
-    &:active:not(.router-link-active) {
-      background-color: variables.$color-bg-1;
     }
   }
 }
