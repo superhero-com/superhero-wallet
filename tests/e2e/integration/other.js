@@ -17,7 +17,7 @@ describe('Tests cases not connected to specific page', () => {
       { path: '/intro', redirect: false },
       { path: '/notifications', redirect: false },
       { path: '/tips', redirect: true },
-      { path: '/receive', redirect: true },
+      { path: '/payments/receive', redirect: true },
       { path: '/payments', redirect: true },
       { path: '/names', redirect: true },
       { path: '/about', redirect: true },
