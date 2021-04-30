@@ -1,4 +1,6 @@
-import { flatten, orderBy, uniq } from 'lodash-es';
+import {
+  flatten, orderBy, uniq, uniqBy,
+} from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import { SCHEMA } from '@aeternity/aepp-sdk';
@@ -60,7 +62,7 @@ export default {
           claim: true,
         }))).catch(() => []),
     ]);
-    txs = orderBy(flatten(txs), ['microTime'], ['desc']);
+    txs = uniqBy(orderBy(flatten(txs), ['microTime'], ['desc']), ({ hash }) => hash);
     return recent ? txs.slice(0, limit) : txs;
   },
 
