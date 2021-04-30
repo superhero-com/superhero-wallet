@@ -22,7 +22,7 @@
         </Button>
         <Button
           bold
-          to="/receive"
+          :to="{ name: 'payments-receive' }"
         >
           {{ $t('pages.token-details.receive') }}
         </Button>
