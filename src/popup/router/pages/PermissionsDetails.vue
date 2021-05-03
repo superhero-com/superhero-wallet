@@ -23,7 +23,7 @@
         <InputField
           :value="transactionSignLimit || ''"
           :error="transactionSignLimitError"
-          placeholder="no limit"
+          placeholder="always ask"
           @input="setTransactionSignLimit"
         />
       </div>
