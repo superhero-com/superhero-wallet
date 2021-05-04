@@ -10,7 +10,7 @@
         data-cy="view-all-transactions"
         class="view-all"
       >
-        <Activity class="icon" />
+        <TxHistory class="icon" />
       </router-link>
     </div>
     <PendingTxs />
@@ -47,7 +47,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import Activity from '../../../icons/activity.svg?vue-component';
+import TxHistory from '../../../icons/tx-history.svg?vue-component';
 import Visible from '../../../icons/visible.svg?vue-component';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import PendingTxs from './PendingTxs';
@@ -55,7 +55,7 @@ import TransactionItem from './TransactionItem';
 
 export default {
   components: {
-    PendingTxs, TransactionItem, Activity, Visible, AnimatedSpinner,
+    PendingTxs, TransactionItem, TxHistory, Visible, AnimatedSpinner,
   },
   data() {
     return {

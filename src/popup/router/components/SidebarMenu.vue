@@ -109,15 +109,15 @@
 import { mapGetters } from 'vuex';
 import Menu from '../../../icons/menu.svg?vue-component';
 import MenuHover from '../../../icons/menu-hover.svg?vue-component';
-import Balances from '../../../icons/sidebar-menu/balances.svg?vue-component';
-import Payments from '../../../icons/sidebar-menu/payments.svg?vue-component';
-import Tips from '../../../icons/sidebar-menu/tips.svg?vue-component';
+import Balances from '../../../icons/balances.svg?vue-component';
+import Payments from '../../../icons/payments.svg?vue-component';
+import Tips from '../../../icons/tips.svg?vue-component';
 import ClaimTips from '../../../icons/claim-tips.svg?vue-component';
-import TxHistory from '../../../icons/sidebar-menu/tx-history.svg?vue-component';
-import Names from '../../../icons/sidebar-menu/names.svg?vue-component';
-import Invite from '../../../icons/sidebar-menu/invite.svg?vue-component';
+import TxHistory from '../../../icons/tx-history.svg?vue-component';
+import Names from '../../../icons/names.svg?vue-component';
+import Invite from '../../../icons/invite.svg?vue-component';
 import Settings from '../../../icons/settings.svg?vue-component';
-import About from '../../../icons/sidebar-menu/about.svg?vue-component';
+import About from '../../../icons/about.svg?vue-component';
 import Avatar from './Avatar';
 import TruncateMid from './TruncateMid';
 

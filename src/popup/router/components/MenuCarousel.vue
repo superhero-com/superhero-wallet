@@ -25,7 +25,7 @@
       to="/transactions"
       class="tour__step5"
     >
-      <Activity /> {{ $t('pages.titles.tx-history') }}
+      <TxHistory /> {{ $t('pages.titles.tx-history') }}
     </BoxButton>
     <BoxButton to="/names">
       <Names /> {{ $t('pages.titles.names') }}
@@ -42,7 +42,7 @@ import BoxButton from './BoxButton';
 import Balances from '../../../icons/balances.svg?vue-component';
 import Payments from '../../../icons/payments.svg?vue-component';
 import Tips from '../../../icons/tips.svg?vue-component';
-import Activity from '../../../icons/activity.svg?vue-component';
+import TxHistory from '../../../icons/tx-history.svg?vue-component';
 import Names from '../../../icons/names.svg?vue-component';
 import Invites from '../../../icons/invites.svg?vue-component';
 
@@ -54,7 +54,7 @@ export default {
     Balances,
     Payments,
     Tips,
-    Activity,
+    TxHistory,
     Names,
     Invites,
   },
