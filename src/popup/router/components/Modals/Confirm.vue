@@ -38,8 +38,8 @@ export default {
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
-    title: { type: String, required: false },
-    msg: { type: String, required: false },
+    title: { type: String, default: '' },
+    msg: { type: String, default: '' },
   },
   methods: {
     cancel() {

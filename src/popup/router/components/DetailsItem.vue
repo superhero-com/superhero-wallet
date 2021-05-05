@@ -34,7 +34,7 @@ export default {
   props: {
     label: { type: String, default: '' },
     value: { type: [String, Number], default: '' },
-    secondary: { type: String },
+    secondary: { type: String, default: '' },
     small: { type: Boolean },
     highlight: { type: Boolean },
   },

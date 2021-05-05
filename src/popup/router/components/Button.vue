@@ -42,7 +42,7 @@ export default {
     onboarding: Boolean,
     inline: Boolean,
     inactive: Boolean,
-    to: [String, Object],
+    to: { type: [String, Object], default: null },
     bold: Boolean,
   },
   computed: {

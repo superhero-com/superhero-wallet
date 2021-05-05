@@ -192,7 +192,11 @@ export default {
     AlertExclamination,
     InfoGroup,
   },
-  props: ['address', 'redirectstep', 'successtx'],
+  props: {
+    address: { type: String, default: '' },
+    redirectstep: { type: Number, default: 0 },
+    successtx: { type: Object, default: null },
+  },
   data() {
     return {
       step: 1,

@@ -14,11 +14,11 @@ import { checkAddress, checkAensName } from '../../utils/helper';
 
 export default {
   props: {
-    type: String,
-    value: String,
+    type: { type: String, default: '' },
+    value: { type: String, default: '' },
     error: Boolean,
-    placeholder: String,
-    size: String,
+    placeholder: { type: String, default: '' },
+    size: { type: String, default: '' },
   },
   data: () => ({ err: false }),
   watch: {

@@ -28,9 +28,9 @@ export default {
   components: { Modal, Button },
   props: {
     resolve: { type: Function, required: true },
-    title: { type: String, required: false },
-    msg: { type: String, required: false },
-    type: { type: String, required: false },
+    title: { type: String, default: '' },
+    msg: { type: String, default: '' },
+    type: { type: String, default: '' },
   },
 };
 </script>

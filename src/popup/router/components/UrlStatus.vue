@@ -20,11 +20,7 @@ export default {
       type: String,
       required: true,
     },
-    info: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+    info: Boolean,
     modal: Boolean,
   },
   computed: {

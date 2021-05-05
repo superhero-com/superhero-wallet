@@ -18,7 +18,7 @@ export default {
       type: String,
       default: 'normal',
     },
-    src: { type: String },
+    src: { type: String, default: '' },
   },
   data: () => ({
     error: false,

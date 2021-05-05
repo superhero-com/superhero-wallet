@@ -70,6 +70,7 @@ export default {
     status: {
       type: String,
       validator: (value) => ['created', 'peeked', 'read'].includes(value),
+      default: 'created',
     },
   },
 };
