@@ -214,14 +214,6 @@ export default {
       },
     };
   },
-  watch: {
-    selectedToken() {
-      this.fetchFee();
-    },
-  },
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balance']);
-  },
   computed: {
     ...mapState('fungibleTokens', ['selectedToken', 'availableTokens']),
     ...mapState(['current', 'sdk']),
@@ -230,6 +222,14 @@ export default {
       return checkAddress(this.form.address)
         || (!this.selectedToken && checkAensName(this.form.address));
     },
+  },
+  watch: {
+    selectedToken() {
+      this.fetchFee();
+    },
+  },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['balance']);
   },
   async mounted() {
     if (this.redirectstep && this.successtx) {
