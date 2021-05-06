@@ -22,21 +22,19 @@
             :highlight="tour.highlight"
             :class="tour.currentStep === 2 ? 'tip-step' : ''"
           >
-            <template>
-              <div
-                slot="header"
-                class="step-header"
-              >
-                {{ $t(`onboarding.step_${step.step}.title`) }}
-                <span class="step-info"> ({{ step.step }}/{{ steps.length }}) </span>
-              </div>
-              <div
-                slot="content"
-                class="step-content"
-                v-html="$t(`onboarding.step_${step.step}.content`)"
-              />
-              <div slot="actions" />
-            </template>
+            <div
+              slot="header"
+              class="step-header"
+            >
+              {{ $t(`onboarding.step_${step.step}.title`) }}
+              <span class="step-info"> ({{ step.step }}/{{ steps.length }}) </span>
+            </div>
+            <div
+              slot="content"
+              class="step-content"
+              v-html="$t(`onboarding.step_${step.step}.content`)"
+            />
+            <div slot="actions" />
           </v-step>
         </transition>
       </template>
