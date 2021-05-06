@@ -1,3 +1,4 @@
+<!-- eslint-disable vue-i18n/no-v-html, vue/no-v-html-->
 <template>
   <div class="tour">
     <v-tour
