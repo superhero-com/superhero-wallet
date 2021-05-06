@@ -147,8 +147,9 @@
       v-if="network.error"
       class="error-msg"
       data-cy="error-msg"
-      v-html="network.error"
-    />
+    >
+      {{ network.error }}
+    </div>
   </div>
 </template>
 
