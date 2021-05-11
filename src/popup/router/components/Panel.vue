@@ -5,10 +5,12 @@
 </template>
 
 <style lang="scss" scoped>
+@use "../../../styles/variables";
+
 .panel-list {
   padding: 0;
-  background: #21222a;
-  box-shadow: 0 0 8px rgba(0, 33, 87, 0.15);
+  background: variables.$color-bg-1;
+  box-shadow: 0 0 8px rgba(variables.$color-blue, 0.15);
   border-radius: 4px;
   margin-top: 30px;
 }

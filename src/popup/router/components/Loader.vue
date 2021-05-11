@@ -1,15 +1,24 @@
 <template>
-  <div class="loader" data-cy="loader">
+  <div
+    class="loader"
+    data-cy="loader"
+  >
     <div class="center">
       <span v-if="content !== ''">{{ content }}</span>
-      <br v-if="content !== ''" />
+      <br v-if="content !== ''">
       <ae-loader v-if="size === 'small'" />
     </div>
     <transition v-if="size === 'big'">
-      <span v-if="type === 'transparent'" class="main-loader main-loader-transparent">
+      <span
+        v-if="type === 'transparent'"
+        class="main-loader main-loader-transparent"
+      >
         <ae-loader />
       </span>
-      <Welcome v-else class="main-loader main-loader-solid" />
+      <Welcome
+        v-else
+        class="main-loader main-loader-solid"
+      />
     </transition>
   </div>
 </template>
@@ -30,7 +39,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .loader {
   .center {
@@ -40,7 +49,7 @@ export default {
   }
 
   .ae-loader {
-    border: 0.2em solid $secondary-color;
+    border: 0.2em solid variables.$color-blue;
     border-left-color: transparent;
     border-right-color: transparent;
   }
@@ -49,7 +58,7 @@ export default {
     position: fixed;
     width: 100%;
     height: 100%;
-    background-color: $bg-color;
+    background-color: variables.$color-bg-3;
     top: 0;
     z-index: 8;
 

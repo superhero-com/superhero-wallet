@@ -1,6 +1,4 @@
-import { RpcWallet } from '@aeternity/aepp-sdk/es/ae/wallet';
-import { Crypto } from '@aeternity/aepp-sdk/es';
-import Node from '@aeternity/aepp-sdk/es/node';
+import { RpcWallet, Crypto, Node } from '@aeternity/aepp-sdk';
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import { isEmpty, isEqual } from 'lodash-es';
 import uuid from 'uuid';
@@ -23,8 +21,8 @@ const showPopup = async (aepp, type, params) => {
   tabs.forEach(({ url: tabURL, id: tabId }) => {
     const tabUrl = new URL(tabURL);
     if (
-      tabUrl.searchParams.get('type') === 'connectConfirm' &&
-      decodeURIComponent(tabUrl.searchParams.get('url')) === href
+      tabUrl.searchParams.get('type') === 'connectConfirm'
+      && decodeURIComponent(tabUrl.searchParams.get('url')) === href
     ) {
       browser.tabs.remove(tabId);
     }
@@ -66,8 +64,8 @@ const signCb = async (type, aepp, action) => {
       host: getAeppUrl(aepp).hostname,
       method,
       params: params?.txObject?.params,
-    })) ||
-    (await showPopup(aepp, type, params).then(
+    }))
+    || (await showPopup(aepp, type, params).then(
       () => true,
       () => false,
     ))
@@ -147,19 +145,19 @@ export async function init() {
         const { address } = store.getters.account;
         const app = args.pop();
         if (
-          app instanceof App &&
-          !(await store.dispatch('permissions/requestAddressForHost', {
+          app instanceof App
+          && !(await store.dispatch('permissions/requestAddressForHost', {
             host: app.host.hostname,
             address,
             connectionPopupCb: async () => showPopup(app.host.href, 'connectConfirm'),
           }))
-        )
-          return Promise.reject(new Error('Rejected by user'));
+        ) return Promise.reject(new Error('Rejected by user'));
         return address;
       },
       sign: (data) => Crypto.sign(data, store.getters.account.secretKey),
     },
   })({
+    address: store.getters.account.address,
     nodes: [{ name: activeNetwork.name, instance: await Node({ url: activeNetwork.url }) }],
     compilerUrl: activeNetwork.compilerUrl,
     name: 'Superhero',

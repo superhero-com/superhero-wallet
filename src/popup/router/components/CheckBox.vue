@@ -6,8 +6,11 @@
       :type="type"
       :name="name"
       @change="$emit('input', $event.target.checked)"
+    >
+    <span
+      class="checkmark"
+      :class="{ checked: value, disabled }"
     />
-    <span class="checkmark" :class="{ checked: value, disabled }" />
     <slot class="checkbox-holder" />
   </label>
 </template>
@@ -24,7 +27,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .checkbox-container {
   display: flex;
@@ -38,13 +41,13 @@ export default {
   user-select: none;
 
   &:hover .checkmark {
-    border-color: $color-border-hover;
-    background-color: $color-bg-3;
+    border-color: variables.$color-border-hover;
+    background-color: variables.$color-bg-3;
   }
 
   &:active .checkmark {
-    border-color: $color-border-hover;
-    background-color: $color-black;
+    border-color: variables.$color-border-hover;
+    background-color: variables.$color-black;
   }
 
   input {
@@ -56,8 +59,8 @@ export default {
   }
 
   .checkmark {
-    background-color: $color-black;
-    border: 1.3px solid $color-border;
+    background-color: variables.$color-black;
+    border: 1.3px solid variables.$color-border;
     border-radius: 2px;
     height: 20px;
     width: 20px;

@@ -1,8 +1,17 @@
 <template>
-  <div :class="['notification-item', status]" @click="$emit('click')">
+  <div
+    :class="['notification-item', status]"
+    @click="$emit('click')"
+  >
     <div class="first-row">
-      <img v-if="wallet" src="../../../icons/logo-small.svg" />
-      <Avatar v-else :address="address" />
+      <img
+        v-if="wallet"
+        src="../../../icons/logo-small.svg"
+      >
+      <Avatar
+        v-else
+        :address="address"
+      />
       <div class="address-and-menu">
         <span @click.stop>
           <slot />
@@ -15,7 +24,10 @@
         </span>
       </div>
       <ThreeDotsMenu @click.native.stop>
-        <div class="mark-as-read" @click="$emit('toggle-read')">
+        <div
+          class="mark-as-read"
+          @click="$emit('toggle-read')"
+        >
           {{
             status === 'read'
               ? $t('pages.notifications.markAsUnread')
@@ -25,7 +37,10 @@
       </ThreeDotsMenu>
     </div>
     <div class="second-row">
-      <span v-if="!wallet" class="notification-text">
+      <span
+        v-if="!wallet"
+        class="notification-text"
+      >
         {{ text }}
       </span>
       <span :class="['format-date', { wallet }]">
@@ -61,7 +76,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .notification-item {
   display: flex;
@@ -75,24 +90,24 @@ export default {
 
   &.created,
   &.peeked {
-    background-color: $color-bg-2;
+    background-color: variables.$color-bg-2;
 
     .three-dots,
     .format-date {
-      color: $color-blue;
+      color: variables.$color-blue;
     }
   }
 
   &.read {
-    background-color: $color-bg-1;
+    background-color: variables.$color-bg-1;
 
     .three-dots,
     .format-date {
-      color: $color-dark-grey;
+      color: variables.$color-dark-grey;
     }
 
     .three-dots:hover {
-      color: $color-light-grey;
+      color: variables.$color-light-grey;
     }
   }
 
@@ -114,7 +129,7 @@ export default {
 
       .address {
         font-size: 0.55rem;
-        color: $text-color;
+        color: variables.$color-white;
 
         &.wallet {
           font-size: inherit;
@@ -133,7 +148,7 @@ export default {
 
     .notification-text {
       word-break: break-word;
-      color: $text-color;
+      color: variables.$color-white;
     }
 
     .format-date {
@@ -163,7 +178,7 @@ export default {
     &:hover {
       box-sizing: border-box;
       border-radius: 50%;
-      background-color: $nav-bg-color;
+      background-color: variables.$color-bg-3;
     }
 
     .mark-as-read {

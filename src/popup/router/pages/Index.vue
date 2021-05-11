@@ -1,7 +1,13 @@
 <template>
   <div class="index">
-    <img v-if="IN_FRAME" src="../../../icons/iframe/sendAndReceive.svg" />
-    <div v-else class="not-iframe">
+    <img
+      v-if="IN_FRAME"
+      src="../../../icons/iframe/sendAndReceive.svg"
+    >
+    <div
+      v-else
+      class="not-iframe"
+    >
       <Logo />
       <span class="heading">
         {{ $t('pages.index.heading') }}
@@ -19,23 +25,34 @@
     </div>
 
     <div class="terms-agreement">
-      <CheckBox v-model="termsAgreed" :class="{ agreed: termsAgreed }" data-cy="checkbox">
+      <CheckBox
+        v-model="termsAgreed"
+        :class="{ agreed: termsAgreed }"
+        data-cy="checkbox"
+      >
         <span>
           {{ $t('pages.index.term1') }}
         </span>
       </CheckBox>
-      <RouterLink to="/about/termsOfService" data-cy="terms">
+      <RouterLink
+        to="/about/termsOfService"
+        data-cy="terms"
+      >
         {{ $t('pages.index.termsAndConditions') }}
       </RouterLink>
     </div>
 
-    <Button @click="$router.push('/intro')" :disabled="!termsAgreed" data-cy="generate-wallet">
+    <Button
+      :disabled="!termsAgreed"
+      data-cy="generate-wallet"
+      @click="$router.push('/intro')"
+    >
       {{ $t('pages.index.generateWallet') }}
     </Button>
     <Button
-      @click="$router.push('/import-account')"
       :disabled="!termsAgreed"
       data-cy="import-wallet"
+      @click="$router.push('/import-account')"
     >
       {{ $t('pages.index.importWallet') }}
     </Button>
@@ -51,7 +68,9 @@ import Button from '../components/Button';
 import Platforms from '../components/Platforms';
 
 export default {
-  components: { Logo, CheckBox, Button, Platforms, AnimatedSpinner },
+  components: {
+    Logo, CheckBox, Button, Platforms, AnimatedSpinner,
+  },
   data: () => ({
     termsAgreed: false,
     IS_WEB: process.env.PLATFORM === 'web',
@@ -61,7 +80,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .index {
   margin-top: 42px;
@@ -80,7 +100,7 @@ export default {
 
     .checkbox-container {
       margin-right: 4px;
-      color: $color-dark-grey;
+      color: variables.$color-dark-grey;
 
       &.agreed {
         color: white;
@@ -88,7 +108,7 @@ export default {
 
       &:hover:not(.agreed),
       &:active:not(.agreed) {
-        color: $color-light-grey;
+        color: variables.$color-light-grey;
       }
 
       ::v-deep .checkmark {
@@ -97,7 +117,7 @@ export default {
     }
 
     a:hover {
-      color: $color-green-hover;
+      color: variables.$color-green-hover;
     }
   }
 
@@ -120,7 +140,7 @@ export default {
       &.heading {
         @extend %face-sans-16-medium;
 
-        color: $color-blue;
+        color: variables.$color-blue;
         padding: 5.5px 0;
         margin: 0 auto;
       }
@@ -143,7 +163,7 @@ export default {
     .spinner {
       width: 256px;
       height: 256px;
-      color: $color-blue;
+      color: variables.$color-blue;
     }
 
     .platforms {

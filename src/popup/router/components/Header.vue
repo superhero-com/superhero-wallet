@@ -1,30 +1,61 @@
 <template>
-  <div class="header" v-if="showNavigation && !aeppPopup">
-    <div v-if="isLoggedIn || (title && !tourRunning)" class="left">
-      <RouterLink v-if="isLoggedIn" to="/account" class="home-button">
+  <div
+    v-if="showNavigation && !aeppPopup"
+    class="header"
+  >
+    <div
+      v-if="isLoggedIn || (title && !tourRunning)"
+      class="left"
+    >
+      <RouterLink
+        v-if="isLoggedIn"
+        to="/account"
+        class="home-button"
+      >
         <Logo />
       </RouterLink>
-      <button v-if="title && !tourRunning" @click="back" class="icon-btn back">
+      <button
+        v-if="title && !tourRunning"
+        class="icon-btn back"
+        @click="back"
+      >
         <Back data-cy="back-arrow" />
       </button>
     </div>
 
-    <div :class="{ 'not-logged-in': !isLoggedIn }" class="title">
-      <TruncateMid v-if="pageTitle" :str="pageTitle" class="text" />
-      <span v-else class="text">
+    <div
+      :class="{ 'not-logged-in': !isLoggedIn }"
+      class="title"
+    >
+      <TruncateMid
+        v-if="pageTitle"
+        :str="pageTitle"
+        class="text"
+      />
+      <span
+        v-else
+        class="text"
+      >
         {{ (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home') }}
       </span>
     </div>
 
-    <div v-if="isLoggedIn" class="right">
+    <div
+      v-if="isLoggedIn"
+      class="right"
+    >
       <button
         v-if="!$route.path.startsWith('/notifications')"
-        @click="toNotifications"
         class="notifications icon-btn"
         data-cy="noti"
+        @click="toNotifications"
       >
         <Bell />
-        <span v-if="notificationsCount" class="badge" data-cy="noti-count">
+        <span
+          v-if="notificationsCount"
+          class="badge"
+          data-cy="noti-count"
+        >
           {{ notificationsCount }}
         </span>
       </button>
@@ -37,7 +68,11 @@
         <Settings />
       </RouterLink>
 
-      <button @click="$emit('toggle-sidebar')" class="icon-btn menu" data-cy="hamburger">
+      <button
+        class="icon-btn menu"
+        data-cy="hamburger"
+        @click="$emit('toggle-sidebar')"
+      >
         <Menu />
         <MenuHover class="hover" />
       </button>
@@ -56,7 +91,9 @@ import MenuHover from '../../../icons/menu-hover.svg?vue-component';
 import TruncateMid from './TruncateMid';
 
 export default {
-  components: { Logo, Back, Bell, Settings, Menu, MenuHover, TruncateMid },
+  components: {
+    Logo, Back, Bell, Settings, Menu, MenuHover, TruncateMid,
+  },
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,
   }),
@@ -84,14 +121,14 @@ export default {
     ...mapMutations(['setNotificationsStatus']),
     back() {
       const fallBackRoute = this.isLoggedIn ? '/account' : '/';
+      let { fullPath } = this.$route;
+      fullPath = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
       this.$router.push(
-        this.$route.fullPath.substr(0, this.$route.fullPath.lastIndexOf('/')) || fallBackRoute,
+        fullPath.substr(0, fullPath.lastIndexOf('/')) || fallBackRoute,
       );
     },
     async toNotifications() {
-      this.notifications.forEach((n) =>
-        this.setNotificationsStatus({ createdAt: n.createdAt, status: 'PEEKED' }),
-      );
+      this.notifications.forEach((n) => this.setNotificationsStatus({ createdAt: n.createdAt, status: 'PEEKED' }));
       await this.$store.dispatch('modifyNotifications', [
         this.superheroNotifications.filter((n) => n.status === 'CREATED').map((n) => n.id),
         'PEEKED',
@@ -105,27 +142,28 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
-@import '../../../styles/mixins';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
+@use '../../../styles/mixins';
 
 .header {
   position: fixed;
   width: 360px;
 
-  @include desktop {
+  @include mixins.desktop {
     position: sticky;
   }
 
   top: 0;
   z-index: 8;
   height: calc(48px + env(safe-area-inset-top));
-  background-color: $color-bg-3;
+  background-color: variables.$color-bg-3;
   display: flex;
   padding: 8px 16px 8px 8px;
   padding-top: calc(8px + env(safe-area-inset-top));
   align-items: center;
 
-  @include mobile {
+  @include mixins.mobile {
     display: flex;
     justify-content: space-between;
     width: 100%;
@@ -159,7 +197,7 @@ export default {
       @extend %face-sans-16-medium;
 
       line-height: 24px;
-      color: $color-white;
+      color: variables.$color-white;
     }
   }
 
@@ -173,11 +211,11 @@ export default {
       }
 
       &:hover svg {
-        color: $color-blue-hover;
+        color: variables.$color-blue-hover;
       }
 
       &:active svg {
-        color: $color-blue-hover;
+        color: variables.$color-blue-hover;
         opacity: 0.9;
       }
     }
@@ -185,7 +223,7 @@ export default {
     svg {
       width: 34px;
       height: 24px;
-      color: $color-blue;
+      color: variables.$color-blue;
     }
   }
 
@@ -215,7 +253,7 @@ export default {
     svg {
       width: 24px;
       height: 24px;
-      color: $color-white;
+      color: variables.$color-white;
       opacity: 0.7;
 
       &.hover {
@@ -225,7 +263,7 @@ export default {
 
     &:hover {
       border-radius: 50%;
-      background-color: $color-hover;
+      background-color: variables.$color-hover;
 
       svg {
         opacity: 1;
@@ -245,13 +283,13 @@ export default {
     position: relative;
 
     .badge {
-      color: $color-white;
+      color: variables.$color-white;
       position: absolute;
       left: -2px;
       top: 20%;
       width: 14px;
       height: 14px;
-      background: $color-blue;
+      background: variables.$color-blue;
       border-radius: 50%;
       text-align: center;
       font-size: 12px;

@@ -1,14 +1,26 @@
 <template>
   <div class="tokens-preview">
     <div class="menu">
-      <a class="menu-item" :class="{ active: activeItem === 'tokens' }">
+      <a
+        class="menu-item"
+        :class="{ active: activeItem === 'tokens' }"
+      >
         <TokenPiles />
         {{ $t('pages.fungible-tokens.tokens') }}
       </a>
     </div>
-    <SearchBar v-model="searchTerm" :placeholder="$t('pages.fungible-tokens.searchPlaceholder')" />
-    <TabsMenu v-model="activeTab" :tabOptions="tabs" />
-    <TokensList :show-my-tokens="activeTab === tabs[1].name" :searchTerm="searchTerm" />
+    <SearchBar
+      v-model="searchTerm"
+      :placeholder="$t('pages.fungible-tokens.searchPlaceholder')"
+    />
+    <TabsMenu
+      v-model="activeTab"
+      :tab-options="tabs"
+    />
+    <TokensList
+      :show-my-tokens="activeTab === tabs[1].name"
+      :search-term="searchTerm"
+    />
   </div>
 </template>
 
@@ -19,7 +31,7 @@ import TokenPiles from '../../../../icons/token-piles.svg?vue-component';
 import SearchBar from '../../components/SearchBar';
 
 export default {
-  name: 'fungible-tokens',
+  name: 'FungibleTokens',
   components: {
     TokenPiles,
     SearchBar,
@@ -47,7 +59,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../styles/variables';
+@use '../../../../styles/variables';
 
 ::v-deep {
   text-align: left;
@@ -56,11 +68,11 @@ export default {
 .menu {
   margin-top: 3px;
   padding: 7px;
-  background-color: $black-2;
+  background-color: variables.$color-bg-3;
 }
 
 .menu-item {
-  color: $gray-2;
+  color: variables.$color-dark-grey;
   padding: 10px 18px;
   font-size: 15px;
   font-weight: 500;
@@ -74,8 +86,8 @@ export default {
   }
 
   &.active {
-    color: $accent-color;
-    background-color: $black-3;
+    color: variables.$color-green;
+    background-color: variables.$color-bg-3;
   }
 }
 </style>

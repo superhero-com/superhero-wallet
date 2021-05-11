@@ -5,7 +5,6 @@
       ...$attrs,
       ...(component === 'a' ? { href: to, target: '_blank' } : { to }),
     }"
-    v-on="$listeners"
     class="button"
     :class="[
       fill,
@@ -15,13 +14,13 @@
         half,
         small,
         onboarding,
-        dark,
         third,
         inline,
         inactive,
         bold,
       },
     ]"
+    v-on="$listeners"
   >
     <slot />
   </Component>
@@ -41,7 +40,6 @@ export default {
     small: Boolean,
     third: Boolean,
     onboarding: Boolean,
-    dark: Boolean,
     inline: Boolean,
     inactive: Boolean,
     to: [String, Object],
@@ -50,8 +48,8 @@ export default {
   computed: {
     isLinkOnSameHost() {
       return (
-        typeof this.to === 'object' ||
-        new URL(this.to, window.location).host === window.location.host
+        typeof this.to === 'object'
+        || new URL(this.to, window.location).host === window.location.host
       );
     },
     component() {
@@ -64,7 +62,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .button {
   display: block;
@@ -77,31 +76,34 @@ export default {
 
   padding: 0;
   margin: 8px auto;
-  color: $button-text-color;
+  color: variables.$color-white;
   height: 40px;
   line-height: 40px;
 
   &.primary {
-    background-color: $color-blue;
+    background-color: variables.$color-blue;
 
     &:hover {
-      background-color: $color-blue-hover;
+      background-color: variables.$color-blue-hover;
     }
 
     &:active {
-      background: rgba(14, 82, 216, 0.9);
+      background: rgba(variables.$color-blue, 0.9);
     }
   }
 
   &.secondary {
-    background-color: $color-black;
+    background-color: variables.$color-border;
+    color: variables.$color-light-grey;
 
     &:hover {
-      background-color: $color-hover;
+      background-color: variables.$color-hover;
+      color: variables.$color-white;
     }
 
     &:active {
-      background: rgba(25, 25, 25, 0.8);
+      background: variables.$color-darker-grey;
+      color: rgba(variables.$color-white, 0.8);
     }
   }
 
@@ -113,7 +115,7 @@ export default {
     left: 0;
     right: 0;
     bottom: 0;
-    border: 4px solid rgba(17, 97, 254, 0.44);
+    border: 4px solid rgba(variables.$color-blue, 0.44);
     border-radius: 10px;
   }
 
@@ -130,10 +132,6 @@ export default {
     width: 48%;
     margin: 0;
     display: inline-block;
-  }
-
-  &.dark {
-    background: $box-button-color;
   }
 
   &.small {
@@ -156,8 +154,8 @@ export default {
 
   &.confirm,
   &.danger {
-    background: $secondary-color;
-    color: $white-color;
+    background: variables.$color-blue;
+    color: variables.$color-white;
   }
 
   &.onboarding {
@@ -166,28 +164,28 @@ export default {
     height: 34px;
     border-radius: 5px;
     line-height: 34px;
-    background: $box-button-color;
+    background: variables.$color-bg-2;
     margin: 0;
     margin-right: 10px;
     font-weight: 500;
-    color: #fff;
+    color: variables.$color-white;
 
     &:last-child {
       margin-right: 0;
     }
 
     &.skip {
-      background: #ff5857;
+      background: variables.$color-error;
     }
 
     &.next {
-      background: $secondary-color;
+      background: variables.$color-blue;
     }
 
     &.start {
       margin-left: auto;
       margin-right: 0;
-      background: $secondary-color;
+      background: variables.$color-blue;
     }
   }
 

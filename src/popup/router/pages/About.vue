@@ -3,23 +3,37 @@
     <Logo class="logo" />
     <p>
       <span class="version">
+        commit
         <a
           :href="`https://github.com/aeternity/superhero-wallet/commit/${commitHash}`"
           target="_blank"
         >
-          {{ commitHash.slice(0, 7) }}</a
-        >
+          {{ commitHash.slice(0, 7) }}</a>
         / {{ extensionVersion }}
       </span>
     </p>
-    <hr />
+    <hr>
     <div class="waellet-links">
-      <router-link to="/about/termsOfService" data-cy="terms">{{
-        $t('pages.about.terms')
-      }}</router-link>
-      <router-link to="/about/privacyPolicy" data-cy="privacy">{{
-        $t('pages.about.privacyPolicy')
-      }}</router-link>
+      <a
+        href="https://superhero.com/faq"
+        target="_blank"
+      >FAQ</a>
+      <router-link
+        to="/about/termsOfService"
+        data-cy="terms"
+      >
+        {{
+          $t('pages.about.terms')
+        }}
+      </router-link>
+      <router-link
+        to="/about/privacyPolicy"
+        data-cy="privacy"
+      >
+        {{
+          $t('pages.about.privacyPolicy')
+        }}
+      </router-link>
       <Button :to="BUG_REPORT_URL">
         {{ $t('pages.about.reportBug') }}
       </Button>
@@ -45,13 +59,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use "../../../styles/variables";
+
 .about {
   .logo {
     margin-top: 16px;
   }
 
   .version {
-    color: #909090;
+    color: variables.$color-dark-grey;
   }
 
   .waellet-links a {

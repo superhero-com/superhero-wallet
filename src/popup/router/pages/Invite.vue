@@ -5,12 +5,25 @@
         <NewInviteLink class="invite-icon" />
         {{ $t('pages.invite.generate-link') }}
       </p>
-      <AmountSend v-model="amount" :label="$t('pages.invite.tip-attached')" />
-      <Button bold :disabled="!sufficientBalance" @click="generate">{{
-        $t('pages.invite.generate')
-      }}</Button>
+      <AmountInput
+        v-model="amount"
+        native-token
+        :label="$t('pages.invite.tip-attached')"
+      />
+      <Button
+        bold
+        :disabled="!sufficientBalance"
+        @click="generate"
+      >
+        {{
+          $t('pages.invite.generate')
+        }}
+      </Button>
     </div>
-    <div v-if="invites.length > 0" class="generated-links">
+    <div
+      v-if="invites.length > 0"
+      class="generated-links"
+    >
       <p class="section-title">
         <Invite class="invite-icon" />
         {{ $t('pages.invite.created-links') }}
@@ -29,16 +42,17 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapState } from 'vuex';
-import { Crypto } from '@aeternity/aepp-sdk/es';
-import { AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk/es/utils/amount-formatter';
-import AmountSend from '../components/AmountSend';
+import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
+import AmountInput from '../components/AmountInput';
 import Button from '../components/Button';
 import InviteItem from '../components/InviteItem';
 import Invite from '../../../icons/invite.svg?vue-component';
 import NewInviteLink from '../../../icons/new-invite-link.svg?vue-component';
 
 export default {
-  components: { AmountSend, Button, InviteItem, Invite, NewInviteLink },
+  components: {
+    AmountInput, Button, InviteItem, Invite, NewInviteLink,
+  },
   data: () => ({ amount: 0, loading: false }),
   subscriptions() {
     return pick(this.$store.state.observables, ['balance']);
@@ -60,7 +74,7 @@ export default {
           await this.$watchUntilTruly(() => this.sdk);
           await this.sdk.spend(this.amount, publicKey, {
             payload: 'referral',
-            denomination: AE_AMOUNT_FORMATS.AE,
+            denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
           });
         }
       } catch (error) {
@@ -78,13 +92,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .invite {
   .top {
     margin: 0 -20px;
     padding: 20px;
-    background-color: $black-1;
+    background-color: variables.$color-black;
   }
 
   .section-title {
@@ -92,7 +106,7 @@ export default {
     text-align: left;
     margin-top: 0;
     margin-bottom: 0;
-    color: $gray-1;
+    color: variables.$color-light-grey;
     font-weight: 400;
   }
 
@@ -101,17 +115,17 @@ export default {
     margin-right: 7px;
   }
 
-  .amount-send-container {
+  .amount-input {
     margin: 10px 0 0 0;
   }
 
   .generated-links {
-    background-color: $transactions-bg;
+    background-color: variables.$color-bg-3;
     margin: 0 -20px;
 
     .section-title {
       padding: 15px 20px;
-      border-bottom: 2px solid $black-1;
+      border-bottom: 2px solid variables.$color-border;
     }
   }
 }

@@ -1,7 +1,14 @@
 <template>
-  <button v-clipboard:success="copy" v-clipboard:copy="value" class="copy-button">
+  <button
+    v-clipboard:success="copy"
+    v-clipboard:copy="value"
+    class="copy-button"
+  >
     <CopyIcon />
-    <span class="message" v-if="copied">{{ message }}</span>
+    <span
+      v-if="copied"
+      class="message"
+    >{{ message }}</span>
   </button>
 </template>
 
@@ -28,8 +35,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .copy-button {
   padding: 0;
@@ -41,16 +48,16 @@ export default {
     width: 24px;
     height: 24px;
     opacity: 0.44;
-    color: $color-white;
+    color: variables.$color-white;
 
     &:hover {
       opacity: 1;
-      color: $color-green;
+      color: variables.$color-green;
     }
 
     &:active {
       opacity: 0.7;
-      color: $color-green;
+      color: variables.$color-green;
     }
   }
 
@@ -59,7 +66,7 @@ export default {
 
     @extend %face-sans-14-regular;
 
-    color: $color-blue;
+    color: variables.$color-blue;
   }
 }
 </style>

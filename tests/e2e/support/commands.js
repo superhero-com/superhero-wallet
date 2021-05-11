@@ -3,15 +3,14 @@ import uuid from 'uuid';
 import { formatDate, formatTime, getLoginState } from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
-  cy.visit(`chrome/popup/popup${route ? `#${route}` : ''}`, { onBeforeLoad });
+  cy.visit(`extension/popup/popup${route ? `#${route}` : ''}`, { onBeforeLoad });
 });
 
 Cypress.Commands.add('openAex2Popup', (type, txType) => {
   const id = uuid();
   const params = `?id=${id}&type=${type}`;
-  const onBeforeLoad = () =>
-    txType ? browser.storage.local.set({ txType }) : browser.storage.local.remove('txType');
-  cy.visit(`chrome/popup/popup${params}`, { onBeforeLoad })
+  const onBeforeLoad = () => (txType ? browser.storage.local.set({ txType }) : browser.storage.local.remove('txType'));
+  cy.visit(`extension/popup/popup${params}`, { onBeforeLoad })
     .get('[data-cy=popup-aex2]')
     .should('exist')
     .should('be.visible');
@@ -42,7 +41,8 @@ Cypress.Commands.add('openTerms', () => {
 });
 
 Cypress.Commands.add('enterSeedPhrase', (seed) => {
-  cy.get('textarea').clear().type(seed).get('[data-cy=import]').click();
+  cy.get('textarea').clear().type(seed).get('[data-cy=import]')
+    .click();
 });
 
 Cypress.Commands.add('openAndEnterSeedPhrase', (seed) => {
@@ -103,7 +103,7 @@ Cypress.Commands.add('logout', () => {
 });
 
 Cypress.Commands.add('shouldRedirect', (url, to) => {
-  cy.visit(`chrome/popup/popup#${url}`)
+  cy.visit(`extension/popup/popup#${url}`)
     .url()
     .should('eq', `${Cypress.config().popupUrl}/popup#${to}`);
 });
@@ -203,7 +203,7 @@ Cypress.Commands.add('sendTip', (tip = {}) => {
 });
 
 Cypress.Commands.add('pendingTx', (tx = {}) => {
-  cy.pendingTxItem().then((txItem) => {
+  cy.pendingTxItem().should((txItem) => {
     txItem.find('[data-cy=amount]').should('contain', tx.amount);
     txItem.find('[data-cy=status]').should('contain', 'Pending');
     if (tx.url) txItem.find('[data-cy=url]').should('contain', tx.url);
@@ -214,7 +214,7 @@ Cypress.Commands.add('pendingTx', (tx = {}) => {
   });
 });
 
-Cypress.Commands.add('enterAmountSend', (amount = 0) => {
+Cypress.Commands.add('enterAmountInput', (amount = 0) => {
   cy.get('[data-cy=input-number]').clear().type(amount);
 });
 
@@ -228,11 +228,10 @@ Cypress.Commands.add('enterAddress', (address) => {
 
 Cypress.Commands.add(
   'storageSet',
-  (key, value) =>
-    new Cypress.Promise(async (resolve) => {
-      await browser.storage.local.set({ [key]: value });
-      resolve();
-    }),
+  (key, value) => new Cypress.Promise(async (resolve) => {
+    await browser.storage.local.set({ [key]: value });
+    resolve();
+  }),
 );
 
 Cypress.Commands.add('urlEquals', (route) => {
@@ -305,7 +304,7 @@ Cypress.Commands.add('openTransactions', () => {
 Cypress.Commands.add('truncateStringShouldContain', (elem, string) => {
   cy.get(elem)
     .should('be.visible')
-    .then(($els) => {
+    .should(($els) => {
       const win = $els[0].ownerDocument.defaultView;
       const before = win.getComputedStyle($els[0], 'before').getPropertyValue('content');
       const after = win.getComputedStyle($els[0], 'after').getPropertyValue('content');

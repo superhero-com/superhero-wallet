@@ -1,12 +1,24 @@
 <template>
   <div class="name-list-header">
-    <Button third :to="{ name: 'name-list' }" :inactive="$route.name !== 'name-list'">
+    <Button
+      third
+      :to="{ name: 'name-list' }"
+      :inactive="$route.name !== 'name-list'"
+    >
       {{ $t('pages.names.list.button') }}
     </Button>
-    <Button third :to="{ name: 'auction-list' }" :inactive="$route.name !== 'auction-list'">
+    <Button
+      third
+      :to="{ name: 'auction-list' }"
+      :inactive="$route.name !== 'auction-list'"
+    >
       {{ $t('pages.names.auctions.button') }}
     </Button>
-    <Button third :to="{ name: 'name-claim' }" :inactive="$route.name !== 'name-claim'">
+    <Button
+      third
+      :to="{ name: 'name-claim' }"
+      :inactive="$route.name !== 'name-claim'"
+    >
       {{ $t('pages.names.claim.button') }}
     </Button>
   </div>

@@ -1,7 +1,11 @@
 <template>
   <div class="details-row">
-    <div class="title text-ellipsis">{{ label }}</div>
-    <div class="text">{{ text }}</div>
+    <div class="title text-ellipsis">
+      {{ label }}
+    </div>
+    <div class="text">
+      {{ text }}
+    </div>
   </div>
 </template>
 
@@ -15,25 +19,25 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../styles/variables';
+@use '../../../../styles/variables';
 
 .details-row {
   font-size: 15px;
   padding: 9px 15px;
-  background-color: $bg-color;
+  background-color: variables.$color-bg-3;
   display: flex;
 
   .title {
-    color: $gray-2;
+    color: variables.$color-dark-grey;
     font-weight: 500;
     width: 100%;
   }
 
   .text {
-    color: $white-1;
+    color: variables.$color-white;
 
     .primary {
-      color: $accent-color;
+      color: variables.$color-green;
     }
   }
 }

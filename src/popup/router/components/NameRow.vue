@@ -1,6 +1,14 @@
 <template>
-  <Component :is="to ? 'RouterLink' : 'li'" :to="to" class="name-row" @click="$emit('click')">
-    <Avatar :name="name" :address="address" />
+  <Component
+    :is="to ? 'RouterLink' : 'li'"
+    :to="to"
+    class="name-row"
+    @click="$emit('click')"
+  >
+    <Avatar
+      :name="name"
+      :address="address"
+    />
     <div class="name-info">
       <slot />
     </div>
@@ -11,17 +19,18 @@
 import Avatar from './Avatar';
 
 export default {
+  components: { Avatar },
   props: {
     name: String,
     address: String,
     to: [String, Object],
   },
-  components: { Avatar },
 };
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .name-row {
   text-decoration: none;
@@ -32,11 +41,11 @@ export default {
   display: flex;
   align-items: center;
   font-size: 14px;
-  border-bottom: 1px solid #12121b;
+  border-bottom: 1px solid variables.$color-bg-3;
   text-align: left;
   border-left: 2px solid transparent;
-  color: $text-color;
-  background: #21222a;
+  color: variables.$color-white;
+  background: variables.$color-bg-1;
 
   .name-info ::v-deep {
     margin-left: 10px;
@@ -49,24 +58,25 @@ export default {
 
     .address {
       word-break: break-all;
-      font-size: 12px;
+
+      @extend %face-sans-12-regular;
+
       line-height: 14px;
-      font-family: IBM Plex Mono, monospace;
       display: inline-block;
     }
 
     .active-name,
     .pending-name {
       float: right;
-      background: #2a9cff;
-      color: #fff;
+      background: variables.$color-blue;
+      color: variables.$color-white;
       position: absolute;
       top: 4px;
       right: 4px;
     }
 
     .pending-name {
-      background: $error-color;
+      background: variables.$color-error;
     }
   }
 }

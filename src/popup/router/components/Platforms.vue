@@ -17,7 +17,7 @@
               :class="{ grey: !isFirefox() || IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/firefox.svg"
               alt="Firefox"
-            />
+            >
           </a>
           <a
             href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne"
@@ -27,7 +27,7 @@
               :class="{ grey: isFirefox() || IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/chrome.svg"
               alt="Chrome"
-            />
+            >
           </a>
         </div>
       </div>
@@ -36,12 +36,15 @@
           {{ $t('pages.index.platforms.mobile-app') }}
         </div>
         <div>
-          <a href="https://testflight.apple.com/join/3o5r4dQQ" target="_blank">
+          <a
+            href="https://testflight.apple.com/join/3o5r4dQQ"
+            target="_blank"
+          >
             <img
               :class="{ grey: !IS_IOS || !IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/app-store.svg"
               alt="App Store"
-            />
+            >
           </a>
           <a
             href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
@@ -51,7 +54,7 @@
               :class="{ grey: IS_IOS || !IS_MOBILE_DEVICE }"
               src="../../../icons/platforms/google-play.svg"
               alt="Google Play"
-            />
+            >
           </a>
         </div>
       </div>
@@ -64,7 +67,7 @@ import { detect } from 'detect-browser';
 
 export default {
   data: () => ({
-    IS_MOBILE_DEVICE: navigator.userAgent.includes('Mobi'),
+    IS_MOBILE_DEVICE: window.IS_MOBILE_DEVICE,
     IS_IOS: window.IS_IOS,
   }),
   methods: {
@@ -76,28 +79,29 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .platforms {
   font-size: 15px;
-  background-color: $color-black;
+  background-color: variables.$color-black;
   word-break: break-word;
 
   @extend %face-sans-15-regular;
 
   &:hover {
-    background-color: $color-bg-3;
+    background-color: variables.$color-bg-3;
   }
 
   .text {
     margin: 8px auto;
     width: 248px;
     padding: 4px 8px;
-    color: $color-light-grey;
+    color: variables.$color-light-grey;
   }
 
   .div-icons {
-    border-top: 1px solid $color-border-hover;
+    border-top: 1px solid variables.$color-border-hover;
     display: flex;
     text-align: center;
     padding-top: 0;
@@ -105,7 +109,7 @@ export default {
 
     .extension {
       width: 50%;
-      border-right: 1px solid $color-border-hover;
+      border-right: 1px solid variables.$color-border-hover;
     }
 
     .mobile-app {

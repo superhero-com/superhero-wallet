@@ -3,13 +3,13 @@
     <RouterLink to="/account">
       <Home />
     </RouterLink>
-    <RouterLink to="/tokens">
+    <RouterLink v-if="UNFINISHED_FEATURES" to="/tokens">
       <Balances />
     </RouterLink>
-    <RouterLink to="/send">
+    <RouterLink to="/payments">
       <Payments />
     </RouterLink>
-    <RouterLink to="/tip">
+    <RouterLink to="/tips">
       <Tips />
     </RouterLink>
     <RouterLink to="/settings">
@@ -26,28 +26,60 @@ import Tips from '../../../icons/sidebar-menu/tips.svg?vue-component';
 import Settings from '../../../icons/settings.svg?vue-component';
 
 export default {
-  components: { Home, Balances, Payments, Tips, Settings },
+  components: {
+    Home, Balances, Payments, Tips, Settings,
+  },
+  data: () => ({
+    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+  }),
 };
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
 
 .tab-bar {
   display: flex;
-  background-color: $color-bg-3;
-  padding-bottom: env(safe-area-inset-bottom);
+  background-color: variables.$color-bg-3;
+  border-bottom: env(safe-area-inset-bottom) solid variables.$color-bg-2;
 
   > a {
+    $sideBorderWidth: calc(1px - min(env(safe-area-inset-bottom), 1px));
+
     height: 48px;
     display: flex;
-    flex-grow: 1;
+    flex: 1 0;
     justify-content: center;
     align-items: center;
     border-radius: 2px 2px 0 0;
-    background-color: $color-bg-2;
-    border: 1px solid $color-bg-3;
-    color: $color-white;
+    background-color: variables.$color-bg-2;
+    margin: 1px 1px $sideBorderWidth;
+    color: variables.$color-white;
+
+    &:first-child {
+      margin-left: $sideBorderWidth;
+
+      @include mixins.desktop {
+        border-bottom-left-radius: 10px;
+      }
+    }
+
+    &:last-child {
+      margin-right: $sideBorderWidth;
+
+      @include mixins.desktop {
+        border-bottom-right-radius: 10px;
+      }
+    }
+
+    &:hover {
+      background-color: variables.$color-hover;
+    }
+
+    &:active {
+      background-color: variables.$color-bg-1;
+    }
 
     svg {
       width: 24px;
@@ -56,24 +88,17 @@ export default {
     }
 
     &.router-link-active {
-      background-color: $color-bg-1;
-      color: $color-blue;
-    }
+      color: variables.$color-blue;
 
-    &.router-link-active,
-    &:hover:not(.router-link-active),
-    &:active:not(.router-link-active) {
-      svg {
-        opacity: 1;
+      &,
+      &:hover,
+      &:active {
+        background-color: variables.$color-bg-1;
+
+        svg {
+          opacity: 1;
+        }
       }
-    }
-
-    &:hover:not(.router-link-active) {
-      background-color: $color-hover;
-    }
-
-    &:active:not(.router-link-active) {
-      background-color: $color-bg-1;
     }
   }
 }

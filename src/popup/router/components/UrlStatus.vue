@@ -1,5 +1,10 @@
 <template>
-  <Component :is="Icon" class="url-status" @click="showModal" :class="{ modal, info }" />
+  <Component
+    :is="Icon"
+    class="url-status"
+    :class="{ modal, info }"
+    @click="showModal"
+  />
 </template>
 
 <script>

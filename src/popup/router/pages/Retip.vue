@@ -6,20 +6,26 @@
     </div>
 
     <div class="url-bar">
-      <UrlStatus :status="urlStatus" info />
+      <UrlStatus
+        :status="urlStatus"
+        info
+      />
       <a class="link-sm text-left">{{ tip.url }}</a>
     </div>
 
-    <AmountSend
-      :amountError="amount && validationStatus.error"
+    <AmountInput
       v-model="amount"
-      :errorMsg="validationStatus.msg"
+      :amount-error="amount && validationStatus.error"
+      :error-message="validationStatus.msg"
     />
     <div class="tip-note-preview mt-15">
       {{ tip.title }}
     </div>
 
-    <Button @click="sendTip" :disabled="!tippingSupported || validationStatus.error">
+    <Button
+      :disabled="!tippingSupported || validationStatus.error"
+      @click="sendTip"
+    >
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button @click="openCallbackOrGoHome(false)">
@@ -33,19 +39,21 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import tipping from 'tipping-contract/util/tippingContractUtil';
 import { MAGNITUDE, calculateFee } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
 import deeplinkApi from '../../../mixins/deeplinkApi';
-import AmountSend from '../components/AmountSend';
+import AmountInput from '../components/AmountInput';
 import UrlStatus from '../components/UrlStatus';
 import Button from '../components/Button';
 import BalanceInfo from '../components/BalanceInfo';
 
 export default {
+  components: {
+    AmountInput, UrlStatus, Button, BalanceInfo,
+  },
   mixins: [deeplinkApi],
-  components: { AmountSend, UrlStatus, Button, BalanceInfo },
   data: () => ({
     tip: {},
     amount: '',
@@ -77,15 +85,15 @@ export default {
         if (!this.selectedToken && +this.amount < minTipAmount) {
           return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
         }
-        const fee = calculateFee(TX_TYPE.contractCall, {
+        const fee = calculateFee(SCHEMA.TX_TYPE.contractCall, {
           ...sdk.Ae.defaults,
           contractId: this.tippingContract.deployInfo.address,
           callerId: account.address,
         });
         if (
           this.selectedToken
-            ? this.selectedToken.balance.comparedTo(this.amount) === -1 ||
-              this.balance.comparedTo(fee) === -1
+            ? this.selectedToken.balance.comparedTo(this.amount) === -1
+              || this.balance.comparedTo(fee) === -1
             : this.balance.comparedTo(fee.plus(this.amount)) === -1
         ) {
           return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
@@ -142,7 +150,7 @@ export default {
           tx: {
             senderId: this.account.address,
             contractId: this.tippingContract.deployInfo.address,
-            type: TX_TYPE.contractCall,
+            type: SCHEMA.TX_TYPE.contractCall,
           },
         });
         this.openCallbackOrGoHome(true);
@@ -159,7 +167,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .retip {
   .url-bar {
@@ -167,7 +175,7 @@ export default {
     align-items: center;
 
     a {
-      color: $text-color;
+      color: variables.$color-white;
       flex-grow: 1;
       text-decoration: none;
       width: 90%;
@@ -179,7 +187,7 @@ export default {
     margin-bottom: 8px;
     margin-top: 16px;
     font-size: 16px;
-    color: $white-color;
+    color: variables.$color-white;
     font-weight: 400;
     text-align: left;
   }

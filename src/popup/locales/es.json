@@ -733,7 +733,6 @@
       "next": "Enviar Propina",
       "url": "Enviar Propina a",
       "to": "para",
-      "amountPlaceholder": "Introduce monto",
       "amountLabel": "Monto",
       "empty": "vacio",
       "availableLabel": "Disponible",

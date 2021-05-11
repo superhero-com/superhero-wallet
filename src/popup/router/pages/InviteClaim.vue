@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { Crypto } from '@aeternity/aepp-sdk/es';
+import { Crypto } from '@aeternity/aepp-sdk';
 
 export default {
   props: {
@@ -25,7 +25,7 @@ export default {
         });
         return;
       }
-      if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', error)) return;
+      if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) return;
       throw error;
     } finally {
       await this.$router.push({ name: 'account' });

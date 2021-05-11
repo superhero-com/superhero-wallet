@@ -8,16 +8,22 @@
       'hide-tab-bar': $route.meta.hideTabBar,
     }"
   >
-    <Header v-if="showStatusAndHeader" @toggle-sidebar="showSidebar = !showSidebar" />
+    <Header
+      v-if="showStatusAndHeader"
+      @toggle-sidebar="showSidebar = !showSidebar"
+    />
 
-    <RouterView :class="{ 'show-header': showStatusAndHeader }" class="main" />
+    <RouterView
+      :class="{ 'show-header': showStatusAndHeader }"
+      class="main"
+    />
 
     <transition name="slide">
       <div
-        class="menu-overlay"
         v-if="showSidebar"
-        @click.self="showSidebar = false"
+        class="menu-overlay"
         data-cy="menu-overlay"
+        @click.self="showSidebar = false"
       >
         <SidebarMenu @close="showSidebar = false" />
       </div>
@@ -58,9 +64,9 @@ export default {
     ...mapState(['isRestored', 'current', 'sdk', 'backedUpSeed', 'notifications']),
     showStatusAndHeader() {
       return !(
-        ['/', '/intro'].includes(this.$route.path) ||
-        this.$route.path.startsWith('/web-iframe-popup') ||
-        this.$route.params.app
+        ['/', '/intro'].includes(this.$route.path)
+        || this.$route.path.startsWith('/web-iframe-popup')
+        || this.$route.params.app
       );
     },
     modals() {
@@ -73,10 +79,7 @@ export default {
     },
   },
   async mounted() {
-    document.documentElement.style.setProperty(
-      '--height',
-      process.env.PLATFORM === 'cordova' && window.IS_IOS ? '100vh' : '100%',
-    );
+    document.documentElement.style.setProperty('--height', process.env.PLATFORM === 'cordova' && window.IS_IOS ? '100vh' : '100%');
     await this.$watchUntilTruly(() => this.isRestored);
 
     this.$store.dispatch('getCurrencies');
@@ -110,11 +113,16 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../styles/mixins';
+@use '../styles/variables';
+@use '../styles/mixins';
 
 body {
   margin: 0;
-  background-color: $color-black;
+  background-color: variables.$color-black;
+}
+
+body.color-bg-3 {
+  background-color: variables.$color-bg-3;
 }
 
 html,
@@ -122,7 +130,7 @@ body {
   height: var(--height);
 }
 
-@include desktop {
+@include mixins.desktop {
   body {
     display: flex;
     flex-direction: column;
@@ -142,31 +150,32 @@ body {
 </style>
 
 <style lang="scss" scoped>
-@import '../styles/typography';
-@import '../styles/mixins';
+@use '../styles/variables';
+@use '../styles/typography';
+@use '../styles/mixins';
 
 #app {
   position: relative;
   margin: 0 auto;
-  width: $extension-width;
+  width: variables.$extension-width;
   height: 600px;
   overflow: auto;
 
-  @include mobile {
+  @include mixins.mobile {
     width: 100%;
     height: 100%;
     overflow: visible;
   }
 
-  @include desktop {
-    box-shadow: $color-border 0 0 0 1px;
+  @include mixins.desktop {
+    box-shadow: variables.$color-border 0 0 0 1px;
   }
 
   border-radius: 10px;
 
   @extend %face-sans-16-regular;
 
-  color: $white-color;
+  color: variables.$color-white;
 
   &.show-sidebar {
     overflow-y: hidden;
@@ -176,25 +185,29 @@ body {
     padding-bottom: 48px;
     padding-bottom: calc(48px + env(safe-area-inset-bottom));
 
-    @include desktop {
+    @include mixins.desktop {
       min-height: 100%;
       padding-bottom: 0;
     }
   }
 
-  &.show-header .main {
-    padding-top: 48px;
-    padding-top: calc(48px + env(safe-area-inset-top));
+  &.show-header {
+    background: variables.$color-bg-3;
 
-    @include desktop {
-      padding-top: 0;
-      min-height: calc(100% - 48px);
-      min-height: calc(100% - 48px - env(safe-area-inset-top));
+    .main {
+      padding-top: 48px;
+      padding-top: calc(48px + env(safe-area-inset-top));
+
+      @include mixins.desktop {
+        padding-top: 0;
+        min-height: calc(100% - 48px);
+        min-height: calc(100% - 48px - env(safe-area-inset-top));
+      }
     }
   }
 
   &.not-rebrand {
-    @include mobile {
+    @include mixins.mobile {
       overflow: visible;
     }
 
@@ -226,14 +239,14 @@ body {
     left: 0;
     right: 0;
 
-    @include desktop {
+    @include mixins.desktop {
       position: sticky;
       height: 100%;
       display: flex;
       flex-direction: row-reverse;
     }
 
-    background: rgba(#000, 0.6);
+    background: rgba(variables.$color-black, 0.6);
     z-index: 10;
   }
 
@@ -265,7 +278,7 @@ body {
     width: 100%;
     bottom: 0;
 
-    @include desktop {
+    @include mixins.desktop {
       position: sticky;
     }
   }

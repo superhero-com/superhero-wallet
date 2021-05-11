@@ -1,10 +1,19 @@
 <template>
-  <Modal v-if="browserReader || !cameraAllowed" @close="resolve" close>
-    <template slot="header">{{ title }}</template>
+  <Modal
+    v-if="browserReader || !cameraAllowed"
+    close
+    @close="resolve"
+  >
+    <template slot="header">
+      {{ title }}
+    </template>
 
     <div class="qr-code-reader">
       <div v-show="cameraAllowed">
-        <video v-show="cameraAllowed" ref="qrCodeVideo" />
+        <video
+          v-show="cameraAllowed"
+          ref="qrCodeVideo"
+        />
       </div>
       <div v-if="!cameraAllowed">
         {{ $t('modals.qrCodeReader.cameraNotAllowed') }}
@@ -15,8 +24,7 @@
 
 <script>
 import Modal from '../Modal';
-
-const handleUnknownError = (error) => console.log(error);
+import { handleUnknownError } from '../../../utils/helper';
 
 export default {
   components: { Modal },
@@ -52,9 +60,9 @@ export default {
                 );
                 reject();
               }
-              if (navigator.mediaDevices.getUserMedia)
-                navigator.mediaDevices.getUserMedia({ video: true }).then(resolve).catch(reject);
-              else reject(new Error('Sorry, your browser does not support getUserMedia'));
+              if (navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true }).then(resolve, reject);
+              } else reject(new Error('Sorry, your browser does not support getUserMedia'));
             });
           } catch {
             this.cameraAllowed = false;
@@ -71,13 +79,10 @@ export default {
   async mounted() {
     if (process.env.PLATFORM === 'cordova') {
       try {
-        await new Promise((resolve, reject) =>
-          window.QRScanner.prepare((error, status) =>
-            !error && status.authorized
-              ? resolve()
-              : reject(error || new Error('Denied to use the camera')),
-          ),
-        );
+        await new Promise((resolve, reject) => window.QRScanner.prepare((error, status) => (
+          !error && status.authorized
+            ? resolve() : reject(error || new Error('Denied to use the camera'))
+        )));
       } catch {
         this.cameraAllowed = false;
       }
@@ -86,11 +91,9 @@ export default {
     }
 
     await this.initBrowserReader();
-    const status =
-      navigator.permissions &&
-      (await navigator.permissions.query({ name: 'camera' }).catch((error) => {
-        const firefoxExceptionMessage =
-          "'name' member of PermissionDescriptor 'camera' is not a valid value for enumeration PermissionName.";
+    const status = navigator.permissions
+      && (await navigator.permissions.query({ name: 'camera' }).catch((error) => {
+        const firefoxExceptionMessage = "'name' member of PermissionDescriptor 'camera' is not a valid value for enumeration PermissionName.";
         if (error.message !== firefoxExceptionMessage) handleUnknownError(error);
         return null;
       }));
@@ -114,31 +117,26 @@ export default {
     async scan() {
       return process.env.PLATFORM === 'cordova'
         ? new Promise((resolve, reject) => {
-            window.QRScanner.scan((error, text) =>
-              !error && text ? resolve(text) : reject(error),
-            );
-            window.QRScanner.show();
-            this.style = document.createElement('style');
-            this.style.type = 'text/css';
-            this.style.appendChild(
-              document.createTextNode('html, body, #app { background: transparent }'),
-            );
-            document.head.appendChild(this.style);
-            document.querySelector('.main').style.display = 'none';
-            document.querySelector('.header .content div:not(.title)').style.display = 'none';
-            this.headerText = document.querySelector('.header .title').innerText;
-            document.querySelector('.header .title').innerText = 'Scan QR';
-          })
+          window.QRScanner.scan((error, text) => (!error && text ? resolve(text) : reject(error)));
+          window.QRScanner.show();
+          this.style = document.createElement('style');
+          this.style.type = 'text/css';
+          this.style.appendChild(
+            document.createTextNode('html, body, #app { background: transparent }'),
+          );
+          document.head.appendChild(this.style);
+          document.querySelector('.main').style.display = 'none';
+          this.$store.commit('setPageTitle', 'Scan QR');
+        })
         : (
-            await this.browserReader.decodeFromInputVideoDevice(undefined, this.$refs.qrCodeVideo)
-          ).getText();
+          await this.browserReader.decodeFromInputVideoDevice(undefined, this.$refs.qrCodeVideo)
+        ).getText();
     },
     stopReading() {
       if (process.env.PLATFORM === 'cordova') {
         if (document.head.contains(this.style)) document.head.removeChild(this.style);
         document.querySelector('.main').style.display = '';
-        document.querySelector('.header .content div:not(.title)').style.display = '';
-        document.querySelector('.header .title').innerText = this.headerText;
+        this.$store.commit('setPageTitle', '');
         window.QRScanner.destroy();
       } else this.browserReader.reset();
     },

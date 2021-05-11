@@ -6,25 +6,71 @@
     </div>
     <div class="invite-link">
       <span>{{ link }}</span>
-      <div class="copied-alert" v-if="copied">{{ $t('pages.invite.copied') }}</div>
-      <button class="invite-link-copy" v-clipboard:success="copy" v-clipboard:copy="link">
+      <div
+        v-if="copied"
+        class="copied-alert"
+      >
+        {{ $t('pages.invite.copied') }}
+      </div>
+      <button
+        v-clipboard:success="copy"
+        v-clipboard:copy="link"
+        class="invite-link-copy"
+      >
         <CopyIcon />
       </button>
     </div>
-    <div class="centered-buttons" v-if="!topUp">
-      <Button v-if="inviteLinkBalance > 0" bold @click="claim">{{
-        $t('pages.invite.claim')
-      }}</Button>
-      <Button v-else bold dark @click="deleteItem">{{ $t('pages.invite.delete') }}</Button>
-      <Button bold @click="topUp = true">{{ $t('pages.invite.top-up') }}</Button>
+    <div
+      v-if="!topUp"
+      class="centered-buttons"
+    >
+      <Button
+        v-if="inviteLinkBalance > 0"
+        bold
+        @click="claim"
+      >
+        {{
+          $t('pages.invite.claim')
+        }}
+      </Button>
+      <Button
+        v-else
+        bold
+        fill="secondary"
+        @click="deleteItem"
+      >
+        {{ $t('pages.invite.delete') }}
+      </Button>
+      <Button
+        bold
+        @click="topUp = true"
+      >
+        {{ $t('pages.invite.top-up') }}
+      </Button>
     </div>
     <template v-else>
-      <AmountSend v-model="topUpAmount" :label="$t('pages.invite.top-up-with')" />
+      <AmountInput
+        v-model="topUpAmount"
+        native-token
+        :label="$t('pages.invite.top-up-with')"
+      />
       <div class="centered-buttons">
-        <Button bold dark @click="resetTopUpChanges">{{ $t('pages.invite.collapse') }}</Button>
-        <Button bold :disabled="!sufficientBalance" @click="sendTopUp">{{
-          $t('pages.invite.top-up')
-        }}</Button>
+        <Button
+          bold
+          fill="secondary"
+          @click="resetTopUpChanges"
+        >
+          {{ $t('pages.invite.collapse') }}
+        </Button>
+        <Button
+          bold
+          :disabled="!sufficientBalance"
+          @click="sendTopUp"
+        >
+          {{
+            $t('pages.invite.top-up')
+          }}
+        </Button>
       </div>
     </template>
   </div>
@@ -33,21 +79,25 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapState } from 'vuex';
-import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk/es';
+import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk';
 import TokenAmount from './TokenAmount';
-import AmountSend from './AmountSend';
+import AmountInput from './AmountInput';
 import Button from './Button';
 import CopyIcon from '../../../icons/copy-old.svg?vue-component';
 import { formatDate } from '../../utils';
 
 export default {
+  components: {
+    TokenAmount, Button, AmountInput, CopyIcon,
+  },
+  filters: { formatDate },
   props: {
     secretKey: { type: String, required: true },
     createdAt: { type: Number, required: true },
   },
-  components: { TokenAmount, Button, AmountSend, CopyIcon },
-  filters: { formatDate },
-  data: () => ({ topUp: false, topUpAmount: 0, inviteLinkBalance: 0, copied: false }),
+  data: () => ({
+    topUp: false, topUpAmount: 0, inviteLinkBalance: 0, copied: false,
+  }),
   subscriptions() {
     return pick(this.$store.state.observables, ['balance']);
   },
@@ -101,7 +151,7 @@ export default {
         await this.$store.dispatch('invites/claim', this.secretKey);
         await this.updateBalance();
       } catch (error) {
-        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', error)) return;
+        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) return;
         throw error;
       } finally {
         this.$emit('loading', false);
@@ -134,14 +184,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .invite-row {
   padding: 1rem;
   width: 100%;
-  border-bottom: 2px solid $black-1;
+  border-bottom: 2px solid variables.$color-border;
   text-align: left;
-  color: $text-color;
+  color: variables.$color-white;
   position: relative;
 
   .invite-link {
@@ -154,13 +204,13 @@ export default {
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
-      color: $white-1;
+      color: variables.$color-white;
     }
   }
 
   .invite-link-copy {
     padding: 0;
-    color: $gray-2;
+    color: variables.$color-dark-grey;
   }
 
   .invite-info {
@@ -168,7 +218,7 @@ export default {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-    color: $gray-2;
+    color: variables.$color-dark-grey;
 
     .token-amount {
       flex-grow: 1;
@@ -176,11 +226,11 @@ export default {
 
     .date {
       font-size: 11px;
-      color: $text-color;
+      color: variables.$color-white;
     }
   }
 
-  .amount-send-container {
+  .amount-input {
     margin: 0;
   }
 
@@ -194,7 +244,7 @@ export default {
   }
 
   .copied-alert {
-    color: $button-color;
+    color: variables.$color-blue;
     margin-right: 7px;
   }
 }

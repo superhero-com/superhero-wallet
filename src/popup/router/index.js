@@ -80,9 +80,7 @@ router.afterEach(async (to) => {
   else await browser.storage.local.set({ [lastRouteKey]: to.path });
 });
 
-const deviceReadyPromise = new Promise((resolve) =>
-  document.addEventListener('deviceready', resolve),
-);
+const deviceReadyPromise = new Promise((resolve) => document.addEventListener('deviceready', resolve));
 
 const routerReadyPromise = new Promise((resolve) => {
   const unbindAfterEach = router.afterEach(() => {
@@ -108,9 +106,17 @@ if (process.env.PLATFORM === 'cordova') {
     window.cordova.openwith.addHandler((intent) => {
       const url = intent.items.find(({ type }) => type.includes('url'))?.data;
       if (url) {
-        router.push({ name: 'tip', params: { tipUrl: url } });
+        router.push({ name: 'tips-send', params: { tipUrl: url } });
       } else {
         store.dispatch('modals/open', { name: 'default', ...i18n.t('modals.mobile-share-error') });
+      }
+    });
+
+    router.afterEach((to) => {
+      if (['/', '/intro'].includes(to.path)) {
+        document.body.classList.remove('color-bg-3');
+      } else {
+        document.body.classList.add('color-bg-3');
       }
     });
   })();

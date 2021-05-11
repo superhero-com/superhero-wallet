@@ -1,23 +1,35 @@
 <template>
   <div class="language-settings">
     <h4>{{ $t('pages.languageSettings.switchLanguage') }}</h4>
-    <hr />
+    <hr>
     <small>
       {{ $t('pages.languageSettings.currentLanguage') }}:
       {{ active.name || 'en' }}
     </small>
     <div class="settings">
-      <div class="dropdown" :class="{ show: dropdown }">
-        <Button extend @click="dropdown = !dropdown">
+      <div
+        class="dropdown"
+        :class="{ show: dropdown }"
+      >
+        <Button
+          extend
+          @click="dropdown = !dropdown"
+        >
           <ae-icon name="globe" />
           {{ $t('pages.languageSettings.switchLanguage') }}
           <ae-icon name="left-more" />
         </Button>
 
         <ul class="sub-dropdown">
-          <li v-for="{ code, name } in list" :key="code">
-            <div @click="switchLanguage(code)" :class="{ active: active == name }">
-              <img :src="flag(code)" />
+          <li
+            v-for="{ code, name } in list"
+            :key="code"
+          >
+            <div
+              :class="{ active: active == name }"
+              @click="switchLanguage(code)"
+            >
+              <img :src="flag(code)">
               <span>{{ name }}</span>
             </div>
           </li>
@@ -54,7 +66,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .language-settings {
   h4 {
@@ -63,7 +75,7 @@ export default {
   }
 
   small {
-    color: #9c9c9c;
+    color: variables.$color-light-grey;
     text-align: left;
     width: 100%;
     margin: 0 0 10px;
@@ -74,7 +86,6 @@ export default {
   .settings {
     li {
       list-style-type: none;
-      color: #717c87;
       margin: 0;
     }
 
@@ -86,11 +97,11 @@ export default {
     button {
       font-size: 14px;
       width: 100%;
-      color: $button-text-color;
+      color: variables.$color-white;
       margin: 0;
       padding: 0 1rem;
       white-space: nowrap;
-      background-color: #505058;
+      background-color: variables.$color-bg-2;
       border-radius: 4px;
       text-align: center;
       display: inline-flex;
@@ -112,7 +123,7 @@ export default {
         width: 30%;
         text-align: center;
         margin: auto;
-        color: #fff;
+        color: variables.$color-white;
         cursor: pointer;
 
         div {

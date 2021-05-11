@@ -1,9 +1,18 @@
-import { TxBuilder } from '@aeternity/aepp-sdk/es';
-import { ABI_VERSIONS, VM_VERSIONS } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import { i18n } from '../../store/plugins/languages';
 
 export const MAGNITUDE = 18;
+
+export const TX_TYPE_MDW = {
+  SpendTx: SCHEMA.TX_TYPE.spend,
+  ContractCallTx: SCHEMA.TX_TYPE.contractCall,
+  ContractCreateTx: SCHEMA.TX_TYPE.contractCreate,
+  NamePreclaimTx: SCHEMA.TX_TYPE.namePreClaim,
+  NameClaimTx: SCHEMA.TX_TYPE.nameClaim,
+  NameBidTx: SCHEMA.TX_TYPE.nameClaim,
+  NameUpdateTx: SCHEMA.TX_TYPE.nameUpdate,
+};
 
 export const CONNECTION_TYPES = {
   POPUP: 'POPUP',
@@ -11,8 +20,7 @@ export const CONNECTION_TYPES = {
 };
 
 const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
-const STUB_CALLDATA =
-  'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
+const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
 export const MAX_UINT256 = BigNumber(2).exponentiatedBy(256).minus(1);
 
 export const calculateFee = (type, params) => {
@@ -23,8 +31,8 @@ export const calculateFee = (type, params) => {
       amount: MAX_UINT256,
       ttl: MAX_UINT256,
       nonce: MAX_UINT256,
-      ctVersion: { abiVersion: ABI_VERSIONS.SOPHIA, vmVersion: VM_VERSIONS.SOPHIA },
-      abiVersion: ABI_VERSIONS.SOPHIA,
+      ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
+      abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
       callData: STUB_CALLDATA,
       ...params,
     },
@@ -39,7 +47,7 @@ export const defaultNetworks = [
     middlewareUrl: 'https://testnet.aeternity.io/mdw',
     explorerUrl: 'https://testnet.aeternal.io',
     compilerUrl: 'https://latest.compiler.aepps.com',
-    backendUrl: 'https://test-tipping.aeternity.art',
+    backendUrl: 'https://testnet.superhero.aeternity.art',
     tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd',
     tipContractV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu',
     name: 'Testnet',
@@ -56,8 +64,7 @@ export const defaultNetworks = [
   },
 ];
 
-export const defaultNetwork =
-  process.env.NETWORK === 'Testnet' ? defaultNetworks[0] : defaultNetworks[1];
+export const defaultNetwork = process.env.NETWORK === 'Testnet' ? defaultNetworks[0] : defaultNetworks[1];
 
 export const AGGREGATOR_URL = 'https://superhero.com/';
 

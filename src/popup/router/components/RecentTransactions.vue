@@ -1,25 +1,45 @@
 <template>
-  <div class="recent-transactions" :class="{ 'tour-bar': tourStartBar }">
+  <div
+    class="recent-transactions"
+    :class="{ 'tour-bar': tourStartBar }"
+  >
     <div class="header">
       <span class="title">{{ $t('pages.recentTransactions.title') }}</span>
-      <router-link to="/transactions" data-cy="view-all-transactions" class="view-all">
+      <router-link
+        to="/transactions"
+        data-cy="view-all-transactions"
+        class="view-all"
+      >
         <Activity class="icon" />
       </router-link>
     </div>
     <PendingTxs />
-    <div v-if="transactions.latest.length" class="transaction-list">
+    <div
+      v-if="transactions.latest.length"
+      class="transaction-list"
+    >
       <TransactionItem
-        v-for="transaction in transactions.latest"
+        v-for="transaction in transactions.latest.slice(0, limit)"
         :key="transaction.hash"
         :transaction="transaction"
       />
     </div>
-    <router-link v-if="transactions.latest.length > 6" to="/transactions" class="view-more">
+    <router-link
+      v-if="transactions.latest.length > 6"
+      to="/transactions"
+      class="view-more"
+    >
       <Visible class="icon" />
       <span class="text">{{ $t('pages.recentTransactions.viewMore') }}</span>
     </router-link>
-    <AnimatedSpinner v-if="loading" class="spinner" />
-    <div v-else-if="!transactions.latest.length && !transactions.pending.length" class="message">
+    <AnimatedSpinner
+      v-if="loading"
+      class="spinner"
+    />
+    <div
+      v-else-if="!transactions.latest.length && !transactions.pending.length"
+      class="message"
+    >
       <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
     </div>
   </div>
@@ -34,25 +54,35 @@ import PendingTxs from './PendingTxs';
 import TransactionItem from './TransactionItem';
 
 export default {
-  components: { PendingTxs, TransactionItem, Activity, Visible, AnimatedSpinner },
+  components: {
+    PendingTxs, TransactionItem, Activity, Visible, AnimatedSpinner,
+  },
   data() {
     return {
       polling: null,
       loading: true,
+      limit: 10,
     };
+  },
+  computed: mapState(['tourStartBar', 'transactions', 'accountSelectedIdx']),
+  watch: {
+    accountSelectedIdx() {
+      this.$store.commit('setTransactions', []);
+      this.loading = true;
+      this.updateTransactions();
+    },
   },
   mounted() {
     if (this.transactions.latest.length) this.loading = false;
     this.polling = setInterval(() => this.updateTransactions(), 5000);
     this.$once('hook:beforeDestroy', () => clearInterval(this.polling));
   },
-  computed: mapState(['tourStartBar', 'transactions']),
   methods: {
     async updateTransactions() {
       this.$store.commit(
-        'updateLatestTransactions',
+        'setTransactions',
         await this.$store.dispatch('fetchTransactions', {
-          limit: 10,
+          limit: this.limit,
           page: 1,
           recent: true,
         }),
@@ -64,11 +94,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .recent-transactions {
-  background: $color-bg-3;
+  background: variables.$color-bg-3;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -76,7 +106,7 @@ export default {
 
   .header {
     padding: 21px 16px 11px 16px;
-    background: $color-bg-2;
+    background: variables.$color-bg-2;
     border-radius: 0 0 4px 4px;
     display: flex;
     justify-content: space-between;
@@ -85,7 +115,7 @@ export default {
     .title {
       @extend %face-sans-15-medium;
 
-      color: $color-dark-grey;
+      color: variables.$color-dark-grey;
     }
 
     .view-all {
@@ -96,7 +126,7 @@ export default {
       text-decoration: none;
 
       .icon {
-        fill: $color-white;
+        fill: variables.$color-white;
         opacity: 0.7;
       }
 
@@ -104,7 +134,7 @@ export default {
         opacity: 1;
 
         path {
-          fill: $color-green-hover;
+          fill: variables.$color-green-hover;
         }
       }
     }
@@ -128,7 +158,7 @@ export default {
 
     @extend %face-sans-15-medium;
 
-    color: $color-light-grey;
+    color: variables.$color-light-grey;
     text-align: center;
   }
 
@@ -136,20 +166,20 @@ export default {
     width: 56px;
     height: 56px;
     margin: 0 auto;
-    color: $color-white;
+    color: variables.$color-white;
   }
 
   .view-more {
     padding: 12px 16px;
     border-radius: 4px;
-    background: $color-bg-1;
+    background: variables.$color-bg-1;
     display: flex;
     align-items: center;
 
     .text {
       @extend %face-sans-14-medium;
 
-      color: $color-green;
+      color: variables.$color-green;
       padding-left: 4px;
     }
 
@@ -160,23 +190,23 @@ export default {
     }
 
     &:hover {
-      background: $color-hover;
+      background: variables.$color-hover;
 
       .text {
-        color: $color-green-hover;
+        color: variables.$color-green-hover;
       }
 
       .icon {
         opacity: 1;
 
         path {
-          fill: $color-green;
+          fill: variables.$color-green;
         }
       }
     }
 
     &:active {
-      background: $color-bg-1;
+      background: variables.$color-bg-1;
 
       .text {
         opacity: 0.7;

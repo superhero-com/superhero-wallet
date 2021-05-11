@@ -8,31 +8,53 @@
           :src="tokenData.image || null"
           size="xlg"
         />
-        <TokenAmount :amount="+tokenData.convertedBalance || 0" :symbol="tokenData.symbol" />
+        <TokenAmount
+          :amount="+tokenData.convertedBalance || 0"
+          :symbol="tokenData.symbol"
+        />
       </div>
       <div class="token-actions">
-        <Button bold :to="{ name: 'send' }">
+        <Button
+          bold
+          :to="{ name: 'payments-send' }"
+        >
           {{ $t('pages.token-details.send') }}
         </Button>
-        <Button bold to="/receive">
+        <Button
+          bold
+          :to="{ name: 'payments-receive' }"
+        >
           {{ $t('pages.token-details.receive') }}
         </Button>
-        <Button bold :disabled="!tippingSupported" :to="{ name: 'tip' }">
+        <Button
+          bold
+          :disabled="!tippingSupported"
+          :to="{ name: 'tips-send' }"
+        >
           {{ $t('pages.token-details.tip') }}
         </Button>
       </div>
     </div>
-    <TabsMenu v-model="activeTab" :tabOptions="tabs" />
+    <TabsMenu
+      v-model="activeTab"
+      :tab-options="tabs"
+    />
     <div class="token-info">
       <div class="section-title">
         {{ $t('pages.token-details.token-details') }}
       </div>
-      <DetailsRow :label="$t('pages.token-details.symbol')" :text="tokenData.symbol" />
+      <DetailsRow
+        :label="$t('pages.token-details.symbol')"
+        :text="tokenData.symbol"
+      />
       <DetailsRow
         :class="{ community: tokenData.community }"
         :label="$t('pages.token-details.community')"
       />
-      <DetailsRow :label="$t('pages.token-details.decimals')" :text="tokenData.decimals" />
+      <DetailsRow
+        :label="$t('pages.token-details.decimals')"
+        :text="tokenData.decimals"
+      />
       <DetailsRow
         v-if="tokenData.contract"
         :class="{ contract: tokenData.contract }"
@@ -43,17 +65,35 @@
         :label="$t('pages.token-details.available-supply')"
         :text="tokenData.circulating_supply"
       />
-      <DetailsRow :label="$t('pages.token-details.total-supply')" :text="tokenData.total_supply" />
-      <DetailsRow :label="$t('pages.token-details.max-supply')" :text="tokenData.max_supply" />
+      <DetailsRow
+        :label="$t('pages.token-details.total-supply')"
+        :text="tokenData.total_supply"
+      />
+      <DetailsRow
+        :label="$t('pages.token-details.max-supply')"
+        :text="tokenData.max_supply"
+      />
       <DetailsRow :label="$t('pages.token-details.price-ae')" />
       <DetailsRow
         :label="$t('pages.token-details.price')"
         :text="tokenData.current_price ? formatCurrency(tokenData.current_price) : ''"
       />
-      <DetailsRow :label="$t('pages.token-details.volume')" :text="tokenData.total_volume" />
-      <DetailsRow :label="$t('pages.token-details.market-cap')" :text="tokenData.market_cap" />
-      <DetailsRow :label="$t('pages.token-details.ath-change')" :text="tokenData.ath" />
-      <DetailsRow :label="$t('pages.token-details.atl-change')" :text="tokenData.atl" />
+      <DetailsRow
+        :label="$t('pages.token-details.volume')"
+        :text="tokenData.total_volume"
+      />
+      <DetailsRow
+        :label="$t('pages.token-details.market-cap')"
+        :text="tokenData.market_cap"
+      />
+      <DetailsRow
+        :label="$t('pages.token-details.ath-change')"
+        :text="tokenData.ath"
+      />
+      <DetailsRow
+        :label="$t('pages.token-details.atl-change')"
+        :text="tokenData.atl"
+      />
       <DetailsRow :label="$t('pages.token-details.chart')" />
     </div>
   </div>
@@ -127,14 +167,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../styles/variables';
+@use '../../../../styles/variables';
 
 ::v-deep {
   text-align: left;
 }
 
 .token-header {
-  background-color: $black-1;
+  background-color: variables.$color-black;
   padding: 20px 30px;
 }
 
@@ -167,20 +207,20 @@ export default {
 }
 
 .section-title {
-  color: $gray-1;
+  color: variables.$color-light-grey;
   font-weight: 500;
   font-size: 15px;
   padding: 12px 15px;
-  background-color: $black-2;
+  background-color: variables.$color-bg-3;
 }
 
 .token-info > div:nth-child(odd) {
-  background-color: $black-2;
+  background-color: variables.$color-bg-3;
 }
 
 .contract ::v-deep .text,
 .community ::v-deep .text {
-  color: $accent-color;
+  color: variables.$color-green;
 }
 
 .contract ::v-deep .text {

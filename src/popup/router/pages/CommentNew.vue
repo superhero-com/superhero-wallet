@@ -4,7 +4,10 @@
       {{ text }}
     </div>
 
-    <Button @click="sendComment" :disabled="!tippingSupported">
+    <Button
+      :disabled="!tippingSupported"
+      @click="sendComment"
+    >
       {{ $t('pages.tipPage.confirm') }}
     </Button>
     <Button @click="openCallbackOrGoHome(false)">
@@ -24,7 +27,9 @@ import deeplinkApi from '../../../mixins/deeplinkApi';
 export default {
   components: { Button },
   mixins: [deeplinkApi],
-  data: () => ({ id: 0, parentId: undefined, text: '', loading: false }),
+  data: () => ({
+    id: 0, parentId: undefined, text: '', loading: false,
+  }),
   computed: {
     ...mapState(['sdk']),
     ...mapGetters(['tippingSupported']),

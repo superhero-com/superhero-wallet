@@ -2,6 +2,7 @@
   "ok": "OK",
   "ae": "AE",
   "mainAccount": "Main account",
+  "subaccountName": "Sub-account #{idx}",
   "onboarding": {
     "step_1": {
       "title": "Your Account Info",
@@ -76,6 +77,10 @@
       "title": "Are you sure you want to remove this account?",
       "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
     },
+    "removeSubaccount": {
+      "title": "Remove sub-account?",
+      "msg": "This sub-account will be removed from your wallet and deleted from storage. It will still remain stored on the blockchain and you will be able to restore it with your seed phrase. Make sure you have backed up your seed phrase before you proceed. This action cannot be undone!"
+    },
     "verified": {
       "title": "What is a \"Verified\" URL?",
       "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed easily."
@@ -91,6 +96,10 @@
     "not-secure": {
       "title": "Superhero Wallet is marking HTTP sites as \"Not secure\" - please, use URLs with HTTPS, only.",
       "msg": "The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
+    },
+    "switcherAccsLimit": {
+      "title": "Unable to show this account.",
+      "msg": "You've reached the limit of showed accounts, uncheck other account, if you want to show this one."
     },
     "confirm-tip": {
       "title": "Send Tip Confirmation",
@@ -121,18 +130,19 @@
       "contract-create": "Contract create",
       "aens": "AENS",
       "payload": "Payload",
-      "recipientId": "Recipient Id",
+      "recipientId": "Recipient ID",
       "code": "Code",
       "callData": "Call data",
-      "contractId": "Contract Id",
-      "commitmentId": "Commitment Id",
+      "contractId": "Contract ID",
+      "commitmentId": "Commitment ID",
       "name": "Name",
       "nameFee": "Name fee",
       "nameSalt": "Name salt",
-      "nameId": "Name Id",
+      "nameId": "Name ID",
       "pointers": "Pointers",
       "sign-raw": "Sign raw transaction by",
-      "data-sign": "Data to sign"
+      "data-sign": "Data to sign",
+      "nonce": "Nonce"
     },
     "add-token": {
       "title": "Token added",
@@ -176,22 +186,28 @@
   },
   "transaction": {
     "type": {
-      "SpendTx": "Spend",
-      "ContractCreateTx": "Contract create",
-      "ContractCallTx": "Contract call",
-      "NamePreclaimTx": "Preclaim name",
-      "NameClaimTx": "Claim name",
-      "NameUpdateTx": "Update name",
-      "NameTransferTx": "Transfer name",
-      "NameRevokeTx": "Revoke name",
-      "OracleRegisterTx": "Register oracle",
-      "OracleExtendTx": "Extend oracle",
-      "OraclePostQueryTx": "Post query oracle",
-      "OracleRespondTx": "Respond oracle",
-      "ChannelCloseSoloTx": "Solo close channel",
-      "ChannelSlashTx": "Slash channel",
-      "ChannelSettleTx": "Settle channel",
-      "ChannelSnapshotSoloTx": "Solo snapshot channel"
+      "spendTx": "Spend",
+      "contractCreateTx": "Contract create",
+      "contractCallTx": "Contract call",
+      "namePreClaimTx": "Preclaim name",
+      "nameClaimTx": "Claim name",
+      "nameUpdateTx": "Update name",
+      "nameTransferTx": "Transfer name",
+      "nameRevokeTx": "Revoke name",
+      "oracleRegisterTx": "Register oracle",
+      "oracleExtendTx": "Extend oracle",
+      "oraclePostQueryTx": "Post query oracle",
+      "oracleRespondTx": "Respond oracle",
+      "channelCloseSoloTx": "Solo close channel",
+      "channelSlashTx": "Slash channel",
+      "channelSettleTx": "Settle channel",
+      "channelSnapshotSoloTx": "Solo snapshot channel"
+    },
+    "overview": {
+      "aens": "AENS",
+      "contractCreate": "Contract create",
+      "contract": "Contract",
+      "accountAddress": "Account address"
     }
   },
   "pages": {
@@ -222,20 +238,21 @@
       "tx-history": "Tx history",
       "payments": "Payments",
       "balances": "Balances",
+      "accounts": "Accounts",
       "tips": "Tips",
       "settings": "Settings",
       "language": "Language",
       "security": "Security",
       "about": "About",
       "send": "Send",
-      "send-tips": "Send Tips",
-      "claim-tips": "Claim Tips",
+      "send-tip": "Send tip",
+      "claim-tips": "Claim tips",
       "scanQr": "Scan QR",
       "terms": "Terms of Use",
       "privacy": "Privacy Policy",
       "importAccount": "Retrieve Existing Account",
       "activity": "Activity History",
-      "topUp": "Top Up",
+      "receive": "Receive",
       "notifications": "Notifications",
       "notification-settings": "Notification Preference",
       "names": "Names",
@@ -278,7 +295,11 @@
       "backup": "backup",
       "updateExtension": "New version available! Please update your extension.",
       "updateAvailable": "New version is available in the store!",
-      "claim-name": "Register a name"
+      "claim-name": "Claim your .chain name",
+      "address-copied": "Address copied"
+    },
+    "accounts": {
+      "showWallet": "Show on Wallet Home"
     },
     "claim": {
       "claim": "Claim tips",
@@ -393,7 +414,8 @@
       "transactionRequest": "This aepp will prepare a transaction, you are in charge of confirming it.",
       "websiteRequestAccounts": "would like to get account addresses",
       "addressesLabel": "Addresses",
-      "addressesRequest": "This aepp is requesting access to view your account addresses"
+      "addressesRequest": "This aepp is requesting access to view your account addresses",
+      "connecting": "Connecting"
     },
     "fungibleTokens": {
       "backToAccount": "Back to account",
@@ -525,7 +547,7 @@
       "term2": "Terms of Use",
       "term3": "Privacy Policy",
       "termsAndConditions": "Terms of Use",
-      "heading": "Social Media with no hidden Agenda",
+      "heading": "Your open-source decentralized social application platform",
       "ready": "Ready to go?",
       "go": "Go!",
       "platforms": {
@@ -734,7 +756,8 @@
       "payload": "Payload",
       "newContract": "New Contract",
       "aens": "AENS",
-      "balanceError": "Your account balance is not enough to execute this transaction."
+      "balanceError": "Your account balance is not enough to execute this transaction.",
+      "advanced": "Advanced transaction details"
     },
     "signTransactionByQrCode": {
       "backToAccount": "Back to account",
@@ -812,8 +835,8 @@
       "next": "Send Tip",
       "url": "Send Tip to",
       "to": "to",
-      "amountPlaceholder": "Enter amount",
       "amountLabel": "Amount",
+      "insufficientAmountError": "This field must be more than 0",
       "empty": "Empty",
       "availableLabel": "Available",
       "sendToAddress": "Send address to",
@@ -1008,6 +1031,7 @@
       "collapse": "Collapse",
       "claim": "Claim Back",
       "insufficient-balance": "Insufficient balance",
+      "insufficient-ivnite-balance": "This invite Link expired and the Tokens are already claimed.",
       "tip-attached": "Tip attached",
       "top-up-with": "Top up with",
       "delete": "Delete",
@@ -1047,5 +1071,7 @@
   "seconds": "{n} seconds | {n} second | {n} seconds",
   "minutes": "{n} minutes | {n} minute | {n} minutes",
   "hours": "{n} hours | {n} hour | {n} hours",
-  "days": "{n} days | {n} day | {n} days"
+  "days": "{n} days | {n} day | {n} days",
+  "addressCopied": "Address copied",
+  "copied": "Copied"
 }

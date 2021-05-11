@@ -1,7 +1,7 @@
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
 import { unionBy } from 'lodash-es';
-import { convertToken, fetchJson } from '../../popup/utils/helper';
+import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
 
 export default {
   namespaced: true,
@@ -32,7 +32,7 @@ export default {
     async getAvailableTokens({ rootGetters: { activeNetwork }, commit }) {
       const availableTokens = await fetchJson(
         `${activeNetwork.backendUrl}/tokenCache/tokenInfo`,
-      ).catch((e) => console.log(e));
+      ).catch(handleUnknownError);
       return commit('setAvailableTokens', availableTokens || {});
     },
     async tokenBalance({ rootState: { sdk } }, [token, address]) {
@@ -51,7 +51,7 @@ export default {
     }) {
       const tokens = await fetchJson(
         `${activeNetwork.backendUrl}/tokenCache/balances?address=${account.address}`,
-      ).catch((e) => console.log(e));
+      ).catch(handleUnknownError);
 
       commit('resetTokenBalances');
 
@@ -104,13 +104,12 @@ export default {
         from_account: account.address,
         for_account: activeNetwork.tipContractV2.replace('ct_', 'ak_'),
       });
-      const allowanceAmount =
-        decodedResult !== undefined
-          ? new BigNumber(decodedResult)
-              .multipliedBy(-1)
-              .plus(convertToken(amount, selectedToken.decimals))
-              .toNumber()
-          : convertToken(amount, selectedToken.decimals).toFixed();
+      const allowanceAmount = decodedResult !== undefined
+        ? new BigNumber(decodedResult)
+          .multipliedBy(-1)
+          .plus(convertToken(amount, selectedToken.decimals))
+          .toNumber()
+        : convertToken(amount, selectedToken.decimals).toFixed();
       return tokenContract.methods[
         decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
       ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);

@@ -1,4 +1,4 @@
-const links = ['settings', 'tip', 'invite', 'transactions', 'names', 'about'];
+const links = ['settings', 'tips', 'invite', 'transactions', 'names', 'about'];
 
 describe('Test cases for menu sidebar component', () => {
   beforeEach(() => {
@@ -32,7 +32,7 @@ describe('Test cases for menu sidebar component', () => {
     cy.closeMenu('overlay').menuShould('not.exist');
   });
 
-  it(`Opens each non-dropdown page and returns to account page`, () => {
+  it('Opens each non-dropdown page and returns to account page', () => {
     links.forEach((page) => {
       cy.openMenuPage(page)
         .get('[data-cy=back-arrow]')

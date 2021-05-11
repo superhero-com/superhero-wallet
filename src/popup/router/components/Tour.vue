@@ -1,7 +1,11 @@
 <!-- eslint-disable vue/no-use-v-if-with-v-for-->
 <template>
   <div class="tour">
-    <v-tour name="onboarding" :steps="tourSteps" :options="{ highlight: true }">
+    <v-tour
+      name="onboarding"
+      :steps="tourSteps"
+      :options="{ highlight: true }"
+    >
       <template slot-scope="tour">
         <transition name="fade">
           <v-step
@@ -19,7 +23,10 @@
             :class="tour.currentStep === 2 ? 'tip-step' : ''"
           >
             <template>
-              <div slot="header" class="step-header">
+              <div
+                slot="header"
+                class="step-header"
+              >
                 {{ $t(`onboarding.step_${step.step}.title`) }}
                 <span class="step-info"> ({{ step.step }}/{{ steps.length }}) </span>
               </div>
@@ -27,14 +34,18 @@
                 slot="content"
                 class="step-content"
                 v-html="$t(`onboarding.step_${step.step}.content`)"
-              ></div>
-              <div slot="actions"></div>
+              />
+              <div slot="actions" />
             </template>
           </v-step>
         </transition>
       </template>
     </v-tour>
-    <div class="tour-actions" v-if="tourRunning" :class="!started ? 'not-started' : ''">
+    <div
+      v-if="tourRunning"
+      class="tour-actions"
+      :class="!started ? 'not-started' : ''"
+    >
       <div class="container">
         <div class="tour-welcome-message">
           <Hero />
@@ -44,26 +55,54 @@
           </div>
         </div>
         <div class="tour-control-buttons">
-          <Button onboarding class="skip" @click="stop">{{ $t('onboarding.skip') }}</Button>
-          <Button v-if="started" onboarding @click="back">{{ $t('onboarding.back') }}</Button>
-          <Button v-if="started" onboarding class="next" @click="next">{{
-            $t('onboarding.next')
-          }}</Button>
-          <Button v-if="!started" onboarding class="start" @click="start">{{
-            $t('onboarding.start')
-          }}</Button>
+          <Button
+            onboarding
+            class="skip"
+            @click="stop"
+          >
+            {{ $t('onboarding.skip') }}
+          </Button>
+          <Button
+            v-if="started"
+            onboarding
+            @click="back"
+          >
+            {{ $t('onboarding.back') }}
+          </Button>
+          <Button
+            v-if="started"
+            onboarding
+            class="next"
+            @click="next"
+          >
+            {{
+              $t('onboarding.next')
+            }}
+          </Button>
+          <Button
+            v-if="!started"
+            onboarding
+            class="start"
+            @click="start"
+          >
+            {{
+              $t('onboarding.start')
+            }}
+          </Button>
         </div>
       </div>
     </div>
     <div
-      class="tour-start"
       v-if="!nodeStatus && $route.path === '/account' && isLoggedIn && !tourRunning && tourStartBar"
+      class="tour-start"
       @click="toggleTour"
     >
       <div class="container">
         <StartOnboarding class="start-onboarding" />
         <span>{{ $t('onboarding.tutorial') }}</span>
-        <div class="close"><Close /></div>
+        <div class="close">
+          <Close />
+        </div>
       </div>
     </div>
   </div>
@@ -107,7 +146,7 @@ export default {
         params: {
           placement: 'bottom',
         },
-        route: '/tip',
+        route: '/tips',
       },
       {
         route: '/account',
@@ -217,6 +256,8 @@ export default {
 </script>
 
 <style lang="scss">
+@use "../../../styles/variables";
+
 .v-tour__target--highlighted {
   -webkit-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6);
   -moz-box-shadow: 0 0 0 99999px rgba(67, 67, 67, 0.6);
@@ -225,7 +266,7 @@ export default {
 
   &::after {
     content: '';
-    border: 1.5px dashed #fff;
+    border: 1.5px dashed variables.$color-white;
     border-radius: 5px;
     background: rgba(42, 156, 255, 0.25);
     position: absolute;
@@ -238,29 +279,29 @@ export default {
 </style>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .container {
-  max-width: $extension-width;
+  max-width: variables.$extension-width;
   margin: 0 auto;
 }
 
 .tour .v-tour .v-step {
-  background-color: $tour-bg-color;
+  background-color: variables.$color-bg-3;
   border-radius: 5px;
-  border: 1px solid $secondary-color;
+  border: 1px solid variables.$color-blue;
   padding: 20px 15px 25px 15px;
   min-width: 345px;
 
   .step-header {
-    background-color: $tour-bg-color;
+    background-color: variables.$color-bg-3;
     margin-bottom: 18px;
     font-weight: bold;
     font-size: 16px;
     line-height: 21px;
 
     .step-info {
-      color: $text-color;
+      color: variables.$color-white;
       margin-left: 8px;
     }
   }
@@ -268,12 +309,12 @@ export default {
   .step-content {
     text-align: left;
     font-size: 14px;
-    color: $text-color;
+    color: variables.$color-white;
     line-height: 20px;
   }
 
   .v-step__arrow {
-    border-color: $tour-bg-color;
+    border-color: variables.$color-bg-3;
     border: none;
     width: 35px;
     height: 12px;
@@ -311,7 +352,7 @@ export default {
   left: 0;
   right: 0;
   z-index: 99999;
-  background: $tour-bg-color;
+  background: variables.$color-bg-3;
   padding: 19px;
   padding-top: 0;
   padding-bottom: 15px;
@@ -334,7 +375,7 @@ export default {
     -webkit-clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
     -moz-clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
     clip-path: polygon(0% 49%, 100% 36%, 100% 100%, 0 100%);
-    background: $tour-bg-color;
+    background: variables.$color-bg-3;
   }
 
   .tour-welcome-message {
@@ -358,7 +399,7 @@ export default {
       font-size: 14px;
       font-weight: normal;
       margin: 0;
-      color: $text-color;
+      color: variables.$color-white;
       line-height: 20px;
     }
   }
@@ -372,7 +413,7 @@ export default {
 
 .tour-start {
   position: fixed;
-  background: $tour-start-bg-color;
+  background: variables.$color-border;
   bottom: 0;
   left: 0;
   right: 0;
@@ -381,7 +422,7 @@ export default {
   cursor: pointer;
 
   &:hover {
-    background: #2c2c34;
+    background: variables.$color-bg-1;
   }
 
   .container {
@@ -392,7 +433,7 @@ export default {
   }
 
   span {
-    color: $accent-color;
+    color: variables.$color-green;
     margin-left: 6px;
     font-size: 15px;
     font-weight: bold;

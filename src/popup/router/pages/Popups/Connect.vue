@@ -1,42 +1,91 @@
 <template>
-  <div class="connect popup-aex2" data-cy="popup-aex2">
+  <div
+    class="connect popup-aex2"
+    data-cy="popup-aex2"
+  >
     <div class="flex identicon-container">
       <div class="identicon">
-        <img :src="faviconUrl" @error="imageError = true" v-if="!imageError" />
-        <ae-identicon :address="app.host || ''" size="base" v-if="imageError" />
-        <div class="account-name" data-cy="name">{{ app.name }}</div>
-        <div class="hostname" data-cy="host">{{ app.host }}</div>
+        <img
+          v-if="!imageError"
+          :src="faviconUrl"
+          @error="imageError = true"
+        >
+        <ae-identicon
+          v-if="imageError"
+          :address="app.host || ''"
+          size="base"
+        />
+        <div
+          class="account-name"
+          data-cy="name"
+        >
+          {{ app.name }}
+        </div>
+        <div
+          class="hostname"
+          data-cy="host"
+        >
+          {{ app.host }}
+        </div>
       </div>
       <div class="separator">
         <ae-icon name="check" />
       </div>
       <div class="identicon">
-        <Avatar :address="account.address" :name="account.name" size="lg" />
-        <div class="account-name">{{ account.name || account.type }}</div>
+        <Avatar
+          :address="account.address"
+          :name="account.name"
+          size="lg"
+        />
+        <div class="account-name">
+          {{ account.name || account.localName }}
+        </div>
       </div>
     </div>
 
     <h2>
-      <span class="secondary-text" data-cy="aepp">{{ app.host }} ({{ app.name }}) </span>
+      <span
+        class="secondary-text"
+        data-cy="aepp"
+      >{{ app.host }} ({{ app.name }})</span>
       {{ $t('pages.connectConfirm.websiteRequestconnect') }}
-      <Avatar class="send-account-icon" :address="account.address" :name="account.name" />
-      {{ account.name || account.type }}
+      <Avatar
+        class="send-account-icon"
+        :address="account.address"
+        :name="account.name"
+      />
+      {{ account.name || account.localName }}
     </h2>
     <ul>
-      <ae-list-item fill="neutral" class="permission-set">
+      <ae-list-item
+        fill="neutral"
+        class="permission-set"
+      >
         <h4>{{ $t('pages.connectConfirm.addressLabel') }}</h4>
         <p>{{ $t('pages.connectConfirm.addressRequest') }}</p>
       </ae-list-item>
-      <ae-list-item fill="neutral" class="permission-set">
+      <ae-list-item
+        fill="neutral"
+        class="permission-set"
+      >
         <h4>{{ $t('pages.connectConfirm.transactionLabel') }}</h4>
         <p>{{ $t('pages.connectConfirm.transactionRequest') }}</p>
       </ae-list-item>
     </ul>
     <div class="button-fixed">
-      <Button half dark @click="cancel" data-cy="deny">
+      <Button
+        half
+        fill="secondary"
+        data-cy="deny"
+        @click="cancel"
+      >
         {{ $t('pages.connectConfirm.cancelButton') }}
       </Button>
-      <Button half @click="resolve()" data-cy="accept">
+      <Button
+        half
+        data-cy="accept"
+        @click="resolve()"
+      >
         {{ $t('pages.connectConfirm.confirmButton') }}
       </Button>
     </div>
@@ -50,11 +99,11 @@ import Avatar from '../../components/Avatar';
 import mixin from './mixin';
 
 export default {
-  mixins: [mixin],
   components: {
     Button,
     Avatar,
   },
+  mixins: [mixin],
   data: () => ({
     imageError: false,
   }),
@@ -63,7 +112,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../styles/variables';
+@use '../../../../styles/variables';
 
 .connect .identicon-container {
   position: relative;
@@ -90,8 +139,8 @@ export default {
       z-index: 1;
       width: auto;
       border: 0.125rem solid transparent;
-      -webkit-box-shadow: 0 0 0 2px $secondary-color;
-      box-shadow: 0 0 0 2px $secondary-color;
+      -webkit-box-shadow: 0 0 0 2px variables.$color-blue;
+      box-shadow: 0 0 0 2px variables.$color-blue;
     }
   }
 
@@ -99,7 +148,7 @@ export default {
   .identicon:last-child::after {
     content: '';
     width: 40%;
-    border-top: 2px dashed $white-color;
+    border-top: 2px dashed variables.$color-white;
     height: 1px;
     display: inline-block;
     position: absolute;
@@ -124,9 +173,9 @@ export default {
     padding: 0 0.7rem;
 
     .ae-icon {
-      background: $accent-color;
+      background: variables.$color-green;
       padding: 0.5rem;
-      color: $white-color;
+      color: variables.$color-white;
       border-radius: 50%;
     }
   }

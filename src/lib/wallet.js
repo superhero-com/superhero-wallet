@@ -1,6 +1,6 @@
-import { Node, RpcWallet } from '@aeternity/aepp-sdk/es';
-import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
-import Swagger from '@aeternity/aepp-sdk/es/utils/swagger';
+import { Node, RpcWallet, genSwaggerClient } from '@aeternity/aepp-sdk';
+import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
+import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { camelCase, isEqual, times } from 'lodash-es';
 import { fetchJson, IN_FRAME } from '../popup/utils/helper';
 import store from '../store';
@@ -12,9 +12,9 @@ async function initMiddleware() {
 
   const swagUrl = `${middlewareUrl}/swagger/swagger.json`;
 
-  const swag = await fetchJson(swagUrl);
-  swag.paths = {
-    ...swag.paths,
+  const spec = await fetchJson(swagUrl);
+  spec.paths = {
+    ...spec.paths,
     'name/auction/{name}': {
       get: {
         operationId: 'getAuctionInfoByName',
@@ -54,17 +54,12 @@ async function initMiddleware() {
       },
     },
   };
-  const { api: middleware } = await Swagger.compose({
-    methods: {
-      urlFor: (path) => middlewareUrl + path,
-      axiosError: () => '',
-    },
-  })({ swag });
-
-  store.commit(
-    'setMiddleware',
-    Object.entries(middleware).reduce((m, [k, v]) => ({ ...m, [camelCase(k)]: v }), {}),
+  spec.basePath = '/mdw//';
+  const middleware = mapObject(
+    (await genSwaggerClient(middlewareUrl, { spec })).api,
+    ([k, v]) => [camelCase(k), v],
   );
+  store.commit('setMiddleware', middleware);
 }
 
 let initSdkRunning = false;
@@ -106,7 +101,7 @@ export default async function initSdk() {
           params: params?.txObject?.params,
         });
         if (method === 'message.sign') {
-          if (!permission)
+          if (!permission) {
             await store.dispatch('modals/open', {
               name: 'confirm-message-sign',
               message: params.message,
@@ -116,18 +111,18 @@ export default async function initSdk() {
                 protocol: originUrl.protocol,
               },
             });
+          }
           action.accept({ onAccount: { sign: () => {}, address: () => {} } });
           return;
         }
         action.accept(null, {
           onAccount: {
-            sign: async () =>
-              store.dispatch('accounts/signTransaction', {
-                txBase64: params.tx,
-                opt: {
-                  modal: !permission,
-                },
-              }),
+            sign: async () => store.dispatch('accounts/signTransaction', {
+              txBase64: params.tx,
+              opt: {
+                modal: !permission,
+              },
+            }),
             address: () => {},
           },
         });
@@ -154,31 +149,28 @@ export default async function initSdk() {
               !(await store.dispatch('permissions/requestAddressForHost', {
                 host: hostname,
                 address,
-                connectionPopupCb: async () =>
-                  store.dispatch('modals/open', {
-                    name: 'confirm-connect',
-                    app: {
-                      name: hostname,
-                      icons: [],
-                      protocol,
-                      host,
-                    },
-                  }),
+                connectionPopupCb: async () => store.dispatch('modals/open', {
+                  name: 'confirm-connect',
+                  app: {
+                    name: hostname,
+                    icons: [],
+                    protocol,
+                    host,
+                  },
+                }),
               }))
-            )
-              return Promise.reject(new Error('Rejected by user'));
+            ) return Promise.reject(new Error('Rejected by user'));
           }
           return address;
         },
         sign: (data) => store.dispatch('accounts/sign', data),
-        signTransaction: (txBase64, opt) =>
-          opt.onAccount
-            ? opt.onAccount.sign()
-            : store.dispatch('accounts/signTransaction', { txBase64, opt }),
+        signTransaction: (txBase64, opt) => (opt.onAccount
+          ? opt.onAccount.sign()
+          : store.dispatch('accounts/signTransaction', { txBase64, opt })),
       },
     })({
+      address: store.getters.account.address,
       nodes: [{ name: activeNetwork.name, instance: node }],
-      nativeMode: true,
       compilerUrl,
       name: 'Superhero',
       onConnection: acceptCb,
@@ -215,31 +207,30 @@ export default async function initSdk() {
 
       const connectedFrames = new Set();
       executeAndSetInterval(
-        () =>
-          getArrayOfAvailableFrames()
-            .filter((frame) => frame !== window)
-            .forEach((target) => {
-              if (connectedFrames.has(target)) return;
-              connectedFrames.add(target);
-              const connection = BrowserWindowMessageConnection({ target });
-              const originalConnect = connection.connect;
-              let intervalId;
-              connection.connect = function connect(onMessage) {
-                originalConnect.call(this, (data, origin, source) => {
-                  if (source !== target) return;
-                  clearInterval(intervalId);
-                  onMessage(data, origin, source);
-                });
-              };
-              sdk.addRpcClient(connection);
-              intervalId = executeAndSetInterval(() => {
-                if (!getArrayOfAvailableFrames().includes(target)) {
-                  clearInterval(intervalId);
-                  return;
-                }
-                sdk.shareWalletInfo(connection.sendMessage.bind(connection));
-              }, 3000);
-            }),
+        () => getArrayOfAvailableFrames()
+          .filter((frame) => frame !== window)
+          .forEach((target) => {
+            if (connectedFrames.has(target)) return;
+            connectedFrames.add(target);
+            const connection = BrowserWindowMessageConnection({ target });
+            const originalConnect = connection.connect;
+            let intervalId;
+            connection.connect = function connect(onMessage) {
+              originalConnect.call(this, (data, origin, source) => {
+                if (source !== target) return;
+                clearInterval(intervalId);
+                onMessage(data, origin, source);
+              });
+            };
+            sdk.addRpcClient(connection);
+            intervalId = executeAndSetInterval(() => {
+              if (!getArrayOfAvailableFrames().includes(target)) {
+                clearInterval(intervalId);
+                return;
+              }
+              sdk.shareWalletInfo(connection.sendMessage.bind(connection));
+            }, 3000);
+          }),
         3000,
       );
     }

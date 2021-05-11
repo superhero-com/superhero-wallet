@@ -4,8 +4,8 @@
     :placeholder="placeholder"
     :class="{ error: error || err, [size]: size }"
     :value="value"
-    @input="$emit('input', $event.target.value)"
     data-cy="textarea"
+    @input="$emit('input', $event.target.value)"
   />
 </template>
 
@@ -32,17 +32,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .textarea {
   display: block;
   width: 100%;
   border-radius: 5px;
-  border: 2px solid $border-color;
-  background: $input-bg-color;
+  background: variables.$color-bg-2;
   padding: 15px;
   margin-bottom: 22px;
-  color: $text-color;
+  color: variables.$color-white;
 
   @extend %face-sans-16-regular;
 
@@ -52,11 +52,11 @@ export default {
   word-break: break-word;
 
   &:focus {
-    border-color: $input-focus-color;
+    border-color: variables.$color-blue;
   }
 
   &.error {
-    border-color: $input-error-color;
+    border-color: variables.$color-error;
   }
 
   &.sm {

@@ -2,9 +2,16 @@
   <div>
     <div id="info">
       <Logo class="logo" />
-      <div class="loader" v-if="!error"></div>
-      <p v-if="!error">{{ $t('redirecting') }}</p>
-      <p v-if="error">{{ error }}</p>
+      <div
+        v-if="!error"
+        class="loader"
+      />
+      <p v-if="!error">
+        {{ $t('redirecting') }}
+      </p>
+      <p v-if="error">
+        {{ error }}
+      </p>
     </div>
   </div>
 </template>
@@ -31,9 +38,11 @@ export default {
 </script>
 
 <style lang="scss">
+@use "../styles/variables";
+
 body,
 html {
-  background: #16161d;
+  background: variables.$color-black;
 }
 
 #info {
@@ -44,7 +53,7 @@ html {
   transform: translate(-50%, -50%);
   -webkit-transform: translate(-50%, -50%);
   text-align: center;
-  color: #fff;
+  color: variables.$color-white;
 
   .logo {
     margin-bottom: 25px;
@@ -55,8 +64,8 @@ html {
   }
 
   .loader {
-    border: 8px solid #f3f3f3; /* Light grey */
-    border-top: 8px solid #ccc; /* Blue */
+    border: 8px solid variables.$color-light-grey;
+    border-top: 8px solid variables.$color-blue;
     border-radius: 50%;
     width: 70px;
     height: 70px;

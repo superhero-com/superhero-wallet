@@ -1,8 +1,9 @@
-import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import { popupProps, txParams } from '../../../src/popup/utils/config';
+import locale from '../../../src/popup/locales/en.json';
 
 const popups = ['connectConfirm', 'sign', 'messageSign'];
-const txTypes = [TX_TYPE.spend, TX_TYPE.contractCall, TX_TYPE.contractCreate];
+const txTypes = [SCHEMA.TX_TYPE.spend, SCHEMA.TX_TYPE.contractCall, SCHEMA.TX_TYPE.contractCreate];
 
 describe('Tests cases for AEX-2 popups', () => {
   beforeEach(() => {
@@ -36,21 +37,21 @@ describe('Tests cases for AEX-2 popups', () => {
 
   it('Opens connectConfirm, sign, messageSign popups and send accept/deny action', () => {
     popups.forEach((popup) => {
-      cy.openAex2Popup(popup, popup === 'sign' && TX_TYPE.spend)
+      cy.openAex2Popup(popup, popup === 'sign' && SCHEMA.TX_TYPE.spend)
         .get('[data-cy=deny]')
         .click()
         .window()
-        .then((win) => {
+        .should((win) => {
           expect(win.reject).to.equal('send');
         });
     });
 
     popups.forEach((popup) => {
-      cy.openAex2Popup(popup, popup === 'sign' && TX_TYPE.spend)
+      cy.openAex2Popup(popup, popup === 'sign' && SCHEMA.TX_TYPE.spend)
         .get('[data-cy=accept]')
         .click()
         .window()
-        .then((win) => {
+        .should((win) => {
           expect(win.resolve).to.equal('send');
         });
     });
@@ -70,29 +71,18 @@ describe('Tests cases for AEX-2 popups', () => {
         receiver = 'Contract create';
       }
       cy.openAex2Popup('sign', txType)
-        .get('[data-cy=tx-type]')
+        .get('[data-cy=title]')
         .should('be.visible')
-        .should('contain', txType)
-        .get('[data-cy=input-number]')
-        .should('have.value', amount.toFixed(1))
-        .get('[data-cy=amount-currency]')
-        .should('be.visible');
+        .should('contain', locale.transaction.type[txType]);
 
-      if (txType === 'spendTx' || txType === 'contractCallTx') {
-        cy.get('[data-cy=address-receiver]')
-          .should('be.visible')
-          .invoke('attr', 'title')
-          .should('contain', receiver);
-      } else {
-        cy.get('[data-cy=receiver]').should('be.visible').should('contain', receiver);
-      }
+      cy.get('[data-cy=recipient]').should('be.visible').should('contain', receiver);
 
       cy.get('[data-cy=fee]')
         .should('be.visible')
         .should('contain', fee.toFixed(2))
         .get('[data-cy=total]')
         .should('be.visible')
-        .should('contain', parseFloat(amount + fee).toFixed(7));
+        .should('contain', parseFloat(amount + fee).toFixed(2));
     });
   });
 });

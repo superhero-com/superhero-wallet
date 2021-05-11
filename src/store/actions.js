@@ -1,6 +1,9 @@
-import { flatten, orderBy, uniq } from 'lodash-es';
+import {
+  flatten, orderBy, uniq, uniqBy,
+} from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import { postMessageToContent } from '../popup/utils/connection';
 import {
   fetchJson,
@@ -14,7 +17,7 @@ import { i18n } from './plugins/languages';
 export default {
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
-    commit('updateLatestTransactions', []);
+    commit('setTransactions', []);
   },
   async fetchPendingTransactions({
     state: { sdk },
@@ -38,27 +41,28 @@ export default {
     if (!state.middleware) return [];
     const { address } = getters.account;
     let txs = await Promise.all([
-      state.middleware
-        .getTxByAccount(address, limit, page)
+      state.middleware.getTxByAccount(address, limit, page)
         .then(({ data }) => data)
         .catch(() => []),
       dispatch('fetchPendingTransactions'),
       fetchJson(
         `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${
-          recent ? `&limit=${limit}` : ``
+          recent ? `&limit=${limit}` : ''
         }`,
       )
-        .then((response) =>
-          response.map(({ amount, ...t }) => ({
-            tx: { address, amount },
-            ...t,
-            microTime: t.time,
-            claim: true,
-          })),
-        )
-        .catch(() => []),
+        .then((response) => response.map(({ amount, ...t }) => ({
+          tx: {
+            address,
+            amount,
+            contractId: t.contract,
+            type: SCHEMA.TX_TYPE.contractCall,
+          },
+          ...t,
+          microTime: t.time,
+          claim: true,
+        }))).catch(() => []),
     ]);
-    txs = orderBy(flatten(txs), ['microTime'], ['desc']);
+    txs = uniqBy(orderBy(flatten(txs), ['microTime'], ['desc']), ({ hash }) => hash);
     return recent ? txs.slice(0, limit) : txs;
   },
 
@@ -71,7 +75,7 @@ export default {
         commit('setCurrencies', aeternity);
         commit('setNextCurrencyFetch', new Date().getTime() + 3600000);
       } catch (e) {
-        console.error(`Cannot fetch currencies: ${e}`);
+        handleUnknownError(e);
       }
     }
   },
@@ -115,10 +119,11 @@ export default {
     { state: { sdk }, getters: { activeNetwork } },
     [tipId, text, author, parentId],
   ) {
-    const sendComment = async (postParam) =>
-      postJson(`${activeNetwork.backendUrl}/comment/api/`, { body: postParam });
+    const sendComment = async (postParam) => postJson(`${activeNetwork.backendUrl}/comment/api/`, { body: postParam });
 
-    const responseChallenge = await sendComment({ tipId, text, author, parentId });
+    const responseChallenge = await sendComment({
+      tipId, text, author, parentId,
+    });
     const signedChallenge = Buffer.from(
       await sdk.signMessage(responseChallenge.challenge),
     ).toString('hex');
@@ -138,8 +143,7 @@ export default {
     },
     [notifId, status],
   ) {
-    const backendMethod = async (postParam) =>
-      postJson(`${activeNetwork.backendUrl}/notification/${notifId}`, { body: postParam });
+    const backendMethod = async (postParam) => postJson(`${activeNetwork.backendUrl}/notification/${notifId}`, { body: postParam });
 
     const responseChallenge = await backendMethod({ author: address, status });
     const signedChallenge = Buffer.from(
@@ -163,8 +167,7 @@ export default {
     [ids, status],
   ) {
     if (!ids.length) return;
-    const backendMethod = async (postParam) =>
-      postJson(`${activeNetwork.backendUrl}/notification`, { body: postParam });
+    const backendMethod = async (postParam) => postJson(`${activeNetwork.backendUrl}/notification`, { body: postParam });
 
     const responseChallenge = await backendMethod({ ids, status, author: address });
     const signedChallenge = Buffer.from(
@@ -193,9 +196,8 @@ export default {
       signature: signedChallenge,
     };
     const url = new URL(`${activeNetwork.backendUrl}/notification/user/${account.address}`);
-    Object.keys(respondChallenge).forEach((key) =>
-      url.searchParams.append(key, respondChallenge[key]),
-    );
+    Object.keys(respondChallenge)
+      .forEach((key) => url.searchParams.append(key, respondChallenge[key]));
     return fetchJson(url.toString());
   },
   async initContractInstances({
@@ -210,9 +212,9 @@ export default {
     });
     const contractInstanceV2 = activeNetwork.tipContractV2
       ? await sdk.getContractInstance(TIPPING_V2_INTERFACE, {
-          contractAddress: activeNetwork.tipContractV2,
-          forceCodeCheck: true,
-        })
+        contractAddress: activeNetwork.tipContractV2,
+        forceCodeCheck: true,
+      })
       : null;
     commit('setTipping', [contractInstanceV1, contractInstanceV2]);
   },

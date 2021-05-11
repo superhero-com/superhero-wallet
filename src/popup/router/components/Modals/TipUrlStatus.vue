@@ -1,13 +1,25 @@
 <template>
-  <Modal @close="resolve" close>
+  <Modal
+    close
+    @close="resolve"
+  >
     <template slot="header">
-      <UrlStatus :status="status" modal />
+      <UrlStatus
+        :status="status"
+        modal
+      />
       {{ content.title }}
     </template>
 
     {{ content.msg }}
 
-    <Button slot="footer" class="ok-button" @click="resolve">{{ $t('ok') }}</Button>
+    <Button
+      slot="footer"
+      class="ok-button"
+      @click="resolve"
+    >
+      {{ $t('ok') }}
+    </Button>
   </Modal>
 </template>
 
@@ -17,11 +29,11 @@ import Button from '../Button';
 import UrlStatus from '../UrlStatus';
 
 export default {
+  components: { Modal, Button, UrlStatus },
   props: {
     resolve: { type: Function, required: true },
     status: { type: String, required: true },
   },
-  components: { Modal, Button, UrlStatus },
   computed: {
     content() {
       switch (this.status) {

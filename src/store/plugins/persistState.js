@@ -3,16 +3,14 @@ import { detect } from 'detect-browser';
 
 const KEY = 'state';
 
-const setState = (state) =>
-  browser.storage.local.set({ [KEY]: detect().name === 'firefox' ? cloneDeep(state) : state });
+const setState = (state) => browser.storage.local.set({ [KEY]: detect().name === 'firefox' ? cloneDeep(state) : state });
 
 const getStateRaw = async () => (await browser.storage.local.get(KEY))[KEY];
 
 // TODO: Avoid direct localStorage access outside of this module
 export const getState = async () => (await getStateRaw()) || {};
 
-const saverName =
-  process.env.IS_EXTENSION && (window.IS_EXTENSION_BACKGROUND ? 'background' : 'popup');
+const saverName = process.env.IS_EXTENSION && (window.IS_EXTENSION_BACKGROUND ? 'background' : 'popup');
 
 export default (
   reducerLoad = (state) => state || {},
@@ -52,8 +50,7 @@ export default (
           await browser.storage.local.clear();
           if (process.env.IS_EXTENSION) browser.runtime.sendMessage({ method: 'reload' });
           const location = {
-            'extension-chrome': './popup.html',
-            'extension-firefox': './popup.html',
+            extension: './popup.html',
             cordova: './index.html',
             web: '/',
           }[process.env.PLATFORM];

@@ -1,22 +1,37 @@
 <template>
-  <flickity class="menu-carousel" ref="flickity" :options="flickityOptions">
-    <BoxButton to="/tokens" :text="$t('pages.titles.balances')">
-      <Balances slot="icon" />
+  <flickity
+    ref="flickity"
+    class="menu-carousel"
+    :options="flickityOptions"
+  >
+    <BoxButton v-if="UNFINISHED_FEATURES" to="/tokens">
+      <Balances /> {{ $t('pages.titles.balances') }}
     </BoxButton>
-    <BoxButton to="/send" :text="$t('pages.titles.payments')" class="tour__step7" data-cy="send">
-      <Payments slot="icon" />
+    <BoxButton
+      :to="{ name: 'payments-send' }"
+      class="tour__step7"
+      data-cy="send"
+    >
+      <Payments /> {{ $t('pages.titles.payments') }}
     </BoxButton>
-    <BoxButton to="/tip" :text="$t('pages.titles.tips')" class="tour__step2" data-cy="tip-button">
-      <Tips slot="icon" />
+    <BoxButton
+      :to="{ name: 'tips-send' }"
+      class="tour__step2"
+      data-cy="tip-button"
+    >
+      <Tips /> {{ $t('pages.titles.tips') }}
     </BoxButton>
-    <BoxButton to="/transactions" :text="$t('pages.titles.tx-history')" class="tour__step5">
-      <Activity slot="icon" />
+    <BoxButton
+      to="/transactions"
+      class="tour__step5"
+    >
+      <Activity /> {{ $t('pages.titles.tx-history') }}
     </BoxButton>
-    <BoxButton to="/names" :text="$t('pages.titles.names')" class="cell">
-      <Names slot="icon" />
+    <BoxButton to="/names">
+      <Names /> {{ $t('pages.titles.names') }}
     </BoxButton>
-    <BoxButton to="/invite" :text="$t('pages.titles.invite')">
-      <Invites slot="icon" />
+    <BoxButton to="/invite">
+      <Invites /> {{ $t('pages.titles.invite') }}
     </BoxButton>
   </flickity>
 </template>
@@ -50,38 +65,34 @@ export default {
         prevNextButtons: true,
         pageDots: false,
         freeScroll: false,
-        draggable: process.env.PLATFORM === 'cordova',
+        draggable: window.IS_MOBILE_DEVICE,
         groupCells: 3,
         contain: true,
         selectedAttraction: 0.15,
         friction: 1,
         cellAlign: 'left',
       },
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/mixins';
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
 
 .menu-carousel {
   flex: 1;
   z-index: 1;
-  padding: 24px 12px;
+  padding: 24px 18px;
 
   ::v-deep {
-    .flickity-slider {
-      @include mobile {
-        width: 97%;
-      }
-    }
-
     .flickity-button {
       width: 24px;
       height: 64px;
       padding: 0;
-      background: #171717;
+      background: variables.$color-bg-2;
       cursor: pointer;
 
       &.previous {
@@ -95,7 +106,7 @@ export default {
       }
 
       .flickity-button-icon {
-        fill: $color-white;
+        fill: variables.$color-white;
         opacity: 0.44;
       }
 
@@ -104,34 +115,32 @@ export default {
       }
 
       &:hover {
-        background: $color-blue-hover-dark;
+        background: variables.$color-blue-hover-dark;
 
         .icon {
           opacity: 1;
 
           path {
-            fill: $color-blue;
+            fill: variables.$color-blue;
           }
         }
       }
 
       &:active {
-        background-color: rgba($color-blue-hover-dark, 0.1);
+        background-color: rgba(variables.$color-blue-hover-dark, 0.1);
       }
     }
   }
 
   .box-button {
-    display: flex;
-    justify-content: center;
-    width: 104px;
+    margin-left: 18px;
 
-    @include mobile {
-      width: 25%;
+    @include mixins.mobile {
+      margin-left: calc(25% - 88px);
     }
 
-    @media (min-width: $extension-width + 2) and (max-width: 400px) {
-      width: 33%;
+    @media (min-width: variables.$extension-width + 2) and (max-width: 400px) {
+      margin-left: calc(33% - 88px);
     }
   }
 }

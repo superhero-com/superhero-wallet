@@ -1,5 +1,8 @@
 <template>
-  <div class="filters" data-cy="filters">
+  <div
+    class="filters"
+    data-cy="filters"
+  >
     <button
       v-for="filter in filters"
       :key="filter"
@@ -36,14 +39,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/typography';
-@import '../../../styles/mixins';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
+@use '../../../styles/mixins';
 
 .filters {
   position: sticky;
   top: 48px;
   top: calc(env(safe-area-inset-top) + 48px);
-  background: $color-bg-3;
+  background: variables.$color-bg-3;
   height: 40px;
   width: 100%;
   display: flex;
@@ -54,16 +58,16 @@ export default {
     display: flex;
     align-items: center;
 
-    @include mobile {
+    @include mixins.mobile {
       padding: 0;
     }
 
     @extend %face-sans-15-medium;
 
-    color: $color-dark-grey;
+    color: variables.$color-dark-grey;
 
     &.active {
-      color: $color-green;
+      color: variables.$color-green;
     }
 
     svg {

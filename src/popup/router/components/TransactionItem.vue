@@ -4,16 +4,22 @@
     :to="{ name: 'tx-details', params: { hash: transaction.hash } }"
   >
     <div class="left">
-      <Pending v-if="transaction.pending" class="icon" />
+      <Pending
+        v-if="transaction.pending"
+        class="icon"
+      />
       <TokenAmount
         :amount="getTxAmountTotal(transaction)"
         :symbol="getTxSymbol(transaction)"
         :direction="getTxDirection(transaction)"
-        :altText="getTxType(transaction)"
+        :alt-text="getTxType(transaction)"
         data-cy="amount"
       />
     </div>
-    <div class="right" v-if="!transaction.pending">
+    <div
+      v-if="!transaction.pending"
+      class="right"
+    >
       <span data-cy="date">{{ transaction.microTime | formatDate }}</span>
       <span data-cy="time">{{ transaction.microTime | formatTime }}</span>
     </div>
@@ -28,15 +34,15 @@ import TokenAmount from './TokenAmount';
 
 export default {
   components: { TokenAmount, Pending },
+  filters: {
+    formatDate,
+    formatTime,
+  },
   props: {
     transaction: {
       type: Object,
       required: true,
     },
-  },
-  filters: {
-    formatDate,
-    formatTime,
   },
   computed: mapGetters([
     'getTxAmountTotal',
@@ -49,21 +55,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .transaction-item {
   padding: 0 16px;
   margin: 1px 0;
   border-radius: 4px;
-  background: $color-bg-1;
+  background: variables.$color-bg-1;
   display: flex;
   justify-content: space-between;
   align-items: center;
   text-decoration: none;
 
   &:hover {
-    background: $color-hover;
+    background: variables.$color-hover;
   }
 
   .left {
@@ -74,7 +80,7 @@ export default {
     .icon {
       width: 24px;
       height: 24px;
-      color: $color-white;
+      color: variables.$color-white;
       margin-right: 2px;
     }
   }
@@ -88,11 +94,11 @@ export default {
     }
 
     :nth-child(1) {
-      color: $color-white;
+      color: variables.$color-white;
     }
 
     :nth-child(2) {
-      color: $color-dark-grey;
+      color: variables.$color-dark-grey;
     }
   }
 }

@@ -30,14 +30,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/mixins';
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
 
 .connect-error,
 .connect-node {
   position: fixed;
   width: 100%;
 
-  @include desktop {
+  @include mixins.desktop {
     position: sticky;
   }
 
@@ -45,8 +46,8 @@ export default {
   bottom: calc(48px + env(safe-area-inset-bottom));
   left: 0;
   right: 0;
-  background: $secondary-color;
-  color: $white-color;
+  background: variables.$color-blue;
+  color: variables.$color-white;
   line-height: 2em;
   z-index: 5;
   text-align: center;
@@ -58,6 +59,6 @@ export default {
 }
 
 .connect-node {
-  background: $nav-bg-color;
+  background: variables.$color-bg-3;
 }
 </style>

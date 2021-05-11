@@ -1,5 +1,7 @@
 const tip = { amount: 0.2, note: '#test', url: 'example.com' };
-const tip2 = { amount: 0.2, note: '#test1234', url: 'example.com', onTip: true };
+const tip2 = {
+  amount: 0.2, note: '#test1234', url: 'example.com', onTip: true,
+};
 
 describe('Test cases for tip page', () => {
   beforeEach(() => {
@@ -69,7 +71,7 @@ describe('Test cases for tip page', () => {
       .click()
       .get('[data-cy=tip-container]')
       .should('be.visible')
-      .urlEquals('/tip');
+      .urlEquals('/tips');
   });
 
   it('Redirect to account page from success tip', () => {

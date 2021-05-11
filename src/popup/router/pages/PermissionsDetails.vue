@@ -2,12 +2,18 @@
   <div class="permissions-details">
     <p>{{ host }}</p>
     <div class="permission-row">
-      <CheckBox :value="address" @input="togglePermission({ host, name: 'address' })" />
+      <CheckBox
+        :value="address"
+        @input="togglePermission({ host, name: 'address' })"
+      />
       <span :class="{ highlight: address }">{{ $t('pages.permissions.login') }}</span>
     </div>
 
     <div class="permission-row">
-      <CheckBox :value="messageSign" @input="togglePermission({ host, name: 'messageSign' })" />
+      <CheckBox
+        :value="messageSign"
+        @input="togglePermission({ host, name: 'messageSign' })"
+      />
       <span :class="{ highlight: messageSign }"> {{ $t('pages.permissions.message-sign') }}</span>
     </div>
 
@@ -17,7 +23,7 @@
         <InputField
           :value="transactionSignLimit || ''"
           :error="transactionSignLimitError"
-          placeholder="no limit"
+          placeholder="always ask"
           @input="setTransactionSignLimit"
         />
       </div>
@@ -41,7 +47,10 @@
         <TokenAmount :amount="+tokenBalance" />
       </div>
     </div>
-    <Button bold @click="removePermissions">
+    <Button
+      bold
+      @click="removePermissions"
+    >
       {{ $t('pages.permissions.delete') }}
     </Button>
   </div>
@@ -107,12 +116,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables.scss';
+@use '../../../styles/variables.scss';
 
 .permissions-details {
   font-size: 15px;
   text-align: left;
-  color: $text-color;
+  color: variables.$color-white;
 
   p {
     text-align: center;
@@ -133,19 +142,19 @@ export default {
 
     .highlight {
       font-weight: 700;
-      color: $white-1;
+      color: variables.$color-white;
     }
 
     .token-amount {
       margin-left: auto;
-      color: $white-1;
+      color: variables.$color-white;
     }
   }
 
   .transaction-sign-limit {
     margin: 0 -12px;
     padding: 0 12px;
-    border: 1px solid $border-color;
+    border: 1px solid variables.$color-border;
     border-left: 0;
     border-right: 0;
 
@@ -163,7 +172,7 @@ export default {
         position: absolute;
         top: 10px;
         left: 120px;
-        color: $secondary-color;
+        color: variables.$color-blue;
       }
     }
   }

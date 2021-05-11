@@ -1,17 +1,33 @@
 <template>
   <transition appear>
-    <div class="modal">
+    <div
+      class="modal"
+      :class="{'full-screen': fullScreen}"
+    >
       <div class="container">
-        <button v-if="close" class="close" @click="$emit('close')">
+        <button
+          v-if="close"
+          class="close"
+          @click="$emit('close')"
+        >
           <Close />
         </button>
-        <div v-if="$slots.header" class="header">
+        <div
+          v-if="$slots.header"
+          class="header"
+        >
           <slot name="header" />
         </div>
-        <div v-if="$slots.default" class="body">
+        <div
+          v-if="$slots.default"
+          class="body"
+        >
           <slot />
         </div>
-        <div v-if="$slots.footer" class="footer">
+        <div
+          v-if="$slots.footer"
+          class="footer"
+        >
           <slot name="footer" />
         </div>
       </div>
@@ -23,8 +39,11 @@
 import Close from '../../../icons/close.svg?vue-component';
 
 export default {
-  props: { close: Boolean },
   components: { Close },
+  props: {
+    close: Boolean,
+    fullScreen: Boolean,
+  },
   mounted() {
     if (document.body.style.overflow) return;
     document.body.style.overflow = 'hidden';
@@ -36,7 +55,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
 
 .modal {
   position: fixed;
@@ -45,7 +65,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(variables.$color-black, 0.7);
   display: flex;
 
   .container {
@@ -53,8 +73,8 @@ export default {
     width: 87%;
     margin: auto;
     padding: 62px 25px 30px;
-    background: $modal-background;
-    border: 1px solid $tx-border-color;
+    background: variables.$color-bg-1;
+    border: 1px solid variables.$color-border;
     border-radius: 5px;
 
     .close {
@@ -69,7 +89,7 @@ export default {
     }
 
     .header {
-      color: $white-color;
+      color: variables.$color-white;
       font-size: 17px;
       font-weight: 500;
       margin-bottom: 25px;
@@ -79,7 +99,7 @@ export default {
 
     .body {
       margin-bottom: 40px;
-      color: $text-color;
+      color: variables.$color-white;
       font-size: 14px;
       word-break: break-word;
       text-align: center;
@@ -93,6 +113,41 @@ export default {
         margin: 0 10px;
         width: 120px;
         font-weight: 700;
+      }
+    }
+  }
+
+  &.full-screen .container {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    padding-top: env(safe-area-inset-top);
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+
+    @include mixins.desktop {
+      width: variables.$extension-width;
+      height: 600px;
+      border-radius: 10px;
+      box-shadow: variables.$color-border 0 0 0 1px;
+    }
+
+    .body {
+      height: 100%;
+      margin-bottom: 0;
+      overflow-y: scroll;
+    }
+
+    .footer {
+      position: sticky;
+      bottom: 0;
+      width: 100%;
+      padding: 24px 0;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom));
+
+      @include mixins.desktop {
+        border-radius: 0 0 10px 10px;
       }
     }
   }

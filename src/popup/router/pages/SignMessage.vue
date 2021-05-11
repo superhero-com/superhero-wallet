@@ -1,12 +1,16 @@
 <template>
   <div class="sign-message">
-    <div class="section-title">Sign message for</div>
+    <div class="section-title">
+      Sign message for
+    </div>
 
     <div class="url-bar link-sm text-left">
       {{ callbackOrigin }}
     </div>
 
-    <div class="section-title">Message</div>
+    <div class="section-title">
+      Message
+    </div>
 
     <div class="tip-note-preview mt-15">
       {{ $route.query.message }}
@@ -40,18 +44,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .sign-message {
   .url-bar {
-    color: $text-color;
+    color: variables.$color-white;
   }
 
   .section-title {
     margin-bottom: 8px;
     margin-top: 16px;
     font-size: 16px;
-    color: $white-color;
+    color: variables.$color-white;
     font-weight: 400;
     text-align: left;
   }

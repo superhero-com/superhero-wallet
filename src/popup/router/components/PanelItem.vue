@@ -1,9 +1,22 @@
 <template>
-  <Component :is="to ? 'RouterLink' : 'button'" :to="to" @click="$emit('click')" class="panel-item">
+  <Component
+    :is="to ? 'RouterLink' : 'button'"
+    :to="to"
+    class="panel-item"
+    @click="$emit('click')"
+  >
     <span class="panel-item-title">{{ title }}</span>
-    <p class="panel-item-info">{{ info }}</p>
-    <slot v-if="$slots['content']" name="content" />
-    <i v-else class="panel-item-arrow-right" />
+    <p class="panel-item-info">
+      {{ info }}
+    </p>
+    <slot
+      v-if="$slots['content']"
+      name="content"
+    />
+    <i
+      v-else
+      class="panel-item-arrow-right"
+    />
   </Component>
 </template>
 
@@ -18,6 +31,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use "../../../styles/variables";
+
 .panel-item {
   text-decoration: none;
   transition: 0.4s;
@@ -26,7 +41,7 @@ export default {
   width: 100%;
   display: block;
   font-size: 14px;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid variables.$color-light-grey;
   text-align: left;
   border-left: 2px solid transparent;
 
@@ -35,8 +50,8 @@ export default {
   }
 
   &:hover {
-    border-left: 2px solid #2a9cff;
-    background: rgba(99, 99, 99, 0.5);
+    border-left: 2px solid variables.$color-blue;
+    background: rgba(variables.$color-dark-grey, 0.5);
 
     .arrow-right {
       right: 20px;
@@ -72,7 +87,7 @@ export default {
   }
 
   .panel-item-info {
-    color: #ccc;
+    color: variables.$color-light-grey;
     font-weight: normal;
     margin: 5px 0;
     width: 90%;

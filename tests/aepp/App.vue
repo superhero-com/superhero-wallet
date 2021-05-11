@@ -1,31 +1,80 @@
 <template>
   <div>
-    <p data-cy="wallet-found" v-if="wallet.found">Wallet found</p>
-    <div v-if="wallet.address && wallet.name" data-cy="wallet-info">
-      <p data-cy="wallet-address">{{ wallet.address }}</p>
-      <p data-cy="wallet-balance">{{ wallet.balance }}</p>
-      <p data-cy="wallet-name">{{ wallet.name }}</p>
-      <button data-cy="wallet-sign-msg" @click="sign">Sign Msg</button>
-      <button data-cy="contract-call" @click="contractCall('statefull')">Contract Call</button>
-      <button data-cy="contract-call-static" @click="contractCall('static')">
+    <p
+      v-if="wallet.found"
+      data-cy="wallet-found"
+    >
+      Wallet found
+    </p>
+    <div
+      v-if="wallet.address && wallet.name"
+      data-cy="wallet-info"
+    >
+      <p data-cy="wallet-address">
+        {{ wallet.address }}
+      </p>
+      <p data-cy="wallet-balance">
+        {{ wallet.balance }}
+      </p>
+      <p data-cy="wallet-name">
+        {{ wallet.name }}
+      </p>
+      <button
+        data-cy="wallet-sign-msg"
+        @click="sign"
+      >
+        Sign Msg
+      </button>
+      <button
+        data-cy="contract-call"
+        @click="contractCall('statefull')"
+      >
+        Contract Call
+      </button>
+      <button
+        data-cy="contract-call-static"
+        @click="contractCall('static')"
+      >
         Contract Call Static
       </button>
-      <button data-cy="send" @click="spend">Spend</button>
-      <p data-cy="message-valid" v-if="message.valid">{{ message.sig }}</p>
-      <p data-cy="contract-call-res" v-if="contractCallRes">{{ contractCallRes }}</p>
-      <p data-cy="contract-call-static-res" v-if="contractCallStaticRes">
+      <button
+        data-cy="send"
+        @click="spend"
+      >
+        Spend
+      </button>
+      <p
+        v-if="message.valid"
+        data-cy="message-valid"
+      >
+        {{ message.sig }}
+      </p>
+      <p
+        v-if="contractCallRes"
+        data-cy="contract-call-res"
+      >
+        {{ contractCallRes }}
+      </p>
+      <p
+        v-if="contractCallStaticRes"
+        data-cy="contract-call-static-res"
+      >
         {{ contractCallStaticRes }}
       </p>
-      <p data-cy="send-res" v-if="sendRes">{{ sendRes }}</p>
+      <p
+        v-if="sendRes"
+        data-cy="send-res"
+      >
+        {{ sendRes }}
+      </p>
     </div>
   </div>
 </template>
 
 <script>
-import { RpcAepp } from '@aeternity/aepp-sdk/es';
+import { RpcAepp, Node } from '@aeternity/aepp-sdk';
 import Detector from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/wallet-detector';
 import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
-import Node from '@aeternity/aepp-sdk/es/node';
 
 const networks = {
   Mainnet: {
@@ -83,12 +132,14 @@ contract Example =
         nodes: [{ name: process.env.NETWORK, instance: node }],
         compilerUrl: networks[process.env.NETWORK].COMPILER_URL,
         onNetworkChange(params) {
-          if (this.getNetworkId() !== params.networkId)
+          if (this.getNetworkId() !== params.networkId) {
+            // eslint-disable-next-line no-alert
             alert(
               `Connected network ${this.getNetworkId()} is not supported with wallet network ${
                 params.networkId
               }`,
             );
+          }
         },
         onAddressChange: async () => {
           this.wallet.address = await this.client.address();

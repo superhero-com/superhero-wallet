@@ -1,9 +1,9 @@
 <template>
   <div class="tabs-menu">
     <button
-      :class="{ active: name === value }"
       v-for="{ text, name } in tabOptions"
       :key="name"
+      :class="{ active: name === value }"
       @click="$emit('input', name)"
     >
       {{ text }}
@@ -21,27 +21,30 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .tabs-menu {
   padding: 0 15px;
-  background-color: $black-3;
+  background-color: variables.$color-bg-3;
 
   button {
     font-size: 16px;
     padding: 5.5px 0;
     margin-right: 17px;
     text-decoration: none;
-    color: $gray-2;
+    color: variables.$color-dark-grey;
     display: inline-block;
 
+    @extend %face-sans-15-medium;
+
     &:hover {
-      color: $gray-1;
+      color: variables.$color-light-grey;
     }
 
     &.active {
-      color: $accent-color;
-      border-bottom: 1px solid $accent-color;
+      color: variables.$color-green;
+      border-bottom: 1px solid variables.$color-green;
     }
 
     &:last-child {

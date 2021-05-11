@@ -1,6 +1,5 @@
 import { isEqual } from 'lodash-es';
-import Universal from '@aeternity/aepp-sdk/es/ae/universal';
-import Node from '@aeternity/aepp-sdk/es/node';
+import { Universal, Node } from '@aeternity/aepp-sdk';
 import { setContractInstance, contractCall, getAddressByNameEntry } from '../popup/utils/helper';
 import Logger from '../lib/logger';
 import store from './store';
@@ -50,8 +49,8 @@ const getAddress = async (name) => {
   }
 };
 
-export const getAddressFromChainName = async (names) =>
-  Array.isArray(names) ? Promise.all(names.map(async (n) => getAddress(n))) : getAddress(names);
+export const getAddressFromChainName = async (names) => (Array.isArray(names)
+  ? Promise.all(names.map(async (n) => getAddress(n))) : getAddress(names));
 
 export const getTippingContractInstance = async (tx) => {
   if (tippingContract) return tippingContract;

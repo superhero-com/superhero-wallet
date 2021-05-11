@@ -1,5 +1,8 @@
 <template>
-  <div class="success-tip" data-cy="success-tip">
+  <div
+    class="success-tip"
+    data-cy="success-tip"
+  >
     <h3 class="heading-1 mb-25 mt-15 center">
       <div class="flex flex-align-center flex-justify-content-center">
         <Heart />
@@ -16,8 +19,11 @@
       />
       {{ $t('pages.successTip.to') }}
     </p>
-    <a class="link-sm text-left block" data-cy="tip-url">{{ tipUrl }}</a>
-    <br />
+    <a
+      class="link-sm text-left block"
+      data-cy="tip-url"
+    >{{ tipUrl }}</a>
+    <br>
     <div>
       {{ $t('pages.successTip.notify') }}
       <TokenAmount
@@ -30,21 +36,37 @@
         {{ note }}
       </div>
     </div>
-    <p class="f-14 sub-heading text-left" v-if="!(tipUrl && isVerifiedUrl)">
+    <p
+      v-if="!(tipUrl && isVerifiedUrl)"
+      class="f-14 sub-heading text-left"
+    >
       {{ $t('pages.successTip.note') }}
     </p>
-    <p class="f-18 my-35">{{ $t('pages.successTip.letThemKnow') }}</p>
+    <p class="f-18 my-35">
+      {{ $t('pages.successTip.letThemKnow') }}
+    </p>
     <div>
       <div class="flex flex-align-center flex-justify-between">
-        <Button half @click="$router.push('/tip')" data-cy="to-tips">
+        <Button
+          half
+          data-cy="to-tips"
+          @click="$router.push('/tips')"
+        >
           {{ $t('pages.successTip.sendMore') }}
         </Button>
-        <Button half @click="$router.push('/account')" data-cy="to-dashboard">
+        <Button
+          half
+          data-cy="to-dashboard"
+          @click="$router.push('/account')"
+        >
           {{ $t('pages.successTip.home') }}
         </Button>
       </div>
-      <br />
-      <Button :to="AGGREGATOR_URL" extend>
+      <br>
+      <Button
+        :to="AGGREGATOR_URL"
+        extend
+      >
         {{ $t('pages.successTip.feed') }}
       </Button>
     </div>
@@ -66,8 +88,8 @@ export default {
     TokenAmount,
     Button,
   },
-  data: () => ({ AGGREGATOR_URL }),
   props: ['amount', 'tipUrl'],
+  data: () => ({ AGGREGATOR_URL }),
   computed: {
     ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
     ...mapState('fungibleTokens', ['selectedToken']),
@@ -82,8 +104,8 @@ export default {
         amount: this.selectedToken
           ? `${this.amount} ${this.selectedToken.symbol}`
           : `${+this.amountTip.toFixed(2)} AE (~${this.formatCurrency(
-              (this.amountTip * this.currentCurrencyRate).toFixed(2),
-            )})`,
+            (this.amountTip * this.currentCurrencyRate).toFixed(2),
+          )})`,
       };
     },
     note() {
@@ -104,7 +126,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .success-tip {
   .sub-heading {
@@ -114,12 +136,12 @@ export default {
   }
 
   .note {
-    color: $text-color;
-    font-size: $base-font-size;
+    color: variables.$color-white;
+    font-size: variables.$base-font-size;
     min-height: 100px;
     border-radius: 5px;
-    border: 2px solid $border-color;
-    background: $input-bg-color;
+    border: 2px solid variables.$color-border;
+    background: variables.$color-bg-2;
     padding: 15px;
   }
 }

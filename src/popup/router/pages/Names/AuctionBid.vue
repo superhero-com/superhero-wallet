@@ -1,8 +1,16 @@
 <template>
   <div class="auction-bid">
     <h4>{{ $t('pages.names.auctions.bid-on') }} {{ name }}</h4>
-    <AmountSend :amountError="!+amount" v-model="amount" :errorMsg="amountError || ''" />
-    <Button extend @click="bid" :disabled="!!amountError || !+amount">
+    <AmountInput
+      v-model="amount"
+      :error="!+amount"
+      :error-message="amountError || ''"
+    />
+    <Button
+      extend
+      :disabled="!!amountError || !+amount"
+      @click="bid"
+    >
       {{ $t('pages.names.auctions.bid') }}
     </Button>
 
@@ -28,11 +36,15 @@
 import { pick } from 'lodash-es';
 import { blocksToRelativeTime } from '../../../../filters/toRelativeTime';
 import Button from '../../components/Button';
-import AmountSend from '../../components/AmountSend';
+import AmountInput from '../../components/AmountInput';
 import { aeToAettos } from '../../../utils/helper';
 
 export default {
-  components: { Button, AmountSend },
+  components: { Button, AmountInput },
+  filters: { blocksToRelativeTime },
+  props: {
+    name: { type: String, required: true },
+  },
   data() {
     return {
       loading: false,
@@ -41,9 +53,6 @@ export default {
       amount: 0,
       amountError: null,
     };
-  },
-  props: {
-    name: { type: String, required: true },
   },
   subscriptions() {
     return pick(this.$store.state.observables, ['topBlockHeight']);
@@ -60,7 +69,6 @@ export default {
       }
     },
   },
-  filters: { blocksToRelativeTime },
   async mounted() {
     this.loading = true;
     await this.$watchUntilTruly(() => this.$store.state.middleware);

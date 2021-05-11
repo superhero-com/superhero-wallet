@@ -1,10 +1,15 @@
 <template>
   <div class="transaction-details">
     <Plate class="header">
-      <TokenAmount :amount="amount" :symbol="symbol" :direction="direction" large />
+      <TokenAmount
+        :amount="amount"
+        :symbol="symbol"
+        :direction="direction"
+        large
+      />
     </Plate>
     <div class="content">
-      <div class="visual-overview"><!-- TODO --></div>
+      <TransactionOverview v-bind="transaction" />
       <div class="data-grid">
         <DetailsItem
           v-if="tipUrl"
@@ -12,8 +17,17 @@
           class="span-2-columns"
           data-cy="tip-url"
         >
-          <CopyButton slot="label" :value="tipUrl" message="URL copied" />
-          <LinkButton slot="value" :to="tipUrl">{{ tipUrl }}</LinkButton>
+          <CopyButton
+            slot="label"
+            :value="tipUrl"
+            message="URL copied"
+          />
+          <LinkButton
+            slot="value"
+            :to="tipUrl"
+          >
+            {{ tipUrl }}
+          </LinkButton>
         </DetailsItem>
         <DetailsItem
           :value="hash"
@@ -22,7 +36,11 @@
           data-cy="hash"
           small
         >
-          <CopyButton slot="label" :value="hash" message="Hash copied" />
+          <CopyButton
+            slot="label"
+            :value="hash"
+            message="Hash copied"
+          />
         </DetailsItem>
         <DetailsItem
           v-if="transaction.microTime"
@@ -48,10 +66,23 @@
           :label="$t('pages.transactionDetails.gasPrice')"
           data-cy="gas-price"
         >
-          <TokenAmount slot="value" :amount="transaction.tx.gasPrice" symbol="ættos" hideFiat />
+          <TokenAmount
+            slot="value"
+            :amount="transaction.tx.gasPrice"
+            symbol="ættos"
+            hide-fiat
+          />
         </DetailsItem>
-        <DetailsItem :label="$t('pages.transactionDetails.amount')" data-cy="amount">
-          <TokenAmount slot="value" :amount="amount" :symbol="symbol" hideFiat />
+        <DetailsItem
+          :label="$t('pages.transactionDetails.amount')"
+          data-cy="amount"
+        >
+          <TokenAmount
+            slot="value"
+            :amount="amount"
+            :symbol="symbol"
+            hide-fiat
+          />
         </DetailsItem>
         <DetailsItem
           v-if="transaction.tx.nonce"
@@ -65,7 +96,12 @@
           class="span-2-columns"
           data-cy="fee"
         >
-          <TokenAmount slot="value" :amount="transaction.tx.fee" symbol="ættos" hideFiat />
+          <TokenAmount
+            slot="value"
+            :amount="transaction.tx.fee"
+            symbol="ættos"
+            hide-fiat
+          />
         </DetailsItem>
         <DetailsItem
           v-if="transaction.pending"
@@ -89,6 +125,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { formatDate, formatTime } from '../../utils';
+import TransactionOverview from '../components/TransactionOverview';
 import Plate from '../components/Plate';
 import TokenAmount from '../components/TokenAmount';
 import DetailsItem from '../components/DetailsItem';
@@ -100,6 +137,7 @@ import BlockIcon from '../../../icons/block.svg?vue-component';
 export default {
   name: 'TransactionDetails',
   components: {
+    TransactionOverview,
     Plate,
     TokenAmount,
     DetailsItem,
@@ -108,12 +146,12 @@ export default {
     AnimatedPending,
     BlockIcon,
   },
-  props: {
-    hash: { type: String, required: true },
-  },
   filters: {
     formatDate,
     formatTime,
+  },
+  props: {
+    hash: { type: String, required: true },
   },
   computed: {
     ...mapGetters([
@@ -144,21 +182,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/mixins';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
+@use '../../../styles/mixins';
 
 .transaction-details {
-  overflow-x: hidden;
-
   .header {
-    position: sticky;
-    top: 0;
-    z-index: 1;
     display: flex;
     justify-content: center;
     height: 92px;
 
-    @include mobile {
+    @include mixins.mobile {
       width: 100%;
     }
 
@@ -176,10 +210,10 @@ export default {
 
   .content {
     margin-top: -10px;
-    background: $color-bg-3;
+    background: variables.$color-bg-3;
 
-    .visual-overview {
-      margin: 18px 0 8px 0;
+    .transaction-overview {
+      padding: 26px 16px 16px 16px;
     }
 
     .data-grid {
@@ -188,7 +222,7 @@ export default {
       grid-auto-rows: 64px;
       row-gap: 8px;
       column-gap: 24px;
-      margin: 0 16px 8px 16px;
+      padding: 8px 16px;
 
       .span-2-columns {
         grid-column-end: span 2;

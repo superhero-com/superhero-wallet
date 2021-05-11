@@ -1,6 +1,5 @@
 <template>
-  <div class="tip">
-    <BalanceInfo />
+  <div class="tips-send">
     <div class="tour__step3">
       <p class="primary-title text-left mb-8 f-16">
         <template v-if="!confirmMode">
@@ -17,43 +16,75 @@
         </template>
       </p>
 
-      <div class="url-bar" :class="editUrl ? 'url-bar--input' : 'url-bar--text'">
+      <div
+        class="url-bar"
+        :class="editUrl ? 'url-bar--input' : 'url-bar--text'"
+      >
         <template v-if="!editUrl">
-          <a class="link-sm text-left" data-cy="tip-url">
+          <a
+            class="link-sm text-left"
+            data-cy="tip-url"
+          >
             {{ url }}
           </a>
         </template>
-        <InputField v-else v-model="url" :placeholder="$t('pages.tipPage.enterUrl')">
-          <UrlStatus slot="left" :status="urlStatus" info />
+        <InputField
+          v-else
+          v-model="url"
+          :placeholder="$t('pages.tipPage.enterUrl')"
+        >
+          <UrlStatus
+            slot="left"
+            :status="urlStatus"
+            info
+          />
         </InputField>
       </div>
     </div>
     <div data-cy="tip-container">
       <template v-if="!confirmMode">
-        <AmountSend v-model="amount" />
-        <Textarea v-model="note" :placeholder="$t('pages.tipPage.titlePlaceholder')" size="sm" />
+        <AmountInput v-model="amount" />
+        <Textarea
+          v-model="note"
+          :placeholder="$t('pages.tipPage.titlePlaceholder')"
+          size="sm"
+        />
         <div class="validation-msg">
           {{ validationStatus.msg }}
         </div>
-        <Button @click="toConfirm" :disabled="validationStatus.error" bold data-cy="send-tip">
+        <Button
+          :disabled="validationStatus.error"
+          bold
+          data-cy="send-tip"
+          @click="toConfirm"
+        >
           {{ $t('pages.tipPage.next') }}
         </Button>
-        <Button bold @click="openCallbackOrGoHome(false)">
+        <Button
+          bold
+          @click="openCallbackOrGoHome(false)"
+        >
           {{ $t('pages.tipPage.cancel') }}
         </Button>
       </template>
       <template v-else>
-        <div class="tip-note-preview mt-15" data-cy="tip-note">
+        <div
+          class="tip-note-preview mt-15"
+          data-cy="tip-note"
+        >
           {{ note }}
         </div>
         <Button
-          @click="sendTip"
           :disabled="selectedToken ? !tippingV2 : !tippingV1"
           data-cy="confirm-tip"
+          @click="sendTip"
         >
           {{ $t('pages.tipPage.confirm') }}
         </Button>
-        <Button @click="toEdit" data-cy="edit-tip">
+        <Button
+          data-cy="edit-tip"
+          @click="toEdit"
+        >
           {{ $t('pages.tipPage.edit') }}
         </Button>
       </template>
@@ -66,30 +97,30 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import { TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import { calculateFee } from '../../utils/constants';
-import { escapeSpecialChars, aeToAettos, validateTipUrl, convertToken } from '../../utils/helper';
-import AmountSend from '../components/AmountSend';
+import {
+  escapeSpecialChars, aeToAettos, validateTipUrl, convertToken,
+} from '../../utils/helper';
+import AmountInput from '../components/AmountInput';
 import Textarea from '../components/Textarea';
 import InputField from '../components/InputField';
 import UrlStatus from '../components/UrlStatus';
 import Button from '../components/Button';
 import TokenAmount from '../components/TokenAmount';
-import BalanceInfo from '../components/BalanceInfo';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
-  mixins: [deeplinkApi],
   components: {
-    AmountSend,
+    AmountInput,
     Textarea,
     InputField,
     UrlStatus,
     Button,
     TokenAmount,
-    BalanceInfo,
   },
-  props: { tipUrl: String },
+  mixins: [deeplinkApi],
+  props: { tipUrl: { type: String, default: '' } },
   data() {
     return {
       url: null,
@@ -138,15 +169,15 @@ export default {
         if (!this.selectedToken && this.amount < minTipAmount) {
           return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
         }
-        const fee = calculateFee(TX_TYPE.contractCall, {
+        const fee = calculateFee(SCHEMA.TX_TYPE.contractCall, {
           ...sdk.Ae.defaults,
           contractId: this.tippingContract.deployInfo.address,
           callerId: account.address,
         });
         if (
           this.selectedToken
-            ? this.selectedToken.balance.comparedTo(this.amount) === -1 ||
-              this.balance.comparedTo(fee) === -1
+            ? this.selectedToken.balance.comparedTo(this.amount) === -1
+              || this.balance.comparedTo(fee) === -1
             : this.balance.comparedTo(fee.plus(this.amount)) === -1
         ) {
           return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
@@ -262,7 +293,7 @@ export default {
           tx: {
             senderId: this.account.address,
             contractId: this.tippingContract.deployInfo.address,
-            type: TX_TYPE.contractCall,
+            type: SCHEMA.TX_TYPE.contractCall,
           },
         });
         this.openCallbackOrGoHome(true);
@@ -284,9 +315,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
-.tip {
+.tips-send {
   .tour__step3 {
     margin: 0 auto;
     margin-top: 22px;
@@ -317,15 +348,19 @@ export default {
     }
 
     a {
-      color: $text-color;
+      color: variables.$color-white;
       text-decoration: none;
       margin-left: 10px;
       width: 90%;
     }
   }
 
+  .amount-input {
+    margin-bottom: 24px;
+  }
+
   .validation-msg {
-    color: #ff8c2a;
+    color: variables.$color-error;
     font-size: 15px;
     min-height: 45px;
   }

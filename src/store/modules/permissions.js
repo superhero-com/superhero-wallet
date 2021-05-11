@@ -52,22 +52,23 @@ export default {
   },
 
   actions: {
-    checkTransactionSignPermission({ state, commit }, { host, amount = 0, fee = 0, nameFee = 0 }) {
+    checkTransactionSignPermission({ state, commit }, {
+      host, amount = 0, fee = 0, nameFee = 0,
+    }) {
       const { transactionSignLimit, transactionSignFirstAskedOn } = state[host] || {};
       if (!transactionSignLimit) return false;
       if (new Date() - new Date(transactionSignFirstAskedOn) >= 24 * 60 * 60 * 1000) {
         commit('resetTransactionSignLimitLeft', host);
       }
 
-      const limitLeft =
-        state[host]?.transactionSignLimitLeft - aettosToAe(+amount + +fee + +nameFee);
+      const limitLeft = state[host]?.transactionSignLimitLeft
+        - aettosToAe(+amount + +fee + +nameFee);
       if (limitLeft < 0) return false;
       commit('setTransactionSignLimitLeft', { host, value: limitLeft });
       return true;
     },
     checkPermissions({ dispatch, state }, { host, method, params = {} }) {
-      if (method === 'transaction.sign')
-        return dispatch('checkTransactionSignPermission', { host, ...params });
+      if (method === 'transaction.sign') return dispatch('checkTransactionSignPermission', { host, ...params });
       const permissionsMethods = {
         'connection.open': 'address',
         'address.subscribe': 'address',

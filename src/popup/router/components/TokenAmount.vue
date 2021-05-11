@@ -1,8 +1,14 @@
 <template>
-  <span class="token-amount" :class="[direction, { large }]">
+  <span
+    class="token-amount"
+    :class="[direction, { large }]"
+  >
     {{ amountRounded }}
     <span class="symbol">{{ symbol }}</span>
-    <span v-if="text" class="text">{{ text }}</span>
+    <span
+      v-if="text"
+      class="text"
+    >{{ text }}</span>
   </span>
 </template>
 
@@ -43,27 +49,27 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .token-amount {
   @extend %face-sans-14-regular;
 
-  color: $white-color;
+  color: variables.$color-white;
   line-height: 24px;
 
   .symbol {
     @extend %face-sans-14-medium;
 
-    color: $color-blue;
+    color: variables.$color-blue;
   }
 
   .text {
-    color: $gray-2;
+    color: variables.$color-dark-grey;
   }
 
   &.sent {
-    color: $color-error;
+    color: variables.$color-error;
 
     &::before {
       content: '-';
@@ -71,7 +77,7 @@ export default {
   }
 
   &.received {
-    color: $color-green-hover;
+    color: variables.$color-green-hover;
 
     &::before {
       content: '+';

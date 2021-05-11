@@ -1,3 +1,5 @@
+@use '../styles/variables';
+
 .action-superhero-tip {
   align-self: center;
   white-space: nowrap;
@@ -20,7 +22,7 @@
 
     &,
     span {
-      color: rgb(101, 119, 134);
+      color: variables.$color-light-grey;
     }
 
     img {
@@ -37,7 +39,7 @@
 
     &:hover {
       span {
-        color: #2a9cff;
+        color: variables.$color-blue;
       }
 
       img {

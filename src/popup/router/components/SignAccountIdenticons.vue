@@ -1,28 +1,43 @@
 <template>
   <div class="identicons-holder">
     <div class="from">
-      <Avatar :address="account.address" :name="account.name" />
-      <span class="account-address">{{ account.name || account.type }}</span>
+      <Avatar
+        :address="account.address"
+        :name="account.name"
+      />
+      <span class="account-address">{{ account.name || account.localName }}</span>
     </div>
     <div class="arrow-separator">
       <ae-icon name="left-more" />
     </div>
-    <div class="to" v-if="!showAddress">
+    <div
+      v-if="!showAddress"
+      class="to"
+    >
       <Avatar :address="receiver" />
       <ae-address
-        :value="receiver"
         v-if="receiver"
+        :value="receiver"
         length="short"
         class="account-address"
         data-cy="address-receiver"
       />
-      <span v-else class="account-address">
+      <span
+        v-else
+        class="account-address"
+      >
         {{ $t('modals.confirm-transaction-sign.unknown') }}
       </span>
     </div>
-    <div v-else class="to">
+    <div
+      v-else
+      class="to"
+    >
       <ae-icon name="square" />
-      <span class="account-address" data-cy="receiver">
+      <span
+        class="account-address"
+        data-cy="receiver"
+      >
         {{
           txType === 'contractCreateTx'
             ? $t('modals.confirm-transaction-sign.contract-create')
@@ -35,16 +50,16 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { OBJECT_ID_TX_TYPE, TX_TYPE } from '@aeternity/aepp-sdk/es/tx/builder/schema';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import Avatar from './Avatar';
 
 export default {
+  components: { Avatar },
   props: {
     recipientId: { type: String, default: '' },
     contractId: { type: String, default: '' },
     tag: { type: String, required: true },
   },
-  components: { Avatar },
   computed: {
     ...mapGetters(['account']),
     receiver() {
@@ -52,20 +67,20 @@ export default {
     },
     showAddress() {
       return [
-        TX_TYPE.contractCreate,
-        TX_TYPE.namePreClaim,
-        TX_TYPE.nameClaim,
-        TX_TYPE.nameUpdate,
+        SCHEMA.TX_TYPE.contractCreate,
+        SCHEMA.TX_TYPE.namePreClaim,
+        SCHEMA.TX_TYPE.nameClaim,
+        SCHEMA.TX_TYPE.nameUpdate,
       ].includes(this.txType);
     },
     txType() {
-      return OBJECT_ID_TX_TYPE[this.tag];
+      return SCHEMA.OBJECT_ID_TX_TYPE[this.tag];
     },
   },
 };
 </script>
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .identicons-holder {
   display: flex;
@@ -93,12 +108,12 @@ export default {
 
   .from {
     padding-right: 15px;
-    background: #33343e;
+    background: variables.$color-border;
   }
 
   .to {
     padding-left: 15px;
-    background: #33343ea1;
+    background: variables.$color-border;
   }
 
   .arrow-separator {
@@ -108,14 +123,14 @@ export default {
     -ms-transform: translate(-50%, -50%);
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
-    background: $button-color;
-    color: $white-color;
+    background: variables.$color-blue;
+    color: variables.$color-white;
     border-radius: 50%;
     width: 20px;
     height: 20px;
     text-align: center;
     vertical-align: middle;
-    border: 1px solid $white-color;
+    border: 1px solid variables.$color-white;
     line-height: 20px;
 
     .ae-icon {

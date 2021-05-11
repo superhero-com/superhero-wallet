@@ -6,26 +6,24 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ChromeExtensionReloader = require('webpack-chrome-extension-reloader');
 const { VueLoaderPlugin } = require('vue-loader');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const GenerateJsonPlugin = require('generate-json-webpack-plugin');
-const commitHash = require('child_process')
-  .execSync('git rev-parse HEAD')
-  .toString().trim();
+const TerserPlugin = require('terser-webpack-plugin')
+const commitHash = require('child_process').execSync('git rev-parse HEAD').toString().trim();
 const sass = require('sass');
 const genManifest = require('./src/manifest');
 
-const parseBool = val => (val ? JSON.parse(val) : false);
+const parseBool = (val) => (val ? JSON.parse(val) : false);
 const RUNNING_IN_TESTS = parseBool(process.env.RUNNING_IN_TESTS);
 
-const getConfig = platform => {
-  const transformHtml = content =>
-    ejs.render(content.toString(), Object.assign({}, process.env, { PLATFORM: platform }));
+const getConfig = (platform) => {
+  const transformHtml = (content) =>
+    ejs.render(content.toString(), { ...process.env, PLATFORM: platform });
 
   return {
     mode: process.env.NODE_ENV,
     context: path.resolve(__dirname, 'src'),
     entry: {
-      ...(platform.startsWith('extension-') && {
+      ...(platform === 'extension' && {
         background: './background/index.js',
         'other/inject': './content-scripts/inject.js',
         'other/twitter': './content-scripts/twitter.js',
@@ -39,15 +37,20 @@ const getConfig = platform => {
       ...(platform === 'aepp' && { aepp: '../tests/aepp/aepp.js' }),
     },
     node: { fs: 'empty', net: 'empty', tls: 'empty' },
+    ...platform === 'extension' && {
+      optimization: {
+        minimizer: [
+          new TerserPlugin({ terserOptions: { output: { ascii_only: true } } }),
+        ],
+      },
+    },
     output: {
       filename: '[name].js',
-      publicPath:
-        { web: '/', 'extension-chrome': '../', 'extension-firefox': '../' }[platform] || './',
+      publicPath: { web: '/', extension: '../' }[platform] || './',
       path: path.resolve(
         __dirname,
         {
-          'extension-chrome': 'dist/chrome',
-          'extension-firefox': 'dist/firefox',
+          extension: 'dist/extension',
           cordova: 'www',
           web: 'dist/web/root',
           aepp: 'dist/aepp',
@@ -57,22 +60,6 @@ const getConfig = platform => {
     resolve: {
       extensions: ['.js', '.vue'],
     },
-    ...(platform === 'extension-firefox' && {
-      optimization: {
-        splitChunks: {
-          cacheGroups: {
-            vendor: {
-              name: 'vendor',
-              test: /[\\/]node_modules[\\/]/,
-              chunks(chunk) {
-                return chunk.name === 'popup/popup';
-              },
-              maxSize: 3999999,
-            },
-          },
-        },
-      },
-    }),
     module: {
       rules: [
         {
@@ -86,19 +73,11 @@ const getConfig = platform => {
         },
         {
           test: /\.css$/,
-          use: [MiniCssExtractPlugin.loader, { loader: 'css-loader', options: { minimize: true } }],
+          use: [MiniCssExtractPlugin.loader, 'css-loader'],
         },
         {
           test: /\.scss$/,
-          use: [
-            MiniCssExtractPlugin.loader,
-            { loader: 'css-loader', options: { minimize: true } },
-            { loader: 'sass-loader', options: { minimize: true } },
-          ],
-        },
-        {
-          test: /\.sass$/,
-          use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader?indentedSyntax'],
+          use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
         },
         {
           test: /\.(png|jpg|gif|svg|ico|woff2|woff)$/,
@@ -127,6 +106,10 @@ const getConfig = platform => {
         },
       ],
     },
+    stats: {
+      entrypoints: false,
+      children: false,
+    },
     plugins: [
       new CleanWebpackPlugin({
         cleanStaleWebpackAssets: false,
@@ -141,15 +124,17 @@ const getConfig = platform => {
         global: 'window',
         'process.env': {
           NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-          IS_EXTENSION: platform.startsWith('extension-') && !RUNNING_IN_TESTS,
+          // TODO: Use PLATFORM === 'extension' comparison instead
+          IS_EXTENSION: platform === 'extension' && !RUNNING_IN_TESTS,
           PLATFORM: JSON.stringify(platform),
           npm_package_version: JSON.stringify(process.env.npm_package_version),
           NETWORK: JSON.stringify(process.env.NETWORK),
           RUNNING_IN_TESTS,
           COMMIT_HASH: JSON.stringify(commitHash),
+          UNFINISHED_FEATURES: JSON.stringify(process.env.UNFINISHED_FEATURES),
         },
       }),
-      ...(platform.startsWith('extension-')
+      ...(platform === 'extension'
         ? [
             new GenerateJsonPlugin(
               'manifest.json',
@@ -159,36 +144,12 @@ const getConfig = platform => {
             ),
           ]
         : []),
-      ...(platform === 'extension-firefox'
-        ? [
-            new HtmlWebpackPlugin({
-              template: path.join(__dirname, 'src', 'popup', 'popup-firefox.html'),
-              filename: 'popup/popup.html',
-              excludeChunks: [
-                'background',
-                'other/youtube',
-                'other/twitter',
-                'other/inject',
-                'phishing/phishing',
-                'popup/cameraPermission',
-                'redirect/redirect',
-              ],
-            }),
-            new HtmlWebpackPlugin({
-              template: path.join(__dirname, 'src', 'phishing', 'phishing.html'),
-              filename: 'phishing/phishing.html',
-              chunks: ['phishing/phishing'],
-            }),
-          ]
-        : []),
-      ...(platform === 'extension-chrome' &&
-      process.env.HMR === 'true' &&
-      !process.env.RUNNING_IN_TESTS
+      ...(process.env.HMR === 'true' && !process.env.RUNNING_IN_TESTS && platform === 'extension'
         ? [new ChromeExtensionReloader({ port: 9099 })]
         : []),
       new CopyWebpackPlugin({
         patterns: [
-          ...(platform.startsWith('extension-')
+          ...(platform === 'extension'
             ? [
                 { from: 'popup/popup.html', to: `popup/popup.html`, transform: transformHtml },
                 {
@@ -235,6 +196,6 @@ const getConfig = platform => {
 };
 
 module.exports = (process.env.RUNNING_IN_TESTS
-  ? ['extension-chrome', 'aepp']
-  : ['extension-chrome', 'extension-firefox', 'cordova', 'web']
-).map(p => getConfig(p));
+  ? ['extension', 'aepp']
+  : ['extension', 'cordova', 'web']
+).map((p) => getConfig(p));

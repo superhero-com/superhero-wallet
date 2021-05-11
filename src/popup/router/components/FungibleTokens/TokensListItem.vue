@@ -24,7 +24,10 @@
         </div>
       </div>
       <div>
-        <TokenAmount :amount="+tokenData.convertedBalance || 0" :symbol="tokenData.symbol" />
+        <TokenAmount
+          :amount="+tokenData.convertedBalance || 0"
+          :symbol="tokenData.symbol"
+        />
         <div>
           <label>{{ $t('pages.fungible-tokens.price') }}</label>
           {{
@@ -55,10 +58,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../../styles/variables';
+@use '../../../../styles/variables';
 
 .tokens-list-item {
-  background-color: $black-1;
+  background-color: variables.$color-bg-1;
   margin-bottom: 3px;
   height: 50px;
   display: flex;
@@ -84,14 +87,14 @@ export default {
       justify-content: space-between;
       line-height: 17px;
       font-size: 13px;
-      color: $gray-1;
+      color: variables.$color-light-grey;
 
       .title {
         font-size: 14px;
       }
 
       label {
-        color: $gray-3;
+        color: variables.$color-dark-grey;
       }
 
       :nth-child(1) {

@@ -1,5 +1,9 @@
 <template>
-  <a class="link-button" :href="to" target="blank">
+  <a
+    class="link-button"
+    :href="to"
+    target="blank"
+  >
     <slot />
   </a>
 </template>
@@ -14,8 +18,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .link-button {
   padding: 0;
@@ -24,22 +28,22 @@ export default {
 
   @extend %face-sans-14-regular;
 
-  color: $color-green;
+  color: variables.$color-green;
 
   svg {
     width: 24px;
     height: 24px;
     margin-right: 4px;
     opacity: 0.44;
-    color: $color-white;
+    color: variables.$color-white;
   }
 
   &:hover {
-    color: $color-green-hover;
+    color: variables.$color-green-hover;
 
     svg {
       opacity: 1;
-      color: $color-green;
+      color: variables.$color-green;
     }
   }
 
@@ -48,7 +52,7 @@ export default {
 
     svg {
       opacity: 0.7;
-      color: $color-green;
+      color: variables.$color-green;
     }
   }
 }

@@ -1,7 +1,10 @@
 <template>
   <div :class="['intro', { iframe }]">
     <div v-show="step === 1">
-      <img v-if="iframe" src="../../../icons/iframe/receive.svg" />
+      <img
+        v-if="iframe"
+        src="../../../icons/iframe/receive.svg"
+      >
       <h2 v-else>
         <Claim /> {{ $t('pages.intro.receive') }}
         <span class="ml-10 secondary-text"> {{ $t('ae') }} </span>
@@ -14,7 +17,10 @@
     </div>
 
     <div v-show="step === 2">
-      <img v-if="iframe" src="../../../icons/iframe/send.svg" />
+      <img
+        v-if="iframe"
+        src="../../../icons/iframe/send.svg"
+      >
       <h2 v-else>
         <Heart /> {{ $t('pages.send.send') }}
         <span class="ml-10 secondary-text">{{ $t('ae') }}</span>
@@ -27,7 +33,10 @@
     </div>
 
     <div v-show="step === 3">
-      <img v-if="iframe" src="../../../icons/iframe/power.svg" />
+      <img
+        v-if="iframe"
+        src="../../../icons/iframe/power.svg"
+      >
       <div class="text-info">
         <span>
           {{ $t('pages.intro.step3text-1') }}
@@ -40,24 +49,59 @@
       </div>
     </div>
 
-    <div class="dotstyle dotstyle-fillup" v-show="step < 4" data-cy="onboarding-steps">
-      <LeftArrow @click="step = step - 1" class="left-arrow" v-show="step > 1" data-cy="prev" />
+    <div
+      v-show="step < 4"
+      class="dotstyle dotstyle-fillup"
+      data-cy="onboarding-steps"
+    >
+      <LeftArrow
+        v-show="step > 1"
+        class="left-arrow"
+        data-cy="prev"
+        @click="step = step - 1"
+      />
       <ul>
-        <li @click="step = 1" :class="step === 1 ? 'current' : ''"><a></a></li>
-        <li @click="step = 2" :class="step === 2 ? 'current' : ''"><a></a></li>
-        <li @click="step = 3" :class="step === 3 ? 'current' : ''"><a></a></li>
+        <li
+          :class="step === 1 ? 'current' : ''"
+          @click="step = 1"
+        >
+          <a />
+        </li>
+        <li
+          :class="step === 2 ? 'current' : ''"
+          @click="step = 2"
+        >
+          <a />
+        </li>
+        <li
+          :class="step === 3 ? 'current' : ''"
+          @click="step = 3"
+        >
+          <a />
+        </li>
       </ul>
-      <RightArrow @click="step = step + 1" class="right-arrow" v-show="step < 3" data-cy="next" />
-      <button class="skip-button" @click="step = 3" v-show="step < 3" data-cy="skip">
+      <RightArrow
+        v-show="step < 3"
+        class="right-arrow"
+        data-cy="next"
+        @click="step = step + 1"
+      />
+      <button
+        v-show="step < 3"
+        class="skip-button"
+        data-cy="skip"
+        @click="step = 3"
+      >
         {{ $t('pages.intro.skip') }}
       </button>
       <Button
-        @click="createWallet"
         v-if="step === 3"
         data-cy="generate-wallet"
         class="generate-wallet"
-        >{{ $t('pages.intro.generateWallet') }}</Button
+        @click="createWallet"
       >
+        {{ $t('pages.intro.generateWallet') }}
+      </Button>
     </div>
 
     <div v-show="step === 4">
@@ -70,12 +114,19 @@
           <span class="mb-4 block"> {{ $t('pages.intro.step4text-3') }} </span>
         </div>
 
-        <p class="last-msg-enjoy">{{ $t('pages.intro.step4text-4') }}</p>
+        <p class="last-msg-enjoy">
+          {{ $t('pages.intro.step4text-4') }}
+        </p>
       </template>
       <template v-else>
-        <h2 class="secondary">{{ $t('pages.intro.wellcome') }}</h2>
+        <h2 class="secondary">
+          {{ $t('pages.intro.wellcome') }}
+        </h2>
         <h4>{{ $t('pages.intro.createdWallet') }}</h4>
-        <CheckBox v-model="understood" data-cy="checkbox">
+        <CheckBox
+          v-model="understood"
+          data-cy="checkbox"
+        >
           <div class="undestand">
             {{ $t('pages.intro.understand') }}
           </div>
@@ -83,14 +134,14 @@
       </template>
       <Button
         :disabled="iframe && !understood"
-        @click="$router.push($store.state.loginTargetLocation)"
         data-cy="proceed-to-wallet"
+        @click="$router.push($store.state.loginTargetLocation)"
       >
         {{ $t('pages.intro.toHome') }}
       </Button>
       <Platforms v-if="iframe">
         {{ $t('pages.intro.step4text-iframe-1') }}
-        <br />
+        <br>
         {{ $t('pages.intro.step4text-iframe-2') }}
       </Platforms>
     </div>
@@ -144,12 +195,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/mixins';
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
 
 .intro {
   padding: 40px 16px 4px 16px;
 
-  @include mobile {
+  @include mixins.mobile {
     padding-top: 48px;
     padding-top: calc(env(safe-area-inset-top) + 48px);
   }
@@ -180,7 +232,7 @@ export default {
     font-size: 18px;
 
     &.secondary {
-      color: $secondary-color;
+      color: variables.$color-blue;
       font-size: 22px;
     }
 
@@ -194,7 +246,7 @@ export default {
     text-align: center;
 
     span:not(.aeid) {
-      color: $text-color;
+      color: variables.$color-white;
       font-size: 16px;
       word-break: break-word;
     }
@@ -202,13 +254,13 @@ export default {
 
   .undestand {
     text-align: left;
-    color: $text-color;
+    color: variables.$color-white;
     font-size: 12px;
     word-break: break-word;
   }
 
   .skip-button {
-    color: $accent-color;
+    color: variables.$color-green;
     font-size: 18px;
     margin-top: 30px;
     text-decoration: underline;
@@ -216,7 +268,7 @@ export default {
   }
 
   .last-msg-enjoy {
-    color: $secondary-color;
+    color: variables.$color-blue;
     font-size: 18px;
     width: 100%;
     margin: 10px auto;
@@ -284,7 +336,7 @@ export default {
 
     li a {
       overflow: hidden;
-      background-color: $text-color;
+      background-color: variables.$color-white;
       transition: background 0.3s;
     }
   }
@@ -296,18 +348,17 @@ export default {
     height: 0;
     left: 0;
     width: 100%;
-    // background-color: #fff;
-    box-shadow: 0 0 1px rgb(172, 172, 172);
+    box-shadow: 0 0 1px variables.$color-light-grey;
     transition: height 0.3s;
   }
 
   .dotstyle-fillup li a:hover,
   .dotstyle-fillup li a:focus {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(variables.$color-black, 0.2);
   }
 
   .dotstyle-fillup li.current a {
-    background-color: $secondary-color;
+    background-color: variables.$color-blue;
   }
 
   .dotstyle-fillup li.current a::after {

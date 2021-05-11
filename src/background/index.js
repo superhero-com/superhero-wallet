@@ -4,6 +4,7 @@ import initDeeplinkHandler from './deeplink-handler';
 import RedirectChainNames from './redirect-chain-names';
 import * as wallet from './wallet';
 import TipClaimRelay from './tip-claim-relay';
+import { handleUnknownError } from '../popup/utils/helper';
 import { getPhishingUrls, phishingCheckUrl, setPhishingUrl } from '../popup/utils/phishing-detect';
 import Logger from '../lib/logger';
 import { getState } from '../store/plugins/persistState';
@@ -16,19 +17,20 @@ initDeeplinkHandler();
 const postPhishingData = async (data) => {
   const tabs = await browser.tabs.query({ active: true, currentWindow: true });
   const message = { method: 'phishingCheck', ...data };
-  tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message).catch(console.log));
+  tabs.forEach(({ id }) => browser.tabs.sendMessage(id, message).catch(handleUnknownError));
 };
 
-const openTipPopup = (pageUrl) =>
-  browser.windows.create({
-    url: browser.extension.getURL(`./popup/popup.html#/tip?url=${encodeURIComponent(pageUrl)}`),
-    type: 'popup',
-    height: 600,
-    width: 375,
-  });
+const openTipPopup = (pageUrl) => browser.windows.create({
+  url: browser.extension.getURL(`./popup/popup.html#/tips?url=${encodeURIComponent(pageUrl)}`),
+  type: 'popup',
+  height: 600,
+  width: 375,
+});
 
 browser.runtime.onMessage.addListener(async (msg, sender) => {
-  const { method, params, from, type, data, url: tipUrl } = msg;
+  const {
+    method, params, from, type, data, url: tipUrl,
+  } = msg;
 
   if (method === 'reload') {
     wallet.disconnect();
@@ -91,8 +93,7 @@ const contextMenuItem = {
 browser.webNavigation.onHistoryStateUpdated.addListener(async ({ tabId, url }) => {
   if (
     (({ origin, pathname }) => origin + pathname)(new URL(url)) !== 'https://www.youtube.com/watch'
-  )
-    return;
+  ) return;
   browser.tabs.executeScript(tabId, { file: 'other/youtube.js' });
 });
 

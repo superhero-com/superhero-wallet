@@ -1,7 +1,14 @@
 <template>
-  <div class="three-dots" :class="{ active: showMenu }" @click="showMenu = !showMenu">
+  <div
+    class="three-dots"
+    :class="{ active: showMenu }"
+    @click="showMenu = !showMenu"
+  >
     •••
-    <SmallModal v-if="showMenu" @close="showMenu = false">
+    <SmallModal
+      v-if="showMenu"
+      @close="showMenu = false"
+    >
       <slot />
     </SmallModal>
   </div>
@@ -23,25 +30,25 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .three-dots {
   position: relative;
 
   &.active {
-    background-color: $black-1;
+    background-color: variables.$color-bg-3;
   }
 
   &:hover {
     cursor: pointer;
-    color: $color-white;
+    color: variables.$color-white;
   }
 
   ::v-deep .not-bootstrap-modal-content {
     font-size: 0.75rem;
     border-radius: 0.25rem;
-    color: #d9d9d9;
-    background-color: $color-black;
+    color: variables.$color-light-grey;
+    background-color: variables.$color-black;
     padding: 0.5rem;
     top: 1.2rem;
     right: 0;
@@ -56,7 +63,7 @@ export default {
 
       &:hover {
         cursor: pointer;
-        color: $color-white;
+        color: variables.$color-white;
       }
     }
   }

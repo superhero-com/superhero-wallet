@@ -1,20 +1,19 @@
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { TxBuilder } from '@aeternity/aepp-sdk/es';
+import { TxBuilder } from '@aeternity/aepp-sdk';
 import { testAccount, txParams } from './config';
 import runMigrations from '../../store/migrations';
 
-export const formatDate = (time) =>
-  // TODO: Use the current language from i18n module
-  new Date(+time).toLocaleDateString(navigator.language, {
+// TODO: Use the current language from i18n module
+export const formatDate = (time) => new Date(+time)
+  .toLocaleDateString(navigator.language, {
     year: '2-digit',
     month: '2-digit',
     day: '2-digit',
   });
 
-export const formatTime = (time) =>
-  new Date(+time).toLocaleTimeString(navigator.language, {
-    timeStyle: 'short',
-  });
+export const formatTime = (time) => new Date(+time).toLocaleTimeString(navigator.language, {
+  timeStyle: 'short',
+});
 
 export const getLoginState = async ({
   backedUpSeed,
@@ -42,13 +41,10 @@ export const getLoginState = async ({
 
 export const buildTx = (txtype) => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);
 
-export const deferPromised = (func, ...args) =>
-  new Promise((resolve, reject) =>
-    setTimeout(() => {
-      try {
-        resolve(func(...args));
-      } catch (error) {
-        reject(error);
-      }
-    }),
-  );
+export const deferPromised = (func, ...args) => new Promise((resolve, reject) => setTimeout(() => {
+  try {
+    resolve(func(...args));
+  } catch (error) {
+    reject(error);
+  }
+}));

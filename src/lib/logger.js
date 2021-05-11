@@ -14,8 +14,7 @@ export default class Logger {
       Vue.config.errorHandler = (error, vm, info) => {
         console.error(info);
         console.error(error);
-        if (error.message !== 'Rejected by user')
-          Logger.write({ message: error.toString(), info, type: 'vue-error' });
+        if (error.message !== 'Rejected by user') Logger.write({ message: error.toString(), info, type: 'vue-error' });
       };
 
       Vue.config.warnHandler = (message, vm, info) => {
@@ -32,12 +31,11 @@ export default class Logger {
     window.addEventListener('unhandledrejection', async (promise) => {
       const { stack, message, name } = promise.reason || {};
       if (
-        (typeof promise.reason === 'string' &&
-          promise.reason.includes('CompileError: WebAssembly.instantiate()')) ||
-        name === 'NavigationDuplicated' ||
-        message === 'Rejected by user'
-      )
-        return;
+        (typeof promise.reason === 'string'
+          && promise.reason.includes('CompileError: WebAssembly.instantiate()'))
+        || name === 'NavigationDuplicated'
+        || message === 'Rejected by user'
+      ) return;
       try {
         await Logger.write({
           message: typeof promise.reason === 'string' ? promise.reason : message,

@@ -1,5 +1,8 @@
 <template>
-  <div class="details-item" :class="direction">
+  <div
+    class="details-item"
+    :class="direction"
+  >
     <label v-if="label">{{ label }}</label>
     <slot />
   </div>
@@ -15,13 +18,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use "../../../styles/variables";
+
 .details-item {
   word-break: break-all;
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin: 10px 0;
-  border-bottom: 1px solid #12121b;
+  border-bottom: 1px solid variables.$color-border;
   padding: 10px;
   font-size: 14px;
 

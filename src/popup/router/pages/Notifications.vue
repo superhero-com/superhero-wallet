@@ -1,13 +1,22 @@
 <template>
   <div class="notifications">
     <div class="tabs">
-      <button :class="{ active: direction === '' }" @click="direction = ''">
+      <button
+        :class="{ active: direction === '' }"
+        @click="direction = ''"
+      >
         {{ $t('pages.notifications.all') }}
       </button>
-      <button :class="{ active: direction === 'superhero' }" @click="direction = 'superhero'">
+      <button
+        :class="{ active: direction === 'superhero' }"
+        @click="direction = 'superhero'"
+      >
         {{ $t('pages.notifications.superhero') }}
       </button>
-      <button :class="{ active: direction === 'wallet' }" @click="direction = 'wallet'">
+      <button
+        :class="{ active: direction === 'wallet' }"
+        @click="direction = 'wallet'"
+      >
         {{ $t('pages.notifications.wallet') }}
       </button>
     </div>
@@ -45,21 +54,18 @@ export default {
     filteredNotifications() {
       return [...this.observableNotifications, ...this.notifications]
         .filter(
-          (n) =>
-            this.direction === '' ||
-            (this.direction === 'superhero' && n.type !== 'wallet') ||
-            (this.direction === 'wallet' && n.type === 'wallet'),
+          (n) => this.direction === ''
+            || (this.direction === 'superhero' && n.type !== 'wallet')
+            || (this.direction === 'wallet' && n.type === 'wallet'),
         )
         .filter(
-          (n) =>
-            n.status === 'READ' ||
-            this.notificationSettings
+          (n) => n.status === 'READ'
+            || this.notificationSettings
               .filter((s) => s.checked)
               .map((s) => s.type)
               .includes(n.type),
         )
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .map((n) => (n.chainName ? { ...n, chainName: n.chainName?.[0] } : n));
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     },
   },
   methods: {
@@ -111,7 +117,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .notifications {
   padding: 0;
@@ -120,8 +126,8 @@ export default {
     position: sticky;
     top: 48px;
     z-index: 1;
-    background-color: $color-bg-2;
-    box-shadow: 0 -1px 0 $color-black;
+    background-color: variables.$color-bg-2;
+    box-shadow: 0 -1px 0 variables.$color-black;
     padding: 0 1rem;
     text-align: left;
 
@@ -131,19 +137,19 @@ export default {
       text-align: center;
       font-size: 0.95rem;
       cursor: pointer;
-      color: $color-dark-grey;
+      color: variables.$color-dark-grey;
       font-weight: 600;
       padding: 0.95rem 0;
       margin-left: 1rem;
       border-bottom: 0.2rem solid transparent;
 
       &:hover {
-        color: $color-light-grey;
+        color: variables.$color-light-grey;
       }
 
       &.active {
-        color: $accent-color;
-        border-bottom-color: $accent-color;
+        color: variables.$color-green;
+        border-bottom-color: variables.$color-green;
       }
     }
   }

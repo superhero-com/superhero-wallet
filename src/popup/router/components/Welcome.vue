@@ -20,10 +20,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../../styles/variables';
+@use '../../../styles/variables';
 
 .welcome {
-  max-width: $extension-width;
+  max-width: variables.$extension-width;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0 auto;

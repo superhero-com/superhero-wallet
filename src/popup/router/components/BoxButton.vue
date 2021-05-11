@@ -1,69 +1,54 @@
 <template>
-  <div class="box-button">
-    <RouterLink :to="to">
-      <slot name="icon" />
-      <span class="text">{{ text }}</span>
-    </RouterLink>
-  </div>
+  <RouterLink
+    class="box-button"
+    :to="to"
+  >
+    <slot />
+  </RouterLink>
 </template>
 
 <script>
 export default {
   props: {
-    to: { type: String, required: true },
-    text: { type: String, required: true },
+    to: { type: [String, Object], required: true },
   },
 };
 </script>
 <style lang="scss" scoped>
-@import '../../../styles/variables';
-@import '../../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .box-button {
-  a {
-    width: 88px;
-    height: 64px;
-    background: $color-bg-2;
-    border-radius: 6px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    user-select: none;
-    cursor: pointer;
+  width: 88px;
+  height: 64px;
+  background: variables.$color-bg-2;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: variables.$color-dark-grey;
 
+  @extend %face-sans-15-medium;
+
+  ::v-deep svg {
+    width: 24px;
+    height: 24px;
+    color: variables.$color-light-grey;
+  }
+
+  &:hover {
+    background: rgba(variables.$color-blue, 0.15);
+
+    &,
     ::v-deep svg {
-      width: 24px;
-      height: 24px;
-      opacity: 0.7;
+      color: variables.$color-blue;
     }
+  }
 
-    .text {
-      @extend %face-sans-15-medium;
-
-      color: $color-dark-grey;
-    }
-
-    &:hover {
-      background: rgba($color-blue, 0.15);
-
-      ::v-deep svg {
-        opacity: 1;
-
-        path {
-          fill: $color-blue;
-        }
-      }
-
-      .text {
-        color: $color-blue;
-      }
-    }
-
-    &:active {
-      background-color: rgba($color-blue, 0.1);
-    }
+  &:active {
+    background-color: rgba(variables.$color-blue, 0.1);
   }
 }
 </style>

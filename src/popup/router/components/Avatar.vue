@@ -1,5 +1,10 @@
 <template>
-  <img class="avatar" :src="error ? avatar : profileImage" :class="size" @error="error = true" />
+  <img
+    class="avatar"
+    :src="error ? avatar : profileImage"
+    :class="size"
+    @error="error = true"
+  >
 </template>
 
 <script>
@@ -36,7 +41,7 @@ export default {
 $x-small-size: 20px;
 $small-size: 30px;
 $mid-size: 36px;
-$normal-size: 38px;
+$normal-size: 40px;
 $x-lg-size: 56px;
 $lg-size: 64px;
 
