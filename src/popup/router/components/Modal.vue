@@ -65,6 +65,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
+  min-width: variables.$extension-width;
   background-color: rgba(variables.$color-black, 0.7);
   display: flex;
 
