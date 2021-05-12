@@ -992,7 +992,8 @@
       "initServices": "Initializing services..."
     },
     "popupMessageSign": {
-      "heading": "would like to sign message ",
+      "title": "Sign message",
+      "heading": "would like to sign message.",
       "message": "Message"
     },
     "network": {
