@@ -140,7 +140,9 @@ export const setBalanceLocalStorage = (balance) => {
   localStorage.rxjs = JSON.stringify({ ...JSON.parse(localStorage.rxjs || '{}'), balance });
 };
 
-export const getBalanceLocalStorage = () => (localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : '0');
+export const getBalanceLocalStorage = () => (
+  localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : {}
+);
 
 export const categorizeContractCallTxObject = (transaction) => {
   if (transaction.tx.type !== 'ContractCallTx') return null;

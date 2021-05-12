@@ -40,12 +40,14 @@ export default (store) => {
     })),
     map((balanceAettos) => {
       const balance = aettosToAe(balanceAettos);
-      if (balance !== getBalanceLocalStorage()) {
-        setBalanceLocalStorage(balance);
+      const storageBalance = getBalanceLocalStorage();
+      if (balance !== storageBalance[address]) {
+        storageBalance[address] = balance;
+        setBalanceLocalStorage(storageBalance);
       }
       return new BigNumber(balance);
     }),
-    multicast(new BehaviorSubject(new BigNumber(getBalanceLocalStorage()))),
+    multicast(new BehaviorSubject(new BigNumber(getBalanceLocalStorage()[address] || 0))),
     refCountDelay(1000),
   ));
 
