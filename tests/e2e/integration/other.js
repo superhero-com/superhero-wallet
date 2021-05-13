@@ -1,12 +1,12 @@
 const txs = [
   {
-    hash: 'th_', amount: 0.1, domain: 'localhost:5000', time: Date.now(), type: 'tip',
+    hash: 'th_', amount: 0.1, domain: 'localhost:5000', time: Date.now(), tx: { type: 'tip' },
   },
   {
-    hash: 'th_', amount: 2, domain: 'localhost:8000', time: Date.now(), type: 'tip',
+    hash: 'th_', amount: 2, domain: 'localhost:8000', time: Date.now(), tx: { type: 'tip' },
   },
   {
-    hash: 'th_', amount: 10, domain: 'localhost:8080', time: Date.now(), type: 'tip',
+    hash: 'th_', amount: 10, domain: 'localhost:8080', time: Date.now(), tx: { type: 'tip' },
   },
 ];
 
