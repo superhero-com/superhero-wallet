@@ -254,6 +254,7 @@ export default [
       path: '',
       name: 'payments-send',
       component: PaymentsSend,
+      props: true,
       meta: {
         title: 'payments',
         notRebrand: true,
