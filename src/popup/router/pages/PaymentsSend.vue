@@ -16,7 +16,7 @@
               :type="address"
               data-cy="address"
               :error="form.address.length > 0 && !validAddress"
-              placeholder="ak.. / name.chain"
+              :placeholder="selectedToken ? 'ak..' : 'ak.. / name.chain'"
               size="h-50"
             />
             <div
@@ -32,7 +32,11 @@
             v-show="form.address.length > 0 && !validAddress"
             class="error"
           >
-            {{ $t('pages.send.error') }}
+            {{
+              selectedToken && form.address.length && checkAensName(form.address)
+                ? $t('pages.send.error-name-send')
+                : $t('pages.send.error')
+            }}
           </div>
           <AmountInput
             v-model="form.amount"
@@ -219,7 +223,8 @@ export default {
     ...mapState(['current', 'sdk']),
     ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate']),
     validAddress() {
-      return checkAddress(this.form.address) || checkAensName(this.form.address);
+      return checkAddress(this.form.address)
+        || (!this.selectedToken && checkAensName(this.form.address));
     },
   },
   async mounted() {
@@ -233,6 +238,7 @@ export default {
     this.fetchFee();
   },
   methods: {
+    checkAensName,
     async scan() {
       this.form.address = await this.$store.dispatch('modals/open', {
         name: 'read-qr-code',

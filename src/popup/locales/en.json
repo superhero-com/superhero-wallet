@@ -699,7 +699,8 @@
       "hash": "Transaction Hash",
       "home": "Home",
       "scanAddress": "Scan AE Address",
-      "error": "Invalid AE address or AENS name"
+      "error": "Invalid AE address or AENS name",
+      "error-name-send": "Unfortunately you can only send AEX-9 Tokens to an address"
     },
     "settings": {
       "backToAccount": "Back to account",
