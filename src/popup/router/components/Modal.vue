@@ -28,7 +28,10 @@
           v-if="$slots.footer"
           class="footer"
         >
-          <slot name="footer" />
+          <div class="content">
+            <slot name="footer" />
+          </div>
+          <NodeConnectionStatus v-if="fullScreen" />
         </div>
       </div>
     </div>
@@ -38,9 +41,10 @@
 <script>
 import ButtonPlain from './ButtonPlain';
 import Close from '../../../icons/close.svg?vue-component';
+import NodeConnectionStatus from './NodeConnectionStatus';
 
 export default {
-  components: { ButtonPlain, Close },
+  components: { ButtonPlain, Close, NodeConnectionStatus },
   props: {
     close: Boolean,
     fullScreen: Boolean,
@@ -57,6 +61,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 @use '../../../styles/mixins';
 
 .modal {
@@ -102,7 +107,7 @@ export default {
       text-align: center;
     }
 
-    .footer {
+    .footer .content {
       display: flex;
       justify-content: center;
 
@@ -140,11 +145,32 @@ export default {
       position: sticky;
       bottom: 0;
       width: 100%;
-      padding: 24px 0;
-      padding-bottom: calc(24px + env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
 
       @include mixins.desktop {
         border-radius: 0 0 10px 10px;
+      }
+
+      .content {
+        padding: 24px 0;
+      }
+
+      .node-connection-status {
+        position: static;
+        height: calc(40px + env(safe-area-inset-bottom));
+        margin-top: 4px;
+        padding-bottom: env(safe-area-inset-bottom);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: variables.$color-dark-grey;
+
+        @extend %face-sans-15-medium;
+
+        @include mixins.desktop {
+          border-radius: 0 0 10px 10px;
+        }
       }
     }
   }

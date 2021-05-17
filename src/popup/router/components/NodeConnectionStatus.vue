@@ -2,6 +2,7 @@
   <div
     v-if="nodeStatus && account.address && isLoggedIn"
     :data-cy="nodeStatus !== 'error' ? 'connect-node' : ''"
+    class="node-connection-status"
     :class="`connect-${nodeStatus === 'error' ? 'error' : 'node'}`"
   >
     {{ statuses[nodeStatus] }}
@@ -33,6 +34,7 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/mixins';
 
+.node-connection-status,
 .connect-error,
 .connect-node {
   position: fixed;
