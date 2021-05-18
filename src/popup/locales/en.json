@@ -700,7 +700,8 @@
       "home": "Home",
       "scanAddress": "Scan AE Address",
       "error": "Invalid AE address or AENS name",
-      "error-name-send": "Unfortunately you can only send AEX-9 Tokens to an address"
+      "error-name-send": "Unfortunately you can only send AEX-9 Tokens to an address",
+      "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
     },
     "settings": {
       "backToAccount": "Back to account",

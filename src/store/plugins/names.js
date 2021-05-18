@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import BigNumber from 'bignumber.js';
-import { aettosToAe, fetchJson, postJson } from '../../popup/utils/helper';
+import {
+  aettosToAe, fetchJson, postJson, checkAddress, checkAensName,
+} from '../../popup/utils/helper';
 import { i18n } from './languages';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
 
@@ -146,6 +148,14 @@ export default (store) => {
           body: respondChallenge,
         });
         commit('setDefault', { name, address });
+      },
+      async getAddress({ rootState: { middleware } }, id) {
+        if (checkAddress(id)) return id;
+        if (checkAensName(id)) {
+          const { info: nameEntry } = await middleware.getNameById(id);
+          return nameEntry.pointers?.accountPubkey;
+        }
+        return '';
       },
     },
   });
