@@ -5,7 +5,7 @@
       v-model="displayMode"
       :filters="filters"
     />
-    <ul
+    <div
       class="list"
       data-cy="list"
     >
@@ -15,7 +15,7 @@
         :key="transaction.hash"
         :transaction="transaction"
       />
-    </ul>
+    </div>
     <AnimatedSpinner
       v-if="loading"
       class="spinner"
