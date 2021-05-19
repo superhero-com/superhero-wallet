@@ -2,7 +2,7 @@
   <div class="privacy-policy">
     <h2>{{ $t('pages.privacyPolicy.heading') }}</h2>
     <p><em>The present Privacy Policy is effective since on 9th April 2020.</em></p>
-    <ol>
+    <ol class="policy-list">
       <li class="first">
         <h3><strong>Introduction</strong></h3>
         <p>
@@ -29,41 +29,43 @@
           quality content. The <strong>application</strong> can be downloaded or used from the
           following places:
         </p>
-        <p>
-          1) downloaded as an add-on (extension) to Firefox:
-          <a
-            href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/"
-            target="_blank"
-          >https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/</a>
-          ; to Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <a
-            href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related"
-            target="_blank"
-          >https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related</a>;
-        </p>
-        <p>
-          2) accessed from any Browser at the address:
-          <a
-            href="https://wallet.superhero.com/"
-            target="_blank"
-          >https://wallet.superhero.com/</a>
-          ;
-        </p>
-        <p>
-          3) downloaded from Google Play:&nbsp;&nbsp;&nbsp;&nbsp;
-          <a
-            href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
-            target="_blank"
-          >https://play.google.com/store/apps/details?id=com.superhero.cordova</a>
-          and
-        </p>
-        <p>
-          from App Store:
-          <a
-            href="https://testflight.apple.com/join/3o5r4dQQ"
-            target="_blank"
-          >https://testflight.apple.com/join/3o5r4dQQ</a>.
-        </p>
+        <ol class="download-options">
+          <li>
+            downloaded as an add-on (extension) to Firefox:
+            <a
+              href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/"
+              target="_blank"
+            >https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/</a>
+            ; to Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a
+              href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related"
+              target="_blank"
+            >https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related</a>;
+          </li>
+          <li>
+            accessed from any Browser at the address:
+            <a
+              href="https://wallet.superhero.com/"
+              target="_blank"
+            >https://wallet.superhero.com/</a>
+            ;
+          </li>
+          <li>
+            downloaded from Google Play:&nbsp;&nbsp;&nbsp;&nbsp;
+            <a
+              href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
+              target="_blank"
+            >https://play.google.com/store/apps/details?id=com.superhero.cordova</a>
+            and
+          </li>
+          <li>
+            from App Store:
+            <a
+              href="https://testflight.apple.com/join/3o5r4dQQ"
+              target="_blank"
+            >https://testflight.apple.com/join/3o5r4dQQ</a>.
+          </li>
+        </ol>
         <p>
           If you have any questions regarding this <strong>Policy</strong>, please contact us at
           superherowallet@protonmail.com. If you do not agree to the terms of this
@@ -257,56 +259,54 @@
           We may disclose <strong>USERS&rsquo;</strong> identifiable personal information to third
           parties &ndash; <strong>recipients</strong>, under special circumstances:
         </p>
-        <p>
-          (i)&nbsp;&nbsp; to comply with a legal requirement, judicial proceeding, court order, or
-          legal process served on <strong>Superhero </strong>or its affiliates,
-        </p>
-        <p>(ii)&nbsp;&nbsp; to investigate a possible crime, such as fraud or identity theft;</p>
-        <p>
-          (iii)&nbsp;&nbsp; to Public Authorities in accordance with their legal obligation for the
-          exercise of their official mission, such as tax and customs authorities, financial
-          investigation units, independent administrative authorities, or financial marker
-          authorities responsible for supervision of securities markets;
-        </p>
-        <p>
-          (iv)&nbsp;&nbsp; in connection with the sale, purchase, business transition under any
-          form, merger, dissolution, reorganization, liquidation of
-          <strong>Superhero</strong>; <strong>We</strong> may have to disclose the information
-          <strong>YOU</strong> have given us to the successor, who is part of the transition,
-        </p>
-        <p>
-          (v)&nbsp;&nbsp; when <strong>WE</strong> believe it is necessary to protect the rights,
-          property, or safety of <strong>Superhero </strong>or other persons, or
-        </p>
-        <p>
-          (vi)&nbsp;&nbsp; as otherwise required or permitted by law, including any contractual
-          obligations of
-          <strong>Superhero</strong>.
-        </p>
+        <ol class="sharing-terms">
+          <li>
+            to comply with a legal requirement, judicial proceeding, court order, or
+            legal process served on <strong>Superhero </strong>or its affiliates,
+          </li>
+          <li>
+            to investigate a possible crime, such as fraud or identity theft;
+          </li>
+          <li>
+            to Public Authorities in accordance with their legal obligation for the
+            exercise of their official mission, such as tax and customs authorities, financial
+            investigation units, independent administrative authorities, or financial marker
+            authorities responsible for supervision of securities markets;
+          </li>
+          <li>
+            in connection with the sale, purchase, business transition under any
+            form, merger, dissolution, reorganization, liquidation of
+            <strong>Superhero</strong>; <strong>We</strong> may have to disclose the information
+            <strong>YOU</strong> have given us to the successor, who is part of the transition,
+          </li>
+          <li>
+            when <strong>WE</strong> believe it is necessary to protect the rights,
+            property, or safety of <strong>Superhero </strong>or other persons, or
+          </li>
+          <li>
+            as otherwise required or permitted by law, including any contractual
+            obligations of
+            <strong>Superhero</strong>.
+          </li>
+        </ol>
       </li>
       <li class="eighth">
         <h3><strong>Children and Privacy</strong></h3>
         <ul>
           <li>
-            <p>
-              <strong>Superhero</strong> does not process information of persons under the age of
-              obtaining full legal capacity (in most countries 18 years old) due to the character of
-              the <strong>Wallet</strong>.
-            </p>
+            <strong>Superhero</strong> does not process information of persons under the age of
+            obtaining full legal capacity (in most countries 18 years old) due to the character of
+            the <strong>Wallet</strong>.
           </li>
           <li>
-            <p>
-              <strong>Superhero</strong> will immediately delete any
-              <strong>personal data</strong> referring to persons under the age of full legal
-              capacity if <strong>Superhero</strong> receives such information.
-            </p>
+            <strong>Superhero</strong> will immediately delete any
+            <strong>personal data</strong> referring to persons under the age of full legal
+            capacity if <strong>Superhero</strong> receives such information.
           </li>
           <li>
-            <p>
-              We are not liable in any way if <strong>YOU</strong> provide false information about
-              your age or use the <strong>application</strong> before <strong>YOU</strong> have
-              turned the above-mentioned age.
-            </p>
+            We are not liable in any way if <strong>YOU</strong> provide false information about
+            your age or use the <strong>application</strong> before <strong>YOU</strong> have
+            turned the above-mentioned age.
           </li>
         </ul>
       </li>
@@ -360,8 +360,26 @@
   font-weight: 100;
 
   ol {
-    list-style: upper-roman;
+    list-style: upper-roman inside;
     padding: 10px;
+
+    ol,
+    ul {
+      list-style-position: inside;
+      padding: 0;
+
+      li {
+        margin: 16px 0 16px 3px;
+      }
+
+      &.download-options {
+        list-style-type: decimal;
+      }
+
+      &.sharing-terms {
+        list-style-type: lower-roman;
+      }
+    }
   }
 }
 </style>

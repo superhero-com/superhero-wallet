@@ -7,7 +7,7 @@
       :placeholder="$t('pages.transactions.search')"
     />
     <TransactionFilters v-model="displayMode" />
-    <ul
+    <div
       class="list"
       data-cy="list"
     >
@@ -17,7 +17,7 @@
         :key="transaction.hash"
         :transaction="transaction"
       />
-    </ul>
+    </div>
     <div v-if="!filteredTransactions.length && !loading">
       <p>{{ $t('pages.transactions.noTransactions') }}</p>
     </div>

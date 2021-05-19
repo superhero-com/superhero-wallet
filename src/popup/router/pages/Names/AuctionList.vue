@@ -27,7 +27,7 @@
       {{ $t('pages.names.auctions.bid') }}
     </Button>
 
-    <ul
+    <div
       v-if="activeAuctions.length"
       class="list"
     >
@@ -46,7 +46,7 @@
           {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
         </div>
       </NameRow>
-    </ul>
+    </div>
 
     <p v-else>
       {{ $t('pages.names.auctions.no-auctions') }}

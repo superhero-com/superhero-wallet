@@ -1,7 +1,7 @@
 <template>
   <div class="list">
     <NameListHeader />
-    <ul
+    <div
       v-if="owned.length"
       class="names-list"
     >
@@ -38,7 +38,7 @@
           {{ $t('pages.names.auto-extend') }}
         </CheckBox>
       </NameRow>
-    </ul>
+    </div>
     <p v-else>
       {{ $t('pages.names.list.no-names') }}
     </p>
