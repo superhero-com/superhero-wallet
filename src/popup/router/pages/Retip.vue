@@ -145,7 +145,7 @@ export default {
         this.$store.commit('addPendingTransaction', {
           hash: retipResponse.hash,
           amount,
-          domain: this.tip.url,
+          tipUrl: this.tip.url,
           type: 'tip',
           tx: {
             senderId: this.account.address,
