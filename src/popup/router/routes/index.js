@@ -206,7 +206,7 @@ export default [
     path: '/retip',
     component: Retip,
     meta: {
-      title: 'send-tips',
+      title: 'send-tip',
       notPersist: true,
       notRebrand: true,
     },
