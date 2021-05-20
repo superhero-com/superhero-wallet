@@ -49,10 +49,7 @@ import TokenAmount from '../TokenAmount';
 
 export default {
   components: { Avatar, TruncateMid, TokenAmount },
-  props: {
-    tokenData: { type: Object, default: null },
-    name: { type: String, default: '' },
-  },
+  props: { tokenData: { type: Object, default: null } },
   computed: mapGetters(['formatCurrency']),
 };
 </script>
