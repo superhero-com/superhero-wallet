@@ -126,6 +126,11 @@ export default {
     .section-title {
       padding: 15px 20px;
       border-bottom: 2px solid variables.$color-border;
+
+      .invite-icon {
+        width: 21px;
+        height: 21px;
+      }
     }
   }
 }
