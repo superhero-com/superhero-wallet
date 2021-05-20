@@ -21,15 +21,7 @@ export default {
   computed: mapState({
     transactions: ({ transactions: { pending } }) => pending
       .filter(({ amount, hash }) => !Number.isNaN(+amount) && hash)
-      .map(({
-        microTime, hash, tipUrl, ...tx
-      }) => ({
-        microTime,
-        hash,
-        tipUrl,
-        tx,
-        pending: true,
-      })),
+      .map((tx) => ({ ...tx, pending: true })),
   }),
 };
 </script>

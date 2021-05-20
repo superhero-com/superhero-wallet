@@ -20,7 +20,7 @@ export default {
     commit('setTransactions', []);
   },
   async fetchPendingTransactions({
-    state: { sdk },
+    state: { sdk, transactions },
     getters: {
       account: { address },
     },
@@ -35,7 +35,9 @@ export default {
           return [];
         },
       )
-    ).map((transaction) => ({ ...transaction, pending: true }));
+    )
+      .filter((transaction) => !transactions.pending.find((tx) => tx?.hash === transaction?.hash))
+      .map((transaction) => ({ ...transaction, pending: true }));
   },
   async fetchTransactions({ state, getters, dispatch }, { limit, page, recent }) {
     if (!state.middleware) return [];
