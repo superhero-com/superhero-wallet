@@ -96,12 +96,12 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 @use '../../../styles/typography';
+@use '../../../styles/mixins';
 
 .recent-transactions {
   background: variables.$color-bg-3;
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
   overflow-y: scroll;
 
   .header {
@@ -146,11 +146,14 @@ export default {
 
   .message,
   .spinner {
-    min-height: 174px;
-    padding-bottom: 8px;
     flex-grow: 1;
     display: flex;
     align-items: center;
+    padding-bottom: 8px;
+
+    @include mixins.desktop {
+      padding-bottom: 56px;
+    }
   }
 
   .message > p {
