@@ -42,29 +42,6 @@ p {
   padding: 0 2.5rem;
 }
 
-.button-fixed {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  -webkit-transform: translateX(-50%);
-  -ms-transform: translateX(-50%);
-  width: $extension-width;
-  padding: 10px 0;
-
-  button {
-    margin-bottom: 0;
-  }
-
-  .ae-button.round {
-    padding: 0 0.5rem;
-  }
-
-  button .ae-icon {
-    font-size: 1.5rem;
-  }
-}
-
 .date {
   margin-left: rem(-48px);
   margin-right: rem(-48px);
