@@ -84,7 +84,7 @@ export default {
 .menu-carousel {
   flex: 1;
   z-index: 1;
-  padding: 24px 18px;
+  padding: 24px;
 
   ::v-deep {
     .flickity-button {
@@ -113,10 +113,13 @@ export default {
         display: none;
       }
 
-      &:hover {
-        background: variables.$color-blue-hover-dark;
+      &:hover,
+      &:active {
+        background:
+          linear-gradient(rgba(variables.$color-blue, 0.15), rgba(variables.$color-blue, 0.15)),
+          linear-gradient(variables.$color-black, variables.$color-black);
 
-        .icon {
+        .flickity-button-icon {
           opacity: 1;
 
           path {
@@ -125,8 +128,8 @@ export default {
         }
       }
 
-      &:active {
-        background-color: rgba(variables.$color-blue-hover-dark, 0.1);
+      &:focus {
+        box-shadow: none;
       }
     }
   }
