@@ -11,8 +11,8 @@
 <script>
 export default {
   props: {
-    label: { type: String, required: false },
-    direction: { type: String, required: false },
+    label: { type: String, default: '' },
+    direction: { type: String, default: '' },
   },
 };
 </script>

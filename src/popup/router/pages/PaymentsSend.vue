@@ -192,7 +192,11 @@ export default {
     AlertExclamination,
     InfoGroup,
   },
-  props: ['address', 'redirectstep', 'successtx'],
+  props: {
+    address: { type: String, default: '' },
+    redirectstep: { type: Number, default: 0 },
+    successtx: { type: Object, default: null },
+  },
   data() {
     return {
       step: 1,
@@ -210,14 +214,6 @@ export default {
       },
     };
   },
-  watch: {
-    selectedToken() {
-      this.fetchFee();
-    },
-  },
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balance']);
-  },
   computed: {
     ...mapState('fungibleTokens', ['selectedToken', 'availableTokens']),
     ...mapState(['current', 'sdk']),
@@ -226,6 +222,14 @@ export default {
       return checkAddress(this.form.address)
         || (!this.selectedToken && checkAensName(this.form.address));
     },
+  },
+  watch: {
+    selectedToken() {
+      this.fetchFee();
+    },
+  },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['balance']);
   },
   async mounted() {
     if (this.redirectstep && this.successtx) {

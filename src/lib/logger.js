@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { pick } from 'lodash-es';
 import Vue from 'vue';
 import { detect } from 'detect-browser';

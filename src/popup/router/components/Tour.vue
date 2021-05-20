@@ -1,4 +1,4 @@
-<!-- eslint-disable vue/no-use-v-if-with-v-for-->
+<!-- eslint-disable vue-i18n/no-v-html, vue/no-v-html-->
 <template>
   <div class="tour">
     <v-tour
@@ -9,10 +9,8 @@
       <template slot-scope="tour">
         <transition name="fade">
           <v-step
-            v-for="(step, index) of tour.steps"
-            v-if="tour.currentStep === index"
-            :key="index"
-            :step="step"
+            v-if="tour.steps[tour.currentStep]"
+            :step="tour.steps[tour.currentStep]"
             :previous-step="tour.previousStep"
             :next-step="tour.nextStep"
             :stop="tour.stop"
@@ -22,21 +20,21 @@
             :highlight="tour.highlight"
             :class="tour.currentStep === 2 ? 'tip-step' : ''"
           >
-            <template>
-              <div
-                slot="header"
-                class="step-header"
-              >
-                {{ $t(`onboarding.step_${step.step}.title`) }}
-                <span class="step-info"> ({{ step.step }}/{{ steps.length }}) </span>
-              </div>
-              <div
-                slot="content"
-                class="step-content"
-                v-html="$t(`onboarding.step_${step.step}.content`)"
-              />
-              <div slot="actions" />
-            </template>
+            <div
+              slot="header"
+              class="step-header"
+            >
+              {{ $t(`onboarding.step_${tour.steps[tour.currentStep].step}.title`) }}
+              <span class="step-info">
+                ({{ tour.steps[tour.currentStep].step }}/{{ steps.length }})
+              </span>
+            </div>
+            <div
+              slot="content"
+              class="step-content"
+              v-html="$t(`onboarding.step_${tour.steps[tour.currentStep].step}.content`)"
+            />
+            <div slot="actions" />
           </v-step>
         </transition>
       </template>

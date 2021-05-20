@@ -79,9 +79,6 @@ export default {
   subscriptions() {
     return pick(this.$store.state.observables, ['tokenBalance']);
   },
-  mounted() {
-    if (!this.$store.state.permissions[this.host]) this.$router.replace({ name: 'not-found' });
-  },
   computed: {
     host() {
       return this.$route.params.host;
@@ -98,6 +95,9 @@ export default {
         {},
       ),
     ),
+  },
+  mounted() {
+    if (!this.$store.state.permissions[this.host]) this.$router.replace({ name: 'not-found' });
   },
   methods: {
     ...mapMutations('permissions', ['togglePermission']),

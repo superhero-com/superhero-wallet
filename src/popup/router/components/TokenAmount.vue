@@ -19,11 +19,12 @@ export default {
   props: {
     amount: { type: Number, required: true },
     symbol: { type: String, default: 'AE' },
-    altText: { type: String },
+    altText: { type: String, default: '' },
     hideFiat: { type: Boolean },
     direction: {
       type: String,
       validator: (value) => ['sent', 'received'].includes(value),
+      default: undefined,
     },
     large: { type: Boolean },
   },

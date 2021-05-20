@@ -20,11 +20,11 @@
         <span>{{ $t('pages.names.details.expires-height') }}</span> {{ nameEntry.expiresAt }}
       </li>
       <li
-        v-for="(pointer, key, index) in nameEntry.pointers"
+        v-for="(nameEntryPointer, key, index) in nameEntry.pointers"
         :key="key"
       >
         <span>{{ $t('pages.names.details.pointer', { id: index + 1 }) }}</span>
-        {{ pointer }}
+        {{ nameEntryPointer }}
       </li>
     </ul>
     <InputField

@@ -21,9 +21,9 @@ import Avatar from './Avatar';
 export default {
   components: { Avatar },
   props: {
-    name: String,
-    address: String,
-    to: [String, Object],
+    name: { type: String, default: '' },
+    address: { type: String, default: '' },
+    to: { type: [String, Object], default: null },
   },
 };
 </script>
