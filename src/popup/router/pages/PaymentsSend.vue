@@ -284,6 +284,12 @@ export default {
         ? aeToAettos(this.form.amount)
         : convertToken(this.form.amount, this.selectedToken.decimals);
       const receiver = this.form.address;
+      if (this.account.address === await this.$store.dispatch('names/getAddress', receiver)) {
+        await this.$store.dispatch('modals/open', {
+          name: 'confirm',
+          title: this.$t('pages.send.confirm-sending-to-same-account'),
+        });
+      }
       let errorModalType = '';
       if (receiver === '' || (!checkAddress(receiver) && !checkAensName(receiver))) {
         errorModalType = 'incorrect-address';
