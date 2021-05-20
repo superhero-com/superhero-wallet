@@ -3,7 +3,7 @@
     <RouterLink to="/account">
       <Home />
     </RouterLink>
-    <RouterLink to="/tokens">
+    <RouterLink v-if="UNFINISHED_FEATURES" to="/tokens">
       <Balances />
     </RouterLink>
     <RouterLink to="/payments">
@@ -29,6 +29,9 @@ export default {
   components: {
     Home, Balances, Payments, Tips, Settings,
   },
+  data: () => ({
+    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+  }),
 };
 </script>
 
