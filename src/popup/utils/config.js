@@ -26,6 +26,16 @@ export const popupProps = {
     },
     message: 'test',
   },
+  rawSign: {
+    type: 'rawSign',
+    app: {
+      url: 'http://localhost:5000/aepp/aepp',
+      name: 'AEPP',
+      protocol: 'http:',
+      host: 'localhost',
+    },
+    data: 'test',
+  },
   sign: {
     type: 'sign',
     app: {

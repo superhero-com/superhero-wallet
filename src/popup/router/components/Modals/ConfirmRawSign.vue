@@ -2,6 +2,7 @@
   <Modal
     full-screen
     class="confirm-raw-sign"
+    data-cy="popup-aex2"
   >
     <Overview
       :title="$t('modals.confirm-raw-sign.title')"
@@ -9,7 +10,10 @@
       :recipient="account"
     />
 
-    <div class="warning">
+    <div
+      class="warning"
+      data-cy="warning"
+    >
       <span class="title">
         <Warning class="icon" />
         {{ $t('modals.confirm-raw-sign.warning.title') }}
@@ -26,6 +30,7 @@
     <DetailsItem
       :label="$t('modals.confirm-transaction-sign.data-sign')"
       :value="dataAsString"
+      data-cy="data"
     >
       <CopyButton
         slot="label"
