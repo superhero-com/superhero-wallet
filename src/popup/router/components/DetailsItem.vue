@@ -33,7 +33,7 @@ export default {
   name: 'DetailsItem',
   props: {
     label: { type: String, default: '' },
-    value: { type: [String, Number], default: '' },
+    value: { type: [String, Number, Array], default: '' },
     secondary: { type: String, default: '' },
     small: { type: Boolean },
     highlight: { type: Boolean },

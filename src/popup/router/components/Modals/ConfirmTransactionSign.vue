@@ -47,7 +47,7 @@
         >
           <CopyButton
             slot="label"
-            :value="transaction[field]"
+            :value="JSON.stringify(transaction[field])"
             :message="$t('copied')"
           />
         </DetailsItem>
