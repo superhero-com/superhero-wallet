@@ -2,13 +2,15 @@
   <Modal
     v-if="browserReader || !cameraAllowed"
     close
+    class="qr-code-reader"
     @close="resolve"
   >
     <template slot="header">
+      <QrScan class="icon" />
       {{ title }}
     </template>
 
-    <div class="qr-code-reader">
+    <div class="camera">
       <div v-show="cameraAllowed">
         <video
           v-show="cameraAllowed"
@@ -19,15 +21,26 @@
         {{ $t('modals.qrCodeReader.cameraNotAllowed') }}
       </div>
     </div>
+
+    <template
+      v-if="!cameraAllowed"
+      slot="footer"
+    >
+      <Button @click="cancelReading">
+        {{ $t('ok') }}
+      </Button>
+    </template>
   </Modal>
 </template>
 
 <script>
 import Modal from '../Modal';
+import Button from '../Button';
 import { handleUnknownError } from '../../../utils/helper';
+import QrScan from '../../../../icons/qr-scan.svg?vue-component';
 
 export default {
-  components: { Modal },
+  components: { Modal, Button, QrScan },
   props: {
     title: { type: String, required: true },
     resolve: { type: Function, required: true },
@@ -146,7 +159,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.qr-code-reader video {
-  max-width: 70vw;
+@use "../../../../styles/variables";
+@use "../../../../styles/mixins";
+
+.qr-code-reader {
+  .icon {
+    color: variables.$color-blue;
+  }
+
+  .camera video {
+    max-width: 70vw;
+
+    @include mixins.desktop {
+      max-width: 100%;
+    }
+  }
 }
 </style>

@@ -182,7 +182,7 @@
       }
     },
     "qrCodeReader": {
-      "cameraNotAllowed": "ERROR: you need to grant camera access permisson"
+      "cameraNotAllowed": "You need to grant your device camera access permission to scan QR code. Please allow camera access in your browser settings and try again."
     },
     "cancel": "Cancel",
     "confirm": "Confirm",
@@ -707,7 +707,7 @@
       "from": "From",
       "hash": "Transaction Hash",
       "home": "Home",
-      "scanAddress": "Scan AE Address",
+      "scanAddress": "Scan aeternity address",
       "error": "Invalid AE address or AENS name",
       "error-name-send": "Unfortunately you can only send AEX-9 Tokens to an address",
       "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
