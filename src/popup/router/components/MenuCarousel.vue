@@ -4,7 +4,10 @@
     class="menu-carousel"
     :options="flickityOptions"
   >
-    <BoxButton v-if="UNFINISHED_FEATURES" to="/tokens">
+    <BoxButton
+      v-if="UNFINISHED_FEATURES"
+      to="/tokens"
+    >
       <Balances /> {{ $t('pages.titles.balances') }}
     </BoxButton>
     <BoxButton

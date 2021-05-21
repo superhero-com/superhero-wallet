@@ -3,7 +3,10 @@
     <RouterLink to="/account">
       <Home />
     </RouterLink>
-    <RouterLink v-if="UNFINISHED_FEATURES" to="/tokens">
+    <RouterLink
+      v-if="UNFINISHED_FEATURES"
+      to="/tokens"
+    >
       <Balances />
     </RouterLink>
     <RouterLink to="/payments">
