@@ -8,9 +8,5 @@
   "viewportHeight": 660,
   "numTestsKeptInMemory": 1,
   "chromeWebSecurity": false,
-  "defaultCommandTimeout": 30000,
-  "ignoreTestFiles": [
-    "tip.js",
-    "transaction-details.js"
-  ]
+  "defaultCommandTimeout": 30000
 }
