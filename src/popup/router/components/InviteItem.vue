@@ -172,7 +172,7 @@ export default {
           await this.updateBalance();
         }
       } catch (error) {
-        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', error)) return;
+        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', { error })) return;
         throw error;
       } finally {
         this.$emit('loading', false);
