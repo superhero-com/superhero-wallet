@@ -88,7 +88,7 @@ Cypress.Commands.add('accordionItemShould', (item, cond) => {
     .get('[data-cy=accordion-item]')
     .eq(item)
     .find('[data-cy=accordion-item-open]')
-    .should(cond === 'not.be.visible' ? 'not.exist' : cond);
+    .should(`${cond === 'not.be.visible' ? 'not.' : ''}have.class`, 'rotated');
 });
 
 Cypress.Commands.add('login', (options = {}, route) => {

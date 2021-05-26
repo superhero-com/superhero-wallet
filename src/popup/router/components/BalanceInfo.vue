@@ -19,7 +19,7 @@
           {{ selectedToken ? selectedToken.convertedBalance : balances[idx].toFixed(2) }}
         </span>
         <span class="token-symbol">{{ !selectedToken ? $t('ae') : selectedToken.symbol }}</span>
-        <ExpandedAngleArrow
+        <Arrow
           v-if="UNFINISHED_FEATURES"
           class="expand-arrow"
         />
@@ -39,7 +39,7 @@
         <span class="display-value text-ellipsis">{{
           formatCurrency(balances[idx] * currentCurrencyRate)
         }}</span>
-        <ExpandedAngleArrow class="expand-arrow" />
+        <Arrow class="expand-arrow" />
       </div>
     </div>
   </div>
@@ -48,12 +48,12 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import ExpandedAngleArrow from '../../../icons/expanded-angle-arrow.svg?vue-component';
+import Arrow from '../../../icons/arrow.svg?vue-component';
 import Dropdown from './Dropdown';
 
 export default {
   components: {
-    ExpandedAngleArrow,
+    Arrow,
     Dropdown,
   },
   props: {
@@ -145,6 +145,10 @@ export default {
 
       .token-symbol {
         color: variables.$color-blue;
+
+        + .expand-arrow {
+          vertical-align: middle;
+        }
       }
 
       &.currenciesgroup {
@@ -173,6 +177,8 @@ export default {
       }
 
       .expand-arrow {
+        height: 16px;
+        width: 16px;
         color: variables.$color-dark-grey;
       }
     }

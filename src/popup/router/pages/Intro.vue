@@ -54,9 +54,9 @@
       class="dotstyle dotstyle-fillup"
       data-cy="onboarding-steps"
     >
-      <LeftArrow
+      <Arrow
         v-show="step > 1"
-        class="left-arrow"
+        class="left arrow"
         data-cy="prev"
         @click="step = step - 1"
       />
@@ -80,9 +80,9 @@
           <a />
         </li>
       </ul>
-      <RightArrow
+      <Arrow
         v-show="step < 3"
-        class="right-arrow"
+        class="right arrow"
         data-cy="next"
         @click="step = step + 1"
       />
@@ -153,8 +153,7 @@ import { generateMnemonic } from '@aeternity/bip39';
 import { IN_FRAME } from '../../utils/helper';
 import Claim from '../../../icons/claim.svg?vue-component';
 import Heart from '../../../icons/heart.svg?vue-component';
-import LeftArrow from '../../../icons/left-arrow.svg?vue-component';
-import RightArrow from '../../../icons/right-arrow.svg?vue-component';
+import Arrow from '../../../icons/arrow.svg?vue-component';
 import Button from '../components/Button';
 import ButtonPlain from '../components/ButtonPlain';
 import CheckBox from '../components/CheckBox';
@@ -166,8 +165,7 @@ export default {
     Heart,
     Button,
     ButtonPlain,
-    LeftArrow,
-    RightArrow,
+    Arrow,
     CheckBox,
     Platforms,
   },
@@ -276,16 +274,22 @@ export default {
     margin: 10px auto;
   }
 
-  .left-arrow {
-    left: 20px;
+  .arrow {
+    color: #f1f1f1;
+    height: 24px;
+    width: 24px;
     position: absolute;
     cursor: pointer;
-  }
 
-  .right-arrow {
-    right: 20px;
-    position: absolute;
-    cursor: pointer;
+    &.left {
+      transform: rotate(90deg);
+      left: 20px;
+    }
+
+    &.right {
+      transform: rotate(-90deg);
+      right: 20px;
+    }
   }
 
   .dotstyle {

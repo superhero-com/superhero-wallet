@@ -65,15 +65,9 @@
         data-cy="accordion-item"
         @click="toggleAccordionItem(index)"
       >
-        <ArrowDown
-          v-if="item.open"
-          class="icon"
+        <Arrow
+          :class="['icon', { rotated: item.open }]"
           data-cy="accordion-item-open"
-        />
-        <ArrowRight
-          v-else
-          class="icon"
-          data-cy="accordion-item-close"
         />
         <span>{{ item.title }}</span>
       </p>
@@ -946,14 +940,10 @@
 </template>
 
 <script>
-import ArrowDown from '../../../icons/arrow-down.svg?vue-component';
-import ArrowRight from '../../../icons/arrow-right.svg?vue-component';
+import Arrow from '../../../icons/arrow.svg?vue-component';
 
 export default {
-  components: {
-    ArrowDown,
-    ArrowRight,
-  },
+  components: { Arrow },
   data() {
     return {
       details: Object.entries(this.$t('pages.termsOfService'))
@@ -1003,8 +993,14 @@ export default {
     text-transform: uppercase;
 
     .icon {
-      width: 25px;
-      margin-top: 4px;
+      color: #6a8ebe;
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+
+      &:not(.rotated) {
+        transform: rotate(-90deg);
+      }
     }
 
     span {
