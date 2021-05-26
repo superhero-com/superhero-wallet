@@ -13,7 +13,6 @@
           :options="tokenBalancesOptions"
           :method="changeToken"
           :selected="currentToken"
-          is-custom
         />
         <span class="display-value text-ellipsis">
           {{ selectedToken ? selectedToken.convertedBalance : balances[idx].toFixed(2) }}
@@ -32,7 +31,6 @@
           :options="currenciesOptions"
           :method="switchCurrency"
           :selected="current.currency"
-          is-custom
         />
         <span class="approx-sign">~</span>
         <span class="display-value text-ellipsis">{{
@@ -131,23 +129,13 @@ export default {
         position: absolute;
 
         ::v-deep {
-          .custom > button,
-          .custom > button:active:not(:disabled) {
+          > div > button,
+          > div > button:active:not(:disabled) {
             opacity: 0;
           }
 
-          .custom {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-
-            .list li {
-              white-space: nowrap;
-            }
-          }
-
-          .custom > button,
-          .custom .list .ae-button {
+          > div > button,
+          > div .list .ae-button {
             @extend %face-sans-16-regular;
           }
         }
