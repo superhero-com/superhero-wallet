@@ -82,7 +82,7 @@
 
 <script>
 import { mapState, mapGetters, mapMutations } from 'vuex';
-import Logo from '../../../icons/logo-small.svg?vue-component';
+import Logo from '../../../icons/bnk2-logo.svg?vue-component';
 import Back from '../../../icons/back.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
 import Settings from '../../../icons/notif-settings.svg?vue-component';
@@ -222,8 +222,8 @@ export default {
     }
 
     svg {
-      width: 34px;
-      height: 24px;
+      width: 50px;
+      height: 18px;
       color: variables.$color-blue;
     }
   }

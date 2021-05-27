@@ -93,7 +93,7 @@ export default {
     button {
       padding: 0;
       opacity: 0.33;
-      color: variables.$color-dark-grey
+      color: variables.$color-dark-grey;
       cursor: pointer;
 
       svg {

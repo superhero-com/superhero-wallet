@@ -6,7 +6,7 @@
     <div class="first-row">
       <img
         v-if="wallet"
-        src="../../../icons/logo-small.svg"
+        src="../../../icons/bnk2-logo.svg"
       >
       <Avatar
         v-else
