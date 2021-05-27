@@ -13,7 +13,6 @@
         <Arrow v-if="right" />
       </button>
     </div>
-    <Triangle class="triangle" />
   </div>
 </template>
 
@@ -54,15 +53,17 @@ export default {
 .account-card {
   display: flex;
   flex-direction: column;
-  height: 169px;
+  height: 180px;
   width: 312px;
-  border-radius: 6px;
-  background-image: url('../../../icons/account-card/account-bg-pattern.svg');
-  background-color: #0a0e16;
-  background-position: calc(var(--shift) * 15px) calc(var(--shift) * 20px);
+  border-radius: 24px;
+  background-image: url('../../../icons/account-card/account-card.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 0px 4px 16px rgb(0 0 0 / 10%);
 
   &.subaccount {
-    background-image: url('../../../icons/account-card/subaccount-bg-pattern.svg');
+    background-image: url('../../../icons/account-card/account-card.png');
     background-color: variables.$color-bg-1;
 
     &.first-subaccount {
@@ -76,19 +77,11 @@ export default {
 
   .account-info {
     padding: 8px 8px 0 8px;
+
   }
 
   .balance-info {
     margin-bottom: 0;
-  }
-
-  .triangle {
-    height: 23px;
-    width: 23px;
-    border-radius: 0 0 5px 0;
-    align-self: flex-end;
-    margin-top: -14px;
-    color: var(--color);
   }
 
   .arrows {
@@ -100,7 +93,7 @@ export default {
     button {
       padding: 0;
       opacity: 0.33;
-      color: variables.$color-white;
+      color: variables.$color-dark-grey
       cursor: pointer;
 
       svg {
