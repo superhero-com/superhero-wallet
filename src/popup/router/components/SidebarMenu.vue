@@ -234,8 +234,10 @@ export default {
 
       &:hover {
         border-radius: 5px;
-        background: rgba(17, 97, 254, 0.15);
+        background: variables.$color-bg-1;
         color: variables.$color-blue;
+        border-radius: 12px;
+        margin: 0px 5px;
 
         a svg {
           opacity: 1;
@@ -244,7 +246,7 @@ export default {
 
       &:active {
         border-radius: 5px;
-        background: rgba(17, 97, 254, 0.05);
+        background: variables.$color-bg-1;
       }
 
       a {
@@ -255,7 +257,7 @@ export default {
         align-items: center;
         color: inherit;
 
-        @extend %face-sans-16-medium;
+        @extend %face-sans-12-regular;
 
         svg {
           width: 24px;

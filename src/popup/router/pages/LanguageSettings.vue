@@ -97,7 +97,7 @@ export default {
     button {
       font-size: 14px;
       width: 100%;
-      color: variables.$color-white;
+      color: variables.$color-dark-grey;
       margin: 0;
       padding: 0 1rem;
       white-space: nowrap;

@@ -35,6 +35,7 @@
 
     &:hover {
       background-color: variables.$color-border;
+      color: variables.$color-white;
     }
 
     &.router-link-active {

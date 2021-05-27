@@ -44,8 +44,9 @@ export default {
 
 .tab-bar {
   display: flex;
-  background-color: variables.$color-bg-3;
-  border-bottom: env(safe-area-inset-bottom) solid variables.$color-bg-2;
+  background-color: variables.$color-white;
+  border-radius: 20px 20px 0px 0px;
+  ssborder: 1px solid #E4E4E4;
 
   > a {
     $sideBorderWidth: calc(1px - min(env(safe-area-inset-bottom), 1px));
@@ -58,7 +59,7 @@ export default {
     border-radius: 2px 2px 0 0;
     background-color: variables.$color-bg-2;
     margin: 1px 1px $sideBorderWidth;
-    color: variables.$color-white;
+    color: variables.$color-light-grey;
 
     &:first-child {
       margin-left: $sideBorderWidth;
@@ -77,7 +78,7 @@ export default {
     }
 
     &:hover {
-      background-color: variables.$color-hover;
+      background-color: variables.$color-bg-1;
     }
 
     &:active {

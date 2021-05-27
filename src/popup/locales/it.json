@@ -201,7 +201,7 @@
       "backup": "backup",
       "updateExtension": "New version available! Please update your extension.",
       "updateAvailable": "New version in store available!",
-      "claim-name": "Claim your .chain name"
+      "claim-name": "Register a name"
     },
     "claim": {
       "claim": "Claim tips",
@@ -468,7 +468,7 @@
       "heading": "Ricevere gettoni AE",
       "copy": "copia",
       "home": "Home",
-      "transferExchange": "Swap crypto for AE tokens",
+      "transferExchange": "Top Up Account",
       "purchase": "Buy AE tokens"
     },
     "securitySettings": {

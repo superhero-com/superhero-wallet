@@ -29,14 +29,16 @@ export default {
   background-color: variables.$color-bg-3;
 
   button {
-    font-size: 16px;
+    font-size: 10px;
     padding: 5.5px 0;
     margin-right: 17px;
     text-decoration: none;
-    color: variables.$color-dark-grey;
+    color: variables.$color-light-grey;
     display: inline-block;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 
-    @extend %face-sans-15-medium;
+    @extend %face-sans-10-medium;
 
     &:hover {
       color: variables.$color-light-grey;

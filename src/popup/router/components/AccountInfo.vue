@@ -231,7 +231,7 @@ export default {
     }
 
     .account-name {
-      color: variables.$color-white;
+      color: variables.$color-dark-grey;
       margin-right: auto;
       display: flex;
       flex-direction: column;
@@ -339,7 +339,7 @@ export default {
     @extend %face-sans-10-medium;
 
     &:hover {
-      color: variables.$color-white;
+      color: variables.$color-dark-grey;
     }
   }
 

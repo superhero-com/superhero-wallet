@@ -56,7 +56,7 @@ export default {
 .token-amount {
   @extend %face-sans-14-regular;
 
-  color: variables.$color-white;
+  color: variables.$color-dark-grey;
   line-height: 24px;
 
   .symbol {

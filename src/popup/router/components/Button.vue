@@ -66,19 +66,25 @@ export default {
 @use '../../../styles/typography';
 
 .button {
-  display: block;
-  position: relative;
-  text-decoration: none;
-  width: 280px;
-  border-radius: 6px;
-
-  @extend %face-sans-16-bold;
-
-  padding: 0;
-  margin: 8px auto;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  min-width: 124px;
+  height: 56px;
+  padding: 0 24px;
+  border-radius: 16px;
+  @extend %face-sans-16-regular;
+  -webkit-transition: all .2s;
+  -o-transition: all .2s;
+  transition: all .2s;
   color: variables.$color-white;
-  height: 40px;
-  line-height: 40px;
+  text-decoration: none;
 
   &.primary {
     background-color: variables.$color-blue;

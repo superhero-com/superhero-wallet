@@ -198,7 +198,7 @@ export default {
       @extend %face-sans-16-medium;
 
       line-height: 24px;
-      color: variables.$color-white;
+      color: variables.$color-dark-grey;
     }
   }
 

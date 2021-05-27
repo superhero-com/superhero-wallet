@@ -158,7 +158,7 @@ export default {
 @use '../../../styles/variables';
 
 .transactions .list {
-  background: variables.$color-black;
+  background: variables.$color-bg-2;
   padding: 0;
   margin: 0;
 }

@@ -1,7 +1,7 @@
 <svg id="Group_933" data-name="Group 933" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 38.726 40">
   <defs>
     <linearGradient id="linear-gradient" x1="0.873" y1="0.155" x2="0.094" y2="0.931" gradientUnits="objectBoundingBox">
-      <stop offset="0.05" stop-color="#fff44f"/>
+      <stop offset="0.05" stop-color="#11142D44f"/>
       <stop offset="0.37" stop-color="#ff980e"/>
       <stop offset="0.53" stop-color="#ff3647"/>
       <stop offset="0.7" stop-color="#e31587"/>
@@ -21,7 +21,7 @@
       <stop offset="0.53" stop-color="#ff3750" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="radial-gradient-3" cx="0.48" cy="-0.12" r="1.4" gradientUnits="objectBoundingBox">
-      <stop offset="0.13" stop-color="#fff44f"/>
+      <stop offset="0.13" stop-color="#11142D44f"/>
       <stop offset="0.53" stop-color="#ff980e"/>
     </radialGradient>
     <radialGradient id="radial-gradient-4" cx="0.228" cy="1.101" r="1" gradientUnits="objectBoundingBox">
@@ -38,30 +38,30 @@
       <stop offset="0.79" stop-color="#ff7139"/>
     </radialGradient>
     <radialGradient id="radial-gradient-7" cx="0.84" cy="-0.41" r="1.8" gradientUnits="objectBoundingBox">
-      <stop offset="0.11" stop-color="#fff44f"/>
+      <stop offset="0.11" stop-color="#11142D44f"/>
       <stop offset="0.46" stop-color="#ff980e"/>
       <stop offset="0.72" stop-color="#ff3647"/>
       <stop offset="0.9" stop-color="#e31587"/>
     </radialGradient>
     <radialGradient id="radial-gradient-8" cx="0.161" cy="-0.186" r="3.488" gradientTransform="matrix(0.105, 0.467, -0.995, 0.049, -0.046, -0.255)" gradientUnits="objectBoundingBox">
-      <stop offset="0" stop-color="#fff44f"/>
+      <stop offset="0" stop-color="#11142D44f"/>
       <stop offset="0.3" stop-color="#ff980e"/>
       <stop offset="0.57" stop-color="#ff3647"/>
       <stop offset="0.74" stop-color="#e31587"/>
     </radialGradient>
     <radialGradient id="radial-gradient-9" cx="0.189" cy="-0.425" r="2.384" gradientUnits="objectBoundingBox">
-      <stop offset="0.14" stop-color="#fff44f"/>
+      <stop offset="0.14" stop-color="#11142D44f"/>
       <stop offset="0.48" stop-color="#ff980e"/>
       <stop offset="0.66" stop-color="#ff3647"/>
       <stop offset="0.9" stop-color="#e31587"/>
     </radialGradient>
     <radialGradient id="radial-gradient-10" cx="1.593" cy="-0.447" r="3.131" gradientUnits="objectBoundingBox">
-      <stop offset="0.09" stop-color="#fff44f"/>
+      <stop offset="0.09" stop-color="#11142D44f"/>
       <stop offset="0.63" stop-color="#ff980e"/>
     </radialGradient>
     <linearGradient id="linear-gradient-2" x1="0.8" y1="0.14" x2="0.18" y2="0.84" gradientUnits="objectBoundingBox">
-      <stop offset="0.17" stop-color="#fff44f" stop-opacity="0.8"/>
-      <stop offset="0.6" stop-color="#fff44f" stop-opacity="0"/>
+      <stop offset="0.17" stop-color="#11142D44f" stop-opacity="0.8"/>
+      <stop offset="0.6" stop-color="#11142D44f" stop-opacity="0"/>
     </linearGradient>
   </defs>
   <g id="_9949a9187a4da9ef27e57a28967a2440" data-name="9949a9187a4da9ef27e57a28967a2440" transform="translate(0 0)">

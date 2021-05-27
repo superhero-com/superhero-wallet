@@ -175,7 +175,7 @@ body {
 
   @extend %face-sans-16-regular;
 
-  color: variables.$color-white;
+  color: variables.$color-dark-grey;
 
   &.show-sidebar {
     overflow-y: hidden;
@@ -192,7 +192,7 @@ body {
   }
 
   &.show-header {
-    background: variables.$color-bg-3;
+    background: variables.$color-bg-2;
 
     .main {
       padding-top: 48px;

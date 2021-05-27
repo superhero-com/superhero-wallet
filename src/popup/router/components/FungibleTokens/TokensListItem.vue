@@ -58,7 +58,7 @@ export default {
 @use '../../../../styles/variables';
 
 .tokens-list-item {
-  background-color: variables.$color-bg-1;
+  background-color: variables.$color-white;
   margin-bottom: 3px;
   height: 50px;
   display: flex;
@@ -74,6 +74,7 @@ export default {
   .details {
     margin-left: 7px;
     flex-grow: 1;
+    color: variables.$color-dark-grey;
 
     .truncate-mid {
       max-width: 215px;

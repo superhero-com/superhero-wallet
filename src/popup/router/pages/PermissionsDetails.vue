@@ -121,7 +121,7 @@ export default {
 .permissions-details {
   font-size: 15px;
   text-align: left;
-  color: variables.$color-white;
+  color: variables.$color-dark-grey;
 
   p {
     text-align: center;

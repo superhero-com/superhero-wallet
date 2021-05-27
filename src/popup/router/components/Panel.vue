@@ -11,7 +11,7 @@
   padding: 0;
   background: variables.$color-bg-1;
   box-shadow: 0 0 8px rgba(variables.$color-blue, 0.15);
-  border-radius: 4px;
+  border-radius: 8px;
   margin-top: 30px;
 }
 </style>

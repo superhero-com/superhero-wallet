@@ -57,16 +57,18 @@ export default {
 
 .transaction-item {
   padding: 0 16px;
-  margin: 1px 0;
-  border-radius: 4px;
-  background: variables.$color-bg-1;
+  margin: 1px 16px;
+  border-radius: 12px;
+  background: variables.$color-white;
   display: flex;
   justify-content: space-between;
   align-items: center;
   text-decoration: none;
 
   &:hover {
-    background: variables.$color-hover;
+    border: 2px solid variables.$color-blue;
+    box-sizing: border-box;
+    border-radius: 12px;
   }
 
   .left {

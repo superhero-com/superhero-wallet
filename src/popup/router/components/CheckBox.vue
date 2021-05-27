@@ -47,7 +47,7 @@ export default {
 
   &:active .checkmark {
     border-color: variables.$color-border-hover;
-    background-color: variables.$color-black;
+    background-color: variables.$color-bg-3;
   }
 
   input {
@@ -60,7 +60,6 @@ export default {
 
   .checkmark {
     background-color: variables.$color-black;
-    border: 1.3px solid variables.$color-border;
     border-radius: 2px;
     height: 20px;
     width: 20px;

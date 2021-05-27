@@ -12,8 +12,8 @@
   top: 48px;
   top: calc(48px + env(safe-area-inset-top));
   z-index: 1;
-  box-shadow: rgba(variables.$color-border, 0.5) 0 1px;
   border-radius: 0 0 10px 10px;
-  background: linear-gradient(180deg, variables.$color-bg-3 0%, variables.$color-black 100%);
+  background: variables.$color-white;
+  box-shadow: 0px 8px 32px rgb(0 0 0 / 10%);
 }
 </style>

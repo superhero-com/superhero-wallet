@@ -19,7 +19,7 @@
     "start": "npm run build:tests && serve -l 4999",
     "start:ci": "serve",
     "start:tests": "cypress run",
-    "gen:cordova-resources": "cordova-res --icon-background-source '#090909'",
+    "gen:cordova-resources": "cordova-res --icon-background-source '#fff'",
     "build:Testnet": "cross-env NETWORK=Testnet npm run build",
     "watch:dev:Testnet": "cross-env NETWORK=Testnet npm run watch:dev",
     "watch:tests": "cross-env NETWORK=Testnet RUNNING_IN_TESTS=true npm run watch:dev",

@@ -63,26 +63,27 @@ export default {
     margin: 8px 0;
     display: block;
 
-    @extend %face-sans-15-medium;
-
-    color: variables.$color-dark-grey;
+    @extend %face-sans-12-medium;
+    text-transform: uppercase;
+    color: variables.$color-light-grey;
     text-align: left;
   }
 
   .wrapper {
     display: flex;
     align-items: center;
-    padding: 8px 16px;
+    padding: 8px 8px;
     height: 40px;
-    background-color: variables.$color-bg-2;
+    background-color: variables.$color-bg-1;
     border: 1px solid transparent;
     border-left: 0;
     border-right: 0;
     border-radius: 6px;
+    margin: 0 15px;
 
     &:focus-within {
-      border-color: variables.$color-blue;
-      background-color: variables.$color-black;
+    border: 2px solid variables.$color-blue;
+    border-radius: 12px;
     }
 
     &.error {

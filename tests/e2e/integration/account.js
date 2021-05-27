@@ -19,7 +19,7 @@ describe('Test cases for Account Page', () => {
 
       .get('[data-cy=claim-name]')
       .should('be.visible')
-      .contains('Claim your .chain name');
+      .contains('Register a name');
   });
 
   it('Check Claim-Name, Tip, View-All-Tancastions, Dropdown Buttons And Back to Account', () => {

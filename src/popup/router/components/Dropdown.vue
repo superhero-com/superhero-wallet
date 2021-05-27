@@ -178,7 +178,7 @@ export default {
   button {
     font-size: 15px;
     width: 100%;
-    color: variables.$color-white;
+    color: variables.$color-dark-grey;
     text-align: left;
     margin: 0;
     padding: 0 5px;
@@ -193,7 +193,7 @@ export default {
     overflow: hidden;
     transition: all 0.3s ease-in-out;
     background: variables.$color-bg-3;
-    border: 1px solid variables.$color-blue;
+    border: 2px solid variables.$color-blue;
     border-radius: 5px;
     scrollbar-width: none;
   }

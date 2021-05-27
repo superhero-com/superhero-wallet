@@ -116,7 +116,7 @@ export default {
   height: 55px;
   margin-bottom: 15px;
   display: flex;
-  color: variables.$color-white;
+  color: variables.$color-dark-grey;
 
   .balance-wrapper {
     margin: 0 auto;

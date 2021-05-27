@@ -90,7 +90,7 @@ export default {
     }
 
     .header {
-      color: variables.$color-white;
+      color: variables.$color-dark-grey;
       font-size: 17px;
       font-weight: 500;
       margin-bottom: 25px;
@@ -100,7 +100,7 @@ export default {
 
     .body {
       margin-bottom: 40px;
-      color: variables.$color-white;
+      color: variables.$color-dark-grey;
       font-size: 14px;
       word-break: break-word;
       text-align: center;

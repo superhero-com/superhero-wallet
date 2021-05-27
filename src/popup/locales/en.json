@@ -264,7 +264,7 @@
       "home": "Wallet Home",
       "donate-error": "Donate Data",
       "address": "Send Address",
-      "tokens-preview": "Tokens",
+      "tokens-preview": "Balance",
       "deploy-token": "Deploy token",
       "add-token": "Add token",
       "mint-burn-token": "Mint/Burn token",
@@ -295,7 +295,7 @@
       "backup": "backup",
       "updateExtension": "New version available! Please update your extension.",
       "updateAvailable": "New version is available in the store!",
-      "claim-name": "Claim your .chain name",
+      "claim-name": "Register a name",
       "address-copied": "Address copied"
     },
     "accounts": {
@@ -430,7 +430,7 @@
       "validContractAddressError": "Valid token contract address",
       "symbolBetween1and12": "Symbol between 1 and 12 characters",
       "numberBetween0and36": "Number between 0 and 36",
-      "token": "Token",
+      "token": "Accounts",
       "balance": "Balance"
     },
     "fungible-tokens": {
@@ -442,10 +442,10 @@
       "allowances-info": "Give or take an allowance",
       "mint": "Mint/Burn token",
       "mint-info": "This allows you to mint or burn token amount",
-      "tokens": "Tokens",
-      "searchPlaceholder": "Search by token name or community...",
+      "tokens": "Currencies",
+      "searchPlaceholder": "Search by currency name",
       "all": "All",
-      "myTokens": "My Tokens",
+      "myTokens": "My Balances",
       "mcap": "MCap",
       "price": "Price",
       "not-available": "N/A",
@@ -456,8 +456,8 @@
       "send": "Send",
       "receive": "Receive",
       "tip": "Tip",
-      "token-details": "Token Details",
-      "token-description": "Token Description",
+      "token-details": "Currency Details",
+      "token-description": "Currency Description",
       "symbol": "Symbol",
       "community": "Community",
       "decimals": "Decimals",
@@ -474,8 +474,8 @@
       "chart": "Chart"
     },
     "deploy-token": {
-      "name": "Token name",
-      "symbol": "Token symbol",
+      "name": "Currency",
+      "symbol": "Currency symbol",
       "initial-supply": "Token initial supply",
       "decimals": "Token decimals",
       "registry-fee": "Include token in global TokenRegistry (tx fees apply)",
@@ -631,7 +631,7 @@
       "heading": "To receive tokens, provide this address or have the payor scan the QR code below.",
       "copy": "Copy",
       "home": "Home",
-      "transferExchange": "Swap crypto for AE tokens",
+      "transferExchange": "Top Up Account",
       "purchase": "Buy AE tokens"
     },
     "securitySettings": {

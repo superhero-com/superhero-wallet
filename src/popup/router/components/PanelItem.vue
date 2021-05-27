@@ -41,7 +41,7 @@ export default {
   width: 100%;
   display: block;
   font-size: 14px;
-  border-bottom: 1px solid variables.$color-light-grey;
+  border-bottom: 1px solid variables.$color-border;
   text-align: left;
   border-left: 2px solid transparent;
 
@@ -51,15 +51,13 @@ export default {
 
   &:hover {
     border-left: 2px solid variables.$color-blue;
-    background: rgba(variables.$color-dark-grey, 0.5);
-
     .arrow-right {
       right: 20px;
     }
   }
 
   .panel-item-title {
-    color: white;
+    color: variables.$color-dark-grey;
     font-size: 18px;
   }
 
@@ -77,7 +75,7 @@ export default {
 
   .panel-item-arrow-right {
     transition: 0.4s;
-    border: solid white;
+    border: solid variables.$color-dark-grey;
     border-width: 0 4px 4px 0;
     display: inline-block;
     padding: 10px;

@@ -130,7 +130,7 @@ export default {
 
       .address {
         font-size: 0.55rem;
-        color: variables.$color-white;
+        color: variables.$color-light-grey;
 
         &.wallet {
           font-size: inherit;
