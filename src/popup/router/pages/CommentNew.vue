@@ -34,17 +34,22 @@ export default {
     ...mapState(['sdk']),
     ...mapGetters(['tippingSupported']),
   },
-  async mounted() {
-    this.loading = true;
-    this.id = this.$route.query.id;
-    if (this.$route.query.parentId) this.parentId = +this.$route.query.parentId;
-    this.text = this.$route.query.text;
-    if (!this.id || !this.text) {
-      this.$router.push('/account');
-      throw new Error('CommentNew: Invalid arguments');
-    }
-    await this.$watchUntilTruly(() => this.sdk);
-    this.loading = false;
+  watch: {
+    $route: {
+      immediate: true,
+      async handler({ query }) {
+        this.loading = true;
+        this.id = query.id;
+        if (query.parentId) this.parentId = +query.parentId;
+        this.text = query.text;
+        if (!this.id || !this.text) {
+          this.$router.push('/account');
+          throw new Error('CommentNew: Invalid arguments');
+        }
+        await this.$watchUntilTruly(() => this.sdk);
+        this.loading = false;
+      },
+    },
   },
   methods: {
     async sendComment() {
@@ -57,7 +62,6 @@ export default {
           this.parentId,
         ]);
         this.openCallbackOrGoHome(true);
-        this.$router.push('/account');
       } catch (e) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
         e.payload = pick(this, ['id', 'parentId', 'text']);
