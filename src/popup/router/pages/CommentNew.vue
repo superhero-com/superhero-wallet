@@ -57,6 +57,7 @@ export default {
           this.parentId,
         ]);
         this.openCallbackOrGoHome(true);
+        this.$router.push('/account');
       } catch (e) {
         this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
         e.payload = pick(this, ['id', 'parentId', 'text']);
