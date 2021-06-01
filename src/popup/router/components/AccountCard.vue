@@ -6,12 +6,12 @@
     <AccountInfo v-bind="$attrs" />
     <BalanceInfo v-bind="$attrs" />
     <div class="arrows">
-      <button @click="$emit('left')">
+      <ButtonPlain @click="$emit('left')">
         <Arrow v-if="left" />
-      </button>
-      <button @click="$emit('right')">
+      </ButtonPlain>
+      <ButtonPlain @click="$emit('right')">
         <Arrow v-if="right" />
-      </button>
+      </ButtonPlain>
     </div>
     <Triangle class="triangle" />
   </div>
@@ -20,6 +20,7 @@
 <script>
 import AccountInfo from './AccountInfo';
 import BalanceInfo from './BalanceInfo';
+import ButtonPlain from './ButtonPlain';
 import Triangle from '../../../icons/account-card/card-bg-triangle.svg?vue-component';
 import Arrow from '../../../icons/account-card/arrow.svg?vue-component';
 
@@ -27,6 +28,7 @@ export default {
   components: {
     AccountInfo,
     BalanceInfo,
+    ButtonPlain,
     Triangle,
     Arrow,
   },
@@ -97,11 +99,9 @@ export default {
     display: flex;
     justify-content: space-between;
 
-    button {
-      padding: 0;
+    .button-plain {
       opacity: 0.33;
       color: variables.$color-white;
-      cursor: pointer;
 
       svg {
         height: 40px;

@@ -1,5 +1,5 @@
 <template>
-  <button
+  <ButtonPlain
     v-clipboard:success="copy"
     v-clipboard:copy="value"
     class="copy-button"
@@ -9,15 +9,16 @@
       v-if="copied"
       class="message"
     >{{ message }}</span>
-  </button>
+  </ButtonPlain>
 </template>
 
 <script>
+import ButtonPlain from './ButtonPlain';
 import CopyIcon from '../../../icons/copy.svg?vue-component';
 
 export default {
   name: 'CopyButton',
-  components: { CopyIcon },
+  components: { ButtonPlain, CopyIcon },
   props: {
     value: { type: String, required: true },
     message: { type: String, required: true },
@@ -39,10 +40,8 @@ export default {
 @use '../../../styles/typography';
 
 .copy-button {
-  padding: 0;
   display: inline-flex;
   align-items: center;
-  cursor: pointer;
 
   svg {
     width: 24px;

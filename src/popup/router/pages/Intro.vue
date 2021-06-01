@@ -86,14 +86,14 @@
         data-cy="next"
         @click="step = step + 1"
       />
-      <button
+      <ButtonPlain
         v-show="step < 3"
         class="skip-button"
         data-cy="skip"
         @click="step = 3"
       >
         {{ $t('pages.intro.skip') }}
-      </button>
+      </ButtonPlain>
       <Button
         v-if="step === 3"
         data-cy="generate-wallet"
@@ -156,6 +156,7 @@ import Heart from '../../../icons/heart.svg?vue-component';
 import LeftArrow from '../../../icons/left-arrow.svg?vue-component';
 import RightArrow from '../../../icons/right-arrow.svg?vue-component';
 import Button from '../components/Button';
+import ButtonPlain from '../components/ButtonPlain';
 import CheckBox from '../components/CheckBox';
 import Platforms from '../components/Platforms';
 
@@ -164,6 +165,7 @@ export default {
     Claim,
     Heart,
     Button,
+    ButtonPlain,
     LeftArrow,
     RightArrow,
     CheckBox,
