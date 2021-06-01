@@ -23,9 +23,9 @@
 <script>
 export default {
   props: {
-    title: String,
-    info: String,
-    to: [String, Object],
+    title: { type: String, required: true },
+    info: { type: String, default: '' },
+    to: { type: [String, Object], default: null },
   },
 };
 </script>

@@ -40,7 +40,6 @@
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import tipping from 'tipping-contract/util/tippingContractUtil';
 import { MAGNITUDE, calculateFee } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
 import deeplinkApi from '../../../mixins/deeplinkApi';
@@ -112,9 +111,7 @@ export default {
     await this.$watchUntilTruly(() => this.tippingV1);
     const tipId = this.$route.query.id;
     if (!tipId) throw new Error('"id" param is missed');
-    const state = await this.tippingContract.methods.get_state();
-    const tipsAndRetips = await tipping.getTipsRetips(state);
-    this.tip = tipsAndRetips.tips.find(({ id }) => id === tipId);
+    this.tip = await this.$store.dispatch('getCacheTip', tipId);
     this.loading = false;
   },
   methods: {
@@ -145,7 +142,7 @@ export default {
         this.$store.commit('addPendingTransaction', {
           hash: retipResponse.hash,
           amount,
-          domain: this.tip.url,
+          tipUrl: this.tip.url,
           type: 'tip',
           tx: {
             senderId: this.account.address,

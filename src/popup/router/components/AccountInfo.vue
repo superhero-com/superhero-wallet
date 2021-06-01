@@ -35,6 +35,7 @@
       />
       <div
         class="account-name"
+        :class="{ long: !UNFINISHED_FEATURES }"
         data-cy="account-name"
       >
         <a
@@ -239,7 +240,7 @@ export default {
       a .chainname {
         @extend %face-sans-17-medium;
 
-        width: 220px;
+        max-width: 150px;
         line-height: 16px;
         color: variables.$color-white;
 
@@ -253,10 +254,17 @@ export default {
 
       a {
         text-decoration: none;
-        width: 220px;
+        max-width: 150px;
 
         &:hover {
           text-decoration: underline;
+        }
+      }
+
+      &.long {
+        a .chainname,
+        a {
+          max-width: 220px;
         }
       }
 

@@ -13,7 +13,7 @@
         <ReceiveIcon /> {{ $t('pages.titles.receive') }}
       </RouterLink>
     </Tabs>
-    <RouterView v-bind="$route.params" />
+    <RouterView />
   </div>
 </template>
 

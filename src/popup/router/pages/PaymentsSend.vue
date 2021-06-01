@@ -16,7 +16,7 @@
               :type="address"
               data-cy="address"
               :error="form.address.length > 0 && !validAddress"
-              placeholder="ak.. / name.chain"
+              :placeholder="selectedToken ? 'ak..' : 'ak.. / name.chain'"
               size="h-50"
             />
             <div
@@ -32,7 +32,11 @@
             v-show="form.address.length > 0 && !validAddress"
             class="error"
           >
-            {{ $t('pages.send.error') }}
+            {{
+              selectedToken && form.address.length && checkAensName(form.address)
+                ? $t('pages.send.error-name-send')
+                : $t('pages.send.error')
+            }}
           </div>
           <AmountInput
             v-model="form.amount"
@@ -188,7 +192,11 @@ export default {
     AlertExclamination,
     InfoGroup,
   },
-  props: ['address', 'redirectstep', 'successtx'],
+  props: {
+    address: { type: String, default: '' },
+    redirectstep: { type: Number, default: 0 },
+    successtx: { type: Object, default: null },
+  },
   data() {
     return {
       step: 1,
@@ -206,6 +214,15 @@ export default {
       },
     };
   },
+  computed: {
+    ...mapState('fungibleTokens', ['selectedToken', 'availableTokens']),
+    ...mapState(['current', 'sdk']),
+    ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate']),
+    validAddress() {
+      return checkAddress(this.form.address)
+        || (!this.selectedToken && checkAensName(this.form.address));
+    },
+  },
   watch: {
     selectedToken() {
       this.fetchFee();
@@ -213,14 +230,6 @@ export default {
   },
   subscriptions() {
     return pick(this.$store.state.observables, ['balance']);
-  },
-  computed: {
-    ...mapState('fungibleTokens', ['selectedToken', 'availableTokens']),
-    ...mapState(['current', 'sdk']),
-    ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate']),
-    validAddress() {
-      return checkAddress(this.form.address) || checkAensName(this.form.address);
-    },
   },
   async mounted() {
     if (this.redirectstep && this.successtx) {
@@ -233,6 +242,7 @@ export default {
     this.fetchFee();
   },
   methods: {
+    checkAensName,
     async scan() {
       this.form.address = await this.$store.dispatch('modals/open', {
         name: 'read-qr-code',
@@ -274,6 +284,12 @@ export default {
         ? aeToAettos(this.form.amount)
         : convertToken(this.form.amount, this.selectedToken.decimals);
       const receiver = this.form.address;
+      if (this.account.address === await this.$store.dispatch('names/getAddress', receiver)) {
+        await this.$store.dispatch('modals/open', {
+          name: 'confirm',
+          title: this.$t('pages.send.confirm-sending-to-same-account'),
+        });
+      }
       let errorModalType = '';
       if (receiver === '' || (!checkAddress(receiver) && !checkAensName(receiver))) {
         errorModalType = 'incorrect-address';

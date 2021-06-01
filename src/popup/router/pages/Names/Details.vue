@@ -20,11 +20,11 @@
         <span>{{ $t('pages.names.details.expires-height') }}</span> {{ nameEntry.expiresAt }}
       </li>
       <li
-        v-for="(pointer, key, index) in nameEntry.pointers"
+        v-for="(nameEntryPointer, key, index) in nameEntry.pointers"
         :key="key"
       >
         <span>{{ $t('pages.names.details.pointer', { id: index + 1 }) }}</span>
-        {{ pointer }}
+        {{ nameEntryPointer }}
       </li>
     </ul>
     <InputField
@@ -36,7 +36,7 @@
     <Button
       v-if="!addPointer"
       extend
-      :disabled="account.name === name || !hasPointer"
+      :disabled="!sdkInit || account.name === name || !hasPointer"
       @click="setDefault"
     >
       {{ $t('pages.names.details.set-default') }}
@@ -44,7 +44,7 @@
     <Button
       v-if="!addPointer"
       extend
-      :disabled="!hasPointer"
+      :disabled="!sdkInit || !hasPointer"
       @click="extend"
     >
       {{ $t('pages.names.details.extend') }}
@@ -59,7 +59,7 @@
     </Button>
     <Button
       extend
-      :disabled="(addPointer && !validPointer) || nameEntry.pending"
+      :disabled="!sdkInit || (addPointer && !validPointer) || nameEntry.pending"
       @click="setPointer"
     >
       {{ $t('pages.names.details.set-pointer') }}
@@ -83,6 +83,7 @@ export default {
     addPointer: false,
     pointerError: null,
     nameHash: '',
+    sdkInit: false,
   }),
   computed: {
     ...mapState(['sdk']),
@@ -98,32 +99,30 @@ export default {
     },
   },
   watch: {
-    name: {
-      async handler() {
-        this.nameHash = this.nameEntry.pending
-          ? this.nameEntry.nameHash
-          : (await this.sdk.api.getNameEntryByName(this.name)).id;
-      },
-      immediate: true,
-    },
     nameEntry(entry) {
       if (!entry) this.$router.push('/names');
     },
   },
   async mounted() {
     await this.$watchUntilTruly(() => this.sdk);
+    this.sdkInit = true;
+    this.$watch('name',
+      async () => {
+        this.nameHash = this.nameEntry.pending
+          ? this.nameEntry.nameHash
+          : (await this.sdk.api.getNameEntryByName(this.name)).id;
+      },
+      { immediate: true });
     this.$store.dispatch('names/fetchOwned');
   },
   methods: {
     async setDefault() {
-      await this.$watchUntilTruly(() => this.sdk);
       await this.$store.dispatch('names/setDefault', {
         address: this.account.address,
         name: this.name,
       });
     },
     async extend() {
-      await this.$watchUntilTruly(() => this.sdk);
       this.$store.dispatch('names/updatePointer', { name: this.name, type: 'extend' });
     },
     async setPointer() {

@@ -77,25 +77,25 @@
     class="mt-10 network"
   >
     <InputField
-      v-model="network.name"
+      v-model="newNetwork.name"
       :placeholder="$t('pages.network.networkNamePlaceholder')"
       :label="$t('pages.network.networkNameLabel')"
       data-cy="network"
     />
     <InputField
-      v-model="network.url"
+      v-model="newNetwork.url"
       :placeholder="$t('pages.network.networkUrlPlaceholder')"
       :label="$t('pages.network.networkUrlLabel')"
       data-cy="url"
     />
     <InputField
-      v-model="network.middlewareUrl"
+      v-model="newNetwork.middlewareUrl"
       :placeholder="$t('pages.network.networkMiddlewarePlaceholder')"
       :label="$t('pages.network.networkMiddlewareLabel')"
       data-cy="middleware"
     />
     <InputField
-      v-model="network.compilerUrl"
+      v-model="newNetwork.compilerUrl"
       :placeholder="$t('pages.network.networkCompilerPlaceholder')"
       :label="$t('pages.network.networkCompilerLabel')"
       data-cy="compiler"
@@ -116,7 +116,7 @@
     </button>
     <InputField
       v-if="backendUrlInputExpanded"
-      v-model="network.backendUrl"
+      v-model="newNetwork.backendUrl"
       :placeholder="$t('pages.network.backendUrlPlaceholder')"
       :label="$t('pages.network.backendUrlLabel')"
     />
@@ -131,12 +131,12 @@
       class="danger"
       half
       :disabled="
-        !network.name ||
-          !network.url ||
-          !network.middlewareUrl ||
-          !network.compilerUrl ||
-          !network.backendUrl ||
-          !!network.error
+        !newNetwork.name ||
+          !newNetwork.url ||
+          !newNetwork.middlewareUrl ||
+          !newNetwork.compilerUrl ||
+          !newNetwork.backendUrl ||
+          !!newNetwork.error
       "
       data-cy="connect"
       @click="addOrUpdateNetwork"
@@ -144,11 +144,12 @@
       {{ $t('pages.network.save') }}
     </Button>
     <div
-      v-if="network.error"
+      v-if="newNetwork.error"
       class="error-msg"
       data-cy="error-msg"
-      v-html="network.error"
-    />
+    >
+      {{ newNetwork.error }}
+    </div>
   </div>
 </template>
 
@@ -177,7 +178,7 @@ export default {
   data() {
     return {
       mode: 'list',
-      network: networkProps,
+      newNetwork: networkProps,
       backendUrlInputExpanded: false,
     };
   },
@@ -185,7 +186,7 @@ export default {
   mounted() {
     this.$watch(
       ({
-        network: {
+        newNetwork: {
           name, url, middlewareUrl, compilerUrl, backendUrl,
         },
       }) => [
@@ -196,7 +197,7 @@ export default {
         backendUrl,
       ],
       () => {
-        this.network.error = false;
+        this.newNetwork.error = false;
       },
     );
   },
@@ -211,11 +212,11 @@ export default {
     },
     cancel() {
       this.mode = 'list';
-      this.network = networkProps;
+      this.newNetwork = networkProps;
     },
     setNetworkEdit(network) {
       this.mode = 'edit';
-      this.network = { ...networkProps, ...network };
+      this.newNetwork = { ...networkProps, ...network };
     },
     async deleteNetwork(networkIndex) {
       this.$store.commit('deleteUserNetwork', networkIndex);
@@ -223,32 +224,33 @@ export default {
     },
     async addOrUpdateNetwork() {
       try {
-        this.network.error = false;
-        if (!this.network.name) throw new Error('Enter network name');
-        const url = new URL(this.network.url);
-        const middleware = new URL(this.network.middlewareUrl);
-        const compiler = new URL(this.network.compilerUrl);
-        const backendUrl = new URL(this.network.backendUrl);
+        this.newNetwork.error = false;
+        if (!this.newNetwork.name) throw new Error('Enter network name');
+        const url = new URL(this.newNetwork.url);
+        const middleware = new URL(this.newNetwork.middlewareUrl);
+        const compiler = new URL(this.newNetwork.compilerUrl);
+        const backendUrl = new URL(this.newNetwork.backendUrl);
         if (!url.hostname || !middleware.hostname || !compiler.hostname || !backendUrl.hostname) throw new Error('Invalid hostname');
 
-        const networkWithSameName = this.networks[this.network.name];
+        const networkWithSameName = this.networks[this.newNetwork.name];
         if (
           networkWithSameName
-          && (this.network.index === undefined || networkWithSameName.index !== this.network.index)
+          && (this.newNetwork.index === undefined
+          || networkWithSameName.index !== this.newNetwork.index)
         ) throw new Error('Network with this name exist');
 
         this.$store.commit('setUserNetwork', {
-          index: this.network.index,
-          url: this.network.url,
-          middlewareUrl: this.network.middlewareUrl,
-          compilerUrl: this.network.compilerUrl,
-          name: this.network.name,
-          backendUrl: this.network.backendUrl,
+          index: this.newNetwork.index,
+          url: this.newNetwork.url,
+          middlewareUrl: this.newNetwork.middlewareUrl,
+          compilerUrl: this.newNetwork.compilerUrl,
+          name: this.newNetwork.name,
+          backendUrl: this.newNetwork.backendUrl,
         });
-        await this.selectNetwork(this.network.name);
+        await this.selectNetwork(this.newNetwork.name);
         this.mode = 'list';
       } catch (e) {
-        this.network.error = e.message;
+        this.newNetwork.error = e.message;
       }
     },
   },

@@ -44,8 +44,13 @@ export default {
 @use '../../../styles/variables';
 
 .account {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+
   .recent-transactions {
     margin-top: -10px;
+    flex-grow: 1;
   }
 
   .seed-backup-notification {

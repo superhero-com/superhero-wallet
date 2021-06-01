@@ -133,9 +133,6 @@ export default {
   subscriptions() {
     return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
   },
-  mounted() {
-    this.$store.commit('setPageTitle', this.fungibleToken ? this.fungibleToken.name : 'Aeternity');
-  },
   computed: {
     ...mapGetters(['tippingSupported', 'formatCurrency']),
     ...mapState('fungibleTokens', ['tokenBalances', 'availableTokens', 'aePublicData']),
@@ -159,6 +156,9 @@ export default {
         }
       );
     },
+  },
+  mounted() {
+    this.$store.commit('setPageTitle', this.fungibleToken ? this.fungibleToken.name : 'Aeternity');
   },
   destroyed() {
     this.$store.commit('setPageTitle', '');

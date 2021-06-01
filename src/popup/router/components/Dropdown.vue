@@ -72,7 +72,7 @@ export default {
     options: { type: Array, default: null },
     selected: { type: [String, Number], default: '' },
     method: { type: Function, required: true },
-    label: { type: String },
+    label: { type: String, default: '' },
     isCustom: { type: Boolean },
   },
   data() {

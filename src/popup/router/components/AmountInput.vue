@@ -3,7 +3,7 @@
     class="amount-input"
     type="number"
     v-bind="$attrs"
-    :error="$attrs.error || $attrs.value <= 0"
+    :error="$attrs.error || !!$attrs.value && $attrs.value <= 0"
     :error-message="$attrs.errorMessage || $t('pages.tipPage.insufficientAmountError')"
     placeholder="0.00"
     :label="$attrs.label || $t('pages.tipPage.amountLabel')"

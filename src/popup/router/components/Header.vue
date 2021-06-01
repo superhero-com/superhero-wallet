@@ -193,6 +193,7 @@ export default {
       padding: 0 4px;
       display: flex;
       justify-content: center;
+      white-space: nowrap;
 
       @extend %face-sans-16-medium;
 

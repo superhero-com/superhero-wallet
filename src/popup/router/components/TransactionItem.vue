@@ -39,10 +39,7 @@ export default {
     formatTime,
   },
   props: {
-    transaction: {
-      type: Object,
-      required: true,
-    },
+    transaction: { type: Object, required: true },
   },
   computed: mapGetters([
     'getTxAmountTotal',

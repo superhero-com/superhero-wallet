@@ -22,9 +22,9 @@ export default {
       });
       await s.transferFunds(1, account.address, { payload: 'referral', verify: false });
     },
-    async handleNotEnoughFoundsError({ dispatch }, { error, isInviteError = false }) {
-      if (!isInviteError && !error.message.includes('is not enough to execute')) return false;
-      if (isInviteError && !error.message.includes('Transaction build error')) return false;
+    async handleNotEnoughFoundsError({ dispatch }, { error: { message }, isInviteError = false }) {
+      if (!isInviteError && !message.includes('is not enough to execute')) return false;
+      if (isInviteError && !message.includes('Transaction build error')) return false;
       await dispatch(
         'modals/open',
         {

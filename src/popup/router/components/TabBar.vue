@@ -3,7 +3,10 @@
     <RouterLink to="/account">
       <Home />
     </RouterLink>
-    <RouterLink v-if="UNFINISHED_FEATURES" to="/tokens">
+    <RouterLink
+      v-if="UNFINISHED_FEATURES"
+      to="/tokens"
+    >
       <Balances />
     </RouterLink>
     <RouterLink to="/payments">
@@ -19,10 +22,10 @@
 </template>
 
 <script>
-import Home from '../../../icons/sidebar-menu/home.svg?vue-component';
-import Balances from '../../../icons/sidebar-menu/balances.svg?vue-component';
-import Payments from '../../../icons/sidebar-menu/payments.svg?vue-component';
-import Tips from '../../../icons/sidebar-menu/tips.svg?vue-component';
+import Home from '../../../icons/home.svg?vue-component';
+import Balances from '../../../icons/balances.svg?vue-component';
+import Payments from '../../../icons/payments.svg?vue-component';
+import Tips from '../../../icons/tips.svg?vue-component';
 import Settings from '../../../icons/settings.svg?vue-component';
 
 export default {

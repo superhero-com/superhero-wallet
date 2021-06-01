@@ -404,13 +404,14 @@
       "remaining-time": "Remaining Time"
     },
     "connectConfirm": {
-      "websiteRequestconnect": "would like to connect to your account",
+      "title": "Allow access",
+      "websiteRequestconnect": "would like to connect to your account.",
       "websiteRequest": "This website is requesting access to view your current account address. Always make sure you trust the website you interact with. ",
       "cancelButton": "Deny",
       "confirmButton": "Accept",
       "addressLabel": "Address",
       "transactionLabel": "Transaction",
-      "addressRequest": "This aepp is requesting access to view your current account address",
+      "addressRequest": "This aepp is requesting access to view your current account address.",
       "transactionRequest": "This aepp will prepare a transaction, you are in charge of confirming it.",
       "websiteRequestAccounts": "would like to get account addresses",
       "addressesLabel": "Addresses",
@@ -699,7 +700,9 @@
       "hash": "Transaction Hash",
       "home": "Home",
       "scanAddress": "Scan AE Address",
-      "error": "Invalid AE address or AENS name"
+      "error": "Invalid AE address or AENS name",
+      "error-name-send": "Unfortunately you can only send AEX-9 Tokens to an address",
+      "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
     },
     "settings": {
       "backToAccount": "Back to account",
@@ -989,7 +992,8 @@
       "initServices": "Initializing services..."
     },
     "popupMessageSign": {
-      "heading": "would like to sign message ",
+      "title": "Sign message",
+      "heading": "would like to sign message.",
       "message": "Message"
     },
     "network": {

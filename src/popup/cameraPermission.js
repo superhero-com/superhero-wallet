@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 if (navigator.userAgent.indexOf('Firefox') !== -1) {
   if (navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices

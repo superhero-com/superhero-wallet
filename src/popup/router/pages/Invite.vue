@@ -78,7 +78,7 @@ export default {
           });
         }
       } catch (error) {
-        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', error)) return;
+        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', { error })) return;
         throw error;
       } finally {
         this.loading = false;
@@ -126,6 +126,11 @@ export default {
     .section-title {
       padding: 15px 20px;
       border-bottom: 2px solid variables.$color-border;
+
+      .invite-icon {
+        width: 21px;
+        height: 21px;
+      }
     }
   }
 }

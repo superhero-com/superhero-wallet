@@ -88,7 +88,10 @@ export default {
     TokenAmount,
     Button,
   },
-  props: ['amount', 'tipUrl'],
+  props: {
+    amount: { type: [Number, String], default: 0 },
+    tipUrl: { type: [String, URL], default: '' },
+  },
   data: () => ({ AGGREGATOR_URL }),
   computed: {
     ...mapGetters(['formatCurrency', 'currentCurrencyRate']),

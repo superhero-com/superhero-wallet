@@ -43,15 +43,12 @@ import Error from '../../../icons/error.svg?vue-component';
 export default {
   components: { Error },
   props: {
-    value: [String, Number],
+    value: { type: [String, Number], default: null },
     error: Boolean,
-    errorMessage: String,
-    placeholder: String,
-    type: {
-      type: String,
-      default: 'text',
-    },
-    label: String,
+    errorMessage: { type: String, default: '' },
+    placeholder: { type: String, default: '' },
+    type: { type: String, default: 'text' },
+    label: { type: String, default: '' },
     readonly: Boolean,
   },
 };

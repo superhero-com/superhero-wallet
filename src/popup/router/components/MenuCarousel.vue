@@ -4,7 +4,10 @@
     class="menu-carousel"
     :options="flickityOptions"
   >
-    <BoxButton v-if="UNFINISHED_FEATURES" to="/tokens">
+    <BoxButton
+      v-if="UNFINISHED_FEATURES"
+      to="/tokens"
+    >
       <Balances /> {{ $t('pages.titles.balances') }}
     </BoxButton>
     <BoxButton
@@ -25,7 +28,7 @@
       to="/transactions"
       class="tour__step5"
     >
-      <Activity /> {{ $t('pages.titles.tx-history') }}
+      <TxHistory /> {{ $t('pages.titles.tx-history') }}
     </BoxButton>
     <BoxButton to="/names">
       <Names /> {{ $t('pages.titles.names') }}
@@ -42,7 +45,7 @@ import BoxButton from './BoxButton';
 import Balances from '../../../icons/balances.svg?vue-component';
 import Payments from '../../../icons/payments.svg?vue-component';
 import Tips from '../../../icons/tips.svg?vue-component';
-import Activity from '../../../icons/activity.svg?vue-component';
+import TxHistory from '../../../icons/tx-history.svg?vue-component';
 import Names from '../../../icons/names.svg?vue-component';
 import Invites from '../../../icons/invites.svg?vue-component';
 
@@ -54,7 +57,7 @@ export default {
     Balances,
     Payments,
     Tips,
-    Activity,
+    TxHistory,
     Names,
     Invites,
   },
@@ -85,7 +88,7 @@ export default {
 .menu-carousel {
   flex: 1;
   z-index: 1;
-  padding: 24px 18px;
+  padding: 24px;
 
   ::v-deep {
     .flickity-button {
@@ -114,10 +117,13 @@ export default {
         display: none;
       }
 
-      &:hover {
-        background: variables.$color-blue-hover-dark;
+      &:hover,
+      &:active {
+        background:
+          linear-gradient(rgba(variables.$color-blue, 0.15), rgba(variables.$color-blue, 0.15)),
+          linear-gradient(variables.$color-black, variables.$color-black);
 
-        .icon {
+        .flickity-button-icon {
           opacity: 1;
 
           path {
@@ -126,8 +132,8 @@ export default {
         }
       }
 
-      &:active {
-        background-color: rgba(variables.$color-blue-hover-dark, 0.1);
+      &:focus {
+        box-shadow: none;
       }
     }
   }

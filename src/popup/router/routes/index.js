@@ -86,7 +86,6 @@ export default [
     props: true,
     meta: {
       notPersist: true,
-      notRebrand: true,
       hideTabBar: true,
     },
   },
@@ -97,7 +96,6 @@ export default [
     props: true,
     meta: {
       notPersist: true,
-      notRebrand: true,
       hideTabBar: true,
     },
   },
@@ -206,7 +204,7 @@ export default [
     path: '/retip',
     component: Retip,
     meta: {
-      title: 'send-tips',
+      title: 'send-tip',
       notPersist: true,
       notRebrand: true,
     },
@@ -254,6 +252,7 @@ export default [
       path: '',
       name: 'payments-send',
       component: PaymentsSend,
+      props: true,
       meta: {
         title: 'payments',
         notRebrand: true,
