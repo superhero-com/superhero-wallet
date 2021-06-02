@@ -13,7 +13,7 @@
     />
     <div class="details">
       <div>
-        <TruncateMid :str="tokenData.name" />
+        <Truncate :str="tokenData.name" />
         <div>
           <label>{{ $t('pages.fungible-tokens.mcap') }}</label>
           {{
@@ -44,11 +44,11 @@
 <script>
 import { mapGetters } from 'vuex';
 import Avatar from '../Avatar';
-import TruncateMid from '../TruncateMid';
+import Truncate from '../Truncate';
 import TokenAmount from '../TokenAmount';
 
 export default {
-  components: { Avatar, TruncateMid, TokenAmount },
+  components: { Avatar, Truncate, TokenAmount },
   props: { tokenData: { type: Object, default: null } },
   computed: mapGetters(['formatCurrency']),
 };
@@ -75,7 +75,7 @@ export default {
     margin-left: 7px;
     flex-grow: 1;
 
-    .truncate-mid {
+    .truncate {
       max-width: 215px;
     }
 
