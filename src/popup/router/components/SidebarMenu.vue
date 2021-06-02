@@ -29,7 +29,7 @@
       </div>
     </div>
     <ul @click="$emit('close')">
-      <li>
+      <li v-if="UNFINISHED_FEATURES">
         <router-link to="/tokens">
           {{ $t('pages.titles.balances') }}
           <Balances />
@@ -137,6 +137,9 @@ export default {
     Settings,
     About,
   },
+  data: () => ({
+    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+  }),
   computed: mapGetters(['account']),
 };
 </script>
