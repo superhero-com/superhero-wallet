@@ -31,6 +31,7 @@
     "@aeternity/aepp-sdk": "^8.1.0",
     "@aeternity/bip39": "^0.1.0",
     "@aeternity/hd-wallet": "^0.2.0",
+    "@fontsource/ibm-plex-mono": "^4.4.2",
     "@zxing/library": "^0.18.3",
     "aepp-raendom": "github:aeternity/aepp-raendom#feature/layout-superhero",
     "aeternity-fungible-token": "github:aeternity/aeternity-fungible-token#v2.0.0",

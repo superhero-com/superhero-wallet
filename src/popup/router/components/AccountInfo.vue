@@ -333,7 +333,9 @@ export default {
     color: variables.$color-light-grey;
     letter-spacing: -0.4px;
 
-    @extend %face-sans-10-medium;
+    @extend %face-mono-10-medium;
+
+    font-size: 9px;
 
     &:hover {
       color: variables.$color-white;
