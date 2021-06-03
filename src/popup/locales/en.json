@@ -189,6 +189,10 @@
     "mobile-share-error": {
       "title": "Only URLs can be tipped at the moment!",
       "msg": "More options are currently being developed - coming to you soon!"
+    },
+    "name-pointers-help": {
+      "title": "Name pointers",
+      "msg": "Name pointers associate your .chain name with one of:{0}{0}• Account address;{0}• Oracle ID;{0}• Channel ID;{0}• Contract ID.{0}{0}Your .chain name may have more than one pointer. However it can be associated with only one of each type of pointers listed above."
     }
   },
   "transaction": {

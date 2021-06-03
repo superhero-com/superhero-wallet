@@ -8,6 +8,7 @@ import ErrorLog from './components/Modals/ErrorLog';
 import ConfirmTransactionSign from './components/Modals/ConfirmTransactionSign';
 import ConfirmRawSign from './components/Modals/ConfirmRawSign';
 import QrCodeReader from './components/Modals/QrCodeReader';
+import NamePointersHelp from './components/Modals/NamePointersHelp';
 
 export default () => {
   registerModal({ name: 'default', component: Default });
@@ -16,6 +17,7 @@ export default () => {
   registerModal({ name: 'confirm-tip', component: ConfirmTip });
   registerModal({ name: 'confirm', component: Confirm });
   registerModal({ name: 'error-log', component: ErrorLog });
+  registerModal({ name: 'name-pointers-help', component: NamePointersHelp });
   registerModal({
     name: 'confirm-transaction-sign',
     component: ConfirmTransactionSign,
