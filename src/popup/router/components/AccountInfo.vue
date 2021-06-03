@@ -330,6 +330,7 @@ export default {
   .ae-address {
     display: block;
     text-decoration: none;
+    text-align: center;
     color: variables.$color-light-grey;
     letter-spacing: -0.4px;
 
