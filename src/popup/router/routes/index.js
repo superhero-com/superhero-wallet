@@ -10,6 +10,7 @@ import TokenDetails from '../pages/FungibleTokens/TokenDetails';
 import Balances from '../pages/FungibleTokens/Balances';
 import ImportAccount from '../pages/ImportAccount';
 import Index from '../pages/Index';
+import Showcase from '../pages/Showcase';
 import Intro from '../pages/Intro';
 import Invite from '../pages/Invite';
 import InviteClaim from '../pages/InviteClaim';
@@ -464,6 +465,17 @@ export default [
       title: 'invite',
       notPersist: true,
       notRebrand: true,
+    },
+  },
+  {
+    path: '/showcase',
+    name: 'showcase',
+    component: Showcase,
+    meta: {
+      title: '',
+      navigation: false,
+      ifNotAuthOnly: true,
+      notPersist: true,
     },
   },
   ...webIframePopups,

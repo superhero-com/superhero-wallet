@@ -141,6 +141,11 @@ body {
   height: 600px;
   overflow-x: hidden;
 
+  &.showcase-big {
+    transition: width 2s;
+    width: 800px;
+  }
+
   @include mixins.mobile {
     width: 100%;
     height: 100%;
