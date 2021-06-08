@@ -17,4 +17,4 @@ export const secondsToRelativeTime = (seconds) => {
   return i18n.tc('days', Math.round(seconds / secondsPerDay));
 };
 
-export const blocksToRelativeTime = (blocks) => `in ~${secondsToRelativeTime(blocks * 3 * 60)}`;
+export const blocksToRelativeTime = (blocks) => secondsToRelativeTime(blocks * 3 * 60);
