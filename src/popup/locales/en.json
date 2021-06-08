@@ -401,7 +401,8 @@
       "requiredField": "This field is required",
       "next": "Next",
       "current-highest-bid": "Current highest bid",
-      "remaining-time": "Remaining Time"
+      "remaining-time": "Remaining Time",
+      "ending-height": "Ending height"
     },
     "connectConfirm": {
       "title": "Allow access",
