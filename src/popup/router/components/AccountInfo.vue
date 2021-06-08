@@ -43,7 +43,7 @@
           :href="explorerUrl"
           target="_blank"
         >
-          <TruncateMid
+          <Truncate
             :str="accounts[idx].name"
             class="chainname"
           />
@@ -108,7 +108,7 @@
 <script>
 import { mapState, mapGetters, mapMutations } from 'vuex';
 import Avatar from './Avatar';
-import TruncateMid from './TruncateMid';
+import Truncate from './Truncate';
 import Add from '../../../icons/account-card/btn-add-subaccount.svg?vue-component';
 import Copy from '../../../icons/account-card/btn-copy-address.svg?vue-component';
 import Settings from '../../../icons/settings.svg?vue-component';
@@ -118,7 +118,7 @@ import Save from '../../../icons/account-card/btn-save.svg?vue-component';
 
 export default {
   components: {
-    Avatar, Add, Copy, Settings, Remove, Edit, Save, TruncateMid,
+    Avatar, Add, Copy, Settings, Remove, Edit, Save, Truncate,
   },
   props: {
     accountIdx: { type: Number, default: -1 },

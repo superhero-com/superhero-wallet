@@ -21,7 +21,7 @@
           class="f-12"
           data-cy="chain-name"
         >
-          <TruncateMid :str="account.name" />
+          <Truncate :str="account.name" />
         </div>
         <div class="account-type">
           {{ account.localName }}
@@ -119,14 +119,14 @@ import Invite from '../../../icons/invite.svg?vue-component';
 import Settings from '../../../icons/settings.svg?vue-component';
 import About from '../../../icons/about.svg?vue-component';
 import Avatar from './Avatar';
-import TruncateMid from './TruncateMid';
+import Truncate from './Truncate';
 
 export default {
   components: {
     Menu,
     MenuHover,
     Avatar,
-    TruncateMid,
+    Truncate,
     Balances,
     Payments,
     Tips,

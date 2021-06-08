@@ -12,7 +12,7 @@
         :name="name"
         :address="owner"
       >
-        <TruncateMid
+        <Truncate
           :str="name"
           class="name"
         />
@@ -50,12 +50,12 @@ import { mapState, mapGetters } from 'vuex';
 import NameListHeader from '../../components/NameListHeader';
 import Badge from '../../components/Badge';
 import NameRow from '../../components/NameRow';
-import TruncateMid from '../../components/TruncateMid';
+import Truncate from '../../components/Truncate';
 import CheckBox from '../../components/CheckBox';
 
 export default {
   components: {
-    NameListHeader, Badge, NameRow, CheckBox, TruncateMid,
+    NameListHeader, Badge, NameRow, CheckBox, Truncate,
   },
   computed: {
     ...mapGetters(['account']),
@@ -69,8 +69,12 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .list .names-list {
   padding: 0;
+
+  .name {
+    width: 100%;
+  }
 }
 </style>

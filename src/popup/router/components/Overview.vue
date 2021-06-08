@@ -42,7 +42,7 @@
           target="_blank"
           class="name"
         >
-          <TruncateMid :str="sender.name || sender.label" />
+          <Truncate :str="sender.name || sender.label" />
         </a>
         <CopyAddress :value="sender.address" />
       </div>
@@ -56,7 +56,7 @@
           target="_blank"
           class="name"
         >
-          <TruncateMid :str="recipient.name || recipient.label" />
+          <Truncate :str="recipient.name || recipient.label" />
         </a>
         <span
           v-else
@@ -75,7 +75,7 @@
 </template>
 
 <script>
-import TruncateMid from './TruncateMid';
+import Truncate from './Truncate';
 import CopyAddress from './CopyAddress';
 import TriangleRight from '../../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../../icons/action.svg?vue-component';
@@ -84,7 +84,7 @@ import Avatar from './Avatar';
 
 export default {
   components: {
-    TruncateMid,
+    Truncate,
     CopyAddress,
     TriangleRight,
     ActionIcon,
@@ -165,6 +165,10 @@ export default {
       width: 148px;
       text-align: right;
 
+      .truncate {
+        justify-content: flex-end;
+      }
+
       .name.aens {
         padding-right: 8px;
       }
@@ -176,12 +180,10 @@ export default {
       font-size: 15px;
       line-height: 16px;
       color: variables.$color-white;
+      text-decoration: none;
 
-      &:hover .truncate-mid {
-        &::before,
-        &::after {
-          text-decoration: underline;
-        }
+      &:hover {
+        text-decoration: underline;
       }
     }
 

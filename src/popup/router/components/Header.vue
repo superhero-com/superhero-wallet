@@ -27,7 +27,7 @@
       :class="{ 'not-logged-in': !isLoggedIn }"
       class="title"
     >
-      <TruncateMid
+      <Truncate
         v-if="pageTitle"
         :str="pageTitle"
         class="text"
@@ -88,11 +88,11 @@ import Bell from '../../../icons/bell.svg?vue-component';
 import Settings from '../../../icons/notif-settings.svg?vue-component';
 import Menu from '../../../icons/menu.svg?vue-component';
 import MenuHover from '../../../icons/menu-hover.svg?vue-component';
-import TruncateMid from './TruncateMid';
+import Truncate from './Truncate';
 
 export default {
   components: {
-    Logo, Back, Bell, Settings, Menu, MenuHover, TruncateMid,
+    Logo, Back, Bell, Settings, Menu, MenuHover, Truncate,
   },
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,
