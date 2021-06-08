@@ -12,7 +12,7 @@ import { mapState } from 'vuex';
 
 export default {
   props: {
-    address: { type: String, required: true },
+    address: { type: String, default: '' },
     name: { type: [String, Boolean], default: '' }, // TODO: Name shouldn't be boolean
     size: {
       type: String,
