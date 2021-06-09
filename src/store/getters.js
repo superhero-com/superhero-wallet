@@ -99,9 +99,11 @@ export default {
       ).plus(transaction.fee || transaction.tx?.fee || 0),
     );
   },
+  getNameFee: () => (transaction) => +aettosToAe(
+    new BigNumber(transaction.nameFee || transaction.tx?.nameFee || 0),
+  ),
   getTxFee: () => (transaction) => +aettosToAe(
-    new BigNumber(transaction.fee || transaction.tx?.fee || 0)
-      .plus(transaction.nameFee || transaction.tx?.nameFee || 0),
+    new BigNumber(transaction.fee || transaction.tx?.fee || 0),
   ),
   getTxDirection: (_, { account: { address } }) => ({ tx }) => (['senderId', 'accountId', 'ownerId', 'callerId'].map((key) => tx?.[key]).includes(address)
     ? 'sent'
