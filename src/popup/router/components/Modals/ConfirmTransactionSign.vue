@@ -6,6 +6,17 @@
   >
     <TransactionOverview :tx="transaction" />
 
+    <DetailsItem
+      v-if="getNameFee(transaction)"
+      :label="$t('modals.confirm-transaction-sign.nameFee')"
+      class="name-fee"
+    >
+      <TokenAmount
+        slot="value"
+        :amount="getNameFee(transaction)"
+      />
+    </DetailsItem>
+
     <div class="details">
       <DetailsItem :label="$t('pages.signTransaction.fee')">
         <TokenAmount
@@ -118,7 +129,12 @@ export default {
       'pointers',
     ],
   }),
-  computed: mapGetters(['getTxSymbol', 'getTxAmountTotal', 'getTxFee']),
+  computed: mapGetters([
+    'getTxSymbol',
+    'getTxAmountTotal',
+    'getTxFee',
+    'getNameFee',
+  ]),
 };
 </script>
 
@@ -138,6 +154,10 @@ export default {
     .details-item {
       margin-right: 24px;
     }
+  }
+
+  .name-fee {
+    padding: 8px 16px;
   }
 
   .show-advanced {
