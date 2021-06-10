@@ -40,7 +40,7 @@ export default {
 <style lang="scss" scoped>
 $x-small-size: 20px;
 $small-size: 30px;
-$mid-size: 36px;
+$mid-size: 32px;
 $normal-size: 40px;
 $x-lg-size: 56px;
 $lg-size: 64px;

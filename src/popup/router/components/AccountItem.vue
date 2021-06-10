@@ -10,12 +10,14 @@
       <Avatar
         :address="address"
         :name="name"
+        size="mid"
       />
       <span class="name">{{ name }}</span>
     </div>
     <Avatar
       v-else
       :address="address"
+      size="mid"
     />
     <span class="address">{{ address }}</span>
   </div>
@@ -42,8 +44,6 @@ export default {
   align-items: center;
 
   .avatar {
-    width: 32px;
-    height: 32px;
     margin-right: 8px;
   }
 
