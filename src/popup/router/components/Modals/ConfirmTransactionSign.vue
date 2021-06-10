@@ -25,14 +25,14 @@
       </DetailsItem>
     </div>
 
-    <button
+    <ButtonPlain
       class="show-advanced"
       :class="{ active: showAdvanced }"
       @click="showAdvanced = !showAdvanced"
     >
       {{ $t('pages.signTransaction.advanced') }}
       <ChevronDown class="icon" />
-    </button>
+    </ButtonPlain>
 
     <div
       v-if="showAdvanced"
@@ -78,6 +78,7 @@
 import { mapGetters } from 'vuex';
 import Modal from '../Modal';
 import Button from '../Button';
+import ButtonPlain from '../ButtonPlain';
 import TransactionOverview from '../TransactionOverview';
 import DetailsItem from '../DetailsItem';
 import TokenAmount from '../TokenAmount';
@@ -89,6 +90,7 @@ export default {
   components: {
     Modal,
     Button,
+    ButtonPlain,
     TransactionOverview,
     DetailsItem,
     TokenAmount,
@@ -151,7 +153,6 @@ export default {
     @extend %face-sans-15-medium;
 
     color: $color-dark-grey;
-    cursor: pointer;
 
     .icon {
       width: 24px;

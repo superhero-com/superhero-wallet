@@ -22,7 +22,7 @@
       v-if="filteredAccounts.length > 1"
       class="buttons"
     >
-      <button
+      <ButtonPlain
         v-for="(account, idx) in filteredAccounts"
         :key="idx"
         :class="{ selected: account.i === accountSelectedIdx }"
@@ -35,9 +35,10 @@
 <script>
 import { mapState, mapGetters, mapMutations } from 'vuex';
 import AccountCard from './AccountCard';
+import ButtonPlain from './ButtonPlain';
 
 export default {
-  components: { AccountCard },
+  components: { AccountCard, ButtonPlain },
   props: { notification: Boolean },
   computed: {
     ...mapState(['accountCount', 'accountSelectedIdx']),
@@ -103,8 +104,7 @@ export default {
     align-items: center;
     justify-content: center;
 
-    button {
-      padding: 0;
+    .button-plain {
       width: 32px;
       height: 16px;
       background: variables.$color-bg-3;
@@ -112,7 +112,6 @@ export default {
       box-sizing: border-box;
       box-shadow: inset 0 0 6px rgb(0 0 0 / 25%);
       border-radius: 8px;
-      cursor: pointer;
       margin-right: 8px;
 
       &:hover:not(.selected) {

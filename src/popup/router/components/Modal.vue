@@ -5,13 +5,13 @@
       :class="{'full-screen': fullScreen}"
     >
       <div class="container">
-        <button
+        <ButtonPlain
           v-if="close"
           class="close"
           @click="$emit('close')"
         >
           <Close />
-        </button>
+        </ButtonPlain>
         <div
           v-if="$slots.header"
           class="header"
@@ -36,10 +36,11 @@
 </template>
 
 <script>
+import ButtonPlain from './ButtonPlain';
 import Close from '../../../icons/close.svg?vue-component';
 
 export default {
-  components: { Close },
+  components: { ButtonPlain, Close },
   props: {
     close: Boolean,
     fullScreen: Boolean,
@@ -82,11 +83,6 @@ export default {
       position: absolute;
       right: 10px;
       top: 10px;
-      // TODO: Extract to ButtonPlain
-      background: none;
-      border: none;
-      outline: none;
-      padding: 0;
     }
 
     .header {

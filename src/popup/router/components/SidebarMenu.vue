@@ -3,13 +3,13 @@
     class="sidebar-menu"
     data-cy="sidebar-menu"
   >
-    <button
+    <ButtonPlain
       data-cy="close-menu"
       @click="$emit('close')"
     >
       <Menu />
       <MenuHover class="hover" />
-    </button>
+    </ButtonPlain>
     <div class="account">
       <Avatar
         :address="account.address"
@@ -120,6 +120,7 @@ import Settings from '../../../icons/settings.svg?vue-component';
 import About from '../../../icons/about.svg?vue-component';
 import Avatar from './Avatar';
 import Truncate from './Truncate';
+import ButtonPlain from './ButtonPlain';
 
 export default {
   components: {
@@ -127,6 +128,7 @@ export default {
     MenuHover,
     Avatar,
     Truncate,
+    ButtonPlain,
     Balances,
     Payments,
     Tips,
@@ -186,12 +188,11 @@ export default {
     }
   }
 
-  & > button {
+  & > .button-plain {
     margin: 4px 4px 0 0;
     height: 32px;
     width: 32px;
-    color: white;
-    cursor: pointer;
+    color: variables.$color-white;
 
     svg {
       width: 24px;

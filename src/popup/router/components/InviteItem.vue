@@ -12,13 +12,13 @@
       >
         {{ $t('pages.invite.copied') }}
       </div>
-      <button
+      <ButtonPlain
         v-clipboard:success="copy"
         v-clipboard:copy="link"
         class="invite-link-copy"
       >
         <CopyIcon />
-      </button>
+      </ButtonPlain>
     </div>
     <div
       v-if="!topUp"
@@ -83,12 +83,13 @@ import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk';
 import TokenAmount from './TokenAmount';
 import AmountInput from './AmountInput';
 import Button from './Button';
+import ButtonPlain from './ButtonPlain';
 import CopyIcon from '../../../icons/copy-old.svg?vue-component';
 import { formatDate } from '../../utils';
 
 export default {
   components: {
-    TokenAmount, Button, AmountInput, CopyIcon,
+    TokenAmount, Button, ButtonPlain, AmountInput, CopyIcon,
   },
   filters: { formatDate },
   props: {
@@ -209,7 +210,6 @@ export default {
   }
 
   .invite-link-copy {
-    padding: 0;
     color: variables.$color-dark-grey;
   }
 
