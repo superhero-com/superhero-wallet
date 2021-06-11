@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.7.2](https://github.com/aeternity/superhero-wallet/compare/v0.7.1...v0.7.2) (2021-06-11)
+
+
+### Features
+
+* show node status in full screen modals ([4cd4f90](https://github.com/aeternity/superhero-wallet/commit/4cd4f9077cc85dfaba1bcd735732aed7f04e3e67))
+* **confirm-tx:** show name fee token amount ([1776fff](https://github.com/aeternity/superhero-wallet/commit/1776fff0dc0bc34f7a1b64c54cbd35c65be2d959))
+* **truncate:** simplify truncate behaviour ([5ae05d3](https://github.com/aeternity/superhero-wallet/commit/5ae05d38ebb0682331cc1ede16148e1dc823504b))
+
+
+### Maintenance
+
+* use iris compatible contracts ([dc08775](https://github.com/aeternity/superhero-wallet/commit/dc087752f11c270b067a0f184217199547059b5e))
+* **global:** use ButtonPlain component ([47304bf](https://github.com/aeternity/superhero-wallet/commit/47304bfa7a31fc42c3c198800e1bb62ec1b25f3a))
+* **receive:** remove exchange url ([2cf8b68](https://github.com/aeternity/superhero-wallet/commit/2cf8b68bb8c3ce7df3b899857c70e37dd79aa740))
+* **tokens:** move tokens path and sidebar entry to unfinished ([e8e2786](https://github.com/aeternity/superhero-wallet/commit/e8e278696ada2ac2d6ba508f45dcf8356cf32a36))
+
 ### [0.7.1](https://github.com/aeternity/superhero-wallet/compare/v0.7.0...v0.7.1) (2021-05-31)
 
 
