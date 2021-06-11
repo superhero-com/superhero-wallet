@@ -6,6 +6,17 @@
   >
     <TransactionOverview :tx="transaction" />
 
+    <DetailsItem
+      v-if="getNameFee(transaction)"
+      :label="$t('modals.confirm-transaction-sign.nameFee')"
+      class="name-fee"
+    >
+      <TokenAmount
+        slot="value"
+        :amount="getNameFee(transaction)"
+      />
+    </DetailsItem>
+
     <div class="details">
       <DetailsItem :label="$t('pages.signTransaction.fee')">
         <TokenAmount
@@ -25,14 +36,14 @@
       </DetailsItem>
     </div>
 
-    <button
+    <ButtonPlain
       class="show-advanced"
       :class="{ active: showAdvanced }"
       @click="showAdvanced = !showAdvanced"
     >
       {{ $t('pages.signTransaction.advanced') }}
       <ChevronDown class="icon" />
-    </button>
+    </ButtonPlain>
 
     <div
       v-if="showAdvanced"
@@ -78,6 +89,7 @@
 import { mapGetters } from 'vuex';
 import Modal from '../Modal';
 import Button from '../Button';
+import ButtonPlain from '../ButtonPlain';
 import TransactionOverview from '../TransactionOverview';
 import DetailsItem from '../DetailsItem';
 import TokenAmount from '../TokenAmount';
@@ -89,6 +101,7 @@ export default {
   components: {
     Modal,
     Button,
+    ButtonPlain,
     TransactionOverview,
     DetailsItem,
     TokenAmount,
@@ -116,7 +129,12 @@ export default {
       'pointers',
     ],
   }),
-  computed: mapGetters(['getTxSymbol', 'getTxAmountTotal', 'getTxFee']),
+  computed: mapGetters([
+    'getTxSymbol',
+    'getTxAmountTotal',
+    'getTxFee',
+    'getNameFee',
+  ]),
 };
 </script>
 
@@ -138,6 +156,10 @@ export default {
     }
   }
 
+  .name-fee {
+    padding: 8px 16px;
+  }
+
   .show-advanced {
     position: sticky;
     top: 0;
@@ -151,7 +173,6 @@ export default {
     @extend %face-sans-15-medium;
 
     color: $color-dark-grey;
-    cursor: pointer;
 
     .icon {
       width: 24px;

@@ -3,7 +3,7 @@
     class="filters"
     data-cy="filters"
   >
-    <button
+    <ButtonPlain
       v-for="filter in filters"
       :key="filter"
       class="filter"
@@ -12,23 +12,24 @@
     >
       <span>{{ $t(`pages.transactionDetails.${filter}`) }}</span>
       <FilterArrow />
-    </button>
-    <button
+    </ButtonPlain>
+    <ButtonPlain
       class="filter active"
       @click="$emit('input', { ...value, latestFirst: !value.latestFirst })"
     >
       <span>{{ $t('pages.transactionDetails.date') }}</span>
       <Sort :class="{ rotate: !value.latestFirst }" />
-    </button>
+    </ButtonPlain>
   </div>
 </template>
 
 <script>
 import FilterArrow from '../../../icons/filter-arrow.svg?vue-component';
 import Sort from '../../../icons/sort.svg?vue-component';
+import ButtonPlain from './ButtonPlain';
 
 export default {
-  components: { FilterArrow, Sort },
+  components: { FilterArrow, Sort, ButtonPlain },
   props: {
     value: { type: Object, required: true },
   },
@@ -57,10 +58,6 @@ export default {
   .filter {
     display: flex;
     align-items: center;
-
-    @include mixins.mobile {
-      padding: 0;
-    }
 
     @extend %face-sans-15-medium;
 

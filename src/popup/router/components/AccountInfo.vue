@@ -1,32 +1,32 @@
 <template>
   <div :class="['account-info', { edit, copied }]">
     <div class="account-buttons">
-      <button
+      <ButtonPlain
         v-if="idx !== 0 && $route.path === '/accounts'"
         class="remove"
         @click="remove"
       >
         <Remove />
-      </button>
+      </ButtonPlain>
       <RouterLink
         v-if="UNFINISHED_FEATURES && $route.path !== '/accounts'"
         to="/accounts"
       >
         <Settings />
       </RouterLink>
-      <button
+      <ButtonPlain
         v-if="UNFINISHED_FEATURES && idx === 0"
         @click="createAccount"
       >
         <Add />
-      </button>
-      <button
+      </ButtonPlain>
+      <ButtonPlain
         v-clipboard:copy="accounts[idx].address"
         data-cy="copy"
         @click="copy"
       >
         <Copy />
-      </button>
+      </ButtonPlain>
     </div>
     <div class="title">
       <Avatar
@@ -43,7 +43,7 @@
           :href="explorerUrl"
           target="_blank"
         >
-          <TruncateMid
+          <Truncate
             :str="accounts[idx].name"
             class="chainname"
           />
@@ -61,12 +61,12 @@
             <span class="text-ellipsis">
               {{ accounts[idx].localName }}
             </span>
-            <button
+            <ButtonPlain
               v-if="idx !== 0 && $route.path === '/accounts'"
               @click="editLocalName"
             >
               <Edit />
-            </button>
+            </ButtonPlain>
           </template>
           <template v-else>
             <input
@@ -74,12 +74,12 @@
               :maxlength="maxCustomNameLength"
               type="text"
             >
-            <button
+            <ButtonPlain
               class="save"
               @click="saveLocalName(customAccountName)"
             >
               <Save />
-            </button>
+            </ButtonPlain>
           </template>
         </div>
         <!-- eslint-disable-next-line vue-i18n/no-raw-text-->
@@ -108,7 +108,8 @@
 <script>
 import { mapState, mapGetters, mapMutations } from 'vuex';
 import Avatar from './Avatar';
-import TruncateMid from './TruncateMid';
+import Truncate from './Truncate';
+import ButtonPlain from './ButtonPlain';
 import Add from '../../../icons/account-card/btn-add-subaccount.svg?vue-component';
 import Copy from '../../../icons/account-card/btn-copy-address.svg?vue-component';
 import Settings from '../../../icons/settings.svg?vue-component';
@@ -118,7 +119,7 @@ import Save from '../../../icons/account-card/btn-save.svg?vue-component';
 
 export default {
   components: {
-    Avatar, Add, Copy, Settings, Remove, Edit, Save, TruncateMid,
+    Avatar, Add, Copy, Settings, Remove, Edit, Save, Truncate, ButtonPlain,
   },
   props: {
     accountIdx: { type: Number, default: -1 },
@@ -194,13 +195,11 @@ export default {
     height: 8px;
 
     a,
-    button {
+    .button-plain {
       color: variables.$color-white;
       opacity: 0.7;
       float: right;
-      padding: 0;
       margin-left: 8px;
-      cursor: pointer;
 
       svg {
         width: 24px;
@@ -303,11 +302,9 @@ export default {
           }
         }
 
-        button {
+        .button-plain {
           height: 24px;
           margin-left: 8px;
-          padding: 0;
-          cursor: pointer;
 
           svg {
             width: 24px;

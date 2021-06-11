@@ -100,7 +100,7 @@
       :label="$t('pages.network.networkCompilerLabel')"
       data-cy="compiler"
     />
-    <button
+    <ButtonPlain
       class="text-left expand"
       @click="backendUrlInputExpanded = !backendUrlInputExpanded"
     >
@@ -113,7 +113,7 @@
           ? $t('pages.network.hideTippingConfig')
           : $t('pages.network.showTippingConfig')
       }}</span>
-    </button>
+    </ButtonPlain>
     <InputField
       v-if="backendUrlInputExpanded"
       v-model="newNetwork.backendUrl"
@@ -156,6 +156,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import Button from '../components/Button';
+import ButtonPlain from '../components/ButtonPlain';
 import InputField from '../components/InputField';
 import CheckBox from '../components/CheckBox';
 import { defaultNetwork } from '../../utils/constants';
@@ -172,6 +173,7 @@ const networkProps = {
 export default {
   components: {
     Button,
+    ButtonPlain,
     InputField,
     CheckBox,
   },
@@ -286,7 +288,7 @@ export default {
     font-size: 14px;
     color: variables.$color-white;
     width: 100%;
-    padding: 0;
+    margin-top: 16px;
 
     span {
       display: inline-block;

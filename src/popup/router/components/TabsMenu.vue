@@ -1,18 +1,21 @@
 <template>
   <div class="tabs-menu">
-    <button
+    <ButtonPlain
       v-for="{ text, name } in tabOptions"
       :key="name"
       :class="{ active: name === value }"
       @click="$emit('input', name)"
     >
       {{ text }}
-    </button>
+    </ButtonPlain>
   </div>
 </template>
 
 <script>
+import ButtonPlain from './ButtonPlain';
+
 export default {
+  components: { ButtonPlain },
   props: {
     tabOptions: { type: Array, default: null },
     value: { type: [String, Number], default: '' },
@@ -28,11 +31,10 @@ export default {
   padding: 0 15px;
   background-color: variables.$color-bg-3;
 
-  button {
+  .button-plain {
     font-size: 16px;
     padding: 5.5px 0;
     margin-right: 17px;
-    text-decoration: none;
     color: variables.$color-dark-grey;
     display: inline-block;
 

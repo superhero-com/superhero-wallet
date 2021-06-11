@@ -75,8 +75,6 @@ export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 
 export const BUG_REPORT_URL = 'https://thesuperherowallet.typeform.com/to/vh8Ffu';
 
-export const CHANGE_CRYPTO_AE_URL = 'https://app.jelly.market';
-
 export const NOTIFICATION_SETTINGS = [
   {
     text: i18n.t('pages.notification-settings.commentOnTip'),

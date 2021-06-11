@@ -390,25 +390,27 @@ export default [
       notRebrand: true,
     },
   },
-  {
-    name: 'tokens-preview',
-    path: '/tokens',
-    component: TokensPreview,
-    meta: {
-      title: 'tokens-preview',
-      notRebrand: true,
+  ...process.env.UNFINISHED_FEATURES ? [
+    {
+      name: 'tokens-preview',
+      path: '/tokens',
+      component: TokensPreview,
+      meta: {
+        title: 'tokens-preview',
+        notRebrand: true,
+      },
     },
-  },
-  {
-    name: 'token-details',
-    path: '/tokens/:id',
-    component: TokenDetails,
-    props: true,
-    meta: {
-      title: 'token-details',
-      notRebrand: true,
+    {
+      name: 'token-details',
+      path: '/tokens/:id',
+      component: TokenDetails,
+      props: true,
+      meta: {
+        title: 'token-details',
+        notRebrand: true,
+      },
     },
-  },
+  ] : [],
   {
     name: 'not-found',
     path: '*',

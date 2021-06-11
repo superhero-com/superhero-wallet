@@ -14,20 +14,20 @@
       >
         <Logo />
       </RouterLink>
-      <button
+      <ButtonPlain
         v-if="title && !tourRunning"
         class="icon-btn back"
         @click="back"
       >
         <Back data-cy="back-arrow" />
-      </button>
+      </ButtonPlain>
     </div>
 
     <div
       :class="{ 'not-logged-in': !isLoggedIn }"
       class="title"
     >
-      <TruncateMid
+      <Truncate
         v-if="pageTitle"
         :str="pageTitle"
         class="text"
@@ -44,7 +44,7 @@
       v-if="isLoggedIn"
       class="right"
     >
-      <button
+      <ButtonPlain
         v-if="!$route.path.startsWith('/notifications')"
         class="notifications icon-btn"
         data-cy="noti"
@@ -58,7 +58,7 @@
         >
           {{ notificationsCount }}
         </span>
-      </button>
+      </ButtonPlain>
 
       <RouterLink
         v-if="$route.path === '/notifications'"
@@ -68,14 +68,14 @@
         <Settings />
       </RouterLink>
 
-      <button
+      <ButtonPlain
         class="icon-btn menu"
         data-cy="hamburger"
         @click="$emit('toggle-sidebar')"
       >
         <Menu />
         <MenuHover class="hover" />
-      </button>
+      </ButtonPlain>
     </div>
   </div>
 </template>
@@ -88,11 +88,12 @@ import Bell from '../../../icons/bell.svg?vue-component';
 import Settings from '../../../icons/notif-settings.svg?vue-component';
 import Menu from '../../../icons/menu.svg?vue-component';
 import MenuHover from '../../../icons/menu-hover.svg?vue-component';
-import TruncateMid from './TruncateMid';
+import Truncate from './Truncate';
+import ButtonPlain from './ButtonPlain';
 
 export default {
   components: {
-    Logo, Back, Bell, Settings, Menu, MenuHover, TruncateMid,
+    Logo, Back, Bell, Settings, Menu, MenuHover, Truncate, ButtonPlain,
   },
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,
@@ -243,10 +244,8 @@ export default {
   }
 
   .icon-btn {
-    cursor: pointer;
     width: 32px;
     height: 32px;
-    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;

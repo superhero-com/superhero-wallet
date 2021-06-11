@@ -3,13 +3,13 @@
     class="sidebar-menu"
     data-cy="sidebar-menu"
   >
-    <button
+    <ButtonPlain
       data-cy="close-menu"
       @click="$emit('close')"
     >
       <Menu />
       <MenuHover class="hover" />
-    </button>
+    </ButtonPlain>
     <div class="account">
       <Avatar
         :address="account.address"
@@ -21,7 +21,7 @@
           class="f-12"
           data-cy="chain-name"
         >
-          <TruncateMid :str="account.name" />
+          <Truncate :str="account.name" />
         </div>
         <div class="account-type">
           {{ account.localName }}
@@ -29,7 +29,7 @@
       </div>
     </div>
     <ul @click="$emit('close')">
-      <li>
+      <li v-if="UNFINISHED_FEATURES">
         <router-link to="/tokens">
           {{ $t('pages.titles.balances') }}
           <Balances />
@@ -119,14 +119,16 @@ import Invite from '../../../icons/invite.svg?vue-component';
 import Settings from '../../../icons/settings.svg?vue-component';
 import About from '../../../icons/about.svg?vue-component';
 import Avatar from './Avatar';
-import TruncateMid from './TruncateMid';
+import Truncate from './Truncate';
+import ButtonPlain from './ButtonPlain';
 
 export default {
   components: {
     Menu,
     MenuHover,
     Avatar,
-    TruncateMid,
+    Truncate,
+    ButtonPlain,
     Balances,
     Payments,
     Tips,
@@ -137,6 +139,9 @@ export default {
     Settings,
     About,
   },
+  data: () => ({
+    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+  }),
   computed: mapGetters(['account']),
 };
 </script>
@@ -183,12 +188,11 @@ export default {
     }
   }
 
-  & > button {
+  & > .button-plain {
     margin: 4px 4px 0 0;
     height: 32px;
     width: 32px;
-    color: white;
-    cursor: pointer;
+    color: variables.$color-white;
 
     svg {
       width: 24px;
