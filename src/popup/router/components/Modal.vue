@@ -79,7 +79,7 @@ export default {
     position: relative;
     width: 92%;
     margin: auto;
-    padding: 48px 32px 40px;
+    padding: 48px 28px 40px;
     background: variables.$color-bg-1;
     border: 1px solid variables.$color-black;
     border-radius: 5px;
