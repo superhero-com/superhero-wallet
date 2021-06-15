@@ -132,9 +132,9 @@ export const getTwitterAccountUrl = (url) => {
   return match ? match[0] : false;
 };
 
-export const isNotFoundError = (error) => error.isAxiosError && error?.response?.status === 404;
+export const isNotFoundError = (error) => error.statusCode === 404;
 
-export const isAccountNotFoundError = (error) => isNotFoundError(error) && error?.response?.data?.reason === 'Account not found';
+export const isAccountNotFoundError = (error) => isNotFoundError(error) && error?.response?.body?.reason === 'Account not found';
 
 export const setBalanceLocalStorage = (balance) => {
   localStorage.rxjs = JSON.stringify({ ...JSON.parse(localStorage.rxjs || '{}'), balance });
