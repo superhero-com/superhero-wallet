@@ -276,6 +276,8 @@
       "notification-settings": "Notification Preference",
       "names": "Names",
       "auction": "Bidding",
+      "name-auctions": "Name auctions",
+      "register-name": "Register name",
       "more": "More",
       "networks": "Networks",
       "permissionsSettings": "Permissions settings",
@@ -522,25 +524,23 @@
       "pointer-added": "Name {type} successful!",
       "pending-claim": "Pending",
       "auto-extend": "Autoextend",
+      "tabs": {
+        "my-names": "My names",
+        "auctions": "Auctions",
+        "register": "Register"
+      },
       "list": {
         "default-name": "Default name",
         "default-make": "Make default",
         "valid-identifier-error": "Enter valid ae blockchain identifier",
-        "no-names": "No names found",
-        "button": "Your names",
+        "no-names": "There are no .chain names owned by this account. Would you like to register one?",
+        "register-name": "Register .chain name",
         "name-hash": "Name code",
         "pointers": "Pointers"
       },
       "details": {
-        "name": "Name",
-        "name-id": "Name ID",
-        "owner": "Owner",
         "created-height": "Created at height",
         "expires-height": "Expires at height",
-        "pointer": "Pointer #{id}",
-        "set-default": "Set as default name",
-        "extend": "Extend",
-        "cancel": "Cancel",
         "set-pointer": "Set pointer",
         "address-placeholder": "Enter ak_, ct_, ok_, ch_"
       },

@@ -1,6 +1,5 @@
 <template>
   <div class="claim">
-    <NameListHeader />
     <div class="claim-name-holder">
       <InputField
         v-model="name"
@@ -23,13 +22,12 @@
 
 <script>
 import { mapState } from 'vuex';
-import NameListHeader from '../../components/NameListHeader';
 import InputField from '../../components/InputField';
 import Button from '../../components/Button';
 import { MAX_AUCTION_NAME_LENGTH } from '../../../utils/constants';
 
 export default {
-  components: { NameListHeader, InputField, Button },
+  components: { InputField, Button },
   data: () => ({ name: '', loading: false }),
   computed: {
     ...mapState(['sdk']),

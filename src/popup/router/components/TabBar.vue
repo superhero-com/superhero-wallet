@@ -22,7 +22,7 @@
       <Tips />
       <span>{{ $t('pages.titles.tips') }}</span>
     </RouterLink>
-    <RouterLink to="/names">
+    <RouterLink :to="{name: 'name-list' }">
       <Names />
       <span>{{ $t('pages.titles.names') }}</span>
     </RouterLink>

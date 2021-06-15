@@ -19,8 +19,8 @@ import AuctionBid from '../pages/Names/AuctionBid';
 import AuctionHistory from '../pages/Names/AuctionHistory';
 import AuctionList from '../pages/Names/AuctionList';
 import More from '../pages/More';
+import Names from '../pages/Names/Names';
 import NameClaim from '../pages/Names/Claim';
-import NamesDetails from '../pages/Names/Details';
 import NamesList from '../pages/Names/List';
 import Networks from '../pages/Networks';
 import NotFound from '../pages/NotFound';
@@ -325,44 +325,33 @@ export default [
   },
   {
     path: '/names',
-    component: NamesList,
+    component: Names,
     props: true,
-    name: 'name-list',
-    meta: {
-      title: 'names',
-      notRebrand: true,
-    },
-  },
-  {
-    path: '/names/claim',
-    component: NameClaim,
-    props: true,
-    name: 'name-claim',
-    meta: {
-      title: 'names',
-      notRebrand: true,
-    },
-  },
-  {
-    path: '/names/auctions',
-    component: AuctionList,
-    props: true,
-    name: 'auction-list',
-    meta: {
-      title: 'names',
-      notRebrand: true,
-    },
-  },
-  {
-    path: '/names/:name',
-    component: NamesDetails,
-    props: true,
-    name: 'name-details',
-    meta: {
-      title: 'names',
-      notPersist: true,
-      notRebrand: true,
-    },
+    children: [{
+      path: '',
+      name: 'name-list',
+      component: NamesList,
+      props: true,
+      meta: {
+        title: 'names',
+      },
+    }, {
+      path: 'auctions',
+      component: AuctionList,
+      props: true,
+      name: 'auction-list',
+      meta: {
+        title: 'name-auctions',
+      },
+    }, {
+      path: 'claim',
+      component: NameClaim,
+      props: true,
+      name: 'name-claim',
+      meta: {
+        title: 'register-name',
+      },
+    }],
   },
   {
     path: '/names/auctions/:name/',

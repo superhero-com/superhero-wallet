@@ -1,7 +1,5 @@
 <template>
   <div class="auction-list">
-    <NameListHeader />
-
     <Button
       :inactive="filter !== 'soonest'"
       third
@@ -56,13 +54,12 @@
 
 <script>
 import { pick } from 'lodash-es';
-import NameListHeader from '../../components/NameListHeader';
 import Button from '../../components/Button';
 import NameRow from '../../components/NameRow';
 import { blocksToRelativeTime } from '../../../../filters/toRelativeTime';
 
 export default {
-  components: { NameListHeader, Button, NameRow },
+  components: { Button, NameRow },
   filters: { blocksToRelativeTime },
   data: () => ({
     filter: 'soonest',

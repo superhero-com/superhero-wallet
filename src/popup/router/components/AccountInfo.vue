@@ -56,7 +56,7 @@
         </a>
         <router-link
           v-else
-          to="/names"
+          :to="{ name: 'name-claim' }"
           data-cy="claim-name"
           class="claim-chainname"
         >
