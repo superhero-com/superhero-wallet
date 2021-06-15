@@ -59,6 +59,8 @@ export const checkAddress = (value) => Crypto.isAddressValid(value, 'ak')
   || Crypto.isAddressValid(value, 'ct')
   || Crypto.isAddressValid(value, 'ok');
 
+export const checkAddressOrChannel = (value) => checkAddress(value) || Crypto.isAddressValid(value, 'ch');
+
 export const checkAensName = (value) => value.endsWith('.chain');
 
 export const getAddressByNameEntry = (nameEntry, pointer = 'account_pubkey') => ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
@@ -171,4 +173,26 @@ export const categorizeContractCallTxObject = (transaction) => {
     default:
       return null;
   }
+};
+
+export const readValueFromClipboard = async () => {
+  let value = '';
+  switch (process.env.PLATFORM) {
+    case 'cordova':
+      value = await new Promise((...args) => window
+        .cordova.plugins.clipboard.paste(...args));
+      break;
+    case 'extension':
+      value = await browser.runtime.sendMessage({ method: 'paste' });
+      break;
+    default:
+      try {
+        value = await navigator.clipboard.readText();
+      } catch (e) {
+        if (!e.message.includes('Read permission denied.')) {
+          handleUnknownError(e);
+        }
+      }
+  }
+  return value;
 };

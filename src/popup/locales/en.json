@@ -197,6 +197,10 @@
     "auctions-help": {
       "title": "Auctions and bidding",
       "msg": "If your .chain name is <strong>12 characters or less</strong> – you’ve got to bid for it in an auction. To win the bidding process, all you have to do is have the highest bid once the auction ends! If somebody outbids you – all of your funds are automatically returned.<br /><br />Auction periods and initial fees vary as the length of the name varies – the shorter the name, the higher the fee and longer the period."
+    },
+    "autoextend-help": {
+      "title": "Autoextend name",
+      "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.<br /><br /> Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.<br /><br /> Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
     }
   },
   "transaction": {
@@ -517,10 +521,15 @@
       "balance-error": "Your account balance is not enough to execute this transaction.",
       "pointer-added": "Name {type} successful!",
       "pending-claim": "Pending",
-      "auto-extend": "Auto-extend",
+      "auto-extend": "Autoextend",
       "list": {
+        "default-name": "Default name",
+        "default-make": "Make default",
+        "valid-identifier-error": "Enter valid ae blockchain identifier",
         "no-names": "No names found",
-        "button": "Your names"
+        "button": "Your names",
+        "name-hash": "Name code",
+        "pointers": "Pointers"
       },
       "details": {
         "name": "Name",
@@ -532,8 +541,8 @@
         "set-default": "Set as default name",
         "extend": "Extend",
         "cancel": "Cancel",
-        "set-pointer": "Set name pointer",
-        "address-placeholder": "Enter ak_, ct_, ok_ or .chain name"
+        "set-pointer": "Set pointer",
+        "address-placeholder": "Enter ak_, ct_, ok_, ch_"
       },
       "claim": {
         "name-placeholder": "Enter .chain name",
