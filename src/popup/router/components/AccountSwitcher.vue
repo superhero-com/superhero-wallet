@@ -68,6 +68,7 @@ export default {
   flex-direction: column;
   border-radius: 0 0 10px 10px;
   padding-top: 32px;
+  overflow-x: hidden;
 
   &.notification-above {
     margin-top: 16px;
