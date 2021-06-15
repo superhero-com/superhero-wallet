@@ -7,7 +7,7 @@
     <template v-else>
       <div class="section-title">
         {{ $t('pages.names.auctions.expires') }}
-        {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
+        in ~ {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
       </div>
 
       <div class="section-title">

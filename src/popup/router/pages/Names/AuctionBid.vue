@@ -25,7 +25,7 @@
         {{ $t('pages.names.auctions.remaining-time') }}
       </span>
       <span>
-        {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
+        in ~ {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
       </span>
     </div>
     <Loader v-if="loading" />

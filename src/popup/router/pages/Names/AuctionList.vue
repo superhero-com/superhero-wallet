@@ -43,7 +43,7 @@
         </div>
         <div class="expiration">
           {{ $t('pages.names.auctions.expires') }}
-          {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
+          in ~ {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
         </div>
       </NameRow>
     </ul>
