@@ -10,7 +10,7 @@ describe('Tests cases for AEX-2 popups', () => {
     cy.login();
   });
 
-  it('Sign Message popup, Conncet display correct data', () => {
+  it('Sign Message popup, Connect, Raw Sign display correct data', () => {
     const props = popupProps.messageSign;
     cy.openAex2Popup('messageSign')
       .get('[data-cy=aepp]')
@@ -27,6 +27,17 @@ describe('Tests cases for AEX-2 popups', () => {
       .should('be.visible')
       .should('contain', props1.app.name)
       .should('contain', props1.app.host);
+
+    const props2 = popupProps.rawSign;
+    cy.openAex2Popup('rawSign')
+      .get('[data-cy=warning]')
+      .should('be.visible')
+      .get('[data-cy=data]')
+      .should('be.visible')
+      .should('contain', props2.data)
+      .get('[data-cy=sender] .address')
+      .should('be.visible')
+      .should('contain', props2.app.host);
   });
 
   it('Opens connectConfirm, sign, messageSign popups and send accept/deny action', () => {

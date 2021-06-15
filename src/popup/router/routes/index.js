@@ -1,4 +1,5 @@
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign';
+import ConfirmRawSign from '../components/Modals/ConfirmRawSign';
 import About from '../pages/About';
 import Account from '../pages/Account';
 import Accounts from '../pages/Accounts';
@@ -73,6 +74,16 @@ export default [
     name: 'popup-sign-tx',
     path: '/popup-sign-tx',
     component: ConfirmTransactionSign,
+    props: true,
+    meta: {
+      notPersist: true,
+      hideTabBar: true,
+    },
+  },
+  {
+    name: 'popup-raw-sign',
+    path: '/popup-raw-sign',
+    component: ConfirmRawSign,
     props: true,
     meta: {
       notPersist: true,

@@ -144,6 +144,13 @@
       "data-sign": "Data to sign",
       "nonce": "Nonce"
     },
+    "confirm-raw-sign": {
+      "title": "Sign raw transaction",
+      "warning": {
+        "title": "Transaction Warning",
+        "content": "Transaction data is either broken or Superhero wallet doesn’t support this type of transactions yet. Signing it may cause unexpected results including loss of your funds or other malicious effects.{0}{0}Be careful and sign the data only if you trust the aepp and its owner."
+      }
+    },
     "add-token": {
       "title": "Token added",
       "msg": "Token added successfully"
