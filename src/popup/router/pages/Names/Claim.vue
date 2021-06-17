@@ -1,34 +1,61 @@
 <template>
   <div class="claim">
-    <div class="claim-name-holder">
-      <InputField
-        v-model="name"
-        :placeholder="$t('pages.names.claim.name-placeholder')"
-        :error="!validName"
-      >
-        <span slot="right">.chain</span>
-      </InputField>
-      <Button
-        small
-        :disabled="!sdk || !validName"
-        @click="claim"
-      >
-        <ae-icon name="plus" />
-      </Button>
+    <span>
+      {{ $t('pages.names.claim.register-name') }}
+    </span>
+    <InputField
+      v-model="name"
+      :placeholder="$t('pages.names.claim.name-placeholder')"
+      :error="!!name.length && !validName"
+    >
+      <span slot="right">.chain</span>
+    </InputField>
+    <div class="flex-row">
+      <CheckBox v-model="autoExtend">
+        {{ $t('pages.names.claim.auto-extend') }}
+        <HelpButton
+          :title="$t('modals.autoextend-help.title')"
+          :msg="$t('modals.autoextend-help.msg')"
+          :class="{ active: autoExtend }"
+        />
+      </CheckBox>
+      <label>{{ name.length }}/{{ maxNameLength }}</label>
     </div>
     <Loader v-if="loading" />
+    <i18n
+      path="pages.names.claim.short-names.message"
+      tag="span"
+      class="explanation"
+    >
+      <mark>{{ $t('pages.names.claim.short-names.insertion') }}</mark>
+    </i18n>
+    <Button
+      :disabled="!sdk || !validName"
+      @click="claim"
+    >
+      {{ $t('pages.names.claim.button') }}
+    </Button>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
 import InputField from '../../components/InputField';
+import CheckBox from '../../components/CheckBox';
+import HelpButton from '../../components/HelpButton';
 import Button from '../../components/Button';
 import { MAX_AUCTION_NAME_LENGTH } from '../../../utils/constants';
 
 export default {
-  components: { InputField, Button },
-  data: () => ({ name: '', loading: false }),
+  components: {
+    InputField, CheckBox, HelpButton, Button,
+  },
+  data: () => ({
+    name: '',
+    loading: false,
+    autoExtend: false,
+    maxNameLength: 253,
+  }),
   computed: {
     ...mapState(['sdk']),
     validName() {
@@ -52,6 +79,7 @@ export default {
         try {
           const { salt } = await this.sdk.aensPreclaim(name);
           claimTxHash = (await this.sdk.aensClaim(name, salt, { waitMined: false })).hash;
+          if (this.autoExtend) this.$store.commit('names/setPendingAutoExtendName', name);
           this.$router.push({ name: 'name-list' });
         } catch (e) {
           let msg = e.message;
@@ -90,20 +118,67 @@ export default {
 @use '../../../../styles/typography';
 
 .claim {
-  .claim-name-holder {
+  margin: 16px 16px 0 16px;
+  display: flex;
+  flex-direction: column;
+  color: variables.$color-dark-grey;
+
+  .flex-row {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 30px;
+    justify-content: space-between;
 
-    .input-field span {
-      @extend %face-sans-14-regular;
+    .checkbox-container {
+      &:hover ::v-deep .checkmark {
+        background-color: variables.$color-black;
+        border-color: variables.$color-border;
+      }
 
-      color: variables.$color-dark-grey;
+      ::v-deep .checkmark {
+        margin-right: 8px;
+      }
+
+      .hint-button {
+        margin-left: 8px;
+
+        &.active:not(:hover) {
+          opacity: 1;
+        }
+
+        &:hover {
+          opacity: unset;
+          color: variables.$color-blue;
+          background-color: rgba(17, 97, 254, 0.44);
+        }
+      }
     }
 
-    .button {
-      margin-right: 0;
+    .checkbox-container + label {
+      font-size: 12px;
+    }
+  }
+
+  .input-field {
+    margin: 8px auto;
+    width: 100%;
+
+    span {
+      color: variables.$color-dark-grey;
+
+      @extend %face-sans-14-regular;
+    }
+  }
+
+  span {
+    @extend %face-sans-15-medium;
+
+    &.explanation {
+      color: variables.$color-light-grey;
+      margin: 24px 16px 16px 16px;
+    }
+
+    mark {
+      background-color: transparent;
+      color: variables.$color-white;
     }
   }
 }

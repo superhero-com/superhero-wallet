@@ -545,8 +545,14 @@
         "address-placeholder": "Enter ak_, ct_, ok_, ch_"
       },
       "claim": {
+        "auto-extend": "Auto extend name",
+        "register-name": "Register .chain name",
         "name-placeholder": "Enter .chain name",
-        "button": "Register"
+        "button": "Register name",
+        "short-names": {
+          "message": "Ownership of .chain names {0} will be acquired at an auction by the account that places the highest bid.",
+          "insertion": "shorter than 13 characters"
+        }
       },
       "auctions": {
         "button": "Auctions",

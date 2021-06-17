@@ -14,6 +14,7 @@ export default (store) => {
       defaults: {},
       preferred: {},
       auctions: {},
+      pendingAutoExtendNames: [],
     },
     getters: {
       get: ({ owned }) => (name) => owned.find((n) => n.name === name),
@@ -56,10 +57,13 @@ export default (store) => {
       setAuctionEntry(state, { name, expiration, bids }) {
         state.auctions[name] = { expiration, bids };
       },
+      setPendingAutoExtendName(state, name) {
+        state.pendingAutoExtendNames.push(name);
+      },
     },
     actions: {
       async fetchOwned({
-        state: { owned },
+        state: { owned, pendingAutoExtendNames },
         rootGetters: { accounts },
         rootState: { middleware },
         commit,
@@ -82,7 +86,8 @@ export default (store) => {
               expiresAt: info.expireHeight,
               owner: info.ownership.current,
               pointers: info.pointers,
-              autoExtend: owned.find((n) => n.name === name)?.autoExtend,
+              autoExtend: owned.find((n) => n.name === name)?.autoExtend
+               || pendingAutoExtendNames?.includes(name),
               name,
             }))),
           ])),
