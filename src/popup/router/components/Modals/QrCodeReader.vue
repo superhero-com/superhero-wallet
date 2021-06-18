@@ -37,7 +37,6 @@ export default {
     // allow camera while QRScanner is loading to not show cameraNotAllowed before actual check
     cameraAllowed: process.env.PLATFORM === 'cordova',
     browserReader: null,
-    style: null,
     headerText: '',
   }),
   watch: {
@@ -119,12 +118,9 @@ export default {
         ? new Promise((resolve, reject) => {
           window.QRScanner.scan((error, text) => (!error && text ? resolve(text) : reject(error)));
           window.QRScanner.show();
-          this.style = document.createElement('style');
-          this.style.type = 'text/css';
-          this.style.appendChild(
-            document.createTextNode('html, body, #app { background: transparent }'),
-          );
-          document.head.appendChild(this.style);
+          ['body', '#app'].forEach((s) => {
+            document.querySelector(s).style = 'background: transparent';
+          });
           document.querySelector('.main').style.display = 'none';
           this.$store.commit('setPageTitle', 'Scan QR');
         })
@@ -134,8 +130,9 @@ export default {
     },
     stopReading() {
       if (process.env.PLATFORM === 'cordova') {
-        if (document.head.contains(this.style)) document.head.removeChild(this.style);
-        document.querySelector('.main').style.display = '';
+        ['body', '#app', '.main'].forEach((s) => {
+          document.querySelector(s).style = '';
+        });
         this.$store.commit('setPageTitle', '');
         window.QRScanner.destroy();
       } else this.browserReader.reset();
