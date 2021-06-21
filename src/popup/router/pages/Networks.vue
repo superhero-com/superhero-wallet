@@ -35,35 +35,34 @@
           <b>{{ $t('pages.network.middleware') }}</b> {{ network.middlewareUrl }}
         </p>
       </div>
-      <ae-dropdown
+      <ActionsMenu
         v-if="network.index !== undefined"
-        direction="right"
         data-cy="more"
       >
         <ae-icon
-          slot="button"
+          slot="display"
           name="more"
           size="20px"
         />
-        <li
+        <ButtonPlain
           data-cy="edit"
           @click="setNetworkEdit(network)"
         >
           <ae-icon name="edit" />
           {{ $t('pages.network.edit') }}
-        </li>
-        <li
+        </ButtonPlain>
+        <ButtonPlain
           data-cy="delete"
           @click="deleteNetwork(network.index)"
         >
           <ae-icon name="delete" />
           {{ $t('pages.network.delete') }}
-        </li>
-      </ae-dropdown>
+        </ButtonPlain>
+      </ActionsMenu>
     </div>
     <Button
       extend
-      class="mt-20"
+      class="connect mt-20"
       data-cy="to-add"
       @click="mode = 'add'"
     >
@@ -154,6 +153,7 @@
 import { mapGetters } from 'vuex';
 import Button from '../components/Button';
 import ButtonPlain from '../components/ButtonPlain';
+import ActionsMenu from '../components/ActionsMenu';
 import InputField from '../components/InputField';
 import CheckBox from '../components/CheckBox';
 import { defaultNetwork } from '../../utils/constants';
@@ -172,6 +172,7 @@ export default {
   components: {
     Button,
     ButtonPlain,
+    ActionsMenu,
     InputField,
     CheckBox,
     Arrow,
@@ -261,28 +262,44 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 
-.networks .network-row {
-  display: flex;
-  align-items: center;
-  border-top: 1px solid variables.$color-border;
-  padding: 12px 0;
-  text-align: left;
+.networks {
+  .network-row {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid variables.$color-border;
+    padding: 12px 0;
+    text-align: left;
 
-  p {
-    margin: 0;
+    p {
+      margin: 0;
+    }
+
+    p.url {
+      font-weight: normal;
+    }
+
+    .actions-menu {
+      ::v-deep .content {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .button-plain {
+        padding: 8px;
+
+        &:hover {
+          color: variables.$color-white;
+        }
+      }
+    }
   }
 
-  p.url {
-    font-weight: normal;
+  .connect {
+    position: initial;
   }
 }
 
 .network {
-  .edit-btn {
-    margin-left: 5px;
-    margin-right: 0;
-  }
-
   .expand {
     font-size: 14px;
     color: variables.$color-white;
