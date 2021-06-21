@@ -43,13 +43,13 @@ describe('Test cases for Account Page', () => {
       .urlEquals('/account')
       .get('[data-cy=view-all-transactions]')
       .should('be.visible')
-      .get('[data-cy=currency-dropdown] [data-cy=dropdown]')
+      .get('[data-cy=currency-dropdown]')
       .should('be.visible')
       .click()
-      .get('[data-cy=currency-dropdown] [data-cy=dropdown]')
-      .should('have.class', 'show')
-      .click({ force: true }) // TODO: remove force
-      .get('[data-cy=currency-dropdown] [data-cy=dropdown]')
-      .should('not.have.class', 'show');
+      .get('[data-cy=currency-dropdown]')
+      .should('have.class', 'active')
+      .click()
+      .get('[data-cy=currency-dropdown]')
+      .should('not.have.class', 'active');
   });
 });

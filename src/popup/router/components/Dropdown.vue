@@ -1,52 +1,36 @@
 <template>
-  <div class="dropdown">
-    <div
-      v-if="openDropdown"
-      class="dropdown-overlay"
-      @click="openDropdown = false"
+  <ActionsMenu
+    class="dropdown"
+    @click.native.stop
+  >
+    <slot
+      v-for="slot in Object.keys($slots)"
+      :slot="slot"
+      :name="slot"
     />
-    <div
-      :class="{ show: openDropdown }"
-      data-cy="dropdown"
-      @click.stop="openDropdown = !openDropdown"
-    >
-      <ae-button>
-        {{ displayValue }}
-      </ae-button>
-      <ul class="list">
-        <li
-          v-for="{ text, value } in options"
-          :key="value"
-          class="list-item"
-          :value="value"
-        >
-          <ae-button @click="(selectedVal = value), method(value)">
-            {{ text }}
-          </ae-button>
-        </li>
-      </ul>
-    </div>
-  </div>
+    <ul class="list">
+      <li
+        v-for="{ text, value } in options"
+        :key="value"
+        class="list-item"
+      >
+        <ButtonPlain @click="method(value)">
+          {{ text }}
+        </ButtonPlain>
+      </li>
+    </ul>
+  </ActionsMenu>
 </template>
 
 <script>
+import ActionsMenu from './ActionsMenu';
+import ButtonPlain from './ButtonPlain';
+
 export default {
+  components: { ActionsMenu, ButtonPlain },
   props: {
     options: { type: Array, default: null },
-    selected: { type: [String, Number], default: '' },
     method: { type: Function, required: true },
-  },
-  data() {
-    return {
-      selectedVal: this.selected,
-      openDropdown: false,
-    };
-  },
-  computed: {
-    displayValue() {
-      const { text } = this.options.find(({ value }) => value === this.selectedVal) || {};
-      return text || '';
-    },
   },
 };
 </script>
@@ -55,73 +39,37 @@ export default {
 @use '../../../styles/variables';
 
 .dropdown {
-  display: inline-block;
-  position: relative;
   min-width: 6rem;
-  width: 100%;
-  margin-bottom: 22px;
-  z-index: 10;
 
-  > div {
-    font-size: 18px;
-    line-height: 24px;
-    font-weight: 500;
-    position: relative;
-
-    svg {
-      margin-left: 5px;
-    }
-
-    li {
-      list-style-type: none;
-
-      .ae-icon {
-        font-size: 1.2rem;
-        margin: 10px 0 0 0;
-      }
-    }
-
-    button {
-      font-size: 15px;
-      width: 100%;
-      color: variables.$color-white;
-      text-align: left;
-      margin: 0;
-      padding: 0 5px;
-    }
-
-    ul {
-      margin: 0;
-      box-shadow: none;
-      visibility: hidden;
-      max-height: 0;
-      padding: 0;
-      overflow: hidden;
-      transition: all 0.3s ease-in-out;
-      background: variables.$color-bg-3;
-      border: 1px solid variables.$color-blue;
-      border-radius: 5px;
-      scrollbar-width: none;
-    }
-
-    &.show ul.list {
-      visibility: visible;
-      max-height: 165px;
-      overflow-y: scroll;
-      position: relative;
-    }
-
-    .list-item:hover {
-      background: variables.$color-bg-2;
-    }
+  ::v-deep .content {
+    width: 100%;
+    z-index: 1;
   }
 
-  .dropdown-overlay {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+  ul {
+    margin: 0;
+    padding: 0;
+    max-height: 100px;
+    overflow: scroll;
+    transition: all 0.3s ease-in-out;
+    background: variables.$color-bg-3;
+    border: 1px solid variables.$color-blue;
+    border-radius: 5px;
+    scrollbar-width: none;
+
+    .list-item {
+      list-style-type: none;
+
+      &:hover {
+        background: variables.$color-bg-2;
+      }
+
+      .button-plain {
+        width: 100%;
+        color: variables.$color-white;
+        padding: 4px 4px;
+      }
+    }
   }
 }
 </style>

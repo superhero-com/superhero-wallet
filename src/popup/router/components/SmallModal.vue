@@ -1,17 +1,17 @@
 <template>
-  <div class="not-bootstrap-modal">
+  <div class="small-modal">
     <div
       class="overlay"
       @click.stop="$emit('close')"
     />
-    <div class="not-bootstrap-modal-content">
+    <div class="content">
       <slot />
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.not-bootstrap-modal {
+.small-modal {
   .overlay {
     position: fixed;
     bottom: 0;
@@ -20,7 +20,7 @@
     top: 0;
   }
 
-  .not-bootstrap-modal-content {
+  .content {
     position: absolute;
   }
 }
