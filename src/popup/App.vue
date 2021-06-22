@@ -159,7 +159,7 @@ body {
   margin: 0 auto;
   width: variables.$extension-width;
   height: 600px;
-  overflow: auto;
+  overflow-x: hidden;
 
   @include mixins.mobile {
     width: 100%;
