@@ -32,6 +32,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .info-group {
   text-align: left;
@@ -44,7 +45,9 @@ export default {
 
   a {
     color: variables.$color-green;
-    font-size: 11px;
+
+    @extend %face-mono-10-medium;
+
     letter-spacing: -0.3px;
   }
 }
