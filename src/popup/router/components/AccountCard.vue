@@ -22,7 +22,7 @@ import AccountInfo from './AccountInfo';
 import BalanceInfo from './BalanceInfo';
 import ButtonPlain from './ButtonPlain';
 import Triangle from '../../../icons/account-card/card-bg-triangle.svg?vue-component';
-import Arrow from '../../../icons/account-card/arrow.svg?vue-component';
+import Arrow from '../../../icons/arrow.svg?vue-component';
 
 export default {
   components: {
@@ -89,13 +89,12 @@ export default {
     width: 23px;
     border-radius: 0 0 5px 0;
     align-self: flex-end;
-    margin-top: -14px;
     color: var(--color);
   }
 
   .arrows {
-    height: 40px;
-    margin-top: -23px;
+    flex-basis: 16px;
+    margin-top: -8px;
     display: flex;
     justify-content: space-between;
 
@@ -104,12 +103,12 @@ export default {
       color: variables.$color-white;
 
       svg {
-        height: 40px;
-        width: 40px;
+        width: 24px;
+        transform: rotate(90deg);
       }
 
       &:last-of-type svg {
-        transform: rotate(180deg);
+        transform: rotate(-90deg);
       }
 
       &:hover {

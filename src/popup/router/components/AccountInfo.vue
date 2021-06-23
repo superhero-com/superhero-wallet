@@ -270,7 +270,7 @@ export default {
       .claim-chainname {
         @extend %face-sans-14-medium;
 
-        line-height: 21px;
+        line-height: 16px;
       }
 
       .account-type-name {

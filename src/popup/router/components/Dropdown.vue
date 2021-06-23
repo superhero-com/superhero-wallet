@@ -19,7 +19,6 @@
       >
         {{ displayValue }}
       </div>
-      <img src="../../../icons/carret-down.svg">
       <select
         v-model="selectedVal"
         @change="method($event)"
@@ -42,7 +41,6 @@
     >
       <ae-button>
         {{ displayValue }}
-        <ExpandedAngleArrow />
       </ae-button>
       <ul class="list">
         <li
@@ -61,13 +59,8 @@
 </template>
 
 <script>
-import ExpandedAngleArrow from '../../../icons/expanded-angle-arrow.svg?vue-component';
-
 export default {
   name: 'VueDropdown',
-  components: {
-    ExpandedAngleArrow,
-  },
   props: {
     options: { type: Array, default: null },
     selected: { type: [String, Number], default: '' },
