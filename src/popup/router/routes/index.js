@@ -14,8 +14,7 @@ import Intro from '../pages/Intro';
 import Invite from '../pages/Invite';
 import InviteClaim from '../pages/InviteClaim';
 import LanguageSettings from '../pages/LanguageSettings';
-import AuctionBid from '../pages/Names/AuctionBid';
-import AuctionDetails from '../pages/Names/AuctionDetails';
+import Auction from '../pages/Names/Auction';
 import AuctionList from '../pages/Names/AuctionList';
 import More from '../pages/More';
 import NameClaim from '../pages/Names/Claim';
@@ -364,25 +363,25 @@ export default [
     },
   },
   {
-    name: 'auction-details',
-    path: '/names/auctions/:name',
-    component: AuctionDetails,
+    path: '/names/auctions/:name/',
+    component: Auction,
     props: true,
-    meta: {
-      title: 'bidding',
-      notPersist: true,
-      notRebrand: true,
-    },
-  },
-  {
-    path: '/names/auctions/:name/bid',
-    component: AuctionBid,
-    props: true,
-    name: 'auction-bid',
-    meta: {
-      title: 'names',
-      notRebrand: true,
-    },
+    children: [{
+      path: '',
+      props: true,
+      name: 'auction-bid',
+      meta: {
+        title: 'auction',
+        hideTabBar: true,
+      },
+    }, {
+      path: 'history',
+      name: 'auction-history',
+      meta: {
+        title: 'auction',
+        hideTabBar: true,
+      },
+    }],
   },
   {
     path: '/comment',

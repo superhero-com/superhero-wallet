@@ -267,7 +267,7 @@
       "notifications": "Notifications",
       "notification-settings": "Notification Preference",
       "names": "Names",
-      "bidding": "Bidding",
+      "auction": "Bidding",
       "more": "More",
       "networks": "Networks",
       "permissionsSettings": "Permissions settings",
@@ -551,7 +551,9 @@
         "remaining-time": "Remaining Time",
         "add-amount": "Enter amount",
         "min-bid": "Bid must be more than {minBid} AE",
-        "bid-added": "Bid added successfully"
+        "bid-added": "Bid added successfully",
+        "place-bid": "Place bid",
+        "bid-history": "Bid history"
       }
     },
     "languageSettings": {
