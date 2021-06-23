@@ -203,6 +203,16 @@
       "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.<br /><br /> Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.<br /><br /> Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
     }
   },
+  "filters": {
+    "all": "All",
+    "sent": "Sent",
+    "received": "Received",
+    "date": "Date",
+    "tips": "Tips",
+    "bid": "Bid",
+    "soonest": "Ending soon",
+    "length": "Name length"
+  },
   "transaction": {
     "type": {
       "spendTx": "Spend",
@@ -559,8 +569,8 @@
         "soonest": "Soonest",
         "length": "Name length",
         "bid": "Bid",
-        "expires": "Expires",
-        "no-auctions": "No auctions",
+        "expires": "Ends",
+        "no-auctions": "There are no .chain names for auction at the moment. Would you like to register one?",
         "not-found": "Not found",
         "current-bid": "Current bid",
         "previous-bids": "Previous bids",
@@ -912,7 +922,6 @@
     },
     "transactionDetails": {
       "heading": "Transactions Details",
-      "date": "Date",
       "type": "Type",
       "amount": "Amount",
       "fee": "Tx fee",
@@ -947,15 +956,11 @@
       "pointerId": "Pointer Id",
       "pointerKey": "Pointer Key",
       "moreInfo": "More Info",
-      "sent": "Sent",
-      "all": "All",
       "hash": "Hash",
       "status": "Status",
       "pending": "Pending",
       "tipUrl": "Tipped URL",
-      "timestamp": "Timestamp",
-      "received": "Received",
-      "tips": "Tips"
+      "timestamp": "Timestamp"
     },
     "transactions": {
       "backToAccount": "Back to account",

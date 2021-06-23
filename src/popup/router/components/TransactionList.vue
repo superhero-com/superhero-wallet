@@ -1,8 +1,9 @@
 <template>
   <div class="transaction-list">
-    <TransactionFilters
+    <Filters
       v-if="displayFilter"
       v-model="displayMode"
+      :filters="filters"
     />
     <ul
       class="list"
@@ -40,7 +41,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { uniqBy } from 'lodash-es';
-import TransactionFilters from './TransactionFilters';
+import Filters from './Filters';
 import TransactionItem from './TransactionItem';
 import PendingTxs from './PendingTxs';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
@@ -49,7 +50,7 @@ import Visible from '../../../icons/visible.svg?vue-component';
 
 export default {
   components: {
-    TransactionFilters,
+    Filters,
     TransactionItem,
     PendingTxs,
     AnimatedSpinner,
@@ -66,7 +67,10 @@ export default {
       loading: false,
       transactions: [],
       page: 1,
-      displayMode: { latestFirst: true, type: 'all' },
+      displayMode: { rotated: true, filter: 'all', sort: 'date' },
+      filters: {
+        all: {}, sent: {}, received: {}, tips: {}, date: { rotated: true },
+      },
     };
   },
   computed: {
@@ -83,7 +87,7 @@ export default {
               : (!tr.tx.contractId
               || !isFungibleTokenTx(tr)))))
           .filter((tr) => {
-            switch (this.displayMode.type) {
+            switch (this.displayMode.filter) {
               case 'all':
                 return true;
               case 'sent':
@@ -95,7 +99,7 @@ export default {
               case 'tips':
                 return (!isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address) || tr.claim;
               default:
-                throw new Error(`Unknown display mode type: ${this.displayMode.type}`);
+                throw new Error(`Unknown display mode type: ${this.displayMode.filter}`);
             }
           })
           .filter(
@@ -106,7 +110,7 @@ export default {
           )
           .sort((a, b) => {
             const arr = [a, b].map((e) => new Date(e.microTime));
-            if (this.displayMode.latestFirst) arr.reverse();
+            if (this.displayMode.rotated) arr.reverse();
             return arr[0] - arr[1];
           })
           .slice(0, this.maxLength || Infinity);
