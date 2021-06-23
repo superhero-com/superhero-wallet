@@ -1,61 +1,73 @@
 <template>
   <div class="auction-bid">
-    <h4>{{ $t('pages.names.auctions.bid-on') }} {{ name }}</h4>
-    <AmountInput
-      v-model="amount"
-      :error="!+amount"
-      :error-message="amountError || ''"
-    />
-    <Button
-      extend
-      :disabled="!!amountError || !+amount"
-      @click="bid"
-    >
-      {{ $t('pages.names.auctions.bid') }}
-    </Button>
-
-    <div class="details-row">
-      <span>
-        {{ $t('pages.names.auctions.current-heighest-bid') }}
-      </span>
-      <span> {{ highestBid }} {{ $t('ae') }} </span>
-    </div>
-    <div class="details-row">
-      <span>
-        {{ $t('pages.names.auctions.remaining-time') }}
-      </span>
-      <span>
-        in ~ {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
-      </span>
+    <AuctionOverview :name="name" />
+    <div class="form">
+      <AmountInput
+        v-model="amount"
+        :error="!!amountError"
+        :error-message="amountError"
+      />
+      <div class="tx-details">
+        <DetailsItem :label="$t('tx-fee')">
+          <TokenAmount
+            slot="value"
+            :amount="+txFee"
+            hide-fiat
+          />
+        </DetailsItem>
+        <DetailsItem :label="$t('total')">
+          <TokenAmount
+            slot="value"
+            :amount="+amountTotal"
+          />
+        </DetailsItem>
+      </div>
+      <Button
+        :disabled="!!amountError || !+amount"
+        @click="bid"
+      >
+        {{ $t('pages.names.auctions.place-bid') }}
+      </Button>
     </div>
     <Loader v-if="loading" />
   </div>
 </template>
 
 <script>
-import { pick } from 'lodash-es';
-import { blocksToRelativeTime } from '../../../../filters/toRelativeTime';
-import Button from '../../components/Button';
-import AmountInput from '../../components/AmountInput';
+import { mapGetters } from 'vuex';
 import { aeToAettos } from '../../../utils/helper';
+import { calculateNameClaimFee } from '../../../utils/constants';
+import AuctionOverview from '../../components/AuctionOverview';
+import AmountInput from '../../components/AmountInput';
+import DetailsItem from '../../components/DetailsItem';
+import TokenAmount from '../../components/TokenAmount';
+import Button from '../../components/Button';
 
 export default {
-  components: { Button, AmountInput },
-  filters: { blocksToRelativeTime },
+  components: {
+    AuctionOverview, AmountInput, DetailsItem, TokenAmount, Button,
+  },
   props: {
     name: { type: String, required: true },
   },
   data() {
     return {
       loading: false,
-      expiration: 0,
-      highestBid: null,
       amount: 0,
       amountError: null,
     };
   },
-  subscriptions() {
-    return pick(this.$store.state.observables, ['topBlockHeight']);
+  computed: {
+    ...mapGetters('names', ['getHighestBid']),
+    highestBid() {
+      return this.getHighestBid(this.name).nameFee;
+    },
+    txFee() {
+      return calculateNameClaimFee(this.name);
+    },
+    amountTotal() {
+      return this.txFee.plus(this.amount || 0);
+    },
   },
   watch: {
     amount(val) {
@@ -65,19 +77,9 @@ export default {
         const minBid = this.highestBid.multipliedBy(1.05).toString();
         this.amountError = this.$t('pages.names.auctions.min-bid', { minBid });
       } else {
-        this.amountError = false;
+        this.amountError = '';
       }
     },
-  },
-  async mounted() {
-    this.loading = true;
-    await this.$watchUntilTruly(() => this.$store.state.middleware);
-    const res = await this.$store.dispatch('names/fetchAuctionEntry', this.name);
-    this.expiration = res.expiration;
-    this.highestBid = res.bids
-      .map(({ nameFee }) => nameFee)
-      .reduce((a, b) => (a.isGreaterThan(b) ? a : b));
-    this.loading = false;
   },
   methods: {
     async bid() {
@@ -90,7 +92,7 @@ export default {
           name: 'default',
           msg: this.$t('pages.names.auctions.bid-added', { name: this.name }),
         });
-        this.$router.push({ name: 'auction-details', params: { name: this.name } });
+        this.$router.push({ name: 'auction-history', params: { name: this.name } });
       } catch (e) {
         let msg = e.message;
         if (msg.includes('is not enough to execute')) {
@@ -101,15 +103,29 @@ export default {
         this.loading = false;
       }
     },
-    blocksToRelativeTime,
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.auction-bid .details-row {
-  display: flex;
-  justify-content: space-between;
-  margin: 5px 0;
+@use '../../../../styles/variables';
+
+.auction-bid {
+  .form {
+    padding: 16px;
+
+    .tx-details {
+      display: flex;
+      padding-top: 16px;
+
+      .details-item {
+        margin-right: 24px;
+      }
+    }
+
+    .button {
+      margin-top: 16px;
+    }
+  }
 }
 </style>

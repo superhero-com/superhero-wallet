@@ -34,7 +34,7 @@
       <NameRow
         v-for="({ name, expiration, lastBid }, key) in auctions"
         :key="key"
-        :to="{ name: 'auction-details', params: { name } }"
+        :to="{ name: 'auction-bid', params: { name } }"
         :name="name"
         :address="lastBid.accountId"
       >
