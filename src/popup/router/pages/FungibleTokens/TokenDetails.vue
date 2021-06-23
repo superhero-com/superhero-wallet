@@ -114,7 +114,7 @@ import SendIcon from '../../../../icons/send.svg?vue-component';
 import ReceiveIcon from '../../../../icons/receive.svg?vue-component';
 import TipIcon from '../../../../icons/tip.svg?vue-component';
 import Warning from '../../../../icons/warning.svg?vue-component';
-import TxHistory from '../../../../icons/tx-history.svg?vue-component';
+import TxHistory from '../../../../icons/history.svg?vue-component';
 import BoxButton from '../../components/BoxButton';
 import TokenAmount from '../../components/TokenAmount';
 import DetailsRow from '../../components/FungibleTokens/DetailsRow';

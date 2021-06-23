@@ -41,7 +41,7 @@
 import { mapState } from 'vuex';
 import Plate from '../components/Plate';
 import AccountSwitcher from '../components/AccountSwitcher';
-import TxHistory from '../../../icons/tx-history.svg?vue-component';
+import TxHistory from '../../../icons/history.svg?vue-component';
 import TransactionList from '../components/TransactionList';
 
 export default {
