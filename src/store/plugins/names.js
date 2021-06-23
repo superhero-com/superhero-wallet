@@ -32,6 +32,8 @@ export default (store) => {
       },
       getName: ({ owned }) => (name) => owned.find((n) => n.name === name),
       getAuction: ({ auctions }) => (name) => auctions[name] || null,
+      getHighestBid: (_, { getAuction }) => (name) => getAuction(name)
+        && getAuction(name).bids.reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b)),
     },
     mutations: {
       set(state, names) {

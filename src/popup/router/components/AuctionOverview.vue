@@ -6,14 +6,14 @@
       <DetailsItem :label="$t('pages.auctionBid.current-highest-bid')">
         <TokenAmount
           slot="value"
-          :amount="highestBid"
+          :amount="+getHighestBid(name).nameFee"
         />
       </DetailsItem>
       <DetailsItem
         class="end-height"
         :label="$t('pages.auctionBid.ending-height')"
-        :value="endHeight"
-        :secondary="`(≈${blocksToRelativeTime(endHeight)})`"
+        :value="auction.expiration"
+        :secondary="`(≈${blocksToRelativeTime(blocksToExpiry)})`"
       />
     </div>
     <ButtonPlain
@@ -26,6 +26,8 @@
 </template>
 
 <script>
+import { pick } from 'lodash-es';
+import { mapGetters } from 'vuex';
 import Avatar from './Avatar';
 import DetailsItem from './DetailsItem';
 import TokenAmount from './TokenAmount';
@@ -43,8 +45,18 @@ export default {
   },
   props: {
     name: { type: String, required: true },
-    highestBid: { type: Number, required: true },
-    endHeight: { type: Number, required: true },
+  },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['topBlockHeight']);
+  },
+  computed: {
+    ...mapGetters('names', ['getAuction', 'getHighestBid']),
+    auction() {
+      return this.getAuction(this.name);
+    },
+    blocksToExpiry() {
+      return this.auction.expiration - this.topBlockHeight;
+    },
   },
   methods: {
     showHelp() {
