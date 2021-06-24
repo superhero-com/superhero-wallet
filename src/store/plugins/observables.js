@@ -40,7 +40,8 @@ export default (store) => {
     })),
     map((balanceAettos) => {
       const balance = aettosToAe(balanceAettos);
-      const storageBalance = getBalanceLocalStorage();
+      let storageBalance = getBalanceLocalStorage();
+      if (typeof storageBalance === 'string') storageBalance = {}; // Previously string was stored
       if (balance !== storageBalance[address]) {
         storageBalance[address] = balance;
         setBalanceLocalStorage(storageBalance);
