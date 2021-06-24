@@ -40,6 +40,7 @@
 <script>
 import Modal from '../Modal';
 import Button from '../Button';
+import TimesCircle from '../../../../icons/times-circle.svg?vue-component';
 import QuestionCircle from '../../../../icons/question-circle.svg?vue-component';
 
 export default {
@@ -55,6 +56,8 @@ export default {
   computed: {
     Icon() {
       switch (this.icon) {
+        case 'critical':
+          return TimesCircle;
         case 'info':
           return QuestionCircle;
         default:
@@ -70,6 +73,10 @@ export default {
 
 .default {
   .icon {
+    &.critical {
+      color: variables.$color-error;
+    }
+
     &.info {
       color: variables.$color-blue;
     }
