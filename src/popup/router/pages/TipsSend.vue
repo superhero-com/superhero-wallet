@@ -36,7 +36,6 @@
           <UrlStatus
             slot="left"
             :status="urlStatus"
-            info
           />
         </InputField>
       </div>

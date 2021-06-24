@@ -6,10 +6,7 @@
     </div>
 
     <div class="url-bar">
-      <UrlStatus
-        :status="urlStatus"
-        info
-      />
+      <UrlStatus :status="urlStatus" />
       <a class="link-sm text-left">{{ tip.url }}</a>
     </div>
 

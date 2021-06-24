@@ -42,6 +42,10 @@ import Modal from '../Modal';
 import Button from '../Button';
 import TimesCircle from '../../../../icons/times-circle.svg?vue-component';
 import QuestionCircle from '../../../../icons/question-circle.svg?vue-component';
+import Alert from '../../../../icons/alert.svg?vue-component';
+import Warning from '../../../../icons/warning.svg?vue-component';
+import CheckCircle from '../../../../icons/check-circle.svg?vue-component';
+import NotSecure from '../../../../icons/not-secure.svg?vue-component';
 
 export default {
   components: { Modal, Button },
@@ -58,8 +62,16 @@ export default {
       switch (this.icon) {
         case 'critical':
           return TimesCircle;
+        case 'alert':
+          return Alert;
+        case 'warning':
+          return Warning;
         case 'info':
           return QuestionCircle;
+        case 'success':
+          return CheckCircle;
+        case 'not-secure':
+          return NotSecure;
         default:
           return null;
       }
@@ -73,12 +85,22 @@ export default {
 
 .default {
   .icon {
+    &.alert,
     &.critical {
       color: variables.$color-error;
     }
 
+    &.warning,
+    &.not-secure {
+      color: variables.$color-warning;
+    }
+
     &.info {
       color: variables.$color-blue;
+    }
+
+    &.success {
+      color: variables.$color-green;
     }
   }
 }

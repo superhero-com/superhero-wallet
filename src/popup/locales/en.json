@@ -82,19 +82,19 @@
       "msg": "This sub-account will be removed from your wallet and deleted from storage. It will still remain stored on the blockchain and you will be able to restore it with your seed phrase. Make sure you have backed up your seed phrase before you proceed. This action cannot be undone!"
     },
     "verified": {
-      "title": "What is a \"Verified\" URL?",
+      "title": "Verified URL",
       "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed easily."
     },
     "not-verified": {
-      "title": "What does it mean when a URL is \"Not Verified\"?",
+      "title": "Not verified URL",
       "msg": "This means that the owner of the URL has not created a Superhero wallet yet. They can claim their tips as soon as they make one and add their wallet address to their website. "
     },
     "blacklisted": {
-      "title": "What is an \"Inaccessible\" URL?",
+      "title": "Inaccessible URL",
       "msg": "The Superhero wallet can tip any public URL. Currently, web pages that require logging in to view information cannot be tipped. We're still working on solutions for this."
     },
     "not-secure": {
-      "title": "Superhero Wallet is marking HTTP sites as \"Not secure\" - please, use URLs with HTTPS, only.",
+      "title": "Not secure URL",
       "msg": "The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
     },
     "switcherAccsLimit": {

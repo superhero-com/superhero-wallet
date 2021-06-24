@@ -1,41 +1,52 @@
 <template>
   <Component
-    :is="Icon"
+    :is="data.Icon"
     class="url-status"
-    :class="{ modal, info }"
+    :class="data.icon"
     @click="showModal"
   />
 </template>
 
 <script>
-import Verified from '../../../icons/badges/verified.svg?vue-component';
-import Blacklisted from '../../../icons/badges/blacklisted.svg?vue-component';
-import NotSecure from '../../../icons/badges/not-secure.svg?vue-component';
-import NotVerified from '../../../icons/badges/not-verified.svg?vue-component';
+import Alert from '../../../icons/alert.svg?vue-component';
+import Warning from '../../../icons/warning.svg?vue-component';
+import CheckCircle from '../../../icons/check-circle.svg?vue-component';
+import NotSecure from '../../../icons/not-secure.svg?vue-component';
 import Default from '../../../icons/badges/default.svg?vue-component';
 
 export default {
   props: {
-    status: {
-      type: String,
-      required: true,
-    },
-    info: Boolean,
-    modal: Boolean,
+    status: { type: String, required: true },
   },
   computed: {
-    Icon() {
+    data() {
       switch (this.status) {
         case 'verified':
-          return Verified;
+          return {
+            Icon: CheckCircle,
+            icon: 'success',
+            content: this.$t('modals.verified'),
+          };
         case 'blacklisted':
-          return Blacklisted;
+          return {
+            Icon: Alert,
+            icon: 'alert',
+            content: this.$t('modals.blacklisted'),
+          };
         case 'not-secure':
-          return NotSecure;
+          return {
+            Icon: NotSecure,
+            icon: 'not-secure',
+            content: this.$t('modals.not-secure'),
+          };
         case 'not-verified':
-          return NotVerified;
+          return {
+            Icon: Warning,
+            icon: 'warning',
+            content: this.$t('modals.not-verified'),
+          };
         case 'default':
-          return Default;
+          return { Icon: Default };
         default:
           throw new Error(`Unknown url status: ${this.status}`);
       }
@@ -43,10 +54,12 @@ export default {
   },
   methods: {
     showModal() {
-      if (this.info && this.status !== 'default') {
+      if (this.status !== 'default') {
         this.$store.dispatch('modals/open', {
-          name: 'tip-url-status',
-          status: this.status,
+          name: 'default',
+          title: this.data.content.title,
+          msg: this.data.content.msg,
+          icon: this.data.icon,
         });
       }
     },
@@ -55,24 +68,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '../../../styles/variables';
+
 .url-status {
+  width: 18px;
+  height: 18px;
   cursor: pointer;
 
-  &.info {
-    width: 18px;
-    height: 18px;
+  &.alert {
+    color: variables.$color-error;
   }
 
-  &.modal {
-    width: 26px;
-    height: 26px;
-    cursor: unset;
-    position: absolute;
-    left: 50%;
-    top: 22px;
-    transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
-    -webkit-transform: translateX(-50%);
+  &.warning,
+  &.not-secure {
+    color: variables.$color-warning;
+  }
+
+  &.success {
+    color: variables.$color-green;
   }
 }
 </style>
