@@ -2,7 +2,7 @@
   <Modal
     class="default"
     close
-    @close="resolve"
+    v-on="{ close: close || resolve }"
   >
     <template slot="header">
       <Component
@@ -22,7 +22,13 @@
       {{ msg || $t(`modals.${type}.msg`) }}
     </template>
 
+    <slot
+      v-if="$slots.footer"
+      slot="footer"
+      name="footer"
+    />
     <Button
+      v-else
       slot="footer"
       @click="resolve"
     >
@@ -40,6 +46,7 @@ export default {
   components: { Modal, Button },
   props: {
     resolve: { type: Function, required: true },
+    close: { type: Function, default: null },
     title: { type: String, default: '' },
     msg: { type: String, default: '' },
     type: { type: String, default: '' },
