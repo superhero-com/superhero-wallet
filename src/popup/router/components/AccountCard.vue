@@ -1,45 +1,38 @@
 <template>
   <div
-    :class="['account-card', { subaccount: idx !== 0, 'first-subaccount': idx === 1 }]"
+    :class="[
+      'account-card',
+      { subaccount: idx !== 0, 'first-subaccount': idx === 1, minified: cardMinified }]"
     :style="cssVar"
   >
     <AccountInfo v-bind="$attrs" />
     <BalanceInfo v-bind="$attrs" />
-    <div class="arrows">
-      <ButtonPlain @click="$emit('left')">
-        <Arrow v-if="left" />
-      </ButtonPlain>
-      <ButtonPlain @click="$emit('right')">
-        <Arrow v-if="right" />
-      </ButtonPlain>
-    </div>
-    <Triangle class="triangle" />
+    <Triangle
+      v-if="!cardMinified"
+      class="triangle"
+    />
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import AccountInfo from './AccountInfo';
 import BalanceInfo from './BalanceInfo';
-import ButtonPlain from './ButtonPlain';
 import Triangle from '../../../icons/account-card/card-bg-triangle.svg?vue-component';
-import Arrow from '../../../icons/arrow.svg?vue-component';
 
 export default {
   components: {
     AccountInfo,
     BalanceInfo,
-    ButtonPlain,
     Triangle,
-    Arrow,
   },
   props: {
     idx: { type: Number, required: true },
     color: { type: String, required: true },
     shift: { type: Number, required: true },
-    left: Boolean,
-    right: Boolean,
   },
   computed: {
+    ...mapState(['cardMinified']),
     cssVar() {
       return {
         '--shift': this.shift,
@@ -56,12 +49,19 @@ export default {
 .account-card {
   display: flex;
   flex-direction: column;
+  position: relative;
+  width: 328px;
   height: 169px;
-  width: 312px;
   border-radius: 6px;
   background-image: url('../../../icons/account-card/account-bg-pattern.svg');
   background-color: #0a0e16;
   background-position: calc(var(--shift) * 15px) calc(var(--shift) * 20px);
+  transition: height 0.2s ease-out;
+
+  &.minified {
+    height: 109px;
+    overflow: hidden;
+  }
 
   &.subaccount {
     background-image: url('../../../icons/account-card/subaccount-bg-pattern.svg');
@@ -77,7 +77,7 @@ export default {
   }
 
   .account-info {
-    padding: 8px 8px 0 8px;
+    padding: 6px 6px 0 6px;
   }
 
   .balance-info {
@@ -85,36 +85,13 @@ export default {
   }
 
   .triangle {
+    position: absolute;
+    bottom: 0;
     height: 23px;
     width: 23px;
     border-radius: 0 0 5px 0;
     align-self: flex-end;
     color: var(--color);
-  }
-
-  .arrows {
-    flex-basis: 16px;
-    margin-top: -8px;
-    display: flex;
-    justify-content: space-between;
-
-    .button-plain {
-      opacity: 0.33;
-      color: variables.$color-white;
-
-      svg {
-        width: 24px;
-        transform: rotate(90deg);
-      }
-
-      &:last-of-type svg {
-        transform: rotate(-90deg);
-      }
-
-      &:hover {
-        opacity: 1;
-      }
-    }
   }
 }
 </style>

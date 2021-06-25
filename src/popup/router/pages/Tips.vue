@@ -1,7 +1,6 @@
 <template>
   <div class="tips">
-    <AccountInfo />
-    <BalanceInfo />
+    <AccountSwitcher />
     <Tabs>
       <RouterLink
         :to="{ name: 'tips-send' }"
@@ -18,16 +17,14 @@
 </template>
 
 <script>
-import AccountInfo from '../components/AccountInfo';
-import BalanceInfo from '../components/BalanceInfo';
+import AccountSwitcher from '../components/AccountSwitcher';
 import Tabs from '../components/Tabs';
 import TipIcon from '../../../icons/tip.svg?vue-component';
 import ClaimTipsIcon from '../../../icons/claim-tips.svg?vue-component';
 
 export default {
   components: {
-    AccountInfo,
-    BalanceInfo,
+    AccountSwitcher,
     Tabs,
     TipIcon,
     ClaimTipsIcon,

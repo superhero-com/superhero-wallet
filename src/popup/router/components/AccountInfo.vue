@@ -1,32 +1,42 @@
 <template>
-  <div :class="['account-info', { edit, copied }]">
-    <div class="account-buttons">
+  <div :class="['account-info', { edit }]">
+    <div class="buttons">
       <ButtonPlain
-        v-if="idx !== 0 && $route.path === '/accounts'"
-        class="remove"
-        @click="remove"
+        class="minify"
+        @click="$store.commit('toggleMinifiedCard')"
       >
-        <Remove />
+        <Component
+          :is="cardMinified ? 'Expand' : 'Collapse'"
+        />
       </ButtonPlain>
-      <RouterLink
-        v-if="UNFINISHED_FEATURES && $route.path !== '/accounts'"
-        to="/accounts"
-      >
-        <Settings />
-      </RouterLink>
-      <ButtonPlain
-        v-if="UNFINISHED_FEATURES && idx === 0"
-        @click="createAccount"
-      >
-        <Add />
-      </ButtonPlain>
-      <ButtonPlain
-        v-clipboard:copy="accounts[idx].address"
-        data-cy="copy"
-        @click="copy"
-      >
-        <Copy />
-      </ButtonPlain>
+      <div>
+        <ButtonPlain
+          v-clipboard:copy="accounts[idx].address"
+          data-cy="copy"
+          @click="copy"
+        >
+          <Copy />
+        </ButtonPlain>
+        <ButtonPlain
+          v-if="UNFINISHED_FEATURES && idx === 0"
+          @click="createAccount"
+        >
+          <Add />
+        </ButtonPlain>
+        <ButtonPlain
+          v-if="idx !== 0 && $route.path === '/accounts'"
+          class="remove"
+          @click="remove"
+        >
+          <Remove />
+        </ButtonPlain>
+        <RouterLink
+          v-if="UNFINISHED_FEATURES && $route.path !== '/accounts'"
+          to="/accounts"
+        >
+          <Settings />
+        </RouterLink>
+      </div>
     </div>
     <div class="title">
       <Avatar
@@ -35,7 +45,6 @@
       />
       <div
         class="account-name"
-        :class="{ long: !UNFINISHED_FEATURES }"
         data-cy="account-name"
       >
         <a
@@ -43,10 +52,7 @@
           :href="explorerUrl"
           target="_blank"
         >
-          <Truncate
-            :str="accounts[idx].name"
-            class="chainname"
-          />
+          <Truncate :str="accounts[idx].name" />
         </a>
         <router-link
           v-else
@@ -77,8 +83,7 @@
             </ButtonPlain>
           </template>
         </InputField>
-        <!-- eslint-disable-next-line vue-i18n/no-raw-text-->
-        <label v-if="edit">{{ customAccountName.length }}/{{ maxCustomNameLength }}</label>
+        <label v-if="edit">{{ `${customAccountName.length}/${maxCustomNameLength}` }}</label>
       </div>
     </div>
     <a
@@ -106,6 +111,8 @@ import Avatar from './Avatar';
 import Truncate from './Truncate';
 import InputField from './InputField';
 import ButtonPlain from './ButtonPlain';
+import Collapse from '../../../icons/account-card/collapse.svg?vue-component';
+import Expand from '../../../icons/account-card/expand.svg?vue-component';
 import Add from '../../../icons/account-card/btn-add-subaccount.svg?vue-component';
 import Copy from '../../../icons/account-card/btn-copy-address.svg?vue-component';
 import Settings from '../../../icons/settings.svg?vue-component';
@@ -115,7 +122,18 @@ import Save from '../../../icons/account-card/btn-save.svg?vue-component';
 
 export default {
   components: {
-    Avatar, Add, Copy, Settings, Remove, Edit, Save, Truncate, InputField, ButtonPlain,
+    Avatar,
+    Collapse,
+    Expand,
+    Add,
+    Copy,
+    Settings,
+    Remove,
+    Edit,
+    Save,
+    Truncate,
+    InputField,
+    ButtonPlain,
   },
   props: {
     accountIdx: { type: Number, default: -1 },
@@ -128,7 +146,7 @@ export default {
     UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
   }),
   computed: {
-    ...mapState(['accountCount', 'accountSelectedIdx']),
+    ...mapState(['accountCount', 'accountSelectedIdx', 'cardMinified']),
     ...mapGetters(['accounts', 'activeNetwork']),
     idx() {
       return this.accountIdx === -1 ? this.accountSelectedIdx : this.accountIdx;
@@ -200,23 +218,30 @@ export default {
     }
   }
 
-  .account-buttons {
-    height: 8px;
+  .buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 24px;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    a,
+    .button-plain,
+    .minify {
+      color: variables.$color-light-grey;
+    }
 
     a,
     .button-plain {
-      color: variables.$color-white;
-      opacity: 0.7;
-      float: right;
-      margin-left: 8px;
-
-      svg {
-        width: 24px;
-        height: 24px;
+      &:not(:first-child) {
+        margin-left: 8px;
       }
 
       &:hover {
-        opacity: 1;
         color: variables.$color-green;
 
         &.remove {
@@ -224,13 +249,23 @@ export default {
         }
       }
     }
+
+    .minify:hover {
+      color: variables.$color-blue;
+    }
   }
 
   .title {
     display: flex;
     align-items: center;
+    justify-content: center;
+    margin-top: 8px;
     margin-bottom: 6px;
     line-height: 21px;
+
+    @extend %face-sans-14-medium;
+
+    line-height: 16px;
 
     .avatar {
       align-self: flex-start;
@@ -239,47 +274,22 @@ export default {
     }
 
     .account-name {
-      color: variables.$color-white;
-      margin-right: auto;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
 
-      a .chainname {
-        @extend %face-sans-17-medium;
-
-        max-width: 150px;
-        line-height: 16px;
-        color: variables.$color-white;
-
-        &:hover {
-          &::before,
-          &::after {
-            text-decoration: underline;
-          }
-        }
-      }
-
       a {
+        color: variables.$color-white;
         text-decoration: none;
-        max-width: 150px;
+        max-width: 250px;
 
         &:hover {
           text-decoration: underline;
         }
       }
 
-      &.long {
-        a .chainname,
-        a {
-          max-width: 220px;
-        }
-      }
-
       .claim-chainname {
-        @extend %face-sans-14-medium;
-
-        line-height: 16px;
+        color: variables.$color-green;
       }
 
       label {
@@ -296,7 +306,6 @@ export default {
     text-decoration: none;
     text-align: center;
     color: variables.$color-light-grey;
-    letter-spacing: -0.4px;
 
     @extend %face-mono-10-medium;
 
@@ -309,21 +318,18 @@ export default {
 
   .copied {
     display: flex;
-    justify-content: center;
     align-items: center;
 
     span {
       width: 100%;
 
       &:not(.text) {
-        height: 0;
         border-bottom: 1px dashed variables.$color-blue;
         margin: 0 8px;
       }
 
       &.text {
         white-space: nowrap;
-        text-align: center;
         color: variables.$color-blue;
 
         @extend %face-sans-14-regular;

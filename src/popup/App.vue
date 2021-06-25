@@ -203,6 +203,11 @@ body {
         padding-left: 0;
         padding-right: 0;
       }
+
+      &:not(.transactions) ::v-deep .account-switcher {
+        margin-left: -20px;
+        margin-right: -20px;
+      }
     }
   }
 

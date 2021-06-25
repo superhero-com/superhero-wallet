@@ -8,14 +8,11 @@
       :style="cssVars"
     >
       <AccountCard
-        v-for="(account, idx) in filteredAccounts"
+        v-for="account in filteredAccounts"
         :key="account.address"
+        :class="{ selected: account.i === accountSelectedIdx }"
         v-bind="account"
         :account-idx="account.i"
-        :left="idx > 0 && filteredAccounts.length > 1"
-        :right="idx < filteredAccounts.length - 1"
-        @left="selectAccount(filteredAccounts[idx - 1].i)"
-        @right="selectAccount(filteredAccounts[idx + 1].i)"
       />
     </div>
     <div
@@ -72,7 +69,7 @@ export default {
   display: flex;
   flex-direction: column;
   border-radius: 0 0 10px 10px;
-  padding-top: 32px;
+  padding-top: 12px;
 
   &.notification-above {
     margin-top: 16px;
@@ -87,20 +84,20 @@ export default {
     margin-left: calc(var(--accountSelectedIdx) * (-312px - 8px));
 
     .account-card {
-      margin-right: 8px;
+      margin-right: 4px;
 
       &:first-of-type {
-        margin-left: 24px;
+        margin-left: 16px;
       }
 
       &:last-of-type {
-        margin-right: 24px;
+        margin-right: 16px;
       }
     }
 
     &.menu-under {
       align-self: flex-start;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
   }
 
@@ -112,7 +109,7 @@ export default {
 
     .button-plain {
       width: 32px;
-      height: 16px;
+      height: 13px;
       background: variables.$color-bg-3;
       border: 1px solid variables.$color-border;
       box-sizing: border-box;

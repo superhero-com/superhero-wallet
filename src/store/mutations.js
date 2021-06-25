@@ -128,4 +128,7 @@ export default {
   selectSdkAccount({ sdk }, address) {
     sdk.selectAccount(address);
   },
+  toggleMinifiedCard(state) {
+    state.cardMinified = !state.cardMinified;
+  },
 };
