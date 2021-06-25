@@ -14,6 +14,7 @@
       <Avatar
         :address="account.address"
         :name="account.name"
+        size="mid"
       />
       <div class="account-info">
         <div
@@ -170,8 +171,6 @@ export default {
 
     .avatar {
       margin-right: 8px;
-      width: 32px;
-      height: 32px;
     }
 
     .account-info {
