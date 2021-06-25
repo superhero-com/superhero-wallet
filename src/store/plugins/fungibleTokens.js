@@ -74,7 +74,10 @@ export default (store) => {
       async getAeternityData({ rootState: { current }, commit }) {
         const [aeternityData] = await fetchJson(
           `https://api.coingecko.com/api/v3/coins/markets?ids=aeternity&vs_currency=${current.currency}`,
-        );
+        ).catch((e) => {
+          handleUnknownError(e);
+          return [];
+        });
         return commit('setAePublicData', aeternityData);
       },
       async createOrChangeAllowance(
