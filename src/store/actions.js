@@ -226,6 +226,7 @@ export default {
   async requestResetting({ dispatch }) {
     await dispatch('modals/open', {
       name: 'confirm',
+      icon: 'critical',
       title: i18n.t('modals.removeAccount.title'),
       msg: i18n.t('modals.removeAccount.msg'),
     });

@@ -1,17 +1,32 @@
 <template>
   <Modal
-    class="default"
     close
-    @close="resolve"
+    v-on="{ close: close || resolve }"
   >
-    <template
-      v-if="title"
-      slot="header"
-    >
+    <template slot="header">
+      <StatusIcon
+        v-if="icon"
+        :status="icon"
+        class="icon"
+      />
       {{ title }}
     </template>
-    {{ msg || $t(`modals.${type}.msg`) }}
+
+    <slot
+      v-if="$slots.msg"
+      name="msg"
+    />
+    <template v-else>
+      {{ msg || $t(`modals.${type}.msg`) }}
+    </template>
+
+    <slot
+      v-if="$slots.footer"
+      slot="footer"
+      name="footer"
+    />
     <Button
+      v-else
       slot="footer"
       @click="resolve"
     >
@@ -23,14 +38,17 @@
 <script>
 import Modal from '../Modal';
 import Button from '../Button';
+import StatusIcon from '../StatusIcon';
 
 export default {
-  components: { Modal, Button },
+  components: { Modal, Button, StatusIcon },
   props: {
     resolve: { type: Function, required: true },
+    close: { type: Function, default: null },
     title: { type: String, default: '' },
     msg: { type: String, default: '' },
     type: { type: String, default: '' },
+    icon: { type: String, default: '' },
   },
 };
 </script>

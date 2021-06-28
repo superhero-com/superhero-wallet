@@ -161,6 +161,7 @@ export default {
     async remove() {
       await this.$store.dispatch('modals/open', {
         name: 'confirm',
+        icon: 'critical',
         title: this.$t('modals.removeSubaccount.title'),
         msg: this.$t('modals.removeSubaccount.msg'),
       });

@@ -1,17 +1,8 @@
 <template>
-  <Modal
-    close
-    @close="cancel"
+  <Default
+    v-bind="{ ...$attrs, resolve }"
+    :close="cancel"
   >
-    <template
-      v-if="title"
-      slot="header"
-    >
-      {{ title }}
-    </template>
-    <template v-if="msg">
-      {{ msg }}
-    </template>
     <template slot="footer">
       <Button
         fill="secondary"
@@ -26,20 +17,18 @@
         {{ $t('modals.confirm') }}
       </Button>
     </template>
-  </Modal>
+  </Default>
 </template>
 
 <script>
-import Modal from '../Modal';
+import Default from './Default';
 import Button from '../Button';
 
 export default {
-  components: { Modal, Button },
+  components: { Default, Button },
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
-    title: { type: String, default: '' },
-    msg: { type: String, default: '' },
   },
   methods: {
     cancel() {
