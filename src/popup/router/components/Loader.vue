@@ -3,91 +3,51 @@
     class="loader"
     data-cy="loader"
   >
-    <div class="center">
-      <span v-if="content !== ''">{{ content }}</span>
-      <br v-if="content !== ''">
-      <ae-loader v-if="size === 'small'" />
+    <div class="container">
+      <AnimatedSpinner class="spinner" />
     </div>
-    <transition v-if="size === 'big'">
-      <span
-        v-if="type === 'transparent'"
-        class="main-loader main-loader-transparent"
-      >
-        <ae-loader />
-      </span>
-      <Welcome
-        v-else
-        class="main-loader main-loader-solid"
-      />
-    </transition>
   </div>
 </template>
 
 <script>
-import Welcome from './Welcome';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 
 export default {
-  components: {
-    Welcome,
-  },
-  props: {
-    content: { type: String, default: '' },
-    size: { type: String, default: 'big' },
-    type: { type: String, default: 'transparent' },
-  },
+  components: { AnimatedSpinner },
 };
 </script>
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/mixins';
 
 .loader {
-  .center {
-    position: relative;
-    z-index: 5;
-    word-break: break-word;
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9;
 
-  .ae-loader {
-    border: 0.2em solid variables.$color-blue;
-    border-left-color: transparent;
-    border-right-color: transparent;
-  }
-
-  .main-loader {
-    position: fixed;
+  .container {
     width: 100%;
     height: 100%;
     background-color: variables.$color-bg-3;
-    top: 0;
-    z-index: 8;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    .ae-loader {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      margin: -1.5em;
-      width: 3em;
-      height: 3em;
-      border-radius: 3em;
+    @include mixins.desktop {
+      width: variables.$extension-width;
+      height: 600px;
+      border-radius: 10px;
+      margin: auto;
     }
 
-    &.main-loader-transparent {
-      opacity: 0.6;
-    }
-
-    &.main-loader-solid {
-      padding-top: 50px;
-      padding-top: calc(50px + env(safe-area-inset-top));
-    }
-
-    &.v-enter-active,
-    &.v-leave-active {
-      transition: all 0.5s ease-in-out;
-    }
-
-    &.v-leave-to {
-      opacity: 0;
+    .spinner {
+      width: 72px;
+      height: 72px;
     }
   }
 }
