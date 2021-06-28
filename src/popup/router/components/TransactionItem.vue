@@ -116,7 +116,7 @@ export default {
     }
 
     :nth-child(1) {
-      color: variables.$color-white;
+      color: variables.$color-light-grey;
     }
 
     :nth-child(2) {
