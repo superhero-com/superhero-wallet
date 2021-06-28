@@ -1,5 +1,5 @@
 <template>
-  <div class="auction-overview">
+  <div class="auction-card">
     <Avatar :name="name" />
     <span class="name">{{ name }}</span>
     <div class="details">
@@ -71,7 +71,7 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 
-.auction-overview {
+.auction-card {
   display: flex;
   flex-direction: column;
   position: relative;

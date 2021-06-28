@@ -1,6 +1,6 @@
 <template>
   <div class="auction-bid">
-    <AuctionOverview :name="name" />
+    <AuctionCard :name="name" />
     <div class="form">
       <AmountInput
         v-model="amount"
@@ -37,7 +37,7 @@
 import { mapGetters } from 'vuex';
 import { aeToAettos } from '../../../utils/helper';
 import { calculateNameClaimFee } from '../../../utils/constants';
-import AuctionOverview from '../../components/AuctionOverview';
+import AuctionCard from '../../components/AuctionCard';
 import AmountInput from '../../components/AmountInput';
 import DetailsItem from '../../components/DetailsItem';
 import TokenAmount from '../../components/TokenAmount';
@@ -45,7 +45,7 @@ import Button from '../../components/Button';
 
 export default {
   components: {
-    AuctionOverview, AmountInput, DetailsItem, TokenAmount, Button,
+    AuctionCard, AmountInput, DetailsItem, TokenAmount, Button,
   },
   props: {
     name: { type: String, required: true },
