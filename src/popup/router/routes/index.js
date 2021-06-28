@@ -17,6 +17,7 @@ import LanguageSettings from '../pages/LanguageSettings';
 import AuctionBid from '../pages/Names/AuctionBid';
 import AuctionDetails from '../pages/Names/AuctionDetails';
 import AuctionList from '../pages/Names/AuctionList';
+import More from '../pages/More';
 import NameClaim from '../pages/Names/Claim';
 import NamesDetails from '../pages/Names/Details';
 import NamesList from '../pages/Names/List';
@@ -287,6 +288,14 @@ export default [
       title: 'send',
       notPersist: true,
       notRebrand: true,
+    },
+  },
+  {
+    path: '/more',
+    component: More,
+    name: 'more',
+    meta: {
+      title: 'more',
     },
   },
   {

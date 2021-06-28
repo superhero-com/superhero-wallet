@@ -4,21 +4,21 @@ describe('About', () => {
   });
 
   it('opens page and go back, opens terms, privacy policy ', () => {
-    cy.openMenu()
+    cy.openPageMore()
       .get('[data-cy=about]')
       .click()
       .urlEquals('/about')
       .goBack()
       .urlEquals('/account')
 
-      .openMenu()
+      .openPageMore()
       .get('[data-cy=about]')
       .click()
       .get('[data-cy=terms]')
       .click()
       .urlEquals('/about/termsOfService')
 
-      .openMenu()
+      .openPageMore()
       .get('[data-cy=about]')
       .click()
       .get('[data-cy=privacy]')

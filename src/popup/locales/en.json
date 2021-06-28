@@ -268,6 +268,7 @@
       "notification-settings": "Notification Preference",
       "names": "Names",
       "bidding": "Bidding",
+      "more": "More",
       "networks": "Networks",
       "permissionsSettings": "Permissions settings",
       "permissionsDetails": "Permissions details",
@@ -502,6 +503,10 @@
       "address": "Address",
       "type": "Select type",
       "token": "Select token"
+    },
+    "more": {
+      "get-ae": "Get AE",
+      "dex": "DEX"
     },
     "names": {
       "default": "Default",

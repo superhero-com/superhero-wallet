@@ -7,11 +7,6 @@ describe('Test cases for Account Page', () => {
     cy.get('.seed-backup-notification')
       .should('be.visible')
 
-      .openMenu()
-      .menuShould('be.visible')
-      .closeMenu()
-      .menuShould('not.exist')
-
       .get('[data-cy=copy]')
       .click()
       .get('.copied > .text')
