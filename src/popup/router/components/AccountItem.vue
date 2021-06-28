@@ -48,7 +48,7 @@ export default {
   }
 
   .address {
-    @extend %face-sans-10-medium;
+    @extend %face-mono-10-medium;
 
     color: variables.$color-light-grey;
     text-align: left;

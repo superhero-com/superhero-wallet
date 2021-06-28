@@ -553,7 +553,8 @@
         "min-bid": "Bid must be more than {minBid} AE",
         "bid-added": "Bid added successfully",
         "place-bid": "Place bid",
-        "bid-history": "Bid history"
+        "bid-history": "Bid history",
+        "bids-on": "Bids on"
       }
     },
     "languageSettings": {

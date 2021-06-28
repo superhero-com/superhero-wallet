@@ -16,6 +16,7 @@ import InviteClaim from '../pages/InviteClaim';
 import LanguageSettings from '../pages/LanguageSettings';
 import Auction from '../pages/Names/Auction';
 import AuctionBid from '../pages/Names/AuctionBid';
+import AuctionHistory from '../pages/Names/AuctionHistory';
 import AuctionList from '../pages/Names/AuctionList';
 import More from '../pages/More';
 import NameClaim from '../pages/Names/Claim';
@@ -378,6 +379,8 @@ export default [
       },
     }, {
       path: 'history',
+      component: AuctionHistory,
+      props: true,
       name: 'auction-history',
       meta: {
         title: 'auction',
