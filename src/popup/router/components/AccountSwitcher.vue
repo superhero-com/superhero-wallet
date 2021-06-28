@@ -103,6 +103,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding-bottom: 12px;
 
     .button-plain {
       width: 32px;

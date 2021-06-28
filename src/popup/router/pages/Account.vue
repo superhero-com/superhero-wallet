@@ -15,7 +15,6 @@
         :notification="!backedUpSeed"
         class="tour__step1"
       />
-      <MenuCarousel />
     </Plate>
     <RecentTransactions />
   </div>
@@ -26,7 +25,6 @@ import { mapState } from 'vuex';
 import Plate from '../components/Plate';
 import RecentTransactions from '../components/RecentTransactions';
 import AccountSwitcher from '../components/AccountSwitcher';
-import MenuCarousel from '../components/MenuCarousel';
 
 export default {
   name: 'Account',
@@ -34,7 +32,6 @@ export default {
     Plate,
     RecentTransactions,
     AccountSwitcher,
-    MenuCarousel,
   },
   computed: mapState(['tourRunning', 'backedUpSeed']),
 };

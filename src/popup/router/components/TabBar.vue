@@ -9,10 +9,16 @@
     >
       <Balances />
     </RouterLink>
-    <RouterLink to="/payments">
+    <RouterLink
+      to="/payments"
+      data-cy="send"
+    >
       <Payments />
     </RouterLink>
-    <RouterLink to="/tips">
+    <RouterLink
+      to="/tips"
+      data-cy="tip-button"
+    >
       <Tips />
     </RouterLink>
     <RouterLink to="/settings">
