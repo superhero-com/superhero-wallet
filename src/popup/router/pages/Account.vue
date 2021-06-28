@@ -33,7 +33,7 @@ export default {
     RecentTransactions,
     AccountSwitcher,
   },
-  computed: mapState(['tourRunning', 'backedUpSeed']),
+  computed: mapState(['backedUpSeed']),
 };
 </script>
 
