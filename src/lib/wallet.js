@@ -241,11 +241,6 @@ export default async function initSdk() {
     store.commit('setNodeStatus', 'connected');
     setTimeout(() => store.commit('setNodeStatus', ''), 2000);
 
-    if (process.env.UNFINISHED_FEATURES) {
-      await store.dispatch('fungibleTokens/getAvailableTokens');
-      store.dispatch('fungibleTokens/loadTokenBalances');
-    }
-
     store.watch(
       (state, getters) => getters.activeNetwork,
       async (network, oldNetwork) => {
