@@ -273,7 +273,7 @@
       "permissionsSettings": "Permissions settings",
       "permissionsDetails": "Permissions details",
       "comment-new": "Add comment",
-      "home": "Wallet Home",
+      "home": "Home",
       "donate-error": "Donate Data",
       "address": "Send Address",
       "tokens-preview": "Tokens",
@@ -283,7 +283,8 @@
       "allowances": "Allowances",
       "sign-message": "Sign Message",
       "invite": "Invite",
-      "tx-details": "Tx Details"
+      "tx-details": "Tx Details",
+      "wallet-home": "Wallet Home"
     },
     "about": {
       "heading": "About",
@@ -647,7 +648,6 @@
       "backToAccount": "Back to account",
       "heading": "To receive tokens, provide this address or have the payor scan the QR code below.",
       "copy": "Copy",
-      "home": "Home",
       "transferExchange": "Swap crypto for AE tokens",
       "purchase": "Buy AE tokens"
     },
@@ -715,7 +715,6 @@
       "to": "To",
       "from": "From",
       "hash": "Transaction Hash",
-      "home": "Home",
       "scanAddress": "Scan aeternity address",
       "error": "Invalid AE address or AENS name",
       "error-name-send": "Unfortunately you can only send AEX-9 Tokens to an address",
@@ -883,7 +882,6 @@
       "sentTo": "Send to: ",
       "letThemKnow": "Let them know!",
       "heading": "SEND",
-      "home": "Home",
       "successfullySent": "You have successfully sent ",
       "to": "to",
       "note": "NOTE: The owner of this URL has not created an account yet. They can claim their tokens easily by creating a wallet - the same way you did.",

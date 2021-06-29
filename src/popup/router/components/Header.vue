@@ -36,7 +36,7 @@
         v-else
         class="text"
       >
-        {{ (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home') }}
+        {{ (title && $t(`pages.titles.${title}`)) || $t('pages.titles.wallet-home') }}
       </span>
     </div>
 

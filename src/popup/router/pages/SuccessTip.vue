@@ -59,7 +59,7 @@
           data-cy="to-dashboard"
           @click="$router.push('/account')"
         >
-          {{ $t('pages.successTip.home') }}
+          {{ $t('pages.titles.home') }}
         </Button>
       </div>
       <br>

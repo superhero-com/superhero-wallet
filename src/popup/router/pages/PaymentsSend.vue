@@ -158,7 +158,7 @@
             :label="$t('pages.send.hash')"
           />
           <Button to="/account">
-            {{ $t('pages.send.home') }}
+            {{ $t('pages.titles.home') }}
           </Button>
         </div>
       </div>
