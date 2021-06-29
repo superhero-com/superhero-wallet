@@ -31,7 +31,7 @@ export default {
   },
   methods: {
     showHelp() {
-      // TODO: show auctions and bidding modal
+      this.$store.dispatch('modals/open', { name: 'help', type: 'auctions' });
     },
     blocksToRelativeTime,
   },
