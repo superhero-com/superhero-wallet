@@ -7,7 +7,7 @@
       class="help"
       @click="showHelp"
     >
-      <HelpCircle class="icon" />
+      <QuestionCircle class="icon" />
     </ButtonPlain>
   </div>
 </template>
@@ -16,14 +16,14 @@
 import Avatar from './Avatar';
 import ButtonPlain from './ButtonPlain';
 import AuctionOverview from './AuctionOverview';
-import HelpCircle from '../../../icons/help-circle.svg?vue-component';
+import QuestionCircle from '../../../icons/question-circle-border.svg?vue-component';
 import { blocksToRelativeTime } from '../../../filters/toRelativeTime';
 
 export default {
   components: {
     Avatar,
     ButtonPlain,
-    HelpCircle,
+    QuestionCircle,
     AuctionOverview,
   },
   props: {
@@ -76,6 +76,7 @@ export default {
       width: 24px;
       height: 24px;
       color: variables.$color-blue;
+      opacity: 0.7;
     }
   }
 }
