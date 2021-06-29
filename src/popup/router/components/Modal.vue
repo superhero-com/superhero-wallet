@@ -40,7 +40,7 @@
 
 <script>
 import ButtonPlain from './ButtonPlain';
-import Close from '../../../icons/close-modal.svg?vue-component';
+import Close from '../../../icons/close.svg?vue-component';
 import NodeConnectionStatus from './NodeConnectionStatus';
 
 export default {
@@ -96,6 +96,10 @@ export default {
       right: 8px;
       top: 8px;
       color: variables.$color-white;
+
+      svg {
+        width: 24px;
+      }
     }
 
     .header {

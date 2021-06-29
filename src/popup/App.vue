@@ -3,31 +3,16 @@
     id="app"
     :class="{
       'not-rebrand': $route.meta.notRebrand,
-      'show-sidebar': showSidebar,
       'show-header': showStatusAndHeader,
       'hide-tab-bar': $route.meta.hideTabBar,
     }"
   >
-    <Header
-      v-if="showStatusAndHeader"
-      @toggle-sidebar="showSidebar = !showSidebar"
-    />
+    <Header v-if="showStatusAndHeader" />
 
     <RouterView
       :class="{ 'show-header': showStatusAndHeader }"
       class="main"
     />
-
-    <transition name="slide">
-      <div
-        v-if="showSidebar"
-        class="menu-overlay"
-        data-cy="menu-overlay"
-        @click.self="showSidebar = false"
-      >
-        <SidebarMenu @close="showSidebar = false" />
-      </div>
-    </transition>
 
     <NodeConnectionStatus v-if="showStatusAndHeader" />
     <TabBar v-if="isLoggedIn && $route.path !== '/intro'" />
@@ -45,20 +30,15 @@ import { mapGetters, mapState } from 'vuex';
 import { detect } from 'detect-browser';
 import { NOTIFICATION_SETTINGS } from './utils/constants';
 import Header from './router/components/Header';
-import SidebarMenu from './router/components/SidebarMenu';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus';
 import TabBar from './router/components/TabBar';
 
 export default {
   components: {
     Header,
-    SidebarMenu,
     NodeConnectionStatus,
     TabBar,
   },
-  data: () => ({
-    showSidebar: false,
-  }),
   computed: {
     ...mapGetters(['account', 'isLoggedIn']),
     ...mapState(['isRestored', 'current', 'sdk', 'backedUpSeed', 'notifications']),
@@ -177,10 +157,6 @@ body {
 
   color: variables.$color-white;
 
-  &.show-sidebar {
-    overflow-y: hidden;
-  }
-
   .main {
     padding-bottom: 48px;
     padding-bottom: calc(48px + env(safe-area-inset-bottom));
@@ -230,47 +206,6 @@ body {
         padding-right: 0;
       }
     }
-  }
-
-  .menu-overlay {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-
-    @include mixins.desktop {
-      position: sticky;
-      height: 100%;
-      display: flex;
-      flex-direction: row-reverse;
-    }
-
-    background: rgba(variables.$color-black, 0.6);
-    z-index: 10;
-  }
-
-  .slide-enter-active,
-  .slide-enter-active .sidebar-menu,
-  .slide-leave-active,
-  .slide-leave-active .sidebar-menu {
-    transition-property: right, opacity;
-    transition-duration: 0.3s;
-    transition-timing-function: ease;
-  }
-
-  .slide-leave-active,
-  .slide-leave-active .sidebar-menu {
-    transition-duration: 0.2s;
-  }
-
-  .slide-enter .sidebar-menu,
-  .slide-leave-to .sidebar-menu {
-    right: -200px;
-  }
-
-  .slide-leave-to .sidebar-menu {
-    opacity: 0;
   }
 
   .tab-bar {
