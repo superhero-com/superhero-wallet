@@ -1,6 +1,5 @@
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
-import { unionBy } from 'lodash-es';
 import Vue from 'vue';
 import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
 
@@ -27,7 +26,7 @@ export default (store) => {
         Vue.set(state.availableTokens, token.contract, token);
       },
       addTokenBalance(state, payload) {
-        state.tokenBalances = unionBy([payload], state.tokenBalances, 'contract');
+        state.tokenBalances.push(payload);
       },
       setAePublicData(state, payload) {
         state.aePublicData = payload;
@@ -46,7 +45,7 @@ export default (store) => {
       },
       async loadTokenBalances({
         rootGetters: { activeNetwork, account },
-        state: { availableTokens, selectedToken, tokenBalances },
+        state: { availableTokens, selectedToken },
         commit,
       }) {
         const tokens = await fetchJson(
@@ -57,19 +56,23 @@ export default (store) => {
 
         tokens.map(({ amount, contract_id: contract }) => {
           const token = availableTokens[contract];
-          const convertedBalance = convertToken(amount, -token.decimals).toFixed(2);
+          const balance = convertToken(amount, -token.decimals);
+          const convertedBalance = balance.toFixed(2);
           const objectStructure = {
+            ...token,
             value: contract,
             text: `${convertedBalance} ${token.symbol}`,
             contract,
+            balance,
             convertedBalance,
-            ...token,
           };
 
           commit('updateAvailableToken', objectStructure);
           return commit('addTokenBalance', objectStructure);
         });
-        commit('setSelectedToken', tokenBalances.find((t) => t.contract === selectedToken?.contract));
+        commit('setSelectedToken',
+          store.state.fungibleTokens.tokenBalances
+            .find((t) => t.contract === selectedToken?.contract));
       },
       async getAeternityData({ rootState: { current }, commit }) {
         const [aeternityData] = await fetchJson(
