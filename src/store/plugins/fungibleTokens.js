@@ -1,6 +1,7 @@
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
 import { unionBy } from 'lodash-es';
+import Vue from 'vue';
 import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
 
 export default (store) => {
@@ -22,6 +23,9 @@ export default (store) => {
       resetTokenBalances(state) {
         state.tokenBalances = [];
       },
+      updateAvailableToken(state, token) {
+        Vue.set(state.availableTokens, token.contract, token);
+      },
       addTokenBalance(state, payload) {
         state.tokenBalances = unionBy([payload], state.tokenBalances, 'contract');
       },
@@ -31,67 +35,49 @@ export default (store) => {
     },
     actions: {
       async getAvailableTokens({ rootGetters: { activeNetwork }, commit }) {
-        const availableTokens = await fetchJson(
-          `${activeNetwork.backendUrl}/tokenCache/tokenInfo`,
+        const response = await fetchJson(
+          `${activeNetwork.middlewareUrl}/aex9/by_name`,
         ).catch(handleUnknownError);
-        return commit('setAvailableTokens', availableTokens || {});
-      },
-      async tokenBalance({ rootState: { sdk } }, [token, address]) {
-        const tokenContract = await sdk.getContractInstance(FUNGIBLE_TOKEN_CONTRACT, {
-          contractAddress: token,
-        });
 
-        const { decodedResult } = await tokenContract.methods.balance(address);
-        return new BigNumber(decodedResult || 0);
+        const availableTokens = response.reduce((obj, { contract_id: contract, ...other }) => ({
+          ...obj, [contract]: { contract, ...other },
+        }), {});
+        return commit('setAvailableTokens', availableTokens);
       },
       async loadTokenBalances({
         rootGetters: { activeNetwork, account },
-        state: { availableTokens, selectedToken },
+        state: { availableTokens, selectedToken, tokenBalances },
         commit,
-        dispatch,
       }) {
         const tokens = await fetchJson(
-          `${activeNetwork.backendUrl}/tokenCache/balances?address=${account.address}`,
+          `${activeNetwork.middlewareUrl}/aex9/balances/account/${account.address}`,
         ).catch(handleUnknownError);
 
         commit('resetTokenBalances');
 
-        await Promise.all(
-          Object.entries(tokens).map(async ([contract, tokenData]) => {
-            const tokenBalance = await dispatch('tokenBalance', [contract, account.address]);
-            const balance = convertToken(tokenBalance, -tokenData.decimals);
-            const convertedBalance = balance.toFixed(2);
-            const objectStructure = {
-              value: contract,
-              text: `${convertedBalance} ${tokenData.symbol}`,
-              symbol: tokenData.symbol,
-              name: tokenData.name,
-              decimals: tokenData.decimals,
-              contract,
-              balance,
-              convertedBalance,
-            };
-            if (availableTokens[contract]) {
-              const updatedTokenInfo = { ...availableTokens };
-              updatedTokenInfo[contract] = { ...objectStructure };
-              commit('setAvailableTokens', updatedTokenInfo);
-            }
-            if (selectedToken && selectedToken.contract === objectStructure.contract) {
-              commit('setSelectedToken', null);
-              commit('setSelectedToken', objectStructure);
-            }
-            return commit('addTokenBalance', objectStructure);
-          }),
-        );
+        tokens.map(({ amount, contract_id: contract }) => {
+          const token = availableTokens[contract];
+          const convertedBalance = convertToken(amount, -token.decimals).toFixed(2);
+          const objectStructure = {
+            value: contract,
+            text: `${convertedBalance} ${token.symbol}`,
+            contract,
+            convertedBalance,
+            ...token,
+          };
 
-        if (selectedToken && !tokens[selectedToken.contract]) {
-          commit('setSelectedToken', null);
-        }
+          commit('updateAvailableToken', objectStructure);
+          return commit('addTokenBalance', objectStructure);
+        });
+        commit('setSelectedToken', tokenBalances.find((t) => t.contract === selectedToken?.contract));
       },
       async getAeternityData({ rootState: { current }, commit }) {
         const [aeternityData] = await fetchJson(
           `https://api.coingecko.com/api/v3/coins/markets?ids=aeternity&vs_currency=${current.currency}`,
-        );
+        ).catch((e) => {
+          handleUnknownError(e);
+          return [];
+        });
         return commit('setAePublicData', aeternityData);
       },
       async createOrChangeAllowance(
