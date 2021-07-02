@@ -74,7 +74,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import Heart from '../../../icons/heart.svg?vue-component';
 import { AGGREGATOR_URL } from '../../utils/constants';
 import { aettosToAe } from '../../utils/helper';
@@ -95,7 +95,7 @@ export default {
   data: () => ({ AGGREGATOR_URL }),
   computed: {
     ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
-    ...mapState('fungibleTokens', ['selectedToken']),
+    ...mapGetters('fungibleTokens', ['selectedToken']),
     amountTip() {
       return +aettosToAe(this.amount);
     },

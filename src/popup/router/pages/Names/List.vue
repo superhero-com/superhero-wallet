@@ -2,11 +2,11 @@
   <div class="list">
     <NameListHeader />
     <ul
-      v-if="owned.length"
+      v-if="namesForAccount.length"
       class="names-list"
     >
       <NameRow
-        v-for="({ name, owner, pending, autoExtend }, index) in owned"
+        v-for="({ name, owner, pending, autoExtend }, index) in namesForAccount"
         :key="index"
         :to="{ name: 'name-details', params: { name } }"
         :name="name"
@@ -32,7 +32,7 @@
         <CheckBox
           :value="autoExtend"
           @click.native.prevent="
-            $store.commit('names/setAutoExtend', { index, value: !autoExtend })
+            $store.commit('names/setAutoExtend', { name, value: !autoExtend })
           "
         >
           {{ $t('pages.names.auto-extend') }}
@@ -59,10 +59,13 @@ export default {
   },
   computed: {
     ...mapGetters(['account']),
-    ...mapState('names', ['owned']),
+    ...mapState({
+      namesForAccount({ names: { owned } }, { account }) {
+        return owned.filter((n) => n.owner === account.address);
+      },
+    }),
   },
   mounted() {
-    this.$store.dispatch('names/fetchOwned');
     const id = setInterval(() => this.$store.dispatch('names/fetchOwned'), 10000);
     this.$once('hook:destroyed', () => clearInterval(id));
   },

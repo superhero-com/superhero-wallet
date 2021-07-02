@@ -138,7 +138,7 @@ export default {
   computed: {
     ...mapGetters(['account']),
     ...mapState(['tourRunning', 'tip', 'sdk', 'tippingV1', 'tippingV2']),
-    ...mapState('fungibleTokens', ['selectedToken', 'tokenBalances']),
+    ...mapGetters('fungibleTokens', ['selectedToken', 'tokenBalances']),
     urlStatus() {
       return this.tourRunning ? 'verified' : this.$store.getters['tipUrl/status'](this.url);
     },
