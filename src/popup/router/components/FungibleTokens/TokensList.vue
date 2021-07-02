@@ -91,7 +91,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '../../../../styles/variables';
+@use '../../../../styles/typography';
+
 .tokens-msg {
-  margin-top: 15px;
+  margin-top: 40px;
+  text-align: center;
+
+  @extend %face-sans-15-medium;
+
+  color: variables.$color-light-grey;
 }
 </style>

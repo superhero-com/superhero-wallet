@@ -463,7 +463,7 @@
       "mcap": "MCap",
       "price": "Price",
       "not-available": "N/A",
-      "no-results": "There are no tokens to display"
+      "no-results": "This account has no tokens with balance"
     },
     "token-details": {
       "details": "Details",
