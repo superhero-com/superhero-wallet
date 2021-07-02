@@ -166,15 +166,20 @@ export async function init() {
       client.disconnect();
     },
     async onSubscription(aepp, { accept, deny }) {
-      const address = await this.address(this.getApp(getAeppUrl(aepp)));
-      if (!address) {
+      const activeAccount = await this.address(this.getApp(getAeppUrl(aepp)));
+      if (!activeAccount) {
         deny();
         return;
       }
       accept({
         accounts: {
-          current: { [address]: {} },
-          connected: {},
+          current: { [activeAccount]: {} },
+          connected: {
+            ...store.getters.accounts
+              .reduce((p, { address }) => ({
+                ...p, ...address !== activeAccount ? { [address]: {} } : {},
+              }), {}),
+          },
         },
       });
     },
@@ -190,6 +195,20 @@ export async function init() {
       sdk.pool.delete(network.name);
       sdk.addNode(network.name, await Node({ url: network.url }), true);
     },
+  );
+
+  store.watch(
+    ({ accountSelectedIdx }) => accountSelectedIdx,
+    async (accountIdx) => sdk.selectAccount(store.getters.accounts[accountIdx].address),
+  );
+
+  store.watch(
+    (state, getters) => getters.accounts.length,
+    () => {
+      sdk.accounts = store.getters.accounts
+        .reduce((p, { address }) => ({ ...p, [address]: {} }), {});
+    },
+    { immediate: true },
   );
 
   connectionsQueue.forEach(addAeppConnection);
