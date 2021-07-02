@@ -77,12 +77,14 @@ export default {
       return (this.showMyTokens
         ? [...(this.aeternityToken ? [this.aeternityToken] : []), ...this.tokenBalances]
         : tokensInfo
-      ).filter(
-        (token) => !searchTerm
-          || token.symbol.toLowerCase().includes(searchTerm)
-          || token.name.toLowerCase().includes(searchTerm)
-          || token.contract.toLowerCase().includes(searchTerm),
-      );
+      )
+        .filter((token) => +token.convertedBalance?.toString() > 0)
+        .filter(
+          (token) => !searchTerm
+            || token.symbol.toLowerCase().includes(searchTerm)
+            || token.name.toLowerCase().includes(searchTerm)
+            || token.contract.toLowerCase().includes(searchTerm),
+        );
     },
   },
 };
