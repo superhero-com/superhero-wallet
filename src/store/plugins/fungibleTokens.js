@@ -11,6 +11,7 @@ export default (store) => {
       availableTokens: {},
       tokens: {},
       aePublicData: {},
+      transactions: {},
     },
     getters: {
       getTokenBalance: ({ tokens }) => (address) => tokens?.[address]?.tokenBalances || [],
@@ -28,6 +29,9 @@ export default (store) => {
           Vue.set(state.tokens, address, { selectedToken: null, tokenBalances: [] });
         }
         Vue.set(state.tokens[address], 'selectedToken', token);
+      },
+      setTransactions(state, { address, transactions }) {
+        Vue.set(state.transactions, address, transactions);
       },
       setAvailableTokens(state, payload) {
         state.availableTokens = payload;
@@ -145,6 +149,21 @@ export default (store) => {
           convertToken(amount, tokens[account.address].selectedToken.decimals).toFixed(),
           option,
         );
+      },
+      async getTokensHistory({ rootState, rootGetters: { activeNetwork, account }, commit }) {
+        const { address } = account;
+        const rawTransactions = ([
+          ...(await fetchJson(`${activeNetwork.middlewareUrl}/aex9/transfers/to/${address}`)),
+          ...(await fetchJson(`${activeNetwork.middlewareUrl}/aex9/transfers/from/${address}`)),
+        ]);
+
+        const transactions = await Promise.all(
+          rawTransactions.map(async ({ call_txi: index, ...otherTx }) => ({
+            ...(await rootState.middleware.getTxByIndex(index)), ...otherTx,
+          })),
+        );
+        commit('setTransactions', { address, transactions });
+        return transactions;
       },
     },
   });

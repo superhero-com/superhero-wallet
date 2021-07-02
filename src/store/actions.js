@@ -59,6 +59,13 @@ export default {
           claim: true,
         }))).catch(() => []),
     ]);
+
+    const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
+    (await dispatch('fungibleTokens/getTokensHistory')).forEach((f) => {
+      if (minMicroTime < f.microTime) {
+        txs[0].push(f);
+      }
+    });
     txs = uniqBy(orderBy(flatten(txs), ['microTime'], ['desc']), ({ hash }) => hash);
     return recent ? txs.slice(0, limit) : txs;
   },
