@@ -53,10 +53,10 @@ export default {
           this.$router.push({ name: 'name-list' });
         } catch (e) {
           let msg = e.message;
-          if (msg.includes('is not enough to execute')) {
+          if (msg.includes('is not enough to execute') || e.statusCode === 404) {
             msg = this.$t('pages.names.balance-error');
           }
-          this.$store.dispatch('modals/open', { name: 'default', msg });
+          this.$store.dispatch('modals/open', { name: 'default', icon: 'critical', title: msg });
           return;
         } finally {
           this.loading = false;
