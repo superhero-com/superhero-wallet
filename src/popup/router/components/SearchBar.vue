@@ -32,7 +32,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '../../../styles/variables';
+
 .search-bar ::v-deep .wrapper:not(:focus-within) {
   border-radius: 0;
+  background-color: variables.$color-bg-3;
 }
 </style>
