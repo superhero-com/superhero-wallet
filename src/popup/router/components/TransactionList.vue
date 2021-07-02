@@ -53,17 +53,26 @@ export default {
     ...mapState('fungibleTokens', ['availableTokens']),
     ...mapState({
       filteredTransactions(state, { account: { address } }) {
+        const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
+          .includes(tr.tx.contractId);
         return this.transactions
+          .filter((tr) => (!this.token
+            || (this.token !== 'aeternity'
+              ? tr.tx?.contractId === this.token
+              : (!tr.tx.contractId
+              || !isFungibleTokenTx(tr)))))
           .filter((tr) => {
             switch (this.displayMode.type) {
               case 'all':
                 return true;
               case 'sent':
-                return tr.tx.type === 'SpendTx' && tr.tx.senderId === address;
+                return (tr.tx.type === 'SpendTx' && tr.tx.senderId === address)
+                  || (isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address);
               case 'received':
-                return tr.tx.type === 'SpendTx' && tr.tx.recipientId === address;
+                return (tr.tx.type === 'SpendTx' && tr.tx.recipientId === address)
+                  || (isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.recipient === address);
               case 'tips':
-                return (tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address) || tr.claim;
+                return (!isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address) || tr.claim;
               default:
                 throw new Error(`Unknown display mode type: ${this.displayMode.type}`);
             }
