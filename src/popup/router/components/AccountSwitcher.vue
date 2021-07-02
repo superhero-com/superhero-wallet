@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import AccountCard from './AccountCard';
 import ButtonPlain from './ButtonPlain';
 
@@ -56,7 +56,12 @@ export default {
       return this.filteredAccounts.findIndex((a) => a.i === this.accountSelectedIdx);
     },
   },
-  methods: mapMutations(['selectAccount']),
+  methods: {
+    async selectAccount(idx) {
+      await this.$watchUntilTruly(() => this.$store.state.middleware);
+      this.$store.commit('selectAccount', idx);
+    },
+  },
 };
 </script>
 
