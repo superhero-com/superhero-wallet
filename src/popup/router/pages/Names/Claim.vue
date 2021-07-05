@@ -43,8 +43,12 @@ export default {
       if (!this.validName) return;
       const name = `${this.name}.chain`;
       const nameEntry = await this.sdk.api.getNameEntryByName(name).catch(() => false);
-      if (nameEntry) this.$store.dispatch('modals/open', { name: 'default', type: 'name-exist' });
-      else {
+      if (nameEntry) {
+        this.$store.dispatch('modals/open', {
+          name: 'default',
+          title: this.$t('modals.name-exist.msg'),
+        });
+      } else {
         this.loading = true;
         let claimTxHash;
         try {

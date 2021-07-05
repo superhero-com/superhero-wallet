@@ -149,7 +149,11 @@ export default {
         });
         this.openCallbackOrGoHome(true);
       } catch (e) {
-        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
+        this.$store.dispatch('modals/open', {
+          name: 'default',
+          title: this.$t('modals.transaction-failed.msg'),
+          icon: 'critical',
+        });
         e.payload = this.tip;
         throw e;
       } finally {

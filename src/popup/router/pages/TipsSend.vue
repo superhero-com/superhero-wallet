@@ -297,7 +297,11 @@ export default {
         });
         this.openCallbackOrGoHome(true);
       } catch (e) {
-        await this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
+        await this.$store.dispatch('modals/open', {
+          name: 'default',
+          title: this.$t('modals.transaction-failed.msg'),
+          icon: 'critical',
+        });
         e.payload = { url: this.url };
         throw e;
       } finally {
