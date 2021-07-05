@@ -9,7 +9,7 @@
         data-cy="tokens-dropdown"
       >
         <Dropdown
-          v-if="tokenBalancesOptions.length && UNFINISHED_FEATURES"
+          v-if="tokenBalancesOptions.length"
           :options="tokenBalancesOptions"
           :method="changeToken"
           :selected="currentToken"
@@ -20,7 +20,6 @@
         </span>
         <span class="token-symbol">{{ !selectedToken ? $t('ae') : selectedToken.symbol }}</span>
         <Arrow
-          v-if="UNFINISHED_FEATURES"
           class="expand-arrow"
         />
       </div>
@@ -59,9 +58,6 @@ export default {
   props: {
     accountIdx: { type: Number, default: -1 },
   },
-  data: () => ({
-    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-  }),
   subscriptions() {
     return pick(this.$store.state.observables, ['balances']);
   },
