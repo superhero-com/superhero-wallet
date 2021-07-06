@@ -81,6 +81,7 @@ export default {
     .find((tx) => tx.hash === hash),
   getTxType: (_, { getTxSymbol }) => (transaction) => (getTxSymbol(transaction) === 'AE' ? transaction.tx.type : null),
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
+    if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
     return contractCallData ? availableTokens[contractCallData.token]?.symbol : 'AE';
   },
