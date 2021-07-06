@@ -247,7 +247,7 @@
     },
     "titles": {
       "tx-history": "Tx history",
-      "payments": "Payments",
+      "transfer": "Transfer",
       "balances": "Balances",
       "accounts": "Accounts",
       "tips": "Tips",

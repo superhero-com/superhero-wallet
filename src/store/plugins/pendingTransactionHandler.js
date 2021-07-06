@@ -10,13 +10,13 @@ export default async (store) => {
           break;
         case 'spend':
           store.dispatch('router/push', {
-            name: 'payments-send',
+            name: 'transfer-send',
             params: { redirectstep: 3, successtx: transaction },
           });
           break;
         case 'spendToken':
           store.dispatch('router/push', {
-            name: 'payments-send',
+            name: 'transfer-send',
             params: { redirectstep: 3, successtx: { ...transaction, amount, recipientId } },
           });
           break;
