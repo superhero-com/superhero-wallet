@@ -11,8 +11,9 @@
       <TokenAmount
         :amount="getTxAmountTotal(transaction)"
         :symbol="getTxSymbol(transaction)"
+        :aex9="isTxAex9(transaction)"
         :direction="getTxDirection(transaction)"
-        :alt-text="getTxType(transaction)"
+        :alt-text="isTxAex9(transaction) ? '' : getTxType(transaction)"
         data-cy="amount"
       />
     </div>
@@ -47,6 +48,7 @@ export default {
     'getTxType',
     'getTxDirection',
     'getTxTipUrl',
+    'isTxAex9',
   ]),
 };
 </script>

@@ -10,7 +10,7 @@
           <TokenAmount
             data-cy="tip-amount"
             :amount="+amount"
-            v-bind="selectedToken ? { symbol: selectedToken.symbol } : {}"
+            v-bind="selectedToken ? { symbol: selectedToken.symbol, aex9: true } : {}"
           />
           {{ $t('pages.tipPage.to') }}
         </template>

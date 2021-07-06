@@ -17,6 +17,7 @@
     <TokenAmount
       :amount="+tokenData.convertedBalance || 0"
       :symbol="tokenData.symbol"
+      :aex9="tokenData.contract !== 'aeternity'"
       no-symbol
     />
   </RouterLink>

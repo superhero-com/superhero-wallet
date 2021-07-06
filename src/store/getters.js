@@ -79,7 +79,7 @@ export default {
   getTx: ({ transactions }) => (hash) => transactions.latest
     .concat(transactions.pending.map((t) => ({ ...t, pending: true })))
     .find((tx) => tx.hash === hash),
-  getTxType: (_, { getTxSymbol }) => (transaction) => (getTxSymbol(transaction) === 'AE' ? transaction.tx.type : null),
+  getTxType: () => (transaction) => transaction?.tx?.type,
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
@@ -119,4 +119,6 @@ export default {
       || categorizeContractCallTxObject(transaction)?.url
       || ''
   ),
+  isTxAex9: () => (transaction) => transaction.tx
+    && !!categorizeContractCallTxObject(transaction)?.token,
 };

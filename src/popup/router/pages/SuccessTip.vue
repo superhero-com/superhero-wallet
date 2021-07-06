@@ -13,7 +13,9 @@
       {{ $t('pages.successTip.successfullySent') }}
       <TokenAmount
         v-bind="
-          selectedToken ? { amount: +amount, symbol: selectedToken.symbol } : { amount: amountTip }
+          selectedToken
+            ? { amount: +amount, symbol: selectedToken.symbol, aex9: true }
+            : { amount: amountTip }
         "
         data-cy="tip-amount"
       />
@@ -28,7 +30,9 @@
       {{ $t('pages.successTip.notify') }}
       <TokenAmount
         v-bind="
-          selectedToken ? { amount: +amount, symbol: selectedToken.symbol } : { amount: amountTip }
+          selectedToken
+            ? { amount: +amount, symbol: selectedToken.symbol, aex9: true }
+            : { amount: amountTip }
         "
       />
       {{ $t('pages.successTip.notifyTo') }}

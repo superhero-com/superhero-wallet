@@ -31,6 +31,7 @@
           slot="value"
           :amount="getTxAmountTotal(transaction)"
           :symbol="getTxSymbol(transaction)"
+          :aex9="isTxAex9(transaction)"
           data-cy="total"
         />
       </DetailsItem>
@@ -134,6 +135,7 @@ export default {
     'getTxAmountTotal',
     'getTxFee',
     'getNameFee',
+    'isTxAex9',
   ]),
 };
 </script>

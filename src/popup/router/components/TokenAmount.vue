@@ -26,6 +26,7 @@ export default {
   props: {
     amount: { type: Number, required: true },
     symbol: { type: String, default: 'AE' },
+    aex9: { type: Boolean, default: false },
     altText: { type: String, default: '' },
     hideFiat: { type: Boolean },
     direction: {
@@ -42,7 +43,7 @@ export default {
     },
     ...mapState({
       amountFiat(state, { convertToCurrency, formatCurrency }) {
-        if (this.symbol !== 'AE') return false;
+        if (this.aex9) return '';
         const converted = convertToCurrency(this.amount);
         if (converted < 0.01 || this.hideFiat) return false;
         return formatCurrency(converted);
