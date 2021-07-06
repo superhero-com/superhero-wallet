@@ -1,6 +1,9 @@
 <template>
   <div class="transaction-list">
-    <TransactionFilters v-model="displayMode" />
+    <TransactionFilters
+      v-if="displayFilter"
+      v-model="displayMode"
+    />
     <ul
       class="list"
       data-cy="list"
@@ -40,6 +43,8 @@ export default {
   props: {
     token: { type: String, default: '' },
     searchTerm: { type: String, default: '' },
+    displayFilter: { type: Boolean, default: true },
+    maxLength: { type: Number, default: 999999 },
   },
   data() {
     return {
@@ -51,6 +56,7 @@ export default {
   },
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
+    ...mapState(['accountSelectedIdx']),
     ...mapState({
       filteredTransactions(state, { account: { address } }) {
         const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
@@ -87,10 +93,17 @@ export default {
             const arr = [a, b].map((e) => new Date(e.microTime));
             if (this.displayMode.latestFirst) arr.reverse();
             return arr[0] - arr[1];
-          });
+          })
+          .slice(0, this.maxLength);
       },
     }),
     ...mapGetters(['getTxSymbol']),
+  },
+  watch: {
+    accountSelectedIdx() {
+      this.$store.commit('setTransactions', []);
+      this.loadMore();
+    },
   },
   mounted() {
     this.loadMore();
@@ -110,6 +123,7 @@ export default {
       const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = isDesktop
         ? document.querySelector('#app') : document.documentElement;
+      if (this.filteredTransactions.length >= this.maxLength) return;
       if (scrollHeight - scrollTop <= clientHeight + 100) {
         setTimeout(() => this.loadMore(), 1500);
       }
