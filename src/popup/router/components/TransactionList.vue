@@ -61,7 +61,7 @@ export default {
       filteredTransactions(state, { account: { address } }) {
         const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
           .includes(tr.tx.contractId);
-        return this.transactions
+        return (this.transactions.concat(this.chainTransactions))
           .filter((tr) => (!this.token
             || (this.token !== 'aeternity'
               ? tr.tx?.contractId === this.token
@@ -98,6 +98,7 @@ export default {
       },
     }),
     ...mapGetters(['getTxSymbol']),
+    ...mapGetters('transactionCache', ['chainTransactions']),
   },
   watch: {
     accountSelectedIdx() {
