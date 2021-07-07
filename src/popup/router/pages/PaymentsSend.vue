@@ -314,22 +314,20 @@ export default {
           const { hash } = await this.$store.dispatch('fungibleTokens/transfer', [
             receiver,
             this.form.amount,
-            { waitMined: true, modal: false },
+            { waitMined: false, modal: false },
           ]);
           this.$store.commit('addPendingTransaction', {
             hash,
             amount,
             type: 'spendToken',
             recipientId: receiver,
+            pendingTokenTx: true,
             tx: {
               senderId: this.account.address,
               contractId: this.selectedToken.contract,
               type: SCHEMA.TX_TYPE.contractCall,
             },
           });
-          await this.$store.dispatch('fungibleTokens/getAvailableTokens');
-          await this.$store.dispatch('fungibleTokens/loadTokenBalances');
-          await this.$store.dispatch('cacheInvalidateFT', this.selectedToken.contract);
         } else {
           const { hash } = await this.sdk.spend(amount, receiver, {
             waitMined: false,
