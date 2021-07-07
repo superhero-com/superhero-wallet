@@ -42,10 +42,11 @@ export default {
     },
     ...mapState({
       amountFiat(state, { convertToCurrency, formatCurrency }) {
-        if (this.aex9) return '';
+        if (this.hideFiat || this.aex9) return '';
         const converted = convertToCurrency(this.amount);
-        if (converted < 0.01 || this.hideFiat) return false;
-        return formatCurrency(converted);
+        if (converted === 0) return `(${formatCurrency(0)})`;
+        if (converted < 0.01) return `(<${formatCurrency(0.01)})`;
+        return `(≈${formatCurrency(converted)})`;
       },
     }),
   },
