@@ -28,6 +28,10 @@ export default {
           name: 'Allowance',
           types: [SOPHIA_TYPES.address, SOPHIA_TYPES.address, SOPHIA_TYPES.int],
         },
+        {
+          name: 'Burn',
+          types: [SOPHIA_TYPES.address, SOPHIA_TYPES.int],
+        },
       ];
       const events = (tx.log ? decodeEvents(tx.log, { schema: eventsSchema }) : [])
         .map((decodedEvent) => {
@@ -46,6 +50,10 @@ export default {
               event.for = `ak_${decodedEvent.decoded[1]}`;
               event.amount = decodedEvent.decoded[2] || null;
               break;
+            case 'Burn':
+              event.from = `ak_${decodedEvent.decoded[0]}`;
+              event.amount = decodedEvent.decoded[1] || null;
+              break;
             default:
               break;
           }
@@ -61,11 +69,13 @@ export default {
     },
     async filterTransfer({ dispatch, rootGetters: { account } }, tx) {
       const { address } = account;
-      const [transferEvent] = tx.events.filter((event) => event.name === 'Transfer');
-      if (transferEvent.from === address || transferEvent.to === address) {
+      // catch any other events
+      if (tx.events.length === 0) return;
+      // filter any events not relevant for the user
+      if (tx.events[0].from === address || tx.events[0].to === address) {
         dispatch('adjustToMiddlewareInterface', {
           ...tx,
-          event: transferEvent,
+          event: tx.events[0],
           events: undefined,
         });
       }

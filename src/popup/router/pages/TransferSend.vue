@@ -171,7 +171,7 @@
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { calculateFee } from '../../utils/constants';
+import { calculateFee, ZEIT_TOKEN_CONTRACT, ZEIT_INVOICE_CONTRACT } from '../../utils/constants';
 import {
   checkAddress, checkAensName, aeToAettos, convertToken,
 } from '../../utils/helper';
@@ -199,6 +199,7 @@ export default {
   data() {
     return {
       step: 1,
+      invoiceId: null,
       form: {
         address: '',
         amount: '',
@@ -215,9 +216,9 @@ export default {
   },
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapState(['current', 'sdk']),
-    ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate']),
-    ...mapGetters('fungibleTokens', ['selectedToken']),
+    ...mapState(['current', 'sdk', 'accountSelectedIdx']),
+    ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate', 'accounts']),
+    ...mapGetters('fungibleTokens', ['selectedToken', 'tokenBalances']),
     validAddress() {
       return checkAddress(this.form.address)
         || (!this.selectedToken && checkAensName(this.form.address));
@@ -244,10 +245,45 @@ export default {
   methods: {
     checkAensName,
     async scan() {
-      this.form.address = await this.$store.dispatch('modals/open', {
+      const scanResult = await this.$store.dispatch('modals/open', {
         name: 'read-qr-code',
         title: this.$t('pages.send.scanAddress'),
       });
+      if (scanResult?.indexOf('ZEITFESTIVAL') === 0) {
+        // does user have zeit tokens?
+        const zeitTokenBalance = this.tokenBalances
+          .find(({ value }) => value === ZEIT_TOKEN_CONTRACT);
+        if (!zeitTokenBalance) {
+          this.form.address = '';
+          this.$store.dispatch('modals/open', { name: 'default', type: 'insufficient-balance' });
+          this.form.address = '';
+          return;
+        }
+
+        // Parse the qr message
+        let data = {};
+        try {
+          data = JSON.parse(scanResult.replace('ZEITFESTIVAL', ''));
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error('Could not parse JSON. Data corrupted?');
+        }
+
+        // SELECT ZEIT TOKEN
+        this.$store.commit('fungibleTokens/setSelectedToken', {
+          address: this.accounts[this.accountSelectedIdx].address,
+          token: this.tokenBalances.find(({ value }) => value === ZEIT_TOKEN_CONTRACT),
+        });
+        // SET result data
+        this.form.address = ZEIT_TOKEN_CONTRACT;
+        this.form.amount = data.amount;
+        this.invoiceId = data.invoiceId;
+
+        this.step = 2;
+      } else {
+        this.form.address = scanResult;
+        this.invoiceId = null;
+      }
       if (!this.form.address) this.form.address = '';
     },
     async fetchFee() {
@@ -309,7 +345,26 @@ export default {
       }
       this.loading = true;
       try {
-        if (this.selectedToken) {
+        if (this.selectedToken && this.invoiceId !== null) {
+          const { hash } = await this.$store.dispatch('fungibleTokens/burnTriggerPoS', [
+            this.form.amount,
+            ZEIT_INVOICE_CONTRACT,
+            this.invoiceId,
+            { waitMined: false, modal: false },
+          ]);
+          this.$store.commit('addPendingTransaction', {
+            hash,
+            amount,
+            type: 'spendToken',
+            recipientId: receiver,
+            pendingTokenTx: true,
+            tx: {
+              senderId: this.account.address,
+              contractId: this.selectedToken.contract,
+              type: SCHEMA.TX_TYPE.contractCall,
+            },
+          });
+        } else if (this.selectedToken) {
           const { hash } = await this.$store.dispatch('fungibleTokens/transfer', [
             receiver,
             this.form.amount,
