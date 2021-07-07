@@ -113,5 +113,10 @@ export const NOTIFICATION_SETTINGS = [
   },
 ];
 
-export const ZEIT_TOKEN_CONTRACT = 'ct_pViaDUH9GwjATmAyT75Byhd9Uh91GBgLnBgwAaih2Z58BNN85';
-export const ZEIT_INVOICE_CONTRACT = 'ct_tbzpYm5kSYWXB4AiYT2PYLxeXMXGyVLqQathcFjxxeMdNcWhz';
+export const ZEIT_TOKEN_CONTRACT = 'ct_2qetb3nYT13MEEsQoMyXWTP2KUadZ936oZsfPDDmPt8B9znJoE';
+export const ZEIT_INVOICE_CONTRACT = 'ct_28NEcA26E2QEUeYA7BLdJJPfkZi6zLKYgfzMTUA9ui6fp4ubr3';
+export const ZEIT_TOKEN_INTERFACE = `@compiler >= 6
+contract interface PoS =
+  stateful entrypoint set_paid : (int) => bool
+main contract FungibleTokenFull =
+  stateful entrypoint burn_trigger_pos : (int, PoS, int) => bool`;

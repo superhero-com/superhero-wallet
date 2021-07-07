@@ -3,6 +3,7 @@ import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullI
 import BigNumber from 'bignumber.js';
 import { unionBy, isEqual } from 'lodash-es';
 import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
+import { ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 
 export default (store) => {
   store.registerModule('fungibleTokens', {
@@ -154,13 +155,7 @@ export default (store) => {
         { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
         [amount, posAddress, invoiceId, option],
       ) {
-        const tokenContract = await sdk.getContractInstance(`
-            @compiler >= 6
-            contract interface PoS =
-              stateful entrypoint set_paid : (int) => bool
-            main contract FungibleTokenFull =
-              stateful entrypoint burn_trigger_pos : (int, PoS, int) => bool
-            `, {
+        const tokenContract = await sdk.getContractInstance(ZEIT_TOKEN_INTERFACE, {
           contractAddress: tokens[account.address].selectedToken.contract,
         });
         return tokenContract.methods.burn_trigger_pos(
