@@ -154,7 +154,13 @@ export default (store) => {
         { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
         [amount, posAddress, invoiceId, option],
       ) {
-        const tokenContract = await sdk.getContractInstance(FUNGIBLE_TOKEN_CONTRACT, {
+        const tokenContract = await sdk.getContractInstance(`
+            @compiler >= 6
+            contract interface PoS =
+              stateful entrypoint set_paid : (int) => bool
+            main contract FungibleTokenFull =
+              stateful entrypoint burn_trigger_pos : (int, PoS, int) => bool
+            `, {
           contractAddress: tokens[account.address].selectedToken.contract,
         });
         return tokenContract.methods.burn_trigger_pos(

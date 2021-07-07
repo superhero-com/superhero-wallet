@@ -113,5 +113,5 @@ export const NOTIFICATION_SETTINGS = [
   },
 ];
 
-export const ZEIT_TOKEN_CONTRACT = 'ct_jzUHLhMK112thY2YkZb4tzgUHtYbtzqHyLZnEjxmKzsp88Hkt';
-export const ZEIT_INVOICE_CONTRACT = 'ct_jzUHLhMK112thY2YkZb4tzgUHtYbtzqHyLZnEjxmKzsp88Hkt';
+export const ZEIT_TOKEN_CONTRACT = 'ct_pViaDUH9GwjATmAyT75Byhd9Uh91GBgLnBgwAaih2Z58BNN85';
+export const ZEIT_INVOICE_CONTRACT = 'ct_tbzpYm5kSYWXB4AiYT2PYLxeXMXGyVLqQathcFjxxeMdNcWhz';

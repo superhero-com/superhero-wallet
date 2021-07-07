@@ -171,7 +171,7 @@
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { calculateFee, ZEIT_TOKEN_CONTRACT } from '../../utils/constants';
+import { calculateFee, ZEIT_TOKEN_CONTRACT, ZEIT_INVOICE_CONTRACT } from '../../utils/constants';
 import {
   checkAddress, checkAensName, aeToAettos, convertToken,
 } from '../../utils/helper';
@@ -346,7 +346,7 @@ export default {
         if (this.selectedToken && this.invoiceId) {
           const { hash } = await this.$store.dispatch('fungibleTokens/burnTriggerPoS', [
             this.form.amount,
-            process.env.ZEIT_INVOICE_CONTRACT,
+            ZEIT_INVOICE_CONTRACT,
             this.invoiceId,
             { waitMined: false, modal: false },
           ]);
