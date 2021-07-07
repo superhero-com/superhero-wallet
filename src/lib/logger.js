@@ -58,7 +58,7 @@ export default class Logger {
     };
   }
 
-  static async write({ modal = true, ...error }) {
+  static async write({ modal = process.env.NODE_ENV !== 'production', ...error }) {
     const { saveErrorLog } = await getState();
     if (!saveErrorLog) return;
     const errorLog = await Logger.get();
