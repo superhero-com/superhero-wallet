@@ -142,11 +142,22 @@ export default {
       return `https://explorer.aeternity.io/account/transactions/${address}`;
     },
   },
+  mounted() {
+    const polling = setInterval(() => this.updateBalances(), 10000);
+
+    this.$once('hook:destroyed', () => {
+      clearInterval(polling);
+    });
+  },
   methods: {
     ...mapMutations(['createAccount', 'deleteAccount']),
     editLocalName() {
       this.customAccountName = this.accounts[this.idx].localName;
       this.edit = true;
+    },
+    updateBalances() {
+      this.$store.dispatch('fungibleTokens/getAvailableTokens');
+      this.$store.dispatch('fungibleTokens/loadTokenBalances');
     },
     saveLocalName(name) {
       this.$store.commit('setAccountLocalName', { name, idx: this.idx });
