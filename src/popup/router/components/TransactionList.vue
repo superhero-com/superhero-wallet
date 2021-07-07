@@ -61,7 +61,7 @@ export default {
       filteredTransactions(state, { account: { address } }) {
         const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
           .includes(tr.tx.contractId);
-        return (this.transactions.concat(this.chainTransactions))
+        return this.transactions
           .filter((tr) => (!this.token
             || (this.token !== 'aeternity'
               ? tr.tx?.contractId === this.token
@@ -163,8 +163,9 @@ export default {
       }
     },
     updateTransactions(transactions) {
-      this.transactions = uniqBy([...this.transactions, ...transactions], 'hash');
+      this.transactions = uniqBy([...this.transactions, ...transactions, ...this.chainTransactions], 'hash');
       this.$store.commit('setTransactions', this.transactions);
+      this.$store.dispatch('transactionCache/removeOldTxFromCache');
     },
   },
 };

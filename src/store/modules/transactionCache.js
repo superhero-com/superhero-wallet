@@ -92,8 +92,13 @@ export default {
         },
       });
     },
-    async removeOldTxFromCache() {
-      // TODO implement
+    async removeOldTxFromCache({ commit, state, rootState: { transactions } }) {
+      const allTxHashes = transactions.latest.map((tx) => tx.hash);
+      state.transactions.forEach((tx) => {
+        if (allTxHashes.includes(tx.hash)) {
+          commit('delete', tx.hash);
+        }
+      });
     },
   },
 };
