@@ -13,35 +13,17 @@
         <TxHistory class="icon" />
       </router-link>
     </div>
-    <PendingTxs />
-    <div
-      v-if="transactions.latest.length"
-      class="transaction-list"
-    >
-      <TransactionItem
-        v-for="transaction in transactions.latest.slice(0, limit)"
-        :key="transaction.hash"
-        :transaction="transaction"
-      />
-    </div>
+    <TransactionList
+      :display-filter="false"
+      :max-length="6"
+    />
     <router-link
-      v-if="transactions.latest.length > 6"
       to="/transactions"
       class="view-more"
     >
       <Visible class="icon" />
       <span class="text">{{ $t('pages.recentTransactions.viewMore') }}</span>
     </router-link>
-    <AnimatedSpinner
-      v-if="loading"
-      class="spinner"
-    />
-    <div
-      v-else-if="!transactions.latest.length && !transactions.pending.length"
-      class="message"
-    >
-      <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
-    </div>
   </div>
 </template>
 
@@ -49,47 +31,15 @@
 import { mapState } from 'vuex';
 import TxHistory from '../../../icons/tx-history.svg?vue-component';
 import Visible from '../../../icons/visible.svg?vue-component';
-import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
-import PendingTxs from './PendingTxs';
-import TransactionItem from './TransactionItem';
+import TransactionList from './TransactionList';
 
 export default {
   components: {
-    PendingTxs, TransactionItem, TxHistory, Visible, AnimatedSpinner,
+    TransactionList,
+    TxHistory,
+    Visible,
   },
-  data() {
-    return {
-      polling: null,
-      loading: true,
-      limit: 10,
-    };
-  },
-  computed: mapState(['tourStartBar', 'transactions', 'accountSelectedIdx']),
-  watch: {
-    accountSelectedIdx() {
-      this.$store.commit('setTransactions', []);
-      this.loading = true;
-      this.updateTransactions();
-    },
-  },
-  mounted() {
-    if (this.transactions.latest.length) this.loading = false;
-    this.polling = setInterval(() => this.updateTransactions(), 5000);
-    this.$once('hook:beforeDestroy', () => clearInterval(this.polling));
-  },
-  methods: {
-    async updateTransactions() {
-      this.$store.commit(
-        'setTransactions',
-        await this.$store.dispatch('fetchTransactions', {
-          limit: this.limit,
-          page: 1,
-          recent: true,
-        }),
-      );
-      this.loading = false;
-    },
-  },
+  computed: mapState(['tourStartBar']),
 };
 </script>
 
@@ -140,36 +90,8 @@ export default {
     }
   }
 
-  .transaction-list > div {
-    margin-bottom: 1px;
-  }
-
-  .message,
-  .spinner {
+  .transaction-list {
     flex-grow: 1;
-    display: flex;
-    align-items: center;
-    padding-bottom: 8px;
-
-    @include mixins.desktop {
-      padding-bottom: 56px;
-    }
-  }
-
-  .message > p {
-    padding: 0 64px;
-
-    @extend %face-sans-15-medium;
-
-    color: variables.$color-light-grey;
-    text-align: center;
-  }
-
-  .spinner {
-    width: 56px;
-    height: 56px;
-    margin: 0 auto;
-    color: variables.$color-white;
   }
 
   .view-more {

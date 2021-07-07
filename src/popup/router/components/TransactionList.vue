@@ -1,6 +1,9 @@
 <template>
   <div class="transaction-list">
-    <TransactionFilters v-model="displayMode" />
+    <TransactionFilters
+      v-if="displayFilter"
+      v-model="displayMode"
+    />
     <ul
       class="list"
       data-cy="list"
@@ -12,14 +15,17 @@
         :transaction="transaction"
       />
     </ul>
-    <div v-if="!filteredTransactions.length && !loading">
-      <p>{{ $t('pages.transactions.noTransactions') }}</p>
-    </div>
-    <Loader
+    <AnimatedSpinner
       v-if="loading"
-      size="small"
-      type="none"
+      class="spinner"
+      data-cy="loader"
     />
+    <div
+      v-else-if="!transactions.length"
+      class="message"
+    >
+      <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
+    </div>
   </div>
 </template>
 
@@ -29,6 +35,7 @@ import { uniqBy } from 'lodash-es';
 import TransactionFilters from './TransactionFilters';
 import TransactionItem from './TransactionItem';
 import PendingTxs from './PendingTxs';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import { TXS_PER_PAGE } from '../../utils/constants';
 
 export default {
@@ -36,10 +43,13 @@ export default {
     TransactionFilters,
     TransactionItem,
     PendingTxs,
+    AnimatedSpinner,
   },
   props: {
     token: { type: String, default: '' },
     searchTerm: { type: String, default: '' },
+    displayFilter: { type: Boolean, default: true },
+    maxLength: { type: Number, default: 999999 },
   },
   data() {
     return {
@@ -51,6 +61,7 @@ export default {
   },
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
+    ...mapState(['accountSelectedIdx']),
     ...mapState({
       filteredTransactions(state, { account: { address } }) {
         const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
@@ -87,10 +98,18 @@ export default {
             const arr = [a, b].map((e) => new Date(e.microTime));
             if (this.displayMode.latestFirst) arr.reverse();
             return arr[0] - arr[1];
-          });
+          })
+          .slice(0, this.maxLength);
       },
     }),
     ...mapGetters(['getTxSymbol']),
+    ...mapGetters('transactionCache', ['chainTransactions']),
+  },
+  watch: {
+    accountSelectedIdx() {
+      this.$store.commit('setTransactions', []);
+      this.loadMore();
+    },
   },
   mounted() {
     this.loadMore();
@@ -110,6 +129,7 @@ export default {
       const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = isDesktop
         ? document.querySelector('#app') : document.documentElement;
+      if (this.filteredTransactions.length >= this.maxLength) return;
       if (scrollHeight - scrollTop <= clientHeight + 100) {
         setTimeout(() => this.loadMore(), 1500);
       }
@@ -148,8 +168,9 @@ export default {
       }
     },
     updateTransactions(transactions) {
-      this.transactions = uniqBy([...this.transactions, ...transactions], 'hash');
+      this.transactions = uniqBy([...this.transactions, ...transactions, ...this.chainTransactions], 'hash');
       this.$store.commit('setTransactions', this.transactions);
+      this.$store.dispatch('transactionCache/removeOldTxFromCache');
     },
   },
 };
@@ -157,10 +178,37 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
-.transaction-list .list {
-  background: variables.$color-black;
-  padding: 0;
-  margin: 0;
+.transaction-list {
+  .list {
+    background: variables.$color-black;
+    padding: 0;
+    margin: 0;
+  }
+
+  .message,
+  .spinner {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    padding-bottom: 8px;
+  }
+
+  .message > p {
+    padding: 0 64px;
+
+    @extend %face-sans-15-medium;
+
+    color: variables.$color-light-grey;
+    text-align: center;
+  }
+
+  .spinner {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto;
+    color: variables.$color-white;
+  }
 }
 </style>
