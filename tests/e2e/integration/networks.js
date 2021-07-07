@@ -51,13 +51,6 @@ describe('Test cases for networks page', () => {
       defaultNetwork.middlewareUrl,
       defaultNetwork.compilerUrl,
     )
-
-      .selectNetwork()
-      .goBack()
-      .goBack()
-      .get('.transaction-list')
-      .should('not.exist')
-
       .openNetworks()
       .get('[data-cy=more]')
       .click()
