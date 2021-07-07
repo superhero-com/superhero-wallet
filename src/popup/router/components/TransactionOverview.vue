@@ -10,7 +10,6 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { TX_TYPE_MDW } from '../../utils/constants';
 import Overview from './Overview';
 
 export default {
@@ -19,7 +18,7 @@ export default {
     tx: { type: Object, required: true },
   },
   computed: {
-    ...mapGetters(['getTxDirection', 'getExplorerPath']),
+    ...mapGetters(['getTxType', 'getTxDirection', 'getExplorerPath']),
     ...mapState({
       account(_, { account }) {
         return {
@@ -86,11 +85,7 @@ export default {
       }
     },
     txType() {
-      return (
-        TX_TYPE_MDW[this.tx.type]
-        || SCHEMA.OBJECT_ID_TX_TYPE[this.tx.tag]
-        || (Object.values(SCHEMA.TX_TYPE).includes(this.tx.type) && this.tx.type)
-      );
+      return this.getTxType({ tx: this.tx });
     },
   },
   methods: {

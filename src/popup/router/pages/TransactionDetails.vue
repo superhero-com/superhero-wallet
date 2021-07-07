@@ -202,7 +202,7 @@ export default {
       text-align: center;
       margin: 16px 0 24px 0;
 
-      ::v-deep .text {
+      ::v-deep .fiat {
         display: block;
         padding-top: 4px;
         line-height: 24px;

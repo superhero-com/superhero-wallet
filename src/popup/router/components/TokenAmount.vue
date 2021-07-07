@@ -11,10 +11,10 @@
       {{ symbol }}
     </span>
     <span
-      v-if="text"
-      class="text"
+      v-if="amountFiat"
+      class="fiat"
     >
-      {{ text }}
+      {{ amountFiat }}
     </span>
   </span>
 </template>
@@ -27,7 +27,6 @@ export default {
     amount: { type: Number, required: true },
     symbol: { type: String, default: 'AE' },
     aex9: { type: Boolean, default: false },
-    altText: { type: String, default: '' },
     hideFiat: { type: Boolean },
     direction: {
       type: String,
@@ -49,11 +48,6 @@ export default {
         return formatCurrency(converted);
       },
     }),
-    text() {
-      if (this.amountFiat) return `(≈${this.amountFiat})`;
-      if (this.altText) return `(${this.altText})`;
-      return false;
-    },
   },
 };
 </script>
@@ -74,7 +68,7 @@ export default {
     color: variables.$color-blue;
   }
 
-  .text {
+  .fiat {
     color: variables.$color-dark-grey;
   }
 

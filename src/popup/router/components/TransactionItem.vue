@@ -13,9 +13,15 @@
         :symbol="getTxSymbol(transaction)"
         :aex9="isTxAex9(transaction)"
         :direction="getTxDirection(transaction)"
-        :alt-text="isTxAex9(transaction) ? '' : getTxType(transaction)"
+        :hide-fiat="showType"
         data-cy="amount"
       />
+      <span
+        v-if="showType"
+        class="type"
+      >
+        ({{ $t('transaction.type')[txType] || txType }})
+      </span>
     </div>
     <div
       v-if="!transaction.pending"
@@ -29,6 +35,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import { formatDate, formatTime } from '../../utils';
 import Pending from '../../../icons/animated-pending.svg?vue-component';
 import TokenAmount from './TokenAmount';
@@ -42,14 +49,23 @@ export default {
   props: {
     transaction: { type: Object, required: true },
   },
-  computed: mapGetters([
-    'getTxAmountTotal',
-    'getTxSymbol',
-    'getTxType',
-    'getTxDirection',
-    'getTxTipUrl',
-    'isTxAex9',
-  ]),
+  computed: {
+    ...mapGetters([
+      'getTxAmountTotal',
+      'getTxSymbol',
+      'getTxType',
+      'getTxDirection',
+      'getTxTipUrl',
+      'isTxAex9',
+    ]),
+    txType() {
+      return this.getTxType(this.transaction);
+    },
+    showType() {
+      return !this.isTxAex9(this.transaction) && this.txType
+        && this.txType !== SCHEMA.TX_TYPE.spend;
+    },
+  },
 };
 </script>
 
@@ -81,6 +97,13 @@ export default {
       height: 24px;
       color: variables.$color-white;
       margin-right: 2px;
+    }
+
+    .type {
+      @extend %face-sans-14-regular;
+
+      color: variables.$color-dark-grey;
+      margin-left: 2px;
     }
   }
 
