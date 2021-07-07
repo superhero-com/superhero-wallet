@@ -32,9 +32,9 @@ import PopupMessageSign from '../pages/Popups/MessageSign';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
 import Retip from '../pages/Retip';
 import SecuritySettings from '../pages/SecuritySettings';
-import Payments from '../pages/Payments';
-import PaymentsSend from '../pages/PaymentsSend';
-import PaymentsReceive from '../pages/PaymentsReceive';
+import Transfer from '../pages/Transfer';
+import TransferSend from '../pages/TransferSend';
+import TransferReceive from '../pages/TransferReceive';
 import Settings from '../pages/Settings';
 import SignMessage from '../pages/SignMessage';
 import SuccessTip from '../pages/SuccessTip';
@@ -258,23 +258,23 @@ export default [
     },
   },
   {
-    path: '/payments',
-    component: Payments,
+    path: '/transfer',
+    component: Transfer,
     children: [{
       path: '',
-      name: 'payments-send',
-      component: PaymentsSend,
+      name: 'transfer-send',
+      component: TransferSend,
       props: true,
       meta: {
-        title: 'payments',
+        title: 'transfer',
         notRebrand: true,
       },
     }, {
       path: 'receive',
-      name: 'payments-receive',
-      component: PaymentsReceive,
+      name: 'transfer-receive',
+      component: TransferReceive,
       meta: {
-        title: 'payments',
+        title: 'transfer',
         notRebrand: true,
       },
     }],

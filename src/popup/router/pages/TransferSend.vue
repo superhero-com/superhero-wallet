@@ -1,5 +1,5 @@
 <template>
-  <div class="payments-send">
+  <div class="transfer-send">
     <div data-cy="send-container">
       <div v-if="step == 1">
         <div class="withdraw step1">
@@ -183,7 +183,6 @@ import QrIcon from '../../../icons/qr-code.svg?vue-component';
 import AlertExclamination from '../../../icons/alert-exclamation.svg?vue-component';
 
 export default {
-  name: 'PaymentsSend',
   components: {
     AmountInput,
     Textarea,
@@ -359,7 +358,7 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 
-.payments-send {
+.transfer-send {
   .primary-title-darker {
     color: variables.$color-white;
   }

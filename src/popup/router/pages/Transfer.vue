@@ -1,15 +1,15 @@
 <template>
-  <div class="payments">
+  <div class="transfer">
     <AccountInfo />
     <BalanceInfo />
     <Tabs>
       <RouterLink
-        :to="{ name: 'payments-send' }"
+        :to="{ name: 'transfer-send' }"
         exact-path
       >
         <SendIcon /> {{ $t('pages.titles.send') }}
       </RouterLink>
-      <RouterLink :to="{ name: 'payments-receive' }">
+      <RouterLink :to="{ name: 'transfer-receive' }">
         <ReceiveIcon /> {{ $t('pages.titles.receive') }}
       </RouterLink>
     </Tabs>

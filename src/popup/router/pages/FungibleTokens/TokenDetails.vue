@@ -16,13 +16,13 @@
       <div class="token-actions">
         <Button
           bold
-          :to="{ name: 'payments-send' }"
+          :to="{ name: 'transfer-send' }"
         >
           {{ $t('pages.token-details.send') }}
         </Button>
         <Button
           bold
-          :to="{ name: 'payments-receive' }"
+          :to="{ name: 'transfer-receive' }"
         >
           {{ $t('pages.token-details.receive') }}
         </Button>

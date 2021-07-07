@@ -1,6 +1,6 @@
 <template>
   <div
-    class="payments-receive"
+    class="transfer-receive"
     data-cy="top-up-container"
   >
     <p class="primary-title text-left mt-20 f-14 mx-20">
@@ -19,7 +19,6 @@ import { mapGetters } from 'vuex';
 import QrcodeVue from 'qrcode.vue';
 
 export default {
-  name: 'PaymentsReceive',
   components: { QrcodeVue },
   computed: mapGetters(['account']),
 };
@@ -28,7 +27,7 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables.scss';
 
-.payments-receive {
+.transfer-receive {
   p.primary-title {
     margin-left: 20px;
   }

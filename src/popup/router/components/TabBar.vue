@@ -12,11 +12,11 @@
       <span>{{ $t('pages.titles.balances') }}</span>
     </RouterLink>
     <RouterLink
-      to="/payments"
+      to="/transfer"
       data-cy="send"
     >
-      <Payments />
-      <span>{{ $t('pages.titles.payments') }}</span>
+      <Transfer />
+      <span>{{ $t('pages.titles.transfer') }}</span>
     </RouterLink>
     <RouterLink
       to="/tips"
@@ -35,13 +35,13 @@
 <script>
 import Home from '../../../icons/home.svg?vue-component';
 import Balances from '../../../icons/balances.svg?vue-component';
-import Payments from '../../../icons/payments.svg?vue-component';
+import Transfer from '../../../icons/transfer.svg?vue-component';
 import Tips from '../../../icons/tips.svg?vue-component';
 import Names from '../../../icons/names.svg?vue-component';
 
 export default {
   components: {
-    Home, Balances, Payments, Tips, Names,
+    Home, Balances, Transfer, Tips, Names,
   },
   data: () => ({
     UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
