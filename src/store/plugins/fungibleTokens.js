@@ -150,6 +150,20 @@ export default (store) => {
           option,
         );
       },
+      async burnTriggerPoS(
+        { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
+        [amount, posAddress, invoiceId, option],
+      ) {
+        const tokenContract = await sdk.getContractInstance(FUNGIBLE_TOKEN_CONTRACT, {
+          contractAddress: tokens[account.address].selectedToken.contract,
+        });
+        return tokenContract.methods.burn_trigger_pos(
+          convertToken(amount, tokens[account.address].selectedToken.decimals).toFixed(),
+          posAddress,
+          invoiceId,
+          option,
+        );
+      },
       async getTokensHistory({ rootState, rootGetters: { activeNetwork, account }, commit }) {
         const { address } = account;
         const rawTransactions = ([

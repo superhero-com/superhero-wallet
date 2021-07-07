@@ -112,3 +112,6 @@ export const NOTIFICATION_SETTINGS = [
     type: 'CLAIM_OF_RETIP',
   },
 ];
+
+export const ZEIT_TOKEN_CONTRACT = 'ct_jzUHLhMK112thY2YkZb4tzgUHtYbtzqHyLZnEjxmKzsp88Hkt';
+export const ZEIT_INVOICE_CONTRACT = 'ct_jzUHLhMK112thY2YkZb4tzgUHtYbtzqHyLZnEjxmKzsp88Hkt';
