@@ -6,7 +6,7 @@
     </RouterLink>
     <RouterLink
       v-if="UNFINISHED_FEATURES"
-      to="/tokens"
+      to="/balances"
     >
       <Balances />
       <span>{{ $t('pages.titles.balances') }}</span>

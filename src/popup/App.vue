@@ -199,9 +199,7 @@ body {
       margin: 0 auto;
       position: relative;
 
-      &.transactions,
-      &.tokens-preview,
-      &.token-details {
+      &.transactions {
         padding-left: 0;
         padding-right: 0;
       }

@@ -276,7 +276,6 @@
       "home": "Home",
       "donate-error": "Donate Data",
       "address": "Send Address",
-      "tokens-preview": "Tokens",
       "deploy-token": "Deploy token",
       "add-token": "Add token",
       "mint-burn-token": "Mint/Burn token",
@@ -457,13 +456,13 @@
       "mint": "Mint/Burn token",
       "mint-info": "This allows you to mint or burn token amount",
       "tokens": "Tokens",
-      "searchPlaceholder": "Search by token name or community...",
+      "searchPlaceholder": "Search for token",
       "all": "All",
       "myTokens": "My Tokens",
       "mcap": "MCap",
       "price": "Price",
       "not-available": "N/A",
-      "no-results": "There are no tokens to display"
+      "no-results": "This account has no tokens with balance"
     },
     "token-details": {
       "details": "Details",
@@ -472,7 +471,7 @@
       "tip": "Tip",
       "token-details": "Token Details",
       "token-description": "Token Description",
-      "symbol": "Symbol",
+      "abbreviation": "Abbreviation",
       "community": "Community",
       "decimals": "Decimals",
       "contract": "Contract",

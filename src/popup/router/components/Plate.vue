@@ -1,6 +1,17 @@
 <template>
-  <div class="plate">
-    <slot />
+  <div
+    class="plate"
+    :class="{ 'only-top': !$slots.bottom }"
+  >
+    <template v-if="$slots.bottom">
+      <div class="top">
+        <slot />
+      </div>
+      <div class="bottom">
+        <slot name="bottom" />
+      </div>
+    </template>
+    <slot v-else />
   </div>
 </template>
 
@@ -12,8 +23,22 @@
   top: 48px;
   top: calc(48px + env(safe-area-inset-top));
   z-index: 1;
-  box-shadow: rgba(variables.$color-border, 0.5) 0 1px;
-  border-radius: 0 0 10px 10px;
-  background: linear-gradient(180deg, variables.$color-bg-3 0%, variables.$color-black 100%);
+
+  &.only-top,
+  .top {
+    background: linear-gradient(180deg, variables.$color-bg-3 0%, variables.$color-black 100%);
+    box-shadow: variables.$color-border 0 1px;
+    border-radius: 0 0 10px 10px;
+  }
+
+  .top {
+    position: relative;
+  }
+
+  .bottom {
+    margin-top: -9px;
+    padding-top: 10px;
+    background-color: variables.$color-bg-3;
+  }
 }
 </style>

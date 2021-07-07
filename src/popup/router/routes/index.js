@@ -7,7 +7,7 @@ import Address from '../pages/Address';
 import CommentNew from '../pages/CommentNew';
 import DonateError from '../pages/DonateError';
 import TokenDetails from '../pages/FungibleTokens/TokenDetails';
-import TokensPreview from '../pages/FungibleTokens/TokensPreview';
+import Balances from '../pages/FungibleTokens/Balances';
 import ImportAccount from '../pages/ImportAccount';
 import Index from '../pages/Index';
 import Intro from '../pages/Intro';
@@ -410,27 +410,23 @@ export default [
       notRebrand: true,
     },
   },
-  ...process.env.UNFINISHED_FEATURES ? [
-    {
-      name: 'tokens-preview',
-      path: '/tokens',
-      component: TokensPreview,
-      meta: {
-        title: 'tokens-preview',
-        notRebrand: true,
-      },
+  {
+    name: 'balances',
+    path: '/balances',
+    component: Balances,
+    meta: {
+      title: 'balances',
     },
-    {
-      name: 'token-details',
-      path: '/tokens/:id',
-      component: TokenDetails,
-      props: true,
-      meta: {
-        title: 'token-details',
-        notRebrand: true,
-      },
+  },
+  {
+    name: 'token-details',
+    path: '/balances/:id',
+    component: TokenDetails,
+    props: true,
+    meta: {
+      title: 'token-details',
     },
-  ] : [],
+  },
   {
     name: 'not-found',
     path: '*',
