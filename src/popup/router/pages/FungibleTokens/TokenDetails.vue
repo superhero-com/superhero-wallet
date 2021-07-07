@@ -5,6 +5,7 @@
         <TokenAmount
           :amount="+tokenData.convertedBalance || 0"
           :symbol="tokenData.symbol"
+          :aex9="id !== 'aeternity'"
         />
       </div>
       <div class="token-actions">

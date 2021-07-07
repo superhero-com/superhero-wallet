@@ -2,8 +2,8 @@ import BigNumber from 'bignumber.js';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { Crypto, TxBuilderHelper } from '@aeternity/aepp-sdk';
-import { defaultNetworks } from '../popup/utils/constants';
+import { Crypto, TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
+import { defaultNetworks, TX_TYPE_MDW } from '../popup/utils/constants';
 import {
   checkHashType,
   convertToken,
@@ -79,7 +79,10 @@ export default {
   getTx: ({ transactions }) => (hash) => transactions.latest
     .concat(transactions.pending.map((t) => ({ ...t, pending: true })))
     .find((tx) => tx.hash === hash),
-  getTxType: (_, { getTxSymbol }) => (transaction) => (getTxSymbol(transaction) === 'AE' ? transaction.tx.type : null),
+  getTxType: () => (transaction) => transaction.tx
+    && (TX_TYPE_MDW[transaction.tx.type]
+    || SCHEMA.OBJECT_ID_TX_TYPE[transaction.tx.tag]
+    || (Object.values(SCHEMA.TX_TYPE).includes(transaction.tx.type) && transaction.tx.type)),
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
@@ -119,4 +122,6 @@ export default {
       || categorizeContractCallTxObject(transaction)?.url
       || ''
   ),
+  isTxAex9: () => (transaction) => transaction.tx
+    && !!categorizeContractCallTxObject(transaction)?.token,
 };
