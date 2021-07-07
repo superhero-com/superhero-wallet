@@ -12,7 +12,7 @@
       />
       <Button
         bold
-        :disabled="!sufficientBalance"
+        :disabled="!canGenerate"
         @click="generate"
       >
         {{
@@ -41,7 +41,7 @@
 
 <script>
 import { pick } from 'lodash-es';
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 import AmountInput from '../components/AmountInput';
 import Button from '../components/Button';
@@ -60,8 +60,12 @@ export default {
   computed: {
     ...mapState(['sdk']),
     ...mapState('invites', ['invites']),
+    ...mapGetters('fungibleTokens', ['selectedToken']),
     sufficientBalance() {
       return this.balance.comparedTo(this.amount) !== -1;
+    },
+    canGenerate() {
+      return !this.selectedToken && this.sufficientBalance;
     },
   },
   methods: {
