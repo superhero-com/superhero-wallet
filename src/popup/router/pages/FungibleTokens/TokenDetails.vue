@@ -197,7 +197,10 @@ export default {
 
 .token-header {
   background-color: variables.$color-black;
-  padding-top: 16px;
+
+  .token-amount {
+    padding-top: 16px;
+  }
 
   .token-actions {
     display: flex;
