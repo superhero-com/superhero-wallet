@@ -10,6 +10,10 @@ export default (store) => {
     }));
   };
 
+  const connectToWebsocket = (websocketUrl) => {
+    wsconnection = new WebSocket(websocketUrl);
+  };
+
   const handleWebsocketMessage = async (message) => {
     const data = JSON.parse(message.data);
     if (data.subscription === 'Object') {
@@ -28,7 +32,6 @@ export default (store) => {
     };
     wsconnection.onClose = (closeCode, closeReason) => {
       if (closeCode === 1006) {
-        // eslint-disable-next-line no-use-before-define
         connectToWebsocket();
       } else {
         // eslint-disable-next-line no-console
@@ -36,14 +39,20 @@ export default (store) => {
       }
     };
   };
-  const { middlewareUrl } = store.getters.activeNetwork;
-  const websocketUrl = new URL(middlewareUrl);
-  websocketUrl.protocol = websocketUrl.protocol === 'https:' ? 'wss' : 'ws';
-  websocketUrl.pathname += '/websocket';
 
-  const connectToWebsocket = () => {
-    wsconnection = new WebSocket(websocketUrl);
-  };
-  connectToWebsocket();
-  wsconnection.onopen = handleConnectionInit;
+  store.watch(
+    ({ middleware }) => middleware,
+    (middleware) => {
+      if (!middleware) return;
+
+      const { middlewareUrl } = store.getters.activeNetwork;
+      const websocketUrl = new URL(middlewareUrl);
+      websocketUrl.protocol = websocketUrl.protocol === 'https:' ? 'wss' : 'ws';
+      websocketUrl.pathname += '/websocket';
+      if (wsconnection) wsconnection.close();
+      connectToWebsocket(websocketUrl);
+      wsconnection.onopen = handleConnectionInit;
+    },
+    { immediate: true },
+  );
 };
