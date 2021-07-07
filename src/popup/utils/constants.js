@@ -112,3 +112,5 @@ export const NOTIFICATION_SETTINGS = [
     type: 'CLAIM_OF_RETIP',
   },
 ];
+
+export const TOKEN_TEST_CONTRACT = 'ct_jzUHLhMK112thY2YkZb4tzgUHtYbtzqHyLZnEjxmKzsp88Hkt';
