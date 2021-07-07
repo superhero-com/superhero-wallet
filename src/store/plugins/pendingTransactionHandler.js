@@ -15,6 +15,7 @@ export default async (store) => {
           });
           break;
         case 'spendToken':
+          store.dispatch('fungibleTokens/loadTokenBalances');
           store.dispatch('router/push', {
             name: 'transfer-send',
             params: { redirectstep: 3, successtx: { ...transaction, amount, recipientId } },
