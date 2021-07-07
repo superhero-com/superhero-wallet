@@ -90,36 +90,8 @@ export default {
     }
   }
 
-  .transaction-list > div {
-    margin-bottom: 1px;
-  }
-
-  .message,
-  .spinner {
+  .transaction-list {
     flex-grow: 1;
-    display: flex;
-    align-items: center;
-    padding-bottom: 8px;
-
-    @include mixins.desktop {
-      padding-bottom: 56px;
-    }
-  }
-
-  .message > p {
-    padding: 0 64px;
-
-    @extend %face-sans-15-medium;
-
-    color: variables.$color-light-grey;
-    text-align: center;
-  }
-
-  .spinner {
-    width: 56px;
-    height: 56px;
-    margin: 0 auto;
-    color: variables.$color-white;
   }
 
   .view-more {

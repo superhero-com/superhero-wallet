@@ -15,14 +15,17 @@
         :transaction="transaction"
       />
     </ul>
-    <div v-if="!filteredTransactions.length && !loading">
-      <p>{{ $t('pages.transactions.noTransactions') }}</p>
-    </div>
-    <Loader
+    <AnimatedSpinner
       v-if="loading"
-      size="small"
-      type="none"
+      class="spinner"
+      data-cy="loader"
     />
+    <div
+      v-else-if="!transactions.length"
+      class="message"
+    >
+      <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
+    </div>
   </div>
 </template>
 
@@ -32,6 +35,7 @@ import { uniqBy } from 'lodash-es';
 import TransactionFilters from './TransactionFilters';
 import TransactionItem from './TransactionItem';
 import PendingTxs from './PendingTxs';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import { TXS_PER_PAGE } from '../../utils/constants';
 
 export default {
@@ -39,6 +43,7 @@ export default {
     TransactionFilters,
     TransactionItem,
     PendingTxs,
+    AnimatedSpinner,
   },
   props: {
     token: { type: String, default: '' },
@@ -173,10 +178,37 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
-.transaction-list .list {
-  background: variables.$color-black;
-  padding: 0;
-  margin: 0;
+.transaction-list {
+  .list {
+    background: variables.$color-black;
+    padding: 0;
+    margin: 0;
+  }
+
+  .message,
+  .spinner {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    padding-bottom: 8px;
+  }
+
+  .message > p {
+    padding: 0 64px;
+
+    @extend %face-sans-15-medium;
+
+    color: variables.$color-light-grey;
+    text-align: center;
+  }
+
+  .spinner {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto;
+    color: variables.$color-white;
+  }
 }
 </style>
