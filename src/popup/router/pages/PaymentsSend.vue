@@ -89,7 +89,7 @@
               <span
                 data-cy="review-amount"
                 class="amount"
-              >{{ parseFloat(form.amount).toFixed(3) }}
+              >{{ parseFloat(form.amount) }}
                 {{ selectedToken ? selectedToken.symbol : $t('ae') }}</span>
               <span
                 v-if="!selectedToken"
@@ -142,7 +142,7 @@
           <p class="primary-title primary-title-darker text-left my-5 f-16">
             <span>{{ $t('pages.send.successalert') }}</span>
             <span class="secondary-text ml-5">
-              {{ successTx.amount }}
+              {{ parseFloat(successTx.amount) }}
               {{ successTx.token ? availableTokens[successTx.token].symbol : $t('ae') }}</span>
           </p>
           <InfoGroup
