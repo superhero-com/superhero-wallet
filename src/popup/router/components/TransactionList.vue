@@ -205,7 +205,7 @@ export default {
   }
 
   .spinner {
-    width: 56px;
+    width: 100%;
     height: 56px;
     margin: 0 auto;
     color: variables.$color-white;
