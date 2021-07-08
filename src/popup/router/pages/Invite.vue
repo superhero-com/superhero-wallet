@@ -9,10 +9,12 @@
         v-model="amount"
         native-token
         :label="$t('pages.invite.tip-attached')"
+        :error="!!errorMsg"
+        :error-message="errorMsg"
       />
       <Button
         bold
-        :disabled="!canGenerate"
+        :disabled="!!errorMsg"
         @click="generate"
       >
         {{
@@ -64,8 +66,10 @@ export default {
     sufficientBalance() {
       return this.balance.comparedTo(this.amount) !== -1;
     },
-    canGenerate() {
-      return !this.selectedToken && this.sufficientBalance;
+    errorMsg() {
+      if (this.selectedToken) return this.$t('pages.invite.tokens-not-allowed');
+      if (!this.sufficientBalance) return this.$t('pages.invite.insufficient-balance');
+      return '';
     },
   },
   methods: {
