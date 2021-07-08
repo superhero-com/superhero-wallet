@@ -26,6 +26,14 @@
     >
       <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
     </div>
+    <router-link
+      v-if="maxLength && transactions.length > maxLength"
+      to="/transactions"
+      class="view-more"
+    >
+      <Visible class="icon" />
+      <span class="text">{{ $t('pages.recentTransactions.viewMore') }}</span>
+    </router-link>
   </div>
 </template>
 
@@ -37,6 +45,7 @@ import TransactionItem from './TransactionItem';
 import PendingTxs from './PendingTxs';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import { TXS_PER_PAGE } from '../../utils/constants';
+import Visible from '../../../icons/visible.svg?vue-component';
 
 export default {
   components: {
@@ -44,12 +53,13 @@ export default {
     TransactionItem,
     PendingTxs,
     AnimatedSpinner,
+    Visible,
   },
   props: {
     token: { type: String, default: '' },
     searchTerm: { type: String, default: '' },
     displayFilter: { type: Boolean, default: true },
-    maxLength: { type: Number, default: 999999 },
+    maxLength: { type: Number, default: null },
   },
   data() {
     return {
@@ -99,7 +109,7 @@ export default {
             if (this.displayMode.latestFirst) arr.reverse();
             return arr[0] - arr[1];
           })
-          .slice(0, this.maxLength);
+          .slice(0, this.maxLength || Infinity);
       },
     }),
     ...mapGetters(['getTxSymbol']),
@@ -129,7 +139,7 @@ export default {
       const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = isDesktop
         ? document.querySelector('#app') : document.documentElement;
-      if (this.filteredTransactions.length >= this.maxLength) return;
+      if (this.maxLength && this.filteredTransactions.length >= this.maxLength) return;
       if (scrollHeight - scrollTop <= clientHeight + 100) {
         setTimeout(() => this.loadMore(), 1500);
       }
@@ -209,6 +219,55 @@ export default {
     height: 56px;
     margin: 0 auto;
     color: variables.$color-white;
+  }
+
+  .view-more {
+    padding: 12px 16px;
+    border-radius: 4px;
+    background: variables.$color-bg-1;
+    display: flex;
+    align-items: center;
+
+    .text {
+      @extend %face-sans-14-medium;
+
+      color: variables.$color-green;
+      padding-left: 4px;
+    }
+
+    .icon {
+      width: 24px;
+      height: 24px;
+      opacity: 0.7;
+    }
+
+    &:hover {
+      background: variables.$color-hover;
+
+      .text {
+        color: variables.$color-green-hover;
+      }
+
+      .icon {
+        opacity: 1;
+
+        path {
+          fill: variables.$color-green;
+        }
+      }
+    }
+
+    &:active {
+      background: variables.$color-bg-1;
+
+      .text {
+        opacity: 0.7;
+      }
+
+      .icon {
+        opacity: 0.44;
+      }
+    }
   }
 }
 </style>

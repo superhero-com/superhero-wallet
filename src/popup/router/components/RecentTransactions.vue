@@ -17,27 +17,18 @@
       :display-filter="false"
       :max-length="6"
     />
-    <router-link
-      to="/transactions"
-      class="view-more"
-    >
-      <Visible class="icon" />
-      <span class="text">{{ $t('pages.recentTransactions.viewMore') }}</span>
-    </router-link>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
 import TxHistory from '../../../icons/tx-history.svg?vue-component';
-import Visible from '../../../icons/visible.svg?vue-component';
 import TransactionList from './TransactionList';
 
 export default {
   components: {
     TransactionList,
     TxHistory,
-    Visible,
   },
   computed: mapState(['tourStartBar']),
 };
@@ -92,55 +83,6 @@ export default {
 
   .transaction-list {
     flex-grow: 1;
-  }
-
-  .view-more {
-    padding: 12px 16px;
-    border-radius: 4px;
-    background: variables.$color-bg-1;
-    display: flex;
-    align-items: center;
-
-    .text {
-      @extend %face-sans-14-medium;
-
-      color: variables.$color-green;
-      padding-left: 4px;
-    }
-
-    .icon {
-      width: 24px;
-      height: 24px;
-      opacity: 0.7;
-    }
-
-    &:hover {
-      background: variables.$color-hover;
-
-      .text {
-        color: variables.$color-green-hover;
-      }
-
-      .icon {
-        opacity: 1;
-
-        path {
-          fill: variables.$color-green;
-        }
-      }
-    }
-
-    &:active {
-      background: variables.$color-bg-1;
-
-      .text {
-        opacity: 0.7;
-      }
-
-      .icon {
-        opacity: 0.44;
-      }
-    }
   }
 }
 </style>
