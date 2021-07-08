@@ -9,10 +9,12 @@
         v-model="amount"
         native-token
         :label="$t('pages.invite.tip-attached')"
+        :error="!!errorMsg"
+        :error-message="errorMsg"
       />
       <Button
         bold
-        :disabled="!sufficientBalance"
+        :disabled="!!errorMsg"
         @click="generate"
       >
         {{
@@ -41,7 +43,7 @@
 
 <script>
 import { pick } from 'lodash-es';
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 import AmountInput from '../components/AmountInput';
 import Button from '../components/Button';
@@ -60,8 +62,14 @@ export default {
   computed: {
     ...mapState(['sdk']),
     ...mapState('invites', ['invites']),
+    ...mapGetters('fungibleTokens', ['selectedToken']),
     sufficientBalance() {
       return this.balance.comparedTo(this.amount) !== -1;
+    },
+    errorMsg() {
+      if (this.selectedToken) return this.$t('pages.invite.tokens-not-allowed');
+      if (!this.sufficientBalance) return this.$t('pages.invite.insufficient-balance');
+      return '';
     },
   },
   methods: {
