@@ -122,16 +122,19 @@ export default {
   color: variables.$color-white;
 
   .balance-wrapper {
+    flex-grow: 1;
     margin: 0 auto;
 
     .balance-dropdown {
+      width: 100%;
+      text-align: center;
       margin-top: 6px;
       margin-left: auto;
       position: relative;
-      width: max-content;
 
       .dropdown {
         position: absolute;
+        left: 0;
 
         ::v-deep {
           .custom > button,

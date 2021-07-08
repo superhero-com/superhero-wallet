@@ -96,6 +96,7 @@ export default {
   min-width: 6rem;
   width: 100%;
   margin-bottom: 22px;
+  z-index: 10;
 
   .display {
     text-align: center;
@@ -196,7 +197,6 @@ export default {
     max-height: 165px;
     overflow-y: scroll;
     position: relative;
-    z-index: 10;
   }
 
   .list-item:hover {
