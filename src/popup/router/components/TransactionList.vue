@@ -181,6 +181,9 @@ export default {
 @use '../../../styles/typography';
 
 .transaction-list {
+  display: flex;
+  flex-direction: column;
+
   .list {
     background: variables.$color-black;
     padding: 0;
@@ -192,7 +195,7 @@ export default {
     flex-grow: 1;
     display: flex;
     align-items: center;
-    padding-bottom: 8px;
+    padding-bottom: 48px;
   }
 
   .message > p {
