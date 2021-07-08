@@ -122,7 +122,6 @@ export default {
   color: variables.$color-white;
 
   .balance-wrapper {
-    flex-grow: 1;
     margin: 0 auto;
 
     .balance-dropdown {
@@ -134,12 +133,16 @@ export default {
 
       .dropdown {
         position: absolute;
-        left: 0;
 
         ::v-deep {
           .custom > button,
           .custom > button:active:not(:disabled) {
             opacity: 0;
+          }
+
+          .custom .list {
+            width: 250px;
+            margin-left: -80px;
           }
 
           .custom > button,
