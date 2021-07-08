@@ -63,7 +63,7 @@ export default {
   },
   data() {
     return {
-      loading: false,
+      loading: true,
       transactions: [],
       page: 1,
       displayMode: { latestFirst: true, type: 'all' },
@@ -164,8 +164,6 @@ export default {
       }
     },
     async getLatest() {
-      if (this.loading) return;
-      this.loading = true;
       try {
         const transactions = await this.$store.dispatch('fetchTransactions', {
           limit: 10,
