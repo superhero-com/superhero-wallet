@@ -30,3 +30,15 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.transactions {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+
+  .transaction-list {
+    flex-grow: 1;
+  }
+}
+</style>
