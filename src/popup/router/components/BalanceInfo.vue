@@ -140,9 +140,14 @@ export default {
             opacity: 0;
           }
 
-          .custom .list {
-            width: 250px;
-            margin-left: -80px;
+          .custom {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            .list li {
+              white-space: nowrap;
+            }
           }
 
           .custom > button,
