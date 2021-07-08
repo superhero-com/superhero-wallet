@@ -1,4 +1,4 @@
-import { TOKEN_TEST_CONTRACT } from '../../popup/utils/constants';
+import { ZEIT_TOKEN_CONTRACT } from '../../popup/utils/constants';
 
 export default (store) => {
   let wsconnection = null;
@@ -24,7 +24,7 @@ export default (store) => {
   const handleConnectionInit = async () => {
     // eslint-disable-next-line no-console
     console.info('WebSocket connected');
-    subscribeToContract(TOKEN_TEST_CONTRACT);
+    subscribeToContract(ZEIT_TOKEN_CONTRACT);
     wsconnection.onmessage = handleWebsocketMessage;
     wsconnection.onerror = (error) => {
       // eslint-disable-next-line no-console

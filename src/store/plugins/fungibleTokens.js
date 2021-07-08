@@ -3,6 +3,7 @@ import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullI
 import BigNumber from 'bignumber.js';
 import { unionBy, isEqual } from 'lodash-es';
 import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
+import { ZEIT_TOKEN_CONTRACT, ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 
 export default (store) => {
   store.registerModule('fungibleTokens', {
@@ -70,14 +71,32 @@ export default (store) => {
         return commit('setAvailableTokens', availableTokens);
       },
       async loadTokenBalances({
+        rootState: { sdk },
         rootGetters: { activeNetwork, accounts },
         state: { availableTokens },
         commit,
       }) {
         accounts.map(async ({ address }) => {
-          const tokens = await fetchJson(
+          let tokens = await fetchJson(
             `${activeNetwork.middlewareUrl}/aex9/balances/account/${address}`,
           ).catch(handleUnknownError);
+
+          // MANUALLY UPDATE ZEIT TOKEN
+          try {
+            const tokenContract = await sdk.getContractInstance(ZEIT_TOKEN_INTERFACE, {
+              contractAddress: ZEIT_TOKEN_CONTRACT,
+            });
+            const { decodedResult } = await tokenContract.methods.balance(address);
+            tokens = tokens
+              .filter(({ contract_id: contractId }) => contractId !== ZEIT_TOKEN_CONTRACT);
+            tokens.push({
+              amount: decodedResult,
+              contract_id: ZEIT_TOKEN_CONTRACT,
+            });
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.warn(e);
+          }
 
           const selectedToken = store.state.fungibleTokens.tokens[address]?.selectedToken;
 
@@ -147,6 +166,20 @@ export default (store) => {
         return tokenContract.methods.transfer(
           toAccount,
           convertToken(amount, tokens[account.address].selectedToken.decimals).toFixed(),
+          option,
+        );
+      },
+      async burnTriggerPoS(
+        { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
+        [amount, posAddress, invoiceId, option],
+      ) {
+        const tokenContract = await sdk.getContractInstance(ZEIT_TOKEN_INTERFACE, {
+          contractAddress: tokens[account.address].selectedToken.contract,
+        });
+        return tokenContract.methods.burn_trigger_pos(
+          convertToken(amount, tokens[account.address].selectedToken.decimals).toFixed(),
+          posAddress,
+          invoiceId,
           option,
         );
       },
