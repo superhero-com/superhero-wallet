@@ -5,6 +5,7 @@
         :amount="amount"
         :symbol="symbol"
         :direction="direction"
+        :aex9="isTxAex9(transaction)"
         large
       />
     </Plate>
@@ -161,6 +162,7 @@ export default {
       'getTxDirection',
       'getTxTipUrl',
       'getExplorerPath',
+      'isTxAex9',
     ]),
     transaction() {
       return this.getTx(this.hash);
@@ -200,7 +202,7 @@ export default {
       text-align: center;
       margin: 16px 0 24px 0;
 
-      ::v-deep .text {
+      ::v-deep .fiat {
         display: block;
         padding-top: 4px;
         line-height: 24px;

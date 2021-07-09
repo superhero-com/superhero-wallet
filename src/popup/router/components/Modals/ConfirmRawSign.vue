@@ -2,23 +2,41 @@
   <Modal
     full-screen
     class="confirm-raw-sign"
+    data-cy="popup-aex2"
   >
-    <h3>
-      {{ $t('modals.confirm-transaction-sign.sign-raw') }} <br>
-      <span class="name-holder">
-        <Avatar
-          :address="account.address"
-          :name="account.name"
-          size="small"
-        />
-        {{ account.name || account.address }}
+    <Overview
+      :title="$t('modals.confirm-raw-sign.title')"
+      :sender="{ name: app.name, address: app.host, url: app.url }"
+      :recipient="account"
+    />
+
+    <div
+      class="warning"
+      data-cy="warning"
+    >
+      <span class="title">
+        <Warning class="icon" />
+        {{ $t('modals.confirm-raw-sign.warning.title') }}
       </span>
-    </h3>
+      <i18n
+        path="modals.confirm-raw-sign.warning.content"
+        tag="span"
+        class="content"
+      >
+        <br>
+      </i18n>
+    </div>
+
     <DetailsItem
       :label="$t('modals.confirm-transaction-sign.data-sign')"
-      direction="column"
+      :value="dataAsString"
+      data-cy="data"
     >
-      <div>{{ dataAsString }}</div>
+      <CopyButton
+        slot="label"
+        :value="dataAsString"
+        :message="$t('copied')"
+      />
     </DetailsItem>
 
     <template slot="footer">
@@ -40,23 +58,35 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import Modal from '../Modal';
+import Overview from '../Overview';
 import Button from '../Button';
-import Avatar from '../Avatar';
-import DetailsItem from '../DetailsItemOld';
+import CopyButton from '../CopyButton';
+import DetailsItem from '../DetailsItem';
+import Warning from '../../../../icons/warning.svg?vue-component';
 
 export default {
   components: {
-    Modal, Button, Avatar, DetailsItem,
+    Modal, Overview, Button, CopyButton, DetailsItem, Warning,
   },
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
     data: { type: [String, Uint8Array], required: true },
+    app: { type: Object, required: true },
   },
   computed: {
-    ...mapGetters(['account']),
+    ...mapGetters(['getExplorerPath']),
+    ...mapState({
+      account(_, { account }) {
+        return {
+          ...account,
+          label: this.$t('transaction.overview.accountAddress'),
+          url: this.getExplorerPath(account.address),
+        };
+      },
+    }),
     dataAsString() {
       if (typeof this.data === 'string') return this.data;
       return Buffer.from(this.data).toString('hex');
@@ -74,11 +104,44 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '../../../../styles/variables';
+@use '../../../../styles/typography';
+
 .confirm-raw-sign {
-  .name-holder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .overview {
+    margin: 16px;
+  }
+
+  .warning {
+    margin: 16px;
+    text-align: left;
+
+    .title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+
+      @extend %face-sans-15-medium;
+
+      color: variables.$color-warning;
+
+      .icon {
+        width: 24px;
+        height: 24px;
+        padding-right: 4px;
+      }
+    }
+
+    .content {
+      @extend %face-sans-15-regular;
+
+      color: variables.$color-white;
+    }
+  }
+
+  .details-item {
+    margin: 24px 16px 16px;
+    text-align: left;
   }
 }
 </style>

@@ -73,7 +73,7 @@ export default {
     }
 
     &.small {
-      @extend %face-sans-11-regular;
+      @extend %face-mono-10-medium;
     }
 
     &.highlight {

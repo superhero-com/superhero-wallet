@@ -1,41 +1,34 @@
 <template>
-  <Component
-    :is="Icon"
-    class="url-status"
-    :class="{ modal, info }"
+  <StatusIcon
+    v-if="data"
+    :status="data.icon"
     @click="showModal"
   />
+  <Default v-else />
 </template>
 
 <script>
-import Verified from '../../../icons/badges/verified.svg?vue-component';
-import Blacklisted from '../../../icons/badges/blacklisted.svg?vue-component';
-import NotSecure from '../../../icons/badges/not-secure.svg?vue-component';
-import NotVerified from '../../../icons/badges/not-verified.svg?vue-component';
+import StatusIcon from './StatusIcon';
 import Default from '../../../icons/badges/default.svg?vue-component';
 
 export default {
+  components: { StatusIcon, Default },
   props: {
-    status: {
-      type: String,
-      required: true,
-    },
-    info: Boolean,
-    modal: Boolean,
+    status: { type: String, required: true },
   },
   computed: {
-    Icon() {
+    data() {
       switch (this.status) {
         case 'verified':
-          return Verified;
+          return { icon: 'success', content: this.$t('modals.verified') };
         case 'blacklisted':
-          return Blacklisted;
+          return { icon: 'alert', content: this.$t('modals.blacklisted') };
         case 'not-secure':
-          return NotSecure;
+          return { icon: 'not-secure', content: this.$t('modals.not-secure') };
         case 'not-verified':
-          return NotVerified;
+          return { icon: 'warning', content: this.$t('modals.not-verified') };
         case 'default':
-          return Default;
+          return null;
         default:
           throw new Error(`Unknown url status: ${this.status}`);
       }
@@ -43,36 +36,19 @@ export default {
   },
   methods: {
     showModal() {
-      if (this.info && this.status !== 'default') {
-        this.$store.dispatch('modals/open', {
-          name: 'tip-url-status',
-          status: this.status,
-        });
-      }
+      this.$store.dispatch('modals/open', {
+        name: 'default',
+        title: this.data.content.title,
+        msg: this.data.content.msg,
+        icon: this.data.icon,
+      });
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.url-status {
+.status-icon {
   cursor: pointer;
-
-  &.info {
-    width: 18px;
-    height: 18px;
-  }
-
-  &.modal {
-    width: 26px;
-    height: 26px;
-    cursor: unset;
-    position: absolute;
-    left: 50%;
-    top: 22px;
-    transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
-    -webkit-transform: translateX(-50%);
-  }
 }
 </style>

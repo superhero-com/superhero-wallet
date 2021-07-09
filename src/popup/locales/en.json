@@ -82,19 +82,19 @@
       "msg": "This sub-account will be removed from your wallet and deleted from storage. It will still remain stored on the blockchain and you will be able to restore it with your seed phrase. Make sure you have backed up your seed phrase before you proceed. This action cannot be undone!"
     },
     "verified": {
-      "title": "What is a \"Verified\" URL?",
+      "title": "Verified URL",
       "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed easily."
     },
     "not-verified": {
-      "title": "What does it mean when a URL is \"Not Verified\"?",
+      "title": "Not verified URL",
       "msg": "This means that the owner of the URL has not created a Superhero wallet yet. They can claim their tips as soon as they make one and add their wallet address to their website. "
     },
     "blacklisted": {
-      "title": "What is an \"Inaccessible\" URL?",
+      "title": "Inaccessible URL",
       "msg": "The Superhero wallet can tip any public URL. Currently, web pages that require logging in to view information cannot be tipped. We're still working on solutions for this."
     },
     "not-secure": {
-      "title": "Superhero Wallet is marking HTTP sites as \"Not secure\" - please, use URLs with HTTPS, only.",
+      "title": "Not secure URL",
       "msg": "The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
     },
     "switcherAccsLimit": {
@@ -144,6 +144,13 @@
       "data-sign": "Data to sign",
       "nonce": "Nonce"
     },
+    "confirm-raw-sign": {
+      "title": "Sign raw transaction",
+      "warning": {
+        "title": "Transaction Warning",
+        "content": "Transaction data is either broken or Superhero wallet doesn’t support this type of transactions yet. Signing it may cause unexpected results including loss of your funds or other malicious effects.{0}{0}Be careful and sign the data only if you trust the aepp and its owner."
+      }
+    },
     "add-token": {
       "title": "Token added",
       "msg": "Token added successfully"
@@ -175,13 +182,17 @@
       }
     },
     "qrCodeReader": {
-      "cameraNotAllowed": "ERROR: you need to grant camera access permisson"
+      "cameraNotAllowed": "You need to grant your device camera access permission to scan QR code. Please allow camera access in your browser settings and try again."
     },
     "cancel": "Cancel",
     "confirm": "Confirm",
     "mobile-share-error": {
       "title": "Only URLs can be tipped at the moment!",
       "msg": "More options are currently being developed - coming to you soon!"
+    },
+    "name-pointers-help": {
+      "title": "Name pointers",
+      "msg": "Name pointers associate your .chain name with one of:{0}{0}• Account address;{0}• Oracle ID;{0}• Channel ID;{0}• Contract ID.{0}{0}Your .chain name may have more than one pointer. However it can be associated with only one of each type of pointers listed above."
     }
   },
   "transaction": {
@@ -236,7 +247,7 @@
     },
     "titles": {
       "tx-history": "Tx history",
-      "payments": "Payments",
+      "transfer": "Transfer",
       "balances": "Balances",
       "accounts": "Accounts",
       "tips": "Tips",
@@ -257,21 +268,22 @@
       "notification-settings": "Notification Preference",
       "names": "Names",
       "bidding": "Bidding",
+      "more": "More",
       "networks": "Networks",
       "permissionsSettings": "Permissions settings",
       "permissionsDetails": "Permissions details",
       "comment-new": "Add comment",
-      "home": "Wallet Home",
+      "home": "Home",
       "donate-error": "Donate Data",
       "address": "Send Address",
-      "tokens-preview": "Tokens",
       "deploy-token": "Deploy token",
       "add-token": "Add token",
       "mint-burn-token": "Mint/Burn token",
       "allowances": "Allowances",
       "sign-message": "Sign Message",
       "invite": "Invite",
-      "tx-details": "Tx Details"
+      "tx-details": "Tx Details",
+      "wallet-home": "Wallet Home"
     },
     "about": {
       "heading": "About",
@@ -401,7 +413,8 @@
       "requiredField": "This field is required",
       "next": "Next",
       "current-highest-bid": "Current highest bid",
-      "remaining-time": "Remaining Time"
+      "remaining-time": "Remaining Time",
+      "ending-height": "Ending height"
     },
     "connectConfirm": {
       "title": "Allow access",
@@ -443,13 +456,13 @@
       "mint": "Mint/Burn token",
       "mint-info": "This allows you to mint or burn token amount",
       "tokens": "Tokens",
-      "searchPlaceholder": "Search by token name or community...",
+      "searchPlaceholder": "Search for token",
       "all": "All",
       "myTokens": "My Tokens",
       "mcap": "MCap",
       "price": "Price",
       "not-available": "N/A",
-      "no-results": "There are no tokens to display"
+      "no-results": "This account has no tokens with balance"
     },
     "token-details": {
       "details": "Details",
@@ -458,7 +471,7 @@
       "tip": "Tip",
       "token-details": "Token Details",
       "token-description": "Token Description",
-      "symbol": "Symbol",
+      "abbreviation": "Abbreviation",
       "community": "Community",
       "decimals": "Decimals",
       "contract": "Contract",
@@ -490,6 +503,10 @@
       "address": "Address",
       "type": "Select type",
       "token": "Select token"
+    },
+    "more": {
+      "get-ae": "Get AE",
+      "dex": "DEX"
     },
     "names": {
       "default": "Default",
@@ -630,7 +647,6 @@
       "backToAccount": "Back to account",
       "heading": "To receive tokens, provide this address or have the payor scan the QR code below.",
       "copy": "Copy",
-      "home": "Home",
       "transferExchange": "Swap crypto for AE tokens",
       "purchase": "Buy AE tokens"
     },
@@ -698,8 +714,7 @@
       "to": "To",
       "from": "From",
       "hash": "Transaction Hash",
-      "home": "Home",
-      "scanAddress": "Scan AE Address",
+      "scanAddress": "Scan aeternity address",
       "error": "Invalid AE address or AENS name",
       "error-name-send": "Unfortunately you can only send AEX-9 Tokens to an address",
       "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
@@ -866,7 +881,6 @@
       "sentTo": "Send to: ",
       "letThemKnow": "Let them know!",
       "heading": "SEND",
-      "home": "Home",
       "successfullySent": "You have successfully sent ",
       "to": "to",
       "note": "NOTE: The owner of this URL has not created an account yet. They can claim their tokens easily by creating a wallet - the same way you did.",
@@ -1036,6 +1050,7 @@
       "claim": "Claim Back",
       "insufficient-balance": "Insufficient balance",
       "insufficient-ivnite-balance": "This invite Link expired and the Tokens are already claimed.",
+      "tokens-not-allowed": "Tokens are currently not allowed, please switch to AE",
       "tip-attached": "Tip attached",
       "top-up-with": "Top up with",
       "delete": "Delete",

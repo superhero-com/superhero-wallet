@@ -4,7 +4,7 @@
     type="number"
     v-bind="$attrs"
     :error="$attrs.error || !!$attrs.value && $attrs.value <= 0"
-    :error-message="$attrs.errorMessage || $t('pages.tipPage.insufficientAmountError')"
+    :error-message="$attrs['error-message'] || $t('pages.tipPage.insufficientAmountError')"
     placeholder="0.00"
     :label="$attrs.label || $t('pages.tipPage.amountLabel')"
     @input="$emit('input', $event)"
@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import InputField from './InputField';
 
 export default {
@@ -31,7 +31,7 @@ export default {
   },
   computed: {
     ...mapGetters(['formatCurrency']),
-    ...mapState('fungibleTokens', ['selectedToken']),
+    ...mapGetters('fungibleTokens', ['selectedToken']),
     currencyAmount() {
       return ((this.$attrs.value || 0) * this.$store.getters.currentCurrencyRate).toFixed(2);
     },

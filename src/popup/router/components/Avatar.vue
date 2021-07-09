@@ -12,7 +12,7 @@ import { mapState } from 'vuex';
 
 export default {
   props: {
-    address: { type: String, required: true },
+    address: { type: String, default: '' },
     name: { type: [String, Boolean], default: '' }, // TODO: Name shouldn't be boolean
     size: {
       type: String,
@@ -40,7 +40,7 @@ export default {
 <style lang="scss" scoped>
 $x-small-size: 20px;
 $small-size: 30px;
-$mid-size: 36px;
+$mid-size: 32px;
 $normal-size: 40px;
 $x-lg-size: 56px;
 $lg-size: 64px;

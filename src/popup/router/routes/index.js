@@ -1,4 +1,5 @@
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign';
+import ConfirmRawSign from '../components/Modals/ConfirmRawSign';
 import About from '../pages/About';
 import Account from '../pages/Account';
 import Accounts from '../pages/Accounts';
@@ -6,7 +7,7 @@ import Address from '../pages/Address';
 import CommentNew from '../pages/CommentNew';
 import DonateError from '../pages/DonateError';
 import TokenDetails from '../pages/FungibleTokens/TokenDetails';
-import TokensPreview from '../pages/FungibleTokens/TokensPreview';
+import Balances from '../pages/FungibleTokens/Balances';
 import ImportAccount from '../pages/ImportAccount';
 import Index from '../pages/Index';
 import Intro from '../pages/Intro';
@@ -16,6 +17,7 @@ import LanguageSettings from '../pages/LanguageSettings';
 import AuctionBid from '../pages/Names/AuctionBid';
 import AuctionDetails from '../pages/Names/AuctionDetails';
 import AuctionList from '../pages/Names/AuctionList';
+import More from '../pages/More';
 import NameClaim from '../pages/Names/Claim';
 import NamesDetails from '../pages/Names/Details';
 import NamesList from '../pages/Names/List';
@@ -30,9 +32,9 @@ import PopupMessageSign from '../pages/Popups/MessageSign';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
 import Retip from '../pages/Retip';
 import SecuritySettings from '../pages/SecuritySettings';
-import Payments from '../pages/Payments';
-import PaymentsSend from '../pages/PaymentsSend';
-import PaymentsReceive from '../pages/PaymentsReceive';
+import Transfer from '../pages/Transfer';
+import TransferSend from '../pages/TransferSend';
+import TransferReceive from '../pages/TransferReceive';
 import Settings from '../pages/Settings';
 import SignMessage from '../pages/SignMessage';
 import SuccessTip from '../pages/SuccessTip';
@@ -73,6 +75,16 @@ export default [
     name: 'popup-sign-tx',
     path: '/popup-sign-tx',
     component: ConfirmTransactionSign,
+    props: true,
+    meta: {
+      notPersist: true,
+      hideTabBar: true,
+    },
+  },
+  {
+    name: 'popup-raw-sign',
+    path: '/popup-raw-sign',
+    component: ConfirmRawSign,
     props: true,
     meta: {
       notPersist: true,
@@ -246,23 +258,23 @@ export default [
     },
   },
   {
-    path: '/payments',
-    component: Payments,
+    path: '/transfer',
+    component: Transfer,
     children: [{
       path: '',
-      name: 'payments-send',
-      component: PaymentsSend,
+      name: 'transfer-send',
+      component: TransferSend,
       props: true,
       meta: {
-        title: 'payments',
+        title: 'transfer',
         notRebrand: true,
       },
     }, {
       path: 'receive',
-      name: 'payments-receive',
-      component: PaymentsReceive,
+      name: 'transfer-receive',
+      component: TransferReceive,
       meta: {
-        title: 'payments',
+        title: 'transfer',
         notRebrand: true,
       },
     }],
@@ -276,6 +288,14 @@ export default [
       title: 'send',
       notPersist: true,
       notRebrand: true,
+    },
+  },
+  {
+    path: '/more',
+    component: More,
+    name: 'more',
+    meta: {
+      title: 'more',
     },
   },
   {
@@ -390,27 +410,23 @@ export default [
       notRebrand: true,
     },
   },
-  ...process.env.UNFINISHED_FEATURES ? [
-    {
-      name: 'tokens-preview',
-      path: '/tokens',
-      component: TokensPreview,
-      meta: {
-        title: 'tokens-preview',
-        notRebrand: true,
-      },
+  {
+    name: 'balances',
+    path: '/balances',
+    component: Balances,
+    meta: {
+      title: 'balances',
     },
-    {
-      name: 'token-details',
-      path: '/tokens/:id',
-      component: TokenDetails,
-      props: true,
-      meta: {
-        title: 'token-details',
-        notRebrand: true,
-      },
+  },
+  {
+    name: 'token-details',
+    path: '/balances/:id',
+    component: TokenDetails,
+    props: true,
+    meta: {
+      title: 'token-details',
     },
-  ] : [],
+  },
   {
     name: 'not-found',
     path: '*',

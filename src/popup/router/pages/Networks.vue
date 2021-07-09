@@ -104,10 +104,7 @@
       class="text-left expand"
       @click="backendUrlInputExpanded = !backendUrlInputExpanded"
     >
-      <img
-        :class="{ expanded: backendUrlInputExpanded }"
-        src="../../../icons/carret-down.svg"
-      >
+      <Arrow :class="['icon', { rotated: backendUrlInputExpanded }]" />
       <span>{{
         backendUrlInputExpanded
           ? $t('pages.network.hideTippingConfig')
@@ -160,6 +157,7 @@ import ButtonPlain from '../components/ButtonPlain';
 import InputField from '../components/InputField';
 import CheckBox from '../components/CheckBox';
 import { defaultNetwork } from '../../utils/constants';
+import Arrow from '../../../icons/arrow.svg?vue-component';
 
 const networkProps = {
   name: null,
@@ -176,6 +174,7 @@ export default {
     ButtonPlain,
     InputField,
     CheckBox,
+    Arrow,
   },
   data() {
     return {
@@ -295,11 +294,14 @@ export default {
       margin-bottom: 10px;
     }
 
-    img {
+    .icon {
+      width: 16px;
+      height: 16px;
+      color: #727278;
       transform: rotate(-90deg);
       vertical-align: middle;
 
-      &.expanded {
+      &.rotated {
         transform: none;
       }
     }

@@ -17,14 +17,10 @@ import { i18n } from './plugins/languages';
 export default {
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
+    commit('setMiddleware', null);
     commit('setTransactions', []);
   },
-  async fetchPendingTransactions({
-    state: { sdk, transactions },
-    getters: {
-      account: { address },
-    },
-  }) {
+  async fetchPendingTransactions({ state: { sdk, transactions } }, address) {
     return (
       await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
         (r) => r.transactions,
@@ -46,7 +42,7 @@ export default {
       state.middleware.getTxByAccount(address, limit, page)
         .then(({ data }) => data)
         .catch(() => []),
-      dispatch('fetchPendingTransactions'),
+      dispatch('fetchPendingTransactions', address),
       fetchJson(
         `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${
           recent ? `&limit=${limit}` : ''
@@ -64,6 +60,13 @@ export default {
           claim: true,
         }))).catch(() => []),
     ]);
+
+    const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
+    (await dispatch('fungibleTokens/getTokensHistory')).forEach((f) => {
+      if (minMicroTime < f.microTime) {
+        txs[0].push(f);
+      }
+    });
     txs = uniqBy(orderBy(flatten(txs), ['microTime'], ['desc']), ({ hash }) => hash);
     return recent ? txs.slice(0, limit) : txs;
   },
@@ -226,6 +229,7 @@ export default {
   async requestResetting({ dispatch }) {
     await dispatch('modals/open', {
       name: 'confirm',
+      icon: 'critical',
       title: i18n.t('modals.removeAccount.title'),
       msg: i18n.t('modals.removeAccount.msg'),
     });

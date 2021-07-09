@@ -142,11 +142,22 @@ export default {
       return `https://explorer.aeternity.io/account/transactions/${address}`;
     },
   },
+  mounted() {
+    const polling = setInterval(() => this.updateBalances(), 10000);
+
+    this.$once('hook:destroyed', () => {
+      clearInterval(polling);
+    });
+  },
   methods: {
     ...mapMutations(['createAccount', 'deleteAccount']),
     editLocalName() {
       this.customAccountName = this.accounts[this.idx].localName;
       this.edit = true;
+    },
+    updateBalances() {
+      this.$store.dispatch('fungibleTokens/getAvailableTokens');
+      this.$store.dispatch('fungibleTokens/loadTokenBalances');
     },
     saveLocalName(name) {
       this.$store.commit('setAccountLocalName', { name, idx: this.idx });
@@ -161,6 +172,7 @@ export default {
     async remove() {
       await this.$store.dispatch('modals/open', {
         name: 'confirm',
+        icon: 'critical',
         title: this.$t('modals.removeSubaccount.title'),
         msg: this.$t('modals.removeSubaccount.msg'),
       });
@@ -270,7 +282,7 @@ export default {
       .claim-chainname {
         @extend %face-sans-14-medium;
 
-        line-height: 21px;
+        line-height: 16px;
       }
 
       .account-type-name {
@@ -330,10 +342,13 @@ export default {
   .ae-address {
     display: block;
     text-decoration: none;
+    text-align: center;
     color: variables.$color-light-grey;
     letter-spacing: -0.4px;
 
-    @extend %face-sans-10-medium;
+    @extend %face-mono-10-medium;
+
+    font-size: 9px;
 
     &:hover {
       color: variables.$color-white;

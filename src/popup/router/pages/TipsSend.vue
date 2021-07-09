@@ -10,7 +10,7 @@
           <TokenAmount
             data-cy="tip-amount"
             :amount="+amount"
-            v-bind="selectedToken ? { symbol: selectedToken.symbol } : {}"
+            v-bind="selectedToken ? { symbol: selectedToken.symbol, aex9: true } : {}"
           />
           {{ $t('pages.tipPage.to') }}
         </template>
@@ -36,7 +36,6 @@
           <UrlStatus
             slot="left"
             :status="urlStatus"
-            info
           />
         </InputField>
       </div>
@@ -139,7 +138,7 @@ export default {
   computed: {
     ...mapGetters(['account']),
     ...mapState(['tourRunning', 'tip', 'sdk', 'tippingV1', 'tippingV2']),
-    ...mapState('fungibleTokens', ['selectedToken', 'tokenBalances']),
+    ...mapGetters('fungibleTokens', ['selectedToken', 'tokenBalances']),
     urlStatus() {
       return this.tourRunning ? 'verified' : this.$store.getters['tipUrl/status'](this.url);
     },

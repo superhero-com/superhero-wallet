@@ -37,7 +37,7 @@
         </div>
         <div>
           <a
-            href="https://testflight.apple.com/join/3o5r4dQQ"
+            href="https://apps.apple.com/us/app/superhero-wallet/id1502786641"
             target="_blank"
           >
             <img

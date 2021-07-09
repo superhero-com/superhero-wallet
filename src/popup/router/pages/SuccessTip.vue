@@ -13,7 +13,9 @@
       {{ $t('pages.successTip.successfullySent') }}
       <TokenAmount
         v-bind="
-          selectedToken ? { amount: +amount, symbol: selectedToken.symbol } : { amount: amountTip }
+          selectedToken
+            ? { amount: +amount, symbol: selectedToken.symbol, aex9: true }
+            : { amount: amountTip }
         "
         data-cy="tip-amount"
       />
@@ -28,7 +30,9 @@
       {{ $t('pages.successTip.notify') }}
       <TokenAmount
         v-bind="
-          selectedToken ? { amount: +amount, symbol: selectedToken.symbol } : { amount: amountTip }
+          selectedToken
+            ? { amount: +amount, symbol: selectedToken.symbol, aex9: true }
+            : { amount: amountTip }
         "
       />
       {{ $t('pages.successTip.notifyTo') }}
@@ -59,7 +63,7 @@
           data-cy="to-dashboard"
           @click="$router.push('/account')"
         >
-          {{ $t('pages.successTip.home') }}
+          {{ $t('pages.titles.home') }}
         </Button>
       </div>
       <br>
@@ -74,7 +78,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import Heart from '../../../icons/heart.svg?vue-component';
 import { AGGREGATOR_URL } from '../../utils/constants';
 import { aettosToAe } from '../../utils/helper';
@@ -95,7 +99,7 @@ export default {
   data: () => ({ AGGREGATOR_URL }),
   computed: {
     ...mapGetters(['formatCurrency', 'currentCurrencyRate']),
-    ...mapState('fungibleTokens', ['selectedToken']),
+    ...mapGetters('fungibleTokens', ['selectedToken']),
     amountTip() {
       return +aettosToAe(this.amount);
     },

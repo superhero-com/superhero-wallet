@@ -89,7 +89,7 @@ export default {
       border-color: variables.$color-error;
     }
 
-    svg {
+    ::v-deep svg {
       width: 24px;
       height: 24px;
       flex-shrink: 0;

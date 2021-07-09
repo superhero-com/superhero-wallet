@@ -88,7 +88,7 @@ Cypress.Commands.add('accordionItemShould', (item, cond) => {
     .get('[data-cy=accordion-item]')
     .eq(item)
     .find('[data-cy=accordion-item-open]')
-    .should(cond === 'not.be.visible' ? 'not.exist' : cond);
+    .should(`${cond === 'not.be.visible' ? 'not.' : ''}have.class`, 'rotated');
 });
 
 Cypress.Commands.add('login', (options = {}, route) => {
@@ -108,30 +108,8 @@ Cypress.Commands.add('shouldRedirect', (url, to) => {
     .should('eq', `${Cypress.config().popupUrl}/popup#${to}`);
 });
 
-Cypress.Commands.add('openMenu', () => {
-  cy.get('[data-cy=hamburger]', { timeout: 10000 }).click();
-});
-
-Cypress.Commands.add('closeMenu', (from = 'button') => {
-  if (from === 'button') {
-    cy.get('[data-cy=close-menu]').should('be.visible').click();
-  } else if (from === 'overlay') {
-    cy.get('[data-cy=menu-overlay]').should('be.visible').click('left');
-  }
-});
-
-Cypress.Commands.add('menuShould', (cond) => {
-  cy.get('[data-cy=sidebar-menu]').should(cond).get('[data-cy=close-menu]').should(cond);
-});
-
-Cypress.Commands.add('openMenuPage', (page) => {
-  const url = `${Cypress.config().popupUrl}/popup#/`;
-  cy.openMenu();
-  cy.get(`[data-cy=sidebar-menu] [data-cy=${page}]`)
-    .click()
-    .url()
-    .should('eq', `${url}${page}`)
-    .menuShould('not.exist');
+Cypress.Commands.add('openPageMore', () => {
+  cy.get('[data-cy=page-more]').click();
 });
 
 Cypress.Commands.add('openTip', () => {
@@ -239,8 +217,7 @@ Cypress.Commands.add('urlEquals', (route) => {
 });
 
 Cypress.Commands.add('openNetworks', () => {
-  cy.get('[data-cy=hamburger]')
-    .click()
+  cy.openPageMore()
     .get('[data-cy=settings]')
     .click()
     .get('[data-cy=networks]')

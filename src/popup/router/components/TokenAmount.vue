@@ -4,11 +4,18 @@
     :class="[direction, { large }]"
   >
     {{ amountRounded }}
-    <span class="symbol">{{ symbol }}</span>
     <span
-      v-if="text"
-      class="text"
-    >{{ text }}</span>
+      v-if="!noSymbol"
+      class="symbol"
+    >
+      {{ symbol }}
+    </span>
+    <span
+      v-if="amountFiat"
+      class="fiat"
+    >
+      {{ amountFiat }}
+    </span>
   </span>
 </template>
 
@@ -19,7 +26,7 @@ export default {
   props: {
     amount: { type: Number, required: true },
     symbol: { type: String, default: 'AE' },
-    altText: { type: String, default: '' },
+    aex9: { type: Boolean, default: false },
     hideFiat: { type: Boolean },
     direction: {
       type: String,
@@ -27,6 +34,7 @@ export default {
       default: undefined,
     },
     large: { type: Boolean },
+    noSymbol: { type: Boolean },
   },
   computed: {
     amountRounded() {
@@ -34,17 +42,13 @@ export default {
     },
     ...mapState({
       amountFiat(state, { convertToCurrency, formatCurrency }) {
-        if (this.symbol !== 'AE') return false;
+        if (this.hideFiat || this.aex9) return '';
         const converted = convertToCurrency(this.amount);
-        if (converted < 0.01 || this.hideFiat) return false;
-        return formatCurrency(converted);
+        if (converted === 0) return `(${formatCurrency(0)})`;
+        if (converted < 0.01) return `(<${formatCurrency(0.01)})`;
+        return `(≈${formatCurrency(converted)})`;
       },
     }),
-    text() {
-      if (this.amountFiat) return `(≈${this.amountFiat})`;
-      if (this.altText) return `(${this.altText})`;
-      return false;
-    },
   },
 };
 </script>
@@ -65,7 +69,7 @@ export default {
     color: variables.$color-blue;
   }
 
-  .text {
+  .fiat {
     color: variables.$color-dark-grey;
   }
 

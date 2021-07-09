@@ -2,8 +2,8 @@ import BigNumber from 'bignumber.js';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { Crypto, TxBuilderHelper } from '@aeternity/aepp-sdk';
-import { defaultNetworks } from '../popup/utils/constants';
+import { Crypto, TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
+import { defaultNetworks, TX_TYPE_MDW, ZEIT_TOKEN_CONTRACT } from '../popup/utils/constants';
 import {
   checkHashType,
   convertToken,
@@ -20,6 +20,10 @@ const getHdWalletAccount = (wallet, accountIdx = 0) => {
     address: Crypto.aeEncodeKey(keyPair.publicKey),
   };
 };
+
+const isZeitSpecial = (transaction) => transaction.tx && transaction.tx.contractId
+  && transaction.tx.contractId === ZEIT_TOKEN_CONTRACT
+  && (transaction.tx.arguments?.length === 3 || transaction.pendingTokenTx);
 
 export default {
   wallet({ mnemonic }) {
@@ -76,16 +80,28 @@ export default {
     const { endpoint, valid } = checkHashType(hash);
     return valid ? `${explorerUrl}/${endpoint}/${hash}` : null;
   },
-  getTx: ({ transactions }) => (hash) => transactions.latest
+  getTx: ({ transactions, transactionCache }) => (hash) => transactions.latest
     .concat(transactions.pending.map((t) => ({ ...t, pending: true })))
+    .concat(transactionCache.transactions)
     .find((tx) => tx.hash === hash),
-  getTxType: (_, { getTxSymbol }) => (transaction) => (getTxSymbol(transaction) === 'AE' ? transaction.tx.type : null),
+  getTxType: () => (transaction) => {
+    if (isZeitSpecial(transaction)) return 'Burned';
+    return transaction.tx
+    && (TX_TYPE_MDW[transaction.tx.type]
+      || SCHEMA.OBJECT_ID_TX_TYPE[transaction.tx.tag]
+      || (Object.values(SCHEMA.TX_TYPE).includes(transaction.tx.type) && transaction.tx.type));
+  },
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
+    if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    return contractCallData ? availableTokens[contractCallData.token]?.symbol : 'AE';
+    const symbol = isZeitSpecial(transaction) ? 'Utopia Token' : 'AE';
+    return contractCallData ? availableTokens[contractCallData.token]?.symbol : symbol;
   },
   getTxAmountTotal: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
+    if (isZeitSpecial(transaction)) {
+      return transaction.tx.arguments?.[0]?.value || +transaction.amount;
+    }
     if (contractCallData && availableTokens[contractCallData.token]) {
       return +convertToken(
         contractCallData.amount,
@@ -118,4 +134,6 @@ export default {
       || categorizeContractCallTxObject(transaction)?.url
       || ''
   ),
+  isTxAex9: () => (transaction) => transaction.tx
+    && !!categorizeContractCallTxObject(transaction)?.token,
 };

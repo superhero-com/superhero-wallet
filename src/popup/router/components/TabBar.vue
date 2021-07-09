@@ -2,21 +2,29 @@
   <div class="tab-bar">
     <RouterLink to="/account">
       <Home />
+      <span>{{ $t('pages.titles.home') }}</span>
+    </RouterLink>
+    <RouterLink to="/balances">
+      <Balances />
+      <span>{{ $t('pages.titles.balances') }}</span>
     </RouterLink>
     <RouterLink
-      v-if="UNFINISHED_FEATURES"
-      to="/tokens"
+      to="/transfer"
+      data-cy="send"
     >
-      <Balances />
+      <Transfer />
+      <span>{{ $t('pages.titles.transfer') }}</span>
     </RouterLink>
-    <RouterLink to="/payments">
-      <Payments />
-    </RouterLink>
-    <RouterLink to="/tips">
+    <RouterLink
+      to="/tips"
+      data-cy="tip-button"
+    >
       <Tips />
+      <span>{{ $t('pages.titles.tips') }}</span>
     </RouterLink>
-    <RouterLink to="/settings">
-      <Settings />
+    <RouterLink to="/names">
+      <Names />
+      <span>{{ $t('pages.titles.names') }}</span>
     </RouterLink>
   </div>
 </template>
@@ -24,22 +32,20 @@
 <script>
 import Home from '../../../icons/home.svg?vue-component';
 import Balances from '../../../icons/balances.svg?vue-component';
-import Payments from '../../../icons/payments.svg?vue-component';
+import Transfer from '../../../icons/transfer.svg?vue-component';
 import Tips from '../../../icons/tips.svg?vue-component';
-import Settings from '../../../icons/settings.svg?vue-component';
+import Names from '../../../icons/names.svg?vue-component';
 
 export default {
   components: {
-    Home, Balances, Payments, Tips, Settings,
+    Home, Balances, Transfer, Tips, Names,
   },
-  data: () => ({
-    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-  }),
 };
 </script>
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 @use '../../../styles/mixins';
 
 .tab-bar {
@@ -52,6 +58,7 @@ export default {
 
     height: 48px;
     display: flex;
+    flex-direction: column;
     flex: 1 0;
     justify-content: center;
     align-items: center;
@@ -59,6 +66,13 @@ export default {
     background-color: variables.$color-bg-2;
     margin: 1px 1px $sideBorderWidth;
     color: variables.$color-white;
+    text-decoration: none;
+
+    @extend %face-sans-12-medium;
+
+    &:not(.router-link-active) span {
+      color: variables.$color-dark-grey;
+    }
 
     &:first-child {
       margin-left: $sideBorderWidth;
@@ -76,8 +90,16 @@ export default {
       }
     }
 
-    &:hover {
+    &:not(:active):hover {
       background-color: variables.$color-hover;
+
+      &:not(.router-link-active) span {
+        color: variables.$color-light-grey;
+      }
+
+      svg {
+        opacity: 1;
+      }
     }
 
     &:active {

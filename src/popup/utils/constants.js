@@ -112,3 +112,12 @@ export const NOTIFICATION_SETTINGS = [
     type: 'CLAIM_OF_RETIP',
   },
 ];
+
+export const ZEIT_TOKEN_CONTRACT = 'ct_zd74RfkhsRQVuHio1nQgteVNbG7jjFJS2xXkfRSbinzi1f3wX';
+export const ZEIT_INVOICE_CONTRACT = 'ct_sjPScSkz8cggXBFFmYcfU95LRSSuqfj7pVkh1kjyj8xQKTQhr';
+export const ZEIT_TOKEN_INTERFACE = `@compiler >= 6
+contract interface PoS =
+  stateful entrypoint set_paid : (int, int) => unit
+main contract FungibleTokenFull =
+  stateful entrypoint burn_trigger_pos : (int, PoS, int) => unit
+  entrypoint balance : (address) => option(int)`;

@@ -2,13 +2,15 @@
   <Modal
     v-if="browserReader || !cameraAllowed"
     close
+    class="qr-code-reader"
     @close="resolve"
   >
     <template slot="header">
+      <QrScan class="icon" />
       {{ title }}
     </template>
 
-    <div class="qr-code-reader">
+    <div class="camera">
       <div v-show="cameraAllowed">
         <video
           v-show="cameraAllowed"
@@ -19,15 +21,26 @@
         {{ $t('modals.qrCodeReader.cameraNotAllowed') }}
       </div>
     </div>
+
+    <template
+      v-if="!cameraAllowed"
+      slot="footer"
+    >
+      <Button @click="cancelReading">
+        {{ $t('ok') }}
+      </Button>
+    </template>
   </Modal>
 </template>
 
 <script>
 import Modal from '../Modal';
+import Button from '../Button';
 import { handleUnknownError } from '../../../utils/helper';
+import QrScan from '../../../../icons/qr-scan.svg?vue-component';
 
 export default {
-  components: { Modal },
+  components: { Modal, Button, QrScan },
   props: {
     title: { type: String, required: true },
     resolve: { type: Function, required: true },
@@ -37,7 +50,6 @@ export default {
     // allow camera while QRScanner is loading to not show cameraNotAllowed before actual check
     cameraAllowed: process.env.PLATFORM === 'cordova',
     browserReader: null,
-    style: null,
     headerText: '',
   }),
   watch: {
@@ -119,12 +131,9 @@ export default {
         ? new Promise((resolve, reject) => {
           window.QRScanner.scan((error, text) => (!error && text ? resolve(text) : reject(error)));
           window.QRScanner.show();
-          this.style = document.createElement('style');
-          this.style.type = 'text/css';
-          this.style.appendChild(
-            document.createTextNode('html, body, #app { background: transparent }'),
-          );
-          document.head.appendChild(this.style);
+          ['body', '#app'].forEach((s) => {
+            document.querySelector(s).style = 'background: transparent';
+          });
           document.querySelector('.main').style.display = 'none';
           this.$store.commit('setPageTitle', 'Scan QR');
         })
@@ -134,8 +143,9 @@ export default {
     },
     stopReading() {
       if (process.env.PLATFORM === 'cordova') {
-        if (document.head.contains(this.style)) document.head.removeChild(this.style);
-        document.querySelector('.main').style.display = '';
+        ['body', '#app', '.main'].forEach((s) => {
+          document.querySelector(s).style = '';
+        });
         this.$store.commit('setPageTitle', '');
         window.QRScanner.destroy();
       } else this.browserReader.reset();
@@ -149,7 +159,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.qr-code-reader video {
-  max-width: 70vw;
+@use "../../../../styles/variables";
+@use "../../../../styles/mixins";
+
+.qr-code-reader {
+  .icon {
+    color: variables.$color-blue;
+  }
+
+  .camera video {
+    max-width: 70vw;
+
+    @include mixins.desktop {
+      max-width: 100%;
+    }
+  }
 }
 </style>

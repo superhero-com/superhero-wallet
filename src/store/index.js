@@ -16,8 +16,11 @@ import openErrorModalPlugin from './plugins/openErrorModal';
 import runMigrations from './migrations';
 import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
-import fungibleTokensModule from './modules/fungibleTokens';
+import transactionCacheModule from './modules/transactionCache';
+import fungibleTokensPlugin from './plugins/fungibleTokens';
 import { defaultNetwork } from '../popup/utils/constants';
+import stateReducer from './utils';
+import chainListener from './plugins/chainListener';
 
 Vue.use(Vuex);
 Vue.use(VueRx);
@@ -68,62 +71,22 @@ export default new Vuex.Store({
   plugins: [
     persistState(
       runMigrations,
-      ({
-        migrations,
-        current,
-        transactions,
-        currencies,
-        userNetworks,
-        names,
-        languages,
-        nextCurrenciesFetch,
-        tip,
-        backedUpSeed,
-        mnemonic,
-        saveErrorLog,
-        tourStartBar,
-        invites,
-        notificationSettings,
-        permissions,
-        fungibleTokens,
-        accountCount,
-        accountSelectedIdx,
-        accs,
-      }) => ({
-        migrations,
-        current,
-        transactions,
-        currencies,
-        userNetworks,
-        names,
-        languages,
-        nextCurrenciesFetch,
-        tip,
-        backedUpSeed,
-        mnemonic,
-        saveErrorLog,
-        tourStartBar,
-        invites,
-        notificationSettings,
-        permissions,
-        fungibleTokens,
-        accountCount,
-        accountSelectedIdx,
-        accs,
-      }),
+      stateReducer,
     ),
     observables,
     modals,
     tipUrl,
     accounts,
     namesPlugin,
+    fungibleTokensPlugin,
     pendingTransactionHandler,
     languagesPlugin,
     openErrorModalPlugin,
+    chainListener,
   ],
   modules: {
     invites: invitesModule,
     permissions: permissionsModule,
-    fungibleTokens: fungibleTokensModule,
+    transactionCache: transactionCacheModule,
   },
 });

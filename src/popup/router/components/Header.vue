@@ -36,7 +36,7 @@
         v-else
         class="text"
       >
-        {{ (title && $t(`pages.titles.${title}`)) || $t('pages.titles.home') }}
+        {{ (title && $t(`pages.titles.${title}`)) || $t('pages.titles.wallet-home') }}
       </span>
     </div>
 
@@ -68,14 +68,21 @@
         <Settings />
       </RouterLink>
 
-      <ButtonPlain
-        class="icon-btn menu"
-        data-cy="hamburger"
-        @click="$emit('toggle-sidebar')"
+      <RouterLink
+        v-if="$route.path !== '/more'"
+        class="icon-btn"
+        to="/more"
+        data-cy="page-more"
       >
-        <Menu />
-        <MenuHover class="hover" />
-      </ButtonPlain>
+        <ThreeDots />
+      </RouterLink>
+      <RouterLink
+        v-else
+        class="icon-btn"
+        :to="$store.state.route.from ? $store.state.route.from.fullPath : '/account'"
+      >
+        <Close />
+      </RouterLink>
     </div>
   </div>
 </template>
@@ -86,14 +93,14 @@ import Logo from '../../../icons/logo-small.svg?vue-component';
 import Back from '../../../icons/back.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
 import Settings from '../../../icons/notif-settings.svg?vue-component';
-import Menu from '../../../icons/menu.svg?vue-component';
-import MenuHover from '../../../icons/menu-hover.svg?vue-component';
+import ThreeDots from '../../../icons/three-dots.svg?vue-component';
+import Close from '../../../icons/close.svg?vue-component';
 import Truncate from './Truncate';
 import ButtonPlain from './ButtonPlain';
 
 export default {
   components: {
-    Logo, Back, Bell, Settings, Menu, MenuHover, Truncate, ButtonPlain,
+    Logo, Back, Bell, Settings, ThreeDots, Close, Truncate, ButtonPlain,
   },
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,
@@ -103,6 +110,7 @@ export default {
       superheroNotifications: this.$store.state.observables.notifications,
     };
   },
+
   computed: {
     ...mapGetters(['isLoggedIn']),
     ...mapState(['tourRunning', 'notifications', 'pageTitle']),
@@ -267,14 +275,6 @@ export default {
 
       svg {
         opacity: 1;
-      }
-
-      &:not(:active).menu svg {
-        display: none;
-
-        &.hover {
-          display: inline;
-        }
       }
     }
   }

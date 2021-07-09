@@ -31,6 +31,7 @@
           slot="value"
           :amount="getTxAmountTotal(transaction)"
           :symbol="getTxSymbol(transaction)"
+          :aex9="isTxAex9(transaction)"
           data-cy="total"
         />
       </DetailsItem>
@@ -42,7 +43,7 @@
       @click="showAdvanced = !showAdvanced"
     >
       {{ $t('pages.signTransaction.advanced') }}
-      <ChevronDown class="icon" />
+      <Arrow class="icon" />
     </ButtonPlain>
 
     <div
@@ -94,7 +95,7 @@ import TransactionOverview from '../TransactionOverview';
 import DetailsItem from '../DetailsItem';
 import TokenAmount from '../TokenAmount';
 import CopyButton from '../CopyButton';
-import ChevronDown from '../../../../icons/chevron-down.svg?vue-component';
+import Arrow from '../../../../icons/arrow.svg?vue-component';
 import mixin from '../../pages/Popups/mixin';
 
 export default {
@@ -106,7 +107,7 @@ export default {
     DetailsItem,
     TokenAmount,
     CopyButton,
-    ChevronDown,
+    Arrow,
   },
   mixins: [mixin],
   props: {
@@ -134,6 +135,7 @@ export default {
     'getTxAmountTotal',
     'getTxFee',
     'getNameFee',
+    'isTxAex9',
   ]),
 };
 </script>
@@ -175,11 +177,11 @@ export default {
     color: $color-dark-grey;
 
     .icon {
-      width: 24px;
-      height: 24px;
-      color: $color-white;
+      width: 16px;
+      height: 16px;
+      color: $color-dark-grey;
       opacity: 0.7;
-      margin-left: 4px;
+      margin-left: 8px;
     }
 
     &:hover {

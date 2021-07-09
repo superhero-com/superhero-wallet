@@ -1,6 +1,6 @@
 {
   "name": "superhero-wallet",
-  "version": "0.7.2",
+  "version": "0.8.0",
   "description": "Superhero wallet",
   "author": "Superhero",
   "license": "MIT",
@@ -31,6 +31,7 @@
     "@aeternity/aepp-sdk": "^8.1.0",
     "@aeternity/bip39": "^0.1.0",
     "@aeternity/hd-wallet": "^0.2.0",
+    "@fontsource/ibm-plex-mono": "^4.4.2",
     "@zxing/library": "^0.18.3",
     "aepp-raendom": "github:aeternity/aepp-raendom#feature/layout-superhero",
     "aeternity-fungible-token": "github:aeternity/aeternity-fungible-token#v2.0.0",
@@ -52,7 +53,6 @@
     "validator": "^13.5.2",
     "vue": "^2.6.12",
     "vue-clipboard2": "^0.3.1",
-    "vue-flickity": "^1.2.1",
     "vue-i18n": "^8.22.3",
     "vue-router": "^3.5.1",
     "vue-rx": "^6.2.0",

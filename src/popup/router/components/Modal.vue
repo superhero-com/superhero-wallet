@@ -77,34 +77,57 @@ export default {
 
   .container {
     position: relative;
-    width: 87%;
+    width: 92%;
     margin: auto;
-    padding: 62px 25px 30px;
+    padding: 48px 28px 40px;
     background: variables.$color-bg-1;
-    border: 1px solid variables.$color-border;
+    border: 1px solid variables.$color-black;
     border-radius: 5px;
+    box-shadow: 2px 4px 12px rgba(variables.$color-black, 0.22);
+
+    @include mixins.desktop {
+      width: calc(#{variables.$extension-width} - 32px);
+    }
 
     .close {
+      width: 24px;
+      height: 24px;
       position: absolute;
-      right: 10px;
-      top: 10px;
+      right: 8px;
+      top: 8px;
+      color: variables.$color-white;
+
+      svg {
+        width: 24px;
+      }
     }
 
     .header {
       color: variables.$color-white;
-      font-size: 17px;
+      font-size: 19px;
+      line-height: 24px;
       font-weight: 500;
-      margin-bottom: 25px;
+      margin-bottom: 24px;
       word-break: break-word;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+
+      ::v-deep .icon {
+        width: 48px;
+        height: 48px;
+        align-self: center;
+        margin-bottom: 16px;
+      }
     }
 
     .body {
-      margin-bottom: 40px;
-      color: variables.$color-white;
-      font-size: 14px;
+      @extend %face-sans-15-regular;
+
+      color: variables.$color-light-grey;
       word-break: break-word;
       text-align: center;
+      margin-bottom: 40px;
     }
 
     .footer .content {
@@ -124,6 +147,7 @@ export default {
     height: 100%;
     padding: 0;
     padding-top: env(safe-area-inset-top);
+    border: none;
     border-radius: 0;
     display: flex;
     flex-direction: column;

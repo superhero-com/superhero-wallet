@@ -175,15 +175,20 @@ export default async function initSdk() {
       name: 'Superhero',
       onConnection: acceptCb,
       async onSubscription(_, { accept, deny }, origin) {
-        const address = await this.address(this.getApp(new URL(origin)));
-        if (!address) {
+        const activeAccount = await this.address(this.getApp(new URL(origin)));
+        if (!activeAccount) {
           deny();
           return;
         }
         accept({
           accounts: {
-            current: { [address]: {} },
-            connected: {},
+            current: { [activeAccount]: {} },
+            connected: {
+              ...store.getters.accounts
+                .reduce((p, { address }) => ({
+                  ...p, ...address !== activeAccount ? { [address]: {} } : {},
+                }), {}),
+            },
           },
         });
       },
@@ -241,11 +246,6 @@ export default async function initSdk() {
     store.commit('setNodeStatus', 'connected');
     setTimeout(() => store.commit('setNodeStatus', ''), 2000);
 
-    if (process.env.UNFINISHED_FEATURES) {
-      await store.dispatch('fungibleTokens/getAvailableTokens');
-      store.dispatch('fungibleTokens/loadTokenBalances');
-    }
-
     store.watch(
       (state, getters) => getters.activeNetwork,
       async (network, oldNetwork) => {
@@ -262,6 +262,16 @@ export default async function initSdk() {
           Logger.write(error);
         }
       },
+    );
+    store.watch(
+      ({ accountSelectedIdx }) => accountSelectedIdx,
+      async (accountIdx) => store.commit('selectSdkAccount', store.getters.accounts[accountIdx].address),
+    );
+
+    store.watch(
+      (state, getters) => getters.accounts.length,
+      () => store.commit('setSdkAccounts', store.getters.accounts),
+      { immediate: true },
     );
   } catch (e) {
     store.commit('setNodeStatus', 'error');

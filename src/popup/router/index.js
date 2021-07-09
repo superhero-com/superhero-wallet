@@ -64,6 +64,7 @@ router.beforeEach(async (to, from, next) => {
     const name = {
       connectConfirm: 'connect',
       sign: 'popup-sign-tx',
+      rawSign: 'popup-raw-sign',
       messageSign: 'message-sign',
     }[window.POPUP_TYPE];
     if (name !== to.name) {

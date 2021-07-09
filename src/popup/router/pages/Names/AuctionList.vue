@@ -43,7 +43,7 @@
         </div>
         <div class="expiration">
           {{ $t('pages.names.auctions.expires') }}
-          {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
+          in ~ {{ (expiration - topBlockHeight) | blocksToRelativeTime }}
         </div>
       </NameRow>
     </ul>
@@ -84,7 +84,7 @@ export default {
     },
   },
   async mounted() {
-    await this.$watchUntilTruly(() => this.$store.state.sdk);
+    await this.$watchUntilTruly(() => this.$store.state.middleware);
     this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');
   },
 };

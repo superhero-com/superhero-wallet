@@ -14,7 +14,7 @@ describe('Test cases for login functionality', () => {
       .shouldRedirect('/intro', '/intro')
       .shouldRedirect('/tips', '/')
       .shouldRedirect('/settings', '/')
-      .shouldRedirect('/payments', '/')
+      .shouldRedirect('/transfer', '/')
       .shouldRedirect('/import-account', '/import-account')
       .shouldRedirect('/about/termsOfService', '/about/termsOfService');
   });
