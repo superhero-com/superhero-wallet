@@ -4,10 +4,7 @@
       <Home />
       <span>{{ $t('pages.titles.home') }}</span>
     </RouterLink>
-    <RouterLink
-      v-if="UNFINISHED_FEATURES"
-      to="/balances"
-    >
+    <RouterLink to="/balances">
       <Balances />
       <span>{{ $t('pages.titles.balances') }}</span>
     </RouterLink>
@@ -43,9 +40,6 @@ export default {
   components: {
     Home, Balances, Transfer, Tips, Names,
   },
-  data: () => ({
-    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-  }),
 };
 </script>
 
