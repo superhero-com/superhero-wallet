@@ -192,94 +192,104 @@ export default {
 @use '../../../../styles/variables';
 @use '../../../../styles/typography';
 
-::v-deep {
-  text-align: left;
-}
+.token-details {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
 
-.token-header {
-  background-color: variables.$color-black;
-
-  .token-amount {
-    padding-top: 16px;
+  .transaction-list {
+    flex-grow: 1;
   }
 
-  .token-actions {
-    display: flex;
-    justify-content: center;
-    padding-bottom: 24px;
-
-    .box-button {
-      margin-right: 24px;
-
-      &:last-child {
-        margin: 0;
-      }
-    }
+  ::v-deep {
+    text-align: left;
   }
 
-  .token-tabs {
-    display: flex;
-    align-items: center;
-    height: 48px;
-    cursor: pointer;
-
-    div {
-      display: flex;
-      align-items: center;
-      margin-left: 18px;
-
-      @extend %face-sans-16-bold;
-
-      font-weight: 500;
-      color: variables.$color-light-grey;
-
-      svg {
-        margin-right: 6px;
-        width: 20px;
-        height: 20px;
-      }
-
-      &.selected {
-        color: variables.$color-green;
-      }
-    }
-  }
-
-  .token-profile {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
+  .token-header {
+    background-color: variables.$color-black;
 
     .token-amount {
-      font-size: 18px;
-      margin-left: 10px;
-      text-align: center;
+      padding-top: 16px;
+    }
 
-      ::v-deep .fiat {
-        display: block;
-        font-size: 16px;
+    .token-actions {
+      display: flex;
+      justify-content: center;
+      padding-bottom: 24px;
+
+      .box-button {
+        margin-right: 24px;
+
+        &:last-child {
+          margin: 0;
+        }
+      }
+    }
+
+    .token-tabs {
+      display: flex;
+      align-items: center;
+      height: 48px;
+      cursor: pointer;
+
+      div {
+        display: flex;
+        align-items: center;
+        margin-left: 18px;
+
+        @extend %face-sans-16-bold;
+
+        font-weight: 500;
+        color: variables.$color-light-grey;
+
+        svg {
+          margin-right: 6px;
+          width: 20px;
+          height: 20px;
+        }
+
+        &.selected {
+          color: variables.$color-green;
+        }
+      }
+    }
+
+    .token-profile {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+
+      .token-amount {
+        font-size: 18px;
+        margin-left: 10px;
+        text-align: center;
+
+        ::v-deep .fiat {
+          display: block;
+          font-size: 16px;
+        }
       }
     }
   }
-}
 
-.token-info > div:nth-child(odd) {
-  background-color: variables.$color-bg-1;
-}
+  .token-info > div:nth-child(odd) {
+    background-color: variables.$color-bg-1;
+  }
 
-.contract ::v-deep .text,
-.community ::v-deep .text {
-  color: variables.$color-green;
-}
+  .contract ::v-deep .text,
+  .community ::v-deep .text {
+    color: variables.$color-green;
+  }
 
-.contract ::v-deep .text {
-  font-size: 9px;
-  display: flex;
-  align-items: center;
-}
+  .contract ::v-deep .text {
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+  }
 
-.community ::v-deep .text {
-  font-size: 13px;
+  .community ::v-deep .text {
+    font-size: 13px;
+  }
 }
 </style>
