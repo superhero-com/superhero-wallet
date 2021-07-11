@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.1](https://github.com/aeternity/superhero-wallet/compare/v0.8.0...v0.8.1) (2021-07-09)
+
+
+### Bug Fixes
+
+* **wallet:** don't set accounts immediately ([d0e5c52](https://github.com/aeternity/superhero-wallet/commit/d0e5c5207feefdfd74fb139c5079d2bfe7b2a563))
+
 ## [0.8.0](https://github.com/aeternity/superhero-wallet/compare/v0.7.2...v0.8.0) (2021-07-09)
 
 

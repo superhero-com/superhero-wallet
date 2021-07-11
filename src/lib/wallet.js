@@ -271,7 +271,6 @@ export default async function initSdk() {
     store.watch(
       (state, getters) => getters.accounts.length,
       () => store.commit('setSdkAccounts', store.getters.accounts),
-      { immediate: true },
     );
   } catch (e) {
     store.commit('setNodeStatus', 'error');
