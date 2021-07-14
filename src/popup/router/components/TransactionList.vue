@@ -63,7 +63,7 @@ export default {
   },
   data() {
     return {
-      loading: true,
+      loading: false,
       transactions: [],
       page: 1,
       displayMode: { latestFirst: true, type: 'all' },
