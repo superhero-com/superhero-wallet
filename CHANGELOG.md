@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.2](https://github.com/aeternity/superhero-wallet/compare/v0.8.1...v0.8.2) (2021-07-14)
+
+
+### Features
+
+* **unfinished:** enable unfinished features ([37b7bd7](https://github.com/aeternity/superhero-wallet/commit/37b7bd783c2c7d12c434bc5e484de447a9282f8f))
+
+
+### Bug Fixes
+
+* **tx-list:** show loader only when fetching ([00f6f24](https://github.com/aeternity/superhero-wallet/commit/00f6f24ac66d9b8a5ed6c185fff95ed657f18709))
+
+
+### Maintenance
+
+* **unfinished:** hide unfinished features ([c4b7536](https://github.com/aeternity/superhero-wallet/commit/c4b7536d2fe7d4dc05828f0193cdebae04bc567b))
+
 ### [0.8.1](https://github.com/aeternity/superhero-wallet/compare/v0.8.0...v0.8.1) (2021-07-09)
 
 
