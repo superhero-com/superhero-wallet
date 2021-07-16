@@ -26,7 +26,7 @@
         data-cy="currency-dropdown"
       >
         <template slot="display">
-          <span class="approx-sign">~</span>
+          <span class="approx-sign">≈</span>
           <span class="display-value">
             {{ formatCurrency(balances[idx] * currentCurrencyRate) }}
           </span>
