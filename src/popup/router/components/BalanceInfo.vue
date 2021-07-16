@@ -4,42 +4,35 @@
     data-cy="balance-info"
   >
     <div class="balance-wrapper">
-      <div
-        class="balance-dropdown"
+      <Dropdown
+        v-if="tokenBalancesOptions.length"
+        :options="tokenBalancesOptions"
+        :method="changeToken"
         data-cy="tokens-dropdown"
       >
-        <Dropdown
-          v-if="tokenBalancesOptions.length"
-          :options="tokenBalancesOptions"
-          :method="changeToken"
-          :selected="currentToken"
-          is-custom
-        />
-        <span class="display-value text-ellipsis">
-          {{ selectedToken ? selectedToken.convertedBalance : balances[idx].toFixed(2) }}
-        </span>
-        <span class="token-symbol">{{ !selectedToken ? $t('ae') : selectedToken.symbol }}</span>
-        <Arrow
-          class="expand-arrow"
-        />
-      </div>
-      <div
+        <template slot="display">
+          <span class="display-value">
+            {{ selectedToken ? selectedToken.convertedBalance : balances[idx].toFixed(2) }}
+          </span>
+          <span class="token-symbol">{{ !selectedToken ? $t('ae') : selectedToken.symbol }}</span>
+          <Arrow class="expand-arrow" />
+        </template>
+      </Dropdown>
+      <Dropdown
         v-if="currentToken === 'default'"
-        class="currenciesgroup balance-dropdown"
+        :options="currenciesOptions"
+        :method="switchCurrency"
+        class="currenciesgroup"
         data-cy="currency-dropdown"
       >
-        <Dropdown
-          :options="currenciesOptions"
-          :method="switchCurrency"
-          :selected="current.currency"
-          is-custom
-        />
-        <span class="approx-sign">~</span>
-        <span class="display-value text-ellipsis">{{
-          formatCurrency(balances[idx] * currentCurrencyRate)
-        }}</span>
-        <Arrow class="expand-arrow" />
-      </div>
+        <template slot="display">
+          <span class="approx-sign">≈</span>
+          <span class="display-value">
+            {{ formatCurrency(balances[idx] * currentCurrencyRate) }}
+          </span>
+          <Arrow class="expand-arrow" />
+        </template>
+      </Dropdown>
     </div>
   </div>
 </template>
@@ -113,43 +106,40 @@ export default {
 
 .balance-info {
   height: 55px;
-  margin-bottom: 15px;
   display: flex;
-  color: variables.$color-white;
 
   .balance-wrapper {
     margin: 0 auto;
 
-    .balance-dropdown {
-      width: 100%;
-      text-align: center;
+    .dropdown {
       margin-top: 6px;
-      margin-left: auto;
-      position: relative;
+      text-align: end;
 
-      .dropdown {
-        position: absolute;
+      &:only-child {
+        text-align: center;
+      }
 
-        ::v-deep {
-          .custom > button,
-          .custom > button:active:not(:disabled) {
-            opacity: 0;
-          }
+      &.currenciesgroup {
+        .approx-sign {
+          margin-top: 3px;
+          color: variables.$color-white;
+        }
 
-          .custom {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        span {
+          @extend %face-sans-16-regular;
+        }
+      }
 
-            .list li {
-              white-space: nowrap;
-            }
-          }
+      ::v-deep {
+        .content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background-color: transparent;
+        }
 
-          .custom > button,
-          .custom .list .ae-button {
-            @extend %face-sans-16-regular;
-          }
+        .list .button-plain {
+          @extend %face-sans-16-regular;
         }
       }
 
@@ -161,29 +151,11 @@ export default {
         }
       }
 
-      &.currenciesgroup {
-        margin-top: 6px;
-
-        .approx-sign {
-          margin-top: 3px;
-          color: variables.$color-white;
-        }
-
-        span {
-          @extend %face-sans-16-regular;
-        }
-      }
-
       .display-value,
       .token-symbol {
         @extend %face-sans-20-regular;
 
         vertical-align: text-top;
-      }
-
-      .display-value {
-        display: inline-block;
-        max-width: 200px;
       }
 
       .expand-arrow {

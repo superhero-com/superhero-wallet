@@ -1,10 +1,10 @@
 <template>
   <div
-    class="three-dots"
+    class="actions-menu"
     :class="{ active: showMenu }"
     @click="showMenu = !showMenu"
   >
-    •••
+    <slot name="display" />
     <SmallModal
       v-if="showMenu"
       @close="showMenu = false"
@@ -32,40 +32,21 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 
-.three-dots {
+.actions-menu {
   position: relative;
-
-  &.active {
-    background-color: variables.$color-bg-3;
-  }
 
   &:hover {
     cursor: pointer;
     color: variables.$color-white;
   }
 
-  ::v-deep .not-bootstrap-modal-content {
-    font-size: 0.75rem;
+  ::v-deep .content {
     border-radius: 0.25rem;
     color: variables.$color-light-grey;
     background-color: variables.$color-black;
-    padding: 0.5rem;
-    top: 1.2rem;
+    top: 1.5rem;
     right: 0;
     white-space: nowrap;
-
-    & > div {
-      padding-bottom: 0.5rem;
-
-      &:last-child {
-        padding-bottom: 0;
-      }
-
-      &:hover {
-        cursor: pointer;
-        color: variables.$color-white;
-      }
-    }
   }
 }
 </style>

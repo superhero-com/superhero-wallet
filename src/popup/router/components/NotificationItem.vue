@@ -23,7 +23,10 @@
           {{ wallet ? text : address }}
         </span>
       </div>
-      <ThreeDotsMenu @click.native.stop>
+      <ActionsMenu @click.native.stop>
+        <template slot="display">
+          •••
+        </template>
         <div
           class="mark-as-read"
           @click="$emit('toggle-read')"
@@ -34,7 +37,7 @@
               : $t('pages.notifications.markAsRead')
           }}
         </div>
-      </ThreeDotsMenu>
+      </ActionsMenu>
     </div>
     <div class="second-row">
       <span
@@ -53,13 +56,13 @@
 <script>
 import FormatDate from './FormatDate';
 import Avatar from './Avatar';
-import ThreeDotsMenu from './ThreeDotsMenu';
+import ActionsMenu from './ActionsMenu';
 
 export default {
   components: {
     FormatDate,
     Avatar,
-    ThreeDotsMenu,
+    ActionsMenu,
   },
   props: {
     address: { type: String, default: '' },
@@ -93,7 +96,7 @@ export default {
   &.peeked {
     background-color: variables.$color-bg-2;
 
-    .three-dots,
+    .actions-menu,
     .format-date {
       color: variables.$color-blue;
     }
@@ -102,12 +105,12 @@ export default {
   &.read {
     background-color: variables.$color-bg-1;
 
-    .three-dots,
+    .actions-menu,
     .format-date {
       color: variables.$color-dark-grey;
     }
 
-    .three-dots:hover {
+    .actions-menu:hover {
       color: variables.$color-light-grey;
     }
   }
@@ -167,7 +170,7 @@ export default {
     }
   }
 
-  .three-dots {
+  .actions-menu {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -175,6 +178,10 @@ export default {
     height: 30px;
     padding: 2px;
     font-size: 1.5rem;
+
+    &.active {
+      background-color: variables.$color-bg-3;
+    }
 
     &:hover {
       box-sizing: border-box;
@@ -185,6 +192,11 @@ export default {
     .mark-as-read {
       font-size: 0.9rem;
       line-height: 1.2rem;
+      padding: 0.5rem;
+
+      &:hover {
+        color: variables.$color-white;
+      }
     }
   }
 }
