@@ -198,6 +198,7 @@ export default [
       path: '',
       name: 'tips-send',
       component: TipsSend,
+      props: true,
       meta: {
         title: 'tips',
         notRebrand: true,
