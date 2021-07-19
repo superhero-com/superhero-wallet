@@ -56,32 +56,27 @@
         >
           {{ $t('pages.account.claim-name') }}
         </router-link>
-        <div class="account-type-name">
-          <template v-if="!edit">
-            <span class="text-ellipsis">
-              {{ accounts[idx].localName }}
-            </span>
+        <InputField
+          v-model="customAccountName"
+          :maxlength="maxCustomNameLength"
+          :readonly="idx === 0 || $route.path !== '/accounts' || !edit"
+          plain
+        >
+          <template slot="right">
             <ButtonPlain
-              v-if="idx !== 0 && $route.path === '/accounts'"
+              v-show="idx !== 0 && $route.path === '/accounts' && !edit"
               @click="editLocalName"
             >
               <Edit />
             </ButtonPlain>
-          </template>
-          <template v-else>
-            <input
-              v-model="customAccountName"
-              :maxlength="maxCustomNameLength"
-              type="text"
-            >
             <ButtonPlain
-              class="save"
-              @click="saveLocalName(customAccountName)"
+              v-show="edit"
+              @click="saveLocalName"
             >
               <Save />
             </ButtonPlain>
           </template>
-        </div>
+        </InputField>
         <!-- eslint-disable-next-line vue-i18n/no-raw-text-->
         <label v-if="edit">{{ customAccountName.length }}/{{ maxCustomNameLength }}</label>
       </div>
@@ -109,6 +104,7 @@
 import { mapState, mapGetters, mapMutations } from 'vuex';
 import Avatar from './Avatar';
 import Truncate from './Truncate';
+import InputField from './InputField';
 import ButtonPlain from './ButtonPlain';
 import Add from '../../../icons/account-card/btn-add-subaccount.svg?vue-component';
 import Copy from '../../../icons/account-card/btn-copy-address.svg?vue-component';
@@ -119,7 +115,7 @@ import Save from '../../../icons/account-card/btn-save.svg?vue-component';
 
 export default {
   components: {
-    Avatar, Add, Copy, Settings, Remove, Edit, Save, Truncate, ButtonPlain,
+    Avatar, Add, Copy, Settings, Remove, Edit, Save, Truncate, InputField, ButtonPlain,
   },
   props: {
     accountIdx: { type: Number, default: -1 },
@@ -148,6 +144,7 @@ export default {
     this.$once('hook:destroyed', () => {
       clearInterval(polling);
     });
+    this.customAccountName = this.accounts[this.idx].localName;
   },
   methods: {
     ...mapMutations(['createAccount', 'deleteAccount']),
@@ -159,8 +156,8 @@ export default {
       this.$store.dispatch('fungibleTokens/getAvailableTokens');
       this.$store.dispatch('fungibleTokens/loadTokenBalances');
     },
-    saveLocalName(name) {
-      this.$store.commit('setAccountLocalName', { name, idx: this.idx });
+    saveLocalName() {
+      this.$store.commit('setAccountLocalName', { name: this.customAccountName, idx: this.idx });
       this.edit = false;
     },
     copy() {
@@ -283,51 +280,6 @@ export default {
         @extend %face-sans-14-medium;
 
         line-height: 16px;
-      }
-
-      .account-type-name {
-        display: flex;
-        border-bottom: 1px solid transparent;
-
-        @extend %face-sans-14-medium;
-
-        span {
-          white-space: nowrap;
-          opacity: 0.5;
-          max-width: 150px;
-        }
-
-        input {
-          border: none;
-          background: transparent;
-          padding: 0;
-          color: variables.$color-white;
-          height: initial;
-
-          @extend %face-sans-14-medium;
-
-          line-height: 24px;
-
-          &:focus {
-            outline: 0;
-            border: 0;
-          }
-        }
-
-        .button-plain {
-          height: 24px;
-          margin-left: 8px;
-
-          svg {
-            width: 24px;
-            height: 24px;
-          }
-
-          &:hover {
-            opacity: 1;
-            color: variables.$color-blue;
-          }
-        }
       }
 
       label {
