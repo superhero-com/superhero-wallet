@@ -56,11 +56,13 @@ export default {
   background-image: url('../../../icons/account-card/account-bg-pattern.svg');
   background-color: #0a0e16;
   background-position: calc(var(--shift) * 15px) calc(var(--shift) * 20px);
-  transition: height 0.2s ease-out;
+  clip-path: inset(0% 0% -200% 0%);
+  transition: height 0.2s ease-out, clip-path 0.2s step-end;
 
   &.minified {
     height: 109px;
-    overflow: hidden;
+    clip-path: inset(0% 0% 0% 0%);
+    transition-timing-function: ease-out, step-start;
   }
 
   &.subaccount {
