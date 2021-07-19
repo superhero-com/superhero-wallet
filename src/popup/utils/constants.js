@@ -126,4 +126,4 @@ export const APP_LINK_WEB = 'https://wallet.superhero.com';
 export const APP_LINK_CHROME = 'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne';
 export const APP_LINK_FIREFOX = 'https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet';
 export const APP_LINK_ANDROID = 'https://play.google.com/store/apps/details?id=com.superhero.cordova';
-export const APP_LINK_IOS = 'https://testflight.apple.com/join/3o5r4dQQ';
+export const APP_LINK_IOS = 'https://apps.apple.com/us/app/superhero-wallet/id1502786641';
