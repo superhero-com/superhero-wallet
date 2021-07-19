@@ -189,7 +189,7 @@ export default {
     return fetchJson(`${activeNetwork.backendUrl}/cache/chainnames`);
   },
   async getCacheTip({ getters: { activeNetwork } }, id) {
-    return fetchJson(`${activeNetwork.backendUrl}/cache/tip?id=${id}`);
+    return fetchJson(`${activeNetwork.backendUrl}/tips/single/${id}`);
   },
   async getAllNotifications({ state: { sdk }, getters: { activeNetwork, account } }) {
     const responseChallenge = await fetchJson(
