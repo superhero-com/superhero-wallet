@@ -168,6 +168,11 @@ export default {
     display: flex;
     align-items: center;
 
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
     a {
       color: variables.$color-white;
       flex-grow: 1;
