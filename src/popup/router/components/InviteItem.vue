@@ -86,6 +86,7 @@ import Button from './Button';
 import ButtonPlain from './ButtonPlain';
 import CopyIcon from '../../../icons/copy-old.svg?vue-component';
 import { formatDate } from '../../utils';
+import { APP_LINK_WEB } from '../../utils/constants';
 
 export default {
   components: {
@@ -110,7 +111,7 @@ export default {
         this.$router
           .resolve({ name: 'invite-claim', params: { secretKey } })
           .href.replace(/^#/, ''),
-        'https://wallet.superhero.com',
+        APP_LINK_WEB,
       );
     },
     address() {

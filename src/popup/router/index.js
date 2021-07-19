@@ -13,6 +13,7 @@ import * as helper from '../utils/helper';
 import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
 import initSdk from '../../lib/wallet';
+import { APP_LINK_WEB } from '../utils/constants';
 
 const plugin = {
   install() {
@@ -94,7 +95,7 @@ if (process.env.PLATFORM === 'cordova') {
   (async () => {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
     window.IonicDeeplink.onDeepLink(({ url }) => {
-      const prefix = ['superhero:', 'https://wallet.superhero.com/'].find((p) => url.startsWith(p));
+      const prefix = ['superhero:', APP_LINK_WEB].find((p) => url.startsWith(p));
       if (!prefix) throw new Error(`Unknown url: ${url}`);
       try {
         window.location = `#/${url.slice(prefix.length)}`;
