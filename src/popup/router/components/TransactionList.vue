@@ -21,7 +21,7 @@
       data-cy="loader"
     />
     <div
-      v-else-if="!transactions.length"
+      v-else-if="!filteredTransactions.length"
       class="message"
     >
       <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
