@@ -10,7 +10,7 @@
         </div>
         <div>
           <a
-            href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/"
+            :href="APP_LINK_FIREFOX"
             target="_blank"
           >
             <img
@@ -20,7 +20,7 @@
             >
           </a>
           <a
-            href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne"
+            :href="APP_LINK_CHROME"
             target="_blank"
           >
             <img
@@ -37,7 +37,7 @@
         </div>
         <div>
           <a
-            href="https://apps.apple.com/us/app/superhero-wallet/id1502786641"
+            :href="APP_LINK_IOS"
             target="_blank"
           >
             <img
@@ -47,7 +47,7 @@
             >
           </a>
           <a
-            href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
+            :href="APP_LINK_ANDROID"
             target="_blank"
           >
             <img
@@ -64,11 +64,21 @@
 
 <script>
 import { detect } from 'detect-browser';
+import {
+  APP_LINK_CHROME,
+  APP_LINK_FIREFOX,
+  APP_LINK_ANDROID,
+  APP_LINK_IOS,
+} from '../../utils/constants';
 
 export default {
   data: () => ({
     IS_MOBILE_DEVICE: window.IS_MOBILE_DEVICE,
     IS_IOS: window.IS_IOS,
+    APP_LINK_CHROME,
+    APP_LINK_FIREFOX,
+    APP_LINK_ANDROID,
+    APP_LINK_IOS,
   }),
   methods: {
     isFirefox() {

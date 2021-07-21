@@ -1,11 +1,11 @@
-const walletUrl = 'https://wallet.superhero.com';
+import { APP_LINK_WEB } from '../popup/utils/constants';
 
 export default () => browser.webRequest.onBeforeRequest.addListener(
   ({ url }) => ({
-    redirectUrl: browser.runtime.getURL(`/popup/popup.html#${url.replace(walletUrl, '')}`),
+    redirectUrl: browser.runtime.getURL(`/popup/popup.html#${url.replace(APP_LINK_WEB, '')}`),
   }),
   {
-    urls: [`${walletUrl}/*`],
+    urls: [`${APP_LINK_WEB}/*`],
     types: ['main_frame'],
   },
   ['blocking'],

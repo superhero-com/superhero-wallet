@@ -117,41 +117,41 @@
           Firefox, Chrome, Brave and Opera and contributes to the browsers&rsquo; additional
           functionalities. For Firefox:
           <a
-            href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/"
+            :href="APP_LINK_FIREFOX"
             target="_blank"
           >
-            https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/
+            {{ APP_LINK_FIREFOX }}
           </a>
           ; for Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <a
-            href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related"
+            :href="APP_LINK_CHROME"
             target="_blank"
           >
-            https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related</a>;
+            {{ APP_LINK_CHROME }}</a>;
         </p>
         <p>
           2) the <strong>application</strong> can be accessed and used from any Browser at the
           address:
           <a
-            href="https://wallet.superhero.com/"
+            :href="APP_LINK_WEB"
             target="_blank"
-          >https://wallet.superhero.com/</a>;
+          >{{ APP_LINK_WEB }}</a>;
         </p>
         <p>
           3) the <strong>application</strong> can be downloaded from Google Play and/or App Store.
           For Google Play:
           <a
-            href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
+            :href="APP_LINK_ANDROID"
             target="_blank"
           >
-            https://play.google.com/store/apps/details?id=com.superhero.cordova
+            {{ APP_LINK_ANDROID }}
           </a>
           and for App Store:
           <a
-            href="https://testflight.apple.com/join/3o5r4dQQ"
+            :href="APP_LINK_IOS"
             target="_blank"
           >
-            https://testflight.apple.com/join/3o5r4dQQ</a>;
+            {{ APP_LINK_IOS }}</a>;
         </p>
         <p>
           The results of the donations and comments are published on the website
@@ -611,37 +611,37 @@
         <p>
           1) downloaded as an add-on (extension) to Firefox:
           <a
-            href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/"
+            :href="APP_LINK_FIREFOX"
             target="_blank"
-          >https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet/</a>
+          >{{ APP_LINK_FIREFOX }}</a>
           ; to Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <a
-            href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related"
+            :href="APP_LINK_CHROME"
             target="_blank"
-          >https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne/related</a>;
+          >{{ APP_LINK_CHROME }}</a>;
         </p>
         <p>
           2) accessed from any Browser at the address:
           <a
-            href="https://wallet.superhero.com/"
+            :href="APP_LINK_WEB"
             target="_blank"
-          >https://wallet.superhero.com/</a>
+          >{{ APP_LINK_WEB }}</a>
           ;
         </p>
         <p>
           3) downloaded from Google Play:&nbsp;&nbsp;&nbsp;&nbsp;
           <a
-            href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
+            :href="APP_LINK_ANDROID"
             target="_blank"
-          >https://play.google.com/store/apps/details?id=com.superhero.cordova</a>
+          >{{ APP_LINK_ANDROID }}</a>
           and
         </p>
         <p>
           from App Store:
           <a
-            href="https://testflight.apple.com/join/3o5r4dQQ"
+            :href="APP_LINK_IOS"
             target="_blank"
-          >https://testflight.apple.com/join/3o5r4dQQ</a>.
+          >{{ APP_LINK_IOS }}</a>.
         </p>
         <p>
           Please bear in mind that the marketplaces for downloading are third-party owned and
@@ -941,6 +941,13 @@
 
 <script>
 import Arrow from '../../../icons/arrow.svg?vue-component';
+import {
+  APP_LINK_WEB,
+  APP_LINK_CHROME,
+  APP_LINK_FIREFOX,
+  APP_LINK_ANDROID,
+  APP_LINK_IOS,
+} from '../../utils/constants';
 
 export default {
   components: { Arrow },
@@ -949,6 +956,11 @@ export default {
       details: Object.entries(this.$t('pages.termsOfService'))
         .filter(([k]) => /section[0-9]+Title/.test(k))
         .map(([, title]) => ({ title, open: false })),
+      APP_LINK_WEB,
+      APP_LINK_CHROME,
+      APP_LINK_FIREFOX,
+      APP_LINK_ANDROID,
+      APP_LINK_IOS,
     };
   },
   methods: {
