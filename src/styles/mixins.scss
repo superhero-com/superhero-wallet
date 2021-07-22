@@ -11,3 +11,9 @@
     @content;
   }
 }
+
+@mixin collapsed {
+  @media screen and (max-height: 250px) {
+    @content;
+  }
+}

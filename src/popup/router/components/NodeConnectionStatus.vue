@@ -62,4 +62,12 @@ export default {
 .connect-node {
   background: variables.$color-bg-3;
 }
+
+@include mixins.collapsed {
+  .node-connection-status,
+  .connect-error,
+  .connect-node {
+    bottom: 0;
+  }
+}
 </style>
