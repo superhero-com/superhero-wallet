@@ -203,6 +203,7 @@ export default [
       meta: {
         title: 'tips',
         notRebrand: true,
+        backButton: false,
       },
     }, {
       path: 'claim',
@@ -211,6 +212,7 @@ export default [
       meta: {
         title: 'tips',
         notRebrand: true,
+        backButton: false,
       },
     }],
   },
@@ -274,6 +276,7 @@ export default [
       meta: {
         title: 'transfer',
         notRebrand: true,
+        backButton: false,
       },
     }, {
       path: 'receive',
@@ -282,6 +285,7 @@ export default [
       meta: {
         title: 'transfer',
         notRebrand: true,
+        backButton: false,
       },
     }],
   },
@@ -302,6 +306,7 @@ export default [
     name: 'more',
     meta: {
       title: 'more',
+      backButton: false,
     },
   },
   {
@@ -334,6 +339,7 @@ export default [
       props: true,
       meta: {
         title: 'names',
+        backButton: false,
       },
     }, {
       path: 'auctions',
@@ -342,6 +348,7 @@ export default [
       name: 'auction-list',
       meta: {
         title: 'name-auctions',
+        backButton: false,
       },
     }, {
       path: 'claim',
@@ -350,6 +357,7 @@ export default [
       name: 'name-claim',
       meta: {
         title: 'register-name',
+        backButton: false,
       },
     }],
   },
@@ -414,6 +422,7 @@ export default [
     component: Balances,
     meta: {
       title: 'balances',
+      backButton: false,
     },
   },
   {
