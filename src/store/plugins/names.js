@@ -15,13 +15,13 @@ export default (store) => {
       preferred: {},
     },
     getters: {
+      get: ({ owned }) => (name) => owned.find((n) => n.name === name),
       getDefault: ({ defaults }, getters, { sdk }, { activeNetwork }) => (address) => {
         if (!defaults) return '';
         let { networkId } = activeNetwork;
         if (sdk) networkId = sdk.getNetworkId();
         return defaults[`${address}-${networkId}`];
       },
-      getName: ({ owned }) => (name) => owned.find((n) => n.name === name),
       getPreferred: (
         { preferred }, { getDefault }, _, { account, activeNetwork },
       ) => (address) => {
