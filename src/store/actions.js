@@ -62,8 +62,9 @@ export default {
     ]);
 
     const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
+    const amountOfTx = flatten(txs).length;
     (await dispatch('fungibleTokens/getTokensHistory')).forEach((f) => {
-      if (minMicroTime < f.microTime) {
+      if (minMicroTime < f.microTime || (amountOfTx === 0 && minMicroTime > f.microTime)) {
         txs[0].push(f);
       }
     });
