@@ -12,6 +12,7 @@ export default (store) => {
     state: {
       owned: [],
       defaults: {},
+      preferred: {},
     },
     getters: {
       getDefault: ({ defaults }, getters, { sdk }, { activeNetwork }) => (address) => {
@@ -21,6 +22,13 @@ export default (store) => {
         return defaults[`${address}-${networkId}`];
       },
       getName: ({ owned }) => (name) => owned.find((n) => n.name === name),
+      getPreferred: (
+        { preferred }, { getDefault }, _, { account, activeNetwork },
+      ) => (address) => {
+        if (account.address === address) return getDefault(address);
+        store.dispatch('names/setPreferred', address);
+        return preferred[`${address}-${activeNetwork.networkId}`] || '';
+      },
     },
     mutations: {
       set(state, names) {
@@ -34,6 +42,11 @@ export default (store) => {
       setAutoExtend(state, { name, value }) {
         const index = state.owned.findIndex((n) => n.name === name);
         Vue.set(state.owned[index], 'autoExtend', value);
+      },
+      setPreferred({ preferred }, { address, name }) {
+        const networkId = store.state.sdk.getNetworkId();
+        if (name) Vue.set(preferred, `${address}-${networkId}`, name);
+        else Vue.delete(preferred, `${address}-${networkId}`);
       },
     },
     actions: {
@@ -150,6 +163,19 @@ export default (store) => {
           return nameEntry.pointers?.accountPubkey;
         }
         return '';
+      },
+      async setPreferred({
+        rootState: { middleware },
+        rootGetters: { activeNetwork },
+        commit,
+      }, address) {
+        if (!middleware) return;
+        const { preferredChainName } = await fetchJson(`${activeNetwork.backendUrl}/profile/${address}`).catch(() => ({}));
+        if (preferredChainName) {
+          commit('setPreferred', { address, name: preferredChainName });
+        } else {
+          commit('setPreferred', { address });
+        }
       },
     },
   });
