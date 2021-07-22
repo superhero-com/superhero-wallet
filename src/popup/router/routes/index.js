@@ -263,6 +263,7 @@ export default [
     props: true,
     meta: {
       title: 'tx-details',
+      hideTabBar: true,
     },
   },
   {
