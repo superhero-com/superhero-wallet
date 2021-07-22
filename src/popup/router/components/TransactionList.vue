@@ -118,6 +118,8 @@ export default {
   watch: {
     accountSelectedIdx() {
       this.$store.commit('setTransactions', []);
+      this.transactions = [];
+      this.page = 1;
       this.loadMore();
     },
   },
