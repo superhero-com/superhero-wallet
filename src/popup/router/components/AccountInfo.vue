@@ -129,13 +129,13 @@ export default {
   }),
   computed: {
     ...mapState(['accountCount', 'accountSelectedIdx']),
-    ...mapGetters(['accounts']),
+    ...mapGetters(['accounts', 'activeNetwork']),
     idx() {
       return this.accountIdx === -1 ? this.accountSelectedIdx : this.accountIdx;
     },
     explorerUrl() {
       const { address } = this.accounts[this.idx];
-      return `https://explorer.aeternity.io/account/transactions/${address}`;
+      return `${this.activeNetwork.explorerUrl}/account/transactions/${address}`;
     },
   },
   mounted() {
