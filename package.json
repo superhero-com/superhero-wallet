@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@aeternity/aepp-components-3": "3.0.0-alpha.9",
-    "@aeternity/aepp-sdk": "^8.1.0",
+    "@aeternity/aepp-sdk": "^8.2.1",
     "@aeternity/bip39": "^0.1.0",
     "@aeternity/hd-wallet": "^0.2.0",
     "@fontsource/ibm-plex-mono": "^4.4.5",
