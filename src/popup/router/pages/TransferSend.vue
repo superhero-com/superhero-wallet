@@ -326,21 +326,21 @@ export default {
           title: this.$t('pages.send.confirm-sending-to-same-account'),
         });
       }
-      let errorModalType = '';
+      let errorModalMsg = '';
       if (receiver === '' || (!checkAddress(receiver) && !checkAensName(receiver))) {
-        errorModalType = 'incorrect-address';
+        errorModalMsg = this.$t('modals.incorrect-address.msg');
       }
-      if (this.form.amount <= 0) errorModalType = 'incorrect-amount';
+      if (this.form.amount <= 0) errorModalMsg = this.$t('modals.incorrect-amount.msg');
       if (
         this.selectedToken
           ? this.selectedToken.balance.comparedTo(this.form.amount) === -1
             || this.balance.comparedTo(this.fee) === -1
           : this.balance.comparedTo(this.fee.plus(this.form.amount)) === -1
       ) {
-        errorModalType = 'insufficient-balance';
+        errorModalMsg = this.$t('modals.insufficient-balance.msg');
       }
-      if (errorModalType) {
-        this.$store.dispatch('modals/open', { name: 'default', type: errorModalType });
+      if (errorModalMsg) {
+        this.$store.dispatch('modals/open', { name: 'default', title: errorModalMsg, icon: 'critical' });
         return;
       }
       this.loading = true;
@@ -400,7 +400,11 @@ export default {
         }
         this.$router.push('/account');
       } catch (e) {
-        this.$store.dispatch('modals/open', { name: 'default', type: 'transaction-failed' });
+        this.$store.dispatch('modals/open', {
+          name: 'default',
+          title: this.$t('modals.transaction-failed.msg'),
+          icon: 'critical',
+        });
         throw e;
       } finally {
         this.loading = false;
