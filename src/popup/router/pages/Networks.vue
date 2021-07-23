@@ -162,8 +162,8 @@ import Arrow from '../../../icons/arrow.svg?vue-component';
 const networkProps = {
   name: null,
   url: null,
-  middlewareUrl: null,
-  compilerUrl: null,
+  middlewareUrl: defaultNetwork.middlewareUrl,
+  compilerUrl: defaultNetwork.compilerUrl,
   backendUrl: defaultNetwork.backendUrl,
   error: false,
 };
