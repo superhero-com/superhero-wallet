@@ -218,10 +218,6 @@ export default [
     redirect: '/tips',
   },
   {
-    path: '/tip/*',
-    redirect: '/tips/*',
-  },
-  {
     path: '/retip',
     component: Retip,
     meta: {
