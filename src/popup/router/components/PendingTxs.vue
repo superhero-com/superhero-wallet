@@ -19,7 +19,8 @@ import TransactionItem from './TransactionItem';
 export default {
   components: { TransactionItem },
   computed: mapState({
-    transactions: ({ transactions: { pending } }) => pending
+    transactions: ({ transactions: { pending } }, { getTxDirection }) => pending
+      .filter((transaction) => getTxDirection(transaction) === 'sent')
       .filter(({ amount, hash }) => !Number.isNaN(+amount) && hash)
       .map((tx) => ({ ...tx, pending: true })),
   }),
