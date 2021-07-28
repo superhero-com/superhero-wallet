@@ -193,7 +193,6 @@ export default {
 .transaction-list {
   display: flex;
   flex-direction: column;
-  padding-bottom: 48px;
 
   .list {
     background: variables.$color-black;
@@ -206,6 +205,7 @@ export default {
     flex-grow: 1;
     display: flex;
     align-items: center;
+    padding-bottom: 48px;
   }
 
   .message > p {
