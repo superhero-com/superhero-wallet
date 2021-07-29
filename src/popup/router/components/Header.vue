@@ -2,6 +2,7 @@
   <div
     v-if="showNavigation && !aeppPopup"
     class="header"
+    :class="{ 'not-logged-in': !isLoggedIn }"
   >
     <div
       v-if="isLoggedIn || (title && !tourRunning)"
@@ -24,7 +25,6 @@
     </div>
 
     <div
-      :class="{ 'not-logged-in': !isLoggedIn }"
       class="title"
     >
       <Truncate
@@ -164,7 +164,7 @@ export default {
   }
 
   top: 0;
-  z-index: 8;
+  z-index: 1;
   height: calc(48px + env(safe-area-inset-top));
   background-color: variables.$color-bg-3;
   display: flex;
@@ -192,12 +192,6 @@ export default {
   .title {
     min-width: 166px;
 
-    &.not-logged-in:not(:only-child) {
-      width: 100%;
-      position: absolute;
-      z-index: -1;
-    }
-
     .text {
       padding: 0 4px;
       display: flex;
@@ -208,6 +202,17 @@ export default {
 
       line-height: 24px;
       color: variables.$color-white;
+    }
+  }
+
+  &.not-logged-in:not(:only-child) {
+    .left {
+      z-index: 1;
+    }
+
+    .title {
+      width: 100%;
+      position: absolute;
     }
   }
 
