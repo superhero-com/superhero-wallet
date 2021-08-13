@@ -51,7 +51,6 @@ export default {
   background: variables.$color-blue;
   color: variables.$color-white;
   line-height: 2em;
-  z-index: 5;
   text-align: center;
   font-size: 14px;
 }
