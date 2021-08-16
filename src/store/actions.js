@@ -38,9 +38,10 @@ export default {
   async fetchTransactions({ state, getters, dispatch }, { limit, page, recent }) {
     if (!state.middleware) return [];
     const { address } = getters.account;
+    let hasMore = false;
     let txs = await Promise.all([
       state.middleware.getTxByAccount(address, limit, page)
-        .then(({ data }) => data)
+        .then(({ data, next }) => { hasMore = !!next; return data; })
         .catch(() => []),
       dispatch('fetchPendingTransactions', address),
       fetchJson(
@@ -69,7 +70,7 @@ export default {
       }
     });
     txs = uniqBy(orderBy(flatten(txs), ['microTime'], ['desc']), ({ hash }) => hash);
-    return recent ? txs.slice(0, limit) : txs;
+    return { txs: recent ? txs.slice(0, limit) : txs, hasMore };
   },
 
   async getCurrencies({ state: { nextCurrenciesFetch }, commit }) {

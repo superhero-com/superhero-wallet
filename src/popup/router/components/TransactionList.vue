@@ -21,7 +21,7 @@
       data-cy="loader"
     />
     <div
-      v-else-if="!transactions.length"
+      v-else-if="!filteredTransactions.length"
       class="message"
     >
       <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
@@ -149,30 +149,30 @@ export default {
     async loadMore() {
       if (this.loading) return;
       this.loading = true;
-      let transactions;
+      let result;
       try {
         await this.$watchUntilTruly(() => this.$store.state.middleware);
-        transactions = await this.$store.dispatch('fetchTransactions', {
+        result = await this.$store.dispatch('fetchTransactions', {
           page: this.page,
           limit: TXS_PER_PAGE,
         });
-        this.updateTransactions(transactions);
+        this.updateTransactions(result.txs);
       } finally {
         this.loading = false;
       }
-      if (transactions.length) {
+      if (result.hasMore) {
         this.page += 1;
         this.checkLoadMore();
       }
     },
     async getLatest() {
       try {
-        const transactions = await this.$store.dispatch('fetchTransactions', {
+        const { txs } = await this.$store.dispatch('fetchTransactions', {
           limit: 10,
           page: 1,
           recent: true,
         });
-        this.updateTransactions(transactions);
+        this.updateTransactions(txs);
       } finally {
         this.loading = false;
       }
@@ -193,7 +193,6 @@ export default {
 .transaction-list {
   display: flex;
   flex-direction: column;
-  padding-bottom: 48px;
 
   .list {
     background: variables.$color-black;
@@ -206,6 +205,7 @@ export default {
     flex-grow: 1;
     display: flex;
     align-items: center;
+    padding-bottom: 48px;
   }
 
   .message > p {
