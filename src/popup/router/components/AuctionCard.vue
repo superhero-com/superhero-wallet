@@ -1,14 +1,14 @@
 <template>
   <div class="auction-card">
-    <Avatar :name="name" />
-    <span class="name">{{ name }}</span>
-    <AuctionOverview :name="name" />
     <ButtonPlain
       class="help"
       @click="showHelp"
     >
       <QuestionCircle class="icon" />
     </ButtonPlain>
+    <Avatar :name="name" />
+    <span class="name">{{ name }}</span>
+    <AuctionOverview :name="name" />
   </div>
 </template>
 
@@ -44,7 +44,6 @@ export default {
 .auction-card {
   display: flex;
   flex-direction: column;
-  position: relative;
   align-items: center;
   height: 184px;
   background-image: url('../../../icons/squares-bg.svg');
@@ -68,15 +67,15 @@ export default {
   }
 
   .help {
-    position: absolute;
-    right: 16px;
-    top: 16px;
+    align-self: flex-end;
+    padding-top: 16px;
+    padding-right: 16px;
+    margin-bottom: -36px;
 
     .icon {
       width: 24px;
       height: 24px;
-      color: variables.$color-blue;
-      opacity: 0.7;
+      color: rgba(variables.$color-blue, 0.7);
     }
   }
 }
