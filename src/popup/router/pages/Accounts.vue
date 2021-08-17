@@ -60,17 +60,17 @@ export default {
   .header {
     display: flex;
     justify-content: center;
-    padding-top: 16px;
-    padding-bottom: 24px;
+    padding-top: 12px;
+    padding-bottom: 16px;
   }
 
   .card-wrapper {
     .account-card {
-      margin: 24px auto 16px auto;
+      margin: 16px auto;
     }
 
     .checkbox-container {
-      padding: 0 0 8px 32px;
+      padding: 0 0 8px 26px;
     }
   }
 }
