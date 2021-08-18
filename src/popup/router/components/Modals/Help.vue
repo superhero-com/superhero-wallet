@@ -1,46 +1,25 @@
 <template>
   <Default
     icon="info"
-    :title="title"
     v-bind="$attrs"
   >
-    <i18n
-      v-if="type === 'auctions'"
+    <TemplateRenderer
       slot="msg"
-      path="modals.auctions-help.msg"
-      tag="span"
-    >
-      <br>
-    </i18n>
-    <i18n
-      v-else-if="type === 'name-pointers'"
-      slot="msg"
-      path="modals.name-pointers-help.msg"
-      tag="span"
-    >
-      <br>
-    </i18n>
+      :node="templateRootNode"
+    />
   </Default>
 </template>
 
 <script>
 import Default from './Default';
+import TemplateRenderer from '../TemplateRenderer';
 
 export default {
-  components: { Default },
-  props: {
-    type: { type: String, required: true },
-  },
+  components: { Default, TemplateRenderer },
   computed: {
-    title() {
-      switch (this.type) {
-        case 'auctions':
-          return this.$t('modals.auctions-help.title');
-        case 'name-pointers':
-          return this.$t('modals.name-pointers-help.title');
-        default:
-          throw Error('Unsupported help modal type');
-      }
+    templateRootNode() {
+      return new DOMParser()
+        .parseFromString(`<root>${this.$attrs.msg}</root>`, 'text/xml').childNodes[0];
     },
   },
 };

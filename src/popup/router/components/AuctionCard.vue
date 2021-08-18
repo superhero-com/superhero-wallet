@@ -31,7 +31,10 @@ export default {
   },
   methods: {
     showHelp() {
-      this.$store.dispatch('modals/open', { name: 'help', type: 'auctions' });
+      this.$store.dispatch('modals/open', {
+        name: 'help',
+        ...this.$t('modals.auctions-help'),
+      });
     },
     blocksToRelativeTime,
   },
