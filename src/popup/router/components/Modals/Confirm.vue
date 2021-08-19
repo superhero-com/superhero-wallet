@@ -3,6 +3,11 @@
     v-bind="{ ...$attrs, resolve }"
     :close="cancel"
   >
+    <TemplateRenderer
+      v-if="!$slots.msg"
+      slot="msg"
+      :node="templateRootNode"
+    />
     <template slot="footer">
       <Button
         fill="secondary"
@@ -23,12 +28,19 @@
 <script>
 import Default from './Default';
 import Button from '../Button';
+import TemplateRenderer from '../TemplateRenderer';
 
 export default {
-  components: { Default, Button },
+  components: { Default, TemplateRenderer, Button },
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
+  },
+  computed: {
+    templateRootNode() {
+      return new DOMParser()
+        .parseFromString(`<root>${this.$attrs.msg}</root>`, 'text/xml').childNodes[0];
+    },
   },
   methods: {
     cancel() {
