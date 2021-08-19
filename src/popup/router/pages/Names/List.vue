@@ -1,62 +1,35 @@
 <template>
   <div class="list">
-    <NameListHeader />
-    <ul
-      v-if="namesForAccount.length"
-      class="names-list"
-    >
-      <NameRow
-        v-for="({ name, owner, pending, autoExtend }, index) in namesForAccount"
+    <template v-if="namesForAccount.length">
+      <NameItem
+        v-for="({ name, owner, autoExtend }, index) in namesForAccount"
         :key="index"
-        :to="{ name: 'name-details', params: { name } }"
+        :index="index"
         :name="name"
         :address="owner"
-      >
-        <Truncate
-          :str="name"
-          class="name"
-        />
-        <Badge
-          v-if="account.name === name"
-          class="active-name"
-        >
-          {{ $t('pages.names.default') }}
-        </Badge>
-        <Badge
-          v-if="pending"
-          class="pending-name"
-        >
-          {{ $t('pages.names.pending-claim') }}
-        </Badge>
-        <span class="address">{{ owner }}</span>
-        <CheckBox
-          :value="autoExtend"
-          @click.native.prevent="
-            $store.commit('names/setAutoExtend', { name, value: !autoExtend })
-          "
-        >
-          {{ $t('pages.names.auto-extend') }}
-        </CheckBox>
-      </NameRow>
-    </ul>
-    <p v-else>
-      {{ $t('pages.names.list.no-names') }}
-    </p>
+        :auto-extend="autoExtend"
+      />
+    </template>
+    <AnimatedSpinner
+      v-else-if="loading"
+      class="spinner"
+    />
+    <RegisterName
+      v-else
+      :msg="$t('pages.names.list.no-names')"
+    />
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import NameListHeader from '../../components/NameListHeader';
-import Badge from '../../components/Badge';
-import NameRow from '../../components/NameRow';
-import Truncate from '../../components/Truncate';
-import CheckBox from '../../components/CheckBox';
+import NameItem from '../../components/NameItem';
+import RegisterName from '../../components/RegisterName';
+import AnimatedSpinner from '../../../../icons/animated-spinner.svg?skip-optimize';
 
 export default {
-  components: {
-    NameListHeader, Badge, NameRow, CheckBox, Truncate,
-  },
+  components: { NameItem, AnimatedSpinner, RegisterName },
+  data: () => ({ loading: false }),
   computed: {
     ...mapGetters(['account']),
     ...mapState({
@@ -66,18 +39,33 @@ export default {
     }),
   },
   mounted() {
-    const id = setInterval(() => this.$store.dispatch('names/fetchOwned'), 10000);
+    const id = setInterval(() => this.updateNames, 10000);
     this.$once('hook:destroyed', () => clearInterval(id));
+  },
+  methods: {
+    async updateNames() {
+      this.loading = true;
+      await this.$store.dispatch('names/fetchOwned');
+      this.loading = false;
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.list .names-list {
-  padding: 0;
+@use '../../../../styles/variables';
+@use '../../../../styles/typography';
 
-  .name {
-    width: 100%;
+.list {
+  .name-item {
+    margin-top: 1px;
+  }
+
+  .spinner {
+    display: flex;
+    width: 56px;
+    height: 56px;
+    margin: 72px auto 0 auto;
   }
 }
 </style>

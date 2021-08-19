@@ -69,6 +69,18 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
     return store.getters.isLoggedIn;
   }
 
+  if (method === 'paste') {
+    let result = '';
+    const textarea = document.createElement('textarea');
+    document.body.appendChild(textarea);
+    textarea.focus();
+    if (document.execCommand('paste')) {
+      result = textarea.value;
+    }
+    document.body.removeChild(textarea);
+    return result;
+  }
+
   if (from === 'content') {
     const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });
     if (type === 'readDom' && (data.address || data.chainName)) {

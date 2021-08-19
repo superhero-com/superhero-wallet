@@ -1,11 +1,9 @@
 <template>
   <div class="auction-card">
-    <ButtonPlain
-      class="help"
-      @click="showHelp"
-    >
-      <QuestionCircle class="icon" />
-    </ButtonPlain>
+    <HelpButton
+      :title="$t('modals.auctions-help.title')"
+      :msg="$t('modals.auctions-help.msg')"
+    />
     <Avatar :name="name" />
     <span class="name">{{ name }}</span>
     <AuctionOverview :name="name" />
@@ -14,28 +12,20 @@
 
 <script>
 import Avatar from './Avatar';
-import ButtonPlain from './ButtonPlain';
+import HelpButton from './HelpButton';
 import AuctionOverview from './AuctionOverview';
-import QuestionCircle from '../../../icons/question-circle-border.svg?vue-component';
 import { blocksToRelativeTime } from '../../../filters/toRelativeTime';
 
 export default {
   components: {
     Avatar,
-    ButtonPlain,
-    QuestionCircle,
+    HelpButton,
     AuctionOverview,
   },
   props: {
     name: { type: String, required: true },
   },
   methods: {
-    showHelp() {
-      this.$store.dispatch('modals/open', {
-        name: 'help',
-        ...this.$t('modals.auctions-help'),
-      });
-    },
     blocksToRelativeTime,
   },
 };
@@ -69,17 +59,11 @@ export default {
     margin-top: 16px;
   }
 
-  .help {
+  .help-button {
     align-self: flex-end;
     padding-top: 16px;
     padding-right: 16px;
     margin-bottom: -36px;
-
-    .icon {
-      width: 24px;
-      height: 24px;
-      color: rgba(variables.$color-blue, 0.7);
-    }
   }
 }
 </style>
