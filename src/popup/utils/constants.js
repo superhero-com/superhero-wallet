@@ -1,4 +1,4 @@
-import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
+import { TxBuilder, Crypto, SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import { i18n } from '../../store/plugins/languages';
 
@@ -21,6 +21,7 @@ export const CONNECTION_TYPES = {
 
 const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
 const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
+const STUB_NONCE = 10000;
 export const MAX_UINT256 = BigNumber(2).exponentiatedBy(256).minus(1);
 
 export const calculateFee = (type, params) => {
@@ -39,6 +40,14 @@ export const calculateFee = (type, params) => {
   });
   return BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE);
 };
+
+export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
+  accountId: STUB_ADDRESS,
+  name: `nm_${Crypto.encodeBase58Check(name)}`,
+  nameSalt: Crypto.salt(),
+  nonce: STUB_NONCE,
+  ttl: SCHEMA.NAME_TTL,
+});
 
 export const defaultNetworks = [
   {

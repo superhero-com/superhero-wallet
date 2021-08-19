@@ -192,7 +192,11 @@
     },
     "name-pointers-help": {
       "title": "Name pointers",
-      "msg": "Name pointers associate your .chain name with one of:{0}{0}• Account address;{0}• Oracle ID;{0}• Channel ID;{0}• Contract ID.{0}{0}Your .chain name may have more than one pointer. However it can be associated with only one of each type of pointers listed above."
+      "msg": "Name pointers associate your .chain name with one of:<br /><br />• Account address;<br />• Oracle ID;<br />• Channel ID;<br />• Contract ID.<br /><br />Your .chain name may have more than one pointer. However it can be associated with only one of each type of pointers listed above."
+    },
+    "auctions-help": {
+      "title": "Auctions and bidding",
+      "msg": "If your .chain name is <strong>12 characters or less</strong> – you’ve got to bid for it in an auction. To win the bidding process, all you have to do is have the highest bid once the auction ends! If somebody outbids you – all of your funds are automatically returned.<br /><br />Auction periods and initial fees vary as the length of the name varies – the shorter the name, the higher the fee and longer the period."
     }
   },
   "transaction": {
@@ -267,7 +271,7 @@
       "notifications": "Notifications",
       "notification-settings": "Notification Preference",
       "names": "Names",
-      "bidding": "Bidding",
+      "auction": "Bidding",
       "more": "More",
       "networks": "Networks",
       "permissionsSettings": "Permissions settings",
@@ -551,7 +555,10 @@
         "remaining-time": "Remaining Time",
         "add-amount": "Enter amount",
         "min-bid": "Bid must be more than {minBid} AE",
-        "bid-added": "Bid added successfully"
+        "bid-added": "Bid added successfully",
+        "place-bid": "Place bid",
+        "bid-history": "Bid history",
+        "bids-on": "Bids on"
       }
     },
     "languageSettings": {
@@ -1092,5 +1099,7 @@
   "hours": "{n} hours | {n} hour | {n} hours",
   "days": "{n} days | {n} day | {n} days",
   "addressCopied": "Address copied",
-  "copied": "Copied"
+  "copied": "Copied",
+  "tx-fee": "Transaction fee",
+  "total": "Total"
 }

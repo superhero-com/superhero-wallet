@@ -13,6 +13,7 @@ export default (store) => {
       owned: [],
       defaults: {},
       preferred: {},
+      auctions: {},
     },
     getters: {
       get: ({ owned }) => (name) => owned.find((n) => n.name === name),
@@ -29,6 +30,10 @@ export default (store) => {
         store.dispatch('names/setPreferred', address);
         return preferred[`${address}-${activeNetwork.networkId}`] || '';
       },
+      getName: ({ owned }) => (name) => owned.find((n) => n.name === name),
+      getAuction: ({ auctions }) => (name) => auctions[name] || null,
+      getHighestBid: (_, { getAuction }) => (name) => getAuction(name)
+        && getAuction(name).bids.reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b)),
     },
     mutations: {
       set(state, names) {
@@ -47,6 +52,9 @@ export default (store) => {
         const networkId = store.state.sdk.getNetworkId();
         if (name) Vue.set(preferred, `${address}-${networkId}`, name);
         else Vue.delete(preferred, `${address}-${networkId}`);
+      },
+      setAuctionEntry(state, { name, expiration, bids }) {
+        state.auctions[name] = { expiration, bids };
       },
     },
     actions: {
