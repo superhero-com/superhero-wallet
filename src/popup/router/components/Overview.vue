@@ -181,6 +181,7 @@ export default {
       line-height: 16px;
       color: variables.$color-white;
       text-decoration: none;
+      white-space: nowrap;
 
       &:hover {
         text-decoration: underline;
