@@ -130,4 +130,10 @@ export default {
     }
   }
 }
+
+@include mixins.collapsed {
+  .tab-bar {
+    display: none;
+  }
+}
 </style>
