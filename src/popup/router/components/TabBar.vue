@@ -1,6 +1,9 @@
 <template>
   <div class="tab-bar">
-    <RouterLink to="/account">
+    <RouterLink
+      to="/account"
+      data-cy="home"
+    >
       <Home />
       <span>{{ $t('pages.titles.home') }}</span>
     </RouterLink>

@@ -16,7 +16,7 @@
         <Logo />
       </RouterLink>
       <ButtonPlain
-        v-if="title && !tourRunning"
+        v-if="showBack"
         class="icon-btn back"
         @click="back"
       >
@@ -119,6 +119,10 @@ export default {
     },
     showNavigation() {
       return this.$route.meta.navigation !== undefined ? this.$route.meta.navigation : true;
+    },
+    showBack() {
+      return (this.$route.meta.backButton !== undefined ? this.$route.meta.backButton : true)
+        && this.title && !this.tourRunning;
     },
     notificationsCount() {
       return [...this.notifications, ...this.superheroNotifications].filter(
