@@ -1,7 +1,10 @@
 <template>
   <div class="name-item">
     <div class="collapsed">
-      <Pending v-if="nameEntry.pending" />
+      <Pending
+        v-if="nameEntry.pending"
+        class="pending-icon"
+      />
       <Avatar
         v-else
         :name="name"
@@ -239,6 +242,11 @@ export default {
     display: flex;
     text-align: left;
     justify-content: space-between;
+
+    .pending-icon {
+      height: 32px;
+      width: 32px;
+    }
 
     .header {
       flex: 2;
