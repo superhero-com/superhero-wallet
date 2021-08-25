@@ -182,7 +182,8 @@
       }
     },
     "qrCodeReader": {
-      "cameraNotAllowed": "You need to grant your device camera access permission to scan QR code. Please allow camera access in your browser settings and try again."
+      "cameraNotAllowed": "You need to grant your device camera access permission to scan QR code. Please allow camera access in your browser settings and try again.",
+      "settings": "Settings"
     },
     "cancel": "Cancel",
     "confirm": "Confirm",
