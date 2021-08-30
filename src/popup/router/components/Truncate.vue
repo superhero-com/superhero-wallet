@@ -1,8 +1,8 @@
 <template>
   <span class="truncate">
     <span
-      class="container"
-      :style="cssVars"
+      :class="['container', { fixed }]"
+      :style="fixed || cssVars"
     >
       <span ref="scroll">{{ nameComponent || str }}</span>
     </span>
@@ -14,6 +14,7 @@
 export default {
   props: {
     str: { type: String, required: true },
+    fixed: { type: Boolean },
   },
   computed: {
     nameComponent() {
@@ -26,6 +27,7 @@ export default {
     },
   },
   mounted() {
+    if (this.fixed) return;
     document.fonts.ready.then(() => {
       const scrollElement = this.$refs.scroll;
       const { parentElement } = scrollElement;
@@ -56,6 +58,10 @@ export default {
     position: relative;
     overflow: hidden;
     white-space: nowrap;
+
+    &.fixed {
+      text-overflow: ellipsis;
+    }
 
     &.scrollable {
       border-radius: 2px;
