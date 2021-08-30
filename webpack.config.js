@@ -29,7 +29,6 @@ const getConfig = (platform) => {
         'other/twitter': './content-scripts/twitter.js',
         'other/youtube': './content-scripts/youtube.js',
         'popup/popup': './popup/popup.js',
-        'phishing/phishing': './phishing/phishing.js',
         'popup/cameraPermission': './popup/cameraPermission.js',
         'redirect/redirect': './redirect/redirect.js',
       }),
@@ -152,11 +151,6 @@ const getConfig = (platform) => {
           ...(platform === 'extension'
             ? [
                 { from: 'popup/popup.html', to: `popup/popup.html`, transform: transformHtml },
-                {
-                  from: 'phishing/phishing.html',
-                  to: `phishing/phishing.html`,
-                  transform: transformHtml,
-                },
                 {
                   from: 'popup/CameraRequestPermission.html',
                   to: `popup/CameraRequestPermission.html`,

@@ -904,26 +904,6 @@
       "donate": "Donar Data"
     }
   },
-  "phishing": {
-    "detection": "Detección de Prishing Superhero",
-    "sections": [
-      {
-        "text": "En este momento este dominio está en la lista de advertencia de dominios de Superhero.com,  esto significa que basados en la informaión que disponemos, Superhero cree que este dominio podría comprometer tu seguridad, y como una función de seguridad extra, Superhero ha restringido el acceso a este sitio. Para anularla, por favor lee el resto de esta advertencia con las instrucciones de cómo continuar bajo tu propio riesgo."
-      },
-      {
-        "text": "Hay muchas razones por las que los sitios pueden aparecer en nuestra lista de advertencias, ella se compila a partir de otras listas ampliamente usadas en la industria. Dichas razones pueden incluir fraude o riesgos de seguridad, tal como los dominios que dan resultados positivos en el {insertion}. Los dominios en estas listas de advertencia incluyen sitios web maliciosos e incluyen a sitios web legítimos que se han visto comprometidos por un actor malicioso.",
-        "insertion": "Detector de Prishing Superhero"
-      },
-      {
-        "text": "Ten encuenta que esta lista de advertencia se compila de forma voluntaria. Esta lista puede ser incorrecta o estar incompleta. Sólo porque un dominio no aparezca en la lista no le da una garantía implícita a la seguridad de ese dominio. Como siempre, tus transacciones son de tu propia responsabilidad. si deseas interactuar con cualquier dominio que esté en nuestra lista, puedes hacerlo {continueHost}.",
-        "continueHost": "bajo tu propio riesgo"
-      },
-      {
-        "text": "Si piensas que este dominio ha sido marcado de forma incorrecta o si un sitio légitimo bloquedo ha resuelto sus problemas de seguridad, {insertion}.",
-        "insertion": " por favor presente un reclamo"
-      }
-    ]
-  },
   "redirecting": "Redirigiendo",
   "minutes": "{n} minutos | {n} minuto | {n} minutos",
   "hours": "{n} horas | {n} hora | {n} horas",
