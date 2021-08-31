@@ -1,6 +1,6 @@
 import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 
-export default (store) => store.registerModule('accounts', {
+export default {
   namespaced: true,
   actions: {
     signWithoutConfirmation({ rootGetters: { account } }, data) {
@@ -50,4 +50,4 @@ export default (store) => store.registerModule('accounts', {
       return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
     },
   },
-});
+};
