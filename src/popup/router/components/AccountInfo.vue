@@ -146,11 +146,11 @@ export default {
     UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
   }),
   computed: {
-    ...mapState('accounts', ['accountSelectedIdx']),
+    ...mapState('accounts', ['activeIdx']),
     ...mapState(['cardMinified']),
     ...mapGetters(['accounts', 'activeNetwork']),
     idx() {
-      return this.accountIdx === -1 ? this.accountSelectedIdx : this.accountIdx;
+      return this.accountIdx === -1 ? this.activeIdx : this.accountIdx;
     },
     explorerUrl() {
       const { address } = this.accounts[this.idx];
@@ -166,7 +166,7 @@ export default {
     this.customAccountName = this.accounts[this.idx].localName;
   },
   methods: {
-    ...mapMutations('accounts', ['createAccount', 'deleteAccount']),
+    ...mapMutations({ createAccount: 'accounts/add' }),
     editLocalName() {
       this.customAccountName = this.accounts[this.idx].localName;
       this.edit = true;
@@ -176,7 +176,7 @@ export default {
       this.$store.dispatch('fungibleTokens/loadTokenBalances');
     },
     saveLocalName() {
-      this.$store.commit('accounts/setAccountLocalName', { name: this.customAccountName, idx: this.idx });
+      this.$store.commit('accounts/setLocalName', { name: this.customAccountName, idx: this.idx });
       this.edit = false;
     },
     copy() {
@@ -192,7 +192,7 @@ export default {
         title: this.$t('modals.removeSubaccount.title'),
         msg: this.$t('modals.removeSubaccount.msg'),
       });
-      this.deleteAccount(this.idx);
+      this.$store.commit('accounts/remove', this.idx);
     },
   },
 };

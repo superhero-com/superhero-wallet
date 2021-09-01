@@ -37,14 +37,14 @@ export default {
   methods: {
     async toggleAccountShowed(isShowed, index) {
       if (!isShowed
-        && this.$store.state.accounts.accs.reduce((a, b) => (b.showed ? a + 1 : a), 0) === 8) {
+        && this.$store.state.accounts.list.reduce((a, b) => (b.showed ? a + 1 : a), 0) === 8) {
         await this.$store.dispatch('modals/open', {
           name: 'default',
           title: this.$t('modals.switcherAccsLimit.title'),
           msg: this.$t('modals.switcherAccsLimit.msg'),
         });
       } else {
-        this.$store.commit('accounts/toggleAccountShowed', index);
+        this.$store.commit('accounts/toggleShowed', index);
       }
     },
   },

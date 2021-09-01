@@ -146,7 +146,7 @@ export default {
   },
   computed: {
     ...mapGetters(['tippingSupported', 'formatCurrency', 'accounts']),
-    ...mapState('accounts', ['accountSelectedIdx']),
+    ...mapState('accounts', ['activeIdx']),
     ...mapState('fungibleTokens', ['aePublicData', 'availableTokens']),
     ...mapGetters('fungibleTokens', ['tokenBalances']),
     fungibleToken() {
@@ -179,7 +179,7 @@ export default {
   methods: {
     proceed(path) {
       this.$store.commit('fungibleTokens/setSelectedToken', {
-        address: this.accounts[this.accountSelectedIdx].address,
+        address: this.accounts[this.activeIdx].address,
         token: this.id !== 'aeternity' ? this.tokenBalances.find(({ value }) => value === this.id) : null,
       });
       this.$router.push(path);

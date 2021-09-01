@@ -4,37 +4,37 @@ import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 export default {
   namespaced: true,
   state: {
-    accs: [{
+    list: [{
       idx: 0, color: '#1161FE', shift: 0, showed: true,
     }],
-    accountSelectedIdx: 0,
-    accountCount: 1,
+    activeIdx: 0,
+    nextAccountIdx: 1,
   },
   mutations: {
-    createAccount(state) {
-      state.accs.push({
-        idx: state.accountCount,
+    add(state) {
+      state.list.push({
+        idx: state.nextAccountIdx,
         color:
           // eslint-disable-next-line no-bitwise
-          state.accountCount === 1 ? '#00FF9D' : `#${((Math.random() * 0xffffff) << 0).toString(16)}`,
+          state.nextAccountIdx === 1 ? '#00FF9D' : `#${((Math.random() * 0xffffff) << 0).toString(16)}`,
         shift: Math.floor(Math.random() * 100),
-        showed: state.accs.reduce((a, b) => (b.showed ? a + 1 : a), 0) < 8,
+        showed: state.list.reduce((a, b) => (b.showed ? a + 1 : a), 0) < 8,
       });
-      state.accountCount += 1;
+      state.nextAccountIdx += 1;
     },
-    deleteAccount(state, idx) {
-      if (state.accountSelectedIdx === idx) state.accountSelectedIdx = 0;
-      Vue.delete(state.accs, idx);
+    remove(state, idx) {
+      if (state.activeIdx === idx) state.activeIdx = 0;
+      Vue.delete(state.list, idx);
     },
-    selectAccount(state, idx) {
-      state.accountSelectedIdx = idx;
+    setActiveIdx(state, idx) {
+      state.activeIdx = idx;
     },
-    setAccountLocalName(state, { name, idx }) {
-      Vue.set(state.accs[idx], 'localName', name);
+    setLocalName(state, { name, idx }) {
+      Vue.set(state.list[idx], 'localName', name);
     },
-    toggleAccountShowed(state, idx) {
-      if (state.accountSelectedIdx === idx) state.accountSelectedIdx = 0;
-      Vue.set(state.accs[idx], 'showed', !state.accs[idx].showed);
+    toggleShowed(state, idx) {
+      if (state.activeIdx === idx) state.activeIdx = 0;
+      Vue.set(state.list[idx], 'showed', !state.list[idx].showed);
     },
   },
   actions: {

@@ -198,7 +198,7 @@ export async function init() {
   );
 
   store.watch(
-    ({ accounts: { accountSelectedIdx } }) => accountSelectedIdx,
+    ({ accounts: { activeIdx } }) => activeIdx,
     async (accountIdx) => sdk.selectAccount(store.getters.accounts[accountIdx].address),
   );
 

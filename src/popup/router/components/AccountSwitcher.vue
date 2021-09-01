@@ -10,7 +10,7 @@
       <AccountCard
         v-for="account in filteredAccounts"
         :key="account.address"
-        :class="{ selected: account.i === accountSelectedIdx }"
+        :class="{ selected: account.i === activeIdx }"
         v-bind="account"
         :account-idx="account.i"
       />
@@ -22,7 +22,7 @@
       <ButtonPlain
         v-for="(account, idx) in filteredAccounts"
         :key="idx"
-        :class="{ selected: account.i === accountSelectedIdx }"
+        :class="{ selected: account.i === activeIdx }"
         @click="selectAccount(account.i)"
       />
     </div>
@@ -38,25 +38,25 @@ export default {
   components: { AccountCard, ButtonPlain },
   props: { notification: Boolean },
   computed: {
-    ...mapState('accounts', ['accountSelectedIdx']),
+    ...mapState('accounts', ['activeIdx']),
     ...mapGetters(['accounts']),
     cssVars() {
       return {
-        '--accountSelectedIdx': this.selectedCardNumber,
-        '--accountCount': this.filteredAccounts.length,
+        '--activeIdx': this.selectedCardNumber,
+        '--nextAccountIdx': this.filteredAccounts.length,
       };
     },
     filteredAccounts() {
       return this.accounts.map((a, index) => ({ ...a, i: index })).filter((a) => a.showed);
     },
     selectedCardNumber() {
-      return this.filteredAccounts.findIndex((a) => a.i === this.accountSelectedIdx);
+      return this.filteredAccounts.findIndex((a) => a.i === this.activeIdx);
     },
   },
   methods: {
     async selectAccount(idx) {
       await this.$watchUntilTruly(() => this.$store.state.middleware);
-      this.$store.commit('accounts/selectAccount', idx);
+      this.$store.commit('accounts/setActiveIdx', idx);
     },
   },
 };
@@ -77,11 +77,11 @@ export default {
 
   .cards-wrapper {
     display: flex;
-    width: calc(var(--accountCount) * (312px + 8px) + 24px + 24px);
+    width: calc(var(--nextAccountIdx) * (312px + 8px) + 24px + 24px);
     align-self: center;
     margin-bottom: 16px;
     transition: margin-left 0.5s ease-out;
-    margin-left: calc(var(--accountSelectedIdx) * (-312px - 8px));
+    margin-left: calc(var(--activeIdx) * (-312px - 8px));
 
     .account-card {
       margin-right: 4px;
