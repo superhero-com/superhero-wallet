@@ -71,7 +71,7 @@
           <template slot="right">
             <ButtonPlain
               v-show="idx !== 0 && $route.path === '/accounts' && !edit"
-              @click="editLocalName"
+              @click="edit = true"
             >
               <Edit />
             </ButtonPlain>
@@ -167,10 +167,6 @@ export default {
   },
   methods: {
     ...mapActions({ createAccount: 'accounts/hdWallet/create' }),
-    editLocalName() {
-      this.customAccountName = this.accounts[this.idx].localName;
-      this.edit = true;
-    },
     updateBalances() {
       this.$store.dispatch('fungibleTokens/getAvailableTokens');
       this.$store.dispatch('fungibleTokens/loadTokenBalances');
