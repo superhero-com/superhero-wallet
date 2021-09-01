@@ -213,7 +213,7 @@ export default (store) => {
   );
 
   store.watch(
-    ({ accounts: { nextAccountIdx } }) => nextAccountIdx,
+    ({ accounts: { hdWallet: { nextAccountIdx } } }) => nextAccountIdx,
     async () => {
       if (!store.state.middleware) return;
       await store.dispatch('names/fetchOwned');

@@ -106,7 +106,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import Avatar from './Avatar';
 import Truncate from './Truncate';
 import InputField from './InputField';
@@ -166,7 +166,7 @@ export default {
     this.customAccountName = this.accounts[this.idx].localName;
   },
   methods: {
-    ...mapMutations({ createAccount: 'accounts/add' }),
+    ...mapActions({ createAccount: 'accounts/hdWallet/create' }),
     editLocalName() {
       this.customAccountName = this.accounts[this.idx].localName;
       this.edit = true;

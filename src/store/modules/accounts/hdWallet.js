@@ -1,43 +1,31 @@
-import Vue from 'vue';
 import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
+
+const type = 'hd-wallet';
 
 export default {
   namespaced: true,
+
+  account: {
+    type,
+  },
+
   state: {
-    list: [{
-      idx: 0, color: '#1161FE', shift: 0, showed: true,
-    }],
-    activeIdx: 0,
     nextAccountIdx: 1,
   },
-  mutations: {
-    add(state) {
-      state.list.push({
-        idx: state.nextAccountIdx,
-        color:
-          // eslint-disable-next-line no-bitwise
-          state.nextAccountIdx === 1 ? '#00FF9D' : `#${((Math.random() * 0xffffff) << 0).toString(16)}`,
-        shift: Math.floor(Math.random() * 100),
-        showed: state.list.reduce((a, b) => (b.showed ? a + 1 : a), 0) < 8,
-      });
+  actions: {
+    create({ state, commit }) {
+      commit('accounts/add',
+        {
+          idx: state.nextAccountIdx,
+          color:
+            // eslint-disable-next-line no-bitwise
+            state.nextAccountIdx === 1 ? '#00FF9D' : `#${((Math.random() * 0xffffff) << 0).toString(16)}`,
+          shift: Math.floor(Math.random() * 100),
+          type,
+        },
+        { root: true });
       state.nextAccountIdx += 1;
     },
-    remove(state, idx) {
-      if (state.activeIdx === idx) state.activeIdx = 0;
-      Vue.delete(state.list, idx);
-    },
-    setActiveIdx(state, idx) {
-      state.activeIdx = idx;
-    },
-    setLocalName(state, { name, idx }) {
-      Vue.set(state.list[idx], 'localName', name);
-    },
-    toggleShowed(state, idx) {
-      if (state.activeIdx === idx) state.activeIdx = 0;
-      Vue.set(state.list[idx], 'showed', !state.list[idx].showed);
-    },
-  },
-  actions: {
     signWithoutConfirmation({ rootGetters: { account } }, data) {
       return Crypto.sign(data, account.secretKey);
     },
