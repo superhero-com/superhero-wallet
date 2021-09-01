@@ -216,8 +216,9 @@ export default {
     };
   },
   computed: {
+    ...mapState('accounts', ['accountSelectedIdx']),
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapState(['current', 'sdk', 'accountSelectedIdx']),
+    ...mapState(['current', 'sdk']),
     ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate', 'accounts']),
     ...mapGetters('fungibleTokens', ['selectedToken', 'tokenBalances']),
     validAddress() {

@@ -146,7 +146,7 @@ export default {
   },
   computed: {
     ...mapGetters(['tippingSupported', 'formatCurrency', 'accounts']),
-    ...mapState(['accountSelectedIdx']),
+    ...mapState('accounts', ['accountSelectedIdx']),
     ...mapState('fungibleTokens', ['aePublicData', 'availableTokens']),
     ...mapGetters('fungibleTokens', ['tokenBalances']),
     fungibleToken() {

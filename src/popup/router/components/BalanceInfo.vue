@@ -55,7 +55,8 @@ export default {
     return pick(this.$store.state.observables, ['balances']);
   },
   computed: {
-    ...mapState(['current', 'currencies', 'accountSelectedIdx']),
+    ...mapState('accounts', ['accountSelectedIdx']),
+    ...mapState(['current', 'currencies']),
     ...mapGetters('fungibleTokens', ['getTokenBalance', 'getSelectedToken']),
     ...mapGetters(['formatCurrency', 'currentCurrencyRate', 'accounts']),
     tokenBalancesOptions() {

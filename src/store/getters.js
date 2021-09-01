@@ -30,7 +30,7 @@ export default {
     if (!mnemonic) return null;
     return generateHdWallet(mnemonicToSeed(mnemonic));
   },
-  accounts({ accs }, getters) {
+  accounts({ accounts: { accs } }, getters) {
     if (!getters.wallet) return [];
     return accs
       .map(({ idx, ...acc }) => ({
@@ -46,7 +46,7 @@ export default {
           localName || (idx === 0 ? i18n.t('mainAccount') : i18n.t('subaccountName', { idx })),
       }));
   },
-  account({ accountSelectedIdx }, { accounts }) {
+  account({ accounts: { accountSelectedIdx } }, { accounts }) {
     return accounts[accountSelectedIdx] || {}; // TODO: Return null
   },
   isLoggedIn: (state, { account }) => Object.keys(account).length > 0,

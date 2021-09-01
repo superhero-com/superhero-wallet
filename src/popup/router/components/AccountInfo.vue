@@ -146,7 +146,8 @@ export default {
     UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
   }),
   computed: {
-    ...mapState(['accountSelectedIdx', 'cardMinified']),
+    ...mapState('accounts', ['accountSelectedIdx']),
+    ...mapState(['cardMinified']),
     ...mapGetters(['accounts', 'activeNetwork']),
     idx() {
       return this.accountIdx === -1 ? this.accountSelectedIdx : this.accountIdx;
@@ -165,7 +166,7 @@ export default {
     this.customAccountName = this.accounts[this.idx].localName;
   },
   methods: {
-    ...mapMutations(['createAccount', 'deleteAccount']),
+    ...mapMutations('accounts', ['createAccount', 'deleteAccount']),
     editLocalName() {
       this.customAccountName = this.accounts[this.idx].localName;
       this.edit = true;
@@ -175,7 +176,7 @@ export default {
       this.$store.dispatch('fungibleTokens/loadTokenBalances');
     },
     saveLocalName() {
-      this.$store.commit('setAccountLocalName', { name: this.customAccountName, idx: this.idx });
+      this.$store.commit('accounts/setAccountLocalName', { name: this.customAccountName, idx: this.idx });
       this.edit = false;
     },
     copy() {

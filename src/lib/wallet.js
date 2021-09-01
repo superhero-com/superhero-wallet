@@ -266,7 +266,7 @@ export default async function initSdk() {
       },
     );
     store.watch(
-      ({ accountSelectedIdx }) => accountSelectedIdx,
+      ({ accounts: { accountSelectedIdx } }) => accountSelectedIdx,
       async (accountIdx) => store.commit('selectSdkAccount', store.getters.accounts[accountIdx].address),
     );
 

@@ -221,7 +221,7 @@ export default (store) => {
   );
 
   store.watch(
-    ({ accountCount }) => accountCount,
+    ({ accounts: { accountCount } }) => accountCount,
     async () => {
       if (!store.state.middleware) return;
       await store.dispatch('fungibleTokens/loadTokenBalances');

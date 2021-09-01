@@ -38,7 +38,7 @@ export default {
   components: { AccountCard, ButtonPlain },
   props: { notification: Boolean },
   computed: {
-    ...mapState(['accountSelectedIdx']),
+    ...mapState('accounts', ['accountSelectedIdx']),
     ...mapGetters(['accounts']),
     cssVars() {
       return {
@@ -56,7 +56,7 @@ export default {
   methods: {
     async selectAccount(idx) {
       await this.$watchUntilTruly(() => this.$store.state.middleware);
-      this.$store.commit('selectAccount', idx);
+      this.$store.commit('accounts/selectAccount', idx);
     },
   },
 };

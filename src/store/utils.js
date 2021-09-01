@@ -16,9 +16,7 @@ export default ({
   notificationSettings,
   permissions,
   fungibleTokens,
-  accountCount,
-  accountSelectedIdx,
-  accs,
+  accounts: { accs, accountSelectedIdx, accountCount } = {},
   cardMinified,
 }) => ({
   migrations,
@@ -38,8 +36,6 @@ export default ({
   notificationSettings,
   permissions,
   fungibleTokens,
-  accountCount,
-  accountSelectedIdx,
-  accs,
+  accounts: { accs, accountSelectedIdx, accountCount },
   cardMinified,
 });

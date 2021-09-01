@@ -75,7 +75,7 @@ export default {
   },
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapState(['accountSelectedIdx']),
+    ...mapState('accounts', ['accountSelectedIdx']),
     ...mapState({
       filteredTransactions(state, { account: { address } }) {
         const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
