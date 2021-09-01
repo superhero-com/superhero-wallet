@@ -8,7 +8,7 @@
     </Plate>
     <div
       v-for="(account, idx) in accounts.slice(1)"
-      :key="idx + 1"
+      :key="account.address"
       class="card-wrapper"
     >
       <AccountCard
