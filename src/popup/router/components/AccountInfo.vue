@@ -146,7 +146,7 @@ export default {
     UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
   }),
   computed: {
-    ...mapState(['accountCount', 'accountSelectedIdx', 'cardMinified']),
+    ...mapState(['accountSelectedIdx', 'cardMinified']),
     ...mapGetters(['accounts', 'activeNetwork']),
     idx() {
       return this.accountIdx === -1 ? this.accountSelectedIdx : this.accountIdx;

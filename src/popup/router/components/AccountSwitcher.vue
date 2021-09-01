@@ -38,7 +38,7 @@ export default {
   components: { AccountCard, ButtonPlain },
   props: { notification: Boolean },
   computed: {
-    ...mapState(['accountCount', 'accountSelectedIdx']),
+    ...mapState(['accountSelectedIdx']),
     ...mapGetters(['accounts']),
     cssVars() {
       return {
