@@ -131,7 +131,8 @@
         "IOS_URL_SCHEME": "hf938wofijfjhsdlsf23",
         "IOS_BUNDLE_IDENTIFIER": "com.superhero.cordova",
         "DISPLAY_NAME": "Superhero"
-      }
+      },
+      "cordova-clipboard": {}
     },
     "platforms": [
       "android",
