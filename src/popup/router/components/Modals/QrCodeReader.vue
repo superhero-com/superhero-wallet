@@ -157,6 +157,8 @@ export default {
         ['body', '#app', '.main'].forEach((s) => {
           document.querySelector(s).style = '';
         });
+        // https://github.com/bitpay/cordova-plugin-qrscanner/issues/234
+        window.plugins.webviewcolor.change('#090909');
         this.$store.commit('setPageTitle', '');
         window.QRScanner.destroy();
       } else this.browserReader.reset();
