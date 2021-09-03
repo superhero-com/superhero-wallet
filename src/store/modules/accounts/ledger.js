@@ -2,7 +2,8 @@
 
 import TransportU2F from '@ledgerhq/hw-transport-u2f';
 import Ae from '@aeternity/ledger-app-api';
-import { Crypto } from '@aeternity/aepp-sdk';
+import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
+import LedgerBridge from './ledger-bridge';
 
 export default {
   namespaced: true,
@@ -17,11 +18,11 @@ export default {
       -1,
     ) + 1,
     ledgerAppApi: () => new Ae(new TransportU2F()),
+    ledgerBridge: () => new LedgerBridge('https://wallet.superhero.com/ledger-bridge'),
   },
 
   actions: {
-    async request({ getters: { ledgerAppApi }, dispatch }, { name, args }) {
-      if (process.env.RUNNING_IN_FRAME) return ledgerAppApi[name](...args);
+    async request({ getters: { ledgerAppApi, ledgerBridge }, dispatch }, { name, args }) {
       let result;
       let error;
       do {
@@ -30,7 +31,8 @@ export default {
           await dispatch('modals/open', { name: 'confirm', title: 'Try again' }, { root: true });
         }
         try {
-          result = await ledgerAppApi[name](...args); // eslint-disable-line no-await-in-loop
+          // eslint-disable-next-line no-await-in-loop
+          result = await (process.env.IS_EXTENSION ? ledgerBridge : ledgerAppApi)[name](...args);
           error = false;
         } catch (err) {
           error = true;
@@ -39,9 +41,10 @@ export default {
       return result;
     },
 
-    async create({ getters: { nextIdx, ledgerAppApi }, commit, dispatch }) {
+    async create({ getters: { nextIdx }, commit, dispatch }) {
+      let address;
       try {
-        const address = await ledgerAppApi.getAddress(nextIdx, true);
+        address = await dispatch('request', { name: 'getAddress', args: [nextIdx, true] });
         commit('accounts/add', {
           address, type: 'ledger', idx: nextIdx, color: '#000', shift: 0,
         }, { root: true });
@@ -53,7 +56,7 @@ export default {
     async ensureCurrentAccountAvailable({ rootGetters: { account }, dispatch }) {
       const address = await dispatch('request', { name: 'getAddress', args: [account.idx] });
       if (account.address !== address) {
-        if (!process.env.RUNNING_IN_FRAME) {
+        if (!process.env.IS_EXTENSION) {
           dispatch('modals/open', { name: 'dafault', icon: 'alert', title: 'account not found' }, { root: true });
         }
         throw new Error('Account not found');
@@ -65,7 +68,7 @@ export default {
     async signTransaction({ rootGetters: { account }, dispatch, rootState }, { txBase64 }) {
       await dispatch('ensureCurrentAccountAvailable');
 
-      const binaryTx = Crypto.decodeBase64Check(Crypto.assertedType(txBase64, 'tx'));
+      const binaryTx = decode(txBase64, 'tx');
       const signature = Buffer.from(await dispatch('request', {
         name: 'signTransaction',
         args: [
