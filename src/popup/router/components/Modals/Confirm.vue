@@ -39,7 +39,7 @@ export default {
   computed: {
     templateRootNode() {
       return new DOMParser()
-        .parseFromString(`<root>${this.$attrs.msg}</root>`, 'text/xml').childNodes[0];
+        .parseFromString(`<root>${this.$attrs.msg || ''}</root>`, 'text/xml').childNodes[0];
     },
   },
   methods: {
