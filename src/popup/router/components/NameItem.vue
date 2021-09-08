@@ -204,7 +204,7 @@ export default {
           msg: this.$t('modals.autoextend-help.msg'),
         });
       }
-      this.$store.commit('names/setAutoExtend', { index: this.index, value: !this.autoExtend });
+      this.$store.commit('names/setAutoExtend', { name: this.name, value: !this.autoExtend });
     },
     expandAndShowInput() {
       this.expand = true;
