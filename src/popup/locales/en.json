@@ -1095,7 +1095,11 @@
     }
   },
   "validation": {
-    "required": "This field is required"
+    "required": "This field is required",
+    "address": "Enter valid blockchain address or .chain name",
+    "nameRegisteredAddress": "This name isn't registered or pointed to address",
+    "aensNameUnregistered": "This name is already registered",
+    "notSameAs": "Sender and receiver address are the same. You will send tokens to our own account."
   },
   "redirecting": "Redirecting",
   "seconds": "{n} seconds | {n} second | {n} seconds",
