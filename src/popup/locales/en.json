@@ -1094,6 +1094,9 @@
       "empty": "You aren't connected to any aepps"
     }
   },
+  "validation": {
+    "required": "This field is required"
+  },
   "redirecting": "Redirecting",
   "seconds": "{n} seconds | {n} second | {n} seconds",
   "minutes": "{n} minutes | {n} minute | {n} minutes",
