@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { Validator, install as VeeValidate } from 'vee-validate/dist/vee-validate.minimal.esm';
+import { Validator, ErrorBag, install as VeeValidate } from 'vee-validate/dist/vee-validate.minimal.esm';
 import { required } from 'vee-validate/dist/rules.esm';
 import { debounce } from 'lodash-es';
 import { Crypto } from '@aeternity/aepp-sdk';
@@ -11,6 +11,36 @@ import {
 } from '../../popup/utils/helper';
 
 Vue.use(VeeValidate);
+
+const filteredRules = (errors, validatedField, rules) => errors.filter(
+  ({ field, rule }) => field === validatedField && !rules.includes(rule),
+);
+
+const { validateAll } = Validator.prototype;
+Object.assign(Validator.prototype, {
+  async validateAll(warningRules) {
+    await validateAll.call(this);
+    return !Object.entries(warningRules).reduce(
+      (count, [field, rules]) => count + filteredRules(this.errors.items, field, rules).length,
+      0,
+    );
+  },
+  firstExcept(field, rules) {
+    return filteredRules(this.errors.items, field, rules)[0]?.msg;
+  },
+  anyExcept(field, rules) {
+    return !!(filteredRules(this.errors.items, field, rules).length);
+  },
+});
+
+Object.assign(ErrorBag.prototype, {
+  firstByRules(field, rules) {
+    return rules.map((r) => this.firstByRule(field, r)).find((r) => r);
+  },
+  anyByRules(field, rules) {
+    return !!this.firstByRules(field, rules);
+  },
+});
 
 Validator.extend('required', required);
 
