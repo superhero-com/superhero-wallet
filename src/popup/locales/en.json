@@ -1018,10 +1018,8 @@
       "backToTokenMigration": "Back to token migration info",
       "backendServiceUrl": "Backend Service Url"
     },
-    "aeAddressInput": {
-      "label": "Aeternity Address",
-      "identicon": "Your identicon",
-      "error": "Invalid AE Address"
+    "addressInput": {
+      "placeholder": "Enter recepient’s address or .chain name"
     },
     "welcome": {
       "send": "Send",
