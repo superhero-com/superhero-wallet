@@ -120,7 +120,7 @@
       </template>
       <template v-else>
         <h2 class="secondary">
-          {{ $t('pages.intro.wellcome') }}
+          {{ $t('pages.intro.welcome') }}
         </h2>
         <h4>{{ $t('pages.intro.createdWallet') }}</h4>
         <CheckBox
