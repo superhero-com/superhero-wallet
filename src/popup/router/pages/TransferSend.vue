@@ -276,7 +276,10 @@ export default {
         });
         // SET result data
         this.form.address = ZEIT_TOKEN_CONTRACT;
-        this.form.amount = data.amount;
+        this.form.amount = +convertToken(
+          data.amount,
+          -this.selectedToken.decimals,
+        );
         this.invoiceId = data.invoiceId;
 
         this.step = 2;

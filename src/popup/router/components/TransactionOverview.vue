@@ -18,7 +18,7 @@ export default {
     tx: { type: Object, required: true },
   },
   computed: {
-    ...mapGetters(['getTxType', 'getTxDirection', 'getExplorerPath']),
+    ...mapGetters(['getTxType', 'getTxDirection', 'getExplorerPath', 'getZeitTxTitle']),
     ...mapGetters('names', ['getPreferred']),
     ...mapState({
       account(_, { account }) {
@@ -57,7 +57,7 @@ export default {
           return {
             sender: direction === 'sent' ? this.account : contract,
             recipient: direction === 'received' ? this.account : contract,
-            title: this.$t('transaction.type.contractCallTx'),
+            title: this.getZeitTxTitle({ tx: this.tx }) || this.$t('transaction.type.contractCallTx'),
           };
         }
         case SCHEMA.TX_TYPE.contractCreate:
