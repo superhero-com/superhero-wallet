@@ -84,23 +84,24 @@ export default {
     .concat(transactions.pending.map((t) => ({ ...t, pending: true })))
     .concat(transactionCache.transactions)
     .find((tx) => tx.hash === hash),
-  getTxType: () => (transaction) => {
-    if (isZeitSpecial(transaction)) return 'Burned';
-    return transaction.tx
+  getTxType: () => (transaction) => transaction.tx
     && (TX_TYPE_MDW[transaction.tx.type]
       || SCHEMA.OBJECT_ID_TX_TYPE[transaction.tx.tag]
-      || (Object.values(SCHEMA.TX_TYPE).includes(transaction.tx.type) && transaction.tx.type));
-  },
+      || (Object.values(SCHEMA.TX_TYPE).includes(transaction.tx.type) && transaction.tx.type)),
+  getZeitTxTitle: () => (transaction) => (isZeitSpecial(transaction) ? 'Burned' : undefined),
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    const symbol = isZeitSpecial(transaction) ? 'Utopia Token' : 'AE';
+    const symbol = isZeitSpecial(transaction) ? 'Hedone' : 'AE';
     return contractCallData ? availableTokens[contractCallData.token]?.symbol : symbol;
   },
   getTxAmountTotal: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
     if (isZeitSpecial(transaction)) {
-      return transaction.tx.arguments?.[0]?.value || +transaction.amount;
+      return +convertToken(
+        transaction.tx.arguments?.[0]?.value || +transaction.amount,
+        -availableTokens[transaction.tx.contractId].decimals,
+      );
     }
     if (contractCallData && availableTokens[contractCallData.token]) {
       return +convertToken(
