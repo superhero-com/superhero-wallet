@@ -1,0 +1,81 @@
+version: 2.1
+
+executors:
+  node:
+    docker:
+      - image: cimg/node:14.17.6
+    working_directory: ~/app
+  docker_builder:
+    docker:
+      - image: circleci/buildpack-deps:bionic
+        user: root
+jobs:
+  build:
+    executor: node
+    steps:
+      - checkout
+      - run:
+          name: npm install
+          command: npm ci
+      - run:
+          name: npm lint
+          command: npm run lint
+      - run:
+          name: npm test 
+          command: npm test
+      - run:
+          name: npm build
+          command: npm run build
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - ./dist
+
+  docker_build:
+    executor: docker_builder
+    environment:
+      DOCKERHUB_REPO: aeternity/superhero-wallet
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Build and push Docker image to DockerHub
+          command: |
+            docker build -t test123 -f nginx.Dockerfile .
+  
+  docker_push_tag:
+    executor: docker_builder
+    environment:
+      DOCKERHUB_REPO: aeternity/superhero-wallet
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Build and push Docker image to DockerHub
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker build -t ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?} -t ${DOCKERHUB_REPO:?}:latest .
+            docker push ${DOCKERHUB_REPO:?}:${CIRCLE_TAG:?}
+            docker push ${DOCKERHUB_REPO:?}:latest
+
+workflows:
+  version: 2
+  build_push:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^v.*$/
+      - docker_build:
+          context: ae-dockerhub
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*$/
