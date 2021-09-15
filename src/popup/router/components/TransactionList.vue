@@ -1,10 +1,11 @@
 <template>
   <div class="transaction-list">
-    <TransactionFilters
+    <Filters
       v-if="displayFilter"
       v-model="displayMode"
+      :filters="filters"
     />
-    <ul
+    <div
       class="list"
       data-cy="list"
     >
@@ -14,14 +15,14 @@
         :key="transaction.hash"
         :transaction="transaction"
       />
-    </ul>
+    </div>
     <AnimatedSpinner
       v-if="loading"
       class="spinner"
       data-cy="loader"
     />
     <div
-      v-else-if="!transactions.length"
+      v-else-if="!filteredTransactions.length"
       class="message"
     >
       <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
@@ -40,7 +41,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { uniqBy } from 'lodash-es';
-import TransactionFilters from './TransactionFilters';
+import Filters from './Filters';
 import TransactionItem from './TransactionItem';
 import PendingTxs from './PendingTxs';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
@@ -49,7 +50,7 @@ import Visible from '../../../icons/visible.svg?vue-component';
 
 export default {
   components: {
-    TransactionFilters,
+    Filters,
     TransactionItem,
     PendingTxs,
     AnimatedSpinner,
@@ -66,7 +67,10 @@ export default {
       loading: false,
       transactions: [],
       page: 1,
-      displayMode: { latestFirst: true, type: 'all' },
+      displayMode: { rotated: true, filter: 'all', sort: 'date' },
+      filters: {
+        all: {}, sent: {}, received: {}, tips: {}, date: { rotated: true },
+      },
     };
   },
   computed: {
@@ -83,7 +87,7 @@ export default {
               : (!tr.tx.contractId
               || !isFungibleTokenTx(tr)))))
           .filter((tr) => {
-            switch (this.displayMode.type) {
+            switch (this.displayMode.filter) {
               case 'all':
                 return true;
               case 'sent':
@@ -95,7 +99,7 @@ export default {
               case 'tips':
                 return (!isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address) || tr.claim;
               default:
-                throw new Error(`Unknown display mode type: ${this.displayMode.type}`);
+                throw new Error(`Unknown display mode type: ${this.displayMode.filter}`);
             }
           })
           .filter(
@@ -106,7 +110,7 @@ export default {
           )
           .sort((a, b) => {
             const arr = [a, b].map((e) => new Date(e.microTime));
-            if (this.displayMode.latestFirst) arr.reverse();
+            if (this.displayMode.rotated) arr.reverse();
             return arr[0] - arr[1];
           })
           .slice(0, this.maxLength || Infinity);
@@ -118,6 +122,8 @@ export default {
   watch: {
     accountSelectedIdx() {
       this.$store.commit('setTransactions', []);
+      this.transactions = [];
+      this.page = 1;
       this.loadMore();
     },
   },
@@ -147,30 +153,30 @@ export default {
     async loadMore() {
       if (this.loading) return;
       this.loading = true;
-      let transactions;
+      let result;
       try {
         await this.$watchUntilTruly(() => this.$store.state.middleware);
-        transactions = await this.$store.dispatch('fetchTransactions', {
+        result = await this.$store.dispatch('fetchTransactions', {
           page: this.page,
           limit: TXS_PER_PAGE,
         });
-        this.updateTransactions(transactions);
+        this.updateTransactions(result.txs);
       } finally {
         this.loading = false;
       }
-      if (transactions.length) {
+      if (result.hasMore) {
         this.page += 1;
         this.checkLoadMore();
       }
     },
     async getLatest() {
       try {
-        const transactions = await this.$store.dispatch('fetchTransactions', {
+        const { txs } = await this.$store.dispatch('fetchTransactions', {
           limit: 10,
           page: 1,
           recent: true,
         });
-        this.updateTransactions(transactions);
+        this.updateTransactions(txs);
       } finally {
         this.loading = false;
       }
@@ -191,7 +197,6 @@ export default {
 .transaction-list {
   display: flex;
   flex-direction: column;
-  padding-bottom: 48px;
 
   .list {
     background: variables.$color-black;
@@ -204,6 +209,7 @@ export default {
     flex-grow: 1;
     display: flex;
     align-items: center;
+    padding-bottom: 48px;
   }
 
   .message > p {

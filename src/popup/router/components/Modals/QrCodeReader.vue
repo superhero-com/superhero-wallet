@@ -29,6 +29,12 @@
       <Button @click="cancelReading">
         {{ $t('ok') }}
       </Button>
+      <Button
+        v-if="mobile"
+        @click="openSettings"
+      >
+        {{ $t('modals.qrCodeReader.settings') }}
+      </Button>
     </template>
   </Modal>
 </template>
@@ -52,6 +58,11 @@ export default {
     browserReader: null,
     headerText: '',
   }),
+  computed: {
+    mobile() {
+      return process.env.PLATFORM === 'cordova';
+    },
+  },
   watch: {
     async cameraAllowed(value) {
       if (!value) {
@@ -89,7 +100,7 @@ export default {
     },
   },
   async mounted() {
-    if (process.env.PLATFORM === 'cordova') {
+    if (this.mobile) {
       try {
         await new Promise((resolve, reject) => window.QRScanner.prepare((error, status) => (
           !error && status.authorized
@@ -127,7 +138,7 @@ export default {
       this.browserReader = new BrowserQRCodeReader();
     },
     async scan() {
-      return process.env.PLATFORM === 'cordova'
+      return this.mobile
         ? new Promise((resolve, reject) => {
           window.QRScanner.scan((error, text) => (!error && text ? resolve(text) : reject(error)));
           window.QRScanner.show();
@@ -142,10 +153,12 @@ export default {
         ).getText();
     },
     stopReading() {
-      if (process.env.PLATFORM === 'cordova') {
+      if (this.mobile) {
         ['body', '#app', '.main'].forEach((s) => {
           document.querySelector(s).style = '';
         });
+        // https://github.com/bitpay/cordova-plugin-qrscanner/issues/234
+        window.plugins.webviewcolor.change('#090909');
         this.$store.commit('setPageTitle', '');
         window.QRScanner.destroy();
       } else this.browserReader.reset();
@@ -153,6 +166,9 @@ export default {
     cancelReading() {
       this.stopReading();
       this.reject(new Error('Rejected by user'));
+    },
+    openSettings() {
+      window.QRScanner.openSettings();
     },
   },
 };

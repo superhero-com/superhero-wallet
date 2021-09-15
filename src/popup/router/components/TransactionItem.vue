@@ -20,7 +20,7 @@
         v-if="showType"
         class="type"
       >
-        ({{ $t('transaction.type')[txType] || txType }})
+        ({{ (getZeitTxTitle(transaction) || $t('transaction.type')[txType]) || txType }})
       </span>
     </div>
     <div
@@ -57,6 +57,7 @@ export default {
       'getTxDirection',
       'getTxTipUrl',
       'isTxAex9',
+      'getZeitTxTitle',
     ]),
     txType() {
       return this.getTxType(this.transaction);
@@ -116,7 +117,7 @@ export default {
     }
 
     :nth-child(1) {
-      color: variables.$color-white;
+      color: variables.$color-light-grey;
     }
 
     :nth-child(2) {

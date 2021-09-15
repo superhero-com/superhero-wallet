@@ -35,26 +35,20 @@ export default {
 .name-row {
   text-decoration: none;
   transition: 0.4s;
-  position: relative;
-  padding: 1rem 1.5rem;
-  width: 100%;
+  padding: 8px 16px;
   display: flex;
   align-items: center;
   font-size: 14px;
-  border-bottom: 1px solid variables.$color-bg-3;
+  border-bottom: 1px solid variables.$color-black;
   text-align: left;
-  border-left: 2px solid transparent;
   color: variables.$color-white;
-  background: variables.$color-bg-1;
+  background: variables.$color-bg-2;
+
+  @extend %face-sans-14-medium;
 
   .name-info ::v-deep {
-    margin-left: 10px;
-    width: 90%;
-    margin-right: auto;
-
-    .name {
-      font-weight: bold;
-    }
+    margin-left: 8px;
+    width: 100%;
 
     .address {
       word-break: break-all;
@@ -63,20 +57,6 @@ export default {
 
       line-height: 14px;
       display: inline-block;
-    }
-
-    .active-name,
-    .pending-name {
-      float: right;
-      background: variables.$color-blue;
-      color: variables.$color-white;
-      position: absolute;
-      top: 4px;
-      right: 4px;
-    }
-
-    .pending-name {
-      background: variables.$color-error;
     }
   }
 }

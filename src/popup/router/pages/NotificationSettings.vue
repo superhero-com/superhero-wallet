@@ -6,7 +6,7 @@
     <CheckBox
       v-for="setting in notificationSettings"
       :key="setting.type"
-      :class="['iframe', { unchecked: !setting.checked }]"
+      :class="{ unchecked: !setting.checked }"
       :disabled="setting.type === 'wallet'"
       :value="setting.checked"
       @input="toggleNotificationSetting(setting.type)"

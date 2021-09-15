@@ -4,21 +4,18 @@
     data-cy="filters"
   >
     <ButtonPlain
-      v-for="filter in filters"
-      :key="filter"
+      v-for="filter in Object.entries(filters)"
+      :key="filter[0]"
       class="filter"
-      :class="{ active: value.type === filter }"
-      @click="$emit('input', { ...value, type: filter })"
+      :class="{ active: value.sort === filter[0] || value.filter === filter[0] }"
+      @click="handleClick(filter)"
     >
-      <span>{{ $t(`pages.transactionDetails.${filter}`) }}</span>
-      <FilterArrow />
-    </ButtonPlain>
-    <ButtonPlain
-      class="filter active"
-      @click="$emit('input', { ...value, latestFirst: !value.latestFirst })"
-    >
-      <span>{{ $t('pages.transactionDetails.date') }}</span>
-      <Sort :class="{ rotate: !value.latestFirst }" />
+      <span>{{ $t(`filters.${filter[0]}`) }}</span>
+      <Sort
+        v-if="filter[1].rotated !== undefined"
+        :class="{ rotate: !rotatableFilters[filter[0]].rotated }"
+      />
+      <FilterArrow v-else />
     </ButtonPlain>
   </div>
 </template>
@@ -32,10 +29,26 @@ export default {
   components: { FilterArrow, Sort, ButtonPlain },
   props: {
     value: { type: Object, required: true },
+    filters: { type: Object, required: true },
   },
-  data: () => ({
-    filters: ['all', 'sent', 'received', 'tips'],
-  }),
+  data() {
+    return {
+      rotatableFilters: this.filters,
+    };
+  },
+  methods: {
+    handleClick([filter, { rotated = null }]) {
+      if (rotated !== null) {
+        if (this.value.sort === filter) {
+          this.rotatableFilters[filter].rotated = !this.rotatableFilters[filter].rotated;
+        }
+        this.$emit('input',
+          { ...this.value, sort: filter, rotated: this.rotatableFilters[filter].rotated });
+        return;
+      }
+      this.$emit('input', { ...this.value, filter });
+    },
+  },
 };
 </script>
 

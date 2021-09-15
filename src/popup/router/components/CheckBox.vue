@@ -40,14 +40,10 @@ export default {
   -ms-user-select: none;
   user-select: none;
 
-  &:hover .checkmark {
-    border-color: variables.$color-border-hover;
-    background-color: variables.$color-bg-3;
-  }
-
+  &:hover .checkmark,
   &:active .checkmark {
     border-color: variables.$color-border-hover;
-    background-color: variables.$color-black;
+    background-color: variables.$color-bg-2;
   }
 
   input {
@@ -59,14 +55,18 @@ export default {
   }
 
   .checkmark {
-    background-color: variables.$color-black;
-    border: 1.3px solid variables.$color-border;
+    background-color: variables.$color-bg-1;
+    border: 1px solid variables.$color-border;
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.25);
     border-radius: 2px;
     height: 20px;
     width: 20px;
     margin-right: 15px;
+    flex-shrink: 0;
 
     &.checked {
+      border: none;
+      box-shadow: none;
       background-image: url('../../../icons/checkbox-checked.svg');
 
       &.disabled {

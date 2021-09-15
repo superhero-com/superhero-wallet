@@ -7,7 +7,7 @@
       {{ label }}
     </label>
     <div
-      :class="{ error }"
+      :class="[{ error }, { plain }, { readonly }]"
       class="wrapper"
       data-cy="input-wrapper"
     >
@@ -17,6 +17,7 @@
       />
       <Error v-else />
       <input
+        v-bind="$attrs"
         :type="type"
         class="input"
         :placeholder="placeholder"
@@ -50,6 +51,7 @@ export default {
     type: { type: String, default: 'text' },
     label: { type: String, default: '' },
     readonly: Boolean,
+    plain: Boolean,
   },
 };
 </script>
@@ -85,8 +87,32 @@ export default {
       background-color: variables.$color-black;
     }
 
-    &.error {
+    &.error,
+    &.error.plain {
       border-color: variables.$color-error;
+    }
+
+    &.plain {
+      height: 24px;
+      background: transparent;
+      border-top: none;
+      padding: 0;
+      border-radius: unset;
+      border-color: variables.$color-blue;
+
+      &.readonly {
+        border-color: transparent;
+
+        input:not(:only-child) {
+          opacity: 0.5;
+        }
+      }
+
+      input:not(:only-child) {
+        padding: 0;
+        color: variables.$color-white;
+        font-weight: 500;
+      }
     }
 
     ::v-deep svg {

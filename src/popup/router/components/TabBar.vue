@@ -1,6 +1,9 @@
 <template>
   <div class="tab-bar">
-    <RouterLink to="/account">
+    <RouterLink
+      to="/account"
+      data-cy="home"
+    >
       <Home />
       <span>{{ $t('pages.titles.home') }}</span>
     </RouterLink>
@@ -22,7 +25,7 @@
       <Tips />
       <span>{{ $t('pages.titles.tips') }}</span>
     </RouterLink>
-    <RouterLink to="/names">
+    <RouterLink :to="{name: 'name-list' }">
       <Names />
       <span>{{ $t('pages.titles.names') }}</span>
     </RouterLink>
@@ -125,6 +128,12 @@ export default {
         }
       }
     }
+  }
+}
+
+@include mixins.collapsed {
+  .tab-bar {
+    display: none;
   }
 }
 </style>

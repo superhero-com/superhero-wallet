@@ -21,7 +21,7 @@ describe('Test cases for Account Page', () => {
     cy.get('[data-cy="claim-name"]')
       .should('be.visible')
       .click()
-      .get('[data-cy="back-arrow"]')
+      .get('[data-cy=home]')
       .click()
 
       .get('[data-cy=tip-button]')
@@ -29,7 +29,7 @@ describe('Test cases for Account Page', () => {
       .click()
       .get('[data-cy=tip-container]')
       .should('be.visible')
-      .get('[data-cy="back-arrow"]')
+      .get('[data-cy=home]')
       .click()
 
       .get('[data-cy=view-all-transactions]')
@@ -37,19 +37,19 @@ describe('Test cases for Account Page', () => {
       .click()
       .get('[data-cy=list]')
       .should('exist')
-      .get('[data-cy="back-arrow"]')
+      .get('[data-cy=home]')
       .click()
 
       .urlEquals('/account')
       .get('[data-cy=view-all-transactions]')
       .should('be.visible')
-      .get('[data-cy=currency-dropdown] [data-cy=custom-dropdown]')
+      .get('[data-cy=currency-dropdown]')
       .should('be.visible')
       .click()
-      .get('[data-cy=currency-dropdown] [data-cy=custom-dropdown]')
-      .should('have.class', 'show')
-      .click({ force: true }) // TODO: remove force
-      .get('[data-cy=currency-dropdown] [data-cy=custom-dropdown]')
-      .should('not.have.class', 'show');
+      .get('[data-cy=currency-dropdown]')
+      .should('have.class', 'active')
+      .click()
+      .get('[data-cy=currency-dropdown]')
+      .should('not.have.class', 'active');
   });
 });

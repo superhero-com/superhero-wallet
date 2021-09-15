@@ -14,6 +14,7 @@ module.exports = (isProd) => ({
     'videoCapture',
     'activeTab',
     'clipboardWrite',
+    'clipboardRead',
     'contextMenus',
     'notifications',
     'tabs',
@@ -60,8 +61,6 @@ module.exports = (isProd) => ({
   ],
   web_accessible_resources: [
     'inject.js',
-    'phishing/phishing.html',
-    'phishing/phishing.js',
     'popup/CameraRequestPermission.html',
     'other/tipButton.css',
     'popup/popup.html',

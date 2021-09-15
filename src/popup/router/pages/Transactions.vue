@@ -1,7 +1,6 @@
 <template>
   <div class="transactions">
-    <AccountInfo />
-    <BalanceInfo />
+    <AccountSwitcher />
     <SearchBar
       v-model="searchTerm"
       :placeholder="$t('pages.transactions.search')"
@@ -11,15 +10,13 @@
 </template>
 
 <script>
-import AccountInfo from '../components/AccountInfo';
-import BalanceInfo from '../components/BalanceInfo';
+import AccountSwitcher from '../components/AccountSwitcher';
 import SearchBar from '../components/SearchBar';
 import TransactionList from '../components/TransactionList';
 
 export default {
   components: {
-    AccountInfo,
-    BalanceInfo,
+    AccountSwitcher,
     SearchBar,
     TransactionList,
   },

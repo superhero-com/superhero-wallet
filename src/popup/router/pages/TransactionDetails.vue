@@ -15,7 +15,7 @@
         <DetailsItem
           v-if="tipUrl"
           :label="$t('pages.transactionDetails.tipUrl')"
-          class="span-2-columns"
+          class="tip-url span-2-columns"
           data-cy="tip-url"
         >
           <CopyButton
@@ -27,7 +27,10 @@
             slot="value"
             :to="tipUrl"
           >
-            {{ tipUrl }}
+            <Truncate
+              :str="tipUrl"
+              fixed
+            />
           </LinkButton>
         </DetailsItem>
         <DetailsItem
@@ -132,6 +135,7 @@ import TokenAmount from '../components/TokenAmount';
 import DetailsItem from '../components/DetailsItem';
 import LinkButton from '../components/LinkButton';
 import CopyButton from '../components/CopyButton';
+import Truncate from '../components/Truncate';
 import AnimatedPending from '../../../icons/animated-pending.svg?vue-component';
 import BlockIcon from '../../../icons/block.svg?vue-component';
 
@@ -144,6 +148,7 @@ export default {
     DetailsItem,
     LinkButton,
     CopyButton,
+    Truncate,
     AnimatedPending,
     BlockIcon,
   },
@@ -228,6 +233,14 @@ export default {
 
       .span-2-columns {
         grid-column-end: span 2;
+      }
+
+      .tip-url {
+        width: 100%;
+
+        .link-button {
+          display: block;
+        }
       }
     }
 

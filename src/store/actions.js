@@ -38,9 +38,10 @@ export default {
   async fetchTransactions({ state, getters, dispatch }, { limit, page, recent }) {
     if (!state.middleware) return [];
     const { address } = getters.account;
+    let hasMore = false;
     let txs = await Promise.all([
       state.middleware.getTxByAccount(address, limit, page)
-        .then(({ data }) => data)
+        .then(({ data, next }) => { hasMore = !!next; return data; })
         .catch(() => []),
       dispatch('fetchPendingTransactions', address),
       fetchJson(
@@ -62,13 +63,14 @@ export default {
     ]);
 
     const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
+    const amountOfTx = flatten(txs).length;
     (await dispatch('fungibleTokens/getTokensHistory')).forEach((f) => {
-      if (minMicroTime < f.microTime) {
+      if (minMicroTime < f.microTime || (amountOfTx === 0 && minMicroTime > f.microTime)) {
         txs[0].push(f);
       }
     });
     txs = uniqBy(orderBy(flatten(txs), ['microTime'], ['desc']), ({ hash }) => hash);
-    return recent ? txs.slice(0, limit) : txs;
+    return { txs: recent ? txs.slice(0, limit) : txs, hasMore };
   },
 
   async getCurrencies({ state: { nextCurrenciesFetch }, commit }) {
@@ -189,7 +191,7 @@ export default {
     return fetchJson(`${activeNetwork.backendUrl}/cache/chainnames`);
   },
   async getCacheTip({ getters: { activeNetwork } }, id) {
-    return fetchJson(`${activeNetwork.backendUrl}/cache/tip?id=${id}`);
+    return fetchJson(`${activeNetwork.backendUrl}/tips/single/${id}`);
   },
   async getAllNotifications({ state: { sdk }, getters: { activeNetwork, account } }) {
     const responseChallenge = await fetchJson(

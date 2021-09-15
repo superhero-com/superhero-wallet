@@ -15,9 +15,11 @@ export default {
   actions: {
     async claim({ rootState: { current, sdk }, rootGetters: { account } }, secretKey) {
       const publicKey = Crypto.getAddressFromPriv(secretKey);
+      // TODO: Remove this after fixing https://github.com/aeternity/aepp-sdk-js/issues/1261
+      const { name, instance } = sdk.pool.get(current.network);
       // TODO: Remove this after merging https://github.com/aeternity/aepp-sdk-js/pull/1060
       const s = await Universal({
-        nodes: [sdk.pool.get(current.network)],
+        nodes: [{ name, instance }],
         accounts: [MemoryAccount({ keypair: { publicKey, secretKey } })],
       });
       await s.transferFunds(1, account.address, { payload: 'referral', verify: false });

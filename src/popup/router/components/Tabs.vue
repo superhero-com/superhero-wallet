@@ -1,8 +1,14 @@
 <template>
-  <div class="tabs">
+  <div :class="['tabs', { three }]">
     <slot />
   </div>
 </template>
+
+<script>
+export default {
+  props: { three: Boolean },
+};
+</script>
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
@@ -10,6 +16,28 @@
 
 .tabs {
   display: flex;
+
+  &.three a {
+    height: 40px;
+    background-color: transparent;
+    border-radius: 50px;
+    color: variables.$color-light-grey;
+
+    ::v-deep svg {
+      opacity: 0.7;
+    }
+
+    &:hover {
+      background-color: variables.$color-hover;
+    }
+
+    &:hover,
+    &.router-link-active {
+      ::v-deep svg {
+        opacity: 1;
+      }
+    }
+  }
 
   a {
     flex: 1 0;
@@ -24,14 +52,6 @@
     color: variables.$color-dark-grey;
     background-color: variables.$color-bg-2;
     border-radius: 0 0 4px 4px;
-
-    &:first-child {
-      border-bottom-left-radius: 2px;
-    }
-
-    &:last-child {
-      border-bottom-right-radius: 2px;
-    }
 
     &:hover {
       background-color: variables.$color-border;
@@ -49,6 +69,16 @@
     ::v-deep svg {
       width: 24px;
       margin-right: 6px;
+    }
+  }
+
+  &:not(.three) a {
+    &:first-child {
+      border-bottom-left-radius: 2px;
+    }
+
+    &:last-child {
+      border-bottom-right-radius: 2px;
     }
   }
 }

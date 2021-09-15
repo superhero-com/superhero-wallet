@@ -19,6 +19,7 @@ export default ({
   accountCount,
   accountSelectedIdx,
   accs,
+  cardMinified,
 }) => ({
   migrations,
   current,
@@ -40,4 +41,5 @@ export default ({
   accountCount,
   accountSelectedIdx,
   accs,
+  cardMinified,
 });

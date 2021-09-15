@@ -16,8 +16,8 @@
       v-if="$slots.msg"
       name="msg"
     />
-    <template v-else-if="msg || type">
-      {{ msg || $t(`modals.${type}.msg`) }}
+    <template v-else>
+      {{ msg }}
     </template>
 
     <slot

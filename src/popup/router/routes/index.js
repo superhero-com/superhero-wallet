@@ -14,12 +14,13 @@ import Intro from '../pages/Intro';
 import Invite from '../pages/Invite';
 import InviteClaim from '../pages/InviteClaim';
 import LanguageSettings from '../pages/LanguageSettings';
+import Auction from '../pages/Names/Auction';
 import AuctionBid from '../pages/Names/AuctionBid';
-import AuctionDetails from '../pages/Names/AuctionDetails';
+import AuctionHistory from '../pages/Names/AuctionHistory';
 import AuctionList from '../pages/Names/AuctionList';
 import More from '../pages/More';
+import Names from '../pages/Names/Names';
 import NameClaim from '../pages/Names/Claim';
-import NamesDetails from '../pages/Names/Details';
 import NamesList from '../pages/Names/List';
 import Networks from '../pages/Networks';
 import NotFound from '../pages/NotFound';
@@ -198,9 +199,11 @@ export default [
       path: '',
       name: 'tips-send',
       component: TipsSend,
+      props: true,
       meta: {
         title: 'tips',
         notRebrand: true,
+        backButton: false,
       },
     }, {
       path: 'claim',
@@ -209,8 +212,13 @@ export default [
       meta: {
         title: 'tips',
         notRebrand: true,
+        backButton: false,
       },
     }],
+  },
+  {
+    path: '/tip',
+    redirect: '/tips',
   },
   {
     path: '/retip',
@@ -255,6 +263,7 @@ export default [
     props: true,
     meta: {
       title: 'tx-details',
+      hideTabBar: true,
     },
   },
   {
@@ -268,6 +277,7 @@ export default [
       meta: {
         title: 'transfer',
         notRebrand: true,
+        backButton: false,
       },
     }, {
       path: 'receive',
@@ -276,6 +286,7 @@ export default [
       meta: {
         title: 'transfer',
         notRebrand: true,
+        backButton: false,
       },
     }],
   },
@@ -296,6 +307,7 @@ export default [
     name: 'more',
     meta: {
       title: 'more',
+      backButton: false,
     },
   },
   {
@@ -319,65 +331,60 @@ export default [
   },
   {
     path: '/names',
-    component: NamesList,
+    component: Names,
     props: true,
-    name: 'name-list',
-    meta: {
-      title: 'names',
-      notRebrand: true,
-    },
+    children: [{
+      path: '',
+      name: 'name-list',
+      component: NamesList,
+      props: true,
+      meta: {
+        title: 'names',
+        backButton: false,
+      },
+    }, {
+      path: 'auctions',
+      component: AuctionList,
+      props: true,
+      name: 'auction-list',
+      meta: {
+        title: 'name-auctions',
+        backButton: false,
+      },
+    }, {
+      path: 'claim',
+      component: NameClaim,
+      props: true,
+      name: 'name-claim',
+      meta: {
+        title: 'register-name',
+        backButton: false,
+      },
+    }],
   },
   {
-    path: '/names/claim',
-    component: NameClaim,
+    path: '/names/auctions/:name/',
+    component: Auction,
     props: true,
-    name: 'name-claim',
-    meta: {
-      title: 'names',
-      notRebrand: true,
-    },
-  },
-  {
-    path: '/names/auctions',
-    component: AuctionList,
-    props: true,
-    name: 'auction-list',
-    meta: {
-      title: 'names',
-      notRebrand: true,
-    },
-  },
-  {
-    path: '/names/:name',
-    component: NamesDetails,
-    props: true,
-    name: 'name-details',
-    meta: {
-      title: 'names',
-      notPersist: true,
-      notRebrand: true,
-    },
-  },
-  {
-    name: 'auction-details',
-    path: '/names/auctions/:name',
-    component: AuctionDetails,
-    props: true,
-    meta: {
-      title: 'bidding',
-      notPersist: true,
-      notRebrand: true,
-    },
-  },
-  {
-    path: '/names/auctions/:name/bid',
-    component: AuctionBid,
-    props: true,
-    name: 'auction-bid',
-    meta: {
-      title: 'names',
-      notRebrand: true,
-    },
+    children: [{
+      path: '',
+      component: AuctionBid,
+      props: true,
+      name: 'auction-bid',
+      meta: {
+        title: 'auction',
+        hideTabBar: true,
+      },
+    }, {
+      path: 'history',
+      component: AuctionHistory,
+      props: true,
+      name: 'auction-history',
+      meta: {
+        title: 'auction',
+        hideTabBar: true,
+      },
+    }],
   },
   {
     path: '/comment',
@@ -416,6 +423,7 @@ export default [
     component: Balances,
     meta: {
       title: 'balances',
+      backButton: false,
     },
   },
   {

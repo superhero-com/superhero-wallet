@@ -12,15 +12,29 @@ export default (store) => {
     state: {
       owned: [],
       defaults: {},
+      preferred: {},
+      auctions: {},
+      pendingAutoExtendNames: [],
     },
     getters: {
+      get: ({ owned }) => (name) => owned.find((n) => n.name === name),
       getDefault: ({ defaults }, getters, { sdk }, { activeNetwork }) => (address) => {
         if (!defaults) return '';
         let { networkId } = activeNetwork;
         if (sdk) networkId = sdk.getNetworkId();
         return defaults[`${address}-${networkId}`];
       },
+      getPreferred: (
+        { preferred }, { getDefault }, _, { account, activeNetwork },
+      ) => (address) => {
+        if (account.address === address) return getDefault(address);
+        store.dispatch('names/setPreferred', address);
+        return preferred[`${address}-${activeNetwork.networkId}`] || '';
+      },
       getName: ({ owned }) => (name) => owned.find((n) => n.name === name),
+      getAuction: ({ auctions }) => (name) => auctions[name] || null,
+      getHighestBid: (_, { getAuction }) => (name) => getAuction(name)
+        && getAuction(name).bids.reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b)),
     },
     mutations: {
       set(state, names) {
@@ -35,10 +49,21 @@ export default (store) => {
         const index = state.owned.findIndex((n) => n.name === name);
         Vue.set(state.owned[index], 'autoExtend', value);
       },
+      setPreferred({ preferred }, { address, name }) {
+        const networkId = store.state.sdk.getNetworkId();
+        if (name) Vue.set(preferred, `${address}-${networkId}`, name);
+        else Vue.delete(preferred, `${address}-${networkId}`);
+      },
+      setAuctionEntry(state, { name, expiration, bids }) {
+        state.auctions[name] = { expiration, bids };
+      },
+      setPendingAutoExtendName(state, name) {
+        state.pendingAutoExtendNames.push(name);
+      },
     },
     actions: {
       async fetchOwned({
-        state: { owned },
+        state: { owned, pendingAutoExtendNames },
         rootGetters: { accounts },
         rootState: { middleware },
         commit,
@@ -61,7 +86,8 @@ export default (store) => {
               expiresAt: info.expireHeight,
               owner: info.ownership.current,
               pointers: info.pointers,
-              autoExtend: owned.find((n) => n.name === name)?.autoExtend,
+              autoExtend: owned.find((n) => n.name === name)?.autoExtend
+               || pendingAutoExtendNames?.includes(name),
               name,
             }))),
           ])),
@@ -150,6 +176,19 @@ export default (store) => {
           return nameEntry.pointers?.accountPubkey;
         }
         return '';
+      },
+      async setPreferred({
+        rootState: { middleware },
+        rootGetters: { activeNetwork },
+        commit,
+      }, address) {
+        if (!middleware) return;
+        const { preferredChainName } = await fetchJson(`${activeNetwork.backendUrl}/profile/${address}`).catch(() => ({}));
+        if (preferredChainName) {
+          commit('setPreferred', { address, name: preferredChainName });
+        } else {
+          commit('setPreferred', { address });
+        }
       },
     },
   });

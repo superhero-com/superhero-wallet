@@ -1,7 +1,6 @@
 <template>
   <div class="transfer">
-    <AccountInfo />
-    <BalanceInfo />
+    <AccountSwitcher />
     <Tabs>
       <RouterLink
         :to="{ name: 'transfer-send' }"
@@ -18,16 +17,14 @@
 </template>
 
 <script>
-import AccountInfo from '../components/AccountInfo';
-import BalanceInfo from '../components/BalanceInfo';
+import AccountSwitcher from '../components/AccountSwitcher';
 import Tabs from '../components/Tabs';
 import SendIcon from '../../../icons/send.svg?vue-component';
 import ReceiveIcon from '../../../icons/receive.svg?vue-component';
 
 export default {
   components: {
-    AccountInfo,
-    BalanceInfo,
+    AccountSwitcher,
     Tabs,
     SendIcon,
     ReceiveIcon,

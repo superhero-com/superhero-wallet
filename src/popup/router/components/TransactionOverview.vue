@@ -18,7 +18,8 @@ export default {
     tx: { type: Object, required: true },
   },
   computed: {
-    ...mapGetters(['getTxType', 'getTxDirection', 'getExplorerPath']),
+    ...mapGetters(['getTxType', 'getTxDirection', 'getExplorerPath', 'getZeitTxTitle']),
+    ...mapGetters('names', ['getPreferred']),
     ...mapState({
       account(_, { account }) {
         return {
@@ -34,13 +35,13 @@ export default {
           return {
             sender: {
               address: this.tx.senderId,
-              name: this.getDisplayName(this.tx.senderId),
+              name: this.getPreferred(this.tx.senderId),
               url: this.getExplorerPath(this.tx.senderId),
               label: this.$t('transaction.overview.accountAddress'),
             },
             recipient: {
               address: this.tx.recipientId,
-              name: this.getDisplayName(this.tx.recipientId),
+              name: this.getPreferred(this.tx.recipientId),
               url: this.getExplorerPath(this.tx.recipientId),
               label: this.$t('transaction.overview.accountAddress'),
             },
@@ -56,7 +57,7 @@ export default {
           return {
             sender: direction === 'sent' ? this.account : contract,
             recipient: direction === 'received' ? this.account : contract,
-            title: this.$t('transaction.type.contractCallTx'),
+            title: this.getZeitTxTitle({ tx: this.tx }) || this.$t('transaction.type.contractCallTx'),
           };
         }
         case SCHEMA.TX_TYPE.contractCreate:
@@ -86,11 +87,6 @@ export default {
     },
     txType() {
       return this.getTxType({ tx: this.tx });
-    },
-  },
-  methods: {
-    getDisplayName(address) {
-      return this.account.address === address ? this.account.name : '';
     },
   },
 };

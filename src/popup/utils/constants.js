@@ -1,4 +1,5 @@
-import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
+import { TxBuilder, Crypto, SCHEMA } from '@aeternity/aepp-sdk';
+import { getMinimumNameFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import BigNumber from 'bignumber.js';
 import { i18n } from '../../store/plugins/languages';
 
@@ -21,6 +22,7 @@ export const CONNECTION_TYPES = {
 
 const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
 const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
+const STUB_NONCE = 10000;
 export const MAX_UINT256 = BigNumber(2).exponentiatedBy(256).minus(1);
 
 export const calculateFee = (type, params) => {
@@ -36,16 +38,26 @@ export const calculateFee = (type, params) => {
       callData: STUB_CALLDATA,
       ...params,
     },
+    ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
   });
   return BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE);
 };
+
+export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
+  accountId: STUB_ADDRESS,
+  name: `nm_${Crypto.encodeBase58Check(name)}`,
+  nameSalt: Crypto.salt(),
+  nameFee: getMinimumNameFee(name),
+  nonce: STUB_NONCE,
+  ttl: SCHEMA.NAME_TTL,
+});
 
 export const defaultNetworks = [
   {
     url: 'https://testnet.aeternity.io',
     networkId: 'ae_uat',
     middlewareUrl: 'https://testnet.aeternity.io/mdw',
-    explorerUrl: 'https://testnet.aeternal.io',
+    explorerUrl: 'https://explorer.testnet.aeternity.io',
     compilerUrl: 'https://latest.compiler.aepps.com',
     backendUrl: 'https://testnet.superhero.aeternity.art',
     tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd',
@@ -56,7 +68,7 @@ export const defaultNetworks = [
     url: 'https://mainnet.aeternity.io',
     networkId: 'ae_mainnet',
     middlewareUrl: 'https://mainnet.aeternity.io/mdw',
-    explorerUrl: 'https://mainnet.aeternal.io',
+    explorerUrl: 'https://explorer.aeternity.io',
     compilerUrl: 'https://compiler.aepps.com',
     backendUrl: 'https://raendom-backend.z52da5wt.xyz',
     tipContractV1: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z',
@@ -113,11 +125,17 @@ export const NOTIFICATION_SETTINGS = [
   },
 ];
 
-export const ZEIT_TOKEN_CONTRACT = 'ct_zd74RfkhsRQVuHio1nQgteVNbG7jjFJS2xXkfRSbinzi1f3wX';
-export const ZEIT_INVOICE_CONTRACT = 'ct_sjPScSkz8cggXBFFmYcfU95LRSSuqfj7pVkh1kjyj8xQKTQhr';
+export const ZEIT_TOKEN_CONTRACT = 'ct_2t7TnocFw7oCYSS7g2yGutZMpGEJta6dq2DTX38SmuqmwtN6Ch';
+export const ZEIT_INVOICE_CONTRACT = 'ct_213B8EVmEzuAG9FiqpvSQA4h4D9v8eNKLTYaBaDUVVp9fnY67A';
 export const ZEIT_TOKEN_INTERFACE = `@compiler >= 6
 contract interface PoS =
   stateful entrypoint set_paid : (int, int) => unit
 main contract FungibleTokenFull =
   stateful entrypoint burn_trigger_pos : (int, PoS, int) => unit
   entrypoint balance : (address) => option(int)`;
+
+export const APP_LINK_WEB = 'https://wallet.superhero.com';
+export const APP_LINK_CHROME = 'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne';
+export const APP_LINK_FIREFOX = 'https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet';
+export const APP_LINK_ANDROID = 'https://play.google.com/store/apps/details?id=com.superhero.cordova';
+export const APP_LINK_IOS = 'https://apps.apple.com/us/app/superhero-wallet/id1502786641';

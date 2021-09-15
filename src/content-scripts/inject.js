@@ -7,21 +7,6 @@ import ContentScriptBridge from '@aeternity/aepp-sdk/es/utils/aepp-wallet-commun
 global.browser = require('webextension-polyfill');
 
 const runContentScript = () => {
-  const redirectToWarning = (hostname, href, extUrl = '') => {
-    window.stop();
-    let extensionUrl = 'chrome-extension';
-    if (typeof chrome === 'undefined') {
-      extensionUrl = 'moz-extension';
-    }
-    let redirectUrl = '';
-    if (extUrl !== '') {
-      redirectUrl = `${extUrl}phishing/phishing.html#hostname=${hostname}&href=${href}`;
-    } else {
-      redirectUrl = `${extensionUrl}://${browser.runtime.id}/phishing/phishing.html#hostname=${hostname}&href=${href}`;
-    }
-    window.location.href = redirectUrl;
-  };
-
   const sendToBackground = (method, params) => new Promise((resolve) => {
     browser.runtime
       .sendMessage({
@@ -32,8 +17,6 @@ const runContentScript = () => {
       })
       .then((res) => resolve(res));
   });
-
-  sendToBackground('phishingCheck', { href: window.location.href });
 
   // Subscribe from postMessages from page
   window.addEventListener(
@@ -104,11 +87,9 @@ const runContentScript = () => {
   // Handle message from background and redirect to page
   browser.runtime.onMessage.addListener(({ data }) => {
     const {
-      method, blocked, extUrl, host, uuid, href,
+      method, uuid,
     } = data;
-    if (method === 'phishingCheck' && blocked) {
-      redirectToWarning(host, href, extUrl);
-    } else if (method === 'getAddresses') {
+    if (method === 'getAddresses') {
       browser.runtime.sendMessage({ uuid, data: { ...getAddresses() } });
     }
   });
