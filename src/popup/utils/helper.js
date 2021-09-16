@@ -176,6 +176,7 @@ export const categorizeContractCallTxObject = (transaction) => {
 };
 
 export const readValueFromClipboard = async () => {
+  if (!process.env.UNFINISHED_FEATURES) return undefined;
   let value = '';
   switch (process.env.PLATFORM) {
     case 'cordova':

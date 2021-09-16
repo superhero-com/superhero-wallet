@@ -14,7 +14,7 @@ module.exports = (isProd) => ({
     'videoCapture',
     'activeTab',
     'clipboardWrite',
-    'clipboardRead',
+    ...process.env.UNFINISHED_FEATURES ? ['clipboardRead'] : [],
     'contextMenus',
     'notifications',
     'tabs',

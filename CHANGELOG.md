@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.1](https://github.com/aeternity/superhero-wallet/compare/v0.9.0...v0.9.1) (2021-09-16)
+
+
+### Maintenance
+
+* **paste:** disable paste functionality ([ccb78d8](https://github.com/aeternity/superhero-wallet/commit/ccb78d89a6124469b18575810dfb8a454a949b08))
+
 ## [0.9.0](https://github.com/aeternity/superhero-wallet/compare/v0.8.2...v0.9.0) (2021-09-14)
 
 
