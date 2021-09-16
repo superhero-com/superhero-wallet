@@ -77,6 +77,7 @@
             <Save />
           </ButtonPlain>
           <ButtonPlain
+            v-if="UNFINISHED_FEATURES"
             v-show="!newPointer.length"
             @click="insertValueFromClipboard"
           >
@@ -154,6 +155,7 @@ export default {
     showInput: false,
     error: false,
     nameHash: '',
+    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
   }),
   subscriptions() {
     return pick(this.$store.state.observables, ['topBlockHeight']);
