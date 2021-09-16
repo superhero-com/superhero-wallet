@@ -34,7 +34,7 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
     return store.getters.isLoggedIn;
   }
 
-  if (method === 'paste') {
+  if (process.env.UNFINISHED_FEATURES && method === 'paste') {
     let result = '';
     const textarea = document.createElement('textarea');
     document.body.appendChild(textarea);
