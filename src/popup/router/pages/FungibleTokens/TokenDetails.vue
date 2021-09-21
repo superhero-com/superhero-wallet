@@ -20,10 +20,11 @@
           <ReceiveIcon />{{ $t('pages.token-details.receive') }}
         </BoxButton>
         <BoxButton
-          :disabled="!tippingSupported"
-          @click.native="proceed({ name: 'tips-send' })"
+          v-if="id === 'aeternity'"
+          fill="alternative"
+          @click.native="proceed({ name: 'buy' })"
         >
-          <TipIcon />{{ $t('pages.token-details.tip') }}
+          <BuyIcon />{{ $t('pages.fungible-tokens.buyAe') }}
         </BoxButton>
       </div>
       <div
@@ -112,7 +113,7 @@ import { mapGetters, mapState } from 'vuex';
 import Plate from '../../components/Plate.vue';
 import SendIcon from '../../../../icons/send.svg?vue-component';
 import ReceiveIcon from '../../../../icons/receive.svg?vue-component';
-import TipIcon from '../../../../icons/tip.svg?vue-component';
+import BuyIcon from '../../../../icons/buy.svg?vue-component';
 import Warning from '../../../../icons/warning.svg?vue-component';
 import TxHistory from '../../../../icons/history.svg?vue-component';
 import BoxButton from '../../components/BoxButton.vue';
@@ -125,7 +126,7 @@ export default {
     Plate,
     SendIcon,
     ReceiveIcon,
-    TipIcon,
+    BuyIcon,
     Warning,
     TxHistory,
     TokenAmount,
@@ -145,7 +146,7 @@ export default {
     return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
   },
   computed: {
-    ...mapGetters(['tippingSupported', 'formatCurrency', 'accounts']),
+    ...mapGetters(['formatCurrency', 'accounts']),
     ...mapState('accounts', ['activeIdx']),
     ...mapState('fungibleTokens', ['aePublicData', 'availableTokens']),
     ...mapGetters('fungibleTokens', ['tokenBalances']),

@@ -20,6 +20,7 @@ import AuctionHistory from '../pages/Names/AuctionHistory.vue';
 import AuctionList from '../pages/Names/AuctionList.vue';
 import LedgerBridge from '../pages/LedgerBridge.vue';
 import More from '../pages/More.vue';
+import Buy from '../pages/Buy.vue';
 import Names from '../pages/Names/Names.vue';
 import NameClaim from '../pages/Names/Claim.vue';
 import NamesList from '../pages/Names/List.vue';
@@ -309,6 +310,15 @@ export default [
     meta: {
       title: 'more',
       backButton: false,
+    },
+  },
+  {
+    path: '/buy',
+    component: Buy,
+    name: 'buy',
+    meta: {
+      title: 'buy',
+      backButton: true,
     },
   },
   {

@@ -1,16 +1,37 @@
 <template>
-  <div v-if="filteredResults.length > 0">
+  <div class="tokens-list">
     <TokensListItem
       v-for="value in filteredResults"
       :key="value.contract || value.id"
       :token-data="value"
     />
-  </div>
-  <div
-    v-else
-    class="tokens-msg"
-  >
-    {{ $t('pages.fungible-tokens.no-results') }}
+    <div v-if="checkZeroBalance(aeternityToken) && filteredResults.length <= 1">
+      <div class="tokens-msg">
+        {{ $t('pages.fungible-tokens.noTokens') }}
+      </div>
+
+      <div class="buttons">
+        <Button
+          small
+          backgroundless
+          icon-text
+          :to="{ name: 'transfer-receive' }"
+        >
+          <Receive />
+          {{ $t('pages.fungible-tokens.receiveTokens') }}
+        </Button>
+        <Button
+          fill="alternative"
+          small
+          backgroundless
+          icon-text
+          :to="{ name: 'buy' }"
+        >
+          <Buy />
+          {{ $t('pages.fungible-tokens.buyAe') }}
+        </Button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -18,10 +39,16 @@
 import { pick } from 'lodash-es';
 import { mapState, mapGetters } from 'vuex';
 import TokensListItem from './TokensListItem.vue';
+import Button from '../Button.vue';
+import Receive from '../../../../icons/receive.svg?vue-component';
+import Buy from '../../../../icons/buy.svg?vue-component';
 
 export default {
   components: {
     TokensListItem,
+    Button,
+    Receive,
+    Buy,
   },
   props: {
     showMyTokens: { type: Boolean },
@@ -78,13 +105,18 @@ export default {
         ? [...(this.aeternityToken ? [this.aeternityToken] : []), ...this.tokenBalances]
         : tokensInfo
       )
-        .filter((token) => +token.convertedBalance?.toString() > 0)
+        .filter((token) => token.contract === 'aeternity' || !this.checkZeroBalance(token))
         .filter(
           (token) => !searchTerm
             || token.symbol.toLowerCase().includes(searchTerm)
             || token.name.toLowerCase().includes(searchTerm)
             || token.contract.toLowerCase().includes(searchTerm),
         );
+    },
+  },
+  methods: {
+    checkZeroBalance(token) {
+      return !+token.convertedBalance?.toString();
     },
   },
 };
@@ -94,12 +126,27 @@ export default {
 @use '../../../../styles/variables';
 @use '../../../../styles/typography';
 
-.tokens-msg {
-  margin-top: 40px;
-  text-align: center;
+.tokens-list {
+  .tokens-msg {
+    margin: 40px 0;
+    text-align: center;
 
-  @extend %face-sans-15-medium;
+    @extend %face-sans-15-medium;
 
-  color: variables.$color-light-grey;
+    color: variables.$color-light-grey;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: center;
+
+    .button {
+      margin: 0;
+
+      &:first-child {
+        margin-right: 16px;
+      }
+    }
+  }
 }
 </style>

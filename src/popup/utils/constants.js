@@ -137,3 +137,5 @@ export const APP_LINK_CHROME = 'https://chrome.google.com/webstore/detail/superh
 export const APP_LINK_FIREFOX = 'https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet';
 export const APP_LINK_ANDROID = 'https://play.google.com/store/apps/details?id=com.superhero.cordova';
 export const APP_LINK_IOS = 'https://apps.apple.com/us/app/superhero-wallet/id1502786641';
+
+export const SIMPLEX_URL = 'https://aeternity.com/simplex-integration';
