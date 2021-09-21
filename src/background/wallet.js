@@ -28,7 +28,7 @@ const showPopup = async (aepp, type, params) => {
     }
   });
 
-  const extUrl = browser.runtime.getURL('./popup/popup.html');
+  const extUrl = browser.runtime.getURL('./index.html');
   const popupUrl = `${extUrl}?id=${id}&type=${type}&url=${encodeURIComponent(href)}`;
   const popupWindow = await browser.windows.create({
     url: popupUrl,

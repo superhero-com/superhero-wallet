@@ -35,7 +35,7 @@ export const validateTipUrl = (urlAsString) => {
 export const detectConnectionType = (port) => {
   const extensionProtocol = detect().name === 'firefox' ? 'moz-extension' : 'chrome-extension';
   const [senderUrl] = port.sender.url.split('?');
-  const isExtensionSender = senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/popup/popup.html`)
+  const isExtensionSender = senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/index.html`)
     || detect().name === 'firefox';
   if (CONNECTION_TYPES.POPUP === port.name && isExtensionSender) {
     return port.name;

@@ -78,7 +78,7 @@ export default {
             await new Promise((resolve, reject) => {
               if (process.env.IS_EXTENSION) {
                 window.open(
-                  browser.extension.getURL('./popup/CameraRequestPermission.html'),
+                  browser.extension.getURL('./CameraRequestPermission.html'),
                   '_blank',
                 );
                 reject();

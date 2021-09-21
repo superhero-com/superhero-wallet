@@ -26,7 +26,8 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: |
-          npm run build
+          npm run build:web
+          npm run build:extension
           npm run build-zip
           cp -r dist/web/root dist-stage
           mv dist-zip dist-stage/artifacts

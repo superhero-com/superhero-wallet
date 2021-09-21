@@ -8,6 +8,12 @@
 /.nyc_output
 tests/e2e/screenshots
 .DS_Store
+/tests/e2e/videos/
+/tests/e2e/screenshots/
+
+# local env files
+.env.local
+.env.*.local
 
 # Cordova files
 /www
@@ -15,3 +21,9 @@ tests/e2e/screenshots
 /plugins
 /resources/*/icon
 /resources/*/splash
+
+# Vue Browser Extension Output
+*.pem
+*.pub
+*.zip
+/artifacts

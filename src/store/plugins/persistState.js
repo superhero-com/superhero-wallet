@@ -27,7 +27,7 @@ export default (
         await browser.storage.local.clear();
         if (process.env.IS_EXTENSION) browser.runtime.sendMessage({ method: 'reload' });
         const location = {
-          extension: './popup.html',
+          extension: './index.html',
           cordova: './index.html',
           web: '/',
         }[process.env.PLATFORM];

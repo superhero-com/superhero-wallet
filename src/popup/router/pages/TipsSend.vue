@@ -214,7 +214,7 @@ export default {
     await this.persistTipDetails();
     if (process.env.IS_EXTENSION) {
       const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });
-      this.tipFromPopup = url.includes(browser.runtime.getURL('popup/popup.html'));
+      this.tipFromPopup = url.includes(browser.runtime.getURL('index.html'));
       if (url && !this.tipFromPopup) {
         this.url = url;
       } else if (this.tipFromPopup) {
