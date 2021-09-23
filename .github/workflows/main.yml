@@ -25,8 +25,11 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+        if: github.ref == 'refs/heads/master'
+      - run: npm run build
+        if: github.ref != 'refs/heads/master'
+      - run: npm run build:dev
       - run: |
-          npm run build
           npm run build-zip
           cp -r dist/web/root dist-stage
           mv dist-zip dist-stage/artifacts

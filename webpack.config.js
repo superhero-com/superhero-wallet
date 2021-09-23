@@ -130,7 +130,7 @@ const getConfig = (platform) => {
           NETWORK: JSON.stringify(process.env.NETWORK),
           RUNNING_IN_TESTS,
           COMMIT_HASH: JSON.stringify(commitHash),
-          UNFINISHED_FEATURES: JSON.stringify(process.env.SHOW_UNFINISHED_FEATURES),
+          UNFINISHED_FEATURES: JSON.stringify(process.env.NODE_ENV === 'development'),
         },
       }),
       ...(platform === 'extension'
