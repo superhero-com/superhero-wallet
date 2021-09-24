@@ -73,6 +73,7 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid variables.$color-black;
 
     .title {
       @extend %face-sans-15-medium;
@@ -113,6 +114,10 @@ export default {
 
   .transaction-list {
     flex-grow: 1;
+
+    ::v-deep .list .transaction-item:first-of-type {
+      margin-top: 0;
+    }
   }
 
   .seed-backup-notification {
