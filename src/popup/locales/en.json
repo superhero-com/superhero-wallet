@@ -1018,10 +1018,8 @@
       "backToTokenMigration": "Back to token migration info",
       "backendServiceUrl": "Backend Service Url"
     },
-    "aeAddressInput": {
-      "label": "Aeternity Address",
-      "identicon": "Your identicon",
-      "error": "Invalid AE Address"
+    "addressInput": {
+      "placeholder": "Enter recepient’s address or .chain name"
     },
     "welcome": {
       "send": "Send",
@@ -1093,6 +1091,13 @@
       "delete": "Remove permissions",
       "empty": "You aren't connected to any aepps"
     }
+  },
+  "validation": {
+    "required": "This field is required",
+    "address": "Enter valid blockchain address or .chain name",
+    "nameRegisteredAddress": "This name isn't registered or pointed to address",
+    "aensNameUnregistered": "This name is already registered",
+    "notSameAs": "Sender and receiver address are the same. You will send tokens to our own account."
   },
   "redirecting": "Redirecting",
   "seconds": "{n} seconds | {n} second | {n} seconds",

@@ -11,13 +11,17 @@
             {{ $t('pages.tipPage.to') }}
           </p>
           <div :class="['d-flex', { 'error-below': form.address.length > 0 && !validAddress }]">
-            <Textarea
+            <InputField
               v-model.trim="form.address"
-              :type="address"
+              v-validate="`required|account|name_registered_address|not_same_as:${account.address}`"
+              class="address-input"
+              name="address"
+              :placeholder="$t('pages.addressInput.placeholder')"
+              :error="$validator._base.anyExcept('address', warningRules.address)"
+              :error-message="$validator._base.firstExcept('address', warningRules.address)"
+              :warning="errors.anyByRules('address', warningRules.address)"
+              :warning-message="errors.firstByRules('address', warningRules.address)"
               data-cy="address"
-              :error="form.address.length > 0 && !validAddress"
-              :placeholder="selectedToken ? 'ak..' : 'ak.. / name.chain'"
-              size="h-50"
             />
             <div
               class="scan"
@@ -27,16 +31,6 @@
               <QrIcon />
               <small>{{ $t('pages.send.scan') }}</small>
             </div>
-          </div>
-          <div
-            v-show="form.address.length > 0 && !validAddress"
-            class="error"
-          >
-            {{
-              selectedToken && form.address.length && checkAensName(form.address)
-                ? $t('pages.send.error-name-send')
-                : $t('pages.send.error')
-            }}
           </div>
           <AmountInput
             v-model="form.amount"
@@ -55,8 +49,12 @@
             <Button
               data-cy="review-withdraw"
               half
-              :disabled="!validAddress || !+form.amount || form.amount <= 0"
-              @click="step = 2"
+              :disabled="
+                !form.address
+                  || $validator._base.anyExcept('address', warningRules.address)
+                  || !+form.amount
+                  || form.amount <= 0"
+              @click="validate"
             >
               {{ $t('pages.send.review') }}
             </Button>
@@ -177,7 +175,7 @@ import {
 } from '../../utils/helper';
 import AmountInput from '../components/AmountInput';
 import InfoGroup from '../components/InfoGroup';
-import Textarea from '../components/Textarea';
+import InputField from '../components/InputField';
 import Button from '../components/Button';
 import QrIcon from '../../../icons/qr-code.svg?vue-component';
 import AlertExclamination from '../../../icons/alert-exclamation.svg?vue-component';
@@ -185,7 +183,7 @@ import AlertExclamination from '../../../icons/alert-exclamation.svg?vue-compone
 export default {
   components: {
     AmountInput,
-    Textarea,
+    InputField,
     Button,
     QrIcon,
     AlertExclamination,
@@ -200,6 +198,9 @@ export default {
     return {
       step: 1,
       invoiceId: null,
+      warningRules: {
+        address: ['not_same_as'],
+      },
       form: {
         address: '',
         amount: '',
@@ -244,6 +245,9 @@ export default {
   },
   methods: {
     checkAensName,
+    async validate() {
+      if (await this.$validator.validateAll(this.warningRules)) this.step = 2;
+    },
     async scan() {
       const scanResult = await this.$store.dispatch('modals/open', {
         name: 'read-qr-code',
@@ -428,17 +432,19 @@ export default {
   .withdraw.step1 {
     .d-flex {
       display: flex;
-      padding-bottom: 24px;
+      padding-bottom: 12px;
 
       &.error-below {
         padding-bottom: 0;
       }
 
-      .textarea {
-        width: 250px;
-        min-height: 60px;
-        margin: 0 20px 0 0;
-        font-size: 11px;
+      .address-input {
+        flex-grow: 1;
+      }
+
+      .scan {
+        flex-basis: 65px;
+        flex-shrink: 0;
       }
     }
 

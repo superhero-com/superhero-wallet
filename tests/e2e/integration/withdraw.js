@@ -26,13 +26,13 @@ describe('Test cases for Withdraw Page', () => {
       .get('[data-cy=input-wrapper]')
       .should('not.have.class', 'error')
       .enterAddress('asd')
-      .inputShouldHaveError('[data-cy=address]')
+      .inputShouldHaveError('[data-cy=address] [data-cy=input-wrapper]')
       .enterAddress(0)
-      .inputShouldHaveError('[data-cy=address]')
+      .inputShouldHaveError('[data-cy=address] [data-cy=input-wrapper]')
       .enterAddress('vmangelovv.chain')
       .should('not.have.class', 'error')
       .enterAddress('ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
-      .get('[data-cy=address]')
+      .get('[data-cy=address] [data-cy=input-wrapper]')
       .should('not.have.class', 'error')
 
       .get('[data-cy=review-withdraw]')
@@ -52,11 +52,11 @@ describe('Test cases for Withdraw Page', () => {
       // edit sending address to .chain name
       .get('[data-cy=reivew-editTxDetails-button]')
       .click()
-      .enterAddress('vmangelovv.chain')
+      .enterAddress('test.chain')
       .get('[data-cy=review-withdraw]')
       .click()
       .get('[data-cy=review-recipient] > a')
-      .should('contain', 'vmangelovv.chain')
+      .should('contain', 'test.chain')
 
       // send
       .get('[data-cy="review-send-button"]')

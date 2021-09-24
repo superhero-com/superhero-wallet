@@ -1,28 +1,27 @@
 <template>
   <div class="input-field">
-    <label
-      v-if="label"
-      class="label"
-    >
+    <label class="label">
       {{ label }}
+      <slot name="label" />
     </label>
     <div
-      :class="[{ error }, { plain }, { readonly }]"
+      :class="{ error, warning, plain, readonly }"
       class="wrapper"
       data-cy="input-wrapper"
     >
       <slot
-        v-if="!error"
+        v-if="!error && !warning"
         name="left"
       />
-      <Error v-else />
+      <StatusIcon
+        v-else
+        :status="error && 'alert' || warning && 'warning'"
+      />
       <input
-        v-bind="$attrs"
-        :type="type"
         class="input"
-        :placeholder="placeholder"
+        v-bind="$attrs"
         :value="value"
-        :data-cy="type ? `input-${type}` : 'input'"
+        :data-cy="$attrs.type ? `input-${$attrs.type}` : 'input'"
         :disabled="readonly"
         step="any"
         @input="$emit('input', $event.target.value)"
@@ -30,25 +29,25 @@
       <slot name="right" />
     </div>
     <div
-      v-if="error && errorMessage"
-      class="error-message"
+      v-if="error && errorMessage || warning && warningMessage"
+      :class="['message', { error, warning }]"
     >
-      {{ errorMessage }}
+      {{ error ? errorMessage : warningMessage }}
     </div>
   </div>
 </template>
 
 <script>
-import Error from '../../../icons/error.svg?vue-component';
+import StatusIcon from './StatusIcon';
 
 export default {
-  components: { Error },
+  components: { StatusIcon },
   props: {
     value: { type: [String, Number], default: null },
     error: Boolean,
     errorMessage: { type: String, default: '' },
-    placeholder: { type: String, default: '' },
-    type: { type: String, default: 'text' },
+    warning: Boolean,
+    warningMessage: { type: String, default: '' },
     label: { type: String, default: '' },
     readonly: Boolean,
     plain: Boolean,
@@ -90,6 +89,10 @@ export default {
     &.error,
     &.error.plain {
       border-color: variables.$color-error;
+    }
+
+    &.warning {
+      border-color: variables.$color-warning;
     }
 
     &.plain {
@@ -137,6 +140,12 @@ export default {
 
       color: variables.$color-light-grey;
 
+      &::placeholder {
+        @extend %face-sans-14-regular;
+
+        color: variables.$color-dark-grey;
+      }
+
       &[type='number'] {
         -moz-appearance: textfield;
       }
@@ -148,13 +157,20 @@ export default {
     }
   }
 
-  .error-message {
+  .message {
     margin-top: 9px;
 
     @extend %face-sans-12-regular;
 
     text-align: left;
-    color: variables.$color-error;
+
+    &.error {
+      color: variables.$color-error;
+    }
+
+    &.warning {
+      color: variables.$color-warning;
+    }
   }
 }
 </style>
