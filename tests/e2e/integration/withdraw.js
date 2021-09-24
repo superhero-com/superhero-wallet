@@ -9,7 +9,7 @@ describe('Test cases for Withdraw Page', () => {
 
       .get('[data-cy=scan-button]')
       .click()
-      .get('.primary-title')
+      .get('.title')
       .should('be.visible')
       .get('.qr-code-reader video')
       .should('be.visible')

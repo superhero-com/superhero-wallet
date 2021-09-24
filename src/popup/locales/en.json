@@ -750,7 +750,8 @@
       "scanAddress": "Scan aeternity address",
       "error": "Invalid AE address or AENS name",
       "error-name-send": "Unfortunately you can only send AEX-9 Tokens to an address",
-      "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
+      "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?",
+      "addressPlaceholder": "Enter recepient’s address or .chain name"
     },
     "settings": {
       "backToAccount": "Back to account",
@@ -1017,9 +1018,6 @@
       "migrateTokenInfo": "The amount of tokens you choose to migrate, will be available on this address in the next scheduled hardfork release.",
       "backToTokenMigration": "Back to token migration info",
       "backendServiceUrl": "Backend Service Url"
-    },
-    "addressInput": {
-      "placeholder": "Enter recepient’s address or .chain name"
     },
     "welcome": {
       "send": "Send",
