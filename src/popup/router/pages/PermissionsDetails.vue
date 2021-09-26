@@ -27,7 +27,7 @@
           @input="setTransactionSignLimit"
         />
       </div>
-      <RangeInput
+      <InputRange
         :value="transactionSignLimit"
         min="0"
         :max="+tokenBalance"
@@ -61,7 +61,7 @@ import { pick } from 'lodash-es';
 import { mapState, mapMutations } from 'vuex';
 import CheckBox from '../components/CheckBox';
 import InputField from '../components/InputField';
-import RangeInput from '../components/RangeInput';
+import InputRange from '../components/InputRange';
 import TokenAmount from '../components/TokenAmount';
 import Button from '../components/Button';
 
@@ -69,7 +69,7 @@ export default {
   components: {
     CheckBox,
     InputField,
-    RangeInput,
+    InputRange,
     TokenAmount,
     Button,
   },
@@ -135,7 +135,7 @@ export default {
       margin-top: -16px;
     }
 
-    + .range-input {
+    + .input-range {
       display: block;
       margin: -16px 0 0 0;
     }

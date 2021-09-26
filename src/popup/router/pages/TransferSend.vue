@@ -38,7 +38,7 @@
               <QrScan />
             </button>
           </InputField>
-          <AmountInput
+          <InputAmount
             v-model="form.amount"
             :error="form.amount.length > 0 && form.amount <= 0"
           />
@@ -179,9 +179,9 @@ import { calculateFee, ZEIT_TOKEN_CONTRACT, ZEIT_INVOICE_CONTRACT } from '../../
 import {
   checkAddress, checkAensName, aeToAettos, convertToken,
 } from '../../utils/helper';
-import AmountInput from '../components/AmountInput';
-import InfoGroup from '../components/InfoGroup';
 import InputField from '../components/InputField';
+import InputAmount from '../components/InputAmount';
+import InfoGroup from '../components/InfoGroup';
 import Button from '../components/Button';
 import Valid from '../../../icons/valid.svg?vue-component';
 import QrScan from '../../../icons/qr-scan.svg?vue-component';
@@ -189,8 +189,8 @@ import AlertExclamination from '../../../icons/alert-exclamation.svg?vue-compone
 
 export default {
   components: {
-    AmountInput,
     InputField,
+    InputAmount,
     Button,
     Valid,
     QrScan,

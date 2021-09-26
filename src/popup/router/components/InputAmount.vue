@@ -1,6 +1,6 @@
 <template>
   <InputField
-    class="amount-input"
+    class="input-amount"
     type="number"
     v-bind="$attrs"
     :error="$attrs.error || !!$attrs.value && $attrs.value <= 0"
@@ -43,7 +43,7 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 
-.amount-input {
+.input-amount {
   white-space: nowrap;
 
   .token {
