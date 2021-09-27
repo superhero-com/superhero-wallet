@@ -16,11 +16,9 @@ import runMigrations from './migrations';
 import accountsModule from './modules/accounts';
 import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
-import transactionCacheModule from './modules/transactionCache';
 import fungibleTokensPlugin from './plugins/fungibleTokens';
 import { defaultNetwork } from '../popup/utils/constants';
 import stateReducer from './utils';
-import chainListener from './plugins/chainListener';
 import veeValidate from './plugins/veeValidate';
 
 Vue.use(Vuex);
@@ -78,13 +76,11 @@ export default new Vuex.Store({
     pendingTransactionHandler,
     languagesPlugin,
     openErrorModalPlugin,
-    chainListener,
     veeValidate,
   ],
   modules: {
     accounts: accountsModule,
     invites: invitesModule,
     permissions: permissionsModule,
-    transactionCache: transactionCacheModule,
   },
 });

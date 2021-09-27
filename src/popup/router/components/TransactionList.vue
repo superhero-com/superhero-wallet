@@ -117,7 +117,6 @@ export default {
       },
     }),
     ...mapGetters(['getTxSymbol']),
-    ...mapGetters('transactionCache', ['chainTransactions']),
   },
   watch: {
     activeIdx() {
@@ -182,9 +181,8 @@ export default {
       }
     },
     updateTransactions(transactions) {
-      this.transactions = uniqBy([...this.transactions, ...transactions, ...this.chainTransactions], 'hash');
+      this.transactions = uniqBy([...this.transactions, ...transactions], 'hash');
       this.$store.commit('setTransactions', this.transactions);
-      this.$store.dispatch('transactionCache/removeOldTxFromCache');
     },
   },
 };

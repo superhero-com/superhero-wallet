@@ -76,9 +76,8 @@ export default {
     const { endpoint, valid } = checkHashType(hash);
     return valid ? `${explorerUrl}/${endpoint}/${hash}` : null;
   },
-  getTx: ({ transactions, transactionCache }) => (hash) => transactions.latest
+  getTx: ({ transactions }) => (hash) => transactions.latest
     .concat(transactions.pending.map((t) => ({ ...t, pending: true })))
-    .concat(transactionCache.transactions)
     .find((tx) => tx.hash === hash),
   getTxType: () => (transaction) => transaction.tx
     && (TX_TYPE_MDW[transaction.tx.type]

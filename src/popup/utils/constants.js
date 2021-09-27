@@ -125,7 +125,6 @@ export const NOTIFICATION_SETTINGS = [
   },
 ];
 
-export const ZEIT_TOKEN_CONTRACT = 'ct_2t7TnocFw7oCYSS7g2yGutZMpGEJta6dq2DTX38SmuqmwtN6Ch';
 export const ZEIT_TOKEN_INTERFACE = `@compiler >= 6
 contract interface PoS =
   stateful entrypoint set_paid : (int, int) => unit
