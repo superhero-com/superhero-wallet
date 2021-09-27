@@ -121,6 +121,9 @@
       "title": "Your Error Report Was not send",
       "msg": "There was problem sending your error report."
     },
+    "invalid-qr-code": {
+      "msg": "The scanned QR code is invalid."
+    },
     "tip-mainnet-warning": {
       "title": "Warning",
       "msg": "Tip/Claim functionality works on the predefined networks."

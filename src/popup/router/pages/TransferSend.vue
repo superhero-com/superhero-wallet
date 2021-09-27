@@ -182,7 +182,7 @@
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { calculateFee, ZEIT_TOKEN_CONTRACT, ZEIT_INVOICE_CONTRACT } from '../../utils/constants';
+import { calculateFee } from '../../utils/constants';
 import {
   checkAddress, checkAensName, aeToAettos, convertToken,
 } from '../../utils/helper';
@@ -216,6 +216,7 @@ export default {
       warningRules: {
         address: ['not_same_as'],
       },
+      invoiceContract: null,
       form: {
         address: '',
         amount: '',
@@ -269,38 +270,44 @@ export default {
         name: 'read-qr-code',
         title: this.$t('pages.send.scanAddress'),
       });
-      if (scanResult?.indexOf('ZEITFESTIVAL') === 0) {
-        // does user have zeit tokens?
-        const zeitTokenBalance = this.tokenBalances
-          .find(({ value }) => value === ZEIT_TOKEN_CONTRACT);
-        if (!zeitTokenBalance) {
+      if (scanResult?.trim().charAt(0) === '{') {
+        let parsedScanResult = null;
+        try {
+          parsedScanResult = JSON.parse(scanResult);
+        } catch (e) {
+          console.error(e);
+          this.form.address = '';
+          this.$store.dispatch('modals/open', {
+            name: 'default',
+            title: this.$t('modals.invalid-qr-code.msg'),
+            icon: 'critical',
+          });
+          return;
+        }
+
+        // does user have the requested tokens?
+        const requestedTokenBalance = this.tokenBalances
+          .find(({ value }) => value === parsedScanResult.tokenContract);
+        if (!requestedTokenBalance) {
           this.form.address = '';
           this.$store.dispatch('modals/open', { name: 'default', type: 'insufficient-balance' });
           this.form.address = '';
           return;
         }
 
-        // Parse the qr message
-        let data = {};
-        try {
-          data = JSON.parse(scanResult.replace('ZEITFESTIVAL', ''));
-        } catch (e) {
-          // eslint-disable-next-line no-console
-          console.error('Could not parse JSON. Data corrupted?');
-        }
-
-        // SELECT ZEIT TOKEN
+        // select requested token
         this.$store.commit('fungibleTokens/setSelectedToken', {
           address: this.accounts[this.activeIdx].address,
-          token: this.tokenBalances.find(({ value }) => value === ZEIT_TOKEN_CONTRACT),
+          token: this.tokenBalances.find(({ value }) => value === parsedScanResult.tokenContract),
         });
         // SET result data
-        this.form.address = ZEIT_TOKEN_CONTRACT;
+        this.form.address = parsedScanResult.tokenContract;
         this.form.amount = +convertToken(
-          data.amount,
+          parsedScanResult.amount,
           -this.selectedToken.decimals,
         );
-        this.invoiceId = data.invoiceId;
+        this.invoiceId = parsedScanResult.invoiceId;
+        this.invoiceContract = parsedScanResult.invoiceContract;
 
         this.step = 2;
       } else {
@@ -371,7 +378,7 @@ export default {
         if (this.selectedToken && this.invoiceId !== null) {
           const { hash } = await this.$store.dispatch('fungibleTokens/burnTriggerPoS', [
             this.form.amount,
-            ZEIT_INVOICE_CONTRACT,
+            this.invoiceContract,
             this.invoiceId,
             { waitMined: false, modal: false },
           ]);
