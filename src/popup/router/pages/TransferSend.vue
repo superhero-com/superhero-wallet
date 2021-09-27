@@ -18,6 +18,7 @@
             <Valid
               v-if="!!form.address"
               slot="left"
+              class="valid"
             />
             <span
               slot="label"
@@ -438,8 +439,14 @@ export default {
   }
 
   .withdraw.step1 {
-    .input-field:first-child ::v-deep main {
+    .input-field {
+      &:first-child ::v-deep main {
       padding-right: 8px;
+      }
+
+      .valid {
+        color: variables.$color-green;
+      }
     }
 
     .input-amount {
