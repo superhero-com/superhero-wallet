@@ -13,7 +13,7 @@ describe('Test cases for Withdraw Page', () => {
       .should('be.visible')
       .get('.qr-code-reader video')
       .should('be.visible')
-      .get('.modal .close')
+      .get('.modal .button-plain.close')
       .click()
 
       .enterInputAmount('asd')
