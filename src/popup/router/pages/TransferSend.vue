@@ -246,6 +246,12 @@ export default {
     selectedToken() {
       this.fetchFee();
     },
+    $route: {
+      immediate: true,
+      async handler({ query }) {
+        await this.queryHandler(query);
+      },
+    },
   },
   subscriptions() {
     return pick(this.$store.state.observables, ['balance']);
@@ -261,6 +267,17 @@ export default {
     this.fetchFee();
   },
   methods: {
+    async queryHandler(query) {
+      await this.$watchUntilTruly(() => this.sdk);
+      if (query.token) {
+        this.$store.commit('fungibleTokens/setSelectedToken', {
+          address: this.accounts[this.accountSelectedIdx].address,
+          token: this.tokenBalances.find(({ value }) => value === query.token),
+        });
+      }
+      if (query.account) this.form.address = query.account;
+      if (query.amount) this.form.amount = query.amount;
+    },
     checkAensName,
     async validate() {
       if (await this.$validator.validateAll(this.warningRules)) this.step = 2;
@@ -312,7 +329,10 @@ export default {
 
         this.step = 2;
       } else {
-        this.form.address = scanResult;
+        if (!scanResult) return;
+        this.queryHandler([
+          ...new URL(scanResult).searchParams.entries(),
+        ].reduce((o, [k, v]) => ({ ...o, [k]: v }), {}));
         this.invoiceId = null;
       }
       if (!this.form.address) this.form.address = '';

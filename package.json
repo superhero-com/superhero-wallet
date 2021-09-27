@@ -132,7 +132,7 @@
       },
       "cordova-clipboard": {},
       "cordova-plugin-webviewcolor": {},
-      "cordova-cordova-plugin-x-socialsharing": {}
+      "cordova-plugin-x-socialsharing": {}
     },
     "platforms": [
       "android",
