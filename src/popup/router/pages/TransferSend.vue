@@ -5,7 +5,13 @@
         <div class="withdraw step1">
           <InputField
             v-model.trim="form.address"
-            v-validate="`required|account|name_registered_address|not_same_as:${account.address}`"
+            v-validate="{
+              required: true,
+              account: true,
+              name_registered_address: true,
+              token_to_an_address: true,
+              not_same_as: account.address
+            }"
             name="address"
             :placeholder="$t('pages.send.addressPlaceholder')"
             :error="$validator._base.anyExcept('address', warningRules.address)"
@@ -441,7 +447,7 @@ export default {
   .withdraw.step1 {
     .input-field {
       &:first-child ::v-deep main {
-      padding-right: 8px;
+        padding-right: 8px;
       }
 
       .valid {
