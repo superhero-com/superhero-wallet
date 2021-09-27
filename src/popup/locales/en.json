@@ -320,19 +320,16 @@
       "heading": "Account",
       "activity": "Activity",
       "accountName": "Account name",
-      "copy": "Copy",
       "claim": "Claim Tip",
       "receive": "Receive",
       "latestTransactions": "Latest transactions",
       "noTransactionsFound": "No transactions found!",
       "balance": "Balance",
-      "copied": "Copied!",
       "seedNotification": "You need to {0} your seed phrase",
       "backup": "backup",
       "updateExtension": "New version available! Please update your extension.",
       "updateAvailable": "New version is available in the store!",
-      "claim-name": "Claim your .chain name",
-      "address-copied": "Address copied"
+      "claim-name": "Claim your .chain name"
     },
     "accounts": {
       "showWallet": "Show on Wallet Home"
@@ -941,7 +938,6 @@
       "name": "Name",
       "nameSalt": "Name Salt",
       "nameId": "Name Id",
-      "copy": "Copy",
       "contractId": "Contract Id",
       "advancedMode": "Advanced Mode",
       "blockHeight": "Block height",
@@ -1079,8 +1075,7 @@
       "tokens-not-allowed": "Tokens are currently not allowed, please switch to AE",
       "tip-attached": "Tip attached",
       "top-up-with": "Top up with",
-      "delete": "Delete",
-      "copied": "Copied!"
+      "delete": "Delete"
     },
     "permissions": {
       "login": "Don't ask for login requests",

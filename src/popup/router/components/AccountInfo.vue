@@ -99,7 +99,7 @@
       class="copied"
     >
       <span />
-      <span class="text">{{ $t('pages.account.address-copied') }}</span>
+      <span class="text">{{ $t('addressCopied') }}</span>
       <span />
     </div>
   </div>
@@ -107,6 +107,7 @@
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
+import CopyMixin from '../../../mixins/copy';
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';
 import InputField from './InputField.vue';
@@ -135,11 +136,11 @@ export default {
     InputField,
     ButtonPlain,
   },
+  mixins: [CopyMixin],
   props: {
     accountIdx: { type: Number, default: -1 },
   },
   data: () => ({
-    copied: false,
     edit: false,
     customAccountName: '',
     maxCustomNameLength: 22,
@@ -174,12 +175,6 @@ export default {
     saveLocalName() {
       this.$store.commit('accounts/setLocalName', { name: this.customAccountName, idx: this.idx });
       this.edit = false;
-    },
-    copy() {
-      this.copied = true;
-      setTimeout(() => {
-        this.copied = false;
-      }, 1000);
     },
     async remove() {
       await this.$store.dispatch('modals/open', {
