@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.2](https://github.com/aeternity/superhero-wallet/compare/v0.9.1...v0.9.2) (2021-09-28)
+
+
+### Features
+
+* **input:** add warnings to input field ([5086efc](https://github.com/aeternity/superhero-wallet/commit/5086efc7046c667d129fd86dd64f0549fbb418ac))
+* **send:** rebrand address input in send screen ([1116153](https://github.com/aeternity/superhero-wallet/commit/111615335d119d81a94446dd4921c8108059b69d))
+* **validation:** add vee-validate as plugin ([c913ea4](https://github.com/aeternity/superhero-wallet/commit/c913ea4637de88541d246c3f948e7b4e39cc5d20))
+* **vee-validate:** add account validation rules ([b5722d9](https://github.com/aeternity/superhero-wallet/commit/b5722d947ff39dc105d618ad85e720afc1378d2a))
+* **vee-validate:** inject warning support to vee-validate ([a41a688](https://github.com/aeternity/superhero-wallet/commit/a41a688cf27725e2f6abaaeb37a7782dc8ff0460))
+
+
+### Bug Fixes
+
+* **permissions:** fix permissions input styling ([b450cb5](https://github.com/aeternity/superhero-wallet/commit/b450cb5483d4a95ee506435ccd1d7b0d2a73058e))
+* **send:** add proper color to valid svg ([9f75935](https://github.com/aeternity/superhero-wallet/commit/9f75935c23de205740e83975b0b2fed7cccc3d3a))
+* **send:** restore error for tokens to name sending ([0da891f](https://github.com/aeternity/superhero-wallet/commit/0da891f6a74e401bf377569b27e0c216bef13a3a))
+
+
+### Maintenance
+
+* **input:** unify input components names ([b25e1d6](https://github.com/aeternity/superhero-wallet/commit/b25e1d6dff8207f94fb0796df807679365c24d26))
+* **recent-transactions:** do not hide line on transaction list overlap ([9b3be97](https://github.com/aeternity/superhero-wallet/commit/9b3be9799a0137a7ed97320d01da455153239ccf))
+* **stale:** remove stale bot support ([ff5d105](https://github.com/aeternity/superhero-wallet/commit/ff5d105b4ba90a1d24bc1f0b60c924d3fd5006fa))
+* **transfer-send:** replace textarea with validatable input ([800babf](https://github.com/aeternity/superhero-wallet/commit/800babf28e276ca6e54b29307422449922eb58e7))
+
 ### [0.9.1](https://github.com/aeternity/superhero-wallet/compare/v0.9.0...v0.9.1) (2021-09-16)
 
 
