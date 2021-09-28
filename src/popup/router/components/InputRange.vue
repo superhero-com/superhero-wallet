@@ -1,6 +1,6 @@
 <template>
   <input
-    class="range-input"
+    class="input-range"
     :value="value"
     v-bind="$attrs"
     type="range"
@@ -19,7 +19,7 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 
-.range-input {
+.input-range {
   -webkit-appearance: none;
   width: 100%;
   height: 25px;

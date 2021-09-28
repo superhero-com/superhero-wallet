@@ -18,16 +18,16 @@
     </div>
 
     <div class="transaction-sign-limit">
-      <div class="permission-row">
-        {{ $t('pages.permissions.transaction-sign') }}
-        <InputField
-          :value="transactionSignLimit || ''"
-          :error="transactionSignLimitError"
-          placeholder="always ask"
-          @input="setTransactionSignLimit"
-        />
-      </div>
-      <RangeInput
+      <InputField
+        :value="transactionSignLimit || ''"
+        :error="transactionSignLimitError"
+        :label="$t('pages.permissions.transaction-sign')"
+        placeholder="always ask"
+        @input="setTransactionSignLimit"
+      >
+        <span slot="right">AE</span>
+      </InputField>
+      <InputRange
         :value="transactionSignLimit"
         min="0"
         :max="+tokenBalance"
@@ -61,7 +61,7 @@ import { pick } from 'lodash-es';
 import { mapState, mapMutations } from 'vuex';
 import CheckBox from '../components/CheckBox';
 import InputField from '../components/InputField';
-import RangeInput from '../components/RangeInput';
+import InputRange from '../components/InputRange';
 import TokenAmount from '../components/TokenAmount';
 import Button from '../components/Button';
 
@@ -69,7 +69,7 @@ export default {
   components: {
     CheckBox,
     InputField,
-    RangeInput,
+    InputRange,
     TokenAmount,
     Button,
   },
@@ -135,7 +135,7 @@ export default {
       margin-top: -16px;
     }
 
-    + .range-input {
+    + .input-range {
       display: block;
       margin: -16px 0 0 0;
     }
@@ -158,22 +158,8 @@ export default {
     border-left: 0;
     border-right: 0;
 
-    .input-wrapper {
-      position: relative;
-
-      ::v-deep .input {
-        margin: 4px 0 0 30px;
-        padding-right: 35px;
-        width: 120px;
-      }
-
-      &::after {
-        content: 'AE';
-        position: absolute;
-        top: 10px;
-        left: 120px;
-        color: variables.$color-blue;
-      }
+    .input-field span {
+      color: variables.$color-blue;
     }
   }
 }

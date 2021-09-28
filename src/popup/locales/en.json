@@ -749,8 +749,8 @@
       "hash": "Transaction Hash",
       "scanAddress": "Scan aeternity address",
       "error": "Invalid AE address or AENS name",
-      "error-name-send": "Unfortunately you can only send AEX-9 Tokens to an address",
-      "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
+      "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?",
+      "addressPlaceholder": "Enter recepient’s address or .chain name"
     },
     "settings": {
       "backToAccount": "Back to account",
@@ -1018,9 +1018,6 @@
       "backToTokenMigration": "Back to token migration info",
       "backendServiceUrl": "Backend Service Url"
     },
-    "addressInput": {
-      "placeholder": "Enter recepient’s address or .chain name"
-    },
     "welcome": {
       "send": "Send",
       "across": "across the Globe"
@@ -1097,7 +1094,8 @@
     "address": "Enter valid blockchain address or .chain name",
     "nameRegisteredAddress": "This name isn't registered or pointed to address",
     "aensNameUnregistered": "This name is already registered",
-    "notSameAs": "Sender and receiver address are the same. You will send tokens to our own account."
+    "notSameAs": "Sender and receiver address are the same. You will send tokens to our own account.",
+    "tokenToAnAddress": "Unfortunately you can only send AEX-9 Tokens to an address"
   },
   "redirecting": "Redirecting",
   "seconds": "{n} seconds | {n} second | {n} seconds",

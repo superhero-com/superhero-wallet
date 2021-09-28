@@ -2,7 +2,7 @@
   <div class="auction-bid">
     <AuctionCard :name="name" />
     <div class="form">
-      <AmountInput
+      <InputAmount
         v-model="amount"
         :error="!!amountError"
         :error-message="amountError"
@@ -38,14 +38,14 @@ import { mapGetters } from 'vuex';
 import { aeToAettos } from '../../../utils/helper';
 import { calculateNameClaimFee } from '../../../utils/constants';
 import AuctionCard from '../../components/AuctionCard';
-import AmountInput from '../../components/AmountInput';
+import InputAmount from '../../components/InputAmount';
 import DetailsItem from '../../components/DetailsItem';
 import TokenAmount from '../../components/TokenAmount';
 import Button from '../../components/Button';
 
 export default {
   components: {
-    AuctionCard, AmountInput, DetailsItem, TokenAmount, Button,
+    AuctionCard, InputAmount, DetailsItem, TokenAmount, Button,
   },
   props: {
     name: { type: String, required: true },

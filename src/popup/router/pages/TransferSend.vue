@@ -3,36 +3,49 @@
     <div data-cy="send-container">
       <div v-if="step == 1">
         <div class="withdraw step1">
-          <p class="primary-title text-left mb-8 f-16">
-            {{ $t('pages.tipPage.heading') }}
-            <span class="secondary-text">{{
-              selectedToken ? selectedToken.symbol : $t('ae')
-            }}</span>
-            {{ $t('pages.tipPage.to') }}
-          </p>
-          <div :class="['d-flex', { 'error-below': form.address.length > 0 && !validAddress }]">
-            <InputField
-              v-model.trim="form.address"
-              v-validate="`required|account|name_registered_address|not_same_as:${account.address}`"
-              class="address-input"
-              name="address"
-              :placeholder="$t('pages.addressInput.placeholder')"
-              :error="$validator._base.anyExcept('address', warningRules.address)"
-              :error-message="$validator._base.firstExcept('address', warningRules.address)"
-              :warning="errors.anyByRules('address', warningRules.address)"
-              :warning-message="errors.firstByRules('address', warningRules.address)"
-              data-cy="address"
+          <InputField
+            v-model.trim="form.address"
+            v-validate="{
+              required: true,
+              account: true,
+              name_registered_address: true,
+              token_to_an_address: true,
+              not_same_as: account.address
+            }"
+            name="address"
+            :placeholder="$t('pages.send.addressPlaceholder')"
+            :error="$validator._base.anyExcept('address', warningRules.address)"
+            :error-message="$validator._base.firstExcept('address', warningRules.address)"
+            :warning="errors.anyByRules('address', warningRules.address)"
+            :warning-message="errors.firstByRules('address', warningRules.address)"
+            data-cy="address"
+            @scan="scan"
+          >
+            <Valid
+              v-if="!!form.address"
+              slot="left"
+              class="valid"
             />
-            <div
-              class="scan"
+            <span
+              slot="label"
+              data-cy="title"
+            >
+              {{ $t('pages.tipPage.heading') }}
+              <span class="secondary-text">
+                {{ selectedToken ? selectedToken.symbol : 'AE' }}
+              </span>
+              {{ $t('pages.tipPage.to') }}
+            </span>
+            <button
+              slot="buttons"
+              class="right-button"
               data-cy="scan-button"
               @click="scan"
             >
-              <QrIcon />
-              <small>{{ $t('pages.send.scan') }}</small>
-            </div>
-          </div>
-          <AmountInput
+              <QrScan />
+            </button>
+          </InputField>
+          <InputAmount
             v-model="form.amount"
             :error="form.amount.length > 0 && form.amount <= 0"
           />
@@ -173,19 +186,21 @@ import { calculateFee, ZEIT_TOKEN_CONTRACT, ZEIT_INVOICE_CONTRACT } from '../../
 import {
   checkAddress, checkAensName, aeToAettos, convertToken,
 } from '../../utils/helper';
-import AmountInput from '../components/AmountInput';
-import InfoGroup from '../components/InfoGroup';
 import InputField from '../components/InputField';
+import InputAmount from '../components/InputAmount';
+import InfoGroup from '../components/InfoGroup';
 import Button from '../components/Button';
-import QrIcon from '../../../icons/qr-code.svg?vue-component';
+import Valid from '../../../icons/valid.svg?vue-component';
+import QrScan from '../../../icons/qr-scan.svg?vue-component';
 import AlertExclamination from '../../../icons/alert-exclamation.svg?vue-component';
 
 export default {
   components: {
-    AmountInput,
     InputField,
+    InputAmount,
     Button,
-    QrIcon,
+    Valid,
+    QrScan,
     AlertExclamination,
     InfoGroup,
   },
@@ -430,33 +445,17 @@ export default {
   }
 
   .withdraw.step1 {
-    .d-flex {
-      display: flex;
-      padding-bottom: 12px;
-
-      &.error-below {
-        padding-bottom: 0;
+    .input-field {
+      &:first-child ::v-deep main {
+        padding-right: 8px;
       }
 
-      .address-input {
-        flex-grow: 1;
-      }
-
-      .scan {
-        flex-basis: 65px;
-        flex-shrink: 0;
+      .valid {
+        color: variables.$color-green;
       }
     }
 
-    .error {
-      padding-top: 8px;
-      line-height: 16px;
-      color: variables.$color-error;
-      font-size: 12px;
-      text-align: left;
-    }
-
-    .amount-input {
+    .input-amount {
       margin-bottom: 24px;
     }
 
