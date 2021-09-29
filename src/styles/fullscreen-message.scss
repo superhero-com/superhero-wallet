@@ -10,9 +10,12 @@ body {
       padding-right: 20px;
       max-width: 400px;
       text-align: center;
-      color: white;
 
       @extend %face-sans-20-regular;
+
+      &.white {
+        color: white;
+      }
     }
   }
 }

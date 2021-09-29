@@ -17,7 +17,7 @@
   </head>
   <body>
     <noscript>
-      <p class="fullscreen-message">
+      <p class="fullscreen-message white">
         Superhero Wallet doesn't work without JavaScript enabled.
         Please enable it to continue.
       </p>
@@ -26,6 +26,18 @@
     <div id="app"></div>
     <!-- built files will be auto injected -->
 
+    <script type="text/javascript">
+      window.onerror = function errorHandler() {
+        if (document.getElementById('app').innerHTML) {
+          window.onerror = null;
+          return;
+        }
+
+        document.body.innerHTML = '<p class="fullscreen-message">'
+          + 'Superhero Wallet has failed to run in this browser.'
+          + '</p>';
+      }
+    </script>
     <% if (process.env.IS_CORDOVA) { %>
     <script type="text/javascript" src="cordova.js"></script>
     <% } %>
