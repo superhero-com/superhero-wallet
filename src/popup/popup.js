@@ -3,6 +3,7 @@ import '../lib/initPolyfills';
 import Vue from 'vue';
 import sync from '../lib/vuexRouterSync';
 import App from './App';
+import '../styles/fullscreen-message.scss';
 import store from '../store';
 import router from './router';
 import { i18n } from '../store/plugins/languages';
