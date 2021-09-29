@@ -2,6 +2,8 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const commitHash = require('child_process').execSync('git rev-parse HEAD').toString().trim();
 const sass = require('sass');
+const EventHooksPlugin = require('event-hooks-webpack-plugin');
+const fs = require('fs-extra');
 
 // eslint-disable-next-line camelcase
 const { npm_package_version, PLATFORM, NODE_ENV } = process.env;
@@ -107,26 +109,30 @@ module.exports = {
 
       return [definitions];
     }).end();
-    if (PLATFORM === 'extension' || PLATFORM === 'web') {
+    if (PLATFORM === 'extension') {
       config.plugin('copy')
         .use(CopyWebpackPlugin, [{
           patterns: [
-            ...(PLATFORM === 'web'
-              ? [
-                { from: 'src/web', to: 'dist/web/' },
-              ]
-              : [
-                { from: 'public/favicons/favicon-48.png', to: 'icons/icon_48.png' },
-                { from: 'public/favicons/favicon-128.png', to: 'icons/icon_128.png' },
-                { from: 'public/favicons/request_permission.jpg', to: 'icons/request_permission.jpg' },
-                {
-                  from: 'src/content-scripts/tipButton.scss',
-                  to: 'other/tipButton.css',
-                  transform: (_, f) => sass.renderSync({ file: f }).css.toString(),
-                }]),
+            { from: 'public/favicons/favicon-48.png', to: 'icons/icon_48.png' },
+            { from: 'public/favicons/favicon-128.png', to: 'icons/icon_128.png' },
+            { from: 'public/favicons/request_permission.jpg', to: 'icons/request_permission.jpg' },
+            {
+              from: 'src/content-scripts/tipButton.scss',
+              to: 'other/tipButton.css',
+              transform: (_, f) => sass.renderSync({ file: f }).css.toString(),
+            },
           ],
         }])
         .end();
+    }
+
+    if (PLATFORM === 'web') {
+      config.plugin('before-run')
+        .use(EventHooksPlugin, [{
+          beforeRun: (compilation, done) => {
+            fs.copy('src/web', 'dist/web', done);
+          },
+        }]);
     }
 
     if (PLATFORM !== 'extension') {
