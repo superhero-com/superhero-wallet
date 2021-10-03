@@ -45,6 +45,7 @@ import CheckBox from '../../components/CheckBox';
 import HelpButton from '../../components/HelpButton';
 import Button from '../../components/Button';
 import { MAX_AUCTION_NAME_LENGTH } from '../../../utils/constants';
+import { checkAensName } from '../../../utils/helper';
 
 export default {
   components: {
@@ -59,7 +60,7 @@ export default {
   computed: {
     ...mapState(['sdk']),
     validName() {
-      return this.name && /^[A-Za-z0-9]+$/.test(this.name);
+      return this.name && checkAensName(`${this.name}.chain`);
     },
   },
   methods: {
