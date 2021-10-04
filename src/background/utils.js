@@ -31,6 +31,8 @@ export const getSDK = async () => {
         networkId: network.networkId,
         nativeMode: true,
         compilerUrl: network.compilerUrl,
+        // https://github.com/aeternity/aepp-sdk-js/issues/1280
+        address: 'ak_s',
       });
     } catch (e) {
       Logger.write(e);
