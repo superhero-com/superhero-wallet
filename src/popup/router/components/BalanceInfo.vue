@@ -41,7 +41,7 @@
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import Arrow from '../../../icons/arrow.svg?vue-component';
-import Dropdown from './Dropdown';
+import Dropdown from './Dropdown.vue';
 
 export default {
   components: {

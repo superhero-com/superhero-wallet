@@ -129,13 +129,13 @@
 <script>
 import { mapGetters } from 'vuex';
 import { formatDate, formatTime } from '../../utils';
-import TransactionOverview from '../components/TransactionOverview';
-import Plate from '../components/Plate';
-import TokenAmount from '../components/TokenAmount';
-import DetailsItem from '../components/DetailsItem';
-import LinkButton from '../components/LinkButton';
-import CopyButton from '../components/CopyButton';
-import Truncate from '../components/Truncate';
+import TransactionOverview from '../components/TransactionOverview.vue';
+import Plate from '../components/Plate.vue';
+import TokenAmount from '../components/TokenAmount.vue';
+import DetailsItem from '../components/DetailsItem.vue';
+import LinkButton from '../components/LinkButton.vue';
+import CopyButton from '../components/CopyButton.vue';
+import Truncate from '../components/Truncate.vue';
 import AnimatedPending from '../../../icons/animated-pending.svg?vue-component';
 import BlockIcon from '../../../icons/block.svg?vue-component';
 

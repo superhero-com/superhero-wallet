@@ -59,11 +59,11 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import Modal from '../Modal';
-import Overview from '../Overview';
-import Button from '../Button';
-import CopyButton from '../CopyButton';
-import DetailsItem from '../DetailsItem';
+import Modal from '../Modal.vue';
+import Overview from '../Overview.vue';
+import Button from '../Button.vue';
+import CopyButton from '../CopyButton.vue';
+import DetailsItem from '../DetailsItem.vue';
 import Warning from '../../../../icons/warning.svg?vue-component';
 
 export default {

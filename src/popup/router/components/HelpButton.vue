@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import ButtonPlain from './ButtonPlain';
+import ButtonPlain from './ButtonPlain.vue';
 import QuestionCircle from '../../../icons/question-circle-border.svg?vue-component';
 
 export default {

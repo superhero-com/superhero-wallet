@@ -10,7 +10,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import Overview from './Overview';
+import Overview from './Overview.vue';
 
 export default {
   components: { Overview },

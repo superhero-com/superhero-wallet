@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import App from './App';
+import App from './App.vue';
 import { i18n } from '../store/plugins/languages';
 
 global.browser = require('webextension-polyfill');

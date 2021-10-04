@@ -186,10 +186,10 @@ import { calculateFee, ZEIT_TOKEN_CONTRACT, ZEIT_INVOICE_CONTRACT } from '../../
 import {
   checkAddress, checkAensName, aeToAettos, convertToken,
 } from '../../utils/helper';
-import InputField from '../components/InputField';
-import InputAmount from '../components/InputAmount';
-import InfoGroup from '../components/InfoGroup';
-import Button from '../components/Button';
+import InputField from '../components/InputField.vue';
+import InputAmount from '../components/InputAmount.vue';
+import InfoGroup from '../components/InfoGroup.vue';
+import Button from '../components/Button.vue';
 import Valid from '../../../icons/valid.svg?vue-component';
 import QrScan from '../../../icons/qr-scan.svg?vue-component';
 import AlertExclamination from '../../../icons/alert-exclamation.svg?vue-component';

@@ -39,9 +39,9 @@
 </template>
 
 <script>
-import ButtonPlain from './ButtonPlain';
+import ButtonPlain from './ButtonPlain.vue';
 import Close from '../../../icons/close.svg?vue-component';
-import NodeConnectionStatus from './NodeConnectionStatus';
+import NodeConnectionStatus from './NodeConnectionStatus.vue';
 
 export default {
   components: { ButtonPlain, Close, NodeConnectionStatus },

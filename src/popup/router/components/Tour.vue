@@ -108,7 +108,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import Button from './Button';
+import Button from './Button.vue';
 import Hero from '../../../icons/hero.svg?vue-component';
 import StartOnboarding from '../../../icons/start-onboarding.svg?vue-component';
 import Close from '../../../icons/close.svg?vue-component';

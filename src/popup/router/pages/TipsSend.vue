@@ -101,12 +101,12 @@ import { calculateFee } from '../../utils/constants';
 import {
   escapeSpecialChars, aeToAettos, validateTipUrl, convertToken,
 } from '../../utils/helper';
-import InputAmount from '../components/InputAmount';
-import Textarea from '../components/Textarea';
-import InputField from '../components/InputField';
-import UrlStatus from '../components/UrlStatus';
-import Button from '../components/Button';
-import TokenAmount from '../components/TokenAmount';
+import InputAmount from '../components/InputAmount.vue';
+import Textarea from '../components/Textarea.vue';
+import InputField from '../components/InputField.vue';
+import UrlStatus from '../components/UrlStatus.vue';
+import Button from '../components/Button.vue';
+import TokenAmount from '../components/TokenAmount.vue';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {

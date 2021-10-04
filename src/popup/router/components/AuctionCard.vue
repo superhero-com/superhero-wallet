@@ -11,9 +11,9 @@
 </template>
 
 <script>
-import Avatar from './Avatar';
-import HelpButton from './HelpButton';
-import AuctionOverview from './AuctionOverview';
+import Avatar from './Avatar.vue';
+import HelpButton from './HelpButton.vue';
+import AuctionOverview from './AuctionOverview.vue';
 import { blocksToRelativeTime } from '../../../filters/toRelativeTime';
 
 export default {

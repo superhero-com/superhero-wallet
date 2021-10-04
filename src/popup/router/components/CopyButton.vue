@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import ButtonPlain from './ButtonPlain';
+import ButtonPlain from './ButtonPlain.vue';
 import CopyIcon from '../../../icons/copy.svg?vue-component';
 
 export default {

@@ -24,9 +24,9 @@
 </template>
 
 <script>
-import Avatar from '../Avatar';
-import Truncate from '../Truncate';
-import TokenAmount from '../TokenAmount';
+import Avatar from '../Avatar.vue';
+import Truncate from '../Truncate.vue';
+import TokenAmount from '../TokenAmount.vue';
 
 export default {
   components: { Avatar, Truncate, TokenAmount },

@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import InputField from './InputField';
+import InputField from './InputField.vue';
 import Search from '../../../icons/search.svg?vue-component';
 import Eraser from '../../../icons/eraser.svg?vue-component';
 

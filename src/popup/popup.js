@@ -2,7 +2,7 @@ import '../lib/initEnv';
 import '../lib/initPolyfills';
 import Vue from 'vue';
 import sync from '../lib/vuexRouterSync';
-import App from './App';
+import App from './App.vue';
 import '../styles/fullscreen-message.scss';
 import store from '../store';
 import router from './router';

@@ -6,7 +6,7 @@ import VueTour from 'vue-tour';
 import 'vue-tour/dist/vue-tour.css';
 import routes from './routes';
 import '@aeternity/aepp-components-3/dist/aepp.components.css';
-import LoaderComponent from './components/Loader';
+import LoaderComponent from './components/Loader.vue';
 import { i18n } from '../../store/plugins/languages';
 
 import * as helper from '../utils/helper';

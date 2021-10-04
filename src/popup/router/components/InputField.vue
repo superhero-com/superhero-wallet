@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import InputWrapper from './InputWrapper';
+import InputWrapper from './InputWrapper.vue';
 
 export default {
   components: { InputWrapper },

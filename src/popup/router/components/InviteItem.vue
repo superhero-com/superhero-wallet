@@ -80,10 +80,10 @@
 import { pick } from 'lodash-es';
 import { mapState } from 'vuex';
 import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk';
-import TokenAmount from './TokenAmount';
-import InputAmount from './InputAmount';
-import Button from './Button';
-import ButtonPlain from './ButtonPlain';
+import TokenAmount from './TokenAmount.vue';
+import InputAmount from './InputAmount.vue';
+import Button from './Button.vue';
+import ButtonPlain from './ButtonPlain.vue';
 import CopyIcon from '../../../icons/copy-old.svg?vue-component';
 import { formatDate } from '../../utils';
 import { APP_LINK_WEB } from '../../utils/constants';

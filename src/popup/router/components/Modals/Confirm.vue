@@ -26,9 +26,9 @@
 </template>
 
 <script>
-import Default from './Default';
-import Button from '../Button';
-import TemplateRenderer from '../TemplateRenderer';
+import Default from './Default.vue';
+import Button from '../Button.vue';
+import TemplateRenderer from '../TemplateRenderer.vue';
 
 export default {
   components: { Default, TemplateRenderer, Button },

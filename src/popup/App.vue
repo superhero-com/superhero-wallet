@@ -29,9 +29,9 @@
 import { mapGetters, mapState } from 'vuex';
 import { detect } from 'detect-browser';
 import { NOTIFICATION_SETTINGS } from './utils/constants';
-import Header from './router/components/Header';
-import NodeConnectionStatus from './router/components/NodeConnectionStatus';
-import TabBar from './router/components/TabBar';
+import Header from './router/components/Header.vue';
+import NodeConnectionStatus from './router/components/NodeConnectionStatus.vue';
+import TabBar from './router/components/TabBar.vue';
 
 export default {
   components: {

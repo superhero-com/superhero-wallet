@@ -23,7 +23,7 @@
 <script>
 import FilterArrow from '../../../icons/filter-arrow.svg?vue-component';
 import Sort from '../../../icons/sort.svg?vue-component';
-import ButtonPlain from './ButtonPlain';
+import ButtonPlain from './ButtonPlain.vue';
 
 export default {
   components: { FilterArrow, Sort, ButtonPlain },

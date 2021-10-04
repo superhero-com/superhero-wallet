@@ -23,8 +23,8 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import NameItem from '../../components/NameItem';
-import RegisterName from '../../components/RegisterName';
+import NameItem from '../../components/NameItem.vue';
+import RegisterName from '../../components/RegisterName.vue';
 import AnimatedSpinner from '../../../../icons/animated-spinner.svg?skip-optimize';
 
 export default {

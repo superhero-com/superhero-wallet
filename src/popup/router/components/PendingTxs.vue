@@ -14,7 +14,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import TransactionItem from './TransactionItem';
+import TransactionItem from './TransactionItem.vue';
 
 export default {
   components: { TransactionItem },

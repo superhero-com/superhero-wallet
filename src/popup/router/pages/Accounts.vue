@@ -27,9 +27,9 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import AccountCard from '../components/AccountCard';
-import Plate from '../components/Plate';
-import CheckBox from '../components/CheckBox';
+import AccountCard from '../components/AccountCard.vue';
+import Plate from '../components/Plate.vue';
+import CheckBox from '../components/CheckBox.vue';
 
 export default {
   components: { AccountCard, Plate, CheckBox },

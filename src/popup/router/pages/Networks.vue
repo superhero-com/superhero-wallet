@@ -151,11 +151,11 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Button from '../components/Button';
-import ButtonPlain from '../components/ButtonPlain';
-import ActionsMenu from '../components/ActionsMenu';
-import InputField from '../components/InputField';
-import CheckBox from '../components/CheckBox';
+import Button from '../components/Button.vue';
+import ButtonPlain from '../components/ButtonPlain.vue';
+import ActionsMenu from '../components/ActionsMenu.vue';
+import InputField from '../components/InputField.vue';
+import CheckBox from '../components/CheckBox.vue';
 import { defaultNetwork } from '../../utils/constants';
 import Arrow from '../../../icons/arrow.svg?vue-component';
 

@@ -1,13 +1,13 @@
 import { registerModal } from '../../store/plugins/modals';
-import Default from './components/Modals/Default';
-import ClaimSuccess from './components/Modals/ClaimSuccess';
-import ConfirmTip from './components/Modals/ConfirmTip';
-import Confirm from './components/Modals/Confirm';
-import ErrorLog from './components/Modals/ErrorLog';
-import ConfirmTransactionSign from './components/Modals/ConfirmTransactionSign';
-import ConfirmRawSign from './components/Modals/ConfirmRawSign';
-import QrCodeReader from './components/Modals/QrCodeReader';
-import Help from './components/Modals/Help';
+import Default from './components/Modals/Default.vue';
+import ClaimSuccess from './components/Modals/ClaimSuccess.vue';
+import ConfirmTip from './components/Modals/ConfirmTip.vue';
+import Confirm from './components/Modals/Confirm.vue';
+import ErrorLog from './components/Modals/ErrorLog.vue';
+import ConfirmTransactionSign from './components/Modals/ConfirmTransactionSign.vue';
+import ConfirmRawSign from './components/Modals/ConfirmRawSign.vue';
+import QrCodeReader from './components/Modals/QrCodeReader.vue';
+import Help from './components/Modals/Help.vue';
 
 export default () => {
   registerModal({ name: 'default', component: Default });

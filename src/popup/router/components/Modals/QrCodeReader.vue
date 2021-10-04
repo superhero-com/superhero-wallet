@@ -40,8 +40,8 @@
 </template>
 
 <script>
-import Modal from '../Modal';
-import Button from '../Button';
+import Modal from '../Modal.vue';
+import Button from '../Button.vue';
 import { handleUnknownError } from '../../../utils/helper';
 import QrScan from '../../../../icons/qr-scan.svg?vue-component';
 

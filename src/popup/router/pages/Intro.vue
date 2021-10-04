@@ -154,10 +154,10 @@ import { IN_FRAME } from '../../utils/helper';
 import Claim from '../../../icons/claim.svg?vue-component';
 import Heart from '../../../icons/heart.svg?vue-component';
 import Arrow from '../../../icons/arrow.svg?vue-component';
-import Button from '../components/Button';
-import ButtonPlain from '../components/ButtonPlain';
-import CheckBox from '../components/CheckBox';
-import Platforms from '../components/Platforms';
+import Button from '../components/Button.vue';
+import ButtonPlain from '../components/ButtonPlain.vue';
+import CheckBox from '../components/CheckBox.vue';
+import Platforms from '../components/Platforms.vue';
 
 export default {
   components: {

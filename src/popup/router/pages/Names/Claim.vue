@@ -43,10 +43,10 @@
 
 <script>
 import { mapState } from 'vuex';
-import InputField from '../../components/InputField';
-import CheckBox from '../../components/CheckBox';
-import HelpButton from '../../components/HelpButton';
-import Button from '../../components/Button';
+import InputField from '../../components/InputField.vue';
+import CheckBox from '../../components/CheckBox.vue';
+import HelpButton from '../../components/HelpButton.vue';
+import Button from '../../components/Button.vue';
 import { MAX_AUCTION_NAME_LENGTH } from '../../../utils/constants';
 import { checkAensName } from '../../../utils/helper';
 

@@ -10,7 +10,7 @@ module.exports = {
   extends: [
     'plugin:vue-i18n/recommended',
     'plugin:vue/recommended',
-    'airbnb-base',
+    '@vue/airbnb',
   ],
   // check if imports actually resolve
   settings: {
@@ -20,11 +20,6 @@ module.exports = {
   },
   // add your custom rules here
   rules: {
-    // don't require .vue extension when importing
-    'import/extensions': ['error', 'always', {
-      js: 'never',
-      vue: 'never',
-    }],
     // disallow reassignment of function parameters
     // disallow parameter object manipulation except for specific exclusions
     'no-param-reassign': ['error', {

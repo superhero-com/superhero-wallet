@@ -50,11 +50,11 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import Modal from '../../components/Modal';
-import Button from '../../components/Button';
-import Overview from '../../components/Overview';
-import DetailsItem from '../../components/DetailsItem';
-import CopyButton from '../../components/CopyButton';
+import Modal from '../../components/Modal.vue';
+import Button from '../../components/Button.vue';
+import Overview from '../../components/Overview.vue';
+import DetailsItem from '../../components/DetailsItem.vue';
+import CopyButton from '../../components/CopyButton.vue';
 import mixin from './mixin';
 
 export default {

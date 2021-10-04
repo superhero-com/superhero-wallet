@@ -59,11 +59,11 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapState, mapMutations } from 'vuex';
-import CheckBox from '../components/CheckBox';
-import InputField from '../components/InputField';
-import InputRange from '../components/InputRange';
-import TokenAmount from '../components/TokenAmount';
-import Button from '../components/Button';
+import CheckBox from '../components/CheckBox.vue';
+import InputField from '../components/InputField.vue';
+import InputRange from '../components/InputRange.vue';
+import TokenAmount from '../components/TokenAmount.vue';
+import Button from '../components/Button.vue';
 
 export default {
   components: {
