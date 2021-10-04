@@ -18,7 +18,7 @@ const filteredRules = (errors, validatedField, rules) => errors.filter(
 
 const { validateAll } = Validator.prototype;
 Object.assign(Validator.prototype, {
-  async validateAll(warningRules) {
+  async validateAll(warningRules = {}) {
     await validateAll.call(this);
     return !Object.entries(warningRules).reduce(
       (count, [field, rules]) => count + filteredRules(this.errors.items, field, rules).length,
@@ -43,11 +43,14 @@ Object.assign(ErrorBag.prototype, {
 });
 
 Validator.extend('required', required);
+Validator.extend('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
+Validator.extend('name', (value) => checkAensName(`${value}.chain`));
 
 Validator.localize('en', {
   messages: {
     required: () => i18n.t('validation.required'),
     account: () => i18n.t('validation.address'),
+    name: () => i18n.t('validation.name'),
     name_registered_address: () => i18n.t('validation.nameRegisteredAddress'),
     name_unregistered: () => i18n.t('validation.nameUnregistered'),
     not_same_as: () => i18n.t('validation.notSameAs'),
@@ -101,12 +104,11 @@ export default (store) => {
     value, [],
   );
 
-  Validator.extend('name_unregistered', checkName(NAME_STATES.UNREGISTERED));
+  Validator.extend('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
   Validator.extend('name_registered_address', (value) => Crypto.isAddressValid(value) || checkNameRegisteredAddress(value));
   Validator.extend('token_to_an_address', (value) => Crypto.isAddressValid(value) || (checkAensName(value) && !store.getters['fungibleTokens/selectedToken']));
   Validator.extend('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
   });
-  Validator.extend('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
 };
