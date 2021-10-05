@@ -1,4 +1,5 @@
 import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
+import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 
 const type = 'hd-wallet';
 
@@ -64,7 +65,7 @@ export default {
       return dispatch('signWithoutConfirmation', data);
     },
     async signTransaction({ dispatch, rootState: { sdk } }, { txBase64, opt: { modal = true } }) {
-      const encodedTx = Crypto.decodeBase64Check(Crypto.assertedType(txBase64, 'tx'));
+      const encodedTx = decode(txBase64, 'tx');
       if (modal) await dispatch('confirmTxSigning', encodedTx);
       const signature = await dispatch(
         'signWithoutConfirmation',
