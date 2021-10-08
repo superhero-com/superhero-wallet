@@ -40,15 +40,6 @@ Cypress.Commands.add('openTerms', () => {
   cy.get('[data-cy=terms]').should('be.visible').click();
 });
 
-Cypress.Commands.add('enterSeedPhrase', (seed) => {
-  cy.get('textarea').clear().type(seed).get('[data-cy=import]')
-    .click();
-});
-
-Cypress.Commands.add('openAndEnterSeedPhrase', (seed) => {
-  cy.openImportWallet().enterSeedPhrase(seed);
-});
-
 Cypress.Commands.add('inputShouldHaveError', (input) => {
   cy.get(input).should('have.class', 'error');
 });
