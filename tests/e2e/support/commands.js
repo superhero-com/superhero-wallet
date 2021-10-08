@@ -68,20 +68,6 @@ Cypress.Commands.add('clickDotNavigationMakeSlideActive', (slide) => {
     .onboardingSlideShouldBeActive(slide);
 });
 
-Cypress.Commands.add('toggleAccordionItem', (item) => {
-  cy.get('[data-cy=accordion-item]').eq(item).click();
-});
-
-Cypress.Commands.add('accordionItemShould', (item, cond) => {
-  cy.get('[data-cy=accordion-item-content]')
-    .eq(item)
-    .should(cond)
-    .get('[data-cy=accordion-item]')
-    .eq(item)
-    .find('[data-cy=accordion-item-open]')
-    .should(`${cond === 'not.be.visible' ? 'not.' : ''}have.class`, 'rotated');
-});
-
 Cypress.Commands.add('login', (options = {}, route) => {
   cy.openPopup(async (contentWindow) => {
     /* eslint-disable-next-line no-param-reassign */
