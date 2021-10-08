@@ -24,22 +24,6 @@ Cypress.Commands.add('openAepp', (onBeforeLoad) => {
     .should('be.visible');
 });
 
-Cypress.Commands.add('termsAgree', () => {
-  cy.get('[data-cy=checkbox]').click();
-});
-
-Cypress.Commands.add('openGenerateWallet', () => {
-  cy.termsAgree().get('[data-cy=generate-wallet]').click();
-});
-
-Cypress.Commands.add('openImportWallet', () => {
-  cy.termsAgree().get('[data-cy=import-wallet]').click();
-});
-
-Cypress.Commands.add('openTerms', () => {
-  cy.get('[data-cy=terms]').should('be.visible').click();
-});
-
 Cypress.Commands.add('inputShouldHaveError', (input) => {
   cy.get(input).should('have.class', 'error');
 });
@@ -54,18 +38,6 @@ Cypress.Commands.add('buttonShouldNotBeDisabled', (button) => {
 
 Cypress.Commands.add('shouldHasErrorMessage', (el) => {
   cy.get(el).should('exist').should('be.visible');
-});
-
-Cypress.Commands.add('onboardingSlideShouldBeActive', (slide) => {
-  cy.get('[data-cy=onboarding-steps]').find('ul li').eq(slide).should('have.class', 'current');
-});
-
-Cypress.Commands.add('clickDotNavigationMakeSlideActive', (slide) => {
-  cy.get('[data-cy=onboarding-steps]')
-    .find('ul li')
-    .eq(slide)
-    .click()
-    .onboardingSlideShouldBeActive(slide);
 });
 
 Cypress.Commands.add('login', (options = {}, route) => {

@@ -13,4 +13,7 @@ module.exports = {
     '^.*\\.svg\\?vue-component$': '<rootDir>/config/jest/EmptySvg.vue',
     '^.*\\.svg\\?skip-optimize$': '<rootDir>/config/jest/EmptySvg.vue',
   },
+  setupFiles: [
+    '<rootDir>/config/jest/setEnvVars.js',
+  ],
 };
