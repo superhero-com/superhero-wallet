@@ -9,4 +9,8 @@ module.exports = {
   transformIgnorePatterns: [
     `node_modules/(?!(${packagesToTranspile.join('|')})/)`,
   ],
+  moduleNameMapper: {
+    '^.*\\.svg\\?vue-component$': '<rootDir>/config/jest/EmptySvg.vue',
+    '^.*\\.svg\\?skip-optimize$': '<rootDir>/config/jest/EmptySvg.vue',
+  },
 };
