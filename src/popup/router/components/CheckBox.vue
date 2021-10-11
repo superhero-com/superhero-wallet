@@ -34,7 +34,7 @@ export default {
   position: relative;
   align-items: center;
   cursor: pointer;
-  justify-content: start;
+  justify-content: flex-start;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
