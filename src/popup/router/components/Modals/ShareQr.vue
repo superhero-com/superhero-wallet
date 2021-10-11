@@ -7,7 +7,7 @@
     <div>
       <qrcode-vue
         :value="qrStr"
-        class="qrcode"
+        :class="[ 'qrcode', { copied }]"
         size="170"
         level="Q"
       />
@@ -26,6 +26,7 @@
       <Button
         v-if="!IS_MOBILE_DEVICE"
         v-clipboard:copy="qrStr"
+        v-clipboard:success="copy"
         icon-text
       >
         <Copy />
@@ -50,6 +51,7 @@ import TemplateRenderer from '../TemplateRenderer.vue';
 import Button from '../Button.vue';
 import Copy from '../../../../icons/copy.svg?vue-component';
 import Share from '../../../../icons/share.svg?vue-component';
+import copy from '../../../../mixins/copy';
 
 export default {
   components: {
@@ -60,6 +62,7 @@ export default {
     Copy,
     Share,
   },
+  mixins: [copy],
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
@@ -82,11 +85,24 @@ export default {
 @use "../../../../styles/variables";
 
 .qrcode {
+  position: relative;
   width: 182px;
   height: 182px;
   margin: 0 auto 24px;
   padding: 6px;
   border-radius: 6px;
   background-color: variables.$color-white;
+
+  &.copied::after {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: -6px;
+    width: 192px;
+    height: 192px;
+    border: 1px dashed variables.$color-blue;
+    border-radius: 6px;
+    background-color: variables.$color-blue-alpha-15;
+  }
 }
 </style>
