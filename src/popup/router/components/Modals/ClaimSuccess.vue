@@ -18,8 +18,8 @@
 </template>
 
 <script>
-import Modal from '../Modal';
-import Button from '../Button';
+import Modal from '../Modal.vue';
+import Button from '../Button.vue';
 import CheckIcon from '../../../../icons/check-icon.svg?vue-component';
 
 export default {

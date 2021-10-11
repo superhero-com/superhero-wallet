@@ -31,8 +31,8 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import AccountCard from './AccountCard';
-import ButtonPlain from './ButtonPlain';
+import AccountCard from './AccountCard.vue';
+import ButtonPlain from './ButtonPlain.vue';
 
 export default {
   components: { AccountCard, ButtonPlain },

@@ -40,10 +40,10 @@ import { SCHEMA } from '@aeternity/aepp-sdk';
 import { MAGNITUDE, calculateFee } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
 import deeplinkApi from '../../../mixins/deeplinkApi';
-import InputAmount from '../components/InputAmount';
-import UrlStatus from '../components/UrlStatus';
-import Button from '../components/Button';
-import BalanceInfo from '../components/BalanceInfo';
+import InputAmount from '../components/InputAmount.vue';
+import UrlStatus from '../components/UrlStatus.vue';
+import Button from '../components/Button.vue';
+import BalanceInfo from '../components/BalanceInfo.vue';
 
 export default {
   components: {

@@ -37,9 +37,9 @@
 </template>
 
 <script>
-import Plate from '../components/Plate';
-import AccountSwitcher from '../components/AccountSwitcher';
-import BoxButton from '../components/BoxButton';
+import Plate from '../components/Plate.vue';
+import AccountSwitcher from '../components/AccountSwitcher.vue';
+import BoxButton from '../components/BoxButton.vue';
 import Invites from '../../../icons/invites.svg?vue-component';
 import Settings from '../../../icons/settings.svg?vue-component';
 import About from '../../../icons/circle-i.svg?vue-component';

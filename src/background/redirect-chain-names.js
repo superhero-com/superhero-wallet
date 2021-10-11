@@ -32,7 +32,7 @@ export default {
 
     browser.webRequest.onBeforeRequest.addListener(
       (requestDetails) => {
-        chrome.tabs.update({ url: '/redirect/index.html' }, async () => {
+        chrome.tabs.update({ url: '/redirect.html' }, async () => {
           try {
             const url = new URL(requestDetails.url);
             const host = url.hostname;
@@ -46,7 +46,7 @@ export default {
             const displayUrl = `${AGGREGATOR_URL}user-profile/${pubKey}`;
             chrome.tabs.update({ url: displayUrl });
           } catch (err) {
-            chrome.tabs.update({ url: `/redirect/index.html?error=${err.message}` });
+            chrome.tabs.update({ url: `/redirect.html?error=${err.message}` });
           }
         });
         return { cancel: true };

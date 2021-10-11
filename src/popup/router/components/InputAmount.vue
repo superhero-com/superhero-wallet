@@ -23,7 +23,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import InputField from './InputField';
+import InputField from './InputField.vue';
 
 export default {
   components: {

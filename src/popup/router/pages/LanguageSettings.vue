@@ -43,7 +43,7 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 import { mapGetters } from 'vuex';
-import Button from '../components/Button';
+import Button from '../components/Button.vue';
 
 export default {
   components: { Button },

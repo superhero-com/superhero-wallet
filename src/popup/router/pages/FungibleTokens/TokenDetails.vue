@@ -109,16 +109,16 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import Plate from '../../components/Plate';
+import Plate from '../../components/Plate.vue';
 import SendIcon from '../../../../icons/send.svg?vue-component';
 import ReceiveIcon from '../../../../icons/receive.svg?vue-component';
 import TipIcon from '../../../../icons/tip.svg?vue-component';
 import Warning from '../../../../icons/warning.svg?vue-component';
 import TxHistory from '../../../../icons/history.svg?vue-component';
-import BoxButton from '../../components/BoxButton';
-import TokenAmount from '../../components/TokenAmount';
-import DetailsRow from '../../components/FungibleTokens/DetailsRow';
-import TransactionList from '../../components/TransactionList';
+import BoxButton from '../../components/BoxButton.vue';
+import TokenAmount from '../../components/TokenAmount.vue';
+import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
+import TransactionList from '../../components/TransactionList.vue';
 
 export default {
   components: {

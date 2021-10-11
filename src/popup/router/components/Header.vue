@@ -95,8 +95,8 @@ import Bell from '../../../icons/bell.svg?vue-component';
 import Settings from '../../../icons/notif-settings.svg?vue-component';
 import ThreeDots from '../../../icons/three-dots.svg?vue-component';
 import Close from '../../../icons/close.svg?vue-component';
-import Truncate from './Truncate';
-import ButtonPlain from './ButtonPlain';
+import Truncate from './Truncate.vue';
+import ButtonPlain from './ButtonPlain.vue';
 
 export default {
   components: {

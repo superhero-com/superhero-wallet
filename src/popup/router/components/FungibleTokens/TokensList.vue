@@ -17,7 +17,7 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapState, mapGetters } from 'vuex';
-import TokensListItem from './TokensListItem';
+import TokensListItem from './TokensListItem.vue';
 
 export default {
   components: {

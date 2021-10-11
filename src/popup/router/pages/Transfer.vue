@@ -17,8 +17,8 @@
 </template>
 
 <script>
-import AccountSwitcher from '../components/AccountSwitcher';
-import Tabs from '../components/Tabs';
+import AccountSwitcher from '../components/AccountSwitcher.vue';
+import Tabs from '../components/Tabs.vue';
 import SendIcon from '../../../icons/send.svg?vue-component';
 import ReceiveIcon from '../../../icons/receive.svg?vue-component';
 

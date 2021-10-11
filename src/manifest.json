@@ -1,0 +1,65 @@
+{
+  "name": "Superhero",
+  "description": "Superhero Wallet",
+  "manifest_version": 2,
+  "applications": {
+    "gecko": {
+      "strict_min_version": "53.0"
+    }
+  },
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "videoCapture",
+    "activeTab",
+    "clipboardWrite",
+    "contextMenus",
+    "notifications",
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "webNavigation",
+    "*://*.chain/*",
+    "*://*.google.com/*",
+    "https://*.twitter.com/*",
+    "https://twitter.com/*",
+    "https://*.youtube.com/watch?v=*",
+    "https://wallet.superhero.com/*"
+  ],
+  "icons": {
+    "48": "./icons/icon_48.png",
+    "128": "./icons/icon_128.png"
+  },
+  "browser_action": {
+    "default_title": "Superhero",
+    "default_popup": "index.html"
+  },
+  "background": {
+    "scripts": ["js/background.js"],
+    "persistent": true
+  },
+  "content_scripts": [
+    {
+      "run_at": "document_start",
+      "all_frames": true,
+      "matches": ["https://*/*", "http://*/*"],
+      "js": ["js/inject.js"]
+    },
+    {
+      "run_at": "document_start",
+      "matches": ["https://*.twitter.com/*", "https://twitter.com/*"],
+      "js": ["js/twitter.js"]
+    },
+    {
+      "run_at": "document_start",
+      "matches": ["https://*.youtube.com/watch?v=*"],
+      "js": ["js/youtube.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    "js/inject.js",
+    "CameraRequestPermission.html",
+    "other/tipButton.css",
+    "index.html"
+  ]
+}

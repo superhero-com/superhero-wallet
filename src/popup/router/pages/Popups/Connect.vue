@@ -53,9 +53,9 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import Modal from '../../components/Modal';
-import Button from '../../components/Button';
-import Overview from '../../components/Overview';
+import Modal from '../../components/Modal.vue';
+import Button from '../../components/Button.vue';
+import Overview from '../../components/Overview.vue';
 import CheckMark from '../../../../icons/check-mark.svg?vue-component';
 import mixin from './mixin';
 

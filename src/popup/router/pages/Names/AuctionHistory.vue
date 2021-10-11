@@ -27,9 +27,9 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import AccountItem from '../../components/AccountItem';
-import AuctionOverview from '../../components/AuctionOverview';
-import TokenAmount from '../../components/TokenAmount';
+import AccountItem from '../../components/AccountItem.vue';
+import AuctionOverview from '../../components/AuctionOverview.vue';
+import TokenAmount from '../../components/TokenAmount.vue';
 
 export default {
   components: { AccountItem, AuctionOverview, TokenAmount },

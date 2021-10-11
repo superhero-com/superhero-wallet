@@ -41,9 +41,9 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { uniqBy } from 'lodash-es';
-import Filters from './Filters';
-import TransactionItem from './TransactionItem';
-import PendingTxs from './PendingTxs';
+import Filters from './Filters.vue';
+import TransactionItem from './TransactionItem.vue';
+import PendingTxs from './PendingTxs.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import { TXS_PER_PAGE } from '../../utils/constants';
 import Visible from '../../../icons/visible.svg?vue-component';

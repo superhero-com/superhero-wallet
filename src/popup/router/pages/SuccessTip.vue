@@ -83,8 +83,8 @@ import Heart from '../../../icons/heart.svg?vue-component';
 import { AGGREGATOR_URL } from '../../utils/constants';
 import { aettosToAe } from '../../utils/helper';
 import Logger from '../../../lib/logger';
-import TokenAmount from '../components/TokenAmount';
-import Button from '../components/Button';
+import TokenAmount from '../components/TokenAmount.vue';
+import Button from '../components/Button.vue';
 
 export default {
   components: {

@@ -13,7 +13,7 @@ RedirectChainNames.init();
 initDeeplinkHandler();
 
 const openTipPopup = (pageUrl) => browser.windows.create({
-  url: browser.extension.getURL(`./popup/popup.html#/tips?url=${encodeURIComponent(pageUrl)}`),
+  url: browser.extension.getURL(`./index.html#/tips?url=${encodeURIComponent(pageUrl)}`),
   type: 'popup',
   height: 600,
   width: 375,
@@ -71,7 +71,7 @@ browser.webNavigation.onHistoryStateUpdated.addListener(async ({ tabId, url }) =
   if (
     (({ origin, pathname }) => origin + pathname)(new URL(url)) !== 'https://www.youtube.com/watch'
   ) return;
-  browser.tabs.executeScript(tabId, { file: 'other/youtube.js' });
+  browser.tabs.executeScript(tabId, { file: 'js/youtube.js' });
 });
 
 browser.contextMenus.removeAll();

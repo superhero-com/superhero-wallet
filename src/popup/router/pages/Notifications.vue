@@ -42,8 +42,8 @@
 
 <script>
 import { mapState, mapMutations } from 'vuex';
-import NotificationItem from '../components/NotificationItem';
-import ButtonPlain from '../components/ButtonPlain';
+import NotificationItem from '../components/NotificationItem.vue';
+import ButtonPlain from '../components/ButtonPlain.vue';
 
 export default {
   components: { NotificationItem, ButtonPlain },

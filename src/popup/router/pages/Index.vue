@@ -63,9 +63,9 @@
 import { IN_FRAME } from '../../utils/helper';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import Logo from '../../../icons/logo.svg?vue-component';
-import CheckBox from '../components/CheckBox';
-import Button from '../components/Button';
-import Platforms from '../components/Platforms';
+import CheckBox from '../components/CheckBox.vue';
+import Button from '../components/Button.vue';
+import Platforms from '../components/Platforms.vue';
 
 export default {
   components: {

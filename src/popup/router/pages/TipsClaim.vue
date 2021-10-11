@@ -25,8 +25,8 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { aettosToAe, toURL, validateTipUrl } from '../../utils/helper';
-import InputField from '../components/InputField';
-import Button from '../components/Button';
+import InputField from '../components/InputField.vue';
+import Button from '../components/Button.vue';
 
 export default {
   components: { InputField, Button },

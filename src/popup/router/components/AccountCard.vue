@@ -16,8 +16,8 @@
 
 <script>
 import { mapState } from 'vuex';
-import AccountInfo from './AccountInfo';
-import BalanceInfo from './BalanceInfo';
+import AccountInfo from './AccountInfo.vue';
+import BalanceInfo from './BalanceInfo.vue';
 import Triangle from '../../../icons/account-card/card-bg-triangle.svg?vue-component';
 
 export default {

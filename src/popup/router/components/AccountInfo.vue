@@ -107,10 +107,10 @@
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import Avatar from './Avatar';
-import Truncate from './Truncate';
-import InputField from './InputField';
-import ButtonPlain from './ButtonPlain';
+import Avatar from './Avatar.vue';
+import Truncate from './Truncate.vue';
+import InputField from './InputField.vue';
+import ButtonPlain from './ButtonPlain.vue';
 import Collapse from '../../../icons/account-card/collapse.svg?vue-component';
 import Expand from '../../../icons/account-card/expand.svg?vue-component';
 import Add from '../../../icons/account-card/btn-add-subaccount.svg?vue-component';

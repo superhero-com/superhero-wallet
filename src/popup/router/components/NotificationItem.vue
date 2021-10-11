@@ -54,9 +54,9 @@
 </template>
 
 <script>
-import FormatDate from './FormatDate';
-import Avatar from './Avatar';
-import ActionsMenu from './ActionsMenu';
+import FormatDate from './FormatDate.vue';
+import Avatar from './Avatar.vue';
+import ActionsMenu from './ActionsMenu.vue';
 
 export default {
   components: {

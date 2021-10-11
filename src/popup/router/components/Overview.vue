@@ -75,12 +75,12 @@
 </template>
 
 <script>
-import Truncate from './Truncate';
-import CopyAddress from './CopyAddress';
+import Truncate from './Truncate.vue';
+import CopyAddress from './CopyAddress.vue';
 import TriangleRight from '../../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../../icons/action.svg?vue-component';
 import AensIcon from '../../../icons/aens.svg?vue-component';
-import Avatar from './Avatar';
+import Avatar from './Avatar.vue';
 
 export default {
   components: {
