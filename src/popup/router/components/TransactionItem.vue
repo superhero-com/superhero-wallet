@@ -20,7 +20,7 @@
         v-if="showType"
         class="type"
       >
-        ({{ (getZeitTxTitle(transaction) || $t('transaction.type')[txType]) || txType }})
+        ({{ ($t('transaction.type')[txType]) || txType }})
       </span>
     </div>
     <div
@@ -57,7 +57,6 @@ export default {
       'getTxDirection',
       'getTxTipUrl',
       'isTxAex9',
-      'getZeitTxTitle',
     ]),
     txType() {
       return this.getTxType(this.transaction);
