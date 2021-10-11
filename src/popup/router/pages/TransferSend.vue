@@ -231,8 +231,9 @@ export default {
     };
   },
   computed: {
+    ...mapState('accounts', ['activeIdx']),
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapState(['current', 'sdk', 'accountSelectedIdx']),
+    ...mapState(['current', 'sdk']),
     ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate', 'accounts']),
     ...mapGetters('fungibleTokens', ['selectedToken', 'tokenBalances']),
     validAddress() {
@@ -290,7 +291,7 @@ export default {
 
         // SELECT ZEIT TOKEN
         this.$store.commit('fungibleTokens/setSelectedToken', {
-          address: this.accounts[this.accountSelectedIdx].address,
+          address: this.accounts[this.activeIdx].address,
           token: this.tokenBalances.find(({ value }) => value === ZEIT_TOKEN_CONTRACT),
         });
         // SET result data

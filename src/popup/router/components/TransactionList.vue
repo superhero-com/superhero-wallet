@@ -75,7 +75,7 @@ export default {
   },
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapState(['accountSelectedIdx']),
+    ...mapState('accounts', ['activeIdx']),
     ...mapState({
       filteredTransactions(state, { account: { address } }) {
         const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
@@ -120,7 +120,7 @@ export default {
     ...mapGetters('transactionCache', ['chainTransactions']),
   },
   watch: {
-    accountSelectedIdx() {
+    activeIdx() {
       this.$store.commit('setTransactions', []);
       this.transactions = [];
       this.page = 1;

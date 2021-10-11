@@ -71,7 +71,7 @@
           <template slot="right">
             <ButtonPlain
               v-show="idx !== 0 && $route.path === '/accounts' && !edit"
-              @click="editLocalName"
+              @click="edit = true"
             >
               <Edit />
             </ButtonPlain>
@@ -106,7 +106,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import Avatar from './Avatar';
 import Truncate from './Truncate';
 import InputField from './InputField';
@@ -146,10 +146,11 @@ export default {
     UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
   }),
   computed: {
-    ...mapState(['accountCount', 'accountSelectedIdx', 'cardMinified']),
+    ...mapState('accounts', ['activeIdx']),
+    ...mapState(['cardMinified']),
     ...mapGetters(['accounts', 'activeNetwork']),
     idx() {
-      return this.accountIdx === -1 ? this.accountSelectedIdx : this.accountIdx;
+      return this.accountIdx === -1 ? this.activeIdx : this.accountIdx;
     },
     explorerUrl() {
       const { address } = this.accounts[this.idx];
@@ -165,17 +166,13 @@ export default {
     this.customAccountName = this.accounts[this.idx].localName;
   },
   methods: {
-    ...mapMutations(['createAccount', 'deleteAccount']),
-    editLocalName() {
-      this.customAccountName = this.accounts[this.idx].localName;
-      this.edit = true;
-    },
+    ...mapActions({ createAccount: 'accounts/hdWallet/create' }),
     updateBalances() {
       this.$store.dispatch('fungibleTokens/getAvailableTokens');
       this.$store.dispatch('fungibleTokens/loadTokenBalances');
     },
     saveLocalName() {
-      this.$store.commit('setAccountLocalName', { name: this.customAccountName, idx: this.idx });
+      this.$store.commit('accounts/setLocalName', { name: this.customAccountName, idx: this.idx });
       this.edit = false;
     },
     copy() {
@@ -191,7 +188,7 @@ export default {
         title: this.$t('modals.removeSubaccount.title'),
         msg: this.$t('modals.removeSubaccount.msg'),
       });
-      this.deleteAccount(this.idx);
+      this.$store.commit('accounts/remove', this.idx);
     },
   },
 };
