@@ -21,6 +21,7 @@ import fungibleTokensPlugin from './plugins/fungibleTokens';
 import { defaultNetwork } from '../popup/utils/constants';
 import stateReducer from './utils';
 import chainListener from './plugins/chainListener';
+import veeValidate from './plugins/veeValidate';
 
 Vue.use(Vuex);
 Vue.use(VueRx);
@@ -84,6 +85,7 @@ export default new Vuex.Store({
     languagesPlugin,
     openErrorModalPlugin,
     chainListener,
+    veeValidate,
   ],
   modules: {
     invites: invitesModule,

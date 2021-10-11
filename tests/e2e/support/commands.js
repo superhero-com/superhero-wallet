@@ -192,7 +192,7 @@ Cypress.Commands.add('pendingTx', (tx = {}) => {
   });
 });
 
-Cypress.Commands.add('enterAmountInput', (amount = 0) => {
+Cypress.Commands.add('enterInputAmount', (amount = 0) => {
   cy.get('[data-cy=input-number]').clear().type(amount);
 });
 
@@ -201,7 +201,7 @@ Cypress.Commands.add('goBack', () => {
 });
 
 Cypress.Commands.add('enterAddress', (address) => {
-  cy.get('[data-cy=address]').clear().type(address);
+  cy.get('[data-cy=address] input').clear().type(address);
 });
 
 Cypress.Commands.add(

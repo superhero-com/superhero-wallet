@@ -5,7 +5,7 @@
         <NewInviteLink class="invite-icon" />
         {{ $t('pages.invite.generate-link') }}
       </p>
-      <AmountInput
+      <InputAmount
         v-model="amount"
         native-token
         :label="$t('pages.invite.tip-attached')"
@@ -45,7 +45,7 @@
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
-import AmountInput from '../components/AmountInput';
+import InputAmount from '../components/InputAmount';
 import Button from '../components/Button';
 import InviteItem from '../components/InviteItem';
 import Invite from '../../../icons/invite.svg?vue-component';
@@ -53,7 +53,7 @@ import NewInviteLink from '../../../icons/new-invite-link.svg?vue-component';
 
 export default {
   components: {
-    AmountInput, Button, InviteItem, Invite, NewInviteLink,
+    InputAmount, Button, InviteItem, Invite, NewInviteLink,
   },
   data: () => ({ amount: 0, loading: false }),
   subscriptions() {
@@ -123,7 +123,7 @@ export default {
     margin-right: 7px;
   }
 
-  .amount-input {
+  .input-amount {
     margin: 10px 0 0 0;
   }
 

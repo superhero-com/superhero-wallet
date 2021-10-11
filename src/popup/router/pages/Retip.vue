@@ -10,7 +10,7 @@
       <a class="link-sm text-left">{{ tip.url }}</a>
     </div>
 
-    <AmountInput
+    <InputAmount
       v-model="amount"
       :amount-error="amount && validationStatus.error"
       :error-message="validationStatus.msg"
@@ -40,14 +40,14 @@ import { SCHEMA } from '@aeternity/aepp-sdk';
 import { MAGNITUDE, calculateFee } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
 import deeplinkApi from '../../../mixins/deeplinkApi';
-import AmountInput from '../components/AmountInput';
+import InputAmount from '../components/InputAmount';
 import UrlStatus from '../components/UrlStatus';
 import Button from '../components/Button';
 import BalanceInfo from '../components/BalanceInfo';
 
 export default {
   components: {
-    AmountInput, UrlStatus, Button, BalanceInfo,
+    InputAmount, UrlStatus, Button, BalanceInfo,
   },
   mixins: [deeplinkApi],
   data: () => ({

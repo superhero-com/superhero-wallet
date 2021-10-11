@@ -5,8 +5,11 @@
     </span>
     <InputField
       v-model="name"
+      v-validate="'required|name|name_unregistered'"
+      name="name"
+      :error="errors.has('name')"
+      :error-message="errors.first('name')"
       :placeholder="$t('pages.names.claim.name-placeholder')"
-      :error="!!name.length && !validName"
     >
       <span slot="right">.chain</span>
     </InputField>
@@ -30,7 +33,7 @@
       <mark>{{ $t('pages.names.claim.short-names.insertion') }}</mark>
     </i18n>
     <Button
-      :disabled="!sdk || !validName"
+      :disabled="!sdk || !name || errors.any()"
       @click="claim"
     >
       {{ $t('pages.names.claim.button') }}
@@ -45,6 +48,7 @@ import CheckBox from '../../components/CheckBox';
 import HelpButton from '../../components/HelpButton';
 import Button from '../../components/Button';
 import { MAX_AUCTION_NAME_LENGTH } from '../../../utils/constants';
+import { checkAensName } from '../../../utils/helper';
 
 export default {
   components: {
@@ -59,13 +63,12 @@ export default {
   computed: {
     ...mapState(['sdk']),
     validName() {
-      return this.name && /^[A-Za-z0-9]+$/.test(this.name);
+      return this.name && checkAensName(`${this.name}.chain`);
     },
   },
   methods: {
     async claim() {
-      this.name = this.name.trim();
-      if (!this.validName) return;
+      if (!await this.$validator.validateAll()) return;
       const name = `${this.name}.chain`;
       const nameEntry = await this.sdk.api.getNameEntryByName(name).catch(() => false);
       if (nameEntry) {

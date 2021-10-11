@@ -49,7 +49,7 @@
       </Button>
     </div>
     <template v-else>
-      <AmountInput
+      <InputAmount
         v-model="topUpAmount"
         native-token
         :label="$t('pages.invite.top-up-with')"
@@ -81,7 +81,7 @@ import { pick } from 'lodash-es';
 import { mapState } from 'vuex';
 import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk';
 import TokenAmount from './TokenAmount';
-import AmountInput from './AmountInput';
+import InputAmount from './InputAmount';
 import Button from './Button';
 import ButtonPlain from './ButtonPlain';
 import CopyIcon from '../../../icons/copy-old.svg?vue-component';
@@ -90,7 +90,7 @@ import { APP_LINK_WEB } from '../../utils/constants';
 
 export default {
   components: {
-    TokenAmount, Button, ButtonPlain, AmountInput, CopyIcon,
+    TokenAmount, Button, ButtonPlain, InputAmount, CopyIcon,
   },
   filters: { formatDate },
   props: {
@@ -231,7 +231,7 @@ export default {
     }
   }
 
-  .amount-input {
+  .input-amount {
     margin: 0;
   }
 
