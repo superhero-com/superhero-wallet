@@ -2,16 +2,15 @@ name: Publish Docker Superhero Wallet image
 
 on:
   push:
-    branches: 
-      - master
+    branches: [ master, develop ]
     tags:
       - 'v*'
   pull_request:
     branches: [ master, develop ]
 
 jobs:
-  push_to_registry:
-    name: Push Docker image to Docker Hub
+  main:
+    name: Wallet Build/Test/Docker
     runs-on: ubuntu-latest
     steps:
       - if: github.ref != 'refs/heads/develop'
