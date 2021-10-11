@@ -276,7 +276,7 @@ export default {
           parsedScanResult = JSON.parse(scanResult);
         } catch (e) {
           // eslint-disable-next-line no-console
-          console.error(e);
+          if (process.env.NODE_ENV !== 'production') console.error(e);
           this.form.address = '';
           this.$store.dispatch('modals/open', {
             name: 'default',
