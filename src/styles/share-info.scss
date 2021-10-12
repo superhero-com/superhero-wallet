@@ -1,0 +1,27 @@
+@use './variables.scss';
+@use './typography.scss';
+
+span {
+  @extend %face-sans-14-medium;
+
+  overflow: hidden;
+  text-align: left;
+  color: variables.$color-light-grey;
+
+  &,
+  strong {
+    word-wrap: break-word;
+  }
+
+  strong {
+    color: variables.$color-white;
+  }
+
+  &.address {
+    @extend %face-mono-12-medium;
+
+    strong {
+      font-weight: 500;
+    }
+  }
+}
