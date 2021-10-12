@@ -20,6 +20,8 @@
       {{ msg }}
     </template>
 
+    <slot />
+
     <slot
       v-if="$slots.footer"
       slot="footer"

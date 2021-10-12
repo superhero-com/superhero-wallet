@@ -81,7 +81,7 @@ export default {
     margin: auto;
     padding: 48px 28px 40px;
     background: variables.$color-bg-1;
-    border: 1px solid variables.$color-black;
+    border: 1px solid variables.$color-border;
     border-radius: 5px;
     box-shadow: 2px 4px 12px rgba(variables.$color-black, 0.22);
 

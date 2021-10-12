@@ -18,6 +18,7 @@
         inline,
         inactive,
         bold,
+        'icon-text': iconText
       },
     ]"
     v-on="$listeners"
@@ -44,6 +45,7 @@ export default {
     inactive: Boolean,
     to: { type: [String, Object], default: null },
     bold: Boolean,
+    iconText: Boolean,
   },
   computed: {
     isLinkOnSameHost() {
@@ -202,6 +204,17 @@ export default {
 
   &.inactive {
     opacity: 0.4;
+  }
+
+  &.icon-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
   }
 }
 </style>

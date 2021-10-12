@@ -6,7 +6,7 @@
     <TemplateRenderer
       v-if="!$slots.msg"
       slot="msg"
-      :node="templateRootNode"
+      :str="$attrs.msg"
     />
     <template slot="footer">
       <Button
@@ -35,12 +35,6 @@ export default {
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
-  },
-  computed: {
-    templateRootNode() {
-      return new DOMParser()
-        .parseFromString(`<root>${this.$attrs.msg || ''}</root>`, 'text/xml').childNodes[0];
-    },
   },
   methods: {
     cancel() {

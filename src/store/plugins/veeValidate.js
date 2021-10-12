@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import { Validator, ErrorBag, install as VeeValidate } from 'vee-validate/dist/vee-validate.minimal.esm';
 import { required } from 'vee-validate/dist/rules.esm';
+import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { Crypto } from '@aeternity/aepp-sdk';
 import { i18n } from './languages';
@@ -45,6 +46,7 @@ Object.assign(ErrorBag.prototype, {
 Validator.extend('required', required);
 Validator.extend('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
 Validator.extend('name', (value) => checkAensName(`${value}.chain`));
+Validator.extend('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
 
 Validator.localize('en', {
   messages: {
@@ -55,6 +57,7 @@ Validator.localize('en', {
     name_unregistered: () => i18n.t('validation.nameUnregistered'),
     not_same_as: () => i18n.t('validation.notSameAs'),
     token_to_an_address: () => i18n.t('validation.tokenToAnAddress'),
+    min_value: (field, [arg]) => i18n.t('validation.minValue', [arg]),
   },
 });
 

@@ -8,6 +8,7 @@ import ConfirmTransactionSign from './components/Modals/ConfirmTransactionSign.v
 import ConfirmRawSign from './components/Modals/ConfirmRawSign.vue';
 import QrCodeReader from './components/Modals/QrCodeReader.vue';
 import Help from './components/Modals/Help.vue';
+import ShareQr from './components/Modals/ShareQr.vue';
 
 export default () => {
   registerModal({ name: 'default', component: Default });
@@ -29,4 +30,5 @@ export default () => {
   registerModal({ name: 'confirm-connect', showInPopupIfWebFrame: true });
   registerModal({ name: 'read-qr-code', component: QrCodeReader });
   registerModal({ name: 'confirm-message-sign', showInPopupIfWebFrame: true });
+  registerModal({ name: 'share-qr', component: ShareQr });
 };

@@ -5,7 +5,7 @@
   >
     <TemplateRenderer
       slot="msg"
-      :node="templateRootNode"
+      :str="$attrs.msg"
     />
   </Default>
 </template>
@@ -16,11 +16,5 @@ import TemplateRenderer from '../TemplateRenderer.vue';
 
 export default {
   components: { Default, TemplateRenderer },
-  computed: {
-    templateRootNode() {
-      return new DOMParser()
-        .parseFromString(`<root>${this.$attrs.msg || ''}</root>`, 'text/xml').childNodes[0];
-    },
-  },
 };
 </script>

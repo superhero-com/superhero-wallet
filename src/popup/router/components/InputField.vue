@@ -12,6 +12,7 @@
     <input
       class="input"
       v-bind="$attrs"
+      autocomplete="off"
       :value="value"
       :data-cy="$attrs.type ? `input-${$attrs.type}` : 'input'"
       :disabled="readonly"
