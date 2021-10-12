@@ -2,8 +2,9 @@
 
 import Vue from 'vue';
 import hdWallet from './hdWallet';
+import ledger from './ledger';
 
-const modules = { hdWallet };
+const modules = { hdWallet, ledger };
 
 export default {
   namespaced: true,

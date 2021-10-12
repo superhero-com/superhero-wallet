@@ -29,10 +29,11 @@ export default {
   accounts({ accounts: { list } }, getters) {
     if (!getters.wallet) return [];
     return list
-      .map(({ idx, ...acc }) => ({
+      .map(({ idx, type, ...acc }) => ({
         idx,
+        type,
         ...acc,
-        ...getHdWalletAccount(getters.wallet, idx),
+        ...(type === 'hd-wallet' ? getHdWalletAccount(getters.wallet, idx) : {}),
       }))
       .map(({ idx, localName, ...account }) => ({
         idx,
