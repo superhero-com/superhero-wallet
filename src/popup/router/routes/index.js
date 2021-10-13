@@ -320,6 +320,12 @@ export default [
       title: 'buy',
       backButton: true,
     },
+    ...process.env.IS_EXTENSION || (window.IS_MOBILE_DEVICE && !process.env.IS_CORDOVA)
+      ? {
+        beforeEnter() {
+          window.open('https://aeternity.com/simplex-integration/', '_blank');
+        },
+      } : {},
   },
   {
     path: '/notifications',
