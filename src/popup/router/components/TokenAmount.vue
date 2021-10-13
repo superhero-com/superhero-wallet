@@ -35,10 +35,11 @@ export default {
     },
     large: { type: Boolean },
     noSymbol: { type: Boolean },
+    highPrecision: { type: Boolean },
   },
   computed: {
     amountRounded() {
-      return +this.amount.toFixed(this.amount < 0.01 ? 9 : 2);
+      return +this.amount.toFixed((this.highPrecision || this.amount < 0.01) ? 9 : 2);
     },
     ...mapState({
       amountFiat(state, { convertToCurrency, formatCurrency }) {

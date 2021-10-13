@@ -47,6 +47,8 @@ Validator.extend('required', required);
 Validator.extend('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
 Validator.extend('name', (value) => checkAensName(`${value}.chain`));
 Validator.extend('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
+Validator.extend('min_value_exclusive', (value, [arg]) => BigNumber(value).isGreaterThan(arg));
+Validator.extend('max_value', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));
 
 Validator.localize('en', {
   messages: {
@@ -58,6 +60,9 @@ Validator.localize('en', {
     not_same_as: () => i18n.t('validation.notSameAs'),
     token_to_an_address: () => i18n.t('validation.tokenToAnAddress'),
     min_value: (field, [arg]) => i18n.t('validation.minValue', [arg]),
+    min_value_exclusive: (field, [arg]) => i18n.t('validation.minValueExclusive', [arg]),
+    max_value: (field, [arg]) => i18n.t('validation.maxValue', [arg]),
+    enough_ae: () => i18n.t('validation.enoughAe'),
   },
 });
 
@@ -114,4 +119,9 @@ export default (store) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
   });
+  Validator.extend('enough_ae', (_, [arg]) => new Promise(
+    (resolve) => store.state.observables.balance
+      .subscribe((balance) => resolve(balance.isGreaterThanOrEqualTo(arg)))
+      .unsubscribe(),
+  ));
 };
