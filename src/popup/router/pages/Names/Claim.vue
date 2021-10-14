@@ -36,19 +36,24 @@
       :disabled="!sdk || !name || errors.any()"
       @click="claim"
     >
-      {{ $t('pages.names.claim.button') }}
+      {{
+        validName ?
+          $t('pages.names.claim.button-price', [nameFee])
+          : $t('pages.names.claim.button')
+      }}
     </Button>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
+import { getMinimumNameFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import HelpButton from '../../components/HelpButton.vue';
 import Button from '../../components/Button.vue';
-import { MAX_AUCTION_NAME_LENGTH } from '../../../utils/constants';
-import { checkAensName } from '../../../utils/helper';
+import { MAX_AUCTION_NAME_LENGTH, MAGNITUDE } from '../../../utils/constants';
+import { checkAensName, convertToken } from '../../../utils/helper';
 
 export default {
   components: {
@@ -64,6 +69,9 @@ export default {
     ...mapState(['sdk']),
     validName() {
       return this.name && checkAensName(`${this.name}.chain`);
+    },
+    nameFee() {
+      return convertToken(getMinimumNameFee(this.name), -MAGNITUDE).toFixed(4);
     },
   },
   methods: {
