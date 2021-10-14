@@ -1,6 +1,6 @@
 <template>
   <RouterLink
-    class="box-button"
+    :class="['box-button', fill ]"
     :to="to"
   >
     <slot />
@@ -11,6 +11,11 @@
 export default {
   props: {
     to: { type: [String, Object], default: '' },
+    fill: {
+      type: String,
+      validator: (value) => ['primary', 'alternative'].includes(value),
+      default: 'primary',
+    },
   },
 };
 </script>
@@ -38,17 +43,28 @@ export default {
     color: variables.$color-light-grey;
   }
 
-  &:hover {
-    background: rgba(variables.$color-blue, 0.15);
+  &.primary {
+    &:hover {
+      background: rgba(variables.$color-blue, 0.15);
 
-    &,
-    ::v-deep svg {
-      color: variables.$color-blue;
+      &,
+      ::v-deep svg {
+        color: variables.$color-blue;
+      }
+    }
+
+    &:active {
+      background-color: variables.$color-blue-alpha-10;
     }
   }
 
-  &:active {
-    background-color: rgba(variables.$color-blue, 0.1);
+  &.alternative:hover {
+    background: variables.$color-red-alpha-10;
+
+    &,
+    ::v-deep svg {
+      color: variables.$color-red;
+    }
   }
 }
 </style>

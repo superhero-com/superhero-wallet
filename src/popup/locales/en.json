@@ -298,6 +298,7 @@
       "name-auctions": "Name auctions",
       "register-name": "Register name",
       "more": "More",
+      "buy": "Buy AE Tokens",
       "networks": "Networks",
       "permissionsSettings": "Permissions settings",
       "permissionsDetails": "Permissions details",
@@ -488,7 +489,9 @@
       "mcap": "MCap",
       "price": "Price",
       "not-available": "N/A",
-      "no-results": "This account has no tokens with balance"
+      "noTokens": "No tokens in account balance.",
+      "buyAe": "Buy AE",
+      "receiveTokens": "Receive tokens"
     },
     "token-details": {
       "details": "Details",

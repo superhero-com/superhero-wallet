@@ -18,7 +18,8 @@
         inline,
         inactive,
         bold,
-        'icon-text': iconText
+        backgroundless,
+        'icon-text': iconText,
       },
     ]"
     v-on="$listeners"
@@ -32,7 +33,7 @@ export default {
   props: {
     fill: {
       type: String,
-      validator: (value) => ['primary', 'secondary'].includes(value),
+      validator: (value) => ['primary', 'secondary', 'alternative'].includes(value),
       default: 'primary',
     },
     disabled: Boolean,
@@ -45,6 +46,7 @@ export default {
     inactive: Boolean,
     to: { type: [String, Object], default: null },
     bold: Boolean,
+    backgroundless: Boolean,
     iconText: Boolean,
   },
   computed: {
@@ -206,14 +208,42 @@ export default {
     opacity: 0.4;
   }
 
+  &.backgroundless {
+    &.small {
+      @extend %face-sans-16-medium;
+    }
+
+    background: transparent;
+
+    &.primary {
+      color: variables.$color-blue;
+      border: 1px solid variables.$color-blue;
+
+      &:hover {
+        background-color: variables.$color-blue-alpha-10;
+      }
+    }
+
+    &.alternative {
+      color: variables.$color-red;
+      border: 1px solid variables.$color-red;
+
+      &:hover {
+        background-color: variables.$color-red-alpha-10;
+      }
+    }
+  }
+
   &.icon-text {
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    cursor: pointer;
 
-    svg {
+    ::v-deep svg {
       width: 24px;
       height: 24px;
+      margin-right: 6px;
     }
   }
 }
