@@ -48,6 +48,7 @@ import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
 import Transactions from '../pages/Transactions.vue';
 import webIframePopups from './web-iframe-popups';
+import { SIMPLEX_URL } from '../../utils/constants';
 
 export default [
   {
@@ -312,7 +313,7 @@ export default [
       backButton: false,
     },
   },
-  {
+  ...process.env.UNFINISHED_FEATURES ? [{
     path: '/buy',
     component: Buy,
     name: 'buy',
@@ -323,10 +324,10 @@ export default [
     ...process.env.IS_EXTENSION || (window.IS_MOBILE_DEVICE && !process.env.IS_CORDOVA)
       ? {
         beforeEnter() {
-          window.open('https://aeternity.com/simplex-integration/', '_blank');
+          window.open(SIMPLEX_URL, '_blank');
         },
       } : {},
-  },
+  }] : [],
   {
     path: '/notifications',
     name: 'notifications',

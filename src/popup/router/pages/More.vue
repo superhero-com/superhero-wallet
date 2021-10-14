@@ -21,6 +21,7 @@
         <About /> {{ $t('pages.titles.about') }}
       </BoxButton>
       <BoxButton
+        v-if="UNFINISHED_FEATURES"
         to="/buy"
         fill="alternative"
       >
