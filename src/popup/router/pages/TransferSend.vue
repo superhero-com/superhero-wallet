@@ -94,6 +94,7 @@
         :amount="(selectedToken ? 0 : +fee.toFixed()) + +form.amount"
         :symbol="tokenSymbol"
         high-precision
+        :hide-fiat="!!selectedToken"
         data-cy="review-total"
       />
     </DetailsItem>
@@ -277,7 +278,7 @@ export default {
         this.invoiceId = parsedScanResult.invoiceId;
         this.invoiceContract = parsedScanResult.invoiceContract;
 
-        if (await this.validate()) this.reviewStep = true;
+        await this.validate();
       } else {
         if (!scanResult) return;
         this.queryHandler([
@@ -417,7 +418,6 @@ export default {
 
       ::v-deep .value {
         margin: 0;
-        font-size: 11px;
         color: variables.$color-light-grey;
       }
     }
