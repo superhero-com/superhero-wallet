@@ -565,6 +565,7 @@
         "register-name": "Register .chain name",
         "name-placeholder": "Enter .chain name",
         "button": "Register name",
+        "button-price": "Register name for {0} AE",
         "short-names": {
           "message": "Ownership of .chain names {0} will be acquired at an auction by the account that places the highest bid.",
           "insertion": "shorter than 13 characters"
