@@ -16,12 +16,6 @@ describe('Test cases for Withdraw Page', () => {
       .get('.modal .button-plain.close')
       .click()
 
-      .enterInputAmount('asd')
-      .get('[data-cy=amount-currency]')
-      .invoke('text')
-      .should((text) => expect(text.trim()).to.eq('($0.00)'))
-      .enterInputAmount(0)
-      .inputShouldHaveError('[data-cy=input-wrapper]')
       .enterInputAmount(0.2)
       .get('[data-cy=input-wrapper]')
       .should('not.have.class', 'error')

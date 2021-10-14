@@ -24,31 +24,6 @@ Cypress.Commands.add('openAepp', (onBeforeLoad) => {
     .should('be.visible');
 });
 
-Cypress.Commands.add('termsAgree', () => {
-  cy.get('[data-cy=checkbox]').click();
-});
-
-Cypress.Commands.add('openGenerateWallet', () => {
-  cy.termsAgree().get('[data-cy=generate-wallet]').click();
-});
-
-Cypress.Commands.add('openImportWallet', () => {
-  cy.termsAgree().get('[data-cy=import-wallet]').click();
-});
-
-Cypress.Commands.add('openTerms', () => {
-  cy.get('[data-cy=terms]').should('be.visible').click();
-});
-
-Cypress.Commands.add('enterSeedPhrase', (seed) => {
-  cy.get('textarea').clear().type(seed).get('[data-cy=import]')
-    .click();
-});
-
-Cypress.Commands.add('openAndEnterSeedPhrase', (seed) => {
-  cy.openImportWallet().enterSeedPhrase(seed);
-});
-
 Cypress.Commands.add('inputShouldHaveError', (input) => {
   cy.get(input).should('have.class', 'error');
 });
@@ -63,32 +38,6 @@ Cypress.Commands.add('buttonShouldNotBeDisabled', (button) => {
 
 Cypress.Commands.add('shouldHasErrorMessage', (el) => {
   cy.get(el).should('exist').should('be.visible');
-});
-
-Cypress.Commands.add('onboardingSlideShouldBeActive', (slide) => {
-  cy.get('[data-cy=onboarding-steps]').find('ul li').eq(slide).should('have.class', 'current');
-});
-
-Cypress.Commands.add('clickDotNavigationMakeSlideActive', (slide) => {
-  cy.get('[data-cy=onboarding-steps]')
-    .find('ul li')
-    .eq(slide)
-    .click()
-    .onboardingSlideShouldBeActive(slide);
-});
-
-Cypress.Commands.add('toggleAccordionItem', (item) => {
-  cy.get('[data-cy=accordion-item]').eq(item).click();
-});
-
-Cypress.Commands.add('accordionItemShould', (item, cond) => {
-  cy.get('[data-cy=accordion-item-content]')
-    .eq(item)
-    .should(cond)
-    .get('[data-cy=accordion-item]')
-    .eq(item)
-    .find('[data-cy=accordion-item-open]')
-    .should(`${cond === 'not.be.visible' ? 'not.' : ''}have.class`, 'rotated');
 });
 
 Cypress.Commands.add('login', (options = {}, route) => {
