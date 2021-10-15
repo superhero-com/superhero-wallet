@@ -205,7 +205,6 @@ export default [
       props: true,
       meta: {
         title: 'tips',
-        notRebrand: true,
         backButton: false,
       },
     }, {
@@ -214,7 +213,6 @@ export default [
       component: TipsClaim,
       meta: {
         title: 'tips',
-        notRebrand: true,
         backButton: false,
       },
     }],
