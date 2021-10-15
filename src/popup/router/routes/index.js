@@ -286,7 +286,6 @@ export default [
       component: TransferReceive,
       meta: {
         title: 'transfer',
-        notRebrand: true,
         backButton: false,
       },
     }],
