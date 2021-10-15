@@ -1,5 +1,19 @@
 <template>
   <div class="tips-claim">
+    <div class="header">
+      {{ $t('pages.claimTips.header') }}
+      <HelpButton
+        :title="$t('modals.verify.title')"
+        :msg="$t('modals.verify.msg')"
+        :option="{
+          attrs: {
+            href: 'https://blog.aeternity.com/superhero-how-to-send-receive-superhero-tips-34971b18c919#024e',
+            target: '_blank'
+          },
+        }"
+        icon="success"
+      />
+    </div>
     <p>
       {{ $t('pages.claimTips.urlToClaim') }}
     </p>
@@ -24,9 +38,10 @@ import { mapGetters, mapState } from 'vuex';
 import { aettosToAe, toURL, validateTipUrl } from '../../utils/helper';
 import InputField from '../components/InputField.vue';
 import Button from '../components/Button.vue';
+import HelpButton from '../components/HelpButton.vue';
 
 export default {
-  components: { InputField, Button },
+  components: { InputField, Button, HelpButton },
   data: () => ({
     url: '',
     loading: false,
@@ -92,10 +107,28 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '../../../styles/variables';
 @use '../../../styles/typography';
 
 .tips-claim {
   padding: 16px;
+
+  .header {
+    margin: 8px 0 24px 36px;
+    display: flex;
+    color: variables.$color-light-grey;
+
+    @extend %face-sans-15-medium;
+
+    .help-button {
+      margin-left: 8px;
+
+      ::v-deep .icon {
+        width: 32px;
+        height: 32px;
+      }
+    }
+  }
 
   p {
     margin: 16px 0 8px 0;
