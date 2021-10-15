@@ -279,8 +279,6 @@ export default [
       props: true,
       meta: {
         title: 'transfer',
-        notRebrand: true,
-        backButton: false,
       },
     }, {
       path: 'receive',

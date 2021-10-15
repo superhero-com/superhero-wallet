@@ -77,7 +77,9 @@ describe('InputAmount', () => {
     const wrapper = mount(InputAmount, { localVue, store, attrs: { value: test.value } });
     expect(wrapper.find('input').element.value).toBe(test.displayed.toString());
     expect(wrapper.find('.token').text()).toBe(test.token?.symbol || 'AE');
-    expect(wrapper.find('[data-cy=amount-currency]').text()).toBe(`(${test.currency.toFixed(2)})`);
+    if (!store.getters['fungibleTokens/selectedToken']) {
+      expect(wrapper.find('[data-cy=amount-currency]').text()).toBe(`(${test.currency.toFixed(2)})`);
+    }
     if (test.error) {
       expect(wrapper.find('.message.error').exists()).toBeTruthy();
     }

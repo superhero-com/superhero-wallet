@@ -1,6 +1,7 @@
 import { registerModal } from '../../store/plugins/modals';
 import Default from './components/Modals/Default.vue';
 import ClaimSuccess from './components/Modals/ClaimSuccess.vue';
+import SpendSuccess from './components/Modals/SpendSuccess.vue';
 import ConfirmTip from './components/Modals/ConfirmTip.vue';
 import Confirm from './components/Modals/Confirm.vue';
 import ErrorLog from './components/Modals/ErrorLog.vue';
@@ -13,6 +14,7 @@ import ShareQr from './components/Modals/ShareQr.vue';
 export default () => {
   registerModal({ name: 'default', component: Default });
   registerModal({ name: 'claim-success', component: ClaimSuccess });
+  registerModal({ name: 'spend-success', component: SpendSuccess });
   registerModal({ name: 'confirm-tip', component: ConfirmTip });
   registerModal({ name: 'confirm', component: Confirm });
   registerModal({ name: 'error-log', component: ErrorLog });
