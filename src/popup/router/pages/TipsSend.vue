@@ -1,5 +1,17 @@
 <template>
   <div class="tips-send">
+    <i18n
+      path="pages.tipPage.header"
+      tag="div"
+      class="header"
+    >
+      <a
+        href="https://superhero.com/"
+        target="_blank"
+      >
+        {{ $t('pages.notifications.superhero') }}
+      </a>
+    </i18n>
     <p>
       <template v-if="!confirmMode">
         {{ $t('pages.tipPage.url') }}
@@ -302,8 +314,25 @@ export default {
 .tips-send {
   padding: 16px;
   margin: 0 auto;
-  margin-top: 22px;
   min-width: auto;
+
+  .header {
+    margin: 8px 0 24px 0;
+    text-align: center;
+    color: variables.$color-light-grey;
+
+    @extend %face-sans-15-medium;
+
+    a {
+      color: variables.$color-white;
+      text-decoration: none;
+      transition: all 0.08s ease-out;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
 
   p {
     color: variables.$color-white;

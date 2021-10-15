@@ -824,6 +824,7 @@
       "section11Title": "11. FINAL PROVISIONS"
     },
     "tipPage": {
+      "header": "This tip will be public on {0}",
       "back": "Back",
       "noImage": "No Image",
       "domainVerified": "Verified",
