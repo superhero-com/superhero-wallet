@@ -25,7 +25,7 @@
           />
           <LinkButton
             slot="value"
-            :to="tipUrl"
+            :to="/^http[s]*:\/\//.test(tipUrl) ? tipUrl : `http://${tipUrl}`"
           >
             <Truncate
               :str="tipUrl"
