@@ -321,6 +321,8 @@ export default {
 @use '../../../styles/variables';
 
 .tips-send {
+  padding: 16px;
+
   .tour__step3 {
     margin: 0 auto;
     margin-top: 22px;

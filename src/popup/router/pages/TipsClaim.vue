@@ -14,9 +14,6 @@
     >
       {{ $t('pages.tipPage.confirm') }}
     </Button>
-    <Button :to="{ name: 'account' }">
-      {{ $t('pages.tipPage.cancel') }}
-    </Button>
 
     <Loader v-if="loading" />
   </div>
@@ -95,7 +92,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.tips-claim .input-field {
-  margin: 20px 0;
+.tips-claim {
+  padding: 16px;
+
+  .input-field {
+    margin: 20px 0;
+  }
 }
 </style>

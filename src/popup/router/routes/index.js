@@ -205,7 +205,6 @@ export default [
       props: true,
       meta: {
         title: 'tips',
-        notRebrand: true,
         backButton: false,
       },
     }, {
@@ -214,7 +213,6 @@ export default [
       component: TipsClaim,
       meta: {
         title: 'tips',
-        notRebrand: true,
         backButton: false,
       },
     }],
@@ -279,6 +277,7 @@ export default [
       props: true,
       meta: {
         title: 'transfer',
+        backButton: false,
       },
     }, {
       path: 'receive',
@@ -286,7 +285,6 @@ export default [
       component: TransferReceive,
       meta: {
         title: 'transfer',
-        notRebrand: true,
         backButton: false,
       },
     }],

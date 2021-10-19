@@ -133,6 +133,8 @@ export default {
 @use '../../../styles/share-info.scss';
 
 .transfer-receive {
+  padding: 16px;
+
   .input-wrapper {
     ::v-deep main,
     div {
