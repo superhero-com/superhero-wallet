@@ -69,8 +69,6 @@ describe('Test cases for networks page', () => {
       .type(defaultNetwork.middlewareUrl)
       .get('[data-cy=connect]')
       .click()
-      .get('.modal .button-plain.close')
-      .click()
       .get('[data-cy=network-url]')
       .eq(-1)
       .should('contain', defaultNetwork.url)

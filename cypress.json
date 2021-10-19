@@ -9,7 +9,6 @@
   "defaultCommandTimeout": 30000,
   "ignoreTestFiles": [
     "tip.js",
-    "transaction-details.js",
-    "aex2-popups.js"
+    "transaction-details.js"
   ]
 }

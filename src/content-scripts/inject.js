@@ -4,7 +4,7 @@ import { getBrowserAPI } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communic
 import { MESSAGE_DIRECTION } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/schema';
 import ContentScriptBridge from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/content-script-bridge';
 
-global.browser = require('webextension-polyfill');
+window.browser = require('webextension-polyfill');
 
 const runContentScript = () => {
   const sendToBackground = (method, params) => new Promise((resolve) => {
