@@ -222,7 +222,7 @@ export default {
       await this.$watchUntilTruly(() => this.sdk);
       if (query.token) {
         this.$store.commit('fungibleTokens/setSelectedToken', {
-          address: this.accounts[this.accountSelectedIdx].address,
+          address: this.accounts[this.activeIdx].address,
           token: this.tokenBalances.find(({ value }) => value === query.token),
         });
       }
