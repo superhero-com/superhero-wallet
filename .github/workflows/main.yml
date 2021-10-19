@@ -3,7 +3,7 @@ name: Publish Docker Superhero Wallet image
 on:
   push:
     branches: 
-      - master
+      - feat/gh-actions
     tags:
       - 'v*'
   pull_request:
