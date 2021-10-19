@@ -3,9 +3,7 @@ WORKDIR /app
 USER root
 RUN apt update && apt install -y make gcc g++ python git
 COPY  . .
-RUN npm install
-RUN npm run lint
-RUN npm test
+RUN npm ci
 RUN npm run build
 
 FROM nginx:1.13.7-alpine
