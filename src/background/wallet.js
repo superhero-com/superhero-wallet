@@ -7,7 +7,7 @@ import { detectConnectionType } from '../popup/utils/helper';
 import store from './store';
 import { App } from '../store/modules/permissions';
 
-global.browser = require('webextension-polyfill');
+window.browser = require('webextension-polyfill');
 
 let sdk;
 let connectionsQueue = [];

@@ -1,4 +1,4 @@
-global.browser = process.env.IS_EXTENSION
+window.browser = process.env.IS_EXTENSION
   ? require('webextension-polyfill')
   : {
     runtime: {
