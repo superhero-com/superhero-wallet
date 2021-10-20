@@ -86,7 +86,7 @@
 <script>
 import { mapState } from 'vuex';
 import { shuffle } from 'lodash-es';
-import Button from '../components/Button';
+import Button from '../components/Button.vue';
 
 export default {
   components: { Button },

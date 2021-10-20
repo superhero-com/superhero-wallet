@@ -10,9 +10,9 @@
 </template>
 
 <script>
-import AccountSwitcher from '../components/AccountSwitcher';
-import SearchBar from '../components/SearchBar';
-import TransactionList from '../components/TransactionList';
+import AccountSwitcher from '../components/AccountSwitcher.vue';
+import SearchBar from '../components/SearchBar.vue';
+import TransactionList from '../components/TransactionList.vue';
 
 export default {
   components: {

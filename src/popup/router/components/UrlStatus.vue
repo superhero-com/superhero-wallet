@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import StatusIcon from './StatusIcon';
+import StatusIcon from './StatusIcon.vue';
 import Default from '../../../icons/badges/default.svg?vue-component';
 
 export default {

@@ -18,13 +18,14 @@ const renderNodeContent = (createElement, node) => (!node.childNodes.length
 export default {
   functional: true,
   props: {
-    node: { type: Node, required: true },
+    str: { type: String, required: true },
   },
   render(createElement, { data, props }) {
     return createElement(
       'span',
-      { class: data.staticClass },
-      renderNodeContent(createElement, props.node),
+      { class: data.class },
+      renderNodeContent(createElement, new DOMParser()
+        .parseFromString(`<root>${props.str || ''}</root>`, 'text/xml').childNodes[0]),
     );
   },
 };

@@ -21,7 +21,7 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import Button from '../components/Button';
+import Button from '../components/Button.vue';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {

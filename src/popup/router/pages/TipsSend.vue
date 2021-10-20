@@ -101,12 +101,12 @@ import { calculateFee } from '../../utils/constants';
 import {
   escapeSpecialChars, aeToAettos, validateTipUrl, convertToken,
 } from '../../utils/helper';
-import InputAmount from '../components/InputAmount';
-import Textarea from '../components/Textarea';
-import InputField from '../components/InputField';
-import UrlStatus from '../components/UrlStatus';
-import Button from '../components/Button';
-import TokenAmount from '../components/TokenAmount';
+import InputAmount from '../components/InputAmount.vue';
+import Textarea from '../components/Textarea.vue';
+import InputField from '../components/InputField.vue';
+import UrlStatus from '../components/UrlStatus.vue';
+import Button from '../components/Button.vue';
+import TokenAmount from '../components/TokenAmount.vue';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
@@ -214,7 +214,7 @@ export default {
     await this.persistTipDetails();
     if (process.env.IS_EXTENSION) {
       const [{ url }] = await browser.tabs.query({ active: true, currentWindow: true });
-      this.tipFromPopup = url.includes(browser.runtime.getURL('popup/popup.html'));
+      this.tipFromPopup = url.includes(browser.runtime.getURL('index.html'));
       if (url && !this.tipFromPopup) {
         this.url = url;
       } else if (this.tipFromPopup) {
@@ -321,6 +321,8 @@ export default {
 @use '../../../styles/variables';
 
 .tips-send {
+  padding: 16px;
+
   .tour__step3 {
     margin: 0 auto;
     margin-top: 22px;

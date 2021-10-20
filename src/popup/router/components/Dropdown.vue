@@ -23,8 +23,8 @@
 </template>
 
 <script>
-import ActionsMenu from './ActionsMenu';
-import ButtonPlain from './ButtonPlain';
+import ActionsMenu from './ActionsMenu.vue';
+import ButtonPlain from './ButtonPlain.vue';
 
 export default {
   components: { ActionsMenu, ButtonPlain },

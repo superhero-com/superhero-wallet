@@ -41,9 +41,9 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { uniqBy } from 'lodash-es';
-import Filters from './Filters';
-import TransactionItem from './TransactionItem';
-import PendingTxs from './PendingTxs';
+import Filters from './Filters.vue';
+import TransactionItem from './TransactionItem.vue';
+import PendingTxs from './PendingTxs.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import { TXS_PER_PAGE } from '../../utils/constants';
 import Visible from '../../../icons/visible.svg?vue-component';
@@ -75,7 +75,7 @@ export default {
   },
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapState(['accountSelectedIdx']),
+    ...mapState('accounts', ['activeIdx']),
     ...mapState({
       filteredTransactions(state, { account: { address } }) {
         const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
@@ -117,10 +117,9 @@ export default {
       },
     }),
     ...mapGetters(['getTxSymbol']),
-    ...mapGetters('transactionCache', ['chainTransactions']),
   },
   watch: {
-    accountSelectedIdx() {
+    activeIdx() {
       this.$store.commit('setTransactions', []);
       this.transactions = [];
       this.page = 1;
@@ -182,9 +181,8 @@ export default {
       }
     },
     updateTransactions(transactions) {
-      this.transactions = uniqBy([...this.transactions, ...transactions, ...this.chainTransactions], 'hash');
+      this.transactions = uniqBy([...this.transactions, ...transactions], 'hash');
       this.$store.commit('setTransactions', this.transactions);
-      this.$store.dispatch('transactionCache/removeOldTxFromCache');
     },
   },
 };

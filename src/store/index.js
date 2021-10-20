@@ -8,19 +8,17 @@ import observables from './plugins/observables';
 import persistState from './plugins/persistState';
 import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
-import accounts from './plugins/account';
 import namesPlugin from './plugins/names';
 import pendingTransactionHandler from './plugins/pendingTransactionHandler';
 import languagesPlugin from './plugins/languages';
 import openErrorModalPlugin from './plugins/openErrorModal';
 import runMigrations from './migrations';
+import accountsModule from './modules/accounts';
 import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
-import transactionCacheModule from './modules/transactionCache';
 import fungibleTokensPlugin from './plugins/fungibleTokens';
 import { defaultNetwork } from '../popup/utils/constants';
 import stateReducer from './utils';
-import chainListener from './plugins/chainListener';
 import veeValidate from './plugins/veeValidate';
 
 Vue.use(Vuex);
@@ -60,11 +58,6 @@ export default new Vuex.Store({
     tourStartBar: true,
     saveErrorLog: true,
     loginTargetLocation: { name: 'account' },
-    accountCount: 1,
-    accountSelectedIdx: 0,
-    accs: [{
-      idx: 0, color: '#1161FE', shift: 0, showed: true,
-    }],
     cardMinified: false,
   },
   getters,
@@ -78,18 +71,16 @@ export default new Vuex.Store({
     observables,
     modals,
     tipUrl,
-    accounts,
     namesPlugin,
     fungibleTokensPlugin,
     pendingTransactionHandler,
     languagesPlugin,
     openErrorModalPlugin,
-    chainListener,
     veeValidate,
   ],
   modules: {
+    accounts: accountsModule,
     invites: invitesModule,
     permissions: permissionsModule,
-    transactionCache: transactionCacheModule,
   },
 });

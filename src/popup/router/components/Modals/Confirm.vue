@@ -6,7 +6,7 @@
     <TemplateRenderer
       v-if="!$slots.msg"
       slot="msg"
-      :node="templateRootNode"
+      :str="$attrs.msg"
     />
     <template slot="footer">
       <Button
@@ -26,21 +26,15 @@
 </template>
 
 <script>
-import Default from './Default';
-import Button from '../Button';
-import TemplateRenderer from '../TemplateRenderer';
+import Default from './Default.vue';
+import Button from '../Button.vue';
+import TemplateRenderer from '../TemplateRenderer.vue';
 
 export default {
   components: { Default, TemplateRenderer, Button },
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
-  },
-  computed: {
-    templateRootNode() {
-      return new DOMParser()
-        .parseFromString(`<root>${this.$attrs.msg || ''}</root>`, 'text/xml').childNodes[0];
-    },
   },
   methods: {
     cancel() {

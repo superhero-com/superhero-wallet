@@ -53,7 +53,7 @@ export default (store) => {
   ));
 
   const balance$ = watchAsObservable(
-    ({ accountSelectedIdx }, { accounts }) => accounts[accountSelectedIdx],
+    ({ accounts: { activeIdx } }, { accounts }) => accounts[activeIdx],
     {
       immediate: true,
     },

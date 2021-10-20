@@ -121,6 +121,9 @@
       "title": "Your Error Report Was not send",
       "msg": "There was problem sending your error report."
     },
+    "invalid-qr-code": {
+      "msg": "The scanned QR code is invalid."
+    },
     "tip-mainnet-warning": {
       "title": "Warning",
       "msg": "Tip/Claim functionality works on the predefined networks."
@@ -202,6 +205,11 @@
     "autoextend-help": {
       "title": "Autoextend name",
       "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.<br /><br /> Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.<br /><br /> Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
+    },
+    "shareQr": {
+      "title": "Scan QR code",
+      "share": "Share",
+      "close": "Close"
     }
   },
   "filters": {
@@ -290,6 +298,7 @@
       "name-auctions": "Name auctions",
       "register-name": "Register name",
       "more": "More",
+      "buy": "Buy AE Tokens",
       "networks": "Networks",
       "permissionsSettings": "Permissions settings",
       "permissionsDetails": "Permissions details",
@@ -317,19 +326,16 @@
       "heading": "Account",
       "activity": "Activity",
       "accountName": "Account name",
-      "copy": "Copy",
       "claim": "Claim Tip",
       "receive": "Receive",
       "latestTransactions": "Latest transactions",
       "noTransactionsFound": "No transactions found!",
       "balance": "Balance",
-      "copied": "Copied!",
       "seedNotification": "You need to {0} your seed phrase",
       "backup": "backup",
       "updateExtension": "New version available! Please update your extension.",
       "updateAvailable": "New version is available in the store!",
-      "claim-name": "Claim your .chain name",
-      "address-copied": "Address copied"
+      "claim-name": "Claim your .chain name"
     },
     "accounts": {
       "showWallet": "Show on Wallet Home"
@@ -483,7 +489,9 @@
       "mcap": "MCap",
       "price": "Price",
       "not-available": "N/A",
-      "no-results": "This account has no tokens with balance"
+      "noTokens": "No tokens in account balance.",
+      "buyAe": "Buy AE",
+      "receiveTokens": "Receive tokens"
     },
     "token-details": {
       "details": "Details",
@@ -560,6 +568,7 @@
         "register-name": "Register .chain name",
         "name-placeholder": "Enter .chain name",
         "button": "Register name",
+        "button-price": "Register name for {0} AE",
         "short-names": {
           "message": "Ownership of .chain names {0} will be acquired at an auction by the account that places the highest bid.",
           "insertion": "shorter than 13 characters"
@@ -677,11 +686,9 @@
       "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
     "receive": {
-      "backToAccount": "Back to account",
-      "heading": "To receive tokens, provide this address or have the payor scan the QR code below.",
-      "copy": "Copy",
-      "transferExchange": "Swap crypto for AE tokens",
-      "purchase": "Buy AE tokens"
+      "requestAmount": "Request amount (optional)",
+      "shareName": "Provide sender with either",
+      "shareAddress": "or your account address"
     },
     "securitySettings": {
       "backToSettings": "Back to settings",
@@ -735,15 +742,15 @@
       "seeTransactionExplorer": "See transaction in the explorer.",
       "scan": "Scan QR",
       "cancel": "Cancel",
-      "review": "Review",
+      "review": "Review and send",
       "reviewtx": "Review Transaction",
       "checkalert": "Please check the information carefully.",
       "sender": "Sending address",
       "recipient": "Receiving address",
       "amount": "Amount",
-      "editTxDetails": "Edit Transaction Details",
+      "editTxDetails": "Edit transaction",
       "tx-success": "Transaction Completed",
-      "successalert": "You have successfully sent ",
+      "successAlert": "has been sent to",
       "to": "To",
       "from": "From",
       "hash": "Transaction Hash",
@@ -938,7 +945,6 @@
       "name": "Name",
       "nameSalt": "Name Salt",
       "nameId": "Name Id",
-      "copy": "Copy",
       "contractId": "Contract Id",
       "advancedMode": "Advanced Mode",
       "blockHeight": "Block height",
@@ -1076,8 +1082,7 @@
       "tokens-not-allowed": "Tokens are currently not allowed, please switch to AE",
       "tip-attached": "Tip attached",
       "top-up-with": "Top up with",
-      "delete": "Delete",
-      "copied": "Copied!"
+      "delete": "Delete"
     },
     "permissions": {
       "login": "Don't ask for login requests",
@@ -1096,7 +1101,11 @@
     "nameRegisteredAddress": "This name isn't registered or pointed to address",
     "nameUnregistered": "This name has already been registered.",
     "notSameAs": "Sender and receiver address are the same. You will send tokens to our own account.",
-    "tokenToAnAddress": "Unfortunately you can only send AEX-9 Tokens to an address"
+    "tokenToAnAddress": "Unfortunately you can only send AEX-9 Tokens to an address",
+    "minValue": "This field must be {0} or more",
+    "minValueExclusive": "This field must be more than {0}",
+    "enoughAe": "Not enough AE balance",
+    "maxValue": "This field must be {0} or less"
   },
   "redirecting": "Redirecting",
   "seconds": "{n} seconds | {n} second | {n} seconds",
@@ -1105,6 +1114,7 @@
   "days": "{n} days | {n} day | {n} days",
   "addressCopied": "Address copied",
   "copied": "Copied",
+  "copy": "Copy",
   "tx-fee": "Transaction fee",
   "total": "Total"
 }

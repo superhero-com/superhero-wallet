@@ -39,10 +39,10 @@
 
 <script>
 import { mapState } from 'vuex';
-import Plate from '../components/Plate';
-import AccountSwitcher from '../components/AccountSwitcher';
+import Plate from '../components/Plate.vue';
+import AccountSwitcher from '../components/AccountSwitcher.vue';
 import TxHistory from '../../../icons/history.svg?vue-component';
-import TransactionList from '../components/TransactionList';
+import TransactionList from '../components/TransactionList.vue';
 
 export default {
   name: 'Account',

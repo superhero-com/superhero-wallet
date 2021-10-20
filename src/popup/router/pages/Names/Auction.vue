@@ -20,9 +20,9 @@
 </template>
 
 <script>
-import AccountSwitcher from '../../components/AccountSwitcher';
-import Plate from '../../components/Plate';
-import Tabs from '../../components/Tabs';
+import AccountSwitcher from '../../components/AccountSwitcher.vue';
+import Plate from '../../components/Plate.vue';
+import Tabs from '../../components/Tabs.vue';
 import Auction from '../../../../icons/auction.svg?vue-component';
 import History from '../../../../icons/history.svg?vue-component';
 

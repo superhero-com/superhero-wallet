@@ -1,6 +1,6 @@
 import icon from '../icons/twitter-icon-tip.svg';
 
-global.browser = require('webextension-polyfill');
+window.browser = require('webextension-polyfill');
 
 const style = document.createElement('link');
 style.rel = 'stylesheet';

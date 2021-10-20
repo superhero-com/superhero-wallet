@@ -14,9 +14,6 @@
     >
       {{ $t('pages.tipPage.confirm') }}
     </Button>
-    <Button :to="{ name: 'account' }">
-      {{ $t('pages.tipPage.cancel') }}
-    </Button>
 
     <Loader v-if="loading" />
   </div>
@@ -25,8 +22,8 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { aettosToAe, toURL, validateTipUrl } from '../../utils/helper';
-import InputField from '../components/InputField';
-import Button from '../components/Button';
+import InputField from '../components/InputField.vue';
+import Button from '../components/Button.vue';
 
 export default {
   components: { InputField, Button },
@@ -95,7 +92,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.tips-claim .input-field {
-  margin: 20px 0;
+.tips-claim {
+  padding: 16px;
+
+  .input-field {
+    margin: 20px 0;
+  }
 }
 </style>

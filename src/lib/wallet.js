@@ -55,8 +55,6 @@ async function initMiddleware() {
     },
   };
   spec.basePath = '/mdw//';
-  // TODO: Review again after merging of https://github.com/aeternity/aepp-sdk-js/pull/1249
-  spec.schemes = ['https'];
   const middleware = mapObject(
     (await genSwaggerClient(middlewareUrl, { spec })).api,
     ([k, v]) => [camelCase(k), v],
@@ -266,7 +264,7 @@ export default async function initSdk() {
       },
     );
     store.watch(
-      ({ accountSelectedIdx }) => accountSelectedIdx,
+      ({ accounts: { activeIdx } }) => activeIdx,
       async (accountIdx) => store.commit('selectSdkAccount', store.getters.accounts[accountIdx].address),
     );
 

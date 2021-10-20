@@ -25,9 +25,9 @@
 </template>
 
 <script>
-import Plate from '../../components/Plate';
-import AccountSwitcher from '../../components/AccountSwitcher';
-import Tabs from '../../components/Tabs';
+import Plate from '../../components/Plate.vue';
+import AccountSwitcher from '../../components/AccountSwitcher.vue';
+import Tabs from '../../components/Tabs.vue';
 import Names from '../../../../icons/names.svg?vue-component';
 import Auction from '../../../../icons/auction.svg?vue-component';
 import PlusCircle from '../../../../icons/plus-circle.svg?vue-component';

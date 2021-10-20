@@ -4,22 +4,20 @@ export default async (store) => {
   }) => {
     try {
       const transaction = await store.state.sdk.poll(hash);
+      const showSpendModal = () => store.dispatch('modals/open', {
+        name: 'spend-success',
+        transaction: { ...transaction, ...type === 'spendToken' ? { tx: { ...transaction.tx, recipientId, amount } } : {} },
+      });
       switch (type) {
         case 'tip':
           store.dispatch('router/push', { name: 'success-tip', params: { amount, tipUrl } });
           break;
         case 'spend':
-          store.dispatch('router/push', {
-            name: 'transfer-send',
-            params: { redirectstep: 3, successtx: transaction },
-          });
+          showSpendModal();
           break;
         case 'spendToken':
           store.dispatch('fungibleTokens/loadTokenBalances');
-          store.dispatch('router/push', {
-            name: 'transfer-send',
-            params: { redirectstep: 3, successtx: { ...transaction, amount, recipientId } },
-          });
+          showSpendModal();
           break;
         default:
       }

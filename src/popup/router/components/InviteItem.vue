@@ -10,7 +10,7 @@
         v-if="copied"
         class="copied-alert"
       >
-        {{ $t('pages.invite.copied') }}
+        {{ $t('copied') }}
       </div>
       <ButtonPlain
         v-clipboard:success="copy"
@@ -80,10 +80,11 @@
 import { pick } from 'lodash-es';
 import { mapState } from 'vuex';
 import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk';
-import TokenAmount from './TokenAmount';
-import InputAmount from './InputAmount';
-import Button from './Button';
-import ButtonPlain from './ButtonPlain';
+import CopyMixin from '../../../mixins/copy';
+import TokenAmount from './TokenAmount.vue';
+import InputAmount from './InputAmount.vue';
+import Button from './Button.vue';
+import ButtonPlain from './ButtonPlain.vue';
 import CopyIcon from '../../../icons/copy-old.svg?vue-component';
 import { formatDate } from '../../utils';
 import { APP_LINK_WEB } from '../../utils/constants';
@@ -93,12 +94,13 @@ export default {
     TokenAmount, Button, ButtonPlain, InputAmount, CopyIcon,
   },
   filters: { formatDate },
+  mixins: [CopyMixin],
   props: {
     secretKey: { type: String, required: true },
     createdAt: { type: Number, required: true },
   },
   data: () => ({
-    topUp: false, topUpAmount: 0, inviteLinkBalance: 0, copied: false,
+    topUp: false, topUpAmount: 0, inviteLinkBalance: 0,
   }),
   subscriptions() {
     return pick(this.$store.state.observables, ['balance']);
@@ -130,12 +132,6 @@ export default {
     },
   },
   methods: {
-    copy() {
-      this.copied = true;
-      setTimeout(() => {
-        this.copied = false;
-      }, 3000);
-    },
     deleteItem() {
       this.$store.commit('invites/delete', this.secretKey);
     },

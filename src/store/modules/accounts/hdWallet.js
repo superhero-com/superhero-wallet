@@ -1,8 +1,32 @@
 import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
+import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 
-export default (store) => store.registerModule('accounts', {
+const type = 'hd-wallet';
+
+export default {
   namespaced: true,
+
+  account: {
+    type,
+  },
+
+  state: {
+    nextAccountIdx: 1,
+  },
   actions: {
+    create({ state, commit }) {
+      commit('accounts/add',
+        {
+          idx: state.nextAccountIdx,
+          color:
+            // eslint-disable-next-line no-bitwise
+            state.nextAccountIdx === 1 ? '#00FF9D' : `#${((Math.random() * 0xffffff) << 0).toString(16)}`,
+          shift: Math.floor(Math.random() * 100),
+          type,
+        },
+        { root: true });
+      state.nextAccountIdx += 1;
+    },
     signWithoutConfirmation({ rootGetters: { account } }, data) {
       return Crypto.sign(data, account.secretKey);
     },
@@ -41,7 +65,7 @@ export default (store) => store.registerModule('accounts', {
       return dispatch('signWithoutConfirmation', data);
     },
     async signTransaction({ dispatch, rootState: { sdk } }, { txBase64, opt: { modal = true } }) {
-      const encodedTx = Crypto.decodeBase64Check(Crypto.assertedType(txBase64, 'tx'));
+      const encodedTx = decode(txBase64, 'tx');
       if (modal) await dispatch('confirmTxSigning', encodedTx);
       const signature = await dispatch(
         'signWithoutConfirmation',
@@ -50,4 +74,4 @@ export default (store) => store.registerModule('accounts', {
       return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
     },
   },
-});
+};

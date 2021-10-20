@@ -1,9 +1,9 @@
 import { IN_POPUP } from '../../utils/helper';
 
-import ConfirmConnect from '../pages/Popups/Connect';
-import ConfirmRawSign from '../components/Modals/ConfirmRawSign';
-import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign';
-import MessageSign from '../pages/Popups/MessageSign';
+import ConfirmConnect from '../pages/Popups/Connect.vue';
+import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
+import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
+import MessageSign from '../pages/Popups/MessageSign.vue';
 
 export default process.env.PLATFORM === 'web' && IN_POPUP
   ? [

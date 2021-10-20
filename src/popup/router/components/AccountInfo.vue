@@ -71,7 +71,7 @@
           <template slot="right">
             <ButtonPlain
               v-show="idx !== 0 && $route.path === '/accounts' && !edit"
-              @click="editLocalName"
+              @click="edit = true"
             >
               <Edit />
             </ButtonPlain>
@@ -99,18 +99,19 @@
       class="copied"
     >
       <span />
-      <span class="text">{{ $t('pages.account.address-copied') }}</span>
+      <span class="text">{{ $t('addressCopied') }}</span>
       <span />
     </div>
   </div>
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations } from 'vuex';
-import Avatar from './Avatar';
-import Truncate from './Truncate';
-import InputField from './InputField';
-import ButtonPlain from './ButtonPlain';
+import { mapState, mapGetters, mapActions } from 'vuex';
+import CopyMixin from '../../../mixins/copy';
+import Avatar from './Avatar.vue';
+import Truncate from './Truncate.vue';
+import InputField from './InputField.vue';
+import ButtonPlain from './ButtonPlain.vue';
 import Collapse from '../../../icons/account-card/collapse.svg?vue-component';
 import Expand from '../../../icons/account-card/expand.svg?vue-component';
 import Add from '../../../icons/account-card/btn-add-subaccount.svg?vue-component';
@@ -135,21 +136,22 @@ export default {
     InputField,
     ButtonPlain,
   },
+  mixins: [CopyMixin],
   props: {
     accountIdx: { type: Number, default: -1 },
   },
   data: () => ({
-    copied: false,
     edit: false,
     customAccountName: '',
     maxCustomNameLength: 22,
     UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
   }),
   computed: {
-    ...mapState(['accountCount', 'accountSelectedIdx', 'cardMinified']),
+    ...mapState('accounts', ['activeIdx']),
+    ...mapState(['cardMinified']),
     ...mapGetters(['accounts', 'activeNetwork']),
     idx() {
-      return this.accountIdx === -1 ? this.accountSelectedIdx : this.accountIdx;
+      return this.accountIdx === -1 ? this.activeIdx : this.accountIdx;
     },
     explorerUrl() {
       const { address } = this.accounts[this.idx];
@@ -165,24 +167,14 @@ export default {
     this.customAccountName = this.accounts[this.idx].localName;
   },
   methods: {
-    ...mapMutations(['createAccount', 'deleteAccount']),
-    editLocalName() {
-      this.customAccountName = this.accounts[this.idx].localName;
-      this.edit = true;
-    },
+    ...mapActions({ createAccount: 'accounts/hdWallet/create' }),
     updateBalances() {
       this.$store.dispatch('fungibleTokens/getAvailableTokens');
       this.$store.dispatch('fungibleTokens/loadTokenBalances');
     },
     saveLocalName() {
-      this.$store.commit('setAccountLocalName', { name: this.customAccountName, idx: this.idx });
+      this.$store.commit('accounts/setLocalName', { name: this.customAccountName, idx: this.idx });
       this.edit = false;
-    },
-    copy() {
-      this.copied = true;
-      setTimeout(() => {
-        this.copied = false;
-      }, 1000);
     },
     async remove() {
       await this.$store.dispatch('modals/open', {
@@ -191,7 +183,7 @@ export default {
         title: this.$t('modals.removeSubaccount.title'),
         msg: this.$t('modals.removeSubaccount.msg'),
       });
-      this.deleteAccount(this.idx);
+      this.$store.commit('accounts/remove', this.idx);
     },
   },
 };

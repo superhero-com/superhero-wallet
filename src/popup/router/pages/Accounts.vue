@@ -8,7 +8,7 @@
     </Plate>
     <div
       v-for="(account, idx) in accounts.slice(1)"
-      :key="idx + 1"
+      :key="account.address"
       class="card-wrapper"
     >
       <AccountCard
@@ -27,23 +27,24 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import AccountCard from '../components/AccountCard';
-import Plate from '../components/Plate';
-import CheckBox from '../components/CheckBox';
+import AccountCard from '../components/AccountCard.vue';
+import Plate from '../components/Plate.vue';
+import CheckBox from '../components/CheckBox.vue';
 
 export default {
   components: { AccountCard, Plate, CheckBox },
   computed: mapGetters(['accounts']),
   methods: {
     async toggleAccountShowed(isShowed, index) {
-      if (!isShowed && this.$store.state.accs.reduce((a, b) => (b.showed ? a + 1 : a), 0) === 8) {
+      if (!isShowed
+        && this.$store.state.accounts.list.reduce((a, b) => (b.showed ? a + 1 : a), 0) === 8) {
         await this.$store.dispatch('modals/open', {
           name: 'default',
           title: this.$t('modals.switcherAccsLimit.title'),
           msg: this.$t('modals.switcherAccsLimit.msg'),
         });
       } else {
-        this.$store.commit('toggleAccountShowed', index);
+        this.$store.commit('accounts/toggleShowed', index);
       }
     },
   },

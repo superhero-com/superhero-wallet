@@ -18,8 +18,8 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters } from 'vuex';
-import DetailsItem from './DetailsItem';
-import TokenAmount from './TokenAmount';
+import DetailsItem from './DetailsItem.vue';
+import TokenAmount from './TokenAmount.vue';
 import { blocksToRelativeTime } from '../../../filters/toRelativeTime';
 
 export default {

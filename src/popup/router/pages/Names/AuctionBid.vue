@@ -37,11 +37,11 @@
 import { mapGetters } from 'vuex';
 import { aeToAettos } from '../../../utils/helper';
 import { calculateNameClaimFee } from '../../../utils/constants';
-import AuctionCard from '../../components/AuctionCard';
-import InputAmount from '../../components/InputAmount';
-import DetailsItem from '../../components/DetailsItem';
-import TokenAmount from '../../components/TokenAmount';
-import Button from '../../components/Button';
+import AuctionCard from '../../components/AuctionCard.vue';
+import InputAmount from '../../components/InputAmount.vue';
+import DetailsItem from '../../components/DetailsItem.vue';
+import TokenAmount from '../../components/TokenAmount.vue';
+import Button from '../../components/Button.vue';
 
 export default {
   components: {

@@ -12,10 +12,11 @@
     <template slot="right">
       <span class="token">{{ selectedToken ? selectedToken.symbol : 'AE' }}</span>
       <span
+        v-if="!selectedToken"
         class="amount"
         data-cy="amount-currency"
       >
-        {{ `(${formatCurrency(selectedToken ? 0 : currencyAmount)})` }}
+        {{ `(${formatCurrency(currencyAmount)})` }}
       </span>
     </template>
   </InputField>
@@ -23,7 +24,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import InputField from './InputField';
+import InputField from './InputField.vue';
 
 export default {
   components: {

@@ -41,7 +41,7 @@
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import Arrow from '../../../icons/arrow.svg?vue-component';
-import Dropdown from './Dropdown';
+import Dropdown from './Dropdown.vue';
 
 export default {
   components: {
@@ -55,7 +55,8 @@ export default {
     return pick(this.$store.state.observables, ['balances']);
   },
   computed: {
-    ...mapState(['current', 'currencies', 'accountSelectedIdx']),
+    ...mapState('accounts', ['activeIdx']),
+    ...mapState(['current', 'currencies']),
     ...mapGetters('fungibleTokens', ['getTokenBalance', 'getSelectedToken']),
     ...mapGetters(['formatCurrency', 'currentCurrencyRate', 'accounts']),
     tokenBalancesOptions() {
@@ -77,7 +78,7 @@ export default {
       return this.selectedToken ? this.selectedToken.value : 'default';
     },
     idx() {
-      return this.accountIdx === -1 ? this.accountSelectedIdx : this.accountIdx;
+      return this.accountIdx === -1 ? this.activeIdx : this.accountIdx;
     },
     tokenBalances() {
       return this.getTokenBalance(this.accounts[this.idx].address);

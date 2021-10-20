@@ -20,7 +20,7 @@
         v-if="showType"
         class="type"
       >
-        ({{ (getZeitTxTitle(transaction) || $t('transaction.type')[txType]) || txType }})
+        ({{ ($t('transaction.type')[txType]) || txType }})
       </span>
     </div>
     <div
@@ -38,7 +38,7 @@ import { mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { formatDate, formatTime } from '../../utils';
 import Pending from '../../../icons/animated-pending.svg?vue-component';
-import TokenAmount from './TokenAmount';
+import TokenAmount from './TokenAmount.vue';
 
 export default {
   components: { TokenAmount, Pending },
@@ -57,7 +57,6 @@ export default {
       'getTxDirection',
       'getTxTipUrl',
       'isTxAex9',
-      'getZeitTxTitle',
     ]),
     txType() {
       return this.getTxType(this.transaction);

@@ -3,14 +3,14 @@ import uuid from 'uuid';
 import { formatDate, formatTime, getLoginState } from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
-  cy.visit(`extension/popup/popup${route ? `#${route}` : ''}`, { onBeforeLoad });
+  cy.visit(`${route ? `#${route}` : ''}`, { onBeforeLoad });
 });
 
 Cypress.Commands.add('openAex2Popup', (type, txType) => {
   const id = uuid();
   const params = `?id=${id}&type=${type}`;
   const onBeforeLoad = () => (txType ? browser.storage.local.set({ txType }) : browser.storage.local.remove('txType'));
-  cy.visit(`extension/popup/popup${params}`, { onBeforeLoad })
+  cy.visit(`${params}`, { onBeforeLoad })
     .get('[data-cy=popup-aex2]')
     .should('exist')
     .should('be.visible');
@@ -22,31 +22,6 @@ Cypress.Commands.add('openAepp', (onBeforeLoad) => {
     .should('be.visible')
     .get('[data-cy=wallet-info]')
     .should('be.visible');
-});
-
-Cypress.Commands.add('termsAgree', () => {
-  cy.get('[data-cy=checkbox]').click();
-});
-
-Cypress.Commands.add('openGenerateWallet', () => {
-  cy.termsAgree().get('[data-cy=generate-wallet]').click();
-});
-
-Cypress.Commands.add('openImportWallet', () => {
-  cy.termsAgree().get('[data-cy=import-wallet]').click();
-});
-
-Cypress.Commands.add('openTerms', () => {
-  cy.get('[data-cy=terms]').should('be.visible').click();
-});
-
-Cypress.Commands.add('enterSeedPhrase', (seed) => {
-  cy.get('textarea').clear().type(seed).get('[data-cy=import]')
-    .click();
-});
-
-Cypress.Commands.add('openAndEnterSeedPhrase', (seed) => {
-  cy.openImportWallet().enterSeedPhrase(seed);
 });
 
 Cypress.Commands.add('inputShouldHaveError', (input) => {
@@ -65,32 +40,6 @@ Cypress.Commands.add('shouldHasErrorMessage', (el) => {
   cy.get(el).should('exist').should('be.visible');
 });
 
-Cypress.Commands.add('onboardingSlideShouldBeActive', (slide) => {
-  cy.get('[data-cy=onboarding-steps]').find('ul li').eq(slide).should('have.class', 'current');
-});
-
-Cypress.Commands.add('clickDotNavigationMakeSlideActive', (slide) => {
-  cy.get('[data-cy=onboarding-steps]')
-    .find('ul li')
-    .eq(slide)
-    .click()
-    .onboardingSlideShouldBeActive(slide);
-});
-
-Cypress.Commands.add('toggleAccordionItem', (item) => {
-  cy.get('[data-cy=accordion-item]').eq(item).click();
-});
-
-Cypress.Commands.add('accordionItemShould', (item, cond) => {
-  cy.get('[data-cy=accordion-item-content]')
-    .eq(item)
-    .should(cond)
-    .get('[data-cy=accordion-item]')
-    .eq(item)
-    .find('[data-cy=accordion-item-open]')
-    .should(`${cond === 'not.be.visible' ? 'not.' : ''}have.class`, 'rotated');
-});
-
 Cypress.Commands.add('login', (options = {}, route) => {
   cy.openPopup(async (contentWindow) => {
     /* eslint-disable-next-line no-param-reassign */
@@ -103,9 +52,7 @@ Cypress.Commands.add('logout', () => {
 });
 
 Cypress.Commands.add('shouldRedirect', (url, to) => {
-  cy.visit(`extension/popup/popup#${url}`)
-    .url()
-    .should('eq', `${Cypress.config().popupUrl}/popup#${to}`);
+  cy.visit(`${url}`).urlEquals(to);
 });
 
 Cypress.Commands.add('openPageMore', () => {
@@ -166,14 +113,12 @@ Cypress.Commands.add('sendTip', (tip = {}) => {
     .click()
     .get('[data-cy=balance-info]')
     .should('be.visible')
-    .url()
-    .should('eq', `${Cypress.config().popupUrl}/popup#/account`)
+    .urlEquals('account')
     .get('[data-cy=pending-txs]')
     .should('be.visible')
     .get('[data-cy=success-tip]', { timeout: 240000 })
     .should('be.visible')
-    .url()
-    .should('eq', `${Cypress.config().popupUrl}/popup#/success-tip`)
+    .urlEquals('success-tip')
     .get('[data-cy=tip-amount]')
     .should('contain', tip.amount)
     .get('[data-cy=tip-url]')
@@ -213,7 +158,7 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add('urlEquals', (route) => {
-  cy.url().should('eq', `${Cypress.config().popupUrl}/popup#${route}`);
+  cy.url().should('contain', route);
 });
 
 Cypress.Commands.add('openNetworks', () => {

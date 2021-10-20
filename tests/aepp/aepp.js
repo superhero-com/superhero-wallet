@@ -1,7 +1,7 @@
 import Vue from 'vue';
-import App from './App';
+import App from './App.vue';
 
-global.browser = require('webextension-polyfill');
+window.browser = require('webextension-polyfill');
 
 new Vue({
   render: (h) => h(App),

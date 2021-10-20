@@ -45,9 +45,9 @@
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
-import InputAmount from '../components/InputAmount';
-import Button from '../components/Button';
-import InviteItem from '../components/InviteItem';
+import InputAmount from '../components/InputAmount.vue';
+import Button from '../components/Button.vue';
+import InviteItem from '../components/InviteItem.vue';
 import Invite from '../../../icons/invite.svg?vue-component';
 import NewInviteLink from '../../../icons/new-invite-link.svg?vue-component';
 

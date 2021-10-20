@@ -9,8 +9,8 @@ Object.assign(process.env, {
 const url = new URL(window.location.href);
 
 window.RUNNING_IN_POPUP = url.searchParams.get('id')
-  && (window.location.pathname.includes('popup.html')
-    || (process.env.RUNNING_IN_TESTS && window.location.pathname.includes('popup')));
+  && (window.location.pathname.includes('index.html')
+    || process.env.RUNNING_IN_TESTS);
 window.POPUP_TYPE = url.searchParams.get('type') || null;
 window.IS_EXTENSION_BACKGROUND = process.env.IS_EXTENSION && window.location.href.endsWith('_generated_background_page.html');
 window.IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
