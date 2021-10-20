@@ -198,7 +198,8 @@ export default {
     },
   },
   watch: {
-    selectedToken() {
+    async selectedToken() {
+      await this.$validator.validateAll(this.warningRules);
       this.fetchFee();
     },
     $route: {
