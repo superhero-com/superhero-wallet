@@ -51,8 +51,8 @@
         v-validate="{
           required: true,
           min_value_exclusive: 0,
-          max_value: max,
-          ...selectedToken ? { enough_ae: fee.toString() } : {}
+          ...+balance.minus(fee) > 0 ? { max_value: max } : {},
+          enough_ae: fee.toString(),
         }"
         name="amount"
         :error="errors.has('amount')"
