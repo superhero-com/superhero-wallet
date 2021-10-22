@@ -57,7 +57,7 @@ export default {
   background-color: #0a0e16;
   background-position: calc(var(--shift) * 15px) calc(var(--shift) * 20px);
   clip-path: inset(0% 0% -200% 0%);
-  transition: height 0.2s ease-out, clip-path 0.2s step-end;
+  transition: height 0.2s ease-out, clip-path 0.1s step-end;
 
   &.minified {
     height: 109px;
