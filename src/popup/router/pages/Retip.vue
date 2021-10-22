@@ -12,7 +12,7 @@
 
     <InputAmount
       v-model="amount"
-      :amount-error="amount && validationStatus.error"
+      :error="amount && validationStatus.error"
       :error-message="validationStatus.msg"
     />
     <div class="tip-note-preview mt-15">
