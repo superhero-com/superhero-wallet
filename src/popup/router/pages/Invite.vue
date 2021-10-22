@@ -54,7 +54,7 @@ export default {
   components: {
     InputAmount, Button, InviteItem, Invite, NewInviteLink,
   },
-  data: () => ({ amount: 0, loading: false }),
+  data: () => ({ amount: '', loading: false }),
   subscriptions() {
     return pick(this.$store.state.observables, ['balance']);
   },

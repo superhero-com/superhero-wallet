@@ -53,7 +53,7 @@ export default {
   data() {
     return {
       loading: false,
-      amount: 0,
+      amount: '',
       amountError: null,
     };
   },

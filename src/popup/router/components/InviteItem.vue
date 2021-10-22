@@ -99,7 +99,7 @@ export default {
     createdAt: { type: Number, required: true },
   },
   data: () => ({
-    topUp: false, topUpAmount: 0, inviteLinkBalance: 0,
+    topUp: false, topUpAmount: '', inviteLinkBalance: 0,
   }),
   subscriptions() {
     return pick(this.$store.state.observables, ['balance']);
