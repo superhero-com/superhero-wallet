@@ -29,9 +29,7 @@
         bold
         @click="claim"
       >
-        {{
-          $t('pages.invite.claim')
-        }}
+        {{ $t('pages.invite.claim') }}
       </Button>
       <Button
         v-else
@@ -66,9 +64,7 @@
           :disabled="!sufficientBalance"
           @click="sendTopUp"
         >
-          {{
-            $t('pages.invite.top-up')
-          }}
+          {{ $t('pages.invite.top-up') }}
         </Button>
       </div>
     </template>

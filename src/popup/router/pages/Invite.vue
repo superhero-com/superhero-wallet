@@ -16,9 +16,7 @@
         :disabled="!!errorMsg"
         @click="generate"
       >
-        {{
-          $t('pages.invite.generate')
-        }}
+        {{ $t('pages.invite.generate') }}
       </Button>
     </div>
     <div
