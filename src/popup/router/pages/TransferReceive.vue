@@ -5,11 +5,9 @@
   >
     <InputAmount
       v-model="amount"
-      v-validate="'min_value:0'"
-      name="amount"
       :placeholder="$t('pages.receive.requestAmount')"
-      :error="errors.has('amount')"
-      :error-message="errors.first('amount')"
+      own-validation
+      :validation="{ min_value_exclusive: 0 }"
     />
     <InputWrapper
       v-for="(value, field) in shareInfo"

@@ -866,7 +866,7 @@
       "notClaimableUrlInfo": "Third party issues prevent us from enabling direct delivery of tips to the URL owner. You are sending this tip at your own risk.",
       "notVerifiedUrlInfo": "This URL has not yet been verified. The owner of the URL has to create account to claim their tokens.",
       "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed.",
-      "minAmountError": "Tips should be over 0.01 USD in tokens in order to push through.",
+      "minAmountError": "Tips should be over 0.01 USD in tokens.",
       "insufficientBalance": "The token balance should be greater than the tip token value.",
       "v1FungibleTokenTipError": "This post could only be tipped with AE tokens.",
       "maxNoteLengthError": "Please enter a message below 280 characters.",
@@ -1038,7 +1038,6 @@
       "claim": "Claim Back",
       "insufficient-balance": "Insufficient balance",
       "insufficient-ivnite-balance": "This invite Link expired and the Tokens are already claimed.",
-      "tokens-not-allowed": "Tokens are currently not allowed, please switch to AE",
       "tip-attached": "Tip attached",
       "top-up-with": "Top up with",
       "delete": "Delete"
@@ -1064,7 +1063,8 @@
     "minValue": "This field must be {0} or more",
     "minValueExclusive": "This field must be more than {0}",
     "enoughAe": "Not enough AE balance",
-    "maxValue": "This field must be {0} or less"
+    "maxValue": "This field must be {0} or less",
+    "notToken": "Tokens are currently not allowed, please switch to AE"
   },
   "redirecting": "Redirecting",
   "seconds": "{n} seconds | {n} second | {n} seconds",

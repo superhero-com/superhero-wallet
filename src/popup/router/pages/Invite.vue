@@ -8,12 +8,12 @@
       <InputAmount
         v-model="amount"
         :label="$t('pages.invite.tip-attached')"
-        :error="!!errorMsg"
-        :error-message="errorMsg"
+        no-token
+        @error="(val) => error = val"
       />
       <Button
         bold
-        :disabled="!!errorMsg"
+        :disabled="error"
         @click="generate"
       >
         {{ $t('pages.invite.generate') }}
@@ -39,8 +39,7 @@
 </template>
 
 <script>
-import { pick } from 'lodash-es';
-import { mapGetters, mapState } from 'vuex';
+import { mapState } from 'vuex';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 import InputAmount from '../components/InputAmount.vue';
 import Button from '../components/Button.vue';
@@ -52,22 +51,10 @@ export default {
   components: {
     InputAmount, Button, InviteItem, Invite, NewInviteLink,
   },
-  data: () => ({ amount: '', loading: false }),
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balance']);
-  },
+  data: () => ({ amount: '', loading: false, error: false }),
   computed: {
     ...mapState(['sdk']),
     ...mapState('invites', ['invites']),
-    ...mapGetters('fungibleTokens', ['selectedToken']),
-    sufficientBalance() {
-      return this.balance.comparedTo(this.amount) !== -1;
-    },
-    errorMsg() {
-      if (this.selectedToken) return this.$t('pages.invite.tokens-not-allowed');
-      if (!this.sufficientBalance) return this.$t('pages.invite.insufficient-balance');
-      return '';
-    },
   },
   methods: {
     async generate() {

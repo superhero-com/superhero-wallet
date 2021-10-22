@@ -40,7 +40,10 @@
     </div>
     <div data-cy="tip-container">
       <template v-if="!confirmMode">
-        <InputAmount v-model="amount" />
+        <InputAmount
+          v-model="amount"
+          @error="(val) => error = val"
+        />
         <Textarea
           v-model="note"
           :placeholder="$t('pages.tipPage.titlePlaceholder')"
@@ -50,7 +53,7 @@
           {{ validationStatus.msg }}
         </div>
         <Button
-          :disabled="validationStatus.error"
+          :disabled="validationStatus.error || error"
           bold
           data-cy="send-tip"
           @click="toConfirm"
@@ -92,10 +95,8 @@
 </template>
 
 <script>
-import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { calculateFee } from '../../utils/constants';
 import {
   escapeSpecialChars, aeToAettos, validateTipUrl, convertToken,
 } from '../../utils/helper';
@@ -128,10 +129,8 @@ export default {
       editUrl: true,
       IS_EXTENSION: process.env.IS_EXTENSION,
       tipFromPopup: false,
+      error: false,
     };
-  },
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balance']);
   },
   computed: {
     ...mapGetters(['account']),
@@ -147,7 +146,7 @@ export default {
       return this.tippingV2 || this.tippingV1;
     },
     ...mapState({
-      validationStatus({ sdk }, { account, minTipAmount }) {
+      validationStatus({ sdk }, { minTipAmount }) {
         if (!sdk || !this.tippingContract) {
           return { error: true };
         }
@@ -160,24 +159,8 @@ export default {
         if (this.selectedToken && !this.tippingV2) {
           return { error: true, msg: this.$t('pages.tipPage.v1FungibleTokenTipError') };
         }
-        if (!+this.amount) {
-          return { error: true, msg: this.$t('pages.tipPage.requiredAmountError') };
-        }
         if (!this.selectedToken && this.amount < minTipAmount) {
           return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
-        }
-        const fee = calculateFee(SCHEMA.TX_TYPE.contractCall, {
-          ...sdk.Ae.defaults,
-          contractId: this.tippingContract.deployInfo.address,
-          callerId: account.address,
-        });
-        if (
-          this.selectedToken
-            ? this.selectedToken.balance.comparedTo(this.amount) === -1
-              || this.balance.comparedTo(fee) === -1
-            : this.balance.comparedTo(fee.plus(this.amount)) === -1
-        ) {
-          return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
         }
         if (!this.note) {
           return { error: true, msg: this.$t('pages.tipPage.titlePlaceholder') };

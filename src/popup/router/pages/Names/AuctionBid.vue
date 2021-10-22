@@ -6,6 +6,7 @@
         v-model="amount"
         :error="!!amountError"
         :error-message="amountError"
+        @error="(val) => error = val"
       />
       <div class="tx-details">
         <DetailsItem :label="$t('tx-fee')">
@@ -23,7 +24,7 @@
         </DetailsItem>
       </div>
       <Button
-        :disabled="!!amountError || !+amount"
+        :disabled="!!amountError || error"
         @click="bid"
       >
         {{ $t('pages.names.auctions.place-bid') }}
@@ -55,6 +56,7 @@ export default {
       loading: false,
       amount: '',
       amountError: null,
+      error: false,
     };
   },
   computed: {
@@ -71,9 +73,7 @@ export default {
   },
   watch: {
     amount(val) {
-      if (!+val) {
-        this.amountError = this.$t('pages.names.auctions.add-amount');
-      } else if (+val <= this.highestBid.multipliedBy(1.05)) {
+      if (+val <= this.highestBid.multipliedBy(1.05)) {
         const minBid = this.highestBid.multipliedBy(1.05).toString();
         this.amountError = this.$t('pages.names.auctions.min-bid', { minBid });
       } else {

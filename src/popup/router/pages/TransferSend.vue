@@ -48,15 +48,7 @@
 
       <InputAmount
         v-model="form.amount"
-        v-validate="{
-          required: true,
-          min_value_exclusive: 0,
-          ...+balance.minus(fee) > 0 ? { max_value: max } : {},
-          enough_ae: fee.toString(),
-        }"
-        name="amount"
-        :error="errors.has('amount')"
-        :error-message="errors.first('amount')"
+        @error="(val) => error = val"
       />
     </div>
     <div
@@ -106,7 +98,7 @@
         !form.address
           || !form.amount
           || $validator._base.anyExcept('address', warningRules.address)
-          || errors.has('amount')"
+          || error"
       @click="validate"
     >
       {{ $t('pages.send.review') }}
@@ -139,7 +131,6 @@
 </template>
 
 <script>
-import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
@@ -180,6 +171,7 @@ export default {
       },
       loading: false,
       fee: BigNumber(0),
+      error: false,
     };
   },
   computed: {
@@ -188,11 +180,6 @@ export default {
     ...mapState(['current', 'sdk']),
     ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate', 'accounts']),
     ...mapGetters('fungibleTokens', ['selectedToken', 'tokenBalances']),
-    max() {
-      return (this.selectedToken
-        ? this.selectedToken.balance
-        : this.balance.minus(this.fee)).toString();
-    },
     tokenSymbol() {
       return this.selectedToken ? this.selectedToken.symbol : 'AE';
     },
@@ -208,9 +195,6 @@ export default {
         await this.queryHandler(query);
       },
     },
-  },
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balance']);
   },
   async mounted() {
     if (typeof this.address !== 'undefined') {
