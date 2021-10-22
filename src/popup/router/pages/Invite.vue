@@ -7,7 +7,6 @@
       </p>
       <InputAmount
         v-model="amount"
-        native-token
         :label="$t('pages.invite.tip-attached')"
         :error="!!errorMsg"
         :error-message="errorMsg"
