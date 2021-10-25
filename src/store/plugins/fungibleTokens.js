@@ -167,10 +167,7 @@ export default (store) => {
       },
       async getTokensHistory({ rootState, rootGetters: { activeNetwork, account }, commit }) {
         const { address } = account;
-        const rawTransactions = ([
-          ...(await fetchJson(`${activeNetwork.middlewareUrl}/aex9/transfers/to/${address}`)),
-          ...(await fetchJson(`${activeNetwork.middlewareUrl}/aex9/transfers/from/${address}`)),
-        ]);
+        const rawTransactions = await fetchJson(`${activeNetwork.middlewareUrl}/aex9/transfers/to/${address}`);
 
         const transactions = await Promise.all(
           rawTransactions.map(async ({ call_txi: index, ...otherTx }) => ({
