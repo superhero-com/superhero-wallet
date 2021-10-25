@@ -106,7 +106,7 @@
     "standard-version": "^9.3.0",
     "stylelint": "^13.13.1",
     "stylelint-config-standard": "^20.0.0",
-    "svg-url-loader": "^7.1.1",
+    "svg-url-loader": "^6.0.0",
     "svgo": "^2.7.0",
     "svgo-loader": "^3.0.0",
     "vue-cli-plugin-browser-extension": "^0.25.2",
