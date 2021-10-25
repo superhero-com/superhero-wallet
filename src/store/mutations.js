@@ -85,12 +85,6 @@ export default {
   setBackedUpSeed(state) {
     state.backedUpSeed = true;
   },
-  setTourRunning(state, payload) {
-    state.tourRunning = payload;
-  },
-  setTourStatusBar(state, payload) {
-    state.tourStartBar = payload;
-  },
   setSaveErrorLog(state) {
     state.saveErrorLog = !state.saveErrorLog;
   },

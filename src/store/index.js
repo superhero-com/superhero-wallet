@@ -54,8 +54,6 @@ export default new Vuex.Store({
     connectedAepps: {},
     migrations: {},
     backedUpSeed: null,
-    tourRunning: false,
-    tourStartBar: true,
     saveErrorLog: true,
     loginTargetLocation: { name: 'account' },
     cardMinified: false,
