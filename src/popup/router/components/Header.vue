@@ -5,7 +5,7 @@
     :class="{ 'not-logged-in': !isLoggedIn }"
   >
     <div
-      v-if="isLoggedIn || (title && !tourRunning)"
+      v-if="isLoggedIn || title"
       class="left"
     >
       <RouterLink
@@ -113,7 +113,7 @@ export default {
 
   computed: {
     ...mapGetters(['isLoggedIn']),
-    ...mapState(['tourRunning', 'notifications', 'pageTitle']),
+    ...mapState(['notifications', 'pageTitle']),
     title() {
       return this.$route.meta.title;
     },
@@ -122,7 +122,7 @@ export default {
     },
     showBack() {
       return (this.$route.meta.backButton !== undefined ? this.$route.meta.backButton : true)
-        && this.title && !this.tourRunning;
+        && this.title;
     },
     notificationsCount() {
       return [...this.notifications, ...this.superheroNotifications].filter(

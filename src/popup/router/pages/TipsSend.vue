@@ -1,44 +1,42 @@
 <template>
   <div class="tips-send">
-    <div class="tour__step3">
-      <p class="primary-title text-left mb-8 f-16">
-        <template v-if="!confirmMode">
-          {{ $t('pages.tipPage.url') }}
-        </template>
-        <template v-else>
-          {{ $t('pages.tipPage.headingSending') }}
-          <TokenAmount
-            data-cy="tip-amount"
-            :amount="+amount"
-            v-bind="selectedToken ? { symbol: selectedToken.symbol, aex9: true } : {}"
-          />
-          {{ $t('pages.tipPage.to') }}
-        </template>
-      </p>
+    <p class="primary-title text-left mb-8 f-16">
+      <template v-if="!confirmMode">
+        {{ $t('pages.tipPage.url') }}
+      </template>
+      <template v-else>
+        {{ $t('pages.tipPage.headingSending') }}
+        <TokenAmount
+          data-cy="tip-amount"
+          :amount="+amount"
+          v-bind="selectedToken ? { symbol: selectedToken.symbol, aex9: true } : {}"
+        />
+        {{ $t('pages.tipPage.to') }}
+      </template>
+    </p>
 
-      <div
-        class="url-bar"
-        :class="editUrl ? 'url-bar--input' : 'url-bar--text'"
-      >
-        <template v-if="!editUrl">
-          <a
-            class="link-sm text-left"
-            data-cy="tip-url"
-          >
-            {{ url }}
-          </a>
-        </template>
-        <InputField
-          v-else
-          v-model="url"
-          :placeholder="$t('pages.tipPage.enterUrl')"
+    <div
+      class="url-bar"
+      :class="editUrl ? 'url-bar--input' : 'url-bar--text'"
+    >
+      <template v-if="!editUrl">
+        <a
+          class="link-sm text-left"
+          data-cy="tip-url"
         >
-          <UrlStatus
-            slot="left"
-            :status="urlStatus"
-          />
-        </InputField>
-      </div>
+          {{ url }}
+        </a>
+      </template>
+      <InputField
+        v-else
+        v-model="url"
+        :placeholder="$t('pages.tipPage.enterUrl')"
+      >
+        <UrlStatus
+          slot="left"
+          :status="urlStatus"
+        />
+      </InputField>
     </div>
     <div data-cy="tip-container">
       <template v-if="!confirmMode">
@@ -137,10 +135,10 @@ export default {
   },
   computed: {
     ...mapGetters(['account']),
-    ...mapState(['tourRunning', 'tip', 'sdk', 'tippingV1', 'tippingV2']),
+    ...mapState(['tip', 'sdk', 'tippingV1', 'tippingV2']),
     ...mapGetters('fungibleTokens', ['selectedToken', 'tokenBalances']),
     urlStatus() {
-      return this.tourRunning ? 'verified' : this.$store.getters['tipUrl/status'](this.url);
+      return this.$store.getters['tipUrl/status'](this.url);
     },
     validUrl() {
       return validateTipUrl(this.url);
@@ -322,25 +320,16 @@ export default {
 
 .tips-send {
   padding: 16px;
+  margin: 0 auto;
+  margin-top: 22px;
+  min-width: auto;
 
-  .tour__step3 {
-    margin: 0 auto;
-    margin-top: 22px;
-    min-width: auto;
+  p {
+    margin-top: 0;
 
-    &.v-tour__target--highlighted {
-      margin: 10px;
-      min-width: auto;
-      padding-bottom: 25px;
-    }
-
-    p {
-      margin-top: 0;
-
-      &.title-holder {
-        display: flex;
-        align-items: center;
-      }
+    &.title-holder {
+      display: flex;
+      align-items: center;
     }
   }
 
@@ -368,14 +357,6 @@ export default {
     color: variables.$color-error;
     font-size: 15px;
     min-height: 45px;
-  }
-
-  @media screen and (min-width: 380px) {
-    .tour__step3.v-tour__target--highlighted {
-      margin: 10px auto 0 auto;
-      min-width: auto;
-      padding-bottom: 25px;
-    }
   }
 }
 </style>

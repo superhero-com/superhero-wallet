@@ -2,47 +2,6 @@
   "ok": "OK",
   "ae": "AE",
   "mainAccount": "Cuenta principal",
-  "onboarding": {
-    "step_1": {
-      "title": "Información de tu cuenta",
-      "content": "Este bloque contiene información acerca la cuenta de tu billetera y de su estado:<br> 1. La dirección de tu cuenta y el nombre .chain ( si ya tienes uno ).<br>2. Tu saldo actual en la billetera. "
-    },
-    "step_2": {
-      "title": "Enviar Propina",
-      "content": "Para enviar propinas, ve a la URL a la que quieres dar propina y abre la billetera. También puedes copiar la URL, darle click a Enviar Propina y pegar la URL en la billetera. Introduce cúanto quieres dar de propina y agregar un mensaje junto con esta propina. Dale a Enviar y a Confirmar."
-    },
-    "step_3": {
-      "title": "¿Qué es una URL \"Verified\"?",
-      "content": "Esto significa simplemente que el propietario de esta URL ya es un compañero Superhero — ¡y eso es asombroso! Una dirección AE ha sido incluida en la URL y el propietario del perfil puede reclamar propinas instantáneamente."
-    },
-    "step_4": {
-      "title": "Reclamar Propina",
-      "content": "Darle a este botón activa la recolección de propinas— todas las propinas que hayas recibido desde una URL en la que hayas agregado tu dirección AE se agregarán a tu saldo."
-    },
-    "step_5": {
-      "title": "Actividad",
-      "content": "Esta pestaña te mostrará un registro completo de toda tu actividad previa usando la Billetera Superhero."
-    },
-    "step_6": {
-      "title": "Agregar Saldo",
-      "content": "Puedes agregar saldo a tu billetera cambiando ETH o BTC a AE, comprando AE usando tu tarjeta de crédito, o enviando AE a la dirección de tu billetera Superhero desde otra cuenta AE. Es muy fácil."
-    },
-    "step_7": {
-      "title": "Retiro",
-      "content": "Puedes retirar tus propinas fácilmente enviándolas a direcciones de billeteras AE en cuentas de casas de intercambio o a billeteras externas que provean soporte de tokens AE."
-    },
-    "step_8": {
-      "title": "Configuración",
-      "content": "Puedes ver tu frase de seguridad (conocida como frase semilla, seedphrase o llave privada), cambiar el idioma y otros ajustes."
-    },
-    "heading": "¡Hey Superhéroe! Bienvenido a bordo",
-    "sub-heading": "Esta guía corta te llevará a través de la DApp Billetera Superhero y todas sus funciones.",
-    "skip": "Saltar",
-    "back": "Regresar",
-    "next": "Próximo",
-    "start": "Empezar",
-    "tutorial": "Tutorial"
-  },
   "badges": {
     "verified": "Verificada",
     "notVerified": "No verificada"
