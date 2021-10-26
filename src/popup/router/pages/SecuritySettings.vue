@@ -3,7 +3,10 @@
     <template v-if="view === 'warning'">
       <h3>{{ $t('pages.securitySettings.seedRecoveryHeading') }}</h3>
       {{ $t('pages.securitySettings.seedRecoverySmall') }}
-      <Button @click="view = 'show'">
+      <Button
+        class="show"
+        @click="view = 'show'"
+      >
         {{ $t('pages.securitySettings.seedRecoveryBtn') }}
       </Button>
     </template>
@@ -144,6 +147,14 @@ export default {
     .ae-button.toolbar {
       color: variables.$color-bg-3;
     }
+  }
+
+  .show.button {
+    margin-top: 48px;
+  }
+
+  .ae-phraser {
+    margin: 8px 0;
   }
 
   .ae-icon.ae-icon-check {
