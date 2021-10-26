@@ -374,10 +374,6 @@ export default {
   .checkbox-container {
     margin: 20px auto 50px auto;
     max-width: 270px;
-
-    ::v-deep .checkmark {
-      width: 50px;
-    }
   }
 
   .platforms {
