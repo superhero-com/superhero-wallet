@@ -66,9 +66,7 @@
       data-cy="to-add"
       @click="mode = 'add'"
     >
-      {{
-        $t('pages.network.addNetwork')
-      }}
+      {{ $t('pages.network.addNetwork') }}
     </Button>
   </div>
   <div
@@ -104,11 +102,13 @@
       @click="backendUrlInputExpanded = !backendUrlInputExpanded"
     >
       <Arrow :class="['icon', { rotated: backendUrlInputExpanded }]" />
-      <span>{{
-        backendUrlInputExpanded
-          ? $t('pages.network.hideTippingConfig')
-          : $t('pages.network.showTippingConfig')
-      }}</span>
+      <span>
+        {{
+          backendUrlInputExpanded
+            ? $t('pages.network.hideTippingConfig')
+            : $t('pages.network.showTippingConfig')
+        }}
+      </span>
     </ButtonPlain>
     <InputField
       v-if="backendUrlInputExpanded"
