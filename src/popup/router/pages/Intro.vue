@@ -44,7 +44,7 @@
           {{ $t('pages.intro.step3text-2') }}
         </span>
       </div>
-      <div class="mt-32">
+      <div class="ever">
         {{ $t('pages.intro.ever') }}
       </div>
     </div>
@@ -135,6 +135,7 @@
       <Button
         :disabled="iframe && !understood"
         data-cy="proceed-to-wallet"
+        :class="!iframe && 'proceed-to-wallet'"
         @click="$router.push($store.state.loginTargetLocation)"
       >
         {{ $t('pages.intro.toHome') }}
@@ -241,6 +242,11 @@ export default {
     }
   }
 
+  .ever {
+    margin-top: 14px;
+    margin-bottom: 10px;
+  }
+
   .text-info {
     margin: 10px 0 0 0;
     text-align: center;
@@ -272,6 +278,10 @@ export default {
     font-size: 18px;
     width: 100%;
     margin: 10px auto;
+  }
+
+  .proceed-to-wallet {
+    margin-top: 32px;
   }
 
   .arrow {

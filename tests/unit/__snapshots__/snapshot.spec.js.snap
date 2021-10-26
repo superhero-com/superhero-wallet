@@ -390,7 +390,7 @@ exports[`Pages Intro 1`] = `
     </div>
      
     <div
-      class="mt-32"
+      class="ever"
     >
       
       locale-specific-text
@@ -487,7 +487,7 @@ exports[`Pages Intro 1`] = `
     </p>
      
     <button
-      class="button primary"
+      class="button primary proceed-to-wallet"
       data-cy="proceed-to-wallet"
     >
       
@@ -576,7 +576,7 @@ exports[`Pages Intro 2`] = `
     </div>
      
     <div
-      class="mt-32"
+      class="ever"
     >
       
       locale-specific-text
@@ -673,7 +673,7 @@ exports[`Pages Intro 2`] = `
     </p>
      
     <button
-      class="button primary"
+      class="button primary proceed-to-wallet"
       data-cy="proceed-to-wallet"
     >
       
@@ -762,7 +762,7 @@ exports[`Pages Intro 3`] = `
     </div>
      
     <div
-      class="mt-32"
+      class="ever"
     >
       
       locale-specific-text
@@ -859,7 +859,7 @@ exports[`Pages Intro 3`] = `
     </p>
      
     <button
-      class="button primary"
+      class="button primary proceed-to-wallet"
       data-cy="proceed-to-wallet"
     >
       
@@ -948,7 +948,7 @@ exports[`Pages Intro 4`] = `
     </div>
      
     <div
-      class="mt-32"
+      class="ever"
     >
       
       locale-specific-text
@@ -1045,7 +1045,7 @@ exports[`Pages Intro 4`] = `
     </p>
      
     <button
-      class="button primary"
+      class="button primary proceed-to-wallet"
       data-cy="proceed-to-wallet"
     >
       
