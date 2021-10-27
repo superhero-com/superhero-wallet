@@ -159,10 +159,12 @@ export default {
     },
   },
   mounted() {
-    const polling = setInterval(() => this.updateBalances(), 10000);
+    const pollBalances = setInterval(() => this.updateBalances(), 10000);
+    const pollDefaultNames = setInterval(() => this.$store.dispatch('names/setDefaults'), 5000);
 
     this.$once('hook:destroyed', () => {
-      clearInterval(polling);
+      clearInterval(pollBalances);
+      clearInterval(pollDefaultNames);
     });
     this.customAccountName = this.accounts[this.idx].localName;
   },
