@@ -132,6 +132,7 @@ export default {
 
 .security-settings {
   .mnemonics {
+    margin: 1.5rem 0;
     margin: 0;
 
     p {
@@ -139,6 +140,9 @@ export default {
     }
 
     .ae-button {
+      border-radius: 8px;
+      height: 52px;
+      padding: 0 2.5rem;
       float: right;
       margin: 10px 0 30px 0;
     }

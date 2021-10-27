@@ -1,6 +1,6 @@
 <template>
   <div class="tips-claim">
-    <p class="primary-title text-left mb-8 f-16">
+    <p>
       {{ $t('pages.claimTips.urlToClaim') }}
     </p>
     <InputField
@@ -92,8 +92,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '../../../styles/typography';
+
 .tips-claim {
   padding: 16px;
+
+  p {
+    margin: 16px 0 8px 0;
+
+    @extend %face-sans-16-regular;
+  }
 
   .input-field {
     margin: 20px 0;

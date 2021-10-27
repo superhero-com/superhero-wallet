@@ -32,7 +32,7 @@
           data-cy="title"
         >
           {{ $t('pages.tipPage.heading') }}
-          <span class="secondary-text">
+          <span class="token-symbol">
             {{ tokenSymbol }}
           </span>
           {{ $t('pages.tipPage.to') }}
@@ -369,6 +369,10 @@ export default {
   padding: 16px;
 
   .send {
+    .token-symbol {
+      color: variables.$color-blue;
+    }
+
     .valid {
       color: variables.$color-green;
     }

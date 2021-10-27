@@ -1,6 +1,6 @@
 <template>
   <div class="tips-send">
-    <p class="primary-title text-left mb-8 f-16">
+    <p>
       <template v-if="!confirmMode">
         {{ $t('pages.tipPage.url') }}
       </template>
@@ -20,10 +20,7 @@
       :class="editUrl ? 'url-bar--input' : 'url-bar--text'"
     >
       <template v-if="!editUrl">
-        <a
-          class="link-sm text-left"
-          data-cy="tip-url"
-        >
+        <a data-cy="tip-url">
           {{ url }}
         </a>
       </template>
@@ -69,7 +66,7 @@
       </template>
       <template v-else>
         <div
-          class="tip-note-preview mt-15"
+          class="tip-note-preview"
           data-cy="tip-note"
         >
           {{ note }}
@@ -300,6 +297,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .tips-send {
   padding: 16px;
@@ -308,7 +306,11 @@ export default {
   min-width: auto;
 
   p {
-    margin-top: 0;
+    color: variables.$color-white;
+    margin: 0 0 8px 0;
+    text-align: left;
+
+    @extend %face-sans-16-regular;
 
     &.title-holder {
       display: flex;
@@ -325,10 +327,13 @@ export default {
     }
 
     a {
+      margin: 8px 0;
       color: variables.$color-white;
       text-decoration: none;
       margin-left: 10px;
       width: 90%;
+
+      @extend %face-sans-11-regular;
     }
   }
 

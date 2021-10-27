@@ -7,12 +7,10 @@
       >
       <h2 v-else>
         <Claim /> {{ $t('pages.intro.receive') }}
-        <span class="ml-10 secondary-text"> {{ $t('ae') }} </span>
+        <span class="ae"> {{ $t('ae') }} </span>
       </h2>
       <div class="text-info">
-        <span>
-          {{ $t('pages.intro.step1text') }}
-        </span>
+        {{ $t('pages.intro.step1text') }}
       </div>
     </div>
 
@@ -23,12 +21,10 @@
       >
       <h2 v-else>
         <Heart /> {{ $t('pages.send.send') }}
-        <span class="ml-10 secondary-text">{{ $t('ae') }}</span>
+        <span class="ae">{{ $t('ae') }}</span>
       </h2>
       <div class="text-info">
-        <span>
-          {{ $t('pages.intro.step2text') }}
-        </span>
+        {{ $t('pages.intro.step2text') }}
       </div>
     </div>
 
@@ -38,11 +34,9 @@
         src="../../../icons/iframe/power.svg"
       >
       <div class="text-info">
-        <span>
-          {{ $t('pages.intro.step3text-1') }}
-          <span class="secondary-text aeid">{{ $t('ae') }}</span>
-          {{ $t('pages.intro.step3text-2') }}
-        </span>
+        {{ $t('pages.intro.step3text-1') }}
+        <span class="ae">{{ $t('ae') }}</span>
+        {{ $t('pages.intro.step3text-2') }}
       </div>
       <div class="ever">
         {{ $t('pages.intro.ever') }}
@@ -62,20 +56,10 @@
       />
       <ul>
         <li
-          :class="step === 1 ? 'current' : ''"
-          @click="step = 1"
-        >
-          <a />
-        </li>
-        <li
-          :class="step === 2 ? 'current' : ''"
-          @click="step = 2"
-        >
-          <a />
-        </li>
-        <li
-          :class="step === 3 ? 'current' : ''"
-          @click="step = 3"
+          v-for="i in 3"
+          :key="i"
+          :class="step === i ? 'current' : ''"
+          @click="step = i"
         >
           <a />
         </li>
@@ -108,10 +92,10 @@
       <template v-if="!iframe">
         <h2>{{ $t('pages.intro.createdWallet') }}</h2>
         <h4>{{ $t('pages.intro.step4text-0') }}</h4>
-        <div class="text-info">
-          <span class="mb-4 block">{{ $t('pages.intro.step4text-1') }}</span>
-          <span class="mb-4 block"> {{ $t('pages.intro.step4text-2') }} </span>
-          <span class="mb-4 block"> {{ $t('pages.intro.step4text-3') }} </span>
+        <div class="text-info splitted-text">
+          <span>{{ $t('pages.intro.step4text-1') }}</span>
+          <span>{{ $t('pages.intro.step4text-2') }}</span>
+          <span>{{ $t('pages.intro.step4text-3') }}</span>
         </div>
 
         <p class="last-msg-enjoy">
@@ -227,8 +211,13 @@ export default {
     }
   }
 
+  .ae {
+    color: variables.$color-blue;
+  }
+
   h2 {
     display: flex;
+    align-items: center;
     justify-content: center;
     font-size: 18px;
 
@@ -240,6 +229,10 @@ export default {
     svg {
       margin-right: 10px;
     }
+
+    .ae {
+      margin-left: 10px;
+    }
   }
 
   .ever {
@@ -249,12 +242,10 @@ export default {
 
   .text-info {
     margin: 10px 0 0 0;
-    text-align: center;
 
-    span:not(.aeid) {
-      color: variables.$color-white;
-      font-size: 16px;
-      word-break: break-word;
+    &.splitted-text span {
+      margin-bottom: 4px;
+      display: block;
     }
   }
 

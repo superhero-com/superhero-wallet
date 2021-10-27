@@ -3,13 +3,11 @@
     class="success-tip"
     data-cy="success-tip"
   >
-    <h3 class="heading-1 mb-25 mt-15 center">
-      <div class="flex flex-align-center flex-justify-content-center">
-        <Heart />
-        <span class="ml-5">{{ $t('pages.successTip.completedHeading') }}</span>
-      </div>
-    </h3>
-    <p class="primary-title text-left mb-8 f-16">
+    <div class="header">
+      <Heart />
+      <span>{{ $t('pages.successTip.completedHeading') }}</span>
+    </div>
+    <div>
       {{ $t('pages.successTip.successfullySent') }}
       <TokenAmount
         v-bind="
@@ -20,12 +18,13 @@
         data-cy="tip-amount"
       />
       {{ $t('pages.successTip.to') }}
-    </p>
+    </div>
     <a
-      class="link-sm text-left block"
+      class="url"
       data-cy="tip-url"
-    >{{ tipUrl }}</a>
-    <br>
+    >
+      {{ tipUrl }}
+    </a>
     <div>
       {{ $t('pages.successTip.notify') }}
       <TokenAmount
@@ -42,38 +41,35 @@
     </div>
     <p
       v-if="!(tipUrl && isVerifiedUrl)"
-      class="f-14 sub-heading text-left"
+      class="sub-heading"
     >
       {{ $t('pages.successTip.note') }}
     </p>
-    <p class="f-18 my-35">
+    <p class="exclamation">
       {{ $t('pages.successTip.letThemKnow') }}
     </p>
-    <div>
-      <div class="flex flex-align-center flex-justify-between">
-        <Button
-          half
-          data-cy="to-tips"
-          @click="$router.push('/tips')"
-        >
-          {{ $t('pages.successTip.sendMore') }}
-        </Button>
-        <Button
-          half
-          data-cy="to-dashboard"
-          @click="$router.push('/account')"
-        >
-          {{ $t('pages.titles.home') }}
-        </Button>
-      </div>
-      <br>
+    <div class="buttons">
       <Button
-        :to="AGGREGATOR_URL"
-        extend
+        half
+        data-cy="to-tips"
+        @click="$router.push('/tips')"
       >
-        {{ $t('pages.successTip.feed') }}
+        {{ $t('pages.successTip.sendMore') }}
+      </Button>
+      <Button
+        half
+        data-cy="to-dashboard"
+        @click="$router.push('/account')"
+      >
+        {{ $t('pages.titles.home') }}
       </Button>
     </div>
+    <Button
+      :to="AGGREGATOR_URL"
+      extend
+    >
+      {{ $t('pages.successTip.feed') }}
+    </Button>
   </div>
 </template>
 
@@ -134,22 +130,52 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .success-tip {
-  .sub-heading {
-    font-size: 14px;
-    font-weight: normal;
+  .header {
+    margin: 16px 0;
+    display: flex;
+    justify-content: center;
+
+    @extend %face-sans-20-regular;
+
+    > span {
+      margin-left: 8px;
+    }
+  }
+
+  .url {
+    display: block;
     margin: 8px 0;
+
+    @extend %face-sans-11-regular;
   }
 
   .note {
-    color: variables.$color-white;
-    font-size: variables.$base-font-size;
-    min-height: 100px;
+    margin-top: 8px;
     border-radius: 5px;
     border: 2px solid variables.$color-border;
     background: variables.$color-bg-2;
-    padding: 15px;
+    padding: 12px;
+
+    @extend %face-sans-16-regular;
+  }
+
+  .sub-heading {
+    @extend %face-sans-14-regular;
+
+    text-align: left;
+    line-height: initial;
+  }
+
+  .exclamation {
+    @extend %face-sans-20-bold;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: space-between;
   }
 }
 </style>
