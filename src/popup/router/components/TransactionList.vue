@@ -206,6 +206,7 @@ export default {
   .spinner {
     flex-grow: 1;
     display: flex;
+    justify-content: center;
     align-items: center;
     padding-bottom: 48px;
   }
