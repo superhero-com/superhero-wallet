@@ -81,6 +81,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .notification-item {
   display: flex;
@@ -190,9 +191,9 @@ export default {
     }
 
     .mark-as-read {
-      font-size: 0.9rem;
-      line-height: 1.2rem;
       padding: 0.5rem;
+
+      @extend %face-sans-14-regular;
 
       &:hover {
         color: variables.$color-white;

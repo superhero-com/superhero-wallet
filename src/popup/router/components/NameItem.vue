@@ -261,10 +261,9 @@ export default {
       }
 
       .truncate {
-        @extend %face-sans-14-medium;
+        @extend %face-sans-14-bold;
 
         line-height: 16px;
-        font-weight: bold;
       }
 
       .buttons {
