@@ -26,26 +26,31 @@ export default {
       };
     },
   },
-  mounted() {
-    if (this.fixed) return;
-    document.fonts.ready.then(() => {
-      const scrollElement = this.$refs.scroll;
-      const { parentElement } = scrollElement;
-      const { scrollWidth, offsetWidth } = parentElement;
+  watch: {
+    str: {
+      async handler() {
+        if (this.fixed) return;
+        document.fonts.ready.then(() => {
+          const scrollElement = this.$refs.scroll;
+          const { parentElement } = scrollElement;
+          const { scrollWidth, offsetWidth } = parentElement;
 
-      if (scrollWidth > offsetWidth) {
-        parentElement.classList.add('scrollable');
-        this.animation = scrollElement.animate(
-          [{ transform: `translateX(calc(-${scrollWidth - offsetWidth}px - var(--beforeWidth)))` }],
-          {
-            delay: 2000,
-            duration: 4000,
-            direction: 'alternate',
-            iterations: Infinity,
-          },
-        );
-      }
-    });
+          if (scrollWidth > offsetWidth) {
+            parentElement.classList.add('scrollable');
+            this.animation = scrollElement.animate(
+              [{ transform: `translateX(calc(-${scrollWidth - offsetWidth}px - var(--beforeWidth)))` }],
+              {
+                delay: 2000,
+                duration: 4000,
+                direction: 'alternate',
+                iterations: Infinity,
+              },
+            );
+          }
+        });
+      },
+      immediate: true,
+    },
   },
 };
 </script>
