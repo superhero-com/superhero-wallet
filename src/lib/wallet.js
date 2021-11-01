@@ -53,6 +53,17 @@ async function initMiddleware() {
         ],
       },
     },
+    '/name/{hash}': {
+      get: {
+        operationId: 'getNameByHash',
+        parameters: [{
+          in: 'path',
+          name: 'hash',
+          required: true,
+          type: 'string',
+        }],
+      },
+    },
   };
   spec.basePath = '/mdw//';
   const middleware = mapObject(

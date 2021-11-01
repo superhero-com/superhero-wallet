@@ -17,6 +17,7 @@ export default {
   props: {
     tx: { type: Object, required: true },
   },
+  data: () => ({ name: '' }),
   computed: {
     ...mapGetters(['getTxType', 'getTxDirection', 'getExplorerPath']),
     ...mapGetters('names', ['getPreferred']),
@@ -41,7 +42,7 @@ export default {
             },
             recipient: {
               address: this.tx.recipientId,
-              name: this.getPreferred(this.tx.recipientId),
+              name: this.name || this.getPreferred(this.tx.recipientId),
               url: this.getExplorerPath(this.tx.recipientId),
               label: this.$t('transaction.overview.accountAddress'),
             },
@@ -88,6 +89,12 @@ export default {
     txType() {
       return this.getTxType({ tx: this.tx });
     },
+  },
+  async mounted() {
+    await this.$watchUntilTruly(() => this.$store.state.middleware);
+    if (this.tx.recipientId?.startsWith('nm_')) {
+      this.name = (await this.$store.state.middleware.getNameByHash(this.tx.recipientId)).name;
+    }
   },
 };
 </script>
