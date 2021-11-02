@@ -1,5 +1,5 @@
 import {
-  flatten, orderBy, uniq, uniqBy,
+  flatten, orderBy, uniq,
 } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
@@ -69,7 +69,7 @@ export default {
         txs[0].push(f);
       }
     });
-    txs = uniqBy(orderBy(flatten(txs), ['microTime'], ['desc']), ({ hash }) => hash);
+    txs = orderBy(flatten(txs), ['microTime'], ['desc']);
     return { txs: recent ? txs.slice(0, limit) : txs, hasMore };
   },
 
