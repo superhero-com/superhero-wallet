@@ -67,6 +67,7 @@ export default {
       loading: false,
       transactions: [],
       page: 1,
+      isDestroyed: false,
       displayMode: { rotated: true, filter: 'all', sort: 'date' },
       filters: {
         all: {}, sent: {}, received: {}, tips: {}, date: { rotated: true },
@@ -136,11 +137,13 @@ export default {
       document.querySelector('#app').removeEventListener('scroll', this.checkLoadMore);
       window.removeEventListener('scroll', this.checkLoadMore);
       clearInterval(polling);
+      this.isDestroyed = true;
     });
     this.$watch(({ displayMode }) => displayMode, this.checkLoadMore);
   },
   methods: {
     checkLoadMore() {
+      if (this.isDestroyed) return;
       const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = isDesktop
         ? document.querySelector('#app') : document.documentElement;
