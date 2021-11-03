@@ -95,7 +95,8 @@ export default {
                 return (tr.tx.type === 'SpendTx' && tr.tx.senderId === address)
                   || (isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address);
               case 'received':
-                return (tr.tx.type === 'SpendTx' && tr.tx.recipientId === address)
+                return (tr.tx.type === 'SpendTx'
+                  && (tr.tx.recipientId === address || (tr.tx.senderId !== address && tr.tx.recipientId.startsWith('nm_'))))
                   || (isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.recipient === address);
               case 'tips':
                 return (!isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address) || tr.claim;
