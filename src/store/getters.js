@@ -3,7 +3,7 @@ import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { Crypto, TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
-import { defaultNetworks, TX_TYPE_MDW } from '../popup/utils/constants';
+import { defaultNetworks, TX_TYPE_MDW, calculateFee } from '../popup/utils/constants';
 import {
   checkHashType,
   convertToken,
@@ -125,4 +125,16 @@ export default {
   ),
   isTxAex9: () => (transaction) => transaction.tx
     && !!categorizeContractCallTxObject(transaction)?.token,
+  getFee({ sdk }, getters) {
+    const selectedToken = getters['fungibleTokens/selectedToken'];
+    return !sdk ? 0 : calculateFee(
+      !selectedToken ? SCHEMA.TX_TYPE.spend : SCHEMA.TX_TYPE.contractCall, {
+        ...sdk.Ae.defaults,
+        ...(selectedToken && {
+          callerId: getters.account.address,
+          contractId: selectedToken.contract,
+        }),
+      },
+    );
+  },
 };

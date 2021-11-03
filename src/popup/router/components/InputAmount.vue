@@ -3,8 +3,8 @@
     v-validate="ownValidation ? validation : {
       required: true,
       min_value_exclusive: 0,
-      ...+balance.minus(fee) > 0 ? { max_value: max } : {},
-      enough_ae: fee.toString(),
+      ...+balance.minus(getFee) > 0 ? { max_value: max } : {},
+      enough_ae: getFee.toString(),
       not_token: noToken,
       ...validation,
     }"
@@ -32,11 +32,8 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
 import { pick } from 'lodash-es';
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import BigNumber from 'bignumber.js';
-import { calculateFee } from '../../utils/constants';
 import InputField from './InputField.vue';
 
 export default {
@@ -48,17 +45,11 @@ export default {
     ownValidation: { type: Boolean },
     validation: { type: Object, default: null },
   },
-  data() {
-    return {
-      fee: BigNumber(0),
-    };
-  },
   subscriptions() {
     return pick(this.$store.state.observables, ['balance']);
   },
   computed: {
-    ...mapState(['sdk']),
-    ...mapGetters(['formatCurrency']),
+    ...mapGetters(['formatCurrency', 'getFee']),
     ...mapGetters('fungibleTokens', ['selectedToken']),
     hasError() {
       return this.$validator.errors.has('amount');
@@ -66,7 +57,7 @@ export default {
     max() {
       return (this.selectedToken && !this.noToken
         ? this.selectedToken.balance
-        : this.balance.minus(this.fee)).toString();
+        : this.balance.minus(this.getFee)).toString();
     },
     currencyAmount() {
       return ((this.$attrs.value || 0) * this.$store.getters.currentCurrencyRate).toFixed(2);
@@ -75,27 +66,9 @@ export default {
   watch: {
     async selectedToken() {
       await this.$validator.validateAll();
-      this.fetchFee();
     },
     hasError(value) {
       return this.$emit('error', value);
-    },
-  },
-  async mounted() {
-    await this.fetchFee();
-  },
-  methods: {
-    async fetchFee() {
-      await this.$watchUntilTruly(() => this.sdk);
-      this.fee = calculateFee(
-        !this.selectedToken ? SCHEMA.TX_TYPE.spend : SCHEMA.TX_TYPE.contractCall, {
-          ...this.sdk.Ae.defaults,
-          ...(this.selectedToken && {
-            callerId: this.account.address,
-            contractId: this.selectedToken.contract,
-          }),
-        },
-      );
     },
   },
 };

@@ -74,7 +74,7 @@
     <DetailsItem :label="$t('pages.signTransaction.fee')">
       <TokenAmount
         slot="value"
-        :amount="+fee.toFixed()"
+        :amount="+getFee.toFixed()"
         symbol="AE"
         hide-fiat
         data-cy="review-fee"
@@ -83,7 +83,7 @@
     <DetailsItem :label="$t('pages.signTransaction.total')">
       <TokenAmount
         slot="value"
-        :amount="(selectedToken ? 0 : +fee.toFixed()) + +form.amount"
+        :amount="(selectedToken ? 0 : +getFee.toFixed()) + +form.amount"
         :symbol="tokenSymbol"
         high-precision
         :hide-fiat="!!selectedToken"
@@ -133,8 +133,6 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import BigNumber from 'bignumber.js';
-import { calculateFee } from '../../utils/constants';
 import { checkAensName, aeToAettos, convertToken } from '../../utils/helper';
 import InputField from '../components/InputField.vue';
 import InputAmount from '../components/InputAmount.vue';
@@ -170,7 +168,6 @@ export default {
         amount: '',
       },
       loading: false,
-      fee: BigNumber(0),
       error: false,
     };
   },
@@ -178,7 +175,7 @@ export default {
     ...mapState('accounts', ['activeIdx']),
     ...mapState('fungibleTokens', ['availableTokens']),
     ...mapState(['current', 'sdk']),
-    ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate', 'accounts']),
+    ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate', 'accounts', 'getFee']),
     ...mapGetters('fungibleTokens', ['selectedToken', 'tokenBalances']),
     tokenSymbol() {
       return this.selectedToken ? this.selectedToken.symbol : 'AE';
@@ -187,7 +184,6 @@ export default {
   watch: {
     async selectedToken() {
       await this.$validator.validateAll(this.warningRules);
-      this.fetchFee();
     },
     $route: {
       immediate: true,
@@ -200,7 +196,6 @@ export default {
     if (typeof this.address !== 'undefined') {
       this.form.address = this.address;
     }
-    await this.fetchFee();
   },
   methods: {
     async queryHandler(query) {
@@ -272,18 +267,6 @@ export default {
         this.invoiceId = null;
       }
       if (!this.form.address) this.form.address = '';
-    },
-    async fetchFee() {
-      await this.$watchUntilTruly(() => this.sdk);
-      this.fee = calculateFee(
-        !this.selectedToken ? SCHEMA.TX_TYPE.spend : SCHEMA.TX_TYPE.contractCall, {
-          ...this.sdk.Ae.defaults,
-          ...(this.selectedToken && {
-            callerId: this.account.address,
-            contractId: this.selectedToken.contract,
-          }),
-        },
-      );
     },
     async send() {
       const amount = !this.selectedToken

@@ -5,7 +5,12 @@
     </span>
     <InputField
       v-model="name"
-      v-validate="'required|name|name_unregistered'"
+      v-validate="{
+        required: true,
+        name: true,
+        name_unregistered: true,
+        enough_ae: (+getFee + +nameFee).toString(),
+      }"
       name="name"
       :error="errors.has('name')"
       :error-message="errors.first('name')"
@@ -46,7 +51,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { getMinimumNameFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
@@ -67,6 +72,7 @@ export default {
   }),
   computed: {
     ...mapState(['sdk']),
+    ...mapGetters(['getFee']),
     validName() {
       return this.name && checkAensName(`${this.name}.chain`);
     },

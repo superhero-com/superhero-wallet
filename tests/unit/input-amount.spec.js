@@ -18,6 +18,7 @@ const store = new Vuex.Store({
   getters: {
     currentCurrencyRate: () => 3,
     formatCurrency: () => (value) => (+value).toFixed(2),
+    getFee: () => 0.00001794,
   },
   modules: {
     fungibleTokens: {
@@ -130,13 +131,10 @@ describe('InputAmount', () => {
       computed: {
         max() { return test.balance || maxBalance; },
       },
-      methods: {
-        fetchFee() { return null; },
-      },
       store,
       attrs: { value: test.value },
       propsData: { ...test.props },
-      data: () => ({ fee: 0.00001794, balance: BigNumber(test.balance || maxBalance) }),
+      data: () => ({ balance: BigNumber(test.balance || maxBalance) }),
     });
 
     // eslint-disable-next-line no-underscore-dangle
