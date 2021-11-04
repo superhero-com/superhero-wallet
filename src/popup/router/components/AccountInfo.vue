@@ -267,6 +267,10 @@ export default {
       overflow: visible;
     }
 
+    .input-field ::v-deep .main-wrapper button {
+      background-color: transparent;
+    }
+
     .account-name {
       display: flex;
       flex-direction: column;
