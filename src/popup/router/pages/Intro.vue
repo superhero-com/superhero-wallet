@@ -44,7 +44,7 @@
     </div>
 
     <div
-      v-show="step < 4"
+      v-show="step < totalsteps"
       class="dotstyle dotstyle-fillup"
       data-cy="onboarding-steps"
     >
@@ -56,7 +56,7 @@
       />
       <ul>
         <li
-          v-for="i in 3"
+          v-for="i in totalsteps - 1"
           :key="i"
           :class="step === i ? 'current' : ''"
           @click="step = i"
@@ -65,21 +65,21 @@
         </li>
       </ul>
       <Arrow
-        v-show="step < 3"
+        v-show="step < totalsteps - 1"
         class="right arrow"
         data-cy="next"
         @click="step = step + 1"
       />
       <ButtonPlain
-        v-show="step < 3"
+        v-show="step < totalsteps - 1"
         class="skip-button"
         data-cy="skip"
-        @click="step = 3"
+        @click="step = totalsteps - 1"
       >
         {{ $t('pages.intro.skip') }}
       </ButtonPlain>
       <Button
-        v-if="step === 3"
+        v-if="step === totalsteps - 1"
         data-cy="generate-wallet"
         class="generate-wallet"
         @click="createWallet"
@@ -88,7 +88,7 @@
       </Button>
     </div>
 
-    <div v-show="step === 4">
+    <div v-show="step === totalsteps">
       <template v-if="!iframe">
         <h2>{{ $t('pages.intro.createdWallet') }}</h2>
         <h4>{{ $t('pages.intro.step4text-0') }}</h4>
