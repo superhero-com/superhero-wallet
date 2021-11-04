@@ -77,10 +77,11 @@ export default {
 
   .cards-wrapper {
     display: flex;
-    width: calc(var(--nextAccountIdx) * (312px + 8px) + 24px + 24px);
+    width: calc(var(--nextAccountIdx) * (328px + 4px) + 16px + 16px - 4px);
+    align-self: center;
     margin-bottom: 16px;
     transition: margin-left 0.5s ease-out;
-    margin-left: calc(var(--activeIdx) * (-312px - 8px));
+    margin-left: calc(var(--activeIdx) * (-328px - 4px));
 
     .account-card {
       margin-right: 4px;
