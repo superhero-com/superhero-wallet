@@ -997,7 +997,8 @@
       "error": "Unable to connect to chosen node",
       "connecting": "Connecting to node...",
       "connected": "Connected",
-      "initServices": "Initializing services..."
+      "initServices": "Initializing services...",
+      "offline": "You are offline"
     },
     "popupMessageSign": {
       "title": "Sign message",
