@@ -17,19 +17,19 @@
       />
       <div>
         <p
-          class="f-16"
+          class="name"
           data-cy="network-name"
         >
           {{ network.name }}
         </p>
         <p
-          class="f-12 url"
+          class="url"
           data-cy="network-url"
         >
           <b>{{ $t('pages.network.url') }}</b> {{ network.url }}
         </p>
         <p
-          class="f-12 url"
+          class="url"
           data-cy="network-middleware"
         >
           <b>{{ $t('pages.network.middleware') }}</b> {{ network.middlewareUrl }}
@@ -62,7 +62,7 @@
     </div>
     <Button
       extend
-      class="connect mt-20"
+      class="connect"
       data-cy="to-add"
       @click="mode = 'add'"
     >
@@ -71,7 +71,7 @@
   </div>
   <div
     v-else-if="mode === 'add' || mode === 'edit'"
-    class="mt-10 network"
+    class="network"
   >
     <InputField
       v-model="newNetwork.name"
@@ -98,7 +98,7 @@
       data-cy="compiler"
     />
     <ButtonPlain
-      class="text-left expand"
+      class="expand"
       @click="backendUrlInputExpanded = !backendUrlInputExpanded"
     >
       <Arrow :class="['icon', { rotated: backendUrlInputExpanded }]" />
@@ -261,6 +261,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .networks {
   .network-row {
@@ -274,8 +275,12 @@ export default {
       margin: 0;
     }
 
+    .name {
+      @extend %face-sans-16-regular;
+    }
+
     p.url {
-      font-weight: normal;
+      @extend %face-sans-12-regular;
     }
 
     .actions-menu {
@@ -301,6 +306,7 @@ export default {
 
 .network {
   .expand {
+    text-align: left;
     font-size: 14px;
     color: variables.$color-white;
     width: 100%;

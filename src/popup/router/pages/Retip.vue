@@ -7,7 +7,7 @@
 
     <div class="url-bar">
       <UrlStatus :status="urlStatus" />
-      <a class="link-sm text-left">{{ tip.url }}</a>
+      <a>{{ tip.url }}</a>
     </div>
 
     <InputAmount
@@ -16,7 +16,7 @@
       :error-message="validationStatus.msg"
       @error="(val) => error = val"
     />
-    <div class="tip-note-preview mt-15">
+    <div class="tip-note-preview">
       {{ tip.title }}
     </div>
 
@@ -148,6 +148,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .retip {
   .url-bar {
@@ -160,21 +161,24 @@ export default {
     }
 
     a {
+      text-align: left;
       color: variables.$color-white;
       flex-grow: 1;
       text-decoration: none;
       width: 90%;
-      margin-left: 10px;
+      margin: 8px 0 8px 10px;
+
+      @extend %face-sans-11-regular;
     }
   }
 
   .section-title {
     margin-bottom: 8px;
     margin-top: 16px;
-    font-size: 16px;
     color: variables.$color-white;
-    font-weight: 400;
     text-align: left;
+
+    @extend %face-sans-16-regular;
   }
 }
 </style>

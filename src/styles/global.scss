@@ -22,88 +22,6 @@ p {
   margin-left: 3px;
 }
 
-.loader {
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: center;
-}
-
-.center {
-  text-align: center;
-}
-
-.text-left {
-  text-align: left;
-}
-
-.ae-button {
-  border-radius: 8px;
-  height: 52px;
-  padding: 0 2.5rem;
-}
-
-.date {
-  margin-left: rem(-48px);
-  margin-right: rem(-48px);
-  padding-left: rem(48px);
-}
-
-.textarea {
-  outline: none;
-  resize: none;
-  border: none;
-  padding-left: 1rem;
-  min-height: 110px;
-  max-height: 200px;
-}
-
-.flex {
-  display: flex;
-}
-
-.flex-justify-between {
-  justify-content: space-between;
-}
-
-.flex-justify-content-center {
-  justify-content: center;
-}
-
-.flex-align-center {
-  align-items: center;
-}
-
-.flex-align-start {
-  align-items: flex-start;
-}
-
-.balance {
-  font-weight: bold;
-  color: $color-light-grey;
-  font-family: monospace;
-
-  &.invert {
-    color: $color-white;
-  }
-
-  &::after {
-    content: ' AE';
-  }
-
-  &.no-sign::after {
-    content: '';
-  }
-}
-
-.ae-panel {
-  margin: 1.5rem 0;
-}
-
-.ae-identicon.base {
-  height: 100%;
-  width: 100%;
-}
-
 button:focus {
   outline: none;
 }
@@ -114,35 +32,8 @@ button {
   color: $color-light-grey;
 }
 
-.identicon {
-  margin-right: 10px;
-}
-
-.text-ellipsis {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 #app {
   font-family: $font-sans;
-}
-
-.disabled {
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-.primary-title {
-  color: $color-white;
-  font-size: 18px;
-  font-weight: 400;
-  margin-bottom: 27px;
-  margin-left: 0;
-}
-
-.secondary-text {
-  color: $color-blue;
 }
 
 .error-msg {
@@ -151,95 +42,13 @@ button {
   font-size: 0.88rem;
 }
 
-.heading-1 {
-  font-size: 18px;
-  font-weight: normal;
-  margin: 8px 0;
-}
-
-.link-sm {
-  font-size: 11px;
-  margin: 8px 0;
-}
-
-.block {
-  display: block;
-}
-
-/* Font size 14 */
-.f-12 {
-  font-size: 12px;
-}
-
-.f-14 {
-  font-size: 14px;
-}
-
-.f-16 {
-  font-size: 16px;
-}
-
-.f-18 {
-  font-size: 18px;
-}
-
-.f-24 {
-  font-size: 24px;
-}
-
-.l-1 {
-  line-height: 1.2;
-}
-
-.hidden {
-  visibility: hidden;
-}
-
 .tip-note-preview {
   border-radius: 5px;
   padding: 10px;
   font-size: 14px;
   border: 1px dashed $color-white;
-  margin-top: 5px;
+  margin-top: 15px;
   margin-bottom: 30px;
   text-align: left;
   word-break: break-word;
-}
-
-/**
-* Dynamic Margins Utilities Classes
-*/
-@mixin margin-left($i) {
-  margin-left: $i + px;
-}
-
-@mixin margin-right($i) {
-  margin-right: $i + px;
-}
-
-@mixin margin-bottom($i) {
-  margin-bottom: $i + px;
-}
-
-@mixin margin-top($i) {
-  margin-top: $i + px;
-}
-
-@mixin margin-x($i) {
-  margin-left: $i + px;
-  margin-right: $i + px;
-}
-
-@mixin margin-y($i) {
-  margin-top: $i + px;
-  margin-bottom: $i + px;
-}
-
-@for $i from 1 through 40 {
-  .ml-#{$i} { @include margin-left($i); }
-  .mr-#{$i} { @include margin-right($i); }
-  .mb-#{$i} { @include margin-bottom($i); }
-  .mt-#{$i} { @include margin-top($i); }
-  .mx-#{$i} { @include margin-x($i); }
-  .my-#{$i} { @include margin-y($i); }
 }

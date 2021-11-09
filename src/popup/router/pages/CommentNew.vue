@@ -1,6 +1,6 @@
 <template>
   <div class="comment-new">
-    <div class="tip-note-preview mt-15">
+    <div class="tip-note-preview">
       {{ text }}
     </div>
 
