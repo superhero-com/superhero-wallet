@@ -44,6 +44,10 @@
       "title": "Verified URL",
       "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed easily."
     },
+    "verify": {
+      "title": "Verify your URL",
+      "msg": "Make sure that the public address of your Superhero wallet, or your .chain name, is added somewhere on the website you want to claim tips for.<br /><br />Learn more: <a>How to Receive Tips</a>"
+    },
     "not-verified": {
       "title": "Not verified URL",
       "msg": "This means that the owner of the URL has not created a Superhero wallet yet. They can claim their tips as soon as they make one and add their wallet address to their website. "
@@ -315,6 +319,7 @@
       "noMobileClaim": "Claiming is currently only available on desktop."
     },
     "claimTips": {
+      "header": "You need to verify ownership of the URL before you can claim any tips.",
       "urlToClaim": "Claim tips from this URL:"
     },
     "notFound": {
@@ -824,6 +829,7 @@
       "section11Title": "11. FINAL PROVISIONS"
     },
     "tipPage": {
+      "header": "This tip will be public on {0}",
       "back": "Back",
       "noImage": "No Image",
       "domainVerified": "Verified",
