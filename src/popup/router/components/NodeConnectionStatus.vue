@@ -23,6 +23,7 @@ export default {
         connecting: this.$t('pages.nodeConnectionStatus.connecting'),
         connected: this.$t('pages.nodeConnectionStatus.connected'),
         error: this.$t('pages.nodeConnectionStatus.error'),
+        offline: this.$t('pages.nodeConnectionStatus.offline'),
       },
     };
   },

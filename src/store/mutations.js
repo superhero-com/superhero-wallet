@@ -33,7 +33,12 @@ export default {
     state.tippingV2 = tippingV2 || null;
   },
   setNodeStatus(state, payload) {
-    state.nodeStatus = payload;
+    if (state.nodeStatus === 'offline') {
+      if (payload !== 'online') return;
+      state.nodeStatus = '';
+    } else {
+      state.nodeStatus = payload;
+    }
   },
   setCurrentCurrency(state, currency) {
     state.current.currency = currency;

@@ -60,6 +60,10 @@ export default {
   },
   async mounted() {
     document.documentElement.style.setProperty('--height', process.env.PLATFORM === 'cordova' && window.IS_IOS ? '100vh' : '100%');
+
+    window.addEventListener('online', () => this.$store.commit('setNodeStatus', 'online'));
+    window.addEventListener('offline', () => this.$store.commit('setNodeStatus', 'offline'));
+
     await this.$watchUntilTruly(() => this.isRestored);
 
     this.$store.dispatch('getCurrencies');
