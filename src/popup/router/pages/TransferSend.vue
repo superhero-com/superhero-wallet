@@ -266,9 +266,12 @@ export default {
         await this.validate();
       } else {
         if (!scanResult) return;
-        this.queryHandler([
-          ...new URL(scanResult).searchParams.entries(),
-        ].reduce((o, [k, v]) => ({ ...o, [k]: v }), {}));
+        if (scanResult.startsWith('ak_')) this.form.address = scanResult;
+        else {
+          this.queryHandler([
+            ...new URL(scanResult).searchParams.entries(),
+          ].reduce((o, [k, v]) => ({ ...o, [k]: v }), {}));
+        }
         this.invoiceId = null;
       }
       if (!this.form.address) this.form.address = '';
