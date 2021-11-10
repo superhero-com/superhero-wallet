@@ -1,7 +1,7 @@
 export default ({
   migrations,
   current,
-  transactions,
+  transactions: { pending },
   currencies,
   userNetworks,
   names,
@@ -20,7 +20,7 @@ export default ({
 }) => ({
   migrations,
   current,
-  transactions,
+  transactions: { pending, loaded: [] },
   currencies,
   userNetworks,
   names,

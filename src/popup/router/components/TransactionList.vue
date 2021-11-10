@@ -28,7 +28,7 @@
       <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
     </div>
     <router-link
-      v-if="maxLength && transactions.length > maxLength"
+      v-if="maxLength && transactions.loaded.length > maxLength"
       to="/transactions"
       class="view-more"
     >
@@ -40,7 +40,6 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { uniqBy } from 'lodash-es';
 import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
 import PendingTxs from './PendingTxs.vue';
@@ -65,7 +64,6 @@ export default {
   data() {
     return {
       loading: false,
-      transactions: [],
       page: 1,
       isDestroyed: false,
       displayMode: { rotated: true, filter: 'all', sort: 'date' },
@@ -77,11 +75,12 @@ export default {
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
     ...mapState('accounts', ['activeIdx']),
+    ...mapState(['transactions']),
     ...mapState({
-      filteredTransactions(state, { account: { address } }) {
+      filteredTransactions({ transactions: { loaded } }, { account: { address } }) {
         const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
           .includes(tr.tx.contractId);
-        return this.transactions
+        return loaded
           .filter((tr) => (!this.token
             || (this.token !== 'aeternity'
               ? tr.tx?.contractId === this.token
@@ -122,8 +121,7 @@ export default {
   },
   watch: {
     activeIdx() {
-      this.$store.commit('setTransactions', []);
-      this.transactions = [];
+      this.$store.commit('initTransactions');
       this.page = 1;
       this.loadMore();
     },
@@ -163,7 +161,7 @@ export default {
           page: this.page,
           limit: TXS_PER_PAGE,
         });
-        this.updateTransactions(result.txs);
+        this.$store.commit('addTransactions', result.txs);
       } finally {
         this.loading = false;
       }
@@ -179,14 +177,10 @@ export default {
           page: 1,
           recent: true,
         });
-        this.updateTransactions(txs);
+        this.$store.commit('addTransactions', txs);
       } finally {
         this.loading = false;
       }
-    },
-    updateTransactions(transactions) {
-      this.transactions = uniqBy([...this.transactions, ...transactions], 'hash');
-      this.$store.commit('setTransactions', this.transactions);
     },
   },
 };

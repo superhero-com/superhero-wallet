@@ -18,7 +18,7 @@ export default {
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
     commit('setMiddleware', null);
-    commit('setTransactions', []);
+    commit('initTransactions');
   },
   async fetchPendingTransactions({ state: { sdk, transactions } }, address) {
     return (

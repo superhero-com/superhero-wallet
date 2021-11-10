@@ -1,13 +1,17 @@
 /* eslint no-param-reassign: ["error", { "ignorePropertyModificationsFor": ["state"] }] */
 import Vue from 'vue';
+import { uniqBy } from 'lodash-es';
 import { defaultNetwork } from '../popup/utils/constants';
 
 export default {
   switchNetwork(state, payload) {
     state.current.network = payload;
   },
-  setTransactions(state, payload) {
-    state.transactions.latest = payload;
+  addTransactions(state, payload) {
+    state.transactions.loaded = uniqBy([...state.transactions.loaded, ...payload], 'hash');
+  },
+  initTransactions(state) {
+    state.transactions.loaded = [];
   },
   addPendingTransaction(state, payload) {
     state.transactions.pending.push({ ...payload, microTime: Date.now() });
