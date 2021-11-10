@@ -255,7 +255,6 @@ export default {
     justify-content: center;
     margin-top: 8px;
     margin-bottom: 6px;
-    line-height: 21px;
 
     @extend %face-sans-14-medium;
 

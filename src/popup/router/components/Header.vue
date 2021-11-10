@@ -301,8 +301,8 @@ export default {
       background: variables.$color-blue;
       border-radius: 50%;
       text-align: center;
-      font-size: 12px;
-      line-height: 14px;
+
+      @extend %face-sans-12-regular;
     }
   }
 }

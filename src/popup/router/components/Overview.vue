@@ -177,11 +177,13 @@ export default {
     .name {
       display: block;
       margin-bottom: 4px;
-      font-size: 15px;
-      line-height: 16px;
       color: variables.$color-white;
       text-decoration: none;
       white-space: nowrap;
+
+      @extend %face-sans-15-regular;
+
+      line-height: 16px;
 
       &:hover {
         text-decoration: underline;

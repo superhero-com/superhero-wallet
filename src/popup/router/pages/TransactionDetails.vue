@@ -210,7 +210,6 @@ export default {
       ::v-deep .fiat {
         display: block;
         padding-top: 4px;
-        line-height: 24px;
       }
     }
   }

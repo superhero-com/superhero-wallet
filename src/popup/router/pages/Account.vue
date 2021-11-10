@@ -118,11 +118,11 @@ export default {
   }
 
   .seed-backup-notification {
-    font-size: 14px;
     text-align: center;
     margin-top: 2px;
-    line-height: 14px;
     color: variables.$color-green;
+
+    @extend %face-sans-14-medium;
   }
 }
 </style>
