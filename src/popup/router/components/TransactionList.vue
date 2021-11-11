@@ -147,9 +147,7 @@ export default {
       const { scrollHeight, scrollTop, clientHeight } = isDesktop
         ? document.querySelector('#app') : document.documentElement;
       if (this.maxLength && this.filteredTransactions.length >= this.maxLength) return;
-      if (scrollHeight - scrollTop <= clientHeight + 100) {
-        setTimeout(() => this.loadMore(), 1500);
-      }
+      if (scrollHeight - scrollTop <= clientHeight + 100) this.loadMore();
     },
     async loadMore() {
       if (this.loading) return;
