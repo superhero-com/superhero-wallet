@@ -67,6 +67,7 @@ export default {
       loading: false,
       transactions: [],
       page: 1,
+      isDestroyed: false,
       displayMode: { rotated: true, filter: 'all', sort: 'date' },
       filters: {
         all: {}, sent: {}, received: {}, tips: {}, date: { rotated: true },
@@ -94,7 +95,8 @@ export default {
                 return (tr.tx.type === 'SpendTx' && tr.tx.senderId === address)
                   || (isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address);
               case 'received':
-                return (tr.tx.type === 'SpendTx' && tr.tx.recipientId === address)
+                return (tr.tx.type === 'SpendTx'
+                  && (tr.tx.recipientId === address || (tr.tx.senderId !== address && tr.tx.recipientId.startsWith('nm_'))))
                   || (isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.recipient === address);
               case 'tips':
                 return (!isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address) || tr.claim;
@@ -136,11 +138,13 @@ export default {
       document.querySelector('#app').removeEventListener('scroll', this.checkLoadMore);
       window.removeEventListener('scroll', this.checkLoadMore);
       clearInterval(polling);
+      this.isDestroyed = true;
     });
     this.$watch(({ displayMode }) => displayMode, this.checkLoadMore);
   },
   methods: {
     checkLoadMore() {
+      if (this.isDestroyed) return;
       const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = isDesktop
         ? document.querySelector('#app') : document.documentElement;
@@ -206,6 +210,7 @@ export default {
   .spinner {
     flex-grow: 1;
     display: flex;
+    justify-content: center;
     align-items: center;
     padding-bottom: 48px;
   }

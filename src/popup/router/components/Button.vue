@@ -13,7 +13,6 @@
         extend,
         half,
         small,
-        onboarding,
         third,
         inline,
         inactive,
@@ -41,7 +40,6 @@ export default {
     half: Boolean,
     small: Boolean,
     third: Boolean,
-    onboarding: Boolean,
     inline: Boolean,
     inactive: Boolean,
     to: { type: [String, Object], default: null },
@@ -160,37 +158,6 @@ export default {
   &.danger {
     background: variables.$color-blue;
     color: variables.$color-white;
-  }
-
-  &.onboarding {
-    width: 100px;
-    font-size: 14px;
-    height: 34px;
-    border-radius: 5px;
-    line-height: 34px;
-    background: variables.$color-bg-2;
-    margin: 0;
-    margin-right: 10px;
-    font-weight: 500;
-    color: variables.$color-white;
-
-    &:last-child {
-      margin-right: 0;
-    }
-
-    &.skip {
-      background: variables.$color-error;
-    }
-
-    &.next {
-      background: variables.$color-blue;
-    }
-
-    &.start {
-      margin-left: auto;
-      margin-right: 0;
-      background: variables.$color-blue;
-    }
   }
 
   &.inline {

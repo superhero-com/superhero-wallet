@@ -29,9 +29,7 @@
         bold
         @click="claim"
       >
-        {{
-          $t('pages.invite.claim')
-        }}
+        {{ $t('pages.invite.claim') }}
       </Button>
       <Button
         v-else
@@ -51,8 +49,9 @@
     <template v-else>
       <InputAmount
         v-model="topUpAmount"
-        native-token
         :label="$t('pages.invite.top-up-with')"
+        no-token
+        @error="(val) => error = val"
       />
       <div class="centered-buttons">
         <Button
@@ -64,12 +63,10 @@
         </Button>
         <Button
           bold
-          :disabled="!sufficientBalance"
+          :disabled="error"
           @click="sendTopUp"
         >
-          {{
-            $t('pages.invite.top-up')
-          }}
+          {{ $t('pages.invite.top-up') }}
         </Button>
       </div>
     </template>
@@ -77,7 +74,6 @@
 </template>
 
 <script>
-import { pick } from 'lodash-es';
 import { mapState } from 'vuex';
 import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk';
 import CopyMixin from '../../../mixins/copy';
@@ -100,11 +96,8 @@ export default {
     createdAt: { type: Number, required: true },
   },
   data: () => ({
-    topUp: false, topUpAmount: 0, inviteLinkBalance: 0,
+    topUp: false, topUpAmount: '', inviteLinkBalance: 0, error: false,
   }),
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balance']);
-  },
   computed: {
     ...mapState(['sdk']),
     link() {
@@ -118,9 +111,6 @@ export default {
     },
     address() {
       return Crypto.getAddressFromPriv(this.secretKey);
-    },
-    sufficientBalance() {
-      return this.balance.comparedTo(this.topUpAmount) !== -1;
     },
   },
   watch: {

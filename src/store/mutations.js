@@ -33,7 +33,12 @@ export default {
     state.tippingV2 = tippingV2 || null;
   },
   setNodeStatus(state, payload) {
-    state.nodeStatus = payload;
+    if (state.nodeStatus === 'offline') {
+      if (payload !== 'online') return;
+      state.nodeStatus = '';
+    } else {
+      state.nodeStatus = payload;
+    }
   },
   setCurrentCurrency(state, currency) {
     state.current.currency = currency;
@@ -84,12 +89,6 @@ export default {
   },
   setBackedUpSeed(state) {
     state.backedUpSeed = true;
-  },
-  setTourRunning(state, payload) {
-    state.tourRunning = payload;
-  },
-  setTourStatusBar(state, payload) {
-    state.tourStartBar = payload;
   },
   setSaveErrorLog(state) {
     state.saveErrorLog = !state.saveErrorLog;

@@ -63,6 +63,7 @@ Validator.localize('en', {
     min_value_exclusive: (field, [arg]) => i18n.t('validation.minValueExclusive', [arg]),
     max_value: (field, [arg]) => i18n.t('validation.maxValue', [arg]),
     enough_ae: () => i18n.t('validation.enoughAe'),
+    not_token: () => i18n.t('validation.notToken'),
   },
 });
 
@@ -115,6 +116,7 @@ export default (store) => {
   Validator.extend('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
   Validator.extend('name_registered_address', (value) => Crypto.isAddressValid(value) || checkNameRegisteredAddress(value));
   Validator.extend('token_to_an_address', (value) => Crypto.isAddressValid(value) || (checkAensName(value) && !store.getters['fungibleTokens/selectedToken']));
+  Validator.extend('not_token', () => !store.getters['fungibleTokens/selectedToken']);
   Validator.extend('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);

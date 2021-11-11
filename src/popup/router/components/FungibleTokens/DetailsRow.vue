@@ -1,6 +1,6 @@
 <template>
   <div class="details-row">
-    <div class="title text-ellipsis">
+    <div class="title">
       {{ label }}
     </div>
     <div class="text">
@@ -28,6 +28,9 @@ export default {
   display: flex;
 
   .title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     color: variables.$color-dark-grey;
     font-weight: 500;
     width: 100%;

@@ -1,11 +1,12 @@
 <template>
   <Default
-    icon="info"
+    :icon="$attrs.icon || 'info'"
     v-bind="$attrs"
   >
     <TemplateRenderer
       slot="msg"
       :str="$attrs.msg"
+      :option="$attrs.option"
     />
   </Default>
 </template>

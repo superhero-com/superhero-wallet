@@ -33,6 +33,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .auction-card {
   display: flex;
@@ -49,8 +50,8 @@ export default {
   }
 
   .name {
-    font-weight: bold;
-    font-size: 14px;
+    @extend %face-sans-14-bold;
+
     line-height: 16px;
     margin-top: 16px;
   }

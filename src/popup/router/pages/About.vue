@@ -22,17 +22,13 @@
         to="/about/termsOfService"
         data-cy="terms"
       >
-        {{
-          $t('pages.about.terms')
-        }}
+        {{ $t('pages.about.terms') }}
       </router-link>
       <router-link
         to="/about/privacyPolicy"
         data-cy="privacy"
       >
-        {{
-          $t('pages.about.privacyPolicy')
-        }}
+        {{ $t('pages.about.privacyPolicy') }}
       </router-link>
       <Button :to="BUG_REPORT_URL">
         {{ $t('pages.about.reportBug') }}

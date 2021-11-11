@@ -62,7 +62,6 @@ export default {
   @extend %face-sans-14-regular;
 
   color: variables.$color-white;
-  line-height: 24px;
 
   .symbol {
     @extend %face-sans-14-medium;

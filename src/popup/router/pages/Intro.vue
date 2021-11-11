@@ -7,12 +7,10 @@
       >
       <h2 v-else>
         <Claim /> {{ $t('pages.intro.receive') }}
-        <span class="ml-10 secondary-text"> {{ $t('ae') }} </span>
+        <span class="ae"> {{ $t('ae') }} </span>
       </h2>
       <div class="text-info">
-        <span>
-          {{ $t('pages.intro.step1text') }}
-        </span>
+        {{ $t('pages.intro.step1text') }}
       </div>
     </div>
 
@@ -23,12 +21,10 @@
       >
       <h2 v-else>
         <Heart /> {{ $t('pages.send.send') }}
-        <span class="ml-10 secondary-text">{{ $t('ae') }}</span>
+        <span class="ae">{{ $t('ae') }}</span>
       </h2>
       <div class="text-info">
-        <span>
-          {{ $t('pages.intro.step2text') }}
-        </span>
+        {{ $t('pages.intro.step2text') }}
       </div>
     </div>
 
@@ -38,19 +34,17 @@
         src="../../../icons/iframe/power.svg"
       >
       <div class="text-info">
-        <span>
-          {{ $t('pages.intro.step3text-1') }}
-          <span class="secondary-text aeid">{{ $t('ae') }}</span>
-          {{ $t('pages.intro.step3text-2') }}
-        </span>
+        {{ $t('pages.intro.step3text-1') }}
+        <span class="ae">{{ $t('ae') }}</span>
+        {{ $t('pages.intro.step3text-2') }}
       </div>
-      <div class="mt-32">
+      <div class="ever">
         {{ $t('pages.intro.ever') }}
       </div>
     </div>
 
     <div
-      v-show="step < 4"
+      v-show="step < totalsteps"
       class="dotstyle dotstyle-fillup"
       data-cy="onboarding-steps"
     >
@@ -62,40 +56,30 @@
       />
       <ul>
         <li
-          :class="step === 1 ? 'current' : ''"
-          @click="step = 1"
-        >
-          <a />
-        </li>
-        <li
-          :class="step === 2 ? 'current' : ''"
-          @click="step = 2"
-        >
-          <a />
-        </li>
-        <li
-          :class="step === 3 ? 'current' : ''"
-          @click="step = 3"
+          v-for="i in totalsteps - 1"
+          :key="i"
+          :class="step === i ? 'current' : ''"
+          @click="step = i"
         >
           <a />
         </li>
       </ul>
       <Arrow
-        v-show="step < 3"
+        v-show="step < totalsteps - 1"
         class="right arrow"
         data-cy="next"
         @click="step = step + 1"
       />
       <ButtonPlain
-        v-show="step < 3"
+        v-show="step < totalsteps - 1"
         class="skip-button"
         data-cy="skip"
-        @click="step = 3"
+        @click="step = totalsteps - 1"
       >
         {{ $t('pages.intro.skip') }}
       </ButtonPlain>
       <Button
-        v-if="step === 3"
+        v-if="step === totalsteps - 1"
         data-cy="generate-wallet"
         class="generate-wallet"
         @click="createWallet"
@@ -104,14 +88,14 @@
       </Button>
     </div>
 
-    <div v-show="step === 4">
+    <div v-show="step === totalsteps">
       <template v-if="!iframe">
         <h2>{{ $t('pages.intro.createdWallet') }}</h2>
         <h4>{{ $t('pages.intro.step4text-0') }}</h4>
-        <div class="text-info">
-          <span class="mb-4 block">{{ $t('pages.intro.step4text-1') }}</span>
-          <span class="mb-4 block"> {{ $t('pages.intro.step4text-2') }} </span>
-          <span class="mb-4 block"> {{ $t('pages.intro.step4text-3') }} </span>
+        <div class="text-info splitted-text">
+          <span>{{ $t('pages.intro.step4text-1') }}</span>
+          <span>{{ $t('pages.intro.step4text-2') }}</span>
+          <span>{{ $t('pages.intro.step4text-3') }}</span>
         </div>
 
         <p class="last-msg-enjoy">
@@ -135,6 +119,7 @@
       <Button
         :disabled="iframe && !understood"
         data-cy="proceed-to-wallet"
+        :class="!iframe && 'proceed-to-wallet'"
         @click="$router.push($store.state.loginTargetLocation)"
       >
         {{ $t('pages.intro.toHome') }}
@@ -226,8 +211,13 @@ export default {
     }
   }
 
+  .ae {
+    color: variables.$color-blue;
+  }
+
   h2 {
     display: flex;
+    align-items: center;
     justify-content: center;
     font-size: 18px;
 
@@ -239,16 +229,23 @@ export default {
     svg {
       margin-right: 10px;
     }
+
+    .ae {
+      margin-left: 10px;
+    }
+  }
+
+  .ever {
+    margin-top: 14px;
+    margin-bottom: 10px;
   }
 
   .text-info {
     margin: 10px 0 0 0;
-    text-align: center;
 
-    span:not(.aeid) {
-      color: variables.$color-white;
-      font-size: 16px;
-      word-break: break-word;
+    &.splitted-text span {
+      margin-bottom: 4px;
+      display: block;
     }
   }
 
@@ -272,6 +269,10 @@ export default {
     font-size: 18px;
     width: 100%;
     margin: 10px auto;
+  }
+
+  .proceed-to-wallet {
+    margin-top: 32px;
   }
 
   .arrow {
@@ -374,10 +375,6 @@ export default {
   .checkbox-container {
     margin: 20px auto 50px auto;
     max-width: 270px;
-
-    ::v-deep .checkmark {
-      width: 50px;
-    }
   }
 
   .platforms {

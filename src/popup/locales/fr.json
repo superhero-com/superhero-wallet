@@ -2,47 +2,6 @@
   "ok": "OK",
   "ae": "AE",
   "mainAccount": "Main account",
-  "onboarding": {
-    "step_1": {
-      "title": "Your Account Info",
-      "content": "This block contains information about your wallet account and its status:<br> 1. Your account address and .chain name ( if you already have one ).<br>2. Your current wallet balance. "
-    },
-    "step_2": {
-      "title": "Send Tip",
-      "content": "To send tips, go to the URL you want to tip and open the wallet. You can also copy the URL, click Send Tip, and paste this URL into the wallet. Fill in how much you want to tip and add a message along with that tip. Hit Send and confirm."
-    },
-    "step_3": {
-      "title": "What is \"Verified\" URL",
-      "content": "This simply means that the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed."
-    },
-    "step_4": {
-      "title": "Claim Tip",
-      "content": "Hit this button to trigger tip collection—all tips you’ve received from URLs where you’ve added your AE address will then be added to your balance."
-    },
-    "step_5": {
-      "title": "Activity",
-      "content": "This tab will show you a full log of your previous activity using the Superhero Wallet."
-    },
-    "step_6": {
-      "title": "Top Up",
-      "content": "You can top up your wallet by swapping ETH or BTC into AE, by purchasing AE using your credit card, or by sending AE to your Superhero wallet address from another AE account. It’s very easy."
-    },
-    "step_7": {
-      "title": "Withdraw",
-      "content": "You can easily withdraw your tips by sending them out to AE wallet addresses from your accounts in exchanges or external wallets, provided that they support AE tokens."
-    },
-    "step_8": {
-      "title": "Settings",
-      "content": "You can view your security phrase (also referred to as seedphrase or private keys) and change your language and other settings."
-    },
-    "heading": "Hey superhero! Welcome onboard",
-    "sub-heading": "This short guide will walk you through the Superhero Wallet DApp and its features.",
-    "skip": "Skip",
-    "back": "Back",
-    "next": "Next",
-    "start": "Start",
-    "tutorial": "Tutorial"
-  },
   "badges": {
     "verified": "Verified",
     "notVerified": "Not verified"

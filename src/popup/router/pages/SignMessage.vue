@@ -4,7 +4,7 @@
       Sign message for
     </div>
 
-    <div class="url-bar link-sm text-left">
+    <div class="url-bar">
       {{ callbackOrigin }}
     </div>
 
@@ -12,7 +12,7 @@
       Message
     </div>
 
-    <div class="tip-note-preview mt-15">
+    <div class="tip-note-preview">
       {{ $route.query.message }}
     </div>
 
@@ -45,10 +45,15 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .sign-message {
   .url-bar {
     color: variables.$color-white;
+    text-align: left;
+    margin: 8px 0;
+
+    @extend %face-sans-11-regular;
   }
 
   .section-title {

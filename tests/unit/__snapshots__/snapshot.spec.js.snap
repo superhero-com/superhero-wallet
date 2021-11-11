@@ -23,7 +23,7 @@ exports[`Pages About 1`] = `
         a1c1c5a
       </a>
       
-      / v.0.9.3
+      / v.0.9.4
     
     </span>
   </p>
@@ -324,7 +324,7 @@ exports[`Pages Intro 1`] = `
        locale-specific-text
       
       <span
-        class="ml-10 secondary-text"
+        class="ae"
       >
          locale-specific-text 
       </span>
@@ -333,11 +333,9 @@ exports[`Pages Intro 1`] = `
     <div
       class="text-info"
     >
-      <span>
-        
-        locale-specific-text
       
-      </span>
+      locale-specific-text
+    
     </div>
   </div>
    
@@ -349,7 +347,7 @@ exports[`Pages Intro 1`] = `
        locale-specific-text
       
       <span
-        class="ml-10 secondary-text"
+        class="ae"
       >
         locale-specific-text
       </span>
@@ -358,11 +356,9 @@ exports[`Pages Intro 1`] = `
     <div
       class="text-info"
     >
-      <span>
-        
-        locale-specific-text
       
-      </span>
+      locale-specific-text
+    
     </div>
   </div>
    
@@ -374,23 +370,21 @@ exports[`Pages Intro 1`] = `
     <div
       class="text-info"
     >
-      <span>
-        
-        locale-specific-text
-        
-        <span
-          class="secondary-text aeid"
-        >
-          locale-specific-text
-        </span>
-        
-        locale-specific-text
       
+      locale-specific-text
+      
+      <span
+        class="ae"
+      >
+        locale-specific-text
       </span>
+      
+      locale-specific-text
+    
     </div>
      
     <div
-      class="mt-32"
+      class="ever"
     >
       
       locale-specific-text
@@ -414,13 +408,11 @@ exports[`Pages Intro 1`] = `
       >
         <a />
       </li>
-       
       <li
         class=""
       >
         <a />
       </li>
-       
       <li
         class=""
       >
@@ -457,24 +449,18 @@ exports[`Pages Intro 1`] = `
     </h4>
      
     <div
-      class="text-info"
+      class="text-info splitted-text"
     >
-      <span
-        class="mb-4 block"
-      >
+      <span>
         locale-specific-text
       </span>
        
-      <span
-        class="mb-4 block"
-      >
-         locale-specific-text 
+      <span>
+        locale-specific-text
       </span>
        
-      <span
-        class="mb-4 block"
-      >
-         locale-specific-text 
+      <span>
+        locale-specific-text
       </span>
     </div>
      
@@ -487,7 +473,7 @@ exports[`Pages Intro 1`] = `
     </p>
      
     <button
-      class="button primary"
+      class="button primary proceed-to-wallet"
       data-cy="proceed-to-wallet"
     >
       
@@ -510,7 +496,7 @@ exports[`Pages Intro 2`] = `
        locale-specific-text
       
       <span
-        class="ml-10 secondary-text"
+        class="ae"
       >
          locale-specific-text 
       </span>
@@ -519,11 +505,9 @@ exports[`Pages Intro 2`] = `
     <div
       class="text-info"
     >
-      <span>
-        
-        locale-specific-text
       
-      </span>
+      locale-specific-text
+    
     </div>
   </div>
    
@@ -535,7 +519,7 @@ exports[`Pages Intro 2`] = `
        locale-specific-text
       
       <span
-        class="ml-10 secondary-text"
+        class="ae"
       >
         locale-specific-text
       </span>
@@ -544,11 +528,9 @@ exports[`Pages Intro 2`] = `
     <div
       class="text-info"
     >
-      <span>
-        
-        locale-specific-text
       
-      </span>
+      locale-specific-text
+    
     </div>
   </div>
    
@@ -560,23 +542,21 @@ exports[`Pages Intro 2`] = `
     <div
       class="text-info"
     >
-      <span>
-        
-        locale-specific-text
-        
-        <span
-          class="secondary-text aeid"
-        >
-          locale-specific-text
-        </span>
-        
-        locale-specific-text
       
+      locale-specific-text
+      
+      <span
+        class="ae"
+      >
+        locale-specific-text
       </span>
+      
+      locale-specific-text
+    
     </div>
      
     <div
-      class="mt-32"
+      class="ever"
     >
       
       locale-specific-text
@@ -600,13 +580,11 @@ exports[`Pages Intro 2`] = `
       >
         <a />
       </li>
-       
       <li
         class=""
       >
         <a />
       </li>
-       
       <li
         class=""
       >
@@ -643,24 +621,18 @@ exports[`Pages Intro 2`] = `
     </h4>
      
     <div
-      class="text-info"
+      class="text-info splitted-text"
     >
-      <span
-        class="mb-4 block"
-      >
+      <span>
         locale-specific-text
       </span>
        
-      <span
-        class="mb-4 block"
-      >
-         locale-specific-text 
+      <span>
+        locale-specific-text
       </span>
        
-      <span
-        class="mb-4 block"
-      >
-         locale-specific-text 
+      <span>
+        locale-specific-text
       </span>
     </div>
      
@@ -673,7 +645,7 @@ exports[`Pages Intro 2`] = `
     </p>
      
     <button
-      class="button primary"
+      class="button primary proceed-to-wallet"
       data-cy="proceed-to-wallet"
     >
       
@@ -696,7 +668,7 @@ exports[`Pages Intro 3`] = `
        locale-specific-text
       
       <span
-        class="ml-10 secondary-text"
+        class="ae"
       >
          locale-specific-text 
       </span>
@@ -705,11 +677,9 @@ exports[`Pages Intro 3`] = `
     <div
       class="text-info"
     >
-      <span>
-        
-        locale-specific-text
       
-      </span>
+      locale-specific-text
+    
     </div>
   </div>
    
@@ -721,7 +691,7 @@ exports[`Pages Intro 3`] = `
        locale-specific-text
       
       <span
-        class="ml-10 secondary-text"
+        class="ae"
       >
         locale-specific-text
       </span>
@@ -730,11 +700,9 @@ exports[`Pages Intro 3`] = `
     <div
       class="text-info"
     >
-      <span>
-        
-        locale-specific-text
       
-      </span>
+      locale-specific-text
+    
     </div>
   </div>
    
@@ -746,23 +714,21 @@ exports[`Pages Intro 3`] = `
     <div
       class="text-info"
     >
-      <span>
-        
-        locale-specific-text
-        
-        <span
-          class="secondary-text aeid"
-        >
-          locale-specific-text
-        </span>
-        
-        locale-specific-text
       
+      locale-specific-text
+      
+      <span
+        class="ae"
+      >
+        locale-specific-text
       </span>
+      
+      locale-specific-text
+    
     </div>
      
     <div
-      class="mt-32"
+      class="ever"
     >
       
       locale-specific-text
@@ -786,13 +752,11 @@ exports[`Pages Intro 3`] = `
       >
         <a />
       </li>
-       
       <li
         class=""
       >
         <a />
       </li>
-       
       <li
         class=""
       >
@@ -829,24 +793,18 @@ exports[`Pages Intro 3`] = `
     </h4>
      
     <div
-      class="text-info"
+      class="text-info splitted-text"
     >
-      <span
-        class="mb-4 block"
-      >
+      <span>
         locale-specific-text
       </span>
        
-      <span
-        class="mb-4 block"
-      >
-         locale-specific-text 
+      <span>
+        locale-specific-text
       </span>
        
-      <span
-        class="mb-4 block"
-      >
-         locale-specific-text 
+      <span>
+        locale-specific-text
       </span>
     </div>
      
@@ -859,7 +817,7 @@ exports[`Pages Intro 3`] = `
     </p>
      
     <button
-      class="button primary"
+      class="button primary proceed-to-wallet"
       data-cy="proceed-to-wallet"
     >
       
@@ -882,7 +840,7 @@ exports[`Pages Intro 4`] = `
        locale-specific-text
       
       <span
-        class="ml-10 secondary-text"
+        class="ae"
       >
          locale-specific-text 
       </span>
@@ -891,11 +849,9 @@ exports[`Pages Intro 4`] = `
     <div
       class="text-info"
     >
-      <span>
-        
-        locale-specific-text
       
-      </span>
+      locale-specific-text
+    
     </div>
   </div>
    
@@ -907,7 +863,7 @@ exports[`Pages Intro 4`] = `
        locale-specific-text
       
       <span
-        class="ml-10 secondary-text"
+        class="ae"
       >
         locale-specific-text
       </span>
@@ -916,11 +872,9 @@ exports[`Pages Intro 4`] = `
     <div
       class="text-info"
     >
-      <span>
-        
-        locale-specific-text
       
-      </span>
+      locale-specific-text
+    
     </div>
   </div>
    
@@ -932,23 +886,21 @@ exports[`Pages Intro 4`] = `
     <div
       class="text-info"
     >
-      <span>
-        
-        locale-specific-text
-        
-        <span
-          class="secondary-text aeid"
-        >
-          locale-specific-text
-        </span>
-        
-        locale-specific-text
       
+      locale-specific-text
+      
+      <span
+        class="ae"
+      >
+        locale-specific-text
       </span>
+      
+      locale-specific-text
+    
     </div>
      
     <div
-      class="mt-32"
+      class="ever"
     >
       
       locale-specific-text
@@ -972,13 +924,11 @@ exports[`Pages Intro 4`] = `
       >
         <a />
       </li>
-       
       <li
         class=""
       >
         <a />
       </li>
-       
       <li
         class=""
       >
@@ -1015,24 +965,18 @@ exports[`Pages Intro 4`] = `
     </h4>
      
     <div
-      class="text-info"
+      class="text-info splitted-text"
     >
-      <span
-        class="mb-4 block"
-      >
+      <span>
         locale-specific-text
       </span>
        
-      <span
-        class="mb-4 block"
-      >
-         locale-specific-text 
+      <span>
+        locale-specific-text
       </span>
        
-      <span
-        class="mb-4 block"
-      >
-         locale-specific-text 
+      <span>
+        locale-specific-text
       </span>
     </div>
      
@@ -1045,7 +989,7 @@ exports[`Pages Intro 4`] = `
     </p>
      
     <button
-      class="button primary"
+      class="button primary proceed-to-wallet"
       data-cy="proceed-to-wallet"
     >
       
@@ -2230,10 +2174,10 @@ exports[`Pages PrivacyPolicy 1`] = `
 
 exports[`Pages TermsOfService 1`] = `
 <div
-  class="terms-of-service text-left"
+  class="terms-of-service"
 >
   <h1
-    class="heading-1 bolder"
+    class="bolder"
   >
     
     TERMS OF USE

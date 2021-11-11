@@ -36,6 +36,9 @@ export default {
 @use '../../../styles/typography';
 
 .textarea {
+  outline: none;
+  resize: none;
+  border: none;
   display: block;
   width: 100%;
   border-radius: 5px;
@@ -46,7 +49,7 @@ export default {
 
   @extend %face-sans-16-regular;
 
-  min-height: 200px;
+  height: 200px;
   margin-left: auto;
   margin-right: auto;
   word-break: break-word;

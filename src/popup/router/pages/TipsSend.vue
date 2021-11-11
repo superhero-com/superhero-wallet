@@ -1,48 +1,58 @@
 <template>
   <div class="tips-send">
-    <div class="tour__step3">
-      <p class="primary-title text-left mb-8 f-16">
-        <template v-if="!confirmMode">
-          {{ $t('pages.tipPage.url') }}
-        </template>
-        <template v-else>
-          {{ $t('pages.tipPage.headingSending') }}
-          <TokenAmount
-            data-cy="tip-amount"
-            :amount="+amount"
-            v-bind="selectedToken ? { symbol: selectedToken.symbol, aex9: true } : {}"
-          />
-          {{ $t('pages.tipPage.to') }}
-        </template>
-      </p>
-
-      <div
-        class="url-bar"
-        :class="editUrl ? 'url-bar--input' : 'url-bar--text'"
+    <i18n
+      path="pages.tipPage.header"
+      tag="div"
+      class="header"
+    >
+      <a
+        href="https://superhero.com/"
+        target="_blank"
       >
-        <template v-if="!editUrl">
-          <a
-            class="link-sm text-left"
-            data-cy="tip-url"
-          >
-            {{ url }}
-          </a>
-        </template>
-        <InputField
-          v-else
-          v-model="url"
-          :placeholder="$t('pages.tipPage.enterUrl')"
-        >
-          <UrlStatus
-            slot="left"
-            :status="urlStatus"
-          />
-        </InputField>
-      </div>
+        {{ $t('pages.notifications.superhero') }}
+      </a>
+    </i18n>
+    <p>
+      <template v-if="!confirmMode">
+        {{ $t('pages.tipPage.url') }}
+      </template>
+      <template v-else>
+        {{ $t('pages.tipPage.headingSending') }}
+        <TokenAmount
+          data-cy="tip-amount"
+          :amount="+amount"
+          v-bind="selectedToken ? { symbol: selectedToken.symbol, aex9: true } : {}"
+        />
+        {{ $t('pages.tipPage.to') }}
+      </template>
+    </p>
+
+    <div
+      class="url-bar"
+      :class="editUrl ? 'url-bar--input' : 'url-bar--text'"
+    >
+      <template v-if="!editUrl">
+        <a data-cy="tip-url">
+          {{ url }}
+        </a>
+      </template>
+      <InputField
+        v-else
+        v-model="url"
+        :placeholder="$t('pages.tipPage.enterUrl')"
+      >
+        <UrlStatus
+          slot="left"
+          :status="urlStatus"
+        />
+      </InputField>
     </div>
     <div data-cy="tip-container">
       <template v-if="!confirmMode">
-        <InputAmount v-model="amount" />
+        <InputAmount
+          v-model="amount"
+          @error="(val) => error = val"
+        />
         <Textarea
           v-model="note"
           :placeholder="$t('pages.tipPage.titlePlaceholder')"
@@ -52,7 +62,7 @@
           {{ validationStatus.msg }}
         </div>
         <Button
-          :disabled="validationStatus.error"
+          :disabled="validationStatus.error || error"
           bold
           data-cy="send-tip"
           @click="toConfirm"
@@ -68,7 +78,7 @@
       </template>
       <template v-else>
         <div
-          class="tip-note-preview mt-15"
+          class="tip-note-preview"
           data-cy="tip-note"
         >
           {{ note }}
@@ -94,10 +104,8 @@
 </template>
 
 <script>
-import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { calculateFee } from '../../utils/constants';
 import {
   escapeSpecialChars, aeToAettos, validateTipUrl, convertToken,
 } from '../../utils/helper';
@@ -130,17 +138,15 @@ export default {
       editUrl: true,
       IS_EXTENSION: process.env.IS_EXTENSION,
       tipFromPopup: false,
+      error: false,
     };
-  },
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balance']);
   },
   computed: {
     ...mapGetters(['account']),
-    ...mapState(['tourRunning', 'tip', 'sdk', 'tippingV1', 'tippingV2']),
+    ...mapState(['tip', 'sdk', 'tippingV1', 'tippingV2']),
     ...mapGetters('fungibleTokens', ['selectedToken', 'tokenBalances']),
     urlStatus() {
-      return this.tourRunning ? 'verified' : this.$store.getters['tipUrl/status'](this.url);
+      return this.$store.getters['tipUrl/status'](this.url);
     },
     validUrl() {
       return validateTipUrl(this.url);
@@ -149,7 +155,7 @@ export default {
       return this.tippingV2 || this.tippingV1;
     },
     ...mapState({
-      validationStatus({ sdk }, { account, minTipAmount }) {
+      validationStatus({ sdk }, { minTipAmount }) {
         if (!sdk || !this.tippingContract) {
           return { error: true };
         }
@@ -162,24 +168,8 @@ export default {
         if (this.selectedToken && !this.tippingV2) {
           return { error: true, msg: this.$t('pages.tipPage.v1FungibleTokenTipError') };
         }
-        if (!+this.amount) {
-          return { error: true, msg: this.$t('pages.tipPage.requiredAmountError') };
-        }
         if (!this.selectedToken && this.amount < minTipAmount) {
           return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
-        }
-        const fee = calculateFee(SCHEMA.TX_TYPE.contractCall, {
-          ...sdk.Ae.defaults,
-          contractId: this.tippingContract.deployInfo.address,
-          callerId: account.address,
-        });
-        if (
-          this.selectedToken
-            ? this.selectedToken.balance.comparedTo(this.amount) === -1
-              || this.balance.comparedTo(fee) === -1
-            : this.balance.comparedTo(fee.plus(this.amount)) === -1
-        ) {
-          return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
         }
         if (!this.note) {
           return { error: true, msg: this.$t('pages.tipPage.titlePlaceholder') };
@@ -319,28 +309,41 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .tips-send {
   padding: 16px;
+  margin: 0 auto;
+  min-width: auto;
 
-  .tour__step3 {
-    margin: 0 auto;
-    margin-top: 22px;
-    min-width: auto;
+  .header {
+    margin: 8px 0 24px 0;
+    text-align: center;
+    color: variables.$color-light-grey;
 
-    &.v-tour__target--highlighted {
-      margin: 10px;
-      min-width: auto;
-      padding-bottom: 25px;
-    }
+    @extend %face-sans-15-medium;
 
-    p {
-      margin-top: 0;
+    a {
+      color: variables.$color-white;
+      text-decoration: none;
+      transition: all 0.08s ease-out;
 
-      &.title-holder {
-        display: flex;
-        align-items: center;
+      &:hover {
+        text-decoration: underline;
       }
+    }
+  }
+
+  p {
+    color: variables.$color-white;
+    margin: 0 0 8px 0;
+    text-align: left;
+
+    @extend %face-sans-16-regular;
+
+    &.title-holder {
+      display: flex;
+      align-items: center;
     }
   }
 
@@ -353,10 +356,13 @@ export default {
     }
 
     a {
+      margin: 8px 0;
       color: variables.$color-white;
       text-decoration: none;
       margin-left: 10px;
       width: 90%;
+
+      @extend %face-sans-11-regular;
     }
   }
 
@@ -368,14 +374,6 @@ export default {
     color: variables.$color-error;
     font-size: 15px;
     min-height: 45px;
-  }
-
-  @media screen and (min-width: 380px) {
-    .tour__step3.v-tour__target--highlighted {
-      margin: 10px auto 0 auto;
-      min-width: auto;
-      padding-bottom: 25px;
-    }
   }
 }
 </style>

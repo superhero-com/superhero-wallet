@@ -11,10 +11,7 @@
           {{ $t('pages.account.backup') }}
         </RouterLink>
       </i18n>
-      <AccountSwitcher
-        :notification="!backedUpSeed"
-        class="tour__step1"
-      />
+      <AccountSwitcher :notification="!backedUpSeed" />
       <div
         slot="bottom"
         class="header"
@@ -52,7 +49,7 @@ export default {
     TransactionList,
     TxHistory,
   },
-  computed: mapState(['backedUpSeed', 'tourStartBar', 'transactions']),
+  computed: mapState(['backedUpSeed', 'transactions']),
 };
 </script>
 
@@ -121,11 +118,11 @@ export default {
   }
 
   .seed-backup-notification {
-    font-size: 14px;
     text-align: center;
     margin-top: 2px;
-    line-height: 14px;
     color: variables.$color-green;
+
+    @extend %face-sans-14-medium;
   }
 }
 </style>

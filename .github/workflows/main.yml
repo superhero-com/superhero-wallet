@@ -34,7 +34,7 @@ jobs:
           mkdir -p tests/e2e/screenshots
           mv tests/e2e/screenshots dist-stage/artifacts/screenshots
           mv tests/pages/index.html dist-stage/artifacts/deeplink-test.html
-
+      - run: cp ./dist/web/root/index.html ./dist/web/root/404.html
       - name: Deploy to production
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/master'

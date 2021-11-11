@@ -2,6 +2,7 @@ const packagesToTranspile = [
   'lodash-es',
   '@aeternity/aepp-sdk',
   '@aeternity/hd-wallet',
+  'vee-validate',
 ];
 
 module.exports = {

@@ -159,10 +159,12 @@ export default {
     },
   },
   mounted() {
-    const polling = setInterval(() => this.updateBalances(), 10000);
+    const pollBalances = setInterval(() => this.updateBalances(), 10000);
+    const pollDefaultNames = setInterval(() => this.$store.dispatch('names/setDefaults'), 5000);
 
     this.$once('hook:destroyed', () => {
-      clearInterval(polling);
+      clearInterval(pollBalances);
+      clearInterval(pollDefaultNames);
     });
     this.customAccountName = this.accounts[this.idx].localName;
   },
@@ -253,7 +255,6 @@ export default {
     justify-content: center;
     margin-top: 8px;
     margin-bottom: 6px;
-    line-height: 21px;
 
     @extend %face-sans-14-medium;
 
@@ -263,6 +264,10 @@ export default {
       align-self: flex-start;
       margin-right: 8px;
       overflow: visible;
+    }
+
+    .input-field ::v-deep .main-wrapper button {
+      background-color: transparent;
     }
 
     .account-name {

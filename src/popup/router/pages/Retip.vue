@@ -7,20 +7,21 @@
 
     <div class="url-bar">
       <UrlStatus :status="urlStatus" />
-      <a class="link-sm text-left">{{ tip.url }}</a>
+      <a>{{ tip.url }}</a>
     </div>
 
     <InputAmount
       v-model="amount"
-      :amount-error="amount && validationStatus.error"
+      :error="amount && validationStatus.error"
       :error-message="validationStatus.msg"
+      @error="(val) => error = val"
     />
-    <div class="tip-note-preview mt-15">
+    <div class="tip-note-preview">
       {{ tip.title }}
     </div>
 
     <Button
-      :disabled="!tippingSupported || validationStatus.error"
+      :disabled="!tippingSupported || error || validationStatus.error"
       @click="sendTip"
     >
       {{ $t('pages.tipPage.confirm') }}
@@ -34,10 +35,9 @@
 </template>
 
 <script>
-import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { MAGNITUDE, calculateFee } from '../../utils/constants';
+import { MAGNITUDE } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 import InputAmount from '../components/InputAmount.vue';
@@ -54,10 +54,8 @@ export default {
     tip: {},
     amount: '',
     loading: false,
+    error: false,
   }),
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balance']);
-  },
   computed: {
     ...mapGetters(['account', 'tippingSupported']),
     ...mapState('fungibleTokens', ['selectedToken']),
@@ -68,31 +66,15 @@ export default {
         return getters['tipUrl/status'](this.tip.url);
       },
 
-      validationStatus({ sdk }, { account, minTipAmount }) {
+      validationStatus({ sdk }, { minTipAmount }) {
         if (!sdk || !this.tippingContract) {
           return { error: true };
         }
         if (this.selectedToken && this.$route.query.id.includes('_v1')) {
           return { error: true, msg: this.$t('pages.tipPage.v1FungibleTokenTipError') };
         }
-        if (!+this.amount) {
-          return { error: true, msg: this.$t('pages.tipPage.requiredAmountError') };
-        }
         if (!this.selectedToken && +this.amount < minTipAmount) {
           return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
-        }
-        const fee = calculateFee(SCHEMA.TX_TYPE.contractCall, {
-          ...sdk.Ae.defaults,
-          contractId: this.tippingContract.deployInfo.address,
-          callerId: account.address,
-        });
-        if (
-          this.selectedToken
-            ? this.selectedToken.balance.comparedTo(this.amount) === -1
-              || this.balance.comparedTo(fee) === -1
-            : this.balance.comparedTo(fee.plus(this.amount)) === -1
-        ) {
-          return { error: true, msg: this.$t('pages.tipPage.insufficientBalance') };
         }
         return { error: false };
       },
@@ -166,6 +148,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .retip {
   .url-bar {
@@ -178,21 +161,24 @@ export default {
     }
 
     a {
+      text-align: left;
       color: variables.$color-white;
       flex-grow: 1;
       text-decoration: none;
       width: 90%;
-      margin-left: 10px;
+      margin: 8px 0 8px 10px;
+
+      @extend %face-sans-11-regular;
     }
   }
 
   .section-title {
     margin-bottom: 8px;
     margin-top: 16px;
-    font-size: 16px;
     color: variables.$color-white;
-    font-weight: 400;
     text-align: left;
+
+    @extend %face-sans-16-regular;
   }
 }
 </style>
