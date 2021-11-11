@@ -20,7 +20,7 @@ export default ({
 }) => ({
   migrations,
   current,
-  transactions: { pending, loaded: [] },
+  transactions: { pending, loaded: [], nextPageUrl: '' },
   currencies,
   userNetworks,
   names,

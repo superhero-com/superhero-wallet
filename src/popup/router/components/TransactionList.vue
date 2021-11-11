@@ -64,7 +64,6 @@ export default {
   data() {
     return {
       loading: false,
-      page: 1,
       isDestroyed: false,
       displayMode: { rotated: true, filter: 'all', sort: 'date' },
       filters: {
@@ -122,7 +121,6 @@ export default {
   watch: {
     activeIdx() {
       this.$store.commit('initTransactions');
-      this.page = 1;
       this.loadMore();
     },
   },
@@ -142,7 +140,7 @@ export default {
   },
   methods: {
     checkLoadMore() {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed || !this.transactions.nextPageUrl) return;
       const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = isDesktop
         ? document.querySelector('#app') : document.documentElement;
@@ -152,30 +150,17 @@ export default {
     async loadMore() {
       if (this.loading) return;
       this.loading = true;
-      let result;
       try {
         await this.$watchUntilTruly(() => this.$store.state.middleware);
-        result = await this.$store.dispatch('fetchTransactions', {
-          page: this.page,
-          limit: TXS_PER_PAGE,
-        });
-        this.$store.commit('addTransactions', result.txs);
+        await this.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE });
       } finally {
         this.loading = false;
       }
-      if (result.hasMore) {
-        this.page += 1;
-        this.checkLoadMore();
-      }
+      this.checkLoadMore();
     },
     async getLatest() {
       try {
-        const { txs } = await this.$store.dispatch('fetchTransactions', {
-          limit: 10,
-          page: 1,
-          recent: true,
-        });
-        this.$store.commit('addTransactions', txs);
+        await this.$store.dispatch('fetchTransactions', { limit: 10, recent: true });
       } finally {
         this.loading = false;
       }

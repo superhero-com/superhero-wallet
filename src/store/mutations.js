@@ -12,6 +12,10 @@ export default {
   },
   initTransactions(state) {
     state.transactions.loaded = [];
+    state.transactions.nextPageUrl = '';
+  },
+  setTransactionsNextPage(state, pageUrl) {
+    state.transactions.nextPageUrl = pageUrl;
   },
   addPendingTransaction(state, payload) {
     state.transactions.pending.push({ ...payload, microTime: Date.now() });
