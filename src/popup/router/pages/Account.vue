@@ -18,7 +18,7 @@
       >
         <span class="title">{{ $t('pages.recentTransactions.title') }}</span>
         <router-link
-          v-if="transactions.latest.length || transactions.pending.length"
+          v-if="transactions.loaded.length || transactions.pending.length"
           to="/transactions"
           data-cy="view-all-transactions"
           class="view-all"

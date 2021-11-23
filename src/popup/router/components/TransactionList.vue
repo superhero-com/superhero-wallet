@@ -28,7 +28,7 @@
       <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
     </div>
     <router-link
-      v-if="maxLength && transactions.length > maxLength"
+      v-if="maxLength && transactions.loaded.length > maxLength"
       to="/transactions"
       class="view-more"
     >
@@ -40,7 +40,6 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { uniqBy } from 'lodash-es';
 import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
 import PendingTxs from './PendingTxs.vue';
@@ -65,8 +64,6 @@ export default {
   data() {
     return {
       loading: false,
-      transactions: [],
-      page: 1,
       isDestroyed: false,
       displayMode: { rotated: true, filter: 'all', sort: 'date' },
       filters: {
@@ -77,11 +74,12 @@ export default {
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
     ...mapState('accounts', ['activeIdx']),
+    ...mapState(['transactions']),
     ...mapState({
-      filteredTransactions(state, { account: { address } }) {
+      filteredTransactions({ transactions: { loaded } }, { account: { address } }) {
         const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
           .includes(tr.tx.contractId);
-        return this.transactions
+        return loaded
           .filter((tr) => (!this.token
             || (this.token !== 'aeternity'
               ? tr.tx?.contractId === this.token
@@ -122,9 +120,7 @@ export default {
   },
   watch: {
     activeIdx() {
-      this.$store.commit('setTransactions', []);
-      this.transactions = [];
-      this.page = 1;
+      this.$store.commit('initTransactions');
       this.loadMore();
     },
   },
@@ -144,49 +140,30 @@ export default {
   },
   methods: {
     checkLoadMore() {
-      if (this.isDestroyed) return;
+      if (this.isDestroyed || !this.transactions.nextPageUrl) return;
       const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = isDesktop
         ? document.querySelector('#app') : document.documentElement;
       if (this.maxLength && this.filteredTransactions.length >= this.maxLength) return;
-      if (scrollHeight - scrollTop <= clientHeight + 100) {
-        setTimeout(() => this.loadMore(), 1500);
-      }
+      if (scrollHeight - scrollTop <= clientHeight + 100) this.loadMore();
     },
     async loadMore() {
       if (this.loading) return;
       this.loading = true;
-      let result;
       try {
         await this.$watchUntilTruly(() => this.$store.state.middleware);
-        result = await this.$store.dispatch('fetchTransactions', {
-          page: this.page,
-          limit: TXS_PER_PAGE,
-        });
-        this.updateTransactions(result.txs);
+        await this.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE });
       } finally {
         this.loading = false;
       }
-      if (result.hasMore) {
-        this.page += 1;
-        this.checkLoadMore();
-      }
+      this.checkLoadMore();
     },
     async getLatest() {
       try {
-        const { txs } = await this.$store.dispatch('fetchTransactions', {
-          limit: 10,
-          page: 1,
-          recent: true,
-        });
-        this.updateTransactions(txs);
+        await this.$store.dispatch('fetchTransactions', { limit: 10, recent: true });
       } finally {
         this.loading = false;
       }
-    },
-    updateTransactions(transactions) {
-      this.transactions = uniqBy([...this.transactions, ...transactions], 'hash');
-      this.$store.commit('setTransactions', this.transactions);
     },
   },
 };

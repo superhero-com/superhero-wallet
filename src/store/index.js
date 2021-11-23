@@ -35,7 +35,8 @@ export default new Vuex.Store({
     },
     userNetworks: [],
     transactions: {
-      latest: [],
+      loaded: [],
+      nextPageUrl: '',
       pending: [],
     },
     pageTitle: '',
