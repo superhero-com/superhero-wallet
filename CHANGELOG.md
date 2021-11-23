@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.5](https://github.com/aeternity/superhero-wallet/compare/v0.9.4...v0.9.5) (2021-11-23)
+
+
+### Features
+
+* save transactions in session ([707561d](https://github.com/aeternity/superhero-wallet/commit/707561d86cb7fa3aa52e2a111727eef5c7602159))
+* **transaction-list:** save scroll position ([23da760](https://github.com/aeternity/superhero-wallet/commit/23da760465d21f4ddd5be004a12a585d22638e18))
+
+
+### Bug Fixes
+
+* **transaction-details:** fetch transaction if not preloaded ([bc65967](https://github.com/aeternity/superhero-wallet/commit/bc65967f5250b6777d8b3be5a1b1d78961a9b584))
+
+
+### Maintenance
+
+* **migrations:** add changeTransactionStructure migration ([af11f64](https://github.com/aeternity/superhero-wallet/commit/af11f64f65a1e961a9ed2af90f68cb334004ca38))
+* **transaction-list:** remove useless setTimeout ([0e41081](https://github.com/aeternity/superhero-wallet/commit/0e4108104222c3b7b6f62358b960adb777ed9478))
+* **transactions:** use next page to load additional transactions ([6a0392f](https://github.com/aeternity/superhero-wallet/commit/6a0392f463acc2c5757d50a47c7ac768f1f677e6))
+
 ### [0.9.4](https://github.com/aeternity/superhero-wallet/compare/v0.9.3...v0.9.4) (2021-11-10)
 
 
