@@ -36,7 +36,9 @@ describe('Pages', () => {
     options: {
       stubs: ['router-link'],
     },
-    data: [{}],
+    data: [{
+      extensionVersion: 'version-specific-text',
+    }],
   },
   {
     name: 'TermsOfService',
