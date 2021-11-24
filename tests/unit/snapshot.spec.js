@@ -65,8 +65,8 @@ describe('Pages', () => {
     }],
   }].forEach((test) => it(test.name, async () => {
     const wrapper = mount(test.page, test.options);
-    test.data.forEach((data) => {
-      wrapper.setData(data);
+    test.data.forEach(async (data) => {
+      await wrapper.setData(data);
       expect(wrapper.element).toMatchSnapshot();
     });
   }));

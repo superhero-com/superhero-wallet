@@ -75,45 +75,25 @@ exports[`Pages Index 1`] = `
 <div
   class="index"
 >
-  <div
-    class="not-iframe"
-  >
-    <svg />
-     
-    <span
-      class="heading"
-    >
-      
-      locale-specific-text
-    
-    </span>
-     
-    <svg
-      class="spinner"
-    />
-     
-    <span
-      class="go"
-    >
-      locale-specific-text
-    </span>
-  </div>
+  <img
+    src="../../../icons/iframe/sendAndReceive.svg"
+  />
    
   <div
     class="terms-agreement"
   >
     <label
-      class="checkbox-container"
+      class="checkbox-container agreed"
       data-cy="checkbox"
     >
       <input
         name=""
         type="checkbox"
-        value="false"
+        value="true"
       />
        
       <span
-        class="checkmark"
+        class="checkmark checked"
       />
        
       <span>
@@ -133,7 +113,7 @@ exports[`Pages Index 1`] = `
   </div>
    
   <button
-    class="button primary disabled"
+    class="button primary"
     data-cy="generate-wallet"
   >
     
@@ -142,7 +122,7 @@ exports[`Pages Index 1`] = `
   </button>
    
   <button
-    class="button primary disabled"
+    class="button primary"
     data-cy="import-wallet"
   >
     
@@ -156,45 +136,25 @@ exports[`Pages Index 2`] = `
 <div
   class="index"
 >
-  <div
-    class="not-iframe"
-  >
-    <svg />
-     
-    <span
-      class="heading"
-    >
-      
-      locale-specific-text
-    
-    </span>
-     
-    <svg
-      class="spinner"
-    />
-     
-    <span
-      class="go"
-    >
-      locale-specific-text
-    </span>
-  </div>
+  <img
+    src="../../../icons/iframe/sendAndReceive.svg"
+  />
    
   <div
     class="terms-agreement"
   >
     <label
-      class="checkbox-container"
+      class="checkbox-container agreed"
       data-cy="checkbox"
     >
       <input
         name=""
         type="checkbox"
-        value="false"
+        value="true"
       />
        
       <span
-        class="checkmark"
+        class="checkmark checked"
       />
        
       <span>
@@ -214,7 +174,7 @@ exports[`Pages Index 2`] = `
   </div>
    
   <button
-    class="button primary disabled"
+    class="button primary"
     data-cy="generate-wallet"
   >
     
@@ -223,7 +183,7 @@ exports[`Pages Index 2`] = `
   </button>
    
   <button
-    class="button primary disabled"
+    class="button primary"
     data-cy="import-wallet"
   >
     
@@ -237,45 +197,25 @@ exports[`Pages Index 3`] = `
 <div
   class="index"
 >
-  <div
-    class="not-iframe"
-  >
-    <svg />
-     
-    <span
-      class="heading"
-    >
-      
-      locale-specific-text
-    
-    </span>
-     
-    <svg
-      class="spinner"
-    />
-     
-    <span
-      class="go"
-    >
-      locale-specific-text
-    </span>
-  </div>
+  <img
+    src="../../../icons/iframe/sendAndReceive.svg"
+  />
    
   <div
     class="terms-agreement"
   >
     <label
-      class="checkbox-container"
+      class="checkbox-container agreed"
       data-cy="checkbox"
     >
       <input
         name=""
         type="checkbox"
-        value="false"
+        value="true"
       />
        
       <span
-        class="checkmark"
+        class="checkmark checked"
       />
        
       <span>
@@ -295,7 +235,7 @@ exports[`Pages Index 3`] = `
   </div>
    
   <button
-    class="button primary disabled"
+    class="button primary"
     data-cy="generate-wallet"
   >
     
@@ -304,7 +244,7 @@ exports[`Pages Index 3`] = `
   </button>
    
   <button
-    class="button primary disabled"
+    class="button primary"
     data-cy="import-wallet"
   >
     
@@ -490,7 +430,9 @@ exports[`Pages Intro 2`] = `
 <div
   class="intro"
 >
-  <div>
+  <div
+    style="display: none;"
+  >
     <h2>
       <svg />
        locale-specific-text
@@ -567,16 +509,17 @@ exports[`Pages Intro 2`] = `
   <div
     class="dotstyle dotstyle-fillup"
     data-cy="onboarding-steps"
+    style="display: none;"
   >
     <svg
       class="left arrow"
       data-cy="prev"
-      style="display: none;"
+      style=""
     />
      
     <ul>
       <li
-        class="current"
+        class=""
       >
         <a />
       </li>
@@ -595,11 +538,13 @@ exports[`Pages Intro 2`] = `
     <svg
       class="right arrow"
       data-cy="next"
+      style="display: none;"
     />
      
     <button
       class="button-plain skip-button"
       data-cy="skip"
+      style="display: none;"
     >
       
       locale-specific-text
@@ -610,7 +555,7 @@ exports[`Pages Intro 2`] = `
   </div>
    
   <div
-    style="display: none;"
+    style=""
   >
     <h2>
       locale-specific-text
@@ -662,7 +607,9 @@ exports[`Pages Intro 3`] = `
 <div
   class="intro"
 >
-  <div>
+  <div
+    style="display: none;"
+  >
     <h2>
       <svg />
        locale-specific-text
@@ -739,16 +686,17 @@ exports[`Pages Intro 3`] = `
   <div
     class="dotstyle dotstyle-fillup"
     data-cy="onboarding-steps"
+    style="display: none;"
   >
     <svg
       class="left arrow"
       data-cy="prev"
-      style="display: none;"
+      style=""
     />
      
     <ul>
       <li
-        class="current"
+        class=""
       >
         <a />
       </li>
@@ -767,11 +715,13 @@ exports[`Pages Intro 3`] = `
     <svg
       class="right arrow"
       data-cy="next"
+      style="display: none;"
     />
      
     <button
       class="button-plain skip-button"
       data-cy="skip"
+      style="display: none;"
     >
       
       locale-specific-text
@@ -782,7 +732,7 @@ exports[`Pages Intro 3`] = `
   </div>
    
   <div
-    style="display: none;"
+    style=""
   >
     <h2>
       locale-specific-text
@@ -834,7 +784,9 @@ exports[`Pages Intro 4`] = `
 <div
   class="intro"
 >
-  <div>
+  <div
+    style="display: none;"
+  >
     <h2>
       <svg />
        locale-specific-text
@@ -911,16 +863,17 @@ exports[`Pages Intro 4`] = `
   <div
     class="dotstyle dotstyle-fillup"
     data-cy="onboarding-steps"
+    style="display: none;"
   >
     <svg
       class="left arrow"
       data-cy="prev"
-      style="display: none;"
+      style=""
     />
      
     <ul>
       <li
-        class="current"
+        class=""
       >
         <a />
       </li>
@@ -939,11 +892,13 @@ exports[`Pages Intro 4`] = `
     <svg
       class="right arrow"
       data-cy="next"
+      style="display: none;"
     />
      
     <button
       class="button-plain skip-button"
       data-cy="skip"
+      style="display: none;"
     >
       
       locale-specific-text
@@ -954,7 +909,7 @@ exports[`Pages Intro 4`] = `
   </div>
    
   <div
-    style="display: none;"
+    style=""
   >
     <h2>
       locale-specific-text
