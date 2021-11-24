@@ -1,7 +1,7 @@
 export default ({
   migrations,
   current,
-  transactions: { pending },
+  transactions: { pending } = {},
   currencies,
   userNetworks,
   names,
