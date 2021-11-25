@@ -31,7 +31,6 @@ const router = new VueRouter({
   mode: process.env.PLATFORM === 'web' ? 'history' : 'hash',
   scrollBehavior: (to, from, savedPosition) => savedPosition || { x: 0, y: 0 },
 });
-router.afterEach(() => document.querySelector('#app').scroll(0, 0));
 
 const lastRouteKey = 'last-path';
 
@@ -43,6 +42,8 @@ const unbind = router.beforeEach(async (to, from, next) => {
   );
   unbind();
 });
+
+let savedScrollPosition = 0;
 
 router.beforeEach(async (to, from, next) => {
   const { isLoggedIn } = store.getters;
@@ -69,6 +70,18 @@ router.beforeEach(async (to, from, next) => {
       next({ name, params: await getPopupProps() });
       return;
     }
+  }
+  if (from.fullPath === '/transactions') {
+    savedScrollPosition = (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('#app')).scrollTop;
+  }
+
+  if (to.fullPath === '/transactions' && savedScrollPosition) {
+    setTimeout(() => {
+      (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('#app')).scroll(0, savedScrollPosition);
+      savedScrollPosition = 0;
+    }, 50);
+  } else {
+    (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('#app')).scroll(0, 0);
   }
 
   next(to.meta.ifNotAuthOnly ? '/account' : undefined);
