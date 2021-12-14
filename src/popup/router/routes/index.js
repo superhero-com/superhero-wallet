@@ -41,6 +41,7 @@ import TransferReceive from '../pages/TransferReceive.vue';
 import Settings from '../pages/Settings.vue';
 import SignMessage from '../pages/SignMessage.vue';
 import SuccessTip from '../pages/SuccessTip.vue';
+import SignTransaction from '../pages/SignTransaction.vue';
 import TermsOfService from '../pages/TermsOfService.vue';
 import Tips from '../pages/Tips.vue';
 import TipsSend from '../pages/TipsSend.vue';
@@ -466,6 +467,16 @@ export default [
       title: 'sign-message',
       notPersist: true,
       notRebrand: true,
+    },
+  },
+  {
+    name: 'sign-transaction',
+    path: '/sign-transaction',
+    component: SignTransaction,
+    meta: {
+      title: 'sign-transaction',
+      notPersist: true,
+      hideTabBar: true,
     },
   },
   {

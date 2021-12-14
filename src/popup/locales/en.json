@@ -274,6 +274,7 @@
       "mint-burn-token": "Mint/Burn token",
       "allowances": "Allowances",
       "sign-message": "Sign Message",
+      "sign-transaction": "Sign Transaction",
       "invite": "Invite",
       "tx-details": "Tx Details",
       "wallet-home": "Wallet Home"

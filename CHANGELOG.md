@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.6](https://github.com/aeternity/superhero-wallet/compare/v0.9.5...v0.9.6) (2021-12-13)
+
+
+### Features
+
+* receive transaction for signing through deeplink ([f1a292a](https://github.com/aeternity/superhero-wallet/commit/f1a292a82515aeea88859ff7f8a257c23362c058))
+
 ### [0.9.5](https://github.com/aeternity/superhero-wallet/compare/v0.9.4...v0.9.5) (2021-11-23)
 
 

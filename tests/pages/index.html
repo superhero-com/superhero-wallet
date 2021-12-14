@@ -19,6 +19,7 @@
     const cancelUrl = encodeURIComponent(`${currentUrl}?result=cancel`);
     const callbackParams = `x-success=${successUrl}&x-cancel=${cancelUrl}`;
     const message = encodeURIComponent(`This is a test message! http://example.com`);
+    const encodedTx = encodeURIComponent('tx_+HQrAaEBbLQV9y00r/WCZ4XWrEVDpdiLPiLx2282rdKA1dkRTlmCA7yhBWuJbvnfcBIKpR/IbC+ywuM9P7fvmDFNerFKykCB+M1qA4al2v8FcAAAhzcV8VZnVACDGBf4hDuaygCQKxEV1igBG2+HI4byb8D/wPOLADU=');
     const url = encodeURIComponent('http://example.com/article?id=123123');
 
     const prefixes = ['superhero:', 'https://wallet.superhero.com/', 'http://localhost:5000/'];
@@ -42,6 +43,7 @@
         `?message=${message}` +
         `&x-success=${encodeURIComponent(`${currentUrl}?result=success&signature={signature}`)}` +
         `&x-cancel=${cancelUrl}`,
+      `sign-transaction?transaction=${encodedTx}&${callbackParams}`,
       `invite/Yqk76XDXNGVMZiCVfzE9NGHwhbXiCAsah2bxVpevCGjdLeeqPaSBVR4CkAdLyb1a7HGn2RD69RDLxYF3rdL3MWouvTyyK`
     ];
 
