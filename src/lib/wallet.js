@@ -129,7 +129,7 @@ export default async function initSdk() {
         }
         action.accept(null, {
           onAccount: {
-            sign: async () => store.dispatch('accounts/signTransaction', {
+            signTransaction: async () => store.dispatch('accounts/signTransaction', {
               txBase64: params.tx,
               opt: {
                 modal: !permission,
@@ -146,13 +146,16 @@ export default async function initSdk() {
     };
 
     const sdk = await RpcWallet.compose({
-      methods: {
-        getApp(aeppUrl) {
-          const hostPermissions = store.state.permissions[aeppUrl.hostname];
-          if (!hostPermissions) store.commit('permissions/addHost', aeppUrl.hostname);
-          return new App(aeppUrl);
-        },
-        async address(...args) {
+      init() {
+        const baseSignTransaction = this.signTransaction;
+        this.signTransaction = (txBase64, opt) => {
+          if (opt.onAccount?.signTransaction) return opt.onAccount.signTransaction();
+          if (opt.onAccount) return baseSignTransaction.call(this, txBase64, opt);
+          return store.dispatch('accounts/signTransaction', { txBase64, opt });
+        };
+        const baseAddress = this.address;
+        this.address = async (...args) => {
+          if (args[0]?.onAccount) return baseAddress.call(this, ...args);
           const { address } = store.getters.account;
           const app = args.pop();
           if (app instanceof App) {
@@ -174,11 +177,19 @@ export default async function initSdk() {
             ) return Promise.reject(new Error('Rejected by user'));
           }
           return address;
+        };
+        const baseSign = this.sign;
+        this.sign = (data, options) => {
+          if (options?.onAccount) return baseSign.call(this, data, options);
+          return store.dispatch('accounts/sign', data);
+        };
+      },
+      methods: {
+        getApp(aeppUrl) {
+          const hostPermissions = store.state.permissions[aeppUrl.hostname];
+          if (!hostPermissions) store.commit('permissions/addHost', aeppUrl.hostname);
+          return new App(aeppUrl);
         },
-        sign: (data) => store.dispatch('accounts/sign', data),
-        signTransaction: (txBase64, opt) => (opt.onAccount
-          ? opt.onAccount.sign()
-          : store.dispatch('accounts/signTransaction', { txBase64, opt })),
       },
     })({
       address: store.getters.account.address,

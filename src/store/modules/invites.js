@@ -1,4 +1,4 @@
-import { Universal, MemoryAccount, Crypto } from '@aeternity/aepp-sdk';
+import { Crypto } from '@aeternity/aepp-sdk';
 import { i18n } from '../plugins/languages';
 
 export default {
@@ -13,16 +13,13 @@ export default {
     },
   },
   actions: {
-    async claim({ rootState: { current, sdk }, rootGetters: { account } }, secretKey) {
+    async claim({ rootState: { sdk }, rootGetters: { account } }, secretKey) {
       const publicKey = Crypto.getAddressFromPriv(secretKey);
-      // TODO: Remove this after fixing https://github.com/aeternity/aepp-sdk-js/issues/1261
-      const { name, instance } = sdk.pool.get(current.network);
-      // TODO: Remove this after merging https://github.com/aeternity/aepp-sdk-js/pull/1060
-      const s = await Universal({
-        nodes: [{ name, instance }],
-        accounts: [MemoryAccount({ keypair: { publicKey, secretKey } })],
-      });
-      await s.transferFunds(1, account.address, { payload: 'referral', verify: false });
+      await sdk.transferFunds(
+        1,
+        account.address,
+        { payload: 'referral', onAccount: { publicKey, secretKey } },
+      );
     },
     async handleNotEnoughFoundsError({ dispatch }, { error: { message }, isInviteError = false }) {
       if (!isInviteError && !message.includes('is not enough to execute')) return false;
