@@ -78,13 +78,14 @@ let initSdkRunning = false;
 if (IN_FRAME) {
   store.registerModule('sdk-frame-reset', {
     actions: {
-      async reset({ sdk }) {
-        const { clients } = sdk.getClients();
-        Array.from(clients.values()).forEach((aepp) => {
-          aepp.sendMessage(
-            { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
-            true,
-          );
+      async reset({ rootState: { sdk } }) {
+        Object.values(sdk.rpcClients).forEach((aepp) => {
+          if (aepp.info.status !== 'DISCONNECTED') {
+            aepp.sendMessage(
+              { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
+              true,
+            );
+          }
           aepp.disconnect();
         });
       },
