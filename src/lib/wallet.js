@@ -186,8 +186,10 @@ export default async function initSdk() {
       name: 'Superhero',
       onConnection: acceptCb,
       async onSubscription(_, { accept, deny }, origin) {
-        const activeAccount = await this.address(this.getApp(new URL(origin)));
-        if (!activeAccount) {
+        let activeAccount;
+        try {
+          activeAccount = await this.address(this.getApp(new URL(origin)));
+        } catch (e) {
           deny();
           return;
         }
