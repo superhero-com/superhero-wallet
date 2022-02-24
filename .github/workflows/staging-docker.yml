@@ -13,7 +13,7 @@ env:
 
 jobs:
   main:
-    name: Checkout
+    name: Staging Pipeline
     runs-on: ubuntu-latest
     steps:
       - if: github.ref != 'refs/heads/develop'
