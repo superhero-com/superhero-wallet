@@ -1,4 +1,4 @@
-name: Staging Superhero Wallet Pipeline
+name: Staging Superhero Wallet Pipeline Trigger
 
 on:
   pull_request:
