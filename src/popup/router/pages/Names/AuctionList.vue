@@ -42,11 +42,11 @@
 <script>
 import { mapGetters } from 'vuex';
 import { pick } from 'lodash-es';
-import Filters from '../../components/Filters';
-import NameRow from '../../components/NameRow';
-import TokenAmount from '../../components/TokenAmount';
+import Filters from '../../components/Filters.vue';
+import NameRow from '../../components/NameRow.vue';
+import TokenAmount from '../../components/TokenAmount.vue';
 import AnimatedSpinner from '../../../../icons/animated-spinner.svg?skip-optimize';
-import RegisterName from '../../components/RegisterName';
+import RegisterName from '../../components/RegisterName.vue';
 import { blocksToRelativeTime } from '../../../../filters/toRelativeTime';
 
 export default {

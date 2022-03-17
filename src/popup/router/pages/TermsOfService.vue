@@ -1,7 +1,7 @@
 <template>
-  <div class="terms-of-service text-left">
+  <div class="terms-of-service">
     <!-- header -->
-    <h1 class="heading-1 bolder">
+    <h1 class="bolder">
       TERMS OF USE
     </h1>
     <p class="italic">
@@ -973,6 +973,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .terms-of-service {
   font-weight: 100;
@@ -992,6 +993,8 @@ export default {
   h1 {
     margin: 20px;
     text-align: center;
+
+    @extend %face-sans-20-regular;
   }
 
   .accordion-item-title {

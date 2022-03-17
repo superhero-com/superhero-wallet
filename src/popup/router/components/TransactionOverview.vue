@@ -10,15 +10,16 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import Overview from './Overview';
+import Overview from './Overview.vue';
 
 export default {
   components: { Overview },
   props: {
     tx: { type: Object, required: true },
   },
+  data: () => ({ name: '' }),
   computed: {
-    ...mapGetters(['getTxType', 'getTxDirection', 'getExplorerPath', 'getZeitTxTitle']),
+    ...mapGetters(['getTxType', 'getTxDirection', 'getExplorerPath']),
     ...mapGetters('names', ['getPreferred']),
     ...mapState({
       account(_, { account }) {
@@ -41,7 +42,7 @@ export default {
             },
             recipient: {
               address: this.tx.recipientId,
-              name: this.getPreferred(this.tx.recipientId),
+              name: this.name || this.getPreferred(this.tx.recipientId),
               url: this.getExplorerPath(this.tx.recipientId),
               label: this.$t('transaction.overview.accountAddress'),
             },
@@ -57,7 +58,7 @@ export default {
           return {
             sender: direction === 'sent' ? this.account : contract,
             recipient: direction === 'received' ? this.account : contract,
-            title: this.getZeitTxTitle({ tx: this.tx }) || this.$t('transaction.type.contractCallTx'),
+            title: this.$t('transaction.type.contractCallTx'),
           };
         }
         case SCHEMA.TX_TYPE.contractCreate:
@@ -88,6 +89,12 @@ export default {
     txType() {
       return this.getTxType({ tx: this.tx });
     },
+  },
+  async mounted() {
+    await this.$watchUntilTruly(() => this.$store.state.middleware);
+    if (this.tx.recipientId?.startsWith('nm_')) {
+      this.name = (await this.$store.state.middleware.getNameByHash(this.tx.recipientId)).name;
+    }
   },
 };
 </script>

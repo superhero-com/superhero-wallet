@@ -25,7 +25,7 @@ describe('Tests cases not connected to specific page', () => {
     ].forEach(({ path, redirect }) => {
       cy.login({}, path)
         .get('[data-cy=connect-node]')
-        .visit('extension/popup/popup')
+        .visit('')
         .urlEquals(redirect ? path : '/account');
     });
   });

@@ -20,18 +20,12 @@
 </template>
 
 <script>
+import CopyMixin from '../../../mixins/copy';
+
 export default {
+  mixins: [CopyMixin],
   props: {
     value: { type: String, required: true },
-  },
-  data: () => ({ copied: false }),
-  methods: {
-    copy() {
-      this.copied = true;
-      setTimeout(() => {
-        this.copied = false;
-      }, 3000);
-    },
   },
 };
 </script>

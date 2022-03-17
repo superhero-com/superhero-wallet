@@ -13,11 +13,12 @@
         extend,
         half,
         small,
-        onboarding,
         third,
         inline,
         inactive,
         bold,
+        backgroundless,
+        'icon-text': iconText,
       },
     ]"
     v-on="$listeners"
@@ -31,7 +32,7 @@ export default {
   props: {
     fill: {
       type: String,
-      validator: (value) => ['primary', 'secondary'].includes(value),
+      validator: (value) => ['primary', 'secondary', 'alternative'].includes(value),
       default: 'primary',
     },
     disabled: Boolean,
@@ -39,11 +40,12 @@ export default {
     half: Boolean,
     small: Boolean,
     third: Boolean,
-    onboarding: Boolean,
     inline: Boolean,
     inactive: Boolean,
     to: { type: [String, Object], default: null },
     bold: Boolean,
+    backgroundless: Boolean,
+    iconText: Boolean,
   },
   computed: {
     isLinkOnSameHost() {
@@ -158,37 +160,6 @@ export default {
     color: variables.$color-white;
   }
 
-  &.onboarding {
-    width: 100px;
-    font-size: 14px;
-    height: 34px;
-    border-radius: 5px;
-    line-height: 34px;
-    background: variables.$color-bg-2;
-    margin: 0;
-    margin-right: 10px;
-    font-weight: 500;
-    color: variables.$color-white;
-
-    &:last-child {
-      margin-right: 0;
-    }
-
-    &.skip {
-      background: variables.$color-error;
-    }
-
-    &.next {
-      background: variables.$color-blue;
-    }
-
-    &.start {
-      margin-left: auto;
-      margin-right: 0;
-      background: variables.$color-blue;
-    }
-  }
-
   &.inline {
     display: inline-block;
     padding: 0 20px;
@@ -202,6 +173,45 @@ export default {
 
   &.inactive {
     opacity: 0.4;
+  }
+
+  &.backgroundless {
+    &.small {
+      @extend %face-sans-16-medium;
+    }
+
+    background: transparent;
+
+    &.primary {
+      color: variables.$color-blue;
+      border: 1px solid variables.$color-blue;
+
+      &:hover {
+        background-color: variables.$color-blue-alpha-10;
+      }
+    }
+
+    &.alternative {
+      color: variables.$color-red;
+      border: 1px solid variables.$color-red;
+
+      &:hover {
+        background-color: variables.$color-red-alpha-10;
+      }
+    }
+  }
+
+  &.icon-text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    ::v-deep svg {
+      width: 24px;
+      height: 24px;
+      margin-right: 6px;
+    }
   }
 }
 </style>

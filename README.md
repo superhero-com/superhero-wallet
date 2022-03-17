@@ -18,8 +18,9 @@ $ cd superhero-wallet
 ```
 $ npm install
 $ npm run build
-$ npm run build:Testnet # build for Testnet
-$ npm run build:Mainnet # build for Mainnet
+$ npm run build:cordova # build a Cordova version
+$ npm run build:extension # build an extension
+$ npm run build:web # build a web version
 $ npm run gen:cordova-resources
 $ npx cordova build/run android/ios # to build Cordova application
 ```
@@ -28,16 +29,17 @@ $ npx cordova build/run android/ios # to build Cordova application
 
 ```
 $ npm install
-$ npm run watch:dev
-$ npm run watch:dev:Testnet
-$ npm run watch:dev:Mainnet
+$ npm run watch # watch an extension
+$ npm run serve # watch a web version
 ```
 
 ### Run tests
 
 ```
 $ npm install
-$ npm run test
+$ npm run test:unit
+$ npm run test:e2e
+$ npm run test # to run both unit and e2e tests
 ```
 
 ### Add to browser via local build or release zip

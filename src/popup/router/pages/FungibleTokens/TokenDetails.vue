@@ -20,10 +20,11 @@
           <ReceiveIcon />{{ $t('pages.token-details.receive') }}
         </BoxButton>
         <BoxButton
-          :disabled="!tippingSupported"
-          @click.native="proceed({ name: 'tips-send' })"
+          v-if="UNFINISHED_FEATURES && id === 'aeternity'"
+          fill="alternative"
+          @click.native="proceed({ name: 'buy' })"
         >
-          <TipIcon />{{ $t('pages.token-details.tip') }}
+          <BuyIcon />{{ $t('pages.fungible-tokens.buyAe') }}
         </BoxButton>
       </div>
       <div
@@ -109,23 +110,23 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import Plate from '../../components/Plate';
+import Plate from '../../components/Plate.vue';
 import SendIcon from '../../../../icons/send.svg?vue-component';
 import ReceiveIcon from '../../../../icons/receive.svg?vue-component';
-import TipIcon from '../../../../icons/tip.svg?vue-component';
+import BuyIcon from '../../../../icons/buy.svg?vue-component';
 import Warning from '../../../../icons/warning.svg?vue-component';
 import TxHistory from '../../../../icons/history.svg?vue-component';
-import BoxButton from '../../components/BoxButton';
-import TokenAmount from '../../components/TokenAmount';
-import DetailsRow from '../../components/FungibleTokens/DetailsRow';
-import TransactionList from '../../components/TransactionList';
+import BoxButton from '../../components/BoxButton.vue';
+import TokenAmount from '../../components/TokenAmount.vue';
+import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
+import TransactionList from '../../components/TransactionList.vue';
 
 export default {
   components: {
     Plate,
     SendIcon,
     ReceiveIcon,
-    TipIcon,
+    BuyIcon,
     Warning,
     TxHistory,
     TokenAmount,
@@ -139,14 +140,15 @@ export default {
   data() {
     return {
       activeTab: 'details',
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
   subscriptions() {
     return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
   },
   computed: {
-    ...mapGetters(['tippingSupported', 'formatCurrency', 'accounts']),
-    ...mapState(['accountSelectedIdx']),
+    ...mapGetters(['formatCurrency', 'accounts']),
+    ...mapState('accounts', ['activeIdx']),
     ...mapState('fungibleTokens', ['aePublicData', 'availableTokens']),
     ...mapGetters('fungibleTokens', ['tokenBalances']),
     fungibleToken() {
@@ -179,7 +181,7 @@ export default {
   methods: {
     proceed(path) {
       this.$store.commit('fungibleTokens/setSelectedToken', {
-        address: this.accounts[this.accountSelectedIdx].address,
+        address: this.accounts[this.activeIdx].address,
         token: this.id !== 'aeternity' ? this.tokenBalances.find(({ value }) => value === this.id) : null,
       });
       this.$router.push(path);

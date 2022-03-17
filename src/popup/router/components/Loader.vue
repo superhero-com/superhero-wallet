@@ -22,6 +22,7 @@ export default {
 @use '../../../styles/mixins';
 
 .loader {
+  display: flex;
   position: fixed;
   top: 0;
   left: 0;

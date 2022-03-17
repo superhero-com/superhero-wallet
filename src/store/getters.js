@@ -3,7 +3,7 @@ import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { Crypto, TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
-import { defaultNetworks, TX_TYPE_MDW, ZEIT_TOKEN_CONTRACT } from '../popup/utils/constants';
+import { defaultNetworks, TX_TYPE_MDW } from '../popup/utils/constants';
 import {
   checkHashType,
   convertToken,
@@ -21,22 +21,19 @@ const getHdWalletAccount = (wallet, accountIdx = 0) => {
   };
 };
 
-const isZeitSpecial = (transaction) => transaction.tx && transaction.tx.contractId
-  && transaction.tx.contractId === ZEIT_TOKEN_CONTRACT
-  && (transaction.tx.arguments?.length === 3 || transaction.pendingTokenTx);
-
 export default {
   wallet({ mnemonic }) {
     if (!mnemonic) return null;
     return generateHdWallet(mnemonicToSeed(mnemonic));
   },
-  accounts({ accs }, getters) {
+  accounts({ accounts: { list } }, getters) {
     if (!getters.wallet) return [];
-    return accs
-      .map(({ idx, ...acc }) => ({
+    return list
+      .map(({ idx, type, ...acc }) => ({
         idx,
+        type,
         ...acc,
-        ...getHdWalletAccount(getters.wallet, idx),
+        ...(type === 'hd-wallet' ? getHdWalletAccount(getters.wallet, idx) : {}),
       }))
       .map(({ idx, localName, ...account }) => ({
         idx,
@@ -46,8 +43,8 @@ export default {
           localName || (idx === 0 ? i18n.t('mainAccount') : i18n.t('subaccountName', { idx })),
       }));
   },
-  account({ accountSelectedIdx }, { accounts }) {
-    return accounts[accountSelectedIdx] || {}; // TODO: Return null
+  account({ accounts: { activeIdx } }, { accounts }) {
+    return accounts[activeIdx] || {}; // TODO: Return null
   },
   isLoggedIn: (state, { account }) => Object.keys(account).length > 0,
   currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,
@@ -80,29 +77,20 @@ export default {
     const { endpoint, valid } = checkHashType(hash);
     return valid ? `${explorerUrl}/${endpoint}/${hash}` : null;
   },
-  getTx: ({ transactions, transactionCache }) => (hash) => transactions.latest
+  getTx: ({ transactions }) => (hash) => transactions.loaded
     .concat(transactions.pending.map((t) => ({ ...t, pending: true })))
-    .concat(transactionCache.transactions)
     .find((tx) => tx.hash === hash),
   getTxType: () => (transaction) => transaction.tx
     && (TX_TYPE_MDW[transaction.tx.type]
       || SCHEMA.OBJECT_ID_TX_TYPE[transaction.tx.tag]
       || (Object.values(SCHEMA.TX_TYPE).includes(transaction.tx.type) && transaction.tx.type)),
-  getZeitTxTitle: () => (transaction) => (isZeitSpecial(transaction) ? 'Burned' : undefined),
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    const symbol = isZeitSpecial(transaction) ? 'Hedone' : 'AE';
-    return contractCallData ? availableTokens[contractCallData.token]?.symbol : symbol;
+    return contractCallData ? availableTokens[contractCallData.token]?.symbol : 'AE';
   },
   getTxAmountTotal: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    if (isZeitSpecial(transaction)) {
-      return +convertToken(
-        transaction.tx.arguments?.[0]?.value || +transaction.amount,
-        -availableTokens[transaction.tx.contractId].decimals,
-      );
-    }
     if (contractCallData && availableTokens[contractCallData.token]) {
       return +convertToken(
         contractCallData.amount,

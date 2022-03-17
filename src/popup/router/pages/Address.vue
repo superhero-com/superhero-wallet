@@ -4,7 +4,7 @@
       {{ $t('pages.tipPage.sendToAddress') }}
     </div>
 
-    <div class="url-bar link-sm text-left">
+    <div class="url-bar">
       {{ callbackOrigin }}
     </div>
 
@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import Button from '../components/Button';
+import Button from '../components/Button.vue';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
@@ -29,10 +29,15 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .address {
   .url-bar {
+    margin: 8px 0;
+    text-align: left;
     color: variables.$color-white;
+
+    @extend %face-sans-11-regular;
   }
 
   .section-title {

@@ -13,10 +13,10 @@
 </template>
 
 <script>
-import Plate from '../../components/Plate';
-import AccountSwitcher from '../../components/AccountSwitcher';
-import SearchBar from '../../components/SearchBar';
-import TokensList from '../../components/FungibleTokens/TokensList';
+import Plate from '../../components/Plate.vue';
+import AccountSwitcher from '../../components/AccountSwitcher.vue';
+import SearchBar from '../../components/SearchBar.vue';
+import TokensList from '../../components/FungibleTokens/TokensList.vue';
 
 export default {
   components: {

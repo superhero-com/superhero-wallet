@@ -7,7 +7,7 @@ import { detectConnectionType } from '../popup/utils/helper';
 import store from './store';
 import { App } from '../store/modules/permissions';
 
-global.browser = require('webextension-polyfill');
+window.browser = require('webextension-polyfill');
 
 let sdk;
 let connectionsQueue = [];
@@ -28,7 +28,7 @@ const showPopup = async (aepp, type, params) => {
     }
   });
 
-  const extUrl = browser.runtime.getURL('./popup/popup.html');
+  const extUrl = browser.runtime.getURL('./index.html');
   const popupUrl = `${extUrl}?id=${id}&type=${type}&url=${encodeURIComponent(href)}`;
   const popupWindow = await browser.windows.create({
     url: popupUrl,
@@ -198,7 +198,7 @@ export async function init() {
   );
 
   store.watch(
-    ({ accountSelectedIdx }) => accountSelectedIdx,
+    ({ accounts: { activeIdx } }) => activeIdx,
     async (accountIdx) => sdk.selectAccount(store.getters.accounts[accountIdx].address),
   );
 
@@ -216,15 +216,13 @@ export async function init() {
 }
 
 export function disconnect() {
-  const { clients: aepps } = sdk.getClients();
-  Array.from(aepps.values()).forEach((aepp) => {
+  Object.values(sdk.rpcClients).forEach((aepp) => {
     if (aepp.info.status !== 'DISCONNECTED') {
       aepp.sendMessage(
         { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
         true,
       );
     }
-    aepp.connection.port.onDisconnect.dispatch();
     aepp.disconnect();
     browser.tabs.reload(aepp.connection.port.sender.tab.id);
     sdk.removeRpcClient(aepp.id);

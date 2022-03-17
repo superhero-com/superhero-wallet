@@ -16,8 +16,8 @@
 </template>
 
 <script>
-import Panel from '../components/Panel';
-import PanelItem from '../components/PanelItem';
+import Panel from '../components/Panel.vue';
+import PanelItem from '../components/PanelItem.vue';
 
 export default {
   components: {

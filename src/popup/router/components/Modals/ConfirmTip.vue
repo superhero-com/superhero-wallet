@@ -30,8 +30,8 @@
 </template>
 
 <script>
-import Modal from '../Modal';
-import Button from '../Button';
+import Modal from '../Modal.vue';
+import Button from '../Button.vue';
 
 export default {
   components: { Modal, Button },

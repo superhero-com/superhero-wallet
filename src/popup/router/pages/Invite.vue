@@ -7,19 +7,16 @@
       </p>
       <InputAmount
         v-model="amount"
-        native-token
         :label="$t('pages.invite.tip-attached')"
-        :error="!!errorMsg"
-        :error-message="errorMsg"
+        no-token
+        @error="(val) => error = val"
       />
       <Button
         bold
-        :disabled="!!errorMsg"
+        :disabled="error"
         @click="generate"
       >
-        {{
-          $t('pages.invite.generate')
-        }}
+        {{ $t('pages.invite.generate') }}
       </Button>
     </div>
     <div
@@ -42,12 +39,11 @@
 </template>
 
 <script>
-import { pick } from 'lodash-es';
-import { mapGetters, mapState } from 'vuex';
+import { mapState } from 'vuex';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
-import InputAmount from '../components/InputAmount';
-import Button from '../components/Button';
-import InviteItem from '../components/InviteItem';
+import InputAmount from '../components/InputAmount.vue';
+import Button from '../components/Button.vue';
+import InviteItem from '../components/InviteItem.vue';
 import Invite from '../../../icons/invite.svg?vue-component';
 import NewInviteLink from '../../../icons/new-invite-link.svg?vue-component';
 
@@ -55,22 +51,10 @@ export default {
   components: {
     InputAmount, Button, InviteItem, Invite, NewInviteLink,
   },
-  data: () => ({ amount: 0, loading: false }),
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balance']);
-  },
+  data: () => ({ amount: '', loading: false, error: false }),
   computed: {
     ...mapState(['sdk']),
     ...mapState('invites', ['invites']),
-    ...mapGetters('fungibleTokens', ['selectedToken']),
-    sufficientBalance() {
-      return this.balance.comparedTo(this.amount) !== -1;
-    },
-    errorMsg() {
-      if (this.selectedToken) return this.$t('pages.invite.tokens-not-allowed');
-      if (!this.sufficientBalance) return this.$t('pages.invite.insufficient-balance');
-      return '';
-    },
   },
   methods: {
     async generate() {

@@ -11,17 +11,14 @@
           {{ $t('pages.account.backup') }}
         </RouterLink>
       </i18n>
-      <AccountSwitcher
-        :notification="!backedUpSeed"
-        class="tour__step1"
-      />
+      <AccountSwitcher :notification="!backedUpSeed" />
       <div
         slot="bottom"
         class="header"
       >
         <span class="title">{{ $t('pages.recentTransactions.title') }}</span>
         <router-link
-          v-if="transactions.latest.length || transactions.pending.length"
+          v-if="transactions.loaded.length || transactions.pending.length"
           to="/transactions"
           data-cy="view-all-transactions"
           class="view-all"
@@ -39,10 +36,10 @@
 
 <script>
 import { mapState } from 'vuex';
-import Plate from '../components/Plate';
-import AccountSwitcher from '../components/AccountSwitcher';
+import Plate from '../components/Plate.vue';
+import AccountSwitcher from '../components/AccountSwitcher.vue';
 import TxHistory from '../../../icons/history.svg?vue-component';
-import TransactionList from '../components/TransactionList';
+import TransactionList from '../components/TransactionList.vue';
 
 export default {
   name: 'Account',
@@ -52,7 +49,7 @@ export default {
     TransactionList,
     TxHistory,
   },
-  computed: mapState(['backedUpSeed', 'tourStartBar', 'transactions']),
+  computed: mapState(['backedUpSeed', 'transactions']),
 };
 </script>
 
@@ -121,11 +118,11 @@ export default {
   }
 
   .seed-backup-notification {
-    font-size: 14px;
     text-align: center;
     margin-top: 2px;
-    line-height: 14px;
     color: variables.$color-green;
+
+    @extend %face-sans-14-medium;
   }
 }
 </style>

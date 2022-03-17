@@ -3,47 +3,6 @@
   "ae": "AE",
   "mainAccount": "Main account",
   "subaccountName": "Sub-account #{idx}",
-  "onboarding": {
-    "step_1": {
-      "title": "Your Account Info",
-      "content": "This block contains information about your wallet account and its status:<br> 1. Your account address and .chain name ( if you already have one ).<br>2. Your current wallet balance. "
-    },
-    "step_2": {
-      "title": "Send Tip",
-      "content": "To send tips, go to the URL you want to tip and open the wallet. You can also copy the URL, click Send Tip, and paste this URL into the wallet. Fill in how much you want to tip and add a message along with that tip. Hit Send and confirm."
-    },
-    "step_3": {
-      "title": "What is a \"Verified\" URL",
-      "content": "This simply means that the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and the profile owner can instantly claim tips."
-    },
-    "step_4": {
-      "title": "Claim Tip",
-      "content": "Hit this button to trigger tip collection—all tips you’ve received from URLs where you’ve added your AE address will then be added to your balance."
-    },
-    "step_5": {
-      "title": "Activity",
-      "content": "This tab will show you a full log of your previous activity using the Superhero Wallet."
-    },
-    "step_6": {
-      "title": "Top Up",
-      "content": "You can top up your wallet by swapping ETH or BTC into AE, by purchasing AE using your credit card, or by sending AE to your Superhero wallet address from another AE account. It’s very easy."
-    },
-    "step_7": {
-      "title": "Withdraw",
-      "content": "You can easily withdraw your tips by sending them out to AE wallet addresses from your accounts in exchanges or external wallets, provided that they support AE tokens."
-    },
-    "step_8": {
-      "title": "Settings",
-      "content": "You can view your security phrase (also referred to as seedphrase or private keys) and change your language and other settings."
-    },
-    "heading": "Hey superhero! Welcome onboard",
-    "sub-heading": "This short guide will walk you through the Superhero Wallet DApp and its features.",
-    "skip": "Skip",
-    "back": "Back",
-    "next": "Next",
-    "start": "Start",
-    "tutorial": "Tutorial"
-  },
   "badges": {
     "verified": "Verified",
     "notVerified": "Not verified"
@@ -85,6 +44,10 @@
       "title": "Verified URL",
       "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed easily."
     },
+    "verify": {
+      "title": "Verify your URL",
+      "msg": "Make sure that the public address of your Superhero wallet, or your .chain name, is added somewhere on the website you want to claim tips for.<br /><br />Learn more: <a>How to Receive Tips</a>"
+    },
     "not-verified": {
       "title": "Not verified URL",
       "msg": "This means that the owner of the URL has not created a Superhero wallet yet. They can claim their tips as soon as they make one and add their wallet address to their website. "
@@ -120,6 +83,9 @@
     "donate-errors-error": {
       "title": "Your Error Report Was not send",
       "msg": "There was problem sending your error report."
+    },
+    "invalid-qr-code": {
+      "msg": "The scanned QR code is invalid."
     },
     "tip-mainnet-warning": {
       "title": "Warning",
@@ -202,6 +168,11 @@
     "autoextend-help": {
       "title": "Autoextend name",
       "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.<br /><br /> Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.<br /><br /> Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
+    },
+    "shareQr": {
+      "title": "Scan QR code",
+      "share": "Share",
+      "close": "Close"
     }
   },
   "filters": {
@@ -290,6 +261,7 @@
       "name-auctions": "Name auctions",
       "register-name": "Register name",
       "more": "More",
+      "buy": "Buy AE Tokens",
       "networks": "Networks",
       "permissionsSettings": "Permissions settings",
       "permissionsDetails": "Permissions details",
@@ -302,6 +274,7 @@
       "mint-burn-token": "Mint/Burn token",
       "allowances": "Allowances",
       "sign-message": "Sign Message",
+      "sign-transaction": "Sign Transaction",
       "invite": "Invite",
       "tx-details": "Tx Details",
       "wallet-home": "Wallet Home"
@@ -317,19 +290,16 @@
       "heading": "Account",
       "activity": "Activity",
       "accountName": "Account name",
-      "copy": "Copy",
       "claim": "Claim Tip",
       "receive": "Receive",
       "latestTransactions": "Latest transactions",
       "noTransactionsFound": "No transactions found!",
       "balance": "Balance",
-      "copied": "Copied!",
       "seedNotification": "You need to {0} your seed phrase",
       "backup": "backup",
       "updateExtension": "New version available! Please update your extension.",
       "updateAvailable": "New version is available in the store!",
-      "claim-name": "Claim your .chain name",
-      "address-copied": "Address copied"
+      "claim-name": "Claim your .chain name"
     },
     "accounts": {
       "showWallet": "Show on Wallet Home"
@@ -350,6 +320,7 @@
       "noMobileClaim": "Claiming is currently only available on desktop."
     },
     "claimTips": {
+      "header": "You need to verify ownership of the URL before you can claim any tips.",
       "urlToClaim": "Claim tips from this URL:"
     },
     "notFound": {
@@ -483,7 +454,9 @@
       "mcap": "MCap",
       "price": "Price",
       "not-available": "N/A",
-      "no-results": "This account has no tokens with balance"
+      "noTokens": "No tokens in account balance.",
+      "buyAe": "Buy AE",
+      "receiveTokens": "Receive tokens"
     },
     "token-details": {
       "details": "Details",
@@ -560,6 +533,7 @@
         "register-name": "Register .chain name",
         "name-placeholder": "Enter .chain name",
         "button": "Register name",
+        "button-price": "Register name for {0} AE",
         "short-names": {
           "message": "Ownership of .chain names {0} will be acquired at an auction by the account that places the highest bid.",
           "insertion": "shorter than 13 characters"
@@ -677,11 +651,9 @@
       "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
     "receive": {
-      "backToAccount": "Back to account",
-      "heading": "To receive tokens, provide this address or have the payor scan the QR code below.",
-      "copy": "Copy",
-      "transferExchange": "Swap crypto for AE tokens",
-      "purchase": "Buy AE tokens"
+      "requestAmount": "Request amount (optional)",
+      "shareName": "Provide sender with either",
+      "shareAddress": "or your account address"
     },
     "securitySettings": {
       "backToSettings": "Back to settings",
@@ -735,15 +707,15 @@
       "seeTransactionExplorer": "See transaction in the explorer.",
       "scan": "Scan QR",
       "cancel": "Cancel",
-      "review": "Review",
+      "review": "Review and send",
       "reviewtx": "Review Transaction",
       "checkalert": "Please check the information carefully.",
       "sender": "Sending address",
       "recipient": "Receiving address",
       "amount": "Amount",
-      "editTxDetails": "Edit Transaction Details",
+      "editTxDetails": "Edit transaction",
       "tx-success": "Transaction Completed",
-      "successalert": "You have successfully sent ",
+      "successAlert": "has been sent to",
       "to": "To",
       "from": "From",
       "hash": "Transaction Hash",
@@ -858,6 +830,7 @@
       "section11Title": "11. FINAL PROVISIONS"
     },
     "tipPage": {
+      "header": "This tip will be public on {0}",
       "back": "Back",
       "noImage": "No Image",
       "domainVerified": "Verified",
@@ -900,7 +873,7 @@
       "notClaimableUrlInfo": "Third party issues prevent us from enabling direct delivery of tips to the URL owner. You are sending this tip at your own risk.",
       "notVerifiedUrlInfo": "This URL has not yet been verified. The owner of the URL has to create account to claim their tokens.",
       "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed.",
-      "minAmountError": "Tips should be over 0.01 USD in tokens in order to push through.",
+      "minAmountError": "Tips should be over 0.01 USD in tokens.",
       "insufficientBalance": "The token balance should be greater than the tip token value.",
       "v1FungibleTokenTipError": "This post could only be tipped with AE tokens.",
       "maxNoteLengthError": "Please enter a message below 280 characters.",
@@ -938,7 +911,6 @@
       "name": "Name",
       "nameSalt": "Name Salt",
       "nameId": "Name Id",
-      "copy": "Copy",
       "contractId": "Contract Id",
       "advancedMode": "Advanced Mode",
       "blockHeight": "Block height",
@@ -1026,7 +998,8 @@
       "error": "Unable to connect to chosen node",
       "connecting": "Connecting to node...",
       "connected": "Connected",
-      "initServices": "Initializing services..."
+      "initServices": "Initializing services...",
+      "offline": "You are offline"
     },
     "popupMessageSign": {
       "title": "Sign message",
@@ -1073,11 +1046,9 @@
       "claim": "Claim Back",
       "insufficient-balance": "Insufficient balance",
       "insufficient-ivnite-balance": "This invite Link expired and the Tokens are already claimed.",
-      "tokens-not-allowed": "Tokens are currently not allowed, please switch to AE",
       "tip-attached": "Tip attached",
       "top-up-with": "Top up with",
-      "delete": "Delete",
-      "copied": "Copied!"
+      "delete": "Delete"
     },
     "permissions": {
       "login": "Don't ask for login requests",
@@ -1096,7 +1067,12 @@
     "nameRegisteredAddress": "This name isn't registered or pointed to address",
     "nameUnregistered": "This name has already been registered.",
     "notSameAs": "Sender and receiver address are the same. You will send tokens to our own account.",
-    "tokenToAnAddress": "Unfortunately you can only send AEX-9 Tokens to an address"
+    "tokenToAnAddress": "Unfortunately you can only send AEX-9 Tokens to an address",
+    "minValue": "This field must be {0} or more",
+    "minValueExclusive": "This field must be more than {0}",
+    "enoughAe": "Not enough AE balance",
+    "maxValue": "This field must be {0} or less",
+    "notToken": "Tokens are currently not allowed, please switch to AE"
   },
   "redirecting": "Redirecting",
   "seconds": "{n} seconds | {n} second | {n} seconds",
@@ -1105,6 +1081,7 @@
   "days": "{n} days | {n} day | {n} days",
   "addressCopied": "Address copied",
   "copied": "Copied",
+  "copy": "Copy",
   "tx-fee": "Transaction fee",
   "total": "Total"
 }

@@ -20,6 +20,8 @@
       {{ msg }}
     </template>
 
+    <slot />
+
     <slot
       v-if="$slots.footer"
       slot="footer"
@@ -36,9 +38,9 @@
 </template>
 
 <script>
-import Modal from '../Modal';
-import Button from '../Button';
-import StatusIcon from '../StatusIcon';
+import Modal from '../Modal.vue';
+import Button from '../Button.vue';
+import StatusIcon from '../StatusIcon.vue';
 
 export default {
   components: { Modal, Button, StatusIcon },

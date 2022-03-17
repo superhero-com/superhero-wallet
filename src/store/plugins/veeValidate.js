@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import { Validator, ErrorBag, install as VeeValidate } from 'vee-validate/dist/vee-validate.minimal.esm';
 import { required } from 'vee-validate/dist/rules.esm';
+import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { Crypto } from '@aeternity/aepp-sdk';
 import { i18n } from './languages';
@@ -45,6 +46,9 @@ Object.assign(ErrorBag.prototype, {
 Validator.extend('required', required);
 Validator.extend('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
 Validator.extend('name', (value) => checkAensName(`${value}.chain`));
+Validator.extend('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
+Validator.extend('min_value_exclusive', (value, [arg]) => BigNumber(value).isGreaterThan(arg));
+Validator.extend('max_value', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));
 
 Validator.localize('en', {
   messages: {
@@ -55,6 +59,11 @@ Validator.localize('en', {
     name_unregistered: () => i18n.t('validation.nameUnregistered'),
     not_same_as: () => i18n.t('validation.notSameAs'),
     token_to_an_address: () => i18n.t('validation.tokenToAnAddress'),
+    min_value: (field, [arg]) => i18n.t('validation.minValue', [arg]),
+    min_value_exclusive: (field, [arg]) => i18n.t('validation.minValueExclusive', [arg]),
+    max_value: (field, [arg]) => i18n.t('validation.maxValue', [arg]),
+    enough_ae: () => i18n.t('validation.enoughAe'),
+    not_token: () => i18n.t('validation.notToken'),
   },
 });
 
@@ -107,8 +116,14 @@ export default (store) => {
   Validator.extend('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
   Validator.extend('name_registered_address', (value) => Crypto.isAddressValid(value) || checkNameRegisteredAddress(value));
   Validator.extend('token_to_an_address', (value) => Crypto.isAddressValid(value) || (checkAensName(value) && !store.getters['fungibleTokens/selectedToken']));
+  Validator.extend('not_token', () => !store.getters['fungibleTokens/selectedToken']);
   Validator.extend('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
   });
+  Validator.extend('enough_ae', (_, [arg]) => new Promise(
+    (resolve) => store.state.observables.balance
+      .subscribe((balance) => resolve(balance.isGreaterThanOrEqualTo(arg)))
+      .unsubscribe(),
+  ));
 };

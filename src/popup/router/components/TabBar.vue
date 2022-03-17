@@ -54,7 +54,8 @@ export default {
 .tab-bar {
   display: flex;
   background-color: variables.$color-bg-3;
-  border-bottom: env(safe-area-inset-bottom) solid variables.$color-bg-2;
+  border-bottom: solid variables.$color-bg-2;
+  border-bottom-width: env(safe-area-inset-bottom);
 
   > a {
     $sideBorderWidth: calc(1px - min(env(safe-area-inset-bottom), 1px));

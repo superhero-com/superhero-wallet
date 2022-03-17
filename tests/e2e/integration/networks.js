@@ -103,7 +103,7 @@ describe('Test cases for networks page', () => {
       .get('[data-cy=networks] .network-row')
       .should('have.length', 2)
       .get('[data-cy=networks] .network-row')
-      .eq(0)
+      .eq(1)
       .find('.checkmark')
       .should('have.class', 'checked');
   });

@@ -53,10 +53,19 @@ async function initMiddleware() {
         ],
       },
     },
+    '/name/{hash}': {
+      get: {
+        operationId: 'getNameByHash',
+        parameters: [{
+          in: 'path',
+          name: 'hash',
+          required: true,
+          type: 'string',
+        }],
+      },
+    },
   };
   spec.basePath = '/mdw//';
-  // TODO: Review again after merging of https://github.com/aeternity/aepp-sdk-js/pull/1249
-  spec.schemes = ['https'];
   const middleware = mapObject(
     (await genSwaggerClient(middlewareUrl, { spec })).api,
     ([k, v]) => [camelCase(k), v],
@@ -69,13 +78,14 @@ let initSdkRunning = false;
 if (IN_FRAME) {
   store.registerModule('sdk-frame-reset', {
     actions: {
-      async reset({ sdk }) {
-        const { clients } = sdk.getClients();
-        Array.from(clients.values()).forEach((aepp) => {
-          aepp.sendMessage(
-            { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
-            true,
-          );
+      async reset({ rootState: { sdk } }) {
+        Object.values(sdk.rpcClients).forEach((aepp) => {
+          if (aepp.info.status !== 'DISCONNECTED') {
+            aepp.sendMessage(
+              { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
+              true,
+            );
+          }
           aepp.disconnect();
         });
       },
@@ -266,7 +276,7 @@ export default async function initSdk() {
       },
     );
     store.watch(
-      ({ accountSelectedIdx }) => accountSelectedIdx,
+      ({ accounts: { activeIdx } }) => activeIdx,
       async (accountIdx) => store.commit('selectSdkAccount', store.getters.accounts[accountIdx].address),
     );
 

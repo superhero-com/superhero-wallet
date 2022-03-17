@@ -43,9 +43,9 @@
 
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex';
-import CheckBox from '../components/CheckBox';
-import Panel from '../components/Panel';
-import PanelItem from '../components/PanelItem';
+import CheckBox from '../components/CheckBox.vue';
+import Panel from '../components/Panel.vue';
+import PanelItem from '../components/PanelItem.vue';
 
 export default {
   components: { CheckBox, Panel, PanelItem },

@@ -1,5 +1,5 @@
 <script>
-const renderNodeContent = (createElement, node) => (!node.childNodes.length
+const renderNodeContent = (createElement, node, option = null) => (!node.childNodes.length
   ? node.textContent
   : Array.from(node.childNodes)
     .filter((n) => [Node.ELEMENT_NODE, Node.TEXT_NODE].includes(n.nodeType))
@@ -7,6 +7,8 @@ const renderNodeContent = (createElement, node) => (!node.childNodes.length
       switch (n.tagName) {
         case 'strong':
           return createElement('strong', renderNodeContent(createElement, n));
+        case 'a':
+          return createElement('a', { ...option }, renderNodeContent(createElement, n));
         case 'br':
           return createElement('br');
         default:
@@ -18,13 +20,16 @@ const renderNodeContent = (createElement, node) => (!node.childNodes.length
 export default {
   functional: true,
   props: {
-    node: { type: Node, required: true },
+    str: { type: String, required: true },
+    option: { type: Object, default: null },
   },
   render(createElement, { data, props }) {
     return createElement(
       'span',
-      { class: data.staticClass },
-      renderNodeContent(createElement, props.node),
+      { class: data.class },
+      renderNodeContent(createElement, new DOMParser()
+        .parseFromString(`<root>${props.str || ''}</root>`, 'text/xml').childNodes[0],
+      props.option),
     );
   },
 };

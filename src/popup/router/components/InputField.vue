@@ -12,6 +12,7 @@
     <input
       class="input"
       v-bind="$attrs"
+      autocomplete="off"
       :value="value"
       :data-cy="$attrs.type ? `input-${$attrs.type}` : 'input'"
       :disabled="readonly"
@@ -22,7 +23,7 @@
 </template>
 
 <script>
-import InputWrapper from './InputWrapper';
+import InputWrapper from './InputWrapper.vue';
 
 export default {
   components: { InputWrapper },

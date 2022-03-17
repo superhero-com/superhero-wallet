@@ -1,13 +1,21 @@
 /* eslint no-param-reassign: ["error", { "ignorePropertyModificationsFor": ["state"] }] */
 import Vue from 'vue';
+import { uniqBy } from 'lodash-es';
 import { defaultNetwork } from '../popup/utils/constants';
 
 export default {
   switchNetwork(state, payload) {
     state.current.network = payload;
   },
-  setTransactions(state, payload) {
-    state.transactions.latest = payload;
+  addTransactions(state, payload) {
+    state.transactions.loaded = uniqBy([...state.transactions.loaded, ...payload], 'hash');
+  },
+  initTransactions(state) {
+    state.transactions.loaded = [];
+    state.transactions.nextPageUrl = '';
+  },
+  setTransactionsNextPage(state, pageUrl) {
+    state.transactions.nextPageUrl = pageUrl;
   },
   addPendingTransaction(state, payload) {
     state.transactions.pending.push({ ...payload, microTime: Date.now() });
@@ -33,7 +41,12 @@ export default {
     state.tippingV2 = tippingV2 || null;
   },
   setNodeStatus(state, payload) {
-    state.nodeStatus = payload;
+    if (state.nodeStatus === 'offline') {
+      if (payload !== 'online') return;
+      state.nodeStatus = '';
+    } else {
+      state.nodeStatus = payload;
+    }
   },
   setCurrentCurrency(state, currency) {
     state.current.currency = currency;
@@ -85,42 +98,11 @@ export default {
   setBackedUpSeed(state) {
     state.backedUpSeed = true;
   },
-  setTourRunning(state, payload) {
-    state.tourRunning = payload;
-  },
-  setTourStatusBar(state, payload) {
-    state.tourStartBar = payload;
-  },
   setSaveErrorLog(state) {
     state.saveErrorLog = !state.saveErrorLog;
   },
   setLoginTargetLocation(state, location) {
     state.loginTargetLocation = location;
-  },
-  createAccount(state) {
-    state.accs.push({
-      idx: state.accountCount,
-      color:
-        // eslint-disable-next-line no-bitwise
-        state.accountCount === 1 ? '#00FF9D' : `#${((Math.random() * 0xffffff) << 0).toString(16)}`,
-      shift: Math.floor(Math.random() * 100),
-      showed: state.accs.reduce((a, b) => (b.showed ? a + 1 : a), 0) < 8,
-    });
-    state.accountCount += 1;
-  },
-  deleteAccount(state, idx) {
-    if (state.accountSelectedIdx === idx) state.accountSelectedIdx = 0;
-    Vue.delete(state.accs, idx);
-  },
-  selectAccount(state, idx) {
-    state.accountSelectedIdx = idx;
-  },
-  setAccountLocalName(state, { name, idx }) {
-    Vue.set(state.accs[idx], 'localName', name);
-  },
-  toggleAccountShowed(state, idx) {
-    if (state.accountSelectedIdx === idx) state.accountSelectedIdx = 0;
-    Vue.set(state.accs[idx], 'showed', !state.accs[idx].showed);
   },
   setSdkAccounts({ sdk }, list) {
     sdk.accounts = list.reduce((p, { address }) => ({ ...p, [address]: {} }), {});

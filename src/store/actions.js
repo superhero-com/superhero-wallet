@@ -1,9 +1,10 @@
 import {
-  flatten, orderBy, uniq, uniqBy,
+  flatten, orderBy, uniq,
 } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import camelcaseKeysDeep from 'camelcase-keys-deep';
 import { postMessageToContent } from '../popup/utils/connection';
 import {
   fetchJson,
@@ -18,7 +19,7 @@ export default {
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
     commit('setMiddleware', null);
-    commit('setTransactions', []);
+    commit('initTransactions');
   },
   async fetchPendingTransactions({ state: { sdk, transactions } }, address) {
     return (
@@ -35,13 +36,20 @@ export default {
       .filter((transaction) => !transactions.pending.find((tx) => tx?.hash === transaction?.hash))
       .map((transaction) => ({ ...transaction, pending: true }));
   },
-  async fetchTransactions({ state, getters, dispatch }, { limit, page, recent }) {
-    if (!state.middleware) return [];
+  async fetchTransactions({
+    state, getters, dispatch, commit,
+  }, { limit, recent }) {
+    if (!state.middleware || (state.transactions.nextPageUrl === null && !recent)) return;
     const { address } = getters.account;
-    let hasMore = false;
     let txs = await Promise.all([
-      state.middleware.getTxByAccount(address, limit, page)
-        .then(({ data, next }) => { hasMore = !!next; return data; })
+      (recent || state.transactions.nextPageUrl === ''
+        ? state.middleware.getTxByAccount(address, limit, 1)
+        : fetchJson(`${getters.activeNetwork.middlewareUrl}/${state.transactions.nextPageUrl}`))
+        .then(({ data, next }) => {
+          const result = recent || state.transactions.nextPageUrl === '' ? data : camelcaseKeysDeep(data);
+          if (!recent) commit('setTransactionsNextPage', next);
+          return result;
+        })
         .catch(() => []),
       dispatch('fetchPendingTransactions', address),
       fetchJson(
@@ -69,8 +77,8 @@ export default {
         txs[0].push(f);
       }
     });
-    txs = uniqBy(orderBy(flatten(txs), ['microTime'], ['desc']), ({ hash }) => hash);
-    return { txs: recent ? txs.slice(0, limit) : txs, hasMore };
+    txs = orderBy(flatten(txs), ['microTime'], ['desc']);
+    commit('addTransactions', recent ? txs.slice(0, limit) : txs);
   },
 
   async getCurrencies({ state: { nextCurrenciesFetch }, commit }) {
@@ -236,5 +244,13 @@ export default {
       msg: i18n.t('modals.removeAccount.msg'),
     });
     await dispatch('reset');
+  },
+  async share(_, options) {
+    await (process.env.IS_CORDOVA
+      ? new Promise((resolve) => window.plugins.socialsharing.shareW3C(
+        options,
+        ({ app }) => app && resolve(),
+      ))
+      : navigator.share(options));
   },
 };

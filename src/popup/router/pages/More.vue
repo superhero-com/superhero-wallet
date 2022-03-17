@@ -22,9 +22,10 @@
       </BoxButton>
       <BoxButton
         v-if="UNFINISHED_FEATURES"
-        to="/more"
+        to="/buy"
+        fill="alternative"
       >
-        <Ae /> {{ $t('pages.more.get-ae') }}
+        <Buy />{{ $t('pages.fungible-tokens.buyAe') }}
       </BoxButton>
       <BoxButton
         v-if="UNFINISHED_FEATURES"
@@ -37,18 +38,18 @@
 </template>
 
 <script>
-import Plate from '../components/Plate';
-import AccountSwitcher from '../components/AccountSwitcher';
-import BoxButton from '../components/BoxButton';
+import Plate from '../components/Plate.vue';
+import AccountSwitcher from '../components/AccountSwitcher.vue';
+import BoxButton from '../components/BoxButton.vue';
 import Invites from '../../../icons/invites.svg?vue-component';
 import Settings from '../../../icons/settings.svg?vue-component';
 import About from '../../../icons/circle-i.svg?vue-component';
-import Ae from '../../../icons/circle-ae.svg?vue-component';
+import Buy from '../../../icons/buy.svg?vue-component';
 import Dex from '../../../icons/dex.svg?vue-component';
 
 export default {
   components: {
-    Plate, AccountSwitcher, BoxButton, Invites, Settings, About, Ae, Dex,
+    Plate, AccountSwitcher, BoxButton, Invites, Settings, About, Buy, Dex,
   },
   data: () => ({
     UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,

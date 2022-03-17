@@ -18,7 +18,7 @@
 
 <script>
 import { mapMutations, mapState } from 'vuex';
-import CheckBox from '../components/CheckBox';
+import CheckBox from '../components/CheckBox.vue';
 
 export default {
   components: { CheckBox },

@@ -4,7 +4,7 @@
 @import '~fontsource-ibm-plex-sans/500-normal.css';
 @import '~fontsource-ibm-plex-sans/700-normal.css';
 @import '~fontsource-ibm-plex-sans/700-italic.css';
-@import '@fontsource/ibm-plex-mono/500.css';
+@import '~@fontsource/ibm-plex-mono/500.css';
 @import 'variables';
 
 %face-sans-20-bold {
@@ -116,6 +116,13 @@
   font-family: $font-sans;
   font-weight: normal;
   font-size: 11px;
+  line-height: 16px;
+}
+
+%face-mono-12-medium {
+  font-family: $font-mono;
+  font-weight: 500;
+  font-size: 12px;
   line-height: 16px;
 }
 

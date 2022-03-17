@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import ButtonPlain from './ButtonPlain';
+import ButtonPlain from './ButtonPlain.vue';
 import QuestionCircle from '../../../icons/question-circle-border.svg?vue-component';
 
 export default {
@@ -16,13 +16,17 @@ export default {
   props: {
     title: { type: String, default: '' },
     msg: { type: String, default: '' },
+    icon: { type: String, default: '' },
+    option: { type: Object, default: null },
   },
   methods: {
     async showHelpModal() {
       await this.$store.dispatch('modals/open', {
         name: 'help',
+        icon: this.icon || 'info',
         title: this.title,
         msg: this.msg,
+        option: this.option,
       });
     },
   },

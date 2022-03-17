@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import SmallModal from './SmallModal';
+import SmallModal from './SmallModal.vue';
 
 export default {
   components: {

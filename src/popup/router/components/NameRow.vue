@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import Avatar from './Avatar';
+import Avatar from './Avatar.vue';
 
 export default {
   components: { Avatar },
@@ -46,18 +46,9 @@ export default {
 
   @extend %face-sans-14-medium;
 
-  .name-info ::v-deep {
+  .name-info {
     margin-left: 8px;
     width: 100%;
-
-    .address {
-      word-break: break-all;
-
-      @extend %face-sans-12-regular;
-
-      line-height: 14px;
-      display: inline-block;
-    }
   }
 }
 </style>

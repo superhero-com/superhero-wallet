@@ -39,8 +39,8 @@
 </template>
 
 <script>
-import Textarea from '../components/Textarea';
-import Button from '../components/Button';
+import Textarea from '../components/Textarea.vue';
+import Button from '../components/Button.vue';
 
 export default {
   components: { Textarea, Button },

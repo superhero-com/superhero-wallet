@@ -2,6 +2,199 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.6](https://github.com/aeternity/superhero-wallet/compare/v0.9.5...v0.9.6) (2021-12-13)
+
+
+### Features
+
+* receive transaction for signing through deeplink ([f1a292a](https://github.com/aeternity/superhero-wallet/commit/f1a292a82515aeea88859ff7f8a257c23362c058))
+
+### [0.9.5](https://github.com/aeternity/superhero-wallet/compare/v0.9.4...v0.9.5) (2021-11-23)
+
+
+### Features
+
+* save transactions in session ([707561d](https://github.com/aeternity/superhero-wallet/commit/707561d86cb7fa3aa52e2a111727eef5c7602159))
+* **transaction-list:** save scroll position ([23da760](https://github.com/aeternity/superhero-wallet/commit/23da760465d21f4ddd5be004a12a585d22638e18))
+
+
+### Bug Fixes
+
+* **transaction-details:** fetch transaction if not preloaded ([bc65967](https://github.com/aeternity/superhero-wallet/commit/bc65967f5250b6777d8b3be5a1b1d78961a9b584))
+
+
+### Maintenance
+
+* **migrations:** add changeTransactionStructure migration ([af11f64](https://github.com/aeternity/superhero-wallet/commit/af11f64f65a1e961a9ed2af90f68cb334004ca38))
+* **transaction-list:** remove useless setTimeout ([0e41081](https://github.com/aeternity/superhero-wallet/commit/0e4108104222c3b7b6f62358b960adb777ed9478))
+* **transactions:** use next page to load additional transactions ([6a0392f](https://github.com/aeternity/superhero-wallet/commit/6a0392f463acc2c5757d50a47c7ac768f1f677e6))
+
+### [0.9.4](https://github.com/aeternity/superhero-wallet/compare/v0.9.3...v0.9.4) (2021-11-10)
+
+
+### Features
+
+* **android-build:** build for higher target sdk version ([991efb6](https://github.com/aeternity/superhero-wallet/commit/991efb61e2b2c547412ebd034bd87a756191b3ee))
+* **input-amount:** use veeValidate in all amount inputs ([fcf9ef7](https://github.com/aeternity/superhero-wallet/commit/fcf9ef7789540932ef7ce3b20a360c90fc8198b3))
+* **status:** add offline status ([daadb77](https://github.com/aeternity/superhero-wallet/commit/daadb7760f9ac9954a87ceed72a8e628e9e71b19))
+* **tip-calim:** add additional info ([147d901](https://github.com/aeternity/superhero-wallet/commit/147d901d10a5ad248c01b7734fdf3c8d24666214))
+* **tip-send:** add additional info ([4f8a79b](https://github.com/aeternity/superhero-wallet/commit/4f8a79b9e56b22b161cb51459c5e5621841fc112))
+* **transfer-send:** fill address if qr consist of it ([2378a8f](https://github.com/aeternity/superhero-wallet/commit/2378a8f50beeb8613dc19f60e738096211a948d8))
+
+
+### Bug Fixes
+
+* **account-card:** adjust card minifying ([01e45ef](https://github.com/aeternity/superhero-wallet/commit/01e45ef22308e93a20d78a4cd4bc23e43871a730))
+* **account-info:** reflect the preffered name change from other deivce ([917df92](https://github.com/aeternity/superhero-wallet/commit/917df922c7c19b57c244347c6da66d5a37646e75))
+* **account-info:** remove wrong button background-color ([c13c50d](https://github.com/aeternity/superhero-wallet/commit/c13c50d41d4fc4f06730e73e35b33986bb232758))
+* **account-switcher:** align single card in the middle ([a914271](https://github.com/aeternity/superhero-wallet/commit/a914271b2f5e372f88868b009f2901693c40c49a))
+* **intro:** adjust checkbox size ([78709bb](https://github.com/aeternity/superhero-wallet/commit/78709bb14f62939eb4df2ec7fe482519383db1d9))
+* **retip:** use valid name of error property ([bb1d416](https://github.com/aeternity/superhero-wallet/commit/bb1d4167c11a73c77549dd2d241fe43bb4a8b23c))
+* set empty amount in InpitAmount ([2e3b197](https://github.com/aeternity/superhero-wallet/commit/2e3b1975ef74b7a551ae6675e18a8c520ed1d16b))
+* **tab-bar:** avoid env not getting add ([42a03c5](https://github.com/aeternity/superhero-wallet/commit/42a03c52df9c84057a097bfdfbe9f0efffdb32a2))
+* **transaction-list:** do not send request after component being destroyed ([f63f41d](https://github.com/aeternity/superhero-wallet/commit/f63f41d15b4bdad1d6724ee6cbe9b05fff2eb09c))
+* **transaction-list:** show transactions to a name ([c263e04](https://github.com/aeternity/superhero-wallet/commit/c263e04a7e2861608f6617707f4f0fc946f80403))
+* **transaction-overview:** show properly if recipient is the name ([fc39320](https://github.com/aeternity/superhero-wallet/commit/fc3932068d8875fa487a157e86a10f0819c4cff7))
+* **truncate:** adjust scrolling on str change ([13ec1e0](https://github.com/aeternity/superhero-wallet/commit/13ec1e02cb126999057d1474bd910662b6978e11))
+
+
+### Performance
+
+* **fungible-tokens:** avoid additional fungible tokens requests ([fcd6f71](https://github.com/aeternity/superhero-wallet/commit/fcd6f71b84a0a17a806655f64aafb3bfdac6a140))
+* **icons:** compress iframe onboarding icons ([007fe50](https://github.com/aeternity/superhero-wallet/commit/007fe50a3fea0600780ef7e570f22e8ded6a26b5))
+
+
+### Tests
+
+* **input-amount:** extend test and use VeeValidate ([44be6ba](https://github.com/aeternity/superhero-wallet/commit/44be6bae24f053e1120e79364ac98adc991bd5a3))
+* **withdraw:** remove duplicate part of test ([3ebf3a2](https://github.com/aeternity/superhero-wallet/commit/3ebf3a226392e26950d561fec9d0e5e82f401ff0))
+
+
+### Style
+
+* add a proper mustache style ([6b94ec6](https://github.com/aeternity/superhero-wallet/commit/6b94ec636bd2f80d85adf0baab726686a4c8a68b))
+* clean up global styles ([ecc791a](https://github.com/aeternity/superhero-wallet/commit/ecc791a9193ed1c47dc2dc1f0d0b95dd3ccb65dc))
+* **intro:** adjust css ([01c028e](https://github.com/aeternity/superhero-wallet/commit/01c028eacfd87e49f1f45c437b325c768cad409c))
+* **security-settings:** adjust css ([8a1ae1b](https://github.com/aeternity/superhero-wallet/commit/8a1ae1b4d1e0d856e6d73d2ee29fbb7aef96018a))
+
+
+### Maintenance
+
+* **account-switcher:** align card-wrapper centered ([1c18a05](https://github.com/aeternity/superhero-wallet/commit/1c18a055ca49823d4abd7a8789d13553d6583d8c))
+* **actions:** drop workaround for the duplicate transactions from mdw ([d9324d3](https://github.com/aeternity/superhero-wallet/commit/d9324d3f8ec9afcbd08810989dc02dffb29c609f))
+* bump version in tests ([b34d3c1](https://github.com/aeternity/superhero-wallet/commit/b34d3c1c96d5333719fd35b52a3788b31cc768f0))
+* **intro:** use esixting varibale ([954945f](https://github.com/aeternity/superhero-wallet/commit/954945fb7078fced6467680521eeb9938e984fa7))
+* **invite:** remove non-existent prop ([47971e9](https://github.com/aeternity/superhero-wallet/commit/47971e92db8c6f20738a0bd3ed114a7fd31df7f6))
+* **name-row:** remove unused styles ([edaa9f1](https://github.com/aeternity/superhero-wallet/commit/edaa9f15602e83e65f3cf60672aed5859b5c68f0))
+* remove Tour component ([6a82a31](https://github.com/aeternity/superhero-wallet/commit/6a82a3132d31e3b763cf666a5f36e10abf612450))
+* remove unused Badge component ([d6664c1](https://github.com/aeternity/superhero-wallet/commit/d6664c1fe19774bf7ed1f511b0039c1f926e8df5))
+* remove unused SignAccountIdenticons component ([3ab4984](https://github.com/aeternity/superhero-wallet/commit/3ab498449656f7f8cdd020703ad9f7453fed6da4))
+* **sass:** removed unused node-sass package ([00eebd4](https://github.com/aeternity/superhero-wallet/commit/00eebd441818a9eab1967d0ccedda1e956eaae86))
+* **transaction-list:** show no transaction message centered ([8a1fd5f](https://github.com/aeternity/superhero-wallet/commit/8a1fd5ff7e3bd8b83ee75c49ced4da3965304072))
+* utilize line-height property in rebranded pages ([55ca3af](https://github.com/aeternity/superhero-wallet/commit/55ca3af11066b139db9d00909b30ff1fedcfc884))
+
+### [0.9.3](https://github.com/aeternity/superhero-wallet/compare/v0.9.2...v0.9.3) (2021-10-18)
+
+
+### Features
+
+* **accounts:** add ledger module ([a2f98d3](https://github.com/aeternity/superhero-wallet/commit/a2f98d3b52bf89d94ed8d3e0f225b7c858dd2acc))
+* **aex9:** don't display fiat value for aex9 tokens ([11bb4d3](https://github.com/aeternity/superhero-wallet/commit/11bb4d30f42278d179f82cd214d9e52972e2a745))
+* **buy:** add buy button and page ([f11881e](https://github.com/aeternity/superhero-wallet/commit/f11881e705af0d1f5041480fe860a22efe6c9749))
+* **claim:** show name price before submit ([f337767](https://github.com/aeternity/superhero-wallet/commit/f3377676060c8feb7740afacea1cdeb59eb81144))
+* **index:** add message on disabled JavaScript ([a8c3702](https://github.com/aeternity/superhero-wallet/commit/a8c3702f39978769c60bfb1ddbbbbb5e989a5726))
+* **index:** add message on exceptions while bundle initialising ([daa8f70](https://github.com/aeternity/superhero-wallet/commit/daa8f70d3a7cb61d8ec54be7c2c70e2159fc9a25))
+* **ledger:** add ledger compatibility with extension ([22147a4](https://github.com/aeternity/superhero-wallet/commit/22147a40ff25f6cf24d56e238eac7fa89b227386))
+* **receive:** add share functionality to receive screen ([2490006](https://github.com/aeternity/superhero-wallet/commit/249000638fad157ceb8f6490faac153758a62f2e))
+* **router:** open simplex in separate tab for extension and mobile ([6634fca](https://github.com/aeternity/superhero-wallet/commit/6634fca4c1b7fe2d3a478e085afa1aaf81c288e6))
+* **send:** add share string parsing ([03be916](https://github.com/aeternity/superhero-wallet/commit/03be9163e6554ff2b22219152e476417aea2741c))
+* **share-qr:** add pseudo element on copy ([fd91f66](https://github.com/aeternity/superhero-wallet/commit/fd91f6606cee5c25f7d491f6aca9e348f2025979))
+* **transfer-send:** rebrand send workflow ([4f0715a](https://github.com/aeternity/superhero-wallet/commit/4f0715a344adf062b5c8f89b3ab1f76a2e07d19c))
+
+
+### Bug Fixes
+
+* **accounts:** use uniq key ([9ede492](https://github.com/aeternity/superhero-wallet/commit/9ede492ff2737af787d62a02b3aa3327bc225077))
+* **account:** use decode instead of removed assertedType ([24f961e](https://github.com/aeternity/superhero-wallet/commit/24f961e33375ea8ba0e69ec1bef46f4a6b588084))
+* allow builds in non git environments ([cddf6fe](https://github.com/aeternity/superhero-wallet/commit/cddf6fe8d053d6956e969700dcb29fbedaa7bcf0))
+* **check-box:** start value has mixed support, using flex-start instead ([4de09fd](https://github.com/aeternity/superhero-wallet/commit/4de09fd1e4bf74a2154f476d8f370487950fe486))
+* **copy-plugin:** copy web folder in dist ([187ad9e](https://github.com/aeternity/superhero-wallet/commit/187ad9ee44f088a57eec5f262e061539a69baf24))
+* **transaction-details:** prevent non external redirection ([845d782](https://github.com/aeternity/superhero-wallet/commit/845d782eb47775c937c86ba4483a4a8cc5f2e00b))
+* **zeit:** linting errors ([4c39430](https://github.com/aeternity/superhero-wallet/commit/4c39430d71ea05bb43e2e1831334c43dd072487b))
+
+
+### Documentation
+
+* **readme:** update README file ([bfebb7f](https://github.com/aeternity/superhero-wallet/commit/bfebb7f8f2769f78d4b391946dba51429351f4ba))
+
+
+### Style
+
+* **lint:** resolve lint issues automatically ([bf0ae50](https://github.com/aeternity/superhero-wallet/commit/bf0ae5070ee4a81ca4aa4367974ecf25878e6a5e))
+* **lint:** resolve lint issues manually ([a362af6](https://github.com/aeternity/superhero-wallet/commit/a362af60afee0a981b3c02c65c9870e94ed9fe30))
+* **modal:** set different border color ([99e7f6a](https://github.com/aeternity/superhero-wallet/commit/99e7f6a7c519260a2de12ffaa00631c691c91f23))
+
+
+### Tests
+
+* **account:** remove duplicate part of test ([aa2bd9e](https://github.com/aeternity/superhero-wallet/commit/aa2bd9e34fcf54e1978b49b51e8868211d307de6))
+* add example unit test ([4d4d029](https://github.com/aeternity/superhero-wallet/commit/4d4d029429265d8cadb245f0705d3aee46c4c6bf))
+* **import-account:** convert test from e2e to unit ([6d74918](https://github.com/aeternity/superhero-wallet/commit/6d74918b6d81aa9af39b725bd7c94a58cadb58d3))
+* **input-amount:** convert test from e2e to unit ([41272ef](https://github.com/aeternity/superhero-wallet/commit/41272efdf3c835f5f9870ea7d106c47ee9531c76))
+* **jest-config:** add several packages to transpile ([fb1e91b](https://github.com/aeternity/superhero-wallet/commit/fb1e91bed0ae04645a11fa07e842282ec929c44d))
+* **jest-config:** map inlined components ([0bb6fde](https://github.com/aeternity/superhero-wallet/commit/0bb6fde4c328e02ebb32e5467d7e82ffaef5f5d6))
+* **terms-of-service:** convert test from e2e to unit ([859018e](https://github.com/aeternity/superhero-wallet/commit/859018eda26b9f2c40ef5f3019ba2346d18a54c4))
+* update test due to work with web version ([183d56a](https://github.com/aeternity/superhero-wallet/commit/183d56addcc130e1114dec9416f0708c07339941))
+* use snapshots to test static pages ([7d8ed17](https://github.com/aeternity/superhero-wallet/commit/7d8ed17b85cc182bec51f8928f7d7f63b5327080))
+
+
+### Maintenance
+
+* **account-info:** do not assign value to a variable twice ([7612c5d](https://github.com/aeternity/superhero-wallet/commit/7612c5d2b3593ae0a6b691b1cf0512790988d8d0))
+* **accounts:** extract hdWallet module ([68bed5c](https://github.com/aeternity/superhero-wallet/commit/68bed5ca3367c0ec58539dcbe0d09abd5e9a9483))
+* **accounts:** move account plugin to module ([4ddd3c1](https://github.com/aeternity/superhero-wallet/commit/4ddd3c1f1cf10b5cf959ee5f3ddeef51a807ca69))
+* **accounts:** move account related to the accounts ([df562aa](https://github.com/aeternity/superhero-wallet/commit/df562aafca6d098e484382562e1f5f8c69acdd07))
+* **accounts:** rename state and mutations ([9695e68](https://github.com/aeternity/superhero-wallet/commit/9695e681b2d98cd50c94ff432ec5f7e3ae27a305))
+* build using @vue/cli ([70718ad](https://github.com/aeternity/superhero-wallet/commit/70718ad70d4107fcd59c5c575fd5530811742c6d))
+* **buy:** add unfinished flag to buy functionality ([29c689a](https://github.com/aeternity/superhero-wallet/commit/29c689a6df94d8884c96ef487c2be4d28e379862))
+* **copy:** extract similar copy functionality to mixin ([abe6abe](https://github.com/aeternity/superhero-wallet/commit/abe6abe084b2f0e9191a74d1fc558dff6844f3a6))
+* **input-field:** set autocomplete off ([08707f9](https://github.com/aeternity/superhero-wallet/commit/08707f9ff6c797f2d0f71bcdc4594da70076c94b))
+* **popup:** remove unused firefox html ([69ab99c](https://github.com/aeternity/superhero-wallet/commit/69ab99c3df66da8358cfeba560461173d88e2260))
+* remove unused mapped states ([d76a0da](https://github.com/aeternity/superhero-wallet/commit/d76a0da14a0e49a2b40de955ac807f94fd8ab8fc))
+* run npm audit fix ([e214f7e](https://github.com/aeternity/superhero-wallet/commit/e214f7ee890e0755b2e42562510768d4e937ee2d))
+* run npm update ([8245153](https://github.com/aeternity/superhero-wallet/commit/824515354ea0d82c754ea348de30328967d5b262))
+* **sdk:** update sdk to 9.0.1 ([8ae8cb1](https://github.com/aeternity/superhero-wallet/commit/8ae8cb1a25343182b88d4fb2e8d9c1a33559dd15))
+* **template-renderer:** extract similar root node creation ([a19091b](https://github.com/aeternity/superhero-wallet/commit/a19091b02a6b9b7e61abd1bfee5f0558780e77a9))
+* **zeit:** do not show error logs on production ([27e7bac](https://github.com/aeternity/superhero-wallet/commit/27e7bac0274040c55de6400cc3764699cd49ce01))
+* **zeit:** makes contract pass through from QR code ([9ae2552](https://github.com/aeternity/superhero-wallet/commit/9ae2552924e74bce8f893d12663904d19d0c1dc3))
+* **zeit:** removes chain listener and tx cache ([fad2bf4](https://github.com/aeternity/superhero-wallet/commit/fad2bf44235732c57177faab176ebcc80069542d))
+
+### [0.9.2](https://github.com/aeternity/superhero-wallet/compare/v0.9.1...v0.9.2) (2021-09-28)
+
+
+### Features
+
+* **input:** add warnings to input field ([5086efc](https://github.com/aeternity/superhero-wallet/commit/5086efc7046c667d129fd86dd64f0549fbb418ac))
+* **send:** rebrand address input in send screen ([1116153](https://github.com/aeternity/superhero-wallet/commit/111615335d119d81a94446dd4921c8108059b69d))
+* **validation:** add vee-validate as plugin ([c913ea4](https://github.com/aeternity/superhero-wallet/commit/c913ea4637de88541d246c3f948e7b4e39cc5d20))
+* **vee-validate:** add account validation rules ([b5722d9](https://github.com/aeternity/superhero-wallet/commit/b5722d947ff39dc105d618ad85e720afc1378d2a))
+* **vee-validate:** inject warning support to vee-validate ([a41a688](https://github.com/aeternity/superhero-wallet/commit/a41a688cf27725e2f6abaaeb37a7782dc8ff0460))
+
+
+### Bug Fixes
+
+* **permissions:** fix permissions input styling ([b450cb5](https://github.com/aeternity/superhero-wallet/commit/b450cb5483d4a95ee506435ccd1d7b0d2a73058e))
+* **send:** add proper color to valid svg ([9f75935](https://github.com/aeternity/superhero-wallet/commit/9f75935c23de205740e83975b0b2fed7cccc3d3a))
+* **send:** restore error for tokens to name sending ([0da891f](https://github.com/aeternity/superhero-wallet/commit/0da891f6a74e401bf377569b27e0c216bef13a3a))
+
+
+### Maintenance
+
+* **input:** unify input components names ([b25e1d6](https://github.com/aeternity/superhero-wallet/commit/b25e1d6dff8207f94fb0796df807679365c24d26))
+* **recent-transactions:** do not hide line on transaction list overlap ([9b3be97](https://github.com/aeternity/superhero-wallet/commit/9b3be9799a0137a7ed97320d01da455153239ccf))
+* **stale:** remove stale bot support ([ff5d105](https://github.com/aeternity/superhero-wallet/commit/ff5d105b4ba90a1d24bc1f0b60c924d3fd5006fa))
+* **transfer-send:** replace textarea with validatable input ([800babf](https://github.com/aeternity/superhero-wallet/commit/800babf28e276ca6e54b29307422449922eb58e7))
+
 ### [0.9.1](https://github.com/aeternity/superhero-wallet/compare/v0.9.0...v0.9.1) (2021-09-16)
 
 

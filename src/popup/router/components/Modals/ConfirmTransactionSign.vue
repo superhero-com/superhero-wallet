@@ -88,13 +88,13 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Modal from '../Modal';
-import Button from '../Button';
-import ButtonPlain from '../ButtonPlain';
-import TransactionOverview from '../TransactionOverview';
-import DetailsItem from '../DetailsItem';
-import TokenAmount from '../TokenAmount';
-import CopyButton from '../CopyButton';
+import Modal from '../Modal.vue';
+import Button from '../Button.vue';
+import ButtonPlain from '../ButtonPlain.vue';
+import TransactionOverview from '../TransactionOverview.vue';
+import DetailsItem from '../DetailsItem.vue';
+import TokenAmount from '../TokenAmount.vue';
+import CopyButton from '../CopyButton.vue';
 import Arrow from '../../../../icons/arrow.svg?vue-component';
 import mixin from '../../pages/Popups/mixin';
 

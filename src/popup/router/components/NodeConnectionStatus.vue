@@ -23,6 +23,7 @@ export default {
         connecting: this.$t('pages.nodeConnectionStatus.connecting'),
         connected: this.$t('pages.nodeConnectionStatus.connected'),
         error: this.$t('pages.nodeConnectionStatus.error'),
+        offline: this.$t('pages.nodeConnectionStatus.offline'),
       },
     };
   },
@@ -35,6 +36,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 @use '../../../styles/mixins';
 
 .node-connection-status,
@@ -53,9 +55,9 @@ export default {
   right: 0;
   background: variables.$color-blue;
   color: variables.$color-white;
-  line-height: 2em;
   text-align: center;
-  font-size: 14px;
+
+  @extend %face-sans-14-regular;
 
   &.hide-tab-bar {
     bottom: env(safe-area-inset-bottom);

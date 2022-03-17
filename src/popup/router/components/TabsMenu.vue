@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import ButtonPlain from './ButtonPlain';
+import ButtonPlain from './ButtonPlain.vue';
 
 export default {
   components: { ButtonPlain },

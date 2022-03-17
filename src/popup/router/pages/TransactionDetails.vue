@@ -1,6 +1,14 @@
 <template>
   <div class="transaction-details">
-    <Plate class="header">
+    <AnimatedSpinner
+      v-if="!transaction"
+      class="spinner"
+    />
+
+    <Plate
+      v-if="transaction"
+      class="header"
+    >
       <TokenAmount
         :amount="amount"
         :symbol="symbol"
@@ -9,7 +17,10 @@
         large
       />
     </Plate>
-    <div class="content">
+    <div
+      v-if="transaction"
+      class="content"
+    >
       <TransactionOverview v-bind="transaction" />
       <div class="data-grid">
         <DetailsItem
@@ -25,7 +36,7 @@
           />
           <LinkButton
             slot="value"
-            :to="tipUrl"
+            :to="/^http[s]*:\/\//.test(tipUrl) ? tipUrl : `http://${tipUrl}`"
           >
             <Truncate
               :str="tipUrl"
@@ -129,14 +140,15 @@
 <script>
 import { mapGetters } from 'vuex';
 import { formatDate, formatTime } from '../../utils';
-import TransactionOverview from '../components/TransactionOverview';
-import Plate from '../components/Plate';
-import TokenAmount from '../components/TokenAmount';
-import DetailsItem from '../components/DetailsItem';
-import LinkButton from '../components/LinkButton';
-import CopyButton from '../components/CopyButton';
-import Truncate from '../components/Truncate';
+import TransactionOverview from '../components/TransactionOverview.vue';
+import Plate from '../components/Plate.vue';
+import TokenAmount from '../components/TokenAmount.vue';
+import DetailsItem from '../components/DetailsItem.vue';
+import LinkButton from '../components/LinkButton.vue';
+import CopyButton from '../components/CopyButton.vue';
+import Truncate from '../components/Truncate.vue';
 import AnimatedPending from '../../../icons/animated-pending.svg?vue-component';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import BlockIcon from '../../../icons/block.svg?vue-component';
 
 export default {
@@ -150,6 +162,7 @@ export default {
     CopyButton,
     Truncate,
     AnimatedPending,
+    AnimatedSpinner,
     BlockIcon,
   },
   filters: {
@@ -158,6 +171,11 @@ export default {
   },
   props: {
     hash: { type: String, required: true },
+  },
+  data() {
+    return {
+      transaction: null,
+    };
   },
   computed: {
     ...mapGetters([
@@ -169,9 +187,6 @@ export default {
       'getExplorerPath',
       'isTxAex9',
     ]),
-    transaction() {
-      return this.getTx(this.hash);
-    },
     amount() {
       return this.getTxAmountTotal(this.transaction);
     },
@@ -185,6 +200,13 @@ export default {
       return this.getTxTipUrl(this.transaction);
     },
   },
+  async mounted() {
+    this.transaction = this.getTx(this.hash);
+    if (!this.transaction) {
+      await this.$watchUntilTruly(() => this.$store.state.middleware);
+      this.transaction = await this.$store.state.middleware.getTxByHash(this.hash);
+    }
+  },
 };
 </script>
 
@@ -194,6 +216,19 @@ export default {
 @use '../../../styles/mixins';
 
 .transaction-details {
+  display: flex;
+  flex-direction: column;
+
+  .spinner {
+    align-self: center;
+    width: 56px;
+    height: 56px;
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   .header {
     display: flex;
     justify-content: center;
@@ -210,7 +245,6 @@ export default {
       ::v-deep .fiat {
         display: block;
         padding-top: 4px;
-        line-height: 24px;
       }
     }
   }

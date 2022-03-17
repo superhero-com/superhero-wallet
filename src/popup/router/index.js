@@ -2,11 +2,9 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import VueClipboard from 'vue-clipboard2';
 import Components from '@aeternity/aepp-components-3';
-import VueTour from 'vue-tour';
-import 'vue-tour/dist/vue-tour.css';
 import routes from './routes';
 import '@aeternity/aepp-components-3/dist/aepp.components.css';
-import LoaderComponent from './components/Loader';
+import LoaderComponent from './components/Loader.vue';
 import { i18n } from '../../store/plugins/languages';
 
 import * as helper from '../utils/helper';
@@ -26,7 +24,6 @@ Vue.use(plugin);
 Vue.use(VueRouter);
 Vue.use(VueClipboard);
 Vue.use(Components);
-Vue.use(VueTour);
 Vue.component('Loader', LoaderComponent);
 
 const router = new VueRouter({
@@ -34,7 +31,6 @@ const router = new VueRouter({
   mode: process.env.PLATFORM === 'web' ? 'history' : 'hash',
   scrollBehavior: (to, from, savedPosition) => savedPosition || { x: 0, y: 0 },
 });
-router.afterEach(() => document.querySelector('#app').scroll(0, 0));
 
 const lastRouteKey = 'last-path';
 
@@ -46,6 +42,8 @@ const unbind = router.beforeEach(async (to, from, next) => {
   );
   unbind();
 });
+
+let savedScrollPosition = 0;
 
 router.beforeEach(async (to, from, next) => {
   const { isLoggedIn } = store.getters;
@@ -72,6 +70,18 @@ router.beforeEach(async (to, from, next) => {
       next({ name, params: await getPopupProps() });
       return;
     }
+  }
+  if (from.fullPath === '/transactions') {
+    savedScrollPosition = (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('#app')).scrollTop;
+  }
+
+  if (to.fullPath === '/transactions' && savedScrollPosition) {
+    setTimeout(() => {
+      (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('#app')).scroll(0, savedScrollPosition);
+      savedScrollPosition = 0;
+    }, 50);
+  } else {
+    (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('#app')).scroll(0, 0);
   }
 
   next(to.meta.ifNotAuthOnly ? '/account' : undefined);

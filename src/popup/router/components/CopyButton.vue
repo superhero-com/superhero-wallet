@@ -13,24 +13,17 @@
 </template>
 
 <script>
-import ButtonPlain from './ButtonPlain';
+import CopyMixin from '../../../mixins/copy';
+import ButtonPlain from './ButtonPlain.vue';
 import CopyIcon from '../../../icons/copy.svg?vue-component';
 
 export default {
   name: 'CopyButton',
   components: { ButtonPlain, CopyIcon },
+  mixins: [CopyMixin],
   props: {
     value: { type: String, required: true },
     message: { type: String, required: true },
-  },
-  data: () => ({ copied: false }),
-  methods: {
-    copy() {
-      this.copied = true;
-      setTimeout(() => {
-        this.copied = false;
-      }, 3000);
-    },
   },
 };
 </script>

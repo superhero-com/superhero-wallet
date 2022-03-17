@@ -6,6 +6,7 @@
         v-model="amount"
         :error="!!amountError"
         :error-message="amountError"
+        @error="(val) => error = val"
       />
       <div class="tx-details">
         <DetailsItem :label="$t('tx-fee')">
@@ -23,7 +24,7 @@
         </DetailsItem>
       </div>
       <Button
-        :disabled="!!amountError || !+amount"
+        :disabled="!!amountError || error"
         @click="bid"
       >
         {{ $t('pages.names.auctions.place-bid') }}
@@ -37,11 +38,11 @@
 import { mapGetters } from 'vuex';
 import { aeToAettos } from '../../../utils/helper';
 import { calculateNameClaimFee } from '../../../utils/constants';
-import AuctionCard from '../../components/AuctionCard';
-import InputAmount from '../../components/InputAmount';
-import DetailsItem from '../../components/DetailsItem';
-import TokenAmount from '../../components/TokenAmount';
-import Button from '../../components/Button';
+import AuctionCard from '../../components/AuctionCard.vue';
+import InputAmount from '../../components/InputAmount.vue';
+import DetailsItem from '../../components/DetailsItem.vue';
+import TokenAmount from '../../components/TokenAmount.vue';
+import Button from '../../components/Button.vue';
 
 export default {
   components: {
@@ -53,8 +54,9 @@ export default {
   data() {
     return {
       loading: false,
-      amount: 0,
+      amount: '',
       amountError: null,
+      error: false,
     };
   },
   computed: {
@@ -71,9 +73,7 @@ export default {
   },
   watch: {
     amount(val) {
-      if (!+val) {
-        this.amountError = this.$t('pages.names.auctions.add-amount');
-      } else if (+val <= this.highestBid.multipliedBy(1.05)) {
+      if (+val <= this.highestBid.multipliedBy(1.05)) {
         const minBid = this.highestBid.multipliedBy(1.05).toString();
         this.amountError = this.$t('pages.names.auctions.min-bid', { minBid });
       } else {

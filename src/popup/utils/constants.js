@@ -125,8 +125,6 @@ export const NOTIFICATION_SETTINGS = [
   },
 ];
 
-export const ZEIT_TOKEN_CONTRACT = 'ct_2t7TnocFw7oCYSS7g2yGutZMpGEJta6dq2DTX38SmuqmwtN6Ch';
-export const ZEIT_INVOICE_CONTRACT = 'ct_213B8EVmEzuAG9FiqpvSQA4h4D9v8eNKLTYaBaDUVVp9fnY67A';
 export const ZEIT_TOKEN_INTERFACE = `@compiler >= 6
 contract interface PoS =
   stateful entrypoint set_paid : (int, int) => unit
@@ -139,3 +137,5 @@ export const APP_LINK_CHROME = 'https://chrome.google.com/webstore/detail/superh
 export const APP_LINK_FIREFOX = 'https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet';
 export const APP_LINK_ANDROID = 'https://play.google.com/store/apps/details?id=com.superhero.cordova';
 export const APP_LINK_IOS = 'https://apps.apple.com/us/app/superhero-wallet/id1502786641';
+
+export const SIMPLEX_URL = 'https://aeternity.com/simplex-integration';

@@ -75,12 +75,12 @@
 </template>
 
 <script>
-import Truncate from './Truncate';
-import CopyAddress from './CopyAddress';
+import Truncate from './Truncate.vue';
+import CopyAddress from './CopyAddress.vue';
 import TriangleRight from '../../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../../icons/action.svg?vue-component';
 import AensIcon from '../../../icons/aens.svg?vue-component';
-import Avatar from './Avatar';
+import Avatar from './Avatar.vue';
 
 export default {
   components: {
@@ -177,11 +177,13 @@ export default {
     .name {
       display: block;
       margin-bottom: 4px;
-      font-size: 15px;
-      line-height: 16px;
       color: variables.$color-white;
       text-decoration: none;
       white-space: nowrap;
+
+      @extend %face-sans-15-regular;
+
+      line-height: 16px;
 
       &:hover {
         text-decoration: underline;
