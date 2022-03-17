@@ -3,7 +3,7 @@ name: Production Superhero Wallet Pipeline
 on:
   push:
     branches:
-      - main
+      - master
     release:
       types: [created]
 
@@ -61,8 +61,8 @@ jobs:
         with:
           images: aeternity/superhero-wallet
           tags: |
-            type=raw,value=latest,enable=${{ endsWith(GitHub.ref, 'main') }}
-            type=raw,value=${{ steps.release.outputs.tag_name }},enable=${{ endsWith(GitHub.ref, 'main') }}
+            type=raw,value=latest,enable=${{ endsWith(GitHub.ref, 'master') }}
+            type=raw,value=${{ steps.release.outputs.tag_name }},enable=${{ endsWith(GitHub.ref, 'master') }}
             type=ref,event=tag
             type=ref,event=pr
 
