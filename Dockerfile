@@ -9,4 +9,4 @@ RUN npm run build
 FROM nginx:1.13.7-alpine
 COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf 
-COPY --from=aepp-superhero-wallet-build /app/dist/web/root /usr/share/nginx/html
+COPY --from=aepp-superhero-wallet-build /app/dist /usr/share/nginx/html
