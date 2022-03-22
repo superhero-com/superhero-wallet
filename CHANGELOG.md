@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.7](https://github.com/aeternity/superhero-wallet/compare/v0.9.6...v0.9.7) (2022-03-22)
+
+
+### Bug Fixes
+
+* call deny on denied address subscription ([3dcc1db](https://github.com/aeternity/superhero-wallet/commit/3dcc1db1357bc1bdd5a889f8492572b80343f333))
+* send connection close message to the aepps ([2149556](https://github.com/aeternity/superhero-wallet/commit/214955689f420c1c4797e6e21f87d4f8d3968fa2))
+
 ### [0.9.6](https://github.com/aeternity/superhero-wallet/compare/v0.9.5...v0.9.6) (2021-12-13)
 
 
