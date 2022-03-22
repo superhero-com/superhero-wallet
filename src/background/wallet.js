@@ -166,8 +166,10 @@ export async function init() {
       client.disconnect();
     },
     async onSubscription(aepp, { accept, deny }) {
-      const activeAccount = await this.address(this.getApp(getAeppUrl(aepp)));
-      if (!activeAccount) {
+      let activeAccount;
+      try {
+        activeAccount = await this.address(this.getApp(getAeppUrl(aepp)));
+      } catch (e) {
         deny();
         return;
       }
