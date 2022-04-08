@@ -12,7 +12,7 @@ export default {
         return;
       }
       const callbackUrl = Object.entries(templateParams).reduce(
-        (url, [key, value]) => url.replace(new RegExp(`{${key}}`, 'g'), value),
+        (url, [key, value]) => url.replace(new RegExp(`{${key}}`, 'g'), encodeURIComponent(value)),
         this.$route.query[isSuccess ? 'x-success' : 'x-cancel'],
       );
       window.open(callbackUrl, '_blank');
