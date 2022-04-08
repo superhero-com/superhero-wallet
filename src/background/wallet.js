@@ -166,8 +166,10 @@ export async function init() {
       client.disconnect();
     },
     async onSubscription(aepp, { accept, deny }) {
-      const activeAccount = await this.address(this.getApp(getAeppUrl(aepp)));
-      if (!activeAccount) {
+      let activeAccount;
+      try {
+        activeAccount = await this.address(this.getApp(getAeppUrl(aepp)));
+      } catch (e) {
         deny();
         return;
       }
@@ -216,15 +218,13 @@ export async function init() {
 }
 
 export function disconnect() {
-  const { clients: aepps } = sdk.getClients();
-  Array.from(aepps.values()).forEach((aepp) => {
+  Object.values(sdk.rpcClients).forEach((aepp) => {
     if (aepp.info.status !== 'DISCONNECTED') {
       aepp.sendMessage(
         { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
         true,
       );
     }
-    aepp.connection.port.onDisconnect.dispatch();
     aepp.disconnect();
     browser.tabs.reload(aepp.connection.port.sender.tab.id);
     sdk.removeRpcClient(aepp.id);
