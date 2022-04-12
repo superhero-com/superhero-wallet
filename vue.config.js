@@ -193,6 +193,7 @@ module.exports = {
         noquotes: true,
         limit: 4096,
         name: 'img/[name].[hash:8].[ext]',
+        esModule: false,
       })
       .end()
       .use('svgo-loader')

@@ -33,6 +33,7 @@ module.exports = {
     'vue-i18n/no-dynamic-keys': 'error',
     'vue-i18n/no-unused-keys': 'error',
     'vue-i18n/no-raw-text': 'off',
+    'vue/multi-word-component-names': 'off',
   },
   overrides: [
     {
