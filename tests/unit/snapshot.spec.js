@@ -43,33 +43,37 @@ describe('Pages', () => {
   {
     name: 'TermsOfService',
     page: TermsOfService,
-    data: [{}],
   },
   {
     name: 'PrivacyPolicy',
     page: PrivacyPolicy,
-    data: [{}],
   },
   {
     name: 'Intro',
     page: Intro,
     data: [{
       step: 1,
+      totalsteps: 4,
     },
     {
       step: 2,
+      totalsteps: 4,
     },
     {
       step: 3,
+      totalsteps: 4,
     },
     {
       step: 4,
+      totalsteps: 4,
     }],
   }].forEach((test) => it(test.name, async () => {
     const wrapper = mount(test.page, test.options);
-    test.data.forEach(async (data) => {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const data of test.data ?? [{}]) {
+      // eslint-disable-next-line no-await-in-loop
       await wrapper.setData(data);
       expect(wrapper.element).toMatchSnapshot();
-    });
+    }
   }));
 });
