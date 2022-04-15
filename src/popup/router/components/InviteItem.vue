@@ -66,7 +66,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import { AmountFormatter, Crypto } from '@aeternity/aepp-sdk';
+import { AmountFormatter, TxBuilderHelper, Crypto } from '@aeternity/aepp-sdk';
 import CopyMixin from '../../../mixins/copy';
 import TokenAmount from './TokenAmount.vue';
 import InputAmount from './InputAmount.vue';
@@ -91,7 +91,8 @@ export default {
   computed: {
     ...mapState(['sdk']),
     link() {
-      const secretKey = Crypto.encodeBase58Check(Buffer.from(this.secretKey, 'hex'));
+      // sg_ prefix was chosen as a dummy to decode from base58Check
+      const secretKey = (TxBuilderHelper.encode(Buffer.from(this.secretKey, 'hex'), 'sg')).slice(3);
       return new URL(
         this.$router
           .resolve({ name: 'invite-claim', params: { secretKey } })

@@ -15,20 +15,7 @@ async function initMiddleware() {
   const spec = await fetchJson(swagUrl);
   spec.paths = {
     ...spec.paths,
-    'name/auction/{name}': {
-      get: {
-        operationId: 'getAuctionInfoByName',
-        parameters: [
-          {
-            in: 'path',
-            name: 'name',
-            required: true,
-            type: 'string',
-          },
-        ],
-      },
-    },
-    'txs/backward': {
+    '/txs/backward': {
       get: {
         operationId: 'getTxByAccount',
         parameters: [
@@ -53,19 +40,13 @@ async function initMiddleware() {
         ],
       },
     },
-    '/name/{hash}': {
-      get: {
-        operationId: 'getNameByHash',
-        parameters: [{
-          in: 'path',
-          name: 'hash',
-          required: true,
-          type: 'string',
-        }],
-      },
-    },
   };
-  spec.basePath = '/mdw//';
+  spec.basePath = '/mdw/';
+  // TODO: remove after resolving https://github.com/aeternity/ae_mdw/issues/160
+  delete spec.schemes;
+  // TODO: remove after resolving https://github.com/aeternity/ae_mdw/issues/508
+  spec.paths['/name/pointees/{id}'] = spec.paths['/names/pointees/{id}'];
+  delete spec.paths['/names/pointees/{id}'];
   const middleware = mapObject(
     (await genSwaggerClient(middlewareUrl, { spec })).api,
     ([k, v]) => [camelCase(k), v],
@@ -181,7 +162,6 @@ export default async function initSdk() {
           : store.dispatch('accounts/signTransaction', { txBase64, opt })),
       },
     })({
-      address: store.getters.account.address,
       nodes: [{ name: activeNetwork.name, instance: node }],
       compilerUrl,
       name: 'Superhero',

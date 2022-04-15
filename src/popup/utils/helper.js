@@ -96,9 +96,9 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
     if (typeof tx.abi_version !== 'undefined' && tx.abi_version !== 3) {
       backend = 'aevm';
     }
-    contractInstance = await sdk.getContractInstance(tx.source, {
+    contractInstance = await sdk.getContractInstance({
+      source: tx.source,
       contractAddress,
-      forceCodeCheck: true,
     });
     contractInstance.setOptions({ backend });
   } catch (e) {

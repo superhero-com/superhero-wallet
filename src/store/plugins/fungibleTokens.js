@@ -121,7 +121,8 @@ export default (store) => {
         amount,
       ) {
         const { selectedToken } = tokens[account.address];
-        const tokenContract = await sdk.getContractInstance(FUNGIBLE_TOKEN_CONTRACT, {
+        const tokenContract = await sdk.getContractInstance({
+          source: FUNGIBLE_TOKEN_CONTRACT,
           contractAddress: selectedToken.contract,
         });
         const { decodedResult } = await tokenContract.methods.allowance({
@@ -142,7 +143,8 @@ export default (store) => {
         { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
         [toAccount, amount, option],
       ) {
-        const tokenContract = await sdk.getContractInstance(FUNGIBLE_TOKEN_CONTRACT, {
+        const tokenContract = await sdk.getContractInstance({
+          source: FUNGIBLE_TOKEN_CONTRACT,
           contractAddress: tokens[account.address].selectedToken.contract,
         });
         return tokenContract.methods.transfer(
@@ -155,7 +157,8 @@ export default (store) => {
         { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
         [amount, posAddress, invoiceId, option],
       ) {
-        const tokenContract = await sdk.getContractInstance(ZEIT_TOKEN_INTERFACE, {
+        const tokenContract = await sdk.getContractInstance({
+          source: ZEIT_TOKEN_INTERFACE,
           contractAddress: tokens[account.address].selectedToken.contract,
         });
         return tokenContract.methods.burn_trigger_pos(
