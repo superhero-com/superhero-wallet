@@ -15,7 +15,7 @@ export default {
         (url, [key, value]) => url.replace(new RegExp(`{${key}}`, 'g'), encodeURIComponent(value)),
         this.$route.query[isSuccess ? 'x-success' : 'x-cancel'],
       );
-      window.open(callbackUrl, '_blank');
+      window.open(callbackUrl, '_self');
     },
   },
 };
