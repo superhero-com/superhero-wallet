@@ -81,15 +81,16 @@ export default (store) => {
         const names = await Promise.all(
           accounts.map(({ address }) => Promise.all([
             getPendingNameClaimTransactions(address),
-            middleware.getOwnedBy(address).then(({ active }) => active.map(({ info, name }) => ({
-              createdAtHeight: info.activeFrom,
-              expiresAt: info.expireHeight,
-              owner: info.ownership.current,
-              pointers: info.pointers,
-              autoExtend: owned.find((n) => n.name === name)?.autoExtend
-               || pendingAutoExtendNames?.includes(name),
-              name,
-            }))),
+            middleware.getNamesOwnedBy(address)
+              .then(({ active }) => active.map(({ info, name }) => ({
+                createdAtHeight: info.activeFrom,
+                expiresAt: info.expireHeight,
+                owner: info.ownership.current,
+                pointers: info.pointers,
+                autoExtend: owned.find((n) => n.name === name)?.autoExtend
+                || pendingAutoExtendNames?.includes(name),
+                name,
+              }))),
           ])),
         ).then((arr) => arr.flat(2));
 
