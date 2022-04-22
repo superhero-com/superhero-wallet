@@ -71,7 +71,7 @@ export default {
       return this.name && checkAensName(`${this.name}.chain`);
     },
     nameFee() {
-      return convertToken(getMinimumNameFee(this.name), -MAGNITUDE).toFixed(4);
+      return convertToken(getMinimumNameFee(`${this.name}.chain`), -MAGNITUDE).toFixed(4);
     },
   },
   methods: {
