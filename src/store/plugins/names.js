@@ -1,7 +1,6 @@
 import Vue from 'vue';
-import BigNumber from 'bignumber.js';
 import {
-  aettosToAe, fetchJson, postJson, checkAddress, checkAensName,
+  fetchJson, postJson, checkAddress, checkAensName,
 } from '../../popup/utils/helper';
 import { i18n } from './languages';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
@@ -105,22 +104,6 @@ export default (store) => {
           expiration: info.auctionEnd,
           lastBid: info.lastBid.tx,
         }));
-      },
-      async fetchAuctionEntry({ rootState: { middleware } }, name) {
-        if (!middleware) return {};
-        const { info } = await middleware.getAuctionInfoByName(name);
-        return {
-          expiration: info.auctionEnd,
-          bids: await Promise.all(
-            info.bids.map(async (index) => {
-              const { tx } = await middleware.getTxByIndex(index);
-              return {
-                accountId: tx.accountId,
-                nameFee: BigNumber(aettosToAe(tx.nameFee)),
-              };
-            }),
-          ),
-        };
       },
       async updatePointer({ rootState: { sdk }, dispatch }, { name, address, type = 'update' }) {
         const nameEntry = await sdk.aensQuery(name);
