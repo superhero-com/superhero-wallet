@@ -65,6 +65,9 @@ export default (store) => {
           `${activeNetwork.middlewareUrl}/aex9/by_name`,
         ).catch(handleUnknownError);
 
+        // TODO - remove
+        if (!response?.length || typeof response === 'string') return null;
+
         const availableTokens = response.reduce((obj, { contract_id: contract, ...other }) => ({
           ...obj, [contract]: { contract, ...other },
         }), {});

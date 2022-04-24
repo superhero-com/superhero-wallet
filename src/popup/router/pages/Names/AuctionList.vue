@@ -14,12 +14,15 @@
         :key="key"
         :to="{ name: 'auction-bid', params: { name } }"
         :name="name"
-        :address="lastBid.accountId"
+        :address="lastBid && lastBid.accountId"
       >
         <div class="name-wrapper">
           <div class="name">
             {{ name }}
-            <TokenAmount :amount="getNameFee(lastBid)" />
+            <TokenAmount
+              v-if="lastBid"
+              :amount="getNameFee(lastBid)"
+            />
           </div>
           <div class="expiration">
             {{ $t('pages.names.auctions.expires') }}
@@ -40,8 +43,8 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import { pick } from 'lodash-es';
+import { mapActions, mapGetters } from 'vuex';
+import { pick, throttle } from 'lodash-es';
 import Filters from '../../components/Filters.vue';
 import NameRow from '../../components/NameRow.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -57,14 +60,15 @@ export default {
   data: () => ({
     displayMode: { sort: 'soonest', rotated: false },
     activeAuctions: [],
+    nextPageUrl: null,
     filters: { soonest: { rotated: false }, bid: { rotated: false }, length: { rotated: false } },
-    loading: false,
+    loading: true,
   }),
   subscriptions() {
     return pick(this.$store.state.observables, ['topBlockHeight']);
   },
   computed: {
-    ...mapGetters(['getNameFee']),
+    ...mapGetters(['getNameFee', 'activeNetwork']),
     auctions() {
       return [...this.activeAuctions].sort((a, b) => {
         switch (this.displayMode.sort) {
@@ -79,10 +83,40 @@ export default {
     },
   },
   async mounted() {
-    this.loading = true;
     await this.$watchUntilTruly(() => this.$store.state.middleware);
-    this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');
+    await this.fetchAuctionsChunk();
+    this.setScrollWatcher();
     this.loading = false;
+  },
+  methods: {
+    ...mapActions('names', ['fetchAuctions']),
+    setScrollWatcher() {
+      const app = document.querySelector('#app');
+      // TODO - throttle
+      app.addEventListener('scroll', throttle(this.checkLoadMore, 500));
+      // window.addEventListener('scroll', this.checkLoadMore);
+      this.$once('hook:destroyed', () => {
+        app.removeEventListener('scroll', throttle(this.checkLoadMore, 500));
+        // window.removeEventListener('scroll', this.checkLoadMore);
+        this.isDestroyed = true;
+      });
+    },
+    checkLoadMore() {
+      if (this.isDestroyed || !this.nextPageUrl) return;
+      const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
+      const { scrollHeight, scrollTop, clientHeight } = isDesktop
+        ? document.querySelector('#app') : document.documentElement;
+      // if (this.maxLength && this.activeAuctions.length >= this.maxLength) return;
+      if (scrollHeight - scrollTop <= clientHeight + 150) {
+        this.fetchAuctionsChunk();
+      }
+    },
+    async fetchAuctionsChunk() {
+      const { data, next } = await this.fetchAuctions({ next: this.nextPageUrl });
+      this.activeAuctions = [...this.activeAuctions, ...data];
+      console.log({ data: this.activeAuctions });
+      this.nextPageUrl = next; // TODO
+    },
   },
 };
 </script>

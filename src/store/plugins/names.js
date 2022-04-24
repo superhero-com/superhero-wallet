@@ -15,6 +15,7 @@ export default (store) => {
       preferred: {},
       auctions: {},
       pendingAutoExtendNames: [],
+      nextPageUrl: null,
     },
     getters: {
       get: ({ owned }) => (name) => owned.find((n) => n.name === name),
@@ -95,15 +96,20 @@ export default (store) => {
 
         commit('set', names);
       },
-      async fetchAuctions({ rootState: { middleware } }) {
+      async fetchAuctions({ rootState: { middleware }, rootGetters: { activeNetwork } }, { next }) {
         if (!middleware) return [];
-        return (
-          await middleware.getAllAuctions({ by: 'expiration', direction: 'forward' })
-        ).data.map(({ name, info }) => ({
-          name,
-          expiration: info.auctionEnd,
-          lastBid: info.lastBid.tx,
-        }));
+        const response = await (next
+          ? fetchJson(`${activeNetwork.middlewareUrl}${next}`)
+          : middleware.getAllAuctions({ by: 'expiration', direction: 'forward' }));
+        console.log({ response, next });
+        return {
+          next: response?.next,
+          data: response.data.map(({ name, info }) => ({
+            name,
+            expiration: info.auctionEnd,
+            lastBid: info.lastBid?.tx,
+          })),
+        };
       },
       async fetchAuctionEntry({ rootState: { middleware } }, name) {
         if (!middleware) return {};
