@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import BigNumber from 'bignumber.js';
+import camelcaseKeysDeep from 'camelcase-keys-deep';
 import {
   aettosToAe, fetchJson, postJson, checkAddress, checkAensName,
 } from '../../popup/utils/helper';
@@ -96,15 +97,18 @@ export default (store) => {
 
         commit('set', names);
       },
-      async fetchAuctions({ rootState: { middleware }, rootGetters: { activeNetwork } }, { next }) {
+      async fetchAuctions({
+        rootState: { middleware },
+        rootGetters: { activeNetwork },
+      }, { next, filterBy = 'expiration', filterDirection = 'forward' }) {
         if (!middleware) return [];
         const response = await (next
           ? fetchJson(`${activeNetwork.middlewareUrl}${next}`)
-          : middleware.getAllAuctions({ by: 'expiration', direction: 'forward' }));
-        console.log({ response, next });
+          : middleware.getAllAuctions({ by: filterBy, direction: filterDirection }));
+
         return {
           next: response?.next,
-          data: response.data.map(({ name, info }) => ({
+          data: camelcaseKeysDeep(response.data).map(({ name, info }) => ({
             name,
             expiration: info.auctionEnd,
             lastBid: info.lastBid?.tx,

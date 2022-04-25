@@ -59,7 +59,6 @@ export default {
 
 .filters {
   position: sticky;
-  top: 48px;
   top: calc(env(safe-area-inset-top) + 48px);
   background: variables.$color-bg-3;
   height: 40px;

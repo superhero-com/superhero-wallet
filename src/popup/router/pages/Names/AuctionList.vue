@@ -1,12 +1,13 @@
 <template>
   <div class="auction-list">
     <Filters
-      v-if="activeAuctions.length || auctions.length || loading"
-      v-model="displayMode"
+      v-if="hasAuctions || loading"
+      :value="displayMode"
       :filters="filters"
+      @input="handleFilter"
     />
     <ul
-      v-if="activeAuctions.length || auctions.length"
+      v-if="hasAuctions"
       class="list"
     >
       <NameRow
@@ -32,11 +33,12 @@
       </NameRow>
     </ul>
     <AnimatedSpinner
-      v-else-if="loading"
+      v-if="loading"
       class="spinner"
+      :class="{ 'load-more': hasAuctions }"
     />
     <RegisterName
-      v-else
+      v-else-if="!hasAuctions"
       :msg="$t('pages.names.auctions.no-auctions')"
     />
   </div>
@@ -51,6 +53,11 @@ import TokenAmount from '../../components/TokenAmount.vue';
 import AnimatedSpinner from '../../../../icons/animated-spinner.svg?skip-optimize';
 import RegisterName from '../../components/RegisterName.vue';
 import { blocksToRelativeTime } from '../../../../filters/toRelativeTime';
+
+const filterMap = {
+  soonest: 'expiration',
+  // TODO - add other filters from middleware
+};
 
 export default {
   components: {
@@ -69,7 +76,11 @@ export default {
   },
   computed: {
     ...mapGetters(['getNameFee', 'activeNetwork']),
+    hasAuctions() {
+      return this.activeAuctions.length || this.auctions.length;
+    },
     auctions() {
+      // TODO - change to middleware sorting
       return [...this.activeAuctions].sort((a, b) => {
         switch (this.displayMode.sort) {
           case 'length':
@@ -79,7 +90,7 @@ export default {
           default:
             return 1;
         }
-      }).sort(() => (this.displayMode.rotated ? -1 : 1));
+      });
     },
   },
   async mounted() {
@@ -92,30 +103,46 @@ export default {
     ...mapActions('names', ['fetchAuctions']),
     setScrollWatcher() {
       const app = document.querySelector('#app');
-      // TODO - throttle
-      app.addEventListener('scroll', throttle(this.checkLoadMore, 500));
-      // window.addEventListener('scroll', this.checkLoadMore);
-      this.$once('hook:destroyed', () => {
-        app.removeEventListener('scroll', throttle(this.checkLoadMore, 500));
-        // window.removeEventListener('scroll', this.checkLoadMore);
+      const throttledLoadMore = () => throttle(this.checkLoadMore, 700);
+      app.addEventListener('scroll', throttledLoadMore());
+      this.$on('hook:destroyed', () => {
+        app.removeEventListener('scroll', throttledLoadMore());
         this.isDestroyed = true;
       });
     },
-    checkLoadMore() {
+    async checkLoadMore() {
       if (this.isDestroyed || !this.nextPageUrl) return;
+      this.loading = true;
       const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = isDesktop
         ? document.querySelector('#app') : document.documentElement;
-      // if (this.maxLength && this.activeAuctions.length >= this.maxLength) return;
-      if (scrollHeight - scrollTop <= clientHeight + 150) {
-        this.fetchAuctionsChunk();
+      if (scrollHeight - scrollTop <= clientHeight + 300) {
+        await this.fetchAuctionsChunk();
+        this.loading = false;
       }
     },
     async fetchAuctionsChunk() {
-      const { data, next } = await this.fetchAuctions({ next: this.nextPageUrl });
+      const filterBy = filterMap[this.displayMode.sort];
+      const filterDirection = this.displayMode.rotated ? 'backward' : 'forward';
+      const { data, next } = await this.fetchAuctions({
+        next: this.nextPageUrl,
+        filterBy,
+        filterDirection,
+      });
       this.activeAuctions = [...this.activeAuctions, ...data];
-      console.log({ data: this.activeAuctions });
-      this.nextPageUrl = next; // TODO
+      this.nextPageUrl = next;
+    },
+    clearAuctionsList() {
+      this.activeAuctions = [];
+      this.nextPageUrl = null;
+      document.querySelector('#app').scrollTop = 0;
+    },
+    async handleFilter(filterValue) {
+      this.loading = true;
+      this.displayMode = filterValue;
+      this.clearAuctionsList();
+      await this.fetchAuctionsChunk();
+      this.loading = false;
     },
   },
 };
@@ -169,6 +196,10 @@ export default {
     width: 56px;
     height: 56px;
     margin: 72px auto 0 auto;
+
+    &.load-more {
+      margin-top: 0;
+    }
   }
 }
 </style>
