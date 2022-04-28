@@ -54,7 +54,7 @@
     "rxjs-etc": "^10.6.0",
     "tipping-contract": "github:aeternity/tipping-contract#v3.1.0-alpha2",
     "uuid": "^3.3.3",
-    "validator": "^13.6.0",
+    "validator": "^13.7.0",
     "vee-validate": "^2.2.15",
     "vue": "^2.6.14",
     "vue-clipboard2": "^0.3.1",
