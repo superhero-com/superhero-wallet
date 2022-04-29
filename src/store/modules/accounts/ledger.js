@@ -1,6 +1,6 @@
 /* eslint no-param-reassign: ["error", { "ignorePropertyModificationsFor": ["state"] }] */
 
-import TransportU2F from '@ledgerhq/hw-transport-u2f';
+import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import Ae from '@aeternity/ledger-app-api';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import LedgerBridge from './ledger-bridge';
@@ -18,27 +18,32 @@ export default {
       ...rootGetters['accounts/getByType']('ledger').map(({ idx }) => idx),
       -1,
     ) + 1,
-    ledgerAppApi: () => new Ae(new TransportU2F()),
     ledgerBridge: () => new LedgerBridge(LEDGER_BRIDGE_URL),
   },
 
   actions: {
-    async request({ getters: { ledgerAppApi, ledgerBridge }, dispatch }, { name, args }) {
+    async request({ getters: { ledgerBridge }, dispatch }, { name, args }) {
       let result;
       let error;
-      do {
-        if (error) {
-          // eslint-disable-next-line no-await-in-loop
-          await dispatch('modals/open', { name: 'confirm', title: 'Try again' }, { root: true });
-        }
-        try {
-          // eslint-disable-next-line no-await-in-loop
-          result = await (process.env.IS_EXTENSION ? ledgerBridge : ledgerAppApi)[name](...args);
-          error = false;
-        } catch (err) {
-          error = true;
-        }
-      } while (error);
+      const transport = await TransportWebUSB.create();
+      const ledgerAppApi = new Ae(transport);
+      try {
+        do {
+          if (error) {
+            // eslint-disable-next-line no-await-in-loop
+            await dispatch('modals/open', { name: 'confirm', title: 'Try again' }, { root: true });
+          }
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            result = await (process.env.IS_EXTENSION ? ledgerBridge : ledgerAppApi)[name](...args);
+            error = false;
+          } catch (err) {
+            error = true;
+          }
+        } while (error);
+      } finally {
+        await transport.close();
+      }
       return result;
     },
 
