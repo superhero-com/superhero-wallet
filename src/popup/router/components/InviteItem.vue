@@ -6,19 +6,10 @@
     </div>
     <div class="invite-link">
       <span>{{ link }}</span>
-      <div
-        v-if="copied"
-        class="copied-alert"
-      >
-        {{ $t('copied') }}
-      </div>
-      <ButtonPlain
-        v-clipboard:success="copy"
-        v-clipboard:copy="link"
-        class="invite-link-copy"
-      >
-        <CopyIcon />
-      </ButtonPlain>
+      <CopyButton
+        :value="link.toString()"
+        :message="$t('copied')"
+      />
     </div>
     <div
       v-if="!topUp"
@@ -80,14 +71,13 @@ import CopyMixin from '../../../mixins/copy';
 import TokenAmount from './TokenAmount.vue';
 import InputAmount from './InputAmount.vue';
 import Button from './Button.vue';
-import ButtonPlain from './ButtonPlain.vue';
-import CopyIcon from '../../../icons/copy-old.svg?vue-component';
+import CopyButton from './CopyButton.vue';
 import { formatDate } from '../../utils';
 import { APP_LINK_WEB } from '../../utils/constants';
 
 export default {
   components: {
-    TokenAmount, Button, ButtonPlain, InputAmount, CopyIcon,
+    TokenAmount, Button, CopyButton, InputAmount,
   },
   filters: { formatDate },
   mixins: [CopyMixin],
@@ -186,6 +176,7 @@ export default {
     margin-bottom: 5px;
     font-size: 11px;
     display: flex;
+    align-items: center;
 
     span {
       margin-left: 5px;
@@ -194,10 +185,11 @@ export default {
       white-space: nowrap;
       color: variables.$color-white;
     }
-  }
 
-  .invite-link-copy {
-    color: variables.$color-dark-grey;
+    .copy-button {
+      color: variables.$color-dark-grey;
+      flex-direction: row-reverse;
+    }
   }
 
   .invite-info {
@@ -228,11 +220,6 @@ export default {
       margin-right: 20px;
       width: 120px;
     }
-  }
-
-  .copied-alert {
-    color: variables.$color-blue;
-    margin-right: 7px;
   }
 }
 </style>
