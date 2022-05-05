@@ -20,6 +20,8 @@
 </template>
 
 <script>
+import BigNumber from 'bignumber.js';
+import { aettosToAe } from '../../../utils/helper';
 import AccountSwitcher from '../../components/AccountSwitcher.vue';
 import Plate from '../../components/Plate.vue';
 import Tabs from '../../components/Tabs.vue';
@@ -54,11 +56,20 @@ export default {
     async updateAuctionEntry() {
       await this.$watchUntilTruly(() => this.$store.state.middleware);
       try {
-        const { expiration, bids } = await this.$store.dispatch('names/fetchAuctionEntry', this.name);
+        const res = await this.$store.state.middleware.getNameById(this.name);
+        // TODO: remove after resolving https://github.com/aeternity/ae_mdw/issues/509
+        const { auctionEnd, bids } = res.auction ?? res.info;
+        const loadedBids = await Promise.all(bids.map(async (txId) => {
+          const { tx } = await this.$store.state.middleware.getTxByIndex(txId);
+          return {
+            nameFee: new BigNumber(aettosToAe(tx.nameFee)),
+            accountId: tx.accountId,
+          };
+        }));
         this.$store.commit('names/setAuctionEntry', {
           name: this.name,
-          expiration,
-          bids,
+          expiration: auctionEnd,
+          bids: loadedBids,
         });
       } catch (error) {
         this.$router.push('/names/auctions');

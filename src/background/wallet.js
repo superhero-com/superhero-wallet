@@ -157,7 +157,6 @@ export async function init() {
       sign: (data) => Crypto.sign(data, store.getters.account.secretKey),
     },
   })({
-    address: store.getters.account.address,
     nodes: [{ name: activeNetwork.name, instance: await Node({ url: activeNetwork.url }) }],
     compilerUrl: activeNetwork.compilerUrl,
     name: 'Superhero',

@@ -1,5 +1,6 @@
-import { TxBuilder, Crypto, SCHEMA } from '@aeternity/aepp-sdk';
-import { getMinimumNameFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
+import {
+  TxBuilder, Crypto, SCHEMA, TxBuilderHelper,
+} from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import { i18n } from '../../store/plugins/languages';
 
@@ -45,9 +46,9 @@ export const calculateFee = (type, params) => {
 
 export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
   accountId: STUB_ADDRESS,
-  name: `nm_${Crypto.encodeBase58Check(name)}`,
+  name,
   nameSalt: Crypto.salt(),
-  nameFee: getMinimumNameFee(name),
+  nameFee: TxBuilderHelper.getMinimumNameFee(name),
   nonce: STUB_NONCE,
   ttl: SCHEMA.NAME_TTL,
 });

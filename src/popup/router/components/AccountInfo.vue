@@ -158,15 +158,16 @@ export default {
       return `${this.activeNetwork.explorerUrl}/account/transactions/${address}`;
     },
   },
-  mounted() {
+  async mounted() {
     const pollBalances = setInterval(() => this.updateBalances(), 10000);
+    this.customAccountName = this.accounts[this.idx].localName;
+    await this.$watchUntilTruly(() => this.$store.state.sdk);
     const pollDefaultNames = setInterval(() => this.$store.dispatch('names/setDefaults'), 5000);
 
     this.$once('hook:destroyed', () => {
       clearInterval(pollBalances);
       clearInterval(pollDefaultNames);
     });
-    this.customAccountName = this.accounts[this.idx].localName;
   },
   methods: {
     ...mapActions({ createAccount: 'accounts/hdWallet/create' }),

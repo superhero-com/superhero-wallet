@@ -224,14 +224,14 @@ export default {
     commit,
   }) {
     if (!tippingSupported && !process.env.RUNNING_IN_TESTS) return;
-    const contractInstanceV1 = await sdk.getContractInstance(TIPPING_V1_INTERFACE, {
+    const contractInstanceV1 = await sdk.getContractInstance({
+      source: TIPPING_V1_INTERFACE,
       contractAddress: activeNetwork.tipContractV1,
-      forceCodeCheck: true,
     });
     const contractInstanceV2 = activeNetwork.tipContractV2
-      ? await sdk.getContractInstance(TIPPING_V2_INTERFACE, {
+      ? await sdk.getContractInstance({
+        source: TIPPING_V2_INTERFACE,
         contractAddress: activeNetwork.tipContractV2,
-        forceCodeCheck: true,
       })
       : null;
     commit('setTipping', [contractInstanceV1, contractInstanceV2]);

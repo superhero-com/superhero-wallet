@@ -47,7 +47,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import { getMinimumNameFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
+import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import HelpButton from '../../components/HelpButton.vue';
@@ -71,7 +71,7 @@ export default {
       return this.name && checkAensName(`${this.name}.chain`);
     },
     nameFee() {
-      return convertToken(getMinimumNameFee(this.name), -MAGNITUDE).toFixed(4);
+      return convertToken(TxBuilderHelper.getMinimumNameFee(`${this.name}.chain`), -MAGNITUDE).toFixed(4);
     },
   },
   methods: {

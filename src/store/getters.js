@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { Crypto, TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
+import { TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
 import { defaultNetworks, TX_TYPE_MDW } from '../popup/utils/constants';
 import {
   checkHashType,
@@ -17,7 +17,7 @@ const getHdWalletAccount = (wallet, accountIdx = 0) => {
   return {
     ...keyPair,
     idx: accountIdx,
-    address: Crypto.aeEncodeKey(keyPair.publicKey),
+    address: TxBuilderHelper.encode(keyPair.publicKey, 'ak'),
   };
 };
 
