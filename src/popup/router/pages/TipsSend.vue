@@ -6,7 +6,7 @@
       class="header"
     >
       <a
-        href="https://superhero.com/"
+        :href="AGGREGATOR_URL"
         target="_blank"
       >
         {{ $t('pages.notifications.superhero') }}
@@ -116,6 +116,7 @@ import UrlStatus from '../components/UrlStatus.vue';
 import Button from '../components/Button.vue';
 import TokenAmount from '../components/TokenAmount.vue';
 import deeplinkApi from '../../../mixins/deeplinkApi';
+import { AGGREGATOR_URL } from '../../utils/constants';
 
 export default {
   components: {
@@ -139,6 +140,7 @@ export default {
       IS_EXTENSION: process.env.IS_EXTENSION,
       tipFromPopup: false,
       error: false,
+      AGGREGATOR_URL,
     };
   },
   computed: {

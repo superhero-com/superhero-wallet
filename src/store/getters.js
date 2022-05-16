@@ -3,7 +3,7 @@ import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
-import { defaultNetworks, TX_TYPE_MDW } from '../popup/utils/constants';
+import { AVATAR_URL, defaultNetworks, TX_TYPE_MDW } from '../popup/utils/constants';
 import {
   checkHashType,
   convertToken,
@@ -67,7 +67,7 @@ export default {
     return networks[network];
   },
   getProfileImage: (_, { activeNetwork }) => (address) => `${activeNetwork.backendUrl}/profile/image/${address}`,
-  getAvatar: () => (address) => `https://avatars.z52da5wt.xyz/${address}`,
+  getAvatar: () => (address) => `${AVATAR_URL}${address}`,
   tippingSupported(state, { activeNetwork }) {
     return (
       ['ae_mainnet', 'ae_uat'].includes(activeNetwork.networkId) || process.env.RUNNING_IN_TESTS

@@ -12,6 +12,7 @@ import {
   setBalanceLocalStorage,
   getBalanceLocalStorage,
 } from '../../popup/utils/helper';
+import { AGGREGATOR_URL } from '../../popup/utils/constants';
 
 export default (store) => {
   // eslint-disable-next-line no-underscore-dangle
@@ -82,8 +83,8 @@ export default (store) => {
     chainName: store.state.chainNames?.[sender],
     path:
       entityType === 'TIP'
-        ? `https://superhero.com/tip/${entityId}`
-        : `https://superhero.com/tip/${sourceId}/comment/${entityId}`,
+        ? `${AGGREGATOR_URL}tip/${entityId}`
+        : `${AGGREGATOR_URL}tip/${sourceId}/comment/${entityId}`,
   });
 
   const notifications$ = createSdkObservable(

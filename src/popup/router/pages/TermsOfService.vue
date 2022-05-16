@@ -156,7 +156,7 @@
         <p>
           The results of the donations and comments are published on the website
           <a
-            href="https://superhero.com/"
+            :href="AGGREGATOR_URL"
             target="_blank"
           >superhero.com</a> .
         </p>
@@ -281,7 +281,7 @@
         <p>
           After that, the website -
           <a
-            href="https://superhero.com/"
+            :href="AGGREGATOR_URL"
             target="_blank"
           >superhero.com</a>, reflects the
           <strong>USERS&rsquo;</strong> donations and comments and gives the possibility for other
@@ -478,7 +478,7 @@
         <p>
           The <strong>name</strong> can also be used as your profile name on the Superhero website
           <a
-            href="https://superhero.com/"
+            :href="AGGREGATOR_URL"
             target="_blank"
           >superhero.com</a>.
         </p>
@@ -947,6 +947,7 @@ import {
   APP_LINK_FIREFOX,
   APP_LINK_ANDROID,
   APP_LINK_IOS,
+  AGGREGATOR_URL,
 } from '../../utils/constants';
 
 export default {
@@ -961,6 +962,7 @@ export default {
       APP_LINK_FIREFOX,
       APP_LINK_ANDROID,
       APP_LINK_IOS,
+      AGGREGATOR_URL,
     };
   },
   methods: {

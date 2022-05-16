@@ -4,6 +4,7 @@ import TransportU2F from '@ledgerhq/hw-transport-u2f';
 import Ae from '@aeternity/ledger-app-api';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import LedgerBridge from './ledger-bridge';
+import { LEDGER_BRIDGE_URL } from '../../../popup/utils/constants';
 
 export default {
   namespaced: true,
@@ -18,7 +19,7 @@ export default {
       -1,
     ) + 1,
     ledgerAppApi: () => new Ae(new TransportU2F()),
-    ledgerBridge: () => new LedgerBridge('https://wallet.superhero.com/ledger-bridge'),
+    ledgerBridge: () => new LedgerBridge(LEDGER_BRIDGE_URL),
   },
 
   actions: {
