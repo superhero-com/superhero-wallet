@@ -3,8 +3,6 @@
 import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import Ae from '@aeternity/ledger-app-api';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import LedgerBridge from './ledger-bridge';
-import { LEDGER_BRIDGE_URL } from '../../../popup/utils/constants';
 
 export default {
   namespaced: true,
@@ -18,11 +16,10 @@ export default {
       ...rootGetters['accounts/getByType']('ledger').map(({ idx }) => idx),
       -1,
     ) + 1,
-    ledgerBridge: () => new LedgerBridge(LEDGER_BRIDGE_URL),
   },
 
   actions: {
-    async request({ getters: { ledgerBridge }, dispatch }, { name, args }) {
+    async request({ dispatch }, { name, args }) {
       let result;
       let error;
       const transport = await TransportWebUSB.create();
@@ -35,7 +32,7 @@ export default {
           }
           try {
             // eslint-disable-next-line no-await-in-loop
-            result = await (process.env.IS_EXTENSION ? ledgerBridge : ledgerAppApi)[name](...args);
+            result = await ledgerAppApi[name](...args);
             error = false;
           } catch (err) {
             error = true;
