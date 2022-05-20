@@ -119,6 +119,7 @@ export default {
       || (!transaction.pending
         && !transaction.claim
         && transaction.tx.log?.[0]
+        && transaction.function === 'tip'
         && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
       || categorizeContractCallTxObject(transaction)?.url
       || ''
