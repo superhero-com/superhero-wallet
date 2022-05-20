@@ -21,7 +21,6 @@
           {{ $t('pages.fungible-tokens.receiveTokens') }}
         </Button>
         <Button
-          v-if="UNFINISHED_FEATURES"
           fill="alternative"
           small
           backgroundless
@@ -55,9 +54,6 @@ export default {
     showMyTokens: { type: Boolean },
     searchTerm: { type: String, default: '' },
   },
-  data: () => ({
-    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-  }),
   subscriptions() {
     return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
   },
