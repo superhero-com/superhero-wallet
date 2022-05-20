@@ -3,7 +3,7 @@ import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullI
 import BigNumber from 'bignumber.js';
 import { unionBy, isEqual, isEmpty } from 'lodash-es';
 import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
-import { ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
+import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 
 export default (store) => {
   store.registerModule('fungibleTokens', {
@@ -121,7 +121,7 @@ export default (store) => {
       },
       async getAeternityData({ rootState: { current }, commit }) {
         const [aeternityData] = await fetchJson(
-          `https://api.coingecko.com/api/v3/coins/markets?ids=aeternity&vs_currency=${current.currency}`,
+          `${CURRENCY_URL}${current.currency}`,
         ).catch((e) => {
           handleUnknownError(e);
           return [];

@@ -72,7 +72,7 @@
         <span>{{ item.title }}</span>
       </p>
       <div
-        v-if="index == 0"
+        v-if="index === 0"
         v-show="item.open"
         data-content="1"
         class="accordion-item-content"
@@ -156,7 +156,7 @@
         <p>
           The results of the donations and comments are published on the website
           <a
-            href="https://superhero.com/"
+            :href="AGGREGATOR_URL"
             target="_blank"
           >superhero.com</a> .
         </p>
@@ -194,7 +194,7 @@
         </p>
       </div>
       <div
-        v-if="index == 1"
+        v-if="index === 1"
         v-show="item.open"
         data-content="2"
         class="accordion-item-content"
@@ -281,7 +281,7 @@
         <p>
           After that, the website -
           <a
-            href="https://superhero.com/"
+            :href="AGGREGATOR_URL"
             target="_blank"
           >superhero.com</a>, reflects the
           <strong>USERS&rsquo;</strong> donations and comments and gives the possibility for other
@@ -388,7 +388,7 @@
         </p>
       </div>
       <div
-        v-if="index == 2"
+        v-if="index === 2"
         v-show="item.open"
         data-content="3"
         class="accordion-item-content"
@@ -478,13 +478,13 @@
         <p>
           The <strong>name</strong> can also be used as your profile name on the Superhero website
           <a
-            href="https://superhero.com/"
+            :href="AGGREGATOR_URL"
             target="_blank"
           >superhero.com</a>.
         </p>
       </div>
       <div
-        v-if="index == 3"
+        v-if="index === 3"
         v-show="item.open"
         data-content="4"
         class="accordion-item-content"
@@ -535,7 +535,7 @@
         </p>
       </div>
       <div
-        v-if="index == 4"
+        v-if="index === 4"
         v-show="item.open"
         data-content="5"
         class="accordion-item-content"
@@ -766,7 +766,7 @@
         </p>
       </div>
       <div
-        v-if="index == 5"
+        v-if="index === 5"
         v-show="item.open"
         data-content="6"
         class="accordion-item-content"
@@ -788,7 +788,7 @@
         </p>
       </div>
       <div
-        v-if="index == 6"
+        v-if="index === 6"
         v-show="item.open"
         data-content="7"
         class="accordion-item-content"
@@ -825,7 +825,7 @@
         </p>
       </div>
       <div
-        v-if="index == 7"
+        v-if="index === 7"
         v-show="item.open"
         data-content="8"
         class="accordion-item-content"
@@ -858,7 +858,7 @@
         </p>
       </div>
       <div
-        v-if="index == 8"
+        v-if="index === 8"
         v-show="item.open"
         data-content="9"
         class="accordion-item-content"
@@ -887,7 +887,7 @@
         </p>
       </div>
       <div
-        v-if="index == 9"
+        v-if="index === 9"
         v-show="item.open"
         data-content="10"
         class="accordion-item-content"
@@ -904,7 +904,7 @@
         </p>
       </div>
       <div
-        v-if="index == 10"
+        v-if="index === 10"
         v-show="item.open"
         data-content="11"
         class="accordion-item-content"
@@ -947,6 +947,7 @@ import {
   APP_LINK_FIREFOX,
   APP_LINK_ANDROID,
   APP_LINK_IOS,
+  AGGREGATOR_URL,
 } from '../../utils/constants';
 
 export default {
@@ -961,6 +962,7 @@ export default {
       APP_LINK_FIREFOX,
       APP_LINK_ANDROID,
       APP_LINK_IOS,
+      AGGREGATOR_URL,
     };
   },
   methods: {

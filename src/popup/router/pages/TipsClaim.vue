@@ -7,7 +7,7 @@
         :msg="$t('modals.verify.msg')"
         :option="{
           attrs: {
-            href: 'https://blog.aeternity.com/superhero-how-to-send-receive-superhero-tips-34971b18c919#024e',
+            href: BLOG_CLAIM_TIP_URL,
             target: '_blank'
           },
         }"
@@ -36,6 +36,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { aettosToAe, toURL, validateTipUrl } from '../../utils/helper';
+import { BLOG_CLAIM_TIP_URL } from '../../utils/constants';
 import InputField from '../components/InputField.vue';
 import Button from '../components/Button.vue';
 import HelpButton from '../components/HelpButton.vue';
@@ -45,6 +46,7 @@ export default {
   data: () => ({
     url: '',
     loading: false,
+    BLOG_CLAIM_TIP_URL,
   }),
   computed: {
     ...mapState(['sdk', 'tippingV1']),

@@ -14,6 +14,7 @@ import {
   isAccountNotFoundError,
 } from '../popup/utils/helper';
 import { i18n } from './plugins/languages';
+import { CURRENCIES_URL } from '../popup/utils/constants';
 
 export default {
   switchNetwork({ commit }, payload) {
@@ -84,9 +85,7 @@ export default {
   async getCurrencies({ state: { nextCurrenciesFetch }, commit }) {
     if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
       try {
-        const { aeternity } = await fetchJson(
-          'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau',
-        );
+        const { aeternity } = await fetchJson(CURRENCIES_URL);
         commit('setCurrencies', aeternity);
         commit('setNextCurrencyFetch', new Date().getTime() + 3600000);
       } catch (e) {
