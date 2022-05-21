@@ -97,7 +97,7 @@ export default {
                   && (tr.tx.recipientId === address || (tr.tx.senderId !== address && tr.tx.recipientId.startsWith('nm_'))))
                   || (isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.recipient === address);
               case 'tips':
-                return (!isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address) || tr.claim;
+                return (!isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address && tr.tx.function === 'tip') || tr.claim;
               default:
                 throw new Error(`Unknown display mode type: ${this.displayMode.filter}`);
             }
