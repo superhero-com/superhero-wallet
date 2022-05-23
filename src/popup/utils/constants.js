@@ -139,7 +139,7 @@ export const APP_LINK_FIREFOX = 'https://addons.mozilla.org/en-US/firefox/addon/
 export const APP_LINK_ANDROID = 'https://play.google.com/store/apps/details?id=com.superhero.cordova';
 export const APP_LINK_IOS = 'https://apps.apple.com/us/app/superhero-wallet/id1502786641';
 
-export const SIMPLEX_URL = 'https://aeternity.com/simplex-integration';
+export const SIMPLEX_URL = 'https://simplex.superhero.com';
 
 export const CURRENCIES_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau';
 export const CURRENCY_URL = 'https://api.coingecko.com/api/v3/coins/markets?ids=aeternity&vs_currency=';

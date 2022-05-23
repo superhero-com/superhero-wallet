@@ -310,7 +310,7 @@ export default [
       backButton: false,
     },
   },
-  ...process.env.UNFINISHED_FEATURES ? [{
+  {
     path: '/buy',
     component: Buy,
     name: 'buy',
@@ -324,7 +324,7 @@ export default [
           window.open(SIMPLEX_URL, '_blank');
         },
       } : {},
-  }] : [],
+  },
   {
     path: '/notifications',
     name: 'notifications',
