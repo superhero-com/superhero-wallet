@@ -4,7 +4,6 @@ import {
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import camelcaseKeysDeep from 'camelcase-keys-deep';
 import { postMessageToContent } from '../popup/utils/connection';
 import {
   fetchJson,
@@ -38,18 +37,17 @@ export default {
       .map((transaction) => ({ ...transaction, pending: true }));
   },
   async fetchTransactions({
-    state, getters, dispatch, commit,
+    state: { middleware, transactions }, getters, dispatch, commit,
   }, { limit, recent }) {
-    if (!state.middleware || (state.transactions.nextPageUrl === null && !recent)) return;
+    if (!middleware || (transactions.nextPageUrl === null && !recent)) return;
     const { address } = getters.account;
     let txs = await Promise.all([
-      (recent || state.transactions.nextPageUrl === ''
-        ? state.middleware.getTxByAccount(address, limit, 1)
-        : fetchJson(`${getters.activeNetwork.middlewareUrl}/${state.transactions.nextPageUrl}`))
+      (recent || transactions.nextPageUrl === ''
+        ? middleware.getTxByAccount(address, limit, 1)
+        : middleware.fetchByPath(transactions.nextPageUrl))
         .then(({ data, next }) => {
-          const result = recent || state.transactions.nextPageUrl === '' ? data : camelcaseKeysDeep(data);
           if (!recent) commit('setTransactionsNextPage', next);
-          return result;
+          return data;
         })
         .catch(() => []),
       dispatch('fetchPendingTransactions', address),

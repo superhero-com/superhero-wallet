@@ -197,3 +197,17 @@ export const readValueFromClipboard = async () => {
   }
   return value;
 };
+
+export const getAllPages = async (getFunction, getNextPage) => {
+  const result = [];
+  let nextPageUrl;
+  while (nextPageUrl !== null) {
+    // eslint-disable-next-line no-await-in-loop
+    const { data, next } = await (nextPageUrl
+      ? getNextPage(nextPageUrl)
+      : getFunction());
+    if (data?.length) result.push(...data);
+    nextPageUrl = next || null;
+  }
+  return result;
+};

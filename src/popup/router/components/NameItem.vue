@@ -86,8 +86,8 @@
         </template>
       </InputField>
       <DetailsItem
-        :value="nameHash"
-        :label="nameHash && $t('pages.names.list.name-hash')"
+        :value="nameEntry.nameHash"
+        :label="nameEntry.nameHash && $t('pages.names.list.name-hash')"
       />
       <div class="heights">
         <DetailsItem
@@ -154,7 +154,6 @@ export default {
     newPointer: '',
     showInput: false,
     error: false,
-    nameHash: '',
     UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
   }),
   subscriptions() {
@@ -177,13 +176,6 @@ export default {
     newPointer() {
       this.error = false;
     },
-  },
-  async mounted() { // TODO: should be removed after https://github.com/aeternity/ae_mdw/issues/177 resolved
-    await this.$watchUntilTruly(() => this.$store.state.sdk);
-    this.nameHash = this.nameEntry.pending
-      ? this.nameEntry.nameHash
-      : (await this.$store.state.sdk.api.getNameEntryByName(this.name)).id;
-    this.$store.dispatch('names/fetchOwned');
   },
   methods: {
     blocksToRelativeTime,

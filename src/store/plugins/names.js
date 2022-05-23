@@ -69,27 +69,31 @@ export default (store) => {
         dispatch,
       }) {
         if (!middleware) return;
-        const getPendingNameClaimTransactions = (address) => dispatch('fetchPendingTransactions', address, { root: true }).then((transactions) => transactions
-          .filter(({ tx: { type } }) => type === 'NameClaimTx')
-          .map(({ tx, ...otherTx }) => ({
-            ...otherTx,
-            ...tx,
-            owner: tx.accountId,
+        const getPendingNameClaimTransactions = (address) => dispatch('fetchPendingTransactions', address, { root: true })
+          .then((transactions) => transactions
+            .filter(({ tx: { type } }) => type === 'NameClaimTx')
+            .map(({ tx, ...otherTx }) => ({
+              ...otherTx,
+              ...tx,
+              owner: tx.accountId,
+            })));
+
+        const getNames = (address) => middleware.getNamesOwnedBy(address)
+          .then(({ active }) => active.map(({ info, name, hash }) => ({
+            createdAtHeight: info.activeFrom,
+            expiresAt: info.expireHeight,
+            owner: info.ownership.current,
+            pointers: info.pointers,
+            nameHash: hash,
+            autoExtend: owned.find((n) => n.name === name)?.autoExtend
+              || pendingAutoExtendNames?.includes(name),
+            name,
           })));
 
         const names = await Promise.all(
           accounts.map(({ address }) => Promise.all([
             getPendingNameClaimTransactions(address),
-            middleware.getNamesOwnedBy(address)
-              .then(({ active }) => active.map(({ info, name }) => ({
-                createdAtHeight: info.activeFrom,
-                expiresAt: info.expireHeight,
-                owner: info.ownership.current,
-                pointers: info.pointers,
-                autoExtend: owned.find((n) => n.name === name)?.autoExtend
-                || pendingAutoExtendNames?.includes(name),
-                name,
-              }))),
+            getNames(address),
           ])),
         ).then((arr) => arr.flat(2));
 

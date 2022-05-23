@@ -2,8 +2,10 @@ import Vue from 'vue';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
 import { unionBy, isEqual, isEmpty } from 'lodash-es';
-import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
 import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
+import {
+  convertToken, fetchJson, getAllPages, handleUnknownError,
+} from '../../popup/utils/helper';
 
 export default (store) => {
   store.registerModule('fungibleTokens', {
@@ -60,38 +62,39 @@ export default (store) => {
       },
     },
     actions: {
-      async getAvailableTokens({ rootGetters: { activeNetwork }, commit }) {
-        const response = await fetchJson(
-          `${activeNetwork.middlewareUrl}/aex9/by_name`,
-        ).catch(handleUnknownError);
+      async getAvailableTokens({ rootState: { middleware }, commit }) {
+        if (!middleware) return;
+        const result = await getAllPages(() => middleware.fetchByPath('/v2/aex9?by=name&limit=100'), middleware.fetchByPath);
+        if (!result?.length) {
+          commit('setAvailableTokens', {});
+          return;
+        }
 
-        if (isEmpty(response) || typeof response !== 'object') return commit('setAvailableTokens', {});
-
-        const availableTokens = response.reduce((obj, { contract_id: contract, ...other }) => ({
+        const availableTokens = result.reduce((obj, { contractId: contract, ...other }) => ({
           ...obj, [contract]: { contract, ...other },
         }), {});
-        return commit('setAvailableTokens', availableTokens);
+        commit('setAvailableTokens', availableTokens);
       },
       async loadTokenBalances({
-        rootGetters: { activeNetwork, accounts },
+        rootGetters: { accounts },
+        rootState: { middleware, fungibleTokens },
         state: { availableTokens },
         commit,
       }) {
         accounts.map(async ({ address }) => {
           let selectedToken = null;
           try {
-            if (isEmpty(availableTokens)) return;
-            const tokens = await fetchJson(
-              `${activeNetwork.middlewareUrl}/aex9/balances/account/${address}`,
-            ).catch(handleUnknownError);
+            if (isEmpty(availableTokens) || !middleware) return;
 
-            if (isEmpty(tokens) || typeof tokens !== 'object') return;
+            const tokens = await getAllPages(() => middleware.fetchByPath(`/v2/aex9/account-balances/${address}?scope=gen:5000-6000`), middleware.fetchByPath);
 
-            selectedToken = store.state.fungibleTokens.tokens[address]?.selectedToken;
+            if (!tokens?.length) return;
+
+            selectedToken = fungibleTokens.tokens[address]?.selectedToken;
 
             commit('resetTokenBalances', address);
 
-            tokens.filter(({ amount }) => amount).map(({ amount, contract_id: contract }) => {
+            tokens.filter(({ amount }) => amount).map(({ amount, contractId: contract }) => {
               const token = availableTokens[contract];
               if (!token) return null;
               const balance = convertToken(amount, -token.decimals);
@@ -113,7 +116,7 @@ export default (store) => {
             commit('setSelectedToken',
               {
                 address,
-                token: (store.state.fungibleTokens.tokens?.[address]?.tokenBalances || [])
+                token: (fungibleTokens.tokens?.[address]?.tokenBalances || [])
                   .find((t) => t.contract === selectedToken?.contract),
               });
           }
@@ -180,13 +183,17 @@ export default (store) => {
           option,
         );
       },
-      async getTokensHistory({ rootState, rootGetters: { activeNetwork, account }, commit }) {
+      async getTokensHistory({
+        rootGetters: { account },
+        rootState: { middleware },
+        commit,
+      }) {
         const { address } = account;
-        const rawTransactions = await fetchJson(`${activeNetwork.middlewareUrl}/aex9/transfers/to/${address}`);
+        const rawTransactions = await middleware.fetchByPath(`/aex9/transfers/to/${address}`);
 
         const transactions = await Promise.all(
-          rawTransactions.map(async ({ call_txi: index, ...otherTx }) => ({
-            ...(await rootState.middleware.getTxByIndex(index)), ...otherTx,
+          rawTransactions.map(async ({ callTxi: index, ...otherTx }) => ({
+            ...(await middleware.getTxByIndex(index)), ...otherTx,
           })),
         );
         commit('setTransactions', { address, transactions });

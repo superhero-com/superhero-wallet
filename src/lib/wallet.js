@@ -2,6 +2,7 @@ import { Node, RpcWallet, genSwaggerClient } from '@aeternity/aepp-sdk';
 import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { camelCase, isEqual, times } from 'lodash-es';
+import camelcaseKeysDeep from 'camelcase-keys-deep';
 import { fetchJson, IN_FRAME } from '../popup/utils/helper';
 import store from '../store';
 import { App } from '../store/modules/permissions';
@@ -15,7 +16,7 @@ async function initMiddleware() {
   const spec = await fetchJson(swagUrl);
   spec.paths = {
     ...spec.paths,
-    '/txs/backward': {
+    '/v2/txs?direction=backward': {
       get: {
         operationId: 'getTxByAccount',
         parameters: [
@@ -40,7 +41,8 @@ async function initMiddleware() {
         ],
       },
     },
-    // TODO: remove after mainnet middleware would be updated to a > 1.7.3 version
+    // TODO: change url to this after middleware would be updated to 1.9.2
+    // '/v2/names?owned_by={id}&state=active&by=name': {
     '/names/owned_by/{id}': {
       get: {
         operationId: 'getNamesOwnedBy',
@@ -57,12 +59,15 @@ async function initMiddleware() {
   // TODO: remove after resolving https://github.com/aeternity/ae_mdw/issues/160
   delete spec.schemes;
   // TODO: remove after resolving https://github.com/aeternity/ae_mdw/issues/508
-  spec.paths['/name/pointees/{id}'] = spec.paths['/names/pointees/{id}'];
+  spec.paths['/v2/names/{id}/pointees'] = spec.paths['/names/pointees/{id}'];
   delete spec.paths['/names/pointees/{id}'];
   const middleware = mapObject(
     (await genSwaggerClient(middlewareUrl, { spec })).api,
     ([k, v]) => [camelCase(k), v],
   );
+
+  middleware.fetchByPath = (path) => fetchJson(`${middlewareUrl}${path}`).then(camelcaseKeysDeep);
+
   store.commit('setMiddleware', middleware);
 }
 
