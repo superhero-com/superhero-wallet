@@ -41,14 +41,22 @@ async function initMiddleware() {
         ],
       },
     },
-    // TODO: change url to this after middleware would be updated to 1.9.2
-    // '/v2/names?owned_by={id}&state=active&by=name': {
-    '/names/owned_by/{id}': {
+    '/v2/names?owned_by={id}&state={state}&by={by}': {
       get: {
         operationId: 'getNamesOwnedBy',
         parameters: [{
           in: 'path',
           name: 'id',
+          required: true,
+          type: 'string',
+        }, {
+          in: 'path',
+          name: 'state',
+          required: true,
+          type: 'string',
+        }, {
+          in: 'path',
+          name: 'by',
           required: true,
           type: 'string',
         }],

@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import {
-  fetchJson, postJson, checkAddress, checkAensName,
+  fetchJson, postJson, checkAddress, checkAensName, getAllPages,
 } from '../../popup/utils/helper';
 import { i18n } from './languages';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
@@ -78,15 +78,18 @@ export default (store) => {
               owner: tx.accountId,
             })));
 
-        const getNames = (address) => middleware.getNamesOwnedBy(address)
-          .then(({ active }) => active.map(({ info, name, hash }) => ({
+        const getNames = async (address) => getAllPages(
+          () => middleware.getNamesOwnedBy(address, 'active', 'name'),
+          middleware.fetchByPath,
+        )
+          .then((data) => data.map(({ info, name, hash }) => ({
             createdAtHeight: info.activeFrom,
             expiresAt: info.expireHeight,
             owner: info.ownership.current,
             pointers: info.pointers,
             nameHash: hash,
             autoExtend: owned.find((n) => n.name === name)?.autoExtend
-              || pendingAutoExtendNames?.includes(name),
+                || pendingAutoExtendNames?.includes(name),
             name,
           })));
 
