@@ -12,7 +12,10 @@
       <span class="heading">
         {{ $t('pages.index.heading') }}
       </span>
-      <template v-if="IS_WEB">
+      <template v-if="IS_MOBILE">
+        <span class="mobile">{{ $t('pages.index.mobileVersion') }}</span>
+      </template>
+      <template v-else-if="IS_WEB">
         <Platforms :class="{ agreed: termsAgreed }">
           {{ $t('pages.index.platforms.heading') }}
         </Platforms>
@@ -74,6 +77,7 @@ export default {
   data: () => ({
     termsAgreed: false,
     IS_WEB: process.env.PLATFORM === 'web',
+    IS_MOBILE: window.IS_MOBILE_DEVICE,
     IN_FRAME,
   }),
 };
@@ -100,7 +104,7 @@ export default {
 
     .checkbox-container {
       margin-right: 4px;
-      color: variables.$color-dark-grey;
+      color: variables.$color-light-grey;
 
       &.agreed {
         color: white;
@@ -108,11 +112,12 @@ export default {
 
       &:hover:not(.agreed),
       &:active:not(.agreed) {
-        color: variables.$color-light-grey;
+        color: variables.$color-dark-grey;
       }
 
       ::v-deep .checkmark {
-        margin-right: 5px;
+        margin-right: 10px;
+        border-color: variables.$color-light-grey;
       }
     }
 
@@ -150,6 +155,16 @@ export default {
 
         margin-top: 32px;
         margin-bottom: 10px;
+      }
+
+      &.mobile {
+        @extend %face-sans-20-regular;
+
+        color: white;
+        max-width: 80%;
+        margin: 0 auto;
+        min-height: 25vh;
+        padding-top: 30px;
       }
 
       &.go {
