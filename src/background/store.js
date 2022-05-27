@@ -20,12 +20,6 @@ const store = new Vuex.Store({
     networks: getters.networks,
     activeNetwork: getters.activeNetwork,
   },
-  actions: {
-    async ensureRestored() {
-      // eslint-disable-next-line no-underscore-dangle
-      await store._watcherVM.$watchUntilTruly(() => store.state.isRestored);
-    },
-  },
 });
 
 export default store;

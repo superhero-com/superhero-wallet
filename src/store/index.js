@@ -4,6 +4,7 @@ import VueRx from 'vue-rx';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
+import sdkPlugin from './plugins/sdk';
 import observables from './plugins/observables';
 import persistState from './plugins/persistState';
 import modals from './plugins/modals';
@@ -66,6 +67,7 @@ export default new Vuex.Store({
       runMigrations,
       stateReducer,
     ),
+    sdkPlugin,
     observables,
     modals,
     tipUrl,

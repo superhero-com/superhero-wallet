@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import { RpcWallet, Crypto, Node } from '@aeternity/aepp-sdk';
 import { isEmpty, isEqual } from 'lodash-es';
 import { App } from '../modules/permissions';
@@ -6,22 +7,72 @@ import { getAeppUrl, showPopup } from '../../background/popupHandler';
 export default (store) => {
   let sdk;
 
-  store.registerModule('sdk', {
+  store.registerModule('sdkPlugin', {
     namespaced: true,
+    state: {
+      ready: false,
+    },
     getters: {
-      sdk: () => sdk || null,
+      sdk: ({ ready }) => (ready ? sdk : undefined),
+    },
+    mutations: {
+      setSdkReady(state) {
+        state.ready = true;
+      },
     },
     actions: {
-      async initialize() {
+      async initialize({ commit }) {
         if (sdk) return;
-        await store.dispatch('ensureRestored');
-        // eslint-disable-next-line no-underscore-dangle
-        await store._watcherVM.$watchUntilTruly(() => !isEmpty(store.getters.account));
+        await store._watcherVM.$watchUntilTruly(
+          () => store.state.isRestored && !isEmpty(store.getters.account),
+        );
 
         const { activeNetwork } = store.getters;
 
         const cbAccept = (_, { accept }) => accept();
-        const signCb = async (type, aepp, action) => {
+        const signCb = async (_, action, origin) => {
+          const { method, params } = action;
+          try {
+            const originUrl = new URL(origin);
+            const permission = await store.dispatch('permissions/checkPermissions', {
+              host: originUrl.hostname,
+              method,
+              params: params?.txObject?.params,
+            });
+            if (method === 'message.sign') {
+              if (!permission) {
+                await store.dispatch('modals/open', {
+                  name: 'confirm-message-sign',
+                  message: params.message,
+                  app: {
+                    name: originUrl.host,
+                    host: originUrl.host,
+                    protocol: originUrl.protocol,
+                  },
+                });
+              }
+              action.accept({ onAccount: { sign: () => {}, address: () => {} } });
+              return;
+            }
+            action.accept(null, {
+              onAccount: {
+                sign: async () => store.dispatch('accounts/signTransaction', {
+                  txBase64: params.tx,
+                  opt: {
+                    modal: !permission,
+                  },
+                }),
+                address: () => {},
+              },
+            });
+          } catch (error) {
+            action.deny();
+            if (error.message !== 'Rejected by user') throw error;
+          }
+          action.deny();
+        };
+
+        const signCbBackground = async (type, aepp, action) => {
           const { method, params } = action;
           if (
             (await store.dispatch('permissions/checkPermissions', {
@@ -58,12 +109,29 @@ export default (store) => {
                 && !(await store.dispatch('permissions/requestAddressForHost', {
                   host: app.host.hostname,
                   address,
-                  connectionPopupCb: async () => showPopup(app.host.href, 'connectConfirm'),
+                  connectionPopupCb: async () => (window.IS_EXTENSION_BACKGROUND
+                    ? showPopup(app.host.href, 'connectConfirm')
+                    : store.dispatch('modals/open', {
+                      name: 'confirm-connect',
+                      app: {
+                        name: app.host.hostname,
+                        icons: [],
+                        protocol: app.host.protocol,
+                        host: app.host.host,
+                      },
+                    })),
                 }))
               ) return Promise.reject(new Error('Rejected by user'));
               return address;
             },
-            sign: (data) => Crypto.sign(data, store.getters.account.secretKey),
+            sign: (data) => (window.IS_EXTENSION_BACKGROUND
+              ? Crypto.sign(data, store.getters.account.secretKey)
+              : store.dispatch('accounts/sign', data)),
+            ...(window.IS_EXTENSION_BACKGROUND ? {} : {
+              signTransaction: (txBase64, opt) => (opt.onAccount
+                ? opt.onAccount.sign()
+                : store.dispatch('accounts/signTransaction', { txBase64, opt })),
+            }),
           },
         })({
           nodes: [{ name: activeNetwork.name, instance: await Node({ url: activeNetwork.url }) }],
@@ -73,10 +141,11 @@ export default (store) => {
           onDisconnect(_, client) {
             client.disconnect();
           },
-          async onSubscription(aepp, { accept, deny }) {
+          async onSubscription(aepp, { accept, deny }, origin) {
             let activeAccount;
             try {
-              activeAccount = await this.address(this.getApp(getAeppUrl(aepp)));
+              const url = window.IS_EXTENSION_BACKGROUND ? getAeppUrl(aepp) : new URL(origin);
+              activeAccount = await this.address(this.getApp(url));
             } catch (e) {
               deny();
               return;
@@ -93,10 +162,11 @@ export default (store) => {
               },
             });
           },
-          onSign: signCb.bind(null, 'sign'),
-          onMessageSign: signCb.bind(null, 'messageSign'),
+          onSign: window.IS_EXTENSION_BACKGROUND ? signCbBackground.bind(null, 'sign') : signCb,
+          onMessageSign: window.IS_EXTENSION_BACKGROUND ? signCbBackground.bind(null, 'messageSign') : signCb,
           onAskAccounts: cbAccept,
         });
+        commit('setSdkReady');
       },
     },
   });
@@ -105,21 +175,28 @@ export default (store) => {
     (state, getters) => getters.activeNetwork,
     async (network, oldNetwork) => {
       if (isEqual(network, oldNetwork)) return;
+      await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
       sdk.pool.delete(network.name);
       sdk.addNode(network.name, await Node({ url: network.url }), true);
     },
   );
 
   store.watch(
-    ({ accounts: { activeIdx } }) => activeIdx,
-    async (accountIdx) => sdk.selectAccount(store.getters.accounts[accountIdx].address),
-  );
-
-  store.watch(
     (state, getters) => getters.accounts.length,
-    () => {
+    async () => {
+      await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
       sdk.accounts = store.getters.accounts
         .reduce((p, { address }) => ({ ...p, [address]: {} }), {});
     },
+    { immediate: true },
+  );
+
+  store.watch(
+    ({ accounts: { activeIdx } }) => activeIdx,
+    async (accountIdx) => {
+      await store._watcherVM.$watchUntilTruly(() => !isEmpty(store.getters['sdkPlugin/sdk']?.accounts));
+      sdk.selectAccount(store.getters.accounts[accountIdx].address);
+    },
+    { immediate: true },
   );
 };
