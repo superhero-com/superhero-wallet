@@ -66,7 +66,7 @@ export default {
             type: SCHEMA.TX_TYPE.contractCall,
           },
           ...t,
-          microTime: t.time,
+          microTime: t.name === 'TipWithdrawn' ? Date(t.createdAt).getTime() : t.time,
           claim: true,
         }))).catch(() => []),
     ]);
