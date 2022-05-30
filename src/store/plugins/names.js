@@ -126,10 +126,10 @@ export default (store) => {
         { rootGetters: { activeNetwork, accounts }, commit },
       ) {
         await Promise.all(accounts.map(async ({ address }) => {
-          const { preferredChainName: defaultNameBackend } = await fetchJson(
+          const response = await fetchJson(
             `${activeNetwork.backendUrl}/profile/${address}`,
-          ).catch(() => null);
-          commit('setDefault', { address, name: defaultNameBackend });
+          ).catch(() => {});
+          commit('setDefault', { address, name: response?.preferredChainName });
         }));
       },
       async setDefault(
@@ -167,9 +167,9 @@ export default (store) => {
         commit,
       }, address) {
         if (!middleware) return;
-        const { preferredChainName } = await fetchJson(`${activeNetwork.backendUrl}/profile/${address}`).catch(() => ({}));
-        if (preferredChainName) {
-          commit('setPreferred', { address, name: preferredChainName });
+        const response = await fetchJson(`${activeNetwork.backendUrl}/profile/${address}`).catch(() => {});
+        if (response?.preferredChainName) {
+          commit('setPreferred', { address, name: response?.preferredChainName });
         } else {
           commit('setPreferred', { address });
         }
