@@ -40,8 +40,8 @@ export default {
     TabBar,
   },
   computed: {
-    ...mapGetters(['account', 'isLoggedIn']),
-    ...mapState(['isRestored', 'current', 'sdk', 'backedUpSeed', 'notifications']),
+    ...mapGetters(['isLoggedIn']),
+    ...mapState(['isRestored', 'backedUpSeed']),
     showStatusAndHeader() {
       return !(
         ['/', '/intro'].includes(this.$route.path)
@@ -55,7 +55,12 @@ export default {
   },
   watch: {
     isLoggedIn(val) {
-      if (val) this.init();
+      if (val && !this.backedUpSeed) {
+        this.$store.commit('addNotification', {
+          text: this.$t('pages.account.seedNotification', [this.$t('pages.account.backup')]),
+          path: '/settings/security',
+        });
+      }
     },
   },
   async mounted() {
@@ -83,16 +88,6 @@ export default {
     }
 
     this.$store.commit('setChainNames', await this.$store.dispatch('getCacheChainNames'));
-  },
-  methods: {
-    async init() {
-      if (!this.backedUpSeed) {
-        this.$store.commit('addNotification', {
-          text: this.$t('pages.account.seedNotification', [this.$t('pages.account.backup')]),
-          path: '/settings/security',
-        });
-      }
-    },
   },
 };
 </script>
