@@ -139,7 +139,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { formatDate, formatTime } from '../../utils';
+import { formatDate, formatTime } from '../../utils/dateTime';
 import TransactionOverview from '../components/TransactionOverview.vue';
 import Plate from '../components/Plate.vue';
 import TokenAmount from '../components/TokenAmount.vue';

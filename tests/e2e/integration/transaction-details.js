@@ -1,4 +1,4 @@
-import { formatDate, formatTime } from '../../../src/popup/utils';
+import { formatDate, formatTime } from '../../../src/popup/utils/dateTime';
 import { defaultNetworks } from '../../../src/popup/utils/constants';
 
 describe('Tests cases for transaction details page', () => {

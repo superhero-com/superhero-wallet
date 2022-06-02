@@ -72,7 +72,7 @@ import TokenAmount from './TokenAmount.vue';
 import InputAmount from './InputAmount.vue';
 import Button from './Button.vue';
 import CopyButton from './CopyButton.vue';
-import { formatDate } from '../../utils';
+import { formatDate } from '../../utils/dateTime';
 import { APP_LINK_WEB } from '../../utils/constants';
 
 export default {

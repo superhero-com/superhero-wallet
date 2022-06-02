@@ -36,7 +36,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { formatDate, formatTime } from '../../utils';
+import { formatDate, formatTime } from '../../utils/dateTime';
 import Pending from '../../../icons/animated-pending.svg?vue-component';
 import TokenAmount from './TokenAmount.vue';
 
