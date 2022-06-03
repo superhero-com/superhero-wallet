@@ -5,7 +5,7 @@
       <span class="version">
         commit
         <a
-          :href="`https://github.com/aeternity/superhero-wallet/commit/${commitHash}`"
+          :href="`${COMMIT_URL}${commitHash}`"
           target="_blank"
         >
           {{ commitHash.slice(0, 7) }}</a>
@@ -15,7 +15,7 @@
     <hr>
     <div class="waellet-links">
       <a
-        href="https://superhero.com/faq"
+        :href="`${AGGREGATOR_URL}faq`"
         target="_blank"
       >FAQ</a>
       <router-link
@@ -40,7 +40,7 @@
 <script>
 import Button from '../components/Button.vue';
 import Logo from '../../../icons/logo.svg?vue-component';
-import { BUG_REPORT_URL } from '../../utils/constants';
+import { BUG_REPORT_URL, AGGREGATOR_URL, COMMIT_URL } from '../../utils/constants';
 
 export default {
   components: { Button, Logo },
@@ -49,6 +49,8 @@ export default {
       extensionVersion: `v.${process.env.npm_package_version}`,
       commitHash: process.env.COMMIT_HASH,
       BUG_REPORT_URL,
+      AGGREGATOR_URL,
+      COMMIT_URL,
     };
   },
 };

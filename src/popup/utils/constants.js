@@ -1,5 +1,6 @@
-import { TxBuilder, Crypto, SCHEMA } from '@aeternity/aepp-sdk';
-import { getMinimumNameFee } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
+import {
+  TxBuilder, Crypto, SCHEMA, TxBuilderHelper,
+} from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import { i18n } from '../../store/plugins/languages';
 
@@ -45,9 +46,9 @@ export const calculateFee = (type, params) => {
 
 export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
   accountId: STUB_ADDRESS,
-  name: `nm_${Crypto.encodeBase58Check(name)}`,
+  name,
   nameSalt: Crypto.salt(),
-  nameFee: getMinimumNameFee(name),
+  nameFee: TxBuilderHelper.getMinimumNameFee(name),
   nonce: STUB_NONCE,
   ttl: SCHEMA.NAME_TTL,
 });
@@ -138,4 +139,15 @@ export const APP_LINK_FIREFOX = 'https://addons.mozilla.org/en-US/firefox/addon/
 export const APP_LINK_ANDROID = 'https://play.google.com/store/apps/details?id=com.superhero.cordova';
 export const APP_LINK_IOS = 'https://apps.apple.com/us/app/superhero-wallet/id1502786641';
 
-export const SIMPLEX_URL = 'https://aeternity.com/simplex-integration';
+export const SIMPLEX_URL = 'https://simplex.superhero.com';
+
+export const CURRENCIES_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=usd,eur,aud,ron,brl,cad,chf,cny,czk,dkk,gbp,hkd,hrk,huf,idr,ils,inr,isk,jpy,krw,mxn,myr,nok,nzd,php,pln,ron,rub,sek,sgd,thb,try,zar,xau';
+export const CURRENCY_URL = 'https://api.coingecko.com/api/v3/coins/markets?ids=aeternity&vs_currency=';
+
+export const AVATAR_URL = 'https://avatars.z52da5wt.xyz/';
+
+export const LEDGER_BRIDGE_URL = 'https://wallet.superhero.com/ledger-bridge';
+
+export const BLOG_CLAIM_TIP_URL = 'https://blog.aeternity.com/superhero-how-to-send-receive-superhero-tips-34971b18c919#024e';
+
+export const COMMIT_URL = 'https://github.com/aeternity/superhero-wallet/commit/';

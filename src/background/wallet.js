@@ -1,7 +1,7 @@
 import { RpcWallet, Crypto, Node } from '@aeternity/aepp-sdk';
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import { isEmpty, isEqual } from 'lodash-es';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { CONNECTION_TYPES } from '../popup/utils/constants';
 import { detectConnectionType } from '../popup/utils/helper';
 import store from './store';
@@ -157,7 +157,6 @@ export async function init() {
       sign: (data) => Crypto.sign(data, store.getters.account.secretKey),
     },
   })({
-    address: store.getters.account.address,
     nodes: [{ name: activeNetwork.name, instance: await Node({ url: activeNetwork.url }) }],
     compilerUrl: activeNetwork.compilerUrl,
     name: 'Superhero',

@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { Crypto } from '@aeternity/aepp-sdk';
+import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 
 export default {
   props: {
@@ -12,7 +12,8 @@ export default {
   async mounted() {
     await this.$watchUntilTruly(() => this.$store.state.sdk);
     try {
-      await this.$store.dispatch('invites/claim', Crypto.decodeBase58Check(this.secretKey));
+      // sg_ prefix was chosen as a dummy to decode from base58Check
+      await this.$store.dispatch('invites/claim', TxBuilderHelper.decode(`sg_${this.secretKey}`, 'sg'));
       await this.$store.dispatch('modals/open', {
         name: 'default',
         msg: 'You have successfully claimed tokens by the invite link',

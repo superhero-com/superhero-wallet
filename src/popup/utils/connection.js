@@ -1,4 +1,4 @@
-import genUuid from 'uuid';
+import { v4 as genUuid } from 'uuid';
 import '../../lib/initPolyfills';
 
 let internalPostMessage;

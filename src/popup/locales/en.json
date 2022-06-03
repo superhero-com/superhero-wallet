@@ -581,6 +581,7 @@
         "mobile-app": "Mobile app"
       },
       "webVersion": "Or continue with our web version",
+      "mobileVersion": "More than just a way to receive, store & send coins on the aeternity blockchain",
       "securingAccount": "Securing your account",
       "generateWallet": "Generate New Wallet",
       "importWallet": "Retrieve existing account",

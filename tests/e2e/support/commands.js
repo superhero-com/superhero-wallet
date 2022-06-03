@@ -1,5 +1,5 @@
 import '../../../src/lib/initPolyfills';
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { formatDate, formatTime, getLoginState } from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {

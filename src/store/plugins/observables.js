@@ -12,6 +12,7 @@ import {
   setBalanceLocalStorage,
   getBalanceLocalStorage,
 } from '../../popup/utils/helper';
+import { AGGREGATOR_URL } from '../../popup/utils/constants';
 
 export default (store) => {
   // eslint-disable-next-line no-underscore-dangle
@@ -82,8 +83,8 @@ export default (store) => {
     chainName: store.state.chainNames?.[sender],
     path:
       entityType === 'TIP'
-        ? `https://superhero.com/tip/${entityId}`
-        : `https://superhero.com/tip/${sourceId}/comment/${entityId}`,
+        ? `${AGGREGATOR_URL}tip/${entityId}`
+        : `${AGGREGATOR_URL}tip/${sourceId}/comment/${entityId}`,
   });
 
   const notifications$ = createSdkObservable(
@@ -96,7 +97,7 @@ export default (store) => {
     notifications: notifications$,
     balance: balance$,
     balances: balances$,
-    topBlockHeight: createSdkObservable(async (sdk) => (await sdk.topBlock()).height, 0),
+    topBlockHeight: createSdkObservable(async (sdk) => (await sdk.api.getTopHeader()).height, 0),
     tokenBalance: watchAsObservable(
       ({ fungibleTokens: { selectedToken } }, tokens) => tokens?.[selectedToken]?.balance,
       { immediate: true },

@@ -2,8 +2,8 @@ import BigNumber from 'bignumber.js';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { Crypto, TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
-import { defaultNetworks, TX_TYPE_MDW } from '../popup/utils/constants';
+import { TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
+import { AVATAR_URL, defaultNetworks, TX_TYPE_MDW } from '../popup/utils/constants';
 import {
   checkHashType,
   convertToken,
@@ -17,7 +17,7 @@ const getHdWalletAccount = (wallet, accountIdx = 0) => {
   return {
     ...keyPair,
     idx: accountIdx,
-    address: Crypto.aeEncodeKey(keyPair.publicKey),
+    address: TxBuilderHelper.encode(keyPair.publicKey, 'ak'),
   };
 };
 
@@ -67,7 +67,7 @@ export default {
     return networks[network];
   },
   getProfileImage: (_, { activeNetwork }) => (address) => `${activeNetwork.backendUrl}/profile/image/${address}`,
-  getAvatar: () => (address) => `https://avatars.z52da5wt.xyz/${address}`,
+  getAvatar: () => (address) => `${AVATAR_URL}${address}`,
   tippingSupported(state, { activeNetwork }) {
     return (
       ['ae_mainnet', 'ae_uat'].includes(activeNetwork.networkId) || process.env.RUNNING_IN_TESTS
@@ -110,7 +110,7 @@ export default {
   getTxFee: () => (transaction) => +aettosToAe(
     new BigNumber(transaction.fee || transaction.tx?.fee || 0),
   ),
-  getTxDirection: (_, { account: { address } }) => ({ tx }) => (['senderId', 'accountId', 'ownerId', 'callerId'].map((key) => tx?.[key]).includes(address)
+  getTxDirection: (_, { account: { address } }) => ({ tx }) => (['senderId', 'accountId', 'ownerId', 'callerId', 'payerId'].map((key) => tx?.[key]).includes(address)
     ? 'sent'
     : 'received'),
   getTxTipUrl: () => (transaction) => (
@@ -119,6 +119,7 @@ export default {
       || (!transaction.pending
         && !transaction.claim
         && transaction.tx.log?.[0]
+        && transaction.function === 'tip'
         && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
       || categorizeContractCallTxObject(transaction)?.url
       || ''

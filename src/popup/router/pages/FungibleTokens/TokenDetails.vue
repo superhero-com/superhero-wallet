@@ -20,7 +20,7 @@
           <ReceiveIcon />{{ $t('pages.token-details.receive') }}
         </BoxButton>
         <BoxButton
-          v-if="UNFINISHED_FEATURES && id === 'aeternity'"
+          v-if="id === 'aeternity'"
           fill="alternative"
           @click.native="proceed({ name: 'buy' })"
         >
@@ -140,7 +140,6 @@ export default {
   data() {
     return {
       activeTab: 'details',
-      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
   subscriptions() {

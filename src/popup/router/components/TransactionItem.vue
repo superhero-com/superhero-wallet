@@ -55,7 +55,6 @@ export default {
       'getTxSymbol',
       'getTxType',
       'getTxDirection',
-      'getTxTipUrl',
       'isTxAex9',
     ]),
     txType() {

@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
-import { unionBy, isEqual } from 'lodash-es';
+import { unionBy, isEqual, isEmpty } from 'lodash-es';
 import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
-import { ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
+import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 
 export default (store) => {
   store.registerModule('fungibleTokens', {
@@ -65,6 +65,8 @@ export default (store) => {
           `${activeNetwork.middlewareUrl}/aex9/by_name`,
         ).catch(handleUnknownError);
 
+        if (isEmpty(response) || typeof response !== 'object') return commit('setAvailableTokens', {});
+
         const availableTokens = response.reduce((obj, { contract_id: contract, ...other }) => ({
           ...obj, [contract]: { contract, ...other },
         }), {});
@@ -76,40 +78,50 @@ export default (store) => {
         commit,
       }) {
         accounts.map(async ({ address }) => {
-          const tokens = await fetchJson(
-            `${activeNetwork.middlewareUrl}/aex9/balances/account/${address}`,
-          ).catch(handleUnknownError);
+          let selectedToken = null;
+          try {
+            if (isEmpty(availableTokens)) return;
+            const tokens = await fetchJson(
+              `${activeNetwork.middlewareUrl}/aex9/balances/account/${address}`,
+            ).catch(handleUnknownError);
 
-          const selectedToken = store.state.fungibleTokens.tokens[address]?.selectedToken;
+            if (isEmpty(tokens) || typeof tokens !== 'object') return;
 
-          commit('resetTokenBalances', address);
+            selectedToken = store.state.fungibleTokens.tokens[address]?.selectedToken;
 
-          tokens.filter(({ amount }) => amount).map(({ amount, contract_id: contract }) => {
-            const token = availableTokens[contract];
-            const balance = convertToken(amount, -token.decimals);
-            const convertedBalance = balance.toFixed(2);
-            const objectStructure = {
-              ...token,
-              value: contract,
-              text: `${convertedBalance} ${token.symbol}`,
-              contract,
-              balance,
-              convertedBalance,
-            };
+            commit('resetTokenBalances', address);
 
-            return commit('addTokenBalance', { address, token: objectStructure });
-          });
-          commit('setSelectedToken',
-            {
-              address,
-              token: (store.state.fungibleTokens.tokens?.[address]?.tokenBalances || [])
-                .find((t) => t.contract === selectedToken?.contract),
+            tokens.filter(({ amount }) => amount).map(({ amount, contract_id: contract }) => {
+              const token = availableTokens[contract];
+              if (!token) return null;
+              const balance = convertToken(amount, -token.decimals);
+              const convertedBalance = balance.toFixed(2);
+              const objectStructure = {
+                ...token,
+                value: contract,
+                text: `${convertedBalance} ${token.symbol}`,
+                contract,
+                balance,
+                convertedBalance,
+              };
+
+              return commit('addTokenBalance', { address, token: objectStructure });
             });
+          } catch (e) {
+            handleUnknownError(e);
+          } finally {
+            commit('setSelectedToken',
+              {
+                address,
+                token: (store.state.fungibleTokens.tokens?.[address]?.tokenBalances || [])
+                  .find((t) => t.contract === selectedToken?.contract),
+              });
+          }
         });
       },
       async getAeternityData({ rootState: { current }, commit }) {
         const [aeternityData] = await fetchJson(
-          `https://api.coingecko.com/api/v3/coins/markets?ids=aeternity&vs_currency=${current.currency}`,
+          `${CURRENCY_URL}${current.currency}`,
         ).catch((e) => {
           handleUnknownError(e);
           return [];
@@ -121,7 +133,8 @@ export default (store) => {
         amount,
       ) {
         const { selectedToken } = tokens[account.address];
-        const tokenContract = await sdk.getContractInstance(FUNGIBLE_TOKEN_CONTRACT, {
+        const tokenContract = await sdk.getContractInstance({
+          source: FUNGIBLE_TOKEN_CONTRACT,
           contractAddress: selectedToken.contract,
         });
         const { decodedResult } = await tokenContract.methods.allowance({
@@ -142,7 +155,8 @@ export default (store) => {
         { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
         [toAccount, amount, option],
       ) {
-        const tokenContract = await sdk.getContractInstance(FUNGIBLE_TOKEN_CONTRACT, {
+        const tokenContract = await sdk.getContractInstance({
+          source: FUNGIBLE_TOKEN_CONTRACT,
           contractAddress: tokens[account.address].selectedToken.contract,
         });
         return tokenContract.methods.transfer(
@@ -155,7 +169,8 @@ export default (store) => {
         { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
         [amount, posAddress, invoiceId, option],
       ) {
-        const tokenContract = await sdk.getContractInstance(ZEIT_TOKEN_INTERFACE, {
+        const tokenContract = await sdk.getContractInstance({
+          source: ZEIT_TOKEN_INTERFACE,
           contractAddress: tokens[account.address].selectedToken.contract,
         });
         return tokenContract.methods.burn_trigger_pos(
