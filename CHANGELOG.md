@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.8](https://github.com/aeternity/superhero-wallet/compare/v0.9.7...v0.9.8) (2022-05-29)
+
+
+### Features
+
+* enable simplex ([2bc57dc](https://github.com/aeternity/superhero-wallet/commit/2bc57dca407731ad1f52afe9c525736fb3a0ff4c))
+
+
+### Bug Fixes
+
+* **account-info:** show default account name ([797e226](https://github.com/aeternity/superhero-wallet/commit/797e22650e167ec5a8b3aacba82924728b67cf71))
+* **claim:** check name fee using new sdk ([f45088d](https://github.com/aeternity/superhero-wallet/commit/f45088d806a2b8b06a4523cec2222b7166361926))
+* **deeplink-api:** fix special symbols encoding in callback url ([e076235](https://github.com/aeternity/superhero-wallet/commit/e0762350d14064571a55b58dc11721ff692c53f3))
+* **deeplink-api:** open all callback urls in the same tab ([a4ae911](https://github.com/aeternity/superhero-wallet/commit/a4ae911320d96bed242cf13773dcd321814c6c3c))
+* **fungible-tokens:** handle errors on update tokens info ([09b1d46](https://github.com/aeternity/superhero-wallet/commit/09b1d46d59c6261920e5c1c9450df84a50c8a16b))
+* **invite-item:** copy the link to the clipboard ([5d85482](https://github.com/aeternity/superhero-wallet/commit/5d85482c570d8328c40ca1dd506bcf6a6c02e528))
+* **names:** get auctions list using new middleware ([78b2fd7](https://github.com/aeternity/superhero-wallet/commit/78b2fd7612991f7445003c3c86cae06be421a612))
+* **names:** load owned names from both nodes ([260178e](https://github.com/aeternity/superhero-wallet/commit/260178e62bd1b79bab35423f65c8981ed2257656))
+* **transactions:** add payerId for comparison in tx direction ([f90a095](https://github.com/aeternity/superhero-wallet/commit/f90a095726330050887b2f7f9e90bfd55660b377))
+* **transactions:** show tipped url only in transaction with function equal to 'tip' ([438db45](https://github.com/aeternity/superhero-wallet/commit/438db45acb64416b4caece779b8cfb02d9c3c2ea))
+* **unit-tests:** use sdk modules instead of inside imports ([39344e2](https://github.com/aeternity/superhero-wallet/commit/39344e2a6e906c4affe14aac9c6c2839c685c295))
+* welcome screen message for mobile ([1f99246](https://github.com/aeternity/superhero-wallet/commit/1f9924681380982ebfc74dde940b28d61839394a))
+
+
+### Tests
+
+* fix snapshots test ([6e8f608](https://github.com/aeternity/superhero-wallet/commit/6e8f60811202dce53d04c8ccb75b87d9e867acff))
+
+
+### Maintenance
+
+* change `==` to `===` in ToS ([70b1588](https://github.com/aeternity/superhero-wallet/commit/70b1588c1b17a0b07e540652e647db2559488136))
+* extract links to constants.js ([ebb9a73](https://github.com/aeternity/superhero-wallet/commit/ebb9a7338d72b9b9223e216f5315bf6aa1dc8955))
+* remove unused/unnecessary config files ([8b84e60](https://github.com/aeternity/superhero-wallet/commit/8b84e607e8f9006ef56a6680e0a5329ac31f138c))
+* update dependencies ([23669de](https://github.com/aeternity/superhero-wallet/commit/23669debc9c9dc61a1fdb85d5a6196898f883fd3))
+* update fontsource/ibm-plex-sans ([497949c](https://github.com/aeternity/superhero-wallet/commit/497949ce0a15edf0f85380eca0b84eaac3ed4e48))
+* update package-lock to lockfileVersion 2 ([108d4df](https://github.com/aeternity/superhero-wallet/commit/108d4df24feaf0764786111507daf5d5366a57c1))
+* update SDK to 11.0.1 ([bd25325](https://github.com/aeternity/superhero-wallet/commit/bd2532543f5678221b50bacc6fcc298ab36f2849))
+* update uuid ([2604f11](https://github.com/aeternity/superhero-wallet/commit/2604f115b1c98974198052f063d924164f910fe2))
+
 ### [0.9.7](https://github.com/aeternity/superhero-wallet/compare/v0.9.6...v0.9.7) (2022-03-22)
 
 
