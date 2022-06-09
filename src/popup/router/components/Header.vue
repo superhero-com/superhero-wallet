@@ -168,7 +168,7 @@ export default {
   }
 
   top: 0;
-  z-index: 1;
+  z-index: 2;
   height: calc(48px + env(safe-area-inset-top));
   background-color: variables.$color-bg-3;
   display: flex;
