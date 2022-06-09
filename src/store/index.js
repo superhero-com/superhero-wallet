@@ -46,7 +46,6 @@ export default new Vuex.Store({
     tippingV2: null,
     nodeStatus: '',
     currencies: {},
-    nextCurrenciesFetch: null,
     notifications: [],
     notificationSettings: [],
     chainNames: null,

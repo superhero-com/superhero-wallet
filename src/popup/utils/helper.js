@@ -197,3 +197,8 @@ export const readValueFromClipboard = async () => {
   }
   return value;
 };
+
+export const executeAndSetInterval = (handler, timeout) => {
+  handler();
+  return setInterval(handler, timeout);
+};
