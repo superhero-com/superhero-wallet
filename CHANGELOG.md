@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.9](https://github.com/aeternity/superhero-wallet/compare/v0.9.8...v0.9.9) (2022-06-10)
+
+
+### Bug Fixes
+
+* open simplex in the new tab on every platform ([5ed9c05](https://github.com/aeternity/superhero-wallet/commit/5ed9c059b6d72aa4101445360216769e26c48770))
+
 ### [0.9.8](https://github.com/aeternity/superhero-wallet/compare/v0.9.7...v0.9.8) (2022-05-29)
 
 
