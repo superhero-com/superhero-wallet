@@ -1,5 +1,14 @@
 <template>
+  <a
+    v-if="isExternalLink"
+    :class="['box-button', fill ]"
+    :href="to"
+    target="_blank"
+  >
+    <slot />
+  </a>
   <RouterLink
+    v-else
     :class="['box-button', fill ]"
     :to="to"
   >
@@ -16,6 +25,7 @@ export default {
       validator: (value) => ['primary', 'alternative'].includes(value),
       default: 'primary',
     },
+    isExternalLink: { type: Boolean },
   },
 };
 </script>
