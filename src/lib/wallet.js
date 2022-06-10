@@ -2,7 +2,7 @@ import { Node, RpcWallet, genSwaggerClient } from '@aeternity/aepp-sdk';
 import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { camelCase, isEqual, times } from 'lodash-es';
-import { fetchJson, IN_FRAME } from '../popup/utils/helper';
+import { fetchJson, IN_FRAME, executeAndSetInterval } from '../popup/utils/helper';
 import store from '../store';
 import { App } from '../store/modules/permissions';
 import Logger from './logger';
@@ -211,10 +211,6 @@ export default async function initSdk() {
         window.parent,
         ...times(window.parent.frames.length, (i) => window.parent.frames[i]),
       ];
-      const executeAndSetInterval = (handler, timeout) => {
-        handler();
-        return setInterval(handler, timeout);
-      };
 
       const connectedFrames = new Set();
       executeAndSetInterval(

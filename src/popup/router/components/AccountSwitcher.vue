@@ -70,6 +70,7 @@ export default {
   flex-direction: column;
   border-radius: 0 0 10px 10px;
   padding-top: 12px;
+  z-index: 1;
 
   &.notification-above {
     margin-top: 16px;

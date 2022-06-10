@@ -57,9 +57,6 @@ export default {
   setCurrencies(state, payload) {
     state.currencies = payload;
   },
-  setNextCurrencyFetch(state, payload) {
-    state.nextCurrenciesFetch = payload;
-  },
   addNotification(state, payload) {
     state.notifications = [
       ...state.notifications,

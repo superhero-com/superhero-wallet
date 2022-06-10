@@ -12,6 +12,7 @@ import {
   postJson,
   handleUnknownError,
   isAccountNotFoundError,
+  executeAndSetInterval,
 } from '../popup/utils/helper';
 import { i18n } from './plugins/languages';
 import { CURRENCIES_URL } from '../popup/utils/constants';
@@ -81,17 +82,15 @@ export default {
     txs = orderBy(flatten(txs), ['microTime'], ['desc']);
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);
   },
-
-  async getCurrencies({ state: { nextCurrenciesFetch }, commit }) {
-    if (!nextCurrenciesFetch || nextCurrenciesFetch <= new Date().getTime()) {
+  pollCurrencies({ commit }) {
+    executeAndSetInterval(async () => {
       try {
         const { aeternity } = await fetchJson(CURRENCIES_URL);
         commit('setCurrencies', aeternity);
-        commit('setNextCurrencyFetch', new Date().getTime() + 3600000);
       } catch (e) {
         handleUnknownError(e);
       }
-    }
+    }, 3600000);
   },
   async getWebPageAddresses({ state: { sdk } }) {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
