@@ -162,8 +162,11 @@ body {
   color: variables.$color-white;
 
   .main {
-    padding-bottom: 48px;
     padding-bottom: calc(48px + env(safe-area-inset-bottom));
+
+    @include mixins.mobile {
+      min-height: 100vh;
+    }
 
     @include mixins.desktop {
       min-height: 100%;
@@ -175,12 +178,10 @@ body {
     background: variables.$color-bg-3;
 
     .main {
-      padding-top: 48px;
       padding-top: calc(48px + env(safe-area-inset-top));
 
       @include mixins.desktop {
         padding-top: 0;
-        min-height: calc(100% - 48px);
         min-height: calc(100% - 48px - env(safe-area-inset-top));
       }
     }
