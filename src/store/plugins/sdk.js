@@ -164,7 +164,8 @@ export default (store) => {
           },
           onSign: window.IS_EXTENSION_BACKGROUND ? signCbBackground.bind(null, 'sign') : signCb,
           onMessageSign: window.IS_EXTENSION_BACKGROUND ? signCbBackground.bind(null, 'messageSign') : signCb,
-          onAskAccounts: cbAccept,
+          onAskAccounts: (_, { accept }) => accept(store.getters.accounts
+            .map(({ address }) => address)),
         });
         commit('setSdkReady');
       },
@@ -182,20 +183,20 @@ export default (store) => {
   );
 
   store.watch(
-    (state, getters) => getters.accounts.length,
+    ({ accounts: { activeIdx } }, { accounts }) => accounts?.length + activeIdx,
     async () => {
       await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
-      sdk.accounts = store.getters.accounts
-        .reduce((p, { address }) => ({ ...p, [address]: {} }), {});
-    },
-    { immediate: true },
-  );
-
-  store.watch(
-    ({ accounts: { activeIdx } }) => activeIdx,
-    async (accountIdx) => {
-      await store._watcherVM.$watchUntilTruly(() => !isEmpty(store.getters['sdkPlugin/sdk']?.accounts));
-      sdk.selectAccount(store.getters.accounts[accountIdx].address);
+      Object.values(sdk.rpcClients)
+        .filter((client) => client.isConnected() && client.isSubscribed())
+        .forEach((client) => client.setAccounts({
+          current: { [store.getters.account.address]: {} },
+          connected: {
+            ...store.getters.accounts
+              .reduce((p, { address }) => ({
+                ...p, ...address !== store.getters.account.address ? { [address]: {} } : {},
+              }), {}),
+          },
+        }));
     },
     { immediate: true },
   );
