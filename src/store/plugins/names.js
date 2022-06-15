@@ -182,8 +182,10 @@ export default (store) => {
     async (middleware) => {
       if (!middleware) return;
 
-      await store.dispatch('names/fetchOwned');
-      await store.dispatch('names/setDefaults');
+      await Promise.all([
+        store.dispatch('names/fetchOwned').catch(() => {}),
+        store.dispatch('names/setDefaults'),
+      ]);
 
       const height = await store.state.sdk.height();
       await Promise.all(
@@ -200,8 +202,10 @@ export default (store) => {
     ({ accounts: { hdWallet: { nextAccountIdx } } }) => nextAccountIdx,
     async () => {
       if (!store.state.middleware) return;
-      await store.dispatch('names/fetchOwned');
-      await store.dispatch('names/setDefaults');
+      await Promise.all([
+        store.dispatch('names/fetchOwned').catch(() => {}),
+        store.dispatch('names/setDefaults'),
+      ]);
     },
   );
 };
