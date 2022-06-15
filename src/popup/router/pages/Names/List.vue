@@ -11,7 +11,7 @@
       />
     </template>
     <AnimatedSpinner
-      v-else-if="loading"
+      v-else-if="areNamesFetching"
       class="spinner"
     />
     <RegisterName
@@ -29,9 +29,9 @@ import AnimatedSpinner from '../../../../icons/animated-spinner.svg?skip-optimiz
 
 export default {
   components: { NameItem, AnimatedSpinner, RegisterName },
-  data: () => ({ loading: false }),
   computed: {
     ...mapGetters(['account']),
+    ...mapState('names', ['areNamesFetching']),
     ...mapState({
       namesForAccount({ names: { owned } }, { account }) {
         return owned.filter((n) => n.owner === account.address);
@@ -39,15 +39,8 @@ export default {
     }),
   },
   mounted() {
-    const id = setInterval(this.updateNames, 10000);
+    const id = setInterval(() => this.$store.dispatch('names/fetchOwned'), 10000);
     this.$once('hook:destroyed', () => clearInterval(id));
-  },
-  methods: {
-    async updateNames() {
-      this.loading = true;
-      await this.$store.dispatch('names/fetchOwned');
-      this.loading = false;
-    },
   },
 };
 </script>

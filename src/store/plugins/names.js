@@ -14,6 +14,7 @@ export default (store) => {
       preferred: {},
       auctions: {},
       pendingAutoExtendNames: [],
+      areNamesFetching: false,
     },
     getters: {
       get: ({ owned }) => (name) => owned.find((n) => n.name === name),
@@ -36,6 +37,9 @@ export default (store) => {
         && getAuction(name).bids.reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b)),
     },
     mutations: {
+      setAreNamesFetching(state, payload) {
+        state.areNamesFetching = payload;
+      },
       set(state, names) {
         state.owned = names;
       },
@@ -69,6 +73,7 @@ export default (store) => {
         dispatch,
       }) {
         if (!middleware) return;
+        commit('setAreNamesFetching', true);
         const getPendingNameClaimTransactions = (address) => dispatch('fetchPendingTransactions', address, { root: true }).then((transactions) => transactions
           .filter(({ tx: { type } }) => type === 'NameClaimTx')
           .map(({ tx, ...otherTx }) => ({
@@ -94,6 +99,7 @@ export default (store) => {
         ).then((arr) => arr.flat(2));
 
         commit('set', names);
+        commit('setAreNamesFetching', false);
       },
       async fetchAuctions({ rootState: { middleware } }) {
         if (!middleware) return [];
