@@ -39,7 +39,7 @@ export default {
     }),
   },
   mounted() {
-    const id = setInterval(() => this.updateNames, 10000);
+    const id = setInterval(this.updateNames, 10000);
     this.$once('hook:destroyed', () => clearInterval(id));
   },
   methods: {
