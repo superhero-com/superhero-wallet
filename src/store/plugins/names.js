@@ -203,6 +203,5 @@ export default (store) => {
       await store.dispatch('names/fetchOwned');
       await store.dispatch('names/setDefaults');
     },
-    { immediate: true },
   );
 };
