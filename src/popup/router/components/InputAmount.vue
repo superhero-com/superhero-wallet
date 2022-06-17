@@ -58,7 +58,7 @@ export default {
   },
   computed: {
     ...mapState(['sdk']),
-    ...mapGetters(['formatCurrency']),
+    ...mapGetters(['formatCurrency', 'account']),
     ...mapGetters('fungibleTokens', ['selectedToken']),
     hasError() {
       return this.$validator.errors.has('amount');
