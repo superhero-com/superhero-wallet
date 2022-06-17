@@ -46,8 +46,8 @@ export default {
   },
   methods: {
     getSymbol() {
-      return this.transaction.contractId
-        ? this.availableTokens[this.transaction.contractId].symbol
+      return this.transaction.tx.contractId
+        ? this.availableTokens[this.transaction.tx.contractId].symbol
         : 'AE';
     },
   },
