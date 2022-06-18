@@ -1,5 +1,5 @@
 import {
-  flatten, orderBy, uniq,
+  flatten, orderBy, uniq, uniqBy,
 } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
@@ -38,6 +38,30 @@ export default {
       .filter((transaction) => !transactions.pending.find((tx) => tx?.hash === transaction?.hash))
       .map((transaction) => ({ ...transaction, pending: true }));
   },
+  // TODO: remove uniqBy and with the `recent` option fetch only recent transactions after https://github.com/aeternity/tipping-community-backend/issues/405, 406 will be resolved
+  async fetchTipWithdrawnTransactions({ state, getters, commit }, recent) {
+    const { address } = getters.account;
+    if (state?.transactions?.tipWithdrawnTransactions?.length && !recent) {
+      return state.transactions.tipWithdrawnTransactions;
+    }
+    const response = await fetchJson(
+      `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn`,
+    );
+    if (response.message) return [];
+    const tipWithdrawnTransactions = (uniqBy(response, 'hash').map(({ amount, ...t }) => ({
+      tx: {
+        address,
+        amount,
+        contractId: t.contract,
+        type: SCHEMA.TX_TYPE.contractCall,
+      },
+      ...t,
+      microTime: new Date(t.createdAt).getTime(),
+      claim: true,
+    })));
+    commit('setTipWithdrawnTransactions', tipWithdrawnTransactions);
+    return tipWithdrawnTransactions;
+  },
   async fetchTransactions({
     state, getters, dispatch, commit,
   }, { limit, recent }) {
@@ -54,22 +78,7 @@ export default {
         })
         .catch(() => []),
       dispatch('fetchPendingTransactions', address),
-      fetchJson(
-        `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${
-          recent ? `&limit=${limit}` : ''
-        }`,
-      )
-        .then((response) => response.map(({ amount, ...t }) => ({
-          tx: {
-            address,
-            amount,
-            contractId: t.contract,
-            type: SCHEMA.TX_TYPE.contractCall,
-          },
-          ...t,
-          microTime: t.name === 'TipWithdrawn' ? Date(t.createdAt).getTime() : t.time,
-          claim: true,
-        }))).catch(() => []),
+      dispatch('fetchTipWithdrawnTransactions', recent),
     ]);
 
     const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
