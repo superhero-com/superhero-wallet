@@ -78,16 +78,17 @@ export default {
         })
         .catch(() => []),
       dispatch('fetchPendingTransactions', address),
-      dispatch('fetchTipWithdrawnTransactions', recent),
     ]);
 
     const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
     const amountOfTx = flatten(txs).length;
-    (await dispatch('fungibleTokens/getTokensHistory')).forEach((f) => {
-      if (minMicroTime < f.microTime || (amountOfTx === 0 && minMicroTime > f.microTime)) {
-        txs[0].push(f);
-      }
-    });
+    flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory'),
+      dispatch('fetchTipWithdrawnTransactions', recent)]))
+      .forEach((f) => {
+        if (minMicroTime < f.microTime || (amountOfTx === 0 && minMicroTime > f.microTime)) {
+          txs[0].push(f);
+        }
+      });
     txs = orderBy(flatten(txs), ['microTime'], ['desc']);
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);
   },
