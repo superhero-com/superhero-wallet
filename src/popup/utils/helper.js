@@ -120,7 +120,7 @@ export const checkHashType = (hash) => {
     endpoint = 'transactions';
   } else if (accountPublicKeyRegex.test(hash)) {
     endpoint = 'account/transactions';
-  } else if (nameRegex.test(hash) || hash.endsWith('.chain')) {
+  } else if (nameRegex.test(hash) || hash?.endsWith('.chain')) {
     endpoint = 'names';
   } else {
     valid = false;
