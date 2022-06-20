@@ -7,11 +7,11 @@ import { CONNECTION_TYPES } from './constants';
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
 
-export const aeToAettos = (v) => AmountFormatter.formatAmount(v, {
+export const aeToAettos = (v) => AmountFormatter.formatAmount(v.toString(), {
   denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
   targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
 });
-export const aettosToAe = (v) => AmountFormatter.formatAmount(v, {
+export const aettosToAe = (v) => AmountFormatter.formatAmount(v.toString(), {
   denomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
   targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
 });
