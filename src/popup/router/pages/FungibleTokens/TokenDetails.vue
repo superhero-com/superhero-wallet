@@ -22,7 +22,8 @@
         <BoxButton
           v-if="id === 'aeternity'"
           fill="alternative"
-          @click.native="proceed({ name: 'buy' })"
+          :to="SIMPLEX_URL"
+          is-external-link
         >
           <BuyIcon />{{ $t('pages.fungible-tokens.buyAe') }}
         </BoxButton>
@@ -120,6 +121,7 @@ import BoxButton from '../../components/BoxButton.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
 import TransactionList from '../../components/TransactionList.vue';
+import { SIMPLEX_URL } from '../../../utils/constants';
 
 export default {
   components: {
@@ -140,6 +142,7 @@ export default {
   data() {
     return {
       activeTab: 'details',
+      SIMPLEX_URL,
     };
   },
   subscriptions() {
