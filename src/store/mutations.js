@@ -14,6 +14,7 @@ export default {
     state.transactions.tipWithdrawnTransactions = payload;
   },
   initTransactions(state) {
+    state.transactions.pending = [];
     state.transactions.loaded = [];
     state.transactions.nextPageUrl = '';
     state.transactions.tipWithdrawnTransactions = [];
