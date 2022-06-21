@@ -1,49 +1,13 @@
-import { isEqual } from 'lodash-es';
-import { Universal, Node } from '@aeternity/aepp-sdk';
 import { setContractInstance, contractCall, getAddressByNameEntry } from '../popup/utils/helper';
-import Logger from '../lib/logger';
 import store from './store';
 
-let sdk;
 let tippingContract;
 
-(async () => {
-  await store.dispatch('ensureRestored');
-  store.watch(
-    (state, { activeNetwork }) => activeNetwork,
-    async (network, oldNetwork) => {
-      if (isEqual(network, oldNetwork)) return;
-      if (!sdk) return;
-      sdk.pool.delete(network.name);
-      sdk.addNode(network.name, await Node({ url: network.url }), true);
-    },
-  );
-})();
-
-export const getSDK = async () => {
-  if (!sdk) {
-    try {
-      await store.dispatch('ensureRestored');
-      const network = store.getters.activeNetwork;
-      const node = await Node({ url: network.url });
-      sdk = await Universal({
-        nodes: [{ name: network.name, instance: node }],
-        networkId: network.networkId,
-        nativeMode: true,
-        compilerUrl: network.compilerUrl,
-      });
-    } catch (e) {
-      Logger.write(e);
-    }
-  }
-
-  return sdk;
-};
-
 const getAddress = async (name) => {
-  await getSDK();
+  // eslint-disable-next-line no-underscore-dangle
+  await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
   try {
-    return getAddressByNameEntry(await sdk.api.getNameEntryByName(name));
+    return getAddressByNameEntry(await store.getters['sdkPlugin/sdk'].api.getNameEntryByName(name));
   } catch (e) {
     return null;
   }
@@ -54,8 +18,9 @@ export const getAddressFromChainName = async (names) => (Array.isArray(names)
 
 export const getTippingContractInstance = async (tx) => {
   if (tippingContract) return tippingContract;
-  await getSDK();
-  tippingContract = await setContractInstance(tx, sdk, tx.address);
+  // eslint-disable-next-line no-underscore-dangle
+  await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
+  tippingContract = await setContractInstance(tx, store.getters['sdkPlugin/sdk'], tx.address);
   return tippingContract;
 };
 

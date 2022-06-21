@@ -220,6 +220,5 @@ export default (store) => {
       if (!store.state.middleware) return;
       await store.dispatch('fungibleTokens/loadTokenBalances');
     },
-    { immediate: true },
   );
 };

@@ -101,12 +101,6 @@ export default {
   setLoginTargetLocation(state, location) {
     state.loginTargetLocation = location;
   },
-  setSdkAccounts({ sdk }, list) {
-    sdk.accounts = list.reduce((p, { address }) => ({ ...p, [address]: {} }), {});
-  },
-  selectSdkAccount({ sdk }, address) {
-    sdk.selectAccount(address);
-  },
   toggleMinifiedCard(state) {
     state.cardMinified = !state.cardMinified;
   },
