@@ -10,6 +10,10 @@ Object.assign(Vue.prototype, {
   $t: () => 'locale-specific-text',
 });
 
+jest.mock('detect-browser', () => ({
+  detect: () => ({}),
+}));
+
 describe('Pages', () => {
   [{
     name: 'Index',
