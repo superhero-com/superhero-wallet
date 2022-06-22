@@ -47,14 +47,14 @@ export default (store) => {
       resetTokens(state) {
         state.tokens = {};
       },
-      addTokenBalance(state, { address, token }) {
+      addTokenBalance(state, { address, balances }) {
         if (!(address in state.tokens)) {
           Vue.set(state.tokens, address, { selectedToken: null, tokenBalances: [] });
         }
         Vue.set(
           state.tokens[address],
           'tokenBalances',
-          unionBy([token], state.tokens[address].tokenBalances, 'contract'),
+          unionBy(balances, state.tokens[address].tokenBalances, 'contract'),
         );
       },
       setAePublicData(state, payload) {
@@ -92,8 +92,9 @@ export default (store) => {
             selectedToken = store.state.fungibleTokens.tokens[address]?.selectedToken;
 
             commit('resetTokenBalances', address);
-            // TODO: remove uniqBy after https://github.com/aeternity/ae_mdw/issues/735 is fixed and release
-            uniqBy(tokens, 'contract_id').filter(({ amount }) => amount).map(({ amount, contract_id: contract }) => {
+
+            // TODO: remove uniqBy after https://github.com/aeternity/ae_mdw/issues/735 is fixed and released
+            const balances = uniqBy(tokens, 'contract_id').filter(({ amount }) => amount).map(({ amount, contract_id: contract }) => {
               const token = availableTokens[contract];
               if (!token) return null;
               const balance = convertToken(amount, -token.decimals);
@@ -107,8 +108,9 @@ export default (store) => {
                 convertedBalance,
               };
 
-              return commit('addTokenBalance', { address, token: objectStructure });
+              return objectStructure;
             });
+            commit('addTokenBalance', { address, balances });
           } catch (e) {
             handleUnknownError(e);
           } finally {
