@@ -1,7 +1,9 @@
 import Vue from 'vue';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
-import { unionBy, isEqual, isEmpty } from 'lodash-es';
+import {
+  unionBy, isEqual, isEmpty, uniqBy,
+} from 'lodash-es';
 import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
 import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 
@@ -90,8 +92,8 @@ export default (store) => {
             selectedToken = store.state.fungibleTokens.tokens[address]?.selectedToken;
 
             commit('resetTokenBalances', address);
-
-            tokens.filter(({ amount }) => amount).map(({ amount, contract_id: contract }) => {
+            // TODO: remove uniqBy after https://github.com/aeternity/ae_mdw/issues/735 is fixed and release
+            uniqBy(tokens, 'contract_id').filter(({ amount }) => amount).map(({ amount, contract_id: contract }) => {
               const token = availableTokens[contract];
               if (!token) return null;
               const balance = convertToken(amount, -token.decimals);
