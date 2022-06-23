@@ -17,7 +17,7 @@ describe('Test cases for Account Page', () => {
       .contains('Claim your .chain name');
   });
 
-  it('Tip, View-All-Tancastions, Dropdown Buttons And Back to Account', () => {
+  it('Tip, View-All-Transactions, Dropdown Buttons And Back to Account', () => {
     cy.get('[data-cy=tip-button]')
       .should('be.visible')
       .click()

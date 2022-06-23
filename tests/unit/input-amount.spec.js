@@ -7,6 +7,7 @@ import veeValidate from '../../src/store/plugins/veeValidate';
 
 Object.assign(Vue.prototype, {
   $t: () => 'locale-specific-text',
+  $watchUntilTruly: async () => new Promise((res) => setTimeout(res, 500)),
 });
 
 Vue.use(Vuex);
@@ -130,13 +131,10 @@ describe('InputAmount', () => {
       computed: {
         max() { return test.balance || maxBalance; },
       },
-      methods: {
-        fetchFee() { return null; },
-      },
       store,
       attrs: { value: test.value },
       propsData: { ...test.props },
-      data: () => ({ fee: 0.00001794, balance: BigNumber(test.balance || maxBalance) }),
+      data: () => ({ balance: BigNumber(test.balance || maxBalance) }),
     });
 
     // eslint-disable-next-line no-underscore-dangle

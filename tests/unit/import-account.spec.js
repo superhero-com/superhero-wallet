@@ -43,11 +43,11 @@ describe('ImportAccount', () => {
       },
     });
     await wrapper.find('textarea').setValue(test.value);
-    expect(wrapper.contains('[data-cy=import].disabled')).toBe(!test.value);
+    expect(wrapper.find('[data-cy=import].disabled').exists()).toBe(!test.value);
     if (test.value) {
       await wrapper.find('[data-cy=import]').trigger('click');
-      expect(wrapper.contains('[data-cy=import].disabled')).toBe(!test.correct);
-      expect(wrapper.contains('.error-msg')).toBe(!test.correct);
+      expect(wrapper.find('[data-cy=import].disabled').exists()).toBe(!test.correct);
+      expect(wrapper.find('.error-msg').exists()).toBe(!test.correct);
     }
   }));
 });
