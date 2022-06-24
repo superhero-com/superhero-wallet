@@ -37,6 +37,7 @@ export const calculateFee = (type, params) => {
       ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
       abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
       callData: STUB_CALLDATA,
+      gas: 0,
       ...params,
     },
     ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
