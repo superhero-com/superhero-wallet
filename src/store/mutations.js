@@ -10,9 +10,14 @@ export default {
   addTransactions(state, payload) {
     state.transactions.loaded = uniqBy([...state.transactions.loaded, ...payload], 'hash');
   },
+  setTipWithdrawnTransactions(state, payload) {
+    state.transactions.tipWithdrawnTransactions = payload;
+  },
   initTransactions(state) {
+    state.transactions.pending = [];
     state.transactions.loaded = [];
     state.transactions.nextPageUrl = '';
+    state.transactions.tipWithdrawnTransactions = [];
   },
   setTransactionsNextPage(state, pageUrl) {
     state.transactions.nextPageUrl = pageUrl;
