@@ -3,7 +3,9 @@ import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
-import { AVATAR_URL, defaultNetworks, TX_TYPE_MDW } from '../popup/utils/constants';
+import {
+  AVATAR_URL, defaultNetworks, TX_TYPE_MDW, DEX_CONTRACTS,
+} from '../popup/utils/constants';
 import {
   checkHashType,
   convertToken,
@@ -126,4 +128,5 @@ export default {
   ),
   isTxAex9: () => (transaction) => transaction.tx
     && !!categorizeContractCallTxObject(transaction)?.token,
+  getDexContracts: (_, { activeNetwork }) => (DEX_CONTRACTS[activeNetwork.networkId]),
 };
