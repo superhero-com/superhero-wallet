@@ -2,6 +2,7 @@ import { genSwaggerClient } from '@aeternity/aepp-sdk';
 import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { camelCase, isEqual, times } from 'lodash-es';
+import camelcaseKeysDeep from 'camelcase-keys-deep';
 import { fetchJson, IN_FRAME, executeAndSetInterval } from '../popup/utils/helper';
 import store from '../store';
 import Logger from './logger';
@@ -62,6 +63,8 @@ async function initMiddleware() {
     (await genSwaggerClient(middlewareUrl, { spec })).api,
     ([k, v]) => [camelCase(k), v],
   );
+  middleware.fetchByPath = (path) => fetchJson(`${middlewareUrl}${path}`).then(camelcaseKeysDeep);
+
   store.commit('setMiddleware', middleware);
 }
 

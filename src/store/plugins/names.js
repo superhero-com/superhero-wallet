@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import {
-  fetchJson, postJson, checkAddress, checkAensName,
+  fetchJson, postJson, checkAddress, checkAensName, getAllPages,
 } from '../../popup/utils/helper';
 import { i18n } from './languages';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
@@ -103,9 +103,11 @@ export default (store) => {
       },
       async fetchAuctions({ rootState: { middleware } }) {
         if (!middleware) return [];
+
+        // TODO: Switch to onscroll loading after/while resolving https://github.com/aeternity/superhero-wallet/issues/1400
         return (
-          await middleware.getAllAuctions({ by: 'expiration', direction: 'forward' })
-        ).data.map(({ name, info }) => ({
+          await getAllPages(() => middleware.getAllAuctions({ by: 'expiration', direction: 'forward', limit: 100 }), middleware.fetchByPath)
+        ).map(({ name, info }) => ({
           name,
           expiration: info.auctionEnd,
           lastBid: info.lastBid.tx,
