@@ -147,6 +147,11 @@ export const getBalanceLocalStorage = () => (
 );
 
 export const categorizeContractCallTxObject = (transaction) => {
+  if (transaction.incomplete) {
+    return {
+      amount: transaction.amount, token: transaction.tx.contractId, to: transaction.tx.recipientId,
+    };
+  }
   if (transaction.tx.type !== 'ContractCallTx') return null;
   switch (transaction.tx.function) {
     case 'transfer':

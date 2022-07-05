@@ -82,7 +82,7 @@ export default {
 
     const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
     const amountOfTx = flatten(txs).length;
-    flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory'),
+    flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', recent),
       dispatch('fetchTipWithdrawnTransactions', recent)]))
       .forEach((f) => {
         if (minMicroTime < f.microTime || (amountOfTx === 0 && minMicroTime > f.microTime)) {
