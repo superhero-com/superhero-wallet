@@ -10,13 +10,12 @@
       </div>
       <div class="token-actions">
         <BoxButton
+          v-if="+tokenData.convertedBalance"
           @click.native="proceed({ name: 'transfer-send' })"
         >
           <SendIcon />{{ $t('pages.token-details.send') }}
         </BoxButton>
-        <BoxButton
-          @click.native="proceed({ name: 'transfer-receive' })"
-        >
+        <BoxButton @click.native="proceed({ name: 'transfer-receive' })">
           <ReceiveIcon />{{ $t('pages.token-details.receive') }}
         </BoxButton>
         <BoxButton

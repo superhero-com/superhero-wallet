@@ -94,7 +94,7 @@ export default (store) => {
             commit('resetTokenBalances', address);
 
             // TODO: remove uniqBy after https://github.com/aeternity/ae_mdw/issues/735 is fixed and released
-            const balances = uniqBy(tokens, 'contract_id').filter(({ amount }) => amount).map(({ amount, contract_id: contract }) => {
+            const balances = uniqBy(tokens, 'contract_id').map(({ amount, contract_id: contract }) => {
               const token = availableTokens[contract];
               if (!token) return null;
               const balance = convertToken(amount, -token.decimals);

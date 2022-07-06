@@ -109,7 +109,7 @@ export default {
         ? [...(this.aeternityToken ? [this.aeternityToken] : []), ...this.tokenBalances]
         : tokensInfo
       )
-        .filter((token) => token.contract === 'aeternity' || !this.checkZeroBalance(token))
+        .filter((token) => token.contract === 'aeternity' || this.tokenBalances.includes(token))
         .filter(
           (token) => !searchTerm
             || token.symbol.toLowerCase().includes(searchTerm)
