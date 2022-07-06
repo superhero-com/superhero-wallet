@@ -25,7 +25,7 @@
           small
           backgroundless
           icon-text
-          :to="{ name: 'buy' }"
+          :to="SIMPLEX_URL"
         >
           <Buy />
           {{ $t('pages.fungible-tokens.buyAe') }}
@@ -38,6 +38,7 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapState, mapGetters } from 'vuex';
+import { SIMPLEX_URL } from '../../../utils/constants';
 import TokensListItem from './TokensListItem.vue';
 import Button from '../Button.vue';
 import Receive from '../../../../icons/receive.svg?vue-component';
@@ -54,6 +55,9 @@ export default {
     showMyTokens: { type: Boolean },
     searchTerm: { type: String, default: '' },
   },
+  data: () => ({
+    SIMPLEX_URL,
+  }),
   subscriptions() {
     return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
   },
