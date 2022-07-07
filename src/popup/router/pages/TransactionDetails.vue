@@ -1,12 +1,12 @@
 <template>
   <div class="transaction-details">
     <AnimatedSpinner
-      v-if="!transaction"
+      v-if="!transaction || transaction.incomplete"
       class="spinner"
     />
 
     <Plate
-      v-if="transaction"
+      v-if="transaction && !transaction.incomplete"
       class="header"
     >
       <TokenAmount
@@ -18,7 +18,7 @@
       />
     </Plate>
     <div
-      v-if="transaction"
+      v-if="transaction && !transaction.incomplete"
       class="content"
     >
       <TransactionOverview v-bind="transaction" />
@@ -202,7 +202,7 @@ export default {
   },
   async mounted() {
     this.transaction = this.getTx(this.hash);
-    if (!this.transaction) {
+    if (!this.transaction || this.transaction?.incomplete) {
       await this.$watchUntilTruly(() => this.$store.state.middleware);
       this.transaction = await this.$store.state.middleware.getTxByHash(this.hash);
     }

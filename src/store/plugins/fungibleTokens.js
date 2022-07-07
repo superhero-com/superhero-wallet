@@ -47,6 +47,9 @@ export default (store) => {
       resetTokens(state) {
         state.tokens = {};
       },
+      resetTransactions(state) {
+        state.transactions = {};
+      },
       addTokenBalance(state, { address, balances }) {
         if (!(address in state.tokens)) {
           Vue.set(state.tokens, address, { selectedToken: null, tokenBalances: [] });
@@ -184,17 +187,58 @@ export default (store) => {
           option,
         );
       },
-      async getTokensHistory({ rootState, rootGetters: { activeNetwork, account }, commit }) {
+      async getTokensHistory(
+        { state: { transactions }, rootGetters: { activeNetwork, account }, commit }, recent,
+      ) {
         const { address } = account;
-        const rawTransactions = await fetchJson(`${activeNetwork.middlewareUrl}/aex9/transfers/to/${address}`);
+        if (transactions[address]?.length && !recent) return transactions[address];
 
-        const transactions = await Promise.all(
-          rawTransactions.map(async ({ call_txi: index, ...otherTx }) => ({
-            ...(await rootState.middleware.getTxByIndex(index)), ...otherTx,
-          })),
-        );
-        commit('setTransactions', { address, transactions });
-        return transactions;
+        let rawTransactions = [];
+        const lastTransaction = transactions[address]?.[0];
+        if (recent) {
+          let nextPageUrl;
+          let isAllNewTransactionsLoadded = false;
+          while (nextPageUrl !== null && !isAllNewTransactionsLoadded) {
+            // eslint-disable-next-line no-await-in-loop
+            const { data, next } = await (fetchJson(nextPageUrl
+              ? `${activeNetwork.middlewareUrl}/${nextPageUrl}`
+              : `${activeNetwork.middlewareUrl}/v2/aex9/transfers/to/${address}`));
+            if (data?.length) rawTransactions.push(...data);
+            if (data?.some((t) => t?.tx_hash === lastTransaction?.hash)
+            || !transactions[address]?.length) {
+              isAllNewTransactionsLoadded = true;
+            }
+            nextPageUrl = next || null;
+          }
+          if (rawTransactions?.[0]?.tx_hash === lastTransaction?.hash) return [];
+        } else {
+          rawTransactions = await fetchJson(`${activeNetwork.middlewareUrl}/aex9/transfers/to/${address}`);
+        }
+
+        const newTransactions = rawTransactions
+          .map((tx) => ({
+            ...tx,
+            tx: {
+              contractId: tx.contract_id,
+              senderId: tx.sender,
+              recipientId: tx.recipient,
+              callerId: tx.sender,
+              type: 'ContractCallTx',
+            },
+            recipient: tx.recipient,
+            incomplete: true,
+            microTime: tx.micro_time,
+            hash: tx.tx_hash,
+          }));
+
+        if (newTransactions?.[0]?.hash !== lastTransaction?.hash && recent) {
+          commit('setTransactions', {
+            address, transactions: uniqBy([...newTransactions, ...(transactions[address] || [])], 'hash'),
+          });
+          return newTransactions;
+        }
+        commit('setTransactions', { address, transactions: newTransactions.reverse() });
+        return newTransactions;
       },
     },
   });
@@ -215,6 +259,7 @@ export default (store) => {
     async (network, oldNetwork) => {
       if (isEqual(network, oldNetwork)) return;
       store.commit('fungibleTokens/resetTokens');
+      store.commit('fungibleTokens/resetTransactions');
     },
   );
 
