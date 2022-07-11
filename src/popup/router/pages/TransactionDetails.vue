@@ -23,6 +23,14 @@
     >
       <TransactionOverview v-bind="transaction" />
       <div class="data-grid">
+        <SwapRates
+          :transaction="transaction"
+          class="span-2-columns"
+        />
+        <SwapRoute
+          :transaction="transaction"
+          class="span-2-columns"
+        />
         <DetailsItem
           v-if="tipUrl"
           :label="$t('pages.transactionDetails.tipUrl')"
@@ -142,6 +150,8 @@ import { mapGetters } from 'vuex';
 import { formatDate, formatTime } from '../../utils';
 import TransactionOverview from '../components/TransactionOverview.vue';
 import Plate from '../components/Plate.vue';
+import SwapRoute from '../components/SwapRoute.vue';
+import SwapRates from '../components/SwapRates.vue';
 import TokenAmount from '../components/TokenAmount.vue';
 import DetailsItem from '../components/DetailsItem.vue';
 import LinkButton from '../components/LinkButton.vue';
@@ -164,6 +174,8 @@ export default {
     AnimatedPending,
     AnimatedSpinner,
     BlockIcon,
+    SwapRoute,
+    SwapRates,
   },
   filters: {
     formatDate,
@@ -260,7 +272,6 @@ export default {
     .data-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-auto-rows: 64px;
       row-gap: 8px;
       column-gap: 24px;
       padding: 8px 16px;
