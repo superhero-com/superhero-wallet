@@ -152,6 +152,16 @@ export const NOTIFICATION_SETTINGS = [
   },
 ];
 
+export const FUNCTION_TYPE_DEX = {
+  pool: ['remove_liquidity', 'remove_liquidity_ae', 'add_liquidity', 'add_liquidity_ae'],
+  swap: [
+    'deposit', 'withdraw', 'swap_exact_tokens_for_tokens', 'swap_tokens_for_exact_tokens',
+    'swap_exact_ae_for_tokens', 'swap_tokens_for_exact_ae', 'swap_exact_tokens_for_ae',
+    'swap_ae_for_exact_tokens',
+  ],
+  allowance: ['transfer_allowance', 'change_allowance', 'create_allowance'],
+};
+
 export const ZEIT_TOKEN_INTERFACE = `@compiler >= 6
 contract interface PoS =
   stateful entrypoint set_paid : (int, int) => unit
