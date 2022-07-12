@@ -188,6 +188,10 @@ export default {
   display: flex;
   flex-direction: column;
 
+  .filters {
+    z-index: 1;
+  }
+
   .list {
     background: variables.$color-black;
     padding: 0;

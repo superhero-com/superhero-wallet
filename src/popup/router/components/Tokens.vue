@@ -112,7 +112,7 @@ export default {
     width: 16px;
     height: 16px;
     border-radius: 8px;
-    margin-right: 6px;
+    margin-right: 4px;
     vertical-align: middle;
 
     &.border {

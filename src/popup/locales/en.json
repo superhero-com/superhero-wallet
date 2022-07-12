@@ -202,13 +202,18 @@
       "channelCloseSoloTx": "Solo close channel",
       "channelSlashTx": "Slash channel",
       "channelSettleTx": "Settle channel",
-      "channelSnapshotSoloTx": "Solo snapshot channel"
+      "channelSnapshotSoloTx": "Solo snapshot channel",
+      "pending": "Pending..."
     },
     "overview": {
       "aens": "AENS",
       "contractCreate": "Contract create",
       "contract": "Contract",
       "accountAddress": "Account address"
+    },
+    "returnType": {
+      "abort": "Failed",
+      "revert": "Reverted"
     }
   },
   "pages": {
