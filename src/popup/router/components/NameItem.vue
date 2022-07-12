@@ -183,7 +183,6 @@ export default {
     this.nameHash = this.nameEntry.pending
       ? this.nameEntry.nameHash
       : (await this.$store.state.sdk.api.getNameEntryByName(this.name)).id;
-    this.$store.dispatch('names/fetchOwned');
   },
   methods: {
     blocksToRelativeTime,
