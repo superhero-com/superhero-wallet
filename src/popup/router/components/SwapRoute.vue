@@ -51,7 +51,7 @@ export default {
         this.transaction, this.availableTokens,
       );
 
-      if (tokens.length && contracts?.wae?.includes(tokens[0].contract)) {
+      if (tokens.length && contracts?.wae?.includes(tokens[0].contractId)) {
         tokens.unshift({
           ...tokens[0],
           isAe: true,

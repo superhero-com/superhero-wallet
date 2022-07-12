@@ -60,10 +60,10 @@
         :text="tokenData.decimals"
       />
       <DetailsRow
-        v-if="tokenData.contract"
-        :class="{ contract: tokenData.contract }"
+        v-if="tokenData.contractId"
+        :class="{ contract: tokenData.contractId }"
         :label="$t('pages.token-details.contract')"
-        :text="tokenData.contract"
+        :text="tokenData.contractId"
       />
       <DetailsRow
         :label="$t('pages.token-details.available-supply')"
@@ -162,13 +162,13 @@ export default {
           symbol: 'AE',
           convertedBalance: this.tokenBalance,
           balanceCurrency: this.balanceCurrency,
-          contract: '',
+          contractId: '',
         };
       }
       return (
-        this.tokenBalances.find(({ contract }) => contract === this.id) || {
+        this.tokenBalances.find(({ contractId }) => contractId === this.id) || {
           ...this.fungibleToken,
-          contract: this.id,
+          contractId: this.id,
         }
       );
     },

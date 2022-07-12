@@ -92,7 +92,7 @@ export default {
           ...this.sdk.Ae.defaults,
           ...(this.selectedToken && {
             callerId: this.account.address,
-            contractId: this.selectedToken.contract,
+            contractId: this.selectedToken.contractId,
           }),
         },
       );

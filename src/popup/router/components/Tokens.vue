@@ -60,7 +60,7 @@ export default {
       return `${String(text).substring(0, this.symbolLength)}${text.length > this.symbolLength ? ' ...' : ''}`;
     },
     mapToken(token) {
-      let img = `https://avatars.z52da5wt.xyz/${token.contract}`;
+      let img = `https://avatars.z52da5wt.xyz/${token.contractId}`;
       let imgBorder = true;
 
       if (token.isAe) {
