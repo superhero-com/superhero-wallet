@@ -255,7 +255,7 @@ export default {
           txResult = await this.tippingV2.methods.tip_token(
             this.url,
             escapeSpecialChars(this.note),
-            this.selectedToken.contract,
+            this.selectedToken.contractId,
             convertToken(this.amount, this.selectedToken.decimals).toFixed(),
           );
 

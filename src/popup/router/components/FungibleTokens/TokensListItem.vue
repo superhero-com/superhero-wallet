@@ -4,12 +4,12 @@
     class="tokens-list-item"
     :to="{
       name: 'token-details',
-      params: { id: tokenData.contract },
+      params: { id: tokenData.contractId },
     }"
   >
     <div class="left">
       <Avatar
-        :address="tokenData.contract !== 'aeternity' ? tokenData.contract : ''"
+        :address="tokenData.contractId !== 'aeternity' ? tokenData.contractId : ''"
         :src="tokenData.image || null"
       />
       <Truncate :str="tokenData.symbol" />
@@ -17,7 +17,7 @@
     <TokenAmount
       :amount="+tokenData.convertedBalance || 0"
       :symbol="tokenData.symbol"
-      :aex9="tokenData.contract !== 'aeternity'"
+      :aex9="tokenData.contractId !== 'aeternity'"
       no-symbol
     />
   </RouterLink>

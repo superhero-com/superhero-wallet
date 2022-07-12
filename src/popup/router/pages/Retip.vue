@@ -106,7 +106,7 @@ export default {
           await this.$store.dispatch('fungibleTokens/createOrChangeAllowance', this.amount);
           retipResponse = await this.tippingV2.methods.retip_token(
             +this.tip.id.split('_')[0],
-            this.selectedToken.contract,
+            this.selectedToken.contractId,
             amount,
             {
               waitMined: false,

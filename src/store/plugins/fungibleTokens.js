@@ -57,7 +57,7 @@ export default (store) => {
         Vue.set(
           state.tokens[address],
           'tokenBalances',
-          unionBy(balances, state.tokens[address].tokenBalances, 'contract'),
+          unionBy(balances, state.tokens[address].tokenBalances, 'contractId'),
         );
       },
       setAePublicData(state, payload) {
@@ -72,8 +72,8 @@ export default (store) => {
 
         if (isEmpty(response) || typeof response !== 'object') return commit('setAvailableTokens', {});
 
-        const availableTokens = response.reduce((obj, { contract_id: contract, ...other }) => ({
-          ...obj, [contract]: { contract, ...other },
+        const availableTokens = response.reduce((obj, { contract_id: contractId, ...other }) => ({
+          ...obj, [contractId]: { contractId, ...other },
         }), {});
         return commit('setAvailableTokens', availableTokens);
       },
@@ -97,16 +97,16 @@ export default (store) => {
             commit('resetTokenBalances', address);
 
             // TODO: remove uniqBy after https://github.com/aeternity/ae_mdw/issues/735 is fixed and released
-            const balances = uniqBy(tokens, 'contract_id').map(({ amount, contract_id: contract }) => {
-              const token = availableTokens[contract];
+            const balances = uniqBy(tokens, 'contract_id').map(({ amount, contract_id: contractId }) => {
+              const token = availableTokens[contractId];
               if (!token) return null;
               const balance = convertToken(amount, -token.decimals);
               const convertedBalance = balance.toFixed(2);
               const objectStructure = {
                 ...token,
-                value: contract,
+                value: contractId,
                 text: `${convertedBalance} ${token.symbol}`,
-                contract,
+                contractId,
                 balance,
                 convertedBalance,
               };
@@ -121,7 +121,7 @@ export default (store) => {
               {
                 address,
                 token: (store.state.fungibleTokens.tokens?.[address]?.tokenBalances || [])
-                  .find((t) => t.contract === selectedToken?.contract),
+                  .find((t) => t.contractId === selectedToken?.contractId),
               });
           }
         });
@@ -142,7 +142,7 @@ export default (store) => {
         const { selectedToken } = tokens[account.address];
         const tokenContract = await sdk.getContractInstance({
           source: FUNGIBLE_TOKEN_CONTRACT,
-          contractAddress: selectedToken.contract,
+          contractAddress: selectedToken.contractId,
         });
         const { decodedResult } = await tokenContract.methods.allowance({
           from_account: account.address,
@@ -164,7 +164,7 @@ export default (store) => {
       ) {
         const tokenContract = await sdk.getContractInstance({
           source: FUNGIBLE_TOKEN_CONTRACT,
-          contractAddress: tokens[account.address].selectedToken.contract,
+          contractAddress: tokens[account.address].selectedToken.contractId,
         });
         return tokenContract.methods.transfer(
           toAccount,
@@ -178,7 +178,7 @@ export default (store) => {
       ) {
         const tokenContract = await sdk.getContractInstance({
           source: ZEIT_TOKEN_INTERFACE,
-          contractAddress: tokens[account.address].selectedToken.contract,
+          contractAddress: tokens[account.address].selectedToken.contractId,
         });
         return tokenContract.methods.burn_trigger_pos(
           convertToken(amount, tokens[account.address].selectedToken.decimals).toFixed(),

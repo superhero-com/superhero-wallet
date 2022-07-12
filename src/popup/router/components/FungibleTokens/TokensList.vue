@@ -2,7 +2,7 @@
   <div class="tokens-list">
     <TokensListItem
       v-for="value in filteredResults"
-      :key="value.contract || value.id"
+      :key="value.contractId || value.id"
       :token-data="value"
     />
     <div v-if="checkZeroBalance(aeternityToken) && filteredResults.length <= 1">
@@ -75,7 +75,7 @@ export default {
           convertedBalance: this.tokenBalance,
           symbol: 'AE',
           balanceCurrency: this.balanceCurrency,
-          contract: 'aeternity',
+          contractId: 'aeternity',
         }
         : null;
       return aeInformation;
@@ -84,15 +84,15 @@ export default {
      * Converts the token information object into a searchable list
      */
     convertedTokenInfo() {
-      const tokens = Object.entries(this.availableTokens).map(([contract, tokenData]) => ({
+      const tokens = Object.entries(this.availableTokens).map(([contractId, tokenData]) => ({
         name: tokenData.name,
         symbol: tokenData.symbol,
-        contract,
+        contractId,
         decimals: tokenData.decimals,
         convertedBalance: tokenData.convertedBalance,
       }));
       this.tokenBalances.forEach((b) => {
-        const index = tokens.findIndex((t) => t.contract === b.contract);
+        const index = tokens.findIndex((t) => t.contractId === b.contractId);
         if (index !== -1) {
           tokens[index] = b;
         }
@@ -109,12 +109,12 @@ export default {
         ? [...(this.aeternityToken ? [this.aeternityToken] : []), ...this.tokenBalances]
         : tokensInfo
       )
-        .filter((token) => token.contract === 'aeternity' || this.tokenBalances.includes(token))
+        .filter((token) => token.contractId === 'aeternity' || this.tokenBalances.includes(token))
         .filter(
           (token) => !searchTerm
             || token.symbol.toLowerCase().includes(searchTerm)
             || token.name.toLowerCase().includes(searchTerm)
-            || token.contract.toLowerCase().includes(searchTerm),
+            || token.contractId.toLowerCase().includes(searchTerm),
         );
     },
   },
