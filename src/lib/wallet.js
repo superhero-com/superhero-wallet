@@ -75,13 +75,13 @@ if (IN_FRAME) {
     actions: {
       async reset({ rootGetters }) {
         Object.values(rootGetters['sdkPlugin/sdk'].rpcClients).forEach((aepp) => {
-          if (aepp.info.status !== 'DISCONNECTED') {
+          if (aepp.info.status && aepp.info.status !== 'DISCONNECTED') {
             aepp.sendMessage(
               { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
               true,
             );
+            aepp.disconnect();
           }
-          aepp.disconnect();
         });
       },
     },

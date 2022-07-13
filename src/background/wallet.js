@@ -66,14 +66,14 @@ export async function init() {
 
 export function disconnect() {
   Object.values(store.getters['sdkPlugin/sdk'].rpcClients).forEach((aepp) => {
-    if (aepp.info.status !== 'DISCONNECTED') {
+    if (aepp.info.status && aepp.info.status !== 'DISCONNECTED') {
       aepp.sendMessage(
         { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
         true,
       );
+      aepp.disconnect();
+      browser.tabs.reload(aepp.connection.port.sender.tab.id);
     }
-    aepp.disconnect();
-    browser.tabs.reload(aepp.connection.port.sender.tab.id);
     store.getters['sdkPlugin/sdk'].removeRpcClient(aepp.id);
   });
 }
