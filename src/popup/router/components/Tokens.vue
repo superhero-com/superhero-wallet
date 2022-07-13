@@ -63,7 +63,7 @@ export default {
       let img = `https://avatars.z52da5wt.xyz/${token.contractId}`;
       let imgBorder = true;
 
-      if (token.isAe) {
+      if (token.isAe || token.contractId === 'aeternity') {
         img = AeIcon;
         imgBorder = false;
       }
