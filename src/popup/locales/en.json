@@ -258,7 +258,7 @@
       "terms": "Terms of Use",
       "privacy": "Privacy Policy",
       "importAccount": "Retrieve Existing Account",
-      "activity": "Activity History",
+      "transactions": "Transaction History",
       "receive": "Receive",
       "notifications": "Notifications",
       "notification-settings": "Notification Preference",
@@ -294,7 +294,6 @@
     },
     "account": {
       "heading": "Account",
-      "activity": "Activity",
       "accountName": "Account name",
       "claim": "Claim Tip",
       "receive": "Receive",

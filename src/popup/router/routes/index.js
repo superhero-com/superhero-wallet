@@ -251,7 +251,7 @@ export default [
     path: '/transactions',
     component: Transactions,
     meta: {
-      title: 'activity',
+      title: 'transactions',
       notRebrand: true,
     },
   },
