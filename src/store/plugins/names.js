@@ -86,7 +86,7 @@ export default (store) => {
           accounts.map(({ address }) => Promise.all([
             getPendingNameClaimTransactions(address),
             middleware.getNamesOwnedBy(address)
-              .then(({ active }) => active.map(({ info, name }) => ({
+              .then(({ active }) => active.map(({ info, name, hash }) => ({
                 createdAtHeight: info.activeFrom,
                 expiresAt: info.expireHeight,
                 owner: info.ownership.current,
@@ -94,6 +94,7 @@ export default (store) => {
                 autoExtend: owned.find((n) => n.name === name)?.autoExtend
                 || pendingAutoExtendNames?.includes(name),
                 name,
+                hash,
               }))),
           ])),
         ).then((arr) => arr.flat(2));
