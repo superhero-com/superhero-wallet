@@ -77,7 +77,6 @@ export default {
 
 .swap-route {
   width: 100%;
-  padding-bottom: 10px;
 
   .title {
     color: variables.$color-dark-grey;

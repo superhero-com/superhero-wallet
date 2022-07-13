@@ -1,6 +1,22 @@
 <template>
   <div class="overview">
+    <div
+      v-if="isNewUI"
+      class="title-tag-wrapper"
+    >
+      <TransactionTag
+        :tx-type="getTitle"
+        data-cy="title"
+      />
+      <TransactionTag
+        v-if="txFunction && getTxType"
+        :tx-type="getTxType"
+        class="title-tag"
+        data-cy="tx-function"
+      />
+    </div>
     <span
+      v-else
       class="title"
       data-cy="title"
     >
@@ -81,6 +97,9 @@ import TriangleRight from '../../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../../icons/action.svg?vue-component';
 import AensIcon from '../../../icons/aens.svg?vue-component';
 import Avatar from './Avatar.vue';
+import TransactionTag from './TransactionTag.vue';
+import { getDexTransactionTag } from '../../utils';
+import { FUNCTION_TYPE_DEX } from '../../utils/constants';
 
 export default {
   components: {
@@ -90,11 +109,28 @@ export default {
     ActionIcon,
     AensIcon,
     Avatar,
+    TransactionTag,
   },
   props: {
     title: { type: String, required: true },
+    txFunction: { type: String, default: null },
     sender: { type: Object, required: true },
     recipient: { type: Object, required: true },
+  },
+  computed: {
+    isNewUI() {
+      return !!this.$route.meta.newUI;
+    },
+    getTxType() {
+      return this.$te(`transaction.dexType.${getDexTransactionTag[this.txFunction] || this.txFunction}`)
+        ? this.$t(`transaction.dexType.${getDexTransactionTag[this.txFunction] || this.txFunction}`)
+        : '';
+    },
+    getTitle() {
+      return [...FUNCTION_TYPE_DEX.pool, ...FUNCTION_TYPE_DEX.allowance].includes(this.txFunction)
+        ? this.$t('transaction.dexType.pool')
+        : this.title;
+    },
   },
 };
 </script>
@@ -102,6 +138,7 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 @use '../../../styles/typography';
+@use '../../../styles/mixins';
 
 .overview {
   .title {
@@ -111,6 +148,13 @@ export default {
     text-align: center;
     display: block;
     margin-bottom: -8px;
+  }
+
+  .title-tag-wrapper {
+    @include mixins.flex(center, center);
+
+    gap: 8px;
+    margin-bottom: -10px;
   }
 
   .parties {
@@ -176,23 +220,32 @@ export default {
 
     .name {
       display: block;
-      margin-bottom: 4px;
+      margin-bottom: 8px;
       color: variables.$color-white;
       text-decoration: none;
       white-space: nowrap;
 
-      @extend %face-sans-15-regular;
+      @extend %face-sans-15-medium;
 
       line-height: 16px;
 
       &:hover {
-        text-decoration: underline;
+        .truncate::v-deep span {
+          text-decoration: underline;
+        }
       }
     }
 
     .copy-address {
+      @extend %face-mono-12-medium;
+
       height: 48px;
     }
+  }
+
+  .truncated-string {
+    background: red;
+    text-decoration: underline;
   }
 }
 </style>

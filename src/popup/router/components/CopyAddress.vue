@@ -9,7 +9,7 @@
       class="copied"
     >
       <div class="line" />
-      <span class="text">{{ $t('addressCopied') }}</span>
+      <span class="text">{{ customText || $t('addressCopied') }}</span>
       <div class="line" />
     </div>
     <span
@@ -26,6 +26,7 @@ export default {
   mixins: [CopyMixin],
   props: {
     value: { type: String, required: true },
+    customText: { type: String, default: '' },
   },
 };
 </script>
@@ -33,6 +34,17 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 @use '../../../styles/typography';
+
+.new-ui {
+  .copy-address {
+    .address {
+      @extend %face-sans-12-medium;
+
+      letter-spacing: 0.05em;
+      line-height: 18px;
+    }
+  }
+}
 
 .copy-address {
   .address {

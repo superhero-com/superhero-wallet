@@ -17,3 +17,10 @@
     @content;
   }
 }
+
+@mixin flex($vertical: flex-start, $horizontal: flex-start, $flow: row) {
+  display: flex;
+  justify-content: $vertical;
+  align-items: $horizontal;
+  flex-flow: $flow;
+}

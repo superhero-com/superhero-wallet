@@ -204,11 +204,23 @@
       "channelSettleTx": "Settle channel",
       "channelSnapshotSoloTx": "Solo snapshot channel"
     },
+    "dexType": {
+      "provide_liquidity": "provide liquidity",
+      "remove_liquidity":"provide liquidity",
+      "swap": "swap",
+      "allow_token":"allow token" ,
+      "change_allowance": "allow token",
+      "transfer_allowance": "allow token",
+      "deposit": "deposit",
+      "withdraw": "withdraw",
+      "pool": "pool"
+    },
     "overview": {
       "aens": "AENS",
       "contractCreate": "Contract create",
       "contract": "Contract",
-      "accountAddress": "Account address"
+      "accountAddress": "Account address",
+      "superheroDex": "Superhero DEX"
     }
   },
   "pages": {
@@ -276,7 +288,7 @@
       "sign-message": "Sign Message",
       "sign-transaction": "Sign Transaction",
       "invite": "Invite",
-      "tx-details": "Tx Details",
+      "tx-details": "Transaction details",
       "wallet-home": "Wallet Home"
     },
     "about": {
@@ -899,14 +911,14 @@
       "heading": "Transactions Details",
       "type": "Type",
       "amount": "Amount",
-      "fee": "Tx fee",
+      "fee": "Transaction fee",
       "total": "Total",
       "txFrom": "From",
       "txTo": "To",
       "txHash": "Tx hash",
       "transactions": "Transactions",
       "backToTransactions": "Back to Transactions",
-      "explorer": "View Tx in blockchain explorer",
+      "explorer": "View transaction in blockchain explorer",
       "txName": "Name",
       "txAccount": "Account",
       "name": "Name",
@@ -918,7 +930,7 @@
       "signatures": "Signatures",
       "nonce": "Nonce",
       "callData": "Call Data",
-      "gas": "Gas",
+      "gasUsed": "Gas used",
       "gasPrice": "Gas Price",
       "code": "Code",
       "abiV": "Abi version",
@@ -933,8 +945,17 @@
       "hash": "Hash",
       "status": "Status",
       "pending": "Pending",
+      "revert": "Reverted",
+      "revertInfo": "Transaction has been reverted. All states returned to the state before the transaction.",
+      "failed": "Failed",
+      "reason": "Reason",
       "tipUrl": "Tipped URL",
       "timestamp": "Timestamp",
+      "poolTokenReceived": "Pool token received",
+      "poolTokenSpent": "Pool token spent",
+      "approveTokenUse": "Approved use of token",
+      "deposited": "Deposited",
+      "withdrawn": "Withdrawn",
       "rates": "Rates",
       "swapRoute": "Swap route"
     },
@@ -1083,6 +1104,7 @@
   "hours": "{n} hours | {n} hour | {n} hours",
   "days": "{n} days | {n} day | {n} days",
   "addressCopied": "Address copied",
+  "hashCopied": "Hash copied",
   "copied": "Copied",
   "copy": "Copy",
   "tx-fee": "Transaction fee",

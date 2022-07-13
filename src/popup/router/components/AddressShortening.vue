@@ -58,11 +58,12 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .address-shortening {
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 24px;
+  @extend %face-sans-12-medium;
+
+  line-height: 20px;
   display: inline-flex;
   align-items: center;
   text-decoration: none;
@@ -73,7 +74,12 @@ export default {
   }
 
   .dots {
-    padding: 0 2px 5px;
+    font-weight: 400;
+    margin-left: 4px;
+    letter-spacing: 0.25em;
+    font-size: 16px;
+    line-height: 20px;
+    transform: translateY(-25%);
   }
 
   svg {

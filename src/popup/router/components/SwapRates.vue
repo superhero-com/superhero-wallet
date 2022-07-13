@@ -16,7 +16,6 @@
         <span class="price">1</span>
         <Tokens :tokens="[rate.from]" />
       </div>
-
       <div>
         <TokenAmount
           :amount="rate.price"
@@ -89,7 +88,6 @@ export default {
 
 .swap-rates {
   width: 100%;
-  padding-bottom: 10px;
 
   .title {
     color: variables.$color-dark-grey;

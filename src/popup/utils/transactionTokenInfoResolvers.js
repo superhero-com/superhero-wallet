@@ -19,6 +19,10 @@ const genLiquiditySwapResolver = (
     || (!poolTokenAmountMapper && transaction.tx.return.type === 'list'))) {
     returns = transaction.tx.return.value;
   }
+  let poolTokenAmount;
+  if (poolTokenAmountMapper && transaction.tx.returnType === 'ok') {
+    poolTokenAmount = poolTokenAmountMapper(transaction);
+  }
 
   return {
     tokens: [{
@@ -37,9 +41,10 @@ const genLiquiditySwapResolver = (
       isReceived: liquidityMethod === 'remove' || !liquidityMethod,
     }, ...poolTokenAmountMapper ? [{
       ...defaultPoolToken,
-      amount: returns?.[2]?.value || poolTokenAmountMapper(transaction), // min_liquidity: int
+      amount: returns?.[2]?.value || poolTokenAmount, // min_liquidity: int
       ...tokens?.[transaction.tx.log?.[0]?.address],
       isReceived: liquidityMethod && liquidityMethod === 'add',
+      isPool: true,
     }] : []],
   };
 };
@@ -83,6 +88,7 @@ export const addLiquidityAe = genLiquiditySwapResolver(
     contractId,
     minAmount: _arguments[3]?.value, // amount_b_min: int
     amount, // amount_b_desired: int
+    isAe: true,
   }),
   ({ tx: { arguments: _arguments } }) => _arguments[5]?.value, // min_liquidity: int
   'add',
@@ -125,6 +131,7 @@ export const removeLiquidityAe = genLiquiditySwapResolver(
     contractId,
     minAmount: _arguments[3]?.value, // amount_b_min: int
     amount: _arguments[3]?.value, // amount_b_desired: int
+    isAe: true,
   }),
   ({ tx: { arguments: _arguments } }) => _arguments[1]?.value, // min_liquidity: int
   'remove',
@@ -176,6 +183,7 @@ export const swapExactAeForTokens = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments, amount } }) => ({
     contractId: _arguments[1]?.value?.[0]?.value,
     amount, // amount_a_desired: int
+    isAe: true,
   }),
   ({ tx: { arguments: _arguments } }) => ({
     contractId: _arguments[1]?.value?.[_arguments[1]?.value?.length - 1]?.value,
@@ -200,6 +208,7 @@ export const swapTokensForExactAe = genLiquiditySwapResolver(
     contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
     minAmount: _arguments[0]?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
+    isAe: true,
   }),
 );
 
@@ -219,6 +228,7 @@ export const swapExactTokensForAe = genLiquiditySwapResolver(
     contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
     maxAmount: _arguments[1]?.value,
     amount: _arguments[1]?.value, // amount_b_desired: int
+    isAe: true,
   }),
 );
 
@@ -232,6 +242,7 @@ export const swapAeForExactTokens = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments, amount } }) => ({
     contractId: _arguments[1]?.value?.[0]?.value,
     amount, // amount_a_desired: int
+    isAe: true,
   }),
   ({ tx: { arguments: _arguments } }) => ({
     contractId: _arguments[1]?.value?.[_arguments[1]?.value?.length - 1]?.value,
@@ -293,6 +304,7 @@ export const deposit = (transaction, tokens = null) => ({
     ...defaultToken,
     amount: transaction.tx.amount,
     isReceived: false,
+    isAe: true,
   },
   {
     ...defaultToken,
@@ -321,5 +333,6 @@ export const withdraw = (transaction, tokens = null) => ({
     ...defaultToken,
     amount: transaction.tx.arguments?.[0]?.value,
     isReceived: true,
+    isAe: true,
   }],
 });

@@ -4,6 +4,7 @@ import BigNumber from 'bignumber.js';
 import {
   unionBy, isEqual, isEmpty, uniqBy,
 } from 'lodash-es';
+import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
 import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
 import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 
@@ -157,6 +158,29 @@ export default (store) => {
         return tokenContract.methods[
           decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
         ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
+      },
+      async getContractTokenPairs(
+        { rootState: { sdk }, state: { availableTokens } },
+        contractAddress,
+      ) {
+        try {
+          const tokenContract = await sdk.getContractInstance({
+            source: pairInterface,
+            contractAddress,
+          });
+
+          const token0 = await tokenContract.methods.token0();
+          const token1 = await tokenContract.methods.token1();
+
+          const tokens = Object.values(availableTokens);
+
+          return [
+            tokens.find(({ contractId }) => contractId === token0.decodedResult),
+            tokens.find(({ contractId }) => contractId === token1.decodedResult),
+          ];
+        } catch (error) {
+          return [];
+        }
       },
       async transfer(
         { rootState: { sdk }, state: { tokens }, rootGetters: { account } },

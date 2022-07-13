@@ -263,6 +263,7 @@ export default [
     meta: {
       title: 'tx-details',
       hideTabBar: true,
+      newUI: true,
     },
   },
   {

@@ -48,3 +48,25 @@ export const deferPromised = (func, ...args) => new Promise((resolve, reject) =>
     reject(error);
   }
 }));
+
+export const getDexTransactionTag = { // TODO - check
+  add_liquidity: 'provide_liquidity',
+  add_liquidity_ae: 'provide_liquidity',
+
+  remove_liquidity: 'remove_liquidity',
+  remove_liquidity_ae: 'remove_liquidity',
+
+  swap_exact_tokens_for_tokens: 'swap',
+  swap_exact_ae_for_tokens: 'swap',
+  swap_tokens_for_exact_tokens: 'swap',
+  swap_tokens_for_exact_ae: 'swap',
+  swap_exact_tokens_for_ae: 'swap',
+  swap_ae_for_exact_tokens: 'swap',
+
+  create_allowance: 'allow_token',
+  change_allowance: 'allow_token',
+  transfer_allowance: 'allow_token',
+
+  deposit: 'swap',
+  withdraw: 'swap',
+};

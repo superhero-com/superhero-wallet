@@ -45,6 +45,10 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 
+.new-ui {
+  margin-block: 8px;
+}
+
 .details-item {
   .label {
     margin-bottom: 8px;

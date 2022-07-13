@@ -93,6 +93,7 @@ export default {
 
   .symbol {
     vertical-align: middle;
+    white-space: nowrap;
   }
 
   .divider {
