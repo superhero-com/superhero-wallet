@@ -203,6 +203,7 @@
       "channelSlashTx": "Slash channel",
       "channelSettleTx": "Settle channel",
       "channelSnapshotSoloTx": "Solo snapshot channel",
+      "payingForTx": "Paying For Transaction",
       "pending": "Pending..."
     },
     "overview": {
