@@ -21,7 +21,7 @@ export default async (store) => {
           break;
         default:
       }
-    } finally {
+    } catch (e) {
       store.commit('removePendingTransactionByHash', hash);
     }
   };
