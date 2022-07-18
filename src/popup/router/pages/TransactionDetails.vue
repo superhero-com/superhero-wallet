@@ -24,10 +24,12 @@
       <TransactionOverview v-bind="transaction" />
       <div class="data-grid">
         <SwapRates
+          v-if="UNFINISHED_FEATURES"
           :transaction="transaction"
           class="span-2-columns"
         />
         <SwapRoute
+          v-if="UNFINISHED_FEATURES"
           :transaction="transaction"
           class="span-2-columns"
         />
@@ -187,6 +189,7 @@ export default {
   data() {
     return {
       transaction: null,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
   computed: {
