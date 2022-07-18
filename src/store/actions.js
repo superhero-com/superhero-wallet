@@ -90,6 +90,11 @@ export default {
         }
       });
     txs = orderBy(flatten(txs), ['microTime'], ['desc']);
+    if (recent) {
+      state.transactions.pending.forEach(({ hash }) => {
+        if (txs.some((tx) => tx.hash === hash)) commit('removePendingTransactionByHash', hash);
+      });
+    }
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);
   },
   pollCurrencies({ commit }) {
