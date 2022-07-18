@@ -13,6 +13,7 @@ import namesPlugin from './plugins/names';
 import pendingTransactionHandler from './plugins/pendingTransactionHandler';
 import languagesPlugin from './plugins/languages';
 import openErrorModalPlugin from './plugins/openErrorModal';
+import pollAccountInfo from './plugins/pollAccountInfo';
 import runMigrations from './migrations';
 import accountsModule from './modules/accounts';
 import invitesModule from './modules/invites';
@@ -78,6 +79,7 @@ export default new Vuex.Store({
     languagesPlugin,
     openErrorModalPlugin,
     veeValidate,
+    pollAccountInfo,
   ],
   modules: {
     accounts: accountsModule,
