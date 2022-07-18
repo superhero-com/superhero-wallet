@@ -182,8 +182,6 @@ export const CURRENCY_URL = 'https://api.coingecko.com/api/v3/coins/markets?ids=
 
 export const AVATAR_URL = 'https://avatars.z52da5wt.xyz/';
 
-export const LEDGER_BRIDGE_URL = 'https://wallet.superhero.com/ledger-bridge';
-
 export const BLOG_CLAIM_TIP_URL = 'https://blog.aeternity.com/superhero-how-to-send-receive-superhero-tips-34971b18c919#024e';
 
 export const COMMIT_URL = 'https://github.com/aeternity/superhero-wallet/commit/';

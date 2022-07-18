@@ -98,7 +98,7 @@ export default {
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);
   },
   pollCurrencies({ commit }) {
-    executeAndSetInterval(async () => {
+    return executeAndSetInterval(async () => {
       try {
         const { aeternity } = await fetchJson(CURRENCIES_URL);
         commit('setCurrencies', aeternity);

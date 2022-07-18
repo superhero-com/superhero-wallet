@@ -71,7 +71,6 @@ export default {
 
     await this.$watchUntilTruly(() => this.isRestored);
 
-    this.$store.dispatch('pollCurrencies');
     this.$store.dispatch('fungibleTokens/getAeternityData');
 
     if (process.env.IS_EXTENSION && detect().name !== 'firefox') {

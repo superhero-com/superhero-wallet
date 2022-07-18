@@ -13,6 +13,7 @@ import namesPlugin from './plugins/names';
 import pendingTransactionHandler from './plugins/pendingTransactionHandler';
 import languagesPlugin from './plugins/languages';
 import openErrorModalPlugin from './plugins/openErrorModal';
+import pollAccountInfo from './plugins/pollAccountInfo';
 import runMigrations from './migrations';
 import accountsModule from './modules/accounts';
 import invitesModule from './modules/invites';
@@ -52,8 +53,6 @@ export default new Vuex.Store({
     notificationSettings: [],
     chainNames: null,
     tip: null,
-    txQueue: [],
-    connectedAepps: {},
     migrations: {},
     backedUpSeed: null,
     saveErrorLog: true,
@@ -78,6 +77,7 @@ export default new Vuex.Store({
     languagesPlugin,
     openErrorModalPlugin,
     veeValidate,
+    pollAccountInfo,
   ],
   modules: {
     accounts: accountsModule,

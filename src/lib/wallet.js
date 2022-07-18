@@ -133,9 +133,8 @@ export default async function initSdk() {
       );
     }
 
-    await store.commit('initSdk', store.getters['sdkPlugin/sdk']);
-    await store.dispatch('initContractInstances');
-    await initMiddleware();
+    store.commit('initSdk', store.getters['sdkPlugin/sdk']);
+    await Promise.all([store.dispatch('initContractInstances'), initMiddleware()]);
     store.commit('setNodeStatus', 'connected');
     setTimeout(() => store.commit('setNodeStatus', ''), 2000);
 
