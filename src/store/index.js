@@ -53,8 +53,6 @@ export default new Vuex.Store({
     notificationSettings: [],
     chainNames: null,
     tip: null,
-    txQueue: [],
-    connectedAepps: {},
     migrations: {},
     backedUpSeed: null,
     saveErrorLog: true,
