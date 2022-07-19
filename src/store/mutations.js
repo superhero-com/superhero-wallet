@@ -13,8 +13,8 @@ export default {
   setTipWithdrawnTransactions(state, payload) {
     state.transactions.tipWithdrawnTransactions = payload;
   },
-  initTransactions(state) {
-    state.transactions.pending = [];
+  initTransactions(state, excludePending = false) {
+    if (!excludePending) state.transactions.pending = [];
     state.transactions.loaded = [];
     state.transactions.nextPageUrl = '';
     state.transactions.tipWithdrawnTransactions = [];
@@ -23,7 +23,7 @@ export default {
     state.transactions.nextPageUrl = pageUrl;
   },
   addPendingTransaction(state, payload) {
-    state.transactions.pending.push({ ...payload, microTime: Date.now() });
+    state.transactions.pending.push({ ...payload, microTime: Date.now(), pending: true });
   },
   removePendingTransactionByHash(state, hash) {
     state.transactions.pending = state.transactions.pending.filter((t) => t.hash !== hash);
