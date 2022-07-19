@@ -147,9 +147,9 @@ export const getBalanceLocalStorage = () => (
 );
 
 export const categorizeContractCallTxObject = (transaction) => {
-  if (transaction.incomplete) {
+  if (transaction.incomplete || (transaction.type === 'tip' && transaction.pending)) {
     return {
-      amount: transaction.amount, token: transaction.tx.contractId, to: transaction.tx.recipientId,
+      amount: transaction.amount, token: transaction.tx.contractId, to: transaction.tx.callerId,
     };
   }
   if (transaction.tx.type !== 'ContractCallTx') return null;

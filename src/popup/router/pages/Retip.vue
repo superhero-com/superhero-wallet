@@ -124,9 +124,10 @@ export default {
           tipUrl: this.tip.url,
           type: 'tip',
           tx: {
-            senderId: this.account.address,
+            callerId: this.account.address,
             contractId: this.tippingContract.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
+            function: 'tip',
           },
         });
         this.openCallbackOrGoHome(true);
