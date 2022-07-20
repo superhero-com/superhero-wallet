@@ -65,7 +65,7 @@ export default {
           value: 'default',
           text: `${this.balances[this.idx].toFixed(2)} ${this.$t('ae')}`,
         },
-        ...this.tokenBalances.filter(({ convertedBalance }) => +convertedBalance),
+        ...this.tokenBalances.filter((b) => +b?.convertedBalance),
       ];
     },
     currenciesOptions() {

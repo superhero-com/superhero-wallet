@@ -121,7 +121,7 @@ export default (store) => {
               {
                 address,
                 token: (store.state.fungibleTokens.tokens?.[address]?.tokenBalances || [])
-                  .find((t) => t.contractId === selectedToken?.contractId),
+                  .find((t) => t?.contractId === selectedToken?.contractId),
               });
           }
         });
