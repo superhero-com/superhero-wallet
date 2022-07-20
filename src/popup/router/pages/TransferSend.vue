@@ -302,7 +302,7 @@ export default {
             this.invoiceId,
             { waitMined: false, modal: false },
           ]);
-          this.$store.commit('addPendingTransaction', {
+          this.$store.dispatch('addPendingTransaction', {
             hash,
             amount,
             type: 'spendToken',
@@ -320,7 +320,7 @@ export default {
             this.form.amount,
             { waitMined: false, modal: false },
           ]);
-          this.$store.commit('addPendingTransaction', {
+          this.$store.dispatch('addPendingTransaction', {
             hash,
             amount,
             type: 'spendToken',
@@ -337,7 +337,7 @@ export default {
             waitMined: false,
             modal: false,
           });
-          this.$store.commit('addPendingTransaction', {
+          this.$store.dispatch('addPendingTransaction', {
             hash,
             amount,
             type: 'spend',

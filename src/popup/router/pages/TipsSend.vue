@@ -276,7 +276,7 @@ export default {
           );
         }
 
-        this.$store.commit('addPendingTransaction', {
+        this.$store.dispatch('addPendingTransaction', {
           hash: txResult.hash,
           amount: this.selectedToken ? this.amount : amount,
           tipUrl: this.url,

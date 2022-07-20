@@ -23,7 +23,15 @@ export default {
     commit('setMiddleware', null);
     commit('initTransactions');
   },
-  async fetchPendingTransactions({ state: { sdk, transactions } }, address) {
+  addPendingTransaction({ getters: { activeNetwork }, commit }, transaction) {
+    commit('addPendingTransaction', {
+      network: activeNetwork.networkId,
+      transaction: { ...transaction, microTime: Date.now(), pending: true },
+    });
+  },
+  async fetchPendingTransactions(
+    { state: { sdk, transactions }, getters: { activeNetwork } }, address,
+  ) {
     return (
       await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
         (r) => r.transactions,
@@ -35,7 +43,8 @@ export default {
         },
       )
     )
-      .filter((transaction) => !transactions.pending.find((tx) => tx?.hash === transaction?.hash))
+      .filter((transaction) => !transactions.pending[activeNetwork.networkId]
+        ?.find((tx) => tx?.hash === transaction?.hash))
       .map((transaction) => ({ ...transaction, pending: true }));
   },
   // TODO: remove uniqBy and with the `recent` option fetch only recent transactions after https://github.com/aeternity/tipping-community-backend/issues/405, 406 will be resolved
@@ -90,9 +99,12 @@ export default {
         }
       });
     txs = orderBy(flatten(txs), ['microTime'], ['desc']);
-    if (recent) {
-      state.transactions.pending.forEach(({ hash }) => {
-        if (txs.some((tx) => tx.hash === hash)) commit('removePendingTransactionByHash', hash);
+    const network = getters.activeNetwork.networkId;
+    if (state.transactions.pending[network]) {
+      state.transactions.pending[network].forEach(({ hash }) => {
+        if (txs.some((tx) => tx.hash === hash && !tx.pending)) {
+          commit('removePendingTransactionByHash', { hash, network });
+        }
       });
     }
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);

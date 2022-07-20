@@ -118,7 +118,7 @@ export default {
             waitMined: false,
           });
         }
-        this.$store.commit('addPendingTransaction', {
+        this.$store.dispatch('addPendingTransaction', {
           hash: retipResponse.hash,
           amount,
           tipUrl: this.tip.url,

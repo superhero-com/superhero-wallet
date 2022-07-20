@@ -75,12 +75,12 @@ export default {
     ...mapState('accounts', ['activeIdx']),
     ...mapState(['transactions']),
     ...mapState({
-      filteredTransactions({ transactions: { loaded, pending } }, { account: { address } }) {
+      filteredTransactions(
+        { transactions: { loaded } }, { account: { address }, getAccountPendingTransactions },
+      ) {
         const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
           .includes(tr.tx.contractId);
-        return [...loaded, ...pending.filter((transaction) => transaction.tx.callerId === address
-          || transaction.tx.recipientId === address
-          || transaction.recipientId === address)]
+        return [...loaded, ...getAccountPendingTransactions]
           .filter((tr) => (!this.token
             || (this.token !== 'aeternity'
               ? tr.tx?.contractId === this.token
@@ -119,7 +119,7 @@ export default {
           .sort((a, b) => {
             const arr = [a, b].map((e) => new Date(e.microTime));
             if (this.displayMode.rotated) arr.reverse();
-            return arr[0] - arr[1];
+            return (arr[0] - arr[1]) || a.pending;
           })
           .slice(0, this.maxLength || Infinity);
       },
@@ -128,7 +128,7 @@ export default {
   },
   watch: {
     activeIdx() {
-      this.$store.commit('initTransactions', true);
+      this.$store.commit('initTransactions');
       this.loadMore();
     },
   },

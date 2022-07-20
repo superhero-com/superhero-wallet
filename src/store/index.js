@@ -39,7 +39,7 @@ export default new Vuex.Store({
     transactions: {
       loaded: [],
       nextPageUrl: '',
-      pending: [],
+      pending: {},
       tipWithdrawnTransactions: [],
     },
     pageTitle: '',

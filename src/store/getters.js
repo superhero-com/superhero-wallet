@@ -79,9 +79,8 @@ export default {
     const { endpoint, valid } = checkHashType(hash);
     return valid ? `${explorerUrl}/${endpoint}/${hash}` : null;
   },
-  getTx: ({ transactions }) => (hash) => transactions.loaded
-    .concat(transactions.pending.map((t) => ({ ...t, pending: true })))
-    .find((tx) => tx.hash === hash),
+  getTx: ({ transactions }, { activeNetwork }) => (hash) => transactions.loaded
+    .concat(transactions.pending[activeNetwork.networkId])?.find((tx) => tx?.hash === hash),
   getTxType: () => (transaction) => transaction.tx
     && (TX_TYPE_MDW[transaction.tx.type]
       || SCHEMA.OBJECT_ID_TX_TYPE[transaction.tx.tag]
@@ -129,4 +128,12 @@ export default {
   isTxAex9: () => (transaction) => transaction.tx
     && !!categorizeContractCallTxObject(transaction)?.token,
   getDexContracts: (_, { activeNetwork }) => (DEX_CONTRACTS[activeNetwork.networkId]),
+  getAccountPendingTransactions: (
+    { transactions: { pending } }, { activeNetwork, account: { address } },
+  ) => (pending[activeNetwork.networkId]?.length ? pending[activeNetwork.networkId]
+    ?.filter((transaction) => transaction.tx.callerId === address
+    || transaction.tx.senderId === address
+    || transaction.tx.recipientId === address
+    || transaction.recipientId === address
+    || transaction.recipient === address) : []),
 };
