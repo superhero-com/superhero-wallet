@@ -7,7 +7,7 @@ export default {
       this.copied = !preserveText || text;
       setTimeout(() => {
         this.copied = false;
-      }, 3000);
+      }, 1000);
     },
   },
 };
