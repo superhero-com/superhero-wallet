@@ -1095,7 +1095,7 @@
   "minutes": "{n} minutes | {n} minute | {n} minutes",
   "hours": "{n} hours | {n} hour | {n} hours",
   "days": "{n} days | {n} day | {n} days",
-  "addressCopied": "Address copied",
+  "addressCopied": "Copied!",
   "copied": "Copied",
   "copy": "Copy",
   "tx-fee": "Transaction fee",

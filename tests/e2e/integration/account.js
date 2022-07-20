@@ -10,14 +10,14 @@ describe('Test cases for Account Page', () => {
       .get('[data-cy=copy]')
       .click()
       .get('.copied > .text')
-      .should('contain', 'Address copied')
+      .should('contain', 'Copied')
 
-      .get('[data-cy=claim-name]')
+      .get('[data-cy=account-name')
       .should('be.visible')
-      .contains('Claim your .chain name');
+      .contains('Account 1');
   });
 
-  it('Tip, View-All-Transactions, Dropdown Buttons And Back to Account', () => {
+  it('Tip, View-All-Transactions, Back to Account', () => {
     cy.get('[data-cy=tip-button]')
       .should('be.visible')
       .click()
@@ -33,15 +33,6 @@ describe('Test cases for Account Page', () => {
       .should('exist')
       .get('[data-cy=home]')
       .click()
-
-      .urlEquals('/account')
-      .get('[data-cy=currency-dropdown]')
-      .should('be.visible')
-      .click()
-      .get('[data-cy=currency-dropdown]')
-      .should('have.class', 'active')
-      .click()
-      .get('[data-cy=currency-dropdown]')
-      .should('not.have.class', 'active');
+      .urlEquals('/account');
   });
 });

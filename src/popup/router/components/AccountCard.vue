@@ -1,42 +1,67 @@
 <template>
   <div
-    :class="[
-      'account-card',
-      { subaccount: idx !== 0, 'first-subaccount': idx === 1, minified: cardMinified }]"
-    :style="cssVar"
+    class="account-card"
+    :style="cardCssProps"
   >
-    <AccountInfo v-bind="$attrs" />
-    <BalanceInfo v-bind="$attrs" />
-    <Triangle
-      v-if="!cardMinified"
-      class="triangle"
+    <AccountInfo
+      v-bind="$attrs"
+      :color="color"
     />
+    <BalanceInfo v-bind="$attrs" />
+    <div class="misc">
+      <div class="total-tokens">
+        <span class="digit">
+          {{ totalTokens }}
+        </span>
+        <span class="wording">
+          {{ $t('pages.fungible-tokens.tokens') }}
+        </span>
+      </div>
+      <div class="buttons">
+        <RouterLink :to="{ name: 'transfer-receive' }">
+          <ReceiveIcon :style="iconCssProps" />
+        </RouterLink>
+        <RouterLink :to="{ name: 'transfer-send' }">
+          <SendIcon :style="iconCssProps" />
+        </RouterLink>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
-import Triangle from '../../../icons/account-card/card-bg-triangle.svg?vue-component';
+import ReceiveIcon from '../../../icons/account-card/account-receive.svg?vue-component';
+import SendIcon from '../../../icons/account-card/account-send.svg?vue-component';
+import { getAddressColor } from '../../utils/avatar';
 
 export default {
   components: {
     AccountInfo,
     BalanceInfo,
-    Triangle,
+    SendIcon,
+    ReceiveIcon,
   },
   props: {
     idx: { type: Number, required: true },
-    color: { type: String, required: true },
-    shift: { type: Number, required: true },
   },
   computed: {
-    ...mapState(['cardMinified']),
-    cssVar() {
+    ...mapGetters('fungibleTokens', ['getTokenBalance']),
+    ...mapGetters(['accounts']),
+    cardCssProps() {
+      return { 'background-color': this.color };
+    },
+    totalTokens() {
+      return this.getTokenBalance(this.accounts[this.idx].address).length;
+    },
+    color() {
+      return getAddressColor(this.accounts[this.idx].address);
+    },
+    iconCssProps() {
       return {
-        '--shift': this.shift,
-        '--color': this.color,
+        '--primaryColor': this.color,
       };
     },
   },
@@ -45,55 +70,55 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .account-card {
   display: flex;
   flex-direction: column;
-  position: relative;
   width: 328px;
-  height: 169px;
-  border-radius: 6px;
-  background-image: url('../../../icons/account-card/account-bg-pattern.svg');
-  background-color: #0a0e16;
-  background-position: calc(var(--shift) * 15px) calc(var(--shift) * 20px);
-  clip-path: inset(0% 0% -200% 0%);
-  transition: height 0.2s ease-out, clip-path 0.1s step-end;
-
-  &.minified {
-    height: 109px;
-    clip-path: inset(0% 0% 0% 0%);
-    transition-timing-function: ease-out, step-start;
-  }
-
-  &.subaccount {
-    background-image: url('../../../icons/account-card/subaccount-bg-pattern.svg');
-    background-color: variables.$color-bg-1;
-
-    &.first-subaccount {
-      background-color: #131b2a;
-    }
-  }
-
-  &:hover {
-    box-shadow: inset 0 0 0 1000px rgba(17, 97, 254, 0.1);
-  }
-
-  .account-info {
-    padding: 6px 6px 0 6px;
-  }
+  height: 192px;
+  border-radius: 16px;
+  margin: 8px 16px 32px 16px;
+  padding: 12px;
+  align-items: flex-start;
+  cursor: pointer;
 
   .balance-info {
-    margin-bottom: 0;
+    margin-top: 12px;
+    align-self: center;
   }
 
-  .triangle {
-    position: absolute;
-    bottom: 0;
-    height: 23px;
-    width: 23px;
-    border-radius: 0 0 5px 0;
-    align-self: flex-end;
-    color: var(--color);
+  .misc {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex: 1;
+
+    .total-tokens {
+      @extend %face-sans-14-medium;
+
+      line-height: 16px;
+
+      .wording {
+        opacity: 0.85;
+      }
+    }
+
+    .buttons {
+      display: flex;
+
+      a {
+        margin-left: 8px;
+
+        svg {
+          height: 36px;
+          width: 36px;
+          color: var(--primaryColor);
+        }
+      }
+    }
   }
 }
 </style>
