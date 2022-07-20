@@ -10,16 +10,10 @@ const store = new Vuex.Store({
   getters: {
     accounts: () => [{
       idx: 0,
-      localName: 'Main account',
-      color: '#1161FE',
-      shift: 1,
       showed: true,
     },
     {
       idx: 1,
-      localName: 'Sub-account #1',
-      color: '#00FF9D',
-      shift: 2,
       showed: true,
     }],
   },

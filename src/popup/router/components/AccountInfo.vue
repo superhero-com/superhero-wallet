@@ -1,154 +1,66 @@
 <template>
-  <div :class="['account-info', { edit }]">
-    <div class="buttons">
-      <ButtonPlain
-        class="minify"
-        @click="$store.commit('toggleMinifiedCard')"
-      >
-        <Component
-          :is="cardMinified ? 'Expand' : 'Collapse'"
-        />
-      </ButtonPlain>
-      <div>
-        <ButtonPlain
-          v-clipboard:copy="accounts[idx].address"
-          data-cy="copy"
-          @click="copy"
-        >
-          <Copy />
-        </ButtonPlain>
-        <ButtonPlain
-          v-if="UNFINISHED_FEATURES && idx === 0"
-          @click="createAccount"
-        >
-          <Add />
-        </ButtonPlain>
-        <ButtonPlain
-          v-if="idx !== 0 && $route.path === '/accounts'"
-          class="remove"
-          @click="remove"
-        >
-          <Remove />
-        </ButtonPlain>
-        <RouterLink
-          v-if="UNFINISHED_FEATURES && $route.path !== '/accounts'"
-          to="/accounts"
-        >
-          <Settings />
-        </RouterLink>
-      </div>
-    </div>
+  <div class="account-info">
     <div class="title">
       <Avatar
+        class="avatar"
         :address="accounts[idx].address"
         :name="accounts[idx].name"
       />
-      <div
-        class="account-name"
-        data-cy="account-name"
-      >
-        <a
-          v-if="accounts[idx].name"
-          :href="explorerUrl"
-          target="_blank"
-        >
-          <Truncate :str="accounts[idx].name" />
-        </a>
-        <router-link
+      <div class="account-details">
+        <template v-if="!copied">
+          <Truncate
+            v-if="accounts[idx].name"
+            :str="accounts[idx].name"
+          />
+          <span
+            v-else
+            data-cy="account-name"
+            class="account-name"
+          >
+            {{ $t('pages.account.heading') }} {{ accountIdx + 1 }}
+          </span>
+          <ButtonPlain
+            v-clipboard:copy="accounts[idx].address"
+            v-clipboard:success="copy"
+            class="ae-address"
+            data-cy="copy"
+          >
+            {{ truncateAdrress(accounts[idx].address) }}
+          </ButtonPlain>
+        </template>
+        <div
           v-else
-          :to="{ name: 'name-claim' }"
-          data-cy="claim-name"
-          class="claim-chainname"
+          class="copied"
         >
-          {{ $t('pages.account.claim-name') }}
-        </router-link>
-        <InputField
-          v-model="customAccountName"
-          :maxlength="maxCustomNameLength"
-          :readonly="idx === 0 || $route.path !== '/accounts' || !edit"
-          plain
-        >
-          <template slot="right">
-            <ButtonPlain
-              v-show="idx !== 0 && $route.path === '/accounts' && !edit"
-              @click="edit = true"
-            >
-              <Edit />
-            </ButtonPlain>
-            <ButtonPlain
-              v-show="edit"
-              @click="saveLocalName"
-            >
-              <Save />
-            </ButtonPlain>
-          </template>
-        </InputField>
-        <label v-if="edit">{{ `${customAccountName.length}/${maxCustomNameLength}` }}</label>
+          <CheckedCircleIcon />
+          <span class="text">{{ $t('addressCopied') }}</span>
+        </div>
       </div>
-    </div>
-    <a
-      v-if="!copied"
-      :href="explorerUrl"
-      target="_blank"
-      class="ae-address"
-    >
-      {{ accounts[idx].address }}
-    </a>
-    <div
-      v-else
-      class="copied"
-    >
-      <span />
-      <span class="text">{{ $t('addressCopied') }}</span>
-      <span />
     </div>
   </div>
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import CopyMixin from '../../../mixins/copy';
 import Avatar from './Avatar.vue';
-import Truncate from './Truncate.vue';
-import InputField from './InputField.vue';
 import ButtonPlain from './ButtonPlain.vue';
-import Collapse from '../../../icons/account-card/collapse.svg?vue-component';
-import Expand from '../../../icons/account-card/expand.svg?vue-component';
-import Add from '../../../icons/account-card/btn-add-subaccount.svg?vue-component';
-import Copy from '../../../icons/account-card/btn-copy-address.svg?vue-component';
-import Settings from '../../../icons/settings.svg?vue-component';
-import Remove from '../../../icons/account-card/btn-remove.svg?vue-component';
-import Edit from '../../../icons/account-card/btn-edit.svg?vue-component';
-import Save from '../../../icons/account-card/btn-save.svg?vue-component';
+import CheckedCircleIcon from '../../../icons/account-card/checked-circle.svg?vue-component';
+import Truncate from './Truncate.vue';
 
 export default {
   components: {
     Avatar,
-    Collapse,
-    Expand,
-    Add,
-    Copy,
-    Settings,
-    Remove,
-    Edit,
-    Save,
-    Truncate,
-    InputField,
     ButtonPlain,
+    CheckedCircleIcon,
+    Truncate,
   },
   mixins: [CopyMixin],
   props: {
     accountIdx: { type: Number, default: -1 },
   },
-  data: () => ({
-    edit: false,
-    customAccountName: '',
-    maxCustomNameLength: 22,
-    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-  }),
   computed: {
     ...mapState('accounts', ['activeIdx']),
-    ...mapState(['cardMinified']),
     ...mapGetters(['accounts', 'activeNetwork']),
     idx() {
       return this.accountIdx === -1 ? this.activeIdx : this.accountIdx;
@@ -158,23 +70,15 @@ export default {
       return `${this.activeNetwork.explorerUrl}/account/transactions/${address}`;
     },
   },
-  mounted() {
-    this.customAccountName = this.accounts[this.idx].localName;
-  },
   methods: {
-    ...mapActions({ createAccount: 'accounts/hdWallet/create' }),
-    saveLocalName() {
-      this.$store.commit('accounts/setLocalName', { name: this.customAccountName, idx: this.idx });
-      this.edit = false;
-    },
-    async remove() {
-      await this.$store.dispatch('modals/open', {
-        name: 'confirm',
-        icon: 'critical',
-        title: this.$t('modals.removeSubaccount.title'),
-        msg: this.$t('modals.removeSubaccount.msg'),
-      });
-      this.$store.commit('accounts/remove', this.idx);
+    truncateAdrress() {
+      const { address } = this.accounts[this.idx];
+      const addressLength = address.length;
+      const firstPart = address.slice(0, addressLength / 2).match(/.{3}/g);
+      const secondPart = address.slice(addressLength / 2, addressLength).match(/.{3}/g);
+
+      return `${firstPart.slice(0, 3).reduce((acc, current) => `${acc} ${current}`)} ···
+      ${secondPart.slice(-3).reduce((acc, current) => `${acc} ${current}`)}`;
     },
   },
 };
@@ -185,142 +89,69 @@ export default {
 @use '../../../styles/typography';
 
 .account-info {
-  padding: 20px 20px 0 20px;
   text-align: left;
-  margin-bottom: 4px;
-
-  &.edit {
-    margin-bottom: -2px;
-
-    .title {
-      margin-bottom: 0;
-
-      .account-name .account-type-name {
-        border-bottom: 1px solid variables.$color-blue;
-      }
-    }
-  }
-
-  .buttons {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 24px;
-
-    svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    a,
-    .button-plain,
-    .minify {
-      color: variables.$color-light-grey;
-    }
-
-    a,
-    .button-plain {
-      &:not(:first-child) {
-        margin-left: 8px;
-      }
-
-      &:hover {
-        color: variables.$color-green;
-
-        &.remove {
-          color: variables.$color-error;
-        }
-      }
-    }
-
-    .minify:hover {
-      color: variables.$color-blue;
-    }
-  }
 
   .title {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 8px;
-    margin-bottom: 6px;
-
-    @extend %face-sans-14-medium;
-
     line-height: 16px;
 
     .avatar {
-      align-self: flex-start;
       margin-right: 8px;
       overflow: visible;
+      width: 48px;
+      height: 48px;
+      background-color: variables.$color-black;
     }
 
-    .input-field ::v-deep .main-wrapper button {
-      background-color: transparent;
-    }
-
-    .account-name {
+    .account-details {
       display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
       flex-direction: column;
-      justify-content: flex-start;
+      width: 203px;
+      height: 48px;
 
-      a {
+      .truncate {
+        @extend %face-sans-16-bold;
+
+        line-height: 16px;
+      }
+
+      .ae-address {
+        @extend %face-mono-14-medium;
+
         color: variables.$color-white;
-        text-decoration: none;
-        max-width: 250px;
+        display: flex;
+        opacity: 0.85;
+        margin-top: 8px;
+        letter-spacing: -1px;
 
         &:hover {
-          text-decoration: underline;
+          opacity: 1;
         }
       }
 
-      .claim-chainname {
-        color: variables.$color-green;
-      }
+      .copied {
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        flex: 0.9;
+        border: dashed 1px rgba(255, 255, 255, 0.75);
+        border-radius: 5px;
 
-      label {
-        font-size: 10px;
-        line-height: 12px;
-        opacity: 0.5;
-        align-self: flex-end;
-      }
-    }
-  }
+        svg {
+          margin-right: 6px;
+          width: 24px;
+          height: 24px;
+        }
 
-  .ae-address {
-    display: block;
-    text-decoration: none;
-    text-align: center;
-    color: variables.$color-light-grey;
+        .text {
+          @extend %face-sans-16-medium;
 
-    @extend %face-mono-10-medium;
-
-    font-size: 9px;
-
-    &:hover {
-      color: variables.$color-white;
-    }
-  }
-
-  .copied {
-    display: flex;
-    align-items: center;
-
-    span {
-      width: 100%;
-
-      &:not(.text) {
-        border-bottom: 1px dashed variables.$color-blue;
-        margin: 0 8px;
-      }
-
-      &.text {
-        white-space: nowrap;
-        color: variables.$color-blue;
-
-        @extend %face-sans-14-regular;
-
-        line-height: 16px;
+          white-space: nowrap;
+        }
       }
     }
   }
