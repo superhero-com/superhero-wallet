@@ -15,16 +15,7 @@ export default {
   },
   actions: {
     create({ state, commit }) {
-      commit('accounts/add',
-        {
-          idx: state.nextAccountIdx,
-          color:
-            // eslint-disable-next-line no-bitwise
-            state.nextAccountIdx === 1 ? '#00FF9D' : `#${((Math.random() * 0xffffff) << 0).toString(16)}`,
-          shift: Math.floor(Math.random() * 100),
-          type,
-        },
-        { root: true });
+      commit('accounts/add', { idx: state.nextAccountIdx, type }, { root: true });
       state.nextAccountIdx += 1;
     },
     signWithoutConfirmation({ rootGetters: { account } }, data) {
