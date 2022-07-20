@@ -21,13 +21,15 @@ export default async (store) => {
           break;
         default:
       }
+      store.commit('setPendingTransactionSentByHash', hash);
     } catch (e) {
       store.commit('removePendingTransactionByHash', hash);
     }
   };
   // eslint-disable-next-line no-underscore-dangle
   await store._watcherVM.$watchUntilTruly(() => store.state.sdk);
-  store.state.transactions.pending.forEach(waitTransactionMined);
+  store.state.transactions.pending
+    .filter(({ sent = false }) => !sent).forEach(waitTransactionMined);
 
   store.subscribe(async (mutation) => {
     if (mutation.type !== 'addPendingTransaction') return;

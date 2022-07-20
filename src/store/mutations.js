@@ -28,6 +28,10 @@ export default {
   removePendingTransactionByHash(state, hash) {
     state.transactions.pending = state.transactions.pending.filter((t) => t.hash !== hash);
   },
+  setPendingTransactionSentByHash(state, hash) {
+    const index = state.transactions.pending.findIndex((t) => t.hash === hash);
+    Vue.set(state.transactions.pending[index], 'sent', true);
+  },
   setUserNetwork(state, { index, ...network }) {
     if (index !== undefined) Vue.set(state.userNetworks, index, network);
     else state.userNetworks.push({ ...defaultNetwork, ...network });
