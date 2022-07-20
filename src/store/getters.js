@@ -12,7 +12,6 @@ import {
   aettosToAe,
   categorizeContractCallTxObject,
 } from '../popup/utils/helper';
-import { i18n } from './plugins/languages';
 
 const getHdWalletAccount = (wallet, accountIdx = 0) => {
   const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
@@ -37,12 +36,9 @@ export default {
         ...acc,
         ...(type === 'hd-wallet' ? getHdWalletAccount(getters.wallet, idx) : {}),
       }))
-      .map(({ idx, localName, ...account }) => ({
-        idx,
+      .map(({ ...account }) => ({
         ...account,
         name: getters['names/getDefault'](account.address),
-        localName:
-          localName || (idx === 0 ? i18n.t('mainAccount') : i18n.t('subaccountName', { idx })),
       }));
   },
   account({ accounts: { activeIdx } }, { accounts }) {
