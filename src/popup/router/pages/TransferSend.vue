@@ -302,14 +302,14 @@ export default {
             this.invoiceId,
             { waitMined: false, modal: false },
           ]);
-          this.$store.commit('addPendingTransaction', {
+          this.$store.dispatch('addPendingTransaction', {
             hash,
             amount,
             type: 'spendToken',
-            recipientId: receiver,
+            recipient: receiver,
             pendingTokenTx: true,
             tx: {
-              senderId: this.account.address,
+              callerId: this.account.address,
               contractId: this.selectedToken.contractId,
               type: SCHEMA.TX_TYPE.contractCall,
             },
@@ -320,14 +320,14 @@ export default {
             this.form.amount,
             { waitMined: false, modal: false },
           ]);
-          this.$store.commit('addPendingTransaction', {
+          this.$store.dispatch('addPendingTransaction', {
             hash,
             amount,
             type: 'spendToken',
-            recipientId: receiver,
+            recipient: receiver,
             pendingTokenTx: true,
             tx: {
-              senderId: this.account.address,
+              callerId: this.account.address,
               contractId: this.selectedToken.contractId,
               type: SCHEMA.TX_TYPE.contractCall,
             },
@@ -337,7 +337,7 @@ export default {
             waitMined: false,
             modal: false,
           });
-          this.$store.commit('addPendingTransaction', {
+          this.$store.dispatch('addPendingTransaction', {
             hash,
             amount,
             type: 'spend',

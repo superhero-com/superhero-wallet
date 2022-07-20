@@ -9,11 +9,11 @@
       class="list"
       data-cy="list"
     >
-      <PendingTxs />
       <TransactionItem
         v-for="transaction in filteredTransactions"
         :key="transaction.hash"
         :transaction="transaction"
+        :data-cy="transaction.pending && 'pending-txs'"
       />
     </div>
     <AnimatedSpinner
@@ -40,9 +40,9 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
-import PendingTxs from './PendingTxs.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import { TXS_PER_PAGE } from '../../utils/constants';
 import Visible from '../../../icons/visible.svg?vue-component';
@@ -51,7 +51,6 @@ export default {
   components: {
     Filters,
     TransactionItem,
-    PendingTxs,
     AnimatedSpinner,
     Visible,
   },
@@ -76,10 +75,12 @@ export default {
     ...mapState('accounts', ['activeIdx']),
     ...mapState(['transactions']),
     ...mapState({
-      filteredTransactions({ transactions: { loaded } }, { account: { address } }) {
+      filteredTransactions(
+        { transactions: { loaded } }, { account: { address }, getAccountPendingTransactions },
+      ) {
         const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
           .includes(tr.tx.contractId);
-        return loaded
+        return [...loaded, ...getAccountPendingTransactions]
           .filter((tr) => (!this.token
             || (this.token !== 'aeternity'
               ? tr.tx?.contractId === this.token
@@ -90,14 +91,21 @@ export default {
               case 'all':
                 return true;
               case 'sent':
-                return (tr.tx.type === 'SpendTx' && tr.tx.senderId === address)
-                  || (isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address);
+                return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
+                  && tr.tx.senderId === address)
+                  || (isFungibleTokenTx(tr)
+                  && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
+                  && tr.tx.callerId === address);
               case 'received':
-                return (tr.tx.type === 'SpendTx'
+                return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
                   && (tr.tx.recipientId === address || (tr.tx.senderId !== address && tr.tx.recipientId.startsWith('nm_'))))
-                  || (isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.recipient === address);
+                  || (isFungibleTokenTx(tr)
+                    && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
+                    && tr.recipient === address);
               case 'tips':
-                return (!isFungibleTokenTx(tr) && tr.tx.type === 'ContractCallTx' && tr.tx.callerId === address && tr.tx.function === 'tip') || tr.claim;
+                return (!isFungibleTokenTx(tr)
+                  && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
+                  && tr.tx.callerId === address && tr.tx.function === 'tip') || tr.claim;
               default:
                 throw new Error(`Unknown display mode type: ${this.displayMode.filter}`);
             }
@@ -111,7 +119,7 @@ export default {
           .sort((a, b) => {
             const arr = [a, b].map((e) => new Date(e.microTime));
             if (this.displayMode.rotated) arr.reverse();
-            return arr[0] - arr[1];
+            return (arr[0] - arr[1]) || a.pending;
           })
           .slice(0, this.maxLength || Infinity);
       },
@@ -146,6 +154,9 @@ export default {
         ? document.querySelector('#app') : document.documentElement;
       if (this.maxLength && this.filteredTransactions.length >= this.maxLength) return;
       if (scrollHeight - scrollTop <= clientHeight + 100) this.loadMore();
+    },
+    compareCaseInsensitive(str1, str2) {
+      return str1.toLocaleLowerCase() === str2.toLocaleLowerCase();
     },
     async loadMore() {
       if (this.loading) return;

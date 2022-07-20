@@ -121,7 +121,7 @@ export default (store) => {
               {
                 address,
                 token: (store.state.fungibleTokens.tokens?.[address]?.tokenBalances || [])
-                  .find((t) => t.contractId === selectedToken?.contractId),
+                  .find((t) => t?.contractId === selectedToken?.contractId),
               });
           }
         });
@@ -210,7 +210,9 @@ export default (store) => {
             }
             nextPageUrl = next || null;
           }
-          if (rawTransactions?.[0]?.tx_hash === lastTransaction?.hash) return [];
+          if (rawTransactions?.[0]?.tx_hash === lastTransaction?.hash) {
+            return transactions[address].slice(0, 10);
+          }
         } else {
           rawTransactions = await fetchJson(`${activeNetwork.middlewareUrl}/aex9/transfers/to/${address}`);
         }

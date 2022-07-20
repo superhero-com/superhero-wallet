@@ -276,15 +276,16 @@ export default {
           );
         }
 
-        this.$store.commit('addPendingTransaction', {
+        this.$store.dispatch('addPendingTransaction', {
           hash: txResult.hash,
           amount: this.selectedToken ? this.amount : amount,
           tipUrl: this.url,
           type: 'tip',
           tx: {
-            senderId: this.account.address,
+            callerId: this.account.address,
             contractId: this.tippingContract.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
+            function: 'tip',
           },
         });
         this.openCallbackOrGoHome(true);

@@ -35,7 +35,8 @@ export const getLoginState = async ({
     current: { network: network || 'Testnet', token: 0, currency: 'usd' },
     balance,
     ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
-    ...(pendingTransaction && { transactions: { loaded: [], pending: [pendingTransaction] } }),
+    ...(pendingTransaction
+        && { transactions: { loaded: [], pending: { ae_uat: [pendingTransaction] } } }),
   };
 };
 

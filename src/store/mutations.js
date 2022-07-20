@@ -14,7 +14,6 @@ export default {
     state.transactions.tipWithdrawnTransactions = payload;
   },
   initTransactions(state) {
-    state.transactions.pending = [];
     state.transactions.loaded = [];
     state.transactions.nextPageUrl = '';
     state.transactions.tipWithdrawnTransactions = [];
@@ -22,11 +21,17 @@ export default {
   setTransactionsNextPage(state, pageUrl) {
     state.transactions.nextPageUrl = pageUrl;
   },
-  addPendingTransaction(state, payload) {
-    state.transactions.pending.push({ ...payload, microTime: Date.now() });
+  addPendingTransaction(state, { transaction, network }) {
+    Vue.set(state.transactions.pending, network,
+      [...(state.transactions.pending[network] || []), transaction]);
   },
-  removePendingTransactionByHash(state, hash) {
-    state.transactions.pending = state.transactions.pending.filter((t) => t.hash !== hash);
+  removePendingTransactionByHash(state, { network, hash }) {
+    Vue.set(state.transactions.pending, network, state.transactions.pending[network]
+      .filter((t) => t.hash !== hash));
+  },
+  setPendingTransactionSentByHash(state, { network, hash }) {
+    const index = state.transactions.pending[network].findIndex((t) => t.hash === hash);
+    Vue.set(state.transactions.pending[network][index], 'sent', true);
   },
   setUserNetwork(state, { index, ...network }) {
     if (index !== undefined) Vue.set(state.userNetworks, index, network);
