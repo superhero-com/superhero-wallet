@@ -39,11 +39,6 @@ export default (store) => {
       setAvailableTokens(state, payload) {
         state.availableTokens = payload;
       },
-      resetTokenBalances(state, address) {
-        if (address in state.tokens) {
-          state.tokens[address].tokenBalances = [];
-        }
-      },
       resetTokens(state) {
         state.tokens = {};
       },
@@ -93,8 +88,6 @@ export default (store) => {
             if (isEmpty(tokens) || typeof tokens !== 'object') return;
 
             selectedToken = store.state.fungibleTokens.tokens[address]?.selectedToken;
-
-            commit('resetTokenBalances', address);
 
             // TODO: remove uniqBy after https://github.com/aeternity/ae_mdw/issues/735 is fixed and released
             const balances = uniqBy(tokens, 'contract_id').map(({ amount, contract_id: contractId }) => {
