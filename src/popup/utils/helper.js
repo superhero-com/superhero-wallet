@@ -156,6 +156,7 @@ export const categorizeContractCallTxObject = (transaction) => {
   if (transaction.tx.type !== 'ContractCallTx') return null;
   switch (transaction.tx.function) {
     case 'transfer':
+    case 'transfer_payload':
     case 'change_allowance':
     case 'create_allowance':
       return {
