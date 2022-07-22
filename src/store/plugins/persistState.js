@@ -60,7 +60,7 @@ export default (
       if (areaName !== 'local' || !rawState) return;
       const { persistStateSavedBy, ...newState } = rawState;
       if (persistStateSavedBy === saverName) return;
-      lastState = newState;
+      lastState = cloneDeep(newState);
       store.commit('syncState', newState);
     });
   }
