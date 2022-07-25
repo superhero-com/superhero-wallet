@@ -277,6 +277,10 @@ export default {
             background: rgba(17, 97, 254, 0.15);
             color: variables.$color-blue;
           }
+
+          &:not(:last-of-type) {
+            margin-right: 4px;
+          }
         }
       }
     }

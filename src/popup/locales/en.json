@@ -512,7 +512,7 @@
       "balance-error": "Your account balance is not enough to execute this transaction.",
       "pointer-added": "Name {type} successful!",
       "pending-claim": "Pending",
-      "auto-extend": "Autoextend",
+      "auto-extend": "Auto-extend",
       "tabs": {
         "my-names": "My names",
         "auctions": "Auctions",
