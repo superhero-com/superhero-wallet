@@ -147,7 +147,6 @@ export default {
     name: { type: String, default: '' },
     address: { type: String, default: '' },
     autoExtend: { type: Boolean },
-    index: { type: Number, required: true },
   },
   data: () => ({
     expand: false,
