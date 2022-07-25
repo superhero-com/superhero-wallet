@@ -18,7 +18,7 @@
       >
         <span class="title">{{ $t('pages.recentTransactions.title') }}</span>
         <router-link
-          v-if="transactions.loaded.length || transactions.pending.length"
+          v-if="transactions.loaded.length || getAccountPendingTransactions.length"
           to="/transactions"
           data-cy="view-all-transactions"
           class="view-all"
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import Plate from '../components/Plate.vue';
 import AccountSwitcher from '../components/AccountSwitcher.vue';
 import TxHistory from '../../../icons/history.svg?vue-component';
@@ -49,7 +49,10 @@ export default {
     TransactionList,
     TxHistory,
   },
-  computed: mapState(['backedUpSeed', 'transactions']),
+  computed: {
+    ...mapState(['backedUpSeed', 'transactions']),
+    ...mapGetters(['getAccountPendingTransactions']),
+  },
 };
 </script>
 

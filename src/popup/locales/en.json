@@ -934,7 +934,9 @@
       "status": "Status",
       "pending": "Pending",
       "tipUrl": "Tipped URL",
-      "timestamp": "Timestamp"
+      "timestamp": "Timestamp",
+      "rates": "Rates",
+      "swapRoute": "Swap route"
     },
     "transactions": {
       "backToAccount": "Back to account",

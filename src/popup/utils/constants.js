@@ -37,6 +37,7 @@ export const calculateFee = (type, params) => {
       ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
       abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
       callData: STUB_CALLDATA,
+      gas: 0,
       ...params,
     },
     ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
@@ -52,6 +53,31 @@ export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameC
   nonce: STUB_NONCE,
   ttl: SCHEMA.NAME_TTL,
 });
+
+export const DEX_CONTRACTS = {
+  ae_uat: {
+    router: [
+      'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6',
+      'ct_6iyAWnbGoEbX6hxWsjKMLSM3Hx542PM9dZeG8mHo1bXzB7DDW',
+      'ct_N3fFG5QqyTb2dhqw8YcTQ3gqQjxjCJT9MTvDWfqBes7wEu4r9',
+      'ct_2eyXvDw3V3WSbcCpSiWcsCYHShBmEJEkU8PpUg7ymDLfZ4cSy4',
+      'ct_2mZo6oniJYbbAuBqJxqydc2ZzUhgrdFbTaR4vq2QxocChGUymJ',
+      'ct_MLXQEP12MBn99HL6WDaiTqDbG4bJQ3Q9Bzr57oLfvEkghvpFb',
+    ],
+    wae: [
+      'ct_RzxedNERBDa9Kfx8FENNKQ33TQTt5FzV8i1WppiaTSC4adRXd',
+      'ct_y1sufvYLCwbbumgV16p8Bk9f5uHGFiteRDC1x8WNxxyvGJEw2',
+      'ct_2kc9naWGGnx4TWGK7UR9gut2cVcDvf7pv8CBYG1a8WML2jzUeb',
+      'ct_24gNuddxAbMYtT32sh8Xm1PpB2fZ3HMGtfST5sA3irect3Yu76',
+      'ct_2mdY71wG4zAjrdmqDJPXU6h8dYpzNs4mMZ81ujeNnrQPU2jMto',
+      'ct_JDp175ruWd7mQggeHewSLS1PFXt9AzThCDaFedxon8mF8xTRF',
+    ],
+  },
+  ae_mainnet: {
+    router: ['ct_azbNZ1XrPjXfqBqbAh1ffLNTQ1sbnuUDFvJrXjYz7JQA1saQ3'],
+    wae: ['ct_J3zBY8xxjsRr3QojETNw48Eb38fjvEuJKkQ6KzECvubvEcvCa'],
+  },
+};
 
 export const defaultNetworks = [
   {
@@ -126,6 +152,16 @@ export const NOTIFICATION_SETTINGS = [
   },
 ];
 
+export const FUNCTION_TYPE_DEX = {
+  pool: ['remove_liquidity', 'remove_liquidity_ae', 'add_liquidity', 'add_liquidity_ae'],
+  swap: [
+    'deposit', 'withdraw', 'swap_exact_tokens_for_tokens', 'swap_tokens_for_exact_tokens',
+    'swap_exact_ae_for_tokens', 'swap_tokens_for_exact_ae', 'swap_exact_tokens_for_ae',
+    'swap_ae_for_exact_tokens',
+  ],
+  allowance: ['transfer_allowance', 'change_allowance', 'create_allowance'],
+};
+
 export const ZEIT_TOKEN_INTERFACE = `@compiler >= 6
 contract interface PoS =
   stateful entrypoint set_paid : (int, int) => unit
@@ -145,8 +181,6 @@ export const CURRENCIES_URL = 'https://api.coingecko.com/api/v3/simple/price?ids
 export const CURRENCY_URL = 'https://api.coingecko.com/api/v3/coins/markets?ids=aeternity&vs_currency=';
 
 export const AVATAR_URL = 'https://avatars.z52da5wt.xyz/';
-
-export const LEDGER_BRIDGE_URL = 'https://wallet.superhero.com/ledger-bridge';
 
 export const BLOG_CLAIM_TIP_URL = 'https://blog.aeternity.com/superhero-how-to-send-receive-superhero-tips-34971b18c919#024e';
 

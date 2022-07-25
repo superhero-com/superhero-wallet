@@ -4,6 +4,7 @@ import VueRx from 'vue-rx';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
+import sdkPlugin from './plugins/sdk';
 import observables from './plugins/observables';
 import persistState from './plugins/persistState';
 import modals from './plugins/modals';
@@ -12,6 +13,7 @@ import namesPlugin from './plugins/names';
 import pendingTransactionHandler from './plugins/pendingTransactionHandler';
 import languagesPlugin from './plugins/languages';
 import openErrorModalPlugin from './plugins/openErrorModal';
+import pollAccountInfo from './plugins/pollAccountInfo';
 import runMigrations from './migrations';
 import accountsModule from './modules/accounts';
 import invitesModule from './modules/invites';
@@ -37,7 +39,8 @@ export default new Vuex.Store({
     transactions: {
       loaded: [],
       nextPageUrl: '',
-      pending: [],
+      pending: {},
+      tipWithdrawnTransactions: [],
     },
     pageTitle: '',
     sdk: null,
@@ -46,13 +49,10 @@ export default new Vuex.Store({
     tippingV2: null,
     nodeStatus: '',
     currencies: {},
-    nextCurrenciesFetch: null,
     notifications: [],
     notificationSettings: [],
     chainNames: null,
     tip: null,
-    txQueue: [],
-    connectedAepps: {},
     migrations: {},
     backedUpSeed: null,
     saveErrorLog: true,
@@ -67,6 +67,7 @@ export default new Vuex.Store({
       runMigrations,
       stateReducer,
     ),
+    sdkPlugin,
     observables,
     modals,
     tipUrl,
@@ -76,6 +77,7 @@ export default new Vuex.Store({
     languagesPlugin,
     openErrorModalPlugin,
     veeValidate,
+    pollAccountInfo,
   ],
   modules: {
     accounts: accountsModule,

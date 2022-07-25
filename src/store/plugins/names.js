@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import {
-  fetchJson, postJson, checkAddress, checkAensName,
+  fetchJson, postJson, checkAddress, checkAensName, getAllPages,
 } from '../../popup/utils/helper';
 import { i18n } from './languages';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
@@ -14,6 +14,7 @@ export default (store) => {
       preferred: {},
       auctions: {},
       pendingAutoExtendNames: [],
+      areNamesFetching: false,
     },
     getters: {
       get: ({ owned }) => (name) => owned.find((n) => n.name === name),
@@ -36,6 +37,9 @@ export default (store) => {
         && getAuction(name).bids.reduce((a, b) => (a.nameFee.isGreaterThan(b.nameFee) ? a : b)),
     },
     mutations: {
+      setAreNamesFetching(state, payload) {
+        state.areNamesFetching = payload;
+      },
       set(state, names) {
         state.owned = names;
       },
@@ -69,6 +73,7 @@ export default (store) => {
         dispatch,
       }) {
         if (!middleware) return;
+        commit('setAreNamesFetching', true);
         const getPendingNameClaimTransactions = (address) => dispatch('fetchPendingTransactions', address, { root: true }).then((transactions) => transactions
           .filter(({ tx: { type } }) => type === 'NameClaimTx')
           .map(({ tx, ...otherTx }) => ({
@@ -81,7 +86,7 @@ export default (store) => {
           accounts.map(({ address }) => Promise.all([
             getPendingNameClaimTransactions(address),
             middleware.getNamesOwnedBy(address)
-              .then(({ active }) => active.map(({ info, name }) => ({
+              .then(({ active }) => active.map(({ info, name, hash }) => ({
                 createdAtHeight: info.activeFrom,
                 expiresAt: info.expireHeight,
                 owner: info.ownership.current,
@@ -89,17 +94,21 @@ export default (store) => {
                 autoExtend: owned.find((n) => n.name === name)?.autoExtend
                 || pendingAutoExtendNames?.includes(name),
                 name,
+                hash,
               }))),
           ])),
         ).then((arr) => arr.flat(2));
 
         commit('set', names);
+        commit('setAreNamesFetching', false);
       },
       async fetchAuctions({ rootState: { middleware } }) {
         if (!middleware) return [];
+
+        // TODO: Switch to onscroll loading after/while resolving https://github.com/aeternity/superhero-wallet/issues/1400
         return (
-          await middleware.getAllAuctions({ by: 'expiration', direction: 'forward' })
-        ).data.map(({ name, info }) => ({
+          await getAllPages(() => middleware.getAllAuctions({ by: 'expiration', direction: 'forward', limit: 100 }), middleware.fetchByPath)
+        ).map(({ name, info }) => ({
           name,
           expiration: info.auctionEnd,
           lastBid: info.lastBid.tx,
@@ -126,10 +135,10 @@ export default (store) => {
         { rootGetters: { activeNetwork, accounts }, commit },
       ) {
         await Promise.all(accounts.map(async ({ address }) => {
-          const { preferredChainName: defaultNameBackend } = await fetchJson(
+          const response = await fetchJson(
             `${activeNetwork.backendUrl}/profile/${address}`,
-          ).catch(() => null);
-          commit('setDefault', { address, name: defaultNameBackend });
+          ).catch(() => {});
+          commit('setDefault', { address, name: response?.preferredChainName });
         }));
       },
       async setDefault(
@@ -167,9 +176,9 @@ export default (store) => {
         commit,
       }, address) {
         if (!middleware) return;
-        const { preferredChainName } = await fetchJson(`${activeNetwork.backendUrl}/profile/${address}`).catch(() => ({}));
-        if (preferredChainName) {
-          commit('setPreferred', { address, name: preferredChainName });
+        const response = await fetchJson(`${activeNetwork.backendUrl}/profile/${address}`).catch(() => {});
+        if (response?.preferredChainName) {
+          commit('setPreferred', { address, name: response?.preferredChainName });
         } else {
           commit('setPreferred', { address });
         }
@@ -182,8 +191,10 @@ export default (store) => {
     async (middleware) => {
       if (!middleware) return;
 
-      await store.dispatch('names/fetchOwned');
-      await store.dispatch('names/setDefaults');
+      await Promise.all([
+        store.dispatch('names/fetchOwned').catch(() => {}),
+        store.dispatch('names/setDefaults'),
+      ]);
 
       const height = await store.state.sdk.height();
       await Promise.all(
@@ -200,9 +211,10 @@ export default (store) => {
     ({ accounts: { hdWallet: { nextAccountIdx } } }) => nextAccountIdx,
     async () => {
       if (!store.state.middleware) return;
-      await store.dispatch('names/fetchOwned');
-      await store.dispatch('names/setDefaults');
+      await Promise.all([
+        store.dispatch('names/fetchOwned').catch(() => {}),
+        store.dispatch('names/setDefaults'),
+      ]);
     },
-    { immediate: true },
   );
 };

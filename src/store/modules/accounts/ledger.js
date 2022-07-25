@@ -1,10 +1,8 @@
 /* eslint no-param-reassign: ["error", { "ignorePropertyModificationsFor": ["state"] }] */
 
-import TransportU2F from '@ledgerhq/hw-transport-u2f';
+import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import Ae from '@aeternity/ledger-app-api';
-import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import LedgerBridge from './ledger-bridge';
-import { LEDGER_BRIDGE_URL } from '../../../popup/utils/constants';
+import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 
 export default {
   namespaced: true,
@@ -18,27 +16,31 @@ export default {
       ...rootGetters['accounts/getByType']('ledger').map(({ idx }) => idx),
       -1,
     ) + 1,
-    ledgerAppApi: () => new Ae(new TransportU2F()),
-    ledgerBridge: () => new LedgerBridge(LEDGER_BRIDGE_URL),
   },
 
   actions: {
-    async request({ getters: { ledgerAppApi, ledgerBridge }, dispatch }, { name, args }) {
+    async request({ dispatch }, { name, args }) {
       let result;
       let error;
-      do {
-        if (error) {
-          // eslint-disable-next-line no-await-in-loop
-          await dispatch('modals/open', { name: 'confirm', title: 'Try again' }, { root: true });
-        }
-        try {
-          // eslint-disable-next-line no-await-in-loop
-          result = await (process.env.IS_EXTENSION ? ledgerBridge : ledgerAppApi)[name](...args);
-          error = false;
-        } catch (err) {
-          error = true;
-        }
-      } while (error);
+      const transport = await TransportWebUSB.create();
+      const ledgerAppApi = new Ae(transport);
+      try {
+        do {
+          if (error) {
+            // eslint-disable-next-line no-await-in-loop
+            await dispatch('modals/open', { name: 'confirm', title: 'Try again' }, { root: true });
+          }
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            result = await ledgerAppApi[name](...args);
+            error = false;
+          } catch (err) {
+            error = true;
+          }
+        } while (error);
+      } finally {
+        await transport.close();
+      }
       return result;
     },
 
@@ -69,7 +71,13 @@ export default {
     async signTransaction({ rootGetters: { account }, dispatch, rootState }, { txBase64 }) {
       await dispatch('ensureCurrentAccountAvailable');
 
-      const binaryTx = decode(txBase64, 'tx');
+      const txObject = TxBuilder.unpackTx(txBase64).tx;
+      const binaryTx = TxBuilder.buildTx(
+        txObject,
+        SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag],
+        { vsn: txObject.VSN },
+      ).rlpEncoded;
+
       const signature = Buffer.from(await dispatch('request', {
         name: 'signTransaction',
         args: [
@@ -78,7 +86,8 @@ export default {
           rootState.sdk.getNetworkId(),
         ],
       }), 'hex');
-      return Crypto.encodeTx(Crypto.prepareTx(signature, binaryTx));
+      return TxBuilder
+        .buildTx({ encodedTx: binaryTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
     },
   },
 };

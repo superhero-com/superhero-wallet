@@ -18,7 +18,6 @@ import Auction from '../pages/Names/Auction.vue';
 import AuctionBid from '../pages/Names/AuctionBid.vue';
 import AuctionHistory from '../pages/Names/AuctionHistory.vue';
 import AuctionList from '../pages/Names/AuctionList.vue';
-import LedgerBridge from '../pages/LedgerBridge.vue';
 import More from '../pages/More.vue';
 import Names from '../pages/Names/Names.vue';
 import NameClaim from '../pages/Names/Claim.vue';
@@ -480,14 +479,6 @@ export default [
       title: 'invite',
       notPersist: true,
       notRebrand: true,
-    },
-  },
-  {
-    name: 'ledger-bridge',
-    path: '/ledger-bridge',
-    component: LedgerBridge,
-    meta: {
-      ifNotAuth: true,
     },
   },
   ...webIframePopups,

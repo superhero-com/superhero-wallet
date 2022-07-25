@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
-import { unionBy, isEqual, isEmpty } from 'lodash-es';
+import { isEqual, isEmpty, uniqBy } from 'lodash-es';
 import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
 import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 
@@ -37,23 +37,17 @@ export default (store) => {
       setAvailableTokens(state, payload) {
         state.availableTokens = payload;
       },
-      resetTokenBalances(state, address) {
-        if (address in state.tokens) {
-          state.tokens[address].tokenBalances = [];
-        }
-      },
       resetTokens(state) {
         state.tokens = {};
       },
-      addTokenBalance(state, { address, token }) {
+      resetTransactions(state) {
+        state.transactions = {};
+      },
+      addTokenBalance(state, { address, balances }) {
         if (!(address in state.tokens)) {
           Vue.set(state.tokens, address, { selectedToken: null, tokenBalances: [] });
         }
-        Vue.set(
-          state.tokens[address],
-          'tokenBalances',
-          unionBy([token], state.tokens[address].tokenBalances, 'contract'),
-        );
+        Vue.set(state.tokens[address], 'tokenBalances', balances);
       },
       setAePublicData(state, payload) {
         state.aePublicData = payload;
@@ -67,8 +61,8 @@ export default (store) => {
 
         if (isEmpty(response) || typeof response !== 'object') return commit('setAvailableTokens', {});
 
-        const availableTokens = response.reduce((obj, { contract_id: contract, ...other }) => ({
-          ...obj, [contract]: { contract, ...other },
+        const availableTokens = response.reduce((obj, { contract_id: contractId, ...other }) => ({
+          ...obj, [contractId]: { contractId, ...other },
         }), {});
         return commit('setAvailableTokens', availableTokens);
       },
@@ -89,24 +83,24 @@ export default (store) => {
 
             selectedToken = store.state.fungibleTokens.tokens[address]?.selectedToken;
 
-            commit('resetTokenBalances', address);
-
-            tokens.filter(({ amount }) => amount).map(({ amount, contract_id: contract }) => {
-              const token = availableTokens[contract];
+            // TODO: remove uniqBy after https://github.com/aeternity/ae_mdw/issues/735 is fixed and released
+            const balances = uniqBy(tokens, 'contract_id').map(({ amount, contract_id: contractId }) => {
+              const token = availableTokens[contractId];
               if (!token) return null;
               const balance = convertToken(amount, -token.decimals);
               const convertedBalance = balance.toFixed(2);
               const objectStructure = {
                 ...token,
-                value: contract,
+                value: contractId,
                 text: `${convertedBalance} ${token.symbol}`,
-                contract,
+                contractId,
                 balance,
                 convertedBalance,
               };
 
-              return commit('addTokenBalance', { address, token: objectStructure });
+              return objectStructure;
             });
+            commit('addTokenBalance', { address, balances });
           } catch (e) {
             handleUnknownError(e);
           } finally {
@@ -114,7 +108,7 @@ export default (store) => {
               {
                 address,
                 token: (store.state.fungibleTokens.tokens?.[address]?.tokenBalances || [])
-                  .find((t) => t.contract === selectedToken?.contract),
+                  .find((t) => t?.contractId === selectedToken?.contractId),
               });
           }
         });
@@ -135,7 +129,7 @@ export default (store) => {
         const { selectedToken } = tokens[account.address];
         const tokenContract = await sdk.getContractInstance({
           source: FUNGIBLE_TOKEN_CONTRACT,
-          contractAddress: selectedToken.contract,
+          contractAddress: selectedToken.contractId,
         });
         const { decodedResult } = await tokenContract.methods.allowance({
           from_account: account.address,
@@ -157,7 +151,7 @@ export default (store) => {
       ) {
         const tokenContract = await sdk.getContractInstance({
           source: FUNGIBLE_TOKEN_CONTRACT,
-          contractAddress: tokens[account.address].selectedToken.contract,
+          contractAddress: tokens[account.address].selectedToken.contractId,
         });
         return tokenContract.methods.transfer(
           toAccount,
@@ -171,7 +165,7 @@ export default (store) => {
       ) {
         const tokenContract = await sdk.getContractInstance({
           source: ZEIT_TOKEN_INTERFACE,
-          contractAddress: tokens[account.address].selectedToken.contract,
+          contractAddress: tokens[account.address].selectedToken.contractId,
         });
         return tokenContract.methods.burn_trigger_pos(
           convertToken(amount, tokens[account.address].selectedToken.decimals).toFixed(),
@@ -180,17 +174,60 @@ export default (store) => {
           option,
         );
       },
-      async getTokensHistory({ rootState, rootGetters: { activeNetwork, account }, commit }) {
+      async getTokensHistory(
+        { state: { transactions }, rootGetters: { activeNetwork, account }, commit }, recent,
+      ) {
         const { address } = account;
-        const rawTransactions = await fetchJson(`${activeNetwork.middlewareUrl}/aex9/transfers/to/${address}`);
+        if (transactions[address]?.length && !recent) return transactions[address];
 
-        const transactions = await Promise.all(
-          rawTransactions.map(async ({ call_txi: index, ...otherTx }) => ({
-            ...(await rootState.middleware.getTxByIndex(index)), ...otherTx,
-          })),
-        );
-        commit('setTransactions', { address, transactions });
-        return transactions;
+        let rawTransactions = [];
+        const lastTransaction = transactions[address]?.[0];
+        if (recent) {
+          let nextPageUrl;
+          let isAllNewTransactionsLoadded = false;
+          while (nextPageUrl !== null && !isAllNewTransactionsLoadded) {
+            // eslint-disable-next-line no-await-in-loop
+            const { data, next } = await (fetchJson(nextPageUrl
+              ? `${activeNetwork.middlewareUrl}/${nextPageUrl}`
+              : `${activeNetwork.middlewareUrl}/v2/aex9/transfers/to/${address}`));
+            if (data?.length) rawTransactions.push(...data);
+            if (data?.some((t) => t?.tx_hash === lastTransaction?.hash)
+            || !transactions[address]?.length) {
+              isAllNewTransactionsLoadded = true;
+            }
+            nextPageUrl = next || null;
+          }
+          if (rawTransactions?.[0]?.tx_hash === lastTransaction?.hash) {
+            return transactions[address].slice(0, 10);
+          }
+        } else {
+          rawTransactions = await fetchJson(`${activeNetwork.middlewareUrl}/aex9/transfers/to/${address}`);
+        }
+
+        const newTransactions = rawTransactions
+          .map((tx) => ({
+            ...tx,
+            tx: {
+              contractId: tx.contract_id,
+              senderId: tx.sender,
+              recipientId: tx.recipient,
+              callerId: tx.sender,
+              type: 'ContractCallTx',
+            },
+            recipient: tx.recipient,
+            incomplete: true,
+            microTime: tx.micro_time,
+            hash: tx.tx_hash,
+          }));
+
+        if (newTransactions?.[0]?.hash !== lastTransaction?.hash && recent) {
+          commit('setTransactions', {
+            address, transactions: uniqBy([...newTransactions, ...(transactions[address] || [])], 'hash'),
+          });
+          return newTransactions;
+        }
+        commit('setTransactions', { address, transactions: newTransactions.reverse() });
+        return newTransactions;
       },
     },
   });
@@ -211,6 +248,7 @@ export default (store) => {
     async (network, oldNetwork) => {
       if (isEqual(network, oldNetwork)) return;
       store.commit('fungibleTokens/resetTokens');
+      store.commit('fungibleTokens/resetTransactions');
     },
   );
 
@@ -220,6 +258,5 @@ export default (store) => {
       if (!store.state.middleware) return;
       await store.dispatch('fungibleTokens/loadTokenBalances');
     },
-    { immediate: true },
   );
 };

@@ -1,12 +1,12 @@
 <template>
   <div class="transaction-details">
     <AnimatedSpinner
-      v-if="!transaction"
+      v-if="!transaction || transaction.incomplete"
       class="spinner"
     />
 
     <Plate
-      v-if="transaction"
+      v-if="transaction && !transaction.incomplete"
       class="header"
     >
       <TokenAmount
@@ -18,11 +18,21 @@
       />
     </Plate>
     <div
-      v-if="transaction"
+      v-if="transaction && !transaction.incomplete"
       class="content"
     >
       <TransactionOverview v-bind="transaction" />
       <div class="data-grid">
+        <SwapRates
+          v-if="UNFINISHED_FEATURES"
+          :transaction="transaction"
+          class="span-2-columns"
+        />
+        <SwapRoute
+          v-if="UNFINISHED_FEATURES"
+          :transaction="transaction"
+          class="span-2-columns"
+        />
         <DetailsItem
           v-if="tipUrl"
           :label="$t('pages.transactionDetails.tipUrl')"
@@ -142,6 +152,8 @@ import { mapGetters } from 'vuex';
 import { formatDate, formatTime } from '../../utils';
 import TransactionOverview from '../components/TransactionOverview.vue';
 import Plate from '../components/Plate.vue';
+import SwapRoute from '../components/SwapRoute.vue';
+import SwapRates from '../components/SwapRates.vue';
 import TokenAmount from '../components/TokenAmount.vue';
 import DetailsItem from '../components/DetailsItem.vue';
 import LinkButton from '../components/LinkButton.vue';
@@ -164,6 +176,8 @@ export default {
     AnimatedPending,
     AnimatedSpinner,
     BlockIcon,
+    SwapRoute,
+    SwapRates,
   },
   filters: {
     formatDate,
@@ -175,6 +189,7 @@ export default {
   data() {
     return {
       transaction: null,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
   computed: {
@@ -202,7 +217,7 @@ export default {
   },
   async mounted() {
     this.transaction = this.getTx(this.hash);
-    if (!this.transaction) {
+    if (!this.transaction || this.transaction?.incomplete) {
       await this.$watchUntilTruly(() => this.$store.state.middleware);
       this.transaction = await this.$store.state.middleware.getTxByHash(this.hash);
     }
@@ -260,7 +275,6 @@ export default {
     .data-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-auto-rows: 64px;
       row-gap: 8px;
       column-gap: 24px;
       padding: 8px 16px;

@@ -58,7 +58,7 @@ export default {
   },
   computed: {
     ...mapState(['sdk']),
-    ...mapGetters(['formatCurrency']),
+    ...mapGetters(['formatCurrency', 'account']),
     ...mapGetters('fungibleTokens', ['selectedToken']),
     hasError() {
       return this.$validator.errors.has('amount');
@@ -92,7 +92,7 @@ export default {
           ...this.sdk.Ae.defaults,
           ...(this.selectedToken && {
             callerId: this.account.address,
-            contractId: this.selectedToken.contract,
+            contractId: this.selectedToken.contractId,
           }),
         },
       );

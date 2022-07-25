@@ -23,18 +23,15 @@ export default {
     border-radius: 50px;
     color: variables.$color-light-grey;
 
-    ::v-deep svg {
-      opacity: 0.7;
+    &:not(.router-link-active) ::v-deep svg {
+      color: rgba(255, 255, 255, 0.7);
     }
 
     &:hover {
       background-color: variables.$color-hover;
-    }
 
-    &:hover,
-    &.router-link-active {
-      ::v-deep svg {
-        opacity: 1;
+      &:not(.router-link-active) ::v-deep svg {
+        color: rgb(255, 255, 255);
       }
     }
   }

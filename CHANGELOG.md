@@ -2,6 +2,88 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.10](https://github.com/aeternity/superhero-wallet/compare/v0.9.9...v0.9.10) (2022-07-22)
+
+
+### Features
+
+* address shortening component ([55edeea](https://github.com/aeternity/superhero-wallet/commit/55edeead669b31e0a4b54f323a66d5b44faa7562))
+* show all tokens user had activity with ([15aef34](https://github.com/aeternity/superhero-wallet/commit/15aef3445a660a991eed49df2b31490e709c9563))
+* store pending transactions for each node ([1b11998](https://github.com/aeternity/superhero-wallet/commit/1b1199854f7af0603385425999af9c382bf3231c))
+* tooltip component ([e448f1e](https://github.com/aeternity/superhero-wallet/commit/e448f1ee6c2870bbc7ee3c2814f64994be08b038))
+* transaction details swap rates ([406adc2](https://github.com/aeternity/superhero-wallet/commit/406adc2416c09ba0915cfcb5d55d0d6bc3d7fa81))
+* transaction details swap route ([28b1111](https://github.com/aeternity/superhero-wallet/commit/28b111162d52ad804cae3e0d60207da5bc51ca18))
+* **transaction-list:** ablity to filter pending transactions ([f7c624e](https://github.com/aeternity/superhero-wallet/commit/f7c624ec81899b850e748d6df0059a48efc8a599))
+
+
+### Bug Fixes
+
+* calculate fee for the token spend properly ([35a9a55](https://github.com/aeternity/superhero-wallet/commit/35a9a552e4d2a84e1a74b6dfdd9b0b5e033d2af9))
+* claiming from url ([30fd918](https://github.com/aeternity/superhero-wallet/commit/30fd9184bed34b9827360a0eafae3ca3c6bcbae0))
+* display currency list over filters ([b0aebd1](https://github.com/aeternity/superhero-wallet/commit/b0aebd199758033ebaabcb74ff779bc86205b5b2))
+* do not reload not connected tabs ([1dcd699](https://github.com/aeternity/superhero-wallet/commit/1dcd6998f38659ae37037836f2bcd4908a99fa3f))
+* do not show spend-success modal multiple time for a one transaction ([61ad864](https://github.com/aeternity/superhero-wallet/commit/61ad8644a9f59c5777c92b923d85800eefe81329))
+* **ledger:** propely sign transactions with ledger ([9f36fbc](https://github.com/aeternity/superhero-wallet/commit/9f36fbc7c23984b95490a8b4d027f3ab3b2f8570))
+* **ledger:** use not deprecated transport ([b71e9c7](https://github.com/aeternity/superhero-wallet/commit/b71e9c74442aef158c318e681cf63ddfe75a98fc))
+* load all auctions at once ([e329213](https://github.com/aeternity/superhero-wallet/commit/e329213d4af4bac11a1ed8186f609233e8b0eff5))
+* load currencies after a time interval ([ab15d0d](https://github.com/aeternity/superhero-wallet/commit/ab15d0dad5241aac20153848d63ed1392f82de7b))
+* **modal:** show modals over Header component ([77b7e64](https://github.com/aeternity/superhero-wallet/commit/77b7e64c7d80f78008f574c22773158574500c67))
+* **mutations:** avoid potential problems with missing fields ([c462025](https://github.com/aeternity/superhero-wallet/commit/c462025f42dfb2cbac0159f966a6500ec2f4ea66))
+* **mutations:** remove pending transctions on network/account change ([e63aaf4](https://github.com/aeternity/superhero-wallet/commit/e63aaf4abab2e295125c4d85ac9128d80a9b3c42))
+* **name-list:** fetch owned names every 10 seconds ([c7327ea](https://github.com/aeternity/superhero-wallet/commit/c7327ea15af19b55b6c12b11d54a93b36de0b0b3))
+* **name-list:** show the loader when the transactions are loading ([062a813](https://github.com/aeternity/superhero-wallet/commit/062a813c3a51c5e84e83a006ffdb5e1cb7db7c17))
+* **names:** handle correctly preferred name response ([31c5874](https://github.com/aeternity/superhero-wallet/commit/31c5874e8781e5d07d808f7b1d10f18775a7a33d))
+* **persist-state:** sync state between stores properly ([6c21387](https://github.com/aeternity/superhero-wallet/commit/6c2138791adfb5b3e02581561fdeda758f765941))
+* **sdk:** enable signing with a permissions module ([886f763](https://github.com/aeternity/superhero-wallet/commit/886f76307f6f218c95a0604cd1e00c68e845c95f))
+* show all transactions in proper order ([f11a700](https://github.com/aeternity/superhero-wallet/commit/f11a700c88863884c3e5b6128d0c2dad159e5389))
+* show proper information for the tip pending transaction ([3feec13](https://github.com/aeternity/superhero-wallet/commit/3feec1361ece777c5daa380e348df38fd4f4acb9))
+* show proper information for tranfer_payload transactions ([4532e69](https://github.com/aeternity/superhero-wallet/commit/4532e698608012760d804f57f3728be6b6ed780f))
+* **spend-success:** show the proper spend transaction symbol ([36d9aca](https://github.com/aeternity/superhero-wallet/commit/36d9acabcda144cce4287251ef8f6b02a99302b3))
+* **tabs:** do not show svgs through other elements ([ba07ffc](https://github.com/aeternity/superhero-wallet/commit/ba07ffc0f9413792fa5689761867c5ce4d4105ca))
+* **token-details:** add a proper link to a simplex ([e8f9bad](https://github.com/aeternity/superhero-wallet/commit/e8f9badf37c7f0243066d0f6772a437bba276c8d))
+* **token-list:** set a proper simplex url ([6c8f686](https://github.com/aeternity/superhero-wallet/commit/6c8f686a1c254e082323c4afa40a236716f2300f))
+* **tokens:** do not read properties of null ([8fb40f1](https://github.com/aeternity/superhero-wallet/commit/8fb40f122b233febed9c555cde4970048f169a04))
+
+
+### Tests
+
+* improve unit testing coverage ([2544996](https://github.com/aeternity/superhero-wallet/commit/25449962d19e0b2996cf775e57bf5568265b2ba3))
+* **input-amount:** avoid deprecated methods overwriting ([52b0371](https://github.com/aeternity/superhero-wallet/commit/52b0371ea45b544031a576877b7fb054dde1aa15))
+* **snapshot:** fix issue with accessing of imported function ([68d96eb](https://github.com/aeternity/superhero-wallet/commit/68d96eb2ac754627892c9d23e71ac08a5a2835dc))
+
+
+### Maintenance
+
+* add dex contracts for testnet and mainnet ([540db78](https://github.com/aeternity/superhero-wallet/commit/540db787dc1a48946c7ddb65a8b59494d225cd79))
+* add transactionTokenInfoResolvers ([a39d1e9](https://github.com/aeternity/superhero-wallet/commit/a39d1e9f93e5225d277317217919d661921cefe6))
+* align every contract id notations ([4e85a28](https://github.com/aeternity/superhero-wallet/commit/4e85a2887a37c2d513701b91791b905ce7fff27f))
+* **App:** drop useless code ([40d96ec](https://github.com/aeternity/superhero-wallet/commit/40d96ec8b5c22327f38bfc207c6b047ced8dad9a))
+* **constants:** add dex related transaction types constant ([2a1f0b7](https://github.com/aeternity/superhero-wallet/commit/2a1f0b7a8666edd5556fb399f034bcb6b9787ea1))
+* do not poll currencies if not logged in ([f97a76c](https://github.com/aeternity/superhero-wallet/commit/f97a76cc5b39a2143ee26dedaaf9618fba038945))
+* extract background sdk into plugin ([b9bb7a5](https://github.com/aeternity/superhero-wallet/commit/b9bb7a508399607837ddc6847a62e25ede3f41f4))
+* **ledger:** remove unused ledger bridge ([c1ce862](https://github.com/aeternity/superhero-wallet/commit/c1ce86256591df5ed881eb26a9222780ce3c45ff))
+* remove unused variables ([38213a9](https://github.com/aeternity/superhero-wallet/commit/38213a9f4e475b15394cda41bdabfbf2d98483c9))
+* show also retip transactions when filtered by tips ([4124442](https://github.com/aeternity/superhero-wallet/commit/4124442da0ba07c3051575f3f81e17f8d49fb8b7))
+* show pending transaction until middleware returns it ([438cb26](https://github.com/aeternity/superhero-wallet/commit/438cb263b880866ec2a26fda8cffa0d7fd7c50ea))
+* **transaction-details:** exclude unfinished components from production ([34f6565](https://github.com/aeternity/superhero-wallet/commit/34f6565de7fef7d0746a1a3e06c891f8ce7fb381))
+* **wallet:** use sdkPlugin instead of initializing new one ([80c3f6f](https://github.com/aeternity/superhero-wallet/commit/80c3f6f49e5d90bbb44e2d36617553da7ae3c281))
+
+
+### Performance
+
+* do not fetch all backend transactions on each call ([bc7462a](https://github.com/aeternity/superhero-wallet/commit/bc7462aff55ece003c39be04c66bcda63c32a53c))
+* do not have a separate request for each fungible token transaction ([3a0fdde](https://github.com/aeternity/superhero-wallet/commit/3a0fddecbfffe84dfbe308b2c11207389ac3f144))
+* do not load additional name entry ([b991b4c](https://github.com/aeternity/superhero-wallet/commit/b991b4c7bd5c27809398dd66c1f818b54a42859a))
+* do not make duplicate requests on initialization ([f2810c0](https://github.com/aeternity/superhero-wallet/commit/f2810c00536b31836160345673b12de717bf27af))
+* do not poll account info on each AccountInfo instance ([57f3e5f](https://github.com/aeternity/superhero-wallet/commit/57f3e5f2e00cac14eb3062418030e56ba1865253))
+* **fungible-tokens:** do not commit each token balance separately ([3df9809](https://github.com/aeternity/superhero-wallet/commit/3df98096942784f76c31b99d29eb4acabd83d458))
+* **fungible-tokens:** do not run through not uniq token balances ([6002cfb](https://github.com/aeternity/superhero-wallet/commit/6002cfb2c7bf4eed3ae31f40de03eb5bf0881c8f))
+* **fungible-tokens:** remove pointless mutation ([742f949](https://github.com/aeternity/superhero-wallet/commit/742f9494c65ca3e66eb0343e750461aa56ed3846))
+* **fungible-tokens:** remove pointless unionBy ([d5c7abb](https://github.com/aeternity/superhero-wallet/commit/d5c7abb0381d448935bffa1423f8d87aa5b947c4))
+* **name-item:** do not fetch owned names in each component instance ([8f48352](https://github.com/aeternity/superhero-wallet/commit/8f4835235f3c21a69a2122e983838c85e071ad37))
+* **names:** fetch names in parallel ([7f5e3ea](https://github.com/aeternity/superhero-wallet/commit/7f5e3ea8c8c6142711c33b9f23926d8014c5ce56))
+* **wallet:** improve handling await events ([f29efc8](https://github.com/aeternity/superhero-wallet/commit/f29efc8daa3ed9f9a9e73d9c1267f63070db23ac))
+
 ### [0.9.9](https://github.com/aeternity/superhero-wallet/compare/v0.9.8...v0.9.9) (2022-06-10)
 
 

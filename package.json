@@ -1,6 +1,6 @@
 {
   "name": "superhero-wallet",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "description": "Superhero wallet",
   "author": "Superhero",
   "license": "MIT",
@@ -33,7 +33,7 @@
     "@aeternity/ledger-app-api": "0.2.1",
     "@fontsource/ibm-plex-mono": "^4.5.7",
     "@fontsource/ibm-plex-sans": "^4.5.7",
-    "@ledgerhq/hw-transport-u2f": "^4.78.0",
+    "@ledgerhq/hw-transport-webusb": "^6.27.1",
     "@zxing/library": "^0.19.1",
     "aeternity-fungible-token": "github:aeternity/aeternity-fungible-token#v2.0.0",
     "bignumber.js": "^9.0.2",

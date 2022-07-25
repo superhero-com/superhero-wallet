@@ -1,10 +1,10 @@
-import { Node, RpcWallet, genSwaggerClient } from '@aeternity/aepp-sdk';
+import { genSwaggerClient } from '@aeternity/aepp-sdk';
 import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { camelCase, isEqual, times } from 'lodash-es';
-import { fetchJson, IN_FRAME } from '../popup/utils/helper';
+import camelcaseKeysDeep from 'camelcase-keys-deep';
+import { fetchJson, IN_FRAME, executeAndSetInterval } from '../popup/utils/helper';
 import store from '../store';
-import { App } from '../store/modules/permissions';
 import Logger from './logger';
 
 async function initMiddleware() {
@@ -63,6 +63,8 @@ async function initMiddleware() {
     (await genSwaggerClient(middlewareUrl, { spec })).api,
     ([k, v]) => [camelCase(k), v],
   );
+  middleware.fetchByPath = (path) => fetchJson(`${middlewareUrl}${path}`).then(camelcaseKeysDeep);
+
   store.commit('setMiddleware', middleware);
 }
 
@@ -71,15 +73,15 @@ let initSdkRunning = false;
 if (IN_FRAME) {
   store.registerModule('sdk-frame-reset', {
     actions: {
-      async reset({ rootState: { sdk } }) {
-        Object.values(sdk.rpcClients).forEach((aepp) => {
-          if (aepp.info.status !== 'DISCONNECTED') {
+      async reset({ rootGetters }) {
+        Object.values(rootGetters['sdkPlugin/sdk'].rpcClients).forEach((aepp) => {
+          if (aepp.info.status && aepp.info.status !== 'DISCONNECTED') {
             aepp.sendMessage(
               { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
               true,
             );
+            aepp.disconnect();
           }
-          aepp.disconnect();
         });
       },
     },
@@ -91,130 +93,15 @@ export default async function initSdk() {
   initSdkRunning = true;
 
   store.commit('setNodeStatus', 'connecting');
-  const { activeNetwork } = store.getters;
-  const { url, compilerUrl } = activeNetwork;
-  const node = await Node({ url });
   try {
-    const acceptCb = (_, { accept }) => accept();
-    const signCb = async (_, action, origin) => {
-      const { method, params } = action;
-      try {
-        const originUrl = new URL(origin);
-        const permission = await store.dispatch('permissions/checkPermissions', {
-          host: originUrl.hostname,
-          method,
-          params: params?.txObject?.params,
-        });
-        if (method === 'message.sign') {
-          if (!permission) {
-            await store.dispatch('modals/open', {
-              name: 'confirm-message-sign',
-              message: params.message,
-              app: {
-                name: originUrl.host,
-                host: originUrl.host,
-                protocol: originUrl.protocol,
-              },
-            });
-          }
-          action.accept({ onAccount: { sign: () => {}, address: () => {} } });
-          return;
-        }
-        action.accept(null, {
-          onAccount: {
-            sign: async () => store.dispatch('accounts/signTransaction', {
-              txBase64: params.tx,
-              opt: {
-                modal: !permission,
-              },
-            }),
-            address: () => {},
-          },
-        });
-      } catch (error) {
-        action.deny();
-        if (error.message !== 'Rejected by user') throw error;
-      }
-      action.deny();
-    };
-
-    const sdk = await RpcWallet.compose({
-      methods: {
-        getApp(aeppUrl) {
-          const hostPermissions = store.state.permissions[aeppUrl.hostname];
-          if (!hostPermissions) store.commit('permissions/addHost', aeppUrl.hostname);
-          return new App(aeppUrl);
-        },
-        async address(...args) {
-          const { address } = store.getters.account;
-          const app = args.pop();
-          if (app instanceof App) {
-            const { host, hostname, protocol } = app.host;
-            if (
-              !(await store.dispatch('permissions/requestAddressForHost', {
-                host: hostname,
-                address,
-                connectionPopupCb: async () => store.dispatch('modals/open', {
-                  name: 'confirm-connect',
-                  app: {
-                    name: hostname,
-                    icons: [],
-                    protocol,
-                    host,
-                  },
-                }),
-              }))
-            ) return Promise.reject(new Error('Rejected by user'));
-          }
-          return address;
-        },
-        sign: (data) => store.dispatch('accounts/sign', data),
-        signTransaction: (txBase64, opt) => (opt.onAccount
-          ? opt.onAccount.sign()
-          : store.dispatch('accounts/signTransaction', { txBase64, opt })),
-      },
-    })({
-      nodes: [{ name: activeNetwork.name, instance: node }],
-      compilerUrl,
-      name: 'Superhero',
-      onConnection: acceptCb,
-      async onSubscription(_, { accept, deny }, origin) {
-        let activeAccount;
-        try {
-          activeAccount = await this.address(this.getApp(new URL(origin)));
-        } catch (e) {
-          deny();
-          return;
-        }
-        accept({
-          accounts: {
-            current: { [activeAccount]: {} },
-            connected: {
-              ...store.getters.accounts
-                .reduce((p, { address }) => ({
-                  ...p, ...address !== activeAccount ? { [address]: {} } : {},
-                }), {}),
-            },
-          },
-        });
-      },
-      onSign: signCb,
-      onMessageSign: signCb,
-      onAskAccounts: acceptCb,
-      onDisconnect(msg, client) {
-        client.disconnect();
-      },
-    });
-
+    await store.dispatch('sdkPlugin/initialize');
+    // eslint-disable-next-line no-underscore-dangle
+    await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
     if (IN_FRAME) {
       const getArrayOfAvailableFrames = () => [
         window.parent,
         ...times(window.parent.frames.length, (i) => window.parent.frames[i]),
       ];
-      const executeAndSetInterval = (handler, timeout) => {
-        handler();
-        return setInterval(handler, timeout);
-      };
 
       const connectedFrames = new Set();
       executeAndSetInterval(
@@ -233,22 +120,21 @@ export default async function initSdk() {
                 onMessage(data, origin, source);
               });
             };
-            sdk.addRpcClient(connection);
+            store.getters['sdkPlugin/sdk'].addRpcClient(connection);
             intervalId = executeAndSetInterval(() => {
               if (!getArrayOfAvailableFrames().includes(target)) {
                 clearInterval(intervalId);
                 return;
               }
-              sdk.shareWalletInfo(connection.sendMessage.bind(connection));
+              store.getters['sdkPlugin/sdk'].shareWalletInfo(connection.sendMessage.bind(connection));
             }, 3000);
           }),
         3000,
       );
     }
 
-    await store.commit('initSdk', sdk);
-    await store.dispatch('initContractInstances');
-    await initMiddleware();
+    store.commit('initSdk', store.getters['sdkPlugin/sdk']);
+    await Promise.all([store.dispatch('initContractInstances'), initMiddleware()]);
     store.commit('setNodeStatus', 'connected');
     setTimeout(() => store.commit('setNodeStatus', ''), 2000);
 
@@ -258,8 +144,6 @@ export default async function initSdk() {
         if (isEqual(network, oldNetwork)) return;
         try {
           store.commit('setNodeStatus', 'connecting');
-          sdk.pool.delete(network.name);
-          sdk.addNode(network.name, await Node({ url: network.url }), true);
           await initMiddleware();
           store.commit('setNodeStatus', 'connected');
           setTimeout(() => store.commit('setNodeStatus', ''), 2000);
@@ -268,15 +152,6 @@ export default async function initSdk() {
           Logger.write(error);
         }
       },
-    );
-    store.watch(
-      ({ accounts: { activeIdx } }) => activeIdx,
-      async (accountIdx) => store.commit('selectSdkAccount', store.getters.accounts[accountIdx].address),
-    );
-
-    store.watch(
-      (state, getters) => getters.accounts.length,
-      () => store.commit('setSdkAccounts', store.getters.accounts),
     );
   } catch (e) {
     store.commit('setNodeStatus', 'error');

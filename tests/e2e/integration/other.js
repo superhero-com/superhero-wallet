@@ -1,12 +1,12 @@
 const txs = [
   {
-    hash: 'th_', amount: 0.1, domain: 'localhost:5000', time: Date.now(), tx: { type: 'tip', senderId: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' },
+    pending: true, hash: 'th_', amount: 0.1, domain: 'localhost:5000', time: Date.now(), tx: { type: 'tip', senderId: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' },
   },
   {
-    hash: 'th_', amount: 2, domain: 'localhost:8000', time: Date.now(), tx: { type: 'tip', senderId: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' },
+    pending: true, hash: 'th_', amount: 2, domain: 'localhost:8000', time: Date.now(), tx: { type: 'tip', senderId: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' },
   },
   {
-    hash: 'th_', amount: 10, domain: 'localhost:8080', time: Date.now(), tx: { type: 'tip', senderId: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' },
+    pending: true, hash: 'th_', amount: 10, domain: 'localhost:8080', time: Date.now(), tx: { type: 'tip', senderId: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' },
   },
 ];
 

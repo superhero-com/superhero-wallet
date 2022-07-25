@@ -10,19 +10,19 @@
       </div>
       <div class="token-actions">
         <BoxButton
+          v-if="+tokenData.convertedBalance"
           @click.native="proceed({ name: 'transfer-send' })"
         >
           <SendIcon />{{ $t('pages.token-details.send') }}
         </BoxButton>
-        <BoxButton
-          @click.native="proceed({ name: 'transfer-receive' })"
-        >
+        <BoxButton @click.native="proceed({ name: 'transfer-receive' })">
           <ReceiveIcon />{{ $t('pages.token-details.receive') }}
         </BoxButton>
         <BoxButton
           v-if="id === 'aeternity'"
           fill="alternative"
-          @click.native="proceed({ name: 'buy' })"
+          :to="SIMPLEX_URL"
+          is-external-link
         >
           <BuyIcon />{{ $t('pages.fungible-tokens.buyAe') }}
         </BoxButton>
@@ -60,10 +60,10 @@
         :text="tokenData.decimals"
       />
       <DetailsRow
-        v-if="tokenData.contract"
-        :class="{ contract: tokenData.contract }"
+        v-if="tokenData.contractId"
+        :class="{ contract: tokenData.contractId }"
         :label="$t('pages.token-details.contract')"
-        :text="tokenData.contract"
+        :text="tokenData.contractId"
       />
       <DetailsRow
         :label="$t('pages.token-details.available-supply')"
@@ -120,6 +120,7 @@ import BoxButton from '../../components/BoxButton.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
 import TransactionList from '../../components/TransactionList.vue';
+import { SIMPLEX_URL } from '../../../utils/constants';
 
 export default {
   components: {
@@ -140,6 +141,7 @@ export default {
   data() {
     return {
       activeTab: 'details',
+      SIMPLEX_URL,
     };
   },
   subscriptions() {
@@ -160,13 +162,13 @@ export default {
           symbol: 'AE',
           convertedBalance: this.tokenBalance,
           balanceCurrency: this.balanceCurrency,
-          contract: '',
+          contractId: '',
         };
       }
       return (
-        this.tokenBalances.find(({ contract }) => contract === this.id) || {
+        this.tokenBalances.find(({ contractId }) => contractId === this.id) || {
           ...this.fungibleToken,
-          contract: this.id,
+          contractId: this.id,
         }
       );
     },

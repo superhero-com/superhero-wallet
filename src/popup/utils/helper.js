@@ -7,11 +7,11 @@ import { CONNECTION_TYPES } from './constants';
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
 
-export const aeToAettos = (v) => AmountFormatter.formatAmount(v, {
+export const aeToAettos = (v) => AmountFormatter.formatAmount(v.toString(), {
   denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
   targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
 });
-export const aettosToAe = (v) => AmountFormatter.formatAmount(v, {
+export const aettosToAe = (v) => AmountFormatter.formatAmount(v.toString(), {
   denomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
   targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
 });
@@ -120,7 +120,7 @@ export const checkHashType = (hash) => {
     endpoint = 'transactions';
   } else if (accountPublicKeyRegex.test(hash)) {
     endpoint = 'account/transactions';
-  } else if (nameRegex.test(hash) || hash.endsWith('.chain')) {
+  } else if (nameRegex.test(hash) || hash?.endsWith('.chain')) {
     endpoint = 'names';
   } else {
     valid = false;
@@ -147,9 +147,16 @@ export const getBalanceLocalStorage = () => (
 );
 
 export const categorizeContractCallTxObject = (transaction) => {
+  if (transaction.incomplete
+    || ((transaction.tx.function === 'tip' || transaction.tx.function === 'retip') && transaction.pending)) {
+    return {
+      amount: transaction.amount, token: transaction.tx.contractId, to: transaction.tx.callerId,
+    };
+  }
   if (transaction.tx.type !== 'ContractCallTx') return null;
   switch (transaction.tx.function) {
     case 'transfer':
+    case 'transfer_payload':
     case 'change_allowance':
     case 'create_allowance':
       return {
@@ -196,4 +203,23 @@ export const readValueFromClipboard = async () => {
       }
   }
   return value;
+};
+
+export const executeAndSetInterval = (handler, timeout) => {
+  handler();
+  return setInterval(handler, timeout);
+};
+
+export const getAllPages = async (getFunction, getNextPage) => {
+  const result = [];
+  let nextPageUrl;
+  while (nextPageUrl !== null) {
+    // eslint-disable-next-line no-await-in-loop
+    const { data, next } = await (nextPageUrl
+      ? getNextPage(nextPageUrl)
+      : getFunction());
+    if (data?.length) result.push(...data);
+    nextPageUrl = next || null;
+  }
+  return result;
 };

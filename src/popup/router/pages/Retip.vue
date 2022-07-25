@@ -106,7 +106,7 @@ export default {
           await this.$store.dispatch('fungibleTokens/createOrChangeAllowance', this.amount);
           retipResponse = await this.tippingV2.methods.retip_token(
             +this.tip.id.split('_')[0],
-            this.selectedToken.contract,
+            this.selectedToken.contractId,
             amount,
             {
               waitMined: false,
@@ -118,15 +118,15 @@ export default {
             waitMined: false,
           });
         }
-        this.$store.commit('addPendingTransaction', {
+        this.$store.dispatch('addPendingTransaction', {
           hash: retipResponse.hash,
           amount,
           tipUrl: this.tip.url,
-          type: 'tip',
           tx: {
-            senderId: this.account.address,
+            callerId: this.account.address,
             contractId: this.tippingContract.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
+            function: 'retip',
           },
         });
         this.openCallbackOrGoHome(true);

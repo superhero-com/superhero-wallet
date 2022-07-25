@@ -16,6 +16,6 @@ describe('TermsOfService', () => {
     expect(wrapper.find('[data-cy=accordion-item-open]:nth-child(1).rotated').exists()).toBeTruthy();
     await wrapper.find('[data-cy=accordion-item-open]:nth-child(1)').trigger('click');
     expect(wrapper.find('[data-cy=accordion-item-content]').isVisible()).toBe(false);
-    expect(wrapper.contains('[data-cy=accordion-item-open]:nth-child(1).rotated')).toBe(false);
+    expect(wrapper.find('[data-cy=accordion-item-open]:nth-child(1).rotated').exists()).toBeFalsy();
   });
 });
