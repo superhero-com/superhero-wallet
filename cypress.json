@@ -9,6 +9,8 @@
   "defaultCommandTimeout": 30000,
   "ignoreTestFiles": [
     "tip.js",
-    "transaction-details.js"
+    "transaction-details.js",
+    "transactions.js",
+    "withdraw.js"
   ]
 }
