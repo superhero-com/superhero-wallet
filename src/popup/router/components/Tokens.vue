@@ -1,45 +1,48 @@
 <template>
   <span class="tokens">
-    <img
-      :src="fromToken.img"
-      :class="{ border: fromToken.imgBorder }"
-    >
-    <img
-      v-if="toToken"
-      :src="toToken.img"
-      :class="{ border: toToken.imgBorder }"
-    >
-    <Tooltip
-      v-if="fromToken"
-      class="symbol"
-      :tooltip="fromToken.name"
-    >
-      {{ shrinkString(fromToken.symbol) }}
-    </Tooltip>
-    <span
-      v-if="fromToken && toToken"
-      class="seperator"
-    >
-      /
+    <span class="icons">
+      <img
+        v-if="toToken"
+        :src="toToken.img"
+        :class="['to-token', { border: toToken.imgBorder }]"
+        :title="toToken.symbol"
+      >
+      <img
+        :src="fromToken.img"
+        :class="{
+          border: fromToken.imgBorder,
+          pair: !!toToken
+        }"
+        :title="fromToken.symbol"
+      >
     </span>
-    <Tooltip
-      v-if="toToken"
-      class="symbol"
-      :tooltip="toToken.name"
-    >
-      {{ shrinkString(toToken.symbol) }}
-    </Tooltip>
+    <span class="symbols">
+      <span
+        v-if="fromToken"
+        class="symbol"
+      >
+        {{ shrinkString(fromToken.symbol) }}
+      </span>
+      <span
+        v-if="fromToken && toToken"
+        class="seperator"
+      >
+        /
+      </span>
+      <span
+        v-if="toToken"
+        class="symbol"
+      >
+        {{ shrinkString(toToken.symbol) }}
+      </span>
+    </span>
   </span>
 </template>
 
 <script>
-import Tooltip from './Tooltip.vue';
 import AeIcon from '../../../icons/tokens/ae.svg';
 
 export default {
-  components: {
-    Tooltip,
-  },
   props: {
     /**
      * transactionTokenInfoResolvers []
@@ -86,8 +89,14 @@ export default {
 
 .tokens {
   color: variables.$color-light-grey;
-  display: inline-flex;
-  align-items: center;
+
+  &,
+  .symbols,
+  .icons {
+    display: inline-flex;
+    align-items: center;
+    align-self: center;
+  }
 
   @extend %face-sans-14-regular;
 
@@ -112,15 +121,20 @@ export default {
     width: 16px;
     height: 16px;
     border-radius: 8px;
-    margin-right: 4px;
     vertical-align: middle;
+    margin-right: 4px;
+
+    &.to-token {
+      margin-left: 10px;
+    }
+
+    &.pair {
+      margin-right: 16px;
+      margin-left: -30px;
+    }
 
     &.border {
       border: 0.25px solid variables.$color-light-grey;
-    }
-
-    &:nth-child(2) {
-      margin-left: -10px;
     }
   }
 }

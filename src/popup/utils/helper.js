@@ -17,6 +17,14 @@ export const aettosToAe = (v) => AmountFormatter.formatAmount(v.toString(), {
 });
 
 export const convertToken = (balance, precision) => BigNumber(balance).shiftedBy(precision);
+export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
+  if (!_balance || !_totalSupply || !_reserve) {
+    return null;
+  }
+  const share = BigNumber(_balance).times(100).div(_totalSupply);
+  const amount = BigNumber(_reserve).times(share).div(100);
+  return amount.toFixed(0);
+};
 
 export const IN_FRAME = window.parent !== window;
 export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');
