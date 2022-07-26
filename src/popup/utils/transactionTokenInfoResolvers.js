@@ -77,7 +77,7 @@ export const addLiquidity = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments } }) => new BigNumber(_arguments[2]?.value)
     .times(_arguments[3]?.value)
     .sqrt()
-    .minus(_arguments[7]?.value[1].value),
+    .minus(_arguments[7]?.value[1]?.value),
   'add',
 );
 
@@ -104,7 +104,7 @@ export const addLiquidityAe = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments, amount } }) => new BigNumber(_arguments[1]?.value)
     .times(amount)
     .sqrt()
-    .minus(_arguments[5]?.value[1].value),
+    .minus(_arguments[5]?.value[1]?.value),
   'add',
 );
 
