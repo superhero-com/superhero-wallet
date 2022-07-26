@@ -1,9 +1,7 @@
 import Vue from 'vue';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
-import {
-  unionBy, isEqual, isEmpty, uniqBy,
-} from 'lodash-es';
+import { isEqual, isEmpty, uniqBy } from 'lodash-es';
 import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
 import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 
@@ -39,11 +37,6 @@ export default (store) => {
       setAvailableTokens(state, payload) {
         state.availableTokens = payload;
       },
-      resetTokenBalances(state, address) {
-        if (address in state.tokens) {
-          state.tokens[address].tokenBalances = [];
-        }
-      },
       resetTokens(state) {
         state.tokens = {};
       },
@@ -54,11 +47,7 @@ export default (store) => {
         if (!(address in state.tokens)) {
           Vue.set(state.tokens, address, { selectedToken: null, tokenBalances: [] });
         }
-        Vue.set(
-          state.tokens[address],
-          'tokenBalances',
-          unionBy(balances, state.tokens[address].tokenBalances, 'contractId'),
-        );
+        Vue.set(state.tokens[address], 'tokenBalances', balances);
       },
       setAePublicData(state, payload) {
         state.aePublicData = payload;
@@ -93,8 +82,6 @@ export default (store) => {
             if (isEmpty(tokens) || typeof tokens !== 'object') return;
 
             selectedToken = store.state.fungibleTokens.tokens[address]?.selectedToken;
-
-            commit('resetTokenBalances', address);
 
             // TODO: remove uniqBy after https://github.com/aeternity/ae_mdw/issues/735 is fixed and released
             const balances = uniqBy(tokens, 'contract_id').map(({ amount, contract_id: contractId }) => {

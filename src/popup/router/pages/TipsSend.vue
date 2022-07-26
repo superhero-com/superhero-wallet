@@ -280,7 +280,6 @@ export default {
           hash: txResult.hash,
           amount: this.selectedToken ? this.amount : amount,
           tipUrl: this.url,
-          type: 'tip',
           tx: {
             callerId: this.account.address,
             contractId: this.tippingContract.deployInfo.address,

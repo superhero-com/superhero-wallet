@@ -105,7 +105,8 @@ export default {
               case 'tips':
                 return (!isFungibleTokenTx(tr)
                   && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
-                  && tr.tx.callerId === address && tr.tx.function === 'tip') || tr.claim;
+                  && tr.tx.callerId === address
+                  && (tr.tx.function === 'tip' || tr.tx.function === 'retip')) || tr.claim;
               default:
                 throw new Error(`Unknown display mode type: ${this.displayMode.filter}`);
             }

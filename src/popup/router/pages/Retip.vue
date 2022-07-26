@@ -122,12 +122,11 @@ export default {
           hash: retipResponse.hash,
           amount,
           tipUrl: this.tip.url,
-          type: 'tip',
           tx: {
             callerId: this.account.address,
             contractId: this.tippingContract.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
-            function: 'tip',
+            function: 'retip',
           },
         });
         this.openCallbackOrGoHome(true);
