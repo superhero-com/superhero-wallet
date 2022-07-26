@@ -138,7 +138,7 @@ Cypress.Commands.add('pendingTx', (tx = {}) => {
 });
 
 Cypress.Commands.add('enterInputAmount', (amount = 0) => {
-  cy.get('[data-cy=input-number]').clear().type(amount);
+  cy.get('[data-cy=input-number]', { timeout: 12000 }).clear().type(amount);
 });
 
 Cypress.Commands.add('goBack', () => {
@@ -217,7 +217,7 @@ Cypress.Commands.add('openTransactions', () => {
     .click()
     .get('[data-cy=loader]')
     .should('be.visible')
-    .get('[data-cy=list]')
+    .get('[data-cy=list]', { timeout: 36000 })
     .should('be.visible')
     .get('[data-cy=filters]')
     .should('be.visible');

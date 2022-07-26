@@ -7,13 +7,21 @@
       :class="['cards-wrapper', { 'menu-under': filteredAccounts.length > 1 }]"
       :style="cssVars"
     >
-      <AccountCard
+      <div
         v-for="account in filteredAccounts"
         :key="account.address"
-        :class="{ selected: account.i === activeIdx }"
-        v-bind="account"
-        :account-idx="account.i"
-      />
+      >
+        <AddAccountCard
+          v-if="account.i === 'add-account'"
+          :class="{ selected: account.i === activeAccount }"
+        />
+        <AccountCard
+          v-else
+          :class="{ selected: account.i === activeAccount }"
+          v-bind="account"
+          :account-idx="account.i"
+        />
+      </div>
     </div>
     <div
       v-if="filteredAccounts.length > 1"
@@ -22,7 +30,7 @@
       <ButtonPlain
         v-for="(account, idx) in filteredAccounts"
         :key="idx"
-        :class="{ selected: account.i === activeIdx }"
+        :class="{ selected: account.i === activeAccount }"
         @click="selectAccount(account.i)"
       />
     </div>
@@ -32,11 +40,17 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import AccountCard from './AccountCard.vue';
+import AddAccountCard from './AddAccountCard.vue';
 import ButtonPlain from './ButtonPlain.vue';
 
 export default {
-  components: { AccountCard, ButtonPlain },
+  components: { AccountCard, AddAccountCard, ButtonPlain },
   props: { notification: Boolean },
+  data() {
+    return {
+      activeAccount: 0,
+    };
+  },
   computed: {
     ...mapState('accounts', ['activeIdx']),
     ...mapGetters(['accounts']),
@@ -47,16 +61,25 @@ export default {
       };
     },
     filteredAccounts() {
-      return this.accounts.map((a, index) => ({ ...a, i: index })).filter((a) => a.showed);
+      return [
+        ...this.accounts.map((a, index) => ({ ...a, i: index })).filter((a) => a.showed),
+        { i: 'add-account' },
+      ];
     },
     selectedCardNumber() {
-      return this.filteredAccounts.findIndex((a) => a.i === this.activeIdx);
+      return this.filteredAccounts.findIndex((a) => a.i === this.activeAccount);
     },
+  },
+  mounted() {
+    this.activeAccount = this.activeIdx;
   },
   methods: {
     async selectAccount(idx) {
       await this.$watchUntilTruly(() => this.$store.state.middleware);
-      this.$store.commit('accounts/setActiveIdx', idx);
+      this.activeAccount = idx;
+      if (idx !== 'add-account') {
+        this.$store.commit('accounts/setActiveIdx', idx);
+      }
     },
   },
 };
