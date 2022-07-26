@@ -92,6 +92,7 @@ export default {
     .divider {
       color: variables.$color-blue;
       margin: 0 4px;
+      padding-bottom: 7px;
       word-break: break-all;
       vertical-align: middle;
     }
@@ -102,10 +103,6 @@ export default {
       vertical-align: middle;
 
       @extend %face-sans-14-regular;
-    }
-
-    .tokens {
-      display: inline-block;
     }
   }
 }

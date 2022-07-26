@@ -283,7 +283,8 @@
       "sign-transaction": "Sign Transaction",
       "invite": "Invite",
       "tx-details": "Tx Details",
-      "wallet-home": "Wallet Home"
+      "wallet-home": "Wallet Home",
+      "token-details": "Token details"
     },
     "about": {
       "heading": "About",
@@ -464,26 +465,33 @@
       "receiveTokens": "Receive tokens"
     },
     "token-details": {
-      "details": "Details",
+      "details": "Token Details",
       "send": "Send",
       "receive": "Receive",
       "tip": "Tip",
       "token-details": "Token Details",
+      "token": "Token",
       "token-description": "Token Description",
-      "abbreviation": "Abbreviation",
       "community": "Community",
       "decimals": "Decimals",
       "contract": "Contract",
       "available-supply": "Available supply",
       "total-supply": "Total supply",
       "max-supply": "Max supply",
+      "supply": "Supply",
       "price-ae": "Price (AE)",
       "price": "Price",
       "volume": "Total Volume",
+      "volumeDaily": "Volume (24h)",
+      "feeDaily": "Fee (24h)",
       "market-cap": "Market Cap",
       "atl-change": "All time low",
       "ath-change": "All time high",
-      "chart": "Chart"
+      "chart": "Chart",
+      "poolShare": "Pool share",
+      "holders": "Holders",
+      "transactions": "Transactions",
+      "pooled": "Pooled"
     },
     "deploy-token": {
       "name": "Token name",

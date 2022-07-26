@@ -2,7 +2,10 @@ import Vue from 'vue';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
 import { isEqual, isEmpty, uniqBy } from 'lodash-es';
-import { convertToken, fetchJson, handleUnknownError } from '../../popup/utils/helper';
+import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
+import {
+  convertToken, fetchJson, handleUnknownError, calculateSupplyAmount,
+} from '../../popup/utils/helper';
 import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 
 export default (store) => {
@@ -144,6 +147,55 @@ export default (store) => {
         return tokenContract.methods[
           decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
         ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
+      },
+      async getContractTokenPairs(
+        { rootState: { sdk }, state: { availableTokens }, rootGetters: { account } },
+        contractAddress,
+      ) {
+        try {
+          const tokenContract = await sdk.getContractInstance({
+            source: pairInterface,
+            contractAddress,
+          });
+
+          const [
+            { decodedResult: balances },
+            { decodedResult: balance },
+            { decodedResult: token0 },
+            { decodedResult: token1 },
+            { decodedResult: reserves },
+            { decodedResult: totalSupply },
+          ] = await Promise.all([
+            tokenContract.methods.balances(),
+            tokenContract.methods.balance(account.address),
+            tokenContract.methods.token0(),
+            tokenContract.methods.token1(),
+            tokenContract.methods.get_reserves(),
+            tokenContract.methods.total_supply(),
+          ]);
+
+          return {
+            token0: {
+              ...availableTokens?.[token0],
+              amount: calculateSupplyAmount(
+                balance, totalSupply, reserves.reserve0,
+              ),
+              reserve: reserves.reserve0,
+            },
+            token1: {
+              ...availableTokens?.[token1],
+              amount: calculateSupplyAmount(
+                balance, totalSupply, reserves.reserve1,
+              ),
+              reserve: reserves.reserve1,
+            },
+            totalSupply,
+            balance,
+            balances,
+          };
+        } catch (error) {
+          return {};
+        }
       },
       async transfer(
         { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
