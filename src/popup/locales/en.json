@@ -202,13 +202,19 @@
       "channelCloseSoloTx": "Solo close channel",
       "channelSlashTx": "Slash channel",
       "channelSettleTx": "Settle channel",
-      "channelSnapshotSoloTx": "Solo snapshot channel"
+      "channelSnapshotSoloTx": "Solo snapshot channel",
+      "payingForTx": "Paying For Transaction",
+      "pending": "Pending..."
     },
     "overview": {
       "aens": "AENS",
       "contractCreate": "Contract create",
       "contract": "Contract",
       "accountAddress": "Account address"
+    },
+    "returnType": {
+      "abort": "Failed",
+      "revert": "Reverted"
     }
   },
   "pages": {
@@ -252,7 +258,7 @@
       "terms": "Terms of Use",
       "privacy": "Privacy Policy",
       "importAccount": "Retrieve Existing Account",
-      "activity": "Activity History",
+      "transactions": "Transaction History",
       "receive": "Receive",
       "notifications": "Notifications",
       "notification-settings": "Notification Preference",
@@ -288,7 +294,6 @@
     },
     "account": {
       "heading": "Account",
-      "activity": "Activity",
       "accountName": "Account name",
       "claim": "Claim Tip",
       "receive": "Receive",

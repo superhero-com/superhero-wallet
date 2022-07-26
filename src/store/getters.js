@@ -128,6 +128,11 @@ export default {
   isTxAex9: () => (transaction) => transaction.tx
     && !!categorizeContractCallTxObject(transaction)?.token,
   getDexContracts: (_, { activeNetwork }) => (DEX_CONTRACTS[activeNetwork.networkId]),
+  getAmountFiat: (_, { convertToCurrency, formatCurrency }) => (amount) => {
+    const converted = convertToCurrency(amount);
+    if (converted < 0.01) return `<${formatCurrency(0.01)}`;
+    return `≈${formatCurrency(converted)}`;
+  },
   getAccountPendingTransactions: (
     { transactions: { pending } }, { activeNetwork, account: { address } },
   ) => (pending[activeNetwork.networkId]?.length ? pending[activeNetwork.networkId]

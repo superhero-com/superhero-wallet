@@ -14,6 +14,7 @@ export const TX_TYPE_MDW = {
   NameClaimTx: SCHEMA.TX_TYPE.nameClaim,
   NameBidTx: SCHEMA.TX_TYPE.nameClaim,
   NameUpdateTx: SCHEMA.TX_TYPE.nameUpdate,
+  PayingForTx: 'payingForTx', // TODO: remove after https://github.com/aeternity/aepp-sdk-js/issues/1583 is resolved
 };
 
 export const CONNECTION_TYPES = {

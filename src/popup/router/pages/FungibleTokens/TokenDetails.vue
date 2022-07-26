@@ -202,6 +202,10 @@ export default {
 
   .transaction-list {
     flex-grow: 1;
+
+    ::v-deep .filters {
+      top: calc(env(safe-area-inset-top) + 270px);
+    }
   }
 
   ::v-deep {
