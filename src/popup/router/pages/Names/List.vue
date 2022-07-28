@@ -4,7 +4,6 @@
       <NameItem
         v-for="({ name, owner, autoExtend }, index) in namesForAccount"
         :key="index"
-        :index="index"
         :name="name"
         :address="owner"
         :auto-extend="autoExtend"

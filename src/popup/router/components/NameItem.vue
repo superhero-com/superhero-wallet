@@ -147,7 +147,6 @@ export default {
     name: { type: String, default: '' },
     address: { type: String, default: '' },
     autoExtend: { type: Boolean },
-    index: { type: Number, required: true },
   },
   data: () => ({
     expand: false,
@@ -277,6 +276,10 @@ export default {
           &.edit {
             background: rgba(17, 97, 254, 0.15);
             color: variables.$color-blue;
+          }
+
+          &:not(:last-of-type) {
+            margin-right: 4px;
           }
         }
       }
