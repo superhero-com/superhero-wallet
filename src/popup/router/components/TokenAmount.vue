@@ -13,6 +13,7 @@
     <span
       v-if="amountFiat"
       class="fiat"
+      :class="{ 'fiat-below': fiatBelow }"
     >
       {{ amountFiat }}
     </span>
@@ -27,6 +28,7 @@ export default {
     amount: { type: Number, required: true },
     symbol: { type: String, default: 'AE' },
     aex9: { type: Boolean, default: false },
+    fiatBelow: { type: Boolean, default: false },
     hideFiat: { type: Boolean },
     direction: {
       type: String,
@@ -39,17 +41,25 @@ export default {
   },
   computed: {
     amountRounded() {
-      return +this.amount.toFixed((this.highPrecision || this.amount < 0.01) ? 9 : 2);
+      return this.amount.toFixed((this.highPrecision || this.amount < 0.01) ? 9 : 2);
     },
     ...mapState({
       amountFiat(state, { convertToCurrency, formatCurrency }) {
         if (this.hideFiat || this.aex9) return '';
         const converted = convertToCurrency(this.amount);
-        if (converted === 0) return `(${formatCurrency(0)})`;
-        if (converted < 0.01) return `(<${formatCurrency(0.01)})`;
-        return `(≈${formatCurrency(converted)})`;
+        if (this.amount === 0) return this.addBraces(formatCurrency(0));
+        if (converted < 0.01) return this.addBraces(`<${formatCurrency(0.01)}`);
+        return this.addBraces(`≈${formatCurrency(converted)}`);
       },
     }),
+  },
+  methods: {
+    addBraces(result) {
+      if (this.$route.meta.newUI) {
+        return result;
+      }
+      return `(${result})`;
+    },
   },
 };
 </script>
@@ -57,6 +67,18 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 @use '../../../styles/typography';
+
+.new-ui {
+  .token-amount {
+    .symbol {
+      color: variables.$color-light-grey;
+    }
+
+    .fiat {
+      margin-left: 8px;
+    }
+  }
+}
 
 .token-amount {
   @extend %face-sans-14-regular;
@@ -71,13 +93,18 @@ export default {
 
   .fiat {
     color: variables.$color-dark-grey;
+
+    &.fiat-below {
+      display: block;
+    }
   }
 
   &.sent {
     color: variables.$color-error;
 
     &::before {
-      content: '-';
+      font-weight: 600;
+      content: '−';
     }
   }
 

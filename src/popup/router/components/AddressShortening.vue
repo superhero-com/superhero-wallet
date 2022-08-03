@@ -58,22 +58,27 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .address-shortening {
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 24px;
+  @extend %face-mono-12-regular;
+
+  line-height: 20px;
   display: inline-flex;
   align-items: center;
   text-decoration: none;
-  color: variables.$color-white;
+  color: variables.$color-light-grey;
+  letter-spacing: 0.07em;
 
   &:hover {
-    color: variables.$color-light-grey;
+    color: variables.$color-white;
   }
 
   .dots {
-    padding: 0 2px 5px;
+    letter-spacing: -0.025em;
+    font-size: 16px;
+    line-height: 20px;
+    transform: translateY(-25%);
   }
 
   svg {
