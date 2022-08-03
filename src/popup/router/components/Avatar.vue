@@ -38,7 +38,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$x-small-size: 20px;
+$x-small-size: 18px;
 $small-size: 30px;
 $mid-size: 32px;
 $normal-size: 40px;
@@ -52,6 +52,7 @@ $lg-size: 64px;
   overflow: hidden;
   display: inline-block;
   object-fit: cover;
+  user-select: none;
   flex-shrink: 0;
 
   &.lg {

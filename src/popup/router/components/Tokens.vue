@@ -49,6 +49,7 @@ export default {
      */
     tokens: { type: Array, required: true },
     symbolLength: { type: Number, default: 11 },
+    doubleSymbolLength: { type: Number, default: 5 },
   },
   computed: {
     fromToken() {
@@ -59,14 +60,21 @@ export default {
     },
   },
   methods: {
+    getAvailableCharLength() {
+      if (this.tokens?.length < 2) return this.symbolLength;
+      const shorterNameLength = [this.tokens[0].symbol.length, this.tokens[1].symbol.length]
+        .find((length) => length < this.doubleSymbolLength);
+      return shorterNameLength ? this.symbolLength - shorterNameLength : this.doubleSymbolLength;
+    },
     shrinkString(text) {
-      return `${String(text).substring(0, this.symbolLength)}${text.length > this.symbolLength ? ' ...' : ''}`;
+      const maxLength = this.getAvailableCharLength();
+      return `${String(text).substring(0, maxLength)}${text.length > maxLength ? '...' : ''}`;
     },
     mapToken(token) {
       let img = `https://avatars.z52da5wt.xyz/${token.contractId}`;
       let imgBorder = true;
 
-      if (token.isAe) {
+      if (token.isAe || token.contractId === 'aeternity') {
         img = AeIcon;
         imgBorder = false;
       }
@@ -102,17 +110,10 @@ export default {
 
   .symbol {
     vertical-align: middle;
-  }
-
-  .divider {
-    color: variables.$color-blue;
-    margin: 0 4px;
-    word-break: break-all;
-    vertical-align: middle;
+    white-space: nowrap;
   }
 
   .seperator {
-    color: variables.$color-blue;
     margin: 0 1px;
     vertical-align: middle;
   }

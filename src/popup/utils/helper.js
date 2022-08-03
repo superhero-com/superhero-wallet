@@ -17,6 +17,7 @@ export const aettosToAe = (v) => AmountFormatter.formatAmount(v.toString(), {
 });
 
 export const convertToken = (balance, precision) => BigNumber(balance).shiftedBy(precision);
+
 export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   if (!_balance || !_totalSupply || !_reserve) {
     return null;
@@ -230,4 +231,16 @@ export const getAllPages = async (getFunction, getNextPage) => {
     nextPageUrl = next || null;
   }
   return result;
+};
+
+export const amountRounded = (rawAmount) => {
+  let amount = rawAmount;
+  if (typeof rawAmount !== 'object') {
+    amount = new BigNumber(rawAmount);
+  }
+
+  if (amount < 0.01 && amount.toString().length < 9 + 2) {
+    return amount.toFixed();
+  }
+  return amount.toFixed((amount < 0.01) ? 9 : 2);
 };

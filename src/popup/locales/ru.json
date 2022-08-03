@@ -682,7 +682,6 @@
       "nonce": "Nonce",
       "callData": "Call Data",
       "gas": "Gas",
-      "gasPrice": "Gas Price",
       "code": "Code",
       "abiV": "Abi version",
       "vmV": "Vm version",

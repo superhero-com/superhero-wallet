@@ -177,12 +177,12 @@ export const swapExactTokensForTokens = genLiquiditySwapResolver(
  */
 export const swapTokensForExactTokens = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
+    contractId: _arguments[2]?.value?.[0]?.value,
     maxAmount: _arguments[1]?.value, // amount_a_max: int
     amount: _arguments[1]?.value, // amount_a_desired: int
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[2]?.value?.[0]?.value,
+    contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
   }),
 );
