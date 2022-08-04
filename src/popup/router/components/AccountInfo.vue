@@ -11,6 +11,7 @@
           <Truncate
             v-if="accounts[idx].name"
             :str="accounts[idx].name"
+            :gradiant-color="color"
           />
           <span
             v-else
@@ -58,6 +59,7 @@ export default {
   mixins: [CopyMixin],
   props: {
     accountIdx: { type: Number, default: -1 },
+    color: { type: String, default: 'black' },
   },
   computed: {
     ...mapState('accounts', ['activeIdx']),
