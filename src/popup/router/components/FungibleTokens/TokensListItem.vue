@@ -7,30 +7,44 @@
       params: { id: tokenData.contractId },
     }"
   >
-    <div class="left">
-      <Avatar
-        :address="tokenData.contractId !== 'aeternity' ? tokenData.contractId : ''"
-        :src="tokenData.image || null"
+    <div class="row">
+      <div class="left">
+        <Tokens :tokens="[tokenData]" />
+      </div>
+      <TokenAmount
+        :amount="+tokenData.convertedBalance || 0"
+        :symbol="tokenData.symbol"
+        :aex9="tokenData.contractId !== 'aeternity'"
+        no-symbol
+        hide-fiat
       />
-      <Truncate :str="tokenData.symbol" />
     </div>
-    <TokenAmount
-      :amount="+tokenData.convertedBalance || 0"
-      :symbol="tokenData.symbol"
-      :aex9="tokenData.contractId !== 'aeternity'"
-      no-symbol
-    />
+    <div
+      v-if="tokenData.contractId == 'aeternity'"
+      class="row"
+    >
+      <div class="price">
+        {{ formatCurrency(aePublicData.current_price) }}
+      </div>
+      <div class="price">
+        {{ convertToCurrencyFormatted(tokenData.convertedBalance) }}
+      </div>
+    </div>
   </RouterLink>
 </template>
 
 <script>
-import Avatar from '../Avatar.vue';
-import Truncate from '../Truncate.vue';
+import { mapGetters, mapState } from 'vuex';
 import TokenAmount from '../TokenAmount.vue';
+import Tokens from '../Tokens.vue';
 
 export default {
-  components: { Avatar, Truncate, TokenAmount },
+  components: { TokenAmount, Tokens },
   props: { tokenData: { type: Object, default: null } },
+  computed: {
+    ...mapGetters(['convertToCurrencyFormatted', 'formatCurrency']),
+    ...mapState('fungibleTokens', ['aePublicData']),
+  },
 };
 </script>
 
@@ -39,39 +53,42 @@ export default {
 @use '../../../../styles/typography';
 
 .tokens-list-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 48px;
+  display: block;
   padding: 8px 16px;
   color: unset;
   text-decoration: unset;
   background-color: variables.$color-bg-1;
-  border-width: 0;
-  border-bottom-width: 1px;
-  border-style: solid;
-  border-color: variables.$color-black;
 
-  &:first-child {
-    border-top-width: 1px;
-  }
-
-  .left {
+  .row {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+  }
 
-    .avatar {
-      width: 32px;
-      height: 32px;
+  ::v-deep .tokens {
+    padding-bottom: 4px;
+
+    img {
+      width: 28px;
+      height: 28px;
+      border-radius: 14px;
     }
 
-    .truncate {
-      @extend %face-sans-14-medium;
+    .symbols {
+      @extend %face-sans-15-medium;
 
-      text-transform: uppercase;
-      margin-left: 4px;
-      color: variables.$color-blue;
+      padding-left: 4px;
     }
+  }
+
+  ::v-deep .token-amount {
+    @extend %face-sans-15-medium;
+  }
+
+  .price {
+    color: variables.$color-dark-grey;
+
+    @extend %face-sans-14-medium;
   }
 }
 </style>
