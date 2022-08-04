@@ -329,7 +329,9 @@
       "claim-name": "Claim your .chain name"
     },
     "accounts": {
-      "showWallet": "Show on Wallet Home"
+      "showWallet": "Show on Wallet Home",
+      "add-account": "Add account",
+      "add-account-description": "Add an account to your wallet to manage funds separately."
     },
     "claim": {
       "claim": "Claim tips",
