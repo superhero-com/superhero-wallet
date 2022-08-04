@@ -163,7 +163,7 @@
       />
 
       <DetailsRow
-        v-if="UNFINISHED_FEATURES"
+        v-if="!tokenData.isAe"
         class="link"
         :label="$t('pages.token-details.chart')"
       >
