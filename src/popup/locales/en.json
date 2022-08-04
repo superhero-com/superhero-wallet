@@ -206,10 +206,6 @@
       "payingForTx": "Paying For Transaction",
       "pending": "Pending..."
     },
-    "spendType": {
-      "out": "out",
-      "in": "in"
-    },
     "dexType": {
       "provide_liquidity": "provide liquidity",
       "remove_liquidity":"remove liquidity",
@@ -220,6 +216,10 @@
       "deposit": "deposit",
       "withdraw": "withdraw",
       "pool": "pool"
+    },
+    "spendType": {
+      "out": "out",
+      "in": "in"
     },
     "overview": {
       "aens": "AENS",
@@ -810,7 +810,16 @@
       "newContract": "New Contract",
       "aens": "AENS",
       "balanceError": "Your account balance is not enough to execute this transaction.",
-      "advanced": "Advanced transaction details"
+      "advanced": "Advanced transaction details",
+      "maxSpent": "Maximum spent",
+      "minReceived": "Minimum received",
+      "from": "From",
+      "to": "To",
+      "approveUseOfToken": "Approve use of token",
+      "approveUseOfTokens": "Approve use of tokens",
+      "maximumDeposited": "Maximum deposited",
+      "poolTokenSpent": "Pool token spent",
+      "minimumWithdrawn": "Minimum withdrawn"
     },
     "signTransactionByQrCode": {
       "backToAccount": "Back to account",
