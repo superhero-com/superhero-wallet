@@ -48,9 +48,7 @@
             </div>
           </div>
           <div>
-            <slot
-              name="right"
-            />
+            <slot name="right" />
           </div>
         </main>
         <slot name="buttons" />
@@ -109,7 +107,7 @@ export default {
 
     .main-wrapper {
       display: flex;
-      width: 312px;
+      width: 312px; // TODO - pawel
 
       main {
         display: flex;

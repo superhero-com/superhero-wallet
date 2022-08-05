@@ -1,13 +1,15 @@
 <template>
-  <Modal class="transfer-receive-modal">
+  <Modal
+    class="transfer-receive-modal"
+    has-close-button
+    from-bottom
+    :header="$t('modals.receive.title')"
+    @close="closeModal"
+  >
     <div
       class="transfer-receive"
       data-cy="top-up-container"
     >
-      <Close class="close" />
-
-      <span class="title">{{ $t('modals.receive.title') }}</span>
-
       <div class="account-info">
         <Avatar
           class="avatar"
@@ -88,17 +90,16 @@ import RequestAmount from '../RequestAmount.vue';
 import Share from '../../../../icons/naked-share.svg?vue-component';
 import { APP_LINK_WEB } from '../../../utils/constants';
 import Modal from '../Modal.vue';
-import Close from '../../../../icons/close.svg?vue-component';
 import Avatar from '../Avatar.vue';
 import Truncate from '../Truncate.vue';
 import Button from '../Button.vue';
 
 export default {
+  name: 'TransferReceive',
   components: {
     RequestAmount,
     Share,
     Modal,
-    Close,
     Avatar,
     Truncate,
     QrcodeVue,
@@ -152,13 +153,13 @@ export default {
         ? `${this.getLink(address)}`
         : address;
     },
-    truncateAdrress(address) {
+    truncateAddress(address) {
       return address.match(/.{1,3}/g).reduce((acc, current) => `${acc} ${current}`);
     },
     formatAddress(address) {
       return this.amount > 0
         ? `${address}?${this.getTokenInfo(true).substring(1)}`
-        : this.truncateAdrress(address);
+        : this.truncateAddress(address);
     },
     getTextToCopy() {
       return this.amount > 0
@@ -172,6 +173,9 @@ export default {
     handleAssetSelection(newToken) {
       this.selectedAsset = newToken;
     },
+    closeModal() {
+      this.$store.commit('modals/closeByKey', 'transfer-receive');
+    },
   },
 };
 </script>
@@ -180,7 +184,7 @@ export default {
 @use '../../../../styles/variables.scss';
 @use '../../../../styles/typography.scss';
 @use '../../../../styles/share-info.scss';
-@use "../../../../styles/mixins";
+@use '../../../../styles/mixins';
 
 .transfer-receive-modal {
   font-weight: 500;
@@ -228,8 +232,21 @@ export default {
       .account-name {
         @extend %face-sans-16-medium;
 
-        padding-left: 7.69px;
-      }
+      padding-left: 7.69px;
+    }
+  }
+
+  .transfer-receive {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    flex-direction: column;
+
+    .title {
+      align-self: center;
+      color: variables.$color-white;
+
+      @extend %face-sans-18-bold;
     }
 
     .address-info {
@@ -290,21 +307,15 @@ export default {
 
     .actions {
       display: flex;
-      justify-content: flex-start;
       align-content: center;
       column-gap: 8px;
       flex: none;
-      order: 2;
       align-self: stretch;
       flex-grow: 0;
-      padding-top: 8px;
-      padding-bottom: 8px;
       margin-top: 24px;
-      width: 312px;
-      height: 56px;
 
-      .copy {
-        align-self: flex-start;
+      .copy,
+      .share {
         gap: 4px;
         order: 0;
         flex-grow: 0;
@@ -326,7 +337,7 @@ export default {
 
       .share {
         display: flex;
-        align-content: center;
+        align-items: center;
         justify-content: center;
         gap: 4px;
         order: 1;
@@ -341,7 +352,6 @@ export default {
         }
 
         .share-text {
-          align-self: center;
           color: variables.$color-white;
 
           @extend %face-sans-16-regular;

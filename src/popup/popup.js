@@ -9,6 +9,7 @@ import router from './router';
 import { i18n } from '../store/plugins/languages';
 import registerModals from './router/modals';
 import Logger from '../lib/logger';
+import './directives';
 
 registerModals();
 sync(store, router);

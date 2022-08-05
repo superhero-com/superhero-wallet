@@ -1,6 +1,6 @@
 <template>
   <Modal
-    close
+    has-close-button
     v-on="{ close: close || resolve }"
   >
     <template slot="header">
