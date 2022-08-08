@@ -69,7 +69,7 @@ export default {
      * Returns the default aeternity meta information
      */
     aeternityToken() {
-      const aeInformation = this.aePublicData && Object.keys(this.aePublicData).length > 0
+      return this.aePublicData && Object.keys(this.aePublicData).length > 0
         ? {
           ...this.aePublicData,
           convertedBalance: this.tokenBalance,
@@ -78,7 +78,6 @@ export default {
           contractId: 'aeternity',
         }
         : null;
-      return aeInformation;
     },
     /**
      * Converts the token information object into a searchable list

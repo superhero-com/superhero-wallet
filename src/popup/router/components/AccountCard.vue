@@ -18,9 +18,16 @@
         </span>
       </div>
       <div class="buttons">
-        <RouterLink :to="{ name: 'transfer-receive' }">
-          <ReceiveIcon :style="iconCssProps" />
-        </RouterLink>
+        <a
+          @click.prevent="$store.dispatch('modals/open', {
+              ...$attrs,
+              name: 'transfer-receive',
+          })"
+        >
+          <ReceiveIcon
+            :style="iconCssProps"
+          />
+        </a>
         <RouterLink :to="{ name: 'transfer-send' }">
           <SendIcon :style="iconCssProps" />
         </RouterLink>

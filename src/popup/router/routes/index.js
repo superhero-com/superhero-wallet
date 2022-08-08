@@ -35,7 +35,7 @@ import Retip from '../pages/Retip.vue';
 import SecuritySettings from '../pages/SecuritySettings.vue';
 import Transfer from '../pages/Transfer.vue';
 import TransferSend from '../pages/TransferSend.vue';
-import TransferReceive from '../pages/TransferReceive.vue';
+import TransferReceive from '../components/Modals/TransferReceive.vue';
 import Settings from '../pages/Settings.vue';
 import SignMessage from '../pages/SignMessage.vue';
 import SuccessTip from '../pages/SuccessTip.vue';

@@ -1,5 +1,8 @@
 <template>
-  <div class="input-wrapper">
+  <div
+    class="input-wrapper"
+    :style="wrapperCssProps"
+  >
     <label
       v-if="label || $slots.label"
       class="label"
@@ -46,6 +49,14 @@ export default {
     warningMessage: { type: String, default: '' },
     label: { type: String, default: '' },
     plain: Boolean,
+    height: { type: String, default: '40px' },
+  },
+  methods: {
+    wrapperCssProps() {
+      return {
+        '--height': this.height,
+      };
+    },
   },
 };
 </script>
@@ -67,13 +78,14 @@ export default {
 
   .main-wrapper {
     display: flex;
+    width: 312px;
 
     main {
       display: flex;
       align-items: center;
       flex-grow: 1;
       padding: 8px 16px;
-      height: 40px;
+      height: var(--height);
       background-color: variables.$color-bg-2;
       border: 1px solid transparent;
       border-left: 0;
