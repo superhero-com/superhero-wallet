@@ -38,6 +38,7 @@ export default process.env.PLATFORM === 'web' && IN_POPUP
       notPersist: true,
       notRebrand: true,
       hideTabBar: true,
+      newUI: name === 'confirm-transaction-sign',
     },
   }))
   : [];

@@ -27,6 +27,7 @@
         <div
           v-if="$slots.footer"
           class="footer"
+          :class="{ absolute: absoluteFooter }"
         >
           <div class="content">
             <slot name="footer" />
@@ -48,6 +49,7 @@ export default {
   props: {
     close: Boolean,
     fullScreen: Boolean,
+    absoluteFooter: Boolean,
   },
   mounted() {
     if (document.body.style.overflow) return;
@@ -174,6 +176,11 @@ export default {
 
       @include mixins.desktop {
         border-radius: 0 0 10px 10px;
+      }
+
+      &.absolute {
+        position: absolute;
+        bottom: 0;
       }
 
       .content {

@@ -154,7 +154,7 @@ export default {
     @include mixins.flex(center, center);
 
     gap: 8px;
-    margin-bottom: -10px;
+    margin-bottom: -8px;
   }
 
   .parties {
@@ -219,6 +219,8 @@ export default {
     }
 
     .name {
+      @extend %face-sans-15-medium;
+
       display: block;
       margin-bottom: 8px;
       color: variables.$color-white;
