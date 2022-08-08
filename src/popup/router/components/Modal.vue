@@ -56,6 +56,7 @@
 </template>
 
 <script>
+import { clickOutside } from '../../directives';
 import ButtonPlain from './ButtonPlain.vue';
 import Close from '../../../icons/close.svg?vue-component';
 import NodeConnectionStatus from './NodeConnectionStatus.vue';
@@ -65,6 +66,9 @@ export default {
     ButtonPlain,
     Close,
     NodeConnectionStatus,
+  },
+  directives: {
+    'click-outside': clickOutside,
   },
   props: {
     hasCloseButton: Boolean,

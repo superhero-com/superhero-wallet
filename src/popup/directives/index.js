@@ -1,6 +1,6 @@
-import Vue from 'vue';
+/* eslint-disable import/prefer-default-export */
 
-Vue.directive('click-outside', {
+export const clickOutside = {
   bind(el, { value }) {
     /* eslint-disable no-param-reassign */
     el.clickOutsideEvent = (event) => {
@@ -17,4 +17,4 @@ Vue.directive('click-outside', {
   unbind(el) {
     document.body.removeEventListener('click', el.clickOutsideEvent);
   },
-});
+};
