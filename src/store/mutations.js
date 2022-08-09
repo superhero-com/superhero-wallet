@@ -10,6 +10,10 @@ export default {
   addTransactions(state, payload) {
     Vue.set(state.transactions, 'loaded', uniqBy([...state.transactions.loaded, ...payload], 'hash'));
   },
+  setTransactionByHash(state, transaction) {
+    const index = state.transactions.loaded.findIndex((t) => t.hash === transaction.hash);
+    if (index !== -1) Vue.set(state.transactions.loaded, index, transaction);
+  },
   setTipWithdrawnTransactions(state, payload) {
     Vue.set(state.transactions, 'tipWithdrawnTransactions', payload);
   },
