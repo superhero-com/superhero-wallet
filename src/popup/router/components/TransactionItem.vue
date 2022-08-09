@@ -105,7 +105,8 @@ export default {
     },
     fiatAmount() {
       const aeToken = this.tokens?.find((t) => t?.isAe);
-      if (!aeToken || this.isErrorTransaction) return 0;
+      if (!aeToken || this.isErrorTransaction
+        || (this.isDex && FUNCTION_TYPE_DEX.pool.includes(this.transaction.tx.function))) return 0;
       return this.getAmountFiat(amountRounded(aeToken.decimals
         ? convertToken(aeToken.amount || 0, -aeToken.decimals) : aeToken.amount));
     },
