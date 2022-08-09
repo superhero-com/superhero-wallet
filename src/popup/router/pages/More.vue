@@ -28,8 +28,8 @@
         <Buy />{{ $t('pages.fungible-tokens.buyAe') }}
       </BoxButton>
       <BoxButton
-        v-if="UNFINISHED_FEATURES"
-        to="/more"
+        :to="DEX_URL"
+        is-external-link
       >
         <Dex /> {{ $t('pages.more.dex') }}
       </BoxButton>
@@ -46,15 +46,15 @@ import Settings from '../../../icons/settings.svg?vue-component';
 import About from '../../../icons/circle-i.svg?vue-component';
 import Buy from '../../../icons/buy.svg?vue-component';
 import Dex from '../../../icons/dex.svg?vue-component';
-import { SIMPLEX_URL } from '../../utils/constants';
+import { DEX_URL, SIMPLEX_URL } from '../../utils/constants';
 
 export default {
   components: {
     Plate, AccountSwitcher, BoxButton, Invites, Settings, About, Buy, Dex,
   },
   data: () => ({
-    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     SIMPLEX_URL,
+    DEX_URL,
   }),
 };
 </script>
