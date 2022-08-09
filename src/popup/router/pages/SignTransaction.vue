@@ -11,9 +11,14 @@ export default {
       const currentNetworkId = this.$store.getters.activeNetwork.networkId;
       if (networkId !== currentNetworkId) {
         await this.$store.dispatch('modals/open', {
-          name: 'confirm',
-          msg: `This action is being done on network ${networkId}, are you sure you want to proceed?`,
+          name: 'default',
+          icon: 'warning',
+          title: this.$t('modals.wrongNetwork.title'),
+          msg: this.$t('modals.wrongNetwork.msg', [networkId]),
+          buttonMessage: this.$t('modals.wrongNetwork.button'),
         });
+        this.openCallbackOrGoHome(false);
+        return;
       }
       const signedTransaction = await this.$store.state.sdk
         .signTransaction(transaction, { networkId });
