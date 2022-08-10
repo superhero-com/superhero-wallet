@@ -24,7 +24,7 @@
         </DetailsItem>
       </div>
       <Button
-        :disabled="!!amountError || error"
+        :disabled="!!amountError || error || !amount"
         @click="bid"
       >
         {{ $t('pages.names.auctions.place-bid') }}
