@@ -173,6 +173,11 @@
       "title": "Scan QR code",
       "share": "Share",
       "close": "Close"
+    },
+    "wrongNetwork": {
+      "title": "Network discrepancy",
+      "msg": "This action was initiated on a different network. Please switch to {0} in your wallet settings to proceed.",
+      "button": "Dismiss"
     }
   },
   "filters": {
