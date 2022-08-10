@@ -41,6 +41,7 @@
           :amount="+convertToken(getSwapTokenAmountData.amount, -getSwapTokenAmountData.decimals)"
           :symbol="getSwapTokenAmountData.isAe ? 'AE' : getSwapTokenAmountData.symbol"
           :aex9="isTxAex9(transaction)"
+          :hide-fiat="!getSwapTokenAmountData.isAe"
           data-cy="total"
         />
       </DetailsItem>
