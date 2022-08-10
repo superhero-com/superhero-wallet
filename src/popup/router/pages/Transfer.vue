@@ -9,9 +9,13 @@
         >
           <SendIcon /> {{ $t('pages.titles.send') }}
         </RouterLink>
-        <RouterLink :to="{ name: 'transfer-receive' }">
+        <a
+          @click="$store.dispatch('modals/open', {
+            name: 'transfer-receive',
+          })"
+        >
           <ReceiveIcon /> {{ $t('pages.titles.receive') }}
-        </RouterLink>
+        </a>
       </Tabs>
     </Plate>
     <RouterView />

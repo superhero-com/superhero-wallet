@@ -91,10 +91,9 @@ export default {
         : this.balance.minus(this.fee)).toString();
     },
     totalAmount() {
-      if (!this.selectedAsset || !this.selectedAsset.current_price) {
-        return 0;
-      }
-      return ((this.$attrs.value || 0) * (this.selectedAsset.current_price).toFixed(2));
+      return !this.selectedAsset?.current_price
+        ? 0
+        : ((this.$attrs.value || 0) * (this.selectedAsset.current_price).toFixed(2));
     },
     currentTokenFiatPrice() {
       return `${this.selectedAsset.current_price.toFixed(2)}`;
@@ -120,19 +119,17 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 @use '../../../styles/typography';
+@use '../../../styles/mixins';
 
 .input-amount {
   white-space: nowrap;
 
   :focus-within .asset-field .asset-selector {
-    background-color: #171717;
+    background-color: variables.$color-bg-2;
   }
 
   .asset-field {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: flex-end;
+    @include mixins.flex(flex-end, flex-end, column);
 
     .asset-selector {
       align-self: center;
@@ -161,8 +158,9 @@ export default {
     white-space: nowrap;
     text-overflow: ellipsis;
     width: 150px;
-    display: inline-block;
+    //display: inline-block;
     text-align: left;
+    line-height: 20px;
     color: variables.$color-dark-grey;
 
     @extend %face-sans-14-regular;

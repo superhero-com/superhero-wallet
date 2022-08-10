@@ -70,7 +70,7 @@
         </Button>
 
         <Button
-          v-if="IS_MOBILE_DEVICE"
+          v-if="!IS_MOBILE_DEVICE"
           class="share"
           @click="share"
         >
@@ -181,9 +181,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../../../styles/variables.scss';
-@use '../../../../styles/typography.scss';
-@use '../../../../styles/share-info.scss';
+@use '../../../../styles/variables';
+@use '../../../../styles/typography';
+@use '../../../../styles/share-info';
 @use '../../../../styles/mixins';
 
 .transfer-receive-modal {
@@ -220,33 +220,23 @@ export default {
 
     .account-info {
       margin-top: 4px;
-      display: flex;
-      justify-content: center;
-      align-content: center;
+
+      @include mixins.flex(center, center, row);
 
       .avatar {
-        width: 16.62px;
-        height: 16.62px;
+        width: 24px;
+        height: 24px;
+      }
+
+      .truncate {
+        display: block;
       }
 
       .account-name {
         @extend %face-sans-16-medium;
 
-      padding-left: 7.69px;
-    }
-  }
-
-  .transfer-receive {
-    display: flex;
-    align-content: center;
-    justify-content: center;
-    flex-direction: column;
-
-    .title {
-      align-self: center;
-      color: variables.$color-white;
-
-      @extend %face-sans-18-bold;
+        padding-left: 7.69px;
+      }
     }
 
     .address-info {
@@ -254,7 +244,6 @@ export default {
       justify-content: flex-start;
       margin-top: 24px;
       height: 128px;
-      top: calc(50% - 128px / 2);
 
       .qrcode-cover {
         background-color: variables.$color-white;
@@ -267,12 +256,11 @@ export default {
 
       .address {
         display: flex;
-        flex-direction: column-reverse;
+        flex-direction: column;
         cursor: pointer;
         overflow: scroll;
         margin-left: 16px;
         height: 128px;
-        width: 174px;
         padding-right: 6px;
         color: variables.$color-white;
         font-style: normal;
@@ -306,21 +294,27 @@ export default {
     }
 
     .actions {
-      display: flex;
-      align-content: center;
+      @include mixins.flex(flex-start, center);
+
       column-gap: 8px;
       flex: none;
+      order: 2;
       align-self: stretch;
       flex-grow: 0;
+      padding-top: 8px;
+      padding-bottom: 8px;
       margin-top: 24px;
+      height: 56px;
 
-      .copy,
-      .share {
+      .button {
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .copy {
         gap: 4px;
         order: 0;
         flex-grow: 0;
-        cursor: pointer;
-        border-radius: 10px;
         width: 100%;
         color: variables.$color-white;
 
@@ -332,26 +326,23 @@ export default {
       }
 
       .mobile-copy {
-        background-color: variables.$color-medium-grey;
+        background-color: rgba(variables.$color-white, 0.15);
       }
 
       .share {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        @include mixins.flex(center, center);
+
         gap: 4px;
-        order: 1;
         flex-grow: 1;
         cursor: pointer;
-        width: 145%;
         border-radius: 10px;
-        padding: 8px 16px;
 
         .share-icon {
           align-self: center;
         }
 
         .share-text {
+          align-self: center;
           color: variables.$color-white;
 
           @extend %face-sans-16-regular;

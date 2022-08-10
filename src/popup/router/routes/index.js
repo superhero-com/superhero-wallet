@@ -35,7 +35,6 @@ import Retip from '../pages/Retip.vue';
 import SecuritySettings from '../pages/SecuritySettings.vue';
 import Transfer from '../pages/Transfer.vue';
 import TransferSend from '../pages/TransferSend.vue';
-import TransferReceive from '../components/Modals/TransferReceive.vue';
 import Settings from '../pages/Settings.vue';
 import SignMessage from '../pages/SignMessage.vue';
 import SuccessTip from '../pages/SuccessTip.vue';
@@ -274,14 +273,6 @@ export default [
       name: 'transfer-send',
       component: TransferSend,
       props: true,
-      meta: {
-        title: 'transfer',
-        backButton: false,
-      },
-    }, {
-      path: 'receive',
-      name: 'transfer-receive',
-      component: TransferReceive,
       meta: {
         title: 'transfer',
         backButton: false,

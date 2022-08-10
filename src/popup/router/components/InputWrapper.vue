@@ -78,7 +78,6 @@ export default {
 
   .main-wrapper {
     display: flex;
-    width: 312px;
 
     main {
       display: flex;

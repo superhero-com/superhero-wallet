@@ -4,10 +4,7 @@
     :class="{ readonly }"
     v-bind="$attrs"
   >
-    <div
-      class="input-wrapper"
-      :style="wrapperCssProps"
-    >
+    <div class="input-wrapper">
       <label
         v-if="label || $slots.label"
         class="label"
@@ -30,7 +27,6 @@
           />
           <div class="amount-fields">
             <input
-              class="input"
               v-bind="$attrs"
               autocomplete="off"
               :value="value"
@@ -38,18 +34,12 @@
               :disabled="readonly"
               step="any"
               @input="$emit('input', $event.target.value)"
-              @focus="isInputOnFocus = true"
-              @blur="isInputOnFocus = false"
             >
-            <div>
-              <slot
-                name="left"
-              />
-            </div>
+            <slot
+              name="left"
+            />
           </div>
-          <div>
-            <slot name="right" />
-          </div>
+          <slot name="right" />
         </main>
         <slot name="buttons" />
       </div>
@@ -70,21 +60,13 @@ export default {
   components: { StatusIcon },
   props: {
     value: { type: [String, Number], default: null },
-    readonly: Boolean,
-    error: Boolean,
     errorMessage: { type: String, default: '' },
-    warning: Boolean,
     warningMessage: { type: String, default: '' },
     label: { type: String, default: '' },
+    readonly: Boolean,
+    error: Boolean,
+    warning: Boolean,
     plain: Boolean,
-    height: { type: String, default: '40px' },
-  },
-  methods: {
-    wrapperCssProps() {
-      return {
-        '--height': this.height,
-      };
-    },
   },
 };
 </script>
@@ -92,6 +74,7 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 @use '../../../styles/typography';
+@use '../../../styles/mixins';
 
 .input-field {
   .input-wrapper {
@@ -107,15 +90,12 @@ export default {
 
     .main-wrapper {
       display: flex;
-      width: 312px; // TODO - pawel
 
       main {
-        display: flex;
+        @include mixins.flex(space-between, center, row);
+
         flex-grow: 1;
-        flex-direction: row;
-        justify-content: space-between;
         padding: 8px 16px;
-        height: var(--height);
         background-color: variables.$color-bg-2;
         border: 1px solid transparent;
         border-radius: 6px;
@@ -134,14 +114,14 @@ export default {
             border: none;
             background: transparent;
             box-shadow: none;
+            height: 28px;
+            color: rgba(variables.$color-white, 0.75);
+
+            @extend %face-sans-15-regular;
 
             &:not(:first-child) {
               padding-left: 6px;
             }
-
-            @extend %face-sans-14-regular;
-
-            color: variables.$color-white;
 
             &::placeholder {
               @extend %face-sans-15-regular;
