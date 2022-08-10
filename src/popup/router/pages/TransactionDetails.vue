@@ -114,6 +114,7 @@
               slot="value"
               :amount="getTxAmountTotal(transaction)"
               :symbol="getTxSymbol(transaction)"
+              :hide-fiat="getTxSymbol(transaction) !== 'AE'"
             />
           </DetailsItem>
           <DetailsItem
