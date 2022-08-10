@@ -227,7 +227,10 @@ export default (store) => {
         );
       },
       async getTokensHistory(
-        { state: { transactions }, rootGetters: { activeNetwork, account }, commit }, recent,
+        {
+          state: { transactions },
+          rootGetters: { activeNetwork, account, getDexContracts }, commit,
+        }, recent,
       ) {
         const { address } = account;
         if (transactions[address]?.length && !recent) return transactions[address];
@@ -257,6 +260,7 @@ export default (store) => {
         }
 
         const newTransactions = rawTransactions
+          .filter((tx) => !getDexContracts.router.includes(tx.contract_id))
           .map((tx) => ({
             ...tx,
             tx: {

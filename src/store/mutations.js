@@ -8,18 +8,22 @@ export default {
     state.current.network = payload;
   },
   addTransactions(state, payload) {
-    state.transactions.loaded = uniqBy([...state.transactions.loaded, ...payload], 'hash');
+    Vue.set(state.transactions, 'loaded', uniqBy([...state.transactions.loaded, ...payload], 'hash'));
+  },
+  setTransactionByHash(state, transaction) {
+    const index = state.transactions.loaded.findIndex((t) => t.hash === transaction.hash);
+    if (index !== -1) Vue.set(state.transactions.loaded, index, transaction);
   },
   setTipWithdrawnTransactions(state, payload) {
-    state.transactions.tipWithdrawnTransactions = payload;
+    Vue.set(state.transactions, 'tipWithdrawnTransactions', payload);
   },
   initTransactions(state) {
-    state.transactions.loaded = [];
-    state.transactions.nextPageUrl = '';
-    state.transactions.tipWithdrawnTransactions = [];
+    Vue.set(state.transactions, 'loaded', []);
+    Vue.set(state.transactions, 'nextPageUrl', '');
+    Vue.set(state.transactions, 'tipWithdrawnTransactions', []);
   },
   setTransactionsNextPage(state, pageUrl) {
-    state.transactions.nextPageUrl = pageUrl;
+    Vue.set(state.transactions, 'nextPageUrl', pageUrl);
   },
   addPendingTransaction(state, { transaction, network }) {
     Vue.set(state.transactions.pending, network,

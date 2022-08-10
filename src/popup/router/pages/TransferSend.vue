@@ -312,6 +312,7 @@ export default {
               callerId: this.account.address,
               contractId: this.selectedToken.contractId,
               type: SCHEMA.TX_TYPE.contractCall,
+              function: 'transfer',
             },
           });
         } else if (this.selectedToken) {
@@ -330,6 +331,7 @@ export default {
               callerId: this.account.address,
               contractId: this.selectedToken.contractId,
               type: SCHEMA.TX_TYPE.contractCall,
+              function: 'transfer',
             },
           });
         } else {
