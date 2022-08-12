@@ -54,7 +54,10 @@ export default {
     +(currentCurrencyRate * value).toFixed(2)),
   // TODO: Use the current language from i18n module
   formatCurrency: ({ current: { currency } }) => (value) => new Intl.NumberFormat(
-    navigator.language, { style: 'currency', currency },
+    navigator.language, { style: 'currency', currencyDisplay: 'symbol', currency },
+  ).format(value),
+  formatNumber: () => (value) => new Intl.NumberFormat(
+    navigator.language,
   ).format(value),
   convertToCurrencyFormatted: (state, { convertToCurrency, formatCurrency }) => (value) => (
     formatCurrency(convertToCurrency(value))),
@@ -128,6 +131,11 @@ export default {
   isTxAex9: () => (transaction) => transaction.tx
     && !!categorizeContractCallTxObject(transaction)?.token,
   getDexContracts: (_, { activeNetwork }) => (DEX_CONTRACTS[activeNetwork.networkId]),
+  getAmountFiat: (_, { convertToCurrency, formatCurrency }) => (amount) => {
+    const converted = convertToCurrency(amount);
+    if (converted < 0.01) return `<${formatCurrency(0.01)}`;
+    return `≈${formatCurrency(converted)}`;
+  },
   getAccountPendingTransactions: (
     { transactions: { pending } }, { activeNetwork, account: { address } },
   ) => (pending[activeNetwork.networkId]?.length ? pending[activeNetwork.networkId]

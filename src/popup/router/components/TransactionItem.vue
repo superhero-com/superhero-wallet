@@ -3,32 +3,50 @@
     class="transaction-item"
     :to="{ name: 'tx-details', params: { hash: transaction.hash } }"
   >
-    <div class="left">
-      <Pending
-        v-if="transaction.pending"
-        class="icon"
-      />
-      <TokenAmount
-        :amount="getTxAmountTotal(transaction)"
-        :symbol="getTxSymbol(transaction)"
-        :aex9="isTxAex9(transaction)"
-        :direction="getTxDirection(transaction)"
-        :hide-fiat="showType"
-        data-cy="amount"
-      />
-      <span
-        v-if="showType"
-        class="type"
-      >
-        ({{ ($t('transaction.type')[txType]) || txType }})
-      </span>
+    <div class="header">
+      <span />
+      <div class="status">
+        <template v-if="transaction.pending">
+          <Pending class="icon" />
+          <span class="pending">{{ $t('transaction.type.pending') }}</span>
+        </template>
+        <template v-else>
+          <span data-cy="date">{{ transaction.microTime | formatDate }}</span>
+          <span data-cy="time">{{ transaction.microTime | formatTime }}</span>
+          <div
+            v-if="isErrorTransaction"
+            class="error"
+          >
+            <Warning
+              v-if="transaction.tx.returnType === 'abort'"
+              class="icon"
+            />
+            <Reverted
+              v-else
+              class="icon"
+            />
+            <span>{{ $t('transaction.returnType')[transaction.tx.returnType] }}</span>
+          </div>
+        </template>
+      </div>
+      <span />
     </div>
-    <div
-      v-if="!transaction.pending"
-      class="right"
-    >
-      <span data-cy="date">{{ transaction.microTime | formatDate }}</span>
-      <span data-cy="time">{{ transaction.microTime | formatTime }}</span>
+    <div class="body">
+      <TransactionTokens
+        :tokens="tokens"
+        :error="isErrorTransaction"
+      />
+      <div class="footer">
+        <div class="labels">
+          <label
+            v-for="label in labels"
+            :key="label"
+          >
+            {{ label.toUpperCase() }}
+          </label>
+        </div>
+        <span v-if="fiatAmount">{{ fiatAmount }}</span>
+      </div>
     </div>
   </RouterLink>
 </template>
@@ -36,33 +54,67 @@
 <script>
 import { mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import { FUNCTION_TYPE_DEX } from '../../utils/constants';
+import { amountRounded, convertToken } from '../../utils/helper';
 import { formatDate, formatTime } from '../../utils';
+import transactionTokensMixin from '../../../mixins/transactionTokensMixin';
 import Pending from '../../../icons/animated-pending.svg?vue-component';
-import TokenAmount from './TokenAmount.vue';
+import Reverted from '../../../icons/refresh.svg?vue-component';
+import Warning from '../../../icons/warning.svg?vue-component';
+import TransactionTokens from './TransactionTokenRows.vue';
 
 export default {
-  components: { TokenAmount, Pending },
+  components: {
+    Pending,
+    Reverted,
+    Warning,
+    TransactionTokens,
+  },
   filters: {
     formatDate,
     formatTime,
   },
+  mixins: [transactionTokensMixin],
   props: {
     transaction: { type: Object, required: true },
   },
   computed: {
-    ...mapGetters([
-      'getTxAmountTotal',
-      'getTxSymbol',
-      'getTxType',
-      'getTxDirection',
-      'isTxAex9',
-    ]),
-    txType() {
-      return this.getTxType(this.transaction);
+    ...mapGetters(['account', 'getAmountFiat', 'activeNetwork']),
+    labels() {
+      if (this.txType && this.txType?.startsWith('name')) {
+        return ['AENS', this.$t('transaction.type')[this.txType]];
+      }
+      if (this.txType === SCHEMA.TX_TYPE.spend) {
+        return [this.$t('transaction.type.spendTx'), this.getTxDirection(this.transaction) === 'sent' ? this.$t('transaction.spendType.out') : this.$t('transaction.spendType.in')];
+      }
+      if (this.isAllowance) {
+        return [this.$t('transaction.dexType.allow_token')];
+      }
+      if (this.isDex) {
+        return ['DEX', FUNCTION_TYPE_DEX.pool.includes(this.transaction.tx.function)
+          ? this.$t('transaction.dexType.pool')
+          : this.$t('transaction.dexType.swap')];
+      }
+      if ((this.transaction.tx.contractId
+        && (this.activeNetwork.tipContractV1 === this.transaction.tx.contractId
+        || this.activeNetwork.tipContractV2 === this.transaction.tx.contractId)
+        && (this.transaction.tx.function === 'tip' || this.transaction.tx.function === 'retip')) || this.transaction.claim) {
+        return [this.$t('pages.token-details.tip'), this.transaction.claim ? this.$t('transaction.spendType.in') : this.$t('transaction.spendType.out')];
+      }
+      if (this.txType === SCHEMA.TX_TYPE.contractCall
+        && this.availableTokens[this.transaction.tx.contractId]
+        && (this.transaction.tx.function === 'transfer' || this.transaction.incomplete)) {
+        return [this.$t('transaction.type.spendTx'), this.transaction.tx.callerId === this.account.address
+          ? this.$t('transaction.spendType.out') : this.$t('transaction.spendType.in')];
+      }
+      return this.transaction.pending ? [] : [this.$t('transaction.type')[this.txType]];
     },
-    showType() {
-      return !this.isTxAex9(this.transaction) && this.txType
-        && this.txType !== SCHEMA.TX_TYPE.spend;
+    fiatAmount() {
+      const aeToken = this.tokens?.find((t) => t?.isAe);
+      if (!aeToken || this.isErrorTransaction
+        || (this.isDex && FUNCTION_TYPE_DEX.pool.includes(this.transaction.tx.function))) return 0;
+      return this.getAmountFiat(amountRounded(aeToken.decimals
+        ? convertToken(aeToken.amount || 0, -aeToken.decimals) : aeToken.amount));
     },
   },
 };
@@ -73,11 +125,10 @@ export default {
 @use '../../../styles/typography';
 
 .transaction-item {
-  padding: 0 16px;
-  margin: 1px 0;
-  border-radius: 4px;
+  padding: 4px 8px 10px 8px;
   background: variables.$color-bg-1;
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
   text-decoration: none;
@@ -86,40 +137,84 @@ export default {
     background: variables.$color-hover;
   }
 
-  .left {
-    padding: 12px 0;
+  .header {
     display: flex;
     align-items: center;
+    width: 100%;
+    color: variables.$color-dark-grey;
+    margin-bottom: 4px;
 
     .icon {
-      width: 24px;
-      height: 24px;
+      width: 16px;
+      height: 16px;
       color: variables.$color-white;
       margin-right: 2px;
     }
 
-    .type {
-      @extend %face-sans-14-regular;
-
+    .status {
+      display: flex;
+      margin-left: 8px;
+      white-space: nowrap;
       color: variables.$color-dark-grey;
-      margin-left: 2px;
+
+      @extend %face-sans-12-regular;
+
+      span {
+        margin-right: 8px;
+      }
+
+      .error {
+        display: flex;
+        color: variables.$color-warning;
+
+        .icon {
+          color: variables.$color-warning;
+        }
+      }
+
+      .pending {
+        font-weight: 500;
+      }
+    }
+
+    > span {
+      width: 100%;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     }
   }
 
-  .right {
-    @extend %face-sans-12-medium;
+  .body {
+    width: 100%;
 
-    > span {
-      display: block;
-      text-align: right;
-    }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      color: white;
+      padding-top: 4px;
 
-    :nth-child(1) {
-      color: variables.$color-light-grey;
-    }
+      span {
+        color: variables.$color-light-grey;
 
-    :nth-child(2) {
-      color: variables.$color-dark-grey;
+        @extend %face-sans-15-medium;
+      }
+
+      .labels {
+        display: flex;
+        width: 100%;
+
+        label {
+          height: 22px;
+          margin-right: 4px;
+          padding: 2px 5px;
+          border: 1px solid variables.$color-dark-grey;
+          border-radius: 4px;
+          color: variables.$color-dark-grey;
+
+          @extend %face-sans-11-regular;
+
+          font-weight: 500;
+        }
+      }
     }
   }
 }

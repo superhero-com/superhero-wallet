@@ -81,6 +81,7 @@ export default [
     meta: {
       notPersist: true,
       hideTabBar: true,
+      newUI: true,
     },
   },
   {
@@ -251,7 +252,7 @@ export default [
     path: '/transactions',
     component: Transactions,
     meta: {
-      title: 'activity',
+      title: 'transactions',
       notRebrand: true,
     },
   },
@@ -263,6 +264,7 @@ export default [
     meta: {
       title: 'tx-details',
       hideTabBar: true,
+      newUI: true,
     },
   },
   {
@@ -459,6 +461,7 @@ export default [
       title: 'sign-transaction',
       notPersist: true,
       hideTabBar: true,
+      newUI: true,
     },
   },
   {
@@ -481,5 +484,6 @@ export default [
       notRebrand: true,
     },
   },
+
   ...webIframePopups,
 ];

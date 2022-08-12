@@ -45,6 +45,22 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 
+.new-ui {
+  margin-block: 8px;
+
+  .details-item {
+    .value {
+      @extend %face-sans-15-regular;
+
+      letter-spacing: 0.05em;
+    }
+
+    .label {
+      margin-bottom: 4px;
+    }
+  }
+}
+
 .details-item {
   .label {
     margin-bottom: 8px;

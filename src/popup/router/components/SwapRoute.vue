@@ -1,25 +1,32 @@
 <template>
   <div
-    v-if="tokenPairs.length > 1"
+    v-if="tokens.length > 1"
     class="swap-route"
   >
     <div class="title">
       {{ $t('pages.transactionDetails.swapRoute') }}
     </div>
-    <span
-      v-for="(pairs, idx) of tokenPairs"
-      :key="idx"
-      class="swap"
-    >
+    <div class="swap-wrapper">
       <span
-        v-if="idx"
-        class="divider"
+        v-for="(token, idx) of tokens"
+        :key="idx"
+        class="swap"
       >
-        {{ idx === 1 ? '--->' : '------>' }}
+        <span
+          v-if="idx"
+          class="divider"
+        >
+          <span class="space" />
+          {{ checkWaeAeTx(idx - 1)
+            ? 0 : `${(idx > 1 && checkWaeAeTx(idx - 2)) || idx === 1 ? '' : '<'}0.3` }}%
+          {{ $t('pages.transactionDetails.poolFee') }}
+          <span class="arrow">
+            <ArrowHead />
+          </span>
+        </span>
+        <Tokens :tokens="[token]" />
       </span>
-
-      <Tokens :tokens="pairs" />
-    </span>
+    </div>
   </div>
 </template>
 
@@ -29,10 +36,12 @@ import { camelCase } from 'lodash-es';
 import Tokens from './Tokens.vue';
 import * as transactionTokenInfoResolvers from '../../utils/transactionTokenInfoResolvers';
 import { DEX_CONTRACTS, FUNCTION_TYPE_DEX } from '../../utils/constants';
+import ArrowHead from '../../../icons/arrow-head.svg?vue-component';
 
 export default {
   components: {
     Tokens,
+    ArrowHead,
   },
   props: {
     transaction: { type: Object, required: true },
@@ -40,32 +49,46 @@ export default {
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
     ...mapGetters(['activeNetwork']),
-    isSwapTx() {
-      return FUNCTION_TYPE_DEX.swap.includes(this.transaction.tx.function);
-    },
-    tokenPairs() {
-      if (!this.isSwapTx) return [];
+    tokens() {
+      if (!FUNCTION_TYPE_DEX.swap.includes(this.transaction.tx.function)) return [];
       if (!transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)]) return [];
-      const contracts = DEX_CONTRACTS[this.activeNetwork.networkId];
-      const { tokens } = transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)](
+      let { tokens } = transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)](
         this.transaction, this.availableTokens,
       );
-
-      if (tokens.length && contracts?.wae?.includes(tokens[0].contractId)) {
+      const index = this.transaction.tx.arguments.findIndex(({ type }) => type === 'list');
+      if (index >= 0 && this.transaction.tx.arguments[index].value.length > tokens.length) {
+        tokens = [
+          tokens[0],
+          ...this.transaction.tx.arguments[index].value
+            .slice(1, this.transaction.tx.arguments[index].value.length - 1)
+            .map(({ value }) => this.availableTokens[value]),
+          tokens[1],
+        ];
+      }
+      const waeContract = DEX_CONTRACTS[this.activeNetwork.networkId]?.wae;
+      if (tokens[0].isAe && waeContract && !waeContract?.includes(tokens[1].contractId)) {
         tokens.unshift({
           ...tokens[0],
           isAe: true,
         });
+        tokens[1].isAe = false;
       }
-      return tokens.map((token, idx) => {
-        if (!idx || idx + 1 === tokens.length) {
-          return [token];
-        }
-        return [
-          token,
-          tokens[idx + 1],
-        ];
-      });
+      if (tokens[tokens.length - 1].isAe && waeContract
+        && !waeContract?.includes(tokens[tokens.length - 2].contractId)) {
+        tokens[tokens.length - 1].isAe = false;
+        tokens.push({ ...tokens[tokens.length - 1], isAe: true });
+      }
+      return tokens;
+    },
+  },
+  methods: {
+    checkWaeAeTx(idx) {
+      if (idx === this.tokens.length - 1) return false;
+      const contracts = DEX_CONTRACTS[this.activeNetwork.networkId];
+      return (contracts?.wae?.includes(this.tokens[idx].contractId)
+        && this.tokens[idx + 1].isAe)
+        || (contracts?.wae?.includes(this.tokens[idx + 1].contractId)
+        && this.tokens[idx].isAe);
     },
   },
 };
@@ -74,10 +97,11 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 @use '../../../styles/typography';
+@use '../../../styles/mixins';
 
 .swap-route {
   width: 100%;
-  padding-bottom: 10px;
+  overflow: hidden;
 
   .title {
     color: variables.$color-dark-grey;
@@ -86,26 +110,76 @@ export default {
     @extend %face-sans-14-medium;
   }
 
+  .swap-wrapper {
+    @include mixins.flex(flex-start, flex-start, row);
+
+    flex-wrap: wrap;
+    row-gap: 4px;
+
+    :last-of-type {
+      flex: 1;
+
+      .tokens::v-deep {
+        width: 100%;
+      }
+    }
+  }
+
   .swap {
-    padding: 4px 0;
+    @include mixins.flex(flex-start, center, row);
+
+    flex: 0;
+    position: relative;
+
+    .tokens::v-deep {
+      @extend %face-sans-15-medium;
+    }
+
+    .divider,
+    .tokens::v-deep {
+      background: variables.$color-bg-3;
+      z-index: 1;
+      padding-right: 4px;
+    }
+
+    &::before {
+      content: "";
+      background-image: linear-gradient(variables.$color-blue 2px, transparent 1px);
+      position: absolute;
+      top: calc(50% - 1px);
+      height: 24px;
+      width: 100vh;
+    }
 
     .divider {
+      @extend %face-sans-13-medium;
+
+      @include mixins.flex(center, center, row);
+
+      gap: 2px;
       color: variables.$color-blue;
-      margin: 0 4px;
-      word-break: break-all;
-      vertical-align: middle;
-    }
+      white-space: nowrap;
 
-    .fee {
-      margin-left: 4px;
-      color: variables.$color-dark-grey;
-      vertical-align: middle;
+      .space,
+      .arrow {
+        background-image: linear-gradient(variables.$color-blue 2px, transparent 1px);
+        width: 12px;
+        height: 24px;
+        transform: translateY(calc(50% - 1px));
+        position: relative;
+      }
 
-      @extend %face-sans-14-regular;
-    }
+      .arrow {
+        margin-right: 1px;
 
-    .tokens {
-      display: inline-block;
+        svg {
+          position: absolute;
+          transform: translateY(-5px);
+          left: 7px;
+          width: 9px;
+          height: 12px;
+        }
+      }
     }
   }
 }

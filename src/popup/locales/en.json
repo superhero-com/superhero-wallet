@@ -173,6 +173,11 @@
       "title": "Scan QR code",
       "share": "Share",
       "close": "Close"
+    },
+    "wrongNetwork": {
+      "title": "Network discrepancy",
+      "msg": "This action was initiated on a different network. Please switch to {0} in your wallet settings to proceed.",
+      "button": "Dismiss"
     }
   },
   "filters": {
@@ -202,13 +207,35 @@
       "channelCloseSoloTx": "Solo close channel",
       "channelSlashTx": "Slash channel",
       "channelSettleTx": "Settle channel",
-      "channelSnapshotSoloTx": "Solo snapshot channel"
+      "channelSnapshotSoloTx": "Solo snapshot channel",
+      "payingForTx": "Paying For Transaction",
+      "pending": "Pending..."
+    },
+    "dexType": {
+      "provide_liquidity": "provide liquidity",
+      "remove_liquidity":"remove liquidity",
+      "swap": "swap",
+      "allow_token":"allow token" ,
+      "change_allowance": "allow token",
+      "transfer_allowance": "allow token",
+      "deposit": "deposit",
+      "withdraw": "withdraw",
+      "pool": "pool"
+    },
+    "spendType": {
+      "out": "out",
+      "in": "in"
     },
     "overview": {
       "aens": "AENS",
       "contractCreate": "Contract create",
       "contract": "Contract",
-      "accountAddress": "Account address"
+      "accountAddress": "Account address",
+      "superheroDex": "Superhero DEX"
+    },
+    "returnType": {
+      "abort": "Failed",
+      "revert": "Reverted"
     }
   },
   "pages": {
@@ -252,7 +279,7 @@
       "terms": "Terms of Use",
       "privacy": "Privacy Policy",
       "importAccount": "Retrieve Existing Account",
-      "activity": "Activity History",
+      "transactions": "Transaction History",
       "receive": "Receive",
       "notifications": "Notifications",
       "notification-settings": "Notification Preference",
@@ -276,8 +303,9 @@
       "sign-message": "Sign Message",
       "sign-transaction": "Sign Transaction",
       "invite": "Invite",
-      "tx-details": "Tx Details",
-      "wallet-home": "Wallet Home"
+      "tx-details": "Transaction details",
+      "wallet-home": "Wallet Home",
+      "token-details": "Token details"
     },
     "about": {
       "heading": "About",
@@ -288,7 +316,6 @@
     },
     "account": {
       "heading": "Account",
-      "activity": "Activity",
       "accountName": "Account name",
       "claim": "Claim Tip",
       "receive": "Receive",
@@ -459,26 +486,33 @@
       "receiveTokens": "Receive tokens"
     },
     "token-details": {
-      "details": "Details",
+      "details": "Token Details",
       "send": "Send",
       "receive": "Receive",
       "tip": "Tip",
       "token-details": "Token Details",
+      "token": "Token",
       "token-description": "Token Description",
-      "abbreviation": "Abbreviation",
       "community": "Community",
       "decimals": "Decimals",
       "contract": "Contract",
       "available-supply": "Available supply",
       "total-supply": "Total supply",
       "max-supply": "Max supply",
+      "supply": "Supply",
       "price-ae": "Price (AE)",
       "price": "Price",
       "volume": "Total Volume",
+      "volumeDaily": "Volume (24h)",
+      "feeDaily": "Fee (24h)",
       "market-cap": "Market Cap",
       "atl-change": "All time low",
       "ath-change": "All time high",
-      "chart": "Chart"
+      "chart": "Chart",
+      "poolShare": "Pool share",
+      "holders": "Holders",
+      "transactions": "Transactions",
+      "pooled": "Pooled"
     },
     "deploy-token": {
       "name": "Token name",
@@ -507,7 +541,7 @@
       "balance-error": "Your account balance is not enough to execute this transaction.",
       "pointer-added": "Name {type} successful!",
       "pending-claim": "Pending",
-      "auto-extend": "Autoextend",
+      "auto-extend": "Auto-extend",
       "tabs": {
         "my-names": "My names",
         "auctions": "Auctions",
@@ -781,7 +815,16 @@
       "newContract": "New Contract",
       "aens": "AENS",
       "balanceError": "Your account balance is not enough to execute this transaction.",
-      "advanced": "Advanced transaction details"
+      "advanced": "Advanced transaction details",
+      "maxSpent": "Maximum spent",
+      "minReceived": "Minimum received",
+      "from": "From",
+      "to": "To",
+      "approveUseOfToken": "Approve use of token",
+      "approveUseOfTokens": "Approve use of tokens",
+      "maximumDeposited": "Maximum deposited",
+      "poolTokenSpent": "Pool token spent",
+      "minimumWithdrawn": "Minimum withdrawn"
     },
     "signTransactionByQrCode": {
       "backToAccount": "Back to account",
@@ -896,17 +939,18 @@
       "notifyMessage": "I just sent you %{amount} for your wonderful post! Start receiving and sending more tips through Superhero.com. Learn more."
     },
     "transactionDetails": {
+      "poolFee": "pool fee",
       "heading": "Transactions Details",
       "type": "Type",
       "amount": "Amount",
-      "fee": "Tx fee",
+      "fee": "Transaction fee",
       "total": "Total",
       "txFrom": "From",
       "txTo": "To",
       "txHash": "Tx hash",
       "transactions": "Transactions",
       "backToTransactions": "Back to Transactions",
-      "explorer": "View Tx in blockchain explorer",
+      "explorer": "View transaction in blockchain explorer",
       "txName": "Name",
       "txAccount": "Account",
       "name": "Name",
@@ -918,8 +962,8 @@
       "signatures": "Signatures",
       "nonce": "Nonce",
       "callData": "Call Data",
-      "gas": "Gas",
-      "gasPrice": "Gas Price",
+      "gasUsed": "Gas used",
+      "gasPrice": "Gas price",
       "code": "Code",
       "abiV": "Abi version",
       "vmV": "Vm version",
@@ -933,10 +977,20 @@
       "hash": "Hash",
       "status": "Status",
       "pending": "Pending",
+      "revert": "Reverted",
+      "revertInfo": "Transaction has been reverted. All states returned to the state before the transaction.",
+      "failed": "Failed",
+      "reason": "Reason",
       "tipUrl": "Tipped URL",
       "timestamp": "Timestamp",
+      "poolTokenReceived": "Pool token received",
+      "poolTokenSpent": "Pool token spent",
+      "approveTokenUse": "Approved use of token",
+      "deposited": "Deposited",
+      "withdrawn": "Withdrawn",
       "rates": "Rates",
-      "swapRoute": "Swap route"
+      "swapRoute": "Swap route",
+      "urlCopied": "URL copied"
     },
     "transactions": {
       "backToAccount": "Back to account",
@@ -1083,6 +1137,7 @@
   "hours": "{n} hours | {n} hour | {n} hours",
   "days": "{n} days | {n} day | {n} days",
   "addressCopied": "Address copied",
+  "hashCopied": "Hash copied",
   "copied": "Copied",
   "copy": "Copy",
   "tx-fee": "Transaction fee",

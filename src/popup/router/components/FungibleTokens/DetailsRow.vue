@@ -1,18 +1,22 @@
 <template>
   <div class="details-row">
     <div class="title">
-      {{ label }}
+      <slot name="label">
+        {{ label }}
+      </slot>
     </div>
-    <div class="text">
-      {{ text }}
-    </div>
+    <span class="text">
+      <slot name="text">
+        {{ text }}
+      </slot>
+    </span>
   </div>
 </template>
 
 <script>
 export default {
   props: {
-    label: { type: String, required: true },
+    label: { type: String, default: null },
     text: { type: [String, Number], default: 'N/A' },
   },
 };
@@ -20,28 +24,37 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../../styles/variables';
+@use '../../../../styles/typography';
 
 .details-row {
-  font-size: 15px;
-  padding: 9px 15px;
+  padding: 8px 16px;
   background-color: variables.$color-bg-3;
   display: flex;
+  justify-content: space-between;
+
+  @extend %face-sans-15-medium;
 
   .title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     color: variables.$color-dark-grey;
-    font-weight: 500;
-    width: 100%;
   }
 
   .text {
-    color: variables.$color-white;
+    color: variables.$color-light-grey;
 
     .primary {
       color: variables.$color-green;
     }
+
+    &.primary {
+      color: variables.$color-blue;
+    }
+  }
+
+  .white {
+    color: variables.$color-white;
   }
 }
 </style>

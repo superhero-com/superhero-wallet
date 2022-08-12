@@ -4,6 +4,7 @@
     :title="transaction.title"
     :sender="transaction.sender"
     :recipient="transaction.recipient"
+    :tx-function="transaction.function"
   />
 </template>
 
@@ -16,10 +17,11 @@ export default {
   components: { Overview },
   props: {
     tx: { type: Object, required: true },
+    isDex: { type: Boolean, default: false },
   },
   data: () => ({ name: '' }),
   computed: {
-    ...mapGetters(['getTxType', 'getTxDirection', 'getExplorerPath']),
+    ...mapGetters(['getTxType', 'getTxDirection', 'getExplorerPath', 'getDexContracts']),
     ...mapGetters('names', ['getPreferred']),
     ...mapState({
       account(_, { account }) {
@@ -28,6 +30,10 @@ export default {
           label: this.$t('transaction.overview.accountAddress'),
           url: this.getExplorerPath(account.address),
         };
+      },
+      isDexRecipient() {
+        return [...this.getDexContracts.router, ...this.getDexContracts.wae]
+          .includes(this.tx?.contractId);
       },
     }),
     transaction() {
@@ -53,12 +59,13 @@ export default {
           const contract = {
             address: this.tx.contractId,
             url: this.getExplorerPath(this.tx.contractId),
-            label: this.$t('transaction.overview.contract'),
+            label: this.$t(`transaction.overview.${this.isDexRecipient ? 'superheroDex' : 'contract'}`),
           };
           return {
             sender: direction === 'sent' ? this.account : contract,
             recipient: direction === 'received' ? this.account : contract,
             title: this.$t('transaction.type.contractCallTx'),
+            function: this.tx.function,
           };
         }
         case SCHEMA.TX_TYPE.contractCreate:
@@ -98,3 +105,13 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+@use '../../../styles/mixins';
+
+.tag-wrapper {
+  @include mixins.flex(center, center);
+
+  gap: 8px;
+}
+</style>

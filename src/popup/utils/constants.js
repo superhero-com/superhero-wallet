@@ -14,6 +14,7 @@ export const TX_TYPE_MDW = {
   NameClaimTx: SCHEMA.TX_TYPE.nameClaim,
   NameBidTx: SCHEMA.TX_TYPE.nameClaim,
   NameUpdateTx: SCHEMA.TX_TYPE.nameUpdate,
+  PayingForTx: 'payingForTx', // TODO: remove after https://github.com/aeternity/aepp-sdk-js/issues/1583 is resolved
 };
 
 export const CONNECTION_TYPES = {
@@ -181,6 +182,8 @@ export const CURRENCIES_URL = 'https://api.coingecko.com/api/v3/simple/price?ids
 export const CURRENCY_URL = 'https://api.coingecko.com/api/v3/coins/markets?ids=aeternity&vs_currency=';
 
 export const AVATAR_URL = 'https://avatars.z52da5wt.xyz/';
+
+export const DEX_URL = 'https://aepp.dex.superhero.com';
 
 export const BLOG_CLAIM_TIP_URL = 'https://blog.aeternity.com/superhero-how-to-send-receive-superhero-tips-34971b18c919#024e';
 

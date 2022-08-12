@@ -1,4 +1,6 @@
 /* eslint-disable no-underscore-dangle */
+import BigNumber from 'bignumber.js';
+
 const defaultToken = {
   decimals: 18,
   symbol: 'AE',
@@ -19,6 +21,13 @@ const genLiquiditySwapResolver = (
     || (!poolTokenAmountMapper && transaction.tx.return.type === 'list'))) {
     returns = transaction.tx.return.value;
   }
+  let poolTokenSymbol;
+  if ((tokens?.[tokenA.contractId] || tokenA.isAe)
+    && (tokens?.[tokenB.contractId] || tokenB.isAe)) {
+    const symbolA = tokenA.isAe ? 'AE' : tokens?.[tokenA.contractId].symbol;
+    const symbolB = tokenB.isAe ? 'AE' : tokens?.[tokenB.contractId].symbol;
+    poolTokenSymbol = `${symbolA}/${symbolB}`;
+  }
 
   return {
     tokens: [{
@@ -37,9 +46,11 @@ const genLiquiditySwapResolver = (
       isReceived: liquidityMethod === 'remove' || !liquidityMethod,
     }, ...poolTokenAmountMapper ? [{
       ...defaultPoolToken,
+      ...(poolTokenSymbol ? { symbol: poolTokenSymbol } : {}),
       amount: returns?.[2]?.value || poolTokenAmountMapper(transaction), // min_liquidity: int
       ...tokens?.[transaction.tx.log?.[0]?.address],
       isReceived: liquidityMethod && liquidityMethod === 'add',
+      isPool: true,
     }] : []],
   };
 };
@@ -62,7 +73,11 @@ export const addLiquidity = genLiquiditySwapResolver(
     minAmount: _arguments[5]?.value, // amount_b_min: int
     amount: _arguments[3]?.value, // amount_b_desired: int
   }),
-  ({ tx: { arguments: _arguments } }) => _arguments[7]?.value, // min_liquidity: int
+  // min_liquidity: int
+  ({ tx: { arguments: _arguments } }) => new BigNumber(_arguments[2]?.value)
+    .times(_arguments[3]?.value)
+    .sqrt()
+    .minus(_arguments[7]?.value[1]?.value),
   'add',
 );
 
@@ -83,8 +98,13 @@ export const addLiquidityAe = genLiquiditySwapResolver(
     contractId,
     minAmount: _arguments[3]?.value, // amount_b_min: int
     amount, // amount_b_desired: int
+    isAe: true,
   }),
-  ({ tx: { arguments: _arguments } }) => _arguments[5]?.value, // min_liquidity: int
+  // min_liquidity: int
+  ({ tx: { arguments: _arguments, amount } }) => new BigNumber(_arguments[1]?.value)
+    .times(amount)
+    .sqrt()
+    .minus(_arguments[5]?.value[1]?.value),
   'add',
 );
 
@@ -125,6 +145,7 @@ export const removeLiquidityAe = genLiquiditySwapResolver(
     contractId,
     minAmount: _arguments[3]?.value, // amount_b_min: int
     amount: _arguments[3]?.value, // amount_b_desired: int
+    isAe: true,
   }),
   ({ tx: { arguments: _arguments } }) => _arguments[1]?.value, // min_liquidity: int
   'remove',
@@ -156,12 +177,12 @@ export const swapExactTokensForTokens = genLiquiditySwapResolver(
  */
 export const swapTokensForExactTokens = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
+    contractId: _arguments[2]?.value?.[0]?.value,
     maxAmount: _arguments[1]?.value, // amount_a_max: int
     amount: _arguments[1]?.value, // amount_a_desired: int
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[2]?.value?.[0]?.value,
+    contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
   }),
 );
@@ -176,6 +197,7 @@ export const swapExactAeForTokens = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments, amount } }) => ({
     contractId: _arguments[1]?.value?.[0]?.value,
     amount, // amount_a_desired: int
+    isAe: true,
   }),
   ({ tx: { arguments: _arguments } }) => ({
     contractId: _arguments[1]?.value?.[_arguments[1]?.value?.length - 1]?.value,
@@ -200,6 +222,7 @@ export const swapTokensForExactAe = genLiquiditySwapResolver(
     contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
     minAmount: _arguments[0]?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
+    isAe: true,
   }),
 );
 
@@ -219,6 +242,7 @@ export const swapExactTokensForAe = genLiquiditySwapResolver(
     contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
     maxAmount: _arguments[1]?.value,
     amount: _arguments[1]?.value, // amount_b_desired: int
+    isAe: true,
   }),
 );
 
@@ -232,6 +256,7 @@ export const swapAeForExactTokens = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments, amount } }) => ({
     contractId: _arguments[1]?.value?.[0]?.value,
     amount, // amount_a_desired: int
+    isAe: true,
   }),
   ({ tx: { arguments: _arguments } }) => ({
     contractId: _arguments[1]?.value?.[_arguments[1]?.value?.length - 1]?.value,
@@ -293,6 +318,7 @@ export const deposit = (transaction, tokens = null) => ({
     ...defaultToken,
     amount: transaction.tx.amount,
     isReceived: false,
+    isAe: true,
   },
   {
     ...defaultToken,
@@ -321,5 +347,6 @@ export const withdraw = (transaction, tokens = null) => ({
     ...defaultToken,
     amount: transaction.tx.arguments?.[0]?.value,
     isReceived: true,
+    isAe: true,
   }],
 });

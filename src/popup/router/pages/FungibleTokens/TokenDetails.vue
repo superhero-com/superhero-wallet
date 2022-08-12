@@ -2,16 +2,25 @@
   <div class="token-details">
     <Plate class="token-header">
       <div class="token-profile">
+        <Loader v-if="loading" />
+        <Tokens
+          :tokens="
+            tokenPairs.token0 && tokenPairs.token1
+              ? [tokenPairs.token0, tokenPairs.token1]
+              : [tokenData]
+          "
+          :symbol-length="22"
+        />
         <TokenAmount
           :amount="+tokenData.convertedBalance || 0"
-          :symbol="tokenData.symbol"
+          no-symbol
           :aex9="id !== 'aeternity'"
         />
       </div>
       <div class="token-actions">
         <BoxButton
-          v-if="+tokenData.convertedBalance"
-          @click.native="proceed({ name: 'transfer-send' })"
+          :class="{ disabled: !+tokenData.convertedBalance }"
+          @click.native="!+tokenData.convertedBalance ? null : proceed({ name: 'transfer-send' })"
         >
           <SendIcon />{{ $t('pages.token-details.send') }}
         </BoxButton>
@@ -35,7 +44,7 @@
           :class="{ selected: activeTab === 'details' }"
           @click="activeTab = 'details'"
         >
-          <Warning />
+          <CircleI />
           {{ $t('pages.token-details.details') }}
         </div>
         <div
@@ -52,53 +61,152 @@
       class="token-info"
     >
       <DetailsRow
-        :label="$t('pages.token-details.abbreviation')"
+        v-if="tokenData.symbol"
+        :label="$t('pages.token-details.token')"
         :text="tokenData.symbol"
       />
       <DetailsRow
+        v-if="tokenData.decimals"
         :label="$t('pages.token-details.decimals')"
         :text="tokenData.decimals"
       />
       <DetailsRow
         v-if="tokenData.contractId"
-        :class="{ contract: tokenData.contractId }"
         :label="$t('pages.token-details.contract')"
-        :text="tokenData.contractId"
-      />
+      >
+        <template #text>
+          <AddressShortening :address="tokenData.contractId" />
+        </template>
+      </DetailsRow>
       <DetailsRow
-        :label="$t('pages.token-details.available-supply')"
-        :text="tokenData.circulating_supply"
-      />
-      <DetailsRow
-        :label="$t('pages.token-details.total-supply')"
-        :text="tokenData.total_supply"
-      />
-      <DetailsRow
+        v-if="tokenData.circulating_supply"
         :label="$t('pages.token-details.max-supply')"
-        :text="tokenData.max_supply"
-      />
-      <DetailsRow :label="$t('pages.token-details.price-ae')" />
-      <DetailsRow
-        :label="$t('pages.token-details.price')"
-        :text="tokenData.current_price ? formatCurrency(tokenData.current_price) : ''"
+        :text="formatNumber(tokenData.circulating_supply)"
       />
       <DetailsRow
-        :label="$t('pages.token-details.volume')"
-        :text="tokenData.total_volume"
+        v-if="tokenData.total_supply"
+        :label="$t('pages.token-details.total-supply')"
+        :text="formatNumber(tokenData.total_supply)"
       />
       <DetailsRow
+        v-if="tokenData.market_cap"
         :label="$t('pages.token-details.market-cap')"
-        :text="tokenData.market_cap"
+        class="price"
+      >
+        <template #text>
+          {{ formatCurrency(tokenData.market_cap) }}
+        </template>
+      </DetailsRow>
+      <DetailsRow
+        v-if="tokenPairs.balances"
+        :label="$t('pages.token-details.holders')"
+        :text="tokenPairs.balances.size"
+      />
+      <DetailsRow v-if="tokenPairs.token0 && tokenPairs.token0.amount > 0">
+        <template #label>
+          {{ $t('pages.token-details.pooled') }}
+          <span class="white">{{ tokenPairs.token0.symbol }}</span>
+        </template>
+        <template #text>
+          {{ convertToken(tokenPairs.token0.amount, -tokenPairs.token0.decimals) }}
+        </template>
+      </DetailsRow>
+
+      <DetailsRow v-if="tokenPairs.token1 && tokenPairs.token1.amount > 0">
+        <template #label>
+          {{ $t('pages.token-details.pooled') }}
+          <span class="white">{{ tokenPairs.token1.symbol }}</span>
+        </template>
+        <template #text>
+          {{ convertToken(tokenPairs.token1.amount, -tokenPairs.token1.decimals) }}
+        </template>
+      </DetailsRow>
+
+      <DetailsRow
+        v-if="poolShare"
+        :label="$t('pages.token-details.poolShare')"
+        :text="poolShare"
       />
       <DetailsRow
+        v-if="!tokenData.isAe && UNFINISHED_FEATURES"
+        :label="$t('pages.token-details.transactions')"
+      />
+
+      <DetailsRow
+        v-if="tokenData.total_volume"
+        :label="$t('pages.token-details.volume')"
+      >
+        <template #text>
+          {{ formatCurrency(tokenData.total_volume) }}
+        </template>
+      </DetailsRow>
+      <DetailsRow
+        v-if="tokenData.market_cap_change_24h"
+        class="price"
+        :label="$t('pages.token-details.volumeDaily')"
+      >
+        <template #text>
+          <span
+            :class="{
+              green: tokenData.market_cap_change_percentage_24h > 0,
+              red: tokenData.market_cap_change_percentage_24h < 0,
+            }"
+          >
+            {{ Number(tokenData.market_cap_change_percentage_24h).toFixed(2) }}%
+          </span>
+          {{ formatCurrency(tokenData.market_cap_change_24h) }}
+        </template>
+      </DetailsRow>
+      <DetailsRow
+        v-if="!tokenData.isAe && UNFINISHED_FEATURES"
+        :label="$t('pages.token-details.feeDaily')"
+      />
+
+      <DetailsRow
+        class="link"
+        :label="$t('pages.token-details.chart')"
+      >
+        <template #text>
+          <a
+            :href="DEX_URL"
+            target="_blank"
+          >
+            {{ displayDexUrl }}
+            <ExternalLink />
+          </a>
+        </template>
+      </DetailsRow>
+      <DetailsRow
+        v-if="!tokenData.isAe && UNFINISHED_FEATURES"
+        :label="$t('pages.token-details.price-ae')"
+      />
+      <DetailsRow
+        v-if="tokenData.current_price"
+        class="price"
+        :label="$t('pages.token-details.price')"
+      >
+        <template #text>
+          <span
+            :class="{
+              green: tokenData.price_change_percentage_24h > 0,
+              red: tokenData.price_change_percentage_24h < 0,
+            }"
+          >
+            {{ Number(tokenData.price_change_percentage_24h).toFixed(2) }}%
+          </span>
+          {{ formatCurrency(tokenData.current_price) }}
+        </template>
+      </DetailsRow>
+      <DetailsRow
+        v-if="tokenData.ath"
         :label="$t('pages.token-details.ath-change')"
-        :text="tokenData.ath"
+        :text="formatCurrency(tokenData.ath)"
       />
       <DetailsRow
+        v-if="tokenData.atl"
         :label="$t('pages.token-details.atl-change')"
-        :text="tokenData.atl"
+        :text="formatCurrency(tokenData.atl)"
       />
-      <DetailsRow :label="$t('pages.token-details.chart')" />
     </div>
     <TransactionList
       v-else
@@ -110,17 +218,23 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
+import BigNumber from 'bignumber.js';
 import Plate from '../../components/Plate.vue';
 import SendIcon from '../../../../icons/send.svg?vue-component';
 import ReceiveIcon from '../../../../icons/receive.svg?vue-component';
 import BuyIcon from '../../../../icons/buy.svg?vue-component';
-import Warning from '../../../../icons/warning.svg?vue-component';
+import CircleI from '../../../../icons/circle-i.svg?vue-component';
 import TxHistory from '../../../../icons/history.svg?vue-component';
+import ExternalLink from '../../../../icons/external-link.svg?vue-component';
 import BoxButton from '../../components/BoxButton.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
+import Tokens from '../../components/Tokens.vue';
+import Loader from '../../components/Loader.vue';
 import TransactionList from '../../components/TransactionList.vue';
-import { SIMPLEX_URL } from '../../../utils/constants';
+import AddressShortening from '../../components/AddressShortening.vue';
+import { SIMPLEX_URL, DEX_URL } from '../../../utils/constants';
+import { convertToken } from '../../../utils/helper';
 
 export default {
   components: {
@@ -128,12 +242,16 @@ export default {
     SendIcon,
     ReceiveIcon,
     BuyIcon,
-    Warning,
+    CircleI,
     TxHistory,
     TokenAmount,
     BoxButton,
     DetailsRow,
     TransactionList,
+    AddressShortening,
+    ExternalLink,
+    Tokens,
+    Loader,
   },
   props: {
     id: { type: String, required: true },
@@ -141,30 +259,41 @@ export default {
   data() {
     return {
       activeTab: 'details',
+      loading: false,
+      tokenPairs: {},
       SIMPLEX_URL,
+      DEX_URL,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
   subscriptions() {
     return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
   },
   computed: {
-    ...mapGetters(['formatCurrency', 'accounts']),
+    ...mapGetters(['formatCurrency', 'formatNumber', 'accounts']),
     ...mapState('accounts', ['activeIdx']),
     ...mapState('fungibleTokens', ['aePublicData', 'availableTokens']),
     ...mapGetters('fungibleTokens', ['tokenBalances']),
     fungibleToken() {
       return this.availableTokens[this.id];
     },
+    displayDexUrl() {
+      return this.DEX_URL.replace('https://', '');
+    },
     tokenData() {
       if (this.id === 'aeternity') {
         return {
+          decimals: 18,
           ...this.aePublicData,
           symbol: 'AE',
           convertedBalance: this.tokenBalance,
           balanceCurrency: this.balanceCurrency,
           contractId: '',
+          description: '',
+          isAe: true,
         };
       }
+
       return (
         this.tokenBalances.find(({ contractId }) => contractId === this.id) || {
           ...this.fungibleToken,
@@ -172,14 +301,24 @@ export default {
         }
       );
     },
+    poolShare() {
+      if (!this.tokenPairs || !this.tokenPairs.balance || !this.tokenPairs.totalSupply) {
+        return null;
+      }
+      return `${BigNumber(this.tokenPairs.balance)
+        .times(100).div(this.tokenPairs.totalSupply).toFixed(8)}%`;
+    },
   },
-  mounted() {
-    this.$store.commit('setPageTitle', this.fungibleToken ? this.fungibleToken.name : 'Aeternity');
-  },
-  destroyed() {
-    this.$store.commit('setPageTitle', '');
+  async mounted() {
+    if (this.id.includes('ct_')) {
+      this.loading = true;
+      await this.$watchUntilTruly(() => this.$store.state.sdk);
+      this.tokenPairs = await this.$store.dispatch('fungibleTokens/getContractTokenPairs', this.id);
+      this.loading = false;
+    }
   },
   methods: {
+    convertToken,
     proceed(path) {
       this.$store.commit('fungibleTokens/setSelectedToken', {
         address: this.accounts[this.activeIdx].address,
@@ -202,6 +341,10 @@ export default {
 
   .transaction-list {
     flex-grow: 1;
+
+    ::v-deep .filters {
+      top: calc(env(safe-area-inset-top) + 270px);
+    }
   }
 
   ::v-deep {
@@ -222,6 +365,21 @@ export default {
 
       .box-button {
         margin-right: 24px;
+        background-color: variables.$color-bg-2;
+
+        &.disabled {
+          background-color: variables.$color-disabled;
+          color: variables.$color-light-grey;
+          opacity: 0.44;
+
+          &:hover {
+            &,
+            ::v-deep svg {
+              color: variables.$color-light-grey;
+              cursor: not-allowed;
+            }
+          }
+        }
 
         &:last-child {
           margin: 0;
@@ -232,13 +390,13 @@ export default {
     .token-tabs {
       display: flex;
       align-items: center;
+      justify-content: space-around;
       height: 48px;
       cursor: pointer;
 
       div {
         display: flex;
         align-items: center;
-        margin-left: 18px;
 
         @extend %face-sans-16-bold;
 
@@ -258,15 +416,44 @@ export default {
     }
 
     .token-profile {
-      display: flex;
       justify-content: center;
       align-items: center;
       margin-bottom: 20px;
 
+      ::v-deep .tokens {
+        display: flex;
+        flex-direction: column;
+
+        .symbols {
+          @extend %face-sans-18-medium;
+
+          .seperator {
+            color: variables.$color-light-grey;
+          }
+        }
+
+        .icons {
+          margin-bottom: 8px;
+
+          img {
+            width: 44px;
+            height: 44px;
+            border-radius: 22px;
+
+            &.pair {
+              margin-left: -80px;
+            }
+          }
+        }
+      }
+
       .token-amount {
-        font-size: 18px;
-        margin-left: 10px;
+        padding-top: 8px;
+        margin-bottom: 8px;
+        display: block;
         text-align: center;
+
+        @extend %face-sans-24-medium;
 
         ::v-deep .fiat {
           display: block;
@@ -280,19 +467,45 @@ export default {
     background-color: variables.$color-bg-1;
   }
 
-  .contract ::v-deep .text,
   .community ::v-deep .text {
     color: variables.$color-green;
-  }
-
-  .contract ::v-deep .text {
-    font-size: 9px;
-    display: flex;
-    align-items: center;
-  }
-
-  .community ::v-deep .text {
     font-size: 13px;
+  }
+
+  .primary ::v-deep .text {
+    color: variables.$color-blue;
+  }
+
+  .link ::v-deep .text a {
+    color: variables.$color-light-grey;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  .price ::v-deep .text {
+    .green {
+      color: variables.$color-green;
+      font-weight: 400;
+    }
+
+    .red {
+      color: variables.$color-red-dark;
+      font-weight: 400;
+    }
+  }
+
+  ::v-deep .address-shortening {
+    color: variables.$color-light-grey;
+
+    &:hover {
+      color: variables.$color-white;
+    }
   }
 }
 </style>

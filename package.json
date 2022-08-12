@@ -1,6 +1,6 @@
 {
   "name": "superhero-wallet",
-  "version": "0.9.10",
+  "version": "0.9.11",
   "description": "Superhero wallet",
   "author": "Superhero",
   "license": "MIT",
@@ -53,6 +53,7 @@
     "rxjs": "^6.6.7",
     "rxjs-etc": "^10.6.2",
     "tipping-contract": "github:aeternity/tipping-contract#v3.1.0-alpha2",
+    "dex-contracts-v2": "github:aeternity/dex-contracts-v2",
     "uuid": "^8.3.2",
     "validator": "^13.7.0",
     "vee-validate": "^2.2.15",

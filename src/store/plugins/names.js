@@ -120,7 +120,7 @@ export default (store) => {
           if (type === 'extend') {
             await nameEntry.extendTtl();
           } else if (type === 'update') {
-            await nameEntry.update([address], { extendPointers: true });
+            await sdk.aensUpdate(name, { account_pubkey: address }, { extendPointers: true });
           }
           dispatch(
             'modals/open',

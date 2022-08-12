@@ -1,51 +1,55 @@
 <template>
   <span class="tokens">
-    <img
-      :src="fromToken.img"
-      :class="{ border: fromToken.imgBorder }"
-    >
-    <img
-      v-if="toToken"
-      :src="toToken.img"
-      :class="{ border: toToken.imgBorder }"
-    >
-    <Tooltip
-      v-if="fromToken"
-      class="symbol"
-      :tooltip="fromToken.name"
-    >
-      {{ shrinkString(fromToken.symbol) }}
-    </Tooltip>
-    <span
-      v-if="fromToken && toToken"
-      class="seperator"
-    >
-      /
+    <span class="icons">
+      <img
+        v-if="toToken"
+        :src="toToken.img"
+        :class="['to-token', { border: toToken.imgBorder }]"
+        :title="toToken.symbol"
+      >
+      <img
+        :src="fromToken.img"
+        :class="{
+          border: fromToken.imgBorder,
+          pair: !!toToken
+        }"
+        :title="fromToken.symbol"
+      >
     </span>
-    <Tooltip
-      v-if="toToken"
-      class="symbol"
-      :tooltip="toToken.name"
-    >
-      {{ shrinkString(toToken.symbol) }}
-    </Tooltip>
+    <span class="symbols">
+      <span
+        v-if="fromToken"
+        class="symbol"
+      >
+        {{ shrinkString(fromToken.symbol) }}
+      </span>
+      <span
+        v-if="fromToken && toToken"
+        class="seperator"
+      >
+        /
+      </span>
+      <span
+        v-if="toToken"
+        class="symbol"
+      >
+        {{ shrinkString(toToken.symbol) }}
+      </span>
+    </span>
   </span>
 </template>
 
 <script>
-import Tooltip from './Tooltip.vue';
 import AeIcon from '../../../icons/tokens/ae.svg';
 
 export default {
-  components: {
-    Tooltip,
-  },
   props: {
     /**
      * transactionTokenInfoResolvers []
      */
     tokens: { type: Array, required: true },
     symbolLength: { type: Number, default: 11 },
+    doubleSymbolLength: { type: Number, default: 5 },
   },
   computed: {
     fromToken() {
@@ -56,14 +60,21 @@ export default {
     },
   },
   methods: {
+    getAvailableCharLength() {
+      if (this.tokens?.length < 2) return this.symbolLength;
+      const shorterNameLength = [this.tokens[0].symbol.length, this.tokens[1].symbol.length]
+        .find((length) => length < this.doubleSymbolLength);
+      return shorterNameLength ? this.symbolLength - shorterNameLength : this.doubleSymbolLength;
+    },
     shrinkString(text) {
-      return `${String(text).substring(0, this.symbolLength)}${text.length > this.symbolLength ? ' ...' : ''}`;
+      const maxLength = this.getAvailableCharLength();
+      return `${String(text).substring(0, maxLength)}${text.length > maxLength ? '...' : ''}`;
     },
     mapToken(token) {
       let img = `https://avatars.z52da5wt.xyz/${token.contractId}`;
       let imgBorder = true;
 
-      if (token.isAe) {
+      if (token.isAe || token.contractId === 'aeternity') {
         img = AeIcon;
         imgBorder = false;
       }
@@ -86,24 +97,23 @@ export default {
 
 .tokens {
   color: variables.$color-light-grey;
-  display: inline-flex;
-  align-items: center;
+
+  &,
+  .symbols,
+  .icons {
+    display: inline-flex;
+    align-items: center;
+    align-self: center;
+  }
 
   @extend %face-sans-14-regular;
 
   .symbol {
     vertical-align: middle;
-  }
-
-  .divider {
-    color: variables.$color-blue;
-    margin: 0 4px;
-    word-break: break-all;
-    vertical-align: middle;
+    white-space: nowrap;
   }
 
   .seperator {
-    color: variables.$color-blue;
     margin: 0 1px;
     vertical-align: middle;
   }
@@ -112,15 +122,20 @@ export default {
     width: 16px;
     height: 16px;
     border-radius: 8px;
-    margin-right: 6px;
     vertical-align: middle;
+    margin-right: 4px;
+
+    &.to-token {
+      margin-left: 10px;
+    }
+
+    &.pair {
+      margin-right: 16px;
+      margin-left: -30px;
+    }
 
     &.border {
       border: 0.25px solid variables.$color-light-grey;
-    }
-
-    &:nth-child(2) {
-      margin-left: -10px;
     }
   }
 }

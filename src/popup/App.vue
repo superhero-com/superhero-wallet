@@ -5,6 +5,7 @@
       'not-rebrand': $route.meta.notRebrand,
       'show-header': showStatusAndHeader,
       'hide-tab-bar': $route.meta.hideTabBar,
+      'new-ui': $route.meta.newUI,
     }"
   >
     <Header v-if="showStatusAndHeader" />

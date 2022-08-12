@@ -18,6 +18,15 @@ export const aettosToAe = (v) => AmountFormatter.formatAmount(v.toString(), {
 
 export const convertToken = (balance, precision) => BigNumber(balance).shiftedBy(precision);
 
+export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
+  if (!_balance || !_totalSupply || !_reserve) {
+    return null;
+  }
+  const share = BigNumber(_balance).times(100).div(_totalSupply);
+  const amount = BigNumber(_reserve).times(share).div(100);
+  return amount.toFixed(0);
+};
+
 export const IN_FRAME = window.parent !== window;
 export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');
 
@@ -149,8 +158,11 @@ export const getBalanceLocalStorage = () => (
 export const categorizeContractCallTxObject = (transaction) => {
   if (transaction.incomplete
     || ((transaction.tx.function === 'tip' || transaction.tx.function === 'retip') && transaction.pending)) {
+    if (!transaction.tx?.selectedTokenId && transaction.pending) return null;
     return {
-      amount: transaction.amount, token: transaction.tx.contractId, to: transaction.tx.callerId,
+      amount: transaction.amount,
+      token: transaction.pending ? transaction.tx?.selectedTokenId : transaction.tx.contractId,
+      to: transaction.tx.callerId,
     };
   }
   if (transaction.tx.type !== 'ContractCallTx') return null;
@@ -222,4 +234,16 @@ export const getAllPages = async (getFunction, getNextPage) => {
     nextPageUrl = next || null;
   }
   return result;
+};
+
+export const amountRounded = (rawAmount) => {
+  let amount = rawAmount;
+  if (typeof rawAmount !== 'object') {
+    amount = new BigNumber(rawAmount);
+  }
+
+  if (amount < 0.01 && amount.toString().length < 9 + 2) {
+    return amount.toFixed();
+  }
+  return amount.toFixed((amount < 0.01) ? 9 : 2);
 };
