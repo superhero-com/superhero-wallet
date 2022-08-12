@@ -127,6 +127,7 @@ export default {
             contractId: this.tippingContract.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'retip',
+            selectedTokenId: this.selectedToken?.contractId,
           },
         });
         this.openCallbackOrGoHome(true);
