@@ -204,7 +204,7 @@ export default {
     .under {
       @extend %face-sans-14-regular;
 
-      color: rgba(variables.$color-white, .5);
+      color: rgba(variables.$color-white, 0.5);
     }
   }
 
@@ -227,7 +227,7 @@ export default {
   &.new-design {
     .input-wrapper {
       border: none;
-      background: rgba(variables.$color-white, .08);
+      background: rgba(variables.$color-white, 0.08);
       border-radius: variables.$border-radius-interactive;
       padding: 8px 12px;
       transition: .1s ease-in-out;
@@ -240,13 +240,13 @@ export default {
       }
 
       &:hover {
-        box-shadow: inset 0 0 0 2px rgba(variables.$color-white, .15);
-        background-color: rgba(variables.$color-white, .05);
+        box-shadow: inset 0 0 0 2px rgba(variables.$color-white, 0.15);
+        background-color: rgba(variables.$color-white, 0.05);
       }
 
       &:focus-within {
         box-shadow: inset 0 0 0 2px variables.$color-primary;
-        background-color: rgba(variables.$color-black, .44);
+        background-color: rgba(variables.$color-black, 0.44);
       }
 
       &.error {
@@ -273,7 +273,7 @@ export default {
         &::placeholder {
           @extend %face-sans-15-regular;
 
-          color: rgba(variables.$color-white, .50);
+          color: rgba(variables.$color-white, 0.50);
         }
       }
     }

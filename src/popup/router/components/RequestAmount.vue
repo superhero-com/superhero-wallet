@@ -126,7 +126,7 @@ export default {
 
   &-total {
     .focused & {
-      color: rgba(variables.$color-white, .75);
+      color: rgba(variables.$color-white, 0.75);
     }
   }
 

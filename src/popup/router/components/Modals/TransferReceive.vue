@@ -30,19 +30,21 @@
       </div>
 
       <div class="address-info">
-        <div class="qrcode-cover">
-          <QrcodeVue
-            :value="getQRdata(accounts[idx].address)"
-            size="112"
-            class="qrcode"
-          />
-        </div>
+        <QrcodeVue
+          :value="getQRdata(accounts[idx].address)"
+          size="112"
+          class="qrcode"
+        />
+
         <a
           class="address"
-          :href="explorerUrl()"
           target="_blank"
+          :href="explorerUrl()"
+          :class="{ copied }"
         >
-          {{ formatAddress(accounts[idx].address) }}
+          <Scrollable>
+            {{ formatAddress(accounts[idx].address) }}
+          </Scrollable>
         </a>
       </div>
 
@@ -60,23 +62,21 @@
         <Button
           v-clipboard:copy="getTextToCopy()"
           v-clipboard:success="copy"
-          class="copy"
-          :class="[IS_MOBILE_DEVICE ? 'mobile-copy': 'web-copy']"
           data-cy="copy"
-          :bold="false"
           fill="secondary"
-        >
-          {{ copied ? $t('modals.receive.copied') : $t('modals.receive.copy') }}
-        </Button>
+          class="copy"
+          new-design
+          :text="copied ? $t('modals.receive.copied') : $t('modals.receive.copy')"
+        />
 
         <Button
           v-if="!IS_MOBILE_DEVICE"
           class="share"
+          new-design
+          :text="$t('modals.receive.share')"
+          :icon="shareIcon"
           @click="share"
-        >
-          <Share class="share-icon" />
-          <span class="share-text"> {{ $t('modals.receive.share') }} </span>
-        </Button>
+        />
       </div>
     </div>
   </Modal>
@@ -87,7 +87,8 @@ import QrcodeVue from 'qrcode.vue';
 import { mapGetters, mapState } from 'vuex';
 import CopyMixin from '../../../../mixins/copy';
 import RequestAmount from '../RequestAmount.vue';
-import Share from '../../../../icons/naked-share.svg?vue-component';
+import Scrollable from '../Scrollable.vue';
+import shareIcon from '../../../../icons/naked-share.svg';
 import { APP_LINK_WEB } from '../../../utils/constants';
 import Modal from '../Modal.vue';
 import Avatar from '../Avatar.vue';
@@ -99,12 +100,12 @@ export default {
   name: 'TransferReceive',
   components: {
     RequestAmount,
-    Share,
     Modal,
     Avatar,
     Truncate,
     QrcodeVue,
     Button,
+    Scrollable,
   },
   mixins: [
     CopyMixin,
@@ -114,6 +115,7 @@ export default {
   },
   data() {
     return {
+      shareIcon,
       amount: null,
       IS_MOBILE_DEVICE: window.IS_MOBILE_DEVICE,
       selectedAsset: null,
@@ -231,27 +233,29 @@ export default {
 
     .address-info {
       display: flex;
-      justify-content: flex-start;
+      justify-content: space-between;
+      gap: 10px;
       margin-top: 24px;
-      height: 128px;
 
-      .qrcode-cover {
+      .qrcode {
+        display: flex;
+        align-self: flex-start;
+        padding: 8px;
         background-color: variables.$color-white;
         border-radius: 12px;
-
-        .qrcode {
-          padding: 8px;
-        }
       }
 
       .address {
-        display: flex;
-        flex-direction: column;
+        @extend %face-mono-14-medium;
+
+        display: block;
+        width: 100%;
         cursor: pointer;
-        overflow: scroll;
-        margin-left: 16px;
-        height: 128px;
-        padding-right: 6px;
+        padding-left: 6px;
+        border-radius: 12px;
+        border-width: 1px;
+        border-style: dashed;
+        border-color: transparent;
         color: variables.$color-white;
         font-style: normal;
         text-align: left;
@@ -259,22 +263,12 @@ export default {
         letter-spacing: 0.15em;
         text-decoration: none;
         word-break: break-all;
+        transition: .2s;
 
-        @extend %face-mono-14-medium;
-
-        &::-webkit-scrollbar {
-          display: block;
-          width: 7px;
-          height: 0;
+        &.copied {
+          background: rgba(variables.$color-primary, 0.1);
+          border-color: rgba(variables.$color-primary, 0.5);
         }
-
-        &::-webkit-scrollbar-thumb {
-          display: block;
-          background-color: rgba(255, 255, 255, 0.15);
-          border-radius: 4px;
-        }
-
-        -ms-overflow-style: auto;
       }
     }
 
@@ -283,58 +277,17 @@ export default {
     }
 
     .actions {
-      @include mixins.flex(flex-start, center);
-
-      column-gap: 8px;
-      flex: none;
-      align-self: stretch;
-      flex-grow: 0;
-      padding-top: 8px;
-      padding-bottom: 8px;
-      margin-top: 24px;
-      height: 56px;
-
-      .button {
-        border-radius: 10px;
-        cursor: pointer;
-      }
+      display: flex;
+      gap: 8px;
+      margin-top: 32px;
 
       .copy {
-        gap: 4px;
-        order: 0;
-        flex-grow: 0;
-        width: 100%;
-        color: variables.$color-white;
-
-        @extend %face-sans-16-regular;
-      }
-
-      .web-copy {
-        background-color: variables.$color-blue;
-      }
-
-      .mobile-copy {
-        background-color: rgba(variables.$color-white, 0.15);
+        flex: 1 1 0;
       }
 
       .share {
-        @include mixins.flex(center, center);
-
-        gap: 4px;
-        flex-grow: 1;
-        cursor: pointer;
-        border-radius: 10px;
-
-        .share-icon {
-          align-self: center;
-        }
-
-        .share-text {
-          align-self: center;
-          color: variables.$color-white;
-
-          @extend %face-sans-16-regular;
-        }
+        flex: 1 1 0;
+        min-width: 60%;
       }
     }
   }

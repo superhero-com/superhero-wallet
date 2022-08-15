@@ -16,14 +16,22 @@
         third,
         inline,
         inactive,
-        bold,
         backgroundless,
         'icon-text': iconText,
+        'new-design': newDesign,
       },
     ]"
     v-on="$listeners"
   >
-    <slot />
+    <slot>
+      <div class="default-text">
+        <img
+          v-if="icon"
+          :src="icon"
+        >
+        <span>{{ text }}</span>
+      </div>
+    </slot>
   </Component>
 </template>
 
@@ -35,6 +43,8 @@ export default {
       validator: (value) => ['primary', 'secondary', 'alternative'].includes(value),
       default: 'primary',
     },
+    text: { type: String, default: '' },
+    icon: { type: String, default: null },
     disabled: Boolean,
     extend: Boolean,
     half: Boolean,
@@ -43,9 +53,9 @@ export default {
     inline: Boolean,
     inactive: Boolean,
     to: { type: [String, Object], default: null },
-    bold: Boolean,
     backgroundless: Boolean,
     iconText: Boolean,
+    newDesign: Boolean,
   },
   computed: {
     isLinkOnSameHost() {
@@ -68,19 +78,25 @@ export default {
 @use '../../../styles/typography';
 
 .button {
+  @extend %face-sans-16-regular;
+
   display: block;
   position: relative;
   text-decoration: none;
   width: 280px;
   border-radius: 6px;
-
-  @extend %face-sans-16-bold;
-
   padding: 0;
   margin: 8px auto;
   color: variables.$color-white;
   height: 40px;
   line-height: 40px;
+
+  .default-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
 
   &.primary {
     background-color: variables.$color-blue;
@@ -167,10 +183,6 @@ export default {
     margin: 8px 10px;
   }
 
-  &.bold {
-    font-weight: 500;
-  }
-
   &.inactive {
     opacity: 0.4;
   }
@@ -187,7 +199,7 @@ export default {
       border: 1px solid variables.$color-blue;
 
       &:hover {
-        background-color: rgba(variables.$color-primary, .10);
+        background-color: rgba(variables.$color-primary, 0.10);
       }
     }
 
@@ -211,6 +223,18 @@ export default {
       width: 24px;
       height: 24px;
       margin-right: 6px;
+    }
+  }
+
+  &.new-design {
+    border-radius: variables.$border-radius-interactive;
+
+    &.secondary {
+      background-color: variables.$color-medium-grey;
+
+      &:hover {
+        background-color: rgba(variables.$color-white, 0.2);
+      }
     }
   }
 }
