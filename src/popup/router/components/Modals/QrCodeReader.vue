@@ -1,7 +1,7 @@
 <template>
   <Modal
     v-if="browserReader || !cameraAllowed"
-    close
+    has-close-button
     class="qr-code-reader"
     @close="resolve"
   >
