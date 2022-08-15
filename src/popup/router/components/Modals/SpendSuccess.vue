@@ -1,7 +1,7 @@
 <template>
   <Modal
     class="spend-success"
-    close
+    has-close-button
     @close="resolve"
   >
     <Pending />

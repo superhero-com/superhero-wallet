@@ -1,33 +1,49 @@
 <template>
-  <transition appear>
+  <transition
+    appear
+    :name="fromBottom ? 'from-bottom-transition' : 'pop-in-transition'"
+  >
     <div
       class="modal"
-      :class="{'full-screen': fullScreen}"
+      :class="{
+        'full-screen': fullScreen,
+        'from-bottom': fromBottom,
+        'has-close-button': hasCloseButton,
+      }"
     >
-      <div class="container">
-        <ButtonPlain
-          v-if="close"
-          class="close"
+      <div
+        v-click-outside="() => $emit('close')"
+        class="container"
+      >
+        <ButtonIcon
+          v-if="hasCloseButton"
+          class="close-button"
           @click="$emit('close')"
         >
           <Close />
-        </ButtonPlain>
+        </ButtonIcon>
         <div
-          v-if="$slots.header"
+          v-if="$slots.header || header"
           class="header"
         >
-          <slot name="header" />
+          <slot name="header">
+            <div class="header-default-text">
+              {{ header }}
+            </div>
+            <slot name="header-after" />
+          </slot>
         </div>
+
         <div
           v-if="$slots.default"
           class="body"
         >
           <slot />
         </div>
+
         <div
           v-if="$slots.footer"
           class="footer"
-          :class="{ absolute: absoluteFooter }"
         >
           <div class="content">
             <slot name="footer" />
@@ -40,16 +56,25 @@
 </template>
 
 <script>
-import ButtonPlain from './ButtonPlain.vue';
+import { clickOutside } from '../../directives';
+import ButtonIcon from './ButtonIcon.vue';
 import Close from '../../../icons/close.svg?vue-component';
 import NodeConnectionStatus from './NodeConnectionStatus.vue';
 
 export default {
-  components: { ButtonPlain, Close, NodeConnectionStatus },
+  components: {
+    ButtonIcon,
+    Close,
+    NodeConnectionStatus,
+  },
+  directives: {
+    'click-outside': clickOutside,
+  },
   props: {
-    close: Boolean,
+    hasCloseButton: Boolean,
     fullScreen: Boolean,
-    absoluteFooter: Boolean,
+    fromBottom: Boolean,
+    header: { type: String, default: null },
   },
   mounted() {
     if (document.body.style.overflow) return;
@@ -76,31 +101,31 @@ export default {
   min-width: variables.$extension-width;
   background-color: rgba(variables.$color-black, 0.7);
   display: flex;
+  backdrop-filter: blur(5px);
 
   .container {
     position: relative;
     width: 92%;
     margin: auto;
-    padding: 48px 28px 40px;
+    padding: 24px;
     background: variables.$color-bg-1;
-    border: 1px solid variables.$color-border;
     border-radius: 5px;
-    box-shadow: 2px 4px 12px rgba(variables.$color-black, 0.22);
+    box-shadow:
+      0 0 0 1px variables.$color-border,
+      2px 4px 12px rgba(variables.$color-black, 0.22);
 
     @include mixins.desktop {
       width: calc(#{variables.$extension-width} - 32px);
     }
 
-    .close {
-      width: 24px;
-      height: 24px;
+    .close-button {
       position: absolute;
-      right: 8px;
-      top: 8px;
+      right: 2px;
+      top: 2px;
       color: variables.$color-white;
 
-      svg {
-        width: 24px;
+      &-icon {
+        width: 100%;
       }
     }
 
@@ -109,7 +134,7 @@ export default {
       font-size: 19px;
       line-height: 24px;
       font-weight: 500;
-      margin-bottom: 24px;
+      margin-bottom: 8px;
       word-break: break-word;
       text-align: center;
       display: flex;
@@ -129,18 +154,24 @@ export default {
       color: variables.$color-light-grey;
       word-break: break-word;
       text-align: center;
-      margin-bottom: 40px;
     }
 
     .footer .content {
       display: flex;
       justify-content: center;
+      margin-top: 40px;
 
       ::v-deep .button {
         margin: 0 10px;
         width: 120px;
         font-weight: 700;
       }
+    }
+  }
+
+  &.has-close-button {
+    .container {
+      padding-top: 40px;
     }
   }
 
@@ -178,11 +209,6 @@ export default {
         border-radius: 0 0 10px 10px;
       }
 
-      &.absolute {
-        position: absolute;
-        bottom: 0;
-      }
-
       .content {
         padding: 24px 0;
       }
@@ -206,21 +232,55 @@ export default {
     }
   }
 
-  &.v-enter-active,
-  &.v-leave-active {
-    transition: opacity 0.3s;
+  &.from-bottom {
+    position: absolute;
+    align-items: end;
 
     .container {
-      transition: transform 0.3s;
+      width: 100%;
+      max-height: 100%;
+      margin-top: 0;
+      margin-bottom: 0;
     }
   }
 
-  &.v-enter,
-  &.v-leave-to {
-    opacity: 0;
+  &.pop-in-transition {
+    &-enter-active,
+    &-leave-active {
+      transition: opacity 0.3s;
 
-    .container {
-      transform: scale(1.1);
+      .container {
+        transition: transform 0.3s;
+      }
+    }
+
+    &-enter,
+    &-leave-to {
+      opacity: 0;
+
+      .container {
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  &.from-bottom-transition {
+    &-enter-active,
+    &-leave-active {
+      transition: opacity 0.3s ease-in-out;
+
+      .container {
+        transition: transform 0.3s ease-in-out;
+      }
+    }
+
+    &-enter,
+    &-leave-to {
+      opacity: 0;
+
+      .container {
+        transform: translateY(70%);
+      }
     }
   }
 }
