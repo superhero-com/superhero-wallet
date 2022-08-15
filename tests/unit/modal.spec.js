@@ -5,14 +5,15 @@ describe('Modal', () => {
   it('should close on button close click', async () => {
     const wrapper = mount(Modal, {
       propsData: {
-        close: true,
+        hasCloseButton: true,
       },
     });
-    await wrapper.find('.close').trigger('click');
+    await wrapper.find('.close-button').trigger('click');
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted('close')).toBeTruthy();
   });
-  it('should have "full-screen" class', async () => {
+
+  it('should have "full-screen" variant', async () => {
     const wrapper = mount(Modal, {
       propsData: {
         fullScreen: true,
@@ -20,17 +21,30 @@ describe('Modal', () => {
     });
     expect(wrapper.find('.full-screen').exists()).toBeTruthy();
   });
-  [{
-    slot: 'header',
-    className: '.header',
-  }, {
-    slot: 'default',
-    className: '.body',
-  },
-  {
-    slot: 'footer',
-    className: '.footer',
-  }].forEach(({ slot, className }) => it(`should have ${slot} slot`, async () => {
+
+  it('should have "from-bottom" variant', async () => {
+    const wrapper = mount(Modal, {
+      propsData: {
+        fromBottom: true,
+      },
+    });
+    expect(wrapper.find('.from-bottom').exists()).toBeTruthy();
+  });
+
+  [
+    {
+      slot: 'header',
+      className: '.header',
+    },
+    {
+      slot: 'default',
+      className: '.body',
+    },
+    {
+      slot: 'footer',
+      className: '.footer',
+    },
+  ].forEach(({ slot, className }) => it(`should have ${slot} slot`, async () => {
     const slotText = `${slot} test`;
     const wrapper = shallowMount(Modal, {
       slots: {

@@ -1,6 +1,6 @@
 <template>
   <Modal
-    close
+    has-close-button
     @close="resolve"
   >
     <template slot="header">

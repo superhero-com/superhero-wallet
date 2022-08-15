@@ -8,21 +8,23 @@
       'new-ui': $route.meta.newUI,
     }"
   >
-    <Header v-if="showStatusAndHeader" />
+    <div class="app-inner">
+      <Header v-if="showStatusAndHeader" />
 
-    <RouterView
-      :class="{ 'show-header': showStatusAndHeader }"
-      class="main"
-    />
+      <RouterView
+        :class="{ 'show-header': showStatusAndHeader }"
+        class="main"
+      />
 
-    <NodeConnectionStatus v-if="showStatusAndHeader" />
-    <TabBar v-if="isLoggedIn && $route.path !== '/intro'" />
-    <Component
-      :is="component"
-      v-for="{ component, key, props } in modals"
-      :key="key"
-      v-bind="props"
-    />
+      <NodeConnectionStatus v-if="showStatusAndHeader" />
+      <TabBar v-if="isLoggedIn && $route.path !== '/intro'" />
+      <Component
+        :is="component"
+        v-for="{ component, key, props } in modals"
+        :key="key"
+        v-bind="props"
+      />
+    </div>
   </div>
 </template>
 
@@ -139,7 +141,7 @@ body {
   margin: 0 auto;
   width: variables.$extension-width;
   height: 600px;
-  overflow-x: hidden;
+  overflow: hidden;
 
   @include mixins.mobile {
     width: 100%;
@@ -156,6 +158,12 @@ body {
   @extend %face-sans-16-regular;
 
   color: variables.$color-white;
+
+  .app-inner {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+  }
 
   .main {
     padding-bottom: 48px;
