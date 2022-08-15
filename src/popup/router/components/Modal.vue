@@ -271,10 +271,10 @@ export default {
   &.from-bottom-transition {
     &-enter-active,
     &-leave-active {
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s ease-in-out;
 
       .container {
-        transition: transform 0.3s ease;
+        transition: transform 0.3s ease-in-out;
       }
     }
 
@@ -283,7 +283,7 @@ export default {
       opacity: 0;
 
       .container {
-        transform: translateY(40px);
+        transform: translateY(70%);
       }
     }
   }

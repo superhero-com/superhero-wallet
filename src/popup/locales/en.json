@@ -174,12 +174,14 @@
       "share": "Share",
       "close": "Close"
     },
-    "receive":{
+    "receive": {
       "title": "Receive funds with public address",
       "requestAmount": "Request specific amount (optional)",
       "copy": "Copy",
       "copied": "Copied!",
-      "share": "Share"
+      "share": "Share",
+      "shareTextNoAmount": "My aeternity address {address} or use the following link {walletLink} to send it with Superhero Wallet",
+      "shareTextWithAmount": "Please send {amount} AE to my aeternity address {address} or use the following link {walletLink} to send it with Superhero Wallet"
     }
   },
   "filters": {

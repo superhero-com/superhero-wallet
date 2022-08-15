@@ -9,11 +9,7 @@
         >
           <SendIcon /> {{ $t('pages.titles.send') }}
         </RouterLink>
-        <a
-          @click="$store.dispatch('modals/open', {
-            name: 'transfer-receive',
-          })"
-        >
+        <a @click="openReceiveModal()">
           <ReceiveIcon /> {{ $t('pages.titles.receive') }}
         </a>
       </Tabs>
@@ -28,6 +24,7 @@ import AccountSwitcher from '../components/AccountSwitcher.vue';
 import Tabs from '../components/Tabs.vue';
 import SendIcon from '../../../icons/send.svg?vue-component';
 import ReceiveIcon from '../../../icons/receive.svg?vue-component';
+import { MODAL_TRANSFER_RECEIVE } from '../../constants';
 
 export default {
   components: {
@@ -36,6 +33,13 @@ export default {
     Tabs,
     SendIcon,
     ReceiveIcon,
+  },
+  methods: {
+    openReceiveModal() {
+      this.$store.dispatch('modals/open', {
+        name: MODAL_TRANSFER_RECEIVE,
+      });
+    },
   },
 };
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <RequestField
+  <InputField
     v-validate="ownValidation ? validation : {
       required: true,
       min_value_exclusive: 0,
@@ -8,62 +8,61 @@
       not_token: noToken,
       ...validation,
     }"
-    name="amount"
-    :error="$attrs.error || errors.has('amount')"
-    :error-message="$attrs['error-message'] || errors.first('amount')"
+    v-bind="$attrs"
     class="input-amount"
     type="number"
-    v-bind="$attrs"
+    name="amount"
     placeholder="0.00"
+    new-design
     :label="$attrs.label || $t('pages.tipPage.amountLabel')"
+    :error="$attrs.error || errors.has('amount')"
+    :error-message="$attrs['error-message'] || errors.first('amount')"
     @input="$emit('input', $event)"
   >
-    <template slot="left">
-      <span
-        v-if="!selectedToken"
-        class="total-amount"
-        data-cy="total-amount-currency"
-      >
-        <span v-if="$attrs.value">&thickapprox;</span>
-        {{ `${formatCurrency(totalAmount)}` }}
-      </span>
+    <template #right>
+      <AssetSelector
+        class="asset-selector"
+        @change="handleAssetSelection"
+      />
     </template>
-    <template slot="right">
-      <div class="asset-field">
-        <AssetSelector
-          class="asset-selector"
-          @change="handleAssetSelection"
-        />
+
+    <template #under="{ focused }">
+      <div
+        class="request-amount-desc"
+        :class="{ focused }"
+      >
         <span
           v-if="!selectedToken"
-          class="asset-fiat-price"
-          data-cy="amount-currency"
+          class="request-amount-desc-total"
+          data-cy="total-amount-currency"
         >
-          <span
-            v-if="selectedAsset && selectedAsset.current_price"
-          >
-            {{ `@${formatCurrency(currentTokenFiatPrice)}` }}
-          </span>
-          <span v-else>
-            @price: n/a
-          </span>
+          <span v-if="$attrs.value">&thickapprox;</span>
+          {{ formatCurrency(totalAmount) }}
+        </span>
+
+        <span class="request-amount-desc-at">
+          @{{
+            (selectedAsset && selectedAsset.current_price)
+              ? formatCurrency(currentTokenFiatPrice)
+              : 'price: n/a'
+          }}
         </span>
       </div>
     </template>
-  </RequestField>
+  </InputField>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import { pick } from 'lodash-es';
 import BigNumber from 'bignumber.js';
-import RequestField from './RequestField.vue';
 import AssetSelector from './AssetSelector.vue';
+import InputField from './InputField.vue';
 
 export default {
   components: {
-    RequestField,
     AssetSelector,
+    InputField,
   },
   props: {
     noToken: { type: Boolean },
@@ -121,49 +120,18 @@ export default {
 @use '../../../styles/typography';
 @use '../../../styles/mixins';
 
-.input-amount {
-  white-space: nowrap;
+.request-amount-desc {
+  display: flex;
+  justify-content: space-between;
 
-  :focus-within .asset-field .asset-selector {
-    background-color: variables.$color-bg-2;
-  }
-
-  .asset-field {
-    @include mixins.flex(flex-end, flex-end, column);
-
-    .asset-selector {
-      align-self: center;
-      max-width: 70px;
-      padding: 2px 12px;
-      gap: 4px;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 16px;
-      height: 28px;
-      margin-right: 2px;
-      font-weight: 500;
-      color: variables.$color-blue;
-      border-color: #171717 transparent;
-      margin-bottom: 2px;
-    }
-
-    .asset-fiat-price {
-      color: variables.$color-dark-grey;
-
-      @extend %face-sans-14-regular;
+  &-total {
+    .focused & {
+      color: rgba(variables.$color-white, .75);
     }
   }
 
-  .total-amount {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    width: 150px;
-    //display: inline-block;
-    text-align: left;
-    line-height: 20px;
-    color: variables.$color-dark-grey;
-
-    @extend %face-sans-14-regular;
+  &-at {
+    margin-left: 0;
   }
 }
 </style>

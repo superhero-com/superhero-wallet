@@ -1,6 +1,6 @@
 <template>
   <select
-    class="token"
+    class="asset-selector"
     :value="JSON.stringify(currentToken)"
     @change="(event) => handleChange(event.target.value) "
   >
@@ -74,3 +74,23 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
+
+.asset-selector {
+  align-self: center;
+  max-width: 70px;
+  padding: 2px 12px;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  height: 28px;
+  margin-right: 2px;
+  font-weight: 500;
+  color: variables.$color-blue;
+  border-color: #171717 transparent;
+  margin-bottom: 2px;
+}
+</style>

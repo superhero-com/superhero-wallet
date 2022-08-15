@@ -18,12 +18,7 @@
         </span>
       </div>
       <div class="buttons">
-        <a
-          @click.prevent="$store.dispatch('modals/open', {
-              ...$attrs,
-              name: 'transfer-receive',
-          })"
-        >
+        <a @click.prevent="openTransferReceiveModal($attrs)">
           <ReceiveIcon
             :style="iconCssProps"
           />
@@ -43,6 +38,7 @@ import BalanceInfo from './BalanceInfo.vue';
 import ReceiveIcon from '../../../icons/account-card/account-receive.svg?vue-component';
 import SendIcon from '../../../icons/account-card/account-send.svg?vue-component';
 import { getAddressColor } from '../../utils/avatar';
+import { MODAL_TRANSFER_RECEIVE } from '../../constants';
 
 export default {
   components: {
@@ -70,6 +66,14 @@ export default {
       return {
         '--primaryColor': this.color,
       };
+    },
+  },
+  methods: {
+    openTransferReceiveModal(attrs) {
+      this.$store.dispatch('modals/open', {
+        ...attrs,
+        name: MODAL_TRANSFER_RECEIVE,
+      });
     },
   },
 };

@@ -31,7 +31,7 @@
 
       <div class="address-info">
         <div class="qrcode-cover">
-          <qrcode-vue
+          <QrcodeVue
             :value="getQRdata(accounts[idx].address)"
             size="112"
             class="qrcode"
@@ -93,6 +93,7 @@ import Modal from '../Modal.vue';
 import Avatar from '../Avatar.vue';
 import Truncate from '../Truncate.vue';
 import Button from '../Button.vue';
+import { MODAL_TRANSFER_RECEIVE } from '../../../constants';
 
 export default {
   name: 'TransferReceive',
@@ -105,13 +106,15 @@ export default {
     QrcodeVue,
     Button,
   },
-  mixins: [CopyMixin],
+  mixins: [
+    CopyMixin,
+  ],
   props: {
     accountIdx: { type: Number, default: -1 },
   },
   data() {
     return {
-      amount: '',
+      amount: null,
       IS_MOBILE_DEVICE: window.IS_MOBILE_DEVICE,
       selectedAsset: null,
     };
@@ -139,14 +142,10 @@ export default {
     async share() {
       const { address } = this.accounts[this.idx];
       const walletLink = this.getLink(address);
-      let msg = `My aeternity address ${address} or use the following
-                link ${walletLink} to send it with Superhero Wallet`;
-      if (this.amount > 0) {
-        msg = `Please send ${this.amount} AE to my aeternity address \
-              ${address} or use the following link ${walletLink} to \
-              send it with Superhero Wallet`;
-      }
-      await this.$store.dispatch('share', { text: msg });
+      const text = (this.amount > 0)
+        ? this.$t('modals.receive.shareTextNoAmount', { address, walletLink })
+        : this.$t('modals.receive.shareTextWithAmount', { address, walletLink, amount: this.amount });
+      await this.$store.dispatch('share', { text });
     },
     getQRdata(address) {
       return this.amount > 0
@@ -174,7 +173,7 @@ export default {
       this.selectedAsset = newToken;
     },
     closeModal() {
-      this.$store.commit('modals/closeByKey', 'transfer-receive');
+      this.$store.commit('modals/closeByKey', MODAL_TRANSFER_RECEIVE);
     },
   },
 };
@@ -190,20 +189,11 @@ export default {
   font-weight: 500;
   color: variables.$color-white;
 
-  ::v-deep .container {
-    padding: 0;
-    width: 360px;
-    overflow: hidden;
-    overflow-y: auto;
-  }
-
   .transfer-receive {
     display: flex;
     align-content: center;
     justify-content: center;
     flex-direction: column;
-    padding: 16px;
-    margin-left: 8px;
 
     .close {
       align-self: flex-end;
@@ -219,9 +209,9 @@ export default {
     }
 
     .account-info {
-      margin-top: 4px;
-
       @include mixins.flex(center, center, row);
+
+      margin-top: 4px;
 
       .avatar {
         width: 24px;
@@ -290,7 +280,6 @@ export default {
 
     .request-specific-amount {
       margin-top: 32px;
-      height: 100px;
     }
 
     .actions {
@@ -298,7 +287,6 @@ export default {
 
       column-gap: 8px;
       flex: none;
-      order: 2;
       align-self: stretch;
       flex-grow: 0;
       padding-top: 8px;

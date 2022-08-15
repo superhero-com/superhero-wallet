@@ -86,7 +86,7 @@ export default {
     background-color: variables.$color-blue;
 
     &:hover {
-      background-color: variables.$color-blue-hover;
+      background-color: variables.$color-primary-hover;
     }
 
     &:active {
@@ -187,7 +187,7 @@ export default {
       border: 1px solid variables.$color-blue;
 
       &:hover {
-        background-color: variables.$color-blue-alpha-10;
+        background-color: rgba(variables.$color-primary, .10);
       }
     }
 
