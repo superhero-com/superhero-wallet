@@ -16,14 +16,22 @@
         third,
         inline,
         inactive,
-        bold,
         backgroundless,
         'icon-text': iconText,
+        'new-ui': newUi,
       },
     ]"
     v-on="$listeners"
   >
-    <slot />
+    <slot>
+      <div class="default-text">
+        <img
+          v-if="icon"
+          :src="icon"
+        >
+        <span>{{ text }}</span>
+      </div>
+    </slot>
   </Component>
 </template>
 
@@ -35,6 +43,8 @@ export default {
       validator: (value) => ['primary', 'secondary', 'alternative'].includes(value),
       default: 'primary',
     },
+    text: { type: String, default: '' },
+    icon: { type: String, default: null },
     disabled: Boolean,
     extend: Boolean,
     half: Boolean,
@@ -43,9 +53,9 @@ export default {
     inline: Boolean,
     inactive: Boolean,
     to: { type: [String, Object], default: null },
-    bold: Boolean,
     backgroundless: Boolean,
     iconText: Boolean,
+    newUi: Boolean,
   },
   computed: {
     isLinkOnSameHost() {
@@ -68,25 +78,31 @@ export default {
 @use '../../../styles/typography';
 
 .button {
+  @extend %face-sans-16-regular;
+
   display: block;
   position: relative;
   text-decoration: none;
   width: 280px;
   border-radius: 6px;
-
-  @extend %face-sans-16-bold;
-
   padding: 0;
   margin: 8px auto;
   color: variables.$color-white;
   height: 40px;
   line-height: 40px;
 
+  .default-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
   &.primary {
     background-color: variables.$color-blue;
 
     &:hover {
-      background-color: variables.$color-blue-hover;
+      background-color: variables.$color-primary-hover;
     }
 
     &:active {
@@ -167,10 +183,6 @@ export default {
     margin: 8px 10px;
   }
 
-  &.bold {
-    font-weight: 500;
-  }
-
   &.inactive {
     opacity: 0.4;
   }
@@ -187,7 +199,7 @@ export default {
       border: 1px solid variables.$color-blue;
 
       &:hover {
-        background-color: variables.$color-blue-alpha-10;
+        background-color: rgba(variables.$color-primary, 0.1);
       }
     }
 
@@ -211,6 +223,23 @@ export default {
       width: 24px;
       height: 24px;
       margin-right: 6px;
+    }
+  }
+
+  &.new-ui {
+    border-radius: variables.$border-radius-interactive;
+    width: auto;
+    padding: 5px 20px;
+    line-height: 20px;
+    flex: 1 1 0;
+    cursor: pointer;
+
+    &.secondary {
+      background-color: variables.$color-medium-grey;
+
+      &:hover {
+        background-color: rgba(variables.$color-white, 0.2);
+      }
     }
   }
 }

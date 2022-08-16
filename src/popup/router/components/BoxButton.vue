@@ -64,7 +64,7 @@ export default {
     }
 
     &:active {
-      background-color: variables.$color-blue-alpha-10;
+      background-color: rgba(variables.$color-primary, 0.1);
     }
   }
 

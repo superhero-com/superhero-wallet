@@ -24,7 +24,7 @@
         >
           <SendIcon />{{ $t('pages.token-details.send') }}
         </BoxButton>
-        <BoxButton @click.native="proceed({ name: 'transfer-receive' })">
+        <BoxButton @click.native="openTransferReceiveModal()">
           <ReceiveIcon />{{ $t('pages.token-details.receive') }}
         </BoxButton>
         <BoxButton
@@ -234,7 +234,11 @@ import Tokens from '../../components/Tokens.vue';
 import Loader from '../../components/Loader.vue';
 import TransactionList from '../../components/TransactionList.vue';
 import AddressShortening from '../../components/AddressShortening.vue';
-import { SIMPLEX_URL, DEX_URL } from '../../../utils/constants';
+import {
+  SIMPLEX_URL,
+  DEX_URL,
+  MODAL_TRANSFER_RECEIVE,
+} from '../../../utils/constants';
 import { convertToken } from '../../../utils/helper';
 
 export default {
@@ -320,12 +324,22 @@ export default {
   },
   methods: {
     convertToken,
-    proceed(path) {
+    storeSelectedToken() {
       this.$store.commit('fungibleTokens/setSelectedToken', {
         address: this.accounts[this.activeIdx].address,
         token: this.id !== 'aeternity' ? this.tokenBalances.find(({ value }) => value === this.id) : null,
       });
+    },
+    proceed(path) {
+      this.storeSelectedToken();
       this.$router.push(path);
+    },
+    openTransferReceiveModal() {
+      this.storeSelectedToken();
+      this.$store.dispatch('modals/open', {
+        name: MODAL_TRANSFER_RECEIVE,
+        tokenContractId: this.fungibleToken?.contractId,
+      });
     },
   },
 };

@@ -190,3 +190,19 @@ export const LEDGER_BRIDGE_URL = 'https://wallet.superhero.com/ledger-bridge';
 export const BLOG_CLAIM_TIP_URL = 'https://blog.aeternity.com/superhero-how-to-send-receive-superhero-tips-34971b18c919#024e';
 
 export const COMMIT_URL = 'https://github.com/aeternity/superhero-wallet/commit/';
+
+export const MODAL_DEFAULT = 'default';
+export const MODAL_ACCOUNT_DETAILS = 'account-details';
+export const MODAL_CLAIM_SUCCESS = 'claim-success';
+export const MODAL_SPEND_SUCCESS = 'spend-success';
+export const NODAL_CONFIRM = 'confirm';
+export const MODAL_CONFIRM_TIP = 'confirm-tip';
+export const MODAL_CONFIRM_TRANSACTION_SIGN = 'confirm-transaction-sign';
+export const MODAL_CONFIRM_RAW_SIGN = 'confirm-raw-sign';
+export const MODAL_CONFIRM_CONNECT = 'confirm-connect';
+export const MODAL_MESSAGE_SIGN = 'confirm-message-sign';
+export const MODAL_ERROR_LOG = 'error-log';
+export const MODAL_HELP = 'help';
+export const MODAL_READ_QR_CODE = 'read-qr-code';
+export const MODAL_SHARE_QR = 'share-qr';
+export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';

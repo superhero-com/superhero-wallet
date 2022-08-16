@@ -4,7 +4,7 @@
     :style="cardCssProps"
     @click.prevent="$store.dispatch('modals/open', {
       ...$attrs,
-      name: 'account-details',
+      name: MODAL_ACCOUNT_DETAILS,
     })"
   >
     <AccountInfo
@@ -22,13 +22,10 @@
           {{ $t('pages.fungible-tokens.tokens') }}
         </span>
       </div>
-      <div
-        class="buttons"
-        @click.stop
-      >
-        <RouterLink :to="{ name: 'transfer-receive' }">
+      <div class="buttons">
+        <a @click.stop="openTransferReceiveModal($attrs)">
           <ReceiveIcon :style="iconCssProps" />
-        </RouterLink>
+        </a>
         <RouterLink :to="{ name: 'transfer-send' }">
           <SendIcon :style="iconCssProps" />
         </RouterLink>
@@ -44,6 +41,7 @@ import BalanceInfo from './BalanceInfo.vue';
 import ReceiveIcon from '../../../icons/account-card/account-receive.svg?vue-component';
 import SendIcon from '../../../icons/account-card/account-send.svg?vue-component';
 import { getAddressColor } from '../../utils/avatar';
+import { MODAL_ACCOUNT_DETAILS, MODAL_TRANSFER_RECEIVE } from '../../utils/constants';
 
 export default {
   components: {
@@ -55,6 +53,9 @@ export default {
   props: {
     idx: { type: Number, required: true },
   },
+  data: () => ({
+    MODAL_ACCOUNT_DETAILS,
+  }),
   computed: {
     ...mapGetters('fungibleTokens', ['getTokenBalance']),
     ...mapGetters(['accounts']),
@@ -71,6 +72,14 @@ export default {
       return {
         '--primaryColor': this.color,
       };
+    },
+  },
+  methods: {
+    openTransferReceiveModal(attrs) {
+      this.$store.dispatch('modals/open', {
+        ...attrs,
+        name: MODAL_TRANSFER_RECEIVE,
+      });
     },
   },
 };
