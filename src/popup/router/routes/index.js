@@ -35,7 +35,6 @@ import Retip from '../pages/Retip.vue';
 import SecuritySettings from '../pages/SecuritySettings.vue';
 import Transfer from '../pages/Transfer.vue';
 import TransferSend from '../pages/TransferSend.vue';
-import TransferReceive from '../pages/TransferReceive.vue';
 import Settings from '../pages/Settings.vue';
 import SignMessage from '../pages/SignMessage.vue';
 import SuccessTip from '../pages/SuccessTip.vue';
@@ -81,7 +80,6 @@ export default [
     meta: {
       notPersist: true,
       hideTabBar: true,
-      newUI: true,
     },
   },
   {
@@ -279,14 +277,6 @@ export default [
         title: 'transfer',
         backButton: false,
       },
-    }, {
-      path: 'receive',
-      name: 'transfer-receive',
-      component: TransferReceive,
-      meta: {
-        title: 'transfer',
-        backButton: false,
-      },
     }],
   },
   {
@@ -461,7 +451,6 @@ export default [
       title: 'sign-transaction',
       notPersist: true,
       hideTabBar: true,
-      newUI: true,
     },
   },
   {
@@ -484,6 +473,5 @@ export default [
       notRebrand: true,
     },
   },
-
   ...webIframePopups,
 ];

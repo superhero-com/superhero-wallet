@@ -3,9 +3,9 @@
     has-close-button
     @close="resolve"
   >
-    <template slot="header">
+    <h2 class="text-heading-2 text-center">
       {{ $t('modals.error-log.title') }}
-    </template>
+    </h2>
 
     <div class="error-msg">
       {{ message }}...
