@@ -230,11 +230,11 @@ export default {
       }
 
       &:hover svg {
-        color: variables.$color-blue-hover;
+        color: variables.$color-primary-hover;
       }
 
       &:active svg {
-        color: variables.$color-blue-hover;
+        color: variables.$color-primary-hover;
         opacity: 0.9;
       }
     }

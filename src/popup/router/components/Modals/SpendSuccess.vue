@@ -2,6 +2,7 @@
   <Modal
     class="spend-success"
     has-close-button
+    centered
     @close="resolve"
   >
     <Pending />

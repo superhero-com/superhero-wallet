@@ -15,7 +15,7 @@ export default {
   props: {
     str: { type: String, required: true },
     fixed: { type: Boolean },
-    gradiantColor: { type: String, default: 'black' },
+    gradientColor: { type: String, default: 'black' },
   },
   computed: {
     nameComponent() {
@@ -24,12 +24,12 @@ export default {
     cssVars() {
       if (this.fixed) {
         return {
-          '--gradiantColor': this.gradiantColor,
+          '--gradientColor': this.gradientColor,
         };
       }
       return {
         '--beforeWidth': '4px',
-        '--gradiantColor': this.gradiantColor,
+        '--gradientColor': this.gradientColor,
       };
     },
   },
@@ -90,14 +90,14 @@ export default {
         right: 0;
         width: var(--beforeWidth);
         height: 100%;
-        background: linear-gradient(270deg, var(--gradiantColor), transparent);
+        background: linear-gradient(270deg, var(--gradientColor), transparent);
       }
 
       &::before {
         z-index: 1;
         left: 0;
         opacity: 0;
-        background: linear-gradient(90deg, var(--gradiantColor), transparent);
+        background: linear-gradient(90deg, var(--gradientColor), transparent);
         animation-name: fade;
         animation-duration: 8s;
         animation-delay: 2s;

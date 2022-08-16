@@ -3,22 +3,18 @@
     has-close-button
     v-on="{ close: close || resolve }"
   >
-    <template slot="header">
-      <StatusIcon
-        v-if="icon"
-        :status="icon"
-        class="icon"
-      />
-      {{ title }}
-    </template>
-
-    <slot
-      v-if="$slots.msg"
-      name="msg"
+    <StatusIcon
+      :status="icon"
+      class="icon"
     />
-    <template v-else>
+
+    <h2 class="text-heading-2 text-center">
+      {{ title }}
+    </h2>
+
+    <slot name="msg">
       {{ msg }}
-    </template>
+    </slot>
 
     <slot />
 
