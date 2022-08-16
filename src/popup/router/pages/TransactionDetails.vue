@@ -114,6 +114,7 @@
               slot="value"
               :amount="getTxAmountTotal(transaction)"
               :symbol="getTxSymbol(transaction)"
+              :hide-fiat="getTxSymbol(transaction) !== 'AE'"
             />
           </DetailsItem>
           <DetailsItem
@@ -228,6 +229,7 @@ export default {
     if (!this.transaction || this.transaction?.incomplete) {
       await this.$watchUntilTruly(() => this.$store.state.middleware);
       this.transaction = await this.$store.state.middleware.getTxByHash(this.hash);
+      this.$store.commit('setTransactionByHash', this.transaction);
     }
   },
   methods: {

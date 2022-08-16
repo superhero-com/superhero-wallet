@@ -32,7 +32,7 @@
       slot="footer"
       @click="resolve"
     >
-      {{ $t('ok') }}
+      {{ buttonMessage || $t('ok') }}
     </Button>
   </Modal>
 </template>
@@ -51,6 +51,7 @@ export default {
     msg: { type: String, default: '' },
     type: { type: String, default: '' },
     icon: { type: String, default: '' },
+    buttonMessage: { type: String, default: '' },
   },
 };
 </script>

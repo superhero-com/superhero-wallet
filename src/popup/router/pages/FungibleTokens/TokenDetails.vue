@@ -172,7 +172,7 @@
             :href="DEX_URL"
             target="_blank"
           >
-            dex.superhero.com
+            {{ displayDexUrl }}
             <ExternalLink />
           </a>
         </template>
@@ -277,6 +277,9 @@ export default {
     ...mapGetters('fungibleTokens', ['tokenBalances']),
     fungibleToken() {
       return this.availableTokens[this.id];
+    },
+    displayDexUrl() {
+      return this.DEX_URL.replace('https://', '');
     },
     tokenData() {
       if (this.id === 'aeternity') {

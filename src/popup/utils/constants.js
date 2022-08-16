@@ -183,7 +183,7 @@ export const CURRENCY_URL = 'https://api.coingecko.com/api/v3/coins/markets?ids=
 
 export const AVATAR_URL = 'https://avatars.z52da5wt.xyz/';
 
-export const DEX_URL = 'https://dex.superhero.com/';
+export const DEX_URL = 'https://aepp.dex.superhero.com';
 
 export const LEDGER_BRIDGE_URL = 'https://wallet.superhero.com/ledger-bridge';
 

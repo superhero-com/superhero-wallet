@@ -15,6 +15,7 @@ export default {
         (url, [key, value]) => url.replace(new RegExp(`{${key}}`, 'g'), encodeURIComponent(value)),
         this.$route.query[isSuccess ? 'x-success' : 'x-cancel'],
       );
+      this.$router.push('/account');
       window.open(callbackUrl, '_self');
     },
   },

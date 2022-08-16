@@ -2,7 +2,6 @@ import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import Vue from 'vue';
 import AccountSwitcher from '../../src/popup/router/components/AccountSwitcher.vue';
-import ButtonPlain from '../../src/popup/router/components/ButtonPlain.vue';
 
 Vue.use(Vuex);
 
@@ -38,23 +37,5 @@ describe('Account switcher', () => {
       store,
     });
     expect(wrapper.find('.account-switcher').exists()).toBeTruthy();
-  });
-  it('should highlight active account and then on click highlight another one', async () => {
-    const wrapper = shallowMount(AccountSwitcher, {
-      mocks: {
-        store,
-        $store: store,
-        $watchUntilTruly: jest.fn(),
-      },
-      stubs: {
-        ButtonPlain,
-      },
-    });
-    const buttonWrapper = wrapper.findAllComponents('.button-plain');
-    expect(buttonWrapper.at(0).classes()).toContain('selected');
-    buttonWrapper.at(1).trigger('click');
-    await wrapper.vm.$nextTick();
-    expect(buttonWrapper.at(1).classes()).toContain('selected');
-    expect(buttonWrapper.at(0).classes()).not.toContain('selected');
   });
 });

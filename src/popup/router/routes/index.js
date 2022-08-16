@@ -81,6 +81,7 @@ export default [
     meta: {
       notPersist: true,
       hideTabBar: true,
+      newUI: true,
     },
   },
   {
@@ -460,6 +461,7 @@ export default [
       title: 'sign-transaction',
       notPersist: true,
       hideTabBar: true,
+      newUI: true,
     },
   },
   {
@@ -482,5 +484,6 @@ export default [
       notRebrand: true,
     },
   },
+
   ...webIframePopups,
 ];

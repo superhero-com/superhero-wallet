@@ -17,6 +17,7 @@ export default {
   components: { Overview },
   props: {
     tx: { type: Object, required: true },
+    isDex: { type: Boolean, default: false },
   },
   data: () => ({ name: '' }),
   computed: {
