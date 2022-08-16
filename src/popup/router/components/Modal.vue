@@ -9,34 +9,40 @@
         'full-screen': fullScreen,
         'from-bottom': fromBottom,
         'has-close-button': hasCloseButton,
+        dense,
       }"
     >
-      <div
-        v-click-outside="() => $emit('close')"
-        class="container"
-      >
-        <ButtonIcon
-          v-if="hasCloseButton"
-          class="close-button"
-          @click="$emit('close')"
-        >
-          <Close />
-        </ButtonIcon>
+      <div class="container">
         <div
-          v-if="$slots.header || header"
+          v-if="$slots.header || header || hasCloseButton"
           class="header"
         >
+          <div
+            v-if="$slots.icon"
+            class="header-icon"
+          >
+            <slot name="icon" />
+          </div>
+
           <slot name="header">
             <div class="header-default-text">
               {{ header }}
             </div>
-            <slot name="header-after" />
           </slot>
+
+          <ButtonIcon
+            v-if="hasCloseButton"
+            class="close-button"
+            @click="$emit('close')"
+          >
+            <Close />
+          </ButtonIcon>
         </div>
 
         <div
           v-if="$slots.default"
           class="body"
+          :class="{ 'text-center': centered }"
         >
           <slot />
         </div>
@@ -45,18 +51,20 @@
           v-if="$slots.footer"
           class="footer"
         >
-          <div class="content">
-            <slot name="footer" />
-          </div>
+          <slot name="footer" />
           <NodeConnectionStatus v-if="fullScreen" />
         </div>
       </div>
+
+      <div
+        class="cover"
+        @click="$emit('close')"
+      />
     </div>
   </transition>
 </template>
 
 <script>
-import { clickOutside } from '../../directives';
 import ButtonIcon from './ButtonIcon.vue';
 import Close from '../../../icons/close.svg?vue-component';
 import NodeConnectionStatus from './NodeConnectionStatus.vue';
@@ -67,13 +75,12 @@ export default {
     Close,
     NodeConnectionStatus,
   },
-  directives: {
-    'click-outside': clickOutside,
-  },
   props: {
     hasCloseButton: Boolean,
     fullScreen: Boolean,
     fromBottom: Boolean,
+    dense: Boolean,
+    centered: Boolean,
     header: { type: String, default: null },
   },
   emits: [
@@ -82,9 +89,9 @@ export default {
   mounted() {
     if (document.body.style.overflow) return;
     document.body.style.overflow = 'hidden';
-    this.$once('hook:destroyed', () => {
-      document.body.style.overflow = '';
-    });
+  },
+  beforeDestroy() {
+    document.body.style.overflow = '';
   },
 };
 </script>
@@ -94,7 +101,11 @@ export default {
 @use '../../../styles/typography';
 @use '../../../styles/mixins';
 
+$modal-bg-color: variables.$color-bg-4;
+
 .modal {
+  --content-padding: 24px; // Default spacing
+
   position: fixed;
   z-index: 2;
   top: 0;
@@ -108,10 +119,11 @@ export default {
 
   .container {
     position: relative;
+    display: flex;
+    flex-direction: column;
     width: 92%;
     margin: auto;
-    padding: 24px;
-    background: variables.$color-bg-1;
+    background: $modal-bg-color;
     border-radius: 5px;
     box-shadow:
       0 0 0 1px variables.$color-border,
@@ -123,6 +135,7 @@ export default {
 
     .close-button {
       position: absolute;
+      z-index: 3;
       right: 2px;
       top: 2px;
       color: variables.$color-white;
@@ -133,105 +146,77 @@ export default {
     }
 
     .header {
+      flex-basis: 32px;
+      flex-shrink: 0;
       color: variables.$color-white;
       font-size: 19px;
       line-height: 24px;
       font-weight: 500;
-      margin-bottom: 8px;
       word-break: break-word;
       text-align: center;
       display: flex;
       flex-direction: column;
 
-      ::v-deep .icon {
+      &-icon {
+        margin: 0 auto 10px;
         width: 48px;
         height: 48px;
-        align-self: center;
-        margin-bottom: 16px;
       }
     }
 
     .body {
       @extend %face-sans-15-regular;
 
+      padding: var(--content-padding);
+      padding-top: 0;
       color: variables.$color-light-grey;
       word-break: break-word;
-      text-align: center;
-    }
-
-    .footer .content {
-      display: flex;
-      justify-content: center;
-      margin-top: 40px;
-
-      ::v-deep .button {
-        margin: 0 10px;
-        width: 120px;
-        font-weight: 700;
-      }
-    }
-  }
-
-  &.has-close-button {
-    .container {
-      padding-top: 40px;
-    }
-  }
-
-  &.full-screen .container {
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    padding-top: env(safe-area-inset-top);
-    border: none;
-    border-radius: 0;
-    display: flex;
-    flex-direction: column;
-
-    @include mixins.desktop {
-      width: variables.$extension-width;
-      height: 600px;
-      border-radius: 10px;
-      box-shadow: variables.$color-border 0 0 0 1px;
-    }
-
-    .body {
-      height: 100%;
-      margin-bottom: 0;
-      overflow-y: scroll;
     }
 
     .footer {
       position: sticky;
       bottom: 0;
-      width: 100%;
+      margin: auto 0 0 0; // Move the footer to the bottom of the container
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+      padding: 8px var(--content-padding);
+      background:
+        linear-gradient(
+          0deg,
+          rgba($modal-bg-color, 0.9) 50%,
+          rgba($modal-bg-color, 0) 100%
+        );
+    }
+  }
 
-      @include mixins.desktop {
-        border-radius: 0 0 10px 10px;
-      }
+  .node-connection-status {
+    position: static;
+    height: calc(40px + env(safe-area-inset-bottom));
+    margin-top: 4px;
+    padding-bottom: env(safe-area-inset-bottom);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: variables.$color-dark-grey;
 
-      .content {
-        padding: 24px 0;
-      }
+    @extend %face-sans-15-medium;
 
-      .node-connection-status {
-        position: static;
-        height: calc(40px + env(safe-area-inset-bottom));
-        margin-top: 4px;
-        padding-bottom: env(safe-area-inset-bottom);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: variables.$color-dark-grey;
+    @include mixins.desktop {
+      border-radius: 0 0 10px 10px;
+    }
+  }
 
-        @extend %face-sans-15-medium;
+  .cover {
+    position: fixed;
+    z-index: -1;
+    inset: 0;
+  }
 
-        @include mixins.desktop {
-          border-radius: 0 0 10px 10px;
-        }
-      }
+  &.full-screen {
+    .container {
+      height: 100%;
+      width: 100%;
     }
   }
 
@@ -239,12 +224,23 @@ export default {
     position: absolute;
     align-items: end;
 
+    .header {
+      position: sticky;
+      z-index: 3;
+      top: 0;
+    }
+
     .container {
       width: 100%;
       max-height: 100%;
       margin-top: 0;
       margin-bottom: 0;
+      overflow: hidden auto;
     }
+  }
+
+  &.dense {
+    --content-padding: 8px;
   }
 
   &.pop-in-transition {

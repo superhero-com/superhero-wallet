@@ -2,21 +2,24 @@
   <Modal
     class="account-details"
     from-bottom
+    has-close-button
+    full-screen
+    @close="resolve"
   >
-    <div ref="accountDetails">
+    <template #header>
       <div class="account-info-wrapper">
         <AccountInfo
           v-bind="$attrs"
           color="#212121"
           show-copy-icon
         />
-        <ButtonPlain @click="resolve">
-          <Close />
-        </ButtonPlain>
       </div>
+    </template>
+
+    <div ref="accountDetails">
       <BalanceInfo v-bind="$attrs" />
       <div class="buttons">
-        <ButtonPlain>
+        <ButtonPlain @click="openTransferReceiveModal">
           <div class="icon">
             <ArrowReceive />
           </div>
@@ -59,6 +62,7 @@
       >
         <SearchBar
           v-model="searchTerm"
+          new-ui
           :placeholder="searchTermPlaceholder"
         />
       </div>
@@ -87,6 +91,7 @@
 </template>
 
 <script>
+import { MODAL_TRANSFER_RECEIVE } from '../../../utils/constants';
 import Modal from '../Modal.vue';
 import AccountInfo from '../AccountInfo.vue';
 import BalanceInfo from '../BalanceInfo.vue';
@@ -98,7 +103,6 @@ import ArrowReceive from '../../../../icons/arrow-receive.svg?vue-component';
 import ArrowSend from '../../../../icons/arrow-send.svg?vue-component';
 import CreditCard from '../../../../icons/credit-card.svg?vue-component';
 import Swap from '../../../../icons/swap.svg?vue-component';
-import Close from '../../../../icons/close.svg?vue-component';
 
 export default {
   components: {
@@ -113,7 +117,6 @@ export default {
     ArrowSend,
     CreditCard,
     Swap,
-    Close,
   },
   props: {
     resolve: { type: Function, required: true },
@@ -157,6 +160,13 @@ export default {
       });
     }
   },
+  methods: {
+    openTransferReceiveModal() {
+      this.$store.dispatch('modals/open', {
+        name: MODAL_TRANSFER_RECEIVE,
+      });
+    },
+  },
 };
 </script>
 
@@ -170,15 +180,8 @@ export default {
   color: variables.$color-white;
 
   ::v-deep .container {
-    padding: 0;
-    width: 360px;
-    height: 600px;
-    overflow: hidden auto;
-    background-color: variables.$color-bg-4;
-
-    @include mixins.mobile {
-      width: 100%;
-      height: 100%;
+    .body {
+      padding: 0;
     }
   }
 
