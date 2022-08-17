@@ -1,0 +1,31 @@
+/**
+ * Transitions used with Vue <transition name="transition-name">...</transition>
+ */
+
+.fade {
+  &-enter-active,
+  &-leave-active {
+    transition: opacity 150ms ease-out;
+  }
+
+  &-enter,
+  &-leave-to {
+    opacity: 0;
+  }
+}
+
+.fade-between {
+  &-enter-active,
+  &-leave-active {
+    transition: all 400ms;
+  }
+
+  &-enter,
+  &-leave-to {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}

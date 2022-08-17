@@ -4,6 +4,7 @@
     from-bottom
     has-close-button
     full-screen
+    dense
     @close="resolve"
   >
     <template #header>
@@ -25,7 +26,7 @@
           </div>
           <div>{{ $t('pages.token-details.receive') }}</div>
         </ButtonPlain>
-        <ButtonPlain>
+        <ButtonPlain @click="openTransferSendModal">
           <div class="icon">
             <ArrowSend />
           </div>
@@ -44,6 +45,7 @@
           <div>{{ $t('pages.token-details.swap') }}</div>
         </ButtonPlain>
       </div>
+
       <div class="tabs-wrapper">
         <div class="tabs">
           <ButtonPlain
@@ -91,7 +93,10 @@
 </template>
 
 <script>
-import { MODAL_TRANSFER_RECEIVE } from '../../../utils/constants';
+import {
+  MODAL_TRANSFER_RECEIVE,
+  MODAL_TRANSFER_SEND,
+} from '../../../utils/constants';
 import Modal from '../Modal.vue';
 import AccountInfo from '../AccountInfo.vue';
 import BalanceInfo from '../BalanceInfo.vue';
@@ -105,6 +110,7 @@ import CreditCard from '../../../../icons/credit-card.svg?vue-component';
 import Swap from '../../../../icons/swap.svg?vue-component';
 
 export default {
+  name: 'AccountDetails',
   components: {
     Modal,
     AccountInfo,
@@ -166,6 +172,11 @@ export default {
         name: MODAL_TRANSFER_RECEIVE,
       });
     },
+    openTransferSendModal() {
+      this.$store.dispatch('modals/open', {
+        name: MODAL_TRANSFER_SEND,
+      });
+    },
   },
 };
 </script>
@@ -193,11 +204,10 @@ export default {
   }
 
   .account-info-wrapper {
-    padding: 8px 6px 6px;
+    padding-bottom: 6px;
     position: sticky;
     top: env(safe-area-inset-top);
     z-index: 1;
-    background-color: variables.$color-bg-4;
 
     .button-plain {
       width: 24px;
@@ -225,7 +235,8 @@ export default {
   }
 
   .buttons {
-    padding: 20px 6px 12px;
+    padding-top: 20px;
+    padding-bottom: 12px;
     width: 100%;
     display: inline-flex;
     justify-content: space-between;
@@ -267,7 +278,7 @@ export default {
     background-color: variables.$color-bg-4;
     position: sticky;
     top: calc(env(safe-area-inset-top) + 60px);
-    padding: 4px 6px 0;
+    padding-top: 4px;
     z-index: 1;
 
     .tabs {

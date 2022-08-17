@@ -13,12 +13,11 @@
     placeholder="0.00"
     new-ui
     :value="value"
-    :label="$attrs.label || $t('pages.tipPage.amountLabel')"
-    :error="$attrs.error || errors.has('amount')"
+    :label="label || $t('pages.tipPage.amountLabel')"
     :error-message="$attrs['error-message'] || errors.first('amount')"
     @input="$emit('input', $event)"
   >
-    <template #right="{ focused }">
+    <template #after="{ focused }">
       <SelectAsset
         :value="selectedAsset"
         :focused="focused"
@@ -65,6 +64,7 @@ export default {
   },
   props: {
     value: { type: [String, Number], default: '' },
+    label: { type: String, default: null },
     validation: { type: Object, default: () => ({}) },
     selectedAsset: { type: Object, default: null },
     required: Boolean,

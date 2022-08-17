@@ -1,17 +1,17 @@
 <template>
   <div class="claim">
-    <span>
-      {{ $t('pages.names.claim.register-name') }}
-    </span>
     <InputField
       v-model="name"
       v-validate="'required|name|name_unregistered'"
       name="name"
-      :error="errors.has('name')"
+      class="name-input"
+      :label="$t('pages.names.claim.register-name')"
       :error-message="errors.first('name')"
       :placeholder="$t('pages.names.claim.name-placeholder')"
     >
-      <span slot="right">.chain</span>
+      <template #after>
+        <span class="name-input-after">.chain</span>
+      </template>
     </InputField>
     <div class="flex-row">
       <CheckBox v-model="autoExtend">
@@ -27,7 +27,7 @@
     <Loader v-if="loading" />
     <i18n
       path="pages.names.claim.short-names.message"
-      tag="span"
+      tag="p"
       class="explanation"
     >
       <mark>{{ $t('pages.names.claim.short-names.insertion') }}</mark>
@@ -168,24 +168,22 @@ export default {
     }
   }
 
-  .input-field {
+  .name-input {
     margin: 8px auto;
     width: 100%;
 
-    span {
+    &-after {
       color: variables.$color-dark-grey;
 
       @extend %face-sans-14-regular;
     }
   }
 
-  span {
+  .explanation {
     @extend %face-sans-15-medium;
 
-    &.explanation {
-      color: variables.$color-light-grey;
-      margin: 24px 16px 16px 16px;
-    }
+    color: variables.$color-light-grey;
+    margin: 24px 16px 16px 16px;
 
     mark {
       background-color: transparent;
