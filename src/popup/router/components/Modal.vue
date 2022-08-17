@@ -2,6 +2,7 @@
   <transition
     appear
     :name="fromBottom ? 'from-bottom-transition' : 'pop-in-transition'"
+    @after-enter="$emit('opened')"
   >
     <div
       class="modal"

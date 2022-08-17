@@ -1,9 +1,10 @@
 <template>
   <Modal
     v-if="browserReader || !cameraAllowed"
-    has-close-button
     class="qr-code-reader"
-    @close="resolve"
+    has-close-button
+    from-bottom
+    @close="closeModal"
   >
     <template slot="header">
       <QrScan class="icon" />
@@ -40,12 +41,14 @@
 </template>
 
 <script>
+import { MODAL_READ_QR_CODE } from '../../../utils/constants';
 import Modal from '../Modal.vue';
 import Button from '../Button.vue';
 import { handleUnknownError } from '../../../utils/helper';
 import QrScan from '../../../../icons/qr-scan.svg?vue-component';
 
 export default {
+  name: 'QrCodeReader',
   components: { Modal, Button, QrScan },
   props: {
     title: { type: String, required: true },
@@ -169,6 +172,9 @@ export default {
     },
     openSettings() {
       window.QRScanner.openSettings();
+    },
+    closeModal() {
+      this.$store.commit('modals/closeByKey', MODAL_READ_QR_CODE);
     },
   },
 };

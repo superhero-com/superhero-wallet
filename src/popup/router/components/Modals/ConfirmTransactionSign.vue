@@ -394,15 +394,5 @@ export default {
   .pool-token-row::v-deep {
     padding-bottom: 8px;
   }
-
-  .fade-enter-active,
-  .fade-leave-active {
-    transition: opacity 150ms ease-out;
-  }
-
-  .fade-enter,
-  .fade-leave-to {
-    opacity: 0;
-  }
 }
 </style>

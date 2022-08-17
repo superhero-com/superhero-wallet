@@ -33,16 +33,10 @@ import PopupMessageSign from '../pages/Popups/MessageSign.vue';
 import PrivacyPolicy from '../pages/PrivacyPolicy.vue';
 import Retip from '../pages/Retip.vue';
 import SecuritySettings from '../pages/SecuritySettings.vue';
-import Transfer from '../pages/Transfer.vue';
-import TransferSend from '../pages/TransferSend.vue';
 import Settings from '../pages/Settings.vue';
 import SignMessage from '../pages/SignMessage.vue';
-import SuccessTip from '../pages/SuccessTip.vue';
 import SignTransaction from '../pages/SignTransaction.vue';
 import TermsOfService from '../pages/TermsOfService.vue';
-import Tips from '../pages/Tips.vue';
-import TipsSend from '../pages/TipsSend.vue';
-import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
 import Transactions from '../pages/Transactions.vue';
 import webIframePopups from './web-iframe-popups';
@@ -193,32 +187,6 @@ export default [
     },
   },
   {
-    path: '/tips',
-    component: Tips,
-    children: [{
-      path: '',
-      name: 'tips-send',
-      component: TipsSend,
-      props: true,
-      meta: {
-        title: 'tips',
-        backButton: false,
-      },
-    }, {
-      path: 'claim',
-      name: 'tips-claim',
-      component: TipsClaim,
-      meta: {
-        title: 'tips',
-        backButton: false,
-      },
-    }],
-  },
-  {
-    path: '/tip',
-    redirect: '/tips',
-  },
-  {
     path: '/retip',
     component: Retip,
     meta: {
@@ -263,31 +231,6 @@ export default [
       title: 'tx-details',
       hideTabBar: true,
       newUI: true,
-    },
-  },
-  {
-    path: '/transfer',
-    component: Transfer,
-    children: [{
-      path: '',
-      name: 'transfer-send',
-      component: TransferSend,
-      props: true,
-      meta: {
-        title: 'transfer',
-        backButton: false,
-      },
-    }],
-  },
-  {
-    path: '/success-tip',
-    component: SuccessTip,
-    name: 'success-tip',
-    props: true,
-    meta: {
-      title: 'send',
-      notPersist: true,
-      notRebrand: true,
     },
   },
   {

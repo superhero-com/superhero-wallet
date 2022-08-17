@@ -6,6 +6,7 @@
     has-close-button
     class="asset-selector"
     @close="handleClose"
+    @opened="onModalOpen"
   >
     <template #header>
       <span class="title">{{ $t('pages.fungible-tokens.select-asset') }}</span>
@@ -15,16 +16,21 @@
         new-ui
       />
     </template>
-    <TokensListItem
-      v-for="token in filteredResults"
-      :key="token.contractId || token.id"
-      :token-data="token"
-      :class="{ selected: isTokenSelected(token) }"
-      prevent-navigation
-      show-current-price
-      asset-selector
-      @click="handleChange(token)"
-    />
+
+    <template v-if="isFullyOpen">
+      <TokensListItem
+        v-for="token in filteredResults"
+        :key="token.contractId || token.id"
+        :token-data="token"
+        :class="{ selected: isTokenSelected(token) }"
+        prevent-navigation
+        show-current-price
+        asset-selector
+        @click="handleChange(token)"
+      />
+    </template>
+    <Loader v-else />
+
     <BackToTop />
   </Modal>
 </template>
@@ -52,6 +58,7 @@ export default {
   data() {
     return {
       searchTerm: '',
+      isFullyOpen: false,
     };
   },
   methods: {
@@ -66,6 +73,15 @@ export default {
       return token.contractId
         ? this.selectedToken.contractId === token.contractId
         : this.selectedToken.id === token.id;
+    },
+    /**
+     * Delay displaying tokens list until the modal transition is finished to prevent
+     * performance issues when both animating the modal and rendering large amount of data.
+     */
+    onModalOpen() {
+      this.$nextTick(() => {
+        this.isFullyOpen = true;
+      });
     },
   },
 };

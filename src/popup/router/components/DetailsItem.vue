@@ -1,5 +1,8 @@
 <template>
-  <div class="details-item">
+  <div
+    class="details-item"
+    :class="{ 'new-ui': newUi }"
+  >
     <div class="label">
       {{ label }}
       <span
@@ -35,8 +38,9 @@ export default {
     label: { type: String, default: '' },
     value: { type: [String, Number, Array], default: '' },
     secondary: { type: String, default: '' },
-    small: { type: Boolean },
-    highlight: { type: Boolean },
+    small: Boolean,
+    highlight: Boolean,
+    newUi: Boolean,
   },
 };
 </script>
@@ -45,19 +49,18 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 
-.new-ui {
-  margin-block: 8px;
+.new-ui .details-item,
+.details-item.new-ui {
+  margin-block: 4px;
 
-  .details-item {
-    .value {
-      @extend %face-sans-15-regular;
+  .value {
+    @extend %face-sans-15-regular;
 
-      letter-spacing: 0.05em;
-    }
+    letter-spacing: 0.05em;
+  }
 
-    .label {
-      margin-bottom: 4px;
-    }
+  .label {
+    margin-bottom: 4px;
   }
 }
 
