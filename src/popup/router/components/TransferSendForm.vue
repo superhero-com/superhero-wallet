@@ -1,132 +1,84 @@
 <template>
-  <div class="transfer-send">
-    <div
-      v-if="!reviewStep"
-      class="send"
+  <div
+    class="transfer-send new-ui"
+  >
+    <p class="text-heading-2 text-center">
+      {{ $t('modals.send.sendTitle') }}
+    </p>
+
+    <!-- account: true,
+    name_registered_address: true,
+    token_to_an_address: true,
+    not_same_as: account.address, -->
+
+    <InputField
+      v-model.trim="formModel.address"
+      v-validate="{
+        required: true,
+        not_same_as: account.address,
+        name_registered_address_or_url: true,
+      }"
+      name="address"
+      data-cy="address"
+      show-help
+      new-ui
+      :label="$t('modals.send.recipientLabel')"
+      :placeholder="$t('modals.send.recipientPlaceholder')"
+      :error-message="addressErrorMsg"
+      :warning-message="addressWarningMsg"
+      @help="showRecipientHelp()"
     >
-      <InputField
-        v-model.trim="form.address"
-        v-validate="{
-          required: true,
-          account: true,
-          name_registered_address: true,
-          token_to_an_address: true,
-          not_same_as: account.address
-        }"
-        name="address"
-        :placeholder="$t('pages.send.addressPlaceholder')"
-        :error="$validator._base.anyExcept('address', warningRules.address)"
-        :error-message="$validator._base.firstExcept('address', warningRules.address)"
-        :warning="errors.anyByRules('address', warningRules.address)"
-        :warning-message="errors.firstByRules('address', warningRules.address)"
-        data-cy="address"
-        @scan="scan"
-      >
+      <template #before>
         <Valid
-          v-if="!!form.address"
-          slot="left"
+          v-if="!!formModel.address"
           class="valid"
         />
-        <span
-          slot="label"
-          data-cy="title"
-        >
-          {{ $t('pages.tipPage.heading') }}
-          <span class="token-symbol">
-            {{ tokenSymbol }}
-          </span>
-          {{ $t('pages.tipPage.to') }}
-        </span>
-        <button
-          slot="buttons"
+      </template>
+
+      <template #label-after>
+        <a
+          class="scan-button"
           data-cy="scan-button"
           @click="scan"
         >
           <QrScan />
-        </button>
-      </InputField>
+        </a>
+      </template>
+    </InputField>
 
-      <InputAmount
-        v-model="form.amount"
-        @error="(val) => error = val"
-      />
-    </div>
-    <div
-      v-else
-      class="review"
+    <RequestAmount
+      v-model="formModel.amount"
+      class="amount-input"
+      :selected-asset="formModel.selectedAsset"
+      @asset-selected="handleAssetChange"
+    />
+
+    <DetailsItem
+      new-ui
+      :label="$t('pages.signTransaction.fee')"
     >
-      <h1>{{ $t('pages.send.reviewtx') }}</h1>
-      <h2>{{ $t('pages.send.checkalert') }}</h2>
-      <DetailsItem
-        :value="account.address"
-        :label="$t('pages.send.sender')"
-        small
-        data-cy="review-sender"
-      />
-      <DetailsItem
-        :value="form.address"
-        :label="$t('pages.send.recipient')"
-        small
-        data-cy="review-recipient"
-      />
-    </div>
-
-    <DetailsItem :label="$t('pages.signTransaction.fee')">
       <TokenAmount
         slot="value"
         :amount="+fee.toFixed()"
         symbol="AE"
-        hide-fiat
         data-cy="review-fee"
+        hide-fiat
       />
     </DetailsItem>
-    <DetailsItem :label="$t('pages.signTransaction.total')">
+
+    <DetailsItem
+      new-ui
+      :label="$t('pages.signTransaction.total')"
+    >
       <TokenAmount
         slot="value"
-        :amount="(selectedToken ? 0 : +fee.toFixed()) + +form.amount"
+        :amount="(selectedToken ? 0 : +fee.toFixed()) + +formModel.amount"
         :symbol="tokenSymbol"
-        high-precision
         :hide-fiat="!!selectedToken"
         data-cy="review-total"
+        high-precision
       />
     </DetailsItem>
-
-    <Button
-      v-if="!reviewStep"
-      data-cy="review-withdraw"
-      :disabled="
-        !form.address
-          || !form.amount
-          || $validator._base.anyExcept('address', warningRules.address)
-          || error"
-      @click="validate"
-    >
-      {{ $t('pages.send.review') }}
-    </Button>
-
-    <div
-      v-if="reviewStep"
-      class="review-buttons"
-    >
-      <Button
-        data-cy="reivew-editTxDetails-button"
-        half
-        dark
-        fill="secondary"
-        @click="reviewStep = false"
-      >
-        {{ $t('pages.send.editTxDetails') }}
-      </Button>
-      <Button
-        data-cy="review-send-button"
-        third
-        :disabled="sdk ? false : true"
-        @click="send"
-      >
-        {{ $t('pages.send.send') }}
-      </Button>
-    </div>
-    <Loader v-if="loading" />
   </div>
 </template>
 
@@ -134,28 +86,29 @@
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { calculateFee } from '../../utils/constants';
-import { checkAensName, aeToAettos, convertToken } from '../../utils/helper';
-import InputField from '../components/InputField.vue';
-import InputAmount from '../components/InputAmount.vue';
-import Button from '../components/Button.vue';
-import DetailsItem from '../components/DetailsItem.vue';
-import TokenAmount from '../components/TokenAmount.vue';
+import { MODAL_DEFAULT, MODAL_READ_QR_CODE } from '../../utils/constants';
+import {
+  aeToAettos,
+  convertToken,
+  calculateFee,
+} from '../../utils/helper';
+import InputField from './InputField.vue';
+import RequestAmount from './RequestAmount.vue';
+import DetailsItem from './DetailsItem.vue';
+import TokenAmount from './TokenAmount.vue';
 import Valid from '../../../icons/valid.svg?vue-component';
 import QrScan from '../../../icons/qr-scan.svg?vue-component';
+
+const WARNING_RULES = ['not_same_as'];
 
 export default {
   components: {
     InputField,
-    InputAmount,
-    Button,
-    Valid,
-    QrScan,
+    RequestAmount,
     DetailsItem,
     TokenAmount,
-  },
-  props: {
-    address: { type: String, default: '' },
+    Valid,
+    QrScan,
   },
   data() {
     return {
@@ -165,9 +118,10 @@ export default {
       },
       invoiceContract: null,
       reviewStep: false,
-      form: {
+      formModel: {
         address: '',
-        amount: '',
+        amount: null,
+        selectedAsset: null,
       },
       loading: false,
       fee: BigNumber(0),
@@ -175,31 +129,52 @@ export default {
     };
   },
   computed: {
-    ...mapState('accounts', ['activeIdx']),
-    ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapState(['current', 'sdk']),
-    ...mapGetters(['account', 'formatCurrency', 'currentCurrencyRate', 'accounts']),
-    ...mapGetters('fungibleTokens', ['selectedToken', 'tokenBalances']),
+    ...mapState('accounts', [
+      'activeIdx',
+    ]),
+    ...mapState('fungibleTokens', [
+      'availableTokens',
+    ]),
+    ...mapState([
+      'current',
+      'sdk',
+    ]),
+    ...mapGetters([
+      'account',
+      'accounts',
+      'formatCurrency',
+      'currentCurrencyRate',
+    ]),
+    ...mapGetters('fungibleTokens', [
+      'selectedToken',
+      'tokenBalances',
+    ]),
     tokenSymbol() {
       return this.selectedToken ? this.selectedToken.symbol : 'AE';
     },
+    addressErrorMsg() {
+      return this.errors.items
+        .filter((error) => !WARNING_RULES.includes(error.rule))[0]?.msg || null;
+    },
+    addressWarningMsg() {
+      return this.errors.items
+        .find((error) => WARNING_RULES.includes(error.rule))?.msg || null;
+    },
   },
   watch: {
+    formModel: {
+      deep: true,
+      immediate: true,
+      handler(val) {
+        this.$emit('input', val);
+      },
+    },
     async selectedToken() {
       await this.$validator.validateAll(this.warningRules);
       this.fetchFee();
     },
-    $route: {
-      immediate: true,
-      async handler({ query }) {
-        await this.queryHandler(query);
-      },
-    },
   },
-  async mounted() {
-    if (typeof this.address !== 'undefined') {
-      this.form.address = this.address;
-    }
+  async created() {
     await this.fetchFee();
   },
   methods: {
@@ -211,18 +186,22 @@ export default {
           token: this.tokenBalances.find(({ value }) => value === query.token),
         });
       }
-      if (query.account) this.form.address = query.account;
-      if (query.amount) this.form.amount = query.amount;
+      if (query.account) {
+        this.formModel.address = query.account;
+      }
+      if (query.amount) {
+        this.formModel.amount = query.amount;
+      }
     },
-    checkAensName,
     async validate() {
       if (await this.$validator.validateAll(this.warningRules)) this.reviewStep = true;
     },
     async scan() {
       const scanResult = await this.$store.dispatch('modals/open', {
-        name: 'read-qr-code',
+        name: MODAL_READ_QR_CODE,
         title: this.$t('pages.send.scanAddress'),
       });
+
       if (scanResult?.trim().charAt(0) === '{') {
         let parsedScanResult = null;
         try {
@@ -230,9 +209,9 @@ export default {
         } catch (e) {
           // eslint-disable-next-line no-console
           if (process.env.NODE_ENV !== 'production') console.error(e);
-          this.form.address = '';
+          this.formModel.address = '';
           this.$store.dispatch('modals/open', {
-            name: 'default',
+            name: MODAL_DEFAULT,
             title: this.$t('modals.invalid-qr-code.msg'),
             icon: 'critical',
           });
@@ -243,20 +222,20 @@ export default {
         const requestedTokenBalance = this.tokenBalances
           .find(({ value }) => value === parsedScanResult.tokenContract);
         if (!requestedTokenBalance) {
-          this.form.address = '';
-          this.$store.dispatch('modals/open', { name: 'default', type: 'insufficient-balance' });
-          this.form.address = '';
+          this.$store.dispatch('modals/open', { name: MODAL_DEFAULT, type: 'insufficient-balance' });
+          this.formModel.address = '';
           return;
         }
 
         // select requested token
         this.$store.commit('fungibleTokens/setSelectedToken', {
           address: this.accounts[this.activeIdx].address,
-          token: this.tokenBalances.find(({ value }) => value === parsedScanResult.tokenContract),
+          token: this.tokenBalances
+            .find(({ value }) => value === parsedScanResult.tokenContract),
         });
         // SET result data
-        this.form.address = parsedScanResult.tokenContract;
-        this.form.amount = +convertToken(
+        this.formModel.address = parsedScanResult.tokenContract;
+        this.formModel.amount = +convertToken(
           parsedScanResult.amount,
           -this.selectedToken.decimals,
         );
@@ -266,15 +245,18 @@ export default {
         await this.validate();
       } else {
         if (!scanResult) return;
-        if (scanResult.startsWith('ak_')) this.form.address = scanResult;
-        else {
+        if (scanResult.startsWith('ak_')) {
+          this.formModel.address = scanResult;
+        } else {
           this.queryHandler([
             ...new URL(scanResult).searchParams.entries(),
           ].reduce((o, [k, v]) => ({ ...o, [k]: v }), {}));
         }
         this.invoiceId = null;
       }
-      if (!this.form.address) this.form.address = '';
+      if (!this.formModel.address) {
+        this.formModel.address = '';
+      }
     },
     async fetchFee() {
       await this.$watchUntilTruly(() => this.sdk);
@@ -290,14 +272,14 @@ export default {
     },
     async send() {
       const amount = !this.selectedToken
-        ? aeToAettos(this.form.amount)
-        : convertToken(this.form.amount, this.selectedToken.decimals);
-      const receiver = this.form.address;
+        ? aeToAettos(this.formModel.amount)
+        : convertToken(this.formModel.amount, this.selectedToken.decimals);
+      const receiver = this.formModel.address;
       this.loading = true;
       try {
         if (this.selectedToken && this.invoiceId !== null) {
           const { hash } = await this.$store.dispatch('fungibleTokens/burnTriggerPoS', [
-            this.form.amount,
+            this.formModel.amount,
             this.invoiceContract,
             this.invoiceId,
             { waitMined: false, modal: false },
@@ -318,7 +300,7 @@ export default {
         } else if (this.selectedToken) {
           const { hash } = await this.$store.dispatch('fungibleTokens/transfer', [
             receiver,
-            this.form.amount,
+            this.formModel.amount,
             { waitMined: false, modal: false },
           ]);
           this.$store.dispatch('addPendingTransaction', {
@@ -345,7 +327,7 @@ export default {
             type: 'spend',
             tx: {
               senderId: this.account.address,
-              recipientId: this.form.address,
+              recipientId: this.formModel.address,
               type: SCHEMA.TX_TYPE.spend,
             },
           });
@@ -362,6 +344,12 @@ export default {
         this.loading = false;
       }
     },
+    showRecipientHelp() {
+      // TODO - in separate task
+    },
+    handleAssetChange(val) {
+      this.formModel.selectedAsset = val;
+    },
   },
 };
 </script>
@@ -371,65 +359,14 @@ export default {
 @use '../../../styles/typography';
 
 .transfer-send {
-  padding: 16px;
-
-  .send {
-    .token-symbol {
-      color: variables.$color-blue;
-    }
-
-    .valid {
-      color: variables.$color-green;
-    }
-
-    .input-amount {
-      margin-bottom: 24px;
-    }
+  .scan-button {
+    display: block;
+    width: 20px;
+    height: 20px;
   }
 
-  .review {
-    h1,
-    h2 {
-      text-align: center;
-    }
-
-    h1 {
-      @extend %face-sans-20-medium;
-
-      font-size: 19px;
-    }
-
-    h2 {
-      margin-bottom: 16px;
-
-      @extend %face-sans-16-medium;
-
-      color: variables.$color-light-grey;
-    }
-
-    .details-item {
-      margin-bottom: 24px;
-
-      ::v-deep .value {
-        margin: 0;
-        color: variables.$color-light-grey;
-      }
-    }
-  }
-
-  .details-item {
-    display: inline-block;
-    margin-right: 24px;
-  }
-
-  .button {
-    margin-top: 24px;
-    margin-bottom: 36px;
-  }
-
-  .review-buttons {
-    display: flex;
-    justify-content: space-around;
+  .amount-input {
+    margin-bottom: 20px;
   }
 }
 </style>

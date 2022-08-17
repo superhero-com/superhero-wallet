@@ -4,6 +4,7 @@ import {
   MODAL_DEFAULT,
   MODAL_ACCOUNT_CREATE,
   MODAL_ACCOUNT_IMPORT,
+  MODAL_ASSET_SELECTOR,
   MODAL_CLAIM_SUCCESS,
   MODAL_SPEND_SUCCESS,
   MODAL_CONFIRM_TIP,
@@ -17,8 +18,8 @@ import {
   MODAL_MESSAGE_SIGN,
   MODAL_SHARE_QR,
   MODAL_TRANSFER_RECEIVE,
-  MODAL_ASSET_SELECTOR,
   MODAL_RESET_WALLET,
+  MODAL_TRANSFER_SEND,
 } from '../utils/constants';
 
 import Default from './components/Modals/Default.vue';
@@ -37,6 +38,7 @@ import ShareQr from './components/Modals/ShareQr.vue';
 import AssetSelector from './components/Modals/AssetSelector.vue';
 import TransferReceive from './components/Modals/TransferReceive.vue';
 import ResetWallet from './components/Modals/ResetWallet.vue';
+import TransferSend from './components/Modals/TransferSend.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
@@ -63,6 +65,7 @@ export default () => {
   registerModal({ name: MODAL_MESSAGE_SIGN, showInPopupIfWebFrame: true });
   registerModal({ name: MODAL_SHARE_QR, component: ShareQr });
   registerModal({ name: MODAL_TRANSFER_RECEIVE, component: TransferReceive });
+  registerModal({ name: MODAL_TRANSFER_SEND, component: TransferSend });
   registerModal({ name: MODAL_ASSET_SELECTOR, component: AssetSelector });
   registerModal({ name: MODAL_RESET_WALLET, component: ResetWallet });
 };

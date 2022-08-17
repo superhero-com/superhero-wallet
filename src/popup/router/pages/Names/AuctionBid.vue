@@ -36,8 +36,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { aeToAettos } from '../../../utils/helper';
-import { calculateNameClaimFee } from '../../../utils/constants';
+import { aeToAettos, calculateNameClaimFee } from '../../../utils/helper';
 import AuctionCard from '../../components/AuctionCard.vue';
 import InputAmount from '../../components/InputAmount.vue';
 import DetailsItem from '../../components/DetailsItem.vue';

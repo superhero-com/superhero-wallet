@@ -65,11 +65,10 @@
         v-show="showInput"
         v-model="newPointer"
         :placeholder="$t('pages.names.details.address-placeholder')"
-        :error-message="$t('pages.names.list.valid-identifier-error')"
-        :error="error"
+        :error-message="error && $t('pages.names.list.valid-identifier-error')"
         plain
       >
-        <template slot="right">
+        <template #after>
           <ButtonPlain
             v-show="newPointer.length"
             @click="setPointer"

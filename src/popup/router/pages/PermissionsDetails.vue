@@ -20,12 +20,14 @@
     <div class="transaction-sign-limit">
       <InputField
         :value="transactionSignLimit || ''"
-        :error="transactionSignLimitError"
+        :error-message="transactionSignLimitError"
         :label="$t('pages.permissions.transaction-sign')"
         placeholder="always ask"
         @input="setTransactionSignLimit"
       >
-        <span slot="right">AE</span>
+        <template #after>
+          <span class="currency-name">AE</span>
+        </template>
       </InputField>
       <InputRange
         :value="transactionSignLimit"
@@ -158,7 +160,7 @@ export default {
     border-left: 0;
     border-right: 0;
 
-    .input-field span {
+    .currency-name {
       color: variables.$color-blue;
     }
   }

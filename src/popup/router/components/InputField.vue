@@ -246,6 +246,13 @@ export default {
     align-items: center;
     margin-top: 9px;
     text-align: left;
+  }
+
+  &.error,
+  &.error.plain {
+    .input-wrapper {
+      border-color: variables.$color-error;
+    }
 
     &-help {
       display: block;

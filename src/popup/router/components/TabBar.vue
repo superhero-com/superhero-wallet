@@ -7,20 +7,6 @@
       <Home />
       <span>{{ $t('pages.titles.home') }}</span>
     </RouterLink>
-    <RouterLink
-      to="/transfer"
-      data-cy="send"
-    >
-      <Transfer />
-      <span>{{ $t('pages.titles.transfer') }}</span>
-    </RouterLink>
-    <RouterLink
-      to="/tips"
-      data-cy="tip-button"
-    >
-      <Tips />
-      <span>{{ $t('pages.titles.tips') }}</span>
-    </RouterLink>
     <RouterLink :to="{name: 'name-list' }">
       <Names />
       <span>{{ $t('pages.titles.names') }}</span>
@@ -30,13 +16,12 @@
 
 <script>
 import Home from '../../../icons/home.svg?vue-component';
-import Transfer from '../../../icons/transfer.svg?vue-component';
-import Tips from '../../../icons/tips.svg?vue-component';
 import Names from '../../../icons/names.svg?vue-component';
 
 export default {
   components: {
-    Home, Transfer, Tips, Names,
+    Home,
+    Names,
   },
 };
 </script>

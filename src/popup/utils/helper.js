@@ -1,8 +1,22 @@
 import { isFQDN } from 'validator';
 import { detect } from 'detect-browser';
-import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
+import {
+  SCHEMA,
+  Crypto,
+  AmountFormatter,
+  TxBuilder,
+  TxBuilderHelper,
+} from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { CONNECTION_TYPES, SEED_LENGTH } from './constants';
+import {
+  CONNECTION_TYPES,
+  STUB_ADDRESS,
+  STUB_CALLDATA,
+  STUB_NONCE,
+  MAX_UINT256,
+  MAGNITUDE,
+  SEED_LENGTH,
+} from './constants';
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
@@ -26,6 +40,34 @@ export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   const amount = BigNumber(_reserve).times(share).div(100);
   return amount.toFixed(0);
 };
+
+export const calculateFee = (type, params) => {
+  const MIN_FEE = TxBuilder.calculateMinFee(type, {
+    params: {
+      senderId: STUB_ADDRESS,
+      recipientId: STUB_ADDRESS,
+      amount: MAX_UINT256,
+      ttl: MAX_UINT256,
+      nonce: MAX_UINT256,
+      ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
+      abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
+      callData: STUB_CALLDATA,
+      gas: 0,
+      ...params,
+    },
+    ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
+  });
+  return BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE);
+};
+
+export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
+  accountId: STUB_ADDRESS,
+  name,
+  nameSalt: Crypto.salt(),
+  nameFee: TxBuilderHelper.getMinimumNameFee(name),
+  nonce: STUB_NONCE,
+  ttl: SCHEMA.NAME_TTL,
+});
 
 export const IN_FRAME = window.parent !== window;
 export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');

@@ -189,6 +189,14 @@
       "shareTextNoAmount": "My aeternity address {address} or use the following link {walletLink} to send it with Superhero Wallet",
       "shareTextWithAmount": "Please send {amount} AE to my aeternity address {address} or use the following link {walletLink} to send it with Superhero Wallet"
     },
+    "send": {
+      "sendTitle": "Send cryptocurrency",
+      "reviewTitle": "Review transaction",
+      "successTitle": "Transaction successfully submitted",
+      "recipientLabel": "Recipient",
+      "recipientPlaceholder": "Enter recipient’s address or .chain name",
+      "next": "Next"
+    },
     "wrongNetwork": {
       "title": "Network discrepancy",
       "msg": "This action was initiated on a different network. Please switch to {0} in your wallet settings to proceed.",
@@ -262,7 +270,7 @@
   "pages": {
     "titles": {
       "tx-history": "Tx history",
-      "transfer": "Transfer",
+      "balances": "Balances",
       "accounts": "Accounts",
       "tips": "Tips",
       "settings": "Wallet settings",
@@ -773,8 +781,7 @@
       "hash": "Transaction Hash",
       "scanAddress": "Scan aeternity address",
       "error": "Invalid AE address or AENS name",
-      "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?",
-      "addressPlaceholder": "Enter recepient’s address or .chain name"
+      "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
     },
     "settings": {
       "backToAccount": "Back to account",
@@ -1148,7 +1155,7 @@
     "name": "Enter valid .chain name",
     "nameRegisteredAddress": "This name isn't registered or pointed to address",
     "nameUnregistered": "This name has already been registered.",
-    "notSameAs": "Sender and receiver address are the same. You will send tokens to our own account.",
+    "notSameAs": "Sender and receiver address are the same. You will send tokens to your own account.",
     "tokenToAnAddress": "Unfortunately you can only send AEX-9 Tokens to an address",
     "minValue": "This field must be {0} or more",
     "minValueExclusive": "This field must be more than {0}",

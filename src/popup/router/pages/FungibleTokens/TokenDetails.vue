@@ -12,19 +12,19 @@
           :symbol-length="22"
         />
         <TokenAmount
-          :amount="+tokenData.convertedBalance || 0"
+          :amount="convertedBalance"
           no-symbol
           :aex9="id !== 'aeternity'"
         />
       </div>
       <div class="token-actions">
         <BoxButton
-          :class="{ disabled: !+tokenData.convertedBalance }"
-          @click.native="!+tokenData.convertedBalance ? null : proceed({ name: 'transfer-send' })"
+          :disabled="!convertedBalance"
+          @click="openTransferSendModal()"
         >
           <SendIcon />{{ $t('pages.token-details.send') }}
         </BoxButton>
-        <BoxButton @click.native="openTransferReceiveModal()">
+        <BoxButton @click="openTransferReceiveModal()">
           <ReceiveIcon />{{ $t('pages.token-details.receive') }}
         </BoxButton>
         <BoxButton
@@ -239,10 +239,12 @@ import {
   SIMPLEX_URL,
   DEX_URL,
   MODAL_TRANSFER_RECEIVE,
+  MODAL_TRANSFER_SEND,
 } from '../../../utils/constants';
 import { convertToken } from '../../../utils/helper';
 
 export default {
+  name: 'TokenDetails',
   components: {
     Plate,
     SendIcon,
@@ -307,6 +309,9 @@ export default {
         }
       );
     },
+    convertedBalance() {
+      return +this.tokenData.convertedBalance || 0;
+    },
     poolShare() {
       if (!this.tokenPairs || !this.tokenPairs.balance || !this.tokenPairs.totalSupply) {
         return null;
@@ -339,6 +344,13 @@ export default {
       this.storeSelectedToken();
       this.$store.dispatch('modals/open', {
         name: MODAL_TRANSFER_RECEIVE,
+        tokenContractId: this.fungibleToken?.contractId,
+      });
+    },
+    openTransferSendModal() {
+      this.storeSelectedToken();
+      this.$store.dispatch('modals/open', {
+        name: MODAL_TRANSFER_SEND,
         tokenContractId: this.fungibleToken?.contractId,
       });
     },
@@ -377,30 +389,8 @@ export default {
     .token-actions {
       display: flex;
       justify-content: center;
-      padding-bottom: 24px;
-
-      .box-button {
-        margin-right: 24px;
-        background-color: variables.$color-bg-2;
-
-        &.disabled {
-          background-color: variables.$color-disabled;
-          color: variables.$color-light-grey;
-          opacity: 0.44;
-
-          &:hover {
-            &,
-            ::v-deep svg {
-              color: variables.$color-light-grey;
-              cursor: not-allowed;
-            }
-          }
-        }
-
-        &:last-child {
-          margin: 0;
-        }
-      }
+      gap: 16px;
+      padding: 0 16px 24px;
     }
 
     .token-tabs {

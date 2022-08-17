@@ -21,6 +21,7 @@
         'new-ui': newUi,
       },
     ]"
+    :type="submit ? 'submit' : null"
     v-on="$listeners"
   >
     <slot>
@@ -56,6 +57,7 @@ export default {
     hollow: Boolean,
     iconText: Boolean,
     newUi: Boolean,
+    submit: Boolean,
   },
   computed: {
     isLinkOnSameHost() {
@@ -227,12 +229,15 @@ export default {
   }
 
   &.new-ui {
-    border-radius: variables.$border-radius-interactive;
     width: auto;
-    padding: 5px 20px;
+    padding: 0 30px;
+    border-radius: variables.$border-radius-interactive;
+    padding: 10px 20px;
     line-height: 20px;
     flex: 1 1 0;
     cursor: pointer;
+    margin-left: 0;
+    margin-right: 0;
 
     &.secondary {
       background-color: variables.$color-medium-grey;
