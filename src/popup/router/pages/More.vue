@@ -21,15 +21,13 @@
         <About /> {{ $t('pages.titles.about') }}
       </BoxButton>
       <BoxButton
-        :to="SIMPLEX_URL"
+        :href="SIMPLEX_URL"
         fill="alternative"
-        is-external-link
       >
         <Buy />{{ $t('pages.fungible-tokens.buyAe') }}
       </BoxButton>
       <BoxButton
-        :to="DEX_URL"
-        is-external-link
+        :href="DEX_URL"
       >
         <Dex /> {{ $t('pages.more.dex') }}
       </BoxButton>

@@ -1,132 +1,82 @@
 <template>
-  <div class="transfer-send">
-    <div
-      v-if="!reviewStep"
-      class="send"
+  <div
+    class="transfer-send new-ui"
+  >
+    <p class="text-heading-2 text-center">
+      {{ $t('modals.send.sendTitle') }}
+    </p>
+
+    <InputField
+      v-model.trim="form.address"
+      v-validate="{
+        required: true,
+        account: true,
+        name_registered_address: true,
+        token_to_an_address: true,
+        not_same_as: account.address
+      }"
+      name="address"
+      data-cy="address"
+      show-help
+      new-ui
+      :label="$t('modals.send.recipientLabel')"
+      :placeholder="$t('modals.send.recipientPlaceholder')"
+      :error="$validator._base.anyExcept('address', warningRules.address)"
+      :error-message="$validator._base.firstExcept('address', warningRules.address)"
+      :warning="errors.anyByRules('address', warningRules.address)"
+      :warning-message="errors.firstByRules('address', warningRules.address)"
+      @help="showRecipientHelp()"
     >
-      <InputField
-        v-model.trim="form.address"
-        v-validate="{
-          required: true,
-          account: true,
-          name_registered_address: true,
-          token_to_an_address: true,
-          not_same_as: account.address
-        }"
-        name="address"
-        :placeholder="$t('pages.send.addressPlaceholder')"
-        :error="$validator._base.anyExcept('address', warningRules.address)"
-        :error-message="$validator._base.firstExcept('address', warningRules.address)"
-        :warning="errors.anyByRules('address', warningRules.address)"
-        :warning-message="errors.firstByRules('address', warningRules.address)"
-        data-cy="address"
-        @scan="scan"
-      >
+      <template #before>
         <Valid
           v-if="!!form.address"
-          slot="left"
           class="valid"
         />
-        <span
-          slot="label"
-          data-cy="title"
-        >
-          {{ $t('pages.tipPage.heading') }}
-          <span class="token-symbol">
-            {{ tokenSymbol }}
-          </span>
-          {{ $t('pages.tipPage.to') }}
-        </span>
-        <button
-          slot="buttons"
+      </template>
+
+      <template #label-after>
+        <a
+          class="scan-button"
           data-cy="scan-button"
           @click="scan"
         >
           <QrScan />
-        </button>
-      </InputField>
+        </a>
+      </template>
+    </InputField>
 
-      <InputAmount
-        v-model="form.amount"
-        @error="(val) => error = val"
-      />
-    </div>
-    <div
-      v-else
-      class="review"
+    <RequestAmount
+      v-model="form.amount"
+      class="amount-input"
+      :validation="{ min_value_exclusive: 0 }"
+    />
+
+    <DetailsItem
+      new-ui
+      :label="$t('pages.signTransaction.fee')"
     >
-      <h1>{{ $t('pages.send.reviewtx') }}</h1>
-      <h2>{{ $t('pages.send.checkalert') }}</h2>
-      <DetailsItem
-        :value="account.address"
-        :label="$t('pages.send.sender')"
-        small
-        data-cy="review-sender"
-      />
-      <DetailsItem
-        :value="form.address"
-        :label="$t('pages.send.recipient')"
-        small
-        data-cy="review-recipient"
-      />
-    </div>
-
-    <DetailsItem :label="$t('pages.signTransaction.fee')">
       <TokenAmount
         slot="value"
         :amount="+fee.toFixed()"
         symbol="AE"
-        hide-fiat
         data-cy="review-fee"
+        hide-fiat
       />
     </DetailsItem>
-    <DetailsItem :label="$t('pages.signTransaction.total')">
+
+    <DetailsItem
+      new-ui
+      :label="$t('pages.signTransaction.total')"
+    >
       <TokenAmount
         slot="value"
         :amount="(selectedToken ? 0 : +fee.toFixed()) + +form.amount"
         :symbol="tokenSymbol"
-        high-precision
         :hide-fiat="!!selectedToken"
         data-cy="review-total"
+        high-precision
       />
     </DetailsItem>
-
-    <Button
-      v-if="!reviewStep"
-      data-cy="review-withdraw"
-      :disabled="
-        !form.address
-          || !form.amount
-          || $validator._base.anyExcept('address', warningRules.address)
-          || error"
-      @click="validate"
-    >
-      {{ $t('pages.send.review') }}
-    </Button>
-
-    <div
-      v-if="reviewStep"
-      class="review-buttons"
-    >
-      <Button
-        data-cy="reivew-editTxDetails-button"
-        half
-        dark
-        fill="secondary"
-        @click="reviewStep = false"
-      >
-        {{ $t('pages.send.editTxDetails') }}
-      </Button>
-      <Button
-        data-cy="review-send-button"
-        third
-        :disabled="sdk ? false : true"
-        @click="send"
-      >
-        {{ $t('pages.send.send') }}
-      </Button>
-    </div>
-    <Loader v-if="loading" />
   </div>
 </template>
 
@@ -134,28 +84,32 @@
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { calculateFee } from '../../utils/constants';
-import { checkAensName, aeToAettos, convertToken } from '../../utils/helper';
-import InputField from '../components/InputField.vue';
-import InputAmount from '../components/InputAmount.vue';
-import Button from '../components/Button.vue';
-import DetailsItem from '../components/DetailsItem.vue';
-import TokenAmount from '../components/TokenAmount.vue';
+import { MODAL_DEFAULT, MODAL_READ_QR_CODE } from '../../utils/constants';
+import {
+  checkAensName,
+  aeToAettos,
+  convertToken,
+  calculateFee,
+} from '../../utils/helper';
+import InputField from './InputField.vue';
+import RequestAmount from './RequestAmount.vue';
+import DetailsItem from './DetailsItem.vue';
+import TokenAmount from './TokenAmount.vue';
 import Valid from '../../../icons/valid.svg?vue-component';
 import QrScan from '../../../icons/qr-scan.svg?vue-component';
 
 export default {
   components: {
     InputField,
-    InputAmount,
-    Button,
-    Valid,
-    QrScan,
+    RequestAmount,
     DetailsItem,
     TokenAmount,
+    Valid,
+    QrScan,
   },
   props: {
     address: { type: String, default: '' },
+    defaultAmount: { type: [String, Number], default: null },
   },
   data() {
     return {
@@ -167,7 +121,7 @@ export default {
       reviewStep: false,
       form: {
         address: '',
-        amount: '',
+        amount: null,
       },
       loading: false,
       fee: BigNumber(0),
@@ -200,6 +154,9 @@ export default {
     if (typeof this.address !== 'undefined') {
       this.form.address = this.address;
     }
+
+    this.form.amount = this.defaultAmount;
+
     await this.fetchFee();
   },
   methods: {
@@ -220,9 +177,10 @@ export default {
     },
     async scan() {
       const scanResult = await this.$store.dispatch('modals/open', {
-        name: 'read-qr-code',
+        name: MODAL_READ_QR_CODE,
         title: this.$t('pages.send.scanAddress'),
       });
+
       if (scanResult?.trim().charAt(0) === '{') {
         let parsedScanResult = null;
         try {
@@ -232,7 +190,7 @@ export default {
           if (process.env.NODE_ENV !== 'production') console.error(e);
           this.form.address = '';
           this.$store.dispatch('modals/open', {
-            name: 'default',
+            name: MODAL_DEFAULT,
             title: this.$t('modals.invalid-qr-code.msg'),
             icon: 'critical',
           });
@@ -244,7 +202,7 @@ export default {
           .find(({ value }) => value === parsedScanResult.tokenContract);
         if (!requestedTokenBalance) {
           this.form.address = '';
-          this.$store.dispatch('modals/open', { name: 'default', type: 'insufficient-balance' });
+          this.$store.dispatch('modals/open', { name: MODAL_DEFAULT, type: 'insufficient-balance' });
           this.form.address = '';
           return;
         }
@@ -252,7 +210,8 @@ export default {
         // select requested token
         this.$store.commit('fungibleTokens/setSelectedToken', {
           address: this.accounts[this.activeIdx].address,
-          token: this.tokenBalances.find(({ value }) => value === parsedScanResult.tokenContract),
+          token: this.tokenBalances
+            .find(({ value }) => value === parsedScanResult.tokenContract),
         });
         // SET result data
         this.form.address = parsedScanResult.tokenContract;
@@ -362,6 +321,9 @@ export default {
         this.loading = false;
       }
     },
+    showRecipientHelp() {
+      // TODO - in separate task
+    },
   },
 };
 </script>
@@ -371,65 +333,14 @@ export default {
 @use '../../../styles/typography';
 
 .transfer-send {
-  padding: 16px;
-
-  .send {
-    .token-symbol {
-      color: variables.$color-blue;
-    }
-
-    .valid {
-      color: variables.$color-green;
-    }
-
-    .input-amount {
-      margin-bottom: 24px;
-    }
+  .scan-button {
+    display: block;
+    width: 20px;
+    height: 20px;
   }
 
-  .review {
-    h1,
-    h2 {
-      text-align: center;
-    }
-
-    h1 {
-      @extend %face-sans-20-medium;
-
-      font-size: 19px;
-    }
-
-    h2 {
-      margin-bottom: 16px;
-
-      @extend %face-sans-16-medium;
-
-      color: variables.$color-light-grey;
-    }
-
-    .details-item {
-      margin-bottom: 24px;
-
-      ::v-deep .value {
-        margin: 0;
-        color: variables.$color-light-grey;
-      }
-    }
-  }
-
-  .details-item {
-    display: inline-block;
-    margin-right: 24px;
-  }
-
-  .button {
-    margin-top: 24px;
-    margin-bottom: 36px;
-  }
-
-  .review-buttons {
-    display: flex;
-    justify-content: space-around;
+  .amount-input {
+    margin-bottom: 20px;
   }
 }
 </style>

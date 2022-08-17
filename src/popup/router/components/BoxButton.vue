@@ -1,34 +1,43 @@
 <template>
-  <a
-    v-if="isExternalLink"
-    :class="['box-button', fill ]"
-    :href="to"
-    target="_blank"
-  >
-    <slot />
-  </a>
-  <RouterLink
-    v-else
-    :class="['box-button', fill ]"
+  <component
+    :is="componentType"
+    class="box-button"
+    :class="[ fill, (disabled) && 'disabled' ]"
     :to="to"
+    :href="href"
+    :target="(href) && '_blank'"
+    @click.prevent="!disabled && $emit('click', $event)"
   >
     <slot />
-  </RouterLink>
+  </component>
 </template>
 
 <script>
 export default {
   props: {
-    to: { type: [String, Object], default: '' },
+    to: { type: [String, Object], default: null },
+    href: { type: String, default: null },
     fill: {
       type: String,
       validator: (value) => ['primary', 'alternative'].includes(value),
       default: 'primary',
     },
-    isExternalLink: { type: Boolean },
+    disabled: Boolean,
+  },
+  computed: {
+    componentType() {
+      if (this.to) {
+        return 'RouterLink';
+      }
+      if (this.href) {
+        return 'a';
+      }
+      return 'button';
+    },
   },
 };
 </script>
+
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 @use '../../../styles/typography';
@@ -44,6 +53,7 @@ export default {
   justify-content: center;
   text-decoration: none;
   color: variables.$color-dark-grey;
+  cursor: pointer;
 
   @extend %face-sans-15-medium;
 
@@ -74,6 +84,20 @@ export default {
     &,
     ::v-deep svg {
       color: variables.$color-red;
+    }
+  }
+
+  &.disabled {
+    background-color: variables.$color-disabled;
+    color: variables.$color-light-grey;
+    opacity: 0.44;
+
+    &:hover {
+      &,
+      ::v-deep svg {
+        color: variables.$color-light-grey;
+        cursor: not-allowed;
+      }
     }
   }
 }

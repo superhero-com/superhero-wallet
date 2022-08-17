@@ -69,7 +69,7 @@
         :error="error"
         plain
       >
-        <template slot="right">
+        <template #after>
           <ButtonPlain
             v-show="newPointer.length"
             @click="setPointer"

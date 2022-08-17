@@ -41,10 +41,9 @@
         v-model="url"
         :placeholder="$t('pages.tipPage.enterUrl')"
       >
-        <UrlStatus
-          slot="left"
-          :status="urlStatus"
-        />
+        <template #before>
+          <UrlStatus :status="urlStatus" />
+        </template>
       </InputField>
     </div>
     <div data-cy="tip-container">

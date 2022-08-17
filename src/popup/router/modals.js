@@ -16,6 +16,7 @@ import {
   MODAL_MESSAGE_SIGN,
   MODAL_SHARE_QR,
   MODAL_TRANSFER_RECEIVE,
+  MODAL_TRANSFER_SEND,
 } from '../utils/constants';
 
 import Default from './components/Modals/Default.vue';
@@ -31,6 +32,7 @@ import Help from './components/Modals/Help.vue';
 import ShareQr from './components/Modals/ShareQr.vue';
 import AccountDetails from './components/Modals/AccountDetails.vue';
 import TransferReceive from './components/Modals/TransferReceive.vue';
+import TransferSend from './components/Modals/TransferSend.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
@@ -56,4 +58,5 @@ export default () => {
   registerModal({ name: MODAL_MESSAGE_SIGN, showInPopupIfWebFrame: true });
   registerModal({ name: MODAL_SHARE_QR, component: ShareQr });
   registerModal({ name: MODAL_TRANSFER_RECEIVE, component: TransferReceive });
+  registerModal({ name: MODAL_TRANSFER_SEND, component: TransferSend });
 };

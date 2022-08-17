@@ -18,7 +18,7 @@
     :label="$attrs.label || $t('pages.tipPage.amountLabel')"
     @input="$emit('input', $event)"
   >
-    <template slot="right">
+    <template #after>
       <span class="token">{{ selectedToken ? selectedToken.symbol : 'AE' }}</span>
       <span
         v-if="!selectedToken"
@@ -36,7 +36,7 @@ import { mapState, mapGetters } from 'vuex';
 import { pick } from 'lodash-es';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { calculateFee } from '../../utils/constants';
+import { calculateFee } from '../../utils/helper';
 import InputField from './InputField.vue';
 
 export default {

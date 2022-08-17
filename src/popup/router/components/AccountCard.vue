@@ -23,12 +23,12 @@
         </span>
       </div>
       <div class="buttons">
-        <a @click.stop="openTransferReceiveModal($attrs)">
+        <a @click.stop="openTransferReceiveModal()">
           <ReceiveIcon :style="iconCssProps" />
         </a>
-        <RouterLink :to="{ name: 'transfer-send' }">
+        <a @click.stop="openTransferSendModal()">
           <SendIcon :style="iconCssProps" />
-        </RouterLink>
+        </a>
       </div>
     </div>
   </div>
@@ -41,7 +41,11 @@ import BalanceInfo from './BalanceInfo.vue';
 import ReceiveIcon from '../../../icons/account-card/account-receive.svg?vue-component';
 import SendIcon from '../../../icons/account-card/account-send.svg?vue-component';
 import { getAddressColor } from '../../utils/avatar';
-import { MODAL_ACCOUNT_DETAILS, MODAL_TRANSFER_RECEIVE } from '../../utils/constants';
+import {
+  MODAL_ACCOUNT_DETAILS,
+  MODAL_TRANSFER_RECEIVE,
+  MODAL_TRANSFER_SEND,
+} from '../../utils/constants';
 
 export default {
   components: {
@@ -75,10 +79,14 @@ export default {
     },
   },
   methods: {
-    openTransferReceiveModal(attrs) {
+    openTransferReceiveModal() {
       this.$store.dispatch('modals/open', {
-        ...attrs,
         name: MODAL_TRANSFER_RECEIVE,
+      });
+    },
+    openTransferSendModal() {
+      this.$store.dispatch('modals/open', {
+        name: MODAL_TRANSFER_SEND,
       });
     },
   },

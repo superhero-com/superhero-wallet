@@ -13,12 +13,12 @@
     placeholder="0.00"
     new-ui
     :value="value"
-    :label="$attrs.label || $t('pages.tipPage.amountLabel')"
+    :label="label || $t('pages.tipPage.amountLabel')"
     :error="$attrs.error || errors.has('amount')"
     :error-message="$attrs['error-message'] || errors.first('amount')"
     @input="$emit('input', $event)"
   >
-    <template #right>
+    <template #after>
       <AssetSelector
         v-model="selectedAsset"
         class="request-amount-asset"
@@ -65,6 +65,7 @@ export default {
   },
   props: {
     value: { type: [String, Number], default: '' },
+    label: { type: String, default: null },
     validation: { type: Object, default: () => ({}) },
     required: Boolean,
   },

@@ -33,8 +33,6 @@ import PopupMessageSign from '../pages/Popups/MessageSign.vue';
 import PrivacyPolicy from '../pages/PrivacyPolicy.vue';
 import Retip from '../pages/Retip.vue';
 import SecuritySettings from '../pages/SecuritySettings.vue';
-import Transfer from '../pages/Transfer.vue';
-import TransferSend from '../pages/TransferSend.vue';
 import Settings from '../pages/Settings.vue';
 import SignMessage from '../pages/SignMessage.vue';
 import SuccessTip from '../pages/SuccessTip.vue';
@@ -264,20 +262,6 @@ export default [
       hideTabBar: true,
       newUI: true,
     },
-  },
-  {
-    path: '/transfer',
-    component: Transfer,
-    children: [{
-      path: '',
-      name: 'transfer-send',
-      component: TransferSend,
-      props: true,
-      meta: {
-        title: 'transfer',
-        backButton: false,
-      },
-    }],
   },
   {
     path: '/success-tip',

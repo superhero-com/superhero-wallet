@@ -12,13 +12,6 @@
       <span>{{ $t('pages.titles.balances') }}</span>
     </RouterLink>
     <RouterLink
-      to="/transfer"
-      data-cy="send"
-    >
-      <Transfer />
-      <span>{{ $t('pages.titles.transfer') }}</span>
-    </RouterLink>
-    <RouterLink
       to="/tips"
       data-cy="tip-button"
     >
@@ -35,13 +28,15 @@
 <script>
 import Home from '../../../icons/home.svg?vue-component';
 import Balances from '../../../icons/balances.svg?vue-component';
-import Transfer from '../../../icons/transfer.svg?vue-component';
 import Tips from '../../../icons/tips.svg?vue-component';
 import Names from '../../../icons/names.svg?vue-component';
 
 export default {
   components: {
-    Home, Balances, Transfer, Tips, Names,
+    Home,
+    Balances,
+    Tips,
+    Names,
   },
 };
 </script>

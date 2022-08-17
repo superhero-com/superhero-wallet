@@ -3,13 +3,32 @@
     class="input-field"
     :class="{ 'new-ui': newUi }"
   >
-    <label
-      v-if="label || $slots.label"
-      :for="inputId"
+    <div
+      v-if="label || $slots.label || $slots['label-after']"
       class="label"
     >
-      <slot name="label">{{ label }}</slot>
-    </label>
+      <label
+        :for="inputId"
+        class="label-text"
+      >
+        <slot name="label">{{ label }}</slot>
+      </label>
+
+      <a
+        v-if="showHelp"
+        class="label-help"
+        @click.prevent="$emit('help')"
+      >
+        <QuestionCircleIcon />
+      </a>
+
+      <div
+        v-if="$slots['label-after']"
+        class="label-after"
+      >
+        <slot name="label-after" />
+      </div>
+    </div>
 
     <label
       data-cy="input-wrapper"
@@ -19,7 +38,7 @@
       <div class="main-inner">
         <slot
           v-if="!error && !warning"
-          name="left"
+          name="before"
         />
         <StatusIcon
           v-else
@@ -44,7 +63,7 @@
             @focusout="focused = false"
           >
         </slot>
-        <slot name="right" />
+        <slot name="after" />
       </div>
 
       <div class="under">
@@ -68,10 +87,12 @@
 
 <script>
 import StatusIcon from './StatusIcon.vue';
+import QuestionCircleIcon from '../../../icons/question-circle-border.svg?vue-component';
 
 export default {
   components: {
     StatusIcon,
+    QuestionCircleIcon,
   },
   props: {
     value: { type: [String, Number], default: null },
@@ -82,6 +103,7 @@ export default {
     warningMessage: { type: String, default: '' },
     readonly: Boolean,
     plain: Boolean,
+    showHelp: Boolean,
     newUi: Boolean,
   },
   data: () => ({
@@ -103,11 +125,28 @@ export default {
   text-align: left;
 
   .label {
-    @extend %face-sans-15-medium;
+    display: flex;
+    align-items: center;
 
-    margin: 8px 0;
-    display: inline-block;
-    color: variables.$color-dark-grey;
+    &-text {
+      @extend %face-sans-15-medium;
+
+      margin-bottom: 8px 0;
+      display: inline-block;
+      color: variables.$color-dark-grey;
+    }
+
+    &-help {
+      display: block;
+      width: 25px;
+      height: 20px;
+      padding-left: 5px;
+      color: inherit;
+    }
+
+    &-after {
+      margin-left: auto;
+    }
   }
 
   .input-wrapper {
@@ -223,6 +262,14 @@ export default {
   }
 
   &.new-ui {
+    .label {
+      margin-top: 16px;
+
+      &-text {
+        margin: 5px 0;
+      }
+    }
+
     .input-wrapper {
       border: none;
       background: rgba(variables.$color-white, 0.08);
