@@ -103,6 +103,10 @@ export default {
       return this.currentStep === STEP_REVIEW;
     },
   },
+  data: () => ({
+    STEP_FORM,
+    currentStep: STEP_FORM,
+  }),
   methods: {
     closeModal() {
       this.$store.commit('modals/closeByKey', MODAL_TRANSFER_SEND);
