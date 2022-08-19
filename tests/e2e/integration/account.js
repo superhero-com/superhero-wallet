@@ -13,8 +13,7 @@ describe('Test cases for Account Page', () => {
       .should('contain', 'Copied')
 
       .get('[data-cy=account-name')
-      .should('be.visible')
-      .contains('Account 1');
+      .should('be.visible');
   });
 
   it('Tip, View-All-Transactions, Back to Account', () => {
