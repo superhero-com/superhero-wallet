@@ -81,6 +81,30 @@
             :display-filter="showSearchBox"
           />
         </div>
+        <div
+          v-if="activeTab === 'names'"
+          class="names-list-wrapper"
+        >
+          <div class="tabs">
+            <ButtonPlain
+              v-for="tab of aensTabs"
+              :key="tab"
+              :class="{active: activeAensTab === tab}"
+              @click.prevent="activeAensTab = tab"
+            >
+              {{ $t(`pages.names.tabs.${tab}`) }}
+            </ButtonPlain>
+          </div>
+          <div v-if="activeAensTab === 'my-names'">
+            <NamesList />
+          </div>
+          <div v-if="activeAensTab === 'auctions'">
+            <NamesList />
+          </div>
+          <div v-if="activeAensTab === 'register'">
+            <NameClaim />
+          </div>
+        </div>
       </div>
     </div>
   </Modal>
@@ -99,6 +123,8 @@ import ArrowSend from '../../../../icons/arrow-send.svg?vue-component';
 import CreditCard from '../../../../icons/credit-card.svg?vue-component';
 import Swap from '../../../../icons/swap.svg?vue-component';
 import Close from '../../../../icons/close.svg?vue-component';
+import NameClaim from '../../pages/Names/Claim.vue';
+import NamesList from '../../pages/Names/List.vue';
 
 export default {
   components: {
@@ -114,6 +140,8 @@ export default {
     CreditCard,
     Swap,
     Close,
+    NameClaim,
+    NamesList,
   },
   props: {
     resolve: { type: Function, required: true },
@@ -123,6 +151,8 @@ export default {
     return {
       activeTab: 'tokens',
       tabs: ['tokens', 'transactions', 'names'],
+      activeAensTab: 'my-names',
+      aensTabs: ['my-names', 'auctions', 'register'],
       searchTerm: '',
       showSearchBox: false,
     };
@@ -340,6 +370,45 @@ export default {
 
         .body .footer {
           word-break: normal;
+        }
+      }
+    }
+
+    .names-list-wrapper {
+      padding: 0;
+
+      ::v-deep .name-item {
+        background-color: variables.$color-bg-4;
+        word-break: normal;
+
+        .container {
+          height: auto;
+        }
+
+        .expand {
+          text-align: left;
+        }
+      }
+
+      .tabs {
+        padding: 6px;
+        gap: 16px;
+
+        @include mixins.flex(flex-start, center, row);
+
+        .button-plain {
+          padding: 4px 14px;
+          gap: 4px;
+          border-radius: 16px;
+
+          @extend %face-sans-14-medium;
+
+          @include mixins.flex(center, center, row);
+
+          &.active {
+            background-color: rgba(variables.$color-white, 0.15);
+            color: variables.$color-white;
+          }
         }
       }
     }
