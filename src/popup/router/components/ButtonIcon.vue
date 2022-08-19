@@ -7,7 +7,6 @@
     <slot />
   </button>
 </template>
-
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 @use '../../../styles/mixins';

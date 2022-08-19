@@ -47,22 +47,24 @@ export default {
     align-items: center;
     margin-bottom: 4px;
 
-    @extend %face-sans-15-medium;
+    @extend %face-sans-15-regular;
 
     &.error .amount {
       color: variables.$color-dark-grey;
     }
 
     &.received:not(.error) .amount {
-      color: variables.$color-green-hover;
+      color: variables.$color-green-dark;
     }
 
     &.sent:not(.error) .amount {
-      color: variables.$color-error;
+      color: variables.$color-red-2;
     }
 
     .tokens {
-      @extend %face-sans-15-medium;
+      @extend %face-sans-15-regular;
+
+      color: variables.$color-white;
     }
   }
 }

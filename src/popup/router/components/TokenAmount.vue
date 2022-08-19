@@ -41,6 +41,8 @@ export default {
   },
   computed: {
     amountRounded() {
+      if (Number.isInteger(this.amount)) return this.amount;
+      if (this.amount === 0) return this.amount;
       return this.amount.toFixed((this.highPrecision || this.amount < 0.01) ? 9 : 2);
     },
     ...mapState({

@@ -41,12 +41,14 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-top: 8px;
 
   .display-value {
-    @extend %face-sans-16-medium;
+    @extend %face-sans-16-regular;
 
+    color: rgba(variables.$color-white, 1);
     line-height: 18px;
-    margin-top: 4px;
+    margin-top: 2px;
     opacity: 0.75;
   }
 }

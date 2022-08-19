@@ -2,10 +2,15 @@
   <div
     class="account-card"
     :style="cardCssProps"
+    @click.prevent="$store.dispatch('modals/open', {
+      ...$attrs,
+      name: 'account-details',
+    })"
   >
     <AccountInfo
       v-bind="$attrs"
       :color="color"
+      @click.native.stop
     />
     <BalanceInfo v-bind="$attrs" />
     <div class="misc">
@@ -17,7 +22,10 @@
           {{ $t('pages.fungible-tokens.tokens') }}
         </span>
       </div>
-      <div class="buttons">
+      <div
+        class="buttons"
+        @click.stop
+      >
         <RouterLink :to="{ name: 'transfer-receive' }">
           <ReceiveIcon :style="iconCssProps" />
         </RouterLink>
@@ -111,11 +119,15 @@ export default {
 
       a {
         margin-left: 8px;
+        color: rgba(variables.$color-white, 0.8);
+
+        &:hover {
+          color: rgba(variables.$color-white, 1);
+        }
 
         svg {
           height: 36px;
           width: 36px;
-          color: var(--primaryColor);
         }
       }
     }
