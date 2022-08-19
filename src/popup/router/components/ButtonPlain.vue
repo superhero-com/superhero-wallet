@@ -1,7 +1,7 @@
 <template>
   <button
     class="button-plain"
-    @click="$emit('click', $event)"
+    @click.prevent="$emit('click', $event)"
   >
     <slot />
   </button>

@@ -71,9 +71,9 @@ export default {
     color: variables.$color-light-grey;
 
     &::placeholder {
-      @extend %face-sans-14-regular;
+      @extend %face-sans-14-light;
 
-      color: variables.$color-dark-grey;
+      color: rgba(variables.$color-white, 0.75);
     }
 
     &[type='number'] {

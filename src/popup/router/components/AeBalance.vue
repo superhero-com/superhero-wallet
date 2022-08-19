@@ -24,24 +24,29 @@ export default {
 
 <style lang="scss">
 @use '../../../styles/typography';
+@use '../../../styles/variables';
 
 .ae-balance {
   display: flex;
   align-items: baseline;
 
   .token-symbol {
-    @extend %face-sans-24-bold;
+    @extend %face-sans-24-medium;
 
+    color: variables.$color-white;
     margin-right: 4px;
   }
 
   .token-integer {
-    @extend %face-sans-30-bold;
+    @extend %face-sans-30-medium;
+
+    color: variables.$color-white;
   }
 
   .token-fractional {
-    @extend %face-sans-24-bold;
+    @extend %face-sans-24-medium;
 
+    color: rgba(variables.$color-white, 0.75);
     line-height: 32px;
     opacity: 0.75;
   }

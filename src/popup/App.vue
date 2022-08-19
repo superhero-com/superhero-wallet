@@ -219,6 +219,10 @@ body {
     }
   }
 
+  .blur {
+    filter: blur(4px);
+  }
+
   .tab-bar {
     position: fixed;
     width: 100%;

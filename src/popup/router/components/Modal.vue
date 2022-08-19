@@ -76,6 +76,9 @@ export default {
     fromBottom: Boolean,
     header: { type: String, default: null },
   },
+  emits: [
+    'close',
+  ],
   mounted() {
     if (document.body.style.overflow) return;
     document.body.style.overflow = 'hidden';
