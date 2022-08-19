@@ -44,7 +44,7 @@ import { SCHEMA } from '@aeternity/aepp-sdk';
 import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
-import { TXS_PER_PAGE } from '../../utils/constants';
+import { TXS_PER_PAGE, FUNCTION_TYPE_DEX } from '../../utils/constants';
 import Visible from '../../../icons/visible.svg?vue-component';
 
 export default {
@@ -66,7 +66,7 @@ export default {
       isDestroyed: false,
       displayMode: { rotated: true, filter: 'all', sort: 'date' },
       filters: {
-        all: {}, sent: {}, received: {}, tips: {}, date: { rotated: true },
+        all: {}, in: {}, out: {}, dex: {},
       },
     };
   },
@@ -91,13 +91,15 @@ export default {
             switch (this.displayMode.filter) {
               case 'all':
                 return true;
-              case 'sent':
+              case 'dex':
+                return FUNCTION_TYPE_DEX.pool.includes(tr.tx.function);
+              case 'out':
                 return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
                   && tr.tx.senderId === address)
                   || (isFungibleTokenTx(tr)
                   && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
                   && tr.tx.callerId === address);
-              case 'received':
+              case 'in':
                 return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
                   && (tr.tx.recipientId === address || (tr.tx.senderId !== address && tr.tx.recipientId.startsWith('nm_'))))
                   || (isFungibleTokenTx(tr)

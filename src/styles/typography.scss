@@ -4,12 +4,20 @@
 @import '~@fontsource/ibm-plex-sans/500.css';
 @import '~@fontsource/ibm-plex-sans/700.css';
 @import '~@fontsource/ibm-plex-sans/700-italic.css';
+@import '~@fontsource/ibm-plex-mono/400.css';
 @import '~@fontsource/ibm-plex-mono/500.css';
 @import 'variables';
 
 %face-sans-30-bold {
   font-family: $font-sans;
   font-weight: bold;
+  font-size: 30px;
+  line-height: 32px;
+}
+
+%face-sans-30-medium {
+  font-family: $font-sans;
+  font-weight: 500;
   font-size: 30px;
   line-height: 32px;
 }
@@ -136,6 +144,13 @@
 %face-sans-14-regular {
   font-family: $font-sans;
   font-weight: normal;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+%face-sans-14-light {
+  font-family: $font-sans;
+  font-weight: 300;
   font-size: 14px;
   line-height: 24px;
 }

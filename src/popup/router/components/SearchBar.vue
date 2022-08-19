@@ -34,8 +34,20 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 
-.search-bar ::v-deep .wrapper:not(:focus-within) {
-  border-radius: 0;
-  background-color: variables.$color-bg-3;
+.search-bar {
+  ::v-deep .main-wrapper main {
+    background-color: rgba(variables.$color-white, 0.08);
+    border: 2px solid transparent;
+    border-radius: 10px;
+
+    svg {
+      color: rgba(variables.$color-white, 0.75);
+    }
+
+    &:focus-within {
+      background-color: rgba(variables.$color-black, 0.44);
+      border-color: variables.$color-blue;
+    }
+  }
 }
 </style>

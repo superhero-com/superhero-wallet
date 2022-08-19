@@ -178,12 +178,18 @@
       "title": "Network discrepancy",
       "msg": "This action was initiated on a different network. Please switch to {0} in your wallet settings to proceed.",
       "button": "Dismiss"
+    },
+    "account-details": {
+      "tokens": "Tokens",
+      "transactions": "Transactions",
+      "names": "Names"
     }
   },
   "filters": {
     "all": "All",
-    "sent": "Sent",
-    "received": "Received",
+    "out": "Out",
+    "in": "In",
+    "dex": "DEX",
     "date": "Date",
     "tips": "Tips",
     "bid": "Bid",
@@ -368,7 +374,8 @@
       "title": "Recent transactions",
       "viewAll": "View all",
       "viewMore": "View full transaction history",
-      "noTransactionsFound": "There are no recent transactions for this account."
+      "noTransactionsFound": "There are no recent transactions for this account.",
+      "searchPlaceholder": "Search transactions by asset name"
     },
     "add-fungible-token": {
       "heading": "Fungible Tokens",
@@ -477,7 +484,7 @@
       "mint": "Mint/Burn token",
       "mint-info": "This allows you to mint or burn token amount",
       "tokens": "Tokens",
-      "searchPlaceholder": "Search for token",
+      "searchPlaceholder": "Search by token name or contract address",
       "all": "All",
       "myTokens": "My Tokens",
       "mcap": "MCap",
@@ -491,6 +498,8 @@
       "details": "Token Details",
       "send": "Send",
       "receive": "Receive",
+      "buy": "Buy",
+      "swap": "Swap",
       "tip": "Tip",
       "token-details": "Token Details",
       "token": "Token",
