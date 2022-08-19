@@ -16,19 +16,19 @@
         <ButtonPlain
           v-if="idx !== 0 && !IS_CORDOVA"
           class="swiper-button prev"
-          @click="swiper.slideTo(swiper.realIndex - 1)"
+          @click="setCurrentSlide(swiper.realIndex - 1)"
         >
           <Chevron />
         </ButtonPlain>
         <AccountCard
           :class="{ selected: account.i === activeIdx }"
           v-bind="account"
-          :account-idx="account.i"
+          :color="getAccountColor(account.i)"
         />
         <ButtonPlain
           v-if="!IS_CORDOVA"
           class="swiper-button next"
-          @click="swiper.slideTo(swiper.realIndex + 1)"
+          @click="setCurrentSlide(swiper.realIndex + 1)"
         >
           <Chevron />
         </ButtonPlain>
@@ -37,18 +37,20 @@
         <ButtonPlain
           v-if="!IS_CORDOVA"
           class="swiper-button prev"
-          @click="swiper.slideTo(swiper.realIndex - 1)"
+          @click="setCurrentSlide(swiper.realIndex - 1)"
         >
           <Chevron />
         </ButtonPlain>
         <AddAccountCard />
       </swiper-slide>
-
-      <div
-        slot="pagination"
-        class="swiper-pagination"
-      />
     </swiper>
+    <BulletSwitcher
+      v-if="filteredAccounts && filteredAccounts.length"
+      :active-color="getAccountColor(currentIdx)"
+      :current-idx="currentIdx"
+      :options-size="filteredAccounts.length"
+      @change="setCurrentSlide"
+    />
   </div>
 </template>
 
@@ -60,9 +62,12 @@ import AccountCard from './AccountCard.vue';
 import AddAccountCard from './AddAccountCard.vue';
 import ButtonPlain from './ButtonPlain.vue';
 import Chevron from '../../../icons/chevron.svg?vue-component';
+import { getAddressColor } from '../../utils/avatar';
+import BulletSwitcher from './BulletSwitcher.vue';
 
 export default {
   components: {
+    BulletSwitcher,
     AccountCard,
     AddAccountCard,
     Swiper,
@@ -74,14 +79,11 @@ export default {
   data() {
     return {
       IS_CORDOVA: process.env.IS_CORDOVA,
+      currentIdx: 0,
       swiperOptions: {
         slidesPerView: 1.1,
         centeredSlides: true,
         spaceBetween: 8,
-        pagination: {
-          el: '.swiper-pagination',
-          clickable: true,
-        },
       },
     };
   },
@@ -99,7 +101,7 @@ export default {
   },
   mounted() {
     if (this.activeIdx) {
-      this.swiper.slideTo(this.activeIdx, 0);
+      this.setCurrentSlide(this.activeIdx, 0);
     }
   },
   methods: {
@@ -108,10 +110,19 @@ export default {
       this.$store.commit('accounts/setActiveIdx', idx);
     },
     onSlideChange() {
+      const { realIndex } = this.swiper;
       if (this.swiper.realIndex < this.filteredAccounts.length
-        && this.filteredAccounts[this.swiper.realIndex]) {
-        this.selectAccount(this.filteredAccounts[this.swiper.realIndex].i);
+        && this.filteredAccounts[realIndex]) {
+        this.selectAccount(this.filteredAccounts[realIndex].i);
       }
+      if (this.currentIdx !== realIndex) this.currentIdx = realIndex;
+    },
+    getAccountColor(idx) {
+      return getAddressColor(this.filteredAccounts[idx]?.address);
+    },
+    setCurrentSlide(idx, slideParams) {
+      this.currentIdx = idx;
+      this.swiper.slideTo(idx, slideParams);
     },
   },
 };
@@ -119,12 +130,12 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/mixins';
 
 @import '../../../../node_modules/swiper/css/swiper.css';
 
 .account-switcher {
   background-color: variables.$color-bg-3;
-  padding-bottom: 10px;
 
   ::v-deep .account-card,
   ::v-deep .add-account-card {
@@ -151,23 +162,6 @@ export default {
 
     &:hover {
       opacity: 1;
-    }
-  }
-
-  .swiper-pagination {
-    position: initial;
-    text-align: left;
-    padding-left: 18px;
-    padding-top: 8px;
-
-    ::v-deep .swiper-pagination-bullet {
-      background: variables.$color-white;
-      opacity: 0.2;
-
-      &.swiper-pagination-bullet-active {
-        opacity: 1;
-        background: variables.$color-purple;
-      }
     }
   }
 }
