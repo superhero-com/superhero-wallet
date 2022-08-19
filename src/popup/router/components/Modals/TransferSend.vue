@@ -105,8 +105,23 @@ export default {
   },
   data: () => ({
     STEP_FORM,
+    STEP_TIP,
+    STEP_REVIEW,
+    STEP_SUCCESS,
     currentStep: STEP_FORM,
   }),
+  computed: {
+    modalTitle() {
+      switch (this.currentStep) {
+        case STEP_REVIEW:
+          return this.$t('modals.send.reviewTitle');
+        case STEP_SUCCESS:
+          return this.$t('modals.send.successTitle');
+        default:
+          return this.$t('modals.send.sendTitle');
+      }
+    },
+  },
   methods: {
     closeModal() {
       this.$store.commit('modals/closeByKey', MODAL_TRANSFER_SEND);
