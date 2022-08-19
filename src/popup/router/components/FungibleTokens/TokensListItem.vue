@@ -24,7 +24,7 @@
       class="row"
     >
       <div class="price">
-        {{ formatCurrency(aePublicData.current_price) }}
+        @ {{ formatCurrency(aePublicData.current_price) }}
       </div>
       <div class="price">
         {{ convertToCurrencyFormatted(tokenData.convertedBalance) }}
@@ -69,26 +69,32 @@ export default {
     padding-bottom: 4px;
 
     img {
-      width: 28px;
-      height: 28px;
-      border-radius: 14px;
+      width: 30px;
+      height: 30px;
+      border-radius: 15px;
+      margin-right: 0;
     }
 
     .symbols {
-      @extend %face-sans-15-medium;
+      @extend %face-sans-15-regular;
 
+      color: variables.$color-white;
       padding-left: 4px;
     }
   }
 
   ::v-deep .token-amount {
-    @extend %face-sans-15-medium;
+    @extend %face-sans-15-regular;
+
+    margin-top: -5px;
   }
 
   .price {
-    color: variables.$color-dark-grey;
+    color: rgba(variables.$color-white, 0.75);
+    font-weight: 100;
+    margin-top: -5px;
 
-    @extend %face-sans-14-medium;
+    @extend %face-sans-14-regular;
   }
 }
 </style>
