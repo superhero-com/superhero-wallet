@@ -1,5 +1,8 @@
 <template>
-  <div class="add-account-card">
+  <div
+    class="add-account-card"
+    @click="handleClick"
+  >
     <div class="title">
       <PlusCircle />
       {{ $t('pages.accounts.add-account') }}
@@ -15,6 +18,11 @@ import PlusCircle from '../../../icons/plus-circle-fill.svg?vue-component';
 
 export default {
   components: { PlusCircle },
+  methods: {
+    handleClick() {
+      this.$store.dispatch('accounts/hdWallet/create');
+    },
+  },
 };
 </script>
 
