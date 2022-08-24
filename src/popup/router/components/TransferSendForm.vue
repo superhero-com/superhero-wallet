@@ -21,7 +21,9 @@
       new-ui
       :label="$t('modals.send.recipientLabel')"
       :placeholder="$t('modals.send.recipientPlaceholder')"
-      :error="$validator._base.anyExcept('address', warningRules.address)"
+      :error="
+        !validateTipUrl(form.address) &&
+          $validator._base.anyExcept('address', warningRules.address)"
       :error-message="$validator._base.firstExcept('address', warningRules.address)"
       :warning="errors.anyByRules('address', warningRules.address)"
       :warning-message="errors.firstByRules('address', warningRules.address)"
@@ -42,6 +44,12 @@
         >
           <QrScan />
         </a>
+      </template>
+      <template #status>
+        <UrlStatus
+          v-show="!checkAensName(form.address) && validateTipUrl(form.address)"
+          :status="urlStatus"
+        />
       </template>
     </InputField>
 
@@ -84,12 +92,17 @@
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { MODAL_DEFAULT, MODAL_READ_QR_CODE } from '../../utils/constants';
+import {
+  MODAL_DEFAULT,
+  MODAL_READ_QR_CODE,
+  MODAL_RECIPIENT_INFO,
+} from '../../utils/constants';
 import {
   checkAensName,
   aeToAettos,
   convertToken,
   calculateFee,
+  validateTipUrl,
 } from '../../utils/helper';
 import InputField from './InputField.vue';
 import RequestAmount from './RequestAmount.vue';
@@ -97,6 +110,7 @@ import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import Valid from '../../../icons/valid.svg?vue-component';
 import QrScan from '../../../icons/qr-scan.svg?vue-component';
+import UrlStatus from './UrlStatus.vue';
 
 export default {
   components: {
@@ -106,6 +120,7 @@ export default {
     TokenAmount,
     Valid,
     QrScan,
+    UrlStatus,
   },
   props: {
     address: { type: String, default: '' },
@@ -137,6 +152,9 @@ export default {
     tokenSymbol() {
       return this.selectedToken ? this.selectedToken.symbol : 'AE';
     },
+    urlStatus() {
+      return this.$store.getters['tipUrl/status'](this.form.address);
+    },
   },
   watch: {
     async selectedToken() {
@@ -160,6 +178,10 @@ export default {
     await this.fetchFee();
   },
   methods: {
+    validateTipUrl,
+    onSubmit() {
+      this.$emit('next');
+    },
     async queryHandler(query) {
       await this.$watchUntilTruly(() => this.sdk);
       if (query.token) {
@@ -322,7 +344,9 @@ export default {
       }
     },
     showRecipientHelp() {
-      // TODO - in separate task
+      this.$store.dispatch('modals/open', {
+        name: MODAL_RECIPIENT_INFO,
+      });
     },
   },
 };

@@ -17,9 +17,13 @@ import {
   MODAL_SHARE_QR,
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
+  MODAL_RECIPIENT_HELPER,
+  MODAL_RECIPIENT_INFO,
 } from '../utils/constants';
 
 import Default from './components/Modals/Default.vue';
+import RecipientHelper from './components/Modals/RecipientHelper.vue';
+import RecipientInfo from './components/Modals/RecipientInfo.vue';
 import ClaimSuccess from './components/Modals/ClaimSuccess.vue';
 import SpendSuccess from './components/Modals/SpendSuccess.vue';
 import ConfirmTip from './components/Modals/ConfirmTip.vue';
@@ -36,6 +40,8 @@ import TransferSend from './components/Modals/TransferSend.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
+  registerModal({ name: MODAL_RECIPIENT_HELPER, component: RecipientHelper });
+  registerModal({ name: MODAL_RECIPIENT_INFO, component: RecipientInfo });
   registerModal({ name: MODAL_ACCOUNT_DETAILS, component: AccountDetails });
   registerModal({ name: MODAL_CLAIM_SUCCESS, component: ClaimSuccess });
   registerModal({ name: MODAL_SPEND_SUCCESS, component: SpendSuccess });

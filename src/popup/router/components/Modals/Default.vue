@@ -3,13 +3,14 @@
     has-close-button
     v-on="{ close: close || resolve }"
   >
-    <StatusIcon
-      :status="icon"
-      class="icon"
-    />
-
+    <div class="icon-box">
+      <StatusIcon
+        :status="icon"
+        class="icon"
+      />
+    </div>
     <h2 class="text-heading-2 text-center">
-      {{ title }}
+      <span> {{ title }} </span>
     </h2>
 
     <slot name="msg">
@@ -51,3 +52,22 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+@use '../../../../styles/variables';
+@use '../../../../styles/mixins';
+
+.icon-box {
+  @include mixins.flex(center, center, column);
+
+  gap: 20px;
+
+  .icon {
+    padding: 4px;
+    border: 4px solid variables.$color-disabled;
+    border-radius: 200%;
+    height: 64px;
+    width: 64px;
+  }
+
+}
+</style>

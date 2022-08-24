@@ -37,14 +37,6 @@
     >
       <div class="main-inner">
         <slot
-          v-if="!error && !warning"
-          name="before"
-        />
-        <StatusIcon
-          v-else
-          :status="error && 'alert' || warning && 'warning'"
-        />
-        <slot
           :id="_uid"
           :input-id="inputId"
         >
@@ -82,16 +74,22 @@
     >
       {{ error ? errorMessage : warningMessage }}
     </label>
+    <div
+      class="status"
+    >
+      <slot
+        name="status"
+        :focused="focused"
+      />
+    </div>
   </div>
 </template>
 
 <script>
-import StatusIcon from './StatusIcon.vue';
 import QuestionCircleIcon from '../../../icons/question-circle-border.svg?vue-component';
 
 export default {
   components: {
-    StatusIcon,
     QuestionCircleIcon,
   },
   props: {
@@ -259,6 +257,10 @@ export default {
     &.warning {
       color: variables.$color-warning;
     }
+  }
+
+  .status {
+    margin-top: 9px;
   }
 
   &.new-ui {

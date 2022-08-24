@@ -162,6 +162,8 @@ export const BLOG_CLAIM_TIP_URL = 'https://blog.aeternity.com/superhero-how-to-s
 export const COMMIT_URL = 'https://github.com/aeternity/superhero-wallet/commit/';
 
 export const MODAL_DEFAULT = 'default';
+export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
+export const MODAL_RECIPIENT_INFO = 'recipient-info';
 export const MODAL_ACCOUNT_DETAILS = 'account-details';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';
 export const MODAL_SPEND_SUCCESS = 'spend-success';
