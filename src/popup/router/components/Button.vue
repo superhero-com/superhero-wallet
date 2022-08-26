@@ -16,6 +16,7 @@
         third,
         inline,
         inactive,
+        nowrap,
         backgroundless,
         'icon-text': iconText,
         'new-ui': newUi,
@@ -53,6 +54,7 @@ export default {
     third: Boolean,
     inline: Boolean,
     inactive: Boolean,
+    nowrap: Boolean,
     to: { type: [String, Object], default: null },
     backgroundless: Boolean,
     iconText: Boolean,
@@ -189,6 +191,10 @@ export default {
     opacity: 0.4;
   }
 
+  &.nowrap {
+    white-space: nowrap;
+  }
+
   &.backgroundless {
     &.small {
       @extend %face-sans-16-medium;
@@ -230,9 +236,7 @@ export default {
 
   &.new-ui {
     width: auto;
-    padding: 0 30px;
     border-radius: variables.$border-radius-interactive;
-    width: auto;
     height: auto;
     padding: 10px 20px;
     line-height: 20px;

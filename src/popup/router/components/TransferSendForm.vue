@@ -79,6 +79,14 @@
         high-precision
       />
     </DetailsItem>
+    <ReviewFooterWrapper>
+      <Button
+        class="btn-primary-action"
+        new-ui
+        :text="$t('modals.send.next')"
+        @click="validate"
+      />
+    </ReviewFooterWrapper>
   </div>
 </template>
 
@@ -98,15 +106,19 @@ import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import Valid from '../../../icons/valid.svg?vue-component';
 import QrScan from '../../../icons/qr-scan.svg?vue-component';
+import ReviewFooterWrapper from './ReviewFooterWrapper.vue';
+import Button from './Button.vue';
 
 const WARNING_RULES = ['not_same_as'];
 
 export default {
   components: {
+    ReviewFooterWrapper,
     InputField,
     RequestAmount,
     DetailsItem,
     TokenAmount,
+    Button,
     Valid,
     QrScan,
   },
@@ -194,7 +206,20 @@ export default {
       }
     },
     async validate() {
-      if (await this.$validator.validateAll(this.warningRules)) this.reviewStep = true;
+      if (await this.$validator.validateAll(this.warningRules)) {
+        this.$emit('submit', {
+          formData: {
+            tipUrl: 'test.com', // TODO - pass proper url
+            selectedToken: this.selectedToken,
+            recipientAddress: this.form.address,
+            amount: this.form.amount,
+            fee: this.fee,
+            total: (this.selectedToken ? 0 : +this.fee.toFixed()) + +this.form.amount,
+            invoiceId: this.invoiceId,
+            contractId: this.contractId,
+          },
+        });
+      }
     },
     async scan() {
       const scanResult = await this.$store.dispatch('modals/open', {
@@ -359,6 +384,8 @@ export default {
 @use '../../../styles/typography';
 
 .transfer-send {
+  margin-bottom: variables.$modal-footer-height;
+
   .scan-button {
     display: block;
     width: 20px;

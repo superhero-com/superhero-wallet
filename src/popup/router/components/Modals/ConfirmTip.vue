@@ -3,12 +3,13 @@
     has-close-button
     @close="resolve"
   >
-    <h2 class="text-heading-2 text-center confirmation-title">
+    <!--     TODO - pawel - remove probably -->
+    <template slot="header">
       {{ $t('modals.confirm-tip.title') }}
-    </h2>
+    </template>
 
-    <p>{{ $t('modals.confirm-tip.msg') }}</p>
-    <p class="confirmation-question">
+    {{ $t('modals.confirm-tip.msg') }}
+    <p class="confirmation--question">
       {{ $t('modals.confirm-tip.sub-message') }}
     </p>
 
@@ -53,14 +54,8 @@ export default {
 <style lang="scss" scoped>
 @use "../../../../styles/variables";
 
-.confirmation {
-  &-title {
-    margin-bottom: 20px;
-  }
-
-  &-question {
-    font-weight: 500;
-    color: variables.$color-white;
-  }
+.confirmation--question {
+  font-weight: 500;
+  color: variables.$color-white;
 }
 </style>

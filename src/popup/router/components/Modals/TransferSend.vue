@@ -8,61 +8,73 @@
     <transition name="fade-between">
       <TransferSendForm
         v-if="currentStep === STEP_FORM"
-        v-model="formModel"
+        :token-symbol="tokenSymbol"
+        @submit="handleSubmit"
       />
 
-      <div v-else-if="currentStep === STEP_TIP">
-        <h2>TIP</h2>
-      </div>
+      <template v-else-if="currentStep === STEP_TIP">
+        <ReviewTip
+          v-bind="formData"
+          :token-symbol="tokenSymbol"
+          @edit="editTransfer"
+          @submit="handleTipSubmit"
+        />
+      </template>
 
-      <div v-else-if="currentStep === STEP_REVIEW">
-        <h2>REVIEW</h2>
-      </div>
+      <template v-else-if="currentStep === STEP_REVIEW">
+        <ReviewTransfer
+          v-bind="formData"
+          :token-symbol="tokenSymbol"
+          @edit="editTransfer"
+        />
+      </template>
 
-      <div v-else-if="currentStep === STEP_SUCCESS">
+      <!--      TODO - This one opens in new modal after the transaction is complete. -->
+      <!--      TODO - ^^ Check pendingTransactionHandler.js-->
+      <template v-else-if="currentStep === STEP_SUCCESS">
         <h2>SUCCESS</h2>
-      </div>
+      </template>
     </transition>
-
-    <template #footer>
-      <template v-if="isSuccess">
-        <Button
-          fill="secondary"
-          text="View in explorer"
-          class="btn-primary-action"
-          new-ui
-        />
-        <Button
-          :text="$t('ok')"
-          new-ui
-          @click="closeModal"
-        />
-      </template>
-      <template v-else>
-        <Button
-          v-if="showEditButton"
-          fill="secondary"
-          text="Edit"
-          class="btn-secondary-action"
-          new-ui
-          @click="editTransfer"
-        />
-        <Button
-          v-if="showSendButton"
-          new-ui
-          class="btn-primary-action"
-          text="Send"
-          @click="send"
-        />
-        <Button
-          v-else
-          class="btn-primary-action"
-          new-ui
-          :text="$t('modals.send.next')"
-          @click="proceedToNextStep"
-        />
-      </template>
-    </template>
+    <!--    TODO - consider moving to certain views -->
+    <!--    <template #footer>-->
+    <!--      <template v-if="isSuccess">-->
+    <!--        <Button-->
+    <!--          fill="secondary"-->
+    <!--          text="View in explorer"-->
+    <!--          class="btn-primary-action"-->
+    <!--          new-ui-->
+    <!--        />-->
+    <!--        <Button-->
+    <!--          :text="$t('ok')"-->
+    <!--          new-ui-->
+    <!--          @click="closeModal"-->
+    <!--        />-->
+    <!--      </template>-->
+    <!--      <template v-else>-->
+    <!--        <Button-->
+    <!--          v-if="showEditButton"-->
+    <!--          fill="secondary"-->
+    <!--          text="Edit"-->
+    <!--          class="btn-secondary-action"-->
+    <!--          new-ui-->
+    <!--          @click="editTransfer"-->
+    <!--        />-->
+    <!--        <Button-->
+    <!--          v-if="showSendButton"-->
+    <!--          new-ui-->
+    <!--          class="btn-primary-action"-->
+    <!--          text="Send"-->
+    <!--          @click="send"-->
+    <!--        />-->
+    <!--        <Button-->
+    <!--          v-else-->
+    <!--          class="btn-primary-action"-->
+    <!--          new-ui-->
+    <!--          :text="$t('modals.send.next')"-->
+    <!--          @click="proceedToNextStep"-->
+    <!--        />-->
+    <!--      </template>-->
+    <!--    </template>-->
   </Modal>
 </template>
 
@@ -73,7 +85,8 @@ import {
 } from '../../../utils/helper';
 import Modal from '../Modal.vue';
 import TransferSendForm from '../TransferSendForm.vue';
-import Button from '../Button.vue';
+import ReviewTip from '../ReviewTip.vue';
+import ReviewTransfer from '../ReviewTransfer.vue';
 
 const STEP_FORM = 'form';
 const STEP_TIP = 'tip';
@@ -83,8 +96,9 @@ const STEP_SUCCESS = 'success';
 export default {
   name: 'TransferSend',
   components: {
+    ReviewTransfer,
+    ReviewTip,
     Modal,
-    Button,
     TransferSendForm,
   },
   data: () => ({
@@ -114,6 +128,14 @@ export default {
     proceedToNextStep() {
       this.currentStep = STEP_REVIEW;
     },
+    handleSubmit({ nextStep, formData }) {
+      console.log({ formData });
+      this.currentStep = nextStep;
+      this.formData = formData;
+    },
+    handleTipSubmit(data) {
+      this.handleSubmit({ nextStep: STEP_REVIEW, formData: { ...this.formData, ...data } });
+    },
     editTransfer() {
       this.currentStep = STEP_FORM;
     },
@@ -124,15 +146,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.transfer-send-modal {
-  .btn-secondary-action {
-    flex-basis: 40%;
-  }
-
-  .btn-primary-action {
-    flex-basis: 60%;
-  }
-}
-</style>

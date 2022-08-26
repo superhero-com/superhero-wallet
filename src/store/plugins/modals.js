@@ -13,7 +13,9 @@ export const registerModal = ({ name, ...options }) => {
 export default (store) => {
   store.registerModule('modals', {
     namespaced: true,
-    state: { opened: [] },
+    state: {
+      opened: [],
+    },
     getters: {
       opened: ({ opened }) => opened
         .filter(({ inPopup }) => !inPopup)

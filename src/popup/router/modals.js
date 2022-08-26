@@ -35,6 +35,7 @@ import AccountDetails from './components/Modals/AccountDetails.vue';
 import AssetSelector from './components/Modals/AssetSelector.vue';
 import TransferReceive from './components/Modals/TransferReceive.vue';
 import TransferSend from './components/Modals/TransferSend.vue';
+import ReviewTransaction from './components/Modals/ReviewTransaction.vue'; // TODO - pawel remove
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
@@ -62,4 +63,5 @@ export default () => {
   registerModal({ name: MODAL_TRANSFER_RECEIVE, component: TransferReceive });
   registerModal({ name: MODAL_TRANSFER_SEND, component: TransferSend });
   registerModal({ name: MODAL_ASSET_SELECTOR, component: AssetSelector });
+  registerModal({ name: 'review-transaction', component: ReviewTransaction });
 };

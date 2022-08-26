@@ -7,6 +7,8 @@ $base-font-size: 16px;
 $font-sans: 'IBM Plex Sans', sans-serif;
 $font-mono: 'IBM Plex Mono';
 
+$modal-footer-height: 64px;
+
 $color-white: #fff;
 $color-black: #000;
 $color-primary: #1161fe;
@@ -39,3 +41,5 @@ $color-disabled: #212121;
 
 $color-warning: #ffaa29;
 $color-error: #ff4746;
+
+$modal-footer-gradient: linear-gradient(180deg, rgba(20, 20, 20, 0) 0%, rgba(20, 20, 20, 0.8) 43.08%, rgba(20, 20, 20, 0.9) 90.79%);

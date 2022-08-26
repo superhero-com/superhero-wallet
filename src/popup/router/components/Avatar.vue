@@ -45,6 +45,7 @@ $size-xs: 18px;
 $size-sm: 24px;
 $size-md: 32px;
 $size-rg: 40px;
+$size-bg: 48px;
 $size-xl: 56px;
 $size-lg: 64px;
 
@@ -76,6 +77,11 @@ $size-lg: 64px;
   &.md {
     height: $size-md;
     width: $size-md;
+  }
+
+  &.big {
+    height: $size-bg;
+    width: $size-bg;
   }
 
   &.xl {
