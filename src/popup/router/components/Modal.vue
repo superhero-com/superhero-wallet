@@ -9,6 +9,7 @@
         'full-screen': fullScreen,
         'from-bottom': fromBottom,
         'has-close-button': hasCloseButton,
+        'no-padding': noPadding,
         dense,
       }"
     >
@@ -16,6 +17,7 @@
         <div
           v-if="$slots.header || header || hasCloseButton"
           class="header"
+          :class="{ transparent: hasCloseButton && !($slots.header || header) }"
         >
           <div
             v-if="$slots.icon"
@@ -80,6 +82,7 @@ export default {
     fullScreen: Boolean,
     fromBottom: Boolean,
     dense: Boolean,
+    noPadding: Boolean,
     centered: Boolean,
     header: { type: String, default: null },
   },
@@ -136,8 +139,8 @@ $modal-bg-color: variables.$color-bg-4;
     .close-button {
       position: absolute;
       z-index: 3;
-      right: 2px;
-      top: 2px;
+      right: 8px;
+      top: 8px;
       color: variables.$color-white;
 
       &-icon {
@@ -156,11 +159,16 @@ $modal-bg-color: variables.$color-bg-4;
       text-align: center;
       display: flex;
       flex-direction: column;
+      background-color: $modal-bg-color;
 
       &-icon {
         margin: 0 auto 10px;
         width: 48px;
         height: 48px;
+      }
+
+      &.transparent {
+        background-color: transparent;
       }
     }
 
@@ -241,6 +249,10 @@ $modal-bg-color: variables.$color-bg-4;
 
   &.dense {
     --content-padding: 8px;
+  }
+
+  &.no-padding {
+    --content-padding: 0;
   }
 
   &.pop-in-transition {
