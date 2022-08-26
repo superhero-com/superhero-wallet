@@ -2,6 +2,7 @@
   <InputField
     class="search-bar"
     v-bind="$attrs"
+    new-ui
     v-on="$listeners"
     @input="$emit('input', $event)"
   >

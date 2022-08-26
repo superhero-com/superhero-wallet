@@ -7,10 +7,6 @@
       <Home />
       <span>{{ $t('pages.titles.home') }}</span>
     </RouterLink>
-    <RouterLink to="/balances">
-      <Balances />
-      <span>{{ $t('pages.titles.balances') }}</span>
-    </RouterLink>
     <RouterLink
       to="/transfer"
       data-cy="send"
@@ -34,14 +30,13 @@
 
 <script>
 import Home from '../../../icons/home.svg?vue-component';
-import Balances from '../../../icons/balances.svg?vue-component';
 import Transfer from '../../../icons/transfer.svg?vue-component';
 import Tips from '../../../icons/tips.svg?vue-component';
 import Names from '../../../icons/names.svg?vue-component';
 
 export default {
   components: {
-    Home, Balances, Transfer, Tips, Names,
+    Home, Transfer, Tips, Names,
   },
 };
 </script>

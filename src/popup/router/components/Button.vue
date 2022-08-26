@@ -16,7 +16,7 @@
         third,
         inline,
         inactive,
-        backgroundless,
+        hollow,
         'icon-text': iconText,
         'new-ui': newUi,
       },
@@ -53,7 +53,7 @@ export default {
     inline: Boolean,
     inactive: Boolean,
     to: { type: [String, Object], default: null },
-    backgroundless: Boolean,
+    hollow: Boolean,
     iconText: Boolean,
     newUi: Boolean,
   },
@@ -187,12 +187,12 @@ export default {
     opacity: 0.4;
   }
 
-  &.backgroundless {
+  &.hollow {
+    background: transparent;
+
     &.small {
       @extend %face-sans-16-medium;
     }
-
-    background: transparent;
 
     &.primary {
       color: variables.$color-blue;

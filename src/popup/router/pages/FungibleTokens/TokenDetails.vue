@@ -30,8 +30,7 @@
         <BoxButton
           v-if="id === 'aeternity'"
           fill="alternative"
-          :to="SIMPLEX_URL"
-          is-external-link
+          :href="SIMPLEX_URL"
         >
           <BuyIcon />{{ $t('pages.fungible-tokens.buyAe') }}
         </BoxButton>
@@ -209,10 +208,12 @@
         :text="formatCurrency(tokenData.atl)"
       />
     </div>
-    <TransactionList
+    <div
       v-else
-      :token="id"
-    />
+      class="transaction-list-wrapper"
+    >
+      <TransactionList :token="id" />
+    </div>
   </div>
 </template>
 
@@ -521,6 +522,10 @@ export default {
     &:hover {
       color: variables.$color-white;
     }
+  }
+
+  .transaction-list-wrapper {
+    padding: 16px;
   }
 }
 </style>

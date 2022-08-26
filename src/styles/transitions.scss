@@ -1,0 +1,77 @@
+/**
+ * Transitions used with Vue <transition name="transition-name">...</transition>
+ */
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: translateY(70%);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dig-out {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+
+  100% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+
+.fade-transition {
+  &-enter-active,
+  &-leave-active {
+    transition: opacity 150ms ease-out;
+  }
+
+  &-enter,
+  &-leave-to {
+    opacity: 0;
+  }
+}
+
+.page-transition {
+  &-enter-active,
+  &-leave-active {
+    transition: opacity 150ms ease-out;
+  }
+
+  &-enter,
+  &-leave-to {
+    opacity: 0;
+  }
+
+  &-leave-to {
+    position: absolute;
+    z-index: -1;
+    top: 48px;
+    left: 0;
+    width: 100%;
+  }
+}
+
+.pop-transition {
+  &-enter-active {
+    animation: pop-in 500ms forwards;
+  }
+
+  &-leave-to {
+    position: absolute;
+    z-index: -1;
+    top: 48px;
+    left: 0;
+    width: 100%;
+  }
+
+  &-leave-active {
+    animation: dig-out 400ms forwards;
+  }
+}

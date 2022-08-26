@@ -346,7 +346,6 @@ export const COMMIT_URL = 'https://github.com/aeternity/superhero-wallet/commit/
 export const TERMS_URL = 'https://wallet.superhero.com/about/termsOfService';
 
 export const MODAL_DEFAULT = 'default';
-export const MODAL_ACCOUNT_DETAILS = 'account-details';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';
 export const MODAL_SPEND_SUCCESS = 'spend-success';
 export const NODAL_CONFIRM = 'confirm';

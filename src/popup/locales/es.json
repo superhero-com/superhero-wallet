@@ -250,7 +250,6 @@
     },
     "recentTransactions": {
       "recentActivity": "Actividad Reciente",
-      "viewAll": "Ver todo",
       "noTransactionsFound": "!No se encontraron transacciones!"
     },
     "add-fungible-token": {
