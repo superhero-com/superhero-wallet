@@ -6,7 +6,7 @@ export default (showAllTokens) => ({
     return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
   },
   props: {
-    showMyTokens: { type: Boolean },
+    showTokensWithBalance: { type: Boolean },
   },
   computed: {
     ...mapState('fungibleTokens', ['availableTokens', 'aePublicData']),
@@ -46,11 +46,12 @@ export default (showAllTokens) => ({
         ...this.convertedTokenInfo,
       ];
       const searchTerm = this.searchTerm.trim().toLowerCase();
-      return (this.showMyTokens
-        ? [...(this.aeternityToken ? [this.aeternityToken] : []), ...this.tokenBalances]
-        : tokensInfo
-      )
-        .filter((token) => (showAllTokens ? token : token.contractId === 'aeternity' || this.tokenBalances.includes(token)))
+      return tokensInfo
+        .filter((token) => (showAllTokens
+          ? token
+          : token.contractId === 'aeternity' || this.tokenBalances.includes(token)))
+        .filter((token) => (this.showTokensWithBalance
+          ? token.contractId === 'aeternity' || +token?.convertedBalance : token))
         .filter(
           (token) => !searchTerm
             || token.symbol.toLowerCase().includes(searchTerm)

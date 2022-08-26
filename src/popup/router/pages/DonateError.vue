@@ -1,10 +1,10 @@
 <template>
   <div class="donate-error">
     <h1>{{ $t('pages.donate-error.error-report') }}</h1>
-    <Textarea
+    <FormTextarea
       v-model="description"
       :placeholder="$t('pages.donate-error.error-placeholder')"
-      size="medium"
+      size="md"
     />
     <h1>{{ $t('pages.donate-error.data-collected') }}</h1>
     <h2 class="error-info-title">
@@ -39,11 +39,14 @@
 </template>
 
 <script>
-import Textarea from '../components/Textarea.vue';
+import FormTextarea from '../components/FormTextarea.vue';
 import Button from '../components/Button.vue';
 
 export default {
-  components: { Textarea, Button },
+  components: {
+    FormTextarea,
+    Button,
+  },
   props: {
     entry: { type: Object, default: () => ({}) },
   },

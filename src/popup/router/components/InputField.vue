@@ -246,6 +246,14 @@ export default {
     align-items: center;
     margin-top: 9px;
     text-align: left;
+
+    &-help {
+      display: block;
+      width: 25px;
+      height: 20px;
+      padding-left: 5px;
+      color: inherit;
+    }
   }
 
   &.error,

@@ -76,7 +76,11 @@ button {
   &-heading-2 {
     @extend %face-sans-18-medium;
 
-    margin-bottom: 0.4em;
+    margin-bottom: 0.45em;
     color: $color-white;
   }
+}
+
+.relative {
+  position: relative;
 }

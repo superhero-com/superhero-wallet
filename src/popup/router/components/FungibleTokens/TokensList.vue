@@ -24,7 +24,7 @@
           fill="alternative"
           small
           hollow
-          icon-text
+          has-icon
           :to="SIMPLEX_URL"
         >
           <Buy />

@@ -20,15 +20,15 @@
           {{ $t('pages.account.heading') }} {{ accountIdx + 1 }}
         </div>
         <ButtonPlain
-          v-if="truncateAddress && truncateAddress.length"
+          v-if="truncatedAddress && truncatedAddress.length"
           v-clipboard:copy="activeAccount.address"
           v-clipboard:success="copy"
           class="ae-address"
           data-cy="copy"
         >
-          <span>{{ truncateAddress[0] }}</span>
+          <span>{{ truncatedAddress[0] }}</span>
           <span class="more">...</span>
-          <span>{{ truncateAddress[1] }}</span>
+          <span>{{ truncatedAddress[1] }}</span>
 
           <CopyOutlined v-if="canCopyAddress" />
 
@@ -51,6 +51,7 @@ import Avatar from './Avatar.vue';
 import ButtonPlain from './ButtonPlain.vue';
 import CopyOutlined from '../../../icons/copy-outlined.svg?vue-component';
 import Truncate from './Truncate.vue';
+import { truncateAddress } from '../../utils/helper';
 
 export default {
   components: {
@@ -74,15 +75,8 @@ export default {
       const { address } = this.activeAccount;
       return `${this.activeNetwork.explorerUrl}/account/transactions/${address}`;
     },
-    truncateAddress() {
-      const { address } = this.activeAccount;
-      const addressLength = address.length;
-      const firstPart = address.slice(0, 6).match(/.{3}/g);
-      const secondPart = address.slice(addressLength - 3, addressLength).match(/.{3}/g);
-      return [
-        firstPart.slice(0, 2).reduce((acc, current) => `${acc}${current}`),
-        secondPart.slice(-1).reduce((acc, current) => `${acc}${current}`),
-      ];
+    truncatedAddress() {
+      return truncateAddress(this.activeAccount);
     },
   },
 };

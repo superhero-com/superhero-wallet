@@ -5,121 +5,146 @@
     from-bottom
     @close="closeModal"
   >
-    <transition name="fade-between">
-      <TransferSendForm
-        v-if="currentStep === STEP_FORM"
-        v-model="formModel"
-      />
-
-      <div v-else-if="currentStep === STEP_TIP">
-        <h2>TIP</h2>
-      </div>
-
-      <div v-else-if="currentStep === STEP_REVIEW">
-        <h2>REVIEW</h2>
-      </div>
-
-      <div v-else-if="currentStep === STEP_SUCCESS">
-        <h2>SUCCESS</h2>
-      </div>
-    </transition>
+    <div class="relative">
+      <transition name="fade-between">
+        <component
+          :is="currentStepConfig.component"
+          ref="currentRenderedComponent"
+          v-model="transferData"
+          :is-address-chain="isAddressChain"
+          :is-address-url="isAddressUrl"
+          @success="currentStepConfig.onSuccess"
+        />
+      </transition>
+    </div>
 
     <template #footer>
-      <template v-if="isSuccess">
-        <Button
-          fill="secondary"
-          text="View in explorer"
-          class="btn-primary-action"
-          new-ui
-        />
-        <Button
-          :text="$t('ok')"
-          new-ui
-          @click="closeModal"
-        />
-      </template>
-      <template v-else>
-        <Button
-          v-if="showEditButton"
-          fill="secondary"
-          text="Edit"
-          class="btn-secondary-action"
-          new-ui
-          @click="editTransfer"
-        />
-        <Button
-          v-if="showSendButton"
-          new-ui
-          class="btn-primary-action"
-          text="Send"
-          @click="send"
-        />
-        <Button
-          v-else
-          class="btn-primary-action"
-          new-ui
-          :text="$t('modals.send.next')"
-          @click="proceedToNextStep"
-        />
-      </template>
+      <Button
+        v-if="showEditButton"
+        fill="secondary"
+        text="Edit"
+        class="button-action-secondary"
+        new-ui
+        @click="editTransfer"
+      />
+      <Button
+        class="button-action-primary"
+        new-ui
+        :has-icon="showSendButton"
+        :text="showSendButton ? $t('pages.send.send') : $t('modals.send.next')"
+        @click="proceedToNextStep"
+      >
+        {{ showSendButton ? $t('pages.send.send') : $t('modals.send.next') }}
+        <ArrowSendIcon v-if="showSendButton" />
+      </Button>
     </template>
   </Modal>
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import { MODAL_TRANSFER_SEND } from '../../../utils/constants';
-import {
-  validateTipUrl,
-} from '../../../utils/helper';
+import { validateTipUrl } from '../../../utils/helper';
 import Modal from '../Modal.vue';
-import TransferSendForm from '../TransferSendForm.vue';
 import Button from '../Button.vue';
+import TransferSendForm from '../TransferSendForm.vue';
+import TransferReview from '../TransferReview.vue';
+import TransferReviewTip from '../TransferReviewTip.vue';
+import ArrowSendIcon from '../../../../icons/arrow-send.svg?vue-component';
 
 const STEP_FORM = 'form';
-const STEP_TIP = 'tip';
 const STEP_REVIEW = 'review';
-const STEP_SUCCESS = 'success';
+const STEP_REVIEW_TIP = 'tip';
 
 export default {
   name: 'TransferSend',
   components: {
     Modal,
     Button,
-    TransferSendForm,
+    ArrowSendIcon,
   },
-  data: () => ({
-    STEP_FORM,
-    STEP_TIP,
-    STEP_REVIEW,
-    STEP_SUCCESS,
-    currentStep: STEP_FORM,
-    isSuccess: false,
-    formModel: {},
-  }),
+  props: {
+    tokenContractId: { type: String, default: null },
+    address: { type: String, default: null },
+  },
+  data() {
+    return {
+      STEP_FORM,
+      STEP_REVIEW,
+      STEP_REVIEW_TIP,
+      currentStep: STEP_FORM,
+      transferData: {
+        address: '',
+        amount: null,
+        selectedAsset: null,
+      },
+      steps: {
+        [STEP_FORM]: {
+          component: TransferSendForm,
+          onSuccess: this.handleSendFormSuccess,
+        },
+        [STEP_REVIEW_TIP]: {
+          component: TransferReviewTip,
+          onSuccess: this.handleReviewTipSuccess,
+        },
+        [STEP_REVIEW]: {
+          component: TransferReview,
+          onSuccess: this.handleReviewSuccess,
+        },
+      },
+    };
+  },
   computed: {
+    ...mapState('fungibleTokens', ['availableTokens']),
+    currentStepConfig() {
+      return this.steps[this.currentStep];
+    },
     showEditButton() {
-      return [STEP_TIP, STEP_REVIEW].includes(this.currentStep);
+      return [STEP_REVIEW_TIP, STEP_REVIEW].includes(this.currentStep);
     },
     showSendButton() {
       return this.currentStep === STEP_REVIEW;
     },
-    isAddressAnUrl() {
-      return this.formModel.address ? validateTipUrl(this.formModel.address) : false;
+    isAddressChain() {
+      return this.transferData.address.endsWith('.chain');
     },
+    isAddressUrl() {
+      return !this.isAddressChain && validateTipUrl(this.transferData.address);
+    },
+  },
+  created() {
+    if (this.tokenContractId && this.availableTokens[this.tokenContractId]) {
+      this.transferData.selectedAsset = this.availableTokens[this.tokenContractId];
+    }
+    if (this.address) this.transferData.address = this.address;
   },
   methods: {
     closeModal() {
       this.$store.commit('modals/closeByKey', MODAL_TRANSFER_SEND);
     },
     proceedToNextStep() {
+      this.$refs.currentRenderedComponent.submit();
+    },
+    handleSendFormSuccess(data) {
+      this.transferData = data;
+      this.currentStep = (this.isAddressUrl)
+        ? STEP_REVIEW_TIP
+        : STEP_REVIEW;
+    },
+    handleReviewTipSuccess() {
       this.currentStep = STEP_REVIEW;
     },
-    editTransfer() {
-      this.currentStep = STEP_FORM;
+    /**
+     * Review success means that the transfer has been initiated
+     * and the summary modal will be displayed by the `pendingTransactionHandler`
+     * after the transfer is finished.
+     */
+    handleReviewSuccess() {
+      this.closeModal();
     },
-    send() {
-      this.currentStep = STEP_SUCCESS;
-      this.isSuccess = true;
+    editTransfer() {
+      this.error = false;
+      this.currentStep = STEP_FORM;
     },
   },
 };
@@ -127,12 +152,12 @@ export default {
 
 <style lang="scss" scoped>
 .transfer-send-modal {
-  .btn-secondary-action {
-    flex-basis: 40%;
+  .button-action-secondary {
+    flex-basis: 30%;
   }
 
-  .btn-primary-action {
-    flex-basis: 60%;
+  .button-action-primary {
+    flex-basis: 70%;
   }
 }
 </style>

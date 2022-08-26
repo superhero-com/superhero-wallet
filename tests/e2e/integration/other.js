@@ -28,13 +28,10 @@
 describe('Tests cases not connected to specific page', () => {
   it('(not) redirects to last visited routes', () => {
     [
-      { path: '/success-tip', redirect: false },
       { path: '/notifications', redirect: false },
-      { path: '/tips', redirect: true },
-      { path: '/transfer/receive', redirect: true },
-      { path: '/transfer', redirect: true },
+      { path: '/tips', redirect: false },
       { path: '/names', redirect: true },
-      { path: '/about', redirect: true },
+      { path: '/more/about', redirect: true },
       { path: '/transactions', redirect: true },
     ].forEach(({ path, redirect }) => {
       cy.login({}, path)

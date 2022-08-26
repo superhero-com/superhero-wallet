@@ -552,8 +552,6 @@
       "sender": "Dirección de envio",
       "recipient": "Dirección de recepción",
       "amount": "Monto",
-      "editTxDetails": "Editar Detalles de la Transacción",
-      "tx-success": "Transacción Completada",
       "successalert": "Haz realizado un envio exitosamente ",
       "to": "Para",
       "from": "De",
@@ -688,7 +686,6 @@
       "title": "Título",
       "titlePlaceholder": "Envia un mensaje de #apoyo junto con tu donación...",
       "account": "Cuenta",
-      "next": "Enviar Propina",
       "url": "Enviar Propina a",
       "to": "para",
       "amountLabel": "Monto",
@@ -705,18 +702,6 @@
       "notVerifiedUrlInfo": "Esta URL aún no ha sido verificada. El propietario de la URL no ha creado una cuenta para reclamar sus tokens.",
       "verifiedUrlInfo": "Si una URL es marcada como verificada. significa que el propietatio de esta URL ya es parte de Superhero — !y eso es buenísimo! Una dirección AE se ha incluido en la URL y las propinas puedess ser reclamadas.",
       "minAmountError": "Las Propinas deberían tener un valor sobre los 0.01 USD en tokens para que puedan ser enviadas."
-    },
-    "successTip": {
-      "feed": "Ver tu propina en el listado",
-      "completedHeading": " Transacción Completada.",
-      "sentTo": "Enviar a: ",
-      "letThemKnow": "!Déjales saber!",
-      "heading": "ENVIAR",
-      "home": "inicio",
-      "successfullySent": "Has enviado exitosamente ",
-      "to": "para",
-      "note": "NOTA: El propietario de esta URL aún no ha creado una cuenta. Ellos pueden reclamar sus tokens fácilmente creando una billetera - de la misma forma en que tú lo hiciste.",
-      "notify": "Notificar al propietario que has enviado AE a esta publicación"
     },
     "transactionDetails": {
       "heading": "Detalles de Transacciones",

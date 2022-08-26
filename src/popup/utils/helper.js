@@ -160,7 +160,7 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
   return Promise.resolve(contractInstance);
 };
 
-export const escapeSpecialChars = (str) => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
+export const escapeSpecialChars = (str = '') => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
 
 export const checkHashType = (hash) => {
   const accountPublicKeyRegex = RegExp('^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$');
@@ -290,4 +290,14 @@ export const amountRounded = (rawAmount) => {
     return amount.toFixed();
   }
   return amount.toFixed((amount < 0.01) ? 9 : 2);
+};
+
+export const truncateAddress = ({ address }) => {
+  const addressLength = address.length;
+  const firstPart = address.slice(0, 6).match(/.{3}/g);
+  const secondPart = address.slice(addressLength - 3, addressLength).match(/.{3}/g);
+  return [
+    firstPart.slice(0, 2).reduce((acc, current) => `${acc}${current}`),
+    secondPart.slice(-1).reduce((acc, current) => `${acc}${current}`),
+  ];
 };

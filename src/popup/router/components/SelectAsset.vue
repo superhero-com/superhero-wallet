@@ -37,6 +37,7 @@ export default {
     openAssetSelector() {
       this.$store.dispatch('modals/open',
         {
+          ...this.$attrs,
           name: MODAL_ASSET_SELECTOR,
           selectedToken: this.value,
           resolve: (token) => token,

@@ -227,6 +227,8 @@ export default {
   }
 
   &.full-screen {
+    position: absolute;
+
     .container {
       height: 100%;
       width: 100%;

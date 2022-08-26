@@ -64,9 +64,15 @@
       </div>
 
       <div class="request-specific-amount">
-        <RequestAmount
+        <InputAmount
           v-model="amount"
+          v-validate="{
+            required: true,
+            min_value_exclusive: 0,
+          }"
+          name="amount"
           :label="$t('modals.receive.requestAmount')"
+          :error-message="errors.first('amount')"
           :selected-asset="selectedAsset"
           @asset-selected="handleAssetChange"
         />
@@ -88,10 +94,12 @@
         v-if="IS_MOBILE_DEVICE"
         class="btn-share"
         new-ui
-        :text="$t('modals.receive.share')"
-        :icon="shareIcon"
+        has-icon
         @click="share"
-      />
+      >
+        <ShareIcon />
+        {{ $t('modals.receive.share') }}
+      </Button>
     </template>
   </Modal>
 </template>
@@ -101,9 +109,8 @@ import QrcodeVue from 'qrcode.vue';
 import { mapGetters, mapState } from 'vuex';
 import { pick } from 'lodash-es';
 import CopyMixin from '../../../../mixins/copy';
-import RequestAmount from '../RequestAmount.vue';
+import InputAmount from '../InputAmountV2.vue';
 import Scrollable from '../Scrollable.vue';
-import shareIcon from '../../../../icons/share-2.svg';
 import { APP_LINK_WEB, MODAL_TRANSFER_RECEIVE } from '../../../utils/constants';
 import Modal from '../Modal.vue';
 import Avatar from '../Avatar.vue';
@@ -111,11 +118,12 @@ import Truncate from '../Truncate.vue';
 import Button from '../Button.vue';
 import AddressFormatted from '../AddressFormatted.vue';
 import ExternalLinkIcon from '../../../../icons/external-link.svg?vue-component';
+import ShareIcon from '../../../../icons/share-2.svg?vue-component';
 
 export default {
   name: 'TransferReceive',
   components: {
-    RequestAmount,
+    InputAmount,
     Modal,
     Avatar,
     Truncate,
@@ -124,6 +132,7 @@ export default {
     Scrollable,
     AddressFormatted,
     ExternalLinkIcon,
+    ShareIcon,
   },
   mixins: [
     CopyMixin,
@@ -134,11 +143,13 @@ export default {
     tokenContractId: { type: [String, Number], default: null },
   },
   subscriptions() {
-    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+    return pick(this.$store.state.observables, [
+      'tokenBalance',
+      'balanceCurrency',
+    ]);
   },
   data() {
     return {
-      shareIcon,
       amount: null,
       IS_MOBILE_DEVICE: window.IS_MOBILE_DEVICE,
       selectedAsset: null,

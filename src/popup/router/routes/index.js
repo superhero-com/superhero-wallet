@@ -40,7 +40,6 @@ import Settings from '../pages/Settings.vue';
 import SignMessage from '../pages/SignMessage.vue';
 import SignTransaction from '../pages/SignTransaction.vue';
 import TermsOfService from '../pages/TermsOfService.vue';
-import TipsSend from '../pages/TipsSend.vue';
 import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
 import ResetWallet from '../pages/ResetWallet.vue';
@@ -295,20 +294,6 @@ export default [
     },
   },
   {
-    path: '/more/tips',
-    name: 'tips-send',
-    component: TipsSend,
-    props: true,
-    meta: {
-      title: 'tips',
-      backButton: true,
-      closeButton: true,
-      hideTabBar: true,
-      hideNotificationsIcon: true,
-      newUI: true,
-    },
-  },
-  {
     path: '/more/tips-claim',
     name: 'tips-claim',
     component: TipsClaim,
@@ -322,8 +307,8 @@ export default [
     },
   },
   {
-    path: '/tip',
-    redirect: '/more/tips',
+    path: '/tips*',
+    redirect: '/account*',
   },
   {
     path: '/retip',
@@ -503,6 +488,7 @@ export default [
       title: 'sign-transaction',
       notPersist: true,
       hideTabBar: true,
+      newUI: true,
     },
   },
   {

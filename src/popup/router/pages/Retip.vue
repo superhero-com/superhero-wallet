@@ -11,17 +11,27 @@
     </div>
 
     <InputAmount
-      v-model="amount"
-      :error="amount && validationStatus.error"
+      v-model="formModel.amount"
+      v-validate="{
+        required: true,
+        min_value_exclusive: 0,
+      }"
+      name="amount"
+      class="amount-input"
+      show-tokens-with-balance
       :error-message="validationStatus.msg"
-      @error="(val) => error = val"
+      :selected-asset="formModel.selectedAsset"
+      @asset-selected="(val) => $set(formModel, 'selectedAsset', val)"
     />
-    <div class="tip-note-preview">
+    <div
+      v-if="tip.title"
+      class="tip-note-preview"
+    >
       {{ tip.title }}
     </div>
 
     <Button
-      :disabled="!tippingSupported || error || validationStatus.error"
+      :disabled="!tippingSupported || validationStatus.error"
       @click="sendTip"
     >
       {{ $t('pages.tipPage.confirm') }}
@@ -40,7 +50,7 @@ import { SCHEMA } from '@aeternity/aepp-sdk';
 import { MAGNITUDE } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
 import deeplinkApi from '../../../mixins/deeplinkApi';
-import InputAmount from '../components/InputAmount.vue';
+import InputAmount from '../components/InputAmountV2.vue';
 import UrlStatus from '../components/UrlStatus.vue';
 import Button from '../components/Button.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
@@ -52,13 +62,15 @@ export default {
   mixins: [deeplinkApi],
   data: () => ({
     tip: {},
-    amount: '',
+    formModel: {
+      amount: null,
+      selectedAsset: null,
+    },
     loading: false,
-    error: false,
   }),
   computed: {
     ...mapGetters(['account', 'tippingSupported']),
-    ...mapState('fungibleTokens', ['selectedToken']),
+    ...mapGetters('fungibleTokens', ['getAeternityToken']),
     ...mapState({
       tippingV1: 'tippingV1',
       tippingV2: 'tippingV2',
@@ -70,10 +82,12 @@ export default {
         if (!sdk || !this.tippingContract) {
           return { error: true };
         }
-        if (this.selectedToken && this.$route.query.id.includes('_v1')) {
+        if (this.formModel.selectedAsset.contractId !== 'aeternity'
+          && this.$route.query.id.includes('_v1')) {
           return { error: true, msg: this.$t('pages.tipPage.v1FungibleTokenTipError') };
         }
-        if (!this.selectedToken && +this.amount < minTipAmount) {
+        if (this.formModel.selectedAsset.contractId === 'aeternity'
+          && +this.formModel.amount < minTipAmount) {
           return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
         }
         return { error: false };
@@ -85,9 +99,13 @@ export default {
         : this.tippingV1;
     },
   },
-  async mounted() {
+  async created() {
     this.loading = true;
-    await this.$watchUntilTruly(() => this.tippingV1);
+    this.formModel.selectedAsset = this.getAeternityToken({
+      tokenBalance: this.tokenBalance,
+      balanceCurrency: this.balanceCurrency,
+    });
+
     const tipId = this.$route.query.id;
     if (!tipId) throw new Error('"id" param is missed');
     this.tip = await this.$store.dispatch('getCacheTip', tipId);
@@ -96,17 +114,20 @@ export default {
   methods: {
     async sendTip() {
       const amount = convertToken(
-        this.amount,
-        this.selectedToken ? this.selectedToken.decimals : MAGNITUDE,
+        this.formModel.amount,
+        this.formModel.selectedAsset.contractId !== 'aeternity'
+          ? this.formModel.selectedAsset.decimals : MAGNITUDE,
       ).toFixed();
       this.loading = true;
+      await this.$watchUntilTruly(() => this.tippingV1);
       try {
         let retipResponse = null;
-        if (this.selectedToken) {
-          await this.$store.dispatch('fungibleTokens/createOrChangeAllowance', this.amount);
+        if (this.formModel.selectedAsset.contractId !== 'aeternity') {
+          await this.$store.dispatch('fungibleTokens/createOrChangeAllowance',
+            [this.formModel.selectedAsset.contractId, this.formModel.amount]);
           retipResponse = await this.tippingV2.methods.retip_token(
             +this.tip.id.split('_')[0],
-            this.selectedToken.contractId,
+            this.formModel.selectedAsset.contractId,
             amount,
             {
               waitMined: false,
@@ -127,7 +148,7 @@ export default {
             contractId: this.tippingContract.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'retip',
-            selectedTokenId: this.selectedToken?.contractId,
+            selectedTokenId: this.formModel.selectedAsset?.contractId,
           },
         });
         this.openCallbackOrGoHome(true);
@@ -171,6 +192,10 @@ export default {
 
       @extend %face-sans-11-regular;
     }
+  }
+
+  .input-field + .button {
+    margin-top: 50px;
   }
 
   .section-title {

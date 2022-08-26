@@ -136,10 +136,11 @@ export default (store) => {
         return commit('setAePublicData', aeternityData);
       },
       async createOrChangeAllowance(
-        { rootState: { sdk }, state: { tokens }, rootGetters: { activeNetwork, account } },
-        amount,
+        { rootState: { sdk }, rootGetters: { activeNetwork, account } },
+        [contractId, amount],
       ) {
-        const { selectedToken } = tokens[account.address];
+        const selectedToken = store.state.fungibleTokens.tokens?.[account.address]?.tokenBalances
+          ?.find((t) => t?.contractId === contractId);
         const tokenContract = await sdk.getContractInstance({
           source: FUNGIBLE_TOKEN_CONTRACT,
           contractAddress: selectedToken.contractId,
@@ -208,32 +209,25 @@ export default (store) => {
         }
       },
       async transfer(
-        { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
-        [toAccount, amount, option],
+        { rootState: { sdk } },
+        [contractId, toAccount, amount, option],
       ) {
         const tokenContract = await sdk.getContractInstance({
           source: FUNGIBLE_TOKEN_CONTRACT,
-          contractAddress: tokens[account.address].selectedToken.contractId,
+          contractAddress: contractId,
         });
-        return tokenContract.methods.transfer(
-          toAccount,
-          convertToken(amount, tokens[account.address].selectedToken.decimals).toFixed(),
-          option,
-        );
+        return tokenContract.methods.transfer(toAccount, amount.toFixed(), option);
       },
       async burnTriggerPoS(
-        { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
-        [amount, posAddress, invoiceId, option],
+        { rootState: { sdk } },
+        [contractId, amount, posAddress, invoiceId, option],
       ) {
         const tokenContract = await sdk.getContractInstance({
           source: ZEIT_TOKEN_INTERFACE,
-          contractAddress: tokens[account.address].selectedToken.contractId,
+          contractAddress: contractId,
         });
         return tokenContract.methods.burn_trigger_pos(
-          convertToken(amount, tokens[account.address].selectedToken.decimals).toFixed(),
-          posAddress,
-          invoiceId,
-          option,
+          amount.toFixed(), posAddress, invoiceId, option,
         );
       },
       async getTokensHistory(

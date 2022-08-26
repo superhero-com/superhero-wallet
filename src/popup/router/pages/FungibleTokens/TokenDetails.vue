@@ -330,25 +330,13 @@ export default {
   },
   methods: {
     convertToken,
-    storeSelectedToken() {
-      this.$store.commit('fungibleTokens/setSelectedToken', {
-        address: this.accounts[this.activeIdx].address,
-        token: this.id !== 'aeternity' ? this.tokenBalances.find(({ value }) => value === this.id) : null,
-      });
-    },
-    proceed(path) {
-      this.storeSelectedToken();
-      this.$router.push(path);
-    },
     openTransferReceiveModal() {
-      this.storeSelectedToken();
       this.$store.dispatch('modals/open', {
         name: MODAL_TRANSFER_RECEIVE,
         tokenContractId: this.fungibleToken?.contractId,
       });
     },
     openTransferSendModal() {
-      this.storeSelectedToken();
       this.$store.dispatch('modals/open', {
         name: MODAL_TRANSFER_SEND,
         tokenContractId: this.fungibleToken?.contractId,

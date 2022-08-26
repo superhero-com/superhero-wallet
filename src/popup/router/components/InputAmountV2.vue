@@ -1,15 +1,8 @@
 <template>
   <InputField
-    v-validate="{
-      required,
-      min_value_exclusive: 0,
-      enough_ae: fee.toString(),
-      ...validation,
-    }"
     v-bind="$attrs"
     class="request-amount"
     type="number"
-    name="amount"
     placeholder="0.00"
     new-ui
     :value="value"
@@ -19,6 +12,7 @@
   >
     <template #after="{ focused }">
       <SelectAsset
+        v-bind="$attrs"
         :value="selectedAsset"
         :focused="focused"
         @input="$emit('asset-selected', $event)"
@@ -39,7 +33,10 @@
           {{ formatCurrency(totalAmount) }}
         </span>
 
-        <span class="request-amount-desc-at">
+        <span
+          v-if="currentTokenFiatPrice"
+          class="request-amount-desc-at"
+        >
           @{{
             (currentTokenFiatPrice)
               ? formatCurrency(currentTokenFiatPrice)
@@ -53,7 +50,6 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import BigNumber from 'bignumber.js';
 import InputField from './InputField.vue';
 import SelectAsset from './SelectAsset.vue';
 
@@ -65,14 +61,7 @@ export default {
   props: {
     value: { type: [String, Number], default: '' },
     label: { type: String, default: null },
-    validation: { type: Object, default: () => ({}) },
     selectedAsset: { type: Object, default: null },
-    required: Boolean,
-  },
-  data() {
-    return {
-      fee: BigNumber(0),
-    };
   },
   computed: {
     ...mapGetters([
@@ -101,7 +90,6 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
-@use '../../../styles/typography';
 @use '../../../styles/mixins';
 
 .request-amount {

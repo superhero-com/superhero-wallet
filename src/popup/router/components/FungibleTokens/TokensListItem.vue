@@ -38,7 +38,6 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import BigNumber from 'bignumber.js';
 import TokenAmount from '../TokenAmount.vue';
 import ButtonPlain from '../ButtonPlain.vue';
 import Tokens from '../Tokens.vue';
@@ -55,11 +54,7 @@ export default {
     ...mapGetters(['convertToCurrencyFormatted', 'formatCurrency', 'convertToCurrency']),
     ...mapState('fungibleTokens', ['aePublicData']),
     price() {
-      return this.formatCurrency(this.aePublicData?.current_price
-      || this.tokenData?.convertedBalance
-        ? BigNumber(this.convertToCurrency(this.tokenData.convertedBalance))
-          .div(+this.tokenData.convertedBalance)
-        : 0);
+      return this.formatCurrency(this.aePublicData?.current_price || 0);
     },
   },
 };
