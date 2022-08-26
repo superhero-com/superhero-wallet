@@ -494,6 +494,7 @@
       "mint-info": "This allows you to mint or burn token amount",
       "tokens": "Tokens",
       "searchPlaceholder": "Search by token name or contract address",
+      "searchAssetsPlaceholder": "Search for assets",
       "all": "All",
       "myTokens": "My Tokens",
       "mcap": "MCap",
@@ -501,7 +502,8 @@
       "not-available": "N/A",
       "noTokens": "No tokens in account balance.",
       "buyAe": "Buy AE",
-      "receiveTokens": "Receive tokens"
+      "receiveTokens": "Receive tokens",
+      "select-asset": "Select asset"
     },
     "token-details": {
       "details": "Token Details",

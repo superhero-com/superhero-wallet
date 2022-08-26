@@ -44,7 +44,10 @@
             @focusout="focused = false"
           >
         </slot>
-        <slot name="right" />
+        <slot
+          name="right"
+          :focused="focused"
+        />
       </div>
 
       <div class="under">
