@@ -36,13 +36,12 @@
 </template>
 
 <script>
-import { pick } from 'lodash-es';
-import { mapState, mapGetters } from 'vuex';
 import { SIMPLEX_URL } from '../../../utils/constants';
 import TokensListItem from './TokensListItem.vue';
 import Button from '../Button.vue';
 import Receive from '../../../../icons/receive.svg?vue-component';
 import Buy from '../../../../icons/buy.svg?vue-component';
+import balanceListMixin from '../../../../mixins/balanceListMixin';
 
 export default {
   components: {
@@ -51,73 +50,13 @@ export default {
     Receive,
     Buy,
   },
+  mixins: [balanceListMixin(false)],
   props: {
-    showMyTokens: { type: Boolean },
     searchTerm: { type: String, default: '' },
   },
   data: () => ({
     SIMPLEX_URL,
   }),
-  subscriptions() {
-    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
-  },
-  computed: {
-    ...mapState('fungibleTokens', ['availableTokens', 'aePublicData']),
-    ...mapGetters('fungibleTokens', ['tokenBalances']),
-
-    /**
-     * Returns the default aeternity meta information
-     */
-    aeternityToken() {
-      const aeInformation = this.aePublicData && Object.keys(this.aePublicData).length > 0
-        ? {
-          ...this.aePublicData,
-          convertedBalance: this.tokenBalance,
-          symbol: 'AE',
-          balanceCurrency: this.balanceCurrency,
-          contractId: 'aeternity',
-        }
-        : null;
-      return aeInformation;
-    },
-    /**
-     * Converts the token information object into a searchable list
-     */
-    convertedTokenInfo() {
-      const tokens = Object.entries(this.availableTokens).map(([contractId, tokenData]) => ({
-        name: tokenData.name,
-        symbol: tokenData.symbol,
-        contractId,
-        decimals: tokenData.decimals,
-        convertedBalance: tokenData.convertedBalance,
-      }));
-      this.tokenBalances.forEach((b) => {
-        const index = tokens.findIndex((t) => t.contractId === b.contractId);
-        if (index !== -1) {
-          tokens[index] = b;
-        }
-      });
-      return tokens;
-    },
-    filteredResults() {
-      const tokensInfo = [
-        ...(this.aeternityToken ? [this.aeternityToken] : []),
-        ...this.convertedTokenInfo,
-      ];
-      const searchTerm = this.searchTerm.trim().toLowerCase();
-      return (this.showMyTokens
-        ? [...(this.aeternityToken ? [this.aeternityToken] : []), ...this.tokenBalances]
-        : tokensInfo
-      )
-        .filter((token) => token.contractId === 'aeternity' || this.tokenBalances.includes(token))
-        .filter(
-          (token) => !searchTerm
-            || token.symbol.toLowerCase().includes(searchTerm)
-            || token.name.toLowerCase().includes(searchTerm)
-            || token.contractId.toLowerCase().includes(searchTerm),
-        );
-    },
-  },
   methods: {
     checkZeroBalance(token) {
       return !+token.convertedBalance?.toString();
