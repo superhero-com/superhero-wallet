@@ -326,7 +326,7 @@ export default {
 
     .transaction-list-wrapper {
       ::v-deep .filters {
-        top: calc(env(safe-area-inset-top) + 152px);
+        top: calc(env(safe-area-inset-top) + 154px);
         background-color: variables.$color-bg-4;
       }
 

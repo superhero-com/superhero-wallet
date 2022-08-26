@@ -18,10 +18,11 @@
     :error-message="$attrs['error-message'] || errors.first('amount')"
     @input="$emit('input', $event)"
   >
-    <template #right>
-      <AssetSelector
-        v-model="selectedAsset"
-        class="request-amount-asset"
+    <template #right="{ focused }">
+      <SelectAsset
+        :value="selectedAsset"
+        :focused="focused"
+        @input="$emit('asset-selected', $event)"
       />
     </template>
 
@@ -38,7 +39,6 @@
           <span v-if="value">&thickapprox;</span>
           {{ formatCurrency(totalAmount) }}
         </span>
-        <span v-else>-</span>
 
         <span class="request-amount-desc-at">
           @{{
@@ -55,23 +55,23 @@
 <script>
 import { mapGetters } from 'vuex';
 import BigNumber from 'bignumber.js';
-import AssetSelector from './AssetSelector.vue';
 import InputField from './InputField.vue';
+import SelectAsset from './SelectAsset.vue';
 
 export default {
   components: {
-    AssetSelector,
+    SelectAsset,
     InputField,
   },
   props: {
     value: { type: [String, Number], default: '' },
     validation: { type: Object, default: () => ({}) },
+    selectedAsset: { type: Object, default: null },
     required: Boolean,
   },
   data() {
     return {
       fee: BigNumber(0),
-      selectedAsset: null,
     };
   },
   computed: {
@@ -92,9 +92,6 @@ export default {
     },
   },
   watch: {
-    async selectedAsset(val) {
-      this.$emit('asset-selected', val);
-    },
     hasError(value) {
       return this.$emit('error', value);
     },

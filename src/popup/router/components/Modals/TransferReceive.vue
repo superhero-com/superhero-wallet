@@ -67,6 +67,7 @@
         <RequestAmount
           v-model="amount"
           :label="$t('modals.receive.requestAmount')"
+          :selected-asset="selectedAsset"
           @asset-selected="handleAssetChange"
         />
       </div>
@@ -98,6 +99,7 @@
 <script>
 import QrcodeVue from 'qrcode.vue';
 import { mapGetters, mapState } from 'vuex';
+import { pick } from 'lodash-es';
 import CopyMixin from '../../../../mixins/copy';
 import RequestAmount from '../RequestAmount.vue';
 import Scrollable from '../Scrollable.vue';
@@ -131,6 +133,9 @@ export default {
     defaultAmount: { type: [String, Number], default: null },
     tokenContractId: { type: [String, Number], default: null },
   },
+  subscriptions() {
+    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+  },
   data() {
     return {
       shareIcon,
@@ -140,6 +145,9 @@ export default {
     };
   },
   computed: {
+    ...mapGetters('fungibleTokens', [
+      'getAeternityToken',
+    ]),
     ...mapGetters([
       'accounts',
       'activeNetwork',
@@ -167,9 +175,13 @@ export default {
   },
   created() {
     this.amount = this.defaultAmount;
-
     if (this.tokenContractId && this.availableTokens[this.tokenContractId]) {
       this.selectedAsset = this.availableTokens[this.tokenContractId];
+    } else {
+      this.selectedAsset = this.getAeternityToken({
+        tokenBalance: this.tokenBalance,
+        balanceCurrency: this.balanceCurrency,
+      });
     }
   },
   methods: {

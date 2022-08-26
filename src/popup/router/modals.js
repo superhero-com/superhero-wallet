@@ -16,6 +16,7 @@ import {
   MODAL_MESSAGE_SIGN,
   MODAL_SHARE_QR,
   MODAL_TRANSFER_RECEIVE,
+  MODAL_ASSET_SELECTOR,
 } from '../utils/constants';
 
 import Default from './components/Modals/Default.vue';
@@ -30,6 +31,7 @@ import QrCodeReader from './components/Modals/QrCodeReader.vue';
 import Help from './components/Modals/Help.vue';
 import ShareQr from './components/Modals/ShareQr.vue';
 import AccountDetails from './components/Modals/AccountDetails.vue';
+import AssetSelector from './components/Modals/AssetSelector.vue';
 import TransferReceive from './components/Modals/TransferReceive.vue';
 
 export default () => {
@@ -56,4 +58,5 @@ export default () => {
   registerModal({ name: MODAL_MESSAGE_SIGN, showInPopupIfWebFrame: true });
   registerModal({ name: MODAL_SHARE_QR, component: ShareQr });
   registerModal({ name: MODAL_TRANSFER_RECEIVE, component: TransferReceive });
+  registerModal({ name: MODAL_ASSET_SELECTOR, component: AssetSelector });
 };
