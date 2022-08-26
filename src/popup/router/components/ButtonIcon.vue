@@ -1,19 +1,44 @@
 <template>
-  <button
+  <Component
+    :is="component"
     v-bind="$attrs"
     class="button-icon"
+    :to="to"
+    :href="href"
+    :target="(href) ? '_blank' : null"
     v-on="$listeners"
   >
     <slot />
-  </button>
+  </Component>
 </template>
-<style lang="scss" scoped>
+
+<script>
+export default {
+  props: {
+    to: { type: Object, default: null },
+    href: { type: String, default: null },
+  },
+  computed: {
+    component() {
+      if (this.to) {
+        return 'RouterLink';
+      }
+      if (this.href) {
+        return 'a';
+      }
+      return 'button';
+    },
+  },
+};
+</script>
+
+<style lang="scss">
 @use '../../../styles/variables';
 @use '../../../styles/mixins';
 
-$size: 32px;
-
 .button-icon {
+  $size: 32px;
+
   @include mixins.flex(center, center);
 
   width: $size;
@@ -26,7 +51,7 @@ $size: 32px;
   transition: 0.1s;
   cursor: pointer;
 
-  svg {
+  > .icon {
     width: 75%;
     height: 75%;
     color: variables.$color-white;
@@ -37,7 +62,7 @@ $size: 32px;
   &:hover {
     background-color: variables.$color-hover;
 
-    svg {
+    > .icon {
       opacity: 1;
     }
   }

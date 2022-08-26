@@ -17,16 +17,18 @@
         icon="success"
       />
     </div>
-    <p>
-      {{ $t('pages.claimTips.urlToClaim') }}
-    </p>
+
     <InputField
       v-model="url"
+      new-ui
+      :label="$t('pages.claimTips.urlToClaim')"
       :error="!normalizedUrl"
     />
 
     <Button
       :disabled="!normalizedUrl || !tippingSupported"
+      new-ui
+      extend
       @click="claimTips"
     >
       {{ $t('pages.tipPage.confirm') }}

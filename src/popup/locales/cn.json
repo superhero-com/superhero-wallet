@@ -253,7 +253,6 @@
     },
     "recentTransactions": {
       "recentActivity": "近期活跃情况",
-      "viewAll": "查看全部",
       "noTransactionsFound": "未发现交易!"
     },
     "add-fungible-token": {

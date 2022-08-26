@@ -80,8 +80,9 @@ describe('Test cases for networks page', () => {
       .goBack()
       .goBack()
       .goBack()
-      .get('.transaction-list', { timeout: 8000 })
-      .should('exist')
+      // TODO should be aligned with the new home page changes
+      // .get('.transaction-list', { timeout: 8000 })
+      // .should('exist')
 
       .openNetworks()
       .get('[data-cy=to-add]')

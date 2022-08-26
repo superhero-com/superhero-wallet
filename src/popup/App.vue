@@ -6,15 +6,18 @@
       'show-header': showStatusAndHeader,
       'hide-tab-bar': $route.meta.hideTabBar,
       'new-ui': $route.meta.newUI,
+      'as-modal': $route.meta.asModal,
     }"
   >
     <div class="app-inner">
       <Header v-if="showStatusAndHeader" />
 
-      <RouterView
-        :class="{ 'show-header': showStatusAndHeader }"
-        class="main"
-      />
+      <transition :name="$route.meta.asModal ? 'pop-transition' : 'page-transition'">
+        <RouterView
+          :class="{ 'show-header': showStatusAndHeader }"
+          class="main"
+        />
+      </transition>
 
       <NodeConnectionStatus v-if="showStatusAndHeader" />
       <TabBar v-if="isLoggedIn" />
@@ -50,6 +53,7 @@ export default {
         this.$route.path === '/'
         || this.$route.path.startsWith('/web-iframe-popup')
         || this.$route.params.app
+        || this.$route.meta.hideHeader
       );
     },
     modals() {
@@ -137,11 +141,21 @@ body {
 @use '../styles/mixins';
 
 #app {
+  --screen-padding-x: 16px;
+  --screen-bg-color: #{variables.$color-bg-3};
+
+  @extend %face-sans-16-regular;
+
   position: relative;
+  z-index: 1;
   margin: 0 auto;
   width: variables.$extension-width;
   height: 600px;
   overflow: hidden;
+  border-radius: 10px;
+  color: variables.$color-white;
+  background-color: var(--screen-bg-color);
+  transition: background-color 200ms;
 
   @include mixins.mobile {
     width: 100%;
@@ -152,12 +166,6 @@ body {
   @include mixins.desktop {
     box-shadow: variables.$color-border 0 0 0 1px;
   }
-
-  border-radius: 10px;
-
-  @extend %face-sans-16-regular;
-
-  color: variables.$color-white;
 
   .app-inner {
     width: 100%;
@@ -176,7 +184,7 @@ body {
   }
 
   &.show-header {
-    background: variables.$color-bg-3;
+    --screen-bg-color: #{variables.$color-bg-3};
 
     &.new-ui {
       background: variables.$color-bg-3-new;
@@ -192,6 +200,10 @@ body {
         min-height: calc(100% - 48px - env(safe-area-inset-top));
       }
     }
+  }
+
+  &.new-ui {
+    --screen-bg-color: #{variables.$color-bg-3-new};
   }
 
   &.not-rebrand {
@@ -223,8 +235,8 @@ body {
     }
   }
 
-  .blur {
-    filter: blur(4px);
+  &.as-modal {
+    --screen-bg-color: #{variables.$modal-bg-color};
   }
 
   .tab-bar {

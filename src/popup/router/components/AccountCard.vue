@@ -1,18 +1,16 @@
 <template>
-  <div
+  <RouterLink
     class="account-card"
     :style="cardCssProps"
-    @click.prevent="$store.dispatch('modals/open', {
-      ...$attrs,
-      name: MODAL_ACCOUNT_DETAILS,
-    })"
+    :to="{ name: 'account-details' }"
   >
     <AccountInfo
       v-bind="$attrs"
       :color="color"
-      @click.native.stop
     />
+
     <BalanceInfo v-bind="$attrs" />
+
     <div class="misc">
       <div class="total-tokens">
         <span class="digit">
@@ -23,15 +21,21 @@
         </span>
       </div>
       <div class="buttons">
-        <a @click.stop="openTransferReceiveModal($attrs)">
+        <button
+          class="buttons-button"
+          @click.prevent="openTransferReceiveModal()"
+        >
           <ReceiveIcon :style="iconCssProps" />
-        </a>
-        <RouterLink :to="{ name: 'transfer-send' }">
+        </button>
+        <RouterLink
+          class="buttons-button"
+          :to="{ name: 'transfer-send' }"
+        >
           <SendIcon :style="iconCssProps" />
         </RouterLink>
       </div>
     </div>
-  </div>
+  </RouterLink>
 </template>
 
 <script>
@@ -41,7 +45,7 @@ import BalanceInfo from './BalanceInfo.vue';
 import ReceiveIcon from '../../../icons/account-card/account-receive.svg?vue-component';
 import SendIcon from '../../../icons/account-card/account-send.svg?vue-component';
 import { getAddressColor } from '../../utils/avatar';
-import { MODAL_ACCOUNT_DETAILS, MODAL_TRANSFER_RECEIVE } from '../../utils/constants';
+import { MODAL_TRANSFER_RECEIVE } from '../../utils/constants';
 
 export default {
   components: {
@@ -53,9 +57,6 @@ export default {
   props: {
     idx: { type: Number, required: true },
   },
-  data: () => ({
-    MODAL_ACCOUNT_DETAILS,
-  }),
   computed: {
     ...mapGetters('fungibleTokens', ['getTokenBalance']),
     ...mapGetters(['accounts']),
@@ -75,9 +76,8 @@ export default {
     },
   },
   methods: {
-    openTransferReceiveModal(attrs) {
+    openTransferReceiveModal() {
       this.$store.dispatch('modals/open', {
-        ...attrs,
         name: MODAL_TRANSFER_RECEIVE,
       });
     },
@@ -98,6 +98,8 @@ export default {
   margin: 8px 16px 32px 16px;
   padding: 12px;
   align-items: flex-start;
+  text-decoration: none;
+  color: inherit;
   cursor: pointer;
 
   .balance-info {
@@ -125,10 +127,13 @@ export default {
 
     .buttons {
       display: flex;
+      gap: 8px;
 
-      a {
-        margin-left: 8px;
+      &-button {
+        margin: 0;
+        padding: 0;
         color: rgba(variables.$color-white, 0.8);
+        cursor: pointer;
 
         &:hover {
           color: rgba(variables.$color-white, 1);

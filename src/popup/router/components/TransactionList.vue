@@ -4,6 +4,7 @@
       v-if="displayFilter"
       v-model="displayMode"
       :filters="filters"
+      :fixed="filtersFixed"
     />
     <div
       class="list"
@@ -57,8 +58,9 @@ export default {
   props: {
     token: { type: String, default: '' },
     searchTerm: { type: String, default: '' },
-    displayFilter: { type: Boolean, default: true },
     maxLength: { type: Number, default: null },
+    displayFilter: Boolean,
+    filtersFixed: Boolean,
   },
   data() {
     return {
@@ -193,7 +195,6 @@ export default {
   flex-direction: column;
 
   .list {
-    background: variables.$color-black;
     padding: 0;
     margin: 0;
   }

@@ -10,7 +10,7 @@
         <Truncate
           v-if="accounts[idx].name"
           :str="accounts[idx].name"
-          :gradiant-color="color"
+          :gradient-color="color"
         />
         <div
           v-else
@@ -20,15 +20,15 @@
           {{ $t('pages.account.heading') }} {{ accountIdx + 1 }}
         </div>
         <ButtonPlain
-          v-if="truncateAdrress && truncateAdrress.length"
+          v-if="truncateAddress && truncateAddress.length"
           v-clipboard:copy="accounts[idx].address"
           v-clipboard:success="copy"
           class="ae-address"
           data-cy="copy"
         >
-          <span>{{ truncateAdrress[0] }}</span>
+          <span>{{ truncateAddress[0] }}</span>
           <span class="more">...</span>
-          <span>{{ truncateAdrress[1] }}</span>
+          <span>{{ truncateAddress[1] }}</span>
 
           <CopyOutlined v-if="showCopyIcon" />
 
@@ -75,7 +75,7 @@ export default {
       const { address } = this.accounts[this.idx];
       return `${this.activeNetwork.explorerUrl}/account/transactions/${address}`;
     },
-    truncateAdrress() {
+    truncateAddress() {
       const { address } = this.accounts[this.idx];
       const addressLength = address.length;
       const firstPart = address.slice(0, 6).match(/.{3}/g);
