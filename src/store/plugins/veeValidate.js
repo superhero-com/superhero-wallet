@@ -18,15 +18,7 @@ const filteredRules = (errors, validatedField, rules) => errors.filter(
   ({ field, rule }) => field === validatedField && !rules.includes(rule),
 );
 
-const { validateAll } = Validator.prototype;
 Object.assign(Validator.prototype, {
-  async validateAll(warningRules = {}) {
-    await validateAll.call(this);
-    return !Object.entries(warningRules).reduce(
-      (count, [field, rules]) => count + filteredRules(this.errors.items, field, rules).length,
-      0,
-    );
-  },
   firstExcept(field, rules) {
     return filteredRules(this.errors.items, field, rules)[0]?.msg;
   },
@@ -134,7 +126,7 @@ export default (store) => {
       .unsubscribe(),
   ));
   Validator.extend('name_registered_address_or_url', {
-    getMessage: () => 'O kurcze',
+    getMessage: () => i18n.t('validation.invalidAddressChainUrl'),
     validate: async (value) => {
       const res = validateTipUrl(value) || await checkNameRegisteredAddress(value);
       return res;

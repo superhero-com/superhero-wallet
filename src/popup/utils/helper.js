@@ -285,3 +285,13 @@ export const amountRounded = (rawAmount) => {
   }
   return amount.toFixed((amount < 0.01) ? 9 : 2);
 };
+
+export const truncateAddress = ({ address }) => {
+  const addressLength = address.length;
+  const firstPart = address.slice(0, 6).match(/.{3}/g);
+  const secondPart = address.slice(addressLength - 3, addressLength).match(/.{3}/g);
+  return [
+    firstPart.slice(0, 2).reduce((acc, current) => `${acc}${current}`),
+    secondPart.slice(-1).reduce((acc, current) => `${acc}${current}`),
+  ];
+};

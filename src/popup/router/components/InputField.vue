@@ -46,7 +46,7 @@
           name="before"
         />
         <StatusIcon
-          v-else
+          v-else-if="!newUi"
           :status="hasError && 'alert' || hasWarning && 'warning'"
         />
         <slot
@@ -82,13 +82,25 @@
       </div>
     </label>
 
-    <label
+    <div
       v-if="hasError || hasWarning"
       class="message"
-      :for="inputId"
     >
-      {{ hasError ? errorMessage : warningMessage }}
-    </label>
+      <label
+        class="message-text"
+        :for="inputId"
+      >
+        {{ hasError ? errorMessage : warningMessage }}
+      </label>
+
+      <a
+        v-if="showMessageHelp"
+        class="message-help"
+        @click.prevent="$emit('help-message')"
+      >
+        <QuestionCircleIcon />
+      </a>
+    </div>
   </div>
 </template>
 
@@ -109,6 +121,7 @@ export default {
     readonly: Boolean,
     plain: Boolean,
     showHelp: Boolean,
+    showMessageHelp: Boolean,
     newUi: Boolean,
   },
   data: () => ({
@@ -228,9 +241,18 @@ export default {
   .message {
     @extend %face-sans-12-regular;
 
-    display: block;
+    display: flex;
+    align-items: center;
     margin-top: 9px;
     text-align: left;
+
+    &-help {
+      display: block;
+      width: 25px;
+      height: 20px;
+      padding-left: 5px;
+      color: inherit;
+    }
   }
 
   &.error,

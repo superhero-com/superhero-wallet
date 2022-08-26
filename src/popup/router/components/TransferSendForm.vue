@@ -2,9 +2,9 @@
   <div
     class="transfer-send new-ui"
   >
-    <p class="text-heading-2 text-center">
-      {{ $t('modals.send.sendTitle') }}
-    </p>
+    <ModalHeader
+      :title="$t('modals.send.sendTitle')"
+    />
 
     <!-- account: true,
     name_registered_address: true,
@@ -21,6 +21,7 @@
       name="address"
       data-cy="address"
       show-help
+      show-message-help
       new-ui
       :label="$t('modals.send.recipientLabel')"
       :placeholder="$t('modals.send.recipientPlaceholder')"
@@ -28,27 +29,26 @@
       :warning-message="addressWarningMsg"
       @help="showRecipientHelp()"
     >
-      <template #before>
-        <Valid
-          v-if="!!formModel.address"
-          class="valid"
-        />
-      </template>
-
       <template #label-after>
         <a
           class="scan-button"
           data-cy="scan-button"
-          @click="scan"
+          @click="openScanQrModal"
         >
-          <QrScan />
+          <QrScanIcon />
         </a>
       </template>
     </InputField>
 
-    <RequestAmount
+    <InputAmount
       v-model="formModel.amount"
+      v-validate="{
+        required: true,
+        min_value_exclusive: 0,
+      }"
+      name="amount"
       class="amount-input"
+      :error-message="errors.first('amount')"
       :selected-asset="formModel.selectedAsset"
       @asset-selected="handleAssetChange"
     />
@@ -62,53 +62,46 @@
         :amount="+fee.toFixed()"
         symbol="AE"
         data-cy="review-fee"
-        hide-fiat
-      />
-    </DetailsItem>
-
-    <DetailsItem
-      new-ui
-      :label="$t('pages.signTransaction.total')"
-    >
-      <TokenAmount
-        slot="value"
-        :amount="(selectedToken ? 0 : +fee.toFixed()) + +formModel.amount"
-        :symbol="tokenSymbol"
-        :hide-fiat="!!selectedToken"
-        data-cy="review-total"
-        high-precision
       />
     </DetailsItem>
   </div>
 </template>
 
 <script>
+import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { MODAL_DEFAULT, MODAL_READ_QR_CODE } from '../../utils/constants';
 import {
-  aeToAettos,
-  convertToken,
+  // aeToAettos,
+  // convertToken,
   calculateFee,
 } from '../../utils/helper';
 import InputField from './InputField.vue';
-import RequestAmount from './RequestAmount.vue';
+import InputAmount from './InputAmountV2.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
-import Valid from '../../../icons/valid.svg?vue-component';
-import QrScan from '../../../icons/qr-scan.svg?vue-component';
+import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
+import { MODAL_READ_QR_CODE } from '../../utils/constants';
+import ModalHeader from './ModalHeader.vue';
 
 const WARNING_RULES = ['not_same_as'];
 
 export default {
+  name: 'TransferSendForm',
   components: {
+    ModalHeader,
     InputField,
-    RequestAmount,
+    InputAmount,
     DetailsItem,
     TokenAmount,
-    Valid,
-    QrScan,
+    QrScanIcon,
+  },
+  model: {
+    prop: 'transferData',
+  },
+  props: {
+    transferData: { type: Object, required: true },
   },
   data() {
     return {
@@ -118,26 +111,28 @@ export default {
       },
       invoiceContract: null,
       reviewStep: false,
-      formModel: {
-        address: '',
-        amount: null,
-        selectedAsset: null,
-      },
+      formModel: {},
       loading: false,
       fee: BigNumber(0),
       error: false,
     };
   },
+  subscriptions() {
+    return pick(this.$store.state.observables, [
+      'tokenBalance',
+      'balanceCurrency',
+    ]);
+  },
   computed: {
+    ...mapState([
+      'current',
+      'sdk',
+    ]),
     ...mapState('accounts', [
       'activeIdx',
     ]),
     ...mapState('fungibleTokens', [
       'availableTokens',
-    ]),
-    ...mapState([
-      'current',
-      'sdk',
     ]),
     ...mapGetters([
       'account',
@@ -146,36 +141,48 @@ export default {
       'currentCurrencyRate',
     ]),
     ...mapGetters('fungibleTokens', [
-      'selectedToken',
       'tokenBalances',
+      'getAeternityToken',
     ]),
     tokenSymbol() {
-      return this.selectedToken ? this.selectedToken.symbol : 'AE';
+      return this.formModel.selectedAsset?.symbol || 'AE';
     },
     addressErrorMsg() {
       return this.errors.items
-        .filter((error) => !WARNING_RULES.includes(error.rule))[0]?.msg || null;
+        .filter(({ field }) => field === 'address')
+        .filter(({ rule }) => !WARNING_RULES.includes(rule))[0]?.msg || null;
     },
     addressWarningMsg() {
       return this.errors.items
+        .filter(({ field }) => field === 'address')
         .find((error) => WARNING_RULES.includes(error.rule))?.msg || null;
     },
   },
   watch: {
     formModel: {
       deep: true,
-      immediate: true,
       handler(val) {
-        this.$emit('input', val);
+        console.log('formModel watch', val);
+        this.$emit('input', {
+          ...val,
+          fee: this.fee,
+          total: (val.selectedAsset ? 0 : +this.fee.toFixed()) + +val.amount,
+        });
       },
-    },
-    async selectedToken() {
-      await this.$validator.validateAll(this.warningRules);
-      this.fetchFee();
     },
   },
   async created() {
     await this.fetchFee();
+
+    console.log('Create form', this.transferData);
+
+    this.formModel = this.transferData;
+    if (!this.formModel.selectedAsset) {
+      this.formModel.selectedAsset = this.getAeternityToken({
+        tokenBalance: this.tokenBalance,
+        balanceCurrency: this.balanceCurrency,
+      });
+    }
   },
   methods: {
     async queryHandler(query) {
@@ -193,155 +200,40 @@ export default {
         this.formModel.amount = query.amount;
       }
     },
-    async validate() {
-      if (await this.$validator.validateAll(this.warningRules)) this.reviewStep = true;
-    },
-    async scan() {
-      const scanResult = await this.$store.dispatch('modals/open', {
-        name: MODAL_READ_QR_CODE,
-        title: this.$t('pages.send.scanAddress'),
-      });
-
-      if (scanResult?.trim().charAt(0) === '{') {
-        let parsedScanResult = null;
-        try {
-          parsedScanResult = JSON.parse(scanResult);
-        } catch (e) {
-          // eslint-disable-next-line no-console
-          if (process.env.NODE_ENV !== 'production') console.error(e);
-          this.formModel.address = '';
-          this.$store.dispatch('modals/open', {
-            name: MODAL_DEFAULT,
-            title: this.$t('modals.invalid-qr-code.msg'),
-            icon: 'critical',
-          });
-          return;
-        }
-
-        // does user have the requested tokens?
-        const requestedTokenBalance = this.tokenBalances
-          .find(({ value }) => value === parsedScanResult.tokenContract);
-        if (!requestedTokenBalance) {
-          this.$store.dispatch('modals/open', { name: MODAL_DEFAULT, type: 'insufficient-balance' });
-          this.formModel.address = '';
-          return;
-        }
-
-        // select requested token
-        this.$store.commit('fungibleTokens/setSelectedToken', {
-          address: this.accounts[this.activeIdx].address,
-          token: this.tokenBalances
-            .find(({ value }) => value === parsedScanResult.tokenContract),
-        });
-        // SET result data
-        this.formModel.address = parsedScanResult.tokenContract;
-        this.formModel.amount = +convertToken(
-          parsedScanResult.amount,
-          -this.selectedToken.decimals,
-        );
-        this.invoiceId = parsedScanResult.invoiceId;
-        this.invoiceContract = parsedScanResult.invoiceContract;
-
-        await this.validate();
-      } else {
-        if (!scanResult) return;
-        if (scanResult.startsWith('ak_')) {
-          this.formModel.address = scanResult;
-        } else {
-          this.queryHandler([
-            ...new URL(scanResult).searchParams.entries(),
-          ].reduce((o, [k, v]) => ({ ...o, [k]: v }), {}));
-        }
-        this.invoiceId = null;
-      }
-      if (!this.formModel.address) {
-        this.formModel.address = '';
-      }
-    },
     async fetchFee() {
       await this.$watchUntilTruly(() => this.sdk);
       this.fee = calculateFee(
-        !this.selectedToken ? SCHEMA.TX_TYPE.spend : SCHEMA.TX_TYPE.contractCall, {
+        !this.selectedAsset ? SCHEMA.TX_TYPE.spend : SCHEMA.TX_TYPE.contractCall, {
           ...this.sdk.Ae.defaults,
-          ...(this.selectedToken && {
+          ...(this.selectedAsset && {
             callerId: this.account.address,
-            contractId: this.selectedToken.contractId,
+            contractId: this.selectedAsset.contractId,
           }),
         },
       );
     },
-    async send() {
-      const amount = !this.selectedToken
-        ? aeToAettos(this.formModel.amount)
-        : convertToken(this.formModel.amount, this.selectedToken.decimals);
-      const receiver = this.formModel.address;
-      this.loading = true;
-      try {
-        if (this.selectedToken && this.invoiceId !== null) {
-          const { hash } = await this.$store.dispatch('fungibleTokens/burnTriggerPoS', [
-            this.formModel.amount,
-            this.invoiceContract,
-            this.invoiceId,
-            { waitMined: false, modal: false },
-          ]);
-          this.$store.dispatch('addPendingTransaction', {
-            hash,
-            amount,
-            type: 'spendToken',
-            recipient: receiver,
-            pendingTokenTx: true,
-            tx: {
-              callerId: this.account.address,
-              contractId: this.selectedToken.contractId,
-              type: SCHEMA.TX_TYPE.contractCall,
-              function: 'transfer',
-            },
-          });
-        } else if (this.selectedToken) {
-          const { hash } = await this.$store.dispatch('fungibleTokens/transfer', [
-            receiver,
-            this.formModel.amount,
-            { waitMined: false, modal: false },
-          ]);
-          this.$store.dispatch('addPendingTransaction', {
-            hash,
-            amount,
-            type: 'spendToken',
-            recipient: receiver,
-            pendingTokenTx: true,
-            tx: {
-              callerId: this.account.address,
-              contractId: this.selectedToken.contractId,
-              type: SCHEMA.TX_TYPE.contractCall,
-              function: 'transfer',
-            },
-          });
-        } else {
-          const { hash } = await this.sdk.spend(amount, receiver, {
-            waitMined: false,
-            modal: false,
-          });
-          this.$store.dispatch('addPendingTransaction', {
-            hash,
-            amount,
-            type: 'spend',
-            tx: {
-              senderId: this.account.address,
-              recipientId: this.formModel.address,
-              type: SCHEMA.TX_TYPE.spend,
-            },
-          });
-        }
-        this.$router.push('/account');
-      } catch (e) {
-        this.$store.dispatch('modals/open', {
-          name: 'default',
-          title: this.$t('modals.transaction-failed.msg'),
-          icon: 'critical',
+    // Method called from a parent scope - avoid changing it's name.
+    async submit() {
+      const isValid = await this.$validator.validateAll();
+      console.log('submit inner', isValid, this.formModel);
+
+      if (isValid) {
+        const { address, amount, selectedAsset } = this.formModel;
+        this.$emit('success', {
+          address,
+          amount,
+          selectedAsset,
+          fee: this.fee,
+          total: (selectedAsset ? 0 : +this.fee.toFixed()) + +amount,
+          // formModel: {
+          //   tipUrl: 'test.com', // TODO - pass proper url
+          //   recipientAddress: this.form.address,
+          //   amount: this.form.amount,
+          //   total: (this.selectedToken ? 0 : +this.fee.toFixed()) + +this.form.amount,
+          //   invoiceId: this.invoiceId,
+          //   contractId: this.contractId,
+          // },
         });
-        throw e;
-      } finally {
-        this.loading = false;
       }
     },
     showRecipientHelp() {
@@ -349,6 +241,13 @@ export default {
     },
     handleAssetChange(val) {
       this.formModel.selectedAsset = val;
+    },
+    openScanQrModal() {
+      this.$store.dispatch('modals/open', {
+        name: MODAL_READ_QR_CODE,
+        title: this.$t('modals.transaction-failed.msg'),
+        icon: 'critical',
+      });
     },
   },
 };

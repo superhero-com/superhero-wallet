@@ -3,7 +3,7 @@
     <p class="regular-text">
       {{ $t('pages.index.enterSeedPhrase') }}
     </p>
-    <Textarea
+    <FormTextarea
       v-model="mnemonic"
       :error="error"
     />
@@ -26,11 +26,14 @@
 
 <script>
 import { validateMnemonic } from '@aeternity/bip39';
-import Textarea from '../components/Textarea.vue';
+import FormTextarea from '../components/FormTextarea.vue';
 import Button from '../components/Button.vue';
 
 export default {
-  components: { Textarea, Button },
+  components: {
+    FormTextarea,
+    Button,
+  },
   data: () => ({
     mnemonic: '',
     error: false,

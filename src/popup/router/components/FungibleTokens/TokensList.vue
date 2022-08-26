@@ -14,7 +14,7 @@
         <Button
           small
           backgroundless
-          icon-text
+          has-icon
           :to="{ name: 'transfer-receive' }"
         >
           <Receive />
@@ -24,7 +24,7 @@
           fill="alternative"
           small
           backgroundless
-          icon-text
+          has-icon
           :to="SIMPLEX_URL"
         >
           <Buy />

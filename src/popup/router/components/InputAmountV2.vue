@@ -1,15 +1,8 @@
 <template>
   <InputField
-    v-validate="{
-      required,
-      min_value_exclusive: 0,
-      enough_ae: fee.toString(),
-      ...validation,
-    }"
     v-bind="$attrs"
     class="request-amount"
     type="number"
-    name="amount"
     placeholder="0.00"
     new-ui
     :value="value"
@@ -65,7 +58,6 @@ export default {
   props: {
     value: { type: [String, Number], default: '' },
     label: { type: String, default: null },
-    validation: { type: Object, default: () => ({}) },
     selectedAsset: { type: Object, default: null },
     required: Boolean,
   },
