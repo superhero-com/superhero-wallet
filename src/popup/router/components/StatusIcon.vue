@@ -15,6 +15,7 @@ import Alert from '../../../icons/alert.svg?vue-component';
 import Warning from '../../../icons/warning.svg?vue-component';
 import CheckCircle from '../../../icons/check-circle.svg?vue-component';
 import NotSecure from '../../../icons/not-secure.svg?vue-component';
+import Globe from '../../../icons/globe.svg?vue-component';
 
 export default {
   props: {
@@ -35,6 +36,8 @@ export default {
           return CheckCircle;
         case 'not-secure':
           return NotSecure;
+        case 'help':
+          return Globe;
         default:
           return null;
       }
@@ -62,7 +65,11 @@ export default {
   }
 
   &.success {
-    color: variables.$color-green;
+    color: variables.$color-green-dark;
+  }
+
+  &.help {
+    color: variables.$color-blue;
   }
 }
 </style>

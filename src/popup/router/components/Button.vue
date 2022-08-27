@@ -230,9 +230,7 @@ export default {
 
   &.new-ui {
     width: auto;
-    padding: 0 30px;
     border-radius: variables.$border-radius-interactive;
-    width: auto;
     height: auto;
     padding: 10px 20px;
     line-height: 20px;
