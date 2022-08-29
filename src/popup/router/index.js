@@ -125,7 +125,7 @@ if (process.env.PLATFORM === 'cordova') {
     });
 
     router.afterEach((to) => {
-      if (['/', '/intro'].includes(to.path)) {
+      if (['/'].includes(to.path)) {
         document.body.classList.remove('color-bg-3');
       } else {
         document.body.classList.add('color-bg-3');

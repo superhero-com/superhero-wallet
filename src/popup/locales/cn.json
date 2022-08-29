@@ -143,31 +143,6 @@
     }
   },
   "pages": {
-    "intro": {
-      "heading": "介绍",
-      "skip": "跳过",
-      "generateWallet": "生成钱包",
-      "receive": "接收小费",
-      "step1text": "为创造和策划伟大的内容，参与有意义的讨论，推动人类的事业，成为一个不错的人",
-      "step2text": "给伟大的网络内容创造者、人道主义事业以及其他令人敬畏的人——不管出于什么原因。",
-      "step3text-1": "这个钱包不会——并永远不会从你的发送和接收中收取佣金",
-      "step3text-2": "超级英雄是特地创造的，除了你自己没有人可以控制你的资金。",
-      "createdWallet": "你的钱包已创建！",
-      "step4text-0": "欢迎来到自由之网。",
-      "step4text-1": "去信任:没有第三方干预。转帐完全是P2P模式。",
-      "step4text-2": "去审查:没有管理人员指定什么可以货币化什么不可以货币化。",
-      "step4text-3": "用区块链永久记录信息:评论和消息会在区块链上永久的标记时间并记录。",
-      "step4text-4": "即时的，无国界的，交易费几乎为零。",
-      "step4text-iframe-1": "但这并不是全部",
-      "step4text-iframe-2": "Superhero wallet is also available as browser extension and mobile app so you can use it on your preferred platforms and devices.",
-      "toHome": "进入钱包",
-      "send": "发送",
-      "ever": "任何时候",
-      "welcome": "欢迎登陆!",
-      "understand": "我知道这是一个加密钱包并且我有责任备份我的钱包助记词。",
-      "extension": "浏览器拓展",
-      "mobileApp": "移动app"
-    },
     "titles": {
       "settings": "设置",
       "language": "语言",

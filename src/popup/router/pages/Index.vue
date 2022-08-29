@@ -48,7 +48,7 @@
     <Button
       :disabled="!termsAgreed"
       data-cy="generate-wallet"
-      @click="$router.push('/intro')"
+      @click="createWallet"
     >
       {{ $t('pages.index.generateWallet') }}
     </Button>
@@ -63,6 +63,7 @@
 </template>
 
 <script>
+import { generateMnemonic } from '@aeternity/bip39';
 import { IN_FRAME } from '../../utils/helper';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import Logo from '../../../icons/logo.svg?vue-component';
@@ -80,6 +81,12 @@ export default {
     IS_MOBILE: window.IS_MOBILE_DEVICE,
     IN_FRAME,
   }),
+  methods: {
+    async createWallet() {
+      this.$store.commit('setMnemonic', generateMnemonic());
+      this.$router.push(this.$store.state.loginTargetLocation);
+    },
+  },
 };
 </script>
 

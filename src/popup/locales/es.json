@@ -143,29 +143,6 @@
     }
   },
   "pages": {
-    "intro": {
-      "heading": "Introducción",
-      "skip": "Saltar",
-      "generateWallet": "Generar Billetera",
-      "receive": "Recibir",
-      "step1text": "por crear y curar gran contenido, atraer discusiones significativas, lanzar causas para la humanidad, y sólo por ser un maravilloso ser humano.",
-      "step2text": "para grandes creadores online, causas humanitarias y otros sorprendentes seres humanos cualquiera sea la razón.",
-      "step3text-1": "esta billetera no toma ni tomará comisiones de",
-      "step3text-2": "envias y recibes. Superhero fue creado específicamente para que nadie más excepto tú tengas el contro de tus fondos.",
-      "createdWallet": "¡Tu billetera ha sido creada!",
-      "step4text-0": "Bienvenido a la web libre.",
-      "step4text-1": "Trustless: no hay intervención de terceras partes. Las transacciones son totalemte P2P.",
-      "step4text-2": "Sin censura: no hay custodios que determinen qué puede y qué no puede ser monetizado.",
-      "step4text-3": "Immortaliza los mensajes en la blockchain: los comentarios y mensajes son marcados y grabados en la blockchain para siempre.",
-      "step4text-4": "Transacciones instantáneas, sin fronteras y con comisiones casi cero.",
-      "toHome": "Procede a tu billetera",
-      "send": "Enviar",
-      "ever": "Siempre.",
-      "welcome": "!Bienveniso abordo!",
-      "understand": "Yo entiendo que esta es una billetera de criptoactivos y yo soy el responsable por respaldar la frase de recuepración de mi cuenta.",
-      "extension": "Extensión del Navegador",
-      "mobileApp": "App Móvil"
-    },
     "titles": {
       "settings": "Ajustes",
       "language": "Idioma",

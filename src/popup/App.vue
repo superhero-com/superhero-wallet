@@ -17,7 +17,7 @@
       />
 
       <NodeConnectionStatus v-if="showStatusAndHeader" />
-      <TabBar v-if="isLoggedIn && $route.path !== '/intro'" />
+      <TabBar v-if="isLoggedIn" />
       <Component
         :is="component"
         v-for="{ component, key, props } in modals"
@@ -47,7 +47,7 @@ export default {
     ...mapState(['isRestored', 'backedUpSeed']),
     showStatusAndHeader() {
       return !(
-        ['/', '/intro'].includes(this.$route.path)
+        ['/'].includes(this.$route.path)
         || this.$route.path.startsWith('/web-iframe-popup')
         || this.$route.params.app
       );
