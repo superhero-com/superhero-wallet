@@ -113,7 +113,7 @@ export default [
     },
   },
   {
-    path: '/settings',
+    path: '/more/settings',
     name: 'settings',
     component: Settings,
     meta: {
@@ -122,7 +122,8 @@ export default [
     },
   },
   {
-    path: '/settings/language',
+    path: '/more/settings/language',
+    name: 'settings-language',
     component: LanguageSettings,
     meta: {
       title: 'language',
@@ -130,7 +131,7 @@ export default [
     },
   },
   {
-    path: '/settings/security',
+    path: '/more/settings/security',
     name: 'settings-security',
     component: SecuritySettings,
     meta: {
@@ -139,7 +140,8 @@ export default [
     },
   },
   {
-    path: '/settings/networks',
+    path: '/more/settings/networks',
+    name: 'network-settings',
     component: Networks,
     props: true,
     meta: {
@@ -148,7 +150,7 @@ export default [
     },
   },
   {
-    path: '/settings/permissions',
+    path: '/more/settings/permissions',
     component: PermissionsSettings,
     name: 'permissions-settings',
     meta: {
@@ -157,7 +159,7 @@ export default [
     },
   },
   {
-    path: '/settings/permissions/:host',
+    path: '/more/settings/permissions/:host',
     component: PermissionsDetails,
     name: 'permissions-details',
     meta: {
@@ -166,8 +168,9 @@ export default [
     },
   },
   {
-    path: '/about',
+    path: '/more/about',
     component: About,
+    name: 'about',
     meta: {
       title: 'about',
       ifNotAuth: true,
@@ -296,7 +299,10 @@ export default [
     name: 'more',
     meta: {
       title: 'more',
-      backButton: false,
+      backButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
@@ -455,7 +461,7 @@ export default [
   },
   {
     name: 'invite',
-    path: '/invite',
+    path: '/more/invite',
     component: Invite,
     meta: {
       title: 'invite',

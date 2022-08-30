@@ -22,7 +22,7 @@ export default {
     to: { type: [String, Object], default: '' },
     fill: {
       type: String,
-      validator: (value) => ['primary', 'alternative'].includes(value),
+      validator: (value) => ['primary', 'alternative', 'light'].includes(value),
       default: 'primary',
     },
     isExternalLink: { type: Boolean },
@@ -36,7 +36,7 @@ export default {
 .box-button {
   width: 88px;
   height: 64px;
-  background: variables.$color-bg-2;
+  background: rgba(variables.$color-white, 0.08);
   border-radius: 6px;
   display: flex;
   flex-direction: column;
@@ -65,6 +65,21 @@ export default {
 
     &:active {
       background-color: rgba(variables.$color-primary, 0.1);
+    }
+  }
+
+  &.light {
+    &:hover {
+      background: rgba(variables.$color-white, 0.1);
+
+      &,
+      ::v-deep svg {
+        color: variables.$color-white;
+      }
+    }
+
+    &:active {
+      background: rgba(variables.$color-white, 0.1);
     }
   }
 
