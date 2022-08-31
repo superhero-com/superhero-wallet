@@ -6,22 +6,29 @@
     @click="$emit('click')"
   >
     <span class="panel-item-title">{{ title }}</span>
-    <p class="panel-item-info">
-      {{ info }}
-    </p>
-    <slot
-      v-if="$slots['content']"
-      name="content"
-    />
-    <i
-      v-else
-      class="panel-item-arrow-right"
-    />
+    <div class="panel-item-right">
+      <div class="panel-item-info">
+        {{ info }}
+      </div>
+      <slot
+        v-if="$slots['content']"
+        name="content"
+      />
+      <ArrowRight
+        v-else
+        class="panel-item-arrow-right"
+      />
+    </div>
   </Component>
 </template>
 
 <script>
+import ArrowRight from '../../../icons/arrow-right.svg?vue-component';
+
 export default {
+  components: {
+    ArrowRight,
+  },
   props: {
     title: { type: String, required: true },
     info: { type: String, default: '' },
@@ -32,66 +39,54 @@ export default {
 
 <style lang="scss" scoped>
 @use "../../../styles/variables";
+@use "../../../styles/typography";
 
 .panel-item {
+  margin: 8px;
+  padding: 8px 12px;
+  width: auto;
+  min-height: 48px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
   text-decoration: none;
-  transition: 0.4s;
-  position: relative;
-  padding: 1rem 1.5rem;
-  width: 100%;
-  display: block;
-  font-size: 14px;
-  border-bottom: 1px solid variables.$color-light-grey;
   text-align: left;
-  border-left: 2px solid transparent;
+  background: rgba(variables.$color-white, 0.08);
+  color: rgba(variables.$color-white, 0.85);
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+  opacity: 0.75;
 
-  &:last-child {
-    border-bottom: 0;
-  }
+  @extend %face-sans-14-regular;
 
   &:hover {
-    border-left: 2px solid variables.$color-blue;
-    background: rgba(variables.$color-dark-grey, 0.5);
+    opacity: 1;
+    background: rgba(variables.$color-white, 0.1);
 
-    .arrow-right {
-      right: 20px;
+    &,
+    ::v-deep svg {
+      color: variables.$color-white;
     }
   }
 
-  .panel-item-title {
-    color: white;
-    font-size: 18px;
-  }
-
-  .checkbox-container,
-  .panel-item-arrow-right {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    margin-top: -15px;
-
-    ::v-deep .checkmark {
-      margin-right: 0;
-    }
+  .panel-item-right {
+    display: inline-flex;
+    align-items: center;
   }
 
   .panel-item-arrow-right {
-    transition: 0.4s;
-    border: solid white;
-    border-width: 0 4px 4px 0;
-    display: inline-block;
-    padding: 10px;
-    transform: rotate(-45deg);
-    -webkit-transform: rotate(-45deg);
-    border-radius: 4px;
+    margin-right: 4px;
+    width: 9.21px;
+    height: 16px;
   }
 
   .panel-item-info {
-    color: variables.$color-light-grey;
-    font-weight: normal;
-    margin: 5px 0;
-    width: 90%;
-    word-break: break-word;
+    opacity: 0.5;
+    padding-right: 16px;
+    margin: 0;
+    color: variables.$color-white;
   }
 }
 </style>

@@ -26,6 +26,7 @@ import Networks from '../pages/Networks.vue';
 import NotFound from '../pages/NotFound.vue';
 import Notifications from '../pages/Notifications.vue';
 import NotificationSettings from '../pages/NotificationSettings.vue';
+import ErrorLogSettings from '../pages/ErrorLogSettings.vue';
 import PermissionsDetails from '../pages/PermissionsDetails.vue';
 import PermissionsSettings from '../pages/PermissionsSettings.vue';
 import PopupConnect from '../pages/Popups/Connect.vue';
@@ -118,7 +119,33 @@ export default [
     component: Settings,
     meta: {
       title: 'settings',
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
+    },
+  },
+  {
+    path: '/more/settings/reset-wallet',
+    name: 'settings-reset-wallet',
+    component: ErrorLogSettings,
+    meta: {
+      title: 'reset-wallet',
       notRebrand: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+    },
+  },
+  {
+    path: '/more/settings/errors-log',
+    name: 'settings-errors-log',
+    component: ErrorLogSettings,
+    meta: {
+      title: 'save-errors-log',
+      notRebrand: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
     },
   },
   {
@@ -127,7 +154,11 @@ export default [
     component: LanguageSettings,
     meta: {
       title: 'language',
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {

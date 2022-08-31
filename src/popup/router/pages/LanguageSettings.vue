@@ -1,40 +1,28 @@
 <template>
   <div class="language-settings">
-    <h4>{{ $t('pages.languageSettings.switchLanguage') }}</h4>
-    <hr>
-    <small>
-      {{ $t('pages.languageSettings.currentLanguage') }}:
-      {{ active.name || 'en' }}
-    </small>
-    <div class="settings">
-      <div
-        class="dropdown"
-        :class="{ show: dropdown }"
+    <div class="description">
+      {{ $t('pages.languageSettings.chooseLanguage') }}
+    </div>
+    <div class="languages">
+      <RadioButton
+        v-for="{ code, name } in list"
+        :key="code"
+        :value="active && active.name == name"
+        :disabled="false"
+        :class="['language', {active: active && active.name == name}]"
+        @input="switchLanguage(code)"
       >
-        <Button
-          extend
-          @click="dropdown = !dropdown"
+        <div
+          class="row"
+          @click="switchLanguage(code)"
         >
-          <ae-icon name="globe" />
-          {{ $t('pages.languageSettings.switchLanguage') }}
-          <ae-icon name="left-more" />
-        </Button>
-
-        <ul class="sub-dropdown">
-          <li
-            v-for="{ code, name } in list"
-            :key="code"
-          >
-            <div
-              :class="{ active: active == name }"
-              @click="switchLanguage(code)"
-            >
-              <img :src="flag(code)">
-              <span>{{ name }}</span>
-            </div>
-          </li>
-        </ul>
-      </div>
+          <div>
+            {{ name }}
+            <span>({{ code }})</span>
+          </div>
+          <img :src="flag(code)">
+        </div>
+      </RadioButton>
     </div>
   </div>
 </template>
@@ -43,15 +31,10 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 import { mapGetters } from 'vuex';
-import Button from '../components/Button.vue';
+import RadioButton from '../components/RadioButton.vue';
 
 export default {
-  components: { Button },
-  data() {
-    return {
-      dropdown: false,
-    };
-  },
+  components: { RadioButton },
   computed: mapGetters('languages', ['list', 'active']),
   methods: {
     async switchLanguage(code) {
@@ -69,90 +52,39 @@ export default {
 @use '../../../styles/variables';
 
 .language-settings {
-  h4 {
+  padding: 16px;
+
+  .description {
+    padding-top: 8px;
     text-align: left;
-    margin: 0;
+    font-size: 14px;
+    line-height: 20px;
+    color: rgba(variables.$color-white, 0.65);
   }
 
-  small {
-    color: variables.$color-light-grey;
-    text-align: left;
-    width: 100%;
-    margin: 0 0 10px;
-    display: block;
-    word-break: break-word;
-  }
+  .languages {
+    padding: 14px 0;
 
-  .settings {
-    li {
-      list-style-type: none;
-      margin: 0;
-    }
-
-    .ae-icon {
-      font-size: 1.2rem;
-      margin-right: 10px;
-    }
-
-    button {
+    .language {
+      padding: 6px 0;
+      font-weight: 500;
       font-size: 14px;
-      width: 100%;
-      color: variables.$color-white;
-      margin: 0;
-      padding: 0 1rem;
-      white-space: nowrap;
-      background-color: variables.$color-bg-2;
-      border-radius: 4px;
-      text-align: center;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-    }
+      line-height: 24px;
+      opacity: 0.5;
 
-    ul {
-      min-width: 250px;
-      box-shadow: none;
-      visibility: hidden;
-      max-height: 0;
-      padding: 0;
-      overflow: hidden;
-      transition: all 0.3s ease-in-out;
-      right: 0;
-
-      li {
-        width: 30%;
-        text-align: center;
-        margin: auto;
-        color: variables.$color-white;
-        cursor: pointer;
-
-        div {
-          width: 100%;
-          display: inline-flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        .active {
-          text-decoration: underline;
-        }
-
-        span {
-          margin-left: auto;
-        }
-      }
-    }
-
-    .dropdown.show {
-      .sub-dropdown {
-        visibility: visible;
-        max-height: 210px;
+      &.active {
+        opacity: 1;
       }
 
-      .ae-icon-left-more {
-        transform: rotate(90deg);
-        -webkit-transform: rotate(90deg);
-        -ms-transform: rotate(90deg);
+      span {
+        text-transform: uppercase;
+      }
+
+      .row {
+        width: 100%;
+        display: inline-flex;
+        justify-content: space-between;
+        align-items: center;
       }
     }
   }

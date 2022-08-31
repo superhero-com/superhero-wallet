@@ -68,20 +68,20 @@
       </RouterLink>
 
       <RouterLink
-        v-if="$route.path !== '/more'"
+        v-if="$route.path !== '/more' && !$route.meta.closeButton"
         class="icon-btn"
         to="/more"
         data-cy="page-more"
       >
         <ThreeDots />
       </RouterLink>
-      <RouterLink
+      <ButtonPlain
         v-else
         class="icon-btn close"
-        :to="$store.state.route.from ? $store.state.route.from.fullPath : '/account'"
+        @click="close"
       >
         <Close />
-      </RouterLink>
+      </ButtonPlain>
     </div>
   </div>
 </template>
@@ -140,6 +140,11 @@ export default {
       fullPath = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
       this.$router.push(
         fullPath.substr(0, fullPath.lastIndexOf('/')) || fallBackRoute,
+      );
+    },
+    close() {
+      this.$router.replace(
+        this.isLoggedIn ? '/account' : '/',
       );
     },
     async toNotifications() {
