@@ -167,7 +167,7 @@ Cypress.Commands.add('openNetworks', () => {
     .click()
     .get('[data-cy=networks]')
     .click()
-    .urlEquals('/settings/networks');
+    .urlEquals('/more/settings/networks');
 });
 
 Cypress.Commands.add('enterNetworkDetails', (network, url, middleware, compiler) => {

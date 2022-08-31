@@ -2,23 +2,23 @@
   <div class="settings">
     <Panel>
       <PanelItem
-        to="/settings/language"
+        :to="{ name: 'settings-language' }"
         :title="$t('pages.settings.tabGeneral')"
         :info="$t('pages.settings.tabGeneralsmall')"
       />
       <PanelItem
-        to="/settings/security"
+        :to="{ name: 'settings-security' }"
         :title="$t('pages.settings.tabSecurity')"
         :info="$t('pages.settings.tabSecuritysmall')"
       />
       <PanelItem
-        to="/settings/networks"
+        :to="{ name: 'network-settings' }"
         :title="$t('pages.titles.networks')"
         :info="$t('pages.settings.tabNetworksSmall')"
         data-cy="networks"
       />
       <PanelItem
-        to="/settings/permissions"
+        :to="{ name: 'permissions-settings' }"
         :title="$t('pages.titles.permissionsSettings')"
         :info="$t('pages.settings.tabPermissionsSettingsSmall')"
       />

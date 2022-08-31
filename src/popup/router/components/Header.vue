@@ -1,15 +1,14 @@
 <template>
   <div
     v-if="showNavigation && !aeppPopup"
-    class="header"
-    :class="{ 'not-logged-in': !isLoggedIn }"
+    :class="['header', { 'not-logged-in': !isLoggedIn, 'new-ui': $route.meta.newUI }]"
   >
     <div
       v-if="isLoggedIn || title"
       class="left"
     >
       <RouterLink
-        v-if="isLoggedIn"
+        v-if="isLoggedIn && !showBack"
         to="/account"
         class="home-button"
       >
@@ -45,7 +44,7 @@
       class="right"
     >
       <ButtonPlain
-        v-if="!$route.path.startsWith('/notifications')"
+        v-if="!$route.path.startsWith('/notifications') && !hideNotificationsIcon"
         class="notifications icon-btn"
         data-cy="noti"
         @click="toNotifications"
@@ -78,7 +77,7 @@
       </RouterLink>
       <RouterLink
         v-else
-        class="icon-btn"
+        class="icon-btn close"
         :to="$store.state.route.from ? $store.state.route.from.fullPath : '/account'"
       >
         <Close />
@@ -124,6 +123,9 @@ export default {
       return (this.$route.meta.backButton !== undefined ? this.$route.meta.backButton : true)
         && this.title;
     },
+    hideNotificationsIcon() {
+      return this.$route.meta.hideNotificationsIcon;
+    },
     notificationsCount() {
       return [...this.notifications, ...this.superheroNotifications].filter(
         (n) => n.status === 'CREATED',
@@ -161,7 +163,6 @@ export default {
 
 .header {
   position: fixed;
-  width: 360px;
 
   @include mixins.desktop {
     position: sticky;
@@ -172,9 +173,11 @@ export default {
   height: calc(48px + env(safe-area-inset-top));
   background-color: variables.$color-bg-3;
   display: flex;
-  padding: 8px 16px 8px 8px;
-  padding-top: calc(8px + env(safe-area-inset-top));
+  padding: 2px 8px 8px 8px;
+  padding-top: calc(2px + env(safe-area-inset-top));
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
 
   @include mixins.mobile {
     display: flex;
@@ -182,19 +185,23 @@ export default {
     width: 100%;
   }
 
+  &.new-ui {
+    background-color: variables.$color-bg-3-new;
+  }
+
   .left {
     display: flex;
-    flex-basis: 88px;
+    width: 20%;
   }
 
   .right {
     display: flex;
-    flex-basis: 82px;
     justify-content: flex-end;
+    width: 20%;
   }
 
   .title {
-    min-width: 166px;
+    width: 60%;
 
     .text {
       padding: 0 4px;
@@ -276,6 +283,15 @@ export default {
       &.hover {
         display: none;
       }
+    }
+
+    &.back svg {
+      width: 19.09px;
+      height: 16px;
+    }
+
+    &.close svg {
+      color: rgba(variables.$color-white, 0.5);
     }
 
     &:hover {
