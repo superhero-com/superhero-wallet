@@ -174,16 +174,31 @@
       "share": "Share",
       "close": "Close"
     },
+    "receive": {
+      "title": "Receive funds to public address",
+      "requestAmount": "Request specific amount (optional)",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "share": "Share",
+      "shareTextNoAmount": "My aeternity address {address} or use the following link {walletLink} to send it with Superhero Wallet",
+      "shareTextWithAmount": "Please send {amount} AE to my aeternity address {address} or use the following link {walletLink} to send it with Superhero Wallet"
+    },
     "wrongNetwork": {
       "title": "Network discrepancy",
       "msg": "This action was initiated on a different network. Please switch to {0} in your wallet settings to proceed.",
       "button": "Dismiss"
+    },
+    "account-details": {
+      "tokens": "Tokens",
+      "transactions": "Transactions",
+      "names": "Names"
     }
   },
   "filters": {
     "all": "All",
-    "sent": "Sent",
-    "received": "Received",
+    "out": "Out",
+    "in": "In",
+    "dex": "DEX",
     "date": "Date",
     "tips": "Tips",
     "bid": "Bid",
@@ -368,7 +383,8 @@
       "title": "Recent transactions",
       "viewAll": "View all",
       "viewMore": "View full transaction history",
-      "noTransactionsFound": "There are no recent transactions for this account."
+      "noTransactionsFound": "There are no recent transactions for this account.",
+      "searchPlaceholder": "Search transactions by asset name"
     },
     "add-fungible-token": {
       "heading": "Fungible Tokens",
@@ -477,7 +493,8 @@
       "mint": "Mint/Burn token",
       "mint-info": "This allows you to mint or burn token amount",
       "tokens": "Tokens",
-      "searchPlaceholder": "Search for token",
+      "searchPlaceholder": "Search by token name or contract address",
+      "searchAssetsPlaceholder": "Search for assets",
       "all": "All",
       "myTokens": "My Tokens",
       "mcap": "MCap",
@@ -485,12 +502,15 @@
       "not-available": "N/A",
       "noTokens": "No tokens in account balance.",
       "buyAe": "Buy AE",
-      "receiveTokens": "Receive tokens"
+      "receiveTokens": "Receive tokens",
+      "select-asset": "Select asset"
     },
     "token-details": {
       "details": "Token Details",
       "send": "Send",
       "receive": "Receive",
+      "buy": "Buy",
+      "swap": "Swap",
       "tip": "Tip",
       "token-details": "Token Details",
       "token": "Token",
@@ -686,11 +706,6 @@
       "backButton": "Back",
       "heading": "Privacy Policy",
       "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
-    },
-    "receive": {
-      "requestAmount": "Request amount (optional)",
-      "shareName": "Provide sender with either",
-      "shareAddress": "or your account address"
     },
     "securitySettings": {
       "backToSettings": "Back to settings",
@@ -1143,5 +1158,6 @@
   "copied": "Copied",
   "copy": "Copy",
   "tx-fee": "Transaction fee",
-  "total": "Total"
+  "total": "Total",
+  "priceNotAvailable": "price: n/a"
 }

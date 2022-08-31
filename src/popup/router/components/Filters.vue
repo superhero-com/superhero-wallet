@@ -62,31 +62,39 @@ export default {
   top: 48px;
   top: calc(env(safe-area-inset-top) + 48px);
   background: variables.$color-bg-3;
-  height: 40px;
+  height: 50px;
   width: 100%;
   display: flex;
-  justify-content: space-between;
-  padding: 8px 16px;
+  gap: 8px;
+  padding: 13px 12px;
 
   .filter {
     display: flex;
     align-items: center;
+    padding: 2px 8px;
+    gap: 2px;
 
-    @extend %face-sans-15-medium;
+    @extend %face-sans-14-regular;
 
-    color: variables.$color-dark-grey;
-
-    &.active {
-      color: variables.$color-green;
-    }
+    color: rgba(variables.$color-white, 0.5);
 
     svg {
-      margin-left: 4px;
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
+      color: rgba(variables.$color-white, 0.3);
 
       &.rotate {
         transform: rotate(180deg);
+      }
+    }
+
+    &.active {
+      color: variables.$color-white;
+      background: rgba(variables.$color-white, 0.1);
+      border-radius: 12px;
+
+      svg {
+        color: rgba(variables.$color-white, 0.5);
       }
     }
   }

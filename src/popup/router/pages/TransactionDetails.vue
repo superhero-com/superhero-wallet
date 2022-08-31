@@ -288,6 +288,8 @@ export default {
 
         .tokens {
           @extend %face-sans-18-medium;
+
+          color: variables.$color-white;
         }
       }
     }

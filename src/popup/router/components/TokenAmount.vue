@@ -41,25 +41,19 @@ export default {
   },
   computed: {
     amountRounded() {
+      if (Number.isInteger(this.amount)) return this.amount;
+      if (this.amount === 0) return this.amount;
       return this.amount.toFixed((this.highPrecision || this.amount < 0.01) ? 9 : 2);
     },
     ...mapState({
       amountFiat(state, { convertToCurrency, formatCurrency }) {
         if (this.hideFiat || this.aex9) return '';
         const converted = convertToCurrency(this.amount);
-        if (this.amount === 0) return this.addBraces(formatCurrency(0));
-        if (converted < 0.01) return this.addBraces(`<${formatCurrency(0.01)}`);
-        return this.addBraces(`≈${formatCurrency(converted)}`);
+        if (this.amount === 0) return formatCurrency(0);
+        if (converted < 0.01) return `<${formatCurrency(0.01)}`;
+        return `≈${formatCurrency(converted)}`;
       },
     }),
-  },
-  methods: {
-    addBraces(result) {
-      if (this.$route.meta.newUI) {
-        return result;
-      }
-      return `(${result})`;
-    },
   },
 };
 </script>

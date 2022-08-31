@@ -1,7 +1,8 @@
 <template>
   <Modal
     class="spend-success"
-    close
+    has-close-button
+    centered
     @close="resolve"
   >
     <Pending />

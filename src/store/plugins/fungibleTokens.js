@@ -26,6 +26,16 @@ export default (store) => {
       selectedToken: (
         state, { getSelectedToken }, rootState, { account: { address } },
       ) => getSelectedToken(address),
+      getAeternityToken: ({ aePublicData }) => ({ balanceCurrency, tokenBalance }) => {
+        const aePublicDataExists = aePublicData && Object.keys(aePublicData).length > 0;
+        return {
+          ...(aePublicDataExists ? aePublicData : {}),
+          convertedBalance: tokenBalance,
+          symbol: 'AE',
+          balanceCurrency,
+          contractId: 'aeternity',
+        };
+      },
     },
     mutations: {
       setSelectedToken(state, { address, token }) {

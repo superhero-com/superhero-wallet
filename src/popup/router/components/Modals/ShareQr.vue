@@ -102,7 +102,7 @@ export default {
     height: 192px;
     border: 1px dashed variables.$color-blue;
     border-radius: 6px;
-    background-color: variables.$color-blue-alpha-15;
+    background-color: rgba(variables.$color-primary, 0.15);
   }
 }
 </style>

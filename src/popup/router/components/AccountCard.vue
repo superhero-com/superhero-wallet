@@ -2,10 +2,15 @@
   <div
     class="account-card"
     :style="cardCssProps"
+    @click.prevent="$store.dispatch('modals/open', {
+      ...$attrs,
+      name: MODAL_ACCOUNT_DETAILS,
+    })"
   >
     <AccountInfo
       v-bind="$attrs"
       :color="color"
+      @click.native.stop
     />
     <BalanceInfo v-bind="$attrs" />
     <div class="misc">
@@ -18,9 +23,9 @@
         </span>
       </div>
       <div class="buttons">
-        <RouterLink :to="{ name: 'transfer-receive' }">
+        <a @click.stop="openTransferReceiveModal($attrs)">
           <ReceiveIcon :style="iconCssProps" />
-        </RouterLink>
+        </a>
         <RouterLink :to="{ name: 'transfer-send' }">
           <SendIcon :style="iconCssProps" />
         </RouterLink>
@@ -36,6 +41,7 @@ import BalanceInfo from './BalanceInfo.vue';
 import ReceiveIcon from '../../../icons/account-card/account-receive.svg?vue-component';
 import SendIcon from '../../../icons/account-card/account-send.svg?vue-component';
 import { getAddressColor } from '../../utils/avatar';
+import { MODAL_ACCOUNT_DETAILS, MODAL_TRANSFER_RECEIVE } from '../../utils/constants';
 
 export default {
   components: {
@@ -47,6 +53,9 @@ export default {
   props: {
     idx: { type: Number, required: true },
   },
+  data: () => ({
+    MODAL_ACCOUNT_DETAILS,
+  }),
   computed: {
     ...mapGetters('fungibleTokens', ['getTokenBalance']),
     ...mapGetters(['accounts']),
@@ -63,6 +72,14 @@ export default {
       return {
         '--primaryColor': this.color,
       };
+    },
+  },
+  methods: {
+    openTransferReceiveModal(attrs) {
+      this.$store.dispatch('modals/open', {
+        ...attrs,
+        name: MODAL_TRANSFER_RECEIVE,
+      });
     },
   },
 };
@@ -111,11 +128,15 @@ export default {
 
       a {
         margin-left: 8px;
+        color: rgba(variables.$color-white, 0.8);
+
+        &:hover {
+          color: rgba(variables.$color-white, 1);
+        }
 
         svg {
           height: 36px;
           width: 36px;
-          color: var(--primaryColor);
         }
       }
     }

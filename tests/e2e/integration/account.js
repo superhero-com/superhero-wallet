@@ -9,12 +9,11 @@ describe('Test cases for Account Page', () => {
 
       .get('[data-cy=copy]')
       .click()
-      .get('.copied > .text')
+      .get('.copied')
       .should('contain', 'Copied')
 
       .get('[data-cy=account-name')
-      .should('be.visible')
-      .contains('Account 1');
+      .should('be.visible');
   });
 
   it('Tip, View-All-Transactions, Back to Account', () => {
