@@ -5,6 +5,11 @@ $base-font-size: 16px;
 $font-sans: 'IBM Plex Sans', sans-serif;
 $font-mono: 'IBM Plex Mono';
 
+$color-white-alpha-15: rgba(255, 255, 255, 0.15);
+$color-white-alpha-30: rgba(255, 255, 255, 0.3);
+$color-white-alpha-50: rgba(255, 255, 255, 0.5);
+$color-white-alpha-70: rgba(255, 255, 255, 0.7);
+$color-white-alpha-75: rgba(255, 255, 255, 0.7);
 $color-white: #fff;
 $color-black: #000;
 $color-blue: #1161fe;
@@ -24,6 +29,7 @@ $color-red-dark: #ff4746;
 $color-red: #f7296e;
 $color-red-2: #ff2b5e;
 $color-red-alpha-10: rgba(247, 41, 110, 0.1);
+$color-red-alpha-100: rgba(255, 43, 94, 1);
 
 $color-border: #232323;
 $color-border-hover: #2f2f2f;
@@ -31,7 +37,10 @@ $color-bg-1: #131313;
 $color-bg-2: #171717;
 $color-bg-3: #090909;
 $color-bg-4: #191919;
+$color-bg-5: rgb(49, 49, 49);
+$color-bg-6: #262626;
 $color-bg-4-hover: #121212;
+$color-bg-5-hover: #212122;
 $color-hover: #1c1c1c;
 $color-disabled: #212121;
 

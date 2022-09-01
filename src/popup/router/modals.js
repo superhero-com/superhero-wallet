@@ -11,6 +11,7 @@ import QrCodeReader from './components/Modals/QrCodeReader.vue';
 import Help from './components/Modals/Help.vue';
 import ShareQr from './components/Modals/ShareQr.vue';
 import AccountDetails from './components/Modals/AccountDetails.vue';
+import ImportAccount from './components/Modals/ImportAccount.vue';
 
 export default () => {
   registerModal({ name: 'default', component: Default });
@@ -34,5 +35,6 @@ export default () => {
   registerModal({ name: 'read-qr-code', component: QrCodeReader });
   registerModal({ name: 'confirm-message-sign', showInPopupIfWebFrame: true });
   registerModal({ name: 'share-qr', component: ShareQr });
+  registerModal({ name: 'import-account', component: ImportAccount });
   registerModal({ name: 'account-details', component: AccountDetails });
 };
