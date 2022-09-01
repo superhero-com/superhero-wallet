@@ -131,10 +131,6 @@ export default {
     pointer-events: none;
   }
 
-  &.extend {
-    width: 100%;
-  }
-
   &.half {
     width: 48%;
     margin: 0;
@@ -239,6 +235,10 @@ export default {
         background-color: rgba(variables.$color-white, 0.2);
       }
     }
+  }
+
+  &.extend {
+    width: 100%;
   }
 }
 </style>
