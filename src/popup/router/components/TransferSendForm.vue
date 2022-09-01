@@ -271,9 +271,10 @@ export default {
 
 .transfer-send {
   .scan-button {
+    color: variables.$color-white;
     display: block;
-    width: 20px;
-    height: 20px;
+    width: 32px;
+    height: 24px;
   }
 
   .amount-input {

@@ -132,10 +132,6 @@ export default {
     pointer-events: none;
   }
 
-  &.extend {
-    width: 100%;
-  }
-
   &.half {
     width: 48%;
     margin: 0;
@@ -253,6 +249,10 @@ export default {
     &.extend {
       width: 100%;
     }
+  }
+
+  &.extend {
+    width: 100%;
   }
 }
 </style>
