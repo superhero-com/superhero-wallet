@@ -83,7 +83,7 @@
     </label>
 
     <div
-      v-if="hasError || hasWarning"
+      v-if="errorMessage || warningMessage"
       class="message"
     >
       <label
@@ -92,14 +92,6 @@
       >
         {{ hasError ? errorMessage : warningMessage }}
       </label>
-
-      <a
-        v-if="showMessageHelp"
-        class="message-help"
-        @click.prevent="$emit('help-message')"
-      >
-        <QuestionCircleIcon />
-      </a>
     </div>
   </div>
 </template>
@@ -116,6 +108,7 @@ export default {
   props: {
     value: { type: [String, Number], default: null },
     label: { type: String, default: '' },
+    status: { type: String, default: null },
     errorMessage: { type: String, default: '' },
     warningMessage: { type: String, default: '' },
     readonly: Boolean,
@@ -132,10 +125,10 @@ export default {
       return `input-${this._uid}`;
     },
     hasError() {
-      return !!this.errorMessage;
+      return !!this.errorMessage || this.status === 'error';
     },
     hasWarning() {
-      return !!this.warningMessage;
+      return !!this.warningMessage || this.status === 'warning';
     },
   },
 };

@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import Textarea from '../../src/popup/router/components/Textarea.vue';
+import Textarea from '../../src/popup/router/components/FormTextarea.vue';
 
 describe('Textarea', () => {
   it('should render', async () => {

@@ -18,6 +18,8 @@ import {
   MODAL_SHARE_QR,
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
+  MODAL_RECIPIENT_INFO,
+  MODAL_RECIPIENT_HELPER,
 } from '../utils/constants';
 
 import Default from './components/Modals/Default.vue';
@@ -35,6 +37,8 @@ import AccountDetails from './components/Modals/AccountDetails.vue';
 import AssetSelector from './components/Modals/AssetSelector.vue';
 import TransferReceive from './components/Modals/TransferReceive.vue';
 import TransferSend from './components/Modals/TransferSend.vue';
+import RecipientHelper from './components/Modals/RecipientHelper.vue';
+import RecipientInfo from './components/Modals/RecipientInfo.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
@@ -62,4 +66,6 @@ export default () => {
   registerModal({ name: MODAL_TRANSFER_RECEIVE, component: TransferReceive });
   registerModal({ name: MODAL_TRANSFER_SEND, component: TransferSend });
   registerModal({ name: MODAL_ASSET_SELECTOR, component: AssetSelector });
+  registerModal({ name: MODAL_RECIPIENT_HELPER, component: RecipientHelper });
+  registerModal({ name: MODAL_RECIPIENT_INFO, component: RecipientInfo });
 };

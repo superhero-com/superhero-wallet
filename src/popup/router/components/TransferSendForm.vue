@@ -25,8 +25,9 @@
       new-ui
       :label="$t('modals.send.recipientLabel')"
       :placeholder="$t('modals.send.recipientPlaceholder')"
-      :error-message="addressErrorMsg"
-      :warning-message="addressWarningMsg"
+      :error-message="isTipUrl ? null : addressErrorMsg"
+      :warning-message="isTipUrl ? null : addressWarningMsg"
+      :status="status"
       @help="showRecipientHelp()"
     >
       <template #label-after>
@@ -39,7 +40,12 @@
         </a>
       </template>
     </InputField>
-
+    <div class="status">
+      <UrlStatus
+        v-show="isTipUrl && !checkAensName(formModel.address) && validateTipUrl(formModel.address)"
+        :status="urlStatus"
+      />
+    </div>
     <InputAmount
       v-model="formModel.amount"
       v-validate="{
@@ -76,14 +82,20 @@ import {
   // aeToAettos,
   // convertToken,
   calculateFee,
+  validateTipUrl,
+  checkAensName,
 } from '../../utils/helper';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
-import { MODAL_READ_QR_CODE } from '../../utils/constants';
 import ModalHeader from './ModalHeader.vue';
+import UrlStatus from './UrlStatus.vue';
+import {
+  MODAL_READ_QR_CODE,
+  MODAL_RECIPIENT_INFO,
+} from '../../utils/constants';
 
 const WARNING_RULES = ['not_same_as'];
 
@@ -96,6 +108,7 @@ export default {
     DetailsItem,
     TokenAmount,
     QrScanIcon,
+    UrlStatus,
   },
   model: {
     prop: 'transferData',
@@ -115,6 +128,8 @@ export default {
       loading: false,
       fee: BigNumber(0),
       error: false,
+      isTipUrl: false,
+      status: '',
     };
   },
   subscriptions() {
@@ -157,12 +172,39 @@ export default {
         .filter(({ field }) => field === 'address')
         .find((error) => WARNING_RULES.includes(error.rule))?.msg || null;
     },
+    urlStatus() {
+      return this.$store.getters['tipUrl/status'](this.formModel.address);
+    },
   },
   watch: {
     formModel: {
       deep: true,
       handler(val) {
         console.log('formModel watch', val);
+
+        this.isTipUrl = validateTipUrl(val.address);
+        if (!checkAensName(val.address) && this.isTipUrl) {
+          const urlStatus = this.$store.getters['tipUrl/status'](val.address);
+          switch (urlStatus) {
+            case 'verified':
+              this.status = 'success';
+              break;
+            case 'blacklisted':
+              this.status = 'error';
+              break;
+            case 'not-secure':
+              this.status = 'warning';
+              break;
+            case 'not-verified':
+              this.status = 'warning';
+              break;
+            default:
+              throw new Error(`Unknown url status: ${this.status}`);
+          }
+        } else {
+          this.status = null;
+        }
+
         this.$emit('input', {
           ...val,
           fee: this.fee,
@@ -185,6 +227,8 @@ export default {
     }
   },
   methods: {
+    checkAensName,
+    validateTipUrl,
     async queryHandler(query) {
       await this.$watchUntilTruly(() => this.sdk);
       if (query.token) {
@@ -237,7 +281,9 @@ export default {
       }
     },
     showRecipientHelp() {
-      // TODO - in separate task
+      this.$store.dispatch('modals/open', {
+        name: MODAL_RECIPIENT_INFO,
+      });
     },
     handleAssetChange(val) {
       this.formModel.selectedAsset = val;
@@ -266,6 +312,10 @@ export default {
 
   .amount-input {
     margin-bottom: 20px;
+  }
+
+  .status {
+    margin-top: 9px;
   }
 }
 </style>
