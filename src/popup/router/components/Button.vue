@@ -241,6 +241,10 @@ export default {
         background-color: rgba(variables.$color-white, 0.2);
       }
     }
+
+    &.extend {
+      width: 100%;
+    }
   }
 }
 </style>

@@ -1,10 +1,40 @@
 <template>
   <div class="platforms">
-    <div class="text">
-      <slot />
+    <div class="heading">
+      <slot name="header" />
     </div>
-    <div class="div-icons">
-      <div class="extension">
+    <div
+      v-if="IS_MOBILE_DEVICE"
+      class="mobile-web-icons"
+    >
+      <a
+        :href="APP_LINK_IOS"
+        target="_blank"
+      >
+        <img
+          :class="{ grey: !IS_IOS || !IS_MOBILE_DEVICE }"
+          src="../../../icons/platforms/app-store-mobile.svg"
+          alt="App Store"
+        >
+      </a>
+      <a
+        :href="APP_LINK_ANDROID"
+        target="_blank"
+      >
+        <img
+          :class="{ grey: IS_IOS || !IS_MOBILE_DEVICE }"
+          src="../../../icons/platforms/google-play-mobile.svg"
+          alt="Google Play"
+        >
+      </a>
+    </div>
+    <div
+      v-else
+      class="web-icons"
+    >
+      <div
+        class="extension"
+      >
         <div>
           {{ $t('pages.index.platforms.browser-extension') }}
         </div>
@@ -59,6 +89,9 @@
         </div>
       </div>
     </div>
+    <div class="footer">
+      <slot name="footer" />
+    </div>
   </div>
 </template>
 
@@ -91,6 +124,7 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 @use '../../../styles/typography';
+@use '../../../styles/mixins';
 
 .platforms {
   font-size: 15px;
@@ -103,19 +137,33 @@ export default {
     background-color: variables.$color-bg-3;
   }
 
-  .text {
+  .heading {
+    @extend %face-sans-17-medium;
+
     margin: 8px auto;
     width: 248px;
     padding: 4px 8px;
-    color: variables.$color-light-grey;
+    color: variables.$color-white;
   }
 
-  .div-icons {
-    border-top: 1px solid variables.$color-border-hover;
-    display: flex;
+  .footer {
+    @extend %face-sans-17-medium;
+
+    margin-top: 14px;
+    margin-bottom: 12px;
+  }
+
+  .mobile-web-icons {
+    @include mixins.flex(center, center);
+
+    gap: 17px;
+  }
+
+  .web-icons {
+    @include mixins.flex(center, center);
+
     text-align: center;
-    padding-top: 0;
-    padding-bottom: 0;
+    color: variables.$color-light-grey;
 
     .extension {
       width: 50%;
@@ -128,11 +176,8 @@ export default {
 
     .mobile-app,
     .extension {
-      padding-top: 15px;
-
       div {
-        display: flex;
-        justify-content: center;
+        @include mixins.flex(center);
 
         + div {
           padding-top: 15px;

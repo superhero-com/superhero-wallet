@@ -9,21 +9,30 @@
       class="not-iframe"
     >
       <Logo />
-      <span class="heading">
-        {{ $t('pages.index.heading') }}
-      </span>
-      <template v-if="IS_MOBILE">
-        <span class="mobile">{{ $t('pages.index.mobileVersion') }}</span>
-      </template>
-      <template v-else-if="IS_WEB">
+      <div
+        class="heading"
+      >
+        <i18n
+          path="pages.index.heading.message"
+          tag="span"
+          class="tag"
+        >
+          <span class="receive">{{ $t('pages.index.heading.receive') }}</span>
+          <span class="store">{{ $t('pages.index.heading.store') }}</span>
+          <span class="send">{{ $t('pages.index.heading.send') }}</span>
+          <span class="aeternity-name">{{ $t('pages.index.heading.aeternityBlockchain') }}</span>
+        </i18n>
+      </div>
+
+      <template v-if="IS_WEB">
         <Platforms :class="{ agreed: termsAgreed }">
-          {{ $t('pages.index.platforms.heading') }}
+          <template #header>
+            {{ $t('pages.index.platforms.heading') }}
+          </template>
+          <template #footer>
+            {{ $t('pages.index.webVersion') }}
+          </template>
         </Platforms>
-        <span class="web">{{ $t('pages.index.webVersion') }}</span>
-      </template>
-      <template v-else-if="!IN_FRAME">
-        <AnimatedSpinner class="spinner" />
-        <span class="go">{{ termsAgreed ? $t('pages.index.go') : $t('pages.index.ready') }}</span>
       </template>
     </div>
 
@@ -37,54 +46,76 @@
           {{ $t('pages.index.term1') }}
         </span>
       </CheckBox>
-      <RouterLink
-        to="/about/termsOfService"
+      <a
+        :href="TERMS_URL"
         data-cy="terms"
+        :class="{ agreed: termsAgreed }"
+        class="terms-of-use"
       >
         {{ $t('pages.index.termsAndConditions') }}
-      </RouterLink>
+      </a>
     </div>
 
-    <Button
-      :disabled="!termsAgreed"
+    <ButtonSubheader
+      v-show="termsAgreed"
       data-cy="generate-wallet"
+      :subheader=" $t('pages.index.getStartedWithWallet') "
+      :header="$t('pages.index.generateWallet')"
       @click="createWallet"
     >
-      {{ $t('pages.index.generateWallet') }}
-    </Button>
-    <Button
-      :disabled="!termsAgreed"
+      <PlusCircleIcon />
+    </ButtonSubheader>
+    <ButtonSubheader
+      v-show="termsAgreed"
       data-cy="import-wallet"
-      @click="$router.push('/import-account')"
+      :subheader=" $t('pages.index.enterSeed') "
+      :header="$t('pages.index.importWallet')"
+      @click="importWallet"
     >
-      {{ $t('pages.index.importWallet') }}
-    </Button>
+      <CheckCircleIcon />
+    </ButtonSubheader>
   </div>
 </template>
 
 <script>
 import { generateMnemonic } from '@aeternity/bip39';
 import { IN_FRAME } from '../../utils/helper';
-import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import Logo from '../../../icons/logo.svg?vue-component';
 import CheckBox from '../components/CheckBox.vue';
-import Button from '../components/Button.vue';
+import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
+import CheckCircleIcon from '../../../icons/check-circle-fill.svg?vue-component';
+import ButtonSubheader from '../components/ButtonSubheader.vue';
 import Platforms from '../components/Platforms.vue';
+import {
+  TERMS_URL,
+  MODAL_IMPORT_ACCOUNT,
+} from '../../utils/constants';
 
 export default {
   components: {
-    Logo, CheckBox, Button, Platforms, AnimatedSpinner,
+    Logo,
+    CheckBox,
+    ButtonSubheader,
+    PlusCircleIcon,
+    CheckCircleIcon,
+    Platforms,
   },
   data: () => ({
     termsAgreed: false,
     IS_WEB: process.env.PLATFORM === 'web',
     IS_MOBILE: window.IS_MOBILE_DEVICE,
     IN_FRAME,
+    TERMS_URL,
   }),
   methods: {
     async createWallet() {
       this.$store.commit('setMnemonic', generateMnemonic());
       this.$router.push(this.$store.state.loginTargetLocation);
+    },
+    async importWallet() {
+      await this.$store.dispatch('modals/open', {
+        name: MODAL_IMPORT_ACCOUNT,
+      });
     },
   },
 };
@@ -93,17 +124,18 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 @use '../../../styles/typography';
+@use '../../../styles/mixins';
 
 .index {
   margin-top: 42px;
   text-align: center;
 
   .terms-agreement {
-    margin-bottom: 24px;
-    display: flex;
-    justify-content: center;
+    @include mixins.flex(center);
 
     @extend %face-sans-15-medium;
+
+    margin-bottom: 4px;
 
     & > * {
       transition: all 0.12s ease-in-out;
@@ -111,10 +143,10 @@ export default {
 
     .checkbox-container {
       margin-right: 4px;
-      color: variables.$color-light-grey;
+      color: rgba(variables.$color-white, 0.5);
 
       &.agreed {
-        color: white;
+        color: variables.$color-white;
       }
 
       &:hover:not(.agreed),
@@ -124,18 +156,23 @@ export default {
 
       ::v-deep .checkmark {
         margin-right: 10px;
-        border-color: variables.$color-light-grey;
+        border-color: rgba(variables.$color-white, 0.3);
       }
     }
 
-    a:hover {
-      color: variables.$color-green-hover;
-    }
-  }
+    .terms-of-use {
+      color: rgba(variables.$color-white, 0.75);
+      text-decoration: none;
 
-  .button {
-    width: 280px;
-    font-weight: 700;
+      &:hover {
+        color: variables.$color-white;
+        text-decoration: underline;
+      }
+
+      &.agreed {
+        color: white;
+      }
+    }
   }
 
   .not-iframe {
@@ -146,40 +183,45 @@ export default {
       margin-bottom: 8px;
     }
 
-    span {
-      display: block;
+    .heading {
+      @extend %face-sans-18-medium;
 
-      &.heading {
-        @extend %face-sans-16-medium;
+      @include mixins.flex(center);
 
-        color: variables.$color-blue;
-        padding: 5.5px 0;
-        margin: 0 auto;
+      line-height: 22px;
+      color: variables.$color-white;
+      margin: 8px 60px 8px 60px;
+
+      .tag {
+        color: rgba(variables.$color-white, 0.75);
+
+        .receive,
+        .store,
+        .send {
+          color: variables.$color-white;
+        }
+
+        .aeternity-name {
+          color: variables.$color-red-2;
+        }
       }
+    }
 
-      &.web {
-        @extend %face-sans-17-medium;
+    &.mobile {
+      @extend %face-sans-20-regular;
 
-        margin-top: 32px;
-        margin-bottom: 10px;
-      }
+      color: variables.$color-white;
+      max-width: 80%;
+      margin: 0 auto;
+      min-height: 25vh;
+      padding-top: 30px;
+    }
 
-      &.mobile {
-        @extend %face-sans-20-regular;
+    &.go {
+      @extend %face-sans-20-bold;
 
-        color: white;
-        max-width: 80%;
-        margin: 0 auto;
-        min-height: 25vh;
-        padding-top: 30px;
-      }
-
-      &.go {
-        @extend %face-sans-20-bold;
-
-        margin-top: -36px;
-        margin-bottom: 42px;
-      }
+      margin-top: -36px;
+      margin-bottom: 42px;
     }
 
     .spinner {

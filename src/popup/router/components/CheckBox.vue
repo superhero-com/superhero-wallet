@@ -57,7 +57,7 @@ export default {
   .checkmark {
     background-color: variables.$color-bg-1;
     border: 1px solid variables.$color-border;
-    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.25);
+    box-shadow: inset 1 1 4px rgba(0, 0, 0, 0.25);
     border-radius: 2px;
     height: 20px;
     width: 20px;
@@ -67,6 +67,7 @@ export default {
     &.checked {
       border: none;
       box-shadow: none;
+      background-color: variables.$color-primary;
       background-image: url('../../../icons/checkbox-checked.svg');
 
       &.disabled {

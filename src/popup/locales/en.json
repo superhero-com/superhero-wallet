@@ -614,11 +614,17 @@
       "term2": "Terms of Use",
       "term3": "Privacy Policy",
       "termsAndConditions": "Terms of Use",
-      "heading": "Your open-source decentralized social application platform",
+      "heading": {
+        "message": "More than just a way to {0}, {1} & {2} on the {3}",
+        "receive": "receive",
+        "store": "store",
+        "send": "send",
+        "aeternityBlockchain": "æternity blockchain"
+      },
       "ready": "Ready to go?",
       "go": "Go!",
       "platforms": {
-        "heading": "Superhero wallet is available as browser extension and mobile app so you can use it on your preferred platforms and devices.",
+        "heading": "Download for your device",
         "browser-extension": "Browser extension",
         "mobile-app": "Mobile app"
       },
@@ -626,17 +632,20 @@
       "mobileVersion": "More than just a way to receive, store & send coins on the aeternity blockchain",
       "securingAccount": "Securing your account",
       "generateWallet": "Generate New Wallet",
-      "importWallet": "Retrieve existing account",
+      "getStartedWithWallet": "Get started with Superhero Wallet",
+      "importWallet": "Restore existing account",
+      "enterSeed": "Enter seed phrase",
       "passwordError": "Password must be at lest 4 symbols.",
       "incorrectPasswordError": "Incorrect password.",
       "loginButton": "Login",
       "seedPhrase": "Seed phrase",
-      "enterSeedPhrase": "Enter your seed phrase. ",
+      "enterSeedPhrase": "Please enter the 12 words of your seed phrase (separated by spaces) in the correct order to restore your Superhero wallet.",
       "continueButton": "Continue",
       "continue": "Continue",
-      "importAccount": "Import Account",
-      "accountNotFound": "Account not found.",
-      "checkSeed": "Please check your seed phrase."
+      "importAccount": "Restore wallet",
+      "accountNotFound": "Account not found. Please check again your seed phrase.",
+      "invalidSeed": "Your seed phrase should consist of 12 words separated by spaces.",
+      "seedPlaceHolder": "Enter or paste your seed phrase here"
     },
     "ledgerSetup": {
       "ledgerConnectSetup": "How to connect from Ledger",

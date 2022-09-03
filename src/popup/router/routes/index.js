@@ -8,7 +8,6 @@ import CommentNew from '../pages/CommentNew.vue';
 import DonateError from '../pages/DonateError.vue';
 import TokenDetails from '../pages/FungibleTokens/TokenDetails.vue';
 import Balances from '../pages/FungibleTokens/Balances.vue';
-import ImportAccount from '../pages/ImportAccount.vue';
 import Index from '../pages/Index.vue';
 import Invite from '../pages/Invite.vue';
 import InviteClaim from '../pages/InviteClaim.vue';
@@ -291,15 +290,6 @@ export default [
     meta: {
       title: 'send-tip',
       notPersist: true,
-      notRebrand: true,
-    },
-  },
-  {
-    path: '/import-account',
-    component: ImportAccount,
-    meta: {
-      title: 'importAccount',
-      ifNotAuthOnly: true,
       notRebrand: true,
     },
   },
