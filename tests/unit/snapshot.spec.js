@@ -51,26 +51,6 @@ describe('Pages', () => {
   {
     name: 'PrivacyPolicy',
     page: PrivacyPolicy,
-  },
-  {
-    name: 'Intro',
-    page: Intro,
-    data: [{
-      step: 1,
-      totalsteps: 4,
-    },
-    {
-      step: 2,
-      totalsteps: 4,
-    },
-    {
-      step: 3,
-      totalsteps: 4,
-    },
-    {
-      step: 4,
-      totalsteps: 4,
-    }],
   }].forEach((test) => it(test.name, async () => {
     const wrapper = mount(test.page, test.options);
     // eslint-disable-next-line no-restricted-syntax

@@ -254,29 +254,6 @@
     }
   },
   "pages": {
-    "intro": {
-      "heading": "Intro",
-      "skip": "Skip",
-      "generateWallet": "Generate Wallet",
-      "receive": "Receive Tips",
-      "step1text": "for creating and curating great content, engaging in meaningful discussions, launching causes for humanity, and for just being a wonderful human being.",
-      "step2text": "to great content creators online, humanitarian causes, and other awesome human beings—for whatever reason.",
-      "step3text-1": "This wallet does not—and will never take commissions off the",
-      "step3text-2": "you send or receive. Superhero was created specifically so that no one but you will have control over your funds.",
-      "createdWallet": "Your wallet has been created!",
-      "step4text-0": "Welcome to the free web.",
-      "step4text-1": "Trustless: no third-party intervention. Transactions are fully P2P.",
-      "step4text-2": "No censorship: there are no custodians to dictate what can and cannot be monetized.",
-      "step4text-3": "Immortalize messages on the blockchain: comments and messages are timestamped and recorded on the blockchain—forever.",
-      "step4text-4": "Instant, borderless, transactions at near-zero fees.",
-      "step4text-iframe-1": "But that's not all.",
-      "step4text-iframe-2": "Superhero wallet is also available as browser extension and mobile app so you can use it on your preferred platforms and devices.",
-      "toHome": "Proceed to your Wallet",
-      "send": "Send",
-      "ever": "Ever.",
-      "welcome": "Welcome on board!",
-      "understand": "I understand that this is a cryptocurrency wallet and I am responsible for backing up my account recovery seed phrase."
-    },
     "titles": {
       "tx-history": "Tx history",
       "transfer": "Transfer",

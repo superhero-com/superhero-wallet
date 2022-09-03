@@ -10,7 +10,6 @@ import TokenDetails from '../pages/FungibleTokens/TokenDetails.vue';
 import Balances from '../pages/FungibleTokens/Balances.vue';
 import ImportAccount from '../pages/ImportAccount.vue';
 import Index from '../pages/Index.vue';
-import Intro from '../pages/Intro.vue';
 import Invite from '../pages/Invite.vue';
 import InviteClaim from '../pages/InviteClaim.vue';
 import LanguageSettings from '../pages/LanguageSettings.vue';
@@ -301,15 +300,6 @@ export default [
     meta: {
       title: 'importAccount',
       ifNotAuthOnly: true,
-      notRebrand: true,
-    },
-  },
-  {
-    path: '/intro',
-    component: Intro,
-    meta: {
-      ifNotAuthOnly: true,
-      notPersist: true,
       notRebrand: true,
     },
   },

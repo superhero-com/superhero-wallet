@@ -14,7 +14,6 @@ describe('Tests cases not connected to specific page', () => {
   it('(not) redirects to last visited routes', () => {
     [
       { path: '/success-tip', redirect: false },
-      { path: '/intro', redirect: false },
       { path: '/notifications', redirect: false },
       { path: '/tips', redirect: true },
       { path: '/transfer/receive', redirect: true },
