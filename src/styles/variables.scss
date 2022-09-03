@@ -1,6 +1,8 @@
 $extension-width: 360px;
 $phone-width: 480px;
 
+$border-radius-interactive: 10px;
+
 $base-font-size: 16px;
 $font-sans: 'IBM Plex Sans', sans-serif;
 $font-mono: 'IBM Plex Mono';
@@ -12,6 +14,7 @@ $color-white-alpha-70: rgba(255, 255, 255, 0.7);
 $color-white-alpha-75: rgba(255, 255, 255, 0.7);
 $color-white: #fff;
 $color-black: #000;
+$color-primary: #1161fe;
 $color-blue: #1161fe;
 $color-blue-hover: #0e52d8;
 $color-blue-hover-dark: #17223a;

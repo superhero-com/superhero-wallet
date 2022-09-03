@@ -2,7 +2,7 @@ import { isFQDN } from 'validator';
 import { detect } from 'detect-browser';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { CONNECTION_TYPES } from './constants';
+import { CONNECTION_TYPES, SEED_LENGTH } from './constants';
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
@@ -244,3 +244,5 @@ export const amountRounded = (rawAmount) => {
   }
   return amount.toFixed((amount < 0.01) ? 9 : 2);
 };
+
+export const validateSeedLength = (seed) => seed && seed.split(' ').length === SEED_LENGTH;

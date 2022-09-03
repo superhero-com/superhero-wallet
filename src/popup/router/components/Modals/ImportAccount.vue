@@ -11,26 +11,23 @@
       <p class="regular-text">
         {{ $t('pages.index.enterSeedPhrase') }}
       </p>
-      <Textarea
+
+      <FormTextarea
         v-model="mnemonic"
-        :error="error"
-        :placeholder="$t('pages.index.seedPlaceHolder')"
+        size="sm"
         :label="$t('pages.index.seedPhrase')"
+        :placeholder="$t('pages.index.seedPlaceHolder')"
+        :error-message="error"
       />
+
       <Button
-        :disabled="!mnemonic || error"
+        :disabled="!mnemonic || (error != null)"
         data-cy="import"
+        class="button"
         @click="importAccount"
       >
         {{ $t('pages.index.importAccount') }}
       </Button>
-      <div
-        v-if="error"
-        class="error-msg"
-      >
-        {{ $t('pages.index.accountNotFound') }}<br>
-        {{ $t('pages.index.invalidSeed') }}
-      </div>
     </div>
   </Modal>
 </template>
@@ -39,17 +36,18 @@
 import { validateMnemonic } from '@aeternity/bip39';
 import Modal from '../Modal.vue';
 import Button from '../Button.vue';
-import Textarea from '../Textarea.vue';
 import ButtonPlain from '../ButtonPlain.vue';
 import Close from '../../../../icons/close.svg?vue-component';
+import FormTextarea from '../FormTextarea.vue';
+import { validateSeedLength } from '../../../utils/helper';
 
 export default {
   components: {
     Button,
     Modal,
-    Textarea,
     ButtonPlain,
     Close,
+    FormTextarea,
   },
   props: {
     resolve: { type: Function, required: true },
@@ -57,11 +55,11 @@ export default {
   },
   data: () => ({
     mnemonic: '',
-    error: false,
+    error: null,
   }),
   watch: {
     mnemonic() {
-      this.error = false;
+      this.error = null;
     },
   },
   methods: {
@@ -71,12 +69,17 @@ export default {
         .replace(/\s+/g, ' ')
         .replace(/[^a-z ]/g, '')
         .trim();
+      if (!validateSeedLength(mnemonic)) {
+        this.error = this.$t('pages.index.invalidSeed');
+        return;
+      }
       if (!mnemonic || !validateMnemonic(mnemonic)) {
-        this.error = true;
+        this.error = this.$t('pages.index.accountNotFound');
         return;
       }
       this.$store.commit('setMnemonic', mnemonic);
       this.$store.commit('setBackedUpSeed');
+      this.resolve();
       await this.$router.push(this.$store.state.loginTargetLocation);
     },
   },
@@ -117,6 +120,12 @@ export default {
       text-align: center;
       margin-bottom: 24px;
     }
+
+  }
+
+  .button {
+    width: 100%;
+    margin-top: 80px;
   }
 }
 </style>
