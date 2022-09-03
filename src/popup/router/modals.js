@@ -20,6 +20,8 @@ import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_RESET_WALLET,
   MODAL_TRANSFER_SEND,
+  MODAL_RECIPIENT_INFO,
+  MODAL_RECIPIENT_HELPER,
 } from '../utils/constants';
 
 import Default from './components/Modals/Default.vue';
@@ -39,6 +41,8 @@ import AssetSelector from './components/Modals/AssetSelector.vue';
 import TransferReceive from './components/Modals/TransferReceive.vue';
 import ResetWallet from './components/Modals/ResetWallet.vue';
 import TransferSend from './components/Modals/TransferSend.vue';
+import RecipientHelper from './components/Modals/RecipientHelper.vue';
+import RecipientInfo from './components/Modals/RecipientInfo.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
@@ -68,4 +72,6 @@ export default () => {
   registerModal({ name: MODAL_TRANSFER_SEND, component: TransferSend });
   registerModal({ name: MODAL_ASSET_SELECTOR, component: AssetSelector });
   registerModal({ name: MODAL_RESET_WALLET, component: ResetWallet });
+  registerModal({ name: MODAL_RECIPIENT_HELPER, component: RecipientHelper });
+  registerModal({ name: MODAL_RECIPIENT_INFO, component: RecipientInfo });
 };

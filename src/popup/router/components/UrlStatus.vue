@@ -1,18 +1,26 @@
 <template>
-  <StatusIcon
+  <div
     v-if="data"
-    :status="data.icon"
-    @click="showModal"
-  />
+    class="url-status"
+    :class="status"
+  >
+    <Span class="title">{{ data.content.title }}</Span>
+    <Span
+      @click="showModal"
+    >
+      <QuestionCircleIcon class="icon" />
+    </Span>
+  </div>
   <Default v-else />
 </template>
 
 <script>
-import StatusIcon from './StatusIcon.vue';
 import Default from '../../../icons/badges/default.svg?vue-component';
+import { MODAL_RECIPIENT_HELPER } from '../../utils/constants';
+import QuestionCircleIcon from '../../../icons/question-circle-border.svg?vue-component';
 
 export default {
-  components: { StatusIcon, Default },
+  components: { Default, QuestionCircleIcon },
   props: {
     status: { type: String, required: true },
   },
@@ -37,7 +45,7 @@ export default {
   methods: {
     showModal() {
       this.$store.dispatch('modals/open', {
-        name: 'default',
+        name: MODAL_RECIPIENT_HELPER,
         title: this.data.content.title,
         msg: this.data.content.msg,
         icon: this.data.icon,
@@ -48,7 +56,47 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.status-icon {
-  cursor: pointer;
+@use '../../../styles/variables';
+@use '../../../styles/typography';
+@use '../../../styles/mixins';
+
+.url-status {
+  @extend %face-sans-14-regular;
+
+  &.blacklisted,
+  &.alert,
+  &.critical {
+    color: variables.$color-error;
+  }
+
+  &.warning,
+  &.not-verified,
+  &.not-secure {
+    color: variables.$color-warning;
+  }
+
+  &.info {
+    color: variables.$color-blue;
+  }
+
+  &.verified,
+  &.success {
+    color: variables.$color-green-dark;
+  }
+
+  &.help {
+    color: variables.$color-blue;
+  }
+
+  .title {
+    padding-right: 10px;
+  }
+
+  .icon {
+    width: 22px;
+    height: 22px;
+    vertical-align: text-bottom;
+    cursor: pointer;
+  }
 }
 </style>

@@ -46,17 +46,40 @@
       "title": "Remove sub-account?",
       "msg": "This sub-account will be removed from your wallet and deleted from storage. It will still remain stored on the blockchain and you will be able to restore it with your seed phrase. Make sure you have backed up your seed phrase before you proceed. This action cannot be undone!"
     },
-    "verified": {
-      "title": "Verified URL",
-      "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed easily."
-    },
     "verify": {
       "title": "Verify your URL",
       "msg": "Make sure that the public address of your Superhero wallet, or your .chain name, is added somewhere on the website you want to claim tips for.<br /><br />Learn more: <a>How to Receive Tips</a>"
     },
+    "recipient": {
+      "title": "Send cryptocurrency",
+      "sub-header": "to public address, .chain name or URL",
+      "msg": {
+        "publicAddress": {
+          "title": "Send to public address",
+          "msg": "{0} scan QR code or manually enter recipient’s æccount address starting with ak_ ."
+        },
+        "chain": {
+          "title":"Send to .chain name",
+          "linkTitle": "claim your own .chain name",
+          "msg": "{0} AENS name is a human friendly nickname ending with .chain that points to recipient’s æccount. Before sending any funds make sure the recipient is still the name owner. You can also {1} and set a pointer to one of your public addresses!"
+        },
+        "url": {
+          "title": "Send to URL",
+          "msg": "{0} send cryptocurrency tip to any web page where æternity public address can be found. URL owners will be able to claim all tips accumulated as soon as they place their æccount address somewhere in the web page content."
+        }
+      }
+    },
+    "readMore": {
+      "msg": "{0} about tipping and claiming cryptocurrency tips.",
+      "linkTitle": "Read more"
+    },
+    "verified": {
+      "title": "Verified URL",
+      "msg": "The Superhero wallet identifies this URL as verified. This means that æternity blockchain account address has been found on the webpage and tips can be successfully claimed by its owner."
+    },
     "not-verified": {
       "title": "Not verified URL",
-      "msg": "This means that the owner of the URL has not created a Superhero wallet yet. They can claim their tips as soon as they make one and add their wallet address to their website. "
+      "msg": "This means that we could not find æternity blockchain account address at this URL. The URL owner will be able to claim all tips accumulated as soon as they add their account address to the web page content."
     },
     "blacklisted": {
       "title": "Inaccessible URL",
@@ -64,7 +87,7 @@
     },
     "not-secure": {
       "title": "Not secure URL",
-      "msg": "The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
+      "msg": "Superhero Wallet is marking HTTP sites as \"Not secure\" - please, use URLs with HTTPS, only. The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
     },
     "switcherAccsLimit": {
       "title": "Unable to show this account.",

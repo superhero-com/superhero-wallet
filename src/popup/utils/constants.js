@@ -336,3 +336,5 @@ export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_TRANSFER_SEND = 'transfer-send';
 export const MODAL_ASSET_SELECTOR = 'asset-selector';
 export const MODAL_RESET_WALLET = 'reset-wallet';
+export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
+export const MODAL_RECIPIENT_INFO = 'recipient-info';

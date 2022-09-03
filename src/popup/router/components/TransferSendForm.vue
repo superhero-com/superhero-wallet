@@ -16,8 +16,9 @@
       new-ui
       :label="$t('modals.send.recipientLabel')"
       :placeholder="$t('modals.send.recipientPlaceholder')"
-      :error-message="addressErrorMsg"
-      :warning-message="addressWarningMsg"
+      :error-message="isTipUrl ? null : addressErrorMsg"
+      :warning-message="isTipUrl ? null : addressWarningMsg"
+      :status="status"
       @help="showRecipientHelp()"
     >
       <template #label-after>
@@ -30,7 +31,12 @@
         </a>
       </template>
     </InputField>
-
+    <div class="status">
+      <UrlStatus
+        v-show="isTipUrl && !checkAensName(formModel.address) && validateTipUrl(formModel.address)"
+        :status="urlStatus"
+      />
+    </div>
     <InputAmount
       v-model="formModel.amount"
       v-validate="{
@@ -76,15 +82,22 @@
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import maxAmountMixin from '../../../mixins/maxAmountMixin';
-import { convertToken, isEqual } from '../../utils/helper';
+import {
+  convertToken, isEqual, validateTipUrl, checkAensName,
+} from '../../utils/helper';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
 import ButtonPlain from './ButtonPlain.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
-import { MODAL_READ_QR_CODE, AETERNITY_CONTRACT_ID } from '../../utils/constants';
 import ModalHeader from './ModalHeader.vue';
+import UrlStatus from './UrlStatus.vue';
+import {
+  MODAL_READ_QR_CODE,
+  MODAL_RECIPIENT_INFO,
+  AETERNITY_CONTRACT_ID,
+} from '../../utils/constants';
 
 const WARNING_RULES = ['not_same_as'];
 
@@ -98,6 +111,7 @@ export default {
     DetailsItem,
     TokenAmount,
     QrScanIcon,
+    UrlStatus,
   },
   mixins: [maxAmountMixin],
   model: {
@@ -113,6 +127,8 @@ export default {
       formModel: {},
       loading: false,
       error: false,
+      isTipUrl: false,
+      status: '',
     };
   },
   subscriptions() {
@@ -135,6 +151,9 @@ export default {
         .filter(({ field }) => field === 'address')
         .find((error) => WARNING_RULES.includes(error.rule))?.msg || null;
     },
+    urlStatus() {
+      return this.$store.getters['tipUrl/status'](this.formModel.address);
+    },
     hasError() {
       return !!this.addressErrorMsg || !!this.errors.first('amount');
     },
@@ -153,6 +172,29 @@ export default {
     formModel: {
       deep: true,
       handler(val) {
+        this.isTipUrl = validateTipUrl(val.address);
+        if (!checkAensName(val.address) && this.isTipUrl) {
+          const urlStatus = this.$store.getters['tipUrl/status'](val.address);
+          switch (urlStatus) {
+            case 'verified':
+              this.status = 'success';
+              break;
+            case 'blacklisted':
+              this.status = 'error';
+              break;
+            case 'not-secure':
+              this.status = 'warning';
+              break;
+            case 'not-verified':
+              this.status = 'warning';
+              break;
+            default:
+              throw new Error(`Unknown url status: ${this.status}`);
+          }
+        } else {
+          this.status = null;
+        }
+
         this.$emit('input', {
           ...val,
           fee: this.fee,
@@ -180,6 +222,8 @@ export default {
     if (tipAmount) this.formModel.amount = tipAmount.toString();
   },
   methods: {
+    checkAensName,
+    validateTipUrl,
     async queryHandler(query) {
       this.formModel.selectedAsset = this.availableTokens[query.token]
         ?? this.getAeternityToken({
@@ -218,7 +262,9 @@ export default {
       }
     },
     showRecipientHelp() {
-      // TODO - in separate task
+      this.$store.dispatch('modals/open', {
+        name: MODAL_RECIPIENT_INFO,
+      });
     },
     handleAssetChange(val) {
       this.formModel.selectedAsset = val;
@@ -297,6 +343,10 @@ export default {
 
   .amount-input {
     margin-bottom: 20px;
+  }
+
+  .status {
+    margin-top: 9px;
   }
 
   .max-button {

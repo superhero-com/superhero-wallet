@@ -6,7 +6,7 @@
     has-close-button
     v-on="{ close: close || resolve }"
   >
-    <div class="icon-wrapper">
+    <div class="icon-box">
       <StatusIcon
         :status="icon"
         class="icon"
@@ -58,28 +58,28 @@ export default {
   },
 };
 </script>
-
 <style lang="scss" scoped>
+@use '../../../../styles/variables';
+@use '../../../../styles/mixins';
 
-  .modal {
-    &.text-center {
-      text-align: center;
-    }
+.icon-box {
+  @include mixins.flex(center, center, column);
 
-    .icon-wrapper {
-      text-align: center;
+  gap: 20px;
 
-      .icon {
-        width: 40px;
-        height: 40px;
-        margin: 0 auto;
-        text-align: center;
-      }
-    }
-
-    .center-button {
-      width: auto;
-      padding: 0 24px;
-    }
+  .icon {
+    padding: 4px;
+    border: 4px solid variables.$color-disabled;
+    border-radius: 200%;
+    height: 64px;
+    width: 64px;
+    margin-bottom: 20px;
+    background-color: variables.$color-bg-1;
   }
+
+  .center-button {
+    width: auto;
+    padding: 0 24px;
+  }
+}
 </style>
