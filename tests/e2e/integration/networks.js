@@ -77,6 +77,7 @@ describe('Test cases for networks page', () => {
       .should('contain', defaultNetwork.middlewareUrl)
       .goBack()
       .goBack()
+      .goBack()
       .get('.transaction-list', { timeout: 8000 })
       .should('exist')
 
