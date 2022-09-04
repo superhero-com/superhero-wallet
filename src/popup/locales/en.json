@@ -699,7 +699,8 @@
       "claimOfRetip": "claimed your retip."
     },
     "notification-settings": {
-      "header": "Select which notification to receive",
+      "description": "Wallet notifications are always on by default and you are not able of turning them off.",
+      "description2": "You can choose below which notifications to receive from social platform Superhero.com.",
       "commentOnTip": "Someone commented on your tip or post.",
       "commentOnComment": "Someone replied to your comment.",
       "retipOnTip": "Someone retipped to your tip.",

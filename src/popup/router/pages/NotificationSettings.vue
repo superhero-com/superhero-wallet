@@ -1,27 +1,31 @@
 <template>
   <div class="notification-settings">
-    <div class="header">
-      {{ $t('pages.notification-settings.header') }}
+    <div class="description">
+      <p>
+        {{ $t('pages.notification-settings.description') }}
+      </p>
+      <p>
+        {{ $t('pages.notification-settings.description2') }}
+      </p>
     </div>
-    <CheckBox
+    <SwitchButton
       v-for="setting in notificationSettings"
       :key="setting.type"
       :class="{ unchecked: !setting.checked }"
       :disabled="setting.type === 'wallet'"
       :value="setting.checked"
+      :label="setting.text"
       @input="toggleNotificationSetting(setting.type)"
-    >
-      {{ setting.text }}
-    </CheckBox>
+    />
   </div>
 </template>
 
 <script>
 import { mapMutations, mapState } from 'vuex';
-import CheckBox from '../components/CheckBox.vue';
+import SwitchButton from '../components/SwitchButton.vue';
 
 export default {
-  components: { CheckBox },
+  components: { SwitchButton },
   computed: mapState(['notificationSettings']),
   methods: mapMutations(['toggleNotificationSetting']),
 };
@@ -29,27 +33,23 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .notification-settings {
-  padding: 0;
-  font-size: 0.95rem;
+  padding: 16px;
 
-  .header,
-  .checkbox-container {
+  .description {
+    color: rgba(variables.$color-white, 0.75);
+    padding: 6px 8px 24px 0;
+    line-height: 20px;
     text-align: left;
-    align-items: center;
-    padding: 1.5rem 0.7rem;
-    border-bottom: 2px solid variables.$color-border;
+    white-space: pre-line;
 
-    &.unchecked {
-      color: variables.$color-white;
-    }
+    @extend %face-sans-14-light;
   }
 
-  .header {
-    padding: 0.75rem;
-    color: variables.$color-light-grey;
-    font-size: 1.05rem;
+  .switch-button {
+    margin-bottom: 12px;;
   }
 }
 </style>
