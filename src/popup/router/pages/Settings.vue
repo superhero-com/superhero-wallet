@@ -1,55 +1,64 @@
 <template>
   <div class="settings">
-    <Panel>
-      <PanelItem
-        to="/settings/language"
-        :title="$t('pages.settings.tabGeneral')"
-        :info="$t('pages.settings.tabGeneralsmall')"
-      />
-      <PanelItem
-        to="/settings/security"
-        :title="$t('pages.settings.tabSecurity')"
-        :info="$t('pages.settings.tabSecuritysmall')"
-      />
-      <PanelItem
-        to="/settings/networks"
-        :title="$t('pages.titles.networks')"
-        :info="$t('pages.settings.tabNetworksSmall')"
-        data-cy="networks"
-      />
-      <PanelItem
-        to="/settings/permissions"
-        :title="$t('pages.titles.permissionsSettings')"
-        :info="$t('pages.settings.tabPermissionsSettingsSmall')"
-      />
-      <PanelItem
-        :title="$t('pages.settings.tabRemoveAccount')"
-        :info="$t('pages.settings.tabRemoveAccountSmall')"
-        @click="requestResetting"
-      />
-      <PanelItem
-        :title="$t('pages.settings.tabSaveErrorLog')"
-        :info="$t('pages.settings.tabSaveErrorLogSmall')"
-      >
-        <CheckBox
-          slot="content"
-          :value="saveErrorLog"
-          @input="setSaveErrorLog"
-        />
-      </PanelItem>
-    </Panel>
+    <PanelItem
+      :to="{ name: 'settings-security' }"
+      :title="$t('pages.index.seedPhrase')"
+    />
+    <PanelItem
+      :to="{ name: 'network-settings' }"
+      :title="$t('pages.titles.networks')"
+      :info="activeNetwork.name"
+      data-cy="networks"
+    />
+    <PanelItem
+      :to="{ name: 'permissions-settings' }"
+      :title="$t('pages.titles.permissionsSettings')"
+    />
+    <PanelItem
+      :to="{ name: 'notification-settings' }"
+      :title="$t('pages.titles.notifications')"
+    />
+    <PanelItem
+      :to="{ name: 'settings-language' }"
+      :title="$t('pages.settings.tabGeneral')"
+    />
+    <PanelItem
+      v-if="UNFINISHED_FEATURES"
+      to="/settings/currency"
+      :title="$t('pages.titles.currency')"
+      info="USD ($)"
+    />
+    <PanelItem
+      v-if="UNFINISHED_FEATURES"
+      :to="{ name: 'settings-errors-log' }"
+      :title="$t('pages.settings.tabSaveErrorLog')"
+      :info="saveErrorLog ? 'On' : 'Off'"
+      @click="setSaveErrorLog(!saveErrorLog)"
+    />
+    <PanelItem
+      v-if="UNFINISHED_FEATURES"
+      :to="{ name: 'settings-reset-wallet' }"
+      :title="$t('pages.settings.tabRemoveAccount')"
+      @click="requestResetting"
+    />
   </div>
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions } from 'vuex';
-import CheckBox from '../components/CheckBox.vue';
-import Panel from '../components/Panel.vue';
+import {
+  mapState, mapMutations, mapActions, mapGetters,
+} from 'vuex';
 import PanelItem from '../components/PanelItem.vue';
 
 export default {
-  components: { CheckBox, Panel, PanelItem },
-  computed: mapState(['saveErrorLog']),
+  components: { PanelItem },
+  data: () => ({
+    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+  }),
+  computed: {
+    ...mapState(['saveErrorLog']),
+    ...mapGetters(['activeNetwork']),
+  },
   methods: {
     ...mapMutations(['setSaveErrorLog']),
     ...mapActions(['requestResetting']),
