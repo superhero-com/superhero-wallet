@@ -1,5 +1,9 @@
 <template>
   <div class="tips-claim">
+    <AccountInfo
+      v-bind="$attrs"
+      color="#212121"
+    />
     <div class="header">
       {{ $t('pages.claimTips.header') }}
       <HelpButton
@@ -40,9 +44,15 @@ import { BLOG_CLAIM_TIP_URL } from '../../utils/constants';
 import InputField from '../components/InputField.vue';
 import Button from '../components/Button.vue';
 import HelpButton from '../components/HelpButton.vue';
+import AccountInfo from '../components/AccountInfo.vue';
 
 export default {
-  components: { InputField, Button, HelpButton },
+  components: {
+    InputField,
+    Button,
+    HelpButton,
+    AccountInfo,
+  },
   data: () => ({
     url: '',
     loading: false,
@@ -113,7 +123,7 @@ export default {
 @use '../../../styles/typography';
 
 .tips-claim {
-  padding: 16px;
+  padding: 12px;
 
   .header {
     margin: 8px 0 24px 36px;
@@ -129,6 +139,14 @@ export default {
         width: 32px;
         height: 32px;
       }
+    }
+  }
+
+  ::v-deep .account-info .title {
+    justify-content: start;
+
+    .copied {
+      top: 72px;
     }
   }
 

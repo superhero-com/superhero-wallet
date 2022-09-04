@@ -16,13 +16,8 @@ describe('Test cases for Account Page', () => {
       .should('be.visible');
   });
 
-  it('Tip, View-All-Transactions, Back to Account', () => {
-    cy.get('[data-cy=tip-button]')
-      .should('be.visible')
-      .click()
-      .get('[data-cy=tip-container]')
-      .should('be.visible')
-      .get('[data-cy=home]')
+  it('View-All-Transactions, Back to Account', () => {
+    cy.get('[data-cy=home]')
       .click()
 
       .get('[data-cy=view-all-transactions]')

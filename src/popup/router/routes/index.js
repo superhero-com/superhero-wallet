@@ -26,6 +26,7 @@ import Networks from '../pages/Networks.vue';
 import NotFound from '../pages/NotFound.vue';
 import Notifications from '../pages/Notifications.vue';
 import NotificationSettings from '../pages/NotificationSettings.vue';
+import ErrorLogSettings from '../pages/ErrorLogSettings.vue';
 import PermissionsDetails from '../pages/PermissionsDetails.vue';
 import PermissionsSettings from '../pages/PermissionsSettings.vue';
 import PopupConnect from '../pages/Popups/Connect.vue';
@@ -40,7 +41,6 @@ import SignMessage from '../pages/SignMessage.vue';
 import SuccessTip from '../pages/SuccessTip.vue';
 import SignTransaction from '../pages/SignTransaction.vue';
 import TermsOfService from '../pages/TermsOfService.vue';
-import Tips from '../pages/Tips.vue';
 import TipsSend from '../pages/TipsSend.vue';
 import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
@@ -113,24 +113,55 @@ export default [
     },
   },
   {
-    path: '/settings',
+    path: '/more/settings',
     name: 'settings',
     component: Settings,
     meta: {
       title: 'settings',
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
-    path: '/settings/language',
+    path: '/more/settings/reset-wallet',
+    name: 'settings-reset-wallet',
+    component: ErrorLogSettings,
+    meta: {
+      title: 'reset-wallet',
+      notRebrand: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+    },
+  },
+  {
+    path: '/more/settings/errors-log',
+    name: 'settings-errors-log',
+    component: ErrorLogSettings,
+    meta: {
+      title: 'save-errors-log',
+      notRebrand: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+    },
+  },
+  {
+    path: '/more/settings/language',
+    name: 'settings-language',
     component: LanguageSettings,
     meta: {
       title: 'language',
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
-    path: '/settings/security',
+    path: '/more/settings/security',
     name: 'settings-security',
     component: SecuritySettings,
     meta: {
@@ -139,7 +170,8 @@ export default [
     },
   },
   {
-    path: '/settings/networks',
+    path: '/more/settings/networks',
+    name: 'network-settings',
     component: Networks,
     props: true,
     meta: {
@@ -148,16 +180,20 @@ export default [
     },
   },
   {
-    path: '/settings/permissions',
+    path: '/more/settings/permissions',
     component: PermissionsSettings,
     name: 'permissions-settings',
     meta: {
       title: 'permissionsSettings',
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
-    path: '/settings/permissions/:host',
+    path: '/more/settings/permissions/:host',
     component: PermissionsDetails,
     name: 'permissions-details',
     meta: {
@@ -166,8 +202,9 @@ export default [
     },
   },
   {
-    path: '/about',
+    path: '/more/about',
     component: About,
+    name: 'about',
     meta: {
       title: 'about',
       ifNotAuth: true,
@@ -193,30 +230,34 @@ export default [
     },
   },
   {
-    path: '/tips',
-    component: Tips,
-    children: [{
-      path: '',
-      name: 'tips-send',
-      component: TipsSend,
-      props: true,
-      meta: {
-        title: 'tips',
-        backButton: false,
-      },
-    }, {
-      path: 'claim',
-      name: 'tips-claim',
-      component: TipsClaim,
-      meta: {
-        title: 'tips',
-        backButton: false,
-      },
-    }],
+    path: '/more/tips',
+    name: 'tips-send',
+    component: TipsSend,
+    props: true,
+    meta: {
+      title: 'tips',
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
+    },
+  }, {
+    path: '/more/tips-claim',
+    name: 'tips-claim',
+    component: TipsClaim,
+    meta: {
+      title: 'claim-tips',
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
+    },
   },
   {
     path: '/tip',
-    redirect: '/tips',
+    redirect: '/more/tips',
   },
   {
     path: '/retip',
@@ -296,7 +337,10 @@ export default [
     name: 'more',
     meta: {
       title: 'more',
-      backButton: false,
+      backButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
@@ -309,13 +353,16 @@ export default [
     },
   },
   {
-    path: '/notifications/settings',
+    path: '/more/settings/notifications',
     name: 'notification-settings',
     component: NotificationSettings,
     meta: {
       title: 'notification-settings',
-      notPersist: true,
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
@@ -455,7 +502,7 @@ export default [
   },
   {
     name: 'invite',
-    path: '/invite',
+    path: '/more/invite',
     component: Invite,
     meta: {
       title: 'invite',
