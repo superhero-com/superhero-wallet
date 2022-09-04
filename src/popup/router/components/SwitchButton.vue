@@ -98,6 +98,7 @@ export default {
         -webkit-transition: 0.4s;
         transition: 0.4s;
       }
+
       &.round {
         border-radius: 12px;
 

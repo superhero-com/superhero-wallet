@@ -363,7 +363,7 @@ export default [
     name: 'notification-settings',
     component: NotificationSettings,
     meta: {
-      title: 'notification-settings',
+      title: 'notifications',
       backButton: true,
       closeButton: true,
       hideTabBar: true,

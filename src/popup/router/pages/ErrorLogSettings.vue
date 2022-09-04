@@ -33,7 +33,7 @@ export default {
 
   .description {
     color: rgba(variables.$color-white, 0.75);
-    padding: 6px 0px 24px;
+    padding: 6px 0 24px;
     line-height: 20px;
     text-align: left;
 
