@@ -167,7 +167,7 @@
       "mobileApp": "App Móvil"
     },
     "titles": {
-      "settings": "Ajustes",
+      "settings": "Configuración de la billetera",
       "language": "Idioma",
       "security": "Securidad",
       "about": "Acerca",
@@ -574,8 +574,7 @@
       "tabAboutsmall": "Versión, centro de ayuda e información de contacto",
       "tabNetworks": "Administrar redes",
       "tabNetworksSmall": "Conectar a nodo personalizado",
-      "tabRemoveAccount": "Eliminar cuenta",
-      "tabRemoveAccountSmall": "Eliminar cuenta de la billetera y borrar el almacenaje de la extension",
+      "tabRemoveAccount": "Restablecer billetera",
       "tabSaveErrorLog": "Guardar historial de errores",
       "tabSaveErrorLogSmall": "Ésto nos ayudará a identificar que esta causando los errores."
     },

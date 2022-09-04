@@ -283,7 +283,7 @@
       "balances": "Balances",
       "accounts": "Accounts",
       "tips": "Tips",
-      "settings": "Settings",
+      "settings": "Wallet settings",
       "language": "Language",
       "security": "Security",
       "about": "About",
@@ -296,6 +296,7 @@
       "importAccount": "Retrieve Existing Account",
       "transactions": "Transaction History",
       "receive": "Receive",
+      "currency": "Currency",
       "notifications": "Notifications",
       "notification-settings": "Notification Preference",
       "names": "Names",
@@ -304,8 +305,8 @@
       "register-name": "Register name",
       "more": "More",
       "buy": "Buy AE Tokens",
-      "networks": "Networks",
-      "permissionsSettings": "Permissions settings",
+      "networks": "Network",
+      "permissionsSettings": "Permissions",
       "permissionsDetails": "Permissions details",
       "comment-new": "Add comment",
       "home": "Home",
@@ -319,8 +320,10 @@
       "sign-transaction": "Sign Transaction",
       "invite": "Invite",
       "tx-details": "Transaction details",
+      "token-details": "Token details",
       "wallet-home": "Wallet Home",
-      "token-details": "Token details"
+      "save-errors-log": "Save errors log",
+      "reset-wallet": "Reset wallet"
     },
     "about": {
       "heading": "About",
@@ -556,7 +559,7 @@
     },
     "more": {
       "get-ae": "Get AE",
-      "dex": "DEX"
+      "dex": "Superhero DEX"
     },
     "names": {
       "default": "Default",
@@ -620,8 +623,7 @@
     "languageSettings": {
       "backToSettings": "Back to settings",
       "heading": "Language",
-      "switchLanguage": "Language",
-      "currentLanguage": "Current language"
+      "chooseLanguage": "Choose Superhero wallet UI language."
     },
     "index": {
       "term1": "I agree to the Superhero ",
@@ -790,8 +792,7 @@
       "tabNetworks": "Manage networks",
       "tabNetworksSmall": "Connect to custom node",
       "tabPermissionsSettingsSmall": "Manage popups appearance for various requests",
-      "tabRemoveAccount": "Remove account",
-      "tabRemoveAccountSmall": "Remove account from the wallet and delete extension storage",
+      "tabRemoveAccount": "Reset wallet",
       "tabSaveErrorLog": "Save error log",
       "tabSaveErrorLogSmall": "This will help us identify what's causing the errors."
     },

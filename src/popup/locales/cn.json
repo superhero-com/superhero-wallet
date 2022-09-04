@@ -169,7 +169,7 @@
       "mobileApp": "移动app"
     },
     "titles": {
-      "settings": "设置",
+      "settings": "钱包设置",
       "language": "语言",
       "security": "安全",
       "about": "关于",
@@ -575,8 +575,7 @@
       "tabAboutsmall": "版本，支持中心，和联系信息",
       "tabNetworks": "管理网络",
       "tabNetworksSmall": "连接到常用节点",
-      "tabRemoveAccount": "移除帐户",
-      "tabRemoveAccountSmall": "从钱包移除帐户并删除扩展存储",
+      "tabRemoveAccount": "重置钱包",
       "tabSaveErrorLog": "保存错误日志",
       "tabSaveErrorLogSmall": "这将会帮助我们区分是什么引发了错误。"
     },

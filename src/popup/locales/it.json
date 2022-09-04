@@ -115,7 +115,7 @@
       "ever": "Ever."
     },
     "titles": {
-      "settings": "Settings",
+      "settings": "Impostazioni del portafoglio",
       "language": "Language",
       "security": "Security",
       "about": "About",
@@ -510,8 +510,7 @@
       "tabAboutsmall": "Versione, centro di supporto e informazioni di contatto",
       "tabNetworks": "Manage networks",
       "tabNetworksSmall": "Connect to custom node",
-      "tabRemoveAccount": "Remove account",
-      "tabRemoveAccountSmall": "Remove account from the wallet and delete extension storage",
+      "tabRemoveAccount": "Ripristina il portafoglio",
       "tabSaveErrorLog": "Save error log",
       "tabSaveErrorLogSmall": "This will help us identify what's causing errors."
     },
