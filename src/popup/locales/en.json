@@ -322,8 +322,11 @@
       "tx-details": "Transaction details",
       "token-details": "Token details",
       "wallet-home": "Wallet Home",
-      "save-errors-log": "Save errors log",
+      "save-errors-log": "Save error log",
       "reset-wallet": "Reset wallet"
+    },
+    "errors-log-settings": {
+      "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
     },
     "about": {
       "heading": "About",

@@ -142,9 +142,11 @@ export default [
     component: ErrorLogSettings,
     meta: {
       title: 'save-errors-log',
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
       hideTabBar: true,
       hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
