@@ -1132,7 +1132,8 @@
       "spent-today": "Spent today",
       "left-today": "Left today",
       "delete": "Remove permissions",
-      "empty": "You aren't connected to any aepps"
+      "empty": "You aren't connected to any aepps",
+      "description": "Manage confirmation popups and daily spending limits. For security reasons use this feature with caution only for trusted platforms such as {0} and your localhost environment."
     }
   },
   "validation": {

@@ -60,14 +60,6 @@
       </ButtonPlain>
 
       <RouterLink
-        v-if="$route.path === '/notifications'"
-        to="/notifications/settings"
-        class="icon-btn settings"
-      >
-        <Settings />
-      </RouterLink>
-
-      <RouterLink
         v-if="$route.path !== '/more' && !$route.meta.closeButton"
         class="icon-btn"
         to="/more"
@@ -91,7 +83,6 @@ import { mapState, mapGetters, mapMutations } from 'vuex';
 import Logo from '../../../icons/logo-small.svg?vue-component';
 import Back from '../../../icons/back.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
-import Settings from '../../../icons/notif-settings.svg?vue-component';
 import ThreeDots from '../../../icons/three-dots.svg?vue-component';
 import Close from '../../../icons/close.svg?vue-component';
 import Truncate from './Truncate.vue';
@@ -99,7 +90,7 @@ import ButtonPlain from './ButtonPlain.vue';
 
 export default {
   components: {
-    Logo, Back, Bell, Settings, ThreeDots, Close, Truncate, ButtonPlain,
+    Logo, Back, Bell, ThreeDots, Close, Truncate, ButtonPlain,
   },
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,
