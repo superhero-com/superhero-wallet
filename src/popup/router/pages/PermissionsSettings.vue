@@ -48,6 +48,7 @@ export default {
 
   .permissions-settings {
     padding: 6px;
+
     .description {
       color: rgba(variables.$color-white, 0.75);
       padding: 8px 8px 12px 8px;

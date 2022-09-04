@@ -1,7 +1,7 @@
 <template>
   <div class="settings">
     <PanelItem
-      :to="{ name: 'settings-security' }"
+      :to="{ name: 'settings-seed-phrase' }"
       :title="$t('pages.index.seedPhrase')"
     />
     <PanelItem
@@ -29,11 +29,9 @@
       info="USD ($)"
     />
     <PanelItem
-      v-if="UNFINISHED_FEATURES"
       :to="{ name: 'settings-errors-log' }"
       :title="$t('pages.settings.tabSaveErrorLog')"
       :info="saveErrorLog ? 'On' : 'Off'"
-      @click="setSaveErrorLog(!saveErrorLog)"
     />
     <PanelItem
       v-if="UNFINISHED_FEATURES"
@@ -45,9 +43,7 @@
 </template>
 
 <script>
-import {
-  mapState, mapMutations, mapActions, mapGetters,
-} from 'vuex';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import PanelItem from '../components/PanelItem.vue';
 
 export default {
@@ -60,7 +56,6 @@ export default {
     ...mapGetters(['activeNetwork']),
   },
   methods: {
-    ...mapMutations(['setSaveErrorLog']),
     ...mapActions(['requestResetting']),
   },
 };

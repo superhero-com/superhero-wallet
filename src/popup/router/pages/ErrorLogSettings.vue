@@ -30,13 +30,14 @@ export default {
 
 .errors-log-settings {
   padding: 16px;
-    .description {
-      color: rgba(variables.$color-white, 0.75);
-      padding: 6px 0px 24px;
-      line-height: 20px;
-      text-align: left;
 
-      @extend %face-sans-14-light;
-    }
+  .description {
+    color: rgba(variables.$color-white, 0.75);
+    padding: 6px 0px 24px;
+    line-height: 20px;
+    text-align: left;
+
+    @extend %face-sans-14-light;
+  }
 }
 </style>

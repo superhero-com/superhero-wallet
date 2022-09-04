@@ -496,7 +496,7 @@
       "transferExchange": "加密资产换取AE代代币",
       "purchase": "购买AE代币"
     },
-    "securitySettings": {
+    "seed-phrase-settings": {
       "backToSettings": "返回在设置",
       "heading": "安全和隐私",
       "privacyDataHeading": "隐私数据",

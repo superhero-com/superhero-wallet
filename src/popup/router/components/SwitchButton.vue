@@ -68,7 +68,7 @@ export default {
       &:checked + .slider {
         background-color: variables.$color-primary;
 
-        &:before {
+        &::before {
           -webkit-transform: translateX(16px);
           -ms-transform: translateX(16px);
           transform: translateX(16px);
@@ -87,7 +87,7 @@ export default {
       -webkit-transition: 0.4s;
       transition: 0.4s;
 
-      &:before {
+      &::before {
         position: absolute;
         content: "";
         height: 16px;
@@ -100,7 +100,8 @@ export default {
       }
       &.round {
         border-radius: 12px;
-        &:before {
+
+        &::before {
           border-radius: 50%;
         }
       }
@@ -111,7 +112,8 @@ export default {
     .label {
       color: rgba(variables.$color-white, 1);
     }
-    .switch .slider:before {
+
+    .switch .slider::before {
       background-color: rgba(variables.$color-white, 1);
     }
   }
