@@ -116,7 +116,6 @@ export default {
       margin-right: 4px;
       width: 26px;
       height: 26px;
-
       opacity: 0.5;
     }
   }

@@ -33,7 +33,7 @@ import PopupConnect from '../pages/Popups/Connect.vue';
 import PopupMessageSign from '../pages/Popups/MessageSign.vue';
 import PrivacyPolicy from '../pages/PrivacyPolicy.vue';
 import Retip from '../pages/Retip.vue';
-import SecuritySettings from '../pages/SecuritySettings.vue';
+import SeedPhraseSettings from '../pages/SeedPhraseSettings.vue';
 import Transfer from '../pages/Transfer.vue';
 import TransferSend from '../pages/TransferSend.vue';
 import Settings from '../pages/Settings.vue';
@@ -163,12 +163,16 @@ export default [
     },
   },
   {
-    path: '/more/settings/security',
-    name: 'settings-security',
-    component: SecuritySettings,
+    path: '/more/settings/seed-phrase',
+    name: 'settings-seed-phrase',
+    component: SeedPhraseSettings,
     meta: {
-      title: 'security',
-      notRebrand: true,
+      title: 'seed-phrase',
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {

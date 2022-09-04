@@ -431,7 +431,7 @@
       "transferExchange": "Swap crypto for AE tokens",
       "purchase": "Buy AE tokens"
     },
-    "securitySettings": {
+    "seed-phrase-settings": {
       "backToSettings": "Retour aux paramètres",
       "heading": "Sécurité et confidentialité",
       "privacyDataHeading": "Données de confidentialité",

@@ -323,7 +323,8 @@
       "token-details": "Token details",
       "wallet-home": "Wallet Home",
       "save-errors-log": "Save error log",
-      "reset-wallet": "Reset wallet"
+      "reset-wallet": "Reset wallet",
+      "seed-phrase": "Seed phrase"
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
@@ -712,7 +713,7 @@
       "heading": "Privacy Policy",
       "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
-    "securitySettings": {
+    "seed-phrase-settings": {
       "backToSettings": "Back to settings",
       "heading": "Security and Privacy",
       "privacyDataHeading": "Privacy Data",
@@ -727,7 +728,8 @@
       "incorrectPassword": "Incorrect Password",
       "decryptingPrivateKey": "Decrypting private key",
       "seedRecoveryHeading": "Show seed phrase",
-      "seedRecoverySmall": "Your seed phrase (also referred to as private key) serves as the keys or a password to access your account. Never disclose this to anyone. And make sure you back it up on a piece of paper that no one else can see—but that you will never lose. Losing these keys means losing access to your wallet and tips",
+      "seedRecoverySmall": "Your seed phrase is a combination of 12 words and serves as  password to access and restore your wallet accounts.\n\n Never disclose this to anyone.\n\n Make sure you {0} on a piece of paper or in a file that no one else can see - but that you will never lose.\n\n Losing your seed phrase means losing access to your wallet and all funds in your accounts.",
+      "seedRecoverySmallBackItUp": "back it up in the correct word sequence",
       "seedRecoveryBtn": "Show seed phrase",
       "seedPhrase": "Your seed phrase",
       "copy": "Copy to clipboard"

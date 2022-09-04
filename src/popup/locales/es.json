@@ -494,7 +494,7 @@
       "transferExchange": "Cambiar (Swap) cripto por tokens AE",
       "purchase": "Comprar tokens AE"
     },
-    "securitySettings": {
+    "seed-phrase-settings": {
       "backToSettings": "Volver a ajustes",
       "heading": "Seguridad y privacidad",
       "privacyDataHeading": "Privacidad de datos",
