@@ -512,7 +512,11 @@ export default [
     component: Invite,
     meta: {
       title: 'invite',
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
