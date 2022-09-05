@@ -4,12 +4,14 @@
     class="url-status"
     :class="status"
   >
-    <Span class="title">{{ data.content.title }}</Span>
-    <Span
+    <span class="title">{{ data.content.title }}</span>
+    <a
+      class="icon-link"
+      :class="status"
       @click="showModal"
     >
       <QuestionCircleIcon class="icon" />
-    </Span>
+    </a>
   </div>
   <Default v-else />
 </template>
@@ -20,9 +22,24 @@ import { MODAL_RECIPIENT_HELPER } from '../../utils/constants';
 import QuestionCircleIcon from '../../../icons/question-circle-border.svg?vue-component';
 
 export default {
-  components: { Default, QuestionCircleIcon },
+  components: {
+    Default,
+    QuestionCircleIcon,
+  },
   props: {
-    status: { type: String, required: true },
+    status: {
+      type: String,
+      required: true,
+      validator(value) {
+        return [
+          'verified',
+          'blacklisted',
+          'not-secure',
+          'not-verified',
+          'default',
+        ].includes(value);
+      },
+    },
   },
   computed: {
     data() {
@@ -60,7 +77,8 @@ export default {
 @use '../../../styles/typography';
 @use '../../../styles/mixins';
 
-.url-status {
+.url-status,
+.icon-link {
   @extend %face-sans-14-regular;
 
   &.blacklisted,
@@ -75,17 +93,14 @@ export default {
     color: variables.$color-warning;
   }
 
-  &.info {
+  &.info,
+  &.help {
     color: variables.$color-blue;
   }
 
   &.verified,
   &.success {
     color: variables.$color-green-dark;
-  }
-
-  &.help {
-    color: variables.$color-blue;
   }
 
   .title {
