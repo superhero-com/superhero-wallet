@@ -44,8 +44,10 @@ export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
 export const calculateFee = (type, params) => {
   const MIN_FEE = TxBuilder.calculateMinFee(type, {
     params: {
-      senderId: STUB_ADDRESS,
-      recipientId: STUB_ADDRESS,
+      ...type === 'spendTx' ? {
+        senderId: STUB_ADDRESS,
+        recipientId: STUB_ADDRESS,
+      } : {},
       amount: MAX_UINT256,
       ttl: MAX_UINT256,
       nonce: MAX_UINT256,

@@ -14,6 +14,7 @@
           :is-address-chain="isAddressChain"
           :is-address-url="isAddressUrl"
           @success="currentStepConfig.onSuccess"
+          @error="(val) => error = val"
         />
       </transition>
     </div>
@@ -30,6 +31,7 @@
       <Button
         class="button-action-primary"
         new-ui
+        :disabled="error || !transferData.address || !transferData.amount"
         :has-icon="showSendButton"
         :text="showSendButton ? $t('pages.send.send') : $t('modals.send.next')"
         @click="proceedToNextStep"
@@ -73,6 +75,7 @@ export default {
       STEP_REVIEW,
       STEP_REVIEW_TIP,
       currentStep: STEP_FORM,
+      error: false,
       transferData: {
         address: '',
         amount: null,

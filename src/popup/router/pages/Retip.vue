@@ -15,11 +15,13 @@
       v-validate="{
         required: true,
         min_value_exclusive: 0,
+        ...+balance.minus(fee) > 0 ? { max_value: max } : {},
+        enough_ae: fee.toString(),
       }"
       name="amount"
       class="amount-input"
       show-tokens-with-balance
-      :error-message="validationStatus.msg"
+      :error-message="validationStatus.msg || errors.first('amount')"
       :selected-asset="formModel.selectedAsset"
       @asset-selected="(val) => $set(formModel, 'selectedAsset', val)"
     />
@@ -31,7 +33,7 @@
     </div>
 
     <Button
-      :disabled="!tippingSupported || validationStatus.error"
+      :disabled="!tippingSupported || validationStatus.error || $validator.errors.has('amount')"
       @click="sendTip"
     >
       {{ $t('pages.tipPage.confirm') }}
@@ -50,6 +52,7 @@ import { SCHEMA } from '@aeternity/aepp-sdk';
 import { MAGNITUDE } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
 import deeplinkApi from '../../../mixins/deeplinkApi';
+import maxAmountMixin from '../../../mixins/maxAmountMixin';
 import InputAmount from '../components/InputAmountV2.vue';
 import UrlStatus from '../components/UrlStatus.vue';
 import Button from '../components/Button.vue';
@@ -59,7 +62,7 @@ export default {
   components: {
     InputAmount, UrlStatus, Button, BalanceInfo,
   },
-  mixins: [deeplinkApi],
+  mixins: [deeplinkApi, maxAmountMixin],
   data: () => ({
     tip: {},
     formModel: {

@@ -7,9 +7,7 @@
         required: true,
         not_same_as: account.address,
         name_registered_address_or_url: true,
-        token_to_an_address: formModel.selectedAsset
-          && formModel.selectedAsset.contractId
-          && formModel.selectedAsset.contractId !== 'aeternity',
+        token_to_an_address: { isToken },
       }"
       name="address"
       data-cy="address"
@@ -38,6 +36,8 @@
       v-validate="{
         required: true,
         min_value_exclusive: 0,
+        ...+balance.minus(fee) > 0 ? { max_value: max } : {},
+        enough_ae: fee.toString(),
         min_tip_amount: isTipUrl,
       }"
       name="amount"
@@ -65,9 +65,8 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import BigNumber from 'bignumber.js';
-import { calculateFee, convertToken } from '../../utils/helper';
+import maxAmountMixin from '../../../mixins/maxAmountMixin';
+import { convertToken } from '../../utils/helper';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
 import DetailsItem from './DetailsItem.vue';
@@ -88,6 +87,7 @@ export default {
     TokenAmount,
     QrScanIcon,
   },
+  mixins: [maxAmountMixin],
   model: {
     prop: 'transferData',
   },
@@ -97,14 +97,9 @@ export default {
   data() {
     return {
       invoiceId: null,
-      warningRules: {
-        address: WARNING_RULES,
-      },
       invoiceContract: null,
-      reviewStep: false,
       formModel: {},
       loading: false,
-      fee: BigNumber(0),
       error: false,
     };
   },
@@ -128,8 +123,18 @@ export default {
         .filter(({ field }) => field === 'address')
         .find((error) => WARNING_RULES.includes(error.rule))?.msg || null;
     },
+    hasError() {
+      return !!this.addressErrorMsg || !!this.errors.first('amount');
+    },
+    isToken() {
+      return this.formModel.selectedAsset?.contractId
+          && this.formModel.selectedAsset.contractId !== 'aeternity';
+    },
   },
   watch: {
+    hasError(value) {
+      return this.$emit('error', value);
+    },
     formModel: {
       deep: true,
       handler(val) {
@@ -141,9 +146,7 @@ export default {
       },
     },
   },
-  async created() {
-    await this.fetchFee();
-
+  created() {
     this.formModel = this.transferData;
     if (!this.formModel.selectedAsset) {
       this.formModel.selectedAsset = this.getAeternityToken({
@@ -161,18 +164,6 @@ export default {
     if (tipAmount) this.formModel.amount = tipAmount.toString();
   },
   methods: {
-    async fetchFee() {
-      await this.$watchUntilTruly(() => this.sdk);
-      this.fee = calculateFee(
-        !this.selectedAsset ? SCHEMA.TX_TYPE.spend : SCHEMA.TX_TYPE.contractCall, {
-          ...this.sdk.Ae.defaults,
-          ...(this.selectedAsset && {
-            callerId: this.account.address,
-            contractId: this.selectedAsset.contractId,
-          }),
-        },
-      );
-    },
     async queryHandler(query) {
       this.formModel.selectedAsset = this.availableTokens[query.token]
         ?? this.getAeternityToken({
@@ -196,7 +187,7 @@ export default {
           fee: this.fee,
           total: (selectedAsset.contractId === 'aeternity' ? +this.fee : 0) + +amount,
           invoiceId: this.invoiceId,
-          contractId: this.contractId,
+          invoiceContract: this.invoiceContract,
         });
       }
     },
@@ -245,7 +236,7 @@ export default {
         this.formModel.address = parsedScanResult.tokenContract;
         this.formModel.amount = +convertToken(
           parsedScanResult.amount,
-          -this.selectedToken.decimals,
+          -this.formModel.selectedAsset.decimals,
         );
         this.invoiceId = parsedScanResult.invoiceId;
         this.invoiceContract = parsedScanResult.invoiceContract;
