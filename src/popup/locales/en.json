@@ -625,9 +625,12 @@
       }
     },
     "languageSettings": {
-      "backToSettings": "Back to settings",
       "heading": "Language",
       "chooseLanguage": "Choose Superhero wallet UI language."
+    },
+    "currencySettings": {
+      "heading": "Currency",
+      "chooseLanguage": "Choose Superhero wallet fiat currency conversion. Conversion to XAU (gold) is also an available option."
     },
     "index": {
       "term1": "I agree to the Superhero ",
