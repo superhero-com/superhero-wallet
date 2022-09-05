@@ -59,6 +59,7 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 @use '../../../styles/mixins';
+
 .url-status {
   @extend %face-sans-14-regular;
 

@@ -5,9 +5,7 @@
     :title="title"
     :close="resolve"
   >
-    <template
-      slot="msg"
-    >
+    <template #msg>
       <div
         class="msg"
       >
@@ -27,7 +25,7 @@
         </p>
       </div>
     </template>
-    <template slot="footer">
+    <template #footer>
       <Button
         class="footer"
         @click="resolve"

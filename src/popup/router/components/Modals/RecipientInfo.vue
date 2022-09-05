@@ -5,9 +5,7 @@
     :title="$t('modals.recipient.title')"
     :close="resolve"
   >
-    <template
-      slot="msg"
-    >
+    <template #msg>
       <div
         class="msg"
       >
@@ -19,7 +17,7 @@
             path="modals.recipient.msg.publicAddress.msg"
             tag="div"
           >
-            <strong>
+            <strong class="title">
               {{ $t('modals.recipient.msg.publicAddress.title') }}:
             </strong>
           </i18n>
@@ -29,7 +27,7 @@
             path="modals.recipient.msg.chain.msg"
             tag="div"
           >
-            <strong>
+            <strong class="title">
               {{ $t('modals.recipient.msg.chain.title') }}:
             </strong>
             <RouterLink :to="{ name: 'name-claim' }">
@@ -42,7 +40,7 @@
             path="modals.recipient.msg.url.msg"
             tag="div"
           >
-            <strong>
+            <strong class="title">
               {{ $t('modals.recipient.msg.url.title') }}:
             </strong>
           </i18n>
@@ -63,7 +61,7 @@
         </p>
       </div>
     </template>
-    <template slot="footer">
+    <template #footer>
       <Button
         class="footer"
         @click="resolve"
@@ -100,9 +98,7 @@ export default {
 @use '../../../../styles/typography';
 @use '../../../../styles/mixins';
 
-.msg,
-p,
-span {
+.msg {
   @extend %face-sans-14-regular;
 
   text-align: left;
@@ -117,17 +113,12 @@ span {
     margin-bottom: 20px;
   }
 
-  strong {
+  .title {
     color: variables.$color-white;
-  }
-
-  a {
-    color: variables.$color-primary;
-    text-decoration: none;
   }
 }
 
 .footer {
-  width: 100% !important;
+  width: 100%;
 }
 </style>

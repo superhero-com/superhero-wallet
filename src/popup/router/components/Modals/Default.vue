@@ -54,13 +54,14 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-  @use '../../../../styles/variables';
-  @use '../../../../styles/mixins';
+@use '../../../../styles/variables';
+@use '../../../../styles/mixins';
 
 .icon-box {
   @include mixins.flex(center, center, column);
 
   gap: 20px;
+
   .icon {
     padding: 4px;
     border: 4px solid variables.$color-disabled;
