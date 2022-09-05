@@ -9,7 +9,7 @@
       ...validation,
     }"
     name="amount"
-    :error-message="$attrs['error-message'] || errors.first('amount')"
+    :message="$attrs['message'] || errors.first('amount')"
     class="input-amount"
     type="number"
     v-bind="$attrs"

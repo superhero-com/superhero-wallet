@@ -65,7 +65,7 @@
         v-show="showInput"
         v-model="newPointer"
         :placeholder="$t('pages.names.details.address-placeholder')"
-        :error-message="error && $t('pages.names.list.valid-identifier-error')"
+        :message="error && $t('pages.names.list.valid-identifier-error')"
         plain
       >
         <template #after>

@@ -1,13 +1,13 @@
 <template>
   <div
     class="input-field"
-    :class="{
+    :class="[{
       'new-ui': newUi,
       'error': hasError,
-      'warning': !hasError && hasWarning,
+      'warning': hasWarning,
       plain,
       readonly
-    }"
+    }]"
   >
     <div
       v-if="label || $slots.label || $slots['label-after']"
@@ -83,14 +83,14 @@
     </label>
 
     <div
-      v-if="errorMessage || warningMessage"
+      v-if="showMessage"
       class="message"
     >
       <label
         class="message-text"
         :for="inputId"
       >
-        {{ hasError ? errorMessage : warningMessage }}
+        {{ typeof message === 'object' ? message.text : message }}
       </label>
     </div>
   </div>
@@ -108,9 +108,16 @@ export default {
   props: {
     value: { type: [String, Number], default: null },
     label: { type: String, default: '' },
-    status: { type: String, default: null },
-    errorMessage: { type: String, default: '' },
-    warningMessage: { type: String, default: '' },
+    message: {
+      type: [String, Object],
+      validator(value) {
+        if (typeof value === 'object' && value.status) {
+          return ['success', 'warning', 'error'].includes(value.status);
+        }
+        return true;
+      },
+      default: () => {},
+    },
     readonly: Boolean,
     plain: Boolean,
     showHelp: Boolean,
@@ -125,10 +132,22 @@ export default {
       return `input-${this._uid}`;
     },
     hasError() {
-      return !!this.errorMessage || this.status === 'error';
+      if (typeof this.message === 'object') {
+        return this.message.status === 'error';
+      }
+      return !!this.message;
     },
     hasWarning() {
-      return !!this.warningMessage || this.status === 'warning';
+      if (typeof this.message === 'object') {
+        return this.message.status === 'warning';
+      }
+      return false;
+    },
+    showMessage() {
+      if (typeof this.message === 'object') {
+        return !this.message.hideMessage;
+      }
+      return !!this.message;
     },
   },
 };
