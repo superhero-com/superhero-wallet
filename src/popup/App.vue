@@ -47,7 +47,7 @@ export default {
     ...mapState(['isRestored', 'backedUpSeed']),
     showStatusAndHeader() {
       return !(
-        ['/'].includes(this.$route.path)
+        this.$route.path === '/'
         || this.$route.path.startsWith('/web-iframe-popup')
         || this.$route.params.app
       );

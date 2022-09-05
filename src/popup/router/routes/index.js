@@ -57,6 +57,7 @@ export default [
       navigation: false,
       ifNotAuthOnly: true,
       notPersist: true,
+      newUI: true,
     },
   },
   {

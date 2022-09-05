@@ -1,8 +1,10 @@
 <template>
   <Button
     class="button-subheader"
-    :class="fill"
     :to="to"
+    new-ui
+    extend
+    fill="alternative"
     @click="$emit('click')"
   >
     <div class="box">
@@ -19,16 +21,16 @@
 </template>
 
 <script>
+import Button from './Button.vue';
+
 export default {
+  components: {
+    Button,
+  },
   props: {
     to: { type: [String, Object], default: '' },
     header: { type: String, default: '' },
     subheader: { type: String, default: '' },
-    fill: {
-      type: String,
-      validator: (value) => ['primary', 'alternative'].includes(value),
-      default: 'primary',
-    },
   },
 };
 </script>
@@ -39,27 +41,16 @@ export default {
 @use '../../../styles/mixins';
 
 .button-subheader {
-  background: variables.$color-bg-6;
-  border-radius: 10px;
-  margin: 16px;
   height: 80px;
-  width: 328px;
-  align-self: flex-start;
+  margin-bottom: 16px;
   cursor: pointer;
-
-  &.primary {
-    &:hover {
-      background: variables.$color-bg-5-hover;
-    }
-  }
 
   .box {
     @include mixins.flex(flex-start, center);
 
     text-decoration: none;
     color: variables.$color-dark-grey;
-    gap: 24px;
-    margin-left: 16px;
+    gap: 16px;
 
     .icon {
       @include mixins.flex(center, center);
@@ -67,12 +58,11 @@ export default {
       width: 36px;
       height: 36px;
       border-radius: 14px;
-      background-color: rgba(variables.$color-white, 0.15);
-      opacity: 0.8;
+      background-color: rgba(variables.$color-white, 0.1);
 
       ::v-deep svg {
-        width: 20px;
-        height: 20px;
+        width: 22px;
+        height: 22px;
         color: variables.$color-white;
       }
     }
@@ -82,13 +72,14 @@ export default {
     @include mixins.flex(flex-start, flex-start, column);
 
     .heading {
-      @extend %face-sans-16-bold;
+      @extend %face-sans-16-medium;
 
+      line-height: 150%;
       color: variables.$color-white;
     }
 
     .description {
-      @extend %face-sans-13-medium ;
+      @extend %face-sans-13-regular;
 
       color: rgba(variables.$color-white, 0.7);
     }

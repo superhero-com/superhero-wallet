@@ -1,5 +1,8 @@
 <template>
-  <div class="platforms">
+  <div
+    class="platforms"
+    :class="{'new-ui': newUi}"
+  >
     <div class="heading">
       <slot name="header" />
     </div>
@@ -105,6 +108,9 @@ import {
 } from '../../utils/constants';
 
 export default {
+  props: {
+    newUi: Boolean,
+  },
   data: () => ({
     IS_MOBILE_DEVICE: window.IS_MOBILE_DEVICE,
     IS_IOS: window.IS_IOS,
@@ -133,12 +139,12 @@ export default {
 
   @extend %face-sans-15-regular;
 
-  &:hover {
-    background-color: variables.$color-bg-3;
+  &.new-ui {
+    background-color: variables.$color-bg-3-new;
   }
 
   .heading {
-    @extend %face-sans-17-medium;
+    @extend %face-sans-17-regular;
 
     margin: 8px auto;
     width: 248px;
@@ -147,7 +153,7 @@ export default {
   }
 
   .footer {
-    @extend %face-sans-17-medium;
+    @extend %face-sans-17-regular;
 
     margin-top: 14px;
     margin-bottom: 12px;

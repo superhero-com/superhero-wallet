@@ -13,7 +13,7 @@
 
       <FormTextarea
         v-model="mnemonic"
-        size="sm"
+        size="xs"
         :label="$t('pages.index.seedPhrase')"
         :placeholder="$t('pages.index.seedPlaceHolder')"
         :error-message="error"
@@ -92,13 +92,13 @@ export default {
 
   .import-account {
     .header {
-      @extend %face-sans-18-bold;
+      @extend %face-sans-18-medium;
 
       color: variables.$color-white;
     }
 
     .regular-text {
-      @extend %face-sans-15-regular;
+      @extend %face-sans-16-light;
 
       color: variables.$color-white;
       text-align: center;

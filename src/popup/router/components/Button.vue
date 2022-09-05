@@ -242,6 +242,14 @@ export default {
       }
     }
 
+    &.alternative {
+      background-color: variables.$color-bg-6;
+
+      &:hover {
+        background-color: variables.$color-bg-5-hover;
+      }
+    }
+
     &.extend {
       width: 100%;
     }

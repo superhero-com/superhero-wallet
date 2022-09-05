@@ -29,7 +29,8 @@
 <script>
 import InputField from './InputField.vue';
 
-const SIZES = ['sm', 'rg', 'md'];
+const SIZES = ['xs', 'sm', 'rg', 'md'];
+
 export default {
   components: {
     InputField,
@@ -55,6 +56,7 @@ export default {
 .textarea {
   --base-line-height: 1.4em;
   --size: 6; // Amount of text lines
+
   &-input {
     @extend %face-sans-16-regular;
 
@@ -68,6 +70,14 @@ export default {
     word-break: break-word;
     font-size: 15px;
     line-height: var(--base-line-height);
+  }
+
+  ::placeholder {
+    color: variables.$color-silver;
+  }
+
+  &.xs {
+    --size: 3;
   }
 
   &.sm {

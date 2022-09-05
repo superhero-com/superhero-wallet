@@ -1,5 +1,8 @@
 <template>
-  <div class="index">
+  <div
+    class="index"
+    :class="[{ 'new-ui': $route.meta.newUI }]"
+  >
     <img
       v-if="IN_FRAME"
       src="../../../icons/iframe/sendAndReceive.svg"
@@ -9,9 +12,7 @@
       class="not-iframe"
     >
       <Logo />
-      <div
-        class="heading"
-      >
+      <div class="heading">
         <i18n
           path="pages.index.heading.message"
           tag="span"
@@ -25,7 +26,10 @@
       </div>
 
       <template v-if="IS_WEB">
-        <Platforms :class="{ agreed: termsAgreed }">
+        <Platforms
+          :class="{ agreed: termsAgreed }"
+          new-ui
+        >
           <template #header>
             {{ $t('pages.index.platforms.heading') }}
           </template>
@@ -55,25 +59,28 @@
         {{ $t('pages.index.termsAndConditions') }}
       </a>
     </div>
-
-    <ButtonSubheader
-      v-show="termsAgreed"
-      data-cy="generate-wallet"
-      :subheader=" $t('pages.index.getStartedWithWallet') "
-      :header="$t('pages.index.generateWallet')"
-      @click="createWallet"
+    <div
+      class="wallet-button-box"
     >
-      <PlusCircleIcon />
-    </ButtonSubheader>
-    <ButtonSubheader
-      v-show="termsAgreed"
-      data-cy="import-wallet"
-      :subheader=" $t('pages.index.enterSeed') "
-      :header="$t('pages.index.importWallet')"
-      @click="importWallet"
-    >
-      <CheckCircleIcon />
-    </ButtonSubheader>
+      <ButtonSubheader
+        v-show="termsAgreed"
+        data-cy="generate-wallet"
+        :subheader=" $t('pages.index.getStartedWithWallet')"
+        :header="$t('pages.index.generateWallet')"
+        @click="createWallet"
+      >
+        <PlusCircleIcon />
+      </ButtonSubheader>
+      <ButtonSubheader
+        v-show="termsAgreed"
+        data-cy="import-wallet"
+        :subheader=" $t('pages.index.enterSeed') "
+        :header="$t('pages.index.importWallet')"
+        @click="importWallet"
+      >
+        <CheckCircleIcon />
+      </ButtonSubheader>
+    </div>
   </div>
 </template>
 
@@ -127,13 +134,18 @@ export default {
 @use '../../../styles/mixins';
 
 .index {
-  margin-top: 42px;
+  padding-top: 42px;
   text-align: center;
+
+  &.new-ui {
+    background-color: variables.$color-bg-3-new;
+    height: 100%;
+  }
 
   .terms-agreement {
     @include mixins.flex(center);
 
-    @extend %face-sans-15-medium;
+    @extend %face-sans-15-regular;
 
     margin-bottom: 4px;
 
@@ -163,6 +175,7 @@ export default {
     .terms-of-use {
       color: rgba(variables.$color-white, 0.75);
       text-decoration: none;
+      margin-bottom: 4px;
 
       &:hover {
         color: variables.$color-white;
@@ -188,7 +201,7 @@ export default {
 
       @include mixins.flex(center);
 
-      line-height: 22px;
+      line-height: 125%;
       color: variables.$color-white;
       margin: 8px 60px 8px 60px;
 
@@ -240,6 +253,11 @@ export default {
         opacity: 0.66;
       }
     }
+  }
+
+  .wallet-button-box {
+    margin-left: 16px;
+    margin-right: 16px;
   }
 }
 </style>
