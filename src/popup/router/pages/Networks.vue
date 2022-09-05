@@ -264,10 +264,11 @@ export default {
 @use '../../../styles/typography';
 
 .networks {
+  padding: 16px;
+
   .network-row {
     display: flex;
     align-items: center;
-    border-top: 1px solid variables.$color-border;
     padding: 12px 0;
     text-align: left;
 

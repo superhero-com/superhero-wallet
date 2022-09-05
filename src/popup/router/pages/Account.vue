@@ -7,7 +7,7 @@
         tag="div"
         class="seed-backup-notification"
       >
-        <RouterLink :to="{ name: 'settings-security' }">
+        <RouterLink :to="{ name: 'settings-seed-phrase' }">
           {{ $t('pages.account.backup') }}
         </RouterLink>
       </i18n>

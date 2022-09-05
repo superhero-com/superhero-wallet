@@ -109,8 +109,8 @@ export default {
   setBackedUpSeed(state) {
     state.backedUpSeed = true;
   },
-  setSaveErrorLog(state) {
-    state.saveErrorLog = !state.saveErrorLog;
+  setSaveErrorLog(state, saveErrorLog) {
+    state.saveErrorLog = saveErrorLog;
   },
   setLoginTargetLocation(state, location) {
     state.loginTargetLocation = location;

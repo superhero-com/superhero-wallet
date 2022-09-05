@@ -283,7 +283,7 @@
       "balances": "Balances",
       "accounts": "Accounts",
       "tips": "Tips",
-      "settings": "Settings",
+      "settings": "Wallet settings",
       "language": "Language",
       "security": "Security",
       "about": "About",
@@ -296,6 +296,7 @@
       "importAccount": "Retrieve Existing Account",
       "transactions": "Transaction History",
       "receive": "Receive",
+      "currency": "Currency",
       "notifications": "Notifications",
       "notification-settings": "Notification Preference",
       "names": "Names",
@@ -304,8 +305,8 @@
       "register-name": "Register name",
       "more": "More",
       "buy": "Buy AE Tokens",
-      "networks": "Networks",
-      "permissionsSettings": "Permissions settings",
+      "networks": "Network",
+      "permissionsSettings": "Permissions",
       "permissionsDetails": "Permissions details",
       "comment-new": "Add comment",
       "home": "Home",
@@ -319,8 +320,14 @@
       "sign-transaction": "Sign Transaction",
       "invite": "Invite",
       "tx-details": "Transaction details",
+      "token-details": "Token details",
       "wallet-home": "Wallet Home",
-      "token-details": "Token details"
+      "save-errors-log": "Save error log",
+      "reset-wallet": "Reset wallet",
+      "seed-phrase": "Seed phrase"
+    },
+    "errors-log-settings": {
+      "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
     },
     "about": {
       "heading": "About",
@@ -556,7 +563,7 @@
     },
     "more": {
       "get-ae": "Get AE",
-      "dex": "DEX"
+      "dex": "Superhero DEX"
     },
     "names": {
       "default": "Default",
@@ -620,8 +627,7 @@
     "languageSettings": {
       "backToSettings": "Back to settings",
       "heading": "Language",
-      "switchLanguage": "Language",
-      "currentLanguage": "Current language"
+      "chooseLanguage": "Choose Superhero wallet UI language."
     },
     "index": {
       "term1": "I agree to the Superhero ",
@@ -693,7 +699,8 @@
       "claimOfRetip": "claimed your retip."
     },
     "notification-settings": {
-      "header": "Select which notification to receive",
+      "description": "Wallet notifications are always on by default and you are not able of turning them off.",
+      "description2": "You can choose below which notifications to receive from social platform Superhero.com.",
       "commentOnTip": "Someone commented on your tip or post.",
       "commentOnComment": "Someone replied to your comment.",
       "retipOnTip": "Someone retipped to your tip.",
@@ -707,7 +714,7 @@
       "heading": "Privacy Policy",
       "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
-    "securitySettings": {
+    "seed-phrase-settings": {
       "backToSettings": "Back to settings",
       "heading": "Security and Privacy",
       "privacyDataHeading": "Privacy Data",
@@ -722,7 +729,8 @@
       "incorrectPassword": "Incorrect Password",
       "decryptingPrivateKey": "Decrypting private key",
       "seedRecoveryHeading": "Show seed phrase",
-      "seedRecoverySmall": "Your seed phrase (also referred to as private key) serves as the keys or a password to access your account. Never disclose this to anyone. And make sure you back it up on a piece of paper that no one else can see—but that you will never lose. Losing these keys means losing access to your wallet and tips",
+      "seedRecoverySmall": "Your seed phrase is a combination of 12 words and serves as  password to access and restore your wallet accounts.\n\n Never disclose this to anyone.\n\n Make sure you {0} on a piece of paper or in a file that no one else can see - but that you will never lose.\n\n Losing your seed phrase means losing access to your wallet and all funds in your accounts.",
+      "seedRecoverySmallBackItUp": "back it up in the correct word sequence",
       "seedRecoveryBtn": "Show seed phrase",
       "seedPhrase": "Your seed phrase",
       "copy": "Copy to clipboard"
@@ -790,8 +798,7 @@
       "tabNetworks": "Manage networks",
       "tabNetworksSmall": "Connect to custom node",
       "tabPermissionsSettingsSmall": "Manage popups appearance for various requests",
-      "tabRemoveAccount": "Remove account",
-      "tabRemoveAccountSmall": "Remove account from the wallet and delete extension storage",
+      "tabRemoveAccount": "Reset wallet",
       "tabSaveErrorLog": "Save error log",
       "tabSaveErrorLogSmall": "This will help us identify what's causing the errors."
     },
@@ -1131,7 +1138,16 @@
       "spent-today": "Spent today",
       "left-today": "Left today",
       "delete": "Remove permissions",
-      "empty": "You aren't connected to any aepps"
+      "empty": "You aren't connected to any aepps",
+      "description": "Manage confirmation popups and daily spending limits. For security reasons use this feature with caution only for trusted platforms such as {0} and your localhost environment."
+    },
+    "reset-wallet": {
+      "description": "This action will remove all accounts from your wallet and delete the extension storage.",
+      "description2": "Make sure you have backed up your {0} before proceeding. This action cannot be undone!",
+      "warning": "This action will remove all accounts from your wallet and delete the extension storage.\n This action cannot be undone!",
+      "warningConfirm": "Are you sure you would like to proceed?",
+      "cancel": "Cancel",
+      "reset": "Reset"
     }
   },
   "validation": {

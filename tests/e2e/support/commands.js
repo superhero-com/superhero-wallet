@@ -56,13 +56,14 @@ Cypress.Commands.add('shouldRedirect', (url, to) => {
 });
 
 Cypress.Commands.add('openPageMore', () => {
-  cy.get('[data-cy=page-more]').click();
+  cy.visit('/account')
+    .get('[data-cy=page-more]')
+    .should('be.visible')
+    .click();
 });
 
 Cypress.Commands.add('openTip', () => {
-  cy.get('[data-cy=tip-button]')
-    .should('be.visible')
-    .click()
+  cy.visit('/more/tips')
     .get('[data-cy=tip-container]')
     .should('be.visible');
 });
@@ -167,7 +168,7 @@ Cypress.Commands.add('openNetworks', () => {
     .click()
     .get('[data-cy=networks]')
     .click()
-    .urlEquals('/settings/networks');
+    .urlEquals('/more/settings/networks');
 });
 
 Cypress.Commands.add('enterNetworkDetails', (network, url, middleware, compiler) => {

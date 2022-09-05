@@ -17,6 +17,7 @@ import {
   MODAL_SHARE_QR,
   MODAL_TRANSFER_RECEIVE,
   MODAL_ASSET_SELECTOR,
+  MODAL_RESET_WALLET,
 } from '../utils/constants';
 
 import Default from './components/Modals/Default.vue';
@@ -33,6 +34,7 @@ import ShareQr from './components/Modals/ShareQr.vue';
 import AccountDetails from './components/Modals/AccountDetails.vue';
 import AssetSelector from './components/Modals/AssetSelector.vue';
 import TransferReceive from './components/Modals/TransferReceive.vue';
+import ResetWallet from './components/Modals/ResetWallet.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
@@ -59,4 +61,5 @@ export default () => {
   registerModal({ name: MODAL_SHARE_QR, component: ShareQr });
   registerModal({ name: MODAL_TRANSFER_RECEIVE, component: TransferReceive });
   registerModal({ name: MODAL_ASSET_SELECTOR, component: AssetSelector });
+  registerModal({ name: MODAL_RESET_WALLET, component: ResetWallet });
 };
