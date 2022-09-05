@@ -56,7 +56,10 @@ Cypress.Commands.add('shouldRedirect', (url, to) => {
 });
 
 Cypress.Commands.add('openPageMore', () => {
-  cy.get('[data-cy=page-more]').click();
+  cy.visit('/account')
+    .get('[data-cy=page-more]')
+    .should('be.visible')
+    .click();
 });
 
 Cypress.Commands.add('openTip', () => {

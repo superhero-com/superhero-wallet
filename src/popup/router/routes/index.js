@@ -44,6 +44,7 @@ import TermsOfService from '../pages/TermsOfService.vue';
 import TipsSend from '../pages/TipsSend.vue';
 import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
+import ResetWallet from '../pages/ResetWallet.vue';
 import Transactions from '../pages/Transactions.vue';
 import webIframePopups from './web-iframe-popups';
 
@@ -128,12 +129,14 @@ export default [
   {
     path: '/more/settings/reset-wallet',
     name: 'settings-reset-wallet',
-    component: ErrorLogSettings,
+    component: ResetWallet,
     meta: {
       title: 'reset-wallet',
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
       hideTabBar: true,
       hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
@@ -182,7 +185,11 @@ export default [
     props: true,
     meta: {
       title: 'networks',
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {

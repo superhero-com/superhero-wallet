@@ -1,7 +1,6 @@
 <template>
   <div class="tips-claim">
     <AccountInfo
-      v-bind="$attrs"
       color="#212121"
     />
     <div class="header">
@@ -139,14 +138,6 @@ export default {
         width: 32px;
         height: 32px;
       }
-    }
-  }
-
-  ::v-deep .account-info .title {
-    justify-content: start;
-
-    .copied {
-      top: 72px;
     }
   }
 

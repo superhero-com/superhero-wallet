@@ -9,7 +9,6 @@
         <Settings />
       </template>
     </PanelItem>
-
     <PanelItem
       :to="{ name: 'tips-claim' }"
       :title="$t('pages.titles.claim-tips')"
@@ -19,7 +18,6 @@
         <ClaimTips />
       </template>
     </PanelItem>
-
     <PanelItem
       :to="{ name: 'invite' }"
       :title="$t('pages.titles.invite')"
@@ -29,8 +27,6 @@
         <Invites />
       </template>
     </PanelItem>
-
-    <!-- TODO FIX URL IN NEW PAGE -->
     <PanelItem
       :href="BUG_REPORT_URL"
       :title="$t('pages.about.reportBug')"
@@ -55,8 +51,6 @@
         <Dex />
       </template>
     </PanelItem>
-
-    <!-- TODO FIX URL IN NEW PAGE -->
     <PanelItem
       :to="{ name: 'about' }"
       :title="$t('pages.titles.about')"

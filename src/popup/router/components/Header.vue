@@ -16,7 +16,7 @@
       </RouterLink>
       <ButtonPlain
         v-if="showBack"
-        class="icon-btn back"
+        class="icon-btn"
         @click="back"
       >
         <Back data-cy="back-arrow" />
@@ -70,6 +70,7 @@
       <ButtonPlain
         v-else
         class="icon-btn close"
+        data-cy="close"
         @click="close"
       >
         <Close />
@@ -280,7 +281,7 @@ export default {
       }
     }
 
-    &.back svg {
+    .back {
       width: 19.09px;
       height: 16px;
     }

@@ -49,7 +49,7 @@ export default {
   }
 
   .switch-button {
-    margin-bottom: 12px;;
+    margin-bottom: 12px;
   }
 }
 </style>

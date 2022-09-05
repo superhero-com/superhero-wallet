@@ -51,6 +51,8 @@ describe('Test cases for networks page', () => {
       defaultNetwork.middlewareUrl,
       defaultNetwork.compilerUrl,
     )
+      .get('[data-cy=close]')
+      .click()
       .openNetworks()
       .get('[data-cy=more]')
       .click()

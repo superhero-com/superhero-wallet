@@ -213,14 +213,9 @@ export default {
     }
 
     ::v-deep .account-info .title {
-      justify-content: flex-start;
       word-break: normal;
 
       @extend %face-sans-16-regular;
-
-      .copied {
-        top: 30px;
-      }
     }
   }
 
