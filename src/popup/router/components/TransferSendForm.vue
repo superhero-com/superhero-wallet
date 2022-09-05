@@ -16,9 +16,7 @@
       new-ui
       :label="$t('modals.send.recipientLabel')"
       :placeholder="$t('modals.send.recipientPlaceholder')"
-      :error-message="isTipUrl ? null : addressErrorMsg"
-      :warning-message="isTipUrl ? null : addressWarningMsg"
-      :status="status"
+      :message="message"
       @help="showRecipientHelp()"
     >
       <template #label-after>
@@ -33,7 +31,7 @@
     </InputField>
     <div class="status">
       <UrlStatus
-        v-show="isTipUrl && !checkAensName(formModel.address) && validateTipUrl(formModel.address)"
+        v-show="isTipUrl"
         :status="urlStatus"
       />
     </div>
@@ -49,7 +47,7 @@
       name="amount"
       class="amount-input"
       show-tokens-with-balance
-      :error-message="errors.first('amount')"
+      :message="errors.first('amount')"
       :selected-asset="formModel.selectedAsset"
       @asset-selected="handleAssetChange"
     >
@@ -127,8 +125,6 @@ export default {
       formModel: {},
       loading: false,
       error: false,
-      isTipUrl: false,
-      status: '',
     };
   },
   subscriptions() {
@@ -154,6 +150,31 @@ export default {
     urlStatus() {
       return this.$store.getters['tipUrl/status'](this.formModel.address);
     },
+    isTipUrl() {
+      return validateTipUrl(this.formModel.address) && !checkAensName(this.formModel.address);
+    },
+    message() {
+      if (this.isTipUrl) {
+        switch (this.urlStatus) {
+          case 'verified': return { status: 'success', text: ' ', hideMessage: true };
+          case 'not-secure': return { status: 'warning', text: ' ', hideMessage: true };
+          case 'not-verified': return { status: 'warning', text: ' ', hideMessage: true };
+          case 'blacklisted': return { status: 'error', text: ' ', hideMessage: true };
+          default:
+            throw new Error(`Unknown url status: ${this.message.status}`);
+        }
+      } else {
+        const warning = this.errors.items
+          .filter(({ field }) => field === 'address')
+          .find((error) => WARNING_RULES.includes(error.rule))?.msg || null;
+        if (warning) return { status: 'warning', text: warning };
+        const error = this.errors.items
+          .filter(({ field }) => field === 'address')
+          .filter(({ rule }) => !WARNING_RULES.includes(rule))[0]?.msg || null;
+        if (error) return { status: 'error', text: error };
+      }
+      return { status: 'success' };
+    },
     hasError() {
       return !!this.addressErrorMsg || !!this.errors.first('amount');
     },
@@ -172,29 +193,6 @@ export default {
     formModel: {
       deep: true,
       handler(val) {
-        this.isTipUrl = validateTipUrl(val.address);
-        if (!checkAensName(val.address) && this.isTipUrl) {
-          const urlStatus = this.$store.getters['tipUrl/status'](val.address);
-          switch (urlStatus) {
-            case 'verified':
-              this.status = 'success';
-              break;
-            case 'blacklisted':
-              this.status = 'error';
-              break;
-            case 'not-secure':
-              this.status = 'warning';
-              break;
-            case 'not-verified':
-              this.status = 'warning';
-              break;
-            default:
-              throw new Error(`Unknown url status: ${this.status}`);
-          }
-        } else {
-          this.status = null;
-        }
-
         this.$emit('input', {
           ...val,
           fee: this.fee,

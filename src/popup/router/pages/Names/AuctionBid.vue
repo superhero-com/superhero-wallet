@@ -5,7 +5,7 @@
       <InputAmount
         v-model="amount"
         :error="!!amountError"
-        :error-message="amountError"
+        :message="amountError"
         @error="(val) => error = val"
       />
       <div class="tx-details">

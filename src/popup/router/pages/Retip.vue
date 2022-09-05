@@ -21,7 +21,7 @@
       name="amount"
       class="amount-input"
       show-tokens-with-balance
-      :error-message="validationStatus.msg || errors.first('amount')"
+      :message="validationStatus.msg || errors.first('amount')"
       :selected-asset="formModel.selectedAsset"
       @asset-selected="(val) => $set(formModel, 'selectedAsset', val)"
     />

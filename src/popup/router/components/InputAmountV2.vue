@@ -7,7 +7,7 @@
     new-ui
     :value="value"
     :label="label || $t('pages.tipPage.amountLabel')"
-    :error-message="$attrs['error-message'] || errors.first('amount')"
+    :message="$attrs['message'] || errors.first('amount')"
     @input="$emit('input', $event)"
   >
     <slot

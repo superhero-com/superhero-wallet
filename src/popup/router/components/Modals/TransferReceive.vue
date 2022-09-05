@@ -71,13 +71,12 @@
           }"
           name="amount"
           :label="$t('modals.receive.requestAmount')"
-          :error-message="errors.first('amount')"
+          :message="errors.first('amount')"
           :selected-asset="selectedAsset"
           @asset-selected="handleAssetChange"
         />
       </div>
     </div>
-
     <template #footer>
       <Button
         v-clipboard:copy="getTextToCopy()"

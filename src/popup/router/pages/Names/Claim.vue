@@ -6,7 +6,7 @@
       name="name"
       class="name-input"
       :label="$t('pages.names.claim.register-name')"
-      :error-message="errors.first('name')"
+      :message="errors.first('name')"
       :placeholder="$t('pages.names.claim.name-placeholder')"
     >
       <template #after>

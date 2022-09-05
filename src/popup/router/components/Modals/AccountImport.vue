@@ -16,7 +16,7 @@
         size="xs"
         :label="$t('pages.index.seedPhrase')"
         :placeholder="$t('pages.index.seedPlaceHolder')"
-        :error-message="error"
+        :message="error"
         new-ui
       />
     </div>

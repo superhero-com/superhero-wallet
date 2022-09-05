@@ -55,7 +55,7 @@
       v-model="note"
       size="sm"
       :label="$t('pages.send.messageUrlOwner')"
-      :error-message="noteError"
+      :message="noteError"
     >
       <template #label-after>
         <span
