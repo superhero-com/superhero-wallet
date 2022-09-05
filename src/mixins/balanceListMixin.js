@@ -3,7 +3,7 @@ import { pick } from 'lodash-es';
 
 export default (showAllTokens) => ({
   subscriptions() {
-    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+    return pick(this.$store.state.observables, ['balance', 'balanceCurrency']);
   },
   props: {
     showTokensWithBalance: { type: Boolean },
@@ -17,7 +17,7 @@ export default (showAllTokens) => ({
      */
     aeternityToken() {
       return this.getAeternityToken({
-        tokenBalance: this.tokenBalance,
+        tokenBalance: this.balance,
         balanceCurrency: this.balanceCurrency,
       });
     },

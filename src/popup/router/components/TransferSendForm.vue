@@ -105,7 +105,7 @@ export default {
   },
   subscriptions() {
     return pick(this.$store.state.observables, [
-      'tokenBalance',
+      'balance',
       'balanceCurrency',
     ]);
   },
@@ -150,7 +150,7 @@ export default {
     this.formModel = this.transferData;
     if (!this.formModel.selectedAsset) {
       this.formModel.selectedAsset = this.getAeternityToken({
-        tokenBalance: this.tokenBalance,
+        tokenBalance: this.balance,
         balanceCurrency: this.balanceCurrency,
       });
     }

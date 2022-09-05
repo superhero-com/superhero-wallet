@@ -32,7 +32,7 @@
       <InputRange
         :value="transactionSignLimit"
         min="0"
-        :max="+tokenBalance"
+        :max="+balance"
         step="0.1"
         @input="setTransactionSignLimit"
       />
@@ -46,7 +46,7 @@
       </div>
       <div class="permission-row">
         {{ $t('pages.account.balance') }}
-        <TokenAmount :amount="+tokenBalance" />
+        <TokenAmount :amount="+balance" />
       </div>
     </div>
     <Button
@@ -79,7 +79,7 @@ export default {
     transactionSignLimitError: false,
   }),
   subscriptions() {
-    return pick(this.$store.state.observables, ['tokenBalance']);
+    return pick(this.$store.state.observables, ['balance']);
   },
   computed: {
     host() {

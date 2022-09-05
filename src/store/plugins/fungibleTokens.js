@@ -19,13 +19,9 @@ export default (store) => {
     },
     getters: {
       getTokenBalance: ({ tokens }) => (address) => tokens?.[address]?.tokenBalances || [],
-      getSelectedToken: ({ tokens }) => (address) => tokens?.[address]?.selectedToken,
       tokenBalances: (
         state, { getTokenBalance }, rootState, { account: { address } },
       ) => getTokenBalance(address),
-      selectedToken: (
-        state, { getSelectedToken }, rootState, { account: { address } },
-      ) => getSelectedToken(address),
       getAeternityToken: ({ aePublicData }) => ({ balanceCurrency, tokenBalance }) => {
         const aePublicDataExists = aePublicData && Object.keys(aePublicData).length > 0;
         return {
@@ -38,12 +34,6 @@ export default (store) => {
       },
     },
     mutations: {
-      setSelectedToken(state, { address, token }) {
-        if (!(address in state.tokens)) {
-          Vue.set(state.tokens, address, { selectedToken: null, tokenBalances: [] });
-        }
-        Vue.set(state.tokens[address], 'selectedToken', token);
-      },
       setTransactions(state, { address, transactions }) {
         Vue.set(state.transactions, address, transactions);
       },
@@ -58,7 +48,7 @@ export default (store) => {
       },
       addTokenBalance(state, { address, balances }) {
         if (!(address in state.tokens)) {
-          Vue.set(state.tokens, address, { selectedToken: null, tokenBalances: [] });
+          Vue.set(state.tokens, address, { tokenBalances: [] });
         }
         Vue.set(state.tokens[address], 'tokenBalances', balances);
       },
@@ -85,7 +75,6 @@ export default (store) => {
         commit,
       }) {
         accounts.map(async ({ address }) => {
-          let selectedToken = null;
           try {
             if (isEmpty(availableTokens)) return;
             const tokens = await fetchJson(
@@ -93,8 +82,6 @@ export default (store) => {
             ).catch(handleUnknownError);
 
             if (isEmpty(tokens) || typeof tokens !== 'object') return;
-
-            selectedToken = store.state.fungibleTokens.tokens[address]?.selectedToken;
 
             // TODO: remove uniqBy after https://github.com/aeternity/ae_mdw/issues/735 is fixed and released
             const balances = uniqBy(tokens, 'contract_id').map(({ amount, contract_id: contractId }) => {
@@ -116,13 +103,6 @@ export default (store) => {
             commit('addTokenBalance', { address, balances });
           } catch (e) {
             handleUnknownError(e);
-          } finally {
-            commit('setSelectedToken',
-              {
-                address,
-                token: (store.state.fungibleTokens.tokens?.[address]?.tokenBalances || [])
-                  .find((t) => t?.contractId === selectedToken?.contractId),
-              });
           }
         });
       },

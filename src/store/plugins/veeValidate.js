@@ -123,7 +123,6 @@ export default (store) => {
     },
     params: ['isToken'],
   });
-  Validator.extend('not_token', () => !store.getters['fungibleTokens/selectedToken']);
   Validator.extend('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);

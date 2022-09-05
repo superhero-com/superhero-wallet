@@ -105,7 +105,7 @@ export default {
   async created() {
     this.loading = true;
     this.formModel.selectedAsset = this.getAeternityToken({
-      tokenBalance: this.tokenBalance,
+      tokenBalance: this.balance,
       balanceCurrency: this.balanceCurrency,
     });
 

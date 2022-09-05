@@ -275,7 +275,7 @@ export default {
     };
   },
   subscriptions() {
-    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+    return pick(this.$store.state.observables, ['balance', 'balanceCurrency']);
   },
   computed: {
     ...mapGetters(['formatCurrency', 'formatNumber', 'accounts']),
@@ -294,7 +294,7 @@ export default {
           decimals: 18,
           ...this.aePublicData,
           symbol: 'AE',
-          convertedBalance: this.tokenBalance,
+          convertedBalance: this.balance,
           balanceCurrency: this.balanceCurrency,
           contractId: '',
           description: '',

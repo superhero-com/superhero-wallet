@@ -20,22 +20,6 @@ const store = new Vuex.Store({
     currentCurrencyRate: () => 3,
     formatCurrency: () => (value) => (+value).toFixed(2),
   },
-  modules: {
-    fungibleTokens: {
-      state: {
-        token: null,
-      },
-      namespaced: true,
-      getters: {
-        selectedToken: ({ token }) => token,
-      },
-      mutations: {
-        setToken(state, token) {
-          state.token = token;
-        },
-      },
-    },
-  },
 });
 
 describe('InputAmount', () => {
@@ -86,31 +70,6 @@ describe('InputAmount', () => {
     currency: (maxBalance + 1) * 3,
   },
   {
-    name: 'input float with token',
-    token: { symbol: 'AR' },
-    value: 0.1234567890,
-    displayed: 0.1234567890,
-    currency: 0,
-  },
-  {
-    name: 'input token, without enough balance for fee',
-    error: true,
-    token: { symbol: 'AR' },
-    value: 1,
-    displayed: 1,
-    currency: 0,
-    balance: 0.000000001,
-  },
-  {
-    name: 'input with noToken property set',
-    error: true,
-    token: { symbol: 'AR' },
-    value: 1,
-    displayed: 1,
-    currency: 0,
-    props: { noToken: true },
-  },
-  {
     name: 'input with validation property set',
     error: true,
     value: 1,
@@ -126,7 +85,6 @@ describe('InputAmount', () => {
     props: { validation: { min_value_exclusive: 0 }, ownValidation: true },
     balance: 1,
   }].forEach((test) => it(test.name, async () => {
-    store.commit('fungibleTokens/setToken', test.token || null);
     const wrapper = mount(InputAmount, {
       computed: {
         max() { return test.balance || maxBalance; },
@@ -140,10 +98,8 @@ describe('InputAmount', () => {
     // eslint-disable-next-line no-underscore-dangle
     store._vm.$validator.extend('enough_ae', (_, [arg]) => BigNumber(test.balance || maxBalance).isGreaterThanOrEqualTo(arg));
     expect(wrapper.find('input').element.value).toBe(test.displayed.toString());
-    expect(wrapper.find('.token').text()).toBe(test.token?.symbol || 'AE');
-    if (!store.getters['fungibleTokens/selectedToken']) {
-      expect(wrapper.find('[data-cy=amount-currency]').text()).toBe(`(${test.currency.toFixed(2)})`);
-    }
+    expect(wrapper.find('.token').text()).toBe('AE');
+    expect(wrapper.find('[data-cy=amount-currency]').text()).toBe(`(${test.currency.toFixed(2)})`);
     // eslint-disable-next-line no-underscore-dangle
     /* await store._vm.$validator.validateAll(); TODO: be able to test errors
     if (test.error) {

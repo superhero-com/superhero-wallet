@@ -144,7 +144,7 @@ export default {
   },
   subscriptions() {
     return pick(this.$store.state.observables, [
-      'tokenBalance',
+      'balance',
       'balanceCurrency',
     ]);
   },
@@ -190,7 +190,7 @@ export default {
       this.selectedAsset = this.availableTokens[this.tokenContractId];
     } else {
       this.selectedAsset = this.getAeternityToken({
-        tokenBalance: this.tokenBalance,
+        tokenBalance: this.balance,
         balanceCurrency: this.balanceCurrency,
       });
     }
