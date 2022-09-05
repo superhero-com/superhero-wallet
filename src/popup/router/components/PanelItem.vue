@@ -3,6 +3,7 @@
     :is="to ? 'RouterLink' : 'a'"
     :to="to"
     :href="href"
+    :target="href && '_blank'"
     class="panel-item"
     @click="$emit('click')"
   >
@@ -68,13 +69,12 @@ export default {
   text-align: left;
   background: rgba(variables.$color-white, 0.08);
   color: rgba(variables.$color-white, 0.95);
-  font-weight: 300;
   -webkit-transition: 0.4s;
   transition: 0.4s;
   opacity: 0.75;
   letter-spacing: 0.5px;
 
-  @extend %face-sans-15-medium;
+  @extend %face-sans-15-regular;
 
   &:hover {
     opacity: 1;
@@ -109,6 +109,7 @@ export default {
       padding-right: 8px;
       margin: 0;
       color: variables.$color-white;
+      font-weight: 300;
     }
 
     .arrow-right,

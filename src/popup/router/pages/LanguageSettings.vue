@@ -20,7 +20,6 @@
             {{ name }}
             <span>({{ code }})</span>
           </div>
-          <img :src="flag(code)">
         </div>
       </RadioButton>
     </div>
@@ -50,6 +49,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .language-settings {
   padding: 16px;
@@ -57,9 +57,10 @@ export default {
   .description {
     padding-top: 8px;
     text-align: left;
-    font-size: 14px;
     line-height: 20px;
     color: rgba(variables.$color-white, 0.65);
+
+    @extend %face-sans-14-light;
   }
 
   .languages {

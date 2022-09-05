@@ -34,16 +34,14 @@
       :info="saveErrorLog ? 'On' : 'Off'"
     />
     <PanelItem
-      v-if="UNFINISHED_FEATURES"
       :to="{ name: 'settings-reset-wallet' }"
       :title="$t('pages.settings.tabRemoveAccount')"
-      @click="requestResetting"
     />
   </div>
 </template>
 
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import PanelItem from '../components/PanelItem.vue';
 
 export default {
@@ -54,9 +52,6 @@ export default {
   computed: {
     ...mapState(['saveErrorLog']),
     ...mapGetters(['activeNetwork']),
-  },
-  methods: {
-    ...mapActions(['requestResetting']),
   },
 };
 </script>

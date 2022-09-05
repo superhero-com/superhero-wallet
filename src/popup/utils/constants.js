@@ -117,6 +117,11 @@ export const BUG_REPORT_URL = 'https://thesuperherowallet.typeform.com/to/vh8Ffu
 
 export const NOTIFICATION_SETTINGS = [
   {
+    text: i18n.t('pages.notification-settings.wallet'),
+    checked: true,
+    type: 'wallet',
+  },
+  {
     text: i18n.t('pages.notification-settings.commentOnTip'),
     checked: true,
     type: 'COMMENT_ON_TIP',
@@ -130,11 +135,6 @@ export const NOTIFICATION_SETTINGS = [
     text: i18n.t('pages.notification-settings.retipOnTip'),
     checked: true,
     type: 'RETIP_ON_TIP',
-  },
-  {
-    text: i18n.t('pages.notification-settings.wallet'),
-    checked: true,
-    type: 'wallet',
   },
   {
     text: i18n.t('pages.notification-settings.tipOnComment'),
@@ -205,3 +205,4 @@ export const MODAL_READ_QR_CODE = 'read-qr-code';
 export const MODAL_SHARE_QR = 'share-qr';
 export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_ASSET_SELECTOR = 'asset-selector';
+export const MODAL_RESET_WALLET = 'reset-wallet';
