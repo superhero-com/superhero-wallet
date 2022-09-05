@@ -40,7 +40,7 @@
         >
           <Chevron />
         </ButtonPlain>
-        <AddAccountCard />
+        <AccountCardAdd />
       </swiper-slide>
     </swiper>
     <BulletSwitcher
@@ -58,7 +58,7 @@ import { mapState, mapGetters } from 'vuex';
 import { Swiper, SwiperSlide } from 'vue-awesome-swiper';
 
 import AccountCard from './AccountCard.vue';
-import AddAccountCard from './AddAccountCard.vue';
+import AccountCardAdd from './AccountCardAdd.vue';
 import ButtonPlain from './ButtonPlain.vue';
 import Chevron from '../../../icons/chevron.svg?vue-component';
 import { getAddressColor } from '../../utils/avatar';
@@ -68,7 +68,7 @@ export default {
   components: {
     BulletSwitcher,
     AccountCard,
-    AddAccountCard,
+    AccountCardAdd,
     Swiper,
     SwiperSlide,
     ButtonPlain,

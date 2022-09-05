@@ -69,7 +69,7 @@ export default {
 
   &.primary {
     &:hover {
-      background: rgba(variables.$color-blue, 0.15);
+      background-color: rgba(variables.$color-blue, 0.15);
 
       &,
       ::v-deep svg {
@@ -83,7 +83,7 @@ export default {
   }
 
   &.alternative:hover {
-    background: variables.$color-red-alpha-10;
+    background-color: rgba(variables.$color-red, 0.1);
 
     &,
     ::v-deep svg {

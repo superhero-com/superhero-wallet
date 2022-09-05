@@ -1,5 +1,8 @@
 <template>
-  <div class="add-account-card">
+  <button
+    class="account-card-add"
+    @click="openCreateAccountModal()"
+  >
     <div class="title">
       <PlusCircle />
       {{ $t('pages.accounts.add-account') }}
@@ -7,14 +10,28 @@
     <div class="description">
       {{ $t('pages.accounts.add-account-description') }}
     </div>
-  </div>
+  </button>
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+import { MODAL_ACCOUNT_CREATE } from '../../utils/constants';
 import PlusCircle from '../../../icons/plus-circle-fill.svg?vue-component';
 
 export default {
-  components: { PlusCircle },
+  components: {
+    PlusCircle,
+  },
+  methods: {
+    ...mapActions('modals', {
+      openModal: 'open',
+    }),
+    openCreateAccountModal() {
+      this.openModal({
+        name: MODAL_ACCOUNT_CREATE,
+      });
+    },
+  },
 };
 </script>
 
@@ -22,13 +39,16 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 
-.add-account-card {
+.account-card-add {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  height: 169px;
+  height: 192px;
   border-radius: 16px;
   background: variables.$color-green-dark;
   padding: 16px;
   text-align: left;
+  cursor: pointer;
 
   .title {
     display: inline-flex;
