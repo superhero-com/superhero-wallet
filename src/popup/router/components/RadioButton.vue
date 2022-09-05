@@ -64,6 +64,7 @@ export default {
     background: variables.$color-bg-3;
     margin-right: 6px;
     position: relative;
+    opacity: 0.5;
 
     &::after {
       content: '';
@@ -79,6 +80,8 @@ export default {
     }
 
     &.checked {
+      opacity: 1;
+
       &::after {
         width: 14px;
         height: 14px;

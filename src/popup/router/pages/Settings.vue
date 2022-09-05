@@ -23,10 +23,9 @@
       :title="$t('pages.settings.tabGeneral')"
     />
     <PanelItem
-      v-if="UNFINISHED_FEATURES"
-      to="/settings/currency"
+      :to="{ name: 'settings-currency' }"
       :title="$t('pages.titles.currency')"
-      info="USD ($)"
+      :info="activeCurrency"
     />
     <PanelItem
       :to="{ name: 'settings-errors-log' }"
@@ -43,15 +42,19 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import PanelItem from '../components/PanelItem.vue';
+import { CURRENCIES } from '../../utils/constants';
 
 export default {
   components: { PanelItem },
-  data: () => ({
-    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-  }),
   computed: {
-    ...mapState(['saveErrorLog']),
+    ...mapState(['saveErrorLog', 'current']),
     ...mapGetters(['activeNetwork']),
+    activeCurrency() {
+      if (!this.current || !this.current.currency) return null;
+      const currency = CURRENCIES.find((_currency) => _currency.code === this.current.currency);
+      if (!currency) return null;
+      return `${String(currency.code).toUpperCase()} (${String(currency.symbol).toUpperCase()})`;
+    },
   },
 };
 </script>
