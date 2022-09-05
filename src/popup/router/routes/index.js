@@ -14,6 +14,7 @@ import Intro from '../pages/Intro.vue';
 import Invite from '../pages/Invite.vue';
 import InviteClaim from '../pages/InviteClaim.vue';
 import LanguageSettings from '../pages/LanguageSettings.vue';
+import CurrencySettings from '../pages/CurrencySettings.vue';
 import Auction from '../pages/Names/Auction.vue';
 import AuctionBid from '../pages/Names/AuctionBid.vue';
 import AuctionHistory from '../pages/Names/AuctionHistory.vue';
@@ -158,6 +159,19 @@ export default [
     component: LanguageSettings,
     meta: {
       title: 'language',
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
+    },
+  },
+  {
+    path: '/more/settings/currency',
+    name: 'settings-currency',
+    component: CurrencySettings,
+    meta: {
+      title: 'currency',
       backButton: true,
       closeButton: true,
       hideTabBar: true,
