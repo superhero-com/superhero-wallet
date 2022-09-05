@@ -79,7 +79,7 @@ export default {
 
       &:hover {
         color: variables.$color-green;
-        background: variables.$color-green-alpha-10;
+        background: rgba(variables.$color-green, 0.1);
 
         .icon {
           opacity: 1;

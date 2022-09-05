@@ -2,6 +2,8 @@ import { registerModal } from '../../store/plugins/modals';
 
 import {
   MODAL_DEFAULT,
+  MODAL_ACCOUNT_CREATE,
+  MODAL_ACCOUNT_IMPORT,
   MODAL_CLAIM_SUCCESS,
   MODAL_SPEND_SUCCESS,
   MODAL_CONFIRM_TIP,
@@ -17,10 +19,11 @@ import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_ASSET_SELECTOR,
   MODAL_RESET_WALLET,
-  MODAL_IMPORT_ACCOUNT,
 } from '../utils/constants';
 
 import Default from './components/Modals/Default.vue';
+import AccountCreate from './components/Modals/AccountCreate.vue';
+import AccountImport from './components/Modals/AccountImport.vue';
 import ClaimSuccess from './components/Modals/ClaimSuccess.vue';
 import SpendSuccess from './components/Modals/SpendSuccess.vue';
 import ConfirmTip from './components/Modals/ConfirmTip.vue';
@@ -34,10 +37,11 @@ import ShareQr from './components/Modals/ShareQr.vue';
 import AssetSelector from './components/Modals/AssetSelector.vue';
 import TransferReceive from './components/Modals/TransferReceive.vue';
 import ResetWallet from './components/Modals/ResetWallet.vue';
-import ImportAccount from './components/Modals/ImportAccount.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
+  registerModal({ name: MODAL_ACCOUNT_CREATE, component: AccountCreate });
+  registerModal({ name: MODAL_ACCOUNT_IMPORT, component: AccountImport });
   registerModal({ name: MODAL_CLAIM_SUCCESS, component: ClaimSuccess });
   registerModal({ name: MODAL_SPEND_SUCCESS, component: SpendSuccess });
   registerModal({ name: MODAL_CONFIRM_TIP, component: ConfirmTip });
@@ -61,5 +65,4 @@ export default () => {
   registerModal({ name: MODAL_TRANSFER_RECEIVE, component: TransferReceive });
   registerModal({ name: MODAL_ASSET_SELECTOR, component: AssetSelector });
   registerModal({ name: MODAL_RESET_WALLET, component: ResetWallet });
-  registerModal({ name: MODAL_IMPORT_ACCOUNT, component: ImportAccount });
 };

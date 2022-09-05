@@ -208,7 +208,7 @@ export default {
       border: 1px solid variables.$color-red;
 
       &:hover {
-        background-color: variables.$color-red-alpha-10;
+        background-color: rgba(variables.$color-red, 0.1);
       }
     }
   }
