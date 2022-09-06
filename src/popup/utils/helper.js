@@ -1,5 +1,6 @@
 import { isFQDN } from 'validator';
 import { detect } from 'detect-browser';
+import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
   SCHEMA,
   Crypto,
@@ -305,3 +306,12 @@ export const truncateAddress = ({ address }) => {
 };
 
 export const isEqual = (a, b) => BigNumber(a).eq(b);
+
+export const getHdWalletAccount = (wallet, accountIdx = 0) => {
+  const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
+  return {
+    ...keyPair,
+    idx: accountIdx,
+    address: TxBuilderHelper.encode(keyPair.publicKey, 'ak'),
+  };
+};
