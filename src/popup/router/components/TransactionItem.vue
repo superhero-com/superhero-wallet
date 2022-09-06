@@ -79,7 +79,7 @@ export default {
     transaction: { type: Object, required: true },
   },
   computed: {
-    ...mapGetters(['account', 'getAmountFiat']),
+    ...mapGetters(['account', 'getAmountFiat', 'activeNetwork']),
     labels() {
       if (this.txType && this.txType?.startsWith('name')) {
         return ['AENS', this.$t('transaction.type')[this.txType]];
@@ -95,7 +95,13 @@ export default {
           ? this.$t('transaction.dexType.pool')
           : this.$t('transaction.dexType.swap')];
       }
-      if (this.txType === (SCHEMA.TX_TYPE.contractCall)
+      if ((this.transaction.tx.contractId
+        && (this.activeNetwork.tipContractV1 === this.transaction.tx.contractId
+        || this.activeNetwork.tipContractV2 === this.transaction.tx.contractId)
+        && (this.transaction.tx.function === 'tip' || this.transaction.tx.function === 'retip')) || this.transaction.claim) {
+        return [this.$t('pages.token-details.tip'), this.transaction.claim ? this.$t('transaction.spendType.in') : this.$t('transaction.spendType.out')];
+      }
+      if (this.txType === SCHEMA.TX_TYPE.contractCall
         && this.availableTokens[this.transaction.tx.contractId]
         && (this.transaction.tx.function === 'transfer' || this.transaction.incomplete)) {
         return [this.$t('transaction.type.spendTx'), this.transaction.tx.callerId === this.account.address
