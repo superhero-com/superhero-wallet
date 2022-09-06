@@ -17,13 +17,13 @@
       <TokenAmount
         :amount="+tokenData.convertedBalance || 0"
         :symbol="tokenData.symbol"
-        :aex9="tokenData.contractId !== 'aeternity'"
+        :aex9="tokenData.contractId !== AETERNITY_CONTRACT_ID"
         no-symbol
         hide-fiat
       />
     </div>
     <div
-      v-if="tokenData.contractId === 'aeternity'"
+      v-if="tokenData.contractId === AETERNITY_CONTRACT_ID"
       class="row"
     >
       <div class="price">
@@ -38,6 +38,7 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
+import { AETERNITY_CONTRACT_ID } from '../../../utils/constants';
 import TokenAmount from '../TokenAmount.vue';
 import ButtonPlain from '../ButtonPlain.vue';
 import Tokens from '../Tokens.vue';
@@ -50,6 +51,9 @@ export default {
     showCurrentPrice: Boolean,
     assetSelector: Boolean,
   },
+  data: () => ({
+    AETERNITY_CONTRACT_ID,
+  }),
   computed: {
     ...mapGetters(['convertToCurrencyFormatted', 'formatCurrency', 'convertToCurrency']),
     ...mapState('fungibleTokens', ['aePublicData']),

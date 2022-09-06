@@ -49,7 +49,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { MAGNITUDE } from '../../utils/constants';
+import { MAGNITUDE, AETERNITY_CONTRACT_ID } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 import maxAmountMixin from '../../../mixins/maxAmountMixin';
@@ -85,11 +85,11 @@ export default {
         if (!sdk || !this.tippingContract) {
           return { error: true };
         }
-        if (this.formModel.selectedAsset.contractId !== 'aeternity'
+        if (this.formModel.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
           && this.$route.query.id.includes('_v1')) {
           return { error: true, msg: this.$t('pages.tipPage.v1FungibleTokenTipError') };
         }
-        if (this.formModel.selectedAsset.contractId === 'aeternity'
+        if (this.formModel.selectedAsset.contractId === AETERNITY_CONTRACT_ID
           && +this.formModel.amount < minTipAmount) {
           return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
         }
@@ -118,14 +118,14 @@ export default {
     async sendTip() {
       const amount = convertToken(
         this.formModel.amount,
-        this.formModel.selectedAsset.contractId !== 'aeternity'
+        this.formModel.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
           ? this.formModel.selectedAsset.decimals : MAGNITUDE,
       ).toFixed();
       this.loading = true;
       await this.$watchUntilTruly(() => this.tippingV1);
       try {
         let retipResponse = null;
-        if (this.formModel.selectedAsset.contractId !== 'aeternity') {
+        if (this.formModel.selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
           await this.$store.dispatch('fungibleTokens/createOrChangeAllowance',
             [this.formModel.selectedAsset.contractId, this.formModel.amount]);
           retipResponse = await this.tippingV2.methods.retip_token(

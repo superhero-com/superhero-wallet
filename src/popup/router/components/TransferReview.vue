@@ -71,7 +71,7 @@
       </template>
     </DetailsItem>
     <DetailsItem
-      v-if="transferData.selectedAsset.contractId === 'aeternity'"
+      v-if="transferData.selectedAsset.contractId === AETERNITY_CONTRACT_ID"
       :label="$t('pages.signTransaction.total')"
       new-ui
     >
@@ -99,7 +99,7 @@ import {
   convertToken,
   escapeSpecialChars,
 } from '../../utils/helper';
-import { MODAL_DEFAULT } from '../../utils/constants';
+import { MODAL_DEFAULT, AETERNITY_CONTRACT_ID } from '../../utils/constants';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import AvatarWithChainName from './AvatarWithChainName.vue';
@@ -125,6 +125,7 @@ export default {
   data() {
     return {
       loading: false,
+      AETERNITY_CONTRACT_ID,
     };
   },
   computed: {
@@ -160,7 +161,7 @@ export default {
           return;
         }
 
-        const amount = (selectedAsset.contractId === 'aeternity')
+        const amount = (selectedAsset.contractId === AETERNITY_CONTRACT_ID)
           ? aeToAettos(amountRaw)
           : convertToken(amountRaw, selectedAsset.decimals);
 
@@ -200,7 +201,7 @@ export default {
           this.transferData.invoiceId,
           { waitMined: false, modal: false },
         ]);
-      } else if (selectedAsset.contractId !== 'aeternity') {
+      } else if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
         actionResult = await this.$store.dispatch('fungibleTokens/transfer', [
           selectedAsset.contractId,
           recipient,
@@ -214,7 +215,7 @@ export default {
         });
       }
 
-      if (actionResult && selectedAsset.contractId !== 'aeternity') {
+      if (actionResult && selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
         this.$store.dispatch('addPendingTransaction', {
           amount,
           recipient,
@@ -251,7 +252,7 @@ export default {
       this.loading = true;
       try {
         let txResult = null;
-        if (selectedAsset.contractId !== 'aeternity') {
+        if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
           await this.$store.dispatch('fungibleTokens/createOrChangeAllowance', [selectedAsset.contractId, this.amount]);
           txResult = await this.tippingV2.methods.tip_token(
             recipient,

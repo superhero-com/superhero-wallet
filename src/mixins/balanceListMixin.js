@@ -1,5 +1,6 @@
 import { mapGetters, mapState } from 'vuex';
 import { pick } from 'lodash-es';
+import { AETERNITY_CONTRACT_ID } from '../popup/utils/constants';
 
 export default (showAllTokens) => ({
   subscriptions() {
@@ -49,9 +50,9 @@ export default (showAllTokens) => ({
       return tokensInfo
         .filter((token) => (showAllTokens
           ? token
-          : token.contractId === 'aeternity' || this.tokenBalances.includes(token)))
+          : token.contractId === AETERNITY_CONTRACT_ID || this.tokenBalances.includes(token)))
         .filter((token) => (this.showTokensWithBalance
-          ? token.contractId === 'aeternity' || +token?.convertedBalance : token))
+          ? token.contractId === AETERNITY_CONTRACT_ID || +token?.convertedBalance : token))
         .filter(
           (token) => !searchTerm
             || token.symbol.toLowerCase().includes(searchTerm)

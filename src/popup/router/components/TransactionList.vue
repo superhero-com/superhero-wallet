@@ -45,7 +45,7 @@ import { SCHEMA } from '@aeternity/aepp-sdk';
 import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
-import { TXS_PER_PAGE, FUNCTION_TYPE_DEX } from '../../utils/constants';
+import { TXS_PER_PAGE, FUNCTION_TYPE_DEX, AETERNITY_CONTRACT_ID } from '../../utils/constants';
 import Visible from '../../../icons/visible.svg?vue-component';
 
 export default {
@@ -85,7 +85,7 @@ export default {
           .includes(tr.tx.contractId);
         return [...loaded, ...getAccountPendingTransactions]
           .filter((tr) => (!this.token
-            || (this.token !== 'aeternity'
+            || (this.token !== AETERNITY_CONTRACT_ID
               ? tr.tx?.contractId === this.token
               : (!tr.tx.contractId
               || !isFungibleTokenTx(tr)))))

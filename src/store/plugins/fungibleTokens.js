@@ -6,7 +6,7 @@ import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
 import {
   convertToken, fetchJson, handleUnknownError, calculateSupplyAmount,
 } from '../../popup/utils/helper';
-import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
+import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE, AETERNITY_CONTRACT_ID } from '../../popup/utils/constants';
 
 export default (store) => {
   store.registerModule('fungibleTokens', {
@@ -29,7 +29,7 @@ export default (store) => {
           convertedBalance: tokenBalance,
           symbol: 'AE',
           balanceCurrency,
-          contractId: 'aeternity',
+          contractId: AETERNITY_CONTRACT_ID,
         };
       },
     },

@@ -83,7 +83,7 @@ import ButtonPlain from './ButtonPlain.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
-import { MODAL_READ_QR_CODE } from '../../utils/constants';
+import { MODAL_READ_QR_CODE, AETERNITY_CONTRACT_ID } from '../../utils/constants';
 import ModalHeader from './ModalHeader.vue';
 
 const WARNING_RULES = ['not_same_as'];
@@ -140,7 +140,7 @@ export default {
     },
     isToken() {
       return this.formModel.selectedAsset?.contractId
-          && this.formModel.selectedAsset.contractId !== 'aeternity';
+          && this.formModel.selectedAsset.contractId !== AETERNITY_CONTRACT_ID;
     },
     isMaxValue() {
       return isEqual(this.formModel.amount, this.max);
@@ -156,7 +156,8 @@ export default {
         this.$emit('input', {
           ...val,
           fee: this.fee,
-          total: (val.selectedAsset.contractId === 'aeternity' ? +this.fee.toFixed() : 0) + +val.amount,
+          total: (val.selectedAsset.contractId === AETERNITY_CONTRACT_ID
+            ? +this.fee.toFixed() : 0) + +val.amount,
         });
       },
     },
@@ -210,7 +211,7 @@ export default {
           amount,
           selectedAsset,
           fee: this.fee,
-          total: (selectedAsset.contractId === 'aeternity' ? +this.fee : 0) + +amount,
+          total: (selectedAsset.contractId === AETERNITY_CONTRACT_ID ? +this.fee : 0) + +amount,
           invoiceId: this.invoiceId,
           invoiceContract: this.invoiceContract,
         });

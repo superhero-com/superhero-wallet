@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import { mapGetters } from 'vuex';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
-import { MAGNITUDE, STUB_CONTRACT_ADDRESS } from '../popup/utils/constants';
+import { MAGNITUDE, STUB_CONTRACT_ADDRESS, AETERNITY_CONTRACT_ID } from '../popup/utils/constants';
 import {
   executeAndSetInterval, calculateFee, validateTipUrl, checkAensName, handleUnknownError,
 } from '../popup/utils/helper';
@@ -19,7 +19,7 @@ export default {
   computed: {
     ...mapGetters(['account']),
     max() {
-      if (this.formModel?.selectedAsset?.contractId === 'aeternity') {
+      if (this.formModel?.selectedAsset?.contractId === AETERNITY_CONTRACT_ID) {
         const max = this.balance.minus(this.fee);
         return (max.isPositive() ? max : 0).toString();
       }
@@ -59,7 +59,7 @@ export default {
         await this.$watchUntilTruly(() => this.$store.state.sdk);
         const { sdk } = this.$store.state;
 
-        if (selectedAsset.contractId !== 'aeternity') {
+        if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
           if (!this.tokenInstance
             || this.tokenInstance.deployInfo.address !== selectedAsset.contractId) {
             this.tokenInstance = await this.$store.state.sdk.getContractInstance({
@@ -70,7 +70,7 @@ export default {
           this.selectedAssetDecimals = selectedAsset.decimals;
         }
 
-        if (selectedAsset.contractId !== 'aeternity'
+        if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID
           || (!checkAensName(address) && validateTipUrl(address))) {
           this.fee = calculateFee(
             SCHEMA.TX_TYPE.contractCall, {

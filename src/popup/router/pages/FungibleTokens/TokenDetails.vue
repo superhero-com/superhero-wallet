@@ -14,7 +14,7 @@
         <TokenAmount
           :amount="convertedBalance"
           no-symbol
-          :aex9="id !== 'aeternity'"
+          :aex9="id !== AETERNITY_CONTRACT_ID"
         />
       </div>
       <div class="token-actions">
@@ -28,7 +28,7 @@
           <ReceiveIcon />{{ $t('pages.token-details.receive') }}
         </BoxButton>
         <BoxButton
-          v-if="id === 'aeternity'"
+          v-if="id === AETERNITY_CONTRACT_ID"
           fill="alternative"
           :href="SIMPLEX_URL"
         >
@@ -240,6 +240,7 @@ import {
   DEX_URL,
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
+  AETERNITY_CONTRACT_ID,
 } from '../../../utils/constants';
 import { convertToken } from '../../../utils/helper';
 
@@ -272,6 +273,7 @@ export default {
       SIMPLEX_URL,
       DEX_URL,
       UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+      AETERNITY_CONTRACT_ID,
     };
   },
   subscriptions() {
@@ -289,7 +291,7 @@ export default {
       return this.DEX_URL.replace('https://', '');
     },
     tokenData() {
-      if (this.id === 'aeternity') {
+      if (this.id === AETERNITY_CONTRACT_ID) {
         return {
           decimals: 18,
           ...this.aePublicData,
