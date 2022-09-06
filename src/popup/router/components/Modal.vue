@@ -11,6 +11,7 @@
         'has-close-button': hasCloseButton,
         'no-padding': noPadding,
         dense,
+        'blur-bg': !noBlur
       }"
     >
       <div class="container">
@@ -83,6 +84,7 @@ export default {
     fromBottom: Boolean,
     dense: Boolean,
     noPadding: Boolean,
+    noBlur: Boolean,
     centered: Boolean,
     header: { type: String, default: null },
   },
@@ -118,7 +120,10 @@ $modal-bg-color: variables.$color-bg-4;
   min-width: variables.$extension-width;
   background-color: rgba(variables.$color-black, 0.7);
   display: flex;
-  backdrop-filter: blur(5px);
+
+  &.blur-bg {
+    backdrop-filter: blur(5px);
+  }
 
   .container {
     position: relative;

@@ -178,6 +178,10 @@ body {
   &.show-header {
     background: variables.$color-bg-3;
 
+    &.new-ui {
+      background: variables.$color-bg-3-new;
+    }
+
     .main {
       padding-top: 48px;
       padding-top: calc(48px + env(safe-area-inset-top));

@@ -87,10 +87,11 @@ export default {
 @use '../../../styles/variables';
 
 .invite {
+  padding: 16px;
+
   .top {
     margin: 0 -20px;
     padding: 20px;
-    background-color: variables.$color-black;
   }
 
   .section-title {
@@ -109,6 +110,10 @@ export default {
 
   .input-amount {
     margin: 10px 0 0 0;
+  }
+
+  .button {
+    width: 100%;
   }
 
   .generated-links {

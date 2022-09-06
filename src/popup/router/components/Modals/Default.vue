@@ -1,12 +1,17 @@
 <template>
   <Modal
+    :class="{
+      'text-center': textCenter
+    }"
     has-close-button
     v-on="{ close: close || resolve }"
   >
-    <StatusIcon
-      :status="icon"
-      class="icon"
-    />
+    <div class="icon-wrapper">
+      <StatusIcon
+        :status="icon"
+        class="icon"
+      />
+    </div>
 
     <h2 class="text-heading-2 text-center">
       {{ title }}
@@ -26,6 +31,7 @@
     <Button
       v-else
       slot="footer"
+      :class="{ 'center-button': textCenter }"
       @click="resolve"
     >
       {{ buttonMessage || $t('ok') }}
@@ -48,6 +54,32 @@ export default {
     type: { type: String, default: '' },
     icon: { type: String, default: '' },
     buttonMessage: { type: String, default: '' },
+    textCenter: Boolean,
   },
 };
 </script>
+
+<style lang="scss" scoped>
+
+  .modal {
+    &.text-center {
+      text-align: center;
+    }
+
+    .icon-wrapper {
+      text-align: center;
+
+      .icon {
+        width: 40px;
+        height: 40px;
+        margin: 0 auto;
+        text-align: center;
+      }
+    }
+
+    .center-button {
+      width: auto;
+      padding: 0 24px;
+    }
+  }
+</style>

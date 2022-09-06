@@ -31,13 +31,14 @@
           <span>{{ truncateAdrress[1] }}</span>
 
           <CopyOutlined v-if="showCopyIcon" />
+
+          <div
+            v-if="copied"
+            class="copied"
+          >
+            {{ $t('addressCopied') }}
+          </div>
         </ButtonPlain>
-        <div
-          v-if="copied"
-          class="copied"
-        >
-          {{ $t('addressCopied') }}
-        </div>
       </div>
     </div>
   </div>
@@ -98,9 +99,9 @@ export default {
   .title {
     display: flex;
     align-items: center;
-    justify-content: center;
     line-height: 16px;
     color: variables.$color-white;
+    justify-content: start;
 
     .avatar {
       margin-right: 8px;
@@ -141,6 +142,7 @@ export default {
         letter-spacing: 0.07em;
         align-items: center;
         width: 150px;
+        position: relative;
 
         .more {
           letter-spacing: -1px;
@@ -157,19 +159,19 @@ export default {
           height: 22px;
           margin-left: 2px;
         }
-      }
 
-      .copied {
-        border: 2px dashed rgba(variables.$color-white, 0.4);
-        border-radius: 4px;
-        background-color: variables.$color-bg-4;
-        width: 117px;
-        text-align: center;
-        padding: 0;
-        position: absolute;
-        top: 36px;
+        .copied {
+          border: 2px dashed rgba(variables.$color-white, 0.4);
+          border-radius: 4px;
+          background-color: variables.$color-bg-4;
+          width: 117px;
+          text-align: center;
+          padding: 0;
+          position: absolute;
+          top: 1px;
 
-        @extend %face-sans-14-regular;
+          @extend %face-sans-14-regular;
+        }
       }
     }
   }

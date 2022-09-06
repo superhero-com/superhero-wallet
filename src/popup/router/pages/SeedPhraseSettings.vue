@@ -1,18 +1,25 @@
 <template>
-  <div class="security-settings">
+  <div class="seed-phrase-settings">
     <template v-if="view === 'warning'">
-      <h3>{{ $t('pages.securitySettings.seedRecoveryHeading') }}</h3>
-      {{ $t('pages.securitySettings.seedRecoverySmall') }}
+      <i18n
+        path="pages.seed-phrase-settings.seedRecoverySmall"
+        tag="div"
+        class="description"
+      >
+        <span>
+          {{ $t('pages.seed-phrase-settings.seedRecoverySmallBackItUp') }}
+        </span>
+      </i18n>
       <Button
         class="show"
         @click="view = 'show'"
       >
-        {{ $t('pages.securitySettings.seedRecoveryBtn') }}
+        {{ $t('pages.seed-phrase-settings.seedRecoveryBtn') }}
       </Button>
     </template>
 
     <template v-else-if="view === 'show'">
-      <h3>{{ $t('pages.securitySettings.seedPhrase') }}</h3>
+      <h3>{{ $t('pages.seed-phrase-settings.seedPhrase') }}</h3>
       <ae-panel class="mnemonics">
         <p>{{ mnemonic }}</p>
         <ae-button
@@ -20,7 +27,7 @@
           face="toolbar"
         >
           <ae-icon name="copy" />
-          {{ $t('pages.securitySettings.copy') }}
+          {{ $t('pages.seed-phrase-settings.copy') }}
         </ae-button>
       </ae-panel>
       {{ $t('pages.seedPhrase.backupText') }}
@@ -129,8 +136,23 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
-.security-settings {
+.seed-phrase-settings {
+  padding: 16px;
+
+  .description {
+    color: rgba(variables.$color-white, 0.75);
+    line-height: 20px;
+    white-space: pre-line;
+
+    span {
+      color: variables.$color-white;
+    }
+
+    @extend %face-sans-14-light;
+  }
+
   .mnemonics {
     margin: 1.5rem 0;
     margin: 0;
@@ -153,8 +175,12 @@ export default {
     }
   }
 
-  .show.button {
-    margin-top: 48px;
+  .button {
+    width: 100%;
+
+    &.show {
+      margin-top: 48px;
+    }
   }
 
   .ae-phraser {

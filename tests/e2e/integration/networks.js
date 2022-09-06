@@ -51,6 +51,8 @@ describe('Test cases for networks page', () => {
       defaultNetwork.middlewareUrl,
       defaultNetwork.compilerUrl,
     )
+      .get('[data-cy=close]')
+      .click()
       .openNetworks()
       .get('[data-cy=more]')
       .click()
@@ -75,6 +77,7 @@ describe('Test cases for networks page', () => {
       .get('[data-cy=network-middleware]')
       .eq(-1)
       .should('contain', defaultNetwork.middlewareUrl)
+      .goBack()
       .goBack()
       .goBack()
       .get('.transaction-list', { timeout: 8000 })

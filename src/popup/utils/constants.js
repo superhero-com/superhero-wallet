@@ -117,6 +117,11 @@ export const BUG_REPORT_URL = 'https://thesuperherowallet.typeform.com/to/vh8Ffu
 
 export const NOTIFICATION_SETTINGS = [
   {
+    text: i18n.t('pages.notification-settings.wallet'),
+    checked: true,
+    type: 'wallet',
+  },
+  {
     text: i18n.t('pages.notification-settings.commentOnTip'),
     checked: true,
     type: 'COMMENT_ON_TIP',
@@ -132,11 +137,6 @@ export const NOTIFICATION_SETTINGS = [
     type: 'RETIP_ON_TIP',
   },
   {
-    text: i18n.t('pages.notification-settings.wallet'),
-    checked: true,
-    type: 'wallet',
-  },
-  {
     text: i18n.t('pages.notification-settings.tipOnComment'),
     checked: true,
     type: 'TIP_ON_COMMENT',
@@ -150,6 +150,159 @@ export const NOTIFICATION_SETTINGS = [
     text: i18n.t('pages.notification-settings.claimOfRetip'),
     checked: true,
     type: 'CLAIM_OF_RETIP',
+  },
+];
+
+export const CURRENCIES = [
+  {
+    name: 'United States Dollar',
+    code: 'usd',
+    symbol: '$',
+  },
+  {
+    name: 'Euro',
+    code: 'eur',
+    symbol: '€',
+  },
+  {
+    name: 'Australia Dollar',
+    code: 'aud',
+    symbol: 'AU$',
+  },
+  {
+    name: 'Brasil Real',
+    code: 'brl',
+    symbol: 'R$',
+  },
+  {
+    name: 'Canada Dollar',
+    code: 'cad',
+    symbol: 'CA$',
+  },
+  {
+    name: 'Swiss Franc',
+    code: 'chf',
+    symbol: 'CHF',
+  },
+  {
+    name: 'China Yuan Renminbi',
+    code: 'cny',
+    symbol: '¥',
+  },
+  {
+    name: 'Czech Republic Koruna',
+    code: 'czk',
+    symbol: 'Kč',
+  },
+  {
+    name: 'Denmark Krone',
+    code: 'dkk',
+    symbol: 'Kr',
+  },
+  {
+    name: 'United Kingdom Pound',
+    code: 'gbp',
+    symbol: '£',
+  },
+  {
+    name: 'Hong Kong Dollar',
+    code: 'hkd',
+    symbol: 'HK$',
+  },
+  {
+    name: 'Hungary Forint',
+    code: 'huf',
+    symbol: 'Ft',
+  },
+  {
+    name: 'Indonesia Rupiah',
+    code: 'idr',
+    symbol: 'Rp',
+  },
+  {
+    name: 'Israel Shekel',
+    code: 'ils',
+    symbol: '₪',
+  },
+  {
+    name: 'India Rupee',
+    code: 'inr',
+    symbol: '₹',
+  },
+  {
+    name: 'Japan Yen',
+    code: 'jpy',
+    symbol: '¥',
+  },
+  {
+    name: 'South Korea Won',
+    code: 'krw',
+    symbol: '₩',
+  },
+  {
+    name: 'Mexico Peso',
+    code: 'mxn',
+    symbol: 'MX$',
+  },
+  {
+    name: 'Malaysia Ringgit',
+    code: 'myr',
+    symbol: 'MR',
+  },
+  {
+    name: 'Norway Krone',
+    code: 'nok',
+    symbol: 'Kr',
+  },
+  {
+    name: 'New Zealand Dollar',
+    code: 'nzd',
+    symbol: 'NZ$',
+  },
+  {
+    name: 'Philippines Peso',
+    code: 'php',
+    symbol: '₱',
+  },
+  {
+    name: 'Poland Zloty',
+    code: 'pln',
+    symbol: 'zł',
+  },
+  {
+    name: 'Russia Ruble',
+    code: 'rub',
+    symbol: '₽',
+  },
+  {
+    name: 'Sweden Krona',
+    code: 'sek',
+    symbol: 'Kr',
+  },
+  {
+    name: 'Singapore Dollar',
+    code: 'sgd',
+    symbol: 'SG$',
+  },
+  {
+    name: 'Thailand Baht',
+    code: 'thb',
+    symbol: '฿',
+  },
+  {
+    name: 'Turkey Lira',
+    code: 'try',
+    symbol: '₺',
+  },
+  {
+    name: 'Sout Africa Rand',
+    code: 'zar',
+    symbol: 'R',
+  },
+  {
+    name: 'Gold Ounce',
+    code: 'xau',
+    symbol: 'XAU',
   },
 ];
 
@@ -207,3 +360,4 @@ export const MODAL_READ_QR_CODE = 'read-qr-code';
 export const MODAL_SHARE_QR = 'share-qr';
 export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_ASSET_SELECTOR = 'asset-selector';
+export const MODAL_RESET_WALLET = 'reset-wallet';
