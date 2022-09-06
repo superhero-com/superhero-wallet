@@ -10,6 +10,11 @@
     :error-message="$attrs['error-message'] || errors.first('amount')"
     @input="$emit('input', $event)"
   >
+    <slot
+      v-for="slot in Object.keys($slots)"
+      :slot="slot"
+      :name="slot"
+    />
     <template #after="{ focused }">
       <SelectAsset
         v-bind="$attrs"

@@ -46,7 +46,17 @@
       :error-message="errors.first('amount')"
       :selected-asset="formModel.selectedAsset"
       @asset-selected="handleAssetChange"
-    />
+    >
+      <template #label-after>
+        <ButtonPlain
+          class="max-button"
+          :class="{ chosen: isMaxValue }"
+          @click="setMaxValue"
+        >
+          MAX
+        </ButtonPlain>
+      </template>
+    </InputAmount>
 
     <DetailsItem
       new-ui
@@ -66,9 +76,10 @@
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import maxAmountMixin from '../../../mixins/maxAmountMixin';
-import { convertToken } from '../../utils/helper';
+import { convertToken, isEqual } from '../../utils/helper';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
+import ButtonPlain from './ButtonPlain.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
@@ -83,6 +94,7 @@ export default {
     ModalHeader,
     InputField,
     InputAmount,
+    ButtonPlain,
     DetailsItem,
     TokenAmount,
     QrScanIcon,
@@ -130,6 +142,9 @@ export default {
       return this.formModel.selectedAsset?.contractId
           && this.formModel.selectedAsset.contractId !== 'aeternity';
     },
+    isMaxValue() {
+      return isEqual(this.formModel.amount, this.max);
+    },
   },
   watch: {
     hasError(value) {
@@ -173,6 +188,16 @@ export default {
 
       if (query.account) this.formModel.address = query.account;
       if (query.amount) this.formModel.amount = query.amount;
+    },
+    setMaxValue() {
+      const { fee } = this;
+      this.$set(this.formModel, 'amount', this.max);
+      setTimeout(() => {
+        if (fee !== this.fee) {
+          this.$set(this.formModel, 'amount', this.max);
+        }
+      },
+      100);
     },
     // Method called from a parent scope - avoid changing it's name.
     async submit() {
@@ -259,6 +284,7 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .transfer-send {
   .scan-button {
@@ -270,6 +296,26 @@ export default {
 
   .amount-input {
     margin-bottom: 20px;
+  }
+
+  .max-button {
+    padding: 2px 8px;
+    color: variables.$color-primary;
+
+    @extend %face-sans-14-medium;
+
+    line-height: 20px;
+    border: 2px solid transparent;
+    border-radius: 12px;
+
+    &:hover {
+      background: rgba(variables.$color-primary, 0.15);
+    }
+
+    &.chosen {
+      background: rgba(variables.$color-primary, 0.15);
+      border-color: rgba(variables.$color-primary, 0.5);
+    }
   }
 }
 </style>

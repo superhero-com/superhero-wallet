@@ -303,3 +303,5 @@ export const truncateAddress = ({ address }) => {
     secondPart.slice(-1).reduce((acc, current) => `${acc}${current}`),
   ];
 };
+
+export const isEqual = (a, b) => BigNumber(a).eq(b);
