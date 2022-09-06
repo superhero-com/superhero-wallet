@@ -76,7 +76,8 @@ export default {
     ...mapState(['transactions']),
     ...mapState({
       filteredTransactions(
-        { transactions: { loaded } }, { account: { address }, getAccountPendingTransactions },
+        { transactions: { loaded } },
+        { account: { address }, activeNetwork, getAccountPendingTransactions },
       ) {
         const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
           .includes(tr.tx.contractId);
@@ -103,9 +104,9 @@ export default {
                     && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
                     && tr.recipient === address);
               case 'tips':
-                return (!isFungibleTokenTx(tr)
-                  && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
-                  && tr.tx.callerId === address
+                return (tr.tx.contractId
+                  && (activeNetwork.tipContractV1 === tr.tx.contractId
+                  || activeNetwork.tipContractV2 === tr.tx.contractId)
                   && (tr.tx.function === 'tip' || tr.tx.function === 'retip')) || tr.claim;
               default:
                 throw new Error(`Unknown display mode type: ${this.displayMode.filter}`);
@@ -188,10 +189,6 @@ export default {
 .transaction-list {
   display: flex;
   flex-direction: column;
-
-  .filters {
-    z-index: 1;
-  }
 
   .list {
     background: variables.$color-black;
