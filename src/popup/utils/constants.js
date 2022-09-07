@@ -5,6 +5,7 @@ import BigNumber from 'bignumber.js';
 import { i18n } from '../../store/plugins/languages';
 
 export const MAGNITUDE = 18;
+export const SEED_LENGTH = 12;
 
 export const TX_TYPE_MDW = {
   SpendTx: SCHEMA.TX_TYPE.spend,
@@ -342,6 +343,8 @@ export const BLOG_CLAIM_TIP_URL = 'https://blog.aeternity.com/superhero-how-to-s
 
 export const COMMIT_URL = 'https://github.com/aeternity/superhero-wallet/commit/';
 
+export const TERMS_URL = 'https://wallet.superhero.com/about/termsOfService';
+
 export const MODAL_DEFAULT = 'default';
 export const MODAL_ACCOUNT_DETAILS = 'account-details';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';
@@ -359,3 +362,4 @@ export const MODAL_SHARE_QR = 'share-qr';
 export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_ASSET_SELECTOR = 'asset-selector';
 export const MODAL_RESET_WALLET = 'reset-wallet';
+export const MODAL_IMPORT_ACCOUNT = 'import-account';

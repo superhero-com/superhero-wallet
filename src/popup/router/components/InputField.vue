@@ -1,29 +1,53 @@
 <template>
   <div
     class="input-field"
-    :class="{ 'new-ui': newUi }"
+    :class="{
+      'new-ui': newUi,
+      'error': hasError,
+      'warning': !hasError && hasWarning,
+      plain,
+      readonly
+    }"
   >
-    <label
-      v-if="label || $slots.label"
-      :for="inputId"
+    <div
+      v-if="label || $slots.label || $slots['label-after']"
       class="label"
     >
-      <slot name="label">{{ label }}</slot>
-    </label>
+      <label
+        :for="inputId"
+        class="label-text"
+      >
+        <slot name="label">{{ label }}</slot>
+      </label>
+
+      <a
+        v-if="showHelp"
+        class="label-help"
+        @click.prevent="$emit('help')"
+      >
+        <QuestionCircleIcon />
+      </a>
+
+      <div
+        v-if="$slots['label-after']"
+        class="label-after"
+      >
+        <slot name="label-after" />
+      </div>
+    </div>
 
     <label
       data-cy="input-wrapper"
       class="input-wrapper"
-      :class="{ error, warning, plain, readonly }"
     >
       <div class="main-inner">
         <slot
-          v-if="!error && !warning"
-          name="left"
+          v-if="!hasError && !hasWarning"
+          name="before"
         />
         <StatusIcon
-          v-else
-          :status="error && 'alert' || warning && 'warning'"
+          v-else-if="!newUi"
+          :status="hasError && 'alert' || hasWarning && 'warning'"
         />
         <slot
           :id="_uid"
@@ -45,7 +69,7 @@
           >
         </slot>
         <slot
-          name="right"
+          name="after"
           :focused="focused"
         />
       </div>
@@ -58,33 +82,46 @@
       </div>
     </label>
 
-    <label
-      v-if="error && errorMessage || warning && warningMessage"
+    <div
+      v-if="hasError || hasWarning"
       class="message"
-      :class="{ error, warning }"
-      :for="inputId"
     >
-      {{ error ? errorMessage : warningMessage }}
-    </label>
+      <label
+        class="message-text"
+        :for="inputId"
+      >
+        {{ hasError ? errorMessage : warningMessage }}
+      </label>
+
+      <a
+        v-if="showMessageHelp"
+        class="message-help"
+        @click.prevent="$emit('help-message')"
+      >
+        <QuestionCircleIcon />
+      </a>
+    </div>
   </div>
 </template>
 
 <script>
 import StatusIcon from './StatusIcon.vue';
+import QuestionCircleIcon from '../../../icons/question-circle-border.svg?vue-component';
 
 export default {
   components: {
     StatusIcon,
+    QuestionCircleIcon,
   },
   props: {
     value: { type: [String, Number], default: null },
     label: { type: String, default: '' },
-    error: Boolean,
     errorMessage: { type: String, default: '' },
-    warning: Boolean,
     warningMessage: { type: String, default: '' },
     readonly: Boolean,
     plain: Boolean,
+    showHelp: Boolean,
+    showMessageHelp: Boolean,
     newUi: Boolean,
   },
   data: () => ({
@@ -92,7 +129,14 @@ export default {
   }),
   computed: {
     inputId() {
+      // eslint-disable-next-line no-underscore-dangle
       return `input-${this._uid}`;
+    },
+    hasError() {
+      return !!this.errorMessage;
+    },
+    hasWarning() {
+      return !!this.warningMessage;
     },
   },
 };
@@ -106,11 +150,28 @@ export default {
   text-align: left;
 
   .label {
-    @extend %face-sans-15-medium;
+    display: flex;
+    align-items: center;
 
-    margin: 8px 0;
-    display: inline-block;
-    color: variables.$color-dark-grey;
+    &-text {
+      @extend %face-sans-15-medium;
+
+      margin-bottom: 8px 0;
+      display: inline-block;
+      color: variables.$color-dark-grey;
+    }
+
+    &-help {
+      display: block;
+      width: 25px;
+      height: 20px;
+      padding-left: 5px;
+      color: inherit;
+    }
+
+    &-after {
+      margin-left: auto;
+    }
   }
 
   .input-wrapper {
@@ -125,37 +186,6 @@ export default {
     &:focus-within {
       border-color: variables.$color-blue;
       background-color: variables.$color-black;
-    }
-
-    &.error,
-    &.error.plain {
-      border-color: variables.$color-error;
-    }
-
-    &.warning {
-      border-color: variables.$color-warning;
-    }
-
-    &.plain {
-      background: transparent;
-      border-top: none;
-      padding: 0;
-      border-radius: unset;
-      border-color: variables.$color-blue;
-
-      .input:not(:only-child) {
-        padding: 0;
-        color: variables.$color-white;
-        font-weight: 500;
-      }
-    }
-
-    &.readonly {
-      border-color: transparent;
-
-      .input:not(:only-child) {
-        opacity: 0.5;
-      }
     }
 
     .main-inner {
@@ -212,20 +242,76 @@ export default {
   .message {
     @extend %face-sans-12-regular;
 
-    display: block;
+    display: flex;
+    align-items: center;
     margin-top: 9px;
     text-align: left;
 
-    &.error {
-      color: variables.$color-error;
+    &-help {
+      display: block;
+      width: 25px;
+      height: 20px;
+      padding-left: 5px;
+      color: inherit;
+    }
+  }
+
+  &.error,
+  &.error.plain {
+    .input-wrapper {
+      border-color: variables.$color-error;
     }
 
-    &.warning {
+    .message {
+      color: variables.$color-error;
+    }
+  }
+
+  &.warning {
+    .input-wrapper {
+      border-color: variables.$color-warning;
+    }
+
+    .message {
       color: variables.$color-warning;
     }
   }
 
+  &.plain {
+    .input-wrapper {
+      background: transparent;
+      border-top: none;
+      padding: 0;
+      border-radius: unset;
+      border-color: variables.$color-blue;
+
+      .input:not(:only-child) {
+        padding: 0;
+        color: variables.$color-white;
+        font-weight: 500;
+      }
+    }
+  }
+
+  &.readonly {
+    .input-wrapper {
+      border-color: transparent;
+
+      .input:not(:only-child) {
+        opacity: 0.5;
+      }
+    }
+  }
+
   &.new-ui {
+    .label {
+      margin-top: 16px;
+
+      &-text {
+        margin: 5px 0;
+      }
+    }
+
     .input-wrapper {
       border: none;
       background: rgba(variables.$color-white, 0.08);
@@ -256,14 +342,6 @@ export default {
         }
       }
 
-      &.error {
-        box-shadow: inset 0 0 0 2px variables.$color-error;
-      }
-
-      &.warning {
-        box-shadow: inset 0 0 0 2px variables.$color-warning;
-      }
-
       &.plain {
         padding-left: 0;
         padding-right: 0;
@@ -280,6 +358,18 @@ export default {
         &::placeholder {
           @extend %face-sans-15-regular;
         }
+      }
+    }
+
+    &.error {
+      .input-wrapper {
+        box-shadow: inset 0 0 0 2px variables.$color-error;
+      }
+    }
+
+    &.warning {
+      .input-wrapper {
+        box-shadow: inset 0 0 0 2px variables.$color-warning;
       }
     }
   }

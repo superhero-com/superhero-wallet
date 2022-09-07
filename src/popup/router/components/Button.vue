@@ -241,6 +241,18 @@ export default {
         background-color: rgba(variables.$color-white, 0.2);
       }
     }
+
+    &.alternative {
+      background-color: variables.$color-bg-6;
+
+      &:hover {
+        background-color: variables.$color-bg-5-hover;
+      }
+    }
+
+    &.extend {
+      width: 100%;
+    }
   }
 }
 </style>
