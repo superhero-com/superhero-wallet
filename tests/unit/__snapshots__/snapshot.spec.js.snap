@@ -73,34 +73,32 @@ exports[`Pages About 1`] = `
 
 exports[`Pages Index 1`] = `
 <div
-  class="index"
+  class="index new-ui"
 >
   <div
     class="not-iframe"
   >
     <svg />
      
-    <span
+    <div
       class="heading"
     >
-      
-      locale-specific-text
-    
-    </span>
+      <!---->
+    </div>
      
     <div
-      class="platforms agreed"
+      class="platforms new-ui agreed"
     >
       <div
-        class="text"
+        class="heading"
       >
         
-        locale-specific-text
-      
+          locale-specific-text
+        
       </div>
        
       <div
-        class="div-icons"
+        class="web-icons"
       >
         <div
           class="extension"
@@ -170,13 +168,15 @@ exports[`Pages Index 1`] = `
           </div>
         </div>
       </div>
+       
+      <div
+        class="footer"
+      >
+        
+          locale-specific-text
+        
+      </div>
     </div>
-     
-    <span
-      class="web"
-    >
-      locale-specific-text
-    </span>
   </div>
    
   <div
@@ -204,7 +204,9 @@ exports[`Pages Index 1`] = `
     </label>
      
     <a
+      class="terms-of-use agreed"
       data-cy="terms"
+      href="https://wallet.superhero.com/about/termsOfService"
     >
       
       locale-specific-text
@@ -212,52 +214,94 @@ exports[`Pages Index 1`] = `
     </a>
   </div>
    
-  <button
-    class="button primary"
-    data-cy="generate-wallet"
+  <div
+    class="wallet-button-box"
   >
-    
-    locale-specific-text
-  
-  </button>
-   
-  <button
-    class="button primary"
-    data-cy="import-wallet"
-  >
-    
-    locale-specific-text
-  
-  </button>
+    <button
+      class="button button-subheader alternative extend new-ui"
+      data-cy="generate-wallet"
+      style=""
+      to=""
+    >
+      <div
+        class="box"
+      >
+        <span
+          class="icon"
+        >
+          <svg />
+        </span>
+         
+        <div
+          class="message"
+        >
+          <span
+            class="heading"
+          >
+            locale-specific-text
+          </span>
+           
+          <span
+            class="description"
+          >
+            locale-specific-text
+          </span>
+        </div>
+      </div>
+    </button>
+     
+    <button
+      class="button button-subheader alternative extend new-ui"
+      data-cy="import-wallet"
+      style=""
+      to=""
+    >
+      <div
+        class="box"
+      >
+        <span
+          class="icon"
+        >
+          <svg />
+        </span>
+         
+        <div
+          class="message"
+        >
+          <span
+            class="heading"
+          >
+            locale-specific-text
+          </span>
+           
+          <span
+            class="description"
+          >
+            locale-specific-text
+          </span>
+        </div>
+      </div>
+    </button>
+  </div>
 </div>
 `;
 
 exports[`Pages Index 2`] = `
 <div
-  class="index"
+  class="index new-ui"
 >
   <div
     class="not-iframe"
   >
     <svg />
      
-    <span
+    <div
       class="heading"
     >
-      
-      locale-specific-text
-    
-    </span>
+      <!---->
+    </div>
      
-    <svg
-      class="spinner"
-    />
-     
-    <span
-      class="go"
-    >
-      locale-specific-text
-    </span>
+    <!---->
   </div>
    
   <div
@@ -285,7 +329,9 @@ exports[`Pages Index 2`] = `
     </label>
      
     <a
+      class="terms-of-use agreed"
       data-cy="terms"
+      href="https://wallet.superhero.com/about/termsOfService"
     >
       
       locale-specific-text
@@ -293,29 +339,81 @@ exports[`Pages Index 2`] = `
     </a>
   </div>
    
-  <button
-    class="button primary"
-    data-cy="generate-wallet"
+  <div
+    class="wallet-button-box"
   >
-    
-    locale-specific-text
-  
-  </button>
-   
-  <button
-    class="button primary"
-    data-cy="import-wallet"
-  >
-    
-    locale-specific-text
-  
-  </button>
+    <button
+      class="button button-subheader alternative extend new-ui"
+      data-cy="generate-wallet"
+      style=""
+      to=""
+    >
+      <div
+        class="box"
+      >
+        <span
+          class="icon"
+        >
+          <svg />
+        </span>
+         
+        <div
+          class="message"
+        >
+          <span
+            class="heading"
+          >
+            locale-specific-text
+          </span>
+           
+          <span
+            class="description"
+          >
+            locale-specific-text
+          </span>
+        </div>
+      </div>
+    </button>
+     
+    <button
+      class="button button-subheader alternative extend new-ui"
+      data-cy="import-wallet"
+      style=""
+      to=""
+    >
+      <div
+        class="box"
+      >
+        <span
+          class="icon"
+        >
+          <svg />
+        </span>
+         
+        <div
+          class="message"
+        >
+          <span
+            class="heading"
+          >
+            locale-specific-text
+          </span>
+           
+          <span
+            class="description"
+          >
+            locale-specific-text
+          </span>
+        </div>
+      </div>
+    </button>
+  </div>
 </div>
 `;
 
 exports[`Pages Index 3`] = `
 <div
-  class="index"
+  class="index new-ui"
 >
   <img
     src="../../../icons/iframe/sendAndReceive.svg"
@@ -346,7 +444,9 @@ exports[`Pages Index 3`] = `
     </label>
      
     <a
+      class="terms-of-use agreed"
       data-cy="terms"
+      href="https://wallet.superhero.com/about/termsOfService"
     >
       
       locale-specific-text
@@ -354,728 +454,74 @@ exports[`Pages Index 3`] = `
     </a>
   </div>
    
-  <button
-    class="button primary"
-    data-cy="generate-wallet"
-  >
-    
-    locale-specific-text
-  
-  </button>
-   
-  <button
-    class="button primary"
-    data-cy="import-wallet"
-  >
-    
-    locale-specific-text
-  
-  </button>
-</div>
-`;
-
-exports[`Pages Intro 1`] = `
-<div
-  class="intro"
->
-  <div>
-    <h2>
-      <svg />
-       locale-specific-text
-      
-      <span
-        class="ae"
-      >
-         locale-specific-text 
-      </span>
-    </h2>
-     
-    <div
-      class="text-info"
-    >
-      
-      locale-specific-text
-    
-    </div>
-  </div>
-   
   <div
-    style="display: none;"
+    class="wallet-button-box"
   >
-    <h2>
-      <svg />
-       locale-specific-text
-      
-      <span
-        class="ae"
-      >
-        locale-specific-text
-      </span>
-    </h2>
-     
-    <div
-      class="text-info"
-    >
-      
-      locale-specific-text
-    
-    </div>
-  </div>
-   
-  <div
-    style="display: none;"
-  >
-    <!---->
-     
-    <div
-      class="text-info"
-    >
-      
-      locale-specific-text
-      
-      <span
-        class="ae"
-      >
-        locale-specific-text
-      </span>
-      
-      locale-specific-text
-    
-    </div>
-     
-    <div
-      class="ever"
-    >
-      
-      locale-specific-text
-    
-    </div>
-  </div>
-   
-  <div
-    class="dotstyle dotstyle-fillup"
-    data-cy="onboarding-steps"
-  >
-    <svg
-      class="left arrow"
-      data-cy="prev"
-      style="display: none;"
-    />
-     
-    <ul>
-      <li
-        class="current"
-      >
-        <a />
-      </li>
-      <li
-        class=""
-      >
-        <a />
-      </li>
-      <li
-        class=""
-      >
-        <a />
-      </li>
-    </ul>
-     
-    <svg
-      class="right arrow"
-      data-cy="next"
-    />
-     
     <button
-      class="button-plain skip-button"
-      data-cy="skip"
-    >
-      
-      locale-specific-text
-    
-    </button>
-     
-    <!---->
-  </div>
-   
-  <div
-    style="display: none;"
-  >
-    <h2>
-      locale-specific-text
-    </h2>
-     
-    <h4>
-      locale-specific-text
-    </h4>
-     
-    <div
-      class="text-info splitted-text"
-    >
-      <span>
-        locale-specific-text
-      </span>
-       
-      <span>
-        locale-specific-text
-      </span>
-       
-      <span>
-        locale-specific-text
-      </span>
-    </div>
-     
-    <p
-      class="last-msg-enjoy"
-    >
-      
-        locale-specific-text
-      
-    </p>
-     
-    <button
-      class="button primary proceed-to-wallet"
-      data-cy="proceed-to-wallet"
-    >
-      
-      locale-specific-text
-    
-    </button>
-     
-    <!---->
-  </div>
-</div>
-`;
-
-exports[`Pages Intro 2`] = `
-<div
-  class="intro"
->
-  <div
-    style="display: none;"
-  >
-    <h2>
-      <svg />
-       locale-specific-text
-      
-      <span
-        class="ae"
-      >
-         locale-specific-text 
-      </span>
-    </h2>
-     
-    <div
-      class="text-info"
-    >
-      
-      locale-specific-text
-    
-    </div>
-  </div>
-   
-  <div
-    style=""
-  >
-    <h2>
-      <svg />
-       locale-specific-text
-      
-      <span
-        class="ae"
-      >
-        locale-specific-text
-      </span>
-    </h2>
-     
-    <div
-      class="text-info"
-    >
-      
-      locale-specific-text
-    
-    </div>
-  </div>
-   
-  <div
-    style="display: none;"
-  >
-    <!---->
-     
-    <div
-      class="text-info"
-    >
-      
-      locale-specific-text
-      
-      <span
-        class="ae"
-      >
-        locale-specific-text
-      </span>
-      
-      locale-specific-text
-    
-    </div>
-     
-    <div
-      class="ever"
-    >
-      
-      locale-specific-text
-    
-    </div>
-  </div>
-   
-  <div
-    class="dotstyle dotstyle-fillup"
-    data-cy="onboarding-steps"
-  >
-    <svg
-      class="left arrow"
-      data-cy="prev"
-      style=""
-    />
-     
-    <ul>
-      <li
-        class=""
-      >
-        <a />
-      </li>
-      <li
-        class="current"
-      >
-        <a />
-      </li>
-      <li
-        class=""
-      >
-        <a />
-      </li>
-    </ul>
-     
-    <svg
-      class="right arrow"
-      data-cy="next"
-    />
-     
-    <button
-      class="button-plain skip-button"
-      data-cy="skip"
-    >
-      
-      locale-specific-text
-    
-    </button>
-     
-    <!---->
-  </div>
-   
-  <div
-    style="display: none;"
-  >
-    <h2>
-      locale-specific-text
-    </h2>
-     
-    <h4>
-      locale-specific-text
-    </h4>
-     
-    <div
-      class="text-info splitted-text"
-    >
-      <span>
-        locale-specific-text
-      </span>
-       
-      <span>
-        locale-specific-text
-      </span>
-       
-      <span>
-        locale-specific-text
-      </span>
-    </div>
-     
-    <p
-      class="last-msg-enjoy"
-    >
-      
-        locale-specific-text
-      
-    </p>
-     
-    <button
-      class="button primary proceed-to-wallet"
-      data-cy="proceed-to-wallet"
-    >
-      
-      locale-specific-text
-    
-    </button>
-     
-    <!---->
-  </div>
-</div>
-`;
-
-exports[`Pages Intro 3`] = `
-<div
-  class="intro"
->
-  <div
-    style="display: none;"
-  >
-    <h2>
-      <svg />
-       locale-specific-text
-      
-      <span
-        class="ae"
-      >
-         locale-specific-text 
-      </span>
-    </h2>
-     
-    <div
-      class="text-info"
-    >
-      
-      locale-specific-text
-    
-    </div>
-  </div>
-   
-  <div
-    style="display: none;"
-  >
-    <h2>
-      <svg />
-       locale-specific-text
-      
-      <span
-        class="ae"
-      >
-        locale-specific-text
-      </span>
-    </h2>
-     
-    <div
-      class="text-info"
-    >
-      
-      locale-specific-text
-    
-    </div>
-  </div>
-   
-  <div
-    style=""
-  >
-    <!---->
-     
-    <div
-      class="text-info"
-    >
-      
-      locale-specific-text
-      
-      <span
-        class="ae"
-      >
-        locale-specific-text
-      </span>
-      
-      locale-specific-text
-    
-    </div>
-     
-    <div
-      class="ever"
-    >
-      
-      locale-specific-text
-    
-    </div>
-  </div>
-   
-  <div
-    class="dotstyle dotstyle-fillup"
-    data-cy="onboarding-steps"
-  >
-    <svg
-      class="left arrow"
-      data-cy="prev"
-      style=""
-    />
-     
-    <ul>
-      <li
-        class=""
-      >
-        <a />
-      </li>
-      <li
-        class=""
-      >
-        <a />
-      </li>
-      <li
-        class="current"
-      >
-        <a />
-      </li>
-    </ul>
-     
-    <svg
-      class="right arrow"
-      data-cy="next"
-      style="display: none;"
-    />
-     
-    <button
-      class="button-plain skip-button"
-      data-cy="skip"
-      style="display: none;"
-    >
-      
-      locale-specific-text
-    
-    </button>
-     
-    <button
-      class="button generate-wallet primary"
+      class="button button-subheader alternative extend new-ui"
       data-cy="generate-wallet"
-    >
-      
-      locale-specific-text
-    
-    </button>
-  </div>
-   
-  <div
-    style="display: none;"
-  >
-    <h2>
-      locale-specific-text
-    </h2>
-     
-    <h4>
-      locale-specific-text
-    </h4>
-     
-    <div
-      class="text-info splitted-text"
-    >
-      <span>
-        locale-specific-text
-      </span>
-       
-      <span>
-        locale-specific-text
-      </span>
-       
-      <span>
-        locale-specific-text
-      </span>
-    </div>
-     
-    <p
-      class="last-msg-enjoy"
-    >
-      
-        locale-specific-text
-      
-    </p>
-     
-    <button
-      class="button primary proceed-to-wallet"
-      data-cy="proceed-to-wallet"
-    >
-      
-      locale-specific-text
-    
-    </button>
-     
-    <!---->
-  </div>
-</div>
-`;
-
-exports[`Pages Intro 4`] = `
-<div
-  class="intro"
->
-  <div
-    style="display: none;"
-  >
-    <h2>
-      <svg />
-       locale-specific-text
-      
-      <span
-        class="ae"
-      >
-         locale-specific-text 
-      </span>
-    </h2>
-     
-    <div
-      class="text-info"
-    >
-      
-      locale-specific-text
-    
-    </div>
-  </div>
-   
-  <div
-    style="display: none;"
-  >
-    <h2>
-      <svg />
-       locale-specific-text
-      
-      <span
-        class="ae"
-      >
-        locale-specific-text
-      </span>
-    </h2>
-     
-    <div
-      class="text-info"
-    >
-      
-      locale-specific-text
-    
-    </div>
-  </div>
-   
-  <div
-    style="display: none;"
-  >
-    <!---->
-     
-    <div
-      class="text-info"
-    >
-      
-      locale-specific-text
-      
-      <span
-        class="ae"
-      >
-        locale-specific-text
-      </span>
-      
-      locale-specific-text
-    
-    </div>
-     
-    <div
-      class="ever"
-    >
-      
-      locale-specific-text
-    
-    </div>
-  </div>
-   
-  <div
-    class="dotstyle dotstyle-fillup"
-    data-cy="onboarding-steps"
-    style="display: none;"
-  >
-    <svg
-      class="left arrow"
-      data-cy="prev"
       style=""
-    />
-     
-    <ul>
-      <li
-        class=""
-      >
-        <a />
-      </li>
-      <li
-        class=""
-      >
-        <a />
-      </li>
-      <li
-        class=""
-      >
-        <a />
-      </li>
-    </ul>
-     
-    <svg
-      class="right arrow"
-      data-cy="next"
-      style="display: none;"
-    />
-     
-    <button
-      class="button-plain skip-button"
-      data-cy="skip"
-      style="display: none;"
+      to=""
     >
-      
-      locale-specific-text
-    
+      <div
+        class="box"
+      >
+        <span
+          class="icon"
+        >
+          <svg />
+        </span>
+         
+        <div
+          class="message"
+        >
+          <span
+            class="heading"
+          >
+            locale-specific-text
+          </span>
+           
+          <span
+            class="description"
+          >
+            locale-specific-text
+          </span>
+        </div>
+      </div>
     </button>
      
-    <!---->
-  </div>
-   
-  <div
-    style=""
-  >
-    <h2>
-      locale-specific-text
-    </h2>
-     
-    <h4>
-      locale-specific-text
-    </h4>
-     
-    <div
-      class="text-info splitted-text"
-    >
-      <span>
-        locale-specific-text
-      </span>
-       
-      <span>
-        locale-specific-text
-      </span>
-       
-      <span>
-        locale-specific-text
-      </span>
-    </div>
-     
-    <p
-      class="last-msg-enjoy"
-    >
-      
-        locale-specific-text
-      
-    </p>
-     
     <button
-      class="button primary proceed-to-wallet"
-      data-cy="proceed-to-wallet"
+      class="button button-subheader alternative extend new-ui"
+      data-cy="import-wallet"
+      style=""
+      to=""
     >
-      
-      locale-specific-text
-    
+      <div
+        class="box"
+      >
+        <span
+          class="icon"
+        >
+          <svg />
+        </span>
+         
+        <div
+          class="message"
+        >
+          <span
+            class="heading"
+          >
+            locale-specific-text
+          </span>
+           
+          <span
+            class="description"
+          >
+            locale-specific-text
+          </span>
+        </div>
+      </div>
     </button>
-     
-    <!---->
   </div>
 </div>
 `;

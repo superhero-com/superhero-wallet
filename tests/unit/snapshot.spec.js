@@ -7,6 +7,7 @@ import PrivacyPolicy from '../../src/popup/router/pages/PrivacyPolicy.vue';
 
 Object.assign(Vue.prototype, {
   $t: () => 'locale-specific-text',
+  $route: { meta: { newUI: true } },
 });
 
 jest.mock('detect-browser', () => ({
