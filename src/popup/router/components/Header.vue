@@ -169,8 +169,8 @@ export default {
 
   top: 0;
   z-index: 2;
-  height: calc(48px + env(safe-area-inset-top));
-  background-color: variables.$color-bg-3-new;
+  height: calc(var(--header-height) + env(safe-area-inset-top));
+  background-color: var(--screen-bg-color);
   display: flex;
   padding: env(safe-area-inset-top) 8px 8px 8px;
   align-items: center;

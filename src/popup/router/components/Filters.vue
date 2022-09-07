@@ -65,12 +65,12 @@ export default {
   display: flex;
   gap: 8px;
   padding: 13px 0;
-  background-color: var(--screen-bg-color);
 
   &.fixed {
     position: sticky;
     top: 48px;
     top: calc(env(safe-area-inset-top) + 48px);
+    background-color: var(--screen-bg-color);
   }
 
   .filter {

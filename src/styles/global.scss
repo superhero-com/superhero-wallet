@@ -1,15 +1,44 @@
 @use './typography';
 @use './variables' as *;
+@use './mixins';
 @use './transitions';
+
+* {
+  box-sizing: border-box;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html,
+body {
+  height: var(--height);
+}
+
+body {
+  margin: 0;
+  background-color: $color-black;
+
+  &.color-bg-3 {
+    background-color: $color-bg-3;
+  }
+
+  @include mixins.desktop {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
 
 @-moz-document url-prefix() {
   html {
     scrollbar-width: none;
   }
-}
-
-* {
-  box-sizing: border-box;
 }
 
 h1,
@@ -41,19 +70,15 @@ ol {
   margin: 0;
 }
 
-button:focus {
-  outline: none;
-}
-
 button {
   padding: 0;
   background: none;
   border: none;
   color: $color-light-grey;
-}
 
-#app {
-  font-family: $font-sans;
+  &:focus {
+    outline: none;
+  }
 }
 
 .error-msg {

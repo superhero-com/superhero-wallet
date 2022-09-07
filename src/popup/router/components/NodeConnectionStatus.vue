@@ -46,13 +46,13 @@ export default {
     position: sticky;
   }
 
+  bottom: env(safe-area-inset-bottom);
   left: 0;
   right: 0;
   background: variables.$color-bg-3-new;
   padding: 4px 0;
   color: variables.$color-white;
   text-align: center;
-  bottom: env(safe-area-inset-bottom);
 
   @extend %face-sans-14-regular;
 }
