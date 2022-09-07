@@ -1,7 +1,10 @@
 <template>
   <div class="account-details">
     <div class="account-info-wrapper">
-      <AccountInfo show-copy-icon />
+      <AccountInfo
+        :account-idx="activeIdx"
+        show-copy-icon
+      />
 
       <ButtonIcon
         class="close-button"
@@ -11,7 +14,7 @@
       </ButtonIcon>
     </div>
 
-    <BalanceInfo v-bind="$attrs" />
+    <BalanceInfo :account-idx="activeIdx" />
 
     <div class="buttons">
       <BoxButton
@@ -56,6 +59,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import { MODAL_TRANSFER_RECEIVE } from '../../utils/constants';
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
@@ -121,6 +125,7 @@ export default {
     };
   },
   computed: {
+    ...mapState('accounts', ['activeIdx']),
     searchTermPlaceholder() {
       switch (this.$route.name) {
         case 'account-details':
