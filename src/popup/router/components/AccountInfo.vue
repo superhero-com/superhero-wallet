@@ -94,7 +94,7 @@ export default {
     align-items: center;
     line-height: 16px;
     color: variables.$color-white;
-    justify-content: start;
+    justify-content: flex-start;
 
     .avatar {
       margin-right: 8px;
