@@ -67,7 +67,6 @@
         <InputAmount
           v-model="amount"
           v-validate="{
-            required: true,
             min_value_exclusive: 0,
           }"
           name="amount"
