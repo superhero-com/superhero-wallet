@@ -3,13 +3,13 @@
     <div class="title">
       <Avatar
         class="avatar"
-        :address="accounts[idx].address"
-        :name="accounts[idx].name"
+        :address="activeAccount.address"
+        :name="activeAccount.name"
       />
       <div class="account-details">
         <Truncate
-          v-if="accounts[idx].name"
-          :str="accounts[idx].name"
+          v-if="activeAccount.name"
+          :str="activeAccount.name"
           :gradient-color="color"
         />
         <div
@@ -21,7 +21,7 @@
         </div>
         <ButtonPlain
           v-if="truncateAddress && truncateAddress.length"
-          v-clipboard:copy="accounts[idx].address"
+          v-clipboard:copy="activeAccount.address"
           v-clipboard:success="copy"
           class="ae-address"
           data-cy="copy"
@@ -30,7 +30,7 @@
           <span class="more">...</span>
           <span>{{ truncateAddress[1] }}</span>
 
-          <CopyOutlined v-if="showCopyIcon" />
+          <CopyOutlined v-if="canCopyAddress" />
 
           <div
             v-if="copied"
@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
 import CopyMixin from '../../../mixins/copy';
 import Avatar from './Avatar.vue';
 import ButtonPlain from './ButtonPlain.vue';
@@ -61,22 +61,21 @@ export default {
   },
   mixins: [CopyMixin],
   props: {
-    accountIdx: { type: Number, default: -1 },
     color: { type: String, default: 'black' },
-    showCopyIcon: { type: Boolean, default: false },
+    canCopyAddress: Boolean,
+    accountIdx: { type: Number, required: true },
   },
   computed: {
-    ...mapState('accounts', ['activeIdx']),
     ...mapGetters(['accounts', 'activeNetwork']),
-    idx() {
-      return this.accountIdx === -1 ? this.activeIdx : this.accountIdx;
+    activeAccount() {
+      return this.accounts[this.accountIdx];
     },
     explorerUrl() {
-      const { address } = this.accounts[this.idx];
+      const { address } = this.activeAccount;
       return `${this.activeNetwork.explorerUrl}/account/transactions/${address}`;
     },
     truncateAddress() {
-      const { address } = this.accounts[this.idx];
+      const { address } = this.activeAccount;
       const addressLength = address.length;
       const firstPart = address.slice(0, 6).match(/.{3}/g);
       const secondPart = address.slice(addressLength - 3, addressLength).match(/.{3}/g);
@@ -154,7 +153,7 @@ export default {
           opacity: 1;
         }
 
-        svg {
+        .icon {
           width: 22px;
           height: 22px;
           margin-left: 2px;

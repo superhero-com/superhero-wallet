@@ -11,7 +11,7 @@
     >
       <swiper-slide
         v-for="(account, idx) in filteredAccounts"
-        :key="account.i"
+        :key="account.accountIdx"
       >
         <ButtonPlain
           v-if="idx !== 0 && !IS_CORDOVA"
@@ -21,9 +21,8 @@
           <Chevron />
         </ButtonPlain>
         <AccountCard
-          :class="{ selected: account.i === activeIdx }"
-          v-bind="account"
-          :color="getAccountColor(account.i)"
+          :class="{ selected: account.accountIdx === activeIdx }"
+          :account-idx="account.accountIdx"
         />
         <ButtonPlain
           v-if="!IS_CORDOVA"
@@ -95,7 +94,7 @@ export default {
     },
     filteredAccounts() {
       return this.accounts.map(
-        (account, index) => ({ ...account, i: index }),
+        (account, index) => ({ ...account, accountIdx: index }),
       ).filter((account) => account.showed);
     },
   },
@@ -113,7 +112,7 @@ export default {
       const { realIndex } = this.swiper;
       if (this.swiper.realIndex < this.filteredAccounts.length
         && this.filteredAccounts[realIndex]) {
-        this.selectAccount(this.filteredAccounts[realIndex].i);
+        this.selectAccount(this.filteredAccounts[realIndex].accountIdx);
       }
       if (this.currentIdx !== realIndex) this.currentIdx = realIndex;
     },
@@ -147,17 +146,19 @@ export default {
   .swiper-button {
     position: absolute;
     opacity: 0.5;
-    top: 81px;
+    top: 61px;
     color: variables.$color-white;
     z-index: 1;
+    height: 60px;
+    width: 30px;
 
     &.prev {
-      left: 12px;
+      left: 2px;
       transform: rotate(180deg);
     }
 
     &.next {
-      right: 12px;
+      right: 2px;
     }
 
     &:hover {

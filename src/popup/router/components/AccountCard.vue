@@ -5,12 +5,11 @@
     :to="{ name: 'account-details' }"
   >
     <AccountInfo
-      v-bind="$attrs"
+      :account-idx="accountIdx"
       :color="color"
     />
 
-    <BalanceInfo v-bind="$attrs" />
-
+    <BalanceInfo :account-idx="accountIdx" />
     <div class="misc">
       <div class="total-tokens">
         <span class="digit">
@@ -55,7 +54,7 @@ export default {
     ReceiveIcon,
   },
   props: {
-    idx: { type: Number, required: true },
+    accountIdx: { type: Number, required: true },
   },
   computed: {
     ...mapGetters('fungibleTokens', ['getTokenBalance']),
@@ -64,10 +63,10 @@ export default {
       return { 'background-color': this.color };
     },
     totalTokens() {
-      return this.getTokenBalance(this.accounts[this.idx].address).length;
+      return this.getTokenBalance(this.accounts[this.accountIdx].address).length;
     },
     color() {
-      return getAddressColor(this.accounts[this.idx].address);
+      return getAddressColor(this.accounts[this.accountIdx].address);
     },
     iconCssProps() {
       return {
