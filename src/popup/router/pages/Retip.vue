@@ -185,7 +185,8 @@ export default {
       height: 24px;
     }
 
-    a {
+    > a {
+      overflow-wrap: anywhere;
       text-align: left;
       color: variables.$color-white;
       flex-grow: 1;
