@@ -2,7 +2,7 @@ import { isFQDN } from 'validator';
 import { detect } from 'detect-browser';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { CONNECTION_TYPES } from './constants';
+import { CONNECTION_TYPES, SEED_LENGTH } from './constants';
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
@@ -73,6 +73,8 @@ export const checkAddressOrChannel = (value) => checkAddress(value) || Crypto.is
 export const checkAensName = (value) => /^[\p{L}\d]+\.chain$/gu.test(value);
 
 export const getAddressByNameEntry = (nameEntry, pointer = 'account_pubkey') => ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
+
+export const validateSeedLength = (seed) => seed && seed.split(' ').length === SEED_LENGTH;
 
 export const contractCall = async ({
   instance,
