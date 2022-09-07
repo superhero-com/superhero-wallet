@@ -17,19 +17,19 @@
         <Avatar
           size="sm"
           class="account-avatar"
-          :address="accounts[idx].address"
-          :name="accounts[idx].name"
+          :address="account.address"
+          :name="account.name"
         />
         <Truncate
-          v-if="accounts[idx].name"
-          :str="accounts[idx].name"
+          v-if="account.name"
+          :str="account.name"
         />
         <span
           v-else
           data-cy="account-name"
           class="account-name"
         >
-          {{ $t('pages.account.heading') }} {{ accountIdx + 1 }}
+          {{ $t('pages.account.heading') }} {{ account.idx }}
         </span>
 
         <a
@@ -43,7 +43,7 @@
 
       <div class="address-info">
         <QrcodeVue
-          :value="getQRdata(accounts[idx].address)"
+          :value="getQRdata(account.address)"
           size="112"
           class="qrcode"
         />
@@ -133,11 +133,8 @@ export default {
     ExternalLinkIcon,
     ShareIcon,
   },
-  mixins: [
-    CopyMixin,
-  ],
+  mixins: [CopyMixin],
   props: {
-    accountIdx: { type: Number, default: -1 },
     defaultAmount: { type: [String, Number], default: null },
     tokenContractId: { type: [String, Number], default: null },
   },
@@ -159,28 +156,19 @@ export default {
       'getAeternityToken',
     ]),
     ...mapGetters([
-      'accounts',
+      'account',
       'activeNetwork',
-    ]),
-    ...mapState('accounts', [
-      'activeIdx',
     ]),
     ...mapState('fungibleTokens', [
       'availableTokens',
     ]),
-    idx() {
-      return this.accountIdx === -1 ? this.activeIdx : this.accountIdx;
-    },
-    address() {
-      return this.accounts[this.idx]?.address || '';
-    },
     computedAddress() {
       return (this.amount > 0)
-        ? `${this.address}?${this.getTokenInfo(true).substring(1)}`
-        : this.address;
+        ? `${this.account.address}?${this.getTokenInfo(true).substring(1)}`
+        : this.account.address;
     },
     explorerUrl() {
-      return `${this.activeNetwork.explorerUrl}/account/transactions/${this.address}`;
+      return `${this.activeNetwork.explorerUrl}/account/transactions/${this.account.address}`;
     },
   },
   created() {
@@ -208,7 +196,7 @@ export default {
       return `${APP_LINK_WEB}/transfer?account=${value}${this.getTokenInfo(true)}`;
     },
     async share() {
-      const { address } = this.accounts[this.idx];
+      const { address } = this.account;
       const walletLink = this.getLink(address);
       const text = (this.amount > 0)
         ? this.$t('modals.receive.shareTextNoAmount', { address, walletLink })
@@ -222,8 +210,8 @@ export default {
     },
     getTextToCopy() {
       return this.amount > 0
-        ? this.getLink(this.address)
-        : this.address;
+        ? this.getLink(this.account.address)
+        : this.account.address;
     },
     handleAssetChange(asset) {
       this.selectedAsset = asset;
