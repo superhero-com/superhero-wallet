@@ -19,20 +19,6 @@
           {{ $t('pages.fungible-tokens.tokens') }}
         </span>
       </div>
-      <div class="buttons">
-        <button
-          class="buttons-button"
-          @click.prevent="openTransferReceiveModal()"
-        >
-          <ReceiveIcon :style="iconCssProps" />
-        </button>
-        <button
-          class="buttons-button"
-          @click.prevent="openTransferSendModal()"
-        >
-          <SendIcon :style="iconCssProps" />
-        </button>
-      </div>
     </div>
   </RouterLink>
 </template>
@@ -41,20 +27,12 @@
 import { mapGetters } from 'vuex';
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
-import ReceiveIcon from '../../../icons/account-card/account-receive.svg?vue-component';
-import SendIcon from '../../../icons/account-card/account-send.svg?vue-component';
 import { getAddressColor } from '../../utils/avatar';
-import {
-  MODAL_TRANSFER_RECEIVE,
-  MODAL_TRANSFER_SEND,
-} from '../../utils/constants';
 
 export default {
   components: {
     AccountInfo,
     BalanceInfo,
-    SendIcon,
-    ReceiveIcon,
   },
   props: {
     accountIdx: { type: Number, required: true },
@@ -70,23 +48,6 @@ export default {
     },
     color() {
       return getAddressColor(this.accounts[this.accountIdx].address);
-    },
-    iconCssProps() {
-      return {
-        '--primaryColor': this.color,
-      };
-    },
-  },
-  methods: {
-    openTransferReceiveModal() {
-      this.$store.dispatch('modals/open', {
-        name: MODAL_TRANSFER_RECEIVE,
-      });
-    },
-    openTransferSendModal() {
-      this.$store.dispatch('modals/open', {
-        name: MODAL_TRANSFER_SEND,
-      });
     },
   },
 };
@@ -129,27 +90,6 @@ export default {
 
       .wording {
         opacity: 0.85;
-      }
-    }
-
-    .buttons {
-      display: flex;
-      gap: 8px;
-
-      &-button {
-        margin: 0;
-        padding: 0;
-        color: rgba(variables.$color-white, 0.8);
-        cursor: pointer;
-
-        &:hover {
-          color: rgba(variables.$color-white, 1);
-        }
-
-        svg {
-          height: 36px;
-          width: 36px;
-        }
       }
     }
   }
