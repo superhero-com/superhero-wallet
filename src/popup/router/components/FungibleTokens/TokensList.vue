@@ -14,8 +14,8 @@
         <Button
           small
           hollow
-          icon-text
-          @click="openReceiveModal"
+          has-icon
+          @click="openTransferReceiveModal"
         >
           <Receive />
           {{ $t('pages.fungible-tokens.receiveTokens') }}
@@ -36,8 +36,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
-import { MODAL_TRANSFER_RECEIVE, SIMPLEX_URL } from '../../../utils/constants';
+import { SIMPLEX_URL, MODAL_TRANSFER_RECEIVE } from '../../../utils/constants';
 import TokensListItem from './TokensListItem.vue';
 import Button from '../Button.vue';
 import Receive from '../../../../icons/receive.svg?vue-component';
@@ -59,16 +58,11 @@ export default {
     SIMPLEX_URL,
   }),
   methods: {
-    ...mapActions('modals', {
-      openModal: 'open',
-    }),
+    openTransferReceiveModal() {
+      this.$store.dispatch('modals/open', { name: MODAL_TRANSFER_RECEIVE });
+    },
     checkZeroBalance(token) {
       return !+token.convertedBalance?.toString();
-    },
-    openReceiveModal() {
-      this.openModal({
-        name: MODAL_TRANSFER_RECEIVE,
-      });
     },
   },
 };
