@@ -29,7 +29,7 @@
           data-cy="account-name"
           class="account-name"
         >
-          {{ $t('pages.account.heading') }} {{ account.idx }}
+          {{ $t('pages.account.heading') }} {{ account.idx + 1 }}
         </span>
 
         <a
