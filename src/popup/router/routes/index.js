@@ -2,12 +2,15 @@ import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import About from '../pages/About.vue';
 import Account from '../pages/Account.vue';
+import AccountDetails from '../pages/AccountDetails.vue';
+import AccountDetailsTokens from '../pages/AccountDetailsTokens.vue';
+import AccountDetailsTransactions from '../pages/AccountDetailsTransactions.vue';
+import AccountDetailsNames from '../pages/AccountDetailsNames.vue';
 import Accounts from '../pages/Accounts.vue';
 import Address from '../pages/Address.vue';
 import CommentNew from '../pages/CommentNew.vue';
 import DonateError from '../pages/DonateError.vue';
 import TokenDetails from '../pages/FungibleTokens/TokenDetails.vue';
-import Balances from '../pages/FungibleTokens/Balances.vue';
 import Index from '../pages/Index.vue';
 import Invite from '../pages/Invite.vue';
 import InviteClaim from '../pages/InviteClaim.vue';
@@ -44,7 +47,6 @@ import TipsSend from '../pages/TipsSend.vue';
 import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
 import ResetWallet from '../pages/ResetWallet.vue';
-import Transactions from '../pages/Transactions.vue';
 import webIframePopups from './web-iframe-popups';
 
 export default [
@@ -64,6 +66,46 @@ export default [
     path: '/account',
     name: 'account',
     component: Account,
+  },
+  {
+    path: '/account-details/',
+    component: AccountDetails,
+    meta: {
+      newUI: true,
+      hideHeader: true,
+    },
+    children: [
+      {
+        path: '',
+        name: 'account-details',
+        component: AccountDetailsTokens,
+        meta: {
+          newUI: true,
+          hideHeader: true,
+          asModal: true,
+        },
+      },
+      {
+        path: 'transactions',
+        name: 'account-details-transactions',
+        component: AccountDetailsTransactions,
+        meta: {
+          newUI: true,
+          hideHeader: true,
+          asModal: true,
+        },
+      },
+      {
+        path: 'names',
+        name: 'account-details-names',
+        component: AccountDetailsNames,
+        meta: {
+          newUI: true,
+          hideHeader: true,
+          asModal: true,
+        },
+      },
+    ],
   },
   {
     path: '/accounts',
@@ -268,7 +310,8 @@ export default [
       hideNotificationsIcon: true,
       newUI: true,
     },
-  }, {
+  },
+  {
     path: '/more/tips-claim',
     name: 'tips-claim',
     component: TipsClaim,
@@ -291,15 +334,6 @@ export default [
     meta: {
       title: 'send-tip',
       notPersist: true,
-      notRebrand: true,
-    },
-  },
-
-  {
-    path: '/transactions',
-    component: Transactions,
-    meta: {
-      title: 'transactions',
       notRebrand: true,
     },
   },
@@ -459,15 +493,6 @@ export default [
       title: 'address',
       notPersist: true,
       notRebrand: true,
-    },
-  },
-  {
-    name: 'balances',
-    path: '/balances',
-    component: Balances,
-    meta: {
-      title: 'balances',
-      backButton: false,
     },
   },
   {

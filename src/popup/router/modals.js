@@ -2,7 +2,6 @@ import { registerModal } from '../../store/plugins/modals';
 
 import {
   MODAL_DEFAULT,
-  MODAL_ACCOUNT_DETAILS,
   MODAL_CLAIM_SUCCESS,
   MODAL_SPEND_SUCCESS,
   MODAL_CONFIRM_TIP,
@@ -32,7 +31,6 @@ import ConfirmRawSign from './components/Modals/ConfirmRawSign.vue';
 import QrCodeReader from './components/Modals/QrCodeReader.vue';
 import Help from './components/Modals/Help.vue';
 import ShareQr from './components/Modals/ShareQr.vue';
-import AccountDetails from './components/Modals/AccountDetails.vue';
 import AssetSelector from './components/Modals/AssetSelector.vue';
 import TransferReceive from './components/Modals/TransferReceive.vue';
 import ResetWallet from './components/Modals/ResetWallet.vue';
@@ -40,7 +38,6 @@ import ImportAccount from './components/Modals/ImportAccount.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
-  registerModal({ name: MODAL_ACCOUNT_DETAILS, component: AccountDetails });
   registerModal({ name: MODAL_CLAIM_SUCCESS, component: ClaimSuccess });
   registerModal({ name: MODAL_SPEND_SUCCESS, component: SpendSuccess });
   registerModal({ name: MODAL_CONFIRM_TIP, component: ConfirmTip });

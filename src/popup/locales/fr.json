@@ -194,7 +194,6 @@
     },
     "recentTransactions": {
       "recentActivity": "Recent Activity",
-      "viewAll": "View all",
       "noTransactionsFound": "No transactions found!"
     },
     "addFungibleToken": {

@@ -71,10 +71,19 @@ export default {
 
 .tokens-list-item {
   display: block;
-  padding: 8px 16px;
+  padding: 8px var(--screen-padding-x);
+  margin-left: calc(-1 * var(--screen-padding-x));
+  margin-right: calc(-1 * var(--screen-padding-x));
   color: unset;
   text-decoration: unset;
-  background-color: variables.$color-bg-1;
+
+  &:hover {
+    background-color: variables.$color-bg-4-hover;
+  }
+
+  &:active {
+    opacity: 0.5;
+  }
 
   .row {
     display: flex;

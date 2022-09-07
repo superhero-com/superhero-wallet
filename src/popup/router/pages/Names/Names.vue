@@ -1,7 +1,6 @@
 <template>
   <div class="names">
     <Plate>
-      <AccountSwitcher />
       <Tabs
         slot="bottom"
         three
@@ -26,7 +25,6 @@
 
 <script>
 import Plate from '../../components/Plate.vue';
-import AccountSwitcher from '../../components/AccountSwitcher.vue';
 import Tabs from '../../components/Tabs.vue';
 import Names from '../../../../icons/names.svg?vue-component';
 import Auction from '../../../../icons/auction.svg?vue-component';
@@ -34,7 +32,7 @@ import PlusCircle from '../../../../icons/plus-circle.svg?vue-component';
 
 export default {
   components: {
-    Plate, AccountSwitcher, Tabs, Names, Auction, PlusCircle,
+    Plate, Tabs, Names, Auction, PlusCircle,
   },
 };
 </script>

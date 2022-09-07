@@ -2,6 +2,7 @@
   <div
     class="filters"
     data-cy="filters"
+    :class="{ fixed }"
   >
     <ButtonPlain
       v-for="filter in Object.entries(filters)"
@@ -30,6 +31,7 @@ export default {
   props: {
     value: { type: Object, required: true },
     filters: { type: Object, required: true },
+    fixed: Boolean,
   },
   data() {
     return {
@@ -58,15 +60,18 @@ export default {
 @use '../../../styles/mixins';
 
 .filters {
-  position: sticky;
-  top: 48px;
-  top: calc(env(safe-area-inset-top) + 48px);
-  background: variables.$color-bg-3;
   height: 50px;
   width: 100%;
   display: flex;
   gap: 8px;
-  padding: 13px 12px;
+  padding: 13px 0;
+  background-color: var(--screen-bg-color);
+
+  &.fixed {
+    position: sticky;
+    top: 48px;
+    top: calc(env(safe-area-inset-top) + 48px);
+  }
 
   .filter {
     display: flex;

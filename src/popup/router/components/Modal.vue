@@ -106,10 +106,9 @@ export default {
 @use '../../../styles/typography';
 @use '../../../styles/mixins';
 
-$modal-bg-color: variables.$color-bg-4;
-
 .modal {
-  --content-padding: 24px; // Default spacing
+  --screen-padding-x: 24px; // Default spacing
+  --screen-bg-color: #{variables.$modal-bg-color};
 
   position: fixed;
   z-index: 2;
@@ -131,7 +130,7 @@ $modal-bg-color: variables.$color-bg-4;
     flex-direction: column;
     width: 92%;
     margin: auto;
-    background: $modal-bg-color;
+    background: var(--screen-bg-color);
     border-radius: 5px;
     box-shadow:
       0 0 0 1px variables.$color-border,
@@ -164,7 +163,7 @@ $modal-bg-color: variables.$color-bg-4;
       text-align: center;
       display: flex;
       flex-direction: column;
-      background-color: $modal-bg-color;
+      background-color: var(--screen-bg-color);
 
       &-icon {
         margin: 0 auto 10px;
@@ -180,7 +179,7 @@ $modal-bg-color: variables.$color-bg-4;
     .body {
       @extend %face-sans-15-regular;
 
-      padding: var(--content-padding);
+      padding: var(--screen-padding-x);
       padding-top: 0;
       color: variables.$color-light-grey;
       word-break: break-word;
@@ -193,12 +192,12 @@ $modal-bg-color: variables.$color-bg-4;
       display: flex;
       justify-content: center;
       gap: 10px;
-      padding: 8px var(--content-padding);
+      padding: 8px var(--screen-padding-x);
       background:
         linear-gradient(
           0deg,
-          rgba($modal-bg-color, 0.9) 50%,
-          rgba($modal-bg-color, 0) 100%
+          rgba(var(--screen-bg-color), 0.9) 50%,
+          rgba(var(--screen-bg-color), 0) 100%
         );
     }
   }
@@ -253,11 +252,11 @@ $modal-bg-color: variables.$color-bg-4;
   }
 
   &.dense {
-    --content-padding: 8px;
+    --screen-padding-x: 8px;
   }
 
   &.no-padding {
-    --content-padding: 0;
+    --screen-padding-x: 0;
   }
 
   &.pop-in-transition {

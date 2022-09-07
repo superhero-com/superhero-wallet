@@ -257,7 +257,6 @@
     "titles": {
       "tx-history": "Tx history",
       "transfer": "Transfer",
-      "balances": "Balances",
       "accounts": "Accounts",
       "tips": "Tips",
       "settings": "Wallet settings",
@@ -365,7 +364,6 @@
     },
     "recentTransactions": {
       "title": "Recent transactions",
-      "viewAll": "View all",
       "viewMore": "View full transaction history",
       "noTransactionsFound": "There are no recent transactions for this account.",
       "searchPlaceholder": "Search transactions by asset name"
