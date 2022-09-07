@@ -109,7 +109,7 @@ export default {
 
 .modal {
   --screen-padding-x: 24px; // Default spacing
-  --screen-bg-color: #{variables.$modal-bg-color};
+  --screen-bg-color: #{variables.$color-bg-modal};
 
   position: fixed;
   z-index: 2;
@@ -131,7 +131,7 @@ export default {
     flex-direction: column;
     width: 92%;
     margin: auto;
-    background: var(--screen-bg-color);
+    background-color: var(--screen-bg-color);
     border-radius: 5px;
     box-shadow:
       0 0 0 1px variables.$color-border,
@@ -288,10 +288,10 @@ export default {
   &.from-bottom-transition {
     &-enter-active,
     &-leave-active {
-      transition: opacity 0.3s ease-in-out;
+      transition: opacity 0.3s;
 
       .container {
-        transition: transform 0.3s ease-in-out;
+        transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
       }
     }
 

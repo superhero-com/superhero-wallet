@@ -2,10 +2,8 @@
   <div
     id="app"
     :class="{
-      'not-rebrand': $route.meta.notRebrand,
       'show-header': showStatusAndHeader,
       'new-ui': $route.meta.newUI,
-      'as-modal': $route.meta.asModal,
     }"
   >
     <button
@@ -105,42 +103,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
-@use '../styles/variables';
-@use '../styles/mixins';
-
-body {
-  margin: 0;
-  background-color: variables.$color-black;
-}
-
-body.color-bg-3 {
-  background-color: variables.$color-bg-3;
-}
-
-html,
-body {
-  height: var(--height);
-}
-
-@include mixins.desktop {
-  body {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-}
-
-* {
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-</style>
+<style lang="scss" src="../styles/global.scss"></style>
 
 <style lang="scss" scoped>
 @use '../styles/variables';
@@ -150,18 +113,19 @@ body {
 #app {
   --screen-padding-x: 16px;
   --screen-bg-color: #{variables.$color-bg-3};
+  --header-height: 0;
 
   @extend %face-sans-16-regular;
 
   position: relative;
-  z-index: 1;
   margin: 0 auto;
   width: variables.$extension-width;
   height: 600px;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: variables.$border-radius-app;
   color: variables.$color-white;
   background-color: var(--screen-bg-color);
+  font-family: variables.$font-sans;
   transition: background-color 200ms;
 
   @include mixins.mobile {
@@ -190,6 +154,10 @@ body {
   }
 
   .main {
+    padding-bottom: 48px;
+    padding-bottom: calc(48px + env(safe-area-inset-bottom));
+    background-color: var(--screen-bg-color);
+
     @include mixins.desktop {
       min-height: 100%;
       padding-bottom: 0;
@@ -197,20 +165,16 @@ body {
   }
 
   &.show-header {
-    --screen-bg-color: #{variables.$color-bg-3};
-
-    &.new-ui {
-      background: variables.$color-bg-3-new;
-    }
+    --header-height: 48px;
 
     .main {
-      padding-top: 48px;
-      padding-top: calc(48px + env(safe-area-inset-top));
+      padding-top: var(--header-height);
+      padding-top: calc(var(--header-height) + env(safe-area-inset-top));
 
       @include mixins.desktop {
         padding-top: 0;
-        min-height: calc(100% - 48px);
-        min-height: calc(100% - 48px - env(safe-area-inset-top));
+        min-height: calc(100% - var(--header-height));
+        min-height: calc(100% - var(--header-height) - env(safe-area-inset-top));
       }
     }
   }
@@ -218,50 +182,5 @@ body {
   &.new-ui {
     --screen-bg-color: #{variables.$color-bg-3-new};
   }
-
-  &.not-rebrand {
-    @include mixins.mobile {
-      overflow: visible;
-    }
-
-    .main,
-    .popup-aex2 {
-      padding-left: 20px;
-      padding-right: 20px;
-    }
-
-    .main {
-      text-align: center;
-      font-size: 16px;
-      margin: 0 auto;
-      position: relative;
-
-      &.transactions {
-        padding-left: 0;
-        padding-right: 0;
-      }
-
-      &:not(.transactions) ::v-deep .account-switcher {
-        margin-left: -20px;
-        margin-right: -20px;
-      }
-    }
-  }
-
-  &.as-modal {
-    --screen-bg-color: #{variables.$modal-bg-color};
-  }
-
-  .tab-bar {
-    position: fixed;
-    width: 100%;
-    bottom: 0;
-
-    @include mixins.desktop {
-      position: sticky;
-    }
-  }
 }
 </style>
-
-<style lang="scss" src="../styles/global.scss" />

@@ -158,6 +158,15 @@ export default {
 
 .account-details {
   --screen-padding-x: 12px;
+  --screen-bg-color: #{variables.$color-bg-modal};
+
+  border-radius: variables.$border-radius-app;
+  font-weight: 500;
+  color: variables.$color-white;
+  background-color: var(--screen-bg-color);
+  box-shadow:
+    0 0 0 1px variables.$color-border,
+    0 0 50px rgba(variables.$color-black, 0.6);
 
   .account-info-wrapper {
     position: sticky;
@@ -206,7 +215,7 @@ export default {
     z-index: 2;
     top: calc(env(safe-area-inset-top) + 62px);
     padding: 8px var(--screen-padding-x);
-    background-color: variables.$modal-bg-color;
+    background-color: var(--screen-bg-color);
   }
 
   .tabs {
@@ -238,7 +247,6 @@ export default {
     top: calc(env(safe-area-inset-top) + 104px);
     z-index: 1;
     margin-top: 8px;
-    background-color: variables.$modal-bg-color;
   }
 
   .tabs-content {

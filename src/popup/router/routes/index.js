@@ -5,7 +5,7 @@ import AccountDetails from '../pages/AccountDetails.vue';
 import AccountDetailsTokens from '../pages/AccountDetailsTokens.vue';
 import AccountDetailsTransactions from '../pages/AccountDetailsTransactions.vue';
 import AccountDetailsNames from '../pages/AccountDetailsNames.vue';
-import Account from '../pages/Dashboard.vue';
+import Dashboard from '../pages/Dashboard.vue';
 import Address from '../pages/Address.vue';
 import CommentNew from '../pages/CommentNew.vue';
 import DonateError from '../pages/DonateError.vue';
@@ -61,7 +61,7 @@ export default [
   {
     path: '/account',
     name: 'account',
-    component: Account,
+    component: Dashboard,
     meta: {
       newUI: true,
     },
@@ -73,10 +73,6 @@ export default [
   {
     path: '/account-details/',
     component: AccountDetails,
-    meta: {
-      newUI: true,
-      hideHeader: true,
-    },
     children: [
       {
         path: '',
@@ -302,7 +298,6 @@ export default [
     name: 'permissions-details',
     meta: {
       title: 'permissionsDetails',
-      notRebrand: true,
     },
   },
   {
@@ -364,7 +359,6 @@ export default [
     meta: {
       title: 'send-tip',
       notPersist: true,
-      notRebrand: true,
     },
   },
   {
@@ -413,25 +407,28 @@ export default [
     path: '/names/auctions/:name/',
     component: Auction,
     props: true,
-    children: [{
-      path: '',
-      component: AuctionBid,
-      props: true,
-      name: 'auction-bid',
-      meta: {
-        title: 'auction',
-        backRoute: '/account-details/names/auctions',
+    children: [
+      {
+        path: '',
+        component: AuctionBid,
+        props: true,
+        name: 'auction-bid',
+        meta: {
+          title: 'auction',
+          backRoute: '/account-details/names/auctions',
+        },
       },
-    }, {
-      path: 'history',
-      component: AuctionHistory,
-      props: true,
-      name: 'auction-history',
-      meta: {
-        title: 'auction',
-        backRoute: '/account-details/names/auctions',
+      {
+        path: 'history',
+        component: AuctionHistory,
+        props: true,
+        name: 'auction-history',
+        meta: {
+          title: 'auction',
+          backRoute: '/account-details/names/auctions',
+        },
       },
-    }],
+    ],
   },
   {
     path: '/comment',
@@ -439,7 +436,6 @@ export default [
     meta: {
       title: 'comment-new',
       notPersist: true,
-      notRebrand: true,
     },
   },
   {
@@ -451,7 +447,6 @@ export default [
       title: 'donate-error',
       notPersist: true,
       ifNotAuth: true,
-      notRebrand: true,
     },
   },
   {
@@ -461,7 +456,6 @@ export default [
     meta: {
       title: 'address',
       notPersist: true,
-      notRebrand: true,
     },
   },
   {
@@ -471,6 +465,7 @@ export default [
     props: true,
     meta: {
       title: 'token-details',
+      newUI: true,
     },
   },
   {
@@ -479,7 +474,6 @@ export default [
     component: NotFound,
     meta: {
       ifNotAuth: true,
-      notRebrand: true,
     },
   },
   {
@@ -489,7 +483,6 @@ export default [
     meta: {
       title: 'sign-message',
       notPersist: true,
-      notRebrand: true,
     },
   },
   {
@@ -522,7 +515,6 @@ export default [
     meta: {
       title: 'invite',
       notPersist: true,
-      notRebrand: true,
     },
   },
   ...webIframePopups,
