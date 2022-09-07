@@ -32,6 +32,12 @@
     "insufficient-balance": {
       "msg": "You do not have enough balance for this transaction."
     },
+    "createAccount": {
+      "title": "Add account",
+      "msg": "Generate new account address to store, send and receive crypto currency on the æternity blockhain.",
+      "btnText": "Create account",
+      "btnSubtitle": "and add it to your wallet"
+    },
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",
       "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"

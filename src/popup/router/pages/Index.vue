@@ -95,7 +95,7 @@ import ButtonSubheader from '../components/ButtonSubheader.vue';
 import Platforms from '../components/Platforms.vue';
 import {
   TERMS_URL,
-  MODAL_IMPORT_ACCOUNT,
+  MODAL_ACCOUNT_IMPORT,
 } from '../../utils/constants';
 
 export default {
@@ -121,7 +121,7 @@ export default {
     },
     async importWallet() {
       await this.$store.dispatch('modals/open', {
-        name: MODAL_IMPORT_ACCOUNT,
+        name: MODAL_ACCOUNT_IMPORT,
       });
     },
   },

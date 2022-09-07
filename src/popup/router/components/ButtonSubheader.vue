@@ -1,5 +1,6 @@
 <template>
   <Button
+    v-bind="$attrs"
     class="button-subheader"
     :to="to"
     new-ui
