@@ -77,7 +77,11 @@ export default {
       this.$store.commit('setMnemonic', mnemonic);
       this.$store.commit('setBackedUpSeed');
       this.resolve();
-      await this.$router.push(this.$store.state.loginTargetLocation);
+      setTimeout(async () => {
+        await this.$watchUntilTruly(() => this.$store.state.sdk);
+        this.$store.dispatch('accounts/hdWallet/discover');
+      }, 100);
+      this.$router.push(this.$store.state.loginTargetLocation);
     },
   },
 };
