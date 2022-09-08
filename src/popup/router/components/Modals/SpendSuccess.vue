@@ -24,6 +24,7 @@
     <AvatarWithChainName
       v-else
       :address="transaction.tx.recipientId"
+      show-address
     />
     <div class="button-wrapper">
       <Button

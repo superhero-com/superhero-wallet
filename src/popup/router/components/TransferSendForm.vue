@@ -1,6 +1,7 @@
 <template>
   <div class="transfer-send new-ui">
     <ModalHeader :title="$t('modals.send.sendTitle')" />
+    <AccountRow />
     <InputField
       v-model.trim="formModel.address"
       v-validate="{
@@ -83,6 +84,7 @@ import maxAmountMixin from '../../../mixins/maxAmountMixin';
 import {
   convertToken, isEqual, validateTipUrl, checkAensName,
 } from '../../utils/helper';
+import AccountRow from './AccountRow.vue';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
 import ButtonPlain from './ButtonPlain.vue';
@@ -103,6 +105,7 @@ export default {
   name: 'TransferSendForm',
   components: {
     ModalHeader,
+    AccountRow,
     InputField,
     InputAmount,
     ButtonPlain,

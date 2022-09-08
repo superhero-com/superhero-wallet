@@ -13,33 +13,7 @@
         {{ $t('modals.receive.title') }}
       </h2>
 
-      <div class="account-info">
-        <Avatar
-          size="sm"
-          class="account-avatar"
-          :address="account.address"
-          :name="account.name"
-        />
-        <Truncate
-          v-if="account.name"
-          :str="account.name"
-        />
-        <span
-          v-else
-          data-cy="account-name"
-          class="account-name"
-        >
-          {{ $t('pages.account.heading') }} {{ account.idx + 1 }}
-        </span>
-
-        <a
-          :href="explorerUrl"
-          target="_blank"
-          class="account-explorer-link"
-        >
-          <ExternalLinkIcon />
-        </a>
-      </div>
+      <AccountRow />
 
       <div class="address-info">
         <QrcodeVue
@@ -111,11 +85,9 @@ import InputAmount from '../InputAmountV2.vue';
 import Scrollable from '../Scrollable.vue';
 import { APP_LINK_WEB, MODAL_TRANSFER_RECEIVE } from '../../../utils/constants';
 import Modal from '../Modal.vue';
-import Avatar from '../Avatar.vue';
-import Truncate from '../Truncate.vue';
 import Button from '../Button.vue';
+import AccountRow from '../AccountRow.vue';
 import AddressFormatted from '../AddressFormatted.vue';
-import ExternalLinkIcon from '../../../../icons/external-link.svg?vue-component';
 import ShareIcon from '../../../../icons/share-2.svg?vue-component';
 
 export default {
@@ -123,13 +95,11 @@ export default {
   components: {
     InputAmount,
     Modal,
-    Avatar,
-    Truncate,
     QrcodeVue,
     Button,
+    AccountRow,
     Scrollable,
     AddressFormatted,
-    ExternalLinkIcon,
     ShareIcon,
   },
   mixins: [CopyMixin],
@@ -244,37 +214,6 @@ export default {
       color: variables.$color-white;
 
       @extend %face-sans-18-bold;
-    }
-
-    .account-info {
-      @include mixins.flex(center, center, row);
-
-      margin-top: 4px;
-
-      .truncate {
-        display: block;
-      }
-
-      .account-avatar {
-        margin-right: 8px;
-      }
-
-      .account-name {
-        @extend %face-sans-16-medium;
-
-        display: inline-block;
-      }
-
-      .account-explorer-link {
-        display: inline-block;
-        width: 22px;
-        height: 22px;
-        color: inherit;
-
-        &:hover {
-          color: variables.$color-primary;
-        }
-      }
     }
 
     .address-info {
