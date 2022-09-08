@@ -6,6 +6,7 @@
       fill,
       {
         'new-ui': newUi,
+        disabled,
       },
     ]"
     :to="to"
@@ -28,6 +29,7 @@ export default {
       default: 'primary',
     },
     newUi: Boolean,
+    disabled: Boolean,
   },
   computed: {
     component() {
@@ -61,6 +63,7 @@ export default {
   text-decoration: none;
   color: variables.$color-dark-grey;
   cursor: pointer;
+  user-select: none;
 
   ::v-deep svg {
     width: 24px;
@@ -126,6 +129,11 @@ export default {
         opacity: 0.75;
       }
     }
+  }
+
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.4;
   }
 }
 </style>
