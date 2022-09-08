@@ -17,21 +17,24 @@ export default {
 .tabs {
   display: flex;
 
-  &.three a {
-    height: 40px;
-    background-color: transparent;
-    border-radius: 50px;
-    color: variables.$color-light-grey;
-
-    &:not(.router-link-active) ::v-deep svg {
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    &:hover {
-      background-color: variables.$color-hover;
+  &.three {
+    a {
+      height: 32px;
+      background-color: transparent;
+      border-radius: 50px;
+      font-size: 14px;
+      color: variables.$color-light-grey;
 
       &:not(.router-link-active) ::v-deep svg {
-        color: rgb(255, 255, 255);
+        color: rgba(variables.$color-white, 0.7);
+      }
+
+      &:hover {
+        background-color: variables.$color-hover;
+
+        &:not(.router-link-active) ::v-deep svg {
+          color: variables.$color-white;
+        }
       }
     }
   }

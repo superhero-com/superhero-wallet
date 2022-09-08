@@ -52,6 +52,7 @@ export default {
     text-decoration: none;
     color: variables.$color-dark-grey;
     gap: 16px;
+    margin-right: auto;
 
     .icon {
       @include mixins.flex(center, center);

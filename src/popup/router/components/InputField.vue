@@ -166,11 +166,8 @@ export default {
     align-items: center;
 
     &-text {
-      @extend %face-sans-15-medium;
-
       margin-bottom: 8px 0;
       display: inline-block;
-      color: variables.$color-dark-grey;
     }
 
     &-help {

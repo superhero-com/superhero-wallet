@@ -106,17 +106,7 @@ export default {
   display: flex;
   flex-direction: column;
 
-  .filters {
-    top: unset;
-    position: fixed;
-
-    @include mixins.desktop {
-      width: variables.$extension-width;
-    }
-  }
-
   .list {
-    margin-top: 40px;
     padding: 0;
 
     .name-wrapper {

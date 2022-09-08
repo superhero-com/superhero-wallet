@@ -7,11 +7,18 @@
       :name="name"
       @change="$emit('input', $event.target.checked)"
     >
+
     <span
       class="checkmark"
       :class="{ checked: value, disabled }"
     />
-    <slot class="checkbox-holder" />
+
+    <div
+      v-if="$slots.default"
+      class="label-text"
+    >
+      <slot />
+    </div>
   </label>
 </template>
 
@@ -21,7 +28,7 @@ export default {
     value: { type: [String, Number, Boolean], default: '' },
     type: { type: String, default: 'checkbox' },
     name: { type: String, default: '' },
-    disabled: { type: Boolean },
+    disabled: Boolean,
   },
 };
 </script>
@@ -40,10 +47,12 @@ export default {
   -ms-user-select: none;
   user-select: none;
 
-  &:hover .checkmark,
-  &:active .checkmark {
-    border-color: variables.$color-border-hover;
-    background-color: variables.$color-bg-2;
+  &:hover,
+  &:active {
+    .checkmark {
+      border-color: rgba(variables.$color-white, 0.5);
+      background-color: variables.$color-bg-2;
+    }
   }
 
   input {
@@ -56,8 +65,8 @@ export default {
 
   .checkmark {
     background-color: variables.$color-bg-1;
-    border: 1px solid variables.$color-border;
-    box-shadow: inset 1 1 4px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(variables.$color-white, 0.3);
+    box-shadow: inset 1 1 4px rgba(variables.$color-black, 0.25);
     border-radius: 2px;
     height: 20px;
     width: 20px;
@@ -74,11 +83,6 @@ export default {
         filter: brightness(0.8);
       }
     }
-  }
-
-  .checkbox-holder {
-    position: relative;
-    margin: 0 10px;
   }
 }
 </style>

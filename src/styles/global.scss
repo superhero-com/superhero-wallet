@@ -36,6 +36,11 @@ p {
   }
 }
 
+ul,
+ol {
+  margin: 0;
+}
+
 button:focus {
   outline: none;
 }
@@ -79,6 +84,12 @@ button {
     margin-bottom: 0.45em;
     color: $color-white;
   }
+}
+
+.label-text {
+  @extend %face-sans-15-medium;
+
+  color: $color-dark-grey;
 }
 
 .relative {

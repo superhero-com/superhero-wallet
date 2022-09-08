@@ -27,7 +27,11 @@ import RegisterName from '../../components/RegisterName.vue';
 import AnimatedSpinner from '../../../../icons/animated-spinner.svg?skip-optimize';
 
 export default {
-  components: { NameItem, AnimatedSpinner, RegisterName },
+  components: {
+    NameItem,
+    AnimatedSpinner,
+    RegisterName,
+  },
   computed: {
     ...mapGetters(['account']),
     ...mapState('names', ['areNamesFetching']),

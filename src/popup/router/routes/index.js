@@ -20,7 +20,6 @@ import AuctionBid from '../pages/Names/AuctionBid.vue';
 import AuctionHistory from '../pages/Names/AuctionHistory.vue';
 import AuctionList from '../pages/Names/AuctionList.vue';
 import More from '../pages/More.vue';
-import Names from '../pages/Names/Names.vue';
 import NameClaim from '../pages/Names/Claim.vue';
 import NamesList from '../pages/Names/List.vue';
 import Networks from '../pages/Networks.vue';
@@ -94,13 +93,42 @@ export default [
       },
       {
         path: 'names',
-        name: 'account-details-names',
         component: AccountDetailsNames,
-        meta: {
-          newUI: true,
-          hideHeader: true,
-          asModal: true,
-        },
+        children: [
+          {
+            path: '',
+            name: 'account-details-names',
+            component: NamesList,
+            props: true,
+            meta: {
+              newUI: true,
+              hideHeader: true,
+              asModal: true,
+            },
+          },
+          {
+            path: 'auctions',
+            component: AuctionList,
+            props: true,
+            name: 'account-details-names-auctions',
+            meta: {
+              newUI: true,
+              hideHeader: true,
+              asModal: true,
+            },
+          },
+          {
+            path: 'claim',
+            component: NameClaim,
+            props: true,
+            name: 'account-details-names-claim',
+            meta: {
+              newUI: true,
+              hideHeader: true,
+              asModal: true,
+            },
+          },
+        ],
       },
     ],
   },
@@ -382,39 +410,6 @@ export default [
       hideNotificationsIcon: true,
       newUI: true,
     },
-  },
-  {
-    path: '/names',
-    component: Names,
-    props: true,
-    children: [{
-      path: '',
-      name: 'name-list',
-      component: NamesList,
-      props: true,
-      meta: {
-        title: 'names',
-        backButton: false,
-      },
-    }, {
-      path: 'auctions',
-      component: AuctionList,
-      props: true,
-      name: 'auction-list',
-      meta: {
-        title: 'name-auctions',
-        backButton: false,
-      },
-    }, {
-      path: 'claim',
-      component: NameClaim,
-      props: true,
-      name: 'name-claim',
-      meta: {
-        title: 'register-name',
-        backButton: false,
-      },
-    }],
   },
   {
     path: '/names/auctions/:name/',

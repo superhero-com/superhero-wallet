@@ -33,14 +33,15 @@
         <ButtonPlain
           v-for="tab in tabs"
           :key="tab.routeName"
+          :exact-path="tab.exact"
           :to="{ name: tab.routeName }"
           :text="tab.text"
-          :class="{ 'active': $route.name === tab.routeName }"
         />
       </div>
 
       <div class="search-bar-wrapper">
         <SearchBar
+          v-if="searchTermPlaceholder"
           v-model="searchTerm"
           :placeholder="searchTermPlaceholder"
         />
@@ -111,6 +112,7 @@ export default {
         {
           text: this.$t('modals.account-details.tokens'),
           routeName: 'account-details',
+          exact: true,
         },
         {
           text: this.$t('modals.account-details.transactions'),
@@ -154,9 +156,6 @@ export default {
 
 .account-details {
   --screen-padding-x: 12px;
-
-  font-weight: 500;
-  color: variables.$color-white;
 
   .account-info-wrapper {
     position: sticky;
@@ -221,7 +220,7 @@ export default {
 
       @include mixins.flex(center, center, row);
 
-      &.active {
+      &.router-link-active {
         background-color: rgba(variables.$color-white, 0.15);
         color: variables.$color-white;
       }

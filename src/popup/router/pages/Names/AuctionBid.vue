@@ -4,6 +4,7 @@
     <div class="form">
       <InputAmount
         v-model="amount"
+        new-ui
         :error="!!amountError"
         :message="amountError"
         @error="(val) => error = val"
@@ -25,6 +26,8 @@
       </div>
       <Button
         :disabled="!!amountError || error || !amount"
+        new-ui
+        extend
         @click="bid"
       >
         {{ $t('pages.names.auctions.place-bid') }}
