@@ -374,9 +374,15 @@
     "about": {
       "heading": "About",
       "systemName": "Superhero",
-      "terms": "Terms of Use",
-      "privacyPolicy": "Privacy Policy",
-      "reportBug": "Report a bug"
+      "terms": "Terms",
+      "privacyPolicy": "Privacy",
+      "reportBug": "Report a bug",
+      "name": "Name",
+      "commit": "Commit",
+      "software-version": "Software version",
+      "sdk-version": "SDK version",
+      "middleware-version": "Middleware version",
+      "node-version": "Node version"
     },
     "account": {
       "heading": "Account",
