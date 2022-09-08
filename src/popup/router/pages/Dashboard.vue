@@ -60,7 +60,7 @@
             new-ui
             inline
             no-margin
-            to="#"
+            :to="SIMPLEX_URL"
             fill="red-2"
           />
         </Card>
@@ -81,7 +81,7 @@
             new-ui
             inline
             no-margin
-            to="#"
+            :to="{ name: 'account-details-names' }"
             fill="purple"
           />
         </Card>
@@ -97,6 +97,7 @@ import AccountSwitcher from '../components/AccountSwitcher.vue';
 import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
+  SIMPLEX_URL,
 } from '../../utils/constants';
 import Card from '../components/dashboard/Card.vue';
 import CardRow from '../components/dashboard/CardRow.vue';
@@ -127,6 +128,7 @@ export default {
   data: () => ({
     buyBackground,
     chainNameBackground,
+    SIMPLEX_URL,
   }),
   computed: {
     ...mapState(['backedUpSeed', 'transactions']),
