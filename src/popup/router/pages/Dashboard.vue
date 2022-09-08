@@ -128,6 +128,7 @@ export default {
   computed: {
     ...mapState(['backedUpSeed', 'transactions']),
     ...mapGetters(['getAccountPendingTransactions']),
+    ...mapState('accounts', ['activeIdx']),
   },
   watch: {
     $route: {
@@ -137,6 +138,9 @@ export default {
           this.$store.dispatch('modals/open', { name: MODAL_TRANSFER_SEND });
         }
       },
+    },
+    activeIdx() { // TODO: remove it, maybe by extracting transactions entity
+      this.$store.commit('initTransactions');
     },
   },
 };
