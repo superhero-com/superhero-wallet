@@ -48,7 +48,7 @@
     },
     "verify": {
       "title": "Verify your URL",
-      "msg": "Make sure that the public address of your Superhero wallet, or your .chain name, is added somewhere on the website you want to claim tips for.<br /><br />Learn more: <a>How to Receive Tips</a>"
+      "msg": "Make sure that the public address of your Superhero wallet, or your .chain name, is added somewhere on the website you want to claim tips for."
     },
     "recipient": {
       "title": "Send cryptocurrency",
