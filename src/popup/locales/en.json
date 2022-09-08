@@ -767,6 +767,7 @@
       "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
     "seed-phrase-settings": {
+      "verifyYourSeedPhrase": "Verify your seed phrase!",
       "backToSettings": "Back to settings",
       "heading": "Security and Privacy",
       "privacyDataHeading": "Privacy Data",
@@ -785,7 +786,13 @@
       "seedRecoverySmallBackItUp": "back it up in the correct word sequence",
       "seedRecoveryBtn": "Show seed phrase",
       "seedPhrase": "Your seed phrase",
-      "copy": "Copy to clipboard"
+      "copy": "Copy to clipboard",
+      "this-your-seed-phrase": "This is your seed phrase. Keep it safe!",
+      "confirm-that-you-save-your-seed-phrase": "Confirm that you got your seed phrase correctly. {0} to  compose your seed phrase.",
+      "compose-your-seed-phrase": "Tap the words below {0} to  compose your seed phrase.",
+      "in-correct-order": "in the correct order",
+      "seed-phrase-correct": "Seed phrase has been verified!",
+      "seed-phrase-incorrect": "Seed phrase words are not in the correct order. Please enter your seed phrase again!"
     },
     "seedPhrase": {
       "securingAccount": "Securing your account",
@@ -794,20 +801,22 @@
       "tip1": "Save a backup in multiple places",
       "tip2": "Remember your password to decrypt your wallet",
       "tip3": "Never share your seed phrase with anyone",
-      "keepCarefully": "Keep this seed phrase safe! Write these 12 words down and keep them in safe place. You need them to recover your account in the future. ",
       "confirmSeedPhrase": "Confirm your seed phrase. Tap the words below to compose your seed phrase in the correct order.",
       "recoveryPhrase": "Your recovery seed phrase",
       "first": "first",
       "second": "second",
       "third": "third",
-      "backupText": "Back up your seed phrase on a piece of paper or file that no one but you will ever see. Make multiple copies.",
       "dontLose": "Do not lose this seed phrase!",
       "nextScreen": "To make sure you got it right, you will be asked to recreate this seed phrase in the next screen.",
-      "verifySeed": "Verify seed",
-      "doneThis": "I've already done this",
-      "verify": "Verify",
+      "verifySeed": "Verify your seed phrase",
+      "doneThis": "I have verified seed phrase before",
+      "verify": "Verify seed phrase",
       "seedConfirmed": "Seed phrase confirmed.",
-      "toDashboard": "Back to Dashboard"
+      "toDashboard": "Back to Dashboard",
+      "backUpYourSeedPhrase": "Back up your seed phrase {0} on a piece of paper or file that no one but you will ever see. Make multiple copies. Make sure you keep your seed phrase in a safe place!",
+      "inCorrectOrder": "in the correct order of 12 words",
+      "toBeSureYouGotItRight": "To be sure you got it right, you should {0} clicking on the button below!",
+      "verifyYourSeedPhrase": "verify your seed phrase"
     },
     "send": {
       "title": "Transaction successfully submitted",

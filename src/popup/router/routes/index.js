@@ -35,6 +35,8 @@ import PopupMessageSign from '../pages/Popups/MessageSign.vue';
 import PrivacyPolicy from '../pages/PrivacyPolicy.vue';
 import Retip from '../pages/Retip.vue';
 import SeedPhraseSettings from '../pages/SeedPhraseSettings.vue';
+import SeedPhraseDetailsSettings from '../pages/SeedPhraseDetailsSettings.vue';
+import SeedPhraseVerifySettings from '../pages/SeedPhraseVerifySettings.vue';
 import Settings from '../pages/Settings.vue';
 import SignMessage from '../pages/SignMessage.vue';
 import SignTransaction from '../pages/SignTransaction.vue';
@@ -211,6 +213,32 @@ export default [
     path: '/more/settings/seed-phrase',
     name: 'settings-seed-phrase',
     component: SeedPhraseSettings,
+    meta: {
+      title: 'seed-phrase',
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
+    },
+  },
+  {
+    path: '/more/settings/seed-phrase/details',
+    name: 'settings-seed-phrase-details',
+    component: SeedPhraseDetailsSettings,
+    meta: {
+      title: 'seed-phrase',
+      backButton: true,
+      closeButton: true,
+      hideTabBar: true,
+      hideNotificationsIcon: true,
+      newUI: true,
+    },
+  },
+  {
+    path: '/more/settings/seed-phrase/details/verify',
+    name: 'settings-seed-phrase-verify',
+    component: SeedPhraseVerifySettings,
     meta: {
       title: 'seed-phrase',
       backButton: true,
