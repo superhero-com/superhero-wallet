@@ -27,14 +27,14 @@
         v-if="!IS_MOBILE_DEVICE"
         v-clipboard:copy="qrStr"
         v-clipboard:success="copy"
-        icon-text
+        has-icon
       >
         <Copy />
         {{ $t('copy') }}
       </Button>
       <Button
         v-else
-        icon-text
+        has-icon
         @click="share"
       >
         <Share />

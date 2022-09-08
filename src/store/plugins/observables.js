@@ -98,16 +98,6 @@ export default (store) => {
     balance: balance$,
     balances: balances$,
     topBlockHeight: createSdkObservable(async (sdk) => (await sdk.api.getTopHeader()).height, 0),
-    tokenBalance: watchAsObservable(
-      ({ fungibleTokens: { selectedToken } }, tokens) => tokens?.[selectedToken]?.balance,
-      { immediate: true },
-    ).pipe(
-      pluck('newValue'),
-      switchMap((p) => timer(0, 3000).pipe(map(() => p))),
-      switchMap((tokenBalance) => (tokenBalance ? Promise.resolve(tokenBalance) : balance$)),
-      multicast(new BehaviorSubject(new BigNumber(0))),
-      refCountDelay(1000),
-    ),
     balanceCurrency: watchAsObservable((state, getters) => getters.currentCurrencyRate, {
       immediate: true,
     }).pipe(

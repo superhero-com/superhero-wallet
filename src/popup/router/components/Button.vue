@@ -17,21 +17,15 @@
         inline,
         inactive,
         hollow,
-        'icon-text': iconText,
+        nowrap,
+        'has-icon': hasIcon,
         'new-ui': newUi,
       },
     ]"
+    :type="submit ? 'submit' : null"
     v-on="$listeners"
   >
-    <slot>
-      <div class="default-text">
-        <img
-          v-if="icon"
-          :src="icon"
-        >
-        <span>{{ text }}</span>
-      </div>
-    </slot>
+    <slot>{{ text }}</slot>
   </Component>
 </template>
 
@@ -44,7 +38,6 @@ export default {
       default: 'primary',
     },
     text: { type: String, default: '' },
-    icon: { type: String, default: null },
     disabled: Boolean,
     extend: Boolean,
     half: Boolean,
@@ -52,10 +45,13 @@ export default {
     third: Boolean,
     inline: Boolean,
     inactive: Boolean,
+    nowrap: Boolean,
     to: { type: [String, Object], default: null },
+    backgroundless: Boolean,
+    hasIcon: Boolean,
     hollow: Boolean,
-    iconText: Boolean,
     newUi: Boolean,
+    submit: Boolean,
   },
   computed: {
     isLinkOnSameHost() {
@@ -90,13 +86,7 @@ export default {
   color: variables.$color-white;
   height: 40px;
   line-height: 40px;
-
-  .default-text {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-  }
+  cursor: pointer;
 
   &.primary {
     background-color: variables.$color-blue;
@@ -142,10 +132,6 @@ export default {
     pointer-events: none;
   }
 
-  &.extend {
-    width: 100%;
-  }
-
   &.half {
     width: 48%;
     margin: 0;
@@ -189,7 +175,13 @@ export default {
 
   &.hollow {
     background: transparent;
+  }
 
+  &.nowrap {
+    white-space: nowrap;
+  }
+
+  &.backgroundless {
     &.small {
       @extend %face-sans-16-medium;
     }
@@ -213,26 +205,30 @@ export default {
     }
   }
 
-  &.icon-text {
+  &.has-icon {
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
+    gap: 4px;
 
-    ::v-deep svg {
+    .icon {
+      flex-shrink: 0;
       width: 24px;
       height: 24px;
-      margin-right: 6px;
+      margin: -2px 0;
+      color: inherit;
     }
   }
 
   &.new-ui {
-    border-radius: variables.$border-radius-interactive;
     width: auto;
-    padding: 5px 20px;
+    border-radius: variables.$border-radius-interactive;
+    padding: 10px 20px;
     line-height: 20px;
-    flex: 1 1 0;
-    cursor: pointer;
+    flex-grow: 1;
+    margin-left: 0;
+    margin-right: 0;
+    transition: all 100ms;
 
     &.secondary {
       background-color: variables.$color-medium-grey;
@@ -253,6 +249,10 @@ export default {
     &.extend {
       width: 100%;
     }
+  }
+
+  &.extend {
+    width: 100%;
   }
 }
 </style>

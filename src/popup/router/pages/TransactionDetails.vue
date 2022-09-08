@@ -316,7 +316,7 @@ export default {
       @include mixins.flex(flex-start, flex-start, column);
 
       column-gap: 24px;
-      row-gap: 16px;
+      row-gap: 8px;
       padding: 8px 16px;
 
       .tip-url {

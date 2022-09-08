@@ -10,7 +10,7 @@
 <script>
 import { mapState } from 'vuex';
 
-const SIZES = ['xs', 'sm', 'md', 'rg', 'xl', 'lg'];
+const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'];
 
 export default {
   props: {
@@ -19,7 +19,7 @@ export default {
     size: {
       type: String,
       default: 'rg',
-      validate: (val) => SIZES.includes(val),
+      validator: (val) => SIZES.includes(val),
     },
     src: { type: String, default: '' },
   },
@@ -45,8 +45,8 @@ $size-xs: 18px;
 $size-sm: 24px;
 $size-md: 32px;
 $size-rg: 40px;
+$size-lg: 48px;
 $size-xl: 56px;
-$size-lg: 64px;
 
 .avatar {
   width: $size-rg;
@@ -57,11 +57,6 @@ $size-lg: 64px;
   object-fit: cover;
   user-select: none;
   flex-shrink: 0;
-
-  &.lg {
-    height: $size-lg;
-    width: $size-lg;
-  }
 
   &.sm {
     height: $size-sm;
@@ -76,6 +71,11 @@ $size-lg: 64px;
   &.md {
     height: $size-md;
     width: $size-md;
+  }
+
+  &.lg {
+    height: $size-lg;
+    width: $size-lg;
   }
 
   &.xl {

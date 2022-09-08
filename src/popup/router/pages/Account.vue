@@ -18,6 +18,7 @@
 
 <script>
 import { mapState } from 'vuex';
+import { MODAL_TRANSFER_SEND } from '../../utils/constants';
 import Plate from '../components/Plate.vue';
 import AccountSwitcher from '../components/AccountSwitcher.vue';
 
@@ -27,8 +28,16 @@ export default {
     Plate,
     AccountSwitcher,
   },
-  computed: {
-    ...mapState(['backedUpSeed', 'transactions']),
+  computed: mapState(['backedUpSeed']),
+  watch: {
+    $route: {
+      immediate: true,
+      handler({ query }) {
+        if (query.url) {
+          this.$store.dispatch('modals/open', { name: MODAL_TRANSFER_SEND });
+        }
+      },
+    },
   },
 };
 </script>
