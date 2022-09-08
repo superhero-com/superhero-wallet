@@ -6,7 +6,6 @@ import AccountDetails from '../pages/AccountDetails.vue';
 import AccountDetailsTokens from '../pages/AccountDetailsTokens.vue';
 import AccountDetailsTransactions from '../pages/AccountDetailsTransactions.vue';
 import AccountDetailsNames from '../pages/AccountDetailsNames.vue';
-import Accounts from '../pages/Accounts.vue';
 import Address from '../pages/Address.vue';
 import CommentNew from '../pages/CommentNew.vue';
 import DonateError from '../pages/DonateError.vue';
@@ -102,14 +101,6 @@ export default [
         },
       },
     ],
-  },
-  {
-    path: '/accounts',
-    name: 'accounts',
-    component: Accounts,
-    meta: {
-      title: 'accounts',
-    },
   },
   {
     name: 'popup-sign-tx',
