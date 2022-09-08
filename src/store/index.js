@@ -58,6 +58,7 @@ export default new Vuex.Store({
     saveErrorLog: true,
     loginTargetLocation: { name: 'account' },
     cardMinified: false,
+    qrScannerOpen: false,
   },
   getters,
   mutations,

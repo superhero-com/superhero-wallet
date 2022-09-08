@@ -115,4 +115,7 @@ export default {
   toggleMinifiedCard(state) {
     state.cardMinified = !state.cardMinified;
   },
+  setQrScanner(state, payload) {
+    state.qrScannerOpen = payload;
+  },
 };

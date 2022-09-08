@@ -9,7 +9,16 @@
       'as-modal': $route.meta.asModal,
     }"
   >
-    <div class="app-inner">
+    <button
+      v-if="qrScannerOpen"
+      class="camera-close-button"
+    >
+      <Close />
+    </button>
+    <div
+      v-show="!qrScannerOpen"
+      class="app-inner"
+    >
       <Header v-if="showStatusAndHeader" />
 
       <transition :name="$route.meta.asModal ? 'pop-transition' : 'page-transition'">
@@ -36,15 +45,17 @@ import { detect } from 'detect-browser';
 import { NOTIFICATION_SETTINGS } from './utils/constants';
 import Header from './router/components/Header.vue';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus.vue';
+import Close from '../icons/close.svg?vue-component';
 
 export default {
   components: {
     Header,
     NodeConnectionStatus,
+    Close,
   },
   computed: {
     ...mapGetters(['isLoggedIn']),
-    ...mapState(['isRestored', 'backedUpSeed']),
+    ...mapState(['isRestored', 'backedUpSeed', 'qrScannerOpen']),
     showStatusAndHeader() {
       return !(
         this.$route.path === '/'
@@ -162,6 +173,15 @@ body {
 
   @include mixins.desktop {
     box-shadow: variables.$color-border 0 0 0 1px;
+  }
+
+  .camera-close-button {
+    position: absolute;
+    top: calc(20px + env(safe-area-inset-top));
+    right: 20px;
+    width: 28px;
+    height: 28px;
+    z-index: 10;
   }
 
   .app-inner {
