@@ -7,7 +7,7 @@
           :title="$t('dashboard.receive-card.title')"
           :description="$t('dashboard.receive-card.description')"
           clickable
-          @click="$router.push('#')"
+          @click="openTransferReceiveModal()"
         >
           <template #icon>
             <ArrowReceiveIcon />
@@ -17,7 +17,7 @@
           :title="$t('dashboard.send-card.title')"
           :description="$t('dashboard.send-card.description')"
           clickable
-          @click="$router.push('#')"
+          @click="openTransferSendModal()"
         >
           <template #icon>
             <ArrowSendIcon />
@@ -94,7 +94,10 @@
 import { mapState, mapGetters } from 'vuex';
 import Plate from '../components/Plate.vue';
 import AccountSwitcher from '../components/AccountSwitcher.vue';
-import { MODAL_TRANSFER_SEND } from '../../utils/constants';
+import {
+  MODAL_TRANSFER_RECEIVE,
+  MODAL_TRANSFER_SEND,
+} from '../../utils/constants';
 import Card from '../components/dashboard/Card.vue';
 import CardRow from '../components/dashboard/CardRow.vue';
 import Button from '../components/Button.vue';
@@ -129,14 +132,16 @@ export default {
     ...mapState(['backedUpSeed', 'transactions']),
     ...mapGetters(['getAccountPendingTransactions']),
   },
-  watch: {
-    $route: {
-      immediate: true,
-      handler({ query }) {
-        if (query.url) {
-          this.$store.dispatch('modals/open', { name: MODAL_TRANSFER_SEND });
-        }
-      },
+  methods: {
+    openTransferReceiveModal() {
+      this.$store.dispatch('modals/open', {
+        name: MODAL_TRANSFER_RECEIVE,
+      });
+    },
+    openTransferSendModal() {
+      this.$store.dispatch('modals/open', {
+        name: MODAL_TRANSFER_SEND,
+      });
     },
   },
 };
