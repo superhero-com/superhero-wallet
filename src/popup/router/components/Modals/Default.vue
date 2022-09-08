@@ -4,6 +4,7 @@
       'text-center': textCenter
     }"
     has-close-button
+    :full-screen="fullScreen"
     v-on="{ close: close || resolve }"
   >
     <div class="icon-box">
@@ -55,6 +56,7 @@ export default {
     icon: { type: String, default: '' },
     buttonMessage: { type: String, default: '' },
     textCenter: Boolean,
+    fullScreen: Boolean,
   },
 };
 </script>
