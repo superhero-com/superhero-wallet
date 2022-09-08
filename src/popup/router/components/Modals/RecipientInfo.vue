@@ -4,6 +4,7 @@
     icon="help"
     :title="$t('modals.recipient.title')"
     :close="resolve"
+    full-screen
   >
     <template #msg>
       <div class="msg">
@@ -28,9 +29,7 @@
             <strong class="title">
               {{ $t('modals.recipient.msg.chain.title') }}:
             </strong>
-            <span>
-              {{ $t('modals.recipient.msg.chain.linkTitle') }}
-            </span>
+            {{ $t('modals.recipient.msg.chain.linkTitle') }}
           </i18n>
         </p>
         <p>
@@ -58,6 +57,8 @@
     <template #footer>
       <Button
         class="footer"
+        new-ui
+        extend
         @click="resolve"
       >
         {{ $t('ok') }}

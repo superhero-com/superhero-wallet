@@ -81,7 +81,7 @@
       "msg": {
         "publicAddress": {
           "title": "Send to public address",
-          "msg": "{0} scan QR code or manually enter recipient’s æccount address starting with ak_ ."
+          "msg": "{0} scan QR code or manually enter recipient’s æccount address starting with ak_."
         },
         "chain": {
           "title":"Send to .chain name",
