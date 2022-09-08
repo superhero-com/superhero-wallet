@@ -62,7 +62,7 @@ export default {
   },
   mixins: [CopyMixin],
   props: {
-    color: { type: String, default: 'black' },
+    color: { type: String, default: '#212121' },
     canCopyAddress: Boolean,
     accountIdx: { type: Number, required: true },
   },

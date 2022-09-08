@@ -10,7 +10,6 @@
       <div class="account-info-wrapper">
         <AccountInfo
           :account-idx="accountIdx"
-          color="#212121"
           can-copy-address
         />
       </div>
