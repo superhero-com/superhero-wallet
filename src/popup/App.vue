@@ -20,7 +20,6 @@
       </transition>
 
       <NodeConnectionStatus v-if="showStatusAndHeader" />
-      <TabBar v-if="isLoggedIn" />
       <Component
         :is="component"
         v-for="{ component, key, props } in modals"
@@ -37,13 +36,11 @@ import { detect } from 'detect-browser';
 import { NOTIFICATION_SETTINGS } from './utils/constants';
 import Header from './router/components/Header.vue';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus.vue';
-import TabBar from './router/components/TabBar.vue';
 
 export default {
   components: {
     Header,
     NodeConnectionStatus,
-    TabBar,
   },
   computed: {
     ...mapGetters(['isLoggedIn']),

@@ -134,8 +134,6 @@ export default {
 @import '../../../../node_modules/swiper/css/swiper.css';
 
 .account-switcher {
-  background-color: variables.$color-bg-3;
-
   ::v-deep .account-card,
   ::v-deep .add-account-card {
     width: 100%;

@@ -26,7 +26,7 @@
 
   &.only-top,
   .top {
-    background: linear-gradient(180deg, variables.$color-bg-3 0%, variables.$color-black 100%);
+    background-color: variables.$color-bg-3-new;
     box-shadow: variables.$color-border 0 1px;
     border-radius: 0 0 10px 10px;
   }

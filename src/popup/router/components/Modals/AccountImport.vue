@@ -26,6 +26,7 @@
       class="import-button"
       new-ui
       extend
+      center
       @click="importAccount"
     >
       {{ $t('pages.index.importAccount') }}
