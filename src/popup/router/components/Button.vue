@@ -17,15 +17,12 @@
         inline,
         inactive,
         hollow,
-        center,
-        'icon-text': iconText,
         nowrap,
         'has-icon': hasIcon,
         'new-ui': newUi,
         'no-margin': noMargin,
       },
     ]"
-    :type="submit ? 'submit' : null"
     v-on="$listeners"
   >
     <slot>{{ text }}</slot>
@@ -41,6 +38,7 @@ export default {
       default: 'primary',
     },
     text: { type: String, default: '' },
+    to: { type: [String, Object], default: null },
     disabled: Boolean,
     extend: Boolean,
     half: Boolean,
@@ -49,15 +47,10 @@ export default {
     inline: Boolean,
     inactive: Boolean,
     nowrap: Boolean,
-    to: { type: [String, Object], default: null },
-    backgroundless: Boolean,
     hasIcon: Boolean,
     hollow: Boolean,
-    center: Boolean,
-    iconText: Boolean,
     newUi: Boolean,
     noMargin: Boolean,
-    submit: Boolean,
   },
   computed: {
     isLinkOnSameHost() {
@@ -92,6 +85,7 @@ export default {
   color: variables.$color-white;
   height: 40px;
   line-height: 40px;
+  text-align: center;
   cursor: pointer;
 
   &.primary {
@@ -208,30 +202,6 @@ export default {
     white-space: nowrap;
   }
 
-  &.backgroundless {
-    &.small {
-      @extend %face-sans-16-medium;
-    }
-
-    &.primary {
-      color: variables.$color-blue;
-      border: 1px solid variables.$color-blue;
-
-      &:hover {
-        background-color: rgba(variables.$color-primary, 0.1);
-      }
-    }
-
-    &.alternative {
-      color: variables.$color-red;
-      border: 1px solid variables.$color-red;
-
-      &:hover {
-        background-color: rgba(variables.$color-red, 0.1);
-      }
-    }
-  }
-
   &.has-icon {
     display: flex;
     justify-content: center;
@@ -255,6 +225,7 @@ export default {
     width: fit-content;
     display: flex;
     align-items: center;
+    justify-content: center;
     cursor: pointer;
     font-weight: 500;
     position: relative;
@@ -295,10 +266,6 @@ export default {
 
     &.extend {
       width: 100%;
-    }
-
-    &.center {
-      justify-content: center;
     }
   }
 

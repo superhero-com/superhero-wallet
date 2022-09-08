@@ -68,7 +68,7 @@
         :message="error ? $t('pages.names.list.valid-identifier-error') : null"
         plain
       >
-        <template #after>
+        <template #right>
           <ButtonPlain
             v-show="newPointer.length"
             @click="setPointer"
@@ -84,6 +84,7 @@
           </ButtonPlain>
         </template>
       </InputField>
+
       <DetailsItem
         :value="nameEntry.hash"
         :label="nameEntry.hash && $t('pages.names.list.name-hash')"
@@ -226,9 +227,14 @@ export default {
 .name-item {
   display: flex;
   flex-direction: column;
-  padding: 8px 8px 8px 16px;
-  background-color: variables.$color-bg-1;
-  border-radius: 4px;
+  padding: 8px var(--screen-padding-x);
+  margin-left: calc(-1 * var(--screen-padding-x));
+  margin-right: calc(-1 * var(--screen-padding-x));
+  transition: 0.2s;
+
+  &:hover {
+    background-color: variables.$color-bg-4-hover;
+  }
 
   .collapsed {
     display: flex;

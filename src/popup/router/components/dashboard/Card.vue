@@ -69,15 +69,26 @@ export default {
   background-repeat: no-repeat;
   background-size: cover;
   text-align: center;
+  transition: background-color 0.2s;
 
   @include mixins.flex(center, center, column);
 
   &.clickable {
     cursor: pointer;
-    transition: 0.4s;
+    user-select: none;
 
     &:hover {
       background-color: variables.$color-disabled;
+
+      .card-icon {
+        background-color: rgba(variables.$color-white, 0.2);
+      }
+    }
+
+    &:active {
+      .card-icon {
+        background-color: rgba(variables.$color-white, 0.4);
+      }
     }
   }
 
@@ -87,6 +98,7 @@ export default {
     min-width: 36px;
     background-color: rgba(variables.$color-white, 0.15);
     border-radius: 14px;
+    transition: background-color 0.2s;
 
     @include mixins.flex(center, center);
 

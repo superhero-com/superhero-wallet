@@ -1,5 +1,6 @@
 <template>
   <Component
+    v-bind="$attrs"
     :is="(to) ? 'RouterLink' : 'button'"
     class="button-plain"
     :class="{ extend }"
