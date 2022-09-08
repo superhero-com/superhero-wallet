@@ -7,6 +7,31 @@
     "verified": "Verified",
     "notVerified": "Not verified"
   },
+  "dashboard": {
+    "receive-card": {
+      "title": "Receive",
+      "description": "from existing wallet"
+    },
+    "send-card": {
+      "title": "Send",
+      "description": "assets to others"
+    },
+    "back-up-card": {
+      "title": "Back up your seed phrase",
+      "description": "Make a copy of your seed phrase to be able to recover your wallet and avoid losing your funds.",
+      "button": "Back up now"
+    },
+    "buy-card": {
+      "title": "Buy AE coin",
+      "description": "Use Simplex to buy AE coins with your credit card or bank account.",
+      "button": "Buy AE"
+    },
+    "name-card": {
+      "title": "Claim your own .chain name",
+      "description": "Get a human-readable name for your account and receive funds with it.",
+      "button": "Claim a name"
+    }
+  },
   "modals": {
     "transaction-failed": {
       "msg": "We cannot process this transaction. Please, try again later."

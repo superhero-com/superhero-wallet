@@ -41,6 +41,7 @@ describe('Tests cases not connected to specific page', () => {
     });
   });
 
+  // TODO fix after release
   // it('Shows pending tx', () => {
   //   txs.forEach((pendingTransaction) => {
   //     cy.login({ pendingTransaction }).get('[data-cy=pending-txs]').should('be.visible');
