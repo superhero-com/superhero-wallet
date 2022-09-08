@@ -1,8 +1,8 @@
 <template>
   <div class="ae-balance">
     <span class="token-symbol">Æ </span>
-    <span class="token-integer">{{ `${integerPart}.` }}</span>
-    <span class="token-fractional">{{ fractionalPart }}</span>
+    <span class="token-integer">{{ balanceParts.integer }}.</span>
+    <span class="token-fractional">{{ balanceParts.fraction }}</span>
   </div>
 </template>
 
@@ -12,11 +12,12 @@ export default {
     balance: { type: Number, default: 0 },
   },
   computed: {
-    integerPart() {
-      return Math.trunc(this.balance).toLocaleString();
-    },
-    fractionalPart() {
-      return (Math.trunc((this.balance % 1) * 100));
+    balanceParts() {
+      const [integer, fraction] = this.balance.toFixed(2).split('.');
+      return {
+        integer: Number(integer).toLocaleString(),
+        fraction,
+      };
     },
   },
 };
