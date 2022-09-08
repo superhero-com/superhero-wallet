@@ -27,8 +27,9 @@
       class="title"
     >
       <Truncate
-        v-if="pageTitle"
-        :str="pageTitle"
+        :str="pageTitle ?
+          pageTitle :
+          title ? $t(`pages.titles.${title}`) : $t('pages.titles.wallet-home')"
         class="text"
       />
     </div>

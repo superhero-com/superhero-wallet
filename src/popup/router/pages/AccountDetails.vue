@@ -61,7 +61,12 @@
 
 <script>
 import { mapState } from 'vuex';
-import { MODAL_TRANSFER_RECEIVE } from '../../utils/constants';
+import {
+  MODAL_TRANSFER_RECEIVE,
+  MODAL_TRANSFER_SEND,
+  DEX_URL,
+  SIMPLEX_URL,
+} from '../../utils/constants';
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
 import ButtonPlain from '../components/ButtonPlain.vue';
@@ -89,22 +94,26 @@ export default {
       actions: [
         {
           text: this.$t('pages.token-details.receive'),
-          onClick: () => this.openTransferReceiveModal(),
+          onClick: () => this.$store.dispatch('modals/open', {
+            name: MODAL_TRANSFER_RECEIVE,
+          }),
           icon: ArrowReceiveIcon,
         },
         {
           text: this.$t('pages.token-details.send'),
-          onClick: () => null, // TODO
+          onClick: () => this.$store.dispatch('modals/open', {
+            name: MODAL_TRANSFER_SEND,
+          }),
           icon: ArrowSendIcon,
         },
         {
           text: this.$t('pages.token-details.buy'),
-          onClick: () => null, // TODO
+          onClick: () => window.open(SIMPLEX_URL, '_blank'),
           icon: CreditCardIcon,
         },
         {
           text: this.$t('pages.token-details.swap'),
-          onClick: () => null, // TODO
+          onClick: () => window.open(DEX_URL, '_blank'),
           icon: SwapIcon,
         },
       ],
@@ -137,13 +146,6 @@ export default {
         default:
           return null;
       }
-    },
-  },
-  methods: {
-    openTransferReceiveModal() {
-      this.$store.dispatch('modals/open', {
-        name: MODAL_TRANSFER_RECEIVE,
-      });
     },
   },
 };
@@ -185,6 +187,10 @@ export default {
 
       @extend %face-sans-16-regular;
     }
+  }
+
+  .balance-info {
+    padding-top: calc(8px + env(safe-area-inset-top));
   }
 
   .buttons {
