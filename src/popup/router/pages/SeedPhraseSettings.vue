@@ -84,11 +84,13 @@
     </template>
 
     <template v-else-if="view === 'verified'">
-      <ae-icon name="check" />
-      <p>{{ $t('pages.seedPhrase.seedConfirmed') }}</p>
-      <Button @click="setBackedUpSeed">
-        {{ $t('pages.seedPhrase.toDashboard') }}
-      </Button>
+      <div class="verified">
+        <ae-icon name="check" />
+        <p>{{ $t('pages.seedPhrase.seedConfirmed') }}</p>
+        <Button @click="setBackedUpSeed">
+          {{ $t('pages.seedPhrase.toDashboard') }}
+        </Button>
+      </div>
     </template>
   </div>
 </template>
@@ -208,6 +210,10 @@ export default {
       border: 2px solid variables.$color-light-grey;
       color: variables.$color-white;
     }
+  }
+
+  .verified {
+    text-align: center;
   }
 }
 </style>

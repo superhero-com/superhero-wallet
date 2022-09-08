@@ -100,9 +100,6 @@ export default {
   setChainNames(state, payload) {
     state.chainNames = payload;
   },
-  setTipDetails(state, payload) {
-    state.tip = payload;
-  },
   setMnemonic(state, payload) {
     state.mnemonic = payload;
   },

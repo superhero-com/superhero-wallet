@@ -17,21 +17,18 @@
         inline,
         inactive,
         hollow,
+        center,
         'icon-text': iconText,
+        nowrap,
+        'has-icon': hasIcon,
         'new-ui': newUi,
+        'no-margin': noMargin,
       },
     ]"
+    :type="submit ? 'submit' : null"
     v-on="$listeners"
   >
-    <slot>
-      <div class="default-text">
-        <img
-          v-if="icon"
-          :src="icon"
-        >
-        <span>{{ text }}</span>
-      </div>
-    </slot>
+    <slot>{{ text }}</slot>
   </Component>
 </template>
 
@@ -40,11 +37,10 @@ export default {
   props: {
     fill: {
       type: String,
-      validator: (value) => ['primary', 'secondary', 'alternative'].includes(value),
+      validator: (value) => ['primary', 'secondary', 'alternative', 'red', 'red-2', 'purple'].includes(value),
       default: 'primary',
     },
     text: { type: String, default: '' },
-    icon: { type: String, default: null },
     disabled: Boolean,
     extend: Boolean,
     half: Boolean,
@@ -52,10 +48,16 @@ export default {
     third: Boolean,
     inline: Boolean,
     inactive: Boolean,
+    nowrap: Boolean,
     to: { type: [String, Object], default: null },
+    backgroundless: Boolean,
+    hasIcon: Boolean,
     hollow: Boolean,
+    center: Boolean,
     iconText: Boolean,
     newUi: Boolean,
+    noMargin: Boolean,
+    submit: Boolean,
   },
   computed: {
     isLinkOnSameHost() {
@@ -90,23 +92,13 @@ export default {
   color: variables.$color-white;
   height: 40px;
   line-height: 40px;
-
-  .default-text {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-  }
+  cursor: pointer;
 
   &.primary {
     background-color: variables.$color-blue;
 
-    &:hover {
-      background-color: variables.$color-primary-hover;
-    }
-
     &:active {
-      background: rgba(variables.$color-blue, 0.9);
+      background-color: rgba(variables.$color-blue, 0.9);
     }
   }
 
@@ -114,13 +106,38 @@ export default {
     background-color: variables.$color-border;
     color: variables.$color-light-grey;
 
-    &:hover {
-      background-color: variables.$color-hover;
-      color: variables.$color-white;
+    &:active {
+      background-color: variables.$color-darker-grey;
+      color: rgba(variables.$color-white, 0.8);
     }
+  }
+
+  &.red {
+    background-color: variables.$color-red-dark;
+    color: variables.$color-white;
 
     &:active {
-      background: variables.$color-darker-grey;
+      background-color: variables.$color-red-dark;
+      color: rgba(variables.$color-white, 0.8);
+    }
+  }
+
+  &.red-2 {
+    background-color: variables.$color-red-2;
+    color: variables.$color-white;
+
+    &:active {
+      background-color: variables.$color-red-2;
+      color: rgba(variables.$color-white, 0.8);
+    }
+  }
+
+  &.purple {
+    background-color: variables.$color-purple;
+    color: variables.$color-white;
+
+    &:active {
+      background: variables.$color-purple;
       color: rgba(variables.$color-white, 0.8);
     }
   }
@@ -140,10 +157,6 @@ export default {
   &.disabled {
     opacity: 0.4;
     pointer-events: none;
-  }
-
-  &.extend {
-    width: 100%;
   }
 
   &.half {
@@ -189,7 +202,13 @@ export default {
 
   &.hollow {
     background: transparent;
+  }
 
+  &.nowrap {
+    white-space: nowrap;
+  }
+
+  &.backgroundless {
     &.small {
       @extend %face-sans-16-medium;
     }
@@ -213,32 +232,56 @@ export default {
     }
   }
 
-  &.icon-text {
+  &.has-icon {
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
+    gap: 4px;
 
-    ::v-deep svg {
+    .icon {
+      flex-shrink: 0;
       width: 24px;
       height: 24px;
-      margin-right: 6px;
+      margin: -2px 0;
+      color: inherit;
     }
   }
 
   &.new-ui {
     border-radius: variables.$border-radius-interactive;
-    width: auto;
-    padding: 5px 20px;
+    padding: 5px 16px;
     line-height: 20px;
     flex: 1 1 0;
+    width: fit-content;
+    display: flex;
+    align-items: center;
     cursor: pointer;
+    font-weight: 500;
+    position: relative;
+    transition: all 100ms;
+
+    &::after {
+      position: absolute;
+      content: '';
+      inset: 0;
+      border-radius: variables.$border-radius-interactive;
+      background-color: variables.$color-bg-6;
+      opacity: 0;
+    }
+
+    &:hover::after {
+      opacity: 0.2;
+    }
 
     &.secondary {
       background-color: variables.$color-medium-grey;
 
       &:hover {
         background-color: rgba(variables.$color-white, 0.2);
+
+        &::after {
+          opacity: 0.2;
+        }
       }
     }
 
@@ -253,6 +296,18 @@ export default {
     &.extend {
       width: 100%;
     }
+
+    &.center {
+      justify-content: center;
+    }
+  }
+
+  &.no-margin {
+    margin: 0;
+  }
+
+  &.extend {
+    width: 100%;
   }
 }
 </style>

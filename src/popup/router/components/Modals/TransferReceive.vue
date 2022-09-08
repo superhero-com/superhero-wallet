@@ -13,37 +13,11 @@
         {{ $t('modals.receive.title') }}
       </h2>
 
-      <div class="account-info">
-        <Avatar
-          size="sm"
-          class="account-avatar"
-          :address="accounts[idx].address"
-          :name="accounts[idx].name"
-        />
-        <Truncate
-          v-if="accounts[idx].name"
-          :str="accounts[idx].name"
-        />
-        <span
-          v-else
-          data-cy="account-name"
-          class="account-name"
-        >
-          {{ $t('pages.account.heading') }} {{ accountIdx + 1 }}
-        </span>
-
-        <a
-          :href="explorerUrl"
-          target="_blank"
-          class="account-explorer-link"
-        >
-          <ExternalLinkIcon />
-        </a>
-      </div>
+      <AccountRow />
 
       <div class="address-info">
         <QrcodeVue
-          :value="getQRdata(accounts[idx].address)"
+          :value="getQRdata(account.address)"
           size="112"
           class="qrcode"
         />
@@ -64,15 +38,19 @@
       </div>
 
       <div class="request-specific-amount">
-        <RequestAmount
+        <InputAmount
           v-model="amount"
+          v-validate="{
+            min_value_exclusive: 0,
+          }"
+          name="amount"
           :label="$t('modals.receive.requestAmount')"
+          :message="errors.first('amount')"
           :selected-asset="selectedAsset"
           @asset-selected="handleAssetChange"
         />
       </div>
     </div>
-
     <template #footer>
       <Button
         v-clipboard:copy="getTextToCopy()"
@@ -88,10 +66,12 @@
         v-if="IS_MOBILE_DEVICE"
         class="btn-share"
         new-ui
-        :text="$t('modals.receive.share')"
-        :icon="shareIcon"
+        has-icon
         @click="share"
-      />
+      >
+        <ShareIcon />
+        {{ $t('modals.receive.share') }}
+      </Button>
     </template>
   </Modal>
 </template>
@@ -101,44 +81,40 @@ import QrcodeVue from 'qrcode.vue';
 import { mapGetters, mapState } from 'vuex';
 import { pick } from 'lodash-es';
 import CopyMixin from '../../../../mixins/copy';
-import RequestAmount from '../RequestAmount.vue';
+import InputAmount from '../InputAmountV2.vue';
 import Scrollable from '../Scrollable.vue';
-import shareIcon from '../../../../icons/share-2.svg';
 import { APP_LINK_WEB, MODAL_TRANSFER_RECEIVE } from '../../../utils/constants';
 import Modal from '../Modal.vue';
-import Avatar from '../Avatar.vue';
-import Truncate from '../Truncate.vue';
 import Button from '../Button.vue';
+import AccountRow from '../AccountRow.vue';
 import AddressFormatted from '../AddressFormatted.vue';
-import ExternalLinkIcon from '../../../../icons/external-link.svg?vue-component';
+import ShareIcon from '../../../../icons/share-2.svg?vue-component';
 
 export default {
   name: 'TransferReceive',
   components: {
-    RequestAmount,
+    InputAmount,
     Modal,
-    Avatar,
-    Truncate,
     QrcodeVue,
     Button,
+    AccountRow,
     Scrollable,
     AddressFormatted,
-    ExternalLinkIcon,
+    ShareIcon,
   },
-  mixins: [
-    CopyMixin,
-  ],
+  mixins: [CopyMixin],
   props: {
-    accountIdx: { type: Number, default: -1 },
     defaultAmount: { type: [String, Number], default: null },
     tokenContractId: { type: [String, Number], default: null },
   },
   subscriptions() {
-    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+    return pick(this.$store.state.observables, [
+      'balance',
+      'balanceCurrency',
+    ]);
   },
   data() {
     return {
-      shareIcon,
       amount: null,
       IS_MOBILE_DEVICE: window.IS_MOBILE_DEVICE,
       selectedAsset: null,
@@ -149,28 +125,19 @@ export default {
       'getAeternityToken',
     ]),
     ...mapGetters([
-      'accounts',
+      'account',
       'activeNetwork',
-    ]),
-    ...mapState('accounts', [
-      'activeIdx',
     ]),
     ...mapState('fungibleTokens', [
       'availableTokens',
     ]),
-    idx() {
-      return this.accountIdx === -1 ? this.activeIdx : this.accountIdx;
-    },
-    address() {
-      return this.accounts[this.idx]?.address || '';
-    },
     computedAddress() {
       return (this.amount > 0)
-        ? `${this.address}?${this.getTokenInfo(true).substring(1)}`
-        : this.address;
+        ? `${this.account.address}?${this.getTokenInfo(true).substring(1)}`
+        : this.account.address;
     },
     explorerUrl() {
-      return `${this.activeNetwork.explorerUrl}/account/transactions/${this.address}`;
+      return `${this.activeNetwork.explorerUrl}/account/transactions/${this.account.address}`;
     },
   },
   created() {
@@ -179,7 +146,7 @@ export default {
       this.selectedAsset = this.availableTokens[this.tokenContractId];
     } else {
       this.selectedAsset = this.getAeternityToken({
-        tokenBalance: this.tokenBalance,
+        tokenBalance: this.balance,
         balanceCurrency: this.balanceCurrency,
       });
     }
@@ -198,7 +165,7 @@ export default {
       return `${APP_LINK_WEB}/transfer?account=${value}${this.getTokenInfo(true)}`;
     },
     async share() {
-      const { address } = this.accounts[this.idx];
+      const { address } = this.account;
       const walletLink = this.getLink(address);
       const text = (this.amount > 0)
         ? this.$t('modals.receive.shareTextNoAmount', { address, walletLink })
@@ -212,8 +179,8 @@ export default {
     },
     getTextToCopy() {
       return this.amount > 0
-        ? this.getLink(this.address)
-        : this.address;
+        ? this.getLink(this.account.address)
+        : this.account.address;
     },
     handleAssetChange(asset) {
       this.selectedAsset = asset;
@@ -247,37 +214,6 @@ export default {
       color: variables.$color-white;
 
       @extend %face-sans-18-bold;
-    }
-
-    .account-info {
-      @include mixins.flex(center, center, row);
-
-      margin-top: 4px;
-
-      .truncate {
-        display: block;
-      }
-
-      .account-avatar {
-        margin-right: 8px;
-      }
-
-      .account-name {
-        @extend %face-sans-16-medium;
-
-        display: inline-block;
-      }
-
-      .account-explorer-link {
-        display: inline-block;
-        width: 22px;
-        height: 22px;
-        color: inherit;
-
-        &:hover {
-          color: variables.$color-primary;
-        }
-      }
     }
 
     .address-info {

@@ -4,7 +4,7 @@
     :class="{
       'new-ui': newUi,
       'error': hasError,
-      'warning': !hasError && hasWarning,
+      'warning': hasWarning,
       plain,
       readonly
     }"
@@ -83,23 +83,15 @@
     </label>
 
     <div
-      v-if="hasError || hasWarning"
+      v-if="showMessage"
       class="message"
     >
       <label
         class="message-text"
         :for="inputId"
       >
-        {{ hasError ? errorMessage : warningMessage }}
+        {{ typeof message === 'object' ? message && message.text : message }}
       </label>
-
-      <a
-        v-if="showMessageHelp"
-        class="message-help"
-        @click.prevent="$emit('help-message')"
-      >
-        <QuestionCircleIcon />
-      </a>
     </div>
   </div>
 </template>
@@ -116,8 +108,16 @@ export default {
   props: {
     value: { type: [String, Number], default: null },
     label: { type: String, default: '' },
-    errorMessage: { type: String, default: '' },
-    warningMessage: { type: String, default: '' },
+    message: {
+      type: [String, Object],
+      validator(value) {
+        if (typeof value === 'object' && value.status) {
+          return ['success', 'warning', 'error'].includes(value.status);
+        }
+        return true;
+      },
+      default: () => {},
+    },
     readonly: Boolean,
     plain: Boolean,
     showHelp: Boolean,
@@ -133,10 +133,22 @@ export default {
       return `input-${this._uid}`;
     },
     hasError() {
-      return !!this.errorMessage;
+      if (typeof this.message === 'object') {
+        return this.message?.status === 'error';
+      }
+      return !!this.message;
     },
     hasWarning() {
-      return !!this.warningMessage;
+      if (typeof this.message === 'object') {
+        return this.message?.status === 'warning';
+      }
+      return false;
+    },
+    showMessage() {
+      if (typeof this.message === 'object') {
+        return !this.message?.hideMessage;
+      }
+      return !!this.message;
     },
   },
 };
@@ -264,6 +276,14 @@ export default {
 
     .message {
       color: variables.$color-error;
+    }
+
+    &-help {
+      display: block;
+      width: 25px;
+      height: 20px;
+      padding-left: 5px;
+      color: inherit;
     }
   }
 

@@ -1,12 +1,11 @@
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import About from '../pages/About.vue';
-import Account from '../pages/Account.vue';
 import AccountDetails from '../pages/AccountDetails.vue';
 import AccountDetailsTokens from '../pages/AccountDetailsTokens.vue';
 import AccountDetailsTransactions from '../pages/AccountDetailsTransactions.vue';
 import AccountDetailsNames from '../pages/AccountDetailsNames.vue';
-import Accounts from '../pages/Accounts.vue';
+import Account from '../pages/Dashboard.vue';
 import Address from '../pages/Address.vue';
 import CommentNew from '../pages/CommentNew.vue';
 import DonateError from '../pages/DonateError.vue';
@@ -36,14 +35,10 @@ import PopupMessageSign from '../pages/Popups/MessageSign.vue';
 import PrivacyPolicy from '../pages/PrivacyPolicy.vue';
 import Retip from '../pages/Retip.vue';
 import SeedPhraseSettings from '../pages/SeedPhraseSettings.vue';
-import Transfer from '../pages/Transfer.vue';
-import TransferSend from '../pages/TransferSend.vue';
 import Settings from '../pages/Settings.vue';
 import SignMessage from '../pages/SignMessage.vue';
-import SuccessTip from '../pages/SuccessTip.vue';
 import SignTransaction from '../pages/SignTransaction.vue';
 import TermsOfService from '../pages/TermsOfService.vue';
-import TipsSend from '../pages/TipsSend.vue';
 import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
 import ResetWallet from '../pages/ResetWallet.vue';
@@ -106,14 +101,6 @@ export default [
         },
       },
     ],
-  },
-  {
-    path: '/accounts',
-    name: 'accounts',
-    component: Accounts,
-    meta: {
-      title: 'accounts',
-    },
   },
   {
     name: 'popup-sign-tx',
@@ -298,20 +285,6 @@ export default [
     },
   },
   {
-    path: '/more/tips',
-    name: 'tips-send',
-    component: TipsSend,
-    props: true,
-    meta: {
-      title: 'tips',
-      backButton: true,
-      closeButton: true,
-      hideTabBar: true,
-      hideNotificationsIcon: true,
-      newUI: true,
-    },
-  },
-  {
     path: '/more/tips-claim',
     name: 'tips-claim',
     component: TipsClaim,
@@ -325,8 +298,8 @@ export default [
     },
   },
   {
-    path: '/tip',
-    redirect: '/more/tips',
+    path: '/tips*',
+    redirect: '/account*',
   },
   {
     path: '/retip',
@@ -346,31 +319,6 @@ export default [
       title: 'tx-details',
       hideTabBar: true,
       newUI: true,
-    },
-  },
-  {
-    path: '/transfer',
-    component: Transfer,
-    children: [{
-      path: '',
-      name: 'transfer-send',
-      component: TransferSend,
-      props: true,
-      meta: {
-        title: 'transfer',
-        backButton: false,
-      },
-    }],
-  },
-  {
-    path: '/success-tip',
-    component: SuccessTip,
-    name: 'success-tip',
-    props: true,
-    meta: {
-      title: 'send',
-      notPersist: true,
-      notRebrand: true,
     },
   },
   {
@@ -531,6 +479,7 @@ export default [
       title: 'sign-transaction',
       notPersist: true,
       hideTabBar: true,
+      newUI: true,
     },
   },
   {

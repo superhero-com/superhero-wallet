@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
@@ -11,16 +10,8 @@ import {
   convertToken,
   aettosToAe,
   categorizeContractCallTxObject,
+  getHdWalletAccount,
 } from '../popup/utils/helper';
-
-const getHdWalletAccount = (wallet, accountIdx = 0) => {
-  const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
-  return {
-    ...keyPair,
-    idx: accountIdx,
-    address: TxBuilderHelper.encode(keyPair.publicKey, 'ak'),
-  };
-};
 
 export default {
   wallet({ mnemonic }) {
@@ -50,7 +41,7 @@ export default {
     +(currentCurrencyRate * value).toFixed(2)),
   // TODO: Use the current language from i18n module
   formatCurrency: ({ current: { currency } }) => (value) => new Intl.NumberFormat(
-    navigator.language, { style: 'currency', currencyDisplay: 'symbol', currency },
+    navigator.language, { style: 'currency', currencyDisplay: 'narrowSymbol', currency },
   ).format(value),
   formatNumber: () => (value) => new Intl.NumberFormat(
     navigator.language,

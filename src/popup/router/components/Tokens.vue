@@ -41,6 +41,7 @@
 
 <script>
 import AeIcon from '../../../icons/tokens/ae.svg';
+import { AETERNITY_CONTRACT_ID } from '../../utils/constants';
 
 export default {
   props: {
@@ -74,7 +75,7 @@ export default {
       let img = `https://avatars.z52da5wt.xyz/${token.contractId}`;
       let imgBorder = true;
 
-      if (token.isAe || token.contractId === 'aeternity') {
+      if (token.isAe || token.contractId === AETERNITY_CONTRACT_ID) {
         img = AeIcon;
         imgBorder = false;
       }

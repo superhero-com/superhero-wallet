@@ -2,6 +2,7 @@
   <transition
     appear
     :name="fromBottom ? 'from-bottom-transition' : 'pop-in-transition'"
+    @after-enter="$emit('opened')"
   >
     <div
       class="modal"
@@ -226,6 +227,8 @@ export default {
   }
 
   &.full-screen {
+    position: absolute;
+
     .container {
       height: 100%;
       width: 100%;

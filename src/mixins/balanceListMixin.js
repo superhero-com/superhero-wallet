@@ -1,12 +1,13 @@
 import { mapGetters, mapState } from 'vuex';
 import { pick } from 'lodash-es';
+import { AETERNITY_CONTRACT_ID } from '../popup/utils/constants';
 
 export default (showAllTokens) => ({
   subscriptions() {
-    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+    return pick(this.$store.state.observables, ['balance', 'balanceCurrency']);
   },
   props: {
-    showMyTokens: { type: Boolean },
+    showTokensWithBalance: { type: Boolean },
   },
   computed: {
     ...mapState('fungibleTokens', ['availableTokens', 'aePublicData']),
@@ -17,7 +18,7 @@ export default (showAllTokens) => ({
      */
     aeternityToken() {
       return this.getAeternityToken({
-        tokenBalance: this.tokenBalance,
+        tokenBalance: this.balance,
         balanceCurrency: this.balanceCurrency,
       });
     },
@@ -46,11 +47,12 @@ export default (showAllTokens) => ({
         ...this.convertedTokenInfo,
       ];
       const searchTerm = this.searchTerm.trim().toLowerCase();
-      return (this.showMyTokens
-        ? [...(this.aeternityToken ? [this.aeternityToken] : []), ...this.tokenBalances]
-        : tokensInfo
-      )
-        .filter((token) => (showAllTokens ? token : token.contractId === 'aeternity' || this.tokenBalances.includes(token)))
+      return tokensInfo
+        .filter((token) => (showAllTokens
+          ? token
+          : token.contractId === AETERNITY_CONTRACT_ID || this.tokenBalances.includes(token)))
+        .filter((token) => (this.showTokensWithBalance
+          ? token.contractId === AETERNITY_CONTRACT_ID || +token?.convertedBalance : token))
         .filter(
           (token) => !searchTerm
             || token.symbol.toLowerCase().includes(searchTerm)

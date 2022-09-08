@@ -31,12 +31,6 @@
         :str="pageTitle"
         class="text"
       />
-      <span
-        v-else
-        class="text"
-      >
-        {{ (title && $t(`pages.titles.${title}`)) || $t('pages.titles.wallet-home') }}
-      </span>
     </div>
 
     <div
@@ -168,7 +162,7 @@ export default {
   top: 0;
   z-index: 2;
   height: calc(48px + env(safe-area-inset-top));
-  background-color: variables.$color-bg-3;
+  background-color: variables.$color-bg-3-new;
   display: flex;
   padding: env(safe-area-inset-top) 8px 8px 8px;
   align-items: center;

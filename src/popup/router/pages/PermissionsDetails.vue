@@ -20,17 +20,19 @@
     <div class="transaction-sign-limit">
       <InputField
         :value="transactionSignLimit || ''"
-        :error="transactionSignLimitError"
+        :message="transactionSignLimitError"
         :label="$t('pages.permissions.transaction-sign')"
         placeholder="always ask"
         @input="setTransactionSignLimit"
       >
-        <span slot="right">AE</span>
+        <template #after>
+          <span class="currency-name">AE</span>
+        </template>
       </InputField>
       <InputRange
         :value="transactionSignLimit"
         min="0"
-        :max="+tokenBalance"
+        :max="+balance"
         step="0.1"
         @input="setTransactionSignLimit"
       />
@@ -44,7 +46,7 @@
       </div>
       <div class="permission-row">
         {{ $t('pages.account.balance') }}
-        <TokenAmount :amount="+tokenBalance" />
+        <TokenAmount :amount="+balance" />
       </div>
     </div>
     <Button
@@ -77,7 +79,7 @@ export default {
     transactionSignLimitError: false,
   }),
   subscriptions() {
-    return pick(this.$store.state.observables, ['tokenBalance']);
+    return pick(this.$store.state.observables, ['balance']);
   },
   computed: {
     host() {
@@ -158,7 +160,7 @@ export default {
     border-left: 0;
     border-right: 0;
 
-    .input-field span {
+    .currency-name {
       color: variables.$color-blue;
     }
   }

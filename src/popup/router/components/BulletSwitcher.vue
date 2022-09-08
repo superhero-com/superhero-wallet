@@ -98,8 +98,9 @@ export default {
     color: rgba(variables.$color-white, 0.5);
     transition: all 0.25s ease-out;
 
-    &.active {
-      color: variables.$color-green-dark;
+    &.active,
+    &:hover {
+      color: variables.$color-white;
     }
   }
 }

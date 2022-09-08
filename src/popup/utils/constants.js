@@ -1,11 +1,10 @@
-import {
-  TxBuilder, Crypto, SCHEMA, TxBuilderHelper,
-} from '@aeternity/aepp-sdk';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import { i18n } from '../../store/plugins/languages';
 
 export const MAGNITUDE = 18;
 export const SEED_LENGTH = 12;
+export const AETERNITY_CONTRACT_ID = 'aeternity';
 
 export const TX_TYPE_MDW = {
   SpendTx: SCHEMA.TX_TYPE.spend,
@@ -23,38 +22,11 @@ export const CONNECTION_TYPES = {
   OTHER: 'OTHER',
 };
 
-const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
-const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
-const STUB_NONCE = 10000;
+export const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
+export const STUB_CONTRACT_ADDRESS = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6';
+export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
+export const STUB_NONCE = 10000;
 export const MAX_UINT256 = BigNumber(2).exponentiatedBy(256).minus(1);
-
-export const calculateFee = (type, params) => {
-  const MIN_FEE = TxBuilder.calculateMinFee(type, {
-    params: {
-      senderId: STUB_ADDRESS,
-      recipientId: STUB_ADDRESS,
-      amount: MAX_UINT256,
-      ttl: MAX_UINT256,
-      nonce: MAX_UINT256,
-      ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
-      abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
-      callData: STUB_CALLDATA,
-      gas: 0,
-      ...params,
-    },
-    ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
-  });
-  return BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE);
-};
-
-export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
-  accountId: STUB_ADDRESS,
-  name,
-  nameSalt: Crypto.salt(),
-  nameFee: TxBuilderHelper.getMinimumNameFee(name),
-  nonce: STUB_NONCE,
-  ttl: SCHEMA.NAME_TTL,
-});
 
 export const DEX_CONTRACTS = {
   ae_uat: {
@@ -114,7 +86,7 @@ export const AENS_DOMAIN = '.chain';
 export const MAX_AUCTION_NAME_LENGTH = 12 + AENS_DOMAIN.length;
 export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 
-export const BUG_REPORT_URL = 'https://thesuperherowallet.typeform.com/to/vh8Ffu';
+export const BUG_REPORT_URL = 'https://spgrrc00ymg.typeform.com/to/Kk3Zyjdr';
 
 export const NOTIFICATION_SETTINGS = [
   {
@@ -363,5 +335,8 @@ export const MODAL_HELP = 'help';
 export const MODAL_READ_QR_CODE = 'read-qr-code';
 export const MODAL_SHARE_QR = 'share-qr';
 export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
+export const MODAL_TRANSFER_SEND = 'transfer-send';
 export const MODAL_ASSET_SELECTOR = 'asset-selector';
 export const MODAL_RESET_WALLET = 'reset-wallet';
+export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
+export const MODAL_RECIPIENT_INFO = 'recipient-info';

@@ -1,8 +1,23 @@
 import { isFQDN } from 'validator';
 import { detect } from 'detect-browser';
-import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
+import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
+import {
+  SCHEMA,
+  Crypto,
+  AmountFormatter,
+  TxBuilder,
+  TxBuilderHelper,
+} from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { CONNECTION_TYPES, SEED_LENGTH } from './constants';
+import {
+  CONNECTION_TYPES,
+  STUB_ADDRESS,
+  STUB_CALLDATA,
+  STUB_NONCE,
+  MAX_UINT256,
+  MAGNITUDE,
+  SEED_LENGTH,
+} from './constants';
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
@@ -26,6 +41,36 @@ export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   const amount = BigNumber(_reserve).times(share).div(100);
   return amount.toFixed(0);
 };
+
+export const calculateFee = (type, params) => {
+  const MIN_FEE = TxBuilder.calculateMinFee(type, {
+    params: {
+      ...type === 'spendTx' ? {
+        senderId: STUB_ADDRESS,
+        recipientId: STUB_ADDRESS,
+      } : {},
+      amount: MAX_UINT256,
+      ttl: MAX_UINT256,
+      nonce: MAX_UINT256,
+      ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
+      abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
+      callData: STUB_CALLDATA,
+      gas: 0,
+      ...params,
+    },
+    ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
+  });
+  return BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE);
+};
+
+export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
+  accountId: STUB_ADDRESS,
+  name,
+  nameSalt: Crypto.salt(),
+  nameFee: TxBuilderHelper.getMinimumNameFee(name),
+  nonce: STUB_NONCE,
+  ttl: SCHEMA.NAME_TTL,
+});
 
 export const IN_FRAME = window.parent !== window;
 export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');
@@ -118,7 +163,7 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
   return Promise.resolve(contractInstance);
 };
 
-export const escapeSpecialChars = (str) => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
+export const escapeSpecialChars = (str = '') => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
 
 export const checkHashType = (hash) => {
   const accountPublicKeyRegex = RegExp('^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$');
@@ -248,4 +293,25 @@ export const amountRounded = (rawAmount) => {
     return amount.toFixed();
   }
   return amount.toFixed((amount < 0.01) ? 9 : 2);
+};
+
+export const truncateAddress = ({ address }) => {
+  const addressLength = address.length;
+  const firstPart = address.slice(0, 6).match(/.{3}/g);
+  const secondPart = address.slice(addressLength - 3, addressLength).match(/.{3}/g);
+  return [
+    firstPart.slice(0, 2).reduce((acc, current) => `${acc}${current}`),
+    secondPart.slice(-1).reduce((acc, current) => `${acc}${current}`),
+  ];
+};
+
+export const isEqual = (a, b) => BigNumber(a).eq(b);
+
+export const getHdWalletAccount = (wallet, accountIdx = 0) => {
+  const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
+  return {
+    ...keyPair,
+    idx: accountIdx,
+    address: TxBuilderHelper.encode(keyPair.publicKey, 'ak'),
+  };
 };

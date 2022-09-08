@@ -6,15 +6,15 @@
     v-on="$listeners"
     @input="$emit('input', $event)"
   >
-    <Search
-      v-if="!$attrs.value"
-      slot="right"
-    />
-    <Eraser
-      v-else
-      slot="right"
-      @click="$emit('input', '')"
-    />
+    <template #after>
+      <Search
+        v-if="!$attrs.value"
+      />
+      <Eraser
+        v-else
+        @click="$emit('input', '')"
+      />
+    </template>
   </InputField>
 </template>
 
