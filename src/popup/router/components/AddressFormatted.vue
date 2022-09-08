@@ -32,7 +32,7 @@ export default {
   letter-spacing: 0.15em;
 
   &-chunk {
-    flex: 0 0 25%;
+    flex: 0 0 16.5%;
   }
 }
 </style>
