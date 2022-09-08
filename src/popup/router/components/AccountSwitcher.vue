@@ -3,6 +3,7 @@
     class="account-switcher"
     :class="{ 'notification-above': notification }"
   >
+    <TotalWalletAmount v-if="filteredAccounts.length > 1" />
     <swiper
       ref="customSwiper"
       class="swiper"
@@ -63,9 +64,11 @@ import ButtonPlain from './ButtonPlain.vue';
 import Chevron from '../../../icons/chevron.svg?vue-component';
 import { getAddressColor } from '../../utils/avatar';
 import BulletSwitcher from './BulletSwitcher.vue';
+import TotalWalletAmount from './TotalWalletAmount.vue';
 
 export default {
   components: {
+    TotalWalletAmount,
     BulletSwitcher,
     AccountCard,
     AccountCardAdd,
