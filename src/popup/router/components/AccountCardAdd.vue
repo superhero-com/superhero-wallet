@@ -45,7 +45,7 @@ export default {
   width: 100%;
   height: 192px;
   border-radius: 16px;
-  background: variables.$color-green-dark;
+  background: variables.$color-bg-6;
   padding: 16px;
   text-align: left;
   cursor: pointer;
