@@ -1,9 +1,6 @@
 <template>
   <div class="terms-of-service">
     <!-- header -->
-    <h1 class="bolder">
-      TERMS OF USE
-    </h1>
     <p class="italic">
       The present <b>TERMS OF USE</b> are effective since 9th April 2020.
     </p>
@@ -978,7 +975,12 @@ export default {
 @use '../../../styles/typography';
 
 .terms-of-service {
-  font-weight: 100;
+  padding: 16px;
+  word-break: break-word;
+  line-height: 20px;
+  color: rgba(variables.$color-white, 0.85);
+
+  @extend %face-sans-14-light;
 
   .italic {
     font-style: italic;
