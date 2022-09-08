@@ -7,13 +7,14 @@
       v-if="isLoggedIn || title"
       class="left"
     >
-      <RouterLink
+      <Component
+        :is="isDiamondDisabled ? 'div' : 'RouterLink'"
         v-if="isLoggedIn && !showBack"
-        to="/account"
-        class="home-button"
+        :to="isDiamondDisabled ? null : '/account'"
+        :class="['home-button', { 'disabled': isDiamondDisabled }]"
       >
         <Logo />
-      </RouterLink>
+      </Component>
       <ButtonPlain
         v-if="showBack"
         class="icon-btn"
@@ -96,7 +97,6 @@ export default {
       superheroNotifications: this.$store.state.observables.notifications,
     };
   },
-
   computed: {
     ...mapGetters(['isLoggedIn']),
     ...mapState(['notifications', 'pageTitle']),
@@ -117,6 +117,9 @@ export default {
       return [...this.notifications, ...this.superheroNotifications].filter(
         (n) => n.status === 'CREATED',
       ).length;
+    },
+    isDiamondDisabled() {
+      return this.$route.name === 'account';
     },
   },
   methods: {
@@ -226,7 +229,11 @@ export default {
     padding: 4px 0;
     height: 32px;
 
-    &:not(:disabled) {
+    &.disabled {
+      cursor: default;
+    }
+
+    &:not(.disabled) {
       svg {
         cursor: pointer;
       }
