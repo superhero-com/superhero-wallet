@@ -163,6 +163,7 @@ export default {
             document.querySelector(s).style = 'background: transparent';
           });
           document.querySelector('.main').style.display = 'none';
+          document.querySelector('.transfer-send-modal').style.display = 'none'; // TODO: refactor cordova qr code reading
           this.$store.commit('setPageTitle', this.$t('modals.qrCodeReader.scanQr'));
         })
         : (
@@ -174,6 +175,7 @@ export default {
         ['body', '#app', '.main'].forEach((s) => {
           document.querySelector(s).style = '';
         });
+        document.querySelector('.transfer-send-modal').style.display = 'flex';
         // https://github.com/bitpay/cordova-plugin-qrscanner/issues/234
         window.plugins.webviewcolor.change('#090909');
         this.$store.commit('setPageTitle', '');
