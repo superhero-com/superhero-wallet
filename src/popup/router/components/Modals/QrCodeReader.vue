@@ -53,6 +53,7 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex';
 import Modal from '../Modal.vue';
 import Button from '../Button.vue';
 import { handleUnknownError } from '../../../utils/helper';
@@ -150,6 +151,7 @@ export default {
     this.stopReading();
   },
   methods: {
+    ...mapMutations(['setQrScanner']),
     async initBrowserReader() {
       const { BrowserQRCodeReader } = await import('@zxing/library');
       this.browserReader = new BrowserQRCodeReader();
@@ -157,28 +159,31 @@ export default {
     async scan() {
       return this.mobile
         ? new Promise((resolve, reject) => {
+          this.setQrScanner(true);
+
           window.QRScanner.scan((error, text) => (!error && text ? resolve(text) : reject(error)));
           window.QRScanner.show();
           ['body', '#app'].forEach((s) => {
             document.querySelector(s).style = 'background: transparent';
           });
-          document.querySelector('.main').style.display = 'none';
-          document.querySelector('.transfer-send-modal').style.display = 'none'; // TODO: refactor cordova qr code reading
-          this.$store.commit('setPageTitle', this.$t('modals.qrCodeReader.scanQr'));
+
+          setTimeout(() => {
+            document.querySelector('.camera-close-button').addEventListener('click', this.stopReading);
+          }, 500);
         })
         : (
           await this.browserReader.decodeFromInputVideoDevice(undefined, this.$refs.qrCodeVideo)
         ).getText();
     },
-    stopReading() {
+    async stopReading() {
       if (this.mobile) {
-        ['body', '#app', '.main'].forEach((s) => {
+        ['body', '#app'].forEach((s) => {
           document.querySelector(s).style = '';
         });
-        document.querySelector('.transfer-send-modal').style.display = 'flex';
-        // https://github.com/bitpay/cordova-plugin-qrscanner/issues/234
-        window.plugins.webviewcolor.change('#090909');
-        this.$store.commit('setPageTitle', '');
+        this.setQrScanner(false);
+        document.querySelector('.camera-close-button').removeEventListener('click');
+        await window.QRScanner.hide();
+        await window.QRScanner.cancelScan();
         window.QRScanner.destroy();
       } else this.browserReader.reset();
     },
