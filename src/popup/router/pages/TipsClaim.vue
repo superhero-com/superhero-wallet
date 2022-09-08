@@ -1,8 +1,6 @@
 <template>
   <div class="tips-claim">
-    <AccountInfo
-      color="#212121"
-    />
+    <AccountInfo :account-idx="activeIdx" />
     <div class="header">
       {{ $t('pages.claimTips.header') }}
       <HelpButton
@@ -60,6 +58,7 @@ export default {
     BLOG_CLAIM_TIP_URL,
   }),
   computed: {
+    ...mapState('accounts', ['activeIdx']),
     ...mapState(['sdk', 'tippingV1']),
     ...mapGetters(['account', 'tippingSupported']),
     normalizedUrl() {
