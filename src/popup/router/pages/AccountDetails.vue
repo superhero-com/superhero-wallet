@@ -119,7 +119,7 @@ export default {
       ],
       tabs: [
         {
-          text: this.$t('modals.account-details.tokens'),
+          text: this.$t('modals.account-details.assets'),
           routeName: 'account-details',
           exact: true,
         },

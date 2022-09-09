@@ -255,7 +255,7 @@
       "button": "Dismiss"
     },
     "account-details": {
-      "tokens": "Tokens",
+      "assets": "Assets",
       "transactions": "Transactions",
       "names": "Names"
     }
