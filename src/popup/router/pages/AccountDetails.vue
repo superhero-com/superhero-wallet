@@ -147,6 +147,19 @@ export default {
           return null;
       }
     },
+    mobile() {
+      return process.env.PLATFORM === 'cordova';
+    },
+  },
+  mounted() {
+    if (this.mobile) {
+      window.StatusBar.backgroundColorByHexString('#191919');
+    }
+  },
+  beforeDestroy() {
+    if (this.mobile) {
+      window.StatusBar.backgroundColorByHexString('#141414');
+    }
   },
 };
 </script>
