@@ -118,14 +118,14 @@ if (process.env.PLATFORM === 'cordova') {
     window.cordova.openwith.addHandler((intent) => {
       const url = intent.items.find(({ type }) => type.includes('url'))?.data;
       if (url) {
-        router.push({ name: 'tips-send', params: { tipUrl: url } });
+        router.push({ name: 'account', query: { url } });
       } else {
         store.dispatch('modals/open', { name: 'default', ...i18n.t('modals.mobile-share-error') });
       }
     });
 
     router.afterEach((to) => {
-      if (['/', '/intro'].includes(to.path)) {
+      if (to.path === '/') {
         document.body.classList.remove('color-bg-3');
       } else {
         document.body.classList.add('color-bg-3');

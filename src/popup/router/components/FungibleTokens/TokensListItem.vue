@@ -1,36 +1,66 @@
 <template>
-  <RouterLink
+  <Component
+    :is="preventNavigation ? 'ButtonPlain' : 'RouterLink'"
     v-if="tokenData"
     class="tokens-list-item"
-    :to="{
+    :class="{ extend: preventNavigation, 'asset-selector': assetSelector }"
+    :to="preventNavigation ? null : {
       name: 'token-details',
       params: { id: tokenData.contractId },
     }"
+    @click="(event) => $emit('click', event)"
   >
-    <div class="left">
-      <Avatar
-        :address="tokenData.contractId !== 'aeternity' ? tokenData.contractId : ''"
-        :src="tokenData.image || null"
+    <div class="row">
+      <div class="left">
+        <Tokens :tokens="[tokenData]" />
+      </div>
+      <TokenAmount
+        :amount="+tokenData.convertedBalance || 0"
+        :symbol="tokenData.symbol"
+        :aex9="tokenData.contractId !== AETERNITY_CONTRACT_ID"
+        no-symbol
+        hide-fiat
       />
-      <Truncate :str="tokenData.symbol" />
     </div>
-    <TokenAmount
-      :amount="+tokenData.convertedBalance || 0"
-      :symbol="tokenData.symbol"
-      :aex9="tokenData.contractId !== 'aeternity'"
-      no-symbol
-    />
-  </RouterLink>
+    <div
+      v-if="tokenData.contractId === AETERNITY_CONTRACT_ID"
+      class="row"
+    >
+      <div class="price">
+        @ {{ price }}
+      </div>
+      <div class="price">
+        {{ convertToCurrencyFormatted(tokenData.convertedBalance) }}
+      </div>
+    </div>
+  </Component>
 </template>
 
 <script>
-import Avatar from '../Avatar.vue';
-import Truncate from '../Truncate.vue';
+import { mapGetters, mapState } from 'vuex';
+import { AETERNITY_CONTRACT_ID } from '../../../utils/constants';
 import TokenAmount from '../TokenAmount.vue';
+import ButtonPlain from '../ButtonPlain.vue';
+import Tokens from '../Tokens.vue';
 
 export default {
-  components: { Avatar, Truncate, TokenAmount },
-  props: { tokenData: { type: Object, default: null } },
+  components: { TokenAmount, Tokens, ButtonPlain },
+  props: {
+    tokenData: { type: Object, default: null },
+    preventNavigation: Boolean,
+    showCurrentPrice: Boolean,
+    assetSelector: Boolean,
+  },
+  data: () => ({
+    AETERNITY_CONTRACT_ID,
+  }),
+  computed: {
+    ...mapGetters(['convertToCurrencyFormatted', 'formatCurrency', 'convertToCurrency']),
+    ...mapState('fungibleTokens', ['aePublicData']),
+    price() {
+      return this.formatCurrency(this.aePublicData?.current_price || 0);
+    },
+  },
 };
 </script>
 
@@ -39,38 +69,79 @@ export default {
 @use '../../../../styles/typography';
 
 .tokens-list-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 48px;
-  padding: 8px 16px;
+  display: block;
+  padding: 8px var(--screen-padding-x);
+  margin-left: calc(-1 * var(--screen-padding-x));
+  margin-right: calc(-1 * var(--screen-padding-x));
   color: unset;
   text-decoration: unset;
-  background-color: variables.$color-bg-1;
-  border-width: 0;
-  border-bottom-width: 1px;
-  border-style: solid;
-  border-color: variables.$color-black;
 
-  &:first-child {
-    border-top-width: 1px;
+  &:hover {
+    background-color: variables.$color-bg-4-hover;
   }
 
-  .left {
+  &:active {
+    opacity: 0.5;
+  }
+
+  .row {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+  }
 
-    .avatar {
-      width: 32px;
-      height: 32px;
+  ::v-deep .tokens {
+    padding-bottom: 4px;
+
+    img {
+      width: 30px;
+      height: 30px;
+      border-radius: 15px;
+      margin-right: 0;
     }
 
-    .truncate {
-      @extend %face-sans-14-medium;
+    .symbols {
+      @extend %face-sans-15-regular;
 
-      text-transform: uppercase;
-      margin-left: 4px;
-      color: variables.$color-blue;
+      color: variables.$color-white;
+      line-height: 28px;
+      padding-left: 4px;
+    }
+  }
+
+  ::v-deep .token-amount {
+    @extend %face-sans-15-regular;
+
+    margin-top: -5px;
+  }
+
+  .price {
+    @extend %face-sans-14-regular;
+
+    &:last-child {
+      color: variables.$color-light-grey;
+    }
+
+    color: rgba(variables.$color-white, 0.75);
+    font-weight: 100;
+    margin-top: -5px;
+  }
+
+  &.asset-selector {
+    padding: 8px;
+    transition: background-color 0.12s ease-in-out;
+    background-color: variables.$color-bg-4;
+
+    &.selected {
+      background-color: rgba(variables.$color-blue, 0.2);
+    }
+
+    &:hover {
+      background-color: variables.$color-bg-4-hover;
+    }
+
+    .price {
+      font-weight: 400;
     }
   }
 }

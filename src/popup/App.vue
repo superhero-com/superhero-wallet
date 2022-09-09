@@ -2,27 +2,37 @@
   <div
     id="app"
     :class="{
-      'not-rebrand': $route.meta.notRebrand,
       'show-header': showStatusAndHeader,
-      'hide-tab-bar': $route.meta.hideTabBar,
       'new-ui': $route.meta.newUI,
     }"
   >
-    <Header v-if="showStatusAndHeader" />
+    <button
+      v-if="qrScannerOpen"
+      class="camera-close-button"
+    >
+      <Close />
+    </button>
+    <div
+      v-show="!qrScannerOpen"
+      class="app-inner"
+    >
+      <Header v-if="showStatusAndHeader" />
 
-    <RouterView
-      :class="{ 'show-header': showStatusAndHeader }"
-      class="main"
-    />
+      <transition :name="$route.meta.asModal ? 'pop-transition' : 'page-transition'">
+        <RouterView
+          :class="{ 'show-header': showStatusAndHeader }"
+          class="main"
+        />
+      </transition>
 
-    <NodeConnectionStatus v-if="showStatusAndHeader" />
-    <TabBar v-if="isLoggedIn && $route.path !== '/intro'" />
-    <Component
-      :is="component"
-      v-for="{ component, key, props } in modals"
-      :key="key"
-      v-bind="props"
-    />
+      <NodeConnectionStatus v-if="showStatusAndHeader" />
+      <Component
+        :is="component"
+        v-for="{ component, key, props } in modals"
+        :key="key"
+        v-bind="props"
+      />
+    </div>
   </div>
 </template>
 
@@ -32,22 +42,23 @@ import { detect } from 'detect-browser';
 import { NOTIFICATION_SETTINGS } from './utils/constants';
 import Header from './router/components/Header.vue';
 import NodeConnectionStatus from './router/components/NodeConnectionStatus.vue';
-import TabBar from './router/components/TabBar.vue';
+import Close from '../icons/close.svg?vue-component';
 
 export default {
   components: {
     Header,
     NodeConnectionStatus,
-    TabBar,
+    Close,
   },
   computed: {
     ...mapGetters(['isLoggedIn']),
-    ...mapState(['isRestored', 'backedUpSeed']),
+    ...mapState(['isRestored', 'backedUpSeed', 'qrScannerOpen']),
     showStatusAndHeader() {
       return !(
-        ['/', '/intro'].includes(this.$route.path)
+        this.$route.path === '/'
         || this.$route.path.startsWith('/web-iframe-popup')
         || this.$route.params.app
+        || this.$route.meta.hideHeader
       );
     },
     modals() {
@@ -59,7 +70,7 @@ export default {
       if (val && !this.backedUpSeed) {
         this.$store.commit('addNotification', {
           text: this.$t('pages.account.seedNotification', [this.$t('pages.account.backup')]),
-          path: '/settings/security',
+          path: '/more/settings/seed-phrase',
         });
       }
     },
@@ -92,42 +103,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
-@use '../styles/variables';
-@use '../styles/mixins';
-
-body {
-  margin: 0;
-  background-color: variables.$color-black;
-}
-
-body.color-bg-3 {
-  background-color: variables.$color-bg-3;
-}
-
-html,
-body {
-  height: var(--height);
-}
-
-@include mixins.desktop {
-  body {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-}
-
-* {
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-</style>
+<style lang="scss" src="../styles/global.scss"></style>
 
 <style lang="scss" scoped>
 @use '../styles/variables';
@@ -135,11 +111,22 @@ body {
 @use '../styles/mixins';
 
 #app {
+  --screen-padding-x: 16px;
+  --screen-bg-color: #{variables.$color-bg-3-new};
+  --header-height: 0;
+
+  @extend %face-sans-16-regular;
+
   position: relative;
   margin: 0 auto;
   width: variables.$extension-width;
   height: 600px;
-  overflow-x: hidden;
+  overflow: hidden;
+  border-radius: variables.$border-radius-app;
+  color: variables.$color-white;
+  background-color: var(--screen-bg-color);
+  font-family: variables.$font-sans;
+  transition: background-color 200ms;
 
   @include mixins.mobile {
     width: 100%;
@@ -151,15 +138,25 @@ body {
     box-shadow: variables.$color-border 0 0 0 1px;
   }
 
-  border-radius: 10px;
+  .camera-close-button {
+    position: absolute;
+    top: calc(20px + env(safe-area-inset-top));
+    right: 20px;
+    width: 28px;
+    height: 28px;
+    z-index: 10;
+  }
 
-  @extend %face-sans-16-regular;
-
-  color: variables.$color-white;
+  .app-inner {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+  }
 
   .main {
     padding-bottom: 48px;
     padding-bottom: calc(48px + env(safe-area-inset-bottom));
+    background-color: var(--screen-bg-color);
 
     @include mixins.desktop {
       min-height: 100%;
@@ -168,69 +165,22 @@ body {
   }
 
   &.show-header {
-    background: variables.$color-bg-3;
+    --header-height: 48px;
 
     .main {
-      padding-top: 48px;
-      padding-top: calc(48px + env(safe-area-inset-top));
+      padding-top: var(--header-height);
+      padding-top: calc(var(--header-height) + env(safe-area-inset-top));
 
       @include mixins.desktop {
         padding-top: 0;
-        min-height: calc(100% - 48px);
-        min-height: calc(100% - 48px - env(safe-area-inset-top));
+        min-height: calc(100% - var(--header-height));
+        min-height: calc(100% - var(--header-height) - env(safe-area-inset-top));
       }
     }
   }
 
-  &.not-rebrand {
-    @include mixins.mobile {
-      overflow: visible;
-    }
-
-    .main,
-    .popup-aex2 {
-      padding-left: 20px;
-      padding-right: 20px;
-    }
-
-    .main {
-      text-align: center;
-      font-size: 16px;
-      margin: 0 auto;
-      position: relative;
-
-      &.transactions {
-        padding-left: 0;
-        padding-right: 0;
-      }
-
-      &:not(.transactions) ::v-deep .account-switcher {
-        margin-left: -20px;
-        margin-right: -20px;
-      }
-    }
-  }
-
-  .tab-bar {
-    position: fixed;
-    width: 100%;
-    bottom: 0;
-
-    @include mixins.desktop {
-      position: sticky;
-    }
-  }
-
-  &.hide-tab-bar {
-    .main {
-      padding-bottom: 0;
-    }
-
-    .tab-bar {
-      display: none;
-    }
+  &.new-ui {
+    --screen-bg-color: #{variables.$color-bg-3-new};
   }
 }
 </style>
-
-<style lang="scss" src="../styles/global.scss" />

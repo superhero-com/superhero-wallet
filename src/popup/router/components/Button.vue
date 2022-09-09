@@ -16,14 +16,16 @@
         third,
         inline,
         inactive,
-        bold,
-        backgroundless,
-        'icon-text': iconText,
+        hollow,
+        nowrap,
+        'has-icon': hasIcon,
+        'new-ui': newUi,
+        'no-margin': noMargin,
       },
     ]"
     v-on="$listeners"
   >
-    <slot />
+    <slot>{{ text }}</slot>
   </Component>
 </template>
 
@@ -32,9 +34,11 @@ export default {
   props: {
     fill: {
       type: String,
-      validator: (value) => ['primary', 'secondary', 'alternative'].includes(value),
+      validator: (value) => ['primary', 'secondary', 'alternative', 'red', 'red-2', 'purple'].includes(value),
       default: 'primary',
     },
+    text: { type: String, default: '' },
+    to: { type: [String, Object], default: null },
     disabled: Boolean,
     extend: Boolean,
     half: Boolean,
@@ -42,10 +46,11 @@ export default {
     third: Boolean,
     inline: Boolean,
     inactive: Boolean,
-    to: { type: [String, Object], default: null },
-    bold: Boolean,
-    backgroundless: Boolean,
-    iconText: Boolean,
+    nowrap: Boolean,
+    hasIcon: Boolean,
+    hollow: Boolean,
+    newUi: Boolean,
+    noMargin: Boolean,
   },
   computed: {
     isLinkOnSameHost() {
@@ -68,29 +73,26 @@ export default {
 @use '../../../styles/typography';
 
 .button {
+  @extend %face-sans-16-regular;
+
   display: block;
   position: relative;
   text-decoration: none;
   width: 280px;
   border-radius: 6px;
-
-  @extend %face-sans-16-bold;
-
   padding: 0;
   margin: 8px auto;
   color: variables.$color-white;
   height: 40px;
   line-height: 40px;
+  text-align: center;
+  cursor: pointer;
 
   &.primary {
     background-color: variables.$color-blue;
 
-    &:hover {
-      background-color: variables.$color-blue-hover;
-    }
-
     &:active {
-      background: rgba(variables.$color-blue, 0.9);
+      background-color: rgba(variables.$color-blue, 0.9);
     }
   }
 
@@ -98,13 +100,38 @@ export default {
     background-color: variables.$color-border;
     color: variables.$color-light-grey;
 
-    &:hover {
-      background-color: variables.$color-hover;
-      color: variables.$color-white;
+    &:active {
+      background-color: variables.$color-darker-grey;
+      color: rgba(variables.$color-white, 0.8);
     }
+  }
+
+  &.red {
+    background-color: variables.$color-red-dark;
+    color: variables.$color-white;
 
     &:active {
-      background: variables.$color-darker-grey;
+      background-color: variables.$color-red-dark;
+      color: rgba(variables.$color-white, 0.8);
+    }
+  }
+
+  &.red-2 {
+    background-color: variables.$color-red-2;
+    color: variables.$color-white;
+
+    &:active {
+      background-color: variables.$color-red-2;
+      color: rgba(variables.$color-white, 0.8);
+    }
+  }
+
+  &.purple {
+    background-color: variables.$color-purple;
+    color: variables.$color-white;
+
+    &:active {
+      background: variables.$color-purple;
       color: rgba(variables.$color-white, 0.8);
     }
   }
@@ -124,10 +151,6 @@ export default {
   &.disabled {
     opacity: 0.4;
     pointer-events: none;
-  }
-
-  &.extend {
-    width: 100%;
   }
 
   &.half {
@@ -167,51 +190,91 @@ export default {
     margin: 8px 10px;
   }
 
-  &.bold {
-    font-weight: 500;
-  }
-
   &.inactive {
     opacity: 0.4;
   }
 
-  &.backgroundless {
-    &.small {
-      @extend %face-sans-16-medium;
+  &.hollow {
+    background: transparent;
+  }
+
+  &.nowrap {
+    white-space: nowrap;
+  }
+
+  &.has-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+
+    .icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      margin: -2px 0;
+      color: inherit;
+    }
+  }
+
+  &.new-ui {
+    border-radius: variables.$border-radius-interactive;
+    padding: 5px 16px;
+    line-height: 20px;
+    flex: 1 1 0;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 500;
+    position: relative;
+    transition: all 100ms;
+
+    &::after {
+      position: absolute;
+      content: '';
+      inset: 0;
+      border-radius: variables.$border-radius-interactive;
+      background-color: variables.$color-bg-6;
+      opacity: 0;
     }
 
-    background: transparent;
+    &:hover::after {
+      opacity: 0.2;
+    }
 
-    &.primary {
-      color: variables.$color-blue;
-      border: 1px solid variables.$color-blue;
+    &.secondary {
+      background-color: variables.$color-medium-grey;
 
       &:hover {
-        background-color: variables.$color-blue-alpha-10;
+        background-color: rgba(variables.$color-white, 0.2);
+
+        &::after {
+          opacity: 0.2;
+        }
       }
     }
 
     &.alternative {
-      color: variables.$color-red;
-      border: 1px solid variables.$color-red;
+      background-color: variables.$color-bg-6;
 
       &:hover {
-        background-color: variables.$color-red-alpha-10;
+        background-color: variables.$color-bg-5-hover;
       }
+    }
+
+    &.extend {
+      width: 100%;
     }
   }
 
-  &.icon-text {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
+  &.no-margin {
+    margin: 0;
+  }
 
-    ::v-deep svg {
-      width: 24px;
-      height: 24px;
-      margin-right: 6px;
-    }
+  &.extend {
+    width: 100%;
   }
 }
 </style>

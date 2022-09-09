@@ -152,7 +152,7 @@ export default {
     }
 
     .divider {
-      @extend %face-sans-13-medium;
+      @extend %face-sans-12-medium;
 
       @include mixins.flex(center, center, row);
 

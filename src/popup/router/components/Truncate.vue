@@ -2,7 +2,7 @@
   <span class="truncate">
     <span
       :class="['container', { fixed }]"
-      :style="fixed || cssVars"
+      :style="cssVars"
     >
       <span ref="scroll">{{ nameComponent || str }}</span>
     </span>
@@ -15,14 +15,21 @@ export default {
   props: {
     str: { type: String, required: true },
     fixed: { type: Boolean },
+    gradientColor: { type: String, default: 'black' },
   },
   computed: {
     nameComponent() {
       return this.str.endsWith('.chain') ? this.str.replace('.chain', '') : '';
     },
     cssVars() {
+      if (this.fixed) {
+        return {
+          '--gradientColor': this.gradientColor,
+        };
+      }
       return {
         '--beforeWidth': '4px',
+        '--gradientColor': this.gradientColor,
       };
     },
   },
@@ -83,14 +90,14 @@ export default {
         right: 0;
         width: var(--beforeWidth);
         height: 100%;
-        background: linear-gradient(270deg, black, transparent);
+        background: linear-gradient(270deg, var(--gradientColor), transparent);
       }
 
       &::before {
         z-index: 1;
         left: 0;
         opacity: 0;
-        background: linear-gradient(90deg, black, transparent);
+        background: linear-gradient(90deg, var(--gradientColor), transparent);
         animation-name: fade;
         animation-duration: 8s;
         animation-delay: 2s;

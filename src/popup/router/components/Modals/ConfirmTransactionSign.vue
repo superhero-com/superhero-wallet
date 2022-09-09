@@ -374,8 +374,9 @@ export default {
     background: $color-bg-1;
 
     .body {
+      overflow-y: scroll;
       text-align: left;
-      padding: 16px 16px 88px;
+      padding: 16px 16px 0;
       border-radius: 0 0 10px 10px;
     }
 
@@ -393,16 +394,6 @@ export default {
 
   .pool-token-row::v-deep {
     padding-bottom: 8px;
-  }
-
-  .fade-enter-active,
-  .fade-leave-active {
-    transition: opacity 150ms ease-out;
-  }
-
-  .fade-enter,
-  .fade-leave-to {
-    opacity: 0;
   }
 }
 </style>

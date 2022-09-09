@@ -12,26 +12,25 @@
           :symbol-length="22"
         />
         <TokenAmount
-          :amount="+tokenData.convertedBalance || 0"
+          :amount="convertedBalance"
           no-symbol
-          :aex9="id !== 'aeternity'"
+          :aex9="id !== AETERNITY_CONTRACT_ID"
         />
       </div>
       <div class="token-actions">
         <BoxButton
-          :class="{ disabled: !+tokenData.convertedBalance }"
-          @click.native="!+tokenData.convertedBalance ? null : proceed({ name: 'transfer-send' })"
+          :disabled="!convertedBalance"
+          @click="openTransferSendModal()"
         >
           <SendIcon />{{ $t('pages.token-details.send') }}
         </BoxButton>
-        <BoxButton @click.native="proceed({ name: 'transfer-receive' })">
+        <BoxButton @click="openTransferReceiveModal()">
           <ReceiveIcon />{{ $t('pages.token-details.receive') }}
         </BoxButton>
         <BoxButton
-          v-if="id === 'aeternity'"
+          v-if="id === AETERNITY_CONTRACT_ID"
           fill="alternative"
-          :to="SIMPLEX_URL"
-          is-external-link
+          :href="SIMPLEX_URL"
         >
           <BuyIcon />{{ $t('pages.fungible-tokens.buyAe') }}
         </BoxButton>
@@ -163,6 +162,7 @@
       />
 
       <DetailsRow
+        v-if="!tokenData.isAe"
         class="link"
         :label="$t('pages.token-details.chart')"
       >
@@ -208,10 +208,12 @@
         :text="formatCurrency(tokenData.atl)"
       />
     </div>
-    <TransactionList
+    <div
       v-else
-      :token="id"
-    />
+      class="transaction-list-wrapper"
+    >
+      <TransactionList :token="id" />
+    </div>
   </div>
 </template>
 
@@ -233,10 +235,17 @@ import Tokens from '../../components/Tokens.vue';
 import Loader from '../../components/Loader.vue';
 import TransactionList from '../../components/TransactionList.vue';
 import AddressShortening from '../../components/AddressShortening.vue';
-import { SIMPLEX_URL, DEX_URL } from '../../../utils/constants';
+import {
+  SIMPLEX_URL,
+  DEX_URL,
+  MODAL_TRANSFER_RECEIVE,
+  MODAL_TRANSFER_SEND,
+  AETERNITY_CONTRACT_ID,
+} from '../../../utils/constants';
 import { convertToken } from '../../../utils/helper';
 
 export default {
+  name: 'TokenDetails',
   components: {
     Plate,
     SendIcon,
@@ -264,10 +273,11 @@ export default {
       SIMPLEX_URL,
       DEX_URL,
       UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+      AETERNITY_CONTRACT_ID,
     };
   },
   subscriptions() {
-    return pick(this.$store.state.observables, ['tokenBalance', 'balanceCurrency']);
+    return pick(this.$store.state.observables, ['balance', 'balanceCurrency']);
   },
   computed: {
     ...mapGetters(['formatCurrency', 'formatNumber', 'accounts']),
@@ -281,12 +291,12 @@ export default {
       return this.DEX_URL.replace('https://', '');
     },
     tokenData() {
-      if (this.id === 'aeternity') {
+      if (this.id === AETERNITY_CONTRACT_ID) {
         return {
           decimals: 18,
           ...this.aePublicData,
           symbol: 'AE',
-          convertedBalance: this.tokenBalance,
+          convertedBalance: this.balance,
           balanceCurrency: this.balanceCurrency,
           contractId: '',
           description: '',
@@ -300,6 +310,9 @@ export default {
           contractId: this.id,
         }
       );
+    },
+    convertedBalance() {
+      return +this.tokenData.convertedBalance || 0;
     },
     poolShare() {
       if (!this.tokenPairs || !this.tokenPairs.balance || !this.tokenPairs.totalSupply) {
@@ -319,12 +332,17 @@ export default {
   },
   methods: {
     convertToken,
-    proceed(path) {
-      this.$store.commit('fungibleTokens/setSelectedToken', {
-        address: this.accounts[this.activeIdx].address,
-        token: this.id !== 'aeternity' ? this.tokenBalances.find(({ value }) => value === this.id) : null,
+    openTransferReceiveModal() {
+      this.$store.dispatch('modals/open', {
+        name: MODAL_TRANSFER_RECEIVE,
+        tokenContractId: this.fungibleToken?.contractId,
       });
-      this.$router.push(path);
+    },
+    openTransferSendModal() {
+      this.$store.dispatch('modals/open', {
+        name: MODAL_TRANSFER_SEND,
+        tokenContractId: this.fungibleToken?.contractId,
+      });
     },
   },
 };
@@ -361,30 +379,8 @@ export default {
     .token-actions {
       display: flex;
       justify-content: center;
-      padding-bottom: 24px;
-
-      .box-button {
-        margin-right: 24px;
-        background-color: variables.$color-bg-2;
-
-        &.disabled {
-          background-color: variables.$color-disabled;
-          color: variables.$color-light-grey;
-          opacity: 0.44;
-
-          &:hover {
-            &,
-            ::v-deep svg {
-              color: variables.$color-light-grey;
-              cursor: not-allowed;
-            }
-          }
-        }
-
-        &:last-child {
-          margin: 0;
-        }
-      }
+      gap: 16px;
+      padding: 0 16px 24px;
     }
 
     .token-tabs {
@@ -506,6 +502,10 @@ export default {
     &:hover {
       color: variables.$color-white;
     }
+  }
+
+  .transaction-list-wrapper {
+    padding: 16px;
   }
 }
 </style>

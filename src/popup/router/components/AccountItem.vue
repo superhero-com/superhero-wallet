@@ -10,14 +10,14 @@
       <Avatar
         :address="address"
         :name="name"
-        size="mid"
+        size="md"
       />
       <span class="name">{{ name }}</span>
     </div>
     <Avatar
       v-else
       :address="address"
-      size="mid"
+      size="md"
     />
     <span class="address">{{ address }}</span>
   </div>

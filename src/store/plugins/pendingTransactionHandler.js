@@ -1,3 +1,5 @@
+import { MODAL_SPEND_SUCCESS } from '../../popup/utils/constants';
+
 export default async (store) => {
   const waitTransactionMined = async ({
     hash, type, amount, tipUrl, recipient: recipientId,
@@ -6,13 +8,18 @@ export default async (store) => {
     try {
       const transaction = await store.state.sdk.poll(hash);
       const showSpendModal = () => store.dispatch('modals/open', {
-        name: 'spend-success',
-        transaction: { ...transaction, ...type === 'spendToken' ? { tx: { ...transaction.tx, recipientId, amount } } : {} },
+        name: MODAL_SPEND_SUCCESS,
+        transaction: {
+          tipUrl,
+          ...transaction,
+          ...(type === 'spendToken')
+            ? { tx: { ...transaction.tx, recipientId, amount } }
+            : {},
+        },
       });
+
       switch (type) {
         case 'tip':
-          store.dispatch('router/push', { name: 'success-tip', params: { amount, tipUrl } });
-          break;
         case 'spend':
           showSpendModal();
           break;

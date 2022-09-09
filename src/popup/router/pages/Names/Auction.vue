@@ -1,20 +1,19 @@
 <template>
   <div class="auction">
-    <Plate>
-      <AccountSwitcher />
-      <Tabs slot="bottom">
-        <RouterLink
-          :to="{ name: 'auction-bid' }"
-          exact-path
-        >
-          <Auction /> {{ $t('pages.names.auctions.place-bid') }}
-        </RouterLink>
-        <RouterLink :to="{ name: 'auction-history' }">
-          <History /> {{ $t('pages.names.auctions.bid-history') }}
-        </RouterLink>
-      </Tabs>
-    </Plate>
+    <Tabs>
+      <RouterLink
+        :to="{ name: 'auction-bid' }"
+        exact-path
+      >
+        <Auction /> {{ $t('pages.names.auctions.place-bid') }}
+      </RouterLink>
+      <RouterLink :to="{ name: 'auction-history' }">
+        <History /> {{ $t('pages.names.auctions.bid-history') }}
+      </RouterLink>
+    </Tabs>
+
     <Loader v-if="loading" />
+
     <RouterView v-else />
   </div>
 </template>
@@ -22,16 +21,13 @@
 <script>
 import BigNumber from 'bignumber.js';
 import { aettosToAe } from '../../../utils/helper';
-import AccountSwitcher from '../../components/AccountSwitcher.vue';
-import Plate from '../../components/Plate.vue';
 import Tabs from '../../components/Tabs.vue';
 import Auction from '../../../../icons/auction.svg?vue-component';
 import History from '../../../../icons/history.svg?vue-component';
 
 export default {
+  name: 'Auctions',
   components: {
-    AccountSwitcher,
-    Plate,
     Tabs,
     Auction,
     History,

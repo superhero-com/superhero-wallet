@@ -4,10 +4,10 @@ import Index from '../../src/popup/router/pages/Index.vue';
 import About from '../../src/popup/router/pages/About.vue';
 import TermsOfService from '../../src/popup/router/pages/TermsOfService.vue';
 import PrivacyPolicy from '../../src/popup/router/pages/PrivacyPolicy.vue';
-import Intro from '../../src/popup/router/pages/Intro.vue';
 
 Object.assign(Vue.prototype, {
   $t: () => 'locale-specific-text',
+  $route: { meta: { newUI: true } },
 });
 
 jest.mock('detect-browser', () => ({
@@ -51,26 +51,6 @@ describe('Pages', () => {
   {
     name: 'PrivacyPolicy',
     page: PrivacyPolicy,
-  },
-  {
-    name: 'Intro',
-    page: Intro,
-    data: [{
-      step: 1,
-      totalsteps: 4,
-    },
-    {
-      step: 2,
-      totalsteps: 4,
-    },
-    {
-      step: 3,
-      totalsteps: 4,
-    },
-    {
-      step: 4,
-      totalsteps: 4,
-    }],
   }].forEach((test) => it(test.name, async () => {
     const wrapper = mount(test.page, test.options);
     // eslint-disable-next-line no-restricted-syntax

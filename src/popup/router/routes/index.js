@@ -1,51 +1,48 @@
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import About from '../pages/About.vue';
-import Account from '../pages/Account.vue';
-import Accounts from '../pages/Accounts.vue';
+import AccountDetails from '../pages/AccountDetails.vue';
+import AccountDetailsTokens from '../pages/AccountDetailsTokens.vue';
+import AccountDetailsTransactions from '../pages/AccountDetailsTransactions.vue';
+import AccountDetailsNames from '../pages/AccountDetailsNames.vue';
+import Dashboard from '../pages/Dashboard.vue';
 import Address from '../pages/Address.vue';
 import CommentNew from '../pages/CommentNew.vue';
 import DonateError from '../pages/DonateError.vue';
 import TokenDetails from '../pages/FungibleTokens/TokenDetails.vue';
-import Balances from '../pages/FungibleTokens/Balances.vue';
-import ImportAccount from '../pages/ImportAccount.vue';
 import Index from '../pages/Index.vue';
-import Intro from '../pages/Intro.vue';
 import Invite from '../pages/Invite.vue';
 import InviteClaim from '../pages/InviteClaim.vue';
 import LanguageSettings from '../pages/LanguageSettings.vue';
+import CurrencySettings from '../pages/CurrencySettings.vue';
 import Auction from '../pages/Names/Auction.vue';
 import AuctionBid from '../pages/Names/AuctionBid.vue';
 import AuctionHistory from '../pages/Names/AuctionHistory.vue';
 import AuctionList from '../pages/Names/AuctionList.vue';
 import More from '../pages/More.vue';
-import Names from '../pages/Names/Names.vue';
 import NameClaim from '../pages/Names/Claim.vue';
 import NamesList from '../pages/Names/List.vue';
 import Networks from '../pages/Networks.vue';
 import NotFound from '../pages/NotFound.vue';
 import Notifications from '../pages/Notifications.vue';
 import NotificationSettings from '../pages/NotificationSettings.vue';
+import ErrorLogSettings from '../pages/ErrorLogSettings.vue';
 import PermissionsDetails from '../pages/PermissionsDetails.vue';
 import PermissionsSettings from '../pages/PermissionsSettings.vue';
 import PopupConnect from '../pages/Popups/Connect.vue';
 import PopupMessageSign from '../pages/Popups/MessageSign.vue';
 import PrivacyPolicy from '../pages/PrivacyPolicy.vue';
 import Retip from '../pages/Retip.vue';
-import SecuritySettings from '../pages/SecuritySettings.vue';
-import Transfer from '../pages/Transfer.vue';
-import TransferSend from '../pages/TransferSend.vue';
-import TransferReceive from '../pages/TransferReceive.vue';
+import SeedPhraseSettings from '../pages/SeedPhraseSettings.vue';
+import SeedPhraseDetailsSettings from '../pages/SeedPhraseDetailsSettings.vue';
+import SeedPhraseVerifySettings from '../pages/SeedPhraseVerifySettings.vue';
 import Settings from '../pages/Settings.vue';
 import SignMessage from '../pages/SignMessage.vue';
-import SuccessTip from '../pages/SuccessTip.vue';
 import SignTransaction from '../pages/SignTransaction.vue';
 import TermsOfService from '../pages/TermsOfService.vue';
-import Tips from '../pages/Tips.vue';
-import TipsSend from '../pages/TipsSend.vue';
 import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
-import Transactions from '../pages/Transactions.vue';
+import ResetWallet from '../pages/ResetWallet.vue';
 import webIframePopups from './web-iframe-popups';
 
 export default [
@@ -58,20 +55,85 @@ export default [
       navigation: false,
       ifNotAuthOnly: true,
       notPersist: true,
+      newUI: true,
     },
   },
   {
     path: '/account',
     name: 'account',
-    component: Account,
+    component: Dashboard,
+    meta: {
+      newUI: true,
+    },
   },
   {
-    path: '/accounts',
-    name: 'accounts',
-    component: Accounts,
-    meta: {
-      title: 'accounts',
-    },
+    path: '/transfer*',
+    redirect: '/account*',
+  },
+  {
+    path: '/account-details/',
+    component: AccountDetails,
+    children: [
+      {
+        path: '',
+        name: 'account-details',
+        component: AccountDetailsTokens,
+        meta: {
+          newUI: true,
+          hideHeader: true,
+          asModal: true,
+        },
+      },
+      {
+        path: 'transactions',
+        name: 'account-details-transactions',
+        component: AccountDetailsTransactions,
+        meta: {
+          newUI: true,
+          hideHeader: true,
+          asModal: true,
+        },
+      },
+      {
+        path: 'names',
+        component: AccountDetailsNames,
+        children: [
+          {
+            path: '',
+            name: 'account-details-names',
+            component: NamesList,
+            props: true,
+            meta: {
+              newUI: true,
+              hideHeader: true,
+              asModal: true,
+            },
+          },
+          {
+            path: 'auctions',
+            component: AuctionList,
+            props: true,
+            name: 'account-details-names-auctions',
+            meta: {
+              newUI: true,
+              hideHeader: true,
+              asModal: true,
+            },
+          },
+          {
+            path: 'claim',
+            component: NameClaim,
+            props: true,
+            name: 'account-details-names-claim',
+            meta: {
+              newUI: true,
+              hideHeader: true,
+              asModal: true,
+            },
+          },
+        ],
+      },
+    ],
   },
   {
     name: 'popup-sign-tx',
@@ -80,8 +142,6 @@ export default [
     props: true,
     meta: {
       notPersist: true,
-      hideTabBar: true,
-      newUI: true,
     },
   },
   {
@@ -91,7 +151,6 @@ export default [
     props: true,
     meta: {
       notPersist: true,
-      hideTabBar: true,
     },
   },
   {
@@ -101,7 +160,6 @@ export default [
     props: true,
     meta: {
       notPersist: true,
-      hideTabBar: true,
     },
   },
   {
@@ -111,114 +169,189 @@ export default [
     props: true,
     meta: {
       notPersist: true,
-      hideTabBar: true,
     },
   },
   {
-    path: '/settings',
+    path: '/more/settings',
     name: 'settings',
     component: Settings,
     meta: {
       title: 'settings',
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
-    path: '/settings/language',
+    path: '/more/settings/reset-wallet',
+    name: 'settings-reset-wallet',
+    component: ResetWallet,
+    meta: {
+      title: 'reset-wallet',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
+    },
+  },
+  {
+    path: '/more/settings/errors-log',
+    name: 'settings-errors-log',
+    component: ErrorLogSettings,
+    meta: {
+      title: 'save-errors-log',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
+    },
+  },
+  {
+    path: '/more/settings/language',
+    name: 'settings-language',
     component: LanguageSettings,
     meta: {
       title: 'language',
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
-    path: '/settings/security',
-    name: 'settings-security',
-    component: SecuritySettings,
+    path: '/more/settings/currency',
+    name: 'settings-currency',
+    component: CurrencySettings,
     meta: {
-      title: 'security',
-      notRebrand: true,
+      title: 'currency',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
-    path: '/settings/networks',
+    path: '/more/settings/seed-phrase',
+    name: 'settings-seed-phrase',
+    component: SeedPhraseSettings,
+    meta: {
+      title: 'seed-phrase',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
+    },
+  },
+  {
+    path: '/more/settings/seed-phrase/details',
+    name: 'settings-seed-phrase-details',
+    component: SeedPhraseDetailsSettings,
+    meta: {
+      title: 'seed-phrase',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
+    },
+  },
+  {
+    path: '/more/settings/seed-phrase/details/verify',
+    name: 'settings-seed-phrase-verify',
+    component: SeedPhraseVerifySettings,
+    meta: {
+      title: 'seed-phrase',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
+    },
+  },
+  {
+    path: '/more/settings/networks',
+    name: 'network-settings',
     component: Networks,
     props: true,
     meta: {
       title: 'networks',
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
-    path: '/settings/permissions',
+    path: '/more/settings/permissions',
     component: PermissionsSettings,
     name: 'permissions-settings',
     meta: {
       title: 'permissionsSettings',
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
-    path: '/settings/permissions/:host',
+    path: '/more/settings/permissions/:host',
     component: PermissionsDetails,
     name: 'permissions-details',
     meta: {
       title: 'permissionsDetails',
-      notRebrand: true,
     },
   },
   {
-    path: '/about',
+    path: '/more/about',
     component: About,
+    name: 'about',
     meta: {
       title: 'about',
-      ifNotAuth: true,
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
-    path: '/about/termsOfService',
+    path: '/more/about/terms',
     component: TermsOfService,
+    name: 'about-terms',
     meta: {
       title: 'terms',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
       ifNotAuth: true,
-      notRebrand: true,
     },
   },
   {
-    path: '/about/privacyPolicy',
+    path: '/more/about/privacy',
     component: PrivacyPolicy,
+    name: 'about-privacy',
     meta: {
       title: 'privacy',
-      ifNotAuth: true,
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
-    path: '/tips',
-    component: Tips,
-    children: [{
-      path: '',
-      name: 'tips-send',
-      component: TipsSend,
-      props: true,
-      meta: {
-        title: 'tips',
-        backButton: false,
-      },
-    }, {
-      path: 'claim',
-      name: 'tips-claim',
-      component: TipsClaim,
-      meta: {
-        title: 'tips',
-        backButton: false,
-      },
-    }],
+    path: '/more/tips-claim',
+    name: 'tips-claim',
+    component: TipsClaim,
+    meta: {
+      title: 'claim-tips',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
+    },
   },
   {
-    path: '/tip',
-    redirect: '/tips',
+    path: '/tips*',
+    redirect: '/account*',
   },
   {
     path: '/retip',
@@ -226,34 +359,6 @@ export default [
     meta: {
       title: 'send-tip',
       notPersist: true,
-      notRebrand: true,
-    },
-  },
-  {
-    path: '/import-account',
-    component: ImportAccount,
-    meta: {
-      title: 'importAccount',
-      ifNotAuthOnly: true,
-      notRebrand: true,
-    },
-  },
-  {
-    path: '/intro',
-    component: Intro,
-    meta: {
-      ifNotAuthOnly: true,
-      notPersist: true,
-      notRebrand: true,
-    },
-  },
-
-  {
-    path: '/transactions',
-    component: Transactions,
-    meta: {
-      title: 'transactions',
-      notRebrand: true,
     },
   },
   {
@@ -263,41 +368,7 @@ export default [
     props: true,
     meta: {
       title: 'tx-details',
-      hideTabBar: true,
       newUI: true,
-    },
-  },
-  {
-    path: '/transfer',
-    component: Transfer,
-    children: [{
-      path: '',
-      name: 'transfer-send',
-      component: TransferSend,
-      props: true,
-      meta: {
-        title: 'transfer',
-        backButton: false,
-      },
-    }, {
-      path: 'receive',
-      name: 'transfer-receive',
-      component: TransferReceive,
-      meta: {
-        title: 'transfer',
-        backButton: false,
-      },
-    }],
-  },
-  {
-    path: '/success-tip',
-    component: SuccessTip,
-    name: 'success-tip',
-    props: true,
-    meta: {
-      title: 'send',
-      notPersist: true,
-      notRebrand: true,
     },
   },
   {
@@ -306,7 +377,9 @@ export default [
     name: 'more',
     meta: {
       title: 'more',
-      backButton: false,
+      backButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
@@ -319,71 +392,43 @@ export default [
     },
   },
   {
-    path: '/notifications/settings',
+    path: '/more/settings/notifications',
     name: 'notification-settings',
     component: NotificationSettings,
     meta: {
-      title: 'notification-settings',
-      notPersist: true,
-      notRebrand: true,
+      title: 'notifications',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
-  },
-  {
-    path: '/names',
-    component: Names,
-    props: true,
-    children: [{
-      path: '',
-      name: 'name-list',
-      component: NamesList,
-      props: true,
-      meta: {
-        title: 'names',
-        backButton: false,
-      },
-    }, {
-      path: 'auctions',
-      component: AuctionList,
-      props: true,
-      name: 'auction-list',
-      meta: {
-        title: 'name-auctions',
-        backButton: false,
-      },
-    }, {
-      path: 'claim',
-      component: NameClaim,
-      props: true,
-      name: 'name-claim',
-      meta: {
-        title: 'register-name',
-        backButton: false,
-      },
-    }],
   },
   {
     path: '/names/auctions/:name/',
     component: Auction,
     props: true,
-    children: [{
-      path: '',
-      component: AuctionBid,
-      props: true,
-      name: 'auction-bid',
-      meta: {
-        title: 'auction',
-        hideTabBar: true,
+    children: [
+      {
+        path: '',
+        component: AuctionBid,
+        props: true,
+        name: 'auction-bid',
+        meta: {
+          title: 'auction',
+          backRoute: '/account-details/names/auctions',
+        },
       },
-    }, {
-      path: 'history',
-      component: AuctionHistory,
-      props: true,
-      name: 'auction-history',
-      meta: {
-        title: 'auction',
-        hideTabBar: true,
+      {
+        path: 'history',
+        component: AuctionHistory,
+        props: true,
+        name: 'auction-history',
+        meta: {
+          title: 'auction',
+          backRoute: '/account-details/names/auctions',
+        },
       },
-    }],
+    ],
   },
   {
     path: '/comment',
@@ -391,7 +436,6 @@ export default [
     meta: {
       title: 'comment-new',
       notPersist: true,
-      notRebrand: true,
     },
   },
   {
@@ -403,7 +447,6 @@ export default [
       title: 'donate-error',
       notPersist: true,
       ifNotAuth: true,
-      notRebrand: true,
     },
   },
   {
@@ -413,16 +456,6 @@ export default [
     meta: {
       title: 'address',
       notPersist: true,
-      notRebrand: true,
-    },
-  },
-  {
-    name: 'balances',
-    path: '/balances',
-    component: Balances,
-    meta: {
-      title: 'balances',
-      backButton: false,
     },
   },
   {
@@ -432,6 +465,7 @@ export default [
     props: true,
     meta: {
       title: 'token-details',
+      newUI: true,
     },
   },
   {
@@ -440,7 +474,6 @@ export default [
     component: NotFound,
     meta: {
       ifNotAuth: true,
-      notRebrand: true,
     },
   },
   {
@@ -450,7 +483,6 @@ export default [
     meta: {
       title: 'sign-message',
       notPersist: true,
-      notRebrand: true,
     },
   },
   {
@@ -460,17 +492,19 @@ export default [
     meta: {
       title: 'sign-transaction',
       notPersist: true,
-      hideTabBar: true,
       newUI: true,
     },
   },
   {
     name: 'invite',
-    path: '/invite',
+    path: '/more/invite',
     component: Invite,
     meta: {
       title: 'invite',
-      notRebrand: true,
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      newUI: true,
     },
   },
   {
@@ -481,9 +515,7 @@ export default [
     meta: {
       title: 'invite',
       notPersist: true,
-      notRebrand: true,
     },
   },
-
   ...webIframePopups,
 ];

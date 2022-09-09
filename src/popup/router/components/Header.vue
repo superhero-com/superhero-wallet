@@ -1,23 +1,23 @@
 <template>
   <div
     v-if="showNavigation && !aeppPopup"
-    class="header"
-    :class="{ 'not-logged-in': !isLoggedIn }"
+    :class="['header', { 'not-logged-in': !isLoggedIn, 'new-ui': $route.meta.newUI }]"
   >
     <div
       v-if="isLoggedIn || title"
       class="left"
     >
-      <RouterLink
+      <Component
+        :is="isDiamondDisabled ? 'div' : 'RouterLink'"
         v-if="isLoggedIn && !showBack"
-        to="/account"
-        class="home-button"
+        :to="isDiamondDisabled ? null : '/account'"
+        :class="['home-button', { 'disabled': isDiamondDisabled }]"
       >
         <Logo />
-      </RouterLink>
+      </Component>
       <ButtonPlain
         v-if="showBack"
-        class="icon-btn back"
+        class="icon-btn"
         @click="back"
       >
         <Back data-cy="back-arrow" />
@@ -28,16 +28,11 @@
       class="title"
     >
       <Truncate
-        v-if="pageTitle"
-        :str="pageTitle"
+        :str="pageTitle ?
+          pageTitle :
+          title ? $t(`pages.titles.${title}`) : ''"
         class="text"
       />
-      <span
-        v-else
-        class="text"
-      >
-        {{ (title && $t(`pages.titles.${title}`)) || $t('pages.titles.wallet-home') }}
-      </span>
     </div>
 
     <div
@@ -45,7 +40,7 @@
       class="right"
     >
       <ButtonPlain
-        v-if="!$route.path.startsWith('/notifications')"
+        v-if="!$route.path.startsWith('/notifications') && !hideNotificationsIcon"
         class="notifications icon-btn"
         data-cy="noti"
         @click="toNotifications"
@@ -61,28 +56,21 @@
       </ButtonPlain>
 
       <RouterLink
-        v-if="$route.path === '/notifications'"
-        to="/notifications/settings"
-        class="icon-btn settings"
-      >
-        <Settings />
-      </RouterLink>
-
-      <RouterLink
-        v-if="$route.path !== '/more'"
+        v-if="$route.path !== '/more' && !$route.meta.closeButton"
         class="icon-btn"
         to="/more"
         data-cy="page-more"
       >
         <ThreeDots />
       </RouterLink>
-      <RouterLink
+      <ButtonPlain
         v-else
-        class="icon-btn"
-        :to="$store.state.route.from ? $store.state.route.from.fullPath : '/account'"
+        class="icon-btn close"
+        data-cy="close"
+        @click="close"
       >
         <Close />
-      </RouterLink>
+      </ButtonPlain>
     </div>
   </div>
 </template>
@@ -92,7 +80,6 @@ import { mapState, mapGetters, mapMutations } from 'vuex';
 import Logo from '../../../icons/logo-small.svg?vue-component';
 import Back from '../../../icons/back.svg?vue-component';
 import Bell from '../../../icons/bell.svg?vue-component';
-import Settings from '../../../icons/notif-settings.svg?vue-component';
 import ThreeDots from '../../../icons/three-dots.svg?vue-component';
 import Close from '../../../icons/close.svg?vue-component';
 import Truncate from './Truncate.vue';
@@ -100,7 +87,7 @@ import ButtonPlain from './ButtonPlain.vue';
 
 export default {
   components: {
-    Logo, Back, Bell, Settings, ThreeDots, Close, Truncate, ButtonPlain,
+    Logo, Back, Bell, ThreeDots, Close, Truncate, ButtonPlain,
   },
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,
@@ -110,7 +97,6 @@ export default {
       superheroNotifications: this.$store.state.observables.notifications,
     };
   },
-
   computed: {
     ...mapGetters(['isLoggedIn']),
     ...mapState(['notifications', 'pageTitle']),
@@ -124,20 +110,35 @@ export default {
       return (this.$route.meta.backButton !== undefined ? this.$route.meta.backButton : true)
         && this.title;
     },
+    hideNotificationsIcon() {
+      return this.$route.meta.hideNotificationsIcon;
+    },
     notificationsCount() {
       return [...this.notifications, ...this.superheroNotifications].filter(
         (n) => n.status === 'CREATED',
       ).length;
     },
+    isDiamondDisabled() {
+      return this.$route.name === 'account';
+    },
   },
   methods: {
     ...mapMutations(['setNotificationsStatus']),
     back() {
-      const fallBackRoute = this.isLoggedIn ? '/account' : '/';
-      let { fullPath } = this.$route;
-      fullPath = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
-      this.$router.push(
-        fullPath.substr(0, fullPath.lastIndexOf('/')) || fallBackRoute,
+      if (this.$store.state.route.from.path === '/') {
+        this.$router.push(this.isLoggedIn ? '/account' : '/');
+        return;
+      }
+      if (this.$route.meta?.backRoute) {
+        // TODO: rewrite back button logic in more unified way
+        this.$router.push(this.$route.meta?.backRoute);
+        return;
+      }
+      this.$router.back();
+    },
+    close() {
+      this.$router.replace(
+        this.isLoggedIn ? '/account' : '/',
       );
     },
     async toNotifications() {
@@ -161,7 +162,6 @@ export default {
 
 .header {
   position: fixed;
-  width: 360px;
 
   @include mixins.desktop {
     position: sticky;
@@ -169,12 +169,13 @@ export default {
 
   top: 0;
   z-index: 2;
-  height: calc(48px + env(safe-area-inset-top));
-  background-color: variables.$color-bg-3;
+  height: calc(var(--header-height) + env(safe-area-inset-top));
+  background-color: var(--screen-bg-color);
   display: flex;
-  padding: 8px 16px 8px 8px;
-  padding-top: calc(8px + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) 8px 8px 8px;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
 
   @include mixins.mobile {
     display: flex;
@@ -182,19 +183,23 @@ export default {
     width: 100%;
   }
 
+  &.new-ui {
+    background-color: variables.$color-bg-3-new;
+  }
+
   .left {
     display: flex;
-    flex-basis: 88px;
+    width: 20%;
   }
 
   .right {
     display: flex;
-    flex-basis: 82px;
     justify-content: flex-end;
+    width: 20%;
   }
 
   .title {
-    min-width: 166px;
+    width: 60%;
 
     .text {
       padding: 0 4px;
@@ -224,17 +229,21 @@ export default {
     padding: 4px 0;
     height: 32px;
 
-    &:not(:disabled) {
+    &.disabled {
+      cursor: default;
+    }
+
+    &:not(.disabled) {
       svg {
         cursor: pointer;
       }
 
       &:hover svg {
-        color: variables.$color-blue-hover;
+        color: variables.$color-primary-hover;
       }
 
       &:active svg {
-        color: variables.$color-blue-hover;
+        color: variables.$color-primary-hover;
         opacity: 0.9;
       }
     }
@@ -276,6 +285,15 @@ export default {
       &.hover {
         display: none;
       }
+    }
+
+    .back {
+      width: 19.09px;
+      height: 16px;
+    }
+
+    &.close svg {
+      color: rgba(variables.$color-white, 0.5);
     }
 
     &:hover {

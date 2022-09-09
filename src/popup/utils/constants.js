@@ -1,10 +1,10 @@
-import {
-  TxBuilder, Crypto, SCHEMA, TxBuilderHelper,
-} from '@aeternity/aepp-sdk';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import { i18n } from '../../store/plugins/languages';
 
 export const MAGNITUDE = 18;
+export const SEED_LENGTH = 12;
+export const AETERNITY_CONTRACT_ID = 'aeternity';
 
 export const TX_TYPE_MDW = {
   SpendTx: SCHEMA.TX_TYPE.spend,
@@ -22,38 +22,11 @@ export const CONNECTION_TYPES = {
   OTHER: 'OTHER',
 };
 
-const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
-const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
-const STUB_NONCE = 10000;
+export const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
+export const STUB_CONTRACT_ADDRESS = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6';
+export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
+export const STUB_NONCE = 10000;
 export const MAX_UINT256 = BigNumber(2).exponentiatedBy(256).minus(1);
-
-export const calculateFee = (type, params) => {
-  const MIN_FEE = TxBuilder.calculateMinFee(type, {
-    params: {
-      senderId: STUB_ADDRESS,
-      recipientId: STUB_ADDRESS,
-      amount: MAX_UINT256,
-      ttl: MAX_UINT256,
-      nonce: MAX_UINT256,
-      ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
-      abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
-      callData: STUB_CALLDATA,
-      gas: 0,
-      ...params,
-    },
-    ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
-  });
-  return BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE);
-};
-
-export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
-  accountId: STUB_ADDRESS,
-  name,
-  nameSalt: Crypto.salt(),
-  nameFee: TxBuilderHelper.getMinimumNameFee(name),
-  nonce: STUB_NONCE,
-  ttl: SCHEMA.NAME_TTL,
-});
 
 export const DEX_CONTRACTS = {
   ae_uat: {
@@ -113,9 +86,14 @@ export const AENS_DOMAIN = '.chain';
 export const MAX_AUCTION_NAME_LENGTH = 12 + AENS_DOMAIN.length;
 export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 
-export const BUG_REPORT_URL = 'https://thesuperherowallet.typeform.com/to/vh8Ffu';
+export const BUG_REPORT_URL = 'https://spgrrc00ymg.typeform.com/to/Kk3Zyjdr';
 
 export const NOTIFICATION_SETTINGS = [
+  {
+    text: i18n.t('pages.notification-settings.wallet'),
+    checked: true,
+    type: 'wallet',
+  },
   {
     text: i18n.t('pages.notification-settings.commentOnTip'),
     checked: true,
@@ -132,11 +110,6 @@ export const NOTIFICATION_SETTINGS = [
     type: 'RETIP_ON_TIP',
   },
   {
-    text: i18n.t('pages.notification-settings.wallet'),
-    checked: true,
-    type: 'wallet',
-  },
-  {
     text: i18n.t('pages.notification-settings.tipOnComment'),
     checked: true,
     type: 'TIP_ON_COMMENT',
@@ -150,6 +123,159 @@ export const NOTIFICATION_SETTINGS = [
     text: i18n.t('pages.notification-settings.claimOfRetip'),
     checked: true,
     type: 'CLAIM_OF_RETIP',
+  },
+];
+
+export const CURRENCIES = [
+  {
+    name: 'United States Dollar',
+    code: 'usd',
+    symbol: '$',
+  },
+  {
+    name: 'Euro',
+    code: 'eur',
+    symbol: '€',
+  },
+  {
+    name: 'Australia Dollar',
+    code: 'aud',
+    symbol: 'AU$',
+  },
+  {
+    name: 'Brasil Real',
+    code: 'brl',
+    symbol: 'R$',
+  },
+  {
+    name: 'Canada Dollar',
+    code: 'cad',
+    symbol: 'CA$',
+  },
+  {
+    name: 'Swiss Franc',
+    code: 'chf',
+    symbol: 'CHF',
+  },
+  {
+    name: 'China Yuan Renminbi',
+    code: 'cny',
+    symbol: '¥',
+  },
+  {
+    name: 'Czech Republic Koruna',
+    code: 'czk',
+    symbol: 'Kč',
+  },
+  {
+    name: 'Denmark Krone',
+    code: 'dkk',
+    symbol: 'Kr',
+  },
+  {
+    name: 'United Kingdom Pound',
+    code: 'gbp',
+    symbol: '£',
+  },
+  {
+    name: 'Hong Kong Dollar',
+    code: 'hkd',
+    symbol: 'HK$',
+  },
+  {
+    name: 'Hungary Forint',
+    code: 'huf',
+    symbol: 'Ft',
+  },
+  {
+    name: 'Indonesia Rupiah',
+    code: 'idr',
+    symbol: 'Rp',
+  },
+  {
+    name: 'Israel Shekel',
+    code: 'ils',
+    symbol: '₪',
+  },
+  {
+    name: 'India Rupee',
+    code: 'inr',
+    symbol: '₹',
+  },
+  {
+    name: 'Japan Yen',
+    code: 'jpy',
+    symbol: '¥',
+  },
+  {
+    name: 'South Korea Won',
+    code: 'krw',
+    symbol: '₩',
+  },
+  {
+    name: 'Mexico Peso',
+    code: 'mxn',
+    symbol: 'MX$',
+  },
+  {
+    name: 'Malaysia Ringgit',
+    code: 'myr',
+    symbol: 'MR',
+  },
+  {
+    name: 'Norway Krone',
+    code: 'nok',
+    symbol: 'Kr',
+  },
+  {
+    name: 'New Zealand Dollar',
+    code: 'nzd',
+    symbol: 'NZ$',
+  },
+  {
+    name: 'Philippines Peso',
+    code: 'php',
+    symbol: '₱',
+  },
+  {
+    name: 'Poland Zloty',
+    code: 'pln',
+    symbol: 'zł',
+  },
+  {
+    name: 'Russia Ruble',
+    code: 'rub',
+    symbol: '₽',
+  },
+  {
+    name: 'Sweden Krona',
+    code: 'sek',
+    symbol: 'Kr',
+  },
+  {
+    name: 'Singapore Dollar',
+    code: 'sgd',
+    symbol: 'SG$',
+  },
+  {
+    name: 'Thailand Baht',
+    code: 'thb',
+    symbol: '฿',
+  },
+  {
+    name: 'Turkey Lira',
+    code: 'try',
+    symbol: '₺',
+  },
+  {
+    name: 'Sout Africa Rand',
+    code: 'zar',
+    symbol: 'R',
+  },
+  {
+    name: 'Gold Ounce',
+    code: 'xau',
+    symbol: 'XAU',
   },
 ];
 
@@ -188,3 +314,25 @@ export const DEX_URL = 'https://aepp.dex.superhero.com';
 export const BLOG_CLAIM_TIP_URL = 'https://blog.aeternity.com/superhero-how-to-send-receive-superhero-tips-34971b18c919#024e';
 
 export const COMMIT_URL = 'https://github.com/aeternity/superhero-wallet/commit/';
+
+export const MODAL_DEFAULT = 'default';
+export const MODAL_ACCOUNT_CREATE = 'account-create';
+export const MODAL_ACCOUNT_IMPORT = 'import-account';
+export const MODAL_CLAIM_SUCCESS = 'claim-success';
+export const MODAL_SPEND_SUCCESS = 'spend-success';
+export const NODAL_CONFIRM = 'confirm';
+export const MODAL_CONFIRM_TIP = 'confirm-tip';
+export const MODAL_CONFIRM_TRANSACTION_SIGN = 'confirm-transaction-sign';
+export const MODAL_CONFIRM_RAW_SIGN = 'confirm-raw-sign';
+export const MODAL_CONFIRM_CONNECT = 'confirm-connect';
+export const MODAL_MESSAGE_SIGN = 'confirm-message-sign';
+export const MODAL_ERROR_LOG = 'error-log';
+export const MODAL_HELP = 'help';
+export const MODAL_READ_QR_CODE = 'read-qr-code';
+export const MODAL_SHARE_QR = 'share-qr';
+export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
+export const MODAL_TRANSFER_SEND = 'transfer-send';
+export const MODAL_ASSET_SELECTOR = 'asset-selector';
+export const MODAL_RESET_WALLET = 'reset-wallet';
+export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
+export const MODAL_RECIPIENT_INFO = 'recipient-info';

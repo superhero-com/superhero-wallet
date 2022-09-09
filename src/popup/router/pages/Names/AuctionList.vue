@@ -4,6 +4,7 @@
       v-if="activeAuctions.length || auctions.length || loading"
       v-model="displayMode"
       :filters="filters"
+      :fixed="filtersFixed"
     />
     <ul
       v-if="activeAuctions.length || auctions.length"
@@ -51,9 +52,18 @@ import { blocksToRelativeTime } from '../../../../filters/toRelativeTime';
 
 export default {
   components: {
-    Filters, NameRow, TokenAmount, AnimatedSpinner, RegisterName,
+    Filters,
+    NameRow,
+    TokenAmount,
+    AnimatedSpinner,
+    RegisterName,
   },
-  filters: { blocksToRelativeTime },
+  filters: {
+    blocksToRelativeTime,
+  },
+  props: {
+    filtersFixed: Boolean,
+  },
   data: () => ({
     displayMode: { sort: 'soonest', rotated: false },
     activeAuctions: [],
@@ -96,17 +106,7 @@ export default {
   display: flex;
   flex-direction: column;
 
-  .filters {
-    top: unset;
-    position: fixed;
-
-    @include mixins.desktop {
-      width: variables.$extension-width;
-    }
-  }
-
   .list {
-    margin-top: 40px;
     padding: 0;
 
     .name-wrapper {

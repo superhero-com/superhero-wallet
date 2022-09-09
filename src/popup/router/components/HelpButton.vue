@@ -27,6 +27,7 @@ export default {
         title: this.title,
         msg: this.msg,
         option: this.option,
+        textCenter: true,
       });
     },
   },

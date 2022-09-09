@@ -4,8 +4,9 @@
     <div class="form">
       <InputAmount
         v-model="amount"
+        new-ui
         :error="!!amountError"
-        :error-message="amountError"
+        :message="amountError"
         @error="(val) => error = val"
       />
       <div class="tx-details">
@@ -25,6 +26,8 @@
       </div>
       <Button
         :disabled="!!amountError || error || !amount"
+        new-ui
+        extend
         @click="bid"
       >
         {{ $t('pages.names.auctions.place-bid') }}
@@ -36,8 +39,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { aeToAettos } from '../../../utils/helper';
-import { calculateNameClaimFee } from '../../../utils/constants';
+import { aeToAettos, calculateNameClaimFee } from '../../../utils/helper';
 import AuctionCard from '../../components/AuctionCard.vue';
 import InputAmount from '../../components/InputAmount.vue';
 import DetailsItem from '../../components/DetailsItem.vue';

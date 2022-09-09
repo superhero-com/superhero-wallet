@@ -10,13 +10,16 @@
 <script>
 import { mapState } from 'vuex';
 
+const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'];
+
 export default {
   props: {
     address: { type: String, default: '' },
     name: { type: [String, Boolean], default: '' }, // TODO: Name shouldn't be boolean
     size: {
       type: String,
-      default: 'normal',
+      default: 'rg',
+      validator: (val) => SIZES.includes(val),
     },
     src: { type: String, default: '' },
   },
@@ -38,16 +41,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$x-small-size: 18px;
-$small-size: 30px;
-$mid-size: 32px;
-$normal-size: 40px;
-$x-lg-size: 56px;
-$lg-size: 64px;
+$size-xs: 18px;
+$size-sm: 24px;
+$size-md: 32px;
+$size-rg: 40px;
+$size-lg: 48px;
+$size-xl: 56px;
 
 .avatar {
-  width: $normal-size;
-  height: $normal-size;
+  width: $size-rg;
+  height: $size-rg;
   border-radius: 50%;
   overflow: hidden;
   display: inline-block;
@@ -55,29 +58,29 @@ $lg-size: 64px;
   user-select: none;
   flex-shrink: 0;
 
+  &.sm {
+    height: $size-sm;
+    width: $size-sm;
+  }
+
+  &.xs {
+    height: $size-xs;
+    width: $size-xs;
+  }
+
+  &.md {
+    height: $size-md;
+    width: $size-md;
+  }
+
   &.lg {
-    height: $lg-size;
-    width: $lg-size;
+    height: $size-lg;
+    width: $size-lg;
   }
 
-  &.small {
-    height: $small-size;
-    width: $small-size;
-  }
-
-  &.x-small {
-    height: $x-small-size;
-    width: $x-small-size;
-  }
-
-  &.mid {
-    height: $mid-size;
-    width: $mid-size;
-  }
-
-  &.xlg {
-    height: $x-lg-size;
-    width: $x-lg-size;
+  &.xl {
+    height: $size-xl;
+    width: $size-xl;
   }
 }
 </style>

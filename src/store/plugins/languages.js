@@ -18,7 +18,7 @@ const languages = {
     getMessages: () => import(/* webpackChunkName: "locale-en" */ '../../popup/locales/en.json'),
   },
   cn: {
-    name: '中文',
+    name: '中国人',
     getMessages: () => import(/* webpackChunkName: "locale-cn" */ '../../popup/locales/cn.json'),
   },
 };

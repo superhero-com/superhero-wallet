@@ -48,9 +48,7 @@ export default {
       let address;
       try {
         address = await dispatch('request', { name: 'getAddress', args: [nextIdx, true] });
-        commit('accounts/add', {
-          address, type: 'ledger', idx: nextIdx, color: '#000', shift: 0,
-        }, { root: true });
+        commit('accounts/add', { address, type: 'ledger', idx: nextIdx }, { root: true });
       } catch (error) {
         dispatch('modals/open', { name: 'default', icon: 'alert', title: 'address not confirmed' }, { root: true });
       }

@@ -78,24 +78,28 @@
       :placeholder="$t('pages.network.networkNamePlaceholder')"
       :label="$t('pages.network.networkNameLabel')"
       data-cy="network"
+      new-ui
     />
     <InputField
       v-model="newNetwork.url"
       :placeholder="$t('pages.network.networkUrlPlaceholder')"
       :label="$t('pages.network.networkUrlLabel')"
       data-cy="url"
+      new-ui
     />
     <InputField
       v-model="newNetwork.middlewareUrl"
       :placeholder="$t('pages.network.networkMiddlewarePlaceholder')"
       :label="$t('pages.network.networkMiddlewareLabel')"
       data-cy="middleware"
+      new-ui
     />
     <InputField
       v-model="newNetwork.compilerUrl"
       :placeholder="$t('pages.network.networkCompilerPlaceholder')"
       :label="$t('pages.network.networkCompilerLabel')"
       data-cy="compiler"
+      new-ui
     />
     <ButtonPlain
       class="expand"
@@ -115,6 +119,7 @@
       v-model="newNetwork.backendUrl"
       :placeholder="$t('pages.network.backendUrlPlaceholder')"
       :label="$t('pages.network.backendUrlLabel')"
+      new-ui
     />
     <Button
       half
@@ -263,11 +268,18 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 
+.networks,
+.network {
+  padding-left: var(--screen-padding-x);
+  padding-right: var(--screen-padding-x);
+}
+
 .networks {
+  padding: 16px;
+
   .network-row {
     display: flex;
     align-items: center;
-    border-top: 1px solid variables.$color-border;
     padding: 12px 0;
     text-align: left;
 
