@@ -162,7 +162,7 @@ export default {
       return `${firstChar}token=${token}${separator}amount=${this.amount}`;
     },
     getLink(value) {
-      return `${APP_LINK_WEB}/transfer?account=${value}${this.getTokenInfo(true)}`;
+      return `${APP_LINK_WEB}/account?account=${value}${this.getTokenInfo(true)}`;
     },
     async share() {
       const { address } = this.account;

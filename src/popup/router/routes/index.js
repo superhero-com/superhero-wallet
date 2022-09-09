@@ -67,6 +67,10 @@ export default [
     },
   },
   {
+    path: '/transfer*',
+    redirect: '/account*',
+  },
+  {
     path: '/account-details/',
     component: AccountDetails,
     meta: {
