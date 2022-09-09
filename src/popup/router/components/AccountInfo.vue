@@ -1,5 +1,8 @@
 <template>
-  <div class="account-info">
+  <div
+    class="account-info"
+    :class="{ 'can-copy-address': canCopyAddress }"
+  >
     <div class="title">
       <Avatar
         class="avatar"
@@ -19,26 +22,39 @@
         >
           {{ $t('pages.account.heading') }} {{ accountIdx + 1 }}
         </div>
-        <ButtonPlain
+        <div
           v-if="truncatedAddress && truncatedAddress.length"
-          v-clipboard:copy="activeAccount.address"
-          v-clipboard:success="copy"
-          class="ae-address"
-          data-cy="copy"
         >
-          <span>{{ truncatedAddress[0] }}</span>
-          <span class="more">...</span>
-          <span>{{ truncatedAddress[1] }}</span>
-
-          <CopyOutlined v-if="canCopyAddress" />
-
-          <div
-            v-if="copied"
-            class="copied"
+          <ButtonPlain
+            v-if="canCopyAddress"
+            v-clipboard:copy="activeAccount.address"
+            v-clipboard:success="copy"
+            class="ae-address"
+            data-cy="copy"
           >
-            {{ $t('addressCopied') }}
+            <span>{{ truncatedAddress[0] }}</span>
+            <span>&middot;&middot;&middot;</span>
+            <span>{{ truncatedAddress[1] }}</span>
+
+            <CopyOutlinedIcon />
+
+            <div
+              v-if="copied"
+              class="copied"
+            >
+              <CopyOutlinedIcon />
+              {{ $t('addressCopied') }}
+            </div>
+          </ButtonPlain>
+          <div
+            v-else
+            class="ae-address"
+          >
+            <span>{{ truncatedAddress[0] }}</span>
+            <span>&middot;&middot;&middot;</span>
+            <span>{{ truncatedAddress[1] }}</span>
           </div>
-        </ButtonPlain>
+        </div>
       </div>
     </div>
   </div>
@@ -47,20 +63,22 @@
 <script>
 import { mapGetters } from 'vuex';
 import CopyMixin from '../../../mixins/copy';
+import { truncateAddress } from '../../utils/helper';
 import Avatar from './Avatar.vue';
 import ButtonPlain from './ButtonPlain.vue';
-import CopyOutlined from '../../../icons/copy-outlined.svg?vue-component';
 import Truncate from './Truncate.vue';
-import { truncateAddress } from '../../utils/helper';
+import CopyOutlinedIcon from '../../../icons/copy-outlined.svg?vue-component';
 
 export default {
   components: {
     Avatar,
     ButtonPlain,
     Truncate,
-    CopyOutlined,
+    CopyOutlinedIcon,
   },
-  mixins: [CopyMixin],
+  mixins: [
+    CopyMixin,
+  ],
   props: {
     color: { type: String, default: '#212121' },
     canCopyAddress: Boolean,
@@ -128,24 +146,14 @@ export default {
       .ae-address {
         @extend %face-mono-12-medium;
 
-        color: rgba(variables.$color-white, 0.85);
-        display: flex;
-        opacity: 0.85;
-        margin-top: 2px;
-        letter-spacing: 0.07em;
-        align-items: center;
-        width: 150px;
         position: relative;
-
-        .more {
-          letter-spacing: -1px;
-          margin-right: 2px;
-          margin-top: -5px;
-        }
-
-        &:hover {
-          opacity: 1;
-        }
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        padding: 2px 0 0;
+        color: rgba(variables.$color-white, 0.85);
+        opacity: 0.85;
+        letter-spacing: 0.07em;
 
         .icon {
           width: 22px;
@@ -154,17 +162,27 @@ export default {
         }
 
         .copied {
-          border: 2px dashed rgba(variables.$color-white, 0.4);
-          border-radius: 4px;
-          background-color: variables.$color-bg-4;
-          width: 117px;
-          text-align: center;
-          padding: 0;
           position: absolute;
-          top: 1px;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px dashed rgba(variables.$color-white, 0.4);
+          border-radius: 5px;
+          font-size: 12px;
+          background-color: variables.$color-bg-4;
+          text-transform: uppercase;
 
           @extend %face-sans-14-regular;
         }
+      }
+    }
+  }
+
+  &.can-copy-address {
+    .ae-address {
+      &:hover {
+        opacity: 1;
       }
     }
   }
