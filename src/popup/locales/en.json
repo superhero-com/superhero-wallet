@@ -794,7 +794,7 @@
       "seedPhrase": "Your seed phrase",
       "copy": "Copy to clipboard",
       "this-your-seed-phrase": "This is your seed phrase. Keep it safe!",
-      "confirm-that-you-save-your-seed-phrase": "Confirm that you got your seed phrase correctly. {0} to  compose your seed phrase.",
+      "confirm-that-you-save-your-seed-phrase": "Confirm that you got your seed phrase correctly.",
       "compose-your-seed-phrase": "Tap the words below {0} to  compose your seed phrase.",
       "in-correct-order": "in the correct order",
       "seed-phrase-correct": "Seed phrase has been verified!",
