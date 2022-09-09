@@ -3,10 +3,7 @@
     v-if="nodeStatus && account.address && isLoggedIn"
     :data-cy="nodeStatus !== 'error' ? 'connect-node' : ''"
     class="node-connection-status"
-    :class="[
-      `connect-${nodeStatus === 'error' ? 'error' : 'node'}`,
-      { 'hide-tab-bar': $route.meta.hideTabBar }
-    ]"
+    :class="`connect-${nodeStatus === 'error' ? 'error' : 'node'}`"
   >
     {{ statuses[nodeStatus] }}
   </div>
@@ -58,10 +55,7 @@ export default {
   text-align: center;
 
   @extend %face-sans-14-regular;
-
-  &.hide-tab-bar {
-    bottom: env(safe-area-inset-bottom);
-  }
+  bottom: env(safe-area-inset-bottom);
 }
 
 .connect-error {
