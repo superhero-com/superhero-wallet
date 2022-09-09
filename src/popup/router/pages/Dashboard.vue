@@ -81,7 +81,7 @@
             new-ui
             inline
             no-margin
-            :to="{ name: 'account-details-names' }"
+            :to="{ name: 'account-details-names-claim' }"
             fill="purple"
           />
         </Card>
