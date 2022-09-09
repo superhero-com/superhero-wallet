@@ -40,7 +40,7 @@
       </template>
     </div>
 
-    <div class="terms-agreement">
+    <div :class="['terms-agreement', { mobile: !IS_WEB }]">
       <CheckBox
         v-model="termsAgreed"
         :class="{ agreed: termsAgreed }"
@@ -182,6 +182,10 @@ export default {
       &.agreed {
         color: white;
       }
+    }
+
+    &.mobile {
+      margin-top: 32px;
     }
   }
 
