@@ -53,7 +53,7 @@
 
         <div
           v-if="$slots.footer"
-          class="footer"
+          :class="['footer', { mobile: IS_MOBILE }]"
         >
           <slot name="footer" />
         </div>
@@ -92,6 +92,11 @@ export default {
   emits: [
     'close',
   ],
+  data() {
+    return {
+      IS_MOBILE: window.IS_MOBILE_DEVICE,
+    };
+  },
   mounted() {
     if (document.body.style.overflow) return;
     document.body.style.overflow = 'hidden';
@@ -200,6 +205,10 @@ export default {
           rgba(var(--screen-bg-color), 0.9) 50%,
           rgba(var(--screen-bg-color), 0) 100%
         );
+
+      &.mobile {
+        margin-bottom: 20px;
+      }
     }
   }
 
