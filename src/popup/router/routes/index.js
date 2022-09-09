@@ -62,6 +62,9 @@ export default [
     path: '/account',
     name: 'account',
     component: Account,
+    meta: {
+      newUI: true,
+    },
   },
   {
     path: '/account-details/',
