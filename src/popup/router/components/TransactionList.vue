@@ -74,7 +74,6 @@ export default {
   },
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapState('accounts', ['activeIdx']),
     ...mapState(['transactions']),
     ...mapState({
       filteredTransactions(
@@ -131,12 +130,6 @@ export default {
       },
     }),
     ...mapGetters(['getTxSymbol']),
-  },
-  watch: {
-    activeIdx() {
-      this.$store.commit('initTransactions');
-      this.loadMore();
-    },
   },
   mounted() {
     this.loadMore();
