@@ -415,6 +415,7 @@ export default [
       name: 'auction-bid',
       meta: {
         title: 'auction',
+        backRoute: '/account-details/names/auctions',
       },
     }, {
       path: 'history',
@@ -423,6 +424,7 @@ export default [
       name: 'auction-history',
       meta: {
         title: 'auction',
+        backRoute: '/account-details/names/auctions',
       },
     }],
   },
