@@ -131,6 +131,7 @@ export default {
 
 .index {
   padding-top: 42px;
+  padding-top: calc(42px + env(safe-area-inset-top));
   text-align: center;
 
   &.new-ui {
