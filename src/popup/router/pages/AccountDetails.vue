@@ -231,13 +231,15 @@ export default {
     position: sticky;
     z-index: 2;
     top: calc(env(safe-area-inset-top) + 62px);
-    padding: 8px var(--screen-padding-x);
+    padding-left: var(--screen-padding-x);
+    padding-right: var(--screen-padding-x);
     background-color: var(--screen-bg-color);
   }
 
   .tabs {
     gap: 16px;
-    padding: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
     border-radius: 14px;
     background-color: var(--screen-bg-color);
 

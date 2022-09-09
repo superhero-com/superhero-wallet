@@ -53,6 +53,8 @@ export default {
 @use '../../../../styles/typography';
 
 .list {
+  padding-top: 4px;
+
   .name-item {
     margin-top: 1px;
   }
