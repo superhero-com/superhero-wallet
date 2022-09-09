@@ -160,6 +160,7 @@ export default {
       return this.mobile
         ? new Promise((resolve, reject) => {
           this.setQrScanner(true);
+          window.plugins.webviewcolor.change('#00FFFFFF');
 
           window.QRScanner.scan((error, text) => (!error && text ? resolve(text) : reject(error)));
           window.QRScanner.show();
@@ -178,12 +179,11 @@ export default {
     async stopReading() {
       if (this.mobile) {
         ['body', '#app'].forEach((s) => {
-          document.querySelector(s).style = '';
+          document.querySelector(s).style = 'background: #141414';
         });
+        await window.QRScanner.pausePreview();
+        window.plugins.webviewcolor.change('#141414');
         this.setQrScanner(false);
-        document.querySelector('.camera-close-button').removeEventListener('click');
-        await window.QRScanner.hide();
-        await window.QRScanner.cancelScan();
         window.QRScanner.destroy();
       } else this.browserReader.reset();
     },

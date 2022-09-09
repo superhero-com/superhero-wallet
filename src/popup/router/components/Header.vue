@@ -30,7 +30,7 @@
       <Truncate
         :str="pageTitle ?
           pageTitle :
-          title ? $t(`pages.titles.${title}`) : $t('pages.titles.wallet-home')"
+          title ? $t(`pages.titles.${title}`) : ''"
         class="text"
       />
     </div>
