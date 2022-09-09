@@ -3,7 +3,7 @@
     v-if="nodeStatus && account.address && isLoggedIn"
     :data-cy="nodeStatus !== 'error' ? 'connect-node' : ''"
     class="node-connection-status"
-    :class="`connect-${nodeStatus === 'error' ? 'error' : 'node'}`"
+    :class="`connect-${nodeStatus === 'error' || nodeStatus === 'offline' ? 'error' : 'node'}`"
   >
     {{ statuses[nodeStatus] }}
   </div>
@@ -46,31 +46,19 @@ export default {
     position: sticky;
   }
 
-  bottom: 48px;
-  bottom: calc(48px + env(safe-area-inset-bottom));
   left: 0;
   right: 0;
-  background: variables.$color-blue;
+  background: variables.$color-bg-3-new;
+  padding: 4px 0;
   color: variables.$color-white;
   text-align: center;
+  bottom: env(safe-area-inset-bottom);
 
   @extend %face-sans-14-regular;
-  bottom: env(safe-area-inset-bottom);
 }
 
 .connect-error {
   font-weight: bold;
-}
-
-.connect-node {
-  background: variables.$color-bg-3;
-}
-
-@include mixins.collapsed {
-  .node-connection-status,
-  .connect-error,
-  .connect-node {
-    bottom: 0;
-  }
+  background: variables.$color-blue;
 }
 </style>
