@@ -1,7 +1,6 @@
 <template>
   <div
     class="index"
-    :class="[{ 'new-ui': $route.meta.newUI }]"
   >
     <img
       v-if="IN_FRAME"
@@ -26,10 +25,7 @@
       </div>
 
       <template v-if="IS_WEB">
-        <Platforms
-          :class="{ agreed: termsAgreed }"
-          new-ui
-        >
+        <Platforms :class="{ agreed: termsAgreed }">
           <template #header>
             {{ $t('pages.index.platforms.heading') }}
           </template>
@@ -133,11 +129,6 @@ export default {
   padding-top: 42px;
   padding-top: calc(42px + env(safe-area-inset-top));
   text-align: center;
-
-  &.new-ui {
-    background-color: variables.$color-bg-3-new;
-    height: 100%;
-  }
 
   .terms-agreement {
     @include mixins.flex(center);

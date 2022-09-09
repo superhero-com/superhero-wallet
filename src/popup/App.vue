@@ -3,7 +3,6 @@
     id="app"
     :class="{
       'show-header': showStatusAndHeader,
-      'new-ui': $route.meta.newUI,
     }"
   >
     <button
@@ -112,7 +111,7 @@ export default {
 
 #app {
   --screen-padding-x: 16px;
-  --screen-bg-color: #{variables.$color-bg-3-new};
+  --screen-bg-color: #{variables.$color-bg-3};
   --header-height: 0;
 
   @extend %face-sans-16-regular;
@@ -177,10 +176,6 @@ export default {
         min-height: calc(100% - var(--header-height) - env(safe-area-inset-top));
       }
     }
-  }
-
-  &.new-ui {
-    --screen-bg-color: #{variables.$color-bg-3-new};
   }
 }
 </style>

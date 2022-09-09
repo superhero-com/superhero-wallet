@@ -36,7 +36,6 @@ export default process.env.PLATFORM === 'web' && IN_POPUP
     },
     meta: {
       notPersist: true,
-      newUI: name === 'confirm-transaction-sign',
     },
   }))
   : [];

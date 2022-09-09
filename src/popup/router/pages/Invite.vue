@@ -117,7 +117,7 @@ export default {
   }
 
   .generated-links {
-    background-color: variables.$color-bg-3;
+    background-color: var(--screen-bg-color);
     margin: 0 -20px;
 
     .section-title {

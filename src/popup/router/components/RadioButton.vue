@@ -58,10 +58,10 @@ export default {
 
   .radio-dot {
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(variables.$color-white, 0.5);
     width: 20px;
     height: 20px;
-    background: variables.$color-bg-3;
+    background: var(--screen-bg-color);
     margin-right: 6px;
     position: relative;
     opacity: 0.5;

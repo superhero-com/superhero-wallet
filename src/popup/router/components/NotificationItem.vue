@@ -181,13 +181,13 @@ export default {
     font-size: 1.5rem;
 
     &.active {
-      background-color: variables.$color-bg-3;
+      background-color: var(--screen-bg-color);
     }
 
     &:hover {
       box-sizing: border-box;
       border-radius: 50%;
-      background-color: variables.$color-bg-3;
+      background-color: var(--screen-bg-color);
     }
 
     .mark-as-read {

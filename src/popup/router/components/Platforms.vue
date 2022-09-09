@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="platforms"
-    :class="{'new-ui': newUi}"
-  >
+  <div class="platforms">
     <div class="heading">
       <slot name="header" />
     </div>
@@ -108,9 +105,6 @@ import {
 } from '../../utils/constants';
 
 export default {
-  props: {
-    newUi: Boolean,
-  },
   data: () => ({
     IS_MOBILE_DEVICE: window.IS_MOBILE_DEVICE,
     IS_IOS: window.IS_IOS,
@@ -134,14 +128,10 @@ export default {
 
 .platforms {
   font-size: 15px;
-  background-color: variables.$color-black;
+  background-color: var(--screen-bg-color);
   word-break: break-word;
 
   @extend %face-sans-15-regular;
-
-  &.new-ui {
-    background-color: variables.$color-bg-3-new;
-  }
 
   .heading {
     @extend %face-sans-17-regular;

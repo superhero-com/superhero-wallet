@@ -55,16 +55,12 @@ export default [
       navigation: false,
       ifNotAuthOnly: true,
       notPersist: true,
-      newUI: true,
     },
   },
   {
     path: '/account',
     name: 'account',
     component: Dashboard,
-    meta: {
-      newUI: true,
-    },
   },
   {
     path: '/transfer*',
@@ -79,7 +75,6 @@ export default [
         name: 'account-details',
         component: AccountDetailsTokens,
         meta: {
-          newUI: true,
           hideHeader: true,
           asModal: true,
         },
@@ -89,7 +84,6 @@ export default [
         name: 'account-details-transactions',
         component: AccountDetailsTransactions,
         meta: {
-          newUI: true,
           hideHeader: true,
           asModal: true,
         },
@@ -104,7 +98,6 @@ export default [
             component: NamesList,
             props: true,
             meta: {
-              newUI: true,
               hideHeader: true,
               asModal: true,
             },
@@ -115,7 +108,6 @@ export default [
             props: true,
             name: 'account-details-names-auctions',
             meta: {
-              newUI: true,
               hideHeader: true,
               asModal: true,
             },
@@ -126,7 +118,6 @@ export default [
             props: true,
             name: 'account-details-names-claim',
             meta: {
-              newUI: true,
               hideHeader: true,
               asModal: true,
             },
@@ -180,7 +171,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -192,7 +182,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -204,7 +193,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -216,7 +204,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -228,7 +215,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -240,7 +226,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -252,7 +237,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -264,7 +248,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -277,7 +260,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -289,7 +271,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -309,7 +290,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -321,7 +301,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
       ifNotAuth: true,
     },
   },
@@ -334,7 +313,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -346,7 +324,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -368,7 +345,6 @@ export default [
     props: true,
     meta: {
       title: 'tx-details',
-      newUI: true,
     },
   },
   {
@@ -379,7 +355,6 @@ export default [
       title: 'more',
       backButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -400,7 +375,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {
@@ -465,7 +439,6 @@ export default [
     props: true,
     meta: {
       title: 'token-details',
-      newUI: true,
     },
   },
   {
@@ -492,7 +465,6 @@ export default [
     meta: {
       title: 'sign-transaction',
       notPersist: true,
-      newUI: true,
     },
   },
   {
@@ -504,7 +476,6 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
-      newUI: true,
     },
   },
   {

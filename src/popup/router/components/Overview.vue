@@ -1,9 +1,6 @@
 <template>
   <div class="overview">
-    <div
-      v-if="isNewUI"
-      class="title-tag-wrapper"
-    >
+    <div class="title-tag-wrapper">
       <TransactionTag
         :tx-type="getTitle"
         data-cy="title"
@@ -15,13 +12,6 @@
         data-cy="tx-function"
       />
     </div>
-    <span
-      v-else
-      class="title"
-      data-cy="title"
-    >
-      {{ title }}
-    </span>
 
     <div class="parties">
       <Avatar v-bind="sender" />
@@ -118,9 +108,6 @@ export default {
     recipient: { type: Object, required: true },
   },
   computed: {
-    isNewUI() {
-      return !!this.$route.meta.newUI;
-    },
     getTxType() {
       return this.$te(`transaction.dexType.${getDexTransactionTag[this.txFunction] || this.txFunction}`)
         ? this.$t(`transaction.dexType.${getDexTransactionTag[this.txFunction] || this.txFunction}`)
