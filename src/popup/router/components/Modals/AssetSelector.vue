@@ -17,7 +17,10 @@
       />
     </template>
 
-    <template v-if="isFullyOpen">
+    <div
+      v-show="isFullyOpen"
+      :class="['appearing-element', { visible: !loading }]"
+    >
       <TokensListItem
         v-for="token in filteredResults"
         :key="token.contractId || token.id"
@@ -28,9 +31,10 @@
         asset-selector
         @click="handleChange(token)"
       />
-    </template>
-    <Loader v-else />
-
+    </div>
+    <Loader
+      :class="['appearing-element', { visible: loading }]"
+    />
     <BackToTop />
   </Modal>
 </template>
@@ -59,6 +63,7 @@ export default {
     return {
       searchTerm: '',
       isFullyOpen: false,
+      loading: true,
     };
   },
   methods: {
@@ -81,6 +86,9 @@ export default {
     onModalOpen() {
       this.$nextTick(() => {
         this.isFullyOpen = true;
+        setTimeout(() => {
+          this.loading = false;
+        }, 250);
       });
     },
   },
@@ -105,6 +113,15 @@ export default {
     line-height: 48px;
     text-align: left;
     color: rgba(variables.$color-white, 0.75);
+  }
+
+  .appearing-element {
+    opacity: 0;
+    transition: opacity 0.25s ease-in-out;
+
+    &.visible {
+      opacity: 1;
+    }
   }
 }
 </style>
