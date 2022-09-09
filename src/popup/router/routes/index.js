@@ -323,6 +323,7 @@ export default [
       closeButton: true,
       hideNotificationsIcon: true,
       newUI: true,
+      ifNotAuth: true,
     },
   },
   {

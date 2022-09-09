@@ -315,8 +315,6 @@ export const BLOG_CLAIM_TIP_URL = 'https://blog.aeternity.com/superhero-how-to-s
 
 export const COMMIT_URL = 'https://github.com/aeternity/superhero-wallet/commit/';
 
-export const TERMS_URL = 'https://wallet.superhero.com/about/termsOfService';
-
 export const MODAL_DEFAULT = 'default';
 export const MODAL_ACCOUNT_CREATE = 'account-create';
 export const MODAL_ACCOUNT_IMPORT = 'import-account';
