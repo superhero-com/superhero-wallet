@@ -126,6 +126,11 @@ export default {
         this.$router.push(this.isLoggedIn ? '/account' : '/');
         return;
       }
+      if (this.$route.meta?.backRoute) {
+        // TODO: rewrite back button logic in more unified way
+        this.$router.push(this.$route.meta?.backRoute);
+        return;
+      }
       this.$router.back();
     },
     close() {

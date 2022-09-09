@@ -62,6 +62,13 @@ export default [
     path: '/account',
     name: 'account',
     component: Account,
+    meta: {
+      newUI: true,
+    },
+  },
+  {
+    path: '/transfer*',
+    redirect: '/account*',
   },
   {
     path: '/account-details/',
@@ -139,7 +146,6 @@ export default [
     props: true,
     meta: {
       notPersist: true,
-      hideTabBar: true,
     },
   },
   {
@@ -149,7 +155,6 @@ export default [
     props: true,
     meta: {
       notPersist: true,
-      hideTabBar: true,
     },
   },
   {
@@ -159,7 +164,6 @@ export default [
     props: true,
     meta: {
       notPersist: true,
-      hideTabBar: true,
     },
   },
   {
@@ -169,7 +173,6 @@ export default [
     props: true,
     meta: {
       notPersist: true,
-      hideTabBar: true,
     },
   },
   {
@@ -180,7 +183,6 @@ export default [
       title: 'settings',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -193,7 +195,6 @@ export default [
       title: 'reset-wallet',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -206,7 +207,6 @@ export default [
       title: 'save-errors-log',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -219,7 +219,6 @@ export default [
       title: 'language',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -232,7 +231,6 @@ export default [
       title: 'currency',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -245,7 +243,6 @@ export default [
       title: 'seed-phrase',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -258,7 +255,6 @@ export default [
       title: 'seed-phrase',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -271,7 +267,6 @@ export default [
       title: 'seed-phrase',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -285,7 +280,6 @@ export default [
       title: 'networks',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -298,7 +292,6 @@ export default [
       title: 'permissionsSettings',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -320,7 +313,6 @@ export default [
       title: 'about',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -333,9 +325,9 @@ export default [
       title: 'terms',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
+      ifNotAuth: true,
     },
   },
   {
@@ -346,7 +338,6 @@ export default [
       title: 'privacy',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -359,7 +350,6 @@ export default [
       title: 'claim-tips',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -384,7 +374,6 @@ export default [
     props: true,
     meta: {
       title: 'tx-details',
-      hideTabBar: true,
       newUI: true,
     },
   },
@@ -395,7 +384,6 @@ export default [
     meta: {
       title: 'more',
       backButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -417,7 +405,6 @@ export default [
       title: 'notifications',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },
@@ -433,7 +420,7 @@ export default [
       name: 'auction-bid',
       meta: {
         title: 'auction',
-        hideTabBar: true,
+        backRoute: '/account-details/names/auctions',
       },
     }, {
       path: 'history',
@@ -442,7 +429,7 @@ export default [
       name: 'auction-history',
       meta: {
         title: 'auction',
-        hideTabBar: true,
+        backRoute: '/account-details/names/auctions',
       },
     }],
   },
@@ -512,7 +499,6 @@ export default [
     meta: {
       title: 'sign-transaction',
       notPersist: true,
-      hideTabBar: true,
       newUI: true,
     },
   },
@@ -524,7 +510,6 @@ export default [
       title: 'invite',
       backButton: true,
       closeButton: true,
-      hideTabBar: true,
       hideNotificationsIcon: true,
       newUI: true,
     },

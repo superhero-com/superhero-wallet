@@ -56,8 +56,8 @@
           class="footer"
         >
           <slot name="footer" />
-          <NodeConnectionStatus v-if="fullScreen" />
         </div>
+        <NodeConnectionStatus v-if="fullScreen" />
       </div>
 
       <div
@@ -204,10 +204,7 @@ export default {
   }
 
   .node-connection-status {
-    position: static;
-    height: calc(40px + env(safe-area-inset-bottom));
-    margin-top: 4px;
-    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 2;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -227,7 +224,13 @@ export default {
   }
 
   &.full-screen {
-    position: absolute;
+    @include mixins.desktop {
+      position: absolute;
+    }
+
+    .footer {
+      padding-bottom: 25px;
+    }
 
     .container {
       height: 100%;

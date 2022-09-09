@@ -20,7 +20,7 @@
     <div class="transaction-sign-limit">
       <InputField
         :value="transactionSignLimit || ''"
-        :message="transactionSignLimitError"
+        :message="transactionSignLimitError ? { status: 'error' } : null"
         :label="$t('pages.permissions.transaction-sign')"
         placeholder="always ask"
         @input="setTransactionSignLimit"

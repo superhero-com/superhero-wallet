@@ -1,98 +1,96 @@
 <template>
-  <div class="account">
-    <Plate>
-      <AccountSwitcher :notification="!backedUpSeed" />
-      <CardRow class="first-card-wrapper">
-        <Card
-          :title="$t('dashboard.receive-card.title')"
-          :description="$t('dashboard.receive-card.description')"
-          clickable
-          @click="openTransferReceiveModal()"
-        >
-          <template #icon>
-            <ArrowReceiveIcon />
-          </template>
-        </Card>
-        <Card
-          :title="$t('dashboard.send-card.title')"
-          :description="$t('dashboard.send-card.description')"
-          clickable
-          @click="openTransferSendModal()"
-        >
-          <template #icon>
-            <ArrowSendIcon />
-          </template>
-        </Card>
-      </CardRow>
-      <CardRow v-if="!backedUpSeed">
-        <Card
-          :title="$t('dashboard.back-up-card.title')"
-          :description="$t('dashboard.back-up-card.description')"
-          is-big
-        >
-          <template #icon>
-            <SubtractIcon />
-          </template>
-          <Button
-            class="card-button"
-            :text="$t('dashboard.back-up-card.button')"
-            new-ui
-            inline
-            no-margin
-            :to="{ name: 'settings-seed-phrase' }"
-            fill="red"
-          />
-        </Card>
-      </CardRow>
-      <CardRow>
-        <Card
-          :title="$t('dashboard.buy-card.title')"
-          :description="$t('dashboard.buy-card.description')"
-          is-big
-          :background="buyBackground"
-        >
-          <template #icon>
-            <CardIcon />
-          </template>
-          <Button
-            class="card-button"
-            :text="$t('dashboard.buy-card.button')"
-            new-ui
-            inline
-            no-margin
-            :to="SIMPLEX_URL"
-            fill="red-2"
-          />
-        </Card>
-      </CardRow>
-      <CardRow>
-        <Card
-          :title="$t('dashboard.name-card.title')"
-          :description="$t('dashboard.name-card.description')"
-          is-big
-          :background="chainNameBackground"
-        >
-          <template #icon>
-            <MenuCardIcon />
-          </template>
-          <Button
-            class="card-button"
-            :text="$t('dashboard.name-card.button')"
-            new-ui
-            inline
-            no-margin
-            :to="{ name: 'account-details-names-claim' }"
-            fill="purple"
-          />
-        </Card>
-      </CardRow>
-    </Plate>
+  <div class="dashboard">
+    <AccountSwitcher :notification="!backedUpSeed" />
+    <CardRow class="first-card-wrapper">
+      <Card
+        :title="$t('dashboard.receive-card.title')"
+        :description="$t('dashboard.receive-card.description')"
+        clickable
+        @click="openTransferReceiveModal()"
+      >
+        <template #icon>
+          <ArrowReceiveIcon />
+        </template>
+      </Card>
+      <Card
+        :title="$t('dashboard.send-card.title')"
+        :description="$t('dashboard.send-card.description')"
+        clickable
+        @click="openTransferSendModal()"
+      >
+        <template #icon>
+          <ArrowSendIcon />
+        </template>
+      </Card>
+    </CardRow>
+    <CardRow v-if="!backedUpSeed">
+      <Card
+        :title="$t('dashboard.back-up-card.title')"
+        :description="$t('dashboard.back-up-card.description')"
+        is-big
+      >
+        <template #icon>
+          <SubtractIcon />
+        </template>
+        <Button
+          class="card-button"
+          :text="$t('dashboard.back-up-card.button')"
+          new-ui
+          inline
+          no-margin
+          :to="{ name: 'settings-seed-phrase' }"
+          fill="red"
+        />
+      </Card>
+    </CardRow>
+    <CardRow>
+      <Card
+        :title="$t('dashboard.buy-card.title')"
+        :description="$t('dashboard.buy-card.description')"
+        is-big
+        :background="buyBackground"
+      >
+        <template #icon>
+          <CardIcon />
+        </template>
+        <Button
+          class="card-button"
+          :text="$t('dashboard.buy-card.button')"
+          new-ui
+          inline
+          no-margin
+          :to="SIMPLEX_URL"
+          fill="red-2"
+        />
+      </Card>
+    </CardRow>
+    <CardRow>
+      <Card
+        :title="$t('dashboard.name-card.title')"
+        :description="$t('dashboard.name-card.description')"
+        is-big
+        :background="chainNameBackground"
+      >
+        <template #icon>
+          <MenuCardIcon />
+        </template>
+        <Button
+          class="card-button"
+          :text="$t('dashboard.name-card.button')"
+          new-ui
+          inline
+          no-margin
+          :to="{ name: 'account-details-names-claim' }"
+          fill="purple"
+        />
+      </Card>
+    </CardRow>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import Plate from '../components/Plate.vue';
+import { isEmpty } from 'lodash-es';
 import AccountSwitcher from '../components/AccountSwitcher.vue';
 import {
   MODAL_TRANSFER_RECEIVE,
@@ -116,7 +114,6 @@ export default {
   components: {
     CardRow,
     Card,
-    Plate,
     AccountSwitcher,
     ArrowReceiveIcon,
     ArrowSendIcon,
@@ -139,6 +136,14 @@ export default {
     activeIdx() { // TODO: remove it, maybe by extracting transactions entity
       this.$store.commit('initTransactions');
     },
+    $route: {
+      immediate: true,
+      handler({ query }) {
+        if (!isEmpty(query)) {
+          this.$store.dispatch('modals/open', { name: MODAL_TRANSFER_SEND });
+        }
+      },
+    },
   },
   methods: {
     openTransferReceiveModal() {
@@ -160,7 +165,7 @@ export default {
 @use '../../../styles/typography';
 @use '../../../styles/mixins';
 
-.account {
+.dashboard {
   display: flex;
   flex-direction: column;
   min-height: 100%;

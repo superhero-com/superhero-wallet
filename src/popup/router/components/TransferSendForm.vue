@@ -219,8 +219,7 @@ export default {
       const tipUrlNormalised = new URL(/^\w+:\D+/.test(tipUrl) ? tipUrl : `https://${tipUrl}`);
       this.formModel.address = tipUrlNormalised.toString();
     }
-    const tipAmount = +this.$route.query.amount;
-    if (tipAmount) this.formModel.amount = tipAmount.toString();
+    this.queryHandler(this.$route.query);
   },
   methods: {
     checkAensName,

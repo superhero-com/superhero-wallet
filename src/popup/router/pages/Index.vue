@@ -50,14 +50,14 @@
           {{ $t('pages.index.term1') }}
         </span>
       </CheckBox>
-      <a
-        :href="TERMS_URL"
+      <RouterLink
+        :to="{ name: 'about-terms' }"
         data-cy="terms"
         :class="{ agreed: termsAgreed }"
         class="terms-of-use"
       >
         {{ $t('pages.index.termsAndConditions') }}
-      </a>
+      </RouterLink>
     </div>
     <div
       class="wallet-button-box"
@@ -93,10 +93,7 @@ import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
 import CheckCircleIcon from '../../../icons/check-circle-fill.svg?vue-component';
 import ButtonSubheader from '../components/ButtonSubheader.vue';
 import Platforms from '../components/Platforms.vue';
-import {
-  TERMS_URL,
-  MODAL_ACCOUNT_IMPORT,
-} from '../../utils/constants';
+import { MODAL_ACCOUNT_IMPORT } from '../../utils/constants';
 
 export default {
   components: {
@@ -112,7 +109,6 @@ export default {
     IS_WEB: process.env.PLATFORM === 'web',
     IS_MOBILE: window.IS_MOBILE_DEVICE,
     IN_FRAME,
-    TERMS_URL,
   }),
   methods: {
     async createWallet() {

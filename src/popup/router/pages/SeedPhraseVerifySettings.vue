@@ -73,7 +73,7 @@
             {{ $t('pages.seed-phrase-settings.seed-phrase-incorrect') }}
           </div>
           <div v-else>
-            {{ $t('pages.seed-phrase-correct.seed-phrase-verified') }}
+            {{ $t('pages.seed-phrase-settings.seed-phrase-correct') }}
           </div>
         </div>
       </div>

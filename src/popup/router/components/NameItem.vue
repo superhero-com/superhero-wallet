@@ -68,7 +68,7 @@
         :message="error ? $t('pages.names.list.valid-identifier-error') : null"
         plain
       >
-        <template #right>
+        <template #after>
           <ButtonPlain
             v-show="newPointer.length"
             @click="setPointer"
@@ -317,9 +317,15 @@ export default {
     .input-field {
       margin: 8px 0;
 
-      ::v-deep .wrapper {
+      ::v-deep .input-wrapper {
         svg + .input {
           margin-left: 4px;
+        }
+
+        .input {
+          @extend %face-mono-10-medium;
+
+          letter-spacing: -0.2px;
         }
 
         .button-plain {
@@ -338,6 +344,8 @@ export default {
 
       ::v-deep .value {
         @extend %face-mono-10-medium;
+
+        letter-spacing: 0;
 
         .pointers {
           display: flex;

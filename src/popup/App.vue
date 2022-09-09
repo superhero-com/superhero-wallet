@@ -4,7 +4,6 @@
     :class="{
       'not-rebrand': $route.meta.notRebrand,
       'show-header': showStatusAndHeader,
-      'hide-tab-bar': $route.meta.hideTabBar,
       'new-ui': $route.meta.newUI,
       'as-modal': $route.meta.asModal,
     }"
@@ -191,9 +190,6 @@ body {
   }
 
   .main {
-    padding-bottom: 48px;
-    padding-bottom: calc(48px + env(safe-area-inset-bottom));
-
     @include mixins.desktop {
       min-height: 100%;
       padding-bottom: 0;
@@ -263,16 +259,6 @@ body {
 
     @include mixins.desktop {
       position: sticky;
-    }
-  }
-
-  &.hide-tab-bar {
-    .main {
-      padding-bottom: 0;
-    }
-
-    .tab-bar {
-      display: none;
     }
   }
 }
