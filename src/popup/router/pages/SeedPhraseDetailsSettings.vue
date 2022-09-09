@@ -64,7 +64,7 @@ export default {
   methods: {
     setBackedUpSeed() {
       this.$store.commit('setBackedUpSeed');
-      this.$router.replace({ name: 'settings-seed-phrase' });
+      this.$router.push({ name: 'account' });
     },
   },
 };

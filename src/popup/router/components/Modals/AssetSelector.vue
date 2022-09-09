@@ -17,6 +17,9 @@
       />
     </template>
 
+    <Loader
+      :class="['appearing-element', { visible: loading }]"
+    />
     <div
       v-show="isFullyOpen"
       :class="['appearing-element', { visible: !loading }]"
@@ -32,9 +35,6 @@
         @click="handleChange(token)"
       />
     </div>
-    <Loader
-      :class="['appearing-element', { visible: loading }]"
-    />
     <BackToTop />
   </Modal>
 </template>
@@ -101,6 +101,8 @@ export default {
 @use '../../../../styles/mixins';
 
 .asset-selector {
+  padding-top: env(safe-area-inset-top);
+
   .search-bar {
     margin: 8px 8px 16px;
   }
@@ -117,10 +119,12 @@ export default {
 
   .appearing-element {
     opacity: 0;
+    z-index: -1;
     transition: opacity 0.25s ease-in-out;
 
     &.visible {
       opacity: 1;
+      z-index: 1;
     }
   }
 }
