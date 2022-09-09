@@ -3,7 +3,7 @@
     class="account-switcher"
     :class="{ 'notification-above': notification }"
   >
-    <TotalWalletAmount v-if="filteredAccounts.length > 1" />
+    <TotalWalletAmount v-if="accounts.length > 1" />
     <swiper
       ref="customSwiper"
       class="swiper"
@@ -11,8 +11,8 @@
       @slideChange="onSlideChange"
     >
       <swiper-slide
-        v-for="(account, idx) in filteredAccounts"
-        :key="account.accountIdx"
+        v-for="(account, idx) in accounts"
+        :key="account.idx"
       >
         <ButtonPlain
           v-if="idx !== 0 && !IS_CORDOVA"
@@ -22,8 +22,8 @@
           <Chevron />
         </ButtonPlain>
         <AccountCard
-          :class="{ selected: account.accountIdx === activeIdx }"
-          :account-idx="account.accountIdx"
+          :class="{ selected: account.idx === activeIdx }"
+          :account-idx="account.idx"
         />
         <ButtonPlain
           v-if="!IS_CORDOVA"
@@ -45,10 +45,10 @@
       </swiper-slide>
     </swiper>
     <BulletSwitcher
-      v-if="filteredAccounts && filteredAccounts.length"
+      v-if="accounts && accounts.length"
       :active-color="getAccountColor(currentIdx)"
       :current-idx="currentIdx"
-      :options-size="filteredAccounts.length"
+      :options-size="accounts.length"
       @change="setCurrentSlide"
     />
   </div>
@@ -95,11 +95,6 @@ export default {
     swiper() {
       return this.$refs.customSwiper.$swiper;
     },
-    filteredAccounts() {
-      return this.accounts.map(
-        (account, index) => ({ ...account, accountIdx: index }),
-      ).filter((account) => account.showed);
-    },
   },
   mounted() {
     if (this.activeIdx) {
@@ -113,14 +108,14 @@ export default {
     },
     onSlideChange() {
       const { realIndex } = this.swiper;
-      if (this.swiper.realIndex < this.filteredAccounts.length
-        && this.filteredAccounts[realIndex]) {
-        this.selectAccount(this.filteredAccounts[realIndex].accountIdx);
+      if (this.swiper.realIndex < this.accounts.length
+        && this.accounts[realIndex]) {
+        this.selectAccount(this.accounts[realIndex].idx);
       }
       if (this.currentIdx !== realIndex) this.currentIdx = realIndex;
     },
     getAccountColor(idx) {
-      return getAddressColor(this.filteredAccounts[idx]?.address);
+      return getAddressColor(this.accounts[idx]?.address);
     },
     setCurrentSlide(idx, slideParams) {
       this.currentIdx = idx;
