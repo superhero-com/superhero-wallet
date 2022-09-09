@@ -233,6 +233,9 @@ export default {
   }
 
   &.full-screen {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+
     @include mixins.desktop {
       position: absolute;
     }
