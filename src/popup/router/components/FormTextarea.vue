@@ -10,9 +10,10 @@
       <textarea
         :id="inputId"
         data-cy="textarea"
-        class="textarea-input"
+        :class="['textarea-input', { resizable }]"
         :placeholder="placeholder"
         :value="value"
+        @keydown.enter="handleEnterClick"
         @input="$emit('input', $event.target.value)"
       />
     </template>
@@ -40,10 +41,19 @@ export default {
     value: { type: String, default: '' },
     error: Boolean,
     placeholder: { type: String, default: '' },
+    enterSubmit: Boolean,
+    resizable: { type: Boolean, default: true },
     size: {
       type: String,
       default: null,
       validator: (val) => SIZES.includes(val),
+    },
+  },
+  methods: {
+    handleEnterClick(event) {
+      if (!this.enterSubmit) return;
+      this.$emit('submit');
+      event.preventDefault();
     },
   },
 };
@@ -70,6 +80,11 @@ export default {
     word-break: break-word;
     font-size: 15px;
     line-height: var(--base-line-height);
+    resize: none;
+
+    &.resizable {
+      resize: both;
+    }
   }
 
   ::placeholder {
