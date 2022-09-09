@@ -1,7 +1,7 @@
 <template>
   <div
     class="card"
-    :class="{ 'is-big': isBig, clickable }"
+    :class="{ 'is-big': isBig, clickable, dense }"
     :style="styleComponent"
     @click="$emit('click', $event)"
   >
@@ -41,6 +41,7 @@ export default {
     },
     isBig: Boolean,
     clickable: Boolean,
+    dense: Boolean,
   },
   computed: {
     styleComponent() {
@@ -72,6 +73,12 @@ export default {
   transition: background-color 0.2s;
 
   @include mixins.flex(center, center, column);
+
+  &.dense {
+    .description {
+      margin-top: 0;
+    }
+  }
 
   &.clickable {
     cursor: pointer;

@@ -6,6 +6,7 @@
         :title="$t('dashboard.receive-card.title')"
         :description="$t('dashboard.receive-card.description')"
         clickable
+        dense
         @click="openTransferReceiveModal()"
       >
         <template #icon>
@@ -16,6 +17,7 @@
         :title="$t('dashboard.send-card.title')"
         :description="$t('dashboard.send-card.description')"
         clickable
+        dense
         @click="openTransferSendModal()"
       >
         <template #icon>
