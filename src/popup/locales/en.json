@@ -238,8 +238,8 @@
       "copy": "Copy",
       "copied": "Copied!",
       "share": "Share",
-      "shareTextNoAmount": "My aeternity address {address} or use the following link {walletLink} to send it with Superhero Wallet",
-      "shareTextWithAmount": "Please send {amount} AE to my aeternity address {address} or use the following link {walletLink} to send it with Superhero Wallet"
+      "shareTextNoAmount": "My æternity address:<br>{address}<br><br>Or send with Superhero Wallet: {walletLink}",
+      "shareTextWithAmount": "{amount} AE has been requested.<br><br>Send to æternity address:<br>{address}<br><br>Or send with Superhero Wallet:<br>{walletLink}"
     },
     "send": {
       "sendTitle": "Send funds",
