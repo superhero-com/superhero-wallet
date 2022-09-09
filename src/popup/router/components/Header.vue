@@ -9,7 +9,7 @@
       class="left"
     >
       <RouterLink
-        v-if="isLoggedIn"
+        v-if="isLoggedIn && !showBack"
         to="/account"
         class="home-button"
       >
