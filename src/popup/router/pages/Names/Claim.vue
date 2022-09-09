@@ -7,8 +7,7 @@
       class="chain-name"
       new-ui
       :label="$t('pages.names.claim.register-name')"
-      :error="errors.has('name')"
-      :error-message="errors.first('name')"
+      :message="errors.first('name')"
       :placeholder="$t('pages.names.claim.name-placeholder')"
     >
       <template #label-after>
