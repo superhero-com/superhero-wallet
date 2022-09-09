@@ -20,7 +20,7 @@
           {{ $t('pages.account.heading') }} {{ accountIdx + 1 }}
         </div>
         <ButtonPlain
-          v-if="truncatedAddress && truncatedAddress.length"
+          v-if="canCopyAddress && truncatedAddress.length"
           v-clipboard:copy="activeAccount.address"
           v-clipboard:success="copy"
           class="ae-address"
@@ -39,6 +39,14 @@
             {{ $t('addressCopied') }}
           </div>
         </ButtonPlain>
+        <div
+          v-else-if="truncatedAddress.length"
+          class="ae-address"
+        >
+          <span>{{ truncatedAddress[0] }}</span>
+          <span class="more">...</span>
+          <span>{{ truncatedAddress[1] }}</span>
+        </div>
       </div>
     </div>
   </div>

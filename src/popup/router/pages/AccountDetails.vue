@@ -3,7 +3,7 @@
     <div class="account-info-wrapper">
       <AccountInfo
         :account-idx="activeIdx"
-        show-copy-icon
+        can-copy-address
       />
 
       <ButtonIcon
