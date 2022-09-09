@@ -62,7 +62,7 @@ export default {
 
       &,
       &:hover {
-        background-color: variables.$color-bg-3;
+        background-color: var(--screen-bg-color);
       }
     }
 

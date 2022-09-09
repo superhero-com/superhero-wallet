@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="showNavigation && !aeppPopup"
-    :class="['header', { 'not-logged-in': !isLoggedIn, 'new-ui': $route.meta.newUI }]"
+    :class="['header', { 'not-logged-in': !isLoggedIn }]"
   >
     <div
       v-if="isLoggedIn || title"
@@ -181,10 +181,6 @@ export default {
     display: flex;
     justify-content: space-between;
     width: 100%;
-  }
-
-  &.new-ui {
-    background-color: variables.$color-bg-3-new;
   }
 
   .left {

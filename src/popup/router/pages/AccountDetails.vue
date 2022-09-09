@@ -168,6 +168,10 @@ export default {
     0 0 0 1px variables.$color-border,
     0 0 50px rgba(variables.$color-black, 0.6);
 
+  @include mixins.mobile {
+    min-height: 100vh;
+  }
+
   .account-info-wrapper {
     position: sticky;
     top: env(safe-area-inset-top);
@@ -222,7 +226,7 @@ export default {
     gap: 16px;
     padding: 4px;
     border-radius: 14px;
-    background-color: variables.$color-bg-3;
+    background-color: var(--screen-bg-color);
 
     @include mixins.flex(flex-start, center, row);
 

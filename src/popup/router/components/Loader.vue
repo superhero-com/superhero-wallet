@@ -33,7 +33,7 @@ export default {
   .container {
     width: 100%;
     height: 100%;
-    background-color: variables.$color-bg-3;
+    background-color: var(--screen-bg-color);
     opacity: 0.9;
     display: flex;
     align-items: center;

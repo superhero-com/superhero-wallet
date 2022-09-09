@@ -302,7 +302,7 @@ export default {
   }
 
   .content {
-    background: variables.$color-bg-3;
+    background: var(--screen-bg-color);
 
     .transaction-overview {
       padding: 16px;

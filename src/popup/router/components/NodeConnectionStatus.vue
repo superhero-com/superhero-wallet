@@ -49,7 +49,7 @@ export default {
   bottom: env(safe-area-inset-bottom);
   left: 0;
   right: 0;
-  background: variables.$color-bg-3-new;
+  background: var(--screen-bg-color);
   padding: 4px 0;
   color: variables.$color-white;
   text-align: center;
