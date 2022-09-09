@@ -124,6 +124,7 @@ export default {
 
       setTimeout(() => {
         this.showNotification = false;
+        this.$router.push({ name: 'account' });
       }, 3000);
     },
     onSelectWord(index) {
