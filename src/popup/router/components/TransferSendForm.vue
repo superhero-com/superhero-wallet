@@ -207,19 +207,19 @@ export default {
   },
   created() {
     this.formModel = this.transferData;
-    if (!this.formModel.selectedAsset) {
-      this.formModel.selectedAsset = this.getAeternityToken({
-        tokenBalance: this.balance,
-        balanceCurrency: this.balanceCurrency,
-      });
-    }
     const tipUrlEncoded = this.$route.query.url;
     if (tipUrlEncoded) {
       const tipUrl = decodeURIComponent(tipUrlEncoded);
       const tipUrlNormalised = new URL(/^\w+:\D+/.test(tipUrl) ? tipUrl : `https://${tipUrl}`);
       this.formModel.address = tipUrlNormalised.toString();
     }
-    this.queryHandler(this.$route.query);
+
+    const { query } = this.$route;
+
+    this.queryHandler({
+      ...query,
+      token: this.formModel?.selectedAsset?.contractId || query.token,
+    });
   },
   methods: {
     checkAensName,
