@@ -15,27 +15,27 @@
 
       <AccountRow />
 
-      <div class="address-info">
+      <div class="qrcode-wrapper">
         <QrcodeVue
           :value="getQRdata(account.address)"
-          size="112"
+          size="180"
           class="qrcode"
         />
-
-        <a
-          class="address"
-          target="_blank"
-          :href="explorerUrl"
-          :class="{ copied }"
-        >
-          <Scrollable>
-            <AddressFormatted
-              :address="computedAddress"
-              :columns="!amount"
-            />
-          </Scrollable>
-        </a>
       </div>
+
+      <a
+        class="address"
+        target="_blank"
+        :href="explorerUrl"
+        :class="{ copied }"
+      >
+        <Scrollable>
+          <AddressFormatted
+            :address="computedAddress"
+            :columns="!amount"
+          />
+        </Scrollable>
+      </a>
 
       <div class="request-specific-amount">
         <InputAmount
@@ -216,46 +216,40 @@ export default {
       @extend %face-sans-18-bold;
     }
 
-    .address-info {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 24px;
+    .qrcode-wrapper {
+      margin-top: 10px;
+      text-align: center;
 
       .qrcode {
-        display: flex;
-        align-self: flex-start;
+        display: inline-flex;
         padding: 8px;
         background-color: variables.$color-white;
         border-radius: 12px;
       }
-
-      .address {
-        @extend %face-mono-14-medium;
-
-        display: block;
-        width: 100%;
-        padding-left: 6px;
-        border-radius: 12px;
-        border-width: 1px;
-        border-style: dashed;
-        border-color: transparent;
-        color: variables.$color-white;
-        font-style: normal;
-        text-align: left;
-        line-height: 24px;
-        text-decoration: none;
-        transition: 0.2s;
-
-        &.copied {
-          background: rgba(variables.$color-primary, 0.1);
-          border-color: rgba(variables.$color-primary, 0.5);
-        }
-      }
     }
 
-    .request-specific-amount {
-      margin-top: 32px;
+    .address {
+      @extend %face-mono-14-medium;
+
+      margin-top: 14px;
+      display: block;
+      width: 100%;
+      height: 74px;
+      border-radius: 12px;
+      border-width: 1px;
+      border-style: dashed;
+      border-color: transparent;
+      color: variables.$color-white;
+      font-style: normal;
+      text-align: left;
+      line-height: 24px;
+      text-decoration: none;
+      transition: 0.2s;
+
+      &.copied {
+        background: rgba(variables.$color-primary, 0.1);
+        border-color: rgba(variables.$color-primary, 0.5);
+      }
     }
   }
 
