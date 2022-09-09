@@ -1227,7 +1227,7 @@
   "minutes": "{n} minutes | {n} minute | {n} minutes",
   "hours": "{n} hours | {n} hour | {n} hours",
   "days": "{n} days | {n} day | {n} days",
-  "addressCopied": "Copied!",
+  "addressCopied": "Copied",
   "hashCopied": "Hash copied",
   "copied": "Copied",
   "copy": "Copy",
