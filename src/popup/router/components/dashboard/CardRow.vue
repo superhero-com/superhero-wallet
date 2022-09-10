@@ -13,9 +13,9 @@ export default {
 <style lang="scss" scoped>
   .card-row {
     display: flex;
-    padding: 0 16px;
-    gap: 12px;
-    margin-bottom: 12px;
+    padding: 0 var(--screen-padding-x);
+    gap: var(--gap);
+    margin-bottom: var(--gap);
     width: 100%;
 
     &:last-child {

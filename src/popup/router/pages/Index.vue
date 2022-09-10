@@ -61,7 +61,7 @@
       <ButtonSubheader
         v-show="termsAgreed"
         data-cy="generate-wallet"
-        :subheader=" $t('pages.index.getStartedWithWallet')"
+        :subheader="$t('pages.index.getStartedWithWallet')"
         :header="$t('pages.index.generateWallet')"
         @click="createWallet"
       >
@@ -70,7 +70,7 @@
       <ButtonSubheader
         v-show="termsAgreed"
         data-cy="import-wallet"
-        :subheader=" $t('pages.index.enterSeed') "
+        :subheader="$t('pages.index.enterSeed')"
         :header="$t('pages.index.importWallet')"
         @click="importWallet"
       >

@@ -113,6 +113,7 @@ export default {
   --screen-padding-x: 16px;
   --screen-bg-color: #{variables.$color-bg-3};
   --header-height: 0;
+  --gap: 12px;
 
   @extend %face-sans-16-regular;
 
