@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="account-details-names">
     <div class="tabs">
       <ButtonPlain
         :to="{ name: 'account-details-names' }"
@@ -35,15 +35,15 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-  @use '../../../styles/variables';
-  @use '../../../styles/mixins';
-  @use '../../../styles/typography';
 
+<style lang="scss" scoped>
+@use '../../../styles/variables';
+@use '../../../styles/mixins';
+@use '../../../styles/typography';
+
+.account-details-names {
   .tabs {
-    gap: 16px;
-    padding-left: 4px;
-    padding-right: 4px;
+    gap: var(--gap);
     border-radius: 14px;
     padding-top: 2px;
     background-color: var(--screen-bg-color);
@@ -68,4 +68,5 @@ export default {
       }
     }
   }
+}
 </style>

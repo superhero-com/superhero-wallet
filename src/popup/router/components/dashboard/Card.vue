@@ -64,7 +64,7 @@ export default {
   width: 100%;
   background-color: variables.$color-bg-6;
   min-height: 116px;
-  border-radius: 10px;
+  border-radius: variables.$border-radius-interactive;
   padding: 16px;
   gap: 8px;
   background-repeat: no-repeat;
