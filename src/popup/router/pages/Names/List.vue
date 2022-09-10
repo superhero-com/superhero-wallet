@@ -27,7 +27,11 @@ import RegisterName from '../../components/RegisterName.vue';
 import AnimatedSpinner from '../../../../icons/animated-spinner.svg?skip-optimize';
 
 export default {
-  components: { NameItem, AnimatedSpinner, RegisterName },
+  components: {
+    NameItem,
+    AnimatedSpinner,
+    RegisterName,
+  },
   computed: {
     ...mapGetters(['account']),
     ...mapState('names', ['areNamesFetching']),
@@ -49,6 +53,8 @@ export default {
 @use '../../../../styles/typography';
 
 .list {
+  padding-top: 4px;
+
   .name-item {
     margin-top: 1px;
   }

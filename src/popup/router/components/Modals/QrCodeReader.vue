@@ -1,52 +1,70 @@
 <template>
   <Modal
     v-if="browserReader || !cameraAllowed"
-    close
     class="qr-code-reader"
+    has-close-button
+    centered
+    from-bottom
     @close="resolve"
   >
-    <template slot="header">
-      <QrScan class="icon" />
-      {{ title }}
-    </template>
+    <div class="qr-scan-wrapper">
+      <QrScan />
+    </div>
+    <span v-if="cameraAllowed">{{ title }}</span>
+    <span v-else>
+      {{ $t('modals.qrCodeReader.grantPermission') }}
+      <div class="subtitle">{{ $t('modals.qrCodeReader.subtitle') }}</div>
+    </span>
 
     <div class="camera">
+      <span
+        v-if="!cameraAllowed"
+        class="video-title"
+      >
+        {{ $t('modals.qrCodeReader.cameraNotAllowedFirst') }}
+        <p class="second-text">
+          {{ $t('modals.qrCodeReader.cameraNotAllowedSecond') }}
+        </p>
+      </span>
       <div v-show="cameraAllowed">
         <video
-          v-show="cameraAllowed"
           ref="qrCodeVideo"
+          class="video"
         />
-      </div>
-      <div v-if="!cameraAllowed">
-        {{ $t('modals.qrCodeReader.cameraNotAllowed') }}
       </div>
     </div>
 
-    <template
-      v-if="!cameraAllowed"
-      slot="footer"
-    >
-      <Button @click="cancelReading">
-        {{ $t('ok') }}
-      </Button>
+    <div class="button-wrapper">
+      <Button
+        :fill="mobile ? 'secondary' : 'primary'"
+        :extend="!mobile"
+        new-ui
+        :text="$t('ok')"
+        @click="cancelReading"
+      />
       <Button
         v-if="mobile"
+        new-ui
+        :text="$t('modals.qrCodeReader.settings')"
         @click="openSettings"
-      >
-        {{ $t('modals.qrCodeReader.settings') }}
-      </Button>
-    </template>
+      />
+    </div>
   </Modal>
 </template>
 
 <script>
+import { mapMutations } from 'vuex';
 import Modal from '../Modal.vue';
 import Button from '../Button.vue';
 import { handleUnknownError } from '../../../utils/helper';
 import QrScan from '../../../../icons/qr-scan.svg?vue-component';
 
 export default {
-  components: { Modal, Button, QrScan },
+  components: {
+    Modal,
+    Button,
+    QrScan,
+  },
   props: {
     title: { type: String, required: true },
     resolve: { type: Function, required: true },
@@ -125,14 +143,15 @@ export default {
       status.onchange = () => {
         this.cameraAllowed = status.state !== 'denied';
       };
+      return;
     }
-
     this.cameraAllowed = true;
   },
   beforeDestroy() {
     this.stopReading();
   },
   methods: {
+    ...mapMutations(['setQrScanner']),
     async initBrowserReader() {
       const { BrowserQRCodeReader } = await import('@zxing/library');
       this.browserReader = new BrowserQRCodeReader();
@@ -140,26 +159,31 @@ export default {
     async scan() {
       return this.mobile
         ? new Promise((resolve, reject) => {
+          this.setQrScanner(true);
+          window.plugins.webviewcolor.change('#00FFFFFF');
+
           window.QRScanner.scan((error, text) => (!error && text ? resolve(text) : reject(error)));
           window.QRScanner.show();
           ['body', '#app'].forEach((s) => {
             document.querySelector(s).style = 'background: transparent';
           });
-          document.querySelector('.main').style.display = 'none';
-          this.$store.commit('setPageTitle', 'Scan QR');
+
+          setTimeout(() => {
+            document.querySelector('.camera-close-button').addEventListener('click', this.stopReading);
+          }, 500);
         })
         : (
           await this.browserReader.decodeFromInputVideoDevice(undefined, this.$refs.qrCodeVideo)
         ).getText();
     },
-    stopReading() {
+    async stopReading() {
       if (this.mobile) {
-        ['body', '#app', '.main'].forEach((s) => {
-          document.querySelector(s).style = '';
+        ['body', '#app'].forEach((s) => {
+          document.querySelector(s).style = 'background: #141414';
         });
-        // https://github.com/bitpay/cordova-plugin-qrscanner/issues/234
-        window.plugins.webviewcolor.change('#090909');
-        this.$store.commit('setPageTitle', '');
+        await window.QRScanner.pausePreview();
+        window.plugins.webviewcolor.change('#141414');
+        this.setQrScanner(false);
         window.QRScanner.destroy();
       } else this.browserReader.reset();
     },
@@ -175,20 +199,66 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use "../../../../styles/variables";
-@use "../../../../styles/mixins";
+@use '../../../../styles/variables';
+@use '../../../../styles/mixins';
+@use '../../../../styles/typography';
 
 .qr-code-reader {
-  .icon {
-    color: variables.$color-blue;
+  .qr-scan-wrapper {
+    @include mixins.flex(center, center);
+
+    background-color: variables.$color-bg-1;
+    border: 4px solid rgba(variables.$color-white, 0.05);
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    align-self: center;
+    margin: 0 auto 16px auto;
+
+    .qr-scan {
+      margin-bottom: 0;
+      width: 40px;
+      height: 40px;
+      color: variables.$color-blue;
+    }
   }
 
-  .camera video {
-    max-width: 70vw;
+  .button-wrapper {
+    padding-top: 20px;
+    padding-bottom: 0;
+    width: 100%;
+  }
 
-    @include mixins.desktop {
-      max-width: 100%;
+  .camera {
+    margin-top: 20px;
+
+    .video {
+      max-width: 70vw;
+
+      @include mixins.desktop {
+        max-width: 100%;
+      }
     }
+
+    .video-title {
+      @extend %face-sans-14-regular;
+
+      color: rgba(variables.$color-white, 0.85);
+      line-height: 20px;
+    }
+
+    .second-text {
+      margin-top: 20px;
+    }
+  }
+
+  .subtitle {
+    @extend %face-sans-16-medium;
+
+    margin-top: 4px;
+    margin-bottom: 20px;
+    line-height: 24px;
+    color: rgba(variables.$color-white, 0.75);
   }
 }
 </style>

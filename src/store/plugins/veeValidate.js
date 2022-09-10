@@ -9,6 +9,7 @@ import {
   isNotFoundError,
   getAddressByNameEntry,
   checkAensName,
+  validateTipUrl,
 } from '../../popup/utils/helper';
 
 Vue.use(VeeValidate);
@@ -17,15 +18,7 @@ const filteredRules = (errors, validatedField, rules) => errors.filter(
   ({ field, rule }) => field === validatedField && !rules.includes(rule),
 );
 
-const { validateAll } = Validator.prototype;
 Object.assign(Validator.prototype, {
-  async validateAll(warningRules = {}) {
-    await validateAll.call(this);
-    return !Object.entries(warningRules).reduce(
-      (count, [field, rules]) => count + filteredRules(this.errors.items, field, rules).length,
-      0,
-    );
-  },
   firstExcept(field, rules) {
     return filteredRules(this.errors.items, field, rules)[0]?.msg;
   },
@@ -64,6 +57,8 @@ Validator.localize('en', {
     max_value: (field, [arg]) => i18n.t('validation.maxValue', [arg]),
     enough_ae: () => i18n.t('validation.enoughAe'),
     not_token: () => i18n.t('validation.notToken'),
+    name_registered_address_or_url: () => i18n.t('validation.invalidAddressChainUrl'),
+    min_tip_amount: () => i18n.t('pages.tipPage.minAmountError'),
   },
 });
 
@@ -109,14 +104,25 @@ export default (store) => {
     },
   );
 
-  const checkNameRegisteredAddress = (value) => checkName(NAME_STATES.REGISTERED_ADDRESS)(
-    value, [],
-  );
+  const checkNameRegisteredAddress = async (value) => {
+    try {
+      return Crypto.isAddressValid(value) || await checkName(NAME_STATES.REGISTERED_ADDRESS)(
+        value, [],
+      );
+    } catch (error) {
+      return false;
+    }
+  };
 
+  Validator.extend('min_tip_amount', (value) => BigNumber(value).isGreaterThan(store.getters.minTipAmount));
   Validator.extend('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
-  Validator.extend('name_registered_address', (value) => Crypto.isAddressValid(value) || checkNameRegisteredAddress(value));
-  Validator.extend('token_to_an_address', (value) => Crypto.isAddressValid(value) || (checkAensName(value) && !store.getters['fungibleTokens/selectedToken']));
-  Validator.extend('not_token', () => !store.getters['fungibleTokens/selectedToken']);
+  Validator.extend('name_registered_address', (value) => checkAensName(value) && checkNameRegisteredAddress(value));
+  Validator.extend('token_to_an_address', {
+    validate(value, args) {
+      return !checkAensName(value) || (checkAensName(value) && !args.isToken);
+    },
+    params: ['isToken'],
+  });
   Validator.extend('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
@@ -126,4 +132,6 @@ export default (store) => {
       .subscribe((balance) => resolve(balance.isGreaterThanOrEqualTo(arg)))
       .unsubscribe(),
   ));
+  Validator.extend('name_registered_address_or_url', (value) => (checkAensName(value)
+    ? checkNameRegisteredAddress(value) : Crypto.isAddressValid(value) || validateTipUrl(value)));
 };

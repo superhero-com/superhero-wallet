@@ -28,7 +28,7 @@ export default {
 
 .details-row {
   padding: 8px 16px;
-  background-color: variables.$color-bg-3;
+  background-color: var(--screen-bg-color);
   display: flex;
   justify-content: space-between;
 

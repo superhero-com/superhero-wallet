@@ -4,6 +4,7 @@
       v-if="displayFilter"
       v-model="displayMode"
       :filters="filters"
+      :fixed="filtersFixed"
     />
     <div
       class="list"
@@ -44,7 +45,7 @@ import { SCHEMA } from '@aeternity/aepp-sdk';
 import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
-import { TXS_PER_PAGE } from '../../utils/constants';
+import { TXS_PER_PAGE, FUNCTION_TYPE_DEX, AETERNITY_CONTRACT_ID } from '../../utils/constants';
 import Visible from '../../../icons/visible.svg?vue-component';
 
 export default {
@@ -57,8 +58,9 @@ export default {
   props: {
     token: { type: String, default: '' },
     searchTerm: { type: String, default: '' },
-    displayFilter: { type: Boolean, default: true },
     maxLength: { type: Number, default: null },
+    displayFilter: Boolean,
+    filtersFixed: Boolean,
   },
   data() {
     return {
@@ -66,13 +68,12 @@ export default {
       isDestroyed: false,
       displayMode: { rotated: true, filter: 'all', sort: 'date' },
       filters: {
-        all: {}, sent: {}, received: {}, tips: {}, date: { rotated: true },
+        all: {}, in: {}, out: {}, dex: {},
       },
     };
   },
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapState('accounts', ['activeIdx']),
     ...mapState(['transactions']),
     ...mapState({
       filteredTransactions(
@@ -83,7 +84,7 @@ export default {
           .includes(tr.tx.contractId);
         return [...loaded, ...getAccountPendingTransactions]
           .filter((tr) => (!this.token
-            || (this.token !== 'aeternity'
+            || (this.token !== AETERNITY_CONTRACT_ID
               ? tr.tx?.contractId === this.token
               : (!tr.tx.contractId
               || !isFungibleTokenTx(tr)))))
@@ -91,13 +92,15 @@ export default {
             switch (this.displayMode.filter) {
               case 'all':
                 return true;
-              case 'sent':
+              case 'dex':
+                return FUNCTION_TYPE_DEX.pool.includes(tr.tx.function);
+              case 'out':
                 return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
                   && tr.tx.senderId === address)
                   || (isFungibleTokenTx(tr)
                   && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
                   && tr.tx.callerId === address);
-              case 'received':
+              case 'in':
                 return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
                   && (tr.tx.recipientId === address || (tr.tx.senderId !== address && tr.tx.recipientId.startsWith('nm_'))))
                   || (isFungibleTokenTx(tr)
@@ -127,12 +130,6 @@ export default {
       },
     }),
     ...mapGetters(['getTxSymbol']),
-  },
-  watch: {
-    activeIdx() {
-      this.$store.commit('initTransactions');
-      this.loadMore();
-    },
   },
   mounted() {
     this.loadMore();
@@ -191,7 +188,6 @@ export default {
   flex-direction: column;
 
   .list {
-    background: variables.$color-black;
     padding: 0;
     margin: 0;
   }

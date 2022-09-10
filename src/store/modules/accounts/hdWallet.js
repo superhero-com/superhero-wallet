@@ -1,5 +1,6 @@
 import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
+import { getHdWalletAccount } from '../../../popup/utils/helper';
 
 const type = 'hd-wallet';
 
@@ -14,17 +15,25 @@ export default {
     nextAccountIdx: 1,
   },
   actions: {
+    async isAccountUsed({ rootState: { sdk } }, address) {
+      return sdk.api.getAccountByPubkey(address).then(() => true, () => false);
+    },
+    async discover({ state, rootGetters, dispatch }) {
+      let lastNotEmptyIdx = 0;
+      let account;
+      // eslint-disable-next-line no-plusplus
+      for (let nextIdx = state.nextAccountIdx; nextIdx <= 5; nextIdx++) {
+        account = getHdWalletAccount(rootGetters.wallet, nextIdx);
+        // eslint-disable-next-line no-await-in-loop
+        if (await dispatch('isAccountUsed', account.address)) lastNotEmptyIdx = nextIdx;
+      }
+      // eslint-disable-next-line no-plusplus
+      for (let i = state.nextAccountIdx; i <= lastNotEmptyIdx; i++) {
+        dispatch('create');
+      }
+    },
     create({ state, commit }) {
-      commit('accounts/add',
-        {
-          idx: state.nextAccountIdx,
-          color:
-            // eslint-disable-next-line no-bitwise
-            state.nextAccountIdx === 1 ? '#00FF9D' : `#${((Math.random() * 0xffffff) << 0).toString(16)}`,
-          shift: Math.floor(Math.random() * 100),
-          type,
-        },
-        { root: true });
+      commit('accounts/add', { idx: state.nextAccountIdx, type }, { root: true });
       state.nextAccountIdx += 1;
     },
     signWithoutConfirmation({ rootGetters: { account } }, data) {

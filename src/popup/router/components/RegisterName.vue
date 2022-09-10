@@ -3,7 +3,10 @@
     <p>
       {{ msg }}
     </p>
-    <Button :to="{ name: 'name-claim' }">
+    <Button
+      :to="{ name: 'account-details-names-claim' }"
+      new-ui
+    >
       {{ $t('pages.names.list.register-name') }}
     </Button>
   </div>
@@ -29,10 +32,6 @@ export default {
     color: variables.$color-light-grey;
 
     @extend %face-sans-15-medium;
-  }
-
-  .button {
-    text-align: center;
   }
 }
 </style>

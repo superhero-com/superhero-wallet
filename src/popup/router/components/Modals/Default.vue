@@ -1,24 +1,26 @@
 <template>
   <Modal
-    close
+    :class="{
+      'text-center': textCenter
+    }"
+    has-close-button
+    :full-screen="fullScreen"
     v-on="{ close: close || resolve }"
   >
-    <template slot="header">
+    <div class="icon-box">
       <StatusIcon
-        v-if="icon"
         :status="icon"
         class="icon"
       />
-      {{ title }}
-    </template>
+    </div>
 
-    <slot
-      v-if="$slots.msg"
-      name="msg"
-    />
-    <template v-else>
+    <h2 class="text-heading-2 text-center">
+      {{ title }}
+    </h2>
+
+    <slot name="msg">
       {{ msg }}
-    </template>
+    </slot>
 
     <slot />
 
@@ -30,6 +32,7 @@
     <Button
       v-else
       slot="footer"
+      :class="{ 'center-button': textCenter }"
       @click="resolve"
     >
       {{ buttonMessage || $t('ok') }}
@@ -52,6 +55,33 @@ export default {
     type: { type: String, default: '' },
     icon: { type: String, default: '' },
     buttonMessage: { type: String, default: '' },
+    textCenter: Boolean,
+    fullScreen: Boolean,
   },
 };
 </script>
+<style lang="scss" scoped>
+@use '../../../../styles/variables';
+@use '../../../../styles/mixins';
+
+.icon-box {
+  @include mixins.flex(center, center, column);
+
+  gap: 20px;
+
+  .icon {
+    padding: 4px;
+    border: 4px solid variables.$color-disabled;
+    border-radius: 200%;
+    height: 64px;
+    width: 64px;
+    margin-bottom: 20px;
+    background-color: variables.$color-bg-1;
+  }
+
+  .center-button {
+    width: auto;
+    padding: 0 24px;
+  }
+}
+</style>

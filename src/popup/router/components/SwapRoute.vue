@@ -137,7 +137,7 @@ export default {
 
     .divider,
     .tokens::v-deep {
-      background: variables.$color-bg-3;
+      background: var(--screen-bg-color);
       z-index: 1;
       padding-right: 4px;
     }
@@ -152,7 +152,7 @@ export default {
     }
 
     .divider {
-      @extend %face-sans-13-medium;
+      @extend %face-sans-12-medium;
 
       @include mixins.flex(center, center, row);
 

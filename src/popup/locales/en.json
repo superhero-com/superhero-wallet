@@ -7,6 +7,31 @@
     "verified": "Verified",
     "notVerified": "Not verified"
   },
+  "dashboard": {
+    "receive-card": {
+      "title": "Receive",
+      "description": "from existing wallet"
+    },
+    "send-card": {
+      "title": "Send",
+      "description": "assets to others"
+    },
+    "back-up-card": {
+      "title": "Back up your seed phrase",
+      "description": "Make a copy of your seed phrase to be able to recover your wallet and avoid losing your funds.",
+      "button": "Back up now"
+    },
+    "buy-card": {
+      "title": "Buy AE coin",
+      "description": "Use Simplex to buy AE coins with your credit card or bank account.",
+      "button": "Buy AE"
+    },
+    "name-card": {
+      "title": "Claim your own .chain name",
+      "description": "Get a human-readable name for your account and receive funds with it.",
+      "button": "Claim a name"
+    }
+  },
   "modals": {
     "transaction-failed": {
       "msg": "We cannot process this transaction. Please, try again later."
@@ -32,6 +57,12 @@
     "insufficient-balance": {
       "msg": "You do not have enough balance for this transaction."
     },
+    "createAccount": {
+      "title": "Add account",
+      "msg": "Generate new account address to store, send and receive crypto currency on the æternity blockhain.",
+      "btnText": "Create account",
+      "btnSubtitle": "and add it to your wallet"
+    },
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",
       "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
@@ -40,17 +71,40 @@
       "title": "Remove sub-account?",
       "msg": "This sub-account will be removed from your wallet and deleted from storage. It will still remain stored on the blockchain and you will be able to restore it with your seed phrase. Make sure you have backed up your seed phrase before you proceed. This action cannot be undone!"
     },
-    "verified": {
-      "title": "Verified URL",
-      "msg": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been found on the page and tips can be claimed easily."
-    },
     "verify": {
       "title": "Verify your URL",
-      "msg": "Make sure that the public address of your Superhero wallet, or your .chain name, is added somewhere on the website you want to claim tips for.<br /><br />Learn more: <a>How to Receive Tips</a>"
+      "msg": "Make sure that the public address of your Superhero wallet, or your .chain name, is added somewhere on the website you want to claim tips for."
+    },
+    "recipient": {
+      "title": "Send cryptocurrency",
+      "sub-header": "to public address, .chain name or URL",
+      "msg": {
+        "publicAddress": {
+          "title": "Send to public address",
+          "msg": "{0} scan QR code or manually enter recipient’s æccount address starting with ak_."
+        },
+        "chain": {
+          "title":"Send to .chain name",
+          "linkTitle": "claim your own .chain name",
+          "msg": "{0} AENS name is a human friendly nickname ending with .chain that points to recipient’s æccount. Before sending any funds make sure the recipient is still the name owner. You can also {1} and set a pointer to one of your public addresses!"
+        },
+        "url": {
+          "title": "Send to URL",
+          "msg": "{0} send cryptocurrency tip to any web page where æternity public address can be found. URL owners will be able to claim all tips accumulated as soon as they place their æccount address somewhere in the web page content."
+        }
+      }
+    },
+    "readMore": {
+      "msg": "{0} about tipping and claiming cryptocurrency tips.",
+      "linkTitle": "Read more"
+    },
+    "verified": {
+      "title": "Verified URL",
+      "msg": "The Superhero wallet identifies this URL as verified. This means that æternity blockchain account address has been found on the webpage and tips can be successfully claimed by its owner."
     },
     "not-verified": {
       "title": "Not verified URL",
-      "msg": "This means that the owner of the URL has not created a Superhero wallet yet. They can claim their tips as soon as they make one and add their wallet address to their website. "
+      "msg": "This means that we could not find æternity blockchain account address at this URL. The URL owner will be able to claim all tips accumulated as soon as they add their account address to the web page content."
     },
     "blacklisted": {
       "title": "Inaccessible URL",
@@ -58,7 +112,7 @@
     },
     "not-secure": {
       "title": "Not secure URL",
-      "msg": "The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
+      "msg": "Superhero Wallet is marking HTTP sites as \"Not secure\" - please, use URLs with HTTPS, only. The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
     },
     "switcherAccsLimit": {
       "title": "Unable to show this account.",
@@ -148,7 +202,11 @@
       }
     },
     "qrCodeReader": {
-      "cameraNotAllowed": "You need to grant your device camera access permission to scan QR code. Please allow camera access in your browser settings and try again.",
+      "grantPermission": "Grant permission",
+      "scanQr": "Scan QR",
+      "subtitle": "Allow camera access to scan QR code",
+      "cameraNotAllowedFirst": "You need to grant your device camera access permission to scan QR code.",
+      "cameraNotAllowedSecond": "Please allow camera access in your browser settings and try again.",
       "settings": "Settings"
     },
     "cancel": "Cancel",
@@ -174,16 +232,39 @@
       "share": "Share",
       "close": "Close"
     },
+    "receive": {
+      "title": "Receive funds to public address",
+      "requestAmount": "Request specific amount (optional)",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "share": "Share",
+      "shareTextNoAmount": "My æternity address: {address} Or send with Superhero Wallet: {walletLink}",
+      "shareTextWithAmount": "{amount} AE has been requested. Send to æternity address: {address} Or send with Superhero Wallet: {walletLink}"
+    },
+    "send": {
+      "sendTitle": "Send funds",
+      "reviewTitle": "Review transaction",
+      "successTitle": "Transaction successfully submitted",
+      "recipientLabel": "Recipient",
+      "recipientPlaceholder": "Enter recipient’s address or .chain name",
+      "next": "Next"
+    },
     "wrongNetwork": {
       "title": "Network discrepancy",
       "msg": "This action was initiated on a different network. Please switch to {0} in your wallet settings to proceed.",
       "button": "Dismiss"
+    },
+    "account-details": {
+      "assets": "Assets",
+      "transactions": "Transactions",
+      "names": "Names"
     }
   },
   "filters": {
     "all": "All",
-    "sent": "Sent",
-    "received": "Received",
+    "out": "Out",
+    "in": "In",
+    "dex": "DEX",
     "date": "Date",
     "tips": "Tips",
     "bid": "Bid",
@@ -239,36 +320,12 @@
     }
   },
   "pages": {
-    "intro": {
-      "heading": "Intro",
-      "skip": "Skip",
-      "generateWallet": "Generate Wallet",
-      "receive": "Receive Tips",
-      "step1text": "for creating and curating great content, engaging in meaningful discussions, launching causes for humanity, and for just being a wonderful human being.",
-      "step2text": "to great content creators online, humanitarian causes, and other awesome human beings—for whatever reason.",
-      "step3text-1": "This wallet does not—and will never take commissions off the",
-      "step3text-2": "you send or receive. Superhero was created specifically so that no one but you will have control over your funds.",
-      "createdWallet": "Your wallet has been created!",
-      "step4text-0": "Welcome to the free web.",
-      "step4text-1": "Trustless: no third-party intervention. Transactions are fully P2P.",
-      "step4text-2": "No censorship: there are no custodians to dictate what can and cannot be monetized.",
-      "step4text-3": "Immortalize messages on the blockchain: comments and messages are timestamped and recorded on the blockchain—forever.",
-      "step4text-4": "Instant, borderless, transactions at near-zero fees.",
-      "step4text-iframe-1": "But that's not all.",
-      "step4text-iframe-2": "Superhero wallet is also available as browser extension and mobile app so you can use it on your preferred platforms and devices.",
-      "toHome": "Proceed to your Wallet",
-      "send": "Send",
-      "ever": "Ever.",
-      "welcome": "Welcome on board!",
-      "understand": "I understand that this is a cryptocurrency wallet and I am responsible for backing up my account recovery seed phrase."
-    },
     "titles": {
       "tx-history": "Tx history",
-      "transfer": "Transfer",
       "balances": "Balances",
       "accounts": "Accounts",
       "tips": "Tips",
-      "settings": "Settings",
+      "settings": "Wallet settings",
       "language": "Language",
       "security": "Security",
       "about": "About",
@@ -281,6 +338,7 @@
       "importAccount": "Retrieve Existing Account",
       "transactions": "Transaction History",
       "receive": "Receive",
+      "currency": "Currency",
       "notifications": "Notifications",
       "notification-settings": "Notification Preference",
       "names": "Names",
@@ -289,8 +347,8 @@
       "register-name": "Register name",
       "more": "More",
       "buy": "Buy AE Tokens",
-      "networks": "Networks",
-      "permissionsSettings": "Permissions settings",
+      "networks": "Network",
+      "permissionsSettings": "Permissions",
       "permissionsDetails": "Permissions details",
       "comment-new": "Add comment",
       "home": "Home",
@@ -304,15 +362,27 @@
       "sign-transaction": "Sign Transaction",
       "invite": "Invite",
       "tx-details": "Transaction details",
+      "token-details": "Token details",
       "wallet-home": "Wallet Home",
-      "token-details": "Token details"
+      "save-errors-log": "Save error log",
+      "reset-wallet": "Reset wallet",
+      "seed-phrase": "Seed phrase"
+    },
+    "errors-log-settings": {
+      "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
     },
     "about": {
       "heading": "About",
       "systemName": "Superhero",
-      "terms": "Terms of Use",
-      "privacyPolicy": "Privacy Policy",
-      "reportBug": "Report a bug"
+      "terms": "Terms",
+      "privacyPolicy": "Privacy",
+      "reportBug": "Report a bug",
+      "name": "Name",
+      "commit": "Commit",
+      "software-version": "Software version",
+      "sdk-version": "SDK version",
+      "middleware-version": "Middleware version",
+      "node-version": "Node version"
     },
     "account": {
       "heading": "Account",
@@ -329,7 +399,9 @@
       "claim-name": "Claim your .chain name"
     },
     "accounts": {
-      "showWallet": "Show on Wallet Home"
+      "showWallet": "Show on Wallet Home",
+      "add-account": "Add account",
+      "add-account-description": "Add an account to your wallet to manage funds separately."
     },
     "claim": {
       "claim": "Claim tips",
@@ -364,9 +436,9 @@
     },
     "recentTransactions": {
       "title": "Recent transactions",
-      "viewAll": "View all",
       "viewMore": "View full transaction history",
-      "noTransactionsFound": "There are no recent transactions for this account."
+      "noTransactionsFound": "There are no recent transactions for this account.",
+      "searchPlaceholder": "Search transactions by asset name"
     },
     "add-fungible-token": {
       "heading": "Fungible Tokens",
@@ -475,7 +547,8 @@
       "mint": "Mint/Burn token",
       "mint-info": "This allows you to mint or burn token amount",
       "tokens": "Tokens",
-      "searchPlaceholder": "Search for token",
+      "searchPlaceholder": "Search by token name or contract address",
+      "searchAssetsPlaceholder": "Search for assets",
       "all": "All",
       "myTokens": "My Tokens",
       "mcap": "MCap",
@@ -483,12 +556,15 @@
       "not-available": "N/A",
       "noTokens": "No tokens in account balance.",
       "buyAe": "Buy AE",
-      "receiveTokens": "Receive tokens"
+      "receiveTokens": "Receive tokens",
+      "select-asset": "Select asset"
     },
     "token-details": {
       "details": "Token Details",
       "send": "Send",
       "receive": "Receive",
+      "buy": "Buy",
+      "swap": "Swap",
       "tip": "Tip",
       "token-details": "Token Details",
       "token": "Token",
@@ -534,7 +610,7 @@
     },
     "more": {
       "get-ae": "Get AE",
-      "dex": "DEX"
+      "dex": "Superhero DEX"
     },
     "names": {
       "default": "Default",
@@ -545,7 +621,7 @@
       "tabs": {
         "my-names": "My names",
         "auctions": "Auctions",
-        "register": "Register"
+        "register": "Register name"
       },
       "list": {
         "default-name": "Default name",
@@ -596,39 +672,49 @@
       }
     },
     "languageSettings": {
-      "backToSettings": "Back to settings",
       "heading": "Language",
-      "switchLanguage": "Language",
-      "currentLanguage": "Current language"
+      "chooseLanguage": "Choose Superhero wallet UI language."
+    },
+    "currencySettings": {
+      "heading": "Currency",
+      "chooseLanguage": "Choose Superhero wallet fiat currency conversion. Conversion to XAU (gold) is also an available option."
     },
     "index": {
       "term1": "I agree to the Superhero ",
       "term2": "Terms of Use",
       "term3": "Privacy Policy",
       "termsAndConditions": "Terms of Use",
-      "heading": "Your open-source decentralized social application platform",
+      "heading": {
+        "message": "More than just a way to {0}, {1} & {2} on the {3}",
+        "receive": "receive",
+        "store": "store",
+        "send": "send tokens",
+        "aeternityBlockchain": "æternity blockchain"
+      },
       "ready": "Ready to go?",
       "go": "Go!",
       "platforms": {
-        "heading": "Superhero wallet is available as browser extension and mobile app so you can use it on your preferred platforms and devices.",
+        "heading": "Download for your device",
         "browser-extension": "Browser extension",
         "mobile-app": "Mobile app"
       },
-      "webVersion": "Or continue with our web version",
-      "mobileVersion": "More than just a way to receive, store & send coins on the aeternity blockchain",
+      "webVersion": "or continue with web version",
       "securingAccount": "Securing your account",
-      "generateWallet": "Generate New Wallet",
-      "importWallet": "Retrieve existing account",
+      "generateWallet": "Create new wallet",
+      "getStartedWithWallet": "Get started with Superhero Wallet",
+      "importWallet": "Restore existing wallet",
+      "enterSeed": "Enter seed phrase",
       "passwordError": "Password must be at lest 4 symbols.",
       "incorrectPasswordError": "Incorrect password.",
       "loginButton": "Login",
       "seedPhrase": "Seed phrase",
-      "enterSeedPhrase": "Enter your seed phrase. ",
+      "enterSeedPhrase": "Please enter the 12 words of your seed phrase (separated by spaces) in the correct order to restore your Superhero wallet.",
       "continueButton": "Continue",
       "continue": "Continue",
-      "importAccount": "Import Account",
-      "accountNotFound": "Account not found.",
-      "checkSeed": "Please check your seed phrase."
+      "importAccount": "Restore wallet",
+      "accountNotFound": "Account not found. Please check again your seed phrase.",
+      "invalidSeed": "Your seed phrase should consist of 12 words separated by spaces.",
+      "seedPlaceHolder": "Enter or paste your seed phrase here"
     },
     "ledgerSetup": {
       "ledgerConnectSetup": "How to connect from Ledger",
@@ -671,7 +757,8 @@
       "claimOfRetip": "claimed your retip."
     },
     "notification-settings": {
-      "header": "Select which notification to receive",
+      "description": "Wallet notifications are always on by default and you are not able of turning them off.",
+      "description2": "You can choose below which notifications to receive from social platform Superhero.com.",
       "commentOnTip": "Someone commented on your tip or post.",
       "commentOnComment": "Someone replied to your comment.",
       "retipOnTip": "Someone retipped to your tip.",
@@ -685,12 +772,8 @@
       "heading": "Privacy Policy",
       "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
-    "receive": {
-      "requestAmount": "Request amount (optional)",
-      "shareName": "Provide sender with either",
-      "shareAddress": "or your account address"
-    },
-    "securitySettings": {
+    "seed-phrase-settings": {
+      "verifyYourSeedPhrase": "Verify your seed phrase!",
       "backToSettings": "Back to settings",
       "heading": "Security and Privacy",
       "privacyDataHeading": "Privacy Data",
@@ -705,10 +788,17 @@
       "incorrectPassword": "Incorrect Password",
       "decryptingPrivateKey": "Decrypting private key",
       "seedRecoveryHeading": "Show seed phrase",
-      "seedRecoverySmall": "Your seed phrase (also referred to as private key) serves as the keys or a password to access your account. Never disclose this to anyone. And make sure you back it up on a piece of paper that no one else can see—but that you will never lose. Losing these keys means losing access to your wallet and tips",
+      "seedRecoverySmall": "Your seed phrase is a combination of 12 words and serves as  password to access and restore your wallet accounts.\n\n Never disclose this to anyone.\n\n Make sure you {0} on a piece of paper or in a file that no one else can see - but that you will never lose.\n\n Losing your seed phrase means losing access to your wallet and all funds in your accounts.",
+      "seedRecoverySmallBackItUp": "back it up in the correct word sequence",
       "seedRecoveryBtn": "Show seed phrase",
       "seedPhrase": "Your seed phrase",
-      "copy": "Copy to clipboard"
+      "copy": "Copy to clipboard",
+      "this-your-seed-phrase": "This is your seed phrase. Keep it safe!",
+      "confirm-that-you-save-your-seed-phrase": "Confirm that you got your seed phrase correctly.",
+      "compose-your-seed-phrase": "Tap the words below {0} to  compose your seed phrase.",
+      "in-correct-order": "in the correct order",
+      "seed-phrase-correct": "Seed phrase has been verified!",
+      "seed-phrase-incorrect": "Seed phrase words are not in the correct order. Please enter your seed phrase again!"
     },
     "seedPhrase": {
       "securingAccount": "Securing your account",
@@ -717,29 +807,29 @@
       "tip1": "Save a backup in multiple places",
       "tip2": "Remember your password to decrypt your wallet",
       "tip3": "Never share your seed phrase with anyone",
-      "keepCarefully": "Keep this seed phrase safe! Write these 12 words down and keep them in safe place. You need them to recover your account in the future. ",
       "confirmSeedPhrase": "Confirm your seed phrase. Tap the words below to compose your seed phrase in the correct order.",
       "recoveryPhrase": "Your recovery seed phrase",
       "first": "first",
       "second": "second",
       "third": "third",
-      "backupText": "Back up your seed phrase on a piece of paper or file that no one but you will ever see. Make multiple copies.",
       "dontLose": "Do not lose this seed phrase!",
       "nextScreen": "To make sure you got it right, you will be asked to recreate this seed phrase in the next screen.",
-      "verifySeed": "Verify seed",
-      "doneThis": "I've already done this",
-      "verify": "Verify",
+      "verifySeed": "Verify your seed phrase",
+      "doneThis": "I have verified seed phrase before",
+      "verify": "Verify seed phrase",
       "seedConfirmed": "Seed phrase confirmed.",
-      "toDashboard": "Back to Dashboard"
+      "toDashboard": "Back to Dashboard",
+      "backUpYourSeedPhrase": "Back up your seed phrase {0} on a piece of paper or file that no one but you will ever see. Make multiple copies. Make sure you keep your seed phrase in a safe place!",
+      "inCorrectOrder": "in the correct order of 12 words",
+      "toBeSureYouGotItRight": "To be sure you got it right, you should {0} clicking on the button below!",
+      "verifyYourSeedPhrase": "verify your seed phrase"
     },
     "send": {
-      "backToAccount": "Back to account",
-      "heading": "New Transfer from",
-      "txFee": "Min Tx fee:",
-      "maxSpendableValue": "Maximum spendable value:",
+      "title": "Transaction successfully submitted",
+      "subtitle": "You may check the status of your transaction in æternity blockchain explorer",
       "send": "Send",
       "success": "Success",
-      "seeTransactionExplorer": "See transaction in the explorer.",
+      "viewInExplorer": "View in explorer",
       "scan": "Scan QR",
       "cancel": "Cancel",
       "review": "Review and send",
@@ -748,16 +838,21 @@
       "sender": "Sending address",
       "recipient": "Receiving address",
       "amount": "Amount",
-      "editTxDetails": "Edit transaction",
-      "tx-success": "Transaction Completed",
-      "successAlert": "has been sent to",
+      "editTxDetails": "Edit",
+      "successAlert": "has been successfully sent to",
+      "receivingUrl": "Receiving URL",
+      "sending": "Sending",
+      "sendingTo": "sending to",
+      "sentTo": "have been successfully sent to",
+      "sendingCryptoToUrl": "Sending tip to URL",
+      "tipInfo": "Your transaction will be publicly displayed as URL tip on {0}",
       "to": "To",
       "from": "From",
       "hash": "Transaction Hash",
+      "messageUrlOwner": "Message the URL owner (optional)",
       "scanAddress": "Scan aeternity address",
       "error": "Invalid AE address or AENS name",
-      "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?",
-      "addressPlaceholder": "Enter recepient’s address or .chain name"
+      "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
     },
     "settings": {
       "backToAccount": "Back to account",
@@ -773,8 +868,7 @@
       "tabNetworks": "Manage networks",
       "tabNetworksSmall": "Connect to custom node",
       "tabPermissionsSettingsSmall": "Manage popups appearance for various requests",
-      "tabRemoveAccount": "Remove account",
-      "tabRemoveAccountSmall": "Remove account from the wallet and delete extension storage",
+      "tabRemoveAccount": "Reset wallet",
       "tabSaveErrorLog": "Save error log",
       "tabSaveErrorLogSmall": "This will help us identify what's causing the errors."
     },
@@ -900,7 +994,7 @@
       "title": "Title",
       "titlePlaceholder": "Send a message of #support along with your donation...",
       "account": "Account",
-      "next": "Send Tip",
+      "next": "Next",
       "url": "Send Tip to",
       "to": "to",
       "amountLabel": "Amount",
@@ -910,7 +1004,7 @@
       "sendToAddress": "Send address to",
       "confirm": "Confirm",
       "cancel": "Cancel",
-      "edit": "Edit Tip Details",
+      "edit": "Edit",
       "whatIsVerifieddUrl": "What is \"Verified\" URL?",
       "whatIsNotVerifiedUrl": "What is \"Not verified\" URL?",
       "enterUrl": "Type the URL you want to tip",
@@ -922,21 +1016,8 @@
       "v1FungibleTokenTipError": "This post could only be tipped with AE tokens.",
       "maxNoteLengthError": "Please enter a message below 280 characters.",
       "blacklistedUrl": "This URL is not public and the funds could not be claimed.",
-      "requiredAmountError": "Please enter a tip amount."
-    },
-    "successTip": {
-      "sendMore": "Send more tips",
-      "feed": "View your tip on the feed",
-      "completedHeading": " Transaction Completed.",
-      "sentTo": "Send to: ",
-      "letThemKnow": "Let them know!",
-      "heading": "SEND",
-      "successfullySent": "You have successfully sent ",
-      "to": "to",
-      "note": "NOTE: The owner of this URL has not created an account yet. They can claim their tokens easily by creating a wallet - the same way you did.",
-      "notify": "Notify the owner that you sent",
-      "notifyTo": "to this post",
-      "notifyMessage": "I just sent you %{amount} for your wonderful post! Start receiving and sending more tips through Superhero.com. Learn more."
+      "requiredAmountError": "Please enter a tip amount.",
+      "claimingExplanation": "With Superhero wallet URL owners will be able to claim all tips from the URL as soon as their account address can be found on the page."
     },
     "transactionDetails": {
       "poolFee": "pool fee",
@@ -1114,7 +1195,16 @@
       "spent-today": "Spent today",
       "left-today": "Left today",
       "delete": "Remove permissions",
-      "empty": "You aren't connected to any aepps"
+      "empty": "You aren't connected to any aepps",
+      "description": "Manage confirmation popups and daily spending limits. For security reasons use this feature with caution only for trusted platforms such as {0} and your localhost environment."
+    },
+    "reset-wallet": {
+      "description": "This action will remove all accounts from your wallet and delete the extension storage.",
+      "description2": "Make sure you have backed up your {0} before proceeding. This action cannot be undone!",
+      "warning": "This action will remove all accounts from your wallet and delete the extension storage.\n This action cannot be undone!",
+      "warningConfirm": "Are you sure you would like to proceed?",
+      "cancel": "Cancel",
+      "reset": "Reset"
     }
   },
   "validation": {
@@ -1123,23 +1213,25 @@
     "name": "Enter valid .chain name",
     "nameRegisteredAddress": "This name isn't registered or pointed to address",
     "nameUnregistered": "This name has already been registered.",
-    "notSameAs": "Sender and receiver address are the same. You will send tokens to our own account.",
+    "notSameAs": "Sender and receiver address are the same. You will send tokens to your own account.",
     "tokenToAnAddress": "Unfortunately you can only send AEX-9 Tokens to an address",
     "minValue": "This field must be {0} or more",
     "minValueExclusive": "This field must be more than {0}",
     "enoughAe": "Not enough AE balance",
     "maxValue": "This field must be {0} or less",
-    "notToken": "Tokens are currently not allowed, please switch to AE"
+    "notToken": "Tokens are currently not allowed, please switch to AE",
+    "invalidAddressChainUrl": "Invalid address, .chain name or URL"
   },
   "redirecting": "Redirecting",
   "seconds": "{n} seconds | {n} second | {n} seconds",
   "minutes": "{n} minutes | {n} minute | {n} minutes",
   "hours": "{n} hours | {n} hour | {n} hours",
   "days": "{n} days | {n} day | {n} days",
-  "addressCopied": "Address copied",
+  "addressCopied": "Copied",
   "hashCopied": "Hash copied",
   "copied": "Copied",
   "copy": "Copy",
   "tx-fee": "Transaction fee",
-  "total": "Total"
+  "total": "Total",
+  "priceNotAvailable": "price: n/a"
 }

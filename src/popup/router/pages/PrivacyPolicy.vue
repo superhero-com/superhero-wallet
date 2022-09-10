@@ -1,6 +1,5 @@
 <template>
   <div class="privacy-policy">
-    <h2>{{ $t('pages.privacyPolicy.heading') }}</h2>
     <p><em>The present Privacy Policy is effective since on 9th April 2020.</em></p>
     <ol class="policy-list">
       <li class="first">
@@ -367,15 +366,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-::v-deep {
-  text-align: left;
-}
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .privacy-policy {
-  padding-left: 20px;
-  padding-right: 20px;
+  padding: 16px;
   word-break: break-word;
-  font-weight: 100;
+  line-height: 20px;
+  color: rgba(variables.$color-white, 0.85);
+
+  @extend %face-sans-14-light;
 
   ol {
     list-style: upper-roman;
@@ -388,6 +388,11 @@ export default {
 
     ul {
       padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 20px;
+      margin-left: 10px;
     }
 
     ol,

@@ -288,6 +288,8 @@ export default {
 
         .tokens {
           @extend %face-sans-18-medium;
+
+          color: variables.$color-white;
         }
       }
     }
@@ -300,7 +302,7 @@ export default {
   }
 
   .content {
-    background: variables.$color-bg-3;
+    background: var(--screen-bg-color);
 
     .transaction-overview {
       padding: 16px;
@@ -314,7 +316,7 @@ export default {
       @include mixins.flex(flex-start, flex-start, column);
 
       column-gap: 24px;
-      row-gap: 16px;
+      row-gap: 8px;
       padding: 8px 16px;
 
       .tip-url {

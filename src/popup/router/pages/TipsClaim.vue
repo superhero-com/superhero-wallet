@@ -1,5 +1,6 @@
 <template>
   <div class="tips-claim">
+    <AccountInfo :account-idx="activeIdx" />
     <div class="header">
       {{ $t('pages.claimTips.header') }}
       <HelpButton
@@ -14,16 +15,18 @@
         icon="success"
       />
     </div>
-    <p>
-      {{ $t('pages.claimTips.urlToClaim') }}
-    </p>
+
     <InputField
       v-model="url"
+      new-ui
+      :label="$t('pages.claimTips.urlToClaim')"
       :error="!normalizedUrl"
     />
 
     <Button
       :disabled="!normalizedUrl || !tippingSupported"
+      new-ui
+      extend
       @click="claimTips"
     >
       {{ $t('pages.tipPage.confirm') }}
@@ -40,15 +43,22 @@ import { BLOG_CLAIM_TIP_URL } from '../../utils/constants';
 import InputField from '../components/InputField.vue';
 import Button from '../components/Button.vue';
 import HelpButton from '../components/HelpButton.vue';
+import AccountInfo from '../components/AccountInfo.vue';
 
 export default {
-  components: { InputField, Button, HelpButton },
+  components: {
+    InputField,
+    Button,
+    HelpButton,
+    AccountInfo,
+  },
   data: () => ({
     url: '',
     loading: false,
     BLOG_CLAIM_TIP_URL,
   }),
   computed: {
+    ...mapState('accounts', ['activeIdx']),
     ...mapState(['sdk', 'tippingV1']),
     ...mapGetters(['account', 'tippingSupported']),
     normalizedUrl() {
@@ -113,7 +123,7 @@ export default {
 @use '../../../styles/typography';
 
 .tips-claim {
-  padding: 16px;
+  padding: 12px;
 
   .header {
     margin: 8px 0 24px 36px;

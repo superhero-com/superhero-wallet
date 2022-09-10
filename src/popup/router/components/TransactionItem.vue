@@ -125,8 +125,9 @@ export default {
 @use '../../../styles/typography';
 
 .transaction-item {
-  padding: 4px 8px 10px 8px;
-  background: variables.$color-bg-1;
+  padding: 4px var(--screen-padding-x) 10px;
+  margin-left: calc(-1 * var(--screen-padding-x));
+  margin-right: calc(-1 * var(--screen-padding-x));
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -134,7 +135,7 @@ export default {
   text-decoration: none;
 
   &:hover {
-    background: variables.$color-hover;
+    background-color: variables.$color-bg-4-hover;
   }
 
   .header {

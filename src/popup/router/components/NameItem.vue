@@ -65,11 +65,10 @@
         v-show="showInput"
         v-model="newPointer"
         :placeholder="$t('pages.names.details.address-placeholder')"
-        :error-message="$t('pages.names.list.valid-identifier-error')"
-        :error="error"
+        :message="error ? $t('pages.names.list.valid-identifier-error') : null"
         plain
       >
-        <template slot="right">
+        <template #after>
           <ButtonPlain
             v-show="newPointer.length"
             @click="setPointer"
@@ -85,6 +84,7 @@
           </ButtonPlain>
         </template>
       </InputField>
+
       <DetailsItem
         :value="nameEntry.hash"
         :label="nameEntry.hash && $t('pages.names.list.name-hash')"
@@ -227,9 +227,14 @@ export default {
 .name-item {
   display: flex;
   flex-direction: column;
-  padding: 8px 8px 8px 16px;
-  background-color: variables.$color-bg-1;
-  border-radius: 4px;
+  padding: 8px var(--screen-padding-x);
+  margin-left: calc(-1 * var(--screen-padding-x));
+  margin-right: calc(-1 * var(--screen-padding-x));
+  transition: 0.2s;
+
+  &:hover {
+    background-color: variables.$color-bg-4-hover;
+  }
 
   .collapsed {
     display: flex;
@@ -312,9 +317,15 @@ export default {
     .input-field {
       margin: 8px 0;
 
-      ::v-deep .wrapper {
+      ::v-deep .input-wrapper {
         svg + .input {
           margin-left: 4px;
+        }
+
+        .input {
+          @extend %face-mono-10-medium;
+
+          letter-spacing: -0.2px;
         }
 
         .button-plain {
@@ -333,6 +344,8 @@ export default {
 
       ::v-deep .value {
         @extend %face-mono-10-medium;
+
+        letter-spacing: 0;
 
         .pointers {
           display: flex;

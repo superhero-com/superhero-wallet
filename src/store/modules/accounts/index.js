@@ -12,7 +12,7 @@ export default {
 
   state: {
     list: [{
-      idx: 0, color: '#1161FE', shift: 0, showed: true, type: 'hd-wallet',
+      idx: 0, showed: true, type: 'hd-wallet',
     }],
     activeIdx: 0,
   },
@@ -37,13 +37,11 @@ export default {
         showed: state.list.reduce((a, b) => (b.showed ? a + 1 : a), 0) < 8,
         ...account,
       });
+      state.activeIdx = account.idx;
     },
     remove(state, idx) {
       if (state.activeIdx === state.list.length) state.activeIdx = 0;
       Vue.delete(state.list, idx);
-    },
-    setLocalName(state, { name, idx }) {
-      Vue.set(state.list[idx], 'localName', name);
     },
     toggleShowed(state, idx) {
       if (state.activeIdx === idx) state.activeIdx = 0;

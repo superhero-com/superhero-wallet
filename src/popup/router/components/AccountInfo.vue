@@ -1,180 +1,100 @@
 <template>
-  <div :class="['account-info', { edit }]">
-    <div class="buttons">
-      <ButtonPlain
-        class="minify"
-        @click="$store.commit('toggleMinifiedCard')"
-      >
-        <Component
-          :is="cardMinified ? 'Expand' : 'Collapse'"
-        />
-      </ButtonPlain>
-      <div>
-        <ButtonPlain
-          v-clipboard:copy="accounts[idx].address"
-          data-cy="copy"
-          @click="copy"
-        >
-          <Copy />
-        </ButtonPlain>
-        <ButtonPlain
-          v-if="UNFINISHED_FEATURES && idx === 0"
-          @click="createAccount"
-        >
-          <Add />
-        </ButtonPlain>
-        <ButtonPlain
-          v-if="idx !== 0 && $route.path === '/accounts'"
-          class="remove"
-          @click="remove"
-        >
-          <Remove />
-        </ButtonPlain>
-        <RouterLink
-          v-if="UNFINISHED_FEATURES && $route.path !== '/accounts'"
-          to="/accounts"
-        >
-          <Settings />
-        </RouterLink>
-      </div>
-    </div>
+  <div
+    class="account-info"
+    :class="{ 'can-copy-address': canCopyAddress }"
+  >
     <div class="title">
       <Avatar
-        :address="accounts[idx].address"
-        :name="accounts[idx].name"
+        class="avatar"
+        :address="activeAccount.address"
+        :name="activeAccount.name"
       />
-      <div
-        class="account-name"
-        data-cy="account-name"
-      >
-        <a
-          v-if="accounts[idx].name"
-          :href="explorerUrl"
-          target="_blank"
-        >
-          <Truncate :str="accounts[idx].name" />
-        </a>
-        <router-link
+      <div class="account-details">
+        <Truncate
+          v-if="activeAccount.name"
+          :str="activeAccount.name"
+          :gradient-color="color"
+        />
+        <div
           v-else
-          :to="{ name: 'name-claim' }"
-          data-cy="claim-name"
-          class="claim-chainname"
+          data-cy="account-name"
+          class="account-name"
         >
-          {{ $t('pages.account.claim-name') }}
-        </router-link>
-        <InputField
-          v-model="customAccountName"
-          :maxlength="maxCustomNameLength"
-          :readonly="idx === 0 || $route.path !== '/accounts' || !edit"
-          plain
+          {{ $t('pages.account.heading') }} {{ accountIdx + 1 }}
+        </div>
+        <div
+          v-if="truncatedAddress && truncatedAddress.length"
         >
-          <template slot="right">
-            <ButtonPlain
-              v-show="idx !== 0 && $route.path === '/accounts' && !edit"
-              @click="edit = true"
+          <ButtonPlain
+            v-if="canCopyAddress"
+            v-clipboard:copy="activeAccount.address"
+            v-clipboard:success="copy"
+            class="ae-address"
+            data-cy="copy"
+          >
+            <span>{{ truncatedAddress[0] }}</span>
+            <span>&middot;&middot;&middot;</span>
+            <span>{{ truncatedAddress[1] }}</span>
+
+            <CopyOutlinedIcon />
+
+            <div
+              v-if="copied"
+              class="copied"
             >
-              <Edit />
-            </ButtonPlain>
-            <ButtonPlain
-              v-show="edit"
-              @click="saveLocalName"
-            >
-              <Save />
-            </ButtonPlain>
-          </template>
-        </InputField>
-        <label v-if="edit">{{ `${customAccountName.length}/${maxCustomNameLength}` }}</label>
+              <CopyOutlinedIcon />
+              {{ $t('addressCopied') }}
+            </div>
+          </ButtonPlain>
+          <div
+            v-else
+            class="ae-address"
+          >
+            <span>{{ truncatedAddress[0] }}</span>
+            <span>&middot;&middot;&middot;</span>
+            <span>{{ truncatedAddress[1] }}</span>
+          </div>
+        </div>
       </div>
-    </div>
-    <a
-      v-if="!copied"
-      :href="explorerUrl"
-      target="_blank"
-      class="ae-address"
-    >
-      {{ accounts[idx].address }}
-    </a>
-    <div
-      v-else
-      class="copied"
-    >
-      <span />
-      <span class="text">{{ $t('addressCopied') }}</span>
-      <span />
     </div>
   </div>
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
+import { mapGetters } from 'vuex';
 import CopyMixin from '../../../mixins/copy';
+import { truncateAddress } from '../../utils/helper';
 import Avatar from './Avatar.vue';
-import Truncate from './Truncate.vue';
-import InputField from './InputField.vue';
 import ButtonPlain from './ButtonPlain.vue';
-import Collapse from '../../../icons/account-card/collapse.svg?vue-component';
-import Expand from '../../../icons/account-card/expand.svg?vue-component';
-import Add from '../../../icons/account-card/btn-add-subaccount.svg?vue-component';
-import Copy from '../../../icons/account-card/btn-copy-address.svg?vue-component';
-import Settings from '../../../icons/settings.svg?vue-component';
-import Remove from '../../../icons/account-card/btn-remove.svg?vue-component';
-import Edit from '../../../icons/account-card/btn-edit.svg?vue-component';
-import Save from '../../../icons/account-card/btn-save.svg?vue-component';
+import Truncate from './Truncate.vue';
+import CopyOutlinedIcon from '../../../icons/copy-outlined.svg?vue-component';
 
 export default {
   components: {
     Avatar,
-    Collapse,
-    Expand,
-    Add,
-    Copy,
-    Settings,
-    Remove,
-    Edit,
-    Save,
-    Truncate,
-    InputField,
     ButtonPlain,
+    Truncate,
+    CopyOutlinedIcon,
   },
-  mixins: [CopyMixin],
+  mixins: [
+    CopyMixin,
+  ],
   props: {
-    accountIdx: { type: Number, default: -1 },
+    color: { type: String, default: '#212121' },
+    canCopyAddress: Boolean,
+    accountIdx: { type: Number, required: true },
   },
-  data: () => ({
-    edit: false,
-    customAccountName: '',
-    maxCustomNameLength: 22,
-    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-  }),
   computed: {
-    ...mapState('accounts', ['activeIdx']),
-    ...mapState(['cardMinified']),
     ...mapGetters(['accounts', 'activeNetwork']),
-    idx() {
-      return this.accountIdx === -1 ? this.activeIdx : this.accountIdx;
+    activeAccount() {
+      return this.accounts[this.accountIdx];
     },
     explorerUrl() {
-      const { address } = this.accounts[this.idx];
+      const { address } = this.activeAccount;
       return `${this.activeNetwork.explorerUrl}/account/transactions/${address}`;
     },
-  },
-  mounted() {
-    this.customAccountName = this.accounts[this.idx].localName;
-  },
-  methods: {
-    ...mapActions({ createAccount: 'accounts/hdWallet/create' }),
-    saveLocalName() {
-      this.$store.commit('accounts/setLocalName', { name: this.customAccountName, idx: this.idx });
-      this.edit = false;
-    },
-    async remove() {
-      await this.$store.dispatch('modals/open', {
-        name: 'confirm',
-        icon: 'critical',
-        title: this.$t('modals.removeSubaccount.title'),
-        msg: this.$t('modals.removeSubaccount.msg'),
-      });
-      this.$store.commit('accounts/remove', this.idx);
+    truncatedAddress() {
+      return truncateAddress(this.activeAccount);
     },
   },
 };
@@ -185,142 +105,84 @@ export default {
 @use '../../../styles/typography';
 
 .account-info {
-  padding: 20px 20px 0 20px;
   text-align: left;
-  margin-bottom: 4px;
-
-  &.edit {
-    margin-bottom: -2px;
-
-    .title {
-      margin-bottom: 0;
-
-      .account-name .account-type-name {
-        border-bottom: 1px solid variables.$color-blue;
-      }
-    }
-  }
-
-  .buttons {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 24px;
-
-    svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    a,
-    .button-plain,
-    .minify {
-      color: variables.$color-light-grey;
-    }
-
-    a,
-    .button-plain {
-      &:not(:first-child) {
-        margin-left: 8px;
-      }
-
-      &:hover {
-        color: variables.$color-green;
-
-        &.remove {
-          color: variables.$color-error;
-        }
-      }
-    }
-
-    .minify:hover {
-      color: variables.$color-blue;
-    }
-  }
 
   .title {
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin-top: 8px;
-    margin-bottom: 6px;
-
-    @extend %face-sans-14-medium;
-
     line-height: 16px;
+    color: variables.$color-white;
+    justify-content: flex-start;
 
     .avatar {
-      align-self: flex-start;
       margin-right: 8px;
       overflow: visible;
+      width: 48px;
+      height: 48px;
+      background-color: variables.$color-black;
     }
 
-    .input-field ::v-deep .main-wrapper button {
-      background-color: transparent;
-    }
-
-    .account-name {
+    .account-details {
       display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
       flex-direction: column;
-      justify-content: flex-start;
+      width: 227px;
+      height: 48px;
+      padding-left: 2px;
 
-      a {
-        color: variables.$color-white;
-        text-decoration: none;
-        max-width: 250px;
-
-        &:hover {
-          text-decoration: underline;
-        }
-      }
-
-      .claim-chainname {
-        color: variables.$color-green;
-      }
-
-      label {
-        font-size: 10px;
-        line-height: 12px;
-        opacity: 0.5;
-        align-self: flex-end;
-      }
-    }
-  }
-
-  .ae-address {
-    display: block;
-    text-decoration: none;
-    text-align: center;
-    color: variables.$color-light-grey;
-
-    @extend %face-mono-10-medium;
-
-    font-size: 9px;
-
-    &:hover {
-      color: variables.$color-white;
-    }
-  }
-
-  .copied {
-    display: flex;
-    align-items: center;
-
-    span {
-      width: 100%;
-
-      &:not(.text) {
-        border-bottom: 1px dashed variables.$color-blue;
-        margin: 0 8px;
-      }
-
-      &.text {
-        white-space: nowrap;
-        color: variables.$color-blue;
-
-        @extend %face-sans-14-regular;
+      .truncate,
+      .account-name {
+        @extend %face-sans-16-medium;
 
         line-height: 16px;
+      }
+
+      .account-name {
+        padding-bottom: 2px;
+        padding-top: 3px;
+      }
+
+      .ae-address {
+        @extend %face-mono-12-medium;
+
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        padding: 2px 0 0;
+        color: rgba(variables.$color-white, 0.85);
+        opacity: 0.85;
+        letter-spacing: 0.07em;
+
+        .icon {
+          width: 22px;
+          height: 22px;
+          margin-left: 2px;
+        }
+
+        .copied {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px dashed rgba(variables.$color-white, 0.4);
+          border-radius: 5px;
+          font-size: 12px;
+          background-color: variables.$color-bg-4;
+          text-transform: uppercase;
+
+          @extend %face-sans-14-regular;
+        }
+      }
+    }
+  }
+
+  &.can-copy-address {
+    .ae-address {
+      &:hover {
+        opacity: 1;
       }
     }
   }

@@ -26,7 +26,7 @@
 
   &.only-top,
   .top {
-    background: linear-gradient(180deg, variables.$color-bg-3 0%, variables.$color-black 100%);
+    background-color: var(--screen-bg-color);
     box-shadow: variables.$color-border 0 1px;
     border-radius: 0 0 10px 10px;
   }
@@ -38,7 +38,7 @@
   .bottom {
     margin-top: -9px;
     padding-top: 10px;
-    background-color: variables.$color-bg-3;
+    background-color: var(--screen-bg-color);
   }
 }
 </style>

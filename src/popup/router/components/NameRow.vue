@@ -33,18 +33,22 @@ export default {
 @use '../../../styles/typography';
 
 .name-row {
-  text-decoration: none;
-  transition: 0.4s;
-  padding: 8px 16px;
+  @extend %face-sans-14-medium;
+
   display: flex;
   align-items: center;
-  font-size: 14px;
-  border-bottom: 1px solid variables.$color-black;
-  text-align: left;
+  padding: 8px var(--screen-padding-x);
+  margin-left: calc(-1 * var(--screen-padding-x));
+  margin-right: calc(-1 * var(--screen-padding-x));
   color: variables.$color-white;
   background: variables.$color-bg-2;
+  text-align: left;
+  text-decoration: none;
+  transition: 0.2s;
 
-  @extend %face-sans-14-medium;
+  &:hover {
+    background-color: variables.$color-bg-4-hover;
+  }
 
   .name-info {
     margin-left: 8px;

@@ -169,7 +169,7 @@
       "mobileApp": "移动app"
     },
     "titles": {
-      "settings": "设置",
+      "settings": "钱包设置",
       "language": "语言",
       "security": "安全",
       "about": "关于",
@@ -253,7 +253,6 @@
     },
     "recentTransactions": {
       "recentActivity": "近期活跃情况",
-      "viewAll": "查看全部",
       "noTransactionsFound": "未发现交易!"
     },
     "add-fungible-token": {
@@ -496,7 +495,7 @@
       "transferExchange": "加密资产换取AE代代币",
       "purchase": "购买AE代币"
     },
-    "securitySettings": {
+    "seed-phrase-settings": {
       "backToSettings": "返回在设置",
       "heading": "安全和隐私",
       "privacyDataHeading": "隐私数据",
@@ -554,8 +553,6 @@
       "sender": "发送地址",
       "recipient": "接收地址",
       "amount": "数量",
-      "editTxDetails": "编辑转账细节",
-      "tx-success": "完成转账",
       "successalert": "您已成功发送 ",
       "to": "到",
       "from": "从",
@@ -575,8 +572,7 @@
       "tabAboutsmall": "版本，支持中心，和联系信息",
       "tabNetworks": "管理网络",
       "tabNetworksSmall": "连接到常用节点",
-      "tabRemoveAccount": "移除帐户",
-      "tabRemoveAccountSmall": "从钱包移除帐户并删除扩展存储",
+      "tabRemoveAccount": "重置钱包",
       "tabSaveErrorLog": "保存错误日志",
       "tabSaveErrorLogSmall": "这将会帮助我们区分是什么引发了错误。"
     },
@@ -689,7 +685,6 @@
       "claimInfo": "如果您已经将您的钱包地址添加到您的URL，通过点击下面的领取按钮您可以立即领取小费",
       "title": "标题",
       "titlePlaceholder": "发送一条支持信息搭配你的捐赠...",
-      "account": "数量",
       "next": "发送小费",
       "url": "发送小费到",
       "to": "到",
@@ -707,18 +702,6 @@
       "notVerifiedUrlInfo": "这个网址还没有被验证。URL的所有者必须创建帐户来领取他们的代币。",
       "verifiedUrlInfo": "如果一个URL被标记为已验证，就意味着这个URL的所有者已经是一个超级英雄了——这太棒了!AE地址已经包含在URL中，可以领取小费。",
       "minAmountError": "小费的代币价值必须超过0.01美元才能发送。"
-    },
-    "successTip": {
-      "feed": "在赠送中查看小费",
-      "completedHeading": " 交易完成。",
-      "sentTo": "发送到: ",
-      "letThemKnow": "让他们知道！",
-      "heading": "发送",
-      "home": "主页",
-      "successfullySent": "你已成功发送 ",
-      "to": "到",
-      "note": "请注意:这个URL的所有者还没有创建一个帐户。他们可以通过创造一个钱包来轻松申领代币——就像你做的那样。",
-      "notify": "通知URL的主人您发送了AE到这个帖子"
     },
     "transactionDetails": {
       "heading": "交易细节",

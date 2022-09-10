@@ -6,7 +6,7 @@ import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
 import {
   convertToken, fetchJson, handleUnknownError, calculateSupplyAmount,
 } from '../../popup/utils/helper';
-import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
+import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE, AETERNITY_CONTRACT_ID } from '../../popup/utils/constants';
 
 export default (store) => {
   store.registerModule('fungibleTokens', {
@@ -19,21 +19,21 @@ export default (store) => {
     },
     getters: {
       getTokenBalance: ({ tokens }) => (address) => tokens?.[address]?.tokenBalances || [],
-      getSelectedToken: ({ tokens }) => (address) => tokens?.[address]?.selectedToken,
       tokenBalances: (
         state, { getTokenBalance }, rootState, { account: { address } },
       ) => getTokenBalance(address),
-      selectedToken: (
-        state, { getSelectedToken }, rootState, { account: { address } },
-      ) => getSelectedToken(address),
+      getAeternityToken: ({ aePublicData }) => ({ balanceCurrency, tokenBalance }) => {
+        const aePublicDataExists = aePublicData && Object.keys(aePublicData).length > 0;
+        return {
+          ...(aePublicDataExists ? aePublicData : {}),
+          convertedBalance: tokenBalance,
+          symbol: 'AE',
+          balanceCurrency,
+          contractId: AETERNITY_CONTRACT_ID,
+        };
+      },
     },
     mutations: {
-      setSelectedToken(state, { address, token }) {
-        if (!(address in state.tokens)) {
-          Vue.set(state.tokens, address, { selectedToken: null, tokenBalances: [] });
-        }
-        Vue.set(state.tokens[address], 'selectedToken', token);
-      },
       setTransactions(state, { address, transactions }) {
         Vue.set(state.transactions, address, transactions);
       },
@@ -48,7 +48,7 @@ export default (store) => {
       },
       addTokenBalance(state, { address, balances }) {
         if (!(address in state.tokens)) {
-          Vue.set(state.tokens, address, { selectedToken: null, tokenBalances: [] });
+          Vue.set(state.tokens, address, { tokenBalances: [] });
         }
         Vue.set(state.tokens[address], 'tokenBalances', balances);
       },
@@ -75,7 +75,6 @@ export default (store) => {
         commit,
       }) {
         accounts.map(async ({ address }) => {
-          let selectedToken = null;
           try {
             if (isEmpty(availableTokens)) return;
             const tokens = await fetchJson(
@@ -83,8 +82,6 @@ export default (store) => {
             ).catch(handleUnknownError);
 
             if (isEmpty(tokens) || typeof tokens !== 'object') return;
-
-            selectedToken = store.state.fungibleTokens.tokens[address]?.selectedToken;
 
             // TODO: remove uniqBy after https://github.com/aeternity/ae_mdw/issues/735 is fixed and released
             const balances = uniqBy(tokens, 'contract_id').map(({ amount, contract_id: contractId }) => {
@@ -106,13 +103,6 @@ export default (store) => {
             commit('addTokenBalance', { address, balances });
           } catch (e) {
             handleUnknownError(e);
-          } finally {
-            commit('setSelectedToken',
-              {
-                address,
-                token: (store.state.fungibleTokens.tokens?.[address]?.tokenBalances || [])
-                  .find((t) => t?.contractId === selectedToken?.contractId),
-              });
           }
         });
       },
@@ -126,10 +116,11 @@ export default (store) => {
         return commit('setAePublicData', aeternityData);
       },
       async createOrChangeAllowance(
-        { rootState: { sdk }, state: { tokens }, rootGetters: { activeNetwork, account } },
-        amount,
+        { rootState: { sdk }, rootGetters: { activeNetwork, account } },
+        [contractId, amount],
       ) {
-        const { selectedToken } = tokens[account.address];
+        const selectedToken = store.state.fungibleTokens.tokens?.[account.address]?.tokenBalances
+          ?.find((t) => t?.contractId === contractId);
         const tokenContract = await sdk.getContractInstance({
           source: FUNGIBLE_TOKEN_CONTRACT,
           contractAddress: selectedToken.contractId,
@@ -198,32 +189,25 @@ export default (store) => {
         }
       },
       async transfer(
-        { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
-        [toAccount, amount, option],
+        { rootState: { sdk } },
+        [contractId, toAccount, amount, option],
       ) {
         const tokenContract = await sdk.getContractInstance({
           source: FUNGIBLE_TOKEN_CONTRACT,
-          contractAddress: tokens[account.address].selectedToken.contractId,
+          contractAddress: contractId,
         });
-        return tokenContract.methods.transfer(
-          toAccount,
-          convertToken(amount, tokens[account.address].selectedToken.decimals).toFixed(),
-          option,
-        );
+        return tokenContract.methods.transfer(toAccount, amount.toFixed(), option);
       },
       async burnTriggerPoS(
-        { rootState: { sdk }, state: { tokens }, rootGetters: { account } },
-        [amount, posAddress, invoiceId, option],
+        { rootState: { sdk } },
+        [contractId, amount, posAddress, invoiceId, option],
       ) {
         const tokenContract = await sdk.getContractInstance({
           source: ZEIT_TOKEN_INTERFACE,
-          contractAddress: tokens[account.address].selectedToken.contractId,
+          contractAddress: contractId,
         });
         return tokenContract.methods.burn_trigger_pos(
-          convertToken(amount, tokens[account.address].selectedToken.decimals).toFixed(),
-          posAddress,
-          invoiceId,
-          option,
+          amount.toFixed(), posAddress, invoiceId, option,
         );
       },
       async getTokensHistory(

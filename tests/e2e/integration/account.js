@@ -3,27 +3,16 @@ describe('Test cases for Account Page', () => {
     cy.login();
   });
 
-  it('Checks dissapearing seed phrase backup button, opens/close sidebar, checks copy button, contains a claim name message', () => {
+  it('Checks dissapearing seed phrase backup button, opens/close sidebar, checks account name', () => {
     cy.get('.seed-backup-notification')
       .should('be.visible')
 
-      .get('[data-cy=copy]')
-      .click()
-      .get('.copied > .text')
-      .should('contain', 'Address copied')
-
-      .get('[data-cy=claim-name]')
-      .should('be.visible')
-      .contains('Claim your .chain name');
+      .get('[data-cy=account-name')
+      .should('be.visible');
   });
 
-  it('Tip, View-All-Transactions, Dropdown Buttons And Back to Account', () => {
-    cy.get('[data-cy=tip-button]')
-      .should('be.visible')
-      .click()
-      .get('[data-cy=tip-container]')
-      .should('be.visible')
-      .get('[data-cy=home]')
+  it('View-All-Transactions, Back to Account', () => {
+    cy.get('[data-cy=home]')
       .click()
 
       .get('[data-cy=view-all-transactions]')
@@ -33,15 +22,6 @@ describe('Test cases for Account Page', () => {
       .should('exist')
       .get('[data-cy=home]')
       .click()
-
-      .urlEquals('/account')
-      .get('[data-cy=currency-dropdown]')
-      .should('be.visible')
-      .click()
-      .get('[data-cy=currency-dropdown]')
-      .should('have.class', 'active')
-      .click()
-      .get('[data-cy=currency-dropdown]')
-      .should('not.have.class', 'active');
+      .urlEquals('/account');
   });
 });

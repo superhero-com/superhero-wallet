@@ -1,18 +1,18 @@
 <template>
   <Modal
-    close
+    has-close-button
     @close="resolve"
   >
-    <template slot="header">
+    <template #header>
       {{ $t('modals.confirm-tip.title') }}
     </template>
 
     {{ $t('modals.confirm-tip.msg') }}
-    <p class="confirmation--question">
+    <p class="confirmation-question">
       {{ $t('modals.confirm-tip.sub-message') }}
     </p>
 
-    <template slot="footer">
+    <template #footer>
       <Button
         fill="secondary"
         @click="cancelTip"
@@ -53,7 +53,7 @@ export default {
 <style lang="scss" scoped>
 @use "../../../../styles/variables";
 
-.confirmation--question {
+.confirmation-question {
   font-weight: 500;
   color: variables.$color-white;
 }

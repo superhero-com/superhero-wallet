@@ -1,4 +1,39 @@
-@import './typography';
+@use './typography';
+@use './variables' as *;
+@use './mixins';
+@use './transitions';
+
+* {
+  box-sizing: border-box;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html,
+body {
+  height: var(--height);
+}
+
+body {
+  margin: 0;
+  background-color: $color-black;
+
+  &.color-bg-3 {
+    background-color: $color-bg-3;
+  }
+
+  @include mixins.desktop {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
 
 @-moz-document url-prefix() {
   html {
@@ -6,34 +41,44 @@
   }
 }
 
-* {
-  box-sizing: border-box;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
 }
 
 a {
-  color: $color-green;
-  text-decoration: underline;
+  color: $color-primary;
+  text-decoration: none;
   cursor: pointer;
 }
 
 p {
+  margin: 0;
   word-break: break-word;
-  font-weight: bolder;
-  margin-left: 3px;
+
+  &:not(:last-child) {
+    margin-bottom: 1em;
+  }
 }
 
-button:focus {
-  outline: none;
+ul,
+ol {
+  margin: 0;
 }
 
 button {
+  padding: 0;
   background: none;
   border: none;
   color: $color-light-grey;
-}
 
-#app {
-  font-family: $font-sans;
+  &:focus {
+    outline: none;
+  }
 }
 
 .error-msg {
@@ -51,4 +96,27 @@ button {
   margin-bottom: 30px;
   text-align: left;
   word-break: break-word;
+}
+
+.text {
+  &-center {
+    text-align: center;
+  }
+
+  &-heading-2 {
+    @extend %face-sans-18-medium;
+
+    margin-bottom: 0.45em;
+    color: $color-white;
+  }
+}
+
+.label-text {
+  @extend %face-sans-15-medium;
+
+  color: $color-dark-grey;
+}
+
+.relative {
+  position: relative;
 }

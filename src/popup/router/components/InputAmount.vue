@@ -5,12 +5,10 @@
       min_value_exclusive: 0,
       ...+balance.minus(fee) > 0 ? { max_value: max } : {},
       enough_ae: fee.toString(),
-      not_token: noToken,
       ...validation,
     }"
     name="amount"
-    :error="$attrs.error || errors.has('amount')"
-    :error-message="$attrs['error-message'] || errors.first('amount')"
+    :message="$attrs['message'] || errors.first('amount')"
     class="input-amount"
     type="number"
     v-bind="$attrs"
@@ -18,10 +16,9 @@
     :label="$attrs.label || $t('pages.tipPage.amountLabel')"
     @input="$emit('input', $event)"
   >
-    <template slot="right">
-      <span class="token">{{ selectedToken ? selectedToken.symbol : 'AE' }}</span>
+    <template #after>
+      <span class="token">AE</span>
       <span
-        v-if="!selectedToken"
         class="amount"
         data-cy="amount-currency"
       >
@@ -36,7 +33,7 @@ import { mapState, mapGetters } from 'vuex';
 import { pick } from 'lodash-es';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { calculateFee } from '../../utils/constants';
+import { calculateFee } from '../../utils/helper';
 import InputField from './InputField.vue';
 
 export default {
@@ -59,44 +56,24 @@ export default {
   computed: {
     ...mapState(['sdk']),
     ...mapGetters(['formatCurrency', 'account']),
-    ...mapGetters('fungibleTokens', ['selectedToken']),
     hasError() {
       return this.$validator.errors.has('amount');
     },
     max() {
-      return (this.selectedToken && !this.noToken
-        ? this.selectedToken.balance
-        : this.balance.minus(this.fee)).toString();
+      return this.balance.minus(this.fee).toString();
     },
     currencyAmount() {
       return ((this.$attrs.value || 0) * this.$store.getters.currentCurrencyRate).toFixed(2);
     },
   },
   watch: {
-    async selectedToken() {
-      await this.$validator.validateAll();
-      this.fetchFee();
-    },
     hasError(value) {
       return this.$emit('error', value);
     },
   },
   async mounted() {
-    await this.fetchFee();
-  },
-  methods: {
-    async fetchFee() {
-      await this.$watchUntilTruly(() => this.sdk);
-      this.fee = calculateFee(
-        !this.selectedToken ? SCHEMA.TX_TYPE.spend : SCHEMA.TX_TYPE.contractCall, {
-          ...this.sdk.Ae.defaults,
-          ...(this.selectedToken && {
-            callerId: this.account.address,
-            contractId: this.selectedToken.contractId,
-          }),
-        },
-      );
-    },
+    await this.$watchUntilTruly(() => this.sdk);
+    this.fee = calculateFee(SCHEMA.TX_TYPE.spend, this.sdk.Ae.defaults);
   },
 };
 </script>

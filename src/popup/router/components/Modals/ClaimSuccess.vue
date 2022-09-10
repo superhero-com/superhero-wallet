@@ -1,6 +1,7 @@
 <template>
   <Modal
-    close
+    has-close-button
+    centered
     @close="resolve"
   >
     <CheckIcon /> <br>
