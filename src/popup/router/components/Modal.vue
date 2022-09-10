@@ -125,6 +125,7 @@ export default {
   min-width: variables.$extension-width;
   background-color: rgba(variables.$color-black, 0.7);
   display: flex;
+  will-change: backdrop-filter;
 
   &.blur-bg {
     backdrop-filter: blur(5px);
@@ -141,6 +142,7 @@ export default {
     box-shadow:
       0 0 0 1px variables.$color-border,
       2px 4px 12px rgba(variables.$color-black, 0.22);
+    will-change: transform;
 
     @include mixins.desktop {
       width: calc(#{variables.$extension-width} - 32px);

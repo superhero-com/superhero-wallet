@@ -172,7 +172,7 @@ export default {
   height: calc(var(--header-height) + env(safe-area-inset-top));
   background-color: var(--screen-bg-color);
   display: flex;
-  padding: env(safe-area-inset-top) 8px 8px 8px;
+  padding: env(safe-area-inset-top) 8px 0 8px;
   align-items: center;
   justify-content: space-between;
   width: 100%;

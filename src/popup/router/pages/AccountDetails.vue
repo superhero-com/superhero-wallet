@@ -39,9 +39,11 @@
         />
       </div>
 
-      <div class="search-bar-wrapper">
+      <div
+        v-if="searchTermPlaceholder"
+        class="search-bar-wrapper"
+      >
         <SearchBar
-          v-if="searchTermPlaceholder"
           v-model="searchTerm"
           :placeholder="searchTermPlaceholder"
         />
@@ -174,6 +176,7 @@ export default {
   --screen-bg-color: #{variables.$color-bg-modal};
 
   border-radius: variables.$border-radius-app;
+  min-height: 100%;
   font-weight: 500;
   color: variables.$color-white;
   background-color: var(--screen-bg-color);
@@ -220,39 +223,44 @@ export default {
   }
 
   .buttons {
-    padding: 20px var(--screen-padding-x) 12px;
+    margin-top: 20px;
+    padding: 0 var(--screen-padding-x);
     width: 100%;
     display: inline-flex;
     justify-content: space-between;
-    gap: 16px;
+    gap: var(--gap);
   }
 
   .header {
     position: sticky;
     z-index: 2;
     top: calc(env(safe-area-inset-top) + 62px);
-    padding-left: var(--screen-padding-x);
-    padding-right: var(--screen-padding-x);
+    padding: var(--gap) var(--screen-padding-x);
     background-color: var(--screen-bg-color);
   }
 
   .tabs {
-    gap: 16px;
-    padding-left: 4px;
-    padding-right: 4px;
-    border-radius: 14px;
-    background-color: var(--screen-bg-color);
+    gap: var(--gap);
+    padding: 4px;
+    border-radius: variables.$border-radius-interactive;
+    background-color: variables.$color-black;
 
     @include mixins.flex(flex-start, center, row);
 
     .button-plain {
-      padding: 4px 10px;
-      gap: 4px;
-      border-radius: 10px;
-
       @extend %face-sans-14-medium;
 
       @include mixins.flex(center, center, row);
+
+      padding: 4px 10px;
+      gap: 4px;
+      border-radius: variables.$border-radius-interactive - 3px;
+      color: rgba(variables.$color-white, 0.75);
+      transition: all 100ms;
+
+      &:hover {
+        color: variables.$color-white;
+      }
 
       &.router-link-active {
         background-color: rgba(variables.$color-white, 0.15);
@@ -265,7 +273,7 @@ export default {
     position: sticky;
     top: calc(env(safe-area-inset-top) + 104px);
     z-index: 1;
-    margin-top: 8px;
+    margin-top: var(--gap);
   }
 
   .tabs-content {
