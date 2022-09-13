@@ -23,7 +23,7 @@
     <CheckBox v-model="autoExtend">
       <div class="auto-extend-label">
         {{ $t('pages.names.claim.auto-extend') }}
-        <HelpButton
+        <BtnHelp
           :title="$t('modals.autoextend-help.title')"
           :msg="$t('modals.autoextend-help.msg')"
           :class="{ active: autoExtend }"
@@ -41,9 +41,8 @@
       <mark>{{ $t('pages.names.claim.short-names.insertion') }}</mark>
     </i18n>
 
-    <Button
+    <BtnMain
       class="btn-register"
-      new-ui
       extend
       :disabled="!sdk || !name || errors.any()"
       @click="claim"
@@ -53,7 +52,7 @@
           ? $t('pages.names.claim.button-price', [nameFee])
           : $t('pages.names.claim.button')
       }}
-    </Button>
+    </BtnMain>
   </div>
 </template>
 
@@ -62,8 +61,8 @@ import { mapActions, mapState } from 'vuex';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
-import HelpButton from '../../components/HelpButton.vue';
-import Button from '../../components/Button.vue';
+import BtnMain from '../../components/buttons/BtnMain.vue';
+import BtnHelp from '../../components/buttons/BtnHelp.vue';
 import { MAX_AUCTION_NAME_LENGTH, MAGNITUDE, MODAL_DEFAULT } from '../../../utils/constants';
 import { checkAensName, convertToken } from '../../../utils/helper';
 
@@ -71,8 +70,8 @@ export default {
   components: {
     InputField,
     CheckBox,
-    HelpButton,
-    Button,
+    BtnMain,
+    BtnHelp,
   },
   data: () => ({
     name: '',

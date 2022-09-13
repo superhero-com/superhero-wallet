@@ -13,28 +13,28 @@
     </p>
 
     <template #footer>
-      <Button
-        fill="secondary"
+      <BtnMain
+        variant="secondary"
         @click="cancelTip"
       >
         {{ $t('modals.cancel') }}
-      </Button>
-      <Button
+      </BtnMain>
+      <BtnMain
         data-cy="to-confirm"
         @click="toConfirm"
       >
         {{ $t('modals.confirm-tip.send') }}
-      </Button>
+      </BtnMain>
     </template>
   </Modal>
 </template>
 
 <script>
 import Modal from '../Modal.vue';
-import Button from '../Button.vue';
+import BtnMain from '../buttons/BtnMain.vue';
 
 export default {
-  components: { Modal, Button },
+  components: { Modal, BtnMain },
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },

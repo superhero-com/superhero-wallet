@@ -20,17 +20,15 @@
     </div>
 
     <template #footer>
-      <Button
+      <BtnMain
         v-if="showEditButton"
-        fill="secondary"
+        variant="secondary"
         text="Edit"
         class="button-action-secondary"
-        new-ui
         @click="editTransfer"
       />
-      <Button
+      <BtnMain
         class="button-action-primary"
-        new-ui
         :disabled="error || !transferData.address || !transferData.amount"
         :has-icon="showSendButton"
         :text="showSendButton ? $t('pages.send.send') : $t('modals.send.next')"
@@ -38,7 +36,7 @@
       >
         {{ showSendButton ? $t('pages.send.send') : $t('modals.send.next') }}
         <ArrowSendIcon v-if="showSendButton" />
-      </Button>
+      </BtnMain>
     </template>
   </Modal>
 </template>
@@ -48,7 +46,7 @@ import { mapState } from 'vuex';
 import { MODAL_TRANSFER_SEND } from '../../../utils/constants';
 import { validateTipUrl } from '../../../utils/helper';
 import Modal from '../Modal.vue';
-import Button from '../Button.vue';
+import BtnMain from '../buttons/BtnMain.vue';
 import TransferSendForm from '../TransferSendForm.vue';
 import TransferReview from '../TransferReview.vue';
 import TransferReviewTip from '../TransferReviewTip.vue';
@@ -62,7 +60,7 @@ export default {
   name: 'TransferSend',
   components: {
     Modal,
-    Button,
+    BtnMain,
     ArrowSendIcon,
   },
   props: {

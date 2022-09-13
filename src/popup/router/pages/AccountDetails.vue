@@ -6,18 +6,18 @@
         can-copy-address
       />
 
-      <ButtonIcon
+      <BtnIcon
         class="close-button"
         :to="{ name: 'index' }"
       >
         <CloseIcon />
-      </ButtonIcon>
+      </BtnIcon>
     </div>
 
     <BalanceInfo :account-idx="activeIdx" />
 
     <div class="buttons">
-      <BoxButton
+      <BtnBox
         v-for="(action, index) in actions"
         :key="index"
         new-ui
@@ -25,12 +25,12 @@
       >
         <Component :is="action.icon" />
         <div>{{ action.text }}</div>
-      </BoxButton>
+      </BtnBox>
     </div>
 
     <div class="header">
       <div class="tabs">
-        <ButtonPlain
+        <BtnPlain
           v-for="tab in tabs"
           :key="tab.routeName"
           :exact-path="tab.exact"
@@ -69,10 +69,10 @@ import {
 } from '../../utils/constants';
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
-import ButtonPlain from '../components/ButtonPlain.vue';
-import BoxButton from '../components/BoxButton.vue';
+import BtnPlain from '../components/buttons/BtnPlain.vue';
+import BtnBox from '../components/buttons/BtnBox.vue';
 import SearchBar from '../components/SearchBar.vue';
-import ButtonIcon from '../components/ButtonIcon.vue';
+import BtnIcon from '../components/buttons/BtnIcon.vue';
 import ArrowReceiveIcon from '../../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../../icons/arrow-send.svg?vue-component';
 import CreditCardIcon from '../../../icons/credit-card.svg?vue-component';
@@ -83,9 +83,9 @@ export default {
   components: {
     AccountInfo,
     BalanceInfo,
-    ButtonPlain,
-    ButtonIcon,
-    BoxButton,
+    BtnPlain,
+    BtnIcon,
+    BtnBox,
     SearchBar,
     CloseIcon,
   },

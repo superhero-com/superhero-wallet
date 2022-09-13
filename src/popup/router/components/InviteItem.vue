@@ -6,7 +6,8 @@
     </div>
     <div class="invite-link">
       <span>{{ link }}</span>
-      <CopyButton
+      <BtnCopy
+        class="copy-button"
         :value="link.toString()"
         :message="$t('copied')"
       />
@@ -15,50 +16,49 @@
       v-if="!topUp"
       class="centered-buttons"
     >
-      <Button
+      <BtnMain
         v-if="inviteLinkBalance > 0"
-        bold
+        class="button"
         @click="claim"
       >
         {{ $t('pages.invite.claim') }}
-      </Button>
-      <Button
+      </BtnMain>
+      <BtnMain
         v-else
-        bold
-        fill="secondary"
+        class="button"
+        variant="secondary"
         @click="deleteItem"
       >
         {{ $t('pages.invite.delete') }}
-      </Button>
-      <Button
-        bold
+      </BtnMain>
+      <BtnMain
+        class="button"
         @click="topUp = true"
       >
         {{ $t('pages.invite.top-up') }}
-      </Button>
+      </BtnMain>
     </div>
     <template v-else>
       <InputAmount
         v-model="topUpAmount"
         :label="$t('pages.invite.top-up-with')"
+        new-ui
         no-token
         @error="(val) => error = val"
       />
       <div class="centered-buttons">
-        <Button
-          bold
-          fill="secondary"
+        <BtnMain
+          variant="secondary"
           @click="resetTopUpChanges"
         >
           {{ $t('pages.invite.collapse') }}
-        </Button>
-        <Button
-          bold
+        </BtnMain>
+        <BtnMain
           :disabled="error"
           @click="sendTopUp"
         >
           {{ $t('pages.invite.top-up') }}
-        </Button>
+        </BtnMain>
       </div>
     </template>
   </div>
@@ -70,14 +70,17 @@ import { AmountFormatter, TxBuilderHelper, Crypto } from '@aeternity/aepp-sdk';
 import CopyMixin from '../../../mixins/copy';
 import TokenAmount from './TokenAmount.vue';
 import InputAmount from './InputAmount.vue';
-import Button from './Button.vue';
-import CopyButton from './CopyButton.vue';
+import BtnMain from './buttons/BtnMain.vue';
+import BtnCopy from './buttons/BtnCopy.vue';
 import { formatDate } from '../../utils';
 import { APP_LINK_WEB } from '../../utils/constants';
 
 export default {
   components: {
-    TokenAmount, Button, CopyButton, InputAmount,
+    TokenAmount,
+    BtnMain,
+    BtnCopy,
+    InputAmount,
   },
   filters: { formatDate },
   mixins: [CopyMixin],
@@ -166,8 +169,7 @@ export default {
 @use '../../../styles/variables';
 
 .invite-row {
-  padding: 1rem;
-  width: 100%;
+  padding: 1rem var(--screen-padding-x);
   border-bottom: 2px solid variables.$color-border;
   text-align: left;
   color: variables.$color-white;

@@ -13,25 +13,29 @@
       </RouterLink>
     </i18n>
 
-    <Button
+    <BtnMain
+      variant="pink"
       class="reset-wallet-button"
+      has-icon
+      extend
       @click="onResetWallet"
     >
-      <div class="box">
-        <ResetWallet />
-        {{ $t('pages.titles.reset-wallet') }}
-      </div>
-    </Button>
+      <ResetWallet />
+      {{ $t('pages.titles.reset-wallet') }}
+    </BtnMain>
   </div>
 </template>
 
 <script>
-import Button from '../components/Button.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
 import ResetWallet from '../../../icons/reset-wallet.svg?vue-component';
 import { MODAL_RESET_WALLET } from '../../utils/constants';
 
 export default {
-  components: { Button, ResetWallet },
+  components: {
+    BtnMain,
+    ResetWallet,
+  },
   methods: {
     onResetWallet() {
       this.$store.dispatch('modals/open', {
@@ -65,29 +69,7 @@ export default {
     }
 
     .reset-wallet-button {
-      width: 100%;
-      background-color: rgba(variables.$color-red-2, 0.15);
-      border: 1px solid rgba(variables.$color-red-2, 0.44);
-      color: variables.$color-red-2;
       margin-top: 34px;
-
-      &,
-      .box {
-        display: inline-flex;
-        justify-content: space-around;
-        align-items: center;
-      }
-
-      &:hover {
-        background-color: rgba(variables.$color-red-2, 0.15);
-        border-color: rgba(variables.$color-red-2, 1);
-      }
-
-      .reset-wallet {
-        width: 25px;
-        height: 24px;
-        margin-right: 4px;
-      }
     }
   }
 

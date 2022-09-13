@@ -8,21 +8,21 @@
       {{ callbackOrigin }}
     </div>
 
-    <Button @click="openCallbackOrGoHome(true, { address: $store.getters.account.address })">
+    <BtnMain @click="openCallbackOrGoHome(true, { address: $store.getters.account.address })">
       {{ $t('pages.tipPage.confirm') }}
-    </Button>
-    <Button @click="openCallbackOrGoHome(false)">
+    </BtnMain>
+    <BtnMain @click="openCallbackOrGoHome(false)">
       {{ $t('pages.tipPage.cancel') }}
-    </Button>
+    </BtnMain>
   </div>
 </template>
 
 <script>
-import Button from '../components/Button.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
-  components: { Button },
+  components: { BtnMain },
   mixins: [deeplinkApi],
 };
 </script>

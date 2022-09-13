@@ -32,27 +32,28 @@
       :value="dataAsString"
       data-cy="data"
     >
-      <CopyButton
-        slot="label"
-        :value="dataAsString"
-        :message="$t('copied')"
-      />
+      <template #label>
+        <BtnCopy
+          :value="dataAsString"
+          :message="$t('copied')"
+        />
+      </template>
     </DetailsItem>
 
-    <template slot="footer">
-      <Button
+    <template #footer>
+      <BtnMain
         third
-        fill="secondary"
+        variant="secondary"
         @click="cancel"
       >
         {{ $t('modals.cancel') }}
-      </Button>
-      <Button
+      </BtnMain>
+      <BtnMain
         third
         @click="confirm"
       >
         {{ $t('modals.confirm') }}
-      </Button>
+      </BtnMain>
     </template>
   </Modal>
 </template>
@@ -61,14 +62,19 @@
 import { mapState, mapGetters } from 'vuex';
 import Modal from '../Modal.vue';
 import Overview from '../Overview.vue';
-import Button from '../Button.vue';
-import CopyButton from '../CopyButton.vue';
+import BtnMain from '../buttons/BtnMain.vue';
+import BtnCopy from '../buttons/BtnCopy.vue';
 import DetailsItem from '../DetailsItem.vue';
 import Warning from '../../../../icons/warning.svg?vue-component';
 
 export default {
   components: {
-    Modal, Overview, Button, CopyButton, DetailsItem, Warning,
+    Modal,
+    Overview,
+    BtnMain,
+    BtnCopy,
+    DetailsItem,
+    Warning,
   },
   props: {
     resolve: { type: Function, required: true },

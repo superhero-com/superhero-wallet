@@ -23,27 +23,28 @@
       :value="message"
       data-cy="message"
     >
-      <CopyButton
-        slot="label"
-        :value="message"
-        :message="$t('copied')"
-      />
+      <template #label>
+        <BtnCopy
+          :value="message"
+          :message="$t('copied')"
+        />
+      </template>
     </DetailsItem>
 
     <template slot="footer">
-      <Button
-        fill="secondary"
+      <BtnMain
+        variant="secondary"
         data-cy="deny"
         @click="cancel()"
       >
         {{ $t('pages.signTransaction.reject') }}
-      </Button>
-      <Button
+      </BtnMain>
+      <BtnMain
         data-cy="accept"
         @click="resolve()"
       >
         {{ $t('pages.signTransaction.confirm') }}
-      </Button>
+      </BtnMain>
     </template>
   </Modal>
 </template>
@@ -51,15 +52,19 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import Modal from '../../components/Modal.vue';
-import Button from '../../components/Button.vue';
+import BtnMain from '../../components/buttons/BtnMain.vue';
+import BtnCopy from '../../components/buttons/BtnCopy.vue';
 import Overview from '../../components/Overview.vue';
 import DetailsItem from '../../components/DetailsItem.vue';
-import CopyButton from '../../components/CopyButton.vue';
 import mixin from './mixin';
 
 export default {
   components: {
-    Modal, Button, Overview, DetailsItem, CopyButton,
+    Modal,
+    BtnMain,
+    Overview,
+    DetailsItem,
+    BtnCopy,
   },
   mixins: [mixin],
   props: {

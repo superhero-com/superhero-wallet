@@ -1,11 +1,11 @@
 <template>
-  <Button
+  <BtnMain
     v-bind="$attrs"
     class="button-subheader"
     :to="to"
     new-ui
     extend
-    fill="alternative"
+    variant="alternative"
     @click="$emit('click')"
   >
     <div class="box">
@@ -18,18 +18,18 @@
         <span class="description">{{ subheader }}</span>
       </div>
     </div>
-  </Button>
+  </BtnMain>
 </template>
 
 <script>
-import Button from './Button.vue';
+import BtnMain from './BtnMain.vue';
 
 export default {
   components: {
-    Button,
+    BtnMain,
   },
   props: {
-    to: { type: [String, Object], default: '' },
+    to: { type: Object, default: null },
     header: { type: String, default: '' },
     subheader: { type: String, default: '' },
   },
@@ -37,9 +37,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-@use '../../../styles/mixins';
+@use '../../../../styles/variables';
+@use '../../../../styles/typography';
+@use '../../../../styles/mixins';
 
 .button-subheader {
   height: 80px;

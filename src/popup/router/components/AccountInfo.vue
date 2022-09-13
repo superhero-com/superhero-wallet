@@ -25,7 +25,7 @@
         <div
           v-if="truncatedAddress && truncatedAddress.length"
         >
-          <ButtonPlain
+          <BtnPlain
             v-if="canCopyAddress"
             v-clipboard:copy="activeAccount.address"
             v-clipboard:success="copy"
@@ -45,7 +45,7 @@
               <CopyOutlinedIcon />
               {{ $t('addressCopied') }}
             </div>
-          </ButtonPlain>
+          </BtnPlain>
           <div
             v-else
             class="ae-address"
@@ -65,14 +65,14 @@ import { mapGetters } from 'vuex';
 import CopyMixin from '../../../mixins/copy';
 import { truncateAddress } from '../../utils/helper';
 import Avatar from './Avatar.vue';
-import ButtonPlain from './ButtonPlain.vue';
+import BtnPlain from './buttons/BtnPlain.vue';
 import Truncate from './Truncate.vue';
 import CopyOutlinedIcon from '../../../icons/copy-outlined.svg?vue-component';
 
 export default {
   components: {
     Avatar,
-    ButtonPlain,
+    BtnPlain,
     Truncate,
     CopyOutlinedIcon,
   },

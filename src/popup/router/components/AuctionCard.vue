@@ -1,6 +1,7 @@
 <template>
   <div class="auction-card">
-    <HelpButton
+    <BtnHelp
+      class="help-button"
       :title="$t('modals.auctions-help.title')"
       :msg="$t('modals.auctions-help.msg')"
     />
@@ -12,14 +13,14 @@
 
 <script>
 import Avatar from './Avatar.vue';
-import HelpButton from './HelpButton.vue';
+import BtnHelp from './buttons/BtnHelp.vue';
 import AuctionOverview from './AuctionOverview.vue';
 import { blocksToRelativeTime } from '../../../filters/toRelativeTime';
 
 export default {
   components: {
     Avatar,
-    HelpButton,
+    BtnHelp,
     AuctionOverview,
   },
   props: {

@@ -96,7 +96,7 @@ export default {
     }
 
     &.highlight {
-      color: variables.$color-error;
+      color: variables.$color-danger;
     }
   }
 }

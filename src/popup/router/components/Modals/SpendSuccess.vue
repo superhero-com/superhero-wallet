@@ -27,8 +27,9 @@
       show-address
     />
     <div class="button-wrapper">
-      <Button
-        fill="secondary"
+      <BtnMain
+        variant="secondary"
+        class="button"
         extend
         nowrap
         has-icon
@@ -36,14 +37,15 @@
       >
         <ExternalLink />
         {{ $t('pages.send.viewInExplorer') }}
-      </Button>
-      <Button
+      </BtnMain>
+      <BtnMain
+        class="button"
         inline
         nowrap
         @click="resolve"
       >
         {{ $t('ok') }}
-      </Button>
+      </BtnMain>
     </div>
   </Modal>
 </template>
@@ -52,7 +54,7 @@
 import { mapState, mapGetters } from 'vuex';
 import Modal from '../Modal.vue';
 import TokenAmount from '../TokenAmount.vue';
-import Button from '../Button.vue';
+import BtnMain from '../buttons/BtnMain.vue';
 import AvatarWithChainName from '../AvatarWithChainName.vue';
 import ModalHeader from '../ModalHeader.vue';
 import Pending from '../../../../icons/animated-pending.svg?vue-component';
@@ -65,7 +67,7 @@ export default {
     Modal,
     Pending,
     TokenAmount,
-    Button,
+    BtnMain,
     ExternalLink,
   },
   props: {

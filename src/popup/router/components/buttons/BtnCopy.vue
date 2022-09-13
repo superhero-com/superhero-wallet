@@ -1,25 +1,28 @@
 <template>
-  <ButtonPlain
+  <BtnPlain
     v-clipboard:success="copy"
     v-clipboard:copy="value"
-    class="copy-button"
+    class="btn-copy"
   >
     <CopyIcon />
     <span
       v-if="copied"
       class="message"
     >{{ message }}</span>
-  </ButtonPlain>
+  </BtnPlain>
 </template>
 
 <script>
-import CopyMixin from '../../../mixins/copy';
-import ButtonPlain from './ButtonPlain.vue';
-import CopyIcon from '../../../icons/copy.svg?vue-component';
+import CopyMixin from '../../../../mixins/copy';
+import BtnPlain from './BtnPlain.vue';
+import CopyIcon from '../../../../icons/copy.svg?vue-component';
 
 export default {
-  name: 'CopyButton',
-  components: { ButtonPlain, CopyIcon },
+  name: 'ButtonCopy',
+  components: {
+    BtnPlain,
+    CopyIcon,
+  },
   mixins: [CopyMixin],
   props: {
     value: { type: String, required: true },
@@ -29,10 +32,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '../../../../styles/variables';
+@use '../../../../styles/typography';
 
-.copy-button {
+.btn-copy {
   display: inline-flex;
   align-items: center;
 
@@ -54,10 +57,9 @@ export default {
   }
 
   span {
-    margin-left: 4px;
-
     @extend %face-sans-14-regular;
 
+    margin-left: 4px;
     color: variables.$color-blue;
   }
 }

@@ -23,30 +23,29 @@
         @submit="importAccount"
       />
     </div>
-    <Button
+    <BtnMain
       :disabled="!mnemonic || (error != null)"
       data-cy="import"
       class="import-button"
-      new-ui
       extend
       center
       @click="importAccount"
     >
       {{ $t('pages.index.importAccount') }}
-    </Button>
+    </BtnMain>
   </Modal>
 </template>
 
 <script>
 import { validateMnemonic } from '@aeternity/bip39';
 import Modal from '../Modal.vue';
-import Button from '../Button.vue';
+import BtnMain from '../buttons/BtnMain.vue';
 import FormTextarea from '../FormTextarea.vue';
 import { validateSeedLength } from '../../../utils/helper';
 
 export default {
   components: {
-    Button,
+    BtnMain,
     Modal,
     FormTextarea,
   },

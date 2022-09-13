@@ -18,22 +18,22 @@
         />
       </div>
       <div class="token-actions">
-        <BoxButton
+        <BtnBox
           :disabled="!convertedBalance"
           @click="openTransferSendModal()"
         >
           <SendIcon />{{ $t('pages.token-details.send') }}
-        </BoxButton>
-        <BoxButton @click="openTransferReceiveModal()">
+        </BtnBox>
+        <BtnBox @click="openTransferReceiveModal()">
           <ReceiveIcon />{{ $t('pages.token-details.receive') }}
-        </BoxButton>
-        <BoxButton
+        </BtnBox>
+        <BtnBox
           v-if="id === AETERNITY_CONTRACT_ID"
-          fill="alternative"
+          variant="alternative"
           :href="SIMPLEX_URL"
         >
           <BuyIcon />{{ $t('pages.fungible-tokens.buyAe') }}
-        </BoxButton>
+        </BtnBox>
       </div>
       <div
         slot="bottom"
@@ -228,7 +228,7 @@ import BuyIcon from '../../../../icons/buy.svg?vue-component';
 import CircleI from '../../../../icons/circle-i.svg?vue-component';
 import TxHistory from '../../../../icons/history.svg?vue-component';
 import ExternalLink from '../../../../icons/external-link.svg?vue-component';
-import BoxButton from '../../components/BoxButton.vue';
+import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
 import Tokens from '../../components/Tokens.vue';
@@ -254,7 +254,7 @@ export default {
     CircleI,
     TxHistory,
     TokenAmount,
-    BoxButton,
+    BtnBox,
     DetailsRow,
     TransactionList,
     AddressShortening,
@@ -491,7 +491,7 @@ export default {
     }
 
     .red {
-      color: variables.$color-red-dark;
+      color: variables.$color-danger;
       font-weight: 400;
     }
   }

@@ -52,26 +52,25 @@
       </div>
     </div>
     <template #footer>
-      <Button
+      <BtnMain
         v-clipboard:copy="getTextToCopy()"
         v-clipboard:success="copy"
         data-cy="copy"
-        :fill="IS_MOBILE_DEVICE ? 'secondary' : 'primary'"
+        :variant="IS_MOBILE_DEVICE ? 'secondary' : 'primary'"
         class="btn-copy"
         new-ui
         :text="copied ? $t('modals.receive.copied') : $t('modals.receive.copy')"
       />
 
-      <Button
+      <BtnMain
         v-if="IS_MOBILE_DEVICE"
         class="btn-share"
-        new-ui
         has-icon
         @click="share"
       >
         <ShareIcon />
         {{ $t('modals.receive.share') }}
-      </Button>
+      </BtnMain>
     </template>
   </Modal>
 </template>
@@ -85,7 +84,7 @@ import InputAmount from '../InputAmountV2.vue';
 import Scrollable from '../Scrollable.vue';
 import { APP_LINK_WEB, MODAL_TRANSFER_RECEIVE } from '../../../utils/constants';
 import Modal from '../Modal.vue';
-import Button from '../Button.vue';
+import BtnMain from '../buttons/BtnMain.vue';
 import AccountRow from '../AccountRow.vue';
 import AddressFormatted from '../AddressFormatted.vue';
 import ShareIcon from '../../../../icons/share-2.svg?vue-component';
@@ -96,7 +95,7 @@ export default {
     InputAmount,
     Modal,
     QrcodeVue,
-    Button,
+    BtnMain,
     AccountRow,
     Scrollable,
     AddressFormatted,

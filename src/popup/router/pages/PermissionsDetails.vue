@@ -49,12 +49,12 @@
         <TokenAmount :amount="+balance" />
       </div>
     </div>
-    <Button
-      bold
+
+    <BtnMain
       @click="removePermissions"
     >
       {{ $t('pages.permissions.delete') }}
-    </Button>
+    </BtnMain>
   </div>
 </template>
 
@@ -65,7 +65,7 @@ import CheckBox from '../components/CheckBox.vue';
 import InputField from '../components/InputField.vue';
 import InputRange from '../components/InputRange.vue';
 import TokenAmount from '../components/TokenAmount.vue';
-import Button from '../components/Button.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
 
 export default {
   components: {
@@ -73,7 +73,7 @@ export default {
     InputField,
     InputRange,
     TokenAmount,
-    Button,
+    BtnMain,
   },
   data: () => ({
     transactionSignLimitError: false,

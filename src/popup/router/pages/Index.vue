@@ -58,7 +58,7 @@
     <div
       class="wallet-button-box"
     >
-      <ButtonSubheader
+      <BtnSubheader
         v-show="termsAgreed"
         data-cy="generate-wallet"
         :subheader=" $t('pages.index.getStartedWithWallet')"
@@ -66,8 +66,8 @@
         @click="createWallet"
       >
         <PlusCircleIcon />
-      </ButtonSubheader>
-      <ButtonSubheader
+      </BtnSubheader>
+      <BtnSubheader
         v-show="termsAgreed"
         data-cy="import-wallet"
         :subheader=" $t('pages.index.enterSeed') "
@@ -75,7 +75,7 @@
         @click="importWallet"
       >
         <CheckCircleIcon />
-      </ButtonSubheader>
+      </BtnSubheader>
     </div>
   </div>
 </template>
@@ -87,7 +87,7 @@ import Logo from '../../../icons/logo.svg?vue-component';
 import CheckBox from '../components/CheckBox.vue';
 import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
 import CheckCircleIcon from '../../../icons/check-circle-fill.svg?vue-component';
-import ButtonSubheader from '../components/ButtonSubheader.vue';
+import BtnSubheader from '../components/buttons/BtnSubheader.vue';
 import Platforms from '../components/Platforms.vue';
 import { MODAL_ACCOUNT_IMPORT } from '../../utils/constants';
 
@@ -95,7 +95,7 @@ export default {
   components: {
     Logo,
     CheckBox,
-    ButtonSubheader,
+    BtnSubheader,
     PlusCircleIcon,
     CheckCircleIcon,
     Platforms,
@@ -207,7 +207,7 @@ export default {
         }
 
         .aeternity-name {
-          color: variables.$color-red-2;
+          color: variables.$color-pink;
         }
       }
     }

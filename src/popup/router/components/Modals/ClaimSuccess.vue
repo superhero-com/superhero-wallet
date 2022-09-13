@@ -9,22 +9,25 @@
     <b>{{ $t('pages.claim.tipsOnUrl') }}:</b> {{ claimAmount }} {{ $t('pages.claim.ae') }} <br>
     <span class="claimed">{{ $t('pages.claim.claimed') }}</span>
 
-    <Button
-      slot="footer"
-      @click="resolve"
-    >
-      {{ $t('ok') }}
-    </Button>
+    <template #footer>
+      <BtnMain @click="resolve">
+        {{ $t('ok') }}
+      </BtnMain>
+    </template>
   </Modal>
 </template>
 
 <script>
 import Modal from '../Modal.vue';
-import Button from '../Button.vue';
+import BtnMain from '../buttons/BtnMain.vue';
 import CheckIcon from '../../../../icons/check-icon.svg?vue-component';
 
 export default {
-  components: { Modal, Button, CheckIcon },
+  components: {
+    Modal,
+    BtnMain,
+    CheckIcon,
+  },
   props: {
     resolve: { type: Function, required: true },
     url: { type: String, required: true },

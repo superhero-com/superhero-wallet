@@ -52,13 +52,13 @@
       </template>
     </ae-phraser>
     <div class="footer">
-      <Button
+      <BtnMain
         class="verify-button"
         :disabled="!selectedWordIds || selectedWordIds.length !== mnemonicShuffled.length"
         @click="verifyLastStep"
       >
         {{ $t('pages.seedPhrase.verify') }}
-      </Button>
+      </BtnMain>
 
       <div
         v-if="showNotification"
@@ -84,14 +84,14 @@
 <script>
 import { mapState } from 'vuex';
 import { shuffle } from 'lodash-es';
-import Button from '../components/Button.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
 import CheckCircle from '../../../icons/check-circle.svg?vue-component';
 import Alert from '../../../icons/alert.svg?vue-component';
 import Close from '../../../icons/close.svg?vue-component';
 
 export default {
   components: {
-    Button,
+    BtnMain,
     CheckCircle,
     Alert,
     Close,
@@ -247,8 +247,8 @@ export default {
       @extend %face-sans-16-medium;
 
       &.error {
-        border-color: variables.$color-red-2;
-        color: variables.$color-red-2;
+        border-color: variables.$color-danger;
+        color: variables.$color-danger;
       }
 
       .text {

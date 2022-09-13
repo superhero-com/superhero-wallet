@@ -34,13 +34,13 @@
             </div>
           </slot>
 
-          <ButtonIcon
+          <BtnIcon
             v-if="hasCloseButton"
             class="close-button"
             @click="$emit('close')"
           >
             <Close />
-          </ButtonIcon>
+          </BtnIcon>
         </div>
 
         <div
@@ -69,13 +69,13 @@
 </template>
 
 <script>
-import ButtonIcon from './ButtonIcon.vue';
+import BtnIcon from './buttons/BtnIcon.vue';
 import Close from '../../../icons/close.svg?vue-component';
 import NodeConnectionStatus from './NodeConnectionStatus.vue';
 
 export default {
   components: {
-    ButtonIcon,
+    BtnIcon,
     Close,
     NodeConnectionStatus,
   },
@@ -199,15 +199,19 @@ export default {
       justify-content: center;
       gap: 10px;
       padding: 8px var(--screen-padding-x);
-      background:
-        linear-gradient(
-          0deg,
-          rgba(var(--screen-bg-color), 0.9) 50%,
-          rgba(var(--screen-bg-color), 0) 100%
-        );
 
       &.mobile {
         margin-bottom: 20px;
+      }
+
+      // Semi-transparent and gradient-like cover under the buttons
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-color: var(--screen-bg-color);
+        opacity: 0.9;
+        box-shadow: 0 -10px 10px var(--screen-bg-color);
       }
     }
   }

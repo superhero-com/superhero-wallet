@@ -50,9 +50,9 @@
           </button>
         </div>
       </div>
-      <ButtonPlain @click="expand = !expand">
+      <BtnPlain @click="expand = !expand">
         <Arrow :class="['icon', { rotated: expand, hidden: nameEntry.pending }]" />
-      </ButtonPlain>
+      </BtnPlain>
     </div>
     <span v-show="!expand && !nameEntry.pending && !!addressOrFirstPointer">
       {{ addressOrFirstPointer }}
@@ -69,19 +69,19 @@
         plain
       >
         <template #after>
-          <ButtonPlain
+          <BtnPlain
             v-show="newPointer.length"
             @click="setPointer"
           >
             <Save />
-          </ButtonPlain>
-          <ButtonPlain
+          </BtnPlain>
+          <BtnPlain
             v-if="UNFINISHED_FEATURES"
             v-show="!newPointer.length"
             @click="insertValueFromClipboard"
           >
             <Paste />
-          </ButtonPlain>
+          </BtnPlain>
         </template>
       </InputField>
 
@@ -104,7 +104,7 @@
         v-if="Object.entries(nameEntry.pointers || {}).length"
         :label="$t('pages.names.list.pointers')"
       >
-        <HelpButton
+        <BtnHelp
           slot="label"
           :title="$t('modals.name-pointers-help.title')"
           :msg="$t('modals.name-pointers-help.msg')"
@@ -132,16 +132,25 @@ import Pending from '../../../icons/animated-pending.svg?vue-component';
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';
 import InputField from './InputField.vue';
-import ButtonPlain from './ButtonPlain.vue';
+import BtnPlain from './buttons/BtnPlain.vue';
+import BtnHelp from './buttons/BtnHelp.vue';
 import DetailsItem from './DetailsItem.vue';
-import HelpButton from './HelpButton.vue';
 import Arrow from '../../../icons/arrow.svg?vue-component';
 import Save from '../../../icons/account-card/btn-save.svg?vue-component';
 import Paste from '../../../icons/paste.svg?vue-component';
 
 export default {
   components: {
-    Pending, Avatar, Truncate, InputField, ButtonPlain, DetailsItem, Arrow, Save, Paste, HelpButton,
+    Pending,
+    Avatar,
+    Truncate,
+    InputField,
+    BtnPlain,
+    BtnHelp,
+    DetailsItem,
+    Arrow,
+    Save,
+    Paste,
   },
   props: {
     name: { type: String, default: '' },

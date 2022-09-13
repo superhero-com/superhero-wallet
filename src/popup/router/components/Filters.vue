@@ -4,7 +4,7 @@
     data-cy="filters"
     :class="{ fixed }"
   >
-    <ButtonPlain
+    <BtnPlain
       v-for="filter in Object.entries(filters)"
       :key="filter[0]"
       class="filter"
@@ -17,17 +17,21 @@
         :class="{ rotate: !rotatableFilters[filter[0]].rotated }"
       />
       <FilterArrow v-else />
-    </ButtonPlain>
+    </BtnPlain>
   </div>
 </template>
 
 <script>
 import FilterArrow from '../../../icons/filter-arrow.svg?vue-component';
 import Sort from '../../../icons/sort.svg?vue-component';
-import ButtonPlain from './ButtonPlain.vue';
+import BtnPlain from './buttons/BtnPlain.vue';
 
 export default {
-  components: { FilterArrow, Sort, ButtonPlain },
+  components: {
+    FilterArrow,
+    Sort,
+    BtnPlain,
+  },
   props: {
     value: { type: Object, required: true },
     filters: { type: Object, required: true },

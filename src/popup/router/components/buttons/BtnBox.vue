@@ -1,7 +1,7 @@
 <template>
   <Component
     :is="component"
-    class="box-button"
+    class="btn-box"
     :class="[
       fill,
       {
@@ -21,7 +21,7 @@
 <script>
 export default {
   props: {
-    to: { type: [String, Object], default: null },
+    to: { type: Object, default: null },
     href: { type: String, default: null },
     fill: {
       type: String,
@@ -46,10 +46,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '../../../../styles/variables';
+@use '../../../../styles/typography';
 
-.box-button {
+.btn-box {
   @extend %face-sans-15-medium;
 
   width: 88px;
@@ -73,11 +73,11 @@ export default {
 
   &.primary {
     &:hover {
-      background-color: rgba(variables.$color-blue, 0.15);
+      background-color: rgba(variables.$color-primary, 0.15);
 
       &,
       ::v-deep svg {
-        color: variables.$color-blue;
+        color: variables.$color-primary;
       }
     }
 

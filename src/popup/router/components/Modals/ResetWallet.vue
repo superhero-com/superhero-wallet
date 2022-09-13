@@ -3,8 +3,7 @@
     class="reset-wallet"
     from-bottom
     has-close-button
-    full-screen
-    no-blur
+    centered
     @close="resolve"
   >
     <div class="icon-wrapper">
@@ -22,18 +21,20 @@
       </div>
     </div>
     <div class="buttons">
-      <Button
+      <BtnMain
         class="cancel-button"
+        variant="secondary"
         @click="reject"
       >
         {{ $t('pages.reset-wallet.cancel') }}
-      </Button>
-      <Button
+      </BtnMain>
+      <BtnMain
         class="reset-button"
+        variant="danger"
         @click="onReset"
       >
         {{ $t('pages.reset-wallet.reset') }}
-      </Button>
+      </BtnMain>
     </div>
   </Modal>
 </template>
@@ -41,13 +42,13 @@
 <script>
 import { mapActions } from 'vuex';
 import Modal from '../Modal.vue';
-import Button from '../Button.vue';
+import BtnMain from '../buttons/BtnMain.vue';
 import ResetWallet from '../../../../icons/reset-wallet.svg?vue-component';
 
 export default {
   components: {
     Modal,
-    Button,
+    BtnMain,
     ResetWallet,
   },
   props: {
@@ -70,21 +71,6 @@ export default {
 @use '../../../../styles/typography';
 
 .reset-wallet {
-  ::v-deep .container {
-    top: 28%;
-    text-align: center;
-    border-radius: 16px;
-
-    .close-button {
-      top: 2px;
-      right: 2px;
-
-      .icon {
-        color: rgba(variables.$color-white, 0.5);
-      }
-    }
-  }
-
   .icon-wrapper {
     margin: 8px auto 18px;
     width: 64px;
@@ -99,7 +85,7 @@ export default {
     .reset-wallet {
       width: 48px;
       height: 48px;
-      color: variables.$color-red-2;
+      color: variables.$color-pink;
     }
   }
 
@@ -124,32 +110,8 @@ export default {
   }
 
   .buttons {
-    display: inline-flex;
-
-    .button {
-      border-radius: 10px;
-      cursor: pointer;
-
-      @extend %face-sans-16-regular;
-
-      &.cancel-button {
-        width: 50%;
-        background-color: rgba(variables.$color-medium-grey, 1);
-
-        &:hover {
-          background-color: rgba(variables.$color-medium-grey, 0.8);
-        }
-      }
-
-      &.reset-button {
-        margin-left: 8px;
-        background-color: rgba(variables.$color-red-2, 1);
-
-        &:hover {
-          background-color: rgba(variables.$color-red-2, 0.8);
-        }
-      }
-    }
+    display: flex;
+    gap: 12px;
   }
 }
 </style>

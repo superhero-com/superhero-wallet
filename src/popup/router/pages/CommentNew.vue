@@ -4,15 +4,15 @@
       {{ text }}
     </div>
 
-    <Button
+    <BtnMain
       :disabled="!tippingSupported"
       @click="sendComment"
     >
       {{ $t('pages.tipPage.confirm') }}
-    </Button>
-    <Button @click="openCallbackOrGoHome(false)">
+    </BtnMain>
+    <BtnMain @click="openCallbackOrGoHome(false)">
       {{ $t('pages.tipPage.cancel') }}
-    </Button>
+    </BtnMain>
 
     <Loader v-if="loading" />
   </div>
@@ -21,14 +21,17 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import Button from '../components/Button.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
 import deeplinkApi from '../../../mixins/deeplinkApi';
 
 export default {
-  components: { Button },
+  components: { BtnMain },
   mixins: [deeplinkApi],
   data: () => ({
-    id: 0, parentId: undefined, text: '', loading: false,
+    id: 0,
+    parentId: undefined,
+    text: '',
+    loading: false,
   }),
   computed: {
     ...mapState(['sdk']),

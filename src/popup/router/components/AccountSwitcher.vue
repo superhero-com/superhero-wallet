@@ -14,33 +14,33 @@
         v-for="(account, idx) in accounts"
         :key="account.idx"
       >
-        <ButtonPlain
+        <BtnPlain
           v-if="idx !== 0 && !IS_CORDOVA"
           class="swiper-button prev"
           @click="setCurrentSlide(swiper.realIndex - 1)"
         >
           <Chevron />
-        </ButtonPlain>
+        </BtnPlain>
         <AccountCard
           :class="{ selected: account.idx === activeIdx }"
           :account-idx="account.idx"
         />
-        <ButtonPlain
+        <BtnPlain
           v-if="!IS_CORDOVA"
           class="swiper-button next"
           @click="setCurrentSlide(swiper.realIndex + 1)"
         >
           <Chevron />
-        </ButtonPlain>
+        </BtnPlain>
       </swiper-slide>
       <swiper-slide>
-        <ButtonPlain
+        <BtnPlain
           v-if="!IS_CORDOVA"
           class="swiper-button prev"
           @click="setCurrentSlide(swiper.realIndex - 1)"
         >
           <Chevron />
-        </ButtonPlain>
+        </BtnPlain>
         <AccountCardAdd />
       </swiper-slide>
     </swiper>
@@ -60,7 +60,7 @@ import { Swiper, SwiperSlide } from 'vue-awesome-swiper';
 
 import AccountCard from './AccountCard.vue';
 import AccountCardAdd from './AccountCardAdd.vue';
-import ButtonPlain from './ButtonPlain.vue';
+import BtnPlain from './buttons/BtnPlain.vue';
 import Chevron from '../../../icons/chevron.svg?vue-component';
 import { getAddressColor } from '../../utils/avatar';
 import BulletSwitcher from './BulletSwitcher.vue';
@@ -74,7 +74,7 @@ export default {
     AccountCardAdd,
     Swiper,
     SwiperSlide,
-    ButtonPlain,
+    BtnPlain,
     Chevron,
   },
   props: { notification: Boolean },

@@ -17,13 +17,13 @@
       :str="msgStr"
     />
     <template slot="footer">
-      <Button
-        fill="secondary"
+      <BtnMain
+        variant="secondary"
         @click="resolve"
       >
         {{ $t('modals.shareQr.close') }}
-      </Button>
-      <Button
+      </BtnMain>
+      <BtnMain
         v-if="!IS_MOBILE_DEVICE"
         v-clipboard:copy="qrStr"
         v-clipboard:success="copy"
@@ -31,15 +31,15 @@
       >
         <Copy />
         {{ $t('copy') }}
-      </Button>
-      <Button
+      </BtnMain>
+      <BtnMain
         v-else
         has-icon
         @click="share"
       >
         <Share />
         {{ $t('modals.shareQr.share') }}
-      </Button>
+      </BtnMain>
     </template>
   </Default>
 </template>
@@ -48,7 +48,7 @@
 import QrcodeVue from 'qrcode.vue';
 import Default from './Default.vue';
 import TemplateRenderer from '../TemplateRenderer.vue';
-import Button from '../Button.vue';
+import BtnMain from '../buttons/BtnMain.vue';
 import Copy from '../../../../icons/copy.svg?vue-component';
 import Share from '../../../../icons/share.svg?vue-component';
 import copy from '../../../../mixins/copy';
@@ -58,7 +58,7 @@ export default {
     QrcodeVue,
     Default,
     TemplateRenderer,
-    Button,
+    BtnMain,
     Copy,
     Share,
   },

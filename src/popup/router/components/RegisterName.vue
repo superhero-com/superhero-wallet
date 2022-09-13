@@ -3,20 +3,20 @@
     <p>
       {{ msg }}
     </p>
-    <Button
+    <BtnMain
       :to="{ name: 'account-details-names-claim' }"
       new-ui
     >
       {{ $t('pages.names.list.register-name') }}
-    </Button>
+    </BtnMain>
   </div>
 </template>
 
 <script>
-import Button from './Button.vue';
+import BtnMain from './buttons/BtnMain.vue';
 
 export default {
-  components: { Button },
+  components: { BtnMain },
   props: { msg: { type: String, required: true } },
 };
 </script>

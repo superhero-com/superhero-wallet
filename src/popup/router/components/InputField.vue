@@ -193,7 +193,7 @@ export default {
     border-radius: 6px;
 
     &:focus-within {
-      border-color: variables.$color-blue;
+      border-color: variables.$color-primary;
       background-color: variables.$color-black;
     }
 
@@ -268,11 +268,11 @@ export default {
   &.error,
   &.error.plain {
     .input-wrapper {
-      border-color: variables.$color-error;
+      border-color: variables.$color-danger;
     }
 
     .message {
-      color: variables.$color-error;
+      color: variables.$color-danger;
     }
 
     &-help {
@@ -300,7 +300,7 @@ export default {
       border-top: none;
       padding: 0;
       border-radius: unset;
-      border-color: variables.$color-blue;
+      border-color: variables.$color-primary;
 
       .input:not(:only-child) {
         padding: 0;
@@ -363,7 +363,7 @@ export default {
         padding-left: 0;
         padding-right: 0;
         border-radius: unset;
-        border-bottom: 2px solid variables.$color-blue;
+        border-bottom: 2px solid variables.$color-primary;
         background: transparent;
       }
 
@@ -380,7 +380,7 @@ export default {
 
     &.error {
       .input-wrapper {
-        box-shadow: inset 0 0 0 2px variables.$color-error;
+        box-shadow: inset 0 0 0 2px variables.$color-danger;
       }
     }
 

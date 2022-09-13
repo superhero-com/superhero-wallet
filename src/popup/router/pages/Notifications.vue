@@ -1,24 +1,24 @@
 <template>
   <div class="notifications">
     <div class="tabs">
-      <ButtonPlain
+      <BtnPlain
         :class="{ active: direction === '' }"
         @click="direction = ''"
       >
         {{ $t('pages.notifications.all') }}
-      </ButtonPlain>
-      <ButtonPlain
+      </BtnPlain>
+      <BtnPlain
         :class="{ active: direction === 'superhero' }"
         @click="direction = 'superhero'"
       >
         {{ $t('pages.notifications.superhero') }}
-      </ButtonPlain>
-      <ButtonPlain
+      </BtnPlain>
+      <BtnPlain
         :class="{ active: direction === 'wallet' }"
         @click="direction = 'wallet'"
       >
         {{ $t('pages.notifications.wallet') }}
-      </ButtonPlain>
+      </BtnPlain>
     </div>
     <div class="list">
       <NotificationItem
@@ -43,10 +43,13 @@
 <script>
 import { mapState, mapMutations } from 'vuex';
 import NotificationItem from '../components/NotificationItem.vue';
-import ButtonPlain from '../components/ButtonPlain.vue';
+import BtnPlain from '../components/buttons/BtnPlain.vue';
 
 export default {
-  components: { NotificationItem, ButtonPlain },
+  components: {
+    NotificationItem,
+    BtnPlain,
+  },
   data: () => ({
     direction: '',
   }),

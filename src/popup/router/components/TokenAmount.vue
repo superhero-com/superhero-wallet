@@ -94,7 +94,7 @@ export default {
   }
 
   &.sent {
-    color: variables.$color-error;
+    color: variables.$color-danger;
 
     &::before {
       font-weight: 600;

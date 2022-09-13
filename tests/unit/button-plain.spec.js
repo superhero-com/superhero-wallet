@@ -1,10 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
-import ButtonPlain from '../../src/popup/router/components/ButtonPlain.vue';
+import BtnPlain from '../../src/popup/router/components/buttons/BtnPlain.vue';
 
-describe('ButtonPlain', () => {
+describe('BtnPlain', () => {
   it('should have default slot', async () => {
     const testPhrase = 'Slot Content';
-    const wrapper = shallowMount(ButtonPlain, {
+    const wrapper = shallowMount(BtnPlain, {
       slots: {
         default: testPhrase,
       },
