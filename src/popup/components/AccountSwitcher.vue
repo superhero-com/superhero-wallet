@@ -22,8 +22,8 @@
           <Chevron />
         </BtnPlain>
         <AccountCard
-          :class="{ selected: account.idx === activeIdx }"
           :account-idx="account.idx"
+          :selected="account.idx === activeIdx"
         />
         <BtnPlain
           v-if="!IS_CORDOVA"
