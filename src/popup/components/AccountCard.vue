@@ -1,6 +1,6 @@
 <template>
   <RouterLink
-    class="account-card"
+    :class="['account-card', { selected }]"
     :style="cardCssProps"
     :to="{ name: 'account-details' }"
   >
@@ -36,6 +36,7 @@ export default {
   },
   props: {
     accountIdx: { type: Number, required: true },
+    selected: Boolean,
   },
   computed: {
     ...mapGetters('fungibleTokens', ['getTokenBalance']),
@@ -69,6 +70,12 @@ export default {
   text-decoration: none;
   color: inherit;
   cursor: pointer;
+  opacity: 0.5;
+  transition-duration: 300ms;
+
+  &.selected {
+    opacity: 1;
+  }
 
   .balance-info {
     margin-top: 12px;
