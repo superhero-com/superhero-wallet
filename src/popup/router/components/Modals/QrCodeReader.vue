@@ -35,16 +35,14 @@
     </div>
 
     <div class="button-wrapper">
-      <Button
-        :fill="mobile ? 'secondary' : 'primary'"
+      <BtnMain
+        :variant="mobile ? 'secondary' : 'primary'"
         :extend="!mobile"
-        new-ui
         :text="$t('ok')"
         @click="cancelReading"
       />
-      <Button
+      <BtnMain
         v-if="mobile"
-        new-ui
         :text="$t('modals.qrCodeReader.settings')"
         @click="openSettings"
       />
@@ -55,14 +53,14 @@
 <script>
 import { mapMutations } from 'vuex';
 import Modal from '../Modal.vue';
-import Button from '../Button.vue';
+import BtnMain from '../buttons/BtnMain.vue';
 import { handleUnknownError } from '../../../utils/helper';
 import QrScan from '../../../../icons/qr-scan.svg?vue-component';
 
 export default {
   components: {
     Modal,
-    Button,
+    BtnMain,
     QrScan,
   },
   props: {

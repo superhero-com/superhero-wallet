@@ -53,13 +53,13 @@
       @asset-selected="handleAssetChange"
     >
       <template #label-after>
-        <ButtonPlain
+        <BtnPlain
           class="max-button"
           :class="{ chosen: isMaxValue }"
           @click="setMaxValue"
         >
           MAX
-        </ButtonPlain>
+        </BtnPlain>
       </template>
     </InputAmount>
 
@@ -87,7 +87,7 @@ import {
 import AccountRow from './AccountRow.vue';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
-import ButtonPlain from './ButtonPlain.vue';
+import BtnPlain from './buttons/BtnPlain.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
@@ -108,7 +108,7 @@ export default {
     AccountRow,
     InputField,
     InputAmount,
-    ButtonPlain,
+    BtnPlain,
     DetailsItem,
     TokenAmount,
     QrScanIcon,

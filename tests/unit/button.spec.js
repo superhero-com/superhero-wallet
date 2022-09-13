@@ -1,10 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
-import Button from '../../src/popup/router/components/Button.vue';
+import BtnMain from '../../src/popup/router/components/buttons/BtnMain.vue';
 
 describe('Button.vue', () => {
   it('adds prop.fill class', () => {
     const fill = 'primary';
-    const wrapper = shallowMount(Button, {
+    const wrapper = shallowMount(BtnMain, {
       propsData: { fill },
     });
     expect(wrapper.find(`.${fill}`).exists()).toBeTruthy();

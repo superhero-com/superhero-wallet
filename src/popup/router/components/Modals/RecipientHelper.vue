@@ -21,25 +21,25 @@
       </div>
     </template>
     <template #footer>
-      <Button
+      <BtnMain
         class="footer"
         @click="resolve"
       >
         {{ $t('ok') }}
-      </Button>
+      </BtnMain>
     </template>
   </Default>
 </template>
 
 <script>
 import Default from './Default.vue';
-import Button from '../Button.vue';
+import BtnMain from '../buttons/BtnMain.vue';
 import { BLOG_CLAIM_TIP_URL } from '../../../utils/constants';
 
 export default {
   components: {
     Default,
-    Button,
+    BtnMain,
   },
   props: {
     resolve: { type: Function, required: true },

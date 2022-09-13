@@ -22,30 +22,30 @@
     <p class="error-info-content">
       {{ error.stack }}
     </p>
-    <Button
-      fill="secondary"
+    <BtnMain
+      variant="secondary"
       inline
       to="/"
     >
       {{ $t('pages.donate-error.cancel') }}
-    </Button>
-    <Button
+    </BtnMain>
+    <BtnMain
       inline
       @click="donate"
     >
       {{ $t('pages.donate-error.donate') }}
-    </Button>
+    </BtnMain>
   </div>
 </template>
 
 <script>
 import FormTextarea from '../components/FormTextarea.vue';
-import Button from '../components/Button.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
 
 export default {
   components: {
     FormTextarea,
-    Button,
+    BtnMain,
   },
   props: {
     entry: { type: Object, default: () => ({}) },

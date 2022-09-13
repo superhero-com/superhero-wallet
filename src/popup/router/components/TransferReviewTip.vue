@@ -209,7 +209,7 @@ export default {
     opacity: 1;
 
     &.below-zero {
-      color: variables.$color-error;
+      color: variables.$color-danger;
     }
   }
 

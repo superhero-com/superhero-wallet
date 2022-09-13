@@ -24,8 +24,8 @@ body {
   margin: 0;
   background-color: $color-black;
 
-  &.color-bg-3 {
-    background-color: $color-bg-3;
+  &.color-bg-app {
+    background-color: $color-bg-app;
   }
 
   @include mixins.desktop {
@@ -83,7 +83,7 @@ button {
 }
 
 .error-msg {
-  color: $color-error;
+  color: $color-danger;
   margin-top: 22px;
   font-size: 0.88rem;
 }

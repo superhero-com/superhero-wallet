@@ -1,18 +1,18 @@
 <template>
-  <ButtonPlain
-    class="help-button"
+  <BtnPlain
+    class="btn-help"
     @click="showHelpModal"
   >
     <QuestionCircle class="icon" />
-  </ButtonPlain>
+  </BtnPlain>
 </template>
 
 <script>
-import ButtonPlain from './ButtonPlain.vue';
-import QuestionCircle from '../../../icons/question-circle-border.svg?vue-component';
+import BtnPlain from './BtnPlain.vue';
+import QuestionCircle from '../../../../icons/question-circle-border.svg?vue-component';
 
 export default {
-  components: { ButtonPlain, QuestionCircle },
+  components: { BtnPlain, QuestionCircle },
   props: {
     title: { type: String, default: '' },
     msg: { type: String, default: '' },
@@ -35,17 +35,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
+@use '../../../../styles/variables';
 
-.help-button {
+.btn-help {
   svg {
     width: 24px;
     height: 24px;
-    color: rgba(variables.$color-blue, 0.7);
+    color: rgba(variables.$color-primary, 0.7);
   }
 
   &:hover svg {
-    color: variables.$color-blue;
+    color: variables.$color-primary;
   }
 }
 </style>

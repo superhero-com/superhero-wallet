@@ -16,25 +16,25 @@
     </div>
 
     <template slot="footer">
-      <Button
-        fill="secondary"
+      <BtnMain
+        variant="secondary"
         @click="cancel"
       >
         {{ $t('modals.cancel') }}
-      </Button>
-      <Button @click="createReport">
+      </BtnMain>
+      <BtnMain @click="createReport">
         {{ $t('modals.error-log.create-report') }}
-      </Button>
+      </BtnMain>
     </template>
   </Modal>
 </template>
 
 <script>
 import Modal from '../Modal.vue';
-import Button from '../Button.vue';
+import BtnMain from '../buttons/BtnMain.vue';
 
 export default {
-  components: { Modal, Button },
+  components: { Modal, BtnMain },
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
@@ -62,7 +62,7 @@ export default {
 @use '../../../../styles/variables';
 
 .error-msg {
-  color: variables.$color-error;
+  color: variables.$color-danger;
   margin-bottom: 30px;
 }
 

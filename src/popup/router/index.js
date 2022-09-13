@@ -126,9 +126,9 @@ if (process.env.PLATFORM === 'cordova') {
 
     router.afterEach((to) => {
       if (to.path === '/') {
-        document.body.classList.remove('color-bg-3');
+        document.body.classList.remove('color-bg-app');
       } else {
-        document.body.classList.add('color-bg-3');
+        document.body.classList.add('color-bg-app');
       }
     });
   })();

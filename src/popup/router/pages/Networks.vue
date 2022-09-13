@@ -44,30 +44,30 @@
           name="more"
           size="20px"
         />
-        <ButtonPlain
+        <BtnPlain
           data-cy="edit"
           @click="setNetworkEdit(network)"
         >
           <ae-icon name="edit" />
           {{ $t('pages.network.edit') }}
-        </ButtonPlain>
-        <ButtonPlain
+        </BtnPlain>
+        <BtnPlain
           data-cy="delete"
           @click="deleteNetwork(network.index)"
         >
           <ae-icon name="delete" />
           {{ $t('pages.network.delete') }}
-        </ButtonPlain>
+        </BtnPlain>
       </ActionsMenu>
     </div>
-    <Button
+    <BtnMain
       extend
       class="connect"
       data-cy="to-add"
       @click="mode = 'add'"
     >
       {{ $t('pages.network.addNetwork') }}
-    </Button>
+    </BtnMain>
   </div>
   <div
     v-else-if="mode === 'add' || mode === 'edit'"
@@ -101,7 +101,7 @@
       data-cy="compiler"
       new-ui
     />
-    <ButtonPlain
+    <BtnPlain
       class="expand"
       @click="backendUrlInputExpanded = !backendUrlInputExpanded"
     >
@@ -113,7 +113,7 @@
             : $t('pages.network.showTippingConfig')
         }}
       </span>
-    </ButtonPlain>
+    </BtnPlain>
     <InputField
       v-if="backendUrlInputExpanded"
       v-model="newNetwork.backendUrl"
@@ -121,29 +121,31 @@
       :label="$t('pages.network.backendUrlLabel')"
       new-ui
     />
-    <Button
-      half
-      data-cy="cancel"
-      @click="cancel"
-    >
-      {{ $t('pages.network.cancel') }}
-    </Button>
-    <Button
-      class="danger"
-      half
-      :disabled="
-        !newNetwork.name ||
-          !newNetwork.url ||
-          !newNetwork.middlewareUrl ||
-          !newNetwork.compilerUrl ||
-          !newNetwork.backendUrl ||
-          !!newNetwork.error
-      "
-      data-cy="connect"
-      @click="addOrUpdateNetwork"
-    >
-      {{ $t('pages.network.save') }}
-    </Button>
+
+    <div class="buttons-wrapper">
+      <BtnMain
+        data-cy="cancel"
+        @click="cancel"
+      >
+        {{ $t('pages.network.cancel') }}
+      </BtnMain>
+      <BtnMain
+        class="danger"
+        :disabled="
+          !newNetwork.name ||
+            !newNetwork.url ||
+            !newNetwork.middlewareUrl ||
+            !newNetwork.compilerUrl ||
+            !newNetwork.backendUrl ||
+            !!newNetwork.error
+        "
+        data-cy="connect"
+        @click="addOrUpdateNetwork"
+      >
+        {{ $t('pages.network.save') }}
+      </BtnMain>
+    </div>
+
     <div
       v-if="newNetwork.error"
       class="error-msg"
@@ -156,8 +158,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Button from '../components/Button.vue';
-import ButtonPlain from '../components/ButtonPlain.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
+import BtnPlain from '../components/buttons/BtnPlain.vue';
 import ActionsMenu from '../components/ActionsMenu.vue';
 import InputField from '../components/InputField.vue';
 import CheckBox from '../components/CheckBox.vue';
@@ -175,8 +177,8 @@ const networkProps = {
 
 export default {
   components: {
-    Button,
-    ButtonPlain,
+    BtnMain,
+    BtnPlain,
     ActionsMenu,
     InputField,
     CheckBox,
@@ -312,7 +314,7 @@ export default {
   }
 
   .connect {
-    position: initial;
+    margin-top: 16px;
   }
 }
 
@@ -342,7 +344,9 @@ export default {
     }
   }
 
-  .button {
+  .buttons-wrapper {
+    display: flex;
+    gap: 12px;
     margin-top: 20px;
   }
 }

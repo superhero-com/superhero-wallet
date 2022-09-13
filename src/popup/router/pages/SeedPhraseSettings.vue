@@ -9,20 +9,21 @@
         {{ $t('pages.seed-phrase-settings.seedRecoverySmallBackItUp') }}
       </span>
     </i18n>
-    <Button
-      class="show"
+    <BtnMain
+      class="button"
+      extend
       :to="{ name: 'settings-seed-phrase-details' }"
     >
       {{ $t('pages.seed-phrase-settings.seedRecoveryBtn') }}
-    </Button>
+    </BtnMain>
   </div>
 </template>
 
 <script>
-import Button from '../components/Button.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
 
 export default {
-  components: { Button },
+  components: { BtnMain },
 };
 </script>
 
@@ -46,9 +47,7 @@ export default {
   }
 
   .button {
-    width: 100%;
     margin-top: 48px;
-    text-align: center;
   }
 
   .verified {

@@ -111,7 +111,7 @@ export default {
 
 #app {
   --screen-padding-x: 16px;
-  --screen-bg-color: #{variables.$color-bg-3};
+  --screen-bg-color: #{variables.$color-bg-app};
   --header-height: 0;
   --gap: 12px;
 

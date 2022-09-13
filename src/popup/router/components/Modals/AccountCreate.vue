@@ -14,21 +14,21 @@
       {{ $t('modals.createAccount.msg') }}
     </p>
 
-    <ButtonSubheader
+    <BtnSubheader
       :header="$t('modals.createAccount.btnText')"
       :subheader="$t('modals.createAccount.btnSubtitle')"
       extend
       @click="createAccount()"
     >
       <PlusCircleIcon />
-    </ButtonSubheader>
+    </BtnSubheader>
 
     <Loader v-if="loading" />
   </Modal>
 </template>
 
 <script>
-import ButtonSubheader from '../ButtonSubheader.vue';
+import BtnSubheader from '../buttons/BtnSubheader.vue';
 import Modal from '../Modal.vue';
 import PlusCircleIcon from '../../../../icons/plus-circle-fill.svg?vue-component';
 import Loader from '../Loader.vue';
@@ -36,7 +36,7 @@ import Loader from '../Loader.vue';
 export default {
   components: {
     Modal,
-    ButtonSubheader,
+    BtnSubheader,
     PlusCircleIcon,
     Loader,
   },

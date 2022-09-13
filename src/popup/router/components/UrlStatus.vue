@@ -84,7 +84,7 @@ export default {
   &.blacklisted,
   &.alert,
   &.critical {
-    color: variables.$color-error;
+    color: variables.$color-danger;
   }
 
   &.warning,

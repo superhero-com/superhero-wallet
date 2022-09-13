@@ -32,15 +32,15 @@
       {{ tip.title }}
     </div>
 
-    <Button
+    <BtnMain
       :disabled="!tippingSupported || validationStatus.error || $validator.errors.has('amount')"
       @click="sendTip"
     >
       {{ $t('pages.tipPage.confirm') }}
-    </Button>
-    <Button @click="openCallbackOrGoHome(false)">
+    </BtnMain>
+    <BtnMain @click="openCallbackOrGoHome(false)">
       {{ $t('pages.tipPage.cancel') }}
-    </Button>
+    </BtnMain>
 
     <Loader v-if="loading" />
   </div>
@@ -55,12 +55,12 @@ import deeplinkApi from '../../../mixins/deeplinkApi';
 import maxAmountMixin from '../../../mixins/maxAmountMixin';
 import InputAmount from '../components/InputAmountV2.vue';
 import UrlStatus from '../components/UrlStatus.vue';
-import Button from '../components/Button.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
 
 export default {
   components: {
-    InputAmount, UrlStatus, Button, BalanceInfo,
+    InputAmount, UrlStatus, BtnMain, BalanceInfo,
   },
   mixins: [deeplinkApi, maxAmountMixin],
   data: () => ({

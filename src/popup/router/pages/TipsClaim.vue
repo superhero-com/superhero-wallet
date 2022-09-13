@@ -3,7 +3,8 @@
     <AccountInfo :account-idx="activeIdx" />
     <div class="header">
       {{ $t('pages.claimTips.header') }}
-      <HelpButton
+      <BtnHelp
+        class="help-button"
         :title="$t('modals.verify.title')"
         :msg="$t('modals.verify.msg')"
         :option="{
@@ -23,14 +24,13 @@
       :error="!normalizedUrl"
     />
 
-    <Button
+    <BtnMain
       :disabled="!normalizedUrl || !tippingSupported"
-      new-ui
       extend
       @click="claimTips"
     >
       {{ $t('pages.tipPage.confirm') }}
-    </Button>
+    </BtnMain>
 
     <Loader v-if="loading" />
   </div>
@@ -41,15 +41,15 @@ import { mapGetters, mapState } from 'vuex';
 import { aettosToAe, toURL, validateTipUrl } from '../../utils/helper';
 import { BLOG_CLAIM_TIP_URL } from '../../utils/constants';
 import InputField from '../components/InputField.vue';
-import Button from '../components/Button.vue';
-import HelpButton from '../components/HelpButton.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
+import BtnHelp from '../components/buttons/BtnHelp.vue';
 import AccountInfo from '../components/AccountInfo.vue';
 
 export default {
   components: {
     InputField,
-    Button,
-    HelpButton,
+    BtnMain,
+    BtnHelp,
     AccountInfo,
   },
   data: () => ({

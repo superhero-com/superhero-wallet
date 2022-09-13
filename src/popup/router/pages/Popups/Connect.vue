@@ -34,19 +34,19 @@
     </div>
 
     <template slot="footer">
-      <Button
-        fill="secondary"
+      <BtnMain
+        variant="secondary"
         data-cy="deny"
         @click="cancel()"
       >
         {{ $t('pages.connectConfirm.cancelButton') }}
-      </Button>
-      <Button
+      </BtnMain>
+      <BtnMain
         data-cy="accept"
         @click="resolve()"
       >
         {{ $t('pages.connectConfirm.confirmButton') }}
-      </Button>
+      </BtnMain>
     </template>
   </Modal>
 </template>
@@ -54,7 +54,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import Modal from '../../components/Modal.vue';
-import Button from '../../components/Button.vue';
+import BtnMain from '../../components/buttons/BtnMain.vue';
 import Overview from '../../components/Overview.vue';
 import CheckMark from '../../../../icons/check-mark.svg?vue-component';
 import mixin from './mixin';
@@ -62,7 +62,7 @@ import mixin from './mixin';
 export default {
   components: {
     Modal,
-    Button,
+    BtnMain,
     Overview,
     CheckMark,
   },

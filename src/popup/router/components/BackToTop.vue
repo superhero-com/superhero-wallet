@@ -1,19 +1,22 @@
 <template>
-  <ButtonPlain
+  <BtnPlain
     v-if="isVisible"
     class="back-to-top"
     @click="scrollTop"
   >
     <Chevron />
-  </ButtonPlain>
+  </BtnPlain>
 </template>
 
 <script>
-import ButtonPlain from './ButtonPlain.vue';
+import BtnPlain from './buttons/BtnPlain.vue';
 import Chevron from '../../../icons/chevron.svg?vue-component';
 
 export default {
-  components: { ButtonPlain, Chevron },
+  components: {
+    BtnPlain,
+    Chevron,
+  },
   data() {
     return {
       isVisible: false,

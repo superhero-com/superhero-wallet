@@ -45,20 +45,22 @@
             class="tip-url"
             data-cy="tip-url"
           >
-            <CopyButton
-              slot="label"
-              :value="tipUrl"
-              :message="$t('pages.transactionDetails.urlCopied')"
-            />
-            <LinkButton
-              slot="value"
-              :to="/^http[s]*:\/\//.test(tipUrl) ? tipUrl : `http://${tipUrl}`"
-            >
-              <Truncate
-                :str="tipUrl"
-                fixed
+            <template #label>
+              <BtnCopy
+                :value="tipUrl"
+                :message="$t('pages.transactionDetails.urlCopied')"
               />
-            </LinkButton>
+            </template>
+            <template #value>
+              <LinkButton
+                :to="/^http[s]*:\/\//.test(tipUrl) ? tipUrl : `http://${tipUrl}`"
+              >
+                <Truncate
+                  :str="tipUrl"
+                  fixed
+                />
+              </LinkButton>
+            </template>
           </DetailsItem>
           <DetailsItem
             :label="$t('pages.transactionDetails.hash')"
@@ -169,7 +171,7 @@ import SwapRates from '../components/SwapRates.vue';
 import TokenAmount from '../components/TokenAmount.vue';
 import DetailsItem from '../components/DetailsItem.vue';
 import LinkButton from '../components/LinkButton.vue';
-import CopyButton from '../components/CopyButton.vue';
+import BtnCopy from '../components/buttons/BtnCopy.vue';
 import Truncate from '../components/Truncate.vue';
 import AnimatedPending from '../../../icons/animated-pending.svg?vue-component';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
@@ -191,7 +193,7 @@ export default {
     TokenAmount,
     DetailsItem,
     LinkButton,
-    CopyButton,
+    BtnCopy,
     Truncate,
     AnimatedPending,
     AnimatedSpinner,

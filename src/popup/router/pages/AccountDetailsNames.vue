@@ -1,17 +1,17 @@
 <template>
   <div class="account-details-names">
     <div class="tabs">
-      <ButtonPlain
+      <BtnPlain
         :to="{ name: 'account-details-names' }"
         :text="$t('pages.names.tabs.my-names')"
         exact
       />
-      <ButtonPlain
+      <BtnPlain
         :to="{ name: 'account-details-names-auctions' }"
         :text="$t('pages.names.tabs.auctions')"
       />
 
-      <ButtonPlain
+      <BtnPlain
         :to="{ name: 'account-details-names-claim' }"
         :text="$t('pages.names.tabs.register')"
       />
@@ -27,11 +27,11 @@
 </template>
 
 <script>
-import ButtonPlain from '../components/ButtonPlain.vue';
+import BtnPlain from '../components/buttons/BtnPlain.vue';
 
 export default {
   components: {
-    ButtonPlain,
+    BtnPlain,
   },
 };
 </script>

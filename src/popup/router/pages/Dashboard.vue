@@ -34,14 +34,12 @@
         <template #icon>
           <SubtractIcon />
         </template>
-        <Button
+        <BtnMain
           class="card-button"
-          :text="$t('dashboard.back-up-card.button')"
-          new-ui
+          variant="danger"
           inline
-          no-margin
+          :text="$t('dashboard.back-up-card.button')"
           :to="{ name: 'settings-seed-phrase' }"
-          fill="red"
         />
       </Card>
     </CardRow>
@@ -55,14 +53,13 @@
         <template #icon>
           <CardIcon />
         </template>
-        <Button
+        <BtnMain
           class="card-button"
           :text="$t('dashboard.buy-card.button')"
           new-ui
           inline
-          no-margin
-          :to="SIMPLEX_URL"
-          fill="red-2"
+          :href="SIMPLEX_URL"
+          variant="pink"
         />
       </Card>
     </CardRow>
@@ -76,14 +73,12 @@
         <template #icon>
           <MenuCardIcon />
         </template>
-        <Button
+        <BtnMain
           class="card-button"
-          :text="$t('dashboard.name-card.button')"
-          new-ui
+          variant="purple"
           inline
-          no-margin
+          :text="$t('dashboard.name-card.button')"
           :to="{ name: 'account-details-names-claim' }"
-          fill="purple"
         />
       </Card>
     </CardRow>
@@ -101,7 +96,7 @@ import {
 } from '../../utils/constants';
 import Card from '../components/dashboard/Card.vue';
 import CardRow from '../components/dashboard/CardRow.vue';
-import Button from '../components/Button.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
 import ArrowReceiveIcon from '../../../icons/dashboard/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../../icons/dashboard/arrow-send.svg?vue-component';
 import SubtractIcon from '../../../icons/subtract.svg?vue-component';
@@ -122,7 +117,7 @@ export default {
     SubtractIcon,
     CardIcon,
     MenuCardIcon,
-    Button,
+    BtnMain,
   },
   data: () => ({
     buyBackground,

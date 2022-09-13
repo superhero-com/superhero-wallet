@@ -24,29 +24,26 @@
 
     <slot />
 
-    <slot
-      v-if="$slots.footer"
-      slot="footer"
-      name="footer"
-    />
-    <Button
-      v-else
-      slot="footer"
-      :class="{ 'center-button': textCenter }"
-      @click="resolve"
-    >
-      {{ buttonMessage || $t('ok') }}
-    </Button>
+    <template #footer>
+      <slot name="footer">
+        <BtnMain
+          :class="{ 'center-button': textCenter }"
+          @click="resolve"
+        >
+          {{ buttonMessage || $t('ok') }}
+        </BtnMain>
+      </slot>
+    </template>
   </Modal>
 </template>
 
 <script>
 import Modal from '../Modal.vue';
-import Button from '../Button.vue';
+import BtnMain from '../buttons/BtnMain.vue';
 import StatusIcon from '../StatusIcon.vue';
 
 export default {
-  components: { Modal, Button, StatusIcon },
+  components: { Modal, BtnMain, StatusIcon },
   props: {
     resolve: { type: Function, required: true },
     close: { type: Function, default: null },
@@ -60,6 +57,7 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
 @use '../../../../styles/variables';
 @use '../../../../styles/mixins';

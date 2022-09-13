@@ -23,7 +23,7 @@ export default {
   props: {
     name: { type: String, default: '' },
     address: { type: String, default: '' },
-    to: { type: [String, Object], default: null },
+    to: { type: Object, default: null },
   },
 };
 </script>

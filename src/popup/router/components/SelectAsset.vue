@@ -1,22 +1,22 @@
 <template>
-  <ButtonPlain
+  <BtnPlain
     class="select-asset"
     :class="{ focused }"
     @click="openAssetSelector"
   >
     {{ displayToken }}
     <ChevronDown />
-  </ButtonPlain>
+  </BtnPlain>
 </template>
 
 <script>
 import ChevronDown from '../../../icons/chevron-down.svg?vue-component';
 import { MODAL_ASSET_SELECTOR } from '../../utils/constants';
-import ButtonPlain from './ButtonPlain.vue';
+import BtnPlain from './buttons/BtnPlain.vue';
 
 export default {
   components: {
-    ButtonPlain,
+    BtnPlain,
     ChevronDown,
   },
   props: {

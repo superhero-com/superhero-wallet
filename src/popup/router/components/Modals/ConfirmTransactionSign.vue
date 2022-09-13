@@ -66,14 +66,14 @@
       </DetailsItem>
     </div>
 
-    <ButtonPlain
+    <BtnPlain
       class="show-advanced"
       :class="{ active: showAdvanced }"
       @click="showAdvanced = !showAdvanced"
     >
       {{ $t('pages.signTransaction.advanced') }}
       <Arrow class="icon" />
-    </ButtonPlain>
+    </BtnPlain>
 
     <transition name="fade">
       <div
@@ -92,21 +92,21 @@
     <template
       slot="footer"
     >
-      <Button
+      <BtnMain
         third
-        fill="secondary"
+        variant="secondary"
         data-cy="deny"
         @click="cancel()"
       >
         {{ $t('pages.signTransaction.reject') }}
-      </Button>
-      <Button
+      </BtnMain>
+      <BtnMain
         third
         data-cy="accept"
         @click="resolve()"
       >
         {{ $t('pages.signTransaction.confirm') }}
-      </Button>
+      </BtnMain>
     </template>
   </Modal>
 </template>
@@ -115,8 +115,8 @@
 import { mapGetters, mapState } from 'vuex';
 import { camelCase } from 'lodash-es';
 import Modal from '../Modal.vue';
-import Button from '../Button.vue';
-import ButtonPlain from '../ButtonPlain.vue';
+import BtnMain from '../buttons/BtnMain.vue';
+import BtnPlain from '../buttons/BtnPlain.vue';
 import TransactionOverview from '../TransactionOverview.vue';
 import DetailsItem from '../DetailsItem.vue';
 import TokenAmount from '../TokenAmount.vue';
@@ -132,8 +132,8 @@ import { convertToken } from '../../../utils/helper';
 export default {
   components: {
     Modal,
-    Button,
-    ButtonPlain,
+    BtnMain,
+    BtnPlain,
     TransactionOverview,
     DetailsItem,
     TokenAmount,

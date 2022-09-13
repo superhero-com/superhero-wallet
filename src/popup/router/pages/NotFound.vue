@@ -1,17 +1,17 @@
 <template>
   <div class="not-found">
     {{ $t('pages.notFound.notFound') }}
-    <Button :to="{ name: 'index' }">
+    <BtnMain :to="{ name: 'index' }">
       {{ $t('pages.notFound.initialPage') }}
-    </Button>
+    </BtnMain>
   </div>
 </template>
 
 <script>
-import Button from '../components/Button.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
 
 export default {
-  components: { Button },
+  components: { BtnMain },
 };
 </script>
 

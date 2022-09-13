@@ -10,18 +10,18 @@
       <Component
         :is="isDiamondDisabled ? 'div' : 'RouterLink'"
         v-if="isLoggedIn && !showBack"
-        :to="isDiamondDisabled ? null : '/account'"
+        :to="isDiamondDisabled ? null : { name: 'account' }"
         :class="['home-button', { 'disabled': isDiamondDisabled }]"
       >
         <Logo />
       </Component>
-      <ButtonPlain
+      <BtnPlain
         v-if="showBack"
         class="icon-btn"
         @click="back"
       >
         <Back data-cy="back-arrow" />
-      </ButtonPlain>
+      </BtnPlain>
     </div>
 
     <div
@@ -39,7 +39,7 @@
       v-if="isLoggedIn"
       class="right"
     >
-      <ButtonPlain
+      <BtnPlain
         v-if="!$route.path.startsWith('/notifications') && !hideNotificationsIcon"
         class="notifications icon-btn"
         data-cy="noti"
@@ -53,7 +53,7 @@
         >
           {{ notificationsCount }}
         </span>
-      </ButtonPlain>
+      </BtnPlain>
 
       <RouterLink
         v-if="$route.path !== '/more' && !$route.meta.closeButton"
@@ -63,14 +63,14 @@
       >
         <ThreeDots />
       </RouterLink>
-      <ButtonPlain
+      <BtnPlain
         v-else
         class="icon-btn close"
         data-cy="close"
         @click="close"
       >
         <Close />
-      </ButtonPlain>
+      </BtnPlain>
     </div>
   </div>
 </template>
@@ -83,11 +83,17 @@ import Bell from '../../../icons/bell.svg?vue-component';
 import ThreeDots from '../../../icons/three-dots.svg?vue-component';
 import Close from '../../../icons/close.svg?vue-component';
 import Truncate from './Truncate.vue';
-import ButtonPlain from './ButtonPlain.vue';
+import BtnPlain from './buttons/BtnPlain.vue';
 
 export default {
   components: {
-    Logo, Back, Bell, ThreeDots, Close, Truncate, ButtonPlain,
+    Logo,
+    Back,
+    Bell,
+    ThreeDots,
+    Close,
+    Truncate,
+    BtnPlain,
   },
   data: () => ({
     aeppPopup: window.RUNNING_IN_POPUP,

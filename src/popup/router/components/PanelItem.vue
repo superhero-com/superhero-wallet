@@ -45,7 +45,7 @@ export default {
   props: {
     title: { type: String, required: true },
     info: { type: String, default: '' },
-    to: { type: [String, Object], default: null },
+    to: { type: Object, default: null },
     href: { type: String, default: null },
   },
 };

@@ -24,14 +24,14 @@
           />
         </DetailsItem>
       </div>
-      <Button
+      <BtnMain
         :disabled="!!amountError || error || !amount"
-        new-ui
+        class="button"
         extend
         @click="bid"
       >
         {{ $t('pages.names.auctions.place-bid') }}
-      </Button>
+      </BtnMain>
     </div>
     <Loader v-if="loading" />
   </div>
@@ -44,11 +44,11 @@ import AuctionCard from '../../components/AuctionCard.vue';
 import InputAmount from '../../components/InputAmount.vue';
 import DetailsItem from '../../components/DetailsItem.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
-import Button from '../../components/Button.vue';
+import BtnMain from '../../components/buttons/BtnMain.vue';
 
 export default {
   components: {
-    AuctionCard, InputAmount, DetailsItem, TokenAmount, Button,
+    AuctionCard, InputAmount, DetailsItem, TokenAmount, BtnMain,
   },
   props: {
     name: { type: String, required: true },

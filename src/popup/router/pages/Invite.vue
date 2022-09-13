@@ -7,17 +7,19 @@
       </p>
       <InputAmount
         v-model="amount"
+        class="amount"
         :label="$t('pages.invite.tip-attached')"
         no-token
+        new-ui
         @error="(val) => error = val"
       />
-      <Button
-        bold
+      <BtnMain
+        extend
         :disabled="error"
         @click="generate"
       >
         {{ $t('pages.invite.generate') }}
-      </Button>
+      </BtnMain>
     </div>
     <div
       v-if="invites.length > 0"
@@ -42,14 +44,14 @@
 import { mapState } from 'vuex';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 import InputAmount from '../components/InputAmount.vue';
-import Button from '../components/Button.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
 import InviteItem from '../components/InviteItem.vue';
 import Invite from '../../../icons/invite.svg?vue-component';
 import NewInviteLink from '../../../icons/new-invite-link.svg?vue-component';
 
 export default {
   components: {
-    InputAmount, Button, InviteItem, Invite, NewInviteLink,
+    InputAmount, BtnMain, InviteItem, Invite, NewInviteLink,
   },
   data: () => ({ amount: '', loading: false, error: false }),
   computed: {
@@ -108,12 +110,8 @@ export default {
     margin-right: 7px;
   }
 
-  .input-amount {
-    margin: 10px 0 0 0;
-  }
-
-  .button {
-    width: 100%;
+  .amount {
+    margin: 20px 0;
   }
 
   .generated-links {

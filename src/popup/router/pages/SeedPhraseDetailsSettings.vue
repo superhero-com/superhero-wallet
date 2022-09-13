@@ -38,27 +38,36 @@
     >
       <span>{{ $t('pages.seedPhrase.verifyYourSeedPhrase') }}</span>
     </i18n>
-    <Button :to="{ name: 'settings-seed-phrase-verify' }">
+    <BtnMain
+      class="button"
+      extend
+      :to="{ name: 'settings-seed-phrase-verify' }"
+    >
       {{ $t('pages.seedPhrase.verifySeed') }}
-    </Button>
-    <Button
-      class="dark"
+    </BtnMain>
+    <BtnMain
+      variant="secondary"
+      extend
       @click="setBackedUpSeed"
     >
       {{ $t('pages.seedPhrase.doneThis') }}
-    </Button>
+    </BtnMain>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
-import Button from '../components/Button.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
 import CopyOutlined from '../../../icons/copy-outlined.svg?vue-component';
 import CheckSuccessCircle from '../../../icons/check-success-circle.svg?vue-component';
 import CopyMixin from '../../../mixins/copy';
 
 export default {
-  components: { Button, CopyOutlined, CheckSuccessCircle },
+  components: {
+    BtnMain,
+    CopyOutlined,
+    CheckSuccessCircle,
+  },
   mixins: [CopyMixin],
   computed: mapState(['mnemonic']),
   methods: {
@@ -148,18 +157,7 @@ export default {
   }
 
   .button {
-    width: 100%;
-    border-radius: variables.$border-radius-interactive;
     margin-bottom: 18px;
-    text-align: center;
-
-    &.dark {
-      background: variables.$color-medium-grey;
-
-      &:hover {
-        opacity: 0.85;
-      }
-    }
   }
 }
 </style>

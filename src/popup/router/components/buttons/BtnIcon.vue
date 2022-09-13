@@ -2,7 +2,7 @@
   <Component
     :is="component"
     v-bind="$attrs"
-    class="button-icon"
+    class="btn-icon"
     :to="to"
     :href="href"
     :target="(href) ? '_blank' : null"
@@ -33,10 +33,10 @@ export default {
 </script>
 
 <style lang="scss">
-@use '../../../styles/variables';
-@use '../../../styles/mixins';
+@use '../../../../styles/variables';
+@use '../../../../styles/mixins';
 
-.button-icon {
+.btn-icon {
   $size: 32px;
 
   @include mixins.flex(center, center);

@@ -1,6 +1,6 @@
 <template>
   <Component
-    :is="preventNavigation ? 'ButtonPlain' : 'RouterLink'"
+    :is="preventNavigation ? 'BtnPlain' : 'RouterLink'"
     v-if="tokenData"
     class="tokens-list-item"
     :class="{ extend: preventNavigation, 'asset-selector': assetSelector }"
@@ -40,11 +40,15 @@
 import { mapGetters, mapState } from 'vuex';
 import { AETERNITY_CONTRACT_ID } from '../../../utils/constants';
 import TokenAmount from '../TokenAmount.vue';
-import ButtonPlain from '../ButtonPlain.vue';
+import BtnPlain from '../buttons/BtnPlain.vue';
 import Tokens from '../Tokens.vue';
 
 export default {
-  components: { TokenAmount, Tokens, ButtonPlain },
+  components: {
+    TokenAmount,
+    Tokens,
+    BtnPlain,
+  },
   props: {
     tokenData: { type: Object, default: null },
     preventNavigation: Boolean,
