@@ -41,8 +41,8 @@
     <template v-else>
       <InputAmount
         v-model="topUpAmount"
+        class="input-amount"
         :label="$t('pages.invite.top-up-with')"
-        new-ui
         no-token
         @error="(val) => error = val"
       />
@@ -89,7 +89,10 @@ export default {
     createdAt: { type: Number, required: true },
   },
   data: () => ({
-    topUp: false, topUpAmount: '', inviteLinkBalance: 0, error: false,
+    topUp: false,
+    topUpAmount: '',
+    inviteLinkBalance: 0,
+    error: false,
   }),
   computed: {
     ...mapState(['sdk']),
@@ -170,7 +173,10 @@ export default {
 
 .invite-row {
   padding: 1rem var(--screen-padding-x);
-  border-bottom: 2px solid variables.$color-border;
+  margin: -2px calc(-1 * var(--screen-padding-x)) 0;
+  border-style: solid;
+  border-color: variables.$color-border;
+  border-width: 2px 0;
   text-align: left;
   color: variables.$color-white;
   position: relative;
@@ -213,16 +219,12 @@ export default {
   }
 
   .input-amount {
-    margin: 0;
+    margin-bottom: var(--gap);
   }
 
   .centered-buttons {
     display: flex;
-
-    > .button {
-      margin-right: 20px;
-      width: 120px;
-    }
+    gap: var(--gap);
   }
 }
 </style>

@@ -8,7 +8,6 @@
     <DetailsItem
       :label="$t('pages.send.sender')"
       data-cy="review-sender"
-      new-ui
     >
       <template #value>
         <AvatarWithChainName
@@ -25,12 +24,10 @@
       class="tip-url"
       :label="$t('pages.send.receivingUrl')"
       :value="transferData.address"
-      new-ui
     />
     <DetailsItem
       v-else
       data-cy="review-recipient"
-      new-ui
       :label="$t('pages.send.recipient')"
     >
       <template #value>
@@ -44,7 +41,6 @@
 
     <DetailsItem
       :label="$t('pages.tipPage.amountLabel')"
-      new-ui
     >
       <template #value>
         <TokenAmount
@@ -58,7 +54,6 @@
 
     <DetailsItem
       :label="$t('pages.signTransaction.fee')"
-      new-ui
     >
       <template #value>
         <TokenAmount
@@ -73,7 +68,6 @@
     <DetailsItem
       v-if="transferData.selectedAsset.contractId === AETERNITY_CONTRACT_ID"
       :label="$t('pages.signTransaction.total')"
-      new-ui
     >
       <template #value>
         <TokenAmount

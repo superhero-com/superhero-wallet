@@ -1,8 +1,7 @@
 <template>
   <InputField
-    class="search-bar"
+    class="input-search"
     v-bind="$attrs"
-    new-ui
     v-on="$listeners"
     @input="$emit('input', $event)"
   >
@@ -31,24 +30,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-@use '../../../styles/variables';
-
-.search-bar {
-  ::v-deep .main-wrapper main {
-    background-color: rgba(variables.$color-white, 0.08);
-    border: 2px solid transparent;
-    border-radius: 10px;
-
-    svg {
-      color: rgba(variables.$color-white, 0.75);
-    }
-
-    &:focus-within {
-      background-color: rgba(variables.$color-black, 0.44);
-      border-color: variables.$color-blue;
-    }
-  }
-}
-</style>

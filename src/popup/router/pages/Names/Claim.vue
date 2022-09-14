@@ -5,7 +5,6 @@
       v-validate="'required|name|name_unregistered'"
       name="name"
       class="chain-name"
-      new-ui
       :label="$t('pages.names.claim.register-name')"
       :message="errors.first('name')"
       :placeholder="$t('pages.names.claim.name-placeholder')"

@@ -1,5 +1,5 @@
 <template>
-  <div class="transfer-send new-ui">
+  <div class="transfer-send">
     <ModalHeader :title="$t('modals.send.sendTitle')" />
     <AccountRow />
     <InputField
@@ -14,7 +14,6 @@
       data-cy="address"
       show-help
       show-message-help
-      new-ui
       :label="$t('modals.send.recipientLabel')"
       :placeholder="$t('modals.send.recipientPlaceholder')"
       :message="message"
@@ -64,7 +63,6 @@
     </InputAmount>
 
     <DetailsItem
-      new-ui
       :label="$t('pages.signTransaction.fee')"
     >
       <TokenAmount

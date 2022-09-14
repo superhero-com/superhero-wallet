@@ -35,31 +35,16 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 
-.new-ui {
-  .copy-address {
-    .address {
-      @extend %face-sans-12-medium;
-
-      letter-spacing: 0.05em;
-      line-height: 18px;
-    }
-
-    .copied {
-      .text {
-        line-height: 18px;
-      }
-    }
-  }
-}
-
 .copy-address {
   .address {
-    @extend %face-sans-11-regular;
+    @extend %face-sans-12-medium;
 
+    display: block;
+    letter-spacing: 0.05em;
+    line-height: 18px;
     color: variables.$color-light-grey;
     word-break: break-all;
     cursor: pointer;
-    display: block;
 
     &:hover {
       color: variables.$color-white;
@@ -76,7 +61,7 @@ export default {
       align-items: center;
       padding: 0 8px;
       font-size: 14px;
-      line-height: 16px;
+      line-height: 18px;
       color: variables.$color-blue;
       text-align: center;
       user-select: none;

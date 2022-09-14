@@ -20,7 +20,6 @@
       <BtnBox
         v-for="(action, index) in actions"
         :key="index"
-        new-ui
         @click="action.onClick"
       >
         <Component :is="action.icon" />
@@ -43,7 +42,7 @@
         v-if="searchTermPlaceholder"
         class="search-bar-wrapper"
       >
-        <SearchBar
+        <InputSearch
           v-model="searchTerm"
           :placeholder="searchTermPlaceholder"
         />
@@ -73,7 +72,7 @@ import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
 import BtnPlain from '../components/buttons/BtnPlain.vue';
 import BtnBox from '../components/buttons/BtnBox.vue';
-import SearchBar from '../components/SearchBar.vue';
+import InputSearch from '../components/InputSearch.vue';
 import BtnIcon from '../components/buttons/BtnIcon.vue';
 import ArrowReceiveIcon from '../../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../../icons/arrow-send.svg?vue-component';
@@ -88,7 +87,7 @@ export default {
     BtnPlain,
     BtnIcon,
     BtnBox,
-    SearchBar,
+    InputSearch,
     CloseIcon,
   },
   data() {
@@ -223,12 +222,12 @@ export default {
   }
 
   .buttons {
-    margin-top: 20px;
-    padding: 0 var(--screen-padding-x);
-    width: 100%;
-    display: inline-flex;
+    display: flex;
     justify-content: space-between;
     gap: var(--gap);
+    width: 100%;
+    margin-top: 20px;
+    padding: 0 var(--screen-padding-x);
   }
 
   .header {

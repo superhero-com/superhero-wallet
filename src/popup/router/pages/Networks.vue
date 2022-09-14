@@ -78,28 +78,24 @@
       :placeholder="$t('pages.network.networkNamePlaceholder')"
       :label="$t('pages.network.networkNameLabel')"
       data-cy="network"
-      new-ui
     />
     <InputField
       v-model="newNetwork.url"
       :placeholder="$t('pages.network.networkUrlPlaceholder')"
       :label="$t('pages.network.networkUrlLabel')"
       data-cy="url"
-      new-ui
     />
     <InputField
       v-model="newNetwork.middlewareUrl"
       :placeholder="$t('pages.network.networkMiddlewarePlaceholder')"
       :label="$t('pages.network.networkMiddlewareLabel')"
       data-cy="middleware"
-      new-ui
     />
     <InputField
       v-model="newNetwork.compilerUrl"
       :placeholder="$t('pages.network.networkCompilerPlaceholder')"
       :label="$t('pages.network.networkCompilerLabel')"
       data-cy="compiler"
-      new-ui
     />
     <BtnPlain
       class="expand"
@@ -119,7 +115,6 @@
       v-model="newNetwork.backendUrl"
       :placeholder="$t('pages.network.backendUrlPlaceholder')"
       :label="$t('pages.network.backendUrlLabel')"
-      new-ui
     />
 
     <div class="buttons-wrapper">

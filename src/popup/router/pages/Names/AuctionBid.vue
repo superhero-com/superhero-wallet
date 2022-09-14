@@ -4,7 +4,6 @@
     <div class="form">
       <InputAmount
         v-model="amount"
-        new-ui
         :error="!!amountError"
         :message="amountError"
         @error="(val) => error = val"

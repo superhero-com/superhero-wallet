@@ -19,20 +19,27 @@
       </div>
       <div class="token-actions">
         <BtnBox
+          class="token-actions-btn"
           :disabled="!convertedBalance"
           @click="openTransferSendModal()"
         >
-          <SendIcon />{{ $t('pages.token-details.send') }}
+          <SendIcon />
+          {{ $t('pages.token-details.send') }}
         </BtnBox>
-        <BtnBox @click="openTransferReceiveModal()">
-          <ReceiveIcon />{{ $t('pages.token-details.receive') }}
+        <BtnBox
+          class="token-actions-btn"
+          @click="openTransferReceiveModal()"
+        >
+          <ReceiveIcon />
+          {{ $t('pages.token-details.receive') }}
         </BtnBox>
         <BtnBox
           v-if="id === AETERNITY_CONTRACT_ID"
-          variant="alternative"
+          class="token-actions-btn"
           :href="SIMPLEX_URL"
         >
-          <BuyIcon />{{ $t('pages.fungible-tokens.buyAe') }}
+          <BuyIcon />
+          {{ $t('pages.fungible-tokens.buyAe') }}
         </BtnBox>
       </div>
       <div
@@ -365,10 +372,6 @@ export default {
     }
   }
 
-  ::v-deep {
-    text-align: left;
-  }
-
   .token-header {
     background-color: variables.$color-black;
 
@@ -379,8 +382,12 @@ export default {
     .token-actions {
       display: flex;
       justify-content: center;
-      gap: 16px;
+      gap: var(--gap);
       padding: 0 16px 24px;
+
+      &-btn {
+        max-width: 120px;
+      }
     }
 
     .token-tabs {

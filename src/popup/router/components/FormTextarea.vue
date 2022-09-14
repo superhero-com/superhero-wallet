@@ -2,7 +2,6 @@
   <InputField
     v-bind="$attrs"
     class="textarea"
-    new-ui
     :class="[ size ]"
     @input="$emit('input', $event)"
   >
@@ -85,10 +84,6 @@ export default {
     &.resizable {
       resize: both;
     }
-  }
-
-  ::placeholder {
-    color: variables.$color-silver;
   }
 
   &.xs {

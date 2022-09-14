@@ -111,7 +111,7 @@ export default {
   .mnemonics {
     background: rgba(variables.$color-white, 0.15);
     border: 2px solid rgba(variables.$color-white, 0.1);
-    border-radius: 16px;
+    border-radius: variables.$border-radius-interactive;
     margin: 0 0 20px 0;
     text-align: center;
 

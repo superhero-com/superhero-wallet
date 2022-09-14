@@ -56,10 +56,9 @@
         <BtnMain
           class="card-button"
           :text="$t('dashboard.buy-card.button')"
-          new-ui
-          inline
           :href="SIMPLEX_URL"
           variant="pink"
+          inline
         />
       </Card>
     </CardRow>

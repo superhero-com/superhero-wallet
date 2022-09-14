@@ -1,8 +1,8 @@
 <template>
-  <div class="invite">
+  <div class="invite-page">
     <div class="top">
       <p class="section-title">
-        <NewInviteLink class="invite-icon" />
+        <NewInviteLink class="section-title-icon" />
         {{ $t('pages.invite.generate-link') }}
       </p>
       <InputAmount
@@ -10,7 +10,6 @@
         class="amount"
         :label="$t('pages.invite.tip-attached')"
         no-token
-        new-ui
         @error="(val) => error = val"
       />
       <BtnMain
@@ -26,7 +25,7 @@
       class="generated-links"
     >
       <p class="section-title">
-        <Invite class="invite-icon" />
+        <Invite class="section-title-icon" />
         {{ $t('pages.invite.created-links') }}
       </p>
       <InviteItem
@@ -51,9 +50,17 @@ import NewInviteLink from '../../../icons/new-invite-link.svg?vue-component';
 
 export default {
   components: {
-    InputAmount, BtnMain, InviteItem, Invite, NewInviteLink,
+    InputAmount,
+    BtnMain,
+    InviteItem,
+    Invite,
+    NewInviteLink,
   },
-  data: () => ({ amount: '', loading: false, error: false }),
+  data: () => ({
+    amount: '',
+    loading: false,
+    error: false,
+  }),
   computed: {
     ...mapState(['sdk']),
     ...mapState('invites', ['invites']),
@@ -88,45 +95,27 @@ export default {
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 
-.invite {
-  padding: 16px;
-
-  .top {
-    margin: 0 -20px;
-    padding: 20px;
-  }
+.invite-page {
+  padding: 0 var(--screen-padding-x);
 
   .section-title {
+    display: flex;
+    align-items: center;
+    margin: 20px 0 16px;
     font-size: 17px;
     text-align: left;
-    margin-top: 0;
-    margin-bottom: 0;
     color: variables.$color-light-grey;
     font-weight: 400;
-  }
 
-  .invite-icon {
-    vertical-align: sub;
-    margin-right: 7px;
+    &-icon {
+      width: 22px;
+      height: 22px;
+      margin-right: 7px;
+    }
   }
 
   .amount {
-    margin: 20px 0;
-  }
-
-  .generated-links {
-    background-color: var(--screen-bg-color);
-    margin: 0 -20px;
-
-    .section-title {
-      padding: 15px 20px;
-      border-bottom: 2px solid variables.$color-border;
-
-      .invite-icon {
-        width: 21px;
-        height: 21px;
-      }
-    }
+    margin-bottom: 20px;
   }
 }
 </style>

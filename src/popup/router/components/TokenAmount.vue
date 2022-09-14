@@ -62,18 +62,6 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 
-.new-ui {
-  .token-amount {
-    .symbol {
-      color: variables.$color-light-grey;
-    }
-
-    .fiat {
-      margin-left: 8px;
-    }
-  }
-}
-
 .token-amount {
   @extend %face-sans-14-regular;
 
@@ -82,10 +70,11 @@ export default {
   .symbol {
     @extend %face-sans-14-medium;
 
-    color: variables.$color-blue;
+    color: variables.$color-light-grey;
   }
 
   .fiat {
+    margin-left: 8px;
     color: variables.$color-dark-grey;
 
     &.fiat-below {

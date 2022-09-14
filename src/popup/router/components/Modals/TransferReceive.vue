@@ -58,7 +58,6 @@
         data-cy="copy"
         :variant="IS_MOBILE_DEVICE ? 'secondary' : 'primary'"
         class="btn-copy"
-        new-ui
         :text="copied ? $t('modals.receive.copied') : $t('modals.receive.copy')"
       />
 

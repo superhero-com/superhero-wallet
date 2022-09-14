@@ -10,10 +10,10 @@
   >
     <template #header>
       <span class="title">{{ $t('pages.fungible-tokens.select-asset') }}</span>
-      <SearchBar
+      <InputSearch
         v-model="searchTerm"
+        class="search-bar"
         :placeholder="$t('pages.fungible-tokens.searchAssetsPlaceholder')"
-        new-ui
       />
     </template>
 
@@ -43,7 +43,7 @@
 import balanceListMixin from '../../../../mixins/balanceListMixin';
 import Modal from '../Modal.vue';
 import TokensListItem from '../FungibleTokens/TokensListItem.vue';
-import SearchBar from '../SearchBar.vue';
+import InputSearch from '../InputSearch.vue';
 import BackToTop from '../BackToTop.vue';
 
 export default {
@@ -51,7 +51,7 @@ export default {
     BackToTop,
     TokensListItem,
     Modal,
-    SearchBar,
+    InputSearch,
   },
   mixins: [balanceListMixin(true)],
   props: {

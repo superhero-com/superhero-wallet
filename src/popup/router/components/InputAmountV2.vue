@@ -1,10 +1,9 @@
 <template>
   <InputField
     v-bind="$attrs"
-    class="request-amount"
+    class="input-amount"
     type="number"
     placeholder="0.00"
-    new-ui
     :value="value"
     :label="label || $t('pages.tipPage.amountLabel')"
     :message="$attrs['message'] || errors.first('amount')"
@@ -26,12 +25,12 @@
 
     <template #under="{ focused }">
       <div
-        class="request-amount-desc"
+        class="input-amount-desc"
         :class="{ focused }"
       >
         <span
           v-if="currentTokenFiatPrice && !hasError"
-          class="request-amount-desc-total"
+          class="input-amount-desc-total"
           data-cy="total-amount-currency"
         >
           <span v-if="value">&thickapprox;</span>
@@ -40,7 +39,7 @@
 
         <span
           v-if="currentTokenFiatPrice"
-          class="request-amount-desc-at"
+          class="input-amount-desc-at"
         >
           @{{
             (currentTokenFiatPrice)
@@ -97,7 +96,7 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/mixins';
 
-.request-amount {
+.input-amount {
   &-desc {
     @include mixins.flex(space-between, center);
 

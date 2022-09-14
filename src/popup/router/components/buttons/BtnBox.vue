@@ -3,9 +3,8 @@
     :is="component"
     class="btn-box"
     :class="[
-      fill,
+      variant,
       {
-        'new-ui': newUi,
         disabled,
       },
     ]"
@@ -21,14 +20,13 @@
 <script>
 export default {
   props: {
-    to: { type: Object, default: null },
+    to: { type: [Object, String], default: null },
     href: { type: String, default: null },
-    fill: {
+    variant: {
       type: String,
       validator: (value) => ['primary', 'alternative'].includes(value),
       default: 'primary',
     },
-    newUi: Boolean,
     disabled: Boolean,
   },
   computed: {
@@ -50,84 +48,54 @@ export default {
 @use '../../../../styles/typography';
 
 .btn-box {
-  @extend %face-sans-15-medium;
+  @extend %face-sans-14-regular;
 
-  width: 88px;
-  height: 64px;
-  background-color: rgba(variables.$color-white, 0.08);
-  border-radius: 6px;
   display: flex;
   flex-direction: column;
+  flex: 1 1 0;
   align-items: center;
   justify-content: center;
+  height: auto;
+  min-height: 58px;
+  border-radius: variables.$border-radius-interactive;
+  background-color: rgba(variables.$color-white, 0.08);
   text-decoration: none;
-  color: variables.$color-dark-grey;
+  color: variables.$color-white;
   cursor: pointer;
   user-select: none;
+  transition: all 100ms;
 
-  ::v-deep svg {
+  &:active {
+    .icon {
+      opacity: 1;
+    }
+  }
+
+  .icon {
     width: 24px;
     height: 24px;
-    color: variables.$color-light-grey;
+    color: inherit;
+    opacity: 0.75;
   }
 
   &.primary {
     &:hover {
-      background-color: rgba(variables.$color-primary, 0.15);
-
-      &,
-      ::v-deep svg {
-        color: variables.$color-primary;
-      }
-    }
-
-    &:active {
-      background-color: rgba(variables.$color-primary, 0.1);
-    }
-  }
-
-  &.alternative:hover {
-    background-color: rgba(variables.$color-red, 0.1);
-
-    &,
-    ::v-deep svg {
-      color: variables.$color-red;
-    }
-  }
-
-  &.new-ui {
-    @extend %face-sans-14-regular;
-
-    height: auto;
-    min-height: 58px;
-    border-radius: 10px;
-    color: variables.$color-white;
-    transition: all 100ms;
-
-    &:hover {
       background-color: rgba(variables.$color-white, 0.1);
-      color: variables.$color-white;
-
-      .icon {
-        opacity: 0.85;
-      }
     }
 
     &:active {
       background-color: rgba(variables.$color-white, 0.15);
+    }
+  }
 
-      .icon {
-        opacity: 1;
-      }
+  &.alternative {
+    &:hover {
+      background-color: rgba(variables.$color-red, 0.2);
+      color: variables.$color-red;
     }
 
-    &,
-    &:hover,
     &:active {
-      .icon {
-        color: inherit;
-        opacity: 0.75;
-      }
+      background-color: rgba(variables.$color-red, 0.3);
     }
   }
 

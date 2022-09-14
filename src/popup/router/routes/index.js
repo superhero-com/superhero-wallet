@@ -358,12 +358,14 @@ export default [
     },
   },
   {
-    path: '/notifications',
-    name: 'notifications',
-    component: Notifications,
+    path: '/more/invite',
+    name: 'invite',
+    component: Invite,
     meta: {
-      title: 'notifications',
-      notPersist: true,
+      title: 'invite',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
     },
   },
   {
@@ -468,23 +470,21 @@ export default [
     },
   },
   {
-    name: 'invite',
-    path: '/more/invite',
-    component: Invite,
-    meta: {
-      title: 'invite',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
-    },
-  },
-  {
     name: 'invite-claim',
     path: '/invite/:secretKey',
     component: InviteClaim,
     props: true,
     meta: {
       title: 'invite',
+      notPersist: true,
+    },
+  },
+  {
+    path: '/notifications',
+    name: 'notifications',
+    component: Notifications,
+    meta: {
+      title: 'notifications',
       notPersist: true,
     },
   },
