@@ -64,23 +64,24 @@
       <InputField
         v-show="showInput"
         v-model="newPointer"
+        class="input-address"
         :placeholder="$t('pages.names.details.address-placeholder')"
         :message="error ? $t('pages.names.list.valid-identifier-error') : null"
-        plain
+        code
       >
         <template #after>
           <BtnPlain
             v-show="newPointer.length"
             @click="setPointer"
           >
-            <Save />
+            <Save class="input-address-icon" />
           </BtnPlain>
           <BtnPlain
             v-if="UNFINISHED_FEATURES"
             v-show="!newPointer.length"
             @click="insertValueFromClipboard"
           >
-            <Paste />
+            <Paste class="input-address-icon" />
           </BtnPlain>
         </template>
       </InputField>
@@ -323,24 +324,13 @@ export default {
     display: flex;
     flex-direction: column;
 
-    .input-field {
+    .input-address {
       margin: 8px 0;
 
-      ::v-deep .input-wrapper {
-        svg + .input {
-          margin-left: 4px;
-        }
-
-        .input {
-          @extend %face-mono-10-medium;
-
-          letter-spacing: -0.2px;
-        }
-
-        .button-plain {
-          width: 24px;
-          height: 24px;
-        }
+      &-icon {
+        width: 24px;
+        height: 24px;
+        margin: -4px 0;
       }
     }
 

@@ -1,7 +1,6 @@
 <template>
   <div
     class="details-item"
-    :class="{ 'new-ui': newUi }"
   >
     <div class="label">
       {{ label }}
@@ -23,10 +22,7 @@
       >
         {{ secondary }}
       </span>
-      <slot
-        v-if="$slots.value"
-        name="value"
-      />
+      <slot name="value" />
     </div>
   </div>
 </template>
@@ -40,7 +36,6 @@ export default {
     secondary: { type: String, default: '' },
     small: Boolean,
     highlight: Boolean,
-    newUi: Boolean,
   },
 };
 </script>
@@ -49,29 +44,15 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 
-.new-ui .details-item,
-.details-item.new-ui {
+.details-item {
   margin-block: 4px;
 
-  .value {
-    @extend %face-sans-15-regular;
-
-    letter-spacing: 0.05em;
-  }
-
   .label {
-    margin-bottom: 4px;
-  }
-}
-
-.details-item {
-  .label {
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-
     @extend %face-sans-15-medium;
 
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
     line-height: 16px;
     color: variables.$color-dark-grey;
 
@@ -81,8 +62,9 @@ export default {
   }
 
   .value {
-    @extend %face-sans-14-regular;
+    @extend %face-sans-15-regular;
 
+    letter-spacing: 0.05em;
     color: variables.$color-white;
     margin-bottom: 8px;
 

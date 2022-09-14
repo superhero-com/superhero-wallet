@@ -16,7 +16,6 @@
         inline,
         nowrap,
         'has-icon': hasIcon,
-        'new-ui': newUi,
       },
     ]"
     v-on="$listeners"
@@ -41,7 +40,7 @@ export default {
       default: 'primary',
     },
     text: { type: String, default: '' },
-    to: { type: Object, default: null },
+    to: { type: [Object, String], default: null },
     href: { type: String, default: null },
     disabled: Boolean,
     extend: Boolean,
@@ -50,7 +49,6 @@ export default {
     inline: Boolean,
     nowrap: Boolean,
     hasIcon: Boolean,
-    newUi: Boolean,
   },
   computed: {
     component() {

@@ -17,7 +17,6 @@
         :label="$t('pages.index.seedPhrase')"
         :placeholder="$t('pages.index.seedPlaceHolder')"
         :message="error"
-        new-ui
         :resizable="false"
         enter-submit
         @submit="importAccount"

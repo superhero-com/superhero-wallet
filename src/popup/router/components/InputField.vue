@@ -2,11 +2,10 @@
   <div
     class="input-field"
     :class="{
-      'new-ui': newUi,
       'error': hasError,
       'warning': hasWarning,
-      plain,
-      readonly
+      readonly,
+      code,
     }"
   >
     <div
@@ -45,10 +44,6 @@
           v-if="!hasError && !hasWarning"
           name="before"
         />
-        <StatusIcon
-          v-else-if="!newUi"
-          :status="hasError && 'alert' || hasWarning && 'warning'"
-        />
         <slot
           :id="_uid"
           :input-id="inputId"
@@ -60,7 +55,6 @@
             autocomplete="off"
             step="any"
             :value="value"
-            :class="{ 'new-ui': newUi }"
             :data-cy="$attrs.type ? `input-${$attrs.type}` : 'input'"
             :disabled="readonly"
             @input="$emit('input', $event.target.value)"
@@ -97,12 +91,10 @@
 </template>
 
 <script>
-import StatusIcon from './StatusIcon.vue';
 import QuestionCircleIcon from '../../../icons/question-circle-border.svg?vue-component';
 
 export default {
   components: {
-    StatusIcon,
     QuestionCircleIcon,
   },
   props: {
@@ -119,10 +111,9 @@ export default {
       default: () => {},
     },
     readonly: Boolean,
-    plain: Boolean,
     showHelp: Boolean,
     showMessageHelp: Boolean,
-    newUi: Boolean,
+    code: Boolean,
   },
   data: () => ({
     focused: false,
@@ -159,14 +150,37 @@ export default {
 @use '../../../styles/typography';
 
 .input-field {
+  --color-border: transparent;
+  --color-bg: #{rgba(variables.$color-white, 0.08)};
+  --color-input-text: #{variables.$color-light-grey};
+  --color-placeholder: #{rgba(variables.$color-white, 0.75)};
+  --color-message: #{rgba(variables.$color-white, 0.75)};
+
   text-align: left;
+
+  &:focus-within,
+  &:hover {
+    --color-input-text: #{variables.$color-white};
+  }
+
+  &:hover {
+    --color-border: #{rgba(variables.$color-white, 0.15)};
+    --color-bg: #{rgba(variables.$color-white, 0.05)};
+  }
+
+  &:focus-within {
+    --color-border: #{variables.$color-primary};
+    --color-bg: #{rgba(variables.$color-black, 0.44)};
+    --color-placeholder: #{variables.$color-white};
+  }
 
   .label {
     display: flex;
     align-items: center;
+    margin-top: 16px;
 
     &-text {
-      margin-bottom: 8px 0;
+      margin: 5px 0;
       display: inline-block;
     }
 
@@ -185,24 +199,20 @@ export default {
 
   .input-wrapper {
     display: block;
-    padding: 8px 16px;
-    background-color: variables.$color-bg-2;
-    border: 1px solid transparent;
-    border-left: 0;
-    border-right: 0;
-    border-radius: 6px;
-
-    &:focus-within {
-      border-color: variables.$color-primary;
-      background-color: variables.$color-black;
-    }
+    padding: 8px 12px;
+    background-color: var(--color-bg);
+    border: none;
+    border-radius: variables.$border-radius-interactive;
+    box-shadow: inset 0 0 0 2px var(--color-border);
+    transition: 100ms ease-in-out;
+    cursor: text;
 
     .main-inner {
       display: flex;
       align-items: center;
       width: 100%;
 
-      ::v-deep svg {
+      .icon {
         width: 24px;
         height: 24px;
         flex-shrink: 0;
@@ -210,7 +220,7 @@ export default {
     }
 
     .input {
-      @extend %face-sans-14-regular;
+      @extend %face-sans-15-regular;
 
       display: block;
       width: 100%;
@@ -219,16 +229,13 @@ export default {
       border: none;
       background: transparent;
       box-shadow: none;
-      color: variables.$color-light-grey;
-
-      &:not(:first-child) {
-        padding-left: 6px;
-      }
+      color: var(--color-input-text);
+      transition: 100ms ease-in-out;
 
       &::placeholder {
-        @extend %face-sans-14-regular;
+        @extend %face-sans-15-regular;
 
-        color: rgba(variables.$color-white, 0.75);
+        color: var(--color-placeholder);
       }
 
       &[type='number'] {
@@ -255,6 +262,7 @@ export default {
     align-items: center;
     margin-top: 9px;
     text-align: left;
+    color: var(--color-message);
 
     &-help {
       display: block;
@@ -265,129 +273,29 @@ export default {
     }
   }
 
-  &.error,
-  &.error.plain {
-    .input-wrapper {
-      border-color: variables.$color-danger;
-    }
-
-    .message {
-      color: variables.$color-danger;
-    }
-
-    &-help {
-      display: block;
-      width: 25px;
-      height: 20px;
-      padding-left: 5px;
-      color: inherit;
-    }
+  &.error {
+    --color-border: #{variables.$color-danger};
+    --color-message: #{variables.$color-danger};
   }
 
   &.warning {
-    .input-wrapper {
-      border-color: variables.$color-warning;
-    }
-
-    .message {
-      color: variables.$color-warning;
-    }
-  }
-
-  &.plain {
-    .input-wrapper {
-      background: transparent;
-      border-top: none;
-      padding: 0;
-      border-radius: unset;
-      border-color: variables.$color-primary;
-
-      .input:not(:only-child) {
-        padding: 0;
-        color: variables.$color-white;
-        font-weight: 500;
-      }
-    }
+    --color-border: #{variables.$color-warning};
+    --color-message: #{variables.$color-warning};
   }
 
   &.readonly {
-    .input-wrapper {
-      border-color: transparent;
+    --color-border: transparent;
 
-      .input:not(:only-child) {
+    .input-wrapper {
+      .input {
         opacity: 0.5;
       }
     }
   }
 
-  &.new-ui {
-    .label {
-      margin-top: 16px;
-
-      &-text {
-        margin: 5px 0;
-      }
-    }
-
-    .input-wrapper {
-      border: none;
-      background: rgba(variables.$color-white, 0.08);
-      border-radius: variables.$border-radius-interactive;
-      padding: 8px 12px;
-      transition: 0.1s ease-in-out;
-
-      &:hover,
-      &:focus-within {
-        .input {
-          color: variables.$color-white;
-        }
-      }
-
-      &:hover {
-        box-shadow: inset 0 0 0 2px rgba(variables.$color-white, 0.15);
-        background-color: rgba(variables.$color-white, 0.05);
-      }
-
-      &:focus-within {
-        box-shadow: inset 0 0 0 2px variables.$color-primary;
-        background-color: rgba(variables.$color-black, 0.44);
-
-        .input {
-          &::placeholder {
-            color: variables.$color-white;
-          }
-        }
-      }
-
-      &.plain {
-        padding-left: 0;
-        padding-right: 0;
-        border-radius: unset;
-        border-bottom: 2px solid variables.$color-primary;
-        background: transparent;
-      }
-
-      .input {
-        @extend %face-sans-15-regular;
-
-        transition: 0.1s ease-in-out;
-
-        &::placeholder {
-          @extend %face-sans-15-regular;
-        }
-      }
-    }
-
-    &.error {
-      .input-wrapper {
-        box-shadow: inset 0 0 0 2px variables.$color-danger;
-      }
-    }
-
-    &.warning {
-      .input-wrapper {
-        box-shadow: inset 0 0 0 2px variables.$color-warning;
-      }
+  &.code {
+    .input {
+      @extend %face-mono-10-medium;
     }
   }
 }

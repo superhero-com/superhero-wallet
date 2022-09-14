@@ -19,7 +19,6 @@
 
     <InputField
       v-model="url"
-      new-ui
       :label="$t('pages.claimTips.urlToClaim')"
       :error="!normalizedUrl"
     />

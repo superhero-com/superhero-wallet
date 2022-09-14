@@ -16,7 +16,7 @@ export default {
   props: {
     extend: Boolean,
     text: { type: String, default: null },
-    to: { type: Object, default: null },
+    to: { type: [Object, String], default: null },
   },
 };
 </script>

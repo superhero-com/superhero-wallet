@@ -3,7 +3,6 @@
     v-bind="$attrs"
     class="button-subheader"
     :to="to"
-    new-ui
     extend
     variant="alternative"
     @click="$emit('click')"
@@ -29,7 +28,7 @@ export default {
     BtnMain,
   },
   props: {
-    to: { type: Object, default: null },
+    to: { type: [Object, String], default: null },
     header: { type: String, default: '' },
     subheader: { type: String, default: '' },
   },
