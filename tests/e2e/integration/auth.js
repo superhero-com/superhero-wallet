@@ -6,7 +6,7 @@ describe('Test cases for login functionality', () => {
 
       .shouldRedirect('/', '/account')
       .shouldRedirect('/import-account', '/account')
-      .shouldRedirect('/about/termsOfService', '/about/termsOfService')
+      .shouldRedirect('/more/about/terms', '/more/about/terms')
 
       .logout()
       .shouldRedirect('/account', '/')
@@ -14,6 +14,6 @@ describe('Test cases for login functionality', () => {
       .shouldRedirect('/settings', '/')
       .shouldRedirect('/transfer', '/')
       .shouldRedirect('/import-account', '/import-account')
-      .shouldRedirect('/about/termsOfService', '/about/termsOfService');
+      .shouldRedirect('/more/about/terms', '/more/about/terms');
   });
 });

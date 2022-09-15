@@ -43,7 +43,7 @@ describe('Test cases for networks page', () => {
 
   it('Can add, select, edit, delete new network, can not add network with the same name', () => {
     cy.addNetwork(
-      'Newnetwork',
+      'NewNetwork',
       defaultNetwork.url,
       defaultNetwork.middlewareUrl,
       defaultNetwork.compilerUrl,
@@ -52,7 +52,7 @@ describe('Test cases for networks page', () => {
       .should('be.visible')
       .click()
       .get('[data-cy=network] input')
-      .should('have.value', 'Newnetwork')
+      .should('have.value', 'NewNetwork')
       .get('[data-cy=url] input')
       .should('have.value', defaultNetwork.url)
       .clear()
@@ -83,7 +83,7 @@ describe('Test cases for networks page', () => {
       .get('[data-cy=to-add]')
       .click()
       .enterNetworkDetails(
-        'Newnetwork',
+        'NewNetwork',
         defaultNetwork.url,
         defaultNetwork.middlewareUrl,
         defaultNetwork.compilerUrl,

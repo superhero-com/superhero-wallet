@@ -56,8 +56,7 @@ Cypress.Commands.add('shouldRedirect', (url, to) => {
 });
 
 Cypress.Commands.add('openPageMore', () => {
-  cy.visit('/account')
-    .get('[data-cy=page-more]')
+  cy.get('[data-cy=page-more]')
     .should('be.visible')
     .click();
 });
