@@ -24,12 +24,14 @@
   </Component>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+
+export default defineComponent({
   props: {
     variant: {
       type: String,
-      validator: (value) => [
+      validator: (value: string) => [
         'primary',
         'secondary',
         'alternative',
@@ -50,18 +52,22 @@ export default {
     nowrap: Boolean,
     hasIcon: Boolean,
   },
-  computed: {
-    component() {
-      if (this.to) {
+  setup(props) {
+    const component = computed((): string => {
+      if (props.to) {
         return 'RouterLink';
       }
-      if (this.href) {
+      if (props.href) {
         return 'a';
       }
       return 'button';
-    },
+    });
+
+    return {
+      component,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

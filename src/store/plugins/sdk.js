@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import { RpcWallet, Crypto, Node } from '@aeternity/aepp-sdk';
 import { isEmpty, isEqual } from 'lodash-es';
 import { App } from '../modules/permissions';

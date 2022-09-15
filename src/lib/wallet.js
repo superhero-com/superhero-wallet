@@ -95,7 +95,6 @@ export default async function initSdk() {
   store.commit('setNodeStatus', 'connecting');
   try {
     await store.dispatch('sdkPlugin/initialize');
-    // eslint-disable-next-line no-underscore-dangle
     await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
     if (IN_FRAME) {
       const getArrayOfAvailableFrames = () => [

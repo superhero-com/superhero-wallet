@@ -26,7 +26,7 @@ module.exports = {
   pages: {
     popup: {
       template: 'public/index.html',
-      entry: 'src/popup/popup.js',
+      entry: 'src/popup/popup.ts',
       title: 'Popup',
       filename: 'index.html',
     },

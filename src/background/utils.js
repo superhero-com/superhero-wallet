@@ -4,7 +4,6 @@ import store from './store';
 let tippingContract;
 
 const getAddress = async (name) => {
-  // eslint-disable-next-line no-underscore-dangle
   await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
   try {
     return getAddressByNameEntry(await store.getters['sdkPlugin/sdk'].api.getNameEntryByName(name));
@@ -18,7 +17,6 @@ export const getAddressFromChainName = async (names) => (Array.isArray(names)
 
 export const getTippingContractInstance = async (tx) => {
   if (tippingContract) return tippingContract;
-  // eslint-disable-next-line no-underscore-dangle
   await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
   tippingContract = await setContractInstance(tx, store.getters['sdkPlugin/sdk'], tx.address);
   return tippingContract;
