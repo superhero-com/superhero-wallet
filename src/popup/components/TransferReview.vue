@@ -141,101 +141,96 @@ export default {
   },
   methods: {
     async submit() {
-      try {
-        this.loading = true;
+      const {
+        amount: amountRaw,
+        address: recipient,
+        selectedAsset,
+        note,
+      } = this.transferData;
 
-        const {
-          amount: amountRaw,
-          address: recipient,
+      if (!amountRaw || !recipient || !selectedAsset) {
+        return;
+      }
+
+      const amount = (selectedAsset.contractId === AETERNITY_CONTRACT_ID)
+        ? aeToAettos(amountRaw)
+        : convertToken(amountRaw, selectedAsset.decimals);
+
+      if (this.isAddressUrl) {
+        this.sendTip({
+          amount,
+          recipient,
           selectedAsset,
           note,
-        } = this.transferData;
-
-        if (!amountRaw || !recipient || !selectedAsset) {
-          return;
-        }
-
-        const amount = (selectedAsset.contractId === AETERNITY_CONTRACT_ID)
-          ? aeToAettos(amountRaw)
-          : convertToken(amountRaw, selectedAsset.decimals);
-
-        if (this.isAddressUrl) {
-          this.sendTip({
-            amount,
-            recipient,
-            selectedAsset,
-            note,
-          });
-        } else {
-          this.transfer({
-            amount,
-            recipient,
-            selectedAsset,
-          });
-        }
-      } catch (e) {
-        this.$store.dispatch('modals/open', {
-          name: MODAL_DEFAULT,
-          title: this.$t('modals.transaction-failed.msg'),
-          icon: 'critical',
         });
+      } else {
+        this.transfer({
+          amount,
+          recipient,
+          selectedAsset,
+        });
+      }
+    },
+    async transfer({ amount, recipient, selectedAsset }) {
+      this.loading = true;
+      try {
+        let actionResult;
+
+        if (this.transferData.invoiceId != null) {
+          actionResult = await this.$store.dispatch('fungibleTokens/burnTriggerPoS', [
+            selectedAsset.contractId,
+            amount,
+            this.transferData.invoiceContract,
+            this.transferData.invoiceId,
+            { waitMined: false, modal: false },
+          ]);
+        } else if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
+          actionResult = await this.$store.dispatch('fungibleTokens/transfer', [
+            selectedAsset.contractId,
+            recipient,
+            amount,
+            { waitMined: false, modal: false },
+          ]);
+        } else {
+          actionResult = await this.sdk.spend(amount, recipient, {
+            waitMined: false,
+            modal: false,
+          });
+        }
+
+        if (actionResult && selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
+          this.$store.dispatch('addPendingTransaction', {
+            amount,
+            recipient,
+            hash: actionResult.hash,
+            type: 'spendToken',
+            pendingTokenTx: true,
+            tx: {
+              callerId: this.account.address,
+              contractId: selectedAsset.contractId,
+              type: SCHEMA.TX_TYPE.contractCall,
+              function: 'transfer',
+            },
+          });
+        } else if (actionResult) {
+          this.$store.dispatch('addPendingTransaction', {
+            hash: actionResult.hash,
+            amount,
+            type: 'spend',
+            tx: {
+              senderId: this.account.address,
+              recipientId: recipient,
+              type: SCHEMA.TX_TYPE.spend,
+            },
+          });
+        }
+        this.$emit('success');
+      } catch (e) {
+        this.openTransactionFailedModal();
         throw e;
       } finally {
         this.loading = false;
       }
-    },
-    async transfer({ amount, recipient, selectedAsset }) {
-      let actionResult;
-
-      if (this.transferData.invoiceId != null) {
-        actionResult = await this.$store.dispatch('fungibleTokens/burnTriggerPoS', [
-          selectedAsset.contractId,
-          amount,
-          this.transferData.invoiceContract,
-          this.transferData.invoiceId,
-          { waitMined: false, modal: false },
-        ]);
-      } else if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-        actionResult = await this.$store.dispatch('fungibleTokens/transfer', [
-          selectedAsset.contractId,
-          recipient,
-          amount,
-          { waitMined: false, modal: false },
-        ]);
-      } else {
-        actionResult = await this.sdk.spend(amount, recipient, {
-          waitMined: false,
-          modal: false,
-        });
-      }
-
-      if (actionResult && selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-        this.$store.dispatch('addPendingTransaction', {
-          amount,
-          recipient,
-          hash: actionResult.hash,
-          type: 'spendToken',
-          pendingTokenTx: true,
-          tx: {
-            callerId: this.account.address,
-            contractId: selectedAsset.contractId,
-            type: SCHEMA.TX_TYPE.contractCall,
-            function: 'transfer',
-          },
-        });
-      } else if (actionResult) {
-        this.$store.dispatch('addPendingTransaction', {
-          hash: actionResult.hash,
-          amount,
-          type: 'spend',
-          tx: {
-            senderId: this.account.address,
-            recipientId: recipient,
-            type: SCHEMA.TX_TYPE.spend,
-          },
-        });
-      }
-      this.$emit('success');
     },
     async sendTip({
       amount,
@@ -277,20 +272,22 @@ export default {
           },
         });
         this.openCallbackOrGoHome(true);
+        this.$emit('success');
       } catch (e) {
         this.openCallbackOrGoHome(false);
-        await this.$store.dispatch('modals/open', {
-          name: 'default',
-          title: this.$t('modals.transaction-failed.msg'),
-          icon: 'critical',
-        });
+        this.openTransactionFailedModal();
         e.payload = { url: recipient };
         throw e;
       } finally {
         this.loading = false;
       }
-
-      this.$emit('success');
+    },
+    openTransactionFailedModal() {
+      this.$store.dispatch('modals/open', {
+        name: MODAL_DEFAULT,
+        title: this.$t('modals.transaction-failed.msg'),
+        icon: 'critical',
+      });
     },
   },
 };
