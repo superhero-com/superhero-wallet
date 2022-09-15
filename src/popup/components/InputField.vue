@@ -123,7 +123,6 @@ export default {
   }),
   computed: {
     inputId() {
-      // eslint-disable-next-line no-underscore-dangle
       return `input-${this._uid}`;
     },
     hasError() {

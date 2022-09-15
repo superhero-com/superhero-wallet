@@ -57,7 +57,6 @@ export async function init() {
     }
   });
   await store.dispatch('sdkPlugin/initialize');
-  // eslint-disable-next-line no-underscore-dangle
   await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
 
   connectionsQueue.forEach(addAeppConnection);

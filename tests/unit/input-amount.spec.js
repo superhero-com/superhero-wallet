@@ -95,12 +95,11 @@ describe('InputAmount', () => {
       data: () => ({ balance: BigNumber(test.balance || maxBalance) }),
     });
 
-    // eslint-disable-next-line no-underscore-dangle
     store._vm.$validator.extend('enough_ae', (_, [arg]) => BigNumber(test.balance || maxBalance).isGreaterThanOrEqualTo(arg));
     expect(wrapper.find('input').element.value).toBe(test.displayed.toString());
     expect(wrapper.find('.token').text()).toBe('AE');
     expect(wrapper.find('[data-cy=amount-currency]').text()).toBe(`(${test.currency.toFixed(2)})`);
-    // eslint-disable-next-line no-underscore-dangle
+
     /* await store._vm.$validator.validateAll(); TODO: be able to test errors
     if (test.error) {
       expect(wrapper.find('.message.error').exists()).toBeTruthy();

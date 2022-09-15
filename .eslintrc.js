@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
   parserOptions: {
-    parser: 'babel-eslint',
+    parser: '@typescript-eslint/parser',
   },
   env: {
     browser: true,
@@ -11,6 +11,7 @@ module.exports = {
     'plugin:vue-i18n/recommended',
     'plugin:vue/recommended',
     '@vue/airbnb',
+    '@vue/typescript',
   ],
   // check if imports actually resolve
   settings: {
