@@ -25,7 +25,7 @@
 
     <template #footer>
       <BtnMain
-        :disabled="!mnemonic || (error != null)"
+        :disabled="!mnemonic || !!error"
         data-cy="import"
         class="import-button"
         extend
@@ -57,11 +57,11 @@ export default {
   },
   data: () => ({
     mnemonic: '',
-    error: null,
+    error: '',
   }),
   watch: {
     mnemonic() {
-      this.error = null;
+      this.error = '';
     },
   },
   methods: {
