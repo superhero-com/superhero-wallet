@@ -24,25 +24,25 @@ import {
   MODAL_RECIPIENT_HELPER,
 } from '../utils/constants';
 
-import Default from './components/Modals/Default.vue';
-import AccountCreate from './components/Modals/AccountCreate.vue';
-import AccountImport from './components/Modals/AccountImport.vue';
-import ClaimSuccess from './components/Modals/ClaimSuccess.vue';
-import SpendSuccess from './components/Modals/SpendSuccess.vue';
-import ConfirmTip from './components/Modals/ConfirmTip.vue';
-import Confirm from './components/Modals/Confirm.vue';
-import ErrorLog from './components/Modals/ErrorLog.vue';
-import ConfirmTransactionSign from './components/Modals/ConfirmTransactionSign.vue';
-import ConfirmRawSign from './components/Modals/ConfirmRawSign.vue';
-import QrCodeReader from './components/Modals/QrCodeReader.vue';
-import Help from './components/Modals/Help.vue';
-import ShareQr from './components/Modals/ShareQr.vue';
-import AssetSelector from './components/Modals/AssetSelector.vue';
-import TransferReceive from './components/Modals/TransferReceive.vue';
-import ResetWallet from './components/Modals/ResetWallet.vue';
-import TransferSend from './components/Modals/TransferSend.vue';
-import RecipientHelper from './components/Modals/RecipientHelper.vue';
-import RecipientInfo from './components/Modals/RecipientInfo.vue';
+import Default from '../components/Modals/Default.vue';
+import AccountCreate from '../components/Modals/AccountCreate.vue';
+import AccountImport from '../components/Modals/AccountImport.vue';
+import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
+import SpendSuccess from '../components/Modals/SpendSuccess.vue';
+import ConfirmTip from '../components/Modals/ConfirmTip.vue';
+import Confirm from '../components/Modals/Confirm.vue';
+import ErrorLog from '../components/Modals/ErrorLog.vue';
+import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
+import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
+import QrCodeReader from '../components/Modals/QrCodeReader.vue';
+import Help from '../components/Modals/Help.vue';
+import ShareQr from '../components/Modals/ShareQr.vue';
+import AssetSelector from '../components/Modals/AssetSelector.vue';
+import TransferReceive from '../components/Modals/TransferReceive.vue';
+import ResetWallet from '../components/Modals/ResetWallet.vue';
+import TransferSend from '../components/Modals/TransferSend.vue';
+import RecipientHelper from '../components/Modals/RecipientHelper.vue';
+import RecipientInfo from '../components/Modals/RecipientInfo.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });

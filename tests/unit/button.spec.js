@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import BtnMain from '../../src/popup/router/components/buttons/BtnMain.vue';
+import BtnMain from '../../src/popup/components/buttons/BtnMain.vue';
 
 describe('Button.vue', () => {
   it('adds prop.fill class', () => {

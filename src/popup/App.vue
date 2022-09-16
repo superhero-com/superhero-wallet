@@ -39,8 +39,8 @@
 import { mapGetters, mapState } from 'vuex';
 import { detect } from 'detect-browser';
 import { NOTIFICATION_SETTINGS } from './utils/constants';
-import Header from './router/components/Header.vue';
-import NodeConnectionStatus from './router/components/NodeConnectionStatus.vue';
+import Header from './components/Header.vue';
+import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
 
 export default {

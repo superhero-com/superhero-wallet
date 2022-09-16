@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import CheckBox from '../../src/popup/router/components/CheckBox.vue';
+import CheckBox from '../../src/popup/components/CheckBox.vue';
 
 describe('Checkbox', () => {
   it('should render', async () => {
@@ -21,7 +21,7 @@ describe('Checkbox', () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.find('.checkmark').classes()).toContain('checked');
   }));
-  [false, '', null, undefined, 0].forEach((value) => it(`should be unchecked with falsey value [${value}]`, () => {
+  [false, '', null, undefined, 0].forEach((value) => it(`should be unchecked with falsy value [${value}]`, () => {
     const wrapper = shallowMount(CheckBox, {
       propsData: {
         value,
