@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import Vue from 'vue';
-import AccountSwitcher from '../../src/popup/router/components/AccountSwitcher.vue';
+import AccountSwitcher from '../../src/popup/components/AccountSwitcher.vue';
 
 Vue.use(Vuex);
 

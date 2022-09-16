@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import SmallModal from '../../src/popup/router/components/SmallModal.vue';
+import SmallModal from '../../src/popup/components/SmallModal.vue';
 
 describe('SmallModal', () => {
   it('should close on button close click', async () => {

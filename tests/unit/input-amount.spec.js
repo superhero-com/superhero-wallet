@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import BigNumber from 'bignumber.js';
 import { mount } from '@vue/test-utils';
-import InputAmount from '../../src/popup/router/components/InputAmount.vue';
+import InputAmount from '../../src/popup/components/InputAmount.vue';
 import veeValidate from '../../src/store/plugins/veeValidate';
 
 Object.assign(Vue.prototype, {

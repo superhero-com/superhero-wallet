@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import { mount, RouterLinkStub } from '@vue/test-utils';
-import Index from '../../src/popup/router/pages/Index.vue';
-import About from '../../src/popup/router/pages/About.vue';
-import TermsOfService from '../../src/popup/router/pages/TermsOfService.vue';
-import PrivacyPolicy from '../../src/popup/router/pages/PrivacyPolicy.vue';
+import Index from '../../src/popup/pages/Index.vue';
+import About from '../../src/popup/pages/About.vue';
+import TermsOfService from '../../src/popup/pages/TermsOfService.vue';
+import PrivacyPolicy from '../../src/popup/pages/PrivacyPolicy.vue';
 
 Object.assign(Vue.prototype, {
   $t: () => 'locale-specific-text',

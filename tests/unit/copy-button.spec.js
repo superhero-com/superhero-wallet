@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import Vue from 'vue';
 import VueClipboard from 'vue-clipboard2';
-import BtnCopy from '../../src/popup/router/components/buttons/BtnCopy.vue';
+import BtnCopy from '../../src/popup/components/buttons/BtnCopy.vue';
 
 Vue.use(VueClipboard);
 

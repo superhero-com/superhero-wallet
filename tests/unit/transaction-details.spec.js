@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
-import TransactionDetails from '../../src/popup/router/pages/TransactionDetails.vue';
-import DetailsItem from '../../src/popup/router/components/DetailsItem.vue';
+import TransactionDetails from '../../src/popup/pages/TransactionDetails.vue';
+import DetailsItem from '../../src/popup/components/DetailsItem.vue';
 import { DEX_CONTRACTS } from '../../src/popup/utils/constants';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';

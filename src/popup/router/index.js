@@ -4,7 +4,7 @@ import VueClipboard from 'vue-clipboard2';
 import Components from '@aeternity/aepp-components-3';
 import routes from './routes';
 import '@aeternity/aepp-components-3/dist/aepp.components.css';
-import LoaderComponent from './components/Loader.vue';
+import LoaderComponent from '../components/Loader.vue';
 import { i18n } from '../../store/plugins/languages';
 
 import * as helper from '../utils/helper';

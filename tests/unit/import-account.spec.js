@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { mount } from '@vue/test-utils';
-import AccountImport from '../../src/popup/router/components/Modals/AccountImport.vue';
+import AccountImport from '../../src/popup/components/Modals/AccountImport.vue';
 
 Object.assign(Vue.prototype, {
   $t: () => 'locale-specific-text',
