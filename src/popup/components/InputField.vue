@@ -51,6 +51,7 @@
           <input
             :id="inputId"
             v-bind="$attrs"
+            :type="type"
             class="input"
             autocomplete="off"
             step="any"
@@ -58,6 +59,7 @@
             :data-cy="$attrs.type ? `input-${$attrs.type}` : 'input'"
             :disabled="readonly"
             @input="$emit('input', $event.target.value)"
+            @keydown="checkIfNumber"
             @focusin="focused = true"
             @focusout="focused = false"
           >
@@ -100,6 +102,7 @@ export default {
   props: {
     value: { type: [String, Number], default: null },
     label: { type: String, default: '' },
+    type: { type: String, default: 'text' },
     message: {
       type: [String, Object],
       validator(value) {
@@ -140,6 +143,13 @@ export default {
         return !this.message?.hideMessage;
       }
       return !!this.message;
+    },
+  },
+  methods: {
+    checkIfNumber(event) {
+      if (this.type === 'number' && !['Enter', 'Backspace'].includes(event.key) && !/^[0-9/-]$/.test(event.key)) {
+        event.preventDefault();
+      }
     },
   },
 };
