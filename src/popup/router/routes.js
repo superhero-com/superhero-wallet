@@ -271,6 +271,7 @@ export default [
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,
+      backRoute: '/more/settings',
     },
   },
   {
