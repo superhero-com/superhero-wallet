@@ -79,6 +79,7 @@ export default defineComponent({
 
   @extend %face-sans-16-regular;
 
+  margin: 0 auto;
   position: relative;
   display: flex;
   align-items: center;
