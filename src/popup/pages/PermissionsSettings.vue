@@ -21,9 +21,12 @@
         :title="host"
       />
     </template>
-    <div v-else>
+    <p
+      v-else
+      class="empty-permissions"
+    >
       {{ $t('pages.permissions.empty') }}
-    </div>
+    </p>
   </div>
 </template>
 
@@ -43,24 +46,27 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  @use '../../styles/variables';
-  @use '../../styles/typography';
+@use '../../styles/variables';
+@use '../../styles/typography';
 
-  .permissions-settings {
-    padding: 6px;
+.permissions-settings {
+  padding: 6px;
 
-    .description {
-      color: rgba(variables.$color-white, 0.75);
-      padding: 8px 8px 12px 8px;
-      line-height: 20px;
-
-      a {
-        color: variables.$color-primary;
-        text-decoration: none;
-      }
-
-      @extend %face-sans-14-light;
-    }
+  .description,
+  .empty-permissions {
+    padding: 8px 8px 12px 8px;
   }
 
+  .description {
+    color: rgba(variables.$color-white, 0.75);
+    line-height: 20px;
+
+    a {
+      color: variables.$color-primary;
+      text-decoration: none;
+    }
+
+    @extend %face-sans-14-light;
+  }
+}
 </style>

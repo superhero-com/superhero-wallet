@@ -1,6 +1,9 @@
 <template>
   <div class="permissions-details">
-    <p>{{ host }}</p>
+    <h2 class="text-heading-2 host">
+      {{ host }}
+    </h2>
+
     <div class="permission-row">
       <CheckBox
         :value="address"
@@ -31,6 +34,7 @@
         </template>
       </InputField>
       <InputRange
+        class="transaction-sign-limit-range"
         :value="transactionSignLimit"
         min="0"
         :max="+balance"
@@ -52,6 +56,8 @@
     </div>
 
     <BtnMain
+      class="btn-remove-permission"
+      extend
       @click="removePermissions"
     >
       {{ $t('pages.permissions.delete') }}
@@ -122,26 +128,16 @@ export default {
 @use '../../styles/variables.scss';
 
 .permissions-details {
-  font-size: 15px;
-  text-align: left;
-  color: variables.$color-white;
+  padding-inline: var(--screen-padding-x);
 
-  p {
+  .host {
+    margin: 10px 0 30px;
     text-align: center;
   }
 
   .permission-row {
     display: flex;
-    margin: 30px 0;
-
-    + .permission-row {
-      margin-top: -16px;
-    }
-
-    + .input-range {
-      display: block;
-      margin: -16px 0 0 0;
-    }
+    margin: 16px 0;
 
     .highlight {
       font-weight: 700;
@@ -155,15 +151,23 @@ export default {
   }
 
   .transaction-sign-limit {
-    margin: 0 -12px;
-    padding: 0 12px;
+    margin: 0 calc(-1 * var(--screen-padding-x));
+    padding: 0 var(--screen-padding-x);
     border: 1px solid variables.$color-border;
-    border-left: 0;
-    border-right: 0;
+    border-left: none;
+    border-right: none;
 
     .currency-name {
       color: variables.$color-blue;
     }
+
+    .transaction-sign-limit-range {
+      margin-top: 10px;
+    }
+  }
+
+  .btn-remove-permission {
+    margin-top: 20px;
   }
 }
 </style>
