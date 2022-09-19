@@ -23,6 +23,7 @@
         :message="transactionSignLimitError ? { status: 'error' } : null"
         :label="$t('pages.permissions.transaction-sign')"
         placeholder="always ask"
+        type="number"
         @input="setTransactionSignLimit"
       >
         <template #after>
