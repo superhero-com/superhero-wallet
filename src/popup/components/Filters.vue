@@ -1,8 +1,7 @@
 <template>
   <div
-    class="filters"
     data-cy="filters"
-    :class="{ fixed }"
+    class="filters"
   >
     <BtnPlain
       v-for="filter in Object.entries(filters)"
@@ -35,7 +34,6 @@ export default {
   props: {
     value: { type: Object, required: true },
     filters: { type: Object, required: true },
-    fixed: Boolean,
   },
   data() {
     return {
@@ -44,6 +42,11 @@ export default {
   },
   methods: {
     handleClick([filter, { rotated = null }]) {
+      const scrollTopThreshold = 140;
+      const appContainer = document.querySelector('.app-inner');
+      if (appContainer.scrollTop > scrollTopThreshold) {
+        appContainer.scrollTo({ top: scrollTopThreshold, behavior: 'smooth' });
+      }
       if (rotated !== null) {
         if (this.value.sort === filter) {
           this.rotatableFilters[filter].rotated = !this.rotatableFilters[filter].rotated;
@@ -64,24 +67,22 @@ export default {
 @use '../../styles/mixins';
 
 .filters {
-  height: 50px;
-  width: 100%;
+  height: 36px;
   display: flex;
   gap: 8px;
-  padding: 13px 0;
-
-  &.fixed {
-    position: sticky;
-    top: 48px;
-    top: calc(env(safe-area-inset-top) + 48px);
-    background-color: var(--screen-bg-color);
-  }
+  padding-bottom: 12px;
+  background: var(--screen-bg-color);
+  padding-inline: var(--screen-padding-x);
+  margin-left: calc(-1 * var(--screen-padding-x));
+  margin-right: calc(-1 * var(--screen-padding-x));
 
   .filter {
     display: flex;
     align-items: center;
     padding: 2px 8px;
     gap: 2px;
+    transition: all 0.08s ease-out;
+    border-radius: 12px;
 
     @extend %face-sans-14-regular;
 
@@ -97,14 +98,18 @@ export default {
       }
     }
 
+    &:hover,
     &.active {
       color: variables.$color-white;
       background: rgba(variables.$color-white, 0.1);
-      border-radius: 12px;
 
       svg {
         color: rgba(variables.$color-white, 0.5);
       }
+    }
+
+    &:hover:not(.active) {
+      opacity: 0.75;
     }
   }
 }

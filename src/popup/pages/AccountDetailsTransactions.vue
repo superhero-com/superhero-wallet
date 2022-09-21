@@ -3,6 +3,7 @@
     <TransactionList
       :search-term="searchTerm"
       display-filter
+      sticky-filter
     />
   </div>
 </template>

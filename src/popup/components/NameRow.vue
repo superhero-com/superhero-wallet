@@ -41,7 +41,7 @@ export default {
   margin-left: calc(-1 * var(--screen-padding-x));
   margin-right: calc(-1 * var(--screen-padding-x));
   color: variables.$color-white;
-  background: variables.$color-bg-2;
+  background-color: var(--screen-bg-color);
   text-align: left;
   text-decoration: none;
   transition: 0.2s;

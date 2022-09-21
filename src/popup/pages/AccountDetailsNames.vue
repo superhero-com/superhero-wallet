@@ -10,13 +10,11 @@
         :to="{ name: 'account-details-names-auctions' }"
         :text="$t('pages.names.tabs.auctions')"
       />
-
       <BtnPlain
         :to="{ name: 'account-details-names-claim' }"
         :text="$t('pages.names.tabs.register')"
       />
     </div>
-
     <transition
       name="fade-transition"
       mode="out-in"
@@ -42,12 +40,16 @@ export default {
 @use '../../styles/typography';
 
 .account-details-names {
+  --header-height: 126px;
+
   .tabs {
+    position: sticky;
+    top: calc(var(--header-height) + env(safe-area-inset-top));
+    z-index: 2;
     gap: var(--gap);
-    border-radius: 14px;
     padding-top: 2px;
+    padding-bottom: 10px;
     background-color: var(--screen-bg-color);
-    margin-bottom: 10px;
 
     @include mixins.flex(flex-start, center, row);
 
