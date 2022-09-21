@@ -4,7 +4,7 @@
       v-if="activeAuctions.length || auctions.length || loading"
       v-model="displayMode"
       :filters="filters"
-      :fixed="filtersFixed"
+      sticky
     />
     <ul
       v-if="activeAuctions.length || auctions.length"
@@ -61,9 +61,6 @@ export default {
   filters: {
     blocksToRelativeTime,
   },
-  props: {
-    filtersFixed: Boolean,
-  },
   data: () => ({
     displayMode: { sort: 'soonest', rotated: false },
     activeAuctions: [],
@@ -103,6 +100,8 @@ export default {
 @use '../../../styles/mixins';
 
 .auction-list {
+  --filter-top-offset: 166px;
+
   display: flex;
   flex-direction: column;
 
@@ -135,6 +134,11 @@ export default {
     width: 56px;
     height: 56px;
     margin: 72px auto 0 auto;
+  }
+
+  ::v-deep .filters {
+    position: sticky;
+    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
   }
 }
 </style>

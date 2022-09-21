@@ -1,10 +1,13 @@
 <template>
-  <div class="transaction-list">
+  <div
+    class="transaction-list"
+    :class="{ 'sticky-filter': stickyFilter }"
+  >
     <Filters
       v-if="displayFilter"
       v-model="displayMode"
       :filters="filters"
-      :fixed="filtersFixed"
+      :sticky="stickyFilter"
     />
     <div
       class="list"
@@ -60,7 +63,7 @@ export default {
     searchTerm: { type: String, default: '' },
     maxLength: { type: Number, default: null },
     displayFilter: Boolean,
-    filtersFixed: Boolean,
+    stickyFilter: Boolean,
   },
   data() {
     return {
@@ -87,7 +90,7 @@ export default {
             || (this.token !== AETERNITY_CONTRACT_ID
               ? tr.tx?.contractId === this.token
               : (!tr.tx.contractId
-              || !isFungibleTokenTx(tr)))))
+                || !isFungibleTokenTx(tr)))))
           .filter((tr) => {
             switch (this.displayMode.filter) {
               case 'all':
@@ -96,20 +99,20 @@ export default {
                 return FUNCTION_TYPE_DEX.pool.includes(tr.tx.function);
               case 'out':
                 return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
-                  && tr.tx.senderId === address)
+                    && tr.tx.senderId === address)
                   || (isFungibleTokenTx(tr)
-                  && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
-                  && tr.tx.callerId === address);
+                    && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
+                    && tr.tx.callerId === address);
               case 'in':
                 return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
-                  && (tr.tx.recipientId === address || (tr.tx.senderId !== address && tr.tx.recipientId.startsWith('nm_'))))
+                    && (tr.tx.recipientId === address || (tr.tx.senderId !== address && tr.tx.recipientId.startsWith('nm_'))))
                   || (isFungibleTokenTx(tr)
                     && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
                     && tr.recipient === address);
               case 'tips':
                 return (tr.tx.contractId
                   && (activeNetwork.tipContractV1 === tr.tx.contractId
-                  || activeNetwork.tipContractV2 === tr.tx.contractId)
+                    || activeNetwork.tipContractV2 === tr.tx.contractId)
                   && (tr.tx.function === 'tip' || tr.tx.function === 'retip')) || tr.claim;
               default:
                 throw new Error(`Unknown display mode type: ${this.displayMode.filter}`);
@@ -184,6 +187,8 @@ export default {
 @use '../../styles/typography';
 
 .transaction-list {
+  --filter-top-offset: 178px;
+
   display: flex;
   flex-direction: column;
 
@@ -264,6 +269,11 @@ export default {
         opacity: 0.44;
       }
     }
+  }
+
+  ::v-deep .filters {
+    position: sticky;
+    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
   }
 }
 </style>
