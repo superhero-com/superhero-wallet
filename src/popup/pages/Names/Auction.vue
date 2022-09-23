@@ -1,16 +1,18 @@
 <template>
   <div class="auction">
-    <Tabs>
-      <RouterLink
-        :to="{ name: 'auction-bid' }"
-        exact-path
-      >
-        <Auction /> {{ $t('pages.names.auctions.place-bid') }}
-      </RouterLink>
-      <RouterLink :to="{ name: 'auction-history' }">
-        <History /> {{ $t('pages.names.auctions.bid-history') }}
-      </RouterLink>
-    </Tabs>
+    <div class="auction-tabs">
+      <Tabs>
+        <Tab
+          :to="{ name: 'auction-bid' }"
+          :text="$t('pages.names.auctions.place-bid')"
+          exact-path
+        />
+        <Tab
+          :to="{ name: 'auction-history' }"
+          :text="$t('pages.names.auctions.bid-history')"
+        />
+      </Tabs>
+    </div>
 
     <Loader v-if="loading" />
 
@@ -21,16 +23,14 @@
 <script>
 import BigNumber from 'bignumber.js';
 import { aettosToAe } from '../../utils/helper';
-import Tabs from '../../components/Tabs.vue';
-import Auction from '../../../icons/auction.svg?vue-component';
-import History from '../../../icons/history.svg?vue-component';
+import Tabs from '../../components/tabs/Tabs.vue';
+import Tab from '../../components/tabs/Tab.vue';
 
 export default {
   name: 'Auctions',
   components: {
     Tabs,
-    Auction,
-    History,
+    Tab,
   },
   props: {
     name: { type: String, required: true },
@@ -80,13 +80,8 @@ export default {
 @use '../../../styles/variables';
 
 .auction {
-  .tabs {
-    margin-top: -10px;
-
-    a {
-      padding-top: 10px;
-      height: 60px;
-    }
+  &-tabs {
+    padding-inline: var(--screen-padding-x);
   }
 }
 </style>

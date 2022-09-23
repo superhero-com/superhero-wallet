@@ -104,7 +104,7 @@ export default {
       color: variables.$color-white;
     }
 
-    .seperator {
+    .separator {
       color: variables.$color-white;
     }
   }

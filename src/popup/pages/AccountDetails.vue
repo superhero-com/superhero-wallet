@@ -28,15 +28,15 @@
     </div>
 
     <div class="header">
-      <div class="tabs">
-        <BtnPlain
+      <Tabs>
+        <Tab
           v-for="tab in tabs"
           :key="tab.routeName"
           :exact-path="tab.exact"
           :to="{ name: tab.routeName }"
           :text="tab.text"
         />
-      </div>
+      </Tabs>
 
       <div
         v-if="searchTermPlaceholder"
@@ -74,6 +74,8 @@ import BtnPlain from '../components/buttons/BtnPlain.vue';
 import BtnBox from '../components/buttons/BtnBox.vue';
 import InputSearch from '../components/InputSearch.vue';
 import BtnIcon from '../components/buttons/BtnIcon.vue';
+import Tabs from '../components/tabs/Tabs.vue';
+import Tab from '../components/tabs/Tab.vue';
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
@@ -81,14 +83,17 @@ import SwapIcon from '../../icons/swap.svg?vue-component';
 import CloseIcon from '../../icons/close.svg?vue-component';
 
 export default {
+  name: 'AccountDetails',
   components: {
     AccountInfo,
     BalanceInfo,
     BtnPlain,
+    Tabs,
+    Tab,
+    CloseIcon,
     BtnIcon,
     BtnBox,
     InputSearch,
-    CloseIcon,
   },
   data() {
     return {
@@ -236,36 +241,6 @@ export default {
     top: calc(env(safe-area-inset-top) + 62px);
     padding: var(--gap) var(--screen-padding-x);
     background-color: var(--screen-bg-color);
-  }
-
-  .tabs {
-    gap: var(--gap);
-    padding: 4px;
-    border-radius: variables.$border-radius-interactive;
-    background-color: variables.$color-black;
-
-    @include mixins.flex(flex-start, center, row);
-
-    .button-plain {
-      @extend %face-sans-14-medium;
-
-      @include mixins.flex(center, center, row);
-
-      padding: 4px 10px;
-      gap: 4px;
-      border-radius: variables.$border-radius-interactive - 3px;
-      color: rgba(variables.$color-white, 0.75);
-      transition: all 100ms;
-
-      &:hover {
-        color: variables.$color-white;
-      }
-
-      &.router-link-active {
-        background-color: rgba(variables.$color-white, 0.15);
-        color: variables.$color-white;
-      }
-    }
   }
 
   .search-bar-wrapper {

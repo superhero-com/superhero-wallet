@@ -1,5 +1,8 @@
 <template>
-  <span class="tokens">
+  <span
+    class="tokens"
+    :class="{ vertical }"
+  >
     <span class="icons">
       <img
         v-if="toToken"
@@ -25,7 +28,7 @@
       </span>
       <span
         v-if="fromToken && toToken"
-        class="seperator"
+        class="separator"
       >
         /
       </span>
@@ -51,6 +54,7 @@ export default {
     tokens: { type: Array, required: true },
     symbolLength: { type: Number, default: 11 },
     doubleSymbolLength: { type: Number, default: 5 },
+    vertical: Boolean,
   },
   computed: {
     fromToken() {
@@ -97,6 +101,8 @@ export default {
 @use '../../styles/typography';
 
 .tokens {
+  @extend %face-sans-14-regular;
+
   color: variables.$color-light-grey;
 
   &,
@@ -107,14 +113,12 @@ export default {
     align-self: center;
   }
 
-  @extend %face-sans-14-regular;
-
   .symbol {
     vertical-align: middle;
     white-space: nowrap;
   }
 
-  .seperator {
+  .separator {
     margin: 0 1px;
     vertical-align: middle;
   }
@@ -137,6 +141,33 @@ export default {
 
     &.border {
       border: 0.25px solid variables.$color-light-grey;
+    }
+  }
+
+  &.vertical {
+    flex-direction: column;
+
+    .symbols {
+      @extend %face-sans-18-medium;
+
+      .separator {
+        color: variables.$color-light-grey;
+      }
+    }
+
+    .icons {
+      margin-bottom: 8px;
+
+      img {
+        width: 44px;
+        height: 44px;
+        margin: 0;
+        border-radius: 22px;
+
+        &.pair {
+          margin-left: -80px;
+        }
+      }
     }
   }
 }
