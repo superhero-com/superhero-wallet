@@ -27,8 +27,7 @@ export default {
 @use '../../../styles/typography';
 
 .details-row {
-  padding: 8px 16px;
-  background-color: var(--screen-bg-color);
+  padding: 8px 0;
   display: flex;
   justify-content: space-between;
 

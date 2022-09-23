@@ -1,67 +1,65 @@
 <template>
   <div class="token-details">
-    <Plate class="token-header">
-      <div class="token-profile">
-        <Loader v-if="loading" />
-        <Tokens
-          :tokens="
-            tokenPairs.token0 && tokenPairs.token1
-              ? [tokenPairs.token0, tokenPairs.token1]
-              : [tokenData]
-          "
-          :symbol-length="22"
-        />
-        <TokenAmount
-          :amount="convertedBalance"
-          no-symbol
-          :aex9="id !== AETERNITY_CONTRACT_ID"
-        />
-      </div>
-      <div class="token-actions">
-        <BtnBox
-          class="token-actions-btn"
-          :disabled="!convertedBalance"
-          @click="openTransferSendModal()"
-        >
-          <SendIcon />
-          {{ $t('pages.token-details.send') }}
-        </BtnBox>
-        <BtnBox
-          class="token-actions-btn"
-          @click="openTransferReceiveModal()"
-        >
-          <ReceiveIcon />
-          {{ $t('pages.token-details.receive') }}
-        </BtnBox>
-        <BtnBox
-          v-if="id === AETERNITY_CONTRACT_ID"
-          class="token-actions-btn"
-          :href="SIMPLEX_URL"
-        >
-          <BuyIcon />
-          {{ $t('pages.fungible-tokens.buyAe') }}
-        </BtnBox>
-      </div>
-      <div
-        slot="bottom"
-        class="token-tabs"
+    <Loader v-if="loading" />
+
+    <div class="top">
+      <Tokens
+        :tokens="
+          tokenPairs.token0 && tokenPairs.token1
+            ? [tokenPairs.token0, tokenPairs.token1]
+            : [tokenData]
+        "
+        :symbol-length="22"
+        vertical
+      />
+
+      <TokenAmount
+        class="token-amount"
+        no-symbol
+        :amount="convertedBalance"
+        :aex9="id !== AETERNITY_CONTRACT_ID"
+      />
+    </div>
+
+    <div class="token-actions">
+      <BtnBox
+        class="token-actions-btn"
+        :disabled="!convertedBalance"
+        @click="openTransferSendModal()"
       >
-        <div
-          :class="{ selected: activeTab === 'details' }"
-          @click="activeTab = 'details'"
-        >
-          <CircleI />
-          {{ $t('pages.token-details.details') }}
-        </div>
-        <div
-          :class="{ selected: activeTab === 'transactions' }"
-          @click="activeTab = 'transactions'"
-        >
-          <TxHistory />
-          {{ $t('pages.transactionDetails.transactions') }}
-        </div>
-      </div>
-    </Plate>
+        <SendIcon />
+        {{ $t('pages.token-details.send') }}
+      </BtnBox>
+      <BtnBox
+        class="token-actions-btn"
+        @click="openTransferReceiveModal()"
+      >
+        <ReceiveIcon />
+        {{ $t('pages.token-details.receive') }}
+      </BtnBox>
+      <BtnBox
+        v-if="id === AETERNITY_CONTRACT_ID"
+        class="token-actions-btn"
+        :href="SIMPLEX_URL"
+      >
+        <BuyIcon />
+        {{ $t('pages.fungible-tokens.buyAe') }}
+      </BtnBox>
+    </div>
+
+    <Tabs>
+      <Tab
+        :text="$t('pages.transactionDetails.transactions')"
+        :active="activeTab === 'transactions'"
+        @click="activeTab = 'transactions'"
+      />
+      <Tab
+        :text="$t('pages.token-details.details')"
+        :active="activeTab === 'details'"
+        @click="activeTab = 'details'"
+      />
+    </Tabs>
+
     <div
       v-if="activeTab === 'details'"
       class="token-info"
@@ -228,12 +226,9 @@
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import Plate from '../../components/Plate.vue';
 import SendIcon from '../../../icons/send.svg?vue-component';
 import ReceiveIcon from '../../../icons/receive.svg?vue-component';
 import BuyIcon from '../../../icons/buy.svg?vue-component';
-import CircleI from '../../../icons/circle-i.svg?vue-component';
-import TxHistory from '../../../icons/history.svg?vue-component';
 import ExternalLink from '../../../icons/external-link.svg?vue-component';
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -250,16 +245,15 @@ import {
   AETERNITY_CONTRACT_ID,
 } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
+import Tabs from '../../components/tabs/Tabs.vue';
+import Tab from '../../components/tabs/Tab.vue';
 
 export default {
   name: 'TokenDetails',
   components: {
-    Plate,
     SendIcon,
     ReceiveIcon,
     BuyIcon,
-    CircleI,
-    TxHistory,
     TokenAmount,
     BtnBox,
     DetailsRow,
@@ -268,13 +262,15 @@ export default {
     ExternalLink,
     Tokens,
     Loader,
+    Tabs,
+    Tab,
   },
   props: {
     id: { type: String, required: true },
   },
   data() {
     return {
-      activeTab: 'details',
+      activeTab: 'transactions',
       loading: false,
       tokenPairs: {},
       SIMPLEX_URL,
@@ -363,6 +359,11 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  padding-inline: var(--screen-padding-x);
+
+  .top {
+    text-align: center;
+  }
 
   .transaction-list {
     flex-grow: 1;
@@ -372,102 +373,33 @@ export default {
     }
   }
 
-  .token-header {
-    background-color: variables.$color-black;
+  .token-amount {
+    padding-top: 8px;
+    margin-bottom: 14px;
+    display: block;
+    text-align: center;
 
-    .token-amount {
-      padding-top: 16px;
-    }
+    @extend %face-sans-24-medium;
 
-    .token-actions {
-      display: flex;
-      justify-content: center;
-      gap: var(--gap);
-      padding: 0 16px 24px;
-
-      &-btn {
-        max-width: 120px;
-      }
-    }
-
-    .token-tabs {
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      height: 48px;
-      cursor: pointer;
-
-      div {
-        display: flex;
-        align-items: center;
-
-        @extend %face-sans-16-bold;
-
-        font-weight: 500;
-        color: variables.$color-light-grey;
-
-        svg {
-          margin-right: 6px;
-          width: 20px;
-          height: 20px;
-        }
-
-        &.selected {
-          color: variables.$color-green;
-        }
-      }
-    }
-
-    .token-profile {
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 20px;
-
-      ::v-deep .tokens {
-        display: flex;
-        flex-direction: column;
-
-        .symbols {
-          @extend %face-sans-18-medium;
-
-          .seperator {
-            color: variables.$color-light-grey;
-          }
-        }
-
-        .icons {
-          margin-bottom: 8px;
-
-          img {
-            width: 44px;
-            height: 44px;
-            border-radius: 22px;
-
-            &.pair {
-              margin-left: -80px;
-            }
-          }
-        }
-      }
-
-      .token-amount {
-        padding-top: 8px;
-        margin-bottom: 8px;
-        display: block;
-        text-align: center;
-
-        @extend %face-sans-24-medium;
-
-        ::v-deep .fiat {
-          display: block;
-          font-size: 16px;
-        }
-      }
+    ::v-deep .fiat {
+      display: block;
+      font-size: 16px;
     }
   }
 
-  .token-info > div:nth-child(odd) {
-    background-color: variables.$color-bg-1;
+  .token-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--gap);
+    margin-bottom: var(--gap);
+
+    &-btn {
+      max-width: 120px;
+    }
+  }
+
+  .token-info {
+    margin-top: 10px;
   }
 
   .community ::v-deep .text {
@@ -512,7 +444,7 @@ export default {
   }
 
   .transaction-list-wrapper {
-    padding: 16px;
+    margin-top: 16px;
   }
 }
 </style>
