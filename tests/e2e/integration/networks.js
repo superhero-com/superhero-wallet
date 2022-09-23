@@ -14,34 +14,35 @@ describe('Test cases for networks page', () => {
       .get('[data-cy=network-url]')
       .should('contain', defaultNetwork.url)
       .get('[data-cy=network-middleware]')
-      .should('contain', defaultNetwork.middlewareUrl)
+      .should('contain', defaultNetwork.middlewareUrl);
 
-      .get('[data-cy=to-add]')
-      .click()
-      .enterNetworkDetails(
-        defaultNetwork.name,
-        defaultNetwork.url,
-        defaultNetwork.middlewareUrl,
-        defaultNetwork.compilerUrl,
-      )
-      .get('[data-cy=connect]')
-      .click()
-      .buttonShouldBeDisabled('[data-cy=connect]')
-      .get('[data-cy=error-msg]')
-      .should('exist')
-
-      .enterNetworkDetails('test', 'test', 'test', 'test')
-      .get('[data-cy=connect]')
-      .click()
-      .buttonShouldBeDisabled('[data-cy=connect]')
-      .get('[data-cy=error-msg]')
-      .should('exist')
-
-      .get('[data-cy=cancel]')
-      .should('be.visible')
-      .click()
-      .get('[data-cy=cancel]')
-      .should('not.exist');
+    // TODO - waiting for add/edit network form (SW-66 & SW-71)
+    // .get('[data-cy=to-add]')
+    // .click()
+    // .enterNetworkDetails(
+    //   defaultNetwork.name,
+    //   defaultNetwork.url,
+    //   defaultNetwork.middlewareUrl,
+    //   defaultNetwork.compilerUrl,
+    // )
+    // .get('[data-cy=connect]')
+    // .click()
+    // .buttonShouldBeDisabled('[data-cy=connect]')
+    // .get('[data-cy=error-msg]')
+    // .should('exist')
+    //
+    // .enterNetworkDetails('test', 'test', 'test', 'test')
+    // .get('[data-cy=connect]')
+    // .click()
+    // .buttonShouldBeDisabled('[data-cy=connect]')
+    // .get('[data-cy=error-msg]')
+    // .should('exist')
+    //
+    // .get('[data-cy=cancel]')
+    // .should('be.visible')
+    // .click()
+    // .get('[data-cy=cancel]')
+    // .should('not.exist');
   });
 
   // it('Can add, select, edit, delete new network, can not add network with the same name', () => {

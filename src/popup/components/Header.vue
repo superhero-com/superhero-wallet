@@ -120,7 +120,10 @@ export default {
       return this.$route.meta.hideNotificationsIcon;
     },
     notificationsCount() {
-      return [...this.notifications, ...this.superheroNotifications].filter(
+      return [
+        ...(this.notifications || []),
+        ...(this.superheroNotifications || []),
+      ].filter(
         (n) => n.status === 'CREATED',
       ).length;
     },

@@ -132,10 +132,12 @@ export default async function initSdk() {
       );
     }
 
+    const nodeStatusTimeout = 1000;
+
     store.commit('initSdk', store.getters['sdkPlugin/sdk']);
     await Promise.all([store.dispatch('initContractInstances'), initMiddleware()]);
     store.commit('setNodeStatus', 'connected');
-    setTimeout(() => store.commit('setNodeStatus', ''), 2000);
+    setTimeout(() => store.commit('setNodeStatus', ''), nodeStatusTimeout);
 
     store.watch(
       (state, getters) => getters.activeNetwork,
@@ -145,7 +147,7 @@ export default async function initSdk() {
           store.commit('setNodeStatus', 'connecting');
           await initMiddleware();
           store.commit('setNodeStatus', 'connected');
-          setTimeout(() => store.commit('setNodeStatus', ''), 2000);
+          setTimeout(() => store.commit('setNodeStatus', ''), nodeStatusTimeout);
         } catch (error) {
           store.commit('setNodeStatus', 'error');
           Logger.write(error);
