@@ -39,21 +39,7 @@
       v-if="isLoggedIn"
       class="right"
     >
-      <BtnPlain
-        v-if="!$route.path.startsWith('/notifications') && !hideNotificationsIcon"
-        class="notifications icon-btn"
-        data-cy="noti"
-        @click="toNotifications"
-      >
-        <Bell />
-        <span
-          v-if="notificationsCount"
-          class="badge"
-          data-cy="noti-count"
-        >
-          {{ notificationsCount }}
-        </span>
-      </BtnPlain>
+      <NotifyBell />
 
       <RouterLink
         v-if="$route.path !== '/more' && !$route.meta.closeButton"
@@ -84,9 +70,11 @@ import ThreeDots from '../../icons/three-dots.svg?vue-component';
 import Close from '../../icons/close.svg?vue-component';
 import Truncate from './Truncate.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
+import NotifyBell from './NotifyBell.vue';
 
 export default {
   components: {
+    NotifyBell,
     Logo,
     Back,
     Bell,
@@ -116,17 +104,6 @@ export default {
       return (this.$route.meta.backButton !== undefined ? this.$route.meta.backButton : true)
         && this.title;
     },
-    hideNotificationsIcon() {
-      return this.$route.meta.hideNotificationsIcon;
-    },
-    notificationsCount() {
-      return [
-        ...(this.notifications || []),
-        ...(this.superheroNotifications || []),
-      ].filter(
-        (n) => n.status === 'CREATED',
-      ).length;
-    },
     isDiamondDisabled() {
       return this.$route.name === 'account';
     },
@@ -149,16 +126,6 @@ export default {
       this.$router.replace(
         this.isLoggedIn ? '/account' : '/',
       );
-    },
-    async toNotifications() {
-      this.notifications.forEach((n) => this.setNotificationsStatus({ createdAt: n.createdAt, status: 'PEEKED' }));
-      await this.$store.dispatch('modifyNotifications', [
-        this.superheroNotifications.filter((n) => n.status === 'CREATED').map((n) => n.id),
-        'PEEKED',
-      ]);
-      if (this.$store.state.route.fullPath !== '/notifications') {
-        this.$router.push('/notifications');
-      }
     },
   },
 };
@@ -308,24 +275,6 @@ export default {
       svg {
         opacity: 1;
       }
-    }
-  }
-
-  .notifications {
-    position: relative;
-
-    .badge {
-      color: variables.$color-white;
-      position: absolute;
-      left: -2px;
-      top: 20%;
-      width: 14px;
-      height: 14px;
-      background: variables.$color-blue;
-      border-radius: 50%;
-      text-align: center;
-
-      @extend %face-sans-12-regular;
     }
   }
 }
