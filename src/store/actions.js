@@ -14,13 +14,24 @@ import {
   isAccountNotFoundError,
   executeAndSetInterval,
 } from '../popup/utils/helper';
-import { CURRENCIES_URL } from '../popup/utils/constants';
+import { CURRENCIES_URL, MODAL_DEFAULT } from '../popup/utils/constants';
+import { i18n } from './plugins/languages';
 
 export default {
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
     commit('setMiddleware', null);
     commit('initTransactions');
+  },
+
+  async selectNetwork({ dispatch, getters }, network) {
+    await dispatch('switchNetwork', network);
+    if (getters.tippingSupported) return;
+    await dispatch('modals/open', {
+      name: MODAL_DEFAULT,
+      title: i18n.t('modals.tip-mainnet-warning.title'),
+      msg: i18n.t('modals.tip-mainnet-warning.msg'),
+    });
   },
   addPendingTransaction({ getters: { activeNetwork }, commit }, transaction) {
     commit('addPendingTransaction', {

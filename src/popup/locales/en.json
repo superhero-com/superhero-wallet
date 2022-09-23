@@ -1145,13 +1145,14 @@
       "message": "Message"
     },
     "network": {
-      "url": "URL:",
+      "listLabel": "Choose between æternity’s Mainnet and Testnet or add custom node to connect to. Only add custom networks you trust to avoid malicious providers.",
+      "url": "URL",
       "edit": "Edit",
       "delete": "Delete",
-      "middleware": "Middleware:",
+      "middleware": "Middleware",
       "allNetworks": "Your networks",
       "cancel": "Cancel",
-      "addNetwork": "Connect to another node",
+      "addNetwork": "Add custom network",
       "networkNamePlaceholder": "Enter network name",
       "networkNameLabel": "Network name",
       "networkUrlPlaceholder": "Enter network url",

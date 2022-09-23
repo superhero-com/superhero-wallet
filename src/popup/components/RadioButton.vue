@@ -24,12 +24,13 @@ export default {
     value: { type: [String, Number, Boolean], default: '' },
     type: { type: String, default: 'checkbox' },
     name: { type: String, default: '' },
-    disabled: { type: Boolean },
+    disabled: Boolean,
   },
   methods: {
     handleChange(event) {
-      if (this.disabled) return;
-      this.$emit('input', event.target.checked);
+      if (!this.disabled) {
+        this.$emit('input', event.target.checked);
+      }
     },
   },
 };
