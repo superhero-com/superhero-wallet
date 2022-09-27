@@ -7,7 +7,6 @@ import veeValidate from '../../src/store/plugins/veeValidate';
 
 Object.assign(Vue.prototype, {
   $t: () => 'locale-specific-text',
-  $watchUntilTruly: async () => new Promise((res) => setTimeout(res, 500)),
 });
 
 Vue.use(Vuex);

@@ -22,12 +22,12 @@
 
 <script>
 import BigNumber from 'bignumber.js';
-import { aettosToAe } from '../../utils/helper';
+import { aettosToAe, watchUntilTruthy } from '../../utils/helper';
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
 
 export default {
-  name: 'Auctions',
+  name: 'Auction',
   components: {
     Tabs,
     Tab,
@@ -50,7 +50,7 @@ export default {
   },
   methods: {
     async updateAuctionEntry() {
-      await this.$watchUntilTruly(() => this.$store.state.middleware);
+      await watchUntilTruthy(() => this.$store.state.middleware);
       try {
         const res = await this.$store.state.middleware.getNameById(this.name);
         // TODO: remove after resolving https://github.com/aeternity/ae_mdw/issues/509

@@ -1,4 +1,4 @@
-import { IN_POPUP } from '../utils/helper';
+import { IN_POPUP } from '../../lib/environment';
 
 import ConfirmConnect from '../pages/Popups/Connect.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';

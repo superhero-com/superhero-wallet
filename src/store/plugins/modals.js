@@ -1,4 +1,4 @@
-import { IN_FRAME } from '../../popup/utils/helper';
+import { IN_FRAME } from '../../lib/environment';
 
 const modals = {};
 let modalCounter = 0;

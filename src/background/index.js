@@ -1,4 +1,4 @@
-import '../lib/initEnv';
+import '../lib/environment';
 import '../lib/initPolyfills';
 import initDeeplinkHandler from './deeplink-handler';
 import RedirectChainNames from './redirect-chain-names';

@@ -78,6 +78,8 @@
 import QrcodeVue from 'qrcode.vue';
 import { mapGetters, mapState } from 'vuex';
 import { pick } from 'lodash-es';
+import { IS_MOBILE_DEVICE } from '../../../lib/environment';
+
 import CopyMixin from '../../../mixins/copy';
 import InputAmount from '../InputAmountV2.vue';
 import Scrollable from '../Scrollable.vue';
@@ -113,8 +115,8 @@ export default {
   },
   data() {
     return {
+      IS_MOBILE_DEVICE,
       amount: null,
-      IS_MOBILE_DEVICE: window.IS_MOBILE_DEVICE,
       selectedAsset: null,
     };
   },

@@ -33,7 +33,7 @@ import { mapState, mapGetters } from 'vuex';
 import { pick } from 'lodash-es';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { calculateFee } from '../utils/helper';
+import { calculateFee, watchUntilTruthy } from '../utils/helper';
 import InputField from './InputField.vue';
 
 export default {
@@ -72,7 +72,7 @@ export default {
     },
   },
   async mounted() {
-    await this.$watchUntilTruly(() => this.sdk);
+    await watchUntilTruthy(() => this.sdk);
     this.fee = calculateFee(SCHEMA.TX_TYPE.spend, this.sdk.Ae.defaults);
   },
 };

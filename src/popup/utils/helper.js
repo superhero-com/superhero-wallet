@@ -1,3 +1,5 @@
+import { watch } from '@vue/composition-api';
+import { defer } from 'lodash-es';
 import { isFQDN } from 'validator';
 import { detect } from 'detect-browser';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
@@ -18,6 +20,20 @@ import {
   MAGNITUDE,
   SEED_LENGTH,
 } from './constants';
+
+export function watchUntilTruthy(getter) {
+  return new Promise((resolve) => {
+    const unwatch = watch(
+      getter,
+      (value) => {
+        if (!value) return;
+        resolve();
+        defer(() => unwatch());
+      },
+      { immediate: true },
+    );
+  });
+}
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
@@ -71,9 +87,6 @@ export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameC
   nonce: STUB_NONCE,
   ttl: SCHEMA.NAME_TTL,
 });
-
-export const IN_FRAME = window.parent !== window;
-export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');
 
 export const toURL = (url) => new URL(url.includes('://') ? url : `https://${url}`);
 

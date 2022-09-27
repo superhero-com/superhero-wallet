@@ -21,6 +21,7 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
+import { watchUntilTruthy } from '../utils/helper';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import deeplinkApi from '../../mixins/deeplinkApi';
 
@@ -49,7 +50,7 @@ export default {
           this.$router.push('/account');
           throw new Error('CommentNew: Invalid arguments');
         }
-        await this.$watchUntilTruly(() => this.sdk);
+        await watchUntilTruthy(() => this.sdk);
         this.loading = false;
       },
     },

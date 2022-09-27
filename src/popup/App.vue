@@ -38,7 +38,9 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { detect } from 'detect-browser';
+import { watchUntilTruthy } from './utils/helper';
 import { NOTIFICATION_SETTINGS } from './utils/constants';
+import { IS_IOS } from '../lib/environment';
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
@@ -75,12 +77,12 @@ export default {
     },
   },
   async mounted() {
-    document.documentElement.style.setProperty('--height', process.env.PLATFORM === 'cordova' && window.IS_IOS ? '100vh' : '100%');
+    document.documentElement.style.setProperty('--height', process.env.PLATFORM === 'cordova' && IS_IOS ? '100vh' : '100%');
 
     window.addEventListener('online', () => this.$store.commit('setNodeStatus', 'online'));
     window.addEventListener('offline', () => this.$store.commit('setNodeStatus', 'offline'));
 
-    await this.$watchUntilTruly(() => this.isRestored);
+    await watchUntilTruthy(() => this.isRestored);
 
     this.$store.dispatch('fungibleTokens/getAeternityData');
 

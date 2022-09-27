@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="showNavigation && !aeppPopup"
+    v-if="showNavigation && !RUNNING_IN_POPUP"
     :class="['header', { 'not-logged-in': !isLoggedIn }]"
   >
     <div
@@ -61,6 +61,7 @@
 
 <script>
 import { mapState, mapGetters, mapMutations } from 'vuex';
+import { RUNNING_IN_POPUP } from '../../lib/environment';
 import Logo from '../../icons/logo-small.svg?vue-component';
 import Back from '../../icons/back.svg?vue-component';
 import Bell from '../../icons/bell.svg?vue-component';
@@ -84,7 +85,7 @@ export default {
     BtnPlain,
   },
   data: () => ({
-    aeppPopup: window.RUNNING_IN_POPUP,
+    RUNNING_IN_POPUP,
   }),
   subscriptions() {
     return {

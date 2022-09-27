@@ -46,6 +46,7 @@
 
 <script>
 import QrcodeVue from 'qrcode.vue';
+import { IS_MOBILE_DEVICE } from '../../../lib/environment';
 import Default from './Default.vue';
 import TemplateRenderer from '../TemplateRenderer.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -70,7 +71,7 @@ export default {
     msgStr: { type: String, required: true },
   },
   data: () => ({
-    IS_MOBILE_DEVICE: window.IS_MOBILE_DEVICE,
+    IS_MOBILE_DEVICE,
   }),
   methods: {
     async share() {

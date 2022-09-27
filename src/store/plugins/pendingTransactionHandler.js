@@ -1,4 +1,5 @@
 import { MODAL_SPEND_SUCCESS } from '../../popup/utils/constants';
+import { watchUntilTruthy } from '../../popup/utils/helper';
 
 export default async (store) => {
   const waitTransactionMined = async ({
@@ -35,7 +36,8 @@ export default async (store) => {
     }
   };
 
-  await store._watcherVM.$watchUntilTruly(() => store.state.sdk);
+  await watchUntilTruthy(() => store.state.sdk);
+
   // eslint-disable-next-line no-unused-expressions
   store.state.transactions.pending[store.getters.activeNetwork?.networkId]
     ?.filter(({ sent = false }) => !sent).forEach((t) => {

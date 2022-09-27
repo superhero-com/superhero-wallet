@@ -40,7 +40,7 @@ import { validateMnemonic } from '@aeternity/bip39';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import FormTextarea from '../FormTextarea.vue';
-import { validateSeedLength } from '../../utils/helper';
+import { validateSeedLength, watchUntilTruthy } from '../../utils/helper';
 
 export default {
   components: {
@@ -80,7 +80,7 @@ export default {
       this.$store.commit('setBackedUpSeed');
       this.resolve();
       setTimeout(async () => {
-        await this.$watchUntilTruly(() => this.$store.state.sdk);
+        await watchUntilTruthy(() => this.$store.state.sdk);
         this.$store.dispatch('accounts/hdWallet/discover');
       }, 100);
       this.$router.push(this.$store.state.loginTargetLocation);

@@ -11,6 +11,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import { watchUntilTruthy } from '../utils/helper';
 import Overview from './Overview.vue';
 
 export default {
@@ -98,7 +99,7 @@ export default {
     },
   },
   async mounted() {
-    await this.$watchUntilTruly(() => this.$store.state.middleware);
+    await watchUntilTruthy(() => this.$store.state.middleware);
     if (this.tx.recipientId?.startsWith('nm_')) {
       this.name = (await this.$store.state.middleware.getNameByHash(this.tx.recipientId)).name;
     }

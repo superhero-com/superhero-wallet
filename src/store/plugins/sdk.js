@@ -2,6 +2,8 @@ import { RpcWallet, Crypto, Node } from '@aeternity/aepp-sdk';
 import { isEmpty, isEqual } from 'lodash-es';
 import { App } from '../modules/permissions';
 import { getAeppUrl, showPopup } from '../../background/popupHandler';
+import { watchUntilTruthy } from '../../popup/utils/helper';
+import { IS_EXTENSION_BACKGROUND } from '../../lib/environment';
 
 export default (store) => {
   let sdk;
@@ -22,7 +24,7 @@ export default (store) => {
     actions: {
       async initialize({ commit }) {
         if (sdk) return;
-        await store._watcherVM.$watchUntilTruly(
+        await watchUntilTruthy(
           () => store.state.isRestored && !isEmpty(store.getters.account),
         );
 
@@ -108,7 +110,7 @@ export default (store) => {
                 && !(await store.dispatch('permissions/requestAddressForHost', {
                   host: app.host.hostname,
                   address,
-                  connectionPopupCb: async () => (window.IS_EXTENSION_BACKGROUND
+                  connectionPopupCb: async () => (IS_EXTENSION_BACKGROUND
                     ? showPopup(app.host.href, 'connectConfirm')
                     : store.dispatch('modals/open', {
                       name: 'confirm-connect',
@@ -123,10 +125,10 @@ export default (store) => {
               ) return Promise.reject(new Error('Rejected by user'));
               return address;
             },
-            sign: (data) => (window.IS_EXTENSION_BACKGROUND
+            sign: (data) => (IS_EXTENSION_BACKGROUND
               ? Crypto.sign(data, store.getters.account.secretKey)
               : store.dispatch('accounts/sign', data)),
-            ...(window.IS_EXTENSION_BACKGROUND ? {} : {
+            ...(IS_EXTENSION_BACKGROUND ? {} : {
               signTransaction: (txBase64, opt) => (opt.onAccount
                 ? opt.onAccount.sign()
                 : store.dispatch('accounts/signTransaction', { txBase64, opt })),
@@ -143,7 +145,7 @@ export default (store) => {
           async onSubscription(aepp, { accept, deny }, origin) {
             let activeAccount;
             try {
-              const url = window.IS_EXTENSION_BACKGROUND ? getAeppUrl(aepp) : new URL(origin);
+              const url = IS_EXTENSION_BACKGROUND ? getAeppUrl(aepp) : new URL(origin);
               activeAccount = await this.address(this.getApp(url));
             } catch (e) {
               deny();
@@ -161,8 +163,8 @@ export default (store) => {
               },
             });
           },
-          onSign: window.IS_EXTENSION_BACKGROUND ? signCbBackground.bind(null, 'sign') : signCb,
-          onMessageSign: window.IS_EXTENSION_BACKGROUND ? signCbBackground.bind(null, 'messageSign') : signCb,
+          onSign: IS_EXTENSION_BACKGROUND ? signCbBackground.bind(null, 'sign') : signCb,
+          onMessageSign: IS_EXTENSION_BACKGROUND ? signCbBackground.bind(null, 'messageSign') : signCb,
           onAskAccounts: (_, { accept }) => accept(store.getters.accounts
             .map(({ address }) => address)),
         });
@@ -175,7 +177,7 @@ export default (store) => {
     (state, getters) => getters.activeNetwork,
     async (network, oldNetwork) => {
       if (isEqual(network, oldNetwork)) return;
-      await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
+      await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
       sdk.pool.delete(network.name);
       sdk.addNode(network.name, await Node({ url: network.url }), true);
     },
@@ -184,7 +186,7 @@ export default (store) => {
   store.watch(
     ({ accounts: { activeIdx } }, { accounts }) => accounts?.length + activeIdx,
     async () => {
-      await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
+      await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
       Object.values(sdk.rpcClients)
         .filter((client) => client.isConnected() && client.isSubscribed())
         .forEach((client) => client.setAccounts({

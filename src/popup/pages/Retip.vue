@@ -50,7 +50,7 @@
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { MAGNITUDE, AETERNITY_CONTRACT_ID } from '../utils/constants';
-import { convertToken } from '../utils/helper';
+import { convertToken, watchUntilTruthy } from '../utils/helper';
 import deeplinkApi from '../../mixins/deeplinkApi';
 import maxAmountMixin from '../../mixins/maxAmountMixin';
 import InputAmount from '../components/InputAmountV2.vue';
@@ -122,7 +122,7 @@ export default {
           ? this.formModel.selectedAsset.decimals : MAGNITUDE,
       ).toFixed();
       this.loading = true;
-      await this.$watchUntilTruly(() => this.tippingV1);
+      await watchUntilTruthy(() => this.tippingV1);
       try {
         let retipResponse = null;
         if (this.formModel.selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {

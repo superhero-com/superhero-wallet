@@ -57,6 +57,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { Swiper, SwiperSlide } from 'vue-awesome-swiper';
+import { watchUntilTruthy } from '../utils/helper';
 
 import AccountCard from './AccountCard.vue';
 import AccountCardAdd from './AccountCardAdd.vue';
@@ -103,7 +104,7 @@ export default {
   },
   methods: {
     async selectAccount(idx) {
-      await this.$watchUntilTruly(() => this.$store.state.middleware);
+      await watchUntilTruthy(() => this.$store.state.middleware);
       this.$store.commit('accounts/setActiveIdx', idx);
     },
     onSlideChange() {

@@ -5,7 +5,12 @@ import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullI
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 import { MAGNITUDE, STUB_CONTRACT_ADDRESS, AETERNITY_CONTRACT_ID } from '../popup/utils/constants';
 import {
-  executeAndSetInterval, calculateFee, validateTipUrl, checkAensName, handleUnknownError,
+  executeAndSetInterval,
+  calculateFee,
+  validateTipUrl,
+  checkAensName,
+  handleUnknownError,
+  watchUntilTruthy,
 } from '../popup/utils/helper';
 
 export default {
@@ -32,13 +37,13 @@ export default {
   created() {
     executeAndSetInterval(async () => {
       if (!this.tokenInstance) return;
-      await this.$watchUntilTruly(() => this.$store.state.sdk);
+      await watchUntilTruthy(() => this.$store.state.sdk);
       this.$set(this, 'selectedTokenBalance', new BigNumber(
         (await this.tokenInstance.methods.balance(this.account.address)).decodedResult,
       ).shiftedBy(-this.selectedAssetDecimals));
     }, 1000);
     executeAndSetInterval(async () => {
-      await this.$watchUntilTruly(() => this.$store.state.sdk);
+      await watchUntilTruthy(() => this.$store.state.sdk);
       try {
         this.nonce = (await this.$store.state.sdk.api
           .getAccountByPubkey(this.account.address))?.nonce;
@@ -56,7 +61,7 @@ export default {
         nonce, selectedAsset, amount, address,
       }) => {
         if (!selectedAsset) return;
-        await this.$watchUntilTruly(() => this.$store.state.sdk);
+        await watchUntilTruthy(() => this.$store.state.sdk);
         const { sdk } = this.$store.state;
 
         if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {

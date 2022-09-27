@@ -127,7 +127,7 @@ import { FUNCTION_TYPE_DEX } from '../../utils/constants';
 import * as transactionTokenInfoResolvers from '../../utils/transactionTokenInfoResolvers';
 import { getDexTransactionTag } from '../../utils';
 import mixin from '../../pages/Popups/mixin';
-import { convertToken } from '../../utils/helper';
+import { convertToken, watchUntilTruthy } from '../../utils/helper';
 
 export default {
   components: {
@@ -225,7 +225,7 @@ export default {
       try {
         this.loading = true;
         setTimeout(() => { this.loading = false; }, 20000);
-        await this.$watchUntilTruly(() => this.sdk);
+        await watchUntilTruthy(() => this.sdk);
         const { bytecode } = await this.sdk.getContractByteCode(this.transaction.contractId);
         const txParams = await this.sdk.compilerApi.decodeCalldataBytecode({
           bytecode,

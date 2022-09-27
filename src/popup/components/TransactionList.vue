@@ -45,6 +45,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import { watchUntilTruthy } from '../utils/helper';
 import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
@@ -164,7 +165,7 @@ export default {
       if (this.loading) return;
       this.loading = true;
       try {
-        await this.$watchUntilTruly(() => this.$store.state.middleware);
+        await watchUntilTruthy(() => this.$store.state.middleware);
         await this.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE });
       } finally {
         this.loading = false;

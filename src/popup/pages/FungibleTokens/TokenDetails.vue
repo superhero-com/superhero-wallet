@@ -243,7 +243,7 @@ import {
   MODAL_TRANSFER_SEND,
   AETERNITY_CONTRACT_ID,
 } from '../../utils/constants';
-import { convertToken } from '../../utils/helper';
+import { convertToken, watchUntilTruthy } from '../../utils/helper';
 import { buildSimplexLink } from '../../../background/utils';
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
@@ -330,7 +330,7 @@ export default {
   async mounted() {
     if (this.id.includes('ct_')) {
       this.loading = true;
-      await this.$watchUntilTruly(() => this.$store.state.sdk);
+      await watchUntilTruthy(() => this.$store.state.sdk);
       this.tokenPairs = await this.$store.dispatch('fungibleTokens/getContractTokenPairs', this.id);
       this.loading = false;
     }

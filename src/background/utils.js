@@ -1,11 +1,16 @@
-import { setContractInstance, contractCall, getAddressByNameEntry } from '../popup/utils/helper';
+import {
+  setContractInstance,
+  contractCall,
+  getAddressByNameEntry,
+  watchUntilTruthy,
+} from '../popup/utils/helper';
 import store from './store';
 import { SIMPLEX_URL } from '../popup/utils/constants';
 
 let tippingContract;
 
 const getAddress = async (name) => {
-  await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
+  await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
   try {
     return getAddressByNameEntry(await store.getters['sdkPlugin/sdk'].api.getNameEntryByName(name));
   } catch (e) {
@@ -18,7 +23,7 @@ export const getAddressFromChainName = async (names) => (Array.isArray(names)
 
 export const getTippingContractInstance = async (tx) => {
   if (tippingContract) return tippingContract;
-  await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
+  await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
   tippingContract = await setContractInstance(tx, store.getters['sdkPlugin/sdk'], tx.address);
   return tippingContract;
 };

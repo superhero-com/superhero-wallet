@@ -50,7 +50,7 @@
 
         <div
           v-if="$slots.footer"
-          :class="['footer', { mobile: IS_MOBILE }]"
+          :class="['footer', { mobile: IS_MOBILE_DEVICE }]"
         >
           <slot name="footer" />
         </div>
@@ -66,6 +66,7 @@
 </template>
 
 <script>
+import { IS_MOBILE_DEVICE } from '../../lib/environment';
 import NodeConnectionStatus from './NodeConnectionStatus.vue';
 import BtnClose from './buttons/BtnClose.vue';
 
@@ -89,7 +90,7 @@ export default {
   ],
   data() {
     return {
-      IS_MOBILE: window.IS_MOBILE_DEVICE,
+      IS_MOBILE_DEVICE,
     };
   },
   mounted() {
