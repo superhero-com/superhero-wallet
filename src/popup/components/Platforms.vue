@@ -44,7 +44,7 @@
             target="_blank"
           >
             <img
-              :class="{ grey: !isFirefox() || IS_MOBILE_DEVICE }"
+              :class="{ grey: !IS_FIREFOX || IS_MOBILE_DEVICE }"
               src="../../icons/platforms/firefox.svg"
               alt="Firefox"
             >
@@ -54,7 +54,7 @@
             target="_blank"
           >
             <img
-              :class="{ grey: isFirefox() || IS_MOBILE_DEVICE }"
+              :class="{ grey: IS_FIREFOX || IS_MOBILE_DEVICE }"
               src="../../icons/platforms/chrome.svg"
               alt="Chrome"
             >
@@ -96,7 +96,6 @@
 </template>
 
 <script>
-import { detect } from 'detect-browser';
 import {
   APP_LINK_CHROME,
   APP_LINK_FIREFOX,
@@ -109,16 +108,12 @@ export default {
   data: () => ({
     IS_IOS,
     IS_MOBILE_DEVICE,
+    IS_FIREFOX,
     APP_LINK_CHROME,
     APP_LINK_FIREFOX,
     APP_LINK_ANDROID,
     APP_LINK_IOS,
   }),
-  methods: {
-    isFirefox() {
-      return detect().name === 'firefox';
-    },
-  },
 };
 </script>
 

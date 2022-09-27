@@ -3,6 +3,7 @@
     id="app"
     :class="{
       'show-header': showStatusAndHeader,
+      'display-as-mobile-app': displayAsMobileApp,
     }"
   >
     <button
@@ -37,10 +38,14 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { detect } from 'detect-browser';
 import { watchUntilTruthy } from './utils/helper';
 import { NOTIFICATION_SETTINGS } from './utils/constants';
-import { IS_IOS } from '../lib/environment';
+import {
+  IS_IOS,
+  IS_ANDROID,
+  IS_CORDOVA,
+  IS_FIREFOX,
+} from '../lib/environment';
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
@@ -65,6 +70,9 @@ export default {
     modals() {
       return this.$store.getters['modals/opened'];
     },
+    displayAsMobileApp() {
+      return !IS_ANDROID;
+    },
   },
   watch: {
     isLoggedIn(val) {
@@ -77,7 +85,10 @@ export default {
     },
   },
   async mounted() {
-    document.documentElement.style.setProperty('--height', process.env.PLATFORM === 'cordova' && IS_IOS ? '100vh' : '100%');
+    document.documentElement.style.setProperty(
+      '--height',
+      IS_CORDOVA && IS_IOS ? '100vh' : '100%',
+    );
 
     window.addEventListener('online', () => this.$store.commit('setNodeStatus', 'online'));
     window.addEventListener('offline', () => this.$store.commit('setNodeStatus', 'offline'));
@@ -86,7 +97,7 @@ export default {
 
     this.$store.dispatch('fungibleTokens/getAeternityData');
 
-    if (process.env.IS_EXTENSION && detect().name !== 'firefox') {
+    if (process.env.IS_EXTENSION && !IS_FIREFOX) {
       const [update] = await browser.runtime.requestUpdateCheck();
       if (update === 'update_available' && !process.env.RUNNING_IN_TESTS) {
         this.$store.commit('addNotification', {
@@ -121,24 +132,12 @@ export default {
 
   position: relative;
   margin: 0 auto;
-  width: variables.$extension-width;
-  height: 600px;
-  overflow: hidden;
-  border-radius: variables.$border-radius-app;
+  width: 100%;
+  height: 100%;
   color: variables.$color-white;
   background-color: var(--screen-bg-color);
   font-family: variables.$font-sans;
   transition: background-color 200ms;
-
-  @include mixins.mobile {
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-  }
-
-  @include mixins.desktop {
-    box-shadow: variables.$color-border 0 0 0 1px;
-  }
 
   .camera-close-button {
     position: absolute;
@@ -163,6 +162,21 @@ export default {
     @include mixins.desktop {
       min-height: 100%;
       padding-bottom: 0;
+    }
+  }
+
+  &.display-as-mobile-app {
+    width: variables.$extension-width;
+    height: 600px;
+    overflow: hidden;
+    border-radius: variables.$border-radius-app;
+    box-shadow: variables.$color-border 0 0 0 1px;
+
+    @include mixins.mobile {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      box-shadow: none;
     }
   }
 

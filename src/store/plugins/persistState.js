@@ -1,12 +1,13 @@
 import Vue from 'vue';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { detect } from 'detect-browser';
 import stateReducer from '../utils';
-import { IS_EXTENSION_BACKGROUND } from '../../lib/environment';
+import { IS_EXTENSION_BACKGROUND, IS_FIREFOX } from '../../lib/environment';
 
 const KEY = 'state';
 
-const setState = (state) => browser.storage.local.set({ [KEY]: detect().name === 'firefox' ? cloneDeep(state) : state });
+const setState = (state) => browser.storage.local.set({
+  [KEY]: IS_FIREFOX ? cloneDeep(state) : state,
+});
 
 const getStateRaw = async () => (await browser.storage.local.get(KEY))[KEY];
 
