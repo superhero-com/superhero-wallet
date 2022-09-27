@@ -83,15 +83,6 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
-import ArrowSendIcon from '../../../icons/arrow-send.svg?vue-component';
-import ArrowReceiveIcon from '../../../icons/arrow-receive.svg?vue-component';
-import SwapIcon from '../../../icons/swap.svg?vue-component';
-import BuyIcon from '../../../icons/buy.svg?vue-component';
-import BtnBox from '../../components/buttons/BtnBox.vue';
-import TokenAmount from '../../components/TokenAmount.vue';
-import Tokens from '../../components/Tokens.vue';
-import Loader from '../../components/Loader.vue';
-import TransactionList from '../../components/TransactionList.vue';
 import {
   DEX_URL,
   MODAL_TRANSFER_RECEIVE,
@@ -100,9 +91,20 @@ import {
   buildSimplexLink,
   watchUntilTruthy,
 } from '../../utils';
+
+import BtnBox from '../../components/buttons/BtnBox.vue';
+import TokenAmount from '../../components/TokenAmount.vue';
+import Tokens from '../../components/Tokens.vue';
+import Loader from '../../components/Loader.vue';
+import TransactionList from '../../components/TransactionList.vue';
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
 import TokenDetailsInfo from '../../components/FungibleTokens/TokenDetailsInfo.vue';
+
+import ArrowSendIcon from '../../../icons/arrow-send.svg?vue-component';
+import ArrowReceiveIcon from '../../../icons/arrow-receive.svg?vue-component';
+import SwapIcon from '../../../icons/swap.svg?vue-component';
+import BuyIcon from '../../../icons/buy.svg?vue-component';
 
 const TABS = {
   details: 1,

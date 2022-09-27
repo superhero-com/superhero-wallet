@@ -2,7 +2,6 @@ import { watch } from '@vue/composition-api';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { defer } from 'lodash-es';
 import { isFQDN } from 'validator';
-import { detect } from 'detect-browser';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
   SCHEMA,
@@ -20,11 +19,11 @@ import {
   MAX_UINT256,
   MAGNITUDE,
   SEED_LENGTH,
-  AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
 } from './constants';
 import { testAccount, txParams } from './config';
 import runMigrations from '../../store/migrations';
+import { IS_FIREFOX } from '../../lib/environment';
 
 export function watchUntilTruthy(getter) {
   return new Promise((resolve) => {
@@ -112,10 +111,10 @@ export const validateTipUrl = (urlAsString) => {
 };
 
 export const detectConnectionType = (port) => {
-  const extensionProtocol = detect().name === 'firefox' ? 'moz-extension' : 'chrome-extension';
+  const extensionProtocol = IS_FIREFOX ? 'moz-extension' : 'chrome-extension';
   const [senderUrl] = port.sender.url.split('?');
   const isExtensionSender = senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/index.html`)
-    || detect().name === 'firefox';
+    || IS_FIREFOX;
   if (CONNECTION_TYPES.POPUP === port.name && isExtensionSender) {
     return port.name;
   }
