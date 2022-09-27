@@ -3,7 +3,12 @@ import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wa
 import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { camelCase, isEqual, times } from 'lodash-es';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
-import { fetchJson, IN_FRAME, executeAndSetInterval } from '../popup/utils/helper';
+import {
+  fetchJson,
+  executeAndSetInterval,
+  watchUntilTruthy,
+} from '../popup/utils/helper';
+import { IN_FRAME } from './environment';
 import store from '../store';
 import Logger from './logger';
 
@@ -95,7 +100,7 @@ export default async function initSdk() {
   store.commit('setNodeStatus', 'connecting');
   try {
     await store.dispatch('sdkPlugin/initialize');
-    await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
+    await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
     if (IN_FRAME) {
       const getArrayOfAvailableFrames = () => [
         window.parent,

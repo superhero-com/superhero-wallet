@@ -37,7 +37,12 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { aettosToAe, toURL, validateTipUrl } from '../utils/helper';
+import {
+  aettosToAe,
+  toURL,
+  validateTipUrl,
+  watchUntilTruthy,
+} from '../utils/helper';
 import { BLOG_CLAIM_TIP_URL } from '../utils/constants';
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -77,7 +82,7 @@ export default {
     async claimTips() {
       const url = this.normalizedUrl;
       this.loading = true;
-      await this.$watchUntilTruly(() => this.sdk && this.tippingV1);
+      await watchUntilTruthy(() => this.sdk && this.tippingV1);
       try {
         const claimAmount = parseFloat(
           aettosToAe(

@@ -43,6 +43,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { pick } from 'lodash-es';
+import { watchUntilTruthy } from '../../utils/helper';
 import Filters from '../../components/Filters.vue';
 import NameRow from '../../components/NameRow.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -87,7 +88,7 @@ export default {
   },
   async mounted() {
     this.loading = true;
-    await this.$watchUntilTruly(() => this.$store.state.middleware);
+    await watchUntilTruthy(() => this.$store.state.middleware);
     this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');
     this.loading = false;
   },

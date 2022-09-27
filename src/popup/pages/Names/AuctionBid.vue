@@ -38,7 +38,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { aeToAettos, calculateNameClaimFee } from '../../utils/helper';
+import { aeToAettos, calculateNameClaimFee, watchUntilTruthy } from '../../utils/helper';
 import AuctionCard from '../../components/AuctionCard.vue';
 import InputAmount from '../../components/InputAmount.vue';
 import DetailsItem from '../../components/DetailsItem.vue';
@@ -84,7 +84,7 @@ export default {
   },
   methods: {
     async bid() {
-      await this.$watchUntilTruly(() => this.$store.state.sdk);
+      await watchUntilTruthy(() => this.$store.state.sdk);
       if (this.amountError) return;
       this.loading = true;
       try {

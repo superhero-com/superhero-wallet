@@ -67,6 +67,7 @@
 <script>
 import { mapState } from 'vuex';
 import { AmountFormatter, TxBuilderHelper, Crypto } from '@aeternity/aepp-sdk';
+import { watchUntilTruthy } from '../utils/helper';
 import CopyMixin from '../../mixins/copy';
 import TokenAmount from './TokenAmount.vue';
 import InputAmount from './InputAmount.vue';
@@ -123,7 +124,7 @@ export default {
       this.$store.commit('invites/delete', this.secretKey);
     },
     async updateBalance() {
-      await this.$watchUntilTruly(() => this.sdk);
+      await watchUntilTruthy(() => this.sdk);
       this.inviteLinkBalance = parseFloat(
         await this.sdk
           .balance(this.address, { format: AmountFormatter.AE_AMOUNT_FORMATS.AE })

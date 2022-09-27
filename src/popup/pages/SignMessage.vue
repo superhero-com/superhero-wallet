@@ -27,6 +27,7 @@
 
 <script>
 import BtnMain from '../components/buttons/BtnMain.vue';
+import { watchUntilTruthy } from '../utils/helper';
 import deeplinkApi from '../../mixins/deeplinkApi';
 
 export default {
@@ -34,7 +35,7 @@ export default {
   mixins: [deeplinkApi],
   methods: {
     async sendAddress() {
-      await this.$watchUntilTruly(() => this.$store.state.sdk);
+      await watchUntilTruthy(() => this.$store.state.sdk);
       const signature = await this.$store.state.sdk.signMessage(this.$route.query.message);
       const signatureHex = Buffer.from(signature).toString('hex');
       this.openCallbackOrGoHome(true, { signature: signatureHex });

@@ -178,7 +178,7 @@ import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
 import TransactionTokens from '../components/TransactionTokenRows.vue';
 import CopyAddress from '../components/CopyAddress.vue';
-import { aettosToAe } from '../utils/helper';
+import { aettosToAe, watchUntilTruthy } from '../utils/helper';
 import TransactionDetailsPoolTokens from '../components/TransactionDetailsPoolTokens.vue';
 import TransactionErrorStatus from '../components/TransactionErrorStatus.vue';
 import { FUNCTION_TYPE_DEX } from '../utils/constants';
@@ -229,7 +229,7 @@ export default {
   async mounted() {
     this.transaction = this.getTx(this.hash);
     if (!this.transaction || this.transaction?.incomplete) {
-      await this.$watchUntilTruly(() => this.$store.state.middleware);
+      await watchUntilTruthy(() => this.$store.state.middleware);
       this.transaction = await this.$store.state.middleware.getTxByHash(this.hash);
       this.$store.commit('setTransactionByHash', this.transaction);
     }

@@ -2,6 +2,7 @@ import Vue from 'vue';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { detect } from 'detect-browser';
 import stateReducer from '../utils';
+import { IS_EXTENSION_BACKGROUND } from '../../lib/environment';
 
 const KEY = 'state';
 
@@ -12,7 +13,7 @@ const getStateRaw = async () => (await browser.storage.local.get(KEY))[KEY];
 // TODO: Avoid direct localStorage access outside of this module
 export const getState = async () => (await getStateRaw()) || {};
 
-const saverName = process.env.IS_EXTENSION && (window.IS_EXTENSION_BACKGROUND ? 'background' : 'popup');
+const saverName = process.env.IS_EXTENSION && (IS_EXTENSION_BACKGROUND ? 'background' : 'popup');
 
 export default (
   reducerLoad = (state) => state || {},
@@ -21,7 +22,7 @@ export default (
   let dontSaveState;
 
   store.registerModule('persistState', {
-    actions: !window.IS_EXTENSION_BACKGROUND && {
+    actions: !IS_EXTENSION_BACKGROUND && {
       async reset() {
         dontSaveState();
         await browser.storage.local.clear();

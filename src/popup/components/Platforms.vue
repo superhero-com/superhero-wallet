@@ -103,11 +103,12 @@ import {
   APP_LINK_ANDROID,
   APP_LINK_IOS,
 } from '../utils/constants';
+import { IS_IOS, IS_MOBILE_DEVICE } from '../../lib/environment';
 
 export default {
   data: () => ({
-    IS_MOBILE_DEVICE: window.IS_MOBILE_DEVICE,
-    IS_IOS: window.IS_IOS,
+    IS_IOS,
+    IS_MOBILE_DEVICE,
     APP_LINK_CHROME,
     APP_LINK_FIREFOX,
     APP_LINK_ANDROID,

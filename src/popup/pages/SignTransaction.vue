@@ -1,12 +1,12 @@
 <script>
 import deeplinkApi from '../../mixins/deeplinkApi';
-import { handleUnknownError } from '../utils/helper';
+import { handleUnknownError, watchUntilTruthy } from '../utils/helper';
 
 export default {
   mixins: [deeplinkApi],
   async mounted() {
     try {
-      await this.$watchUntilTruly(() => this.$store.state.sdk);
+      await watchUntilTruthy(() => this.$store.state.sdk);
       const { transaction, networkId, broadcast } = this.$route.query;
       const currentNetworkId = this.$store.getters.activeNetwork.networkId;
       if (networkId !== currentNetworkId) {

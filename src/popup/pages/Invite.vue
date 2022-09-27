@@ -42,6 +42,7 @@
 <script>
 import { mapState } from 'vuex';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
+import { watchUntilTruthy } from '../utils/helper';
 import InputAmount from '../components/InputAmount.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InviteItem from '../components/InviteItem.vue';
@@ -72,7 +73,7 @@ export default {
 
       try {
         if (this.amount > 0) {
-          await this.$watchUntilTruly(() => this.sdk);
+          await watchUntilTruthy(() => this.sdk);
           await this.sdk.spend(this.amount, publicKey, {
             payload: 'referral',
             denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,

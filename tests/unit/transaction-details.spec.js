@@ -75,7 +75,6 @@ const testTransaction = (txParams) => ({
 Object.assign(Vue.prototype, {
   $t: () => 'locale-specific-text',
   $te: () => true,
-  $watchUntilTruly: async () => new Promise((res) => setTimeout(res, 500)),
 });
 
 Vue.use(Vuex);

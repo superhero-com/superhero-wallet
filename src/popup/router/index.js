@@ -1,30 +1,15 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import VueClipboard from 'vue-clipboard2';
-import Components from '@aeternity/aepp-components-3';
 import routes from './routes';
-import '@aeternity/aepp-components-3/dist/aepp.components.css';
-import LoaderComponent from '../components/Loader.vue';
 import { i18n } from '../../store/plugins/languages';
-
-import * as helper from '../utils/helper';
+import { watchUntilTruthy } from '../utils/helper';
 import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
 import initSdk from '../../lib/wallet';
 import { APP_LINK_WEB } from '../utils/constants';
+import { RUNNING_IN_POPUP, POPUP_TYPE } from '../../lib/environment';
 
-const plugin = {
-  install() {
-    Vue.helpers = helper;
-    Vue.prototype.$helpers = helper;
-  },
-};
-
-Vue.use(plugin);
 Vue.use(VueRouter);
-Vue.use(VueClipboard);
-Vue.use(Components);
-Vue.component('Loader', LoaderComponent);
 
 const router = new VueRouter({
   routes,
@@ -35,7 +20,7 @@ const router = new VueRouter({
 const lastRouteKey = 'last-path';
 
 const unbind = router.beforeEach(async (to, from, next) => {
-  await store._watcherVM.$watchUntilTruly(() => store.state.isRestored);
+  await watchUntilTruthy(() => store.state.isRestored);
   next(
     (to.path === '/' && (await browser.storage.local.get(lastRouteKey))[lastRouteKey]) || undefined,
   );
@@ -58,13 +43,14 @@ router.beforeEach(async (to, from, next) => {
 
   if (!store.state.sdk) initSdk();
 
-  if (window.RUNNING_IN_POPUP) {
+  if (RUNNING_IN_POPUP) {
     const name = {
       connectConfirm: 'connect',
       sign: 'popup-sign-tx',
       rawSign: 'popup-raw-sign',
       messageSign: 'message-sign',
-    }[window.POPUP_TYPE];
+    }[POPUP_TYPE];
+
     if (name !== to.name) {
       next({ name, params: await getPopupProps() });
       return;
