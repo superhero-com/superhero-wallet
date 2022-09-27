@@ -1,11 +1,13 @@
 <template>
   <div class="register-name">
-    <p>
+    <p class="message">
       {{ msg }}
     </p>
-    <BtnMain :to="{ name: 'account-details-names-claim' }">
-      {{ $t('pages.names.list.register-name') }}
-    </BtnMain>
+    <BtnMain
+      class="btn"
+      :text="$t('pages.names.list.register-name')"
+      :to="{ name: 'account-details-names-claim' }"
+    />
   </div>
 </template>
 
@@ -25,12 +27,16 @@ export default {
 @use '../../styles/typography';
 
 .register-name {
-  p {
+  .message {
     @extend %face-sans-15-medium;
 
     margin: 32px;
     text-align: center;
     color: variables.$color-light-grey;
+  }
+
+  .btn {
+    margin-inline: auto;
   }
 }
 </style>
