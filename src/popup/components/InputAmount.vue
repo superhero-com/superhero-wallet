@@ -92,7 +92,7 @@ export default {
   }
 
   .amount {
-    color: variables.$color-dark-grey;
+    color: variables.$color-grey-dark;
   }
 }
 </style>

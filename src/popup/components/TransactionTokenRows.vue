@@ -50,7 +50,7 @@ export default {
     @extend %face-sans-15-regular;
 
     &.error .amount {
-      color: variables.$color-dark-grey;
+      color: variables.$color-grey-dark;
     }
 
     &.received:not(.error) .amount {

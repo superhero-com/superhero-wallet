@@ -34,13 +34,10 @@
             </div>
           </slot>
 
-          <BtnIcon
+          <BtnClose
             v-if="hasCloseButton"
-            class="close-button"
             @click="$emit('close')"
-          >
-            <Close />
-          </BtnIcon>
+          />
         </div>
 
         <div
@@ -69,14 +66,12 @@
 </template>
 
 <script>
-import BtnIcon from './buttons/BtnIcon.vue';
-import Close from '../../icons/close.svg?vue-component';
 import NodeConnectionStatus from './NodeConnectionStatus.vue';
+import BtnClose from './buttons/BtnClose.vue';
 
 export default {
   components: {
-    BtnIcon,
-    Close,
+    BtnClose,
     NodeConnectionStatus,
   },
   props: {
@@ -172,6 +167,7 @@ export default {
       display: flex;
       flex-direction: column;
       background-color: var(--screen-bg-color);
+      position: relative;
 
       &-icon {
         margin: 0 auto 10px;
@@ -223,7 +219,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    color: variables.$color-dark-grey;
+    color: variables.$color-grey-dark;
 
     @extend %face-sans-15-medium;
 

@@ -104,7 +104,7 @@ export default {
   overflow: hidden;
 
   .title {
-    color: variables.$color-dark-grey;
+    color: variables.$color-grey-dark;
     padding-bottom: 8px;
 
     @extend %face-sans-14-medium;

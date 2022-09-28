@@ -321,12 +321,12 @@ export default {
 
     @extend %face-sans-15-medium;
 
-    color: variables.$color-dark-grey;
+    color: variables.$color-grey-dark;
 
     .icon {
       width: 16px;
       height: 16px;
-      color: variables.$color-dark-grey;
+      color: variables.$color-grey-dark;
       opacity: 0.7;
       margin-left: 8px;
     }

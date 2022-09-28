@@ -23,8 +23,8 @@ export default {
   @extend %face-sans-11-medium;
 
   padding: 1px 5px;
-  color: variables.$color-dark-grey;
-  border: 1px solid variables.$color-dark-grey;
+  color: variables.$color-grey-dark;
+  border: 1px solid variables.$color-grey-dark;
   border-radius: 4px;
   text-transform: uppercase;
   white-space: nowrap;

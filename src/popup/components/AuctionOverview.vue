@@ -73,7 +73,7 @@ export default {
       }
 
       ::v-deep .secondary {
-        color: variables.$color-dark-grey;
+        color: variables.$color-grey-dark;
       }
     }
   }

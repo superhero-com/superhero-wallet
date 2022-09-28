@@ -61,7 +61,7 @@ export default {
   .title {
     padding: 16px 0 8px 0;
     text-align: center;
-    color: variables.$color-dark-grey;
+    color: variables.$color-grey-dark;
     display: block;
 
     @extend %face-sans-17-medium;
