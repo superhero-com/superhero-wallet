@@ -49,7 +49,7 @@ export default {
     @include mixins.flex(flex-start, center);
 
     text-decoration: none;
-    color: variables.$color-dark-grey;
+    color: variables.$color-grey-dark;
     gap: 16px;
     margin-right: auto;
 

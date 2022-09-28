@@ -139,7 +139,7 @@ export default {
       display: inline-block;
       text-align: center;
       font-size: 0.95rem;
-      color: variables.$color-dark-grey;
+      color: variables.$color-grey-dark;
       font-weight: 600;
       padding: 0.95rem 0;
       margin-left: 1rem;

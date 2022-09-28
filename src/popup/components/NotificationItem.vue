@@ -108,7 +108,7 @@ export default {
 
     .actions-menu,
     .format-date {
-      color: variables.$color-dark-grey;
+      color: variables.$color-grey-dark;
     }
 
     .actions-menu:hover {

@@ -75,7 +75,7 @@ export default {
 
   .fiat {
     margin-left: 8px;
-    color: variables.$color-dark-grey;
+    color: variables.$color-grey-dark;
 
     &.fiat-below {
       display: block;

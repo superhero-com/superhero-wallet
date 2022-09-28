@@ -115,7 +115,7 @@ export default {
 
       @extend %face-sans-15-medium;
 
-      color: variables.$color-dark-grey;
+      color: variables.$color-grey-dark;
 
       .icon {
         width: 24px;

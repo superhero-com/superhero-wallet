@@ -94,7 +94,7 @@ export default {
 
   .error-info-title {
     text-transform: uppercase;
-    color: variables.$color-dark-grey;
+    color: variables.$color-grey-dark;
     text-align: left;
     font-size: 14px;
     margin: 0 0 15px;

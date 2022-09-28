@@ -37,7 +37,7 @@ export default {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: variables.$color-dark-grey;
+    color: variables.$color-grey-dark;
   }
 
   .text {

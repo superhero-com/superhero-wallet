@@ -165,7 +165,7 @@ export default {
     &-counter {
       @extend %face-sans-13-regular;
 
-      color: variables.$color-dark-grey;
+      color: variables.$color-grey-dark;
     }
   }
 

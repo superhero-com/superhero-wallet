@@ -49,14 +49,12 @@
       >
         <ThreeDots />
       </RouterLink>
-      <BtnPlain
+
+      <BtnClose
         v-else
-        class="icon-btn close"
         data-cy="close"
         @click="close"
-      >
-        <Close />
-      </BtnPlain>
+      />
     </div>
   </div>
 </template>
@@ -70,11 +68,13 @@ import ThreeDots from '../../icons/three-dots.svg?vue-component';
 import Close from '../../icons/close.svg?vue-component';
 import Truncate from './Truncate.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
+import BtnClose from './buttons/BtnClose.vue';
 import NotifyBell from './NotifyBell.vue';
 
 export default {
   components: {
     NotifyBell,
+    BtnClose,
     Logo,
     Back,
     Bell,

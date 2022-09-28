@@ -142,7 +142,7 @@ export default {
     display: flex;
     align-items: center;
     width: 100%;
-    color: variables.$color-dark-grey;
+    color: variables.$color-grey-dark;
     margin-bottom: 4px;
 
     .icon {
@@ -156,7 +156,7 @@ export default {
       display: flex;
       margin-left: 8px;
       white-space: nowrap;
-      color: variables.$color-dark-grey;
+      color: variables.$color-grey-dark;
 
       @extend %face-sans-12-regular;
 
@@ -207,9 +207,9 @@ export default {
           height: 22px;
           margin-right: 4px;
           padding: 2px 5px;
-          border: 1px solid variables.$color-dark-grey;
+          border: 1px solid variables.$color-grey-dark;
           border-radius: 4px;
-          color: variables.$color-dark-grey;
+          color: variables.$color-grey-dark;
 
           @extend %face-sans-11-regular;
 

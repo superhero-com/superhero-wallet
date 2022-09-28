@@ -196,7 +196,7 @@ export default {
     }
 
     .copy-button {
-      color: variables.$color-dark-grey;
+      color: variables.$color-grey-dark;
       flex-direction: row-reverse;
     }
   }
@@ -206,7 +206,7 @@ export default {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-    color: variables.$color-dark-grey;
+    color: variables.$color-grey-dark;
 
     .token-amount {
       flex-grow: 1;

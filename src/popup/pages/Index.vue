@@ -151,7 +151,7 @@ export default {
 
       &:hover:not(.agreed),
       &:active:not(.agreed) {
-        color: variables.$color-dark-grey;
+        color: variables.$color-grey-dark;
       }
 
       ::v-deep .checkmark {

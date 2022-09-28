@@ -29,7 +29,7 @@ export default {
   overflow: hidden;
 
   $colors: (
-    track-color: variables.$color-dark-grey,
+    track-color: variables.$color-grey-dark,
     progress-color: variables.$color-green,
     thumb-color: variables.$color-green,
   );

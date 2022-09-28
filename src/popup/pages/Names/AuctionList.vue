@@ -124,7 +124,7 @@ export default {
 
       .expiration {
         align-self: flex-end;
-        color: variables.$color-dark-grey;
+        color: variables.$color-grey-dark;
       }
     }
   }

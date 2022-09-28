@@ -261,7 +261,7 @@ export default {
       max-width: 260px;
 
       .pending {
-        color: variables.$color-dark-grey;
+        color: variables.$color-grey-dark;
 
         @extend %face-sans-12-regular;
       }
@@ -351,7 +351,7 @@ export default {
 
           span {
             margin-right: 4px;
-            color: variables.$color-dark-grey;
+            color: variables.$color-grey-dark;
 
             @extend %face-sans-12-medium;
           }
@@ -367,7 +367,7 @@ export default {
         flex: 1;
 
         ::v-deep .value .secondary {
-          color: variables.$color-dark-grey;
+          color: variables.$color-grey-dark;
           margin-left: -2px;
         }
 
