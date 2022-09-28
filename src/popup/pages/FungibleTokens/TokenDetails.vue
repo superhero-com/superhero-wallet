@@ -40,7 +40,7 @@
       <BtnBox
         v-if="id === AETERNITY_CONTRACT_ID"
         class="token-actions-btn"
-        :href="SIMPLEX_URL"
+        :href="simplexLink"
       >
         <BuyIcon />
         {{ $t('pages.fungible-tokens.buyAe') }}
@@ -238,13 +238,13 @@ import Loader from '../../components/Loader.vue';
 import TransactionList from '../../components/TransactionList.vue';
 import AddressShortening from '../../components/AddressShortening.vue';
 import {
-  SIMPLEX_URL,
   DEX_URL,
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
   AETERNITY_CONTRACT_ID,
 } from '../../utils/constants';
 import { convertToken } from '../../utils/helper';
+import { buildSimplexLink } from '../../../background/utils';
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
 
@@ -273,7 +273,6 @@ export default {
       activeTab: 'transactions',
       loading: false,
       tokenPairs: {},
-      SIMPLEX_URL,
       DEX_URL,
       UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
       AETERNITY_CONTRACT_ID,
@@ -283,10 +282,13 @@ export default {
     return pick(this.$store.state.observables, ['balance', 'balanceCurrency']);
   },
   computed: {
-    ...mapGetters(['formatCurrency', 'formatNumber', 'accounts']),
+    ...mapGetters(['formatCurrency', 'formatNumber', 'accounts', 'account']),
     ...mapState('accounts', ['activeIdx']),
     ...mapState('fungibleTokens', ['aePublicData', 'availableTokens']),
     ...mapGetters('fungibleTokens', ['tokenBalances']),
+    simplexLink() {
+      return buildSimplexLink(this.account.address);
+    },
     fungibleToken() {
       return this.availableTokens[this.id];
     },
