@@ -61,12 +61,11 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
   DEX_URL,
-  SIMPLEX_URL,
 } from '../utils/constants';
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
@@ -81,6 +80,7 @@ import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
 import SwapIcon from '../../icons/swap.svg?vue-component';
 import CloseIcon from '../../icons/close.svg?vue-component';
+import { buildSimplexLink } from '../../background/utils';
 
 export default {
   name: 'AccountDetails',
@@ -114,7 +114,7 @@ export default {
         },
         {
           text: this.$t('pages.token-details.buy'),
-          onClick: () => window.open(SIMPLEX_URL, '_blank'),
+          onClick: () => window.open(this.simplexLink, '_blank'),
           icon: CreditCardIcon,
         },
         {
@@ -143,6 +143,10 @@ export default {
   },
   computed: {
     ...mapState('accounts', ['activeIdx']),
+    ...mapGetters(['account']),
+    simplexLink() {
+      return buildSimplexLink(this.account.address);
+    },
     searchTermPlaceholder() {
       switch (this.$route.name) {
         case 'account-details':

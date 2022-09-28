@@ -56,7 +56,7 @@
         <BtnMain
           class="card-button"
           :text="$t('dashboard.buy-card.button')"
-          :href="SIMPLEX_URL"
+          :href="simplexLink"
           variant="pink"
           inline
         />
@@ -91,7 +91,6 @@ import AccountSwitcher from '../components/AccountSwitcher.vue';
 import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
-  SIMPLEX_URL,
 } from '../utils/constants';
 import Card from '../components/dashboard/Card.vue';
 import CardRow from '../components/dashboard/CardRow.vue';
@@ -104,6 +103,7 @@ import MenuCardIcon from '../../icons/menucard.fill.svg?vue-component';
 
 import buyBackground from '../../image/dashboard/buy-ae.jpg';
 import chainNameBackground from '../../image/dashboard/chain-name.jpg';
+import { buildSimplexLink } from '../../background/utils';
 
 export default {
   name: 'Dashboard',
@@ -121,12 +121,14 @@ export default {
   data: () => ({
     buyBackground,
     chainNameBackground,
-    SIMPLEX_URL,
   }),
   computed: {
     ...mapState(['backedUpSeed', 'transactions']),
-    ...mapGetters(['getAccountPendingTransactions']),
+    ...mapGetters(['getAccountPendingTransactions', 'account']),
     ...mapState('accounts', ['activeIdx']),
+    simplexLink() {
+      return buildSimplexLink(this.account.address);
+    },
   },
   watch: {
     activeIdx() { // TODO: remove it, maybe by extracting transactions entity
