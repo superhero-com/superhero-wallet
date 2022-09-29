@@ -15,7 +15,6 @@
 import Avatar from './Avatar.vue';
 import BtnHelp from './buttons/BtnHelp.vue';
 import AuctionOverview from './AuctionOverview.vue';
-import { blocksToRelativeTime } from '../../filters/toRelativeTime';
 
 export default {
   components: {
@@ -25,9 +24,6 @@ export default {
   },
   props: {
     name: { type: String, required: true },
-  },
-  methods: {
-    blocksToRelativeTime,
   },
 };
 </script>

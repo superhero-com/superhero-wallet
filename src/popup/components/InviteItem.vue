@@ -2,7 +2,7 @@
   <div class="invite-row">
     <div class="invite-info">
       <TokenAmount :amount="inviteLinkBalance" />
-      <span class="date">{{ createdAt | formatDate }}</span>
+      <span class="date">{{ formatDate(createdAt) }}</span>
     </div>
     <div class="invite-link">
       <span>{{ link }}</span>
@@ -67,14 +67,12 @@
 <script>
 import { mapState } from 'vuex';
 import { AmountFormatter, TxBuilderHelper, Crypto } from '@aeternity/aepp-sdk';
-import { watchUntilTruthy } from '../utils/helper';
+import { APP_LINK_WEB, watchUntilTruthy, formatDate } from '../utils';
 import CopyMixin from '../../mixins/copy';
 import TokenAmount from './TokenAmount.vue';
 import InputAmount from './InputAmount.vue';
 import BtnMain from './buttons/BtnMain.vue';
 import BtnCopy from './buttons/BtnCopy.vue';
-import { formatDate } from '../utils';
-import { APP_LINK_WEB } from '../utils/constants';
 
 export default {
   components: {
@@ -83,7 +81,6 @@ export default {
     BtnCopy,
     InputAmount,
   },
-  filters: { formatDate },
   mixins: [CopyMixin],
   props: {
     secretKey: { type: String, required: true },
@@ -120,6 +117,7 @@ export default {
     },
   },
   methods: {
+    formatDate,
     deleteItem() {
       this.$store.commit('invites/delete', this.secretKey);
     },

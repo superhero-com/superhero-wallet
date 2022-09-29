@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { convertToken } from '../../../src/popup/utils/helper';
+import { convertToken } from '../../../src/popup/utils';
 
 const invalidInput = [null, 'test', undefined, {}, [], NaN, '1', '-1'];
 

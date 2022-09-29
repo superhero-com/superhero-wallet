@@ -11,8 +11,8 @@
           <span class="pending">{{ $t('transaction.type.pending') }}</span>
         </template>
         <template v-else>
-          <span data-cy="date">{{ transaction.microTime | formatDate }}</span>
-          <span data-cy="time">{{ transaction.microTime | formatTime }}</span>
+          <span data-cy="date">{{ formatDate(transaction.microTime) }}</span>
+          <span data-cy="time">{{ formatTime(transaction.microTime) }}</span>
           <div
             v-if="isErrorTransaction"
             class="error"
@@ -54,9 +54,13 @@
 <script>
 import { mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { FUNCTION_TYPE_DEX } from '../utils/constants';
-import { amountRounded, convertToken } from '../utils/helper';
-import { formatDate, formatTime } from '../utils';
+import {
+  FUNCTION_TYPE_DEX,
+  amountRounded,
+  convertToken,
+  formatDate,
+  formatTime,
+} from '../utils';
 import transactionTokensMixin from '../../mixins/transactionTokensMixin';
 import Pending from '../../icons/animated-pending.svg?vue-component';
 import Reverted from '../../icons/refresh.svg?vue-component';
@@ -69,10 +73,6 @@ export default {
     Reverted,
     Warning,
     TransactionTokens,
-  },
-  filters: {
-    formatDate,
-    formatTime,
   },
   mixins: [transactionTokensMixin],
   props: {
@@ -116,6 +116,10 @@ export default {
       return this.getAmountFiat(amountRounded(aeToken.decimals
         ? convertToken(aeToken.amount || 0, -aeToken.decimals) : aeToken.amount));
     },
+  },
+  methods: {
+    formatDate,
+    formatTime,
   },
 };
 </script>
@@ -204,15 +208,14 @@ export default {
         width: 100%;
 
         label {
+          @extend %face-sans-11-regular;
+
           height: 22px;
           margin-right: 4px;
           padding: 2px 5px;
           border: 1px solid variables.$color-grey-dark;
           border-radius: 4px;
           color: variables.$color-grey-dark;
-
-          @extend %face-sans-11-regular;
-
           font-weight: 500;
         }
       }

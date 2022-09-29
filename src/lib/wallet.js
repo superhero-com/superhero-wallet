@@ -7,7 +7,7 @@ import {
   fetchJson,
   executeAndSetInterval,
   watchUntilTruthy,
-} from '../popup/utils/helper';
+} from '../popup/utils';
 import { IN_FRAME } from './environment';
 import store from '../store';
 import Logger from './logger';

@@ -114,6 +114,14 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { camelCase } from 'lodash-es';
+import {
+  FUNCTION_TYPE_DEX,
+  DEX_TRANSACTION_TAGS,
+  DEX_PROVIDE_LIQUIDITY,
+  DEX_REMOVE_LIQUIDITY,
+  convertToken,
+  watchUntilTruthy,
+} from '../../utils';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import BtnPlain from '../buttons/BtnPlain.vue';
@@ -123,11 +131,8 @@ import TokenAmount from '../TokenAmount.vue';
 import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import Arrow from '../../../icons/arrow.svg?vue-component';
-import { FUNCTION_TYPE_DEX } from '../../utils/constants';
 import * as transactionTokenInfoResolvers from '../../utils/transactionTokenInfoResolvers';
-import { getDexTransactionTag } from '../../utils';
 import mixin from '../../pages/Popups/mixin';
-import { convertToken, watchUntilTruthy } from '../../utils/helper';
 
 export default {
   components: {
@@ -217,7 +222,7 @@ export default {
       return { ...this.transaction, function: this.txFunction };
     },
     isProvideLiquidity() {
-      return getDexTransactionTag[this.txFunction] === 'provide_liquidity';
+      return DEX_TRANSACTION_TAGS[this.txFunction] === DEX_PROVIDE_LIQUIDITY;
     },
   },
   async mounted() {
@@ -274,8 +279,10 @@ export default {
       if (this.isPool && this.isProvideLiquidity) {
         return token.isPool ? '' : this.$t('pages.signTransaction.maximumDeposited');
       }
-      if (this.isPool && getDexTransactionTag[this.txFunction] === 'remove_liquidity') {
-        return token.isPool ? this.$t('pages.signTransaction.poolTokenSpent') : this.$t('pages.signTransaction.minimumWithdrawn');
+      if (this.isPool && DEX_TRANSACTION_TAGS[this.txFunction] === DEX_REMOVE_LIQUIDITY) {
+        return token.isPool
+          ? this.$t('pages.signTransaction.poolTokenSpent')
+          : this.$t('pages.signTransaction.minimumWithdrawn');
       }
       return '';
     },
@@ -367,28 +374,6 @@ export default {
           line-height: 20px;
         }
       }
-    }
-  }
-
-  ::v-deep .container {
-    background: variables.$color-bg-1;
-
-    .body {
-      overflow-y: scroll;
-      text-align: left;
-      padding: 16px 16px 0;
-      border-radius: 0 0 10px 10px;
-    }
-
-    .footer {
-      background:
-        linear-gradient(
-          180deg,
-          rgba(19, 19, 19, 0) 0%,
-          rgba(19, 19, 19, 0.65) 28.13%,
-          rgba(19, 19, 19, 0.7) 33.33%
-        );
-      z-index: 1;
     }
   }
 

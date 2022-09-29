@@ -13,7 +13,7 @@ import {
   handleUnknownError,
   isAccountNotFoundError,
   executeAndSetInterval,
-} from '../popup/utils/helper';
+} from '../popup/utils';
 import { CURRENCIES_URL, MODAL_DEFAULT } from '../popup/utils/constants';
 import { i18n } from './plugins/languages';
 

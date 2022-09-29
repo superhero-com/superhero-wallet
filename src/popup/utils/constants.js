@@ -22,6 +22,8 @@ export const CONNECTION_TYPES = {
   OTHER: 'OTHER',
 };
 
+export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
+
 export const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
 export const STUB_CONTRACT_ADDRESS = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6';
 export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
@@ -273,7 +275,7 @@ export const CURRENCIES = [
     symbol: '₺',
   },
   {
-    name: 'Sout Africa Rand',
+    name: 'South Africa Rand',
     code: 'zar',
     symbol: 'R',
   },
@@ -341,3 +343,30 @@ export const MODAL_ASSET_SELECTOR = 'asset-selector';
 export const MODAL_RESET_WALLET = 'reset-wallet';
 export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
 export const MODAL_RECIPIENT_INFO = 'recipient-info';
+
+export const DEX_PROVIDE_LIQUIDITY = 'provide_liquidity';
+export const DEX_REMOVE_LIQUIDITY = 'remove_liquidity';
+export const DEX_SWAP = 'swap';
+export const DEX_ALLOW_TOKEN = 'allow_token';
+
+export const DEX_TRANSACTION_TAGS = {
+  add_liquidity: DEX_PROVIDE_LIQUIDITY,
+  add_liquidity_ae: DEX_PROVIDE_LIQUIDITY,
+
+  remove_liquidity: DEX_REMOVE_LIQUIDITY,
+  remove_liquidity_ae: DEX_REMOVE_LIQUIDITY,
+
+  swap_exact_tokens_for_tokens: DEX_SWAP,
+  swap_exact_ae_for_tokens: DEX_SWAP,
+  swap_tokens_for_exact_tokens: DEX_SWAP,
+  swap_tokens_for_exact_ae: DEX_SWAP,
+  swap_exact_tokens_for_ae: DEX_SWAP,
+  swap_ae_for_exact_tokens: DEX_SWAP,
+
+  create_allowance: DEX_ALLOW_TOKEN,
+  change_allowance: DEX_ALLOW_TOKEN,
+  transfer_allowance: DEX_ALLOW_TOKEN,
+
+  deposit: DEX_SWAP,
+  withdraw: DEX_SWAP,
+};

@@ -1,7 +1,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { camelCase } from 'lodash-es';
 import { FUNCTION_TYPE_DEX, MAGNITUDE } from '../popup/utils/constants';
-import { amountRounded, convertToken } from '../popup/utils/helper';
+import { amountRounded, convertToken } from '../popup/utils';
 import * as TransactionResolver from '../popup/utils/transactionTokenInfoResolvers';
 
 export default {

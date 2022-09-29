@@ -1,4 +1,5 @@
 import { watch } from '@vue/composition-api';
+import { mnemonicToSeed } from '@aeternity/bip39';
 import { defer } from 'lodash-es';
 import { isFQDN } from 'validator';
 import { detect } from 'detect-browser';
@@ -22,6 +23,8 @@ import {
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
 } from './constants';
+import { testAccount, txParams } from './config';
+import runMigrations from '../../store/migrations';
 
 export function watchUntilTruthy(getter) {
   return new Promise((resolve) => {
@@ -48,8 +51,6 @@ export const aettosToAe = (v) => AmountFormatter.formatAmount(v.toString(), {
   denomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
   targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
 });
-
-export const convertToken = (balance, precision) => BigNumber(balance).shiftedBy(precision);
 
 export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   if (!_balance || !_totalSupply || !_reserve) {
@@ -181,28 +182,6 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
   return Promise.resolve(contractInstance);
 };
 
-export const escapeSpecialChars = (str = '') => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
-
-export const checkHashType = (hash) => {
-  const accountPublicKeyRegex = RegExp('^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$');
-  const transactionHashRegex = RegExp('^th_[1-9A-HJ-NP-Za-km-z]{48,50}$');
-  const nameRegex = RegExp('^nm_[1-9A-HJ-NP-Za-km-z]{48,50}$');
-  let valid = true;
-  let endpoint = null;
-
-  if (transactionHashRegex.test(hash)) {
-    endpoint = 'transactions';
-  } else if (accountPublicKeyRegex.test(hash)) {
-    endpoint = 'account/transactions';
-  } else if (nameRegex.test(hash) || hash?.endsWith('.chain')) {
-    endpoint = 'names';
-  } else {
-    valid = false;
-  }
-
-  return { valid, endpoint };
-};
-
 export const getTwitterAccountUrl = (url) => {
   const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
   return match ? match[0] : false;
@@ -282,11 +261,6 @@ export const readValueFromClipboard = async () => {
   return value;
 };
 
-export const executeAndSetInterval = (handler, timeout) => {
-  handler();
-  return setInterval(handler, timeout);
-};
-
 export const getAllPages = async (getFunction, getNextPage) => {
   const result = [];
   let nextPageUrl;
@@ -323,8 +297,6 @@ export const truncateAddress = ({ address }) => {
   ];
 };
 
-export const isEqual = (a, b) => BigNumber(a).eq(b);
-
 export const getHdWalletAccount = (wallet, accountIdx = 0) => {
   const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
   return {
@@ -333,3 +305,30 @@ export const getHdWalletAccount = (wallet, accountIdx = 0) => {
     address: TxBuilderHelper.encode(keyPair.publicKey, 'ak'),
   };
 };
+
+export const getLoginState = async ({
+  backedUpSeed,
+  balance,
+  name,
+  pendingTransaction,
+  network,
+}) => {
+  const { mnemonic, address } = testAccount;
+  const account = {
+    address,
+    privateKey: mnemonicToSeed(mnemonic).toString('hex'),
+  };
+  return {
+    ...(await runMigrations()),
+    account,
+    mnemonic,
+    backedUpSeed,
+    current: { network: network || 'Testnet', token: 0, currency: 'usd' },
+    balance,
+    ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
+    ...(pendingTransaction
+        && { transactions: { loaded: [], pending: { ae_uat: [pendingTransaction] } } }),
+  };
+};
+
+export const buildTx = (txtype) => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);

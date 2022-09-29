@@ -11,7 +11,7 @@ import {
   checkAensName,
   handleUnknownError,
   watchUntilTruthy,
-} from '../popup/utils/helper';
+} from '../popup/utils';
 
 export default {
   data: () => ({

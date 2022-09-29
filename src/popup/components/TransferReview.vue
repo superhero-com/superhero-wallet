@@ -92,7 +92,7 @@ import {
   checkAensName,
   convertToken,
   escapeSpecialChars,
-} from '../utils/helper';
+} from '../utils';
 import { MODAL_DEFAULT, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';

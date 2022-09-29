@@ -77,15 +77,14 @@ export default {
   margin-right: calc(-1 * var(--screen-padding-x));
 
   .filter {
+    @extend %face-sans-14-regular;
+
     display: flex;
     align-items: center;
     padding: 2px 8px;
     gap: 2px;
     transition: all 0.08s ease-out;
     border-radius: 12px;
-
-    @extend %face-sans-14-regular;
-
     color: rgba(variables.$color-white, 0.5);
 
     svg {

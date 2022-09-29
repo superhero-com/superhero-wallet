@@ -226,6 +226,15 @@
 import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
+import {
+  DEX_URL,
+  MODAL_TRANSFER_RECEIVE,
+  MODAL_TRANSFER_SEND,
+  AETERNITY_CONTRACT_ID,
+  convertToken,
+  watchUntilTruthy,
+  buildSimplexLink,
+} from '../../utils';
 import SendIcon from '../../../icons/send.svg?vue-component';
 import ReceiveIcon from '../../../icons/receive.svg?vue-component';
 import BuyIcon from '../../../icons/buy.svg?vue-component';
@@ -237,16 +246,8 @@ import Tokens from '../../components/Tokens.vue';
 import Loader from '../../components/Loader.vue';
 import TransactionList from '../../components/TransactionList.vue';
 import AddressShortening from '../../components/AddressShortening.vue';
-import {
-  DEX_URL,
-  MODAL_TRANSFER_RECEIVE,
-  MODAL_TRANSFER_SEND,
-  AETERNITY_CONTRACT_ID,
-} from '../../utils/constants';
-import { convertToken, watchUntilTruthy } from '../../utils/helper';
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
-import { buildSimplexLink } from '../../utils';
 
 export default {
   name: 'TokenDetails',

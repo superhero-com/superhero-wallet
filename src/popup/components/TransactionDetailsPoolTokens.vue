@@ -12,8 +12,13 @@
 </template>
 
 <script>
-import { getDexTransactionTag } from '../utils';
-import { aettosToAe, convertToken } from '../utils/helper';
+import {
+  DEX_TRANSACTION_TAGS,
+  DEX_PROVIDE_LIQUIDITY,
+  DEX_ALLOW_TOKEN,
+  aettosToAe,
+  convertToken,
+} from '../utils';
 import TransactionDetailsPoolTokenRow from './TransactionDetailsPoolTokenRow.vue';
 
 export default {
@@ -38,9 +43,9 @@ export default {
     aettosToAe,
     convertToken,
     getLabel(isPool) {
-      const tag = getDexTransactionTag[this.txFunction];
-      if (tag === 'allow_token') return 'approveTokenUse';
-      const provideLiquidity = tag === 'provide_liquidity';
+      const tag = DEX_TRANSACTION_TAGS[this.txFunction];
+      if (tag === DEX_ALLOW_TOKEN) return 'approveTokenUse';
+      const provideLiquidity = tag === DEX_PROVIDE_LIQUIDITY;
       if (isPool) return provideLiquidity ? 'poolTokenReceived' : 'poolTokenSpent';
       return provideLiquidity ? 'deposited' : 'withdrawn';
     },
