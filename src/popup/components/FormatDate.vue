@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { secondsToRelativeTime } from '../../filters/toRelativeTime';
+import { secondsToRelativeTime } from '../utils';
 
 export default {
   props: {

@@ -127,8 +127,11 @@
 <script>
 import { mapGetters } from 'vuex';
 import { pick } from 'lodash-es';
-import { blocksToRelativeTime } from '../../filters/toRelativeTime';
-import { checkAddressOrChannel, readValueFromClipboard } from '../utils/helper';
+import {
+  blocksToRelativeTime,
+  checkAddressOrChannel,
+  readValueFromClipboard,
+} from '../utils';
 import Pending from '../../icons/animated-pending.svg?vue-component';
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';

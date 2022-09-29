@@ -1,6 +1,6 @@
 <template>
   <a
-    :href="link"
+    :href="explorerPath"
     target="_blank"
     class="address-shortening"
   >
@@ -24,7 +24,9 @@ export default {
     limit: { type: Number, default: 3 },
   },
   computed: {
-    ...mapGetters(['activeNetwork']),
+    ...mapGetters([
+      'getExplorerPath',
+    ]),
     firstPart() {
       if (!this.address) return '';
 
@@ -37,20 +39,8 @@ export default {
         (this.address.length - this.limit), this.address.length,
       );
     },
-    link() {
-      const addressTypes = {
-        th: 'transactions',
-        ok: 'oracles/queries',
-        ct: 'contracts/transactions',
-        ak: 'account',
-      };
-      if (!(
-        this.address.match(/^[a-z]{2}_[1-9A-HJ-NP-Za-km-z]{48,50}$/)
-        && Object.keys(addressTypes).includes(this.address.substring(0, 2))
-      )) return null;
-
-      const type = addressTypes[this.address.substring(0, 2)];
-      return `${this.activeNetwork.explorerUrl}/${type}/${this.address}`;
+    explorerPath() {
+      return this.getExplorerPath(this.address);
     },
   },
 };

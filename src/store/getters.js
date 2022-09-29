@@ -11,7 +11,7 @@ import {
   aettosToAe,
   categorizeContractCallTxObject,
   getHdWalletAccount,
-} from '../popup/utils/helper';
+} from '../popup/utils';
 
 export default {
   wallet({ mnemonic }) {

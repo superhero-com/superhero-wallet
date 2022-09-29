@@ -25,9 +25,9 @@
 </template>
 
 <script>
+import { convertToken } from '../utils';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
-import { convertToken } from '../utils/helper';
 import Tokens from './Tokens.vue';
 import AddressShortening from './AddressShortening.vue';
 

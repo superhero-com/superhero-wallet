@@ -1,25 +1,34 @@
 <template>
   <span class="truncate">
     <span
-      :class="['container', { fixed }]"
+      class="container"
+      :class="{ fixed }"
       :style="cssVars"
     >
       <span ref="scroll">{{ nameComponent || str }}</span>
     </span>
-    <span v-if="nameComponent">{{ '.chain' }}</span>
+    <span
+      v-if="nameComponent"
+      class="domain"
+    >{{ AENS_DOMAIN }}</span>
   </span>
 </template>
 
 <script>
+import { AENS_DOMAIN } from '../utils';
+
 export default {
   props: {
     str: { type: String, required: true },
     fixed: { type: Boolean },
     gradientColor: { type: String, default: 'black' },
   },
+  data: () => ({
+    AENS_DOMAIN,
+  }),
   computed: {
     nameComponent() {
-      return this.str.endsWith('.chain') ? this.str.replace('.chain', '') : '';
+      return this.str.endsWith(AENS_DOMAIN) ? this.str.replace(AENS_DOMAIN, '') : '';
     },
     cssVars() {
       if (this.fixed) {
@@ -110,6 +119,10 @@ export default {
         }
       }
     }
+  }
+
+  .domain {
+    word-break: keep-all;
   }
 }
 </style>

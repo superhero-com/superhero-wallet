@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { amountRounded, convertToken } from '../utils/helper';
+import { amountRounded, convertToken } from '../utils';
 import Tokens from './Tokens.vue';
 
 export default {

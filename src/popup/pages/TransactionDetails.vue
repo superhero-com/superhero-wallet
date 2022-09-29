@@ -77,8 +77,8 @@
           <div class="span-3-columns">
             <DetailsItem
               v-if="transaction.microTime && !transaction.pending"
-              :value="transaction.microTime | formatDate"
-              :secondary="transaction.microTime | formatTime"
+              :value="formatDate(transaction.microTime)"
+              :secondary="formatTime(transaction.microTime)"
               :label="$t('pages.transactionDetails.timestamp')"
               data-cy="timestamp"
             />
@@ -162,7 +162,13 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { formatDate, formatTime } from '../utils';
+import {
+  FUNCTION_TYPE_DEX,
+  formatDate,
+  formatTime,
+  aettosToAe,
+  watchUntilTruthy,
+} from '../utils';
 import transactionTokensMixin from '../../mixins/transactionTokensMixin';
 import TransactionOverview from '../components/TransactionOverview.vue';
 import Plate from '../components/Plate.vue';
@@ -178,10 +184,8 @@ import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
 import TransactionTokens from '../components/TransactionTokenRows.vue';
 import CopyAddress from '../components/CopyAddress.vue';
-import { aettosToAe, watchUntilTruthy } from '../utils/helper';
 import TransactionDetailsPoolTokens from '../components/TransactionDetailsPoolTokens.vue';
 import TransactionErrorStatus from '../components/TransactionErrorStatus.vue';
-import { FUNCTION_TYPE_DEX } from '../utils/constants';
 
 export default {
   components: {
@@ -201,10 +205,6 @@ export default {
     CopyAddress,
     SwapRoute,
     SwapRates,
-  },
-  filters: {
-    formatDate,
-    formatTime,
   },
   mixins: [transactionTokensMixin],
   props: {
@@ -236,6 +236,8 @@ export default {
   },
   methods: {
     aettosToAe,
+    formatDate,
+    formatTime,
   },
 };
 </script>

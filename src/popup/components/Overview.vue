@@ -88,7 +88,7 @@ import ActionIcon from '../../icons/action.svg?vue-component';
 import AensIcon from '../../icons/aens.svg?vue-component';
 import Avatar from './Avatar.vue';
 import TransactionTag from './TransactionTag.vue';
-import { getDexTransactionTag } from '../utils';
+import { DEX_TRANSACTION_TAGS } from '../utils';
 import { FUNCTION_TYPE_DEX } from '../utils/constants';
 
 export default {
@@ -109,8 +109,8 @@ export default {
   },
   computed: {
     getTxType() {
-      return this.$te(`transaction.dexType.${getDexTransactionTag[this.txFunction] || this.txFunction}`)
-        ? this.$t(`transaction.dexType.${getDexTransactionTag[this.txFunction] || this.txFunction}`)
+      return this.$te(`transaction.dexType.${DEX_TRANSACTION_TAGS[this.txFunction] || this.txFunction}`)
+        ? this.$t(`transaction.dexType.${DEX_TRANSACTION_TAGS[this.txFunction] || this.txFunction}`)
         : '';
     },
     getTitle() {

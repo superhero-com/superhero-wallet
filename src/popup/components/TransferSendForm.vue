@@ -80,8 +80,11 @@ import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import maxAmountMixin from '../../mixins/maxAmountMixin';
 import {
-  convertToken, isEqual, validateTipUrl, checkAensName,
-} from '../utils/helper';
+  convertToken,
+  isNumbersEqual,
+  validateTipUrl,
+  checkAensName,
+} from '../utils';
 import AccountRow from './AccountRow.vue';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
@@ -184,7 +187,7 @@ export default {
           && this.formModel.selectedAsset.contractId !== AETERNITY_CONTRACT_ID;
     },
     isMaxValue() {
-      return isEqual(this.formModel.amount, this.max);
+      return isNumbersEqual(this.formModel.amount, this.max);
     },
   },
   watch: {

@@ -50,7 +50,7 @@
 import { mapGetters, mapState } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { MAGNITUDE, AETERNITY_CONTRACT_ID } from '../utils/constants';
-import { convertToken, watchUntilTruthy } from '../utils/helper';
+import { convertToken, watchUntilTruthy } from '../utils';
 import deeplinkApi from '../../mixins/deeplinkApi';
 import maxAmountMixin from '../../mixins/maxAmountMixin';
 import InputAmount from '../components/InputAmountV2.vue';

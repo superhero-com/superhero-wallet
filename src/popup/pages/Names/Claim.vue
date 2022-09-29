@@ -59,13 +59,14 @@
 import { mapActions, mapState } from 'vuex';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import {
-  AENS_NAME_AUCTION_MAX_LENGTH,
   MAGNITUDE,
   MODAL_DEFAULT,
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
-} from '../../utils/constants';
-import { checkAensName, convertToken } from '../../utils/helper';
+  AENS_NAME_AUCTION_MAX_LENGTH,
+  checkAensName,
+  convertToken,
+} from '../../utils';
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';

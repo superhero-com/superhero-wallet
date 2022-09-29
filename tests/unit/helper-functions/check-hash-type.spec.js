@@ -1,4 +1,4 @@
-import { checkHashType } from '../../../src/popup/utils/helper';
+import { checkHashType } from '../../../src/popup/utils';
 
 const testHashes = [{
   hash: null,
