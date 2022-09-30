@@ -15,7 +15,7 @@
         </span>
       </template>
       <template #after>
-        .chain
+        {{ AENS_DOMAIN }}
       </template>
     </InputField>
 
@@ -47,7 +47,7 @@
       @click="claim"
     >
       {{
-        validName
+        isNameValid
           ? $t('pages.names.claim.button-price', [nameFee])
           : $t('pages.names.claim.button')
       }}
@@ -58,14 +58,21 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import {
+  AENS_NAME_AUCTION_MAX_LENGTH,
+  MAGNITUDE,
+  MODAL_DEFAULT,
+  AENS_DOMAIN,
+  AENS_NAME_MAX_LENGTH,
+} from '../../utils/constants';
+import { checkAensName, convertToken } from '../../utils/helper';
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import BtnHelp from '../../components/buttons/BtnHelp.vue';
-import { MAX_AUCTION_NAME_LENGTH, MAGNITUDE, MODAL_DEFAULT } from '../../utils/constants';
-import { checkAensName, convertToken } from '../../utils/helper';
 
 export default {
+  name: 'Claim',
   components: {
     InputField,
     CheckBox,
@@ -73,21 +80,22 @@ export default {
     BtnHelp,
   },
   data: () => ({
+    AENS_DOMAIN,
     name: '',
     loading: false,
     autoExtend: false,
-    maxNameLength: 253,
+    maxNameLength: AENS_NAME_MAX_LENGTH - AENS_DOMAIN.length,
   }),
   computed: {
     ...mapState([
       'sdk',
     ]),
-    validName() {
+    isNameValid() {
       return this.name && checkAensName(`${this.name}.chain`);
     },
     nameFee() {
       return convertToken(
-        TxBuilderHelper.getMinimumNameFee(`${this.name}.chain`),
+        TxBuilderHelper.getMinimumNameFee(`${this.name}${AENS_DOMAIN}`),
         -MAGNITUDE,
       ).toFixed(4);
     },
@@ -98,7 +106,7 @@ export default {
     }),
     async claim() {
       if (!await this.$validator.validateAll()) return;
-      const name = `${this.name}.chain`;
+      const name = `${this.name}${AENS_DOMAIN}`;
       const nameEntry = await this.sdk.api.getNameEntryByName(name).catch(() => false);
       if (nameEntry) {
         this.openModal({
@@ -133,7 +141,7 @@ export default {
         try {
           this.$store.dispatch('names/fetchOwned');
           await this.sdk.poll(claimTxHash);
-          const isAuction = MAX_AUCTION_NAME_LENGTH >= name.length;
+          const isAuction = AENS_NAME_AUCTION_MAX_LENGTH >= name.length;
           if (!isAuction) {
             this.$store.dispatch('names/updatePointer', {
               name,
