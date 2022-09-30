@@ -14,102 +14,94 @@ describe('Test cases for networks page', () => {
       .get('[data-cy=network-url]')
       .should('contain', defaultNetwork.url)
       .get('[data-cy=network-middleware]')
-      .should('contain', defaultNetwork.middlewareUrl);
+      .should('contain', defaultNetwork.middlewareUrl)
 
-    // TODO - waiting for add/edit network form (SW-66 & SW-71)
-    // .get('[data-cy=to-add]')
-    // .click()
-    // .enterNetworkDetails(
-    //   defaultNetwork.name,
-    //   defaultNetwork.url,
-    //   defaultNetwork.middlewareUrl,
-    //   defaultNetwork.compilerUrl,
-    // )
-    // .get('[data-cy=connect]')
-    // .click()
-    // .buttonShouldBeDisabled('[data-cy=connect]')
-    // .get('[data-cy=error-msg]')
-    // .should('exist')
-    //
-    // .enterNetworkDetails('test', 'test', 'test', 'test')
-    // .get('[data-cy=connect]')
-    // .click()
-    // .buttonShouldBeDisabled('[data-cy=connect]')
-    // .get('[data-cy=error-msg]')
-    // .should('exist')
-    //
-    // .get('[data-cy=cancel]')
-    // .should('be.visible')
-    // .click()
-    // .get('[data-cy=cancel]')
-    // .should('not.exist');
+      .get('[data-cy=to-add]')
+      .click()
+      .enterNetworkDetails(
+        defaultNetwork.name,
+        defaultNetwork.url,
+        defaultNetwork.middlewareUrl,
+        defaultNetwork.compilerUrl,
+      )
+      .get('[data-cy=connect]')
+      .buttonShouldBeDisabled('[data-cy=connect]')
+      .get('[data-cy=input-message]')
+      .should('exist')
+
+      .enterNetworkDetails('test', 'test', 'test', 'test')
+      .get('[data-cy=connect]')
+      .buttonShouldBeDisabled('[data-cy=connect]')
+      .get('[data-cy=input-message]')
+      .should('exist')
+
+      .get('[data-cy=cancel]')
+      .should('be.visible')
+      .click()
+      .urlEquals('/more/settings/networks');
   });
 
-  // it('Can add, select, edit, delete new network, can not add network with the same name', () => {
-  //   cy.addNetwork(
-  //     'Newnetwork',
-  //     defaultNetwork.url,
-  //     defaultNetwork.middlewareUrl,
-  //     defaultNetwork.compilerUrl,
-  //   )
-  //     .get('[data-cy=close]')
-  //     .click()
-  //     .openNetworks()
-  //     .get('[data-cy=more]')
-  //     .click()
-  //     .get('[data-cy=edit]')
-  //     .should('be.visible')
-  //     .click()
-  //     .get('[data-cy=network] input')
-  //     .should('have.value', 'Newnetwork')
-  //     .get('[data-cy=url] input')
-  //     .should('have.value', defaultNetwork.url)
-  //     .clear()
-  //     .type(defaultNetwork.url)
-  //     .get('[data-cy=middleware] input ')
-  //     .should('have.value', defaultNetwork.middlewareUrl)
-  //     .clear()
-  //     .type(defaultNetwork.middlewareUrl)
-  //     .get('[data-cy=connect]')
-  //     .click()
-  //     .get('[data-cy=network-url]')
-  //     .eq(-1)
-  //     .should('contain', defaultNetwork.url)
-  //     .get('[data-cy=network-middleware]')
-  //     .eq(-1)
-  //     .should('contain', defaultNetwork.middlewareUrl)
-  //     .goBack()
-  //     .goBack()
-  //     .goBack()
-  //     // TODO should be aligned with the new home page changes
-  //     // .get('.transaction-list', { timeout: 8000 })
-  //     // .should('exist')
-  //
-  //     .openNetworks()
-  //     .get('[data-cy=to-add]')
-  //     .click()
-  //     .enterNetworkDetails(
-  //       'Newnetwork',
-  //       defaultNetwork.url,
-  //       defaultNetwork.middlewareUrl,
-  //       defaultNetwork.compilerUrl,
-  //     )
-  //     .get('[data-cy=connect]')
-  //     .click()
-  //     .buttonShouldBeDisabled('[data-cy=connect]')
-  //     .get('[data-cy=cancel]')
-  //     .click()
-  //
-  //     .get('[data-cy=more]')
-  //     .click()
-  //     .get('[data-cy=delete]')
-  //     .should('be.visible')
-  //     .click()
-  //     .get('[data-cy=networks] .network-row')
-  //     .should('have.length', 2)
-  //     .get('[data-cy=networks] .network-row')
-  //     .eq(1)
-  //     .find('.checkmark')
-  //     .should('have.class', 'checked');
-  // });
+  it('Can add, select, edit, delete new network, can not add network with the same name', () => {
+    cy.addNetwork(
+      'Newnetwork',
+      defaultNetwork.url,
+      defaultNetwork.middlewareUrl,
+      defaultNetwork.compilerUrl,
+    )
+      .get('[data-cy=edit]')
+      .should('be.visible')
+      .click()
+      .get('[data-cy=network] input')
+      .should('have.value', 'Newnetwork')
+      .get('[data-cy=url] input')
+      .should('have.value', defaultNetwork.url)
+      .clear()
+      .type(defaultNetwork.url)
+      .get('[data-cy=middleware] input')
+      .should('have.value', defaultNetwork.middlewareUrl)
+      .clear()
+      .type(defaultNetwork.middlewareUrl)
+      .get('[data-cy=connect]')
+      .click()
+      .get('[data-cy=network-url]')
+      .eq(-1)
+      .should('contain', defaultNetwork.url)
+      .get('[data-cy=network-middleware]')
+      .eq(-1)
+      .should('contain', defaultNetwork.middlewareUrl)
+      .goBack()
+      .goBack()
+      .goBack()
+      .goBack()
+      .goBack()
+      .goBack()
+      .goBack()
+      .get('.account-card')
+      .should('exist')
+
+      .openNetworks()
+      .get('[data-cy=to-add]')
+      .click()
+      .enterNetworkDetails(
+        'Newnetwork',
+        defaultNetwork.url,
+        defaultNetwork.middlewareUrl,
+        defaultNetwork.compilerUrl,
+      )
+      .buttonShouldBeDisabled('[data-cy=connect]')
+      .get('[data-cy=input-message]')
+      .should('exist')
+      .get('[data-cy=cancel]')
+      .click()
+
+      .get('[data-cy=delete]')
+      .should('be.visible')
+      .click()
+      .get('[data-cy=networks] .network-row')
+      .should('have.length', 2)
+      .get('[data-cy=networks] .network-row')
+      .eq(0)
+      .find('.radio-dot')
+      .should('have.class', 'checked');
+  });
 });

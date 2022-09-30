@@ -3,6 +3,7 @@
     :is="component"
     v-bind="$attrs"
     class="btn-icon"
+    :class="[size, variant]"
     :to="to"
     :href="href"
     :target="(href) ? '_blank' : null"
@@ -13,10 +14,18 @@
 </template>
 
 <script>
+const SIZES = ['rg', 'md'];
+
 export default {
   props: {
     to: { type: Object, default: null },
     href: { type: String, default: null },
+    variant: { type: String, default: null },
+    size: {
+      type: String,
+      default: 'md',
+      validator: (val) => SIZES.includes(val),
+    },
   },
   computed: {
     component() {
@@ -37,13 +46,11 @@ export default {
 @use '../../../styles/mixins';
 
 .btn-icon {
-  $size: 32px;
+  --size: 20px;
 
   @include mixins.flex(center, center);
 
-  width: $size;
-  height: $size;
-  padding: 0;
+  padding: 4px;
   background: transparent;
   border: none;
   border-radius: 50%;
@@ -52,11 +59,19 @@ export default {
   cursor: pointer;
 
   > .icon {
-    width: 75%;
-    height: 75%;
     color: variables.$color-white;
+    width: var(--size);
+    height: var(--size);
     opacity: 0.7;
     transition: 0.1s;
+  }
+
+  &.rg {
+    --size: 20px;
+  }
+
+  &.md {
+    --size: 24px;
   }
 
   &:hover {
@@ -64,6 +79,22 @@ export default {
 
     > .icon {
       opacity: 1;
+    }
+  }
+
+  &.pink {
+    &:hover {
+      > .icon {
+        color: variables.$color-pink;
+      }
+    }
+  }
+
+  &.dimmed {
+    &:hover {
+      > .icon {
+        opacity: 0.75;
+      }
     }
   }
 }

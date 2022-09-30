@@ -10,16 +10,18 @@
       v-for="network in networks"
       :key="network.name"
       :network="network"
-      @selectNetwork="selectNetwork(network.name)"
+      @selectNetwork="selectNetwork"
     />
     <BtnMain
       extend
       variant="secondary"
       class="add-custom-network"
       data-cy="to-add"
+      has-icon
+      :to="{ name: 'network-add' }"
     >
-      <PlusCircleIcon class="plus-icon" />
-      {{ $t('pages.network.addNetwork') }}
+      <PlusCircleIcon />
+      {{ $t('pages.network.addCustomNetwork') }}
     </BtnMain>
   </div>
 </template>
@@ -57,13 +59,7 @@ export default {
   }
 
   .add-custom-network {
-    gap: 6px;
     margin-top: 16px;
-  }
-
-  .plus-icon {
-    width: 20px;
-    height: 20px;
   }
 }
 </style>

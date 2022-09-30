@@ -59,6 +59,9 @@ Validator.localize('en', {
     not_token: () => i18n.t('validation.notToken'),
     name_registered_address_or_url: () => i18n.t('validation.invalidAddressChainUrl'),
     min_tip_amount: () => i18n.t('pages.tipPage.minAmountError'),
+    invalid_hostname: () => i18n.t('pages.network.error.invalidHostname'),
+    network_name: () => i18n.t('pages.network.error.enterName'),
+    network_exists: () => i18n.t('pages.network.error.networkExists'),
   },
 });
 
@@ -134,4 +137,25 @@ export default (store) => {
   ));
   Validator.extend('name_registered_address_or_url', (value) => (checkAensName(value)
     ? checkNameRegisteredAddress(value) : Crypto.isAddressValid(value) || validateTipUrl(value)));
+  Validator.extend('invalid_hostname', (value) => {
+    try {
+      const url = new URL(value);
+      return !!url.hostname;
+    } catch (error) {
+      return false;
+    }
+  });
+  Validator.extend('network_name', (value) => ({
+    valid: !!value,
+    data: {
+      required: true,
+    },
+  }), {
+    computesRequired: true,
+  });
+  Validator.extend('network_exists', (name, [index, networks]) => {
+    const networkWithSameName = networks[name];
+    return !networkWithSameName
+      && (index === undefined || networkWithSameName?.index !== index);
+  });
 };

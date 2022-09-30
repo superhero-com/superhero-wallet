@@ -53,31 +53,35 @@ export const DEX_CONTRACTS = {
   },
 };
 
+const NETWORK_MAINNET = {
+  url: 'https://mainnet.aeternity.io',
+  networkId: 'ae_mainnet',
+  middlewareUrl: 'https://mainnet.aeternity.io/mdw',
+  explorerUrl: 'https://explorer.aeternity.io',
+  compilerUrl: 'https://compiler.aepps.com',
+  backendUrl: 'https://raendom-backend.z52da5wt.xyz',
+  tipContractV1: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z',
+  name: 'Mainnet',
+};
+
+const NETWORK_TESTNET = {
+  url: 'https://testnet.aeternity.io',
+  networkId: 'ae_uat',
+  middlewareUrl: 'https://testnet.aeternity.io/mdw',
+  explorerUrl: 'https://explorer.testnet.aeternity.io',
+  compilerUrl: 'https://latest.compiler.aepps.com',
+  backendUrl: 'https://testnet.superhero.aeternity.art',
+  tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd',
+  tipContractV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu',
+  name: 'Testnet',
+};
+
 export const defaultNetworks = [
-  {
-    url: 'https://testnet.aeternity.io',
-    networkId: 'ae_uat',
-    middlewareUrl: 'https://testnet.aeternity.io/mdw',
-    explorerUrl: 'https://explorer.testnet.aeternity.io',
-    compilerUrl: 'https://latest.compiler.aepps.com',
-    backendUrl: 'https://testnet.superhero.aeternity.art',
-    tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd',
-    tipContractV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu',
-    name: 'Testnet',
-  },
-  {
-    url: 'https://mainnet.aeternity.io',
-    networkId: 'ae_mainnet',
-    middlewareUrl: 'https://mainnet.aeternity.io/mdw',
-    explorerUrl: 'https://explorer.aeternity.io',
-    compilerUrl: 'https://compiler.aepps.com',
-    backendUrl: 'https://raendom-backend.z52da5wt.xyz',
-    tipContractV1: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z',
-    name: 'Mainnet',
-  },
+  NETWORK_MAINNET,
+  NETWORK_TESTNET,
 ];
 
-export const defaultNetwork = process.env.NETWORK === 'Testnet' ? defaultNetworks[0] : defaultNetworks[1];
+export const defaultNetwork = process.env.NETWORK === 'Testnet' ? NETWORK_TESTNET : NETWORK_MAINNET;
 
 export const AGGREGATOR_URL = 'https://superhero.com/';
 
