@@ -19,6 +19,8 @@ import {
   MAX_UINT256,
   MAGNITUDE,
   SEED_LENGTH,
+  AENS_DOMAIN,
+  AENS_NAME_MAX_LENGTH,
 } from './constants';
 
 export function watchUntilTruthy(getter) {
@@ -128,7 +130,10 @@ export const checkAddress = (value) => Crypto.isAddressValid(value, 'ak')
 
 export const checkAddressOrChannel = (value) => checkAddress(value) || Crypto.isAddressValid(value, 'ch');
 
-export const checkAensName = (value) => /^[\p{L}\d]+\.chain$/gu.test(value);
+export const checkAensName = (value) => (
+  value.length <= AENS_NAME_MAX_LENGTH
+  && /^[\p{L}\d]+\.chain$/gu.test(value)
+);
 
 export const getAddressByNameEntry = (nameEntry, pointer = 'account_pubkey') => ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
 

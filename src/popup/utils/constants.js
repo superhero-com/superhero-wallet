@@ -83,7 +83,8 @@ export const AGGREGATOR_URL = 'https://superhero.com/';
 
 export const TXS_PER_PAGE = 30;
 export const AENS_DOMAIN = '.chain';
-export const MAX_AUCTION_NAME_LENGTH = 12 + AENS_DOMAIN.length;
+export const AENS_NAME_MAX_LENGTH = 63 + AENS_DOMAIN.length;
+export const AENS_NAME_AUCTION_MAX_LENGTH = 12 + AENS_DOMAIN.length;
 export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 
 export const BUG_REPORT_URL = 'https://spgrrc00ymg.typeform.com/to/Kk3Zyjdr';
