@@ -2,6 +2,7 @@ import { mnemonicToSeed } from '@aeternity/bip39';
 import { TxBuilder } from '@aeternity/aepp-sdk';
 import { testAccount, txParams } from './config';
 import runMigrations from '../../store/migrations';
+import { SIMPLEX_URL } from './constants';
 
 // TODO: Use the current language from i18n module
 export const formatDate = (time) => new Date(+time)
@@ -70,4 +71,10 @@ export const getDexTransactionTag = {
 
   deposit: 'swap',
   withdraw: 'swap',
+};
+
+export const buildSimplexLink = (address) => {
+  const link = new URL(SIMPLEX_URL);
+  link.searchParams.set('wallet_address', address);
+  return link.toString();
 };

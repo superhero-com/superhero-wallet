@@ -103,7 +103,7 @@ import MenuCardIcon from '../../icons/menucard.fill.svg?vue-component';
 
 import buyBackground from '../../image/dashboard/buy-ae.jpg';
 import chainNameBackground from '../../image/dashboard/chain-name.jpg';
-import { buildSimplexLink } from '../../background/utils';
+import { buildSimplexLink } from '../utils';
 
 export default {
   name: 'Dashboard',

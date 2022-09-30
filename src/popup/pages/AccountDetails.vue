@@ -80,7 +80,7 @@ import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
 import SwapIcon from '../../icons/swap.svg?vue-component';
 import CloseIcon from '../../icons/close.svg?vue-component';
-import { buildSimplexLink } from '../../background/utils';
+import { buildSimplexLink } from '../utils';
 
 export default {
   name: 'AccountDetails',
