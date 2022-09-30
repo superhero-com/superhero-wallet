@@ -22,7 +22,6 @@ import AuctionList from '../pages/Names/AuctionList.vue';
 import More from '../pages/More.vue';
 import NameClaim from '../pages/Names/Claim.vue';
 import NamesList from '../pages/Names/List.vue';
-import Networks from '../pages/Networks.vue';
 import NotFound from '../pages/NotFound.vue';
 import Notifications from '../pages/Notifications.vue';
 import NotificationSettings from '../pages/NotificationSettings.vue';
@@ -44,6 +43,8 @@ import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
 import ResetWallet from '../pages/ResetWallet.vue';
 import webIframePopups from './web-iframe-popups';
+import Networks from '../pages/Networks.vue';
+import NetworkForm from '../pages/NetworkForm.vue';
 
 export default [
   {
@@ -257,6 +258,30 @@ export default [
     props: true,
     meta: {
       title: 'networks',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+    },
+  },
+  {
+    path: '/more/settings/networks/add',
+    name: 'network-add',
+    component: NetworkForm,
+    props: true,
+    meta: {
+      title: 'network-add',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+    },
+  },
+  {
+    path: '/more/settings/networks/edit/:name',
+    name: 'network-edit',
+    component: NetworkForm,
+    props: true,
+    meta: {
+      title: 'network-edit',
       backButton: true,
       closeButton: true,
       hideNotificationsIcon: true,

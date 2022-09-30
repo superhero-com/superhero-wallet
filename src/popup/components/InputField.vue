@@ -28,10 +28,12 @@
       </a>
 
       <div
-        v-if="$slots['label-after']"
+        v-if="$slots['label-after'] || textLimit"
         class="label-after"
       >
-        <slot name="label-after" />
+        <slot name="label-after">
+          {{ availableTextLimit }}
+        </slot>
       </div>
     </div>
 
@@ -58,6 +60,7 @@
             :value="value"
             :data-cy="$attrs.type ? `input-${$attrs.type}` : 'input'"
             :disabled="readonly"
+            :maxlength="textLimit"
             @input="$emit('input', $event.target.value)"
             @keydown="checkIfNumber"
             @focusin="focused = true"
@@ -81,6 +84,7 @@
     <div
       v-if="showMessage"
       class="message"
+      data-cy="input-message"
     >
       <label
         class="message-text"
@@ -117,6 +121,10 @@ export default {
     showHelp: Boolean,
     showMessageHelp: Boolean,
     code: Boolean,
+    textLimit: {
+      type: Number,
+      default: null,
+    },
   },
   data: () => ({
     focused: false,
@@ -142,6 +150,11 @@ export default {
         return !this.message?.hideMessage;
       }
       return !!this.message;
+    },
+    availableTextLimit() {
+      return (this.textLimit && this.value?.length)
+        ? this.textLimit - this.value.length
+        : this.textLimit;
     },
   },
   methods: {
@@ -202,7 +215,10 @@ export default {
     }
 
     &-after {
+      @extend %face-sans-15-regular;
+
       margin-left: auto;
+      color: variables.$color-grey-dark;
     }
   }
 

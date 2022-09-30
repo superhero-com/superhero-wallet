@@ -172,11 +172,10 @@ export default defineComponent({
   &.has-icon {
     gap: 4px;
 
-    .icon {
+    ::v-deep .icon {
       flex-shrink: 0;
-      width: 24px;
-      height: 24px;
-      margin: -2px 0;
+      width: 20px;
+      height: 20px;
       color: inherit;
     }
   }

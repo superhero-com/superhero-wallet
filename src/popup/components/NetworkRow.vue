@@ -16,12 +16,35 @@
         >
           {{ network.name }}
         </p>
+        <div
+          v-if="network.index !== undefined"
+          class="action-wrapper"
+        >
+          <BtnIcon
+            size="rg"
+            data-cy="edit"
+            variant="dimmed"
+            :to="{ name: 'network-edit', params: { name: network.name } }"
+          >
+            <PencilIcon />
+          </BtnIcon>
+          <BtnIcon
+            size="rg"
+            data-cy="delete"
+            variant="pink"
+            @click="deleteNetwork(network.index)"
+          >
+            <TrashIcon />
+          </BtnIcon>
+        </div>
       </RadioButton>
       <p
         class="url"
         data-cy="network-url"
       >
-        <span class="url-label">{{ $t('pages.network.url') }}</span>
+        <span class="url-label">
+          {{ $t('pages.network.url') }}
+        </span>
         {{ network.url }}
       </p>
       <p
@@ -43,13 +66,20 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { defaultNetwork } from '../utils/constants';
 import NodeConnectionStatus from './NodeConnectionStatus.vue';
 import RadioButton from './RadioButton.vue';
+import BtnIcon from './buttons/BtnIcon.vue';
+import PencilIcon from '../../icons/pencil.svg?vue-component';
+import TrashIcon from '../../icons/trash.svg?vue-component';
 
 export default {
   components: {
+    BtnIcon,
     RadioButton,
     NodeConnectionStatus,
+    PencilIcon,
+    TrashIcon,
   },
   props: {
     network: {
@@ -63,11 +93,21 @@ export default {
       return this.network.name === this.activeNetwork.name;
     },
   },
+  methods: {
+    async deleteNetwork(networkIndex) {
+      if (networkIndex === this.activeNetwork.index) {
+        this.$emit('selectNetwork', defaultNetwork.name);
+      }
+      this.$store.commit('deleteUserNetwork', networkIndex);
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
 @use '../../styles/typography';
+@use '../../styles/variables';
+@use '../../styles/mixins';
 
 .network-row {
   margin-bottom: 12px;
@@ -79,6 +119,8 @@ export default {
 
     .name {
       @extend %face-sans-15-medium;
+
+      margin: 0;
     }
 
     .url {
@@ -93,6 +135,13 @@ export default {
       margin-right: 4px;
       opacity: 0.6;
     }
+  }
+
+  .action-wrapper {
+    @include mixins.flex(flex-end, center);
+
+    gap: 4px;
+    flex: 1;
   }
 }
 </style>
