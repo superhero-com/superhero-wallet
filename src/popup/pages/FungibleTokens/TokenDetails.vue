@@ -244,9 +244,9 @@ import {
   AETERNITY_CONTRACT_ID,
 } from '../../utils/constants';
 import { convertToken, watchUntilTruthy } from '../../utils/helper';
-import { buildSimplexLink } from '../../../background/utils';
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
+import { buildSimplexLink } from '../../utils';
 
 export default {
   name: 'TokenDetails',

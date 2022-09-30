@@ -5,7 +5,6 @@ import {
   watchUntilTruthy,
 } from '../popup/utils/helper';
 import store from './store';
-import { SIMPLEX_URL } from '../popup/utils/constants';
 
 let tippingContract;
 
@@ -46,10 +45,4 @@ export const contractCallStatic = async ({ tx, callType }) => {
     throw new Error('You need to unlock the wallet first');
   }
   throw new Error('No data to return');
-};
-
-export const buildSimplexLink = (address) => {
-  const link = new URL(SIMPLEX_URL);
-  link.searchParams.set('wallet_address', address);
-  return link.toString();
 };
