@@ -38,7 +38,6 @@
     <span class="token-amount-wrapper">
       {{ $t('pages.send.sending') }}
       <TokenAmount
-        slot="value"
         :amount="+transferData.amount"
         :symbol="tokenSymbol"
         :hide-fiat="!!selectedToken"

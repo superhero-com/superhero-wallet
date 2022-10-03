@@ -1,10 +1,11 @@
 <template>
   <div class="auction-overview">
     <DetailsItem :label="$t('pages.auctionBid.current-highest-bid')">
-      <TokenAmount
-        slot="value"
-        :amount="+getHighestBid(name).nameFee"
-      />
+      <template #value>
+        <TokenAmount
+          :amount="+getHighestBid(name).nameFee"
+        />
+      </template>
     </DetailsItem>
     <DetailsItem
       class="end-height"

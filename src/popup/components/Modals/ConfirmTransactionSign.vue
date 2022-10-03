@@ -25,10 +25,11 @@
       :label="$t('modals.confirm-transaction-sign.nameFee')"
       class="name-fee"
     >
-      <TokenAmount
-        slot="value"
-        :amount="getNameFee(transaction)"
-      />
+      <template #value>
+        <TokenAmount
+          :amount="getNameFee(transaction)"
+        />
+      </template>
     </DetailsItem>
 
     <div class="details">
@@ -36,33 +37,36 @@
         v-if="isSwap"
         :label="$t(`pages.signTransaction.${swapDirection}`)"
       >
-        <TokenAmount
-          slot="value"
-          :amount="+convertToken(getSwapTokenAmountData.amount, -getSwapTokenAmountData.decimals)"
-          :symbol="getSwapTokenAmountData.isAe ? 'AE' : getSwapTokenAmountData.symbol"
-          :aex9="isTxAex9(transaction)"
-          :hide-fiat="!getSwapTokenAmountData.isAe"
-          data-cy="total"
-        />
+        <template #value>
+          <TokenAmount
+            :amount="+convertToken(getSwapTokenAmountData.amount, -getSwapTokenAmountData.decimals)"
+            :symbol="getSwapTokenAmountData.isAe ? 'AE' : getSwapTokenAmountData.symbol"
+            :aex9="isTxAex9(transaction)"
+            :hide-fiat="!getSwapTokenAmountData.isAe"
+            data-cy="total"
+          />
+        </template>
       </DetailsItem>
       <DetailsItem :label="$t('pages.signTransaction.fee')">
-        <TokenAmount
-          slot="value"
-          :amount="getTxFee(transaction)"
-          data-cy="fee"
-        />
+        <template #value>
+          <TokenAmount
+            :amount="getTxFee(transaction)"
+            data-cy="fee"
+          />
+        </template>
       </DetailsItem>
       <DetailsItem
         v-if="!isDex"
         :label="$t('pages.signTransaction.total')"
       >
-        <TokenAmount
-          slot="value"
-          :amount="getTxAmountTotal(transaction)"
-          :symbol="getTxSymbol(transaction)"
-          :aex9="isTxAex9(transaction)"
-          data-cy="total"
-        />
+        <template #value>
+          <TokenAmount
+            :amount="getTxAmountTotal(transaction)"
+            :symbol="getTxSymbol(transaction)"
+            :aex9="isTxAex9(transaction)"
+            data-cy="total"
+          />
+        </template>
       </DetailsItem>
     </div>
 
@@ -89,9 +93,8 @@
         />
       </div>
     </transition>
-    <template
-      slot="footer"
-    >
+
+    <template #footer>
       <BtnMain
         third
         variant="secondary"

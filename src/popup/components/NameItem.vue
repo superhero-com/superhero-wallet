@@ -105,20 +105,22 @@
         v-if="Object.entries(nameEntry.pointers || {}).length"
         :label="$t('pages.names.list.pointers')"
       >
-        <BtnHelp
-          slot="label"
-          :title="$t('modals.name-pointers-help.title')"
-          :msg="$t('modals.name-pointers-help.msg')"
-        />
-        <div
-          v-for="(nameEntryPointer, key, idx) in nameEntry.pointers"
-          slot="value"
-          :key="key"
-          class="pointers"
-        >
-          <span>{{ `#${idx + 1}` }}</span>
-          {{ nameEntryPointer }}
-        </div>
+        <template #label>
+          <BtnHelp
+            :title="$t('modals.name-pointers-help.title')"
+            :msg="$t('modals.name-pointers-help.msg')"
+          />
+        </template>
+        <template #value>
+          <div
+            v-for="(nameEntryPointer, key, idx) in nameEntry.pointers"
+            :key="key"
+            class="pointers"
+          >
+            <span>{{ `#${idx + 1}` }}</span>
+            {{ nameEntryPointer }}
+          </div>
+        </template>
       </DetailsItem>
     </div>
   </div>

@@ -67,12 +67,13 @@
             data-cy="hash"
             small
           >
-            <CopyAddress
-              slot="value"
-              class="copy-hash"
-              :value="hash"
-              :custom-text="$t('hashCopied')"
-            />
+            <template #value>
+              <CopyAddress
+                class="copy-hash"
+                :value="hash"
+                :custom-text="$t('hashCopied')"
+              />
+            </template>
           </DetailsItem>
           <div class="span-3-columns">
             <DetailsItem
@@ -112,24 +113,26 @@
             :label="$t('pages.transactionDetails.amount')"
             data-cy="amount"
           >
-            <TokenAmount
-              slot="value"
-              :amount="getTxAmountTotal(transaction)"
-              :symbol="getTxSymbol(transaction)"
-              :hide-fiat="getTxSymbol(transaction) !== 'AE'"
-            />
+            <template #value>
+              <TokenAmount
+                :amount="getTxAmountTotal(transaction)"
+                :symbol="getTxSymbol(transaction)"
+                :hide-fiat="getTxSymbol(transaction) !== 'AE'"
+              />
+            </template>
           </DetailsItem>
           <DetailsItem
             v-if="transaction.tx.gasPrice"
             :label="$t('pages.transactionDetails.gasPrice')"
             data-cy="gas-price"
           >
-            <TokenAmount
-              slot="value"
-              :amount="+aettosToAe(transaction.tx.gasPrice)"
-              symbol="AE"
-              hide-fiat
-            />
+            <template #value>
+              <TokenAmount
+                :amount="+aettosToAe(transaction.tx.gasPrice)"
+                symbol="AE"
+                hide-fiat
+              />
+            </template>
           </DetailsItem>
           <DetailsItem
             v-if="transaction.tx.gasUsed"
@@ -142,11 +145,12 @@
             :label="$t('pages.transactionDetails.fee')"
             data-cy="fee"
           >
-            <TokenAmount
-              slot="value"
-              :amount="+aettosToAe(transaction.tx.fee)"
-              symbol="AE"
-            />
+            <template #value>
+              <TokenAmount
+                :amount="+aettosToAe(transaction.tx.fee)"
+                symbol="AE"
+              />
+            </template>
           </DetailsItem>
         </div>
         <div class="explorer">

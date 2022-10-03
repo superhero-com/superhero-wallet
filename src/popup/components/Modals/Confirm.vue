@@ -3,12 +3,12 @@
     v-bind="{ ...$attrs, resolve }"
     :close="cancel"
   >
-    <TemplateRenderer
-      v-if="!$slots.msg"
-      slot="msg"
-      :str="$attrs.msg"
-    />
-    <template slot="footer">
+    <template #msg>
+      <TemplateRenderer
+        :str="msg"
+      />
+    </template>
+    <template #footer>
       <BtnMain
         variant="secondary"
         @click="cancel"
@@ -39,6 +39,7 @@ export default {
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
+    msg: { type: String, default: '' },
   },
   methods: {
     cancel() {

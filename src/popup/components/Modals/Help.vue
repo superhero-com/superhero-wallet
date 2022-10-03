@@ -1,13 +1,14 @@
 <template>
   <Default
-    :icon="$attrs.icon || 'info'"
+    :icon="icon || 'info'"
     v-bind="$attrs"
   >
-    <TemplateRenderer
-      slot="msg"
-      :str="$attrs.msg"
-      :option="$attrs.option"
-    />
+    <template #msg>
+      <TemplateRenderer
+        :str="msg"
+        :option="option"
+      />
+    </template>
   </Default>
 </template>
 
@@ -16,6 +17,14 @@ import Default from './Default.vue';
 import TemplateRenderer from '../TemplateRenderer.vue';
 
 export default {
-  components: { Default, TemplateRenderer },
+  components: {
+    Default,
+    TemplateRenderer,
+  },
+  props: {
+    msg: { type: String, default: '' },
+    option: { type: Object, default: null },
+    icon: { type: String, default: null },
+  },
 };
 </script>
