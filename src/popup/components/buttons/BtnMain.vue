@@ -130,7 +130,7 @@ export default defineComponent({
   }
 
   &.secondary {
-    --color: #{variables.$color-medium-grey};
+    --color: #{variables.$color-grey-medium};
   }
 
   &.alternative {

@@ -1,11 +1,11 @@
 <template>
-  <BtnPlain
+  <BtnIcon
     v-if="!$route.path.startsWith('/notifications') && !hideNotificationsIcon"
     class="notifications"
     data-cy="noti"
     @click="toNotifications"
   >
-    <Bell class="bell-icon" />
+    <BellIcon class="bell-icon" />
     <span
       v-if="notificationsCount"
       class="badge"
@@ -13,13 +13,13 @@
     >
       {{ notificationsCount }}
     </span>
-  </BtnPlain>
+  </BtnIcon>
 </template>
 
 <script>
 import { mapMutations, mapState } from 'vuex';
-import BtnPlain from './buttons/BtnPlain.vue';
-import Bell from '../../icons/bell.svg?vue-component';
+import BellIcon from '../../icons/bell.svg?vue-component';
+import BtnIcon from './buttons/BtnIcon.vue';
 
 const notificationStatus = {
   created: 'CREATED',
@@ -29,8 +29,8 @@ const notificationStatus = {
 export default {
   name: 'NotifyBell',
   components: {
-    Bell,
-    BtnPlain,
+    BtnIcon,
+    BellIcon,
   },
   subscriptions() {
     return {
@@ -79,11 +79,6 @@ export default {
 
 .notifications {
   position: relative;
-  min-width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
   .badge {
     @extend %face-sans-11-regular;
@@ -104,15 +99,6 @@ export default {
   .bell-icon {
     width: 24px;
     height: 24px;
-  }
-
-  &:hover {
-    border-radius: 50%;
-    background-color: variables.$color-hover;
-
-    .bell-icon {
-      opacity: 1;
-    }
   }
 }
 </style>

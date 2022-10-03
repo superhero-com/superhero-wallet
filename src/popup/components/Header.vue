@@ -15,13 +15,13 @@
       >
         <Logo class="home-icon" />
       </Component>
-      <BtnPlain
+      <BtnIcon
         v-if="showBack"
         class="icon-btn"
         @click="back"
       >
-        <Back data-cy="back-arrow" />
-      </BtnPlain>
+        <BackIcon data-cy="back-arrow" />
+      </BtnIcon>
     </div>
 
     <div
@@ -39,14 +39,13 @@
     >
       <NotifyBell />
 
-      <RouterLink
+      <BtnIcon
         v-if="$route.path !== '/more' && !$route.meta.closeButton"
-        class="icon-btn"
-        to="/more"
+        :to="{ name: 'more' }"
         data-cy="page-more"
       >
         <ThreeDots />
-      </RouterLink>
+      </BtnIcon>
 
       <BtnClose
         v-else
@@ -61,7 +60,7 @@
 import { mapState, mapGetters, mapMutations } from 'vuex';
 import { RUNNING_IN_POPUP } from '../../lib/environment';
 import Logo from '../../icons/logo-small.svg?vue-component';
-import Back from '../../icons/back.svg?vue-component';
+import BackIcon from '../../icons/back.svg?vue-component';
 import Bell from '../../icons/bell.svg?vue-component';
 import ThreeDots from '../../icons/three-dots.svg?vue-component';
 import Close from '../../icons/close.svg?vue-component';
@@ -69,18 +68,20 @@ import Truncate from './Truncate.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
 import BtnClose from './buttons/BtnClose.vue';
 import NotifyBell from './NotifyBell.vue';
+import BtnIcon from './buttons/BtnIcon.vue';
 
 export default {
   components: {
     NotifyBell,
     BtnClose,
     Logo,
-    Back,
+    BackIcon,
     Bell,
     ThreeDots,
     Close,
     Truncate,
     BtnPlain,
+    BtnIcon,
   },
   data: () => ({
     RUNNING_IN_POPUP,
@@ -180,13 +181,12 @@ export default {
     width: 60%;
 
     .text {
+      @extend %face-sans-16-medium;
+
       padding: 0 4px;
       display: flex;
       justify-content: center;
       white-space: nowrap;
-
-      @extend %face-sans-16-medium;
-
       line-height: 24px;
       color: variables.$color-white;
     }
@@ -246,44 +246,6 @@ export default {
   .settings,
   .notifications {
     margin-right: 8px;
-  }
-
-  .icon-btn {
-    width: 32px;
-    min-width: 32px;
-    height: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    svg {
-      width: 24px;
-      height: 24px;
-      color: variables.$color-white;
-      opacity: 0.7;
-
-      &.hover {
-        display: none;
-      }
-    }
-
-    .back {
-      width: 19.09px;
-      height: 16px;
-    }
-
-    &.close svg {
-      color: rgba(variables.$color-white, 0.5);
-    }
-
-    &:hover {
-      border-radius: 50%;
-      background-color: variables.$color-grey-dark-hover;
-
-      svg {
-        opacity: 1;
-      }
-    }
   }
 }
 </style>

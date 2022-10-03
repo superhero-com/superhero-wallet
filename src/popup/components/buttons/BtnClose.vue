@@ -1,19 +1,21 @@
 <template>
-  <button
+  <BtnIcon
     class="btn-close"
     v-bind="$attrs"
     @click="$emit('click', $event)"
   >
     <CloseIcon />
-  </button>
+  </BtnIcon>
 </template>
 
 <script>
+import BtnIcon from './BtnIcon.vue';
 import CloseIcon from '../../../icons/modal/close_modal.svg?vue-component';
 
 export default {
   name: 'BtnClose',
   components: {
+    BtnIcon,
     CloseIcon,
   },
 };
@@ -23,20 +25,8 @@ export default {
 @use '../../../styles/variables';
 
 .btn-close {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  transition: 0.4s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: absolute;
   top: 4px;
   right: 8px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: variables.$color-grey-dark-hover;
-  }
 }
 </style>

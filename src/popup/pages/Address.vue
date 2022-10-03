@@ -8,10 +8,17 @@
       {{ callbackOrigin }}
     </div>
 
-    <BtnMain @click="openCallbackOrGoHome(true, { address: $store.getters.account.address })">
+    <BtnMain
+      class="btn-confirm"
+      extend
+      @click="openCallbackOrGoHome(true, { address: $store.getters.account.address })"
+    >
       {{ $t('pages.tipPage.confirm') }}
     </BtnMain>
-    <BtnMain @click="openCallbackOrGoHome(false)">
+    <BtnMain
+      extend
+      @click="openCallbackOrGoHome(false)"
+    >
       {{ $t('pages.tipPage.cancel') }}
     </BtnMain>
   </div>
@@ -32,6 +39,8 @@ export default {
 @use '../../styles/typography';
 
 .address {
+  padding: var(--screen-padding-x);
+
   .url-bar {
     margin: 8px 0;
     text-align: left;
@@ -47,6 +56,10 @@ export default {
     color: variables.$color-white;
     font-weight: 400;
     text-align: left;
+  }
+
+  .btn-confirm {
+    margin-bottom: var(--gap);
   }
 }
 </style>

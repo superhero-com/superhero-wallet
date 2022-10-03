@@ -20,14 +20,10 @@
 
     <DetailsItem
       :label="$t('pages.popupMessageSign.message')"
-      :value="message"
       data-cy="message"
     >
-      <template #label>
-        <BtnCopy
-          :value="message"
-          :message="$t('copied')"
-        />
+      <template #value>
+        <CopyText :value="message" />
       </template>
     </DetailsItem>
 
@@ -53,9 +49,9 @@
 import { mapState, mapGetters } from 'vuex';
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
-import BtnCopy from '../../components/buttons/BtnCopy.vue';
 import Overview from '../../components/Overview.vue';
 import DetailsItem from '../../components/DetailsItem.vue';
+import CopyText from '../../components/CopyText.vue';
 import mixin from './mixin';
 
 export default {
@@ -64,7 +60,7 @@ export default {
     BtnMain,
     Overview,
     DetailsItem,
-    BtnCopy,
+    CopyText,
   },
   mixins: [mixin],
   props: {

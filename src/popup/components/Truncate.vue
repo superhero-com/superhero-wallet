@@ -1,5 +1,5 @@
 <template>
-  <span class="truncate">
+  <div class="truncate">
     <span
       class="container"
       :class="{ fixed }"
@@ -11,7 +11,7 @@
       v-if="nameComponent"
       class="domain"
     >{{ AENS_DOMAIN }}</span>
-  </span>
+  </div>
 </template>
 
 <script>

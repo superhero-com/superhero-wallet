@@ -227,11 +227,6 @@
       "title": "Autoextend name",
       "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.<br /><br /> Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.<br /><br /> Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
     },
-    "shareQr": {
-      "title": "Scan QR code",
-      "share": "Share",
-      "close": "Close"
-    },
     "receive": {
       "title": "Receive funds to public address",
       "requestAmount": "Request specific amount (optional)",
@@ -1076,8 +1071,7 @@
       "deposited": "Deposited",
       "withdrawn": "Withdrawn",
       "rates": "Rates",
-      "swapRoute": "Swap route",
-      "urlCopied": "URL copied"
+      "swapRoute": "Swap route"
     },
     "transactions": {
       "backToAccount": "Back to account",
@@ -1244,7 +1238,6 @@
   "days": "{n} days | {n} day | {n} days",
   "addressCopied": "Copied",
   "hashCopied": "Hash copied",
-  "copied": "Copied",
   "copy": "Copy",
   "tx-fee": "Transaction fee",
   "total": "Total",

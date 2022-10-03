@@ -9,8 +9,7 @@
         {{ mnemonic }}
       </p>
       <ae-button
-        v-clipboard:copy="mnemonic"
-        v-clipboard:success="copy"
+        @click="copy(mnemonic)"
       >
         <template v-if="!copied">
           <CopyOutlined />
@@ -55,28 +54,36 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import CopyOutlined from '../../icons/copy-outlined.svg?vue-component';
 import CheckSuccessCircle from '../../icons/check-success-circle.svg?vue-component';
-import CopyMixin from '../../mixins/copy';
+import { useCopy } from '../../composables';
 
-export default {
+export default defineComponent({
   components: {
     BtnMain,
     CopyOutlined,
     CheckSuccessCircle,
   },
-  mixins: [CopyMixin],
-  computed: mapState(['mnemonic']),
-  methods: {
-    setBackedUpSeed() {
-      this.$store.commit('setBackedUpSeed');
-      this.$router.push({ name: 'account' });
-    },
+  setup(props, { root }) {
+    const { copy, copied } = useCopy();
+    const mnemonic = computed(() => root.$store.state.mnemonic);
+
+    function setBackedUpSeed() {
+      root.$store.commit('setBackedUpSeed');
+      root.$router.push({ name: 'account' });
+    }
+
+    return {
+      copy,
+      copied,
+      mnemonic,
+      setBackedUpSeed,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
