@@ -1,4 +1,6 @@
 import BigNumber from 'bignumber.js';
+import { Observable } from 'rxjs';
+import { onUnmounted, Ref, ref } from '@vue/composition-api';
 import { HASH_REGEX, SIMPLEX_URL } from './constants';
 import { i18n } from '../../store/plugins/languages';
 
@@ -84,4 +86,19 @@ export function buildSimplexLink(address: string) {
   const link = new URL(SIMPLEX_URL);
   link.searchParams.set('wallet_address', address);
   return link.toString();
+}
+
+/**
+ * Temporary function that allows to replace the `subscriptions` property
+ * on Vue components when using the Vue setup() hook of the Vue composition API.
+ */
+export function rxJsObservableToVueState(observable: Observable<any>): Ref<any> {
+  const state = ref(null);
+  const subscription = observable.subscribe((val) => {
+    state.value = val;
+  });
+  onUnmounted(() => {
+    subscription.unsubscribe();
+  });
+  return state;
 }

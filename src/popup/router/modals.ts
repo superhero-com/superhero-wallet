@@ -16,7 +16,6 @@ import {
   MODAL_HELP,
   MODAL_READ_QR_CODE,
   MODAL_MESSAGE_SIGN,
-  MODAL_SHARE_QR,
   MODAL_TRANSFER_RECEIVE,
   MODAL_RESET_WALLET,
   MODAL_TRANSFER_SEND,
@@ -36,7 +35,6 @@ import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import QrCodeReader from '../components/Modals/QrCodeReader.vue';
 import Help from '../components/Modals/Help.vue';
-import ShareQr from '../components/Modals/ShareQr.vue';
 import AssetSelector from '../components/Modals/AssetSelector.vue';
 import TransferReceive from '../components/Modals/TransferReceive.vue';
 import ResetWallet from '../components/Modals/ResetWallet.vue';
@@ -67,7 +65,6 @@ export default () => {
   registerModal({ name: MODAL_CONFIRM_CONNECT, showInPopupIfWebFrame: true });
   registerModal({ name: MODAL_READ_QR_CODE, component: QrCodeReader });
   registerModal({ name: MODAL_MESSAGE_SIGN, showInPopupIfWebFrame: true });
-  registerModal({ name: MODAL_SHARE_QR, component: ShareQr });
   registerModal({ name: MODAL_TRANSFER_RECEIVE, component: TransferReceive });
   registerModal({ name: MODAL_TRANSFER_SEND, component: TransferSend });
   registerModal({ name: MODAL_ASSET_SELECTOR, component: AssetSelector });

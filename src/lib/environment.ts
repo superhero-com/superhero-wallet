@@ -1,4 +1,3 @@
-const windowTypeless = window as any;
 const userAgentLowerCase = navigator.userAgent.toLowerCase();
 const url = new URL(window.location.href);
 
@@ -13,10 +12,10 @@ export const IN_FRAME = window.parent !== window;
 
 export const IS_EXTENSION_BACKGROUND = !!(process.env.IS_EXTENSION && window.location.href.endsWith('_generated_background_page.html'));
 
-export const IS_IOS = /ipad|iphone|ipod/.test(userAgentLowerCase) && !windowTypeless.MSStream;
+export const IS_IOS = /ipad|iphone|ipod/.test(userAgentLowerCase) && !(window as any).MSStream;
 
 export const IS_ANDROID = !!(userAgentLowerCase.includes('android')
-  || windowTypeless.cordova?.platformId?.toLowerCase()?.includes('android'));
+  || window.cordova?.platformId?.toLowerCase()?.includes('android'));
 
 export const IS_MOBILE_DEVICE = userAgentLowerCase.includes('mobi');
 

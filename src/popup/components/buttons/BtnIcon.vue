@@ -55,7 +55,7 @@ export default {
   border: none;
   border-radius: 50%;
   outline: none;
-  transition: 0.1s;
+  transition: 0.2s;
   cursor: pointer;
 
   > .icon {
@@ -75,11 +75,15 @@ export default {
   }
 
   &:hover {
-    background-color: variables.$color-hover;
+    background-color: variables.$color-grey-dark-hover;
 
     > .icon {
       opacity: 1;
     }
+  }
+
+  &:active {
+    background-color: variables.$color-grey-medium;
   }
 
   &.pink {

@@ -32,11 +32,8 @@
       :value="dataAsString"
       data-cy="data"
     >
-      <template #label>
-        <BtnCopy
-          :value="dataAsString"
-          :message="$t('copied')"
-        />
+      <template #value>
+        <CopyText :value="dataAsString" />
       </template>
     </DetailsItem>
 
@@ -63,18 +60,18 @@ import { mapState, mapGetters } from 'vuex';
 import Modal from '../Modal.vue';
 import Overview from '../Overview.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import BtnCopy from '../buttons/BtnCopy.vue';
 import DetailsItem from '../DetailsItem.vue';
 import Warning from '../../../icons/warning.svg?vue-component';
+import CopyText from '../CopyText.vue';
 
 export default {
   components: {
     Modal,
     Overview,
     BtnMain,
-    BtnCopy,
     DetailsItem,
     Warning,
+    CopyText,
   },
   props: {
     resolve: { type: Function, required: true },

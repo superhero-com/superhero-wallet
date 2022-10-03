@@ -6,12 +6,10 @@
         can-copy-address
       />
 
-      <BtnIcon
+      <BtnClose
         class="close-button"
         :to="{ name: 'index' }"
-      >
-        <CloseIcon />
-      </BtnIcon>
+      />
     </div>
 
     <BalanceInfo :account-idx="activeIdx" />
@@ -67,12 +65,14 @@ import {
   MODAL_TRANSFER_SEND,
   DEX_URL,
 } from '../utils/constants';
+import { buildSimplexLink } from '../utils';
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
 import BtnPlain from '../components/buttons/BtnPlain.vue';
 import BtnBox from '../components/buttons/BtnBox.vue';
-import InputSearch from '../components/InputSearch.vue';
 import BtnIcon from '../components/buttons/BtnIcon.vue';
+import BtnClose from '../components/buttons/BtnClose.vue';
+import InputSearch from '../components/InputSearch.vue';
 import Tabs from '../components/tabs/Tabs.vue';
 import Tab from '../components/tabs/Tab.vue';
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
@@ -80,7 +80,6 @@ import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
 import SwapIcon from '../../icons/swap.svg?vue-component';
 import CloseIcon from '../../icons/close.svg?vue-component';
-import { buildSimplexLink } from '../utils';
 
 export default {
   name: 'AccountDetails',
@@ -93,6 +92,7 @@ export default {
     CloseIcon,
     BtnIcon,
     BtnBox,
+    BtnClose,
     InputSearch,
   },
   data() {

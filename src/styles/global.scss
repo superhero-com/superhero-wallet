@@ -104,6 +104,23 @@ button {
     text-align: center;
   }
 
+  &-left {
+    text-align: left;
+  }
+
+  &-right {
+    text-align: right;
+  }
+
+  &-address {
+    @extend %face-sans-12-medium;
+
+    letter-spacing: 0.05em;
+    line-height: 18px;
+    color: $color-light-grey;
+    word-break: break-all;
+  }
+
   &-heading-2 {
     @extend %face-sans-18-medium;
 

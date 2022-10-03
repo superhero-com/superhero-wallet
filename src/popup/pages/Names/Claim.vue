@@ -92,7 +92,7 @@ export default {
       'sdk',
     ]),
     isNameValid() {
-      return this.name && checkAensName(`${this.name}.chain`);
+      return this.name && checkAensName(`${this.name}${AENS_DOMAIN}`);
     },
     nameFee() {
       return convertToken(

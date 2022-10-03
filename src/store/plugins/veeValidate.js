@@ -11,6 +11,7 @@ import {
   checkAensName,
   validateTipUrl,
 } from '../../popup/utils/helper';
+import { AENS_DOMAIN } from '../../popup/utils/constants';
 
 Vue.use(VeeValidate);
 
@@ -38,7 +39,7 @@ Object.assign(ErrorBag.prototype, {
 
 Validator.extend('required', required);
 Validator.extend('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
-Validator.extend('name', (value) => checkAensName(`${value}.chain`));
+Validator.extend('name', (value) => checkAensName(`${value}${AENS_DOMAIN}`));
 Validator.extend('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
 Validator.extend('min_value_exclusive', (value, [arg]) => BigNumber(value).isGreaterThan(arg));
 Validator.extend('max_value', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));

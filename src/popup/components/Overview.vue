@@ -50,7 +50,12 @@
         >
           <Truncate :str="sender.name || sender.label" />
         </a>
-        <CopyAddress :value="sender.address" />
+        <CopyText
+          hide-icon
+          :value="sender.address"
+        >
+          <span class="text-address text-left">{{ sender.address }}</span>
+        </CopyText>
       </div>
       <div
         class="recipient"
@@ -71,10 +76,13 @@
         >
           {{ recipient.label }}
         </span>
-        <CopyAddress
+        <CopyText
           v-if="recipient.address"
+          hide-icon
           :value="recipient.address"
-        />
+        >
+          <span class="text-address text-right">{{ recipient.address }}</span>
+        </CopyText>
       </div>
     </div>
   </div>
@@ -82,7 +90,7 @@
 
 <script>
 import Truncate from './Truncate.vue';
-import CopyAddress from './CopyAddress.vue';
+import CopyText from './CopyText.vue';
 import TriangleRight from '../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../icons/action.svg?vue-component';
 import AensIcon from '../../icons/aens.svg?vue-component';
@@ -94,7 +102,7 @@ import { FUNCTION_TYPE_DEX } from '../utils/constants';
 export default {
   components: {
     Truncate,
-    CopyAddress,
+    CopyText,
     TriangleRight,
     ActionIcon,
     AensIcon,

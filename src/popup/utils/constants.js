@@ -336,7 +336,6 @@ export const MODAL_MESSAGE_SIGN = 'confirm-message-sign';
 export const MODAL_ERROR_LOG = 'error-log';
 export const MODAL_HELP = 'help';
 export const MODAL_READ_QR_CODE = 'read-qr-code';
-export const MODAL_SHARE_QR = 'share-qr';
 export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_TRANSFER_SEND = 'transfer-send';
 export const MODAL_ASSET_SELECTOR = 'asset-selector';

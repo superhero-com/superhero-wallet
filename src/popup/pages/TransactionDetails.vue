@@ -39,42 +39,41 @@
             :is-allowance="isAllowance"
             :class="{ reverse: isPool }"
           />
+
           <DetailsItem
             v-if="tipUrl"
             :label="$t('pages.transactionDetails.tipUrl')"
             class="tip-url"
             data-cy="tip-url"
           >
-            <template #label>
-              <BtnCopy
-                :value="tipUrl"
-                :message="$t('pages.transactionDetails.urlCopied')"
-              />
-            </template>
             <template #value>
-              <LinkButton
-                :to="/^http[s]*:\/\//.test(tipUrl) ? tipUrl : `http://${tipUrl}`"
-              >
-                <Truncate
-                  :str="tipUrl"
-                  fixed
-                />
-              </LinkButton>
+              <CopyText :value="tipUrl">
+                <LinkButton :to="/^http[s]*:\/\//.test(tipUrl) ? tipUrl : `http://${tipUrl}`">
+                  <Truncate
+                    :str="tipUrl"
+                    fixed
+                  />
+                </LinkButton>
+              </CopyText>
             </template>
           </DetailsItem>
+
           <DetailsItem
             :label="$t('pages.transactionDetails.hash')"
             data-cy="hash"
             small
           >
             <template #value>
-              <CopyAddress
-                class="copy-hash"
+              <CopyText
+                hide-icon
                 :value="hash"
-                :custom-text="$t('hashCopied')"
-              />
+                :copied-text="$t('hashCopied')"
+              >
+                <span class="text-address">{{ hash }}</span>
+              </CopyText>
             </template>
           </DetailsItem>
+
           <div class="span-3-columns">
             <DetailsItem
               v-if="transaction.microTime && !transaction.pending"
@@ -181,17 +180,17 @@ import SwapRates from '../components/SwapRates.vue';
 import TokenAmount from '../components/TokenAmount.vue';
 import DetailsItem from '../components/DetailsItem.vue';
 import LinkButton from '../components/LinkButton.vue';
-import BtnCopy from '../components/buttons/BtnCopy.vue';
 import Truncate from '../components/Truncate.vue';
 import AnimatedPending from '../../icons/animated-pending.svg?vue-component';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
 import TransactionTokens from '../components/TransactionTokenRows.vue';
-import CopyAddress from '../components/CopyAddress.vue';
+import CopyText from '../components/CopyText.vue';
 import TransactionDetailsPoolTokens from '../components/TransactionDetailsPoolTokens.vue';
 import TransactionErrorStatus from '../components/TransactionErrorStatus.vue';
 
 export default {
+  name: 'TransactionDetails',
   components: {
     TransactionErrorStatus,
     TransactionDetailsPoolTokens,
@@ -201,12 +200,11 @@ export default {
     TokenAmount,
     DetailsItem,
     LinkButton,
-    BtnCopy,
     Truncate,
     AnimatedPending,
     AnimatedSpinner,
     ExternalLink,
-    CopyAddress,
+    CopyText,
     SwapRoute,
     SwapRates,
   },
@@ -362,19 +360,6 @@ export default {
   .details-item::v-deep {
     .label {
       white-space: nowrap;
-    }
-  }
-
-  .copy-hash::v-deep {
-    .copied {
-      align-items: center;
-
-      .text {
-        flex: 0;
-        margin-inline: 8px;
-        word-spacing: 100vw;
-        justify-content: center;
-      }
     }
   }
 

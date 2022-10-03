@@ -24,3 +24,25 @@
   align-items: $horizontal;
   flex-flow: $flow;
 }
+
+/**
+ * Allows to add custom dashed outline to elements with control on the dash width
+ * and space between the dashes.
+ */
+@mixin dashed-border(
+  $color: rgba(variables.$color-white, 0.5),
+  $width: 1px,
+  $dash: 4px,
+  $spacing: 4px
+) {
+  $dash-and-space: $dash + $spacing;
+
+  background-image:
+    repeating-linear-gradient(0deg, $color, $color $dash, transparent $dash, transparent $dash-and-space, $color $dash-and-space),
+    repeating-linear-gradient(90deg, $color, $color $dash, transparent $dash, transparent $dash-and-space, $color $dash-and-space),
+    repeating-linear-gradient(180deg, $color, $color $dash, transparent $dash, transparent $dash-and-space, $color $dash-and-space),
+    repeating-linear-gradient(270deg, $color, $color $dash, transparent $dash, transparent $dash-and-space, $color $dash-and-space);
+  background-size: $width 100%, 100% $width, $width 100%, 100% $width;
+  background-position: 0 0, 0 0, 100% 0, 0 100%;
+  background-repeat: no-repeat;
+}

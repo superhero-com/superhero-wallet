@@ -18,6 +18,11 @@
     "src/**/*.vue",
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "**/*.svg",
   ],
+  "files": [
+    "window.d.ts",
+    "shims.d.ts",
+  ]
 }
