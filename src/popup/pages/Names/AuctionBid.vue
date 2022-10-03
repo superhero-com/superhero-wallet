@@ -10,17 +10,19 @@
       />
       <div class="tx-details">
         <DetailsItem :label="$t('tx-fee')">
-          <TokenAmount
-            slot="value"
-            :amount="+txFee"
-            hide-fiat
-          />
+          <template #value>
+            <TokenAmount
+              :amount="+txFee"
+              hide-fiat
+            />
+          </template>
         </DetailsItem>
         <DetailsItem :label="$t('total')">
-          <TokenAmount
-            slot="value"
-            :amount="+amountTotal"
-          />
+          <template #value>
+            <TokenAmount
+              :amount="+amountTotal"
+            />
+          </template>
         </DetailsItem>
       </div>
       <BtnMain

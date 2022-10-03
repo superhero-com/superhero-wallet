@@ -3,24 +3,26 @@
     :label="label"
     class="pool-token-row"
   >
-    <div slot="value">
-      <TokenAmount
-        v-if="!hideAmount"
-        :amount="+convertToken(token.amount, -token.decimals)"
-        hide-fiat
-        no-symbol
-      />
-      <div class="token-info">
-        <Tokens
-          v-if="token"
-          :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]"
+    <template #value>
+      <div>
+        <TokenAmount
+          v-if="!hideAmount"
+          :amount="+convertToken(token.amount, -token.decimals)"
+          hide-fiat
+          no-symbol
         />
-        <AddressShortening
-          v-if="token.contractId"
-          :address="token.contractId"
-        />
+        <div class="token-info">
+          <Tokens
+            v-if="token"
+            :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]"
+          />
+          <AddressShortening
+            v-if="token.contractId"
+            :address="token.contractId"
+          />
+        </div>
       </div>
-    </div>
+    </template>
   </DetailsItem>
 </template>
 

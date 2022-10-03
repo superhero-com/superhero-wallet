@@ -33,7 +33,7 @@
       </span>
     </div>
 
-    <template slot="footer">
+    <template #footer>
       <BtnMain
         variant="secondary"
         data-cy="deny"

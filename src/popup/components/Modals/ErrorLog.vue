@@ -15,7 +15,7 @@
       {{ $t('modals.error-log.content') }}
     </div>
 
-    <template slot="footer">
+    <template #footer>
       <BtnMain
         variant="secondary"
         @click="cancel"

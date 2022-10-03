@@ -31,7 +31,7 @@
       </template>
     </DetailsItem>
 
-    <template slot="footer">
+    <template #footer>
       <BtnMain
         variant="secondary"
         data-cy="deny"

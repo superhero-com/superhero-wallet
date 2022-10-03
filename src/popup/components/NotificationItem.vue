@@ -24,7 +24,7 @@
         </span>
       </div>
       <ActionsMenu @click.native.stop>
-        <template slot="display">
+        <template #display>
           •••
         </template>
         <div

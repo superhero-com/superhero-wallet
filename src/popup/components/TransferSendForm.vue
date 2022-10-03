@@ -65,12 +65,13 @@
     <DetailsItem
       :label="$t('pages.signTransaction.fee')"
     >
-      <TokenAmount
-        slot="value"
-        :amount="+fee.toFixed()"
-        symbol="AE"
-        data-cy="review-fee"
-      />
+      <template #value>
+        <TokenAmount
+          :amount="+fee.toFixed()"
+          symbol="AE"
+          data-cy="review-fee"
+        />
+      </template>
     </DetailsItem>
   </div>
 </template>

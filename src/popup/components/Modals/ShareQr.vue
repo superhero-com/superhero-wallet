@@ -12,11 +12,13 @@
         level="Q"
       />
     </div>
+
     <TemplateRenderer
       :class="!msgStr.includes('.chain') && 'address'"
       :str="msgStr"
     />
-    <template slot="footer">
+
+    <template #footer>
       <BtnMain
         variant="secondary"
         @click="resolve"
