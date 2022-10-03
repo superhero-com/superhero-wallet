@@ -17,4 +17,5 @@ module.exports = {
   setupFiles: [
     '<rootDir>/config/jest/setEnvVars.js',
   ],
+  collectCoverage: true,
 };
