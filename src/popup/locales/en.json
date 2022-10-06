@@ -246,7 +246,7 @@
       "reviewTitle": "Review transaction",
       "successTitle": "Transaction successfully submitted",
       "recipientLabel": "Recipient",
-      "recipientPlaceholder": "Enter recipient’s address or .chain name",
+      "recipientPlaceholder": "Enter address, .chain name or URL",
       "next": "Next"
     },
     "wrongNetwork": {
