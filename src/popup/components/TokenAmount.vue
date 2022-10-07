@@ -79,6 +79,7 @@ export default {
 
     &.fiat-below {
       display: block;
+      margin-left: 0;
     }
   }
 

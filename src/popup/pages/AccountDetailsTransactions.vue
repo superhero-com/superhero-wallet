@@ -20,3 +20,14 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.transaction-list-wrapper {
+  --filter-top-offset: 178px;
+
+  ::v-deep .filters {
+    position: sticky;
+    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
+  }
+}
+</style>
