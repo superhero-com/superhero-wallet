@@ -1,13 +1,10 @@
 <template>
-  <div
-    class="transaction-list"
-    :class="{ 'sticky-filter': stickyFilter }"
-  >
+  <div class="transaction-list">
     <Filters
       v-if="displayFilter"
       v-model="displayMode"
       :filters="filters"
-      :sticky="stickyFilter"
+      :scroll-top-threshold="scrollTopThreshold"
     />
     <div
       class="list"
@@ -63,8 +60,8 @@ export default {
     token: { type: String, default: '' },
     searchTerm: { type: String, default: '' },
     maxLength: { type: Number, default: null },
+    scrollTopThreshold: { type: Number, default: undefined },
     displayFilter: Boolean,
-    stickyFilter: Boolean,
   },
   data() {
     return {
@@ -188,8 +185,6 @@ export default {
 @use '../../styles/typography';
 
 .transaction-list {
-  --filter-top-offset: 178px;
-
   display: flex;
   flex-direction: column;
 
@@ -208,7 +203,7 @@ export default {
   }
 
   .message > p {
-    padding: 0 64px;
+    padding: 48px 64px 0;
 
     @extend %face-sans-15-medium;
 
@@ -270,11 +265,6 @@ export default {
         opacity: 0.44;
       }
     }
-  }
-
-  ::v-deep .filters {
-    position: sticky;
-    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
   }
 }
 </style>

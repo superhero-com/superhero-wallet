@@ -466,6 +466,23 @@ export default [
     props: true,
     meta: {
       title: 'token-details',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      modalHeader: true,
+    },
+  },
+  {
+    name: 'coin-details',
+    path: '/ae-balances',
+    component: TokenDetails,
+    props: true,
+    meta: {
+      title: 'coin-details',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      modalHeader: true,
     },
   },
   {

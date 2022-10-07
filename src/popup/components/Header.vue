@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="showNavigation && !RUNNING_IN_POPUP"
-    :class="['header', { 'not-logged-in': !isLoggedIn }]"
+    :class="['header', { 'not-logged-in': !isLoggedIn, 'modal-header': modalHeader }]"
   >
     <div
       v-if="isLoggedIn || title"
@@ -101,6 +101,9 @@ export default {
     showNavigation() {
       return this.$route.meta.navigation !== undefined ? this.$route.meta.navigation : true;
     },
+    modalHeader() {
+      return this.$route.meta.modalHeader;
+    },
     showBack() {
       return (this.$route.meta.backButton !== undefined ? this.$route.meta.backButton : true)
         && this.title;
@@ -196,6 +199,10 @@ export default {
       width: 100%;
       position: absolute;
     }
+  }
+
+  &.modal-header {
+    background-color: variables.$color-bg-modal;
   }
 
   .left .home-button {

@@ -34,6 +34,7 @@ export default {
   props: {
     value: { type: Object, required: true },
     filters: { type: Object, required: true },
+    scrollTopThreshold: { type: Number, default: 140 },
   },
   data() {
     return {
@@ -42,10 +43,9 @@ export default {
   },
   methods: {
     handleClick([filter, { rotated = null }]) {
-      const scrollTopThreshold = 140;
       const appContainer = document.querySelector('.app-inner');
-      if (appContainer.scrollTop > scrollTopThreshold) {
-        appContainer.scrollTo({ top: scrollTopThreshold, behavior: 'smooth' });
+      if (appContainer.scrollTop > this.scrollTopThreshold) {
+        appContainer.scrollTo({ top: this.scrollTopThreshold, behavior: 'smooth' });
       }
       if (rotated !== null) {
         if (this.value.sort === filter) {
