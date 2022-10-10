@@ -13,7 +13,7 @@
         :to="isDiamondDisabled ? null : { name: 'account' }"
         :class="['home-button', { 'disabled': isDiamondDisabled }]"
       >
-        <Logo />
+        <Logo class="home-icon" />
       </Component>
       <BtnPlain
         v-if="showBack"
@@ -28,9 +28,7 @@
       class="title"
     >
       <Truncate
-        :str="pageTitle ?
-          pageTitle :
-          title ? $t(`pages.titles.${title}`) : ''"
+        :str="truncateStr"
         class="text"
       />
     </div>
@@ -95,6 +93,10 @@ export default {
   computed: {
     ...mapGetters(['isLoggedIn']),
     ...mapState(['notifications', 'pageTitle']),
+    truncateStr() {
+      const { pageTitle, title } = this;
+      return pageTitle || (title ? this.$t(`pages.titles.${title}`) : '');
+    },
     title() {
       return this.$route.meta.title;
     },
@@ -144,14 +146,14 @@ export default {
     position: sticky;
   }
 
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   top: 0;
   z-index: 2;
   height: calc(var(--header-height) + env(safe-area-inset-top));
   background-color: var(--screen-bg-color);
-  display: flex;
-  padding: env(safe-area-inset-top) 8px 0 8px;
-  align-items: center;
-  justify-content: space-between;
+  padding: env(safe-area-inset-top) 8px 0;
   width: 100%;
 
   @include mixins.mobile {
@@ -199,15 +201,12 @@ export default {
   }
 
   .left .home-button {
-    padding: 4px 0;
-    height: 32px;
-
     &.disabled {
       cursor: default;
     }
 
     &:not(.disabled) {
-      svg {
+      .home-icon {
         cursor: pointer;
       }
 
@@ -221,9 +220,9 @@ export default {
       }
     }
 
-    svg {
-      width: 34px;
-      height: 24px;
+    .home-icon {
+      width: 32px;
+      height: 32px;
       color: variables.$color-blue;
     }
   }
@@ -244,6 +243,7 @@ export default {
 
   .icon-btn {
     width: 32px;
+    min-width: 32px;
     height: 32px;
     display: flex;
     justify-content: center;
@@ -271,7 +271,7 @@ export default {
 
     &:hover {
       border-radius: 50%;
-      background-color: variables.$color-hover;
+      background-color: variables.$color-grey-dark-hover;
 
       svg {
         opacity: 1;

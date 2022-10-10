@@ -167,7 +167,7 @@ export default {
   }
 
   &.show-header {
-    --header-height: 48px;
+    --header-height: 40px;
 
     .main {
       padding-top: var(--header-height);

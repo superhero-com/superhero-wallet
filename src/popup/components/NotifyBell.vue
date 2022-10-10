@@ -81,6 +81,9 @@ export default {
   position: relative;
   min-width: 32px;
   height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   .badge {
     @extend %face-sans-11-regular;
