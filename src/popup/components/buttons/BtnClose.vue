@@ -31,7 +31,7 @@ export default {
   align-items: center;
   justify-content: center;
   position: absolute;
-  top: 8px;
+  top: 4px;
   right: 8px;
   cursor: pointer;
 
