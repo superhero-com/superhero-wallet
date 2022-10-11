@@ -51,12 +51,6 @@
       "title": "Superhero Wallet is marking HTTP sites as \"Not secure\" - please, use URLs with HTTPS, only.",
       "msg": "The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
     },
-    "confirm-tip": {
-      "title": "打赏确认",
-      "msg": "没有添加超级英雄钱包的网页主人。我们无法保证他们会领取他们的小费。",
-      "sub-message": "你可以继续给他们打赏——告知他们被打赏了并来领取小费。你想继续吗？",
-      "send": "发送小费"
-    },
     "error-log": {
       "title": "出错了",
       "sub-title": "成为超级英雄!",

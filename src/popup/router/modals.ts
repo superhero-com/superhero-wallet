@@ -7,7 +7,6 @@ import {
   MODAL_ASSET_SELECTOR,
   MODAL_CLAIM_SUCCESS,
   MODAL_SPEND_SUCCESS,
-  MODAL_CONFIRM_TIP,
   NODAL_CONFIRM,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_CONFIRM_RAW_SIGN,
@@ -28,7 +27,6 @@ import AccountCreate from '../components/Modals/AccountCreate.vue';
 import AccountImport from '../components/Modals/AccountImport.vue';
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
 import SpendSuccess from '../components/Modals/SpendSuccess.vue';
-import ConfirmTip from '../components/Modals/ConfirmTip.vue';
 import Confirm from '../components/Modals/Confirm.vue';
 import ErrorLog from '../components/Modals/ErrorLog.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -48,7 +46,6 @@ export default () => {
   registerModal({ name: MODAL_ACCOUNT_IMPORT, component: AccountImport });
   registerModal({ name: MODAL_CLAIM_SUCCESS, component: ClaimSuccess });
   registerModal({ name: MODAL_SPEND_SUCCESS, component: SpendSuccess });
-  registerModal({ name: MODAL_CONFIRM_TIP, component: ConfirmTip });
   registerModal({ name: NODAL_CONFIRM, component: Confirm });
   registerModal({ name: MODAL_ERROR_LOG, component: ErrorLog });
   registerModal({ name: MODAL_HELP, component: Help });

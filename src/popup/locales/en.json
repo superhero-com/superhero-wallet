@@ -118,12 +118,6 @@
       "title": "Unable to show this account.",
       "msg": "You've reached the limit of showed accounts, uncheck other account, if you want to show this one."
     },
-    "confirm-tip": {
-      "title": "Send Tip Confirmation",
-      "msg": "The webpage owner has not added a SUPERHERO wallet yet. We cannot guarantee that they will claim their tips.",
-      "sub-message": "You can still tip them—let them know so they can claim it. Would you like to proceed?",
-      "send": "Send Tip"
-    },
     "error-log": {
       "title": "Something went wrong",
       "sub-title": "Be a Superhero!",
