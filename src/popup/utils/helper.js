@@ -40,6 +40,15 @@ export function watchUntilTruthy(getter) {
   });
 }
 
+export function waitUntilTruthy(getter) {
+  const poll = (resolve) => {
+    if (getter()) resolve();
+    else setTimeout(() => poll(resolve), 400);
+  };
+
+  return new Promise(poll);
+}
+
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
 
