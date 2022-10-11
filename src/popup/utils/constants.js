@@ -328,7 +328,6 @@ export const MODAL_ACCOUNT_IMPORT = 'import-account';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';
 export const MODAL_SPEND_SUCCESS = 'spend-success';
 export const NODAL_CONFIRM = 'confirm';
-export const MODAL_CONFIRM_TIP = 'confirm-tip';
 export const MODAL_CONFIRM_TRANSACTION_SIGN = 'confirm-transaction-sign';
 export const MODAL_CONFIRM_RAW_SIGN = 'confirm-raw-sign';
 export const MODAL_CONFIRM_CONNECT = 'confirm-connect';
