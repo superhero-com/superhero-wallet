@@ -1,5 +1,8 @@
 <template>
-  <div class="permissions-details">
+  <div
+    v-if="!isLoading"
+    class="permissions-details"
+  >
     <p>{{ host }}</p>
     <div class="permission-row">
       <CheckBox
@@ -78,6 +81,7 @@ export default {
   },
   data: () => ({
     transactionSignLimitError: false,
+    isLoading: true,
   }),
   subscriptions() {
     return pick(this.$store.state.observables, ['balance']);
@@ -92,7 +96,7 @@ export default {
         (c, s) => ({
           ...c,
           [s](state) {
-            return state[this.host][s];
+            return state[this.host]?.[s];
           },
         }),
         {},
@@ -100,7 +104,11 @@ export default {
     ),
   },
   mounted() {
-    if (!this.$store.state.permissions[this.host]) this.$router.replace({ name: 'not-found' });
+    if (this.$store.state.permissions[this.host]) {
+      this.isLoading = false;
+    } else {
+      this.$router.go(-2);
+    }
   },
   methods: {
     ...mapMutations('permissions', ['togglePermission']),
