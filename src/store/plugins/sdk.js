@@ -2,7 +2,7 @@ import { RpcWallet, Crypto, Node } from '@aeternity/aepp-sdk';
 import { isEmpty, isEqual } from 'lodash-es';
 import { App } from '../modules/permissions';
 import { getAeppUrl, showPopup } from '../../background/popupHandler';
-import { watchUntilTruthy } from '../../popup/utils/helper';
+import { watchUntilTruthy, waitUntilTruthy } from '../../popup/utils/helper';
 import { IS_EXTENSION_BACKGROUND } from '../../lib/environment';
 
 export default (store) => {
@@ -24,7 +24,7 @@ export default (store) => {
     actions: {
       async initialize({ commit }) {
         if (sdk) return;
-        await watchUntilTruthy(
+        await waitUntilTruthy(
           () => store.state.isRestored && !isEmpty(store.getters.account),
         );
 
