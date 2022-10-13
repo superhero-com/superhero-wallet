@@ -48,7 +48,7 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import { MAGNITUDE, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import { convertToken, watchUntilTruthy } from '../utils';
 import deeplinkApi from '../../mixins/deeplinkApi';
@@ -149,7 +149,7 @@ export default {
           tx: {
             callerId: this.account.address,
             contractId: this.tippingContract.deployInfo.address,
-            type: SCHEMA.TX_TYPE.contractCall,
+            type: Tag.ContractCallTx,
             function: 'retip',
             selectedTokenId: this.formModel.selectedAsset?.contractId,
           },

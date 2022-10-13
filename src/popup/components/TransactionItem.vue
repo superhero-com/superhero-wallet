@@ -53,7 +53,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import {
   FUNCTION_TYPE_DEX,
   amountRounded,
@@ -84,7 +84,7 @@ export default {
       if (this.txType && this.txType?.startsWith('name')) {
         return ['AENS', this.$t('transaction.type')[this.txType]];
       }
-      if (this.txType === SCHEMA.TX_TYPE.spend) {
+      if (this.txType === Tag.SpendTx) {
         return [this.$t('transaction.type.spendTx'), this.getTxDirection(this.transaction) === 'sent' ? this.$t('transaction.spendType.out') : this.$t('transaction.spendType.in')];
       }
       if (this.isAllowance) {
@@ -101,7 +101,7 @@ export default {
         && (this.transaction.tx.function === 'tip' || this.transaction.tx.function === 'retip')) || this.transaction.claim) {
         return [this.$t('pages.token-details.tip'), this.transaction.claim ? this.$t('transaction.spendType.in') : this.$t('transaction.spendType.out')];
       }
-      if (this.txType === SCHEMA.TX_TYPE.contractCall
+      if (this.txType === Tag.ContractCallTx
         && this.availableTokens[this.transaction.tx.contractId]
         && (this.transaction.tx.function === 'transfer' || this.transaction.incomplete)) {
         return [this.$t('transaction.type.spendTx'), this.transaction.tx.callerId === this.account.address

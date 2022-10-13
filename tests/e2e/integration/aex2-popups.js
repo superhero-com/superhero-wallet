@@ -1,9 +1,9 @@
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import { popupProps, txParams } from '../../../src/popup/utils/config';
 import locale from '../../../src/popup/locales/en.json';
 
 const popups = ['connectConfirm', 'sign', 'messageSign'];
-const txTypes = [SCHEMA.TX_TYPE.spend, SCHEMA.TX_TYPE.contractCall, SCHEMA.TX_TYPE.contractCreate];
+const txTypes = [Tag.SpendTx, Tag.ContractCallTx, Tag.ContractCreateTx];
 
 describe('Tests cases for AEX-2 popups', () => {
   beforeEach(() => {
@@ -42,7 +42,7 @@ describe('Tests cases for AEX-2 popups', () => {
 
   it('Opens connectConfirm, sign, messageSign popups and send accept/deny action', () => {
     popups.forEach((popup) => {
-      cy.openAex2Popup(popup, popup === 'sign' && SCHEMA.TX_TYPE.spend)
+      cy.openAex2Popup(popup, popup === 'sign' && Tag.SpendTx)
         .get('[data-cy=deny]')
         .click()
         .window()
@@ -52,7 +52,7 @@ describe('Tests cases for AEX-2 popups', () => {
     });
 
     popups.forEach((popup) => {
-      cy.openAex2Popup(popup, popup === 'sign' && SCHEMA.TX_TYPE.spend)
+      cy.openAex2Popup(popup, popup === 'sign' && Tag.SpendTx)
         .get('[data-cy=accept]')
         .click()
         .window()

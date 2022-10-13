@@ -32,7 +32,7 @@ export default (store) => {
 
   const getAccountBalance = memoize((address) => sdk$.pipe(
     switchMap((sdk) => timer(0, 3000).pipe(map(() => sdk))),
-    switchMap((sdk) => sdk.balance(address).catch((error) => {
+    switchMap((sdk) => sdk.getBalance(address).catch((error) => {
       if (!isNotFoundError(error)) {
         handleUnknownError(error);
       }

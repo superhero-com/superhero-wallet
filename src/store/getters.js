@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
+import { decode, Tag } from '@aeternity/aepp-sdk';
 import {
   AETERNITY_SYMBOL,
   AVATAR_URL,
@@ -81,8 +81,8 @@ export default {
     .concat(transactions.pending[activeNetwork.networkId])?.find((tx) => tx?.hash === hash),
   getTxType: () => (transaction) => transaction.tx
     && (TX_TYPE_MDW[transaction.tx.type]
-      || SCHEMA.OBJECT_ID_TX_TYPE[transaction.tx.tag]
-      || (Object.values(SCHEMA.TX_TYPE).includes(transaction.tx.type) && transaction.tx.type)),
+      || Tag[transaction.tx.tag]
+      || (Object.values(Tag).includes(transaction.tx.type) && transaction.tx.type)),
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
@@ -119,7 +119,7 @@ export default {
         && !transaction.claim
         && transaction.tx.log?.[0]
         && transaction.function === 'tip'
-        && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
+        && decode(transaction.tx.log[0].data).toString())
       || categorizeContractCallTxObject(transaction)?.url
       || ''
   ),

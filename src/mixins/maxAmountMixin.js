@@ -2,7 +2,9 @@ import { pick } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { mapGetters } from 'vuex';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
-import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
+import {
+  buildTx, Tag, unpackTx, AE_AMOUNT_FORMATS,
+} from '@aeternity/aepp-sdk';
 import { MAGNITUDE, STUB_CONTRACT_ADDRESS, AETERNITY_CONTRACT_ID } from '../popup/utils/constants';
 import {
   executeAndSetInterval,
@@ -78,8 +80,7 @@ export default {
         if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID
           || (!checkAensName(address) && validateTipUrl(address))) {
           this.fee = calculateFee(
-            SCHEMA.TX_TYPE.contractCall, {
-              ...sdk.Ae.defaults,
+            Tag.ContractCallTx, {
               ttl: 0,
               nonce: nonce + 1,
               amount: BigNumber(amount > 0 ? amount : 0).shiftedBy(MAGNITUDE),
@@ -90,18 +91,15 @@ export default {
           );
           return;
         }
-        const minFee = BigNumber(TxBuilder.calculateMinFee('spendTx', {
-          gas: sdk.Ae.defaults.gas,
-          params: {
-            ...sdk.Ae.defaults,
-            senderId: this.account.address,
-            recipientId: this.account.address,
-            amount: BigNumber(amount > 0 ? amount : 0).shiftedBy(MAGNITUDE),
-            ttl: 0,
-            nonce: nonce + 1,
-            payload: '',
-          },
-        })).shiftedBy(-MAGNITUDE);
+        const encodedTx = await this.$store.state.sdk.buildTx(Tag.SpendTx, {
+          senderId: this.account.address,
+          recipientId: this.account.address,
+          amount: BigNumber(amount > 0 ? amount : 0).shiftedBy(MAGNITUDE),
+          ttl: 0,
+          nonce: nonce + 1,
+          payload: '',
+        });
+        const minFee = BigNumber(unpackTx(encodedTx).tx.fee).shiftedBy(-MAGNITUDE);
         if (!minFee.isEqualTo(this.fee)) this.fee = minFee;
       },
       { immediate: true },

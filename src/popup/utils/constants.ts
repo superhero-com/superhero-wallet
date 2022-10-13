@@ -1,4 +1,4 @@
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import type { ICurrency, INetwork, INotificationSetting } from '../../types';
 import { i18n } from '../../store/plugins/languages';
@@ -9,13 +9,13 @@ export const AETERNITY_CONTRACT_ID = 'aeternity';
 export const AETERNITY_SYMBOL = 'AE';
 
 export const TX_TYPE_MDW = {
-  SpendTx: SCHEMA.TX_TYPE.spend,
-  ContractCallTx: SCHEMA.TX_TYPE.contractCall,
-  ContractCreateTx: SCHEMA.TX_TYPE.contractCreate,
-  NamePreclaimTx: SCHEMA.TX_TYPE.namePreClaim,
-  NameClaimTx: SCHEMA.TX_TYPE.nameClaim,
-  NameBidTx: SCHEMA.TX_TYPE.nameClaim,
-  NameUpdateTx: SCHEMA.TX_TYPE.nameUpdate,
+  SpendTx: Tag.SpendTx,
+  ContractCallTx: Tag.ContractCall,
+  ContractCreateTx: Tag.ContractCreateTx,
+  NamePreclaimTx: Tag.NamePreclaimTx,
+  NameClaimTx: Tag.NameClaimTx,
+  NameBidTx: Tag.NameClaimTx,
+  NameUpdateTx: Tag.NameTransferTx,
   PayingForTx: 'payingForTx', // TODO: remove after https://github.com/aeternity/aepp-sdk-js/issues/1583 is resolved
 };
 

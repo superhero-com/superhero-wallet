@@ -10,7 +10,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import { watchUntilTruthy } from '../utils/helper';
 import TransactionInfo from './TransactionInfo.vue';
 
@@ -39,7 +39,7 @@ export default {
     }),
     transaction() {
       switch (this.txType) {
-        case SCHEMA.TX_TYPE.spend:
+        case Tag.SpendTx:
           return {
             sender: {
               address: this.tx.senderId,
@@ -55,7 +55,7 @@ export default {
             },
             title: this.$t('transaction.type.spendTx'),
           };
-        case SCHEMA.TX_TYPE.contractCall: {
+        case Tag.ContractCallTx: {
           const direction = this.getTxDirection({ tx: this.tx });
           const contract = {
             address: this.tx.contractId,
@@ -69,7 +69,7 @@ export default {
             function: this.tx.function,
           };
         }
-        case SCHEMA.TX_TYPE.contractCreate:
+        case Tag.ContractCreateTx:
           return {
             sender: this.account,
             recipient: {
@@ -78,10 +78,9 @@ export default {
             },
             title: this.$t('transaction.type.contractCreateTx'),
           };
-        case SCHEMA.TX_TYPE.namePreClaim:
-        case SCHEMA.TX_TYPE.nameClaim:
-        case SCHEMA.TX_TYPE.nameBid:
-        case SCHEMA.TX_TYPE.nameUpdate:
+        case Tag.NamePreclaimTx:
+        case Tag.NameClaimTx:
+        case Tag.NameUpdateTx:
           return {
             sender: this.account,
             recipient: {
