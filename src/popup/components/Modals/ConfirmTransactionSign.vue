@@ -3,13 +3,14 @@
     full-screen
     class="confirm-transaction-sign"
     data-cy="popup-aex2"
-    absolute-footer
   >
     <TransactionOverview :tx="completeTransaction" />
+
     <AnimatedSpinner
       v-if="loading"
       class="loader"
     />
+
     <template v-if="(isDex || isAllowance) && tokenList">
       <TransactionDetailsPoolTokenRow
         v-for="(token, idx) in tokenList"
@@ -20,6 +21,7 @@
         :hide-amount="isSwap"
       />
     </template>
+
     <DetailsItem
       v-if="getNameFee(transaction)"
       :label="$t('modals.confirm-transaction-sign.nameFee')"
@@ -309,7 +311,8 @@ export default {
   }
 
   .transaction-overview {
-    padding-bottom: 16px;
+    margin-top: 20px;
+    margin-bottom: 16px;
   }
 
   .details {
@@ -324,14 +327,13 @@ export default {
   }
 
   .show-advanced {
+    @extend %face-sans-15-medium;
+
     display: flex;
     align-items: center;
     padding-top: 8px;
     margin-bottom: 8px;
     width: 100%;
-
-    @extend %face-sans-15-medium;
-
     color: variables.$color-grey-dark;
 
     .icon {

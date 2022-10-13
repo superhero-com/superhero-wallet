@@ -1,11 +1,11 @@
-import { IN_POPUP } from '../../lib/environment';
+import { IN_POPUP, IS_WEB } from '../../lib/environment';
 
 import ConfirmConnect from '../pages/Popups/Connect.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
 
-export default process.env.PLATFORM === 'web' && IN_POPUP
+export default IS_WEB && IN_POPUP
   ? [
     { name: 'confirm-connect', component: ConfirmConnect },
     { name: 'confirm-raw-sign', component: ConfirmRawSign },

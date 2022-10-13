@@ -3,7 +3,8 @@
     id="app"
     :class="{
       'show-header': showStatusAndHeader,
-      'display-as-mobile-app': displayAsMobileApp,
+      'is-web': IS_WEB,
+      'is-extension': IS_EXTENSION,
     }"
   >
     <button
@@ -41,6 +42,7 @@ import { mapGetters, mapState } from 'vuex';
 import { watchUntilTruthy } from './utils/helper';
 import { NOTIFICATION_DEFAULT_SETTINGS } from './utils/constants';
 import {
+  IS_WEB,
   IS_IOS,
   IS_ANDROID,
   IS_CORDOVA,
@@ -56,6 +58,10 @@ export default {
     NodeConnectionStatus,
     Close,
   },
+  data: () => ({
+    IS_WEB,
+    IS_EXTENSION,
+  }),
   computed: {
     ...mapGetters(['isLoggedIn']),
     ...mapState(['isRestored', 'backedUpSeed', 'qrScannerOpen']),
@@ -69,9 +75,6 @@ export default {
     },
     modals() {
       return this.$store.getters['modals/opened'];
-    },
-    displayAsMobileApp() {
-      return !IS_ANDROID;
     },
   },
   watch: {
@@ -132,6 +135,7 @@ export default {
 
 #app {
   --screen-padding-x: 16px;
+  --screen-border-radius: 0;
   --screen-bg-color: #{variables.$color-bg-app};
   --header-height: 0;
   --gap: 12px;
@@ -142,6 +146,7 @@ export default {
   margin: 0 auto;
   width: 100%;
   height: 100%;
+  border-radius: var(--screen-border-radius);
   color: variables.$color-white;
   background-color: var(--screen-bg-color);
   font-family: variables.$font-sans;
@@ -173,14 +178,22 @@ export default {
     }
   }
 
-  &.display-as-mobile-app {
+  &.is-extension,
+  &.is-web {
     width: variables.$extension-width;
-    height: 600px;
+    height: variables.$extension-height;
+  }
+
+  // Imitate the appearance of the mobile/extension app in a desktop browser
+  &.is-web {
+    --screen-border-radius: #{variables.$border-radius-app};
+
     overflow: hidden;
-    border-radius: variables.$border-radius-app;
     box-shadow: variables.$color-border 0 0 0 1px;
 
     @include mixins.mobile {
+      --screen-border-radius: 0;
+
       width: 100%;
       height: 100%;
       overflow: visible;

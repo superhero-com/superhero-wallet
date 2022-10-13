@@ -7,13 +7,18 @@ import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
 import initSdk from '../../lib/wallet';
 import { APP_LINK_WEB } from '../utils/constants';
-import { RUNNING_IN_POPUP, POPUP_TYPE } from '../../lib/environment';
+import {
+  RUNNING_IN_POPUP,
+  POPUP_TYPE,
+  IS_CORDOVA,
+  IS_WEB,
+} from '../../lib/environment';
 
 Vue.use(VueRouter);
 
 const router = new VueRouter({
   routes,
-  mode: process.env.PLATFORM === 'web' ? 'history' : 'hash',
+  mode: IS_WEB ? 'history' : 'hash',
   scrollBehavior: (to, from, savedPosition) => savedPosition || { x: 0, y: 0 },
 });
 
@@ -86,7 +91,7 @@ const routerReadyPromise = new Promise((resolve) => {
   });
 });
 
-if (process.env.PLATFORM === 'cordova') {
+if (IS_CORDOVA) {
   (async () => {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
     window.IonicDeeplink.onDeepLink(({ url }) => {

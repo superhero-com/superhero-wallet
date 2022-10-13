@@ -60,12 +60,13 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
+import { IS_CORDOVA } from '../../lib/environment';
 import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
   DEX_URL,
-} from '../utils/constants';
-import { buildSimplexLink } from '../utils';
+  buildSimplexLink,
+} from '../utils';
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
 import BtnPlain from '../components/buttons/BtnPlain.vue';
@@ -157,17 +158,14 @@ export default {
           return null;
       }
     },
-    mobile() {
-      return process.env.PLATFORM === 'cordova';
-    },
   },
   mounted() {
-    if (this.mobile) {
+    if (IS_CORDOVA) {
       window.StatusBar.backgroundColorByHexString('#191919');
     }
   },
   beforeDestroy() {
-    if (this.mobile) {
+    if (IS_CORDOVA) {
       window.StatusBar.backgroundColorByHexString('#141414');
     }
   },
