@@ -82,7 +82,7 @@
 
 <script>
 import { generateMnemonic } from '@aeternity/bip39';
-import { IN_FRAME } from '../../lib/environment';
+import { IS_WEB, IN_FRAME } from '../../lib/environment';
 import CheckBox from '../components/CheckBox.vue';
 import BtnSubheader from '../components/buttons/BtnSubheader.vue';
 import Platforms from '../components/Platforms.vue';
@@ -102,7 +102,7 @@ export default {
   },
   data: () => ({
     termsAgreed: false,
-    IS_WEB: process.env.PLATFORM === 'web',
+    IS_WEB,
     IN_FRAME,
   }),
   methods: {

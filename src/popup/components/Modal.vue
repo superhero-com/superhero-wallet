@@ -12,7 +12,7 @@
         'has-close-button': hasCloseButton,
         'no-padding': noPadding,
         dense,
-        'blur-bg': !noBlur
+        'blur-bg': !(IS_FIREFOX && IS_EXTENSION)
       }"
     >
       <div class="container">
@@ -65,12 +65,13 @@
   </transition>
 </template>
 
-<script>
-import { IS_MOBILE_DEVICE } from '../../lib/environment';
+<script lang="ts">
+import { defineComponent, onBeforeUnmount, onMounted } from '@vue/composition-api';
+import { IS_MOBILE_DEVICE, IS_FIREFOX, IS_EXTENSION } from '../../lib/environment';
 import NodeConnectionStatus from './NodeConnectionStatus.vue';
 import BtnClose from './buttons/BtnClose.vue';
 
-export default {
+export default defineComponent({
   components: {
     BtnClose,
     NodeConnectionStatus,
@@ -81,26 +82,30 @@ export default {
     fromBottom: Boolean,
     dense: Boolean,
     noPadding: Boolean,
-    noBlur: Boolean,
     centered: Boolean,
     header: { type: String, default: null },
   },
   emits: [
     'close',
   ],
-  data() {
+  setup() {
+    onMounted(() => {
+      if (!document.body.style.overflow) {
+        document.body.style.overflow = 'hidden';
+      }
+    });
+
+    onBeforeUnmount(() => {
+      document.body.style.overflow = '';
+    });
+
     return {
       IS_MOBILE_DEVICE,
+      IS_FIREFOX,
+      IS_EXTENSION,
     };
   },
-  mounted() {
-    if (document.body.style.overflow) return;
-    document.body.style.overflow = 'hidden';
-  },
-  beforeDestroy() {
-    document.body.style.overflow = '';
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -124,6 +129,7 @@ export default {
   display: flex;
   will-change: backdrop-filter;
 
+  // This is not working correctly in Firefox extension
   &.blur-bg {
     backdrop-filter: blur(5px);
   }
@@ -135,7 +141,7 @@ export default {
     width: 92%;
     margin: auto;
     background-color: var(--screen-bg-color);
-    border-radius: 5px;
+    border-radius: variables.$border-radius-modal;
     box-shadow:
       0 0 0 1px variables.$color-border,
       2px 4px 12px rgba(variables.$color-black, 0.22);
@@ -213,6 +219,13 @@ export default {
         opacity: 0.9;
         box-shadow: 0 -10px 10px var(--screen-bg-color);
       }
+
+      // Make the footer bottom rounded corners the same as the container
+      &,
+      &::before {
+        border-bottom-left-radius: inherit;
+        border-bottom-right-radius: inherit;
+      }
     }
   }
 
@@ -245,6 +258,8 @@ export default {
       max-height: 100%;
       margin-top: 0;
       margin-bottom: 0;
+      border-bottom-left-radius: var(--screen-border-radius);
+      border-bottom-right-radius: var(--screen-border-radius);
       overflow: hidden auto;
     }
 

@@ -44,6 +44,7 @@ import {
   watchUntilTruthy,
 } from '../utils/helper';
 import { BLOG_CLAIM_TIP_URL } from '../utils/constants';
+import { IS_EXTENSION } from '../../lib/environment';
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BtnHelp from '../components/buttons/BtnHelp.vue';
@@ -71,7 +72,7 @@ export default {
     },
   },
   async mounted() {
-    if (process.env.IS_EXTENSION) {
+    if (IS_EXTENSION) {
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       if (tab && validateTipUrl(tab.url)) {
         this.url = tab.url;

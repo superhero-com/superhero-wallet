@@ -51,6 +51,7 @@
 
 <script>
 import { mapMutations } from 'vuex';
+import { IS_EXTENSION, IS_CORDOVA } from '../../../lib/environment';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import { handleUnknownError } from '../../utils/helper';
@@ -68,16 +69,12 @@ export default {
     reject: { type: Function, required: true },
   },
   data: () => ({
+    mobile: IS_CORDOVA,
     // allow camera while QRScanner is loading to not show cameraNotAllowed before actual check
-    cameraAllowed: process.env.PLATFORM === 'cordova',
+    cameraAllowed: IS_CORDOVA,
     browserReader: null,
     headerText: '',
   }),
-  computed: {
-    mobile() {
-      return process.env.PLATFORM === 'cordova';
-    },
-  },
   watch: {
     async cameraAllowed(value) {
       if (!value) {
@@ -91,7 +88,7 @@ export default {
         if (error.name === 'NotAllowedError') {
           try {
             await new Promise((resolve, reject) => {
-              if (process.env.IS_EXTENSION) {
+              if (IS_EXTENSION) {
                 window.open(
                   browser.extension.getURL('./CameraRequestPermission.html'),
                   '_blank',
