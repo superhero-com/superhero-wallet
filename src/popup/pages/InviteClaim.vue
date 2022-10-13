@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import { decode } from '@aeternity/aepp-sdk';
 import { watchUntilTruthy } from '../utils/helper';
 
 export default {
@@ -14,7 +14,7 @@ export default {
     await watchUntilTruthy(() => this.$store.state.sdk);
     try {
       // sg_ prefix was chosen as a dummy to decode from base58Check
-      await this.$store.dispatch('invites/claim', TxBuilderHelper.decode(`sg_${this.secretKey}`, 'sg'));
+      await this.$store.dispatch('invites/claim', decode(`sg_${this.secretKey}`, 'sg'));
       await this.$store.dispatch('modals/open', {
         name: 'default',
         msg: 'You have successfully claimed tokens by the invite link',

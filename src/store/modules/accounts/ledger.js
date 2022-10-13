@@ -2,7 +2,11 @@
 
 import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import Ae from '@aeternity/ledger-app-api';
-import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
+import {
+  buildTx,
+  unpackTx,
+  Tag,
+} from '@aeternity/aepp-sdk';
 import { MODAL_DEFAULT } from '../../../popup/utils';
 
 export default {
@@ -70,10 +74,10 @@ export default {
     async signTransaction({ rootGetters: { account }, dispatch, rootState }, { txBase64 }) {
       await dispatch('ensureCurrentAccountAvailable');
 
-      const txObject = TxBuilder.unpackTx(txBase64).tx;
-      const binaryTx = TxBuilder.buildTx(
+      const txObject = unpackTx(txBase64).tx;
+      const encodedTx = buildTx(
         txObject,
-        SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag],
+        Tag[txObject.tag],
         { vsn: txObject.VSN },
       ).rlpEncoded;
 
@@ -81,13 +85,11 @@ export default {
         name: 'signTransaction',
         args: [
           account.idx,
-          binaryTx,
+          encodedTx,
           rootState.sdk.getNetworkId(),
         ],
       }), 'hex');
-
-      return TxBuilder
-        .buildTx({ encodedTx: binaryTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
+      return buildTx({ encodedTx, signatures: [signature] }, Tag.SignedTx).tx;
     },
   },
 };

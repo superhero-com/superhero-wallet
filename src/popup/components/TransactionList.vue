@@ -50,7 +50,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import { watchUntilTruthy } from '../utils/helper';
 import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
@@ -108,16 +108,16 @@ export default {
               case 'dex':
                 return FUNCTION_TYPE_DEX.pool.includes(tr.tx.function);
               case 'out':
-                return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
+                return (this.compareCaseInsensitive(tr.tx.type, Tag.SpendTx)
                     && tr.tx.senderId === address)
                   || (isFungibleTokenTx(tr)
-                    && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
+                    && this.compareCaseInsensitive(tr.tx.type, Tag.ContractCallTx)
                     && tr.tx.callerId === address);
               case 'in':
-                return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
+                return (this.compareCaseInsensitive(tr.tx.type, Tag.SpendTx)
                     && (tr.tx.recipientId === address || (tr.tx.senderId !== address && tr.tx.recipientId.startsWith('nm_'))))
                   || (isFungibleTokenTx(tr)
-                    && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
+                    && this.compareCaseInsensitive(tr.tx.type, Tag.ContractCallTx)
                     && tr.recipient === address);
               case 'tips':
                 return (tr.tx.contractId

@@ -1,8 +1,8 @@
-import { genSwaggerClient } from '@aeternity/aepp-sdk';
-import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
+import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk';
 import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { camelCase, isEqual, times } from 'lodash-es';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
+import SwaggerClient from 'swagger-client';
 import {
   NODE_STATUS_CONNECTING,
   NODE_STATUS_CONNECTION_DONE,
@@ -48,18 +48,6 @@ async function initMiddleware() {
         ],
       },
     },
-    // TODO: remove after mainnet middleware would be updated to a > 1.7.3 version
-    '/names/owned_by/{id}': {
-      get: {
-        operationId: 'getNamesOwnedBy',
-        parameters: [{
-          in: 'path',
-          name: 'id',
-          required: true,
-          type: 'string',
-        }],
-      },
-    },
   };
   spec.basePath = '/mdw/';
   // TODO: remove after resolving https://github.com/aeternity/ae_mdw/issues/160
@@ -67,8 +55,38 @@ async function initMiddleware() {
   // TODO: remove after resolving https://github.com/aeternity/ae_mdw/issues/508
   spec.paths['/name/pointees/{id}'] = spec.paths['/names/pointees/{id}'];
   delete spec.paths['/names/pointees/{id}'];
+  const { apis } = await new SwaggerClient(
+    {
+      url: middlewareUrl,
+      spec,
+      requestInterceptor: (request) => {
+        if (request.method !== 'GET') return;
+        // eslint-disable-next-line consistent-return
+        return {
+          ...request,
+          userFetch: async (url, request1) => {
+            const key = JSON.stringify({ ...request1, url });
+            pendingGetRequests[key] ??= fetch(url, request1);
+            try {
+              return (await pendingGetRequests[key]).clone();
+            } finally {
+              delete pendingGetRequests[key];
+            }
+          },
+        };
+      },
+      responseInterceptor: (response) => {
+        if (response.text === '' || response.text?.size === 0) return response;
+        const body = jsonImp.parse(response.text);
+        Object.assign(response, {
+          body: disableCaseConversion ? body : pascalizeKeys(body),
+        });
+        return (responseInterceptor && responseInterceptor(response)) || response;
+      },
+    },
+  );
   const middleware = mapObject(
-    (await genSwaggerClient(middlewareUrl, { spec })).api,
+    { ...apis.Middleware, ...apis.default },
     ([k, v]) => [camelCase(k), v],
   );
   middleware.fetchByPath = (path) => fetchJson(`${middlewareUrl}${path}`).then(camelcaseKeysDeep);

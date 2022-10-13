@@ -1,4 +1,4 @@
-import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
+import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk';
 import { CONNECTION_TYPES } from '../popup/utils/constants';
 import { detectConnectionType, waitUntilTruthy } from '../popup/utils/helper';
 import { removePopup, getPopup } from './popupHandler';
