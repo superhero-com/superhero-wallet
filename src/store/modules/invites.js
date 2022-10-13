@@ -1,5 +1,5 @@
 import {
-  Universal, MemoryAccount, Crypto, Node,
+  AeSdk, MemoryAccount, getAddressFromPriv, Node,
 } from '@aeternity/aepp-sdk';
 import { i18n } from '../plugins/languages';
 
@@ -16,9 +16,9 @@ export default {
   },
   actions: {
     async claim({ rootGetters: { account, activeNetwork } }, secretKey) {
-      const publicKey = Crypto.getAddressFromPriv(secretKey);
-      const s = await Universal({
-        nodes: [{ name: activeNetwork.name, instance: await Node({ url: activeNetwork.url }) }],
+      const publicKey = getAddressFromPriv(secretKey);
+      const s = await AeSdk({
+        nodes: [{ name: activeNetwork.name, instance: new Node(activeNetwork.url) }],
         accounts: [MemoryAccount({ keypair: { publicKey, secretKey } })],
       });
       await s.transferFunds(1, account.address, { payload: 'referral', verify: false });

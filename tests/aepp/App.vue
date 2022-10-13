@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import { RpcAepp, Node } from '@aeternity/aepp-sdk';
+import { Node, AeSdkAepp } from '@aeternity/aepp-sdk';
 import Detector from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/wallet-detector';
 import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 
@@ -124,10 +124,8 @@ contract Example =
   },
   methods: {
     async initClient() {
-      const node = await Node({
-        url: networks[process.env.NETWORK].NODE_URL,
-      });
-      this.client = await RpcAepp({
+      const node = new Node(networks[process.env.NETWORK].NODE_URL);
+      this.client = await AeSdkAepp({
         name: 'AEPP',
         nodes: [{ name: process.env.NETWORK, instance: node }],
         compilerUrl: networks[process.env.NETWORK].COMPILER_URL,

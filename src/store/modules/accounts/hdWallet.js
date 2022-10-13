@@ -1,5 +1,10 @@
-import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
-import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
+import {
+  sign,
+  unpackTx,
+  Tag,
+  decode,
+  buildTx,
+} from '@aeternity/aepp-sdk';
 import { getHdWalletAccount } from '../../../popup/utils/helper';
 
 const type = 'hd-wallet';
@@ -37,7 +42,7 @@ export default {
       state.nextAccountIdx += 1;
     },
     signWithoutConfirmation({ rootGetters: { account } }, data) {
-      return Crypto.sign(data, account.secretKey);
+      return sign(data, account.secretKey);
     },
     async confirmRawDataSigning({ dispatch }, data) {
       await dispatch('modals/open', { name: 'confirm-raw-sign', data }, { root: true });
@@ -45,21 +50,21 @@ export default {
     async confirmTxSigning({ dispatch }, { encodedTx, host }) {
       let txObject;
       try {
-        txObject = TxBuilder.unpackTx(encodedTx, true).tx;
+        txObject = unpackTx(encodedTx, true).tx;
       } catch (e) {
         await dispatch('confirmRawDataSigning', encodedTx);
         return;
       }
       const SUPPORTED_TX_TYPES = [
-        SCHEMA.TX_TYPE.spend,
-        SCHEMA.TX_TYPE.contractCreate,
-        SCHEMA.TX_TYPE.contractCall,
-        SCHEMA.TX_TYPE.namePreClaim,
-        SCHEMA.TX_TYPE.nameClaim,
-        SCHEMA.TX_TYPE.nameUpdate,
-        SCHEMA.TX_TYPE.nameTransfer,
+        Tag.SpendTx,
+        Tag.ContractCreateTx,
+        Tag.ContractCallTx,
+        Tag.NamePreclaimTx,
+        Tag.NameClaimTx,
+        Tag.NameUpdateTx,
+        Tag.NameTransferTx,
       ];
-      if (!SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag])) {
+      if (!SUPPORTED_TX_TYPES.includes(Tag[txObject.tag])) {
         await dispatch('confirmRawDataSigning', encodedTx);
         return;
       }
@@ -88,9 +93,9 @@ export default {
       if (modal) await dispatch('confirmTxSigning', { encodedTx, host });
       const signature = await dispatch(
         'signWithoutConfirmation',
-        Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]),
+        Buffer.concat([Buffer.from(await sdk.getNetworkId()), Buffer.from(encodedTx)]),
       );
-      return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
+      return buildTx({ encodedTx, signatures: [signature] }, Tag.SignedTx).tx;
     },
   },
 };

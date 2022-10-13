@@ -84,7 +84,7 @@
 </template>
 
 <script>
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import { mapGetters, mapState } from 'vuex';
 import deeplinkApi from '../../mixins/deeplinkApi';
 import {
@@ -208,7 +208,7 @@ export default {
             tx: {
               callerId: this.account.address,
               contractId: selectedAsset.contractId,
-              type: SCHEMA.TX_TYPE.contractCall,
+              type: Tag.ContractCallTx,
               function: 'transfer',
             },
           });
@@ -220,7 +220,7 @@ export default {
             tx: {
               senderId: this.account.address,
               recipientId: recipient,
-              type: SCHEMA.TX_TYPE.spend,
+              type: Tag.SpendTx,
             },
           });
         }
@@ -267,7 +267,7 @@ export default {
           tx: {
             callerId: this.account.address,
             contractId: this.tippingContract.deployInfo.address,
-            type: SCHEMA.TX_TYPE.contractCall,
+            type: Tag.ContractCallTx,
             function: 'tip',
           },
         });

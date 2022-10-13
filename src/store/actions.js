@@ -3,7 +3,7 @@ import {
 } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag, AeSdk, Node } from '@aeternity/aepp-sdk';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
 import { postMessageToContent } from '../popup/utils/connection';
 import {
@@ -72,7 +72,7 @@ export default {
         address,
         amount,
         contractId: t.contract,
-        type: SCHEMA.TX_TYPE.contractCall,
+        type: Tag.ContractCall,
       },
       ...t,
       microTime: new Date(t.createdAt).getTime(),
@@ -88,10 +88,11 @@ export default {
     const { address } = getters.account;
     let txs = await Promise.all([
       (recent || state.transactions.nextPageUrl === ''
-        ? state.middleware.getTxByAccount(address, limit, 1)
+        ? state.middleware.getTxByAccount({ account: address, limit, page: 1 })
         : fetchJson(`${getters.activeNetwork.middlewareUrl}/${state.transactions.nextPageUrl}`))
         .then(({ data, next }) => {
-          const result = recent || state.transactions.nextPageUrl === '' ? data : camelcaseKeysDeep(data);
+          const result = recent
+      || state.transactions.nextPageUrl === '' ? data : camelcaseKeysDeep(data);
           if (!recent) commit('setTransactionsNextPage', next);
           return result;
         })
