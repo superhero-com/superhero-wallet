@@ -16,7 +16,7 @@ export default {
         this.$route.query[isSuccess ? 'x-success' : 'x-cancel'],
       );
       this.$router.push('/account');
-      window.open(callbackUrl, '_self');
+      window.open(`${callbackUrl.includes('://') ? '' : 'http://'}${callbackUrl}`, '_blank');
     },
   },
 };
