@@ -102,12 +102,12 @@ import {
   APP_LINK_ANDROID,
   APP_LINK_IOS,
 } from '../utils/constants';
-import { IS_IOS, IS_MOBILE_DEVICE } from '../../lib/environment';
+import { IS_MOBILE_DEVICE, IS_IOS, IS_FIREFOX } from '../../lib/environment';
 
 export default {
   data: () => ({
-    IS_IOS,
     IS_MOBILE_DEVICE,
+    IS_IOS,
     IS_FIREFOX,
     APP_LINK_CHROME,
     APP_LINK_FIREFOX,
@@ -123,11 +123,11 @@ export default {
 @use '../../styles/mixins';
 
 .platforms {
+  @extend %face-sans-15-regular;
+
   font-size: 15px;
   background-color: var(--screen-bg-color);
   word-break: break-word;
-
-  @extend %face-sans-15-regular;
 
   .heading {
     @extend %face-sans-17-regular;
