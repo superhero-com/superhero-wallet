@@ -101,6 +101,7 @@ export default {
     if (this.activeIdx) {
       this.setCurrentSlide(this.activeIdx, 0);
     }
+    this.$watch('activeIdx', (activeIdx) => this.setCurrentSlide(activeIdx, 0));
   },
   methods: {
     async selectAccount(idx) {
@@ -119,8 +120,10 @@ export default {
       return getAddressColor(this.accounts[idx]?.address);
     },
     setCurrentSlide(idx, slideParams) {
-      this.currentIdx = idx;
-      this.swiper.slideTo(idx, slideParams);
+      if (this.currentIdx !== idx) {
+        this.currentIdx = idx;
+        this.swiper.slideTo(idx, slideParams);
+      }
     },
   },
 };

@@ -29,11 +29,11 @@ export default {
       }
       // eslint-disable-next-line no-plusplus
       for (let i = state.nextAccountIdx; i <= lastNotEmptyIdx; i++) {
-        dispatch('create');
+        dispatch('create', true);
       }
     },
-    create({ state, commit }) {
-      commit('accounts/add', { idx: state.nextAccountIdx, type }, { root: true });
+    create({ state, commit }, isRestored = false) {
+      commit('accounts/add', { idx: state.nextAccountIdx, type, isRestored }, { root: true });
       state.nextAccountIdx += 1;
     },
     signWithoutConfirmation({ rootGetters: { account } }, data) {
