@@ -50,7 +50,10 @@
         >
           <Truncate :str="sender.name || sender.label" />
         </a>
-        <CopyAddress :value="sender.address" />
+        <CopyAddress
+          :value="sender.address"
+          :letter-spacing="addressLetterSpacing"
+        />
       </div>
       <div
         class="recipient"
@@ -74,6 +77,7 @@
         <CopyAddress
           v-if="recipient.address"
           :value="recipient.address"
+          :letter-spacing="addressLetterSpacing"
         />
       </div>
     </div>
@@ -106,6 +110,7 @@ export default {
     txFunction: { type: String, default: null },
     sender: { type: Object, required: true },
     recipient: { type: Object, required: true },
+    addressLetterSpacing: { type: Boolean },
   },
   computed: {
     getTxType() {

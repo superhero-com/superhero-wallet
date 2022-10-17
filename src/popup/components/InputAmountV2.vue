@@ -20,6 +20,7 @@
         v-bind="$attrs"
         :value="selectedAsset"
         :focused="focused"
+        :disabled="disableAssetSelector"
         @input="$emit('asset-selected', $event)"
       />
     </template>
@@ -67,6 +68,7 @@ export default {
     value: { type: [String, Number], default: '' },
     label: { type: String, default: null },
     selectedAsset: { type: Object, default: null },
+    disableAssetSelector: Boolean,
   },
   computed: {
     ...mapGetters([

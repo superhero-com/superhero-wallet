@@ -349,7 +349,8 @@
       "buy": "Buy AE Tokens",
       "networks": "Network",
       "permissionsSettings": "Permissions",
-      "permissionsDetails": "Permissions details",
+      "permissionsEdit": "Edit permissions",
+      "permissionsAdd": "Add permissions",
       "comment-new": "Add comment",
       "home": "Home",
       "donate-error": "Donate Data",
@@ -1206,12 +1207,22 @@
     "permissions": {
       "login": "Don't ask for login requests",
       "message-sign": "Don't ask for message signing",
+      "daily-spending-limit": "Daily spending limit without asking",
       "transaction-sign": "Limit for spending without asking per day",
       "spent-today": "Spent today",
       "left-today": "Left today",
       "delete": "Remove permissions",
+      "add": "Add permissions",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "add-description": "Use this feature with caution and only for platforms you trust.",
       "empty": "You aren't connected to any aepps",
-      "description": "Manage confirmation popups and daily spending limits. For security reasons use this feature with caution only for trusted platforms such as {0} and your localhost environment."
+      "description": "Manage confirmation popups and daily spending limits. For security reasons use this feature with caution only for trusted platforms such as {0} and your localhost environment.",
+      "custom-name": "Custom name",
+      "enter-custom-name": "Enter custom name of your choice",
+      "permissions-for-url": "Permissions for URL",
+      "enter-url": "Enter URL",
+      "always-ask": "always ask"
     },
     "reset-wallet": {
       "description": "This action will remove all accounts from your wallet and delete the extension storage.",
@@ -1224,6 +1235,7 @@
   },
   "validation": {
     "required": "This field is required",
+    "url": "Invalid URL",
     "address": "Enter valid blockchain address or .chain name",
     "name": "Enter valid .chain name",
     "nameRegisteredAddress": "This name isn't registered or pointed to address",

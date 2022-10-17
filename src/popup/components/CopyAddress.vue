@@ -15,18 +15,29 @@
     <span
       v-else
       class="address"
-    >{{ value }}</span>
+    >{{ address }}</span>
   </div>
 </template>
 
 <script>
 import CopyMixin from '../../mixins/copy';
+import { chunkString } from '../utils/utils';
 
 export default {
   mixins: [CopyMixin],
   props: {
     value: { type: String, required: true },
     customText: { type: String, default: '' },
+    letterSpacing: { type: Boolean },
+  },
+  computed: {
+    address() {
+      if (this.letterSpacing && this.value.includes('ak_')) {
+        return chunkString(this.value, 3).join(' ');
+      }
+
+      return this.value;
+    },
   },
 };
 </script>
@@ -41,6 +52,7 @@ export default {
 
     display: block;
     letter-spacing: 0.05em;
+    word-spacing: 3px;
     line-height: 18px;
     color: variables.$color-light-grey;
     word-break: break-all;

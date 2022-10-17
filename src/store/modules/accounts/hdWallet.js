@@ -42,7 +42,7 @@ export default {
     async confirmRawDataSigning({ dispatch }, data) {
       await dispatch('modals/open', { name: 'confirm-raw-sign', data }, { root: true });
     },
-    async confirmTxSigning({ dispatch }, encodedTx) {
+    async confirmTxSigning({ dispatch }, { encodedTx, host }) {
       let txObject;
       try {
         txObject = TxBuilder.unpackTx(encodedTx, true).tx;
@@ -64,18 +64,28 @@ export default {
         return;
       }
 
-      await dispatch(
-        'modals/open',
-        { name: 'confirm-transaction-sign', transaction: txObject },
-        { root: true },
-      );
+      const checkTransactionSignPermission = await dispatch('permissions/checkTransactionSignPermission', {
+        ...txObject,
+        host,
+      }, { root: true });
+
+      if (!checkTransactionSignPermission) {
+        await dispatch(
+          'modals/open',
+          { name: 'confirm-transaction-sign', transaction: txObject },
+          { root: true },
+        );
+      }
     },
     sign({ dispatch }, data) {
       return dispatch('signWithoutConfirmation', data);
     },
-    async signTransaction({ dispatch, rootState: { sdk } }, { txBase64, opt: { modal = true } }) {
+    async signTransaction({ dispatch, rootState: { sdk } }, {
+      txBase64,
+      opt: { modal = true, host = null },
+    }) {
       const encodedTx = decode(txBase64, 'tx');
-      if (modal) await dispatch('confirmTxSigning', encodedTx);
+      if (modal) await dispatch('confirmTxSigning', { encodedTx, host });
       const signature = await dispatch(
         'signWithoutConfirmation',
         Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]),

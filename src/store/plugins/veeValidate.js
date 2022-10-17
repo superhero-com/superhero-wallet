@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { Validator, ErrorBag, install as VeeValidate } from 'vee-validate/dist/vee-validate.minimal.esm';
-import { required } from 'vee-validate/dist/rules.esm';
+import { required, url } from 'vee-validate/dist/rules.esm';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { Crypto } from '@aeternity/aepp-sdk';
@@ -36,6 +36,7 @@ Object.assign(ErrorBag.prototype, {
   },
 });
 
+Validator.extend('url', url);
 Validator.extend('required', required);
 Validator.extend('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
 Validator.extend('name', (value) => checkAensName(`${value}.chain`));
@@ -45,6 +46,7 @@ Validator.extend('max_value', (value, [arg]) => BigNumber(value).isLessThanOrEqu
 
 Validator.localize('en', {
   messages: {
+    url: () => i18n.t('validation.url'),
     required: () => i18n.t('validation.required'),
     account: () => i18n.t('validation.address'),
     name: () => i18n.t('validation.name'),
@@ -139,8 +141,8 @@ export default (store) => {
     ? checkNameRegisteredAddress(value) : Crypto.isAddressValid(value) || validateTipUrl(value)));
   Validator.extend('invalid_hostname', (value) => {
     try {
-      const url = new URL(value);
-      return !!url.hostname;
+      const _url = new URL(value);
+      return !!_url.hostname;
     } catch (error) {
       return false;
     }

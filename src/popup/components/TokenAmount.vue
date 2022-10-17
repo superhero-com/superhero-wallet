@@ -1,14 +1,25 @@
 <template>
   <span
     class="token-amount"
-    :class="[direction, { large }]"
+    :class="[direction, { large, 'has-label': !!label }]"
   >
-    {{ amountRounded }}
-    <span
-      v-if="!noSymbol"
-      class="symbol"
-    >
-      {{ symbol }}
+    <span>
+      <span
+        v-if="label"
+        class="label"
+      >
+        {{ label }}
+      </span>
+
+      <span class="amount">
+        {{ amountRounded }}
+        <span
+          v-if="!noSymbol"
+          class="symbol"
+        >
+          {{ symbol }}
+        </span>
+      </span>
     </span>
     <span
       v-if="amountFiat"
@@ -26,6 +37,7 @@ import { mapState } from 'vuex';
 export default {
   props: {
     amount: { type: Number, required: true },
+    label: { type: String, default: null },
     symbol: { type: String, default: 'AE' },
     aex9: { type: Boolean, default: false },
     fiatBelow: { type: Boolean, default: false },
@@ -36,6 +48,7 @@ export default {
       default: undefined,
     },
     large: { type: Boolean },
+    row: { type: Boolean },
     noSymbol: { type: Boolean },
     highPrecision: { type: Boolean },
   },
@@ -67,6 +80,13 @@ export default {
 
   color: variables.$color-white;
 
+  .label {
+    @extend %face-sans-14-medium;
+
+    color: rgba(variables.$color-white, 0.5);
+    display: block;
+  }
+
   .symbol {
     @extend %face-sans-14-medium;
 
@@ -81,6 +101,13 @@ export default {
       display: block;
       margin-left: 0;
     }
+  }
+
+  &.has-label {
+    display: inline-flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
   }
 
   &.sent {

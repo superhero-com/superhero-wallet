@@ -85,3 +85,11 @@ export function buildSimplexLink(address: string) {
   link.searchParams.set('wallet_address', address);
   return link.toString();
 }
+
+export function chunkString(text: string, length: number) {
+  const space = [];
+  for (let i = 0, len = text.length; i < len; i += length) {
+    space.push(text.substr(i, length));
+  }
+  return space;
+}

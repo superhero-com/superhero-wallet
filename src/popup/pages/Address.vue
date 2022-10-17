@@ -1,52 +1,40 @@
 <template>
-  <div class="address">
-    <div class="section-title">
-      {{ $t('pages.tipPage.sendToAddress') }}
-    </div>
-
-    <div class="url-bar">
-      {{ callbackOrigin }}
-    </div>
-
-    <BtnMain @click="openCallbackOrGoHome(true, { address: $store.getters.account.address })">
-      {{ $t('pages.tipPage.confirm') }}
-    </BtnMain>
-    <BtnMain @click="openCallbackOrGoHome(false)">
-      {{ $t('pages.tipPage.cancel') }}
-    </BtnMain>
-  </div>
+  <Connect
+    :app="app"
+    :resolve="onResolve"
+    :reject="onReject"
+    :transaction-access="false"
+  />
 </template>
 
 <script>
-import BtnMain from '../components/buttons/BtnMain.vue';
+
+import Connect from './Popups/Connect.vue';
 import deeplinkApi from '../../mixins/deeplinkApi';
 
 export default {
-  components: { BtnMain },
+  components: { Connect },
   mixins: [deeplinkApi],
+  computed: {
+    app() {
+      const host = (new URL(this.$route.query['x-success']));
+      return {
+        name: host.hostname,
+        url: host.origin,
+        host: host.host,
+      };
+    },
+  },
+  methods: {
+    onResolve() {
+      this.openCallbackOrGoHome(true, {
+        address: this.$store.getters.account.address,
+        networkId: this.$store.getters.activeNetwork.networkId,
+      });
+    },
+    onReject() {
+      this.openCallbackOrGoHome(false);
+    },
+  },
 };
 </script>
-
-<style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-
-.address {
-  .url-bar {
-    margin: 8px 0;
-    text-align: left;
-    color: variables.$color-white;
-
-    @extend %face-sans-11-regular;
-  }
-
-  .section-title {
-    margin-bottom: 8px;
-    margin-top: 16px;
-    font-size: 16px;
-    color: variables.$color-white;
-    font-weight: 400;
-    text-align: left;
-  }
-}
-</style>
