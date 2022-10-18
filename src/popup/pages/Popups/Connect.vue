@@ -19,18 +19,22 @@
     </div>
 
     <div class="permissions">
-      <span class="title">
-        <CheckMark class="icon" /> {{ $t('pages.connectConfirm.addressLabel') }}
-      </span>
-      <span class="description">
-        {{ $t('pages.connectConfirm.addressRequest') }}
-      </span>
-      <span class="title">
-        <CheckMark class="icon" /> {{ $t('pages.connectConfirm.transactionLabel') }}
-      </span>
-      <span class="description">
-        {{ $t('pages.connectConfirm.transactionRequest') }}
-      </span>
+      <template v-if="permissions.includes('address')">
+        <span class="title">
+          <CheckMark class="icon" /> {{ $t('pages.connectConfirm.addressLabel') }}
+        </span>
+        <span class="description">
+          {{ $t('pages.connectConfirm.addressRequest') }}
+        </span>
+      </template>
+      <template v-if="permissions.includes('transactions')">
+        <span class="title">
+          <CheckMark class="icon" /> {{ $t('pages.connectConfirm.transactionLabel') }}
+        </span>
+        <span class="description">
+          {{ $t('pages.connectConfirm.transactionRequest') }}
+        </span>
+      </template>
     </div>
 
     <template #footer>
@@ -43,7 +47,7 @@
       </BtnMain>
       <BtnMain
         data-cy="accept"
-        @click="resolve()"
+        @click="confirm()"
       >
         {{ $t('pages.connectConfirm.confirmButton') }}
       </BtnMain>
@@ -67,7 +71,10 @@ export default {
     CheckMark,
   },
   mixins: [mixin],
-  props: { app: { type: Object, required: true } },
+  props: {
+    app: { type: Object, required: true },
+    permissions: { type: Array, default: () => (['address', 'transactions']) },
+  },
   computed: {
     ...mapGetters(['getExplorerPath']),
     ...mapState({
@@ -79,6 +86,19 @@ export default {
         };
       },
     }),
+  },
+  methods: {
+    confirm() {
+      this.$store.commit('permissions/addPermission', {
+        address: false,
+        messageSign: false,
+        transactionSignLimit: 0,
+        transactionSignLimitLeft: 0,
+        transactionSignFirstAskedOn: null,
+        ...this.app,
+      });
+      this.resolve();
+    },
   },
 };
 </script>
