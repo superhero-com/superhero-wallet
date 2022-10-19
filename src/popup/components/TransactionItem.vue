@@ -184,7 +184,7 @@ export default {
 
     > span {
       width: 100%;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      border-bottom: 1px solid rgba(variables.$color-white, 0.15);
     }
   }
 
@@ -194,11 +194,11 @@ export default {
     .footer {
       display: flex;
       justify-content: space-between;
-      color: white;
+      color: variables.$color-white;
       padding-top: 4px;
 
       span {
-        color: variables.$color-light-grey;
+        color: variables.$color-grey-light;
 
         @extend %face-sans-15-medium;
       }

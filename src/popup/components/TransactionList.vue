@@ -207,7 +207,7 @@ export default {
 
     @extend %face-sans-15-medium;
 
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
     text-align: center;
   }
 
@@ -228,7 +228,7 @@ export default {
     .text {
       @extend %face-sans-14-medium;
 
-      color: variables.$color-green;
+      color: variables.$color-success;
       padding-left: 4px;
     }
 
@@ -239,17 +239,17 @@ export default {
     }
 
     &:hover {
-      background: variables.$color-hover;
+      background: variables.$color-bg-2;
 
       .text {
-        color: variables.$color-green-hover;
+        color: variables.$color-success-hover;
       }
 
       .icon {
         opacity: 1;
 
         path {
-          fill: variables.$color-green;
+          fill: variables.$color-success;
         }
       }
     }

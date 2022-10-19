@@ -18,13 +18,15 @@
 </template>
 
 <script>
+const VARIANTS = ['primary'];
+
 export default {
   props: {
     to: { type: [Object, String], default: null },
     href: { type: String, default: null },
     variant: {
       type: String,
-      validator: (value) => ['primary', 'alternative'].includes(value),
+      validator: (value) => VARIANTS.includes(value),
       default: 'primary',
     },
     disabled: Boolean,
@@ -85,17 +87,6 @@ export default {
 
     &:active {
       background-color: rgba(variables.$color-white, 0.15);
-    }
-  }
-
-  &.alternative {
-    &:hover {
-      background-color: rgba(variables.$color-red, 0.2);
-      color: variables.$color-red;
-    }
-
-    &:active {
-      background-color: rgba(variables.$color-red, 0.3);
     }
   }
 

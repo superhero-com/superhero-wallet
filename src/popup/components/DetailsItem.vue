@@ -69,7 +69,7 @@ export default {
     margin-bottom: 8px;
 
     .secondary {
-      color: variables.$color-light-grey;
+      color: variables.$color-grey-light;
       margin-left: 4px;
     }
 

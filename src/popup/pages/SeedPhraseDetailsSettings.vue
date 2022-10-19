@@ -154,7 +154,7 @@ export default defineComponent({
 
       .check-success-circle {
         margin-right: 4px;
-        color: variables.$color-green-dark;
+        color: variables.$color-success-dark;
       }
 
       &:hover {

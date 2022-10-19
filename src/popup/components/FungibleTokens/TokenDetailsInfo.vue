@@ -219,7 +219,7 @@ export default {
 
   .price {
     .green {
-      color: variables.$color-green;
+      color: variables.$color-success;
       font-weight: 400;
     }
 
@@ -230,7 +230,7 @@ export default {
   }
 
   .link a {
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -242,7 +242,7 @@ export default {
   }
 
   .address-shortening {
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
 
     &:hover {
       color: variables.$color-white;

@@ -81,7 +81,7 @@ export default {
 
 .connect-error {
   font-weight: bold;
-  background: variables.$color-blue;
+  background: variables.$color-primary;
 }
 
 .from-settings-fade {

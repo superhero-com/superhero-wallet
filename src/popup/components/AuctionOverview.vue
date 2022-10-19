@@ -70,7 +70,7 @@ export default {
 
     &.end-height {
       ::v-deep .value {
-        color: variables.$color-light-grey;
+        color: variables.$color-grey-light;
       }
 
       ::v-deep .secondary {

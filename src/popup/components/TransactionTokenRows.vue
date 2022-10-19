@@ -54,11 +54,11 @@ export default {
     }
 
     &.received:not(.error) .amount {
-      color: variables.$color-green-dark;
+      color: variables.$color-success-dark;
     }
 
     &.sent:not(.error) .amount {
-      color: variables.$color-pink;
+      color: variables.$color-danger;
     }
 
     .tokens {

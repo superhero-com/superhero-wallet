@@ -48,14 +48,6 @@ export default {
 
   .text {
     color: rgba(variables.$color-white, 0.75);
-
-    .primary {
-      color: variables.$color-green;
-    }
-
-    &.primary {
-      color: variables.$color-blue;
-    }
   }
 
   .white {

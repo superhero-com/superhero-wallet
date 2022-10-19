@@ -106,7 +106,7 @@ export default {
     margin: 20px 0 16px;
     font-size: 17px;
     text-align: left;
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
     font-weight: 400;
 
     &-icon {

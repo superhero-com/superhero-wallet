@@ -92,7 +92,7 @@ export default {
 
     line-height: 19px;
     margin-top: 10px;
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
     text-align: center;
   }
 }

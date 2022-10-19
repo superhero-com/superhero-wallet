@@ -346,11 +346,11 @@ export default {
 
         svg {
           opacity: 1;
-          color: variables.$color-green;
+          color: variables.$color-success;
         }
 
         &:hover {
-          color: variables.$color-green;
+          color: variables.$color-success;
           text-decoration: underline;
         }
       }

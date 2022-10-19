@@ -146,12 +146,12 @@ export default {
       border-bottom: 0.2rem solid transparent;
 
       &:hover {
-        color: variables.$color-light-grey;
+        color: variables.$color-grey-light;
       }
 
       &.active {
-        color: variables.$color-green;
-        border-bottom-color: variables.$color-green;
+        color: variables.$color-success;
+        border-bottom-color: variables.$color-success;
       }
     }
   }

@@ -99,7 +99,7 @@ export default {
 
     .actions-menu,
     .format-date {
-      color: variables.$color-blue;
+      color: variables.$color-primary;
     }
   }
 
@@ -112,7 +112,7 @@ export default {
     }
 
     .actions-menu:hover {
-      color: variables.$color-light-grey;
+      color: variables.$color-grey-light;
     }
   }
 

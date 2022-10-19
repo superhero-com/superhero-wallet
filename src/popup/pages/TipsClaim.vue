@@ -132,7 +132,7 @@ export default {
   .header {
     margin: 8px 0 24px 36px;
     display: flex;
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
 
     @extend %face-sans-15-medium;
 

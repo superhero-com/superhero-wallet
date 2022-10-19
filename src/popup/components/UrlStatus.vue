@@ -95,12 +95,12 @@ export default {
 
   &.info,
   &.help {
-    color: variables.$color-blue;
+    color: variables.$color-primary;
   }
 
   &.verified,
   &.success {
-    color: variables.$color-green-dark;
+    color: variables.$color-success-dark;
   }
 
   .title {

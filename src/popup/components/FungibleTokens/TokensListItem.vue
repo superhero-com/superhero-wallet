@@ -126,7 +126,7 @@ export default {
     @extend %face-sans-14-regular;
 
     &:last-child {
-      color: variables.$color-light-grey;
+      color: variables.$color-grey-light;
     }
 
     color: rgba(variables.$color-white, 0.75);
@@ -140,7 +140,7 @@ export default {
     background-color: variables.$color-bg-4;
 
     &.selected {
-      background-color: rgba(variables.$color-blue, 0.2);
+      background-color: rgba(variables.$color-primary, 0.2);
     }
 
     &:hover {

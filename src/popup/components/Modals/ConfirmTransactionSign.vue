@@ -342,7 +342,7 @@ export default {
     }
 
     &:hover {
-      color: variables.$color-light-grey;
+      color: variables.$color-grey-light;
 
       .icon {
         opacity: 1;
@@ -362,7 +362,7 @@ export default {
 
     .details-item::v-deep {
       .value {
-        color: variables.$color-light-grey;
+        color: variables.$color-grey-light;
         line-height: 24px;
         letter-spacing: 0.05em;
         margin-bottom: 12px;

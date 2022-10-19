@@ -88,7 +88,7 @@ export default {
   .token {
     margin-right: 2px;
     font-weight: 500;
-    color: variables.$color-blue;
+    color: variables.$color-primary;
   }
 
   .amount {

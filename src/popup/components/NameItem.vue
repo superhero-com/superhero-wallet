@@ -289,13 +289,13 @@ export default {
           @extend %face-sans-12-medium;
 
           &.set {
-            background: rgba(255, 170, 41, 0.1);
+            background: rgba(variables.$color-warning, 0.1);
             color: variables.$color-warning;
           }
 
           &.edit {
-            background: rgba(17, 97, 254, 0.15);
-            color: variables.$color-blue;
+            background: rgba(variables.$color-primary, 0.15);
+            color: variables.$color-primary;
           }
 
           &:not(:last-of-type) {
@@ -340,7 +340,7 @@ export default {
     }
 
     .details-item ::v-deep .value {
-      color: variables.$color-light-grey;
+      color: variables.$color-grey-light;
     }
 
     > .details-item {
@@ -385,7 +385,7 @@ export default {
 
   > span {
     margin-top: 4px;
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
 
     @extend %face-mono-10-medium;
   }

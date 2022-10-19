@@ -144,7 +144,7 @@ export default {
 
     &::before {
       content: "";
-      background-image: linear-gradient(variables.$color-blue 2px, transparent 1px);
+      background-image: linear-gradient(variables.$color-primary 2px, transparent 1px);
       position: absolute;
       top: calc(50% - 1px);
       height: 24px;
@@ -157,12 +157,12 @@ export default {
       @include mixins.flex(center, center, row);
 
       gap: 2px;
-      color: variables.$color-blue;
+      color: variables.$color-primary;
       white-space: nowrap;
 
       .space,
       .arrow {
-        background-image: linear-gradient(variables.$color-blue 2px, transparent 1px);
+        background-image: linear-gradient(variables.$color-primary 2px, transparent 1px);
         width: 12px;
         height: 24px;
         transform: translateY(calc(50% - 1px));

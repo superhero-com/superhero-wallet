@@ -57,7 +57,7 @@ export default {
   display: inline-flex;
   align-items: center;
   text-decoration: none;
-  color: variables.$color-light-grey;
+  color: variables.$color-grey-light;
   letter-spacing: 0.07em;
 
   &:hover {

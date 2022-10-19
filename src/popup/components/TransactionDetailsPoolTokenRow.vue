@@ -73,7 +73,7 @@ export default {
   .contract-id {
     @extend %face-mono-12-medium;
 
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
     letter-spacing: 0.07em;
     cursor: pointer;
 

@@ -30,8 +30,8 @@ export default {
 
   $colors: (
     track-color: variables.$color-grey-dark,
-    progress-color: variables.$color-green,
-    thumb-color: variables.$color-green,
+    progress-color: variables.$color-success,
+    thumb-color: variables.$color-success,
   );
 
   @mixin range-track($background-color) {
