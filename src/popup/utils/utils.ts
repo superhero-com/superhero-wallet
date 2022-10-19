@@ -92,10 +92,13 @@ export function buildSimplexLink(address: string) {
  * Temporary function that allows to replace the `subscriptions` property
  * on Vue components when using the Vue setup() hook of the Vue composition API.
  */
-export function rxJsObservableToVueState(observable: Observable<any>): Ref<any> {
-  const state = ref(null);
+export function rxJsObservableToVueState(
+  observable: Observable<any>,
+  defaultState: any = null,
+): Ref<any> {
+  const state = ref(defaultState);
   const subscription = observable.subscribe((val) => {
-    state.value = val;
+    state.value = val || defaultState;
   });
   onUnmounted(() => {
     subscription.unsubscribe();

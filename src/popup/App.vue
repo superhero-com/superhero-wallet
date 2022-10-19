@@ -39,12 +39,12 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { watchUntilTruthy } from './utils/helper';
-import { NOTIFICATION_SETTINGS } from './utils/constants';
+import { NOTIFICATION_DEFAULT_SETTINGS } from './utils/constants';
 import {
   IS_IOS,
   IS_ANDROID,
   IS_CORDOVA,
-  IS_FIREFOX,
+  IS_EXTENSION,
 } from '../lib/environment';
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
@@ -95,22 +95,30 @@ export default {
 
     await watchUntilTruthy(() => this.isRestored);
 
+    this.setNotificationSettings();
+
+    this.checkExtensionUpdates();
+
     this.$store.dispatch('fungibleTokens/getAeternityData');
-
-    if (process.env.IS_EXTENSION && !IS_FIREFOX) {
-      const [update] = await browser.runtime.requestUpdateCheck();
-      if (update === 'update_available' && !process.env.RUNNING_IN_TESTS) {
-        this.$store.commit('addNotification', {
-          text: this.$t('pages.account.updateAvailable'),
-          path: '',
-        });
-      }
-    }
-    if (this.$store.state.notificationSettings.length === 0) {
-      this.$store.commit('setNotificationSettings', NOTIFICATION_SETTINGS);
-    }
-
     this.$store.commit('setChainNames', await this.$store.dispatch('getCacheChainNames'));
+  },
+  methods: {
+    setNotificationSettings() {
+      if (this.$store.state.notificationSettings.length === 0) {
+        this.$store.commit('setNotificationSettings', NOTIFICATION_DEFAULT_SETTINGS);
+      }
+    },
+    async checkExtensionUpdates() {
+      if (IS_EXTENSION && browser?.runtime?.requestUpdateCheck) {
+        const [update] = await browser.runtime.requestUpdateCheck();
+        if (update === 'update_available') {
+          this.$store.commit('addNotification', {
+            text: this.$t('pages.account.updateAvailable'),
+            path: '',
+          });
+        }
+      }
+    },
   },
 };
 </script>

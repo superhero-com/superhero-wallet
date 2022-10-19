@@ -1,5 +1,5 @@
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import BigNumber from 'bignumber.js';
+import { MAX_UINT256 } from './constants';
 
 export const testAccount = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
@@ -69,7 +69,6 @@ export const popupProps = {
 };
 
 export const recipientId = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';
-export const MAX_UINT256 = BigNumber(2).exponentiatedBy(256).minus(1);
 const commonParams = {
   amount: 100000000000000000,
   ttl: MAX_UINT256,

@@ -1,7 +1,11 @@
 /* eslint no-param-reassign: ["error", { "ignorePropertyModificationsFor": ["state"] }] */
 import Vue from 'vue';
 import { uniqBy } from 'lodash-es';
-import { defaultNetwork } from '../popup/utils/constants';
+import {
+  defaultNetwork,
+  NOTIFICATION_STATUS_CREATED,
+  NOTIFICATION_TYPE_WALLET,
+} from '../popup/utils/constants';
 
 export default {
   switchNetwork(state, payload) {
@@ -76,8 +80,8 @@ export default {
       ...state.notifications,
       {
         ...payload,
-        type: 'wallet',
-        status: 'CREATED',
+        type: NOTIFICATION_TYPE_WALLET,
+        status: NOTIFICATION_STATUS_CREATED,
         createdAt: new Date().toISOString(),
       },
     ];

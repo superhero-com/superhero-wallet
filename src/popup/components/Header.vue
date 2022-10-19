@@ -8,10 +8,10 @@
       class="left"
     >
       <Component
-        :is="isDiamondDisabled ? 'div' : 'RouterLink'"
+        :is="isLogoDisabled ? 'div' : 'RouterLink'"
         v-if="isLoggedIn && !showBack"
-        :to="isDiamondDisabled ? null : { name: 'account' }"
-        :class="['home-button', { 'disabled': isDiamondDisabled }]"
+        :to="isLogoDisabled ? null : { name: 'account' }"
+        :class="['home-button', { 'disabled': isLogoDisabled }]"
       >
         <Logo class="home-icon" />
       </Component>
@@ -37,10 +37,10 @@
       v-if="isLoggedIn"
       class="right"
     >
-      <NotifyBell />
+      <NotifyBell v-if="showNotifications" />
 
       <BtnIcon
-        v-if="$route.path !== '/more' && !$route.meta.closeButton"
+        v-if="showMore"
         :to="{ name: 'more' }"
         data-cy="page-more"
       >
@@ -108,15 +108,22 @@ export default {
       return this.$route.meta.modalHeader;
     },
     showBack() {
-      return (this.$route.meta.backButton !== undefined ? this.$route.meta.backButton : true)
-        && this.title;
+      return (
+        (this.$route.meta.backButton !== undefined ? this.$route.meta.backButton : true)
+        && this.title
+      );
     },
-    isDiamondDisabled() {
+    showMore() {
+      return this.$route.name !== 'more' && !this.$route.meta?.closeButton;
+    },
+    showNotifications() {
+      return this.$route.name !== 'notifications' && !this.$route.meta?.hideNotificationsIcon;
+    },
+    isLogoDisabled() {
       return this.$route.name === 'account';
     },
   },
   methods: {
-    ...mapMutations(['setNotificationsStatus']),
     back() {
       if (this.$store.state.route.from.path === '/') {
         this.$router.push(this.isLoggedIn ? '/account' : '/');

@@ -1,9 +1,8 @@
 <template>
   <BtnIcon
-    v-if="!$route.path.startsWith('/notifications') && !hideNotificationsIcon"
     class="notifications"
     data-cy="noti"
-    @click="toNotifications"
+    :to="{ name: 'notifications' }"
   >
     <BellIcon class="bell-icon" />
     <span
@@ -16,60 +15,42 @@
   </BtnIcon>
 </template>
 
-<script>
-import { mapMutations, mapState } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent, Ref } from '@vue/composition-api';
+import { INotification } from '../../types';
+import { NOTIFICATION_STATUS_CREATED, rxJsObservableToVueState } from '../utils';
 import BellIcon from '../../icons/bell.svg?vue-component';
 import BtnIcon from './buttons/BtnIcon.vue';
 
-const notificationStatus = {
-  created: 'CREATED',
-  peeked: 'PEEKED',
-};
-
-export default {
+export default defineComponent({
   name: 'NotifyBell',
   components: {
     BtnIcon,
     BellIcon,
   },
-  subscriptions() {
-    return {
-      superheroNotifications: this.$store.state.observables.notifications,
-    };
-  },
-  computed: {
-    ...mapState(['notifications', 'pageTitle']),
-    notificationsCount() {
-      const count = [...(this.notifications || []), ...(this.superheroNotifications || [])].filter(
-        (n) => n.status === notificationStatus.created,
-      ).length;
+  setup(props, { root }) {
+    const superheroNotifications = rxJsObservableToVueState(
+      root.$store.state.observables.notifications,
+      [],
+    ) as Ref<INotification[]>;
+    const notifications = computed<INotification[]>(() => root.$store.state.notifications);
+
+    const notificationsCount = computed<string | number>(() => {
+      const count = [
+        ...notifications.value,
+        ...superheroNotifications.value,
+      ]
+        .filter(({ status }) => status === NOTIFICATION_STATUS_CREATED)
+        .length;
 
       return count > 99 ? '99+' : count;
-    },
-    hideNotificationsIcon() {
-      return this.$route.meta.hideNotificationsIcon;
-    },
-  },
-  methods: {
-    ...mapMutations(['setNotificationsStatus']),
-    async toNotifications() {
-      this.notifications.forEach((n) => this.setNotificationsStatus({
-        createdAt: n.createdAt,
-        status: notificationStatus.peeked,
-      }));
-      await this.$store.dispatch('modifyNotifications', [
-        this.superheroNotifications.filter(
-          (n) => n.status === notificationStatus.created,
-        ).map((n) => n.id),
-        notificationStatus.peeked,
-      ]);
-      if (this.$store.state.route.fullPath !== '/notifications') {
-        this.$router.push('/notifications');
-      }
-    },
-  },
+    });
 
-};
+    return {
+      notificationsCount,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>

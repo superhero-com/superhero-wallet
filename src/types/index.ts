@@ -1,5 +1,7 @@
 /* eslint-disable camelcase */
 
+import { RawLocation } from 'vue-router';
+import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 
 export interface IToken {
@@ -62,7 +64,7 @@ export interface INetwork {
   name: string
   networkId: string
   tipContractV1: string
-  tipContractV2: string
+  tipContractV2?: string
   url: string
 }
 
@@ -74,4 +76,35 @@ export interface IPermission {
   transactionSignFirstAskedOn: any
   transactionSignLimit: number
   transactionSignLimitLeft: number
+}
+
+export type NotificationStatus = 'CREATED' | 'PEEKED' | 'READ';
+
+export interface INotification {
+  chainName?: string
+  createdAt: string
+  entityId?: string
+  entityType?: string
+  id?: number
+  path?: RawLocation
+  receiver?: string
+  sender?: string
+  sourceId?: string
+  sourceType?: string
+  status: NotificationStatus
+  text?: string
+  type: string
+  updatedAt?: string
+}
+
+export interface INotificationSetting {
+  text: TranslateResult
+  checked: boolean
+  type: string
+}
+
+export interface ICurrency {
+  name: string
+  code: string
+  symbol: string
 }
