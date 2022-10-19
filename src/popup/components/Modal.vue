@@ -186,7 +186,7 @@ export default {
 
       padding: var(--screen-padding-x);
       padding-top: 0;
-      color: variables.$color-light-grey;
+      color: variables.$color-grey-light;
       word-break: break-word;
     }
 

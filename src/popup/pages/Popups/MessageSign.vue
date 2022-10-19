@@ -96,7 +96,7 @@ export default {
 
     @extend %face-sans-15-medium;
 
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
     text-align: center;
 
     .app-name {

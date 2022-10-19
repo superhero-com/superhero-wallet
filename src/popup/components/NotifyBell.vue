@@ -89,7 +89,7 @@ export default {
     top: 4px;
     min-width: 14px;
     height: 14px;
-    background: variables.$color-pink;
+    background: variables.$color-danger;
     border-radius: 7px;
     text-align: center;
     line-height: 14px;

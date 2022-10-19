@@ -75,7 +75,7 @@ export default {
   }
 
   &:hover {
-    background-color: variables.$color-grey-dark-hover;
+    background-color: rgba(variables.$color-white, 0.08);
 
     > .icon {
       opacity: 1;
@@ -86,10 +86,10 @@ export default {
     background-color: variables.$color-grey-medium;
   }
 
-  &.pink {
+  &.danger {
     &:hover {
       > .icon {
-        color: variables.$color-pink;
+        color: variables.$color-danger;
       }
     }
   }

@@ -70,7 +70,7 @@ export default {
   .symbol {
     @extend %face-sans-14-medium;
 
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
   }
 
   .fiat {
@@ -93,7 +93,7 @@ export default {
   }
 
   &.received {
-    color: variables.$color-green-hover;
+    color: variables.$color-success-hover;
 
     &::before {
       content: '+';

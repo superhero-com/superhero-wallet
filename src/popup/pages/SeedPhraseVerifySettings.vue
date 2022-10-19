@@ -186,7 +186,7 @@ export default {
         opacity: 0.4;
         cursor: unset;
         background: transparent;
-        border-color: variables.$color-light-grey;
+        border-color: variables.$color-grey-light;
         color: variables.$color-white;
       }
     }
@@ -232,7 +232,7 @@ export default {
 
     .notification {
       min-height: 176px;
-      border: 2px solid variables.$color-green-dark;
+      border: 2px solid variables.$color-success-dark;
       border-radius: 16px;
       background: rgba(variables.$color-black, 0.85);
       position: absolute;
@@ -242,7 +242,7 @@ export default {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      color: variables.$color-green-dark;
+      color: variables.$color-success-dark;
 
       @extend %face-sans-16-medium;
 

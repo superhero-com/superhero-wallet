@@ -61,7 +61,7 @@ export default {
   background-color: rgba(variables.$color-black, 0.3);
   border-radius: 16px;
   gap: 6px;
-  color: variables.$color-blue;
+  color: variables.$color-primary;
   white-space: nowrap;
   border: 2px solid transparent;
   transition: all 0.12s ease-out;

@@ -155,7 +155,7 @@ export default {
     @include mixins.flex(center, center);
 
     text-align: center;
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
 
     .extension {
       width: 50%;

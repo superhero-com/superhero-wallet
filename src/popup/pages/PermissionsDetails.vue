@@ -170,7 +170,7 @@ export default {
     border-right: 0;
 
     .currency-name {
-      color: variables.$color-blue;
+      color: variables.$color-primary;
     }
   }
 }

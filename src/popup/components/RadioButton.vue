@@ -75,7 +75,7 @@ export default {
       height: 0;
       top: 50%;
       left: 50%;
-      background: variables.$color-blue;
+      background: variables.$color-primary;
       transition: all 0.15s ease-in-out;
       transform: translate(-50%, -50%);
     }

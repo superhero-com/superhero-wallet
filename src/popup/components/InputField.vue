@@ -174,7 +174,7 @@ export default {
 .input-field {
   --color-border: transparent;
   --color-bg: #{rgba(variables.$color-white, 0.08)};
-  --color-input-text: #{variables.$color-light-grey};
+  --color-input-text: #{variables.$color-grey-light};
   --color-placeholder: #{rgba(variables.$color-white, 0.75)};
   --color-message: #{rgba(variables.$color-white, 0.75)};
 

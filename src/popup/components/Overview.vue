@@ -160,7 +160,7 @@ export default {
       width: 56px;
       height: 56px;
       padding: 8px;
-      border: 2px solid variables.$color-blue;
+      border: 2px solid variables.$color-primary;
       border-radius: 100px;
     }
 
@@ -181,12 +181,12 @@ export default {
         transform: translate(-50%, -50%);
         width: 15px;
         height: 17px;
-        color: variables.$color-blue;
+        color: variables.$color-primary;
       }
 
       .line {
         height: calc(50% + 1px);
-        border-bottom: 2px solid variables.$color-blue;
+        border-bottom: 2px solid variables.$color-primary;
       }
     }
   }

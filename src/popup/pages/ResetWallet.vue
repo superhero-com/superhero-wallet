@@ -14,7 +14,7 @@
     </i18n>
 
     <BtnMain
-      variant="pink"
+      variant="danger"
       class="reset-wallet-button"
       has-icon
       extend

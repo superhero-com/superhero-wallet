@@ -97,7 +97,7 @@ export default {
 
     @extend %face-sans-15-medium;
 
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
     text-align: center;
 
     .app-name {
@@ -120,7 +120,7 @@ export default {
       .icon {
         width: 24px;
         height: 24px;
-        color: variables.$color-green;
+        color: variables.$color-success;
         padding-right: 4px;
       }
     }

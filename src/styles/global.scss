@@ -75,7 +75,7 @@ button {
   padding: 0;
   background: none;
   border: none;
-  color: $color-light-grey;
+  color: $color-grey-light;
 
   &:focus {
     outline: none;
@@ -117,7 +117,7 @@ button {
 
     letter-spacing: 0.05em;
     line-height: 18px;
-    color: $color-light-grey;
+    color: $color-grey-light;
     word-break: break-all;
   }
 

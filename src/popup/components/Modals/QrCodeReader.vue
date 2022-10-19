@@ -217,7 +217,7 @@ export default {
       margin-bottom: 0;
       width: 40px;
       height: 40px;
-      color: variables.$color-blue;
+      color: variables.$color-primary;
     }
   }
 

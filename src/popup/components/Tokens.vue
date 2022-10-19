@@ -103,7 +103,7 @@ export default {
 .tokens {
   @extend %face-sans-14-regular;
 
-  color: variables.$color-light-grey;
+  color: variables.$color-grey-light;
 
   &,
   .symbols,
@@ -140,7 +140,7 @@ export default {
     }
 
     &.border {
-      border: 0.25px solid variables.$color-light-grey;
+      border: 0.25px solid variables.$color-grey-light;
     }
   }
 
@@ -151,7 +151,7 @@ export default {
       @extend %face-sans-18-medium;
 
       .separator {
-        color: variables.$color-light-grey;
+        color: variables.$color-grey-light;
       }
     }
 

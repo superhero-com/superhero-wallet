@@ -47,7 +47,7 @@ export default {
 
     a {
       font-weight: 500;
-      color: variables.$color-blue;
+      color: variables.$color-primary;
       text-decoration: none;
 
       &:hover {

@@ -85,7 +85,7 @@ export default {
     .reset-wallet {
       width: 48px;
       height: 48px;
-      color: variables.$color-pink;
+      color: variables.$color-danger;
     }
   }
 

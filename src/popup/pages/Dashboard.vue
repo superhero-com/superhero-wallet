@@ -57,7 +57,7 @@
           class="card-button"
           :text="$t('dashboard.buy-card.button')"
           :href="simplexLink"
-          variant="pink"
+          variant="danger"
           inline
         />
       </Card>

@@ -230,7 +230,7 @@ export default {
     .home-icon {
       width: 32px;
       height: 32px;
-      color: variables.$color-blue;
+      color: variables.$color-primary;
     }
   }
 

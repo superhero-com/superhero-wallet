@@ -187,7 +187,7 @@ export default {
   .explanation {
     margin-top: 16px;
     line-height: 1.4em;
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
 
     mark {
       background-color: transparent;

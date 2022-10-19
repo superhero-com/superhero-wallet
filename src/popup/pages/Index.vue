@@ -206,7 +206,7 @@ export default {
         }
 
         .aeternity-name {
-          color: variables.$color-pink;
+          color: variables.$color-danger;
         }
       }
     }
@@ -231,7 +231,7 @@ export default {
     .spinner {
       width: 256px;
       height: 256px;
-      color: variables.$color-blue;
+      color: variables.$color-primary;
     }
 
     .platforms {

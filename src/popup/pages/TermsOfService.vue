@@ -1005,7 +1005,7 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    color: variables.$color-green;
+    color: variables.$color-success;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -1024,7 +1024,7 @@ export default {
 
     span {
       margin-right: auto;
-      color: variables.$color-green;
+      color: variables.$color-success;
     }
   }
 

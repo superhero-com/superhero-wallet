@@ -62,11 +62,11 @@ export default {
 
   &.help,
   &.info {
-    color: variables.$color-blue;
+    color: variables.$color-primary;
   }
 
   &.success {
-    color: variables.$color-green-dark;
+    color: variables.$color-success-dark;
   }
 }
 </style>

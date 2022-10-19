@@ -42,7 +42,7 @@ export default {
 
   ::v-deep .content {
     border-radius: 0.25rem;
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
     background-color: variables.$color-black;
     top: 1.5rem;
     right: 0;
