@@ -17,11 +17,18 @@
     </template>
     <template #after="{ focused }">
       <SelectAsset
+        v-if="!aeOnly"
         v-bind="$attrs"
-        :value="selectedAsset"
+        :value="currentAsset"
         :focused="focused"
-        @input="$emit('asset-selected', $event)"
+        @input="handleAssetSelected($event)"
       />
+      <div
+        v-else
+        class="ae-symbol"
+      >
+        AE
+      </div>
     </template>
 
     <template #under="{ focused }">
@@ -55,6 +62,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { pick } from 'lodash-es';
 import InputField from './InputField.vue';
 import SelectAsset from './SelectAsset.vue';
 
@@ -67,8 +75,21 @@ export default {
     value: { type: [String, Number], default: '' },
     label: { type: String, default: null },
     selectedAsset: { type: Object, default: null },
+    aeOnly: Boolean,
+  },
+  subscriptions() {
+    return pick(this.$store.state.observables, [
+      'balance',
+      'balanceCurrency',
+    ]);
+  },
+  data() {
+    return {
+      aeToken: null,
+    };
   },
   computed: {
+    ...mapGetters('fungibleTokens', ['getAeternityToken']),
     ...mapGetters([
       'formatCurrency',
       'account',
@@ -77,12 +98,15 @@ export default {
       return this.$validator.errors.has('amount');
     },
     totalAmount() {
-      return (this.selectedAsset?.current_price)
-        ? ((+this.value || 0) * this.selectedAsset.current_price).toFixed(2)
+      return (this.currentAsset?.current_price)
+        ? ((+this.value || 0) * this.currentAsset.current_price).toFixed(2)
         : 0;
     },
     currentTokenFiatPrice() {
-      return this.selectedAsset?.current_price?.toFixed(2);
+      return this.currentAsset?.current_price?.toFixed(2);
+    },
+    currentAsset() {
+      return this.selectedAsset || this.aeToken;
     },
   },
   watch: {
@@ -90,11 +114,26 @@ export default {
       return this.$emit('error', value);
     },
   },
+  created() {
+    this.aeToken = this.getAeternityToken({
+      tokenBalance: this.balance,
+      balanceCurrency: this.balanceCurrency,
+    });
+    if (!this.selectedAsset) {
+      this.handleAssetSelected(this.aeToken);
+    }
+  },
+  methods: {
+    handleAssetSelected(asset) {
+      this.$emit('asset-selected', asset);
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
 @use '../../styles/variables';
+@use '../../styles/typography';
 @use '../../styles/mixins';
 
 .input-amount {
@@ -102,6 +141,8 @@ export default {
     @include mixins.flex(space-between, center);
 
     &-total {
+      word-break: break-word;
+
       .focused & {
         color: rgba(variables.$color-white, 0.75);
       }
@@ -114,6 +155,12 @@ export default {
 
   &-asset {
     margin-right: -2px; // Compensate visually the roundness of the input
+  }
+
+  .ae-symbol {
+    @extend %face-sans-15-medium;
+
+    color: variables.$color-primary;
   }
 }
 </style>

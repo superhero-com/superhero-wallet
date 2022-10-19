@@ -91,7 +91,6 @@ import { useCopy } from '../../../composables';
 import {
   APP_LINK_WEB,
   MODAL_TRANSFER_RECEIVE,
-  rxJsObservableToVueState,
 } from '../../utils';
 
 import InputAmount from '../InputAmountV2.vue';
@@ -121,28 +120,13 @@ export default defineComponent({
     tokenContractId: { type: [String, Number], default: null },
   },
   setup(props, { root }) {
-    const getAeternityToken = root.$store.getters['fungibleTokens/getAeternityToken'] as (options: {
-      tokenBalance: any
-      balanceCurrency: any
-    }) => IToken;
-
     const amount = ref<number | null>(props.defaultAmount ? Number(props.defaultAmount) : null);
     const account = computed<IAccount>(() => root.$store.getters.account);
     const availableTokens = computed<ITokenList>(
       () => root.$store.state.fungibleTokens.availableTokens,
     );
 
-    const balance = rxJsObservableToVueState(root.$store.state.observables.balance);
-    const balanceCurrency = rxJsObservableToVueState(root.$store.state.observables.balanceCurrency);
-
-    const selectedAsset = ref<IAsset | IToken | null>(
-      (props.tokenContractId && availableTokens.value[props.tokenContractId])
-        ? availableTokens.value[props.tokenContractId]
-        : getAeternityToken({
-          tokenBalance: balance.value,
-          balanceCurrency: balanceCurrency.value,
-        }),
-    );
+    const selectedAsset = ref<IAsset | IToken | null>(null);
 
     const { copied, copy } = useCopy();
 
@@ -179,7 +163,7 @@ export default defineComponent({
       await root.$store.dispatch('share', { text });
     }
 
-    function handleAssetChange(asset: IAsset) {
+    function handleAssetChange(asset: IAsset | IToken) {
       selectedAsset.value = asset;
     }
 
@@ -191,11 +175,16 @@ export default defineComponent({
       copy(accountAddressToCopy.value);
     }
 
+    (() => {
+      if (props.tokenContractId && availableTokens.value[props.tokenContractId]) {
+        handleAssetChange(availableTokens.value[props.tokenContractId]);
+      }
+    })();
+
     return {
       IS_MOBILE_DEVICE,
       amount,
       selectedAsset,
-      balance,
       share,
       closeModal,
       handleAssetChange,

@@ -10,6 +10,7 @@
         class="amount"
         :label="$t('pages.invite.tip-attached')"
         no-token
+        ae-only
         @error="(val) => error = val"
       />
       <BtnMain
@@ -43,7 +44,7 @@
 import { mapState } from 'vuex';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 import { watchUntilTruthy } from '../utils/helper';
-import InputAmount from '../components/InputAmount.vue';
+import InputAmount from '../components/InputAmountV2.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InviteItem from '../components/InviteItem.vue';
 import Invite from '../../icons/invite.svg?vue-component';
