@@ -3,7 +3,11 @@ import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
 import {
-  AVATAR_URL, defaultNetworks, TX_TYPE_MDW, DEX_CONTRACTS,
+  AVATAR_URL,
+  NETWORK_MAINNET,
+  NETWORK_TESTNET,
+  TX_TYPE_MDW,
+  DEX_CONTRACTS,
 } from '../popup/utils/constants';
 import {
   checkHashType,
@@ -51,7 +55,8 @@ export default {
   minTipAmount: ({ currencies: { usd } }) => 0.01 / usd,
   networks({ userNetworks }) {
     return [
-      ...defaultNetworks,
+      NETWORK_MAINNET,
+      NETWORK_TESTNET,
       ...userNetworks.map((network, index) => ({ index, ...network })),
     ].reduce((acc, n) => ({ ...acc, [n.name]: n }), {});
   },

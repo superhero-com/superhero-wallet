@@ -12,7 +12,7 @@
       v-for="setting in notificationSettings"
       :key="setting.type"
       :class="{ unchecked: !setting.checked }"
-      :disabled="setting.type === 'wallet'"
+      :disabled="setting.type === NOTIFICATION_TYPE_WALLET"
       :value="setting.checked"
       :label="setting.text"
       @input="toggleNotificationSetting(setting.type)"
@@ -22,10 +22,14 @@
 
 <script>
 import { mapMutations, mapState } from 'vuex';
+import { NOTIFICATION_TYPE_WALLET } from '../utils';
 import SwitchButton from '../components/SwitchButton.vue';
 
 export default {
   components: { SwitchButton },
+  data: () => ({
+    NOTIFICATION_TYPE_WALLET,
+  }),
   computed: mapState(['notificationSettings']),
   methods: mapMutations(['toggleNotificationSetting']),
 };

@@ -1,5 +1,6 @@
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
+import { ICurrency, INetwork, INotificationSetting } from '../../types';
 import { i18n } from '../../store/plugins/languages';
 
 export const MAGNITUDE = 18;
@@ -28,7 +29,7 @@ export const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dx
 export const STUB_CONTRACT_ADDRESS = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6';
 export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
 export const STUB_NONCE = 10000;
-export const MAX_UINT256 = BigNumber(2).exponentiatedBy(256).minus(1);
+export const MAX_UINT256 = new BigNumber(2).exponentiatedBy(256).minus(1);
 
 export const DEX_CONTRACTS = {
   ae_uat: {
@@ -55,7 +56,7 @@ export const DEX_CONTRACTS = {
   },
 };
 
-const NETWORK_MAINNET = {
+export const NETWORK_MAINNET: INetwork = {
   url: 'https://mainnet.aeternity.io',
   networkId: 'ae_mainnet',
   middlewareUrl: 'https://mainnet.aeternity.io/mdw',
@@ -66,7 +67,7 @@ const NETWORK_MAINNET = {
   name: 'Mainnet',
 };
 
-const NETWORK_TESTNET = {
+export const NETWORK_TESTNET: INetwork = {
   url: 'https://testnet.aeternity.io',
   networkId: 'ae_uat',
   middlewareUrl: 'https://testnet.aeternity.io/mdw',
@@ -77,11 +78,6 @@ const NETWORK_TESTNET = {
   tipContractV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu',
   name: 'Testnet',
 };
-
-export const defaultNetworks = [
-  NETWORK_MAINNET,
-  NETWORK_TESTNET,
-];
 
 export const defaultNetwork = process.env.NETWORK === 'Testnet' ? NETWORK_TESTNET : NETWORK_MAINNET;
 
@@ -95,45 +91,57 @@ export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 
 export const BUG_REPORT_URL = 'https://spgrrc00ymg.typeform.com/to/Kk3Zyjdr';
 
-export const NOTIFICATION_SETTINGS = [
+export const NOTIFICATION_STATUS_CREATED = 'CREATED';
+export const NOTIFICATION_STATUS_PEEKED = 'PEEKED';
+export const NOTIFICATION_STATUS_READ = 'READ';
+
+export const NOTIFICATION_TYPE_WALLET = 'wallet';
+export const NOTIFICATION_TYPE_COMMENT_ON_TIP = 'COMMENT_ON_TIP';
+export const NOTIFICATION_TYPE_COMMENT_ON_COMMENT = 'COMMENT_ON_COMMENT';
+export const NOTIFICATION_TYPE_TIP_ON_COMMENT = 'TIP_ON_COMMENT';
+export const NOTIFICATION_TYPE_CLAIM_OF_TIP = 'CLAIM_OF_TIP';
+export const NOTIFICATION_TYPE_CLAIM_OF_RETIP = 'CLAIM_OF_RETIP';
+export const NOTIFICATION_TYPE_RETIP_ON_TIP = 'RETIP_ON_TIP';
+
+export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
   {
     text: i18n.t('pages.notification-settings.wallet'),
     checked: true,
-    type: 'wallet',
+    type: NOTIFICATION_TYPE_WALLET,
   },
   {
     text: i18n.t('pages.notification-settings.commentOnTip'),
     checked: true,
-    type: 'COMMENT_ON_TIP',
+    type: NOTIFICATION_TYPE_COMMENT_ON_TIP,
   },
   {
     text: i18n.t('pages.notification-settings.commentOnComment'),
     checked: false,
-    type: 'COMMENT_ON_COMMENT',
+    type: NOTIFICATION_TYPE_COMMENT_ON_COMMENT,
   },
   {
     text: i18n.t('pages.notification-settings.retipOnTip'),
     checked: true,
-    type: 'RETIP_ON_TIP',
+    type: NOTIFICATION_TYPE_RETIP_ON_TIP,
   },
   {
     text: i18n.t('pages.notification-settings.tipOnComment'),
     checked: true,
-    type: 'TIP_ON_COMMENT',
+    type: NOTIFICATION_TYPE_TIP_ON_COMMENT,
   },
   {
     text: i18n.t('pages.notification-settings.claimOfTip'),
     checked: true,
-    type: 'CLAIM_OF_TIP',
+    type: NOTIFICATION_TYPE_CLAIM_OF_TIP,
   },
   {
     text: i18n.t('pages.notification-settings.claimOfRetip'),
     checked: true,
-    type: 'CLAIM_OF_RETIP',
+    type: NOTIFICATION_TYPE_CLAIM_OF_RETIP,
   },
 ];
 
-export const CURRENCIES = [
+export const CURRENCIES: ICurrency[] = [
   {
     name: 'United States Dollar',
     code: 'usd',
