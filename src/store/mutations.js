@@ -1,7 +1,10 @@
 /* eslint no-param-reassign: ["error", { "ignorePropertyModificationsFor": ["state"] }] */
 import Vue from 'vue';
 import { uniqBy } from 'lodash-es';
-import { defaultNetwork } from '../popup/utils/constants';
+import {
+  NODE_STATUS_CONNECTED,
+  defaultNetwork,
+} from '../popup/utils/constants';
 
 export default {
   switchNetwork(state, payload) {
@@ -55,11 +58,13 @@ export default {
     state.tippingV2 = tippingV2 || null;
   },
   setNodeStatus(state, payload) {
-    if (state.nodeStatus === 'offline') {
-      if (payload !== 'online') return;
-      state.nodeStatus = '';
-    } else {
-      state.nodeStatus = payload;
+    state.nodeStatus = payload;
+
+    // Hide "connected" message after some delay.
+    if (payload === NODE_STATUS_CONNECTED) {
+      setTimeout(() => {
+        state.nodeStatus = '';
+      }, 1000);
     }
   },
   setCurrentCurrency(state, currency) {

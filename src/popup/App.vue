@@ -25,7 +25,6 @@
         />
       </transition>
 
-      <NodeConnectionStatus v-if="showStatusAndHeader" />
       <Component
         :is="component"
         v-for="{ component, key, props } in modals"
@@ -33,13 +32,18 @@
         v-bind="props"
       />
     </div>
+
+    <NodeConnectionStatus
+      v-if="showStatusAndHeader"
+      class="connection-status"
+    />
   </div>
 </template>
 
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { watchUntilTruthy } from './utils/helper';
-import { NOTIFICATION_SETTINGS } from './utils/constants';
+import { NOTIFICATION_SETTINGS, NODE_STATUS_OFFLINE, NODE_STATUS_CONNECTED } from './utils';
 import {
   IS_IOS,
   IS_ANDROID,
@@ -90,8 +94,8 @@ export default {
       IS_CORDOVA && IS_IOS ? '100vh' : '100%',
     );
 
-    window.addEventListener('online', () => this.$store.commit('setNodeStatus', 'online'));
-    window.addEventListener('offline', () => this.$store.commit('setNodeStatus', 'offline'));
+    window.addEventListener('online', () => this.$store.commit('setNodeStatus', NODE_STATUS_CONNECTED));
+    window.addEventListener('offline', () => this.$store.commit('setNodeStatus', NODE_STATUS_OFFLINE));
 
     await watchUntilTruthy(() => this.isRestored);
 
@@ -138,6 +142,7 @@ export default {
   background-color: var(--screen-bg-color);
   font-family: variables.$font-sans;
   transition: background-color 200ms;
+  transform: translate(0, 0); // Create a scope for child fixed elements
 
   .camera-close-button {
     position: absolute;
@@ -160,9 +165,13 @@ export default {
     background-color: var(--screen-bg-color);
 
     @include mixins.desktop {
-      min-height: 100%;
       padding-bottom: 0;
     }
+  }
+
+  .connection-status {
+    margin-top: auto;
+    position: fixed;
   }
 
   &.display-as-mobile-app {
@@ -189,8 +198,8 @@ export default {
 
       @include mixins.desktop {
         padding-top: 0;
-        min-height: calc(100% - var(--header-height));
-        min-height: calc(100% - var(--header-height) - env(safe-area-inset-top));
+        // min-height: calc(100% - var(--header-height));
+        // min-height: calc(100% - var(--header-height) - env(safe-area-inset-top));
       }
     }
   }

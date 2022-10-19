@@ -85,6 +85,12 @@ export const defaultNetworks = [
 
 export const defaultNetwork = process.env.NETWORK === 'Testnet' ? NETWORK_TESTNET : NETWORK_MAINNET;
 
+export const NODE_STATUS_INIT_SERVICES = 'initServices';
+export const NODE_STATUS_CONNECTING = 'connecting';
+export const NODE_STATUS_CONNECTED = 'connected';
+export const NODE_STATUS_ERROR = 'error';
+export const NODE_STATUS_OFFLINE = 'offline';
+
 export const AGGREGATOR_URL = 'https://superhero.com/';
 
 export const TXS_PER_PAGE = 30;

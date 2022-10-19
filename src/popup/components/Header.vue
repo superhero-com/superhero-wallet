@@ -156,9 +156,18 @@ export default {
   top: 0;
   z-index: 2;
   height: calc(var(--header-height) + env(safe-area-inset-top));
-  background-color: var(--screen-bg-color);
   padding: env(safe-area-inset-top) 8px 0;
   width: 100%;
+  backdrop-filter: blur(4px);
+
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background-color: var(--screen-bg-color);
+    opacity: 0.90;
+  }
 
   @include mixins.mobile {
     display: flex;
@@ -207,7 +216,7 @@ export default {
     background-color: variables.$color-bg-modal;
   }
 
-  .left .home-button {
+  .home-button {
     &.disabled {
       cursor: default;
     }

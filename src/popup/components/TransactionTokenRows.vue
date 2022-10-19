@@ -58,7 +58,7 @@ export default {
     }
 
     &.sent:not(.error) .amount {
-      color: variables.$color-pink;
+      color: variables.$color-danger;
     }
 
     .tokens {

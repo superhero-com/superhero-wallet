@@ -57,7 +57,7 @@
           class="card-button"
           :text="$t('dashboard.buy-card.button')"
           :href="simplexLink"
-          variant="pink"
+          variant="danger"
           inline
         />
       </Card>
@@ -166,7 +166,6 @@ export default {
 .dashboard {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
 
   .first-card-wrapper {
     padding-top: 8px;

@@ -86,10 +86,10 @@ export default {
     background-color: variables.$color-grey-medium;
   }
 
-  &.pink {
+  &.danger {
     &:hover {
       > .icon {
-        color: variables.$color-pink;
+        color: variables.$color-danger;
       }
     }
   }

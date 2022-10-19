@@ -31,7 +31,7 @@
           <BtnIcon
             size="rg"
             data-cy="delete"
-            variant="pink"
+            variant="danger"
             @click="deleteNetwork(network.index)"
           >
             <TrashIcon />

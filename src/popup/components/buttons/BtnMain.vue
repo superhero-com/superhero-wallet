@@ -36,7 +36,6 @@ export default defineComponent({
         'secondary',
         'alternative',
         'danger',
-        'pink',
         'purple',
       ].includes(value),
       default: 'primary',
@@ -139,10 +138,6 @@ export default defineComponent({
 
   &.danger {
     --color: #{variables.$color-danger};
-  }
-
-  &.pink {
-    --color: #{variables.$color-pink};
   }
 
   &.purple {

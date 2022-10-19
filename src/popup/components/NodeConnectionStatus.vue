@@ -9,13 +9,20 @@
         'connect-error': isError && !isSettings,
       }"
     >
-      {{ statuses[nodeStatus] }}
+      {{ statusText }}
     </div>
   </transition>
 </template>
 
 <script>
 import { mapGetters, mapState } from 'vuex';
+import {
+  NODE_STATUS_INIT_SERVICES,
+  NODE_STATUS_CONNECTING,
+  NODE_STATUS_CONNECTED,
+  NODE_STATUS_ERROR,
+  NODE_STATUS_OFFLINE,
+} from '../utils';
 
 export default {
   props: {
@@ -24,11 +31,11 @@ export default {
   data() {
     return {
       statuses: {
-        initServices: this.$t('pages.nodeConnectionStatus.initServices'),
-        connecting: this.$t('pages.nodeConnectionStatus.connecting'),
-        connected: this.$t('pages.nodeConnectionStatus.connected'),
-        error: this.$t('pages.nodeConnectionStatus.error'),
-        offline: this.$t('pages.nodeConnectionStatus.offline'),
+        [NODE_STATUS_INIT_SERVICES]: this.$t('pages.nodeConnectionStatus.initServices'),
+        [NODE_STATUS_CONNECTING]: this.$t('pages.nodeConnectionStatus.connecting'),
+        [NODE_STATUS_CONNECTED]: this.$t('pages.nodeConnectionStatus.connected'),
+        [NODE_STATUS_ERROR]: this.$t('pages.nodeConnectionStatus.error'),
+        [NODE_STATUS_OFFLINE]: this.$t('pages.nodeConnectionStatus.offline'),
       },
     };
   },
@@ -36,10 +43,16 @@ export default {
     ...mapState(['nodeStatus']),
     ...mapGetters(['account', 'isLoggedIn']),
     isVisible() {
-      return this.nodeStatus && this.account.address && this.isLoggedIn && (this.isSettings || !this.$route.path.startsWith('/more/settings'));
+      // return this.nodeStatus && this.account.address && this.isLoggedIn
+      // && (this.isSettings || !this.$route.path.startsWith('/more/settings'));
+      return true;
     },
     isError() {
-      return this.nodeStatus === 'error' || this.nodeStatus === 'offline';
+      // return [NODE_STATUS_ERROR, NODE_STATUS_OFFLINE].includes(this.nodeStatus);
+      return true;
+    },
+    statusText() {
+      return this.statuses[this.nodeStatus] || 'Foo';
     },
   },
 };
@@ -81,7 +94,7 @@ export default {
 
 .connect-error {
   font-weight: bold;
-  background: variables.$color-blue;
+  background: variables.$color-danger;
 }
 
 .from-settings-fade {
