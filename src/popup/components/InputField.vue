@@ -236,6 +236,7 @@ export default {
       display: flex;
       align-items: center;
       width: 100%;
+      overflow: hidden;
 
       .icon {
         width: 24px;

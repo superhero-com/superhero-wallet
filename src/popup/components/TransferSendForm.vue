@@ -77,7 +77,6 @@
 </template>
 
 <script>
-import { pick } from 'lodash-es';
 import { mapGetters, mapState } from 'vuex';
 import maxAmountMixin from '../../mixins/maxAmountMixin';
 import {
@@ -132,16 +131,9 @@ export default {
       error: false,
     };
   },
-  subscriptions() {
-    return pick(this.$store.state.observables, [
-      'balance',
-      'balanceCurrency',
-    ]);
-  },
   computed: {
     ...mapGetters(['account']),
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters('fungibleTokens', ['getAeternityToken']),
     addressErrorMsg() {
       return this.errors.items
         .filter(({ field }) => field === 'address')
@@ -227,11 +219,7 @@ export default {
     checkAensName,
     validateTipUrl,
     async queryHandler(query) {
-      this.formModel.selectedAsset = this.availableTokens[query.token]
-        ?? this.getAeternityToken({
-          tokenBalance: this.balance,
-          balanceCurrency: this.balanceCurrency,
-        });
+      this.formModel.selectedAsset = this.availableTokens[query.token];
 
       if (query.account) this.formModel.address = query.account;
       if (query.amount) this.formModel.amount = query.amount;
