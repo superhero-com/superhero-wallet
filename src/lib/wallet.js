@@ -4,6 +4,9 @@ import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { camelCase, isEqual, times } from 'lodash-es';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
 import {
+  NODE_STATUS_CONNECTING,
+  NODE_STATUS_CONNECTION_DONE,
+  NODE_STATUS_ERROR,
   fetchJson,
   executeAndSetInterval,
   watchUntilTruthy,
@@ -97,7 +100,7 @@ export default async function initSdk() {
   if (initSdkRunning) return;
   initSdkRunning = true;
 
-  store.commit('setNodeStatus', 'connecting');
+  store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
   try {
     await store.dispatch('sdkPlugin/initialize');
     await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
@@ -137,30 +140,29 @@ export default async function initSdk() {
       );
     }
 
-    const nodeStatusTimeout = 1000;
-
     store.commit('initSdk', store.getters['sdkPlugin/sdk']);
-    await Promise.all([store.dispatch('initContractInstances'), initMiddleware()]);
-    store.commit('setNodeStatus', 'connected');
-    setTimeout(() => store.commit('setNodeStatus', ''), nodeStatusTimeout);
+    await Promise.all([
+      store.dispatch('initContractInstances'),
+      initMiddleware(),
+    ]);
+    store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE);
 
     store.watch(
       (state, getters) => getters.activeNetwork,
       async (network, oldNetwork) => {
         if (isEqual(network, oldNetwork)) return;
         try {
-          store.commit('setNodeStatus', 'connecting');
+          store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
           await initMiddleware();
-          store.commit('setNodeStatus', 'connected');
-          setTimeout(() => store.commit('setNodeStatus', ''), nodeStatusTimeout);
+          store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE);
         } catch (error) {
-          store.commit('setNodeStatus', 'error');
+          store.commit('setNodeStatus', NODE_STATUS_ERROR);
           Logger.write(error);
         }
       },
     );
   } catch (e) {
-    store.commit('setNodeStatus', 'error');
+    store.commit('setNodeStatus', NODE_STATUS_ERROR);
     Logger.write(e);
   } finally {
     initSdkRunning = false;

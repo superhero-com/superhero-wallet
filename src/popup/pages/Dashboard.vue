@@ -16,6 +16,7 @@
       <Card
         :title="$t('dashboard.send-card.title')"
         :description="$t('dashboard.send-card.description')"
+        :disabled="!isConnected"
         clickable
         dense
         @click="openTransferSendModal()"
@@ -89,14 +90,17 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { isEmpty } from 'lodash-es';
-import AccountSwitcher from '../components/AccountSwitcher.vue';
 import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
-} from '../utils/constants';
+  buildSimplexLink,
+} from '../utils';
+
 import Card from '../components/dashboard/Card.vue';
 import CardRow from '../components/dashboard/CardRow.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
+import AccountSwitcher from '../components/AccountSwitcher.vue';
+
 import ArrowReceiveIcon from '../../icons/dashboard/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/dashboard/arrow-send.svg?vue-component';
 import SubtractIcon from '../../icons/subtract.svg?vue-component';
@@ -105,7 +109,6 @@ import MenuCardIcon from '../../icons/menucard.fill.svg?vue-component';
 
 import buyBackground from '../../image/dashboard/buy-ae.jpg';
 import chainNameBackground from '../../image/dashboard/chain-name.jpg';
-import { buildSimplexLink } from '../utils';
 
 export default {
   name: 'Dashboard',
@@ -126,8 +129,8 @@ export default {
   }),
   computed: {
     ...mapState(['backedUpSeed', 'transactions']),
-    ...mapGetters(['getAccountPendingTransactions', 'account']),
     ...mapState('accounts', ['activeIdx']),
+    ...mapGetters(['getAccountPendingTransactions', 'account', 'isConnected']),
     simplexLink() {
       return buildSimplexLink(this.account.address);
     },

@@ -29,7 +29,7 @@
       />
       <BtnMain
         class="button-action-primary"
-        :disabled="error || !transferData.address || !transferData.amount"
+        :disabled="error || !isConnected || !transferData.address || !transferData.amount"
         :has-icon="showSendButton"
         :text="showSendButton ? $t('pages.send.send') : $t('modals.send.next')"
         @click="proceedToNextStep"
@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { MODAL_TRANSFER_SEND } from '../../utils/constants';
 import { validateTipUrl } from '../../utils/helper';
 import Modal from '../Modal.vue';
@@ -97,6 +97,7 @@ export default {
   },
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
+    ...mapGetters(['isConnected']),
     currentStepConfig() {
       return this.steps[this.currentStep];
     },

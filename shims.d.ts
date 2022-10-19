@@ -1,3 +1,14 @@
+/**
+ * Global object available when running as the extension.
+ */
+declare const browser: undefined | {
+  runtime: any
+  tabs: any
+  webNavigation: any
+  contextMenus: any
+  storage: any
+};
+
 declare module '*.vue' {
   import Vue from 'vue';
 

@@ -26,7 +26,7 @@
         {{ $t('pages.token-details.receive') }}
       </BtnBox>
       <BtnBox
-        :disabled="!convertedBalance"
+        :disabled="!(convertedBalance && isConnected)"
         @click="openTransferSendModal()"
       >
         <ArrowSendIcon />
@@ -144,7 +144,7 @@ export default {
     return pick(this.$store.state.observables, ['balance', 'balanceCurrency']);
   },
   computed: {
-    ...mapGetters(['account']),
+    ...mapGetters(['account', 'isConnected']),
     ...mapGetters('fungibleTokens', ['tokenBalances']),
     ...mapState('fungibleTokens', ['aePublicData', 'availableTokens']),
     simplexLink() {

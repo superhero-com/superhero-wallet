@@ -1128,11 +1128,11 @@
       "across": "across the Globe"
     },
     "nodeConnectionStatus": {
-      "error": "Unable to connect to chosen node",
+      "error": "Unable to connect to chosen node.",
       "connecting": "Connecting to node...",
       "connected": "Connected",
       "initServices": "Initializing services...",
-      "offline": "You are offline"
+      "offline": "You are offline. Go online to get real time data."
     },
     "popupMessageSign": {
       "title": "Sign message",
@@ -1187,7 +1187,7 @@
       "collapse": "Collapse",
       "claim": "Claim Back",
       "insufficient-balance": "Insufficient balance",
-      "insufficient-ivnite-balance": "This invite Link expired and the Tokens are already claimed.",
+      "insufficient-invite-balance": "This invite Link expired and the Tokens are already claimed.",
       "tip-attached": "Tip attached",
       "top-up-with": "Top up with",
       "delete": "Delete"

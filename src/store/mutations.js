@@ -2,9 +2,11 @@
 import Vue from 'vue';
 import { uniqBy } from 'lodash-es';
 import {
-  defaultNetwork,
   NOTIFICATION_STATUS_CREATED,
   NOTIFICATION_TYPE_WALLET,
+  NODE_STATUS_CONNECTION_DONE,
+  NODE_STATUS_CONNECTED,
+  defaultNetwork,
 } from '../popup/utils/constants';
 
 export default {
@@ -59,11 +61,13 @@ export default {
     state.tippingV2 = tippingV2 || null;
   },
   setNodeStatus(state, payload) {
-    if (state.nodeStatus === 'offline') {
-      if (payload !== 'online') return;
-      state.nodeStatus = '';
-    } else {
-      state.nodeStatus = payload;
+    state.nodeStatus = payload;
+
+    // Hide "connected" message after some delay.
+    if (payload === NODE_STATUS_CONNECTION_DONE) {
+      setTimeout(() => {
+        state.nodeStatus = NODE_STATUS_CONNECTED;
+      }, 1000);
     }
   },
   setCurrentCurrency(state, currency) {

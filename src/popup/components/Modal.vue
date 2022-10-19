@@ -54,7 +54,6 @@
         >
           <slot name="footer" />
         </div>
-        <NodeConnectionStatus v-if="fullScreen" />
       </div>
 
       <div
@@ -68,13 +67,11 @@
 <script lang="ts">
 import { defineComponent, onBeforeUnmount, onMounted } from '@vue/composition-api';
 import { IS_MOBILE_DEVICE, IS_FIREFOX, IS_EXTENSION } from '../../lib/environment';
-import NodeConnectionStatus from './NodeConnectionStatus.vue';
 import BtnClose from './buttons/BtnClose.vue';
 
 export default defineComponent({
   components: {
     BtnClose,
-    NodeConnectionStatus,
   },
   props: {
     hasCloseButton: Boolean,
@@ -119,7 +116,7 @@ export default defineComponent({
   --footer-padding-bottom: 36px;
 
   position: fixed;
-  z-index: 2;
+  z-index: variables.$z-index-modal;
   top: 0;
   left: 0;
   width: 100%;
@@ -131,7 +128,7 @@ export default defineComponent({
 
   // This is not working correctly in Firefox extension
   &.blur-bg {
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(variables.$bg-blur-radius);
   }
 
   .container {
@@ -214,6 +211,7 @@ export default defineComponent({
       &::before {
         content: '';
         position: absolute;
+        z-index: -1;
         inset: 0;
         background-color: var(--screen-bg-color);
         opacity: 0.9;
@@ -226,20 +224,6 @@ export default defineComponent({
         border-bottom-left-radius: inherit;
         border-bottom-right-radius: inherit;
       }
-    }
-  }
-
-  .node-connection-status {
-    z-index: 2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: variables.$color-grey-dark;
-
-    @extend %face-sans-15-medium;
-
-    @include mixins.desktop {
-      border-radius: 0 0 10px 10px;
     }
   }
 
@@ -258,8 +242,6 @@ export default defineComponent({
       max-height: 100%;
       margin-top: 0;
       margin-bottom: 0;
-      border-bottom-left-radius: var(--screen-border-radius);
-      border-bottom-right-radius: var(--screen-border-radius);
       overflow: hidden auto;
     }
 
@@ -280,12 +262,18 @@ export default defineComponent({
 
     .container {
       height: 100%;
+      border-radius: 0;
     }
   }
 
   &.from-bottom {
     position: absolute;
     align-items: end;
+
+    .container {
+      border-bottom-left-radius: var(--screen-border-radius);
+      border-bottom-right-radius: var(--screen-border-radius);
+    }
   }
 
   &.dense {

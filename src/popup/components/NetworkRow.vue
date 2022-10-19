@@ -57,17 +57,12 @@
         {{ network.middlewareUrl }}
       </p>
     </div>
-    <NodeConnectionStatus
-      v-if="isActive"
-      is-settings
-    />
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import { defaultNetwork } from '../utils/constants';
-import NodeConnectionStatus from './NodeConnectionStatus.vue';
 import RadioButton from './RadioButton.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
 import PencilIcon from '../../icons/pencil.svg?vue-component';
@@ -77,7 +72,6 @@ export default {
   components: {
     BtnIcon,
     RadioButton,
-    NodeConnectionStatus,
     PencilIcon,
     TrashIcon,
   },

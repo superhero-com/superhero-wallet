@@ -2,7 +2,7 @@
   <div
     id="app"
     :class="{
-      'show-header': showStatusAndHeader,
+      'show-header': showHeader,
       'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
       'is-extension': IS_EXTENSION,
     }"
@@ -17,16 +17,20 @@
       v-show="!qrScannerOpen"
       class="app-inner"
     >
-      <Header v-if="showStatusAndHeader" />
+      <Header v-if="showHeader" />
 
       <transition :name="$route.meta.asModal ? 'pop-transition' : 'page-transition'">
         <RouterView
-          :class="{ 'show-header': showStatusAndHeader }"
+          :class="{ 'show-header': showHeader }"
           class="main"
         />
       </transition>
 
-      <NodeConnectionStatus v-if="showStatusAndHeader" />
+      <NodeConnectionStatus
+        v-if="!modals.length"
+        class="connection-status"
+      />
+
       <Component
         :is="component"
         v-for="{ component, key, props } in modals"
@@ -37,10 +41,19 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapState } from 'vuex';
-import { watchUntilTruthy } from './utils/helper';
-import { NOTIFICATION_DEFAULT_SETTINGS } from './utils/constants';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  watch,
+} from '@vue/composition-api';
+import {
+  NOTIFICATION_DEFAULT_SETTINGS,
+  NODE_STATUS_OFFLINE,
+  NODE_STATUS_CONNECTION_DONE,
+  watchUntilTruthy,
+} from './utils';
 import {
   IS_WEB,
   IS_IOS,
@@ -52,79 +65,88 @@ import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
 
-export default {
+export default defineComponent({
   components: {
     Header,
     NodeConnectionStatus,
     Close,
   },
-  data: () => ({
-    IS_WEB,
-    IS_EXTENSION,
-    IS_MOBILE_DEVICE,
-  }),
-  computed: {
-    ...mapGetters(['isLoggedIn']),
-    ...mapState(['isRestored', 'backedUpSeed', 'qrScannerOpen']),
-    showStatusAndHeader() {
-      return !(
-        this.$route.path === '/'
-        || this.$route.path.startsWith('/web-iframe-popup')
-        || this.$route.params.app
-        || this.$route.meta.hideHeader
+  setup(props, { root }) {
+    const isLoggedIn = computed(() => root.$store.getters.isLoggedIn);
+    const isRestored = computed(() => root.$store.state.isRestored);
+    const backedUpSeed = computed(() => root.$store.state.backedUpSeed);
+    const qrScannerOpen = computed(() => root.$store.state.qrScannerOpen);
+
+    const showHeader = computed(() => !(
+      root.$route.path === '/'
+      || root.$route.path.startsWith('/web-iframe-popup')
+      || root.$route.params.app
+      || root.$route.meta?.hideHeader
+    ));
+
+    const modals = computed(() => root.$store.getters['modals/opened']);
+
+    function setDocumentHeight() {
+      document.documentElement.style.setProperty(
+        '--height',
+        IS_CORDOVA && IS_IOS ? '100vh' : '100%',
       );
-    },
-    modals() {
-      return this.$store.getters['modals/opened'];
-    },
-  },
-  watch: {
-    isLoggedIn(val) {
-      if (val && !this.backedUpSeed) {
-        this.$store.commit('addNotification', {
-          text: this.$t('pages.account.seedNotification', [this.$t('pages.account.backup')]),
-          path: '/more/settings/seed-phrase',
-        });
-      }
-    },
-  },
-  async mounted() {
-    document.documentElement.style.setProperty(
-      '--height',
-      IS_CORDOVA && IS_IOS ? '100vh' : '100%',
-    );
+    }
 
-    window.addEventListener('online', () => this.$store.commit('setNodeStatus', 'online'));
-    window.addEventListener('offline', () => this.$store.commit('setNodeStatus', 'offline'));
-
-    await watchUntilTruthy(() => this.isRestored);
-
-    this.setNotificationSettings();
-
-    this.checkExtensionUpdates();
-
-    this.$store.dispatch('fungibleTokens/getAeternityData');
-    this.$store.commit('setChainNames', await this.$store.dispatch('getCacheChainNames'));
-  },
-  methods: {
-    setNotificationSettings() {
-      if (this.$store.state.notificationSettings.length === 0) {
-        this.$store.commit('setNotificationSettings', NOTIFICATION_DEFAULT_SETTINGS);
-      }
-    },
-    async checkExtensionUpdates() {
+    async function checkExtensionUpdates() {
       if (IS_EXTENSION && browser?.runtime?.requestUpdateCheck) {
         const [update] = await browser.runtime.requestUpdateCheck();
         if (update === 'update_available') {
-          this.$store.commit('addNotification', {
-            text: this.$t('pages.account.updateAvailable'),
+          root.$store.commit('addNotification', {
+            text: root.$t('pages.account.updateAvailable'),
             path: '',
           });
         }
       }
-    },
+    }
+
+    function setNotificationSettings() {
+      if (root.$store.state.notificationSettings.length === 0) {
+        root.$store.commit('setNotificationSettings', NOTIFICATION_DEFAULT_SETTINGS);
+      }
+    }
+
+    function watchAppNetworkAccess() {
+      window.addEventListener('online', () => root.$store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE));
+      window.addEventListener('offline', () => root.$store.commit('setNodeStatus', NODE_STATUS_OFFLINE));
+    }
+
+    watch(isLoggedIn, (val) => {
+      if (val && !backedUpSeed.value) {
+        root.$store.commit('addNotification', {
+          text: root.$t('pages.account.seedNotification', [root.$t('pages.account.backup')]),
+          path: '/more/settings/seed-phrase',
+        });
+      }
+    });
+
+    onMounted(async () => {
+      setDocumentHeight();
+      checkExtensionUpdates();
+      watchAppNetworkAccess();
+
+      await watchUntilTruthy(() => isRestored.value);
+
+      setNotificationSettings();
+      root.$store.dispatch('fungibleTokens/getAeternityData');
+      root.$store.commit('setChainNames', await root.$store.dispatch('getCacheChainNames'));
+    });
+
+    return {
+      IS_WEB,
+      IS_EXTENSION,
+      IS_MOBILE_DEVICE,
+      modals,
+      qrScannerOpen,
+      showHeader,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" src="../styles/global.scss"></style>
@@ -179,6 +201,13 @@ export default {
     }
   }
 
+  .connection-status {
+    position: fixed;
+    bottom: env(safe-area-inset-bottom);
+    left: 0;
+    width: 100%;
+  }
+
   &.is-extension,
   &.is-desktop-web {
     width: variables.$extension-width;
@@ -191,6 +220,7 @@ export default {
 
     overflow: hidden;
     box-shadow: variables.$color-border 0 0 0 1px;
+    transform: translate(0, 0); // Create custom viewport for fixed elements
 
     @include mixins.mobile {
       --screen-border-radius: 0;
