@@ -3,7 +3,7 @@
     <div
       v-if="isVisible"
       class="card"
-      :class="{ 'is-big': isBig, clickable, dense }"
+      :class="{ 'is-big': isBig, clickable, dense, disabled }"
       :style="styleComponent"
       @click="$emit('click', $event)"
     >
@@ -64,6 +64,7 @@ export default {
     isBig: Boolean,
     clickable: Boolean,
     dense: Boolean,
+    disabled: Boolean,
     cardId: { type: String, default: null },
   },
   computed: {
@@ -102,31 +103,6 @@ export default {
 
   @include mixins.flex(center, center, column);
 
-  &.dense {
-    .description {
-      margin-top: 0;
-    }
-  }
-
-  &.clickable {
-    cursor: pointer;
-    user-select: none;
-
-    &:hover {
-      background-color: variables.$color-disabled;
-
-      .card-icon {
-        background-color: rgba(variables.$color-white, 0.2);
-      }
-    }
-
-    &:active {
-      .card-icon {
-        background-color: rgba(variables.$color-white, 0.4);
-      }
-    }
-  }
-
   .card-icon {
     height: 36px;
     width: 36px;
@@ -158,10 +134,10 @@ export default {
   }
 
   .description {
+    @extend %face-sans-13-regular;
+
     opacity: 0.7;
     margin-top: 4px;
-
-    @extend %face-sans-13-medium;
   }
 
   &.is-big {
@@ -174,6 +150,36 @@ export default {
     .card-icon {
       margin-top: 2px;
     }
+  }
+
+  &.dense {
+    .description {
+      margin-top: 0;
+    }
+  }
+
+  &.clickable {
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      background-color: variables.$color-disabled;
+
+      .card-icon {
+        background-color: rgba(variables.$color-white, 0.2);
+      }
+    }
+
+    &:active {
+      .card-icon {
+        background-color: rgba(variables.$color-white, 0.4);
+      }
+    }
+  }
+
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.4;
   }
 }
 </style>

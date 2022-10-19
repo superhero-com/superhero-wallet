@@ -47,6 +47,7 @@
       </BtnMain>
       <BtnMain
         data-cy="accept"
+        :disabled="!isConnected"
         @click="confirm()"
       >
         {{ $t('pages.connectConfirm.confirmButton') }}
@@ -76,7 +77,10 @@ export default {
     permissions: { type: Array, default: () => (['address', 'transactions']) },
   },
   computed: {
-    ...mapGetters(['getExplorerPath']),
+    ...mapGetters([
+      'isConnected',
+      'getExplorerPath',
+    ]),
     ...mapState({
       account(_, { account }) {
         return {

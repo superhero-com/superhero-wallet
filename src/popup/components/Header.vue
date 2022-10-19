@@ -161,7 +161,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   top: 0;
-  z-index: 2;
+  z-index: variables.$z-index-header;
   height: calc(var(--header-height) + env(safe-area-inset-top));
   background-color: var(--screen-bg-color);
   padding: env(safe-area-inset-top) 8px 0;

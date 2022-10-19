@@ -1,45 +1,59 @@
 <template>
-  <transition :name="isSettings ? 'from-settings-fade' : ''">
+  <transition name="fade">
     <div
       v-if="isVisible"
-      :data-cy="isError ? 'connect-node' : ''"
+      data-cy="connect-node"
       class="node-connection-status"
       :class="{
-        'from-settings': isSettings,
-        'connect-error': isError && !isSettings,
+        'is-error': isError,
       }"
     >
-      {{ statuses[nodeStatus] }}
+      {{ statusText }}
     </div>
   </transition>
 </template>
 
 <script>
 import { mapGetters, mapState } from 'vuex';
+import {
+  NODE_STATUS_INIT_SERVICES,
+  NODE_STATUS_CONNECTING,
+  NODE_STATUS_CONNECTION_DONE,
+  NODE_STATUS_CONNECTED,
+  NODE_STATUS_ERROR,
+  NODE_STATUS_OFFLINE,
+} from '../utils';
 
 export default {
-  props: {
-    isSettings: Boolean,
-  },
   data() {
     return {
       statuses: {
-        initServices: this.$t('pages.nodeConnectionStatus.initServices'),
-        connecting: this.$t('pages.nodeConnectionStatus.connecting'),
-        connected: this.$t('pages.nodeConnectionStatus.connected'),
-        error: this.$t('pages.nodeConnectionStatus.error'),
-        offline: this.$t('pages.nodeConnectionStatus.offline'),
+        [NODE_STATUS_INIT_SERVICES]: this.$t('pages.nodeConnectionStatus.initServices'),
+        [NODE_STATUS_CONNECTING]: this.$t('pages.nodeConnectionStatus.connecting'),
+        [NODE_STATUS_CONNECTION_DONE]: this.$t('pages.nodeConnectionStatus.connected'),
+        [NODE_STATUS_ERROR]: this.$t('pages.nodeConnectionStatus.error'),
+        [NODE_STATUS_OFFLINE]: this.$t('pages.nodeConnectionStatus.offline'),
       },
     };
   },
   computed: {
     ...mapState(['nodeStatus']),
-    ...mapGetters(['account', 'isLoggedIn']),
+    ...mapGetters(['account', 'isConnected', 'isLoggedIn']),
     isVisible() {
-      return this.nodeStatus && this.account.address && this.isLoggedIn && (this.isSettings || !this.$route.path.startsWith('/more/settings'));
+      return (
+        this.nodeStatus !== NODE_STATUS_CONNECTED
+        && this.account.address
+        && this.isLoggedIn
+      );
     },
     isError() {
-      return this.nodeStatus === 'error' || this.nodeStatus === 'offline';
+      return [
+        NODE_STATUS_ERROR,
+        NODE_STATUS_OFFLINE,
+      ].includes(this.nodeStatus);
+    },
+    statusText() {
+      return this.statuses[this.nodeStatus];
     },
   },
 };
@@ -51,50 +65,28 @@ export default {
 @use '../../styles/mixins';
 
 .node-connection-status {
-  @extend %face-sans-14-regular;
+  @extend %face-sans-15-medium;
 
-  position: fixed;
-  width: 100%;
-  bottom: env(safe-area-inset-bottom);
-  left: 0;
-  right: 0;
-  background: var(--screen-bg-color);
-  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 4px 10px;
   color: variables.$color-white;
+  backdrop-filter: blur(variables.$bg-blur-radius);
   text-align: center;
 
-  @include mixins.desktop {
-    position: sticky;
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: variables.$color-bg-3;
+    opacity: 0.8;
   }
 
-  &.from-settings {
-    @extend %face-sans-14-medium;
-
-    position: relative;
-    pointer-events: none;
-    user-select: none;
-    padding-bottom: 8px;
-    margin-top: 12px;
-    height: 32px;
+  &.is-error {
+    color: variables.$color-warning;
   }
 }
-
-.connect-error {
-  font-weight: bold;
-  background: variables.$color-primary;
-}
-
-.from-settings-fade {
-  &-enter-active,
-  &-leave-active {
-    transition: opacity 150ms ease-in;
-    opacity: 0.75;
-  }
-
-  &-enter,
-  &-leave-to {
-    opacity: 0;
-  }
-}
-
 </style>

@@ -10,5 +10,6 @@ interface Cordova {
 declare global {
   interface Window {
     cordova?: Cordova
+    StatusBar?: any // cordova-plugin-statusbar
   }
 }

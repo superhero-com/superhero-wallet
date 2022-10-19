@@ -19,9 +19,9 @@ import accountsModule from './modules/accounts';
 import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
 import fungibleTokensPlugin from './plugins/fungibleTokens';
-import { defaultNetwork } from '../popup/utils/constants';
 import stateReducer from './utils';
 import veeValidate from './plugins/veeValidate';
+import { defaultNetwork, NODE_STATUS_OFFLINE } from '../popup/utils/constants';
 
 Vue.use(Vuex);
 Vue.use(VueRx);
@@ -47,7 +47,7 @@ export default new Vuex.Store({
     middleware: null,
     tippingV1: null,
     tippingV2: null,
-    nodeStatus: '',
+    nodeStatus: NODE_STATUS_OFFLINE,
     currencies: {},
     notifications: [],
     notificationSettings: [],

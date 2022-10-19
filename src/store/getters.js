@@ -3,11 +3,13 @@ import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
 import {
+  AETERNITY_SYMBOL,
   AVATAR_URL,
+  DEX_CONTRACTS,
+  NETWORK_MAINNET,
+  NETWORK_TESTNET,
+  NODE_STATUS_CONNECTED,
   TX_TYPE_MDW,
-  DEX_CONTRACTS, NETWORK_MAINNET, NETWORK_TESTNET, AETERNITY_SYMBOL,
-} from '../popup/utils/constants';
-import {
   checkHashType,
   convertToken,
   aettosToAe,
@@ -60,6 +62,9 @@ export default {
   },
   activeNetwork({ current: { network } }, { networks }) {
     return networks[network];
+  },
+  isConnected({ nodeStatus }) {
+    return nodeStatus === NODE_STATUS_CONNECTED;
   },
   getProfileImage: (_, { activeNetwork }) => (address) => `${activeNetwork.backendUrl}/profile/image/${address}`,
   getAvatar: () => (address) => `${AVATAR_URL}${address}`,

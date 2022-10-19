@@ -18,6 +18,7 @@
       <BtnBox
         v-for="(action, index) in actions"
         :key="index"
+        :disabled="action.disabled"
         @click="action.onClick"
       >
         <Component :is="action.icon" />
@@ -58,15 +59,22 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapState } from 'vuex';
-import { IS_CORDOVA } from '../../lib/environment';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+} from '@vue/composition-api';
 import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
   DEX_URL,
   buildSimplexLink,
 } from '../utils';
+import { IS_CORDOVA } from '../../lib/environment';
+
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
 import BtnPlain from '../components/buttons/BtnPlain.vue';
@@ -76,13 +84,14 @@ import BtnClose from '../components/buttons/BtnClose.vue';
 import InputSearch from '../components/InputSearch.vue';
 import Tabs from '../components/tabs/Tabs.vue';
 import Tab from '../components/tabs/Tab.vue';
+
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
 import SwapIcon from '../../icons/swap.svg?vue-component';
 import CloseIcon from '../../icons/close.svg?vue-component';
 
-export default {
+export default defineComponent({
   name: 'AccountDetails',
   components: {
     AccountInfo,
@@ -96,80 +105,90 @@ export default {
     BtnClose,
     InputSearch,
   },
-  data() {
-    return {
-      actions: [
-        {
-          text: this.$t('pages.token-details.receive'),
-          onClick: () => this.$store.dispatch('modals/open', {
-            name: MODAL_TRANSFER_RECEIVE,
-          }),
-          icon: ArrowReceiveIcon,
-        },
-        {
-          text: this.$t('pages.token-details.send'),
-          onClick: () => this.$store.dispatch('modals/open', {
-            name: MODAL_TRANSFER_SEND,
-          }),
-          icon: ArrowSendIcon,
-        },
-        {
-          text: this.$t('pages.token-details.buy'),
-          onClick: () => window.open(this.simplexLink, '_blank'),
-          icon: CreditCardIcon,
-        },
-        {
-          text: this.$t('pages.token-details.swap'),
-          onClick: () => window.open(DEX_URL, '_blank'),
-          icon: SwapIcon,
-        },
-      ],
-      tabs: [
-        {
-          text: this.$t('modals.account-details.assets'),
-          routeName: 'account-details',
-          exact: true,
-        },
-        {
-          text: this.$t('modals.account-details.transactions'),
-          routeName: 'account-details-transactions',
-        },
-        {
-          text: this.$t('modals.account-details.names'),
-          routeName: 'account-details-names',
-        },
-      ],
-      searchTerm: '',
-    };
-  },
-  computed: {
-    ...mapState('accounts', ['activeIdx']),
-    ...mapGetters(['account']),
-    simplexLink() {
-      return buildSimplexLink(this.account.address);
-    },
-    searchTermPlaceholder() {
-      switch (this.$route.name) {
+  setup(props, { root }) {
+    const searchTerm = ref('');
+    const isConnected = computed(() => root.$store.getters.isConnected);
+    const account = computed(() => root.$store.getters.account);
+    const activeIdx = computed(() => root.$store.state.accounts.activeIdx);
+    const simplexLink = computed(() => buildSimplexLink(account.value.address));
+
+    const actions = computed(() => [
+      {
+        text: root.$t('pages.token-details.receive'),
+        onClick: () => root.$store.dispatch('modals/open', {
+          name: MODAL_TRANSFER_RECEIVE,
+        }),
+        icon: ArrowReceiveIcon,
+      },
+      {
+        text: root.$t('pages.token-details.send'),
+        onClick: () => root.$store.dispatch('modals/open', {
+          name: MODAL_TRANSFER_SEND,
+        }),
+        icon: ArrowSendIcon,
+        disabled: !isConnected.value,
+      },
+      {
+        text: root.$t('pages.token-details.buy'),
+        onClick: () => window.open(simplexLink.value, '_blank'),
+        icon: CreditCardIcon,
+      },
+      {
+        text: root.$t('pages.token-details.swap'),
+        onClick: () => window.open(DEX_URL, '_blank'),
+        icon: SwapIcon,
+      },
+    ]);
+
+    const tabs = [
+      {
+        text: root.$t('modals.account-details.assets'),
+        routeName: 'account-details',
+        exact: true,
+      },
+      {
+        text: root.$t('modals.account-details.transactions'),
+        routeName: 'account-details-transactions',
+      },
+      {
+        text: root.$t('modals.account-details.names'),
+        routeName: 'account-details-names',
+      },
+    ];
+
+    const searchTermPlaceholder = computed(() => {
+      switch (root.$route.name) {
         case 'account-details':
-          return this.$t('pages.fungible-tokens.searchPlaceholder');
+          return root.$t('pages.fungible-tokens.searchPlaceholder');
         case 'account-details-transactions':
-          return this.$t('pages.recentTransactions.searchPlaceholder');
+          return root.$t('pages.recentTransactions.searchPlaceholder');
         default:
           return null;
       }
-    },
+    });
+
+    onMounted(() => {
+      if (IS_CORDOVA) {
+        window.StatusBar.backgroundColorByHexString('#191919');
+      }
+    });
+
+    onBeforeUnmount(() => {
+      if (IS_CORDOVA) {
+        window.StatusBar.backgroundColorByHexString('#141414');
+      }
+    });
+
+    return {
+      actions,
+      tabs,
+      activeIdx,
+      searchTerm,
+      searchTermPlaceholder,
+      isConnected,
+    };
   },
-  mounted() {
-    if (IS_CORDOVA) {
-      window.StatusBar.backgroundColorByHexString('#191919');
-    }
-  },
-  beforeDestroy() {
-    if (IS_CORDOVA) {
-      window.StatusBar.backgroundColorByHexString('#141414');
-    }
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
