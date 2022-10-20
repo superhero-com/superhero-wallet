@@ -145,25 +145,27 @@ export default {
 
 .header {
   position: fixed;
-
-  @include mixins.desktop {
-    position: sticky;
-  }
-
   display: flex;
   align-items: center;
   justify-content: space-between;
   top: 0;
   z-index: 2;
   height: calc(var(--header-height) + env(safe-area-inset-top));
-  background-color: var(--screen-bg-color);
   padding: env(safe-area-inset-top) 8px 0;
   width: 100%;
+  backdrop-filter: blur(4px);
 
-  @include mixins.mobile {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background-color: var(--screen-bg-color);
+    opacity: 0.8;
+  }
+
+  @include mixins.desktop {
+    position: sticky;
   }
 
   .left {
