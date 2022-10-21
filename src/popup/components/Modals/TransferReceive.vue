@@ -2,7 +2,7 @@
   <Modal
     class="transfer-receive-modal"
     has-close-button
-    from-bottom
+    full-screen
     @close="closeModal"
   >
     <div

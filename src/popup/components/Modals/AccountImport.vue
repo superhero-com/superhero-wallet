@@ -22,16 +22,19 @@
         @submit="importAccount"
       />
     </div>
-    <BtnMain
-      :disabled="!mnemonic || (error != null)"
-      data-cy="import"
-      class="import-button"
-      extend
-      center
-      @click="importAccount"
-    >
-      {{ $t('pages.index.importAccount') }}
-    </BtnMain>
+
+    <template #footer>
+      <BtnMain
+        :disabled="!mnemonic || (error != null)"
+        data-cy="import"
+        class="import-button"
+        extend
+        center
+        @click="importAccount"
+      >
+        {{ $t('pages.index.importAccount') }}
+      </BtnMain>
+    </template>
   </Modal>
 </template>
 
@@ -114,7 +117,7 @@ export default {
   }
 
   .import-button {
-    margin-top: 80px;
+    margin-top: 40px;
   }
 }
 </style>

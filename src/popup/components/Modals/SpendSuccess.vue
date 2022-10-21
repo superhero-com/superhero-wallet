@@ -26,7 +26,8 @@
       :address="transaction.tx.recipientId"
       show-address
     />
-    <div class="button-wrapper">
+
+    <template #footer>
       <BtnMain
         variant="secondary"
         class="button"
@@ -46,7 +47,7 @@
       >
         {{ $t('ok') }}
       </BtnMain>
-    </div>
+    </template>
   </Modal>
 </template>
 
@@ -138,24 +139,6 @@ export default {
   .sending-to {
     margin-bottom: 12px;
     color: rgba(variables.$color-white, 0.75);
-  }
-
-  .button-wrapper {
-    @include mixins.flex(center, center);
-
-    width: 100%;
-    margin-top: 40px;
-    gap: 8px;
-
-    .button {
-      margin: 0;
-    }
-
-    svg {
-      width: 30px;
-      height: 30px;
-      margin-right: 0;
-    }
   }
 }
 </style>

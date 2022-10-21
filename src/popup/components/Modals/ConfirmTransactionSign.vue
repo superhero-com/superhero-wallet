@@ -326,7 +326,6 @@ export default {
     align-items: center;
     padding-top: 8px;
     margin-bottom: 8px;
-    background: variables.$color-bg-1;
     width: 100%;
 
     @extend %face-sans-15-medium;

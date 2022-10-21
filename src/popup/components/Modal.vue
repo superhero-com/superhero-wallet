@@ -111,6 +111,7 @@ export default {
 .modal {
   --screen-padding-x: 24px; // Default spacing
   --screen-bg-color: #{variables.$color-bg-modal};
+  --footer-padding-bottom: 36px;
 
   position: fixed;
   z-index: 2;
@@ -197,7 +198,7 @@ export default {
       display: flex;
       justify-content: center;
       gap: 10px;
-      padding: 8px var(--screen-padding-x);
+      padding: 8px var(--screen-padding-x) var(--footer-padding-bottom);
 
       &.mobile {
         margin-bottom: 20px;
@@ -235,33 +236,9 @@ export default {
     inset: 0;
   }
 
-  &.full-screen {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-
-    @include mixins.desktop {
-      position: absolute;
-    }
-
-    .footer {
-      padding-bottom: 25px;
-    }
-
-    .container {
-      height: 100%;
-      width: 100%;
-    }
-  }
-
+  &.full-screen,
   &.from-bottom {
-    position: absolute;
-    align-items: end;
-
-    .header {
-      position: sticky;
-      z-index: 3;
-      top: 0;
-    }
+    --footer-padding-bottom: 24px;
 
     .container {
       width: 100%;
@@ -270,6 +247,30 @@ export default {
       margin-bottom: 0;
       overflow: hidden auto;
     }
+
+    .header {
+      position: sticky;
+      z-index: 3;
+      top: 0;
+    }
+  }
+
+  &.full-screen {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom) !important; // needed to overwrite #app .main styles
+
+    @include mixins.desktop {
+      position: absolute;
+    }
+
+    .container {
+      height: 100%;
+    }
+  }
+
+  &.from-bottom {
+    position: absolute;
+    align-items: end;
   }
 
   &.dense {
