@@ -15,6 +15,7 @@ import {
   aettosToAe,
   categorizeContractCallTxObject,
   getHdWalletAccount,
+  AETERNITY_CONTRACT_ID,
 } from '../popup/utils';
 
 export default {
@@ -124,7 +125,8 @@ export default {
       || ''
   ),
   isTxAex9: () => (transaction) => transaction.tx
-    && !!categorizeContractCallTxObject(transaction)?.token,
+    && !!categorizeContractCallTxObject(transaction)?.token
+    && categorizeContractCallTxObject(transaction)?.token !== AETERNITY_CONTRACT_ID,
   getDexContracts: (_, { activeNetwork }) => (DEX_CONTRACTS[activeNetwork.networkId]),
   getAmountFiat: (_, { convertToCurrency, formatCurrency }) => (amount) => {
     const converted = convertToCurrency(amount);

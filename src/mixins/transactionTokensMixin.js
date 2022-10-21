@@ -14,6 +14,7 @@ export default {
       'getTxDirection',
       'account',
       'getDexContracts',
+      'isTxAex9',
     ]),
     txType() {
       return this.getTxType(this.transaction);
@@ -30,7 +31,9 @@ export default {
           : this.getTxAmountTotal(this.transaction),
         symbol: this.isAllowance ? AETERNITY_SYMBOL : this.getTxSymbol(this.transaction),
         isReceived: this.getTxDirection(this.transaction) === 'received',
-        isAe: this.isAllowance || this.getTxSymbol(this.transaction) === AETERNITY_SYMBOL,
+        isAe: this.isAllowance
+          || (this.getTxSymbol(this.transaction) === AETERNITY_SYMBOL
+          && !this.isTxAex9(this.transaction)),
       }];
     },
     isErrorTransaction() {

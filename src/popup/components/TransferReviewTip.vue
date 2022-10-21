@@ -40,7 +40,7 @@
       <TokenAmount
         :amount="+transferData.amount"
         :symbol="tokenSymbol"
-        :hide-fiat="!!selectedToken"
+        :hide-fiat="isAex9"
         data-cy="review-total"
       />
       <span class="lowercase">{{ $t('pages.send.to') }}</span>
@@ -76,7 +76,7 @@ import TokenAmount from './TokenAmount.vue';
 import FormTextarea from './FormTextarea.vue';
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';
-import { AGGREGATOR_URL } from '../utils/constants';
+import { AGGREGATOR_URL, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import AddressShortening from './AddressShortening.vue';
 
 export default {
@@ -94,16 +94,20 @@ export default {
   },
   props: {
     transferData: { type: Object, required: true },
-    selectedToken: { type: Object, default: null },
   },
   data() {
     return {
       AGGREGATOR_URL,
+      AETERNITY_CONTRACT_ID,
       note: '',
       noteMaxLength: 280,
     };
   },
   computed: {
+    isAex9() {
+      return !!this.transferData.selectedAsset
+        && this.transferData.selectedAsset.contractId !== AETERNITY_CONTRACT_ID;
+    },
     ...mapGetters(['account']),
     noteError() {
       return (this.note.length > this.noteMaxLength)
