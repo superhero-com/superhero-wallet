@@ -13,29 +13,25 @@
       <h3 class="title">
         {{ $t('pages.titles.reset-wallet') }}?
       </h3>
-      <div class="description">
-        {{ $t('pages.reset-wallet.warning') }}
-      </div>
-      <div class="warning">
-        {{ $t('pages.reset-wallet.warningConfirm') }}
+      <div class="text">
+        <span>{{ $t('pages.reset-wallet.warning') }}</span>
+        <span>{{ $t('pages.reset-wallet.warningConfirm') }}</span>
       </div>
     </div>
-    <div class="buttons">
+    <template #footer>
       <BtnMain
-        class="cancel-button"
         variant="secondary"
         @click="reject"
       >
         {{ $t('pages.reset-wallet.cancel') }}
       </BtnMain>
       <BtnMain
-        class="reset-button"
         variant="danger"
         @click="onReset"
       >
         {{ $t('pages.reset-wallet.reset') }}
       </BtnMain>
-    </div>
+    </template>
   </Modal>
 </template>
 
@@ -90,8 +86,6 @@ export default {
   }
 
   .info {
-    padding-bottom: 24px;
-
     .title {
       color: variables.$color-white;
       padding-bottom: 20px;
@@ -99,19 +93,15 @@ export default {
       @extend %face-sans-18-medium;
     }
 
-    .description,
-    .warning {
+    .text {
       color: rgba(variables.$color-white, 0.85);
       line-height: 20px;
-      padding-bottom: 10px;
+      gap: 10px;
 
       @extend %face-sans-14-light;
-    }
-  }
 
-  .buttons {
-    display: flex;
-    gap: 12px;
+      @include mixins.flex(center, center, column);
+    }
   }
 }
 </style>

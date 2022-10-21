@@ -33,8 +33,7 @@
         />
       </div>
     </div>
-
-    <div class="button-wrapper">
+    <template #footer>
       <BtnMain
         :variant="mobile ? 'secondary' : 'primary'"
         :extend="!mobile"
@@ -46,7 +45,7 @@
         :text="$t('modals.qrCodeReader.settings')"
         @click="openSettings"
       />
-    </div>
+    </template>
   </Modal>
 </template>
 
@@ -219,12 +218,6 @@ export default {
       height: 40px;
       color: variables.$color-primary;
     }
-  }
-
-  .button-wrapper {
-    padding-top: 20px;
-    padding-bottom: 0;
-    width: 100%;
   }
 
   .camera {
