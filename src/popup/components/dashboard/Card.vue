@@ -1,31 +1,53 @@
 <template>
-  <div
-    class="card"
-    :class="{ 'is-big': isBig, clickable, dense }"
-    :style="styleComponent"
-    @click="$emit('click', $event)"
-  >
-    <div class="card-icon">
-      <slot
-        name="icon"
-        class="icon-svg"
-      />
-    </div>
-    <div>
-      <div class="title">
-        {{ title }}
+  <transition name="fade">
+    <div
+      v-if="isVisible"
+      class="card"
+      :class="{ 'is-big': isBig, clickable, dense }"
+      :style="styleComponent"
+      @click="$emit('click', $event)"
+    >
+      <div class="card-icon">
+        <slot
+          name="icon"
+          class="icon-svg"
+        />
       </div>
-      <div class="description">
-        {{ description }}
+      <div>
+        <div class="title">
+          {{ title }}
+        </div>
+        <div class="description">
+          {{ description }}
+        </div>
+        <slot />
       </div>
-      <slot />
+      <div
+        v-if="cardId"
+        class="card-close"
+      >
+        <BtnIcon
+          variant="light"
+          @click="$store.commit('hideCard', cardId)"
+        >
+          <CloseIcon class="close-icon" />
+        </BtnIcon>
+      </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script>
+import { mapState } from 'vuex';
+import BtnIcon from '../buttons/BtnIcon.vue';
+import CloseIcon from '../../../icons/times-circle.svg?vue-component';
+
 export default {
   name: 'Card',
+  components: {
+    BtnIcon,
+    CloseIcon,
+  },
   props: {
     title: {
       type: String,
@@ -42,14 +64,19 @@ export default {
     isBig: Boolean,
     clickable: Boolean,
     dense: Boolean,
+    cardId: { type: String, default: null },
   },
   computed: {
+    ...mapState(['hiddenCards']),
     styleComponent() {
       return {
         backgroundImage: (this.background)
           ? `url("${this.background}")`
           : null,
       };
+    },
+    isVisible() {
+      return !this.cardId || !this.hiddenCards || !this.hiddenCards.includes(this.cardId);
     },
   },
 };
@@ -61,6 +88,7 @@ export default {
 @use '../../../styles/mixins';
 
 .card {
+  position: relative;
   width: 100%;
   background-color: variables.$color-bg-6;
   min-height: 116px;
@@ -111,6 +139,17 @@ export default {
 
     .icon-svg {
       height: 20px;
+    }
+  }
+
+  .card-close {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+
+    .close-icon {
+      width: 24px;
+      height: 24px;
     }
   }
 
