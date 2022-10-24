@@ -4,11 +4,14 @@
       {{ $t('pages.seed-phrase-settings.this-your-seed-phrase') }}
     </div>
 
-    <ae-panel class="mnemonics">
+    <div class="mnemonics">
       <p class="mnemonics-text">
         {{ mnemonic }}
       </p>
-      <ae-button
+      <BtnMain
+        has-icon
+        variant="dark"
+        class="copy-btn"
         @click="copy(mnemonic)"
       >
         <template v-if="!copied">
@@ -20,8 +23,8 @@
           <CheckSuccessCircle />
           {{ $t('addressCopied') }}
         </template>
-      </ae-button>
-    </ae-panel>
+      </BtnMain>
+    </div>
 
     <i18n
       path="pages.seedPhrase.backUpYourSeedPhrase"
@@ -57,6 +60,7 @@
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
 import BtnMain from '../components/buttons/BtnMain.vue';
+
 import CopyOutlined from '../../icons/copy-outlined.svg?vue-component';
 import CheckSuccessCircle from '../../icons/check-success-circle.svg?vue-component';
 import { useCopy } from '../../composables';
@@ -120,7 +124,10 @@ export default defineComponent({
     border: 2px solid rgba(variables.$color-white, 0.1);
     border-radius: variables.$border-radius-interactive;
     margin: 0 0 20px 0;
+    padding: 12px;
     text-align: center;
+    box-shadow: 0 4px 8px 2px rgb(60 60 60 / 10%);
+    box-sizing: border-box;
 
     ::v-deep .content {
       padding: 12px;
@@ -136,29 +143,14 @@ export default defineComponent({
       @extend %face-sans-18-regular;
     }
 
-    .ae-button {
-      border-radius: variables.$border-radius-interactive;
-      height: 40px;
-      width: auto;
-      padding: 8px 24px;
-      min-width: 190px;
-      background: rgba(variables.$color-black, 0.2);
-      color: rgba(variables.$color-white, 1);
-
+    .copy-btn {
       @extend %face-sans-16-regular;
 
-      .icon {
-        width: 24px;
-        height: 24px;
-      }
+      margin: 0 auto;
 
       .check-success-circle {
         margin-right: 4px;
         color: variables.$color-success-dark;
-      }
-
-      &:hover {
-        color: rgba(variables.$color-white, 0.75);
       }
     }
   }
