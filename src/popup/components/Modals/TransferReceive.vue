@@ -16,9 +16,9 @@
       <AccountRow />
 
       <div class="qrcode-wrapper">
-        <QrcodeVue
+        <QrCode
           :value="accountAddressToCopy"
-          size="180"
+          :size="180"
           class="qrcode"
         />
       </div>
@@ -78,7 +78,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from '@vue/composition-api';
-import QrcodeVue from 'qrcode.vue';
 import {
   IAccount,
   IAsset,
@@ -94,6 +93,7 @@ import {
 } from '../../utils';
 
 import InputAmount from '../InputAmountV2.vue';
+import QrCode from '../QrCode.vue';
 import Scrollable from '../Scrollable.vue';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -107,7 +107,7 @@ export default defineComponent({
   components: {
     InputAmount,
     Modal,
-    QrcodeVue,
+    QrCode,
     BtnMain,
     AccountRow,
     Scrollable,
