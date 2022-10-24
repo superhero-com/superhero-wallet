@@ -59,6 +59,7 @@ export default new Vuex.Store({
     loginTargetLocation: { name: 'account' },
     cardMinified: false,
     qrScannerOpen: false,
+    hiddenCards: [],
   },
   getters,
   mutations,

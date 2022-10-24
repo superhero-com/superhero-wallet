@@ -118,4 +118,7 @@ export default {
   setQrScanner(state, payload) {
     state.qrScannerOpen = payload;
   },
+  hideCard(state, name) {
+    state.hiddenCards.push(name);
+  },
 };

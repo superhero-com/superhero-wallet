@@ -15,12 +15,17 @@
 
 <script>
 const SIZES = ['rg', 'md'];
+const VARIANTS = ['light', 'dimmed', 'danger'];
 
 export default {
   props: {
     to: { type: Object, default: null },
     href: { type: String, default: null },
-    variant: { type: String, default: null },
+    variant: {
+      type: String,
+      default: null,
+      validator: (val) => VARIANTS.includes(val),
+    },
     size: {
       type: String,
       default: 'md',
@@ -99,6 +104,13 @@ export default {
       > .icon {
         opacity: 0.75;
       }
+    }
+  }
+
+  &.light {
+    &:hover {
+      background-color: transparent;
+      opacity: 0.5;
     }
   }
 }

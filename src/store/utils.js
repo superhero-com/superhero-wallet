@@ -15,6 +15,7 @@ export default ({
   fungibleTokens,
   accounts: { list, activeIdx, hdWallet: { nextAccountIdx } = {} } = {},
   cardMinified,
+  hiddenCards,
 }) => ({
   migrations,
   current,
@@ -32,4 +33,5 @@ export default ({
   fungibleTokens,
   accounts: { list, activeIdx, hdWallet: { nextAccountIdx } },
   cardMinified,
+  hiddenCards,
 });
