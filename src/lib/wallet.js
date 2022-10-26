@@ -2,7 +2,7 @@ import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk';
 import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { camelCase, isEqual, times } from 'lodash-es';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
-import SwaggerClient from 'swagger-client';
+import { genSwaggerClient } from 'gen-swagger-client';
 import {
   fetchJson,
   executeAndSetInterval,
@@ -52,42 +52,11 @@ async function initMiddleware() {
   // TODO: remove after resolving https://github.com/aeternity/ae_mdw/issues/508
   spec.paths['/name/pointees/{id}'] = spec.paths['/names/pointees/{id}'];
   delete spec.paths['/names/pointees/{id}'];
-  const { apis } = await new SwaggerClient(
-    {
-      url: middlewareUrl,
-      spec,
-      requestInterceptor: (request) => {
-        if (request.method !== 'GET') return;
-        // eslint-disable-next-line consistent-return
-        return {
-          ...request,
-          userFetch: async (url, request1) => {
-            const key = JSON.stringify({ ...request1, url });
-            pendingGetRequests[key] ??= fetch(url, request1);
-            try {
-              return (await pendingGetRequests[key]).clone();
-            } finally {
-              delete pendingGetRequests[key];
-            }
-          },
-        };
-      },
-      responseInterceptor: (response) => {
-        if (response.text === '' || response.text?.size === 0) return response;
-        const body = jsonImp.parse(response.text);
-        Object.assign(response, {
-          body: disableCaseConversion ? body : pascalizeKeys(body),
-        });
-        return (responseInterceptor && responseInterceptor(response)) || response;
-      },
-    },
-  );
   const middleware = mapObject(
-    { ...apis.Middleware, ...apis.default },
+    (await genSwaggerClient(middlewareUrl, { spec })).api,
     ([k, v]) => [camelCase(k), v],
   );
   middleware.fetchByPath = (path) => fetchJson(`${middlewareUrl}${path}`).then(camelcaseKeysDeep);
-
   store.commit('setMiddleware', middleware);
 }
 
