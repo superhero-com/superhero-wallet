@@ -105,7 +105,7 @@ export default defineComponent({
       if (txType.value?.startsWith('name')) {
         return [AENS, transactionTypes[transactionType]];
       }
-     if (txType === Tag.SpendTx) {
+      if (txType === Tag.SpendTx) {
         return [root.$t('transaction.type.spendTx'), getTxDirection.value(props.transaction) === 'sent' ? root.$t('transaction.spendType.out') : root.$t('transaction.spendType.in')];
       }
       if (isAllowance.value) {

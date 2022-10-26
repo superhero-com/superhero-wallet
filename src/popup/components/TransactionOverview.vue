@@ -38,7 +38,7 @@ export default {
       },
     }),
     transaction() {
-      switch (this.txType) {
+      switch (Tag[this.txType]) {
         case Tag.SpendTx:
           return {
             sender: {
