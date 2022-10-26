@@ -9,14 +9,14 @@ export const AETERNITY_CONTRACT_ID = 'aeternity';
 export const AETERNITY_SYMBOL = 'AE';
 
 export const TX_TYPE_MDW = {
-  SpendTx: Tag.SpendTx,
-  ContractCallTx: Tag.ContractCall,
-  ContractCreateTx: Tag.ContractCreateTx,
-  NamePreclaimTx: Tag.NamePreclaimTx,
-  NameClaimTx: Tag.NameClaimTx,
-  NameBidTx: Tag.NameClaimTx,
-  NameUpdateTx: Tag.NameTransferTx,
-  PayingForTx: 'payingForTx', // TODO: remove after https://github.com/aeternity/aepp-sdk-js/issues/1583 is resolved
+  spendTx: Tag.SpendTx,
+  contractCallTx: Tag.ContractCall,
+  contractCreateTx: Tag.ContractCreateTx,
+  namePreclaimTx: Tag.NamePreclaimTx,
+  nameClaimTx: Tag.NameClaimTx,
+  nameBidTx: Tag.NameClaimTx,
+  nameUpdateTx: Tag.NameTransferTx,
+  payingForTx: Tag.PayingForTx, // TODO: remove after https://github.com/aeternity/aepp-sdk-js/issues/1583 is resolved
 };
 
 export const CONNECTION_TYPES = {

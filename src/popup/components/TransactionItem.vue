@@ -81,7 +81,7 @@ export default {
   computed: {
     ...mapGetters(['account', 'getAmountFiat', 'activeNetwork']),
     labels() {
-      if (this.txType && this.txType?.startsWith('name')) {
+      if (this.txType && (typeof this.txType === 'string') && this.txType?.startsWith('name')) {
         return ['AENS', this.$t('transaction.type')[this.txType]];
       }
       if (this.txType === Tag.SpendTx) {

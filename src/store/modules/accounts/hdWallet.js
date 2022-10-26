@@ -49,8 +49,9 @@ export default {
     },
     async confirmTxSigning({ dispatch }, { encodedTx, host }) {
       let txObject;
+      // TODO: unpack if needed by checking encodedTx type
       try {
-        txObject = unpackTx(encodedTx, true).tx;
+        txObject = unpackTx(encodedTx).tx;
       } catch (e) {
         await dispatch('confirmRawDataSigning', encodedTx);
         return;
@@ -64,8 +65,8 @@ export default {
         Tag.NameUpdateTx,
         Tag.NameTransferTx,
       ];
-      if (!SUPPORTED_TX_TYPES.includes(Tag[txObject.tag])) {
-        await dispatch('confirmRawDataSigning', encodedTx);
+      if (!SUPPORTED_TX_TYPES.includes(txObject.tag)) {
+        await dispatch('confirmRawDataSigning', txObject);
         return;
       }
 
