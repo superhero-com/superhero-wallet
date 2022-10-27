@@ -1,24 +1,34 @@
 <template>
   <div class="tokens-list">
     <TokensListItem
-      v-for="value in filteredResults"
+      v-for="value in filteredTokens"
       :key="value.contractId || value.id"
       :token-data="value"
     />
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import { useTokensList } from '../../../composables';
 import TokensListItem from './TokensListItem.vue';
-import balanceListMixin from '../../../mixins/balanceListMixin';
 
-export default {
+export default defineComponent({
   components: {
     TokensListItem,
   },
-  mixins: [balanceListMixin(false)],
   props: {
     searchTerm: { type: String, default: '' },
   },
-};
+  setup(props) {
+    const { filteredTokens } = useTokensList({
+      ownedOnly: true,
+      searchTerm: computed(() => props.searchTerm),
+    });
+
+    return {
+      filteredTokens,
+    };
+  },
+});
 </script>
