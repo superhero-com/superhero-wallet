@@ -1,8 +1,8 @@
 <template>
   <a
     class="copy-text"
-    :class="{ 'has-icon': !hideIcon }"
-    @click.prevent="copyText()"
+    :class="{ 'has-icon': !hideIcon, disabled }"
+    @click="copyText($event)"
   >
     <div
       v-if="copied || copiedLocally"
@@ -41,11 +41,11 @@ export default defineComponent({
   setup(props, { emit }) {
     const { copied: copiedLocally, copy } = useCopy();
 
-    function copyText() {
+    function copyText(event: MouseEvent) {
       if (!props.disabled) {
         copy(props.value);
+        event.preventDefault();
       }
-      emit('click');
     }
 
     return {
@@ -103,6 +103,10 @@ export default defineComponent({
       right: 0;
       transform: translateY(-50%);
     }
+  }
+
+  &.disabled {
+    cursor: inherit;
   }
 }
 </style>
