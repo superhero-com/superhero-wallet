@@ -16,11 +16,12 @@
       <slot :name="name" />
     </template>
     <template #after="{ focused }">
-      <SelectAsset
+      <InputSelectAsset
         v-if="!aeOnly"
         v-bind="$attrs"
         :value="currentAsset"
         :focused="focused"
+        :show-tokens-with-balance="showTokensWithBalance"
         @input="handleAssetSelected($event)"
       />
       <div
@@ -64,11 +65,11 @@
 import { mapGetters } from 'vuex';
 import { pick } from 'lodash-es';
 import InputField from './InputField.vue';
-import SelectAsset from './SelectAsset.vue';
+import InputSelectAsset from './InputSelectAsset.vue';
 
 export default {
   components: {
-    SelectAsset,
+    InputSelectAsset,
     InputField,
   },
   props: {
@@ -76,6 +77,7 @@ export default {
     label: { type: String, default: null },
     selectedAsset: { type: Object, default: null },
     aeOnly: Boolean,
+    showTokensWithBalance: Boolean,
   },
   subscriptions() {
     return pick(this.$store.state.observables, [

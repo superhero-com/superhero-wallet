@@ -23,6 +23,7 @@ export default {
     value: { type: Object, default: null },
     disabled: Boolean,
     focused: Boolean,
+    showTokensWithBalance: Boolean,
   },
   computed: {
     displayToken() {
@@ -43,6 +44,7 @@ export default {
           ...this.$attrs,
           name: MODAL_ASSET_SELECTOR,
           selectedToken: this.value,
+          showTokensWithBalance: this.showTokensWithBalance,
           resolve: (token) => token,
         }).then((token) => this.handleChange(token));
     },

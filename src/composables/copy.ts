@@ -42,7 +42,7 @@ export interface UseCopyOptions {
 export function useCopy(options: UseCopyOptions = {}) {
   const {
     timeout = 1000,
-  } = options;
+  }: UseCopyOptions = options;
   const copied = ref(false);
 
   /**

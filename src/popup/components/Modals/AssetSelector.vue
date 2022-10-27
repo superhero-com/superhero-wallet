@@ -5,7 +5,7 @@
     no-padding
     has-close-button
     class="asset-selector"
-    @close="handleClose"
+    @close="reject()"
     @opened="onModalOpen"
   >
     <template #header>
@@ -25,74 +25,87 @@
       :class="['appearing-element', { visible: !loading }]"
     >
       <TokensListItem
-        v-for="token in filteredResults"
+        v-for="token in filteredTokens"
         :key="token.contractId || token.id"
         :token-data="token"
         :class="{ selected: isTokenSelected(token) }"
         prevent-navigation
         show-current-price
         asset-selector
-        @click="handleChange(token)"
+        @click="resolve(token)"
       />
     </div>
     <BackToTop />
   </Modal>
 </template>
 
-<script>
-import balanceListMixin from '../../../mixins/balanceListMixin';
+<script lang="ts">
+import {
+  defineComponent,
+  nextTick,
+  PropType,
+  ref,
+} from '@vue/composition-api';
+import { IToken } from '../../../types';
 import Modal from '../Modal.vue';
 import TokensListItem from '../FungibleTokens/TokensListItem.vue';
 import InputSearch from '../InputSearch.vue';
 import BackToTop from '../BackToTop.vue';
+import { useTokensList } from '../../../composables';
 
-export default {
+export default defineComponent({
+  name: 'AssetSelector',
   components: {
     BackToTop,
     TokensListItem,
     Modal,
     InputSearch,
   },
-  mixins: [balanceListMixin(true)],
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
-    selectedToken: { type: Object, default: null },
+    selectedToken: { type: Object as PropType<IToken>, default: null },
+    showTokensWithBalance: Boolean,
   },
-  data() {
-    return {
-      searchTerm: '',
-      isFullyOpen: false,
-      loading: true,
-    };
-  },
-  methods: {
-    handleChange(token) {
-      this.resolve(token);
-    },
-    handleClose() {
-      this.reject();
-    },
-    isTokenSelected(token) {
-      if (!this.selectedToken) return false;
-      return token.contractId
-        ? this.selectedToken.contractId === token.contractId
-        : this.selectedToken.id === token.id;
-    },
+  setup(props) {
+    const loading = ref(true);
+    const searchTerm = ref('');
+    const isFullyOpen = ref(false);
+
+    const { filteredTokens } = useTokensList({
+      searchTerm,
+      withBalanceOnly: props.showTokensWithBalance,
+    });
+
+    function isTokenSelected(token: IToken): boolean {
+      if (!props.selectedToken) return false;
+      return (token.contractId)
+        ? props.selectedToken.contractId === token.contractId
+        : props.selectedToken.id === token.id;
+    }
+
     /**
      * Delay displaying tokens list until the modal transition is finished to prevent
      * performance issues when both animating the modal and rendering large amount of data.
      */
-    onModalOpen() {
-      this.$nextTick(() => {
-        this.isFullyOpen = true;
-        setTimeout(() => {
-          this.loading = false;
-        }, 250);
-      });
-    },
+    async function onModalOpen() {
+      await nextTick();
+      isFullyOpen.value = true;
+      setTimeout(() => {
+        loading.value = false;
+      }, 250);
+    }
+
+    return {
+      loading,
+      searchTerm,
+      isFullyOpen,
+      filteredTokens,
+      isTokenSelected,
+      onModalOpen,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

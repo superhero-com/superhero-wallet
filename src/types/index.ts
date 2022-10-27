@@ -6,8 +6,9 @@ import BigNumber from 'bignumber.js';
 
 export interface IToken {
   contractId: string
-  convertedBalance: number | undefined
+  convertedBalance?: number
   decimals: number
+  id?: string // Only for the Aeternity coin
   name: string
   symbol: string
 }
