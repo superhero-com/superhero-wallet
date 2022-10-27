@@ -7,11 +7,12 @@
     "module": "ES6",
     "moduleResolution": "node",
     "paths": {
-      "@/*": ["src/*"]
+      // "@/*": ["src/*"]
     },
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
+    "outDir": "dist",
   },
   "include": [
     "src/**/*.ts",
@@ -19,6 +20,7 @@
   ],
   "exclude": [
     "node_modules",
+    "dist/**/*",
     "**/*.svg",
   ],
   "files": [
