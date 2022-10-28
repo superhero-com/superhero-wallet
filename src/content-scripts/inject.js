@@ -1,9 +1,8 @@
 import {
   BrowserRuntimeConnection,
   BrowserWindowMessageConnection,
-  getBrowserAPI,
   MESSAGE_DIRECTION,
-  ContentScriptBridge,
+  connectionProxy,
 } from '@aeternity/aepp-sdk';
 
 window.browser = require('webextension-polyfill');
@@ -102,25 +101,15 @@ const runContentScript = () => {
   const readyStateCheckInterval = setInterval(() => {
     if (document.readyState === 'complete') {
       clearInterval(readyStateCheckInterval);
-      const port = getBrowserAPI().runtime.connect();
-      const extConnection = BrowserRuntimeConnection({
-        connectionInfo: {
-          description: 'Content Script to Extension connection',
-          origin: window.origin,
-        },
-        port,
-      });
+      const port = browser.runtime.connect();
+      const extConnection = BrowserRuntimeConnection({ port });
       const pageConnection = BrowserWindowMessageConnection({
-        connectionInfo: {
-          description: 'Content Script to Page  connection',
-          origin: window.origin,
-        },
+        target: window,
         origin: window.origin,
         sendDirection: MESSAGE_DIRECTION.to_aepp,
         receiveDirection: MESSAGE_DIRECTION.to_waellet,
       });
-      const bridge = ContentScriptBridge({ pageConnection, extConnection });
-      bridge.run();
+      connectionProxy(pageConnection, extConnection);
     }
   }, 10);
 };

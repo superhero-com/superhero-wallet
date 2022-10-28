@@ -47,13 +47,13 @@ export default {
     async confirmRawDataSigning({ dispatch }, data) {
       await dispatch('modals/open', { name: 'confirm-raw-sign', data }, { root: true });
     },
-    async confirmTxSigning({ dispatch }, { encodedTx, host }) {
+    async confirmTxSigning({ dispatch }, { txBase64, host }) {
       let txObject;
       // TODO: unpack if needed by checking encodedTx type
       try {
-        txObject = unpackTx(encodedTx).tx;
+        txObject = unpackTx(txBase64).tx;
       } catch (e) {
-        await dispatch('confirmRawDataSigning', encodedTx);
+        await dispatch('confirmRawDataSigning', txBase64);
         return;
       }
       const SUPPORTED_TX_TYPES = [
@@ -91,7 +91,7 @@ export default {
       opt: { modal = true, host = null },
     }) {
       const encodedTx = decode(txBase64, 'tx');
-      if (modal) await dispatch('confirmTxSigning', { encodedTx, host });
+      if (modal) await dispatch('confirmTxSigning', { txBase64, host });
       const signature = await dispatch(
         'signWithoutConfirmation',
         Buffer.concat([Buffer.from(await sdk.getNetworkId()), Buffer.from(encodedTx)]),

@@ -102,10 +102,10 @@ export default defineComponent({
       const transactionTypes = root.$t('transaction.type') as Record<TransactionType, any>;
       const transactionType = txType.value;
 
-      if (txType.value?.startsWith('name')) {
+      if (txType.value && typeof txType.value === 'string' && txType.value?.startsWith('name')) {
         return [AENS, transactionTypes[transactionType]];
       }
-      if (txType === Tag.SpendTx) {
+      if (txType.value === Tag.SpendTx.toString()) {
         return [root.$t('transaction.type.spendTx'), getTxDirection.value(props.transaction) === 'sent' ? root.$t('transaction.spendType.out') : root.$t('transaction.spendType.in')];
       }
       if (isAllowance.value) {
@@ -122,7 +122,7 @@ export default defineComponent({
         && (props.transaction.tx.function === 'tip' || props.transaction.tx.function === 'retip')) || props.transaction.claim) {
         return [root.$t('pages.token-details.tip'), props.transaction.claim ? root.$t('transaction.spendType.in') : root.$t('transaction.spendType.out')];
       }
-      if (txType === Tag.ContractCallTx
+      if (txType.value === Tag.ContractCallTx.toString()
         && availableTokens.value[props.transaction.tx.contractId]
         && (props.transaction.tx.function === 'transfer' || props.transaction.incomplete)) {
         return [root.$t('transaction.type.spendTx'), props.transaction.tx.callerId === account.value.address

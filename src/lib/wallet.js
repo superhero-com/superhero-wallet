@@ -1,5 +1,4 @@
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk';
-import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { camelCase, isEqual, times } from 'lodash-es';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
 import { genSwaggerClient } from 'gen-swagger-client';
@@ -10,6 +9,7 @@ import {
   fetchJson,
   executeAndSetInterval,
   watchUntilTruthy,
+  mapObject,
 } from '../popup/utils';
 import { IN_FRAME } from './environment';
 import store from '../store';

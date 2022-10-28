@@ -109,3 +109,10 @@ export function rxJsObservableToVueState(
 export function splitAddress(address: string | null): string {
   return address ? address.match(/.{1,3}/g)!.reduce((acc, current) => `${acc} ${current}`) : '';
 }
+
+export const mapObject = <InputV, OutputV>(
+  object: { [k: string]: InputV },
+  fn: (
+    value: [string, InputV], index: number, array: Array<[string, InputV]>
+  ) => [number | string, OutputV],
+): { [k: string]: OutputV } => Object.fromEntries(Object.entries(object).map(fn));

@@ -9,13 +9,10 @@ window.browser = require('webextension-polyfill');
 let connectionsQueue = [];
 
 const addAeppConnection = (port) => {
-  const connection = BrowserRuntimeConnection({
-    connectionInfo: { id: port.sender.frameId },
-    port,
-  });
-  store.getters['sdkPlugin/sdk'].addRpcClient(connection);
-  store.getters['sdkPlugin/sdk'].shareWalletInfo(port.postMessage.bind(port));
-  const shareWalletInfo = setInterval(() => store.getters['sdkPlugin/sdk'].shareWalletInfo(port.postMessage.bind(port)), 3000);
+  const connection = BrowserRuntimeConnection({ port });
+  const clientId = store.getters['sdkPlugin/sdk'].addRpcClient(connection);
+  store.getters['sdkPlugin/sdk'].shareWalletInfo(clientId);
+  const shareWalletInfo = setInterval(() => store.getters['sdkPlugin/sdk'].shareWalletInfo(clientId), 3000);
   port.onDisconnect.addListener(() => clearInterval(shareWalletInfo));
 };
 
@@ -64,7 +61,7 @@ export async function init() {
 }
 
 export function disconnect() {
-  Object.values(store.getters['sdkPlugin/sdk'].rpcClients).forEach((aepp) => {
+  Object.values(store.getters['sdkPlugin/sdk']._clients).forEach((aepp) => {
     if (aepp.info.status && aepp.info.status !== 'DISCONNECTED') {
       aepp.sendMessage(
         { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
