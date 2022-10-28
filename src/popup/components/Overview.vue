@@ -54,7 +54,7 @@
           hide-icon
           :value="sender.address"
         >
-          <span class="text-address text-left">{{ sender.address }}</span>
+          <span class="text-address text-left">{{ senderAddress }}</span>
         </CopyText>
       </div>
       <div
@@ -81,7 +81,7 @@
           hide-icon
           :value="recipient.address"
         >
-          <span class="text-address text-right">{{ recipient.address }}</span>
+          <span class="text-address text-right">{{ recipientAddress }}</span>
         </CopyText>
       </div>
     </div>
@@ -125,6 +125,16 @@ export default {
       return FUNCTION_TYPE_DEX.pool.includes(this.txFunction)
         ? this.$t('transaction.dexType.pool')
         : this.title;
+    },
+    senderAddress() {
+      if (!this.sender.address.includes('ak_')) return this.sender.address;
+
+      return this.sender.address.match(/.{1,3}/g).join(' ');
+    },
+    recipientAddress() {
+      if (!this.recipient.address.includes('ak_')) return this.recipient.address;
+
+      return this.recipient.address.match(/.{1,3}/g).join(' ');
     },
   },
 };
@@ -194,6 +204,10 @@ export default {
   .details {
     display: flex;
     justify-content: space-between;
+
+    .text-address {
+      word-spacing: 3px;
+    }
 
     .sender {
       width: 148px;

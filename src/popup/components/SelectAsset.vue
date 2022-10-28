@@ -1,11 +1,11 @@
 <template>
   <BtnPlain
     class="select-asset"
-    :class="{ focused }"
+    :class="{ focused, disabled }"
     @click="openAssetSelector"
   >
     {{ displayToken }}
-    <ChevronDown />
+    <ChevronDown v-if="!disabled" />
   </BtnPlain>
 </template>
 
@@ -21,6 +21,7 @@ export default {
   },
   props: {
     value: { type: Object, default: null },
+    disabled: Boolean,
     focused: Boolean,
   },
   computed: {
@@ -35,6 +36,8 @@ export default {
       this.$emit('input', token);
     },
     openAssetSelector() {
+      if (this.disabled) return;
+
       this.$store.dispatch('modals/open',
         {
           ...this.$attrs,
@@ -72,12 +75,14 @@ export default {
     opacity: 0.75;
   }
 
-  &:hover {
-    border-color: rgba(variables.$color-white, 0.15);
-  }
+  &:not(.disabled) {
+    &:hover {
+      border-color: rgba(variables.$color-white, 0.15);
+    }
 
-  &.focused {
-    background-color: rgba(variables.$color-white, 0.05);
+    &.focused {
+      background-color: rgba(variables.$color-white, 0.05);
+    }
   }
 }
 </style>

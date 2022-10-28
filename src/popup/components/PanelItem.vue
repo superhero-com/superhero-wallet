@@ -93,6 +93,8 @@ export default {
   }
 
   .panel-item-left {
+    overflow-x: hidden;
+
     ::v-deep .icon {
       width: 24px;
       height: 24px;
