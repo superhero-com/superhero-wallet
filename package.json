@@ -30,6 +30,7 @@
     "@aeternity/aepp-sdk": "^12.1.3",
     "@aeternity/bip39": "^0.1.0",
     "@aeternity/hd-wallet": "^0.2.0",
+    "@aeternity/json-bigint": "^0.3.1",
     "@aeternity/ledger-app-api": "0.2.1",
     "@fontsource/ibm-plex-mono": "^4.5.7",
     "@fontsource/ibm-plex-sans": "^4.5.7",
