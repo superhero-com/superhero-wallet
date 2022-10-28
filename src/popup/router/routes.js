@@ -26,8 +26,8 @@ import NotFound from '../pages/NotFound.vue';
 import Notifications from '../pages/Notifications.vue';
 import NotificationSettings from '../pages/NotificationSettings.vue';
 import ErrorLogSettings from '../pages/ErrorLogSettings.vue';
-import PermissionsDetails from '../pages/PermissionsDetails.vue';
 import PermissionsSettings from '../pages/PermissionsSettings.vue';
+import PermissionManager from '../pages/PermissionManager.vue';
 import PopupConnect from '../pages/Popups/Connect.vue';
 import PopupMessageSign from '../pages/Popups/MessageSign.vue';
 import PrivacyPolicy from '../pages/PrivacyPolicy.vue';
@@ -299,11 +299,26 @@ export default [
     },
   },
   {
+    path: '/more/settings/permissions/add',
+    component: PermissionManager,
+    name: 'permissions-add',
+    meta: {
+      title: 'permissionsAdd',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+    },
+  },
+  {
     path: '/more/settings/permissions/:host',
-    component: PermissionsDetails,
+    component: PermissionManager,
     name: 'permissions-details',
     meta: {
-      title: 'permissionsDetails',
+      title: 'permissionsEdit',
+      backButton: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
+      edit: true,
     },
   },
   {
