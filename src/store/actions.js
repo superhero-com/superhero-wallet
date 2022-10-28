@@ -5,6 +5,7 @@ import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import { Tag, AeSdk, Node } from '@aeternity/aepp-sdk';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
+import JsonBig from '@aeternity/json-bigint';
 import { postMessageToContent } from '../popup/utils/connection';
 import {
   fetchJson,
@@ -44,7 +45,7 @@ export default {
   ) {
     return (
       await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
-        (r) => r.transactions,
+        (r) => JsonBig.parse(JsonBig.stringify(r.transactions)),
         (error) => {
           if (!isAccountNotFoundError(error)) {
             handleUnknownError(error);
@@ -88,7 +89,7 @@ export default {
     const { address } = getters.account;
     let txs = await Promise.all([
       (recent || state.transactions.nextPageUrl === ''
-        ? state.middleware.getTxByAccount({ account: address, limit, page: 1 })
+        ? state.middleware.getTxByAccount(address, limit, 1)
         : fetchJson(`${getters.activeNetwork.middlewareUrl}/${state.transactions.nextPageUrl}`))
         .then(({ data, next }) => {
           const result = recent
