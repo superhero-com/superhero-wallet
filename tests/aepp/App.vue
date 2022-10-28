@@ -72,9 +72,12 @@
 </template>
 
 <script>
-import { Node, AeSdkAepp } from '@aeternity/aepp-sdk';
-import Detector from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/wallet-detector';
-import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
+import {
+  Node,
+  AeSdkAepp,
+  BrowserWindowMessageConnection,
+  walletDetector,
+} from '@aeternity/aepp-sdk';
 
 const networks = {
   Mainnet: {
@@ -208,7 +211,7 @@ contract Example =
       const scannerConnection = await BrowserWindowMessageConnection({
         connectionInfo: { id: 'spy' },
       });
-      this.detector = await Detector({ connection: scannerConnection });
+      this.detector = await walletDetector(scannerConnection);
       this.detector.scan(handleWallets);
     },
   },
