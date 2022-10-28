@@ -73,7 +73,7 @@ export default {
   },
   async mounted() {
     await watchUntilTruthy(() => this.sdk);
-    this.fee = calculateFee(Tag.SpendTx, this.sdk.Ae.defaults);
+    this.fee = await calculateFee(Tag.SpendTx);
   },
 };
 </script>

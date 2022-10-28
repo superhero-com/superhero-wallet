@@ -85,7 +85,7 @@ export default {
         return ['AENS', this.$t('transaction.type')[this.txType]];
       }
       if (this.txType === Tag.SpendTx) {
-        return [this.$t('transaction.type.spendTx'), this.getTxDirection(this.transaction) === 'sent' ? this.$t('transaction.spendType.out') : this.$t('transaction.spendType.in')];
+        return [this.$t('transaction.type.SpendTx'), this.getTxDirection(this.transaction) === 'sent' ? this.$t('transaction.spendType.out') : this.$t('transaction.spendType.in')];
       }
       if (this.isAllowance) {
         return [this.$t('transaction.dexType.allow_token')];
@@ -104,7 +104,7 @@ export default {
       if (this.txType === Tag.ContractCallTx
         && this.availableTokens[this.transaction.tx.contractId]
         && (this.transaction.tx.function === 'transfer' || this.transaction.incomplete)) {
-        return [this.$t('transaction.type.spendTx'), this.transaction.tx.callerId === this.account.address
+        return [this.$t('transaction.type.SpendTx'), this.transaction.tx.callerId === this.account.address
           ? this.$t('transaction.spendType.out') : this.$t('transaction.spendType.in')];
       }
       return this.transaction.pending ? [] : [this.$t('transaction.type')[this.txType]];
