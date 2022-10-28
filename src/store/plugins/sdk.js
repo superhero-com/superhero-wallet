@@ -108,31 +108,6 @@ export default (store) => {
             super(other);
           }
 
-          address = async (...args) => {
-            const { address } = store.getters.account;
-            const app = args.pop();
-            if (
-              app instanceof App
-              && !(await store.dispatch('permissions/requestAddressForHost', {
-                host: app.host.host,
-                name: app.host.hostname,
-                address,
-                connectionPopupCb: async () => (IS_EXTENSION_BACKGROUND
-                  ? showPopup(app.host.href, 'connectConfirm')
-                  : store.dispatch('modals/open', {
-                    name: MODAL_CONFIRM_CONNECT,
-                    app: {
-                      name: app.host.hostname,
-                      icons: [],
-                      protocol: app.host.protocol,
-                      host: app.host.host,
-                    },
-                  })),
-              }))
-            ) return Promise.reject(new Error('Rejected by user'));
-            return address;
-          }
-
           _resolveAccount = (data) => (
             {
               address: async (...args) => {
@@ -166,7 +141,7 @@ export default (store) => {
                 ? Crypto.sign(unsigned, store.getters.account.secretKey)
                 : store.dispatch('accounts/sign', messageToHash(unsigned))),
               ...(IS_EXTENSION_BACKGROUND ? {} : {
-                signTransaction: (tx, opt) => (store.dispatch('accounts/signTransaction', { tx, opt })),
+                signTransaction: (txBase64, opt) => (store.dispatch('accounts/signTransaction', { txBase64, opt })),
               }),
             })
         }
