@@ -20,7 +20,7 @@
         <DetailsItem :label="$t('total')">
           <template #value>
             <TokenAmount
-              :amount="+amountTotal"
+              :amount="+totalAmount"
             />
           </template>
         </DetailsItem>
@@ -60,6 +60,7 @@ export default {
       amount: '',
       amountError: null,
       error: false,
+      txFee: 0,
     };
   },
   computed: {
@@ -67,11 +68,8 @@ export default {
     highestBid() {
       return this.getHighestBid(this.name).nameFee;
     },
-    txFee() {
-      return calculateNameClaimFee(this.name);
-    },
-    amountTotal() {
-      return this.txFee.plus(this.amount || 0);
+    totalAmount() {
+      return this.txFee + Number(this.amount);
     },
   },
   watch: {
@@ -83,6 +81,10 @@ export default {
         this.amountError = '';
       }
     },
+  },
+  async created() {
+    const fee = await calculateNameClaimFee(this.name);
+    this.txFee = fee.toNumber();
   },
   methods: {
     async bid() {

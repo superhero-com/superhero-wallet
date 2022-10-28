@@ -16,6 +16,9 @@ import {
   buildTx as rawBuildTx,
   unpackTx,
   encode,
+  calculateMinFee,
+  AeSdk,
+  _buildTx,
 } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import {
@@ -76,28 +79,27 @@ export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   return amount.toFixed(0);
 };
 
-export const calculateFee = (type, params) => {
-  const encodedTx = rawBuildTx(type, {
-    params: {
-      ...type === 'spendTx' ? {
-        senderId: STUB_ADDRESS,
-        recipientId: STUB_ADDRESS,
-      } : {},
-      amount: MAX_UINT256,
-      ttl: MAX_UINT256,
-      nonce: MAX_UINT256,
-      ctVersion: { abiVersion: ABI_VERSIONS.SOPHIA, vmVersion: VM_VERSIONS.SOPHIA },
-      abiVersion: ABI_VERSIONS.SOPHIA,
-      callData: STUB_CALLDATA,
-      gas: 0,
-      ...params,
-    },
-    ...type === 'nameClaimTx' ? { vsn: 2 } : {},
-  });
-  return BigNumber(unpackTx(encodedTx).fee).shiftedBy(-MAGNITUDE);
+export const calculateFee = async (type, params) => {
+  const _params = {
+    ...type === Tag.SpendTx ? {
+      senderId: STUB_ADDRESS,
+      recipientId: STUB_ADDRESS,
+    } : {},
+    amount: MAX_UINT256,
+    ttl: MAX_UINT256,
+    nonce: MAX_UINT256,
+    ctVersion: { abiVersion: ABI_VERSIONS.SOPHIA, vmVersion: VM_VERSIONS.SOPHIA },
+    abiVersion: ABI_VERSIONS.SOPHIA,
+    callData: STUB_CALLDATA,
+    gas: 0,
+    ...params,
+    ...type === Tag.NameClaimTx ? { vsn: 2 } : {},
+  };
+  const { fee } = await rawBuildTx(_params, type).txObject;
+  return BigNumber(fee).shiftedBy(-MAGNITUDE);
 };
 
-export const calculateNameClaimFee = (name) => calculateFee(Tag.NameClaimTx, {
+export const calculateNameClaimFee = async (name) => calculateFee(Tag.NameClaimTx, {
   accountId: STUB_ADDRESS,
   name,
   nameSalt: genSalt(),
