@@ -116,7 +116,7 @@
               <TokenAmount
                 :amount="getTxAmountTotal(transaction)"
                 :symbol="getTxSymbol(transaction)"
-                :hide-fiat="getTxSymbol(transaction) !== 'AE'"
+                :hide-fiat="getTxSymbol(transaction) !== AETERNITY_SYMBOL"
               />
             </template>
           </DetailsItem>
@@ -147,7 +147,7 @@
             <template #value>
               <TokenAmount
                 :amount="+aettosToAe(transaction.tx.fee)"
-                symbol="AE"
+                :symbol="AETERNITY_SYMBOL"
               />
             </template>
           </DetailsItem>
@@ -171,6 +171,7 @@ import {
   formatTime,
   aettosToAe,
   watchUntilTruthy,
+  AETERNITY_SYMBOL,
 } from '../utils';
 import transactionTokensMixin from '../../mixins/transactionTokensMixin';
 import TransactionOverview from '../components/TransactionOverview.vue';
@@ -215,6 +216,7 @@ export default {
   data: () => ({
     transaction: null,
     showDetailedAllowanceInfo: true,
+    AETERNITY_SYMBOL,
   }),
   computed: {
     ...mapGetters(['getTx', 'getTxSymbol', 'getTxAmountTotal', 'getTxTipUrl', 'getExplorerPath']),

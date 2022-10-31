@@ -89,7 +89,7 @@ import {
   MODAL_TRANSFER_SEND,
   AETERNITY_CONTRACT_ID,
   buildSimplexLink,
-  watchUntilTruthy,
+  watchUntilTruthy, AETERNITY_SYMBOL,
 } from '../../utils';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
@@ -161,7 +161,7 @@ export default {
         return {
           decimals: 18,
           ...this.aePublicData,
-          symbol: 'AE',
+          symbol: AETERNITY_SYMBOL,
           convertedBalance: this.balance,
           balanceCurrency: this.balanceCurrency,
           contractId: '',

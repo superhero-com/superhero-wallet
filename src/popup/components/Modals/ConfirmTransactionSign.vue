@@ -40,7 +40,7 @@
         <template #value>
           <TokenAmount
             :amount="+convertToken(getSwapTokenAmountData.amount, -getSwapTokenAmountData.decimals)"
-            :symbol="getSwapTokenAmountData.isAe ? 'AE' : getSwapTokenAmountData.symbol"
+            :symbol="getSwapTokenAmountData.isAe ? AETERNITY_SYMBOL : getSwapTokenAmountData.symbol"
             :aex9="isTxAex9(transaction)"
             :hide-fiat="!getSwapTokenAmountData.isAe"
             data-cy="total"
@@ -124,6 +124,7 @@ import {
   DEX_REMOVE_LIQUIDITY,
   convertToken,
   watchUntilTruthy,
+  AETERNITY_SYMBOL,
 } from '../../utils';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -158,6 +159,7 @@ export default {
     tokenList: null,
     txFunction: null,
     loading: false,
+    AETERNITY_SYMBOL,
     TX_FIELDS: [
       'nonce',
       'payload',
