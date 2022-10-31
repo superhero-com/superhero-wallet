@@ -6,6 +6,7 @@ import { i18n } from '../../store/plugins/languages';
 export const MAGNITUDE = 18;
 export const SEED_LENGTH = 12;
 export const AETERNITY_CONTRACT_ID = 'aeternity';
+export const AETERNITY_SYMBOL = 'AE';
 
 export const TX_TYPE_MDW = {
   SpendTx: SCHEMA.TX_TYPE.spend,

@@ -33,12 +33,13 @@
 
 <script>
 import { mapState } from 'vuex';
+import { AETERNITY_SYMBOL } from '../utils/constants';
 
 export default {
   props: {
     amount: { type: Number, required: true },
     label: { type: String, default: null },
-    symbol: { type: String, default: 'AE' },
+    symbol: { type: String, default: AETERNITY_SYMBOL },
     aex9: { type: Boolean, default: false },
     fiatBelow: { type: Boolean, default: false },
     hideFiat: Boolean,

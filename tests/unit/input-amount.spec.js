@@ -4,6 +4,7 @@ import BigNumber from 'bignumber.js';
 import { mount } from '@vue/test-utils';
 import InputAmount from '../../src/popup/components/InputAmount.vue';
 import veeValidate from '../../src/store/plugins/veeValidate';
+import { AETERNITY_SYMBOL } from '../../src/popup/utils';
 
 Object.assign(Vue.prototype, {
   $t: () => 'locale-specific-text',
@@ -96,7 +97,7 @@ describe('InputAmount', () => {
 
     store._vm.$validator.extend('enough_ae', (_, [arg]) => BigNumber(test.balance || maxBalance).isGreaterThanOrEqualTo(arg));
     expect(wrapper.find('input').element.value).toBe(test.displayed.toString());
-    expect(wrapper.find('.token').text()).toBe('AE');
+    expect(wrapper.find('.token').text()).toBe(AETERNITY_SYMBOL);
     expect(wrapper.find('[data-cy=amount-currency]').text()).toBe(`(${test.currency.toFixed(2)})`);
 
     /* await store._vm.$validator.validateAll(); TODO: be able to test errors

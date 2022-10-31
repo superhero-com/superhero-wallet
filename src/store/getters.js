@@ -4,10 +4,8 @@ import { mnemonicToSeed } from '@aeternity/bip39';
 import { TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
 import {
   AVATAR_URL,
-  NETWORK_MAINNET,
-  NETWORK_TESTNET,
   TX_TYPE_MDW,
-  DEX_CONTRACTS,
+  DEX_CONTRACTS, NETWORK_MAINNET, NETWORK_TESTNET, AETERNITY_SYMBOL,
 } from '../popup/utils/constants';
 import {
   checkHashType,
@@ -83,7 +81,7 @@ export default {
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    return contractCallData ? availableTokens[contractCallData.token]?.symbol : 'AE';
+    return contractCallData ? availableTokens[contractCallData.token]?.symbol : AETERNITY_SYMBOL;
   },
   getTxAmountTotal: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);

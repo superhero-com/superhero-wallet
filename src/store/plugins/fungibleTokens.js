@@ -7,7 +7,7 @@ import {
   convertToken,
   fetchJson,
   handleUnknownError,
-  calculateSupplyAmount,
+  calculateSupplyAmount, AETERNITY_SYMBOL,
 } from '../../popup/utils';
 import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE, AETERNITY_CONTRACT_ID } from '../../popup/utils/constants';
 
@@ -30,7 +30,7 @@ export default (store) => {
         return {
           ...(aePublicDataExists ? aePublicData : {}),
           convertedBalance: tokenBalance,
-          symbol: 'AE',
+          symbol: AETERNITY_SYMBOL,
           balanceCurrency,
           contractId: AETERNITY_CONTRACT_ID,
         };

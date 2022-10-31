@@ -88,6 +88,7 @@ import { i18n } from '../../../store/plugins/languages';
 import { IS_MOBILE_DEVICE } from '../../../lib/environment';
 import { useCopy } from '../../../composables';
 import {
+  AETERNITY_SYMBOL,
   APP_LINK_WEB,
   MODAL_TRANSFER_RECEIVE,
 } from '../../utils';
@@ -132,8 +133,8 @@ export default defineComponent({
 
     function getTokenInfoQuery() {
       if (!amount.value || amount.value <= 0) return '';
-      const token = (selectedAsset.value && selectedAsset.value.symbol === 'AE')
-        ? 'AE'
+      const token = (selectedAsset.value && selectedAsset.value.symbol === AETERNITY_SYMBOL)
+        ? AETERNITY_SYMBOL
         : selectedAsset.value?.contractId;
       return `token=${token}&amount=${amount.value}`;
     }

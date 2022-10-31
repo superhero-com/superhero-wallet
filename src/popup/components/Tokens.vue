@@ -44,7 +44,7 @@
 
 <script>
 import AeIcon from '../../icons/tokens/ae.svg';
-import { AETERNITY_CONTRACT_ID } from '../utils/constants';
+import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils/constants';
 
 export default {
   props: {
@@ -86,7 +86,7 @@ export default {
 
       return {
         ...token,
-        symbol: token.isAe ? 'AE' : token.symbol,
+        symbol: token.isAe ? AETERNITY_SYMBOL : token.symbol,
         name: token.isAe ? 'Aeternity' : token.symbol,
         img,
         imgBorder,

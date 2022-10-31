@@ -1,8 +1,9 @@
 import BigNumber from 'bignumber.js';
+import { AETERNITY_SYMBOL } from './constants';
 
 const defaultToken = {
   decimals: 18,
-  symbol: 'AE',
+  symbol: AETERNITY_SYMBOL,
 };
 const defaultPoolToken = {
   symbol: 'Pool Token',
@@ -23,8 +24,8 @@ const genLiquiditySwapResolver = (
   let poolTokenSymbol;
   if ((tokens?.[tokenA.contractId] || tokenA.isAe)
     && (tokens?.[tokenB.contractId] || tokenB.isAe)) {
-    const symbolA = tokenA.isAe ? 'AE' : tokens?.[tokenA.contractId].symbol;
-    const symbolB = tokenB.isAe ? 'AE' : tokens?.[tokenB.contractId].symbol;
+    const symbolA = tokenA.isAe ? AETERNITY_SYMBOL : tokens?.[tokenA.contractId].symbol;
+    const symbolB = tokenB.isAe ? AETERNITY_SYMBOL : tokens?.[tokenB.contractId].symbol;
     poolTokenSymbol = `${symbolA}/${symbolB}`;
   }
 

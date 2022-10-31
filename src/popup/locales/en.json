@@ -822,7 +822,7 @@
       "verifyYourSeedPhrase": "verify your seed phrase"
     },
     "send": {
-      "title": "Transaction successfully submitted",
+      "title": "Transaction has been submitted",
       "subtitle": "You may check the status of your transaction in æternity blockchain explorer",
       "send": "Send",
       "success": "Success",

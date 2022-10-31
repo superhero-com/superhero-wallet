@@ -197,8 +197,8 @@ export default {
       margin: auto 0 0 0; // Move the footer to the bottom of the container
       display: flex;
       justify-content: center;
-      gap: 10px;
-      padding: 8px var(--screen-padding-x) var(--footer-padding-bottom);
+      gap: 8px;
+      padding: 24px;
 
       &.mobile {
         margin-bottom: 20px;
