@@ -101,7 +101,7 @@ export default {
   async mounted() {
     await watchUntilTruthy(() => this.$store.state.middleware);
     if (this.tx.recipientId?.startsWith('nm_')) {
-      this.name = (await this.$store.state.middleware.getNameByHash(this.tx.recipientId)).name;
+      this.name = (await this.$store.state.middleware.getNameById(this.tx.recipientId)).name;
     }
   },
 };
