@@ -17,7 +17,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, Ref } from '@vue/composition-api';
-import { INotification } from '../../types';
+import type { INotification } from '../../types';
 import { NOTIFICATION_STATUS_CREATED, rxJsObservableToVueState } from '../utils';
 import BellIcon from '../../icons/bell.svg?vue-component';
 import BtnIcon from './buttons/BtnIcon.vue';

@@ -1,5 +1,5 @@
 <template>
-  <Overview
+  <TransactionInfo
     class="transaction-overview"
     :title="transaction.title"
     :sender="transaction.sender"
@@ -12,10 +12,10 @@
 import { mapState, mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { watchUntilTruthy } from '../utils/helper';
-import Overview from './Overview.vue';
+import TransactionInfo from './TransactionInfo.vue';
 
 export default {
-  components: { Overview },
+  components: { TransactionInfo },
   props: {
     tx: { type: Object, required: true },
     isDex: { type: Boolean, default: false },

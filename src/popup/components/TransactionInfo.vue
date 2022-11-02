@@ -1,5 +1,5 @@
 <template>
-  <div class="overview">
+  <div class="transaction-info">
     <div class="title-tag-wrapper">
       <TransactionTag
         :tx-type="getTitle"
@@ -16,7 +16,7 @@
     <div class="parties">
       <Avatar v-bind="sender" />
       <div class="mid">
-        <TriangleRight />
+        <TriangleRight class="triangle" />
         <div class="line" />
       </div>
       <Avatar
@@ -39,70 +39,31 @@
     </div>
 
     <div class="details">
-      <div
-        class="sender"
+      <TransactionInfoDetailsParty
+        :tx-party="sender"
         data-cy="sender"
-      >
-        <a
-          :href="sender.url"
-          target="_blank"
-          class="name"
-        >
-          <Truncate :str="sender.name || sender.label" />
-        </a>
-        <CopyText
-          hide-icon
-          :value="sender.address"
-        >
-          <span class="text-address text-left">{{ senderAddress }}</span>
-        </CopyText>
-      </div>
-      <div
-        class="recipient"
+      />
+      <TransactionInfoDetailsParty
+        :tx-party="recipient"
         data-cy="recipient"
-      >
-        <a
-          v-if="recipient.url"
-          :href="recipient.url"
-          target="_blank"
-          class="name"
-        >
-          <Truncate :str="recipient.name || recipient.label" />
-        </a>
-        <span
-          v-else
-          class="name"
-          :class="{ aens: recipient.aens }"
-        >
-          {{ recipient.label }}
-        </span>
-        <CopyText
-          v-if="recipient.address"
-          hide-icon
-          :value="recipient.address"
-        >
-          <span class="text-address text-right">{{ recipientAddress }}</span>
-        </CopyText>
-      </div>
+        is-recipient
+      />
     </div>
   </div>
 </template>
 
 <script>
-import Truncate from './Truncate.vue';
-import CopyText from './CopyText.vue';
 import TriangleRight from '../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../icons/action.svg?vue-component';
 import AensIcon from '../../icons/aens.svg?vue-component';
 import Avatar from './Avatar.vue';
 import TransactionTag from './TransactionTag.vue';
-import { DEX_TRANSACTION_TAGS } from '../utils';
-import { FUNCTION_TYPE_DEX } from '../utils/constants';
+import TransactionInfoDetailsParty from './TransactionInfoDetailsParty.vue';
+import { DEX_TRANSACTION_TAGS, FUNCTION_TYPE_DEX } from '../utils';
 
 export default {
   components: {
-    Truncate,
-    CopyText,
+    TransactionInfoDetailsParty,
     TriangleRight,
     ActionIcon,
     AensIcon,
@@ -126,16 +87,6 @@ export default {
         ? this.$t('transaction.dexType.pool')
         : this.title;
     },
-    senderAddress() {
-      if (!this.sender.address.includes('ak_')) return this.sender.address;
-
-      return this.sender.address.match(/.{1,3}/g).join(' ');
-    },
-    recipientAddress() {
-      if (!this.recipient.address.includes('ak_')) return this.recipient.address;
-
-      return this.recipient.address.match(/.{1,3}/g).join(' ');
-    },
   },
 };
 </script>
@@ -145,7 +96,7 @@ export default {
 @use '../../styles/typography';
 @use '../../styles/mixins';
 
-.overview {
+.transaction-info {
   .title {
     @extend %face-sans-15-regular;
 
@@ -170,7 +121,7 @@ export default {
       width: 56px;
       height: 56px;
       padding: 8px;
-      border: 2px solid variables.$color-primary;
+      border: 2px solid variables.$color-grey-border;
       border-radius: 100px;
     }
 
@@ -184,19 +135,19 @@ export default {
       position: relative;
       width: 100%;
 
-      svg {
+      .triangle {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         width: 15px;
         height: 17px;
-        color: variables.$color-primary;
+        color: variables.$color-grey-border;
       }
 
       .line {
         height: calc(50% + 1px);
-        border-bottom: 2px solid variables.$color-primary;
+        border-bottom: 2px solid variables.$color-grey-border;
       }
     }
   }
@@ -204,54 +155,8 @@ export default {
   .details {
     display: flex;
     justify-content: space-between;
-
-    .text-address {
-      word-spacing: 3px;
-    }
-
-    .sender {
-      width: 148px;
-      text-align: left;
-    }
-
-    .recipient {
-      width: 148px;
-      text-align: right;
-
-      .truncate {
-        justify-content: flex-end;
-      }
-
-      .name.aens {
-        padding-right: 8px;
-      }
-    }
-
-    .name {
-      @extend %face-sans-15-medium;
-
-      display: block;
-      margin-bottom: 8px;
-      color: variables.$color-white;
-      text-decoration: none;
-      white-space: nowrap;
-
-      @extend %face-sans-15-medium;
-
-      line-height: 16px;
-
-      &:hover {
-        .truncate::v-deep span {
-          text-decoration: underline;
-        }
-      }
-    }
-
-    .copy-address {
-      @extend %face-mono-12-medium;
-
-      height: 48px;
-    }
+    padding: 0 4px;
+    gap: 22px;
   }
 }
 </style>

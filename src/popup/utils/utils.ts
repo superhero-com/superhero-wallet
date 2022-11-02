@@ -105,3 +105,7 @@ export function rxJsObservableToVueState(
   });
   return state;
 }
+
+export function splitAddress(address: string | null): string {
+  return address ? address.match(/.{1,3}/g)!.reduce((acc, current) => `${acc} ${current}`) : '';
+}

@@ -385,6 +385,8 @@ export default [
     props: true,
     meta: {
       title: 'tx-details',
+      hideNotificationsIcon: true,
+      closeButton: true,
     },
   },
   {

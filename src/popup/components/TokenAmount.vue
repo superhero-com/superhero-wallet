@@ -77,7 +77,7 @@ export default {
 @use '../../styles/typography';
 
 .token-amount {
-  @extend %face-sans-14-regular;
+  @extend %face-sans-15-medium;
 
   color: variables.$color-white;
 
@@ -89,14 +89,14 @@ export default {
   }
 
   .symbol {
-    @extend %face-sans-14-medium;
-
-    color: variables.$color-grey-light;
+    color: rgba(variables.$color-white, 0.75);
   }
 
   .fiat {
+    @extend %face-sans-15-regular;
+
     margin-left: 8px;
-    color: variables.$color-grey-dark;
+    color: rgba(variables.$color-white, 0.75);
 
     &.fiat-below {
       display: block;

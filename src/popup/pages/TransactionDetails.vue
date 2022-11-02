@@ -5,7 +5,7 @@
       class="spinner"
     />
     <template v-else>
-      <Plate
+      <div
         v-if="!isAllowance || isErrorTransaction"
         class="header"
       >
@@ -17,10 +17,17 @@
           :tokens="tokens"
           :error="isErrorTransaction"
           :class="{ reverse: isPool }"
+          icon-size="md"
         />
-      </Plate>
+      </div>
       <div class="content">
         <TransactionOverview v-bind="transaction" />
+        <div class="explorer">
+          <LinkButton :to="getExplorerPath(hash)">
+            {{ $t('pages.transactionDetails.explorer') }}
+            <ExternalLink />
+          </LinkButton>
+        </div>
         <div class="data-grid">
           <template v-if="isSwap && !isErrorTransaction">
             <SwapRates :transaction="transaction" />
@@ -69,7 +76,7 @@
                 :value="hash"
                 :copied-text="$t('hashCopied')"
               >
-                <span class="text-address">{{ hash }}</span>
+                <span class="text-address">{{ splitAddress(hash) }}</span>
               </CopyText>
             </template>
           </DetailsItem>
@@ -152,12 +159,6 @@
             </template>
           </DetailsItem>
         </div>
-        <div class="explorer">
-          <LinkButton :to="getExplorerPath(hash)">
-            {{ $t('pages.transactionDetails.explorer') }}
-            <ExternalLink />
-          </LinkButton>
-        </div>
       </div>
     </template>
   </div>
@@ -171,11 +172,11 @@ import {
   formatTime,
   aettosToAe,
   watchUntilTruthy,
+  splitAddress,
   AETERNITY_SYMBOL,
 } from '../utils';
 import transactionTokensMixin from '../../mixins/transactionTokensMixin';
 import TransactionOverview from '../components/TransactionOverview.vue';
-import Plate from '../components/Plate.vue';
 import SwapRoute from '../components/SwapRoute.vue';
 import SwapRates from '../components/SwapRates.vue';
 import TokenAmount from '../components/TokenAmount.vue';
@@ -197,7 +198,6 @@ export default {
     TransactionDetailsPoolTokens,
     TransactionTokens,
     TransactionOverview,
-    Plate,
     TokenAmount,
     DetailsItem,
     LinkButton,
@@ -239,6 +239,7 @@ export default {
     }
   },
   methods: {
+    splitAddress,
     aettosToAe,
     formatDate,
     formatTime,
@@ -297,7 +298,7 @@ export default {
         .tokens {
           @extend %face-sans-18-medium;
 
-          color: variables.$color-white;
+          color: rgba(variables.$color-white, 0.75);
         }
       }
     }
@@ -310,10 +311,10 @@ export default {
   }
 
   .content {
-    background: var(--screen-bg-color);
+    background-color: variables.$color-bg-4;
 
     .transaction-overview {
-      padding: 16px;
+      padding: 16px 12px 8px;
     }
 
     .pool-tokens.reverse {
@@ -337,23 +338,29 @@ export default {
     }
 
     .explorer {
-      height: 56px;
-      margin: 0 16px;
-      padding: 8px 0 32px 0;
+      height: 38px;
+      padding-inline: 16px;
+      display: flex;
+      align-items: center;
 
       .link-button {
         @extend %face-sans-14-medium;
 
         text-decoration: none;
+        color: rgba(variables.$color-white, 0.75);
 
         svg {
           opacity: 1;
-          color: variables.$color-success;
+          color: rgba(variables.$color-white, 0.75);
         }
 
         &:hover {
-          color: variables.$color-success;
+          color: variables.$color-white;
           text-decoration: underline;
+
+          svg {
+            color: variables.$color-white;
+          }
         }
       }
     }

@@ -75,6 +75,7 @@ export default {
   padding-inline: var(--screen-padding-x);
   margin-left: calc(-1 * var(--screen-padding-x));
   margin-right: calc(-1 * var(--screen-padding-x));
+  z-index: 2;
 
   .filter {
     @extend %face-sans-14-regular;

@@ -78,7 +78,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from '@vue/composition-api';
-import {
+import type {
   IAccount,
   IAsset,
   IToken,

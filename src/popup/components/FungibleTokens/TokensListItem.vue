@@ -12,7 +12,10 @@
   >
     <div class="row">
       <div class="left">
-        <Tokens :tokens="[tokenData]" />
+        <Tokens
+          :tokens="[tokenData]"
+          icon-size="xl"
+        />
       </div>
       <TokenAmount
         :amount="+tokenData.convertedBalance || 0"
@@ -101,8 +104,6 @@ export default {
     padding-bottom: 4px;
 
     img {
-      width: 30px;
-      height: 30px;
       border-radius: 15px;
       margin-right: 0;
     }

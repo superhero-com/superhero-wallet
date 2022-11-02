@@ -54,7 +54,7 @@ export default {
     align-items: center;
     margin-bottom: 4px;
     line-height: 16px;
-    color: variables.$color-grey-dark;
+    color: rgba(variables.$color-white, 0.5);
 
     .indent {
       margin-left: 8px;

@@ -5,7 +5,10 @@
       :key="token.symbol"
       :class="['token-row', token.isReceived ? 'received': 'sent', { error }]"
     >
-      <Tokens :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]" />
+      <Tokens
+        :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]"
+        :icon-size="iconSize"
+      />
       <span class="amount">
         {{
           `${token.isReceived ? '+' : '−'}
@@ -25,7 +28,8 @@ export default {
   components: { Tokens },
   props: {
     tokens: { type: Array, required: true },
-    error: { type: Boolean },
+    iconSize: { type: String, default: 'rg' },
+    error: Boolean,
   },
   methods: {
     convertToken,

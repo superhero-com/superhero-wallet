@@ -4,7 +4,7 @@
     class="connect"
     data-cy="popup-aex2"
   >
-    <Overview
+    <TransactionInfo
       :title="$t('pages.connectConfirm.title')"
       :sender="{ name: app.name, address: app.host, url: app.url }"
       :recipient="account"
@@ -59,7 +59,7 @@
 import { mapState, mapGetters } from 'vuex';
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
-import Overview from '../../components/Overview.vue';
+import TransactionInfo from '../../components/TransactionInfo.vue';
 import CheckMark from '../../../icons/check-mark.svg?vue-component';
 import mixin from './mixin';
 
@@ -67,7 +67,7 @@ export default {
   components: {
     Modal,
     BtnMain,
-    Overview,
+    TransactionInfo,
     CheckMark,
   },
   mixins: [mixin],
@@ -108,7 +108,7 @@ export default {
 @use '../../../styles/typography';
 
 .connect {
-  .overview {
+  .transaction-info {
     margin: 16px;
   }
 

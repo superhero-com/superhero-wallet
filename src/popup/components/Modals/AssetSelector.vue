@@ -46,7 +46,7 @@ import {
   PropType,
   ref,
 } from '@vue/composition-api';
-import { IToken } from '../../../types';
+import type { IToken } from '../../../types';
 import Modal from '../Modal.vue';
 import TokensListItem from '../FungibleTokens/TokensListItem.vue';
 import InputSearch from '../InputSearch.vue';
