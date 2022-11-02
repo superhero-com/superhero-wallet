@@ -131,10 +131,6 @@ export default {
     flex: 0;
     position: relative;
 
-    .tokens::v-deep {
-      @extend %face-sans-15-medium;
-    }
-
     .divider,
     .tokens::v-deep {
       background: var(--screen-bg-color);
@@ -144,7 +140,7 @@ export default {
 
     &::before {
       content: "";
-      background-image: linear-gradient(variables.$color-primary 2px, transparent 1px);
+      background-image: linear-gradient(variables.$color-white 2px, transparent 1px);
       position: absolute;
       top: calc(50% - 1px);
       height: 24px;
@@ -152,17 +148,17 @@ export default {
     }
 
     .divider {
-      @extend %face-sans-12-medium;
+      @extend %face-sans-13-medium;
 
       @include mixins.flex(center, center, row);
 
       gap: 2px;
-      color: variables.$color-primary;
+      color: variables.$color-white;
       white-space: nowrap;
 
       .space,
       .arrow {
-        background-image: linear-gradient(variables.$color-primary 2px, transparent 1px);
+        background-image: linear-gradient(variables.$color-white 2px, transparent 1px);
         width: 12px;
         height: 24px;
         transform: translateY(calc(50% - 1px));
@@ -170,7 +166,7 @@ export default {
       }
 
       .arrow {
-        margin-right: 1px;
+        margin-right: 4px;
 
         svg {
           position: absolute;

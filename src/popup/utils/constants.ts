@@ -1,6 +1,6 @@
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { ICurrency, INetwork, INotificationSetting } from '../../types';
+import type { ICurrency, INetwork, INotificationSetting } from '../../types';
 import { i18n } from '../../store/plugins/languages';
 
 export const MAGNITUDE = 18;

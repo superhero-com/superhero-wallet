@@ -1,5 +1,5 @@
 import { computed, ref, Ref } from '@vue/composition-api';
-import { IToken, ITokenList } from '../types';
+import type { IToken, ITokenList } from '../types';
 import { AETERNITY_CONTRACT_ID, rxJsObservableToVueState } from '../popup/utils';
 import store from '../store';
 

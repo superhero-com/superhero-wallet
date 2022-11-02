@@ -113,12 +113,16 @@ button {
   }
 
   &-address {
-    @extend %face-sans-12-medium;
+    @extend %face-mono-11-medium;
 
-    letter-spacing: 0.05em;
-    line-height: 18px;
-    color: $color-grey-light;
-    word-break: break-all;
+    letter-spacing: 0.13em;
+    color: rgba($color-white, 0.75);
+    word-break: break-word;
+    transition: 0.1s;
+
+    &:hover {
+      color: $color-white;
+    }
   }
 
   &-heading-2 {

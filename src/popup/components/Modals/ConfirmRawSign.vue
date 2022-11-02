@@ -4,7 +4,7 @@
     class="confirm-raw-sign"
     data-cy="popup-aex2"
   >
-    <Overview
+    <TransactionInfo
       :title="$t('modals.confirm-raw-sign.title')"
       :sender="{ name: app.name, address: app.host, url: app.url }"
       :recipient="account"
@@ -58,7 +58,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import Modal from '../Modal.vue';
-import Overview from '../Overview.vue';
+import TransactionInfo from '../TransactionInfo.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import DetailsItem from '../DetailsItem.vue';
 import Warning from '../../../icons/warning.svg?vue-component';
@@ -67,7 +67,7 @@ import CopyText from '../CopyText.vue';
 export default {
   components: {
     Modal,
-    Overview,
+    TransactionInfo,
     BtnMain,
     DetailsItem,
     Warning,

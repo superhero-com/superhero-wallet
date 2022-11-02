@@ -14,7 +14,10 @@
     >
       <div>
         <span class="price">1</span>
-        <Tokens :tokens="[rate.from]" />
+        <Tokens
+          :tokens="[rate.from]"
+          no-icons
+        />
       </div>
       <div>
         <TokenAmount
@@ -25,7 +28,10 @@
           aex9
           high-precision
         />
-        <Tokens :tokens="[rate.to]" />
+        <Tokens
+          :tokens="[rate.to]"
+          no-icons
+        />
       </div>
     </div>
   </div>
@@ -106,7 +112,7 @@ export default {
     .price {
       padding-right: 4px;
 
-      @extend %face-sans-14-medium;
+      @extend %face-sans-15-medium;
     }
 
     div {

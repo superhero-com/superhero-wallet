@@ -1,5 +1,8 @@
 <template>
-  <div class="truncate">
+  <div
+    class="truncate"
+    :class="{ right }"
+  >
     <span
       class="container"
       :class="{ fixed }"
@@ -20,8 +23,9 @@ import { AENS_DOMAIN } from '../utils';
 export default {
   props: {
     str: { type: String, required: true },
-    fixed: { type: Boolean },
     gradientColor: { type: String, default: 'black' },
+    fixed: Boolean,
+    right: Boolean,
   },
   data: () => ({
     AENS_DOMAIN,
@@ -74,6 +78,10 @@ export default {
 <style lang="scss" scoped>
 .truncate {
   display: flex;
+
+  &.right {
+    justify-content: flex-end;
+  }
 
   .container {
     position: relative;

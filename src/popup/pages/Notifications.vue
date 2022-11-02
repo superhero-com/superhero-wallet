@@ -47,7 +47,7 @@ import {
   Ref,
   ref,
 } from '@vue/composition-api';
-import { INotification, INotificationSetting, NotificationStatus } from '../../types';
+import type { INotification, INotificationSetting, NotificationStatus } from '../../types';
 import {
   NOTIFICATION_STATUS_CREATED,
   NOTIFICATION_STATUS_PEEKED,
