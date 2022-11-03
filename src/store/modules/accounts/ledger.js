@@ -62,7 +62,7 @@ export default {
       const address = await dispatch('request', { name: 'getAddress', args: [account.idx] });
       if (account.address !== address) {
         if (!process.env.IS_EXTENSION) {
-          dispatch('modals/open', { name: 'dafault', icon: 'alert', title: 'account not found' }, { root: true });
+          dispatch('modals/open', { name: 'default', icon: 'alert', title: 'account not found' }, { root: true });
         }
         throw new Error('Account not found');
       }
