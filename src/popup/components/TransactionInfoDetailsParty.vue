@@ -11,7 +11,7 @@
     >
       <Truncate
         :right="isRecipient"
-        :str="txParty.name || txParty.label"
+        :str="punycodeToName(txParty.name) || txParty.label"
       />
     </a>
     <span
@@ -28,7 +28,7 @@
     >
       <AddressFormatted
         :address="txParty.address"
-        columns
+        :columns="!isAddressChain"
         :column-count="5"
         :align-right="isRecipient"
         class="text-address"
@@ -38,7 +38,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from '@vue/composition-api';
+import { punycodeToName } from '../utils/names';
+import { checkAensName } from '../utils';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressFormatted from './AddressFormatted.vue';
@@ -55,6 +57,14 @@ export default defineComponent({
       type: Object,
       required: true,
     },
+  },
+  setup(props) {
+    const isAddressChain = computed(() => checkAensName(props.txParty.address));
+
+    return {
+      isAddressChain,
+      punycodeToName,
+    };
   },
 });
 </script>

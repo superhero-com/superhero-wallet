@@ -16,6 +16,7 @@ import {
   categorizeContractCallTxObject,
   getHdWalletAccount,
 } from '../popup/utils';
+import { punycodeToName } from '../popup/utils/names';
 
 export default {
   wallet({ mnemonic }) {
@@ -33,7 +34,7 @@ export default {
       }))
       .map(({ ...account }) => ({
         ...account,
-        name: getters['names/getDefault'](account.address),
+        name: punycodeToName(getters['names/getDefault'](account.address)),
       }));
   },
   account({ accounts: { activeIdx } }, { accounts }) {

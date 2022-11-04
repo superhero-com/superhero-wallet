@@ -94,6 +94,7 @@ import {
   escapeSpecialChars,
 } from '../utils';
 import { MODAL_DEFAULT, AETERNITY_CONTRACT_ID } from '../utils/constants';
+import { nameToPunycode } from '../utils/names';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import AvatarWithChainName from './AvatarWithChainName.vue';
@@ -130,7 +131,8 @@ export default {
       'tippingV2',
     ]),
     isRecipientName() {
-      return this?.recipientAddress && checkAensName(this.recipientAddress);
+      return this.transferData?.address
+          && checkAensName(this.transferData?.address);
     },
     tokenSymbol() {
       return this.transferData.selectedAsset?.symbol || '-';
@@ -173,6 +175,7 @@ export default {
     },
     async transfer({ amount, recipient, selectedAsset }) {
       this.loading = true;
+      const formattedRecipient = nameToPunycode(recipient);
       try {
         let actionResult;
 
@@ -187,12 +190,12 @@ export default {
         } else if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
           actionResult = await this.$store.dispatch('fungibleTokens/transfer', [
             selectedAsset.contractId,
-            recipient,
+            formattedRecipient,
             amount,
             { waitMined: false, modal: false },
           ]);
         } else {
-          actionResult = await this.sdk.spend(amount, recipient, {
+          actionResult = await this.sdk.spend(amount, formattedRecipient, {
             waitMined: false,
             modal: false,
           });
@@ -201,7 +204,7 @@ export default {
         if (actionResult && selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
           this.$store.dispatch('addPendingTransaction', {
             amount,
-            recipient,
+            formattedRecipient,
             hash: actionResult.hash,
             type: 'spendToken',
             pendingTokenTx: true,
@@ -219,7 +222,7 @@ export default {
             type: 'spend',
             tx: {
               senderId: this.account.address,
-              recipientId: recipient,
+              recipientId: formattedRecipient,
               type: SCHEMA.TX_TYPE.spend,
             },
           });

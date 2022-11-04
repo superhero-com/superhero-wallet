@@ -56,6 +56,7 @@
     "rxjs-etc": "^10.6.2",
     "swiper": "^5.4.5",
     "tipping-contract": "github:aeternity/tipping-contract#v3.1.0-alpha2",
+    "tr46": "^3.0.0",
     "uuid": "^8.3.2",
     "validator": "^13.7.0",
     "vee-validate": "^2.2.15",

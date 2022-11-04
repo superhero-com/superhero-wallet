@@ -1,7 +1,7 @@
 <template>
   <div class="claim">
     <InputField
-      v-model="name"
+      v-model.trim="name"
       v-validate="'required|name|name_unregistered'"
       name="name"
       class="chain-name"
@@ -11,7 +11,7 @@
     >
       <template #label-after>
         <span class="chain-name-counter">
-          {{ name.length }}/{{ maxNameLength }}
+          {{ nameLength }}/{{ maxNameLength }}
         </span>
       </template>
       <template #after>
@@ -67,6 +67,7 @@ import {
   checkAensName,
   convertToken,
 } from '../../utils';
+import { nameToPunycode } from '../../utils/names';
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -96,9 +97,15 @@ export default {
     },
     nameFee() {
       return convertToken(
-        TxBuilderHelper.getMinimumNameFee(`${this.name}${AENS_DOMAIN}`),
+        TxBuilderHelper.getMinimumNameFee(`${this.formattedName}${AENS_DOMAIN}`),
         -MAGNITUDE,
       ).toFixed(4);
+    },
+    formattedName() {
+      return nameToPunycode(this.name);
+    },
+    nameLength() {
+      return this.formattedName?.length || 0;
     },
   },
   methods: {
@@ -107,8 +114,8 @@ export default {
     }),
     async claim() {
       if (!await this.$validator.validateAll()) return;
-      const name = `${this.name}${AENS_DOMAIN}`;
-      const nameEntry = await this.sdk.api.getNameEntryByName(name).catch(() => false);
+      const name = `${this.formattedName}${AENS_DOMAIN}`;
+      const nameEntry = await this.sdk.api.getNameEntryByName(this.name).catch(() => false);
       if (nameEntry) {
         this.openModal({
           name: MODAL_DEFAULT,
@@ -142,7 +149,7 @@ export default {
         try {
           this.$store.dispatch('names/fetchOwned');
           await this.sdk.poll(claimTxHash);
-          const isAuction = AENS_NAME_AUCTION_MAX_LENGTH >= name.length;
+          const isAuction = AENS_NAME_AUCTION_MAX_LENGTH >= this.nameLength;
           if (!isAuction) {
             this.$store.dispatch('names/updatePointer', {
               name,
