@@ -92,14 +92,14 @@ export default {
 
 .message-sign {
   .transaction-info {
-    margin: 16px;
+    margin-bottom: 16px;
   }
 
   .subtitle {
-    margin: 24px 16px 16px;
-
     @extend %face-sans-15-medium;
 
+    margin-top: 24px;
+    margin-bottom: 16px;
     color: variables.$color-grey-light;
     text-align: center;
 

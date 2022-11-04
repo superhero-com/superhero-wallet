@@ -120,12 +120,11 @@ export default {
     text-align: left;
 
     .title {
+      @extend %face-sans-15-medium;
+
       display: flex;
       align-items: center;
       margin-bottom: 4px;
-
-      @extend %face-sans-15-medium;
-
       color: variables.$color-warning;
 
       .icon {
