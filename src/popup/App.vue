@@ -3,7 +3,7 @@
     id="app"
     :class="{
       'show-header': showStatusAndHeader,
-      'is-web': IS_WEB,
+      'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
       'is-extension': IS_EXTENSION,
     }"
   >
@@ -44,7 +44,7 @@ import { NOTIFICATION_DEFAULT_SETTINGS } from './utils/constants';
 import {
   IS_WEB,
   IS_IOS,
-  IS_ANDROID,
+  IS_MOBILE_DEVICE,
   IS_CORDOVA,
   IS_EXTENSION,
 } from '../lib/environment';
@@ -61,6 +61,7 @@ export default {
   data: () => ({
     IS_WEB,
     IS_EXTENSION,
+    IS_MOBILE_DEVICE,
   }),
   computed: {
     ...mapGetters(['isLoggedIn']),
@@ -179,13 +180,13 @@ export default {
   }
 
   &.is-extension,
-  &.is-web {
+  &.is-desktop-web {
     width: variables.$extension-width;
     height: variables.$extension-height;
   }
 
   // Imitate the appearance of the mobile/extension app in a desktop browser
-  &.is-web {
+  &.is-desktop-web {
     --screen-border-radius: #{variables.$border-radius-app};
 
     overflow: hidden;
