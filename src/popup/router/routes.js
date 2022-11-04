@@ -77,7 +77,6 @@ export default [
         component: AccountDetailsTokens,
         meta: {
           hideHeader: true,
-          asModal: true,
         },
       },
       {
@@ -86,7 +85,6 @@ export default [
         component: AccountDetailsTransactions,
         meta: {
           hideHeader: true,
-          asModal: true,
         },
       },
       {
@@ -100,7 +98,6 @@ export default [
             props: true,
             meta: {
               hideHeader: true,
-              asModal: true,
             },
           },
           {
@@ -110,7 +107,6 @@ export default [
             name: 'account-details-names-auctions',
             meta: {
               hideHeader: true,
-              asModal: true,
             },
           },
           {
@@ -120,7 +116,6 @@ export default [
             name: 'account-details-names-claim',
             meta: {
               hideHeader: true,
-              asModal: true,
             },
           },
         ],

@@ -19,7 +19,7 @@
     >
       <Header v-if="showStatusAndHeader" />
 
-      <transition :name="$route.meta.asModal ? 'pop-transition' : 'page-transition'">
+      <transition name="page-transition">
         <RouterView
           :class="{ 'show-header': showStatusAndHeader }"
           class="main"
