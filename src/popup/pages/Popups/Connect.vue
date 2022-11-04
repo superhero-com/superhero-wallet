@@ -113,14 +113,14 @@ export default {
 
 .connect {
   .transaction-info {
-    margin: 16px;
+    margin-bottom: 16px;
   }
 
   .subtitle {
-    margin: 24px 16px 16px;
-
     @extend %face-sans-15-medium;
 
+    margin-top: 24px;
+    margin-bottom: 16px;
     color: variables.$color-grey-light;
     text-align: center;
 
@@ -130,15 +130,14 @@ export default {
   }
 
   .permissions {
-    margin: 16px;
+    margin: 16px 0;
 
     .title {
+      @extend %face-sans-15-medium;
+
       display: flex;
       align-items: center;
       padding-bottom: 4px;
-
-      @extend %face-sans-15-medium;
-
       color: variables.$color-grey-dark;
 
       .icon {
@@ -150,11 +149,10 @@ export default {
     }
 
     .description {
-      display: block;
-      padding-bottom: 16px;
-
       @extend %face-sans-15-regular;
 
+      display: block;
+      padding-bottom: 16px;
       color: variables.$color-white;
       text-align: left;
     }

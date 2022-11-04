@@ -9,6 +9,7 @@
       :class="{
         'full-screen': fullScreen,
         'from-bottom': fromBottom,
+        'has-header': showHeader,
         'has-close-button': hasCloseButton,
         'no-padding': noPadding,
         dense,
@@ -17,7 +18,7 @@
     >
       <div class="container">
         <div
-          v-if="$slots.header || header || hasCloseButton"
+          v-if="showHeader"
           class="header"
           :class="{ transparent: hasCloseButton && !($slots.header || header) }"
         >
@@ -65,7 +66,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeUnmount, onMounted } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  onBeforeUnmount,
+  onMounted,
+} from '@vue/composition-api';
 import { IS_MOBILE_DEVICE, IS_FIREFOX, IS_EXTENSION } from '../../lib/environment';
 import BtnClose from './buttons/BtnClose.vue';
 
@@ -85,7 +91,9 @@ export default defineComponent({
   emits: [
     'close',
   ],
-  setup() {
+  setup(props, { slots }) {
+    const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
+
     onMounted(() => {
       if (!document.body.style.overflow) {
         document.body.style.overflow = 'hidden';
@@ -100,6 +108,7 @@ export default defineComponent({
       IS_MOBILE_DEVICE,
       IS_FIREFOX,
       IS_EXTENSION,
+      showHeader,
     };
   },
 });
@@ -125,11 +134,6 @@ export default defineComponent({
   background-color: rgba(variables.$color-black, 0.7);
   display: flex;
   will-change: backdrop-filter;
-
-  // This is not working correctly in Firefox extension
-  &.blur-bg {
-    backdrop-filter: blur(variables.$bg-blur-radius);
-  }
 
   .container {
     position: relative;
@@ -189,7 +193,6 @@ export default defineComponent({
       @extend %face-sans-15-regular;
 
       padding: var(--screen-padding-x);
-      padding-top: 0;
       color: variables.$color-grey-light;
       word-break: break-word;
     }
@@ -276,12 +279,23 @@ export default defineComponent({
     }
   }
 
+  &.has-header {
+    .body {
+      padding-top: 0;
+    }
+  }
+
   &.dense {
     --screen-padding-x: 8px;
   }
 
   &.no-padding {
     --screen-padding-x: 0;
+  }
+
+  // This is not working correctly in Firefox extension
+  &.blur-bg {
+    backdrop-filter: blur(5px);
   }
 
   &.pop-in-transition {

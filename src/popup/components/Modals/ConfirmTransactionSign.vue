@@ -311,7 +311,6 @@ export default {
   }
 
   .transaction-overview {
-    margin-top: 20px;
     margin-bottom: 16px;
   }
 
