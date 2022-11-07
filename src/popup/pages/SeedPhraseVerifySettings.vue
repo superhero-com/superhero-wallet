@@ -30,7 +30,7 @@
       <template v-if="!selectedWordIds.length">
         <BtnPlain class="badge selected">
           <div>{{ $t('pages.seedPhrase.first') }}</div>
-          <Close class="close-icon"/>
+          <Close class="close-icon" />
         </BtnPlain>
         <BtnPlain class="badge selected">
           <div>{{ $t('pages.seedPhrase.second') }}</div>
@@ -149,7 +149,7 @@ export default {
 
   .title {
     color: rgba(variables.$color-white, 1);
-    padding: 12px 0;
+    padding: 18px 0;
     text-align: center;
 
     @extend %face-sans-18-regular;

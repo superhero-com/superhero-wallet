@@ -15,7 +15,7 @@
         @click="copy(mnemonic)"
       >
         <template v-if="!copied">
-          <CopyOutlined />
+          <CopyOutlined class="copy-icon" />
           {{ $t('pages.seed-phrase-settings.copy') }}
         </template>
 
@@ -99,7 +99,7 @@ export default defineComponent({
 
   .title {
     color: rgba(variables.$color-white, 1);
-    padding: 12px 0 24px;
+    padding: 18px 0 26px;
     text-align: center;
 
     @extend %face-sans-18-regular;
@@ -107,7 +107,7 @@ export default defineComponent({
 
   .description {
     color: rgba(variables.$color-white, 0.75);
-    line-height: 20px;
+    line-height: 22px;
     white-space: pre-line;
     text-align: center;
     padding-bottom: 12px;
@@ -116,13 +116,13 @@ export default defineComponent({
       color: variables.$color-white;
     }
 
-    @extend %face-sans-14-light;
+    @extend %face-sans-15-regular;
   }
 
   .mnemonics {
     background: rgba(variables.$color-white, 0.15);
     border: 2px solid rgba(variables.$color-white, 0.1);
-    border-radius: variables.$border-radius-interactive;
+    border-radius: variables.$border-radius-modal;
     margin: 0 0 20px 0;
     padding: 12px;
     text-align: center;
@@ -152,10 +152,16 @@ export default defineComponent({
         margin-right: 4px;
         color: variables.$color-success-dark;
       }
+
+      .copy-icon {
+        width: 24px;
+        height: 24px;
+      }
     }
   }
 
   .button {
+    margin-top: 8px;
     margin-bottom: 18px;
   }
 }

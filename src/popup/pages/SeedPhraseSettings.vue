@@ -4,11 +4,26 @@
       path="pages.seed-phrase-settings.seedRecoverySmall"
       tag="div"
       class="description"
+    />
+    <i18n
+      path="pages.seed-phrase-settings.seedRecoverySmall-2"
+      tag="div"
+      class="description"
+    />
+    <i18n
+      path="pages.seed-phrase-settings.seedRecoverySmall-3"
+      tag="div"
+      class="description"
     >
       <span class="white-text">
         {{ $t('pages.seed-phrase-settings.seedRecoverySmallBackItUp') }}
       </span>
     </i18n>
+    <i18n
+      path="pages.seed-phrase-settings.seedRecoverySmall-4"
+      tag="div"
+      class="description"
+    />
     <BtnMain
       class="button"
       extend
@@ -35,23 +50,23 @@ export default {
   padding: 16px;
 
   .description {
+    @extend %face-sans-15-regular;
+
     color: rgba(variables.$color-white, 0.75);
-    line-height: 20px;
-    white-space: pre-line;
+    line-height: 22px;
+    padding-top: 8px;
 
     .white-text {
       color: variables.$color-white;
     }
 
-    @extend %face-sans-14-light;
+    &:first-of-type {
+      padding-top: 18px;
+    }
   }
 
   .button {
-    margin-top: 48px;
-  }
-
-  .verified {
-    text-align: center;
+    margin-top: 22px;
   }
 }
 </style>
