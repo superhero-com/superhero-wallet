@@ -76,6 +76,9 @@ export default {
   }
 
   .centered {
+    @extend %face-sans-15-medium;
+
+    opacity: 1;
     text-align: center;
     color: variables.$color-white;
     width: 100%;

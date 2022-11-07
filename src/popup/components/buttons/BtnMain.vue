@@ -86,9 +86,9 @@ export default defineComponent({
   flex: 1 1 0;
   width: fit-content;
   min-height: 40px;
-  padding: 5px 16px;
+  padding: 8px 16px;
   border-radius: variables.$border-radius-interactive;
-  line-height: 20px;
+  line-height: 24px;
   font-weight: 500;
   text-align: center;
   text-decoration: none;
@@ -131,6 +131,8 @@ export default defineComponent({
 
   &.secondary {
     --color: #{variables.$color-grey-medium};
+
+    padding: 8px 32px;
   }
 
   &.alternative {
