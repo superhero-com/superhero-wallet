@@ -15,42 +15,44 @@
         {{ $t('pages.seed-phrase-settings.in-correct-order') }}
       </span>
     </i18n>
-    <ae-phraser>
-      <ae-badge
+    <div class="phraser">
+      <BtnPlain
         v-for="(word, index) in mnemonicShuffled"
         :key="index"
-        :class="{ selected: selectedWordIds.includes(index) }"
+        :class="['badge', { selected: selectedWordIds.includes(index) }]"
         @click.native="onSelectWord(index)"
       >
         {{ word }}
-      </ae-badge>
-    </ae-phraser>
+      </BtnPlain>
+    </div>
 
-    <ae-phraser class="custom">
+    <div class="phraser custom">
       <template v-if="!selectedWordIds.length">
-        <ae-badge class="selected">
+        <BtnPlain class="badge selected">
           <div>{{ $t('pages.seedPhrase.first') }}</div>
-          <Close />
-        </ae-badge>
-        <ae-badge class="selected">
+          <Close class="close-icon" />
+        </BtnPlain>
+        <BtnPlain class="badge selected">
           <div>{{ $t('pages.seedPhrase.second') }}</div>
-          <Close />
-        </ae-badge>
-        <ae-badge class="selected">
+          <Close class="close-icon" />
+        </BtnPlain>
+        <BtnPlain class="badge selected">
           <div>...</div>
-          <Close />
-        </ae-badge>
+          <Close class="close-icon" />
+        </BtnPlain>
       </template>
       <template v-else>
-        <ae-badge
+        <BtnPlain
           v-for="(id, index) in selectedWordIds"
           :key="id"
+          class="badge"
           @click.native="selectedWordIds.splice(index, 1)"
         >
-          {{ mnemonicShuffled[id] }} <ae-icon name="close" />
-        </ae-badge>
+          {{ mnemonicShuffled[id] }}
+          <Close class="close-icon" />
+        </BtnPlain>
       </template>
-    </ae-phraser>
+    </div>
     <div class="footer">
       <BtnMain
         class="verify-button"
@@ -85,6 +87,7 @@
 import { mapState } from 'vuex';
 import { shuffle } from 'lodash-es';
 import BtnMain from '../components/buttons/BtnMain.vue';
+import BtnPlain from '../components/buttons/BtnPlain.vue';
 import CheckCircle from '../../icons/check-circle.svg?vue-component';
 import Alert from '../../icons/alert.svg?vue-component';
 import Close from '../../icons/close.svg?vue-component';
@@ -92,6 +95,7 @@ import Close from '../../icons/close.svg?vue-component';
 export default {
   components: {
     BtnMain,
+    BtnPlain,
     CheckCircle,
     Alert,
     Close,
@@ -145,7 +149,7 @@ export default {
 
   .title {
     color: rgba(variables.$color-white, 1);
-    padding: 12px 0;
+    padding: 18px 0;
     text-align: center;
 
     @extend %face-sans-18-regular;
@@ -164,21 +168,27 @@ export default {
     @extend %face-sans-14-light;
   }
 
-  .ae-phraser {
+  .phraser {
     margin: 18px 0 0;
     padding: 0;
 
-    .ae-badge {
-      user-select: unset;
-      cursor: pointer;
-      border: 1px solid rgba(variables.$color-white, 0.44);
-      background-color: variables.$color-black;
-      border-radius: 4px;
-      color: variables.$color-white;
-      padding: 4px 6px;
-      height: auto;
+    .badge {
+      @extend %face-sans-16-light;
 
-      .ae-icon-close {
+      height: 30px;
+      border: 1px solid rgba(variables.$color-white, 0.44);
+      border-radius: 4px;
+      padding: 4px 6px;
+      margin-right: 4px;
+      margin-bottom: 8px;
+      color: variables.$color-white;
+      background-color: variables.$color-black;
+      cursor: pointer;
+      letter-spacing: 0.1rem;
+      line-height: 100%;
+      user-select: unset;
+
+      .close-icon {
         margin-left: 5px;
       }
 
@@ -198,22 +208,15 @@ export default {
       padding: 12px 8px;
       min-height: 176px;
 
-      .ae-badge {
+      .badge {
         background: rgba(variables.$color-black, 0.25);
         border-radius: 4px;
         border: none;
+        display: inline-flex;
+        align-items: center;
 
-        .ae-icon {
+        .close-icon {
           color: rgba(variables.$color-white, 0.44);
-          font-size: 24px;
-        }
-
-        &.selected {
-          display: inline-flex;
-          align-items: center;
-        }
-
-        .icon {
           width: 24px;
           height: 24px;
         }
