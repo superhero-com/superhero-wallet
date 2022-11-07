@@ -1,7 +1,12 @@
 import Vue from 'vue';
 import {
-  fetchJson, postJson, checkAddress, checkAensName, getAllPages,
-} from '../../popup/utils/helper';
+  fetchJson,
+  postJson,
+  checkAddress,
+  checkAensName,
+  getAllPages,
+  watchUntilTruthy,
+} from '../../popup/utils';
 import { i18n } from './languages';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
 
@@ -43,7 +48,8 @@ export default (store) => {
       set(state, names) {
         state.owned = names;
       },
-      setDefault({ defaults }, { address, name }) {
+      async setDefault({ defaults }, { address, name }) {
+        await watchUntilTruthy(() => store.state.sdk);
         const networkId = store.state.sdk.getNetworkId();
         if (name) Vue.set(defaults, `${address}-${networkId}`, name);
         else Vue.delete(defaults, `${address}-${networkId}`);
