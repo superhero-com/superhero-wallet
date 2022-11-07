@@ -86,7 +86,7 @@ export default {
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    return contractCallData ? availableTokens[contractCallData.token]?.symbol : AETERNITY_SYMBOL;
+    return availableTokens[contractCallData?.token]?.symbol || AETERNITY_SYMBOL;
   },
   getTxAmountTotal: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
