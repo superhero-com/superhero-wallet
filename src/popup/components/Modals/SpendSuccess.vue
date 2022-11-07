@@ -48,7 +48,6 @@
         {{ $t('pages.send.viewInExplorer') }}
       </BtnMain>
       <BtnMain
-        class="button-ok"
         inline
         nowrap
         @click="resolve"
@@ -170,15 +169,6 @@ export default {
   .content {
     margin-bottom: 26px;
     width: 100%;
-  }
-
-  .button-ok {
-    width: 86px;
-    max-width: 86px;
-  }
-
-  .external-link {
-    margin-right: 2px;
   }
 }
 </style>
