@@ -89,6 +89,7 @@ import { IS_MOBILE_DEVICE } from '../../../lib/environment';
 import { useCopy } from '../../../composables';
 import {
   AETERNITY_SYMBOL,
+  AETERNITY_CONTRACT_ID,
   APP_LINK_WEB,
   MODAL_TRANSFER_RECEIVE,
 } from '../../utils';
@@ -133,7 +134,7 @@ export default defineComponent({
 
     function getTokenInfoQuery() {
       if (!amount.value || amount.value <= 0) return '';
-      const token = (selectedAsset.value && selectedAsset.value.symbol === AETERNITY_SYMBOL)
+      const token = selectedAsset.value && selectedAsset.value.contractId === AETERNITY_CONTRACT_ID
         ? AETERNITY_SYMBOL
         : selectedAsset.value?.contractId;
       return `token=${token}&amount=${amount.value}`;
