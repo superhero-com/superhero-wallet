@@ -46,7 +46,7 @@
         <TokenAmount
           :amount="+transferData.amount"
           :symbol="tokenSymbol"
-          :hide-fiat="!!transferData.selectedAsset"
+          :hide-fiat="isSelectedAssetAex9"
           data-cy="review-total"
         />
       </template>
@@ -129,6 +129,10 @@ export default {
       'tippingV1',
       'tippingV2',
     ]),
+    isSelectedAssetAex9() {
+      return !!this.transferData.selectedAsset
+        && this.transferData.selectedAsset.contractId !== AETERNITY_CONTRACT_ID;
+    },
     isRecipientName() {
       return this?.recipientAddress && checkAensName(this.recipientAddress);
     },
@@ -269,6 +273,7 @@ export default {
             contractId: this.tippingContract.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'tip',
+            selectedTokenContractId: selectedAsset.contractId,
           },
         });
         this.openCallbackOrGoHome(true);

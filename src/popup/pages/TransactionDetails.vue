@@ -123,7 +123,7 @@
               <TokenAmount
                 :amount="getTxAmountTotal(transaction)"
                 :symbol="getTxSymbol(transaction)"
-                :hide-fiat="getTxSymbol(transaction) !== AETERNITY_SYMBOL"
+                :hide-fiat="isTxAex9(transaction)"
               />
             </template>
           </DetailsItem>
@@ -219,7 +219,8 @@ export default {
     AETERNITY_SYMBOL,
   }),
   computed: {
-    ...mapGetters(['getTx', 'getTxSymbol', 'getTxAmountTotal', 'getTxTipUrl', 'getExplorerPath']),
+    ...mapGetters(['getTx', 'getTxSymbol', 'getTxAmountTotal',
+      'isTxAex9', 'getTxTipUrl', 'getExplorerPath']),
     tipUrl() {
       return this.getTxTipUrl(this.transaction);
     },
