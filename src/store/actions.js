@@ -89,7 +89,7 @@ export default {
     let txs = await Promise.all([
       (recent || state.transactions.nextPageUrl === ''
         ? state.middleware.getTxByAccount(address, limit, 1)
-        : fetchJson(`${getters.activeNetwork.middlewareUrl}/${state.transactions.nextPageUrl}`))
+        : fetchJson(`${getters.activeNetwork.middlewareUrl}${state.transactions.nextPageUrl}`))
         .then(({ data, next }) => {
           const result = recent || state.transactions.nextPageUrl === '' ? data : camelcaseKeysDeep(data);
           if (!recent) commit('setTransactionsNextPage', next);
