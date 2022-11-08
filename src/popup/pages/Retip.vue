@@ -151,7 +151,7 @@ export default {
             contractId: this.tippingContract.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'retip',
-            selectedTokenId: this.formModel.selectedAsset?.contractId,
+            selectedTokenContractId: this.formModel.selectedAsset?.contractId,
           },
         });
         this.openCallbackOrGoHome(true);

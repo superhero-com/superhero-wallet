@@ -273,7 +273,7 @@ export default {
             contractId: this.tippingContract.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'tip',
-            selectedTokenId: selectedAsset.contractId,
+            selectedTokenContractId: selectedAsset.contractId,
           },
         });
         this.openCallbackOrGoHome(true);
