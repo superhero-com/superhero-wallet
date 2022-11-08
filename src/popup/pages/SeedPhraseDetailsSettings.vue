@@ -147,6 +147,7 @@ export default defineComponent({
       @extend %face-sans-16-regular;
 
       margin: 0 auto;
+      min-width: 210px;
 
       .check-success-circle {
         margin-right: 4px;
@@ -162,7 +163,7 @@ export default defineComponent({
 
   .button {
     margin-top: 8px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
 }
 </style>
