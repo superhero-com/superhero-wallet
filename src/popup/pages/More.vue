@@ -92,3 +92,9 @@ export default {
   }),
 };
 </script>
+
+<style lang="scss" scoped>
+.more {
+  overflow: hidden;
+}
+</style>

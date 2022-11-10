@@ -66,6 +66,7 @@ export default {
     margin-right: 6px;
     position: relative;
     opacity: 0.5;
+    flex-shrink: 0;
 
     &::after {
       content: '';

@@ -99,6 +99,7 @@ export default {
 
 .invite-page {
   padding: 0 var(--screen-padding-x);
+  overflow: hidden;
 
   .section-title {
     display: flex;
