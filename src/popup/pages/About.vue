@@ -138,8 +138,10 @@ export default {
 @use '../../styles/typography';
 
 .about {
+  padding-top: 14px;
+
   .table {
-    margin: 14px 8px 36px;
+    margin: 0 8px 36px;
     background: rgba(variables.$color-white, 0.06);
     border-radius: 10px;
     overflow: hidden;

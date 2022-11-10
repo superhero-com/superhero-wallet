@@ -58,3 +58,9 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.settings {
+  overflow: hidden;
+}
+</style>

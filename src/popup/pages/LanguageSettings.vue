@@ -1,8 +1,9 @@
 <template>
   <div class="language-settings">
-    <div class="description">
+    <p class="text-description">
       {{ $t('pages.languageSettings.chooseLanguage') }}
-    </div>
+    </p>
+
     <div class="languages">
       <RadioButton
         v-for="{ code, name } in list"
@@ -27,7 +28,6 @@
 </template>
 
 <script>
-/* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 import { mapGetters } from 'vuex';
 import RadioButton from '../components/RadioButton.vue';
@@ -40,9 +40,6 @@ export default {
       this.dropdown = false;
       this.$store.commit('languages/setActiveCode', code);
     },
-    flag(code) {
-      return require(`../../icons/flag_${code}.png`);
-    },
   },
 };
 </script>
@@ -52,19 +49,10 @@ export default {
 @use '../../styles/typography';
 
 .language-settings {
-  padding: 16px;
-
-  .description {
-    padding-top: 8px;
-    text-align: left;
-    line-height: 20px;
-    color: rgba(variables.$color-white, 0.65);
-
-    @extend %face-sans-14-light;
-  }
+  padding: var(--screen-padding-x);
 
   .languages {
-    padding: 14px 0;
+    margin-top: 16px;
 
     .language {
       padding: 6px 0;

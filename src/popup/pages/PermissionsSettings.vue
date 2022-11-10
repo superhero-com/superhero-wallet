@@ -3,7 +3,7 @@
     <i18n
       path="pages.permissions.description"
       tag="div"
-      class="description"
+      class="text-description"
     >
       <a
         href="https://superhero.com/"
@@ -55,32 +55,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  @use '../../styles/variables';
-  @use '../../styles/typography';
+@use '../../styles/variables';
+@use '../../styles/typography';
 
-  .permissions-settings {
-    padding: 14px;
+.permissions-settings {
+  padding: var(--screen-padding-x);
 
-    .description {
-      color: rgba(variables.$color-white, 0.75);
-      padding: 8px 0 12px;
-      line-height: 20px;
+  .hosts {
+    margin-bottom: 26px;
 
-      a {
-        color: variables.$color-primary;
-        text-decoration: none;
-      }
-
-      @extend %face-sans-14-light;
-    }
-
-    .hosts {
-      margin-bottom: 26px;
-
-      .host {
-        margin: 8px 0;
-      }
+    .host {
+      margin: 8px 0;
     }
   }
-
+}
 </style>

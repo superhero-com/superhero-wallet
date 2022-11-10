@@ -1,9 +1,10 @@
 <template>
   <div class="errors-log-settings">
-    <div class="description">
+    <p class="text-description">
       {{ $t('pages.errors-log-settings.description') }}
-    </div>
-    <div>
+    </p>
+
+    <div class="options">
       <SwitchButton
         :label="$t('pages.titles.save-errors-log')"
         :value="saveErrorLog"
@@ -29,15 +30,10 @@ export default {
 @use '../../styles/typography';
 
 .errors-log-settings {
-  padding: 16px;
+  padding: var(--screen-padding-x);
 
-  .description {
-    color: rgba(variables.$color-white, 0.75);
-    padding: 6px 0 24px;
-    line-height: 20px;
-    text-align: left;
-
-    @extend %face-sans-14-light;
+  .options {
+    margin-top: 20px;
   }
 }
 </style>

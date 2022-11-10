@@ -236,11 +236,7 @@ export default defineComponent({
     --header-height: 40px;
 
     .main {
-      padding-top: var(--header-height);
-      padding-top: calc(var(--header-height) + env(safe-area-inset-top));
-
       @include mixins.desktop {
-        padding-top: 0;
         min-height: calc(100% - var(--header-height));
         min-height: calc(100% - var(--header-height) - env(safe-area-inset-top));
       }

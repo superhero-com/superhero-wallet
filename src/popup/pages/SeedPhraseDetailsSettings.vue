@@ -95,14 +95,14 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .seed-phrase-details {
-  padding: 16px;
+  padding: var(--screen-padding-x);
 
   .title {
-    color: rgba(variables.$color-white, 1);
-    padding: 18px 0 26px;
-    text-align: center;
-
     @extend %face-sans-18-regular;
+
+    color: rgba(variables.$color-white, 1);
+    margin-bottom: 26px;
+    text-align: center;
   }
 
   .description {
