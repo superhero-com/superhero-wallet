@@ -62,16 +62,16 @@ router.beforeEach(async (to, from, next) => {
     }
   }
   if (from.fullPath === '/transactions') {
-    savedScrollPosition = (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('#app')).scrollTop;
+    savedScrollPosition = (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('.app-inner')).scrollTop;
   }
 
   if (to.fullPath === '/transactions' && savedScrollPosition) {
     setTimeout(() => {
-      (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('#app')).scroll(0, savedScrollPosition);
+      (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('.app-inner')).scroll(0, savedScrollPosition);
       savedScrollPosition = 0;
     }, 50);
   } else {
-    (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('#app')).scroll(0, 0);
+    (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('.app-inner')).scroll(0, 0);
   }
 
   next(to.meta.ifNotAuthOnly ? '/account' : undefined);

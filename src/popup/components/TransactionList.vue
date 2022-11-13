@@ -135,11 +135,12 @@ export default {
   mounted() {
     this.loadMore();
     const polling = setInterval(() => this.getLatest(), 10000);
+    const appInner = document.querySelector('.app-inner');
 
-    document.querySelector('#app').addEventListener('scroll', this.checkLoadMore);
+    appInner.addEventListener('scroll', this.checkLoadMore);
     window.addEventListener('scroll', this.checkLoadMore);
     this.$once('hook:destroyed', () => {
-      document.querySelector('#app').removeEventListener('scroll', this.checkLoadMore);
+      appInner.removeEventListener('scroll', this.checkLoadMore);
       window.removeEventListener('scroll', this.checkLoadMore);
       clearInterval(polling);
       this.isDestroyed = true;
@@ -151,7 +152,7 @@ export default {
       if (this.isDestroyed || !this.transactions.nextPageUrl) return;
       const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = isDesktop
-        ? document.querySelector('#app') : document.documentElement;
+        ? document.querySelector('.app-inner') : document.documentElement;
       if (this.maxLength && this.filteredTransactions.length >= this.maxLength) return;
       if (scrollHeight - scrollTop <= clientHeight + 100) this.loadMore();
     },
