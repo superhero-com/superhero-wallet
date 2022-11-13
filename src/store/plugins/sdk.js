@@ -3,7 +3,7 @@ import { isEmpty, isEqual } from 'lodash-es';
 import { App } from '../modules/permissions';
 import { MODAL_CONFIRM_CONNECT } from '../../popup/utils/constants';
 import { getAeppUrl, showPopup } from '../../background/popupHandler';
-import { watchUntilTruthy, waitUntilTruthy } from '../../popup/utils/helper';
+import { waitUntilTruthy } from '../../popup/utils/helper';
 import { IS_EXTENSION_BACKGROUND } from '../../lib/environment';
 
 export default (store) => {
@@ -178,7 +178,7 @@ export default (store) => {
     (state, getters) => getters.activeNetwork,
     async (network, oldNetwork) => {
       if (isEqual(network, oldNetwork)) return;
-      await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
+      await waitUntilTruthy(() => store.getters['sdkPlugin/sdk']);
       sdk.pool.delete(network.name);
       sdk.addNode(network.name, await Node({ url: network.url }), true);
     },
@@ -187,7 +187,7 @@ export default (store) => {
   store.watch(
     ({ accounts: { activeIdx } }, { accounts }) => accounts?.length + activeIdx,
     async () => {
-      await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
+      await waitUntilTruthy(() => store.getters['sdkPlugin/sdk']);
       Object.values(sdk.rpcClients)
         .filter((client) => client.isConnected() && client.isSubscribed())
         .forEach((client) => client.setAccounts({
