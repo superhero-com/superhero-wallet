@@ -133,7 +133,7 @@ export default {
   },
   computed: {
     ...mapGetters(['account']),
-    ...mapState('fungibleTokens', ['availableTokens']),
+    ...mapState('fungibleTokens', ['availableTokens', 'getAeternityToken']),
     addressErrorMsg() {
       return this.errors.items
         .filter(({ field }) => field === 'address')
@@ -193,7 +193,7 @@ export default {
         this.$emit('input', {
           ...val,
           fee: this.fee,
-          total: (val.selectedAsset.contractId === AETERNITY_CONTRACT_ID
+          total: (val.selectedAsset?.contractId === AETERNITY_CONTRACT_ID
             ? +this.fee.toFixed() : 0) + +val.amount,
         });
       },
@@ -219,7 +219,11 @@ export default {
     checkAensName,
     validateTipUrl,
     async queryHandler(query) {
-      this.formModel.selectedAsset = this.availableTokens[query.token];
+      if (query.token === AETERNITY_CONTRACT_ID) {
+        this.formModel.seelctedAsset = this.getAeternityToken();
+      } else {
+        this.formModel.selectedAsset = this.availableTokens[query.token];
+      }
 
       if (query.account) this.formModel.address = query.account;
       if (query.amount) this.formModel.amount = query.amount;
