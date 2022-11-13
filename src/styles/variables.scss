@@ -11,7 +11,8 @@ $font-sans: 'IBM Plex Sans', sans-serif;
 $font-mono: 'IBM Plex Mono';
 
 $z-index-header: 2;
-$z-index-modal: $z-index-header + 1;
+$z-index-modal: $z-index-header + 2;
+$z-index-loader: $z-index-modal - 1; // Modals should always be above the loader
 
 $bg-blur-radius: 4px;
 

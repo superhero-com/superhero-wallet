@@ -258,7 +258,7 @@ export default defineComponent({
 
   .header {
     position: sticky;
-    z-index: 2;
+    z-index: variables.$z-index-header;
     top: calc(env(safe-area-inset-top) + 62px);
     padding: var(--gap) var(--screen-padding-x);
     background-color: var(--screen-bg-color);

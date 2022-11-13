@@ -22,13 +22,13 @@ export default {
 @use '../../styles/mixins';
 
 .loader {
-  display: flex;
   position: fixed;
+  z-index: variables.$z-index-loader;
   top: 0;
   left: 0;
+  display: flex;
   width: 100%;
   height: 100%;
-  z-index: 1;
 
   .container {
     width: 100%;
@@ -41,7 +41,7 @@ export default {
 
     @include mixins.desktop {
       width: variables.$extension-width;
-      height: 600px;
+      height: variables.$extension-height;
       border-radius: 10px;
       margin: auto;
     }
