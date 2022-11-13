@@ -217,8 +217,9 @@ export default defineComponent({
         z-index: -1;
         inset: 0;
         background-color: var(--screen-bg-color);
+        top: 40px;
+        box-shadow: 0 -30px 20px var(--screen-bg-color);
         opacity: 0.9;
-        box-shadow: 0 -10px 10px var(--screen-bg-color);
       }
 
       // Make the footer bottom rounded corners the same as the container
