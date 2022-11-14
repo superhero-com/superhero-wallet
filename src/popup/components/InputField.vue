@@ -164,7 +164,7 @@ export default {
   methods: {
     checkIfNumber(event) {
       const isSingleChar = event.key.length === 1 && !event.ctrlKey && !event.metaKey;
-      const alreadyHasDot = this.value?.includes('.') && [',', '.'].includes(event.key);
+      const alreadyHasDot = (typeof this.value === 'string' && this.value?.includes('.')) && [',', '.'].includes(event.key);
       if (
         this.type === 'number'
         && isSingleChar
