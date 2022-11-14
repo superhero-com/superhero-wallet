@@ -3,6 +3,7 @@ import BigNumber from 'bignumber.js';
 import type { ICurrency, INetwork, INotificationSetting } from '../../types';
 import { i18n } from '../../store/plugins/languages';
 
+export const EXTENSION_HEIGHT = 600;
 export const MAGNITUDE = 18;
 export const SEED_LENGTH = 12;
 export const AETERNITY_CONTRACT_ID = 'aeternity';

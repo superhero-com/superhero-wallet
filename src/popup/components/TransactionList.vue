@@ -1,7 +1,7 @@
 <template>
   <div class="transaction-list">
     <Filters
-      v-if="displayFilter"
+      v-if="showFilters"
       v-model="displayMode"
       :filters="filters"
       :scroll-top-threshold="scrollTopThreshold"
@@ -61,7 +61,7 @@ export default {
     searchTerm: { type: String, default: '' },
     maxLength: { type: Number, default: null },
     scrollTopThreshold: { type: Number, default: undefined },
-    displayFilter: Boolean,
+    showFilters: Boolean,
   },
   data() {
     return {

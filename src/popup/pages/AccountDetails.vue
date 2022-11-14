@@ -1,5 +1,8 @@
 <template>
-  <div class="account-details">
+  <div
+    ref="accountDetailsElem"
+    class="account-details"
+  >
     <div class="account-info-wrapper">
       <AccountInfo
         :account-idx="activeIdx"
@@ -36,9 +39,8 @@
           :text="tab.text"
         />
       </Tabs>
-
       <div
-        v-if="searchTermPlaceholder"
+        v-if="showSearchBar"
         class="search-bar-wrapper"
       >
         <InputSearch
@@ -53,7 +55,10 @@
         name="fade-transition"
         mode="out-in"
       >
-        <RouterView :search-term="searchTerm" />
+        <RouterView
+          :search-term="searchTerm"
+          :show-filters="showSearchBar"
+        />
       </transition>
     </div>
   </div>
@@ -66,7 +71,9 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
+  watch,
 } from '@vue/composition-api';
+import { debounce } from 'lodash-es';
 import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
@@ -74,6 +81,7 @@ import {
   buildSimplexLink,
 } from '../utils';
 import { IS_CORDOVA } from '../../lib/environment';
+import { EXTENSION_HEIGHT } from '../utils/constants';
 
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
@@ -106,7 +114,16 @@ export default defineComponent({
     InputSearch,
   },
   setup(props, { root }) {
+    const ACCOUNT_INFO_HEIGHT = 120;
+    const BALANCE_AND_ACTIONS_HEIGHT = 280;
+    const accountDetailsElem = ref<HTMLElement>();
+    const appInnerElem = computed<HTMLElement | null | undefined>(
+      () => accountDetailsElem.value?.parentElement,
+    );
     const searchTerm = ref('');
+    const appInnerScrollTop = ref<number>(0);
+    const initialClientHeight = ref<number>(EXTENSION_HEIGHT);
+    const clientHeight = ref<number>(0);
     const isConnected = computed(() => root.$store.getters.isConnected);
     const account = computed(() => root.$store.getters.account);
     const activeIdx = computed(() => root.$store.state.accounts.activeIdx);
@@ -167,9 +184,48 @@ export default defineComponent({
       }
     });
 
+    const showSearchBar = computed<boolean>(() => !!(
+      searchTerm.value || (
+        clientHeight.value > initialClientHeight.value
+        && appInnerScrollTop.value >= ACCOUNT_INFO_HEIGHT
+      )
+    ));
+
+    const resizeObserver = new ResizeObserver(debounce((entries) => {
+      if (!(Array.isArray(entries) && entries.length)) {
+        return;
+      }
+      const newClientHeight = entries[0].target.clientHeight;
+      if (
+        newClientHeight && (
+          (
+            clientHeight.value + BALANCE_AND_ACTIONS_HEIGHT + ACCOUNT_INFO_HEIGHT
+          ) < newClientHeight
+          || newClientHeight <= initialClientHeight.value
+        )
+      ) {
+        clientHeight.value = newClientHeight;
+      }
+    }, 100));
+
+    watch(
+      () => root.$route,
+      () => {
+        clientHeight.value = 0;
+      },
+    );
+
     onMounted(() => {
       if (IS_CORDOVA) {
         window.StatusBar.backgroundColorByHexString('#191919');
+      }
+      if (accountDetailsElem.value && appInnerElem.value) {
+        resizeObserver.observe(accountDetailsElem.value);
+        initialClientHeight.value = appInnerElem.value.clientHeight;
+        appInnerElem.value.addEventListener('scroll', () => {
+          appInnerScrollTop.value = accountDetailsElem?.value?.parentElement?.scrollTop ?? 0;
+          clientHeight.value = accountDetailsElem?.value?.clientHeight ?? 0;
+        });
       }
     });
 
@@ -177,6 +233,8 @@ export default defineComponent({
       if (IS_CORDOVA) {
         window.StatusBar.backgroundColorByHexString('#141414');
       }
+
+      resizeObserver.disconnect();
     });
 
     return {
@@ -185,7 +243,9 @@ export default defineComponent({
       activeIdx,
       searchTerm,
       searchTermPlaceholder,
+      showSearchBar,
       isConnected,
+      accountDetailsElem,
     };
   },
 });
