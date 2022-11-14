@@ -9,7 +9,7 @@ import {
   ref,
   watch,
 } from '@vue/composition-api';
-import QRCodeStyling from '@solana/qr-code-styling';
+import QRCodeStyling from 'qr-code-styling';
 import SHLogo from '../../icons/logo-small-blue.png';
 
 export default defineComponent({
@@ -29,7 +29,7 @@ export default defineComponent({
       qrOptions: {
         typeNumber: 0,
         mode: 'Byte',
-        errorCorrectionLevel: 'Q',
+        errorCorrectionLevel: 'L',
       },
       imageOptions: {
         hideBackgroundDots: false,
