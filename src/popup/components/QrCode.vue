@@ -36,10 +36,7 @@ export default defineComponent({
         imageSize: 0.4,
         margin: 0,
       },
-      dotsOptions: { type: 'square', color: '#1161fe' },
       image: SHLogo,
-      cornersSquareOptions: { type: 'square', color: '#6da0fe' },
-      cornersDotOptions: { type: 'square', color: '#1161fe' },
     });
 
     watch(() => props.value, (data: string) => qrCode.update({ data }));

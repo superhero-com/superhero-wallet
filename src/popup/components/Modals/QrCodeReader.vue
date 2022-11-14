@@ -148,9 +148,8 @@ export default {
   methods: {
     ...mapMutations(['setQrScanner']),
     async initBrowserReader() {
-      const { BrowserQRCodeReader, BrowserCodeReader } = await import('@zxing/browser');
+      const { BrowserQRCodeReader } = await import('@zxing/library');
 
-      this.videoInputDevices = await BrowserCodeReader.listVideoInputDevices();
       this.browserReader = new BrowserQRCodeReader();
     },
     async scan() {
@@ -169,19 +168,9 @@ export default {
             document.querySelector('.camera-close-button').addEventListener('click', this.stopReading);
           }, 500);
         })
-        : new Promise((resolve, reject) => {
-          (async () => {
-            this.webQrControls = await this.browserReader.decodeFromVideoDevice(
-              this.videoInputDevices[(this.videoInputDevices.length - 1)].deviceId,
-              this.$refs.qrCodeVideo, (result, errors, controls) => {
-                if (result?.text) {
-                  resolve(result.text);
-                  controls.stop();
-                }
-              },
-            );
-          })();
-        });
+        : (
+          await this.browserReader.decodeFromInputVideoDevice(undefined, this.$refs.qrCodeVideo)
+        ).getText();
     },
     async stopReading() {
       if (this.mobile) {
@@ -192,9 +181,7 @@ export default {
         window.plugins.webviewcolor.change('#141414');
         this.setQrScanner(false);
         window.QRScanner.destroy();
-      } else if (this.webQrControls) {
-        this.webQrControls.stop();
-      }
+      } else this.browserReader.reset();
     },
     cancelReading() {
       this.stopReading();
