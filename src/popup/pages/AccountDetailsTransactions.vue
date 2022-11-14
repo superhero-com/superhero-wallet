@@ -2,7 +2,7 @@
   <div class="transaction-list-wrapper">
     <TransactionList
       :search-term="searchTerm"
-      display-filter
+      :show-filters="showFilters"
       sticky-filter
     />
   </div>
@@ -17,6 +17,7 @@ export default {
   },
   props: {
     searchTerm: { type: String, default: '' },
+    showFilters: Boolean,
   },
 };
 </script>
