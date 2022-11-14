@@ -1,87 +1,90 @@
 <template>
   <div class="dashboard">
     <AccountSwitcher :notification="!backedUpSeed" />
-    <CardRow class="first-card-wrapper">
-      <Card
-        :title="$t('dashboard.receive-card.title')"
-        :description="$t('dashboard.receive-card.description')"
-        clickable
-        dense
-        @click="openTransferReceiveModal()"
-      >
-        <template #icon>
-          <ArrowReceiveIcon />
-        </template>
-      </Card>
-      <Card
-        :title="$t('dashboard.send-card.title')"
-        :description="$t('dashboard.send-card.description')"
-        :disabled="!isConnected"
-        clickable
-        dense
-        @click="openTransferSendModal()"
-      >
-        <template #icon>
-          <ArrowSendIcon />
-        </template>
-      </Card>
-    </CardRow>
-    <CardRow v-if="!backedUpSeed">
-      <Card
-        :title="$t('dashboard.back-up-card.title')"
-        :description="$t('dashboard.back-up-card.description')"
-        is-big
-      >
-        <template #icon>
-          <SubtractIcon />
-        </template>
-        <BtnMain
-          class="card-button"
-          variant="danger"
-          inline
-          :text="$t('dashboard.back-up-card.button')"
-          :to="{ name: 'settings-seed-phrase' }"
-        />
-      </Card>
-    </CardRow>
-    <CardRow>
-      <Card
-        :title="$t('dashboard.buy-card.title')"
-        :description="$t('dashboard.buy-card.description')"
-        is-big
-        :background="buyBackground"
-      >
-        <template #icon>
-          <CardIcon />
-        </template>
-        <BtnMain
-          class="card-button"
-          :text="$t('dashboard.buy-card.button')"
-          :href="simplexLink"
-          variant="danger"
-          inline
-        />
-      </Card>
-    </CardRow>
-    <CardRow>
-      <Card
-        :title="$t('dashboard.name-card.title')"
-        :description="$t('dashboard.name-card.description')"
-        is-big
-        :background="chainNameBackground"
-      >
-        <template #icon>
-          <MenuCardIcon />
-        </template>
-        <BtnMain
-          class="card-button"
-          variant="purple"
-          inline
-          :text="$t('dashboard.name-card.button')"
-          :to="{ name: 'account-details-names-claim' }"
-        />
-      </Card>
-    </CardRow>
+
+    <div class="dashboard-cards">
+      <CardRow class="first-card-wrapper">
+        <Card
+          :title="$t('dashboard.receive-card.title')"
+          :description="$t('dashboard.receive-card.description')"
+          clickable
+          dense
+          @click="openTransferReceiveModal()"
+        >
+          <template #icon>
+            <ArrowReceiveIcon />
+          </template>
+        </Card>
+        <Card
+          :title="$t('dashboard.send-card.title')"
+          :description="$t('dashboard.send-card.description')"
+          :disabled="!isConnected"
+          clickable
+          dense
+          @click="openTransferSendModal()"
+        >
+          <template #icon>
+            <ArrowSendIcon />
+          </template>
+        </Card>
+      </CardRow>
+      <CardRow v-if="!backedUpSeed">
+        <Card
+          :title="$t('dashboard.back-up-card.title')"
+          :description="$t('dashboard.back-up-card.description')"
+          is-big
+        >
+          <template #icon>
+            <SubtractIcon />
+          </template>
+          <BtnMain
+            class="card-button"
+            variant="danger"
+            inline
+            :text="$t('dashboard.back-up-card.button')"
+            :to="{ name: 'settings-seed-phrase' }"
+          />
+        </Card>
+      </CardRow>
+      <CardRow>
+        <Card
+          :title="$t('dashboard.buy-card.title')"
+          :description="$t('dashboard.buy-card.description')"
+          is-big
+          :background="buyBackground"
+        >
+          <template #icon>
+            <CardIcon />
+          </template>
+          <BtnMain
+            class="card-button"
+            :text="$t('dashboard.buy-card.button')"
+            :href="simplexLink"
+            variant="danger"
+            inline
+          />
+        </Card>
+      </CardRow>
+      <CardRow>
+        <Card
+          :title="$t('dashboard.name-card.title')"
+          :description="$t('dashboard.name-card.description')"
+          is-big
+          :background="chainNameBackground"
+        >
+          <template #icon>
+            <MenuCardIcon />
+          </template>
+          <BtnMain
+            class="card-button"
+            variant="purple"
+            inline
+            :text="$t('dashboard.name-card.button')"
+            :to="{ name: 'account-details-names-claim' }"
+          />
+        </Card>
+      </CardRow>
+    </div>
   </div>
 </template>
 
@@ -170,6 +173,11 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 100%;
+
+  .dashboard-cards {
+    padding: var(--screen-padding-x);
+    padding-top: 0;
+  }
 
   .first-card-wrapper {
     padding-top: 8px;
