@@ -34,7 +34,6 @@
     "@fontsource/ibm-plex-sans": "^4.5.7",
     "@ledgerhq/hw-transport-webusb": "^6.27.1",
     "@vue/composition-api": "^1.0.3",
-    "@zxing/browser": "^0.1.1",
     "@zxing/library": "^0.19.1",
     "aeternity-fungible-token": "github:aeternity/aeternity-fungible-token#v2.0.0",
     "bignumber.js": "^9.0.2",
