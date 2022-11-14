@@ -50,7 +50,6 @@
         :description="$t('dashboard.buy-card.description')"
         is-big
         :background="buyBackground"
-        card-id="dashboard-buy-ae-card"
       >
         <template #icon>
           <CardIcon />
@@ -70,7 +69,6 @@
         :description="$t('dashboard.name-card.description')"
         is-big
         :background="chainNameBackground"
-        card-id="dashboard-claim-name-card"
       >
         <template #icon>
           <MenuCardIcon />
