@@ -20,6 +20,7 @@ export default defineComponent({
   },
   setup(props) {
     const canvas = ref<HTMLElement>();
+    const updateQrCode = ref();
 
     const qrCode = new QRCodeStyling({
       data: props.value,
@@ -33,13 +34,21 @@ export default defineComponent({
       },
       imageOptions: {
         hideBackgroundDots: false,
-        imageSize: 0.4,
+        imageSize: 1.5,
         margin: 0,
       },
       image: SHLogo,
     });
 
-    watch(() => props.value, (data: string) => qrCode.update({ data }));
+    watch(() => props.value, (data: string) => {
+      if (updateQrCode.value) {
+        clearTimeout(updateQrCode.value);
+      }
+
+      updateQrCode.value = setTimeout(() => {
+        qrCode.update({ data });
+      }, 500);
+    });
     onMounted(() => qrCode.append(canvas.value));
 
     return {
