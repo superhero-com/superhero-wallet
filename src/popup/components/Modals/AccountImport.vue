@@ -115,9 +115,5 @@ export default {
       margin-top: 8px;
     }
   }
-
-  .import-button {
-    margin-top: 40px;
-  }
 }
 </style>
