@@ -100,6 +100,7 @@ export default {
 
   .account-details {
     max-width: 230px;
+    font-weight: 500;
 
     .account-name-truncated,
     .account-name-number {
