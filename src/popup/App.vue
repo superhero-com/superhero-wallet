@@ -191,13 +191,11 @@ export default defineComponent({
   }
 
   .main {
-    padding-bottom: 48px;
-    padding-bottom: calc(48px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
     background-color: var(--screen-bg-color);
 
     @include mixins.desktop {
       min-height: 100%;
-      padding-bottom: 0;
     }
   }
 
