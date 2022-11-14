@@ -73,6 +73,7 @@ export default {
     // allow camera while QRScanner is loading to not show cameraNotAllowed before actual check
     cameraAllowed: IS_CORDOVA,
     browserReader: null,
+    videoInputDevices: [],
     headerText: '',
   }),
   watch: {
@@ -95,7 +96,7 @@ export default {
                 );
                 reject();
               }
-              if (navigator.mediaDevices.getUserMedia) {
+              if (navigator.mediaDevices?.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ video: true }).then(resolve, reject);
               } else reject(new Error('Sorry, your browser does not support getUserMedia'));
             });
@@ -147,7 +148,9 @@ export default {
   methods: {
     ...mapMutations(['setQrScanner']),
     async initBrowserReader() {
-      const { BrowserQRCodeReader } = await import('@zxing/library');
+      const { BrowserQRCodeReader, BrowserCodeReader } = await import('@zxing/browser');
+
+      this.videoInputDevices = await BrowserCodeReader.listVideoInputDevices();
       this.browserReader = new BrowserQRCodeReader();
     },
     async scan() {
@@ -166,9 +169,19 @@ export default {
             document.querySelector('.camera-close-button').addEventListener('click', this.stopReading);
           }, 500);
         })
-        : (
-          await this.browserReader.decodeFromInputVideoDevice(undefined, this.$refs.qrCodeVideo)
-        ).getText();
+        : new Promise((resolve, reject) => {
+          (async () => {
+            this.webQrControls = await this.browserReader.decodeFromVideoDevice(
+              this.videoInputDevices[(this.videoInputDevices.length - 1)].deviceId,
+              this.$refs.qrCodeVideo, (result, errors, controls) => {
+                if (result?.text) {
+                  resolve(result.text);
+                  controls.stop();
+                }
+              },
+            );
+          })();
+        });
     },
     async stopReading() {
       if (this.mobile) {
@@ -179,7 +192,9 @@ export default {
         window.plugins.webviewcolor.change('#141414');
         this.setQrScanner(false);
         window.QRScanner.destroy();
-      } else this.browserReader.reset();
+      } else if (this.webQrControls) {
+        this.webQrControls.stop();
+      }
     },
     cancelReading() {
       this.stopReading();
