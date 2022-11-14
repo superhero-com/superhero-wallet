@@ -49,6 +49,7 @@ import NameRow from '../../components/NameRow.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import RegisterName from '../../components/RegisterName.vue';
+import { punycodeToName } from '../../utils/names';
 
 export default {
   components: {
@@ -85,7 +86,7 @@ export default {
   async mounted() {
     this.loading = true;
     await watchUntilTruthy(() => this.$store.state.middleware);
-    this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');
+    this.activeAuctions = (await this.$store.dispatch('names/fetchAuctions')).map((auction) => ({ ...auction, name: punycodeToName(auction.name) }));
     this.loading = false;
   },
   methods: {

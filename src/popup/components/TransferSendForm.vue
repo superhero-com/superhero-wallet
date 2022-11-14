@@ -246,7 +246,7 @@ export default {
       },
       100);
     },
-    // Method called from a parent scope - avoid changing it's name.
+    // Method called from a parent scope - avoid changing its name.
     async submit() {
       const isValid = !(await this.$validator._base.anyExcept('address', WARNING_RULES));
 

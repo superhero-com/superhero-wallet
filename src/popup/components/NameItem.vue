@@ -7,11 +7,11 @@
       />
       <Avatar
         v-else
-        :name="name"
+        :name="displayName"
         :address="address"
       />
       <div class="header">
-        <Truncate :str="name" />
+        <Truncate :str="displayName" />
         <span
           v-if="nameEntry.pending"
           class="pending"
@@ -24,12 +24,12 @@
         >
           <button
             v-show="hasPointer"
-            :class="{ set: account.name === name }"
-            :disabled="account.name === name"
+            :class="{ set: isActive }"
+            :disabled="isActive"
             @click="setDefault"
           >
             {{
-              account.name === name
+              isActive
                 ? $t('pages.names.list.default-name')
                 : $t('pages.names.list.default-make')
             }}
@@ -144,6 +144,7 @@ import DetailsItem from './DetailsItem.vue';
 import Arrow from '../../icons/arrow.svg?vue-component';
 import Save from '../../icons/account-card/btn-save.svg?vue-component';
 import Paste from '../../icons/paste.svg?vue-component';
+import { punycodeToName } from '../utils/names';
 
 export default {
   components: {
@@ -177,6 +178,12 @@ export default {
     ...mapGetters(['account']),
     nameEntry() {
       return this.$store.getters['names/get'](this.name);
+    },
+    displayName() {
+      return punycodeToName(this.name);
+    },
+    isActive() {
+      return this.displayName === this.account.name;
     },
     hasPointer() {
       return this.nameEntry?.pointers?.accountPubkey;

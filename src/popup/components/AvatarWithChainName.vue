@@ -14,7 +14,7 @@
       class="chain-name"
       :class="{ centered: hideAvatar }"
     >
-      {{ name }}
+      {{ punycodeToName(name) }}
     </div>
     <AddressFormatted
       v-else
@@ -27,6 +27,7 @@
 <script>
 import Avatar from './Avatar.vue';
 import AddressFormatted from './AddressFormatted.vue';
+import { punycodeToName } from '../utils/names';
 
 export default {
   components: {
@@ -48,6 +49,9 @@ export default {
       default: 'md',
     },
     showAddress: Boolean,
+  },
+  methods: {
+    punycodeToName,
   },
 };
 </script>

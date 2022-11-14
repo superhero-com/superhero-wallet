@@ -14,7 +14,10 @@
     </div>
 
     <div class="parties">
-      <Avatar v-bind="sender" />
+      <Avatar
+        v-bind="sender"
+        :name="punycodeToName(sender.name)"
+      />
       <div class="mid">
         <TriangleRight class="triangle" />
         <div class="line" />
@@ -22,6 +25,7 @@
       <Avatar
         v-if="recipient.address"
         v-bind="recipient"
+        :name="punycodeToName(recipient.name)"
       />
       <div
         v-else
@@ -60,6 +64,7 @@ import Avatar from './Avatar.vue';
 import TransactionTag from './TransactionTag.vue';
 import TransactionInfoDetailsParty from './TransactionInfoDetailsParty.vue';
 import { DEX_TRANSACTION_TAGS, FUNCTION_TYPE_DEX } from '../utils';
+import { punycodeToName } from '../utils/names';
 
 export default {
   components: {
@@ -87,6 +92,9 @@ export default {
         ? this.$t('transaction.dexType.pool')
         : this.title;
     },
+  },
+  methods: {
+    punycodeToName,
   },
 };
 </script>
