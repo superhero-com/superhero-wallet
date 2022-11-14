@@ -78,12 +78,14 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
+import { pick } from 'lodash-es';
 import maxAmountMixin from '../../mixins/maxAmountMixin';
 import {
   convertToken,
   isNumbersEqual,
   validateTipUrl,
   checkAensName,
+  MODAL_DEFAULT,
 } from '../utils';
 import AccountRow from './AccountRow.vue';
 import InputField from './InputField.vue';
@@ -133,6 +135,7 @@ export default {
   },
   computed: {
     ...mapGetters(['account']),
+    ...mapGetters('fungibleTokens', ['getAeternityToken']),
     ...mapState('fungibleTokens', ['availableTokens']),
     addressErrorMsg() {
       return this.errors.items
@@ -193,7 +196,7 @@ export default {
         this.$emit('input', {
           ...val,
           fee: this.fee,
-          total: (val.selectedAsset.contractId === AETERNITY_CONTRACT_ID
+          total: (val.selectedAsset?.contractId === AETERNITY_CONTRACT_ID
             ? +this.fee.toFixed() : 0) + +val.amount,
         });
       },
@@ -215,11 +218,20 @@ export default {
       token: this.formModel?.selectedAsset?.contractId || query.token,
     });
   },
+  subscriptions() {
+    return pick(this.$store.state.observables, [
+      'balance',
+      'balanceCurrency',
+    ]);
+  },
   methods: {
     checkAensName,
     validateTipUrl,
     async queryHandler(query) {
-      this.formModel.selectedAsset = this.availableTokens[query.token];
+      this.formModel.selectedAsset = this.availableTokens[query.token] || this.getAeternityToken({
+        tokenBalance: this.balance,
+        balanceCurrency: this.balanceCurrency,
+      });
 
       if (query.account) this.formModel.address = query.account;
       if (query.amount) this.formModel.amount = query.amount;
@@ -274,7 +286,7 @@ export default {
           if (process.env.NODE_ENV !== 'production') console.error(e);
           this.formModel.address = '';
           this.$store.dispatch('modals/open', {
-            name: 'default',
+            name: MODAL_DEFAULT,
             title: this.$t('modals.invalid-qr-code.msg'),
             icon: 'critical',
           });
@@ -285,7 +297,7 @@ export default {
           .find(({ value }) => value === parsedScanResult.tokenContract);
         if (!requestedTokenBalance) {
           this.formModel.address = '';
-          this.$store.dispatch('modals/open', { name: 'default', type: 'insufficient-balance' });
+          this.$store.dispatch('modals/open', { name: MODAL_DEFAULT, type: 'insufficient-balance' });
           this.formModel.address = '';
           return;
         }
