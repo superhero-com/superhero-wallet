@@ -286,5 +286,12 @@ export default {
       }
     }
   }
+
+  .search-bar-wrapper {
+    background: var(--screen-bg-color);
+    margin-left: calc(-1 * var(--screen-padding-x));
+    margin-right: calc(-1 * var(--screen-padding-x));
+    padding-inline: var(--screen-padding-x);
+  }
 }
 </style>
