@@ -1,7 +1,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { camelCase } from 'lodash-es';
-import { FUNCTION_TYPE_DEX, MAGNITUDE } from '../popup/utils/constants';
-import { amountRounded, convertToken } from '../popup/utils/helper';
+import { AETERNITY_SYMBOL, FUNCTION_TYPE_DEX, MAGNITUDE } from '../popup/utils/constants';
+import { amountRounded, convertToken } from '../popup/utils';
 import * as TransactionResolver from '../popup/utils/transactionTokenInfoResolvers';
 
 export default {
@@ -14,6 +14,7 @@ export default {
       'getTxDirection',
       'account',
       'getDexContracts',
+      'isTxAex9',
     ]),
     txType() {
       return this.getTxType(this.transaction);
@@ -28,9 +29,11 @@ export default {
         amount: this.isAllowance
           ? convertToken(this.transaction.tx.fee, -MAGNITUDE)
           : this.getTxAmountTotal(this.transaction),
-        symbol: this.isAllowance ? 'AE' : this.getTxSymbol(this.transaction),
+        symbol: this.isAllowance ? AETERNITY_SYMBOL : this.getTxSymbol(this.transaction),
         isReceived: this.getTxDirection(this.transaction) === 'received',
-        isAe: this.isAllowance || this.getTxSymbol(this.transaction) === 'AE',
+        isAe: this.isAllowance
+          || (this.getTxSymbol(this.transaction) === AETERNITY_SYMBOL
+          && !this.isTxAex9(this.transaction)),
       }];
     },
     isErrorTransaction() {

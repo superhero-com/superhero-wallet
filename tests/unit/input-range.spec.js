@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import InputRange from '../../src/popup/router/components/InputRange.vue';
+import InputRange from '../../src/popup/components/InputRange.vue';
 
 describe('InputRange', () => {
   it('should render', async () => {

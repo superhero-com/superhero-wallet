@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
-import TransactionDetails from '../../src/popup/router/pages/TransactionDetails.vue';
-import DetailsItem from '../../src/popup/router/components/DetailsItem.vue';
-import { DEX_CONTRACTS } from '../../src/popup/utils/constants';
+import TransactionDetails from '../../src/popup/pages/TransactionDetails.vue';
+import DetailsItem from '../../src/popup/components/DetailsItem.vue';
+import { AETERNITY_SYMBOL, DEX_CONTRACTS } from '../../src/popup/utils/constants';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';
 const testTransaction = (txParams) => ({
@@ -75,7 +75,6 @@ const testTransaction = (txParams) => ({
 Object.assign(Vue.prototype, {
   $t: () => 'locale-specific-text',
   $te: () => true,
-  $watchUntilTruly: async () => new Promise((res) => setTimeout(res, 500)),
 });
 
 Vue.use(Vuex);
@@ -84,7 +83,7 @@ const store = (txParams) => new Vuex.Store({
   getters: {
     getTx: () => () => testTransaction(txParams),
     getTxType: () => 'provide liquidity',
-    getTxSymbol: () => () => 'AE',
+    getTxSymbol: () => () => AETERNITY_SYMBOL,
     getDexContracts: () => DEX_CONTRACTS.ae_uat,
     getTxTipUrl: () => () => '',
     getTxAmountTotal: () => () => 1,

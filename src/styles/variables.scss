@@ -1,51 +1,48 @@
 $extension-width: 360px;
+$extension-height: 600px;
 $phone-width: 480px;
 
 $border-radius-app: 10px;
 $border-radius-interactive: 10px;
+$border-radius-modal: 16px;
 
 $base-font-size: 16px;
 $font-sans: 'IBM Plex Sans', sans-serif;
 $font-mono: 'IBM Plex Mono';
 
+$z-index-header: 2;
+$z-index-modal: $z-index-header + 2;
+$z-index-loader: $z-index-modal - 1; // Modals should always be above the loader
+
+$bg-blur-radius: 4px;
+
 $color-white: #fff;
 $color-black: #000;
 $color-primary: #1161fe;
 $color-primary-hover: #0e52d8;
-$color-secondary: #ff2b5e;
-$color-purple: #3270ff;
-$color-blue: $color-primary; // Legacy color name
-$color-green: #00ff9d;
-$color-green-dark: #00d3a1;
-$color-green-hover: #00dc87;
-$color-silver: #cbcbcb;
-$color-light-grey: #babac0;
-$color-medium-grey: #373737;
-$color-dark-grey: #787878;
-$color-darker-grey: #161616;
-$color-red-dark: #ff4746;
-$color-red: #f7296e;
-$color-red-2: #ff2b5e;
+$color-grey-light: #babac0;
+$color-grey-medium: #373737;
+$color-grey-dark: #787878;
+$color-grey-border: #5e5e5e;
 $color-purple: #8f00ff;
-$color-red-alpha-10: rgba(247, 41, 110, 0.1);
-$color-light-black: #1a1a1a;
 
 $color-border: #232323;
 $color-border-hover: #2f2f2f;
 
 $color-bg-1: #131313;
 $color-bg-2: #171717;
-$color-bg-3: #141414;
+$color-bg-3: #282828;
 $color-bg-4: #191919;
 $color-bg-4-hover: #121212;
-$color-bg-5: #313131;
-$color-bg-5-hover: #212122;
 $color-bg-6: #262626;
 
-$color-hover: #1c1c1c;
 $color-disabled: #212121;
 
-$color-warning: #ffaa29;
-$color-error: #ff4746;
+$color-success: #00ff9d;
+$color-success-dark: #00d3a1;
+$color-success-hover: #00dc87;
+$color-warning: #ffb422;
+$color-danger: #ff2b5e;
 
+$color-bg-app: #141414;
 $color-bg-modal: $color-bg-4;

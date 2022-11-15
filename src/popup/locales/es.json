@@ -51,12 +51,6 @@
       "title": "Superhero Wallet is marking HTTP sites as \"Not secure\" - please, use URLs with HTTPS, only.",
       "msg": "The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
     },
-    "confirm-tip": {
-      "title": "Enviar Confirmación de Propina",
-      "msg": "Estás a punto de darle una propina a una URL que no está verificada en Superhero. No podemos garantizar que el propietario reclame las propinas de este sitio.",
-      "sub-message": "¿Estás seguro que quieres enviar la propina de todos modos? Puedes darles la propina y hacérselo saber para que puede reclamarla.",
-      "send": "Enviar Propina"
-    },
     "error-log": {
       "title": "Algo salió mal",
       "sub-title": "Se un Superhéroe!",
@@ -183,7 +177,6 @@
       "notifications": "Notificaciones",
       "names": "Nombres",
       "bidding": "Subastar",
-      "networks": "Redes",
       "comment-new": "Agregar comentario",
       "home": "Superhero Inicio",
       "donate-error": "Donar Data",
@@ -826,14 +819,13 @@
       "middleware": "Middleware:",
       "allNetworks": "Tus redes",
       "cancel": "Cancelar",
-      "addNetwork": "Conectar a otro nodo",
       "networkNamePlaceholder": "Introduce el nombre de la red",
       "networkNameLabel": "Nombre de la red",
-      "networkUrlPlaceholder": "Introduce la url de la red",
-      "networkUrlLabel": "Url de la red",
-      "networkMiddlewarePlaceholder": "Introduce la url del middleware de la red",
+      "networkUrlPlaceholder": "Introduce la URL de la red",
+      "networkUrlLabel": "URL de la red",
+      "networkMiddlewarePlaceholder": "Introduce la URL del middleware de la red",
       "networkMiddlewareLabel": "Middleware de la red",
-      "networkCompilerPlaceholder": "Introduce la url del compilador de la red",
+      "networkCompilerPlaceholder": "Introduce la URL del compilador de la red",
       "networkCompilerLabel": "Compilador de la red",
       "save": "Conectar"
     },

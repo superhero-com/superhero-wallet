@@ -3,6 +3,7 @@
 import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import Ae from '@aeternity/ledger-app-api';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
+import { MODAL_DEFAULT } from '../../../popup/utils';
 
 export default {
   namespaced: true,
@@ -50,7 +51,7 @@ export default {
         address = await dispatch('request', { name: 'getAddress', args: [nextIdx, true] });
         commit('accounts/add', { address, type: 'ledger', idx: nextIdx }, { root: true });
       } catch (error) {
-        dispatch('modals/open', { name: 'default', icon: 'alert', title: 'address not confirmed' }, { root: true });
+        dispatch('modals/open', { name: MODAL_DEFAULT, icon: 'alert', title: 'address not confirmed' }, { root: true });
       }
     },
 
@@ -58,7 +59,7 @@ export default {
       const address = await dispatch('request', { name: 'getAddress', args: [account.idx] });
       if (account.address !== address) {
         if (!process.env.IS_EXTENSION) {
-          dispatch('modals/open', { name: 'dafault', icon: 'alert', title: 'account not found' }, { root: true });
+          dispatch('modals/open', { name: MODAL_DEFAULT, icon: 'alert', title: 'account not found' }, { root: true });
         }
         throw new Error('Account not found');
       }
@@ -84,6 +85,7 @@ export default {
           rootState.sdk.getNetworkId(),
         ],
       }), 'hex');
+
       return TxBuilder
         .buildTx({ encodedTx: binaryTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
     },

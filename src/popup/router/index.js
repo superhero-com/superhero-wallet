@@ -1,42 +1,31 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import VueClipboard from 'vue-clipboard2';
-import Components from '@aeternity/aepp-components-3';
 import routes from './routes';
-import '@aeternity/aepp-components-3/dist/aepp.components.css';
-import LoaderComponent from './components/Loader.vue';
 import { i18n } from '../../store/plugins/languages';
-
-import * as helper from '../utils/helper';
+import { watchUntilTruthy } from '../utils/helper';
 import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
 import initSdk from '../../lib/wallet';
 import { APP_LINK_WEB } from '../utils/constants';
+import {
+  RUNNING_IN_POPUP,
+  POPUP_TYPE,
+  IS_CORDOVA,
+  IS_WEB,
+} from '../../lib/environment';
 
-const plugin = {
-  install() {
-    Vue.helpers = helper;
-    Vue.prototype.$helpers = helper;
-  },
-};
-
-Vue.use(plugin);
 Vue.use(VueRouter);
-Vue.use(VueClipboard);
-Vue.use(Components);
-Vue.component('Loader', LoaderComponent);
 
 const router = new VueRouter({
   routes,
-  mode: process.env.PLATFORM === 'web' ? 'history' : 'hash',
+  mode: IS_WEB ? 'history' : 'hash',
   scrollBehavior: (to, from, savedPosition) => savedPosition || { x: 0, y: 0 },
 });
 
 const lastRouteKey = 'last-path';
 
 const unbind = router.beforeEach(async (to, from, next) => {
-  // eslint-disable-next-line no-underscore-dangle
-  await store._watcherVM.$watchUntilTruly(() => store.state.isRestored);
+  await watchUntilTruthy(() => store.state.isRestored);
   next(
     (to.path === '/' && (await browser.storage.local.get(lastRouteKey))[lastRouteKey]) || undefined,
   );
@@ -59,29 +48,30 @@ router.beforeEach(async (to, from, next) => {
 
   if (!store.state.sdk) initSdk();
 
-  if (window.RUNNING_IN_POPUP) {
+  if (RUNNING_IN_POPUP) {
     const name = {
       connectConfirm: 'connect',
       sign: 'popup-sign-tx',
       rawSign: 'popup-raw-sign',
       messageSign: 'message-sign',
-    }[window.POPUP_TYPE];
+    }[POPUP_TYPE];
+
     if (name !== to.name) {
       next({ name, params: await getPopupProps() });
       return;
     }
   }
   if (from.fullPath === '/transactions') {
-    savedScrollPosition = (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('#app')).scrollTop;
+    savedScrollPosition = (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('.app-inner')).scrollTop;
   }
 
   if (to.fullPath === '/transactions' && savedScrollPosition) {
     setTimeout(() => {
-      (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('#app')).scroll(0, savedScrollPosition);
+      (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('.app-inner')).scroll(0, savedScrollPosition);
       savedScrollPosition = 0;
     }, 50);
   } else {
-    (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('#app')).scroll(0, 0);
+    (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('.app-inner')).scroll(0, 0);
   }
 
   next(to.meta.ifNotAuthOnly ? '/account' : undefined);
@@ -101,7 +91,7 @@ const routerReadyPromise = new Promise((resolve) => {
   });
 });
 
-if (process.env.PLATFORM === 'cordova') {
+if (IS_CORDOVA) {
   (async () => {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
     window.IonicDeeplink.onDeepLink(({ url }) => {
@@ -126,9 +116,9 @@ if (process.env.PLATFORM === 'cordova') {
 
     router.afterEach((to) => {
       if (to.path === '/') {
-        document.body.classList.remove('color-bg-3');
+        document.body.classList.remove('color-bg-app');
       } else {
-        document.body.classList.add('color-bg-3');
+        document.body.classList.add('color-bg-app');
       }
     });
   })();

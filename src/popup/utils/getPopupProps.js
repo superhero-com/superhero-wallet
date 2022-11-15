@@ -1,6 +1,7 @@
 import { postMessage } from './connection';
 import { popupProps } from './config';
 import { buildTx } from './index';
+import { POPUP_TYPE } from '../../lib/environment';
 
 const internalPostMessage = process.env.RUNNING_IN_TESTS
   ? async ({ type }) => {
@@ -12,7 +13,7 @@ const internalPostMessage = process.env.RUNNING_IN_TESTS
           props.transaction = buildTx(txType).txObject;
           return props;
         }
-        return popupProps[window.POPUP_TYPE];
+        return popupProps[POPUP_TYPE];
       }
       case 'resolve':
       case 'reject':

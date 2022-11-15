@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import TermsOfService from '../../src/popup/router/pages/TermsOfService.vue';
+import TermsOfService from '../../src/popup/pages/TermsOfService.vue';
 
 const text = {
   section1Title: 'section1Title',

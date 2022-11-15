@@ -51,12 +51,6 @@
       "title": "Superhero Wallet is marking HTTP sites as \"Not secure\" - please, use URLs with HTTPS, only.",
       "msg": "The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
     },
-    "confirm-tip": {
-      "title": "Send Tip Confirmation",
-      "msg": "You are about to tip a URL that is not Superhero-verified. We cannot guarantee that the owner will claim their tips on this site.",
-      "sub-message": "Are you sure you would like to send the tip anyway? You can still tip them—let them know so they can claim it.",
-      "send": "Send Tip"
-    },
     "error-log": {
       "title": "Something went wrong",
       "sub-title": "Be a Superhero!",
@@ -131,7 +125,6 @@
       "notifications": "Notifications",
       "names": "Names",
       "bidding": "Bidding",
-      "networks": "Networks",
       "comment-new": "Add comment",
       "home": "Superhero Home",
       "donate-error": "Donate Data",
@@ -762,12 +755,11 @@
       "middleware": "Middleware:",
       "allNetworks": "Your networks",
       "cancel": "Cancel",
-      "addNetwork": "Connect to another node",
       "networkNamePlaceholder": "Enter network name",
       "networkNameLabel": "Network name",
-      "networkUrlPlaceholder": "Enter network url",
-      "networkUrlLabel": "Network Url",
-      "networkMiddlewarePlaceholder": "Enter network middleware url",
+      "networkUrlPlaceholder": "Enter network URL",
+      "networkUrlLabel": "Network URL",
+      "networkMiddlewarePlaceholder": "Enter network middleware URL",
       "networkMiddlewareLabel": "Network middleware",
       "save": "Connect"
     },

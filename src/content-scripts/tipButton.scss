@@ -22,7 +22,7 @@
 
     &,
     span {
-      color: variables.$color-light-grey;
+      color: variables.$color-grey-light;
     }
 
     img {
@@ -39,7 +39,7 @@
 
     &:hover {
       span {
-        color: variables.$color-blue;
+        color: variables.$color-primary;
       }
 
       img {

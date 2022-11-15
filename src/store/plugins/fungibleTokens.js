@@ -4,8 +4,11 @@ import BigNumber from 'bignumber.js';
 import { isEqual, isEmpty, uniqBy } from 'lodash-es';
 import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
 import {
-  convertToken, fetchJson, handleUnknownError, calculateSupplyAmount,
-} from '../../popup/utils/helper';
+  convertToken,
+  fetchJson,
+  handleUnknownError,
+  calculateSupplyAmount, AETERNITY_SYMBOL,
+} from '../../popup/utils';
 import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE, AETERNITY_CONTRACT_ID } from '../../popup/utils/constants';
 
 export default (store) => {
@@ -27,7 +30,7 @@ export default (store) => {
         return {
           ...(aePublicDataExists ? aePublicData : {}),
           convertedBalance: tokenBalance,
-          symbol: 'AE',
+          symbol: AETERNITY_SYMBOL,
           balanceCurrency,
           contractId: AETERNITY_CONTRACT_ID,
         };

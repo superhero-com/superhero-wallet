@@ -1,4 +1,4 @@
-import { IN_FRAME } from '../../popup/utils/helper';
+import { IN_FRAME, IS_WEB } from '../../lib/environment';
 
 const modals = {};
 let modalCounter = 0;
@@ -37,7 +37,7 @@ export default (store) => {
         const key = modalCounter;
         modalCounter += 1;
 
-        const inPopup = process.env.PLATFORM === 'web' && IN_FRAME && modals[name].showInPopupIfWebFrame;
+        const inPopup = IS_WEB && IN_FRAME && modals[name].showInPopupIfWebFrame;
 
         const promise = new Promise((resolve, reject) => {
           commit('open', {

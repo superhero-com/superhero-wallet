@@ -8,6 +8,8 @@ const hostConfig = (addresses, isDefault = false) => ({
   transactionSignLimit: isDefault ? 50 : 0,
   transactionSignLimitLeft: isDefault ? 50 : 0,
   transactionSignFirstAskedOn: null,
+  host: null,
+  name: null,
 });
 
 export class App {
@@ -18,35 +20,38 @@ export class App {
 
 export default {
   namespaced: true,
-
-  state: Object.fromEntries(
-    ['superhero.com', 'localhost'].map((domain) => [domain, hostConfig([], true)]),
-  ),
-
+  state: {},
   mutations: {
-    togglePermission(state, { host, name }) {
-      state[host][name] = !state[host][name];
-    },
+
     setTransactionSignLimit(state, { host, value }) {
-      state[host].transactionSignLimit = value;
-      state[host].transactionSignLimitLeft = value;
-      state[host].transactionSignFirstAskedOn = new Date();
+      Vue.set(state, host, {
+        ...state[host],
+        transactionSignLimit: value,
+        transactionSignLimitLeft: value,
+        transactionSignFirstAskedOn: new Date(),
+      });
     },
     setTransactionSignLimitLeft(state, { host, value }) {
-      state[host].transactionSignLimitLeft = value;
+      Vue.set(state, host, {
+        ...state[host],
+        transactionSignLimitLeft: value,
+      });
     },
     resetTransactionSignLimitLeft(state, host) {
-      state[host].transactionSignLimitLeft = state[host].transactionSignLimit;
-      state[host].transactionSignFirstAskedOn = new Date();
+      Vue.set(state, host, {
+        ...state[host],
+        transactionSignLimitLeft: state[host].transactionSignLimit,
+        transactionSignFirstAskedOn: new Date(),
+      });
     },
-    addHost(state, host) {
-      Vue.set(state, host, hostConfig([]));
-    },
-    addAddressToHost(state, { host, address }) {
-      if (!state[host]) Vue.set(state, host, hostConfig([address]));
+    addAddressToHost(state, { host, address, name }) {
+      if (!state[host]) Vue.set(state, host, { ...hostConfig([address]), name, host });
       else state[host].addresses.push(address);
     },
-    removeAeppPermissions(state, host) {
+    addPermission(state, permission) {
+      Vue.set(state, permission.host, permission);
+    },
+    removePermission(state, host) {
       Vue.delete(state, host);
     },
   },
@@ -57,11 +62,14 @@ export default {
     }) {
       const { transactionSignLimit, transactionSignFirstAskedOn } = state[host] || {};
       if (!transactionSignLimit) return false;
-      if (new Date() - new Date(transactionSignFirstAskedOn) >= 24 * 60 * 60 * 1000) {
+      if (
+        !transactionSignFirstAskedOn
+        || new Date() - new Date(transactionSignFirstAskedOn) >= 24 * 60 * 60 * 1000
+      ) {
         commit('resetTransactionSignLimitLeft', host);
       }
 
-      const limitLeft = state[host]?.transactionSignLimitLeft
+      const limitLeft = state[host].transactionSignLimitLeft
         - aettosToAe(+amount + +fee + +nameFee);
       if (limitLeft < 0) return false;
       commit('setTransactionSignLimitLeft', { host, value: limitLeft });
@@ -76,7 +84,12 @@ export default {
       };
       return state[host]?.[permissionsMethods[method]];
     },
-    async requestAddressForHost({ state, commit, dispatch }, { host, address, connectionPopupCb }) {
+    async requestAddressForHost({ state, commit, dispatch }, {
+      host,
+      address,
+      name,
+      connectionPopupCb,
+    }) {
       if (state[host]?.addresses?.includes(address)) return true;
 
       try {
@@ -87,7 +100,7 @@ export default {
       } catch {
         return false;
       }
-      commit('addAddressToHost', { host, address });
+      commit('addAddressToHost', { host, address, name });
 
       return true;
     },

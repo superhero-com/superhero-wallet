@@ -3,7 +3,15 @@ import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wa
 import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { camelCase, isEqual, times } from 'lodash-es';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
-import { fetchJson, IN_FRAME, executeAndSetInterval } from '../popup/utils/helper';
+import {
+  NODE_STATUS_CONNECTING,
+  NODE_STATUS_CONNECTION_DONE,
+  NODE_STATUS_ERROR,
+  fetchJson,
+  executeAndSetInterval,
+  watchUntilTruthy,
+} from '../popup/utils';
+import { IN_FRAME } from './environment';
 import store from '../store';
 import Logger from './logger';
 
@@ -92,11 +100,10 @@ export default async function initSdk() {
   if (initSdkRunning) return;
   initSdkRunning = true;
 
-  store.commit('setNodeStatus', 'connecting');
+  store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
   try {
     await store.dispatch('sdkPlugin/initialize');
-    // eslint-disable-next-line no-underscore-dangle
-    await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
+    await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
     if (IN_FRAME) {
       const getArrayOfAvailableFrames = () => [
         window.parent,
@@ -134,27 +141,28 @@ export default async function initSdk() {
     }
 
     store.commit('initSdk', store.getters['sdkPlugin/sdk']);
-    await Promise.all([store.dispatch('initContractInstances'), initMiddleware()]);
-    store.commit('setNodeStatus', 'connected');
-    setTimeout(() => store.commit('setNodeStatus', ''), 2000);
+    await Promise.all([
+      store.dispatch('initContractInstances'),
+      initMiddleware(),
+    ]);
+    store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE);
 
     store.watch(
       (state, getters) => getters.activeNetwork,
       async (network, oldNetwork) => {
         if (isEqual(network, oldNetwork)) return;
         try {
-          store.commit('setNodeStatus', 'connecting');
+          store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
           await initMiddleware();
-          store.commit('setNodeStatus', 'connected');
-          setTimeout(() => store.commit('setNodeStatus', ''), 2000);
+          store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE);
         } catch (error) {
-          store.commit('setNodeStatus', 'error');
+          store.commit('setNodeStatus', NODE_STATUS_ERROR);
           Logger.write(error);
         }
       },
     );
   } catch (e) {
-    store.commit('setNodeStatus', 'error');
+    store.commit('setNodeStatus', NODE_STATUS_ERROR);
     Logger.write(e);
   } finally {
     initSdkRunning = false;

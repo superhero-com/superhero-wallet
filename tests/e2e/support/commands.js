@@ -172,7 +172,9 @@ Cypress.Commands.add('openNetworks', () => {
 });
 
 Cypress.Commands.add('enterNetworkDetails', (network, url, middleware, compiler) => {
-  cy.get('[data-cy=network] input')
+  cy.get('[data-cy=network-form]')
+    .should('be.visible')
+    .get('[data-cy=network] input')
     .clear()
     .type(network)
     .get('[data-cy=url] input')

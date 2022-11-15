@@ -13,14 +13,25 @@ import {
   handleUnknownError,
   isAccountNotFoundError,
   executeAndSetInterval,
-} from '../popup/utils/helper';
-import { CURRENCIES_URL } from '../popup/utils/constants';
+} from '../popup/utils';
+import { CURRENCIES_URL, MODAL_DEFAULT } from '../popup/utils/constants';
+import { i18n } from './plugins/languages';
 
 export default {
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
     commit('setMiddleware', null);
     commit('initTransactions');
+  },
+
+  async selectNetwork({ dispatch, getters }, network) {
+    await dispatch('switchNetwork', network);
+    if (getters.tippingSupported) return;
+    await dispatch('modals/open', {
+      name: MODAL_DEFAULT,
+      title: i18n.t('modals.tip-mainnet-warning.title'),
+      msg: i18n.t('modals.tip-mainnet-warning.msg'),
+    });
   },
   addPendingTransaction({ getters: { activeNetwork }, commit }, transaction) {
     commit('addPendingTransaction', {
@@ -78,7 +89,7 @@ export default {
     let txs = await Promise.all([
       (recent || state.transactions.nextPageUrl === ''
         ? state.middleware.getTxByAccount(address, limit, 1)
-        : fetchJson(`${getters.activeNetwork.middlewareUrl}/${state.transactions.nextPageUrl}`))
+        : fetchJson(`${getters.activeNetwork.middlewareUrl}${state.transactions.nextPageUrl}`))
         .then(({ data, next }) => {
           const result = recent || state.transactions.nextPageUrl === '' ? data : camelcaseKeysDeep(data);
           if (!recent) commit('setTransactionsNextPage', next);
@@ -180,9 +191,9 @@ export default {
         account: { address },
       },
     },
-    [notifId, status],
+    [notificationId, status],
   ) {
-    const backendMethod = async (postParam) => postJson(`${activeNetwork.backendUrl}/notification/${notifId}`, { body: postParam });
+    const backendMethod = async (body) => postJson(`${activeNetwork.backendUrl}/notification/${notificationId}`, { body });
 
     const responseChallenge = await backendMethod({ author: address, status });
     const signedChallenge = Buffer.from(
@@ -206,7 +217,7 @@ export default {
     [ids, status],
   ) {
     if (!ids.length) return;
-    const backendMethod = async (postParam) => postJson(`${activeNetwork.backendUrl}/notification`, { body: postParam });
+    const backendMethod = async (body) => postJson(`${activeNetwork.backendUrl}/notification`, { body });
 
     const responseChallenge = await backendMethod({ ids, status, author: address });
     const signedChallenge = Buffer.from(

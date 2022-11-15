@@ -1,6 +1,6 @@
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import { CONNECTION_TYPES } from '../popup/utils/constants';
-import { detectConnectionType } from '../popup/utils/helper';
+import { detectConnectionType, waitUntilTruthy } from '../popup/utils/helper';
 import { removePopup, getPopup } from './popupHandler';
 import store from './store';
 
@@ -57,8 +57,7 @@ export async function init() {
     }
   });
   await store.dispatch('sdkPlugin/initialize');
-  // eslint-disable-next-line no-underscore-dangle
-  await store._watcherVM.$watchUntilTruly(() => store.getters['sdkPlugin/sdk']);
+  await waitUntilTruthy(() => store.getters['sdkPlugin/sdk']);
 
   connectionsQueue.forEach(addAeppConnection);
   connectionsQueue = [];

@@ -1,5 +1,5 @@
 import { formatDate, formatTime } from '../../../src/popup/utils';
-import { defaultNetworks } from '../../../src/popup/utils/constants';
+import { NETWORK_MAINNET } from '../../../src/popup/utils/constants';
 
 describe('Tests cases for transaction details page', () => {
   it('Render transaction details', () => {
@@ -10,7 +10,7 @@ describe('Tests cases for transaction details page', () => {
     cy.get('@transactionHash')
       .then((transactionHash) => {
         cy.request(
-          `${defaultNetworks[0].middlewareUrl}/tx/${transactionHash.trim()}`,
+          `${NETWORK_MAINNET.middlewareUrl}/tx/${transactionHash.trim()}`,
         ).then(
           ({
             body:

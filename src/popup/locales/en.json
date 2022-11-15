@@ -118,12 +118,6 @@
       "title": "Unable to show this account.",
       "msg": "You've reached the limit of showed accounts, uncheck other account, if you want to show this one."
     },
-    "confirm-tip": {
-      "title": "Send Tip Confirmation",
-      "msg": "The webpage owner has not added a SUPERHERO wallet yet. We cannot guarantee that they will claim their tips.",
-      "sub-message": "You can still tip them—let them know so they can claim it. Would you like to proceed?",
-      "send": "Send Tip"
-    },
     "error-log": {
       "title": "Something went wrong",
       "sub-title": "Be a Superhero!",
@@ -227,11 +221,6 @@
       "title": "Autoextend name",
       "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.<br /><br /> Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.<br /><br /> Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
     },
-    "shareQr": {
-      "title": "Scan QR code",
-      "share": "Share",
-      "close": "Close"
-    },
     "receive": {
       "title": "Receive funds to public address",
       "requestAmount": "Request specific amount (optional)",
@@ -246,7 +235,7 @@
       "reviewTitle": "Review transaction",
       "successTitle": "Transaction successfully submitted",
       "recipientLabel": "Recipient",
-      "recipientPlaceholder": "Enter recipient’s address or .chain name",
+      "recipientPlaceholder": "Enter address, .chain name or URL",
       "next": "Next"
     },
     "wrongNetwork": {
@@ -349,7 +338,8 @@
       "buy": "Buy AE Tokens",
       "networks": "Network",
       "permissionsSettings": "Permissions",
-      "permissionsDetails": "Permissions details",
+      "permissionsEdit": "Edit permissions",
+      "permissionsAdd": "Add permissions",
       "comment-new": "Add comment",
       "home": "Home",
       "donate-error": "Donate Data",
@@ -363,10 +353,13 @@
       "invite": "Invite",
       "tx-details": "Transaction details",
       "token-details": "Token details",
+      "coin-details": "Coin details",
       "wallet-home": "Wallet Home",
       "save-errors-log": "Save error log",
       "reset-wallet": "Reset wallet",
-      "seed-phrase": "Seed phrase"
+      "seed-phrase": "Seed phrase",
+      "network-add": "Add custom network",
+      "network-edit": "Edit network"
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
@@ -556,6 +549,8 @@
       "not-available": "N/A",
       "noTokens": "No tokens in account balance.",
       "buyAe": "Buy AE",
+      "buy": "Buy",
+      "swap": "Swap",
       "receiveTokens": "Receive tokens",
       "select-asset": "Select asset"
     },
@@ -566,8 +561,10 @@
       "buy": "Buy",
       "swap": "Swap",
       "tip": "Tip",
-      "token-details": "Token Details",
+      "token-details": "Token details",
+      "coin-details": "Coin details",
       "token": "Token",
+      "coin": "Coin",
       "token-description": "Token Description",
       "community": "Community",
       "decimals": "Decimals",
@@ -788,7 +785,10 @@
       "incorrectPassword": "Incorrect Password",
       "decryptingPrivateKey": "Decrypting private key",
       "seedRecoveryHeading": "Show seed phrase",
-      "seedRecoverySmall": "Your seed phrase is a combination of 12 words and serves as  password to access and restore your wallet accounts.\n\n Never disclose this to anyone.\n\n Make sure you {0} on a piece of paper or in a file that no one else can see - but that you will never lose.\n\n Losing your seed phrase means losing access to your wallet and all funds in your accounts.",
+      "seedRecoverySmall": "Your seed phrase is a combination of 12 words and serves as  password to access and restore your wallet accounts.",
+      "seedRecoverySmall-2": "Never disclose this to anyone.",
+      "seedRecoverySmall-3": "Make sure you {0} on a piece of paper or in a file that no one else can see - but that you will never lose.",
+      "seedRecoverySmall-4": "Losing your seed phrase means losing access to your wallet and all funds in your accounts.",
       "seedRecoverySmallBackItUp": "back it up in the correct word sequence",
       "seedRecoveryBtn": "Show seed phrase",
       "seedPhrase": "Your seed phrase",
@@ -825,7 +825,7 @@
       "verifyYourSeedPhrase": "verify your seed phrase"
     },
     "send": {
-      "title": "Transaction successfully submitted",
+      "title": "Transaction has been submitted",
       "subtitle": "You may check the status of your transaction in æternity blockchain explorer",
       "send": "Send",
       "success": "Success",
@@ -866,7 +866,6 @@
       "tabAbout": "About",
       "tabAboutsmall": "Version, support center, and contact info",
       "tabNetworks": "Manage networks",
-      "tabNetworksSmall": "Connect to custom node",
       "tabPermissionsSettingsSmall": "Manage popups appearance for various requests",
       "tabRemoveAccount": "Reset wallet",
       "tabSaveErrorLog": "Save error log",
@@ -1070,8 +1069,7 @@
       "deposited": "Deposited",
       "withdrawn": "Withdrawn",
       "rates": "Rates",
-      "swapRoute": "Swap route",
-      "urlCopied": "URL copied"
+      "swapRoute": "Swap route"
     },
     "transactions": {
       "backToAccount": "Back to account",
@@ -1133,11 +1131,11 @@
       "across": "across the Globe"
     },
     "nodeConnectionStatus": {
-      "error": "Unable to connect to chosen node",
+      "error": "Unable to connect to chosen node.",
       "connecting": "Connecting to node...",
       "connected": "Connected",
       "initServices": "Initializing services...",
-      "offline": "You are offline"
+      "offline": "You are offline. Go online to get real time data."
     },
     "popupMessageSign": {
       "title": "Sign message",
@@ -1145,26 +1143,35 @@
       "message": "Message"
     },
     "network": {
-      "url": "URL:",
+      "listLabel": "Choose between æternity’s Mainnet and Testnet or add custom node to connect to. Only add custom networks you trust to avoid malicious providers.",
+      "formLabel": "Fill in the custom node details in the fields below. Make sure to add only trusted custom networks.",
+      "url": "URL",
       "edit": "Edit",
       "delete": "Delete",
-      "middleware": "Middleware:",
+      "middleware": "Middleware",
       "allNetworks": "Your networks",
       "cancel": "Cancel",
-      "addNetwork": "Connect to another node",
+      "addCustomNetwork": "Add custom network",
+      "addNetwork": "Add network",
+      "apply": "Apply",
       "networkNamePlaceholder": "Enter network name",
       "networkNameLabel": "Network name",
-      "networkUrlPlaceholder": "Enter network url",
-      "networkUrlLabel": "Network Url",
-      "networkMiddlewarePlaceholder": "Enter network middleware url",
+      "networkUrlPlaceholder": "Enter network URL",
+      "networkUrlLabel": "Network URL",
+      "networkMiddlewarePlaceholder": "Enter network middleware URL",
       "networkMiddlewareLabel": "Network middleware",
-      "networkCompilerPlaceholder": "Enter network compiler url",
+      "networkCompilerPlaceholder": "Enter network compiler URL",
       "networkCompilerLabel": "Network compiler",
-      "backendUrlPlaceholder": "Enter backend url",
-      "backendUrlLabel": "Backend URL",
+      "backendUrlPlaceholder": "Enter tipping Backend URL",
+      "backendUrlLabel": "Tipping backend",
       "showTippingConfig": "Show Tipping Configuration",
       "hideTippingConfig": "Hide Tipping Configuration",
-      "save": "Connect"
+      "save": "Connect",
+      "error": {
+        "networkExists": "Network with this name exist",
+        "invalidHostname": "Invalid hostname",
+        "enterName": "Enter network name"
+      }
     },
     "donate-error": {
       "error-report": "Error Report:",
@@ -1183,7 +1190,7 @@
       "collapse": "Collapse",
       "claim": "Claim Back",
       "insufficient-balance": "Insufficient balance",
-      "insufficient-ivnite-balance": "This invite Link expired and the Tokens are already claimed.",
+      "insufficient-invite-balance": "This invite Link expired and the Tokens are already claimed.",
       "tip-attached": "Tip attached",
       "top-up-with": "Top up with",
       "delete": "Delete"
@@ -1191,12 +1198,22 @@
     "permissions": {
       "login": "Don't ask for login requests",
       "message-sign": "Don't ask for message signing",
+      "daily-spending-limit": "Daily spending limit without asking",
       "transaction-sign": "Limit for spending without asking per day",
       "spent-today": "Spent today",
       "left-today": "Left today",
       "delete": "Remove permissions",
+      "add": "Add permissions",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "add-description": "Use this feature with caution and only for platforms you trust.",
       "empty": "You aren't connected to any aepps",
-      "description": "Manage confirmation popups and daily spending limits. For security reasons use this feature with caution only for trusted platforms such as {0} and your localhost environment."
+      "description": "Manage confirmation popups and daily spending limits. For security reasons use this feature with caution only for trusted platforms such as {0} and your localhost environment.",
+      "custom-name": "Custom name",
+      "enter-custom-name": "Enter custom name of your choice",
+      "permissions-for-url": "Permissions for URL",
+      "enter-url": "Enter URL",
+      "always-ask": "always ask"
     },
     "reset-wallet": {
       "description": "This action will remove all accounts from your wallet and delete the extension storage.",
@@ -1209,6 +1226,7 @@
   },
   "validation": {
     "required": "This field is required",
+    "url": "Invalid URL",
     "address": "Enter valid blockchain address or .chain name",
     "name": "Enter valid .chain name",
     "nameRegisteredAddress": "This name isn't registered or pointed to address",
@@ -1229,7 +1247,6 @@
   "days": "{n} days | {n} day | {n} days",
   "addressCopied": "Copied",
   "hashCopied": "Hash copied",
-  "copied": "Copied",
   "copy": "Copy",
   "tx-fee": "Transaction fee",
   "total": "Total",

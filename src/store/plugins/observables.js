@@ -15,7 +15,6 @@ import {
 import { AGGREGATOR_URL } from '../../popup/utils/constants';
 
 export default (store) => {
-  // eslint-disable-next-line no-underscore-dangle
   const watchAsObservable = (getter, options) => store._watcherVM
     .$watchAsObservable(() => getter(store.state, store.getters), options);
 

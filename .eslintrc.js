@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
   parserOptions: {
-    parser: 'babel-eslint',
+    parser: '@typescript-eslint/parser',
   },
   env: {
     browser: true,
@@ -11,6 +11,7 @@ module.exports = {
     'plugin:vue-i18n/recommended',
     'plugin:vue/recommended',
     '@vue/airbnb',
+    '@vue/typescript',
   ],
   // check if imports actually resolve
   settings: {
@@ -31,6 +32,8 @@ module.exports = {
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-underscore-dangle': 'off',
+    'no-confusing-arrow': 'off',
+    'import/prefer-default-export': 'off',
     'vue-i18n/no-dynamic-keys': 'error',
     'vue-i18n/no-unused-keys': 'error',
     'vue-i18n/no-raw-text': 'off',
