@@ -39,15 +39,6 @@
           :text="tab.text"
         />
       </Tabs>
-      <div
-        v-if="showSearchBar"
-        class="search-bar-wrapper"
-      >
-        <InputSearch
-          v-model="searchTerm"
-          :placeholder="searchTermPlaceholder"
-        />
-      </div>
     </div>
 
     <div class="tabs-content">
@@ -56,8 +47,7 @@
         mode="out-in"
       >
         <RouterView
-          :search-term="searchTerm"
-          :show-filters="showSearchBar"
+          :show-filters="showFilters"
         />
       </transition>
     </div>
@@ -89,7 +79,6 @@ import BtnPlain from '../components/buttons/BtnPlain.vue';
 import BtnBox from '../components/buttons/BtnBox.vue';
 import BtnIcon from '../components/buttons/BtnIcon.vue';
 import BtnClose from '../components/buttons/BtnClose.vue';
-import InputSearch from '../components/InputSearch.vue';
 import Tabs from '../components/tabs/Tabs.vue';
 import Tab from '../components/tabs/Tab.vue';
 
@@ -111,7 +100,6 @@ export default defineComponent({
     BtnIcon,
     BtnBox,
     BtnClose,
-    InputSearch,
   },
   setup(props, { root }) {
     const ACCOUNT_INFO_HEIGHT = 120;
@@ -120,7 +108,6 @@ export default defineComponent({
     const appInnerElem = computed<HTMLElement | null | undefined>(
       () => accountDetailsElem.value?.parentElement,
     );
-    const searchTerm = ref('');
     const appInnerScrollTop = ref<number>(0);
     const initialClientHeight = ref<number>(EXTENSION_HEIGHT);
     const clientHeight = ref<number>(0);
@@ -173,22 +160,9 @@ export default defineComponent({
       },
     ];
 
-    const searchTermPlaceholder = computed(() => {
-      switch (root.$route.name) {
-        case 'account-details':
-          return root.$t('pages.fungible-tokens.searchPlaceholder');
-        case 'account-details-transactions':
-          return root.$t('pages.recentTransactions.searchPlaceholder');
-        default:
-          return null;
-      }
-    });
-
-    const showSearchBar = computed<boolean>(() => !!(
-      searchTerm.value || (
-        clientHeight.value > initialClientHeight.value
-        && appInnerScrollTop.value >= ACCOUNT_INFO_HEIGHT
-      )
+    const showFilters = computed<boolean>(() => !!(
+      clientHeight.value > initialClientHeight.value
+      && appInnerScrollTop.value >= ACCOUNT_INFO_HEIGHT
     ));
 
     const resizeObserver = new ResizeObserver(debounce((entries) => {
@@ -241,9 +215,7 @@ export default defineComponent({
       actions,
       tabs,
       activeIdx,
-      searchTerm,
-      searchTermPlaceholder,
-      showSearchBar,
+      showFilters,
       isConnected,
       accountDetailsElem,
     };
@@ -257,6 +229,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .account-details {
+  --account-info-height: 120px;
   --screen-padding-x: 12px;
   --screen-bg-color: #{variables.$color-bg-modal};
 
@@ -271,6 +244,13 @@ export default defineComponent({
 
   @include mixins.mobile {
     min-height: 100vh;
+  }
+
+  ::v-deep .search-bar-wrapper {
+    position: sticky;
+    top: calc(var(--account-info-height) + 6px);
+    z-index: 1;
+    background-color: var(--screen-bg-color);
   }
 
   .account-info-wrapper {
