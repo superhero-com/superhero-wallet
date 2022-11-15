@@ -28,13 +28,13 @@ export default defineComponent({
       height: props.size,
       margin: 0,
       qrOptions: {
-        typeNumber: 0,
+        typeNumber: 10,
         mode: 'Byte',
-        errorCorrectionLevel: 'L',
+        errorCorrectionLevel: 'M',
       },
       imageOptions: {
         hideBackgroundDots: false,
-        imageSize: 1.5,
+        imageSize: 0.7,
         margin: 0,
       },
       image: SHLogo,
