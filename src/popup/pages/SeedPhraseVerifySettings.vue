@@ -1,20 +1,22 @@
 <template>
   <div class="seed-phrase-settings">
-    <div class="title">
+    <div class="text-heading-1">
       {{ $t('pages.seed-phrase-settings.verifyYourSeedPhrase') }}
     </div>
-    <div class="description">
+
+    <div class="text-description">
       {{ $t('pages.seed-phrase-settings.confirm-that-you-save-your-seed-phrase') }}
     </div>
     <i18n
       path="pages.seed-phrase-settings.compose-your-seed-phrase"
       tag="div"
-      class="description"
+      class="text-description"
     >
-      <span class="white-text">
+      <strong>
         {{ $t('pages.seed-phrase-settings.in-correct-order') }}
-      </span>
+      </strong>
     </i18n>
+
     <div class="phraser">
       <BtnPlain
         v-for="(word, index) in mnemonicShuffled"
@@ -53,6 +55,7 @@
         </BtnPlain>
       </template>
     </div>
+
     <div class="footer">
       <BtnMain
         class="verify-button"
@@ -149,23 +152,10 @@ export default {
 
   .title {
     color: rgba(variables.$color-white, 1);
-    padding: 18px 0;
+    margin-bottom: 18px;
     text-align: center;
 
     @extend %face-sans-18-regular;
-  }
-
-  .description {
-    color: rgba(variables.$color-white, 0.75);
-    line-height: 20px;
-    text-align: center;
-    padding-bottom: 8px;
-
-    .white-text {
-      color: variables.$color-white;
-    }
-
-    @extend %face-sans-14-light;
   }
 
   .phraser {

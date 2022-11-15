@@ -125,6 +125,14 @@ button {
     }
   }
 
+  &-heading-1 {
+    @extend %face-sans-18-regular;
+
+    margin-bottom: 18px;
+    color: $color-white;
+    text-align: center;
+  }
+
   &-heading-2 {
     @extend %face-sans-18-medium;
 

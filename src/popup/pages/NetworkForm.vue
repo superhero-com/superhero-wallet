@@ -3,7 +3,7 @@
     class="network-form"
     data-cy="network-form"
   >
-    <p class="network-label">
+    <p class="text-description">
       {{ $t('pages.network.formLabel') }}
     </p>
     <InputField
@@ -161,13 +161,6 @@ export default {
 
 .network-form {
   margin: 16px var(--screen-padding-x);
-
-  .network-label {
-    @extend %face-sans-14-regular;
-
-    margin-bottom: 14px;
-    color: rgba(variables.$color-white, 0.85);
-  }
 
   .name-characters-left {
     @extend %face-sans-14-regular;

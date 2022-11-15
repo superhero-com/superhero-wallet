@@ -224,7 +224,6 @@ export default {
 
   display: flex;
   flex-direction: column;
-  min-height: 100%;
   padding-inline: var(--screen-padding-x);
   background-color: variables.$color-bg-4;
 
@@ -233,12 +232,12 @@ export default {
   }
 
   .token-amount {
+    @extend %face-sans-22-medium;
+
     padding-top: 10px;
     margin-bottom: 20px;
     display: block;
     text-align: center;
-
-    @extend %face-sans-22-medium;
 
     ::v-deep .fiat {
       padding-top: 4px;

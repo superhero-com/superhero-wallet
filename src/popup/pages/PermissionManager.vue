@@ -2,7 +2,7 @@
   <div class="permission-manager">
     <div
       v-if="!editView"
-      class="description"
+      class="text-description"
     >
       {{ $t('pages.permissions.add-description') }}
     </div>
@@ -255,14 +255,6 @@ export default {
 .permission-manager {
   padding: 14px;
   color: variables.$color-white;
-
-  .description {
-    @extend %face-sans-14-light;
-
-    color: rgba(variables.$color-white, 0.75);
-    padding: 8px 0 2px;
-    line-height: 20px;
-  }
 
   .inputs {
     margin-bottom: 32px;
