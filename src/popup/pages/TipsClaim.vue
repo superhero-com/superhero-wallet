@@ -1,8 +1,12 @@
 <template>
   <div class="tips-claim">
     <AccountInfo :account-idx="activeIdx" />
+
     <div class="header">
-      {{ $t('pages.claimTips.header') }}
+      <p class="text-description">
+        {{ $t('pages.claimTips.header') }}
+      </p>
+
       <BtnHelp
         class="help-button"
         :title="$t('modals.verify.title')"
@@ -131,11 +135,8 @@ export default {
   padding: 12px;
 
   .header {
-    margin: 8px 0 24px 36px;
+    margin: 20px 0 24px 0;
     display: flex;
-    color: variables.$color-grey-light;
-
-    @extend %face-sans-15-medium;
 
     .help-button {
       margin-left: 8px;
@@ -145,12 +146,6 @@ export default {
         height: 32px;
       }
     }
-  }
-
-  p {
-    margin: 16px 0 8px 0;
-
-    @extend %face-sans-16-regular;
   }
 
   .input-field {

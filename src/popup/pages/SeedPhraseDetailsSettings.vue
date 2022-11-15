@@ -1,6 +1,6 @@
 <template>
   <div class="seed-phrase-details">
-    <div class="title">
+    <div class="text-heading-1">
       {{ $t('pages.seed-phrase-settings.this-your-seed-phrase') }}
     </div>
 
@@ -28,32 +28,35 @@
 
     <i18n
       path="pages.seedPhrase.backUpYourSeedPhrase"
-      tag="div"
-      class="description"
+      tag="p"
+      class="text-description"
     >
-      <span>{{ $t('pages.seedPhrase.inCorrectOrder') }}</span>
+      <strong>{{ $t('pages.seedPhrase.inCorrectOrder') }}</strong>
     </i18n>
     <i18n
       path="pages.seedPhrase.toBeSureYouGotItRight"
-      tag="div"
-      class="description"
+      tag="p"
+      class="text-description"
     >
-      <span>{{ $t('pages.seedPhrase.verifyYourSeedPhrase') }}</span>
+      <strong>{{ $t('pages.seedPhrase.verifyYourSeedPhrase') }}</strong>
     </i18n>
-    <BtnMain
-      class="button"
-      extend
-      :to="{ name: 'settings-seed-phrase-verify' }"
-    >
-      {{ $t('pages.seedPhrase.verifySeed') }}
-    </BtnMain>
-    <BtnMain
-      variant="secondary"
-      extend
-      @click="setBackedUpSeed"
-    >
-      {{ $t('pages.seedPhrase.doneThis') }}
-    </BtnMain>
+
+    <div class="buttons">
+      <BtnMain
+        class="button"
+        extend
+        :to="{ name: 'settings-seed-phrase-verify' }"
+      >
+        {{ $t('pages.seedPhrase.verifySeed') }}
+      </BtnMain>
+      <BtnMain
+        variant="secondary"
+        extend
+        @click="setBackedUpSeed"
+      >
+        {{ $t('pages.seedPhrase.doneThis') }}
+      </BtnMain>
+    </div>
   </div>
 </template>
 
@@ -97,28 +100,6 @@ export default defineComponent({
 .seed-phrase-details {
   padding: var(--screen-padding-x);
 
-  .title {
-    @extend %face-sans-18-regular;
-
-    color: rgba(variables.$color-white, 1);
-    margin-bottom: 26px;
-    text-align: center;
-  }
-
-  .description {
-    color: rgba(variables.$color-white, 0.75);
-    line-height: 22px;
-    white-space: pre-line;
-    text-align: center;
-    padding-bottom: 12px;
-
-    span {
-      color: variables.$color-white;
-    }
-
-    @extend %face-sans-15-regular;
-  }
-
   .mnemonics {
     background: rgba(variables.$color-white, 0.15);
     border: 2px solid rgba(variables.$color-white, 0.1);
@@ -161,9 +142,11 @@ export default defineComponent({
     }
   }
 
-  .button {
-    margin-top: 8px;
-    margin-bottom: 16px;
+  .buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    margin-top: 20px;
   }
 }
 </style>

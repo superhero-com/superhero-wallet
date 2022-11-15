@@ -35,9 +35,9 @@
     <i18n
       path="pages.names.claim.short-names.message"
       tag="p"
-      class="explanation"
+      class="text-description explanation"
     >
-      <mark>{{ $t('pages.names.claim.short-names.insertion') }}</mark>
+      <strong>{{ $t('pages.names.claim.short-names.insertion') }}</strong>
     </i18n>
 
     <BtnMain
@@ -169,7 +169,7 @@ export default {
 
 .claim {
   .chain-name {
-    margin-bottom: 20px;
+    margin-bottom: 6px;
 
     &-counter {
       @extend %face-sans-13-regular;
@@ -185,14 +185,11 @@ export default {
   }
 
   .explanation {
-    margin-top: 16px;
-    line-height: 1.4em;
-    color: variables.$color-grey-light;
+    margin-top: 10px;
+  }
 
-    mark {
-      background-color: transparent;
-      color: variables.$color-white;
-    }
+  .btn-register {
+    margin-top: 20px;
   }
 }
 </style>
