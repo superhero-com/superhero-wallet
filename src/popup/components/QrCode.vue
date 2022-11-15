@@ -34,7 +34,7 @@ export default defineComponent({
       },
       imageOptions: {
         hideBackgroundDots: false,
-        imageSize: 1.5,
+        imageSize: 0.8,
         margin: 0,
       },
       image: SHLogo,
