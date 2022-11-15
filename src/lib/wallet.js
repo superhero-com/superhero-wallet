@@ -1,4 +1,5 @@
 import { genSwaggerClient } from '@aeternity/aepp-sdk';
+import { ABI_VERSIONS } from 'aeternity-sdk-12';
 import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { camelCase, isEqual, times } from 'lodash-es';
@@ -14,6 +15,9 @@ import {
 import { IN_FRAME } from './environment';
 import store from '../store';
 import Logger from './logger';
+
+// eslint-disable-next-line no-console
+console.log(ABI_VERSIONS);
 
 async function initMiddleware() {
   const { middlewareUrl } = store.getters.activeNetwork;
