@@ -30,11 +30,11 @@ export default defineComponent({
       qrOptions: {
         typeNumber: 0,
         mode: 'Byte',
-        errorCorrectionLevel: 'L',
+        errorCorrectionLevel: 'H',
       },
       imageOptions: {
         hideBackgroundDots: false,
-        imageSize: 1.5,
+        imageSize: 0.5,
         margin: 0,
       },
       image: SHLogo,
