@@ -304,13 +304,6 @@ export default defineComponent({
     background-color: var(--screen-bg-color);
   }
 
-  .search-bar-wrapper {
-    position: sticky;
-    top: calc(env(safe-area-inset-top) + 104px);
-    z-index: 1;
-    margin-top: var(--gap);
-  }
-
   .tabs-content {
     position: relative;
     padding: 0 var(--screen-padding-x);
