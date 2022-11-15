@@ -258,7 +258,8 @@ export default defineComponent({
 
   &.full-screen {
     padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom) !important; // needed to overwrite #app .main styles
+    padding-bottom: 0; // needed to overwrite #app .main styles
+    padding-bottom: env(safe-area-inset-bottom); // needed to overwrite #app .main styles
 
     @include mixins.desktop {
       position: absolute;

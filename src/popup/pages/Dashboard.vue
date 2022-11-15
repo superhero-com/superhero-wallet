@@ -172,7 +172,6 @@ export default {
 .dashboard {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
 
   .dashboard-cards {
     padding: var(--screen-padding-x);
