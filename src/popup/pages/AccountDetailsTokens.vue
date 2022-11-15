@@ -1,5 +1,14 @@
 <template>
   <div class="token-list-wrapper">
+    <div
+      v-if="showFilters"
+      class="search-bar-wrapper"
+    >
+      <InputSearch
+        v-model="searchTerm"
+        :placeholder="$t('pages.fungible-tokens.searchPlaceholder')"
+      />
+    </div>
     <TokensList
       :search-term="searchTerm"
     />
@@ -8,13 +17,20 @@
 
 <script>
 import TokensList from '../components/FungibleTokens/TokensList.vue';
+import InputSearch from '../components/InputSearch.vue';
 
 export default {
   components: {
     TokensList,
+    InputSearch,
   },
   props: {
-    searchTerm: { type: String, default: '' },
+    showFilters: Boolean,
+  },
+  data() {
+    return {
+      searchTerm: '',
+    };
   },
 };
 </script>

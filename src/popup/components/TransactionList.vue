@@ -1,7 +1,16 @@
 <template>
   <div class="transaction-list">
+    <div
+      v-if="showSearch && showSearchAndFilters"
+      class="search-bar-wrapper"
+    >
+      <InputSearch
+        v-model="searchTerm"
+        :placeholder="$t('pages.recentTransactions.searchPlaceholder')"
+      />
+    </div>
     <Filters
-      v-if="showFilters"
+      v-if="showSearchAndFilters"
       v-model="displayMode"
       :filters="filters"
       :scroll-top-threshold="scrollTopThreshold"
@@ -45,6 +54,7 @@ import { SCHEMA } from '@aeternity/aepp-sdk';
 import { watchUntilTruthy } from '../utils/helper';
 import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
+import InputSearch from './InputSearch.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import { TXS_PER_PAGE, FUNCTION_TYPE_DEX, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import Visible from '../../icons/visible.svg?vue-component';
@@ -53,20 +63,22 @@ export default {
   components: {
     Filters,
     TransactionItem,
+    InputSearch,
     AnimatedSpinner,
     Visible,
   },
   props: {
     token: { type: String, default: '' },
-    searchTerm: { type: String, default: '' },
     maxLength: { type: Number, default: null },
     scrollTopThreshold: { type: Number, default: undefined },
     showFilters: Boolean,
+    showSearch: Boolean,
   },
   data() {
     return {
       loading: false,
       isDestroyed: false,
+      searchTerm: '',
       displayMode: { rotated: true, filter: 'all', sort: 'date' },
       filters: {
         all: {}, in: {}, out: {}, dex: {},
@@ -131,6 +143,13 @@ export default {
       },
     }),
     ...mapGetters(['getTxSymbol']),
+    showSearchAndFilters() {
+      return (
+        this.showFilters
+        || this.displayMode.filter !== 'all'
+        || this.searchTerm
+      );
+    },
   },
   mounted() {
     this.loadMore();

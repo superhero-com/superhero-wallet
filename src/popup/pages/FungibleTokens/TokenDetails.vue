@@ -73,7 +73,7 @@
     <TransactionList
       v-else
       :token="id"
-      display-filter
+      show-filters
       :scroll-top-threshold="213"
       class="transaction-list-wrapper"
     />
@@ -261,9 +261,9 @@ export default {
   }
 
   ::v-deep .filters {
-    --buttons-height: 40px;
+    --buttons-height: 44px;
 
-    padding-top: 16px;
+    padding-top: 12px;
     height: 56px;
     position: sticky;
     top: calc(var(--header-height) + var(--buttons-height) + env(safe-area-inset-top));
