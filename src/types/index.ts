@@ -10,7 +10,8 @@ export interface IToken {
   decimals: number
   id?: string // Only for the Aeternity coin
   name: string
-  symbol: string
+  symbol: string,
+  extension?: string[]
 }
 
 export type ITokenList = Record<string, IToken>
@@ -109,3 +110,69 @@ export interface ICurrency {
   code: string
   symbol: string
 }
+
+export interface ITxArguments {
+  type: string,
+  value: string | number | any[],
+}
+
+export type TxFunction = 'addLiquidity' |
+  'addLiquidityAe' |
+  'removeLiquidity' |
+  'removeLiquidityAe' |
+  'swapExactTokensForTokens' |
+  'swapTokensForExactTokens' |
+  'swapExactAeForTokens' |
+  'swapTokensForExactAe' |
+  'swapExactTokensForAe' |
+  'swapAeForExactTokens' |
+  'changeAllowance' |
+  'transferAllowance' |
+  'deposit' |
+  'withdraw'
+
+export interface ITx {
+  abiVersion: number,
+  amount: number
+  contractId: string
+  fee: number
+  function: string,
+  gas: number,
+  gasPrice: number,
+  gasUsed: number,
+  nonce: number,
+  result: string
+  return:string
+  returnType: string
+  type: string
+  callerId: string
+  arguments: ITxArguments[]
+}
+export interface ITransaction {
+  blockHeight: number;
+  hash: string,
+  microIndex: number,
+  microTime: number,
+  claim: any, // TODO find type
+  incomplete: any // TODO find type
+  pending: any // TODO find type
+  tx: ITx
+}
+
+export type TransactionType =
+  'SpendTx' |
+  'ContractCreateTx' |
+  'ContractCallTx' |
+  'NamePreclaimTx' |
+  'NameClaimTx' |
+  'NameUpdateTx' |
+  'NameTransferTx' |
+  'NameRevokeTx' |
+  'OracleRegisterTx' |
+  'OracleExtendTx' |
+  'OraclePostQueryTx' |
+  'OracleRespondTx' |
+  'ChannelCloseSoloTx' |
+  'ChannelSlashTx' |
+  'ChannelSettleTx' |
+  'ChannelSnapshotSoloTx';

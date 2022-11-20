@@ -112,6 +112,9 @@ export const NOTIFICATION_TYPE_CLAIM_OF_TIP = 'CLAIM_OF_TIP';
 export const NOTIFICATION_TYPE_CLAIM_OF_RETIP = 'CLAIM_OF_RETIP';
 export const NOTIFICATION_TYPE_RETIP_ON_TIP = 'RETIP_ON_TIP';
 
+export const AENS = 'AENS';
+export const DEX = 'DEX';
+
 export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
   {
     text: i18n.t('pages.notification-settings.wallet'),
@@ -385,3 +388,5 @@ export const DEX_TRANSACTION_TAGS = {
   deposit: DEX_SWAP,
   withdraw: DEX_SWAP,
 };
+
+export const RETURN_TYPE_OK = 'ok';
