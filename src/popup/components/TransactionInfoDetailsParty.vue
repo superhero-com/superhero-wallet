@@ -28,7 +28,6 @@
     >
       <AddressFormatted
         :address="txParty.address"
-        :columns="disableFormatting"
         :column-count="5"
         :align-right="isRecipient"
         class="text-address"
@@ -39,7 +38,6 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { checkAensName } from '../utils';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressFormatted from './AddressFormatted.vue';
@@ -56,14 +54,6 @@ export default defineComponent({
       type: Object,
       required: true,
     },
-  },
-  setup(props) {
-    const disableFormatting = computed(
-      () => !(checkAensName(props.txParty.address) || (props.txParty.url && !props.txParty.label)),
-    );
-    return {
-      disableFormatting,
-    };
   },
 });
 </script>
