@@ -65,6 +65,7 @@ import {
 import NotificationItem from '../components/NotificationItem.vue';
 import Tabs from '../components/tabs/Tabs.vue';
 import Tab from '../components/tabs/Tab.vue';
+import { IS_MOBILE_DEVICE } from '../../lib/environment';
 
 const DIR_ALL = 'all';
 const DIR_WALLET = 'wallet';
@@ -144,7 +145,7 @@ export default defineComponent({
       await modifyNotificationStatus(notification, NOTIFICATION_STATUS_READ);
       if (notification.path) {
         if (typeof notification.path === 'string' && /^\w+:\D+/.test(notification.path)) {
-          window.open(notification.path, '_blank');
+          window.open(notification.path, IS_MOBILE_DEVICE ? '_self' : '_blank');
         } else {
           root.$router.push(notification.path);
         }
