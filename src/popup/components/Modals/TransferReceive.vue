@@ -34,7 +34,6 @@
           <Scrollable class="address-scrollable-area">
             <AddressFormatted
               :address="accountAddressToDisplay"
-              :columns="!amount"
             />
           </Scrollable>
         </CopyText>
