@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { RUNNING_IN_POPUP } from '../../lib/environment';
 import Logo from '../../icons/logo-small.svg?vue-component';
 import BackIcon from '../../icons/back.svg?vue-component';
