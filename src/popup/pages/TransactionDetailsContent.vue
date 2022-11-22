@@ -176,7 +176,6 @@ import {
   formatDate,
   formatTime,
   aettosToAe,
-  watchUntilTruthy,
   splitAddress,
   AETERNITY_SYMBOL,
 } from '../utils';

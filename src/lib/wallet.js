@@ -1,7 +1,7 @@
 import { genSwaggerClient } from '@aeternity/aepp-sdk';
-import { ABI_VERSIONS } from 'aeternity-sdk-12';
 import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
+import { ABI_VERSIONS } from 'aeternity-sdk-12/dist/aepp-sdk.browser-script';
 import { camelCase, isEqual, times } from 'lodash-es';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
 import {
