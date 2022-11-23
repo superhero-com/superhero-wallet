@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "outDir": "./dist",
     "allowJs": true,
     "baseUrl": ".",
     "jsx": "preserve",
@@ -9,7 +10,6 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
   },

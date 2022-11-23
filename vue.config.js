@@ -13,6 +13,7 @@ const parseBool = (val) => (val ? JSON.parse(val) : false);
 const RUNNING_IN_TESTS = parseBool(process.env.RUNNING_IN_TESTS);
 const UNFINISHED_FEATURES = parseBool(process.env.UNFINISHED_FEATURES);
 const IS_CORDOVA = PLATFORM === 'cordova';
+const TSCONFIG_PATH = path.resolve(__dirname, './tsconfig.json');
 
 module.exports = {
   publicPath: { web: '/', extension: '../' }[PLATFORM] || './',
@@ -85,6 +86,24 @@ module.exports = {
   },
 
   chainWebpack: (config) => {
+    config.module
+    .rule('ts')
+    .use('ts-loader')
+    .tap(options => {
+      options.configFile = TSCONFIG_PATH,
+      options.onlyCompileBundledFiles = true;
+      return options
+    })
+    config.plugin('fork-ts-checker').tap((args) => {
+      args[0].issue = {
+        include: [
+          { file: '**/*' }
+        ]
+      }
+
+      //args[0].tsconfig = TSCONFIG_PATH
+      return args;
+    });
     config.plugin('define').tap((options) => {
       const definitions = { ...options[0] };
 
