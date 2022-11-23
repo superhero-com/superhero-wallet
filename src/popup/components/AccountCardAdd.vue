@@ -44,7 +44,7 @@ export default {
   flex-direction: column;
   width: 100%;
   height: 192px;
-  border-radius: 16px;
+  border-radius: variables.$border-radius-card;
   background: variables.$color-bg-6;
   padding: 16px;
   text-align: left;
