@@ -1,6 +1,12 @@
 import BigNumber from 'bignumber.js';
 import { Observable } from 'rxjs';
-import { onUnmounted, Ref, ref } from '@vue/composition-api';
+import {
+  onUnmounted,
+  Ref,
+  ref,
+  watch,
+} from '@vue/composition-api';
+import { defer } from 'lodash-es';
 import {
   ADDRESS_TYPES, AENS_DOMAIN,
   HASH_PREFIX_CONTRACT,
@@ -104,8 +110,39 @@ export function buildSimplexLink(address: string) {
 }
 
 /**
+ * Watch for the getter to be truthy with the use of the compositionApi.
+ */
+export function watchUntilTruthy(getter: () => any): Promise<any> {
+  return new Promise((resolve) => {
+    const unwatch = watch(
+      getter,
+      (value) => {
+        if (!value) return;
+        resolve(getter());
+        defer(() => unwatch());
+      },
+      { immediate: true },
+    );
+  });
+}
+
+/**
+ * Wait for the getter to be truthy with the use of the setTimeout.
+ * TODO: Should be removed when SDK > 11
+ */
+export function waitUntilTruthy(getter: () => any) {
+  const poll = (resolve: any) => {
+    if (getter()) resolve();
+    else setTimeout(() => poll(resolve), 400);
+  };
+
+  return new Promise(poll);
+}
+
+/**
  * Temporary function that allows to replace the `subscriptions` property
  * on Vue components when using the Vue setup() hook of the Vue composition API.
+ * TODO: Remove when the rxJs will be replaced with the compositionApi
  */
 export function rxJsObservableToVueState(
   observable: Observable<any>,

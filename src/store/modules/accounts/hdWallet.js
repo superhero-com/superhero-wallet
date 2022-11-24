@@ -15,8 +15,8 @@ export default {
     nextAccountIdx: 1,
   },
   actions: {
-    async isAccountUsed({ rootState: { sdk } }, address) {
-      return sdk.api.getAccountByPubkey(address).then(() => true, () => false);
+    async isAccountUsed({ rootGetters }, address) {
+      return rootGetters['sdkPlugin/sdk'].api.getAccountByPubkey(address).then(() => true, () => false);
     },
     async discover({ state, rootGetters, dispatch }) {
       let lastNotEmptyIdx = 0;
@@ -80,10 +80,11 @@ export default {
     sign({ dispatch }, data) {
       return dispatch('signWithoutConfirmation', data);
     },
-    async signTransaction({ dispatch, rootState: { sdk } }, {
+    async signTransaction({ dispatch, rootGetters }, {
       txBase64,
       opt: { modal = true, host = null },
     }) {
+      const sdk = rootGetters['sdkPlugin/sdk'];
       const encodedTx = decode(txBase64, 'tx');
       if (modal) await dispatch('confirmTxSigning', { encodedTx, host });
       const signature = await dispatch(

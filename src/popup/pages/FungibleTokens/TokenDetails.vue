@@ -26,7 +26,7 @@
         {{ $t('pages.token-details.receive') }}
       </BtnBox>
       <BtnBox
-        :disabled="!(convertedBalance && isConnected)"
+        :disabled="!convertedBalance"
         @click="openTransferSendModal()"
       >
         <ArrowSendIcon />
@@ -146,7 +146,7 @@ export default {
     return pick(this.$store.state.observables, ['balance', 'balanceCurrency']);
   },
   computed: {
-    ...mapGetters(['account', 'isConnected']),
+    ...mapGetters(['account']),
     ...mapGetters('fungibleTokens', ['tokenBalances']),
     ...mapState('fungibleTokens', ['aePublicData', 'availableTokens']),
     simplexLink() {
@@ -191,7 +191,7 @@ export default {
   async mounted() {
     if (isContract(this.id)) {
       this.loading = true;
-      await watchUntilTruthy(() => this.$store.state.sdk);
+      await watchUntilTruthy(() => this.$store.getters['sdkPlugin/sdk']);
       this.tokenPairs = await this.$store.dispatch('fungibleTokens/getContractTokenPairs', this.id);
       this.loading = false;
     }

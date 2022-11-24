@@ -66,6 +66,7 @@ import NotificationItem from '../components/NotificationItem.vue';
 import Tabs from '../components/tabs/Tabs.vue';
 import Tab from '../components/tabs/Tab.vue';
 import { IS_MOBILE_DEVICE } from '../../lib/environment';
+import { useSdk } from '../../composables';
 
 const DIR_ALL = 'all';
 const DIR_WALLET = 'wallet';
@@ -79,6 +80,8 @@ export default defineComponent({
     Tab,
   },
   setup(props, { root }) {
+    const { getSdk } = useSdk();
+
     const direction = ref(DIR_ALL);
 
     const notifications = computed<INotification[]>(
@@ -174,7 +177,7 @@ export default defineComponent({
     }
 
     async function setNotificationsStatusesAsPeeked() {
-      await waitUntilTruthy(() => root.$store.getters['sdkPlugin/sdk']);
+      await getSdk();
 
       notifications.value
         .filter(({ status }) => status === NOTIFICATION_STATUS_CREATED)

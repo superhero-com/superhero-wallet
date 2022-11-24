@@ -2,17 +2,25 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import routes from './routes';
 import { i18n } from '../../store/plugins/languages';
-import { watchUntilTruthy } from '../utils/helper';
 import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
-import initSdk from '../../lib/wallet';
-import { APP_LINK_WEB } from '../utils/constants';
+import { initSdk } from '../../lib/wallet';
+import {
+  APP_LINK_WEB,
+  POPUP_TYPE_CONNECT,
+  POPUP_TYPE_SIGN,
+  POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_RAW_SIGN,
+  MODAL_DEFAULT,
+  watchUntilTruthy,
+} from '../utils';
 import {
   RUNNING_IN_POPUP,
   POPUP_TYPE,
   IS_CORDOVA,
   IS_WEB,
 } from '../../lib/environment';
+import { useMiddleware } from '../../composables';
 
 Vue.use(VueRouter);
 
@@ -33,27 +41,35 @@ const unbind = router.beforeEach(async (to, from, next) => {
 });
 
 let savedScrollPosition = 0;
+const { initMiddleware, isMiddlewareReady } = useMiddleware(store);
 
 router.beforeEach(async (to, from, next) => {
   const { isLoggedIn } = store.getters;
 
   if (!isLoggedIn) {
-    if (to.meta.ifNotAuthOnly || to.meta.ifNotAuth) next();
-    else {
+    if (to.meta.ifNotAuthOnly || to.meta.ifNotAuth) {
+      next();
+    } else {
       store.commit('setLoginTargetLocation', to);
       next('/');
     }
     return;
   }
 
-  if (!store.state.sdk) initSdk();
+  // TODO: Initializing SDK & Middleware should be lazy and performed in the getter
+  if (!store.getters['sdkPlugin/sdk']) {
+    initSdk(store);
+  }
+  if (!isMiddlewareReady.value) {
+    initMiddleware();
+  }
 
   if (RUNNING_IN_POPUP) {
     const name = {
-      connectConfirm: 'connect',
-      sign: 'popup-sign-tx',
-      rawSign: 'popup-raw-sign',
-      messageSign: 'message-sign',
+      [POPUP_TYPE_CONNECT]: 'connect',
+      [POPUP_TYPE_SIGN]: 'popup-sign-tx',
+      [POPUP_TYPE_RAW_SIGN]: 'popup-raw-sign',
+      [POPUP_TYPE_MESSAGE_SIGN]: 'message-sign',
     }[POPUP_TYPE];
 
     if (name !== to.name) {
@@ -61,17 +77,21 @@ router.beforeEach(async (to, from, next) => {
       return;
     }
   }
-  if (from.fullPath === '/transactions') {
-    savedScrollPosition = (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('.app-inner')).scrollTop;
-  }
 
+  const scrollingElement = (IS_CORDOVA)
+    ? document.scrollingElement
+    : document.querySelector('.app-inner');
+
+  if (from.fullPath === '/transactions') {
+    savedScrollPosition = scrollingElement.scrollTop;
+  }
   if (to.fullPath === '/transactions' && savedScrollPosition) {
     setTimeout(() => {
-      (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('.app-inner')).scroll(0, savedScrollPosition);
+      scrollingElement.scroll(0, savedScrollPosition);
       savedScrollPosition = 0;
     }, 50);
   } else {
-    (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('.app-inner')).scroll(0, 0);
+    scrollingElement.scroll(0, 0);
   }
 
   next(to.meta.ifNotAuthOnly ? '/account' : undefined);
@@ -110,7 +130,7 @@ if (IS_CORDOVA) {
       if (url) {
         router.push({ name: 'account', query: { url } });
       } else {
-        store.dispatch('modals/open', { name: 'default', ...i18n.t('modals.mobile-share-error') });
+        store.dispatch('modals/open', { name: MODAL_DEFAULT, ...i18n.t('modals.mobile-share-error') });
       }
     });
 

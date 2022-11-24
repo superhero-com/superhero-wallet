@@ -8,14 +8,13 @@
 
 <script lang="ts">
 import {
-  computed, defineComponent, onMounted, PropType, ref,
+  defineComponent,
+  onMounted,
+  PropType,
+  ref,
 } from '@vue/composition-api';
-import {
-  watchUntilTruthy,
-} from '../utils';
-
 import { ITransaction } from '../../types';
-import store from '../../store';
+import { useGetter, useMiddleware } from '../../composables';
 import TransactionDetailsContent from './TransactionDetailsContent.vue';
 
 export default defineComponent({
@@ -26,19 +25,17 @@ export default defineComponent({
   props: {
     hash: { type: String as PropType<string>, required: true },
   },
-  setup(props) {
+  setup(props, { root }) {
+    const { getMiddleware } = useMiddleware(root.$store);
     const transaction = ref<ITransaction | null>(null);
-
-    const getTx = computed(() => store.getters.getTx);
-
-    const state = computed(() => store.state as any);
+    const getTx = useGetter('getTx');
 
     onMounted(async () => {
       transaction.value = getTx.value(props.hash);
       if (!transaction.value || transaction.value?.incomplete) {
-        await watchUntilTruthy(() => state.value.middleware);
-        transaction.value = await state.value?.middleware.getTxByHash(props.hash);
-        store.commit('setTransactionByHash', transaction.value);
+        const middleware = await getMiddleware();
+        transaction.value = await middleware.getTxByHash(props.hash);
+        root.$store.commit('setTransactionByHash', transaction.value);
       }
     });
 

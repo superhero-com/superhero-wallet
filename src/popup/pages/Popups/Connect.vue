@@ -47,7 +47,6 @@
       </BtnMain>
       <BtnMain
         data-cy="accept"
-        :disabled="!isConnected"
         @click="confirm()"
       >
         {{ $t('pages.connectConfirm.confirmButton') }}
@@ -78,7 +77,6 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'isConnected',
       'getExplorerPath',
     ]),
     ...mapState({

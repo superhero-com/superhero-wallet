@@ -27,19 +27,21 @@
 
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
+import { ISdk } from '../../types';
+import { watchUntilTruthy } from '../utils';
+import { useDeepLinkApi, useGetter } from '../../composables';
 import BtnMain from '../components/buttons/BtnMain.vue';
-import { watchUntilTruthy } from '../utils/helper';
-import { useDeepLinkApi } from '../../composables';
 
 export default defineComponent({
   name: 'SignMessage',
   components: { BtnMain },
   setup(props, { root }) {
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
 
     const sendAddress = async () => {
-      await watchUntilTruthy(() => root.$store.state.sdk);
-      const signature = await root.$store.state.sdk.signMessage(root.$route.query.message);
+      await watchUntilTruthy(() => sdk);
+      const signature = await sdk.value.signMessage(root.$route.query.message);
       const signatureHex = Buffer.from(signature).toString('hex');
       openCallbackOrGoHome(true, { signature: signatureHex });
     };

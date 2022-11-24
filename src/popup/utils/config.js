@@ -1,14 +1,23 @@
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { MAX_UINT256 } from './constants';
+import {
+  MAX_UINT256,
+  POPUP_TYPE_CONNECT,
+  POPUP_TYPE_SIGN,
+  POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_RAW_SIGN,
+} from './constants';
 
 export const testAccount = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
   address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
 };
 
+export const recipientId = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';
+export const contractCallAddress = 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio';
+
 export const popupProps = {
-  connectConfirm: {
-    type: 'connectConfirm',
+  [POPUP_TYPE_CONNECT]: {
+    type: POPUP_TYPE_CONNECT,
     app: {
       url: 'http://localhost:5000/aepp/aepp',
       name: 'AEPP',
@@ -16,8 +25,8 @@ export const popupProps = {
       host: 'localhost',
     },
   },
-  messageSign: {
-    type: 'messageSign',
+  [POPUP_TYPE_MESSAGE_SIGN]: {
+    type: POPUP_TYPE_MESSAGE_SIGN,
     app: {
       url: 'http://localhost:5000/aepp/aepp',
       name: 'AEPP',
@@ -26,8 +35,8 @@ export const popupProps = {
     },
     message: 'test',
   },
-  rawSign: {
-    type: 'rawSign',
+  [POPUP_TYPE_RAW_SIGN]: {
+    type: POPUP_TYPE_RAW_SIGN,
     app: {
       url: 'http://localhost:5000/aepp/aepp',
       name: 'AEPP',
@@ -36,8 +45,8 @@ export const popupProps = {
     },
     data: 'test',
   },
-  sign: {
-    type: 'sign',
+  [POPUP_TYPE_SIGN]: {
+    type: POPUP_TYPE_SIGN,
     app: {
       url: 'http://localhost:5000/aepp/aepp',
       name: 'AEPP',
@@ -47,8 +56,8 @@ export const popupProps = {
     transaction: {
       tag: '12',
       VSN: '1',
-      senderId: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
-      recipientId: 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q',
+      senderId: testAccount.address,
+      recipientId,
       amount: '1000000000000000',
       fee: '16820000000000',
       ttl: '0',
@@ -68,7 +77,6 @@ export const popupProps = {
   },
 };
 
-export const recipientId = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';
 const commonParams = {
   amount: 100000000000000000,
   ttl: MAX_UINT256,
@@ -113,7 +121,7 @@ export const txParams = {
     ...commonParams,
   },
   [SCHEMA.TX_TYPE.contractCall]: {
-    contractId: 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio',
+    contractId: contractCallAddress,
     callerId: testAccount.address,
     ...commonParams,
   },

@@ -86,7 +86,7 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { useDeepLinkApi } from '../../composables';
+import { useDeepLinkApi, useGetter } from '../../composables';
 import {
   aeToAettos,
   checkAensName,
@@ -124,7 +124,7 @@ export default defineComponent({
     const account = computed<IAccount>(() => root.$store.getters.account);
     const tippingV1 = computed(() => root.$store.state.tippingV1);
     const tippingV2 = computed(() => root.$store.state.tippingV2);
-    const sdk = computed(() => root.$store.state.sdk);
+    const sdk = useGetter('sdkPlugin/sdk');
     const isRecipientName = computed(
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );

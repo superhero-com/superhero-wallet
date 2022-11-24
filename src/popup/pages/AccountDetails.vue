@@ -111,7 +111,6 @@ export default defineComponent({
     const appInnerScrollTop = ref<number>(0);
     const initialClientHeight = ref<number>(EXTENSION_HEIGHT);
     const clientHeight = ref<number>(0);
-    const isConnected = computed(() => root.$store.getters.isConnected);
     const account = computed(() => root.$store.getters.account);
     const activeIdx = computed(() => root.$store.state.accounts.activeIdx);
     const simplexLink = computed(() => buildSimplexLink(account.value.address));
@@ -130,7 +129,6 @@ export default defineComponent({
           name: MODAL_TRANSFER_SEND,
         }),
         icon: ArrowSendIcon,
-        disabled: !isConnected.value,
       },
       {
         text: root.$t('pages.token-details.buy'),
@@ -216,7 +214,6 @@ export default defineComponent({
       tabs,
       activeIdx,
       showFilters,
-      isConnected,
       accountDetailsElem,
     };
   },

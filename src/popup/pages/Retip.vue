@@ -76,6 +76,7 @@ import {
   useMaxAmount,
   useGetter,
   useState,
+  useSdk,
 } from '../../composables';
 import InputAmount from '../components/InputAmountV2.vue';
 import UrlStatus from '../components/UrlStatus.vue';
@@ -113,7 +114,7 @@ export default defineComponent({
 
     const loading = ref<boolean>(false);
     const getAeternityToken = useGetter('fungibleTokens/getAeternityToken');
-    const sdk = useState('sdk');
+    const sdk = useGetter('sdkPlugin/sdk');
     const tippingV1 = useState('tippingV1');
     const tippingV2 = useState('tippingV2');
     const tippingSupported = useGetter('tippingSupported');

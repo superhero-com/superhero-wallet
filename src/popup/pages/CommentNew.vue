@@ -26,9 +26,8 @@ import {
   watch,
 } from '@vue/composition-api';
 import { Route } from 'vue-router';
-import { watchUntilTruthy } from '../utils/helper';
-import { MODAL_DEFAULT } from '../utils/constants';
-import { useDeepLinkApi } from '../../composables';
+import { MODAL_DEFAULT, watchUntilTruthy } from '../utils';
+import { useDeepLinkApi, useGetter } from '../../composables';
 import BtnMain from '../components/buttons/BtnMain.vue';
 
 export default defineComponent({
@@ -40,7 +39,7 @@ export default defineComponent({
     const parentId = ref<number | undefined>(undefined);
     const text = ref<string>('');
     const loading = ref<boolean>(false);
-    const sdk = computed(() => root.$store.state.sdk);
+    const sdk = useGetter('sdkPlugin/sdk');
     const tippingSupported = computed(() => root.$store.getters.tippingSupported);
 
     watch(

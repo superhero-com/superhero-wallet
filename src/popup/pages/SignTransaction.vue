@@ -3,18 +3,23 @@ import {
   defineComponent,
   onMounted,
 } from '@vue/composition-api';
-import { useDeepLinkApi } from '../../composables';
-import { handleUnknownError, watchUntilTruthy } from '../utils/helper';
-import { MODAL_DEFAULT } from '../utils';
+import { ISdk } from '../../types';
+import { useDeepLinkApi, useGetter } from '../../composables';
+import {
+  MODAL_DEFAULT,
+  handleUnknownError,
+  watchUntilTruthy,
+} from '../utils';
 
 export default defineComponent({
   name: 'SignTransaction',
   setup(props, { root }) {
     onMounted(async () => {
       const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+      const sdk = useGetter<ISdk>('sdkPlugin/sdk');
 
       try {
-        await watchUntilTruthy(() => root.$store.state.sdk);
+        await watchUntilTruthy(() => sdk);
         const { transaction, networkId, broadcast } = root.$route.query;
         const currentNetworkId = root.$store.getters.activeNetwork.networkId;
 
@@ -30,17 +35,15 @@ export default defineComponent({
           return;
         }
 
-        const signedTransaction = await root.$store.state.sdk
-          .signTransaction(transaction, { networkId });
+        const signedTransaction = await sdk.value.signTransaction(transaction, { networkId });
 
         if (broadcast) {
-          const result = await root.$store.state.sdk
-            .sendTransaction(signedTransaction, { waitMined: true });
+          const result = await sdk.value.sendTransaction(signedTransaction, { waitMined: true });
           openCallbackOrGoHome(true, { 'transaction-hash': result.hash });
         } else {
           openCallbackOrGoHome(true, { transaction: signedTransaction });
         }
-      } catch (e:any) {
+      } catch (e: any) {
         openCallbackOrGoHome(false);
 
         if (e.message !== 'Rejected by user') handleUnknownError(e);

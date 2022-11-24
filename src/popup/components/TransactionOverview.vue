@@ -11,7 +11,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { watchUntilTruthy } from '../utils/helper';
+import { watchUntilTruthy } from '../utils';
 import TransactionInfo from './TransactionInfo.vue';
 
 export default {

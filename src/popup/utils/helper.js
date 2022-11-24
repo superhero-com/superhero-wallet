@@ -1,6 +1,4 @@
-import { watch } from '@vue/composition-api';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { defer } from 'lodash-es';
 import { isFQDN } from 'validator';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
@@ -24,29 +22,6 @@ import {
 import { testAccount, txParams } from './config';
 import runMigrations from '../../store/migrations';
 import { IS_FIREFOX } from '../../lib/environment';
-
-export function watchUntilTruthy(getter) {
-  return new Promise((resolve) => {
-    const unwatch = watch(
-      getter,
-      (value) => {
-        if (!value) return;
-        resolve();
-        defer(() => unwatch());
-      },
-      { immediate: true },
-    );
-  });
-}
-
-export function waitUntilTruthy(getter) {
-  const poll = (resolve) => {
-    if (getter()) resolve();
-    else setTimeout(() => poll(resolve), 400);
-  };
-
-  return new Promise(poll);
-}
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);

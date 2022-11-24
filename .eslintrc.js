@@ -33,6 +33,7 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-underscore-dangle': 'off',
     'no-confusing-arrow': 'off',
+    'no-mixed-operators': 'error',
     'import/prefer-default-export': 'off',
     'vue-i18n/no-dynamic-keys': 'error',
     'vue-i18n/no-unused-keys': 'error',

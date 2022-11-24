@@ -178,10 +178,16 @@ export default {
     ],
   }),
   computed: {
-    ...mapState(['sdk']),
-    ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters(['formatCurrency', 'account', 'activeNetwork']),
+    ...mapState('fungibleTokens', [
+      'availableTokens',
+    ]),
+    ...mapGetters('sdkPlugin', [
+      'sdk',
+    ]),
     ...mapGetters([
+      'formatCurrency',
+      'account',
+      'activeNetwork',
       'getTxSymbol',
       'getTxAmountTotal',
       'getTxFee',

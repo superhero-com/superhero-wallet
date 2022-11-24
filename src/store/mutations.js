@@ -4,8 +4,6 @@ import { uniqBy } from 'lodash-es';
 import {
   NOTIFICATION_STATUS_CREATED,
   NOTIFICATION_TYPE_WALLET,
-  NODE_STATUS_CONNECTION_DONE,
-  NODE_STATUS_CONNECTED,
   defaultNetwork,
 } from '../popup/utils/constants';
 
@@ -50,25 +48,12 @@ export default {
   deleteUserNetwork(state, index) {
     state.userNetworks = state.userNetworks.filter((el, idx) => idx !== index);
   },
-  initSdk(state, payload) {
-    state.sdk = payload;
-  },
   setMiddleware(state, payload) {
     state.middleware = payload;
   },
   setTipping(state, [tippingV1, tippingV2]) {
     state.tippingV1 = tippingV1 || null;
     state.tippingV2 = tippingV2 || null;
-  },
-  setNodeStatus(state, payload) {
-    state.nodeStatus = payload;
-
-    // Hide "connected" message after some delay.
-    if (payload === NODE_STATUS_CONNECTION_DONE) {
-      setTimeout(() => {
-        state.nodeStatus = NODE_STATUS_CONNECTED;
-      }, 1000);
-    }
   },
   setCurrentCurrency(state, currency) {
     state.current.currency = currency;

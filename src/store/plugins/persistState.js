@@ -1,7 +1,12 @@
 import Vue from 'vue';
 import { cloneDeep, isEqual } from 'lodash-es';
 import stateReducer from '../utils';
-import { IS_EXTENSION_BACKGROUND, IS_FIREFOX } from '../../lib/environment';
+import {
+  PLATFORM,
+  IS_EXTENSION,
+  IS_EXTENSION_BACKGROUND,
+  IS_FIREFOX,
+} from '../../lib/environment';
 
 const KEY = 'state';
 
@@ -14,7 +19,7 @@ const getStateRaw = async () => (await browser.storage.local.get(KEY))[KEY];
 // TODO: Avoid direct localStorage access outside of this module
 export const getState = async () => (await getStateRaw()) || {};
 
-const saverName = process.env.IS_EXTENSION && (IS_EXTENSION_BACKGROUND ? 'background' : 'popup');
+const saverName = IS_EXTENSION && (IS_EXTENSION_BACKGROUND ? 'background' : 'popup');
 
 export default (
   reducerLoad = (state) => state || {},
@@ -27,12 +32,12 @@ export default (
       async reset() {
         dontSaveState();
         await browser.storage.local.clear();
-        if (process.env.IS_EXTENSION) browser.runtime.sendMessage({ method: 'reload' });
+        if (IS_EXTENSION) browser.runtime.sendMessage({ method: 'reload' });
         const location = {
           extension: './index.html',
           cordova: './index.html',
           web: '/',
-        }[process.env.PLATFORM];
+        }[PLATFORM];
         if (!location) throw new Error('Unknown platform');
         window.location = location;
       },
@@ -56,7 +61,7 @@ export default (
     await setState({ ...stateToSave, ...(saverName && { persistStateSavedBy: saverName }) });
   });
 
-  if (process.env.IS_EXTENSION) {
+  if (IS_EXTENSION) {
     browser.storage.onChanged.addListener((changes, areaName) => {
       const rawState = changes[KEY]?.newValue;
       if (areaName !== 'local' || !rawState) return;

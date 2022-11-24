@@ -18,16 +18,18 @@ import {
   validateTipUrl,
   checkAensName,
   handleUnknownError,
-  watchUntilTruthy,
 } from '../popup/utils';
 import { IAccount } from '../types';
-import { useGetter, useState } from './vuex';
+import { useGetter } from './vuex';
+import { useSdk } from './sdk';
 
 export interface UseMaxAmountOptions {
   formModel: any,
 }
 
 export function useMaxAmount({ formModel }: UseMaxAmountOptions) {
+  const { getSdk } = useSdk();
+
   let updateTokenBalanceInterval: NodeJS.Timer;
   let updateNonceInterval: NodeJS.Timer;
   const fee = ref(new BigNumber(0));
@@ -35,7 +37,6 @@ export function useMaxAmount({ formModel }: UseMaxAmountOptions) {
   const tokenInstance = ref<any>(null);
   const nonce = ref(0);
   const selectedAssetDecimals = ref(0);
-  const sdk = useState('sdk');
 
   const balance = rxJsObservableToVueState((store.state as any).observables.balance);
   const balanceCurrency = rxJsObservableToVueState(
@@ -54,12 +55,14 @@ export function useMaxAmount({ formModel }: UseMaxAmountOptions) {
     () => formModel.value,
     async (val) => {
       if (!val?.selectedAsset) return;
-      await watchUntilTruthy(() => sdk.value);
+      const sdk = await getSdk();
 
       if (val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-        if (!tokenInstance.value
-          || tokenInstance.value.deployInfo.address !== val.selectedAsset.contractId) {
-          tokenInstance.value = await sdk.value.getContractInstance({
+        if (
+          !tokenInstance.value
+          || tokenInstance.value.deployInfo.address !== val.selectedAsset.contractId
+        ) {
+          tokenInstance.value = await sdk.getContractInstance({
             source: FUNGIBLE_TOKEN_CONTRACT,
             contractAddress: val.selectedAsset.contractId,
           });
@@ -75,7 +78,7 @@ export function useMaxAmount({ formModel }: UseMaxAmountOptions) {
       ) {
         fee.value = calculateFee(
           SCHEMA.TX_TYPE.contractCall, {
-            ...sdk.value.Ae.defaults,
+            ...sdk.Ae.defaults,
             ttl: 0,
             nonce: nonce.value + 1,
             amount: (new BigNumber(val.amount > 0 ? val.amount : 0)).shiftedBy(MAGNITUDE),
@@ -88,9 +91,9 @@ export function useMaxAmount({ formModel }: UseMaxAmountOptions) {
         return;
       }
       const minFee: BigNumber = new BigNumber(TxBuilder.calculateMinFee('spendTx', {
-        gas: sdk.value.Ae.defaults.gas,
+        gas: sdk.Ae.defaults.gas,
         params: {
-          ...sdk.value.Ae.defaults,
+          ...sdk.Ae.defaults,
           senderId: account.value.address,
           recipientId: account.value.address,
           amount: new BigNumber(val.amount > 0 ? val.amount : 0).shiftedBy(MAGNITUDE),
@@ -107,16 +110,16 @@ export function useMaxAmount({ formModel }: UseMaxAmountOptions) {
   onMounted(() => {
     updateTokenBalanceInterval = executeAndSetInterval(async () => {
       if (!tokenInstance.value) return;
-      await watchUntilTruthy(() => store.state.sdk);
+      await getSdk();
       selectedTokenBalance.value = new BigNumber(
         (await tokenInstance.value.methods.balance(account.value.address)).decodedResult,
       ).shiftedBy(-selectedAssetDecimals.value);
     }, 1000);
 
     updateNonceInterval = executeAndSetInterval(async () => {
-      await watchUntilTruthy(() => store.state.sdk);
+      const sdk = await getSdk();
       try {
-        nonce.value = (await sdk.value.api
+        nonce.value = (await sdk.api
           .getAccountByPubkey(account.value.address))?.nonce;
       } catch (error: any) {
         if (!error.message.includes('Account not found')) handleUnknownError(error);

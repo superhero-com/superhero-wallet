@@ -75,6 +75,7 @@
 import { RpcAepp, Node } from '@aeternity/aepp-sdk';
 import Detector from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/wallet-detector';
 import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
+import { recipientId, contractCallAddress } from '../../src/popup/utils/config';
 
 const networks = {
   Mainnet: {
@@ -86,6 +87,7 @@ const networks = {
     COMPILER_URL: 'https://latest.compiler.aepps.com',
   },
 };
+
 export default {
   name: 'App',
   data() {
@@ -111,7 +113,7 @@ contract Example =
   entrypoint init() : state = { b = #aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa }
   entrypoint get_bytes() : bytes(32) = state.b
   stateful entrypoint set_bytes(x: bytes(32)) = put(state{ b = x })`,
-      contractAddress: 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio',
+      contractAddress: contractCallAddress,
     };
   },
   async mounted() {
@@ -151,7 +153,7 @@ contract Example =
     async spend() {
       const spend = await this.client.spend(
         1000000000000000,
-        'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q',
+        recipientId,
         { payload: '' },
       );
       if (spend.hash) {

@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import Vuex from 'vuex';
+import Vuex, { Store } from 'vuex';
 import VueRx from 'vue-rx';
 import getters from './getters';
 import mutations from './mutations';
@@ -26,7 +26,7 @@ import { defaultNetwork, NODE_STATUS_OFFLINE } from '../popup/utils/constants';
 Vue.use(Vuex);
 Vue.use(VueRx);
 
-export default new Vuex.Store({
+const store = new Vuex.Store({
   state: {
     isRestored: false,
     mnemonic: null,
@@ -43,11 +43,9 @@ export default new Vuex.Store({
       tipWithdrawnTransactions: [],
     },
     pageTitle: '',
-    sdk: null,
     middleware: null,
     tippingV1: null,
     tippingV2: null,
-    nodeStatus: NODE_STATUS_OFFLINE,
     currencies: {},
     notifications: [],
     notificationSettings: [],
@@ -87,3 +85,5 @@ export default new Vuex.Store({
     permissions: permissionsModule,
   },
 });
+
+export default store;

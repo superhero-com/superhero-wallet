@@ -1,4 +1,5 @@
 import { v4 as uuid } from 'uuid';
+import { POPUP_TYPE_CONNECT } from '../popup/utils';
 
 const popups = {};
 
@@ -11,7 +12,7 @@ export const showPopup = async (aepp, type, params) => {
   tabs.forEach(({ url: tabURL, id: tabId }) => {
     const tabUrl = new URL(tabURL);
     if (
-      tabUrl.searchParams.get('type') === 'connectConfirm'
+      tabUrl.searchParams.get('type') === POPUP_TYPE_CONNECT
       && decodeURIComponent(tabUrl.searchParams.get('url')) === href
     ) {
       browser.tabs.remove(tabId);

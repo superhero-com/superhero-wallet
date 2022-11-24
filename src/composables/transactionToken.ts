@@ -34,8 +34,10 @@ export const useTransactionToken = (
 
   const txType = computed<TransactionType>(() => getTxType.value(transaction));
 
-  const isAllowance = computed(() => FUNCTION_TYPE_DEX.allowance.includes(transaction?.tx?.function)
-      && availableTokens.value[transaction?.tx?.contractId]);
+  const isAllowance = computed<boolean>(() => (
+    FUNCTION_TYPE_DEX.allowance.includes(transaction?.tx?.function)
+    && !!availableTokens.value[transaction?.tx?.contractId]
+  ));
 
   const transactionFunction = computed(() => {
     const functionName = camelCase(transaction?.tx?.function || '');

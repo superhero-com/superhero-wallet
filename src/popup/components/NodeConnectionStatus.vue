@@ -5,16 +5,18 @@
       data-cy="connect-node"
       class="node-connection-status"
       :class="{
-        'is-error': isError,
+        'is-error': isNodeError,
       }"
     >
-      {{ statusText }}
+      Connecting or not connected
     </div>
   </transition>
 </template>
 
-<script>
-import { mapGetters, mapState } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import { IAccount } from '../../types';
+import { useGetter, useSdk } from '../../composables';
 import {
   NODE_STATUS_INIT_SERVICES,
   NODE_STATUS_CONNECTING,
@@ -24,39 +26,34 @@ import {
   NODE_STATUS_OFFLINE,
 } from '../utils';
 
-export default {
-  data() {
+export default defineComponent({
+  setup(props, { root }) {
+    // const statuses = {
+    //   [NODE_STATUS_INIT_SERVICES]: root.$t('pages.nodeConnectionStatus.initServices'),
+    //   [NODE_STATUS_CONNECTING]: root.$t('pages.nodeConnectionStatus.connecting'),
+    //   [NODE_STATUS_CONNECTION_DONE]: root.$t('pages.nodeConnectionStatus.connected'),
+    //   [NODE_STATUS_ERROR]: root.$t('pages.nodeConnectionStatus.error'),
+    //   [NODE_STATUS_OFFLINE]: root.$t('pages.nodeConnectionStatus.offline'),
+    // };
+
+    const account = useGetter<IAccount>('account');
+    const isLoggedIn = useGetter('isLoggedIn');
+    const { isNodeReady, isNodeConnecting, isNodeError } = useSdk();
+
+    const isVisible = computed(() => (
+      isLoggedIn.value
+      && account.value.address
+      && (!isNodeReady.value || isNodeConnecting.value)
+    ));
+
     return {
-      statuses: {
-        [NODE_STATUS_INIT_SERVICES]: this.$t('pages.nodeConnectionStatus.initServices'),
-        [NODE_STATUS_CONNECTING]: this.$t('pages.nodeConnectionStatus.connecting'),
-        [NODE_STATUS_CONNECTION_DONE]: this.$t('pages.nodeConnectionStatus.connected'),
-        [NODE_STATUS_ERROR]: this.$t('pages.nodeConnectionStatus.error'),
-        [NODE_STATUS_OFFLINE]: this.$t('pages.nodeConnectionStatus.offline'),
-      },
+      isNodeReady,
+      isNodeConnecting,
+      isVisible,
+      isNodeError,
     };
   },
-  computed: {
-    ...mapState(['nodeStatus']),
-    ...mapGetters(['account', 'isConnected', 'isLoggedIn']),
-    isVisible() {
-      return (
-        this.nodeStatus !== NODE_STATUS_CONNECTED
-        && this.account.address
-        && this.isLoggedIn
-      );
-    },
-    isError() {
-      return [
-        NODE_STATUS_ERROR,
-        NODE_STATUS_OFFLINE,
-      ].includes(this.nodeStatus);
-    },
-    statusText() {
-      return this.statuses[this.nodeStatus];
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>

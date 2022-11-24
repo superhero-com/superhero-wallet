@@ -8,7 +8,7 @@ import {
   watchUntilTruthy,
 } from '../../popup/utils';
 import { i18n } from './languages';
-import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '../../popup/utils/constants';
+import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL, MODAL_DEFAULT } from '../../popup/utils/constants';
 
 export default (store) => {
   store.registerModule('names', {
@@ -23,7 +23,8 @@ export default (store) => {
     },
     getters: {
       get: ({ owned }) => (name) => owned.find((n) => n.name === name),
-      getDefault: ({ defaults }, getters, { sdk }, { activeNetwork }) => (address) => {
+      getDefault: ({ defaults }, getters, _, { activeNetwork }) => (address) => {
+        const sdk = store.getters['sdkPlugin/sdk'];
         if (!defaults) return '';
         let { networkId } = activeNetwork;
         if (sdk) networkId = sdk.getNetworkId();
@@ -49,8 +50,8 @@ export default (store) => {
         state.owned = names;
       },
       async setDefault({ defaults }, { address, name }) {
-        await watchUntilTruthy(() => store.state.sdk);
-        const networkId = store.state.sdk.getNetworkId();
+        const sdk = await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
+        const networkId = sdk.getNetworkId();
         if (name) Vue.set(defaults, `${address}-${networkId}`, name);
         else Vue.delete(defaults, `${address}-${networkId}`);
       },
@@ -59,7 +60,7 @@ export default (store) => {
         Vue.set(state.owned[index], 'autoExtend', value);
       },
       setPreferred({ preferred }, { address, name }) {
-        const networkId = store.state.sdk.getNetworkId();
+        const networkId = store.getters['sdkPlugin/sdk'].getNetworkId();
         if (name) Vue.set(preferred, `${address}-${networkId}`, name);
         else Vue.delete(preferred, `${address}-${networkId}`);
       },
@@ -108,19 +109,23 @@ export default (store) => {
         commit('set', names);
         commit('setAreNamesFetching', false);
       },
-      async fetchAuctions({ rootState: { middleware } }) {
-        if (!middleware) return [];
+      async fetchAuctions({ rootState }) {
+        const middleware = await watchUntilTruthy(() => rootState.middleware);
 
         // TODO: Switch to onscroll loading after/while resolving https://github.com/aeternity/superhero-wallet/issues/1400
         return (
-          await getAllPages(() => middleware.getAllAuctions({ by: 'expiration', direction: 'forward', limit: 100 }), middleware.fetchByPath)
+          await getAllPages(
+            () => middleware.getAllAuctions({ by: 'expiration', direction: 'forward', limit: 100 }),
+            middleware.fetchByPath,
+          )
         ).map(({ name, info }) => ({
           name,
           expiration: info.auctionEnd,
           lastBid: info.lastBid.tx,
         }));
       },
-      async updatePointer({ rootState: { sdk }, dispatch }, { name, address, type = 'update' }) {
+      async updatePointer({ dispatch }, { name, address, type = 'update' }) {
+        const sdk = await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
         const nameEntry = await sdk.aensQuery(name);
         try {
           if (type === 'extend') {
@@ -130,11 +135,11 @@ export default (store) => {
           }
           dispatch(
             'modals/open',
-            { name: 'default', msg: i18n.t('pages.names.pointer-added', { type }) },
+            { name: MODAL_DEFAULT, msg: i18n.t('pages.names.pointer-added', { type }) },
             { root: true },
           );
         } catch (e) {
-          dispatch('modals/open', { name: 'default', msg: e.message }, { root: true });
+          dispatch('modals/open', { name: MODAL_DEFAULT, msg: e.message }, { root: true });
         }
       },
       async setDefaults(
@@ -148,9 +153,10 @@ export default (store) => {
         }));
       },
       async setDefault(
-        { rootState: { sdk }, commit, rootGetters: { activeNetwork } },
+        { commit, rootGetters: { activeNetwork } },
         { name, address },
       ) {
+        const sdk = await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
         const response = await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
           body: {
             preferredChainName: name,
@@ -202,7 +208,7 @@ export default (store) => {
         store.dispatch('names/setDefaults'),
       ]);
 
-      const height = await store.state.sdk.height();
+      const height = (await watchUntilTruthy(() => store.getters['sdkPlugin/sdk'])).height();
       await Promise.all(
         store.state.names.owned
           .filter(({ autoExtend }) => autoExtend)

@@ -1,10 +1,16 @@
 import { RpcWallet, Crypto, Node } from '@aeternity/aepp-sdk';
 import { isEmpty, isEqual } from 'lodash-es';
 import { App } from '../modules/permissions';
-import { MODAL_CONFIRM_CONNECT } from '../../popup/utils/constants';
+import {
+  MODAL_CONFIRM_CONNECT,
+  MODAL_MESSAGE_SIGN,
+  POPUP_TYPE_CONNECT,
+} from '../../popup/utils/constants';
 import { getAeppUrl, showPopup } from '../../background/popupHandler';
-import { waitUntilTruthy } from '../../popup/utils/helper';
+import { waitUntilTruthy } from '../../popup/utils';
 import { IS_EXTENSION_BACKGROUND } from '../../lib/environment';
+
+const initMiddleware = () => null; // TODO
 
 export default (store) => {
   let sdk;
@@ -41,10 +47,11 @@ export default (store) => {
               method,
               params: params?.txObject?.params,
             });
+
             if (method === 'message.sign') {
               if (!permission) {
                 await store.dispatch('modals/open', {
-                  name: 'confirm-message-sign',
+                  name: MODAL_MESSAGE_SIGN,
                   message: params.message,
                   app: {
                     name: originUrl.host,
@@ -56,6 +63,7 @@ export default (store) => {
               action.accept({ onAccount: { sign: () => {}, address: () => {} } });
               return;
             }
+
             action.accept(null, {
               onAccount: {
                 sign: async () => store.dispatch('accounts/signTransaction', {
@@ -112,7 +120,7 @@ export default (store) => {
                   name: app.host.hostname,
                   address,
                   connectionPopupCb: async () => (IS_EXTENSION_BACKGROUND
-                    ? showPopup(app.host.href, 'connectConfirm')
+                    ? showPopup(app.host.href, POPUP_TYPE_CONNECT)
                     : store.dispatch('modals/open', {
                       name: MODAL_CONFIRM_CONNECT,
                       app: {
@@ -126,9 +134,9 @@ export default (store) => {
               ) return Promise.reject(new Error('Rejected by user'));
               return address;
             },
-            sign: (data) => (IS_EXTENSION_BACKGROUND
+            sign: (data) => (IS_EXTENSION_BACKGROUND)
               ? Crypto.sign(data, store.getters.account.secretKey)
-              : store.dispatch('accounts/sign', data)),
+              : store.dispatch('accounts/sign', data),
             ...(IS_EXTENSION_BACKGROUND ? {} : {
               signTransaction: (txBase64, opt) => (opt.onAccount
                 ? opt.onAccount.sign()
@@ -136,7 +144,10 @@ export default (store) => {
             }),
           },
         })({
-          nodes: [{ name: activeNetwork.name, instance: await Node({ url: activeNetwork.url }) }],
+          nodes: [{
+            name: activeNetwork.name,
+            instance: await Node({ url: activeNetwork.url }),
+          }],
           compilerUrl: activeNetwork.compilerUrl,
           name: 'Superhero',
           onConnection: cbAccept,
@@ -166,8 +177,9 @@ export default (store) => {
           },
           onSign: IS_EXTENSION_BACKGROUND ? signCbBackground.bind(null, 'sign') : signCb,
           onMessageSign: IS_EXTENSION_BACKGROUND ? signCbBackground.bind(null, 'messageSign') : signCb,
-          onAskAccounts: (_, { accept }) => accept(store.getters.accounts
-            .map(({ address }) => address)),
+          onAskAccounts: (_, { accept }) => accept(
+            store.getters.accounts.map(({ address }) => address),
+          ),
         });
         commit('setSdkReady');
       },
@@ -178,9 +190,12 @@ export default (store) => {
     (state, getters) => getters.activeNetwork,
     async (network, oldNetwork) => {
       if (isEqual(network, oldNetwork)) return;
+
       await waitUntilTruthy(() => store.getters['sdkPlugin/sdk']);
       sdk.pool.delete(network.name);
       sdk.addNode(network.name, await Node({ url: network.url }), true);
+
+      initMiddleware(store);
     },
   );
 

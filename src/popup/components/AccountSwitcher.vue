@@ -57,7 +57,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { Swiper, SwiperSlide } from 'vue-awesome-swiper';
-import { watchUntilTruthy } from '../utils/helper';
+import { watchUntilTruthy } from '../utils';
 
 import AccountCard from './AccountCard.vue';
 import AccountCardAdd from './AccountCardAdd.vue';

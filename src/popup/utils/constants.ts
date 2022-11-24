@@ -39,10 +39,21 @@ export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUr
 export const STUB_NONCE = 10000;
 export const MAX_UINT256 = new BigNumber(2).exponentiatedBy(256).minus(1);
 
+export const NETWORK_ID_MAINNET = 'ae_mainnet';
+export const NETWORK_ID_TESTNET = 'ae_uat';
+
 export const DEX_CONTRACTS = {
-  ae_uat: {
+  [NETWORK_ID_MAINNET]: {
     router: [
-      'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6',
+      'ct_azbNZ1XrPjXfqBqbAh1ffLNTQ1sbnuUDFvJrXjYz7JQA1saQ3',
+    ],
+    wae: [
+      'ct_J3zBY8xxjsRr3QojETNw48Eb38fjvEuJKkQ6KzECvubvEcvCa',
+    ],
+  },
+  [NETWORK_ID_TESTNET]: {
+    router: [
+      STUB_CONTRACT_ADDRESS,
       'ct_6iyAWnbGoEbX6hxWsjKMLSM3Hx542PM9dZeG8mHo1bXzB7DDW',
       'ct_N3fFG5QqyTb2dhqw8YcTQ3gqQjxjCJT9MTvDWfqBes7wEu4r9',
       'ct_2eyXvDw3V3WSbcCpSiWcsCYHShBmEJEkU8PpUg7ymDLfZ4cSy4',
@@ -58,15 +69,11 @@ export const DEX_CONTRACTS = {
       'ct_JDp175ruWd7mQggeHewSLS1PFXt9AzThCDaFedxon8mF8xTRF',
     ],
   },
-  ae_mainnet: {
-    router: ['ct_azbNZ1XrPjXfqBqbAh1ffLNTQ1sbnuUDFvJrXjYz7JQA1saQ3'],
-    wae: ['ct_J3zBY8xxjsRr3QojETNw48Eb38fjvEuJKkQ6KzECvubvEcvCa'],
-  },
 };
 
 export const NETWORK_MAINNET: INetwork = {
   url: 'https://mainnet.aeternity.io',
-  networkId: 'ae_mainnet',
+  networkId: NETWORK_ID_MAINNET,
   middlewareUrl: 'https://mainnet.aeternity.io/mdw',
   explorerUrl: 'https://explorer.aeternity.io',
   compilerUrl: 'https://compiler.aepps.com',
@@ -77,7 +84,7 @@ export const NETWORK_MAINNET: INetwork = {
 
 export const NETWORK_TESTNET: INetwork = {
   url: 'https://testnet.aeternity.io',
-  networkId: 'ae_uat',
+  networkId: NETWORK_ID_TESTNET,
   middlewareUrl: 'https://testnet.aeternity.io/mdw',
   explorerUrl: 'https://explorer.testnet.aeternity.io',
   compilerUrl: 'https://latest.compiler.aepps.com',
@@ -404,3 +411,15 @@ export const ADDRESS_TYPES: Record<string, string> = {
   [HASH_PREFIX_ORACLE]: 'oracles/queries',
   [HASH_PREFIX_TRANSACTION]: 'transactions',
 };
+
+export const POPUP_TYPE_CONNECT = 'connectConfirm';
+export const POPUP_TYPE_SIGN = 'sign';
+export const POPUP_TYPE_MESSAGE_SIGN = 'messageSign';
+export const POPUP_TYPE_RAW_SIGN = 'rawSign';
+
+export const POPUP_TYPES = [
+  POPUP_TYPE_CONNECT,
+  POPUP_TYPE_SIGN,
+  POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_RAW_SIGN,
+] as const;

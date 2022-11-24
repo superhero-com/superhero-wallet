@@ -18,7 +18,6 @@
         <Card
           :title="$t('dashboard.send-card.title')"
           :description="$t('dashboard.send-card.description')"
-          :disabled="!isConnected"
           clickable
           dense
           @click="openTransferSendModal()"
@@ -131,7 +130,7 @@ export default {
   computed: {
     ...mapState(['backedUpSeed', 'transactions']),
     ...mapState('accounts', ['activeIdx']),
-    ...mapGetters(['getAccountPendingTransactions', 'account', 'isConnected']),
+    ...mapGetters(['getAccountPendingTransactions', 'account']),
     simplexLink() {
       return buildSimplexLink(this.account.address);
     },

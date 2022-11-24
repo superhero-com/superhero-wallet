@@ -84,7 +84,6 @@ export default {
   },
   async mounted() {
     this.loading = true;
-    await watchUntilTruthy(() => this.$store.state.middleware);
     this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');
     this.loading = false;
   },

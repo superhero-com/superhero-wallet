@@ -5,14 +5,13 @@ import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
-import { postMessageToContent } from '../popup/utils/connection';
 import {
   fetchJson,
-  getAddressByNameEntry,
   postJson,
   handleUnknownError,
   isAccountNotFoundError,
   executeAndSetInterval,
+  watchUntilTruthy,
 } from '../popup/utils';
 import { CURRENCIES_URL, MODAL_DEFAULT } from '../popup/utils/constants';
 import { i18n } from './plugins/languages';
@@ -40,8 +39,9 @@ export default {
     });
   },
   async fetchPendingTransactions(
-    { state: { sdk, transactions }, getters: { activeNetwork } }, address,
+    { state: { transactions }, getters }, address,
   ) {
+    const sdk = await watchUntilTruthy(() => getters['sdkPlugin/sdk']);
     return (
       await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
         (r) => r.transactions,
@@ -53,7 +53,7 @@ export default {
         },
       )
     )
-      .filter((transaction) => !transactions.pending[activeNetwork.networkId]
+      .filter((transaction) => !transactions.pending[getters.activeNetwork.networkId]
         ?.find((tx) => tx?.hash === transaction?.hash))
       .map((transaction) => ({ ...transaction, pending: true }));
   },
@@ -133,27 +133,6 @@ export default {
       }
     }, 3600000);
   },
-  async getWebPageAddresses({ state: { sdk } }) {
-    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-    const { address, chainName } = await postMessageToContent(
-      { method: 'getAddresses' },
-      tab.id,
-    ).catch(() => ({ address: [], chainName: [] }));
-    let addresses = Array.isArray(address) ? address : [address];
-    const chainNames = Array.isArray(chainName) ? chainName : [chainName];
-    const chainNamesAddresses = await Promise.all(
-      chainNames.map(async (n) => {
-        try {
-          return getAddressByNameEntry(await sdk.api.getNameEntryByName(n));
-        } catch (e) {
-          return null;
-        }
-      }),
-    );
-    addresses = [...addresses, ...chainNamesAddresses];
-
-    return { addresses: uniq(addresses).filter((a) => a), tab };
-  },
   async claimTips({ getters: { activeNetwork } }, { url, address }) {
     return postJson(`${activeNetwork.backendUrl}/claim/submit`, { body: { url, address } });
   },
@@ -170,7 +149,7 @@ export default {
     return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: error });
   },
   async sendTipComment(
-    { state: { sdk }, getters: { activeNetwork } },
+    { getters: { activeNetwork, 'sdkPlugin/sdk': sdk } },
     [tipId, text, author, parentId],
   ) {
     const sendComment = async (postParam) => postJson(`${activeNetwork.backendUrl}/comment/api/`, { body: postParam });
@@ -189,8 +168,8 @@ export default {
   },
   async modifyNotification(
     {
-      state: { sdk },
       getters: {
+        'sdkPlugin/sdk': sdk,
         activeNetwork,
         account: { address },
       },
@@ -212,8 +191,8 @@ export default {
   },
   async modifyNotifications(
     {
-      state: { sdk },
       getters: {
+        'sdkPlugin/sdk': sdk,
         activeNetwork,
         account: { address },
       },
@@ -240,7 +219,7 @@ export default {
   async getCacheTip({ getters: { activeNetwork } }, id) {
     return fetchJson(`${activeNetwork.backendUrl}/tips/single/${id}`);
   },
-  async getAllNotifications({ state: { sdk }, getters: { activeNetwork, account } }) {
+  async getAllNotifications({ getters: { 'sdkPlugin/sdk': sdk, activeNetwork, account } }) {
     const responseChallenge = await fetchJson(
       `${activeNetwork.backendUrl}/notification/user/${account.address}`,
     );
@@ -258,8 +237,7 @@ export default {
     return fetchJson(url.toString());
   },
   async initContractInstances({
-    state: { sdk },
-    getters: { activeNetwork, tippingSupported },
+    getters: { 'sdkPlugin/sdk': sdk, activeNetwork, tippingSupported },
     commit,
   }) {
     if (!tippingSupported && !process.env.RUNNING_IN_TESTS) return;

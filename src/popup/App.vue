@@ -50,8 +50,6 @@ import {
 } from '@vue/composition-api';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
-  NODE_STATUS_OFFLINE,
-  NODE_STATUS_CONNECTION_DONE,
   watchUntilTruthy,
 } from './utils';
 import {
@@ -61,6 +59,7 @@ import {
   IS_CORDOVA,
   IS_EXTENSION,
 } from '../lib/environment';
+import { useConnection } from '../composables';
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
@@ -72,10 +71,13 @@ export default defineComponent({
     Close,
   },
   setup(props, { root }) {
+    const { watchConnectionStatus } = useConnection();
+
     const isLoggedIn = computed(() => root.$store.getters.isLoggedIn);
     const isRestored = computed(() => root.$store.state.isRestored);
     const backedUpSeed = computed(() => root.$store.state.backedUpSeed);
     const qrScannerOpen = computed(() => root.$store.state.qrScannerOpen);
+    const modals = computed(() => root.$store.getters['modals/opened']);
 
     const showHeader = computed(() => !(
       root.$route.path === '/'
@@ -83,8 +85,6 @@ export default defineComponent({
       || root.$route.params.app
       || root.$route.meta?.hideHeader
     ));
-
-    const modals = computed(() => root.$store.getters['modals/opened']);
 
     function setDocumentHeight() {
       document.documentElement.style.setProperty(
@@ -111,11 +111,6 @@ export default defineComponent({
       }
     }
 
-    function watchAppNetworkAccess() {
-      window.addEventListener('online', () => root.$store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE));
-      window.addEventListener('offline', () => root.$store.commit('setNodeStatus', NODE_STATUS_OFFLINE));
-    }
-
     watch(isLoggedIn, (val) => {
       if (val && !backedUpSeed.value) {
         root.$store.commit('addNotification', {
@@ -128,7 +123,7 @@ export default defineComponent({
     onMounted(async () => {
       setDocumentHeight();
       checkExtensionUpdates();
-      watchAppNetworkAccess();
+      watchConnectionStatus();
 
       await watchUntilTruthy(() => isRestored.value);
 

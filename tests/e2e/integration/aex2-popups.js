@@ -1,8 +1,14 @@
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import {
+  POPUP_TYPE_CONNECT,
+  POPUP_TYPE_SIGN,
+  POPUP_TYPE_RAW_SIGN,
+  POPUP_TYPE_MESSAGE_SIGN,
+} from '../../../src/popup/utils';
 import { popupProps, txParams } from '../../../src/popup/utils/config';
 import locale from '../../../src/popup/locales/en.json';
 
-const popups = ['connectConfirm', 'sign', 'messageSign'];
+const popups = [POPUP_TYPE_CONNECT, POPUP_TYPE_SIGN, POPUP_TYPE_MESSAGE_SIGN];
 const txTypes = [SCHEMA.TX_TYPE.spend, SCHEMA.TX_TYPE.contractCall, SCHEMA.TX_TYPE.contractCreate];
 
 describe('Tests cases for AEX-2 popups', () => {
@@ -11,8 +17,8 @@ describe('Tests cases for AEX-2 popups', () => {
   });
 
   it('Sign Message popup, Connect, Raw Sign display correct data', () => {
-    const props = popupProps.messageSign;
-    cy.openAex2Popup('messageSign')
+    const props = popupProps[POPUP_TYPE_SIGN];
+    cy.openAex2Popup(POPUP_TYPE_SIGN)
       .get('[data-cy=aepp]')
       .should('be.visible')
       .should('contain', props.app.name)
@@ -21,15 +27,15 @@ describe('Tests cases for AEX-2 popups', () => {
       .should('be.visible')
       .should('contain', props.message);
 
-    const props1 = popupProps.connectConfirm;
-    cy.openAex2Popup('connectConfirm')
+    const props1 = popupProps[POPUP_TYPE_CONNECT];
+    cy.openAex2Popup(POPUP_TYPE_CONNECT)
       .get('[data-cy=aepp]')
       .should('be.visible')
       .should('contain', props1.app.name)
       .should('contain', props1.app.host);
 
-    const props2 = popupProps.rawSign;
-    cy.openAex2Popup('rawSign')
+    const props2 = popupProps[POPUP_TYPE_RAW_SIGN];
+    cy.openAex2Popup(POPUP_TYPE_RAW_SIGN)
       .get('[data-cy=warning]')
       .should('be.visible')
       .get('[data-cy=data]')

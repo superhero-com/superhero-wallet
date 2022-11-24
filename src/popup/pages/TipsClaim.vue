@@ -46,7 +46,7 @@ import {
   toURL,
   validateTipUrl,
   watchUntilTruthy,
-} from '../utils/helper';
+} from '../utils';
 import { BLOG_CLAIM_TIP_URL } from '../utils/constants';
 import { IS_EXTENSION } from '../../lib/environment';
 import InputField from '../components/InputField.vue';
@@ -68,7 +68,8 @@ export default {
   }),
   computed: {
     ...mapState('accounts', ['activeIdx']),
-    ...mapState(['sdk', 'tippingV1']),
+    ...mapState(['tippingV1']),
+    ...mapGetters('sdkPlugin', ['sdk']),
     ...mapGetters(['account', 'tippingSupported']),
     normalizedUrl() {
       if (!validateTipUrl(this.url)) return '';
