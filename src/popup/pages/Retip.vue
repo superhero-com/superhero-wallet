@@ -62,13 +62,16 @@ import {
   computed,
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import VueI18n from 'vue-i18n';
 import {
   IToken,
   IPendingTransaction,
-  ISdk,
+  IInputMessage,
 } from '../../types';
-import { MAGNITUDE, AETERNITY_CONTRACT_ID } from '../utils/constants';
+import {
+  AETERNITY_CONTRACT_ID,
+  MAGNITUDE,
+  INPUT_MESSAGE_STATUSES,
+} from '../utils/constants';
 import { convertToken, watchUntilTruthy } from '../utils';
 import {
   useDeepLinkApi,
@@ -110,7 +113,6 @@ export default defineComponent({
     });
 
     const loading = ref<boolean>(false);
-    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
     const tippingV1 = useState('tippingV1');
     const tippingV2 = useState('tippingV2');
     const tippingSupported = useGetter('tippingSupported');
@@ -123,14 +125,9 @@ export default defineComponent({
 
     const numericBalance = computed<number>(() => balance.value.toNumber());
 
-    const validationStatus = computed<{
-      error: boolean, msg?: string | VueI18n.TranslateResult
-    }>(() => {
-      if (!sdk.value || !tippingContract.value) {
-        return { error: true };
-      }
-      return { error: false };
-    });
+    const validationStatus = computed((): IInputMessage => ({
+      status: tippingContract.value ? undefined : INPUT_MESSAGE_STATUSES.error,
+    }));
 
     async function sendTip() {
       const amount = convertToken(

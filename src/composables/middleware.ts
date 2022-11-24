@@ -12,8 +12,9 @@ import {
 } from '../types';
 
 const middleware = ref<IMiddleware | null>(null);
-const initializing = ref(false);
 const isMiddlewareReady = computed(() => !!middleware.value);
+let isInitializing = false;
+let middlewareCurrentNetworkId: string;
 
 export function useMiddleware({ store }: IDefaultComposableOptions) {
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
@@ -35,9 +36,12 @@ export function useMiddleware({ store }: IDefaultComposableOptions) {
    * Force to initialize new middleware instance.
    */
   async function initMiddleware() {
-    const { middlewareUrl } = await watchUntilTruthy(activeNetwork);
+    isInitializing = true;
 
+    const { networkId, middlewareUrl } = activeNetwork.value;
     const swagUrl = `${middlewareUrl}/swagger/swagger.json`;
+
+    middlewareCurrentNetworkId = networkId;
 
     const spec = await fetchJson(swagUrl);
     spec.paths = {
@@ -85,16 +89,19 @@ export function useMiddleware({ store }: IDefaultComposableOptions) {
       ([key, value]: any[]) => [camelCase(key), value],
     );
 
-    initializing.value = false;
+    isInitializing = false;
   }
 
   /**
    * Get the current middleware instance. Create new one if it's not instantiated.
    */
   async function getMiddleware(): Promise<IMiddleware> {
-    if (initializing.value) {
+    const { networkId } = await watchUntilTruthy(activeNetwork);
+    const sameNetwork = networkId === middlewareCurrentNetworkId;
+
+    if (isInitializing && sameNetwork) {
       await watchUntilTruthy(middleware);
-    } else if (!middleware.value) {
+    } else if (!isMiddlewareReady.value || !sameNetwork) {
       await initMiddleware();
     }
     return middleware.value!;
@@ -105,7 +112,6 @@ export function useMiddleware({ store }: IDefaultComposableOptions) {
   }
 
   return {
-    initMiddleware,
     getMiddleware,
     getMiddlewareRef,
     fetchFromMiddleware,

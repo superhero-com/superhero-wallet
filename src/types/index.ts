@@ -470,9 +470,15 @@ export interface INameEntryFetched {
  */
 export interface ISdk {
   addNode: (name: string, node: any, select: boolean) => void;
+  address: () => Promise<string>;
+  addRpcClient: (connection: any) => any;
   Ae: Dictionary;
+  aensBid: (name: string, aettos: any) => Promise<any>;
   aensQuery: (name: string) => Promise<any>;
-  api: Record<string, GenericApiMethod>;
+  api: {
+    [key: string]: GenericApiMethod;
+    getNameEntryByName: (name: string) => Promise<INameEntryFetched>;
+  },
   balance: (address: string) => Promise<number>;
   compilerApi: Record<string, (...args: any[]) => Promise<any>>;
   getAccount: (publicKey: any) => Promise<any>
@@ -498,8 +504,10 @@ export interface ISdk {
   payingForTx(arg0: any): any;
   poll: (txHash: string, options: any) => any;
   pool: Map<string, any>;
-  signTransaction: (t: any, o: any) => Promise<any>
-  signMessage: ISignMessage
+  removeRpcClient: (id: string) => any;
+  rpcClients: any[];
+  shareWalletInfo: (c: any) => any;
+  selectedNode: any;
   send: (
     tx: any,
     options?: {
@@ -509,11 +517,10 @@ export interface ISdk {
     }
   ) => Promise<ITransaction>
   sendTransaction: (t: any, o: any) => Promise<any>
-  selectedNode: any
+  signTransaction: (t: any, o: any) => Promise<any>;
+  signMessage: ISignMessage;
   spend: (a: any, r: any, o: any) => Promise<any>
   spendTx: (a: any) => Promise<any>
-  address: () => Promise<string>
-  aensBid: (name: string, aettos: any) => Promise<any>
 }
 
 /**

@@ -17,11 +17,12 @@
     </template>
     <template #after="{ focused }">
       <InputSelectAsset
-        v-if="!aeOnly"
+        v-if="!aeOnlyOrNoConnection"
         v-bind="$attrs"
         :value="currentAsset"
         :focused="focused"
         :show-tokens-with-balance="showTokensWithBalance"
+        :disabled="!isOnline || !isMiddlewareReady"
         @input="handleAssetSelected($event)"
       />
       <div
@@ -68,7 +69,12 @@ import {
   PropType,
   watch,
 } from '@vue/composition-api';
-import { useBalances, useCurrencies } from '../../composables';
+import {
+  useBalances,
+  useConnection,
+  useCurrencies,
+  useMiddleware,
+} from '../../composables';
 import type { IAsset } from '../../types';
 import { AETERNITY_SYMBOL } from '../utils';
 import InputField from './InputField.vue';
@@ -87,11 +93,16 @@ export default defineComponent({
     showTokensWithBalance: Boolean,
   },
   setup(props, { root, emit }) {
-    const { aeternityToken } = useBalances({ store: root.$store });
+    const { isOnline } = useConnection();
+    const { isMiddlewareReady } = useMiddleware({ store: root.$store });
     const { formatCurrency } = useCurrencies();
+    const { aeternityToken } = useBalances({ store: root.$store });
 
     const currentAsset = computed((): IAsset => props.selectedAsset || aeternityToken.value);
     const hasError = computed(() => (root as any).$validator.errors.has('amount'));
+    const aeOnlyOrNoConnection = computed(
+      () => props.aeOnly || !isOnline.value || !isMiddlewareReady.value,
+    );
     const totalAmountFormatted = computed(() => formatCurrency(
       (currentAsset.value?.current_price)
         ? (+props.value || 0) * currentAsset.value.current_price
@@ -117,6 +128,9 @@ export default defineComponent({
     return {
       AETERNITY_SYMBOL,
       totalAmountFormatted,
+      isOnline,
+      isMiddlewareReady,
+      aeOnlyOrNoConnection,
       currentTokenFiatPrice,
       currentTokenFiatPriceFormatted,
       currentAsset,

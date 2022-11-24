@@ -38,7 +38,7 @@
       <BtnMain
         data-cy="accept"
         :text="$t('pages.signTransaction.confirm')"
-        :disabled="!isConnected"
+        :disabled="!isNodeReady"
         @click="resolve()"
       />
     </template>
@@ -49,7 +49,7 @@
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 import type { IAccountLabeled, IAppData } from '../../../types';
 import { useGetter } from '../../../composables/vuex';
-import { useAccounts } from '../../../composables';
+import { useAccounts, useSdk } from '../../../composables';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -74,8 +74,8 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { activeAccount } = useAccounts({ store: root.$store });
+    const { isNodeReady } = useSdk({ store: root.$store });
 
-    const isConnected = useGetter('isConnected');
     const getExplorerPath = useGetter('getExplorerPath');
     const accountExtended = computed((): IAccountLabeled => ({
       ...activeAccount.value,
@@ -88,7 +88,7 @@ export default defineComponent({
     }
 
     return {
-      isConnected,
+      isNodeReady,
       accountExtended,
       cancel,
     };

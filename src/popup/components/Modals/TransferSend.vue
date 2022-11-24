@@ -33,7 +33,7 @@
       />
       <BtnMain
         class="button-action-primary"
-        :disabled="error || !isConnected || !transferData.address || !transferData.amount"
+        :disabled="error || !isNodeReady || !transferData.address || !transferData.amount"
         :icon="(showSendButton && !isMultisig) ? ArrowSendIcon : null"
         :text="primaryButtonText"
         data-cy="next-step-button"
@@ -52,9 +52,9 @@ import {
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import type { ITokenList, ObjectValues, ResolveRejectCallback } from '../../../types';
-import { IFormModel } from '../../../composables';
+import { IFormModel, useSdk } from '../../../composables';
 import { AENS_DOMAIN, validateTipUrl } from '../../utils';
-import { useGetter, useState } from '../../../composables/vuex';
+import { useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -92,6 +92,8 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props, { root }) {
+    const { isNodeReady } = useSdk({ store: root.$store });
+
     const currentRenderedComponent = ref<Vue.Component>();
     const currentStep = ref<Step>(STEPS.form);
     const error = ref(false);
@@ -100,7 +102,6 @@ export default defineComponent({
     });
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
-    const isConnected = useGetter<boolean>('isConnected');
 
     const showEditButton = computed(() => [
       STEPS.review,
@@ -178,7 +179,7 @@ export default defineComponent({
     return {
       STEPS,
       ArrowSendIcon,
-      isConnected,
+      isNodeReady,
       currentRenderedComponent,
       steps,
       currentStep,

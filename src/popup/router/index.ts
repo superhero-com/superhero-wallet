@@ -9,7 +9,6 @@ import { routes } from './routes';
 import { i18n } from '../../store/plugins/languages';
 import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
-import initSdk from '../../lib/wallet';
 import {
   APP_LINK_WEB,
   POPUP_TYPE_CONNECT,
@@ -57,8 +56,6 @@ router.beforeEach(async (to, from, next) => {
     }
     return;
   }
-
-  if (!store.getters['sdkPlugin/sdk']) initSdk();
 
   if (RUNNING_IN_POPUP) {
     const name = {

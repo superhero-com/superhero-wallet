@@ -1,6 +1,6 @@
 import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import { useModals } from '../../../composables';
+import { useModals, useSdk } from '../../../composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
@@ -20,8 +20,10 @@ export default {
     nextAccountIdx: 1,
   },
   actions: {
-    async isAccountUsed({ rootGetters }, address) {
-      return rootGetters['sdkPlugin/sdk'].api.getAccountByPubkey(address).then(() => true, () => false);
+    async isAccountUsed(context, address) {
+      const { getSdk } = useSdk({ store: context });
+      const sdk = await getSdk();
+      return sdk.api.getAccountByPubkey(address).then(() => true, () => false);
     },
     async discover({ state, rootGetters, dispatch }) {
       let lastNotEmptyIdx = 0;
@@ -75,31 +77,33 @@ export default {
     sign({ dispatch }, data) {
       return dispatch('signWithoutConfirmation', { data });
     },
-    async signTransaction({ dispatch, rootGetters }, {
+    async signTransaction(context, {
       txBase64,
       opt: { modal = true, app = null },
     }) {
-      const sdk = rootGetters['sdkPlugin/sdk'];
+      const { getSdk } = useSdk({ store: context });
+      const sdk = await getSdk();
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
-        await dispatch('confirmTxSigning', { encodedTx, app });
+        await context.dispatch('confirmTxSigning', { encodedTx, app });
       }
-      const signature = await dispatch(
+      const signature = await context.dispatch(
         'signWithoutConfirmation',
         { data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]) },
       );
       return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
     },
-    async signTransactionFromAccount({ dispatch, rootGetters }, {
+    async signTransactionFromAccount(context, {
       txBase64,
       opt: { modal = true, app = null, fromAccount },
     }) {
-      const sdk = rootGetters['sdkPlugin/sdk'];
+      const { getSdk } = useSdk({ store: context });
+      const sdk = await getSdk();
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
-        await dispatch('confirmTxSigning', { encodedTx, app });
+        await context.dispatch('confirmTxSigning', { encodedTx, app });
       }
-      const signature = await dispatch(
+      const signature = await context.dispatch(
         'signWithoutConfirmation',
         {
           data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]),

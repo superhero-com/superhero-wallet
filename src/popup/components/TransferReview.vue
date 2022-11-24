@@ -133,8 +133,8 @@ import {
   useModals,
   useMultisigAccounts,
   useMultisigTransactions,
+  useSdk,
 } from '../../composables';
-import { useGetter } from '../../composables/vuex';
 import {
   AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
@@ -146,7 +146,7 @@ import {
   handleUnknownError,
 } from '../utils';
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '../router/routeNames';
-import { IPendingTransaction, ISdk } from '../../types';
+import { IPendingTransaction } from '../../types';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -178,6 +178,7 @@ export default defineComponent({
   },
   setup(props, { root, emit }) {
     const { openDefaultModal } = useModals();
+    const { getSdk } = useSdk({ store: root.$store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const { activeAccount } = useAccounts({ store: root.$store });
     const {
@@ -189,7 +190,6 @@ export default defineComponent({
     const loading = ref<boolean>(false);
     const tippingV1 = computed(() => root.$store.state.tippingV1);
     const tippingV2 = computed(() => root.$store.state.tippingV2);
-    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
     const isRecipientName = computed(
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );
@@ -231,7 +231,8 @@ export default defineComponent({
             { waitMined: false, modal: false },
           ]);
         } else {
-          actionResult = await sdk.value.spend(amount, recipient, {
+          const sdk = await getSdk();
+          actionResult = await sdk.spend(amount, recipient, {
             waitMined: false,
             modal: false,
             payload: props.transferData.payload,

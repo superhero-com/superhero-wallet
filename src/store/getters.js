@@ -9,7 +9,6 @@ import {
   NETWORK_ID_TESTNET,
   NETWORK_MAINNET,
   NETWORK_TESTNET,
-  NODE_STATUS_CONNECTED,
   TX_FUNCTIONS,
   ACCOUNT_HD_WALLET,
   validateHash,
@@ -52,9 +51,6 @@ export default {
   },
   activeNetwork({ current: { network } }, { networks }) {
     return networks[network];
-  },
-  isConnected({ nodeStatus }) {
-    return nodeStatus === NODE_STATUS_CONNECTED;
   },
   tippingSupported(state, { activeNetwork }) {
     return (

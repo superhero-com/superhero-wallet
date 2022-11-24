@@ -55,7 +55,7 @@ import AuctionHistory from '../pages/Names/AuctionHistory.vue';
 import AuctionList from '../pages/Names/AuctionList.vue';
 import More from '../pages/More.vue';
 import NameClaim from '../pages/Names/Claim.vue';
-import NamesList from '../pages/Names/List.vue';
+import NamesList from '../pages/Names/NamesList.vue';
 import NotFound from '../pages/NotFound.vue';
 import Notifications from '../pages/Notifications.vue';
 import NotificationSettings from '../pages/NotificationSettings.vue';

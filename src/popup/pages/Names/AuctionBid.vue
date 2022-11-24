@@ -54,8 +54,8 @@ import {
 
 import AuctionCard from '../../components/AuctionCard.vue';
 import InputAmount from '../../components/InputAmount.vue';
-import DetailsItem from '../../components/DetailsItem.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
+import DetailsItem from '../../components/DetailsItem.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 
 export default defineComponent({

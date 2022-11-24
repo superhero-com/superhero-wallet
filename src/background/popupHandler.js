@@ -1,5 +1,10 @@
 import { v4 as uuid } from 'uuid';
-import { isTxOfASupportedType, POPUP_TYPE_SIGN, POPUP_TYPE_RAW_SIGN } from '../popup/utils';
+import {
+  isTxOfASupportedType,
+  POPUP_TYPE_SIGN,
+  POPUP_TYPE_CONNECT,
+  POPUP_TYPE_RAW_SIGN,
+} from '../popup/utils';
 
 const popups = {};
 

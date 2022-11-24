@@ -3,7 +3,7 @@
     :text="isMultisig ? $t('dashboard.proposeCard.title') : $t('dashboard.sendCard.title')"
     :subtitle="subtitle"
     :icon="ArrowSendIcon"
-    :disabled="!isOnline || !isConnected || (!!pendingMultisigTransaction && isMultisig)"
+    :disabled="!isOnline || !isNodeReady || (!!pendingMultisigTransaction && isMultisig)"
     data-cy="send"
     :is-big="isBig"
     @click="openTransferSendModal()"
@@ -12,8 +12,12 @@
 
 <script lang="ts">
 import { defineComponent, computed } from '@vue/composition-api';
-import { useConnection, useModals, usePendingMultisigTransaction } from '../../composables';
-import { useGetter } from '../../composables/vuex';
+import {
+  useConnection,
+  useModals,
+  usePendingMultisigTransaction,
+  useSdk,
+} from '../../composables';
 import { MODAL_TRANSFER_SEND } from '../utils';
 
 import BtnBox from './buttons/BtnBox.vue';
@@ -29,9 +33,8 @@ export default defineComponent({
   setup(props, { root }) {
     const { isOnline } = useConnection();
     const { openModal } = useModals();
+    const { isNodeReady } = useSdk({ store: root.$store });
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
-
-    const isConnected = useGetter('isConnected');
 
     function openTransferSendModal() {
       openModal(MODAL_TRANSFER_SEND, {
@@ -46,7 +49,7 @@ export default defineComponent({
 
     return {
       isOnline,
-      isConnected,
+      isNodeReady,
       pendingMultisigTransaction,
       subtitle,
       ArrowSendIcon,

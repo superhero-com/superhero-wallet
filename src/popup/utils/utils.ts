@@ -5,7 +5,8 @@ import VueCompositionApi, {
 } from '@vue/composition-api';
 import { isFQDN, isURL } from 'validator';
 import BigNumber from 'bignumber.js';
-import { defer } from 'lodash-es';
+import { defer, times } from 'lodash-es';
+import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
 import {
   SCHEMA,
   AmountFormatter,
@@ -41,9 +42,6 @@ import { i18n } from '../../store/plugins/languages';
 import dayjs from '../plugins/dayjsConfig';
 import type {
   IAccount,
-  IRespondChallenge,
-  IResponseChallenge,
-  ISdk,
   ITransaction,
   ITx,
   TxType,
@@ -54,8 +52,9 @@ import type {
   INameEntryFetched,
   IWallet,
   IRequestInitBodyParsed,
+  ISdk,
 } from '../../types';
-import { IS_CORDOVA, IS_EXTENSION } from '../../lib/environment';
+import { IS_CORDOVA, IS_EXTENSION, IN_FRAME } from '../../lib/environment';
 import runMigrations from '../../store/migrations';
 
 Vue.use(VueCompositionApi);
@@ -88,7 +87,7 @@ export function convertToken(balance: number | string, precision: number): BigNu
   return new BigNumber(balance).shiftedBy(precision);
 }
 
-export function executeAndSetInterval(handler: () => any, timeout: number) {
+export function executeAndSetInterval(handler: () => any, timeout: number): NodeJS.Timer {
   handler();
   return setInterval(handler, timeout);
 }
@@ -145,10 +144,6 @@ export function truncateAddress(address: string): [string, string] {
   ];
 }
 
-export function getAddressByNameEntry(nameEntry: INameEntryFetched, pointer = 'account_pubkey') {
-  return ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
-}
-
 export function isValidURL(url: string): boolean {
   const pattern = new RegExp(/((http(s)?:\/\/)?(localhost|127.0.0.1)((:)?[\0-9]{4})?\/?)/, 'i');
   return isURL(url) || !!pattern.test(url);
@@ -181,6 +176,10 @@ export function validateHash(fullHash?: string) {
   return {
     valid, isName, prefix, hash,
   };
+}
+
+export function getAddressByNameEntry(nameEntry: INameEntryFetched, pointer = 'account_pubkey') {
+  return (nameEntry.pointers?.find(({ key }: any) => key === pointer) || {}).id;
 }
 
 export function getMdwEndpointPrefixForHash(fullHash: string) {
@@ -355,21 +354,6 @@ export async function fetchAllPages<T = any>(
     nextPageUrl = next || null;
   }
   return result;
-}
-
-// TODO - move to sdk.ts composable after the removal of action.js file
-export async function fetchRespondChallenge(
-  sdk: ISdk,
-  responseChallenge: IResponseChallenge,
-): Promise<IRespondChallenge> {
-  const signedChallenge = Buffer.from(
-    await sdk.signMessage(responseChallenge.challenge),
-  ).toString('hex');
-
-  return {
-    challenge: responseChallenge.challenge,
-    signature: signedChallenge,
-  };
 }
 
 export function getPayload(transaction: ITransaction) {
@@ -669,4 +653,55 @@ export function isInsufficientBalanceError(error: any) {
     error instanceof InvalidTxError
     && errorHasValidationKey(error, 'InsufficientBalance')
   );
+}
+
+export function connectFrames(sdk: ISdk) {
+  if (!IN_FRAME) {
+    return;
+  }
+
+  try {
+    const getArrayOfAvailableFrames = (): Window[] => [
+      window.parent,
+      ...times(window.parent.frames.length, (i) => window.parent.frames[i]),
+    ];
+
+    const connectedFrames = new Set();
+
+    executeAndSetInterval(
+      () => getArrayOfAvailableFrames()
+        .filter((frame) => frame !== window)
+        .forEach((target) => {
+          if (connectedFrames.has(target)) {
+            return;
+          }
+          connectedFrames.add(target);
+          const connection = BrowserWindowMessageConnection({ target });
+          const originalConnect = connection.connect;
+          let intervalId: NodeJS.Timer;
+
+          connection.connect = function connect(onMessage: any) {
+            originalConnect.call(this, (data: any, origin: any, source: any) => {
+              if (source !== target) {
+                return;
+              }
+              clearInterval(intervalId);
+              onMessage(data, origin, source);
+            });
+          };
+          sdk.addRpcClient(connection);
+          intervalId = executeAndSetInterval(() => {
+            if (!getArrayOfAvailableFrames().includes(target)) {
+              clearInterval(intervalId);
+              return;
+            }
+            sdk.shareWalletInfo(connection.sendMessage.bind(connection));
+          }, 3000);
+        }),
+      3000,
+    );
+  } catch (error: any) {
+    // TODO creates dependency cycle, probably we need to move whole function
+    // Logger.write(error);
+  }
 }

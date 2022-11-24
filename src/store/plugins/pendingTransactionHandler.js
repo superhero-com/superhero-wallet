@@ -1,5 +1,5 @@
-import { useModals } from '../../composables';
-import { MODAL_SPEND_SUCCESS, watchUntilTruthy } from '../../popup/utils';
+import { useModals, useSdk } from '../../composables';
+import { MODAL_SPEND_SUCCESS } from '../../popup/utils';
 
 export default async (store) => {
   const { openModal } = useModals();
@@ -7,10 +7,14 @@ export default async (store) => {
   const waitTransactionMined = async ({
     hash, type, tipUrl, recipient: recipientId, tx, ...otherTx
   }) => {
+    const { getSdk } = useSdk({ store });
     const network = store.getters.activeNetwork?.networkId;
+    const sdk = await getSdk();
+
     try {
-      const transaction = await store.getters['sdkPlugin/sdk'].poll(hash);
+      const transaction = await sdk.poll(hash);
       const showSpendModal = () => openModal(MODAL_SPEND_SUCCESS, {
+        name: MODAL_SPEND_SUCCESS,
         transaction: {
           tipUrl,
           ...otherTx,
@@ -37,8 +41,6 @@ export default async (store) => {
       store.commit('removePendingTransactionByHash', { hash, network });
     }
   };
-
-  await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
 
   // eslint-disable-next-line no-unused-expressions
   store.state.transactions.pending[store.getters.activeNetwork?.networkId]

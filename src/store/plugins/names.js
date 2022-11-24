@@ -7,7 +7,6 @@ import {
   checkAddress,
   checkAensName,
   fetchAllPages,
-  fetchRespondChallenge,
 } from '../../popup/utils';
 import { i18n } from './languages';
 import { useMiddleware, useModals, useSdk } from '../../composables';
@@ -15,6 +14,7 @@ import { useMiddleware, useModals, useSdk } from '../../composables';
 export default (store) => {
   const {
     getSdk,
+    fetchRespondChallenge,
   } = useSdk({ store });
 
   const {
@@ -165,20 +165,14 @@ export default (store) => {
           commit('setDefault', { address, name: response?.preferredChainName });
         }));
       },
-      async setDefault(
-        { commit, rootGetters: { activeNetwork } },
-        { name, address },
-      ) {
-        const [sdk, response] = await Promise.all([
-          getSdk(),
-          postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
-            body: {
-              preferredChainName: name,
-            },
-          }),
-        ]);
+      async setDefault({ commit, rootGetters: { activeNetwork } }, { name, address }) {
+        const response = await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
+          body: {
+            preferredChainName: name,
+          },
+        });
 
-        const respondChallenge = await fetchRespondChallenge(sdk, response);
+        const respondChallenge = await fetchRespondChallenge(response);
 
         await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
           body: respondChallenge,

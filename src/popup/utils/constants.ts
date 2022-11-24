@@ -86,10 +86,12 @@ export const MAX_UINT256 = new BigNumber(2).exponentiatedBy(256).minus(1);
 export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8';
 
 export const ACCOUNT_HD_WALLET = 'hd-wallet';
-export const ACCOUNT_LEDEGR_WALLET = 'ledger';
+export const ACCOUNT_LEDGER_WALLET = 'ledger';
 
 export const NETWORK_ID_MAINNET = 'ae_mainnet';
+export const NETWORK_NAME_MAINNET = 'Mainnet';
 export const NETWORK_ID_TESTNET = 'ae_uat';
+export const NETWORK_NAME_TESTNET = 'Testnet';
 
 export const DEX_CONTRACTS: Record<string, IDexContracts> = {
   [NETWORK_ID_MAINNET]: {
@@ -129,7 +131,7 @@ export const NETWORK_MAINNET: INetwork = {
   backendUrl: 'https://raendom-backend.z52da5wt.xyz',
   tipContractV1: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z',
   multisigBackendUrl: 'https://ga-multisig-backend-mainnet.prd.aepps.com',
-  name: 'Mainnet',
+  name: NETWORK_NAME_MAINNET,
 };
 
 export const NETWORK_TESTNET: INetwork = {
@@ -142,16 +144,12 @@ export const NETWORK_TESTNET: INetwork = {
   tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd',
   tipContractV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu',
   multisigBackendUrl: 'https://ga-multisig-backend-testnet.prd.aepps.com',
-  name: 'Testnet',
+  name: NETWORK_NAME_TESTNET,
 };
 
 export const defaultNetwork = process.env.NETWORK === 'Testnet' ? NETWORK_TESTNET : NETWORK_MAINNET;
 
 export const DEFAULT_WAITING_HEIGHT = 15;
-
-export const NODE_STATUS_CONNECTING = 'connecting';
-export const NODE_STATUS_CONNECTED = 'connected';
-export const NODE_STATUS_ERROR = 'error';
 
 export const AGGREGATOR_URL = 'https://superhero.com/';
 

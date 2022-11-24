@@ -75,17 +75,17 @@
 import { RpcAepp, Node } from '@aeternity/aepp-sdk';
 import Detector from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/wallet-detector';
 import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
+import {
+  NETWORK_MAINNET,
+  NETWORK_TESTNET,
+  NETWORK_NAME_MAINNET,
+  NETWORK_NAME_TESTNET,
+} from '../../src/popup/utils/constants';
 import { recipientId, contractCallAddress } from '../../src/popup/utils/testsConfig';
 
-const networks = {
-  Mainnet: {
-    NODE_URL: 'https://mainnet.aeternity.io',
-    COMPILER_URL: 'https://compiler.aepps.com',
-  },
-  Testnet: {
-    NODE_URL: 'https://testnet.aeternity.io',
-    COMPILER_URL: 'https://latest.compiler.aepps.com',
-  },
+const DEFAULT_NETWORKS = {
+  [NETWORK_NAME_MAINNET]: NETWORK_MAINNET,
+  [NETWORK_NAME_TESTNET]: NETWORK_TESTNET,
 };
 
 export default {
@@ -127,12 +127,12 @@ contract Example =
   methods: {
     async initClient() {
       const node = await Node({
-        url: networks[process.env.NETWORK].NODE_URL,
+        url: DEFAULT_NETWORKS[process.env.NETWORK].url,
       });
       this.client = await RpcAepp({
         name: 'AEPP',
         nodes: [{ name: process.env.NETWORK, instance: node }],
-        compilerUrl: networks[process.env.NETWORK].COMPILER_URL,
+        compilerUrl: DEFAULT_NETWORKS[process.env.NETWORK].compilerUrl,
         onNetworkChange(params) {
           if (this.getNetworkId() !== params.networkId) {
             // eslint-disable-next-line no-alert

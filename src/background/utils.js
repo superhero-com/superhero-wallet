@@ -1,9 +1,8 @@
-import { useAccounts } from '../composables';
+import { useAccounts, useSdk } from '../composables';
 import { IS_FIREFOX } from '../lib/environment';
 import {
   CONNECTION_TYPES,
   getAddressByNameEntry,
-  watchUntilTruthy,
 } from '../popup/utils';
 import store from './store';
 
@@ -31,9 +30,10 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
 };
 
 const getAddress = async (name) => {
-  await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
+  const { getSdk } = useSdk({ store });
+  const sdk = await getSdk();
   try {
-    return getAddressByNameEntry(await store.getters['sdkPlugin/sdk'].api.getNameEntryByName(name));
+    return getAddressByNameEntry(await sdk.api.getNameEntryByName(name));
   } catch (e) {
     return null;
   }
@@ -43,9 +43,12 @@ export const getAddressFromChainName = async (names) => (Array.isArray(names)
   ? Promise.all(names.map(async (n) => getAddress(n))) : getAddress(names));
 
 export const getTippingContractInstance = async (tx) => {
-  if (tippingContract) return tippingContract;
-  await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
-  tippingContract = await setContractInstance(tx, store.getters['sdkPlugin/sdk'], tx.address);
+  if (tippingContract) {
+    return tippingContract;
+  }
+  const { getSdk } = useSdk({ store });
+  const sdk = await getSdk();
+  tippingContract = await setContractInstance(tx, sdk, tx.address);
   return tippingContract;
 };
 

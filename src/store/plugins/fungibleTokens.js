@@ -10,9 +10,10 @@ import {
   fetchAllPages,
 } from '../../popup/utils';
 import { ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
-import { useMiddleware } from '../../composables';
+import { useMiddleware, useSdk } from '../../composables';
 
 export default (store) => {
+  const { getSdk } = useSdk({ store });
   const { fetchFromMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware({ store });
 
   store.registerModule('fungibleTokens', {
@@ -95,9 +96,10 @@ export default (store) => {
         commit('addTokenBalance', newBalances);
       },
       async createOrChangeAllowance(
-        { rootGetters: { activeNetwork, account, 'sdkPlugin/sdk': sdk } },
+        { rootGetters: { activeNetwork, account } },
         [contractId, amount],
       ) {
+        const sdk = await getSdk();
         const selectedToken = store.state.fungibleTokens.tokens?.[account.address]?.tokenBalances
           ?.find((t) => t?.contractId === contractId);
         const tokenContract = await sdk.getContractInstance({
@@ -119,9 +121,10 @@ export default (store) => {
         ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
       },
       async getContractTokenPairs(
-        { state: { availableTokens }, rootGetters: { account, 'sdkPlugin/sdk': sdk } },
+        { state: { availableTokens }, rootGetters: { account } },
         contractAddress,
       ) {
+        const sdk = await getSdk();
         try {
           const tokenContract = await sdk.getContractInstance({
             source: pairInterface,
@@ -167,10 +170,8 @@ export default (store) => {
           return {};
         }
       },
-      async transfer(
-        { rootGetters: { 'sdkPlugin/sdk': sdk } },
-        [contractId, toAccount, amount, option],
-      ) {
+      async transfer(context, [contractId, toAccount, amount, option]) {
+        const sdk = await getSdk();
         const tokenContract = await sdk.getContractInstance({
           source: FUNGIBLE_TOKEN_CONTRACT,
           contractAddress: contractId,
@@ -178,9 +179,10 @@ export default (store) => {
         return tokenContract.methods.transfer(toAccount, amount.toFixed(), option);
       },
       async burnTriggerPoS(
-        { rootGetters: { 'sdkPlugin/sdk': sdk } },
+        context,
         [contractId, amount, posAddress, invoiceId, option],
       ) {
+        const sdk = await getSdk();
         const tokenContract = await sdk.getContractInstance({
           source: ZEIT_TOKEN_INTERFACE,
           contractAddress: contractId,

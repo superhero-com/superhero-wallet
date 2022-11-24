@@ -48,7 +48,7 @@
       <BtnMain
         data-cy="accept"
         :text="$t('pages.connectConfirm.confirmButton')"
-        :disabled="!isConnected"
+        :disabled="!isNodeReady"
         @click="confirm()"
       />
     </template>
@@ -68,7 +68,7 @@ import {
   POPUP_CONNECT_TRANSACTIONS_PERMISSION,
 } from '../../utils';
 import { useGetter, useState } from '../../../composables/vuex';
-import { useAccounts } from '../../../composables';
+import { useAccounts, useSdk } from '../../../composables';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -97,8 +97,8 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { activeAccount } = useAccounts({ store: root.$store });
+    const { isNodeReady } = useSdk({ store: root.$store });
 
-    const isConnected = useGetter('isConnected');
     const getExplorerPath = useGetter('getExplorerPath');
 
     const permission = useState<IPermission>('permissions', props.app.host);
@@ -126,7 +126,7 @@ export default defineComponent({
       POPUP_CONNECT_ADDRESS_PERMISSION,
       POPUP_CONNECT_TRANSACTIONS_PERMISSION,
       appName,
-      isConnected,
+      isNodeReady,
       accountExtended,
       confirm,
       cancel,

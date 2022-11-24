@@ -160,10 +160,10 @@ export default defineComponent({
       setDocumentHeight();
       checkExtensionUpdates();
       initViewport(innerElement.value);
-
       watchConnectionStatus();
 
       await watchUntilTruthy(() => isRestored.value);
+
       setNotificationSettings();
 
       loadAeternityData();

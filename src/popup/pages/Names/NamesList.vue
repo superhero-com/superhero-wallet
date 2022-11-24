@@ -1,5 +1,5 @@
 <template>
-  <div class="list">
+  <div class="names-list">
     <template v-if="namesForAccount.length">
       <NameItem
         v-for="({ name, owner, autoExtend }, index) in namesForAccount"
@@ -63,7 +63,7 @@ export default defineComponent({
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 
-.list {
+.names-list {
   padding-top: 4px;
 
   .name-item {

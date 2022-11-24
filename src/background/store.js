@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import persistState from '../store/plugins/persistState';
-import sdk from '../store/plugins/sdk';
 import permissions from '../store/modules/permissions';
 import accounts from '../store/modules/accounts';
 import getters from '../store/getters';
@@ -9,7 +8,9 @@ import getters from '../store/getters';
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
-  plugins: [sdk, persistState()],
+  plugins: [
+    persistState(),
+  ],
   modules: { permissions, accounts },
   getters: {
     'names/getDefault': () => (address) => `placeholder name for ${address}`,

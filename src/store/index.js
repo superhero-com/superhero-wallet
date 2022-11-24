@@ -3,7 +3,7 @@ import Vuex from 'vuex';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
-import sdkPlugin from './plugins/sdk';
+import sdkFrameReset from './plugins/sdkFrameReset';
 import persistState from './plugins/persistState';
 import tipUrl from './plugins/tipUrl';
 import namesPlugin from './plugins/names';
@@ -17,11 +17,11 @@ import permissionsModule from './modules/permissions';
 import fungibleTokensPlugin from './plugins/fungibleTokens';
 import stateReducer from './utils';
 import veeValidate from './plugins/veeValidate';
-import { defaultNetwork, NODE_STATUS_CONNECTING } from '../popup/utils/constants';
+import { defaultNetwork } from '../popup/utils/constants';
 
 Vue.use(Vuex);
 
-export default new Vuex.Store({
+const store = new Vuex.Store({
   state: {
     isRestored: false,
     mnemonic: null,
@@ -38,7 +38,6 @@ export default new Vuex.Store({
     },
     tippingV1: null,
     tippingV2: null,
-    nodeStatus: NODE_STATUS_CONNECTING,
     notificationSettings: [],
     chainNames: null,
     tip: null,
@@ -58,7 +57,7 @@ export default new Vuex.Store({
       runMigrations,
       stateReducer,
     ),
-    sdkPlugin,
+    sdkFrameReset,
     tipUrl,
     namesPlugin,
     fungibleTokensPlugin,
@@ -73,3 +72,5 @@ export default new Vuex.Store({
     permissions: permissionsModule,
   },
 });
+
+export default store;

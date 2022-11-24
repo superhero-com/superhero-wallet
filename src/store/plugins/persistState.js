@@ -28,6 +28,10 @@ export default (
   let dontSaveState;
 
   store.registerModule('persistState', {
+    /**
+     * If the app is running in a frame this method is replaced by `reset` function
+     * located in `sdkFrameReset.js` file.
+     */
     actions: !IS_EXTENSION_BACKGROUND && {
       async reset() {
         dontSaveState();
