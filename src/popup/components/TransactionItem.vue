@@ -102,7 +102,7 @@ export default defineComponent({
       if (txType.value?.startsWith('name')) {
         return [AENS, transactionTypes[transactionType]];
       }
-      if (txType === SCHEMA.TX_TYPE.spend) {
+      if (txType.value === SCHEMA.TX_TYPE.spend) {
         return [root.$t('transaction.type.spendTx'), getTxDirection.value(props.transaction) === 'sent' ? root.$t('transaction.spendType.out') : root.$t('transaction.spendType.in')];
       }
       if (isAllowance.value) {
@@ -132,7 +132,7 @@ export default defineComponent({
     const fiatAmount = computed(() => {
       // TODO add type to tokens
       const aeToken = tokens.value?.find((t: any) => t?.isAe);
-      if (!aeToken || isErrorTransaction
+      if (!aeToken || isErrorTransaction.value
         || (isDex.value && FUNCTION_TYPE_DEX.pool.includes(props.transaction.tx.function))
       ) return 0;
       return getAmountFiat.value(amountRounded(aeToken.decimals
