@@ -22,7 +22,9 @@ export const useTransactionToken = (
   transaction: ITransaction,
   showDetailedAllowanceInfo?: boolean,
 ) => {
-  const availableTokens = useState<ITokenList>('fungibleTokens/availableTokens');
+  const fungibleTokens = useState('fungibleTokens');
+  const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
+
   const getTxAmountTotal = useGetter('getTxAmountTotal');
 
   const getTxSymbol = useGetter('getTxSymbol');

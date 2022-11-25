@@ -71,6 +71,7 @@ export default {
     .secondary {
       color: variables.$color-grey-light;
       margin-left: 4px;
+      white-space: nowrap;
     }
 
     &.small {

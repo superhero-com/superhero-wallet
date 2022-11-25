@@ -63,14 +63,12 @@ import {
   AENS,
   DEX,
 } from '../utils';
-import transactionTokensMixin from '../../mixins/transactionTokensMixin';
 import Pending from '../../icons/animated-pending.svg?vue-component';
 import Reverted from '../../icons/refresh.svg?vue-component';
 import Warning from '../../icons/warning.svg?vue-component';
 import TransactionTokens from './TransactionTokenRows.vue';
-import { useTransactionToken } from '../../composables';
+import { useTransactionToken, useGetter } from '../../composables';
 import { ITransaction, TransactionType } from '../../types';
-import { useGetter } from '../../composables/vuex';
 
 export default defineComponent({
   components: {
@@ -79,7 +77,6 @@ export default defineComponent({
     Warning,
     TransactionTokens,
   },
-  mixins: [transactionTokensMixin],
   props: {
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
@@ -147,6 +144,8 @@ export default defineComponent({
       fiatAmount,
       formatDate,
       formatTime,
+      isErrorTransaction,
+      tokens,
     };
   },
 });
