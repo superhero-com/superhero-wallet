@@ -195,8 +195,7 @@ import CopyText from '../components/CopyText.vue';
 import TransactionDetailsPoolTokens from '../components/TransactionDetailsPoolTokens.vue';
 import TransactionErrorStatus from '../components/TransactionErrorStatus.vue';
 import { ITransaction } from '../../types';
-import { useTransactionToken } from '../../composables';
-import { useGetter } from '../../composables/vuex';
+import { useTransactionToken, useGetter } from '../../composables';
 
 export default defineComponent({
   name: 'TransactionDetailsContent',
