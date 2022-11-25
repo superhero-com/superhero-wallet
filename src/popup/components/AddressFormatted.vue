@@ -14,9 +14,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
-
-import { checkAddress } from '../utils';
+import { computed, defineComponent } from '@vue/composition-api';
+import { validateHash } from '../utils';
 
 export default defineComponent({
   props: {
@@ -30,7 +29,10 @@ export default defineComponent({
       return chunk.length === maxLength ? chunk : `${chunk}${' '.repeat(maxLength - chunk.length)}`;
     };
 
-    const isAddress = computed(() => checkAddress(props.address));
+    const isAddress = computed(() => {
+      const { valid, isName } = validateHash(props.address);
+      return valid && !isName;
+    });
     const addressChunks = computed(() => props.address.match(/.{1,3}/g)?.map(prepareChunk));
     const cssVariable = computed(() => ({
       '--column-width': `${100 / props.columnCount}%`,

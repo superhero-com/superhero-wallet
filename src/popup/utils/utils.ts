@@ -1,7 +1,12 @@
 import BigNumber from 'bignumber.js';
 import { Observable } from 'rxjs';
 import { onUnmounted, Ref, ref } from '@vue/composition-api';
-import { HASH_REGEX, SIMPLEX_URL } from './constants';
+import {
+  ADDRESS_TYPES, AENS_DOMAIN,
+  HASH_PREFIX_CONTRACT,
+  HASH_REGEX,
+  SIMPLEX_URL,
+} from './constants';
 import { i18n } from '../../store/plugins/languages';
 
 export function isNumbersEqual(a: number, b: number) {
@@ -33,28 +38,38 @@ export function formatTime(time: number) {
   });
 }
 
-export function checkHashType(fullHash: string) {
-  const addressTypes: Record<string, string> = {
-    ak: 'account/transactions',
-    ct: 'contracts/transactions',
-    nm: 'names',
-    ok: 'oracles/queries',
-    th: 'transactions',
-  };
-  const [prefix, hash] = fullHash.split('_');
+export const validateHash = (fullHash?: string) => {
+  const isName = !!fullHash?.endsWith(AENS_DOMAIN);
+  let valid = false;
+  let prefix = null;
+  let hash = null;
 
-  let valid: boolean = false;
-  let endpoint: string | null = null;
-
-  if (fullHash.endsWith('.chain')) {
-    valid = true;
-    endpoint = addressTypes.nm;
-  } else if (addressTypes[prefix] && HASH_REGEX.test(hash)) {
-    valid = true;
-    endpoint = addressTypes[prefix];
+  if (fullHash) {
+    [prefix, hash] = fullHash.split('_');
+    valid = (ADDRESS_TYPES[prefix] && HASH_REGEX.test(hash)) || isName;
   }
 
-  return { valid, endpoint, prefix };
+  return {
+    valid, isName, prefix, hash,
+  };
+};
+
+export function getMdwEndpointPrefixForHash(fullHash: string) {
+  const { valid, isName, prefix } = validateHash(fullHash);
+
+  if (!valid || !prefix) {
+    return null;
+  }
+
+  if (isName) {
+    return ADDRESS_TYPES.nm;
+  }
+  return ADDRESS_TYPES[prefix];
+}
+
+export function isContract(fullHash: string) {
+  const { valid, prefix } = validateHash(fullHash);
+  return (valid && prefix === HASH_PREFIX_CONTRACT);
 }
 
 export function escapeSpecialChars(str = '') {

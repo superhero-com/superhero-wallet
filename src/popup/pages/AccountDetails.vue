@@ -68,10 +68,10 @@ import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
   DEX_URL,
+  EXTENSION_HEIGHT,
   buildSimplexLink,
 } from '../utils';
 import { IS_CORDOVA } from '../../lib/environment';
-import { EXTENSION_HEIGHT } from '../utils/constants';
 
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
