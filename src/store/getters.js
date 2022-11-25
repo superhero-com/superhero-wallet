@@ -10,11 +10,12 @@ import {
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
   TX_TYPE_MDW,
-  checkHashType,
+  validateHash,
   convertToken,
   aettosToAe,
   categorizeContractCallTxObject,
   getHdWalletAccount,
+  getMdwEndpointPrefixForHash,
   AETERNITY_CONTRACT_ID,
 } from '../popup/utils';
 
@@ -75,8 +76,12 @@ export default {
     );
   },
   getExplorerPath: (_, { activeNetwork: { explorerUrl } }) => (hash) => {
-    const { endpoint, valid } = checkHashType(hash);
-    return valid ? `${explorerUrl}/${endpoint}/${hash}` : null;
+    const { valid } = validateHash(hash);
+    if (!valid) {
+      return null;
+    }
+    const endpoint = getMdwEndpointPrefixForHash(hash);
+    return `${explorerUrl}/${endpoint}/${hash}`;
   },
   getTx: ({ transactions }, { activeNetwork }) => (hash) => transactions.loaded
     .concat(transactions.pending[activeNetwork.networkId])?.find((tx) => tx?.hash === hash),

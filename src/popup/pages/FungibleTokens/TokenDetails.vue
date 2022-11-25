@@ -88,8 +88,10 @@ import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
   AETERNITY_CONTRACT_ID,
+  AETERNITY_SYMBOL,
   buildSimplexLink,
-  watchUntilTruthy, AETERNITY_SYMBOL,
+  watchUntilTruthy,
+  isContract,
 } from '../../utils';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
@@ -128,7 +130,7 @@ export default {
     Tab,
   },
   props: {
-    id: { type: String, required: true },
+    id: { type: String, default: null },
   },
   data() {
     return {
@@ -154,7 +156,7 @@ export default {
       return this.availableTokens[this.id];
     },
     isAe() {
-      return this.id === AETERNITY_CONTRACT_ID;
+      return this.$route.meta.isAeCoinDetails || this.id === AETERNITY_CONTRACT_ID;
     },
     tokenData() {
       if (this.isAe) {
@@ -187,7 +189,7 @@ export default {
     },
   },
   async mounted() {
-    if (this.id.includes('ct_')) {
+    if (isContract(this.id)) {
       this.loading = true;
       await watchUntilTruthy(() => this.$store.state.sdk);
       this.tokenPairs = await this.$store.dispatch('fungibleTokens/getContractTokenPairs', this.id);

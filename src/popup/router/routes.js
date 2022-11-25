@@ -500,6 +500,7 @@ export default [
       closeButton: true,
       hideNotificationsIcon: true,
       modalHeader: true,
+      isAeCoinDetails: true,
     },
   },
   {
