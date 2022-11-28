@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { defineComponent } from '@vue/composition-api';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressFormatted from './AddressFormatted.vue';
@@ -63,10 +63,17 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .transaction-info-details-party {
+  $padding-edge: 4px;
+  $padding-middle: 11px;
+
   width: 50%;
-  max-width: 50%;
+  padding-left: $padding-edge;
+  padding-right: $padding-middle;
 
   &.recipient {
+    padding-left: $padding-middle;
+    padding-right: $padding-edge;
+
     .name {
       text-align: right;
     }

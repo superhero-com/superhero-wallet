@@ -155,8 +155,7 @@ export default {
   .details {
     display: flex;
     justify-content: space-between;
-    padding: 0 4px;
-    gap: 22px;
+    overflow: hidden;
   }
 }
 </style>
