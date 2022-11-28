@@ -25,23 +25,30 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import { watchUntilTruthy } from '../utils/helper';
-import deeplinkApi from '../../mixins/deeplinkApi';
+import { useDeepLinkApi } from '../../composables';
 
-export default {
+export default defineComponent({
+  name: 'SignMessage',
   components: { BtnMain },
-  mixins: [deeplinkApi],
-  methods: {
-    async sendAddress() {
-      await watchUntilTruthy(() => this.$store.state.sdk);
-      const signature = await this.$store.state.sdk.signMessage(this.$route.query.message);
+  setup(props, { root }) {
+    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+
+    const sendAddress = async () => {
+      await watchUntilTruthy(() => root.$store.state.sdk);
+      const signature = await root.$store.state.sdk.signMessage(root.$route.query.message);
       const signatureHex = Buffer.from(signature).toString('hex');
-      this.openCallbackOrGoHome(true, { signature: signatureHex });
-    },
+      openCallbackOrGoHome(true, { signature: signatureHex });
+    };
+
+    return {
+      sendAddress,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

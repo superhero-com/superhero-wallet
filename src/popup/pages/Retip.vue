@@ -5,7 +5,10 @@
       {{ $t('pages.tipPage.url') }}
     </div>
 
-    <div class="url-bar">
+    <div
+      v-if="urlStatus"
+      class="url-bar"
+    >
       <UrlStatus :status="urlStatus" />
       <a>{{ tip.url }}</a>
     </div>
@@ -23,7 +26,7 @@
       show-tokens-with-balance
       :message="validationStatus.msg || errors.first('amount')"
       :selected-asset="formModel.selectedAsset"
-      @asset-selected="(val) => $set(formModel, 'selectedAsset', val)"
+      @asset-selected="handleAssetChange"
     />
     <div
       v-if="tip.title"
@@ -32,13 +35,21 @@
       {{ tip.title }}
     </div>
 
+    <pre>{{ validationStatus }}</pre>
+
     <BtnMain
+      class="bottom-btn"
+      extend
       :disabled="!tippingSupported || validationStatus.error || $validator.errors.has('amount')"
       @click="sendTip"
     >
       {{ $t('pages.tipPage.confirm') }}
     </BtnMain>
-    <BtnMain @click="openCallbackOrGoHome(false)">
+    <BtnMain
+      class="bottom-btn"
+      extend
+      @click="openCallbackOrGoHome(false)"
+    >
       {{ $t('pages.tipPage.cancel') }}
     </BtnMain>
 
@@ -46,129 +57,188 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapState } from 'vuex';
+<script lang="ts">
+import {
+  defineComponent,
+  onMounted,
+  ref,
+  computed,
+  Ref,
+} from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { MAGNITUDE, AETERNITY_CONTRACT_ID } from '../utils/constants';
-import { convertToken, watchUntilTruthy } from '../utils';
-import deeplinkApi from '../../mixins/deeplinkApi';
-import maxAmountMixin from '../../mixins/maxAmountMixin';
+import VueI18n from 'vue-i18n';
+import type { IAsset, IToken } from '../../types';
+import { MAGNITUDE, AETERNITY_CONTRACT_ID, MODAL_DEFAULT } from '../utils/constants';
+import { convertToken, watchUntilTruthy, rxJsObservableToVueState } from '../utils';
+import { IPendingTransaction } from '../../types';
+import {
+  useDeepLinkApi,
+  useMaxAmount,
+  useGetter,
+  useState,
+} from '../../composables';
 import InputAmount from '../components/InputAmountV2.vue';
 import UrlStatus from '../components/UrlStatus.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
 
-export default {
+export default defineComponent({
+  name: 'Retip',
   components: {
     InputAmount, UrlStatus, BtnMain, BalanceInfo,
   },
-  mixins: [deeplinkApi, maxAmountMixin],
-  data: () => ({
-    tip: {},
-    formModel: {
-      amount: null,
+  setup(props, { root }) {
+    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+    const tipId = root.$route.query.id;
+    const tip = ref<{url: string, id: string}>({
+      url: 'default',
+      id: '',
+    });
+    const formModel = ref<{
+      amount: number;
+      selectedAsset: IToken | IAsset | null
+    }>({
+      amount: 0,
       selectedAsset: null,
-    },
-    loading: false,
-  }),
-  computed: {
-    ...mapGetters(['account', 'tippingSupported']),
-    ...mapGetters('fungibleTokens', ['getAeternityToken']),
-    ...mapState({
-      tippingV1: 'tippingV1',
-      tippingV2: 'tippingV2',
-      urlStatus(state, getters) {
-        return getters['tipUrl/status'](this.tip.url);
-      },
+    });
+    const {
+      max,
+      fee,
+      balance,
+      account,
+    } = useMaxAmount({ formModel });
+    const balanceCurrency = rxJsObservableToVueState(
+      root.$store.state.observables.balanceCurrency,
+    ) as Ref<number>;
 
-      validationStatus({ sdk }, { minTipAmount }) {
-        if (!sdk || !this.tippingContract) {
-          return { error: true };
-        }
-        if (this.formModel.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
-          && this.$route.query.id.includes('_v1')) {
-          return { error: true, msg: this.$t('pages.tipPage.v1FungibleTokenTipError') };
-        }
-        if (this.formModel.selectedAsset.contractId === AETERNITY_CONTRACT_ID
-          && +this.formModel.amount < minTipAmount) {
-          return { error: true, msg: this.$t('pages.tipPage.minAmountError') };
-        }
-        return { error: false };
-      },
-    }),
-    tippingContract() {
-      return this.$route.query.id.includes('_v2') || this.$route.query.id.includes('_v3')
-        ? this.tippingV2
-        : this.tippingV1;
-    },
-  },
-  async created() {
-    this.loading = true;
-    this.formModel.selectedAsset = this.getAeternityToken({
-      tokenBalance: this.balance,
-      balanceCurrency: this.balanceCurrency,
+    const loading = ref<boolean>(false);
+    const getAeternityToken = useGetter('fungibleTokens/getAeternityToken');
+    const sdk = useState('sdk');
+    const tippingV1 = useState('tippingV1');
+    const tippingV2 = useState('tippingV2');
+    const tippingSupported = useGetter('tippingSupported');
+    const minTipAmount = useGetter('minTipAmount');
+    const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
+    const tippingContract = computed(
+      () => tipId.includes('_v2') || tipId.includes('_v3')
+        ? tippingV2.value
+        : tippingV1.value,
+    );
+    const validationStatus = computed<{
+      error: boolean, msg?: string | VueI18n.TranslateResult
+    }>(() => {
+      if (!sdk.value || !tippingContract.value) {
+        return { error: true };
+      }
+      if (formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID
+        && tipId.includes('_v1')) {
+        return { error: true, msg: root.$t('pages.tipPage.v1FungibleTokenTipError') };
+      }
+      if (formModel.value.selectedAsset?.contractId === AETERNITY_CONTRACT_ID
+        && +formModel.value.amount < minTipAmount.value) {
+        return { error: true, msg: root.$t('pages.tipPage.minAmountError') };
+      }
+      return { error: false };
     });
 
-    const tipId = this.$route.query.id;
-    if (!tipId) throw new Error('"id" param is missed');
-    this.tip = await this.$store.dispatch('getCacheTip', tipId);
-    this.loading = false;
-  },
-  methods: {
-    async sendTip() {
+    async function sendTip() {
       const amount = convertToken(
-        this.formModel.amount,
-        this.formModel.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
-          ? this.formModel.selectedAsset.decimals : MAGNITUDE,
+        formModel.value.amount,
+        formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID
+          ? (formModel.value.selectedAsset as IToken).decimals
+          : MAGNITUDE,
       ).toFixed();
-      this.loading = true;
-      await watchUntilTruthy(() => this.tippingV1);
+      loading.value = true;
+      await watchUntilTruthy(() => tippingV1.value);
       try {
         let retipResponse = null;
-        if (this.formModel.selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-          await this.$store.dispatch('fungibleTokens/createOrChangeAllowance',
-            [this.formModel.selectedAsset.contractId, this.formModel.amount]);
-          retipResponse = await this.tippingV2.methods.retip_token(
-            +this.tip.id.split('_')[0],
-            this.formModel.selectedAsset.contractId,
+        if (formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID) {
+          await root.$store.dispatch(
+            'fungibleTokens/createOrChangeAllowance',
+            [
+              formModel.value.selectedAsset?.contractId,
+              formModel.value.amount],
+          );
+
+          retipResponse = await tippingV2.value.methods.retip_token(
+            +tip.value.id.split('_')[0],
+            formModel.value.selectedAsset?.contractId,
             amount,
             {
               waitMined: false,
             },
           );
         } else {
-          retipResponse = await this.tippingContract.methods.retip(+this.tip.id.split('_')[0], {
+          retipResponse = await tippingContract.value.methods.retip(+tip.value.id.split('_')[0], {
             amount,
             waitMined: false,
           });
         }
-        this.$store.dispatch('addPendingTransaction', {
+        const transaction: IPendingTransaction = {
           hash: retipResponse.hash,
           amount,
-          tipUrl: this.tip.url,
+          tipUrl: tip.value.url,
           tx: {
-            callerId: this.account.address,
-            contractId: this.tippingContract.deployInfo.address,
+            callerId: account.value.address,
+            contractId: tippingContract.value.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'retip',
-            selectedTokenContractId: this.formModel.selectedAsset?.contractId,
+            selectedTokenContractId: formModel.value.selectedAsset?.contractId,
           },
-        });
-        this.openCallbackOrGoHome(true);
-      } catch (e) {
-        this.$store.dispatch('modals/open', {
-          name: 'default',
-          title: this.$t('modals.transaction-failed.msg'),
+        };
+        root.$store.dispatch('addPendingTransaction', transaction);
+        openCallbackOrGoHome(true);
+      } catch (error: any) {
+        root.$store.dispatch('modals/open', {
+          name: MODAL_DEFAULT,
+          title: root.$t('modals.transaction-failed.msg'),
           icon: 'critical',
         });
-        e.payload = this.tip;
-        throw e;
+        error.payload = tip.value;
+        throw error;
       } finally {
-        this.loading = false;
+        loading.value = false;
       }
-    },
+    }
+
+    function handleAssetChange(selectedAsset: any) {
+      formModel.value.selectedAsset = selectedAsset;
+    }
+
+    onMounted(async () => {
+      loading.value = true;
+      formModel.value.selectedAsset = getAeternityToken.value({
+        tokenBalance: balance.value,
+        balanceCurrency: balanceCurrency.value,
+      });
+
+      if (!tipId) throw new Error('"id" param is missing');
+
+      try {
+        tip.value = await root.$store.dispatch('getCacheTip', tipId);
+      } catch (error: any) {
+        error.payload = tipId;
+        throw error;
+      }
+      loading.value = false;
+    });
+
+    return {
+      handleAssetChange,
+      tip,
+      formModel,
+      loading,
+      urlStatus,
+      validationStatus,
+      tippingSupported,
+      sendTip,
+      max,
+      fee,
+      balance,
+      openCallbackOrGoHome,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -176,6 +246,8 @@ export default {
 @use '../../styles/typography';
 
 .retip {
+  padding: 16px;
+
   .url-bar {
     display: flex;
     align-items: center;
@@ -209,6 +281,11 @@ export default {
     text-align: left;
 
     @extend %face-sans-16-regular;
+  }
+
+  .bottom-btn {
+    max-width: 280px;
+    margin: 10px auto 0;
   }
 }
 </style>
