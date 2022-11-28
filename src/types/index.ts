@@ -133,20 +133,23 @@ export type TxFunction = 'addLiquidity' |
 
 export interface ITx {
   abiVersion: number,
-  amount: number
-  contractId: string
-  fee: number
+  amount: number,
+  contractId: string,
+  fee: number,
   function: string,
   gas: number,
   gasPrice: number,
   gasUsed: number,
   nonce: number,
-  result: string
-  return:string
-  returnType: string
-  type: string
-  callerId: string
-  arguments: ITxArguments[]
+  result: string,
+  return:string,
+  returnType: string,
+  type: string,
+  callerId: string,
+  senderId?: string,
+  recipientId?: string,
+  selectedTokenContractId?: string,
+  arguments: ITxArguments[],
 }
 export interface ITransaction {
   blockHeight: number;
@@ -157,6 +160,16 @@ export interface ITransaction {
   incomplete: any // TODO find type
   pending: any // TODO find type
   tx: ITx
+}
+
+export interface IPendingTransaction {
+  hash: string,
+  amount: number | string,
+  type?: string,
+  recipient?: string,
+  pendingTokenTx?: boolean,
+  tipUrl?: string,
+  tx: Partial<ITx>
 }
 
 export type TransactionType =
