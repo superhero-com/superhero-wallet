@@ -67,15 +67,19 @@ export default {
       `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn`,
     );
     if (response.message) return [];
-    const tipWithdrawnTransactions = (uniqBy(response, 'hash').map(({ amount, ...t }) => ({
+    const tipWithdrawnTransactions = (uniqBy(response, 'hash').map(({
+      amount, contract, height, data: { tx }, ...t
+    }) => ({
       tx: {
+        ...tx,
         address,
         amount,
-        contractId: t.contract,
+        contractId: contract,
         type: SCHEMA.TX_TYPE.contractCall,
       },
       ...t,
       microTime: new Date(t.createdAt).getTime(),
+      blockHeight: height,
       claim: true,
     })));
     commit('setTipWithdrawnTransactions', tipWithdrawnTransactions);
