@@ -1,30 +1,14 @@
 <template>
   <div class="notifications">
-    <div class="tabs-wrapper">
-      <Tabs>
-        <Tab
-          :text="$t('pages.notifications.all')"
-          :active="direction === DIR_ALL"
-          @click="direction = DIR_ALL"
-        />
-        <Tab
-          :text="$t('pages.notifications.superhero')"
-          :active="direction === DIR_SUPERHERO"
-          @click="direction = DIR_SUPERHERO"
-        />
-        <Tab
-          :text="$t('pages.notifications.wallet')"
-          :active="direction === DIR_WALLET"
-          @click="direction = DIR_WALLET"
-        />
-      </Tabs>
-    </div>
-
-    <div class="list">
+    <InfiniteScroll
+      :is-more-data="canLoadMore"
+      @loadMore="loadMore"
+    >
       <NotificationItem
-        v-for="notification in filteredNotifications"
+        v-for="notification in notificationsToShow"
         :key="notification.id"
         :address="notification.sender || ''"
+        :id="notification.id"
         :name="
           notification.wallet ? notification.title : notification.chainName || 'Fellow Superhero'
         "
@@ -36,7 +20,7 @@
         @click="onClickHandler(notification)"
         @toggle-read="toggleNotificationStatus(notification)"
       />
-    </div>
+    </InfiniteScroll>
   </div>
 </template>
 
@@ -44,8 +28,10 @@
 import {
   computed,
   defineComponent,
+  onMounted,
   Ref,
   ref,
+  watch,
 } from '@vue/composition-api';
 import type { INotification, INotificationSetting, NotificationStatus } from '../../types';
 import {
@@ -63,23 +49,25 @@ import {
   rxJsObservableToVueState,
 } from '../utils';
 import NotificationItem from '../components/NotificationItem.vue';
-import Tabs from '../components/tabs/Tabs.vue';
-import Tab from '../components/tabs/Tab.vue';
 import { IS_MOBILE_DEVICE } from '../../lib/environment';
+import InfiniteScroll from '../components/InfiniteScroll.vue';
 
 const DIR_ALL = 'all';
 const DIR_WALLET = 'wallet';
 const DIR_SUPERHERO = 'superhero';
 
+const COUNT_OF_CHUNK = 20;
+
 export default defineComponent({
   name: 'Notifications',
   components: {
+    InfiniteScroll,
     NotificationItem,
-    Tabs,
-    Tab,
   },
   setup(props, { root }) {
     const direction = ref(DIR_ALL);
+    const notificationsToShow = ref<INotification[]>([]);
+    const canLoadMore = ref(true);
 
     const notifications = computed<INotification[]>(
       () => root.$store.state.notifications,
@@ -100,13 +88,6 @@ export default defineComponent({
 
     const filteredNotifications = computed<INotification[]>(
       () => [...superheroNotifications.value, ...notifications.value]
-        .filter(
-          ({ type }) => (
-            direction.value === DIR_ALL
-            || (direction.value === DIR_SUPERHERO && type !== NOTIFICATION_TYPE_WALLET)
-            || (direction.value === DIR_WALLET && type === NOTIFICATION_TYPE_WALLET)
-          ),
-        )
         .filter(
           ({ status, type }) => (
             status === NOTIFICATION_STATUS_READ
@@ -193,15 +174,37 @@ export default defineComponent({
 
     setNotificationsStatusesAsPeeked();
 
+    const loadMore = () => {
+      canLoadMore.value = false;
+      const from = notificationsToShow.value.length;
+      const to = from + COUNT_OF_CHUNK;
+      notificationsToShow.value.push(...filteredNotifications.value.slice(from, to));
+      if (notificationsToShow.value.length < filteredNotifications.value.length) {
+        canLoadMore.value = true;
+      }
+    };
+
+    watch(() => filteredNotifications.value, () => {
+      notificationsToShow.value = [];
+      loadMore();
+    });
+
+    onMounted(() => {
+      loadMore();
+    });
+
     return {
       DIR_WALLET,
       DIR_SUPERHERO,
       DIR_ALL,
       direction,
       filteredNotifications,
+      notificationsToShow,
+      canLoadMore,
       getNotificationText,
       onClickHandler,
       toggleNotificationStatus,
+      loadMore,
     };
   },
 });
