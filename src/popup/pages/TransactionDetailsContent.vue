@@ -348,6 +348,10 @@ export default defineComponent({
       .tip-url {
         width: 100%;
 
+        .copy-text {
+          width: 100%;
+        }
+
         .link-button {
           display: block;
         }
