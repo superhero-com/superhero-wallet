@@ -239,7 +239,7 @@ export default defineComponent({
 
     const isPool = computed(() => FUNCTION_TYPE_DEX.pool.includes(props.transaction?.tx?.function || ''));
 
-    const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl : `http://${tipUrl.value}`);
+    const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
 
     return {
       AETERNITY_SYMBOL,
