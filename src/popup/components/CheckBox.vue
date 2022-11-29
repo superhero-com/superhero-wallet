@@ -16,6 +16,7 @@
     <div
       v-if="$slots.default"
       class="label-text"
+      :class="{ checked: value }"
     >
       <slot />
     </div>
@@ -47,11 +48,18 @@ export default {
   -ms-user-select: none;
   user-select: none;
 
-  &:hover,
-  &:active {
+  & > * {
+    transition: all 0.15s ease-in-out;
+  }
+
+  &:hover {
     .checkmark {
       border-color: rgba(variables.$color-white, 0.5);
-      background-color: variables.$color-bg-2;
+      background-color: variables.$color-bg-1-hover;
+    }
+
+    .label-text {
+      color: rgba(variables.$color-white, 0.75);
     }
   }
 
@@ -67,10 +75,10 @@ export default {
     background-color: variables.$color-bg-1;
     border: 1px solid rgba(variables.$color-white, 0.3);
     box-shadow: inset 1 1 4px rgba(variables.$color-black, 0.25);
-    border-radius: 2px;
+    border-radius: 4px;
     height: 20px;
     width: 20px;
-    margin-right: 15px;
+    margin-right: 10px;
     flex-shrink: 0;
 
     &.checked {
@@ -82,6 +90,14 @@ export default {
       &.disabled {
         filter: brightness(0.8);
       }
+    }
+  }
+
+  .label-text {
+    color: rgba(variables.$color-white, 0.5);
+
+    &.checked {
+      color: variables.$color-white;
     }
   }
 }
