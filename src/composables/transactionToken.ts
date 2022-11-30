@@ -32,6 +32,7 @@ export const useTransactionToken = (
   const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
 
   const getTxAmountTotal = useGetter('getTxAmountTotal');
+  const isTxAex9 = useGetter('isTxAex9');
 
   const getTxSymbol = useGetter('getTxSymbol');
   const getTxType = useGetter('getTxType');
@@ -71,7 +72,12 @@ export const useTransactionToken = (
         : getTxAmountTotal.value(transaction.value),
       symbol: isAllowance.value ? AETERNITY_SYMBOL : getTxSymbol.value(transaction.value),
       isReceived: getTxDirection.value(transaction.value) === 'received',
-      isAe: isAllowance.value || getTxSymbol.value(transaction.value) === AETERNITY_SYMBOL,
+      isAe:
+        isAllowance.value
+        || (
+          getTxSymbol.value(transaction.value) === AETERNITY_SYMBOL
+          && !isTxAex9.value(transaction.value)
+        ),
     }];
   });
 
