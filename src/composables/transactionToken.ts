@@ -46,7 +46,8 @@ export const useTransactionToken = (
   });
 
   const tokens = computed<ITokenTransactionComposable[]>(() => {
-    if (!transaction
+    if (
+      transaction
       && transactionFunction.value
       && (!isAllowance.value || showDetailedAllowanceInfo)
     ) {
@@ -71,9 +72,10 @@ export const useTransactionToken = (
     },
   );
 
-  const isDex = computed(() => transactionFunction.value
-      && (getDexContracts.value.router.includes(transaction?.tx?.contractId)
-        || getDexContracts.value.includes(transaction?.tx?.contractId)));
+  const isDex = computed(() => getDexContracts.value && transaction.tx.contractId && (
+    getDexContracts.value.router.includes(transaction.tx.contractId)
+    || getDexContracts.value.wae?.includes(transaction.tx.contractId)
+  ));
 
   return {
     txType,
