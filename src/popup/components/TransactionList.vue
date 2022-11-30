@@ -56,7 +56,7 @@ import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
 import InputSearch from './InputSearch.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
-import { TXS_PER_PAGE, FUNCTION_TYPE_DEX, AETERNITY_CONTRACT_ID } from '../utils/constants';
+import { TXS_PER_PAGE, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import Visible from '../../icons/visible.svg?vue-component';
 
 export default {
@@ -86,6 +86,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['getDexContracts', 'getTxSymbol']),
     ...mapState('fungibleTokens', ['availableTokens']),
     ...mapState(['transactions']),
     ...mapState({
@@ -106,7 +107,10 @@ export default {
               case 'all':
                 return true;
               case 'dex':
-                return FUNCTION_TYPE_DEX.pool.includes(tr.tx.function);
+                return this.getDexContracts && tr.tx.contractId && (
+                  this.getDexContracts.router.includes(tr.tx.contractId)
+                  || this.getDexContracts.wae?.includes(tr.tx.contractId)
+                );
               case 'out':
                 return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
                     && tr.tx.senderId === address)
@@ -142,7 +146,6 @@ export default {
           .slice(0, this.maxLength || Infinity);
       },
     }),
-    ...mapGetters(['getTxSymbol']),
     showSearchAndFilters() {
       return (
         this.showFilters
