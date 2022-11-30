@@ -52,6 +52,8 @@ import {
   NOTIFICATION_DEFAULT_SETTINGS,
   NODE_STATUS_OFFLINE,
   NODE_STATUS_CONNECTION_DONE,
+  APP_LINK_FIREFOX,
+  APP_LINK_CHROME,
   watchUntilTruthy,
 } from './utils';
 import {
@@ -60,6 +62,8 @@ import {
   IS_MOBILE_DEVICE,
   IS_CORDOVA,
   IS_EXTENSION,
+  IS_CHROME_BASED,
+  IS_FIREFOX,
 } from '../lib/environment';
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
@@ -96,10 +100,19 @@ export default defineComponent({
     async function checkExtensionUpdates() {
       if (IS_EXTENSION && browser?.runtime?.requestUpdateCheck) {
         const [update] = await browser.runtime.requestUpdateCheck();
+        let path = '';
+        if (IS_FIREFOX) {
+          path = APP_LINK_FIREFOX;
+        }
+        if (IS_CHROME_BASED) {
+          path = APP_LINK_CHROME;
+        }
         if (update === 'update_available') {
           root.$store.commit('addNotification', {
-            text: root.$t('pages.account.updateAvailable'),
-            path: '',
+            text: root.$t('pages.account.updateAvailableText'),
+            title: root.$t('pages.account.updateAvailable'),
+            buttonLabel: root.$t('pages.notifications.goToStore'),
+            path,
           });
         }
       }
@@ -119,8 +132,11 @@ export default defineComponent({
     watch(isLoggedIn, (val) => {
       if (val && !backedUpSeed.value) {
         root.$store.commit('addNotification', {
-          text: root.$t('pages.account.seedNotification', [root.$t('pages.account.backup')]),
+          title: root.$t('pages.account.secureYourAccount'),
+          text: root.$t('pages.account.seedNotification'),
+          buttonLabel: root.$t('pages.account.backupNow'),
           path: '/more/settings/seed-phrase',
+          isSeedBackup: true,
         });
       }
     });

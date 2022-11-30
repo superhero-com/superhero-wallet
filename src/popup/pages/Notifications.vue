@@ -7,18 +7,7 @@
       <NotificationItem
         v-for="notification in notificationsToShow"
         :key="notification.id"
-        :address="notification.sender || ''"
-        :id="notification.id"
-        :name="
-          notification.wallet ? notification.title : notification.chainName || 'Fellow Superhero'
-        "
-        :text="getNotificationText(notification)"
-        :date="new Date(notification.createdAt)"
-        :to="notification.path"
-        :status="notification.status"
-        v-bind="notification.wallet && { wallet: true }"
-        @click="onClickHandler(notification)"
-        @toggle-read="toggleNotificationStatus(notification)"
+        :notification="notification"
       />
     </InfiniteScroll>
   </div>
@@ -27,34 +16,19 @@
 <script lang="ts">
 import {
   computed,
-  defineComponent,
+  defineComponent, onBeforeUnmount,
   onMounted,
   Ref,
   ref,
   watch,
 } from '@vue/composition-api';
-import type { INotification, INotificationSetting, NotificationStatus } from '../../types';
+import type { INotification, INotificationSetting } from '../../types';
 import {
-  NOTIFICATION_STATUS_CREATED,
-  NOTIFICATION_STATUS_PEEKED,
-  NOTIFICATION_STATUS_READ,
-  NOTIFICATION_TYPE_WALLET,
-  NOTIFICATION_TYPE_COMMENT_ON_TIP,
-  NOTIFICATION_TYPE_COMMENT_ON_COMMENT,
-  NOTIFICATION_TYPE_TIP_ON_COMMENT,
-  NOTIFICATION_TYPE_CLAIM_OF_TIP,
-  NOTIFICATION_TYPE_CLAIM_OF_RETIP,
-  NOTIFICATION_TYPE_RETIP_ON_TIP,
-  waitUntilTruthy,
+  NOTIFICATION_STATUS_READ, NOTIFICATION_TYPE_WALLET,
   rxJsObservableToVueState,
 } from '../utils';
 import NotificationItem from '../components/NotificationItem.vue';
-import { IS_MOBILE_DEVICE } from '../../lib/environment';
 import InfiniteScroll from '../components/InfiniteScroll.vue';
-
-const DIR_ALL = 'all';
-const DIR_WALLET = 'wallet';
-const DIR_SUPERHERO = 'superhero';
 
 const COUNT_OF_CHUNK = 20;
 
@@ -65,7 +39,6 @@ export default defineComponent({
     NotificationItem,
   },
   setup(props, { root }) {
-    const direction = ref(DIR_ALL);
     const notificationsToShow = ref<INotification[]>([]);
     const canLoadMore = ref(true);
 
@@ -97,84 +70,7 @@ export default defineComponent({
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     );
 
-    async function modifyNotificationStatus(
-      notification: INotification,
-      status: NotificationStatus,
-    ) {
-      if (notification.type === NOTIFICATION_TYPE_WALLET) {
-        root.$store.commit('setNotificationsStatus', { createdAt: notification.createdAt, status });
-      } else {
-        await root.$store.dispatch('modifyNotification', [notification.id, status]);
-
-        const storedNotification = superheroNotifications.value
-          .find((n) => n.id === notification.id);
-
-        if (storedNotification) {
-          storedNotification.status = status;
-        }
-      }
-    }
-
-    async function toggleNotificationStatus(notification: INotification) {
-      const newStatus = (notification.status === NOTIFICATION_STATUS_READ)
-        ? NOTIFICATION_STATUS_CREATED
-        : NOTIFICATION_STATUS_READ;
-      return modifyNotificationStatus(notification, newStatus);
-    }
-
-    async function onClickHandler(notification: INotification) {
-      await modifyNotificationStatus(notification, NOTIFICATION_STATUS_READ);
-      if (notification.path) {
-        if (typeof notification.path === 'string' && /^\w+:\D+/.test(notification.path)) {
-          window.open(notification.path, IS_MOBILE_DEVICE ? '_self' : '_blank');
-        } else {
-          root.$router.push(notification.path);
-        }
-      }
-    }
-
-    function getNotificationText(notification: INotification) {
-      switch (notification.type) {
-        case NOTIFICATION_TYPE_COMMENT_ON_COMMENT:
-          return root.$t('pages.notifications.commentOnComment');
-        case NOTIFICATION_TYPE_COMMENT_ON_TIP:
-          return root.$t('pages.notifications.commentOnTip');
-        case NOTIFICATION_TYPE_TIP_ON_COMMENT:
-          return root.$t('pages.notifications.tipOnComment');
-        case NOTIFICATION_TYPE_RETIP_ON_TIP:
-          return root.$t('pages.notifications.retipOnTip');
-        case NOTIFICATION_TYPE_CLAIM_OF_TIP:
-          return root.$t('pages.notifications.claimOfTip');
-        case NOTIFICATION_TYPE_CLAIM_OF_RETIP:
-          return root.$t('pages.notifications.claimOfRetip');
-        case NOTIFICATION_TYPE_WALLET:
-          return notification.text;
-        default:
-          throw new Error(`Unknown notification status: ${notification.type}`);
-      }
-    }
-
-    async function setNotificationsStatusesAsPeeked() {
-      await waitUntilTruthy(() => root.$store.getters['sdkPlugin/sdk']);
-
-      notifications.value
-        .filter(({ status }) => status === NOTIFICATION_STATUS_CREATED)
-        .forEach(({ createdAt }) => root.$store.commit('setNotificationsStatus', {
-          createdAt,
-          status: NOTIFICATION_STATUS_PEEKED,
-        }));
-
-      await root.$store.dispatch('modifyNotifications', [
-        superheroNotifications.value
-          .filter(({ status }) => status === NOTIFICATION_STATUS_CREATED)
-          .map(({ id }) => id),
-        NOTIFICATION_STATUS_PEEKED,
-      ]);
-    }
-
-    setNotificationsStatusesAsPeeked();
-
-    const loadMore = () => {
+    function loadMore() {
       canLoadMore.value = false;
       const from = notificationsToShow.value.length;
       const to = from + COUNT_OF_CHUNK;
@@ -182,7 +78,30 @@ export default defineComponent({
       if (notificationsToShow.value.length < filteredNotifications.value.length) {
         canLoadMore.value = true;
       }
-    };
+    }
+
+    async function handleMarkAsReadSuperhero() {
+      const unreadNotificationsIds = superheroNotifications.value
+        .filter((notification) => notification.status !== NOTIFICATION_STATUS_READ)
+        .map((notification) => notification.id);
+      await root.$store.dispatch('modifyNotifications', [unreadNotificationsIds, NOTIFICATION_STATUS_READ]);
+
+      // TODO - come up with better way of updating the statuses locally
+      filteredNotifications.value.map((notification) => {
+        // eslint-disable-next-line no-param-reassign
+        notification.status = NOTIFICATION_STATUS_READ;
+        return notification;
+      });
+    }
+
+    function handleMarkAsReadWallet() {
+      notifications.value.map((notification) => {
+        if (notification.type === NOTIFICATION_TYPE_WALLET) {
+          root.$store.commit('setNotificationsStatus', { createdAt: notification.createdAt, status: NOTIFICATION_STATUS_READ });
+        }
+        return notification;
+      });
+    }
 
     watch(() => filteredNotifications.value, () => {
       notificationsToShow.value = [];
@@ -193,17 +112,15 @@ export default defineComponent({
       loadMore();
     });
 
+    onBeforeUnmount(() => {
+      handleMarkAsReadWallet();
+      handleMarkAsReadSuperhero();
+    });
+
     return {
-      DIR_WALLET,
-      DIR_SUPERHERO,
-      DIR_ALL,
-      direction,
       filteredNotifications,
       notificationsToShow,
       canLoadMore,
-      getNotificationText,
-      onClickHandler,
-      toggleNotificationStatus,
       loadMore,
     };
   },

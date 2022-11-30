@@ -83,6 +83,7 @@ export interface IPermission {
 export type NotificationStatus = 'CREATED' | 'PEEKED' | 'READ';
 
 export interface INotification {
+  wallet?: boolean;
   chainName?: string
   createdAt: string
   entityId?: string
@@ -97,6 +98,9 @@ export interface INotification {
   text?: string
   type: string
   updatedAt?: string
+  isSeedBackup?: boolean
+  buttonLabel?: string,
+  title?: string,
 }
 
 export interface INotificationSetting {

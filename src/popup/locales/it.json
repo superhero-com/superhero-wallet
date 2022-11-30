@@ -149,10 +149,9 @@
       "noTransactionsFound": "Nessuna transazione trovato!",
       "balance": "Balance",
       "copied": "Copied!",
-      "seedNotification": "You need to {0} your seed phrase",
+      "seedNotification": "Welcome to Superhero wallet! Please backup your seed phrase! ",
       "backup": "backup",
       "updateExtension": "New version available! Please update your extension.",
-      "updateAvailable": "New version in store available!",
       "claim-name": "Claim your .chain name"
     },
     "claim": {

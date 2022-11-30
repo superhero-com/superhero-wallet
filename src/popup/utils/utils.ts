@@ -8,6 +8,7 @@ import {
   SIMPLEX_URL,
 } from './constants';
 import { i18n } from '../../store/plugins/languages';
+import dayjs from '../plugins/dayjsConfig';
 
 export function isNumbersEqual(a: number, b: number) {
   return new BigNumber(a).eq(b);
@@ -123,4 +124,9 @@ export function rxJsObservableToVueState(
 
 export function splitAddress(address: string | null): string {
   return address ? address.match(/.{1,3}/g)!.reduce((acc, current) => `${acc} ${current}`) : '';
+}
+
+export function relativeTimeTo(date: string) {
+  // @ts-ignore
+  return dayjs().to(dayjs(date));
 }

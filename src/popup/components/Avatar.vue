@@ -2,7 +2,7 @@
   <img
     class="avatar"
     :src="error ? avatar : profileImage"
-    :class="size"
+    :class="[size, { withBorder }]"
     @error="error = true"
   >
 </template>
@@ -22,6 +22,7 @@ export default {
       validator: (val) => SIZES.includes(val),
     },
     src: { type: String, default: '' },
+    withBorder: Boolean,
   },
   data: () => ({
     error: false,

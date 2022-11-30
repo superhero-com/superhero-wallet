@@ -31,11 +31,10 @@
           :value="address"
           :disabled="!canCopyAddress"
         >
-          <div class="ae-address">
-            <span>{{ truncatedAddress[0] }}</span>
-            <span>&middot;&middot;&middot;</span>
-            <span>{{ truncatedAddress[1] }}</span>
-          </div>
+          <AddressTruncated
+            :address="address"
+            class="ae-address"
+          />
         </CopyText>
       </div>
     </div>
@@ -44,13 +43,15 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { truncateAddress } from '../utils/helper';
+import { truncateAddress } from '../utils';
 import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
+import AddressTruncated from './AddressTruncated.vue';
 
 export default {
   components: {
+    AddressTruncated,
     Avatar,
     Truncate,
     CopyText,

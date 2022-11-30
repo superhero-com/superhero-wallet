@@ -385,10 +385,13 @@
       "latestTransactions": "Latest transactions",
       "noTransactionsFound": "No transactions found!",
       "balance": "Balance",
-      "seedNotification": "You need to {0} your seed phrase",
+      "secureYourAccount": "Secure your account",
+      "backupNow": "Back up now",
+      "seedNotification": "Welcome to Superhero wallet! Please backup your seed phrase! ",
       "backup": "backup",
       "updateExtension": "New version available! Please update your extension.",
-      "updateAvailable": "New version is available in the store!",
+      "updateAvailable": "Update available",
+      "updateAvailableText": "There is a new wallet version available for download in the store",
       "claim-name": "Claim your .chain name"
     },
     "accounts": {
@@ -744,14 +747,14 @@
       "all": "All",
       "wallet": "Wallet",
       "superhero": "Superhero.com",
-      "markAsRead": "Mark as Read",
-      "markAsUnread": "Mark as Unread",
       "commentOnComment": "replied to your comment.",
       "commentOnTip": "commented on your tip.",
       "tipOnComment": "tipped on your comment",
       "retipOnTip": "retipped your tip.",
       "claimOfTip": "claimed your tip.",
-      "claimOfRetip": "claimed your retip."
+      "claimOfRetip": "claimed your retip.",
+      "viewOnSuperhero": "View on Superhero.com",
+      "goToStore": "Go to store"
     },
     "notification-settings": {
       "description": "Wallet notifications are always on by default and you are not able of turning them off.",

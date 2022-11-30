@@ -107,7 +107,6 @@ export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 export const BUG_REPORT_URL = 'https://spgrrc00ymg.typeform.com/to/Kk3Zyjdr';
 
 export const NOTIFICATION_STATUS_CREATED = 'CREATED';
-export const NOTIFICATION_STATUS_PEEKED = 'PEEKED';
 export const NOTIFICATION_STATUS_READ = 'READ';
 
 export const NOTIFICATION_TYPE_WALLET = 'wallet';
