@@ -146,7 +146,7 @@ export const checkAensName = (value) => (
 
 export const getAddressByNameEntry = (nameEntry, pointer = 'account_pubkey') => ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
 
-export const validateSeedLength = (seed) => seed && seed.split(' ').length === SEED_LENGTH;
+export const validateSeedLength = (seed) => seed && seed.split(' ').length >= SEED_LENGTH;
 
 export const contractCall = async ({
   instance,
