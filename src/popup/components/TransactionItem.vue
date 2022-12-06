@@ -97,10 +97,9 @@ export default defineComponent({
 
     const labels = computed(() => {
       const transactionTypes = root.$t('transaction.type') as Record<TransactionType, any>;
-      const transactionType = txType.value;
 
       if (txType.value?.startsWith('name')) {
-        return [AENS, transactionTypes[transactionType]];
+        return [AENS, transactionTypes[txType.value]];
       }
       if (txType.value === SCHEMA.TX_TYPE.spend) {
         return [root.$t('transaction.type.spendTx'), getTxDirection.value(props.transaction) === 'sent' ? root.$t('transaction.spendType.out') : root.$t('transaction.spendType.in')];
@@ -119,14 +118,14 @@ export default defineComponent({
         && (props.transaction.tx.function === 'tip' || props.transaction.tx.function === 'retip')) || props.transaction.claim) {
         return [root.$t('pages.token-details.tip'), props.transaction.claim ? root.$t('transaction.spendType.in') : root.$t('transaction.spendType.out')];
       }
-      if (txType === SCHEMA.TX_TYPE.contractCall
+      if (txType.value === SCHEMA.TX_TYPE.contractCall
         && availableTokens.value[props.transaction.tx.contractId]
         && (props.transaction.tx.function === 'transfer' || props.transaction.incomplete)) {
         return [root.$t('transaction.type.spendTx'), props.transaction.tx.callerId === account.value.address
           ? root.$t('transaction.spendType.out') : root.$t('transaction.spendType.in')];
       }
 
-      return props.transaction.pending ? [] : [transactionTypes[transactionType]];
+      return props.transaction.pending ? [] : [transactionTypes[txType.value]];
     });
 
     const fiatAmount = computed(() => {
