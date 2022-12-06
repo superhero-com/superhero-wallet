@@ -28,7 +28,10 @@
           </template>
         </Card>
       </CardRow>
-      <CardRow v-if="!backedUpSeed">
+      <CardRow
+        v-if="!backedUpSeed"
+        data-cy="backup-seed-phrase"
+      >
         <Card
           :title="$t('dashboard.back-up-card.title')"
           :description="$t('dashboard.back-up-card.description')"

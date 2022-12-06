@@ -78,7 +78,7 @@ export default {
           key: 'name',
           placeholder: this.$t('pages.network.networkNamePlaceholder'),
           label: this.$t('pages.network.networkNameLabel'),
-          dateCy: 'network',
+          dataCy: 'network',
           textLimit: 17,
         },
         {

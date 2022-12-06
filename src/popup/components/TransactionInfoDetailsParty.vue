@@ -31,13 +31,14 @@
         :column-count="5"
         :align-right="isRecipient"
         class="text-address"
+        data-cy="address"
       />
     </CopyText>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { defineComponent } from '@vue/composition-api';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressFormatted from './AddressFormatted.vue';

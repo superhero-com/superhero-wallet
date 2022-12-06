@@ -38,7 +38,6 @@ export default {
   props: {
     type: { type: String, default: '' },
     value: { type: String, default: '' },
-    error: Boolean,
     placeholder: { type: String, default: '' },
     enterSubmit: Boolean,
     resizable: { type: Boolean, default: true },

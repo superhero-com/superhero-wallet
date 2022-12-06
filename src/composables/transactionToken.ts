@@ -1,4 +1,4 @@
-import { computed } from '@vue/composition-api';
+import { computed, ref } from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
 import type {
   ITransaction, ITokenList, ITx, TransactionType,
@@ -19,9 +19,15 @@ interface ITokenTransactionComposable extends ITx {
 }
 
 export const useTransactionToken = (
-  transaction: ITransaction,
+  initTransaction: ITransaction | undefined,
   showDetailedAllowanceInfo?: boolean,
 ) => {
+  const transaction = ref<ITransaction | undefined>(initTransaction);
+
+  function setTransaction(newTransaction: ITransaction) {
+    transaction.value = newTransaction;
+  }
+
   const fungibleTokens = useState('fungibleTokens');
   const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
 
@@ -32,49 +38,55 @@ export const useTransactionToken = (
   const getTxDirection = useGetter('getTxDirection');
   const getDexContracts = useGetter('getDexContracts');
 
-  const txType = computed<TransactionType>(() => getTxType.value(transaction));
+  const txType = computed<TransactionType>(() => getTxType.value(transaction.value));
 
-  const isAllowance = computed(() => FUNCTION_TYPE_DEX.allowance.includes(transaction?.tx?.function)
-      && availableTokens.value[transaction?.tx?.contractId]);
+  const isAllowance = computed(() => transaction.value
+    && FUNCTION_TYPE_DEX.allowance.includes(transaction.value.tx.function)
+    && availableTokens.value[transaction.value.tx.contractId]);
 
   const transactionFunction = computed(() => {
-    const functionName = camelCase(transaction?.tx?.function || '');
+    if (transaction.value) {
+      const functionName = camelCase(transaction.value.tx.function || '');
 
-    // TODO this line needs refactoring in TransactionResolver
-    // @ts-ignore
-    return TransactionResolver[functionName as string];
+      // TODO this line needs refactoring in TransactionResolver
+      // @ts-ignore
+      return TransactionResolver[functionName as string];
+    }
+    return null;
   });
 
   const tokens = computed<ITokenTransactionComposable[]>(() => {
     if (
-      transaction
+      transaction.value
       && transactionFunction.value
       && (!isAllowance.value || showDetailedAllowanceInfo)
     ) {
-      return transactionFunction.value(transaction, availableTokens.value).tokens;
+      return transactionFunction.value(transaction.value, availableTokens.value).tokens;
     }
-
+    if (!transaction.value) return [];
     return [{
-      ...transaction?.tx || {},
+      ...transaction.value.tx || {},
       amount: isAllowance.value
-        ? convertToken(transaction.tx.fee, -MAGNITUDE)
-        : getTxAmountTotal.value(transaction),
-      symbol: isAllowance.value ? AETERNITY_SYMBOL : getTxSymbol.value(transaction),
-      isReceived: getTxDirection.value(transaction) === 'received',
-      isAe: isAllowance.value || getTxSymbol.value(transaction) === AETERNITY_SYMBOL,
+        ? convertToken(transaction.value.tx.fee, -MAGNITUDE)
+        : getTxAmountTotal.value(transaction.value),
+      symbol: isAllowance.value ? AETERNITY_SYMBOL : getTxSymbol.value(transaction.value),
+      isReceived: getTxDirection.value(transaction.value) === 'received',
+      isAe: isAllowance.value || getTxSymbol.value(transaction.value) === AETERNITY_SYMBOL,
     }];
   });
 
   const isErrorTransaction = computed(
     () => {
-      const returnType = transaction?.tx?.returnType;
+      if (!transaction.value) return false;
+      const { returnType } = transaction.value.tx;
       return returnType && returnType !== RETURN_TYPE_OK;
     },
   );
 
-  const isDex = computed(() => getDexContracts.value && transaction.tx.contractId && (
-    getDexContracts.value.router.includes(transaction.tx.contractId)
-    || getDexContracts.value.wae?.includes(transaction.tx.contractId)
+  const isDex = computed(() => transaction.value
+    && getDexContracts.value && transaction.value.tx.contractId && (
+    getDexContracts.value.router.includes(transaction.value.tx.contractId)
+    || getDexContracts.value.wae.includes(transaction.value.tx.contractId)
   ));
 
   return {
@@ -89,5 +101,6 @@ export const useTransactionToken = (
     getTxType,
     getTxDirection,
     getDexContracts,
+    setTransaction,
   };
 };

@@ -35,7 +35,7 @@ describe('Tests cases for AEX-2 popups', () => {
       .get('[data-cy=data]')
       .should('be.visible')
       .should('contain', props2.data)
-      .get('[data-cy=sender] .address')
+      .get('[data-cy=sender]')
       .should('be.visible')
       .should('contain', props2.app.host);
   });
@@ -80,7 +80,15 @@ describe('Tests cases for AEX-2 popups', () => {
         .should('be.visible')
         .should('contain', locale.transaction.type[txType]);
 
-      cy.get('[data-cy=recipient]').should('be.visible').should('contain', receiver);
+      if (txType !== SCHEMA.TX_TYPE.contractCreate) {
+        cy.get('[data-cy=recipient] [data-cy=address]')
+          .should('be.visible')
+          .then((recipient) => {
+            expect(recipient.text().replaceAll(' ', '')).to.equal(receiver);
+          });
+      } else {
+        cy.get('[data-cy=recipient]').should('be.visible').should('contain', receiver);
+      }
 
       cy.get('[data-cy=fee]')
         .should('be.visible')

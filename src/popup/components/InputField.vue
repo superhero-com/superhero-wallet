@@ -89,6 +89,7 @@
     >
       <label
         class="message-text"
+        data-cy="input-field-message"
         :for="inputId"
       >
         {{ typeof message === 'object' ? message && message.text : message }}

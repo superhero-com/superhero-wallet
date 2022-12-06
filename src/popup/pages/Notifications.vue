@@ -59,7 +59,7 @@ import {
   NOTIFICATION_TYPE_CLAIM_OF_TIP,
   NOTIFICATION_TYPE_CLAIM_OF_RETIP,
   NOTIFICATION_TYPE_RETIP_ON_TIP,
-  waitUntilTruthy,
+  watchUntilTruthy,
   rxJsObservableToVueState,
 } from '../utils';
 import NotificationItem from '../components/NotificationItem.vue';
@@ -174,7 +174,7 @@ export default defineComponent({
     }
 
     async function setNotificationsStatusesAsPeeked() {
-      await waitUntilTruthy(() => root.$store.getters['sdkPlugin/sdk']);
+      await watchUntilTruthy(() => root.$store.getters['sdkPlugin/sdk']);
 
       notifications.value
         .filter(({ status }) => status === NOTIFICATION_STATUS_CREATED)

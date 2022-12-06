@@ -37,6 +37,7 @@
 
           <BtnClose
             v-if="hasCloseButton"
+            data-cy="btn-close"
             @click="$emit('close')"
           />
         </div>
@@ -150,18 +151,6 @@ export default defineComponent({
 
     @include mixins.desktop {
       width: calc(#{variables.$extension-width} - 32px);
-    }
-
-    .close-button {
-      position: absolute;
-      z-index: 3;
-      right: 8px;
-      top: 8px;
-      color: variables.$color-white;
-
-      &-icon {
-        width: 100%;
-      }
     }
 
     .header {
