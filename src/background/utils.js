@@ -2,14 +2,14 @@ import {
   setContractInstance,
   contractCall,
   getAddressByNameEntry,
-  waitUntilTruthy,
+  watchUntilTruthy,
 } from '../popup/utils/helper';
 import store from './store';
 
 let tippingContract;
 
 const getAddress = async (name) => {
-  await waitUntilTruthy(() => store.getters['sdkPlugin/sdk']);
+  await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
   try {
     return getAddressByNameEntry(await store.getters['sdkPlugin/sdk'].api.getNameEntryByName(name));
   } catch (e) {
@@ -22,7 +22,7 @@ export const getAddressFromChainName = async (names) => (Array.isArray(names)
 
 export const getTippingContractInstance = async (tx) => {
   if (tippingContract) return tippingContract;
-  await waitUntilTruthy(() => store.getters['sdkPlugin/sdk']);
+  await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
   tippingContract = await setContractInstance(tx, store.getters['sdkPlugin/sdk'], tx.address);
   return tippingContract;
 };
