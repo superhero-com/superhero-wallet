@@ -202,17 +202,16 @@ export const getBalanceLocalStorage = () => (
 );
 
 export const categorizeContractCallTxObject = (transaction) => {
-  if (transaction.incomplete
-    || ((transaction.tx.function === 'tip' || transaction.tx.function === 'retip') && transaction.pending)) {
-    if (!transaction.tx?.selectedTokenContractId && transaction.pending) return null;
+  if (transaction.tx.type?.toLowerCase() !== SCHEMA.TX_TYPE.contractCall.toLowerCase()) {
+    return null;
+  }
+  if (transaction.incomplete || transaction.pending) {
     return {
       amount: transaction.amount,
-      token: transaction.pending
-        ? transaction.tx?.selectedTokenContractId : transaction.tx.contractId,
-      to: transaction.tx.callerId,
+      token: transaction.tx.selectedTokenContractId ?? transaction.tx.contractId,
+      to: transaction.incomplete ? transaction.tx.recipientId : transaction.tx.callerId,
     };
   }
-  if (transaction.tx.type !== 'ContractCallTx') return null;
   switch (transaction.tx.function) {
     case 'transfer':
     case 'transfer_payload':
