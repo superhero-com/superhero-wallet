@@ -359,7 +359,8 @@
       "reset-wallet": "Reset wallet",
       "seed-phrase": "Seed phrase",
       "network-add": "Add custom network",
-      "network-edit": "Edit network"
+      "network-edit": "Edit network",
+      "not-found": "Feature not found"
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
@@ -416,8 +417,10 @@
       "urlToClaim": "Claim tips from this URL:"
     },
     "notFound": {
-      "notFound": "Requested page can't be found",
-      "initialPage": "Open initial page"
+      "notFound": "Lost in space",
+      "description": "The feature could not be found in this Universe. Keep calm and safely fly back home.",
+      "backToHome": "Return home",
+      "reportBug": "Report a bug"
     },
     "accountPassword": {
       "heading": "",

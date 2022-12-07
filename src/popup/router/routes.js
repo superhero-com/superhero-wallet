@@ -508,7 +508,11 @@ export default [
     path: '*',
     component: NotFound,
     meta: {
-      ifNotAuth: true,
+      title: 'not-found',
+      backButton: true,
+      asModal: true,
+      closeButton: true,
+      hideNotificationsIcon: true,
     },
   },
   {
