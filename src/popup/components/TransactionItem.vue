@@ -102,27 +102,52 @@ export default defineComponent({
         return [AENS, transactionTypes[txType.value]];
       }
       if (txType.value === SCHEMA.TX_TYPE.spend) {
-        return [root.$t('transaction.type.spendTx'), getTxDirection.value(props.transaction) === 'sent' ? root.$t('transaction.spendType.out') : root.$t('transaction.spendType.in')];
+        return [
+          root.$t('transaction.type.spendTx'),
+          getTxDirection.value(props.transaction) === 'sent'
+            ? root.$t('transaction.spendType.out')
+            : root.$t('transaction.spendType.in'),
+        ];
       }
       if (isAllowance.value) {
         return [root.$t('transaction.dexType.allow_token')];
       }
       if (isDex.value) {
-        return [DEX, FUNCTION_TYPE_DEX.pool.includes(props.transaction.tx.function)
-          ? root.$t('transaction.dexType.pool')
-          : root.$t('transaction.dexType.swap')];
+        return [
+          DEX, FUNCTION_TYPE_DEX.pool.includes(props.transaction.tx.function)
+            ? root.$t('transaction.dexType.pool')
+            : root.$t('transaction.dexType.swap'),
+        ];
       }
-      if ((props.transaction.tx.contractId
-        && (activeNetwork.value.tipContractV1 === props.transaction.tx.contractId
-          || activeNetwork.value.tipContractV2 === props.transaction.tx.contractId)
-        && (props.transaction.tx.function === 'tip' || props.transaction.tx.function === 'retip')) || props.transaction.claim) {
-        return [root.$t('pages.token-details.tip'), props.transaction.claim ? root.$t('transaction.spendType.in') : root.$t('transaction.spendType.out')];
+      if (
+        (
+          props.transaction.tx.contractId
+          && (
+            activeNetwork.value.tipContractV1 === props.transaction.tx.contractId
+            || activeNetwork.value.tipContractV2 === props.transaction.tx.contractId
+          )
+          && (props.transaction.tx.function === 'tip' || props.transaction.tx.function === 'retip')
+        )
+        || props.transaction.claim
+      ) {
+        return [
+          root.$t('pages.token-details.tip'),
+          props.transaction.claim
+            ? root.$t('transaction.spendType.in')
+            : root.$t('transaction.spendType.out'),
+        ];
       }
-      if (txType.value === SCHEMA.TX_TYPE.contractCall
+      if (
+        txType.value === SCHEMA.TX_TYPE.contractCall
         && availableTokens.value[props.transaction.tx.contractId]
-        && (props.transaction.tx.function === 'transfer' || props.transaction.incomplete)) {
-        return [root.$t('transaction.type.spendTx'), props.transaction.tx.callerId === account.value.address
-          ? root.$t('transaction.spendType.out') : root.$t('transaction.spendType.in')];
+        && (props.transaction.tx.function === 'transfer' || props.transaction.incomplete)
+      ) {
+        return [
+          root.$t('transaction.type.spendTx'),
+          props.transaction.tx.callerId === account.value.address
+            ? root.$t('transaction.spendType.out')
+            : root.$t('transaction.spendType.in'),
+        ];
       }
 
       return props.transaction.pending ? [] : [transactionTypes[txType.value]];
@@ -131,11 +156,16 @@ export default defineComponent({
     const fiatAmount = computed(() => {
       // TODO add type to tokens
       const aeToken = tokens.value?.find((t: any) => t?.isAe);
-      if (!aeToken || isErrorTransaction.value
+      if (
+        !aeToken
+        || isErrorTransaction.value
         || (isDex.value && FUNCTION_TYPE_DEX.pool.includes(props.transaction.tx.function))
       ) return 0;
-      return getAmountFiat.value(amountRounded(aeToken.decimals
-        ? convertToken(aeToken.amount || 0, -aeToken.decimals) : aeToken.amount));
+      return getAmountFiat.value(amountRounded(
+        aeToken.decimals
+          ? convertToken(aeToken.amount || 0, -aeToken.decimals)
+          : aeToken.amount,
+      ));
     });
 
     return {
