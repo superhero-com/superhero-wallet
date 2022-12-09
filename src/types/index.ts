@@ -120,20 +120,21 @@ export interface ITxArguments {
   value: string | number | any[],
 }
 
-export type TxFunction = 'addLiquidity' |
-  'addLiquidityAe' |
-  'removeLiquidity' |
-  'removeLiquidityAe' |
-  'swapExactTokensForTokens' |
-  'swapTokensForExactTokens' |
-  'swapExactAeForTokens' |
-  'swapTokensForExactAe' |
-  'swapExactTokensForAe' |
-  'swapAeForExactTokens' |
-  'changeAllowance' |
-  'transferAllowance' |
-  'deposit' |
-  'withdraw'
+export type TxFunction =
+  | 'addLiquidity'
+  | 'addLiquidityAe'
+  | 'removeLiquidity'
+  | 'removeLiquidityAe'
+  | 'swapExactTokensForTokens'
+  | 'swapTokensForExactTokens'
+  | 'swapExactAeForTokens'
+  | 'swapTokensForExactAe'
+  | 'swapExactTokensForAe'
+  | 'swapAeForExactTokens'
+  | 'changeAllowance'
+  | 'transferAllowance'
+  | 'deposit'
+  | 'withdraw'
 
 export interface ITx {
   abiVersion: number,
@@ -177,22 +178,22 @@ export interface IPendingTransaction {
 }
 
 export type TransactionType =
-  'SpendTx' |
-  'ContractCreateTx' |
-  'ContractCallTx' |
-  'NamePreclaimTx' |
-  'NameClaimTx' |
-  'NameUpdateTx' |
-  'NameTransferTx' |
-  'NameRevokeTx' |
-  'OracleRegisterTx' |
-  'OracleExtendTx' |
-  'OraclePostQueryTx' |
-  'OracleRespondTx' |
-  'ChannelCloseSoloTx' |
-  'ChannelSlashTx' |
-  'ChannelSettleTx' |
-  'ChannelSnapshotSoloTx';
+  | 'SpendTx'
+  | 'ContractCreateTx'
+  | 'ContractCallTx'
+  | 'NamePreclaimTx'
+  | 'NameClaimTx'
+  | 'NameUpdateTx'
+  | 'NameTransferTx'
+  | 'NameRevokeTx'
+  | 'OracleRegisterTx'
+  | 'OracleExtendTx'
+  | 'OraclePostQueryTx'
+  | 'OracleRespondTx'
+  | 'ChannelCloseSoloTx'
+  | 'ChannelSlashTx'
+  | 'ChannelSettleTx'
+  | 'ChannelSnapshotSoloTx';
 
 export interface IDexContracts {
   router: string[],

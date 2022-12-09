@@ -44,6 +44,8 @@ export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUr
 export const STUB_NONCE = 10000;
 export const MAX_UINT256 = new BigNumber(2).exponentiatedBy(256).minus(1);
 
+export const ACCOUNT_HD_WALLET = 'hd-wallet';
+
 export const NETWORK_ID_MAINNET = 'ae_mainnet';
 export const NETWORK_ID_TESTNET = 'ae_uat';
 

@@ -90,7 +90,7 @@ export default defineComponent({
   setup(props, { root }) {
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const tipId = root.$route.query.id;
-    const tip = ref<{url: string, id: string}>({
+    const tip = ref<{ url: string, id: string }>({
       url: 'default',
       id: '',
     });
@@ -113,7 +113,7 @@ export default defineComponent({
 
     const loading = ref<boolean>(false);
     const getAeternityToken = useGetter('fungibleTokens/getAeternityToken');
-    const sdk = useState('sdk');
+    const sdk = useGetter('sdkPlugin/sdk');
     const tippingV1 = useState('tippingV1');
     const tippingV2 = useState('tippingV2');
     const tippingSupported = useGetter('tippingSupported');

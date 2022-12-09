@@ -50,9 +50,6 @@ export default {
   deleteUserNetwork(state, index) {
     state.userNetworks = state.userNetworks.filter((el, idx) => idx !== index);
   },
-  initSdk(state, payload) {
-    state.sdk = payload;
-  },
   setMiddleware(state, payload) {
     state.middleware = payload;
   },

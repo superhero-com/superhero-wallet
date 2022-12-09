@@ -4,14 +4,17 @@
 
 <script>
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
-import { MODAL_DEFAULT, watchUntilTruthy } from '../utils';
+import { MODAL_DEFAULT } from '../utils';
+import { useSdk } from '../../composables';
 
 export default {
   props: {
     secretKey: { type: String, required: true },
   },
   async mounted() {
-    await watchUntilTruthy(() => this.$store.state.sdk);
+    const { getSdk } = useSdk();
+    await getSdk();
+
     try {
       // sg_ prefix was chosen as a dummy to decode from base58Check
       await this.$store.dispatch('invites/claim', TxBuilderHelper.decode(`sg_${this.secretKey}`, 'sg'));

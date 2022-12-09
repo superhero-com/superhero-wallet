@@ -58,7 +58,7 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
-  if (!store.state.sdk) initSdk();
+  if (!store.getters['sdkPlugin/sdk']) initSdk();
 
   if (RUNNING_IN_POPUP) {
     const name = {

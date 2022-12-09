@@ -79,7 +79,7 @@ export default (store) => {
   const checkNameDebounced = debounce(
     async (name, expectedNameState, comparedAddress, { resolve, reject }) => {
       try {
-        const nameEntry = await store.state.sdk.api.getNameEntryByName(name);
+        const nameEntry = await store.getters['sdkPlugin/sdk'].api.getNameEntryByName(name);
         const address = getAddressByNameEntry(nameEntry);
         resolve(({
           [NAME_STATES.REGISTERED]: true,
