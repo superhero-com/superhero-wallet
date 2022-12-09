@@ -57,15 +57,15 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { Swiper, SwiperSlide } from 'vue-awesome-swiper';
-import { watchUntilTruthy } from '../utils/helper';
+import { watchUntilTruthy } from '../utils';
+import { getAddressColor } from '../utils/avatar';
 
 import AccountCard from './AccountCard.vue';
 import AccountCardAdd from './AccountCardAdd.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
-import Chevron from '../../icons/chevron.svg?vue-component';
-import { getAddressColor } from '../utils/avatar';
 import BulletSwitcher from './BulletSwitcher.vue';
 import TotalWalletAmount from './TotalWalletAmount.vue';
+import Chevron from '../../icons/chevron.svg?vue-component';
 
 export default {
   components: {

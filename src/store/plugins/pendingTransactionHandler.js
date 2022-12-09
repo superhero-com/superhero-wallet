@@ -1,5 +1,4 @@
-import { MODAL_SPEND_SUCCESS } from '../../popup/utils/constants';
-import { watchUntilTruthy } from '../../popup/utils/helper';
+import { MODAL_SPEND_SUCCESS, watchUntilTruthy } from '../../popup/utils';
 
 export default async (store) => {
   const waitTransactionMined = async ({

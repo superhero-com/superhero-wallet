@@ -4,8 +4,7 @@ import {
   onMounted,
 } from '@vue/composition-api';
 import { useDeepLinkApi } from '../../composables';
-import { handleUnknownError, watchUntilTruthy } from '../utils/helper';
-import { MODAL_DEFAULT } from '../utils';
+import { MODAL_DEFAULT, handleUnknownError, watchUntilTruthy } from '../utils';
 
 export default defineComponent({
   name: 'SignTransaction',

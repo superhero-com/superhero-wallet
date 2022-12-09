@@ -1,9 +1,8 @@
 import { RpcWallet, Crypto, Node } from '@aeternity/aepp-sdk';
 import { isEmpty, isEqual } from 'lodash-es';
 import { App } from '../modules/permissions';
-import { MODAL_CONFIRM_CONNECT } from '../../popup/utils/constants';
 import { getAeppUrl, showPopup } from '../../background/popupHandler';
-import { watchUntilTruthy } from '../../popup/utils/helper';
+import { MODAL_CONFIRM_CONNECT, watchUntilTruthy } from '../../popup/utils';
 import { IS_EXTENSION_BACKGROUND } from '../../lib/environment';
 
 export default (store) => {

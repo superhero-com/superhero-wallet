@@ -33,7 +33,7 @@ import { mapState, mapGetters } from 'vuex';
 import { pick } from 'lodash-es';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { calculateFee, watchUntilTruthy } from '../utils/helper';
+import { calculateFee, watchUntilTruthy } from '../utils';
 import InputField from './InputField.vue';
 
 export default {

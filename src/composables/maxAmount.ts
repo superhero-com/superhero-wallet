@@ -8,11 +8,12 @@ import {
 import BigNumber from 'bignumber.js';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
-import { MAGNITUDE, STUB_CONTRACT_ADDRESS, AETERNITY_CONTRACT_ID } from '../popup/utils/constants';
-import { rxJsObservableToVueState } from '../popup/utils/utils';
 import store from '../store';
-
 import {
+  MAGNITUDE,
+  STUB_CONTRACT_ADDRESS,
+  AETERNITY_CONTRACT_ID,
+  rxJsObservableToVueState,
   executeAndSetInterval,
   calculateFee,
   validateTipUrl,

@@ -26,8 +26,7 @@ import {
   watch,
 } from '@vue/composition-api';
 import { Route } from 'vue-router';
-import { watchUntilTruthy } from '../utils/helper';
-import { MODAL_DEFAULT } from '../utils/constants';
+import { MODAL_DEFAULT, watchUntilTruthy } from '../utils';
 import { useDeepLinkApi } from '../../composables';
 import BtnMain from '../components/buttons/BtnMain.vue';
 
