@@ -83,7 +83,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1 1 0;
+  flex-grow: 1;
   width: fit-content;
   min-height: 40px;
   padding: 8px 16px;
