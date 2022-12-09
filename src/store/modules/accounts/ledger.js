@@ -67,7 +67,7 @@ export default {
 
     sign: () => Promise.reject(new Error('Not implemented yet')),
 
-    async signTransaction({ rootGetters: { account }, dispatch, rootState }, { txBase64 }) {
+    async signTransaction({ rootGetters: { account, 'sdkPlugin/sdk': sdk }, dispatch }, { txBase64 }) {
       await dispatch('ensureCurrentAccountAvailable');
 
       const txObject = TxBuilder.unpackTx(txBase64).tx;
@@ -82,7 +82,7 @@ export default {
         args: [
           account.idx,
           binaryTx,
-          rootState.sdk.getNetworkId(),
+          sdk.getNetworkId(),
         ],
       }), 'hex');
 

@@ -13,6 +13,7 @@ import {
   handleUnknownError,
   isAccountNotFoundError,
   executeAndSetInterval,
+  watchUntilTruthy,
 } from '../popup/utils';
 import { CURRENCIES_URL, MODAL_DEFAULT } from '../popup/utils/constants';
 import { i18n } from './plugins/languages';
@@ -40,8 +41,9 @@ export default {
     });
   },
   async fetchPendingTransactions(
-    { state: { sdk, transactions }, getters: { activeNetwork } }, address,
+    { state: { transactions }, getters }, address,
   ) {
+    const sdk = await watchUntilTruthy(() => getters['sdkPlugin/sdk']);
     return (
       await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
         (r) => r.transactions,
@@ -53,7 +55,7 @@ export default {
         },
       )
     )
-      .filter((transaction) => !transactions.pending[activeNetwork.networkId]
+      .filter((transaction) => !transactions.pending[getters.activeNetwork.networkId]
         ?.find((tx) => tx?.hash === transaction?.hash))
       .map((transaction) => ({ ...transaction, pending: true }));
   },
@@ -170,7 +172,7 @@ export default {
     return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: error });
   },
   async sendTipComment(
-    { state: { sdk }, getters: { activeNetwork } },
+    { getters: { activeNetwork, 'sdkPlugin/sdk': sdk } },
     [tipId, text, author, parentId],
   ) {
     const sendComment = async (postParam) => postJson(`${activeNetwork.backendUrl}/comment/api/`, { body: postParam });
@@ -189,8 +191,8 @@ export default {
   },
   async modifyNotification(
     {
-      state: { sdk },
       getters: {
+        'sdkPlugin/sdk': sdk,
         activeNetwork,
         account: { address },
       },
@@ -212,8 +214,8 @@ export default {
   },
   async modifyNotifications(
     {
-      state: { sdk },
       getters: {
+        'sdkPlugin/sdk': sdk,
         activeNetwork,
         account: { address },
       },
@@ -240,7 +242,7 @@ export default {
   async getCacheTip({ getters: { activeNetwork } }, id) {
     return fetchJson(`${activeNetwork.backendUrl}/tips/single/${id}`);
   },
-  async getAllNotifications({ state: { sdk }, getters: { activeNetwork, account } }) {
+  async getAllNotifications({ getters: { 'sdkPlugin/sdk': sdk, activeNetwork, account } }) {
     const responseChallenge = await fetchJson(
       `${activeNetwork.backendUrl}/notification/user/${account.address}`,
     );
@@ -257,22 +259,28 @@ export default {
       .forEach((key) => url.searchParams.append(key, respondChallenge[key]));
     return fetchJson(url.toString());
   },
-  async initContractInstances({
-    state: { sdk },
-    getters: { activeNetwork, tippingSupported },
+  async initTippingContractInstances({
+    getters: { 'sdkPlugin/sdk': sdk, activeNetwork, tippingSupported },
     commit,
   }) {
     if (!tippingSupported && !process.env.RUNNING_IN_TESTS) return;
-    const contractInstanceV1 = await sdk.getContractInstance({
-      source: TIPPING_V1_INTERFACE,
-      contractAddress: activeNetwork.tipContractV1,
-    });
-    const contractInstanceV2 = activeNetwork.tipContractV2
-      ? await sdk.getContractInstance({
-        source: TIPPING_V2_INTERFACE,
-        contractAddress: activeNetwork.tipContractV2,
-      })
-      : null;
+
+    const [
+      contractInstanceV1,
+      contractInstanceV2,
+    ] = await Promise.all([
+      sdk.getContractInstance({
+        source: TIPPING_V1_INTERFACE,
+        contractAddress: activeNetwork.tipContractV1,
+      }),
+      activeNetwork.tipContractV2
+        ? sdk.getContractInstance({
+          source: TIPPING_V2_INTERFACE,
+          contractAddress: activeNetwork.tipContractV2,
+        })
+        : null,
+    ]);
+
     commit('setTipping', [contractInstanceV1, contractInstanceV2]);
   },
   async share(_, options) {

@@ -3,6 +3,7 @@
 import Vue from 'vue';
 import hdWallet from './hdWallet';
 import ledger from './ledger';
+import { ACCOUNT_HD_WALLET } from '../../../popup/utils';
 
 const modules = { hdWallet, ledger };
 
@@ -12,7 +13,7 @@ export default {
 
   state: {
     list: [{
-      idx: 0, showed: true, type: 'hd-wallet',
+      idx: 0, showed: true, type: ACCOUNT_HD_WALLET,
     }],
     activeIdx: 0,
   },

@@ -21,32 +21,32 @@
 <script lang="ts">
 import {
   defineComponent,
-  computed,
   ref,
   watch,
 } from '@vue/composition-api';
 import { Route } from 'vue-router';
-import { MODAL_DEFAULT, watchUntilTruthy } from '../utils';
-import { useDeepLinkApi } from '../../composables';
+import { MODAL_DEFAULT } from '../utils';
+import { useDeepLinkApi, useGetter, useSdk } from '../../composables';
 import BtnMain from '../components/buttons/BtnMain.vue';
 
 export default defineComponent({
   name: 'CommentNew',
-  components: { BtnMain },
+  components: {
+    BtnMain,
+  },
   setup(props, { root }) {
+    const { getSdk } = useSdk();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+
     const id = ref<string>('');
     const parentId = ref<number | undefined>(undefined);
     const text = ref<string>('');
     const loading = ref<boolean>(false);
-    const sdk = computed(() => root.$store.state.sdk);
-    const tippingSupported = computed(() => root.$store.getters.tippingSupported);
+    const tippingSupported = useGetter('tippingSupported');
 
     watch(
       () => root.$route,
-      async ({ query }: Route) => {
-        loading.value = true;
-
+      ({ query }: Route) => {
         id.value = query.id as string ?? '';
         parentId.value = query.parentId ? +query.parentId : undefined;
         text.value = query.text as string ?? '';
@@ -55,18 +55,17 @@ export default defineComponent({
           root.$router.push({ name: 'account' });
           throw new Error('CommentNew: Invalid arguments');
         }
-        await watchUntilTruthy(() => sdk.value);
-        loading.value = false;
       },
     );
 
     async function sendComment() {
       loading.value = true;
+      const sdk = await getSdk();
       try {
         await root.$store.dispatch('sendTipComment', [
           id,
           text,
-          await sdk.value.address(),
+          await sdk.address(),
           parentId,
         ]);
         openCallbackOrGoHome(true);
@@ -82,6 +81,13 @@ export default defineComponent({
         loading.value = false;
       }
     }
+
+    // Wait until the `tippingSupported` is established by the SDK
+    (async () => {
+      loading.value = true;
+      await getSdk();
+      loading.value = false;
+    })();
 
     return {
       id,

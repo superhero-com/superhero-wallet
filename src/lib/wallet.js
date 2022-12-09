@@ -140,9 +140,8 @@ export default async function initSdk() {
       );
     }
 
-    store.commit('initSdk', store.getters['sdkPlugin/sdk']);
     await Promise.all([
-      store.dispatch('initContractInstances'),
+      store.dispatch('initTippingContractInstances'),
       initMiddleware(),
     ]);
     store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE);

@@ -6,10 +6,13 @@ import {
   AETERNITY_SYMBOL,
   AVATAR_URL,
   DEX_CONTRACTS,
+  NETWORK_ID_MAINNET,
+  NETWORK_ID_TESTNET,
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
   TX_TYPE_MDW,
+  ACCOUNT_HD_WALLET,
   validateHash,
   convertToken,
   aettosToAe,
@@ -31,7 +34,7 @@ export default {
         idx,
         type,
         ...acc,
-        ...(type === 'hd-wallet' ? getHdWalletAccount(getters.wallet, idx) : {}),
+        ...(type === ACCOUNT_HD_WALLET ? getHdWalletAccount(getters.wallet, idx) : {}),
       }))
       .map(({ ...account }) => ({
         ...account,
@@ -72,7 +75,8 @@ export default {
   getAvatar: () => (address) => `${AVATAR_URL}${address}`,
   tippingSupported(state, { activeNetwork }) {
     return (
-      ['ae_mainnet', 'ae_uat'].includes(activeNetwork.networkId) || process.env.RUNNING_IN_TESTS
+      [NETWORK_ID_MAINNET, NETWORK_ID_TESTNET].includes(activeNetwork.networkId)
+      || process.env.RUNNING_IN_TESTS
     );
   },
   getExplorerPath: (_, { activeNetwork: { explorerUrl } }) => (hash) => {

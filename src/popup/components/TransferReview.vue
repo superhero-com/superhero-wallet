@@ -86,14 +86,14 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { useDeepLinkApi } from '../../composables';
+import { useDeepLinkApi, useGetter } from '../../composables';
 import {
   aeToAettos,
   checkAensName,
   convertToken,
   escapeSpecialChars,
 } from '../utils';
-import { IAccount, IPendingTransaction } from '../../types';
+import { IAccount, IPendingTransaction, ISdk } from '../../types';
 import { MODAL_DEFAULT, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -124,7 +124,7 @@ export default defineComponent({
     const account = computed<IAccount>(() => root.$store.getters.account);
     const tippingV1 = computed(() => root.$store.state.tippingV1);
     const tippingV2 = computed(() => root.$store.state.tippingV2);
-    const sdk = computed(() => root.$store.state.sdk);
+    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
     const isRecipientName = computed(
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );

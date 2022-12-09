@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 import { watchUntilTruthy } from '../utils';
 import InputAmount from '../components/InputAmountV2.vue';
@@ -64,8 +64,8 @@ export default {
     error: false,
   }),
   computed: {
-    ...mapState(['sdk']),
     ...mapState('invites', ['invites']),
+    ...mapGetters('sdkPlugin', ['sdk']),
   },
   methods: {
     async generate() {

@@ -27,8 +27,7 @@
 
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
-import { watchUntilTruthy } from '../utils';
-import { useDeepLinkApi } from '../../composables';
+import { useDeepLinkApi, useSdk } from '../../composables';
 import BtnMain from '../components/buttons/BtnMain.vue';
 
 export default defineComponent({
@@ -36,10 +35,11 @@ export default defineComponent({
   components: { BtnMain },
   setup(props, { root }) {
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+    const { getSdk } = useSdk();
 
     const sendAddress = async () => {
-      await watchUntilTruthy(() => root.$store.state.sdk);
-      const signature = await root.$store.state.sdk.signMessage(root.$route.query.message);
+      const sdk = await getSdk();
+      const signature = await sdk.signMessage(root.$route.query.message);
       const signatureHex = Buffer.from(signature).toString('hex');
       openCallbackOrGoHome(true, { signature: signatureHex });
     };

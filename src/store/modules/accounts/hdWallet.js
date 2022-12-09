@@ -1,22 +1,25 @@
 import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import { MODAL_CONFIRM_TRANSACTION_SIGN, getHdWalletAccount } from '../../../popup/utils';
-
-const type = 'hd-wallet';
+import {
+  ACCOUNT_HD_WALLET,
+  MODAL_CONFIRM_RAW_SIGN,
+  MODAL_CONFIRM_TRANSACTION_SIGN,
+  getHdWalletAccount,
+} from '../../../popup/utils';
 
 export default {
   namespaced: true,
 
   account: {
-    type,
+    type: ACCOUNT_HD_WALLET,
   },
 
   state: {
     nextAccountIdx: 1,
   },
   actions: {
-    async isAccountUsed({ rootState: { sdk } }, address) {
-      return sdk.api.getAccountByPubkey(address).then(() => true, () => false);
+    async isAccountUsed({ rootGetters }, address) {
+      return rootGetters['sdkPlugin/sdk'].api.getAccountByPubkey(address).then(() => true, () => false);
     },
     async discover({ state, rootGetters, dispatch }) {
       let lastNotEmptyIdx = 0;
@@ -33,14 +36,18 @@ export default {
       }
     },
     create({ state, commit }, isRestored = false) {
-      commit('accounts/add', { idx: state.nextAccountIdx, type, isRestored }, { root: true });
+      commit(
+        'accounts/add',
+        { idx: state.nextAccountIdx, type: ACCOUNT_HD_WALLET, isRestored },
+        { root: true },
+      );
       state.nextAccountIdx += 1;
     },
     signWithoutConfirmation({ rootGetters: { account } }, data) {
       return Crypto.sign(data, account.secretKey);
     },
     async confirmRawDataSigning({ dispatch }, data) {
-      await dispatch('modals/open', { name: 'confirm-raw-sign', data }, { root: true });
+      await dispatch('modals/open', { name: MODAL_CONFIRM_RAW_SIGN, data }, { root: true });
     },
     async confirmTxSigning({ dispatch }, { encodedTx, host }) {
       let txObject;
@@ -80,10 +87,11 @@ export default {
     sign({ dispatch }, data) {
       return dispatch('signWithoutConfirmation', data);
     },
-    async signTransaction({ dispatch, rootState: { sdk } }, {
+    async signTransaction({ dispatch, rootGetters }, {
       txBase64,
       opt: { modal = true, host = null },
     }) {
+      const sdk = rootGetters['sdkPlugin/sdk'];
       const encodedTx = decode(txBase64, 'tx');
       if (modal) await dispatch('confirmTxSigning', { encodedTx, host });
       const signature = await dispatch(

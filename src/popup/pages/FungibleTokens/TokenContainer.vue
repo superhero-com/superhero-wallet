@@ -89,11 +89,10 @@ import {
   AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
   buildSimplexLink,
-  watchUntilTruthy,
   isContract,
   rxJsObservableToVueState,
 } from '../../utils';
-import { useGetter } from '../../../composables';
+import { useGetter, useSdk } from '../../../composables';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -122,6 +121,8 @@ export default defineComponent({
     Tab,
   },
   setup(props, { root }) {
+    const { getSdk } = useSdk();
+
     const contractId = root.$route.params.id;
     const isAe = contractId === AETERNITY_CONTRACT_ID;
     const tabs = [
@@ -190,7 +191,7 @@ export default defineComponent({
       }
 
       if (isContract(contractId) && !isAe) {
-        await watchUntilTruthy(() => root.$store.state.sdk);
+        await getSdk();
         tokenPairs.value = await root.$store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
       }
       loading.value = false;

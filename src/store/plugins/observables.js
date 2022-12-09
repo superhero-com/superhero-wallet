@@ -18,7 +18,7 @@ export default (store) => {
   const watchAsObservable = (getter, options) => store._watcherVM
     .$watchAsObservable(() => getter(store.state, store.getters), options);
 
-  const sdk$ = watchAsObservable(({ sdk }) => sdk, { immediate: true }).pipe(
+  const sdk$ = watchAsObservable((state, getters) => getters['sdkPlugin/sdk'], { immediate: true }).pipe(
     pluck('newValue'),
     filter((sdk) => sdk),
   );

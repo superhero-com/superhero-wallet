@@ -68,7 +68,8 @@ export default {
   }),
   computed: {
     ...mapState('accounts', ['activeIdx']),
-    ...mapState(['sdk', 'tippingV1']),
+    ...mapState(['tippingV1']),
+    ...mapGetters('sdkPlugin', ['sdk']),
     ...mapGetters(['account', 'tippingSupported']),
     normalizedUrl() {
       if (!validateTipUrl(this.url)) return '';

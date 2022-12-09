@@ -86,11 +86,11 @@ export default {
   },
   methods: {
     async bid() {
-      await watchUntilTruthy(() => this.$store.state.sdk);
+      await watchUntilTruthy(() => this.$store.getters['sdkPlugin/sdk']);
       if (this.amountError) return;
       this.loading = true;
       try {
-        await this.$store.state.sdk.aensBid(this.name, aeToAettos(this.amount));
+        await this.$store.getters['sdkPlugin/sdk'].aensBid(this.name, aeToAettos(this.amount));
         this.$store.dispatch('modals/open', {
           name: 'default',
           msg: this.$t('pages.names.auctions.bid-added', { name: this.name }),

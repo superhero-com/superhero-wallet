@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import {
   MAGNITUDE,
@@ -88,7 +88,7 @@ export default {
     maxNameLength: AENS_NAME_MAX_LENGTH - AENS_DOMAIN.length,
   }),
   computed: {
-    ...mapState([
+    ...mapGetters('sdkPlugin', [
       'sdk',
     ]),
     isNameValid() {

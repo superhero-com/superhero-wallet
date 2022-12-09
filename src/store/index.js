@@ -43,7 +43,6 @@ export default new Vuex.Store({
       tipWithdrawnTransactions: [],
     },
     pageTitle: '',
-    sdk: null,
     middleware: null,
     tippingV1: null,
     tippingV2: null,
