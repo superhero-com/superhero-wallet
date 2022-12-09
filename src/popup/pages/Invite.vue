@@ -43,7 +43,7 @@
 <script>
 import { mapState } from 'vuex';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
-import { watchUntilTruthy } from '../utils/helper';
+import { watchUntilTruthy } from '../utils';
 import InputAmount from '../components/InputAmountV2.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InviteItem from '../components/InviteItem.vue';

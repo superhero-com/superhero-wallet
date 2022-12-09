@@ -51,12 +51,11 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { watchUntilTruthy } from '../utils/helper';
+import { TXS_PER_PAGE, AETERNITY_CONTRACT_ID, watchUntilTruthy } from '../utils';
 import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
 import InputSearch from './InputSearch.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
-import { TXS_PER_PAGE, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import Visible from '../../icons/visible.svg?vue-component';
 
 export default {

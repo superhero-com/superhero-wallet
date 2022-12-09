@@ -1,7 +1,7 @@
 import { computed, ref } from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
 import type {
-  ITransaction, ITokenList, ITx, TransactionType,
+  ITransaction, ITokenList, ITx, TransactionType, IDexContracts,
 } from '../types';
 import * as TransactionResolver from '../popup/utils/transactionTokenInfoResolvers';
 
@@ -36,7 +36,7 @@ export const useTransactionToken = (
   const getTxSymbol = useGetter('getTxSymbol');
   const getTxType = useGetter('getTxType');
   const getTxDirection = useGetter('getTxDirection');
-  const getDexContracts = useGetter('getDexContracts');
+  const getDexContracts = useGetter<IDexContracts>('getDexContracts');
 
   const txType = computed<TransactionType>(() => getTxType.value(transaction.value));
 

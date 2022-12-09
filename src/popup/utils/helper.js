@@ -1,6 +1,4 @@
-import VueCompositionApi, { watch } from '@vue/composition-api';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { defer } from 'lodash-es';
 import { isFQDN } from 'validator';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
@@ -11,7 +9,6 @@ import {
   TxBuilderHelper,
 } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import Vue from 'vue';
 import {
   CONNECTION_TYPES,
   STUB_ADDRESS,
@@ -25,22 +22,6 @@ import {
 import { testAccount, txParams } from './config';
 import runMigrations from '../../store/migrations';
 import { IS_FIREFOX } from '../../lib/environment';
-
-Vue.use(VueCompositionApi);
-
-export function watchUntilTruthy(getter) {
-  return new Promise((resolve) => {
-    const unwatch = watch(
-      getter,
-      (value) => {
-        if (!value) return;
-        resolve();
-        defer(() => unwatch());
-      },
-      { immediate: true },
-    );
-  });
-}
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);

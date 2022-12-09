@@ -2,11 +2,10 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import routes from './routes';
 import { i18n } from '../../store/plugins/languages';
-import { watchUntilTruthy } from '../utils/helper';
+import { APP_LINK_WEB, watchUntilTruthy } from '../utils';
 import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
 import initSdk from '../../lib/wallet';
-import { APP_LINK_WEB } from '../utils/constants';
 import {
   RUNNING_IN_POPUP,
   POPUP_TYPE,

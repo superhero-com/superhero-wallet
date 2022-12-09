@@ -27,9 +27,9 @@
 
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
-import BtnMain from '../components/buttons/BtnMain.vue';
-import { watchUntilTruthy } from '../utils/helper';
+import { watchUntilTruthy } from '../utils';
 import { useDeepLinkApi } from '../../composables';
+import BtnMain from '../components/buttons/BtnMain.vue';
 
 export default defineComponent({
   name: 'SignMessage',

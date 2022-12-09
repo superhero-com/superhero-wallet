@@ -40,10 +40,10 @@
 
 <script>
 import { validateMnemonic } from '@aeternity/bip39';
+import { validateSeedLength, watchUntilTruthy } from '../../utils';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import FormTextarea from '../FormTextarea.vue';
-import { validateSeedLength, watchUntilTruthy } from '../../utils/helper';
 
 export default {
   components: {

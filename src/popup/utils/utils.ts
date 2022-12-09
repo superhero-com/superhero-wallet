@@ -1,6 +1,13 @@
+import Vue from 'vue';
+import VueCompositionApi, {
+  onUnmounted,
+  Ref,
+  ref,
+  watch,
+} from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
+import { defer } from 'lodash-es';
 import { Observable } from 'rxjs';
-import { onUnmounted, Ref, ref } from '@vue/composition-api';
 import {
   ADDRESS_TYPES, AENS_DOMAIN,
   HASH_PREFIX_CONTRACT,
@@ -8,6 +15,8 @@ import {
   SIMPLEX_URL,
 } from './constants';
 import { i18n } from '../../store/plugins/languages';
+
+Vue.use(VueCompositionApi);
 
 export function isNumbersEqual(a: number, b: number) {
   return new BigNumber(a).eq(b);
@@ -101,6 +110,23 @@ export function buildSimplexLink(address: string) {
   const link = new URL(SIMPLEX_URL);
   link.searchParams.set('wallet_address', address);
   return link.toString();
+}
+
+/**
+ * Watch for the getter to be truthy with the use of the compositionApi.
+ */
+export function watchUntilTruthy<T>(getter: () => T): Promise<NonNullable<T>> {
+  return new Promise((resolve) => {
+    const unwatch = watch(
+      getter,
+      (value) => {
+        if (!value) return;
+        resolve(getter() as NonNullable<T>);
+        defer(() => unwatch());
+      },
+      { immediate: true },
+    );
+  });
 }
 
 /**
