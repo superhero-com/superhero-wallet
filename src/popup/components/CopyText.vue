@@ -38,7 +38,7 @@ export default defineComponent({
     disabled: Boolean,
     hideIcon: Boolean,
   },
-  setup(props, { emit }) {
+  setup(props) {
     const { copied: copiedLocally, copy } = useCopy();
 
     function copyText(event: MouseEvent) {
