@@ -133,6 +133,7 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters } from 'vuex';
+import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils';
 import SwitchButton from '../components/SwitchButton.vue';
 import InputAmount from '../components/InputAmountV2.vue';
 import InputField from '../components/InputField.vue';
@@ -180,12 +181,12 @@ export default {
       return this.$route.params.host;
     },
     editView() {
-      return !!this.$route.meta.edit;
+      return !!this.$route.meta.isEdit;
     },
     selectedAsset() {
       return {
-        contractId: 'aeternity',
-        symbol: 'AE',
+        contractId: AETERNITY_CONTRACT_ID,
+        symbol: AETERNITY_SYMBOL,
         current_price: this.currentCurrencyRate,
       };
     },

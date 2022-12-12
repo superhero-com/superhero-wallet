@@ -15,7 +15,7 @@
     </button>
     <div
       v-show="!qrScannerOpen"
-      :class="{ 'show-scrollbar': $route.meta.scrollbarVisible }"
+      :class="{ 'show-scrollbar': $route.meta.showScrollbar }"
       class="app-inner"
     >
       <Header v-if="showHeader" />
@@ -61,12 +61,14 @@ import {
   IS_MOBILE_DEVICE,
   IS_CORDOVA,
   IS_EXTENSION,
+  RUNNING_IN_POPUP,
 } from '../lib/environment';
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
 
 export default defineComponent({
+  name: 'App',
   components: {
     Header,
     NodeConnectionStatus,
@@ -80,9 +82,8 @@ export default defineComponent({
     const modals = computed(() => root.$store.getters['modals/opened']);
 
     const showHeader = computed(() => !(
-      root.$route.path === '/'
-      || root.$route.path.startsWith('/web-iframe-popup')
-      || root.$route.params.app
+      RUNNING_IN_POPUP
+      || root.$route.params.app // TODO determine if still used
       || root.$route.meta?.hideHeader
     ));
 

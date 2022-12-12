@@ -1,7 +1,10 @@
 <template>
   <div
-    v-if="showNavigation && !RUNNING_IN_POPUP"
-    :class="['header', { 'not-logged-in': !isLoggedIn, 'modal-header': modalHeader }]"
+    class="header"
+    :class="{
+      'not-logged-in': !isLoggedIn,
+      'modal-header': isModalHeader,
+    }"
   >
     <div
       v-if="isLoggedIn || title"
@@ -58,7 +61,6 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { RUNNING_IN_POPUP } from '../../lib/environment';
 import Logo from '../../icons/logo-small.svg?vue-component';
 import BackIcon from '../../icons/back.svg?vue-component';
 import Bell from '../../icons/bell.svg?vue-component';
@@ -83,9 +85,6 @@ export default {
     BtnPlain,
     BtnIcon,
   },
-  data: () => ({
-    RUNNING_IN_POPUP,
-  }),
   subscriptions() {
     return {
       superheroNotifications: this.$store.state.observables.notifications,
@@ -101,11 +100,8 @@ export default {
     title() {
       return this.$route.meta.title;
     },
-    showNavigation() {
-      return this.$route.meta.navigation !== undefined ? this.$route.meta.navigation : true;
-    },
-    modalHeader() {
-      return this.$route.meta.modalHeader;
+    isModalHeader() {
+      return this.$route.meta.isModalHeader;
     },
     showBack() {
       return (

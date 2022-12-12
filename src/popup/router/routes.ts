@@ -1,3 +1,5 @@
+import { WalletAppRouteConfig } from '../../types';
+
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import About from '../pages/About.vue';
@@ -44,25 +46,30 @@ import TermsOfService from '../pages/TermsOfService.vue';
 import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
 import ResetWallet from '../pages/ResetWallet.vue';
-import webIframePopups from './web-iframe-popups';
+import webIframePopups from './webIframePopups';
 import Networks from '../pages/Networks.vue';
 import NetworkForm from '../pages/NetworkForm.vue';
 
-export default [
+export const ROUTE_INDEX = 'index';
+export const ROUTE_ACCOUNT = 'account';
+export const ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS = 'account-details-names-auctions';
+
+export const routes: WalletAppRouteConfig[] = [
+  ...webIframePopups,
   {
     path: '/',
-    name: 'index',
+    name: ROUTE_INDEX,
     component: Index,
     meta: {
       title: '',
-      navigation: false,
+      hideHeader: true,
       ifNotAuthOnly: true,
       notPersist: true,
     },
   },
   {
     path: '/account',
-    name: 'account',
+    name: ROUTE_ACCOUNT,
     component: Dashboard,
   },
   {
@@ -171,8 +178,8 @@ export default [
     component: Settings,
     meta: {
       title: 'settings',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -182,8 +189,8 @@ export default [
     component: ResetWallet,
     meta: {
       title: 'reset-wallet',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -193,8 +200,8 @@ export default [
     component: ErrorLogSettings,
     meta: {
       title: 'save-errors-log',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -204,8 +211,8 @@ export default [
     component: LanguageSettings,
     meta: {
       title: 'language',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -215,8 +222,8 @@ export default [
     component: CurrencySettings,
     meta: {
       title: 'currency',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -226,8 +233,8 @@ export default [
     component: SeedPhraseSettings,
     meta: {
       title: 'seed-phrase',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -237,8 +244,8 @@ export default [
     component: SeedPhraseDetailsSettings,
     meta: {
       title: 'seed-phrase',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -248,8 +255,8 @@ export default [
     component: SeedPhraseVerifySettings,
     meta: {
       title: 'seed-phrase',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -260,8 +267,8 @@ export default [
     props: true,
     meta: {
       title: 'networks',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -272,8 +279,8 @@ export default [
     props: true,
     meta: {
       title: 'network-add',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -284,8 +291,8 @@ export default [
     props: true,
     meta: {
       title: 'network-edit',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -295,8 +302,8 @@ export default [
     name: 'permissions-settings',
     meta: {
       title: 'permissionsSettings',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -306,8 +313,8 @@ export default [
     name: 'permissions-add',
     meta: {
       title: 'permissionsAdd',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -317,10 +324,10 @@ export default [
     name: 'permissions-details',
     meta: {
       title: 'permissionsEdit',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
-      edit: true,
+      isEdit: true,
     },
   },
   {
@@ -329,8 +336,8 @@ export default [
     name: 'about',
     meta: {
       title: 'about',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -340,11 +347,11 @@ export default [
     name: 'about-terms',
     meta: {
       title: 'terms',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
+      showScrollbar: true,
       hideNotificationsIcon: true,
       ifNotAuth: true,
-      scrollbarVisible: true,
     },
   },
   {
@@ -353,10 +360,10 @@ export default [
     name: 'about-privacy',
     meta: {
       title: 'privacy',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
+      showScrollbar: true,
       hideNotificationsIcon: true,
-      scrollbarVisible: true,
     },
   },
   {
@@ -365,8 +372,8 @@ export default [
     component: TipsClaim,
     meta: {
       title: 'claim-tips',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -390,7 +397,7 @@ export default [
     meta: {
       title: 'tx-details',
       hideNotificationsIcon: true,
-      closeButton: true,
+      showCloseButton: true,
     },
   },
   {
@@ -399,7 +406,7 @@ export default [
     name: 'more',
     meta: {
       title: 'more',
-      backButton: true,
+      showBackButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -409,8 +416,8 @@ export default [
     component: Invite,
     meta: {
       title: 'invite',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -420,8 +427,8 @@ export default [
     component: NotificationSettings,
     meta: {
       title: 'notifications',
-      backButton: true,
-      closeButton: true,
+      showBackButton: true,
+      showCloseButton: true,
       hideNotificationsIcon: true,
     },
   },
@@ -437,7 +444,7 @@ export default [
         name: 'auction-bid',
         meta: {
           title: 'auction',
-          backRoute: '/account-details/names/auctions',
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS },
         },
       },
       {
@@ -447,7 +454,7 @@ export default [
         name: 'auction-history',
         meta: {
           title: 'auction',
-          backRoute: '/account-details/names/auctions',
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS },
         },
       },
     ],
@@ -491,10 +498,10 @@ export default [
         props: true,
         meta: {
           title: 'token-details',
-          backButton: true,
-          closeButton: true,
+          showBackButton: true,
+          showCloseButton: true,
           hideNotificationsIcon: true,
-          modalHeader: true,
+          isModalHeader: true,
         },
       },
       {
@@ -504,21 +511,13 @@ export default [
         props: true,
         meta: {
           title: 'token-details',
-          backButton: true,
-          closeButton: true,
+          showBackButton: true,
+          showCloseButton: true,
           hideNotificationsIcon: true,
-          modalHeader: true,
+          isModalHeader: true,
         },
       },
     ],
-  },
-  {
-    name: 'not-found',
-    path: '*',
-    component: NotFound,
-    meta: {
-      ifNotAuth: true,
-    },
   },
   {
     name: 'sign-message',
@@ -557,5 +556,12 @@ export default [
       notPersist: true,
     },
   },
-  ...webIframePopups,
+  {
+    name: 'not-found',
+    path: '*',
+    component: NotFound,
+    meta: {
+      ifNotAuth: true,
+    },
+  },
 ];
