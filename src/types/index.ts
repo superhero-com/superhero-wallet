@@ -1,4 +1,4 @@
-/* eslint-disable camelcase */
+/* eslint-disable camelcase, no-unused-vars */
 
 import { RawLocation } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
