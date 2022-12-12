@@ -1,6 +1,6 @@
 import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import { getHdWalletAccount } from '../../../popup/utils/helper';
+import { MODAL_CONFIRM_TRANSACTION_SIGN, getHdWalletAccount } from '../../../popup/utils';
 
 const type = 'hd-wallet';
 
@@ -72,7 +72,7 @@ export default {
       if (!checkTransactionSignPermission) {
         await dispatch(
           'modals/open',
-          { name: 'confirm-transaction-sign', transaction: txObject },
+          { name: MODAL_CONFIRM_TRANSACTION_SIGN, transaction: txObject },
           { root: true },
         );
       }

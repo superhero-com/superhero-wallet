@@ -5,6 +5,9 @@ import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { POPUP_TYPES } from '../popup/utils';
 
+export * from './cordova';
+export * from './router';
+
 export interface IToken {
   contractId: string
   convertedBalance?: number

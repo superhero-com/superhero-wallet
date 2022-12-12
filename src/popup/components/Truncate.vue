@@ -4,6 +4,7 @@
     :class="{ right }"
   >
     <span
+      ref="container"
       class="container"
       :class="{ fixed }"
       :style="cssVars"
@@ -51,21 +52,24 @@ export default {
       async handler() {
         if (this.fixed) return;
         document.fonts.ready.then(() => {
-          const scrollElement = this.$refs.scroll;
-          const { parentElement } = scrollElement;
-          const { scrollWidth, offsetWidth } = parentElement;
+          const scrollElem = this.$refs.scroll;
+          const containerElem = this.$refs.container;
 
-          if (scrollWidth > offsetWidth) {
-            parentElement.classList.add('scrollable');
-            this.animation = scrollElement.animate(
-              [{ transform: `translateX(calc(-${scrollWidth - offsetWidth}px - var(--beforeWidth)))` }],
-              {
-                delay: 2000,
-                duration: 4000,
-                direction: 'alternate',
-                iterations: Infinity,
-              },
-            );
+          if (scrollElem && containerElem) {
+            const { scrollWidth, offsetWidth } = containerElem;
+
+            if (scrollWidth > offsetWidth) {
+              containerElem.classList.add('scrollable');
+              this.animation = scrollElem.animate(
+                [{ transform: `translateX(calc(-${scrollWidth - offsetWidth}px - var(--beforeWidth)))` }],
+                {
+                  delay: 2000,
+                  duration: 4000,
+                  direction: 'alternate',
+                  iterations: Infinity,
+                },
+              );
+            }
           }
         });
       },
