@@ -129,6 +129,12 @@ export default {
       || categorizeContractCallTxObject(transaction)?.url
       || ''
   ),
+  getPayload: () => (transaction) => {
+    if (transaction.tx?.payload) {
+      return TxBuilderHelper.decode(transaction.tx?.payload).toString();
+    }
+    return null;
+  },
   isTxAex9: () => (transaction) => transaction.tx
     && !!categorizeContractCallTxObject(transaction)?.token
     && categorizeContractCallTxObject(transaction)?.token !== AETERNITY_CONTRACT_ID,

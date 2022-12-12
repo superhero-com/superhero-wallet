@@ -26,7 +26,10 @@
     <span class="sending-to">
       {{ transaction.tipUrl ? $t('pages.send.sentTo') : $t('pages.send.sendingTo') }}
     </span>
-    <div class="content">
+    <div
+      class="content"
+      :class="{ 'without-margin': payload.length }"
+    >
       <span v-if="transaction.tipUrl">{{ transaction.tipUrl }}</span>
       <AvatarWithChainName
         v-else
@@ -36,6 +39,11 @@
         :name="nameRecipient"
       />
     </div>
+
+    <Payload
+      :payload="payload"
+    />
+
     <template #footer>
       <BtnMain
         variant="secondary"
@@ -69,9 +77,11 @@ import Pending from '../../../icons/animated-pending.svg?vue-component';
 import ExternalLink from '../../../icons/external-link-big.svg?vue-component';
 import { AETERNITY_SYMBOL } from '../../utils/constants';
 import { watchUntilTruthy } from '../../utils';
+import Payload from '../Payload.vue';
 
 export default {
   components: {
+    Payload,
     ModalHeader,
     AvatarWithChainName,
     Modal,
@@ -90,11 +100,14 @@ export default {
   }),
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters(['getTxAmountTotal', 'getTxSymbol', 'getExplorerPath', 'isTxAex9']),
+    ...mapGetters(['getTxAmountTotal', 'getTxSymbol', 'getPayload', 'getExplorerPath', 'isTxAex9']),
     ...mapGetters('names', ['getPreferred']),
     isAe() {
       return !(this.transaction.tx.contractId
         && this.availableTokens[this.transaction.tx.contractId]?.symbol);
+    },
+    payload() {
+      return this.getPayload(this.transaction);
     },
   },
   async mounted() {
@@ -104,6 +117,7 @@ export default {
       this.hideAvatar = true;
       this.nameRecipient = (await this.$store.state.middleware.getNameById(recipientId)).name;
     }
+    console.log(this.transaction);
   },
   methods: {
     getSymbol() {
@@ -169,6 +183,10 @@ export default {
   .content {
     margin-bottom: 26px;
     width: 100%;
+
+    &.without-margin {
+      margin-bottom: 0;
+    }
   }
 }
 </style>

@@ -35,6 +35,7 @@
         :status="urlStatus"
       />
     </div>
+
     <InputAmount
       v-model="formModel.amount"
       v-validate="{
@@ -61,6 +62,40 @@
         </BtnPlain>
       </template>
     </InputAmount>
+
+    <div
+      v-if="!payload.length"
+      class="payload-add-wrapper"
+    >
+      <div
+        class="payload-btn"
+        @click="editPayload"
+      >
+        <PayloadAddIcon class="payload-add-icon" />
+        PAYLOAD
+      </div>
+      <QuestionIcon
+        class="icon-btn"
+        @click="openPayloadInformation"
+      />
+    </div>
+
+    <Payload
+      v-else
+      :payload="payload"
+      class="payload"
+    >
+      <div class="payload-options">
+        <EditIcon
+          class="icon-btn"
+          @click="editPayload"
+        />
+        <DeleteIcon
+          class="icon-btn"
+          @click="clearPayload"
+        />
+      </div>
+    </Payload>
 
     <DetailsItem
       :label="$t('pages.signTransaction.fee')"
@@ -96,6 +131,8 @@ import {
   MODAL_READ_QR_CODE,
   MODAL_RECIPIENT_INFO,
   AETERNITY_CONTRACT_ID,
+  MODAL_PAYLOAD_INFO,
+  MODAL_PAYLOAD_FORM,
 } from '../utils/constants';
 import { useMaxAmount } from '../../composables';
 import AccountRow from './AccountRow.vue';
@@ -105,14 +142,20 @@ import BtnPlain from './buttons/BtnPlain.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import QrScanIcon from '../../icons/qr-scan.svg?vue-component';
+import PayloadAddIcon from '../../icons/payload-add.svg?vue-component';
+import QuestionIcon from '../../icons/question.svg?vue-component';
+import EditIcon from '../../icons/pencil.svg?vue-component';
+import DeleteIcon from '../../icons/trash.svg?vue-component';
 import ModalHeader from './ModalHeader.vue';
 import UrlStatus from './UrlStatus.vue';
+import Payload from './Payload.vue';
 
 const WARNING_RULES = ['not_same_as'];
 
 export default defineComponent({
   name: 'TransferSendForm',
   components: {
+    Payload,
     ModalHeader,
     AccountRow,
     InputField,
@@ -122,6 +165,10 @@ export default defineComponent({
     TokenAmount,
     QrScanIcon,
     UrlStatus,
+    PayloadAddIcon,
+    QuestionIcon,
+    EditIcon,
+    DeleteIcon,
   },
   model: {
     prop: 'transferData',
@@ -139,6 +186,7 @@ export default defineComponent({
     }>(props.transferData as any);
     const loading = ref<boolean>(false);
     const error = ref<boolean>(false);
+    const payload = ref('');
 
     const {
       max,
@@ -252,6 +300,7 @@ export default defineComponent({
           total: (selectedAsset?.contractId === AETERNITY_CONTRACT_ID ? +fee.value : 0) + +amount,
           invoiceId: invoiceId.value,
           invoiceContract: invoiceContract.value,
+          payload: payload.value,
         });
       }
     };
@@ -321,6 +370,28 @@ export default defineComponent({
       if (!formModel.value.address) formModel.value.address = '';
     };
 
+    const openPayloadInformation = () => {
+      root.$store.dispatch('modals/open', {
+        name: MODAL_PAYLOAD_INFO,
+        title: root.$t('modals.invalid-qr-code.msg'),
+      });
+    };
+
+    const editPayload = () => {
+      root.$store.dispatch('modals/open', {
+        name: MODAL_PAYLOAD_FORM,
+        title: root.$t('modals.invalid-qr-code.msg'),
+        payload: payload.value,
+        onChange: (text: string) => {
+          payload.value = text;
+        },
+      });
+    };
+
+    const clearPayload = () => {
+      payload.value = '';
+    };
+
     onMounted(async () => {
       const tipUrlEncoded: any = root.$route.query.url;
       if (tipUrlEncoded) {
@@ -361,6 +432,10 @@ export default defineComponent({
       balance,
       fee,
       max,
+      editPayload,
+      openPayloadInformation,
+      payload,
+      clearPayload,
     };
   },
 });
@@ -404,6 +479,62 @@ export default defineComponent({
       background: rgba(variables.$color-primary, 0.15);
       border-color: rgba(variables.$color-primary, 0.5);
     }
+  }
+
+  .icon-btn {
+    width: 20px;
+    height: 20px;
+    fill: variables.$color-white;
+    opacity: 0.5;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .payload-add-wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+
+    .payload-btn {
+      @extend %face-sans-14-medium;
+
+      color: variables.$color-primary;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      height: 28px;
+      padding: 0 4px 0 1px;
+      margin-right: 8px;
+
+      .payload-add-icon {
+        margin-right: 4px;
+        width: 20px;
+        height: 20px;
+      }
+
+      &:hover {
+        border-radius: 8px;
+        background: rgba(variables.$color-primary, 0.15);
+      }
+    }
+
+    .icon-btn {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .payload {
+    margin-bottom: 24px;
+  }
+
+  .payload-options {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 }
 </style>

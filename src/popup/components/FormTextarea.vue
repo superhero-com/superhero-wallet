@@ -3,6 +3,7 @@
     v-bind="$attrs"
     class="textarea"
     :class="[ size ]"
+    :message="message"
     @input="$emit('input', $event)"
   >
     <template #default="{ inputId }">
@@ -41,6 +42,16 @@ export default {
     placeholder: { type: String, default: '' },
     enterSubmit: Boolean,
     resizable: { type: Boolean, default: true },
+    message: {
+      type: [String, Object],
+      validator(value) {
+        if (typeof value === 'object' && value.status) {
+          return ['success', 'warning', 'error'].includes(value.status);
+        }
+        return true;
+      },
+      default: null,
+    },
     size: {
       type: String,
       default: null,

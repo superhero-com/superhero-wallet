@@ -79,6 +79,9 @@
         />
       </template>
     </DetailsItem>
+    <Payload
+      :payload="transferData.payload"
+    />
     <Loader v-if="loading" />
   </div>
 </template>
@@ -99,10 +102,12 @@ import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import AvatarWithChainName from './AvatarWithChainName.vue';
 import ModalHeader from './ModalHeader.vue';
+import Payload from './Payload.vue';
 
 export default defineComponent({
   name: 'TransferReview',
   components: {
+    Payload,
     ModalHeader,
     AvatarWithChainName,
     DetailsItem,
@@ -167,6 +172,7 @@ export default defineComponent({
           actionResult = await sdk.value.spend(amount, recipient, {
             waitMined: false,
             modal: false,
+            payload: props.transferData.payload,
           });
         }
 

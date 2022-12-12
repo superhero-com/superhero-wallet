@@ -39,6 +39,19 @@
     "required": {
       "msg": "Please fill in all fields."
     },
+    "payload-info": {
+      "title": "Payload",
+      "msg": "Payload is an optional memo or custom message composed by the sender and sent to the recipient along with a blockchain transaction.",
+      "desc": "Payload can be utilized as additional transaction identifier, destination tag (required by some centralized exchanges when depositing funds), or just to provide any extra information in free-form text."
+    },
+    "payload-form": {
+      "title": "Add payload",
+      "desc": " Memo or custom message to recipient that will be broadcasted with your transaction.",
+      "label": "Enter payload (optional)",
+      "error-message": "Your message exceeds the limit of 280 characters",
+      "done-btn": "Done",
+      "cancel-btn": "Cancel"
+    },
     "only-chars": {
       "msg": "Only letters and numbers are allowed."
     },

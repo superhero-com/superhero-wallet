@@ -20,6 +20,8 @@ import {
   MODAL_TRANSFER_SEND,
   MODAL_RECIPIENT_INFO,
   MODAL_RECIPIENT_HELPER,
+  MODAL_PAYLOAD_INFO,
+  MODAL_PAYLOAD_FORM,
 } from '../utils/constants';
 
 import Default from '../components/Modals/Default.vue';
@@ -39,6 +41,8 @@ import ResetWallet from '../components/Modals/ResetWallet.vue';
 import TransferSend from '../components/Modals/TransferSend.vue';
 import RecipientHelper from '../components/Modals/RecipientHelper.vue';
 import RecipientInfo from '../components/Modals/RecipientInfo.vue';
+import PayloadDescription from '../components/Modals/PayloadDescription.vue';
+import PayloadForm from '../components/Modals/PayloadForm.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
@@ -68,4 +72,6 @@ export default () => {
   registerModal({ name: MODAL_RESET_WALLET, component: ResetWallet });
   registerModal({ name: MODAL_RECIPIENT_HELPER, component: RecipientHelper });
   registerModal({ name: MODAL_RECIPIENT_INFO, component: RecipientInfo });
+  registerModal({ name: MODAL_PAYLOAD_INFO, component: PayloadDescription });
+  registerModal({ name: MODAL_PAYLOAD_FORM, component: PayloadForm });
 };
