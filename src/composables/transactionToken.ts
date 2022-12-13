@@ -6,7 +6,11 @@ import type {
 import * as TransactionResolver from '../popup/utils/transactionTokenInfoResolvers';
 
 import {
-  AETERNITY_SYMBOL, convertToken, FUNCTION_TYPE_DEX, MAGNITUDE, RETURN_TYPE_OK,
+  AETERNITY_SYMBOL,
+  FUNCTION_TYPE_DEX,
+  MAGNITUDE,
+  RETURN_TYPE_OK,
+  convertToken,
 } from '../popup/utils';
 import { useGetter, useState } from './vuex';
 

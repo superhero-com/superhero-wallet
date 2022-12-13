@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { Validator, ErrorBag, install as VeeValidate } from 'vee-validate/dist/vee-validate.minimal.esm';
-import { required, url } from 'vee-validate/dist/rules.esm';
+import { required } from 'vee-validate/dist/rules.esm';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { Crypto } from '@aeternity/aepp-sdk';
@@ -9,7 +9,7 @@ import {
   isNotFoundError,
   getAddressByNameEntry,
   checkAensName,
-  validateTipUrl,
+  validateTipUrl, isValidURL,
 } from '../../popup/utils/helper';
 import { AENS_DOMAIN } from '../../popup/utils/constants';
 
@@ -37,7 +37,7 @@ Object.assign(ErrorBag.prototype, {
   },
 });
 
-Validator.extend('url', url);
+Validator.extend('url', (url) => isValidURL(url));
 Validator.extend('required', required);
 Validator.extend('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
 Validator.extend('name', (value) => checkAensName(`${value}${AENS_DOMAIN}`));
