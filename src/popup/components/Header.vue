@@ -151,7 +151,7 @@ export default {
 @use '../../styles/mixins';
 
 .header {
-  position: sticky;
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: space-between;
