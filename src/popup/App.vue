@@ -15,6 +15,7 @@
     </button>
     <div
       v-show="!qrScannerOpen"
+      :class="{ 'show-scrollbar': $route.meta.scrollbarVisible }"
       class="app-inner"
     >
       <Header v-if="showHeader" />
@@ -188,6 +189,22 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     overflow-y: auto;
+
+    &.show-scrollbar {
+      -ms-overflow-style: auto;
+
+      &::-webkit-scrollbar {
+        display: block;
+        width: 6px;
+        height: 0;
+
+        &-thumb {
+          display: block;
+          background-color: rgba(variables.$color-white, 0.15);
+          border-radius: 4px;
+        }
+      }
+    }
   }
 
   .main {
@@ -235,11 +252,8 @@ export default defineComponent({
   &.show-header {
     --header-height: 40px;
 
-    .main {
-      @include mixins.desktop {
-        min-height: calc(100% - var(--header-height));
-        min-height: calc(100% - var(--header-height) - env(safe-area-inset-top));
-      }
+    .app-inner {
+      padding-top: var(--header-height);
     }
   }
 }

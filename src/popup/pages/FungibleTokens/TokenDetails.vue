@@ -257,8 +257,9 @@ export default {
 
   .sticky-tabs-wrapper {
     position: sticky;
-    top: calc(var(--header-height) + env(safe-area-inset-top));
+    top: env(safe-area-inset-top);
     background-color: var(--screen-bg-color);
+    padding-bottom: 4px;
   }
 
   ::v-deep .filters {
@@ -267,7 +268,7 @@ export default {
     padding-top: 12px;
     height: 56px;
     position: sticky;
-    top: calc(var(--header-height) + var(--buttons-height) + env(safe-area-inset-top));
+    top: calc(var(--buttons-height) + env(safe-area-inset-top));
   }
 }
 </style>

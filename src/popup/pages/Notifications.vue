@@ -216,7 +216,6 @@ export default defineComponent({
 
   .tabs-wrapper {
     position: sticky;
-    top: var(--header-height);
     z-index: 1;
     padding: var(--gap) var(--screen-padding-x);
     background-color: var(--screen-bg-color);
