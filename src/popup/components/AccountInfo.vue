@@ -92,7 +92,6 @@ export default {
 
   .avatar {
     margin-right: 8px;
-    overflow: visible;
     width: 48px;
     height: 48px;
     background-color: variables.$color-black;
