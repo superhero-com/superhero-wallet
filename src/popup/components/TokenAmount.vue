@@ -101,6 +101,7 @@ export default {
     &.fiat-below {
       display: block;
       margin-left: 0;
+      padding-top: 4px;
     }
   }
 
@@ -137,6 +138,10 @@ export default {
 
     .text {
       @extend %face-sans-16-regular;
+    }
+
+    .fiat {
+      @extend %face-sans-18-regular;
     }
   }
 }
