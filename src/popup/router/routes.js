@@ -9,6 +9,8 @@ import Dashboard from '../pages/Dashboard.vue';
 import Address from '../pages/Address.vue';
 import CommentNew from '../pages/CommentNew.vue';
 import DonateError from '../pages/DonateError.vue';
+import TokenContainer from '../pages/FungibleTokens/TokenContainer.vue';
+import TokenTransactions from '../pages/FungibleTokens/TokenTransactions.vue';
 import TokenDetails from '../pages/FungibleTokens/TokenDetails.vue';
 import Index from '../pages/Index.vue';
 import Invite from '../pages/Invite.vue';
@@ -479,31 +481,36 @@ export default [
     },
   },
   {
-    name: 'token-details',
-    path: '/balances/:id',
-    component: TokenDetails,
-    props: true,
-    meta: {
-      title: 'token-details',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
-      modalHeader: true,
-    },
-  },
-  {
-    name: 'coin-details',
-    path: '/ae-balances',
-    component: TokenDetails,
-    props: true,
-    meta: {
-      title: 'coin-details',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
-      modalHeader: true,
-      isAeCoinDetails: true,
-    },
+    path: '/account-details/:type/:id',
+    component: TokenContainer,
+    children: [
+      {
+        name: 'token-details',
+        path: 'details',
+        component: TokenDetails,
+        props: true,
+        meta: {
+          title: 'token-details',
+          backButton: true,
+          closeButton: true,
+          hideNotificationsIcon: true,
+          modalHeader: true,
+        },
+      },
+      {
+        name: 'token-transactions',
+        path: 'transactions',
+        component: TokenTransactions,
+        props: true,
+        meta: {
+          title: 'token-details',
+          backButton: true,
+          closeButton: true,
+          hideNotificationsIcon: true,
+          modalHeader: true,
+        },
+      },
+    ],
   },
   {
     name: 'not-found',
