@@ -8,8 +8,6 @@ const hostConfig = (addresses, isDefault = false) => ({
   transactionSignLimit: isDefault ? 50 : 0,
   transactionSignLimitLeft: isDefault ? 50 : 0,
   transactionSignFirstAskedOn: null,
-  host: null,
-  name: null,
 });
 
 export class App {
@@ -84,25 +82,17 @@ export default {
       };
       return state[host]?.[permissionsMethods[method]];
     },
-    async requestAddressForHost({ state, commit, dispatch }, {
+    async requestAddressForHost({ dispatch }, {
       host,
-      address,
-      name,
       connectionPopupCb,
     }) {
-      if (state[host]?.addresses?.includes(address)) return true;
-
+      if (await dispatch('checkPermissions', { host, method: 'connection.open' })) return true;
       try {
-        if (!(await dispatch('checkPermissions', { host, method: 'connection.open' }))) {
-          const cp = await connectionPopupCb();
-          if (cp !== undefined && !cp) return false;
-        }
+        await connectionPopupCb();
+        return true;
       } catch {
         return false;
       }
-      commit('addAddressToHost', { host, address, name });
-
-      return true;
     },
   },
 };
