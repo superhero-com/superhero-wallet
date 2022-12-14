@@ -19,10 +19,14 @@
           :message="errors.first('name')"
         />
       </div>
+
       <div class="permission-row">
         <InputField
           v-model="permission.host"
-          v-validate="{ required: true, url: true }"
+          v-validate="{
+            required: true,
+            url: permissionHostValidation
+          }"
           type="url"
           name="url"
           :label="$t('pages.permissions.permissions-for-url')"
@@ -185,6 +189,9 @@ export default {
         current_price: this.currentCurrencyRate,
       };
     },
+    permissionHostValidation() {
+      return !this.permission.host || !this.permission.host.includes('localhost');
+    },
   },
   subscriptions() {
     return pick(this.$store.state.observables, ['balance']);
@@ -227,7 +234,11 @@ export default {
       this.$validator.validateAll().then((result) => {
         if (!result) return;
 
-        if (this.permission.host !== this.host) {
+        const { host } = (new URL(
+          `${this.permission.host.includes('http') ? '' : 'http://'}${this.permission.host}`,
+        ));
+
+        if (host !== this.host) {
           this.$store.commit('permissions/removePermission', this.host);
         }
 
@@ -239,7 +250,10 @@ export default {
           );
         }
 
-        this.$store.commit('permissions/addPermission', this.permission);
+        this.$store.commit('permissions/addPermission', {
+          ...this.permission,
+          host,
+        });
         this.$router.push({ name: 'permissions-settings' });
       });
     },

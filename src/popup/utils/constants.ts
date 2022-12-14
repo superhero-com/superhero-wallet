@@ -428,3 +428,6 @@ export const POPUP_TYPES = [
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
 ] as const;
+
+export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';
+export const POPUP_CONNECT_TRANSACTIONS_PERMISSION = 'transactions';

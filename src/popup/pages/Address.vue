@@ -3,13 +3,14 @@
     :app="app"
     :resolve="onResolve"
     :reject="onReject"
-    :permissions="['address']"
+    :access="[POPUP_CONNECT_ADDRESS_PERMISSION]"
   />
 </template>
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
 import { useDeepLinkApi } from '../../composables';
+import { POPUP_CONNECT_ADDRESS_PERMISSION } from '../utils/constants';
 import Connect from './Popups/Connect.vue';
 
 export default defineComponent({
@@ -34,6 +35,7 @@ export default defineComponent({
       onResolve,
       onReject,
       app,
+      POPUP_CONNECT_ADDRESS_PERMISSION,
     };
   },
 });
