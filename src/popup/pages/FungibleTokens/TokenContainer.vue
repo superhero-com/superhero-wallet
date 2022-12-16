@@ -226,12 +226,10 @@ export default defineComponent({
 
 .token-container {
   --screen-padding-x: 12px;
-  --screen-bg-color: #{variables.$color-bg-modal};
 
   display: flex;
   flex-direction: column;
   padding-inline: var(--screen-padding-x);
-  background-color: variables.$color-bg-4;
 
   .top {
     text-align: center;

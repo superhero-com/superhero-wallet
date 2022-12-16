@@ -4,7 +4,7 @@ import { RawLocation, RouteConfig } from 'vue-router';
 export interface WalletRouteMeta {
   /**
    * Decide if the page should be displayed in a similar way to modal.
-   * Applies mostly to the page transition animation.
+   * Affects mostly the page transition animation and the page bg color.
    */
   asModal?: boolean
   /**
@@ -18,10 +18,6 @@ export interface WalletRouteMeta {
    */
   hideHeader?: boolean
   /**
-   * Decide if the app header notification icon should be hidden
-   */
-  hideNotificationsIcon?: boolean
-  /**
    * Allow to see the page by unauthorized users
    */
   ifNotAuth?: boolean
@@ -29,16 +25,10 @@ export interface WalletRouteMeta {
    * Only for unauthorized users
    */
   ifNotAuthOnly?: boolean
-  isAeCoinDetails?: boolean
   /**
    * Decide if the page allows to edit the displayed data
    */
   isEdit?: boolean
-  /**
-   * Display the app header as a modal header
-   * @default: false
-   */
-  isModalHeader?: boolean
   /**
    * Decide of the route should be saved to browser's local storage
    */
@@ -49,13 +39,10 @@ export interface WalletRouteMeta {
    */
   title?: string
   /**
-   * Decide if the header back button should be visible
+   * Decide if the header should display the logo and more button
+   * or the back and close buttons.
    */
-  showBackButton?: boolean
-  /**
-   * Decide if the header close button should be visible
-   */
-  showCloseButton?: boolean
+  showHeaderNavigation?: boolean
   /**
    * Decide if the scrollbar should be visible to the user
    * @default: false

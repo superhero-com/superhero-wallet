@@ -3,35 +3,34 @@
     class="header"
     :class="{
       'not-logged-in': !isLoggedIn,
-      'modal-header': isModalHeader,
     }"
   >
     <div
       v-if="isLoggedIn || title"
       class="left"
     >
-      <Component
-        :is="isLogoDisabled ? 'div' : 'RouterLink'"
-        v-if="isLoggedIn && !showBack"
-        :to="isLogoDisabled ? null : { name: 'account' }"
-        :class="['home-button', { 'disabled': isLogoDisabled }]"
-      >
-        <Logo class="home-icon" />
-      </Component>
       <BtnIcon
-        v-if="showBack"
+        v-if="showHeaderNavigation"
         class="icon-btn"
         @click="back"
       >
         <BackIcon data-cy="back-arrow" />
       </BtnIcon>
+      <Component
+        :is="isLogoDisabled ? 'div' : 'RouterLink'"
+        v-else-if="isLoggedIn"
+        :to="isLogoDisabled ? null : { name: ROUTE_ACCOUNT }"
+        :class="['home-button', { 'disabled': isLogoDisabled }]"
+      >
+        <Logo class="home-icon" />
+      </Component>
     </div>
 
     <div
       class="title"
     >
       <Truncate
-        :str="truncateStr"
+        :str="titleTruncated"
         class="text"
       />
     </div>
@@ -40,27 +39,34 @@
       v-if="isLoggedIn"
       class="right"
     >
-      <NotifyBell v-if="showNotifications" />
-
-      <BtnIcon
-        v-if="showMore"
-        :to="{ name: 'more' }"
-        data-cy="page-more"
-      >
-        <ThreeDots />
-      </BtnIcon>
-
       <BtnClose
-        v-else
+        v-if="showHeaderNavigation"
         data-cy="close"
         @click="close"
       />
+      <template v-else>
+        <NotifyBell />
+
+        <BtnIcon
+          :to="{ name: ROUTE_MORE }"
+          data-cy="page-more"
+        >
+          <ThreeDots />
+        </BtnIcon>
+      </template>
     </div>
   </div>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import { useGetter } from '../../composables';
+import { WalletRouteMeta } from '../../types';
+import {
+  ROUTE_INDEX,
+  ROUTE_ACCOUNT,
+  ROUTE_MORE,
+} from '../router/routeNames';
 import Logo from '../../icons/logo-small.svg?vue-component';
 import BackIcon from '../../icons/back.svg?vue-component';
 import Bell from '../../icons/bell.svg?vue-component';
@@ -72,7 +78,7 @@ import BtnClose from './buttons/BtnClose.vue';
 import NotifyBell from './NotifyBell.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
 
-export default {
+export default defineComponent({
   components: {
     NotifyBell,
     BtnClose,
@@ -85,60 +91,43 @@ export default {
     BtnPlain,
     BtnIcon,
   },
-  subscriptions() {
+  setup(props, { root }) {
+    const isLoggedIn = useGetter('isLoggedIn');
+    const currentHomeRouteName = computed(() => (isLoggedIn.value) ? ROUTE_ACCOUNT : ROUTE_INDEX);
+    const routeMeta = computed(() => root.$route.meta as WalletRouteMeta);
+    const showHeaderNavigation = computed(() => !!routeMeta.value?.showHeaderNavigation);
+    const isLogoDisabled = computed(() => root.$route.name === ROUTE_ACCOUNT);
+    const titleTruncated = computed(
+      () => routeMeta.value?.title ? root.$t(`pages.titles.${routeMeta.value.title}`) : '',
+    );
+
+    function back() {
+      if (root.$store.state.route.from.name === ROUTE_INDEX) {
+        return root.$router.push({ name: currentHomeRouteName.value });
+      }
+      if (root.$route.meta?.backRoute) {
+        // TODO: rewrite back button logic in more unified way
+        return root.$router.push(root.$route.meta?.backRoute);
+      }
+      return root.$router.back();
+    }
+
+    function close() {
+      root.$router.replace({ name: currentHomeRouteName.value });
+    }
+
     return {
-      superheroNotifications: this.$store.state.observables.notifications,
+      ROUTE_ACCOUNT,
+      ROUTE_MORE,
+      isLoggedIn,
+      showHeaderNavigation,
+      isLogoDisabled,
+      titleTruncated,
+      back,
+      close,
     };
   },
-  computed: {
-    ...mapGetters(['isLoggedIn']),
-    ...mapState(['notifications', 'pageTitle']),
-    truncateStr() {
-      const { pageTitle, title } = this;
-      return pageTitle || (title ? this.$t(`pages.titles.${title}`) : '');
-    },
-    title() {
-      return this.$route.meta.title;
-    },
-    isModalHeader() {
-      return this.$route.meta.isModalHeader;
-    },
-    showBack() {
-      return (
-        (this.$route.meta.backButton !== undefined ? this.$route.meta.backButton : true)
-        && this.title
-      );
-    },
-    showMore() {
-      return this.$route.name !== 'more' && !this.$route.meta?.closeButton;
-    },
-    showNotifications() {
-      return this.$route.name !== 'notifications' && !this.$route.meta?.hideNotificationsIcon;
-    },
-    isLogoDisabled() {
-      return this.$route.name === 'account';
-    },
-  },
-  methods: {
-    back() {
-      if (this.$store.state.route.from.path === '/') {
-        this.$router.push(this.isLoggedIn ? '/account' : '/');
-        return;
-      }
-      if (this.$route.meta?.backRoute) {
-        // TODO: rewrite back button logic in more unified way
-        this.$router.push(this.$route.meta?.backRoute);
-        return;
-      }
-      this.$router.back();
-    },
-    close() {
-      this.$router.replace(
-        this.isLoggedIn ? '/account' : '/',
-      );
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -199,10 +188,6 @@ export default {
       width: 100%;
       position: absolute;
     }
-  }
-
-  &.modal-header {
-    background-color: variables.$color-bg-modal;
   }
 
   .left .home-button {

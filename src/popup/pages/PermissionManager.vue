@@ -181,7 +181,7 @@ export default {
       return this.$route.params.host;
     },
     editView() {
-      return !!this.$route.meta.isEdit;
+      return !!this.$route.meta?.isEdit;
     },
     selectedAsset() {
       return {
