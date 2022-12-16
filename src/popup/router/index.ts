@@ -4,8 +4,8 @@ import { ICordova } from '../../types';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
-  routes,
-} from './routes';
+} from './routeNames';
+import { routes } from './routes';
 import { i18n } from '../../store/plugins/languages';
 import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';

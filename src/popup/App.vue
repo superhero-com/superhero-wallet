@@ -3,6 +3,7 @@
     id="app"
     :class="{
       'show-header': showHeader,
+      'display-as-modal': displayAsModal,
       'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
       'is-extension': IS_EXTENSION,
     }"
@@ -20,7 +21,7 @@
     >
       <Header v-if="showHeader" />
 
-      <transition :name="$route.meta.asModal ? 'pop-transition' : 'page-transition'">
+      <transition :name="displayAsModal ? 'pop-transition' : 'page-transition'">
         <RouterView
           :class="{ 'show-header': showHeader }"
           class="main"
@@ -49,6 +50,7 @@ import {
   onMounted,
   watch,
 } from '@vue/composition-api';
+import type { WalletRouteMeta } from '../types';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
   NODE_STATUS_OFFLINE,
@@ -80,6 +82,7 @@ export default defineComponent({
     const backedUpSeed = computed(() => root.$store.state.backedUpSeed);
     const qrScannerOpen = computed(() => root.$store.state.qrScannerOpen);
     const modals = computed(() => root.$store.getters['modals/opened']);
+    const displayAsModal = computed(() => (root.$route.meta as WalletRouteMeta)?.asModal);
 
     const showHeader = computed(() => !(
       RUNNING_IN_POPUP
@@ -142,6 +145,7 @@ export default defineComponent({
       IS_WEB,
       IS_EXTENSION,
       IS_MOBILE_DEVICE,
+      displayAsModal,
       modals,
       qrScannerOpen,
       showHeader,
@@ -255,6 +259,10 @@ export default defineComponent({
     .app-inner {
       padding-top: var(--header-height);
     }
+  }
+
+  &.display-as-modal {
+    --screen-bg-color: #{variables.$color-bg-modal};
   }
 }
 </style>

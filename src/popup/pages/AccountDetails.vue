@@ -11,7 +11,7 @@
 
       <BtnClose
         class="close-button"
-        :to="{ name: 'index' }"
+        :to="{ name: 'account' }"
       />
     </div>
 
@@ -231,13 +231,11 @@ export default defineComponent({
 .account-details {
   --account-info-height: 120px;
   --screen-padding-x: 12px;
-  --screen-bg-color: #{variables.$color-bg-modal};
 
   border-radius: variables.$border-radius-app;
   min-height: 100%;
   font-weight: 500;
   color: variables.$color-white;
-  background-color: var(--screen-bg-color);
   box-shadow:
     0 0 0 1px variables.$color-border,
     0 0 50px rgba(variables.$color-black, 0.6);

@@ -1,4 +1,10 @@
-import { WalletAppRouteConfig } from '../../types';
+import type { WalletAppRouteConfig } from '../../types';
+import {
+  ROUTE_INDEX,
+  ROUTE_ACCOUNT,
+  ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+  ROUTE_NOTIFICATIONS,
+} from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
@@ -49,10 +55,6 @@ import ResetWallet from '../pages/ResetWallet.vue';
 import webIframePopups from './webIframePopups';
 import Networks from '../pages/Networks.vue';
 import NetworkForm from '../pages/NetworkForm.vue';
-
-export const ROUTE_INDEX = 'index';
-export const ROUTE_ACCOUNT = 'account';
-export const ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS = 'account-details-names-auctions';
 
 export const routes: WalletAppRouteConfig[] = [
   ...webIframePopups,
@@ -178,9 +180,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: Settings,
     meta: {
       title: 'settings',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -189,9 +189,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: ResetWallet,
     meta: {
       title: 'reset-wallet',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -200,9 +198,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: ErrorLogSettings,
     meta: {
       title: 'save-errors-log',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -211,9 +207,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: LanguageSettings,
     meta: {
       title: 'language',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -222,9 +216,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: CurrencySettings,
     meta: {
       title: 'currency',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -233,9 +225,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: SeedPhraseSettings,
     meta: {
       title: 'seed-phrase',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -244,9 +234,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: SeedPhraseDetailsSettings,
     meta: {
       title: 'seed-phrase',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -255,9 +243,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: SeedPhraseVerifySettings,
     meta: {
       title: 'seed-phrase',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -267,9 +253,7 @@ export const routes: WalletAppRouteConfig[] = [
     props: true,
     meta: {
       title: 'networks',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -279,9 +263,7 @@ export const routes: WalletAppRouteConfig[] = [
     props: true,
     meta: {
       title: 'network-add',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -291,9 +273,7 @@ export const routes: WalletAppRouteConfig[] = [
     props: true,
     meta: {
       title: 'network-edit',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -302,9 +282,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'permissions-settings',
     meta: {
       title: 'permissionsSettings',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -313,9 +291,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'permissions-add',
     meta: {
       title: 'permissionsAdd',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -324,9 +300,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'permissions-details',
     meta: {
       title: 'permissionsEdit',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
       isEdit: true,
     },
   },
@@ -336,9 +310,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'about',
     meta: {
       title: 'about',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -347,10 +319,8 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'about-terms',
     meta: {
       title: 'terms',
-      showBackButton: true,
-      showCloseButton: true,
+      showHeaderNavigation: true,
       showScrollbar: true,
-      hideNotificationsIcon: true,
       ifNotAuth: true,
     },
   },
@@ -360,10 +330,8 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'about-privacy',
     meta: {
       title: 'privacy',
-      showBackButton: true,
-      showCloseButton: true,
+      showHeaderNavigation: true,
       showScrollbar: true,
-      hideNotificationsIcon: true,
     },
   },
   {
@@ -372,9 +340,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: TipsClaim,
     meta: {
       title: 'claim-tips',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -396,8 +362,7 @@ export const routes: WalletAppRouteConfig[] = [
     props: true,
     meta: {
       title: 'tx-details',
-      hideNotificationsIcon: true,
-      showCloseButton: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -406,8 +371,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'more',
     meta: {
       title: 'more',
-      showBackButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -416,9 +380,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: Invite,
     meta: {
       title: 'invite',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -427,9 +389,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: NotificationSettings,
     meta: {
       title: 'notifications',
-      showBackButton: true,
-      showCloseButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -498,10 +458,7 @@ export const routes: WalletAppRouteConfig[] = [
         props: true,
         meta: {
           title: 'token-details',
-          showBackButton: true,
-          showCloseButton: true,
-          hideNotificationsIcon: true,
-          isModalHeader: true,
+          showHeaderNavigation: true,
         },
       },
       {
@@ -511,10 +468,7 @@ export const routes: WalletAppRouteConfig[] = [
         props: true,
         meta: {
           title: 'token-details',
-          showBackButton: true,
-          showCloseButton: true,
-          hideNotificationsIcon: true,
-          isModalHeader: true,
+          showHeaderNavigation: true,
         },
       },
     ],
@@ -549,10 +503,11 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/notifications',
-    name: 'notifications',
+    name: ROUTE_NOTIFICATIONS,
     component: Notifications,
     meta: {
       title: 'notifications',
+      showHeaderNavigation: true,
       notPersist: true,
     },
   },
