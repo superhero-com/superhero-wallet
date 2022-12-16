@@ -95,6 +95,9 @@ cordova build android --release --buildConfig=myBuildConfig.json
 ## Security
 If you discover a security vulnerability within this application, please get in touch with us. All security vulnerabilities will be promptly addressed.
 
+## Tooling
+This project is tested with BrowserStack.
+
 ## Contribution
 
 Contributions are more than welcome.
