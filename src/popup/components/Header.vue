@@ -6,7 +6,7 @@
     }"
   >
     <div
-      v-if="isLoggedIn || title"
+      v-if="isLoggedIn || titleTruncated"
       class="left"
     >
       <BtnIcon
