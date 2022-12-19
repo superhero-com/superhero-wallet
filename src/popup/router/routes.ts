@@ -88,7 +88,6 @@ export const routes: WalletAppRouteConfig[] = [
         component: AccountDetailsTokens,
         meta: {
           hideHeader: true,
-          asModal: true,
         },
       },
       {
@@ -97,7 +96,6 @@ export const routes: WalletAppRouteConfig[] = [
         component: AccountDetailsTransactions,
         meta: {
           hideHeader: true,
-          asModal: true,
         },
       },
       {
@@ -111,7 +109,6 @@ export const routes: WalletAppRouteConfig[] = [
             props: true,
             meta: {
               hideHeader: true,
-              asModal: true,
             },
           },
           {
@@ -121,7 +118,6 @@ export const routes: WalletAppRouteConfig[] = [
             name: 'account-details-names-auctions',
             meta: {
               hideHeader: true,
-              asModal: true,
             },
           },
           {
@@ -131,7 +127,6 @@ export const routes: WalletAppRouteConfig[] = [
             name: 'account-details-names-claim',
             meta: {
               hideHeader: true,
-              asModal: true,
             },
           },
         ],

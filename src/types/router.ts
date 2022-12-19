@@ -3,11 +3,6 @@ import { RawLocation, RouteConfig } from 'vue-router';
 
 export interface WalletRouteMeta {
   /**
-   * Decide if the page should be displayed in a similar way to modal.
-   * Affects mostly the page transition animation and the page bg color.
-   */
-  asModal?: boolean
-  /**
    * Explicitly define the route that the user will be taken to after clicking
    * the app header back arrow.
    * TODO: Temporary solution.
