@@ -519,6 +519,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: NotFound,
     meta: {
       ifNotAuth: true,
+      showHeaderNavigation: true,
     },
   },
 ];
