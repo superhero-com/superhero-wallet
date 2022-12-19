@@ -1,5 +1,5 @@
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { isFQDN } from 'validator';
+import { isFQDN, isURL } from 'validator';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
   SCHEMA,
@@ -315,3 +315,8 @@ export const getLoginState = async ({
 };
 
 export const buildTx = (txtype) => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);
+
+export const isValidURL = (url) => {
+  const pattern = new RegExp(/((http(s)?:\/\/)?(localhost|127.0.0.1)((:)?[\0-9]{4})?\/?)/, 'i');
+  return isURL(url) || !!pattern.test(url);
+};
