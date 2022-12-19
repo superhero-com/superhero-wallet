@@ -405,6 +405,7 @@ export const routes: WalletAppRouteConfig[] = [
         meta: {
           title: 'auction',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS },
+          showHeaderNavigation: true,
         },
       },
       {
@@ -415,6 +416,7 @@ export const routes: WalletAppRouteConfig[] = [
         meta: {
           title: 'auction',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS },
+          showHeaderNavigation: true,
         },
       },
     ],
