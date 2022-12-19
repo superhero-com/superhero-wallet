@@ -67,7 +67,7 @@ export default {
     color: variables.$color-white;
     width: var(--size);
     height: var(--size);
-    opacity: 0.7;
+    opacity: 0.75;
     transition: 0.1s;
   }
 
@@ -92,14 +92,27 @@ export default {
   }
 
   &.danger {
+    background: transparent;
+
+    > .icon {
+      opacity: 0.5;
+    }
+
     &:hover {
       > .icon {
         color: variables.$color-danger;
+        opacity: 1;
       }
     }
   }
 
   &.dimmed {
+    background: transparent;
+
+    > .icon {
+      opacity: 0.5;
+    }
+
     &:hover {
       > .icon {
         opacity: 0.75;
