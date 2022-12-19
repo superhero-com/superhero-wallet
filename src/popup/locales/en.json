@@ -1200,7 +1200,7 @@
     },
     "permissions": {
       "login": "Don't ask for login requests",
-      "message-sign": "Don't ask for message signing",
+      "message-sign": "Auto-sign messages",
       "daily-spending-limit": "Daily spending limit without asking",
       "transaction-sign": "Limit for spending without asking per day",
       "spent-today": "Spent today",
