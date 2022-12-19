@@ -77,7 +77,6 @@ import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
 import BtnPlain from '../components/buttons/BtnPlain.vue';
 import BtnBox from '../components/buttons/BtnBox.vue';
-import BtnIcon from '../components/buttons/BtnIcon.vue';
 import BtnClose from '../components/buttons/BtnClose.vue';
 import Tabs from '../components/tabs/Tabs.vue';
 import Tab from '../components/tabs/Tab.vue';
@@ -86,7 +85,6 @@ import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
 import SwapIcon from '../../icons/swap.svg?vue-component';
-import CloseIcon from '../../icons/close.svg?vue-component';
 
 export default defineComponent({
   name: 'AccountDetails',
@@ -96,8 +94,6 @@ export default defineComponent({
     BtnPlain,
     Tabs,
     Tab,
-    CloseIcon,
-    BtnIcon,
     BtnBox,
     BtnClose,
   },
