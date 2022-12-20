@@ -23,7 +23,7 @@
       {{ error.stack }}
     </p>
     <BtnMain
-      variant="secondary"
+      variant="muted"
       inline
       to="/"
     >

@@ -102,7 +102,7 @@
         <BtnMain
           class="btn"
           extend
-          variant="secondary"
+          variant="muted"
           :to="{ name: 'permissions-settings' }"
         >
           {{ $t('pages.permissions.cancel') }}
@@ -120,7 +120,7 @@
         v-if="editView"
         extend
         has-icon
-        variant="secondary"
+        variant="muted"
         @click="onRemovePermission"
       >
         <DeleteIcon />

@@ -39,7 +39,7 @@
 
     <template #footer>
       <BtnMain
-        variant="secondary"
+        variant="muted"
         data-cy="deny"
         @click="cancel()"
       >
@@ -61,12 +61,12 @@ import { mapState, mapGetters } from 'vuex';
 import {
   POPUP_CONNECT_ADDRESS_PERMISSION,
   POPUP_CONNECT_TRANSACTIONS_PERMISSION,
-} from '../../utils/constants';
+} from '../../utils';
+import mixin from './mixin';
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import TransactionInfo from '../../components/TransactionInfo.vue';
 import CheckMark from '../../../icons/check-mark.svg?vue-component';
-import mixin from './mixin';
 
 export default {
   components: {

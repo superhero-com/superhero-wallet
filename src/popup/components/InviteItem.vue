@@ -24,7 +24,7 @@
       <BtnMain
         v-else
         class="button"
-        variant="secondary"
+        variant="muted"
         @click="deleteItem"
       >
         {{ $t('pages.invite.delete') }}
@@ -46,7 +46,7 @@
       />
       <div class="centered-buttons">
         <BtnMain
-          variant="secondary"
+          variant="muted"
           @click="resetTopUpChanges"
         >
           {{ $t('pages.invite.collapse') }}

@@ -86,7 +86,7 @@ import {
 import CheckBox from '../components/CheckBox.vue';
 import BtnSubheader from '../components/buttons/BtnSubheader.vue';
 import Platforms from '../components/Platforms.vue';
-import { MODAL_ACCOUNT_IMPORT } from '../utils/constants';
+import { MODAL_ACCOUNT_IMPORT } from '../utils';
 import SuperheroLogoIcon from '../../icons/logo.svg?vue-component';
 import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
 import CheckCircleIcon from '../../icons/check-circle-fill.svg?vue-component';
@@ -191,7 +191,7 @@ export default {
         }
 
         .aeternity-name {
-          color: variables.$color-danger;
+          color: variables.$color-secondary;
         }
       }
     }
