@@ -10,7 +10,7 @@
 
 <script>
 import BtnIcon from './BtnIcon.vue';
-import CloseIcon from '../../../icons/modal/close_modal.svg?vue-component';
+import CloseIcon from '../../../icons/close.svg?vue-component';
 
 export default {
   name: 'BtnClose',

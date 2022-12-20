@@ -69,11 +69,8 @@ import {
 } from '../router/routeNames';
 import Logo from '../../icons/logo-small.svg?vue-component';
 import BackIcon from '../../icons/back.svg?vue-component';
-import Bell from '../../icons/bell.svg?vue-component';
 import ThreeDots from '../../icons/three-dots.svg?vue-component';
-import Close from '../../icons/close.svg?vue-component';
 import Truncate from './Truncate.vue';
-import BtnPlain from './buttons/BtnPlain.vue';
 import BtnClose from './buttons/BtnClose.vue';
 import NotifyBell from './NotifyBell.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
@@ -84,11 +81,8 @@ export default defineComponent({
     BtnClose,
     Logo,
     BackIcon,
-    Bell,
     ThreeDots,
-    Close,
     Truncate,
-    BtnPlain,
     BtnIcon,
   },
   setup(props, { root }) {
