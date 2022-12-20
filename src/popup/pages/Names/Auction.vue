@@ -68,7 +68,7 @@ export default {
           bids: loadedBids,
         });
       } catch (error) {
-        this.$router.push('/names/auctions');
+        this.$router.push({ name: 'auction-bid' });
       }
       this.loading = false;
     },
