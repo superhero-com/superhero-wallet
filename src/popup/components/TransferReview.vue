@@ -21,12 +21,13 @@
     <DetailsItem
       v-if="isAddressUrl"
       data-cy="review-tip-url"
-      class="tip-url"
+      class="tip-url details-item"
       :label="$t('pages.send.receivingUrl')"
       :value="transferData.address"
     />
     <DetailsItem
       v-else
+      class="details-item"
       data-cy="review-recipient"
       :label="$t('pages.send.recipient')"
     >
@@ -41,18 +42,20 @@
 
     <DetailsItem
       :label="$t('pages.tipPage.amountLabel')"
+      class="details-item"
     >
       <template #value>
         <TokenAmount
+          data-cy="review-total"
           :amount="+transferData.amount"
           :symbol="tokenSymbol"
           :hide-fiat="isSelectedAssetAex9"
-          data-cy="review-total"
         />
       </template>
     </DetailsItem>
 
     <DetailsItem
+      class="details-item"
       :label="$t('pages.signTransaction.fee')"
     >
       <template #value>
@@ -65,9 +68,11 @@
         />
       </template>
     </DetailsItem>
+
     <DetailsItem
       v-if="transferData.selectedAsset.contractId === AETERNITY_CONTRACT_ID"
       :label="$t('pages.signTransaction.total')"
+      class="details-item"
     >
       <template #value>
         <TokenAmount
@@ -79,6 +84,12 @@
         />
       </template>
     </DetailsItem>
+
+    <PayloadDetails
+      class="details-item"
+      :payload="transferData.payload"
+    />
+
     <Loader v-if="loading" />
   </div>
 </template>
@@ -99,10 +110,12 @@ import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import AvatarWithChainName from './AvatarWithChainName.vue';
 import ModalHeader from './ModalHeader.vue';
+import PayloadDetails from './PayloadDetails.vue';
 
 export default defineComponent({
   name: 'TransferReview',
   components: {
+    PayloadDetails,
     ModalHeader,
     AvatarWithChainName,
     DetailsItem,
@@ -167,6 +180,7 @@ export default defineComponent({
           actionResult = await sdk.value.spend(amount, recipient, {
             waitMined: false,
             modal: false,
+            payload: props.transferData.payload,
           });
         }
 
@@ -309,3 +323,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped lang="scss">
+  .details-item {
+    margin-top: 16px;
+  }
+</style>

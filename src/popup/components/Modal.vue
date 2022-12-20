@@ -20,7 +20,9 @@
         <div
           v-if="showHeader"
           class="header"
-          :class="{ transparent: hasCloseButton && !($slots.header || header) }"
+          :class="{
+            transparent: hasCloseButton && !($slots.header || header),
+          }"
         >
           <div
             v-if="$slots.icon"
@@ -45,7 +47,10 @@
         <div
           v-if="$slots.default"
           class="body"
-          :class="{ 'text-center': centered }"
+          :class="{
+            'text-center': centered,
+            'without-padding-bottom': bodyWithoutPaddingBottom
+          }"
         >
           <slot />
         </div>
@@ -88,6 +93,7 @@ export default defineComponent({
     dense: Boolean,
     noPadding: Boolean,
     centered: Boolean,
+    bodyWithoutPaddingBottom: Boolean,
     header: { type: String, default: null },
   },
   emits: [
@@ -184,6 +190,10 @@ export default defineComponent({
       padding: var(--screen-padding-x);
       color: variables.$color-grey-light;
       word-break: break-word;
+
+      &.without-padding-bottom {
+        padding-bottom: 0;
+      }
     }
   }
 

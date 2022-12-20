@@ -35,6 +35,7 @@
         :status="urlStatus"
       />
     </div>
+
     <InputAmount
       v-model="formModel.amount"
       v-validate="{
@@ -62,9 +63,49 @@
       </template>
     </InputAmount>
 
-    <DetailsItem
-      :label="$t('pages.signTransaction.fee')"
-    >
+    <template v-if="showPayloadForm">
+      <div
+        v-if="!(formModel.payload && formModel.payload.length)"
+        class="payload-add-wrapper"
+      >
+        <BtnText
+          has-icon
+          @click="editPayload"
+        >
+          <PlusCircle />
+          <span>{{ $t('modals.send.payload') }}</span>
+        </BtnText>
+        <BtnHelp
+          :title="$t('modals.payloadInfo.title')"
+          :msg="$t('modals.payloadInfo.msg')"
+        />
+      </div>
+
+      <PayloadDetails
+        v-else
+        :payload="formModel.payload"
+        class="payload-details"
+      >
+        <div class="payload-options">
+          <BtnIcon
+            size="rg"
+            variant="dimmed"
+            @click="editPayload"
+          >
+            <EditIcon />
+          </BtnIcon>
+          <BtnIcon
+            size="rg"
+            variant="danger"
+            @click="clearPayload"
+          >
+            <DeleteIcon />
+          </BtnIcon>
+        </div>
+      </PayloadDetails>
+    </template>
+
+    <DetailsItem :label="$t('pages.signTransaction.fee')">
       <template #value>
         <TokenAmount
           :amount="+fee.toFixed()"
@@ -84,7 +125,7 @@ import {
   watch,
   onMounted,
 } from '@vue/composition-api';
-import type { IAsset, IToken } from '../../types';
+import type { IToken } from '../../types';
 import {
   convertToken,
   isNumbersEqual,
@@ -96,23 +137,35 @@ import {
   MODAL_READ_QR_CODE,
   MODAL_RECIPIENT_INFO,
   AETERNITY_CONTRACT_ID,
+  MODAL_PAYLOAD_FORM,
 } from '../utils/constants';
-import { useMaxAmount } from '../../composables';
+import { IFormModel, IMaxAmount, useMaxAmount } from '../../composables';
 import AccountRow from './AccountRow.vue';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
+import BtnHelp from './buttons/BtnHelp.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import QrScanIcon from '../../icons/qr-scan.svg?vue-component';
+import EditIcon from '../../icons/pencil.svg?vue-component';
+import DeleteIcon from '../../icons/trash.svg?vue-component';
+import PlusCircle from '../../icons/plus-circle-fill.svg?vue-component';
 import ModalHeader from './ModalHeader.vue';
 import UrlStatus from './UrlStatus.vue';
+import PayloadDetails from './PayloadDetails.vue';
+import BtnText from './buttons/BtnText.vue';
+import BtnIcon from './buttons/BtnIcon.vue';
 
 const WARNING_RULES = ['not_same_as'];
 
 export default defineComponent({
   name: 'TransferSendForm',
   components: {
+    BtnText,
+    BtnHelp,
+    BtnIcon,
+    PayloadDetails,
     ModalHeader,
     AccountRow,
     InputField,
@@ -120,8 +173,11 @@ export default defineComponent({
     BtnPlain,
     DetailsItem,
     TokenAmount,
-    QrScanIcon,
     UrlStatus,
+    QrScanIcon,
+    EditIcon,
+    DeleteIcon,
+    PlusCircle,
   },
   model: {
     prop: 'transferData',
@@ -132,11 +188,7 @@ export default defineComponent({
   setup(props, { root, emit }) {
     const invoiceId = ref(null);
     const invoiceContract = ref(null);
-    const formModel = ref<{
-      amount: number;
-      address: string;
-      selectedAsset: IToken | IAsset | null
-    }>(props.transferData as any);
+    const formModel = ref<IFormModel>(props.transferData as IFormModel);
     const loading = ref<boolean>(false);
     const error = ref<boolean>(false);
 
@@ -146,7 +198,7 @@ export default defineComponent({
       balance,
       balanceCurrency,
       account,
-    } = useMaxAmount({ formModel });
+    } = useMaxAmount({ formModel } as IMaxAmount);
 
     const availableTokens = computed(() => root.$store.state.fungibleTokens.availableTokens);
     const tokenBalances = computed(() => root.$store.getters.fungibleTokens.tokenBalances);
@@ -201,10 +253,15 @@ export default defineComponent({
       () => isNumbersEqual(formModel.value.amount, max.value),
     );
 
+    const showPayloadForm = computed<boolean>(
+      () => formModel.value.selectedAsset?.id === AETERNITY_CONTRACT_ID,
+    );
+
     watch(
       () => hasError.value,
       (val) => emit('error', val),
     );
+
     watch(
       () => formModel.value,
       (val) => emit('input', {
@@ -243,11 +300,14 @@ export default defineComponent({
     const submit = async () => {
       const isValid = !(await (root as any).$validator._base.anyExcept('address', WARNING_RULES));
       if (isValid) {
-        const { address, amount, selectedAsset } = formModel.value;
+        const {
+          address, amount, selectedAsset, payload,
+        } = formModel.value;
         emit('success', {
           address,
           amount,
           selectedAsset,
+          payload: showPayloadForm.value ? payload : '',
           fee: fee.value,
           total: (selectedAsset?.contractId === AETERNITY_CONTRACT_ID ? +fee.value : 0) + +amount,
           invoiceId: invoiceId.value,
@@ -321,6 +381,28 @@ export default defineComponent({
       if (!formModel.value.address) formModel.value.address = '';
     };
 
+    const openPayloadInformation = () => {
+      root.$store.dispatch('modals/open', {
+        name: 'help',
+        title: root.$t('modals.payloadInfo.title'),
+        msg: root.$t('modals.payloadInfo.msg'),
+        textCenter: true,
+      });
+    };
+
+    const editPayload = () => {
+      root.$store.dispatch('modals/open', {
+        name: MODAL_PAYLOAD_FORM,
+        payload: formModel.value.payload,
+      }).then((text) => {
+        formModel.value.payload = text;
+      }).catch(() => null);
+    };
+
+    const clearPayload = () => {
+      formModel.value.payload = '';
+    };
+
     onMounted(async () => {
       const tipUrlEncoded: any = root.$route.query.url;
       if (tipUrlEncoded) {
@@ -361,6 +443,10 @@ export default defineComponent({
       balance,
       fee,
       max,
+      editPayload,
+      openPayloadInformation,
+      clearPayload,
+      showPayloadForm,
     };
   },
 });
@@ -379,7 +465,7 @@ export default defineComponent({
   }
 
   .amount-input {
-    margin-bottom: 20px;
+    margin-bottom: 22px;
   }
 
   .status {
@@ -403,6 +489,30 @@ export default defineComponent({
     &.chosen {
       background: rgba(variables.$color-primary, 0.15);
       border-color: rgba(variables.$color-primary, 0.5);
+    }
+  }
+
+  .payload-add-wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 22px;
+
+    .btn-help {
+      display: flex;
+      margin-left: 4px;
+    }
+  }
+
+  .payload-details {
+    margin-bottom: 24px;
+  }
+
+  .payload-options {
+    display: flex;
+    gap: 8px;
+
+    .btn-icon {
+      padding: 0;
     }
   }
 }

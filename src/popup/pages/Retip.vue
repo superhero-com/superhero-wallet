@@ -66,7 +66,7 @@ import {
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import VueI18n from 'vue-i18n';
-import type { IAsset, IToken } from '../../types';
+import type { IToken } from '../../types';
 import { MAGNITUDE, AETERNITY_CONTRACT_ID, MODAL_DEFAULT } from '../utils/constants';
 import { convertToken, watchUntilTruthy, rxJsObservableToVueState } from '../utils';
 import { IPendingTransaction } from '../../types';
@@ -75,6 +75,8 @@ import {
   useMaxAmount,
   useGetter,
   useState,
+  IFormModel,
+  IMaxAmount,
 } from '../../composables';
 import InputAmount from '../components/InputAmountV2.vue';
 import UrlStatus from '../components/UrlStatus.vue';
@@ -93,10 +95,7 @@ export default defineComponent({
       url: 'default',
       id: '',
     });
-    const formModel = ref<{
-      amount: number;
-      selectedAsset: IToken | IAsset | null
-    }>({
+    const formModel = ref<IFormModel>({
       amount: 0,
       selectedAsset: null,
     });
@@ -105,7 +104,7 @@ export default defineComponent({
       fee,
       balance,
       account,
-    } = useMaxAmount({ formModel });
+    } = useMaxAmount({ formModel } as IMaxAmount);
     const balanceCurrency = rxJsObservableToVueState<number>(
       root.$store.state.observables.balanceCurrency,
     );

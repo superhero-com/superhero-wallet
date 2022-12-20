@@ -82,6 +82,8 @@
             </template>
           </DetailsItem>
 
+          <PayloadDetails :payload="getPayload(transaction)" />
+
           <div class="span-3-columns">
             <DetailsItem
               v-if="transaction.microTime && !transaction.pending"
@@ -177,6 +179,7 @@ import {
   watchUntilTruthy,
   splitAddress,
   AETERNITY_SYMBOL,
+  getPayload,
 } from '../utils';
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
@@ -185,19 +188,20 @@ import TokenAmount from '../components/TokenAmount.vue';
 import DetailsItem from '../components/DetailsItem.vue';
 import LinkButton from '../components/LinkButton.vue';
 import Truncate from '../components/Truncate.vue';
-import AnimatedPending from '../../icons/animated-pending.svg?vue-component';
-import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
-import ExternalLink from '../../icons/external-link.svg?vue-component';
 import TransactionTokens from '../components/TransactionTokenRows.vue';
 import CopyText from '../components/CopyText.vue';
 import TransactionDetailsPoolTokens from '../components/TransactionDetailsPoolTokens.vue';
+import PayloadDetails from '../components/PayloadDetails.vue';
 import TransactionErrorStatus from '../components/TransactionErrorStatus.vue';
+import AnimatedPending from '../../icons/animated-pending.svg?vue-component';
+import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
+import ExternalLink from '../../icons/external-link.svg?vue-component';
 import type { ITransaction } from '../../types';
-import { useTransactionToken } from '../../composables';
-import { useGetter } from '../../composables/vuex';
+import { useTransactionToken, useGetter } from '../../composables';
 
 export default defineComponent({
   components: {
+    PayloadDetails,
     TransactionErrorStatus,
     TransactionDetailsPoolTokens,
     TransactionTokens,
@@ -206,12 +210,12 @@ export default defineComponent({
     DetailsItem,
     LinkButton,
     Truncate,
-    AnimatedPending,
-    AnimatedSpinner,
-    ExternalLink,
     CopyText,
     SwapRoute,
     SwapRates,
+    AnimatedPending,
+    AnimatedSpinner,
+    ExternalLink,
   },
   props: {
     hash: { type: String as PropType<string>, required: true },
@@ -252,12 +256,8 @@ export default defineComponent({
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
 
     return {
-      transaction,
       AETERNITY_SYMBOL,
-      splitAddress,
-      aettosToAe,
-      formatDate,
-      formatTime,
+      transaction,
       tipUrl,
       isSwap,
       isPool,
@@ -270,6 +270,11 @@ export default defineComponent({
       getExplorerPath,
       isTxAex9,
       tipLink,
+      getPayload,
+      splitAddress,
+      aettosToAe,
+      formatDate,
+      formatTime,
     };
   },
 });

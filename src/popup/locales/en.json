@@ -39,6 +39,17 @@
     "required": {
       "msg": "Please fill in all fields."
     },
+    "payloadInfo": {
+      "title": "Payload message",
+      "msg": "A payload is an optional public message composed by the sender and sent to the recipient along with a blockchain transaction.<br /> <br />Payload can be utilized as additional transaction identifier, destination tag (required by some centralized exchanges when depositing funds), or just to provide any extra information in free-form text."
+    },
+    "payloadForm": {
+      "title": "Add payload (optional)",
+      "desc": "Send a public message with your transaction for approx. 0.00000002 AE per character.",
+      "label": "Payload message",
+      "doneBtn": "Done",
+      "cancelBtn": "Cancel"
+    },
     "only-chars": {
       "msg": "Only letters and numbers are allowed."
     },
@@ -236,7 +247,8 @@
       "successTitle": "Transaction successfully submitted",
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter address, .chain name or URL",
-      "next": "Next"
+      "next": "Next",
+      "payload": "Payload"
     },
     "wrongNetwork": {
       "title": "Network discrepancy",

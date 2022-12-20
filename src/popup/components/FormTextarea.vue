@@ -66,7 +66,7 @@ export default {
   --size: 6; // Amount of text lines
 
   &-input {
-    @extend %face-sans-16-regular;
+    @extend %face-sans-14-regular;
 
     min-height: calc(var(--base-line-height) * var(--size));
     width: 100%;
@@ -76,7 +76,6 @@ export default {
     color: variables.$color-white;
     outline: none;
     word-break: break-word;
-    font-size: 15px;
     line-height: var(--base-line-height);
     resize: none;
 
