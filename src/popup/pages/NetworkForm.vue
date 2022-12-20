@@ -24,22 +24,21 @@
         data-cy="cancel"
         variant="muted"
         class="cancel-button"
+        extra-padded
+        :text="$t('pages.network.cancel')"
         @click="goBack"
-      >
-        {{ $t('pages.network.cancel') }}
-      </BtnMain>
+      />
       <BtnMain
         :disabled="buttonDisabled"
+        :icon="isEdit ? PlusCircleIcon : null"
         data-cy="connect"
         class="add-button"
-        has-icon
         @click="addOrUpdateNetwork"
       >
         <template v-if="isEdit">
           {{ $t('pages.network.apply') }}
         </template>
         <template v-else>
-          <PlusCircleIcon />
           {{ $t('pages.network.addNetwork') }}
         </template>
       </BtnMain>
@@ -66,10 +65,10 @@ export default {
   components: {
     BtnMain,
     InputField,
-    PlusCircleIcon,
   },
   data() {
     return {
+      PlusCircleIcon,
       newNetwork: {
         ...NETWORK_PROPS,
       },

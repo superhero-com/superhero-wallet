@@ -52,3 +52,6 @@ $color-bg-app: #141414;
 $color-bg-modal: $color-bg-4;
 
 $color-scrollbar-thumb: rgba($color-white, 0.15);
+
+// Transition properties for clickable elements like buttons
+$transition-interactive: all 150ms;

@@ -65,10 +65,9 @@
       <BtnMain
         v-if="IS_MOBILE_DEVICE"
         class="btn-share"
-        has-icon
+        :icon="ShareIcon"
         @click="share"
       >
-        <ShareIcon />
         {{ $t('modals.receive.share') }}
       </BtnMain>
     </template>
@@ -113,7 +112,6 @@ export default defineComponent({
     AccountRow,
     Scrollable,
     AddressFormatted,
-    ShareIcon,
     CopyText,
   },
   props: {
@@ -184,6 +182,7 @@ export default defineComponent({
 
     return {
       IS_MOBILE_DEVICE,
+      ShareIcon,
       amount,
       selectedAsset,
       share,

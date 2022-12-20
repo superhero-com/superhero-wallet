@@ -31,17 +31,16 @@
       <BtnMain
         variant="muted"
         data-cy="deny"
+        extra-padded
+        :text="$t('pages.signTransaction.reject')"
         @click="cancel()"
-      >
-        {{ $t('pages.signTransaction.reject') }}
-      </BtnMain>
+      />
       <BtnMain
         data-cy="accept"
+        :text="$t('pages.signTransaction.confirm')"
         :disabled="!isConnected"
         @click="resolve()"
-      >
-        {{ $t('pages.signTransaction.confirm') }}
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>

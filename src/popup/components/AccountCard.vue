@@ -1,16 +1,24 @@
 <template>
-  <RouterLink
+  <BtnBase
     :class="['account-card', { selected }]"
-    :style="cardCssProps"
     :to="{ name: 'account-details' }"
+    :disabled="!selected"
+    :bg-color="color"
     data-cy="account-card"
   >
-    <AccountInfo
-      :account-idx="accountIdx"
-      :color="color"
-    />
+    <div class="top">
+      <AccountInfo
+        :account-idx="accountIdx"
+        :color="color"
+      />
+    </div>
 
-    <BalanceInfo :account-idx="accountIdx" />
+    <div class="middle">
+      <BalanceInfo
+        :account-idx="accountIdx"
+      />
+    </div>
+
     <div class="misc">
       <div class="total-tokens">
         <span class="digit">
@@ -21,38 +29,41 @@
         </span>
       </div>
     </div>
-  </RouterLink>
+  </BtnBase>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import { IAccount } from '../../types';
+import { useGetter } from '../../composables/vuex';
+import { getAddressColor } from '../utils/avatar';
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
-import { getAddressColor } from '../utils/avatar';
+import BtnBase from './buttons/BtnBase.vue';
 
-export default {
+export default defineComponent({
   components: {
     AccountInfo,
     BalanceInfo,
+    BtnBase,
   },
   props: {
     accountIdx: { type: Number, required: true },
     selected: Boolean,
   },
-  computed: {
-    ...mapGetters('fungibleTokens', ['getTokenBalance']),
-    ...mapGetters(['accounts']),
-    cardCssProps() {
-      return { 'background-color': this.color };
-    },
-    totalTokens() {
-      return this.getTokenBalance(this.accounts[this.accountIdx].address).length;
-    },
-    color() {
-      return getAddressColor(this.accounts[this.accountIdx].address);
-    },
+  setup(props) {
+    const getTokenBalance = useGetter('fungibleTokens/getTokenBalance');
+    const accounts = useGetter<IAccount[]>('accounts');
+    const account = computed(() => accounts.value[props.accountIdx]);
+    const totalTokens = computed(() => getTokenBalance.value(account.value.address).length);
+    const color = computed(() => getAddressColor(account.value.address));
+
+    return {
+      totalTokens,
+      color,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -62,34 +73,38 @@ export default {
 .account-card {
   display: flex;
   flex-direction: column;
-  width: 328px;
-  height: 192px;
   border-radius: variables.$border-radius-card;
   margin: 8px 16px 32px 16px;
   padding: 12px;
-  align-items: flex-start;
   text-decoration: none;
   color: inherit;
-  cursor: pointer;
-  opacity: 0.5;
-  transition-duration: 300ms;
 
   &.selected {
-    opacity: 1;
+    .account-info,
+    .middle,
+    .misc {
+      opacity: 1;
+    }
   }
 
-  .balance-info {
-    margin-top: 12px;
-    align-self: center;
+  .account-info,
+  .middle,
+  .misc {
+    opacity: 0.5;
+  }
+
+  .middle {
+    margin-top: 5px;
+    text-align: center;
   }
 
   .misc {
-    width: 100%;
     display: flex;
     flex-direction: row;
     align-items: flex-end;
     justify-content: space-between;
-    flex: 1;
+    width: 100%;
+    margin-top: auto;
 
     .total-tokens {
       @extend %face-sans-14-medium;

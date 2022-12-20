@@ -3,91 +3,70 @@
     <AccountSwitcher :notification="!backedUpSeed" />
 
     <div class="dashboard-cards">
-      <CardRow class="first-card-wrapper">
-        <Card
-          :title="$t('dashboard.receive-card.title')"
-          :description="$t('dashboard.receive-card.description')"
-          clickable
-          dense
+      <div class="buttons-row">
+        <BtnBox
+          :text="$t('dashboard.receive-card.title')"
+          :subtitle="$t('dashboard.receive-card.description')"
+          :icon="ArrowReceiveIcon"
+          is-big
           @click="openTransferReceiveModal()"
-        >
-          <template #icon>
-            <ArrowReceiveIcon />
-          </template>
-        </Card>
-        <Card
-          :title="$t('dashboard.send-card.title')"
-          :description="$t('dashboard.send-card.description')"
+        />
+        <BtnBox
+          :text="$t('dashboard.send-card.title')"
+          :subtitle="$t('dashboard.send-card.description')"
+          :icon="ArrowSendIcon"
           :disabled="!isConnected"
-          clickable
-          dense
           data-cy="send"
+          is-big
           @click="openTransferSendModal()"
-        >
-          <template #icon>
-            <ArrowSendIcon />
-          </template>
-        </Card>
-      </CardRow>
-      <CardRow
+        />
+      </div>
+
+      <Card
         v-if="!backedUpSeed"
+        :text="$t('dashboard.back-up-card.title')"
+        :description="$t('dashboard.back-up-card.description')"
+        :icon="SubtractIcon"
         data-cy="backup-seed-phrase"
       >
-        <Card
-          :title="$t('dashboard.back-up-card.title')"
-          :description="$t('dashboard.back-up-card.description')"
-          is-big
-        >
-          <template #icon>
-            <SubtractIcon />
-          </template>
-          <BtnMain
-            class="card-button"
-            variant="danger"
-            inline
-            :text="$t('dashboard.back-up-card.button')"
-            :to="{ name: 'settings-seed-phrase' }"
-          />
-        </Card>
-      </CardRow>
-      <CardRow>
-        <Card
-          :title="$t('dashboard.buy-card.title')"
-          :description="$t('dashboard.buy-card.description')"
-          is-big
-          :background="buyBackground"
-        >
-          <template #icon>
-            <CardIcon />
-          </template>
-          <BtnMain
-            class="card-button"
-            :text="$t('dashboard.buy-card.button')"
-            :href="simplexLink"
-            variant="secondary"
-            inline
-          />
-        </Card>
-      </CardRow>
-      <CardRow>
-        <Card
-          :title="$t('dashboard.name-card.title')"
-          :description="$t('dashboard.name-card.description')"
-          is-big
-          :background="chainNameBackground"
-        >
-          <template #icon>
-            <MenuCardIcon />
-          </template>
-          <BtnMain
-            class="card-button"
-            variant="purple"
-            inline
-            :text="$t('dashboard.name-card.button')"
-            :to="{ name: 'account-details-names-claim' }"
-          />
-        </Card>
-      </CardRow>
+        <BtnMain
+          class="card-button"
+          variant="danger"
+          inline
+          :text="$t('dashboard.back-up-card.button')"
+          :to="{ name: 'settings-seed-phrase' }"
+        />
+      </Card>
+
+      <Card
+        :text="$t('dashboard.buy-card.title')"
+        :description="$t('dashboard.buy-card.description')"
+        :background="buyBackground"
+        :icon="CardIcon"
+      >
+        <BtnMain
+          class="card-button"
+          :text="$t('dashboard.buy-card.button')"
+          :href="simplexLink"
+          variant="secondary"
+          inline
+        />
+      </Card>
+
+      <Card
+        :text="$t('dashboard.name-card.title')"
+        :description="$t('dashboard.name-card.description')"
+        :background="chainNameBackground"
+        :icon="MenuCardIcon"
+      >
+        <BtnMain
+          class="card-button"
+          variant="purple"
+          inline
+          :text="$t('dashboard.name-card.button')"
+          :to="{ name: 'account-details-names-claim' }"
+        />
+      </Card>
     </div>
   </div>
 </template>
@@ -101,34 +80,34 @@ import {
   buildSimplexLink,
 } from '../utils';
 
-import Card from '../components/dashboard/Card.vue';
-import CardRow from '../components/dashboard/CardRow.vue';
+import Card from '../components/Card.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import AccountSwitcher from '../components/AccountSwitcher.vue';
 
-import ArrowReceiveIcon from '../../icons/dashboard/arrow-receive.svg?vue-component';
-import ArrowSendIcon from '../../icons/dashboard/arrow-send.svg?vue-component';
+import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
+import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import SubtractIcon from '../../icons/subtract.svg?vue-component';
-import CardIcon from '../../icons/creditcard.fill.svg?vue-component';
+import CardIcon from '../../icons/credit-card.svg?vue-component';
 import MenuCardIcon from '../../icons/menucard.fill.svg?vue-component';
 
 import buyBackground from '../../image/dashboard/buy-ae.jpg';
 import chainNameBackground from '../../image/dashboard/chain-name.jpg';
+import BtnBox from '../components/buttons/BtnBox.vue';
 
 export default {
   name: 'Dashboard',
   components: {
-    CardRow,
     Card,
     AccountSwitcher,
-    ArrowReceiveIcon,
-    ArrowSendIcon,
+    BtnMain,
+    BtnBox,
+  },
+  data: () => ({
     SubtractIcon,
     CardIcon,
     MenuCardIcon,
-    BtnMain,
-  },
-  data: () => ({
+    ArrowReceiveIcon,
+    ArrowSendIcon,
     buyBackground,
     chainNameBackground,
   }),
@@ -178,12 +157,17 @@ export default {
   flex-direction: column;
 
   .dashboard-cards {
-    padding: var(--screen-padding-x);
-    padding-top: 0;
-  }
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    margin-top: 8px;
+    padding-inline: var(--screen-padding-x);
+    padding-bottom: var(--screen-padding-x);
 
-  .first-card-wrapper {
-    padding-top: 8px;
+    .buttons-row {
+      display: flex;
+      gap: var(--gap);
+    }
   }
 
   .card-button {

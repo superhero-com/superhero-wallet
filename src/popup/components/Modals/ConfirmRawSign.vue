@@ -39,18 +39,17 @@
 
     <template #footer>
       <BtnMain
-        third
         variant="muted"
+        third
+        extra-padded
+        :text="$t('modals.cancel')"
         @click="cancel"
-      >
-        {{ $t('modals.cancel') }}
-      </BtnMain>
+      />
       <BtnMain
         third
+        :text="$t('modals.confirm')"
         @click="confirm"
-      >
-        {{ $t('modals.confirm') }}
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>

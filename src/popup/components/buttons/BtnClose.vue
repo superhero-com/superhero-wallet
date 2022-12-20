@@ -2,10 +2,9 @@
   <BtnIcon
     class="btn-close"
     v-bind="$attrs"
+    :icon="CloseIcon"
     @click="$emit('click', $event)"
-  >
-    <CloseIcon />
-  </BtnIcon>
+  />
 </template>
 
 <script>
@@ -16,8 +15,10 @@ export default {
   name: 'BtnClose',
   components: {
     BtnIcon,
-    CloseIcon,
   },
+  data: () => ({
+    CloseIcon,
+  }),
 };
 </script>
 

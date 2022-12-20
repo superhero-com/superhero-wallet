@@ -50,19 +50,17 @@
         variant="muted"
         extend
         nowrap
-        has-icon
+        extra-padded
+        :text="$t('pages.send.viewInExplorer')"
         :href="getExplorerPath(transaction.hash)"
-      >
-        <ExternalLink class="external-link" />
-        {{ $t('pages.send.viewInExplorer') }}
-      </BtnMain>
+        :icon="ExternalLink"
+      />
       <BtnMain
         inline
         nowrap
+        :text="$t('ok')"
         @click="resolve"
-      >
-        {{ $t('ok') }}
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>
@@ -88,13 +86,13 @@ export default {
     Pending,
     TokenAmount,
     BtnMain,
-    ExternalLink,
   },
   props: {
     resolve: { type: Function, required: true },
     transaction: { type: Object, required: true },
   },
   data: () => ({
+    ExternalLink,
     hideAvatar: false,
     nameRecipient: null,
   }),

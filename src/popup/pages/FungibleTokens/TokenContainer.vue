@@ -21,32 +21,28 @@
 
     <div class="token-actions">
       <BtnBox
+        :text="$t('pages.token-details.receive')"
+        :icon="ArrowReceiveIcon"
         @click="openTransferReceiveModal()"
-      >
-        <ArrowReceiveIcon />
-        {{ $t('pages.token-details.receive') }}
-      </BtnBox>
+      />
       <BtnBox
+        :text="$t('pages.token-details.send')"
         :disabled="!(convertedBalance && isConnected)"
+        :icon="ArrowSendIcon"
         @click="openTransferSendModal()"
-      >
-        <ArrowSendIcon />
-        {{ $t('pages.token-details.send') }}
-      </BtnBox>
+      />
       <BtnBox
         v-if="isAe"
+        :text="$t('pages.fungible-tokens.buy')"
+        :icon="BuyIcon"
         :href="simplexLink"
-      >
-        <BuyIcon />
-        {{ $t('pages.fungible-tokens.buy') }}
-      </BtnBox>
+      />
       <BtnBox
         v-else
+        :text="$t('pages.fungible-tokens.swap')"
+        :icon="SwapIcon"
         :href="DEX_URL"
-      >
-        <SwapIcon />
-        {{ $t('pages.fungible-tokens.swap') }}
-      </BtnBox>
+      />
     </div>
 
     <div class="sticky-tabs-wrapper">
@@ -109,16 +105,12 @@ import Tab from '../../components/tabs/Tab.vue';
 import ArrowSendIcon from '../../../icons/arrow-send.svg?vue-component';
 import ArrowReceiveIcon from '../../../icons/arrow-receive.svg?vue-component';
 import SwapIcon from '../../../icons/swap.svg?vue-component';
-import BuyIcon from '../../../icons/buy.svg?vue-component';
+import BuyIcon from '../../../icons/credit-card.svg?vue-component';
 
 export default defineComponent({
   name: 'TokenContainer',
   components: {
     TransactionAndTokenFilter,
-    ArrowSendIcon,
-    ArrowReceiveIcon,
-    BuyIcon,
-    SwapIcon,
     TokenAmount,
     BtnBox,
     Tokens,
@@ -204,6 +196,10 @@ export default defineComponent({
     });
 
     return {
+      ArrowReceiveIcon,
+      ArrowSendIcon,
+      BuyIcon,
+      SwapIcon,
       DEX_URL,
       AETERNITY_CONTRACT_ID,
       contractId,

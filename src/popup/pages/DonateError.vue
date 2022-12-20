@@ -25,6 +25,7 @@
     <BtnMain
       variant="muted"
       inline
+      extra-padded
       to="/"
     >
       {{ $t('pages.donate-error.cancel') }}

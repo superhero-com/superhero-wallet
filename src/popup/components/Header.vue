@@ -12,10 +12,10 @@
       <BtnIcon
         v-if="showHeaderNavigation"
         class="icon-btn"
+        data-cy="back-arrow"
+        :icon="BackIcon"
         @click="back"
-      >
-        <BackIcon data-cy="back-arrow" />
-      </BtnIcon>
+      />
       <Component
         :is="isLogoDisabled ? 'div' : 'RouterLink'"
         v-else-if="isLoggedIn"
@@ -26,19 +26,8 @@
       </Component>
     </div>
 
-    <BtnPlain
-      v-if="!showHeaderNavigation"
-      :to="{ name: 'network-settings' }"
-      class="network-btn"
-    >
-      <div
-        class="circle"
-        :class="[ nodeStatus ]"
-      />
-      {{ activeNetwork.name }}
-    </BtnPlain>
     <div
-      v-else
+      v-if="showHeaderNavigation"
       class="title"
     >
       <Truncate
@@ -47,24 +36,33 @@
       />
     </div>
 
-    <div
-      v-if="isLoggedIn"
-      class="right"
-    >
+    <div class="right">
       <BtnClose
         v-if="showHeaderNavigation"
         data-cy="close"
         @click="close"
       />
       <template v-else>
-        <NotifyBell />
-
-        <BtnIcon
-          :to="{ name: ROUTE_MORE }"
-          data-cy="page-more"
+        <BtnPlain
+          :to="{ name: 'network-settings' }"
+          class="network-btn"
         >
-          <ThreeDots />
-        </BtnIcon>
+          <div
+            class="circle"
+            :class="[ nodeStatus ]"
+          />
+          {{ activeNetwork.name }}
+        </BtnPlain>
+
+        <template v-if="isLoggedIn">
+          <NotificationsIcon />
+
+          <BtnIcon
+            :to="{ name: ROUTE_MORE }"
+            :icon="ThreeDotsIcon"
+            data-cy="page-more"
+          />
+        </template>
       </template>
     </div>
   </div>
@@ -81,21 +79,19 @@ import {
 } from '../router/routeNames';
 import Logo from '../../icons/logo-small.svg?vue-component';
 import BackIcon from '../../icons/back.svg?vue-component';
-import ThreeDots from '../../icons/three-dots.svg?vue-component';
+import ThreeDotsIcon from '../../icons/three-dots.svg?vue-component';
 import Truncate from './Truncate.vue';
 import BtnClose from './buttons/BtnClose.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
-import NotifyBell from './NotifyBell.vue';
+import NotificationsIcon from './NotificationsIcon.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
 
 export default defineComponent({
   components: {
-    NotifyBell,
+    NotificationsIcon,
     BtnClose,
     BtnPlain,
     Logo,
-    BackIcon,
-    ThreeDots,
     Truncate,
     BtnIcon,
   },
@@ -128,6 +124,8 @@ export default defineComponent({
     }
 
     return {
+      BackIcon,
+      ThreeDotsIcon,
       ROUTE_ACCOUNT,
       ROUTE_MORE,
       isLoggedIn,
@@ -169,11 +167,39 @@ export default defineComponent({
   .left {
     display: flex;
     width: 20%;
+
+    .home-button {
+      &.disabled {
+        cursor: default;
+      }
+
+      &:not(.disabled) {
+        .home-icon {
+          cursor: pointer;
+        }
+
+        &:hover svg {
+          color: variables.$color-primary-hover;
+        }
+
+        &:active svg {
+          color: variables.$color-primary-hover;
+          opacity: 0.9;
+        }
+      }
+
+      .home-icon {
+        width: 32px;
+        height: 32px;
+        color: variables.$color-primary;
+      }
+    }
   }
 
   .right {
     display: flex;
     justify-content: flex-end;
+    gap: 8px;
     width: 20%;
   }
 
@@ -190,6 +216,11 @@ export default defineComponent({
       line-height: 24px;
       color: variables.$color-white;
     }
+
+    &:only-child {
+      flex-grow: 2;
+      margin-left: 8px;
+    }
   }
 
   .network-btn {
@@ -198,7 +229,7 @@ export default defineComponent({
     display: inline-flex;
     align-items: center;
     justify-content: flex-end;
-    margin-right: 16px;
+    margin-right: 8px;
     margin-left: auto;
     color: rgba(variables.$color-white, 0.75);
 
@@ -234,45 +265,8 @@ export default defineComponent({
     }
   }
 
-  .left .home-button {
-    &.disabled {
-      cursor: default;
-    }
-
-    &:not(.disabled) {
-      .home-icon {
-        cursor: pointer;
-      }
-
-      &:hover svg {
-        color: variables.$color-primary-hover;
-      }
-
-      &:active svg {
-        color: variables.$color-primary-hover;
-        opacity: 0.9;
-      }
-    }
-
-    .home-icon {
-      width: 32px;
-      height: 32px;
-      color: variables.$color-primary;
-    }
-  }
-
   .home-button + .back {
     margin-left: 22px;
-  }
-
-  .title:only-child {
-    flex-grow: 2;
-    margin-left: 8px;
-  }
-
-  .settings,
-  .notifications {
-    margin-right: 8px;
   }
 }
 </style>

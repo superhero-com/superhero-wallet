@@ -1,11 +1,10 @@
 <template>
-  <Component
-    :is="to ? 'RouterLink' : 'a'"
-    :to="to"
-    :href="href"
-    :target="href && '_blank'"
+  <BtnBase
+    v-bind="$attrs"
     class="panel-item"
-    @click="$emit('click')"
+    variant="dark"
+    :to="to"
+    v-on="$listeners"
   >
     <div class="panel-item-left">
       <slot name="icon" />
@@ -26,64 +25,73 @@
         name="right-icon"
         class="panel-item-arrow-right"
       >
-        <ArrowRight v-if="to" />
-        <ExternalLink v-else />
+        <ArrowRight
+          v-if="to"
+          class="icon-indicator"
+        />
+        <ExternalLink
+          v-else
+          class="icon-indicator"
+        />
       </slot>
     </div>
-  </Component>
+  </BtnBase>
 </template>
 
 <script>
 import ArrowRight from '../../icons/arrow-right.svg?vue-component';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
+import BtnBase from './buttons/BtnBase.vue';
 
 export default {
   components: {
     ArrowRight,
     ExternalLink,
+    BtnBase,
   },
   props: {
     title: { type: String, required: true },
     info: { type: String, default: '' },
     to: { type: Object, default: null },
-    href: { type: String, default: null },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '../../styles/variables' as *;
 @use '../../styles/typography';
 
 .panel-item {
-  margin: 8px;
-  padding: 8px 2px 8px 12px;
-  width: auto;
-  min-height: 48px;
-  border-radius: 10px;
-  display: flex;
-  justify-content: space-between;
-  flex-direction: row;
-  align-items: center;
-  text-decoration: none;
-  text-align: left;
-  background: rgba(variables.$color-white, 0.08);
-  color: rgba(variables.$color-white, 0.95);
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
-  opacity: 0.75;
-  letter-spacing: 0.5px;
-
   @extend %face-sans-15-regular;
 
-  &:hover {
-    opacity: 1;
-    background: rgba(variables.$color-white, 0.1);
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  margin-bottom: 8px;
+  padding: 8px 2px 8px 12px;
+  border-radius: $border-radius-interactive;
+  justify-content: space-between;
+  text-decoration: none;
+  text-align: left;
+  color: rgba($color-white, 0.75);
+  transition: $transition-interactive;
+  letter-spacing: 0.5px;
+  will-change: transform;
 
-    &,
-    ::v-deep svg {
-      color: variables.$color-white;
+  &:hover,
+  &:active {
+    color: $color-white;
+
+    .panel-item-right {
+      .icon-indicator {
+        opacity: 0.75;
+      }
     }
+  }
+
+  &:active {
+    transform: scale(0.99);
   }
 
   .panel-item-left,
@@ -110,16 +118,16 @@ export default {
       opacity: 0.5;
       padding-right: 8px;
       margin: 0;
-      color: variables.$color-white;
+      color: $color-white;
       font-weight: 300;
     }
 
-    .arrow-right,
-    .external-link {
+    .icon-indicator {
       margin-right: 4px;
       width: 26px;
       height: 26px;
       opacity: 0.5;
+      transition: $transition-interactive;
     }
   }
 }

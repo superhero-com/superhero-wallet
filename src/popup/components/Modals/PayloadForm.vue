@@ -27,16 +27,15 @@
       <BtnMain
         class="btn-cancel"
         variant="muted"
+        extra-padded
+        :text="$t('modals.payloadForm.cancelBtn')"
         @click="reject()"
-      >
-        {{ $t('modals.payloadForm.cancelBtn') }}
-      </BtnMain>
+      />
       <BtnMain
+        :text="$t('modals.payloadForm.doneBtn')"
         :disabled="!value.length"
         @click="resolve(value)"
-      >
-        {{ $t('modals.payloadForm.doneBtn') }}
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>

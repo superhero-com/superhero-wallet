@@ -24,14 +24,12 @@
     </div>
 
     <BtnMain
-      has-icon
       extend
       variant="muted"
+      :text="$t('pages.permissions.add')"
       :to="{ name: 'permissions-add' }"
-    >
-      <PlusIcon />
-      {{ $t('pages.permissions.add') }}
-    </BtnMain>
+      :icon="PlusIcon"
+    />
   </div>
 </template>
 
@@ -44,8 +42,10 @@ export default {
   components: {
     PanelItem,
     BtnMain,
-    PlusIcon,
   },
+  data: () => ({
+    PlusIcon,
+  }),
   computed: {
     permissions() {
       return Object.values(this.$store.state.permissions);

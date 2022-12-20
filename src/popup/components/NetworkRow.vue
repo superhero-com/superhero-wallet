@@ -21,21 +21,20 @@
           class="action-wrapper"
         >
           <BtnIcon
-            size="rg"
+            size="sm"
             data-cy="edit"
-            variant="dimmed"
+            dimmed
             :to="{ name: 'network-edit', params: { name: network.name } }"
-          >
-            <PencilIcon />
-          </BtnIcon>
+            :icon="PencilIcon"
+          />
           <BtnIcon
-            size="rg"
+            size="sm"
             data-cy="delete"
-            variant="danger"
+            icon-variant="danger"
+            dimmed
+            :icon="TrashIcon"
             @click="deleteNetwork(network.index)"
-          >
-            <TrashIcon />
-          </BtnIcon>
+          />
         </div>
       </RadioButton>
       <p
@@ -72,8 +71,6 @@ export default {
   components: {
     BtnIcon,
     RadioButton,
-    PencilIcon,
-    TrashIcon,
   },
   props: {
     network: {
@@ -81,6 +78,10 @@ export default {
       required: true,
     },
   },
+  data: () => ({
+    PencilIcon,
+    TrashIcon,
+  }),
   computed: {
     ...mapGetters(['activeNetwork']),
     isActive() {

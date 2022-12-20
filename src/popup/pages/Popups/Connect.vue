@@ -41,17 +41,16 @@
       <BtnMain
         variant="muted"
         data-cy="deny"
+        extra-padded
+        :text="$t('pages.connectConfirm.cancelButton')"
         @click="cancel()"
-      >
-        {{ $t('pages.connectConfirm.cancelButton') }}
-      </BtnMain>
+      />
       <BtnMain
         data-cy="accept"
+        :text="$t('pages.connectConfirm.confirmButton')"
         :disabled="!isConnected"
         @click="confirm()"
-      >
-        {{ $t('pages.connectConfirm.confirmButton') }}
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>

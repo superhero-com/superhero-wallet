@@ -81,7 +81,7 @@
       <Arrow class="icon" />
     </BtnPlain>
 
-    <transition name="fade">
+    <transition name="fade-transition">
       <div
         v-if="showAdvanced && transaction"
         class="advanced"
@@ -98,20 +98,19 @@
 
     <template #footer>
       <BtnMain
-        third
         variant="muted"
         data-cy="deny"
-        @click="cancel()"
-      >
-        {{ $t('pages.signTransaction.reject') }}
-      </BtnMain>
-      <BtnMain
         third
+        extra-padded
+        :text="$t('pages.signTransaction.reject')"
+        @click="cancel()"
+      />
+      <BtnMain
         data-cy="accept"
+        third
+        :text="$t('pages.signTransaction.confirm')"
         @click="resolve()"
-      >
-        {{ $t('pages.signTransaction.confirm') }}
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>

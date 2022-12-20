@@ -1,5 +1,5 @@
 <template>
-  <transition name="fade">
+  <transition name="fade-transition">
     <div
       v-if="isVisible"
       data-cy="connect-node"

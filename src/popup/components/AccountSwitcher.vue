@@ -4,6 +4,7 @@
     :class="{ 'notification-above': notification }"
   >
     <TotalWalletAmount v-if="accounts.length > 1" />
+
     <swiper
       ref="customSwiper"
       class="swiper"
@@ -14,6 +15,11 @@
         v-for="(account, idx) in accounts"
         :key="account.idx"
       >
+        <AccountCard
+          class="swiper-card"
+          :account-idx="account.idx"
+          :selected="account.idx === activeIdx"
+        />
         <BtnPlain
           v-if="idx !== 0 && !IS_CORDOVA"
           class="swiper-button prev"
@@ -21,10 +27,6 @@
         >
           <Chevron />
         </BtnPlain>
-        <AccountCard
-          :account-idx="account.idx"
-          :selected="account.idx === activeIdx"
-        />
         <BtnPlain
           v-if="!IS_CORDOVA"
           class="swiper-button next"
@@ -41,9 +43,10 @@
         >
           <Chevron />
         </BtnPlain>
-        <AccountCardAdd />
+        <AccountCardAdd class="swiper-card" />
       </swiper-slide>
     </swiper>
+
     <BulletSwitcher
       v-if="accounts && accounts.length"
       :active-color="getAccountColor(currentIdx)"
@@ -130,14 +133,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '../../styles/variables' as *;
 @use '../../styles/mixins';
 
 @import '../../../node_modules/swiper/css/swiper.css';
 
 .account-switcher {
-  ::v-deep .account-card,
-  ::v-deep .add-account-card {
+  .swiper-card {
     width: 100%;
     height: 192px;
     margin: 0;
@@ -145,20 +147,22 @@ export default {
 
   .swiper-button {
     position: absolute;
-    opacity: 0.5;
-    top: 61px;
-    color: variables.$color-white;
     z-index: 1;
+    top: 50%;
     height: 60px;
     width: 30px;
+    color: $color-white;
+    opacity: 0.5;
+    transition: $transition-interactive;
 
     &.prev {
       left: 2px;
-      transform: rotate(180deg);
+      transform: translateY(-50%) scaleX(-1);
     }
 
     &.next {
       right: 2px;
+      transform: translateY(-50%);
     }
 
     &:hover {
