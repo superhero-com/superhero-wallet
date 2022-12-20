@@ -99,7 +99,7 @@
     <template #footer>
       <BtnMain
         third
-        variant="secondary"
+        variant="muted"
         data-cy="deny"
         @click="cancel()"
       >

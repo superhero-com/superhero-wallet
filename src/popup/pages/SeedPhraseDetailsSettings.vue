@@ -50,7 +50,7 @@
         {{ $t('pages.seedPhrase.verifySeed') }}
       </BtnMain>
       <BtnMain
-        variant="secondary"
+        variant="muted"
         extend
         @click="setBackedUpSeed"
       >

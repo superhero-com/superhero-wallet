@@ -42,7 +42,7 @@
           </template>
           <BtnMain
             class="card-button"
-            variant="danger"
+            variant="secondary"
             inline
             :text="$t('dashboard.back-up-card.button')"
             :to="{ name: 'settings-seed-phrase' }"
@@ -63,7 +63,7 @@
             class="card-button"
             :text="$t('dashboard.buy-card.button')"
             :href="simplexLink"
-            variant="danger"
+            variant="secondary"
             inline
           />
         </Card>

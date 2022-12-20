@@ -34,6 +34,7 @@ export default defineComponent({
       validator: (value: string) => [
         'primary',
         'secondary',
+        'muted',
         'alternative',
         'danger',
         'purple',
@@ -130,6 +131,10 @@ export default defineComponent({
   }
 
   &.secondary {
+    --color: #{variables.$color-secondary};
+  }
+
+  &.muted {
     --color: #{variables.$color-grey-medium};
 
     padding: 8px 32px;

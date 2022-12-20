@@ -38,7 +38,7 @@
     </div>
     <template #footer>
       <BtnMain
-        variant="secondary"
+        variant="muted"
         extend
         nowrap
         has-icon
@@ -67,8 +67,7 @@ import AvatarWithChainName from '../AvatarWithChainName.vue';
 import ModalHeader from '../ModalHeader.vue';
 import Pending from '../../../icons/animated-pending.svg?vue-component';
 import ExternalLink from '../../../icons/external-link-big.svg?vue-component';
-import { AETERNITY_SYMBOL } from '../../utils/constants';
-import { watchUntilTruthy } from '../../utils';
+import { AETERNITY_SYMBOL, watchUntilTruthy } from '../../utils';
 
 export default {
   components: {

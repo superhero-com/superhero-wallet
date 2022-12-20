@@ -26,7 +26,7 @@
     <BtnMain
       has-icon
       extend
-      variant="secondary"
+      variant="muted"
       :to="{ name: 'permissions-add' }"
     >
       <PlusIcon />

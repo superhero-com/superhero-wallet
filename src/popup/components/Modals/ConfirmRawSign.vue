@@ -40,7 +40,7 @@
     <template #footer>
       <BtnMain
         third
-        variant="secondary"
+        variant="muted"
         @click="cancel"
       >
         {{ $t('modals.cancel') }}
