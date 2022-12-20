@@ -7,7 +7,10 @@ import {
   convertToken,
   fetchJson,
   handleUnknownError,
-  calculateSupplyAmount, AETERNITY_SYMBOL,
+  calculateSupplyAmount,
+  AETERNITY_SYMBOL,
+  getAllPages,
+  watchUntilTruthy,
 } from '../../popup/utils';
 import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE, AETERNITY_CONTRACT_ID } from '../../popup/utils/constants';
 
@@ -74,15 +77,20 @@ export default (store) => {
       },
       async loadTokenBalances({
         rootGetters: { activeNetwork, accounts },
+        rootState: { middleware },
         state: { availableTokens },
         commit,
       }) {
         accounts.map(async ({ address }) => {
           try {
             if (isEmpty(availableTokens)) return;
-            const tokens = await fetchJson(
-              `${activeNetwork.middlewareUrl}/aex9/balances/account/${address}`,
-            ).catch(handleUnknownError);
+            await watchUntilTruthy(() => middleware);
+            const tokens = await getAllPages(
+              () => fetchJson(
+                `${activeNetwork.middlewareUrl}/v2/aex9/account-balances/${address}?limit=100`,
+              ),
+              middleware.fetchByPath,
+            );
 
             if (isEmpty(tokens) || typeof tokens !== 'object') return;
 
