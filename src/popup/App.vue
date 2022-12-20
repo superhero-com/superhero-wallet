@@ -235,6 +235,7 @@ export default defineComponent({
 
   .connection-status {
     position: fixed;
+    z-index: variables.$z-index-header;
     bottom: 0;
     bottom: env(safe-area-inset-bottom);
     left: 0;

@@ -21,12 +21,10 @@
       variant="muted"
       class="add-custom-network"
       data-cy="to-add"
-      has-icon
+      :text="$t('pages.network.addCustomNetwork')"
+      :icon="PlusCircleIcon"
       :to="{ name: 'network-add' }"
-    >
-      <PlusCircleIcon />
-      {{ $t('pages.network.addCustomNetwork') }}
-    </BtnMain>
+    />
   </div>
 </template>
 
@@ -40,8 +38,10 @@ export default {
   components: {
     BtnMain,
     NetworkRow,
-    PlusCircleIcon,
   },
+  data: () => ({
+    PlusCircleIcon,
+  }),
   computed: mapGetters(['networks']),
   methods: mapActions(['selectNetwork']),
 };

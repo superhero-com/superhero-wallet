@@ -10,7 +10,7 @@
         </div>
       </div>
       <a
-        class="table-item dark link"
+        class="table-item link"
         :href="`${COMMIT_URL}${commitHash}`"
         target="_blank"
       >
@@ -30,7 +30,7 @@
           {{ extensionVersion }}
         </div>
       </div>
-      <div class="table-item dark">
+      <div class="table-item">
         <div class="name">
           {{ $t('pages.about.sdk-version') }}
         </div>
@@ -49,12 +49,12 @@
         </div>
         <div class="value">
           {{ mdw.mdw_version }}
-          <ExternalLink />
+          <ExternalLink class="compensate-icon-margin" />
         </div>
       </a>
       <a
         v-if="activeNetwork"
-        class="table-item dark link"
+        class="table-item link"
         target="_blank"
         :href="`${activeNetwork.middlewareUrl}/status`"
       >
@@ -63,27 +63,29 @@
         </div>
         <div class="value">
           {{ mdw.node_version }}
-          <ExternalLink />
+          <ExternalLink class="compensate-icon-margin" />
         </div>
       </a>
     </div>
 
-    <PanelItem
-      :to="{ name: 'about-terms' }"
-      :title="$t('pages.about.terms')"
-    >
-      <template #icon>
-        <Terms />
-      </template>
-    </PanelItem>
-    <PanelItem
-      :to="{ name: 'about-privacy' }"
-      :title="$t('pages.about.privacyPolicy')"
-    >
-      <template #icon>
-        <Terms />
-      </template>
-    </PanelItem>
+    <div class="additional-links">
+      <PanelItem
+        :to="{ name: 'about-terms' }"
+        :title="$t('pages.about.terms')"
+      >
+        <template #icon>
+          <Terms />
+        </template>
+      </PanelItem>
+      <PanelItem
+        :to="{ name: 'about-privacy' }"
+        :title="$t('pages.about.privacyPolicy')"
+      >
+        <template #icon>
+          <Terms />
+        </template>
+      </PanelItem>
+    </div>
   </div>
 </template>
 
@@ -138,12 +140,13 @@ export default {
 @use '../../styles/typography';
 
 .about {
-  padding-top: 14px;
+  --screen-padding-x: 8px;
+
+  padding-top: 16px;
+  padding-inline: var(--screen-padding-x);
 
   .table {
-    margin: 0 8px 36px;
-    background: rgba(variables.$color-white, 0.06);
-    border-radius: 10px;
+    border-radius: variables.$border-radius-interactive;
     overflow: hidden;
 
     .table-item {
@@ -153,25 +156,26 @@ export default {
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
-      padding: 4px 14px;
+      padding: 4px 16px;
+      background: rgba(variables.$color-white, 0.08);
 
-      &.dark {
-        background-color: variables.$color-disabled;
+      &:nth-child(even) {
+        background-color: rgba(variables.$color-white, 0.06);
       }
 
       .name {
+        @extend %face-sans-15-regular;
+
         color: rgba(variables.$color-white, 0.75);
         font-weight: 400;
-
-        @extend %face-sans-15-regular;
       }
 
       .value {
+        @extend %face-sans-14-light;
+
         display: inline-flex;
         align-items: center;
         color: rgba(variables.$color-white, 1);
-
-        @extend %face-sans-14-light;
 
         .icon {
           width: 24px;
@@ -185,16 +189,33 @@ export default {
       &.link {
         text-decoration: none;
         cursor: pointer;
+        transition: variables.$transition-interactive;
 
-        .value:hover {
-          text-decoration: underline;
+        &:hover {
+          background: rgba(variables.$color-white, 0.05);
 
-          .icon {
-            opacity: 1;
+          .name {
+            color: variables.$color-white;
           }
+
+          .value {
+            text-decoration: underline;
+
+            .icon {
+              opacity: 1;
+            }
+          }
+        }
+
+        &:active {
+          background: rgba(variables.$color-white, 0.04);
         }
       }
     }
+  }
+
+  .additional-links {
+    margin-top: 24px;
   }
 }
 </style>

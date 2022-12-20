@@ -22,11 +22,10 @@
           v-for="(action, index) in actions"
           :key="index"
           :disabled="action.disabled"
+          :icon="action.icon"
+          :text="action.text"
           @click="action.onClick"
-        >
-          <Component :is="action.icon" />
-          <div>{{ action.text }}</div>
-        </BtnBox>
+        />
       </div>
 
       <div class="header">
@@ -58,6 +57,7 @@ import {
   ref,
   watch,
 } from '@vue/composition-api';
+import { TranslateResult } from 'vue-i18n';
 import { debounce } from 'lodash-es';
 import {
   MODAL_TRANSFER_RECEIVE,
@@ -67,10 +67,10 @@ import {
   buildSimplexLink,
 } from '../utils';
 import { IS_CORDOVA } from '../../lib/environment';
+import { useTransactionAndTokenFilter } from '../../composables';
 
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
-import BtnPlain from '../components/buttons/BtnPlain.vue';
 import BtnBox from '../components/buttons/BtnBox.vue';
 import BtnClose from '../components/buttons/BtnClose.vue';
 import TransactionAndTokenFilter from '../components/TransactionAndTokenFilter.vue';
@@ -80,18 +80,21 @@ import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
 import SwapIcon from '../../icons/swap.svg?vue-component';
-import { useTransactionAndTokenFilter } from '../../composables';
-import BtnPill from '../components/buttons/BtnPill.vue';
+
+interface ButtonAction {
+  text: TranslateResult
+  icon: Vue.Component
+  disabled?: boolean
+  onClick: () => any
+}
 
 export default defineComponent({
   name: 'AccountDetails',
   components: {
     AccountDetailsNavigation,
-    BtnPill,
     TransactionAndTokenFilter,
     AccountInfo,
     BalanceInfo,
-    BtnPlain,
     BtnBox,
     BtnClose,
   },
@@ -115,7 +118,7 @@ export default defineComponent({
     const showNamesNavigation = computed(() => !!root.$route?.meta?.showNamesNavigation);
     const routeName = computed(() => root.$route.name);
 
-    const actions = computed(() => [
+    const actions = computed((): ButtonAction[] => [
       {
         text: root.$t('pages.token-details.receive'),
         onClick: () => root.$store.dispatch('modals/open', {

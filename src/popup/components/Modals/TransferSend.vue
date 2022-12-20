@@ -25,22 +25,20 @@
       <BtnMain
         v-if="showEditButton"
         variant="muted"
-        :text="$t('pages.send.edit')"
+        :text="$t('pages.send.editTxDetails')"
         class="button-action-secondary"
         data-cy="edit"
+        extra-padded
         @click="editTransfer"
       />
       <BtnMain
         class="button-action-primary"
         :disabled="error || !isConnected || !transferData.address || !transferData.amount"
-        :has-icon="showSendButton"
+        :icon="showSendButton ? ArrowSendIcon : null"
         :text="showSendButton ? $t('pages.send.send') : $t('modals.send.next')"
         data-cy="next-step-button"
         @click="proceedToNextStep"
-      >
-        {{ showSendButton ? $t('pages.send.send') : $t('modals.send.next') }}
-        <ArrowSendIcon v-if="showSendButton" />
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>
@@ -64,7 +62,6 @@ export default {
   components: {
     Modal,
     BtnMain,
-    ArrowSendIcon,
   },
   props: {
     tokenContractId: { type: String, default: null },
@@ -75,6 +72,7 @@ export default {
       STEP_FORM,
       STEP_REVIEW,
       STEP_REVIEW_TIP,
+      ArrowSendIcon,
       currentStep: STEP_FORM,
       error: false,
       transferData: {

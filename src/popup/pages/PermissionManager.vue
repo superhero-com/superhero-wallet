@@ -100,32 +100,26 @@
     <div class="bottom">
       <div class="actions">
         <BtnMain
-          class="btn"
-          extend
           variant="muted"
+          :text="$t('pages.permissions.cancel')"
           :to="{ name: 'permissions-settings' }"
-        >
-          {{ $t('pages.permissions.cancel') }}
-        </BtnMain>
+        />
         <BtnMain
           class="confirm"
-          extend
+          extra-padded
+          :text="$t('pages.permissions.confirm')"
           :disabled="!permissionChanged"
           @click="savePermission"
-        >
-          {{ $t('pages.permissions.confirm') }}
-        </BtnMain>
+        />
       </div>
       <BtnMain
         v-if="editView"
         extend
-        has-icon
         variant="muted"
+        :text="$t('pages.permissions.delete')"
+        :icon="DeleteIcon"
         @click="removePermission"
-      >
-        <DeleteIcon />
-        {{ $t('pages.permissions.delete') }}
-      </BtnMain>
+      />
     </div>
   </div>
 </template>
@@ -157,7 +151,6 @@ export default defineComponent({
     InputAmount,
     TokenAmount,
     BtnMain,
-    DeleteIcon,
   },
   setup(props, { root }) {
     const { balance } = useBalances({ store: root.$store });
@@ -249,6 +242,7 @@ export default defineComponent({
     }, { deep: true });
 
     return {
+      DeleteIcon,
       editView,
       balance,
       permission,

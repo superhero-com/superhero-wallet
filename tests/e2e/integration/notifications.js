@@ -1,20 +1,23 @@
 describe('Tests cases for notifications page and icon', () => {
-  it('Have and click notification icon, open notifications page and return', () => {
+  it('Notifications badge should contain number of notifications', () => {
     cy.login({ network: 'Mainnet' })
-      .get('[data-cy=noti-count]')
+      .get('[data-cy=notifications-btn]')
+      .find('[data-cy=badge-text]')
       .should('be.visible')
-      .should('contain', 1)
-      .get('[data-cy=noti]')
-      .click()
-      .urlEquals('/notifications')
-
-      .goBack()
-      .urlEquals('/account');
+      .should('contain', 1);
   });
 
-  it("Don't have backup seed notification", () => {
+  it('Notifications icon should navigate to the notifications list', () => {
+    cy.login({ network: 'Mainnet' })
+      .get('[data-cy=notifications-btn]')
+      .click()
+      .urlEquals('/notifications');
+  });
+
+  it('Do not have backup seed notification', () => {
     cy.login({ backedUpSeed: true, network: 'Mainnet' })
-      .get('[data-cy=noti-count]')
+      .get('[data-cy=notifications-btn]')
+      .find('[data-cy=badge-text]')
       .should('not.exist');
   });
 });

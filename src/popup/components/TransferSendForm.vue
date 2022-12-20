@@ -70,12 +70,10 @@
         class="payload-add-wrapper"
       >
         <BtnText
-          has-icon
+          :icon="PlusCircleIcon"
+          :text="$t('modals.send.payload')"
           @click="editPayload"
-        >
-          <PlusCircle />
-          <span>{{ $t('modals.send.payload') }}</span>
-        </BtnText>
+        />
         <BtnHelp
           :title="$t('modals.payloadInfo.title')"
           :msg="$t('modals.payloadInfo.msg')"
@@ -89,19 +87,18 @@
       >
         <div class="payload-options">
           <BtnIcon
-            size="rg"
-            variant="dimmed"
+            size="sm"
+            dimmed
+            :icon="EditIcon"
             @click="editPayload"
-          >
-            <EditIcon />
-          </BtnIcon>
+          />
           <BtnIcon
-            size="rg"
-            variant="danger"
+            size="sm"
+            icon-variant="danger"
+            dimmed
+            :icon="DeleteIcon"
             @click="clearPayload"
-          >
-            <DeleteIcon />
-          </BtnIcon>
+          />
         </div>
       </PayloadDetails>
     </template>
@@ -157,15 +154,16 @@ import BtnPlain from './buttons/BtnPlain.vue';
 import BtnHelp from './buttons/BtnHelp.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
-import QrScanIcon from '../../icons/qr-scan.svg?vue-component';
-import EditIcon from '../../icons/pencil.svg?vue-component';
-import DeleteIcon from '../../icons/trash.svg?vue-component';
-import PlusCircle from '../../icons/plus-circle-fill.svg?vue-component';
 import ModalHeader from './ModalHeader.vue';
 import UrlStatus from './UrlStatus.vue';
 import PayloadDetails from './PayloadDetails.vue';
 import BtnText from './buttons/BtnText.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
+
+import QrScanIcon from '../../icons/qr-scan.svg?vue-component';
+import EditIcon from '../../icons/pencil.svg?vue-component';
+import DeleteIcon from '../../icons/trash.svg?vue-component';
+import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
 
 const WARNING_RULES = ['not_same_as'];
 
@@ -185,9 +183,6 @@ export default defineComponent({
     TokenAmount,
     UrlStatus,
     QrScanIcon,
-    EditIcon,
-    DeleteIcon,
-    PlusCircle,
   },
   model: {
     prop: 'transferData',
@@ -427,6 +422,9 @@ export default defineComponent({
     });
 
     return {
+      EditIcon,
+      DeleteIcon,
+      PlusCircleIcon,
       isToken,
       isMaxValue,
       invoiceId,
@@ -516,11 +514,7 @@ export default defineComponent({
 
   .payload-options {
     display: flex;
-    gap: 8px;
-
-    .btn-icon {
-      padding: 0;
-    }
+    gap: 4px;
   }
 }
 </style>

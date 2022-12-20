@@ -16,26 +16,26 @@
     <BtnMain
       variant="danger"
       class="reset-wallet-button"
-      has-icon
       extend
+      :text="$t('pages.titles.reset-wallet')"
+      :icon="ResetWalletIcon"
       @click="onResetWallet"
-    >
-      <ResetWallet />
-      {{ $t('pages.titles.reset-wallet') }}
-    </BtnMain>
+    />
   </div>
 </template>
 
 <script>
 import BtnMain from '../components/buttons/BtnMain.vue';
-import ResetWallet from '../../icons/reset-wallet.svg?vue-component';
+import ResetWalletIcon from '../../icons/reset-wallet.svg?vue-component';
 import { MODAL_RESET_WALLET } from '../utils/constants';
 
 export default {
   components: {
     BtnMain,
-    ResetWallet,
   },
+  data: () => ({
+    ResetWalletIcon,
+  }),
   methods: {
     onResetWallet() {
       this.$store.dispatch('modals/open', {

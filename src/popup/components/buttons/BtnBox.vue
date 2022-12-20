@@ -1,98 +1,106 @@
 <template>
-  <Component
-    :is="component"
+  <BtnBase
+    v-bind="$attrs"
     class="btn-box"
-    :class="[
-      variant,
-      {
-        disabled,
-      },
-    ]"
-    :to="to"
-    :href="href"
-    :target="(href) ? '_blank' : null"
+    variant="dark"
+    :disabled="disabled"
+    :class="{
+      disabled,
+      'is-big': isBig,
+    }"
     v-on="$listeners"
   >
-    <slot />
-  </Component>
+    <IconWrapper
+      v-if="icon"
+      class="icon"
+      :icon="icon"
+      :is-boxed="isBig"
+    />
+
+    <span
+      v-if="text"
+      class="text"
+      v-text="text"
+    />
+
+    <span
+      v-if="subtitle"
+      class="subtitle"
+      v-text="subtitle"
+    />
+  </BtnBase>
 </template>
 
 <script>
-const VARIANTS = ['primary'];
+import IconWrapper from '../IconWrapper.vue';
+import BtnBase from './BtnBase.vue';
 
 export default {
-  props: {
-    to: { type: [Object, String], default: null },
-    href: { type: String, default: null },
-    variant: {
-      type: String,
-      validator: (value) => VARIANTS.includes(value),
-      default: 'primary',
-    },
-    disabled: Boolean,
+  components: {
+    BtnBase,
+    IconWrapper,
   },
-  computed: {
-    component() {
-      if (this.to) {
-        return 'RouterLink';
-      }
-      if (this.href) {
-        return 'a';
-      }
-      return 'button';
-    },
+  props: {
+    text: { type: String, default: null },
+    subtitle: { type: String, default: null },
+    icon: { type: Object, default: null },
+    disabled: Boolean,
+    isBig: Boolean,
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
+@use '../../../styles/variables' as *;
 @use '../../../styles/typography';
+@use '../../../styles/mixins';
 
 .btn-box {
   @extend %face-sans-14-regular;
 
   display: flex;
   flex-direction: column;
-  flex: 1 1 0;
   align-items: center;
   justify-content: center;
+  width: 100%;
   height: auto;
   min-height: 58px;
-  border-radius: variables.$border-radius-interactive;
-  background-color: rgba(variables.$color-white, 0.08);
-  text-decoration: none;
-  color: variables.$color-white;
-  cursor: pointer;
-  user-select: none;
-  transition: all 100ms;
+  padding: 4px 6px;
+  border-radius: $border-radius-interactive;
 
-  &:active {
+  &:hover {
     .icon {
-      opacity: 1;
+      color: $color-white;
     }
   }
 
   .icon {
-    width: 24px;
-    height: 24px;
-    color: inherit;
-    opacity: 0.75;
+    color: rgba($color-white, 0.75);
   }
 
-  &.primary {
-    &:hover {
-      background-color: rgba(variables.$color-white, 0.1);
-    }
+  .subtitle {
+    @extend %face-sans-13-regular;
 
-    &:active {
-      background-color: rgba(variables.$color-white, 0.15);
-    }
+    opacity: 0.7;
   }
 
   &.disabled {
-    pointer-events: none;
-    opacity: 0.4;
+    .icon {
+      opacity: 0.5;
+    }
+  }
+
+  &.is-big {
+    min-height: 116px;
+    padding: 10px;
+
+    .icon {
+      margin-bottom: 8px;
+    }
+
+    .text {
+      @extend %face-sans-16-bold;
+    }
   }
 }
 </style>

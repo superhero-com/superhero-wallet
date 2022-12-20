@@ -69,7 +69,7 @@ import Invites from '../../icons/invites.svg?vue-component';
 import Settings from '../../icons/settings.svg?vue-component';
 import BugReport from '../../icons/bug-report.svg?vue-component';
 import About from '../../icons/about.svg?vue-component';
-import Buy from '../../icons/buy.svg?vue-component';
+import Buy from '../../icons/credit-card.svg?vue-component';
 import Dex from '../../icons/dex.svg?vue-component';
 import ClaimTips from '../../icons/claim-tips.svg?vue-component';
 import { DEX_URL, SIMPLEX_URL, BUG_REPORT_URL } from '../utils/constants';
@@ -95,6 +95,9 @@ export default {
 
 <style lang="scss" scoped>
 .more {
+  --screen-padding-x: 8px;
+
   overflow: hidden;
+  padding-inline: var(--screen-padding-x);
 }
 </style>

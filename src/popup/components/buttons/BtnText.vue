@@ -2,11 +2,17 @@
   <BtnPlain
     class="btn-text"
     :class="{
-      'has-icon': hasIcon,
+      'has-icon': !!icon,
     }"
     @click="$emit('click')"
   >
-    <slot />
+    <Component
+      :is="icon"
+      v-if="icon"
+      class="btn-text-icon"
+    />
+
+    <slot>{{ text }}</slot>
   </BtnPlain>
 </template>
 
@@ -18,14 +24,15 @@ export default defineComponent({
   name: 'BtnText',
   components: { BtnPlain },
   props: {
-    hasIcon: { type: Boolean },
+    text: { type: String, default: '' },
+    icon: { type: Object, default: null },
   },
 });
 </script>
 
 <style lang="scss" scoped>
 @use '../../../styles/typography';
-@use '../../../styles/variables'   ;
+@use '../../../styles/variables';
 
 .btn-text {
   @extend %face-sans-14-medium;
@@ -46,7 +53,7 @@ export default defineComponent({
   &.has-icon {
     gap: 4px;
 
-    ::v-deep .icon {
+    .btn-text-icon {
       flex-shrink: 0;
       width: 20px;
       height: 20px;

@@ -17,11 +17,9 @@
     <BtnSubheader
       :header="$t('modals.createAccount.btnText')"
       :subheader="$t('modals.createAccount.btnSubtitle')"
-      extend
+      :icon="PlusCircleIcon"
       @click="createAccount()"
-    >
-      <PlusCircleIcon />
-    </BtnSubheader>
+    />
 
     <Loader v-if="loading" />
   </Modal>
@@ -37,13 +35,13 @@ export default {
   components: {
     Modal,
     BtnSubheader,
-    PlusCircleIcon,
     Loader,
   },
   props: {
     resolve: { type: Function, required: true },
   },
   data: () => ({
+    PlusCircleIcon,
     loading: false,
   }),
   methods: {

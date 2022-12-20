@@ -1,57 +1,72 @@
 <template>
-  <Component
-    :is="component"
+  <BtnBase
     v-bind="$attrs"
     class="btn-icon"
-    :class="[size, variant]"
-    :to="to"
-    :href="href"
-    :target="(href) ? '_blank' : null"
+    variant="muted"
+    hollow
+    :class="[
+      `size-${size}`,
+      `icon-variant-${iconVariant}`,
+      {
+        dimmed,
+      }
+    ]"
     v-on="$listeners"
   >
-    <slot />
-  </Component>
+    <Badge
+      class="badge"
+      :text="badgeText"
+    >
+      <slot>
+        <Component
+          :is="icon"
+          v-if="icon"
+          class="icon"
+        />
+      </slot>
+    </Badge>
+  </BtnBase>
 </template>
 
 <script>
-const SIZES = ['rg', 'md'];
-const VARIANTS = ['light', 'dimmed', 'danger'];
+import Badge from '../Badge.vue';
+import BtnBase from './BtnBase.vue';
+
+const SIZES = ['sm', 'rg'];
+const VARIANTS = ['default', 'light', 'dimmed', 'danger'];
 
 export default {
+  components: {
+    BtnBase,
+    Badge,
+  },
   props: {
-    to: { type: Object, default: null },
-    href: { type: String, default: null },
-    variant: {
+    icon: { type: Object, default: null },
+    iconVariant: {
       type: String,
-      default: null,
+      default: 'default',
       validator: (val) => VARIANTS.includes(val),
     },
     size: {
       type: String,
-      default: 'md',
+      default: 'rg',
       validator: (val) => SIZES.includes(val),
     },
-  },
-  computed: {
-    component() {
-      if (this.to) {
-        return 'RouterLink';
-      }
-      if (this.href) {
-        return 'a';
-      }
-      return 'button';
-    },
+    badgeText: { type: [String, Number], default: null },
+    dimmed: Boolean,
   },
 };
 </script>
 
 <style lang="scss">
-@use '../../../styles/variables';
+@use '../../../styles/variables' as *;
 @use '../../../styles/mixins';
 
 .btn-icon {
-  --size: 20px;
+  --size: 24px;
+  --icon-opacity: 0.75;
+  --icon-opacity-hover: 1;
+  --icon-color-hover: #{$color-white};
 
   @include mixins.flex(center, center);
 
@@ -60,70 +75,47 @@ export default {
   border: none;
   border-radius: 50%;
   outline: none;
-  transition: 0.2s;
   cursor: pointer;
 
-  > .icon {
-    color: variables.$color-white;
+  .badge {
+    display: flex;
+  }
+
+  .icon {
+    color: $color-white;
     width: var(--size);
     height: var(--size);
-    opacity: 0.75;
-    transition: 0.1s;
-  }
-
-  &.rg {
-    --size: 20px;
-  }
-
-  &.md {
-    --size: 24px;
+    opacity: var(--icon-opacity);
+    transition: $transition-interactive;
   }
 
   &:hover {
-    background-color: rgba(variables.$color-white, 0.08);
-
-    > .icon {
-      opacity: 1;
+    .icon {
+      opacity: var(--icon-opacity-hover);
+      color: var(--icon-color-hover);
     }
   }
 
   &:active {
-    background-color: variables.$color-grey-medium;
-  }
-
-  &.danger {
-    background: transparent;
-
-    > .icon {
-      opacity: 0.5;
-    }
-
-    &:hover {
-      > .icon {
-        color: variables.$color-danger;
-        opacity: 1;
-      }
+    .icon {
+      opacity: 1;
     }
   }
 
   &.dimmed {
-    background: transparent;
+    --icon-opacity: 0.5;
+    --icon-opacity-hover: 0.75;
+  }
 
-    > .icon {
-      opacity: 0.5;
-    }
-
-    &:hover {
-      > .icon {
-        opacity: 0.75;
-      }
+  &.size {
+    &-sm {
+      --size: 20px;
     }
   }
 
-  &.light {
-    &:hover {
-      background-color: transparent;
-      opacity: 0.5;
+  &.icon-variant {
+    &-danger {
+      --icon-color-hover: #{$color-danger};
     }
   }
 }

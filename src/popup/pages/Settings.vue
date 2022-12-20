@@ -45,6 +45,7 @@ import PanelItem from '../components/PanelItem.vue';
 import { CURRENCIES } from '../utils/constants';
 
 export default {
+  name: 'Settings',
   components: { PanelItem },
   computed: {
     ...mapState(['saveErrorLog', 'current']),
@@ -61,6 +62,9 @@ export default {
 
 <style lang="scss" scoped>
 .settings {
+  --screen-padding-x: 8px;
+
   overflow: hidden;
+  padding-inline: var(--screen-padding-x);
 }
 </style>
