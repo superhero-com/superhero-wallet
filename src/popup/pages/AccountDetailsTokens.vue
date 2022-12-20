@@ -1,7 +1,7 @@
 <template>
   <div class="token-list-wrapper">
     <div
-      v-if="showFilters"
+      v-if="showFilters || searchTerm.length"
       class="search-bar-wrapper"
     >
       <InputSearch

@@ -86,7 +86,10 @@ export function useTokensList(options: UseTokensListOptions = {}) {
         !searchTermParsed
         || symbol.toLowerCase().includes(searchTermParsed)
         || name.toLowerCase().includes(searchTermParsed)
-        || contractId.toLowerCase().includes(searchTermParsed)
+        || (
+          searchTermParsed.startsWith('ct_')
+          && contractId.toLowerCase().includes(searchTermParsed)
+        )
       ));
   });
 
