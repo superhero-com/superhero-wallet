@@ -26,7 +26,19 @@
       </Component>
     </div>
 
+    <BtnPlain
+      v-if="!showHeaderNavigation"
+      :to="{ name: 'network-settings' }"
+      class="network-btn"
+    >
+      <div
+        class="circle"
+        :class="[ nodeStatus ]"
+      />
+      {{ activeNetwork.name }}
+    </BtnPlain>
     <div
+      v-else
       class="title"
     >
       <Truncate
@@ -60,8 +72,8 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { useGetter } from '../../composables';
-import { WalletRouteMeta } from '../../types';
+import { useGetter, useState } from '../../composables';
+import { WalletRouteMeta, INetwork } from '../../types';
 import {
   ROUTE_INDEX,
   ROUTE_ACCOUNT,
@@ -72,6 +84,7 @@ import BackIcon from '../../icons/back.svg?vue-component';
 import ThreeDots from '../../icons/three-dots.svg?vue-component';
 import Truncate from './Truncate.vue';
 import BtnClose from './buttons/BtnClose.vue';
+import BtnPlain from './buttons/BtnPlain.vue';
 import NotifyBell from './NotifyBell.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
 
@@ -79,6 +92,7 @@ export default defineComponent({
   components: {
     NotifyBell,
     BtnClose,
+    BtnPlain,
     Logo,
     BackIcon,
     ThreeDots,
@@ -87,6 +101,8 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const isLoggedIn = useGetter('isLoggedIn');
+    const nodeStatus = useState('nodeStatus');
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
     const currentHomeRouteName = computed(() => (isLoggedIn.value) ? ROUTE_ACCOUNT : ROUTE_INDEX);
     const routeMeta = computed(() => root.$route.meta as WalletRouteMeta);
     const showHeaderNavigation = computed(() => !!routeMeta.value?.showHeaderNavigation);
@@ -119,6 +135,8 @@ export default defineComponent({
       titleTruncated,
       back,
       close,
+      nodeStatus,
+      activeNetwork,
     };
   },
 });
@@ -170,6 +188,37 @@ export default defineComponent({
       white-space: nowrap;
       line-height: 24px;
       color: variables.$color-white;
+    }
+  }
+
+  .network-btn {
+    @extend %face-sans-14-medium;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-right: 16px;
+    margin-left: auto;
+    color: rgba(variables.$color-white, 0.75);
+
+    .circle {
+      width: 6px;
+      height: 6px;
+      border-radius: 100%;
+      margin-right: 4px;
+      background-color: variables.$color-warning;
+
+      &.connected {
+        background-color: variables.$color-success-dark;
+      }
+
+      &.error {
+        background-color: variables.$color-danger;
+      }
+    }
+
+    &:hover {
+      color: rgba(variables.$color-white, 1);
     }
   }
 
