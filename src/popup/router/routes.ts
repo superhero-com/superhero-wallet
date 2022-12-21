@@ -5,6 +5,7 @@ import {
   ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
   ROUTE_NOTIFICATIONS,
   ROUTE_COIN,
+  ROUTE_ACCOUNT_DETAILS,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -85,7 +86,7 @@ export const routes: WalletAppRouteConfig[] = [
     children: [
       {
         path: '',
-        name: 'account-details',
+        name: ROUTE_ACCOUNT_DETAILS,
         component: AccountDetailsTokens,
         meta: {
           hideHeader: true,
@@ -352,8 +353,8 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
+    path: '/account-details/transactions/:hash',
     name: 'tx-details',
-    path: '/transactions/:hash',
     component: TransactionDetails,
     props: true,
     meta: {
@@ -389,7 +390,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/names/auctions/:name/',
+    path: '/account-details/names/auctions/:name/',
     component: Auction,
     props: true,
     children: [
@@ -400,7 +401,6 @@ export const routes: WalletAppRouteConfig[] = [
         name: 'auction-bid',
         meta: {
           title: 'auction',
-          backRoute: { name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS },
           showHeaderNavigation: true,
         },
       },
@@ -467,6 +467,7 @@ export const routes: WalletAppRouteConfig[] = [
         props: true,
         meta: {
           title: 'coin-details',
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
         },
       },
@@ -483,6 +484,7 @@ export const routes: WalletAppRouteConfig[] = [
         props: true,
         meta: {
           title: 'token-details',
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
         },
       },

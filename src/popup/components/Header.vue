@@ -112,14 +112,15 @@ export default defineComponent({
     );
 
     function back() {
-      if (root.$store.state.route.from.name === ROUTE_INDEX) {
-        return root.$router.push({ name: currentHomeRouteName.value });
-      }
       if (root.$route.meta?.backRoute) {
         // TODO: rewrite back button logic in more unified way
         return root.$router.push(root.$route.meta?.backRoute);
       }
-      return root.$router.back();
+      let { fullPath } = root.$route;
+      fullPath = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
+      return root.$router.push(
+        fullPath.substr(0, fullPath.lastIndexOf('/')) || currentHomeRouteName.value,
+      );
     }
 
     function close() {

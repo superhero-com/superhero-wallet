@@ -72,10 +72,6 @@ describe('Test cases for networks page', () => {
       .goBack()
       .goBack()
       .goBack()
-      .goBack()
-      .goBack()
-      .goBack()
-      .goBack()
       .get('.account-card')
       .should('exist')
 
