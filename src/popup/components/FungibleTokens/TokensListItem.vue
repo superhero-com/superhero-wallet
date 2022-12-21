@@ -5,10 +5,9 @@
     class="tokens-list-item"
     :class="{ extend: preventNavigation, 'asset-selector': assetSelector }"
     :to="preventNavigation ? null : {
-      name: 'token-transactions',
+      name: targetRouteName,
       params: {
         id: tokenData.contractId,
-        type: targetRouteType,
       },
     }"
     @click="(event) => $emit('click', event)"
@@ -70,8 +69,8 @@ export default {
     price() {
       return this.formatCurrency(this.aePublicData?.current_price || 0);
     },
-    targetRouteType() {
-      return this.tokenData.contractId === AETERNITY_CONTRACT_ID ? 'coin' : 'token';
+    targetRouteName() {
+      return this.tokenData.contractId === AETERNITY_CONTRACT_ID ? 'coin-transactions' : 'token-transactions';
     },
   },
 };

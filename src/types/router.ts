@@ -20,6 +20,7 @@ export interface WalletRouteMeta {
    * Only for unauthorized users
    */
   ifNotAuthOnly?: boolean
+
   /**
    * Decide if the page allows to edit the displayed data
    */

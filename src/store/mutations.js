@@ -68,9 +68,6 @@ export default {
   setCurrentCurrency(state, currency) {
     state.current.currency = currency;
   },
-  setPageTitle(state, title) {
-    state.pageTitle = title;
-  },
   setCurrencies(state, payload) {
     state.currencies = payload;
   },
