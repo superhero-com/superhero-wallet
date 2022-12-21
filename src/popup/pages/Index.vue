@@ -25,7 +25,7 @@
         </i18n>
       </div>
 
-      <Platforms v-if="!IS_EXTENSION">
+      <Platforms v-if="IS_WEB">
         <template #header>
           {{ $t('pages.index.platforms.heading') }}
         </template>
@@ -81,7 +81,7 @@
 <script>
 import { generateMnemonic } from '@aeternity/bip39';
 import {
-  IS_EXTENSION, IS_WEB, IN_FRAME, IS_MOBILE_DEVICE,
+  IS_WEB, IN_FRAME, IS_MOBILE_DEVICE,
 } from '../../lib/environment';
 import CheckBox from '../components/CheckBox.vue';
 import BtnSubheader from '../components/buttons/BtnSubheader.vue';
@@ -102,7 +102,6 @@ export default {
   },
   data: () => ({
     termsAgreed: false,
-    IS_EXTENSION,
     IS_WEB,
     IS_MOBILE_DEVICE,
     IN_FRAME,
