@@ -9,12 +9,19 @@ import BigNumber from 'bignumber.js';
 import { defer } from 'lodash-es';
 import { Observable } from 'rxjs';
 import {
-  ADDRESS_TYPES, AENS_DOMAIN,
+  ADDRESS_TYPES,
+  AENS_DOMAIN,
   HASH_PREFIX_CONTRACT,
   HASH_REGEX,
   SIMPLEX_URL,
 } from './constants';
 import { i18n } from '../../store/plugins/languages';
+import dayjs from '../plugins/dayjsConfig';
+import type {
+  IRespondChallenge,
+  IResponseChallenge,
+  ISdk,
+} from '../../types';
 
 Vue.use(VueCompositionApi);
 
@@ -133,10 +140,10 @@ export function watchUntilTruthy<T>(getter: () => T): Promise<NonNullable<T>> {
  * Temporary function that allows to replace the `subscriptions` property
  * on Vue components when using the Vue setup() hook of the Vue composition API.
  */
-export function rxJsObservableToVueState(
+export function rxJsObservableToVueState<T = any>(
   observable: Observable<any>,
   defaultState: any = null,
-): Ref<any> {
+): Ref<T> {
   const state = ref(defaultState);
   const subscription = observable.subscribe((val) => {
     state.value = val || defaultState;
@@ -149,4 +156,23 @@ export function rxJsObservableToVueState(
 
 export function splitAddress(address: string | null): string {
   return address ? address.match(/.{1,3}/g)!.reduce((acc, current) => `${acc} ${current}`) : '';
+}
+
+export function relativeTimeTo(date: string): string {
+  return dayjs().to(dayjs(date));
+}
+
+// TODO - move to sdk.ts composable after the removal of action.js file
+export async function fetchRespondChallenge(
+  sdk: ISdk,
+  responseChallenge: IResponseChallenge,
+): Promise<IRespondChallenge> {
+  const signedChallenge = Buffer.from(
+    await sdk.signMessage(responseChallenge.challenge),
+  ).toString('hex');
+
+  return {
+    challenge: responseChallenge.challenge,
+    signature: signedChallenge,
+  };
 }

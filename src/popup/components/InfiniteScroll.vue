@@ -1,17 +1,12 @@
 <template>
-  <div
-    ref="scrollArea"
-    class="infinite-scroll"
-    @scroll="onScroll"
-  >
+  <div class="infinite-scroll">
     <slot />
   </div>
 </template>
 
 <script lang="ts">
-import {
-  defineComponent, onMounted, onUnmounted,
-} from '@vue/composition-api';
+import { defineComponent } from '@vue/composition-api';
+import { IScrollCallbackParams, useViewport } from '../../composables/viewport';
 
 export default defineComponent({
   name: 'InfiniteScroll',
@@ -19,36 +14,21 @@ export default defineComponent({
     isMoreData: { type: Boolean, required: true },
   },
   setup(props, { emit }) {
-    const appInner = document.querySelector('.app-inner')!;
+    const { onViewportScroll } = useViewport();
 
-    const onScroll = () => {
-      const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
-      const { scrollHeight, scrollTop, clientHeight } = isDesktop
-        ? appInner : document.documentElement;
-      if (props.isMoreData && (scrollHeight - scrollTop <= clientHeight + 100)) {
+    function onScroll({ isOutsideOfViewport }: IScrollCallbackParams) {
+      if (props.isMoreData && isOutsideOfViewport) {
         emit('loadMore');
       }
-    };
+    }
 
-    onMounted(() => {
-      appInner.addEventListener('scroll', onScroll);
-      window.addEventListener('scroll', onScroll);
-    });
-
-    onUnmounted(() => {
-      appInner.removeEventListener('scroll', onScroll);
-      window.removeEventListener('scroll', onScroll);
-    });
-
-    return {
-      onScroll,
-    };
+    onViewportScroll(onScroll);
   },
 });
 </script>
 
 <style scoped>
-  .infinite-scroll {
-    height: 100%;
-  }
+.infinite-scroll {
+  height: 100%;
+}
 </style>

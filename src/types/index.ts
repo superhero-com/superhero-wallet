@@ -87,7 +87,9 @@ export interface IPermission {
 export type NotificationStatus = 'CREATED' | 'PEEKED' | 'READ';
 
 export interface INotification {
-  chainName?: string
+  wallet?: boolean
+  senderName?: string
+  receiverName?: string
   createdAt: string
   entityId?: string
   entityType?: string
@@ -98,9 +100,12 @@ export interface INotification {
   sourceId?: string
   sourceType?: string
   status: NotificationStatus
-  text?: string
+  text?: string | TranslateResult
   type: string
   updatedAt?: string
+  isSeedBackup?: boolean
+  buttonLabel?: TranslateResult,
+  title?: TranslateResult,
 }
 
 export interface INotificationSetting {
@@ -209,13 +214,15 @@ export type IPopupType = typeof POPUP_TYPES[number];
  * Temporary typing for the SDK used in the app.
  * TODO remove after migrating to SDK v12
  */
+export type ISignMessage = (m: any) => Promise<any>
+
 export interface ISdk {
   api: Record<string, (a: string) => any>
   Ae: Record<string, any>
   pool: Map<string, any>
   getContractInstance: (o: any) => any
   signTransaction: (t: any, o: any) => Promise<any>
-  signMessage: (m: any) => Promise<any>
+  signMessage: ISignMessage
   sendTransaction: (t: any, o: any) => Promise<any>
   spend: (a: any, r: any, o: any) => Promise<any>
   address: () => Promise<string>,
@@ -265,4 +272,14 @@ export interface IName {
   name: string
   owner: string
   pointers: Record<string, any>
+}
+
+export interface IResponseChallenge {
+  challenge: string,
+  payload: string,
+}
+
+export interface IRespondChallenge {
+  challenge: string,
+  signature: string,
 }

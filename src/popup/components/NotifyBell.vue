@@ -16,9 +16,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, Ref } from '@vue/composition-api';
-import type { INotification } from '../../types';
-import { NOTIFICATION_STATUS_CREATED, rxJsObservableToVueState } from '../utils';
+import { computed, defineComponent } from '@vue/composition-api';
+import { NOTIFICATION_STATUS_CREATED } from '../utils';
+import { useNotifications } from '../../composables/notifications';
 import BellIcon from '../../icons/bell.svg?vue-component';
 import BtnIcon from './buttons/BtnIcon.vue';
 
@@ -28,18 +28,11 @@ export default defineComponent({
     BtnIcon,
     BellIcon,
   },
-  setup(props, { root }) {
-    const superheroNotifications = rxJsObservableToVueState(
-      root.$store.state.observables.notifications,
-      [],
-    ) as Ref<INotification[]>;
-    const notifications = computed<INotification[]>(() => root.$store.state.notifications);
+  setup() {
+    const { notificationsAll } = useNotifications({ requirePolling: true });
 
     const notificationsCount = computed<string | number>(() => {
-      const count = [
-        ...notifications.value,
-        ...superheroNotifications.value,
-      ]
+      const count = notificationsAll.value
         .filter(({ status }) => status === NOTIFICATION_STATUS_CREATED)
         .length;
 
@@ -70,7 +63,7 @@ export default defineComponent({
     top: 4px;
     min-width: 14px;
     height: 14px;
-    background: variables.$color-danger;
+    background: variables.$color-secondary;
     border-radius: 7px;
     text-align: center;
     line-height: 14px;

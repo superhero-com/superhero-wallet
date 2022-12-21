@@ -14,8 +14,10 @@ import {
   isAccountNotFoundError,
   executeAndSetInterval,
   watchUntilTruthy,
+  fetchRespondChallenge,
+  CURRENCIES_URL,
+  MODAL_DEFAULT,
 } from '../popup/utils';
-import { CURRENCIES_URL, MODAL_DEFAULT } from '../popup/utils/constants';
 import { i18n } from './plugins/languages';
 
 export default {
@@ -180,84 +182,15 @@ export default {
     const responseChallenge = await sendComment({
       tipId, text, author, parentId,
     });
-    const signedChallenge = Buffer.from(
-      await sdk.signMessage(responseChallenge.challenge),
-    ).toString('hex');
-    const respondChallenge = {
-      challenge: responseChallenge.challenge,
-      signature: signedChallenge,
-    };
+    const respondChallenge = await fetchRespondChallenge(sdk, responseChallenge);
+
     return sendComment(respondChallenge);
-  },
-  async modifyNotification(
-    {
-      getters: {
-        'sdkPlugin/sdk': sdk,
-        activeNetwork,
-        account: { address },
-      },
-    },
-    [notificationId, status],
-  ) {
-    const backendMethod = async (body) => postJson(`${activeNetwork.backendUrl}/notification/${notificationId}`, { body });
-
-    const responseChallenge = await backendMethod({ author: address, status });
-    const signedChallenge = Buffer.from(
-      await sdk.signMessage(responseChallenge.challenge),
-    ).toString('hex');
-    const respondChallenge = {
-      challenge: responseChallenge.challenge,
-      signature: signedChallenge,
-    };
-
-    backendMethod(respondChallenge);
-  },
-  async modifyNotifications(
-    {
-      getters: {
-        'sdkPlugin/sdk': sdk,
-        activeNetwork,
-        account: { address },
-      },
-    },
-    [ids, status],
-  ) {
-    if (!ids.length) return;
-    const backendMethod = async (body) => postJson(`${activeNetwork.backendUrl}/notification`, { body });
-
-    const responseChallenge = await backendMethod({ ids, status, author: address });
-    const signedChallenge = Buffer.from(
-      await sdk.signMessage(responseChallenge.challenge),
-    ).toString('hex');
-    const respondChallenge = {
-      challenge: responseChallenge.challenge,
-      signature: signedChallenge,
-    };
-
-    backendMethod(respondChallenge);
   },
   async getCacheChainNames({ getters: { activeNetwork } }) {
     return fetchJson(`${activeNetwork.backendUrl}/cache/chainnames`);
   },
   async getCacheTip({ getters: { activeNetwork } }, id) {
     return fetchJson(`${activeNetwork.backendUrl}/tips/single/${id}`);
-  },
-  async getAllNotifications({ getters: { 'sdkPlugin/sdk': sdk, activeNetwork, account } }) {
-    const responseChallenge = await fetchJson(
-      `${activeNetwork.backendUrl}/notification/user/${account.address}`,
-    );
-    const signedChallenge = Buffer.from(
-      await sdk.signMessage(responseChallenge.challenge),
-    ).toString('hex');
-
-    const respondChallenge = {
-      challenge: responseChallenge.challenge,
-      signature: signedChallenge,
-    };
-    const url = new URL(`${activeNetwork.backendUrl}/notification/user/${account.address}`);
-    Object.keys(respondChallenge)
-      .forEach((key) => url.searchParams.append(key, respondChallenge[key]));
-    return fetchJson(url.toString());
   },
   async initTippingContractInstances({
     getters: { 'sdkPlugin/sdk': sdk, activeNetwork, tippingSupported },

@@ -208,10 +208,8 @@
       "noTransactionsFound": "未发现转帐！",
       "balance": "余额",
       "copied": "已复制!",
-      "seedNotification": "你需要 {0} 你的助记词",
       "backup": "备份",
       "updateExtension": "有新版本!请更新扩展",
-      "updateAvailable": "商店中有新版本!",
       "claim-name": "申明你的.chain名称"
     },
     "claim": {

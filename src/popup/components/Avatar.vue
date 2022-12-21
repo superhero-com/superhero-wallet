@@ -2,7 +2,7 @@
   <img
     class="avatar"
     :src="error ? avatar : profileImage"
-    :class="size"
+    :class="[size, { 'with-border': withBorder }]"
     @error="error = true"
   >
 </template>
@@ -22,6 +22,7 @@ export default {
       validator: (val) => SIZES.includes(val),
     },
     src: { type: String, default: '' },
+    withBorder: Boolean,
   },
   data: () => ({
     error: false,
@@ -41,6 +42,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '../../styles/variables';
+
 $size-xs: 18px;
 $size-sm: 24px;
 $size-md: 32px;
@@ -81,6 +84,10 @@ $size-xl: 56px;
   &.xl {
     height: $size-xl;
     width: $size-xl;
+  }
+
+  &.with-border {
+    border: 1px solid variables.$color-grey-border-avatar;
   }
 }
 </style>

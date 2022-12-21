@@ -149,10 +149,8 @@
       "noTransactionsFound": "Aucune transaction trouvée!",
       "balance": "Balance",
       "copied": "Copied!",
-      "seedNotification": "You need to {0} your seed phrase",
       "backup": "backup",
       "updateExtension": "New version available! Please update your extension.",
-      "updateAvailable": "New version in store available!",
       "claim-name": "Claim your .chain name"
     },
     "claim": {

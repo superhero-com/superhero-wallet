@@ -51,7 +51,12 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { TXS_PER_PAGE, AETERNITY_CONTRACT_ID, watchUntilTruthy } from '../utils';
+import {
+  TXS_PER_PAGE,
+  AETERNITY_CONTRACT_ID,
+  MOBILE_WIDTH,
+  watchUntilTruthy,
+} from '../utils';
 import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
 import InputSearch from './InputSearch.vue';
@@ -171,7 +176,9 @@ export default {
   methods: {
     checkLoadMore() {
       if (this.isDestroyed || !this.transactions.nextPageUrl) return;
-      const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
+      // TODO - use viewport.ts composable after rewriting component to Vue 3
+      const isDesktop = document.documentElement.clientWidth > MOBILE_WIDTH
+          || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = isDesktop
         ? document.querySelector('.app-inner') : document.documentElement;
       if (this.maxLength && this.filteredTransactions.length >= this.maxLength) return;

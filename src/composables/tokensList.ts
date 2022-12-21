@@ -31,12 +31,12 @@ export function useTokensList(options: UseTokensListOptions = {}) {
   const tokenBalances = computed<IToken[]>(() => store.getters['fungibleTokens/tokenBalances']);
   const getAeternityToken = computed(() => store.getters['fungibleTokens/getAeternityToken']);
 
-  const balance = rxJsObservableToVueState(
+  const balance = rxJsObservableToVueState<any>(
     (store.state as any).observables.balance,
-  ) as Ref<any>;
-  const balanceCurrency = rxJsObservableToVueState(
+  );
+  const balanceCurrency = rxJsObservableToVueState<number>(
     (store.state as any).observables.balanceCurrency,
-  ) as Ref<any>;
+  );
 
   /**
    * Returns the default aeternity meta information
