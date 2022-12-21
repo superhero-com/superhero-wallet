@@ -7,7 +7,7 @@ describe('Tokens', () => {
   beforeEach(() => {
     wrapper = shallowMount(Tokens, {
       propsData: {
-        tokens: [{ symbol: 'test123' }, { symbol: 'test456', contractId: '1' }],
+        tokens: [{ symbol: 'test123', contractId: '1' }, { symbol: 'test456', contractId: '2' }],
         vertical: true,
       },
     });
