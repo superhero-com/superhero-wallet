@@ -33,8 +33,7 @@
         />
       </div>
     </div>
-
-    <div class="button-wrapper">
+    <template #footer>
       <BtnMain
         :variant="mobile ? 'secondary' : 'primary'"
         :extend="!mobile"
@@ -46,12 +45,13 @@
         :text="$t('modals.qrCodeReader.settings')"
         @click="openSettings"
       />
-    </div>
+    </template>
   </Modal>
 </template>
 
 <script>
 import { mapMutations } from 'vuex';
+import { IS_EXTENSION, IS_CORDOVA } from '../../../lib/environment';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import { handleUnknownError } from '../../utils/helper';
@@ -69,16 +69,13 @@ export default {
     reject: { type: Function, required: true },
   },
   data: () => ({
+    mobile: IS_CORDOVA,
     // allow camera while QRScanner is loading to not show cameraNotAllowed before actual check
-    cameraAllowed: process.env.PLATFORM === 'cordova',
+    cameraAllowed: IS_CORDOVA,
     browserReader: null,
+    videoInputDevices: [],
     headerText: '',
   }),
-  computed: {
-    mobile() {
-      return process.env.PLATFORM === 'cordova';
-    },
-  },
   watch: {
     async cameraAllowed(value) {
       if (!value) {
@@ -92,14 +89,14 @@ export default {
         if (error.name === 'NotAllowedError') {
           try {
             await new Promise((resolve, reject) => {
-              if (process.env.IS_EXTENSION) {
+              if (IS_EXTENSION) {
                 window.open(
                   browser.extension.getURL('./CameraRequestPermission.html'),
                   '_blank',
                 );
                 reject();
               }
-              if (navigator.mediaDevices.getUserMedia) {
+              if (navigator.mediaDevices?.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ video: true }).then(resolve, reject);
               } else reject(new Error('Sorry, your browser does not support getUserMedia'));
             });
@@ -152,6 +149,7 @@ export default {
     ...mapMutations(['setQrScanner']),
     async initBrowserReader() {
       const { BrowserQRCodeReader } = await import('@zxing/library');
+
       this.browserReader = new BrowserQRCodeReader();
     },
     async scan() {
@@ -217,14 +215,8 @@ export default {
       margin-bottom: 0;
       width: 40px;
       height: 40px;
-      color: variables.$color-blue;
+      color: variables.$color-primary;
     }
-  }
-
-  .button-wrapper {
-    padding-top: 20px;
-    padding-bottom: 0;
-    width: 100%;
   }
 
   .camera {

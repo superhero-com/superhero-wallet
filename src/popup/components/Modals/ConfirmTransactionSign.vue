@@ -3,13 +3,14 @@
     full-screen
     class="confirm-transaction-sign"
     data-cy="popup-aex2"
-    absolute-footer
   >
     <TransactionOverview :tx="completeTransaction" />
+
     <AnimatedSpinner
       v-if="loading"
       class="loader"
     />
+
     <template v-if="(isDex || isAllowance) && tokenList">
       <TransactionDetailsPoolTokenRow
         v-for="(token, idx) in tokenList"
@@ -20,15 +21,17 @@
         :hide-amount="isSwap"
       />
     </template>
+
     <DetailsItem
       v-if="getNameFee(transaction)"
       :label="$t('modals.confirm-transaction-sign.nameFee')"
       class="name-fee"
     >
-      <TokenAmount
-        slot="value"
-        :amount="getNameFee(transaction)"
-      />
+      <template #value>
+        <TokenAmount
+          :amount="getNameFee(transaction)"
+        />
+      </template>
     </DetailsItem>
 
     <div class="details">
@@ -36,33 +39,36 @@
         v-if="isSwap"
         :label="$t(`pages.signTransaction.${swapDirection}`)"
       >
-        <TokenAmount
-          slot="value"
-          :amount="+convertToken(getSwapTokenAmountData.amount, -getSwapTokenAmountData.decimals)"
-          :symbol="getSwapTokenAmountData.isAe ? 'AE' : getSwapTokenAmountData.symbol"
-          :aex9="isTxAex9(transaction)"
-          :hide-fiat="!getSwapTokenAmountData.isAe"
-          data-cy="total"
-        />
+        <template #value>
+          <TokenAmount
+            :amount="+convertToken(getSwapTokenAmountData.amount, -getSwapTokenAmountData.decimals)"
+            :symbol="getSwapTokenAmountData.isAe ? AETERNITY_SYMBOL : getSwapTokenAmountData.symbol"
+            :aex9="isTxAex9(transaction)"
+            :hide-fiat="!getSwapTokenAmountData.isAe"
+            data-cy="total"
+          />
+        </template>
       </DetailsItem>
       <DetailsItem :label="$t('pages.signTransaction.fee')">
-        <TokenAmount
-          slot="value"
-          :amount="getTxFee(transaction)"
-          data-cy="fee"
-        />
+        <template #value>
+          <TokenAmount
+            :amount="getTxFee(transaction)"
+            data-cy="fee"
+          />
+        </template>
       </DetailsItem>
       <DetailsItem
         v-if="!isDex"
         :label="$t('pages.signTransaction.total')"
       >
-        <TokenAmount
-          slot="value"
-          :amount="getTxAmountTotal(transaction)"
-          :symbol="getTxSymbol(transaction)"
-          :aex9="isTxAex9(transaction)"
-          data-cy="total"
-        />
+        <template #value>
+          <TokenAmount
+            :amount="getTxAmountTotal(transaction)"
+            :symbol="getTxSymbol(transaction)"
+            :aex9="isTxAex9(transaction)"
+            data-cy="total"
+          />
+        </template>
       </DetailsItem>
     </div>
 
@@ -89,9 +95,8 @@
         />
       </div>
     </transition>
-    <template
-      slot="footer"
-    >
+
+    <template #footer>
       <BtnMain
         third
         variant="secondary"
@@ -114,6 +119,18 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { camelCase } from 'lodash-es';
+import {
+  FUNCTION_TYPE_DEX,
+  DEX_TRANSACTION_TAGS,
+  DEX_PROVIDE_LIQUIDITY,
+  DEX_REMOVE_LIQUIDITY,
+  AETERNITY_SYMBOL,
+  convertToken,
+} from '../../utils';
+import * as transactionTokenInfoResolvers from '../../utils/transactionTokenInfoResolvers';
+import mixin from '../../pages/Popups/mixin';
+import { useSdk } from '../../../composables';
+
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import BtnPlain from '../buttons/BtnPlain.vue';
@@ -123,11 +140,6 @@ import TokenAmount from '../TokenAmount.vue';
 import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import Arrow from '../../../icons/arrow.svg?vue-component';
-import { FUNCTION_TYPE_DEX } from '../../utils/constants';
-import * as transactionTokenInfoResolvers from '../../utils/transactionTokenInfoResolvers';
-import { getDexTransactionTag } from '../../utils';
-import mixin from '../../pages/Popups/mixin';
-import { convertToken, watchUntilTruthy } from '../../utils/helper';
 
 export default {
   components: {
@@ -150,6 +162,7 @@ export default {
     tokenList: null,
     txFunction: null,
     loading: false,
+    AETERNITY_SYMBOL,
     TX_FIELDS: [
       'nonce',
       'payload',
@@ -166,10 +179,13 @@ export default {
     ],
   }),
   computed: {
-    ...mapState(['sdk']),
-    ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters(['formatCurrency', 'account', 'activeNetwork']),
+    ...mapState('fungibleTokens', [
+      'availableTokens',
+    ]),
     ...mapGetters([
+      'formatCurrency',
+      'account',
+      'activeNetwork',
       'getTxSymbol',
       'getTxAmountTotal',
       'getTxFee',
@@ -217,17 +233,18 @@ export default {
       return { ...this.transaction, function: this.txFunction };
     },
     isProvideLiquidity() {
-      return getDexTransactionTag[this.txFunction] === 'provide_liquidity';
+      return DEX_TRANSACTION_TAGS[this.txFunction] === DEX_PROVIDE_LIQUIDITY;
     },
   },
   async mounted() {
     if (this.transaction.contractId) {
       try {
         this.loading = true;
+        const { getSdk } = useSdk();
         setTimeout(() => { this.loading = false; }, 20000);
-        await watchUntilTruthy(() => this.sdk);
-        const { bytecode } = await this.sdk.getContractByteCode(this.transaction.contractId);
-        const txParams = await this.sdk.compilerApi.decodeCalldataBytecode({
+        const sdk = await getSdk();
+        const { bytecode } = await sdk.getContractByteCode(this.transaction.contractId);
+        const txParams = await sdk.compilerApi.decodeCalldataBytecode({
           bytecode,
           calldata: this.transaction.callData,
         });
@@ -274,8 +291,10 @@ export default {
       if (this.isPool && this.isProvideLiquidity) {
         return token.isPool ? '' : this.$t('pages.signTransaction.maximumDeposited');
       }
-      if (this.isPool && getDexTransactionTag[this.txFunction] === 'remove_liquidity') {
-        return token.isPool ? this.$t('pages.signTransaction.poolTokenSpent') : this.$t('pages.signTransaction.minimumWithdrawn');
+      if (this.isPool && DEX_TRANSACTION_TAGS[this.txFunction] === DEX_REMOVE_LIQUIDITY) {
+        return token.isPool
+          ? this.$t('pages.signTransaction.poolTokenSpent')
+          : this.$t('pages.signTransaction.minimumWithdrawn');
       }
       return '';
     },
@@ -297,7 +316,7 @@ export default {
   }
 
   .transaction-overview {
-    padding-bottom: 16px;
+    margin-bottom: 16px;
   }
 
   .details {
@@ -312,15 +331,13 @@ export default {
   }
 
   .show-advanced {
+    @extend %face-sans-15-medium;
+
     display: flex;
     align-items: center;
     padding-top: 8px;
     margin-bottom: 8px;
-    background: variables.$color-bg-1;
     width: 100%;
-
-    @extend %face-sans-15-medium;
-
     color: variables.$color-grey-dark;
 
     .icon {
@@ -332,7 +349,7 @@ export default {
     }
 
     &:hover {
-      color: variables.$color-light-grey;
+      color: variables.$color-grey-light;
 
       .icon {
         opacity: 1;
@@ -352,7 +369,7 @@ export default {
 
     .details-item::v-deep {
       .value {
-        color: variables.$color-light-grey;
+        color: variables.$color-grey-light;
         line-height: 24px;
         letter-spacing: 0.05em;
         margin-bottom: 12px;
@@ -367,28 +384,6 @@ export default {
           line-height: 20px;
         }
       }
-    }
-  }
-
-  ::v-deep .container {
-    background: variables.$color-bg-1;
-
-    .body {
-      overflow-y: scroll;
-      text-align: left;
-      padding: 16px 16px 0;
-      border-radius: 0 0 10px 10px;
-    }
-
-    .footer {
-      background:
-        linear-gradient(
-          180deg,
-          rgba(19, 19, 19, 0) 0%,
-          rgba(19, 19, 19, 0.65) 28.13%,
-          rgba(19, 19, 19, 0.7) 33.33%
-        );
-      z-index: 1;
     }
   }
 

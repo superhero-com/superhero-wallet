@@ -1,7 +1,5 @@
-import { watch } from '@vue/composition-api';
-import { defer } from 'lodash-es';
-import { isFQDN } from 'validator';
-import { detect } from 'detect-browser';
+import { mnemonicToSeed } from '@aeternity/bip39';
+import { isFQDN, isURL } from 'validator';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
   SCHEMA,
@@ -19,23 +17,11 @@ import {
   MAX_UINT256,
   MAGNITUDE,
   SEED_LENGTH,
-  AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
 } from './constants';
-
-export function watchUntilTruthy(getter) {
-  return new Promise((resolve) => {
-    const unwatch = watch(
-      getter,
-      (value) => {
-        if (!value) return;
-        resolve();
-        defer(() => unwatch());
-      },
-      { immediate: true },
-    );
-  });
-}
+import { testAccount, txParams } from './config';
+import runMigrations from '../../store/migrations';
+import { IS_FIREFOX } from '../../lib/environment';
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
@@ -48,8 +34,6 @@ export const aettosToAe = (v) => AmountFormatter.formatAmount(v.toString(), {
   denomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
   targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
 });
-
-export const convertToken = (balance, precision) => BigNumber(balance).shiftedBy(precision);
 
 export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   if (!_balance || !_totalSupply || !_reserve) {
@@ -102,10 +86,10 @@ export const validateTipUrl = (urlAsString) => {
 };
 
 export const detectConnectionType = (port) => {
-  const extensionProtocol = detect().name === 'firefox' ? 'moz-extension' : 'chrome-extension';
+  const extensionProtocol = IS_FIREFOX ? 'moz-extension' : 'chrome-extension';
   const [senderUrl] = port.sender.url.split('?');
   const isExtensionSender = senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/index.html`)
-    || detect().name === 'firefox';
+    || IS_FIREFOX;
   if (CONNECTION_TYPES.POPUP === port.name && isExtensionSender) {
     return port.name;
   }
@@ -137,7 +121,7 @@ export const checkAensName = (value) => (
 
 export const getAddressByNameEntry = (nameEntry, pointer = 'account_pubkey') => ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
 
-export const validateSeedLength = (seed) => seed && seed.split(' ').length === SEED_LENGTH;
+export const validateSeedLength = (seed) => seed && seed.split(' ').length >= SEED_LENGTH;
 
 export const contractCall = async ({
   instance,
@@ -181,28 +165,6 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
   return Promise.resolve(contractInstance);
 };
 
-export const escapeSpecialChars = (str = '') => str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
-
-export const checkHashType = (hash) => {
-  const accountPublicKeyRegex = RegExp('^ak_[1-9A-HJ-NP-Za-km-z]{48,50}$');
-  const transactionHashRegex = RegExp('^th_[1-9A-HJ-NP-Za-km-z]{48,50}$');
-  const nameRegex = RegExp('^nm_[1-9A-HJ-NP-Za-km-z]{48,50}$');
-  let valid = true;
-  let endpoint = null;
-
-  if (transactionHashRegex.test(hash)) {
-    endpoint = 'transactions';
-  } else if (accountPublicKeyRegex.test(hash)) {
-    endpoint = 'account/transactions';
-  } else if (nameRegex.test(hash) || hash?.endsWith('.chain')) {
-    endpoint = 'names';
-  } else {
-    valid = false;
-  }
-
-  return { valid, endpoint };
-};
-
 export const getTwitterAccountUrl = (url) => {
   const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
   return match ? match[0] : false;
@@ -221,16 +183,16 @@ export const getBalanceLocalStorage = () => (
 );
 
 export const categorizeContractCallTxObject = (transaction) => {
-  if (transaction.incomplete
-    || ((transaction.tx.function === 'tip' || transaction.tx.function === 'retip') && transaction.pending)) {
-    if (!transaction.tx?.selectedTokenId && transaction.pending) return null;
+  if (transaction.tx.type?.toLowerCase() !== SCHEMA.TX_TYPE.contractCall.toLowerCase()) {
+    return null;
+  }
+  if (transaction.incomplete || transaction.pending) {
     return {
       amount: transaction.amount,
-      token: transaction.pending ? transaction.tx?.selectedTokenId : transaction.tx.contractId,
-      to: transaction.tx.callerId,
+      token: transaction.tx.selectedTokenContractId ?? transaction.tx.contractId,
+      to: transaction.incomplete ? transaction.tx.recipientId : transaction.tx.callerId,
     };
   }
-  if (transaction.tx.type !== 'ContractCallTx') return null;
   switch (transaction.tx.function) {
     case 'transfer':
     case 'transfer_payload':
@@ -282,11 +244,6 @@ export const readValueFromClipboard = async () => {
   return value;
 };
 
-export const executeAndSetInterval = (handler, timeout) => {
-  handler();
-  return setInterval(handler, timeout);
-};
-
 export const getAllPages = async (getFunction, getNextPage) => {
   const result = [];
   let nextPageUrl;
@@ -313,7 +270,7 @@ export const amountRounded = (rawAmount) => {
   return amount.toFixed((amount < 0.01) ? 9 : 2);
 };
 
-export const truncateAddress = ({ address }) => {
+export const truncateAddress = (address) => {
   const addressLength = address.length;
   const firstPart = address.slice(0, 6).match(/.{3}/g);
   const secondPart = address.slice(addressLength - 3, addressLength).match(/.{3}/g);
@@ -323,8 +280,6 @@ export const truncateAddress = ({ address }) => {
   ];
 };
 
-export const isEqual = (a, b) => BigNumber(a).eq(b);
-
 export const getHdWalletAccount = (wallet, accountIdx = 0) => {
   const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
   return {
@@ -332,4 +287,36 @@ export const getHdWalletAccount = (wallet, accountIdx = 0) => {
     idx: accountIdx,
     address: TxBuilderHelper.encode(keyPair.publicKey, 'ak'),
   };
+};
+
+export const getLoginState = async ({
+  backedUpSeed,
+  balance,
+  name,
+  pendingTransaction,
+  network,
+}) => {
+  const { mnemonic, address } = testAccount;
+  const account = {
+    address,
+    privateKey: mnemonicToSeed(mnemonic).toString('hex'),
+  };
+  return {
+    ...(await runMigrations()),
+    account,
+    mnemonic,
+    backedUpSeed,
+    current: { network: network || 'Testnet', token: 0, currency: 'usd' },
+    balance,
+    ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
+    ...(pendingTransaction
+        && { transactions: { loaded: [], pending: { ae_uat: [pendingTransaction] } } }),
+  };
+};
+
+export const buildTx = (txtype) => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);
+
+export const isValidURL = (url) => {
+  const pattern = new RegExp(/((http(s)?:\/\/)?(localhost|127.0.0.1)((:)?[\0-9]{4})?\/?)/, 'i');
+  return isURL(url) || !!pattern.test(url);
 };

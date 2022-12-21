@@ -12,7 +12,6 @@
 .tabs {
   @include mixins.flex(flex-start, center, row);
 
-  gap: var(--gap);
   padding: 4px;
   border-radius: variables.$border-radius-interactive;
   background-color: variables.$color-black;

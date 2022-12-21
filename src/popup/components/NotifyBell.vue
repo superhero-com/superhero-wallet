@@ -1,11 +1,10 @@
 <template>
-  <BtnPlain
-    v-if="!$route.path.startsWith('/notifications') && !hideNotificationsIcon"
+  <BtnIcon
     class="notifications"
     data-cy="noti"
-    @click="toNotifications"
+    :to="{ name: 'notifications' }"
   >
-    <Bell class="bell-icon" />
+    <BellIcon class="bell-icon" />
     <span
       v-if="notificationsCount"
       class="badge"
@@ -13,63 +12,45 @@
     >
       {{ notificationsCount }}
     </span>
-  </BtnPlain>
+  </BtnIcon>
 </template>
 
-<script>
-import { mapMutations, mapState } from 'vuex';
-import BtnPlain from './buttons/BtnPlain.vue';
-import Bell from '../../icons/bell.svg?vue-component';
+<script lang="ts">
+import { computed, defineComponent, Ref } from '@vue/composition-api';
+import type { INotification } from '../../types';
+import { NOTIFICATION_STATUS_CREATED, rxJsObservableToVueState } from '../utils';
+import BellIcon from '../../icons/bell.svg?vue-component';
+import BtnIcon from './buttons/BtnIcon.vue';
 
-const notificationStatus = {
-  created: 'CREATED',
-  peeked: 'PEEKED',
-};
-
-export default {
+export default defineComponent({
   name: 'NotifyBell',
   components: {
-    Bell,
-    BtnPlain,
+    BtnIcon,
+    BellIcon,
   },
-  subscriptions() {
-    return {
-      superheroNotifications: this.$store.state.observables.notifications,
-    };
-  },
-  computed: {
-    ...mapState(['notifications', 'pageTitle']),
-    notificationsCount() {
-      const count = [...(this.notifications || []), ...(this.superheroNotifications || [])].filter(
-        (n) => n.status === notificationStatus.created,
-      ).length;
+  setup(props, { root }) {
+    const superheroNotifications = rxJsObservableToVueState(
+      root.$store.state.observables.notifications,
+      [],
+    ) as Ref<INotification[]>;
+    const notifications = computed<INotification[]>(() => root.$store.state.notifications);
+
+    const notificationsCount = computed<string | number>(() => {
+      const count = [
+        ...notifications.value,
+        ...superheroNotifications.value,
+      ]
+        .filter(({ status }) => status === NOTIFICATION_STATUS_CREATED)
+        .length;
 
       return count > 99 ? '99+' : count;
-    },
-    hideNotificationsIcon() {
-      return this.$route.meta.hideNotificationsIcon;
-    },
-  },
-  methods: {
-    ...mapMutations(['setNotificationsStatus']),
-    async toNotifications() {
-      this.notifications.forEach((n) => this.setNotificationsStatus({
-        createdAt: n.createdAt,
-        status: notificationStatus.peeked,
-      }));
-      await this.$store.dispatch('modifyNotifications', [
-        this.superheroNotifications.filter(
-          (n) => n.status === notificationStatus.created,
-        ).map((n) => n.id),
-        notificationStatus.peeked,
-      ]);
-      if (this.$store.state.route.fullPath !== '/notifications') {
-        this.$router.push('/notifications');
-      }
-    },
-  },
+    });
 
-};
+    return {
+      notificationsCount,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>
@@ -79,8 +60,6 @@ export default {
 
 .notifications {
   position: relative;
-  min-width: 32px;
-  height: 32px;
 
   .badge {
     @extend %face-sans-11-regular;
@@ -91,7 +70,7 @@ export default {
     top: 4px;
     min-width: 14px;
     height: 14px;
-    background: variables.$color-pink;
+    background: variables.$color-danger;
     border-radius: 7px;
     text-align: center;
     line-height: 14px;
@@ -101,15 +80,6 @@ export default {
   .bell-icon {
     width: 24px;
     height: 24px;
-  }
-
-  &:hover {
-    border-radius: 50%;
-    background-color: variables.$color-hover;
-
-    .bell-icon {
-      opacity: 1;
-    }
   }
 }
 </style>

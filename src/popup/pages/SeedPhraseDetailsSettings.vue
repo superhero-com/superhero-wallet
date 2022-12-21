@@ -1,19 +1,21 @@
 <template>
   <div class="seed-phrase-details">
-    <div class="title">
+    <div class="text-heading-1">
       {{ $t('pages.seed-phrase-settings.this-your-seed-phrase') }}
     </div>
 
-    <ae-panel class="mnemonics">
+    <div class="mnemonics">
       <p class="mnemonics-text">
         {{ mnemonic }}
       </p>
-      <ae-button
-        v-clipboard:copy="mnemonic"
-        v-clipboard:success="copy"
+      <BtnMain
+        has-icon
+        variant="dark"
+        class="copy-btn"
+        @click="copy(mnemonic)"
       >
         <template v-if="!copied">
-          <CopyOutlined />
+          <CopyOutlined class="copy-icon" />
           {{ $t('pages.seed-phrase-settings.copy') }}
         </template>
 
@@ -21,62 +23,74 @@
           <CheckSuccessCircle />
           {{ $t('addressCopied') }}
         </template>
-      </ae-button>
-    </ae-panel>
+      </BtnMain>
+    </div>
 
     <i18n
       path="pages.seedPhrase.backUpYourSeedPhrase"
-      tag="div"
-      class="description"
+      tag="p"
+      class="text-description"
     >
-      <span>{{ $t('pages.seedPhrase.inCorrectOrder') }}</span>
+      <strong>{{ $t('pages.seedPhrase.inCorrectOrder') }}</strong>
     </i18n>
     <i18n
       path="pages.seedPhrase.toBeSureYouGotItRight"
-      tag="div"
-      class="description"
+      tag="p"
+      class="text-description"
     >
-      <span>{{ $t('pages.seedPhrase.verifyYourSeedPhrase') }}</span>
+      <strong>{{ $t('pages.seedPhrase.verifyYourSeedPhrase') }}</strong>
     </i18n>
-    <BtnMain
-      class="button"
-      extend
-      :to="{ name: 'settings-seed-phrase-verify' }"
-    >
-      {{ $t('pages.seedPhrase.verifySeed') }}
-    </BtnMain>
-    <BtnMain
-      variant="secondary"
-      extend
-      @click="setBackedUpSeed"
-    >
-      {{ $t('pages.seedPhrase.doneThis') }}
-    </BtnMain>
+
+    <div class="buttons">
+      <BtnMain
+        class="button"
+        extend
+        :to="{ name: 'settings-seed-phrase-verify' }"
+      >
+        {{ $t('pages.seedPhrase.verifySeed') }}
+      </BtnMain>
+      <BtnMain
+        variant="secondary"
+        extend
+        @click="setBackedUpSeed"
+      >
+        {{ $t('pages.seedPhrase.doneThis') }}
+      </BtnMain>
+    </div>
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
 import BtnMain from '../components/buttons/BtnMain.vue';
+
 import CopyOutlined from '../../icons/copy-outlined.svg?vue-component';
 import CheckSuccessCircle from '../../icons/check-success-circle.svg?vue-component';
-import CopyMixin from '../../mixins/copy';
+import { useCopy } from '../../composables';
 
-export default {
+export default defineComponent({
   components: {
     BtnMain,
     CopyOutlined,
     CheckSuccessCircle,
   },
-  mixins: [CopyMixin],
-  computed: mapState(['mnemonic']),
-  methods: {
-    setBackedUpSeed() {
-      this.$store.commit('setBackedUpSeed');
-      this.$router.push({ name: 'account' });
-    },
+  setup(props, { root }) {
+    const { copy, copied } = useCopy();
+    const mnemonic = computed(() => root.$store.state.mnemonic);
+
+    function setBackedUpSeed() {
+      root.$store.commit('setBackedUpSeed');
+      root.$router.push({ name: 'account' });
+    }
+
+    return {
+      copy,
+      copied,
+      mnemonic,
+      setBackedUpSeed,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -84,36 +98,17 @@ export default {
 @use '../../styles/typography';
 
 .seed-phrase-details {
-  padding: 16px;
-
-  .title {
-    color: rgba(variables.$color-white, 1);
-    padding: 12px 0 24px;
-    text-align: center;
-
-    @extend %face-sans-18-regular;
-  }
-
-  .description {
-    color: rgba(variables.$color-white, 0.75);
-    line-height: 20px;
-    white-space: pre-line;
-    text-align: center;
-    padding-bottom: 12px;
-
-    span {
-      color: variables.$color-white;
-    }
-
-    @extend %face-sans-14-light;
-  }
+  padding: var(--screen-padding-x);
 
   .mnemonics {
     background: rgba(variables.$color-white, 0.15);
     border: 2px solid rgba(variables.$color-white, 0.1);
-    border-radius: variables.$border-radius-interactive;
+    border-radius: variables.$border-radius-modal;
     margin: 0 0 20px 0;
+    padding: 12px;
     text-align: center;
+    box-shadow: 0 4px 8px 2px rgb(60 60 60 / 10%);
+    box-sizing: border-box;
 
     ::v-deep .content {
       padding: 12px;
@@ -129,35 +124,29 @@ export default {
       @extend %face-sans-18-regular;
     }
 
-    .ae-button {
-      border-radius: variables.$border-radius-interactive;
-      height: 40px;
-      width: auto;
-      padding: 8px 24px;
-      min-width: 190px;
-      background: rgba(variables.$color-black, 0.2);
-      color: rgba(variables.$color-white, 1);
-
+    .copy-btn {
       @extend %face-sans-16-regular;
 
-      .icon {
-        width: 24px;
-        height: 24px;
-      }
+      margin: 0 auto;
+      min-width: 210px;
 
       .check-success-circle {
         margin-right: 4px;
-        color: variables.$color-green-dark;
+        color: variables.$color-success-dark;
       }
 
-      &:hover {
-        color: rgba(variables.$color-white, 0.75);
+      .copy-icon {
+        width: 24px;
+        height: 24px;
       }
     }
   }
 
-  .button {
-    margin-bottom: 18px;
+  .buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    margin-top: 20px;
   }
 }
 </style>

@@ -6,7 +6,7 @@ Object.assign(Vue.prototype, {
   $t: () => 'locale-specific-text',
 });
 
-describe.skip('ImportAccount', () => { // TODO: rewrite test
+describe('ImportAccount', () => { // TODO: rewrite test
   [{
     name: 'input empty',
     value: '',
@@ -20,8 +20,18 @@ describe.skip('ImportAccount', () => { // TODO: rewrite test
     value: 'mystery mystery mystery mystery mystery mystery mystery mystery mystery mystery mystery mystery',
   },
   {
-    name: 'input correct phrase',
+    name: 'input correct seed phrase of 12 words',
     value: 'media view gym mystery all fault truck target envelope kit drop fade',
+    correct: true,
+  },
+  {
+    name: 'input correct seed phrase of 18 words',
+    value: 'lonely asset near deputy child echo biology talk receive pen alcohol habit myth retreat rebel grief twenty nothing',
+    correct: true,
+  },
+  {
+    name: 'input correct seed phrase of 24 words',
+    value: 'draft cruise tenant ride extend rose urban mean sponsor quit friend indoor door mean toe donate journey minute annual rough give giggle motion zebra',
     correct: true,
   },
   {
@@ -41,13 +51,17 @@ describe.skip('ImportAccount', () => { // TODO: rewrite test
           push: jest.fn(),
         },
       },
+      propsData: {
+        resolve: () => null,
+        reject: () => null,
+      },
     });
     await wrapper.find('textarea').setValue(test.value);
     expect(wrapper.find('[data-cy=import].disabled').exists()).toBe(!test.value);
     if (test.value) {
       await wrapper.find('[data-cy=import]').trigger('click');
       expect(wrapper.find('[data-cy=import].disabled').exists()).toBe(!test.correct);
-      expect(wrapper.find('.error-msg').exists()).toBe(!test.correct);
+      expect(wrapper.find('[data-cy=input-field-message]').exists()).toBe(!test.correct);
     }
   }));
 });

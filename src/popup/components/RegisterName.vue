@@ -32,7 +32,7 @@ export default {
 
     margin: 32px;
     text-align: center;
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
   }
 
   .btn {

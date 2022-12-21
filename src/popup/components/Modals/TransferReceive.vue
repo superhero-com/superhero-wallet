@@ -16,30 +16,32 @@
       <AccountRow />
 
       <div class="qrcode-wrapper">
-        <QrcodeVue
-          :value="getQRdata(account.address)"
-          size="180"
+        <QrCode
+          :value="accountAddressToCopy"
+          :size="180"
           class="qrcode"
         />
       </div>
 
-      <a
-        class="address"
-        target="_blank"
-        :href="explorerUrl"
-        :class="{ copied }"
-      >
-        <Scrollable>
-          <AddressFormatted
-            :address="computedAddress"
-            :columns="!amount"
-          />
-        </Scrollable>
-      </a>
+      <div class="address">
+        <CopyText
+          class="address-copy"
+          hide-icon
+          disabled
+          :copied="copied"
+          @click="copyAddress()"
+        >
+          <Scrollable class="address-scrollable-area">
+            <AddressFormatted
+              :address="accountAddressToDisplay"
+            />
+          </Scrollable>
+        </CopyText>
+      </div>
 
       <div class="request-specific-amount">
         <InputAmount
-          v-model="amount"
+          v-model.number="amount"
           v-validate="{
             min_value_exclusive: 0,
           }"
@@ -53,12 +55,11 @@
     </div>
     <template #footer>
       <BtnMain
-        v-clipboard:copy="getTextToCopy()"
-        v-clipboard:success="copy"
         data-cy="copy"
         :variant="IS_MOBILE_DEVICE ? 'secondary' : 'primary'"
         class="btn-copy"
         :text="copied ? $t('modals.receive.copied') : $t('modals.receive.copy')"
+        @click="copyAddress()"
       />
 
       <BtnMain
@@ -74,122 +75,127 @@
   </Modal>
 </template>
 
-<script>
-import QrcodeVue from 'qrcode.vue';
-import { mapGetters, mapState } from 'vuex';
-import { pick } from 'lodash-es';
+<script lang="ts">
+import { computed, defineComponent, ref } from '@vue/composition-api';
+import type {
+  IAccount,
+  IAsset,
+  IToken,
+  ITokenList,
+} from '../../../types';
+import { i18n } from '../../../store/plugins/languages';
 import { IS_MOBILE_DEVICE } from '../../../lib/environment';
+import { useCopy } from '../../../composables';
+import {
+  AETERNITY_SYMBOL,
+  AETERNITY_CONTRACT_ID,
+  APP_LINK_WEB,
+  MODAL_TRANSFER_RECEIVE,
+} from '../../utils';
 
-import CopyMixin from '../../../mixins/copy';
 import InputAmount from '../InputAmountV2.vue';
+import QrCode from '../QrCode.vue';
 import Scrollable from '../Scrollable.vue';
-import { APP_LINK_WEB, MODAL_TRANSFER_RECEIVE } from '../../utils/constants';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AccountRow from '../AccountRow.vue';
 import AddressFormatted from '../AddressFormatted.vue';
+import CopyText from '../CopyText.vue';
 import ShareIcon from '../../../icons/share-2.svg?vue-component';
 
-export default {
+export default defineComponent({
   name: 'TransferReceive',
   components: {
     InputAmount,
     Modal,
-    QrcodeVue,
+    QrCode,
     BtnMain,
     AccountRow,
     Scrollable,
     AddressFormatted,
     ShareIcon,
+    CopyText,
   },
-  mixins: [CopyMixin],
   props: {
     defaultAmount: { type: [String, Number], default: null },
     tokenContractId: { type: [String, Number], default: null },
   },
-  subscriptions() {
-    return pick(this.$store.state.observables, [
-      'balance',
-      'balanceCurrency',
-    ]);
-  },
-  data() {
+  setup(props, { root }) {
+    const amount = ref<number | null>(props.defaultAmount ? Number(props.defaultAmount) : null);
+    const account = computed<IAccount>(() => root.$store.getters.account);
+    const availableTokens = computed<ITokenList>(
+      () => root.$store.state.fungibleTokens.availableTokens,
+    );
+
+    const selectedAsset = ref<IAsset | IToken | null>(null);
+
+    const { copied, copy } = useCopy();
+
+    function getTokenInfoQuery() {
+      if (!amount.value || amount.value <= 0) return '';
+      const token = selectedAsset.value && selectedAsset.value.contractId === AETERNITY_CONTRACT_ID
+        ? AETERNITY_SYMBOL
+        : selectedAsset.value?.contractId;
+      return `token=${token}&amount=${amount.value}`;
+    }
+
+    function getAccountLink(value: string) {
+      return `${APP_LINK_WEB}/account?account=${value}&${getTokenInfoQuery()}`;
+    }
+
+    const accountAddressToCopy = computed(
+      () => (amount.value && amount.value > 0)
+        ? getAccountLink(account.value.address)
+        : account.value.address,
+    );
+
+    const accountAddressToDisplay = computed(
+      () => (amount.value && amount.value > 0)
+        ? `${account.value.address}?${getTokenInfoQuery()}`
+        : account.value.address,
+    );
+
+    async function share() {
+      const { address } = account.value;
+      const walletLink = getAccountLink(address);
+      const text = (amount.value && amount.value > 0)
+        ? i18n.t('modals.receive.shareTextNoAmount', { address, walletLink })
+        : i18n.t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
+      await root.$store.dispatch('share', { text });
+    }
+
+    function handleAssetChange(asset: IAsset | IToken) {
+      selectedAsset.value = asset;
+    }
+
+    function closeModal() {
+      root.$store.commit('modals/closeByKey', MODAL_TRANSFER_RECEIVE);
+    }
+
+    function copyAddress() {
+      copy(accountAddressToCopy.value);
+    }
+
+    (() => {
+      if (props.tokenContractId && availableTokens.value[props.tokenContractId]) {
+        handleAssetChange(availableTokens.value[props.tokenContractId]);
+      }
+    })();
+
     return {
       IS_MOBILE_DEVICE,
-      amount: null,
-      selectedAsset: null,
+      amount,
+      selectedAsset,
+      share,
+      closeModal,
+      handleAssetChange,
+      copyAddress,
+      copied,
+      accountAddressToDisplay,
+      accountAddressToCopy,
     };
   },
-  computed: {
-    ...mapGetters('fungibleTokens', [
-      'getAeternityToken',
-    ]),
-    ...mapGetters([
-      'account',
-      'activeNetwork',
-    ]),
-    ...mapState('fungibleTokens', [
-      'availableTokens',
-    ]),
-    computedAddress() {
-      return (this.amount > 0)
-        ? `${this.account.address}?${this.getTokenInfo(true).substring(1)}`
-        : this.account.address;
-    },
-    explorerUrl() {
-      return `${this.activeNetwork.explorerUrl}/account/transactions/${this.account.address}`;
-    },
-  },
-  created() {
-    this.amount = this.defaultAmount;
-    if (this.tokenContractId && this.availableTokens[this.tokenContractId]) {
-      this.selectedAsset = this.availableTokens[this.tokenContractId];
-    } else {
-      this.selectedAsset = this.getAeternityToken({
-        tokenBalance: this.balance,
-        balanceCurrency: this.balanceCurrency,
-      });
-    }
-  },
-  methods: {
-    getTokenInfo(link = false) {
-      if (this.amount <= 0) return '';
-      const token = this.selectedAsset && (this.selectedAsset.symbol === 'AE'
-        ? 'AE'
-        : this.selectedAsset.contractId);
-      const firstChar = link ? '&' : '?';
-      const separator = link ? '&' : '&amp;';
-      return `${firstChar}token=${token}${separator}amount=${this.amount}`;
-    },
-    getLink(value) {
-      return `${APP_LINK_WEB}/account?account=${value}${this.getTokenInfo(true)}`;
-    },
-    async share() {
-      const { address } = this.account;
-      const walletLink = this.getLink(address);
-      const text = (this.amount > 0)
-        ? this.$t('modals.receive.shareTextNoAmount', { address, walletLink })
-        : this.$t('modals.receive.shareTextWithAmount', { address, walletLink, amount: this.amount });
-      await this.$store.dispatch('share', { text });
-    },
-    getQRdata(address) {
-      return this.amount > 0
-        ? `${this.getLink(address)}`
-        : address;
-    },
-    getTextToCopy() {
-      return this.amount > 0
-        ? this.getLink(this.account.address)
-        : this.account.address;
-    },
-    handleAssetChange(asset) {
-      this.selectedAsset = asset;
-    },
-    closeModal() {
-      this.$store.commit('modals/closeByKey', MODAL_TRANSFER_RECEIVE);
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -202,54 +208,42 @@ export default {
   font-weight: 500;
   color: variables.$color-white;
 
-  .transfer-receive {
-    .close {
-      align-self: flex-end;
-      width: 16px;
-      height: 16px;
+  .title {
+    @extend %face-sans-18-bold;
+
+    align-self: center;
+    color: variables.$color-white;
+  }
+
+  .qrcode-wrapper {
+    margin-top: 10px;
+    text-align: center;
+
+    .qrcode {
+      display: inline-flex;
+      padding: 8px;
+      background-color: variables.$color-white;
+      border-radius: 12px;
+    }
+  }
+
+  .address {
+    max-width: 260px;
+    margin: 14px auto 0;
+
+    &-copy {
+      display: block;
     }
 
-    .title {
-      align-self: center;
-      color: variables.$color-white;
-
-      @extend %face-sans-18-bold;
-    }
-
-    .qrcode-wrapper {
-      margin-top: 10px;
-      text-align: center;
-
-      .qrcode {
-        display: inline-flex;
-        padding: 8px;
-        background-color: variables.$color-white;
-        border-radius: 12px;
-      }
-    }
-
-    .address {
+    &-scrollable-area {
       @extend %face-mono-14-medium;
 
-      margin-top: 14px;
-      display: block;
       width: 100%;
       height: 74px;
-      border-radius: 12px;
-      border-width: 1px;
-      border-style: dashed;
-      border-color: transparent;
       color: variables.$color-white;
       font-style: normal;
       text-align: left;
       line-height: 24px;
-      text-decoration: none;
-      transition: 0.2s;
-
-      &.copied {
-        background: rgba(variables.$color-primary, 0.1);
-        border-color: rgba(variables.$color-primary, 0.5);
-      }
     }
   }
 

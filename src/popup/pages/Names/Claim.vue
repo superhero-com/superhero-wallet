@@ -35,9 +35,9 @@
     <i18n
       path="pages.names.claim.short-names.message"
       tag="p"
-      class="explanation"
+      class="text-description explanation"
     >
-      <mark>{{ $t('pages.names.claim.short-names.insertion') }}</mark>
+      <strong>{{ $t('pages.names.claim.short-names.insertion') }}</strong>
     </i18n>
 
     <BtnMain
@@ -56,16 +56,17 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import {
-  AENS_NAME_AUCTION_MAX_LENGTH,
   MAGNITUDE,
   MODAL_DEFAULT,
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
-} from '../../utils/constants';
-import { checkAensName, convertToken } from '../../utils/helper';
+  AENS_NAME_AUCTION_MAX_LENGTH,
+  checkAensName,
+  convertToken,
+} from '../../utils';
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -87,11 +88,11 @@ export default {
     maxNameLength: AENS_NAME_MAX_LENGTH - AENS_DOMAIN.length,
   }),
   computed: {
-    ...mapState([
+    ...mapGetters('sdkPlugin', [
       'sdk',
     ]),
     isNameValid() {
-      return this.name && checkAensName(`${this.name}.chain`);
+      return this.name && checkAensName(`${this.name}${AENS_DOMAIN}`);
     },
     nameFee() {
       return convertToken(
@@ -168,7 +169,7 @@ export default {
 
 .claim {
   .chain-name {
-    margin-bottom: 20px;
+    margin-bottom: 6px;
 
     &-counter {
       @extend %face-sans-13-regular;
@@ -184,14 +185,11 @@ export default {
   }
 
   .explanation {
-    margin-top: 16px;
-    line-height: 1.4em;
-    color: variables.$color-light-grey;
+    margin-top: 10px;
+  }
 
-    mark {
-      background-color: transparent;
-      color: variables.$color-white;
-    }
+  .btn-register {
+    margin-top: 20px;
   }
 }
 </style>

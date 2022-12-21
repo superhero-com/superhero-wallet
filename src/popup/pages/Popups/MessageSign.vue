@@ -4,7 +4,7 @@
     class="message-sign"
     data-cy="popup-aex2"
   >
-    <Overview
+    <TransactionInfo
       :title="$t('pages.popupMessageSign.title')"
       :sender="{ name: app.name, address: app.host, url: app.url }"
       :recipient="account"
@@ -20,18 +20,14 @@
 
     <DetailsItem
       :label="$t('pages.popupMessageSign.message')"
-      :value="message"
       data-cy="message"
     >
-      <template #label>
-        <BtnCopy
-          :value="message"
-          :message="$t('copied')"
-        />
+      <template #value>
+        <CopyText :value="message" />
       </template>
     </DetailsItem>
 
-    <template slot="footer">
+    <template #footer>
       <BtnMain
         variant="secondary"
         data-cy="deny"
@@ -41,6 +37,7 @@
       </BtnMain>
       <BtnMain
         data-cy="accept"
+        :disabled="!isConnected"
         @click="resolve()"
       >
         {{ $t('pages.signTransaction.confirm') }}
@@ -53,18 +50,18 @@
 import { mapState, mapGetters } from 'vuex';
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
-import BtnCopy from '../../components/buttons/BtnCopy.vue';
-import Overview from '../../components/Overview.vue';
+import TransactionInfo from '../../components/TransactionInfo.vue';
 import DetailsItem from '../../components/DetailsItem.vue';
+import CopyText from '../../components/CopyText.vue';
 import mixin from './mixin';
 
 export default {
   components: {
     Modal,
     BtnMain,
-    Overview,
+    TransactionInfo,
     DetailsItem,
-    BtnCopy,
+    CopyText,
   },
   mixins: [mixin],
   props: {
@@ -72,7 +69,10 @@ export default {
     app: { type: Object, required: true },
   },
   computed: {
-    ...mapGetters(['getExplorerPath']),
+    ...mapGetters([
+      'isConnected',
+      'getExplorerPath',
+    ]),
     ...mapState({
       account(_, { account }) {
         return {
@@ -91,16 +91,16 @@ export default {
 @use '../../../styles/typography';
 
 .message-sign {
-  .overview {
-    margin: 16px;
+  .transaction-info {
+    margin-bottom: 16px;
   }
 
   .subtitle {
-    margin: 24px 16px 16px;
-
     @extend %face-sans-15-medium;
 
-    color: variables.$color-light-grey;
+    margin-top: 24px;
+    margin-bottom: 16px;
+    color: variables.$color-grey-light;
     text-align: center;
 
     .app-name {

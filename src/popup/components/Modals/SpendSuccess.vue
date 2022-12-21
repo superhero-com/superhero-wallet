@@ -6,47 +6,55 @@
     centered
     @close="resolve"
   >
-    <ModalHeader
-      :title="$t('pages.send.title')"
-      :subtitle="$t('pages.send.subtitle')"
-    />
+    <template #header>
+      <ModalHeader
+        class="header"
+        :title="$t('pages.send.title')"
+        :subtitle="$t('pages.send.subtitle')"
+        disable-subtitle-margin
+      />
+    </template>
+
     <div class="pending-wrapper">
       <Pending />
     </div>
     <TokenAmount
       :amount="getTxAmountTotal(transaction)"
       :symbol="getSymbol(transaction)"
+      :hide-fiat="!isAe"
     />
     <span class="sending-to">
       {{ transaction.tipUrl ? $t('pages.send.sentTo') : $t('pages.send.sendingTo') }}
     </span>
-    <span v-if="transaction.tipUrl">{{ transaction.tipUrl }}</span>
-    <AvatarWithChainName
-      v-else
-      :address="transaction.tx.recipientId"
-      show-address
-    />
-    <div class="button-wrapper">
+    <div class="content">
+      <span v-if="transaction.tipUrl">{{ transaction.tipUrl }}</span>
+      <AvatarWithChainName
+        v-else
+        :address="transaction.tx.recipientId"
+        :show-address="!nameRecipient"
+        :hide-avatar="hideAvatar"
+        :name="nameRecipient"
+      />
+    </div>
+    <template #footer>
       <BtnMain
         variant="secondary"
-        class="button"
         extend
         nowrap
         has-icon
-        :to="getExplorerPath(transaction.hash)"
+        :href="getExplorerPath(transaction.hash)"
       >
-        <ExternalLink />
+        <ExternalLink class="external-link" />
         {{ $t('pages.send.viewInExplorer') }}
       </BtnMain>
       <BtnMain
-        class="button"
         inline
         nowrap
         @click="resolve"
       >
         {{ $t('ok') }}
       </BtnMain>
-    </div>
+    </template>
   </Modal>
 </template>
 
@@ -58,7 +66,9 @@ import BtnMain from '../buttons/BtnMain.vue';
 import AvatarWithChainName from '../AvatarWithChainName.vue';
 import ModalHeader from '../ModalHeader.vue';
 import Pending from '../../../icons/animated-pending.svg?vue-component';
-import ExternalLink from '../../../icons/external-link.svg?vue-component';
+import ExternalLink from '../../../icons/external-link-big.svg?vue-component';
+import { AETERNITY_SYMBOL } from '../../utils/constants';
+import { watchUntilTruthy } from '../../utils';
 
 export default {
   components: {
@@ -74,16 +84,32 @@ export default {
     resolve: { type: Function, required: true },
     transaction: { type: Object, required: true },
   },
+  data: () => ({
+    hideAvatar: false,
+    nameRecipient: null,
+  }),
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters(['getTxAmountTotal', 'getTxSymbol', 'getExplorerPath']),
+    ...mapGetters(['getTxAmountTotal', 'getTxSymbol', 'getExplorerPath', 'isTxAex9']),
     ...mapGetters('names', ['getPreferred']),
+    isAe() {
+      return !(this.transaction.tx.contractId
+        && this.availableTokens[this.transaction.tx.contractId]?.symbol);
+    },
+  },
+  async mounted() {
+    const { recipientId } = this.transaction.tx;
+    await watchUntilTruthy(() => this.$store.state.middleware);
+    if (recipientId.includes('nm_')) {
+      this.hideAvatar = true;
+      this.nameRecipient = (await this.$store.state.middleware.getNameById(recipientId)).name;
+    }
   },
   methods: {
     getSymbol() {
       return this.transaction.tx.contractId
         ? this.availableTokens[this.transaction.tx.contractId].symbol
-        : 'AE';
+        : AETERNITY_SYMBOL;
     },
   },
 };
@@ -97,8 +123,6 @@ export default {
 .spend-success {
   ::v-deep .container .body {
     @include mixins.flex(flex-start, center, column);
-
-    padding-inline: 16px;
   }
 
   ::v-deep .token-amount {
@@ -114,6 +138,10 @@ export default {
     }
   }
 
+  .header {
+    margin-top: 40px;
+  }
+
   .avatar-with-chain-name {
     padding-inline: 8px;
   }
@@ -121,13 +149,11 @@ export default {
   .pending-wrapper {
     @include mixins.flex(center, center, column);
 
-    width: 64px;
-    height: 64px;
     background-color: variables.$color-bg-1;
     border: 4px solid rgba(variables.$color-white, 0.05);
     border-radius: 50%;
-    margin-top: 26px;
-    margin-bottom: 22px;
+    margin-top: 34px;
+    margin-bottom: 24px;
   }
 
   .animated-pending {
@@ -140,22 +166,9 @@ export default {
     color: rgba(variables.$color-white, 0.75);
   }
 
-  .button-wrapper {
-    @include mixins.flex(center, center);
-
+  .content {
+    margin-bottom: 26px;
     width: 100%;
-    margin-top: 40px;
-    gap: 8px;
-
-    .button {
-      margin: 0;
-    }
-
-    svg {
-      width: 30px;
-      height: 30px;
-      margin-right: 0;
-    }
   }
 }
 </style>

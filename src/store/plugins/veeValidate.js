@@ -9,8 +9,9 @@ import {
   isNotFoundError,
   getAddressByNameEntry,
   checkAensName,
-  validateTipUrl,
+  validateTipUrl, isValidURL,
 } from '../../popup/utils/helper';
+import { AENS_DOMAIN } from '../../popup/utils/constants';
 
 Vue.use(VeeValidate);
 
@@ -36,15 +37,17 @@ Object.assign(ErrorBag.prototype, {
   },
 });
 
+Validator.extend('url', (url) => isValidURL(url));
 Validator.extend('required', required);
 Validator.extend('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
-Validator.extend('name', (value) => checkAensName(`${value}.chain`));
+Validator.extend('name', (value) => checkAensName(`${value}${AENS_DOMAIN}`));
 Validator.extend('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
 Validator.extend('min_value_exclusive', (value, [arg]) => BigNumber(value).isGreaterThan(arg));
 Validator.extend('max_value', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));
 
 Validator.localize('en', {
   messages: {
+    url: () => i18n.t('validation.url'),
     required: () => i18n.t('validation.required'),
     account: () => i18n.t('validation.address'),
     name: () => i18n.t('validation.name'),
@@ -76,7 +79,7 @@ export default (store) => {
   const checkNameDebounced = debounce(
     async (name, expectedNameState, comparedAddress, { resolve, reject }) => {
       try {
-        const nameEntry = await store.state.sdk.api.getNameEntryByName(name);
+        const nameEntry = await store.getters['sdkPlugin/sdk'].api.getNameEntryByName(name);
         const address = getAddressByNameEntry(nameEntry);
         resolve(({
           [NAME_STATES.REGISTERED]: true,
@@ -139,8 +142,8 @@ export default (store) => {
     ? checkNameRegisteredAddress(value) : Crypto.isAddressValid(value) || validateTipUrl(value)));
   Validator.extend('invalid_hostname', (value) => {
     try {
-      const url = new URL(value);
-      return !!url.hostname;
+      const _url = new URL(value);
+      return !!_url.hostname;
     } catch (error) {
       return false;
     }

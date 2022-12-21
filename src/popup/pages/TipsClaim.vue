@@ -1,8 +1,12 @@
 <template>
   <div class="tips-claim">
     <AccountInfo :account-idx="activeIdx" />
+
     <div class="header">
-      {{ $t('pages.claimTips.header') }}
+      <p class="text-description">
+        {{ $t('pages.claimTips.header') }}
+      </p>
+
       <BtnHelp
         class="help-button"
         :title="$t('modals.verify.title')"
@@ -38,12 +42,13 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import {
+  BLOG_CLAIM_TIP_URL,
   aettosToAe,
   toURL,
   validateTipUrl,
   watchUntilTruthy,
-} from '../utils/helper';
-import { BLOG_CLAIM_TIP_URL } from '../utils/constants';
+} from '../utils';
+import { IS_EXTENSION } from '../../lib/environment';
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BtnHelp from '../components/buttons/BtnHelp.vue';
@@ -63,7 +68,8 @@ export default {
   }),
   computed: {
     ...mapState('accounts', ['activeIdx']),
-    ...mapState(['sdk', 'tippingV1']),
+    ...mapState(['tippingV1']),
+    ...mapGetters('sdkPlugin', ['sdk']),
     ...mapGetters(['account', 'tippingSupported']),
     normalizedUrl() {
       if (!validateTipUrl(this.url)) return '';
@@ -71,7 +77,7 @@ export default {
     },
   },
   async mounted() {
-    if (process.env.IS_EXTENSION) {
+    if (IS_EXTENSION) {
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       if (tab && validateTipUrl(tab.url)) {
         this.url = tab.url;
@@ -130,11 +136,8 @@ export default {
   padding: 12px;
 
   .header {
-    margin: 8px 0 24px 36px;
+    margin: 20px 0 24px 0;
     display: flex;
-    color: variables.$color-light-grey;
-
-    @extend %face-sans-15-medium;
 
     .help-button {
       margin-left: 8px;
@@ -144,12 +147,6 @@ export default {
         height: 32px;
       }
     }
-  }
-
-  p {
-    margin: 16px 0 8px 0;
-
-    @extend %face-sans-16-regular;
   }
 
   .input-field {

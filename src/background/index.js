@@ -77,5 +77,5 @@ browser.webNavigation.onHistoryStateUpdated.addListener(async ({ tabId, url }) =
 browser.contextMenus.removeAll();
 browser.contextMenus.create(contextMenuItem);
 browser.contextMenus.onClicked.addListener(({ menuItemId, pageUrl }) => {
-  if (menuItemId === 'superheroTip') openTipPopup(pageUrl);
+  if (menuItemId === contextMenuItem.id) openTipPopup(pageUrl);
 });

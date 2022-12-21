@@ -5,14 +5,20 @@
     class="tokens-list-item"
     :class="{ extend: preventNavigation, 'asset-selector': assetSelector }"
     :to="preventNavigation ? null : {
-      name: 'token-details',
-      params: { id: tokenData.contractId },
+      name: 'token-transactions',
+      params: {
+        id: tokenData.contractId,
+        type: targetRouteType,
+      },
     }"
     @click="(event) => $emit('click', event)"
   >
     <div class="row">
       <div class="left">
-        <Tokens :tokens="[tokenData]" />
+        <Tokens
+          :tokens="[tokenData]"
+          icon-size="xl"
+        />
       </div>
       <TokenAmount
         :amount="+tokenData.convertedBalance || 0"
@@ -64,6 +70,9 @@ export default {
     price() {
       return this.formatCurrency(this.aePublicData?.current_price || 0);
     },
+    targetRouteType() {
+      return this.tokenData.contractId === AETERNITY_CONTRACT_ID ? 'coin' : 'token';
+    },
   },
 };
 </script>
@@ -98,8 +107,6 @@ export default {
     padding-bottom: 4px;
 
     img {
-      width: 30px;
-      height: 30px;
       border-radius: 15px;
       margin-right: 0;
     }
@@ -123,7 +130,7 @@ export default {
     @extend %face-sans-14-regular;
 
     &:last-child {
-      color: variables.$color-light-grey;
+      color: variables.$color-grey-light;
     }
 
     color: rgba(variables.$color-white, 0.75);
@@ -137,7 +144,7 @@ export default {
     background-color: variables.$color-bg-4;
 
     &.selected {
-      background-color: rgba(variables.$color-blue, 0.2);
+      background-color: rgba(variables.$color-primary, 0.2);
     }
 
     &:hover {

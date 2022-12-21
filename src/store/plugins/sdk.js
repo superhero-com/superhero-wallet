@@ -2,7 +2,7 @@ import { RpcWallet, Crypto, Node } from '@aeternity/aepp-sdk';
 import { isEmpty, isEqual } from 'lodash-es';
 import { App } from '../modules/permissions';
 import { getAeppUrl, showPopup } from '../../background/popupHandler';
-import { watchUntilTruthy } from '../../popup/utils/helper';
+import { MODAL_CONFIRM_CONNECT, watchUntilTruthy } from '../../popup/utils';
 import { IS_EXTENSION_BACKGROUND } from '../../lib/environment';
 
 export default (store) => {
@@ -36,7 +36,7 @@ export default (store) => {
           try {
             const originUrl = new URL(origin);
             const permission = await store.dispatch('permissions/checkPermissions', {
-              host: originUrl.hostname,
+              host: originUrl.host,
               method,
               params: params?.txObject?.params,
             });
@@ -61,6 +61,7 @@ export default (store) => {
                   txBase64: params.tx,
                   opt: {
                     modal: !permission,
+                    host: originUrl.host,
                   },
                 }),
                 address: () => {},
@@ -98,8 +99,6 @@ export default (store) => {
         sdk = await RpcWallet.compose({
           methods: {
             getApp(aeppUrl) {
-              const hostPermissions = store.state.permissions[aeppUrl.hostname];
-              if (!hostPermissions) store.commit('permissions/addHost', aeppUrl.hostname);
               return new App(aeppUrl);
             },
             async address(...args) {
@@ -108,12 +107,13 @@ export default (store) => {
               if (
                 app instanceof App
                 && !(await store.dispatch('permissions/requestAddressForHost', {
-                  host: app.host.hostname,
+                  host: app.host.host,
+                  name: app.host.hostname,
                   address,
                   connectionPopupCb: async () => (IS_EXTENSION_BACKGROUND
                     ? showPopup(app.host.href, 'connectConfirm')
                     : store.dispatch('modals/open', {
-                      name: 'confirm-connect',
+                      name: MODAL_CONFIRM_CONNECT,
                       app: {
                         name: app.host.hostname,
                         icons: [],

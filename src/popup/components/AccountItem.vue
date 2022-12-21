@@ -50,7 +50,7 @@ export default {
   .address {
     @extend %face-mono-10-medium;
 
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
     text-align: left;
     word-break: break-all;
   }

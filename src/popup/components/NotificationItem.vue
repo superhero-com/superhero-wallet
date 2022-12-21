@@ -1,6 +1,6 @@
 <template>
   <div
-    :class="['notification-item', status]"
+    :class="['notification-item', status.toLowerCase()]"
     @click="$emit('click')"
   >
     <div class="first-row">
@@ -24,15 +24,17 @@
         </span>
       </div>
       <ActionsMenu @click.native.stop>
-        <template slot="display">
-          •••
+        <template #display>
+          <BtnIcon>
+            <ThreeDotsIcon />
+          </BtnIcon>
         </template>
         <div
           class="mark-as-read"
           @click="$emit('toggle-read')"
         >
           {{
-            status === 'read'
+            (status === NOTIFICATION_STATUS_READ)
               ? $t('pages.notifications.markAsUnread')
               : $t('pages.notifications.markAsRead')
           }}
@@ -54,15 +56,24 @@
 </template>
 
 <script>
+import {
+  NOTIFICATION_STATUS_CREATED,
+  NOTIFICATION_STATUS_PEEKED,
+  NOTIFICATION_STATUS_READ,
+} from '../utils';
 import FormatDate from './FormatDate.vue';
 import Avatar from './Avatar.vue';
 import ActionsMenu from './ActionsMenu.vue';
+import ThreeDotsIcon from '../../icons/three-dots.svg?vue-component';
+import BtnIcon from './buttons/BtnIcon.vue';
 
 export default {
   components: {
     FormatDate,
     Avatar,
     ActionsMenu,
+    ThreeDotsIcon,
+    BtnIcon,
   },
   props: {
     address: { type: String, default: '' },
@@ -72,10 +83,17 @@ export default {
     wallet: { type: Boolean },
     status: {
       type: String,
-      validator: (value) => ['created', 'peeked', 'read'].includes(value),
-      default: 'created',
+      validator: (value) => [
+        NOTIFICATION_STATUS_CREATED,
+        NOTIFICATION_STATUS_PEEKED,
+        NOTIFICATION_STATUS_READ,
+      ].includes(value),
+      default: NOTIFICATION_STATUS_CREATED,
     },
   },
+  data: () => ({
+    NOTIFICATION_STATUS_READ,
+  }),
 };
 </script>
 
@@ -98,8 +116,9 @@ export default {
     background-color: variables.$color-bg-2;
 
     .actions-menu,
-    .format-date {
-      color: variables.$color-blue;
+    .format-date,
+    .notification-text {
+      color: variables.$color-primary;
     }
   }
 
@@ -107,18 +126,24 @@ export default {
     background-color: variables.$color-bg-1;
 
     .actions-menu,
-    .format-date {
+    .format-date,
+    .second-row .notification-text {
       color: variables.$color-grey-dark;
     }
 
     .actions-menu:hover {
-      color: variables.$color-light-grey;
+      color: variables.$color-grey-light;
     }
+  }
+
+  &:hover {
+    background-color: variables.$color-bg-4-hover;
   }
 
   .first-row {
     width: 100%;
     display: flex;
+    align-items: center;
     justify-content: space-between;
 
     .avatar,
@@ -146,7 +171,7 @@ export default {
   }
 
   .second-row {
-    margin-top: 0.25rem;
+    margin-top: 10px;
     width: 100%;
     display: flex;
     justify-content: space-between;

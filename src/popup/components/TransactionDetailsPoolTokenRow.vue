@@ -3,31 +3,33 @@
     :label="label"
     class="pool-token-row"
   >
-    <div slot="value">
-      <TokenAmount
-        v-if="!hideAmount"
-        :amount="+convertToken(token.amount, -token.decimals)"
-        hide-fiat
-        no-symbol
-      />
-      <div class="token-info">
-        <Tokens
-          v-if="token"
-          :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]"
+    <template #value>
+      <div>
+        <TokenAmount
+          v-if="!hideAmount"
+          :amount="+convertToken(token.amount, -token.decimals)"
+          hide-fiat
+          no-symbol
         />
-        <AddressShortening
-          v-if="token.contractId"
-          :address="token.contractId"
-        />
+        <div class="token-info">
+          <Tokens
+            v-if="token"
+            :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]"
+          />
+          <AddressShortening
+            v-if="token.contractId"
+            :address="token.contractId"
+          />
+        </div>
       </div>
-    </div>
+    </template>
   </DetailsItem>
 </template>
 
 <script>
+import { convertToken } from '../utils';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
-import { convertToken } from '../utils/helper';
 import Tokens from './Tokens.vue';
 import AddressShortening from './AddressShortening.vue';
 
@@ -71,7 +73,7 @@ export default {
   .contract-id {
     @extend %face-mono-12-medium;
 
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
     letter-spacing: 0.07em;
     cursor: pointer;
 

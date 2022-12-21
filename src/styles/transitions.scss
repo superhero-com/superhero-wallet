@@ -14,18 +14,6 @@
   }
 }
 
-@keyframes dig-out {
-  0% {
-    opacity: 1;
-    transform: none;
-  }
-
-  100% {
-    filter: blur(5px);
-    opacity: 0;
-  }
-}
-
 .fade-transition {
   &-enter-active,
   &-leave-active {
@@ -39,37 +27,13 @@
 }
 
 .page-transition {
-  &-enter-active,
-  &-leave-active {
+  &-enter-active {
     transition: opacity 300ms ease-out;
   }
 
   &-enter,
   &-leave-to {
     opacity: 0;
-  }
-
-  &-leave-active {
-    position: absolute;
-    z-index: -1;
-    top: 0;
-    left: 0;
-    width: 100%;
-  }
-}
-
-.pop-transition {
-  &-enter-active {
-    animation: pop-in 600ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
-  }
-
-  &-leave-active {
-    position: absolute;
-    z-index: -1;
-    top: 48px;
-    left: 0;
-    width: 100%;
-    animation: dig-out 400ms forwards;
   }
 }
 

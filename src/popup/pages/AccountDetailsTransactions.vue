@@ -1,9 +1,8 @@
 <template>
   <div class="transaction-list-wrapper">
     <TransactionList
-      :search-term="searchTerm"
-      display-filter
-      sticky-filter
+      :show-filters="showFilters"
+      show-search
     />
   </div>
 </template>
@@ -16,7 +15,18 @@ export default {
     TransactionList,
   },
   props: {
-    searchTerm: { type: String, default: '' },
+    showFilters: Boolean,
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.transaction-list-wrapper {
+  --filter-top-offset: 175px;
+
+  ::v-deep .filters {
+    position: sticky;
+    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
+  }
+}
+</style>

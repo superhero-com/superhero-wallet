@@ -24,32 +24,30 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+@use '../../../styles/mixins';
 @use '../../../styles/typography';
 
 .details-row {
-  padding: 8px 0;
-  display: flex;
-  justify-content: space-between;
+  @include mixins.flex(space-between, center);
 
   @extend %face-sans-15-medium;
+
+  margin-inline: calc(-1 * var(--screen-padding-x));
+  padding: 8px var(--screen-padding-x);
+
+  &:nth-child(2n) {
+    background: variables.$color-bg-app;
+  }
 
   .title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: variables.$color-grey-dark;
+    color: rgba(variables.$color-white, 0.5);
   }
 
   .text {
-    color: variables.$color-light-grey;
-
-    .primary {
-      color: variables.$color-green;
-    }
-
-    &.primary {
-      color: variables.$color-blue;
-    }
+    color: rgba(variables.$color-white, 0.75);
   }
 
   .white {

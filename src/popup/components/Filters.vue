@@ -34,6 +34,7 @@ export default {
   props: {
     value: { type: Object, required: true },
     filters: { type: Object, required: true },
+    scrollTopThreshold: { type: Number, default: 140 },
   },
   data() {
     return {
@@ -42,10 +43,9 @@ export default {
   },
   methods: {
     handleClick([filter, { rotated = null }]) {
-      const scrollTopThreshold = 140;
       const appContainer = document.querySelector('.app-inner');
-      if (appContainer.scrollTop > scrollTopThreshold) {
-        appContainer.scrollTo({ top: scrollTopThreshold, behavior: 'smooth' });
+      if (appContainer.scrollTop > this.scrollTopThreshold) {
+        appContainer.scrollTo({ top: this.scrollTopThreshold, behavior: 'smooth' });
       }
       if (rotated !== null) {
         if (this.value.sort === filter) {
@@ -75,17 +75,17 @@ export default {
   padding-inline: var(--screen-padding-x);
   margin-left: calc(-1 * var(--screen-padding-x));
   margin-right: calc(-1 * var(--screen-padding-x));
+  z-index: 2;
 
   .filter {
+    @extend %face-sans-14-regular;
+
     display: flex;
     align-items: center;
     padding: 2px 8px;
     gap: 2px;
     transition: all 0.08s ease-out;
     border-radius: 12px;
-
-    @extend %face-sans-14-regular;
-
     color: rgba(variables.$color-white, 0.5);
 
     svg {

@@ -9,15 +9,16 @@
       :class="{
         'full-screen': fullScreen,
         'from-bottom': fromBottom,
+        'has-header': showHeader,
         'has-close-button': hasCloseButton,
         'no-padding': noPadding,
         dense,
-        'blur-bg': !noBlur
+        'blur-bg': !(IS_FIREFOX && IS_EXTENSION)
       }"
     >
       <div class="container">
         <div
-          v-if="$slots.header || header || hasCloseButton"
+          v-if="showHeader"
           class="header"
           :class="{ transparent: hasCloseButton && !($slots.header || header) }"
         >
@@ -36,6 +37,7 @@
 
           <BtnClose
             v-if="hasCloseButton"
+            data-cy="btn-close"
             @click="$emit('close')"
           />
         </div>
@@ -48,13 +50,11 @@
           <slot />
         </div>
 
-        <div
+        <FixedScreenFooter
           v-if="$slots.footer"
-          :class="['footer', { mobile: IS_MOBILE_DEVICE }]"
         >
           <slot name="footer" />
-        </div>
-        <NodeConnectionStatus v-if="fullScreen" />
+        </FixedScreenFooter>
       </div>
 
       <div
@@ -65,15 +65,21 @@
   </transition>
 </template>
 
-<script>
-import { IS_MOBILE_DEVICE } from '../../lib/environment';
-import NodeConnectionStatus from './NodeConnectionStatus.vue';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  onBeforeUnmount,
+  onMounted,
+} from '@vue/composition-api';
+import { IS_FIREFOX, IS_EXTENSION } from '../../lib/environment';
 import BtnClose from './buttons/BtnClose.vue';
+import FixedScreenFooter from './FixedScreenFooter.vue';
 
-export default {
+export default defineComponent({
   components: {
+    FixedScreenFooter,
     BtnClose,
-    NodeConnectionStatus,
   },
   props: {
     hasCloseButton: Boolean,
@@ -81,26 +87,32 @@ export default {
     fromBottom: Boolean,
     dense: Boolean,
     noPadding: Boolean,
-    noBlur: Boolean,
     centered: Boolean,
     header: { type: String, default: null },
   },
   emits: [
     'close',
   ],
-  data() {
+  setup(props, { slots }) {
+    const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
+
+    onMounted(() => {
+      if (!document.body.style.overflow) {
+        document.body.style.overflow = 'hidden';
+      }
+    });
+
+    onBeforeUnmount(() => {
+      document.body.style.overflow = '';
+    });
+
     return {
-      IS_MOBILE_DEVICE,
+      IS_FIREFOX,
+      IS_EXTENSION,
+      showHeader,
     };
   },
-  mounted() {
-    if (document.body.style.overflow) return;
-    document.body.style.overflow = 'hidden';
-  },
-  beforeDestroy() {
-    document.body.style.overflow = '';
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -111,9 +123,10 @@ export default {
 .modal {
   --screen-padding-x: 24px; // Default spacing
   --screen-bg-color: #{variables.$color-bg-modal};
+  --footer-padding-bottom: 36px;
 
   position: fixed;
-  z-index: 2;
+  z-index: variables.$z-index-modal;
   top: 0;
   left: 0;
   width: 100%;
@@ -123,10 +136,6 @@ export default {
   display: flex;
   will-change: backdrop-filter;
 
-  &.blur-bg {
-    backdrop-filter: blur(5px);
-  }
-
   .container {
     position: relative;
     display: flex;
@@ -134,7 +143,7 @@ export default {
     width: 92%;
     margin: auto;
     background-color: var(--screen-bg-color);
-    border-radius: 5px;
+    border-radius: variables.$border-radius-modal;
     box-shadow:
       0 0 0 1px variables.$color-border,
       2px 4px 12px rgba(variables.$color-black, 0.22);
@@ -142,18 +151,6 @@ export default {
 
     @include mixins.desktop {
       width: calc(#{variables.$extension-width} - 32px);
-    }
-
-    .close-button {
-      position: absolute;
-      z-index: 3;
-      right: 8px;
-      top: 8px;
-      color: variables.$color-white;
-
-      &-icon {
-        width: 100%;
-      }
     }
 
     .header {
@@ -185,47 +182,8 @@ export default {
       @extend %face-sans-15-regular;
 
       padding: var(--screen-padding-x);
-      padding-top: 0;
-      color: variables.$color-light-grey;
+      color: variables.$color-grey-light;
       word-break: break-word;
-    }
-
-    .footer {
-      position: sticky;
-      bottom: 0;
-      margin: auto 0 0 0; // Move the footer to the bottom of the container
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      padding: 8px var(--screen-padding-x);
-
-      &.mobile {
-        margin-bottom: 20px;
-      }
-
-      // Semi-transparent and gradient-like cover under the buttons
-      &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background-color: var(--screen-bg-color);
-        opacity: 0.9;
-        box-shadow: 0 -10px 10px var(--screen-bg-color);
-      }
-    }
-  }
-
-  .node-connection-status {
-    z-index: 2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: variables.$color-grey-dark;
-
-    @extend %face-sans-15-medium;
-
-    @include mixins.desktop {
-      border-radius: 0 0 10px 10px;
     }
   }
 
@@ -235,33 +193,9 @@ export default {
     inset: 0;
   }
 
-  &.full-screen {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-
-    @include mixins.desktop {
-      position: absolute;
-    }
-
-    .footer {
-      padding-bottom: 25px;
-    }
-
-    .container {
-      height: 100%;
-      width: 100%;
-    }
-  }
-
+  &.full-screen,
   &.from-bottom {
-    position: absolute;
-    align-items: end;
-
-    .header {
-      position: sticky;
-      z-index: 3;
-      top: 0;
-    }
+    --footer-padding-bottom: 24px;
 
     .container {
       width: 100%;
@@ -269,6 +203,43 @@ export default {
       margin-top: 0;
       margin-bottom: 0;
       overflow: hidden auto;
+    }
+
+    .header {
+      position: sticky;
+      z-index: 3;
+      top: 0;
+    }
+  }
+
+  &.full-screen {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: 0; // needed to overwrite #app .main styles
+    padding-bottom: env(safe-area-inset-bottom); // needed to overwrite #app .main styles
+
+    @include mixins.desktop {
+      position: absolute;
+    }
+
+    .container {
+      height: 100%;
+      border-radius: 0;
+    }
+  }
+
+  &.from-bottom {
+    position: absolute;
+    align-items: end;
+
+    .container {
+      border-bottom-left-radius: var(--screen-border-radius);
+      border-bottom-right-radius: var(--screen-border-radius);
+    }
+  }
+
+  &.has-header {
+    .body {
+      padding-top: 0;
     }
   }
 
@@ -278,6 +249,11 @@ export default {
 
   &.no-padding {
     --screen-padding-x: 0;
+  }
+
+  // This is not working correctly in Firefox extension
+  &.blur-bg {
+    backdrop-filter: blur(5px);
   }
 
   &.pop-in-transition {

@@ -3,15 +3,19 @@
     data-cy="networks"
     class="networks"
   >
-    <p class="screen-label">
+    <p class="text-description">
       {{ $t('pages.network.listLabel') }}
     </p>
-    <NetworkRow
-      v-for="network in networks"
-      :key="network.name"
-      :network="network"
-      @selectNetwork="selectNetwork"
-    />
+
+    <div class="networks-list">
+      <NetworkRow
+        v-for="network in networks"
+        :key="network.name"
+        :network="network"
+        @selectNetwork="selectNetwork"
+      />
+    </div>
+
     <BtnMain
       extend
       variant="secondary"
@@ -49,17 +53,14 @@ export default {
 @use '../../styles/typography';
 
 .networks {
-  margin: 16px var(--screen-padding-x);
+  padding: var(--screen-padding-x);
 
-  .screen-label {
-    @extend %face-sans-14-regular;
-
-    margin-bottom: 20px;
-    color: rgba(variables.$color-white, 0.85);
+  .networks-list {
+    margin-top: 20px;
   }
 
   .add-custom-network {
-    margin-top: 16px;
+    margin-top: 20px;
   }
 }
 </style>

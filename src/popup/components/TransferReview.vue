@@ -46,7 +46,7 @@
         <TokenAmount
           :amount="+transferData.amount"
           :symbol="tokenSymbol"
-          :hide-fiat="!!transferData.selectedAsset"
+          :hide-fiat="isSelectedAssetAex9"
           data-cy="review-total"
         />
       </template>
@@ -83,23 +83,24 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { computed, defineComponent, ref } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { mapGetters, mapState } from 'vuex';
-import deeplinkApi from '../../mixins/deeplinkApi';
+import { useDeepLinkApi, useGetter } from '../../composables';
 import {
   aeToAettos,
   checkAensName,
   convertToken,
   escapeSpecialChars,
-} from '../utils/helper';
+} from '../utils';
+import { IAccount, IPendingTransaction, ISdk } from '../../types';
 import { MODAL_DEFAULT, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import AvatarWithChainName from './AvatarWithChainName.vue';
 import ModalHeader from './ModalHeader.vue';
 
-export default {
+export default defineComponent({
   name: 'TransferReview',
   components: {
     ModalHeader,
@@ -107,7 +108,6 @@ export default {
     DetailsItem,
     TokenAmount,
   },
-  mixins: [deeplinkApi],
   model: {
     prop: 'transferData',
   },
@@ -115,142 +115,122 @@ export default {
     transferData: { type: Object, required: true },
     isAddressChain: Boolean,
     isAddressUrl: Boolean,
+    recipientAddress: { type: String, default: null },
+    amount: { type: Number, default: null },
   },
-  data() {
-    return {
-      loading: false,
-      AETERNITY_CONTRACT_ID,
-    };
-  },
-  computed: {
-    ...mapGetters(['account']),
-    ...mapState([
-      'sdk',
-      'tippingV1',
-      'tippingV2',
-    ]),
-    isRecipientName() {
-      return this?.recipientAddress && checkAensName(this.recipientAddress);
-    },
-    tokenSymbol() {
-      return this.transferData.selectedAsset?.symbol || '-';
-    },
-    tippingContract() {
-      return this.tippingV2 || this.tippingV1;
-    },
-  },
-  methods: {
-    async submit() {
-      const {
-        amount: amountRaw,
-        address: recipient,
-        selectedAsset,
-        note,
-      } = this.transferData;
+  setup(props, { root, emit }) {
+    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+    const loading = ref<boolean>(false);
+    const account = computed<IAccount>(() => root.$store.getters.account);
+    const tippingV1 = computed(() => root.$store.state.tippingV1);
+    const tippingV2 = computed(() => root.$store.state.tippingV2);
+    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
+    const isRecipientName = computed(
+      () => props.recipientAddress && checkAensName(props.recipientAddress),
+    );
+    const tokenSymbol = computed(() => props.transferData.selectedAsset?.symbol || '-');
+    const tippingContract = computed(() => tippingV2.value || tippingV1.value);
+    const isSelectedAssetAex9 = computed(() => (
+      !!props.transferData.selectedAsset
+      && props.transferData.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
+    ));
 
-      if (!amountRaw || !recipient || !selectedAsset) {
-        return;
-      }
+    function openTransactionFailedModal() {
+      root.$store.dispatch('modals/open', {
+        name: MODAL_DEFAULT,
+        title: root.$t('modals.transaction-failed.msg'),
+        icon: 'critical',
+      });
+    }
 
-      const amount = (selectedAsset.contractId === AETERNITY_CONTRACT_ID)
-        ? aeToAettos(amountRaw)
-        : convertToken(amountRaw, selectedAsset.decimals);
-
-      if (this.isAddressUrl) {
-        this.sendTip({
-          amount,
-          recipient,
-          selectedAsset,
-          note,
-        });
-      } else {
-        this.transfer({
-          amount,
-          recipient,
-          selectedAsset,
-        });
-      }
-    },
-    async transfer({ amount, recipient, selectedAsset }) {
-      this.loading = true;
+    async function transfer({ amount, recipient, selectedAsset }: any) {
+      loading.value = true;
       try {
         let actionResult;
 
-        if (this.transferData.invoiceId != null) {
-          actionResult = await this.$store.dispatch('fungibleTokens/burnTriggerPoS', [
+        if (props.transferData.invoiceId !== null) {
+          actionResult = await root.$store.dispatch('fungibleTokens/burnTriggerPoS', [
             selectedAsset.contractId,
             amount,
-            this.transferData.invoiceContract,
-            this.transferData.invoiceId,
+            props.transferData.invoiceContract,
+            props.transferData.invoiceId,
             { waitMined: false, modal: false },
           ]);
         } else if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-          actionResult = await this.$store.dispatch('fungibleTokens/transfer', [
+          actionResult = await root.$store.dispatch('fungibleTokens/transfer', [
             selectedAsset.contractId,
             recipient,
             amount,
             { waitMined: false, modal: false },
           ]);
         } else {
-          actionResult = await this.sdk.spend(amount, recipient, {
+          actionResult = await sdk.value.spend(amount, recipient, {
             waitMined: false,
             modal: false,
           });
         }
 
         if (actionResult && selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-          this.$store.dispatch('addPendingTransaction', {
+          const transaction: IPendingTransaction = {
             amount,
             recipient,
             hash: actionResult.hash,
             type: 'spendToken',
             pendingTokenTx: true,
             tx: {
-              callerId: this.account.address,
+              callerId: account.value.address,
               contractId: selectedAsset.contractId,
               type: SCHEMA.TX_TYPE.contractCall,
               function: 'transfer',
             },
-          });
+          };
+
+          root.$store.dispatch('addPendingTransaction', transaction);
         } else if (actionResult) {
-          this.$store.dispatch('addPendingTransaction', {
+          const transaction: IPendingTransaction = {
             hash: actionResult.hash,
             amount,
             type: 'spend',
             tx: {
-              senderId: this.account.address,
+              senderId: account.value.address,
               recipientId: recipient,
               type: SCHEMA.TX_TYPE.spend,
             },
-          });
+          };
+
+          root.$store.dispatch('addPendingTransaction', transaction);
         }
-        this.$emit('success');
-      } catch (e) {
-        this.openTransactionFailedModal();
-        throw e;
+        emit('success');
+      } catch (error) {
+        openTransactionFailedModal();
+        throw error;
       } finally {
-        this.loading = false;
+        loading.value = false;
       }
-    },
-    async sendTip({
+    }
+
+    async function sendTip({
       amount,
       recipient,
       selectedAsset,
       note,
-    }) {
-      this.loading = true;
+    }: any) {
+      loading.value = true;
       try {
         let txResult = null;
         if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-          await this.$store.dispatch('fungibleTokens/createOrChangeAllowance', [selectedAsset.contractId, this.amount]);
-          txResult = await this.tippingV2.methods.tip_token(
+          await root.$store.dispatch('fungibleTokens/createOrChangeAllowance', [
+            selectedAsset.contractId,
+            props.amount,
+          ]);
+          txResult = await tippingV2.value.methods.tip_token(
             recipient,
             escapeSpecialChars(note),
             selectedAsset.contractId,
             amount,
           );
         } else {
-          txResult = await this.tippingContract.call(
+          txResult = await tippingContract.value.call(
             'tip',
             [recipient, escapeSpecialChars(note)],
             {
@@ -260,35 +240,72 @@ export default {
             },
           );
         }
-        this.$store.dispatch('addPendingTransaction', {
+        const transaction: IPendingTransaction = {
           hash: txResult.hash,
           amount,
           tipUrl: recipient,
           tx: {
-            callerId: this.account.address,
-            contractId: this.tippingContract.deployInfo.address,
+            callerId: account.value.address,
+            contractId: tippingContract.value.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'tip',
+            selectedTokenContractId: selectedAsset.contractId,
           },
-        });
-        this.openCallbackOrGoHome(true);
-        this.$emit('success');
-      } catch (e) {
-        this.openCallbackOrGoHome(false);
-        this.openTransactionFailedModal();
-        e.payload = { url: recipient };
-        throw e;
+        };
+        root.$store.dispatch('addPendingTransaction', transaction);
+        openCallbackOrGoHome(true);
+        emit('success');
+      } catch (error: any) {
+        openCallbackOrGoHome(false);
+        openTransactionFailedModal();
+        error.payload = { url: recipient };
+        throw error;
       } finally {
-        this.loading = false;
+        loading.value = false;
       }
-    },
-    openTransactionFailedModal() {
-      this.$store.dispatch('modals/open', {
-        name: MODAL_DEFAULT,
-        title: this.$t('modals.transaction-failed.msg'),
-        icon: 'critical',
-      });
-    },
+    }
+
+    async function submit() {
+      const {
+        amount: amountRaw,
+        address: recipient,
+        selectedAsset,
+        note,
+      } = props.transferData;
+
+      if (!amountRaw || !recipient || !selectedAsset) {
+        return;
+      }
+
+      const amount = (selectedAsset.contractId === AETERNITY_CONTRACT_ID)
+        ? aeToAettos(amountRaw)
+        : convertToken(amountRaw, selectedAsset.decimals);
+
+      if (props.isAddressUrl) {
+        sendTip({
+          amount,
+          recipient,
+          selectedAsset,
+          note,
+        });
+      } else {
+        transfer({
+          amount,
+          recipient,
+          selectedAsset,
+        });
+      }
+    }
+
+    return {
+      AETERNITY_CONTRACT_ID,
+      loading,
+      submit,
+      isRecipientName,
+      isSelectedAssetAex9,
+      tokenSymbol,
+      account,
+    };
   },
-};
+});
 </script>

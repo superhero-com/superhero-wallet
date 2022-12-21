@@ -5,7 +5,10 @@
       :key="token.symbol"
       :class="['token-row', token.isReceived ? 'received': 'sent', { error }]"
     >
-      <Tokens :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]" />
+      <Tokens
+        :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]"
+        :icon-size="iconSize"
+      />
       <span class="amount">
         {{
           `${token.isReceived ? '+' : '−'}
@@ -18,14 +21,15 @@
 </template>
 
 <script>
-import { amountRounded, convertToken } from '../utils/helper';
+import { amountRounded, convertToken } from '../utils';
 import Tokens from './Tokens.vue';
 
 export default {
   components: { Tokens },
   props: {
     tokens: { type: Array, required: true },
-    error: { type: Boolean },
+    iconSize: { type: String, default: 'rg' },
+    error: Boolean,
   },
   methods: {
     convertToken,
@@ -54,11 +58,11 @@ export default {
     }
 
     &.received:not(.error) .amount {
-      color: variables.$color-green-dark;
+      color: variables.$color-success-dark;
     }
 
     &.sent:not(.error) .amount {
-      color: variables.$color-pink;
+      color: variables.$color-danger;
     }
 
     .tokens {

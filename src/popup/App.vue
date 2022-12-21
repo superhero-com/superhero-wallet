@@ -2,7 +2,9 @@
   <div
     id="app"
     :class="{
-      'show-header': showStatusAndHeader,
+      'show-header': showHeader,
+      'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
+      'is-extension': IS_EXTENSION,
     }"
   >
     <button
@@ -13,18 +15,23 @@
     </button>
     <div
       v-show="!qrScannerOpen"
+      :class="{ 'show-scrollbar': $route.meta.showScrollbar }"
       class="app-inner"
     >
-      <Header v-if="showStatusAndHeader" />
+      <Header v-if="showHeader" />
 
-      <transition :name="$route.meta.asModal ? 'pop-transition' : 'page-transition'">
+      <transition name="page-transition">
         <RouterView
-          :class="{ 'show-header': showStatusAndHeader }"
+          :class="{ 'show-header': showHeader }"
           class="main"
         />
       </transition>
 
-      <NodeConnectionStatus v-if="showStatusAndHeader" />
+      <NodeConnectionStatus
+        v-if="!modals.length"
+        class="connection-status"
+      />
+
       <Component
         :is="component"
         v-for="{ component, key, props } in modals"
@@ -35,73 +42,112 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapState } from 'vuex';
-import { detect } from 'detect-browser';
-import { watchUntilTruthy } from './utils/helper';
-import { NOTIFICATION_SETTINGS } from './utils/constants';
-import { IS_IOS } from '../lib/environment';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  watch,
+} from '@vue/composition-api';
+import {
+  NOTIFICATION_DEFAULT_SETTINGS,
+  NODE_STATUS_OFFLINE,
+  NODE_STATUS_CONNECTION_DONE,
+  watchUntilTruthy,
+} from './utils';
+import {
+  IS_WEB,
+  IS_IOS,
+  IS_MOBILE_DEVICE,
+  IS_CORDOVA,
+  IS_EXTENSION,
+  RUNNING_IN_POPUP,
+} from '../lib/environment';
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
 
-export default {
+export default defineComponent({
+  name: 'App',
   components: {
     Header,
     NodeConnectionStatus,
     Close,
   },
-  computed: {
-    ...mapGetters(['isLoggedIn']),
-    ...mapState(['isRestored', 'backedUpSeed', 'qrScannerOpen']),
-    showStatusAndHeader() {
-      return !(
-        this.$route.path === '/'
-        || this.$route.path.startsWith('/web-iframe-popup')
-        || this.$route.params.app
-        || this.$route.meta.hideHeader
+  setup(props, { root }) {
+    const isLoggedIn = computed(() => root.$store.getters.isLoggedIn);
+    const isRestored = computed(() => root.$store.state.isRestored);
+    const backedUpSeed = computed(() => root.$store.state.backedUpSeed);
+    const qrScannerOpen = computed(() => root.$store.state.qrScannerOpen);
+    const modals = computed(() => root.$store.getters['modals/opened']);
+
+    const showHeader = computed(() => !(
+      RUNNING_IN_POPUP
+      || root.$route.params.app // TODO determine if still used
+      || root.$route.meta?.hideHeader
+    ));
+
+    function setDocumentHeight() {
+      document.documentElement.style.setProperty(
+        '--height',
+        IS_CORDOVA && IS_IOS ? '100vh' : '100%',
       );
-    },
-    modals() {
-      return this.$store.getters['modals/opened'];
-    },
-  },
-  watch: {
-    isLoggedIn(val) {
-      if (val && !this.backedUpSeed) {
-        this.$store.commit('addNotification', {
-          text: this.$t('pages.account.seedNotification', [this.$t('pages.account.backup')]),
+    }
+
+    async function checkExtensionUpdates() {
+      if (IS_EXTENSION && browser?.runtime?.requestUpdateCheck) {
+        const [update] = await browser.runtime.requestUpdateCheck();
+        if (update === 'update_available') {
+          root.$store.commit('addNotification', {
+            text: root.$t('pages.account.updateAvailable'),
+            path: '',
+          });
+        }
+      }
+    }
+
+    function setNotificationSettings() {
+      if (root.$store.state.notificationSettings.length === 0) {
+        root.$store.commit('setNotificationSettings', NOTIFICATION_DEFAULT_SETTINGS);
+      }
+    }
+
+    function watchAppNetworkAccess() {
+      window.addEventListener('online', () => root.$store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE));
+      window.addEventListener('offline', () => root.$store.commit('setNodeStatus', NODE_STATUS_OFFLINE));
+    }
+
+    watch(isLoggedIn, (val) => {
+      if (val && !backedUpSeed.value) {
+        root.$store.commit('addNotification', {
+          text: root.$t('pages.account.seedNotification', [root.$t('pages.account.backup')]),
           path: '/more/settings/seed-phrase',
         });
       }
-    },
+    });
+
+    onMounted(async () => {
+      setDocumentHeight();
+      checkExtensionUpdates();
+      watchAppNetworkAccess();
+
+      await watchUntilTruthy(() => isRestored.value);
+
+      setNotificationSettings();
+      root.$store.dispatch('fungibleTokens/getAeternityData');
+      root.$store.commit('setChainNames', await root.$store.dispatch('getCacheChainNames'));
+    });
+
+    return {
+      IS_WEB,
+      IS_EXTENSION,
+      IS_MOBILE_DEVICE,
+      modals,
+      qrScannerOpen,
+      showHeader,
+    };
   },
-  async mounted() {
-    document.documentElement.style.setProperty('--height', process.env.PLATFORM === 'cordova' && IS_IOS ? '100vh' : '100%');
-
-    window.addEventListener('online', () => this.$store.commit('setNodeStatus', 'online'));
-    window.addEventListener('offline', () => this.$store.commit('setNodeStatus', 'offline'));
-
-    await watchUntilTruthy(() => this.isRestored);
-
-    this.$store.dispatch('fungibleTokens/getAeternityData');
-
-    if (process.env.IS_EXTENSION && detect().name !== 'firefox') {
-      const [update] = await browser.runtime.requestUpdateCheck();
-      if (update === 'update_available' && !process.env.RUNNING_IN_TESTS) {
-        this.$store.commit('addNotification', {
-          text: this.$t('pages.account.updateAvailable'),
-          path: '',
-        });
-      }
-    }
-    if (this.$store.state.notificationSettings.length === 0) {
-      this.$store.commit('setNotificationSettings', NOTIFICATION_SETTINGS);
-    }
-
-    this.$store.commit('setChainNames', await this.$store.dispatch('getCacheChainNames'));
-  },
-};
+});
 </script>
 
 <style lang="scss" src="../styles/global.scss"></style>
@@ -113,6 +159,7 @@ export default {
 
 #app {
   --screen-padding-x: 16px;
+  --screen-border-radius: 0;
   --screen-bg-color: #{variables.$color-bg-app};
   --header-height: 0;
   --gap: 12px;
@@ -121,24 +168,13 @@ export default {
 
   position: relative;
   margin: 0 auto;
-  width: variables.$extension-width;
-  height: 600px;
-  overflow: hidden;
-  border-radius: variables.$border-radius-app;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--screen-border-radius);
   color: variables.$color-white;
   background-color: var(--screen-bg-color);
   font-family: variables.$font-sans;
   transition: background-color 200ms;
-
-  @include mixins.mobile {
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-  }
-
-  @include mixins.desktop {
-    box-shadow: variables.$color-border 0 0 0 1px;
-  }
 
   .camera-close-button {
     position: absolute;
@@ -153,31 +189,71 @@ export default {
     width: 100%;
     height: 100%;
     overflow-y: auto;
+
+    &.show-scrollbar {
+      -ms-overflow-style: auto;
+
+      &::-webkit-scrollbar {
+        display: block;
+        width: 6px;
+        height: 0;
+
+        &-thumb {
+          display: block;
+          background-color: rgba(variables.$color-white, 0.15);
+          border-radius: 4px;
+        }
+      }
+    }
   }
 
   .main {
-    padding-bottom: 48px;
-    padding-bottom: calc(48px + env(safe-area-inset-bottom));
+    padding-bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom);
     background-color: var(--screen-bg-color);
 
     @include mixins.desktop {
       min-height: 100%;
-      padding-bottom: 0;
+    }
+  }
+
+  .connection-status {
+    position: fixed;
+    bottom: 0;
+    bottom: env(safe-area-inset-bottom);
+    left: 0;
+    width: 100%;
+  }
+
+  &.is-extension,
+  &.is-desktop-web {
+    width: variables.$extension-width;
+    height: variables.$extension-height;
+  }
+
+  // Imitate the appearance of the mobile/extension app in a desktop browser
+  &.is-desktop-web {
+    --screen-border-radius: #{variables.$border-radius-app};
+
+    overflow: hidden;
+    box-shadow: variables.$color-border 0 0 0 1px;
+    transform: translate(0, 0); // Create custom viewport for fixed elements
+
+    @include mixins.mobile {
+      --screen-border-radius: 0;
+
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      box-shadow: none;
     }
   }
 
   &.show-header {
-    --header-height: 48px;
+    --header-height: 40px;
 
-    .main {
+    .app-inner {
       padding-top: var(--header-height);
-      padding-top: calc(var(--header-height) + env(safe-area-inset-top));
-
-      @include mixins.desktop {
-        padding-top: 0;
-        min-height: calc(100% - var(--header-height));
-        min-height: calc(100% - var(--header-height) - env(safe-area-inset-top));
-      }
     }
   }
 }

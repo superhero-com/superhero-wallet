@@ -1,28 +1,51 @@
 <template>
   <div class="address-formatted">
-    <template v-if="columns">
+    <template v-if="isAddress">
       <span
         v-for="(chunk, index) in addressChunks"
         :key="index"
         class="address-formatted-chunk"
+        :class="{ 'align-right': alignRight }"
+        :style="cssVariable"
       >{{ chunk }}</span>
     </template>
     <span v-else>{{ address }}</span>
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import { validateHash } from '../utils';
+
+export default defineComponent({
   props: {
     address: { type: String, required: true },
-    columns: Boolean,
+    columnCount: { type: Number, default: 6 },
+    alignRight: Boolean,
   },
-  computed: {
-    addressChunks() {
-      return this.address.match(/.{1,3}/g);
-    },
+  setup(props) {
+    const prepareChunk = (chunk: any) => {
+      const maxLength = 3;
+      return chunk.length === maxLength ? chunk : `${chunk}${' '.repeat(maxLength - chunk.length)}`;
+    };
+
+    const isAddress = computed(() => {
+      const { valid, isName } = validateHash(props.address);
+      return valid && !isName;
+    });
+    const addressChunks = computed(() => props.address.match(/.{1,3}/g)?.map(prepareChunk));
+    const cssVariable = computed(() => ({
+      '--column-width': `${100 / props.columnCount}%`,
+    }));
+
+    return {
+      prepareChunk,
+      isAddress,
+      addressChunks,
+      cssVariable,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -32,7 +55,12 @@ export default {
   letter-spacing: 0.15em;
 
   &-chunk {
-    flex: 0 0 16.5%;
+    flex: 0 0 var(--column-width);
+
+    &.align-right {
+      text-align: right;
+      white-space: break-spaces;
+    }
   }
 }
 </style>

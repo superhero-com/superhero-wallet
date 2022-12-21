@@ -61,7 +61,8 @@
             :data-cy="$attrs.type ? `input-${$attrs.type}` : 'input'"
             :disabled="readonly"
             :maxlength="textLimit"
-            @input="$emit('input', $event.target.value)"
+            :inputmode="inputMode"
+            @input="handleInput"
             @keydown="checkIfNumber"
             @focusin="focused = true"
             @focusout="focused = false"
@@ -88,6 +89,7 @@
     >
       <label
         class="message-text"
+        data-cy="input-field-message"
         :for="inputId"
       >
         {{ typeof message === 'object' ? message && message.text : message }}
@@ -115,7 +117,7 @@ export default {
         }
         return true;
       },
-      default: () => {},
+      default: null,
     },
     readonly: Boolean,
     showHelp: Boolean,
@@ -132,6 +134,9 @@ export default {
   computed: {
     inputId() {
       return `input-${this._uid}`;
+    },
+    inputMode() {
+      return this.type === 'number' ? 'decimal' : 'text';
     },
     hasError() {
       if (typeof this.message === 'object') {
@@ -159,10 +164,21 @@ export default {
   },
   methods: {
     checkIfNumber(event) {
-      if (this.type === 'number' && !['Enter', 'Backspace'].includes(event.key) && !/^[0-9/-]$/.test(event.key)) {
+      const isSingleChar = event.key.length === 1 && !event.ctrlKey && !event.metaKey;
+      const alreadyHasDot = (typeof this.value === 'string' && this.value?.includes('.')) && [',', '.'].includes(event.key);
+      if (
+        this.type === 'number'
+        && isSingleChar
+        && (alreadyHasDot || !/^([0-9]+|,|\.)$/.test(event.key)) // Non numerical
+      ) {
         event.preventDefault();
       }
     },
+    handleInput(event) {
+      const { value } = event.target;
+      this.$emit('input', this.type === 'number' ? value?.replace(',', '.') : value);
+    },
+
   },
 };
 </script>
@@ -174,7 +190,7 @@ export default {
 .input-field {
   --color-border: transparent;
   --color-bg: #{rgba(variables.$color-white, 0.08)};
-  --color-input-text: #{variables.$color-light-grey};
+  --color-input-text: #{variables.$color-grey-light};
   --color-placeholder: #{rgba(variables.$color-white, 0.75)};
   --color-message: #{rgba(variables.$color-white, 0.75)};
 
@@ -236,6 +252,7 @@ export default {
       display: flex;
       align-items: center;
       width: 100%;
+      overflow: hidden;
 
       .icon {
         width: 24px;

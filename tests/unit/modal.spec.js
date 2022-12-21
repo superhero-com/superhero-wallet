@@ -1,5 +1,10 @@
-import { mount, shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
+import { mount } from '@vue/test-utils';
 import Modal from '../../src/popup/components/Modal.vue';
+
+Object.assign(Vue.prototype, {
+  $t: () => 'locale-specific-text',
+});
 
 describe('Modal', () => {
   it('should close on button close click', async () => {
@@ -8,13 +13,18 @@ describe('Modal', () => {
         hasCloseButton: true,
       },
     });
-    await wrapper.find('.close-button').trigger('click');
+    await wrapper.find('[data-cy=btn-close]').trigger('click');
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted('close')).toBeTruthy();
   });
 
   it('should have "full-screen" variant', async () => {
     const wrapper = mount(Modal, {
+      mocks: {
+        $store: {
+          state: {},
+        },
+      },
       propsData: {
         fullScreen: true,
       },
@@ -42,11 +52,11 @@ describe('Modal', () => {
     },
     {
       slot: 'footer',
-      className: '.footer',
+      className: '.fixed-screen-footer',
     },
   ].forEach(({ slot, className }) => it(`should have ${slot} slot`, async () => {
     const slotText = `${slot} test`;
-    const wrapper = shallowMount(Modal, {
+    const wrapper = mount(Modal, {
       slots: {
         [slot]: slotText,
       },

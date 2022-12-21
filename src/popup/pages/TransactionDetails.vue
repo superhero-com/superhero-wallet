@@ -5,7 +5,7 @@
       class="spinner"
     />
     <template v-else>
-      <Plate
+      <div
         v-if="!isAllowance || isErrorTransaction"
         class="header"
       >
@@ -17,10 +17,17 @@
           :tokens="tokens"
           :error="isErrorTransaction"
           :class="{ reverse: isPool }"
+          icon-size="md"
         />
-      </Plate>
+      </div>
       <div class="content">
         <TransactionOverview v-bind="transaction" />
+        <div class="explorer">
+          <LinkButton :to="getExplorerPath(hash)">
+            {{ $t('pages.transactionDetails.explorer') }}
+            <ExternalLink />
+          </LinkButton>
+        </div>
         <div class="data-grid">
           <template v-if="isSwap && !isErrorTransaction">
             <SwapRates :transaction="transaction" />
@@ -33,52 +40,53 @@
             class="reason"
           />
           <TransactionDetailsPoolTokens
-            v-if="(isPool || isAllowance) && tokens"
+            v-if="(isPool || isAllowance)
+              && tokens"
             :tokens="tokens"
             :tx-function="transaction.tx.function"
             :is-allowance="isAllowance"
             :class="{ reverse: isPool }"
           />
+
           <DetailsItem
             v-if="tipUrl"
             :label="$t('pages.transactionDetails.tipUrl')"
             class="tip-url"
             data-cy="tip-url"
           >
-            <template #label>
-              <BtnCopy
-                :value="tipUrl"
-                :message="$t('pages.transactionDetails.urlCopied')"
-              />
-            </template>
             <template #value>
-              <LinkButton
-                :to="/^http[s]*:\/\//.test(tipUrl) ? tipUrl : `http://${tipUrl}`"
-              >
-                <Truncate
-                  :str="tipUrl"
-                  fixed
-                />
-              </LinkButton>
+              <CopyText :value="tipUrl">
+                <LinkButton :to="tipLink">
+                  <Truncate
+                    :str="tipUrl"
+                    fixed
+                  />
+                </LinkButton>
+              </CopyText>
             </template>
           </DetailsItem>
+
           <DetailsItem
             :label="$t('pages.transactionDetails.hash')"
             data-cy="hash"
             small
           >
-            <CopyAddress
-              slot="value"
-              class="copy-hash"
-              :value="hash"
-              :custom-text="$t('hashCopied')"
-            />
+            <template #value>
+              <CopyText
+                hide-icon
+                :value="hash"
+                :copied-text="$t('hashCopied')"
+              >
+                <span class="text-address">{{ splitAddress(hash) }}</span>
+              </CopyText>
+            </template>
           </DetailsItem>
+
           <div class="span-3-columns">
             <DetailsItem
               v-if="transaction.microTime && !transaction.pending"
-              :value="transaction.microTime | formatDate"
-              :secondary="transaction.microTime | formatTime"
+              :value="formatDate(transaction.microTime)"
+              :secondary="formatTime(transaction.microTime)"
               :label="$t('pages.transactionDetails.timestamp')"
               data-cy="timestamp"
             />
@@ -112,24 +120,26 @@
             :label="$t('pages.transactionDetails.amount')"
             data-cy="amount"
           >
-            <TokenAmount
-              slot="value"
-              :amount="getTxAmountTotal(transaction)"
-              :symbol="getTxSymbol(transaction)"
-              :hide-fiat="getTxSymbol(transaction) !== 'AE'"
-            />
+            <template #value>
+              <TokenAmount
+                :amount="getTxAmountTotal(transaction)"
+                :symbol="getTxSymbol(transaction)"
+                :hide-fiat="isTxAex9(transaction)"
+              />
+            </template>
           </DetailsItem>
           <DetailsItem
             v-if="transaction.tx.gasPrice"
             :label="$t('pages.transactionDetails.gasPrice')"
             data-cy="gas-price"
           >
-            <TokenAmount
-              slot="value"
-              :amount="+aettosToAe(transaction.tx.gasPrice)"
-              symbol="AE"
-              hide-fiat
-            />
+            <template #value>
+              <TokenAmount
+                :amount="+(aettosToAe(transaction.tx.gasPrice))"
+                symbol="AE"
+                hide-fiat
+              />
+            </template>
           </DetailsItem>
           <DetailsItem
             v-if="transaction.tx.gasUsed"
@@ -142,102 +152,127 @@
             :label="$t('pages.transactionDetails.fee')"
             data-cy="fee"
           >
-            <TokenAmount
-              slot="value"
-              :amount="+aettosToAe(transaction.tx.fee)"
-              symbol="AE"
-            />
+            <template #value>
+              <TokenAmount
+                :amount="+aettosToAe(transaction.tx.fee)"
+                :symbol="AETERNITY_SYMBOL"
+              />
+            </template>
           </DetailsItem>
-        </div>
-        <div class="explorer">
-          <LinkButton :to="getExplorerPath(hash)">
-            {{ $t('pages.transactionDetails.explorer') }}
-            <ExternalLink />
-          </LinkButton>
         </div>
       </div>
     </template>
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { formatDate, formatTime } from '../utils';
-import transactionTokensMixin from '../../mixins/transactionTokensMixin';
+<script lang="ts">
+import {
+  computed, defineComponent, PropType, ref, onMounted,
+} from '@vue/composition-api';
+import {
+  FUNCTION_TYPE_DEX,
+  formatDate,
+  formatTime,
+  aettosToAe,
+  watchUntilTruthy,
+  splitAddress,
+  AETERNITY_SYMBOL,
+} from '../utils';
 import TransactionOverview from '../components/TransactionOverview.vue';
-import Plate from '../components/Plate.vue';
 import SwapRoute from '../components/SwapRoute.vue';
 import SwapRates from '../components/SwapRates.vue';
 import TokenAmount from '../components/TokenAmount.vue';
 import DetailsItem from '../components/DetailsItem.vue';
 import LinkButton from '../components/LinkButton.vue';
-import BtnCopy from '../components/buttons/BtnCopy.vue';
 import Truncate from '../components/Truncate.vue';
 import AnimatedPending from '../../icons/animated-pending.svg?vue-component';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
 import TransactionTokens from '../components/TransactionTokenRows.vue';
-import CopyAddress from '../components/CopyAddress.vue';
-import { aettosToAe, watchUntilTruthy } from '../utils/helper';
+import CopyText from '../components/CopyText.vue';
 import TransactionDetailsPoolTokens from '../components/TransactionDetailsPoolTokens.vue';
 import TransactionErrorStatus from '../components/TransactionErrorStatus.vue';
-import { FUNCTION_TYPE_DEX } from '../utils/constants';
+import type { ITransaction } from '../../types';
+import { useTransactionToken } from '../../composables';
+import { useGetter } from '../../composables/vuex';
 
-export default {
+export default defineComponent({
   components: {
     TransactionErrorStatus,
     TransactionDetailsPoolTokens,
     TransactionTokens,
     TransactionOverview,
-    Plate,
     TokenAmount,
     DetailsItem,
     LinkButton,
-    BtnCopy,
     Truncate,
     AnimatedPending,
     AnimatedSpinner,
     ExternalLink,
-    CopyAddress,
+    CopyText,
     SwapRoute,
     SwapRates,
   },
-  filters: {
-    formatDate,
-    formatTime,
-  },
-  mixins: [transactionTokensMixin],
   props: {
-    hash: { type: String, required: true },
+    hash: { type: String as PropType<string>, required: true },
   },
-  data: () => ({
-    transaction: null,
-    showDetailedAllowanceInfo: true,
-  }),
-  computed: {
-    ...mapGetters(['getTx', 'getTxSymbol', 'getTxAmountTotal', 'getTxTipUrl', 'getExplorerPath']),
-    tipUrl() {
-      return this.getTxTipUrl(this.transaction);
-    },
-    isSwap() {
-      return FUNCTION_TYPE_DEX.swap.includes(this.transaction?.tx?.function);
-    },
-    isPool() {
-      return FUNCTION_TYPE_DEX.pool.includes(this.transaction?.tx?.function);
-    },
+  setup(props, { root }) {
+    const transaction = ref<ITransaction>();
+    const getTx = useGetter('getTx');
+
+    const getTxTipUrl = useGetter('getTxTipUrl');
+    const getExplorerPath = useGetter('getExplorerPath');
+    const isTxAex9 = useGetter('isTxAex9');
+
+    const tipUrl = computed(() => getTxTipUrl.value(transaction.value));
+    const {
+      setTransaction,
+      getTxSymbol,
+      getTxAmountTotal,
+      isErrorTransaction,
+      isAllowance,
+      tokens,
+      isDex,
+    } = useTransactionToken(undefined, true);
+
+    onMounted(async () => {
+      transaction.value = getTx.value(props.hash);
+      if (!transaction.value || transaction.value.incomplete) {
+        await watchUntilTruthy(() => root.$store.state.middleware);
+        transaction.value = await root.$store.state?.middleware.getTxByHash(props.hash);
+        root.$store.commit('setTransactionByHash', transaction.value);
+      }
+      if (transaction.value) setTransaction(transaction.value);
+    });
+
+    const isSwap = computed(() => FUNCTION_TYPE_DEX.swap.includes(transaction.value?.tx?.function || ''));
+
+    const isPool = computed(() => FUNCTION_TYPE_DEX.pool.includes(transaction.value?.tx?.function || ''));
+
+    const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
+
+    return {
+      transaction,
+      AETERNITY_SYMBOL,
+      splitAddress,
+      aettosToAe,
+      formatDate,
+      formatTime,
+      tipUrl,
+      isSwap,
+      isPool,
+      getTxSymbol,
+      getTxAmountTotal,
+      isErrorTransaction,
+      isAllowance,
+      tokens,
+      isDex,
+      getExplorerPath,
+      isTxAex9,
+      tipLink,
+    };
   },
-  async mounted() {
-    this.transaction = this.getTx(this.hash);
-    if (!this.transaction || this.transaction?.incomplete) {
-      await watchUntilTruthy(() => this.$store.state.middleware);
-      this.transaction = await this.$store.state.middleware.getTxByHash(this.hash);
-      this.$store.commit('setTransactionByHash', this.transaction);
-    }
-  },
-  methods: {
-    aettosToAe,
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -291,7 +326,7 @@ export default {
         .tokens {
           @extend %face-sans-18-medium;
 
-          color: variables.$color-white;
+          color: rgba(variables.$color-white, 0.75);
         }
       }
     }
@@ -304,10 +339,10 @@ export default {
   }
 
   .content {
-    background: var(--screen-bg-color);
+    background-color: variables.$color-bg-4;
 
     .transaction-overview {
-      padding: 16px;
+      padding: 16px 12px 8px;
     }
 
     .pool-tokens.reverse {
@@ -324,6 +359,10 @@ export default {
       .tip-url {
         width: 100%;
 
+        .copy-text {
+          width: 100%;
+        }
+
         .link-button {
           display: block;
         }
@@ -331,23 +370,29 @@ export default {
     }
 
     .explorer {
-      height: 56px;
-      margin: 0 16px;
-      padding: 8px 0 32px 0;
+      height: 38px;
+      padding-inline: 16px;
+      display: flex;
+      align-items: center;
 
       .link-button {
         @extend %face-sans-14-medium;
 
         text-decoration: none;
+        color: rgba(variables.$color-white, 0.75);
 
         svg {
           opacity: 1;
-          color: variables.$color-green;
+          color: rgba(variables.$color-white, 0.75);
         }
 
         &:hover {
-          color: variables.$color-green;
+          color: variables.$color-white;
           text-decoration: underline;
+
+          svg {
+            color: variables.$color-white;
+          }
         }
       }
     }
@@ -356,19 +401,6 @@ export default {
   .details-item::v-deep {
     .label {
       white-space: nowrap;
-    }
-  }
-
-  .copy-hash::v-deep {
-    .copied {
-      align-items: center;
-
-      .text {
-        flex: 0;
-        margin-inline: 8px;
-        word-spacing: 100vw;
-        justify-content: center;
-      }
     }
   }
 

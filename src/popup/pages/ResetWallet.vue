@@ -1,12 +1,12 @@
 <template>
   <div class="reset-wallet-settings">
-    <div class="description">
+    <p class="text-description">
       {{ $t('pages.reset-wallet.description') }}
-    </div>
+    </p>
     <i18n
       path="pages.reset-wallet.description2"
-      tag="div"
-      class="description"
+      tag="p"
+      class="text-description"
     >
       <RouterLink :to="{ name: 'settings-seed-phrase' }">
         seed phrase
@@ -14,7 +14,7 @@
     </i18n>
 
     <BtnMain
-      variant="pink"
+      variant="danger"
       class="reset-wallet-button"
       has-icon
       extend
@@ -47,30 +47,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  @use '../../styles/variables';
-  @use '../../styles/typography';
+@use '../../styles/variables';
+@use '../../styles/typography';
 
-  .reset-wallet-settings {
-    padding: 16px;
+.reset-wallet-settings {
+  padding: var(--screen-padding-x);
 
-    .description {
-      color: rgba(variables.$color-white, 0.75);
-      padding: 6px 8px 2px 0;
-      line-height: 20px;
-      text-align: left;
-      white-space: pre-line;
-
-      a {
-        color: variables.$color-primary;
-        text-decoration: none;
-      }
-
-      @extend %face-sans-14-light;
-    }
-
-    .reset-wallet-button {
-      margin-top: 34px;
-    }
+  .reset-wallet-button {
+    margin-top: 34px;
   }
-
+}
 </style>

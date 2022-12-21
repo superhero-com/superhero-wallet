@@ -3,7 +3,7 @@ import {
   contractCall,
   getAddressByNameEntry,
   watchUntilTruthy,
-} from '../popup/utils/helper';
+} from '../popup/utils';
 import store from './store';
 
 let tippingContract;

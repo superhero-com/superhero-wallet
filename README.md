@@ -67,6 +67,22 @@ $ npm run test # to run both unit and e2e tests
 - ensure that `applinks:wallet.superhero.com` is in Associated domains feature
 - open Build Settings
 - switch "Code Signing Identity => Release" and "Code Signing Identity => Release => Any iOS SDK" from "iOS Distribution" to "iOS Developer" 
+- add those lines to: `platforms/ios/CordovaLib/Classes/Private/Plugins/CDVWebViewEngine/CDVWebViewEngine.m`
+```
+if (!bounceAllowed) {
+  if ([wkWebView respondsToSelector:@selector(scrollView)]) {
+      ((UIScrollView*)[wkWebView scrollView]).bounces = NO;
+      ((UIScrollView*)[wkWebView scrollView]).scrollEnabled = NO; // <==
+  } else {
+      for (id subview in wkWebView.subviews) {
+          if ([[subview class] isSubclassOfClass:[UIScrollView class]]) {
+              ((UIScrollView*)subview).scrollEnabled = NO; // <==
+              ((UIScrollView*)subview).bounces = NO;
+          }
+      }
+  }
+}
+```
 - choose Product => Archive and follow the instructions
 
 #### Android
@@ -78,6 +94,9 @@ cordova build android --release --buildConfig=myBuildConfig.json
 
 ## Security
 If you discover a security vulnerability within this application, please get in touch with us. All security vulnerabilities will be promptly addressed.
+
+## Tooling
+This project is tested with BrowserStack.
 
 ## Contribution
 

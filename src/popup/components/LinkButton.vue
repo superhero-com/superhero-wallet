@@ -22,13 +22,12 @@ export default {
 @use '../../styles/typography';
 
 .link-button {
+  @extend %face-sans-14-regular;
+
   padding: 0;
   display: inline-flex;
   align-items: center;
-
-  @extend %face-sans-14-regular;
-
-  color: variables.$color-green;
+  color: variables.$color-success;
 
   svg {
     width: 24px;
@@ -39,11 +38,11 @@ export default {
   }
 
   &:hover {
-    color: variables.$color-green-hover;
+    color: variables.$color-success-hover;
 
     svg {
       opacity: 1;
-      color: variables.$color-green;
+      color: variables.$color-success;
     }
   }
 
@@ -52,7 +51,7 @@ export default {
 
     svg {
       opacity: 0.7;
-      color: variables.$color-green;
+      color: variables.$color-success;
     }
   }
 }

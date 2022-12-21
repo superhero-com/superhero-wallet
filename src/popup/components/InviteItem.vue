@@ -2,16 +2,14 @@
   <div class="invite-row">
     <div class="invite-info">
       <TokenAmount :amount="inviteLinkBalance" />
-      <span class="date">{{ createdAt | formatDate }}</span>
+      <span class="date">{{ formatDate(createdAt) }}</span>
     </div>
-    <div class="invite-link">
-      <span>{{ link }}</span>
-      <BtnCopy
-        class="copy-button"
-        :value="link.toString()"
-        :message="$t('copied')"
-      />
-    </div>
+    <CopyText
+      class="invite-link"
+      :value="link.toString()"
+    >
+      <span class="invite-link-url">{{ link }}</span>
+    </CopyText>
     <div
       v-if="!topUp"
       class="centered-buttons"
@@ -65,26 +63,21 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import { AmountFormatter, TxBuilderHelper, Crypto } from '@aeternity/aepp-sdk';
-import { watchUntilTruthy } from '../utils/helper';
-import CopyMixin from '../../mixins/copy';
+import { APP_LINK_WEB, watchUntilTruthy, formatDate } from '../utils';
 import TokenAmount from './TokenAmount.vue';
 import InputAmount from './InputAmount.vue';
 import BtnMain from './buttons/BtnMain.vue';
-import BtnCopy from './buttons/BtnCopy.vue';
-import { formatDate } from '../utils';
-import { APP_LINK_WEB } from '../utils/constants';
+import CopyText from './CopyText.vue';
 
 export default {
   components: {
     TokenAmount,
     BtnMain,
-    BtnCopy,
     InputAmount,
+    CopyText,
   },
-  filters: { formatDate },
-  mixins: [CopyMixin],
   props: {
     secretKey: { type: String, required: true },
     createdAt: { type: Number, required: true },
@@ -96,7 +89,7 @@ export default {
     error: false,
   }),
   computed: {
-    ...mapState(['sdk']),
+    ...mapGetters('sdkPlugin', ['sdk']),
     link() {
       // sg_ prefix was chosen as a dummy to decode from base58Check
       const secretKey = (TxBuilderHelper.encode(Buffer.from(this.secretKey, 'hex'), 'sg')).slice(3);
@@ -120,6 +113,7 @@ export default {
     },
   },
   methods: {
+    formatDate,
     deleteItem() {
       this.$store.commit('invites/delete', this.secretKey);
     },
@@ -183,22 +177,17 @@ export default {
   position: relative;
 
   .invite-link {
+    width: 100%;
     margin-bottom: 5px;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
+    padding-block: 4px;
 
-    span {
-      margin-left: 5px;
+    &-url {
+      display: block;
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
+      font-size: 11px;
       color: variables.$color-white;
-    }
-
-    .copy-button {
-      color: variables.$color-grey-dark;
-      flex-direction: row-reverse;
     }
   }
 

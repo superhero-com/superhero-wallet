@@ -6,10 +6,14 @@
       :address="account.address"
       :name="account.name"
     />
-    <Truncate
+    <div
       v-if="account.name"
-      :str="account.name"
-    />
+      class="truncate-wrapper"
+    >
+      <Truncate
+        :str="account.name"
+      />
+    </div>
     <span
       v-else
       data-cy="account-name"
@@ -60,10 +64,6 @@ export default {
 
   margin-top: 4px;
 
-  .truncate {
-    display: block;
-  }
-
   .account-avatar {
     margin-right: 8px;
   }
@@ -83,6 +83,10 @@ export default {
     &:hover {
       color: variables.$color-primary;
     }
+  }
+
+  .truncate-wrapper {
+    max-width: calc(100% - (2 * var(--screen-padding-x)));
   }
 }
 </style>

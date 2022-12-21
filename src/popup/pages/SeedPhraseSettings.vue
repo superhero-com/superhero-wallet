@@ -2,13 +2,28 @@
   <div class="seed-phrase-settings">
     <i18n
       path="pages.seed-phrase-settings.seedRecoverySmall"
-      tag="div"
-      class="description"
+      tag="p"
+      class="text-description"
+    />
+    <i18n
+      path="pages.seed-phrase-settings.seedRecoverySmall-2"
+      tag="p"
+      class="text-description"
+    />
+    <i18n
+      path="pages.seed-phrase-settings.seedRecoverySmall-3"
+      tag="p"
+      class="text-description"
     >
-      <span class="white-text">
+      <strong>
         {{ $t('pages.seed-phrase-settings.seedRecoverySmallBackItUp') }}
-      </span>
+      </strong>
     </i18n>
+    <i18n
+      path="pages.seed-phrase-settings.seedRecoverySmall-4"
+      tag="p"
+      class="text-description"
+    />
     <BtnMain
       class="button"
       extend
@@ -32,26 +47,14 @@ export default {
 @use '../../styles/typography';
 
 .seed-phrase-settings {
-  padding: 16px;
+  padding: var(--screen-padding-x);
 
-  .description {
-    color: rgba(variables.$color-white, 0.75);
-    line-height: 20px;
-    white-space: pre-line;
-
-    .white-text {
-      color: variables.$color-white;
-    }
-
-    @extend %face-sans-14-light;
+  .white-text {
+    color: variables.$color-white;
   }
 
   .button {
-    margin-top: 48px;
-  }
-
-  .verified {
-    text-align: center;
+    margin-top: 22px;
   }
 }
 </style>

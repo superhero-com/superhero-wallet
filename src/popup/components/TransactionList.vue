@@ -1,13 +1,19 @@
 <template>
-  <div
-    class="transaction-list"
-    :class="{ 'sticky-filter': stickyFilter }"
-  >
+  <div class="transaction-list">
+    <div
+      v-if="showSearch && showSearchAndFilters"
+      class="search-bar-wrapper"
+    >
+      <InputSearch
+        v-model="searchTerm"
+        :placeholder="$t('pages.recentTransactions.searchPlaceholder')"
+      />
+    </div>
     <Filters
-      v-if="displayFilter"
+      v-if="showSearchAndFilters"
       v-model="displayMode"
       :filters="filters"
-      :sticky="stickyFilter"
+      :scroll-top-threshold="scrollTopThreshold"
     />
     <div
       class="list"
@@ -45,31 +51,33 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { watchUntilTruthy } from '../utils/helper';
+import { TXS_PER_PAGE, AETERNITY_CONTRACT_ID, watchUntilTruthy } from '../utils';
 import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
+import InputSearch from './InputSearch.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
-import { TXS_PER_PAGE, FUNCTION_TYPE_DEX, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import Visible from '../../icons/visible.svg?vue-component';
 
 export default {
   components: {
     Filters,
     TransactionItem,
+    InputSearch,
     AnimatedSpinner,
     Visible,
   },
   props: {
     token: { type: String, default: '' },
-    searchTerm: { type: String, default: '' },
     maxLength: { type: Number, default: null },
-    displayFilter: Boolean,
-    stickyFilter: Boolean,
+    scrollTopThreshold: { type: Number, default: undefined },
+    showFilters: Boolean,
+    showSearch: Boolean,
   },
   data() {
     return {
       loading: false,
       isDestroyed: false,
+      searchTerm: '',
       displayMode: { rotated: true, filter: 'all', sort: 'date' },
       filters: {
         all: {}, in: {}, out: {}, dex: {},
@@ -77,6 +85,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['getDexContracts', 'getTxSymbol']),
     ...mapState('fungibleTokens', ['availableTokens']),
     ...mapState(['transactions']),
     ...mapState({
@@ -97,7 +106,10 @@ export default {
               case 'all':
                 return true;
               case 'dex':
-                return FUNCTION_TYPE_DEX.pool.includes(tr.tx.function);
+                return this.getDexContracts && tr.tx.contractId && (
+                  this.getDexContracts.router.includes(tr.tx.contractId)
+                  || this.getDexContracts.wae?.includes(tr.tx.contractId)
+                );
               case 'out':
                 return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
                     && tr.tx.senderId === address)
@@ -133,16 +145,23 @@ export default {
           .slice(0, this.maxLength || Infinity);
       },
     }),
-    ...mapGetters(['getTxSymbol']),
+    showSearchAndFilters() {
+      return (
+        this.showFilters
+        || this.displayMode.filter !== 'all'
+        || this.searchTerm
+      );
+    },
   },
   mounted() {
     this.loadMore();
     const polling = setInterval(() => this.getLatest(), 10000);
+    const appInner = document.querySelector('.app-inner');
 
-    document.querySelector('#app').addEventListener('scroll', this.checkLoadMore);
+    appInner.addEventListener('scroll', this.checkLoadMore);
     window.addEventListener('scroll', this.checkLoadMore);
     this.$once('hook:destroyed', () => {
-      document.querySelector('#app').removeEventListener('scroll', this.checkLoadMore);
+      appInner.removeEventListener('scroll', this.checkLoadMore);
       window.removeEventListener('scroll', this.checkLoadMore);
       clearInterval(polling);
       this.isDestroyed = true;
@@ -154,7 +173,7 @@ export default {
       if (this.isDestroyed || !this.transactions.nextPageUrl) return;
       const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = isDesktop
-        ? document.querySelector('#app') : document.documentElement;
+        ? document.querySelector('.app-inner') : document.documentElement;
       if (this.maxLength && this.filteredTransactions.length >= this.maxLength) return;
       if (scrollHeight - scrollTop <= clientHeight + 100) this.loadMore();
     },
@@ -188,8 +207,6 @@ export default {
 @use '../../styles/typography';
 
 .transaction-list {
-  --filter-top-offset: 178px;
-
   display: flex;
   flex-direction: column;
 
@@ -208,11 +225,11 @@ export default {
   }
 
   .message > p {
-    padding: 0 64px;
+    padding: 48px 64px 0;
 
     @extend %face-sans-15-medium;
 
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
     text-align: center;
   }
 
@@ -233,7 +250,7 @@ export default {
     .text {
       @extend %face-sans-14-medium;
 
-      color: variables.$color-green;
+      color: variables.$color-success;
       padding-left: 4px;
     }
 
@@ -244,17 +261,17 @@ export default {
     }
 
     &:hover {
-      background: variables.$color-hover;
+      background: variables.$color-bg-2;
 
       .text {
-        color: variables.$color-green-hover;
+        color: variables.$color-success-hover;
       }
 
       .icon {
         opacity: 1;
 
         path {
-          fill: variables.$color-green;
+          fill: variables.$color-success;
         }
       }
     }
@@ -272,9 +289,11 @@ export default {
     }
   }
 
-  ::v-deep .filters {
-    position: sticky;
-    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
+  .search-bar-wrapper {
+    background: var(--screen-bg-color);
+    margin-left: calc(-1 * var(--screen-padding-x));
+    margin-right: calc(-1 * var(--screen-padding-x));
+    padding-inline: var(--screen-padding-x);
   }
 }
 </style>

@@ -24,7 +24,7 @@
           </div>
           <div class="expiration">
             {{ $t('pages.names.auctions.expires') }}
-            in ≈{{ (expiration - topBlockHeight) | blocksToRelativeTime }}
+            in ≈{{ blocksToRelativeTime(expiration - topBlockHeight) }}
           </div>
         </div>
       </NameRow>
@@ -43,13 +43,12 @@
 <script>
 import { mapGetters } from 'vuex';
 import { pick } from 'lodash-es';
-import { watchUntilTruthy } from '../../utils/helper';
+import { watchUntilTruthy, blocksToRelativeTime } from '../../utils';
 import Filters from '../../components/Filters.vue';
 import NameRow from '../../components/NameRow.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import RegisterName from '../../components/RegisterName.vue';
-import { blocksToRelativeTime } from '../../../filters/toRelativeTime';
 
 export default {
   components: {
@@ -58,9 +57,6 @@ export default {
     TokenAmount,
     AnimatedSpinner,
     RegisterName,
-  },
-  filters: {
-    blocksToRelativeTime,
   },
   data: () => ({
     displayMode: { sort: 'soonest', rotated: false },
@@ -91,6 +87,9 @@ export default {
     await watchUntilTruthy(() => this.$store.state.middleware);
     this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');
     this.loading = false;
+  },
+  methods: {
+    blocksToRelativeTime,
   },
 };
 </script>

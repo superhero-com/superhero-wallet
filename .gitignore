@@ -1,12 +1,13 @@
 /node_modules
 /*.log
+/*.sh
 /dist
 /dist-zip
+/cypress
 /bower_components
 /.history
-/cypress
+/.idea
 /.nyc_output
-tests/e2e/screenshots
 .DS_Store
 /tests/e2e/videos/
 /tests/e2e/screenshots/

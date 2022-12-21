@@ -31,7 +31,7 @@ export default {
         {
           name: 'default',
           msg: isInviteError
-            ? i18n.t('pages.invite.insufficient-ivnite-balance')
+            ? i18n.t('pages.invite.insufficient-invite-balance')
             : i18n.t('pages.invite.insufficient-balance'),
         },
         { root: true },

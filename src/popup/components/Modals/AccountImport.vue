@@ -22,25 +22,28 @@
         @submit="importAccount"
       />
     </div>
-    <BtnMain
-      :disabled="!mnemonic || (error != null)"
-      data-cy="import"
-      class="import-button"
-      extend
-      center
-      @click="importAccount"
-    >
-      {{ $t('pages.index.importAccount') }}
-    </BtnMain>
+
+    <template #footer>
+      <BtnMain
+        :disabled="!mnemonic || !!error"
+        data-cy="import"
+        class="import-button"
+        extend
+        center
+        @click="importAccount"
+      >
+        {{ $t('pages.index.importAccount') }}
+      </BtnMain>
+    </template>
   </Modal>
 </template>
 
 <script>
 import { validateMnemonic } from '@aeternity/bip39';
+import { validateSeedLength, watchUntilTruthy } from '../../utils';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import FormTextarea from '../FormTextarea.vue';
-import { validateSeedLength, watchUntilTruthy } from '../../utils/helper';
 
 export default {
   components: {
@@ -54,11 +57,11 @@ export default {
   },
   data: () => ({
     mnemonic: '',
-    error: null,
+    error: '',
   }),
   watch: {
     mnemonic() {
-      this.error = null;
+      this.error = '';
     },
   },
   methods: {
@@ -80,7 +83,7 @@ export default {
       this.$store.commit('setBackedUpSeed');
       this.resolve();
       setTimeout(async () => {
-        await watchUntilTruthy(() => this.$store.state.sdk);
+        await watchUntilTruthy(() => this.$store.getters['sdkPlugin/sdk']);
         this.$store.dispatch('accounts/hdWallet/discover');
       }, 100);
       this.$router.push(this.$store.state.loginTargetLocation);
@@ -111,10 +114,6 @@ export default {
       margin-bottom: 24px;
       margin-top: 8px;
     }
-  }
-
-  .import-button {
-    margin-top: 80px;
   }
 }
 </style>

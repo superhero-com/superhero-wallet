@@ -40,6 +40,6 @@ export default {
 @use '../../../styles/variables';
 
 .claimed {
-  color: variables.$color-blue;
+  color: variables.$color-primary;
 }
 </style>

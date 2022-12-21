@@ -3,7 +3,7 @@
     <i18n
       path="pages.permissions.description"
       tag="div"
-      class="description"
+      class="text-description"
     >
       <a
         href="https://superhero.com/"
@@ -12,55 +12,61 @@
         superhero.com
       </a>
     </i18n>
-    <template v-if="hosts.length">
+
+    <div class="hosts">
       <PanelItem
-        v-for="host in hosts"
-        :key="host"
+        v-for="permission in permissions"
+        :key="permission.host"
         class="host"
-        :to="{ name: 'permissions-details', params: { host } }"
-        :title="host"
+        :to="{ name: 'permissions-details', params: { host: permission.host } }"
+        :title="permission.name"
       />
-    </template>
-    <div v-else>
-      {{ $t('pages.permissions.empty') }}
     </div>
+
+    <BtnMain
+      has-icon
+      extend
+      variant="secondary"
+      :to="{ name: 'permissions-add' }"
+    >
+      <PlusIcon />
+      {{ $t('pages.permissions.add') }}
+    </BtnMain>
   </div>
 </template>
 
 <script>
 import PanelItem from '../components/PanelItem.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
+import PlusIcon from '../../icons/plus-circle-fill.svg?vue-component';
 
 export default {
   components: {
     PanelItem,
+    BtnMain,
+    PlusIcon,
   },
   computed: {
-    hosts() {
-      return Object.keys(this.$store.state.permissions);
+    permissions() {
+      return Object.values(this.$store.state.permissions);
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-  @use '../../styles/variables';
-  @use '../../styles/typography';
+@use '../../styles/variables';
+@use '../../styles/typography';
 
-  .permissions-settings {
-    padding: 6px;
+.permissions-settings {
+  padding: var(--screen-padding-x);
 
-    .description {
-      color: rgba(variables.$color-white, 0.75);
-      padding: 8px 8px 12px 8px;
-      line-height: 20px;
+  .hosts {
+    margin-bottom: 26px;
 
-      a {
-        color: variables.$color-primary;
-        text-decoration: none;
-      }
-
-      @extend %face-sans-14-light;
+    .host {
+      margin: 8px 0;
     }
   }
-
+}
 </style>

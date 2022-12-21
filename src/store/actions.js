@@ -13,7 +13,8 @@ import {
   handleUnknownError,
   isAccountNotFoundError,
   executeAndSetInterval,
-} from '../popup/utils/helper';
+  watchUntilTruthy,
+} from '../popup/utils';
 import { CURRENCIES_URL, MODAL_DEFAULT } from '../popup/utils/constants';
 import { i18n } from './plugins/languages';
 
@@ -40,8 +41,9 @@ export default {
     });
   },
   async fetchPendingTransactions(
-    { state: { sdk, transactions }, getters: { activeNetwork } }, address,
+    { state: { transactions }, getters }, address,
   ) {
+    const sdk = await watchUntilTruthy(() => getters['sdkPlugin/sdk']);
     return (
       await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
         (r) => r.transactions,
@@ -53,7 +55,7 @@ export default {
         },
       )
     )
-      .filter((transaction) => !transactions.pending[activeNetwork.networkId]
+      .filter((transaction) => !transactions.pending[getters.activeNetwork.networkId]
         ?.find((tx) => tx?.hash === transaction?.hash))
       .map((transaction) => ({ ...transaction, pending: true }));
   },
@@ -67,15 +69,19 @@ export default {
       `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn`,
     );
     if (response.message) return [];
-    const tipWithdrawnTransactions = (uniqBy(response, 'hash').map(({ amount, ...t }) => ({
+    const tipWithdrawnTransactions = (uniqBy(response, 'hash').map(({
+      amount, contract, height, data: { tx }, ...t
+    }) => ({
       tx: {
+        ...tx,
         address,
         amount,
-        contractId: t.contract,
+        contractId: contract,
         type: SCHEMA.TX_TYPE.contractCall,
       },
       ...t,
       microTime: new Date(t.createdAt).getTime(),
+      blockHeight: height,
       claim: true,
     })));
     commit('setTipWithdrawnTransactions', tipWithdrawnTransactions);
@@ -89,7 +95,7 @@ export default {
     let txs = await Promise.all([
       (recent || state.transactions.nextPageUrl === ''
         ? state.middleware.getTxByAccount(address, limit, 1)
-        : fetchJson(`${getters.activeNetwork.middlewareUrl}/${state.transactions.nextPageUrl}`))
+        : fetchJson(`${getters.activeNetwork.middlewareUrl}${state.transactions.nextPageUrl}`))
         .then(({ data, next }) => {
           const result = recent || state.transactions.nextPageUrl === '' ? data : camelcaseKeysDeep(data);
           if (!recent) commit('setTransactionsNextPage', next);
@@ -166,7 +172,7 @@ export default {
     return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: error });
   },
   async sendTipComment(
-    { state: { sdk }, getters: { activeNetwork } },
+    { getters: { activeNetwork, 'sdkPlugin/sdk': sdk } },
     [tipId, text, author, parentId],
   ) {
     const sendComment = async (postParam) => postJson(`${activeNetwork.backendUrl}/comment/api/`, { body: postParam });
@@ -185,15 +191,15 @@ export default {
   },
   async modifyNotification(
     {
-      state: { sdk },
       getters: {
+        'sdkPlugin/sdk': sdk,
         activeNetwork,
         account: { address },
       },
     },
-    [notifId, status],
+    [notificationId, status],
   ) {
-    const backendMethod = async (postParam) => postJson(`${activeNetwork.backendUrl}/notification/${notifId}`, { body: postParam });
+    const backendMethod = async (body) => postJson(`${activeNetwork.backendUrl}/notification/${notificationId}`, { body });
 
     const responseChallenge = await backendMethod({ author: address, status });
     const signedChallenge = Buffer.from(
@@ -208,8 +214,8 @@ export default {
   },
   async modifyNotifications(
     {
-      state: { sdk },
       getters: {
+        'sdkPlugin/sdk': sdk,
         activeNetwork,
         account: { address },
       },
@@ -217,7 +223,7 @@ export default {
     [ids, status],
   ) {
     if (!ids.length) return;
-    const backendMethod = async (postParam) => postJson(`${activeNetwork.backendUrl}/notification`, { body: postParam });
+    const backendMethod = async (body) => postJson(`${activeNetwork.backendUrl}/notification`, { body });
 
     const responseChallenge = await backendMethod({ ids, status, author: address });
     const signedChallenge = Buffer.from(
@@ -236,7 +242,7 @@ export default {
   async getCacheTip({ getters: { activeNetwork } }, id) {
     return fetchJson(`${activeNetwork.backendUrl}/tips/single/${id}`);
   },
-  async getAllNotifications({ state: { sdk }, getters: { activeNetwork, account } }) {
+  async getAllNotifications({ getters: { 'sdkPlugin/sdk': sdk, activeNetwork, account } }) {
     const responseChallenge = await fetchJson(
       `${activeNetwork.backendUrl}/notification/user/${account.address}`,
     );
@@ -253,22 +259,28 @@ export default {
       .forEach((key) => url.searchParams.append(key, respondChallenge[key]));
     return fetchJson(url.toString());
   },
-  async initContractInstances({
-    state: { sdk },
-    getters: { activeNetwork, tippingSupported },
+  async initTippingContractInstances({
+    getters: { 'sdkPlugin/sdk': sdk, activeNetwork, tippingSupported },
     commit,
   }) {
     if (!tippingSupported && !process.env.RUNNING_IN_TESTS) return;
-    const contractInstanceV1 = await sdk.getContractInstance({
-      source: TIPPING_V1_INTERFACE,
-      contractAddress: activeNetwork.tipContractV1,
-    });
-    const contractInstanceV2 = activeNetwork.tipContractV2
-      ? await sdk.getContractInstance({
-        source: TIPPING_V2_INTERFACE,
-        contractAddress: activeNetwork.tipContractV2,
-      })
-      : null;
+
+    const [
+      contractInstanceV1,
+      contractInstanceV2,
+    ] = await Promise.all([
+      sdk.getContractInstance({
+        source: TIPPING_V1_INTERFACE,
+        contractAddress: activeNetwork.tipContractV1,
+      }),
+      activeNetwork.tipContractV2
+        ? sdk.getContractInstance({
+          source: TIPPING_V2_INTERFACE,
+          contractAddress: activeNetwork.tipContractV2,
+        })
+        : null,
+    ]);
+
     commit('setTipping', [contractInstanceV1, contractInstanceV2]);
   },
   async share(_, options) {

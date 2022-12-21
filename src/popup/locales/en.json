@@ -118,12 +118,6 @@
       "title": "Unable to show this account.",
       "msg": "You've reached the limit of showed accounts, uncheck other account, if you want to show this one."
     },
-    "confirm-tip": {
-      "title": "Send Tip Confirmation",
-      "msg": "The webpage owner has not added a SUPERHERO wallet yet. We cannot guarantee that they will claim their tips.",
-      "sub-message": "You can still tip them—let them know so they can claim it. Would you like to proceed?",
-      "send": "Send Tip"
-    },
     "error-log": {
       "title": "Something went wrong",
       "sub-title": "Be a Superhero!",
@@ -227,11 +221,6 @@
       "title": "Autoextend name",
       "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.<br /><br /> Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.<br /><br /> Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
     },
-    "shareQr": {
-      "title": "Scan QR code",
-      "share": "Share",
-      "close": "Close"
-    },
     "receive": {
       "title": "Receive funds to public address",
       "requestAmount": "Request specific amount (optional)",
@@ -246,7 +235,7 @@
       "reviewTitle": "Review transaction",
       "successTitle": "Transaction successfully submitted",
       "recipientLabel": "Recipient",
-      "recipientPlaceholder": "Enter recipient’s address or .chain name",
+      "recipientPlaceholder": "Enter address, .chain name or URL",
       "next": "Next"
     },
     "wrongNetwork": {
@@ -349,7 +338,8 @@
       "buy": "Buy AE Tokens",
       "networks": "Network",
       "permissionsSettings": "Permissions",
-      "permissionsDetails": "Permissions details",
+      "permissionsEdit": "Edit permissions",
+      "permissionsAdd": "Add permissions",
       "comment-new": "Add comment",
       "home": "Home",
       "donate-error": "Donate Data",
@@ -363,12 +353,14 @@
       "invite": "Invite",
       "tx-details": "Transaction details",
       "token-details": "Token details",
+      "coin-details": "Coin details",
       "wallet-home": "Wallet Home",
       "save-errors-log": "Save error log",
       "reset-wallet": "Reset wallet",
       "seed-phrase": "Seed phrase",
       "network-add": "Add custom network",
-      "network-edit": "Edit network"
+      "network-edit": "Edit network",
+      "not-found": "Feature not found"
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
@@ -425,8 +417,10 @@
       "urlToClaim": "Claim tips from this URL:"
     },
     "notFound": {
-      "notFound": "Requested page can't be found",
-      "initialPage": "Open initial page"
+      "header": "Lost in space?",
+      "description": "The feature could not be found in this Universe. Keep calm and safely fly back home.",
+      "backToHome": "Return home",
+      "reportBug": "Report a bug"
     },
     "accountPassword": {
       "heading": "",
@@ -558,6 +552,8 @@
       "not-available": "N/A",
       "noTokens": "No tokens in account balance.",
       "buyAe": "Buy AE",
+      "buy": "Buy",
+      "swap": "Swap",
       "receiveTokens": "Receive tokens",
       "select-asset": "Select asset"
     },
@@ -568,8 +564,10 @@
       "buy": "Buy",
       "swap": "Swap",
       "tip": "Tip",
-      "token-details": "Token Details",
+      "token-details": "Token details",
+      "coin-details": "Coin details",
       "token": "Token",
+      "coin": "Coin",
       "token-description": "Token Description",
       "community": "Community",
       "decimals": "Decimals",
@@ -710,12 +708,12 @@
       "incorrectPasswordError": "Incorrect password.",
       "loginButton": "Login",
       "seedPhrase": "Seed phrase",
-      "enterSeedPhrase": "Please enter the 12 words of your seed phrase (separated by spaces) in the correct order to restore your Superhero wallet.",
+      "enterSeedPhrase": "Please enter the 12 words or more of your seed phrase (separated by spaces) in the correct order to restore your Superhero wallet.",
       "continueButton": "Continue",
       "continue": "Continue",
       "importAccount": "Restore wallet",
       "accountNotFound": "Account not found. Please check again your seed phrase.",
-      "invalidSeed": "Your seed phrase should consist of 12 words separated by spaces.",
+      "invalidSeed": "Your seed phrase should consist of 12 words or more separated by spaces.",
       "seedPlaceHolder": "Enter or paste your seed phrase here"
     },
     "ledgerSetup": {
@@ -790,7 +788,10 @@
       "incorrectPassword": "Incorrect Password",
       "decryptingPrivateKey": "Decrypting private key",
       "seedRecoveryHeading": "Show seed phrase",
-      "seedRecoverySmall": "Your seed phrase is a combination of 12 words and serves as  password to access and restore your wallet accounts.\n\n Never disclose this to anyone.\n\n Make sure you {0} on a piece of paper or in a file that no one else can see - but that you will never lose.\n\n Losing your seed phrase means losing access to your wallet and all funds in your accounts.",
+      "seedRecoverySmall": "Your seed phrase is a combination of 12 words and serves as  password to access and restore your wallet accounts.",
+      "seedRecoverySmall-2": "Never disclose this to anyone.",
+      "seedRecoverySmall-3": "Make sure you {0} on a piece of paper or in a file that no one else can see - but that you will never lose.",
+      "seedRecoverySmall-4": "Losing your seed phrase means losing access to your wallet and all funds in your accounts.",
       "seedRecoverySmallBackItUp": "back it up in the correct word sequence",
       "seedRecoveryBtn": "Show seed phrase",
       "seedPhrase": "Your seed phrase",
@@ -827,7 +828,7 @@
       "verifyYourSeedPhrase": "verify your seed phrase"
     },
     "send": {
-      "title": "Transaction successfully submitted",
+      "title": "Transaction has been submitted",
       "subtitle": "You may check the status of your transaction in æternity blockchain explorer",
       "send": "Send",
       "success": "Success",
@@ -1071,8 +1072,7 @@
       "deposited": "Deposited",
       "withdrawn": "Withdrawn",
       "rates": "Rates",
-      "swapRoute": "Swap route",
-      "urlCopied": "URL copied"
+      "swapRoute": "Swap route"
     },
     "transactions": {
       "backToAccount": "Back to account",
@@ -1134,11 +1134,11 @@
       "across": "across the Globe"
     },
     "nodeConnectionStatus": {
-      "error": "Unable to connect to chosen node",
+      "error": "Unable to connect to chosen node.",
       "connecting": "Connecting to node...",
       "connected": "Connected",
       "initServices": "Initializing services...",
-      "offline": "You are offline"
+      "offline": "You are offline. Go online to get real time data."
     },
     "popupMessageSign": {
       "title": "Sign message",
@@ -1193,20 +1193,30 @@
       "collapse": "Collapse",
       "claim": "Claim Back",
       "insufficient-balance": "Insufficient balance",
-      "insufficient-ivnite-balance": "This invite Link expired and the Tokens are already claimed.",
+      "insufficient-invite-balance": "This invite Link expired and the Tokens are already claimed.",
       "tip-attached": "Tip attached",
       "top-up-with": "Top up with",
       "delete": "Delete"
     },
     "permissions": {
       "login": "Don't ask for login requests",
-      "message-sign": "Don't ask for message signing",
+      "message-sign": "Auto-sign messages",
+      "daily-spending-limit": "Daily spending limit without asking",
       "transaction-sign": "Limit for spending without asking per day",
       "spent-today": "Spent today",
       "left-today": "Left today",
       "delete": "Remove permissions",
+      "add": "Add permissions",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "add-description": "Use this feature with caution and only for platforms you trust.",
       "empty": "You aren't connected to any aepps",
-      "description": "Manage confirmation popups and daily spending limits. For security reasons use this feature with caution only for trusted platforms such as {0} and your localhost environment."
+      "description": "Manage confirmation popups and daily spending limits. For security reasons use this feature with caution only for trusted platforms such as {0} and your localhost environment.",
+      "custom-name": "Custom name",
+      "enter-custom-name": "Enter custom name of your choice",
+      "permissions-for-url": "Permissions for URL",
+      "enter-url": "Enter URL",
+      "always-ask": "always ask"
     },
     "reset-wallet": {
       "description": "This action will remove all accounts from your wallet and delete the extension storage.",
@@ -1219,6 +1229,7 @@
   },
   "validation": {
     "required": "This field is required",
+    "url": "Invalid URL",
     "address": "Enter valid blockchain address or .chain name",
     "name": "Enter valid .chain name",
     "nameRegisteredAddress": "This name isn't registered or pointed to address",
@@ -1239,7 +1250,6 @@
   "days": "{n} days | {n} day | {n} days",
   "addressCopied": "Copied",
   "hashCopied": "Hash copied",
-  "copied": "Copied",
   "copy": "Copy",
   "tx-fee": "Transaction fee",
   "total": "Total",

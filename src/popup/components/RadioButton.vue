@@ -66,6 +66,7 @@ export default {
     margin-right: 6px;
     position: relative;
     opacity: 0.5;
+    flex-shrink: 0;
 
     &::after {
       content: '';
@@ -75,7 +76,7 @@ export default {
       height: 0;
       top: 50%;
       left: 50%;
-      background: variables.$color-blue;
+      background: variables.$color-primary;
       transition: all 0.15s ease-in-out;
       transform: translate(-50%, -50%);
     }

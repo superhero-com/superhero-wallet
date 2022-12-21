@@ -10,17 +10,19 @@
       />
       <div class="tx-details">
         <DetailsItem :label="$t('tx-fee')">
-          <TokenAmount
-            slot="value"
-            :amount="+txFee"
-            hide-fiat
-          />
+          <template #value>
+            <TokenAmount
+              :amount="+txFee"
+              hide-fiat
+            />
+          </template>
         </DetailsItem>
         <DetailsItem :label="$t('total')">
-          <TokenAmount
-            slot="value"
-            :amount="+amountTotal"
-          />
+          <template #value>
+            <TokenAmount
+              :amount="+amountTotal"
+            />
+          </template>
         </DetailsItem>
       </div>
       <BtnMain
@@ -38,7 +40,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { aeToAettos, calculateNameClaimFee, watchUntilTruthy } from '../../utils/helper';
+import { aeToAettos, calculateNameClaimFee, watchUntilTruthy } from '../../utils';
 import AuctionCard from '../../components/AuctionCard.vue';
 import InputAmount from '../../components/InputAmount.vue';
 import DetailsItem from '../../components/DetailsItem.vue';
@@ -84,11 +86,11 @@ export default {
   },
   methods: {
     async bid() {
-      await watchUntilTruthy(() => this.$store.state.sdk);
+      await watchUntilTruthy(() => this.$store.getters['sdkPlugin/sdk']);
       if (this.amountError) return;
       this.loading = true;
       try {
-        await this.$store.state.sdk.aensBid(this.name, aeToAettos(this.amount));
+        await this.$store.getters['sdkPlugin/sdk'].aensBid(this.name, aeToAettos(this.amount));
         this.$store.dispatch('modals/open', {
           name: 'default',
           msg: this.$t('pages.names.auctions.bid-added', { name: this.name }),

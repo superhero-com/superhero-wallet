@@ -12,6 +12,7 @@
     <h3
       v-if="subtitle || $slots.subtitle"
       class="subtitle"
+      :class="{ 'with-margin': !disableSubtitleMargin }"
     >
       <slot name="subtitle">
         {{ subtitle }}
@@ -25,6 +26,7 @@ export default {
   props: {
     title: { type: String, default: '' },
     subtitle: { type: String, default: '' },
+    disableSubtitleMargin: Boolean,
   },
 };
 </script>
@@ -36,23 +38,27 @@ export default {
 .modal-header {
   width: 100%;
   text-align: center;
+  padding: 0 16px;
 
   .subtitle {
     @extend %face-sans-16-regular;
 
     margin-block: 0;
     line-height: 24px;
-    margin-bottom: 1em;
     color: rgba(variables.$color-white, 0.75);
 
     a {
       font-weight: 500;
-      color: variables.$color-blue;
+      color: variables.$color-primary;
       text-decoration: none;
 
       &:hover {
         text-decoration: underline;
       }
+    }
+
+    &.with-margin {
+      margin-bottom: 1em;
     }
   }
 }

@@ -105,20 +105,22 @@
         v-if="Object.entries(nameEntry.pointers || {}).length"
         :label="$t('pages.names.list.pointers')"
       >
-        <BtnHelp
-          slot="label"
-          :title="$t('modals.name-pointers-help.title')"
-          :msg="$t('modals.name-pointers-help.msg')"
-        />
-        <div
-          v-for="(nameEntryPointer, key, idx) in nameEntry.pointers"
-          slot="value"
-          :key="key"
-          class="pointers"
-        >
-          <span>{{ `#${idx + 1}` }}</span>
-          {{ nameEntryPointer }}
-        </div>
+        <template #label>
+          <BtnHelp
+            :title="$t('modals.name-pointers-help.title')"
+            :msg="$t('modals.name-pointers-help.msg')"
+          />
+        </template>
+        <template #value>
+          <div
+            v-for="(nameEntryPointer, key, idx) in nameEntry.pointers"
+            :key="key"
+            class="pointers"
+          >
+            <span>{{ `#${idx + 1}` }}</span>
+            {{ nameEntryPointer }}
+          </div>
+        </template>
       </DetailsItem>
     </div>
   </div>
@@ -127,8 +129,11 @@
 <script>
 import { mapGetters } from 'vuex';
 import { pick } from 'lodash-es';
-import { blocksToRelativeTime } from '../../filters/toRelativeTime';
-import { checkAddressOrChannel, readValueFromClipboard } from '../utils/helper';
+import {
+  blocksToRelativeTime,
+  checkAddressOrChannel,
+  readValueFromClipboard,
+} from '../utils';
 import Pending from '../../icons/animated-pending.svg?vue-component';
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';
@@ -284,13 +289,13 @@ export default {
           @extend %face-sans-12-medium;
 
           &.set {
-            background: rgba(255, 170, 41, 0.1);
+            background: rgba(variables.$color-warning, 0.1);
             color: variables.$color-warning;
           }
 
           &.edit {
-            background: rgba(17, 97, 254, 0.15);
-            color: variables.$color-blue;
+            background: rgba(variables.$color-primary, 0.15);
+            color: variables.$color-primary;
           }
 
           &:not(:last-of-type) {
@@ -335,7 +340,7 @@ export default {
     }
 
     .details-item ::v-deep .value {
-      color: variables.$color-light-grey;
+      color: variables.$color-grey-light;
     }
 
     > .details-item {
@@ -380,7 +385,7 @@ export default {
 
   > span {
     margin-top: 4px;
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
 
     @extend %face-mono-10-medium;
   }

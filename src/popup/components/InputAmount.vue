@@ -29,11 +29,12 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
 import { pick } from 'lodash-es';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { calculateFee, watchUntilTruthy } from '../utils/helper';
+import { calculateFee } from '../utils';
+import { useSdk } from '../../composables';
 import InputField from './InputField.vue';
 
 export default {
@@ -54,7 +55,6 @@ export default {
     return pick(this.$store.state.observables, ['balance']);
   },
   computed: {
-    ...mapState(['sdk']),
     ...mapGetters(['formatCurrency', 'account']),
     hasError() {
       return this.$validator.errors.has('amount');
@@ -72,8 +72,9 @@ export default {
     },
   },
   async mounted() {
-    await watchUntilTruthy(() => this.sdk);
-    this.fee = calculateFee(SCHEMA.TX_TYPE.spend, this.sdk.Ae.defaults);
+    const { getSdk } = useSdk();
+    const sdk = await getSdk();
+    this.fee = calculateFee(SCHEMA.TX_TYPE.spend, sdk.Ae.defaults);
   },
 };
 </script>
@@ -88,7 +89,7 @@ export default {
   .token {
     margin-right: 2px;
     font-weight: 500;
-    color: variables.$color-blue;
+    color: variables.$color-primary;
   }
 
   .amount {

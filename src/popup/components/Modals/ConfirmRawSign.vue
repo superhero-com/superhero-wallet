@@ -4,7 +4,7 @@
     class="confirm-raw-sign"
     data-cy="popup-aex2"
   >
-    <Overview
+    <TransactionInfo
       :title="$t('modals.confirm-raw-sign.title')"
       :sender="{ name: app.name, address: app.host, url: app.url }"
       :recipient="account"
@@ -32,11 +32,8 @@
       :value="dataAsString"
       data-cy="data"
     >
-      <template #label>
-        <BtnCopy
-          :value="dataAsString"
-          :message="$t('copied')"
-        />
+      <template #value>
+        <CopyText :value="dataAsString" />
       </template>
     </DetailsItem>
 
@@ -61,20 +58,20 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import Modal from '../Modal.vue';
-import Overview from '../Overview.vue';
+import TransactionInfo from '../TransactionInfo.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import BtnCopy from '../buttons/BtnCopy.vue';
 import DetailsItem from '../DetailsItem.vue';
 import Warning from '../../../icons/warning.svg?vue-component';
+import CopyText from '../CopyText.vue';
 
 export default {
   components: {
     Modal,
-    Overview,
+    TransactionInfo,
     BtnMain,
-    BtnCopy,
     DetailsItem,
     Warning,
+    CopyText,
   },
   props: {
     resolve: { type: Function, required: true },
@@ -123,12 +120,11 @@ export default {
     text-align: left;
 
     .title {
+      @extend %face-sans-15-medium;
+
       display: flex;
       align-items: center;
       margin-bottom: 4px;
-
-      @extend %face-sans-15-medium;
-
       color: variables.$color-warning;
 
       .icon {

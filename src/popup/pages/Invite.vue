@@ -10,6 +10,7 @@
         class="amount"
         :label="$t('pages.invite.tip-attached')"
         no-token
+        ae-only
         @error="(val) => error = val"
       />
       <BtnMain
@@ -40,10 +41,10 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
-import { watchUntilTruthy } from '../utils/helper';
-import InputAmount from '../components/InputAmount.vue';
+import { watchUntilTruthy } from '../utils';
+import InputAmount from '../components/InputAmountV2.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InviteItem from '../components/InviteItem.vue';
 import Invite from '../../icons/invite.svg?vue-component';
@@ -63,8 +64,8 @@ export default {
     error: false,
   }),
   computed: {
-    ...mapState(['sdk']),
     ...mapState('invites', ['invites']),
+    ...mapGetters('sdkPlugin', ['sdk']),
   },
   methods: {
     async generate() {
@@ -98,6 +99,7 @@ export default {
 
 .invite-page {
   padding: 0 var(--screen-padding-x);
+  overflow: hidden;
 
   .section-title {
     display: flex;
@@ -105,7 +107,7 @@ export default {
     margin: 20px 0 16px;
     font-size: 17px;
     text-align: left;
-    color: variables.$color-light-grey;
+    color: variables.$color-grey-light;
     font-weight: 400;
 
     &-icon {

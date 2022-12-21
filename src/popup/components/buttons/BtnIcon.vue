@@ -15,12 +15,17 @@
 
 <script>
 const SIZES = ['rg', 'md'];
+const VARIANTS = ['light', 'dimmed', 'danger'];
 
 export default {
   props: {
     to: { type: Object, default: null },
     href: { type: String, default: null },
-    variant: { type: String, default: null },
+    variant: {
+      type: String,
+      default: null,
+      validator: (val) => VARIANTS.includes(val),
+    },
     size: {
       type: String,
       default: 'md',
@@ -55,14 +60,14 @@ export default {
   border: none;
   border-radius: 50%;
   outline: none;
-  transition: 0.1s;
+  transition: 0.2s;
   cursor: pointer;
 
   > .icon {
     color: variables.$color-white;
     width: var(--size);
     height: var(--size);
-    opacity: 0.7;
+    opacity: 0.75;
     transition: 0.1s;
   }
 
@@ -75,26 +80,50 @@ export default {
   }
 
   &:hover {
-    background-color: variables.$color-hover;
+    background-color: rgba(variables.$color-white, 0.08);
 
     > .icon {
       opacity: 1;
     }
   }
 
-  &.pink {
+  &:active {
+    background-color: variables.$color-grey-medium;
+  }
+
+  &.danger {
+    background: transparent;
+
+    > .icon {
+      opacity: 0.5;
+    }
+
     &:hover {
       > .icon {
-        color: variables.$color-pink;
+        color: variables.$color-danger;
+        opacity: 1;
       }
     }
   }
 
   &.dimmed {
+    background: transparent;
+
+    > .icon {
+      opacity: 0.5;
+    }
+
     &:hover {
       > .icon {
         opacity: 0.75;
       }
+    }
+  }
+
+  &.light {
+    &:hover {
+      background-color: transparent;
+      opacity: 0.5;
     }
   }
 }

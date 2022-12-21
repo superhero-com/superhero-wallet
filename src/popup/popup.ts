@@ -3,8 +3,6 @@ import '../lib/initPolyfills';
 import Vue from 'vue';
 import sync from '../lib/vuexRouterSync';
 import './plugins/compositionApi';
-import './plugins/vueClipboard';
-import './plugins/aeppComponents';
 import store from '../store';
 import router from './router';
 import { i18n } from '../store/plugins/languages';

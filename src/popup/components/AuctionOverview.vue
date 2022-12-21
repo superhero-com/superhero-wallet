@@ -1,10 +1,11 @@
 <template>
   <div class="auction-overview">
     <DetailsItem :label="$t('pages.auctionBid.current-highest-bid')">
-      <TokenAmount
-        slot="value"
-        :amount="+getHighestBid(name).nameFee"
-      />
+      <template #value>
+        <TokenAmount
+          :amount="+getHighestBid(name).nameFee"
+        />
+      </template>
     </DetailsItem>
     <DetailsItem
       class="end-height"
@@ -18,9 +19,9 @@
 <script>
 import { pick } from 'lodash-es';
 import { mapGetters } from 'vuex';
+import { blocksToRelativeTime } from '../utils';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
-import { blocksToRelativeTime } from '../../filters/toRelativeTime';
 
 export default {
   components: {
@@ -69,7 +70,7 @@ export default {
 
     &.end-height {
       ::v-deep .value {
-        color: variables.$color-light-grey;
+        color: variables.$color-grey-light;
       }
 
       ::v-deep .secondary {

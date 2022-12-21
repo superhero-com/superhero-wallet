@@ -36,8 +36,8 @@ export default defineComponent({
         'secondary',
         'alternative',
         'danger',
-        'pink',
         'purple',
+        'dark',
       ].includes(value),
       default: 'primary',
     },
@@ -83,12 +83,12 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1 1 0;
+  flex-grow: 1;
   width: fit-content;
   min-height: 40px;
-  padding: 5px 16px;
+  padding: 8px 16px;
   border-radius: variables.$border-radius-interactive;
-  line-height: 20px;
+  line-height: 24px;
   font-weight: 500;
   text-align: center;
   text-decoration: none;
@@ -130,7 +130,9 @@ export default defineComponent({
   }
 
   &.secondary {
-    --color: #{variables.$color-medium-grey};
+    --color: #{variables.$color-grey-medium};
+
+    padding: 8px 32px;
   }
 
   &.alternative {
@@ -141,12 +143,12 @@ export default defineComponent({
     --color: #{variables.$color-danger};
   }
 
-  &.pink {
-    --color: #{variables.$color-pink};
-  }
-
   &.purple {
     --color: #{variables.$color-purple};
+  }
+
+  &.dark {
+    --color: #{rgba(variables.$color-black, 0.2)};
   }
 
   &.half {

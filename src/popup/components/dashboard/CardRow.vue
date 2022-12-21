@@ -11,15 +11,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .card-row {
-    display: flex;
-    padding: 0 var(--screen-padding-x);
-    gap: var(--gap);
-    margin-bottom: var(--gap);
-    width: 100%;
+.card-row {
+  display: flex;
+  gap: var(--gap);
+  margin-bottom: var(--gap);
+  width: 100%;
 
-    &:last-child {
-      margin-bottom: 24px;
-    }
+  &:last-of-type {
+    margin-bottom: 0;
   }
+}
 </style>

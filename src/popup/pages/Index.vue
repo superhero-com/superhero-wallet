@@ -1,6 +1,7 @@
 <template>
   <div
     class="index"
+    :class="{ 'extended-top-padding': !IS_WEB && !IS_MOBILE_DEVICE }"
   >
     <img
       v-if="IN_FRAME"
@@ -10,7 +11,7 @@
       v-else
       class="not-iframe"
     >
-      <Logo />
+      <SuperheroLogoIcon class="superhero-logo" />
       <div class="heading">
         <i18n
           path="pages.index.heading.message"
@@ -24,22 +25,19 @@
         </i18n>
       </div>
 
-      <template v-if="IS_WEB">
-        <Platforms :class="{ agreed: termsAgreed }">
-          <template #header>
-            {{ $t('pages.index.platforms.heading') }}
-          </template>
-          <template #footer>
-            {{ $t('pages.index.webVersion') }}
-          </template>
-        </Platforms>
-      </template>
+      <Platforms v-if="!IS_EXTENSION">
+        <template #header>
+          {{ $t('pages.index.platforms.heading') }}
+        </template>
+        <template #footer>
+          {{ $t('pages.index.webVersion') }}
+        </template>
+      </Platforms>
     </div>
 
     <div :class="['terms-agreement', { mobile: !IS_WEB }]">
       <CheckBox
         v-model="termsAgreed"
-        :class="{ agreed: termsAgreed }"
         data-cy="checkbox"
       >
         <span>
@@ -49,8 +47,8 @@
       <RouterLink
         :to="{ name: 'about-terms' }"
         data-cy="terms"
-        :class="{ agreed: termsAgreed }"
         class="terms-of-use"
+        :class="{ agreed: termsAgreed }"
       >
         {{ $t('pages.index.termsAndConditions') }}
       </RouterLink>
@@ -82,18 +80,20 @@
 
 <script>
 import { generateMnemonic } from '@aeternity/bip39';
-import { IN_FRAME } from '../../lib/environment';
+import {
+  IS_EXTENSION, IS_WEB, IN_FRAME, IS_MOBILE_DEVICE,
+} from '../../lib/environment';
 import CheckBox from '../components/CheckBox.vue';
 import BtnSubheader from '../components/buttons/BtnSubheader.vue';
 import Platforms from '../components/Platforms.vue';
 import { MODAL_ACCOUNT_IMPORT } from '../utils/constants';
-import Logo from '../../icons/logo.svg?vue-component';
+import SuperheroLogoIcon from '../../icons/logo.svg?vue-component';
 import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
 import CheckCircleIcon from '../../icons/check-circle-fill.svg?vue-component';
 
 export default {
   components: {
-    Logo,
+    SuperheroLogoIcon,
     CheckBox,
     BtnSubheader,
     PlusCircleIcon,
@@ -102,7 +102,9 @@ export default {
   },
   data: () => ({
     termsAgreed: false,
-    IS_WEB: process.env.PLATFORM === 'web',
+    IS_EXTENSION,
+    IS_WEB,
+    IS_MOBILE_DEVICE,
     IN_FRAME,
   }),
   methods: {
@@ -125,44 +127,27 @@ export default {
 @use '../../styles/mixins';
 
 .index {
-  padding-top: 42px;
-  padding-top: calc(42px + env(safe-area-inset-top));
+  --padding-top: 44px;
+
+  padding-top: var(--padding-top);
+  padding-top: calc(var(--padding-top) + env(safe-area-inset-top));
   text-align: center;
 
+  &.extended-top-padding {
+    --padding-top: 64px;
+  }
+
   .terms-agreement {
-    @include mixins.flex(center);
+    @include mixins.flex(center, center);
 
-    @extend %face-sans-15-regular;
-
-    margin-bottom: 4px;
-
-    & > * {
-      transition: all 0.12s ease-in-out;
-    }
-
-    .checkbox-container {
-      margin-right: 4px;
-      color: rgba(variables.$color-white, 0.5);
-
-      &.agreed {
-        color: variables.$color-white;
-      }
-
-      &:hover:not(.agreed),
-      &:active:not(.agreed) {
-        color: variables.$color-grey-dark;
-      }
-
-      ::v-deep .checkmark {
-        margin-right: 10px;
-        border-color: rgba(variables.$color-white, 0.3);
-      }
-    }
+    margin-bottom: 16px;
 
     .terms-of-use {
+      @extend %face-sans-15-regular;
+
       color: rgba(variables.$color-white, 0.75);
       text-decoration: none;
-      margin-bottom: 4px;
+      margin-left: 4px;
 
       &:hover {
         color: variables.$color-white;
@@ -182,8 +167,8 @@ export default {
   .not-iframe {
     text-align: center;
 
-    svg {
-      height: 35px;
+    .superhero-logo {
+      height: 32px;
       margin-bottom: 8px;
     }
 
@@ -194,7 +179,7 @@ export default {
 
       line-height: 125%;
       color: variables.$color-white;
-      margin: 8px 60px 8px 60px;
+      margin: 4px 60px 24px;
 
       .tag {
         color: rgba(variables.$color-white, 0.75);
@@ -206,7 +191,7 @@ export default {
         }
 
         .aeternity-name {
-          color: variables.$color-pink;
+          color: variables.$color-danger;
         }
       }
     }
@@ -231,24 +216,18 @@ export default {
     .spinner {
       width: 256px;
       height: 256px;
-      color: variables.$color-blue;
+      color: variables.$color-primary;
     }
 
     .platforms {
-      border-radius: 6px;
-      margin: 8px auto 0 auto;
-      padding-top: 8px;
+      margin: 0 auto;
       max-width: 312px;
-
-      &.agreed {
-        opacity: 0.66;
-      }
     }
   }
 
   .wallet-button-box {
-    margin-left: 16px;
-    margin-right: 16px;
+    margin-inline: 16px;
+    padding-block: 4px;
   }
 }
 </style>

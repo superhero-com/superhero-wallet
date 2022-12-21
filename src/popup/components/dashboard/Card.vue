@@ -1,31 +1,53 @@
 <template>
-  <div
-    class="card"
-    :class="{ 'is-big': isBig, clickable, dense }"
-    :style="styleComponent"
-    @click="$emit('click', $event)"
-  >
-    <div class="card-icon">
-      <slot
-        name="icon"
-        class="icon-svg"
-      />
-    </div>
-    <div>
-      <div class="title">
-        {{ title }}
+  <transition name="fade">
+    <div
+      v-if="isVisible"
+      class="card"
+      :class="{ 'is-big': isBig, clickable, dense, disabled }"
+      :style="styleComponent"
+      @click="$emit('click', $event)"
+    >
+      <div class="card-icon">
+        <slot
+          name="icon"
+          class="icon-svg"
+        />
       </div>
-      <div class="description">
-        {{ description }}
+      <div>
+        <div class="title">
+          {{ title }}
+        </div>
+        <div class="description">
+          {{ description }}
+        </div>
+        <slot />
       </div>
-      <slot />
+      <div
+        v-if="cardId"
+        class="card-close"
+      >
+        <BtnIcon
+          variant="light"
+          @click="$store.commit('hideCard', cardId)"
+        >
+          <CloseIcon class="close-icon" />
+        </BtnIcon>
+      </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script>
+import { mapState } from 'vuex';
+import BtnIcon from '../buttons/BtnIcon.vue';
+import CloseIcon from '../../../icons/times-circle.svg?vue-component';
+
 export default {
   name: 'Card',
+  components: {
+    BtnIcon,
+    CloseIcon,
+  },
   props: {
     title: {
       type: String,
@@ -42,14 +64,20 @@ export default {
     isBig: Boolean,
     clickable: Boolean,
     dense: Boolean,
+    disabled: Boolean,
+    cardId: { type: String, default: null },
   },
   computed: {
+    ...mapState(['hiddenCards']),
     styleComponent() {
       return {
         backgroundImage: (this.background)
           ? `url("${this.background}")`
           : null,
       };
+    },
+    isVisible() {
+      return !this.cardId || !this.hiddenCards || !this.hiddenCards.includes(this.cardId);
     },
   },
 };
@@ -61,6 +89,7 @@ export default {
 @use '../../../styles/mixins';
 
 .card {
+  position: relative;
   width: 100%;
   background-color: variables.$color-bg-6;
   min-height: 116px;
@@ -73,6 +102,55 @@ export default {
   transition: background-color 0.2s;
 
   @include mixins.flex(center, center, column);
+
+  .card-icon {
+    height: 36px;
+    width: 36px;
+    min-width: 36px;
+    background-color: rgba(variables.$color-white, 0.15);
+    border-radius: 14px;
+    transition: background-color 0.2s;
+
+    @include mixins.flex(center, center);
+
+    .icon-svg {
+      height: 20px;
+    }
+  }
+
+  .card-close {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+
+    .close-icon {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .title {
+    @extend %face-sans-16-bold;
+  }
+
+  .description {
+    @extend %face-sans-13-regular;
+
+    opacity: 0.7;
+    margin-top: 4px;
+  }
+
+  &.is-big {
+    flex-direction: row;
+    align-items: start;
+    gap: 16px;
+    padding: 20px 16px;
+    text-align: left;
+
+    .card-icon {
+      margin-top: 2px;
+    }
+  }
 
   &.dense {
     .description {
@@ -99,42 +177,9 @@ export default {
     }
   }
 
-  .card-icon {
-    height: 36px;
-    width: 36px;
-    min-width: 36px;
-    background-color: rgba(variables.$color-white, 0.15);
-    border-radius: 14px;
-    transition: background-color 0.2s;
-
-    @include mixins.flex(center, center);
-
-    .icon-svg {
-      height: 20px;
-    }
-  }
-
-  .title {
-    @extend %face-sans-16-bold;
-  }
-
-  .description {
-    opacity: 0.7;
-    margin-top: 4px;
-
-    @extend %face-sans-13-medium;
-  }
-
-  &.is-big {
-    flex-direction: row;
-    align-items: start;
-    gap: 16px;
-    padding: 20px 16px;
-    text-align: left;
-
-    .card-icon {
-      margin-top: 2px;
-    }
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.4;
   }
 }
 </style>

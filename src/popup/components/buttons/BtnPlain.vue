@@ -30,6 +30,7 @@ export default {
   text-decoration: none;
   color: inherit;
   cursor: pointer;
+  user-select: none;
 
   &.extend {
     width: 100%;

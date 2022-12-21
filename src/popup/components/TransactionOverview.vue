@@ -1,5 +1,5 @@
 <template>
-  <Overview
+  <TransactionInfo
     class="transaction-overview"
     :title="transaction.title"
     :sender="transaction.sender"
@@ -11,11 +11,11 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { watchUntilTruthy } from '../utils/helper';
-import Overview from './Overview.vue';
+import { watchUntilTruthy } from '../utils';
+import TransactionInfo from './TransactionInfo.vue';
 
 export default {
-  components: { Overview },
+  components: { TransactionInfo },
   props: {
     tx: { type: Object, required: true },
     isDex: { type: Boolean, default: false },
@@ -101,7 +101,7 @@ export default {
   async mounted() {
     await watchUntilTruthy(() => this.$store.state.middleware);
     if (this.tx.recipientId?.startsWith('nm_')) {
-      this.name = (await this.$store.state.middleware.getNameByHash(this.tx.recipientId)).name;
+      this.name = (await this.$store.state.middleware.getNameById(this.tx.recipientId)).name;
     }
   },
 };

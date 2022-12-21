@@ -1,52 +1,42 @@
 <template>
-  <div class="address">
-    <div class="section-title">
-      {{ $t('pages.tipPage.sendToAddress') }}
-    </div>
-
-    <div class="url-bar">
-      {{ callbackOrigin }}
-    </div>
-
-    <BtnMain @click="openCallbackOrGoHome(true, { address: $store.getters.account.address })">
-      {{ $t('pages.tipPage.confirm') }}
-    </BtnMain>
-    <BtnMain @click="openCallbackOrGoHome(false)">
-      {{ $t('pages.tipPage.cancel') }}
-    </BtnMain>
-  </div>
+  <Connect
+    :app="app"
+    :resolve="onResolve"
+    :reject="onReject"
+    :access="[POPUP_CONNECT_ADDRESS_PERMISSION]"
+  />
 </template>
 
-<script>
-import BtnMain from '../components/buttons/BtnMain.vue';
-import deeplinkApi from '../../mixins/deeplinkApi';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import { useDeepLinkApi } from '../../composables';
+import { POPUP_CONNECT_ADDRESS_PERMISSION } from '../utils/constants';
+import Connect from './Popups/Connect.vue';
 
-export default {
-  components: { BtnMain },
-  mixins: [deeplinkApi],
-};
+export default defineComponent({
+  name: 'Address',
+  components: { Connect },
+  setup(props, { root }) {
+    const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router: root.$router });
+    const app = computed<any>(() => callbackOrigin.value ? ({
+      name: callbackOrigin.value.hostname,
+      url: callbackOrigin.value.origin,
+      host: callbackOrigin.value.host,
+    }) : {});
+
+    const onResolve = () => openCallbackOrGoHome(true, {
+      address: root.$store.getters.account.address,
+      networkId: root.$store.getters.activeNetwork.networkId,
+    });
+
+    const onReject = () => openCallbackOrGoHome(false);
+
+    return {
+      onResolve,
+      onReject,
+      app,
+      POPUP_CONNECT_ADDRESS_PERMISSION,
+    };
+  },
+});
 </script>
-
-<style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-
-.address {
-  .url-bar {
-    margin: 8px 0;
-    text-align: left;
-    color: variables.$color-white;
-
-    @extend %face-sans-11-regular;
-  }
-
-  .section-title {
-    margin-bottom: 8px;
-    margin-top: 16px;
-    font-size: 16px;
-    color: variables.$color-white;
-    font-weight: 400;
-    text-align: left;
-  }
-}
-</style>

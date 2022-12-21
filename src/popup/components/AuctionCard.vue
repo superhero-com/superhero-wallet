@@ -15,7 +15,6 @@
 import Avatar from './Avatar.vue';
 import BtnHelp from './buttons/BtnHelp.vue';
 import AuctionOverview from './AuctionOverview.vue';
-import { blocksToRelativeTime } from '../../filters/toRelativeTime';
 
 export default {
   components: {
@@ -25,9 +24,6 @@ export default {
   },
   props: {
     name: { type: String, required: true },
-  },
-  methods: {
-    blocksToRelativeTime,
   },
 };
 </script>
@@ -46,7 +42,7 @@ export default {
   .avatar {
     width: 48px;
     height: 48px;
-    box-shadow: rgba(variables.$color-blue, 0.15) 0 0 0 8px;
+    box-shadow: rgba(variables.$color-primary, 0.15) 0 0 0 8px;
     margin-top: 36px;
   }
 

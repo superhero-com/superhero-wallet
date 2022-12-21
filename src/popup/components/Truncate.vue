@@ -1,25 +1,39 @@
 <template>
-  <span class="truncate">
+  <div
+    class="truncate"
+    :class="{ right }"
+  >
     <span
-      :class="['container', { fixed }]"
+      ref="container"
+      class="container"
+      :class="{ fixed }"
       :style="cssVars"
     >
       <span ref="scroll">{{ nameComponent || str }}</span>
     </span>
-    <span v-if="nameComponent">{{ '.chain' }}</span>
-  </span>
+    <span
+      v-if="nameComponent"
+      class="domain"
+    >{{ AENS_DOMAIN }}</span>
+  </div>
 </template>
 
 <script>
+import { AENS_DOMAIN } from '../utils';
+
 export default {
   props: {
     str: { type: String, required: true },
-    fixed: { type: Boolean },
     gradientColor: { type: String, default: 'black' },
+    fixed: Boolean,
+    right: Boolean,
   },
+  data: () => ({
+    AENS_DOMAIN,
+  }),
   computed: {
     nameComponent() {
-      return this.str.endsWith('.chain') ? this.str.replace('.chain', '') : '';
+      return this.str.endsWith(AENS_DOMAIN) ? this.str.replace(AENS_DOMAIN, '') : '';
     },
     cssVars() {
       if (this.fixed) {
@@ -38,21 +52,24 @@ export default {
       async handler() {
         if (this.fixed) return;
         document.fonts.ready.then(() => {
-          const scrollElement = this.$refs.scroll;
-          const { parentElement } = scrollElement;
-          const { scrollWidth, offsetWidth } = parentElement;
+          const scrollElem = this.$refs.scroll;
+          const containerElem = this.$refs.container;
 
-          if (scrollWidth > offsetWidth) {
-            parentElement.classList.add('scrollable');
-            this.animation = scrollElement.animate(
-              [{ transform: `translateX(calc(-${scrollWidth - offsetWidth}px - var(--beforeWidth)))` }],
-              {
-                delay: 2000,
-                duration: 4000,
-                direction: 'alternate',
-                iterations: Infinity,
-              },
-            );
+          if (scrollElem && containerElem) {
+            const { scrollWidth, offsetWidth } = containerElem;
+
+            if (scrollWidth > offsetWidth) {
+              containerElem.classList.add('scrollable');
+              this.animation = scrollElem.animate(
+                [{ transform: `translateX(calc(-${scrollWidth - offsetWidth}px - var(--beforeWidth)))` }],
+                {
+                  delay: 2000,
+                  duration: 4000,
+                  direction: 'alternate',
+                  iterations: Infinity,
+                },
+              );
+            }
           }
         });
       },
@@ -65,6 +82,10 @@ export default {
 <style lang="scss" scoped>
 .truncate {
   display: flex;
+
+  &.right {
+    justify-content: flex-end;
+  }
 
   .container {
     position: relative;
@@ -110,6 +131,10 @@ export default {
         }
       }
     }
+  }
+
+  .domain {
+    word-break: keep-all;
   }
 }
 </style>

@@ -61,8 +61,8 @@ p {
   margin: 0;
   word-break: break-word;
 
-  &:not(:last-child) {
-    margin-bottom: 1em;
+  &:not(:last-of-type) {
+    margin-bottom: 8px;
   }
 }
 
@@ -75,7 +75,7 @@ button {
   padding: 0;
   background: none;
   border: none;
-  color: $color-light-grey;
+  color: $color-grey-light;
 
   &:focus {
     outline: none;
@@ -104,11 +104,62 @@ button {
     text-align: center;
   }
 
+  &-left {
+    text-align: left;
+  }
+
+  &-right {
+    text-align: right;
+  }
+
+  &-address {
+    @extend %face-mono-11-medium;
+
+    letter-spacing: 0.13em;
+    color: rgba($color-white, 0.75);
+    word-break: break-word;
+    transition: 0.1s;
+
+    &:hover {
+      color: $color-white;
+    }
+  }
+
+  &-heading-1 {
+    @extend %face-sans-18-regular;
+
+    margin-bottom: 18px;
+    color: $color-white;
+    text-align: center;
+  }
+
   &-heading-2 {
     @extend %face-sans-18-medium;
 
     margin-bottom: 0.45em;
     color: $color-white;
+  }
+
+  &-description {
+    @extend %face-sans-15-regular;
+
+    color: rgba($color-white, 0.85);
+    text-align: left;
+    white-space: pre-line;
+
+    a {
+      color: $color-primary;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    strong {
+      font-weight: 500;
+      color: $color-white;
+    }
   }
 }
 

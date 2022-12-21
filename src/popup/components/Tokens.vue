@@ -1,20 +1,21 @@
 <template>
   <span
     class="tokens"
-    :class="{ vertical }"
+    :class="[iconSize, { vertical }]"
   >
     <span class="icons">
       <img
-        v-if="toToken"
+        v-if="toToken && !noIcons"
         :src="toToken.img"
         :class="['to-token', { border: toToken.imgBorder }]"
         :title="toToken.symbol"
       >
       <img
+        v-if="!noIcons"
         :src="fromToken.img"
         :class="{
           border: fromToken.imgBorder,
-          pair: !!toToken
+          pair: !!toToken,
         }"
         :title="fromToken.symbol"
       >
@@ -44,7 +45,9 @@
 
 <script>
 import AeIcon from '../../icons/tokens/ae.svg';
-import { AETERNITY_CONTRACT_ID } from '../utils/constants';
+import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils/constants';
+
+const SIZES = ['rg', 'md', 'xl']; // TODO - add more sizes to icons
 
 export default {
   props: {
@@ -54,7 +57,13 @@ export default {
     tokens: { type: Array, required: true },
     symbolLength: { type: Number, default: 11 },
     doubleSymbolLength: { type: Number, default: 5 },
+    iconSize: {
+      type: String,
+      default: 'rg',
+      validator: (val) => SIZES.includes(val),
+    },
     vertical: Boolean,
+    noIcons: Boolean,
   },
   computed: {
     fromToken() {
@@ -86,7 +95,7 @@ export default {
 
       return {
         ...token,
-        symbol: token.isAe ? 'AE' : token.symbol,
+        symbol: token.isAe ? AETERNITY_SYMBOL : token.symbol,
         name: token.isAe ? 'Aeternity' : token.symbol,
         img,
         imgBorder,
@@ -101,9 +110,11 @@ export default {
 @use '../../styles/typography';
 
 .tokens {
-  @extend %face-sans-14-regular;
+  --icon-size: 16px;
 
-  color: variables.$color-light-grey;
+  @extend %face-sans-15-medium;
+
+  color: rgba(variables.$color-white, 0.75);
 
   &,
   .symbols,
@@ -123,9 +134,17 @@ export default {
     vertical-align: middle;
   }
 
+  &.md {
+    --icon-size: 18px;
+  }
+
+  &.xl {
+    --icon-size: 30px;
+  }
+
   img {
-    width: 16px;
-    height: 16px;
+    width: var(--icon-size);
+    height: var(--icon-size);
     border-radius: 8px;
     vertical-align: middle;
     margin-right: 4px;
@@ -140,7 +159,7 @@ export default {
     }
 
     &.border {
-      border: 0.25px solid variables.$color-light-grey;
+      border: 0.25px solid rgba(variables.$color-white, 0.75);
     }
   }
 
@@ -151,7 +170,7 @@ export default {
       @extend %face-sans-18-medium;
 
       .separator {
-        color: variables.$color-light-grey;
+        color: rgba(variables.$color-white, 0.75);
       }
     }
 

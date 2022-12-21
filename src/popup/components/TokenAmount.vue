@@ -1,14 +1,25 @@
 <template>
   <span
     class="token-amount"
-    :class="[direction, { large }]"
+    :class="[direction, { large, 'has-label': !!label }]"
   >
-    {{ amountRounded }}
-    <span
-      v-if="!noSymbol"
-      class="symbol"
-    >
-      {{ symbol }}
+    <span>
+      <span
+        v-if="label"
+        class="label"
+      >
+        {{ label }}
+      </span>
+
+      <span class="amount">
+        {{ amountRounded }}
+        <span
+          v-if="!noSymbol"
+          class="symbol"
+        >
+          {{ symbol }}
+        </span>
+      </span>
     </span>
     <span
       v-if="amountFiat"
@@ -22,22 +33,25 @@
 
 <script>
 import { mapState } from 'vuex';
+import { AETERNITY_SYMBOL } from '../utils/constants';
 
 export default {
   props: {
     amount: { type: Number, required: true },
-    symbol: { type: String, default: 'AE' },
+    label: { type: String, default: null },
+    symbol: { type: String, default: AETERNITY_SYMBOL },
     aex9: { type: Boolean, default: false },
     fiatBelow: { type: Boolean, default: false },
-    hideFiat: { type: Boolean },
+    hideFiat: Boolean,
     direction: {
       type: String,
       validator: (value) => ['sent', 'received'].includes(value),
       default: undefined,
     },
-    large: { type: Boolean },
-    noSymbol: { type: Boolean },
-    highPrecision: { type: Boolean },
+    large: Boolean,
+    row: Boolean,
+    noSymbol: Boolean,
+    highPrecision: Boolean,
   },
   computed: {
     amountRounded() {
@@ -63,23 +77,39 @@ export default {
 @use '../../styles/typography';
 
 .token-amount {
-  @extend %face-sans-14-regular;
+  @extend %face-sans-15-medium;
 
   color: variables.$color-white;
 
-  .symbol {
+  .label {
     @extend %face-sans-14-medium;
 
-    color: variables.$color-light-grey;
+    color: rgba(variables.$color-white, 0.5);
+    display: block;
+  }
+
+  .symbol {
+    color: rgba(variables.$color-white, 0.75);
   }
 
   .fiat {
+    @extend %face-sans-15-regular;
+
     margin-left: 8px;
-    color: variables.$color-grey-dark;
+    color: rgba(variables.$color-white, 0.75);
 
     &.fiat-below {
       display: block;
+      margin-left: 0;
+      padding-top: 4px;
     }
+  }
+
+  &.has-label {
+    display: inline-flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
   }
 
   &.sent {
@@ -92,7 +122,7 @@ export default {
   }
 
   &.received {
-    color: variables.$color-green-hover;
+    color: variables.$color-success-hover;
 
     &::before {
       content: '+';
@@ -108,6 +138,10 @@ export default {
 
     .text {
       @extend %face-sans-16-regular;
+    }
+
+    .fiat {
+      @extend %face-sans-18-regular;
     }
   }
 }

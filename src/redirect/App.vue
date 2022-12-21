@@ -64,8 +64,8 @@ html {
   }
 
   .loader {
-    border: 8px solid variables.$color-light-grey;
-    border-top: 8px solid variables.$color-blue;
+    border: 8px solid variables.$color-grey-light;
+    border-top: 8px solid variables.$color-primary;
     border-radius: 50%;
     width: 70px;
     height: 70px;

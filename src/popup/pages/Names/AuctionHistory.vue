@@ -67,7 +67,7 @@ export default {
     @extend %face-sans-17-medium;
 
     .name {
-      color: variables.$color-blue;
+      color: variables.$color-primary;
     }
   }
 
@@ -76,7 +76,7 @@ export default {
     padding: 8px 0;
 
     &:not(:first-of-type) {
-      border-top: 1px solid rgba(variables.$color-blue, 0.44);
+      border-top: 1px solid rgba(variables.$color-primary, 0.44);
     }
 
     .account-item {
