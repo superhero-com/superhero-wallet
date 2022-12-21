@@ -48,7 +48,6 @@ export default new Vuex.Store({
     tippingV2: null,
     nodeStatus: NODE_STATUS_OFFLINE,
     currencies: {},
-    notifications: [],
     notificationSettings: [],
     chainNames: null,
     tip: null,

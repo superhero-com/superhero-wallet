@@ -2,8 +2,6 @@
 import Vue from 'vue';
 import { uniqBy } from 'lodash-es';
 import {
-  NOTIFICATION_STATUS_CREATED,
-  NOTIFICATION_TYPE_WALLET,
   NODE_STATUS_CONNECTION_DONE,
   NODE_STATUS_CONNECTED,
   defaultNetwork,
@@ -75,21 +73,6 @@ export default {
   },
   setCurrencies(state, payload) {
     state.currencies = payload;
-  },
-  addNotification(state, payload) {
-    state.notifications = [
-      ...state.notifications,
-      {
-        ...payload,
-        type: NOTIFICATION_TYPE_WALLET,
-        status: NOTIFICATION_STATUS_CREATED,
-        createdAt: new Date().toISOString(),
-      },
-    ];
-  },
-  setNotificationsStatus(state, { createdAt, status }) {
-    const index = state.notifications.findIndex((n) => n.createdAt === createdAt);
-    Vue.set(state.notifications[index], 'status', status);
   },
   setNotificationSettings(state, payload) {
     state.notificationSettings = payload;

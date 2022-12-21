@@ -39,10 +39,13 @@ export function useMaxAmount({ formModel }: UseMaxAmountOptions) {
   const nonce = ref(0);
   const selectedAssetDecimals = ref(0);
 
-  const balance = rxJsObservableToVueState((store.state as any).observables.balance);
-  const balanceCurrency = rxJsObservableToVueState(
+  const balance = rxJsObservableToVueState<any>(
+    (store.state as any).observables.balance,
+  );
+  const balanceCurrency = rxJsObservableToVueState<number>(
     (store.state as any).observables.balanceCurrency,
   );
+
   const account = useGetter<IAccount>('account');
   const max = computed(() => {
     if (balance.value && formModel.value?.selectedAsset?.contractId === AETERNITY_CONTRACT_ID) {

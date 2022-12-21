@@ -9,6 +9,8 @@ import type {
 import { i18n } from '../../store/plugins/languages';
 
 export const EXTENSION_HEIGHT = 600;
+export const MOBILE_WIDTH = 480;
+
 export const MAGNITUDE = 18;
 export const SEED_LENGTH = 12;
 export const AETERNITY_CONTRACT_ID = 'aeternity';
@@ -121,7 +123,6 @@ export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 export const BUG_REPORT_URL = 'https://spgrrc00ymg.typeform.com/to/Kk3Zyjdr';
 
 export const NOTIFICATION_STATUS_CREATED = 'CREATED';
-export const NOTIFICATION_STATUS_PEEKED = 'PEEKED';
 export const NOTIFICATION_STATUS_READ = 'READ';
 
 export const NOTIFICATION_TYPE_WALLET = 'wallet';
@@ -433,3 +434,5 @@ export const POPUP_TYPES = [
 
 export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';
 export const POPUP_CONNECT_TRANSACTIONS_PERMISSION = 'transactions';
+
+export const NOTIFICATION_ENTITY_TYPE_TIP = 'TIP';

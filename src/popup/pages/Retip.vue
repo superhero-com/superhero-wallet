@@ -63,7 +63,6 @@ import {
   onMounted,
   ref,
   computed,
-  Ref,
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import VueI18n from 'vue-i18n';
@@ -107,9 +106,9 @@ export default defineComponent({
       balance,
       account,
     } = useMaxAmount({ formModel });
-    const balanceCurrency = rxJsObservableToVueState(
+    const balanceCurrency = rxJsObservableToVueState<number>(
       root.$store.state.observables.balanceCurrency,
-    ) as Ref<number>;
+    );
 
     const loading = ref<boolean>(false);
     const getAeternityToken = useGetter('fungibleTokens/getAeternityToken');

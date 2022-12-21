@@ -205,10 +205,8 @@
       "noTransactionsFound": "¡No se encontraron transacciones!",
       "balance": "Saldo",
       "copied": "¡Copiado!",
-      "seedNotification": "Necesitas {0} tu frase semilla",
       "backup": "respaldar",
       "updateExtension": "¡Nueva versión disponible! Por favor actualiza tu extensión.",
-      "updateAvailable": "¡Nueva versión disponible en la tienda!",
       "claim-name": "Reclama tu nombre .chain"
     },
     "claim": {

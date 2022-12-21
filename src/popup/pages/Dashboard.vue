@@ -42,7 +42,7 @@
           </template>
           <BtnMain
             class="card-button"
-            variant="secondary"
+            variant="danger"
             inline
             :text="$t('dashboard.back-up-card.button')"
             :to="{ name: 'settings-seed-phrase' }"

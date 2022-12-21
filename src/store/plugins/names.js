@@ -8,6 +8,7 @@ import {
   checkAensName,
   getAllPages,
   watchUntilTruthy,
+  fetchRespondChallenge,
 } from '../../popup/utils';
 import { i18n } from './languages';
 
@@ -167,13 +168,9 @@ export default (store) => {
             preferredChainName: name,
           },
         });
-        const signedChallenge = Buffer.from(await sdk.signMessage(response.challenge)).toString(
-          'hex',
-        );
-        const respondChallenge = {
-          challenge: response.challenge,
-          signature: signedChallenge,
-        };
+
+        const respondChallenge = await fetchRespondChallenge(sdk, response);
+
         await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
           body: respondChallenge,
         });

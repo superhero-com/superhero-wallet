@@ -47,6 +47,7 @@
     "cordova-plugin-splashscreen": "^6.0.1",
     "cordova-plugin-statusbar": "^3.0.0",
     "cordova-plugin-x-socialsharing": "^6.0.3",
+    "dayjs": "^1.11.7",
     "detect-browser": "^5.3.0",
     "dex-contracts-v2": "github:aeternity/dex-contracts-v2",
     "lodash-es": "^4.17.21",
