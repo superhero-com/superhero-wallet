@@ -4,6 +4,7 @@ import {
   ROUTE_ACCOUNT,
   ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
   ROUTE_NOTIFICATIONS,
+  ROUTE_COIN,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -445,13 +446,40 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/account-details/:type/:id',
+    path: '/coins/:id',
+    component: TokenContainer,
+    name: ROUTE_COIN,
+    children: [
+      {
+        name: 'coin-transactions',
+        path: '',
+        component: TokenTransactions,
+        props: true,
+        meta: {
+          title: 'coin-details',
+          showHeaderNavigation: true,
+        },
+      },
+      {
+        name: 'coin-details',
+        path: 'details',
+        component: TokenDetails,
+        props: true,
+        meta: {
+          title: 'coin-details',
+          showHeaderNavigation: true,
+        },
+      },
+    ],
+  },
+  {
+    path: '/tokens/:id',
     component: TokenContainer,
     children: [
       {
-        name: 'token-details',
-        path: 'details',
-        component: TokenDetails,
+        name: 'token-transactions',
+        path: '',
+        component: TokenTransactions,
         props: true,
         meta: {
           title: 'token-details',
@@ -459,9 +487,9 @@ export const routes: WalletAppRouteConfig[] = [
         },
       },
       {
-        name: 'token-transactions',
-        path: 'transactions',
-        component: TokenTransactions,
+        name: 'token-details',
+        path: 'details',
+        component: TokenDetails,
         props: true,
         meta: {
           title: 'token-details',

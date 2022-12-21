@@ -78,7 +78,6 @@
 import {
   computed,
   defineComponent,
-  onBeforeUnmount,
   onMounted,
   ref,
 } from '@vue/composition-api';
@@ -92,6 +91,7 @@ import {
   isContract,
   rxJsObservableToVueState,
 } from '../../utils';
+import { ROUTE_COIN } from '../../router/routeNames';
 import { useGetter, useSdk } from '../../../composables';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
@@ -107,7 +107,7 @@ import SwapIcon from '../../../icons/swap.svg?vue-component';
 import BuyIcon from '../../../icons/buy.svg?vue-component';
 
 export default defineComponent({
-  name: 'TokenDetails',
+  name: 'TokenContainer',
   components: {
     ArrowSendIcon,
     ArrowReceiveIcon,
@@ -122,17 +122,24 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { getSdk } = useSdk();
-
+    const isCoin: boolean = !!root.$route.matched.find(({ name }) => name === ROUTE_COIN);
     const contractId = root.$route.params.id;
     const isAe = contractId === AETERNITY_CONTRACT_ID;
     const tabs = [
       {
         text: root.$t('pages.transactionDetails.transactions'),
-        routeName: 'token-transactions',
+        routeName: isCoin
+          ? 'coin-transactions'
+          : 'token-transactions',
+        exact: true,
       },
       {
-        text: root.$t(`pages.token-details.${root.$route.params.type}-details`),
-        routeName: 'token-details',
+        text: isCoin
+          ? root.$t('pages.token-details.coin-details')
+          : root.$t('pages.token-details.token-details'),
+        routeName: isCoin
+          ? 'coin-details'
+          : 'token-details',
         exact: true,
       },
     ];
@@ -184,20 +191,11 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      const tokenType = root.$route.params.type;
-
-      if (tokenType === 'token' || tokenType === 'coin') {
-        root.$store.commit('setPageTitle', root.$t(`pages.token-details.${tokenType}-details`));
-      }
-
       if (isContract(contractId) && !isAe) {
         await getSdk();
         tokenPairs.value = await root.$store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
       }
       loading.value = false;
-    });
-    onBeforeUnmount(() => {
-      root.$store.commit('setPageTitle', null);
     });
 
     return {
