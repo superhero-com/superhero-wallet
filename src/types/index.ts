@@ -50,6 +50,7 @@ export interface IAsset {
   symbol: string
   total_supply: number
   total_volume: number
+  decimals?: number,
 }
 
 export interface IAccount {
@@ -160,6 +161,7 @@ export interface ITx {
   recipientId?: string,
   selectedTokenContractId?: string,
   arguments: ITxArguments[],
+  payload?: string
 }
 export interface ITransaction {
   blockHeight: number;

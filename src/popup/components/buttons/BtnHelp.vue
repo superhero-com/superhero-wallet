@@ -41,11 +41,12 @@ export default {
   svg {
     width: 24px;
     height: 24px;
-    color: rgba(variables.$color-primary, 0.7);
+    opacity: 0.5;
+    color: variables.$color-white;
   }
 
   &:hover svg {
-    color: variables.$color-primary;
+    opacity: 1;
   }
 }
 </style>

@@ -4,17 +4,15 @@
     has-close-button
     from-bottom
     centered
+    :body-without-padding-bottom="!!payload.length"
     @close="resolve"
   >
-    <template #header>
-      <ModalHeader
-        class="header"
-        :title="$t('pages.send.title')"
-        :subtitle="$t('pages.send.subtitle')"
-        disable-subtitle-margin
-      />
-    </template>
-
+    <ModalHeader
+      class="header"
+      :title="$t('pages.send.title')"
+      :subtitle="$t('pages.send.subtitle')"
+      disable-subtitle-margin
+    />
     <div class="pending-wrapper">
       <Pending />
     </div>
@@ -26,7 +24,10 @@
     <span class="sending-to">
       {{ transaction.tipUrl ? $t('pages.send.sentTo') : $t('pages.send.sendingTo') }}
     </span>
-    <div class="content">
+    <div
+      class="content"
+      :class="{ 'without-margin': payload.length }"
+    >
       <span v-if="transaction.tipUrl">{{ transaction.tipUrl }}</span>
       <AvatarWithChainName
         v-else
@@ -36,8 +37,15 @@
         :name="nameRecipient"
       />
     </div>
+
+    <PayloadDetails
+      class="payload-detail"
+      :payload="payload"
+    />
+
     <template #footer>
       <BtnMain
+        class="btn-secondary"
         variant="muted"
         extend
         nowrap
@@ -65,12 +73,14 @@ import TokenAmount from '../TokenAmount.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AvatarWithChainName from '../AvatarWithChainName.vue';
 import ModalHeader from '../ModalHeader.vue';
+import PayloadDetails from '../PayloadDetails.vue';
+import { getPayload, watchUntilTruthy, AETERNITY_SYMBOL } from '../../utils';
 import Pending from '../../../icons/animated-pending.svg?vue-component';
 import ExternalLink from '../../../icons/external-link-big.svg?vue-component';
-import { AETERNITY_SYMBOL, watchUntilTruthy } from '../../utils';
 
 export default {
   components: {
+    PayloadDetails,
     ModalHeader,
     AvatarWithChainName,
     Modal,
@@ -94,6 +104,9 @@ export default {
     isAe() {
       return !(this.transaction.tx.contractId
         && this.availableTokens[this.transaction.tx.contractId]?.symbol);
+    },
+    payload() {
+      return getPayload(this.transaction);
     },
   },
   async mounted() {
@@ -138,7 +151,7 @@ export default {
   }
 
   .header {
-    margin-top: 40px;
+    padding: 0;
   }
 
   .avatar-with-chain-name {
@@ -168,6 +181,19 @@ export default {
   .content {
     margin-bottom: 26px;
     width: 100%;
+
+    &.without-margin {
+      margin-bottom: 0;
+    }
+  }
+
+  .payload-detail {
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  .btn-secondary {
+    width: 119px;
   }
 }
 </style>

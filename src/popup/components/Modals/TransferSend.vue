@@ -1,8 +1,10 @@
 <template>
   <Modal
+    :key="currentStep"
     class="transfer-send-modal"
     has-close-button
     from-bottom
+    :body-without-padding-bottom="currentStep === STEP_FORM"
     @close="closeModal"
   >
     <div class="relative">
@@ -77,6 +79,7 @@ export default {
         address: '',
         amount: null,
         selectedAsset: null,
+        payload: '',
       },
       steps: {
         [STEP_FORM]: {

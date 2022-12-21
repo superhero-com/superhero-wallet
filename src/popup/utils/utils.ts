@@ -8,6 +8,7 @@ import VueCompositionApi, {
 import BigNumber from 'bignumber.js';
 import { defer } from 'lodash-es';
 import { Observable } from 'rxjs';
+import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import {
   ADDRESS_TYPES,
   AENS_DOMAIN,
@@ -21,6 +22,7 @@ import type {
   IRespondChallenge,
   IResponseChallenge,
   ISdk,
+  ITransaction,
 } from '../../types';
 
 Vue.use(VueCompositionApi);
@@ -175,4 +177,10 @@ export async function fetchRespondChallenge(
     challenge: responseChallenge.challenge,
     signature: signedChallenge,
   };
+}
+
+export function getPayload(transaction: ITransaction) {
+  return (transaction.tx?.payload)
+    ? TxBuilderHelper.decode(transaction.tx?.payload).toString()
+    : null;
 }

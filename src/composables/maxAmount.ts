@@ -4,6 +4,7 @@ import {
   onMounted,
   onBeforeUnmount,
   watch,
+  Ref,
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
@@ -20,15 +21,21 @@ import {
   checkAensName,
   handleUnknownError,
 } from '../popup/utils';
-import { IAccount } from '../types';
+import { IAccount, IAsset, IToken } from '../types';
 import { useGetter } from './vuex';
 import { useSdk } from './sdk';
 
-export interface UseMaxAmountOptions {
-  formModel: any,
+export interface IFormModel {
+  amount: number;
+  selectedAsset: IToken | IAsset | null;
+  address?: string;
+  payload?: string;
+}
+export interface IMaxAmount {
+  formModel: Ref<IFormModel>
 }
 
-export function useMaxAmount({ formModel }: UseMaxAmountOptions) {
+export function useMaxAmount({ formModel }: IMaxAmount) {
   const { getSdk } = useSdk();
 
   let updateTokenBalanceInterval: NodeJS.Timer;
@@ -71,7 +78,7 @@ export function useMaxAmount({ formModel }: UseMaxAmountOptions) {
             contractAddress: val.selectedAsset.contractId,
           });
         }
-        selectedAssetDecimals.value = val.selectedAsset.decimals;
+        selectedAssetDecimals.value = val.selectedAsset.decimals!;
       }
 
       if (
@@ -104,7 +111,7 @@ export function useMaxAmount({ formModel }: UseMaxAmountOptions) {
           amount: new BigNumber(val.amount > 0 ? val.amount : 0).shiftedBy(MAGNITUDE),
           ttl: 0,
           nonce: nonce.value + 1,
-          payload: '',
+          payload: val.payload,
         },
       })).shiftedBy(-MAGNITUDE);
       if (!minFee.isEqualTo(fee.value)) fee.value = minFee;
