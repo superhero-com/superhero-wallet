@@ -16,6 +16,7 @@
       <FormTextarea
         v-model="value"
         size="sm"
+        :resizable="false"
       >
         <template #label>
           {{ $t('modals.payloadForm.label') }}
