@@ -264,7 +264,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/more/settings/networks/edit/:name',
+    path: '/more/settings/networks/:name',
     name: 'network-edit',
     component: NetworkForm,
     props: true,
@@ -457,6 +457,7 @@ export const routes: WalletAppRouteConfig[] = [
         props: true,
         meta: {
           title: 'coin-details',
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
         },
       },
@@ -495,6 +496,7 @@ export const routes: WalletAppRouteConfig[] = [
         props: true,
         meta: {
           title: 'token-details',
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
         },
       },
