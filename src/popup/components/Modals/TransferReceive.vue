@@ -56,7 +56,7 @@
     <template #footer>
       <BtnMain
         data-cy="copy"
-        :variant="IS_MOBILE_DEVICE ? 'secondary' : 'primary'"
+        :variant="IS_MOBILE_DEVICE ? 'muted' : 'primary'"
         class="btn-copy"
         :text="copied ? $t('modals.receive.copied') : $t('modals.receive.copy')"
         @click="copyAddress()"
