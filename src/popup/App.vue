@@ -17,7 +17,7 @@
       v-show="!qrScannerOpen"
       ref="innerElement"
       class="app-inner"
-      :class="{ 'show-scrollbar': $route.meta.showScrollbar }"
+      :class="{ 'styled-scrollbar': showScrollbar }"
     >
       <Header v-if="showHeader" />
 
@@ -51,6 +51,7 @@ import {
   ref,
   watch,
 } from '@vue/composition-api';
+import type { WalletRouteMeta } from '../types';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
   NODE_STATUS_OFFLINE,
@@ -89,6 +90,8 @@ export default defineComponent({
     const backedUpSeed = computed(() => root.$store.state.backedUpSeed);
     const qrScannerOpen = computed(() => root.$store.state.qrScannerOpen);
     const modals = computed(() => root.$store.getters['modals/opened']);
+    const routeMeta = computed<WalletRouteMeta | undefined>(() => root.$route.meta);
+    const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
     const { addWalletNotification } = useNotifications();
 
@@ -97,7 +100,7 @@ export default defineComponent({
     const showHeader = computed(() => !(
       RUNNING_IN_POPUP
       || root.$route.params.app // TODO determine if still used
-      || root.$route.meta?.hideHeader
+      || routeMeta.value?.hideHeader
     ));
 
     function setDocumentHeight() {
@@ -172,6 +175,7 @@ export default defineComponent({
       modals,
       qrScannerOpen,
       showHeader,
+      showScrollbar,
       innerElement,
     };
   },
@@ -217,22 +221,6 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     overflow-y: auto;
-
-    &.show-scrollbar {
-      -ms-overflow-style: auto;
-
-      &::-webkit-scrollbar {
-        display: block;
-        width: 6px;
-        height: 0;
-
-        &-thumb {
-          display: block;
-          background-color: rgba(variables.$color-white, 0.15);
-          border-radius: 4px;
-        }
-      }
-    }
   }
 
   .main {

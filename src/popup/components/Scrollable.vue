@@ -1,13 +1,13 @@
 <template>
   <div class="scrollable">
-    <div class="scrollable-inner">
+    <div class="scrollable-inner styled-scrollbar">
       <slot />
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '../../styles/variables' as *;
 
 .scrollable {
   position: relative;
@@ -21,20 +21,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    overflow: scroll;
-    -ms-overflow-style: auto;
-
-    &::-webkit-scrollbar {
-      display: block;
-      width: 6px;
-      height: 0;
-
-      &-thumb {
-        display: block;
-        background-color: rgba(variables.$color-white, 0.15);
-        border-radius: 4px;
-      }
-    }
+    overflow-y: scroll;
   }
 }
 </style>

@@ -5,14 +5,13 @@
 
 * {
   box-sizing: border-box;
+  scrollbar-width: none;
+  -webkit-tap-highlight-color: transparent;
+  -ms-overflow-style: none;
 
   &::-webkit-scrollbar {
     display: none;
   }
-
-  -webkit-tap-highlight-color: transparent;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
 
 html,
@@ -171,4 +170,22 @@ button {
 
 .relative {
   position: relative;
+}
+
+.styled-scrollbar {
+  scrollbar-color: #{$color-scrollbar-thumb} transparent; // Firefox
+  scrollbar-width: thin; // Firefox
+  -ms-overflow-style: auto;
+
+  &::-webkit-scrollbar {
+    display: block;
+    width: 6px;
+    height: 0;
+
+    &-thumb {
+      display: block;
+      background-color: $color-scrollbar-thumb;
+      border-radius: 4px;
+    }
+  }
 }
